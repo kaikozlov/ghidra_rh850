@@ -230,6 +230,21 @@ def main() -> int:
           and hv_test["runtime_length_probe"]["response_prefix_length"] == 3
           and hv_test["execution"] == "plan_only")
 
+    engine_static_routine = next(row for row in actual["catalogs"]["372"]["active_tests"] if row["id"] == 40402)
+    check("static routine-command variable bytes do not falsely make a routine runtime-parameterized",
+          engine_static_routine["name"] == "AIR PUMP: OFF / ASV B1: CLOSE / ASV B2: CLOSE"
+          and engine_static_routine["start_static"] == "3101113600"
+          and engine_static_routine["routine_command"]["bytes"] == "00"
+          and engine_static_routine["output_mask_value"]["bytes"] == ""
+          and engine_static_routine["output_mask_button"]["bytes"] == ""
+          and engine_static_routine["fixed_request"] is True
+          and engine_static_routine["execution"] == "executable")
+    engine_masked_routine = next(row for row in actual["catalogs"]["372"]["active_tests"] if row["id"] == 40000)
+    check("runtime button mask remains plan-only while its exact mask bytes are exported",
+          engine_masked_routine["fixed_request"] is False
+          and engine_masked_routine["output_mask_button"]["bytes"] == "ff"
+          and engine_masked_routine["execution"] == "plan_only")
+
     frc_test = next(row for row in actual["catalogs"]["498"]["active_tests"] if row["id"] == 0xA429)
     check("FRC LTA Steering Vibration is exact fixed RID 0x1588 executable RoutineControl geometry",
           frc_test["name"] == "LTA Steering Vibration"
@@ -243,8 +258,8 @@ def main() -> int:
 
     active = [row for catalog in actual["catalogs"].values() for row in catalog["active_tests"]]
     check("Active Tests are graded by fixed-geometry sufficiency without guessing",
-          sum(row["execution"] == "executable" for row in active) == 41
-          and sum(row["execution"] == "plan_only" for row in active) == 361
+          sum(row["execution"] == "executable" for row in active) == 69
+          and sum(row["execution"] == "plan_only" for row in active) == 333
           and sum(row["execution"] == "unresolved_static_plan" for row in active) == 26
           and all(row["execution"] != "executable" for row in active if row["kind"] == "direct"))
     check("registry contains derived metadata only and forbids execution authorization",

@@ -827,14 +827,11 @@ def _routine_active_test_executor_plan(
     result = phase(0xD7, 0x03, None)
     value_mask = _master_variable(master, int(selected["output_mask_value_variable"]))
     button_mask = _master_variable(master, int(selected["output_mask_button_variable"]))
-    fixed = not any(
-        int(selected[field])
-        for field in (
-            "routine_command_variable",
-            "routine_stop_command_variable",
-            "output_mask_value_variable",
-            "output_mask_button_variable",
-        )
+    # Routine command/stop variables are static bytes copied directly into the
+    # request by DataMonitorPhase5. Only output masks admit runtime UI/value bytes.
+    fixed = not (
+        int(selected["output_mask_value_variable"])
+        or int(selected["output_mask_button_variable"])
     )
     return {
         "service": "0x31",
@@ -849,9 +846,9 @@ def _routine_active_test_executor_plan(
         "output_mask_button": button_mask,
         "fixed_request": fixed,
         "parameterization": (
-            "fixed: no routine command, stop-command, value-mask, or button-mask variable is referenced"
+            "fixed: all command/stop bytes are static and no runtime value/button mask is referenced"
             if fixed
-            else "parameterized: static command bytes and/or runtime value/button bytes are merged through explicit type-71 variable masks"
+            else "parameterized: static command bytes are merged with runtime value/button bytes through explicit type-71 masks"
         ),
         "transport": (
             "DataMonitorPhase5 passes buffer+1/length-1 to the shared active_test_start interface with "
@@ -2724,6 +2721,10 @@ def _compact_routine_active_test(selected: dict[str, Any], executor: dict[str, A
         "routine_stop_command_variable": selected["routine_stop_command_variable"],
         "output_mask_value_variable": selected["output_mask_value_variable"],
         "output_mask_button_variable": selected["output_mask_button_variable"],
+        "routine_command": executor["start"]["static_command_variable"],
+        "routine_stop_command": executor["stop"]["static_command_variable"],
+        "output_mask_value": executor["output_mask_value"],
+        "output_mask_button": executor["output_mask_button"],
         "routine_status_key": selected["routine_status_key"],
         "session_requirement": _session_requirement(executor["start"]["materialized_static_request"]),
         "execution": "executable" if executor["fixed_request"] else "plan_only",

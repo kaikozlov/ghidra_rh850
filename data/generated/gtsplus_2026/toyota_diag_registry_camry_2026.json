@@ -4430,13 +4430,33 @@
           "id": 40000,
           "kind": "routine",
           "name": "Control the Injection Way",
+          "output_mask_button": {
+            "bytes": "ff",
+            "id": "0x278E",
+            "normalized_id": "0x7E"
+          },
           "output_mask_button_variable": 10126,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031105",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 4357,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -4467,13 +4487,33 @@
           "id": 40002,
           "kind": "routine",
           "name": "Control the Injection Way",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031105",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 4357,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -4486,13 +4526,33 @@
           "id": 40003,
           "kind": "routine",
           "name": "Control the Injection Way",
+          "output_mask_button": {
+            "bytes": "ff",
+            "id": "0x278E",
+            "normalized_id": "0x7E"
+          },
           "output_mask_button_variable": 10126,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031105",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 4357,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -4505,13 +4565,33 @@
           "id": 40004,
           "kind": "routine",
           "name": "Control the Injection Way",
+          "output_mask_button": {
+            "bytes": "ff",
+            "id": "0x278E",
+            "normalized_id": "0x7E"
+          },
           "output_mask_button_variable": 10126,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031105",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 4357,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -4524,13 +4604,33 @@
           "id": 40005,
           "kind": "routine",
           "name": "Control the Select Cylinder Fuel Cut",
+          "output_mask_button": {
+            "bytes": "ff0000",
+            "id": "0x2C30",
+            "normalized_id": "0x520"
+          },
           "output_mask_button_variable": 11312,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "3103111a",
+          "routine_command": {
+            "bytes": "005aa5",
+            "id": "0x2C31",
+            "normalized_id": "0x521"
+          },
           "routine_command_variable": 11313,
           "routine_id": 4378,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -4543,13 +4643,33 @@
           "id": 40006,
           "kind": "routine",
           "name": "Control the Injection Way",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031105",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 4357,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -4562,13 +4682,33 @@
           "id": 40007,
           "kind": "routine",
           "name": "Control the Injection Way",
+          "output_mask_button": {
+            "bytes": "ff",
+            "id": "0x278E",
+            "normalized_id": "0x7E"
+          },
           "output_mask_button_variable": 10126,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031105",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 4357,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -4581,13 +4721,33 @@
           "id": 40008,
           "kind": "routine",
           "name": "Control the Select Cylinder F/C (with Ignition)",
+          "output_mask_button": {
+            "bytes": "ff0000",
+            "id": "0x2C30",
+            "normalized_id": "0x520"
+          },
           "output_mask_button_variable": 11312,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031119",
+          "routine_command": {
+            "bytes": "00a5a5",
+            "id": "0x2F82",
+            "normalized_id": "0x872"
+          },
           "routine_command_variable": 12162,
           "routine_id": 4377,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -4600,13 +4760,33 @@
           "id": 40009,
           "kind": "routine",
           "name": "Control the Injection Way",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031105",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 4357,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -4619,13 +4799,33 @@
           "id": 40401,
           "kind": "routine",
           "name": "Auto",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031135",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 4405,
           "routine_status_key": 11,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -4633,18 +4833,38 @@
           "stop_static": "31021135"
         },
         {
-          "execution": "plan_only",
-          "fixed_request": false,
+          "execution": "executable",
+          "fixed_request": true,
           "id": 40402,
           "kind": "routine",
           "name": "AIR PUMP: OFF / ASV B1: CLOSE / ASV B2: CLOSE",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031136",
+          "routine_command": {
+            "bytes": "00",
+            "id": "0x2C2B",
+            "normalized_id": "0x51B"
+          },
           "routine_command_variable": 11307,
           "routine_id": 4406,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -4652,18 +4872,38 @@
           "stop_static": "31021136"
         },
         {
-          "execution": "plan_only",
-          "fixed_request": false,
+          "execution": "executable",
+          "fixed_request": true,
           "id": 40403,
           "kind": "routine",
           "name": "AIR PUMP: ON / ASV B1: OPEN / ASV B2: OPEN",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031136",
+          "routine_command": {
+            "bytes": "01",
+            "id": "0x275D",
+            "normalized_id": "0x4D"
+          },
           "routine_command_variable": 10077,
           "routine_id": 4406,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -4671,18 +4911,38 @@
           "stop_static": "31021136"
         },
         {
-          "execution": "plan_only",
-          "fixed_request": false,
+          "execution": "executable",
+          "fixed_request": true,
           "id": 40404,
           "kind": "routine",
           "name": "AIR PUMP: ON / ASV B1: CLOSE / ASV B2: CLOSE",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031136",
+          "routine_command": {
+            "bytes": "02",
+            "id": "0x2764",
+            "normalized_id": "0x54"
+          },
           "routine_command_variable": 10084,
           "routine_id": 4406,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -4690,18 +4950,38 @@
           "stop_static": "31021136"
         },
         {
-          "execution": "plan_only",
-          "fixed_request": false,
+          "execution": "executable",
+          "fixed_request": true,
           "id": 40405,
           "kind": "routine",
           "name": "AIR PUMP: ON / ASV B1: OPEN / ASV B2: CLOSE",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031136",
+          "routine_command": {
+            "bytes": "04",
+            "id": "0x2743",
+            "normalized_id": "0x33"
+          },
           "routine_command_variable": 10051,
           "routine_id": 4406,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -4709,18 +4989,38 @@
           "stop_static": "31021136"
         },
         {
-          "execution": "plan_only",
-          "fixed_request": false,
+          "execution": "executable",
+          "fixed_request": true,
           "id": 40406,
           "kind": "routine",
           "name": "AIR PUMP: ON / ASV B1: CLOSE / ASV B2: OPEN",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031136",
+          "routine_command": {
+            "bytes": "05",
+            "id": "0x2765",
+            "normalized_id": "0x55"
+          },
           "routine_command_variable": 10085,
           "routine_id": 4406,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -4728,18 +5028,38 @@
           "stop_static": "31021136"
         },
         {
-          "execution": "plan_only",
-          "fixed_request": false,
+          "execution": "executable",
+          "fixed_request": true,
           "id": 40407,
           "kind": "routine",
           "name": "AIR PUMP: OFF / ASV: CLOSE",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031151",
+          "routine_command": {
+            "bytes": "00",
+            "id": "0x2C2B",
+            "normalized_id": "0x51B"
+          },
           "routine_command_variable": 11307,
           "routine_id": 4433,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -4747,18 +5067,38 @@
           "stop_static": "31021151"
         },
         {
-          "execution": "plan_only",
-          "fixed_request": false,
+          "execution": "executable",
+          "fixed_request": true,
           "id": 40408,
           "kind": "routine",
           "name": "AIR PUMP: ON / ASV: OPEN",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031151",
+          "routine_command": {
+            "bytes": "01",
+            "id": "0x275D",
+            "normalized_id": "0x4D"
+          },
           "routine_command_variable": 10077,
           "routine_id": 4433,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -4766,18 +5106,38 @@
           "stop_static": "31021151"
         },
         {
-          "execution": "plan_only",
-          "fixed_request": false,
+          "execution": "executable",
+          "fixed_request": true,
           "id": 40409,
           "kind": "routine",
           "name": "AIR PUMP: ON / ASV: CLOSE",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031151",
+          "routine_command": {
+            "bytes": "02",
+            "id": "0x2764",
+            "normalized_id": "0x54"
+          },
           "routine_command_variable": 10084,
           "routine_id": 4433,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -4790,13 +5150,33 @@
           "id": 42000,
           "kind": "routine",
           "name": "Control the ETCS Open/Close Fast Speed",
+          "output_mask_button": {
+            "bytes": "ff",
+            "id": "0x278E",
+            "normalized_id": "0x7E"
+          },
           "output_mask_button_variable": 10126,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031101",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 4353,
           "routine_status_key": 5,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -4809,13 +5189,33 @@
           "id": 42001,
           "kind": "routine",
           "name": "Control the ETCS Open/Close Slow Speed",
+          "output_mask_button": {
+            "bytes": "ff",
+            "id": "0x278E",
+            "normalized_id": "0x7E"
+          },
           "output_mask_button_variable": 10126,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031101",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 4353,
           "routine_status_key": 5,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -4828,13 +5228,33 @@
           "id": 42002,
           "kind": "routine",
           "name": "Prohibit the Idle Fuel Cut",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031102",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 4354,
           "routine_status_key": 5,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -4847,13 +5267,33 @@
           "id": 42003,
           "kind": "routine",
           "name": "Prohibit the Catalyst OT Misfire Prevent Fuel Cut",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031103",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 4355,
           "routine_status_key": 5,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -4866,13 +5306,33 @@
           "id": 42004,
           "kind": "routine",
           "name": "Control the Injection Mode",
+          "output_mask_button": {
+            "bytes": "ff",
+            "id": "0x278E",
+            "normalized_id": "0x7E"
+          },
           "output_mask_button_variable": 10126,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031105",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 4357,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -4939,13 +5399,33 @@
           "id": 42008,
           "kind": "routine",
           "name": "Activate the Lock Up Solenoid",
+          "output_mask_button": {
+            "bytes": "ff",
+            "id": "0x278E",
+            "normalized_id": "0x7E"
+          },
           "output_mask_button_variable": 10126,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031110",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 4368,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -4958,13 +5438,33 @@
           "id": 42009,
           "kind": "routine",
           "name": "Control the Shift Position",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "ff",
+            "id": "0x278E",
+            "normalized_id": "0x7E"
+          },
           "output_mask_value_variable": 10126,
           "positive_response": 113,
           "result_static": "31031111",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 4369,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -4977,13 +5477,33 @@
           "id": 42010,
           "kind": "routine",
           "name": "D-4S (A/F Control)",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031105",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 4357,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -5014,13 +5534,33 @@
           "id": 42012,
           "kind": "routine",
           "name": "D-4S (Injection Volume)",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031105",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 4357,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -5033,13 +5573,33 @@
           "id": 42013,
           "kind": "routine",
           "name": "Control the Shift Area(CVT)",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "ff",
+            "id": "0x278E",
+            "normalized_id": "0x7E"
+          },
           "output_mask_value_variable": 10126,
           "positive_response": 113,
           "result_static": "31031118",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 4376,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -5052,13 +5612,33 @@
           "id": 42014,
           "kind": "routine",
           "name": "Control the Select Cylinder Fuel Cut",
+          "output_mask_button": {
+            "bytes": "ff0000",
+            "id": "0x2C30",
+            "normalized_id": "0x520"
+          },
           "output_mask_button_variable": 11312,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "3103111a",
+          "routine_command": {
+            "bytes": "005aa5",
+            "id": "0x2C31",
+            "normalized_id": "0x521"
+          },
           "routine_command_variable": 11313,
           "routine_id": 4378,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -5066,18 +5646,38 @@
           "stop_static": "3102111a"
         },
         {
-          "execution": "plan_only",
-          "fixed_request": false,
+          "execution": "executable",
+          "fixed_request": true,
           "id": 42015,
           "kind": "routine",
           "name": "Control the All Cylinders Fuel Cut",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "3103111a",
+          "routine_command": {
+            "bytes": "3fa5a5",
+            "id": "0x2D13",
+            "normalized_id": "0x603"
+          },
           "routine_command_variable": 11539,
           "routine_id": 4378,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -5085,18 +5685,38 @@
           "stop_static": "3102111a"
         },
         {
-          "execution": "plan_only",
-          "fixed_request": false,
+          "execution": "executable",
+          "fixed_request": true,
           "id": 42016,
           "kind": "routine",
           "name": "Check the Cylinder Compression",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "3103111a",
+          "routine_command": {
+            "bytes": "3f5a5a",
+            "id": "0x2D12",
+            "normalized_id": "0x602"
+          },
           "routine_command_variable": 11538,
           "routine_id": 4378,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -5109,13 +5729,33 @@
           "id": 42017,
           "kind": "routine",
           "name": "D-4S (Fuel Cut)",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031105",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 4357,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -5128,13 +5768,33 @@
           "id": 42018,
           "kind": "routine",
           "name": "Control the ACM Inhibit",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031115",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 4373,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -5147,13 +5807,33 @@
           "id": 42019,
           "kind": "routine",
           "name": "Active the Synchronize",
+          "output_mask_button": {
+            "bytes": "ff",
+            "id": "0x278E",
+            "normalized_id": "0x7E"
+          },
           "output_mask_button_variable": 10126,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031133",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 4403,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -5166,13 +5846,33 @@
           "id": 42020,
           "kind": "routine",
           "name": "Control the Shift Mode",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "ff",
+            "id": "0x278E",
+            "normalized_id": "0x7E"
+          },
           "output_mask_value_variable": 10126,
           "positive_response": 113,
           "result_static": "31031134",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 4404,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -5185,13 +5885,33 @@
           "id": 42021,
           "kind": "routine",
           "name": "Activate the VN Turbo Cleaning",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031125",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 4389,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -5204,13 +5924,33 @@
           "id": 42022,
           "kind": "routine",
           "name": "Activate the Pre-stroke Control Valve",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031126",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 4390,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -5223,13 +5963,33 @@
           "id": 42023,
           "kind": "routine",
           "name": "Test the Fuel Leak",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031128",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 4392,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -5242,13 +6002,33 @@
           "id": 42024,
           "kind": "routine",
           "name": "Control the EGR Cooler Bypass Control Valve",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "ff",
+            "id": "0x278E",
+            "normalized_id": "0x7E"
+          },
           "output_mask_value_variable": 10126,
           "positive_response": 113,
           "result_static": "31031129",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 4393,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -5261,13 +6041,33 @@
           "id": 42025,
           "kind": "routine",
           "name": "Activate the EGR Cooler Bypass Control Valve",
+          "output_mask_button": {
+            "bytes": "ff",
+            "id": "0x278E",
+            "normalized_id": "0x7E"
+          },
           "output_mask_button_variable": 10126,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031129",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 4393,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -5280,13 +6080,33 @@
           "id": 42026,
           "kind": "routine",
           "name": "Control the Select Cylinder Fuel Cut",
+          "output_mask_button": {
+            "bytes": "ff00",
+            "id": "0x2B2A",
+            "normalized_id": "0x41A"
+          },
           "output_mask_button_variable": 11050,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031138",
+          "routine_command": {
+            "bytes": "00a5",
+            "id": "0x2EE0",
+            "normalized_id": "0x7D0"
+          },
           "routine_command_variable": 12000,
           "routine_id": 4408,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -5294,18 +6114,38 @@
           "stop_static": "31021138"
         },
         {
-          "execution": "plan_only",
-          "fixed_request": false,
+          "execution": "executable",
+          "fixed_request": true,
           "id": 42028,
           "kind": "routine",
           "name": "Check the Cylinder Compression",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031138",
+          "routine_command": {
+            "bytes": "0f5a",
+            "id": "0x2EE1",
+            "normalized_id": "0x7D1"
+          },
           "routine_command_variable": 12001,
           "routine_id": 4408,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -5318,13 +6158,33 @@
           "id": 42029,
           "kind": "routine",
           "name": "Control the Select Cylinder F/C (with Ignition)",
+          "output_mask_button": {
+            "bytes": "ff0000",
+            "id": "0x2C30",
+            "normalized_id": "0x520"
+          },
           "output_mask_button_variable": 11312,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031119",
+          "routine_command": {
+            "bytes": "00a5a5",
+            "id": "0x2F82",
+            "normalized_id": "0x872"
+          },
           "routine_command_variable": 12162,
           "routine_id": 4377,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -5332,18 +6192,38 @@
           "stop_static": "31021119"
         },
         {
-          "execution": "plan_only",
-          "fixed_request": false,
+          "execution": "executable",
+          "fixed_request": true,
           "id": 42030,
           "kind": "routine",
           "name": "Control the All Cylinders Fuel Cut",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031119",
+          "routine_command": {
+            "bytes": "07a55a",
+            "id": "0x2F83",
+            "normalized_id": "0x873"
+          },
           "routine_command_variable": 12163,
           "routine_id": 4377,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -5351,18 +6231,38 @@
           "stop_static": "31021119"
         },
         {
-          "execution": "plan_only",
-          "fixed_request": false,
+          "execution": "executable",
+          "fixed_request": true,
           "id": 42031,
           "kind": "routine",
           "name": "Check the Cylinder Compression",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031119",
+          "routine_command": {
+            "bytes": "075a5a",
+            "id": "0x2F80",
+            "normalized_id": "0x870"
+          },
           "routine_command_variable": 12160,
           "routine_id": 4377,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -5375,13 +6275,33 @@
           "id": 42032,
           "kind": "routine",
           "name": "Brake Ejector VSV Inspection",
+          "output_mask_button": {
+            "bytes": "ff",
+            "id": "0x278E",
+            "normalized_id": "0x7E"
+          },
           "output_mask_button_variable": 10126,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "3103113b",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 4411,
           "routine_status_key": 5,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -5394,13 +6314,33 @@
           "id": 42033,
           "kind": "routine",
           "name": "Control the Grille Shutter",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "00ff",
+            "id": "0x2953",
+            "normalized_id": "0x243"
+          },
           "output_mask_value_variable": 10579,
           "positive_response": 113,
           "result_static": "31031140",
+          "routine_command": {
+            "bytes": "0000",
+            "id": "0x2C2F",
+            "normalized_id": "0x51F"
+          },
           "routine_command_variable": 11311,
           "routine_id": 4416,
           "routine_status_key": 5,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -5413,13 +6353,33 @@
           "id": 42034,
           "kind": "routine",
           "name": "Activate the Intank Fuel Pump Relay",
+          "output_mask_button": {
+            "bytes": "ff",
+            "id": "0x278E",
+            "normalized_id": "0x7E"
+          },
           "output_mask_button_variable": 10126,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031141",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 4417,
           "routine_status_key": 12,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -5432,13 +6392,33 @@
           "id": 42035,
           "kind": "routine",
           "name": "D-4S (Fuel Cut (with Ignition))",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031105",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 4357,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -5451,13 +6431,33 @@
           "id": 42036,
           "kind": "routine",
           "name": "Control the Select Cylinder Fuel Cut",
+          "output_mask_button": {
+            "bytes": "ff00",
+            "id": "0x2B2A",
+            "normalized_id": "0x41A"
+          },
           "output_mask_button_variable": 11050,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "3103113c",
+          "routine_command": {
+            "bytes": "00a5",
+            "id": "0x2EE0",
+            "normalized_id": "0x7D0"
+          },
           "routine_command_variable": 12000,
           "routine_id": 4412,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -5465,18 +6465,38 @@
           "stop_static": "3102113c"
         },
         {
-          "execution": "plan_only",
-          "fixed_request": false,
+          "execution": "executable",
+          "fixed_request": true,
           "id": 42037,
           "kind": "routine",
           "name": "Check the Cylinder Compression",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "3103113c",
+          "routine_command": {
+            "bytes": "3f5a",
+            "id": "0x30D8",
+            "normalized_id": "0x9C8"
+          },
           "routine_command_variable": 12504,
           "routine_id": 4412,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -5489,13 +6509,33 @@
           "id": 42038,
           "kind": "routine",
           "name": "Activate the 2 Stage VN Turbo",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031143",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 4419,
           "routine_status_key": 5,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -5508,13 +6548,33 @@
           "id": 42039,
           "kind": "routine",
           "name": "Activate the Air Bypass Valve",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031144",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 4420,
           "routine_status_key": 5,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -5527,13 +6587,33 @@
           "id": 42040,
           "kind": "routine",
           "name": "Activate the Air Control Valve",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031145",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 4421,
           "routine_status_key": 5,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -5546,13 +6626,33 @@
           "id": 42041,
           "kind": "routine",
           "name": "Activate the Exhaust Control Valve",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031146",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 4422,
           "routine_status_key": 5,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -5565,13 +6665,33 @@
           "id": 42042,
           "kind": "routine",
           "name": "Activate the Fuel Filter Heater",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031147",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 4423,
           "routine_status_key": 5,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -5584,13 +6704,33 @@
           "id": 42043,
           "kind": "routine",
           "name": "K0 Learning Promotion",
+          "output_mask_button": {
+            "bytes": "ff",
+            "id": "0x278E",
+            "normalized_id": "0x7E"
+          },
           "output_mask_button_variable": 10126,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031149",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 4425,
           "routine_status_key": 5,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -5603,13 +6743,33 @@
           "id": 42044,
           "kind": "routine",
           "name": "Control the Transmission Oil Pump Motor",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "ffff",
+            "id": "0x27A2",
+            "normalized_id": "0x92"
+          },
           "output_mask_value_variable": 10146,
           "positive_response": 113,
           "result_static": "31031150",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 4432,
           "routine_status_key": 5,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -5622,13 +6782,33 @@
           "id": 42045,
           "kind": "routine",
           "name": "Starter Start Mode",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "3103117c",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 4476,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -5641,13 +6821,33 @@
           "id": 42046,
           "kind": "routine",
           "name": "Compression Test",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "3103117d",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 4477,
           "routine_status_key": 5,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -5660,13 +6860,33 @@
           "id": 42047,
           "kind": "routine",
           "name": "Brake Ejector VSV Inspection",
+          "output_mask_button": {
+            "bytes": "ff",
+            "id": "0x278E",
+            "normalized_id": "0x7E"
+          },
           "output_mask_button_variable": 10126,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "3103114b",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 4427,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -190867,13 +192087,33 @@
           "id": 42000,
           "kind": "routine",
           "name": "Control the Motor/Generator Cooling Oil Pump",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "ffff",
+            "id": "0x27A2",
+            "normalized_id": "0x92"
+          },
           "output_mask_value_variable": 10146,
           "positive_response": 113,
           "result_static": "3103110b",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 4363,
           "routine_status_key": 1,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -217004,13 +218244,33 @@
           "id": 42000,
           "kind": "routine",
           "name": "Compression Test",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031101",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 4353,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -217023,13 +218283,33 @@
           "id": 42001,
           "kind": "routine",
           "name": "Hybrid/EV Battery Charge",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031107",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 4359,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -217042,13 +218322,33 @@
           "id": 42002,
           "kind": "routine",
           "name": "Control the Motor/Generator Cooling Oil Pump",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "ffff",
+            "id": "0x27A2",
+            "normalized_id": "0x92"
+          },
           "output_mask_value_variable": 10146,
           "positive_response": 113,
           "result_static": "3103110b",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 4363,
           "routine_status_key": 1,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -217061,13 +218361,33 @@
           "id": 42003,
           "kind": "routine",
           "name": "Control the Shift Position",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "ff",
+            "id": "0x278E",
+            "normalized_id": "0x7E"
+          },
           "output_mask_value_variable": 10126,
           "positive_response": 113,
           "result_static": "31031111",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 4369,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -217080,13 +218400,33 @@
           "id": 42004,
           "kind": "routine",
           "name": "Control the Transmission Oil Pump",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "ffff",
+            "id": "0x27A2",
+            "normalized_id": "0x92"
+          },
           "output_mask_value_variable": 10146,
           "positive_response": 113,
           "result_static": "3103110c",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 4364,
           "routine_status_key": 1,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -217099,13 +218439,33 @@
           "id": 42005,
           "kind": "routine",
           "name": "Control the Select Hydrogen Injector",
+          "output_mask_button": {
+            "bytes": "ff",
+            "id": "0x278E",
+            "normalized_id": "0x7E"
+          },
           "output_mask_button_variable": 10126,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031115",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 4373,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -217118,13 +218478,33 @@
           "id": 42006,
           "kind": "routine",
           "name": "Activate the Exhaust Drainage Valve",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031116",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 4374,
           "routine_status_key": 1,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -217137,13 +218517,33 @@
           "id": 42007,
           "kind": "routine",
           "name": "Activate the FC Water Drainage",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "3103111c",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 4380,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -217156,13 +218556,33 @@
           "id": 42008,
           "kind": "routine",
           "name": "FC Stack Inspection Mode",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "3103111d",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 4381,
           "routine_status_key": 1,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -217175,13 +218595,33 @@
           "id": 42009,
           "kind": "routine",
           "name": "Control the Grille Shutter",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "00ff",
+            "id": "0x2953",
+            "normalized_id": "0x243"
+          },
           "output_mask_value_variable": 10579,
           "positive_response": 113,
           "result_static": "31031140",
+          "routine_command": {
+            "bytes": "0000",
+            "id": "0x2C2F",
+            "normalized_id": "0x51F"
+          },
           "routine_command_variable": 11311,
           "routine_id": 4416,
           "routine_status_key": 1,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -349212,13 +350652,33 @@
           "id": 42000,
           "kind": "routine",
           "name": "Hybrid/EV Battery Refrigerant Cooling Valve",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031117",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 4375,
           "routine_status_key": 3,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -349231,13 +350691,33 @@
           "id": 42001,
           "kind": "routine",
           "name": "Hybrid/EV Battery Refrigerant Cooling Control",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031118",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 4376,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -349250,13 +350730,33 @@
           "id": 42002,
           "kind": "routine",
           "name": "Hybrid/EV Battery Water Cooling System",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031124",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 4388,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -453356,13 +454856,33 @@
           "id": 42000,
           "kind": "routine",
           "name": "EBS Relay",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "3103110b",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 4363,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -453375,13 +454895,33 @@
           "id": 42001,
           "kind": "routine",
           "name": "ABS Solenoid",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "3103ffff",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 65535,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -453394,13 +454934,33 @@
           "id": 42002,
           "kind": "routine",
           "name": "VSC Solenoid",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "3103ffff",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 65535,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -453413,13 +454973,33 @@
           "id": 42003,
           "kind": "routine",
           "name": "ECB Solenoid",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "3103ffff",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 65535,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -520968,18 +522548,38 @@
       },
       "active_tests": [
         {
-          "execution": "plan_only",
-          "fixed_request": false,
+          "execution": "executable",
+          "fixed_request": true,
           "id": 42000,
           "kind": "routine",
           "name": "PCS Warning Buzzer",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031601",
+          "routine_command": {
+            "bytes": "01",
+            "id": "0x275D",
+            "normalized_id": "0x4D"
+          },
           "routine_command_variable": 10077,
           "routine_id": 5633,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -520992,13 +522592,33 @@
           "id": 42001,
           "kind": "routine",
           "name": "PCS Collision Avoidance Assist",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031604",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 5636,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -521011,13 +522631,33 @@
           "id": 42002,
           "kind": "routine",
           "name": "PCS Reminder Buzzer",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031605",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 5637,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -521030,13 +522670,33 @@
           "id": 42003,
           "kind": "routine",
           "name": "LDA Indicator 1",
+          "output_mask_button": {
+            "bytes": "ff00",
+            "id": "0x2B2A",
+            "normalized_id": "0x41A"
+          },
           "output_mask_button_variable": 11050,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031503",
+          "routine_command": {
+            "bytes": "0000",
+            "id": "0x2C2F",
+            "normalized_id": "0x51F"
+          },
           "routine_command_variable": 11311,
           "routine_id": 5379,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -521049,13 +522709,33 @@
           "id": 42004,
           "kind": "routine",
           "name": "LDA Indicator 2",
+          "output_mask_button": {
+            "bytes": "00ff",
+            "id": "0x2953",
+            "normalized_id": "0x243"
+          },
           "output_mask_button_variable": 10579,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031503",
+          "routine_command": {
+            "bytes": "0000",
+            "id": "0x2C2F",
+            "normalized_id": "0x51F"
+          },
           "routine_command_variable": 11311,
           "routine_id": 5379,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -521068,13 +522748,33 @@
           "id": 42005,
           "kind": "routine",
           "name": "LDA Message 1 Display",
+          "output_mask_button": {
+            "bytes": "ff00",
+            "id": "0x2B2A",
+            "normalized_id": "0x41A"
+          },
           "output_mask_button_variable": 11050,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031504",
+          "routine_command": {
+            "bytes": "0000",
+            "id": "0x2C2F",
+            "normalized_id": "0x51F"
+          },
           "routine_command_variable": 11311,
           "routine_id": 5380,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -521087,13 +522787,33 @@
           "id": 42006,
           "kind": "routine",
           "name": "LDA Message 2 Display",
+          "output_mask_button": {
+            "bytes": "00ff",
+            "id": "0x2953",
+            "normalized_id": "0x243"
+          },
           "output_mask_button_variable": 10579,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031504",
+          "routine_command": {
+            "bytes": "0000",
+            "id": "0x2C2F",
+            "normalized_id": "0x51F"
+          },
           "routine_command_variable": 11311,
           "routine_id": 5380,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -521106,13 +522826,33 @@
           "id": 42007,
           "kind": "routine",
           "name": "LDA MID 1-1 Display",
+          "output_mask_button": {
+            "bytes": "f000",
+            "id": "0x3172",
+            "normalized_id": "0xA62"
+          },
           "output_mask_button_variable": 12658,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031505",
+          "routine_command": {
+            "bytes": "0000",
+            "id": "0x2C2F",
+            "normalized_id": "0x51F"
+          },
           "routine_command_variable": 11311,
           "routine_id": 5381,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -521125,13 +522865,33 @@
           "id": 42008,
           "kind": "routine",
           "name": "LDA MID 1-2 Display",
+          "output_mask_button": {
+            "bytes": "0f00",
+            "id": "0x3170",
+            "normalized_id": "0xA60"
+          },
           "output_mask_button_variable": 12656,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031505",
+          "routine_command": {
+            "bytes": "0000",
+            "id": "0x2C2F",
+            "normalized_id": "0x51F"
+          },
           "routine_command_variable": 11311,
           "routine_id": 5381,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -521144,13 +522904,33 @@
           "id": 42009,
           "kind": "routine",
           "name": "LDA MID 2-1 Display",
+          "output_mask_button": {
+            "bytes": "00f0",
+            "id": "0x29F7",
+            "normalized_id": "0x2E7"
+          },
           "output_mask_button_variable": 10743,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031505",
+          "routine_command": {
+            "bytes": "0000",
+            "id": "0x2C2F",
+            "normalized_id": "0x51F"
+          },
           "routine_command_variable": 11311,
           "routine_id": 5381,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -521163,13 +522943,33 @@
           "id": 42010,
           "kind": "routine",
           "name": "LDA Buzzer 1-1",
+          "output_mask_button": {
+            "bytes": "f000",
+            "id": "0x3172",
+            "normalized_id": "0xA62"
+          },
           "output_mask_button_variable": 12658,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031506",
+          "routine_command": {
+            "bytes": "0000",
+            "id": "0x2C2F",
+            "normalized_id": "0x51F"
+          },
           "routine_command_variable": 11311,
           "routine_id": 5382,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -521177,18 +522977,38 @@
           "stop_static": "31021506"
         },
         {
-          "execution": "plan_only",
-          "fixed_request": false,
+          "execution": "executable",
+          "fixed_request": true,
           "id": 42011,
           "kind": "routine",
           "name": "LDA Buzzer 1-2",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031506",
+          "routine_command": {
+            "bytes": "0100",
+            "id": "0x279D",
+            "normalized_id": "0x8D"
+          },
           "routine_command_variable": 10141,
           "routine_id": 5382,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -521196,18 +523016,38 @@
           "stop_static": "31021506"
         },
         {
-          "execution": "plan_only",
-          "fixed_request": false,
+          "execution": "executable",
+          "fixed_request": true,
           "id": 42012,
           "kind": "routine",
           "name": "LDA Buzzer 2-1",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031506",
+          "routine_command": {
+            "bytes": "0010",
+            "id": "0x2E3D",
+            "normalized_id": "0x72D"
+          },
           "routine_command_variable": 11837,
           "routine_id": 5382,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -521220,13 +523060,33 @@
           "id": 42013,
           "kind": "routine",
           "name": "LDA Steering Vibration",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031508",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 5384,
           "routine_status_key": 2,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -521239,13 +523099,33 @@
           "id": 42015,
           "kind": "routine",
           "name": "LTA Indicator 1",
+          "output_mask_button": {
+            "bytes": "ff",
+            "id": "0x278E",
+            "normalized_id": "0x7E"
+          },
           "output_mask_button_variable": 10126,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031583",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 5507,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -521258,13 +523138,33 @@
           "id": 42016,
           "kind": "routine",
           "name": "LTA Message 1 Display",
+          "output_mask_button": {
+            "bytes": "ff000000000000",
+            "id": "0x3174",
+            "normalized_id": "0xA64"
+          },
           "output_mask_button_variable": 12660,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031584",
+          "routine_command": {
+            "bytes": "00000000000000",
+            "id": "0x3175",
+            "normalized_id": "0xA65"
+          },
           "routine_command_variable": 12661,
           "routine_id": 5508,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -521277,13 +523177,33 @@
           "id": 42017,
           "kind": "routine",
           "name": "Hands Off Message 1 Display",
+          "output_mask_button": {
+            "bytes": "00ff0000000000",
+            "id": "0x316F",
+            "normalized_id": "0xA5F"
+          },
           "output_mask_button_variable": 12655,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031584",
+          "routine_command": {
+            "bytes": "00000000000000",
+            "id": "0x3175",
+            "normalized_id": "0xA65"
+          },
           "routine_command_variable": 12661,
           "routine_id": 5508,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -521296,13 +523216,33 @@
           "id": 42018,
           "kind": "routine",
           "name": "Hands Off Message 2 Display",
+          "output_mask_button": {
+            "bytes": "0000ff00000000",
+            "id": "0x316E",
+            "normalized_id": "0xA5E"
+          },
           "output_mask_button_variable": 12654,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031584",
+          "routine_command": {
+            "bytes": "00000000000000",
+            "id": "0x3175",
+            "normalized_id": "0xA65"
+          },
           "routine_command_variable": 12661,
           "routine_id": 5508,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -521310,18 +523250,38 @@
           "stop_static": "31021584"
         },
         {
-          "execution": "plan_only",
-          "fixed_request": false,
+          "execution": "executable",
+          "fixed_request": true,
           "id": 42019,
           "kind": "routine",
           "name": "Hands Off Message 3 Display",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031584",
+          "routine_command": {
+            "bytes": "00000001000000",
+            "id": "0x3177",
+            "normalized_id": "0xA67"
+          },
           "routine_command_variable": 12663,
           "routine_id": 5508,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -521334,13 +523294,33 @@
           "id": 42020,
           "kind": "routine",
           "name": "Hands Off Message 4 Display",
+          "output_mask_button": {
+            "bytes": "00000000ff0000",
+            "id": "0x2AF9",
+            "normalized_id": "0x3E9"
+          },
           "output_mask_button_variable": 11001,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031584",
+          "routine_command": {
+            "bytes": "00000000000000",
+            "id": "0x3175",
+            "normalized_id": "0xA65"
+          },
           "routine_command_variable": 12661,
           "routine_id": 5508,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -521353,13 +523333,33 @@
           "id": 42021,
           "kind": "routine",
           "name": "Hands Off Message 5 Display",
+          "output_mask_button": {
+            "bytes": "0000000000ff00",
+            "id": "0x2AFA",
+            "normalized_id": "0x3EA"
+          },
           "output_mask_button_variable": 11002,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031584",
+          "routine_command": {
+            "bytes": "00000000000000",
+            "id": "0x3175",
+            "normalized_id": "0xA65"
+          },
           "routine_command_variable": 12661,
           "routine_id": 5508,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -521367,18 +523367,38 @@
           "stop_static": "31021584"
         },
         {
-          "execution": "plan_only",
-          "fixed_request": false,
+          "execution": "executable",
+          "fixed_request": true,
           "id": 42022,
           "kind": "routine",
           "name": "Hands Off Message 6 Display",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031584",
+          "routine_command": {
+            "bytes": "00000000000001",
+            "id": "0x3176",
+            "normalized_id": "0xA66"
+          },
           "routine_command_variable": 12662,
           "routine_id": 5508,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -521386,18 +523406,38 @@
           "stop_static": "31021584"
         },
         {
-          "execution": "plan_only",
-          "fixed_request": false,
+          "execution": "executable",
+          "fixed_request": true,
           "id": 42023,
           "kind": "routine",
           "name": "LTA Buzzer 1-1",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031586",
+          "routine_command": {
+            "bytes": "10",
+            "id": "0x2BC1",
+            "normalized_id": "0x4B1"
+          },
           "routine_command_variable": 11201,
           "routine_id": 5510,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -521410,13 +523450,33 @@
           "id": 42024,
           "kind": "routine",
           "name": "Advanced Drive Buzzer 1-1",
+          "output_mask_button": {
+            "bytes": "0f",
+            "id": "0x29E2",
+            "normalized_id": "0x2D2"
+          },
           "output_mask_button_variable": 10722,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031586",
+          "routine_command": {
+            "bytes": "00",
+            "id": "0x2C2B",
+            "normalized_id": "0x51B"
+          },
           "routine_command_variable": 11307,
           "routine_id": 5510,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -521429,13 +523489,33 @@
           "id": 42025,
           "kind": "routine",
           "name": "LTA Steering Vibration",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031588",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 5512,
           "routine_status_key": 2,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -521448,13 +523528,33 @@
           "id": 42026,
           "kind": "routine",
           "name": "LCA Indicator 1",
+          "output_mask_button": {
+            "bytes": "ff",
+            "id": "0x278E",
+            "normalized_id": "0x7E"
+          },
           "output_mask_button_variable": 10126,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "310315c3",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 5571,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -521467,13 +523567,33 @@
           "id": 42027,
           "kind": "routine",
           "name": "LCA Message 1 Display",
+          "output_mask_button": {
+            "bytes": "ff00",
+            "id": "0x2B2A",
+            "normalized_id": "0x41A"
+          },
           "output_mask_button_variable": 11050,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "310315c4",
+          "routine_command": {
+            "bytes": "0000",
+            "id": "0x2C2F",
+            "normalized_id": "0x51F"
+          },
           "routine_command_variable": 11311,
           "routine_id": 5572,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -521486,13 +523606,33 @@
           "id": 42028,
           "kind": "routine",
           "name": "LCA Message 2 Display",
+          "output_mask_button": {
+            "bytes": "00ff",
+            "id": "0x2953",
+            "normalized_id": "0x243"
+          },
           "output_mask_button_variable": 10579,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "310315c4",
+          "routine_command": {
+            "bytes": "0000",
+            "id": "0x2C2F",
+            "normalized_id": "0x51F"
+          },
           "routine_command_variable": 11311,
           "routine_id": 5572,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -521505,13 +523645,33 @@
           "id": 42029,
           "kind": "routine",
           "name": "LCA MID 1-1 Display",
+          "output_mask_button": {
+            "bytes": "f00000",
+            "id": "0x3173",
+            "normalized_id": "0xA63"
+          },
           "output_mask_button_variable": 12659,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "310315c5",
+          "routine_command": {
+            "bytes": "000000",
+            "id": "0x2CBC",
+            "normalized_id": "0x5AC"
+          },
           "routine_command_variable": 11452,
           "routine_id": 5573,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -521524,13 +523684,33 @@
           "id": 42030,
           "kind": "routine",
           "name": "LCA MID 1-2 Display",
+          "output_mask_button": {
+            "bytes": "0f0000",
+            "id": "0x3171",
+            "normalized_id": "0xA61"
+          },
           "output_mask_button_variable": 12657,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "310315c5",
+          "routine_command": {
+            "bytes": "000000",
+            "id": "0x2CBC",
+            "normalized_id": "0x5AC"
+          },
           "routine_command_variable": 11452,
           "routine_id": 5573,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -521543,13 +523723,33 @@
           "id": 42031,
           "kind": "routine",
           "name": "LCA MID 2-1 Display",
+          "output_mask_button": {
+            "bytes": "00f000",
+            "id": "0x31C3",
+            "normalized_id": "0xAB3"
+          },
           "output_mask_button_variable": 12739,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "310315c5",
+          "routine_command": {
+            "bytes": "000000",
+            "id": "0x2CBC",
+            "normalized_id": "0x5AC"
+          },
           "routine_command_variable": 11452,
           "routine_id": 5573,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -521562,13 +523762,33 @@
           "id": 42032,
           "kind": "routine",
           "name": "LCA MID 2-2 Display",
+          "output_mask_button": {
+            "bytes": "000f00",
+            "id": "0x31C2",
+            "normalized_id": "0xAB2"
+          },
           "output_mask_button_variable": 12738,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "310315c5",
+          "routine_command": {
+            "bytes": "000000",
+            "id": "0x2CBC",
+            "normalized_id": "0x5AC"
+          },
           "routine_command_variable": 11452,
           "routine_id": 5573,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -521581,13 +523801,33 @@
           "id": 42033,
           "kind": "routine",
           "name": "LCA MID 3-1 Display",
+          "output_mask_button": {
+            "bytes": "0000f0",
+            "id": "0x31C1",
+            "normalized_id": "0xAB1"
+          },
           "output_mask_button_variable": 12737,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "310315c5",
+          "routine_command": {
+            "bytes": "000000",
+            "id": "0x2CBC",
+            "normalized_id": "0x5AC"
+          },
           "routine_command_variable": 11452,
           "routine_id": 5573,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -521595,18 +523835,38 @@
           "stop_static": "310215c5"
         },
         {
-          "execution": "plan_only",
-          "fixed_request": false,
+          "execution": "executable",
+          "fixed_request": true,
           "id": 42034,
           "kind": "routine",
           "name": "LCA Buzzer 1-1",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "310315c6",
+          "routine_command": {
+            "bytes": "1000",
+            "id": "0x286E",
+            "normalized_id": "0x15E"
+          },
           "routine_command_variable": 10350,
           "routine_id": 5574,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -521614,18 +523874,38 @@
           "stop_static": "310215c6"
         },
         {
-          "execution": "plan_only",
-          "fixed_request": false,
+          "execution": "executable",
+          "fixed_request": true,
           "id": 42035,
           "kind": "routine",
           "name": "LCA Buzzer 1-2",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "310315c6",
+          "routine_command": {
+            "bytes": "0100",
+            "id": "0x279D",
+            "normalized_id": "0x8D"
+          },
           "routine_command_variable": 10141,
           "routine_id": 5574,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -521633,18 +523913,38 @@
           "stop_static": "310215c6"
         },
         {
-          "execution": "plan_only",
-          "fixed_request": false,
+          "execution": "executable",
+          "fixed_request": true,
           "id": 42036,
           "kind": "routine",
           "name": "LCA Buzzer 2-1",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "310315c6",
+          "routine_command": {
+            "bytes": "0010",
+            "id": "0x2E3D",
+            "normalized_id": "0x72D"
+          },
           "routine_command_variable": 11837,
           "routine_id": 5574,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -521657,13 +523957,33 @@
           "id": 42037,
           "kind": "routine",
           "name": "LCA Steering Vibration",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "310315c8",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 5576,
           "routine_status_key": 2,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -521676,13 +523996,33 @@
           "id": 42038,
           "kind": "routine",
           "name": "PCS Right Turn/Left Turn Warning Buzzer",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031606",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 5638,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -521695,13 +524035,33 @@
           "id": 42039,
           "kind": "routine",
           "name": "PCS Warning Display",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031607",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 5639,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -521714,13 +524074,33 @@
           "id": 42040,
           "kind": "routine",
           "name": "Improper Vehicle Start Display",
+          "output_mask_button": {
+            "bytes": "ff",
+            "id": "0x278E",
+            "normalized_id": "0x7E"
+          },
           "output_mask_button_variable": 10126,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031608",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 5640,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -521733,13 +524113,33 @@
           "id": 42041,
           "kind": "routine",
           "name": "Sound Message (PCS)",
+          "output_mask_button": {
+            "bytes": "ff",
+            "id": "0x278E",
+            "normalized_id": "0x7E"
+          },
           "output_mask_button_variable": 10126,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031609",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 5641,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -521752,13 +524152,33 @@
           "id": 42042,
           "kind": "routine",
           "name": "PCS Right Turn/Left Turn Warning Pattern",
+          "output_mask_button": {
+            "bytes": "ff",
+            "id": "0x278E",
+            "normalized_id": "0x7E"
+          },
           "output_mask_button_variable": 10126,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "3103160a",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 5642,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -521771,13 +524191,33 @@
           "id": 42043,
           "kind": "routine",
           "name": "AES Automatic Steering in Control Notification",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "3103160b",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 5643,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -521790,13 +524230,33 @@
           "id": 42044,
           "kind": "routine",
           "name": "PDA Control Status Display",
+          "output_mask_button": {
+            "bytes": "ff",
+            "id": "0x278E",
+            "normalized_id": "0x7E"
+          },
           "output_mask_button_variable": 10126,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031801",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 6145,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -521804,18 +524264,38 @@
           "stop_static": "31021801"
         },
         {
-          "execution": "plan_only",
-          "fixed_request": false,
+          "execution": "executable",
+          "fixed_request": true,
           "id": 42045,
           "kind": "routine",
           "name": "PDA Center Display",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031802",
+          "routine_command": {
+            "bytes": "01",
+            "id": "0x275D",
+            "normalized_id": "0x4D"
+          },
           "routine_command_variable": 10077,
           "routine_id": 6146,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -521828,13 +524308,33 @@
           "id": 42046,
           "kind": "routine",
           "name": "PDA Left Display",
+          "output_mask_button": {
+            "bytes": "ff",
+            "id": "0x278E",
+            "normalized_id": "0x7E"
+          },
           "output_mask_button_variable": 10126,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031803",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 6147,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -521847,13 +524347,33 @@
           "id": 42047,
           "kind": "routine",
           "name": "PDA Right Display",
+          "output_mask_button": {
+            "bytes": "ff",
+            "id": "0x278E",
+            "normalized_id": "0x7E"
+          },
           "output_mask_button_variable": 10126,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031804",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 6148,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -521866,13 +524386,33 @@
           "id": 42048,
           "kind": "routine",
           "name": "PDA Cancel Notification Display",
+          "output_mask_button": {
+            "bytes": "ff",
+            "id": "0x278E",
+            "normalized_id": "0x7E"
+          },
           "output_mask_button_variable": 10126,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031805",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 6149,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -521885,13 +524425,33 @@
           "id": 42049,
           "kind": "routine",
           "name": "PDA Buzzer",
+          "output_mask_button": {
+            "bytes": "ff",
+            "id": "0x278E",
+            "normalized_id": "0x7E"
+          },
           "output_mask_button_variable": 10126,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031806",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 6150,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -521904,13 +524464,33 @@
           "id": 42050,
           "kind": "routine",
           "name": "PDA (DA) Forward Vehicle Notification",
+          "output_mask_button": {
+            "bytes": "ff",
+            "id": "0x278E",
+            "normalized_id": "0x7E"
+          },
           "output_mask_button_variable": 10126,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031901",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 6401,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -521918,18 +524498,38 @@
           "stop_static": "31021901"
         },
         {
-          "execution": "plan_only",
-          "fixed_request": false,
+          "execution": "executable",
+          "fixed_request": true,
           "id": 42051,
           "kind": "routine",
           "name": "PDA (DA) Curve Notification",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031904",
+          "routine_command": {
+            "bytes": "80",
+            "id": "0x2DC0",
+            "normalized_id": "0x6B0"
+          },
           "routine_command_variable": 11712,
           "routine_id": 6404,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -521942,13 +524542,33 @@
           "id": 42052,
           "kind": "routine",
           "name": "PDA (DA) Buzzer",
+          "output_mask_button": {
+            "bytes": "ff",
+            "id": "0x278E",
+            "normalized_id": "0x7E"
+          },
           "output_mask_button_variable": 10126,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031909",
+          "routine_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_command_variable": 0,
           "routine_id": 6409,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -521956,18 +524576,38 @@
           "stop_static": "31021909"
         },
         {
-          "execution": "plan_only",
-          "fixed_request": false,
+          "execution": "executable",
+          "fixed_request": true,
           "id": 42053,
           "kind": "routine",
           "name": "Distance Warning Intervention",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "3103190f",
+          "routine_command": {
+            "bytes": "01",
+            "id": "0x275D",
+            "normalized_id": "0x4D"
+          },
           "routine_command_variable": 10077,
           "routine_id": 6415,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -521980,13 +524620,33 @@
           "id": 42054,
           "kind": "routine",
           "name": "LTA Message 1 Display",
+          "output_mask_button": {
+            "bytes": "ff0000000000000000",
+            "id": "0x2B95",
+            "normalized_id": "0x485"
+          },
           "output_mask_button_variable": 11157,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031585",
+          "routine_command": {
+            "bytes": "000000000000000000",
+            "id": "0x324F",
+            "normalized_id": "0xB3F"
+          },
           "routine_command_variable": 12879,
           "routine_id": 5509,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -521999,13 +524659,33 @@
           "id": 42055,
           "kind": "routine",
           "name": "Advanced Drive Message 1 Display",
+          "output_mask_button": {
+            "bytes": "00ff00000000000000",
+            "id": "0x324E",
+            "normalized_id": "0xB3E"
+          },
           "output_mask_button_variable": 12878,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031585",
+          "routine_command": {
+            "bytes": "000000000000000000",
+            "id": "0x324F",
+            "normalized_id": "0xB3F"
+          },
           "routine_command_variable": 12879,
           "routine_id": 5509,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -522018,13 +524698,33 @@
           "id": 42056,
           "kind": "routine",
           "name": "Advanced Drive Message 2 Display",
+          "output_mask_button": {
+            "bytes": "0000ff000000000000",
+            "id": "0x324D",
+            "normalized_id": "0xB3D"
+          },
           "output_mask_button_variable": 12877,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031585",
+          "routine_command": {
+            "bytes": "000000000000000000",
+            "id": "0x324F",
+            "normalized_id": "0xB3F"
+          },
           "routine_command_variable": 12879,
           "routine_id": 5509,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -522037,13 +524737,33 @@
           "id": 42057,
           "kind": "routine",
           "name": "Advanced Drive Message 3 Display",
+          "output_mask_button": {
+            "bytes": "000000ff0000000000",
+            "id": "0x324C",
+            "normalized_id": "0xB3C"
+          },
           "output_mask_button_variable": 12876,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031585",
+          "routine_command": {
+            "bytes": "000000000000000000",
+            "id": "0x324F",
+            "normalized_id": "0xB3F"
+          },
           "routine_command_variable": 12879,
           "routine_id": 5509,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -522056,13 +524776,33 @@
           "id": 42058,
           "kind": "routine",
           "name": "Advanced Drive Message 4 Display",
+          "output_mask_button": {
+            "bytes": "00000000ff00000000",
+            "id": "0x324B",
+            "normalized_id": "0xB3B"
+          },
           "output_mask_button_variable": 12875,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031585",
+          "routine_command": {
+            "bytes": "000000000000000000",
+            "id": "0x324F",
+            "normalized_id": "0xB3F"
+          },
           "routine_command_variable": 12879,
           "routine_id": 5509,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -522075,13 +524815,33 @@
           "id": 42059,
           "kind": "routine",
           "name": "Advanced Drive Message 5 Display",
+          "output_mask_button": {
+            "bytes": "0000000000ff000000",
+            "id": "0x324A",
+            "normalized_id": "0xB3A"
+          },
           "output_mask_button_variable": 12874,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031585",
+          "routine_command": {
+            "bytes": "000000000000000000",
+            "id": "0x324F",
+            "normalized_id": "0xB3F"
+          },
           "routine_command_variable": 12879,
           "routine_id": 5509,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -522094,13 +524854,33 @@
           "id": 42060,
           "kind": "routine",
           "name": "Advanced Drive Message 7 Display",
+          "output_mask_button": {
+            "bytes": "00000000000000ff00",
+            "id": "0x3249",
+            "normalized_id": "0xB39"
+          },
           "output_mask_button_variable": 12873,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031585",
+          "routine_command": {
+            "bytes": "000000000000000000",
+            "id": "0x324F",
+            "normalized_id": "0xB3F"
+          },
           "routine_command_variable": 12879,
           "routine_id": 5509,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -522113,13 +524893,33 @@
           "id": 42061,
           "kind": "routine",
           "name": "Advanced Drive Message 8 Display",
+          "output_mask_button": {
+            "bytes": "0000000000000000ff",
+            "id": "0x3248",
+            "normalized_id": "0xB38"
+          },
           "output_mask_button_variable": 12872,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031585",
+          "routine_command": {
+            "bytes": "000000000000000000",
+            "id": "0x324F",
+            "normalized_id": "0xB3F"
+          },
           "routine_command_variable": 12879,
           "routine_id": 5509,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -522132,13 +524932,33 @@
           "id": 42062,
           "kind": "routine",
           "name": "LCA Message 1 Display",
+          "output_mask_button": {
+            "bytes": "ff00",
+            "id": "0x2B2A",
+            "normalized_id": "0x41A"
+          },
           "output_mask_button_variable": 11050,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "310315cc",
+          "routine_command": {
+            "bytes": "0000",
+            "id": "0x2C2F",
+            "normalized_id": "0x51F"
+          },
           "routine_command_variable": 11311,
           "routine_id": 5580,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -522151,13 +524971,33 @@
           "id": 42063,
           "kind": "routine",
           "name": "LCA MID 1-1 Display",
+          "output_mask_button": {
+            "bytes": "f00000",
+            "id": "0x3173",
+            "normalized_id": "0xA63"
+          },
           "output_mask_button_variable": 12659,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "310315cd",
+          "routine_command": {
+            "bytes": "000000",
+            "id": "0x2CBC",
+            "normalized_id": "0x5AC"
+          },
           "routine_command_variable": 11452,
           "routine_id": 5581,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -522165,18 +525005,38 @@
           "stop_static": "310215cd"
         },
         {
-          "execution": "plan_only",
-          "fixed_request": false,
+          "execution": "executable",
+          "fixed_request": true,
           "id": 42064,
           "kind": "routine",
           "name": "PDA (DA)  Blinking Display",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031913",
+          "routine_command": {
+            "bytes": "80",
+            "id": "0x2DC0",
+            "normalized_id": "0x6B0"
+          },
           "routine_command_variable": 11712,
           "routine_id": 6419,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -522189,13 +525049,33 @@
           "id": 42065,
           "kind": "routine",
           "name": "LCA MID 1-2 Display",
+          "output_mask_button": {
+            "bytes": "0f0000",
+            "id": "0x3171",
+            "normalized_id": "0xA61"
+          },
           "output_mask_button_variable": 12657,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "310315cd",
+          "routine_command": {
+            "bytes": "000000",
+            "id": "0x2CBC",
+            "normalized_id": "0x5AC"
+          },
           "routine_command_variable": 11452,
           "routine_id": 5581,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -522208,13 +525088,33 @@
           "id": 42066,
           "kind": "routine",
           "name": "LCA MID 2-1 Display",
+          "output_mask_button": {
+            "bytes": "00f000",
+            "id": "0x31C3",
+            "normalized_id": "0xAB3"
+          },
           "output_mask_button_variable": 12739,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "310315cd",
+          "routine_command": {
+            "bytes": "000000",
+            "id": "0x2CBC",
+            "normalized_id": "0x5AC"
+          },
           "routine_command_variable": 11452,
           "routine_id": 5581,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -522227,13 +525127,33 @@
           "id": 42067,
           "kind": "routine",
           "name": "LCA MID 2-2 Display",
+          "output_mask_button": {
+            "bytes": "000f00",
+            "id": "0x31C2",
+            "normalized_id": "0xAB2"
+          },
           "output_mask_button_variable": 12738,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "310315cd",
+          "routine_command": {
+            "bytes": "000000",
+            "id": "0x2CBC",
+            "normalized_id": "0x5AC"
+          },
           "routine_command_variable": 11452,
           "routine_id": 5581,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -522246,13 +525166,33 @@
           "id": 42068,
           "kind": "routine",
           "name": "LCA MID 3-1 Display",
+          "output_mask_button": {
+            "bytes": "0000f0",
+            "id": "0x31C1",
+            "normalized_id": "0xAB1"
+          },
           "output_mask_button_variable": 12737,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "310315cd",
+          "routine_command": {
+            "bytes": "000000",
+            "id": "0x2CBC",
+            "normalized_id": "0x5AC"
+          },
           "routine_command_variable": 11452,
           "routine_id": 5581,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",
@@ -522260,18 +525200,38 @@
           "stop_static": "310215cd"
         },
         {
-          "execution": "plan_only",
-          "fixed_request": false,
+          "execution": "executable",
+          "fixed_request": true,
           "id": 42069,
           "kind": "routine",
           "name": "PDA (DA) Signal / Intersection Turn Display",
+          "output_mask_button": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_button_variable": 0,
+          "output_mask_value": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "output_mask_value_variable": 0,
           "positive_response": 113,
           "result_static": "31031902",
+          "routine_command": {
+            "bytes": "05",
+            "id": "0x2765",
+            "normalized_id": "0x55"
+          },
           "routine_command_variable": 10085,
           "routine_id": 6402,
           "routine_status_key": 0,
+          "routine_stop_command": {
+            "bytes": "",
+            "id": "0x0",
+            "normalized_id": "0x0"
+          },
           "routine_stop_command_variable": 0,
           "service": 49,
           "session_requirement": "extended",

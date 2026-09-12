@@ -150,6 +150,13 @@ def main() -> int:
                 check(f"{region} TSS3 category-local D1/D2 session executor is recovered", True)
 
         hybrid_catalog = json.loads(archive.read("catalogs/NA/397.json"))
+        engine_catalog = json.loads(archive.read("catalogs/NA/372.json"))
+        engine_static_routine = next(row for row in engine_catalog["active_tests"] if row["id"] == 40402)
+        check("universal Engine catalog grades static routine-command bytes as executable",
+              engine_static_routine["start_static"] == "3101113600"
+              and engine_static_routine["routine_command"]["bytes"] == "00"
+              and engine_static_routine["fixed_request"] is True
+              and engine_static_routine["execution"] == "executable")
         hybrid_test = next(row for row in hybrid_catalog["active_tests"] if row["id"] == 1)
         hybrid_ffd = next(row for row in hybrid_catalog["commands"] if row["kind"] == "p5_dtc_snapshot")
         check("universal Hybrid catalog exports generic P5 DTC snapshot request",
