@@ -58,6 +58,12 @@ the exact car's retained fields differ from the statically derived minimal ID11
 candidate. Each result is actionable without road motion. A full EPS power
 cycle removes the volatile resident.
 
+The matching `tss3` openpilot path gates both `CarState` and Panda from
+`0x08A byte22 bit4`, matching the contributor's live implementation. The
+tracked Span drive independently contains 37 asserted and 2,363 clear samples
+of that field, while legacy `0x176 B0[5]` remains clear in all 1,890 frames.
+The legacy field must therefore not be used as the Corolla control gate.
+
 
 ## 2026-09-11 TSS3 port architecture/change reference
 

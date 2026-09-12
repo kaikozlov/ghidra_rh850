@@ -79,6 +79,15 @@ with tempfile.TemporaryDirectory(prefix="verify-corolla-hf-inline-signer-") as t
     check("no direct CAN or verification bypass", not h["behavior"]["can_transmit"] and not h["behavior"]["secoc_result_override"])
 
     helper_source = (REPO / "exploit/ephemeral_runtime/corolla_hf_b6_inline_signer_helper.S").read_text()
+    resident_source = (REPO / "exploit/ephemeral_runtime/corolla_hf_b6_inline_signer_resident.S").read_text()
+    builder_source = (REPO / "exploit/ephemeral_runtime/build_corolla_hf_b6_inline_signer.py").read_text()
+    check("resident has no address-in-r6 call trampoline", all(
+        "call0" not in source and "jarl [r6]" not in source
+        for source in (resident_source, builder_source)
+    ))
+    check("resident directly links stock startup calls",
+          all(f"jarl32 startup_{i:02d}, lp" in resident_source for i in range(18)) and
+          "mov 0, r6\n    jarl32 app_startup_final_init, lp" in resident_source)
     consume = helper_source.index("sst.b r8, 5[ep]")
     command5 = helper_source.index("jarl32 command5_sync")
     check("helper consumes C7 before signing", consume < command5)
