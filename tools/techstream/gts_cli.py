@@ -995,6 +995,7 @@ def _direct_active_test_executor_plan(
                 "type67_rows_for_selected_byte_span" if encoding_mode == 0
                 else "none" if encoding_mode == 3
                 else "selected_bit_range" if encoding_mode in {1, 4}
+                else "none" if encoding_mode == 6
                 else "mode_specific"
             ),
             "type67_rule": (
@@ -1010,6 +1011,8 @@ def _direct_active_test_executor_plan(
             if encoding_mode == 1
             else "mode 4 writes the shifted raw value across the selected byte span and uses the selected-bit-range mask on return-control"
             if encoding_mode == 4
+            else "mode 6 writes the low raw byte at bit_end>>3 with the same MSB shift as mode 1 and carries no control-enable mask"
+            if encoding_mode == 6
             else f"encoding mode {encoding_mode} is selected by type-67 +0x0A; exact packing remains mode-specific"
         ),
         "transport": (
@@ -2804,10 +2807,16 @@ def _registry_active_tests(
     db = parser.parse_ecu_db(db_path)
     init_frames = _master_frame_rows(parser, master, int(category["category_id"]), 0xCA)
     init_frame = init_frames[0] if len(init_frames) == 1 else None
+    dll_rows = list(parser.extract_master_dlls(master.sections[19]))
+    category_id = int(category["category_id"])
+    support_family = _bundle_support_family(
+        _bundle_support_plugin(dll_rows, category_id, 0x67),
+        _bundle_support_plugin(dll_rows, category_id, 0xD5),
+    )
+    support_mode = _bundle_support_mode(category_id, int(category["generation"]), support_family)
     signal_info_enabled = any(
         int(binding.get("role", -1)) == 0x70
-        and binding.get("dll") == "GetATSignalInfoP5_DT.dll"
-        and binding.get("semantic_kind") == "p5_active_test_signal_info"
+        and binding.get("semantic_kind") in {"p5_active_test_signal_info", "p6_active_test_signal_info"}
         and binding.get("semantic_status") == "exact_plugin_identity"
         for binding in bindings
     )
@@ -2867,6 +2876,15 @@ def _registry_active_tests(
                 compact = _compact_direct_active_test(
                     selected, executor, monitor_rows, init_frame, signal_info=signal_info
                 )
+                if support_mode == "p6-standard":
+                    compact["support_gate"] = {
+                        "family": "p6",
+                        "mode": "p6-standard",
+                        "kind": "did",
+                        "identifier": int(selected["initial_read_did"]),
+                        "inventory": "selector 0xC8: A100/A1nn enabled-DID list",
+                        "length_probe": "selector 0xCA: 22 <DID>; N = received_length - 3",
+                    }
                 multi_section = db_obj.sections.get(33)
                 if multi_section is not None and multi_section.decoded_record_size == 12:
                     group_ids = {
@@ -2916,7 +2934,16 @@ def _registry_active_tests(
             _, _, selected = _routine_active_test_selected_row(parser, category, db_root, active_test_id, strings)
             try:
                 executor = _routine_active_test_executor_plan(parser, master, category, selected)
-                rows.append(_compact_routine_active_test(selected, executor))
+                compact = _compact_routine_active_test(selected, executor)
+                if support_mode == "p6-standard":
+                    compact["support_gate"] = {
+                        "family": "p6",
+                        "mode": "p6-standard",
+                        "kind": "rid",
+                        "identifier": int(selected["routine_id"]),
+                        "inventory": "selector 0xCC: D100/D1nn enabled-RID list",
+                    }
+                rows.append(compact)
             except ValueError as exc:
                 rows.append({
                     "id": active_test_id,
@@ -2965,6 +2992,15 @@ GENERIC_UTILITY_ROLE_KINDS = {
     0xD4: "single_routine_active_test",
 }
 
+P6_ACTIVE_TEST_PLUGIN_KINDS = {
+    (0x06, "2bf137cccfdc063f20d27e73eca89b5c1f409dd5d929ce8f7af5c6745a3d52ee"): "p6_active_test_list",
+    (0x08, "0c1ea2ed81271b86ca92ee46f3b3379da4a8664c379409881f35c5945c6dc195"): "p6_active_test_init",
+    (0x70, "5106c7d9e14781b2ae7596324889de1d9b0fe00f16247df606b15c411e7fc621"): "p6_active_test_signal_info",
+    (0xAE, "8967ac19164ff91cae26a229b28753656c369bcc01a493ee912bcdcf77af846d"): "p6_routine_active_test_init",
+    (0xAF, "f009fe6c1d59bb8413e119937d10bdf9687ed983ec747911290d992d21df92e1"): "p6_routine_active_test_signal_info",
+}
+
+
 _SEMANTIC_KIND_PATTERN = re.compile(r"^role_0x[0-9A-Fa-f]+_(?P<kind>.+)$")
 
 
@@ -2988,11 +3024,18 @@ def _registry_role_bindings(
         (row for row in parser.extract_master_dlls(master.sections[19]) if row.category_id == category_id),
         key=lambda row: (row.dll_role_id, row.dll_name.casefold()),
     ):
-        profile_name, _, status = _semantic_profile_for_plugin(bin_root / entry.dll_name, entry.dll_role_id)
+        plugin_path = bin_root / entry.dll_name
+        profile_name, _, status = _semantic_profile_for_plugin(plugin_path, entry.dll_role_id)
+        semantic_kind = _semantic_kind_for_profile(profile_name)
+        if semantic_kind is None and plugin_path.is_file():
+            p6_kind = P6_ACTIVE_TEST_PLUGIN_KINDS.get((entry.dll_role_id, _file_sha256(plugin_path)))
+            if p6_kind is not None:
+                semantic_kind = p6_kind
+                status = "exact_plugin_identity"
         bindings.append({
             "role": entry.dll_role_id,
             "dll": entry.dll_name,
-            "semantic_kind": _semantic_kind_for_profile(profile_name),
+            "semantic_kind": semantic_kind,
             "semantic_status": status,
         })
     return bindings
@@ -4195,18 +4238,20 @@ def _bundle_category_catalog(
     db = parser.parse_ecu_db(db_path)
     monitor_rows = _monitor_rows(db, strings, db_path.name)
     bindings = _registry_role_bindings(parser, master, category, bin_root)
-    return {
+    dll_rows = list(parser.extract_master_dlls(master.sections[19]))
+    category_id = int(category["category_id"])
+    support_family = _bundle_support_family(
+        _bundle_support_plugin(dll_rows, category_id, 0x67),
+        _bundle_support_plugin(dll_rows, category_id, 0xD5),
+    )
+    support_mode = _bundle_support_mode(category_id, int(category["generation"]), support_family)
+    common = {
         "category": category,
-        "dids": _registry_did_catalog(monitor_rows),
-        "dtcs": _registry_dtc_catalog(parser, db, strings, db_path.name),
         "active_tests": _registry_active_tests(parser, master, category, db_root, strings, monitor_rows, bindings),
-        "functions": _registry_function_hierarchy(parser, master, strings, int(category["category_id"])),
+        "functions": _registry_function_hierarchy(parser, master, strings, category_id),
         "plugins": bindings,
         "commands": _registry_command_rows(parser, master, category, bin_root, bindings),
-        "selectors": _registry_selector_rows(parser, master, int(category["category_id"])),
-        "data_list": _registry_data_list(db, strings),
-        "generic_ffd": _generic_ffd_rows(db, strings, db_path.name, master),
-        "rob": _rob_rows(db, strings, db_path.name),
+        "selectors": _registry_selector_rows(parser, master, category_id),
         "active_test_groups": _registry_active_test_groups(parser, category, db_root, strings),
         "source_identity": {
             "database": {
@@ -4216,6 +4261,34 @@ def _bundle_category_catalog(
             },
         },
     }
+    if support_mode != "p6-standard":
+        return {
+            **common,
+            "dids": _registry_did_catalog(monitor_rows),
+            "dtcs": _registry_dtc_catalog(parser, db, strings, db_path.name),
+            "data_list": _registry_data_list(db, strings),
+            "generic_ffd": _generic_ffd_rows(db, strings, db_path.name, master),
+            "rob": _rob_rows(db, strings, db_path.name),
+        }
+    if support_mode == "p6-standard":
+        return {
+            **common,
+            "dids": {},
+            "dtcs": {},
+            "data_list": {
+                "tables": [], "record_counts": {}, "row_count": 0,
+                "display_order": "P6 Data List presentation semantics are not exported by this catalog yet",
+                "rows": [],
+            },
+            "generic_ffd": {
+                "signals": [], "boundary": "P6 generic freeze-frame semantics are not projected from P5",
+            },
+            "rob": {
+                "behavior_codes": [], "signals": [],
+                "boundary": "P6 Record-of-Behavior semantics are not projected from P5",
+            },
+        }
+    raise AssertionError(f"unreachable catalog support mode for category {category_id}: {support_mode!r}")
 
 
 def _bundle_json_bytes(payload: Any) -> bytes:
@@ -4245,19 +4318,25 @@ def _build_toyota_diag_region(
     category_rows = _master_category_rows(parser, master, strings)
     dll_rows = list(parser.extract_master_dlls(master.sections[19]))
 
-    # Catalog decoding is a tooling capability, not a vehicle/category support policy.
-    # Today the high-fidelity signal catalog extractor is closed for current P5 DDBs.
+    # Preserve the exact P5 catalog set that shipped before P6 catalog support, then
+    # add current p6-standard categories. Do not broaden or shrink legacy partner P5 shards here.
     p5_catalog_ids = {
         int(entry.category_id)
         for entry in dll_rows
         if entry.dll_name == "GetSupportP5_DT.dll"
     }
-    catalog_categories = [
-        row for row in category_rows
-        if int(row["category_id"]) in p5_catalog_ids
-        and row.get("database")
-        and (db_root / str(row["database"])).is_file()
-    ]
+    catalog_categories = []
+    for row in category_rows:
+        category_id = int(row["category_id"])
+        if not row.get("database") or not (db_root / str(row["database"])).is_file():
+            continue
+        family = _bundle_support_family(
+            _bundle_support_plugin(dll_rows, category_id, 0x67),
+            _bundle_support_plugin(dll_rows, category_id, 0xD5),
+        )
+        mode = _bundle_support_mode(category_id, int(row["generation"]), family)
+        if category_id in p5_catalog_ids or mode == "p6-standard":
+            catalog_categories.append(row)
     catalog_ids = {int(row["category_id"]) for row in catalog_categories}
 
     vehicles: dict[str, dict[str, Any]] = {}

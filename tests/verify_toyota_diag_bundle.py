@@ -43,7 +43,7 @@ def main() -> int:
               and index["release"] == "2026.03.002.02"
               and set(index["regions"]) == {"NA", "EU", "JP"})
         check("bundle keeps lazy decoded catalogs separate from resolver metadata",
-              len(names) == 440 and sum(name.startswith("catalogs/") for name in names) == 439)
+              len(names) == 683 and sum(name.startswith("catalogs/") for name in names) == 682)
         check("universal Toyota bundle does not project a Panda wiring default",
               "default_panda_bus" not in index)
         p5_contract = index["support_contracts"]["p5"]
@@ -69,9 +69,9 @@ def main() -> int:
               and p6_contract["implementation"]["CreateEnableRIdList"] == "0x10067CF0")
 
         expected_counts = {
-            "NA": (2864, 8372, 2136, 135, 82761, 2402, 1869, 479),
-            "EU": (6057, 17656, 2136, 161, 180592, 4621, 938, 554),
-            "JP": (1868, 5583, 2136, 143, 61095, 414, 653, 589),
+            "NA": (2864, 8372, 2136, 203, 82761, 2402, 1869, 479),
+            "EU": (6057, 17656, 2136, 232, 180592, 4621, 938, 554),
+            "JP": (1868, 5583, 2136, 247, 61095, 414, 653, 589),
         }
         for region, expected in expected_counts.items():
             counts = index["regions"][region]["counts"]
@@ -98,7 +98,8 @@ def main() -> int:
                   categories["6000"]["database"] == "Engine_CM_P6.ddb"
                   and categories["6000"]["support_family"] == "p6"
                   and categories["6000"]["support_mode"] == "p6-standard"
-                  and categories["6000"]["catalog_available"] is False)
+                  and categories["6000"]["catalog_available"] is True
+                  and categories["6000"]["catalog_member"] == f"catalogs/{region}/6000.json")
             check(f"{region} representative current TSS3 categories bind literal ordinary-Toyota P5 mode",
                   all(categories[str(cid)]["support_family"] == "p5"
                       and categories[str(cid)]["support_mode"] == "p5-standard"
@@ -148,6 +149,43 @@ def main() -> int:
                     break
             else:
                 check(f"{region} TSS3 category-local D1/D2 session executor is recovered", True)
+
+        p6_engine_catalog = json.loads(archive.read("catalogs/NA/6000.json"))
+        check("universal P6 Engine catalog exports exact Active-Test plugins and conservative non-P5 boundaries",
+              len(p6_engine_catalog["active_tests"]) == 106
+              and any(row["role"] == 0x06 and row["semantic_kind"] == "p6_active_test_list"
+                      and row["semantic_status"] == "exact_plugin_identity" for row in p6_engine_catalog["plugins"])
+              and any(row["role"] == 0x08 and row["semantic_kind"] == "p6_active_test_init"
+                      and row["semantic_status"] == "exact_plugin_identity" for row in p6_engine_catalog["plugins"])
+              and any(row["role"] == 0x70 and row["semantic_kind"] == "p6_active_test_signal_info"
+                      and row["semantic_status"] == "exact_plugin_identity" for row in p6_engine_catalog["plugins"])
+              and p6_engine_catalog["data_list"]["row_count"] == 0
+              and "not exported" in p6_engine_catalog["data_list"]["display_order"]
+              and "not projected from P5" in p6_engine_catalog["generic_ffd"]["boundary"]
+              and "not projected from P5" in p6_engine_catalog["rob"]["boundary"])
+        p6_mode6 = next(row for row in p6_engine_catalog["active_tests"]
+                        if row["kind"] == "direct" and row["id"] == 1)
+        check("P6 direct Active Test mode-6 geometry and live support gate are explicit",
+              p6_mode6["name"] == "Activate the EVAP Purge VSV"
+              and p6_mode6["did"] == 0x2801
+              and p6_mode6["encoding_mode"] == 6
+              and p6_mode6["control_enable_mask"]["start"] == "none"
+              and p6_mode6["control_enable_mask"]["stop"] == "none"
+              and p6_mode6["support_gate"] == {
+                  "family": "p6", "mode": "p6-standard", "kind": "did", "identifier": 0x2801,
+                  "inventory": "selector 0xC8: A100/A1nn enabled-DID list",
+                  "length_probe": "selector 0xCA: 22 <DID>; N = received_length - 3",
+              }
+              and p6_mode6["signal_info"]["choices"] == [{"value": 0, "text": "OFF"}, {"value": 1, "text": "ON"}])
+        p6_masked_routine = next(row for row in p6_engine_catalog["active_tests"]
+                                  if row["kind"] == "routine" and row["id"] == 40000)
+        check("P6 routine Active Test carries exact D100/D1nn RID support gate",
+              p6_masked_routine["fixed_request"] is False
+              and p6_masked_routine["output_mask_button"]["bytes"] == "ff"
+              and p6_masked_routine["support_gate"] == {
+                  "family": "p6", "mode": "p6-standard", "kind": "rid", "identifier": 0x1105,
+                  "inventory": "selector 0xCC: D100/D1nn enabled-RID list",
+              })
 
         hybrid_catalog = json.loads(archive.read("catalogs/NA/397.json"))
         engine_catalog = json.loads(archive.read("catalogs/NA/372.json"))

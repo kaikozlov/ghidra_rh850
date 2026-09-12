@@ -387,6 +387,7 @@ The legacy Camry registry schema **v6** predates the universal bundle and remain
   type-62/157 sort key, deduplicated by signal identity; DID signal rows also gain
   `data_range`/`graph_range` display metadata.
 - `catalogs.<id>.active_test_groups` — type-33 multi-control group geometry
+- generation-22/P6 catalog shards export the recovered Active-Test surface plus exact P6 DID/RID support-gate metadata; P6 Data List/FFD/RoB presentation remains intentionally unprojected from P5
   (presently only Engine 372: 5 groups / 10 memberships).
 - `utilities` — a deliberately compact runtime `utility list/plan` surface: only the
   recovered generic category-0 families (TestPresent start/stop, check-mode
