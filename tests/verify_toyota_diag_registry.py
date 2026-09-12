@@ -230,6 +230,23 @@ def main() -> int:
           and hv_test["runtime_length_probe"]["response_prefix_length"] == 3
           and hv_test["execution"] == "plan_only")
 
+    engine_shared_direct = next(row for row in actual["catalogs"]["372"]["active_tests"] if row["id"] == 77)
+    check("shared-DID direct Active Test preserves the full one-to-many type-67 control geometry",
+          engine_shared_direct["name"] == "Pilot Injection Volume Select Cylinder"
+          and engine_shared_direct["did"] == 0x284A
+          and engine_shared_direct["encoding_mode"] == 0
+          and [(row["control_enable_bit_1based"], row["data_byte_offset"], row["data_byte_length"])
+               for row in engine_shared_direct["data_id_for_act_records"]] == [(1, 0, 1), (2, 1, 1)]
+          and engine_shared_direct["control_enable_mask"]["start"] == "type67_rows_for_selected_byte_span"
+          and engine_shared_direct["control_enable_mask"]["stop"] == "type67_rows_for_selected_byte_span"
+          and engine_shared_direct["execution"] == "plan_only")
+    brake_shared_direct = next(row for row in actual["catalogs"]["435"]["active_tests"] if row["id"] == 42)
+    check("Brake shared-DID direct control is no longer rejected merely because type-67 is one-to-many",
+          brake_shared_direct["did"] == 0x2805
+          and brake_shared_direct["encoding_mode"] == 0
+          and len(brake_shared_direct["data_id_for_act_records"]) == 2
+          and brake_shared_direct["execution"] == "plan_only")
+
     engine_static_routine = next(row for row in actual["catalogs"]["372"]["active_tests"] if row["id"] == 40402)
     check("static routine-command variable bytes do not falsely make a routine runtime-parameterized",
           engine_static_routine["name"] == "AIR PUMP: OFF / ASV B1: CLOSE / ASV B2: CLOSE"
@@ -259,8 +276,8 @@ def main() -> int:
     active = [row for catalog in actual["catalogs"].values() for row in catalog["active_tests"]]
     check("Active Tests are graded by fixed-geometry sufficiency without guessing",
           sum(row["execution"] == "executable" for row in active) == 69
-          and sum(row["execution"] == "plan_only" for row in active) == 333
-          and sum(row["execution"] == "unresolved_static_plan" for row in active) == 26
+          and sum(row["execution"] == "plan_only" for row in active) == 349
+          and sum(row["execution"] == "unresolved_static_plan" for row in active) == 10
           and all(row["execution"] != "executable" for row in active if row["kind"] == "direct"))
     check("registry contains derived metadata only and forbids execution authorization",
           "no Toyota binaries" in actual["boundary"]

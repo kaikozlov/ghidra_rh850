@@ -151,6 +151,13 @@ def main() -> int:
 
         hybrid_catalog = json.loads(archive.read("catalogs/NA/397.json"))
         engine_catalog = json.loads(archive.read("catalogs/NA/372.json"))
+        engine_shared_direct = next(row for row in engine_catalog["active_tests"] if row["id"] == 77)
+        check("universal Engine catalog exports one-to-many type-67 geometry for shared-DID direct controls",
+              engine_shared_direct["did"] == 0x284A
+              and engine_shared_direct["encoding_mode"] == 0
+              and len(engine_shared_direct["data_id_for_act_records"]) == 2
+              and engine_shared_direct["control_enable_mask"]["start"] == "type67_rows_for_selected_byte_span"
+              and engine_shared_direct["execution"] == "plan_only")
         engine_static_routine = next(row for row in engine_catalog["active_tests"] if row["id"] == 40402)
         check("universal Engine catalog grades static routine-command bytes as executable",
               engine_static_routine["start_static"] == "3101113600"

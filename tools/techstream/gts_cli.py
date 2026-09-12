@@ -883,10 +883,29 @@ def _direct_active_test_executor_plan(
         raw = section.decoded_data[index * 18 : (index + 1) * 18]
         if struct.unpack_from("<H", raw, 0x02)[0] == did:
             matches.append((index, raw))
-    if len(matches) != 1:
-        raise ValueError(f"{db_path.name}: DID 0x{did:04X} resolved {len(matches)} type-67 rows")
-    record_index, raw = matches[0]
-    encoding_mode = raw[0x0A]
+    if not matches:
+        raise ValueError(f"{db_path.name}: DID 0x{did:04X} resolved no type-67 rows")
+    encoding_modes = {raw[0x0A] for _, raw in matches}
+    if len(encoding_modes) != 1:
+        raise ValueError(
+            f"{db_path.name}: DID 0x{did:04X} type-67 rows disagree on encoding mode: "
+            + ", ".join(str(value) for value in sorted(encoding_modes))
+        )
+    encoding_mode = next(iter(encoding_modes))
+    type67_records = [
+        {
+            "record": index,
+            "did": did,
+            "control_enable_bit_1based": struct.unpack_from("<H", raw, 0x04)[0],
+            "data_byte_offset": struct.unpack_from("<H", raw, 0x06)[0],
+            "data_byte_length": struct.unpack_from("<H", raw, 0x08)[0],
+            "encoding_mode": raw[0x0A],
+            "mode5_bit_start_match": struct.unpack_from("<H", raw, 0x0C)[0],
+            "mode5_bit_end_match": struct.unpack_from("<H", raw, 0x0E)[0],
+            "raw": raw.hex(),
+        }
+        for index, raw in matches
+    ]
 
     def frame(selector: int, expected: bytes) -> dict[str, Any]:
         rows = _master_frame_rows(parser, master, int(category["category_id"]), selector)
@@ -926,11 +945,10 @@ def _direct_active_test_executor_plan(
         "data_id_for_act": {
             "table": 67,
             "table_class": ECU_TABLE_CLASS_NAMES[67],
-            "record": record_index,
             "did": did,
             "did_hex": f"0x{did:04X}",
             "encoding_mode": encoding_mode,
-            "raw": raw.hex(),
+            "records": type67_records,
         },
         "start": {
             "selector": "0x9D",
@@ -969,11 +987,30 @@ def _direct_active_test_executor_plan(
             "boundary": "static DDB geometry gives only a minimum; the exact length is materialized from the live 0x22 response",
         },
         "bit_range": {"start": bit_start, "end": bit_end},
+        "control_enable_mask": {
+            "start": (
+                "type67_rows_for_selected_byte_span" if encoding_mode == 0 else "none"
+            ),
+            "stop": (
+                "type67_rows_for_selected_byte_span" if encoding_mode == 0
+                else "none" if encoding_mode == 3
+                else "selected_bit_range" if encoding_mode in {1, 4}
+                else "mode_specific"
+            ),
+            "type67_rule": (
+                "for mode 0, include each type-67 row whose data_byte_offset/data_byte_length lies fully "
+                "inside the selected type-68 byte span; set MSB0 mask bit control_enable_bit_1based-1"
+            ),
+        },
         "encoding": (
-            "mode 1 zero-fills N bytes, then uses raw CStartActTstSnd +0x24 with byte=bit_end>>3 "
-            "and shift=7-(bit_end&7); stop appends the N-byte bit-range control-enable mask"
+            "mode 0/3 zero-fill N bytes and write the raw value big-endian into the selected whole-byte span; "
+            "mode 0 additionally appends the type-67-derived control-enable mask while mode 3 appends none"
+            if encoding_mode in {0, 3}
+            else "mode 1 writes the raw value into the selected bit ending position and uses the selected-bit-range mask on return-control"
             if encoding_mode == 1
-            else f"encoding mode {encoding_mode} is selected by type-67 +0x0A; this CLI currently exposes exact mode-1 packing only"
+            else "mode 4 writes the shifted raw value across the selected byte span and uses the selected-bit-range mask on return-control"
+            if encoding_mode == 4
+            else f"encoding mode {encoding_mode} is selected by type-67 +0x0A; exact packing remains mode-specific"
         ),
         "transport": (
             "DataMonitorPhase5 strips the existing SID for its interface call; DataListIF CCommEventPhase5AT "
@@ -2663,6 +2700,8 @@ def _compact_direct_active_test(
         "positive_response": 0x6F,
         "did": executor["data_id_for_act"]["did"],
         "encoding_mode": executor["data_id_for_act"]["encoding_mode"],
+        "data_id_for_act_records": executor["data_id_for_act"]["records"],
+        "control_enable_mask": executor["control_enable_mask"],
         "bit_start": executor["bit_range"]["start"],
         "bit_end": executor["bit_range"]["end"],
         "start_prefix": executor["start"]["materialized_prefix"],
