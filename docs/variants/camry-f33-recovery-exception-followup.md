@@ -942,7 +942,7 @@ bodies for all five involved CUW libraries were hash-matched against the
 recovery manifest; their identities are retained in the observation artifact.
 
 
-## 18. Network-selected startup state versus gateway routing
+## 19. Network-selected startup state versus gateway routing
 
 2026-09-12. This pass tested two alternatives to another EPS-directed diagnostic
 retry: a retained programming request that could select a different startup
@@ -951,7 +951,7 @@ There was no vehicle connection, traffic generation, session change, ECU reset,
 RAM upload, flash write, or physical connector operation. No working recovery
 route was established.
 
-### 18.1 The normal programming handoff is not a next-reset request
+### 19.1 The normal programming handoff is not a next-reset request
 
 Fresh target-native decompilation of `65F5E`, `9F00`, `148E`, and `1478`
 establishes a direct transition rather than a persistent boot-request flag:
@@ -985,7 +985,7 @@ readback. It rules out using the *normal handoff's configuration* as evidence
 for a CAN-selectable warm-reset recovery flag; it does not prove every unseen
 hardware startup mechanism absent.
 
-### 18.2 A package gateway list is not a generic intermediate-ECU programmer
+### 19.2 A package gateway list is not a generic intermediate-ECU programmer
 
 The installed P5-Unified preparation module was checked at its gateway loop,
 not merely at the later target `10 02` exchange. Current protected inputs,
@@ -1017,7 +1017,7 @@ gateway. That API's existence in a related module is not evidence that Unified
 accepts an arbitrary replacement gateway-mode byte, or that the missing exact
 EPS package selects ReproStd. No guessed gateway command was emitted.
 
-### 18.3 Keep the delivery and execution hypotheses separate
+### 19.3 Keep the delivery and execution hypotheses separate
 
 A target instruction fault and an intermediary forwarding failure are different
 explanations for diagnostic silence. Upstream traffic, a tester TX echo, or a
@@ -1042,3 +1042,30 @@ normal direct handoff does not create a retained next-boot selector, and the
 selected Unified gateway list does not provide arbitrary intermediate-node
 mode control. Neither result supports another ordinary EPS request as a new
 recovery technique, and neither is a completed repair.
+
+
+The gateway-specific candidate in section 18 is compatible with this narrower
+loop result: normal authorization and the correct recognized gateway branch
+may expose an already-running EPS listener; merely adding an arbitrary brake
+address to the package's gateway list does not do so. Its absence from the
+retained traffic is a test-coverage gap, not a demonstration that preparation
+will repair the incident.
+
+
+The section-18 positive host result was independently rechecked: the
+`100026E0` identity wrapper reaches `ReadSoftwareID` at `10002778`; its
+FuncInfo at `10004B1C` points to one try block (`10004AE8`, states 2..2),
+whose catch-all handler at `100027AE` returns continuation `1000277E`.
+The exact six handler bytes are `B8 7E 27 00 10 C3`. Re-running the historical
+gateway extractor also reproduced all `counts`, `messages`, per-file rows,
+and parse warnings exactly: 39 inputs, 184 selected logged records, and only
+0F/6D shared-address extensions in the retained transactions. No unrecorded
+wire-format bit or traffic outside those captured spans was inferred.
+
+The separately named `CDHUtils::ChangeDefaultSessionForPhase5` and
+`StopCommunicationForPhase5` were checked rather than borrowed as a guessed
+abort procedure. Their named import consumers are the DH/DHUDS writer families,
+not Unified; the former builds suppressed-response default-session requests,
+and the latter builds communication-control requests. Their names and presence
+in a shared library do not by themselves establish the selected Unified P5
+preparation's target-specific state-restoring exit.
