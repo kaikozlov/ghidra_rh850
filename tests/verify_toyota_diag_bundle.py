@@ -53,6 +53,9 @@ def main() -> int:
         check("P5 and P6 support contracts are independent Toyota families",
               set(index["support_contracts"]) == {"p5", "p6"}
               and p5_contract["did_root"]["request"] == "220101"
+              and p5_contract["routine_root"]["request"] == "31011001"
+              and p5_contract["routine_root"]["selector_range"] == ["0x0200", "0xDF00"]
+              and p5_contract["routine_root"]["implementation"]["CreateEnableRIdList"] == "0x10066160"
               and p6_contract["did_root"]["request"] == "22a100")
         check("ordinary Toyota P5 preserves root IDs and skips Toyota-reserved group queries",
               p5_contract["standard_did"]["root_ids_remain_supported"] is True
@@ -234,6 +237,18 @@ def main() -> int:
                   "inventory": "selector 0xCC: D100/D1nn enabled-RID list",
               })
 
+        p6_engine_catalog = json.loads(archive.read("catalogs/NA/6000.json"))
+        p6_simple = next(row for row in p6_engine_catalog["utilities"] if row["id"] == 8001)
+        check("universal P6 Engine catalog exports fixed Simple Operation Utility geometry",
+              p6_simple["name"] == "Switch Specification Information"
+              and p6_simple["routine_id"] == 0xDA03
+              and p6_simple["start_static"] == "3101da03"
+              and p6_simple["stop_static"] == "3102da03"
+              and p6_simple["result_static"] == "3103da03"
+              and p6_simple["timer_ms"] == 8000
+              and p6_simple["check_interval_ms"] == 200
+              and p6_simple["support_gate"]["mode"] == "p6-standard")
+
         hybrid_catalog = json.loads(archive.read("catalogs/NA/397.json"))
         engine_catalog = json.loads(archive.read("catalogs/NA/372.json"))
         engine_groups = engine_catalog["active_test_groups"]
@@ -252,6 +267,17 @@ def main() -> int:
               and len(engine_shared_direct["data_id_for_act_records"]) == 2
               and engine_shared_direct["control_enable_mask"]["start"] == "type67_rows_for_selected_byte_span"
               and engine_shared_direct["execution"] == "plan_only")
+        engine_simple = next(row for row in engine_catalog["utilities"] if row["id"] == 8001)
+        check("universal P5 Engine catalog exports fixed Simple Operation Utility geometry",
+              engine_simple["name"] == "Reset Memory"
+              and engine_simple["routine_id"] == 0x1187
+              and engine_simple["start_static"] == "31011187"
+              and engine_simple["stop_static"] == "31021187"
+              and engine_simple["result_static"] == "31031187"
+              and engine_simple["timer_ms"] == 180000
+              and engine_simple["check_interval_ms"] == 200
+              and engine_simple["support_gate"]["mode"] == "p5-standard"
+              and engine_simple["execution"] == "plan_only")
         engine_static_routine = next(row for row in engine_catalog["active_tests"] if row["id"] == 40402)
         check("universal Engine catalog grades static routine-command bytes as executable",
               engine_static_routine["start_static"] == "3101113600"

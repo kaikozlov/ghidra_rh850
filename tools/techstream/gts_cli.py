@@ -4226,6 +4226,99 @@ def _bundle_session_control(parser: DDBParser, master: Any, categories: list[dic
     }
 
 
+def _simple_utility_rows(
+    parser: DDBParser,
+    master: Any,
+    category: dict[str, Any],
+    db: Any,
+    strings: Any,
+    *,
+    support_mode: str | None,
+) -> list[dict[str, Any]]:
+    section = db.sections.get(77)
+    if section is None:
+        return []
+    if section.decoded_record_size != 52:
+        raise ValueError(
+            f"{category.get('database')}: type-77 record size {section.decoded_record_size}, expected 52"
+        )
+    category_id = int(category["category_id"])
+
+    phases: dict[int, dict[str, Any] | None] = {}
+    for selector, subfunction in ((0xD8, 1), (0xD9, 2), (0xDA, 3)):
+        rows = _master_frame_rows(parser, master, category_id, selector)
+        if len(rows) != 1:
+            phases[selector] = None
+            continue
+        frame = rows[0]
+        expected = bytes((0x31, subfunction, 0xFF, 0xFF))
+        send = bytes.fromhex(frame["send"]["bytes"])
+        expected_reply = bytes((0x71, subfunction)).hex()
+        phases[selector] = frame if send == expected and frame["receive_check"]["bytes"] == expected_reply else None
+
+    result = []
+    for index, raw in enumerate(ddb_records(section)):
+        name_index = struct.unpack_from("<I", raw, 0x00)[0]
+        rid = struct.unpack_from("<H", raw, 0x14)[0]
+        utility_id = struct.unpack_from("<H", raw, 0x16)[0]
+        command_variable = struct.unpack_from("<H", raw, 0x1A)[0]
+        stop_variable = struct.unpack_from("<H", raw, 0x1C)[0]
+        command = _master_variable(master, command_variable)
+        stop_command = _master_variable(master, stop_variable)
+        geometry_ok = all(phases.values()) and rid not in {0, 0xFFFF}
+        row = {
+            "id": utility_id,
+            "kind": "simple_operation",
+            "record": index,
+            "name": strings.get_string(name_index) or "",
+            "name_string_index": name_index,
+            "routine_id": rid,
+            "timer_ms": struct.unpack_from("<I", raw, 0x04)[0],
+            "start_help_id": struct.unpack_from("<I", raw, 0x0C)[0],
+            "sort_key": struct.unpack_from("<H", raw, 0x18)[0],
+            "routine_command_variable": command_variable,
+            "routine_command": command,
+            "routine_stop_command_variable": stop_variable,
+            "routine_stop_command": stop_command,
+            "check_interval_ms": struct.unpack_from("<H", raw, 0x1E)[0],
+            "result_keys": {
+                "p5_pattern_display": struct.unpack_from("<H", raw, 0x20)[0],
+                "p6_pattern_display": struct.unpack_from("<H", raw, 0x22)[0],
+                "p5_pattern_description": struct.unpack_from("<H", raw, 0x24)[0],
+                "p6_pattern_description": struct.unpack_from("<H", raw, 0x26)[0],
+                "status_1": struct.unpack_from("<H", raw, 0x28)[0],
+                "status_2": struct.unpack_from("<H", raw, 0x2A)[0],
+                "p6_status_5": struct.unpack_from("<H", raw, 0x2C)[0],
+                "p6_status_6": struct.unpack_from("<H", raw, 0x2E)[0],
+                "raw_u16_30": struct.unpack_from("<H", raw, 0x30)[0],
+                "raw_u16_32": struct.unpack_from("<H", raw, 0x32)[0],
+            },
+            "start_static": (
+                bytes((0x31, 0x01)) + rid.to_bytes(2, "big") + bytes.fromhex(command["bytes"])
+            ).hex() if geometry_ok else None,
+            "stop_static": (bytes((0x31, 0x02)) + rid.to_bytes(2, "big")).hex() if geometry_ok else None,
+            "result_static": (bytes((0x31, 0x03)) + rid.to_bytes(2, "big")).hex() if geometry_ok else None,
+            "positive_response": 0x71,
+            "session_requirement": "extended",
+            "support_gate": {
+                "mode": support_mode,
+                "kind": "rid",
+                "identifier": rid,
+            },
+            "execution": "plan_only" if geometry_ok and support_mode in {"p5-standard", "p6-standard"} else "unresolved_static_plan",
+            "boundary": (
+                "D8/D9/DA request geometry, fixed command bytes, timer/check interval, and result keys are exact. "
+                "Runtime must apply Toyota RID support before mutation; result-key semantic rendering is separate."
+            ),
+        }
+        if not geometry_ok:
+            row["error"] = "D8/D9/DA simple-operation RoutineControl geometry is missing or malformed"
+        elif support_mode not in {"p5-standard", "p6-standard"}:
+            row["error"] = f"support mode {support_mode or 'unresolved'} has no standalone Simple Utility executor"
+        result.append(row)
+    return sorted(result, key=lambda row: (int(row["sort_key"]), int(row["id"])))
+
+
 def _bundle_category_catalog(
     parser: DDBParser,
     master: Any,
@@ -4253,6 +4346,7 @@ def _bundle_category_catalog(
         "commands": _registry_command_rows(parser, master, category, bin_root, bindings),
         "selectors": _registry_selector_rows(parser, master, category_id),
         "active_test_groups": _registry_active_test_groups(parser, category, db_root, strings),
+        "utilities": _simple_utility_rows(parser, master, category, db, strings, support_mode=support_mode),
         "source_identity": {
             "database": {
                 "path": f"{db_root.parent.parent.name}/DB/{db_root.name}/{db_path.name}",
@@ -4698,6 +4792,29 @@ def write_toyota_diag_bundle(
                     "p5-suzuki": "CreateEnableDataIdListForSuzuki path",
                     "p5-mazda": "CreateEnableDataIdListForMazda path",
                     "p5-hino": "CreateEnableDataIdListForHino path for category 0x13A9/0x13B9/0x13BA",
+                },
+                "routine_root": {
+                    "request": "31011001",
+                    "positive_sid": "0x71",
+                    "bitmap_bytes_max": 32,
+                    "bit_numbering": "msb0",
+                    "root_base": "0x0000",
+                    "root_shift": 8,
+                    "member_offset": 1,
+                    "terminal_alias_bit_skipped": True,
+                    "selector_range": ["0x0200", "0xDF00"],
+                    "selector_request": "3101NNNN",
+                    "group_ids_remain_supported": True,
+                    "routine_info_capability": "function 3 / detail 0x56; if present, strip first returned option byte before bitmap decoding",
+                    "generation_21_policy": "generation-low5 0x15 uses static type-71/type-77 RIDs rather than selector 0xCC",
+                    "hierarchy": "RID 0x1001 root bitmap -> xx00 group RIDs; query 0x0200..0xDF00 groups -> xx01..xxFF member RID bitmap",
+                    "implementation": {
+                        "command_common_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+                        "AnalyzeFrameData": "0x10063660",
+                        "CreateEnableRIdList": "0x10066160",
+                        "ConvertToNoRoutineInfo": "0x100738F0",
+                        "CheckIncludingRoutineInfo": "0x10070910"
+                    }
                 },
                 "standard_did": {
                     "root_ids_remain_supported": True,
