@@ -363,3 +363,121 @@ it does not issue a newly recovered P5 abort/reset packet. GUI callbacks and
 provider-internal behavior retain their separate scope. Together with sections
 2 and 8, these inspected wrapper paths provide no basis for presenting a
 prepare-then-unrelated-writer sequence as already complete.
+
+
+## 10. Native restoration coverage and saved-image verification
+
+This additional pass checks the **restoration half** of the network candidate.
+It does not establish the missing live EPS entry, acquire a matching OEM flash
+package, or execute any writer. Undoing the incident and returning every byte to
+factory state are distinct goals; the archived stage-7 inverse remains an
+incident rollback even though it preserves the previous stage-6 modifications.
+
+### All reconstructed changes fall within the normal upper-region erase domain
+
+Fresh exact-F33 decompilation of `3402`, `3474`, `34A8`, `40E0`, `41E0`,
+`42F6`, `4332`, `43BE`, and `4428` was checked against the factory binary.
+The routine dispatcher has its ordinary erase call at `58B4 -> 41E0`.
+`41E0` selects sector boundaries using `40E0 -> 3474`, selects the region's
+metadata location through `3402`, and queues the normal erase worker. This
+analysis concerns an already executing, authorized programming service; erase
+is not a way to contact an unresponsive target.
+
+The fixed upper-region descriptor at `8E1C` has data bounds
+`18000..FFDFF`. The native sector boundary table at `86EC` contains 38 sectors;
+the final one is `F8000..FFFFF`. Therefore a completed **full upper-region**
+erase covers `18000..FFFFF`, including the trailer beyond the ordinary data
+range. It is not limited to the bytes included in the application CRC.
+
+Independent comparisons of the complete retained images give:
+
+| Saved image versus factory | Different bytes | Inside CRC inputs | Outside CRC inputs |
+|---|---:|---:|---:|
+| Stage 6 (the archived inverse's result) | 488 | 12 | 476 |
+| Complete incident reconstruction | 492 | 16 | 476 |
+
+Every difference in both comparisons is inside that upper-region erase extent.
+The lower boot bytes are unchanged. The incident-to-stage-6 comparison differs
+at eight bytes, consistent with the archived inverse already checked in section
+3. These are **saved-image** comparisons, not present-ECU flash measurements.
+
+**Positive result:** normal full upper-region restoration has the necessary
+address coverage to remove the damaged call, previous application patches, and
+resident tail together. A hypothesis that the normal erase necessarily leaves
+the tail untouched is not supported by these tables. This does not prove that
+an as-yet unacquired F33 package selects the full range, that its driver runs,
+or that programming succeeds on this rack. It does not call for erasing the
+boot region or vehicle-specific DataFlash to undo these known CodeFlash changes.
+
+### A native erase changes metadata; CRC success alone is not factory equality
+
+The same descriptor selects `FFF00` as the upper-region counter word; the lower
+region selects `17F00`. `3402` obtains the descriptor's fifth word. `41E0`
+stores it in the flash-operation state. When that address lies in the sector
+being erased, `42F6` saves its previous value plus one and fills the rest of the
+256-byte staging page with `FF`. `4332` calls the installed normal flash driver
+for erase and then for the counter-page rewrite. `43BE` avoids overwriting that
+same metadata page through the ordinary data-writing branch. These are native
+firmware semantics, not a newly constructed RAM writer.
+
+Thus a successfully reprogrammed image need not have the factory dump's **whole
+CodeFlash hash**: the programming counter is expected to change according to the
+actual erase history. Conversely, exempting that whole page would hide resident
+bytes. Only the separate four-byte words are identified as counter fields here;
+their values still need transaction history to interpret.
+
+The 476 differing bytes outside the CRC inputs are not counter changes. In the
+factory image, the upper trailer after the validity marker is erased except for
+the four-byte counter. A CRC-only comparison cannot establish that resident
+trailer content was removed. Counter changes and a CRC pass therefore must not
+silently become a general "stock restored" result.
+
+### An offline comparison is not a live dump mechanism
+
+The exact boot SID table's ReadMemoryByAddress record at `8E8C` names `69B0`.
+The handler at `69B0..69D1` builds a fixed negative reply rather than a flash
+read. Its bytes match both the factory and incident images. Consequently,
+ordinary boot-service availability does not also establish availability of a
+one-megabyte standard-service readback. A live bytewise audit needs a separately
+established read mechanism; do not append a nonexistent dump command to the OEM
+flow or replace normal programming-integrity checks with a simulated image hash.
+
+The new read-only saved-image comparator is:
+
+```sh
+uv run python tools/targets/camry/analysis/analyze_camry_f33_recovery_image.py SAVED_CODEFLASH.bin
+uv run python tests/verify_camry_f33_recovery_image.py
+```
+
+It reads files only, trusts geometry solely from the exact hash-checked factory
+reference, reports every differing range, and distinguishes counter-word
+changes from all other differences. Exit zero requires **exact** equality;
+counter-only differences still exit one and remain explicitly visible. It
+neither obtains a live dump nor generates/writes a replacement image.
+The 11 portable tests cover trailer residue with unchanged CRC inputs, adjacent
+counter-page bytes, validity markers, truncated images, an altered reference,
+modified candidate descriptors, and conservative CLI exit behavior. All pass;
+Ruff checks and formatting pass. The tests do not execute the ECU or native
+flash driver.
+
+The raw instruction ranges used for counter selection, erase setup, counter
+update/rewrite, normal data writes, the erase callsite and negative readback
+handler were independently matched byte-for-byte against both factory and
+retained incident images (490 bytes total). The disposable observations are
+`build/work/f33-native-restore-coverage/image-comparisons.json` and
+`raw-byte-checks.json`; portable tests require neither file nor any other
+`build/` artifact.
+
+`tools/gts cuw 8965F3307 --json` still returns no local package match. Toyota's
+public reprogramming index directs matched-calibration acquisition to TIS and
+applicable service bulletins, but the public search in this pass supplied no
+exact F33 package or independent recovery-entry procedure:
+https://techinfo.toyota.com/techInfoPortal/appmanager/t3/ti?_nfpb=true&_pageLabel=ti_tdt_reprog
+This is an acquisition gap for the OEM-package branch, not proof that no such
+package exists or that the archived incident inverse lacks the correct bytes.
+
+**Remaining composition gap:** no prepared-state EPS response was observed;
+no compatible native restoration was executed; the repaired application has
+not reappeared. A read-only SSH retry returned "Host is down" before any device
+command ran. The restoration coverage is more tightly established, but this
+is still not a completed network-only recovery route.
