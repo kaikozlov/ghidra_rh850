@@ -113,6 +113,36 @@
       "entry_seed_script": "SeedCorollaHFEntries.java",
       "diagnostic_seed_script": "SeedCorollaHFDiagnostics.java",
       "recovered_seed_script": "SeedCorollaHFRecoveredFunctions.java"
+    },
+    "crown-8965F3012000": {
+      "status": "first_class",
+      "vehicle": "2024 Toyota Crown Limited",
+      "software_id": "8965F3012000",
+      "secondary_id": "8A3113008000",
+      "auxiliary_id": "8965H3008000",
+      "codeflash": "firmware/crown-8965F3012000/CodeFlash.bin",
+      "codeflash_sha256": "5b89fdbc69edc2f66ef8a557f88b08c758e3146bd4e90067320d7966812b1273",
+      "dataflash": "firmware/crown-8965F3012000/DataFlash.bin",
+      "dataflash_sha256": "0c7b027900d4ac12a4e665e17c0575d44efb0ccfbcb6239416a40c8260c50872",
+      "capture_root": "community/mruno",
+      "project_name": "crown_8965F3012000",
+      "program_name": "CodeFlash.bin",
+      "snapshot_dir": "projects/crown-8965F3012000",
+      "work_dir": "build/work/targets/crown-8965F3012000/project",
+      "inventory_baseline": "data/targets/crown-8965F3012000/ghidra_project_inventory.baseline.jsonl",
+      "decompiler_corpus": "data/generated/crown-8965F3012000/decompilations.jsonl",
+      "rebuild_profile": "crown_f30_v1",
+      "codeflash_size": 1048576,
+      "codeflash_base": "0x00000000",
+      "dataflash_size": 32768,
+      "dataflash_base": "0xFF200000",
+      "mcu": "R7F701381",
+      "processor": "v850e3:LE:32:default",
+      "function_seeds": "data/targets/crown-8965F3012000/function_seeds.csv",
+      "device_profile_script": "ApplyCrownF30DeviceProfile.java",
+      "entry_seed_script": "SeedCrownF30Entries.java",
+      "diagnostic_seed_script": "SeedCrownF30Diagnostics.java",
+      "recovered_seed_script": "SeedCrownF30RecoveredFunctions.java"
     }
   }
 }

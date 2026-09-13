@@ -1,0 +1,5 @@
+1;kai;1789341285642;Import registered target images and target-native context
+2;kai;1789341336713;Seed registered target application roots
+3;kai;1789341346692;Seed registered target diagnostic callbacks
+4;kai;1789341356560;Seed evidence-backed registered-target recovered functions
+5;kai;1789341359238;Finalize target calling conventions

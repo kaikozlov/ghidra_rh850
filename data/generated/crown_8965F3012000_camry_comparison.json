@@ -1,0 +1,182 @@
+{
+  "application_context": {
+    "body_size": 44,
+    "camry_function": "0x000715B4",
+    "camry_tp": "0x00023DFC",
+    "crown_function": "0x000709E4",
+    "crown_tp": "0x00023C98",
+    "differing_byte_offsets": [
+      32,
+      33
+    ],
+    "gp": "0xFEBEB800",
+    "sp": "0xFEBE2000"
+  },
+  "c7_ingress_boundary": {
+    "camry_hardware_extended_id_word": "0x9FDC0002",
+    "camry_raw_occurrences": 2,
+    "crown_raw_occurrences": 0,
+    "interpretation": "The Camry C7/XCP ingress identifier is not a raw Crown CodeFlash constant; Crown control ingress must be resolved target-natively before porting the resident."
+  },
+  "camry": {
+    "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
+    "mcu": "R7F701381",
+    "software_id": "8965F3307000"
+  },
+  "crown": {
+    "codeflash_sha256": "5b89fdbc69edc2f66ef8a557f88b08c758e3146bd4e90067320d7966812b1273",
+    "mcu": "R7F701381",
+    "software_id": "8965F3012000"
+  },
+  "crypto_roots": {
+    "application_sa_secret": {
+      "address": "0x00020840",
+      "identical": true,
+      "sha256": "5801c0aad614d7446f42410b334158a9a269839e7e4e70f5b732ec37cc305e2f"
+    },
+    "boot_sa_secret": {
+      "address": "0x0000BFE8",
+      "identical": true,
+      "sha256": "15264462fe0618b12bcf3059c1f120e5e738f021111fa381fec13a9b0da97933"
+    },
+    "payload_build_secret": {
+      "address": "0x0000BFD8",
+      "identical": true,
+      "sha256": "2aea015ddae7f99590918290d6b6fa05e975af9125096f2e27274674d3504d11"
+    }
+  },
+  "exact_body_mappings": {
+    "command5_dispatcher": {
+      "camry": "0x00089440",
+      "crown": "0x00086EE0",
+      "delta": -9568,
+      "sha256": "dca5252efba4bfee3cc2a509050d088b280771ce58b1d4134d3ead290545d4e4",
+      "size": 150
+    },
+    "command5_sync_wrapper": {
+      "camry": "0x00089BC2",
+      "crown": "0x00087662",
+      "delta": -9568,
+      "sha256": "edce5eb73b6cfb881a414328353e7aa575f19d30b55bd7a45db09d7d4cc43339",
+      "size": 138
+    },
+    "freshness48_packer": {
+      "camry": "0x00090566",
+      "crown": "0x0008E006",
+      "delta": -9568,
+      "sha256": "5683f2780a5aeb96e677416e2cf2f7459a36d09b96713f7a1c50ea38fad484f8",
+      "size": 120
+    },
+    "startup_shadow_copy": {
+      "camry": "0x000636D4",
+      "crown": "0x00062AD4",
+      "delta": -3072,
+      "sha256": "969ee65ec1d2a2523c1bd97a317de7923bc05a7e5ca3785760e5cb78296dc8b2",
+      "size": 36
+    }
+  },
+  "identity_records": {
+    "auxiliary_id": {
+      "address": "0x00017D80",
+      "value": "8965H3008000"
+    },
+    "boot_info_mcu": {
+      "address": "0x00000190",
+      "value": "R7F701381 "
+    },
+    "primary_f181": {
+      "address": "0x00020860",
+      "value": "8965F3012000"
+    },
+    "secondary_f181": {
+      "address": "0x00017DC0",
+      "value": "8A3113008000"
+    }
+  },
+  "raw_identity": {
+    "application_entry_pointer": "0x00020880",
+    "application_entry_pointer_same": true,
+    "boot_core_0_9200_identical": true,
+    "common_prefix_bytes": 40964,
+    "first_differing_offset": "0x00A004",
+    "regions": [
+      {
+        "differing_bytes": 0,
+        "end": "0x009200",
+        "name": "boot_core",
+        "size": 37376,
+        "start": "0x000000"
+      },
+      {
+        "differing_bytes": 555,
+        "end": "0x010000",
+        "name": "low_calibration",
+        "size": 28160,
+        "start": "0x009200"
+      },
+      {
+        "differing_bytes": 8605,
+        "end": "0x018000",
+        "name": "shadow_source",
+        "size": 32768,
+        "start": "0x010000"
+      },
+      {
+        "differing_bytes": 417,
+        "end": "0x020000",
+        "name": "low_identity_tail",
+        "size": 32768,
+        "start": "0x018000"
+      },
+      {
+        "differing_bytes": 235049,
+        "end": "0x060000",
+        "name": "application_early",
+        "size": 262144,
+        "start": "0x020000"
+      },
+      {
+        "differing_bytes": 147191,
+        "end": "0x085000",
+        "name": "application_mid",
+        "size": 151552,
+        "start": "0x060000"
+      },
+      {
+        "differing_bytes": 229536,
+        "end": "0x100000",
+        "name": "application_high",
+        "size": 503808,
+        "start": "0x085000"
+      }
+    ],
+    "total_differing_bytes": 621353
+  },
+  "rdbi": {
+    "callback_delta_histogram": {
+      "-1704": 188,
+      "-2426": 1,
+      "-2438": 1,
+      "-2450": 1,
+      "-2462": 1,
+      "-2474": 1,
+      "-2596": 1,
+      "-2718": 1,
+      "-2730": 1,
+      "-2742": 1,
+      "-2754": 1,
+      "-2766": 1,
+      "-2778": 1,
+      "-2790": 1,
+      "-2802": 1,
+      "-2814": 1,
+      "-2826": 38
+    },
+    "camry_table": "0x0002928C",
+    "count": 241,
+    "crown_table": "0x00028FA8",
+    "did_membership_identical": true,
+    "unique_callbacks": 195
+  },
+  "schema": "crown-8965f3012000-camry-f33-comparison-v1"
+}

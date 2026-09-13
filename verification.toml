@@ -488,6 +488,9 @@ tests = ["tests/verify_camry_8965F3307000_canfd_timing.py"]
 tests = ["tests/verify_camry_8965F3307000.py"]
 args = ["--section", "codeflash"]
 
+[suite.crown_8965f3012000]
+tests = ["tests/verify_crown_8965F3012000.py"]
+
 [suite.camry_8965f3307000_flash_backend]
 tests = ["tests/verify_camry_8965F3307000.py"]
 args = ["--section", "flash_backend"]

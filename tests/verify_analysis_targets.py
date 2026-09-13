@@ -36,6 +36,7 @@ expected_targets = {
     "camry-8965F3307000",
     "corolla-8965H1202000",
     "corolla-8965F1208000",
+    "crown-8965F3012000",
 }
 check("exact registered target set", set(targets) == expected_targets)
 
@@ -88,6 +89,20 @@ check("Camry canonical CodeFlash equals acquired lower MiB", raw_cf.is_file() an
 raw_df = ROOT / "targets/camry-2026/raw-20260826/secoc-recovery/dataflash/dump_ff200000_ff208000.bin"
 check("Camry canonical DataFlash equals acquired evidence", raw_df.is_file() and raw_df.read_bytes() == (ROOT / camry["dataflash"]).read_bytes())
 check("Camry identity pair embedded", (ROOT / camry["codeflash"]).read_bytes()[0x20860:0x2086C] == b"8965F3307000" and (ROOT / camry["codeflash"]).read_bytes()[0x17DC0:0x17DCC] == b"8A3113303100")
+
+crown = targets["crown-8965F3012000"]
+check("Crown is first-class community target", crown["status"] == "first_class" and crown["capture_root"] == "community/mruno")
+crown_raw = ROOT / "community/mruno/partial_codeflash_00000000_00200000_20260913-220010_2075572of2097152.bin"
+crown_cf = (ROOT / crown["codeflash"]).read_bytes()
+check("Crown canonical CodeFlash equals complete lower MiB", crown_raw.is_file() and crown_raw.read_bytes()[:0x100000] == crown_cf)
+if crown_raw.is_file():
+    crown_raw_bytes = crown_raw.read_bytes()
+    check("Crown received upper host range is erased FF", set(crown_raw_bytes[0x100000:2075572]) == {0xFF})
+    check("Crown unreceived host-buffer tail is zero-filled", set(crown_raw_bytes[2075572:]) == {0x00})
+check("Crown canonical DataFlash equals supplied 32KiB snapshot", (ROOT / crown["dataflash"]).read_bytes() == (ROOT / "community/mruno/crown-eps-dataflash-dump-20260913.bin").read_bytes())
+check("Crown identities embedded", crown_cf[0x20860:0x2086C] == b"8965F3012000" and crown_cf[0x17DC0:0x17DCC] == b"8A3113008000" and crown_cf[0x17D80:0x17D8C] == b"8965H3008000")
+r = subprocess.run([sys.executable, str(ROOT / "tools/targets/crown/builders/promote_crown_analysis_inputs.py"), "--check"], cwd=ROOT, capture_output=True, text=True)
+check("Crown canonical input promotion reproduces tracked outputs", r.returncode == 0, r.stderr.strip())
 
 h = targets["corolla-8965H1202000"]
 f = targets["corolla-8965F1208000"]
