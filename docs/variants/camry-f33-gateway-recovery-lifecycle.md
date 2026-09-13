@@ -329,3 +329,37 @@ Working disassemblies from this independent check are under
 `build/work/f33-network-return-20260912/`; they are disposable outputs, not new
 inputs required by portable verification. No additional vehicle observation,
 recovery sender, exploit primitive, or completed repair is implied.
+
+
+## 9. The surrounding phase wrapper distinguishes retry policy from restoration
+
+The native caller outside the preparer was also followed, so its failure branch
+is not assumed to be the same as successful flash completion. In current
+`TCUWControlCommPhase`, the P5-Unified selection at `1000B43C..1000B477` reaches
+`1000B720`; its preparation dispatch at `1000B72E` calls the thunk to `10009370`.
+That wrapper invokes the dynamically resolved `StartPrepareWrite` at `10009B4E`.
+On failure it calls the shared error handler (`10009B8C -> 10003B90`) rather than
+claiming success and proceeding directly to the flash phase. Only the successful
+branch changes the phase byte to 2 at `10009BD5`.
+
+The separately named `ProcessBeforeIGOffOnAtRetry` callback is not an uncovered
+P5 recovery operation in this wrapper. The comparison at `10009ADE..10009B15`
+selects it specifically for the Phase-6 contact type; the callback invocation
+at `10009BC5` is additionally guarded by that equality after a failure. Its
+existence in the shared module cannot be projected onto P5-Unified.
+
+The shipped **P5-Unified** and **P5-Unified10** route settings are
+`IGOffRetriableFlag=1` and `PrepareRetryFlag=0`. Those are distinct policies:
+absence of a writer retry export is not proof that the OEM host has no
+ignition-cycle retry interaction. The shared error handler reads the former
+from its literal at `10014A08`, and reads the latter at `10003DFD..10003E15`
+before the optional writer retry call at `10003EF8`. This host-policy evidence
+does not prove that ignition alone cold-resets the EPS, normalizes every gateway
+mode, or creates an EPS boot listener.
+
+Finally, the normal common phase tail (`1000B74A -> 10004BE0`) calls the
+J2534 and calibration objects' `ExportData` methods. It preserves host state;
+it does not issue a newly recovered P5 abort/reset packet. GUI callbacks and
+provider-internal behavior retain their separate scope. Together with sections
+2 and 8, these inspected wrapper paths provide no basis for presenting a
+prepare-then-unrelated-writer sequence as already complete.
