@@ -722,3 +722,93 @@ startup was observed. The configured comma still timed out before the read-only
 SSH command ran. These results close additional **host-side composition**
 questions; they do not turn the gateway reachability hypothesis into a complete
 end-to-end network repair.
+
+
+## Read-only gateway selection and native cancellation: caller-level follow-up
+
+2026-09-12. Offline investigation of the actual OEM route, with no vehicle
+request, mode change, reset, upload or write. This extends the gateway candidate;
+it does not establish a surviving EPS executor or a completed repair.
+
+### The actual Unified caller enables the legacy query first
+
+Current `TCUWCanUnifiedPrepareWriter.dll!10001DA8` pushes **0**, then calls
+`CCanCommonPrepareWriter::JudgeReproGWNode` at `10001DAE`. In the current common
+helper, `10001930..10001934` skips its one-byte query only when that argument
+is **1**. The selected caller therefore does not skip it. The helper first
+constructs bare `3E`, requiring positive prefix `7E`, and assigns enum2 after
+success; only its permitted fallback path tries `3E 00` / `7E 00` and assigns
+enum1. Vehicle year and a P5 database label do not substitute for that exchange.
+
+The existing standalone CLI can express both non-programming requests through
+11-bit `750/758`, address extension `5F`. New end-to-end tests exercise the
+real CLI and ISO-TP implementation with only the Panda replaced by a fake:
+
+- Bare `3E` and `3E 00` remain different payloads; exactly one host CAN
+  submission occurs for each test exchange.
+- A returned-TX echo and unrelated `0F`/`6D` logical-node responses cannot
+  stand in for the gateway's response.
+- A negative `7F 3E 13` remains negative. Raw CLI exit code zero means a
+  transport exchange completed, **not** that the gateway selected a family.
+- Both the current default registry and the older test fixture work with
+  an explicit numeric endpoint, without triggering VIN/vehicle discovery.
+- Explicit OBD multiplexing selects Panda bus 1 / ELM327 parameter 0; this is
+  separate from the EPS normal-harness path, not a new EPS bus assignment.
+
+These are software tests, not on-wire qualification or full OEM classifier,
+retry or timing parity. The committed tests are
+`toyota-diagnostics/tests/test_gateway_raw_cli.py` (`08539fe`, `b3cb8b8`);
+that file plus `tests/test_transport.py` passes **15 tests**. No production
+runtime was changed in this pass and no extra raw probe framework was created.
+
+The literal `5000` passed by the legacy-query caller is not proved to be its
+initial response timeout. `TCUWCanDiagCommUtils!10001586` obtains the existing
+J2534 timeout; `100016DF..100016E4` applies the caller's final argument in its
+response-pending branch. Do not turn that literal into a guessed initial wait
+or claim that the raw CLI's timeout behavior reproduces the full OEM helper.
+
+### An older positive gateway identification was sought, not assumed
+
+A separate local sweep examined **559** earlier saved rlogs (5,608,876,389
+compressed bytes) and found no `750/758` extension-`5F` record. Another sweep
+checked cached `carParams.carFw` in **598** saved rlogs: **703** CarParams
+records containing **1,134** firmware entries, with no entry identified as
+the gateway or as `750/5F`. This checks identification that could have been
+cached before logging began, rather than relying only on raw CAN absence.
+
+The observed `761` frames are sixteen `sendcan` requests, their sixteen
+returned-TX records and sixteen forwarded copies, all carrying `3E 00`. They
+are not responses from the alternative OEM gateway family. Archives can duplicate
+time spans, and one earlier file reports corrupted events; these numbers are
+file/cached-record coverage, not continuous or unique lifetime capture. The
+maintainer-local inputs are under `/Users/kai/dev/inspect/logs/camry-2026`;
+disposable sweep code/results are in `build/work/f33-historical-gateway-baseline`.
+No historical positive was recovered to replace the missing live family witness.
+
+### ClearStatus cancellation is not a newly found reverse gateway operation
+
+The exported `CUW.dll!ClearStatusOfReprogramming` reaches `1003FE00`. Its
+worker sets the active job's stop byte at **+14** (`1003FE55`) and waits for
+that host job. Constructor `10058780` installs vtable `1007C738`; slot +4 is
+job worker `10059ED0`. If stop is observed in its initial state, it returns
+through `1005A76B`. In the reviewed active phase, `1005A5E2..1005A5F4` selects
+the job's +3C cancellation callback when the phase and stop conditions match.
+
+The manager explicitly installs **1003D490** into that +3C slot at `1003C3D6`.
+That callback only loads the host object at `1008AE4C`, sets its byte +258 to
+one, and returns. It does not send a gateway-normalization packet. This resolves
+a concrete cancellation callback; it is not a whole-program claim that no
+other cancellation, job phase or supplier package has any network side effect.
+
+Likewise, current managed `CuwModel::SuppressSleepMode` and
+`CancelingSleepMode` set/clear the host static `IsSuppressSleep`. Their names
+are not evidence of remote EPS power control. The native/managed input PEs,
+sidecars and recovered outputs were matched against their existing manifests.
+
+**Recovery consequence:** completing the appropriate OEM gateway preparation
+remains an untested network delivery condition. A gateway reply alone, the
+read-only CLI tests, a cached lookup, or setting a host cancellation flag does
+not supply the target-side programming executor. In the reconstructed terminal
+EPS fault, changing routing cannot repair the bad instruction. An actual EPS
+response after a changed network condition is required to overturn that premise;
+none was observed in this pass.
