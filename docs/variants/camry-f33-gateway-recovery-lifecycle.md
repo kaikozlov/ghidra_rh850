@@ -481,3 +481,59 @@ no compatible native restoration was executed; the repaired application has
 not reappeared. A read-only SSH retry returned "Host is down" before any device
 command ran. The restoration coverage is more tightly established, but this
 is still not a completed network-only recovery route.
+
+
+## 11. Normal host phases are not an independent network entry
+
+Returning to the previously working pre-incident image is a valid **unbricking**
+goal. Factory-exact restoration is optional, not an extra prerequisite. The
+archived inverse's 488 remaining factory differences do not themselves
+invalidate its incident rollback; its missing live entry and terminal-halt
+completion are the separate concerns identified above.
+
+Fresh instruction inspection of the current `TCUWCanUnifiedFlashWriter.dll`
+matched the following direct-call opcodes and relative destinations to the
+hash-pinned recovered PE. The protected input and its sidecar were also freshly
+matched to the recovery manifest before inspection.
+
+| Callsite | Callee | Normal host stage |
+|---|---|---|
+| `1000158D` | `10002AD0` | Install package-defined fields |
+| `10001609` / `10001621` | `10002510` / `10002060` | Transfer and verify phase 0 |
+| `10001651` | `10002060` | Phase-1 erase operation |
+| `100017D7` / `100017EF` | `10002510` / `10002060` | Transfer and verify phase 2 |
+| `10001813` / `1000182B` | `10002510` / `10002060` | Transfer and verify phase 3 |
+| `10001857` | `100012B0` | Target reset after the final CPU image |
+| `10001893` | `10001000` | Functional completion after periodic-stop/wait |
+
+Numeric phases are the actual caller arguments. Their work is driven by the
+package's area records; an empty phase does not imply an unconditional write.
+The transfer helper calls the ordinary download/data/transfer-exit helpers at
+`10001BE0`, `10002980`, and `10001F70`. The routine helper checks corresponding
+positive replies. These functions do not invoke the archived custom writer
+which stops in a terminal halt.
+
+On the exact F33 target, the ordinary erase/program worker invokes an installed
+RAM flash driver through `FEBF0FD0` (`4332`, `43BE`, `4428`). Thus the presence of
+normal programming services does not mean the entire writer is resident in
+untouched boot code. Compatible driver/package material and normal authorization
+are still required for that branch; the raw factory dump alone is not a complete
+OEM programming package. The retained Tundra package's shared protocol and
+flash-controller behavior do not prove full F33 package compatibility.
+
+Fresh `5A04` decompilation also confirms that normal verification completion can
+resolve the validity-marker destination through `33CC`, call `5286`, and wait for
+the marker-write worker result before returning success. `5286` queues the native
+validity value using `4188` and `4276`. This fills in the connection between
+ordinary verification and the marker discussed in section 10; it does not supply
+a pre-application entry into those services.
+
+The ten direct-call checks and the independent saved-image count check passed.
+The latter again found 16 incident differences in the application data range,
+476 in the footer, and none below `18000`. The existing saved-image comparator's
+11 portable tests also passed. These checks are offline observations, not ECU
+execution, complete flash-driver emulation, or evidence of successful recovery.
+The disposable numeric record is
+`build/work/f33-oem-writer-composition/observations.json`; no portable check
+requires it. No new transport, writer payload, key material, or vehicle command
+was introduced.
