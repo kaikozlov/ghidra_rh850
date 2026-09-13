@@ -597,3 +597,51 @@ Primary inputs: current **TCUWCanDiagCommUtils.dll**, **TCUWJ2534DeviceIF.dll**,
 literals were read from their recovered PE images; disposable disassemblies
 are under `build/work/f33-network-return-20260912/`. No new recovery sender,
 authentication bypass or claimed vehicle repair is implied.
+
+
+## 11. The surviving 7A2 response is a camera-side control, not a second EPS
+
+The existing Camry mount resolution maps plain request **7A2** to category
+**5005 / RC_P5.ddb / Rear Camera**. Fresh `tools/gts category RC_P5 --json`
+confirms the OEM category, and `tools/gts canbus 12984 --json` places
+`Parking Assist Monitor System / Rear Camera` on **Toyota Bus 1**, whereas
+`Power Steering (EPS)` is on **Toyota Bus 4**. Those Toyota bus labels are not
+Panda bus indices.
+
+The previously captured 7A2 fault **561854** independently agrees with this
+mapping: current RC_P5 table 65, record 1, resolves it to **C161854, Optical
+Axis Alignment / Missing Calibration**. The prior F181 **867BF0601001**
+observation therefore must not be treated as a central-gateway identity or an
+alternate EPS programming CPU merely because it is adjacent to 7A1. The join
+is an OEM install-set/observed-fault identification, not a newly captured
+hardware label or an authenticated sender measurement.
+
+Both current camera category 5005 and gateway category 443 use selector DC,
+frame 2B54, for normal F181 reading. Their identical request service does not
+make them the same endpoint. The gateway's separate **750/758, extension 5F**
+route remains the relevant route for the prepared-network hypothesis. A camera
+reply demonstrates communication with that camera path, not that the gateway's
+EPS route is in its programming state.
+
+## 12. The incident reconstruction also passes the native regional CRC inputs
+
+The claim that the retained incident passes startup integrity was checked
+against **the actual boot descriptors**, not merely a whole-file CRC. Fresh
+exact-target decompilation of `3438`, `344C`, `47EA` and `481A`, together with
+boot TP **869C** (raw handoff setup `9F50`), resolves the selected descriptor
+records at **8DD0** and **8DE0**:
+
+| Profile | CRC input, end exclusive | Descriptor-reference words |
+|---|---|---|
+| 0 | 10000..17DF0 | FFDD0 / FFDD4 |
+| 1 | 18000..FFDF0 | FFDE0 / FFDE4 |
+
+In both the retained factory image and complete incident reconstruction
+`aba6867f...50f2d74`, the referenced start/length words match the boot table;
+each range's CRC32 is **FFFFFFFF**, and validity markers **17E00 / FFE00**
+are both **5AA5A55A**. Thus an unnoticed difference between whole-file CRC and
+native regional CRC does not, in the retained reconstruction, put the ECU in
+the validity-failure boot path. The resident tail beyond these CRC ranges must
+still be included in a complete image comparison. This checks saved bytes;
+it neither measures live flash ECC nor converts the reconstruction into a
+post-incident ECU readback.
