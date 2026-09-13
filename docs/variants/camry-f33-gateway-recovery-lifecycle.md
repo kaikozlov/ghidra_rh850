@@ -537,3 +537,63 @@ The disposable numeric record is
 `build/work/f33-oem-writer-composition/observations.json`; no portable check
 requires it. No new transport, writer payload, key material, or vehicle command
 was introduced.
+
+
+## 10. Generic session, flow-control and power-hold helpers are different operations
+
+The remaining cleanup candidates were followed through their actual call targets
+and destination construction. This was offline; no diagnostic transaction,
+authorization attempt, ECU reset or flash write was made. All five relevant
+current protected inputs, sidecars and recovered images matched the existing
+CUW recovery manifest before these checks.
+
+**`SetBStoECU` is a provider configuration operation in the reviewed body.**
+`TCUWCanDiagCommUtils!10002140..10002176` builds a one-entry configuration list
+with parameter `1E` and the supplied byte value, then calls J2534 object vtable
+slot `+0C` with operation `2`. The actual `CJ2534IF` vtable at `100071DC` resolves
+that slot to `10001D80`; this wrapper calls object member `+1C0`. Its loader
+at `10003577..10003581` binds that member from the literal **PassThruIoctl**
+at `10007344`. Thus the preparer's cleanup call at `1000245D` does not reveal
+an EPS boot request or gateway-normal-state request. Provider-internal traffic
+remains a separate implementation boundary; a name containing “ECU” was not
+used to infer a transmitted diagnostic service.
+
+**The generic default-session helper is real, but its recovered caller is the
+local-bus controller flow.** `TCUWUnifiedUtils!10003230` builds normal `10 01`,
+checks `50 01`, and uses its two supplied address objects. The current Unified
+CID getter's call at `10002514` is guarded by local-bus flow value `1` and follows
+`RoutineControlForChargeLocalBus` at `100024F0`. Its address objects are the
+same ones populated by `GetChargeLocalBusPowerOnControllingEcuDiagID` at
+`10001F56` and used for that controller's extended session at `1000206A`.
+They are not automatically the Camry central-gateway `750/758, extension 5F`
+objects. This additional normal-session implementation therefore does not fill
+the separate P5 gateway-abort proof gap. It also does not prove that a standard
+default-session request would fail on the real gateway; that behavior is still
+unmeasured.
+
+**Automatic ignition-off cancellation is a third endpoint and must not be
+misread as a reverse-state switch.** The current
+`CancelAutomaticIGOFFForP4CanAndP5Can` body starts at `10001630`; its literals
+at `100082A4/100082B0` select **750/758 with extension E9**, not `5F`. It reads
+its configured power-management data, and the supported write branch sets a
+bit using `OR 40` at `1000189E`. The boolean argument changes compatibility/
+error-path handling; the reviewed write branch does not use false to clear
+that bit. Its legacy fallback is another operation on the same E9 endpoint.
+Neither calling a function named “Cancel” nor changing that boolean establishes
+an inverse operation for the 5F gateway's programming routines. The ECU-side
+persistence and release conditions were not measured and must not be inferred
+from host cleanup alone.
+
+These distinctions prevent composing an incorrect recovery lifecycle from
+similarly named helpers. They do not require a special inverse packet to exist:
+a supported ignition-cycle procedure or ECU-side timeout could be the intended
+release mechanism, but its exact gateway behavior needs its own evidence.
+The P5 host's ignition-retry policy in section 9 is retained separately from
+such a live state-restoration observation.
+
+Primary inputs: current **TCUWCanDiagCommUtils.dll**, **TCUWJ2534DeviceIF.dll**,
+**TCUWUnifiedUtils.dll**, **TCUWCanUnifiedCIDGetter.dll**, and
+**TCUWCanUnifiedPrepareWriter.dll**. The relevant native bodies and address
+literals were read from their recovered PE images; disposable disassemblies
+are under `build/work/f33-network-return-20260912/`. No new recovery sender,
+authentication bypass or claimed vehicle repair is implied.
