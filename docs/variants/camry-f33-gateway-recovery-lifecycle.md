@@ -242,3 +242,68 @@ ID, and payload. All 89,484 recovered records of `rlog-1.live.zst` and all
 The first partial file reports corrupted events; neither supplies an additional
 record or an independent gateway-preparation attempt. The comparison does not
 extend capture coverage beyond the spans already reviewed.
+
+
+## 7. The standard end-of-write reset is an executing boot service, not a second recovery entry
+
+This check closes the target side of the normal final reset rather than
+assuming that the host's ECUReset request necessarily resets the chip. It is
+specific to the original `8965F3307000` bytes and requires a **running,
+authorized boot diagnostic service**; it supplies no new ingress to the
+currently silent ECU.
+
+Boot startup sets TP to `869C`. The SID table consumed by `5222` is therefore
+`8E54`; its SID-11 record at **`8E5C`** contains callback **`60C2`**. The
+unseeded handler's actual instructions establish the following constraints:
+
+- `60D8..60E8` compares the current session with the ROM value at `8EF4`,
+  which is **2**. Failure produces the service-not-supported-in-active-session
+  response through `6084`.
+- `60F4..6122` accepts only the hard-reset subfunction after masking its
+  response-suppression bit, requires the state checked at `610C` to equal 2
+  (otherwise NRC33), and requires an exact two-byte request. This is not an
+  unauthenticated reset command independent of the normal diagnostic state.
+- `6128` calls **`67DA`** to request a reset, then `612C` calls **`6098`** to
+  construct the positive response. `6098` constructs `51` plus the accepted
+  subfunction and uses the ordinary response path `674A`.
+- `67DA` resets immediately only when the dispatcher is idle; otherwise it
+  sets the deferred-reset byte at **`FEBF2BBD`**. For the normal answered
+  transaction, transmission completion **`66BE`** calls `159E` only when the
+  completion status is success; a failed completion clears the deferred flag.
+  The response-suppressed branch in `674A` has its corresponding direct reset
+  handling. Merely enqueueing a request or observing a Panda TX echo does not
+  establish that this end state was reached.
+- **`159E -> 1550 -> 1560`** records the boot terminal state, disables
+  interrupts, stops the configured external supervisor clock, changes Port-4
+  bit-5 configuration and enters a terminal loop. This is the firmware's
+  external-supervisor reset sequence, not a newly discovered independent CAN
+  receiver or an instruction that edits application flash. The resulting
+  physical reboot was not measured in this offline pass.
+
+The current native Unified flash writer is consistent with that normal
+contract. After the final CPU image it calls its `11 01` / `51 01` reset
+exchange (`10001857 -> 100012B0`), stops its periodic transmitter, waits the
+configured post-reset interval, and only then calls its functional
+return-to-default helper at `10001893`. The packet construction and the
+applicability limit of that completion-only helper are separately recorded in
+[the network lifecycle observations](camry-f33-network-lifecycle-observations-2026-09-12.md).
+
+**Composition result:** the ordinary manufacturer update keeps the boot
+service running until its reset exchange. The archived custom inverse does
+not have that lifecycle: its documented DONE path enters `runtime_halt`.
+Appending an ECUReset request *after* that halt cannot be counted as a working
+finish step, because the same CPU would have to process it. The correctness of
+the inverse bytes does not validate a hypothetical alternate finalizer, and
+none was created or executed in this pass. A network-only restoration plan
+must use a verified restoration mechanism that retains its normal reset
+executor; the archived inverse's byte-level simulation alone is insufficient.
+
+Primary verification was the exact table and raw instruction bytes, plus fresh
+Ghidra decompilation of `5222`, `674A`, `66BE`, `1550`, `1560` and `159E`.
+The unseeded `60C2`, `6098`, and `67DA` instruction listings were byte-matched
+to the stock image rather than trusting inferred function boundaries. All
+seven relevant table/code ranges are byte-identical in the complete retained
+incident reconstruction; 121 inspected saved-disassembly rows matched the
+stock bytes. No Ghidra project mutation, diagnostic request, ECU reset, or
+vehicle write was performed. This is a verified static dependency, not a
+recovered complete route into the faulted EPS.
