@@ -1,0 +1,352 @@
+{
+  "schema": "camry-f33-historical-installer-observation-v1",
+  "scope": "Selected fields copied from archived tool-result stdout only. No model reasoning, security material, new vehicle access, full CodeFlash readback, or post-install CPU-reset proof. expected_post_image_sha256 is an expectation, not a measured hash.",
+  "records": [
+    {
+      "schema": "camry-f33-persistent-b6-signer-stage6-run-v1",
+      "operation": "stage6-preflight",
+      "source": {
+        "session_file": ".codex/sessions/2026/09/10/rollout-2026-09-10T23-31-27-01a08ebc-1cb8-7881-9f68-4ea81dd22b95.jsonl",
+        "line": 455,
+        "record_type": "custom_tool_call_output",
+        "record_timestamp": "2026-09-11T04:47:45.941Z",
+        "call_id": "call_v0A3FtedrjWP593kT4PHMnFR"
+      },
+      "execution": {
+        "direct_bootloader": false,
+        "initial_f181_hex": "023839363546333330373030300000000038413331313333303331303000000000",
+        "initial_f181_ascii": "\u00028965F3307000\u0000\u0000\u0000\u00008A3113303100",
+        "boot_f181_hex": "022121212121212121212121212121212121212121212121212121212121212121",
+        "boot_f181_ascii": "\u0002!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+        "handler_done": true,
+        "telemetry_frames": 9,
+        "timed_out": false,
+        "route": {
+          "bus": 0,
+          "cpu_index": 0,
+          "elm327_param": 1,
+          "uds_variant": "old"
+        },
+        "programming_handoff": {
+          "programming_response_timeout": false,
+          "route_before": {
+            "elm327_param": 1,
+            "eps_bus": 0,
+            "eps_rx": "0x7a9",
+            "eps_rx_bus": 0,
+            "eps_tx": "0x7a1",
+            "semantic_path": "normal-harness"
+          },
+          "route_after": {
+            "elm327_param": 1,
+            "eps_bus": 0,
+            "eps_rx": "0x7a9",
+            "eps_rx_bus": 0,
+            "eps_tx": "0x7a1",
+            "semantic_path": "normal-harness"
+          }
+        }
+      },
+      "telemetry": {
+        "errors": [],
+        "success": true,
+        "stages": [
+          {
+            "stage": 16,
+            "name": "BOOT"
+          },
+          {
+            "stage": 16,
+            "name": "BOOT"
+          },
+          {
+            "stage": 127,
+            "name": "SUCCESS"
+          },
+          {
+            "stage": 127,
+            "name": "SUCCESS"
+          },
+          {
+            "stage": 255,
+            "name": "DONE"
+          }
+        ]
+      }
+    },
+    {
+      "schema": "camry-f33-persistent-b6-signer-stage6-run-v1",
+      "operation": "stage6-apply",
+      "source": {
+        "session_file": ".codex/sessions/2026/09/10/rollout-2026-09-10T23-31-27-01a08ebc-1cb8-7881-9f68-4ea81dd22b95.jsonl",
+        "line": 605,
+        "record_type": "custom_tool_call_output",
+        "record_timestamp": "2026-09-11T04:50:08.921Z",
+        "call_id": "call_dEXgCoMnRgA8xCxr2Y5RdQfQ"
+      },
+      "execution": {
+        "direct_bootloader": false,
+        "initial_f181_hex": "023839363546333330373030300000000038413331313333303331303000000000",
+        "initial_f181_ascii": "\u00028965F3307000\u0000\u0000\u0000\u00008A3113303100",
+        "boot_f181_hex": "022121212121212121212121212121212121212121212121212121212121212121",
+        "boot_f181_ascii": "\u0002!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+        "handler_done": true,
+        "telemetry_frames": 15,
+        "timed_out": false,
+        "route": {
+          "bus": 0,
+          "cpu_index": 0,
+          "elm327_param": 1,
+          "uds_variant": "old"
+        },
+        "programming_handoff": {
+          "programming_response_timeout": false,
+          "route_before": {
+            "elm327_param": 1,
+            "eps_bus": 0,
+            "eps_rx": "0x7a9",
+            "eps_rx_bus": 0,
+            "eps_tx": "0x7a1",
+            "semantic_path": "normal-harness"
+          },
+          "route_after": {
+            "elm327_param": 1,
+            "eps_bus": 0,
+            "eps_rx": "0x7a9",
+            "eps_rx_bus": 0,
+            "eps_tx": "0x7a1",
+            "semantic_path": "normal-harness"
+          }
+        }
+      },
+      "telemetry": {
+        "errors": [],
+        "success": true,
+        "stages": [
+          {
+            "stage": 16,
+            "name": "BOOT"
+          },
+          {
+            "stage": 16,
+            "name": "BOOT"
+          },
+          {
+            "stage": 32,
+            "name": "APPLY_TARGET"
+          },
+          {
+            "stage": 32,
+            "name": "APPLY_TARGET"
+          },
+          {
+            "stage": 34,
+            "name": "VERIFY_FINAL"
+          },
+          {
+            "stage": 34,
+            "name": "VERIFY_FINAL"
+          },
+          {
+            "stage": 127,
+            "name": "SUCCESS"
+          },
+          {
+            "stage": 127,
+            "name": "SUCCESS"
+          },
+          {
+            "stage": 255,
+            "name": "DONE"
+          }
+        ]
+      }
+    },
+    {
+      "schema": "secoc-patch-run-v1",
+      "created_at": "2026-09-11T04:50:33+00:00",
+      "mode": "validate-only",
+      "status": "payload-complete",
+      "execute": true,
+      "source": {
+        "session_file": ".codex/sessions/2026/09/10/rollout-2026-09-10T23-31-27-01a08ebc-1cb8-7881-9f68-4ea81dd22b95.jsonl",
+        "line": 626,
+        "record_type": "custom_tool_call_output",
+        "record_timestamp": "2026-09-11T04:50:34.279Z",
+        "call_id": "call_VpASoYjupbH7EOslcUjYTwav"
+      },
+      "execution": {
+        "direct_bootloader": false,
+        "initial_f181_hex": "023839363546333330373030300000000038413331313333303331303000000000",
+        "initial_f181_ascii": "\u00028965F3307000\u0000\u0000\u0000\u00008A3113303100",
+        "boot_f181_hex": "022121212121212121212121212121212121212121212121212121212121212121",
+        "boot_f181_ascii": "\u0002!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+        "handler_done": true,
+        "telemetry_frames": 35,
+        "timed_out": false,
+        "route": {
+          "bus": 0,
+          "cpu_index": 0,
+          "elm327_param": 1,
+          "uds_variant": "old"
+        },
+        "programming_handoff": {
+          "programming_response_timeout": false,
+          "route_before": {
+            "elm327_param": 1,
+            "eps_bus": 0,
+            "eps_rx": "0x7a9",
+            "eps_rx_bus": 0,
+            "eps_tx": "0x7a1",
+            "semantic_path": "normal-harness"
+          },
+          "route_after": {
+            "elm327_param": 1,
+            "eps_bus": 0,
+            "eps_rx": "0x7a9",
+            "eps_rx_bus": 0,
+            "eps_tx": "0x7a1",
+            "semantic_path": "normal-harness"
+          }
+        }
+      },
+      "configured_shellcode": {
+        "path": "/data/camry-f33-car-kit-state/hook-preflight/shellcode-validate-only.bin",
+        "sha256": "3a77b4315ac1c191b108379f6f7cad7e68d2490da340f0f0f63d07434e536d4b",
+        "size": 4048
+      },
+      "payload": {
+        "path": "/data/camry-f33-car-kit-state/hook-preflight/payload-validate-only.bin",
+        "sha256": "fa5e0a8604445fa3381995d900d2a405ce4b41922b923f6015daa07428e69b90",
+        "size": 4096
+      },
+      "template": {
+        "path": "/data/camry-f33-car-kit/persistent_patch/generic_shellcode_template.bin",
+        "sha256": "3d6c4e685ad8e6460a624e501948324e989a751a94cfd69f12078ab158e40426"
+      },
+      "image": {
+        "path": "/data/camry-f33-car-kit/persistent_patch/CodeFlash.stage6-resident.bin",
+        "sha256": "818338cc3e3dc23f1cf466c72f497699adc9ff33767e67b81fb65bccfab09010",
+        "size": 1048576
+      },
+      "manifest": {
+        "path": "/data/camry-f33-car-kit/persistent_patch/stage7-hook-manifest.json",
+        "sha256": "88d8a2eb5425550eed6328053154f3575483d1e369fcbc2b3f0b567087090030"
+      },
+      "config_identity": {
+        "image_sha256": "818338cc3e3dc23f1cf466c72f497699adc9ff33767e67b81fb65bccfab09010",
+        "patch_va": 500338,
+        "patch_len": 4,
+        "original": "80ffee1c",
+        "replacement": "ff02925b",
+        "crc_fixup_va": 1048044,
+        "expected_residue": 4294967295
+      },
+      "preflight": {
+        "apply_ready": true,
+        "mismatches": []
+      },
+      "telemetry": {
+        "errors": [],
+        "event_count": 35,
+        "path": "/data/camry-f33-car-kit-state/hook-preflight/telemetry.ndjson",
+        "payload_success": true,
+        "sha256": "9d9ba707e649711edff2d6476b721ac7d010976b86022df937827f4de264c202"
+      }
+    },
+    {
+      "schema": "secoc-patch-run-v1",
+      "created_at": "2026-09-11T04:51:01+00:00",
+      "mode": "apply",
+      "status": "payload-complete",
+      "execute": true,
+      "source": {
+        "session_file": ".codex/sessions/2026/09/10/rollout-2026-09-10T23-31-27-01a08ebc-1cb8-7881-9f68-4ea81dd22b95.jsonl",
+        "line": 647,
+        "record_type": "custom_tool_call_output",
+        "record_timestamp": "2026-09-11T04:51:02.464Z",
+        "call_id": "call_45lA66AzN9tj6R1mQjnpv4zQ"
+      },
+      "execution": {
+        "direct_bootloader": false,
+        "initial_f181_hex": "023839363546333330373030300000000038413331313333303331303000000000",
+        "initial_f181_ascii": "\u00028965F3307000\u0000\u0000\u0000\u00008A3113303100",
+        "boot_f181_hex": "022121212121212121212121212121212121212121212121212121212121212121",
+        "boot_f181_ascii": "\u0002!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+        "handler_done": true,
+        "telemetry_frames": 65,
+        "timed_out": false,
+        "route": {
+          "bus": 0,
+          "cpu_index": 0,
+          "elm327_param": 1,
+          "uds_variant": "old"
+        },
+        "programming_handoff": {
+          "programming_response_timeout": false,
+          "route_before": {
+            "elm327_param": 1,
+            "eps_bus": 0,
+            "eps_rx": "0x7a9",
+            "eps_rx_bus": 0,
+            "eps_tx": "0x7a1",
+            "semantic_path": "normal-harness"
+          },
+          "route_after": {
+            "elm327_param": 1,
+            "eps_bus": 0,
+            "eps_rx": "0x7a9",
+            "eps_rx_bus": 0,
+            "eps_tx": "0x7a1",
+            "semantic_path": "normal-harness"
+          }
+        }
+      },
+      "configured_shellcode": {
+        "path": "/data/camry-f33-car-kit-state/hook-install/shellcode-apply.bin",
+        "sha256": "fe2c46b16096260fa6d438a43d0fc662f444648815058fbe60ee7ea0d12c893a",
+        "size": 4048
+      },
+      "payload": {
+        "path": "/data/camry-f33-car-kit-state/hook-install/payload-apply.bin",
+        "sha256": "dff29bde433196a291a4833e0e1223b46c4069ec999b2237683c1252036a1aa4",
+        "size": 4096
+      },
+      "template": {
+        "path": "/data/camry-f33-car-kit/persistent_patch/generic_shellcode_template.bin",
+        "sha256": "3d6c4e685ad8e6460a624e501948324e989a751a94cfd69f12078ab158e40426"
+      },
+      "image": {
+        "path": "/data/camry-f33-car-kit/persistent_patch/CodeFlash.stage6-resident.bin",
+        "sha256": "818338cc3e3dc23f1cf466c72f497699adc9ff33767e67b81fb65bccfab09010",
+        "size": 1048576
+      },
+      "manifest": {
+        "path": "/data/camry-f33-car-kit/persistent_patch/stage7-hook-manifest.json",
+        "sha256": "88d8a2eb5425550eed6328053154f3575483d1e369fcbc2b3f0b567087090030"
+      },
+      "config_identity": {
+        "image_sha256": "818338cc3e3dc23f1cf466c72f497699adc9ff33767e67b81fb65bccfab09010",
+        "patch_va": 500338,
+        "patch_len": 4,
+        "original": "80ffee1c",
+        "replacement": "ff02925b",
+        "crc_fixup_va": 1048044,
+        "expected_residue": 4294967295
+      },
+      "apply": {
+        "expected_fixup": "0x4AED0259",
+        "expected_post_image_sha256": "aba6867f244dda42b754d6f455f25a226ee95025dee6a2d98b07b3ac550f2d74",
+        "expected_residue": "0xFFFFFFFF",
+        "write_crc_sequence_complete": true
+      },
+      "telemetry": {
+        "errors": [],
+        "event_count": 65,
+        "path": "/data/camry-f33-car-kit-state/hook-install/telemetry.ndjson",
+        "payload_success": true,
+        "sha256": "8439209debceec8e4402b62092ea9cdbb34736d1238114d6fcb0bfd753acc2f4"
+      }
+    }
+  ]
+}
