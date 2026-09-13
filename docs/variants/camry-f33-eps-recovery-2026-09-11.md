@@ -7,6 +7,16 @@ network-only recovery routes were closed was broader than the evidence.** This
 pass resolves specific missing paths rather than inferring impossibility from
 diagnostic silence or a function-name census.
 
+A retained exact-car diagnostic result now supplies the first no-lift,
+network-only check: ask the reachable Brake/EPB ECU whether it currently regards
+EPS communication as open. Section 17 defines that ordinary read-only query.
+The current operating directive is network-only: no lifting, under-car access,
+rack access, or connector work. Section 18 retains the historical A30 analysis
+but that experiment is shelved. The active sequence is the dedicated
+[network-only recovery runbook](camry-f33-network-only-recovery-runbook-2026-09-12.md):
+qualify the current route, query both exact EPS diagnostic listeners once, then
+use current GTS+/TIS for Health Check, CAN Bus Check, and exact-package discovery.
+
 The work used the exact `8965F3307000` stock CodeFlash, the recorded malformed
 hook, target-native Ghidra output, raw RH850 disassembly where Ghidra had no
 function, and the Renesas P1M-E hardware manual. The vehicle was off. No vehicle
@@ -925,7 +935,7 @@ The narrow `camry_eps_recovery_liveness` suite exercises native-vs-TX/rejected
 source separation, positive controls, repeated metadata timing, per-length time
 ranges, producer metadata, and empty/send-only logs without a vehicle or capnp.
 
-## 15. Same-part exterior connector photograph: populated contacts are not a pinout
+## 15. Same-part exterior connector photograph does not establish hidden contacts
 
 The previous shorthand about a five-wire vehicle interface must not be read as
 proof that every externally exposed terminal is assigned. Original photographs
@@ -936,9 +946,10 @@ from a 2025 Camry donor listing provide a more specific physical lead:
   **JJ501-016640**, DENSO **210600-3912**.
 - Photograph 18 labels the rack **44250-06490**, JTEKT **JG402-006840**.
 - Photograph 17 exposes the main external socket: two large blade contacts and
-  an array of small contacts, with visibly more than three small contacts.
-  This is an observation of contacts, not a verified count of electrically
-  connected circuits or an assignment of terminal numbers.
+  three clear smaller central contacts. Other bright/dark features cannot be
+  separated reliably from plastic edges, reflections and blur. The photograph
+  therefore does **not** establish more than the five vehicle circuits later
+  documented by the service EWD, much less a hidden programming contact.
 
 Original photographic sources:
 
@@ -954,19 +965,18 @@ The images were acquired and visually checked in the disposable
 `build/work/f33-external-recovery/` workspace, not treated as OEM electrical
 schematics.
 
-**What changes:** absence of a CAN-only recovery path does not establish that
-an installed, closed assembly has no other usable external contacts. Accounting
-for the socket is a concrete unresolved task, rather than an unspecified hope
-for a hidden message.
+**What changes:** the same-part photograph verifies the part labels and physical
+connector family, but supplies no positive evidence for another installed,
+closed-assembly interface. The prior visual claim of more than three small
+contacts is withdrawn.
 
-**What does not change:** none of these contacts has been identified as reset,
-mode select, UART, a diagnostic input, or a working recovery interface. Extra
-contacts may be unused, share a connector across variants, or serve unrelated
-functions. A service EWD showing only vehicle-used wires could still leave the
-other contacts electrically unexplained. The photos also do not show whether
-the socket can be reached on this car without lifting it or removing prohibited
-components. Do not assign old-Camry terminal numbers, apply voltage, short pins,
-or manufacture a programming sequence from these pictures.
+**What does not change:** no contact has been identified as reset, mode select,
+UART, a second diagnostic input, or a working recovery interface. A service EWD
+showing only vehicle-used wires cannot by itself prove the internal absence of
+an obscured contact, but the photo supplies no reason to posit one. It also does
+not show whether C50 can be reached on this car without lifting it or removing
+prohibited components. Do not assign old-Camry terminal numbers, apply voltage,
+short pins, or manufacture a programming sequence from these pictures.
 
 The relevant alternative is a **documented independent service interface through
 an externally accessible connector**, if one exists and is enabled. Establishing
@@ -1044,8 +1054,308 @@ application, whether that entry is enabled on supplied units, and whether it
 can be used with the rack installed and closed.** A bench test that merely
 supplies ignition and CAN to a healthy rack does not answer that question.
 
-No independent external service entry has yet been verified. This pass produced
-a narrower physical lead and corrected the saved-wire-format boundary; it did
-not repair the ECU, perform a live test, or establish that another ordinary CAN
-request will work. The exact installed-access/pin-function evidence remains the
-missing input needed to turn the connector lead into a recovery procedure.
+No independent external service entry has yet been verified. This pass bounded
+the public tool/supplier coverage and corrected the saved-wire-format boundary;
+it did not repair the ECU, perform a live test, or establish that another
+ordinary CAN request will work. Section 18 resolves a separate installed-access
+lead at the upstream A30 connector without treating the rack photo as a pinout.
+
+## 17. First no-lift network check: Brake/EPB reports EPS communication state
+
+The exact 2026 Camry Hybrid already has a live-identified, ordinary diagnostic
+neighbor that can be queried without lifting the car, unplugging A30 or touching
+the rack. GTS+ category 435 **Brake/EPB**, database `ABS_P5.ddb`, is the
+11-bit UDS endpoint `0x7B0 -> 0x7B8`; exact-car F181 is `F152633K0000`.
+ReadDataByIdentifier `22 10 2F` succeeded in the ordinary/default context and
+returned ten value bytes:
+
+```text
+f7 00 fd 00 7c 00 a9 00 00 00
+```
+
+The current `ABS_P5` Data List maps **EPS/Steering Control Actuator ECU
+Communication Open** to MSB0 bit 74 of those ten bytes. For a zero-indexed byte
+array `value`, decode it as `(value[9] & 0x20) != 0`: zero is `Normal`; one is
+`Under intermittent`. The retained pre-incident value decodes to zero. It is a
+baseline, not the missing post-incident observation.
+
+The safest first action is therefore a stationary, IG-ON/not-READY Techstream or
+GTS read: select Brake/EPB identity `F152633K0000`, open Data List, retain the
+full raw value for that exact label, and then read—but do not clear—DTC
+**U0131-87, Lost Communication with Power Steering Control Module / Missing
+Message**. If an already-validated direct UDS setup is used instead, keep the
+physical route current rather than hardcoding a Panda bus: retained harness
+configurations place this stable CAN-ID pair on different logical buses.
+
+Interpretation is intentionally narrow:
+
+- a positive `0x7B8` response proves the Brake/EPB ECU and route are alive, not
+  that EPS acknowledged anything;
+- bit 74 set is the brake ECU's current peer-monitor report that EPS
+  communication is open/intermittent;
+- bit 74 clear means the brake ECU currently considers that monitored EPS
+  communication normal, which is a reason to retain passive EPS-origin traffic
+  and recheck routing/frame format before treating the rack as network-dead; and
+- U0131-87 alone is historical/status evidence. The exact car previously stored
+  Brake/EPB status `0xAC` with current-failure bits clear, so its mere presence
+  is not a current-liveness result.
+
+Exact evidence is
+`targets/camry-2026/raw-20260826/camry_nrtd_p5_oracles_extra_20260826.json`,
+`data/generated/camry_2026_nrtd_p5.json`, and the retained DTC interpretation in
+`docs/variants/camry-2026-live-baseline.md` §17. Offline vocabulary reproduction
+is `tools/gts did ABS_P5 0x102F --json`. Category-466 `Brk_Bst_P5`, the P6
+`BSCM_B`/`ADCU` catalogs, alternate DID `0x302F`, and DID `0x1382` do not have
+the same exact-car route proof and are not substitutes. This check is exact to
+the incident 2026 Camry Hybrid; transfer to another XV80 calibration requires a
+separate route/identity join.
+
+Post-incident retained traffic does show native `0x7B8` replies to session and
+TesterPresent requests, so this neighboring endpoint survived the incident.
+No post-incident `0x102F` value was retained. That missing read is now the first
+network step; it reports state but does not reset, reflash or repair EPS.
+
+## 18. A30 exposes an installed-rack, downstream-CAN discriminator
+
+Public 2025 North American Camry service information resolves one useful route
+that the ordinary OBD/camera connection cannot provide. This source is exact to
+the current XV80 model family (Camry LE, 2.5L VIN A, `[04/2024 - ]`), but it is
+not an independent verification of every 2026/AWD wiring revision. The transfer
+to the incident vehicle must therefore be checked at the connector before use.
+
+### What the vehicle wiring establishes
+
+The power-steering ECU's C50 vehicle harness contains only these five circuits:
+
+- C50-4 IG, C50-7 PGND, C50-8 PIG, C50-10 CANH and C50-11 CANL;
+- the EWD draws the remaining C50 vehicle-side cavities blank; and
+- PIG is supplied through the 80 A EPS circuit while IG is separately supplied
+  through the IGR2 relay and 5 A EPS-IGR 1 circuit.
+
+Sources are the service-manual `Terminals of ECU` page,
+`https://lemon-manuals.la/Toyota/2025/Camry%20LE%2C%202.5L%20Eng%20VIN%20A/Repair%20and%20Diagnosis/Steering/Power%20Steering/Power%20Steering%20System%20-%20Diagnostics%20-%20Introduction/Power%20Steering%20System/Terminals%20Of%20Ecu%20%5B04%2F2024%20-%20%5D/Terminals%20Of%20Ecu%20%5B04%2F2024%20-%20%5D/`,
+and its full EWD images:
+`https://lemon-manuals.la/images25/VA898898/`,
+`https://lemon-manuals.la/images25/VA902517/` and
+`https://lemon-manuals.la/images25/VA902521/`. Blank **vehicle harness**
+cavities do not prove that every visible ECU-side contact is internally absent
+or unused; they do close an unsupported attempt to energize an extra C50 pin.
+
+The CAN system diagram puts EPS at the end of Bus 4, downstream of the brake
+booster/skid ECU at A30. A30 is a two-port node, not merely another branch:
+
+- A30-36 CA1H / A30-37 CA1L are the upstream Bus 4 leg;
+- A30-34 DC1H / A30-35 DC1L are the downstream EPS leg; and
+- with A30 unplugged, Toyota specifies **108 to 132 ohms** across each isolated
+  harness-side pair.
+
+The CAN-system A30 terminal page is
+`https://lemon-manuals.la/Toyota/2025/Camry%20LE%2C%202.5L%20Eng%20VIN%20A/Repair%20and%20Diagnosis/Accessories%20%26%20Equipment/Communication%20Devices/Can%20Communication%20System%20-%20Diagnostics%20-%20Introduction/Can%20Communication%20System/Terminals%20Of%20Ecu%20%5B04%2F2024%20-%20%5D/Terminals%20Of%20Ecu%20%5B04%2F2024%20-%20%5D/`.
+The system diagram is `https://lemon-manuals.la/images25/GTY1267625/`; the
+A30 terminal face is `https://lemon-manuals.la/images25/GTY1267223/`; and the
+power-steering branch is shown in `https://lemon-manuals.la/images25/GTY1267483/`.
+The specified resistance on both disconnected legs independently establishes
+two terminated physical segments. A direct tester on A30-34/35 can therefore
+bypass the A30 bridge and every upstream gateway while leaving the rack
+installed and closed.
+
+A30 is a sealed underhood connector on the upper/rear brake-booster electronics
+in the left-rear engine compartment; full booster removal is not a prerequisite
+merely to release this plug. Toyota's CAN drawing is the **front view of the
+unplugged harness connector** with its latch at the top. It shows a 42-position
+face, bottom row 33 through 42: 34/35 are the second and third small cavities
+from the left. A different brake-subsystem drawing, `GTY1263768`, stops at 41;
+use the CAN-test face `GTY1267223` and verify the in-hand connector/VIN before
+inserting anything. The red retainer/lever release is photographed at
+`https://lemon-manuals.la/images25/GTY1268672/`. No public exact A30 housing,
+mating-header, repair-wire or breakout part number was verified. In particular,
+`90980-12C06` has not been tied to A30 by a connector list or primary application
+record and must not be used; the public Toyota listing describes it only as a
+general female housing. Do not pierce insulation, force generic terminals,
+backprobe a sealed connector, or rely on cavity numbering without visually
+matching the exact car.
+
+The model's brake-control tool list does name Toyota `09080-2C101`; Toyota's
+tool catalog describes only a general test-lead set with 2.0 mm and 0.5 mm
+pins, not compatibility with A30's terminal or seal. Likewise, networking SST
+`09991-00570` is a lance-cancelling terminal-removal tool, not a contact lead.
+Neither is an approved A30 breakout on the available evidence. Searches across
+the retained GTS+/Techstream catalogs found no A30 housing, terminal family,
+`82998-*` repair wire or dedicated harness. The remaining low-cost sourcing
+step is a VIN-specific Toyota EWD **Connector List / Wire Harness Repair** query
+for A30-34/35; until it returns an exact terminal or test adapter, do not buy or
+insert either generic lead.
+
+The tool-list sources are the model-specific
+`https://lemon-manuals.la/Toyota/2025/Camry%20LE%2C%202.5L%20Eng%20VIN%20A/Repair%20and%20Diagnosis/Brakes/Anti-Lock%20Brakes/Brake%20Control%20%2F%20Dynamic%20Control%20System%20%28Preparation%29/Brake%20Control%20%2F%20Dynamic%20Control%20Systems/Recommended%20Tools%20%5B04%2F2024%20-%20%5D/Recommended%20Tools%20%5B04%2F2024%20-%20%5D/`,
+Toyota's `https://www.toyota-tech.eu/SST/2013/Recommended_Tools_and_Checkers.pdf`,
+and the model-specific networking SST page
+`https://lemon-manuals.la/Toyota/2025/Camry%20LE%2C%202.5L%20Eng%20VIN%20A/Repair%20and%20Diagnosis/Accessories%20%26%20Equipment/Communication%20Devices/Networking%20%28Preparation%29/Networking/SST%20%5B04%2F2024%20-%20%5D/SST%20%5B04%2F2024%20-%20%5D/`.
+
+### The safe experiment and what each result means
+
+If this A30 fallback is reached, its first live experiment should remain a
+mode/liveness probe, not a programming attempt. `tools/toyota
+eps-isolated-probe` prints the plan without opening hardware by default; its
+live path remains fail-closed behind the following physical measurements and
+typed transition attestations:
+
+1. On level ground, apply the parking brake, chock the wheels and take feet off
+   the brake pedal. Turn the power switch off; avoid key, door and pedal activity
+   for at least one minute; disconnect the auxiliary-battery negative cable;
+   wait at least one additional minute; and then unplug A30.
+   With the negative cable disconnected, verify **108 to 132 ohms** across
+   harness-side 34/35, at least
+   **200 ohms** from each line to body ground, and at least **6 kilohms** from
+   each line to the auxiliary-battery positive terminal. A failed check is a
+   wiring/termination problem to resolve before power.
+2. Using only a verified nondamaging A30 mate or correct service terminals,
+   connect the CAN interface exclusively to the isolated rack segment. Use a
+   short twisted H/L pair, a verified body-ground point and a verified second
+   120-ohm termination at the interface end; do not infer ground from an A30
+   cavity. Do not backprobe, pierce insulation or force a generic pin. Before
+   power, the combined pair should measure roughly **54 to 66 ohms**. Remove the
+   ohmmeter and all resistance-test leads before reconnecting power. Ensure no
+   second tester transceiver can acknowledge the same bus. With current comma
+   hardware, use only independent logical CAN1, provide its external 120-ohm
+   termination, and leave the unused CAN1 pass-through physically unconnected;
+   do not use the CAN0/CAN2 relay pair.
+3. While the auxiliary-battery negative cable is still disconnected, power the
+   Panda independently over USB and configure CAN1 at 500 kbit/s / 2 Mbit/s in
+   Panda `NOOUTPUT`: host data transmission is blocked, but protocol ACK is
+   enabled. Only after that readback succeeds, reconnect the negative cable with
+   IG still off and record an ACK-capable receive baseline. This avoids driving
+   a live rack's transmit error count up on an unacknowledged isolated bus. The
+   USB host must be battery-powered and independent of vehicle or mains power.
+   Panda heartbeat checks remain enabled; the interactive prompts, passive
+   capture intervals, response windows and shutdown waits refresh them every
+   0.5 seconds so a failed host falls back to `SILENT` rather than leaving
+   ACKing or ELM327 safety active indefinitely.
+4. With A30 still unplugged, turn ignition on without pressing the brake and
+   keep the vehicle **not READY**. Send only TesterPresent and the read-only F186
+   current-session query. Run distinct Classical-CAN and ISO CAN-FD trials
+   (2 Mbit/s data phase for FD), recording receiver frames and controller/Panda
+   health before and after each trial. Panda's one `NOOUTPUT`-to-ELM327 safety
+   transition reinitializes CAN, so the tool reapplies and verifies the exact
+   500 kbit/s / 2 Mbit/s ISO-FD configuration once after passive capture. It
+   does not clear the global RX queue or repeat that reset between requests;
+   an empty, all-controller counter-stable drain barrier precedes every TX.
+   Never drive or enter READY with A30 unplugged.
+5. Treat a Panda/comma returned-TX frame as an echo only. On this two-node bus,
+   stable transmission without ACK errors is meaningful only because the rack
+   is the sole possible peer. A valid host receipt requires exactly one returned
+   echo matching the current `0x7A1` address and payload plus a controller
+   `total_tx_cnt` delta of exactly one; any duplicate, unrelated or other-source
+   receipt stops the experiment. A native `0x7A1` mirror of the request also
+   stops the experiment as possible internal loopback. Native receive rows from
+   all three physical Panda controllers must reconcile exactly to each
+   controller's final post-drain `total_rx_cnt` delta; any CAN0/CAN2 counter
+   activity, incomplete counter schema or late off-bus row/receipt stops the
+   experiment. Record ACK-error, transmit-error-counter, bus-off/core-reset,
+   native-response, Panda safety, fault, power, overflow and uptime changes
+   rather than inferring ACK from the echo. Panda FDCAN uses automatic
+   retransmission: three maximum host
+   submissions do **not** mean only three on-wire attempts. An unacknowledged
+   request can repeat until its transmit error count forces controller recovery.
+   Only an exact positive `7E 00` TesterPresent response together with the exact
+   receipt, reconciled native RX evidence, and complete clean controller/Panda
+   health permits one same-format F186 request; then stop even if F186 is silent.
+   An exact negative `7F 3E <NRC>` proves that the DCM executor is active only
+   when its receipt, topology, drain and health evidence also validate; a merely
+   syntactic match still stops the experiment without F186 but proves no mode.
+   Not every NRC denotes a final rejection.
+   Try the FD
+   TesterPresent only after a clean, ACK-consistent/no-response Classical-CAN
+   phase or a clean Classical-CAN phase containing an unmatched native peer
+   frame. A missing or contaminated transmit receipt, incomplete health schema,
+   receive loss, Panda fault or drift, ACK/link/controller error, bus-off or core
+   reset stops the experiment rather than opening another format trial. Any
+   validated F186 response stops all later format trials.
+
+After the capture, the live tool attempts to return Panda to ACK-capable
+`NOOUTPUT`. Only read-back-verified `NOOUTPUT` is kept alive during the physical
+shutdown sequence. If that readback fails, the tool immediately attempts
+`SILENT` and sends no more heartbeats while it still separately attests IG OFF,
+enforces a monotonic quiet minute, separately attests auxiliary-battery-negative
+disconnection, and enforces a second monotonic minute. It enters or reasserts
+`SILENT` after the shutdown attestation. Only after that may the interface close
+or A30 be touched and restored. PIG remains supplied when IG alone is off.
+
+The result partitions the remaining problem:
+
+- **Validated TesterPresent or F186 response:** a unique syntactic response plus
+  the exact host receipt, uncontaminated topology, reconciled drain and complete
+  clean controller/Panda health establishes that a software executor is alive.
+  Exact application callback `0x4FA7C -> 0x91AF4 -> 0x924FC` returns its current
+  DCM session byte, so `04 62 F1 86 <session>` identifies the application
+  service implementation. The exact boot handler checks only four descriptors
+  at `0x8F14`; F186 is absent, so `03 7F 22 31` is compatible with that boot
+  table. It is **boot-compatible, not standalone boot proof**: another NRC,
+  silence, or a malformed reply leaves mode unknown. The tool deliberately uses
+  F186 rather than F181 because the exact application F181 callback can itself
+  emit the boot-like all-`21` placeholder after a metadata mismatch. No F186
+  result authorizes programming. The tool retains a syntactic F186
+  classification separately but does not promote it to a mode label when any
+  surrounding evidence fails. An unmatched native frame on `0x7A9`
+  establishes physical peer activity, not a DCM executor or software identity.
+  `tools/test camry_f33_recovery_identity` pins the exact application DID row,
+  default-session access, current-session producer, boot session/table bounds,
+  and unknown-DID branch directly from the retained firmware bytes.
+- **ACK-consistent clean controller/Panda health but no response:** because the
+  rack is the sole physical peer, repeated phases with an exact host receipt and
+  reconciled native RX evidence strongly support live rack acknowledgement,
+  wiring and transceiver. Panda does not expose a separate positive TX-complete
+  receipt, so retain the result as ACK-consistent rather than confirmed. It
+  would support the recovered pre-DCM fault model and show that prior upstream
+  ACKs were not evidence of a responsive EPS CPU. It does not itself create a
+  repair executor.
+- **ACK error or link fault:** recheck PIG/IG, common ground, termination,
+  connector orientation and both frame modes. It does not by itself distinguish
+  a dead transceiver from an unpowered rack or a configuration mismatch.
+
+This is a real new discriminator because the application initializes its
+RSCANFD controller before reaching the malformed instruction at `0x7A272`.
+Hardware acknowledgement can remain possible even when the CPU never reaches
+scheduled DCM processing. Conversely, the current Panda implementation emits
+the returned-TX echo before wire-level success; only an exact host receipt,
+reconciled native RX evidence, and complete clean controller/Panda health on the
+physically isolated segment support an ACK-consistent inference.
+
+### Why the ordinary reset and initial-setting ideas do not repair CodeFlash
+
+Cold-start recovery was rechecked from reset rather than inferred from the main
+loop. `0x1B0 -> 0x1404 -> 0x13B0 -> 0x119E` chooses the image solely from the
+two validity markers, region CRC checks and fresh CodeFlash ECC/parity state.
+It does not branch on reset cause, IG/PIG state, CAN input, crash count or
+DataFlash. A still-valid poisoned image therefore returns to `0x20880` and the
+same malformed instruction after every genuine power cycle. IG-only removal is
+not a proven reset because PIG remains supplied; removing both external supplies
+guarantees power loss but does not alter that selection. The 80 A EPS path is a
+fastened multi-fuse/fusible-link block, not a convenient pullout fuse; Toyota's
+prescribed wait followed by auxiliary-battery-negative disconnection is the
+bounded accessible cold-isolation method.
+
+Toyota's `Power Steering ECU Initial Setting` utility is documented after rack
+replacement as assist-map writing. In this F33 image, routine `0x1109` reaches a
+16-byte default/calibration payload through the normal scheduled DCM path and
+stores it through the DataFlash/NvM object layer. It neither writes CodeFlash
+nor executes before the malformed instruction. The public utility page is:
+`https://lemon-manuals.la/Toyota/2025/Camry%20LE%2C%202.5L%20Eng%20VIN%20A/Repair%20and%20Diagnosis/Steering/Power%20Steering/Steering%20Gear%20-%20Service%20Information/Steering%20Gear/Power%20Steering%20Ecu%20Initial%20Setting%20%5B04%2F2024%20-%20%5D/Procedure/`.
+
+The same service manual's EPS communication-stop tree checks the downstream
+termination, PIG/IG and ground, then specifies rack replacement if those checks
+pass. Its C05D6 internal/calibration-failure tree likewise offers clear/recheck
+and replacement, not an independent reflashing entry. The readable GTS+ Brake
+Booster catalog contains 20 direct motor/relay/solenoid tests and four routine
+tests, but no CAN-bridge reset or downstream-EPS power control. These are
+important OEM-service negatives, not proof that an undocumented recovery mode
+cannot exist.
+
+**Current boundary:** the fresh Brake/EPB `0x102F` read in §17 is first because
+it is network-only and requires no connector handling. If it cannot resolve the
+route question, the A30 test remains the strongest no-lift installed-rack
+fallback because it removes the upstream gateway from the observation and tests
+two candidate frame formats. A positive F186 identifies the application service;
+NRC `0x31` is only boot-compatible, and neither result is restore authorization.
+This is not yet a repair, and A30 should not be attempted until a nondamaging
+exact connection method and the car's own connector orientation are verified.

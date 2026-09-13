@@ -176,13 +176,6 @@ not required authority for these conclusions.
 
 ## Live boundary
 
-The configured comma SSH endpoint did not answer. A read-only check of the
-owner's router's cached, comma-named DHCP lease still resolves to that same
-configured address; this is not an overlooked known replacement IP. The stored
-comma-named overlay-network peer is offline and stale. Local J2534 provider
-discovery returns no provider; no local serial-device candidate was present.
-These availability observations are not facts about EPS execution.
-
 There has been no live gateway response, completed gateway preparation, new EPS
 identity or ECU repair in this pass. The concrete next experiment is the
 properly routed and demultiplexed **OEM gateway-preparation condition**, not a

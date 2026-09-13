@@ -1496,3 +1496,75 @@ with only routine implementation work remaining. No missing first-stage entry
 was supplied by this review. A complete path still needs positive evidence of
 an independent normal executor or a different actual failure state; neither
 is established here.
+
+
+## 25. Cold-fallback response routing and OEM recovery-label ownership
+
+2026-09-12. Entirely offline: the comma remained unavailable by instruction, and
+no connection attempt or vehicle operation was made. The question here was
+whether cold fallback had an overlooked response endpoint or identification
+precondition, rather than assuming that matching request IDs proved the entire
+transport was identical. No working network-only recovery entry was found.
+
+### The cold listener does not answer on a different CAN ID
+
+Fresh exact-target decompilation follows response construction through
+`674A -> 2D88 -> 2CD4/2C16 -> 1EC0 -> 4606`. Both configured receive records
+at `8F04` and `8F0C` use transmit route zero. The fixed transmit-table pointer
+at `893C` points to `8948`, with count one at `8944`. That one 12-byte record
+selects standard identifier **7A9**, route zero, and hardware transmit PDU 19.
+`4606` uses that table to construct the frame. No cold/live handoff flag selects
+a different response identifier in this reviewed route.
+
+The read-identity session question was checked separately against the actual
+RDBI handler. At `5FB8`, the three accepted session values come from `8F00`:
+**1, 2, and 3**. Thus a running default-session cold bootloader does not reject
+F181 merely because the host has not entered programming. This is distinct
+from the real restriction on a direct default-to-programming session transition
+at `614A`, described in the earlier boot lifecycle analysis. An identity read
+is not that transition.
+
+Fresh `69D2/6A22/5086/6320` inspection still shows the cold `FF` path enabling
+the diagnostic master and initializing session one. `6AAC` calls its workers
+under that master flag; its later elapsed-time branch changes a separate flag,
+not the previously executed worker calls. The `6B1E` activation is reached via
+`6244 -> 62DC` in the programming transition; its absence on initial cold entry
+is not, by itself, evidence that ordinary RDBI is disabled. No new mandatory
+network unlock or startup-delay value is inferred from those state bytes.
+
+The fourteen freshly reviewed defined function bodies in this response/init
+chain (1,378 bytes), the relevant ROM tables, and the RDBI handler were also
+compared with the complete retained incident image and are unchanged. The
+numeric comparison is retained only as disposable workspace output at
+`build/work/f33-network-entry-20260912/cold-response-route.json`. This is
+configuration and saved-image evidence, not a live response or target emulation.
+
+### An apparent OEM recovery mode belongs to a driving function
+
+The current NA `M_English.ddb` string **Operation (Recovery Mode)** is string
+index 216404. Resolving it through the actual pattern and monitor tables of
+`ADCU_P6.ddb` and `ADCU_P6F.ddb` identifies it as value 4 of **Sudden Acceleration
+Suppression Operation Mode**, DID **2106**. The other values describe
+inoperative, high/low acceleration suppression, and monitor states. It is not
+an EPS firmware recovery procedure. The existing `gts_cli._monitor_rows`
+resolver reproduces that ownership from the current source databases.
+
+A broader raw integer-reference scan was used only to locate candidate records;
+numeric matches in other table fields were not promoted to string ownership.
+In particular, neither a raw match nor an unqualified search result establishes
+an executable recovery function. The disposable scan record is
+`build/work/f33-network-entry-20260912/oem-recovery-label-references.json`.
+
+### Result
+
+The existing incident-fault verifier was rerun and passed 33 checks, including
+exact artifact regeneration and preservation of its unobserved-live-state
+qualifications. Those checks verify the reconstruction and pinned machine facts;
+they do not experimentally prove the present ECU's exception state.
+
+The alternative reply-address and default-session identity hypotheses do not
+supply the missing entry. A correctly routed surviving bootloader would be a
+useful finding, but its existence is still unproved. If the EPS instead occupies
+the reconstructed terminal application fault, this normal boot transport is not
+executing. Neither its complete response route nor the unrelated OEM recovery
+label changes that control-flow dependency. No end-to-end repair is claimed.

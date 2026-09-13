@@ -26,6 +26,12 @@ def main() -> int:
     assert app_dids[0xF181] == (33, 0x4FA26)
     assert app_dids[0xF186] == (1, 0x4FA7C)
 
+    # Application SID22 is admitted in all three configured DCM sessions,
+    # including the initialized default session used by a read-only probe.
+    app_sid22 = struct.unpack_from("<IIIIBBBBB3x", image, 0x25CB4)
+    assert app_sid22 == (0x962F2, 0, 0x259DD, 0, 0x22, 0, 0, 3, 0)
+    assert image[0x259DD:0x259E0] == bytes((1, 2, 3))
+
     # Complete application F181 producer: count 2; status-selected 16-byte
     # records, or two sixteen-byte literal-0x21 loops. All opcodes are checked,
     # including both stores and the loop bound; this is not a text-name test.
@@ -43,6 +49,8 @@ def main() -> int:
 
     # Boot service 22's descriptor pointer, table bound and read-access test.
     assert image[0x8E84:0x8E8C] == bytes.fromhex("22020000b85f0000")
+    assert image[0x5086:0x5090] == bytes.fromhex("80072100010a440f0e93")
+    assert image[0x8F00:0x8F03] == bytes((1, 2, 3))
     boot = [struct.unpack_from("<IHHBBBB", image, 0x8F14 + 12 * i) for i in range(4)]
     assert [row[2] for row in boot] == [0xF181, 0x0201, 0x0202, 0x0203]
     assert [row[2] for row in boot if row[3] & 1] == [0xF181]
