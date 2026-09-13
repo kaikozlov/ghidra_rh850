@@ -8,7 +8,7 @@ provenance metadata in `../external-references.lock.json` under `community_artif
 
 ## `blurbdust_secoc_flash_patcher/`
 
-**Author:** blurbdust 
+**Author:** blurbdust
 **Channel:** comma Discord, EPS/SecOC discussion, 2026-08-01
 **Status per author:** "largely untested so don't go out and flash everyone's
 cars" — verification checks forced to always return true, which also accepts
@@ -278,3 +278,27 @@ retention path, while deliberately stopping short of a no-auth PC-pivot claim.
 See
 [`spanconstant/README.md`](spanconstant/README.md) and
 [`docs/variants/corolla-8965F1208000.md`](../docs/variants/corolla-8965F1208000.md).
+
+## `mruno/`
+
+**Contributor/specimen:** mruno, reported 2024 Toyota Crown Limited
+**Acquired:** 2026-09-13
+
+This directory preserves the first Crown EPS DataFlash and CodeFlash artifacts
+from mruno's TSS3 investigation. The retained CodeFlash identifies RH850/P1M-E
+`R7F701381`, primary F181 `8965F3012000`, secondary record `8A3113008000`, and
+auxiliary identity `8965H3008000`.
+
+The supplied CodeFlash host buffer is 2 MiB, but the contributor's collector
+stopped after 2,075,572 bytes because of a repeatable Panda SPI failure. The
+missing 21,580 bytes are represented by one zero-filled trailing interval in the
+otherwise-erased upper host-range half. The contributor reports zero gaps in the
+populated lower 1 MiB; its SHA-256 is
+`5b89fdbc69edc2f66ef8a557f88b08c758e3146bd4e90067320d7966812b1273`.
+The raw partial must therefore be preserved as supplied and its zero-filled tail
+must not be interpreted as firmware.
+
+The directory also contains an independently supplied 32-KiB DataFlash snapshot
+(MD5 `e9865f35fce9dae03ce5438b33fd671a`) and a later 64-KiB host-range read.
+See [`mruno/README.md`](mruno/README.md) for hashes, acquisition context, and the
+evidence boundary.

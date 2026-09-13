@@ -903,6 +903,30 @@
       "sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
       "size": 1048576,
       "source": "Maintainer-operated 2026 Toyota Camry EPS CodeFlash acquisition, 2026-08-26"
+    },
+    {
+      "notes": "Complete contributor-reported 0xFF200000..0xFF207FFF Crown EPS DataFlash snapshot; posted MD5 e9865f35fce9dae03ce5438b33fd671a.",
+      "path": "community/mruno/crown-eps-dataflash-dump-20260913.bin",
+      "provenance": "Discord-supplied raw DataFlash output from mruno's Crown EPS investigation; preserved byte-for-byte.",
+      "sha256": "0c7b027900d4ac12a4e665e17c0575d44efb0ccfbcb6239416a40c8260c50872",
+      "size": 32768,
+      "source": "mruno, comma Discord, 2026-09-13"
+    },
+    {
+      "notes": "Separate 64-KiB host-range read 0xFF200000..0xFF20FFFF; R7F701381 specifies only the lower 32 KiB as physical DataFlash. Lower 32 KiB differs from the earlier 32-KiB snapshot in 2,880 bytes.",
+      "path": "community/mruno/dump_dataflash_ff200000_ff210000_20260913-213026.bin",
+      "provenance": "Discord-supplied raw range-dump output from mruno's Crown EPS investigation; preserved byte-for-byte.",
+      "sha256": "5e37da024723d1d7ac1ece7a8430f8a335110db97b1f4d0f00f7e78c0fd716aa",
+      "size": 65536,
+      "source": "mruno, comma Discord, 2026-09-13"
+    },
+    {
+      "notes": "2-MiB host buffer from a 2,075,572/2,097,152-byte CodeFlash collection. Missing 21,580 bytes are one zero-filled trailing interval 0x1FABB4..0x1FFFFF; contributor reports complete lower 1 MiB. First-1-MiB SHA-256 5b89fdbc69edc2f66ef8a557f88b08c758e3146bd4e90067320d7966812b1273; contains R7F701381 and F181 8965F3012000.",
+      "path": "community/mruno/partial_codeflash_00000000_00200000_20260913-220010_2075572of2097152.bin",
+      "provenance": "Discord-supplied raw collector buffer from mruno's Crown EPS investigation after repeatable end-of-transfer Panda SPI failure; preserved byte-for-byte, including zero-filled missing tail.",
+      "sha256": "d4952d5aeb385709d6705750b59bbce46b06cc56790c09e361a7c83e746f6560",
+      "size": 2097152,
+      "source": "mruno, comma Discord, 2026-09-13"
     }
   ],
   "public_routes": [
