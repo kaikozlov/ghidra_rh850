@@ -54,6 +54,8 @@ def main() -> int:
               set(index["support_contracts"]) == {"p5", "p6"}
               and p5_contract["did_root"]["request"] == "220101"
               and p5_contract["routine_root"]["request"] == "31011001"
+              and p5_contract["routine_root"]["root_request_rid"] == "0x1001"
+              and p5_contract["routine_root"]["root_bitmap_base"] == "0x0000"
               and p5_contract["routine_root"]["selector_range"] == ["0x0200", "0xDF00"]
               and p5_contract["routine_root"]["implementation"]["CreateEnableRIdList"] == "0x10066160"
               and p6_contract["did_root"]["request"] == "22a100")
