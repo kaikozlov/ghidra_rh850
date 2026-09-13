@@ -4366,18 +4366,18 @@ def _bundle_customize_catalog(
             "support_bit_end": u16(raw, 0x12),
             "current_bit_start": u16(raw, 0x14),
             "current_bit_end": u16(raw, 0x16),
-            "p4_support_bit_start": u16(raw, 0x18),
-            "p4_support_bit_end": u16(raw, 0x1A),
-            "data_id": u16(raw, 0x1C),
+            "write_bit_start": u16(raw, 0x18),
+            "write_bit_end": u16(raw, 0x1A),
+            "legacy_data_id": u16(raw, 0x1C),
             "raw_u16_1e": u16(raw, 0x1E),
             "choice_list_key": choice_key,
             "choices": choice_rows.get(choice_key, []),
             "all_default_gate_u16_22": all_default_gate,
             "raw_u32_24": u32(raw, 0x24),
             "raw_u16_28": u16(raw, 0x28),
-            "write_group_id": u16(raw, 0x2A),
-            "target_selector": raw[0x2C],
-            "support_bit_mode": raw[0x2D],
+            "write_did": u16(raw, 0x2A),
+            "target_phase_type": raw[0x2C],
+            "merge_mode": raw[0x2D],
             "support_selector": raw[0x2E],
             "read_current": raw[0x2F],
             "current_data_mode": raw[0x30],
@@ -4385,6 +4385,19 @@ def _bundle_customize_catalog(
             "support_mode": raw[0x32],
             "raw_u8_33": raw[0x33],
         })
+    for item in items:
+        generation_low5 = (int(item["target_generation"]) & 0x1F) if item["target_generation"] is not None else None
+        if generation_low5 in {0x14, 0x15, 0x16} and int(item["write_did"]) != 0:
+            family = "p6" if generation_low5 == 0x16 else "p5"
+            item["modern_executor"] = {
+                "family": family,
+                "support_gate": f"{family}-standard DID support inventory must advertise write_did",
+                "read_current": "22 <write_did> -> 62 <write_did> || current bytes",
+                "merge": "clear MSB0 write_bit_start..write_bit_end then OR selected raw value; merge_mode 1 additionally requires the preceding-byte support bit(s)",
+                "write": "2E <write_did> || merged current bytes -> 6E <write_did>",
+                "verify": "re-read write_did and require the merged bytes/value",
+                "session_requirement": "extended",
+            }
     items.sort(key=lambda row: (int(row["group_id"]), int(row["item_id"]), int(row["target_category_id"])))
 
     probes = []
@@ -4420,7 +4433,11 @@ def _bundle_customize_catalog(
                 "SetCustomizeAllDefault checks CustItem +0x22 before its per-row default path; this field is zero in every "
                 "current NA/EU/JP CustItem row, so no OEM default value is inferred from the current master"
             ),
-            "target": "CustItem +0x0C is the live target ECU/category id",
+            "target": "CustItem +0x0C is the live target ECU/category id; +0x2C is the target phase type",
+            "modern_write": (
+                "For generation-low5 0x14/0x15/0x16, +0x2A is the write/current DID. SetCustom reads it through selector 0xCA, "
+                "merges the selected value into +0x18/+0x1A MSB0 write bits, then selector 0x74 sends 2E <DID> || merged bytes and verifies 6E <DID>."
+            ),
         },
         "boundary": (
             "Static OEM Customize catalog and item geometry only. Body-type selection still requires the recovered live "

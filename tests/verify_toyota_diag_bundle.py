@@ -113,11 +113,28 @@ def main() -> int:
               and open_door["name"] == "Open Door Warn"
               and open_door["target_category_id"] == 26
               and open_door["target_category_name"] == "Theft Deterrent"
-              and open_door["data_id"] == 1009
+              and open_door["legacy_data_id"] == 1009
               and [row["name"] for row in open_door["choices"]] == ["OFF", "ON"]
               and [row["value"] for row in open_door["choices"]] == [0, 1]
               and open_door["current_bit_start"] == 7
               and open_door["current_bit_end"] == 7)
+        p5_customize = next(row for row in na_customize["items"]
+                            if row["group_id"] == 1 and row["item_id"] == 200
+                            and row["target_category_id"] == 449)
+        p6_customize = next(row for row in na_customize["items"]
+                            if row["group_id"] == 1 and row["item_id"] == 210
+                            and row["target_category_id"] == 6033)
+        check("NA current P5/P6 Customize rows export exact write DID/phase/merge geometry",
+              p5_customize["name"] == "Wireless Control Function"
+              and p5_customize["write_did"] == 0x225A
+              and p5_customize["target_phase_type"] == 0x22
+              and [p5_customize["write_bit_start"], p5_customize["write_bit_end"]] == [0, 7]
+              and p5_customize["merge_mode"] == 0
+              and p5_customize["modern_executor"]["family"] == "p5"
+              and p6_customize["name"] == "Wireless Remote Control Setting"
+              and p6_customize["write_did"] == 0x225A
+              and p6_customize["target_phase_type"] == 0x18
+              and p6_customize["modern_executor"]["family"] == "p6")
 
         for region in ("NA", "EU", "JP"):
             regional = index["regions"][region]
