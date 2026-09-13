@@ -69,12 +69,30 @@ and responses, not assumed from model year.
 
 Stopping periodic transmissions and receive filters appears in the preparation
 error/cleanup path. Those are **host transport cleanup**, not proof of restoring
-every gateway or power-management state. `CUW!ProcessAfterReprogramming` at
-`10064D10` dispatches through configured callbacks at object offsets `28/2C`;
-the reviewed managed wrapper calls it and logs the return. These indirections
-are not a recovered universal P5 reverse-transition packet. The ordinary flash
-completion contains a P4-specific gateway-default branch; it must not be
-projected onto P5 abort handling.
+every gateway or power-management state. The post-programming callback owner is
+now resolved, not left as an opaque indirect call:
+
+- The manager constructs its real 0xC84-byte active job through `10058780` and
+  stores it at manager `+24` (`1003C39C`), corresponding to global `1008BFD4`.
+- Its loader at `10058E70` loads **TCUWControlCommPhase.dll**, resolves
+  `IsSendingSyncPeriodicMsgToECU` into job `+28` at `10059133`, and resolves
+  `DisconnectJ2534Connection` into job `+2C` at `1005913C`.
+- `CUW!ProcessAfterReprogramming @ 10064D10` tests the former and calls the
+  latter only when periodic traffic is active. It does not choose a P5
+  gateway-normalization operation.
+- The predicate thunk `TCUWControlCommPhase!10001181 -> 1000B850` calls
+  `CJ2534IF::IsSendingSyncPeriodicMsg @ 10002CA0`, which tests the host thread
+  handle at `+38`. Disconnect thunk `100010CD -> 1000B3D0` calls
+  `CJ2534IF::Disconnect @ 10001E70`.
+- That final disconnect stops the host periodic thread, invokes ordinary
+  `PassThruDisconnect`, `PassThruClose`, and `PassThruUnloadLibrary`, and joins
+  remaining host threads. The dynamic API slots were independently resolved
+  in `CJ2534IF::LoadDLL` (`10003491/100034CD/10003614`). It contains no newly
+  recovered ECU reset or P5 recovery/normalization packet.
+
+The ordinary flash completion contains a P4-specific gateway-default branch;
+it must not be projected onto P5 abort handling. Disconnecting the tester and
+proving that a gateway has returned to its normal state are distinct results.
 
 Thus separately running preparation and then an unrelated loader is not yet a
 verified composed lifecycle: gateway mode/authorization, keepalive ownership,
@@ -149,7 +167,7 @@ more complete **audit of the candidate**, not an end-to-end demonstrated route.
 ## Sources and reproduction boundary
 
 Current protected inputs, sidecars, and recovered outputs were freshly checked
-against `build/out/cuwplus-unprotected/manifest.json` for all six native/managed
+against `build/out/cuwplus-unprotected/manifest.json` for all eight native/managed
 inputs used here. Recovered SHA-256 identities:
 
 | Input | Recovered SHA-256 |
@@ -160,6 +178,8 @@ inputs used here. Recovered SHA-256 identities:
 | `TCUWCanUnifiedPrepareWriter.dll` | `797b15b8ae8049717c1f5ec2692b923dcea9abb52bd2add6415cf295281db1dc` |
 | `TCUWCanUnifiedFlashWriter.dll` | `97cdba7f5cc57a555df27893479141632e48a41276e73c54f9c36de3e6e16647` |
 | `TCUWUnifiedUtils.dll` | `fed628ec4c9ca0d6905c96c68e3bdfd574f9c64d2fd76b50de6eba4206579672` |
+| `TCUWControlCommPhase.dll` | `684a60c95121d29991669c3e48e4efc8410aa4604bcb56d88cbdd702d80aecec` |
+| `TCUWJ2534DeviceIF.dll` | `f95dafd49a5fdff6c7a35b21f20529eb739386c299fcb298fa541f3e254908a3` |
 
 Target claims use `firmware/camry-8965F3307000/CodeFlash.bin`, target-native
 Ghidra for the defined functions and raw RH850 instructions for the unseeded
