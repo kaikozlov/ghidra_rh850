@@ -114,3 +114,26 @@ exact-identity searches in this pass supplied no matched package or independent
 network recovery procedure. No authenticated Toyota lookup result was obtained,
 no prepared-state EPS response was observed and no restoration was run. A
 checksum-valid retained identity is not evidence that the live ECU executes.
+
+
+## Separate cold-versus-warm transport check
+
+A different possible cause of silence was checked: could the normal live
+programming handoff and cold invalid-image fallback use the same CAN-register
+values but a different input clock? The common boot initializer is
+`1398 -> 1338 -> 3B3C` for both entries. Its `396C` global write selects
+`DCS=0`; `3978` uses the same nominal/data timing values. Renesas
+R01UH0585EJ0120 Table 12.2 (p.469) and Tables 17.6/17.7 (p.791), rendered and
+visually checked in this pass, identify `clkc=CLK_LSB` as **40 MHz fixed**.
+The reconstructed modes therefore do not establish an overlooked 250-kbit/s or
+1-Mbit/s cold recovery listener. This is configured behavior, not a live clock
+measurement or proof against an electrical clock fault.
+
+The cold handoff value `FF` is not simply a disabled-protocol flag:
+`69D2` enables the boot protocol for either `0` or `FF`, and `6A22` initializes
+its protocol state in both cases. The `0` path additionally performs the
+synthetic programming-session handoff through `6504`; the `FF` path does not.
+Thus cold and warm session state must still be distinguished, but the cold
+configuration is not evidence of a second hidden address family or magic
+network enable operation. None of this makes the boot runtime execute when the
+cold selector has already entered the CRC-valid damaged application.
