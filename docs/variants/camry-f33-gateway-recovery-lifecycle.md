@@ -143,10 +143,33 @@ routine. The default request therefore is **not established as a route-destroyin
 boot exit** in this image.
 
 The F33 boot F181 value of two exclamation-filled identifiers is a family
-placeholder, not a unique match to `8965F3307000`. It cannot replace a trusted
-route/target binding and the appropriate image and live-preimage checks.
-Nothing in this admission logic makes an unresponsive CPU start processing
-requests.
+placeholder, not a unique match to `8965F3307000`. **It is not even exclusive
+to the bootloader:** exact application producer `4FA26` emits the same
+`02 || 32*21` response when its compatibility-status getter `62E18` is nonzero.
+The complete application producer, its status getter, and the boot RDBI table
+are unchanged in the retained incident reconstruction. Normal compatibility
+bytes match in that reconstruction, so this is a required interpretation
+qualification, not evidence that the current application actually takes its
+fallback branch.
+
+An independent, ordinary read-only distinction is available if the target
+answers: the application implements **F186** through `4FA7C -> 91AF4 -> 924FC`,
+which copies its current-session byte from `FEBE595C`. The exact boot handler
+`5FB8` checks four 12-byte descriptors at `8F14`; only F181 is readable. In a
+supported boot session a well-formed F186 read therefore gets the explicit
+unknown-DID negative response, not the application's positive session value.
+A placeholder plus that explicit negative is boot-compatible under these exact
+tables; a positive F186 identifies the application service implementation.
+A timeout, unrelated negative reply, incomplete FirstFrame, or response from
+another source does not decide the issue. Correlation requires one outstanding
+request to the same EPS endpoint; negative RDBI responses do not echo the DID.
+
+The portable `camry_f33_recovery_identity` verifier pins the machine-level
+producer branches, table bound/access bits, negative-response branch, and
+current-session store. It does not emulate or observe the live ECU. F181/F186
+observations still cannot replace trusted route/target binding or appropriate
+image/live-preimage checks, and they do not authorize a write. Nothing in this
+admission logic makes an unresponsive CPU start processing requests.
 
 ## 5. DONE is not a completed recovery lifecycle
 
@@ -185,3 +208,37 @@ Target claims use `firmware/camry-8965F3307000/CodeFlash.bin`, target-native
 Ghidra for the defined functions and raw RH850 instructions for the unseeded
 `614A` wrapper. No committed Ghidra project was opened or modified. Temporary
 PE disassembly and IL outputs live under `build/work/f33-gateway-end-to-end/`.
+
+## 6. Exact Camry gateway identity acquisition is an ordinary read
+
+The retained current Camry install set resolves Central Gateway to category
+443 `CentralGW_P5`, request/response `750/758` with addressing extension `5F`.
+That is catalog resolution, not a live gateway identity or a verified current
+Panda-bus assignment. Its role-82 plugin is the specially named
+`GetCID_SID22_GearShiftControl_DT.dll`; the name must not be treated as proof
+that identification needs a different protocol.
+
+Its primary path at `100013F0` loads selector **DC** with `GetCommFrmInfo`
+at `1000149E/100014A9`, and sends it through `CommFrameSendReceiveExt` at
+`10001520`. Current category-443 DC resolves to **22 F1 81**, with response
+mask `FF FF FF` and check `62 F1 81`. The response parser checks the DID bytes,
+skips the three-byte response header plus count byte, and iterates 16-byte
+software-ID fields. `Execute @ 100027D0` then calls two optional related-unit
+branches, each guarded by `CheckEcuFunc` metadata before connecting; those
+branches are not prerequisites for that first identity read.
+
+Thus an initial gateway-identification observation can use the existing
+standard read operation with correct extended addressing, without guessing
+another service, starting a programming session, or treating the plugin's
+special name as an access requirement. This does not replace the separate
+live gateway-family determination used by the CUW preparer. Plugin input
+SHA-256: `aaaea5ac9e323b527ae3ae3bd29e2b659900f4eb097dfa806b8c889132600728`.
+Reproduce the table side with `tools/gts frame 443 0xDC --json`.
+
+The two retained partial `.live.zst` files were also compared record-for-record
+with their completed `d4` files, using event kind, monotonic timestamp, source,
+ID, and payload. All 89,484 recovered records of `rlog-1.live.zst` and all
+103,207 records of `rlog-6.live.zst` occur in their completed counterparts.
+The first partial file reports corrupted events; neither supplies an additional
+record or an independent gateway-preparation attempt. The comparison does not
+extend capture coverage beyond the spans already reviewed.
