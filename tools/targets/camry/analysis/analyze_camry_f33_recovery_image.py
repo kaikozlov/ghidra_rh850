@@ -13,6 +13,7 @@ import argparse
 import hashlib
 import json
 import struct
+import zlib
 from collections.abc import Sequence
 from itertools import pairwise
 from pathlib import Path
@@ -32,6 +33,37 @@ def _spans(offsets: list[int]) -> list[dict[str, int]]:
         else:
             result.append({"start": offset, "end_exclusive": offset + 1})
     return result
+
+
+def _factory_lookup_identity(factory: bytes) -> dict[str, Any]:
+    """Read the reviewed 0105 backing object, not a guessed serial-number prefix.
+
+    The caller has already verified the complete factory-reference hash. These
+    are archived lookup inputs, never substituted for a live diagnostic reply.
+    """
+    descriptor = 0x2AF8C + 4 * 12  # 0105 -> object 0204 -> ROM-object index 4.
+    length = struct.unpack_from("<H", factory, descriptor)[0]
+    address = struct.unpack_from("<I", factory, descriptor + 8)[0]
+    block = factory[address : address + length + 4]
+    marker = struct.unpack_from("<I", block)[0]
+    crc = zlib.crc32(block)
+    if length != 16 or marker != 0xA55A5AA5 or crc != 0xFFFFFFFF:
+        raise ValueError("The retained assembly-number object failed validation")
+    return {
+        "scope": "Original saved factory dump only; not a live response or proof of package availability.",
+        "ecu_assembly_number": block[4:14].decode("ascii"),
+        "base_software_numbers": [
+            factory[offset : offset + 16].split(b"\0", 1)[0].decode("ascii")
+            for offset in (0x20860, 0x17DC0)
+        ],
+        "assembly_did": 0x0105,
+        "assembly_object": 0x0204,
+        "assembly_descriptor_address": descriptor,
+        "assembly_storage_address": address,
+        "assembly_object_crc32_with_checkword": crc,
+        "live_identity_verified": False,
+        "matching_calibration_package_evaluated": False,
+    }
 
 
 def compare_image(candidate: bytes, factory: bytes) -> dict[str, Any]:
@@ -83,6 +115,7 @@ def compare_image(candidate: bytes, factory: bytes) -> dict[str, Any]:
         "scope": "Offline saved-image comparison only; no live contents, execution, repair, or roadworthiness established.",
         "factory_sha256": STOCK_SHA256,
         "candidate_sha256": hashlib.sha256(candidate).hexdigest(),
+        "retained_factory_calibration_lookup": _factory_lookup_identity(factory),
         "size": len(candidate),
         "exact_factory_codeflash": not diffs,
         "matches_factory_outside_native_counter_words": not other_diffs,

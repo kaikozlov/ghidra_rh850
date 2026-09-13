@@ -9,6 +9,7 @@ import json
 import struct
 import tempfile
 import unittest
+import zlib
 from contextlib import redirect_stdout
 from pathlib import Path
 
@@ -48,6 +49,50 @@ class RecoveryImageTests(unittest.TestCase):
         self.assertEqual(
             [v["address"] for v in result["native_counter_words"]], [0x17F00, 0xFFF00]
         )
+
+    def test_retained_lookup_identity_uses_the_actual_0105_backing_object(self) -> None:
+        # ROM-selected DID callback and its actual object-read argument/callee.
+        self.assertEqual(
+            struct.unpack_from("<HHI", self.factory, 0x292BC),
+            (0x0105, 12, 0x4D93C),
+        )
+        self.assertEqual(self.factory[0x4D95C:0x4D964].hex(), "2036040281ff9c94")
+        self.assertEqual(self.factory[0x66E1A:0x66E24].hex(), "010600feca0580ffe803")
+        # The ROM-object reader consumes +8, not the descriptor's RAM mirror.
+        self.assertEqual(
+            self.factory[0x6725A:0x6726A].hex(), "21068caf0200c1f1043d7040bfffc8fb"
+        )
+        length, _, source = struct.unpack_from("<3I", self.factory, 0x2AFBC)
+        self.assertEqual((length, source), (16, 0xA0A0))
+        self.assertEqual(
+            zlib.crc32(self.factory[source : source + length + 4]), 0xFFFFFFFF
+        )
+        result = module.compare_image(self.factory, self.factory)[
+            "retained_factory_calibration_lookup"
+        ]
+        self.assertEqual(result["ecu_assembly_number"], "8965033K90")
+        self.assertEqual(
+            result["base_software_numbers"], ["8965F3307000", "8A3113303100"]
+        )
+        self.assertFalse(result["live_identity_verified"])
+        self.assertFalse(result["matching_calibration_package_evaluated"])
+
+    def test_candidate_cannot_replace_archived_lookup_identity(self) -> None:
+        # A candidate with altered part text must not redefine the trusted query.
+        result = module.compare_image(self.changed(0xA0A4), self.factory)
+        self.assertEqual(
+            result["retained_factory_calibration_lookup"]["ecu_assembly_number"],
+            "8965033K90",
+        )
+        self.assertFalse(result["exact_factory_codeflash"])
+
+    def test_assembly_identity_corruption_is_not_covered_by_application_crc(
+        self,
+    ) -> None:
+        result = module.compare_image(self.changed(0xA0A4), self.factory)
+        self.assertFalse(result["all_differences_within_upper_region_erase_extent"])
+        self.assertEqual(result["different_bytes_in_native_crc_inputs"], 0)
+        self.assertEqual(result["different_bytes_outside_native_crc_inputs"], 1)
 
     def test_only_counter_difference_is_not_exact_factory(self) -> None:
         data = bytearray(self.factory)
