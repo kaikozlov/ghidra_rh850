@@ -101,6 +101,21 @@ both cases; all these differences remain in the native upper erase domain.
 The tool obtains no live image, evaluates no calibration package, generates no
 replacement bytes and changes no authorization or programming behavior.
 
+## Incident recovery is not the same goal as factory equality
+
+The known inverse restores the complete retained incident reconstruction to its
+previous stage-6 state, not to untouched factory firmware. That distinction
+must not become an invented requirement that every previous working change be
+removed merely to recover EPS operation. The missing exact OEM package is a
+dependency of the **manufacturer-package restoration branch**, not proof that
+all other authorized restoration routes are unavailable.
+
+Either restoration objective still needs a reachable, executing programmer and
+a completion path back to the EPS application. The archived custom writer's
+DONE/halt does not supply that completion path. The normal bootloader's own
+programming/verification/reset lifecycle is a separate implementation and has
+not been exercised in the current incident state.
+
 ## What this closes, and what it does not
 
 This removes an avoidable dependency on a fresh assembly-number read for the
