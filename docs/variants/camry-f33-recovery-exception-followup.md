@@ -1387,3 +1387,112 @@ the real cold selector choose differently from the logical reconstruction.
 Nevertheless, this specific alternative does not reveal an untried cold-only
 request address. It also does not permit intentionally damaging integrity to
 force fallback. No traffic, reset, or write was performed for this check.
+
+
+## 24. Offline entry review: startup scheduling, software IDs, and hardware monitors
+
+2026-09-12. The comma was deliberately unavailable for the whole investigation.
+No connection attempt, vehicle command, session change, image modification, or
+payload construction was performed. This review addresses **entry**, not another
+hypothetical post-entry restoration sequence. It found no complete network-only
+recovery route.
+
+### Normal startup does not select a diagnostic-first foreground schedule
+
+Fresh exact-target decompilation confirms the ordering
+`637EE -> 666BC -> 7A132` before interrupts are enabled and before the call to
+`66062`. Initializer `7A132` writes the aggregate guard first as `FD02` and then
+unconditionally as `FE01` after its initialization calls. The foreground
+aggregate at `7A254` uses that value, not an ignition or network-mode byte, as
+its entry guard.
+
+In `66062`, the optional work at `64F12` is controlled by fixed CodeFlash byte
+`31910`, which is **00** in the exact source and retained incident image. That
+is not an externally selectable startup mode. After supervision and its early
+job-engine call, the loop calls `667E6`; the diagnostic worker and the normal
+system-mode worker remain later than the malformed aggregate call. The system
+mode dispatcher `58B5E` reaches `5F464/5F91C -> 56CF6 -> 65F5E`, rather than
+providing a separate earlier handoff. Changing a normal system-mode request
+does not change this call ordering.
+
+This rechecks the relevant startup premise. It does not claim that waiting for
+the first hardware scheduler flag is a new bootloader listening window or that
+inducing a hardware failure would be a supported mode-selection procedure.
+
+### The early internal job engine has a fixed callback table
+
+The earlier worker reaches `74164 -> 72EEA -> 723D6 -> 72342`. Its keyed map at
+`27400` has eight entries, and the stage table at `274CC` has eight 24-byte rows.
+The five distinct first-stage entries are `724C0`, `726C4`, `727D2`, `729E8`,
+and `72B92`. The last is exactly `mov 2,r10; jmp [lp]`. The other inspected
+entry bodies read the internal job-state record around `FEBF6104`, invoke their
+configured local operations, and return status. They are not another recovered
+CAN diagnostic entry.
+
+Several of those entry addresses are absent from the current Ghidra function
+inventory. Their raw instructions were therefore read from the retained full
+RH850 disassembly and byte-matched to the source image rather than treating
+"No function" as evidence of absence. The keyed-map, stage-selection, and mode
+helper bodies were freshly decompiled. This is an extension of section 16's
+dispatch analysis, **not** an exhaustive transitive proof over every descendant
+of the internal library or an operational memory-manipulation route.
+
+### Two F181 IDs are not evidence of two running processors
+
+Fresh `4FA26` decompilation shows one routine assembling both 16-byte software-ID
+fields by copying from **20860** and **17DC0** in the same CodeFlash address
+space. Exact source bytes at those locations contain `8965F3307000` and
+`8A3113303100`; the boot-info field at `190` contains `R7F701381`. This producer
+performs no exchange with a second processor to obtain the second ID.
+
+Renesas's exact R7F701381EAFP product page specifies one main G3M plus one
+checker and no sub-CPU. The P1M-E datasheet, section 1.1, expressly describes
+the pair as operating in lockstep. Thus neither the two strings nor the
+manufacturer's "two CPUs" wording establishes an independent programming
+server. This does not rule out an uncharacterized additional component elsewhere
+on the rack PCB; its existence and network-recovery behavior remain unsupported
+by these particular observations.
+
+### CPU-independent debug hardware is not a recovered CAN service
+
+The exact-family datasheet's Table 1.1 (printed page 3) marks **AUD-RAM monitor:
+No**, while listing Nexus-JTAG and LDU. Table 2.2 (printed page 25) assigns the
+Nexus, low-pin debug, and FLSCI3 flash-writer signals to the separate JP0 group.
+These are different interfaces from the listed RS-CANFD peripheral. Generic
+RH850 debugger documentation mentioning an AUDR/RAM monitor must not be used
+to invent an available CAN command on this part.
+
+The manufacturer-hosted PDF parsed successfully in the web reader, but its
+screenshot requests failed. The matching retained PDF
+`REFERENCE/r01ds0505ed0100-rh850p1m-e.pdf` was rendered locally and pages 3 and
+25 were visually inspected. No connector operation is proposed. An external
+bridge to those debug interfaces would require independent board-level evidence;
+none was established by the datasheet or the inspected firmware.
+
+Primary public sources:
+
+- Renesas R7F701381EAFP product attributes:
+  https://www.renesas.com/en/products/rh850-p1m-e/part-details/r7f701381eafp
+- Renesas RH850/P1M-E datasheet, R01DS0505ED0100 Rev.1.00,
+  September 30, 2025, section 1.1 and Tables 1.1/2.2:
+  https://www.renesas.com/en/document/dst/rh850p1m-e-datasheet
+
+### Interpretation boundary
+
+Thirteen reviewed startup, dispatch, identity, and normal-handoff function
+bodies (1,378 bytes) were independently compared to the complete retained
+incident reconstruction and are unchanged. Those checks do not measure the
+present ECU's flash or exception registers. The disposable numeric record is
+`build/work/f33-offline-entry-review/observations.json`; it is not a new portable
+verification dependency. No executable repository behavior changed, so no
+unrelated test suite was run.
+
+For the reconstructed CRC-valid startup-fault state, gateway preparation cannot
+by itself move the EPS into its programmer: it changes delivery conditions, not
+the demonstrated target call ordering. The gateway experiment can still test
+whether that execution-state premise is wrong (for example, whether a surviving
+listener is hidden), but it must not be described as a complete recovery entry
+with only routine implementation work remaining. No missing first-stage entry
+was supplied by this review. A complete path still needs positive evidence of
+an independent normal executor or a different actual failure state; neither
+is established here.
