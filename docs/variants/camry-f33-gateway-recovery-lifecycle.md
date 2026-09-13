@@ -307,3 +307,85 @@ incident reconstruction; 121 inspected saved-disassembly rows matched the
 stock bytes. No Ghidra project mutation, diagnostic request, ECU reset, or
 vehicle write was performed. This is a verified static dependency, not a
 recovered complete route into the faulted EPS.
+
+
+## 7. Normal bootloader completion has a network-requested reset, unlike the halted writer
+
+The remaining return-to-application question was checked against both the current
+native programmer and the exact F33 receiver, not just an exported “reset” name.
+This is an ordinary authorized programming-service path. No service was sent,
+no RAM writer was modified, and no target memory was written.
+
+`TCUWCanUnifiedFlashWriter!100012B0..1000138F` constructs the ordinary hard-reset
+request, expects its corresponding positive reply, and calls the P5
+request/response helper at `10001379`. The successful normal flash path calls
+this helper at `10001857`, before stopping periodic messages, waiting for the
+configured wake-up interval, and entering its functional default-session phase.
+The functional phase's existing evidence and its success-only callsite are in
+[the original-installer/exit note](camry-f33-network-lifecycle-observations-2026-09-12.md).
+It is not an independently validated preparation-abort path.
+
+The exact F33 boot receiver supplies the other half:
+
+- Reset handler `60C2..6133` copies two request bytes, requires the configured
+  programming session and authorization state, validates hard reset, and
+  schedules it through `67DA` before constructing the positive reply at `6098`.
+  Startup's TP load at `1F8` sets `TP=869C`; the actual session-policy byte at
+  `TP+858 = 8EF4` is `02`. This is not borrowed from another ECU's annotations.
+- `67DA..67F5` enters `159E` directly when the transport is idle or records a
+  pending reset while the response is in progress. The confirmation callback
+  `66BE..66F9` calls `159E` at `66E6` only on the successful pending-response
+  branch; a failed confirmation clears the pending flag.
+- Fresh Ghidra decompilation of `159E`, `1550`, and `1560` shows the reset
+  shutdown: interrupts are disabled, the low boot state becomes 3, the clock
+  output divider is stopped when enabled, and Port 4 bit 5 is driven low in
+  GPIO output mode before a nonreturning wait. The previously recovered
+  EXTCLK1O/supervisor relationship explains the intended hardware reset.
+  The external supervisor's actual reaction and subsequent boot were **not**
+  observed during this offline pass.
+
+The unseeded handler/confirmation slices were independently byte-matched,
+instruction by instruction, to `firmware/camry-8965F3307000/CodeFlash.bin`:
+114 request-handler bytes, 42 response-builder bytes, 28 scheduling bytes,
+and 78 bytes spanning the confirmation context. The decoding source was the
+retained low-region disassembly, not a decompilation of a different target.
+The defined reset functions were additionally read from the target-native
+Ghidra project. Current UnifiedFlashWriter protected input, sidecar, and
+recovered body were hash-matched to the existing recovery manifest.
+
+**Positive result:** a surviving, authorized normal bootloader can be asked over
+the network to perform its normal reset shutdown after compatible restoration.
+There is no architectural requirement to finish an OEM programming transaction
+with the custom RAM writer's halt-only terminal state.
+
+**Composition boundary:** this normal reset handler is not executing inside the
+archived writer after its DONE/halt. Appending an ECUReset request after that
+halt does not make the handler available. Likewise, the reset request cannot
+unbrick a CPU that is not processing diagnostics in the first place. A completed
+network-only route still needs demonstrated entry to the normal programming
+service, a compatible authorized restoration flow that preserves that service,
+and actual repaired-application reappearance.
+
+## 8. Post-programming disconnect does not send a hidden final recovery packet
+
+Section 2's callback resolution was independently reproduced through the actual
+`GetProcAddress` assignments and the ControlCommPhase export thunks. The final
+thread behavior was checked as well: `CJ2534IF::StopSyncPeriodicMsg` sets the
+host stop flag and joins the periodic thread. `SendSyncPeriodicMsg`, at
+`100043D0..1000450D`, exits its send loop when that flag is set; it does not
+append a special P5 inverse or target reset on exit. An in-flight ordinary
+periodic batch can finish, so this is not a claim that no byte can still be
+transmitted during a stop.
+
+The subsequent `Disconnect` body calls the provider APIs whose names were
+resolved from their actual loader strings: `PassThruDisconnect`, `PassThruClose`,
+and `PassThruUnloadLibrary`. These are host/interface lifecycle operations.
+No gateway-normal-state reply or target-reset acknowledgement is checked here.
+Provider-specific internal behavior is outside this bounded host analysis.
+Thus the unresolved P5 reverse-state question cannot be filled merely by calling
+`ProcessAfterReprogramming` or releasing a Python/VCI handle.
+
+Working disassemblies from this independent check are under
+`build/work/f33-network-return-20260912/`; they are disposable outputs, not new
+inputs required by portable verification. No additional vehicle observation,
+recovery sender, exploit primitive, or completed repair is implied.
