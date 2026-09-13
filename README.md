@@ -7,9 +7,9 @@ vehicle-bound captures, diagnostic tooling, and reproducible runtime experiments
 
 The Sienna EPS calibration **`8965B4512000`** remains the primary reference image
 for deep P1M-E internals, but the project is no longer a single-firmware study.
-The 2026 Camry F33 and two newer Corolla EPS calibrations are first-class analysis
-targets with their own firmware, Ghidra projects, generated evidence, and live or
-field evidence.
+The 2026 Camry F33, two newer Corolla EPS calibrations, and the 2024 Crown are
+first-class analysis targets with their own firmware, Ghidra projects, generated
+evidence, and live or field evidence.
 
 The evidence rule is unchanged: **firmware bytes and deterministic verification
 are authoritative**. Generated artifacts, Ghidra annotations, captures, external
@@ -93,7 +93,7 @@ set is:
 | `sienna-8965B4512000` | primary reference | Toyota Sienna `8965B4512000` |
 | `camry-8965F3307000` | first-class | 2026 Toyota Camry Hybrid `8965F3307000` |
 | `corolla-8965H1202000` | first-class | 2023 Toyota Corolla `8965H1202000` |
-| `corolla-8965F1208000` | first-class | 2025 Toyota Corolla `8965F1208000` |
+| `crown-8965F3012000` | first-class | 2024 Toyota Crown Limited `8965F3012000` |
 
 Do not infer equivalence from the common P1M-E/SecOC architecture. A signal,
 address, secret, freshness slot, diagnostic route, or control behavior belongs to
