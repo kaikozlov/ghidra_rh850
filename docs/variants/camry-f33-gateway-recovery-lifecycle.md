@@ -645,3 +645,80 @@ the validity-failure boot path. The resident tail beyond these CRC ranges must
 still be included in a complete image comparison. This checks saved bytes;
 it neither measures live flash ECC nor converts the reconstruction into a
 post-incident ECU readback.
+
+
+## Native frontend admission and the last-message record: additional closure
+
+The earlier distinction between the optional F181 read **inside preparation**
+and admission **before preparation** was followed into current `CUW.dll`, not
+left at its managed wrapper. This is a bounded native-code result, not a live
+run of GTS and not proof of a complete recovery procedure.
+
+### No received CID is a real native condition, not an automatic blank target
+
+`_JudgeFlashable@16` at `10061B70` reaches the worker at `1005F800` through its
+normal or alternate loaded-package paths. In the reviewed worker:
+
+- `1005F927..1005F9B2` reduces the selected node's per-entry bitmap. This pass
+  calls it a bitmap, not a proven EPS fault or hardware-blank indicator.
+- If that bitmap condition is not satisfied, `1005F9EF..1005FA28` checks a
+  package-filename exception containing the literal **`.vbf`** at `10078D50`.
+- Outside that exception, `1005FA33..1005FA52` branches to the **`BBE`** return
+  at `1005FA6F` when the current received-CID vector has zero entries. Its endpoints are `1008C1D8/1008C1DC`,
+  with 24-byte elements. `_GetNumberOfReceivedCID@4` at `1005F000` independently
+  uses those same endpoints on its corresponding normal-source branch.
+- The separate target-blank-only configuration byte at `1008C460` is populated
+  by `_ConfigureCUWDLL@32` (`10064849`) and read later in the matching logic.
+  It does not bypass this earlier empty-CID return merely by being set.
+
+There are real bitmap, file-family and alternate-package cases, so this does
+**not** establish that every zero-CID call is rejected, nor that every F33
+package would select this branch. It establishes why a zero-count managed call,
+`BlankECU` wording, or the optional later F181 exception handler cannot stand in
+for a successful native admission result. None of the missing input state was
+fabricated and no compatibility check was patched or disabled.
+
+The absolute byte at `1008CA1C` must also not be named as an ECU recovery-mode
+flag just from its presence in this decision. Its native writer `10045880`
+sets it while unpacking a host archive whose `Setting.ini` names
+`DeltaReproCalFile` and `WholeReproCalFile` members. That observed host-package
+state is not evidence that the ECU has entered a recoverable boot state.
+
+### The saved last message is consumed as failure-report data
+
+The previous observation that `SetLastCommunicationMessage` only copies data
+was extended to its CUW consumers. At `10030F8D..10030F92`, CUW supplies the
+host record `1008CA88` to the J2534 object's setter. In `1004A940`, the saved
+address/header and payload are converted to printable hexadecimal strings;
+a negative response's NRC is extracted for the error classification. There is
+no replay of that stored byte array into a diagnostic sender in the reviewed
+consumer. `_InformResultOfQueryRetry@8` at `1005E180` clears the entire `1028`-
+byte record at `1005E21D..1005E227` before signaling the retry decision. Thus
+this record does not fill the missing P5 abort/normalization operation.
+
+### Source and recovery-state boundaries
+
+The protected inputs, sidecars and recovered copies of `CUW.dll` and
+`TCUWJ2534DeviceIF.dll` matched the existing CUW recovery manifest. The existing
+working x86 Ghidra project's memory was compared with the current recovered
+CUW PE over `1004A850..1004AD4F`, `1005E180..1005E2CF`,
+`1005F000..1005F14F`, `1005F800..10062597`, and `10064800..1006488F`,
+bounding use of its decompiler output. The work neither relies on a different-version
+host graph nor changes the ECU image. Working disassemblies and comparison
+metadata are under `build/work/f33-native-admission-20260912/` and are disposable;
+the current PE and exact source spans are the evidence inputs.
+
+A fresh file-only comparison reproduces **488** factory differences in stage6
+and **492** in the incident reconstruction, all within the native upper-region
+erase extent. Returning to the prior working stage6 image remains a legitimate
+unbricking objective; factory-exact restoration is not imposed as a separate
+requirement. Canonical F33 decompilation of `4332/43BE` confirms that ordinary
+programming still calls the installed RAM driver through `FEBF0FD0`.
+Consequently neither the correct rollback bytes nor a raw factory image alone
+is a runnable, target-independent native restoration method.
+
+No prepared-state EPS response, native flash operation, or repaired application
+startup was observed. The configured comma still timed out before the read-only
+SSH command ran. These results close additional **host-side composition**
+questions; they do not turn the gateway reachability hypothesis into a complete
+end-to-end network repair.
