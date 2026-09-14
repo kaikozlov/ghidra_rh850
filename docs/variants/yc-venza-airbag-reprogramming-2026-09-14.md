@@ -400,6 +400,45 @@ as plaintext in these files. The exact airbag MCU/security peripheral is still
 unresolved, so this note does not assume the EPS ICU-S implementation transfers
 to the airbag ECU.
 
+### 5.5 No ICU-S/HSM SecOC call path is recovered
+
+The supplied airbag CodeFlash/RPRG also does not show the runtime hardware-CMAC
+shape recovered from the tracked P1M-E EPS family. On those EPS images, the
+Renesas ICU-S path is unambiguous: command 5 (MAC generation) and command 7
+(CMAC verification) stage data through `ICUSDAT` at `0xFFC5D004`, poll status
+at `0xFFC5D00C` / `0xFFC5D014`, and finally write `(key_selector << 16) | 5`
+or `(key_selector << 16) | 7` to `ICUSCMD` at `0xFFC5D000`.
+
+A complete executable-reference census of the yc CodeFlash finds **zero**
+references anywhere in `0xFFC5D000..0xFFC5D03F`. A raw-byte search of both
+`cflash.bin` and `boot.bin` likewise finds no 32-bit literal from that register
+block. The whole high-MMIO reference census contains no `0xFFC5Dxxx` page at
+all. Therefore this image is not calling the same ICU-S interface used by the
+known P1M-E EPS implementation.
+
+The nearby `0xFFC5B000` accesses in the airbag image are not evidence for
+ICU-S. They are startup/system-control accesses: the airbag toggles that register
+during early initialization and memory/protection setup, and the known Sienna
+and Camry P1M-E images independently use the same `0xFFC5B000` family while
+their actual ICU-S crypto engine remains at `0xFFC5D000`.
+
+A second structural pass searched every high-MMIO write for the characteristic
+`(selector << 16) | command` construction used by ICU-S commands 5/7/8. The
+matches resolve to ordinary flash/controller/channel-register setup; none forms
+a crypto command/data/status sequence. The software side is negative as well:
+the application contains a second AES table set, but no executable references
+to it are currently recovered and no AES-CMAC subkey path using the standard
+`0x87` reduction step was found.
+
+The bounded conclusion is therefore: **no SecOC signing or verification call
+path is recovered from the supplied airbag image, either through the known
+P1M-E ICU-S interface or through an identified software-CMAC implementation.**
+This is not proof that the ECU cannot participate in SecOC. The exact airbag MCU
+and security peripheral are unresolved, so another HSM interface remains
+possible, and DataFlash / protected hardware-key contents were not supplied. A
+future DataFlash key candidate would still need a runtime consumer or live-CMAC
+validation before being called the operational SecOC path.
+
 ## 6. What the yc image changes for F33 EPS recovery
 
 ### It disproves one tempting interpretation
