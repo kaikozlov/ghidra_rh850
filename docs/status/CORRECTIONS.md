@@ -107,9 +107,11 @@ the mistakes are not re-made.
   counter enforcement remain the security boundary.
 - **Boundary:** the earlier rejection of `0x65CD8 → 0x72F58` as a key-set path
   remains correct; that chain is generic NvM. Command 8 is a separate driver
-  and diagnostic subsystem. The package carries its target slot, so static
-  firmware does not prove that Toyota dealer tooling uses DID `0x1010` or that
-  a particular request targets slot 4.
+  and diagnostic subsystem. Current 2026 GTS+ independently proves Toyota's
+  `MAC_01` utility contains the matching RoutineControl RID `0x1010` M1–M5
+  transport. The package still carries its target slot, so static evidence does
+  not prove a live session for this exact EPS selects that branch or targets
+  slot 4.
 - **Canonical:**
   [../security/secoc/key-storage-and-lifecycle.md](../security/secoc/key-storage-and-lifecycle.md)
   §"Injection and refresh"; `tests/verify_icus_key_update.py`.

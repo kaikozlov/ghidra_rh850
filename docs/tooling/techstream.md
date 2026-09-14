@@ -3549,8 +3549,12 @@ post-clear DTC-status acceptance check.
 
 The canonical report is
 [security/mackey-registration.md](../security/mackey-registration.md). Managed
-IL plus native `IT3UtilityNK.dll`/`UtilityExNK2.dll` now recover the complete
-online and vehicle-facing flow:
+IL plus native `IT3UtilityNK.dll`/`UtilityExNK2.dll` recover the online and
+vehicle-facing ECU Security Key flow, with an important generation distinction:
+**the V18 capture uses Routine `0x3002`, while current 2026 GTS+ carries both
+`0x3002` and an older/alternate RID-`0x1010` MACKey transport.**
+
+The V18 path remains exactly as recovered:
 
 - the request XML contains VIN, master/slave `SafekeyNumber`, `MACM1`,
   `MACM2`, `MACM3`, and a deterministic SHA-256 `HashValue`;
@@ -3559,23 +3563,44 @@ online and vehicle-facing flow:
 - the returned request ID replaces `$36` in the configured login URL, then the
   client polls by `request_id` plus `SHA256(request_id)` and stores the returned
   exchange-key XML as `Memg/MAC_01_WriteData.xml`;
-- `$36` is therefore **not DID `0x0036`**. The former `ecuMacId` URL claim came
-  from an untracked configuration example and is not repeated as pinned fact;
+- `$36` is therefore **not DID `0x0036`**;
 - `UtilityExNK2.dll` reads VIN with `22 F1 90`, the 16+32+16-byte MAC tuple
   with `22 10 2E`, and master/slave 16-byte `SafekeyNumber` values with
   `22 10 10`;
-- the response parser matches returned records by raw `SafekeyNumber`, then
-  writes each selected ECU through `31 01 30 02 || M1 || M2 || M3` and polls
-  with `31 03 30 02` for state plus `M4[32] || M5[16]`;
+- selected ECUs are written through
+  `31 01 30 02 || M1[16] || M2[32] || M3[16]` and polled with
+  `31 03 30 02` for state plus `M4[32] || M5[16]`;
 - all 24 `CMAC_01_*` RTTI classes, vtables, 51 embedded `S324-*` procedure
   codes, critical body hashes, and command shapes are pinned in generated
   evidence. Cross-class UI successors remain caller-selected and bounded.
 
-This remains distinct from ordinary UDS SecurityAccess. It uses the same
-M1–M5 cryptographic architecture as the Sienna command-8 path, but it is not an
-exact diagnostic join: Techstream uses Routine `0x3002`, while the Sienna uses
-RoutineControl RID `0x1010` control types `01/03`. A relationship to that EPS or its SecOC
-slot 4 is therefore **not proven**.
+Current GTS+ adds a direct official `MAC_01` RID-`0x1010` route in its pinned
+`UtilityExNK2.dll` (SHA-256
+`d9868c8a9a69ffbab26ea7d4431e290372cd207e84e7b4aed27446aeb4c12ec1`):
+
+- helper `0x100F9FE0` builds and sends exactly
+  `31 01 10 10 || M1[16] || M2[32] || M3[16]` (`0x44` bytes total);
+- helper `0x100F9EF0` sends `31 03 10 10` and copies the returned
+  `M4[32] || M5[16]`;
+- worker `0x100FA9C0` runs the start/poll sequence;
+- exported `Ex2MAC_01_ComProcess @ 0x10028590` selects the state machine at
+  `0x100F9740` containing that worker for one supported protocol family;
+- the same DLL also contains the newer `31 01/03 30 02` helpers, so both
+  transports intentionally coexist.
+
+That current-GTS result closes a previous over-bounding statement: Toyota
+service tooling **does** have an exact diagnostic join to the RID-`0x1010`
+M1–M5 routine used by Sienna firmware and by the yc 2021 Venza SRS firmware.
+It still does not prove which family branch a specific live vehicle selects
+without a transcript.
+
+This remains distinct from ordinary UDS SecurityAccess and from CUW reflash
+authorization. In the yc airbag, the `0x1010` package is routed to the local
+secure subsystem as an authenticated key-update operation; its application
+SecOC MAC paths use key selectors into the same secure-service boundary. Thus
+MACKey Registration is now directly relevant to **key provisioning/lifecycle**,
+while still exposing neither the plaintext runtime SecOC key nor the ordinary
+SecOC verify/generate traffic.
 
 ### 7.1 Representation-bounded secret census
 
@@ -3611,7 +3636,7 @@ confidence.
 
 | Open question | Techstream relevance |
 |---|---|
-| SecOC slot-4 key extraction | None — Techstream does not interact with SecOC runtime verification/key slots |
+| SecOC runtime-key extraction | None — diagnostic MACKey tooling can provision secure network-key state, but it does not expose the plaintext runtime key or ordinary SecOC verify/generate traffic |
 | Motor actuation join (`0x2E4` → d/q current) | Techstream now corroborates the **steering-command domain** through monitor 402, but still provides no direct SecOC or d/q-current join |
 | Runtime RAM key-slot mirror | None — Techstream reads diagnostic values, not raw RAM |
 | ICU-S command 5/13 characterization | None — Techstream does not issue ICU-S commands |
@@ -3623,7 +3648,7 @@ confidence.
 | `ptshim32.dll` CAN logger | Capture a real Techstream↔EPS session for transcript validation |
 | `CSecurityAccessAES128` source paths | PDB/source-tree context for the KGProject diagnostic framework |
 | TIS portal RKS flow (`CUWAccessRKS.dll`, §5.3) | OEM reprogramming-key authorization (Layer A) — VIN+license bound, IE-automated, no client crypto; independent of the cal-file crypto key (Layer B). Not immobilizer. |
-| MACKey Registration (§7) | Recovered exchange-key provisioning path: `22 F190/102E/1010` vehicle reads → VIN + master/slave safe-key/MAC fields → hashed `ECUExchangeKey` XML → native TIS bridge → identity-matched response → per-ECU Routine `0x3002` M1–M3 write and M4/M5 poll. `$36` is the server request ID. This shares the Sienna command-8 envelope but is not its RoutineControl RID-`0x1010` service. |
+| MACKey Registration (§7) | V18 recovers the online `0x3002` exchange-key path; current GTS+ additionally contains an official `MAC_01` RID-`0x1010` M1–M5 start/poll path, exactly matching the diagnostic routine shape in Sienna and the yc Venza airbag. Target family selection still requires a live transcript. |
 | `TCUWControlCommPhase.dll` parameters | Exact timing values for SA seed/key exchange during reflash |
 | `[ISTA_T3_Login]` credentials | Hardcoded hex credentials in `uspublic.ini` for Toyota ISTA portal |
 

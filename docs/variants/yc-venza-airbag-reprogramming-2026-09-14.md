@@ -43,8 +43,29 @@ A follow-up crypto pass also recovers the two independent 128-bit RPRG roots:
 RequestDownload payload key from DID `0x0201`, while
 `8f69e6dc2a4b80b45054b4827a5ab622` is the 16-byte boot/RPRG SecurityAccess root.
 The ordinary application SID `0x27` instead uses inline two-byte arithmetic and
-has no analogous third 128-bit acceptance root. Section 5 gives the complete
-firmware-static chains.
+has no analogous third 128-bit acceptance root.
+
+The separate **ECU Security Key / rekey** question is now closed much further.
+This image contains live SecOC MAC-generation and MAC-verification paths, but the
+network-authentication key is represented only by a selector at the application
+boundary. The crypto request is queued through shared `0xFE...` RAM and the
+RH850 system-reserved `0xFF1F...` window to the P1x-C secure subsystem. More
+importantly, application RoutineControl RID `0x1010` accepts exactly the
+SHE-compatible authenticated-key-update envelope `M1[16] || M2[32] || M3[16]`
+and returns status plus `M4[32] || M5[16]`. The asynchronous worker routes that
+64-byte package through the same secure subsystem instead of manipulating a
+plaintext key in CodeFlash.
+
+Current GTS+ independently closes the host side of that path. Its
+`UtilityExNK2.dll` `MAC_01` implementation contains a direct
+`31 01 10 10 || M1 || M2 || M3` start followed by `31 03 10 10` result polling,
+in addition to the newer `0x3002` transport already recovered from Techstream.
+Toyota's public ECU Security Key bulletin includes 2021 Venza HV in the key-write
+procedure, and Toyota's Techstream known-bugs page explicitly lists a 2021 Venza
+HV “ECU Security Key write process” failure mode. The firmware, host utility,
+and service procedure therefore agree on the architecture: **“rekey” means
+provisioning the HSM-backed network authentication credential, not satisfying
+RPRG SecurityAccess.** Sections 5.4–5.7 give the bounded static join.
 
 For the exact F33 EPS, this is useful architectural evidence but not a code
 transfer. Exact complete-function comparison found only generic/library overlap
@@ -64,10 +85,28 @@ Contributor artifacts are retained unchanged under `community/yc/venza/`:
 | `boot.bin` | `0x8000` | `943934abc9a5c676eff46f51f008baa39e4f533e66650ffcce54d7bfb6e6e6e2` |
 | `cflash.bin` | `0x300000` | `2dfaf7ce21cb04af1126192f574103f63802352f8717fa0f03986d5a11d067f9` |
 
-The vehicle/ECU attribution (“Venza airbag sensor”) and glitch-acquisition method
-are contributor-provided. The exact RH850 MCU part number is not established by
-the supplied metadata. Do not transfer airbag SFR addresses or this DCM layout
-to P1M-E merely because both ECUs are RH850.
+The glitch-acquisition method is contributor-provided. The vehicle/ECU
+attribution is now independently corroborated by the raw identity and dealer OEM
+parts data: CodeFlash contains `8917048E30`, and Toyota parts catalogs identify
+`89170-48E30` as the 2021–2022 Venza air-bag sensor/diagnostic unit. The exact
+RH850 MCU part number is still not established by the supplied metadata. Do not
+transfer airbag SFR addresses or this DCM layout to P1M-E merely because both
+ECUs are RH850.
+
+External service-procedure corroboration is likewise bounded but unusually
+specific. Toyota T-SB-0111-20, “ECU Security Key Writing,” covers 2021 Venza HV
+and states that replacement of covered ECUs can require an ECU Security Key to
+be written before normal network communication. Toyota's Techstream known-bugs
+page separately names 2021 Venza HV in an “ECU Security Key write process ends
+with error” item. Neither public item exposes key material or proves which
+internal GTS protocol branch a particular SRS part selects; the protocol join
+below comes from the supplied firmware plus the pinned local GTS+ binary.
+
+Public corroboration used here:
+
+1. Toyota Motor Sales, USA, [T-SB-0111-20 Rev1 — ECU Security Key Writing](https://static.nhtsa.gov/odi/tsbs/2022/MC-10224141-9999.pdf), revised July 8, 2022.
+2. Toyota Motor Sales, USA, [Techstream Known Bugs, Version 18.00.008](https://techinfo.toyota.com/techInfoPortal/staticcontent/en/techinfo/html/prelogin/tsrss/ts_known_bugs.html), updated March 15, 2023.
+3. Camelback Toyota Parts, [89170-48E30 SDM Module](https://parts.camelbacktoyota.com/oem-parts/toyota-sdm-module-8917048e30), identifying the part as a 2021–2022 Venza air-bag sensor/diagnostic unit.
 
 The CodeFlash contains raw identity strings at `0x17FFC6` and `0x17FFD0`:
 
@@ -374,76 +413,181 @@ roots are **airbag-specimen credentials**. Their values must not be projected
 onto the Camry EPS merely because both systems use Toyota/Denso RH850
 reprogramming architecture.
 
-### 5.4 No plaintext SecOC key is identified in the supplied dump
+### 5.4 No plaintext operational SecOC key is present in the supplied dump — and the runtime explains why
 
-A separate search for an operational SecOC/AES-CMAC key does **not** identify
-one in either supplied artifact. The two unexplained-looking 16-byte constants
-at `0xC3AC` and `0xC3BC` cannot be repurposed as SecOC candidates: the call
-chains above already assign them independently to RequestDownload payload
-construction and RPRG SecurityAccess. Known comparison credentials from the
-tracked EPS specimens likewise do not occur in `cflash.bin` or `boot.bin`.
+A raw/structured search still does **not** identify a plaintext operational
+SecOC key in either contributor artifact. That negative is now meaningful
+rather than merely inconclusive. The two CodeFlash roots recovered above have
+complete, independent callers in the reprogramming path; neither is passed to
+the application SecOC implementation. The known EPS roots are also absent.
 
-There is additional application-side AES material in CodeFlash: a second
-standard forward/inverse AES table set begins at `0x22EE1` / `0x22FE1`, distinct
-from the RPRG AES tables at `0xC3FD` / `0xC4FD`. That establishes more AES
-capability in the image, but not SecOC by itself. The current static project has
-no recovered direct reference from executable code into the second table set,
-and a focused search did not recover a software-CMAC subkey path around the
-standard `0x87` reduction constant. Therefore neither those tables nor any
-adjacent 16-byte data are assigned as an operational SecOC key.
+The application SecOC callers instead carry a small key/configuration selector
+through generated crypto records. No 16-byte key crosses the application-side
+MAC generation or verification adapters. That is exactly the shape expected
+when the actual network key is owned by a secure subsystem rather than ordinary
+CodeFlash.
 
-This negative is deliberately scoped to the supplied artifacts. yc provided
-CodeFlash plus the extended-user RPRG image, **not DataFlash or protected
-security-hardware contents**. A live SecOC key could therefore reside in a
-non-CodeFlash persistent object or a hardware-backed key slot without appearing
-as plaintext in these files. The exact airbag MCU/security peripheral is still
-unresolved, so this note does not assume the EPS ICU-S implementation transfers
-to the airbag ECU.
+The live SecOC configuration is also concrete. Four `0x50`-byte receive-shaped
+profiles begin at the following CodeFlash offsets:
 
-### 5.5 The P1M-E ICU-S SecOC path is absent; the actual crypto backend remains open
+| Record | Data/CAN ID in record | Configured PDU/buffer length |
+|---:|---:|---:|
+| `0x1D6C8` | `0x00F` | 8 |
+| `0x1D718` | `0x090` | 32 |
+| `0x1D768` | `0x0D7` | 32 |
+| `0x1D7B8` | `0x024` | 32 |
 
-The supplied airbag CodeFlash/RPRG also does not show the runtime hardware-CMAC
-shape recovered from the tracked P1M-E EPS family. On those EPS images, the
-Renesas ICU-S path is unambiguous: command 5 (MAC generation) and command 7
-(CMAC verification) stage data through `ICUSDAT` at `0xFFC5D004`, poll status
-at `0xFFC5D00C` / `0xFFC5D014`, and finally write `(key_selector << 16) | 5`
-or `(key_selector << 16) | 7` to `ICUSCMD` at `0xFFC5D000`.
+Two adjacent transmit-shaped `0x50`-byte records begin at `0x1D808` and
+`0x1D84C`. Those records, the actual generation/verification workers, and their
+key-selector-only lower interface are all byte-pinned by
+`verify_yc_venza_airbag_reprogramming.py`. Downstream application semantics are
+not inferred from the record IDs here.
 
-A complete executable-reference census of the yc CodeFlash finds **zero**
-references anywhere in `0xFFC5D000..0xFFC5D03F`. A raw-byte search of both
-`cflash.bin` and `boot.bin` likewise finds no 32-bit literal from that register
-block. The whole high-MMIO reference census contains no `0xFFC5Dxxx` page at
-all. Therefore this image is not calling the same ICU-S interface used by the
-known P1M-E EPS implementation.
+This closes the earlier search question in the useful direction: **absence of a
+plaintext SecOC key from CodeFlash is expected for this implementation and is
+not evidence that the airbag lacks SecOC.**
 
-The nearby `0xFFC5B000` accesses in the airbag image are not evidence for
-ICU-S. They are startup/system-control accesses: the airbag toggles that register
-during early initialization and memory/protection setup, and the known Sienna
-and Camry P1M-E images independently use the same `0xFFC5B000` family while
-their actual ICU-S crypto engine remains at `0xFFC5D000`.
+### 5.5 The actual SecOC backend is a local P1x-C secure-service path
 
-A second structural pass searched every high-MMIO write for the characteristic
-`(selector << 16) | command` construction used by **that ICU-S implementation**.
-The matches resolve to ordinary flash/controller/channel-register setup. This
-only strengthens the negative for the known P1M-E ICU-S ABI; it does **not**
-exclude a different Renesas security peripheral/HSM with a different register
-map or calling convention.
+The airbag does not use the P1M-E EPS's `0xFFC5D000` ICU-S command-register ABI.
+Instead it uses a second, self-contained local crypto stack whose final service
+boundary is the RH850 `0xFF1F...` system-reserved window plus shared `0xFE...`
+RAM. Public P1x-C documentation identifies the corresponding security block as
+ICUMC, a dedicated secure RH850/G3K subsystem with Secure DataFlash; the detailed
+security-hardware command semantics live in the separate Renesas Security
+Hardware Manual. Therefore the observed request opcodes below are intentionally
+left as numeric protocol values rather than assigned proprietary command names.
 
-Likewise, the software side is unresolved rather than excluded. The application
-contains a second AES table set, but the current Ghidra recovery has no direct
-executable xrefs into it and the focused scan did not find the textbook CMAC
-subkey `0x87` reduction shape. Neither observation is sufficient to rule out
-software AES-CMAC: references may be indirect or unrecovered, the implementation
-may use a different AES core, and CMAC subkeys may be precomputed or expressed
-without a literal `0x87` in an obvious instruction sequence.
+The application-side paths are:
 
-The bounded conclusion is therefore only: **the supplied airbag image does not
-use the same P1M-E ICU-S command-5/command-7 interface recovered in the EPS
-family.** Whether SecOC authentication is performed by (1) another Renesas HSM
-or security peripheral, (2) CPU-side AES-CMAC, or (3) not by this ECU remains an
-open reverse-engineering question. DataFlash / protected hardware-key contents
-were not supplied. A future DataFlash key candidate still needs a runtime
-consumer or live-CMAC validation before its role is assigned.
+```text
+SecOC TX worker  0xDE9F0
+  -> MAC-generation dispatcher 0xBCCF4
+  -> lower adapter 0xBDC7A
+       request descriptor @ FEFF02B8
+       observed opcode 0x12
+       key selector from config+4
+
+SecOC RX worker  0xDE09E
+  -> MAC-verification dispatcher 0xBCEFA
+  -> lower adapter 0xBDE88
+       request descriptor @ FEFF0330
+       observed opcode 0x12
+       key selector from config+4
+```
+
+Both lower adapters converge on `0xBD69E`, which submits through `0x8A18A`.
+`0x8A18A` records the current PE identity and passes the descriptor into the
+secure-service queue. `0x89E60` reads the service's shared-RAM pointer from
+`0xFF1F0014`, derives the `0xFE000000` shared address, and enqueues the request
+in a four-entry ring. `0x89F6E` then writes the service trigger at `0xFF1F0044`.
+Initialization at `0x864E4/0x86510` configures the same boundary.
+
+The key observation is the interface itself: ordinary application code supplies
+message/tag buffers, lengths, callbacks, and a selector; it does **not** supply
+plaintext AES key bytes. This is the firmware-static reason the operational
+network key is not recoverable by scanning the supplied CodeFlash/RPRG images.
+It may reside in ICUMC Secure DataFlash or other security-owned state, but its
+actual secure-storage slot contents are outside these artifacts.
+
+### 5.6 RoutineControl RID `0x1010` is the airbag's authenticated ECU Security Key update
+
+The application has 19 configured RoutineControl RIDs. The exact table at
+`0x255E4` contains, at index 9, **RID `0x1010`**. Its generated dispatchers are
+not generic reprogramming code: their input/output geometry joins directly to
+the secure key-update path.
+
+StartRoutine stages exactly 64 bytes:
+
+```text
+31 01 10 10 || M1[16] || M2[32] || M3[16]
+        |
+        v
+RID table index 9
+  -> start dispatcher 0xC1C06 case 9
+  -> wrapper 0xCB18A
+  -> 0x69458 -> 0x7B306
+       copy 0x40 request bytes to FEFF0168
+       mark operation pending
+       return status byte + 48 zeroed result bytes
+  -> asynchronous worker 0xB76D4
+  -> key-update dispatcher 0xBD2EC, record 0
+  -> lower adapter 0xBE0CC
+       require 0x40-byte input
+       require >=0x30-byte result buffer
+       split input as +0x00 / +0x10 / +0x30
+       split result as +0x00 / +0x20
+       observed secure-service opcode 0x31
+  -> 0xBD69E -> secure-service boundary
+```
+
+The offsets make the SHE-compatible envelope explicit: the 64-byte request is
+`16 + 32 + 16`, and the successful 48-byte proof/result is `32 + 16`. The result
+path is:
+
+```text
+31 03 10 10
+  -> result dispatcher 0xC1B00 case 9
+  -> 0xCADF4 -> 0x69476 -> 0x7B3A6
+  -> status || M4[32] || M5[16]
+  -> terminal read clears the staging bank
+```
+
+A second worker mode routes through record 1 and a small opcode-`0x04` secure
+request. Its exact proprietary meaning is not assigned here. It is not needed
+to establish the 64-byte authenticated update and 48-byte proof geometry.
+
+This resolves the service-information terminology. The ECU can be placed into
+RPRG programming mode using the separate `10 02`/SecurityAccess path described
+above, but **that does not install the network authentication key**. ECU Security
+Key writing is a separate application RoutineControl operation that asks the
+secure subsystem to authenticate and commit a key-update package.
+
+### 5.7 Current GTS+ contains the matching official `MAC_01` RID-`0x1010` host path
+
+The local 2026 GTS+ install provides the missing host-side join in
+`UtilityExNK2.dll` (SHA-256
+`d9868c8a9a69ffbab26ea7d4431e290372cd207e84e7b4aed27446aeb4c12ec1`).
+This is the same DLL family that exports the official `Ex2MAC_01_*` ECU Security
+Key operations.
+
+One helper at VA `0x100F9FE0` constructs exactly:
+
+```text
+31 01 10 10 || M1[16] || M2[32] || M3[16]
+```
+
+and sends `0x44` bytes. A paired helper at VA `0x100F9EF0` sends
+`31 03 10 10`, validates the response, and copies a 32-byte field plus a 16-byte
+field. Worker `0x100FA9C0` runs start then polls that result path. More strongly,
+exported `Ex2MAC_01_ComProcess @ 0x10028590` selects the `0x100F9740` state
+machine containing that worker for one supported MACKey protocol family.
+Therefore RID `0x1010` is not merely a firmware-private routine: current Toyota
+service software contains a first-class `MAC_01` implementation of the same
+wire protocol and M1–M5 geometry.
+
+The same current GTS+ binary also contains the newer `0x3002` form recovered
+from Techstream V18:
+
+```text
+31 01 30 02 || M1 || M2 || M3
+31 03 30 02 -> state || M4 || M5
+```
+
+So the correct host conclusion is **multi-generation protocol support**, not
+“Toyota tooling uses only `0x3002`.” Static GTS analysis alone does not tell us
+which branch a live 2021 Venza SRS session selects. The exact airbag firmware,
+however, implements `0x1010`, making that GTS branch the structurally matching
+candidate.
+
+This also defines the remaining barrier to arbitrary rekeying. The ECU-side
+primitive is callable, but an accepted `M1/M2/M3` package is cryptographically
+authenticated by the secure subsystem. The recovered RPRG roots do not supply
+that authorization. Without the existing update/authentication key, secure
+storage contents, or a valid Toyota server-produced exchange-key package, we
+cannot synthesize an arbitrary new network key merely from this CodeFlash dump.
+A live GTS key-write capture is now the highest-value way to bind the exact
+2021 Venza service transaction and server material.
 
 ## 6. What the yc image changes for F33 EPS recovery
 

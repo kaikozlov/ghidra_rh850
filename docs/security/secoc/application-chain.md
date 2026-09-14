@@ -566,9 +566,12 @@ status/result reads; it is documented and tested in
 
 Command 8 is not statically fixed to slot 4—the target is carried inside M1.
 This establishes a credible in-application mechanism capable of updating slot
-4 when given a valid slot-4 package. Static firmware does not show that Toyota's
-dealer backend actually uses DID `0x1010`, nor does it reveal the authentication
-secret/counter needed to construct an accepted package. The canonical lifecycle
+4 when given a valid slot-4 package. Current 2026 GTS+ independently proves
+Toyota's `MAC_01` utility contains the matching RoutineControl RID `0x1010`
+start/result transport. Static firmware still does not show that a live session
+for this exact EPS selects that GTS branch or targets slot 4, and neither side
+reveals the authentication secret/counter needed to construct an accepted
+package. The canonical lifecycle
 analysis and revised provisioning experiment are in
 [key-storage-and-lifecycle.md](key-storage-and-lifecycle.md). §5.10 recovers a
 second stock command-8 submitter — the RID-`0x100E` bank-0 crypto test fed by
@@ -1023,8 +1026,9 @@ an update package:
    assuming command 8 mirrors protected storage into CPU-visible NvM.
 
 This distinguishes an application diagnostic key update from the unrelated RFP
-mask-ROM ICU-S enable/validation commands. Static reachability alone does not
-establish that Toyota's dealer backend uses DID `0x1010`.
+mask-ROM ICU-S enable/validation commands. Current GTS+ establishes that Toyota
+service tooling has a matching RID-`0x1010` `MAC_01` transport; only the
+exact-EPS branch selection and package target remain dynamic questions.
 
 ### 7.5 ICU generation and CAN correlation
 
@@ -1102,7 +1106,8 @@ establish that Toyota's dealer backend uses DID `0x1010`.
 | The composition race is a key bypass or exposes M4/M5 remotely | **Disproved for this graph; classification is state misattribution only** |
 | Command 8 is the SHE-compatible authenticated key-update service | **Recovered** |
 | DID `0x1010` is statically fixed to slot 4 | **Disproved; the target is package-carried** |
-| Toyota dealer tooling uses DID `0x1010` to rekey this EPS | **Requires dynamic observation** |
+| current GTS+ contains a matching RID `0x1010` `MAC_01` transport | **Definitive host-static** |
+| a live dealer session uses RID `0x1010` to rekey this exact EPS / slot 4 | **Requires dynamic observation** |
 | The public bootloader payload is a safe application-context signing oracle | **Unsupported** |
 | SecOC handle 0 resolves to lower ICU driver record 0 | **Definitive** |
 | Static CodeFlash determines the donor's live slot-4 key state | **Unsupported** |

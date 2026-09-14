@@ -121,5 +121,36 @@ check("boot-SA root transform body is exact", sha256(cf[0x77B4:0x77EC]) == "8fca
 check("boot-SA expected-key transform body is exact", sha256(cf[0x77EC:0x7820]) == "b8ef89653e0a785943ba84cdfb6791ed4b346f21e7bb42c0189fcbe2e790bc5b")
 check("boot-SA 16-byte key compare body is exact", sha256(cf[0x7820:0x78DC]) == "174830b17c7830fc69f2f441af464687ba32d208757b3444449186007f817f9d")
 
+print("\n== application SecOC secure-service boundary ==")
+secoc_profiles = (
+    (0x1D6C8, 0x00F, 8, "ed0d2d403d752d0bad2c7c922fff53fd6e110d2bd521ceb674fed77ab86a1270"),
+    (0x1D718, 0x090, 32, "aa57b49a9975bd312800c5bf5f99ad8608e93be460453b778d26189babbdaa6b"),
+    (0x1D768, 0x0D7, 32, "ed1146f6d5e88ce5f2faec28fb15bd0e1276b308daf70c87b0cc8c16d58c3077"),
+    (0x1D7B8, 0x024, 32, "b749a52a24ee7d05d9394940614113b2383b42b8b0bbc44e9c65ac0020077e12"),
+)
+for off, can_id, secured_len, digest in secoc_profiles:
+    check(f"SecOC receive record {off:#x} is byte-pinned", sha256(cf[off:off + 0x50]) == digest)
+    check(f"SecOC receive record {off:#x} carries ID {can_id:#x}", struct.unpack_from("<H", cf, off + 0x0A)[0] == can_id)
+    check(f"SecOC receive record {off:#x} carries configured PDU/buffer length {secured_len}", struct.unpack_from("<I", cf, off + 0x24)[0] == secured_len)
+check("first adjacent transmit-shaped SecOC record is byte-pinned", sha256(cf[0x1D808:0x1D858]) == "ee90254ab0a7925c5dde3ba238027f06d91829ae27c0082336dc326217b5474a")
+check("second adjacent transmit-shaped SecOC record is byte-pinned", sha256(cf[0x1D84C:0x1D89C]) == "333b11d2500b24c527953577ff367dc7ddd6d969a55cd568a9ad89ca8b28b787")
+check("SecOC RX verification worker body is exact", sha256(cf[0xDE09E:0xDE240]) == "71897f7543e1dce29971da1967929fc6c0fca6994ab734d0f8c0ea68b50d140a")
+check("SecOC TX generation worker body is exact", sha256(cf[0xDE9F0:0xDEB58]) == "ea373a29ee2eb29c004b1f344a5ce5c76480bda45b79efd18ce78a51c0f0aeaa")
+check("secure request enqueue wrapper is exact", sha256(cf[0x8A18A:0x8A1F0]) == "0de122986c51d93ab0dcf75e2134fc5f51ea9a1f70bec49b158cf53b359a62a3")
+check("secure shared-RAM queue body is exact", sha256(cf[0x89E60:0x89ED0]) == "bb0541973644e0ab89b5a66a8534a04a3960464fa3aaf6fe53ebae2333d463c8")
+check("secure service trigger body is exact", sha256(cf[0x89F6E:0x89FC4]) == "8675acdb3e9932632c7f6bc321ec318e3b4fdbc7302bd607d27612ce49a4f11f")
+
+print("\n== authenticated ECU Security Key update: RoutineControl RID 0x1010 ==")
+check("application RoutineControl table has 19 entries", struct.unpack_from("<H", cf, 0x2506C)[0] == 19)
+rid_table = cf[0x255E4:0x255E4 + 19 * 8]
+check("19-entry RoutineControl table is byte-pinned", sha256(rid_table) == "37a6786788f944c737ddb73daec9d24ba98edc899119289a08bbd2b491414474")
+check("RoutineControl table index 9 is RID 0x1010", struct.unpack_from("<H", rid_table, 9 * 8)[0] == 0x1010)
+check("RID 0x1010 start staging body is exact", sha256(cf[0x7B306:0x7B370]) == "135a3d6da6241665554bad3a84615bb34e8c6566cc2403b4ecde2fc0dcccd063")
+check("RID 0x1010 result body is exact", sha256(cf[0x7B3A6:0x7B414]) == "7030ff37050ff7c7be38ef982b21613a65c5d00f43abcc703050eb8bca445a77")
+check("RID 0x1010 key-update worker is exact", sha256(cf[0xB76D4:0xB77B8]) == "87a24689ed7d1960839fde41739860af629898b3ef59c395e72fd4ad12554327")
+check("authenticated key-update dispatcher is exact", sha256(cf[0xBD2EC:0xBD37C]) == "1e174b5310cb2c445fe5a010b40bdd5d991c7442dfe9d7ace56cb9252a337550")
+check("authenticated 64-byte/48-byte lower adapter is exact", sha256(cf[0xBE0CC:0xBE1DA]) == "adea5483aa15706e8fcae2ee368143584e92037f3e7b2c01d5893fa3e219ca27")
+check("RoutineControl application dispatcher body is exact", sha256(cf[0xC6672:0xC6776]) == "e7dbd1793c2df4dc30efd47dcea3f51e67b29043053ed7085531aa4839b49212")
+
 print(f"\nResults: {passed} passed, {failed} failed")
 raise SystemExit(1 if failed else 0)

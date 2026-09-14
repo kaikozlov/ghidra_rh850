@@ -64,6 +64,13 @@ tests = ["tests/verify_gtsplus_artifact_lock.py"]
 requires_external = ["gtsplus"]
 modes = ["local"]
 
+[suite.gtsplus_mackey_rid1010]
+tests = ["tests/verify_gtsplus_mackey_rid1010.py"]
+requires_external = ["gtsplus"]
+modes = ["local"]
+# Pins the current-GTS MAC_01 RID-0x1010 M1-M5 path and its coexistence with
+# the newer RID-0x3002 transport.
+
 [suite.gtsplus_tss3_crossvehicle_surface]
 tests = ["tests/verify_gtsplus_tss3_crossvehicle_surface.py"]
 requires_external = ["gtsplus"]

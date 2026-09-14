@@ -381,10 +381,15 @@ or the authorization key.
 The diagnostic result bank at `0xFEBE523A` can return all 48 M4/M5 bytes after
 completion. The 64-byte request bank is `0xFEBE51BA`. The application exposes
 these through two control types of service `0x31`: control type `0x01` starts the
-operation and control type `0x03` reads its status/result. The production dealer
-backend, package-generation algorithm inputs, AuthID, and current slot-4 counter
-remain unobserved. Consequently RID `0x1010` is the strongest static candidate
-for dealer rekey, not proof that a particular dealer tool invokes it.
+operation and control type `0x03` reads its status/result.
+
+Current 2026 GTS+ closes the former host-side uncertainty: its `MAC_01`
+`UtilityExNK2.dll` contains an official branch that emits exactly
+`31 01 10 10 || M1 || M2 || M3` and polls `31 03 10 10` for M4/M5. RID
+`0x1010` is therefore an OEM-supported ECU Security Key transport, not merely a
+firmware-side candidate. What remains unobserved is whether a live
+`8965B4512000` session selects that GTS branch, which target slot a particular
+M1 names, and the server-side package-generation inputs/AuthID/current counter.
 
 ### 8.1 Exact diagnostic transport contract
 
@@ -599,7 +604,8 @@ that the RAM field held a valid key at capture time.
 | command 8 is a SHE-compatible authenticated memory/key update | **Recovered** |
 | RID `0x1010` per-RID policy is extended session, no Dcm SA level | **Definitive** |
 | command 8 is statically fixed to slot 4 | **Disproved; target is package-carried** |
-| Toyota dealer tooling invokes RoutineControl RID `0x1010` for slot 4 | **Unknown; dynamic trace required** |
+| current GTS+ contains a `MAC_01` RoutineControl RID `0x1010` M1–M5 transport | **Definitive host-static** |
+| Toyota dealer tooling invokes RID `0x1010` for this EPS and targets slot 4 | **Unknown; dynamic trace required** |
 | both slot-4 KAT bodies are compiled out; the `FF*16` vector is latent | **Definitive** |
 | CPU-visible objects 12–15 are invalid/inactive in this snapshot | **Definitive for the captured NvM bank** |
 | protected ICU-S slot 4 is personalized or erased | **Unknown** |

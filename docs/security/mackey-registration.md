@@ -195,33 +195,62 @@ UI/controller callback. Consequently predecessor/successor edges stay
 `00 -> 01 -> ...` graph. This UI transition boundary does not obscure the
 vehicle request/response protocol recovered above.
 
-## Comparison with Sienna firmware DID `0x1010`
+## Comparison with firmware RID `0x1010` and current GTS+
 
-The firmware was independently reopened through `tools/g`. Its application
-RoutineControl RID `0x1010` routes a 64-byte request into ICU-S command 8 and returns a
-48-byte M4/M5 result. The exact comparison is:
+The original V18 recovery remains valid but is no longer the whole host picture.
+Techstream V18's recovered online MACKey workflow writes selected ECUs through
+Routine `0x3002`. Independently, current 2026 GTS+ `UtilityExNK2.dll` contains a
+second first-class `MAC_01` transport that uses RoutineControl RID `0x1010`.
 
-| Property | Techstream MACKey | Sienna `8965B4512000` |
-|---|---|---|
-| Start | `31 01 30 02 || M1[16] || M2[32] || M3[16]` | `31 01 10 10 || M1[16] || M2[32] || M3[16]` |
-| Poll | `31 03 30 02` | `31 03 10 10` |
-| Result | state plus `M4[32] || M5[16]` | status plus `M4[32] || M5[16]` |
-| Engine evidence | ECU-side routine, implementation absent | literal ICU-S command 8 at `0x8997A` |
+The current GTS+ binary is SHA-256
+`d9868c8a9a69ffbab26ea7d4431e290372cd207e84e7b4aed27446aeb4c12ec1`.
+Its `MAC_01` helpers are exact:
 
-Conclusion: **same SHE-compatible cryptographic architecture, different
-diagnostic service/procedure; no exact join**. The Techstream read of DID
-`0x1010` is a separate 16-byte safe-key identity read, not the Sienna's
-startRoutine 64-byte RoutineControl package. Static evidence does not prove that this
-Techstream utility targets the analyzed EPS or provisions its slot 4.
+- VA `0x100F9FE0` builds `31 01 10 10 || M1[16] || M2[32] || M3[16]` and sends
+  exactly `0x44` bytes;
+- VA `0x100F9EF0` builds `31 03 10 10`, validates the positive response, and
+  copies `M4[32] || M5[16]`;
+- worker `0x100FA9C0` starts the update and polls the paired result helper;
+- exported `Ex2MAC_01_ComProcess @ 0x10028590` selects the `0x100F9740` state
+  machine containing that worker for one supported MACKey protocol family.
+
+The same GTS+ DLL still carries the newer `0x3002` start/result helpers, so this
+is deliberate multi-generation support rather than a replacement of one
+protocol by the other.
+
+The firmware comparison is now:
+
+| Property | Techstream V18 recovered path | GTS+ 2026 `MAC_01` alternate path | Sienna `8965B4512000` | yc Venza SRS `89170-48E30` |
+|---|---|---|---|---|
+| Start | `31 01 30 02 || M1 || M2 || M3` | `31 01 10 10 || M1 || M2 || M3` | `31 01 10 10 || M1 || M2 || M3` | `31 01 10 10 || M1 || M2 || M3` |
+| Poll | `31 03 30 02` | `31 03 10 10` | `31 03 10 10` | `31 03 10 10` |
+| Result | state + `M4[32] || M5[16]` | `M4[32] || M5[16]` | status + `M4[32] || M5[16]` | status + `M4[32] || M5[16]` |
+| Secure engine evidence | target implementation not joined | host transport only | literal ICU-S command 8 at `0x8997A` | secure-service opcode `0x31` via `0xBE0CC -> 0xBD69E` |
+
+The yc airbag is especially useful because its 64-byte RID-`0x1010` start path
+and 48-byte result path are independently visible in the ECU firmware, while
+the application SecOC implementation reaches the same local secure subsystem by
+key selector. This closes the architectural meaning of Toyota's “ECU Security
+Key” write for that ECU family: it is an authenticated HSM-backed network-key
+provisioning operation, distinct from ordinary UDS SecurityAccess and from
+RPRG/reflash authorization.
+
+The `22 10 10` `SafekeyNumber` read remains a separate 16-byte identity read. A
+shared numeric `0x1010` does not make that DID the RoutineControl payload. What
+has changed is that current Toyota tooling now proves a genuine RoutineControl
+RID-`0x1010` MACKey transport exists.
 
 ## Remaining dynamic questions
 
 - Is the raw DID `0x1010` `SafekeyNumber` the same MCU ID that the pinned
   external rekey report says Toyota requires alongside VIN? A labeled official
   transcript or target implementation is still required.
-- Does a real Sienna provisioning session use application RoutineControl RID `0x1010`,
-  Routine `0x3002`, or neither?
+- Which current-GTS MACKey family selector is chosen by a live 2021 Venza SRS
+  `89170-48E30`, and does the resulting trace use the statically matching
+  RID-`0x1010` path?
+- What exact server-produced `M1/M2/M3` package and counter/authorization state
+  are used for that SRS key write?
 - What timing/retry behavior appears on a live master/slave network?
 
-Those require target firmware or a capture. They no longer block the recovered
-Techstream V18 vehicle protocol.
+Those require a live target capture. They no longer block the recovered
+Toyota host-protocol model.
