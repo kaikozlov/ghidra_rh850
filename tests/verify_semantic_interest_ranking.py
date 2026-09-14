@@ -11,7 +11,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 ARTIFACT = REPO / "data" / "generated" / "semantic_interest_ranking.csv"
-GENERATOR = REPO / "tools" / "generate_semantic_interest_ranking.py"
+GENERATOR = REPO / "tools" / "project" / "generate_semantic_interest_ranking.py"
 TOP40 = [
     0x58404, 0xBD10E, 0x56FC2, 0xBA43A, 0xBCB3A, 0x57BFE, 0x5C666, 0x5C0B6,
     0x5B9C4, 0x5B740, 0x50268, 0xFD49E, 0x33198, 0x3728E, 0xB98BC, 0x56E4E,

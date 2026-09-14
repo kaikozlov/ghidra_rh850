@@ -79,7 +79,7 @@ check("Ghidra script contains no rename mutation", "setName(" not in script and 
 
 print("\n== CLI ==")
 run = subprocess.run(
-    [sys.executable, str(REPO / "tools" / "analyze_secoc_patch_target.py"), str(cf_path)],
+    [sys.executable, str(REPO / "tools" / "security" / "analyze_secoc_patch_target.py"), str(cf_path)],
     cwd=REPO,
     capture_output=True,
     text=True,

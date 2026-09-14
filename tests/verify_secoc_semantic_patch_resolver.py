@@ -108,7 +108,7 @@ check("minimal import explicitly reports unmapped RAM provenance", minimal_resol
 check("annotated import upgrades result provenance", resolution["mac_result_source"]["passed_by_address_elsewhere"] is True)
 
 print("\n== arbitrary-image workflow contract ==")
-image_wrapper = (REPO / "tools" / "resolve_secoc_patch_image.sh").read_text(encoding="utf-8")
+image_wrapper = (REPO / "tools" / "security" / "resolve_secoc_patch_image.sh").read_text(encoding="utf-8")
 check("arbitrary-image workflow uses a disposable build workspace", "build/work/secoc-targets" in image_wrapper)
 check("arbitrary-image workflow performs a raw RH850/P1M-E import", "-import \"$IMAGE\"" in image_wrapper and "v850e3:LE:32:default" in image_wrapper)
 check("arbitrary-image workflow seeds undiscovered Gate-2 owners before semantic resolution",
@@ -220,7 +220,7 @@ with tempfile.TemporaryDirectory() as td:
     else:
         check("manifest builder rejects truncated image on geometry", False)
     check("valid manifest rebuild still succeeds after geometry gate", build_manifest(resolution, cf_path, 0) == committed_manifest)
-wrapper = (REPO / "tools" / "resolve_secoc_patch_image.sh").read_text(encoding="utf-8")
+wrapper = (REPO / "tools" / "security" / "resolve_secoc_patch_image.sh").read_text(encoding="utf-8")
 check("arbitrary-image wrapper gates geometry before the Ghidra import", "validate_codeflash_geometry" in wrapper and wrapper.index("validate_codeflash_geometry") < wrapper.index('-import "$IMAGE"'))
 check("arbitrary-image wrapper diagnoses the concatenated dump by name", "DataFlash+CodeFlash concatenated" in wrapper or "validate_codeflash_geometry" in wrapper)
 

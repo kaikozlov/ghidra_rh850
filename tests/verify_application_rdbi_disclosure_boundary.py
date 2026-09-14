@@ -31,7 +31,7 @@ def main() -> int:
         log = Path(directory) / "headless.log"
         result = subprocess.run(
             [
-                str(REPO / "tools" / "run_headless"),
+                str(REPO / "tools" / "project" / "run_headless"),
                 "--project-dir", str(project_dir),
                 "--project", "rh850_p1me_mapped",
                 "--label", "application-rdbi-disclosure-boundary",

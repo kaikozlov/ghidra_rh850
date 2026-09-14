@@ -227,7 +227,7 @@ print("\n== RDBI emitted-write audit ==")
 
 ARTIFACT = ROOT / "data" / "generated" / "rdbi_emitted_write_audit.json"
 CORPUS = ROOT / "data" / "generated" / "decompilations.jsonl"
-GENERATOR = ROOT / "tools" / "generate_rdbi_emitted_write_audit.py"
+GENERATOR = ROOT / "tools" / "security" / "generate_rdbi_emitted_write_audit.py"
 
 DID_TABLE = 0x2941C
 DID_ROWS = 0xF2

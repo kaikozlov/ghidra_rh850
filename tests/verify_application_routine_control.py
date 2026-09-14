@@ -32,7 +32,7 @@ print("== RoutineControl surface ==")
 
 
 CSV_PATH = REPO / "data" / "application_routine_control_surface.csv"
-GEN_PATH = REPO / "tools" / "generate_application_routine_control_surface.py"
+GEN_PATH = REPO / "tools" / "firmware" / "generate_application_routine_control_surface.py"
 
 
 

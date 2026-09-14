@@ -21,7 +21,7 @@ REPO = Path(__file__).resolve().parents[1]
 CF = (REPO / "firmware" / "RH850_P1M-E_CodeFlash.bin").read_bytes()
 CSV_PATH = REPO / "data" / "application_rx_map.csv"
 EVIDENCE_PATH = REPO / "data" / "application_rx_signal_evidence.csv"
-GEN = REPO / "tools" / "generate_application_rx_map.py"
+GEN = REPO / "tools" / "firmware" / "generate_application_rx_map.py"
 
 ACCEPTANCE = 0x231A0
 RX_DESC = 0x22018

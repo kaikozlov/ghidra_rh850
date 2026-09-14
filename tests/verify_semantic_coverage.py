@@ -15,7 +15,7 @@ REPO = Path(__file__).resolve().parents[1]
 LEDGER = REPO / "data" / "semantic_coverage_ledger.csv"
 SUMMARY = REPO / "data" / "semantic_coverage_summary.json"
 REVIEWS = REPO / "data" / "semantic_review_status.csv"
-MERGER = REPO / "tools" / "apply_semantic_review_status.py"
+MERGER = REPO / "tools" / "project" / "apply_semantic_review_status.py"
 HEADER = [
     "entry_addr", "body_bytes", "name", "discovery_source",
     "discovery_provenance", "name_source", "is_thunk", "calling_convention",

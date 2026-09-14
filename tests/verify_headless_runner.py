@@ -11,7 +11,7 @@ import time
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
-RUNNER = REPO / "tools" / "run_headless"
+RUNNER = REPO / "tools" / "project" / "run_headless"
 
 passed = 0
 failed = 0

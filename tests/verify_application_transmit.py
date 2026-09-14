@@ -14,7 +14,7 @@ import tempfile
 REPO = Path(__file__).resolve().parents[1]
 CF = (REPO / "firmware" / "RH850_P1M-E_CodeFlash.bin").read_bytes()
 CSV_PATH = REPO / "data" / "application_tx_map.csv"
-GEN = REPO / "tools" / "generate_application_tx_map.py"
+GEN = REPO / "tools" / "firmware" / "generate_application_tx_map.py"
 
 passed = failed = 0
 

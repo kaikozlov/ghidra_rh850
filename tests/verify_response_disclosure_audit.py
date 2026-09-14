@@ -58,7 +58,7 @@ def main() -> int:
     print("== regeneration is byte-identical ==")
     with tempfile.TemporaryDirectory() as tmp:
         result = subprocess.run(
-            [sys.executable, str(ROOT / "tools" / "generate_response_disclosure_audit.py")],
+            [sys.executable, str(ROOT / "tools" / "security" / "generate_response_disclosure_audit.py")],
             capture_output=True, text=True,
         )
         check("generator exit 0", result.returncode == 0, result.stderr[-300:])

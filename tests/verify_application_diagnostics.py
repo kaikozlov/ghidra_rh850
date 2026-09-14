@@ -671,7 +671,7 @@ import csv
 import tempfile
 from pathlib import Path as _Path
 MAP_CSV = REPO / "data" / "application_diagnostic_map.csv"
-GEN = REPO / "tools" / "generate_application_diagnostic_map.py"
+GEN = REPO / "tools" / "firmware" / "generate_application_diagnostic_map.py"
 check("application diagnostic map CSV exists", MAP_CSV.is_file())
 with MAP_CSV.open(newline="") as fh:
     map_rows = list(csv.DictReader(fh))

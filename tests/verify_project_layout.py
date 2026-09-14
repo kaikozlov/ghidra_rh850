@@ -8,7 +8,7 @@ import tempfile
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
-TOOL = REPO / "tools" / "project_layout.py"
+TOOL = REPO / "tools" / "project" / "project_layout.py"
 NAME = "rh850_p1me_mapped"
 
 passed = 0

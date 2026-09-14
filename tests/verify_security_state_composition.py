@@ -44,7 +44,7 @@ def main() -> int:
     print("== regeneration is byte-identical ==")
     with tempfile.TemporaryDirectory() as tmp:
         subprocess.run(
-            [sys.executable, str(ROOT / "tools" / "generate_security_state_composition.py")],
+            [sys.executable, str(ROOT / "tools" / "security" / "generate_security_state_composition.py")],
             capture_output=True, check=True,
         )
         check("regenerated JSON matches tracked artifact", True)

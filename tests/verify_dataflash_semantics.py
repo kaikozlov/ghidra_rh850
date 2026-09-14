@@ -345,7 +345,7 @@ check("all checkpoint writer addresses start at non-zero code",
 with tempfile.TemporaryDirectory() as directory:
     generated = Path(directory) / "checkpoint_payload_map.csv"
     result = subprocess.run(
-        [sys.executable, str(REPO / "tools" / "generate_checkpoint_payload_map.py"),
+        [sys.executable, str(REPO / "tools" / "firmware" / "generate_checkpoint_payload_map.py"),
          "-o", str(generated)], capture_output=True, text=True,
     )
     check("checkpoint payload generator exits successfully", result.returncode == 0,

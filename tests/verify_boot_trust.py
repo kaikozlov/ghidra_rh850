@@ -172,7 +172,7 @@ with tempfile.TemporaryDirectory() as tmp:
     out_csv = Path(tmp) / "object15_reachability.csv"
     out_json = Path(tmp) / "object15_reachability_summary.json"
     result = subprocess.run(
-        [sys.executable, str(REPO / "tools" / "generate_object15_reachability.py"),
+        [sys.executable, str(REPO / "tools" / "firmware" / "generate_object15_reachability.py"),
          "-o", str(out_csv), "--summary", str(out_json)],
         capture_output=True, text=True,
     )

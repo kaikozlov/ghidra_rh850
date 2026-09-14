@@ -56,7 +56,7 @@ print("\n== Sienna image geometry and identity ==")
 check("committed image classifies as bare 1 MiB CodeFlash", report["image"]["geometry"]["classification"] == "bare-codeflash-1m")
 check("report binds the committed image SHA-256", report["image"]["sha256"] == hashlib.sha256(cf).hexdigest())
 check("no software-ID offset fallback table is emitted", report["image"]["software_id_offsets"] is None)
-scanner_source = (REPO / "tools" / "analyze_rh850_codeflash_structure.py").read_text(encoding="utf-8").lower()
+scanner_source = (REPO / "tools" / "firmware" / "analyze_rh850_codeflash_structure.py").read_text(encoding="utf-8").lower()
 check("scanner source contains no software-ID offset table", "software_id_offsets = {" not in scanner_source and "f181" not in scanner_source)
 
 print("\n== deterministic Sienna anchor counts ==")
@@ -137,7 +137,7 @@ check("content-free 1 MiB image has correct geometry but zero anchors",
 print("\n== determinism and CLI ==")
 check("analysis is deterministic", analyze(cf, max_vas=200) == report)
 cli = subprocess.run(
-    [sys.executable, str(REPO / "tools" / "analyze_rh850_codeflash_structure.py"), str(cf_path)],
+    [sys.executable, str(REPO / "tools" / "firmware" / "analyze_rh850_codeflash_structure.py"), str(cf_path)],
     cwd=REPO, capture_output=True, text=True, check=False,
 )
 check("CLI emits valid JSON report", cli.returncode == 0 and json.loads(cli.stdout)["schema"] == "rh850-codeflash-structure-triage-v1")

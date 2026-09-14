@@ -7,7 +7,7 @@ daemon or a full project rebuild. Mutation-path finalization uses --dry-run, so
 the suite never snapshots a real project or changes the Git index.
 
 Scope (no Ghidra required):
-  1. tools/g session-status works with no daemon and no project.
+  1. tools/g session-status works whether or not a project daemon already exists.
   2. Mutation marker is written for `script run` subcommands.
   3. Mutation marker is written for `analyze` subcommands.
   4. Mutation marker is NOT written for read-only commands (decompile, x-ref).
@@ -142,7 +142,7 @@ check(
     "unknown fingerprint mode" in env_content,
 )
 
-# --- Test 1: session-status with no daemon -----------------------------------
+# --- Test 1: session-status is environment-independent ------------------------
 # We need GHIDRA_NO_BOOTSTRAP=1 to skip the processor env bootstrap (which needs
 # Ghidra). session-status should work without the full env.
 remove_marker()
@@ -160,7 +160,7 @@ if result.returncode == 0:
     try:
         status = json.loads(result.stdout.strip())
         check("session-status JSON has daemon key", "daemon" in status)
-        check("session-status reports daemon stopped", status.get("daemon", {}).get("state") == "stopped")
+        check("session-status reports a valid daemon state", status.get("daemon", {}).get("state") in {"running", "stopped"})
     except json.JSONDecodeError:
         check("session-status JSON parse", False, result.stdout[:200])
 else:
@@ -276,7 +276,7 @@ with tempfile.TemporaryDirectory() as td:
 with tempfile.TemporaryDirectory() as td:
     result = run(
         [
-            "bash", str(REPO / "tools" / "snapshot_project.sh"),
+            "bash", str(REPO / "tools" / "project" / "snapshot_project.sh"),
             "--project-dir", str(Path(td) / "working"),
             "--snapshot-dir", str(Path(td) / "destination"),
         ],
@@ -291,7 +291,7 @@ with tempfile.TemporaryDirectory() as td:
 inventory_baseline = REPO / "data" / "ghidra_project_inventory.baseline.jsonl"
 inventory_before = inventory_baseline.read_bytes()
 result = run(
-    ["bash", str(REPO / "tools" / "export_ghidra_project.sh"), "project-inventory", str(inventory_baseline)],
+    ["bash", str(REPO / "tools" / "project" / "export_ghidra_project.sh"), "project-inventory", str(inventory_baseline)],
     timeout=10,
 )
 check(
@@ -431,7 +431,7 @@ check(
 remove_marker()
 divergent_project = (BUILD_WORK / "phase-i-rebuild-a").resolve()
 result = run(
-    ["bash", str(REPO / "tools" / "finalize_project.sh"), "--dry-run"],
+    ["bash", str(REPO / "tools" / "project" / "finalize_project.sh"), "--dry-run"],
     env={"GHIDRA_NO_BOOTSTRAP": "1", "PROJECT_DIR": str(divergent_project)},
     timeout=10,
 )
@@ -444,7 +444,7 @@ check(
     f"rc={result.returncode}, stdout={result.stdout[:200]}",
 )
 
-finalize_content = (REPO / "tools" / "finalize_project.sh").read_text()
+finalize_content = (REPO / "tools" / "project" / "finalize_project.sh").read_text()
 check(
     "finalize-project stops the selected project daemon",
     'GHIDRA_PROJECT="$PROJECT_DIR" "$ROOT/tools/g" stop' in finalize_content,
@@ -456,7 +456,7 @@ check(
 
 # --- Test 8: snapshot_project.sh clears marker on success ---------------------
 # We verify the clearing logic exists in the script (can't run it without Ghidra).
-snap_content = (REPO / "tools" / "snapshot_project.sh").read_text()
+snap_content = (REPO / "tools" / "project" / "snapshot_project.sh").read_text()
 check(
     "snapshot_project.sh clears mutation marker",
     "project_mutation_marker" in snap_content and 'rm -f "$MUTATION_MARKER"' in snap_content,
@@ -543,14 +543,14 @@ check(
     "override PROJECT_INVENTORY_BASELINE :=" in makefile_content,
 )
 
-rebuild_help = run(["bash", str(REPO / "tools" / "rebuild_project.sh"), "--help"])
+rebuild_help = run(["bash", str(REPO / "tools" / "project" / "rebuild_project.sh"), "--help"])
 check(
     "rebuild makes local Techstream refresh explicit",
     rebuild_help.returncode == 0 and "--refresh-diagnostic-vocabulary" in rebuild_help.stdout,
 )
 
 rebuild_unsafe = run([
-    "bash", str(REPO / "tools" / "rebuild_project.sh"),
+    "bash", str(REPO / "tools" / "project" / "rebuild_project.sh"),
     "--project-dir", str(REPO / "project"), "--force",
 ])
 check(
