@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from exploit.ephemeral_runtime import crown_f30_b6_inline_signer as host
+from tools.targets.crown.live import crown_f30_resident_soak as soak
 
 CONTRACT_BUILDER = ROOT / "tools/targets/crown/builders/build_crown_8965F3012000_b6_signer_contract.py"
 CONTRACT = ROOT / "data/generated/crown_8965F3012000_b6_signer_contract.json"
@@ -199,15 +200,37 @@ with tempfile.TemporaryDirectory(prefix="verify-crown-f30-signer-") as td:
     kit_meta = json.loads(kit_result.stdout)
     check("field kit is exact Crown/live-unqualified", kit_meta["schema"] == "crown-f30-car-kit-v1" and
           kit_meta["target"]["software_id"] == "8965F3012000" and kit_meta["review_status"] == "firmware-closed-live-unqualified")
-    check("field kit includes passive preflight and volatile signer entrypoint",
+    check("field kit includes passive preflight, current-angle soak, and volatile signer entrypoint",
           (kit / "crown-tss3-signer").is_file() and
           (kit / "runtime/tools/targets/crown/live/crown_f30_sideband_preflight.py").is_file() and
+          (kit / "runtime/tools/targets/crown/live/crown_f30_resident_soak.py").is_file() and
           (kit / "ram_payloads/crown_f30_b6_inline_signer_payload.bin").is_file())
     check("field kit usage orders passive preflight before install",
           kit_meta["usage"].index("NRTD/Park: ./crown-tss3-signer preflight /tmp/crown-preflight.json") <
           kit_meta["usage"].index("NRTD/Park: ./crown-tss3-signer install /tmp/crown-install.json"))
+    launcher_text = (kit / "crown-tss3-signer").read_text(encoding="utf-8")
     check("field kit makes current-angle replacement the first bounded command",
           "READY/Park/stationary: ./crown-tss3-signer replace-current /tmp/crown-replace-current.json" in kit_meta["usage"] and
-          "replace-current" in (kit / "crown-tss3-signer").read_text(encoding="utf-8"))
+          "replace-current" in launcher_text)
+    check("field kit exposes repeated current-angle qualification without changing the resident",
+          "soak-current" in launcher_text and
+          any("soak-current" in row for row in kit_meta["usage"]))
+    soak_tool = kit / "runtime/tools/targets/crown/live/crown_f30_resident_soak.py"
+    soak_plan = subprocess.run([
+        sys.executable, str(soak_tool),
+        "--payload", str(kit / "ram_payloads/crown_f30_b6_inline_signer_payload.bin"),
+        "--helper", str(kit / "ram_payloads/crown_f30_b6_inline_signer_helper_padded.bin"),
+        "--meta", str(kit / "ram_payloads/crown_f30_b6_inline_signer.json"),
+    ], cwd=ROOT, check=True, capture_output=True, text=True)
+    soak_plan_json = json.loads(soak_plan.stdout)
+    check("current-angle soak is inert without execute",
+          soak_plan_json["schema"] == "crown-f30-b6-resident-current-angle-soak-plan-v1" and
+          soak_plan_json["resident_bytes_modified"] is False and soak_plan_json["persistent_flash_writes"] is False)
+    soak_state = {"initialized": True, "armed": True, "last_command5_rc": 0}
+    soak_telemetry = {"native_verified_raw": 1, "last_done_flag": 1, "last_command_status": 0, "native_signature_match": False}
+    check("current-angle soak treats post-replacement trailer inequality as expected",
+          soak.repeated_signing_qualified(state_after=soak_state, telemetry_after=soak_telemetry, signed_delta=10, attempt_delta=10))
+    check("current-angle soak fails on command5/replacement count mismatch",
+          not soak.repeated_signing_qualified(state_after=soak_state, telemetry_after=soak_telemetry, signed_delta=9, attempt_delta=10))
 
 print("Crown F30 B6 inline signer verification passed.")

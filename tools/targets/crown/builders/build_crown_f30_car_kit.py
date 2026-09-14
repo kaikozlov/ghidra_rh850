@@ -22,6 +22,7 @@ RUNTIME_FILES = (
     "exploit/ephemeral_runtime/camry_f33_runtime_replay_discriminator.py",
     "exploit/ephemeral_runtime/f33_panda_lease.sh",
     "tools/targets/crown/live/crown_f30_sideband_preflight.py",
+    "tools/targets/crown/live/crown_f30_resident_soak.py",
 )
 
 
@@ -81,7 +82,8 @@ def build(out: Path) -> dict:
             "./crown-tss3-signer load-arm /tmp/crown-arm.json",
             "continue only if native_verification.native_verified=true",
             "READY/Park/stationary: ./crown-tss3-signer replace-current /tmp/crown-replace-current.json",
-            "replace-current derives the nearest B6 raw target from a fresh Crown 0x025 measured angle; full EPS power cycle removes the resident",
+            "optional repeated qualification without an openpilot port: ./crown-tss3-signer soak-current /tmp/crown-soak.json",
+            "replace-current/soak-current use the fresh Crown 0x025 measured angle; full EPS power cycle removes the resident",
         ],
     }
     (out / "manifest.json").write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
