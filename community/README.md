@@ -302,3 +302,17 @@ The directory also contains an independently supplied 32-KiB DataFlash snapshot
 (MD5 `e9865f35fce9dae03ce5438b33fd671a`) and a later 64-KiB host-range read.
 See [`mruno/README.md`](mruno/README.md) for hashes, acquisition context, and the
 evidence boundary.
+
+## `yc/`
+
+**Contributor/specimen:** yc, contributor-reported Toyota Venza airbag sensor
+**Received:** 2026-09-14
+
+This directory preserves a 32-KiB `boot.bin` and 3-MiB `cflash.bin` extracted
+from an RH850 airbag sensor using a contributor-reported hardware-glitch method.
+yc describes the boot image as an earlier stage that executes before the normal
+CodeFlash bootloader at `0x00000000`; the immediate research question is whether
+that stage exposes a hardware or CAN-triggered stay-in-boot path that transfers
+to the related EPS family. That transfer is not assumed. See
+[`yc/README.md`](yc/README.md) for exact hashes, provenance, and the evidence
+boundary.
