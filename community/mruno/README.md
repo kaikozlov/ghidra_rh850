@@ -79,3 +79,64 @@ using more than 12,000 signed Crown frames (`0x090`, `0x0D7`, `0x116`, `0x24D`)
 with zero key matches. The CAN oracle is **not** part of this import, so that
 zero-match result remains external-source context rather than a locally
 reproducible repository result.
+
+## Read-only preflight artifacts received 2026-09-14
+
+Both files below are retained unchanged. The Python file is the contributor's
+troubleshooting variant, not the current shipped implementation; it was read and
+compared, not executed against a vehicle during this review.
+
+| File | Size | SHA-256 | Interpretation |
+|---|---:|---|---|
+| `crown-preflight.json` | 908 | `eedb0bd89b8f1fd62a45d8e017c4e777ea2843ddb49744c07b86fe20afd4e0e7` | Contributor heartbeat-preflight result: exact Crown F181, requested five-second interval, three TesterPresent calls, generation byte 115 to 120, empty outer-loop `0x1DA` counts, and `candidate_in_use`. No raw CAN transcript or per-sample timestamps are included. |
+| `crown_f30_sideband_preflight_heartbeat.py` | 5,415 | `cc3440d3d2b09c80b55de812b4f3ff8f14fefba0bd743e9ed332db42230e6b79` | Local modification adding TesterPresent about every two seconds and before the closing read; also adds heartbeat reporting. The contributor reports that this resolved the closing SID23 session error. |
+
+The supplied `.json` contains literal unescaped control characters in
+`target.f181_ascii` (including four NUL bytes), so strict `json.loads` rejects it.
+A control-character-tolerant parse (`json.loads(raw, strict=False)`) recovers the
+reported fields and exact F181 hex. The raw artifact is not silently repaired;
+its hashes above cover the supplied bytes. The contributor script uses
+`json.dumps`, which would escape those characters, so the point at which the
+serialization changed is not established by these files.
+
+The contributor reports stopping after preflight: no resident installation or
+subsequent control test was run. The original failing transcript and raw UDS
+responses are not supplied; session expiration is supported by the original
+source's idle interval and the contributor's successful keepalive experiment,
+not by a retained exact ECU session-timeout measurement.
+
+The result is **not** proof of a one-Hz counter, an entirely silent bus, or an
+ICU-S consumer. The byte delta is five modulo 256. The count dictionary filters
+only `0x1DA`, and this script does not count frames that the UDS client consumes
+from the shared Panda receive queue during its own requests. See the
+[preflight review](../../docs/variants/crown-8965F3012000.md#contributor-preflight-review-2026-09-14)
+for the narrowed interpretation and read-only tooling fix.
+
+
+## Preflight follow-up received 2026-09-14
+
+Two further contributor files are retained unchanged:
+
+| File | Bytes | SHA-256 | Role |
+|---|---:|---|---|
+| `crown-preflight.json` | 908 | `eedb0bd89b8f1fd62a45d8e017c4e777ea2843ddb49744c07b86fe20afd4e0e7` | Contributor preflight summary after adding diagnostic keepalive. |
+| `crown_f30_sideband_preflight_heartbeat.py` | 5,415 | `cc3440d3d2b09c80b55de812b4f3ff8f14fefba0bd743e9ed332db42230e6b79` | Contributor troubleshooting copy, archived as supplied rather than installed as the canonical probe. |
+
+The supplied summary records F181 `8965F3012000 / 8A3113008000`, a requested
+5-second observation, three completed TesterPresent calls, no `0x1DA` counted
+by the outer observation loop, and the sampled byte changing from 115 to 120.
+Its recorded verdict is `candidate_in_use` / `safe_to_experiment=false`.
+The contributor reports using checkout `68b9d8a8` and stopping before resident
+installation. The report also describes a closing-read session error without
+keepalive, resolved by the attached change. There is no failing-run transcript,
+raw CAN capture, per-read timestamp series, Panda health/build identity, or
+resident-execution result in this follow-up. The summary has no capture date.
+
+The transferred JSON contains five literal control bytes inside `f181_ascii`
+(one `0x02` and four NULs); strict JSON parsing rejects line 36. Inspection used
+`json.loads(..., strict=False)` without rewriting the source file. The provided
+script uses normal `json.dumps`, which would escape these characters; the
+transfer/representation discrepancy is not attributed to an ECU or probe bug.
+
+The diagnostic timing and measurement limitations are reviewed in
+[the Crown target report](../../docs/variants/crown-8965F3012000.md#contributor-preflight-review-2026-09-14).
