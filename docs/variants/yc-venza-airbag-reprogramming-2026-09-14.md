@@ -38,6 +38,14 @@ This is **not** a recovered “spam `10 02` during power-up and stay in boot”
 shortcut. The request is handled by ordinary DCM configuration and is subject to
 policy before the retained handoff is created.
 
+A follow-up crypto pass also recovers the two independent 128-bit RPRG roots:
+`8af2c4708cd9cdec494da7acdaa9a8f7` is the payload-build root used to derive the
+RequestDownload payload key from DID `0x0201`, while
+`8f69e6dc2a4b80b45054b4827a5ab622` is the 16-byte boot/RPRG SecurityAccess root.
+The ordinary application SID `0x27` instead uses inline two-byte arithmetic and
+has no analogous third 128-bit acceptance root. Section 5 gives the complete
+firmware-static chains.
+
 For the exact F33 EPS, this is useful architectural evidence but not a code
 transfer. Exact complete-function comparison found only generic/library overlap
 and no named semantic transfer into the airbag image. The F33's known normal
@@ -243,7 +251,130 @@ programming-mode byte has not yet been assigned a semantic name, so the evidence
 boundary is “startup passes the mode into the common RAM runtime,” not “this
 specific RPRG function is proven to branch on that byte.”
 
-## 5. What the yc image changes for F33 EPS recovery
+## 5. SecurityAccess and payload-build roots are recoverable from this image
+
+The airbag image contains two adjacent 16-byte roots in the common CodeFlash
+portion immediately before the AES tables:
+
+```text
+CodeFlash 0xC3AC  8af2c4708cd9cdec494da7acdaa9a8f7
+CodeFlash 0xC3BC  8f69e6dc2a4b80b45054b4827a5ab622
+```
+
+They are not the three roots shared by the tracked P1M-E EPS images. None of the
+EPS payload-build (`ba052435...`), boot-SA (`f05f36b7...`), or application-SA
+(`893e0841...`) values occurs in either yc artifact. The two airbag roots each
+occur exactly once in `cflash.bin`.
+
+The relocation row `0xBBAC..0xC3CC -> FEBFB770` places the two roots at runtime
+`FEBFBF70` and `FEBFBF80`. Static pointer indirection and the actual crypto call
+chains establish different roles for them.
+
+### 5.1 Payload-build root: `8af2c4708cd9cdec494da7acdaa9a8f7`
+
+This first root is the payload-build root for the RPRG RequestDownload path, not
+merely an unused AES-looking constant.
+
+The WDBI dispatcher at CodeFlash `0x654A` explicitly recognizes DIDs `0x0201`,
+`0x0202`, and `0x0203`. Its `0x0201` handler at `0x64DE` stores exactly 16 bytes
+at the first credential slot; the `0x0202` handler at `0x6514` stores another
+16 bytes at the second slot. The KDF path then does:
+
+```text
+0x66C8  copy DID 0x0201[16] into KDF input
+0x62A6  AES-128-ECB-ENC(root @ FEBFBF70, DID0201) -> derived key
+0x6716  copy DID 0x0202[16] into crypto setup input
+0x630A  initialize payload crypto context with derived key + DID0202 IV
+```
+
+The runtime lookup used by `0x62A6` is `TP-0x735C = FEBFBCC4`. That cell is the
+relocated form of CodeFlash `0xC100`, whose dword points to `FEBFBF70`, exactly
+the relocated first root. Its AES wrapper reaches the recovered forward AES
+block primitive at CodeFlash `0xA38A`.
+
+The resulting KDF is therefore:
+
+```text
+Kpayload = AES-128-ECB-ENC(
+    8af2c4708cd9cdec494da7acdaa9a8f7,
+    DID_0201[16]
+)
+```
+
+`DID_0202[16]` is installed as the 16-byte IV in the payload crypto context.
+This KDF is reached from the RPRG RequestDownload setup (`0x01004036 ->
+0x01003F14` on the normal branch) through the relocated `0x7A4C -> 0x635C`
+call. That closes the role strongly enough to call the first value the
+**payload-build root**, rather than only a generic crypto key.
+
+This is notably the same *construction shape* as the P1M-E EPS payload gate —
+AES(root, DID0201), with DID0202 supplying the IV — but the root value is
+rotated and the implementation is not byte-identical.
+
+### 5.2 Boot/RPRG SecurityAccess root: `8f69e6dc2a4b80b45054b4827a5ab622`
+
+The second root belongs to the 16-byte RPRG SecurityAccess service. The RPRG SID
+`0x27` configuration exposes `0x01/0x02` request-seed/send-key with 16-byte
+material. Its lower send-key path at CodeFlash `0x7820` derives a 16-byte
+expected key and byte-compares all 16 bytes before accepting the unlock.
+
+The root lookup in `0x77B4` is `TP-0x7290 = FEBFBD90`. That is the relocated
+form of CodeFlash `0xC1CC`, whose dword points to `FEBFBF80`, exactly the second
+root. The two-stage construction is:
+
+```text
+0x77B4: initialize AES with root @ FEBFBF80;
+        inverse AES block transform over the 16-byte request-seed auxiliary block
+0x77EC: initialize AES with that 16-byte result;
+        forward AES block transform over the retained 16-byte seed
+0x7820: compare the resulting 16 bytes against the tester's 27 02 key
+```
+
+The forward and inverse block implementations are the same recovered AES core at
+`0xA38A` / `0xA4A8`. In compact form, for the buffers used by this RPRG:
+
+```text
+Ktmp     = AES-128-ECB-DEC(BOOT_SA_ROOT, request_seed_aux[16])
+expected = AES-128-ECB-ENC(Ktmp, seed[16])
+```
+
+with:
+
+```text
+BOOT_SA_ROOT = 8f69e6dc2a4b80b45054b4827a5ab622
+```
+
+The request-seed routine stores the request's 16-byte auxiliary block and the
+returned 16-byte seed separately, so these are not inferred aliases of one
+buffer.
+
+### 5.3 Application SecurityAccess does not use another hidden 128-bit root
+
+The ordinary airbag application also has SID `0x27`, but its configured levels
+are a different design. The recovered send-key workers use two-byte seeds and
+inline transforms:
+
+| Subfunctions | Expected two-byte key |
+|---|---|
+| `03/04` | `(~seed + 0x4544) & 0xFFFF` |
+| `05/06` | `(~seed + 0x4C6E) & 0xFFFF` |
+| `07/08` | `(~seed + 0x61A4) & 0xFFFF` |
+| `1F/20` | bytewise `~seed` |
+| `5F/60` | bytewise `~seed` |
+
+The relevant workers are `0xCAA2C`, `0xCAA94`, `0xCAAFE`, `0xCAB66`, and
+`0xCABB4`. Thus no third 16-byte application-SA secret analogous to the EPS
+`0x20840` root is present in the configured application unlock algorithm. The
+application's seed-generation machinery does use AES internally, but the
+SecurityAccess acceptance secret is the inline arithmetic above, not another
+hidden 128-bit CodeFlash root.
+
+The important transfer boundary remains unchanged: these two recovered airbag
+roots are **airbag-specimen credentials**. Their values must not be projected
+onto the Camry EPS merely because both systems use Toyota/Denso RH850
+reprogramming architecture.
+
+## 6. What the yc image changes for F33 EPS recovery
 
 ### It disproves one tempting interpretation
 
@@ -282,7 +413,7 @@ No pin should be shorted based on the airbag artifact. The remaining physical
 question is connector/test-pad identification and electrical qualification on
 the exact F33 EPS.
 
-## 6. Cross-image transfer boundary
+## 7. Cross-image transfer boundary
 
 A complete-body comparison against the first-class F33 corpus found 63 exact
 complete-function matches among 6,065 F33 functions, with the largest relocation

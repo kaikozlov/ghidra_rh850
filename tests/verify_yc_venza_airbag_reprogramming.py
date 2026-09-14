@@ -12,6 +12,13 @@ CFLASH = REPO / "community/yc/venza/cflash.bin"
 
 BOOT_SHA = "943934abc9a5c676eff46f51f008baa39e4f533e66650ffcce54d7bfb6e6e6e2"
 CFLASH_SHA = "2dfaf7ce21cb04af1126192f574103f63802352f8717fa0f03986d5a11d067f9"
+PAYLOAD_BUILD_ROOT = bytes.fromhex("8af2c4708cd9cdec494da7acdaa9a8f7")
+BOOT_SECURITY_ACCESS_ROOT = bytes.fromhex("8f69e6dc2a4b80b45054b4827a5ab622")
+EPS_ROOTS = (
+    bytes.fromhex("ba052435f8843f985fd1329d2b6117b0"),
+    bytes.fromhex("f05f36b7d78c03e24ab4faef2a57d044"),
+    bytes.fromhex("893e08418c741ffa2a9c044bffa55813"),
+)
 COPY = struct.Struct("<III")
 SERVICE = struct.Struct("<IIIIBBBBB3x")
 SUBFUNCTION = struct.Struct("<IIIHH")
@@ -85,6 +92,34 @@ check(
     cf[0x17BC:0x17D2] == bytes.fromhex("409ef1fe339ff1ff21065aa5a55ae199ea5700007f00"),
 )
 check("startup immediately has a dedicated magic-clear helper", cf[0x17D2:0x17DC] == bytes.fromhex("405ef1fe6b07f1ff7f00"))
+
+print("\n== reprogramming SecurityAccess and payload-build roots ==")
+check("payload-build root is the unique 16-byte block at C3AC", cf[0xC3AC:0xC3BC] == PAYLOAD_BUILD_ROOT and cf.count(PAYLOAD_BUILD_ROOT) == 1)
+check("boot SecurityAccess root is the adjacent unique block at C3BC", cf[0xC3BC:0xC3CC] == BOOT_SECURITY_ACCESS_ROOT and cf.count(BOOT_SECURITY_ACCESS_ROOT) == 1)
+check("yc roots are distinct from all three tracked EPS roots", all(root not in cf and root not in boot for root in EPS_ROOTS))
+common_crypto_copy = second_group[0]
+check("common crypto/data segment relocates BBAC..C3CC to FEBFB770", common_crypto_copy == (0xFEBFB770, 0xBBAC, 0xC3CC))
+payload_root_runtime = common_crypto_copy[0] + (0xC3AC - common_crypto_copy[1])
+boot_sa_root_runtime = common_crypto_copy[0] + (0xC3BC - common_crypto_copy[1])
+check("payload-build root relocates to FEBFBF70", payload_root_runtime == 0xFEBFBF70)
+check("boot-SA root relocates to FEBFBF80", boot_sa_root_runtime == 0xFEBFBF80)
+check("payload-root indirection at source C100 points to relocated FEBFBF70", struct.unpack_from("<I", cf, 0xC100)[0] == payload_root_runtime)
+check("boot-SA indirection at source C1CC points to relocated FEBFBF80", struct.unpack_from("<I", cf, 0xC1CC)[0] == boot_sa_root_runtime)
+check("runtime TP geometry selects C100 payload-root pointer via TP-735C", 0xFEC03020 - 0x735C == common_crypto_copy[0] + (0xC100 - common_crypto_copy[1]))
+check("runtime TP geometry selects C1CC boot-SA pointer via TP-7290", 0xFEC03020 - 0x7290 == common_crypto_copy[0] + (0xC1CC - common_crypto_copy[1]))
+
+print("\n== payload key derivation inputs and RequestDownload hook ==")
+check("WDBI dispatcher 0201/0202/0203 body is exact", sha256(cf[0x654A:0x65CA]) == "e0f663505921b223617bac3e489758ad86e6e4336d47ea8749085f6e8db9a68e")
+check("DID 0201 16-byte writer body is exact", sha256(cf[0x64DE:0x6514]) == "957f8a809e1b815c5fcf761ecde5abebe93883886870e54c07bec3fb143d9e10")
+check("DID 0202 16-byte writer body is exact", sha256(cf[0x6514:0x654A]) == "54313cd1942d52d8b20616075f0b3502c61de546290f93a4d687c463ffb891a0")
+check("payload AES root/KDF body is exact", sha256(cf[0x62A6:0x630A]) == "61f9ad9ee0d57b8213ca2cae8148f48567df49fb08d29620c2065a4af5edffa3")
+check("derived-key plus DID0202 IV context body is exact", sha256(cf[0x630A:0x635C]) == "794f64e77c83e66bd422fc7c1faa3dbd591e26bbd07214053e666985a5ee343e")
+check("RequestDownload normal-path branch containing relocated 7A4C KDF call is exact", sha256(boot[0x3F14:0x3FD6]) == "839753a894a67316be5bb67cf10ecb154c3a7921353f764ada56b3e03cf93282")
+
+print("\n== boot SecurityAccess AES construction ==")
+check("boot-SA root transform body is exact", sha256(cf[0x77B4:0x77EC]) == "8fca2937edca82d96acd22e43004724024afd4c133dccea2ff6403a1efc8be53")
+check("boot-SA expected-key transform body is exact", sha256(cf[0x77EC:0x7820]) == "b8ef89653e0a785943ba84cdfb6791ed4b346f21e7bb42c0189fcbe2e790bc5b")
+check("boot-SA 16-byte key compare body is exact", sha256(cf[0x7820:0x78DC]) == "174830b17c7830fc69f2f441af464687ba32d208757b3444449186007f817f9d")
 
 print(f"\nResults: {passed} passed, {failed} failed")
 raise SystemExit(1 if failed else 0)
