@@ -249,10 +249,10 @@
       "sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f"
     },
     "data/generated/corolla_8965H1202000_b6_secoc_verification.json": {
-      "sha256": "fe90866ad6a965011f73c910abe86045dede5cc70b4185b0a6fec0820529cc33"
+      "sha256": "bfa448f468333a55552b3a18a8c202c4de4c8cd796d4393ad0970113cc855735"
     },
     "data/generated/corolla_8965H1202000_lta_command_provenance.json": {
-      "sha256": "7f9b6e9502e03d673d5eaa9319e2ca3d262f77e2c99c89a5869fdf07c6228f35"
+      "sha256": "016ac3c03dcb0aa87556a4d1c061ad44076a91776fa8432ec03db93428470251"
     },
     "data/generated/corolla_8965H1202000_secoc_key_provenance.json": {
       "sha256": "80a8f926d5db6172d3edb8ba3dc1d79708166af8c4c1d5379142188cf153f43e"
