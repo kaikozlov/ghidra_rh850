@@ -400,7 +400,7 @@ as plaintext in these files. The exact airbag MCU/security peripheral is still
 unresolved, so this note does not assume the EPS ICU-S implementation transfers
 to the airbag ECU.
 
-### 5.5 No ICU-S/HSM SecOC call path is recovered
+### 5.5 The P1M-E ICU-S SecOC path is absent; the actual crypto backend remains open
 
 The supplied airbag CodeFlash/RPRG also does not show the runtime hardware-CMAC
 shape recovered from the tracked P1M-E EPS family. On those EPS images, the
@@ -423,21 +423,27 @@ and Camry P1M-E images independently use the same `0xFFC5B000` family while
 their actual ICU-S crypto engine remains at `0xFFC5D000`.
 
 A second structural pass searched every high-MMIO write for the characteristic
-`(selector << 16) | command` construction used by ICU-S commands 5/7/8. The
-matches resolve to ordinary flash/controller/channel-register setup; none forms
-a crypto command/data/status sequence. The software side is negative as well:
-the application contains a second AES table set, but no executable references
-to it are currently recovered and no AES-CMAC subkey path using the standard
-`0x87` reduction step was found.
+`(selector << 16) | command` construction used by **that ICU-S implementation**.
+The matches resolve to ordinary flash/controller/channel-register setup. This
+only strengthens the negative for the known P1M-E ICU-S ABI; it does **not**
+exclude a different Renesas security peripheral/HSM with a different register
+map or calling convention.
 
-The bounded conclusion is therefore: **no SecOC signing or verification call
-path is recovered from the supplied airbag image, either through the known
-P1M-E ICU-S interface or through an identified software-CMAC implementation.**
-This is not proof that the ECU cannot participate in SecOC. The exact airbag MCU
-and security peripheral are unresolved, so another HSM interface remains
-possible, and DataFlash / protected hardware-key contents were not supplied. A
-future DataFlash key candidate would still need a runtime consumer or live-CMAC
-validation before being called the operational SecOC path.
+Likewise, the software side is unresolved rather than excluded. The application
+contains a second AES table set, but the current Ghidra recovery has no direct
+executable xrefs into it and the focused scan did not find the textbook CMAC
+subkey `0x87` reduction shape. Neither observation is sufficient to rule out
+software AES-CMAC: references may be indirect or unrecovered, the implementation
+may use a different AES core, and CMAC subkeys may be precomputed or expressed
+without a literal `0x87` in an obvious instruction sequence.
+
+The bounded conclusion is therefore only: **the supplied airbag image does not
+use the same P1M-E ICU-S command-5/command-7 interface recovered in the EPS
+family.** Whether SecOC authentication is performed by (1) another Renesas HSM
+or security peripheral, (2) CPU-side AES-CMAC, or (3) not by this ECU remains an
+open reverse-engineering question. DataFlash / protected hardware-key contents
+were not supplied. A future DataFlash key candidate still needs a runtime
+consumer or live-CMAC validation before its role is assigned.
 
 ## 6. What the yc image changes for F33 EPS recovery
 
