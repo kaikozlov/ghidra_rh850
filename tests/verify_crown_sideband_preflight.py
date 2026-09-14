@@ -63,6 +63,44 @@ class StaticGenerationSemanticsTests(unittest.TestCase):
         self.assertIn("(&DAT_febe4e64)[param_1] + '\\x01'", rows[0x8C212]['decompiled_c'])
         self.assertIn("(&DAT_febe4e64)[param_1 & 0xffff] + '\\x01'", rows[0x8C244]['decompiled_c'])
 
+        # PDU45 is descriptor 40 of the 41 normal application Rx descriptors.
+        # Controller-0 starts at descriptor 0/count 41; the generated PDU base is 5.
+        self.assertEqual(image[0x218FC:0x21904], bytes.fromhex('0000290000000000'))
+        self.assertEqual(int.from_bytes(image[0x21A6C:0x21A70], 'little'), 5)
+        self.assertEqual(image[0x22010:0x22018], bytes.fromhex('da01000008000000'))
+
+        # The lower receive matcher maps descriptor index 40 -> PDU 45, then
+        # dispatches through module-0's +8 Rx callback to 0x7AEE8.
+        self.assertEqual(int.from_bytes(image[0x21CB0:0x21CB2], 'little'), 46)
+        self.assertEqual(int.from_bytes(image[0x21CC8:0x21CCC], 'little'), 0x22866)
+        self.assertEqual(image[0x2291A:0x2291E], bytes.fromhex('2d00ffff'))
+        self.assertEqual(int.from_bytes(image[0x21DFC:0x21E00], 'little'), 0x21D28)
+        self.assertEqual(int.from_bytes(image[0x21D30:0x21D34], 'little'), 0x7AEE8)
+        self.assertEqual(image[0x7E7C2:0x7E7D4], bytes.fromhex('1d300338630f01006708630f040080ff4e09'))
+
+        # Crown's five generated-COM Tx IDs do not include 0x1DA, so this is
+        # not a normal local Tx PDU looping back through generated COM.
+        tx = [int.from_bytes(image[0x21E40+i*8:0x21E44+i*8], 'little') & 0x1FFFFFFF for i in range(5)]
+        self.assertEqual(tx, [0x30, 0x351, 0x394, 0x4A3, 0x4C8])
+        self.assertNotIn(0x1DA, tx)
+
+        # The only SecOC upper-route deliveries are PDU9 (00F), PDU40 (D7),
+        # and PDU42 (B6); none can synthesize a delivery to PDU45.
+        secoc_routes = [int.from_bytes(image[0x255BA+i*0x50:0x255BC+i*0x50], 'little') for i in range(3)]
+        self.assertEqual(secoc_routes, [9, 40, 42])
+        self.assertNotIn(45, secoc_routes)
+
+        # Exact driver path: hardware FIFO/buffer readers -> common frame
+        # adapter -> receive ring -> foreground drain. These tokens pin the
+        # recovered path without requiring Ghidra at test time.
+        self.assertIn('FUN_0007fea4(param_1,uVar6 >> 0x10 & 0xff,&puStack_20)', rows[0x7FED0]['decompiled_c'])
+        self.assertIn('FUN_0007fea4(param_1,uVar6 >> 0x10 & 0xff,&puStack_20)', rows[0x7FF9C]['decompiled_c'])
+        self.assertIn('FUN_0007e1ac', rows[0x7FEA4]['decompiled_c'])
+        self.assertIn('FUN_0007e0bc(uVar6,&local_2c)', rows[0x7E1AC]['decompiled_c'])
+        self.assertIn('FUN_0007df42(uVar5)', rows[0x7E06A]['decompiled_c'])
+        self.assertIn('FUN_0007def0(param_1,&uStack_38)', rows[0x7DF42]['decompiled_c'])
+        self.assertIn('FUN_0007e06a()', rows[0x792EE]['decompiled_c'])
+
 
 class PreflightTests(unittest.TestCase):
     def simulate(self, *, before=115, after=120, opening_rows=(), heartbeat_rows=(), closing_rows=(),
