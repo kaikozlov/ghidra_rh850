@@ -61,8 +61,79 @@ check("C28FC fallback and C58B8 selector records alias across all selector value
 check("route-zero sig160 can choose only equivalent normal C2B64 banks",
       "FEBEC156 0 or 2" in eff["zero_sig160_state_reduction"]
       and "normal blocks are identical" in eff["zero_sig160_state_reduction"]
-      and "no effective C2B64 calibration effect" in eff["classification"]
+      and "Normal-compatible value0 state" in eff["classification"]
       and "0x55/0x11" in eff["remaining_special_modes"])
+mode = art["drive_mode_assist_map"]
+check("Camry HV GTS drive-mode enum is joined to the exact F33 selector shape",
+      mode["oem_diagnostic_source"]["category_id"] == 397
+      and mode["oem_diagnostic_source"]["data_id"] == "0x1004"
+      and mode["oem_diagnostic_source"]["name"] == "Drive Mode Select Status"
+      and mode["oem_diagnostic_source"]["patterns"]["0"] == "Normal Mode"
+      and mode["oem_diagnostic_source"]["patterns"]["2"] == "Sport Mode"
+      and mode["oem_diagnostic_source"]["patterns"]["6"] == "Eco Mode"
+      and mode["eps_wire_selector"]["can_id"] == "0x51E"
+      and mode["eps_wire_selector"]["bits"] == 4
+      and "synchronized live" in mode["eps_wire_selector"]["semantic_grade"])
+check("Normal and Eco share the primary C2B64 surface while Sport selects its distinct bank",
+      mode["mode_to_calibration"]["normal"]["effective_bank"] == "normal_primary_surface"
+      and mode["mode_to_calibration"]["eco"] == {
+          "oem_value":6, "selector":0, "effective_bank":"normal_primary_surface",
+          "reason":"value6 falls through to AC2F=0 -> C156=0",
+      }
+      and mode["mode_to_calibration"]["sport"]["selector"] == 1
+      and mode["mode_to_calibration"]["sport"]["effective_bank"] == "sport_primary_surface"
+      and "differs by 215 bytes" in mode["healthy_bank_relation"])
+check("drive-mode assist surface uses the exact speed-axis breakpoints",
+      mode["speed_breakpoints_kph"] == [0.0,7.68,19.2,38.4,76.8,128.0,192.0,256.0]
+      and "0x100 counts corresponds to 1.000 Nm" in mode["driver_torque_axis"])
+samples = {(r["speed_kph"],r["steering_torque_nm_equivalent"]):r for r in mode["direct_bf3c_samples"]}
+check("Sport substantially reduces the direct BF3C assist term at representative road states",
+      samples[(40.0,1.0)]["normal_eco_direct_bf3c"] == 703
+      and samples[(40.0,1.0)]["sport_direct_bf3c"] == 280
+      and samples[(40.0,1.0)]["sport_reduction_percent"] == 60.2
+      and samples[(60.0,2.0)]["sport_reduction_percent"] == 46.4
+      and samples[(80.0,1.0)]["sport_reduction_percent"] == 41.3
+      and samples[(120.0,1.0)]["sport_reduction_percent"] == 68.2
+      and "not total EPS motor torque" in mode["boundary"])
+check("drive-mode bank also propagates through the C29B2 slope into C8678/C4C0",
+      "FEBEBF40" in mode["secondary_effect"] and "C8678" in mode["secondary_effect"]
+      and "more than the direct BF3C magnitude" in mode["secondary_effect"])
+census = mode["selector_reader_census"]
+check("drive-mode selector reader census is exact and finite",
+      len(census["FEBEC156_direct_readers"]) == 31
+      and census["direct_region_count"] == 26
+      and len(census["direct_regions"]) == 26)
+check("Sport selector1 differs from selector0 in exactly five direct calibration regions",
+      census["sport_selector1_distinct_regions_vs_selector0"] == [
+          "C28FC_C2B64_driver_torque_surface",
+          "C6E7E_8x_map_bank",
+          "C7AB0_map_B_to_C41E",
+          "C91F2_map_A_to_C5A8",
+          "C9258_map_B_to_C5A8",
+      ])
+check("selector2 differs only in three small shaping regions, not the main torque surface",
+      census["selector2_distinct_regions_vs_selector0"] == [
+          "C7AB0_map_B_to_C41E", "C91F2_map_A_to_C5A8", "C9258_map_B_to_C5A8",
+      ])
+regions = {r["name"]: r for r in census["direct_regions"]}
+check("direct selector byte-delta census pins the five changing regions",
+      regions["C28FC_C2B64_driver_torque_surface"]["diff_bytes_vs_selector0"] == [0,215,0,0]
+      and regions["C6E7E_8x_map_bank"]["diff_bytes_vs_selector0"] == [0,40,0,0]
+      and regions["C7AB0_map_B_to_C41E"]["diff_bytes_vs_selector0"] == [0,6,6,6]
+      and regions["C91F2_map_A_to_C5A8"]["diff_bytes_vs_selector0"] == [0,2,2,2]
+      and regions["C9258_map_B_to_C5A8"]["diff_bytes_vs_selector0"] == [0,4,4,4])
+check("all enumerated pointer-indexed selector families alias across modes",
+      len(census["pointer_alias_families"]) == 15
+      and all(len(set(v)) == 1 for v in census["pointer_alias_families"].values()))
+check("secondary Sport shaping paths converge into normal assist terms",
+      "C39C -> D0162" in census["sport_secondary_paths"]["C6E7E_8x_map_bank"]
+      and "C41E -> D0162" in census["sport_secondary_paths"]["C7AB0_map_B_to_C41E"]
+      and "C5A8 -> D0162" in census["sport_secondary_paths"]["C91F2_map_A_to_C5A8"]
+      and "C5A8 -> D0162" in census["sport_secondary_paths"]["C9258_map_B_to_C5A8"])
+check("Normal/Eco equivalence claim remains bounded to the ordinary selector0 state",
+      "Eco value6 deterministically selects selector0" in mode["normal_eco_boundary"]
+      and "selector2 is a separate value0 companion/customization substate" in mode["normal_eco_boundary"]
+      and "Do not generalize Normal==Eco" in mode["normal_eco_boundary"])
 inf = art["selector_influence_observability"]
 check("1C3E C5EE selector indexing aliases away in exact F33 calibration",
       "PTR_DAT_000D39DC[FEBEC156&3]" in inf["FEBEC5EE_via_0x1C3E"]

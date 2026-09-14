@@ -139,7 +139,7 @@
       {
         "cell": "FEBEBF3C",
         "classification": "nonnegative |measured torque| calibration-curve term",
-        "provenance": "C2B64 interpolates C28FC-selected curves over |C128| and scales by ROM gain; route-zero ordinary selector can reach only equivalent normal banks 0/2",
+        "provenance": "C2B64 interpolates C28FC-selected curves over |C128| and scales by ROM gain; retained Normal-mode value0 can reach only equivalent banks 0/2, while Sport value2 selects distinct bank1",
         "runtime_writer": "0x000C2B64"
       },
       {
@@ -160,6 +160,736 @@
         "provenance": "CFCD4 clamps CC22+CB64; both are internally sequenced angle/phase waveform state, not an external lane target",
         "runtime_writer": "0x000CFCD4"
       }
+    ]
+  },
+  "drive_mode_assist_map": {
+    "boundary": "The percentages above compare only the exact C2B64/FEBEBF3C base-assist term, not total EPS motor torque. D0218 sums multiple torque/speed/return terms before the shared current-control funnel. They demonstrate why Sport is heavier without quantifying whole-rack assist reduction.",
+    "direct_bf3c_samples": [
+      {
+        "normal_eco_direct_bf3c": 703,
+        "speed_kph": 40.0,
+        "sport_direct_bf3c": 280,
+        "sport_over_normal": 0.3983,
+        "sport_reduction_percent": 60.2,
+        "steering_torque_nm_equivalent": 1.0
+      },
+      {
+        "normal_eco_direct_bf3c": 1869,
+        "speed_kph": 60.0,
+        "sport_direct_bf3c": 1002,
+        "sport_over_normal": 0.5361,
+        "sport_reduction_percent": 46.4,
+        "steering_torque_nm_equivalent": 2.0
+      },
+      {
+        "normal_eco_direct_bf3c": 366,
+        "speed_kph": 80.0,
+        "sport_direct_bf3c": 215,
+        "sport_over_normal": 0.5874,
+        "sport_reduction_percent": 41.3,
+        "steering_torque_nm_equivalent": 1.0
+      },
+      {
+        "normal_eco_direct_bf3c": 343,
+        "speed_kph": 120.0,
+        "sport_direct_bf3c": 109,
+        "sport_over_normal": 0.3178,
+        "sport_reduction_percent": 68.2,
+        "steering_torque_nm_equivalent": 1.0
+      }
+    ],
+    "driver_torque_axis": "signed Q8.8 torque-domain axis; 0x100 counts corresponds to 1.000 Nm by the exact upstream DID 0x1035 Steering Wheel Torque scaling",
+    "eps_wire_selector": {
+      "bit_offset": 0,
+      "bits": 4,
+      "byte": 0,
+      "can_id": "0x51E",
+      "chain": "0x51E B0[3:0] -> FEBE8030 -> FEBEF050 -> B3430/B3686 -> FEBEB124 -> B35DC/B372A -> FEBEB121 -> AC2F -> C54A2/C158 -> C5554/C156 -> C28FC/C2B64",
+      "mode_cell": "FEBEB124",
+      "raw_cell": "FEBE8030",
+      "semantic_grade": "recovered: exact F33 enum branches align with installed Camry HV_P5 Drive Mode Select Status; a synchronized live DID0x1004/0x51E mode-toggle capture is still the independent wire-name closure",
+      "stage_cell": "FEBEF050"
+    },
+    "healthy_bank_relation": "For the 0x220-byte C28FC/C2B64 primary surface, selectors0/2/3 are byte-identical and selector1/Sport differs by 215 bytes. Smaller selector-indexed shaping regions are censused separately below.",
+    "mode_to_calibration": {
+      "eco": {
+        "effective_bank": "normal_primary_surface",
+        "oem_value": 6,
+        "reason": "value6 falls through to AC2F=0 -> C156=0",
+        "selector": 0
+      },
+      "normal": {
+        "effective_bank": "normal_primary_surface",
+        "oem_value": 0,
+        "reason": "selector0 == selector2 byte-for-byte for the C28FC/C2B64 primary surface; smaller selector2 shaping differences are recorded separately",
+        "selector": "0 or 2"
+      },
+      "sport": {
+        "effective_bank": "sport_primary_surface",
+        "oem_value": 2,
+        "reason": "B35DC/B372A value2 -> 0x11 -> C158=0x77 -> C156=1",
+        "selector": 1
+      },
+      "sport_s_plus": {
+        "effective_bank": "sport_primary_surface",
+        "oem_value": 4,
+        "reason": "value4 follows the same selector1 branch as value2",
+        "selector": 1
+      }
+    },
+    "normal_eco_boundary": "Eco value6 deterministically selects selector0. Mode value0 with the retained route-wide zero companion fields settles the ordinary Normal path to selector0; selector2 is a separate value0 companion/customization substate and differs from selector0 in three small shaping regions even though the main C28FC/C2B64 driver-torque surface is identical. Do not generalize Normal==Eco to every possible value0 companion/customization state.",
+    "oem_diagnostic_source": {
+      "category_id": 397,
+      "data_id": "0x1004",
+      "database": "HV_P5.ddb",
+      "name": "Drive Mode Select Status",
+      "patterns": {
+        "0": "Normal Mode",
+        "1": "Power Mode",
+        "11": "Chauffeur Mode",
+        "2": "Sport Mode",
+        "3": "Sport S Mode",
+        "4": "Sport S+ Mode",
+        "5": "Comfort Mode",
+        "6": "Eco Mode",
+        "9": "Range Mode"
+      },
+      "source": "data/generated/gtsplus_2026/toyota_diag_registry_camry_2026.json"
+    },
+    "secondary_effect": "C29B2 also emits local curve slope; C2C32 speed-blends that slope into FEBEBF40, which C8678 consumes in the separate FEBEC4C0 torque+speed term. The mode bank therefore affects more than the direct BF3C magnitude.",
+    "selector_reader_census": {
+      "C4E94_pointer_pairs": {
+        "D2F38": [
+          "0x0AFB6C",
+          "0x0AFB4C",
+          "0x0AFB6C",
+          "0x0AFB4C",
+          "0x0AFB6C",
+          "0x0AFB4C",
+          "0x0AFB6C",
+          "0x0AFB4C"
+        ],
+        "D2F3C": [
+          "0x0AFB4C",
+          "0x0AFB6C",
+          "0x0AFB4C",
+          "0x0AFB6C",
+          "0x0AFB4C",
+          "0x0AFB6C",
+          "0x0AFB4C",
+          "0x0AFB6C"
+        ]
+      },
+      "C8678_pointer_words": [
+        "0x0B1248",
+        "0x0B121C",
+        "0x0B1248",
+        "0x0B121C",
+        "0x0B1248",
+        "0x0B121C",
+        "0x0B1248",
+        "0x0B121C",
+        "0x0B1248"
+      ],
+      "FEBEC156_direct_readers": [
+        "0x0C28FC",
+        "0x0C4E94",
+        "0x0C51F0",
+        "0x0C5326",
+        "0x0C58B8",
+        "0x0C5910",
+        "0x0C5956",
+        "0x0C675C",
+        "0x0C6E7E",
+        "0x0C6F86",
+        "0x0C713C",
+        "0x0C74E2",
+        "0x0C7612",
+        "0x0C7966",
+        "0x0C7AB0",
+        "0x0C7B44",
+        "0x0C8678",
+        "0x0C89E6",
+        "0x0C8A78",
+        "0x0C8AB2",
+        "0x0C8AF2",
+        "0x0C8ECC",
+        "0x0C8EF4",
+        "0x0C91F2",
+        "0x0C9258",
+        "0x0C9812",
+        "0x0C98AE",
+        "0x0C9A5C",
+        "0x0C9BA6",
+        "0x0C9BCE",
+        "0x0CC3BE"
+      ],
+      "classification": "31 exact C156 readers are censused. Among 26 direct healthy selector-strided calibration regions, selector1/Sport differs from selector0 in five regions; the other direct regions alias. All separately pointer-indexed selector families enumerated here alias across 0..3. OEM names for the four smaller distinct shaping regions remain bounded, but their control paths are live and all four converge into D0162 through C39C, C41E, or C5A8.",
+      "direct_region_count": 26,
+      "direct_regions": [
+        {
+          "diff_bytes_vs_selector0": [
+            0,
+            215,
+            0,
+            0
+          ],
+          "name": "C28FC_C2B64_driver_torque_surface",
+          "relative_offset": "0x0",
+          "selector_stride": 544,
+          "sha256": [
+            "e7c4dd02bd2245de4c2412695feb88f41826bb93c629e82f3bf5a8033fa20a77",
+            "b48655a3c063d6dc2ca1795c225d7111d358dccf23b1ed07c146a09cefd8e000",
+            "e7c4dd02bd2245de4c2412695feb88f41826bb93c629e82f3bf5a8033fa20a77",
+            "e7c4dd02bd2245de4c2412695feb88f41826bb93c629e82f3bf5a8033fa20a77"
+          ]
+        },
+        {
+          "diff_bytes_vs_selector0": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "name": "C5326_speed_map",
+          "relative_offset": "0x8C4",
+          "selector_stride": 36,
+          "sha256": [
+            "8a6f336bda14e0162452cd68847ced3dedcce4754bf10f584dcbd55bc3e2e5de",
+            "8a6f336bda14e0162452cd68847ced3dedcce4754bf10f584dcbd55bc3e2e5de",
+            "8a6f336bda14e0162452cd68847ced3dedcce4754bf10f584dcbd55bc3e2e5de",
+            "8a6f336bda14e0162452cd68847ced3dedcce4754bf10f584dcbd55bc3e2e5de"
+          ]
+        },
+        {
+          "diff_bytes_vs_selector0": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "name": "C51F0_torque_map",
+          "relative_offset": "0x954",
+          "selector_stride": 28,
+          "sha256": [
+            "e5f2c935b2cd008d3bb5a85eb1ffe145653fb60d33e4e7a924966e3354014f77",
+            "e5f2c935b2cd008d3bb5a85eb1ffe145653fb60d33e4e7a924966e3354014f77",
+            "e5f2c935b2cd008d3bb5a85eb1ffe145653fb60d33e4e7a924966e3354014f77",
+            "e5f2c935b2cd008d3bb5a85eb1ffe145653fb60d33e4e7a924966e3354014f77"
+          ]
+        },
+        {
+          "diff_bytes_vs_selector0": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "name": "C58B8_speed_axis",
+          "relative_offset": "0x9C4",
+          "selector_stride": 18,
+          "sha256": [
+            "79c5179b884072fd261e222e94393f94d9e127bee4ce1b6824da45e03f8f092c",
+            "79c5179b884072fd261e222e94393f94d9e127bee4ce1b6824da45e03f8f092c",
+            "79c5179b884072fd261e222e94393f94d9e127bee4ce1b6824da45e03f8f092c",
+            "79c5179b884072fd261e222e94393f94d9e127bee4ce1b6824da45e03f8f092c"
+          ]
+        },
+        {
+          "diff_bytes_vs_selector0": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "name": "C5956_speed_axis",
+          "relative_offset": "0xA0C",
+          "selector_stride": 18,
+          "sha256": [
+            "8690c40055ab21b4bfb50dff5613e733a263a12fed1dfc583e55aaaf4382ffba",
+            "8690c40055ab21b4bfb50dff5613e733a263a12fed1dfc583e55aaaf4382ffba",
+            "8690c40055ab21b4bfb50dff5613e733a263a12fed1dfc583e55aaaf4382ffba",
+            "8690c40055ab21b4bfb50dff5613e733a263a12fed1dfc583e55aaaf4382ffba"
+          ]
+        },
+        {
+          "diff_bytes_vs_selector0": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "name": "C675C_8x_speed_map_bank",
+          "relative_offset": "0xA54",
+          "selector_stride": 320,
+          "sha256": [
+            "0d099d673076daff9ea5d5ddf069bfffbc1a7fdcff8b6da0a957d0c353a465b8",
+            "0d099d673076daff9ea5d5ddf069bfffbc1a7fdcff8b6da0a957d0c353a465b8",
+            "0d099d673076daff9ea5d5ddf069bfffbc1a7fdcff8b6da0a957d0c353a465b8",
+            "0d099d673076daff9ea5d5ddf069bfffbc1a7fdcff8b6da0a957d0c353a465b8"
+          ]
+        },
+        {
+          "diff_bytes_vs_selector0": [
+            0,
+            40,
+            0,
+            0
+          ],
+          "name": "C6E7E_8x_map_bank",
+          "relative_offset": "0xF54",
+          "selector_stride": 224,
+          "sha256": [
+            "1c7400e10cce048c80f83318fea2bc610d5ef9796b0da556b29c3ffac10e28ab",
+            "944b82589a423041c92979d65bef9117383b64babf69fa0339e705c746bac295",
+            "1c7400e10cce048c80f83318fea2bc610d5ef9796b0da556b29c3ffac10e28ab",
+            "1c7400e10cce048c80f83318fea2bc610d5ef9796b0da556b29c3ffac10e28ab"
+          ]
+        },
+        {
+          "diff_bytes_vs_selector0": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "name": "C6F86_speed_axis",
+          "relative_offset": "0x12D4",
+          "selector_stride": 18,
+          "sha256": [
+            "df3222c2f802cc64c529524a0cf238dbc469ac45dd81d9b7ec8dc041ddbfc646",
+            "df3222c2f802cc64c529524a0cf238dbc469ac45dd81d9b7ec8dc041ddbfc646",
+            "df3222c2f802cc64c529524a0cf238dbc469ac45dd81d9b7ec8dc041ddbfc646",
+            "df3222c2f802cc64c529524a0cf238dbc469ac45dd81d9b7ec8dc041ddbfc646"
+          ]
+        },
+        {
+          "diff_bytes_vs_selector0": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "name": "C713C_map_A",
+          "relative_offset": "0x131C",
+          "selector_stride": 36,
+          "sha256": [
+            "d795fef145a355e88c1457338367c6e8c48d0994d0a51fb7b1dcb3e266af0c51",
+            "d795fef145a355e88c1457338367c6e8c48d0994d0a51fb7b1dcb3e266af0c51",
+            "d795fef145a355e88c1457338367c6e8c48d0994d0a51fb7b1dcb3e266af0c51",
+            "d795fef145a355e88c1457338367c6e8c48d0994d0a51fb7b1dcb3e266af0c51"
+          ]
+        },
+        {
+          "diff_bytes_vs_selector0": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "name": "C713C_map_B",
+          "relative_offset": "0x13AC",
+          "selector_stride": 36,
+          "sha256": [
+            "f740d5d07a4acc7507cb6771a329d31b3fa0d53e503004225d4e4541c48b400d",
+            "f740d5d07a4acc7507cb6771a329d31b3fa0d53e503004225d4e4541c48b400d",
+            "f740d5d07a4acc7507cb6771a329d31b3fa0d53e503004225d4e4541c48b400d",
+            "f740d5d07a4acc7507cb6771a329d31b3fa0d53e503004225d4e4541c48b400d"
+          ]
+        },
+        {
+          "diff_bytes_vs_selector0": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "name": "C713C_map_C",
+          "relative_offset": "0x143C",
+          "selector_stride": 36,
+          "sha256": [
+            "f740d5d07a4acc7507cb6771a329d31b3fa0d53e503004225d4e4541c48b400d",
+            "f740d5d07a4acc7507cb6771a329d31b3fa0d53e503004225d4e4541c48b400d",
+            "f740d5d07a4acc7507cb6771a329d31b3fa0d53e503004225d4e4541c48b400d",
+            "f740d5d07a4acc7507cb6771a329d31b3fa0d53e503004225d4e4541c48b400d"
+          ]
+        },
+        {
+          "diff_bytes_vs_selector0": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "name": "C74E2_speed_map",
+          "relative_offset": "0x14CC",
+          "selector_stride": 36,
+          "sha256": [
+            "fc14ba581d88f382802393e9f5a3a505b23104882a772956fce196a55aaa9dd0",
+            "fc14ba581d88f382802393e9f5a3a505b23104882a772956fce196a55aaa9dd0",
+            "fc14ba581d88f382802393e9f5a3a505b23104882a772956fce196a55aaa9dd0",
+            "fc14ba581d88f382802393e9f5a3a505b23104882a772956fce196a55aaa9dd0"
+          ]
+        },
+        {
+          "diff_bytes_vs_selector0": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "name": "C7612_map_A",
+          "relative_offset": "0x155C",
+          "selector_stride": 40,
+          "sha256": [
+            "7596765171b81acf7f2ec774ff418be4d30b4c4a1a48cf43c0934c691f49744b",
+            "7596765171b81acf7f2ec774ff418be4d30b4c4a1a48cf43c0934c691f49744b",
+            "7596765171b81acf7f2ec774ff418be4d30b4c4a1a48cf43c0934c691f49744b",
+            "7596765171b81acf7f2ec774ff418be4d30b4c4a1a48cf43c0934c691f49744b"
+          ]
+        },
+        {
+          "diff_bytes_vs_selector0": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "name": "C7612_map_B",
+          "relative_offset": "0x15FC",
+          "selector_stride": 40,
+          "sha256": [
+            "7596765171b81acf7f2ec774ff418be4d30b4c4a1a48cf43c0934c691f49744b",
+            "7596765171b81acf7f2ec774ff418be4d30b4c4a1a48cf43c0934c691f49744b",
+            "7596765171b81acf7f2ec774ff418be4d30b4c4a1a48cf43c0934c691f49744b",
+            "7596765171b81acf7f2ec774ff418be4d30b4c4a1a48cf43c0934c691f49744b"
+          ]
+        },
+        {
+          "diff_bytes_vs_selector0": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "name": "C7966_speed_map",
+          "relative_offset": "0x169C",
+          "selector_stride": 36,
+          "sha256": [
+            "56b67c461068781d359088db4f89a41d8c92f643a88e88f44d149f23eb99c1d9",
+            "56b67c461068781d359088db4f89a41d8c92f643a88e88f44d149f23eb99c1d9",
+            "56b67c461068781d359088db4f89a41d8c92f643a88e88f44d149f23eb99c1d9",
+            "56b67c461068781d359088db4f89a41d8c92f643a88e88f44d149f23eb99c1d9"
+          ]
+        },
+        {
+          "diff_bytes_vs_selector0": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "name": "C7AB0_map_A",
+          "relative_offset": "0x172C",
+          "selector_stride": 36,
+          "sha256": [
+            "f9ba818ab22e21bf415d382ba605a1fcea4614a56f1ba84ddab7077ab6f6d489",
+            "f9ba818ab22e21bf415d382ba605a1fcea4614a56f1ba84ddab7077ab6f6d489",
+            "f9ba818ab22e21bf415d382ba605a1fcea4614a56f1ba84ddab7077ab6f6d489",
+            "f9ba818ab22e21bf415d382ba605a1fcea4614a56f1ba84ddab7077ab6f6d489"
+          ]
+        },
+        {
+          "diff_bytes_vs_selector0": [
+            0,
+            6,
+            6,
+            6
+          ],
+          "name": "C7AB0_map_B_to_C41E",
+          "relative_offset": "0x17BC",
+          "selector_stride": 36,
+          "sha256": [
+            "135fd977a55577ec80438360542de9ed16df443eb13e2c2084ce7e4be34794bb",
+            "9bed970cf8f1bcd650bce28c9fa23e1b8298b93f8c7bcabf936f65f5136e4eed",
+            "9bed970cf8f1bcd650bce28c9fa23e1b8298b93f8c7bcabf936f65f5136e4eed",
+            "9bed970cf8f1bcd650bce28c9fa23e1b8298b93f8c7bcabf936f65f5136e4eed"
+          ]
+        },
+        {
+          "diff_bytes_vs_selector0": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "name": "C7B44_torque_map",
+          "relative_offset": "0x184C",
+          "selector_stride": 28,
+          "sha256": [
+            "148cc73b9001a7f3d3d3fb1079c96f9bb88bc5bb329ebe25e6e12b7f4e2eb49a",
+            "148cc73b9001a7f3d3d3fb1079c96f9bb88bc5bb329ebe25e6e12b7f4e2eb49a",
+            "148cc73b9001a7f3d3d3fb1079c96f9bb88bc5bb329ebe25e6e12b7f4e2eb49a",
+            "148cc73b9001a7f3d3d3fb1079c96f9bb88bc5bb329ebe25e6e12b7f4e2eb49a"
+          ]
+        },
+        {
+          "diff_bytes_vs_selector0": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "name": "C8A78_speed_map",
+          "relative_offset": "0x1A4C",
+          "selector_stride": 36,
+          "sha256": [
+            "86ba943072d47383a166a2003da8b20913d89c4f12e4c1ba71f0bf31a3124de8",
+            "86ba943072d47383a166a2003da8b20913d89c4f12e4c1ba71f0bf31a3124de8",
+            "86ba943072d47383a166a2003da8b20913d89c4f12e4c1ba71f0bf31a3124de8",
+            "86ba943072d47383a166a2003da8b20913d89c4f12e4c1ba71f0bf31a3124de8"
+          ]
+        },
+        {
+          "diff_bytes_vs_selector0": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "name": "C8AF2_map",
+          "relative_offset": "0x1ADC",
+          "selector_stride": 36,
+          "sha256": [
+            "26db72204dc5b8ce39cc0eb934b9ecdcd51918cf161133642d22460890851898",
+            "26db72204dc5b8ce39cc0eb934b9ecdcd51918cf161133642d22460890851898",
+            "26db72204dc5b8ce39cc0eb934b9ecdcd51918cf161133642d22460890851898",
+            "26db72204dc5b8ce39cc0eb934b9ecdcd51918cf161133642d22460890851898"
+          ]
+        },
+        {
+          "diff_bytes_vs_selector0": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "name": "C8AB2_map",
+          "relative_offset": "0x1B6C",
+          "selector_stride": 20,
+          "sha256": [
+            "c98bcf42eda937efaa62b5b8a342e4d41bf424798ca06a5649686d1062c940b8",
+            "c98bcf42eda937efaa62b5b8a342e4d41bf424798ca06a5649686d1062c940b8",
+            "c98bcf42eda937efaa62b5b8a342e4d41bf424798ca06a5649686d1062c940b8",
+            "c98bcf42eda937efaa62b5b8a342e4d41bf424798ca06a5649686d1062c940b8"
+          ]
+        },
+        {
+          "diff_bytes_vs_selector0": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "name": "C89E6_8x_map_bank",
+          "relative_offset": "0x1BBC",
+          "selector_stride": 288,
+          "sha256": [
+            "13d49a70301bbaedcd341402482dc1c29f2ff37204f857912d2b8d34b8b5dcf4",
+            "13d49a70301bbaedcd341402482dc1c29f2ff37204f857912d2b8d34b8b5dcf4",
+            "13d49a70301bbaedcd341402482dc1c29f2ff37204f857912d2b8d34b8b5dcf4",
+            "13d49a70301bbaedcd341402482dc1c29f2ff37204f857912d2b8d34b8b5dcf4"
+          ]
+        },
+        {
+          "diff_bytes_vs_selector0": [
+            0,
+            2,
+            2,
+            2
+          ],
+          "name": "C91F2_map_A_to_C5A8",
+          "relative_offset": "0x203C",
+          "selector_stride": 36,
+          "sha256": [
+            "d9c038aa6c7b9528242d9a707bba825fb5e281f3517a34ae3e7ae6b1f9a7387a",
+            "6e946fc6fdba4e56b93fabbd21e838c041c556704769b18e8793687e549c5d99",
+            "6e946fc6fdba4e56b93fabbd21e838c041c556704769b18e8793687e549c5d99",
+            "6e946fc6fdba4e56b93fabbd21e838c041c556704769b18e8793687e549c5d99"
+          ]
+        },
+        {
+          "diff_bytes_vs_selector0": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "name": "C91F2_map_B",
+          "relative_offset": "0x20CC",
+          "selector_stride": 36,
+          "sha256": [
+            "40c6fb2b2c31ef7d8b48a1e5d1cf9d67d7cfb039bfbea74d18c6f423fde50ae5",
+            "40c6fb2b2c31ef7d8b48a1e5d1cf9d67d7cfb039bfbea74d18c6f423fde50ae5",
+            "40c6fb2b2c31ef7d8b48a1e5d1cf9d67d7cfb039bfbea74d18c6f423fde50ae5",
+            "40c6fb2b2c31ef7d8b48a1e5d1cf9d67d7cfb039bfbea74d18c6f423fde50ae5"
+          ]
+        },
+        {
+          "diff_bytes_vs_selector0": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "name": "C9258_map_A",
+          "relative_offset": "0x215C",
+          "selector_stride": 36,
+          "sha256": [
+            "69ff6e100431032f5e263f4b2cc259575147ee2ac43fdb1618d14fd154837e17",
+            "69ff6e100431032f5e263f4b2cc259575147ee2ac43fdb1618d14fd154837e17",
+            "69ff6e100431032f5e263f4b2cc259575147ee2ac43fdb1618d14fd154837e17",
+            "69ff6e100431032f5e263f4b2cc259575147ee2ac43fdb1618d14fd154837e17"
+          ]
+        },
+        {
+          "diff_bytes_vs_selector0": [
+            0,
+            4,
+            4,
+            4
+          ],
+          "name": "C9258_map_B_to_C5A8",
+          "relative_offset": "0x21EC",
+          "selector_stride": 36,
+          "sha256": [
+            "05764cd653e04c8bc165d4caddbd941ff62236ff83fec62f77e8d85c274ae09f",
+            "11a7ef19498b2d5a8b177d6bc8d736bdd06a38be2c86c1b616b77ba25100c517",
+            "11a7ef19498b2d5a8b177d6bc8d736bdd06a38be2c86c1b616b77ba25100c517",
+            "11a7ef19498b2d5a8b177d6bc8d736bdd06a38be2c86c1b616b77ba25100c517"
+          ]
+        }
+      ],
+      "pointer_alias_families": {
+        "C5910_D30E8": [
+          "0x0B1174",
+          "0x0B1174",
+          "0x0B1174",
+          "0x0B1174"
+        ],
+        "C8678_D3630": [
+          "0x0B1208",
+          "0x0B1208",
+          "0x0B1208",
+          "0x0B1208"
+        ],
+        "C8ECC_D3810": [
+          "0x0B1292",
+          "0x0B1292",
+          "0x0B1292",
+          "0x0B1292"
+        ],
+        "C8EF4_D37D0": [
+          "0x0B1276",
+          "0x0B1276",
+          "0x0B1276",
+          "0x0B1276"
+        ],
+        "C9812_D39DC": [
+          "0x0B018A",
+          "0x0B018A",
+          "0x0B018A",
+          "0x0B018A"
+        ],
+        "C98AE_D3A1C": [
+          "0x0B01D2",
+          "0x0B01D2",
+          "0x0B01D2",
+          "0x0B01D2"
+        ],
+        "C98AE_D3A5C": [
+          "0x0B01E6",
+          "0x0B01E6",
+          "0x0B01E6",
+          "0x0B01E6"
+        ],
+        "C98AE_D3A9C": [
+          "0x0B01FA",
+          "0x0B01FA",
+          "0x0B01FA",
+          "0x0B01FA"
+        ],
+        "C98AE_D3ADC": [
+          "0x0B019A",
+          "0x0B019A",
+          "0x0B019A",
+          "0x0B019A"
+        ],
+        "C98AE_D3B1C": [
+          "0x0B01B2",
+          "0x0B01B2",
+          "0x0B01B2",
+          "0x0B01B2"
+        ],
+        "C9A5C_D3B5C": [
+          "0x0B01C2",
+          "0x0B01C2",
+          "0x0B01C2",
+          "0x0B01C2"
+        ],
+        "C9BA6_D3B9C": [
+          "0x0B020E",
+          "0x0B020E",
+          "0x0B020E",
+          "0x0B020E"
+        ],
+        "C9BCE_D3BDC": [
+          "0x0B0242",
+          "0x0B0242",
+          "0x0B0242",
+          "0x0B0242"
+        ],
+        "CC3BE_D3C1C": [
+          "0x0B0518",
+          "0x0B0518",
+          "0x0B0518",
+          "0x0B0518"
+        ],
+        "CC3BE_D3C5C": [
+          "0x0B053C",
+          "0x0B053C",
+          "0x0B053C",
+          "0x0B053C"
+        ]
+      },
+      "selector2_distinct_regions_vs_selector0": [
+        "C7AB0_map_B_to_C41E",
+        "C91F2_map_A_to_C5A8",
+        "C9258_map_B_to_C5A8"
+      ],
+      "sport_secondary_paths": {
+        "C6E7E_8x_map_bank": "C6E7E C362 -> C6F1E C348 -> C6F58 C358 -> C6F68 C39C -> D0162",
+        "C7AB0_map_B_to_C41E": "C7AB0 C416 -> C7B44 C418 -> C7C58 C41E -> D0162",
+        "C91F2_map_A_to_C5A8": "C91F2 C590/C592 -> C9314 dynamic state -> C945E/C94B8 C5A8 -> D0162",
+        "C9258_map_B_to_C5A8": "C9258 C594 -> C945E/C94B8 C5A8 -> D0162"
+      },
+      "sport_selector1_distinct_regions_vs_selector0": [
+        "C28FC_C2B64_driver_torque_surface",
+        "C6E7E_8x_map_bank",
+        "C7AB0_map_B_to_C41E",
+        "C91F2_map_A_to_C5A8",
+        "C9258_map_B_to_C5A8"
+      ]
+    },
+    "speed_breakpoints_kph": [
+      0.0,
+      7.68,
+      19.2,
+      38.4,
+      76.8,
+      128.0,
+      192.0,
+      256.0
     ]
   },
   "exact_rdbi_table": {
@@ -185,7 +915,7 @@
       "AC3C_0_integrity_fallback": "0x18100",
       "AC3C_1_healthy": "0x10100"
     },
-    "classification": "verified static+retained-drive closure: the ordinary COM parameter selector has no effective C2B64 calibration effect under the route-wide zero sig160 state; the sole distinct normal bank is FEBEC156=1, which the zero mode value cannot select.",
+    "classification": "verified static+retained-drive closure: the 0x51E sig160 drive-mode selector has no C2B64 calibration change under the retained route-wide Normal-compatible value0 state; FEBEC156=1 is the sole distinct healthy bank and is selected by the recovered Sport value2 path.",
     "fallback_block_sha256": [
       "0bf6b23b9ca2e957cafda774969d085e422e1443c41cc2e72b14d49b016b5c85",
       "0bf6b23b9ca2e957cafda774969d085e422e1443c41cc2e72b14d49b016b5c85",

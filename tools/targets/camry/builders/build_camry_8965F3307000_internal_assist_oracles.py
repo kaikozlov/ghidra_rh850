@@ -21,6 +21,8 @@ from tools.targets.camry.support.camry_f33_corpus import CORPUS, IMAGE, IMAGE_SH
 
 OUT = REPO / "data/generated/camry_8965F3307000_internal_assist_oracles.json"
 GTS = REPO / "data/generated/gtsplus_2026/camry_8965F3307000_emps_semantics.json"
+GTS_REGISTRY = REPO / "data/generated/gtsplus_2026/toyota_diag_registry_camry_2026.json"
+COMMAND_CONE = REPO / "data/generated/camry_8965F3307000_command_cone_ingress.json"
 LIVE_SELECTOR = REPO / "data/generated/camry_2026_baseline_selector_live.json"
 RDBI_OFFSET = 0x2928C
 RDBI_COUNT = 241
@@ -265,6 +267,222 @@ def main() -> int:
         s160 = live_selector["drives"][label]["signals"]["sig160"]
         need(s160["all"]["values"] == {"0": s160["all"]["frames"]}, f"{label} sig160 no longer route-zero")
 
+    # Recover the driver-selected drive-mode steering calibration.  Current GTS+ for the
+    # exact Camry vehicle profile installs category 397 (HV_P5) and names DID 0x1004
+    # Drive Mode Select Status.  Its enum shape matches the exact F33 0x51E B0[3:0]
+    # selector consumer: Normal=0 and Eco=6 select the default/equivalent banks, while
+    # Sport=2 (and Sport S+=4) takes the only distinct healthy C28FC/C2B64 bank.
+    # Keep the CAN semantic join recovered rather than "verified" until a retained drive
+    # explicitly toggles 0x51E B0[3:0] alongside the Toyota diagnostic oracle.
+    registry = json.loads(GTS_REGISTRY.read_text())
+    need(397 in registry["profile"]["catalog_category_ids"], "Camry HV category 397 no longer installed")
+    drive_mode_did = registry["catalogs"]["397"]["dids"]["0x1004"][0]
+    need(drive_mode_did["name"] == "Drive Mode Select Status", "HV_P5 drive-mode name drift")
+    drive_mode_patterns = drive_mode_did["patterns"]
+    expected_drive_modes = {
+        "0": "Normal Mode", "2": "Sport Mode", "4": "Sport S+ Mode", "6": "Eco Mode",
+    }
+    need(all(drive_mode_patterns.get(k) == v for k, v in expected_drive_modes.items()),
+         f"HV_P5 drive-mode enum drift: {drive_mode_patterns}")
+
+    command_cone = json.loads(COMMAND_CONE.read_text())
+    s160_rows = [r for r in command_cone["baseline_selector_machinery"]["generated_com_inputs"]
+                 if r["signal"] == 160]
+    need(s160_rows == [{
+        "bit_offset": 0, "bits": 4, "byte": 0, "can_id": "0x51E", "length": 8,
+        "raw_cell": "0xFEBE8030", "signal": 160, "stage_cell": "0xFEBEF050",
+    }], f"0x51E sig160 geometry drift: {s160_rows}")
+    tokens(funcs, 0xB35DC,
+           "uVar1 = (uint)DAT_febeb124;", "(uVar1 == 2) || (uVar1 == 4)",
+           "DAT_febeb121 = 0x11;", "DAT_febeb121 = 0x33;")
+    tokens(funcs, 0xC54A2,
+           "DAT_febeac2f == '\\x11'", "DAT_febec158 = 0x77;",
+           "DAT_febec158 = 0x44;", "DAT_febec158 = 0x88;")
+    tokens(funcs, 0xC5554, "DAT_febec156 = 0;", "uVar1 = 1;", "uVar1 = 2", "uVar1 = 3")
+    tokens(funcs, 0xC58B8,
+           "(DAT_febec156 & 3) * 0x12 + 0x9c4", "DAT_febeadf6", "FUN_000d097a")
+    tokens(funcs, 0xC2B64,
+           "iVar7 = (int)DAT_febec1a6;", "iVar8 = (int)DAT_febec128;",
+           "FUN_000c28fc(&local_1c,apuStack_18);", "FUN_000c29b2")
+    tokens(funcs, 0xC29B2, "uVar5 =", "*param_3 = sVar3;")
+    tokens(funcs, 0xC2C32, "DAT_febec1a6", "DAT_febebf40")
+
+    # C58B8 uses SP1 in 0.01 km/h and linearly interpolates between eight C2B64 rows.
+    # The speed-axis records are byte-identical across selector banks in this image.
+    speed_axis_raw = list(struct.unpack_from("<9H", image, bank_ptrs[1] + 0x9C4))
+    need(speed_axis_raw == [0, 0x300, 0x780, 0xF00, 0x1E00, 0x3200, 0x4B00, 0x6400, 0xFFFF],
+         f"drive-mode speed axis drift: {speed_axis_raw}")
+    speed_breakpoints_kph = [round(v / 100.0, 2) for v in speed_axis_raw[:-1]]
+
+    # C29B2's 0x44-byte row is sixteen (signed torque-axis, unsigned assist-value)
+    # points followed by the 0x7FFF/0xFFFF terminator pair.  C128 remains in the
+    # steering-torque Q8.8 domain: exact DID 0x1035 maps the same upstream torque source
+    # as internal/256 Nm, and the intervening C52FA/C4DF2 filter preserves that domain.
+    def curve(selector: int, row: int) -> list[tuple[int, int]]:
+        off = bank_ptrs[1] + selector * block_size + row * 0x44
+        pts = [struct.unpack_from("<hH", image, off + i * 4) for i in range(16)]
+        need(struct.unpack_from("<HH", image, off + 0x40) == (0x7FFF, 0xFFFF),
+             f"C2B64 curve terminator drift selector={selector} row={row}")
+        return pts
+
+    def c_div(num: int, den: int) -> int:
+        # RH850/C signed integer division truncates toward zero; Python // floors negatives.
+        need(den != 0, "zero calibration interpolation denominator")
+        q = abs(num) // abs(den)
+        return -q if (num < 0) != (den < 0) else q
+
+    def interp_curve(selector: int, row: int, torque_raw: int) -> int:
+        pts = curve(selector, row)
+        if torque_raw <= pts[0][0]:
+            return pts[0][1]
+        for (x0, y0), (x1, y1) in zip(pts, pts[1:]):
+            if torque_raw <= x1:
+                return y0 + c_div((torque_raw - x0) * (y1 - y0), x1 - x0)
+        return pts[-1][1]
+
+    def direct_term(selector: int, speed_kph: float, torque_nm: float) -> int:
+        speed_raw = round(speed_kph * 100)
+        torque_raw = round(abs(torque_nm) * 0x100)
+        finite = speed_axis_raw[:-1]
+        if speed_raw <= finite[0]:
+            row, frac = 0, 0
+        elif speed_raw >= finite[-1]:
+            row, frac = len(finite) - 2, 0x400
+        else:
+            row = 0
+            while finite[row + 1] < speed_raw:
+                row += 1
+            frac = c_div((speed_raw - finite[row]) * 0x400, finite[row + 1] - finite[row])
+        lo = interp_curve(selector, row, torque_raw)
+        hi = interp_curve(selector, row + 1, torque_raw)
+        return lo + c_div((hi - lo) * frac, 0x400)
+
+    sample_inputs = [(40.0, 1.0), (60.0, 2.0), (80.0, 1.0), (120.0, 1.0)]
+    drive_mode_samples = []
+    for speed_kph, torque_nm in sample_inputs:
+        normal = direct_term(0, speed_kph, torque_nm)
+        sport = direct_term(1, speed_kph, torque_nm)
+        drive_mode_samples.append({
+            "speed_kph": speed_kph, "steering_torque_nm_equivalent": torque_nm,
+            "normal_eco_direct_bf3c": normal, "sport_direct_bf3c": sport,
+            "sport_over_normal": round(sport / normal, 4),
+            "sport_reduction_percent": round((1.0 - sport / normal) * 100.0, 1),
+        })
+    need([(r["normal_eco_direct_bf3c"], r["sport_direct_bf3c"]) for r in drive_mode_samples] ==
+         [(703, 280), (1869, 1002), (366, 215), (343, 109)],
+         f"drive-mode representative map values drift: {drive_mode_samples}")
+
+    # Exhaust the direct healthy-bank selector regions used by the C156 reader family.
+    # This distinguishes the large Sport-only driver-torque surface from smaller shaping
+    # tables and prevents interpreting the representative BF3C percentages as a whole-EPS
+    # gain change.  All offsets are relative to healthy base 0x10100.
+    selector_group_specs = [
+        ("C28FC_C2B64_driver_torque_surface", 0x000, 0x220),
+        ("C5326_speed_map", 0x8C4, 0x24),
+        ("C51F0_torque_map", 0x954, 0x1C),
+        ("C58B8_speed_axis", 0x9C4, 0x12),
+        ("C5956_speed_axis", 0xA0C, 0x12),
+        ("C675C_8x_speed_map_bank", 0xA54, 8 * 0x28),
+        ("C6E7E_8x_map_bank", 0xF54, 8 * 0x1C),
+        ("C6F86_speed_axis", 0x12D4, 0x12),
+        ("C713C_map_A", 0x131C, 0x24),
+        ("C713C_map_B", 0x13AC, 0x24),
+        ("C713C_map_C", 0x143C, 0x24),
+        ("C74E2_speed_map", 0x14CC, 0x24),
+        ("C7612_map_A", 0x155C, 0x28),
+        ("C7612_map_B", 0x15FC, 0x28),
+        ("C7966_speed_map", 0x169C, 0x24),
+        ("C7AB0_map_A", 0x172C, 0x24),
+        ("C7AB0_map_B_to_C41E", 0x17BC, 0x24),
+        ("C7B44_torque_map", 0x184C, 0x1C),
+        ("C8A78_speed_map", 0x1A4C, 0x24),
+        ("C8AF2_map", 0x1ADC, 0x24),
+        ("C8AB2_map", 0x1B6C, 0x14),
+        ("C89E6_8x_map_bank", 0x1BBC, 8 * 0x24),
+        ("C91F2_map_A_to_C5A8", 0x203C, 0x24),
+        ("C91F2_map_B", 0x20CC, 0x24),
+        ("C9258_map_A", 0x215C, 0x24),
+        ("C9258_map_B_to_C5A8", 0x21EC, 0x24),
+    ]
+    selector_group_census = []
+    for name, rel, stride in selector_group_specs:
+        regions = [image[bank_ptrs[1] + rel + sel * stride: bank_ptrs[1] + rel + (sel + 1) * stride]
+                   for sel in range(4)]
+        need(all(len(x) == stride for x in regions), f"short selector region {name}")
+        diff_vs_0 = [sum(a != b for a, b in zip(regions[0], regions[sel])) for sel in range(4)]
+        selector_group_census.append({
+            "name": name, "relative_offset": f"0x{rel:X}", "selector_stride": stride,
+            "diff_bytes_vs_selector0": diff_vs_0,
+            "sha256": [hashlib.sha256(x).hexdigest() for x in regions],
+        })
+
+    sport_distinct_groups = [r["name"] for r in selector_group_census if r["diff_bytes_vs_selector0"][1]]
+    selector2_distinct_groups = [r["name"] for r in selector_group_census if r["diff_bytes_vs_selector0"][2]]
+    need(sport_distinct_groups == [
+        "C28FC_C2B64_driver_torque_surface",
+        "C6E7E_8x_map_bank",
+        "C7AB0_map_B_to_C41E",
+        "C91F2_map_A_to_C5A8",
+        "C9258_map_B_to_C5A8",
+    ], f"Sport direct selector-region census drift: {sport_distinct_groups}")
+    need(selector2_distinct_groups == [
+        "C7AB0_map_B_to_C41E", "C91F2_map_A_to_C5A8", "C9258_map_B_to_C5A8",
+    ], f"selector2 direct-region census drift: {selector2_distinct_groups}")
+
+    c156_readers = direct_users(funcs, 0xFEBEC156, "READ")
+    need(c156_readers == [
+        0xC28FC, 0xC4E94, 0xC51F0, 0xC5326, 0xC58B8, 0xC5910, 0xC5956, 0xC675C,
+        0xC6E7E, 0xC6F86, 0xC713C, 0xC74E2, 0xC7612, 0xC7966, 0xC7AB0, 0xC7B44,
+        0xC8678, 0xC89E6, 0xC8A78, 0xC8AB2, 0xC8AF2, 0xC8ECC, 0xC8EF4, 0xC91F2,
+        0xC9258, 0xC9812, 0xC98AE, 0xC9A5C, 0xC9BA6, 0xC9BCE, 0xCC3BE,
+    ], f"C156 reader census drift: {[hex(x) for x in c156_readers]}")
+
+    # Pointer-indexed C156 readers alias their selector entries in this exact image.
+    # Record the concrete pointers so any future calibration divergence is visible.
+    def u32s(off: int, n: int) -> list[int]:
+        return [struct.unpack_from("<I", image, off + 4 * i)[0] for i in range(n)]
+
+    pointer_alias_families = {
+        "C5910_D30E8": u32s(0xD30E8, 4),
+        "C8678_D3630": u32s(0xD3630, 4),
+        "C8EF4_D37D0": u32s(0xD37D0, 4),
+        "C8ECC_D3810": u32s(0xD3810, 4),
+        "C9812_D39DC": u32s(0xD39DC, 4),
+        "C98AE_D3A1C": u32s(0xD3A1C, 4),
+        "C98AE_D3A5C": u32s(0xD3A5C, 4),
+        "C98AE_D3A9C": u32s(0xD3A9C, 4),
+        "C98AE_D3ADC": u32s(0xD3ADC, 4),
+        "C98AE_D3B1C": u32s(0xD3B1C, 4),
+        "C9A5C_D3B5C": u32s(0xD3B5C, 4),
+        "C9BA6_D3B9C": u32s(0xD3B9C, 4),
+        "C9BCE_D3BDC": u32s(0xD3BDC, 4),
+        "CC3BE_D3C1C": u32s(0xD3C1C, 4),
+        "CC3BE_D3C5C": u32s(0xD3C5C, 4),
+    }
+    need(all(len(set(v)) == 1 for v in pointer_alias_families.values()),
+         f"selector pointer alias drift: {pointer_alias_families}")
+    c4e94_a = u32s(0xD2F38, 8)
+    c4e94_b = u32s(0xD2F3C, 8)
+    need(all(c4e94_a[sel*2:(sel+1)*2] == c4e94_a[:2] for sel in range(4))
+         and all(c4e94_b[sel*2:(sel+1)*2] == c4e94_b[:2] for sel in range(4)),
+         f"C4E94 selector pointer pairs drift: {c4e94_a} / {c4e94_b}")
+    c8678_pairs = u32s(0xD3670, 9)
+    need(all(c8678_pairs[sel*2:sel*2+3] == c8678_pairs[:3] for sel in range(4)),
+         f"C8678 selector pointer pair drift: {c8678_pairs}")
+
+    # The four non-base-surface Sport differences are not dead calibration.  Three have
+    # short, exact paths into D0162 terms C39C/C41E/C5A8; the fourth C6E7E family reaches
+    # C39C through C362->C6F1E/C348->C6F58/C358->C6F68.
+    tokens(funcs, 0xC6E7E, "DAT_febec156", "puVar5 + 0xb62")
+    tokens(funcs, 0xC6F1E, "DAT_febec362", "puVar1 + 0xb48")
+    tokens(funcs, 0xC6F58, "DAT_febec358 = DAT_febec348")
+    tokens(funcs, 0xC6F68, "DAT_febec39c", "DAT_febec358")
+    tokens(funcs, 0xC7AB0, "DAT_febec156", "puVar2 + 0xc16")
+    need(direct_users(funcs, 0xFEBEC418, "READ") == [0xC7C58], "C418 reader drift")
+    need(direct_users(funcs, 0xFEBEC41E, "READ") == [0xD0162], "C41E D0162 reader drift")
+    need(direct_users(funcs, 0xFEBEC5A8, "READ") == [0xD0162], "C5A8 D0162 reader drift")
+    tokens(funcs, 0xD0162, "DAT_febec39c", "DAT_febec41e", "DAT_febec5a8")
+
     # Close the exact-F33 command-value-model -> motor-current boundary.  The earlier
     # direct-reader-only interpretation was incomplete because D042C writes FEBECC62 and
     # immediately reuses the same value to form FEBECC66 inside one function.  The
@@ -347,7 +565,7 @@ def main() -> int:
         {"cell": "FEBEC4C0", "runtime_writer": "0x000C8678", "classification": "torque+speed gain/map term", "provenance": "C8678 maps filtered torque-family C266 through ROM tables and crossfades with C1AA/BF40; exact ordinary selector maps alias"},
         {"cell": "FEBEC3BA", "runtime_writer": "0x000C74AC", "classification": "measured steering-torque-family term", "provenance": "C74AC clamps ABB0+C3A4, both recovered in the torque-filter family"},
         {"cell": "FEBECC2C", "runtime_writer": "0x000D0162", "classification": "internal assist aggregate with ROM slew bound", "provenance": "D0162 sums C3A0+C39C+C41E+C5A8+C53A with constant/ROM-bounded accumulator state"},
-        {"cell": "FEBEBF3C", "runtime_writer": "0x000C2B64", "classification": "nonnegative |measured torque| calibration-curve term", "provenance": "C2B64 interpolates C28FC-selected curves over |C128| and scales by ROM gain; route-zero ordinary selector can reach only equivalent normal banks 0/2"},
+        {"cell": "FEBEBF3C", "runtime_writer": "0x000C2B64", "classification": "nonnegative |measured torque| calibration-curve term", "provenance": "C2B64 interpolates C28FC-selected curves over |C128| and scales by ROM gain; retained Normal-mode value0 can reach only equivalent banks 0/2, while Sport value2 selects distinct bank1"},
         {"cell": "FEBECB38", "runtime_writer": "0x000CF2B2", "classification": "angle-domain ramp/return/dither term", "provenance": "CF2B2 slew/median-limits CB08*CB20/0x100; CB08 is recovered from the 0x025 angle-processing family and CB20 is an internal ramp sequencer"},
         {"cell": "FEBEC5EE", "runtime_writer": "0x000C9A84", "classification": "moving-mode monitor/assist term; zero in retained drives", "provenance": "C9A84 scales C5EC by C5B8; retained 0x0D5 s213 source is identically zero"},
         {"cell": "FEBECBE8", "runtime_writer": "0x000CFCD4", "classification": "phase-window angle excitation/return term", "provenance": "CFCD4 clamps CC22+CB64; both are internally sequenced angle/phase waveform state, not an external lane target"},
@@ -468,10 +686,60 @@ def main() -> int:
             ),
             "live_source": str(LIVE_SELECTOR.relative_to(REPO)),
             "classification": (
-                "verified static+retained-drive closure: the ordinary COM parameter selector has no effective "
-                "C2B64 calibration effect under the route-wide zero sig160 state; the sole distinct normal bank "
-                "is FEBEC156=1, which the zero mode value cannot select."
+                "verified static+retained-drive closure: the 0x51E sig160 drive-mode selector has no C2B64 calibration "
+                "change under the retained route-wide Normal-compatible value0 state; FEBEC156=1 is the sole "
+                "distinct healthy bank and is selected by the recovered Sport value2 path."
             ),
+        },
+        "drive_mode_assist_map": {
+            "oem_diagnostic_source": {
+                "source": str(GTS_REGISTRY.relative_to(REPO)),
+                "category_id": 397,
+                "database": "HV_P5.ddb",
+                "data_id": "0x1004",
+                "name": drive_mode_did["name"],
+                "patterns": drive_mode_patterns,
+            },
+            "eps_wire_selector": {
+                "can_id": "0x51E", "byte": 0, "bit_offset": 0, "bits": 4,
+                "raw_cell": "FEBE8030", "stage_cell": "FEBEF050",
+                "mode_cell": "FEBEB124",
+                "chain": "0x51E B0[3:0] -> FEBE8030 -> FEBEF050 -> B3430/B3686 -> FEBEB124 -> B35DC/B372A -> FEBEB121 -> AC2F -> C54A2/C158 -> C5554/C156 -> C28FC/C2B64",
+                "semantic_grade": "recovered: exact F33 enum branches align with installed Camry HV_P5 Drive Mode Select Status; a synchronized live DID0x1004/0x51E mode-toggle capture is still the independent wire-name closure",
+            },
+            "mode_to_calibration": {
+                "normal": {"oem_value": 0, "selector": "0 or 2", "effective_bank": "normal_primary_surface", "reason": "selector0 == selector2 byte-for-byte for the C28FC/C2B64 primary surface; smaller selector2 shaping differences are recorded separately"},
+                "sport": {"oem_value": 2, "selector": 1, "effective_bank": "sport_primary_surface", "reason": "B35DC/B372A value2 -> 0x11 -> C158=0x77 -> C156=1"},
+                "eco": {"oem_value": 6, "selector": 0, "effective_bank": "normal_primary_surface", "reason": "value6 falls through to AC2F=0 -> C156=0"},
+                "sport_s_plus": {"oem_value": 4, "selector": 1, "effective_bank": "sport_primary_surface", "reason": "value4 follows the same selector1 branch as value2"},
+            },
+            "healthy_bank_relation": "For the 0x220-byte C28FC/C2B64 primary surface, selectors0/2/3 are byte-identical and selector1/Sport differs by 215 bytes. Smaller selector-indexed shaping regions are censused separately below.",
+            "speed_breakpoints_kph": speed_breakpoints_kph,
+            "driver_torque_axis": "signed Q8.8 torque-domain axis; 0x100 counts corresponds to 1.000 Nm by the exact upstream DID 0x1035 Steering Wheel Torque scaling",
+            "direct_bf3c_samples": drive_mode_samples,
+            "secondary_effect": "C29B2 also emits local curve slope; C2C32 speed-blends that slope into FEBEBF40, which C8678 consumes in the separate FEBEC4C0 torque+speed term. The mode bank therefore affects more than the direct BF3C magnitude.",
+            "selector_reader_census": {
+                "FEBEC156_direct_readers": [f"0x{x:06X}" for x in c156_readers],
+                "direct_region_count": len(selector_group_census),
+                "direct_regions": selector_group_census,
+                "sport_selector1_distinct_regions_vs_selector0": sport_distinct_groups,
+                "selector2_distinct_regions_vs_selector0": selector2_distinct_groups,
+                "pointer_alias_families": {k: [f"0x{x:06X}" for x in v] for k, v in pointer_alias_families.items()},
+                "C4E94_pointer_pairs": {
+                    "D2F38": [f"0x{x:06X}" for x in c4e94_a],
+                    "D2F3C": [f"0x{x:06X}" for x in c4e94_b],
+                },
+                "C8678_pointer_words": [f"0x{x:06X}" for x in c8678_pairs],
+                "sport_secondary_paths": {
+                    "C6E7E_8x_map_bank": "C6E7E C362 -> C6F1E C348 -> C6F58 C358 -> C6F68 C39C -> D0162",
+                    "C7AB0_map_B_to_C41E": "C7AB0 C416 -> C7B44 C418 -> C7C58 C41E -> D0162",
+                    "C91F2_map_A_to_C5A8": "C91F2 C590/C592 -> C9314 dynamic state -> C945E/C94B8 C5A8 -> D0162",
+                    "C9258_map_B_to_C5A8": "C9258 C594 -> C945E/C94B8 C5A8 -> D0162",
+                },
+                "classification": "31 exact C156 readers are censused. Among 26 direct healthy selector-strided calibration regions, selector1/Sport differs from selector0 in five regions; the other direct regions alias. All separately pointer-indexed selector families enumerated here alias across 0..3. OEM names for the four smaller distinct shaping regions remain bounded, but their control paths are live and all four converge into D0162 through C39C, C41E, or C5A8.",
+            },
+            "normal_eco_boundary": "Eco value6 deterministically selects selector0. Mode value0 with the retained route-wide zero companion fields settles the ordinary Normal path to selector0; selector2 is a separate value0 companion/customization substate and differs from selector0 in three small shaping regions even though the main C28FC/C2B64 driver-torque surface is identical. Do not generalize Normal==Eco to every possible value0 companion/customization state.",
+            "boundary": "The percentages above compare only the exact C2B64/FEBEBF3C base-assist term, not total EPS motor torque. D0218 sums multiple torque/speed/return terms before the shared current-control funnel. They demonstrate why Sport is heavier without quantifying whole-rack assist reduction.",
         },
         "selector_influence_observability": {
             "FEBEC5EE_via_0x1C3E": (
