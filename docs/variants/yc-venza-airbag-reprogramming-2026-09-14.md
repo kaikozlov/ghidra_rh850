@@ -374,6 +374,32 @@ roots are **airbag-specimen credentials**. Their values must not be projected
 onto the Camry EPS merely because both systems use Toyota/Denso RH850
 reprogramming architecture.
 
+### 5.4 No plaintext SecOC key is identified in the supplied dump
+
+A separate search for an operational SecOC/AES-CMAC key does **not** identify
+one in either supplied artifact. The two unexplained-looking 16-byte constants
+at `0xC3AC` and `0xC3BC` cannot be repurposed as SecOC candidates: the call
+chains above already assign them independently to RequestDownload payload
+construction and RPRG SecurityAccess. Known comparison credentials from the
+tracked EPS specimens likewise do not occur in `cflash.bin` or `boot.bin`.
+
+There is additional application-side AES material in CodeFlash: a second
+standard forward/inverse AES table set begins at `0x22EE1` / `0x22FE1`, distinct
+from the RPRG AES tables at `0xC3FD` / `0xC4FD`. That establishes more AES
+capability in the image, but not SecOC by itself. The current static project has
+no recovered direct reference from executable code into the second table set,
+and a focused search did not recover a software-CMAC subkey path around the
+standard `0x87` reduction constant. Therefore neither those tables nor any
+adjacent 16-byte data are assigned as an operational SecOC key.
+
+This negative is deliberately scoped to the supplied artifacts. yc provided
+CodeFlash plus the extended-user RPRG image, **not DataFlash or protected
+security-hardware contents**. A live SecOC key could therefore reside in a
+non-CodeFlash persistent object or a hardware-backed key slot without appearing
+as plaintext in these files. The exact airbag MCU/security peripheral is still
+unresolved, so this note does not assume the EPS ICU-S implementation transfers
+to the airbag ECU.
+
 ## 6. What the yc image changes for F33 EPS recovery
 
 ### It disproves one tempting interpretation
