@@ -2142,7 +2142,7 @@
     "exact_f33_corpus": "data/generated/camry-8965F3307000/decompilations.jsonl",
     "exact_f33_corpus_sha256": "760d19ce641e3e73b89bfc65185ffa08f16e563cc7a83a07f0594a42889c001d",
     "external_ingress_artifact": "data/generated/camry_8965F3307000_external_lateral_ingress.json",
-    "external_ingress_artifact_sha256": "d6c13f5feeb0e7adc7d6671f8ef5a22019d20d30a0d7c61156e5827d223306c2",
+    "external_ingress_artifact_sha256": "cf1a1ea385506983029869c9e802288d690f1241cd51fe32d4c92a8dc87b7393",
     "f33_port_artifact": "data/generated/camry_8965F3307000_tss3_opendbc_port.json",
     "f33_port_artifact_sha256": "a0c9fbecc1a80a6a460c83f112110dc09fcd671582b05b2b40a4683a5ddf0a0b",
     "freshness_artifact": "data/generated/camry_b6_freshness_contract.json",
