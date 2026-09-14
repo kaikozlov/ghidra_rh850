@@ -64,7 +64,11 @@ from this CodeFlash rather than assumed from part-number similarity.
 
 The contributor reports that Calvin's existing DataFlash and CodeFlash dump
 payloads executed successfully on this Crown after the direct EPS diagnostic
-route was corrected. The CodeFlash collection repeatedly hit
+route was corrected. The route discussed immediately before this acquisition
+was the stock Toyota-B normal-harness path, `set_safety_mode(3, 1)` with Panda
+logical bus 1. No machine-readable route transcript accompanied the imported
+files, so `bus1,param1` is retained as contributor-reported acquisition context,
+not as a locally replayed capture. The CodeFlash collection repeatedly hit
 `PandaSpiNackResponse` near the end of the 2-MiB transfer, so the contributor
 changed the collector to preserve the partial buffer instead of discarding it.
 That collector patch and its coverage metadata were not supplied with these

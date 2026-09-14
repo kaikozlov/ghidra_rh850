@@ -68,6 +68,10 @@ def u32(data: bytes, off: int) -> int:
     return struct.unpack_from("<I", data, off)[0]
 
 
+def s16(data: bytes, off: int) -> int:
+    return struct.unpack_from("<h", data, off)[0]
+
+
 def corpus(path: Path) -> dict[int, dict]:
     out: dict[int, dict] = {}
     with path.open() as f:
@@ -242,6 +246,58 @@ def main() -> int:
     # address and numeric transform below is checked against Crown CodeFlash.
     target_scale = cr[0xC9B64]["decompiled_c"]
     need(target_scale, "iVar1 = DAT_febeae90 * 2", "DAT_febec09c = DAT_febebfb4", "DAT_febec0c8 = DAT_febebfb4")
+
+    # ID11 selects mode/bank 2. The following target conditioner loads its
+    # absolute and per-foreground-step limits from the mode/bank calibration
+    # record before clamping the doubled B6 raw target.  AC3C selects one of two
+    # calibration halves, but both ID11 records resolve to the same values.
+    target_limit_select = cr[0xC9B22]["decompiled_c"]
+    need(
+        target_limit_select,
+        "(DAT_febec200 & 7) == 7",
+        "iVar1 = (int)(short)((DAT_febec200 & 7) + (DAT_febeac3c & 1) * 8)",
+        "DAT_febec0fe = 0x7ffe", "DAT_febec100 = 0x7ffe",
+        "(&PTR_LAB_000d094c)[iVar1 * 0x57]",
+        "(&PTR_LAB_000d0950)[iVar1 * 0x57]",
+        "DAT_febec0fe", "DAT_febec100",
+    )
+    target_limit_clamp = cr[0xC9C08]["decompiled_c"]
+    need(
+        target_limit_clamp,
+        "uVar5 = (uint)DAT_febec0fe",
+        "uVar4 = (uint)DAT_febec100",
+        "DAT_febebfb0 = uVar4 + DAT_febec0a0",
+        "DAT_febebfb8 = -uVar5",
+        "DAT_febec0a0 = DAT_febebfb8",
+    )
+    id11_limit_records = []
+    for bank_bit, index, expected_delta_ptr in ((0, 2, 0x1A99A), (1, 10, 0x1299A)):
+        record = 0xD094C + index * 0x15C
+        absolute_ptr = u32(crown, record)
+        delta_ptr = u32(crown, record + 4)
+        absolute_internal = s16(crown, absolute_ptr)
+        delta_internal = s16(crown, delta_ptr)
+        if not (
+            absolute_ptr == 0xB057E and delta_ptr == expected_delta_ptr
+            and absolute_internal == 3490 and delta_internal == 7
+        ):
+            raise ValueError(
+                f"Crown ID11 target-limit calibration drift bank={bank_bit}: "
+                f"record=0x{record:X} abs=0x{absolute_ptr:X}/{absolute_internal} "
+                f"delta=0x{delta_ptr:X}/{delta_internal}"
+            )
+        id11_limit_records.append({
+            "ac3c_bank_bit": bank_bit,
+            "mode_index": index,
+            "record": f"0x{record:08X}",
+            "absolute_limit_pointer": f"0x{absolute_ptr:08X}",
+            "absolute_limit_internal": absolute_internal,
+            "step_limit_pointer": f"0x{delta_ptr:08X}",
+            "step_limit_internal": delta_internal,
+        })
+    id11_raw_limit = 3490 // 2
+    if id11_raw_limit * 2 != 3490:
+        raise ValueError("Crown ID11 internal/raw target-limit relation no longer integral")
     measured_unpack = cr[0x4AEF8]["decompiled_c"]
     need(
         measured_unpack,
@@ -249,9 +305,30 @@ def main() -> int:
         "FUN_0007a8e6(0xba,0x123,4,4,1,(int)puVar2 + -0x3ccd)",
     )
     measured_reconstruct = cr[0xCB640]["decompiled_c"]
-    need(measured_reconstruct, "((int)DAT_febeacc5 + DAT_febeadfe * 0xf) * 0x6fb) / 0x200")
+    need(
+        measured_reconstruct,
+        "((int)DAT_febeacc5 + DAT_febeadfe * 0xf) * 0x6fb) / 0x200",
+        "iVar13 = iVar12 * 2 - iVar1",
+        "puVar6[0x26f] = iVar13",
+    )
     measured_republish = cr[0xCB730]["decompiled_c"]
-    need(measured_republish, "DAT_febeae5e * 2 - iVar2", "DAT_febec1d2", "DAT_febec1d4", "DAT_febec1d6")
+    need(
+        measured_republish,
+        "iVar2 = DAT_febeae5e * 2 - iVar2",
+        "DAT_febec1d2", "DAT_febec1d4", "DAT_febec1d6",
+    )
+    # CB640 first stores (2*AE5E - measured_internal). CB730 later consumes that
+    # voted value and computes (2*AE5E - prior), algebraically restoring the
+    # same-sign measured_internal term. Pin the auxiliary AE5E copy edge too so
+    # this cancellation cannot silently become an assumed sign convention.
+    aux_writer = cr[0xB9066]["decompiled_c"]
+    need(aux_writer, "DAT_febeb49e", "DAT_febeafe8", "0x188b", "0x4000")
+    bb51a_refs = {(r.get("from_addr"), r.get("ref_type"), r.get("to_addr")) for r in cr[0xBB51A].get("data_references", [])}
+    if not ({
+        ("0x000bb8b4", "READ", "0xfebeb49e"),
+        ("0x000bb8b8", "WRITE", "0xfebeae5e"),
+    } <= bb51a_refs):
+        raise ValueError("Crown AE5E auxiliary copy edge drift")
     comparator = cr[0xC9D7E]["decompiled_c"]
     need(
         comparator,
@@ -270,6 +347,43 @@ def main() -> int:
     controller_deg_den = 17870
     controller_deg = controller_deg_num / controller_deg_den
     controller_mrad = controller_deg * math.pi / 180.0 * 1000.0
+
+    # Diagnostic transport is target-native too. The boot core is byte-identical
+    # through these tables, while the application carries a relocated but value-
+    # identical physical/functional/secondary address block and only the CAN1
+    # interrupt pair is active.
+    if (u32(crown, 0x8924), u32(crown, 0x8930), u32(crown, 0x894C)) != (0x7A1, 0x777, 0x7A9):
+        raise ValueError("Crown boot diagnostic address table drift")
+    app_diag_ids = [u32(crown, off) for off in (0x21E68, 0x21E70, 0x21E78, 0x21E80, 0x21E88, 0x21E90, 0x21E98)]
+    if app_diag_ids != [0x7A9, 0x7A9, 0x7A8, 0x7A8, 0x7A1, 0x777, 0x7A0]:
+        raise ValueError(f"Crown application diagnostic address block drift: {app_diag_ids}")
+    app_vectors = {irq: u32(crown, 0x20200 + irq * 4) for irq in (184, 185, 187, 188, 192, 193)}
+    if not (
+        app_vectors[187] == 0x65500 and app_vectors[188] == 0x654BE
+        and len({app_vectors[x] for x in (184, 185, 192, 193)}) == 1
+        and app_vectors[184] == 0x6221E
+    ):
+        raise ValueError(f"Crown application RSCFD interrupt routing drift: {app_vectors}")
+
+    # Crown receives classic 0x127, but the exact EPS generated-COM unpacker does
+    # not extract B5[7:4]. Upstream Toyota TSS3 calls that nibble GEAR; without a
+    # Crown-native semantic consumer or field enum we deliberately do not use it
+    # as an automatic Park safety gate.
+    pdu127 = 25
+    pdu127_desc = struct.unpack_from("<II", crown, RX_DESCRIPTOR_BASE + (pdu127 - TX_PDU_COUNT) * 8)
+    pdu127_signals = [i for i, p in enumerate(signal_to_pdu) if p == pdu127]
+    pdu127_unpack = cr[0x4AA6C]["decompiled_c"]
+    if (pdu127_desc[0] & 0x1FFFFFFF, pdu127_desc[1]) != (0x127, 8) or pdu127_signals != list(range(124, 134)):
+        raise ValueError("Crown 0x127 generated-COM geometry drift")
+    for token in (
+        "FUN_0007a8e6(0x82,0xda,0xb,0,1,&DAT_febe7af6)",
+        "FUN_0007a8e6(0x7c,0xd7,6,2,0,(int)puVar2 + -0x3d06)",
+        "FUN_0007a8e6(0x7e,0xd8,1,3,0,(int)puVar2 + -0x3d05)",
+    ):
+        if token not in pdu127_unpack:
+            raise ValueError(f"Crown 0x127 unpack token drift: {token}")
+    if ",0xdc," in pdu127_unpack:
+        raise ValueError("Crown unexpectedly extracts the upstream-prior-art 0x127 B5 gear nibble")
 
     # Candidate Crown-native sideband: accepted classic 0x1DA/DLC8 with only B0 low nibble
     # configured in generated COM. B1..B7 have no generated scalar extraction.
@@ -377,6 +491,18 @@ def main() -> int:
             "controller_equivalent_deg_per_b6_count": controller_deg,
             "controller_equivalent_mrad_per_b6_count": controller_mrad,
             "target_internal_relation": "C9B64: target_internal_pre_controller = saturate(2 * signed16(B6 B4:B5))",
+            "id11_limits": {
+                "selector": "CBC52 maps Target Lateral ID 11 to C200 mode 2; C9B22 then selects index 2+(AC3C&1)*8",
+                "calibration_records": id11_limit_records,
+                "absolute_limit_internal": 3490,
+                "absolute_limit_b6_raw": id11_raw_limit,
+                "absolute_limit_deg": id11_raw_limit * controller_deg,
+                "step_limit_internal_per_foreground_invocation": 7,
+                "step_limit_b6_raw_equivalent_per_foreground_invocation": 3.5,
+                "step_limit_deg_equivalent_per_foreground_invocation": 3.5 * controller_deg,
+                "clamp_function": "0x000C9C08",
+                "boundary": "The step limit is per target-conditioner foreground invocation; no time unit is attached here. The host hard bound uses only the exact +/-1745 raw absolute envelope.",
+            },
             "measured_wire": {
                 "can_id": "0x025",
                 "coarse_signal": 185,
@@ -387,8 +513,10 @@ def main() -> int:
                 "combined_unit": "0.1 deg",
                 "oem_join": "Crown DID1037 callback reads the same coarse source; current Toyota P5 Techstream names DID1037 Steering Angle at 1.5 deg/count, leaving the signed4 fraction as 0.1 deg/count",
             },
-            "measured_internal_relation": "CB640: trunc((fraction + 15*coarse) * 1787 / 512)",
-            "measured_republish": "CB730 republishes the valid measured-angle controller domain to C1D2/C1D4/C1D6",
+            "measured_internal_relation": "CB640: measured_internal=trunc((fraction + 15*coarse) * 1787 / 512), then stores prior=2*AE5E-measured_internal",
+            "measured_republish": "CB730 consumes the voted prior and computes 2*AE5E-prior; substituting CB640 gives measured_internal with the original sign, then republishes it to C1D2/C1D4/C1D6",
+            "measured_sign_proof": "CB640 prior=2*A-M and CB730 output=2*A-prior => output=M; AE5E cancels exactly before the common comparator",
+            "auxiliary_term": "AE5E is copied from FEBEB49E by BB51A; B9066 computes FEBEB49E independently. Its physical meaning is not required for the scale/sign proof because it cancels algebraically.",
             "matched_controller": "C9D7E applies the same 0xB76/0x400 gain to target and measured domains before subtracting measured from target",
             "derivation": "2 B6-internal counts per B6 raw count versus (10 tenths/deg)*(1787/512) measured-internal counts/deg => 2*512/(10*1787) = 1024/17870 deg/count",
             "quantization_boundary": "integer truncation/saturation remain; the fraction is the exact linearized controller-equivalent conversion, not a claim that every integer code has a unique exact degree value",
@@ -411,6 +539,20 @@ def main() -> int:
                 "position": "after native receive drain and before untouched receive tail / later stock SecOC scheduling",
             },
             "application_sid23": {"service_table": "0x00025990", "callback": "0x00094060", "session": "EXTENDED"},
+        },
+        "diagnostic_transport": {
+            "boot": {"physical_request": "0x7A1", "functional_request": "0x777", "physical_response": "0x7A9", "evidence": "exact Crown boot tables 0x8920/0x8948 inside byte-identical 0x0000..0x91FF boot core"},
+            "application": {"address_block": "0x00021E68..0x00021E9F", "physical_request": "0x7A1", "functional_request": "0x777", "physical_response": "0x7A9", "secondary_request": "0x7A0", "secondary_response": "0x7A8"},
+            "controller": {"rscfd_channel": 1, "rx_irq": 187, "tx_irq": 188, "rx_vector": "0x00065500", "tx_vector": "0x000654BE", "other_can_irq_vectors_default": True},
+            "panda_stock_wire_route": {"bus": 1, "elm327_param": 1, "status": "contributor-reported acquisition route; no machine-readable route transcript accompanied the imported dumps"},
+        },
+        "park_gate_boundary": {
+            "can_id": "0x127", "format": "classic", "dlc": 8, "pdu_id": 25,
+            "configured_signal_ids": list(range(124, 134)),
+            "exact_eps_extractions": ["signal130 raw+3 signed11", "signal124 B0[7:2]", "signal126 B1[3]"],
+            "b5_high_nibble_extracted": False,
+            "upstream_prior_art": "Toyota TSS3 DBC names 0x127 B5[7:4] GEAR, but exact Crown EPS firmware does not consume that nibble",
+            "runtime_policy": "Park remains explicit operator confirmation; do not turn upstream gear enum into an exact-Crown safety claim",
         },
         "sideband_candidate": {
             "status": "firmware-qualified-live-conflict-gated",

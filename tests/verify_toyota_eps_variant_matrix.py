@@ -41,7 +41,7 @@ check("matrix has at least Sienna and Corolla rows", len(rows) >= 2)
 vehicles = [r["vehicle"] for r in rows]
 check("Sienna row present", any("Sienna" in v for v in vehicles))
 check("Corolla row present", any("Corolla" in v for v in vehicles))
-check("matrix contains only evidence-backed rows", len(rows) == 5 and all(r["application_software_id"] != "unknown" for r in rows))
+check("matrix contains only evidence-backed rows", len(rows) == 6 and all(r["application_software_id"] != "unknown" for r in rows))
 check("matrix models ADAS and security as separate columns", all("adas_generation" in r and "security_architecture" in r for r in rows))
 check("all three tracked dump specimens are SecOC/TSK", all(
     r["security_architecture"].startswith("SecOC/TSK") for r in rows
@@ -59,6 +59,7 @@ sienna_4514000 = next(
 corolla = next((r for r in rows if r["vehicle"].startswith("2025 Toyota Corolla")), None)
 corolla_h = next((r for r in rows if r["vehicle"].startswith("2023 US Toyota Corolla")), None)
 camry = next((r for r in rows if r["vehicle"].startswith("2026 Toyota Camry")), None)
+crown = next((r for r in rows if r["vehicle"].startswith("2024 Toyota Crown")), None)
 
 check("Sienna 4512000 ADAS generation is not inferred from security", sienna_4512000 is not None and "not established" in sienna_4512000["adas_generation"] and "do not infer from SecOC" in sienna_4512000["adas_generation"])
 check("Sienna 4514000 external TSS3 label is independent of SecOC evidence", sienna_4514000 is not None and "reported TSS3" in sienna_4514000["adas_generation"] and "independent of SecOC" in sienna_4514000["adas_generation"])
@@ -194,6 +195,30 @@ if camry:
     check("Camry exact MCU is R7F701381", "RH850/P1M-E" in camry["mcu"] and "R7F701381" in camry["mcu"] and "0x180" in camry["mcu"])
     check("Camry boot routines are direct and stock RMBA is rejected", all(x in camry["bootloader_routines"] for x in ("10F0", "FEBF0000/0x1000", "FF00", "SID23", "rejected")))
     check("Camry source points at exact CodeFlash evidence", all(x in camry["source"] for x in ("CODEFLASH_MANIFEST.txt", "8965F3307000_codeflash.json", "normalized CodeFlash")))
+
+# ── 2024 Crown: exact target + contributor dump acquisition ─────
+check("Crown row present", crown is not None)
+if crown:
+    check("Crown exact F181 pair is preserved",
+          crown["application_software_id"] == "8965F3012000" and crown["secondary_software_id"] == "8A3113008000")
+    check("Crown diagnostic endpoint is exact 7A1/777 -> 7A9",
+          crown["physical_request"] == "0x7A1" and crown["physical_response"] == "0x7A9" and crown["functional_request"] == "0x777" and crown["secondary_request"] == "0x7A0")
+    check("Crown route distinguishes exact ECU channel from contributor Panda provenance",
+          all(x in crown["diagnostic_bus"] for x in ("ELM327 param 1", "logical bus 1", "RSCFD channel 1", "no machine-readable route transcript")))
+    check("Crown application SID table is exact 17-entry set",
+          set(x.strip() for x in crown["application_sid_set"].split(" (")[0].split(",")) == {
+              "10","11","14","19","22","23","27","28","2E","31","34","36","37","3E","85","AB","BA"
+          })
+    check("Crown exact crypto roots and dynamic-transcript boundary are explicit",
+          all(x in crown["security_levels"] for x in ("@0xBFD8", "@0xBFE8", "@0x20840", "byte-identical", "no raw SA transcript")))
+    check("Crown contributor dump success is retained without inventing a run transcript",
+          all(x in crown["programming_observation"] for x in ("Calvin", "bus1,param1", "executed successfully", "no session/run JSON", "no CAN transcript")))
+    check("Crown exact secured receive set is 00F/D7/B6",
+          all(x in crown["secured_can_ids"] for x in ("0x00F", "0x0D7", "0x0B6", "@0x25584", "PDU42", "selector4")) and "0x2E4" not in crown["secured_can_ids"])
+    check("Crown exact MCU and firmware are retained",
+          "R7F701381" in crown["mcu"] and "@0x190" in crown["mcu"] and crown["firmware_available"].startswith("yes") and "crown-8965F3012000" in crown["firmware_available"])
+    check("Crown evidence grade is definitive while field route stays source-bounded",
+          crown["evidence_grade"] == "definitive" and "external-source provenance without run transcript" in crown["source"])
 
 # ── Global structural checks ────────────────────────────────────
 required_cols = {

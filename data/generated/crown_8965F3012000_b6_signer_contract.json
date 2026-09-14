@@ -38,6 +38,61 @@
       "wire": "B3[5:0]"
     }
   },
+  "diagnostic_transport": {
+    "application": {
+      "address_block": "0x00021E68..0x00021E9F",
+      "functional_request": "0x777",
+      "physical_request": "0x7A1",
+      "physical_response": "0x7A9",
+      "secondary_request": "0x7A0",
+      "secondary_response": "0x7A8"
+    },
+    "boot": {
+      "evidence": "exact Crown boot tables 0x8920/0x8948 inside byte-identical 0x0000..0x91FF boot core",
+      "functional_request": "0x777",
+      "physical_request": "0x7A1",
+      "physical_response": "0x7A9"
+    },
+    "controller": {
+      "other_can_irq_vectors_default": true,
+      "rscfd_channel": 1,
+      "rx_irq": 187,
+      "rx_vector": "0x00065500",
+      "tx_irq": 188,
+      "tx_vector": "0x000654BE"
+    },
+    "panda_stock_wire_route": {
+      "bus": 1,
+      "elm327_param": 1,
+      "status": "contributor-reported acquisition route; no machine-readable route transcript accompanied the imported dumps"
+    }
+  },
+  "park_gate_boundary": {
+    "b5_high_nibble_extracted": false,
+    "can_id": "0x127",
+    "configured_signal_ids": [
+      124,
+      125,
+      126,
+      127,
+      128,
+      129,
+      130,
+      131,
+      132,
+      133
+    ],
+    "dlc": 8,
+    "exact_eps_extractions": [
+      "signal130 raw+3 signed11",
+      "signal124 B0[7:2]",
+      "signal126 B1[3]"
+    ],
+    "format": "classic",
+    "pdu_id": 25,
+    "runtime_policy": "Park remains explicit operator confirmation; do not turn upstream gear enum into an exact-Crown safety claim",
+    "upstream_prior_art": "Toyota TSS3 DBC names 0x127 B5[7:4] GEAR, but exact Crown EPS firmware does not consume that nibble"
+  },
   "port_boundary": {
     "closed": [
       "RAM geometry",
@@ -257,6 +312,7 @@
     "tp": "0x00023C98"
   },
   "target_angle_scaling": {
+    "auxiliary_term": "AE5E is copied from FEBEB49E by BB51A; B9066 computes FEBEB49E independently. Its physical meaning is not required for the scale/sign proof because it cancels algebraically.",
     "controller_equivalent_deg_per_b6_count": 0.05730274202574147,
     "controller_equivalent_fraction_deg_per_b6_count": {
       "denominator": 17870,
@@ -274,9 +330,41 @@
       "measured_reconstruct": "0x000CB640",
       "measured_republish": "0x000CB730"
     },
+    "id11_limits": {
+      "absolute_limit_b6_raw": 1745,
+      "absolute_limit_deg": 99.99328483491887,
+      "absolute_limit_internal": 3490,
+      "boundary": "The step limit is per target-conditioner foreground invocation; no time unit is attached here. The host hard bound uses only the exact +/-1745 raw absolute envelope.",
+      "calibration_records": [
+        {
+          "absolute_limit_internal": 3490,
+          "absolute_limit_pointer": "0x000B057E",
+          "ac3c_bank_bit": 0,
+          "mode_index": 2,
+          "record": "0x000D0C04",
+          "step_limit_internal": 7,
+          "step_limit_pointer": "0x0001A99A"
+        },
+        {
+          "absolute_limit_internal": 3490,
+          "absolute_limit_pointer": "0x000B057E",
+          "ac3c_bank_bit": 1,
+          "mode_index": 10,
+          "record": "0x000D16E4",
+          "step_limit_internal": 7,
+          "step_limit_pointer": "0x0001299A"
+        }
+      ],
+      "clamp_function": "0x000C9C08",
+      "selector": "CBC52 maps Target Lateral ID 11 to C200 mode 2; C9B22 then selects index 2+(AC3C&1)*8",
+      "step_limit_b6_raw_equivalent_per_foreground_invocation": 3.5,
+      "step_limit_deg_equivalent_per_foreground_invocation": 0.20055959709009513,
+      "step_limit_internal_per_foreground_invocation": 7
+    },
     "matched_controller": "C9D7E applies the same 0xB76/0x400 gain to target and measured domains before subtracting measured from target",
-    "measured_internal_relation": "CB640: trunc((fraction + 15*coarse) * 1787 / 512)",
-    "measured_republish": "CB730 republishes the valid measured-angle controller domain to C1D2/C1D4/C1D6",
+    "measured_internal_relation": "CB640: measured_internal=trunc((fraction + 15*coarse) * 1787 / 512), then stores prior=2*AE5E-measured_internal",
+    "measured_republish": "CB730 consumes the voted prior and computes 2*AE5E-prior; substituting CB640 gives measured_internal with the original sign, then republishes it to C1D2/C1D4/C1D6",
+    "measured_sign_proof": "CB640 prior=2*A-M and CB730 output=2*A-prior => output=M; AE5E cancels exactly before the common comparator",
     "measured_wire": {
       "can_id": "0x025",
       "coarse_signal": 185,
