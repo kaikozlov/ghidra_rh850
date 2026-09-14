@@ -1359,3 +1359,53 @@ two candidate frame formats. A positive F186 identifies the application service;
 NRC `0x31` is only boot-compatible, and neither result is restore authorization.
 This is not yet a repair, and A30 should not be attempted until a nondamaging
 exact connection method and the car's own connector orientation are verified.
+
+## 19. yc Venza airbag image: real retained RPRG handoff, but not a new F33 CAN recovery path
+
+A 2026-09-14 community artifact from yc adds a useful related-RH850 comparison,
+but it does **not** change the no-working-CAN-only result of this incident audit.
+The specimen is a contributor-reported Venza airbag sensor, not an EPS, and its
+exact MCU part number is still unknown. The complete airbag analysis is in
+[yc-venza-airbag-reprogramming-2026-09-14.md](yc-venza-airbag-reprogramming-2026-09-14.md).
+
+The received 32-KiB `boot.bin` initially looked promising as a possible stage
+that ran before CodeFlash `0x0`. The airbag's own CodeFlash disproves that simple
+interpretation. Its relocation tables source `0x01000000..0x01007588` and
+`0x01007588..0x01007BD0` into the common RAM runtime, with the trailer identifying
+`AUBIST_RPRG_201902`. A relocated direct-call seam enters the first copied byte.
+This is an extended-user RPRG component linked into the RAM-loaded runtime, not
+the RH850's immutable on-chip serial-programming firmware.
+
+The same image does prove a deliberate retained programming transition. One DCM
+SID-`0x10` group has subfunction `0x02` at `0x237E0`, callback `0xC190C`, and
+allowed current sessions `1/3/2`. The session-2 policy at `0xC772C` has three
+live preconditions and can return NRC `0x88` or `0x22`; it is not unconditional.
+On the asynchronous accepted path, `0xC76C6` writes a 32-byte record at
+`FEF0FFD0..FEF0FFEF` and `FEF0FFF0=5AA5A55A`. Startup preserves the record across
+its destructive RAM test, `0x17BC` recognizes the magic, `0x17D2` clears it, and
+`0xE9E` folds it together with other reset/hardware predicates into the boolean
+passed to the relocated runtime. The programming transition's event-6 callback
+also writes `0x200` to two airbag-specific hardware locations, disables
+interrupts, and halts; those SFRs are deliberately not named without the exact
+airbag MCU manual.
+
+This sharpens two boundaries for the F33 incident:
+
+- **No power-up `10 02` shortcut was recovered.** The airbag request is ordinary
+  DCM work followed by a retained handoff. On a healthy F33, the known
+  application programming transition can succeed in NRTD; on the currently
+  poisoned F33, §2 already establishes that its scheduled DCM worker and normal
+  `0x65F5E -> 0x9F00` handoff lie after the malformed foreground call. The yc
+  mechanism gives no pre-fault packet interpreter to bypass that dependency.
+- **Do not transfer the airbag boot implementation to EPS.** Complete-body
+  comparison found only generic/library overlap and no named semantic F33
+  transfer. The useful transfer is an implementation pattern to search for,
+  not addresses or code.
+
+P1M-E's manufacturer-defined FLMD serial-programming mode remains a separate
+hardware route. It executes on-chip boot firmware selected at pin-reset release
+and therefore does not depend on healthy application CodeFlash. The yc RPRG
+image neither proves nor disproves external FLMD accessibility on the F33 rack;
+it mainly clarifies that the supplied `boot.bin` is not that mechanism. Any
+physical recovery work still requires exact connector/test-pad identification
+and electrical qualification rather than blind pin shorting.

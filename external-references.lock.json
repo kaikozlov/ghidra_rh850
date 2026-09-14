@@ -929,7 +929,7 @@
       "source": "mruno, comma Discord, 2026-09-13"
     },
     {
-      "notes": "32-KiB contributor-described Venza airbag-sensor boot-flash image; reported to execute before the ordinary CodeFlash bootloader at 0x00000000. Mapping address and transferability to EPS are not assumed.",
+      "notes": "32-KiB contributor-described Venza airbag-sensor boot-flash image. Firmware-static analysis maps it at 0x01000000..0x01007FFF and shows its executable portion relocated into RAM as an AUBIST_RPRG_201902 component; the contributor's earlier pre-CodeFlash-stage interpretation is retained only as provenance.",
       "path": "community/yc/venza/boot.bin",
       "provenance": "Discord-supplied raw boot-flash extraction from yc's Toyota Venza airbag-sensor investigation; preserved byte-for-byte.",
       "sha256": "943934abc9a5c676eff46f51f008baa39e4f533e66650ffcce54d7bfb6e6e6e2",
@@ -937,7 +937,7 @@
       "source": "yc, comma Discord, received 2026-09-14"
     },
     {
-      "notes": "3-MiB contributor-described Venza airbag-sensor CodeFlash dump. No acquisition transcript, address map, or coverage bitmap accompanied the import.",
+      "notes": "3-MiB contributor-described Venza airbag-sensor CodeFlash dump. No acquisition transcript or coverage bitmap accompanied the import; firmware-static analysis recovers the extended-user relocation and policy-gated 10 02 retained programming handoff.",
       "path": "community/yc/venza/cflash.bin",
       "provenance": "Discord-supplied raw CodeFlash extraction from yc's Toyota Venza airbag-sensor investigation; preserved byte-for-byte.",
       "sha256": "2dfaf7ce21cb04af1126192f574103f63802352f8717fa0f03986d5a11d067f9",

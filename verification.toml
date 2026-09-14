@@ -753,6 +753,9 @@ modes = ["local"]
 # explicit invocation fails closed unless --allow-skips is requested. Run with:
 # tools/test techstream_layerb
 
+[suite.yc_venza_airbag_reprogramming]
+tests = ["tests/verify_yc_venza_airbag_reprogramming.py"]
+
 [suite.community_tooling]
 tests = ["tests/verify_community_tooling.py"]
 # Cross-validates community exploit tooling (blurbdust/@yc flash patcher,

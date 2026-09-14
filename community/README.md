@@ -310,9 +310,11 @@ evidence boundary.
 
 This directory preserves a 32-KiB `boot.bin` and 3-MiB `cflash.bin` extracted
 from an RH850 airbag sensor using a contributor-reported hardware-glitch method.
-yc describes the boot image as an earlier stage that executes before the normal
-CodeFlash bootloader at `0x00000000`; the immediate research question is whether
-that stage exposes a hardware or CAN-triggered stay-in-boot path that transfers
-to the related EPS family. That transfer is not assumed. See
-[`yc/README.md`](yc/README.md) for exact hashes, provenance, and the evidence
-boundary.
+Initial reverse engineering corrects the contributor's pre-CodeFlash-stage
+hypothesis: `boot.bin` is the `0x01000000..0x01007FFF` extended-user image, its
+executable portion is relocated into RAM as an `AUBIST_RPRG_201902` component,
+and a configured, policy-gated `10 02` DCM path creates a retained programming
+handoff. No direct F33 code transfer was established. See
+[`yc/README.md`](yc/README.md) for exact hashes/provenance and
+[`docs/variants/yc-venza-airbag-reprogramming-2026-09-14.md`](../docs/variants/yc-venza-airbag-reprogramming-2026-09-14.md)
+for the recovered chain.
