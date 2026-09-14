@@ -1,0 +1,323 @@
+{
+  "b6_application": {
+    "contribution_1": {
+      "replacement_value": 100,
+      "scale": "percent / 100",
+      "signal": 263,
+      "snapshot": "0xFEBEADBD",
+      "wire": "B8"
+    },
+    "contribution_2": {
+      "replacement_value": 100,
+      "scale": "percent / 100",
+      "signal": 264,
+      "snapshot": "0xFEBEADBE",
+      "wire": "B9"
+    },
+    "native_sequence": {
+      "signal": 262,
+      "wire": "B7[5:0]"
+    },
+    "pdu_id": 42,
+    "raw_buffer": "0xFEBE4A38",
+    "replacement": "preserve native B0..B27 except B3 low6=11, B4:B5=target raw, B6 bit2=0, B8=B9=100; preserve native B7 sequence and all other fields",
+    "signal259": {
+      "replacement_value": 0,
+      "wire": "B6[2]"
+    },
+    "target_angle": {
+      "raw": "0xFEBE7B98",
+      "signal": 256,
+      "wire": "B4:B5 signed16"
+    },
+    "target_lateral_id": {
+      "id11_bank": 2,
+      "raw": "0xFEBE7B9C",
+      "signal": 255,
+      "snapshot": "0xFEBEADB0",
+      "wire": "B3[5:0]"
+    }
+  },
+  "port_boundary": {
+    "closed": [
+      "RAM geometry",
+      "startup/foreground replay",
+      "post-receive/pre-SecOC hook",
+      "B6 queue/buffer",
+      "freshness state",
+      "slot4 command5",
+      "B6 mutation tuple",
+      "B6 controller-equivalent target scale",
+      "application SID23 readback",
+      "Crown READY/stationary guard"
+    ],
+    "live_required": [
+      "0x1DA source-conflict negative",
+      "resident startup survival",
+      "native B6 presence",
+      "no-mutation native trailer equality",
+      "stationary one-shot replacement"
+    ],
+    "not_claimed": [
+      "literal OEM B6 engineering-unit label",
+      "road actuation",
+      "native 0x1DA absence"
+    ]
+  },
+  "runtime": {
+    "application_sid23": {
+      "callback": "0x00094060",
+      "service_table": "0x00025990",
+      "session": "EXTENDED"
+    },
+    "direct_reference_census": {
+      "helper": [],
+      "resident": []
+    },
+    "foreground": {
+      "aggregate": "0x00065BE2",
+      "pre_receive_call": "0x0006909E",
+      "stock_tail_after_receive": "0x00065BEE"
+    },
+    "helper_range": [
+      "0xFEBF0000",
+      "0xFEBF0307"
+    ],
+    "receive_hook": {
+      "native_receive_drain": "0x000792EE",
+      "position": "after native receive drain and before untouched receive tail / later stock SecOC scheduling",
+      "pre_helper_calls": [
+        "0x000798F0",
+        "0x000796C2",
+        "0x00079EA2",
+        "0x000792EE"
+      ],
+      "stock_tail_after_drain": "0x00079638",
+      "wrapper": "0x0007961A"
+    },
+    "resident_range": [
+      "0xFEBFF9F0",
+      "0xFEBFFBFB"
+    ]
+  },
+  "schema": "crown-8965f3012000-b6-signer-contract-v1",
+  "secoc": {
+    "authenticated_sync": {
+      "reset": "0xFEBE50F0",
+      "trip": "0xFEBE50EC"
+    },
+    "b6_profile": 2,
+    "b6_queue_record": "0xFEBE4FA6",
+    "b6_secured_buffer": "0xFEBE5000",
+    "command5_sync_wrapper": "0x00087662",
+    "committed_slot1": {
+      "message": "0xFEBE511C",
+      "reset": "0xFEBE5118",
+      "trip": "0xFEBE5114"
+    },
+    "freshness48_packer": "0x0008E006",
+    "key_config": {
+      "address": "0x00025564",
+      "selector": 4,
+      "type": 1
+    },
+    "profiles": [
+      {
+        "address": "0x00025584",
+        "application_bytes": 0,
+        "application_pdu_id": 9,
+        "commit_callback": "0x0008DEE8",
+        "cryptoif_handle": 0,
+        "data_id": "0x00F",
+        "freshness_id": 0,
+        "full_cmac_bits": 128,
+        "full_freshness_bits": 36,
+        "get_freshness_callback": "0x0008DE40",
+        "index": 0,
+        "is_sync": true,
+        "secured_pdu_length": 8,
+        "transmitted_cmac_bits": 28,
+        "transmitted_freshness_bits": 36,
+        "upper_callback": "0x00069614",
+        "upper_route_id": 9
+      },
+      {
+        "address": "0x000255D4",
+        "application_bytes": 28,
+        "application_pdu_id": 40,
+        "commit_callback": "0x0008DEE8",
+        "cryptoif_handle": 0,
+        "data_id": "0x0D7",
+        "freshness_id": 1,
+        "full_cmac_bits": 128,
+        "full_freshness_bits": 46,
+        "get_freshness_callback": "0x0008DE40",
+        "index": 1,
+        "is_sync": false,
+        "secured_pdu_length": 32,
+        "transmitted_cmac_bits": 28,
+        "transmitted_freshness_bits": 4,
+        "upper_callback": "0x00069614",
+        "upper_route_id": 40
+      },
+      {
+        "address": "0x00025624",
+        "application_bytes": 28,
+        "application_pdu_id": 42,
+        "commit_callback": "0x0008DEE8",
+        "cryptoif_handle": 0,
+        "data_id": "0x0B6",
+        "freshness_id": 2,
+        "full_cmac_bits": 128,
+        "full_freshness_bits": 46,
+        "get_freshness_callback": "0x0008DE40",
+        "index": 2,
+        "is_sync": false,
+        "secured_pdu_length": 32,
+        "transmitted_cmac_bits": 28,
+        "transmitted_freshness_bits": 4,
+        "upper_callback": "0x00069614",
+        "upper_route_id": 42
+      }
+    ]
+  },
+  "shared_architecture": {
+    "boot_core_0_91ff_identical_to_f33": true,
+    "crypto_roots_identical_to_f33": true,
+    "exact_body_mappings": {
+      "command5_dispatcher": {
+        "camry": "0x00089440",
+        "crown": "0x00086EE0",
+        "sha256": "dca5252efba4bfee3cc2a509050d088b280771ce58b1d4134d3ead290545d4e4",
+        "size": 150
+      },
+      "command5_sync_wrapper": {
+        "camry": "0x00089BC2",
+        "crown": "0x00087662",
+        "sha256": "edce5eb73b6cfb881a414328353e7aa575f19d30b55bd7a45db09d7d4cc43339",
+        "size": 138
+      },
+      "freshness48_packer": {
+        "camry": "0x00090566",
+        "crown": "0x0008E006",
+        "sha256": "5683f2780a5aeb96e677416e2cf2f7459a36d09b96713f7a1c50ea38fad484f8",
+        "size": 120
+      },
+      "generic_memcpy": {
+        "camry": "0x00089F2E",
+        "crown": "0x000879CE",
+        "sha256": "d0e538e63b2039cb7fba9d5b50d63e7ef480ec5c74a91d900bab0372acf3942c",
+        "size": 166
+      },
+      "startup_shadow_copy": {
+        "camry": "0x000636D4",
+        "crown": "0x00062AD4",
+        "sha256": "969ee65ec1d2a2523c1bd97a317de7923bc05a7e5ca3785760e5cb78296dc8b2",
+        "size": 36
+      }
+    }
+  },
+  "sideband_candidate": {
+    "boundary": "Generated-COM configuration proves B1..B7 have no configured scalar extraction and no direct reader of the sole B0-low4 snapshot. It does not prove the vehicle never publishes native 0x1DA or exclude pointer/DMA/computed consumers; live preflight is mandatory.",
+    "can_id": "0x1DA",
+    "configured_signal": {
+      "generation": "0xFEBE7BB7",
+      "signal": 276,
+      "status": "0xFEBE7BB8",
+      "value": "0xFEBE7BB6",
+      "wire": "B0[3:0]"
+    },
+    "direct_raw_buffer_references": [],
+    "direct_snapshot_readers": [],
+    "dlc": 8,
+    "format": "classic",
+    "live_gate": "before any 0x1DA transmission, observe stock bus1 and refuse if native 0x1DA is present",
+    "loader_frame": "00 C6 5A word_le32 index",
+    "pdu_id": 45,
+    "raw_buffer": "0xFEBE4A61",
+    "raw_generation": "0xFEBE4E91",
+    "runtime_frame": "00 C7 5A target_hi target_lo 00 00 seq",
+    "status": "firmware-qualified-live-conflict-gated",
+    "unused_wire_bytes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ]
+  },
+  "target": {
+    "codeflash_sha256": "5b89fdbc69edc2f66ef8a557f88b08c758e3146bd4e90067320d7966812b1273",
+    "gp": "0xFEBEB800",
+    "mcu": "R7F701381",
+    "secondary_id": "8A3113008000",
+    "software_id": "8965F3012000",
+    "tp": "0x00023C98"
+  },
+  "target_angle_scaling": {
+    "controller_equivalent_deg_per_b6_count": 0.05730274202574147,
+    "controller_equivalent_fraction_deg_per_b6_count": {
+      "denominator": 17870,
+      "numerator": 1024
+    },
+    "controller_equivalent_mrad_per_b6_count": 1.0001215187701138,
+    "derivation": "2 B6-internal counts per B6 raw count versus (10 tenths/deg)*(1787/512) measured-internal counts/deg => 2*512/(10*1787) = 1024/17870 deg/count",
+    "functions": {
+      "b6_target_scale": "0x000C9B64",
+      "b6_unpack": "0x0004B608",
+      "did1037": "0x0004D550",
+      "fd025_stage": "0x0004749C",
+      "fd025_unpack": "0x0004AEF8",
+      "matched_comparator": "0x000C9D7E",
+      "measured_reconstruct": "0x000CB640",
+      "measured_republish": "0x000CB730"
+    },
+    "matched_controller": "C9D7E applies the same 0xB76/0x400 gain to target and measured domains before subtracting measured from target",
+    "measured_internal_relation": "CB640: trunc((fraction + 15*coarse) * 1787 / 512)",
+    "measured_republish": "CB730 republishes the valid measured-angle controller domain to C1D2/C1D4/C1D6",
+    "measured_wire": {
+      "can_id": "0x025",
+      "coarse_signal": 185,
+      "coarse_wire": "signed12 starting at raw offset 0x11F",
+      "combined_relation": "15*coarse + fraction",
+      "combined_unit": "0.1 deg",
+      "fraction_signal": 186,
+      "fraction_wire": "signed4 high nibble at raw offset 0x123",
+      "oem_join": "Crown DID1037 callback reads the same coarse source; current Toyota P5 Techstream names DID1037 Steering Angle at 1.5 deg/count, leaving the signed4 fraction as 0.1 deg/count"
+    },
+    "oem_wire_unit_name_closed": false,
+    "physical_scale_closed": true,
+    "quantization_boundary": "integer truncation/saturation remain; the fraction is the exact linearized controller-equivalent conversion, not a claim that every integer code has a unique exact degree value",
+    "target_internal_relation": "C9B64: target_internal_pre_controller = saturate(2 * signed16(B6 B4:B5))"
+  },
+  "vehicle_state_guard": {
+    "park": "operator-confirmed; F33 0x127 B5-high4 gear decode is deliberately not transferred to Crown",
+    "ready": {
+      "can_id": "0x51E",
+      "signal": 155,
+      "unpacker": "0x0004ACD2",
+      "wire": "B0[7]"
+    },
+    "wheel_speed": {
+      "can_id": "0x0AA",
+      "normalizer": "0x0004A988",
+      "raw_zero": 6767,
+      "signals": [
+        193,
+        195,
+        197,
+        199
+      ],
+      "stationary_guard": "absolute centered raw <= 50 counts on all four wheels",
+      "unpacker": "0x0004AFE4",
+      "wire": [
+        "B0:B1 15-bit",
+        "B2:B3 15-bit",
+        "B4:B5 15-bit",
+        "B6:B7 15-bit"
+      ]
+    }
+  }
+}

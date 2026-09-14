@@ -1089,3 +1089,6 @@ tests = ["tests/verify_camry_8965F3307000_incident_fault_model.py"]
 
 [suite.camry_f33_recovery_identity]
 tests = ["tests/verify_camry_f33_recovery_identity.py"]
+
+[suite.crown_f30_b6_inline_signer]
+tests = ["tests/verify_crown_f30_b6_inline_signer.py"]
