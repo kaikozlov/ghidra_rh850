@@ -46,11 +46,15 @@ The ordinary application SID `0x27` instead uses inline two-byte arithmetic and
 has no analogous third 128-bit acceptance root.
 
 The separate **ECU Security Key / rekey** question is now closed much further.
-This image contains live SecOC MAC-generation and MAC-verification paths, but the
-network-authentication key is represented only by a selector at the application
-boundary. The crypto request is queued through shared `0xFE...` RAM and the
-RH850 system-reserved `0xFF1F...` window to the P1x-C secure subsystem. More
-importantly, application RoutineControl RID `0x1010` accepts exactly the
+This image contains configured SecOC in **both directions**: four receive
+verification profiles and two transmit MAC-generation profiles. All six resolve
+crypto-config ID `0` to one 20-byte type-1 config whose logical key selector is
+**4**. That config object is byte-identical to the selector-4 object used by the
+tracked EPS family, even though the airbag's secure-engine ABI is different.
+The network-authentication key itself is represented only by that selector at
+the application boundary. The crypto request is queued through shared `0xFE...`
+RAM and the RH850 system-reserved `0xFF1F...` window to the P1x-C secure
+subsystem. More importantly, application RoutineControl RID `0x1010` accepts exactly the
 SHE-compatible authenticated-key-update envelope `M1[16] || M2[32] || M3[16]`
 and returns status plus `M4[32] || M5[16]`. The asynchronous worker routes that
 64-byte package through the same secure subsystem instead of manipulating a
@@ -427,21 +431,60 @@ MAC generation or verification adapters. That is exactly the shape expected
 when the actual network key is owned by a secure subsystem rather than ordinary
 CodeFlash.
 
-The live SecOC configuration is also concrete. Four `0x50`-byte receive-shaped
-profiles begin at the following CodeFlash offsets:
+The live SecOC configuration is also concrete, including the key selector and
+both directions of traffic.
 
-| Record | Data/CAN ID in record | Configured PDU/buffer length |
+Application startup sets `TP=0x24050`. SecOC initialization at `0xDD6F4` passes
+`TP-0x69A8 = 0x1D6A8` to the only configured crypto-config setter. The exact
+20-byte object is:
+
+```text
+01 00 00 00  04 00 00 00  00 00 00 00  00 00 00 00  00 00 00 00
+```
+
+That is the same generated shape used in the tracked P1M-E EPS images:
+`type=1`, logical key selector **4**, with the remaining 15 bytes zero. This is
+an exact byte-level structural join, not a guessed semantic transfer. The
+important boundary is the next layer: on P1M-E EPS firmware selector 4 is
+literally encoded into the ICU-S command-7 command word; on this airbag the same
+logical selector is copied into a request descriptor for a different local
+secure-service/HSM interface. Therefore **logical selector 4 is proven here;
+physical secure-storage slot numbering equivalence to P1M-E ICU-S is not.**
+
+The generated route-set helper at `0xDD23A` exposes two Tx routes and four Rx
+routes. The four receive profiles are `0x50` bytes each:
+
+| Record | SecOC DataID field | Configured PDU/buffer length | Crypto config |
+|---:|---:|---:|---:|
+| `0x1D6C8` | `0x00F` | 8 | 0 -> selector 4 |
+| `0x1D718` | `0x090` | 32 | 0 -> selector 4 |
+| `0x1D768` | `0x0D7` | 32 | 0 -> selector 4 |
+| `0x1D7B8` | `0x024` | 32 | 0 -> selector 4 |
+
+The receive worker at `0xDE09E` uses a `0x50`-byte stride, resolves each row's
+config ID through the common config getter, and reaches the MAC-verification
+adapter. So this is a configured production receive-verification graph, not
+merely crypto library residue.
+
+Transmit uses a distinct `0x44`-byte generated descriptor type, not another
+`0x50`-byte receive record. There are exactly two profiles:
+
+| Record | Authenticated SecOC DataID field | Crypto config |
 |---:|---:|---:|
-| `0x1D6C8` | `0x00F` | 8 |
-| `0x1D718` | `0x090` | 32 |
-| `0x1D768` | `0x0D7` | 32 |
-| `0x1D7B8` | `0x024` | 32 |
+| `0x1D808` | `0x0326` | 0 -> selector 4 |
+| `0x1D84C` | `0x0024` | 0 -> selector 4 |
 
-Two adjacent transmit-shaped `0x50`-byte records begin at `0x1D808` and
-`0x1D84C`. Those records, the actual generation/verification workers, and their
-key-selector-only lower interface are all byte-pinned by
-`verify_yc_venza_airbag_reprogramming.py`. Downstream application semantics are
-not inferred from the record IDs here.
+The Tx worker at `0xDE9F0` uses a `0x44`-byte stride and places the `u16` at
+record `+0x0C` into the authenticated material as the SecOC DataID before
+calling the MAC-generation dispatcher. Both Tx rows likewise select config ID
+0. The table DataID is a SecOC authentication-domain value; this report does
+not promote it to a physical CAN arbitration ID without the separate Com/CAN
+routing join.
+
+This makes the directional comparison with the EPS family unusually sharp:
+**the tracked Sienna/P1M-E application graph is configured receive-only, while
+this Venza airbag is configured bidirectionally — four protected receives and
+two protected transmits — and both directions use logical selector 4.**
 
 This closes the earlier search question in the useful direction: **absence of a
 plaintext SecOC key from CodeFlash is expected for this implementation and is
@@ -475,6 +518,11 @@ SecOC RX worker  0xDE09E
        observed opcode 0x12
        key selector from config+4
 ```
+
+For both paths, the lower adapter copies byte `+4` of the recovered 20-byte
+crypto config into the secure request descriptor. Since every configured Rx/Tx
+profile selects config ID 0, both verification and generation reach the secure
+subsystem with logical selector **4**.
 
 Both lower adapters converge on `0xBD69E`, which submits through `0x8A18A`.
 `0x8A18A` records the current PE identity and passes the descriptor into the
