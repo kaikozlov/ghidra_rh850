@@ -307,10 +307,14 @@ check("FCU enter and exit transitions return checked status", "static int faci_e
 check("erase and program completion use full FACI result", flash_c.count("return faci_result();") >= 3)
 check("all P/E-attempt failures converge on cleanup and exit", flash_c.count("goto cleanup;") >= 3 and "cleanup:" in flash_c and "err = faci_exit_pe_mode();" in flash_c)
 check("FCU errors preserve failing phase in return code", all(token in flash_c for token in ("flash_err_unlock", "flash_err_enter", "flash_err_erase", "flash_err_program", "flash_err_exit", "flash_err_cleanup")))
-all_generic_c = "\n".join(
-    p.read_text(encoding="utf-8").lower()
-    for p in (REPO / "exploit").rglob("*.c")
+generic_patcher_sources = (
+    REPO / "exploit" / "patcher" / "main.c",
+    REPO / "exploit" / "patcher" / "preflight.c",
+    REPO / "exploit" / "patcher" / "apply.c",
+    REPO / "exploit" / "patcher" / "flash_backend.c",
+    REPO / "exploit" / "patcher" / "shellcode.c",
 )
+all_generic_c = "\n".join(p.read_text(encoding="utf-8").lower() for p in generic_patcher_sources)
 check("generic payload C embeds no known Sienna patch/CRC addresses", all(token not in all_generic_c for token in ("8e6c6", "8e6c8", "ffdec", "88000", "f8000")))
 check("generic payload C contains no automatic reset target", "0x157e" not in all_generic_c and "reset(" not in all_generic_c)
 

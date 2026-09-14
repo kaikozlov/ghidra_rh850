@@ -356,8 +356,8 @@
     }
   ],
   "generator": {
-    "path": "tools/extract_corolla_h_b6_secoc_verification_evidence.py",
-    "sha256": "2f997cfd95943926d97597bb5a004566a75ad0ecb75c523eec5e3ab45157b1fc"
+    "path": "tools/targets/corolla/extract/extract_corolla_h_b6_secoc_verification_evidence.py",
+    "sha256": "6ab42e55763e2f06058f832dad614964dd60126da0c2b032d2182fad0a59950e"
   },
   "image": {
     "path": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",

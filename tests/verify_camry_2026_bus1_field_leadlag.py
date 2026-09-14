@@ -49,8 +49,8 @@ REGENERATE = "--regenerate" in sys.argv[1:]
 # tracked result immediately, without paying the ~12-minute exhaustive recomputation on
 # every unrelated test run.  ``--regenerate`` remains the byte-exact proof path.
 EXPECTED_LOGIC_SHA = {
-    BUILD: "615742ee5480554726600fe1e4fe62a27d8bc2cd0b064e55009e5bf955d3e931",
-    REPO / "tools/targets/camry/analysis/analyze_camry_2026_relay_capture.py": "de7be0be4e114ca06a051e3a28bebaa880fa54c29e10e9279724107cd991f5d8",
+    BUILD: "984e59a51c0945653d9ad752f9b20cd3ef1950f5f27fb28d140b79326cc7c944",
+    REPO / "tools/targets/camry/analysis/analyze_camry_2026_relay_capture.py": "dcf82265ef97aeb550ba66cff84d5df7f7f28d85b2131b9102cc6685f79ecc9d",
     REPO / "tools/toyota_support/toyota_route_opendbc_common.py": "a8cfb474b9932a2d9a1f3c258428695eb2ad41e1d285ec26e2627fe4e1f4d259",
 }
 

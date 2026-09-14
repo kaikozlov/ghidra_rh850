@@ -425,8 +425,8 @@
     "start": "0xFEBF0000"
   },
   "generator": {
-    "path": "tools/extract_corolla_hf_command5_runtime_carrier_evidence.py",
-    "sha256": "d83fa58edba50fb3f2b3cedef3dbbbf40c627890b905e966e9cafb4ccabfc5e6"
+    "path": "tools/targets/corolla/extract/extract_corolla_hf_command5_runtime_carrier_evidence.py",
+    "sha256": "54d3df01eb1649157609d4924506885b23c6d48ea36ba361aa9f9afee8377722"
   },
   "h_f_exact_transfer": {
     "all_ranges_byte_equal": true,

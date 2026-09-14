@@ -100,8 +100,8 @@
     }
   ],
   "generator": {
-    "path": "tools/extract_corolla_h_b6_competing_sender_evidence.py",
-    "sha256": "ba2096e9434b4bfe2efef9e8b29e75ab3e471da936d9724c2ff45ad46269db8b"
+    "path": "tools/targets/corolla/extract/extract_corolla_h_b6_competing_sender_evidence.py",
+    "sha256": "bdcc89b2ebd8695cea3dff98b66f92427361536cb296bc67c9a5dce4f0f2c8d1"
   },
   "image": {
     "path": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",

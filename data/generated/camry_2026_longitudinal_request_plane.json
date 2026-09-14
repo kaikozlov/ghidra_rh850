@@ -325,7 +325,7 @@
     "0x0CA": "Already-protected/downstream-looking Toyota-P5 longitudinal PDU. Its FV4||MAC28 structural match rejects treating 0x0CA itself as the unsigned FRC-to-signer request.",
     "0x0CA_words": "B3:B4, B5:B6, and B7:B8 form a strong upper/lower/result-like signed16 x0.001 m/s^2 triplet, but exact byte-to-OEM-name assignment awaits synchronized diagnostic/FFD capture.",
     "0x160_B12": "High-value non-SecOC cross-plane candidate. Signed7 B12 maps tightly to protected 0x0CA B7:B8 during stock cruise, but producer, direction, and OEM request identity are not yet proved.",
-    "next_discriminator": "Run tools/camry_tss3_request_capture.py during stock DRCC and join FRC 0x792 DIDs 1B03..1B07 plus Brake 0x7B0 DIDs 10A1..10A4 to native bus1 0x160 and protected bus0/bus2 0x0CA."
+    "next_discriminator": "Run tools/targets/camry/live/camry_tss3_request_capture.py during stock DRCC and join FRC 0x792 DIDs 1B03..1B07 plus Brake 0x7B0 DIDs 10A1..10A4 to native bus1 0x160 and protected bus0/bus2 0x0CA."
   },
   "schema": "camry-2026-longitudinal-request-plane-v1",
   "vehicle": "2026 Toyota Camry Hybrid / exact maintainer vehicle"
