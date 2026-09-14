@@ -2,6 +2,7 @@
 """Offline tests of diagnostic session lifetime and shared preflight RX accounting."""
 from __future__ import annotations
 
+import json
 import sys
 import unittest
 from pathlib import Path
@@ -34,6 +35,33 @@ class Panda:
 
     def set_canfd_auto(self, *args):
         pass
+
+
+class StaticGenerationSemanticsTests(unittest.TestCase):
+    def test_pdu45_generation_is_normal_delivery_generation(self):
+        image = (ROOT / 'firmware/crown-8965F3012000/CodeFlash.bin').read_bytes()
+        # PDU45 / 0x1DA: raw offset 0x258, length 8, communication flags 0x0C.
+        self.assertEqual(image[0x226E0:0x226E8], bytes.fromhex('580200000800000c'))
+        flags = image[0x226E7]
+        self.assertTrue(flags & 0x04)   # ordinary delivery calls 0x8C212
+        self.assertFalse(flags & 0x02)  # secondary callback does not call 0x8C244 for this PDU
+
+        # Ordinary receive/delivery path: SHR 3 exposes original flag bit2 in C,
+        # BNC skips the generation update, otherwise pdu_id -> 0x8C212.
+        self.assertEqual(image[0x7AFA2:0x7AFAC], bytes.fromhex('83cac9051d3081ff6a12'))
+        # Secondary callback path equivalently tests original bit1 before 0x8C244.
+        self.assertEqual(image[0x7BBBE:0x7BBC8], bytes.fromhex('82dac9051d3081ff8006'))
+
+        rows = {}
+        with (ROOT / 'data/generated/crown-8965F3012000/decompilations.jsonl').open() as fh:
+            for line in fh:
+                row = json.loads(line)
+                if row.get('record') == 'function':
+                    rows[int(row['entry_addr'], 16)] = row
+        self.assertIn('cVar1 = DAT_febe4e91', rows[0x4B874]['decompiled_c'])
+        self.assertIn('FUN_0007a8e6(0x114,0x1d0,4,0,0,&DAT_febe7bb6)', rows[0x4B874]['decompiled_c'])
+        self.assertIn("(&DAT_febe4e64)[param_1] + '\\x01'", rows[0x8C212]['decompiled_c'])
+        self.assertIn("(&DAT_febe4e64)[param_1 & 0xffff] + '\\x01'", rows[0x8C244]['decompiled_c'])
 
 
 class PreflightTests(unittest.TestCase):
