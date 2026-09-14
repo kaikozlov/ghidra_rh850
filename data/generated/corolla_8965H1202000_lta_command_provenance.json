@@ -919,7 +919,7 @@
     },
     "supervisor_external_ingress_census": {
       "path": "data/generated/corolla_8965H1202000_supervisor_external_ingress_census.json",
-      "sha256": "cb8d37c7e64130dfd8d4fe4b20a7de08d246fa21c1c1a6e5a6d4cdebbceb8c96"
+      "sha256": "a977a50083d35d24fdcfbc6cabef16a6a433cddf99d4e98adde4a28976e18937"
     },
     "toyota_dbc": {
       "path": "data/external/opendbc/toyota_dbc_facts.json",

@@ -1177,7 +1177,7 @@
     "corolla_h": "build/work/corpora/h_8965H1202000_decompilations.corrected-context.raw.jsonl",
     "corolla_h_sha256": "c3411eec57b9d55c004b0b0f328394bb152577c3398084dccc729dab5da54656",
     "sienna": "data/generated/decompilations.jsonl",
-    "sienna_sha256": "62cfae5194102d44456c2cdf1183ee76b51111fa3dc8b5cf190545618b1fd4f8"
+    "sienna_sha256": "1869abc13a806b8898ab49754cadfb219f65ea0249d5c4e8a585f2b3adffc9a8"
   },
   "summary": {
     "can_counts": {
