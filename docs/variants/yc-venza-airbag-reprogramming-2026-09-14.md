@@ -451,6 +451,36 @@ logical selector is copied into a request descriptor for a different local
 secure-service/HSM interface. Therefore **logical selector 4 is proven here;
 physical secure-storage slot numbering equivalence to P1M-E ICU-S is not.**
 
+The value `4` is also not an arbitrary application allocation. AUTOSAR SHE's
+standard four-bit key-ID namespace reserves `0x0` for `SECRET_KEY`, `0x1` for
+`MASTER_ECU_KEY`, `0x2` for `BOOT_MAC_KEY`, and `0x3` for `BOOT_MAC`;
+**`0x4` is `KEY_1`, the first general-purpose nonvolatile application key**.
+`0x5..0xD` are `KEY_2..KEY_10` and `0xE` is `RAM_KEY`. Renesas publicly states
+that both ICU-S and ICU-M secure-boot designs can be based on the AUTOSAR/HIS
+SHE model. Combined with this airbag's SHE-shaped M1/M2/M3 -> M4/M5 key-update
+protocol, the selector-4 match strongly supports the interpretation that Toyota
+is using the standard SHE logical namespace and placing its TSK/SecOC key in
+`KEY_1`, not choosing an unexplained fourth Toyota-specific slot.
+
+That does **not** reveal the actual contents of IDs `1..3` on this specimen.
+Those values live behind the ICUM secure boundary and were not part of yc's
+MainPE CodeFlash/RPRG dump. Their standardized roles are `MASTER_ECU_KEY`,
+`BOOT_MAC_KEY`, and `BOOT_MAC`; whether each is populated, empty, or superseded
+by an ICU-M-specific secure-boot policy requires the secure-side firmware/data
+or a legitimate key-update transcript. The MainPE SecOC graph itself selects
+only `KEY_1`/ID `4`; it has no configured production SecOC profile selecting
+IDs `1`, `2`, or `3`.
+
+The MainPE MAC adapters themselves do not impose that SHE-role policy. The
+crypto-config setter validates the config type but does not range-filter the
+selector byte, and the Tx/Rx adapters copy config byte `+4` directly into their
+secure-service requests. Thus MainPE can syntactically request selectors
+`0x0..0x3`; acceptance is left to ICUM. Standard SHE predicts: no MAC generate
+or verify for IDs `0`/`1`/`3`, and **verify-only** for ID `2` (`BOOT_MAC_KEY`).
+The literal P1M-E command-5/7 numbers do not transfer to this different ICUM ABI;
+the corresponding airbag operations are its recovered MAC-generate/MAC-verify
+secure-service requests.
+
 The generated route-set helper at `0xDD23A` exposes two Tx routes and four Rx
 routes. The four receive profiles are `0x50` bytes each:
 

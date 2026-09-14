@@ -318,13 +318,17 @@ wrappers constrain their selectors/operation IDs, and no stock application
 writer invokes command 13 or a recovered persistent-slot export command.
 
 That negative result is scoped to the firmware's existing call graph. The
-restricted Renesas ICU-S/ICUSE command manual is unavailable, so it does not
-establish command 13's exact semantics or rule out a custom harness invoking an
-undocumented selector, slot-to-`RAM_KEY` copy/alias, or export behavior. Public
-AUTOSAR SHE descriptions of volatile `RAM_KEY` are architectural evidence, not
-proof that direct command 13 on this implementation cannot involve slot 4. The
-proposed `slot 4 -> RAM_KEY -> command 13` sequence remains an explicit bench
-question.
+restricted Renesas ICU-S/ICUSE command manual is unavailable, so direct Renesas
+command 13 still has no assigned vendor semantics. The **standard SHE** route is
+not ambiguous, however: §4.4.3.1/§4.7.7-4.7.9 define no operation that copies a
+nonvolatile `KEY_<n>` value into `RAM_KEY`, and `CMD_EXPORT_RAM_KEY` is allowed
+only when `RAM_KEY` was populated by `CMD_LOAD_PLAIN_KEY`. A `CMD_LOAD_KEY`
+package may target `RAM_KEY` and use a `KEY_<n>` as its authentication secret,
+but M2 carries a separately supplied new RAM-key value and the secure load clears
+the plain-origin flag. Therefore `slot 4 -> RAM_KEY -> export` is **disproved as
+a SHE mechanism**. A custom command-13 experiment can still characterize an
+undocumented Renesas extension, but any persistent-slot copy/alias it reveals
+would be a vendor deviation rather than normal SHE behavior.
 
 This leaves peer-ECU extraction, direct command characterization, and physical
 leakage as the leading existing-key routes. In particular, the CAN-FD

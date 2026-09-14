@@ -132,6 +132,38 @@ Therefore the previously proposed standard-SHE chain
 `slot 4 -> RAM_KEY -> export` is disproved (SECOC-025): normal SHE cannot pull a
 persistent slot into `RAM_KEY` for exfiltration.
 
+The potentially confusing sentence in SHE §4.4.3.1 that `RAM_KEY` can be
+“written with the knowledge of the `KEY_<n>`” means **authenticated provisioning**,
+not a slot-to-slot copy. The specification itself distinguishes an actual key from
+its identifier in §4.1.1 using subscript notation (`KEY_{KEY_NAME}` versus
+`ID_{KEY_NAME}`). Table 4.5 is
+introduced as the matrix of which keys can **serve as a secret to update another
+key**; its `RAM_KEY` row permits `KEY_<n>`, `SECRET_KEY`, or plaintext. In
+`CMD_LOAD_KEY`, M1 names `ID=RAM_KEY` and an `AuthID=KEY_<n>`; M2 contains a
+separately supplied **new RAM_KEY value**, encrypted under a KDF derived from the
+actual `KEY_AuthID`; M3 authenticates the package. The existing `KEY_<n>` bytes
+never become the RAM_KEY merely because that key was used as `AuthID`.
+
+This is not redundant with `CMD_LOAD_PLAIN_KEY`: the distinction is **who may see
+the new RAM-key value during transport**. In the secure path, the provisioning
+backend knows the new value and a `KEY_<n>` secret, but CPU/application software
+need only relay M1/M2/M3 and never sees the new key in plaintext. In the plain
+path, the CPU hands the 128-bit new key directly to SHE. This is distinct from
+updating a nonvolatile `KEY_<n>` itself: that row permits `MASTER_ECU_KEY` or the
+current `KEY_<n>` as the authorization secret, whereas the `RAM_KEY` row permits
+`KEY_<n>` directly. No `MASTER_ECU_KEY` is required for a `KEY_<n>`-authorized
+RAM-key load.
+
+SHE tracks how `RAM_KEY` was populated with the dedicated `RAM_KEY_PLAIN` flag.
+`CMD_LOAD_PLAIN_KEY` sets it to 1. A protected `CMD_LOAD_KEY` into `RAM_KEY`
+clears it. **The origin flag is the export gate, not a gate on loading or using
+`RAM_KEY`.** Both paths legitimately populate the same volatile slot and that
+slot remains usable for its permitted crypto operations; the difference is only
+that `CMD_EXPORT_RAM_KEY` is permitted when `RAM_KEY_PLAIN == 1`. Thus a key
+installed through the secure M1/M2/M3 path is intentionally usable but
+non-exportable. Even the plaintext-origin export returns M1..M5 wrapped under the
+device `SECRET_KEY`, not the raw 16-byte RAM key.
+
 The remaining uncertainty is vendor-specific. The public P1M-E hardware manual
 omits the ICU-S command specification and the restricted ICUSE manual has not
 been obtained, so static analysis has not established:
@@ -173,6 +205,28 @@ the prior AES-oracle fallback: it is command 1/3 (raw encipher/decipher) that a
 MAC-usage slot would reject, while command 5 (MAC generation) is the
 spec-permitted primitive — which makes a command-5 signing oracle the
 SHE-aligned path, not a likely-denied one.
+
+The reserved SHE IDs `0x0..0x3` are different from `KEY_<n>` and therefore do
+not inherit that arbitrary-use rule. The exact SHE function/memory matrix gives
+this MAC-service disposition:
+
+| Selector | SHE object | `CMD_GENERATE_MAC` / command 5 | `CMD_VERIFY_MAC` / command 7 |
+|---:|---|---|---|
+| `0x0` | `SECRET_KEY` | no | no |
+| `0x1` | `MASTER_ECU_KEY` | no | no |
+| `0x2` | `BOOT_MAC_KEY` | no | **yes** |
+| `0x3` | `BOOT_MAC` | no | no |
+| `0x4..0xD` | `KEY_1..KEY_10` | depends on `KEY_USAGE` | depends on `KEY_USAGE` |
+| `0xE` | `RAM_KEY` | yes | yes |
+
+This is an important distinction between **software requestability** and
+**hardware acceptance**. The recovered P1M-E command-5 and command-7 engines
+accept runtime selectors `0..14` and will form the corresponding ICU-S command
+word, so selectors `0..3` can be submitted. Under standard SHE, however, only
+selector `0x2` has a MAC operation at all, and it is verification-only. Requests
+for command 5 on `0x0..0x3`, or command 7 on `0x0`, `0x1`, or `0x3`, should be
+rejected by the secure engine (normally as an invalid-key/usage condition). A
+Renesas extension could differ; that remains a hardware behavior question.
 
 Caveat, kept separate: this is the AUTOSAR SHE architectural reference. Renesas
 public P1M material calls ICU-S SHE-compliant and explicitly lists CMAC
