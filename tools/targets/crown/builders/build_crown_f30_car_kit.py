@@ -15,7 +15,16 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[4]
 BUILDER = ROOT / "exploit/ephemeral_runtime/build_crown_f30_b6_inline_signer.py"
 LAUNCHER = ROOT / "exploit/ephemeral_runtime/crown_f30_b6_inline_signer_launcher.sh"
+PROGRAMMING_HELPER_SOURCE_COMMIT = "fdded7183e41bed42d0c74b1a204e8883e543a6f"
+PROGRAMMING_HELPER_HASHES = {
+    "tsk/lib/programming.py": "ab6aba3b47cd4ab2fa2ad680504dfe9f013c7f936f02169ba3334c1435829905",
+    "tsk/lib/diagnostic_route.py": "703739d2257eb27fd0dfbfc60beea3883e661ae05f1ad6b04ee64e57c87c22d9",
+}
 RUNTIME_FILES = (
+    "tsk/__init__.py",
+    "tsk/lib/__init__.py",
+    "tsk/lib/programming.py",
+    "tsk/lib/diagnostic_route.py",
     "exploit/common/ram_exec.py",
     "exploit/ephemeral_runtime/crown_f30_b6_inline_signer.py",
     "exploit/ephemeral_runtime/camry_f33_runtime_monitor.py",
@@ -49,6 +58,7 @@ This is a standalone field qualification kit. It does not require a Crown openpi
 It uses the openpilot checkout on the comma device only for the existing Python panda/opendbc environment.
 The resident and helper are RAM-only; a full EPS power cycle removes them.
 The active control ingress is the stock functional diagnostic path on classic CAN 0x777; this kit does not patch Crown CodeFlash.
+The field-proven Toyota programming handoff helper and its diagnostic-route dependency are bundled in runtime/tsk/lib; no TSKM reflash or separate tsk checkout is required.
 
 Run from this directory on the comma device:
 
@@ -122,6 +132,11 @@ def build(out: Path) -> dict:
     copy(LAUNCHER, launcher)
     launcher.chmod(0o755)
 
+    for relative, expected in PROGRAMMING_HELPER_HASHES.items():
+        observed = sha256(ROOT / relative)
+        if observed != expected:
+            raise RuntimeError(f"field-proven programming helper drift: {relative}: {observed} != {expected}")
+
     commit = source_commit()
     (out / "SOURCE_COMMIT").write_text(commit + "\n", encoding="utf-8")
     (out / "TESTING.txt").write_text(testing_text(commit), encoding="utf-8")
@@ -130,6 +145,10 @@ def build(out: Path) -> dict:
         "schema": "crown-f30-car-kit-v1",
         "created_at": datetime.now(UTC).isoformat(timespec="seconds"),
         "source_commit": commit,
+        "programming_helper": {
+            "source_commit": PROGRAMMING_HELPER_SOURCE_COMMIT,
+            "files": {relative: {"sha256": expected} for relative, expected in PROGRAMMING_HELPER_HASHES.items()},
+        },
         "target": meta["target"],
         "review_status": meta["review_status"],
         "control": meta["loader"],

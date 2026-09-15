@@ -217,14 +217,29 @@ with tempfile.TemporaryDirectory(prefix="verify-crown-f30-signer-") as td:
           (kit / "crown-tss3-signer").is_file() and
           (kit / "runtime/tools/targets/crown/live/crown_f30_diag_mailbox_probe.py").is_file() and
           (kit / "runtime/tools/targets/crown/live/crown_f30_resident_soak.py").is_file() and
+          (kit / "runtime/tsk/lib/programming.py").is_file() and
+          (kit / "runtime/tsk/lib/diagnostic_route.py").is_file() and
           (kit / "ram_payloads/crown_f30_b6_inline_signer_payload.bin").is_file())
+    check("field kit vendors byte-exact field-proven programming handoff",
+          kit_meta["programming_helper"]["source_commit"] == "fdded7183e41bed42d0c74b1a204e8883e543a6f" and
+          kit_meta["programming_helper"]["files"]["tsk/lib/programming.py"]["sha256"] ==
+              "ab6aba3b47cd4ab2fa2ad680504dfe9f013c7f936f02169ba3334c1435829905" and
+          kit_meta["programming_helper"]["files"]["tsk/lib/diagnostic_route.py"]["sha256"] ==
+              "703739d2257eb27fd0dfbfc60beea3883e661ae05f1ad6b04ee64e57c87c22d9")
+    import_cmd = [sys.executable, "-c",
+                  "from tsk.lib.programming import enter_programming_bootloader, uds_client; "
+                  "from tsk.lib.diagnostic_route import rediscover_route"]
+    imported = subprocess.run(import_cmd, cwd=kit, env={**__import__("os").environ, "PYTHONPATH": str(kit / "runtime")},
+                              capture_output=True, text=True)
+    check("field kit programming helper imports without a device tsk checkout", imported.returncode == 0)
     source_commit = (kit / "SOURCE_COMMIT").read_text(encoding="utf-8").strip()
     testing_text = (kit / "TESTING.txt").read_text(encoding="utf-8")
     check("field kit carries source revision and self-contained current instructions",
           kit_meta["source_commit"] == source_commit and len(source_commit) == 40 and
           "stock functional diagnostic path on classic CAN 0x777" in testing_text and
           "qualified=true" in testing_text and "stock_functional_mailbox_live" in testing_text and
-          "safe_to_experiment" not in testing_text)
+          "safe_to_experiment" not in testing_text and
+          "no TSKM reflash or separate tsk checkout is required" in testing_text)
     check("field kit usage orders mailbox preflight before install",
           kit_meta["usage"].index("NRTD/Park: ./crown-tss3-signer preflight /tmp/crown-preflight.json") <
           kit_meta["usage"].index("NRTD/Park: ./crown-tss3-signer install /tmp/crown-install.json"))
