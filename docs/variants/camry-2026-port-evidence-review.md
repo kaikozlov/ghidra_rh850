@@ -43,3 +43,44 @@ therefore keep a stale host target active after host updates cease. The
 historical steering witness does not establish host-loss behavior. This is an
 adapter lifecycle defect, not a reason to add another engagement policy to
 CarController or Panda.
+
+## Completed independent radar-unit review
+
+`data/generated/camry_2026_radar_anchors.json` and its raw-object-byte fixture
+retain 17 original rlog identities and independent vision/gyro observations.
+They supersede the prior direct FFD-to-CAN scale transfer:
+
+| Quantity | Corrected observed wire interpretation | Independent anchor |
+|---|---|---|
+| Range | unsigned B0:B1 × 0.005 m | 1,953 vision-associated observations: r=0.998518, slope=1.029071, median absolute error 0.799 m |
+| Lateral | signed12 B2:B3[7:4] × 0.04 m, left-positive | 240 off-center vision observations: slope=0.982563; 27,602 continuity-qualified gyro pairs: r=0.843106 and inferred LSB=0.038909 m/count |
+| Relative speed | signed low14 B1:B2 × 0.025 m/s; B1[7:6] excluded | vision-speed slope=0.992347; signed12 wraps 113 retained high-closing-speed observations |
+
+The previous range/range-rate correlation could not determine their common
+scale: both were doubled. Signed13 and signed14 velocity interpretations agree
+on the retained data; the wider field boundary is not independently resolved.
+Object validity/confidence and silent same-slot reassignment are also not
+resolved. The corrected parser remains available for offline/replay inspection;
+normal CarParams retains the model-only radar-unavailable path until object
+validity/lifecycle is established.
+
+The corrected full August reconstruction consumes each time-bounded occurrence
+rather than overwriting repeated counter values: 30,532 / 35,994 complete
+four-record bank bursts. Its kinematic agreement is corroboration, not a
+substitute for the independent unit anchors above.
+
+## Completed diagnostic recovery review
+
+FRC_P5 monitor 199 defines control modes 1/2/4 as distance control and mode 3
+as conventional constant-speed cruise. Recovery now requires a distance-control
+mode as well as the permission flag and a clear ACC-not-available flag. Truncated
+DID1903/1905/1906 values are errors, never implicit false/no-fault booleans.
+ISO-TP response-pending no longer terminates a transaction, malformed single
+frames are rejected, and sequence errors cannot produce partial success.
+
+The pre-clear snapshot is written atomically **before** the first clearing
+request. A later timeout preserves that snapshot, completed clear responses,
+and the failure instead of discarding the diagnostic evidence. Six offline
+regression tests cover these cases, including an injected mid-clear failure
+and final Panda ownership cleanup. Same-cycle physical DRCC restoration is
+still a vehicle observation, not established by these tests.

@@ -9,6 +9,7 @@ bus. It does not invent a 64-byte OEM field map where the corpus has none.
 from __future__ import annotations
 
 import argparse
+import binascii
 import gzip
 import hashlib
 import json
@@ -32,9 +33,9 @@ SLOT_LEN = 7
 HEADER_LEN = 4
 TRAILER_LEN = 4
 FAMILY = range(0x180, 0x18D)
-DIST_LSB_M = 0.01  # FFD 5A22 / FRC 0x190A
-LAT_LSB_M = 0.05  # FFD 57BA exact signed-12 vocabulary
-REL_SPEED_LSB_M_S = 0.1  # FFD 573C exact signed-10 vocabulary
+DIST_LSB_M = 0.005  # independent vision/range anchor, not the FFD encoding
+LAT_LSB_M = 0.04  # independent calibrated-gyro and vision anchors, left-positive
+REL_SPEED_LSB_M_S = 0.025  # independent vision/ego-speed anchors; low14 word
 DIST_MAX_M = 500.0
 # FFD 5282 consecutive layout: byte1 ID, bytes2-3 s16be pinion, byte4 assist.
 JOIN_WINDOW_NS = 25_000_000
@@ -81,11 +82,11 @@ def decode_object_geometry(slot: bytes) -> tuple[float, float]:
 
 
 def decode_object_relative_speed(slot: bytes) -> float:
-    """Recover companion record s10 relative speed: B1[2:0] || B2[7:1]."""
+    """Decode the low14 velocity word; B1[7:6] are independent flags."""
     if len(slot) != SLOT_LEN:
         raise ValueError("object slot must be exactly 7 bytes")
-    raw = ((slot[1] & 0x07) << 7) | (slot[2] >> 1)
-    return signed(raw, 10) * REL_SPEED_LSB_M_S
+    raw = ((slot[1] & 0x3F) << 8) | slot[2]
+    return signed(raw, 14) * REL_SPEED_LSB_M_S
 
 
 def pearson(xs: list[float], ys: list[float]) -> float:
@@ -123,8 +124,8 @@ def joined_object_family(bursts: dict[tuple[int, int, int], dict[int, tuple[int,
             decoded.append((seg, timestamp, bank * SLOT_N + slot_idx, distance_m, lateral_m, relative_speed_m_s))
 
     # Kinematic validation: same slot, same segment, short 20 Hz step, continuous
-    # range/lateral geometry. This rejects object-slot reassignment before comparing
-    # vRel to finite-difference range rate.
+    # range/lateral geometry. Large discontinuities are excluded, but silent
+    # same-slot reassignment is not proved absent by this filter.
     prev: dict[tuple[int, int], tuple[int, float, float]] = {}
     range_rate: list[float] = []
     encoded_vrel: list[float] = []
@@ -162,8 +163,8 @@ def joined_object_family(bursts: dict[tuple[int, int, int], dict[int, tuple[int,
         "empty_objects": empty,
         "occupied_objects": occupied,
         "distance_m": summarize([row[3] for row in decoded]),
-        "lateral_m_s12_lsb_0_05": summarize([row[4] for row in decoded]),
-        "relative_speed_m_s_s10_lsb_0_1": summarize([row[5] for row in decoded]),
+        "lateral_m_s12_lsb_0_04": summarize([row[4] for row in decoded]),
+        "relative_speed_m_s_s14_lsb_0_025": summarize([row[5] for row in decoded]),
         "kinematic_validation": {
             "n": len(diffs),
             "pearson_r": round(corr, 6),
@@ -176,9 +177,9 @@ def joined_object_family(bursts: dict[tuple[int, int, int], dict[int, tuple[int,
             "continuity_filter": "35..65 ms, |delta range|<2.5 m, |delta lateral|<1.0 m, |range rate|<=50 m/s",
         },
         "wire_fields": {
-            "record0_distance": "B0:B1 u16be * 0.01 m",
-            "record0_lateral": "B2:B3[7:4] signed12be * 0.05 m",
-            "record1_relative_speed": "B1[2:0]||B2[7:1] signed10be * 0.1 m/s",
+            "record0_distance": "B0:B1 u16be * 0.005 m",
+            "record0_lateral": "B2:B3[7:4] signed12be * 0.04 m, left-positive",
+            "record1_relative_speed": "B1[5:0]||B2[7:0] signed14be * 0.025 m/s",
         },
     }
 
@@ -248,16 +249,16 @@ def gts_vocabulary() -> dict:
     return {
         "boundary": (
             "GTS+ names quantities and diagnostic/FFD bit layouts. It does not "
-            "emit BO_ 0x180. Wire packing is recovered from sniffed Bus-1 frames "
-            "joined to those scales."
+            "emit BO_ 0x180. Wire packing and units need independent CAN/physics "
+            "anchors; diagnostic scales do not transfer automatically."
         ),
         "frc_p5_geometry_dids": frc,
         "operation_ffd_object_layouts": ffd,
         "joined_distance_scale": {
             "lsb_m": DIST_LSB_M,
             "sources": [
-                "FRC_P5 DID 0x190A Forward Vehicle Distance (mul=100, 2 decimal places, m)",
-                "FFD 5A22 vertical distance (unsigned, LSB 0.01 m)",
+                "independent retained model lead / wheel-speed / calibrated-gyro anchors",
+                "data/generated/camry_2026_radar_anchors.json (FFD 5A22 is NOT a direct scale source)",
             ],
         },
     }
@@ -353,6 +354,12 @@ def collect_drive(path: Path) -> dict:
     n_180 = 0
     id11: list[tuple[int, bytes, int, int]] = []
     object_bursts: dict[tuple[int, int, int], dict[int, tuple[int, bytes]]] = defaultdict(dict)
+    object_cycle: tuple[int, int, int] | None = None
+    object_epoch = 0
+    object_crc_valid = object_crc_invalid = 0
+    pending_bursts = {}
+    burst_serial = 0
+    expired_bursts = 0
     with gzip.open(path, "rt") as f:
         for line in f:
             seg, t, src, addr, hx = json.loads(line)
@@ -373,8 +380,31 @@ def collect_drive(path: Path) -> dict:
             if 0x180 <= addr <= 0x18B and len(d) == 64:
                 bank = (addr - 0x180) % 3
                 record_group = (addr - 0x180) // 3
-                counter = int.from_bytes(d[2:4], "big")
-                object_bursts[(seg, counter, bank)][record_group] = (t, d)
+                # P05 has an 8-bit B2 counter, not a monotonic B2:B3 u16.
+                # B3 also repeats after 256 cycles. An occurrence ordinal keeps
+                # every wrap in a segment instead of overwriting earlier data.
+                cycle = (seg, d[2], d[3])
+                if cycle != object_cycle:
+                    object_epoch += 1
+                    object_cycle = cycle
+                valid = int.from_bytes(d[:2], "little") == binascii.crc_hqx(
+                    d[2:] + addr.to_bytes(2, "little"), 0xFFFF,
+                )
+                object_crc_valid += valid
+                object_crc_invalid += not valid
+                if valid:
+                    key = (seg, d[2], d[3], bank)
+                    if key in pending_bursts and t - pending_bursts[key][1] > 50_000_000:
+                        del pending_bursts[key]
+                        expired_bursts += 1
+                    if key not in pending_bursts:
+                        burst_serial += 1
+                        pending_bursts[key] = (burst_serial, t, {})
+                    serial, _start, records = pending_bursts[key]
+                    records[record_group] = (t, d)
+                    if len(records) == 4:
+                        object_bursts[(seg, serial, bank)] = records
+                        del pending_bursts[key]
             if addr == 0x180:
                 n_180 += 1
             if 0x180 <= addr <= 0x182 and len(d) == 64:
@@ -421,6 +451,14 @@ def collect_drive(path: Path) -> dict:
         "periodic_streams": stream_rows,
         "0x180_n": n_180,
         "0x180_unique_last4": len(last4[0x180]),
+        "object_cycle_integrity": {
+            "crc_valid_frames": object_crc_valid,
+            "crc_invalid_frames": object_crc_invalid,
+            "chronological_cycle_occurrences": object_epoch,
+            "counter_width_bits": 8,
+            "join_key": "segment + counter bytes + bank, bounded to 50ms and consumed after completion",
+            "incomplete_bursts": expired_bursts + len(pending_bursts),
+        },
         "object_slots_0x180_0x182": {
             "header_bytes": HEADER_LEN,
             "slot_bytes": SLOT_LEN,
@@ -429,7 +467,7 @@ def collect_drive(path: Path) -> dict:
             "empty_sentinel": EMPTY7.hex(),
             "empty_slots": empty_slots,
             "occupied_slots": occupied_slots,
-            "longitudinal_m_u16be_lsb_0_01": summarize(occupied_dist),
+            "longitudinal_m_u16be_lsb_0_005": summarize(occupied_dist),
             "occupied_distance_in_range_frac": in_range_frac,
             "rejected_direct_ffd_5A24_lateral_s16_0_01": {
                 "reason": (
@@ -462,7 +500,7 @@ def main() -> int:
     args = parser.parse_args()
     drives = {name: collect_drive(path) for name, path in DRIVES.items()}
     artifact = {
-        "schema": "camry-2026-bus1-camera-output-v3",
+        "schema": "camry-2026-bus1-camera-output-v5",
         "gts_vocabulary": gts_vocabulary(),
         "drives": drives,
         "classification": {
@@ -472,16 +510,16 @@ def main() -> int:
                 "on that bus. Exact F33 does not accept 0x180..0x18C."
             ),
             "framing": (
-                "0x180..0x18B/64: B0-B1 unique per frame (checksum/CRC), B2-B3 shared "
-                "rolling counter across the burst, last-4 constant 00000000 (not a MAC). "
+                "0x180..0x18B/64: B0-B1 unique per frame (checksum/CRC), B2 is an 8-bit alive counter; B3 is a "
+                "separate synchronized cycle byte, last-4 constant 00000000 (not a MAC). "
                 "0x18C is the same header/trailer with DLC 48."
             ),
             "object_family_0x180_0x182": (
                 "Eight 7-byte slots after the 4-byte header. Empty slot is exactly "
                 "fff8000000ffff (0xFFF8/0xFFFF invalid-style sentinels). Occupied slot "
-                "bytes 0-1 unsigned big-endian * 0.01 m is longitudinal/vertical range "
-                "at the FRC 0x190A / FFD 5A22 scale (median tens of metres, tail to "
-                "a few hundred metres on occupied slots)."
+                "bytes 0-1 unsigned big-endian * 0.005 m is the independently "
+                "vision-anchored longitudinal range; FRC DID/FFD distance encodings "
+                "are diagnostic vocabulary, not a wire-scale proof."
             ),
             "not_08A": (
                 "The 28-byte 0x08A application blob is absent. This family is perception "
@@ -508,14 +546,15 @@ def main() -> int:
                 "transmitter or standing field identity is assigned."
             ),
             "joined_object_records": (
-                "The shared B2:B3 burst counter closes 0x180..0x18B as three banks of "
+                "The repeated B2/B3 cycle bytes join 0x180..0x18B as three banks of "
                 "eight objects with four 7-byte records per object: bank0 180/183/186/189, "
                 "bank1 181/184/187/18A, bank2 182/185/188/18B. Empty geometry in the first "
                 "record coincides with zero companion records. In record0, B0:B1 is u16be "
-                "range *0.01 m and B2:B3[7:4] is signed12 lateral *0.05 m, matching GTS FFD "
-                "57BA. In record1, B1[2:0]||B2[7:1] is signed10 relative speed *0.1 m/s, "
-                "matching FFD 573C and independently validated against finite-difference "
-                "range rate. 0x18C/48 remains the VAR-068 staircase/status PDU."
+                "range *0.005 m and B2:B3[7:4] is signed12 lateral *0.04 m, left-positive. "
+                "In record1, B1[5:0]||B2 is a signed14 velocity word *0.025 m/s. "
+                "Independent vision, ego-speed, and gyro anchors supersede the former "
+                "direct FFD 57BA/573C scale transfer. Range-rate agreement by itself "
+                "cannot identify a common scale. 0x18C/48 remains the VAR-068 status PDU."
             ),
             "remainder": (
                 "The three core RadarPoint quantities (range, lateral position, relative "

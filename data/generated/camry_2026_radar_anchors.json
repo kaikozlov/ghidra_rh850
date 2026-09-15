@@ -1,0 +1,172 @@
+{
+  "boundaries": [
+    "range and range-rate agreement alone cannot determine their common scale",
+    "stationary-object membership is inferred from continuity and velocity, not an OEM validity bit",
+    "OEM object validity, confidence, and silent slot reassignment remain unresolved; no production radar-enable decision follows automatically",
+    "cached lagd outputs are not independent fresh identifications"
+  ],
+  "fixture": {
+    "path": "tests/fixtures/camry_2026_radar_anchors.jsonl.gz",
+    "sha256": "9bd8783d761b01752f91a72ec17bd23cede738dffda73e72c08c73b5ebddb94b",
+    "sources": [
+      {
+        "path": "2026-09-04/0000003b--62262eb7a1/rlog-0.zst",
+        "sha256": "d3ecfb93361134238fcb7f84731e034d39adbf3bfc3d2eaeba05a894eb078bf4"
+      },
+      {
+        "path": "2026-09-04/0000003b--62262eb7a1/rlog-9.zst",
+        "sha256": "8542fb754c5e64bcdb28fe0063e84617e14168969a022aa52489733f28683f51"
+      },
+      {
+        "path": "2026-09-04/0000003b--62262eb7a1/rlog-18.zst",
+        "sha256": "31adfd09c5099fccd3230ab54ee4d470a5c12e835071475bc7ccbfeb95d29a1c"
+      },
+      {
+        "path": "2026-09-04/0000003b--62262eb7a1/rlog-27.zst",
+        "sha256": "ad6fd57672e0a82ca280799646c21a5e8c792c1136c490454145b3bffbd5358d"
+      },
+      {
+        "path": "2026-09-04/0000003b--62262eb7a1/rlog-36.zst",
+        "sha256": "b02d12aaf38f4080957113a25fea15499cc209bbca14cef26b3895620a61ed71"
+      },
+      {
+        "path": "2026-09-04/0000003b--62262eb7a1/rlog-45.zst",
+        "sha256": "6e3368995f7cc805c5e3517d944383f15db942c95cb5dbd63f6ba2badb5673cd"
+      },
+      {
+        "path": "2026-09-04/0000003b--62262eb7a1/rlog-54.zst",
+        "sha256": "534898db70a83fd9343fd8c65d7bb74e07acbc8acd9528acadc9d6aa4e09b79c"
+      },
+      {
+        "path": "2026-09-04/0000003b--62262eb7a1/rlog-63.zst",
+        "sha256": "b5ebd87baec8912c47a96a1693c9969f606da5f391ac0d8080c2b8b40503f373"
+      },
+      {
+        "path": "2026-09-04/0000003b--62262eb7a1/rlog-72.zst",
+        "sha256": "dca156da65a75debf5e9bb0811089fa156a4a1b3c7945fc63e75702e67289b80"
+      },
+      {
+        "path": "2026-09-04/0000003b--62262eb7a1/rlog-81.zst",
+        "sha256": "e17e1e9a157f0404b2aa3fae299f0a0657adfc6baa5f0c5886d28d570b353eb2"
+      },
+      {
+        "path": "2026-09-04/0000003b--62262eb7a1/rlog-90.zst",
+        "sha256": "48c55b274d76f30e1384a3fda15a9b8d5ea51bb96acfdddd57253439dee9ac55"
+      },
+      {
+        "path": "2026-09-04/0000003b--62262eb7a1/rlog-99.zst",
+        "sha256": "90b7e0c1f8361e6238ba6df69d2646998887680eb24e95d7d7d5446f55ef348e"
+      },
+      {
+        "path": "2026-09-04/0000003b--62262eb7a1/rlog-108.zst",
+        "sha256": "47e7497b9383b102df0be352ea94280229b5728fab9c08bfa642e4494ab661e4"
+      },
+      {
+        "path": "2026-09-10/0000008d--a9f348691a/rlog-2.zst",
+        "sha256": "591c4097f6156d01b97f1b414cbc8c815c84a3541a96f5b2dc1cd0422ebdc4a3"
+      },
+      {
+        "path": "2026-09-10/0000008d--a9f348691a/rlog-4.zst",
+        "sha256": "ea352b715c200f09384cd8612ee01ff936e858cf045ad065bbc9362f88bbf48d"
+      },
+      {
+        "path": "2026-09-10/0000008d--a9f348691a/rlog-6.zst",
+        "sha256": "87ec47f75bf4ab45463cd70dbc0ba79e5aa339f9ec55493629931499c6fb4832"
+      },
+      {
+        "path": "2026-09-10/00000093--4066e7ae51/rlog-3.zst",
+        "sha256": "65bc4e824580628cb8409d92b72e15e0626b92e1a2553b304d3e81db209ca2ad"
+      }
+    ]
+  },
+  "gyro_implied_lateral_lsb": 0.03890878,
+  "gyro_inverted_sign_error": {
+    "n": 27602,
+    "p05_median_p95": [
+      0.38028164,
+      2.89637712,
+      10.68987163
+    ]
+  },
+  "gyro_lateral_derivative": {
+    "absolute_error": {
+      "n": 27602,
+      "p05_median_p95": [
+        0.08304395,
+        0.83594103,
+        3.49967377
+      ]
+    },
+    "intercept": 0.00146852,
+    "n": 27602,
+    "pearson_r": 0.84310584,
+    "slope": 1.02804564
+  },
+  "narrow_velocity_wrap_disagreements": {
+    "10": 11140,
+    "11": 6700,
+    "12": 113,
+    "13": 0,
+    "14": 28522,
+    "15": 5194
+  },
+  "schema": "camry-radar-independent-anchors-v1",
+  "vision_lateral_inverted_error": {
+    "n": 240,
+    "p05_median_p95": [
+      0.68844277,
+      1.79803135,
+      7.37086744
+    ]
+  },
+  "vision_lateral_offcenter": {
+    "absolute_error": {
+      "n": 240,
+      "p05_median_p95": [
+        0.02401939,
+        0.45054764,
+        3.93582133
+      ]
+    },
+    "intercept": 0.33427641,
+    "n": 240,
+    "pearson_r": 0.71445755,
+    "slope": 0.98256275
+  },
+  "vision_range": {
+    "absolute_error": {
+      "n": 1953,
+      "p05_median_p95": [
+        0.07545612,
+        0.79870895,
+        4.13767847
+      ]
+    },
+    "intercept": 0.04505002,
+    "n": 1953,
+    "pearson_r": 0.99851812,
+    "slope": 1.02907078
+  },
+  "vision_relative_speed": {
+    "absolute_error": {
+      "n": 1953,
+      "p05_median_p95": [
+        0.00242206,
+        0.25965867,
+        1.38224159
+      ]
+    },
+    "intercept": 0.05906132,
+    "n": 1953,
+    "pearson_r": 0.83062521,
+    "slope": 0.99234693
+  },
+  "vision_selection": "range/velocity only, score=abs(range error)+2*abs(velocity error); gap>=2 to runner-up; range error<=max(2m,10%); velocity error<=2m/s",
+  "wire_decode": {
+    "distance_m_per_word": 0.005,
+    "lateral_m_per_signed12": 0.04,
+    "lateral_positive": "left",
+    "relative_speed_m_s_per_signed14": 0.025,
+    "speed_width_boundary": "at least 13 bits required; signed13 and signed14 agree in retained data; B1[7:6] independently vary"
+  }
+}

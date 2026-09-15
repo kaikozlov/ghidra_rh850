@@ -1111,3 +1111,9 @@ tests = ["tests/verify_crown_sideband_preflight.py"]
 
 [suite.tss3_resident_control_ingress]
 tests = ["tests/verify_tss3_resident_control_ingress.py"]
+
+[suite.camry_2026_radar_anchors]
+tests = ["tests/verify_camry_2026_radar_anchors.py"]
+
+[suite.camry_f33_post_install_recovery]
+tests = ["tests/verify_camry_f33_post_install_recovery.py"]

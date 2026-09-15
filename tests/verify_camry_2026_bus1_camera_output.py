@@ -41,7 +41,7 @@ with tempfile.TemporaryDirectory() as td:
         proc.returncode == 0 and out.read_bytes() == ART.read_bytes(),
     )
 
-check("schema is v3", art["schema"] == "camry-2026-bus1-camera-output-v3")
+check("schema is v5", art["schema"] == "camry-2026-bus1-camera-output-v5")
 gts = art["gts_vocabulary"]
 names = {row["name"] for row in gts["frc_p5_geometry_dids"]}
 check("FRC 0x190A Forward Vehicle Distance is in vocabulary", "Forward Vehicle Distance" in names)
@@ -50,7 +50,7 @@ check("FFD 5A22 is unsigned 0.01 m", any(
     f["lsb"] == "0.01" and f["type"] == "u"
     for f in gts["operation_ffd_object_layouts"]["5A22"]["fields"]
 ))
-check("joined distance LSB is 0.01 m", gts["joined_distance_scale"]["lsb_m"] == 0.01)
+check("independently anchored CAN distance LSB is 0.005 m", gts["joined_distance_scale"]["lsb_m"] == 0.005)
 check("FFD 57BA supplies signed12 0.05 m lateral vocabulary", any(
     f["length"] == 12 and f["type"] == "s" and f["lsb"] == "0.05"
     for f in gts["operation_ffd_object_layouts"]["57BA"]["fields"]
@@ -75,10 +75,10 @@ for drive in ("drive_a", "drive_b"):
     check(f"{drive}: eight 7-byte slots", slots["slots_per_pdu"] == 8 and slots["slot_bytes"] == 7)
     check(f"{drive}: empty slots observed", slots["empty_slots"] > 0)
     check(f"{drive}: occupied slots observed", slots["occupied_slots"] > 1000)
-    dist = slots["longitudinal_m_u16be_lsb_0_01"]
+    dist = slots["longitudinal_m_u16be_lsb_0_005"]
     check(
-        f"{drive}: occupied range is metres-to-hundreds at 0.01 m LSB",
-        dist["min"] >= 1.0 and dist["max"] <= 500.0 and 10.0 <= dist["median"] <= 60.0,
+        f"{drive}: occupied range uses independently anchored 0.005 m LSB",
+        dist["min"] >= 0.5 and dist["max"] < 327.64 and 5.0 <= dist["median"] <= 30.0,
         str(dist),
     )
     check(
@@ -92,6 +92,9 @@ for drive in ("drive_a", "drive_b"):
         abs(rel["max"]) > 100 or abs(rel["min"]) > 100,
         str(rel),
     )
+    integrity = d["object_cycle_integrity"]
+    check(f"{drive}: every radar frame has a valid P05 checksum", integrity["crc_invalid_frames"] == 0 and integrity["crc_valid_frames"] > 120000)
+    check(f"{drive}: every wrap keeps a new cycle occurrence", integrity["chronological_cycle_occurrences"] > 10000)
     joined = d["joined_object_family_0x180_0x18B"]
     check(f"{drive}: three banks join four 7-byte records per object", joined["bank_layout"] == {
         "bank0": ["0x180", "0x183", "0x186", "0x189"],
@@ -100,14 +103,14 @@ for drive in ("drive_a", "drive_b"):
         "object_slots_per_bank": 8,
         "record_bytes_per_object": 28,
     })
-    check(f"{drive}: thousands of complete synchronized object bursts", joined["complete_bursts"] > 5000)
-    check(f"{drive}: recovered lateral field is signed12 * 0.05 m", joined["wire_fields"]["record0_lateral"] == "B2:B3[7:4] signed12be * 0.05 m")
-    check(f"{drive}: recovered relative-speed field is signed10 * 0.1 m/s", joined["wire_fields"]["record1_relative_speed"] == "B1[2:0]||B2[7:1] signed10be * 0.1 m/s")
+    check(f"{drive}: thousands of complete synchronized object bursts", joined["complete_bursts"] > 30000)
+    check(f"{drive}: recovered lateral field is signed12 * 0.04 m, left-positive", joined["wire_fields"]["record0_lateral"] == "B2:B3[7:4] signed12be * 0.04 m, left-positive")
+    check(f"{drive}: recovered relative-speed field is signed14 * 0.025 m/s", joined["wire_fields"]["record1_relative_speed"] == "B1[5:0]||B2[7:0] signed14be * 0.025 m/s")
     kin = joined["kinematic_validation"]
-    check(f"{drive}: >20k continuity-filtered relative-speed witnesses", kin["n"] > 20000, str(kin))
-    check(f"{drive}: encoded relative speed tracks d(range)/dt at r>0.90", kin["pearson_r"] > 0.90, str(kin))
+    check(f"{drive}: >90k continuity-filtered relative-speed witnesses", kin["n"] > 90000, str(kin))
+    check(f"{drive}: encoded relative speed tracks d(range)/dt at r>0.85", kin["pearson_r"] > 0.85, str(kin))
     check(f"{drive}: relative-speed fitted slope is ~1", 0.97 <= kin["fit_range_rate_from_encoded_vrel"]["slope"] <= 1.03, str(kin))
-    check(f"{drive}: relative-speed fitted intercept is near zero", abs(kin["fit_range_rate_from_encoded_vrel"]["intercept_m_s"]) < 0.1, str(kin))
+    check(f"{drive}: relative-speed fitted intercept is near zero", abs(kin["fit_range_rate_from_encoded_vrel"]["intercept_m_s"]) < 0.15, str(kin))
     check(f"{drive}: relative-speed median absolute kinematic error <1.3 m/s", kin["median_abs_error_m_s"] < 1.3, str(kin))
     req = d["request_object_on_bus1"]
     check(f"{drive}: sampled ID11 |pinion|>=20", req["sampled"] >= 50, str(req["sampled"]))
