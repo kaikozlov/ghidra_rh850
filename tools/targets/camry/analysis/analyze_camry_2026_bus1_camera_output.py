@@ -12,6 +12,7 @@ import argparse
 import gzip
 import hashlib
 import json
+import math
 import statistics
 import subprocess
 from collections import Counter, defaultdict
@@ -32,6 +33,8 @@ HEADER_LEN = 4
 TRAILER_LEN = 4
 FAMILY = range(0x180, 0x18D)
 DIST_LSB_M = 0.01  # FFD 5A22 / FRC 0x190A
+LAT_LSB_M = 0.05  # FFD 57BA exact signed-12 vocabulary
+REL_SPEED_LSB_M_S = 0.1  # FFD 573C exact signed-10 vocabulary
 DIST_MAX_M = 500.0
 # FFD 5282 consecutive layout: byte1 ID, bytes2-3 s16be pinion, byte4 assist.
 JOIN_WINDOW_NS = 25_000_000
@@ -62,6 +65,124 @@ def summarize(xs: list[float]) -> dict | None:
     }
 
 
+def signed(value: int, bits: int) -> int:
+    sign = 1 << (bits - 1)
+    return value - (1 << bits) if value & sign else value
+
+
+def decode_object_geometry(slot: bytes) -> tuple[float, float]:
+    """Recover the first 7-byte record: u16 range + s12 lateral geometry."""
+    if len(slot) != SLOT_LEN:
+        raise ValueError("object slot must be exactly 7 bytes")
+    distance_m = int.from_bytes(slot[0:2], "big") * DIST_LSB_M
+    lateral_raw = (slot[2] << 4) | (slot[3] >> 4)
+    lateral_m = signed(lateral_raw, 12) * LAT_LSB_M
+    return distance_m, lateral_m
+
+
+def decode_object_relative_speed(slot: bytes) -> float:
+    """Recover companion record s10 relative speed: B1[2:0] || B2[7:1]."""
+    if len(slot) != SLOT_LEN:
+        raise ValueError("object slot must be exactly 7 bytes")
+    raw = ((slot[1] & 0x07) << 7) | (slot[2] >> 1)
+    return signed(raw, 10) * REL_SPEED_LSB_M_S
+
+
+def pearson(xs: list[float], ys: list[float]) -> float:
+    if len(xs) != len(ys) or len(xs) < 2:
+        return float("nan")
+    mx = statistics.fmean(xs)
+    my = statistics.fmean(ys)
+    dx = [x - mx for x in xs]
+    dy = [y - my for y in ys]
+    den = math.sqrt(sum(x * x for x in dx) * sum(y * y for y in dy))
+    return sum(x * y for x, y in zip(dx, dy, strict=True)) / den if den else float("nan")
+
+
+def joined_object_family(bursts: dict[tuple[int, int, int], dict[int, tuple[int, bytes]]]) -> dict:
+    """Join 0x180..0x18B into three banks x four records x eight object slots."""
+    decoded: list[tuple[int, int, int, float, float, float]] = []
+    # seg, timestamp, object index, distance, lateral, relative speed
+    complete = 0
+    empty = 0
+    occupied = 0
+    for (seg, _counter, bank), records in sorted(bursts.items(), key=lambda item: min(v[0] for v in item[1].values())):
+        if set(records) != {0, 1, 2, 3}:
+            continue
+        complete += 1
+        timestamp = min(v[0] for v in records.values())
+        payloads = [records[group][1] for group in range(4)]
+        for slot_idx in range(SLOT_N):
+            slots = [p[HEADER_LEN + slot_idx * SLOT_LEN:HEADER_LEN + (slot_idx + 1) * SLOT_LEN] for p in payloads]
+            if slots[0] == EMPTY7:
+                empty += 1
+                continue
+            occupied += 1
+            distance_m, lateral_m = decode_object_geometry(slots[0])
+            relative_speed_m_s = decode_object_relative_speed(slots[1])
+            decoded.append((seg, timestamp, bank * SLOT_N + slot_idx, distance_m, lateral_m, relative_speed_m_s))
+
+    # Kinematic validation: same slot, same segment, short 20 Hz step, continuous
+    # range/lateral geometry. This rejects object-slot reassignment before comparing
+    # vRel to finite-difference range rate.
+    prev: dict[tuple[int, int], tuple[int, float, float]] = {}
+    range_rate: list[float] = []
+    encoded_vrel: list[float] = []
+    for seg, timestamp, obj, distance_m, lateral_m, relative_speed_m_s in decoded:
+        key = (seg, obj)
+        if key in prev:
+            pt, pd, py = prev[key]
+            dt = (timestamp - pt) * 1e-9
+            if 0.035 <= dt <= 0.065 and abs(distance_m - pd) < 2.5 and abs(lateral_m - py) < 1.0:
+                drdt = (distance_m - pd) / dt
+                if abs(drdt) <= 50:
+                    range_rate.append(drdt)
+                    encoded_vrel.append(relative_speed_m_s)
+        prev[key] = (timestamp, distance_m, lateral_m)
+
+    diffs = [a - b for a, b in zip(range_rate, encoded_vrel, strict=True)]
+    corr = pearson(range_rate, encoded_vrel)
+    slope = intercept = float("nan")
+    if len(range_rate) >= 2:
+        mx = statistics.fmean(encoded_vrel)
+        my = statistics.fmean(range_rate)
+        denom = sum((x - mx) ** 2 for x in encoded_vrel)
+        if denom:
+            slope = sum((x - mx) * (y - my) for x, y in zip(encoded_vrel, range_rate, strict=True)) / denom
+            intercept = my - slope * mx
+    return {
+        "bank_layout": {
+            "bank0": ["0x180", "0x183", "0x186", "0x189"],
+            "bank1": ["0x181", "0x184", "0x187", "0x18A"],
+            "bank2": ["0x182", "0x185", "0x188", "0x18B"],
+            "object_slots_per_bank": SLOT_N,
+            "record_bytes_per_object": SLOT_LEN * 4,
+        },
+        "complete_bursts": complete,
+        "empty_objects": empty,
+        "occupied_objects": occupied,
+        "distance_m": summarize([row[3] for row in decoded]),
+        "lateral_m_s12_lsb_0_05": summarize([row[4] for row in decoded]),
+        "relative_speed_m_s_s10_lsb_0_1": summarize([row[5] for row in decoded]),
+        "kinematic_validation": {
+            "n": len(diffs),
+            "pearson_r": round(corr, 6),
+            "median_abs_error_m_s": round(statistics.median(abs(x) for x in diffs), 6) if diffs else None,
+            "rmse_m_s": round(math.sqrt(statistics.fmean(x * x for x in diffs)), 6) if diffs else None,
+            "fit_range_rate_from_encoded_vrel": {
+                "slope": round(slope, 6),
+                "intercept_m_s": round(intercept, 6),
+            },
+            "continuity_filter": "35..65 ms, |delta range|<2.5 m, |delta lateral|<1.0 m, |range rate|<=50 m/s",
+        },
+        "wire_fields": {
+            "record0_distance": "B0:B1 u16be * 0.01 m",
+            "record0_lateral": "B2:B3[7:4] signed12be * 0.05 m",
+            "record1_relative_speed": "B1[2:0]||B2[7:1] signed10be * 0.1 m/s",
+        },
+    }
+
+
 def gts_vocabulary() -> dict:
     """OEM names/scales from tracked FFD tables plus live FRC Data List."""
     pcs = json.loads(PCS.read_text())
@@ -75,6 +196,11 @@ def gts_vocabulary() -> dict:
         "5A33": "right lane boundary offset/yaw Type f",
         "5737": "control-target lateral corners s11 LSB 0.05 m",
         "5738": "control-target longitudinal corners u11 LSB 0.05 m",
+        "573C": "relative speed for control target s10 LSB 0.1 m/s",
+        "573D": "control-target object number u5",
+        "573E": "target object number u5",
+        "573F": "control-target object type u3",
+        "57BA": "camera-target lateral position s12 LSB 0.05 m",
     }
     ffd = {}
     for row in rows:
@@ -226,9 +352,10 @@ def collect_drive(path: Path) -> dict:
     family_samples: dict[str, str] = {}
     n_180 = 0
     id11: list[tuple[int, bytes, int, int]] = []
+    object_bursts: dict[tuple[int, int, int], dict[int, tuple[int, bytes]]] = defaultdict(dict)
     with gzip.open(path, "rt") as f:
         for line in f:
-            _seg, t, src, addr, hx = json.loads(line)
+            seg, t, src, addr, hx = json.loads(line)
             if src == 0 and addr == 0x08A:
                 d08 = bytes.fromhex(hx)
                 if len(d08) >= 25 and d08[21] == 11:
@@ -243,6 +370,11 @@ def collect_drive(path: Path) -> dict:
                 n_00f += 1
             if addr in FAMILY and len(d) >= 4:
                 last4[addr].add(d[-4:])
+            if 0x180 <= addr <= 0x18B and len(d) == 64:
+                bank = (addr - 0x180) % 3
+                record_group = (addr - 0x180) // 3
+                counter = int.from_bytes(d[2:4], "big")
+                object_bursts[(seg, counter, bank)][record_group] = (t, d)
             if addr == 0x180:
                 n_180 += 1
             if 0x180 <= addr <= 0x182 and len(d) == 64:
@@ -315,6 +447,7 @@ def collect_drive(path: Path) -> dict:
             },
         },
         "family_first_samples": {k: family_samples[k] for k in sorted(family_samples)},
+        "joined_object_family_0x180_0x18B": joined_object_family(object_bursts),
         "request_object_on_bus1": join_5282_on_bus1(path, id11),
     }
 
@@ -329,7 +462,7 @@ def main() -> int:
     args = parser.parse_args()
     drives = {name: collect_drive(path) for name, path in DRIVES.items()}
     artifact = {
-        "schema": "camry-2026-bus1-camera-output-v2",
+        "schema": "camry-2026-bus1-camera-output-v3",
         "gts_vocabulary": gts_vocabulary(),
         "drives": drives,
         "classification": {
@@ -374,17 +507,22 @@ def main() -> int:
                 "correlation collapses to r=+0.086104/-0.091204. No per-ID FRC-versus-radar "
                 "transmitter or standing field identity is assigned."
             ),
-            "0x183_0x18C": (
-                "Different schemas: 0x183/0x184 carry typed records with float-shaped "
-                "words (FFD Type-f / 32-bit FRC geometry vocabulary) but are not a 1:1 "
-                "copy of FFD 590C. 0x185/0x188/0x18B are often idle zeros. 0x186/0x189/"
-                "0x18A are structured and still unpacking. 0x18C/48 is the VAR-068 "
-                "staircase/status PDU."
+            "joined_object_records": (
+                "The shared B2:B3 burst counter closes 0x180..0x18B as three banks of "
+                "eight objects with four 7-byte records per object: bank0 180/183/186/189, "
+                "bank1 181/184/187/18A, bank2 182/185/188/18B. Empty geometry in the first "
+                "record coincides with zero companion records. In record0, B0:B1 is u16be "
+                "range *0.01 m and B2:B3[7:4] is signed12 lateral *0.05 m, matching GTS FFD "
+                "57BA. In record1, B1[2:0]||B2[7:1] is signed10 relative speed *0.1 m/s, "
+                "matching FFD 573C and independently validated against finite-difference "
+                "range rate. 0x18C/48 remains the VAR-068 staircase/status PDU."
             ),
             "remainder": (
-                "Object-slot bytes 2-6 are not FFD 5A24/5A26 16-bit overlays. Which "
-                "Bus-1 node transmits which ID (FRC vs Front Radar vs fusion) is not "
-                "named by GTS+ CAN-ID. No output authorized."
+                "The three core RadarPoint quantities (range, lateral position, relative "
+                "speed) are recovered. Remaining companion bits include object identity/type/"
+                "reliability/classification metadata; GTS provides matching u5/u3 vocabulary "
+                "but exact CAN packing is not yet assigned. Which Bus-1 node transmits the "
+                "family (FRC vs Front Radar vs fusion) is likewise not named by GTS+ CAN-ID."
             ),
         },
     }

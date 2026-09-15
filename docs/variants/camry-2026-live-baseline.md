@@ -5896,6 +5896,60 @@ Machine-readable proof is
 independent verifier are `tools/targets/camry/analysis/analyze_camry_8965F3307000_b6_ingress_closure.py` and
 `tests/verify_camry_8965F3307000_b6_ingress_closure.py`.
 
+### 2026-09-15: TSS3 object bank closed far enough for RadarPoint
+
+A fresh retained-corpus pass closes the three quantities openpilot actually needs
+for `RadarData.RadarPoint` without importing the old TSS2 8-byte track DBC.
+The shared Profile-5 B2:B3 burst counter joins `0x180..0x18B` into three banks
+of eight objects and four 7-byte records per object:
+
+- bank 0: `0x180 / 0x183 / 0x186 / 0x189`;
+- bank 1: `0x181 / 0x184 / 0x187 / 0x18A`;
+- bank 2: `0x182 / 0x185 / 0x188 / 0x18B`.
+
+The first record's exact empty sentinel remains `ff f8 00 00 00 ff ff`.
+Occupied first records now decode as:
+
+- `B0:B1`: unsigned big-endian distance, `0.01 m/count`;
+- `B2:B3[7:4]`: signed 12-bit lateral position, `0.05 m/count`.
+
+The lateral width/scale is not a free statistical fit: GTS+ Operation-FFD
+`0x57BA`, **Lateral position for camera target [m]**, is exactly signed 12-bit
+at `0.05 m/count`. A representative retained burst decodes eight bank-0 objects
+at roughly `+0.8, +4.9, -6.5, +0.2, -0.45, -4.1, -5.3, +4.5 m`, which is a
+physically coherent multi-lane object spread rather than the impossible
+hundreds-of-metres result produced by the older rejected s16 overlay.
+
+The second 7-byte record closes relative velocity. Its
+`B1[2:0] || B2[7:1]` field is signed 10-bit at `0.1 m/s/count`, exactly matching
+Operation-FFD `0x573C`, **Relative speed for control target [m/s]**. The mapping
+is independently checked against finite-difference range rate only after
+requiring the same bank/slot to remain continuous in both range and lateral
+position:
+
+| retained drive | continuity witnesses | Pearson r | fit `dRange/dt = a*vRel+b` | median |error| |
+|---|---:|---:|---:|---:|
+| relay route | 21,685 | 0.912359 | `a=0.994375`, `b=+0.069844 m/s` | 1.192327 m/s |
+| LTA-confirm route | 30,894 | 0.956321 | `a=0.990272`, `b=-0.009856 m/s` | 1.216007 m/s |
+
+That near-unit slope/near-zero intercept across two independent drives is the
+key discriminator: this is the wire relative-speed field, not merely another
+correlated object attribute. `0x573D/0x573E/0x573F` additionally provide Toyota
+u5 object-number/u5 target-number/u3 object-type vocabulary, but their exact
+CAN packing is not needed for the first openpilot RadarInterface and remains
+unassigned.
+
+`data/generated/camry_2026_bus1_camera_output.json` is now schema v3 and records
+all three bank joins and kinematic witnesses. `tools/test
+camry_2026_bus1_camera_output` regenerates it byte-identically. The corresponding
+opendbc implementation uses `0x180..0x182` geometry plus `0x183..0x185` motion
+at 20 Hz on Panda bus 1; the 24 bank/slot indices serve as stable track IDs and
+the exact `0xFFF8` distance sentinel removes empty tracks. The wire lateral sign
+is converted with the established Toyota radar convention (`RadarPoint.yRel`
+left-positive, Toyota wire lateral right-positive); this sign orientation is the
+one remaining field detail worth checking visually on-car, but it does not
+change the recovered bit packing or magnitude.
+
 ## 70. Bounded exact-F33 ICU-S command-5 permission probe (VAR-154)
 
 The exact image contains a smaller and safer command-5 call surface than the superseded

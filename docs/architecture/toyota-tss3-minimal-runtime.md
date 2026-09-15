@@ -42,7 +42,7 @@ material, not the intended deployment architecture.
 | repository | required for the demonstrated lateral path | not required by that path |
 |---|---|---|
 | openpilot | After CarParams identifies the F33 safety profile, disable Panda `canfd_auto` on unsplit Toyota-B bus 1. No controls/model changes. | direct-Panda lease; `CanData.fd` schema/logging; SecOC-key Params; controller arming Params; changes to `card.py` or `controlsd` |
-| opendbc | F33 platform identity and DBC; TSS3 state decoding; F33 CarParams; direct C7 angle encoder; Toyota F33 safety RX state, angle checks, TX whitelist, and normal relay blocking | host construction or signing of B6; host freshness/MAC state; diagnostic/oracle arming; controller-side permission vetoes; Corolla actuation assumptions |
+| opendbc | F33 platform identity and DBC; TSS3 state decoding; F33 CarParams; direct C7 angle encoder; native 20 Hz TSS3 RadarInterface from recovered `0x180..0x185` geometry/motion fields; Toyota F33 safety RX state, angle checks, TX whitelist, and normal relay blocking | host construction or signing of B6; host freshness/MAC state; diagnostic/oracle arming; controller-side permission vetoes; unmapped object-class/reliability metadata |
 | Panda | Preserve the received FDF and BRS attributes when software-forwarding across the relay; sanitize the queue-private forwarding markers on host input and validate the original host checksum | relay-close/debug exceptions; F33-specific safety state outside opendbc; global 70% data sample point; global EFBI; logging the per-frame FDF bit to cereal |
 
 ## Current longitudinal layer
@@ -151,9 +151,15 @@ new evidence.
 The current upstream-shaped stock-harness port has moved beyond the original
 `3c79d935` checkpoint. It now includes target-native Camry state, exact-EPS
 fingerprinting, C7 bus-1 lateral control, normal Toyota HUD/cancel ownership,
-alpha `0x160` longitudinal replacement, and target-specific Panda limits. The
-latest focused Camry+Corolla TSS3 suite passes 27/27 and the full Toyota unit
-set passes 45 tests / 205 subtests at the September 15 checkpoint.
+alpha `0x160` longitudinal replacement, target-specific Panda limits, and a
+native TSS3 RadarInterface. The retained Bus-1 family closes three banks of
+eight objects: `0x180..0x182` provide u16×0.01 m range plus s12×0.05 m lateral
+geometry and `0x183..0x185` provide s10×0.1 m/s relative speed. The latter is
+independently validated against finite-difference range in both retained drives
+(r=0.912/0.956, fitted slope ~0.99). The latest focused Camry+Corolla TSS3 suite
+passes 28/28 and the full Toyota unit set passes 46 tests / 205 subtests; CAN/
+DBC/docs/platform validation passes 56 tests / 2,959 subtests and the generic
+car-interface suite passes 252 tests at the September 15 checkpoint.
 
 The parent openpilot tree still has only the target-scoped transport exception
 needed to keep short C7 Classical on exact-F33 bus 1. Panda retains the generic

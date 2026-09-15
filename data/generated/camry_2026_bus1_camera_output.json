@@ -1,5 +1,5 @@
 {
- "schema": "camry-2026-bus1-camera-output-v2",
+ "schema": "camry-2026-bus1-camera-output-v3",
  "gts_vocabulary": {
   "boundary": "GTS+ names quantities and diagnostic/FFD bit layouts. It does not emit BO_ 0x180. Wire packing is recovered from sniffed Bus-1 frames joined to those scales.",
   "frc_p5_geometry_dids": [
@@ -162,6 +162,76 @@
       "type": "u",
       "lsb": "0.05",
       "data_size": 8
+     }
+    ]
+   },
+   "573C": {
+    "role": "relative speed for control target s10 LSB 0.1 m/s",
+    "fields": [
+     {
+      "name": "Relative speed for control target [m/s]",
+      "byte": 1,
+      "bit": 1,
+      "length": 10,
+      "type": "s",
+      "lsb": "0.1",
+      "data_size": 2
+     }
+    ]
+   },
+   "573D": {
+    "role": "control-target object number u5",
+    "fields": [
+     {
+      "name": "Object number for control target for AES",
+      "byte": 1,
+      "bit": 4,
+      "length": 5,
+      "type": "u",
+      "lsb": "1",
+      "data_size": 1
+     }
+    ]
+   },
+   "573E": {
+    "role": "target object number u5",
+    "fields": [
+     {
+      "name": "Target Object Number",
+      "byte": 1,
+      "bit": 4,
+      "length": 5,
+      "type": "u",
+      "lsb": "1",
+      "data_size": 1
+     }
+    ]
+   },
+   "573F": {
+    "role": "control-target object type u3",
+    "fields": [
+     {
+      "name": "Type of the Object for Control Target",
+      "byte": 1,
+      "bit": 2,
+      "length": 3,
+      "type": "u",
+      "lsb": "1",
+      "data_size": 1
+     }
+    ]
+   },
+   "57BA": {
+    "role": "camera-target lateral position s12 LSB 0.05 m",
+    "fields": [
+     {
+      "name": "Lateral position for camera target [m]",
+      "byte": 1,
+      "bit": 3,
+      "length": 12,
+      "type": "s",
+      "lsb": "0.05",
+      "data_size": 2
      }
     ]
    },
@@ -634,6 +704,73 @@
     "0x18B/64": "91690006000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
     "0x18C/48": "bcdd0006fff80001fe01fff00003fc03ffe00007f807ffc0000ff00fff80001fe0000000000000000000000000000000"
    },
+   "joined_object_family_0x180_0x18B": {
+    "bank_layout": {
+     "bank0": [
+      "0x180",
+      "0x183",
+      "0x186",
+      "0x189"
+     ],
+     "bank1": [
+      "0x181",
+      "0x184",
+      "0x187",
+      "0x18A"
+     ],
+     "bank2": [
+      "0x182",
+      "0x185",
+      "0x188",
+      "0x18B"
+     ],
+     "object_slots_per_bank": 8,
+     "record_bytes_per_object": 28
+    },
+    "complete_bursts": 6912,
+    "empty_objects": 31942,
+    "occupied_objects": 23354,
+    "distance_m": {
+     "n": 23354,
+     "min": 1.29,
+     "p05": 4.39,
+     "median": 26.02,
+     "p95": 179.28,
+     "max": 333.13
+    },
+    "lateral_m_s12_lsb_0_05": {
+     "n": 23354,
+     "min": -64.0,
+     "p05": -17.8,
+     "median": -2.05,
+     "p95": 15.65,
+     "max": 69.5
+    },
+    "relative_speed_m_s_s10_lsb_0_1": {
+     "n": 23354,
+     "min": -32.4,
+     "p05": -22.2,
+     "median": -15.5,
+     "p95": 0.0,
+     "max": 25.0
+    },
+    "kinematic_validation": {
+     "n": 21685,
+     "pearson_r": 0.912359,
+     "median_abs_error_m_s": 1.192327,
+     "rmse_m_s": 3.863925,
+     "fit_range_rate_from_encoded_vrel": {
+      "slope": 0.994375,
+      "intercept_m_s": 0.069844
+     },
+     "continuity_filter": "35..65 ms, |delta range|<2.5 m, |delta lateral|<1.0 m, |range rate|<=50 m/s"
+    },
+    "wire_fields": {
+     "record0_distance": "B0:B1 u16be * 0.01 m",
+     "record0_lateral": "B2:B3[7:4] signed12be * 0.05 m",
+     "record1_relative_speed": "B1[2:0]||B2[7:1] signed10be * 0.1 m/s"
+    }
+   },
    "request_object_on_bus1": {
     "layout": "5282 byte1 Target Lateral ID || bytes2-3 pinion s16be || byte4 assist",
     "id11_min_abs_pinion": 20,
@@ -882,6 +1019,73 @@
     "0x18B/64": "dedb0f15000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
     "0x18C/48": "1cb50f15025fed4c2a0004bbfe0028000ee7fa002800150ff20104001f9fd001a01fff80000000000000000000000000"
    },
+   "joined_object_family_0x180_0x18B": {
+    "bank_layout": {
+     "bank0": [
+      "0x180",
+      "0x183",
+      "0x186",
+      "0x189"
+     ],
+     "bank1": [
+      "0x181",
+      "0x184",
+      "0x187",
+      "0x18A"
+     ],
+     "bank2": [
+      "0x182",
+      "0x185",
+      "0x188",
+      "0x18B"
+     ],
+     "object_slots_per_bank": 8,
+     "record_bytes_per_object": 28
+    },
+    "complete_bursts": 7680,
+    "empty_objects": 27509,
+    "occupied_objects": 33931,
+    "distance_m": {
+     "n": 33931,
+     "min": 1.29,
+     "p05": 7.62,
+     "median": 38.97,
+     "p95": 217.49,
+     "max": 439.11
+    },
+    "lateral_m_s12_lsb_0_05": {
+     "n": 33931,
+     "min": -57.8,
+     "p05": -13.1,
+     "median": -2.4,
+     "p95": 15.95,
+     "max": 52.1
+    },
+    "relative_speed_m_s_s10_lsb_0_1": {
+     "n": 33931,
+     "min": -50.0,
+     "p05": -39.8,
+     "median": -22.9,
+     "p95": 0.0,
+     "max": 49.7
+    },
+    "kinematic_validation": {
+     "n": 30894,
+     "pearson_r": 0.956321,
+     "median_abs_error_m_s": 1.216007,
+     "rmse_m_s": 4.45972,
+     "fit_range_rate_from_encoded_vrel": {
+      "slope": 0.990272,
+      "intercept_m_s": -0.009856
+     },
+     "continuity_filter": "35..65 ms, |delta range|<2.5 m, |delta lateral|<1.0 m, |range rate|<=50 m/s"
+    },
+    "wire_fields": {
+     "record0_distance": "B0:B1 u16be * 0.01 m",
+     "record0_lateral": "B2:B3[7:4] signed12be * 0.05 m",
+     "record1_relative_speed": "B1[2:0]||B2[7:1] signed10be * 0.1 m/s"
+    }
+   },
    "request_object_on_bus1": {
     "layout": "5282 byte1 Target Lateral ID || bytes2-3 pinion s16be || byte4 assist",
     "id11_min_abs_pinion": 20,
@@ -944,7 +1148,7 @@
   "middle_hop": "FRC builds FFD 5282/5631 in camera RAM (ID + milliradian pinion + assist + damping) from vision objects plus plant observers (including SAS 0x025 and EPS torque 0x030; 0x160 remains unassigned after CORR-138). The consecutive 5282 layout ID||pinion||assist is absent from sniffed Bus-1 CAN. A Bus-4 origin truncates damping, packs ID/pinion/assist as 0x08A B21/B18/B24, and SecOC-wraps it. Measured angle on the camera bus is inbound plant echo, not a command to EPS. Requested pinion is not an F33 COM input.",
   "not_tss2_8byte_radar_dbc": "Old comma 8-byte 0x180..0x19F radar-track geometry does not transfer.",
   "0x160": "0x160/32 remains a roughly 40 Hz camera/radar-domain stream. CORR-138 rejects the former standing 0x025 steering-angle-echo identity: the high 0x160[22] correlation was Class-L-window-restricted, while full-drive correlation collapses to r=+0.086104/-0.091204. No per-ID FRC-versus-radar transmitter or standing field identity is assigned.",
-  "0x183_0x18C": "Different schemas: 0x183/0x184 carry typed records with float-shaped words (FFD Type-f / 32-bit FRC geometry vocabulary) but are not a 1:1 copy of FFD 590C. 0x185/0x188/0x18B are often idle zeros. 0x186/0x189/0x18A are structured and still unpacking. 0x18C/48 is the VAR-068 staircase/status PDU.",
-  "remainder": "Object-slot bytes 2-6 are not FFD 5A24/5A26 16-bit overlays. Which Bus-1 node transmits which ID (FRC vs Front Radar vs fusion) is not named by GTS+ CAN-ID. No output authorized."
+  "joined_object_records": "The shared B2:B3 burst counter closes 0x180..0x18B as three banks of eight objects with four 7-byte records per object: bank0 180/183/186/189, bank1 181/184/187/18A, bank2 182/185/188/18B. Empty geometry in the first record coincides with zero companion records. In record0, B0:B1 is u16be range *0.01 m and B2:B3[7:4] is signed12 lateral *0.05 m, matching GTS FFD 57BA. In record1, B1[2:0]||B2[7:1] is signed10 relative speed *0.1 m/s, matching FFD 573C and independently validated against finite-difference range rate. 0x18C/48 remains the VAR-068 staircase/status PDU.",
+  "remainder": "The three core RadarPoint quantities (range, lateral position, relative speed) are recovered. Remaining companion bits include object identity/type/reliability/classification metadata; GTS provides matching u5/u3 vocabulary but exact CAN packing is not yet assigned. Which Bus-1 node transmits the family (FRC vs Front Radar vs fusion) is likewise not named by GTS+ CAN-ID."
  }
 }
