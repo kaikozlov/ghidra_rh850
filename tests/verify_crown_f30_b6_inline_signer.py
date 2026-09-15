@@ -244,6 +244,26 @@ with tempfile.TemporaryDirectory(prefix="verify-crown-f30-signer-") as td:
           kit_meta["usage"].index("NRTD/Park: ./crown-tss3-signer preflight /tmp/crown-preflight.json") <
           kit_meta["usage"].index("NRTD/Park: ./crown-tss3-signer install /tmp/crown-install.json"))
     launcher_text = (kit / "crown-tss3-signer").read_text(encoding="utf-8")
+    check("field kit runtime precedes host openpilot on PYTHONPATH",
+          'PYTHONPATH="$KIT_ROOT/runtime:$OPENPILOT_ROOT"' in launcher_text)
+    # Reproduce mruno's actual shape: Sunnypilot provides panda/opendbc, while a
+    # leftover partial host tsk package exists but lacks programming.py. The kit
+    # must win package resolution so that stale host tsk cannot shadow it.
+    fake_host = root / "fake-sunnypilot"
+    (fake_host / "tsk/lib").mkdir(parents=True)
+    (fake_host / "tsk/__init__.py").write_text("", encoding="utf-8")
+    (fake_host / "tsk/lib/__init__.py").write_text("", encoding="utf-8")
+    (fake_host / "tsk/lib/dump_dataflash.py").write_text("HOST_PARTIAL_TSK = True\n", encoding="utf-8")
+    resolution = subprocess.run(
+        [sys.executable, "-c",
+         "import tsk.lib.programming as p, tsk.lib.diagnostic_route as d; "
+         "print(p.__file__); print(d.__file__)"],
+        cwd=kit, env={**__import__("os").environ, "PYTHONPATH": f"{kit / 'runtime'}:{fake_host}"},
+        capture_output=True, text=True,
+    )
+    check("vendored tsk wins over incomplete host Sunnypilot tsk",
+          resolution.returncode == 0 and str(kit / "runtime/tsk/lib/programming.py") in resolution.stdout and
+          str(kit / "runtime/tsk/lib/diagnostic_route.py") in resolution.stdout)
     check("field kit makes current-angle replacement the first bounded command",
           "READY/Park/stationary: ./crown-tss3-signer replace-current /tmp/crown-replace-current.json" in kit_meta["usage"] and
           "replace-current" in launcher_text)
