@@ -1,0 +1,127 @@
+{
+  "authenticated_payload": {
+    "path": "camry_f33_b6_inline_signer_continuous_payload.bin",
+    "sha256": "01ce993425e910a6ea37473580adb6e641bdff56a3568492d4c9e0388e02fc6c",
+    "size": 4096
+  },
+  "helper": {
+    "base": "0xFEBF0000",
+    "headroom": 16,
+    "limit": 604,
+    "padded_path": "camry_f33_b6_inline_signer_continuous_helper_padded.bin",
+    "padded_sha256": "b417e12dde0dc7d6478ea6f242fe9eaa246a00a9fbbcc711a5d2d3adcf159a28",
+    "padded_size": 600,
+    "path": "camry_f33_b6_inline_signer_continuous_helper.bin",
+    "relocations": 0,
+    "sha256": "74315a067cfe457c945cbeadb0e1432e70765bbe36ef022fc57ffad272cb4469",
+    "size": 588,
+    "word_count": 150
+  },
+  "loader": {
+    "can_id": "0x1FDC0002",
+    "frame": "00 C6 seq word_index word_le32; word_index FF arms after exact sequential word count",
+    "runtime_control_frame": "00 C7 seq 00 target_hi target_lo 00 00; nonzero seq remains active for every distinct native B6 until sequence zero",
+    "scratch": {
+      "base": "0xFEBF0288",
+      "sid23_readable": false,
+      "size": 72
+    },
+    "staging": "0xFEBE4C34",
+    "state": {
+      "base": "0xFEBF025C",
+      "layout": "magic:u32, next_index:u8, initialized:u8, armed:u8, last_command5_rc:u8, signed_count:u32",
+      "magic": "0x53364249",
+      "size": 12
+    },
+    "telemetry": {
+      "base": "0xFEBF0268",
+      "layout": "native_frame_count:u32, command5_attempts:u32, oracle_native_trailer:bytes4, oracle_computed_trailer:bytes4, last_control_seq:u8, native_verified:u8, last_done_flag:u8, last_command_status:u8, reconstructed_freshness:{trip:u32,reset:u32,message:u16,reset_low2:u8,length:u8}",
+      "size": 32
+    }
+  },
+  "mode": "continuous-signed",
+  "mutation_boundary": {
+    "can_transmit": false,
+    "command5_failure_leaves_queue_unchanged": true,
+    "flash_write": false,
+    "native_oracle_mutates_queue": false,
+    "replacement_application_bytes": "B3..B9 only",
+    "replacement_requires_native_mac_equality": true,
+    "replacement_trailer_bytes": "computed B28..B31 only",
+    "requires_installed_stage5_receiver_result_bypass": false,
+    "route44_injection": false,
+    "secoc_result_override": false,
+    "uncommanded_native_b6_unchanged": true
+  },
+  "purpose": "live-qualified diagnostic variant: while C7 sequence is nonzero, replace and re-sign every distinct native B6 before the existing receiver SecOC path",
+  "resident": {
+    "base": "0xFEBFF9F0",
+    "headroom": 0,
+    "path": "camry_f33_b6_inline_signer_continuous_resident.bin",
+    "relocations": 0,
+    "sha256": "31b1b2c31007f130d6b4679a0c99f5903a58f748daf11978f9c52f504aea3a3a",
+    "size": 524
+  },
+  "schema": "camry-f33-b6-inline-signer-build-v1",
+  "signer": {
+    "command5": {
+      "config_type": 1,
+      "input_length": 36,
+      "output_length": 16,
+      "record": 0,
+      "selector": 4,
+      "wrapper": "0x00089BC2"
+    },
+    "domain": "00B6 || native-or-replacement B0..B27 || freshness48",
+    "freshness_owner": "exact arithmetic recovered from stock 0x909CA/0x90A48 using received FV4, EPS authenticated sync, and committed ordinary slot 1; disagreement is fail-closed",
+    "native_oracle": "first distinct native B6 is signed locally and its transaction-paired computed FV4||MAC28 must equal Toyota's preserved trailer before replacement is enabled",
+    "replacement": "scratch only until freshness reconstruction and command5 rc0/done1/status0; then copy B3..B9 with ID11, requested B4:B5, signal265=0, B8/B9=100/100 and write computed B28..B31",
+    "trigger": "each distinct native profile2 B6 is observed once by trailer identity; after the first no-mutation native-MAC oracle, every frame is replaced while the current C7 sequence is nonzero; sequence zero stops replacement"
+  },
+  "sources": {
+    "builder": {
+      "path": "exploit/ephemeral_runtime/build_camry_f33_b6_inline_signer.py",
+      "sha256": "d3e8a159c7bb7924de60a38b63ab2c4a7458ee1949387159936c3829a7f53084"
+    },
+    "helper": {
+      "path": "exploit/ephemeral_runtime/camry_f33_b6_inline_signer_continuous_helper.S",
+      "sha256": "fb5f5041b4f1289e257c3d57cec58adc1113ca0333a50588a29f1b45ecaf2899"
+    },
+    "resident": {
+      "path": "exploit/ephemeral_runtime/camry_f33_b6_inline_signer_resident.S",
+      "sha256": "34cd51f288cedf2bc1417e4c521e67bfe403e4945bc6028d5333332730a8cc6c"
+    },
+    "shared_helper": {
+      "path": "exploit/ephemeral_runtime/camry_f33_b6_inline_signer_helper.S",
+      "sha256": "aa04ff419800abc073708a7869f1199ea689a4958b9d94e8803f1eeabe4d51f7"
+    }
+  },
+  "staging": {
+    "base": "0xFEBF0000",
+    "path": "camry_f33_b6_inline_signer_continuous.bin",
+    "relocations": 0,
+    "sha256": "2b6fa690f3ea1ece5f301e976e2f4f781f802ff92c1a6667b8a61ae4d18deb45",
+    "size": 652
+  },
+  "static_pins": {
+    "authenticated_sync": "0xFEBE55C0",
+    "b6_queue_record": "0xFEBE547A",
+    "b6_secured_buffer": "0xFEBE54D4",
+    "committed_b6_freshness": "0xFEBE55E8",
+    "helper_mpu": "FEBF0000..FEBF02F7 lies in exact-F33 MPU region5 FEBEF400..FEBF33FC, MPAT 0xB8 in both application contexts; the existing scalar-reference census remains empty through FEBF0307",
+    "midaggregate_boundary": "after 0x79EDE receive-ring drain, before untouched 0x7A272 tail/0x6A410 SecOC"
+  },
+  "target": {
+    "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
+    "software_id": "8965F3307000"
+  },
+  "toolchain": {
+    "accepted_by": "canonical-sienna-proxy-byte-equivalence",
+    "canonical_image_id": "sha256:2d5e4c27e490302fbcd05e896e31bf36109a2c5aab899b500eecbebd3fec8c24",
+    "reference_binary": "exploit/ephemeral_runtime/audited/ephemeral_command5_proxy.bin",
+    "reference_sha256": "273202dc591810b2f587ab8fac044599b57b4e07a24ff61d36b7131b97c00660",
+    "reference_size": 546,
+    "reproduced_byte_exact": true,
+    "selected_image_id": "sha256:89676b8b85d27e84538ffd8a7764ea30a90e09b5a759a242801229f96fc01d43"
+  }
+}

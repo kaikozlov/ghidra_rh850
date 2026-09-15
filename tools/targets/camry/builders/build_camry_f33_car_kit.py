@@ -51,9 +51,13 @@ PREAGG_MONITOR_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_runtime
 INTERTICK_MONITOR_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_runtime_monitor_intertick.bin"
 MIDAGG_OBSERVER_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_midaggregate_observer.bin"
 COMMAND5_PROBE_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_command5_probe.bin"
-INLINE_SIGNER_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_inline_signer.bin"
-INLINE_SIGNER_HELPER = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_inline_signer_helper_padded.bin"
-INLINE_SIGNER_META = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_b6_inline_signer_build.json"
+# The default car-kit signer is the byte-exact continuous helper from the
+# September 10 working-steering handoff.  Keep the one-shot audited bundle as
+# analysis prior art, but do not make a user override three environment
+# variables to reproduce the configuration that actually steered the car.
+INLINE_SIGNER_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_inline_signer_continuous.bin"
+INLINE_SIGNER_HELPER = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_inline_signer_continuous_helper_padded.bin"
+INLINE_SIGNER_META = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_b6_inline_signer_continuous_build.json"
 ICUS_RAMKEY_HELPER9 = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_icus_ramkey_cmd9_helper_padded.bin"
 ICUS_RAMKEY_HELPER10 = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_icus_ramkey_cmd10_helper_padded.bin"
 ICUS_RAMKEY_META = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_icus_ramkey_probe.json"
@@ -74,6 +78,7 @@ RUNTIME_FILES = [
     "exploit/ephemeral_runtime/camry_f33_b6_ingress_helper.py",
     "exploit/ephemeral_runtime/camry_f33_command5_probe.py",
     "exploit/ephemeral_runtime/camry_f33_b6_inline_signer.py",
+    "exploit/ephemeral_runtime/camry_f33_post_install_recovery.py",
     "exploit/ephemeral_runtime/camry_f33_icus_ramkey_probe.py",
     "exploit/ephemeral_runtime/camry_f33_persistent_signer.py",
     "exploit/ephemeral_runtime/f33_panda_lease.sh",
@@ -131,8 +136,8 @@ This package is for the exact `8965F3307000` EPS only.
 **Historical-provenance label.** The sequence below records the historical
 stage-2 -> stage-3 progression as it was performed and reboot-verified at the
 time. It is **not** a fresh live identity measurement of the currently
-installed firmware. The kit manifest's `current_firmware` block is the
-authoritative installed-state record (stage 5, SHA-256
+installed firmware. The kit manifest's `last_observed_firmware` block is the
+historical installed-state record at that checkpoint (stage 5, SHA-256
 `{stage5.EXPECTED_FINAL_SHA256}`, persistence-verified 2026-09-01);
 verify the live image against that record before any operation. Earlier kit
 builds described the stage-2 image as "currently installed"; that wording
@@ -333,8 +338,13 @@ def build(out: Path, openpilot: Path) -> dict:
     for name, helper in (("command9", icus_ramkey_helper9), ("command10", icus_ramkey_helper10)):
         if hashlib.sha256(helper).hexdigest() != icus_ramkey_meta["helpers"][name]["sha256"]:
             raise RuntimeError(f"ICU-S RAM_KEY {name} audited helper identity drift")
-    if icus_ramkey_meta["reused_live_qualified_payload"]["resident"] != inline_meta["resident"]:
-        raise RuntimeError("ICU-S RAM_KEY probe no longer reuses the r6-correct resident")
+    reused_resident = icus_ramkey_meta["reused_live_qualified_payload"]["resident"]
+    # Continuous and one-shot signer bundles intentionally reuse the exact same
+    # r6-correct staging/resident while carrying different post-startup helpers.
+    # Artifact filenames differ, so bind the executable identity, not the path.
+    for key in ("base", "size", "sha256"):
+        if reused_resident[key] != inline_meta["resident"][key]:
+            raise RuntimeError(f"ICU-S RAM_KEY probe no longer reuses the r6-correct resident ({key})")
     if icus_ramkey_meta["reused_live_qualified_payload"]["authenticated_payload_sha256"] != hashlib.sha256(inline_signer_payload).hexdigest():
         raise RuntimeError("ICU-S RAM_KEY authenticated payload identity drift")
     ingress_meta = json.loads(INGRESS_META.read_text(encoding="utf-8"))
@@ -429,19 +439,28 @@ def build(out: Path, openpilot: Path) -> dict:
     for path in sorted(p for p in persistent_dir.rglob("*") if p.is_file()):
         files[str(path.relative_to(out))] = {"sha256": sha256(path)}
     manifest = {
-        "schema": "camry-f33-car-kit-v15",
+        "schema": "camry-f33-car-kit-v16",
         "created_at": datetime.now(UTC).isoformat(timespec="seconds"),
         "target": {
             "eps_f181": "8965F3307000",
-            "eps_diag": "0x7A1->0x7A9 bus0",
-            "b6": "0x0B6/32 FD bus0",
+            "eps_diag": "0x7A1->0x7A9 bus1 (stock Toyota-B unsplit EPS/Brake network)",
+            "b6": "0x0B6/32 FD bus1 (native EPS/Brake network; resident replaces internally)",
         },
-        "current_firmware": {
+        "last_observed_firmware": {
             "stage": 5,
             "sha256": stage5.EXPECTED_FINAL_SHA256,
             "crc_prefix": f"0x{stage5.EXPECTED_STAGE5_PREFIX:08X}",
             "crc_fixup": f"0x{stage5.EXPECTED_STAGE5_FIXUP:08X}",
-            "note": "live persistence-verified 2026-09-01; no further persistent patch is part of the observer experiment",
+            "observed_at": "2026-09-01",
+            "note": "historical maintainer-rack state only; do not infer the currently installed rack/image from this record",
+        },
+        "runtime_firmware_contract": {
+            "software_id": "8965F3307000",
+            "persistent_patch_required": False,
+            "stage5_receiver_bypass_required": False,
+            "reason": "the continuous RAM helper installs a locally generated valid FV4+CMAC28 trailer before the untouched stock SecOC consumer",
+            "live_qualified_on_stock_codeflash": False,
+            "live_qualified_configuration": "continuous RAM signer on the historical stage-5 image; stock-CodeFlash use is structurally independent of stage 5 but still awaits same-car validation",
         },
         "persistent_b6_signer": {
             "launcher": "f33-persist",
@@ -463,6 +482,7 @@ def build(out: Path, openpilot: Path) -> dict:
             "control_route": "extended 0x1FDC0002 C7 sideband on unsplit Panda bus 1",
             "openpilot_requirement": "exact-F33 stock-Toyota-B support with Classical C7 on Panda bus 1",
             "development_only": True,
+            "historical_only": True,
         },
         "live_observers": {
             "native_xcp_steering_state": {
@@ -514,7 +534,7 @@ def build(out: Path, openpilot: Path) -> dict:
                 "control_can_id": inline_meta["loader"]["can_id"],
                 "state": inline_meta["loader"]["state"],
                 "telemetry": inline_meta["loader"]["telemetry"],
-                "operation": "post-startup helper load; first prove local slot-4 signing against an untouched native B6, then optionally replace/re-sign exactly one native B6 from a one-shot control frame",
+                "operation": "post-startup helper load; first prove local slot-4 signing against an untouched native B6, then continuously replace/re-sign each distinct native B6 while the latest nonzero C7 command remains active",
                 "trigger": inline_meta["signer"]["trigger"],
                 "domain": inline_meta["signer"]["domain"],
                 "freshness_owner": inline_meta["signer"]["freshness_owner"],
@@ -527,11 +547,31 @@ def build(out: Path, openpilot: Path) -> dict:
                     "./f33-secoc install in NRTD/Park/stationary",
                     "direct NRTD->READY without OFF",
                     "./f33-secoc load-arm in READY/Park/stationary; require native Toyota trailer == locally computed trailer",
-                    "./f33-secoc quiet-source in READY/Park/stationary to measure distinct native B6 rate with host B6 quiesced",
-                    "only after the native oracle passes: ./f33-secoc replace-once TARGET_RAW in READY/Park/stationary",
+                    "./f33-secoc recover-drcc in READY/Park/stationary; preserve DTCs, run the exact physical-SID14 + functional-Mode04 clear, require zero post-clear fault bits, and observe FRC DRCC permission",
+                    "./f33-secoc quiet-source in READY/Park/stationary to measure distinct native B6 rate with host C7 neutral",
+                    "return Panda ownership to openpilot; CarController C7 sequence zero leaves native B6 untouched and nonzero latActive C7 continuously replaces/re-signs native B6",
                 ],
                 "persistent_flash_write": False,
-                "live_qualified": False,
+                "stage5_receiver_bypass_required": False,
+                "live_qualified": True,
+                "live_qualification": {
+                    "route": "0000008d--a9f348691a",
+                    "corroborating_route": "00000093--4066e7ae51",
+                    "helper_padded_sha256": "b417e12dde0dc7d6478ea6f242fe9eaa246a00a9fbbcc711a5d2d3adcf159a28",
+                    "boundary": "the exact continuous helper identity is joined from the contemporaneous install/status handoff; the route records C7 and vehicle response but not EPS LocalRAM bytes",
+                },
+                "same_cycle_drcc_recovery": {
+                    "command": "./f33-secoc recover-drcc",
+                    "tool": "runtime/exploit/ephemeral_runtime/camry_f33_post_install_recovery.py",
+                    "physical_clear": "14FFFFFF on the six exact-car responders that accepted it",
+                    "functional_clear": "0x7DF Mode 04 on Panda bus 0; require 0x7E8/7EA/7EB/7ED/7EE positive 44",
+                    "acceptance": "all 11 known physical responders have no status&0xAF fault records and FRC DID1905 permits cruise without DID1906 ACC-not-available",
+                    "eps_power_cycle": False,
+                    "persistent_flash_write": False,
+                    "live_qualified_clear_transport": True,
+                    "live_qualified_after_signer_bootstrap": False,
+                    "remaining_question": "does the proven same-cycle clear restore DRCC after NRTD volatile-signer installation while the signer remains resident?",
+                },
             },
             "command5_probe": {
                 "payload": "ram_payloads/camry_f33_command5_probe_payload.bin",
@@ -746,7 +786,7 @@ def build(out: Path, openpilot: Path) -> dict:
                 "requires_before_arm": "first prove the exact injected ID63 frame reaches profile2 with b6_midaggregate_observer; bridge is a later controlled transformation experiment",
             },
             "order": [
-                "b6_inline_signer is the production-shaped fast path: install retained resident in NRTD, direct transition to READY, load/readback/arm helper, prove the local signer by reproducing one untouched Toyota B6 trailer, then use one-shot native-B6 replacement for the parked causal test",
+                "b6_inline_signer is the production-shaped volatile path: on stock Toyota-B bus 1 install the retained resident in NRTD, transition directly to READY, load/readback/arm the exact continuous helper, prove local signing against one untouched native B6 trailer, then return Panda ownership to openpilot; nonzero C7 drives continuous signed replacement and sequence zero returns to native B6",
                 "command5_probe is retained as the already-live-qualified diagnostic oracle and is no longer the continuous signing architecture",
                 "b6_ingress_observer is the live-qualified two-stage topology discriminator; its 2026-09-10 D7-positive marker run closed bounded negative for direct Panda ID63 at post-CanIf/pre-SecOC",
                 "the original b6_midaggregate_observer full-runtime install failed before initialization and is retained only as a superseded artifact",

@@ -855,6 +855,7 @@ check("command-5 plan is non-actuating and ephemeral", command5_probe.plan(None)
 print("\n== inline B6 signer host-visible state ==")
 from exploit.ephemeral_runtime import camry_f33_b6_inline_signer as inline_signer
 from exploit.ephemeral_runtime import camry_f33_b6_ingress_helper as ingress_helper
+from exploit.ephemeral_runtime import camry_f33_post_install_recovery as post_recovery
 check("inline signer state remains wholly SID23-readable below the protected boundary",
       inline_signer.STATE_BASE == 0xFEBF025C and inline_signer.STATE_SIZE == 12 and
       inline_signer.STATE_BASE + inline_signer.STATE_SIZE == inline_signer.TELEMETRY_BASE and
@@ -898,8 +899,26 @@ check("inline signer telemetry exposes native-frame/signing equality gates",
 check("inline signer telemetry refuses equality without completed native verification",
       inline_signer.decode_signer_telemetry(telemetry_raw[:17] + b"\x00" + telemetry_raw[18:])["native_signature_match"] is False and
       inline_signer.decode_signer_telemetry(telemetry_raw[:12] + bytes.fromhex("11223344") + telemetry_raw[16:])["native_signature_match"] is False)
-check("inline signer replacement control is exact one-shot C7 signed16 big-endian",
+check("inline signer replacement control is exact stock-harness C7 signed16 big-endian",
+      inline_signer.CONTROL_BUS == 1 and
       inline_signer.replacement_frame(sequence=0x2A, target_angle_raw=-13) == bytes.fromhex("00c72a00fff30000"))
+recovery_plan = post_recovery.plan()
+check("post-install recovery pins the exact stock-harness EPS identity and proven split clear",
+      post_recovery.EPS_BUS == 1 and post_recovery.EPS_TX == 0x7A1 and
+      post_recovery.OBD_CLEAR_BUS == 0 and post_recovery.OBD_CLEAR_TX == 0x7DF and
+      recovery_plan["physical_clear"]["request"] == "14FFFFFF" and
+      recovery_plan["functional_clear"]["required_positive_responders"] ==
+      ["0x7E8", "0x7EA", "0x7EB", "0x7ED", "0x7EE"] and
+      recovery_plan["acceptance"]["fault_mask"] == "0xAF")
+parsed_recovery_dtcs = post_recovery.parse_dtc_by_status(bytes.fromhex("5902bd543a7e1040632a1045262a1040632810452c1410c13187ac"))
+check("post-install recovery preserves and classifies exact U0131 warning bits",
+      parsed_recovery_dtcs["status_availability_mask"] == "0xBD" and
+      parsed_recovery_dtcs["records"][-1]["dtc"] == "C13187" and
+      parsed_recovery_dtcs["records"][-1]["status"] == 0xAC and
+      parsed_recovery_dtcs["fault_records"][-1]["fault_bits"] == 0xAC)
+check("post-install recovery FRC oracle decoder distinguishes DRCC permission from MAIN state",
+      post_recovery.decode_frc_did(0x1905, bytes.fromhex("62 19 05 00 80"))["cruise_control_allowed"] is True and
+      post_recovery.decode_frc_did(0x1906, bytes.fromhex("62 19 06 00 80 00 00 00 00"))["acc_not_available_icon"] is False)
 check("inline signer exposes exact profile2 queue and full secured buffer through SID23",
       inline_signer.B6_QUEUE_RECORD_BASE == 0xFEBE547A and inline_signer.B6_QUEUE_RECORD_SIZE == 8 and
       inline_signer.B6_SECURED_BUFFER_BASE == 0xFEBE54D4 and inline_signer.B6_SECURED_BUFFER_SIZE == 32 and
@@ -1007,15 +1026,22 @@ with tempfile.TemporaryDirectory() as td:
     runbook = (out / "RUNBOOK.md").read_text(encoding="utf-8")
     patch_runbook = (out / "FIRMWARE_PATCH.md").read_text(encoding="utf-8")
     check("kit copies the exact standalone probe", copied.read_bytes() == MODULE_PATH.read_bytes())
-    check("kit manifest is self-contained v15 and binds exact route", manifest["schema"] == "camry-f33-car-kit-v15" and manifest["target"] == {
-        "eps_f181": "8965F3307000", "eps_diag": "0x7A1->0x7A9 bus0", "b6": "0x0B6/32 FD bus0",
+    check("kit manifest is self-contained v16 and binds exact stock-Toyota-B route", manifest["schema"] == "camry-f33-car-kit-v16" and manifest["target"] == {
+        "eps_f181": "8965F3307000",
+        "eps_diag": "0x7A1->0x7A9 bus1 (stock Toyota-B unsplit EPS/Brake network)",
+        "b6": "0x0B6/32 FD bus1 (native EPS/Brake network; resident replaces internally)",
     })
-    check("kit pins live persistence-verified stage5 as current firmware", manifest["current_firmware"] == {
+    check("kit retains stage5 only as the last-observed historical firmware state", manifest["last_observed_firmware"] == {
         "stage": 5,
         "sha256": "669cedf8c8465ebfd02318cb7708b897b817bc3b40925c89743b64ce49aa01af",
-        "crc_prefix": "0x1960380A", "crc_fixup": "0xE69FC7F5",
-        "note": "live persistence-verified 2026-09-01; no further persistent patch is part of the observer experiment",
+        "crc_prefix": "0x1960380A", "crc_fixup": "0xE69FC7F5", "observed_at": "2026-09-01",
+        "note": "historical maintainer-rack state only; do not infer the currently installed rack/image from this record",
     })
+    check("kit makes the continuous RAM signer independent of persistent stage5 policy",
+          manifest["runtime_firmware_contract"]["software_id"] == "8965F3307000" and
+          manifest["runtime_firmware_contract"]["persistent_patch_required"] is False and
+          manifest["runtime_firmware_contract"]["stage5_receiver_bypass_required"] is False and
+          manifest["runtime_firmware_contract"]["live_qualified_on_stock_codeflash"] is False)
     inline = manifest["ram_experiments"]["b6_inline_signer"]
     check("kit packages native-B6 verify/replace signer as the primary fast path",
           inline["launcher"] == "f33-secoc" and
@@ -1023,7 +1049,7 @@ with tempfile.TemporaryDirectory() as td:
           inline["resident_sha256"] == "31b1b2c31007f130d6b4679a0c99f5903a58f748daf11978f9c52f504aea3a3a" and
           inline["helper_base"] == "0xFEBF0000" and inline["helper_padded_size"] == 600 and
           inline["helper_word_count"] == 150 and
-          inline["helper_padded_sha256"] == "4719c4f27563180359445724eaefd594e3051ea545f75d69efb9bbede8f1965a" and
+          inline["helper_padded_sha256"] == "b417e12dde0dc7d6478ea6f242fe9eaa246a00a9fbbcc711a5d2d3adcf159a28" and
           inline["state"]["base"] == "0xFEBF025C" and inline["state"]["magic"] == "0x53364249" and
           inline["telemetry"]["base"] == "0xFEBF0268" and inline["telemetry"]["size"] == 0x20 and
           inline["scratch"] == {"base": "0xFEBF0288", "size": 0x48, "sid23_readable": False} and
@@ -1036,8 +1062,13 @@ with tempfile.TemporaryDirectory() as td:
           inline["mutation_boundary"]["command5_failure_leaves_queue_unchanged"] is True and
           inline["mutation_boundary"]["secoc_result_override"] is False and
           inline["mutation_boundary"]["can_transmit"] is False and
-          inline["persistent_flash_write"] is False and inline["live_qualified"] is False and
-          manifest["ram_experiments"]["order"][0].startswith("b6_inline_signer is the production-shaped fast path"))
+          inline["persistent_flash_write"] is False and inline["stage5_receiver_bypass_required"] is False and
+          inline["live_qualified"] is True and inline["live_qualification"]["route"] == "0000008d--a9f348691a" and
+          inline["live_qualification"]["helper_padded_sha256"] == "b417e12dde0dc7d6478ea6f242fe9eaa246a00a9fbbcc711a5d2d3adcf159a28" and
+          inline["same_cycle_drcc_recovery"]["command"] == "./f33-secoc recover-drcc" and
+          inline["same_cycle_drcc_recovery"]["live_qualified_clear_transport"] is True and
+          inline["same_cycle_drcc_recovery"]["live_qualified_after_signer_bootstrap"] is False and
+          manifest["ram_experiments"]["order"][0].startswith("b6_inline_signer is the production-shaped volatile path"))
     mid = manifest["ram_experiments"]["b6_midaggregate_observer"]
     signer = manifest["ram_experiments"]["command5_probe"]
     check("kit packages bounded high-tail command5 permission probe",
@@ -1172,6 +1203,7 @@ with tempfile.TemporaryDirectory() as td:
         "runtime/exploit/ephemeral_runtime/camry_f33_b6_midaggregate_observer.py",
         "runtime/exploit/ephemeral_runtime/camry_f33_b6_ingress_helper.py",
         "runtime/exploit/ephemeral_runtime/camry_f33_b6_inline_signer.py",
+        "runtime/exploit/ephemeral_runtime/camry_f33_post_install_recovery.py",
         "runtime/exploit/ephemeral_runtime/f33_panda_lease.sh",
         "runtime/exploit/ephemeral_runtime/camry_f33_runtime_replay_discriminator.py",
         "runtime/exploit/followups/xcp_read_probe.py", "runtime/exploit/followups/xcp_daq_probe.py",
@@ -1237,14 +1269,16 @@ with tempfile.TemporaryDirectory() as td:
           "phase requires a phase name" in launcher_text and 'monitor phase "$@" --execute' in launcher_text)
     secoc_launcher = out / "f33-secoc"
     secoc_launcher_text = secoc_launcher.read_text(encoding="utf-8")
-    check("inline signer launcher preserves manager lifecycle and exposes install/load-arm/status/quiet-source/replace-once",
+    check("inline signer launcher preserves manager lifecycle and exposes install/load-arm/recover/status/quiet-source/replace-once",
           "systemctl stop openpilot" not in secoc_launcher_text and
           'kill -STOP "$PANDAD_WRAPPER_PID"' not in secoc_launcher_text and
           'kill -CONT "$PANDAD_WRAPPER_PID"' not in secoc_launcher_text and
           "start_power_watchdog_keeper" not in secoc_launcher_text and
           "f33_panda_lease.sh" in secoc_launcher_text and
           "source \"$PANDA_LEASE_LIB\"" in secoc_launcher_text and
-          "load-arm" in secoc_launcher_text and "quiet-source" in secoc_launcher_text and "replace-once" in secoc_launcher_text and
+          "load-arm" in secoc_launcher_text and "recover-drcc" in secoc_launcher_text and
+          "camry_f33_post_install_recovery.py" in secoc_launcher_text and
+          "quiet-source" in secoc_launcher_text and "replace-once" in secoc_launcher_text and
           "verify_openpilot_ready_parked" in secoc_launcher_text and
           secoc_launcher_text.index("verify_openpilot_ready_parked") < secoc_launcher_text.rindex("quiesce_panda_owner") and
           "camry_f33_b6_inline_signer_helper_padded.bin" in secoc_launcher_text)
