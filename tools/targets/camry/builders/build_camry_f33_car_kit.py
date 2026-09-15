@@ -40,7 +40,7 @@ PREAGG_FIELD_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_field_preagg
 MIDAGG_FIELD_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_field_midaggregate_launcher.sh"
 COMMAND5_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_command5_launcher.sh"
 INLINE_SIGNER_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_b6_inline_signer_launcher.sh"
-ICUS13_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_icus13_probe_launcher.sh"
+ICUS_RAMKEY_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_icus_ramkey_probe_launcher.sh"
 PERSISTENT_SIGNER_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_persistent_signer_launcher.sh"
 F33_IMAGE = ROOT / "firmware/camry-8965F3307000/CodeFlash.bin"
 OBSERVER_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_transaction_observer.bin"
@@ -54,8 +54,9 @@ COMMAND5_PROBE_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_command
 INLINE_SIGNER_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_inline_signer.bin"
 INLINE_SIGNER_HELPER = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_inline_signer_helper_padded.bin"
 INLINE_SIGNER_META = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_b6_inline_signer_build.json"
-ICUS13_HELPER = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_icus13_probe_helper_padded.bin"
-ICUS13_META = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_icus13_probe.json"
+ICUS_RAMKEY_HELPER9 = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_icus_ramkey_cmd9_helper_padded.bin"
+ICUS_RAMKEY_HELPER10 = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_icus_ramkey_cmd10_helper_padded.bin"
+ICUS_RAMKEY_META = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_icus_ramkey_probe.json"
 INGRESS_HELPER = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_ingress_helper_helper_padded.bin"
 INGRESS_META = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_b6_ingress_helper_build.json"
 DEFAULT_OPENPILOT = Path("/Users/kai/dev/inspect/repos/kai-openpilot")
@@ -73,7 +74,7 @@ RUNTIME_FILES = [
     "exploit/ephemeral_runtime/camry_f33_b6_ingress_helper.py",
     "exploit/ephemeral_runtime/camry_f33_command5_probe.py",
     "exploit/ephemeral_runtime/camry_f33_b6_inline_signer.py",
-    "exploit/ephemeral_runtime/camry_f33_icus13_probe.py",
+    "exploit/ephemeral_runtime/camry_f33_icus_ramkey_probe.py",
     "exploit/ephemeral_runtime/camry_f33_persistent_signer.py",
     "exploit/ephemeral_runtime/f33_panda_lease.sh",
     "exploit/followups/xcp_read_probe.py",
@@ -324,16 +325,18 @@ def build(out: Path, openpilot: Path) -> dict:
     if hashlib.sha256(inline_helper).hexdigest() != inline_meta["helper"]["padded_sha256"]:
         raise RuntimeError("inline signer audited helper identity drift")
     inline_signer_payload = package_shellcode(inline_staging, secret=TOYOTA_P1ME_PAYLOAD_BUILD_SECRET)
-    icus13_meta = json.loads(ICUS13_META.read_text(encoding="utf-8"))
-    icus13_helper = ICUS13_HELPER.read_bytes()
-    if icus13_meta.get("schema") != "camry-f33-icus13-probe-build-v1":
-        raise RuntimeError("ICU-S-13 audited metadata schema drift")
-    if hashlib.sha256(icus13_helper).hexdigest() != icus13_meta["helper"]["sha256"]:
-        raise RuntimeError("ICU-S-13 audited helper identity drift")
-    if icus13_meta["reused_live_qualified_payload"]["resident"] != inline_meta["resident"]:
-        raise RuntimeError("ICU-S-13 no longer reuses the r6-correct resident")
-    if icus13_meta["reused_live_qualified_payload"]["authenticated_payload_sha256"] != hashlib.sha256(inline_signer_payload).hexdigest():
-        raise RuntimeError("ICU-S-13 authenticated payload identity drift")
+    icus_ramkey_meta = json.loads(ICUS_RAMKEY_META.read_text(encoding="utf-8"))
+    icus_ramkey_helper9 = ICUS_RAMKEY_HELPER9.read_bytes()
+    icus_ramkey_helper10 = ICUS_RAMKEY_HELPER10.read_bytes()
+    if icus_ramkey_meta.get("schema") != "camry-f33-icus-ramkey-probe-build-v1":
+        raise RuntimeError("ICU-S RAM_KEY audited metadata schema drift")
+    for name, helper in (("command9", icus_ramkey_helper9), ("command10", icus_ramkey_helper10)):
+        if hashlib.sha256(helper).hexdigest() != icus_ramkey_meta["helpers"][name]["sha256"]:
+            raise RuntimeError(f"ICU-S RAM_KEY {name} audited helper identity drift")
+    if icus_ramkey_meta["reused_live_qualified_payload"]["resident"] != inline_meta["resident"]:
+        raise RuntimeError("ICU-S RAM_KEY probe no longer reuses the r6-correct resident")
+    if icus_ramkey_meta["reused_live_qualified_payload"]["authenticated_payload_sha256"] != hashlib.sha256(inline_signer_payload).hexdigest():
+        raise RuntimeError("ICU-S RAM_KEY authenticated payload identity drift")
     ingress_meta = json.loads(INGRESS_META.read_text(encoding="utf-8"))
     ingress_padded_helper = INGRESS_HELPER.read_bytes()
     if ingress_meta.get("mode") != "ingress-observer":
@@ -374,9 +377,10 @@ def build(out: Path, openpilot: Path) -> dict:
     (ram_dir / "camry_f33_b6_inline_signer_payload.bin").write_bytes(inline_signer_payload)
     (ram_dir / "camry_f33_b6_inline_signer_helper_padded.bin").write_bytes(inline_helper)
     (ram_dir / "camry_f33_b6_inline_signer.json").write_text(json.dumps(inline_meta, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    (ram_dir / "camry_f33_icus13_probe_payload.bin").write_bytes(inline_signer_payload)
-    (ram_dir / "camry_f33_icus13_probe_helper_padded.bin").write_bytes(icus13_helper)
-    (ram_dir / "camry_f33_icus13_probe.json").write_text(json.dumps(icus13_meta, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    (ram_dir / "camry_f33_icus_ramkey_probe_payload.bin").write_bytes(inline_signer_payload)
+    (ram_dir / "camry_f33_icus_ramkey_cmd9_helper_padded.bin").write_bytes(icus_ramkey_helper9)
+    (ram_dir / "camry_f33_icus_ramkey_cmd10_helper_padded.bin").write_bytes(icus_ramkey_helper10)
+    (ram_dir / "camry_f33_icus_ramkey_probe.json").write_text(json.dumps(icus_ramkey_meta, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     (ram_dir / "camry_f33_b6_ingress_helper_payload.bin").write_bytes(ingress_payload)
     (ram_dir / "camry_f33_b6_ingress_helper_helper_padded.bin").write_bytes(ingress_padded_helper)
     (ram_dir / "camry_f33_b6_ingress_helper.json").write_text(json.dumps(ingress_meta, indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -398,9 +402,9 @@ def build(out: Path, openpilot: Path) -> dict:
     inline_signer_launcher = out / "f33-secoc"
     shutil.copy2(INLINE_SIGNER_LAUNCHER, inline_signer_launcher)
     inline_signer_launcher.chmod(0o755)
-    icus13_launcher = out / "f33-icus13"
-    shutil.copy2(ICUS13_LAUNCHER, icus13_launcher)
-    icus13_launcher.chmod(0o755)
+    icus_ramkey_launcher = out / "f33-icus-ramkey"
+    shutil.copy2(ICUS_RAMKEY_LAUNCHER, icus_ramkey_launcher)
+    icus_ramkey_launcher.chmod(0o755)
     persistent_signer_launcher = out / "f33-persist"
     shutil.copy2(PERSISTENT_SIGNER_LAUNCHER, persistent_signer_launcher)
     persistent_signer_launcher.chmod(0o755)
@@ -414,7 +418,7 @@ def build(out: Path, openpilot: Path) -> dict:
         "f33-ingress": {"sha256": sha256(ingress_launcher)},
         "f33-sign": {"sha256": sha256(command5_launcher)},
         "f33-secoc": {"sha256": sha256(inline_signer_launcher)},
-        "f33-icus13": {"sha256": sha256(icus13_launcher)},
+        "f33-icus-ramkey": {"sha256": sha256(icus_ramkey_launcher)},
         "f33-persist": {"sha256": sha256(persistent_signer_launcher)},
     }
     files.update(runtime_files)
@@ -425,7 +429,7 @@ def build(out: Path, openpilot: Path) -> dict:
     for path in sorted(p for p in persistent_dir.rglob("*") if p.is_file()):
         files[str(path.relative_to(out))] = {"sha256": sha256(path)}
     manifest = {
-        "schema": "camry-f33-car-kit-v14",
+        "schema": "camry-f33-car-kit-v15",
         "created_at": datetime.now(UTC).isoformat(timespec="seconds"),
         "target": {
             "eps_f181": "8965F3307000",
@@ -476,22 +480,24 @@ def build(out: Path, openpilot: Path) -> dict:
             },
         },
         "ram_experiments": {
-            "icus13_key_export_probe": {
-                "launcher": "f33-icus13",
-                "payload": "ram_payloads/camry_f33_icus13_probe_payload.bin",
-                "payload_sha256": icus13_meta["reused_live_qualified_payload"]["authenticated_payload_sha256"],
-                "resident": icus13_meta["reused_live_qualified_payload"]["resident"],
-                "helper": icus13_meta["helper"],
-                "telemetry": icus13_meta["telemetry"],
-                "result": icus13_meta["result"],
-                "operation": icus13_meta["operation"],
-                "mutation_boundary": icus13_meta["mutation_boundary"],
+            "icus_ramkey_opcode_probe": {
+                "launcher": "f33-icus-ramkey",
+                "payload": "ram_payloads/camry_f33_icus_ramkey_probe_payload.bin",
+                "payload_sha256": icus_ramkey_meta["reused_live_qualified_payload"]["authenticated_payload_sha256"],
+                "resident": icus_ramkey_meta["reused_live_qualified_payload"]["resident"],
+                "helpers": icus_ramkey_meta["helpers"],
+                "known_answer": icus_ramkey_meta["known_answer"],
+                "telemetry": icus_ramkey_meta["telemetry"],
+                "operation": icus_ramkey_meta["operation"],
+                "mutation_boundary": icus_ramkey_meta["mutation_boundary"],
                 "field_sequence": [
-                    "./f33-icus13 install in NRTD/Park/stationary",
+                    "./f33-icus-ramkey install in NRTD/Park/stationary",
                     "direct NRTD->READY without OFF",
-                    "./f33-icus13 run in READY/Park/stationary",
+                    "./f33-icus-ramkey run in READY/Park/stationary",
                 ],
                 "persistent_flash_write": False,
+                "persistent_key_update": False,
+                "volatile_ram_key_modified_until_reset": True,
                 "live_qualified": False,
             },
             "b6_inline_signer": {

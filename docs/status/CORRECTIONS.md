@@ -155,9 +155,12 @@ the mistakes are not re-made.
   The low-level wrapper at `0x8954C` constrains its operation flag to literal
   command 1 or 3 and its selector to `0..14`. The complete nine-site
   `ICUSCMD` census contains no **stock application** command-13 invocation.
-  That corrects the function label only: without the restricted Renesas ICU-S
-  manual or a bench test, it does not establish direct command-13 semantics or
-  disprove a slot-4-to-`RAM_KEY` copy/alias followed by export.
+  Later SHE-specific closure further narrows the implication: standard SHE has
+  no nonvolatile-slot→`RAM_KEY` copy/export operation (SECOC-025), and the exact
+  firmware's command 8/11/`0x22` shapes now bound commands 9/10—not command 13—as
+  the strongest `LOAD_PLAIN_KEY`/`EXPORT_RAM_KEY` candidates pending dynamic KAT.
+  Direct command-13 semantics can remain unknown; it is no longer a justified
+  key-export experiment.
 - **Canonical:**
   [../security/secoc/key-recovery-assessment.md](../security/secoc/key-recovery-assessment.md)
   §"Complete application command-writer census";

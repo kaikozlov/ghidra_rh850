@@ -318,20 +318,28 @@ wrappers constrain their selectors/operation IDs, and no stock application
 writer invokes command 13 or a recovered persistent-slot export command.
 
 That negative result is scoped to the firmware's existing call graph. The
-restricted Renesas ICU-S/ICUSE command manual is unavailable, so direct Renesas
-command 13 still has no assigned vendor semantics. The **standard SHE** route is
-not ambiguous, however: §4.4.3.1/§4.7.7-4.7.9 define no operation that copies a
-nonvolatile `KEY_<n>` value into `RAM_KEY`, and `CMD_EXPORT_RAM_KEY` is allowed
-only when `RAM_KEY` was populated by `CMD_LOAD_PLAIN_KEY`. A `CMD_LOAD_KEY`
-package may target `RAM_KEY` and use a `KEY_<n>` as its authentication secret,
-but M2 carries a separately supplied new RAM-key value and the secure load clears
-the plain-origin flag. Therefore `slot 4 -> RAM_KEY -> export` is **disproved as
-a SHE mechanism**. A custom command-13 experiment can still characterize an
-undocumented Renesas extension, but any persistent-slot copy/alias it reveals
-would be a vendor deviation rather than normal SHE behavior.
+restricted Renesas ICU-S/ICUSE command manual is unavailable, but the vendor boundary
+is narrower than the old command-13 hypothesis implied. Renesas publicly describes
+ICU-S as a fixed state machine supporting SHE; exact firmware command 8 has the
+4-input/3-output `CMD_LOAD_KEY` shape, command 11 has the no-I/O `CMD_INIT_RNG` shape,
+and command `0x22` has the 1-input/2-output `CMD_GET_ID` shape. If the local register
+encoding is contiguous between 8 and 11, commands 9/10 are therefore the strongest
+candidates for `CMD_LOAD_PLAIN_KEY` / `CMD_EXPORT_RAM_KEY`. That numbering remains
+**bounded until dynamic KAT**, and the exact-F33 probe now performs that KAT without
+persistent key mutation.
 
-This leaves peer-ECU extraction, direct command characterization, and physical
-leakage as the leading existing-key routes. In particular, the CAN-FD
+The **standard SHE** extraction boundary itself is not ambiguous: §4.4.3.1 and
+§4.7.7-4.7.9 define no operation that copies a nonvolatile `KEY_<n>` value into
+`RAM_KEY`, and `CMD_EXPORT_RAM_KEY` is allowed only when `RAM_KEY` was populated by
+`CMD_LOAD_PLAIN_KEY`. A `CMD_LOAD_KEY` package may target `RAM_KEY` and use a
+`KEY_<n>` as its authentication secret, but M2 carries a separately supplied new
+RAM-key value and the secure load clears the plain-origin flag. Therefore `slot 4 ->
+RAM_KEY -> export` remains **disproved as a SHE mechanism**. The removed command-13
+key-export probe neither changed nor tested that conclusion.
+
+This leaves peer-ECU extraction, selector-4 command-5 signing, and physical leakage as
+the leading existing-key routes. Candidate commands 9/10 are useful for closing the
+vendor ABI, not for exporting slot 4. In particular, the CAN-FD
 command-7 path authenticates
 `DataID_be16 || payload[28] || freshness[6]`, placing 14 chosen payload bytes in
 CMAC's first AES block. The ranked methods and isolated-bench plan are canonical
@@ -597,8 +605,8 @@ that the RAM field held a valid key at capture time.
 | application CMAC path selects ICU-S slot 4, not object-15 RAM | **Definitive** |
 | all nine application `ICUSCMD` writers are accounted for | **Definitive** |
 | stock application invokes command 13 or a plaintext persistent-slot export | **Disproved for this image** |
-| direct command 13 semantics and selector-4 behavior | **Unknown; not constrained by the writer census** |
-| an undocumented slot-4-to-`RAM_KEY` copy/alias exists | **Unknown; bench/restricted manual required** |
+| commands 8/11/`0x22` match SHE LOAD_KEY/INIT_RNG/GET_ID shapes; 9/10 are the strongest contiguous LOAD_PLAIN_KEY/EXPORT_RAM_KEY candidates | **Recovered anchors / bounded mapping; dynamic KAT pending** |
+| an undocumented persistent slot-4-to-`RAM_KEY` copy/alias exists | **Unsupported by SHE; no firmware evidence** |
 | command-1/3 software accepts selectors `0..14`; slot-4 hardware permission | **Definitive / unknown** |
 | FD command-7 input places 14 chosen payload bytes in CMAC block 1 | **Definitive** |
 | RoutineControl RID `0x1010` reaches literal ICU-S command 8 | **Definitive structural behavior** |

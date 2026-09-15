@@ -31,31 +31,49 @@ operations. The final 2 KiB of captured DataFlash exposes only `00/FF`
 readback, and neither normal MainPE memory access nor a serial/debug-protection
 bypass is evidence that the underlying ICU-S key array becomes readable.
 
-That firmware-static result does **not** determine the behavior of an otherwise
-unused Renesas command issued directly by a custom harness. However, the
-standard SHE architecture does settle the normal extraction question: its
-export primitive operates only on a caller-loaded volatile `RAM_KEY`, and SHE
-provides no command that copies or exports a nonvolatile key slot. The former
-“slot 4 -> RAM_KEY -> export” route is therefore **disproved under SHE**
-(SECOC-025). Because the restricted Renesas ICU-S/ICUSE command manual is
-unavailable, command 13 remains worth characterizing only as a possible
-vendor-specific undocumented deviation in opcode/selector/lifecycle behavior.
+That firmware-static result does **not** determine the behavior of otherwise-unused
+ICU-S register commands issued by a custom harness. The external semantic boundary is
+now materially tighter, however: Renesas support describes ICU-S as a fixed state
+machine that supports SHE, and the exact firmware exposes three command-shape anchors
+that line up with SHE operations:
 
-The **best overall recovery route** is therefore to acquire and dump a weaker
-ECU from the same vehicle that produces one of the messages this EPS verifies.
-A producer must possess the same AES key or equivalent signing capability. The
-forward camera is the leading candidate for the steering-related traffic, but
-message ownership must be established by an in-vehicle capture or isolation
-test rather than assumed from network role.
+- command `8` is the existing 4-input/3-output authenticated key-update engine, i.e.
+  the `M1/M2/M3 -> M4/M5` shape of `CMD_LOAD_KEY`;
+- command `11` has no input or output FIFO callbacks, the shape of `CMD_INIT_RNG`; and
+- command `0x22` has exactly one 128-bit input and two 128-bit outputs, the shape of
+  `CMD_GET_ID` (`CHALLENGE -> UID||SREG, MAC`).
 
-The **best first direct experiment on this EPS's existing slot 4** is the
-application-context command-5 permission test specified in
-`sender-implementation.md`: the stock serialized wrapper already provides the
-selector-4 call shape, so no direct ICU command-word manipulation is required.
-Record status, CMAC output, latency, and contention against command 7. The
-recovered authenticated 4 KiB bootloader callback remains useful for lower-level
-ICU characterization, but command 13 is no longer the default key-extraction
-route; use it only to test for a Renesas-specific deviation from SHE.
+Those anchors make register commands **9** and **10** the strongest bounded candidates
+for `CMD_LOAD_PLAIN_KEY` and `CMD_EXPORT_RAM_KEY`, respectively, *if the local register
+encoding remains contiguous between command 8 and command 11*. That final mapping is
+not promoted from static structure alone. The exact-F33 application-context probe now
+makes it falsifiable: command 9 must load a known volatile `RAM_KEY` that reproduces a
+full 128-bit selector-`0xE` command-5 CMAC, and command 10 is attempted only after that
+proof and must return exactly seven blocks that satisfy independent SHE `M1/M4/K3/K4/M5`
+known-answer checks. No persistent key slot or command 8 is touched.
+
+This supersedes the old direct-command-13 "key export" experiment. SHE
+`CMD_EXPORT_RAM_KEY` has **zero input blocks and seven output blocks**; the former
+command-13 probe supplied a selector and guessed a four-block output shape. Regardless
+of command 13's still-unpublished Renesas opcode identity, that was not a justified
+RAM-key-export contract. Standard SHE also already disproves `slot 4 -> RAM_KEY ->
+export`: there is no command that copies a nonvolatile `KEY_<n>` into `RAM_KEY` for
+exfiltration.
+
+The **best overall recovery route** therefore remains to acquire and dump a weaker
+ECU from the same vehicle that produces one of the messages this EPS verifies. A
+producer must possess the same AES key or equivalent signing capability. The forward
+camera is a leading candidate for steering-related traffic, but message ownership must
+be established by an in-vehicle capture or isolation test rather than assumed from
+network role.
+
+The **best first direct experiment on this EPS's existing slot 4** remains the
+application-context command-5 permission test specified in `sender-implementation.md`:
+the stock serialized wrapper already provides the selector-4 call shape, so no direct
+ICU command-word manipulation is required. Record status, CMAC output, latency, and
+contention against command 7. The new command-9/10 RAM-key probe is a separate vendor-
+ABI characterization: it can prove the volatile SHE command mapping, but even success
+does not export slot 4.
 
 The **best characterized physical fallback** is power or EM side-channel
 analysis of repeated command-7 verifications. It does not depend on command-5
@@ -78,12 +96,11 @@ Before building a large trace set, test slot-4 command-5 permission after normal
 application initialization. Under SHE's `KEY_USAGE` model, a slot already used
 for MAC verification should also permit MAC generation; a denial would be a
 Renesas-specific policy deviation worth recording. The generic command-1/3 AES
-wrapper is expected to be rejected for a MAC-usage slot under SHE. Separately,
-a bootloader or application harness may characterize command 13 with a known
-caller-loaded `RAM_KEY` to identify Renesas opcode behavior, but any useful
-persistent-slot copy/export effect would be an undocumented vendor deviation,
-not a standard SHE capability. None of these hardware outcomes should be
-assumed from the stock call graph.
+wrapper is expected to be rejected for a MAC-usage slot under SHE. Separately, the exact-F33 application harness now characterizes candidate
+commands 9/10 with a known caller-loaded `RAM_KEY` and independent cryptographic
+known answers. A successful result identifies the vendor ABI for volatile RAM-key
+load/export; it still does not create a persistent-slot export operation. None of
+these hardware outcomes should be assumed from the stock call graph.
 
 Fault injection against serial read-range checks or ICU-S policy is a later
 fallback, not the first experiment. Public P1M-E work proves that RH850 serial
@@ -165,19 +182,32 @@ non-exportable. Even the plaintext-origin export returns M1..M5 wrapped under th
 device `SECRET_KEY`, not the raw 16-byte RAM key.
 
 The remaining uncertainty is vendor-specific. The public P1M-E hardware manual
-omits the ICU-S command specification and the restricted ICUSE manual has not
-been obtained, so static analysis has not established:
+omits the ICU-S command-register specification and the restricted ICUSE manual has not
+been obtained. Renesas support does publicly state that ICU-S is a fixed state machine
+supporting SHE, while this firmware supplies the command-shape anchors above. The
+resulting bounded register-map hypothesis is now:
 
-- that Renesas command 13 maps to the SHE RAM-key export primitive at all;
-- its input/output block shape or command-word selector semantics;
-- whether debug/manufacturing/faulted lifecycle implements any undocumented
-  persistent-slot copy/alias behavior; or
-- whether Renesas intentionally deviates from SHE in a way useful for slot 4.
+| ICU-S register command | Firmware shape | SHE operation consistent with that shape | Status |
+|---:|---|---|---|
+| `8` | 4 input + 3 output blocks | `CMD_LOAD_KEY` | **recovered/anchored** by the existing M1-M5 path |
+| `9` | not used by stock application | `CMD_LOAD_PLAIN_KEY` | **bounded candidate; dynamic KAT prepared** |
+| `10` | not used by stock application | `CMD_EXPORT_RAM_KEY` | **bounded candidate; dynamic KAT prepared** |
+| `11` | no input/output callbacks | `CMD_INIT_RNG` | **shape match; semantic label external-source bounded** |
+| `0x22` | 1 input + 2 output blocks | `CMD_GET_ID` | **shape match; semantic label external-source bounded** |
 
-A direct command-13 bench experiment can still characterize that vendor surface.
-A known caller-loaded `RAM_KEY` is the correct baseline. Any later effect that
-copies or exports persistent slot 4 must be reported explicitly as a **Renesas
-extension/deviation**, not as expected SHE behavior.
+The exact-F33 probe intentionally tests only the two non-persistent middle commands.
+Command 9 receives known key `00..0f`; its success is accepted only if selector `0xE`
+then reproduces the independently calculated 128-bit CMAC. Command 10 is issued in the
+same HSM session only after that proof; it must return 112 bytes and satisfy `M1 ==
+M4[:16]`, the RAM-key/SECRET-key ID nibble, the known `K3`-derived `M4*` block, and the
+known `K4`-derived `M5` CMAC. Any undocumented persistent-slot copy/export effect would
+still have to be demonstrated separately and reported as a **Renesas deviation**, not
+as SHE behavior.
+
+External semantic sources: Renesas Engineering Community,
+<https://community.renesas.com/mcu/rh850/f/rh850-rl78f/17819/rh850vp1m-x-icum-secure-documents>;
+AUTOSAR, *Specification of Secure Hardware Extensions*, §4.7.8-§4.7.10,
+<https://www.autosar.org/fileadmin/standards/R24-11/FO/AUTOSAR_FO_TR_SecureHardwareExtensions.pdf>.
 
 ### 1.3 The available operations are oracles, not key reads
 
@@ -505,9 +535,9 @@ performance, not basic software plumbing.
 | Rank | Method | Expected value | Cost/risk | Current evidence |
 |---:|---|---|---|---|
 | 1 | Extract from a same-vehicle producer/peer ECU | Highest overall: may reduce the problem to ordinary flash/RAM analysis | Requires identifying and acquiring the exact peer; peer may also use an HSM | **Hypothesis**, compelled by shared signing capability but producer/storage unobserved |
-| 2 | Characterize command 13 and test `slot 4 -> RAM_KEY -> export` | First direct experiment: cheap discriminator that could expose an undocumented copy/export capability | Start with a constructible one-shot bootloader CAN payload; use a restorable application hook only if lifecycle/context requires it | **Software foothold verified; hardware behavior unknown** |
-| 3 | Power/EM SCA on EPS command 7 | Best characterized physical slot-4 recovery path; unlimited chosen-input verifications are structurally available | Lab equipment, trace alignment, possible masking/noise | **Recovered attack surface**, leakage unobserved |
-| 4 | Test command 5 and command 1 under selector 4 | Can yield cleaner SCA stimulus or a usable in-ECU oracle | Requires application-context harness; slot policy may reject | **Verified software support**, hardware permission unknown |
+| 2 | Test command 5 under selector 4 | Directly determines whether the provisioned SecOC key can be used as an in-ECU signing oracle | Existing serialized application wrapper; no key mutation | **Verified software support; live permission is the discriminator** |
+| 3 | Characterize candidate commands 9/10 with a known volatile `RAM_KEY` | Closes the Renesas ICU-S SHE register ABI and tests the only standard exportable key object | Exact-F33 application probe is non-persistent; overwrites only volatile RAM_KEY until reset | **Audited static harness; live hardware result pending** |
+| 4 | Power/EM SCA on EPS command 7 | Best characterized physical slot-4 plaintext-recovery path; unlimited chosen-input verifications are structurally available | Lab equipment, trace alignment, possible masking/noise | **Recovered attack surface**, leakage unobserved |
 | 5 | Capture factory/dealer provisioning ecosystem | A tool/backend or manufacturing station may expose plaintext or authorization material | Opportunistic and access-dependent; M1-M5 capture alone is insufficient | **Recovered command-8 route**, production use unknown |
 | 6 | Fault serial protected-tail read or ICU-S access check | Could work if protection is a skip-able software range check | Destructive tuning; hardware blanking may still return `00/FF` | **Public P1M-E FI precedent**, no protected-key read precedent |
 | 7 | DFA on command-1/5 output or targeted ICU-S policy fault | Potentially fewer traces than SCA if faulty ciphertext/MAC pairs are observable | Precise fault location/timing; depends on an output-producing command | **Hypothesis** |
@@ -669,9 +699,8 @@ that context has different interrupts, global pointers, RAM, and driver state.
 | command 5 / selector 4 | chosen 16- or 36-byte message | 16-byte returned MAC matching known capture/model | cleaner CMAC/SCA oracle; possible signing proxy |
 | command 1 / selector 4 | chosen 16-byte block | returned AES block, stable across repeats | ideal CPA/DFA oracle; AES primitive can synthesize CMAC |
 | command 3 / selector 4 | chosen 16-byte block | returned AES inverse block | secondary oracle, unlikely to be needed |
-| candidate command 13 with known caller-loaded `RAM_KEY` | known 16-byte volatile key, then candidate export command | status, exact output length/content, reset behavior | establishes actual command mapping and baseline RAM-key semantics |
-| candidate command 13 with selector 4 | no preceding persistent-key write | status and output compared with known-RAM baseline | directly tests whether selector 4 is accepted, ignored, or rejected |
-| candidate slot-4-to-`RAM_KEY` copy/alias sequence | only after identifying non-destructive source/destination semantics | changed command-13 output that validates as slot 4 | tests the proposed recovery chain |
+| candidate command 9 | known key `00..0f`, one input block, zero output blocks | status zero **and** full 128-bit selector-`0xE` command-5 CMAC equals independent known answer | proves `LOAD_PLAIN_KEY` semantics without trusting output shape |
+| candidate command 10 | same HSM session after command-9 KAT; zero inputs, seven outputs | status zero, exactly 112 bytes, `M1/M4` prefix equality plus independent `K3/K4` `M4*`/`M5` checks | proves `EXPORT_RAM_KEY` semantics without knowing SECRET_KEY/UID |
 
 For each operation, record:
 
@@ -686,33 +715,35 @@ For each operation, record:
 A software return showing the command was submitted is not proof of slot
 permission. A command-5 result is valid only if it matches a known CMAC; a
 command-1 result is valid only if repeated calls and inverse/independent checks
-are consistent. A command-13 experiment must distinguish command rejection,
-empty/unchanged output, plaintext, and a deterministic or randomized protected
-envelope. Any apparent 16-byte slot-4 result must validate stock SecOC frames;
-output shape or entropy is not sufficient.
+are consistent. Candidate commands 9/10 are accepted only through the cryptographic
+known-answer gates above; output shape or entropy is not sufficient. Any future
+claim of persistent-slot extraction still requires a 16-byte candidate that validates
+multiple stock SecOC frames.
 
-### 5.2 Command-13 experiment controls
+### 5.2 Command-9/10 RAM-key experiment controls
 
-1. Run first from a non-persistent bootloader payload, then repeat after normal
-   application ICU-S initialization when bootloader behavior rejects or differs.
-2. Establish the candidate command's behavior first with a known volatile key
-   loaded through the corresponding non-persistent operation, if that operation
-   can be identified safely.
-3. Repeat across warm reset and cold power cycle to distinguish volatile state,
-   stale staging data, and deterministic hardware output.
-4. Test command-word high selector values separately, including the expected
-   RAM selector and selector 4; do not infer selector semantics from commands
-   1/3/5/7.
-5. If an internal copy/alias command is identified, prove it with two different
-   known source values before targeting slot 4.
-6. Preserve raw status registers and all output words even when the high-level
-   driver reports failure; an undocumented result may not match stock wrapper
-   expectations.
+1. Run in normal application context after the stock ICU-S driver has initialized;
+   both helpers refuse unless the driver state is idle and hardware busy/status-low
+   bits are clear.
+2. Issue candidate command 9 with exactly one known 128-bit input and zero output
+   blocks. Do **not** infer success from status alone.
+3. Prove the resulting volatile object by invoking stock command 5 with selector
+   `0xE` over a fixed 36-byte domain and comparing all 128 CMAC bits with an
+   independently computed answer.
+4. Without an ECU/HSM reset, disarm the first helper, replace only the low-RAM helper,
+   and issue candidate command 10 with zero inputs and exactly seven output blocks.
+5. Accept command-10 semantics only if the 112-byte result satisfies the independent
+   SHE export invariants (`M1 == M4[:16]`, RAM_KEY/SECRET_KEY ID nibble `E0`, known
+   `K3`/CID0 `M4*`, and known-`K4` `M5`). Output length or entropy alone is not proof.
+6. Preserve raw status and every output block on failure. Full ECU reset/power-cycle is
+   the cleanup boundary for the volatile RAM_KEY; the experiment intentionally never
+   issues command 8 or writes flash.
 
-The absence of a stock command-13 wrapper means a harness must supply correct
-FIFO counts, callbacks/interrupt handling, status clearing, and timeout logic.
-A failed first attempt may indicate malformed driver setup rather than rejected
-hardware semantics.
+The tracked exact-F33 implementation is
+`exploit/ephemeral_runtime/camry_f33_icus_ramkey_probe.py` with audited helper
+artifacts under `exploit/ephemeral_runtime/audited/`. The old command-13 key-export
+probe was removed because its selector/four-output contract did not match SHE
+`CMD_EXPORT_RAM_KEY` and no longer represented the strongest register-map hypothesis.
 
 ### 5.3 Safety exclusions
 
@@ -798,15 +829,17 @@ Have exact-vehicle protected CAN capture and identified producer?
            |
            +-- no candidate / peer also protected
                    |
-                   +-- one-shot boot payload: known RAM_KEY + candidate command 13
+                   +-- application-context volatile RAM_KEY ABI probe
                    |      |
-                   |      +-- selector 4/copy produces useful output
-                   |      |       -> validate against stock SecOC frames
-                   |      +-- boot-context rejection / ordinary RAM-only behavior
-                   |              -> repeat in application context; test command 5 and command 1
-                   |                    +-- command 1 -> AES oracle/SCA
-                   |                    +-- command 5 -> CMAC oracle/SCA
-                   |                    +-- both reject -> command-7 FD path
+                   |      +-- command 9 passes selector-E 128-bit CMAC KAT
+                   |      |       -> command 10, same HSM session, exact 7-block export KAT
+                   |      |              -> confirms LOAD_PLAIN_KEY/EXPORT_RAM_KEY ABI only
+                   |      +-- reject/mismatch -> preserve raw status; do not infer slot-4 policy
+                   |
+                   +-- test selector-4 command 5 (and command 1 only as secondary oracle)
+                   |      +-- command 5 -> CMAC signing oracle/SCA
+                   |      +-- command 1 -> AES oracle/SCA
+                   |      +-- both reject -> command-7 FD path
                    |
                    +-- fixed/random leakage visible?
                           |
@@ -832,11 +865,10 @@ A recovery is complete only when one 16-byte candidate:
    repository.
 
 A successful command-5 or command-1 oracle is a useful fallback but is not
-plaintext-key recovery. A command-13 result is recovery only if its semantics
-are characterized and the resulting candidate independently validates stock
-SecOC frames; mere output or a SHE-shaped envelope is insufficient. A
-successful serial/debug bypass is instrumentation access but is not key
-recovery. A changed slot-4 key is rekeying, not recovery of the original.
+plaintext-key recovery. A successful command-9/10 RAM-key characterization proves the
+vendor ABI for a **known volatile test key**; it is not slot-4 recovery. A successful
+serial/debug bypass is instrumentation access but is not key recovery. A changed
+slot-4 key is rekeying, not recovery of the original.
 
 ## 10. Evidence summary
 
@@ -848,9 +880,9 @@ recovery. A changed slot-4 key is rekeying, not recovery of the original.
 | accepted 4 KiB bootloader payloads provide a constructible callback and existing CAN transport with more than `0xE00` bytes spare | **verified** | firmware-static/fixtures/test |
 | application SID `0x23` is a verified bounded RMBA disclosure; SIDs `0x34/0x36/0x37` remain null direct callbacks; RoutineControl sizing is exact (maximum 67 bytes after SID) | **verified, scoped to this image** | firmware-static/test |
 | command-5 preserves selector plumbing for a candidate command-ID substitution; DID `0x1010` preserves output transport but has fixed command-8 block shape and no selector | **verified structure; untested patch** | firmware-static/test |
-| command 13's exact Renesas operation, selector semantics, and output format | **unknown** | restricted manual or bench required |
-| an internal slot-4-to-`RAM_KEY` copy/alias exists | **unknown; not disproved** | restricted manual or bench required |
-| command 13 can return useful slot-4 material after such a copy/alias | **unknown; not disproved** | bench required |
+| command 8 / 11 / `0x22` shapes align with SHE LOAD_KEY / INIT_RNG / GET_ID, bounding 9/10 as the strongest LOAD_PLAIN_KEY / EXPORT_RAM_KEY candidates if the local encoding is contiguous | **recovered anchors + bounded mapping** | firmware-static + Renesas/AUTOSAR external-source |
+| exact-F33 command-9/10 volatile RAM_KEY probe is byte-audited and cryptographically self-validating | **verified static harness; live result pending** | tracked source/artifacts + `verify_camry_f33_icus_ramkey_probe.py` |
+| an undocumented persistent slot-4-to-`RAM_KEY` copy/alias exists | **unsupported by SHE; no firmware evidence** | would require direct vendor/manual or dynamic proof |
 | command 1/3, 5, and 7 accept software selectors `0..14` | **verified** | firmware-static/test |
 | slot 4 permits command 1 or command 5 | **unknown** | bench required |
 | FD command-7 input provides 14 chosen bytes in CMAC block 1 | **verified** | firmware-static/test |

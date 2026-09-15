@@ -1007,7 +1007,7 @@ with tempfile.TemporaryDirectory() as td:
     runbook = (out / "RUNBOOK.md").read_text(encoding="utf-8")
     patch_runbook = (out / "FIRMWARE_PATCH.md").read_text(encoding="utf-8")
     check("kit copies the exact standalone probe", copied.read_bytes() == MODULE_PATH.read_bytes())
-    check("kit manifest is self-contained v14 and binds exact route", manifest["schema"] == "camry-f33-car-kit-v14" and manifest["target"] == {
+    check("kit manifest is self-contained v15 and binds exact route", manifest["schema"] == "camry-f33-car-kit-v15" and manifest["target"] == {
         "eps_f181": "8965F3307000", "eps_diag": "0x7A1->0x7A9 bus0", "b6": "0x0B6/32 FD bus0",
     })
     check("kit pins live persistence-verified stage5 as current firmware", manifest["current_firmware"] == {

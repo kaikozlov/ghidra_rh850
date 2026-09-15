@@ -298,13 +298,17 @@ ledger context is useful.
   compare mismatch; record status, output, latency, jitter, and debug-attached
   behavior. See
   [../security/secoc/key-recovery-assessment.md](../security/secoc/key-recovery-assessment.md) §1.3.
-- **OQ-013 — Command 13 vendor semantics.** The SHE spec disproves the normal
-  slot-4→`RAM_KEY`→export extraction route (SECOC-025): `CMD_EXPORT_RAM_KEY` is
-  `RAM_KEY`-only/plain-only and no nonvolatile KEY has an export or copy command.
-  Command-13 opcode identity is therefore moot for standard SHE extraction. Its
-  remaining value is narrow: determine whether Renesas implements an undocumented
-  deviation in opcode/selector/lifecycle behavior. This is lower priority than
-  the live command-5 permission test. See
+- **OQ-013 — Live ICU-S command-9/10 opcode mapping.** Renesas publicly says
+  ICU-S supports SHE, and firmware command shapes anchor command 8 as the existing
+  `CMD_LOAD_KEY`-shaped 4-in/3-out path, command 11 as no-I/O `CMD_INIT_RNG` shape,
+  and `0x22` as 1-in/2-out `CMD_GET_ID` shape. If the local register encoding is
+  contiguous between 8 and 11, commands 9/10 are the strongest candidates for
+  `CMD_LOAD_PLAIN_KEY` / `CMD_EXPORT_RAM_KEY`. The exact-F33 audited probe is ready:
+  command 9 must first load known `00..0f` and reproduce a full 128-bit selector-E
+  command-5 CMAC; only then, without reset, command 10 may return exactly seven
+  blocks and must satisfy independent `M1/M4/K3/K4/M5` known-answer checks. A
+  successful result closes the volatile RAM-key ABI only; standard SHE still has
+  no nonvolatile slot-4→RAM_KEY copy/export route. See
   [../security/secoc/software-path-assessment.md](../security/secoc/software-path-assessment.md).
 - **OQ-014 — `8965B4514000` runtime object-15 key path.** Vance's external field report
   places a CMAC-validating candidate in the structural object-15 second field

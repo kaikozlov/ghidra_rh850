@@ -836,8 +836,8 @@ tests = [
   "tests/verify_camry_f33_b6_midaggregate_observer.py",
 ]
 
-[suite.camry_f33_icus13_probe]
-tests = ["tests/verify_camry_f33_icus13_probe.py"]
+[suite.camry_f33_icus_ramkey_probe]
+tests = ["tests/verify_camry_f33_icus_ramkey_probe.py"]
 
 [suite.exploit_followups]
 tests = [
