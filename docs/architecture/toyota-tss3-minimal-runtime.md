@@ -113,6 +113,49 @@ Adding `CanData.fd` remains useful for exact logging and arbitrary short FD
 host TX, but the demonstrated controller sends no short FD PDU. It is a
 transport enhancement, not a dependency of this lateral baseline.
 
+### Cross-variant resident control ingress
+
+The Crown bring-up closed a second stock host-to-resident transport that is
+present on all four tracked TSS3 EPS images. Exact Camry F33, Corolla H,
+Corolla F, and Crown F30 each configure classic functional request `0x777` as
+DCM request type 1. Their functional service set is identically
+`10,14,28,31,3E,85`; `C6` and `C7` are absent. The common service lookup
+therefore assigns NRC `0x11` to either control SID, and each exact response
+selector suppresses that NRC for a functional request. CanTp/PduR delivers the
+complete seven-byte N-SDU to the target's channel-1 DCM buffer before the
+resident's existing post-receive hook:
+
+| target | functional DCM buffer | dedicated family-5 ingress | dedicated staging |
+|---|---:|---|---:|
+| Camry `8965F3307000` | `FEBE5751` | `0x1FDC0002` enabled | `FEBE4C34` |
+| Corolla `8965H1202000` | `FEBE563D` | `0x1FDC0002` enabled | `FEBE4B20` |
+| Corolla `8965F1208000` | `FEBE563D` | `0x1FDC0002` enabled | `FEBE4B20` |
+| Crown `8965F3012000` | `FEBE527D` | family 5 disabled | — |
+
+The Crown vehicle has dynamically proved the functional form with
+`07 C7 A5 00 12 34 00 00`: the DCM mailbox tail matched and no `0x7A9` NRC was
+emitted. Camry and Corolla functional ingress are firmware-closed but have not
+been separately live-qualified because they do not need that fallback. The
+deterministic matrix is
+[`tss3_resident_control_ingress_matrix.json`](../../data/generated/tss3_resident_control_ingress_matrix.json).
+
+This means **Corolla does not need an unoccupied CAN mailbox hunt**. Both H and
+F already carry the same configured dedicated extended-CAN family as F33; the
+current Corolla signer uses `0x1FDC0002 -> FEBE4B20`. The functional `0x777`
+route is available as a second stock-firmware ingress if a future calibration
+compiles family 5 out, as Crown does.
+
+For F33 there is likewise no present reason to replace the road-proven
+`0x1FDC0002 -> FEBE4C34` runtime with functional diagnostics. `0x777` is a
+functional diagnostic endpoint, not a dedicated signer transport, so a normal
+driving integration would have to grant only the exact C7 envelope rather than
+arbitrary diagnostic TX. It would also still be an 8-byte Classical PDU on the
+same mixed/FD bus, so switching carriers would **not** remove the bus-1
+Classical-TX/`canfd_auto` requirement. The smaller architecture is therefore:
+use the dedicated family-5 carrier where the target already configures it, and
+use the stock functional-Diagnostic C6/C7 path as the no-CodeFlash fallback
+where that carrier is absent.
+
 ### Why Panda still needs a generic fix
 
 The Toyota-B relay remains open in the normal comma topology. Stock traffic is
@@ -143,8 +186,10 @@ RX/TX set. Keeping this flag target-specific prevents another TSS3 platform
 from inheriting F33 behavior merely because it is newer Toyota hardware.
 
 The reusable architecture is the normal openpilot division of ownership. The
-C7 wire contract and EPS payload remain exact-F33 facts until transferred by
-new evidence.
+dedicated `0x1FDC0002` C7 transport has now transferred exactly to Corolla H/F,
+but actuator field semantics, scaling, limits, signer RAM locations, and the EPS
+payload remain exact-target facts and must not transfer merely from the shared
+carrier.
 
 ## Current cleanup checkpoint
 

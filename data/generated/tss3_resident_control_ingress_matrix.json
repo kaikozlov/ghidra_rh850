@@ -1,0 +1,655 @@
+{
+  "cross_variant": {
+    "c6_c7_unconfigured_all": true,
+    "corolla_hf_diagnostic_functions_byte_identical": [
+      {
+        "end_exclusive": "0x0008A36A",
+        "function": "service_lookup",
+        "identical": true,
+        "start": "0x0008A2A8"
+      },
+      {
+        "end_exclusive": "0x0008A57A",
+        "function": "response_selector",
+        "identical": true,
+        "start": "0x0008A4EA"
+      },
+      {
+        "end_exclusive": "0x0008B024",
+        "function": "response_action",
+        "identical": true,
+        "start": "0x0008AFF2"
+      },
+      {
+        "end_exclusive": "0x0008C848",
+        "function": "response_machine",
+        "identical": true,
+        "start": "0x0008C708"
+      },
+      {
+        "end_exclusive": "0x0008B462",
+        "function": "start_of_reception",
+        "identical": true,
+        "start": "0x0008B3CE"
+      },
+      {
+        "end_exclusive": "0x0008B4E2",
+        "function": "copy_rx_data",
+        "identical": true,
+        "start": "0x0008B462"
+      },
+      {
+        "end_exclusive": "0x0008B5BA",
+        "function": "rx_indication",
+        "identical": true,
+        "start": "0x0008B4E2"
+      },
+      {
+        "end_exclusive": "0x0008D142",
+        "function": "copy_engine",
+        "identical": true,
+        "start": "0x0008D0F8"
+      },
+      {
+        "end_exclusive": "0x000774A6",
+        "function": "receive_drain",
+        "identical": true,
+        "start": "0x0007744A"
+      }
+    ],
+    "dedicated_xcp_disabled": [
+      "crown-8965F3012000"
+    ],
+    "dedicated_xcp_enabled": [
+      "camry-8965F3307000",
+      "corolla-8965H1202000",
+      "corolla-8965F1208000"
+    ],
+    "functional_0x777_present_all": true,
+    "functional_nrc11_suppressed_all": true,
+    "functional_service_ids": [
+      "0x10",
+      "0x14",
+      "0x28",
+      "0x31",
+      "0x3E",
+      "0x85"
+    ],
+    "functional_service_set_identical": true,
+    "response_action_structure_identical_all": true,
+    "response_machine_structure_identical_all": true
+  },
+  "integration_boundary": {
+    "common_fallback": "All four tracked TSS3 EPS images can stage C6/C7 through stock functional 0x777 without a firmware patch; only Crown is live-proven on this diagnostic carrier.",
+    "dedicated_carrier": "Camry F33 and both Corolla H/F images already enable family5 extended 0x1FDC0002 with a dedicated staging buffer; Crown does not.",
+    "runtime_shape": "Where family5 exists, retain the dedicated XCP-family C7 carrier unless a target-specific reason requires otherwise. Use functional 0x777 as the stock-firmware fallback for variants such as Crown that compile family5 out.",
+    "safety_boundary": "0x777 is a functional diagnostic address rather than a dedicated signer transport. A normal driving integration must not grant arbitrary diagnostic TX merely to carry C7; any Panda allowance must remain payload/target scoped."
+  },
+  "schema": "toyota-tss3-resident-control-ingress-matrix-v1",
+  "targets": {
+    "camry-8965F3307000": {
+      "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
+      "dedicated_xcp_ingress": {
+        "enabled": true,
+        "family5_count": 1,
+        "family5_route": 4,
+        "family_counts": [
+          5,
+          0,
+          4,
+          0,
+          0,
+          1
+        ],
+        "family_counts_address": "0x00021A48",
+        "family_routes": [
+          0,
+          255,
+          2,
+          255,
+          255,
+          4
+        ],
+        "family_routes_address": "0x0002195C",
+        "request": "0x1FDC0002",
+        "request_word_occurrences": 2,
+        "response": "0x1FE00002",
+        "response_word_occurrences": 1,
+        "staging": "0xFEBE4C34",
+        "status": "live-proven-to-staging-and-road-proven-C7-steering"
+      },
+      "functional_diagnostic_ingress": {
+        "c6_configured": false,
+        "c7_configured": false,
+        "can_id": "0x777",
+        "cantp_first_words": [
+          "0x0101",
+          "0x0803",
+          "0x0805",
+          "0xFFFF",
+          "0x0803",
+          "0xFFFF",
+          "0x0100"
+        ],
+        "cantp_record": "0x00022BFE",
+        "cantp_rx_pdu": "0x0805",
+        "configured_service_ids": [
+          "0x10",
+          "0x11",
+          "0x14",
+          "0x19",
+          "0x22",
+          "0x23",
+          "0x27",
+          "0x28",
+          "0x2E",
+          "0x31",
+          "0x34",
+          "0x36",
+          "0x37",
+          "0x3E",
+          "0x85",
+          "0xAB",
+          "0xBA",
+          "0x10",
+          "0x10",
+          "0x19",
+          "0x22",
+          "0x3E",
+          "0xAB"
+        ],
+        "dcm_buffer_table": "0x00025E94",
+        "dcm_buffers": [
+          "0xFEBE5651",
+          "0xFEBE5751",
+          "0xFEBE5851"
+        ],
+        "dcm_request_types": [
+          0,
+          1,
+          0
+        ],
+        "dcm_upper_pdu_ids": [
+          2,
+          3,
+          4
+        ],
+        "decompiler_semantic_hashes": {
+          "copy_engine": "799a7ad0763a8ebc34484c0a794c7dc2b5d3f7edc745dd1f413c3ae63c6cfd84",
+          "response_action": "c701298c1b6c819d7e224d2a62ad73a36498b65616628ae1bbd212c11694e67d",
+          "response_machine": "9c68504e4653c5f0c26feb2ac100cdc3ed253530bff01876f1fa46f59843df71",
+          "response_selector": "85c7b31cd3642771420331f7f682ff6405339a42fe0276926504c30d0f24cb2d",
+          "service_lookup": "4441a65bceef175557097d825538f3becda4429c8f5ac04b5081ec40445b18b3"
+        },
+        "diagnostic_request_block": "0x00021FA0",
+        "format": "classic",
+        "functional_dcm_buffer": "0xFEBE5751",
+        "functional_nrc11_suppressed": true,
+        "functional_request": "0x777",
+        "functional_request_type": 1,
+        "functional_service_ids": [
+          "0x10",
+          "0x14",
+          "0x28",
+          "0x31",
+          "0x3E",
+          "0x85"
+        ],
+        "functional_service_indices": [
+          17,
+          2,
+          7,
+          9,
+          13,
+          14
+        ],
+        "functions": {
+          "copy_engine": "0x00093DE8",
+          "copy_rx_data": "0x00092152",
+          "receive_drain": "0x00079EDE",
+          "response_action": "0x00091CE2",
+          "response_machine": "0x000933F8",
+          "response_selector": "0x000911DA",
+          "rx_indication": "0x000921D2",
+          "service_lookup": "0x00090F98",
+          "start_of_reception": "0x000920BE"
+        },
+        "pdur_rx_pdu": "0x0803",
+        "physical_request": "0x7A1",
+        "resident_sampling_boundary": "after receive drain 0x00079EDE; complete N-SDU is already copied by the PduR/DCM receive callbacks, while service dispatch/unsupported-SID handling is a separate DCM-main path",
+        "secondary_request": "0x7A0",
+        "service_table": "0x00025C54",
+        "unsupported_service_nrc": "0x11",
+        "wire": {
+          "loader": "07 C6 index 00 word_le32",
+          "runtime": "07 C7 seq 00 target_hi target_lo 00 00"
+        }
+      },
+      "software_id": "8965F3307000",
+      "vehicle": "2026 Toyota Camry Hybrid"
+    },
+    "corolla-8965F1208000": {
+      "codeflash_sha256": "fdb35b76891cf84a8b89e0a05c9c7c5cfcd27994cf85ccc01ff32828f53091f6",
+      "dedicated_xcp_ingress": {
+        "enabled": true,
+        "family5_count": 1,
+        "family5_route": 4,
+        "family_counts": [
+          5,
+          0,
+          4,
+          0,
+          0,
+          1
+        ],
+        "family_counts_address": "0x000219F4",
+        "family_routes": [
+          0,
+          255,
+          2,
+          255,
+          255,
+          4
+        ],
+        "family_routes_address": "0x00021908",
+        "request": "0x1FDC0002",
+        "request_word_occurrences": 2,
+        "response": "0x1FE00002",
+        "response_word_occurrences": 1,
+        "staging": "0xFEBE4B20",
+        "status": "firmware-configured-current-signer-carrier-live-command5-unvalidated"
+      },
+      "functional_diagnostic_ingress": {
+        "c6_configured": false,
+        "c7_configured": false,
+        "can_id": "0x777",
+        "cantp_first_words": [
+          "0x0101",
+          "0x0803",
+          "0x0805",
+          "0xFFFF",
+          "0x0803",
+          "0xFFFF",
+          "0x0100"
+        ],
+        "cantp_record": "0x00022B22",
+        "cantp_rx_pdu": "0x0805",
+        "configured_service_ids": [
+          "0x10",
+          "0x11",
+          "0x14",
+          "0x19",
+          "0x22",
+          "0x23",
+          "0x27",
+          "0x28",
+          "0x2E",
+          "0x31",
+          "0x34",
+          "0x36",
+          "0x37",
+          "0x3E",
+          "0x85",
+          "0xAB",
+          "0xBA",
+          "0x10",
+          "0x10",
+          "0x19",
+          "0x22",
+          "0x3E",
+          "0xAB"
+        ],
+        "dcm_buffer_table": "0x00025D78",
+        "dcm_buffers": [
+          "0xFEBE553D",
+          "0xFEBE563D",
+          "0xFEBE573D"
+        ],
+        "dcm_request_types": [
+          0,
+          1,
+          0
+        ],
+        "dcm_upper_pdu_ids": [
+          2,
+          3,
+          4
+        ],
+        "decompiler_semantic_hashes": {
+          "copy_engine": "53902bf4972f25c481ded290ece2e5fca41a61b69de5cd88b03811d2d380b0fe",
+          "response_action": "52d3454e4bf333933829abfb4c0a32675d7cb2d63b4de3bcf2e744a84ce7b5bf",
+          "response_machine": "6354257f8b740ffea28f9134d7f288f42bb91c846850803dde64b67bb55059d8",
+          "response_selector": "a8feece4d656266b926bb05a775132d4e88c1494b7715594a77ccd4adca5654d",
+          "service_lookup": "603b4de22d8b02a779fd7459d5d61adbd84abcbf7c1875d346dfe7645b4357d9"
+        },
+        "diagnostic_request_block": "0x00021F4C",
+        "format": "classic",
+        "functional_dcm_buffer": "0xFEBE563D",
+        "functional_nrc11_suppressed": true,
+        "functional_request": "0x777",
+        "functional_request_type": 1,
+        "functional_service_ids": [
+          "0x10",
+          "0x14",
+          "0x28",
+          "0x31",
+          "0x3E",
+          "0x85"
+        ],
+        "functional_service_indices": [
+          17,
+          2,
+          7,
+          9,
+          13,
+          14
+        ],
+        "functions": {
+          "copy_engine": "0x0008D0F8",
+          "copy_rx_data": "0x0008B462",
+          "receive_drain": "0x0007744A",
+          "response_action": "0x0008AFF2",
+          "response_machine": "0x0008C708",
+          "response_selector": "0x0008A4EA",
+          "rx_indication": "0x0008B4E2",
+          "service_lookup": "0x0008A2A8",
+          "start_of_reception": "0x0008B3CE"
+        },
+        "pdur_rx_pdu": "0x0803",
+        "physical_request": "0x7A1",
+        "resident_sampling_boundary": "after receive drain 0x0007744A; complete N-SDU is already copied by the PduR/DCM receive callbacks, while service dispatch/unsupported-SID handling is a separate DCM-main path",
+        "secondary_request": "0x7A0",
+        "service_table": "0x00025B38",
+        "unsupported_service_nrc": "0x11",
+        "wire": {
+          "loader": "07 C6 index 00 word_le32",
+          "runtime": "07 C7 seq 00 target_hi target_lo 00 00"
+        }
+      },
+      "software_id": "8965F1208000",
+      "vehicle": "2025 Toyota Corolla"
+    },
+    "corolla-8965H1202000": {
+      "codeflash_sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
+      "dedicated_xcp_ingress": {
+        "enabled": true,
+        "family5_count": 1,
+        "family5_route": 4,
+        "family_counts": [
+          5,
+          0,
+          4,
+          0,
+          0,
+          1
+        ],
+        "family_counts_address": "0x000219F4",
+        "family_routes": [
+          0,
+          255,
+          2,
+          255,
+          255,
+          4
+        ],
+        "family_routes_address": "0x00021908",
+        "request": "0x1FDC0002",
+        "request_word_occurrences": 2,
+        "response": "0x1FE00002",
+        "response_word_occurrences": 1,
+        "staging": "0xFEBE4B20",
+        "status": "firmware-configured-current-signer-carrier-live-command5-unvalidated"
+      },
+      "functional_diagnostic_ingress": {
+        "c6_configured": false,
+        "c7_configured": false,
+        "can_id": "0x777",
+        "cantp_first_words": [
+          "0x0101",
+          "0x0803",
+          "0x0805",
+          "0xFFFF",
+          "0x0803",
+          "0xFFFF",
+          "0x0100"
+        ],
+        "cantp_record": "0x00022B22",
+        "cantp_rx_pdu": "0x0805",
+        "configured_service_ids": [
+          "0x10",
+          "0x11",
+          "0x14",
+          "0x19",
+          "0x22",
+          "0x23",
+          "0x27",
+          "0x28",
+          "0x2E",
+          "0x31",
+          "0x34",
+          "0x36",
+          "0x37",
+          "0x3E",
+          "0x85",
+          "0xAB",
+          "0xBA",
+          "0x10",
+          "0x10",
+          "0x19",
+          "0x22",
+          "0x3E",
+          "0xAB"
+        ],
+        "dcm_buffer_table": "0x00025D78",
+        "dcm_buffers": [
+          "0xFEBE553D",
+          "0xFEBE563D",
+          "0xFEBE573D"
+        ],
+        "dcm_request_types": [
+          0,
+          1,
+          0
+        ],
+        "dcm_upper_pdu_ids": [
+          2,
+          3,
+          4
+        ],
+        "decompiler_semantic_hashes": {
+          "copy_engine": "53902bf4972f25c481ded290ece2e5fca41a61b69de5cd88b03811d2d380b0fe",
+          "response_action": "52d3454e4bf333933829abfb4c0a32675d7cb2d63b4de3bcf2e744a84ce7b5bf",
+          "response_machine": "6354257f8b740ffea28f9134d7f288f42bb91c846850803dde64b67bb55059d8",
+          "response_selector": "a8feece4d656266b926bb05a775132d4e88c1494b7715594a77ccd4adca5654d",
+          "service_lookup": "603b4de22d8b02a779fd7459d5d61adbd84abcbf7c1875d346dfe7645b4357d9"
+        },
+        "diagnostic_request_block": "0x00021F4C",
+        "format": "classic",
+        "functional_dcm_buffer": "0xFEBE563D",
+        "functional_nrc11_suppressed": true,
+        "functional_request": "0x777",
+        "functional_request_type": 1,
+        "functional_service_ids": [
+          "0x10",
+          "0x14",
+          "0x28",
+          "0x31",
+          "0x3E",
+          "0x85"
+        ],
+        "functional_service_indices": [
+          17,
+          2,
+          7,
+          9,
+          13,
+          14
+        ],
+        "functions": {
+          "copy_engine": "0x0008D0F8",
+          "copy_rx_data": "0x0008B462",
+          "receive_drain": "0x0007744A",
+          "response_action": "0x0008AFF2",
+          "response_machine": "0x0008C708",
+          "response_selector": "0x0008A4EA",
+          "rx_indication": "0x0008B4E2",
+          "service_lookup": "0x0008A2A8",
+          "start_of_reception": "0x0008B3CE"
+        },
+        "pdur_rx_pdu": "0x0803",
+        "physical_request": "0x7A1",
+        "resident_sampling_boundary": "after receive drain 0x0007744A; complete N-SDU is already copied by the PduR/DCM receive callbacks, while service dispatch/unsupported-SID handling is a separate DCM-main path",
+        "secondary_request": "0x7A0",
+        "service_table": "0x00025B38",
+        "unsupported_service_nrc": "0x11",
+        "wire": {
+          "loader": "07 C6 index 00 word_le32",
+          "runtime": "07 C7 seq 00 target_hi target_lo 00 00"
+        }
+      },
+      "software_id": "8965H1202000",
+      "vehicle": "2023 Toyota Corolla"
+    },
+    "crown-8965F3012000": {
+      "codeflash_sha256": "5b89fdbc69edc2f66ef8a557f88b08c758e3146bd4e90067320d7966812b1273",
+      "dedicated_xcp_ingress": {
+        "enabled": false,
+        "family5_count": 0,
+        "family5_route": 255,
+        "family_counts": [
+          5,
+          0,
+          4,
+          0,
+          0,
+          0
+        ],
+        "family_counts_address": "0x00021A6C",
+        "family_routes": [
+          0,
+          255,
+          2,
+          255,
+          255,
+          255
+        ],
+        "family_routes_address": "0x00021948",
+        "request": null,
+        "request_word_occurrences": 0,
+        "response": null,
+        "response_word_occurrences": 0,
+        "staging": null,
+        "status": "production-family5-disabled"
+      },
+      "functional_diagnostic_ingress": {
+        "c6_configured": false,
+        "c7_configured": false,
+        "can_id": "0x777",
+        "cantp_first_words": [
+          "0x0101",
+          "0x0803",
+          "0x0805",
+          "0xFFFF",
+          "0x0803",
+          "0xFFFF",
+          "0x0100"
+        ],
+        "cantp_record": "0x0002309E",
+        "cantp_rx_pdu": "0x0805",
+        "configured_service_ids": [
+          "0x10",
+          "0x11",
+          "0x14",
+          "0x19",
+          "0x22",
+          "0x23",
+          "0x27",
+          "0x28",
+          "0x2E",
+          "0x31",
+          "0x34",
+          "0x36",
+          "0x37",
+          "0x3E",
+          "0x85",
+          "0xAB",
+          "0xBA",
+          "0x10",
+          "0x10",
+          "0x19",
+          "0x22",
+          "0x3E",
+          "0xAB"
+        ],
+        "dcm_buffer_table": "0x00025BD0",
+        "dcm_buffers": [
+          "0xFEBE517D",
+          "0xFEBE527D",
+          "0xFEBE537D"
+        ],
+        "dcm_request_types": [
+          0,
+          1,
+          0
+        ],
+        "dcm_upper_pdu_ids": [
+          2,
+          3,
+          4
+        ],
+        "decompiler_semantic_hashes": {
+          "copy_engine": "2389fd5089dc09eb00d401f7a3ac71f5998833fc8aee189643a0eac591d3a1ef",
+          "response_action": "f01290f2a8482e86d061f972c39daa3d429ce6ae338fd4b702403e25410e4b94",
+          "response_machine": "cb52ca76fce98ed00cb952f334d1aaff630107375b94760dfad34b16896e0a4e",
+          "response_selector": "5a17fc952cc21e59562943c47fc16eaa821a475cb4f374ffdb963bbfdf41bc2c",
+          "service_lookup": "92035aeee1610359e8b1e58a2ba06777eea528ce8c9547e5646b2a27aa250bc5"
+        },
+        "diagnostic_request_block": "0x00021E88",
+        "format": "classic",
+        "functional_dcm_buffer": "0xFEBE527D",
+        "functional_nrc11_suppressed": true,
+        "functional_request": "0x777",
+        "functional_request_type": 1,
+        "functional_service_ids": [
+          "0x10",
+          "0x14",
+          "0x28",
+          "0x31",
+          "0x3E",
+          "0x85"
+        ],
+        "functional_service_indices": [
+          17,
+          2,
+          7,
+          9,
+          13,
+          14
+        ],
+        "functions": {
+          "copy_engine": "0x00091888",
+          "copy_rx_data": "0x0008FBF2",
+          "receive_drain": "0x000792EE",
+          "response_action": "0x0008F782",
+          "response_machine": "0x00090E98",
+          "response_selector": "0x0008EC7A",
+          "rx_indication": "0x0008FC72",
+          "service_lookup": "0x0008EA38",
+          "start_of_reception": "0x0008FB5E"
+        },
+        "pdur_rx_pdu": "0x0803",
+        "physical_request": "0x7A1",
+        "resident_sampling_boundary": "after receive drain 0x000792EE; complete N-SDU is already copied by the PduR/DCM receive callbacks, while service dispatch/unsupported-SID handling is a separate DCM-main path",
+        "secondary_request": "0x7A0",
+        "service_table": "0x00025990",
+        "unsupported_service_nrc": "0x11",
+        "wire": {
+          "loader": "07 C6 index 00 word_le32",
+          "runtime": "07 C7 seq 00 target_hi target_lo 00 00"
+        }
+      },
+      "software_id": "8965F3012000",
+      "vehicle": "2024 Toyota Crown Limited"
+    }
+  }
+}

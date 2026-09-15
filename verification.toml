@@ -1108,3 +1108,6 @@ tests = ["tests/verify_crown_diag_mailbox_probe.py"]
 
 [suite.crown_sideband_preflight]
 tests = ["tests/verify_crown_sideband_preflight.py"]
+
+[suite.tss3_resident_control_ingress]
+tests = ["tests/verify_tss3_resident_control_ingress.py"]
