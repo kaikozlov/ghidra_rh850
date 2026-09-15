@@ -152,9 +152,9 @@ The current upstream-shaped stock-harness port has moved beyond the original
 `3c79d935` checkpoint. It now includes target-native Camry state, exact-EPS
 fingerprinting, C7 bus-1 lateral control, normal Toyota HUD/cancel ownership,
 alpha `0x160` longitudinal replacement, target-specific Panda limits, a
-retained-route-tuned 15.3 steering-ratio default (with the existing 0.18 s
-actuator delay independently consistent with `lagd`), and a native TSS3
-RadarInterface. The retained Bus-1 family closes three banks of
+retained-route-tuned 15.3 steering-ratio and 1.0 tire-stiffness defaults (with
+the existing 0.18 s actuator delay independently consistent with `lagd`), and a
+native TSS3 RadarInterface. The retained Bus-1 family closes three banks of
 eight objects: `0x180..0x182` provide u16×0.01 m range plus s12×0.05 m lateral
 geometry and `0x183..0x185` provide s10×0.1 m/s relative speed. The latter is
 independently validated against finite-difference range in both retained drives
@@ -170,7 +170,17 @@ reviewable as ordinary openpilot architecture; what remains is vehicle
 qualification, not another control stack.
 
 Deployment tooling now defaults to the byte-exact continuous helper from the
-September 10 successful steering handoff. The car kit also contains a bounded
+September 10 successful steering handoff. A fresh exact-F33 application-loader
+audit also closes the tempting READY-mode shortcut: stock XCP extended ingress
+reaches staging, but fixed CodeFlash `0x30D68=0x5A` rejects protocol dispatch
+before CONNECT; configured UDS 0x34/0x36/0x37 hand off to disruptive programming;
+and the recovered WDBI/RoutineControl/AB/BA/reset/callback/exception/DMA/page
+surfaces expose no tester-chosen RAM-PC transfer. There is therefore no proved
+stock READY-mode placement+execution primitive to replace the NRTD bootstrap;
+using one would currently invent an unproved pivot rather than complete the
+port.
+
+The car kit also contains a bounded
 `f33-secoc recover-drcc` operation: after volatile signer bootstrap it preserves
 DTC state, runs the exact physical-SID14 plus functional-Mode04 clear already
 proved on the maintainer car, verifies no known responder retains
@@ -195,8 +205,12 @@ DRCC restoration after signer bootstrap is not yet live-qualified.
    openpilot `steerRequired` presentation and stock-cruise cancellation.
 5. Test alpha longitudinal separately: first parked/template ownership, then a
    bounded road acceleration/deceleration A/B. Require downstream vehicle
-   response, source suppression, gas/brake disengagement behavior, and PCS/AEB
-   coexistence. Keep release-default stock ACC until these are closed.
+   response, source suppression, gas/brake disengagement behavior, causal
+   actuator-delay measurement, and PCS/AEB coexistence. Passive stock-ACC logs
+   cannot identify actuator lag—the closed-loop `0x160` request and `aEgo`
+   correlate with an apparent ~-60 ms timestamp optimum—so do not replace the
+   inherited 0.05 s longitudinal delay from that non-causal correlation. Keep
+   release-default stock ACC until these are closed.
 6. Capture one delayed (>5 s) stop/restart cycle. Do not set `autoResumeSng`
    unless openpilot can release Toyota's long-stop hold without driver input.
 7. Keep `steerFaultTemporary`/`steerFaultPermanent` unmapped until a controlled

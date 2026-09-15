@@ -5909,8 +5909,16 @@ steering routes settle lower and much more tightly: route `8d` has p5/median/p95
 15.258/15.322/15.394 and ends at 15.258; route `93` has
 15.254/15.258/15.268 and ends at **15.254**. The new F33 CarSpecs default is
 therefore **15.3**, rather than continuing to make paramsd correct a roughly
-12% low TSS2 default. Tire-stiffness learning remains essentially 1.0 in the
-working routes, so no target-specific stiffness override is justified.
+12% low TSS2 default.
+
+The same direct configured-vs-learned check closes the inherited tire-stiffness
+factor. The working route `8d` has stiffness p5/median/p95 `1.0000 / 1.0026 /
+1.0030` and ends at `1.0030`; route `93` has `1.0000 / 1.0002 / 1.0003` and ends
+at `1.0003`. openpilot's own vehicle-dynamics PlotJuggler layout labels
+`carParams.tireStiffnessFactor` versus `vehicleParameters.stiffnessFactor` as a
+configured-initial / online-learned comparison and directs setting the former
+to the learned value. F33 therefore now uses **1.0**, not the inherited TSS2
+`0.7933`.
 
 The delay result goes the other direction: keep the existing `0.18 s` actuator
 delay. Current openpilot `lagd` defines its total initial lag as
