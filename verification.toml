@@ -507,6 +507,9 @@ tests = ["tests/verify_t0035_faci_backend_external.py"]
 requires_external = ["cuw_reference_corpus"]
 modes = ["local"]
 
+[suite.tundra_8965f3401200_firmware]
+tests = ["tests/verify_tundra_8965F3401200_firmware.py"]
+
 [suite.camry_8965f3307000_secoc_patch]
 tests = ["tests/verify_camry_8965F3307000.py"]
 args = ["--section", "secoc_patch"]
