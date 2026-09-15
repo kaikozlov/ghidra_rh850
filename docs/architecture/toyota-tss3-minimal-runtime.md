@@ -151,8 +151,10 @@ new evidence.
 The current upstream-shaped stock-harness port has moved beyond the original
 `3c79d935` checkpoint. It now includes target-native Camry state, exact-EPS
 fingerprinting, C7 bus-1 lateral control, normal Toyota HUD/cancel ownership,
-alpha `0x160` longitudinal replacement, target-specific Panda limits, and a
-native TSS3 RadarInterface. The retained Bus-1 family closes three banks of
+alpha `0x160` longitudinal replacement, target-specific Panda limits, a
+retained-route-tuned 15.3 steering-ratio default (with the existing 0.18 s
+actuator delay independently consistent with `lagd`), and a native TSS3
+RadarInterface. The retained Bus-1 family closes three banks of
 eight objects: `0x180..0x182` provide u16×0.01 m range plus s12×0.05 m lateral
 geometry and `0x183..0x185` provide s10×0.1 m/s relative speed. The latter is
 independently validated against finite-difference range in both retained drives

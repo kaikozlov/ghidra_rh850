@@ -5896,6 +5896,33 @@ Machine-readable proof is
 independent verifier are `tools/targets/camry/analysis/analyze_camry_8965F3307000_b6_ingress_closure.py` and
 `tests/verify_camry_8965F3307000_b6_ingress_closure.py`.
 
+### 2026-09-15: retained-route tuning closes the F33 steering-ratio default
+
+The successful C7 routes also provide the missing vehicle-model tuning check.
+Their embedded `carParams` still carry the inherited TSS2 defaults
+`steerRatio=13.7` and `steerActuatorDelay=0.18 s`, while openpilot's online
+vehicle/lag estimators provide independent observations of the actual plant.
+
+Across the three long 2026-09-04 routes, learned steering ratio spans roughly
+15.1..15.8; route medians are 15.70, 15.40, and 15.56. The September-10 working
+steering routes settle lower and much more tightly: route `8d` has p5/median/p95
+15.258/15.322/15.394 and ends at 15.258; route `93` has
+15.254/15.258/15.268 and ends at **15.254**. The new F33 CarSpecs default is
+therefore **15.3**, rather than continuing to make paramsd correct a roughly
+12% low TSS2 default. Tire-stiffness learning remains essentially 1.0 in the
+working routes, so no target-specific stiffness override is justified.
+
+The delay result goes the other direction: keep the existing `0.18 s` actuator
+delay. Current openpilot `lagd` defines its total initial lag as
+`CP.steerActuatorDelay + 0.2 s`; both successful routes report an estimated
+`lateralDelay=0.3837597 s` with 21 valid blocks and zero reported estimator
+standard deviation. That corresponds to about **0.184 s** actuator delay, while
+a separate command-rate/response-rate scan of the clean road segments places
+the dominant closed-loop phase delay broadly in the expected ~0.3-0.5 s total
+range. The existing 0.18 s CarParams value is therefore consistent with the
+current openpilot lag model; changing it to the raw ~0.4 s angle-correlation lag
+would double-count the model's 0.2 s smoothing/latency term.
+
 ### 2026-09-15: TSS3 object bank closed far enough for RadarPoint
 
 A fresh retained-corpus pass closes the three quantities openpilot actually needs

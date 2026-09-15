@@ -17,6 +17,7 @@ contract, and exact-F33 machinery exists only where the vehicle actually differs
 | Physical vehicle state | **reviewable** | target-native `0x025` angle/rate, `0x030` driver torque, four wheel speeds, gear, READY, doors/belt, brake/hold/parking brake, BSM, source-real cluster speed | exact temporary/permanent EPS fault-state mapping is still deliberately unmapped |
 | Cruise/engagement state | **reviewable** | source-real `0x251` availability/set speed, real `0x08A` cruise latch, exact delayed standstill states `0x66/0x67`; no synthesized authority bit | none for ordinary stock-ACC engagement; long-stop release remains separate |
 | Driver interaction | **reviewable** | same-car `0x030`/`0x371` join; 0.6 N·m `steeringPressed` threshold; left/right torque sign fixed; normal openpilot nudge semantics | Toyota's own hysteretic detector is not modeled as a second permission system |
+| Vehicle model / lateral timing | **retained-route tuned** | Sep-4/Sep-10 `vehicleParameters.steerRatio` repeatedly converges in ~15.1–15.8 and the latest fully learned routes settle at 15.254; F33 default is now 15.3 instead of inherited TSS2 13.7. Online `lateralDelay` on both successful steering routes is 0.3837597 s with 21 valid blocks; current openpilot initializes total lag as `steerActuatorDelay + 0.2`, validating the existing 0.18 s actuator parameter. Learned tire-stiffness factor stays ~1.0. | ordinary paramsd/lagd continue adapting online; no special controller tuning path is needed |
 | Lateral command contract | **road-observed** | C7 `0x1FDC0002` -> EPS-resident continuous signer -> native B6; route `0000008d--a9f348691a` plus corroborating `00000093--4066e7ae51`; clean segment r=0.9888 / 0.873° MAE at tested 400 ms lag | road proof used temporary repin/C7 bus0; current stock Toyota-B C7 bus1 mapping still needs parked + short-road revalidation |
 | Lateral authentication | **road-observed / production-shaped candidate** | exact continuous helper `b417e12d…159a`; native command-5/selector-4 FV4+CMAC28 generation; native-trailer equality oracle before arming | same-car stock-CodeFlash + volatile-resident combination not yet live-qualified |
 | Persistent EPS modification | **not required by intended runtime** | continuous helper signs before the untouched native SecOC consumer; stage-5 receiver bypass is not part of the v16 runtime contract | validate on replacement rack's stock CodeFlash; historical stage-5/persistent artifacts remain provenance only |
@@ -57,12 +58,16 @@ The previous matrix is obsolete in four important ways.
 ## Software checkpoint
 
 At the September 15 checkpoint, nested opendbc commit
-`01b6d188` (`toyota: restore production Camry TSS3 surfaces`) carries the latest
-Camry cleanup. Its focused Camry+Corolla TSS3 tests pass **27/27** and the full
-Toyota unit set passes **45 tests / 205 subtests**. The generated support table
-classifies Camry Hybrid 2026 as **Custom**, which is the correct current product
-classification: the control integration is upstream-shaped, but volatile signer
-bootstrap is not a normal plug-and-play comma installation.
+`ab369e53` (`toyota: tune Camry TSS3 vehicle model`) carries the current Camry
+stack, including the production-surface cleanup (`01b6d188`), native TSS3 radar
+parser (`65366c44`), and retained-route vehicle-model tuning. Its focused
+Camry+Corolla TSS3 tests pass **28/28**, the full Toyota unit set passes
+**46 tests / 205 subtests**, the CAN/DBC/docs/platform set passes **56 tests /
+2,959 subtests**, and the generic car-interface suite passes **252/252**. The
+generated support table classifies Camry Hybrid 2026 as **Custom**, which is the
+correct current product classification: the control integration is
+upstream-shaped, but volatile signer bootstrap is not a normal plug-and-play
+comma installation.
 
 The analysis car-kit v16 work packages the exact continuous helper from the
 successful steering handoff and moves the host loader/diagnostic path to stock
