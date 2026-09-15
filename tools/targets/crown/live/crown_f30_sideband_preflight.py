@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Read-only Crown 8965F3012000 check for the candidate classic 0x1DA signer sideband.
+"""Historical read-only check for the rejected Crown classic-0x1DA sideband candidate.
 
 This probe sends no CAN application/control frame. It uses only stock-wire EPS
 UDS on Panda bus1/ELM param1 to bind F181, enter EXTENDED for SID23, and compare
@@ -30,13 +30,16 @@ from exploit.ephemeral_runtime import camry_f33_runtime_monitor as monitor  # no
 from exploit.ephemeral_runtime.camry_f33_runtime_replay_discriminator import _read_memory  # noqa: E402
 from exploit.ephemeral_runtime.crown_f30_b6_inline_signer import (  # noqa: E402
     CONTROL_BUS,
-    CONTROL_CAN_ID,
+    LEGACY_SIDEBAND_CAN_ID,
     EXPECTED_F181_HEX,
     ROUTE,
-    SIDEBAND_GENERATION_BASE,
+    LEGACY_SIDEBAND_GENERATION_BASE,
 )
 
 
+# Historical rejected-candidate aliases retained for the standalone evidence test.
+CONTROL_CAN_ID = LEGACY_SIDEBAND_CAN_ID
+SIDEBAND_GENERATION_BASE = LEGACY_SIDEBAND_GENERATION_BASE
 HEARTBEAT_PERIOD_S = 2.0
 
 
@@ -66,7 +69,7 @@ class PreflightTap(monitor.PandaTap):
             for address, data, bus in rows:
                 address, bus = int(address), int(bus)
                 self.all_counts[bus] = self.all_counts.get(bus, 0) + 1
-                if address != CONTROL_CAN_ID:
+                if address != LEGACY_SIDEBAND_CAN_ID:
                     continue
                 self.counts[bus] = self.counts.get(bus, 0) + 1
                 if len(self.samples) < 32:
@@ -95,7 +98,7 @@ def run(duration: float) -> dict[str, Any]:
     # reaches the host, and application traffic can arrive in that interval.
     panda.begin_observation()
     observation_start = time.monotonic()
-    generation_before = _read_memory(client, uds_mod, SIDEBAND_GENERATION_BASE, 1)[0]
+    generation_before = _read_memory(client, uds_mod, LEGACY_SIDEBAND_GENERATION_BASE, 1)[0]
     last_heartbeat = time.monotonic()
     deadline = last_heartbeat + duration
     heartbeats_sent = 0
@@ -111,7 +114,7 @@ def run(duration: float) -> dict[str, Any]:
     # drained by this request and by every periodic TesterPresent above.
     client.tester_present()
     heartbeats_sent += 1
-    generation_after = _read_memory(client, uds_mod, SIDEBAND_GENERATION_BASE, 1)[0]
+    generation_after = _read_memory(client, uds_mod, LEGACY_SIDEBAND_GENERATION_BASE, 1)[0]
     observed_elapsed = time.monotonic() - observation_start
     panda.observing = False
     counts, samples = panda.counts, panda.samples
@@ -122,7 +125,7 @@ def run(duration: float) -> dict[str, Any]:
         "schema": "crown-f30-sideband-preflight-v1",
         "target": {"f181_hex": f181_hex, "f181_ascii": f181_ascii},
         "route": {"bus": ROUTE.bus, "elm327_param": ROUTE.elm327_param},
-        "candidate": {"can_id": f"0x{CONTROL_CAN_ID:X}", "bus": CONTROL_BUS, "format": "classic", "dlc": 8},
+        "candidate": {"can_id": f"0x{LEGACY_SIDEBAND_CAN_ID:X}", "bus": CONTROL_BUS, "format": "classic", "dlc": 8},
         "duration_s": duration,
         "observed_elapsed_s": observed_elapsed,
         "heartbeats_sent": heartbeats_sent,
@@ -131,7 +134,7 @@ def run(duration: float) -> dict[str, Any]:
         "observed_1da_counts_by_bus": {str(k): v for k, v in sorted(counts.items())},
         "samples": samples,
         "eps_generation": {
-            "address": f"0x{SIDEBAND_GENERATION_BASE:08X}",
+            "address": f"0x{LEGACY_SIDEBAND_GENERATION_BASE:08X}",
             "before": generation_before,
             "after": generation_after,
             "stable": generation_stable,

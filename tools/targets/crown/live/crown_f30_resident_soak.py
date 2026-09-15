@@ -57,14 +57,25 @@ def run(*, payload: Path, helper: Path, meta: Path, duration: float, rate_hz: fl
     initial_state = session.read_state()
     if not initial_state["initialized"] or not initial_state["armed"]:
         raise SoakError(f"resident must already be initialized and armed: {initial_state}")
-    native = session.wait_native_verification(timeout=0.25)
-    if not native["telemetry"]["native_signature_match"]:
-        raise SoakError("native MAC equality has not been proven")
+    # native_verified is a sticky result from the resident's untouched first-B6
+    # oracle. After a successful replacement, the current computed trailer signs
+    # modified B6 data and is expected to differ from the saved native trailer;
+    # do not re-require current trailer equality here.
+    native_state = session.read_state()
+    native_telemetry = signer.decode_signer_telemetry(
+        signer._read_memory(session.client, session.uds_mod, signer.TELEMETRY_BASE, signer.TELEMETRY_SIZE)
+    )
+    if not (
+        native_telemetry["native_verified_raw"] == 1
+        and native_state["last_command5_rc"] == 0
+        and native_telemetry["last_done_flag"] == 1
+        and native_telemetry["last_command_status"] == 0
+    ):
+        raise SoakError(f"sticky native-MAC oracle has not been proven cleanly: state={native_state} telemetry={native_telemetry}")
+    native = {"state": native_state, "telemetry": native_telemetry, "verified": True, "sticky_oracle": True}
 
-    # Reuse the exact same pre-send candidate-sideband gate as replace-once.
-    # Take the counter baseline *after* that passive interval so the deltas below
-    # describe only this soak.
-    sideband_preflight = session.require_idle_sideband()
+    # Control now uses Crown's stock functional 0x777 diagnostic transport.
+    # Take the counter baseline immediately before this bounded soak.
     state_before = session.read_state()
     telemetry_before = signer.decode_signer_telemetry(
         signer._read_memory(session.client, session.uds_mod, signer.TELEMETRY_BASE, signer.TELEMETRY_SIZE)
@@ -121,7 +132,7 @@ def run(*, payload: Path, helper: Path, meta: Path, duration: float, rate_hz: fl
             "target_deg": target_deg,
             "intent": "repeat the proven one-shot replacement at the fresh measured steering angle; no offset target",
         },
-        "sideband_preflight": sideband_preflight,
+        "control_ingress": {"can_id": "0x777", "transport": "stock functional UDS single frame"},
         "native_verification": native,
         "start_vehicle_guard": session.vehicle_guard,
         "end_vehicle_guard": end_guard,

@@ -21,7 +21,7 @@ RUNTIME_FILES = (
     "exploit/ephemeral_runtime/camry_f33_runtime_monitor.py",
     "exploit/ephemeral_runtime/camry_f33_runtime_replay_discriminator.py",
     "exploit/ephemeral_runtime/f33_panda_lease.sh",
-    "tools/targets/crown/live/crown_f30_sideband_preflight.py",
+    "tools/targets/crown/live/crown_f30_diag_mailbox_probe.py",
     "tools/targets/crown/live/crown_f30_resident_soak.py",
 )
 
@@ -76,13 +76,14 @@ def build(out: Path) -> dict:
             "copy this directory to comma hardware",
             "./crown-tss3-signer doctor",
             "NRTD/Park: ./crown-tss3-signer preflight /tmp/crown-preflight.json",
-            "continue only if safe_to_experiment=true",
+            "continue only if qualified=true and verdict=stock_functional_mailbox_live",
             "NRTD/Park: ./crown-tss3-signer install /tmp/crown-install.json",
             "transition directly to READY/Park without EPS OFF",
             "./crown-tss3-signer load-arm /tmp/crown-arm.json",
             "continue only if native_verification.native_verified=true",
             "READY/Park/stationary: ./crown-tss3-signer replace-current /tmp/crown-replace-current.json",
             "optional repeated qualification without an openpilot port: ./crown-tss3-signer soak-current /tmp/crown-soak.json",
+            "preflight/install/load/control use stock functional UDS 0x777; no Crown CodeFlash patch is used",
             "replace-current/soak-current use the fresh Crown 0x025 measured angle; full EPS power cycle removes the resident",
         ],
     }

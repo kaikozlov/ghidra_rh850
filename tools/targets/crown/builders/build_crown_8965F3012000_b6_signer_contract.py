@@ -50,6 +50,17 @@ SIDEBAND_SIGNAL_VALUE = 0xFEBE7BB6
 SIDEBAND_SIGNAL_GENERATION = 0xFEBE7BB7
 SIDEBAND_SIGNAL_STATUS = 0xFEBE7BB8
 
+FUNCTIONAL_DIAG_CAN_ID = 0x777
+FUNCTIONAL_CANTP_RX_PDU = 0x0805
+FUNCTIONAL_PDUR_RX_PDU = 0x0803
+FUNCTIONAL_DCM_CHANNEL = 1
+FUNCTIONAL_DCM_BUFFER = 0xFEBE527D
+FUNCTIONAL_CANTP_CONFIG = 0x2309E
+DCM_CHANNEL_CONFIG = 0x25C24
+DCM_BUFFER_POINTERS = 0x25BD0
+DCM_SERVICE_SET_CONFIG = 0x25948
+DCM_SERVICE_DESCRIPTOR_BASE = 0x25990
+
 RESIDENT_BASE = 0xFEBFF9F0
 RESIDENT_END = 0xFEBFFBFC
 LOW_HELPER_BASE = 0xFEBF0000
@@ -365,6 +376,66 @@ def main() -> int:
     ):
         raise ValueError(f"Crown application RSCFD interrupt routing drift: {app_vectors}")
 
+    # Stock-firmware host->resident ingress. The functional 0x777 route is a
+    # normal eight-byte ISO-TP receive endpoint. Its CanTp record maps Rx PDU
+    # 0x805 to upper/PduR 0x803, which DCM maps to channel1 and its 0x100-byte
+    # buffer at FEBE527D. The channel's request-type byte resolves to 1
+    # (functional) through the exact DCM configuration graph.
+    functional_address_row = 0x21E90
+    if [u32(crown, functional_address_row), u32(crown, functional_address_row + 4)] != [FUNCTIONAL_DIAG_CAN_ID, 8]:
+        raise ValueError("Crown functional diagnostic CAN row drift")
+    functional_cantp = [u16(crown, FUNCTIONAL_CANTP_CONFIG + i) for i in range(0, 0x20, 2)]
+    if functional_cantp != [
+        0x0101, FUNCTIONAL_PDUR_RX_PDU, FUNCTIONAL_CANTP_RX_PDU, 0xFFFF, FUNCTIONAL_PDUR_RX_PDU, 0xFFFF, 0x0100, 0x0000,
+        0x0000, 0x0014, 0x0000, 0x0000, 0x0000, 0x0001, 0x0000, 0x0000,
+    ]:
+        raise ValueError(f"Crown functional CanTp record drift: {functional_cantp}")
+    if [u32(crown, DCM_BUFFER_POINTERS + i * 8) for i in range(3)] != [0xFEBE517D, 0xFEBE527D, 0xFEBE537D]:
+        raise ValueError("Crown DCM receive-buffer pointers drift")
+    dcm_upper_ids = [u16(crown, DCM_CHANNEL_CONFIG + i * 12 + 10) for i in range(3)]
+    if dcm_upper_ids != [2, 3, 4]:
+        raise ValueError(f"Crown DCM upper-PDU mapping drift: {dcm_upper_ids}")
+
+    def dcm_request_type(channel: int) -> int:
+        row = DCM_CHANNEL_CONFIG + channel * 12
+        group = u16(crown, row)
+        route = u16(crown, row + 2)
+        config_index = u16(crown, row + 4)
+        route_table = u32(crown, 0x25BFC + group * 20)
+        protocol = u32(crown, route_table + route * 4)
+        service_config = u32(crown, protocol + 4)
+        return crown[service_config + config_index * 12 + 8]
+
+    dcm_request_types = [dcm_request_type(i) for i in range(3)]
+    if dcm_request_types != [0, 1, 0]:
+        raise ValueError(f"Crown DCM addressing-type map drift: {dcm_request_types}")
+    # Close the synchronous CanTp->PduR->DCM callback chain for upper PDU
+    # 0x0803. The generic PduR vtable resolves StartOfReception/CopyRxData/
+    # TpRxIndication to wrappers 7990C/79920/79944, whose configured DCM
+    # callbacks are 8FB5E/8FBF2/8FC72. CopyRxData reaches 91888; TpRxIndication
+    # only queues the request. Service lookup/dispatch is a separate DCM-main
+    # path at 8F6AA -> 8F006, so the resident hook immediately after 792EE
+    # samples the completed N-SDU before service processing can consume it.
+    pdur_vtable = u32(crown, 0x21DFC + 4)
+    if pdur_vtable != 0x21D48:
+        raise ValueError(f"Crown PduR group1 vtable drift: 0x{pdur_vtable:08X}")
+    pdur_tp_wrappers = [u32(crown, pdur_vtable + offset) for offset in (0x0C, 0x10, 0x18)]
+    if pdur_tp_wrappers != [0x7990C, 0x79920, 0x79944]:
+        raise ValueError(f"Crown PduR TP callback wrapper drift: {pdur_tp_wrappers}")
+    dcm_tp_callbacks = [u32(crown, address) for address in (0x21884, 0x21888, 0x21890)]
+    if dcm_tp_callbacks != [0x8FB5E, 0x8FBF2, 0x8FC72]:
+        raise ValueError(f"Crown DCM TP callback drift: {dcm_tp_callbacks}")
+    copy_rx = cr[0x91888]["decompiled_c"]
+    need(copy_rx, "*(undefined1 *)*piVar1 = uVar3", "(&DAT_febe5520)[param_1 * 8]")
+    copy_cb = cr[0x8FBF2]["decompiled_c"]
+    need(copy_cb, "FUN_00091888")
+    indication_cb = cr[0x8FC72]["decompiled_c"]
+    need(indication_cb, "FUN_00091418", "FUN_00091734(0)")
+    if "FUN_0008f006" in indication_cb:
+        raise ValueError("Crown DCM TpRxIndication unexpectedly dispatches services inline")
+    dcm_main = cr[0x8F6AA]["decompiled_c"]
+    need(dcm_main, "FUN_0008f006")
+
     # Crown receives classic 0x127, but the exact EPS generated-COM unpacker does
     # not extract B5[7:4]. Upstream Toyota TSS3 calls that nibble GEAR; without a
     # Crown-native semantic consumer or field enum we deliberately do not use it
@@ -435,13 +506,54 @@ def main() -> int:
         raise ValueError("Crown receive FE01 gate drift")
 
     # Application UDS SID 0x23 is present in EXTENDED and its entry wrapper is the same as F33.
-    sids = [0x10,0x11,0x14,0x19,0x22,0x23,0x27,0x28,0x2E,0x31,0x34,0x36,0x37,0x3E,0x85,0xAB,0xBA]
-    service_base = 0x25990
-    if [crown[service_base + i * 24 + 16] for i in range(len(sids))] != sids:
-        raise ValueError("Crown application UDS service table drift")
-    sid23 = service_base + sids.index(0x23) * 24
+    # Derive all three configured service sets rather than inferring descriptor
+    # completeness from a contiguous table scan. FUN_8EE90 maps message channel
+    # IDs 2/3/4 onto these rows; channel 1 above carries upper ID 3, so row 1 is
+    # specifically the functional-0x777 service set.
+    expected_service_sets = [
+        {"message_channel_id": 2, "indices": list(range(17)), "index_table": 0x25960},
+        {"message_channel_id": 3, "indices": [17, 2, 7, 9, 13, 14], "index_table": 0x25928},
+        {"message_channel_id": 4, "indices": [18, 19, 20, 21, 22], "index_table": 0x25984},
+    ]
+    service_sets: list[dict[str, object]] = []
+    referenced_service_indices: set[int] = set()
+    for row_index, expected in enumerate(expected_service_sets):
+        row = DCM_SERVICE_SET_CONFIG + row_index * 8
+        message_channel_id = u16(crown, row)
+        count = u16(crown, row + 2)
+        index_table = u32(crown, row + 4)
+        indices = [u16(crown, index_table + i * 2) for i in range(count)]
+        observed = {"message_channel_id": message_channel_id, "indices": indices, "index_table": index_table}
+        if observed != expected:
+            raise ValueError(f"Crown DCM service-set row {row_index} drift: {observed}")
+        referenced_service_indices.update(indices)
+        service_sets.append(observed)
+    if referenced_service_indices != set(range(23)):
+        raise ValueError(f"Crown DCM service-descriptor coverage drift: {sorted(referenced_service_indices)}")
+
+    all_service_sids = [crown[DCM_SERVICE_DESCRIPTOR_BASE + i * 24 + 16] for i in range(23)]
+    expected_service_sids = [0x10,0x11,0x14,0x19,0x22,0x23,0x27,0x28,0x2E,0x31,0x34,0x36,0x37,0x3E,0x85,0xAB,0xBA,0x10,0x10,0x19,0x22,0x3E,0xAB]
+    if all_service_sids != expected_service_sids or 0xC6 in all_service_sids or 0xC7 in all_service_sids:
+        raise ValueError(f"Crown application UDS service table drift: {all_service_sids}")
+    functional_service_indices = expected_service_sets[1]["indices"]
+    functional_service_sids = [all_service_sids[i] for i in functional_service_indices]
+    if functional_service_sids != [0x10, 0x14, 0x28, 0x31, 0x3E, 0x85]:
+        raise ValueError(f"Crown functional UDS service-set drift: {functional_service_sids}")
+    sid23 = DCM_SERVICE_DESCRIPTOR_BASE + all_service_sids.index(0x23) * 24
     if u32(crown, sid23) != 0x94060 or crown[0x94060:0x94060+18] != camry[0x965C0:0x965C0+18]:
         raise ValueError("Crown application SID23 wrapper drift")
+    service_lookup = cr[0x8EA38]["decompiled_c"]
+    need(service_lookup, "*param_4 = 0x11", "if (puVar2 == (undefined *)0x0)")
+    service_dispatch = cr[0x8F006]["decompiled_c"]
+    need(service_dispatch, "FUN_0008ea38", "if (cStack_15 != '\\x11')", "FUN_0008ec52(puVar5,cStack_15)")
+    response_select = cr[0x8EC7A]["decompiled_c"]
+    need(
+        response_select,
+        "*(char *)(param_1 + 0x10) == '\\x01'",
+        "cVar1 == '\\x11'",
+        "uVar3 = 3",
+        "FUN_0008f782(param_1,uVar3)",
+    )
 
     high_refs = direct_refs(cr, RESIDENT_BASE, RESIDENT_END)
     low_refs = direct_refs(cr, LOW_HELPER_BASE, LOW_HELPER_END)
@@ -554,6 +666,66 @@ def main() -> int:
             "upstream_prior_art": "Toyota TSS3 DBC names 0x127 B5[7:4] GEAR, but exact Crown EPS firmware does not consume that nibble",
             "runtime_policy": "Park remains explicit operator confirmation; do not turn upstream gear enum into an exact-Crown safety claim",
         },
+        "functional_diagnostic_ingress": {
+            "status": "firmware-closed-live-unqualified",
+            "can_id": f"0x{FUNCTIONAL_DIAG_CAN_ID:X}",
+            "format": "classic",
+            "dlc": 8,
+            "wire": {
+                "isotp": "single frame, PCI=0x07",
+                "loader": "07 C6 index 00 word_le32",
+                "runtime": "07 C7 seq 00 target_hi target_lo 00 00",
+            },
+            "application_route": {
+                "address_row": f"0x{functional_address_row:08X}",
+                "cantp_rx_pdu": f"0x{FUNCTIONAL_CANTP_RX_PDU:04X}",
+                "cantp_config": f"0x{FUNCTIONAL_CANTP_CONFIG:08X}",
+                "pdur_rx_pdu": f"0x{FUNCTIONAL_PDUR_RX_PDU:04X}",
+                "dcm_upper_pdu": 3,
+                "dcm_channel": FUNCTIONAL_DCM_CHANNEL,
+                "dcm_buffer": f"0x{FUNCTIONAL_DCM_BUFFER:08X}",
+                "dcm_buffer_capacity": 256,
+                "request_type": "functional",
+                "pdur_tp_wrappers": {
+                    "start_of_reception": "0x0007990C",
+                    "copy_rx_data": "0x00079920",
+                    "rx_indication": "0x00079944",
+                },
+                "dcm_tp_callbacks": {
+                    "start_of_reception": "0x0008FB5E",
+                    "copy_rx_data": "0x0008FBF2",
+                    "rx_indication": "0x0008FC72",
+                    "copy_engine": "0x00091888",
+                },
+            },
+            "service_semantics": {
+                "loader_sid": "0xC6",
+                "runtime_sid": "0xC7",
+                "descriptor_count": len(all_service_sids),
+                "configured_service_ids": [f"0x{x:02X}" for x in all_service_sids],
+                "service_sets": [
+                    {
+                        "message_channel_id": row["message_channel_id"],
+                        "indices": row["indices"],
+                        "index_table": f"0x{int(row['index_table']):08X}",
+                    }
+                    for row in service_sets
+                ],
+                "functional_service_ids": [f"0x{x:02X}" for x in functional_service_sids],
+                "c6_configured": False,
+                "c7_configured": False,
+                "unsupported_service_nrc": "0x11",
+                "functional_nrc11_response": "suppressed",
+                "service_lookup": "0x0008EA38",
+                "response_selector": "0x0008EC7A",
+                "dcm_main_worker": "0x0008F6AA",
+                "service_dispatch": "0x0008F006",
+                "rx_indication_dispatches_service_inline": False,
+            },
+            "resident_sampling_boundary": "after 0x792EE native receive drain has synchronously copied and indicated the complete N-SDU, before the untouched 0x79638 receive tail; service lookup runs later on the separate 0x8F6AA -> 0x8F006 DCM-main path",
+            "persistent_flash_write": False,
+            "firmware_patch": False,
+        },
         "sideband_candidate": {
             "status": "rejected-as-idle-private-mailbox",
             "can_id": "0x1DA", "format": "classic", "dlc": 8, "pdu_id": SIDEBAND_PDU,
@@ -565,7 +737,7 @@ def main() -> int:
             "loader_frame": "00 C6 5A word_le32 index",
             "runtime_frame": "00 C7 5A target_hi target_lo 00 00 seq",
             "live_gate": "contributor preflight observed FEBE4E91 movement; exact firmware trace closes that byte to normal PDU45/0x1DA receive delivery",
-            "boundary": "Generated-COM configuration still proves B1..B7 have no configured scalar extraction and no direct reader of the sole B0-low4 snapshot, but the original private-idle-mailbox premise is false on the contributor Crown. Do not transmit active 0x1DA sideband frames; preserve the proven Camry C7 protocol while resolving/restoring a dedicated Crown ingress.",
+            "boundary": "Generated-COM configuration still proves B1..B7 have no configured scalar extraction and no direct reader of the sole B0-low4 snapshot, but the original private-idle-mailbox premise is false on the contributor Crown. Do not transmit active 0x1DA sideband frames; the active runtime instead uses the stock functional-diagnostic ingress closed separately in this contract.",
         },
         "vehicle_state_guard": {
             "ready": {"can_id": "0x51E", "wire": "B0[7]", "signal": 155, "unpacker": "0x0004ACD2"},
@@ -577,8 +749,8 @@ def main() -> int:
             "park": "operator-confirmed; F33 0x127 B5-high4 gear decode is deliberately not transferred to Crown",
         },
         "port_boundary": {
-            "closed": ["RAM geometry", "startup/foreground replay", "post-receive/pre-SecOC hook", "B6 queue/buffer", "freshness state", "slot4 command5", "B6 mutation tuple", "B6 controller-equivalent target scale", "application SID23 readback", "Crown READY/stationary guard"],
-            "live_required": ["dedicated host-to-resident control ingress", "resident startup survival", "native B6 presence", "no-mutation native trailer equality", "stationary one-shot replacement"],
+            "closed": ["RAM geometry", "startup/foreground replay", "post-receive/pre-SecOC hook", "B6 queue/buffer", "freshness state", "slot4 command5", "B6 mutation tuple", "B6 controller-equivalent target scale", "application SID23 readback", "Crown READY/stationary guard", "stock functional 0x777 host-to-resident ingress"],
+            "live_required": ["functional 0x777 mailbox delivery", "resident startup survival", "native B6 presence", "no-mutation native trailer equality", "stationary one-shot replacement"],
             "not_claimed": ["literal OEM B6 engineering-unit label", "road actuation", "safe active 0x1DA overlay"],
         },
     }

@@ -1103,5 +1103,8 @@ tests = ["tests/verify_camry_f33_recovery_identity.py"]
 [suite.crown_f30_b6_inline_signer]
 tests = ["tests/verify_crown_f30_b6_inline_signer.py"]
 
+[suite.crown_diag_mailbox_probe]
+tests = ["tests/verify_crown_diag_mailbox_probe.py"]
+
 [suite.crown_sideband_preflight]
 tests = ["tests/verify_crown_sideband_preflight.py"]
