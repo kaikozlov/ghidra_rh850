@@ -29,9 +29,13 @@ The active path is:
    application fields, and lets the stock EPS SecOC path produce the trailer.
 
 The exact-F33 signer is a target prerequisite, not a replacement openpilot
-controller or permission system. The current normal-boot form is installed in
-CodeFlash and survives full EPS power loss; its installation payload and the
-earlier bring-up signer execute from RAM.
+controller or permission system. The production-shaped candidate is now the
+**volatile continuous RAM signer**: it generates a native-valid FV4+CMAC28
+trailer with the EPS's own ICU-S path and therefore does not require the
+historical stage-5 receiver bypass or any persistent CodeFlash change. Full EPS
+power loss removes it and requires the bounded NRTD -> READY install/load-arm
+lifecycle again. The old persistent signer remains historical development
+material, not the intended deployment architecture.
 
 ## Minimum by repository
 
@@ -41,32 +45,25 @@ earlier bring-up signer execute from RAM.
 | opendbc | F33 platform identity and DBC; TSS3 state decoding; F33 CarParams; direct C7 angle encoder; Toyota F33 safety RX state, angle checks, TX whitelist, and normal relay blocking | host construction or signing of B6; host freshness/MAC state; diagnostic/oracle arming; controller-side permission vetoes; Corolla actuation assumptions |
 | Panda | Preserve the received FDF and BRS attributes when software-forwarding across the relay; sanitize the queue-private forwarding markers on host input and validate the original host checksum | relay-close/debug exceptions; F33-specific safety state outside opendbc; global 70% data sample point; global EFBI; logging the per-frame FDF bit to cereal |
 
-## Existing longitudinal seed
+## Current longitudinal layer
 
 [`camry_frc_request_poc.py`](../../tools/targets/camry/live/camry_frc_request_poc.py)
-is already the bare message-generation primitive for the observed Camry
-Toyota-B request family. It starts from a valid 32-byte `0x160` frame, changes
-only the B2 alive counter and candidate signed-7 B12 request, and recomputes the
-recovered AUTOSAR E2E Profile-5 CRC. The reusable integrity implementation is
-[`toyota_e2e_p05.py`](../../tools/toyota_support/toyota_e2e_p05.py).
+was the bare message-generation primitive for the observed Camry Toyota-B
+request family. That wire contract is now integrated into the normal opendbc
+controller as an **alpha longitudinal** path: `CarState` retains the live
+camera `0x160` template/counter, `CarController` owns the frame while stock
+cruise is engaged, applies the exact Camry B4:B5 signed-15 request plus the
+inverted signed-7 B12 companion, and recomputes AUTOSAR E2E Profile-5 CRC/Data
+ID `0x444A`. Panda blocks the stock bus-2 copy only while longitudinal control
+is allowed and accepts the bus-0 replacement under the exact target range
+`-1.5..+1.3 m/s²`.
 
-`tools/test camry_frc_request_poc` verifies fixed retained witnesses, more than
-20,000 direct retained B2/B12 frame pairs, byte-exact reconstruction, counter
-behavior, request bounds, and fail-closed template validation. The tool is
-deliberately offline and transmits nothing. This proves that the minimum wire
-encoder exists; it does not by itself prove Camry request scaling or receiver
-ownership.
-
-The native openpilot-shaped driving layer should therefore add only:
-
-1. opendbc target configuration enabling openpilot longitudinal control;
-2. a `CarController` adapter from ordinary `CC.actuators.accel` to the proved
-   target request semantics, using the existing Profile-5 encoder and the
-   required cadence/counter ownership;
-3. the exact `0x160`, 32-byte, Toyota-B TX entry plus ordinary acceleration
-   bounds in Toyota safety; and
-4. target validation of scaling, companion fields, source ownership, release,
-   and standstill behavior.
+Below the retained low-speed override boundary the controller relays Toyota's
+live request unchanged rather than claiming standstill/hold ownership. This is
+why `autoResumeSng` is deliberately false: short-stop restart is observed, but
+release from Toyota's delayed long-stop hold is not proved. Full physical DRCC
+acceleration authority and PCS/AEB coexistence also remain vehicle-validation
+items, so release-default operation continues to use stock ACC.
 
 No longitudinal planner, `controlsd`, or second permission-system change is
 indicated. The Corolla field result establishes that a TSS3 target can use the
@@ -94,21 +91,23 @@ configuration.
 
 ### Why one openpilot transport exception remains
 
-The successful route contains only Classical host TX:
+The road-proven temporary-repin route contained only Classical host TX and put
+C7 on bus 0. The **current stock-Toyota-B candidate** is:
 
-- C7 `0x1FDC0002`, bus 0, 8 bytes;
+- C7 `0x1FDC0002`, **bus 1**, 8 bytes;
 - HUD `0x412`, bus 0, 8 bytes;
-- cancel `0x101`, bus 2, 8 bytes.
+- cancel `0x101`, bus 2, 8 bytes;
+- alpha-long `0x160`, bus 0, 32-byte CAN-FD.
 
 The same network carries 32-byte FD `0x08A`. Route 45 directly showed that
 upstream's sticky bus-global `canfd_auto` promoted native-Classical replacement
 frames to FD. C7 is also an 8-byte Classical PDU and must not inherit that
-format. The post-repin lateral-only candidate therefore disables auto promotion
-on buses 0 and 2 after the F33 Toyota safety parameter is known. In the intended
-stock-harness combined topology, the short Classical C7 sideband moves to bus
-1, so the same target-scoped exception moves with it; buses 0 and 2 must retain
-FD transport for the 32-byte `0x160` replacement. Neither form alters
-fingerprinting or unrelated cars.
+format. The old post-repin lateral-only candidate disabled auto promotion on the buses
+used by that experiment. In the intended stock-harness topology, the short
+Classical C7 sideband is on bus 1, so the target-scoped exception is now only
+there; buses 0 and 2 retain normal mixed/FD transport for the 32-byte `0x160`
+path and forwarded vehicle traffic. Neither form alters fingerprinting or
+unrelated cars.
 
 Adding `CanData.fd` remains useful for exact logging and arbitrary short FD
 host TX, but the demonstrated controller sends no short FD PDU. It is a
@@ -147,49 +146,54 @@ The reusable architecture is the normal openpilot division of ownership. The
 C7 wire contract and EPS payload remain exact-F33 facts until transferred by
 new evidence.
 
-## First cleanup checkpoints
+## Current cleanup checkpoint
 
-- `opendbc@3c79d935` is the current upstream-shaped stock-harness port. It
-  retains the GTS resolver, adds the exact firmware identity and bus-1 state
-  parsing, emits only C7, and selects exact-F33 Toyota safety.
-- `openpilot@de6b14669` contains the sole openpilot runtime exception: disable
-  sticky FD auto-promotion on exact-F33 bus 1. Integration commit
-  `openpilot@dbdf44a23` records the matching opendbc and Panda revisions.
-- `Panda@5bc72a28..c89d14a6` contains the three generic transport corrections:
-  preserve forwarded FDF, preserve forwarded frame format, and validate host
-  checksums before clearing queue-private flags.
+The current upstream-shaped stock-harness port has moved beyond the original
+`3c79d935` checkpoint. It now includes target-native Camry state, exact-EPS
+fingerprinting, C7 bus-1 lateral control, normal Toyota HUD/cancel ownership,
+alpha `0x160` longitudinal replacement, and target-specific Panda limits. The
+latest focused Camry+Corolla TSS3 suite passes 27/27 and the full Toyota unit
+set passes 45 tests / 205 subtests at the September 15 checkpoint.
 
-These stock-topology revisions are test-verified but not yet vehicle-verified
-replacements for the successful post-repin stack. Panda's focused USB protocol
-suite passes (8 tests / 199 subtests). The opendbc targeted Toyota/parser/safety
-set passes 254 tests (120 skipped / 200 subtests), its broader interface and
-fingerprinting set passes 270 tests (141 skipped / 7,889 subtests), and its DBC
-parser set passes 20 tests (194 subtests). The openpilot pandad target is not
-defined by the Darwin SCons build, so that repository has no local compile
-result from this host.
+The parent openpilot tree still has only the target-scoped transport exception
+needed to keep short C7 Classical on exact-F33 bus 1. Panda retains the generic
+forwarded-frame format corrections. The stock-topology software is therefore
+reviewable as ordinary openpilot architecture; what remains is vehicle
+qualification, not another control stack.
 
-## Build-up order
+Deployment tooling now defaults to the byte-exact continuous helper from the
+September 10 successful steering handoff. The car kit also contains a bounded
+`f33-secoc recover-drcc` operation: after volatile signer bootstrap it preserves
+DTC state, runs the exact physical-SID14 plus functional-Mode04 clear already
+proved on the maintainer car, verifies no known responder retains
+`status&0xAF`, and reads FRC DIDs `1903/1905/1906`. This is the explicit test of
+whether stock DRCC can be restored in the same ignition cycle **without**
+powering off the EPS and losing the RAM signer. The clear transport is proven;
+DRCC restoration after signer bootstrap is not yet live-qualified.
 
-1. Reconstruct the F33 opendbc port on current upstream with only the state,
-   interface, C7 controller, DBC, fingerprint, and F33 safety contract.
-2. Replay the retained route and prove expected CarState, C7 cadence, inactive
-   sequence behavior, safety acceptance/rejection, and no controller-side
-   permission layer.
-3. With the normal Toyota-B pin mapping restored, validate the implemented C7
-   controller, state parsers, signer tooling, and safety entry on unsplit bus
-   1. Prove parked that EPS/C7 remains reachable and that Toyota Bus-1 is split
-   across CAN0/CAN2.
-4. Promote the existing offline `0x160` builder into the normal opendbc
-   controller/safety path only after binding its request semantics to the
-   target. Use the retained Corolla architecture reference as an implementation
-   comparison, and obtain/reduce its exact source revision and rlog when they are
-   available. Emit the replacement on bus 0 and block the stock bus-2 copy
-   through normal relay ownership. This path is independent of the
-   SecOC-protected B6 lateral carrier and must remain separately reviewable.
-5. Run a parked/bench transport check, then a controlled road A/B using the
-   upstream Panda timing before deleting the matched-timing override from the
-   deployment stack.
-6. Add native cancellation and HUD replacement as separate reviewable layers.
+## Remaining qualification order
+
+1. On the replacement rack with **stock Toyota-B pinning and stock CodeFlash**,
+   run the v16 car-kit volatile lifecycle: NRTD `install` -> direct READY
+   `load-arm`. Require exact helper readback and native-trailer equality.
+2. Run `f33-secoc recover-drcc`. A positive result must show zero post-clear
+   `status&0xAF` records and FRC cruise permission restored while the resident
+   remains alive. This closes the only known conflict between volatile signer
+   bootstrap and release-default stock ACC.
+3. Parked, verify C7 reaches the EPS on stock bus 1 and that sequence zero is a
+   native-B6 no-op. Then perform a short controlled lateral A/B and compare it
+   with the retained September 10 route.
+4. Validate the current HUD/cancel replacement on the stock harness, including
+   openpilot `steerRequired` presentation and stock-cruise cancellation.
+5. Test alpha longitudinal separately: first parked/template ownership, then a
+   bounded road acceleration/deceleration A/B. Require downstream vehicle
+   response, source suppression, gas/brake disengagement behavior, and PCS/AEB
+   coexistence. Keep release-default stock ACC until these are closed.
+6. Capture one delayed (>5 s) stop/restart cycle. Do not set `autoResumeSng`
+   unless openpilot can release Toyota's long-stop hold without driver input.
+7. Keep `steerFaultTemporary`/`steerFaultPermanent` unmapped until a controlled
+   asserted/recovery capture distinguishes the exact F33 native states; do not
+   invent policy from static DTC classes.
 
 The direct-Panda lease and installer remain deployment tooling until the signer
 load can be expressed without modifying openpilot runtime. They must not become

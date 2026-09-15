@@ -27,12 +27,25 @@ delta was uncommitted.
 
 A corrected two-stage ingress observer then established a bounded negative for the older
 direct-B6 sender: 121/121 Panda-returned ID63 markers produced zero ID63 observations at the
-live post-CanIf/pre-SecOC boundary while D7 and native B6 advanced. Therefore the current
-native-integration problem is upstream topology/source ownership, not merely EPS SecOC
-acceptance. The leading hypothesis is `0x08A` request -> Brake/Skid/CGW-domain arbitration ->
-`0x081` result plus independently authenticated B6 on a non-observed path to F33. The final
-transform remains unproven; see live-baseline §70.5 and
-`targets/camry-2026/raw-20260910/f33-ingress/session-summary.json`.
+live post-CanIf/pre-SecOC boundary while D7 and native B6 advanced. That result remains useful
+as a negative for **host-transmitted B6**, but it no longer describes the active integration:
+the September 10 C7/RAM-resident path edits an already-native B6 inside the EPS and physically
+steered the car. The old direct-B6/source-transform investigation is retained below as
+historical localization evidence, not as the current blocker.
+
+**2026-09-15 current-state update.** The production-shaped candidate is now the stock-Toyota-B
+port summarized in [the capability matrix](camry-2026-capability-matrix.md) and
+[`toyota-tss3-minimal-runtime.md`](../architecture/toyota-tss3-minimal-runtime.md): C7 on
+unsplit Panda bus 1, exact-EPS fingerprinting, normal `CarState`/`CarController` ownership,
+HUD `0x412` replacement, stock-shaped `0x101` cancel, release-default stock ACC, and an alpha
+native-long `0x160` replacement path. The intended lateral runtime uses the byte-exact
+continuous RAM helper from the successful steering handoff and generates a **native-valid**
+B6 FV4+CMAC28 trailer; the historical stage-5 receiver bypass and persistent signer are not
+runtime requirements. Any section below that calls the current sender zero-MAC, places current
+C7 on bus 0, calls lateral receiver-unqualified, or says native-long integration is absent is a
+dated Sep-7/Sep-10 checkpoint. The remaining vehicle questions are stock-topology/stock-CodeFlash
+revalidation, same-cycle DRCC recovery after volatile signer bootstrap, and alpha-long physical
+qualification.
 
 All three fork trees were clean at the final audit point. Upstream has **no** Toyota TSS3
 platform, no `0x025/0x030/0x08A/0x0B6` Toyota CAN-FD messages, and no

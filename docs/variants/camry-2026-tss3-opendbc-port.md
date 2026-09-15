@@ -13,6 +13,20 @@ the independent TSS3 Corolla longitudinal proof of concept are summarized in
 Earlier passive/direct-B6 checkpoints below remain useful history, but they do
 not supersede that working result.
 
+**2026-09-15 runtime checkpoint:** the current production-shaped candidate no
+longer host-transmits B6 or depends on a dummy/zero MAC. `CarController` sends a
+short Classical C7 sideband on **stock Toyota-B Panda bus 1**; the volatile
+continuous resident edits an already-native B6 inside the EPS and obtains a
+native-valid FV4+CMAC28 through the EPS ICU-S command-5 path. Sequence zero
+returns ownership to untouched native B6. Release mode retains stock ACC;
+alpha-long owns camera `0x160` through the ordinary bus2->bus0 relay replacement.
+HUD `0x412` and stock-shaped cancel `0x101` are integrated through normal Toyota
+controller/safety ownership. The intended runtime requires **no persistent EPS
+CodeFlash patch**; the stage-5 receiver bypass and persistent signer below are
+historical development artifacts. Current qualification status and exact next
+vehicle tests are maintained in [camry-2026-capability-matrix.md](camry-2026-capability-matrix.md)
+and [the minimal runtime contract](../architecture/toyota-tss3-minimal-runtime.md).
+
 **Evidence boundary:** this report closes the exact-F33 generated-COM transmit
 geometry, the software integration, and the development B6 sender/safety envelope.
 The September 10 route establishes steering for the exact C7/RAM configuration;
@@ -21,18 +35,17 @@ universal TSS3 interface. CORR-129/VAR-081 identify **73.303384 s of retained `0
 
 The integration and stock-architecture questions are deliberately separate.
 OQ-054 still tracks the private FRC request handoff and exact Bus-4 `0x08A`
-signer. That attribution is **not** a prerequisite for exercising B6 as an
-independent external EPS angle ingress. Exact-F33 Gate-2 compare neutralization
-is homologous to the field-proven Sienna result bypass, but the cumulative F33
-stage-5 patch plus the **historical zero-MAC** B6 sender did not update the application
-snapshot. Static review now closes the configured Corolla/Camry B6 path and the downstream
-F33 ID11/health selector; it does not claim live receiver/application admission. Current
-opendbc `f207c273b645` instead emits the normal Toyota FV4+MAC28 SecOC envelope with a fixed
-all-zero dummy AES-128 key. VAR-147/CORR-178 prove that this wrong-key CMAC and the historical
-zero tag are acceptance-equivalent under cumulative stage 5, so the envelope change is
-wire-grammar hygiene rather than an admission fix. The current `kai-openpilot` fork carries
-the exact-F181 B6 development path through the ordinary Toyota safety model (§3.4); upstream
-comma opendbc has no Camry TSS3 platform at all.
+signer. That attribution is **not** a prerequisite for the demonstrated C7 ->
+native-B6 ingress. Exact-F33 Gate-2 compare neutralization and the historical
+zero-MAC/wrong-key host-B6 senders remain useful failure-localization evidence,
+but they are not the current sender. VAR-155/156 and the September 10 road handoff
+supersede that architecture: local selector-4 command-5 signing reproduces the
+native trailer and continuously re-signs the resident's B3..B9 replacement before
+the untouched SecOC consumer. The current `kai-openpilot`/opendbc path therefore
+carries only C7 through ordinary Toyota safety; B6 construction/freshness/MAC
+ownership stays inside the EPS. Upstream comma opendbc still has no Camry TSS3
+platform, so the comparison target remains upstream architecture rather than a
+preexisting wire implementation.
 
 **Current execution boundary:** VAR-155 proves the live native profile-2 B6 boundary and
 byte-exact local slot-4 signing. VAR-156 then deliberately installed the preserved
@@ -51,17 +64,17 @@ that the exact development path can steer. VAR-148/CORR-179 close the ID11 compo
 semantics statically: accepted B6 is co-modulated inside the ordinary EPS sum, not an
 exclusive replacement mode.
 
-**Physical routing decision (CORR-139):** the present Toyota-B repin is correct.
-Current GTS+ places Brake/Skid/SAS/EPS together on Toyota Bus 4; exact F33 has one
-application CAN controller carrying both its B6 rule and diagnostic rules; the
-relay-correct capture observes exact-F33 `0x030` and EPS UDS on the repinned
-steering family. Therefore the candidate external-control route is `0x0B6`,
-DLC 32, on **Panda bus 0 across the current CAN0/CAN2 relay pair**. Panda bus 1
-remains the native FRC/camera-radar plane. Do not send `0x08A` to EPS, do not infer
-an `0x08A -> B6` transform, and do not repin again in search of an EBU-private EPS
-stub: the telemetry/carrier absences in VAR-099 are not a routing discriminator.
-Direct host-B6 transmission remains unqualified for production; the demonstrated C7/RAM
-development adapter is documented separately and must remain exact-F33-specific.
+**Current physical routing decision (supersedes the temporary CORR-139 repin as
+a deployment topology):** the September steering proof used a development
+CAN0/CAN1 repin and therefore carried C7 on Panda bus 0. The Sep-11 integration
+cleanup returned to **stock Toyota-B pinning**. Toyota Bus-1 / camera `0x160` is
+again the normal CAN0/CAN2 relay pair (stock source bus2, openpilot replacement
+bus0), while Toyota Bus-4 / EPS-Brake is the unsplit Panda **bus 1**. Exact-F33
+EPS UDS and C7 therefore use bus1 with ELM327 param1 for direct diagnostics.
+The resident never host-transmits B6; it replaces/re-signs the EPS's internally
+native B6. Do not send `0x08A` to EPS and do not infer an `0x08A -> B6` transform.
+The stock topology is software/test complete but still needs the parked and short
+road revalidation called out in the capability matrix.
 
 Working session notes for the GTS+ vehicle-type → install-set → family-`.ddb` → GetSupport funnel (not a claim ledger): [../history/2026-08/CAMRY_GTS_LATERAL_FUNNEL_2026-08-29.md](../history/2026-08/CAMRY_GTS_LATERAL_FUNNEL_2026-08-29.md).
 

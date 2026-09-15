@@ -146,16 +146,17 @@ Its source-level difference is one sequence-equality instruction: the continuous
 helper replaces `be .L_return` with `nop`. Because the branch encodes to four bytes
 and the NOP to two, the continuous helper is 588 rather than 590 bytes.
 
-The required volatile lifecycle explicitly selected the retained continuous
+The road-proven volatile lifecycle explicitly selected the retained continuous
 payload, helper, and matching metadata through `F33_INLINE_PAYLOAD_PATH`,
-`F33_INLINE_HELPER_PATH`, and `F33_INLINE_META_PATH`; launcher defaults may select
-the one-shot artifact. It then used full EPS OFF, NRTD/Park/stationary
-`./f33-secoc install`, direct NRTD-to-READY without OFF, then
-`./f33-secoc load-arm`. The last step required byte-exact helper readback and
-equality between one untouched Toyota B6 trailer and the locally generated
-command-5 trailer. Panda ownership was then returned to exactly one normal
-openpilot manager/pandad tree. Full EPS OFF removed the resident and required
-repeating the install/arm sequence.
+`F33_INLINE_HELPER_PATH`, and `F33_INLINE_META_PATH`. As of the September 15 car-kit
+v16 cleanup, those exact continuous artifacts are now the **launcher defaults**;
+the distinct one-shot helper is retained only as development prior art. The
+lifecycle is full EPS OFF, NRTD/Park/stationary `./f33-secoc install`, direct
+NRTD-to-READY without OFF, then `./f33-secoc load-arm`. The last step requires
+byte-exact helper readback and equality between one untouched Toyota B6 trailer
+and the locally generated command-5 trailer. Panda ownership is then returned to
+exactly one normal openpilot manager/pandad tree. Full EPS OFF removes the
+resident and requires repeating the install/arm sequence.
 
 The retained [session summary](../../targets/camry-2026/raw-20260910/working-steering/summary.json),
 [verbatim runtime artifacts, hashes, and replay procedure](../../targets/camry-2026/raw-20260910/working-steering/runtime/README.md),
@@ -175,10 +176,20 @@ Entering EPS programming recorded historical U0131-87 faults and disabled Toyota
 TSS/DRCC for the demonstrated ignition cycle, so normal non-adaptive cruise was
 used for engagement. On this exact car, the already-proven parked/READY DTC-clear
 sequence can remove that dash-warning state without cycling EPS power: physical
-UDS `14 FF FF FF` on `0x7A1`, `0x7B3`, `0x7C4`, `0x7D0`, `0x792`, and `0x7A2`,
-then functional OBD Mode 04 on `0x7DF`. Exact-F33 SID 14 is DTC-clear processing,
-not ECU reset or flash programming, so it does not inherently remove the RAM
-signer. Same-cycle DRCC restoration remains unproven.
+UDS `14 FF FF FF` on the six controllers that accept it, then functional OBD
+Mode 04 on `0x7DF` for the five legislated P5 responders. Exact-F33 SID 14 is
+DTC-clear processing, not ECU reset or flash programming, so it does not
+inherently remove the RAM signer.
+
+Car-kit v16 packages this as `./f33-secoc recover-drcc`. The command first
+preserves SID19 state from all 11 known responders, dynamically binds each
+physical address to the responding stock-Toyota-B diagnostic bus, executes the
+proved clear transports, requires zero remaining `status&0xAF` records, then
+reads FRC DIDs `0x1903`, `0x1905`, and `0x1906`. Its positive verdict requires
+FRC cruise permission and no ACC-not-available indication. The clear transport
+is already live-proven; **same-cycle DRCC restoration after volatile signer
+bootstrap remains the unperformed acceptance test**, now reduced to this one
+bounded command rather than another reverse-engineering task.
 
 ## 3. Corolla TSS3 longitudinal proof of concept
 
