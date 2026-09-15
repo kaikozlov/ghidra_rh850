@@ -229,23 +229,37 @@ def _section_corolla_hf_nonsteering_engagement_state():
     check('public route corroborates Ready=1', ready['route_corroboration']['public_2023'] == {'frames': 59, 'values': [1], 'payloads': ['8000004500000000']})
     check('Span route corroborates Ready=1', ready['route_corroboration']['span_2025'] == {'frames': 60, 'values': [1], 'payloads': ['86001a0000000000']})
     check('Ready=0 remains bounded', all((x in ready['boundary'] for x in ('value 0', 'uncaptured', 'incoming', 'not proof'))))
-    print('\n== 0x127 gear carrier ==')
+    print('\n== generation-native gear state ==')
     gear = art['gear']
-    check('exact H retains 0x127/8 as Rx PDU20', gear['can_id'] == '0x127' and gear['length'] == 8 and (gear['h_rx_descriptor_index'] == 20))
-    check('exact H generated signal ownership is 123..132', gear['h_signal_ids'] == list(range(123, 133)))
-    check('exact H scalar extraction positions are regenerated', gear['h_scalar_extractions'] == [{'signal_id': 123, 'wire': 'B0[7:2]', 'length': 6}, {'signal_id': 125, 'wire': 'B1[3]', 'length': 1}, {'signal_id': 129, 'wire': 'B3/B4 signed11 domain', 'length': 11}])
-    check('legacy B5 gear nibble is not statically consumed by exact H scalar unpacker', 'does not consume' in gear['h_static_boundary'] and gear['legacy_gear_field']['wire'] == 'B5[3:0]')
-    check('Span observes raw3 with prior-art D compatibility only', gear['span_dynamic']['frames'] == gear['span_dynamic']['checksum_valid'] == 3662 and gear['span_dynamic']['raw_values'] == [3] and (gear['span_dynamic']['prior_art_decoded_values'] == ['D']) and ('MOCK' in gear['span_dynamic']['decode_basis']))
-    check('gear target-native validation remains bounded', all((x in gear['production_boundary'] for x in ('no independent gear-state oracle', 'target-native D semantics', 'P/R/N/B', 'live transitions'))))
-    print('\n== retained cruise prior art and false-positive rejection ==')
+    h127 = gear['exact_h_0x127']
+    check('exact H retains 0x127/8 as Rx PDU20', h127['can_id'] == '0x127' and h127['length'] == 8 and h127['h_rx_descriptor_index'] == 20)
+    check('exact H generated signal ownership is 123..132', h127['h_signal_ids'] == list(range(123, 133)))
+    check('exact H scalar extraction positions are regenerated', h127['h_scalar_extractions'] == [{'signal_id': 123, 'wire': 'B0[7:2]', 'length': 6}, {'signal_id': 125, 'wire': 'B1[3]', 'length': 1}, {'signal_id': 129, 'wire': 'B3/B4 signed11 domain', 'length': 11}])
+    check('EPS static boundary does not overclaim 0x127 gear nibble', 'does not consume' in h127['static_boundary'] and h127['legacy_gear_field']['wire'] == 'B5[3:0]')
+    span127 = gear['span_0x127']
+    check('Span 0x127 raw3 is independently D-corroborated', span127['frames'] == span127['checksum_valid'] == 3662 and span127['raw_values'] == [3] and span127['decoded_values'] == ['D'] and all(x in span127['decode_basis'] for x in ('0x3BF', '0x10', 'D')))
+    g3 = gear['generation_native_0x3bf']
+    check('public route directly closes 0x3BF P/R/D', g3['public_2023']['direct_observed_labels'] == {'0x10': 'D', '0x40': 'R', '0x80': 'P'} and [x['raw'] for x in g3['public_2023']['transitions']] == [128, 64, 16])
+    check('Span repeats 0x3BF D on moving 2025 Corolla', g3['span_2025']['raw_values'] == [16] and g3['span_2025']['direct_decoded_values'] == ['D'])
+    check('0x3BF N boundary is one-hot plus GTS corroboration', g3['enum'] == {'0x10': 'D', '0x20': 'N', '0x40': 'R', '0x80': 'P'} and all(x in g3['boundary'] for x in ('N=0x20', 'remaining one-hot', 'GTS+')))
+    check('0x2A1 independently corroborates route P/R/D transitions', gear['corroborating_0x2a1']['direct_observed_labels'] == {'0x01': 'P', '0x02': 'R', '0x04': 'D'} and [x['raw'] for x in gear['corroborating_0x2a1']['transitions']] == [1, 2, 4])
+    check('GTS+ P5 hybrid preserves P/R/N/D/B ordering', gear['gts_p5_hybrid_ordering'] == {'source': 'HV_P5.ddb', 'name': 'Shift Position', 'pattern_display': {'0': 'P', '2': 'R', '4': 'N', '6': 'D', '8': 'B'}})
+    check('base gear discovery is closed', gear['classification'].startswith('core CarState gear semantics closed') and 'no longer needs a gear-discovery experiment' in gear['production_boundary'])
+
+    print('\n== generation-native cruise state ==')
     cruise = art['cruise']
     c176 = cruise['retained_wire_prior_art']['0x176']
-    check('0x176 survives both captures with valid checksum', c176['public_2023_frames'] == 1855 and c176['span_2025_frames'] == 1890 and (c176['checksums_all_valid'] is True))
-    check('old 0x176 cruise-active/state fields stay inactive', c176['legacy_cruise_active_values'] == [False] and c176['legacy_cruise_state_values'] == [0])
-    check('0x176 B0[3] is not justified as cruise replacement', c176['b0_bit3_values'] == [0, 1] and 'accelerator-release' in c176['b0_bit3_interpretation'] and ('does not disprove every possible cruise-related meaning' in c176['b0_bit3_interpretation']) and (c176['public_2023_b0_bit3_context']['0']['gas_positive_fraction'] > 0.99) and (c176['public_2023_b0_bit3_context']['1']['gas_positive_fraction'] == 0.0) and (c176['span_2025_b0_bit3_context']['0']['gas_positive_fraction'] > 0.97) and (c176['span_2025_b0_bit3_context']['1']['gas_positive_fraction'] < 0.01))
+    check('0x176 survives both captures with valid checksum', c176['public_2023_frames'] == 1855 and c176['span_2025_frames'] == 1890 and c176['checksums_all_valid'] is True)
+    check('old 0x176 active/state is explicitly rejected', c176['legacy_cruise_active_values'] == [False] and c176['legacy_cruise_state_values'] == [0] and 'Rejected' in c176['b0_bit3_interpretation'])
     c24d = cruise['retained_wire_prior_art']['0x24D']
-    check('0x24D survives but old switch fields remain inactive', c24d['public_2023_frames'] == 59 and c24d['span_2025_frames'] == 60 and all((v == [0] for v in c24d['legacy_button_fields'].values())))
+    check('0x24D survives but old switch fields remain inactive', c24d['public_2023_frames'] == 59 and c24d['span_2025_frames'] == 60 and all(v == [0] for v in c24d['legacy_button_fields'].values()))
     check('old cruise replacement IDs absent in both captures', cruise['legacy_ids_absent_in_both_captures'] == ['0x177', '0x1A2', '0x1D3', '0x399'])
+    native = cruise['native_wire_mapping']
+    check('0x08A native available/enabled mapping is closed', 'ACC_STATE' in native['available'] and 'B22 bit0x10' in native['enabled'] and native['span_0x08a']['acc_engaged_frames'] == 37 and native['span_0x08a']['acc_disengaged_frames'] == 2363)
+    check('standstill and set speed carry retained live-drive boundary', all(x in native['standstill'] for x in ('bit0x20', '0x67', 'hold')) and all(x in native['set_speed'] for x in ('0x251 B2', 'mph', '19-mph')))
+    check('core cruise fields are closed while optional fields remain open', cruise['wire_mapping_status']['cruise_available'].startswith('closed') and cruise['wire_mapping_status']['cruise_enabled'].startswith('closed') and cruise['wire_mapping_status']['cruise_standstill'].startswith('closed') and cruise['wire_mapping_status']['set_speed'].startswith('closed') and cruise['wire_mapping_status']['follow_distance'].startswith('optional/open'))
+    check('retained contributor result is bounded to longitudinal', all(x in cruise['retained_contributor_boundary'] for x in ('longitudinal', 'VALIDATED on car', 'lateral remained IN PROGRESS')))
+
     print('\n== Toyota P5 engagement diagnostic oracles ==')
     rows = {x['name']: x for x in cruise['techstream_p5_frc_oracles']}
     for name, data_id, bits in (('Cruise Control Permission Flag', '0x1905', [8, 8]), ('Main Switch Recognition Flag', '0x1906', [8, 8]), ('ACC Not Available Icon Lighting Request Flag', '0x1906', [40, 40]), ('ACC Control in Operation Flag', '0x1914', [8, 8]), ('Set Vehicle Interval Time', '0x1912', [0, 7]), ('Current Vehicle Speed', '0x1901', [0, 31]), ('Memory Vehicle Speed', '0x1901', [32, 63])):
@@ -254,16 +268,17 @@ def _section_corolla_hf_nonsteering_engagement_state():
     check('ACC-operation dictionary exact', rows['ACC Control in Operation Flag']['pattern_values'] == {'0': 'Cruise Control Not in Operation', '1': 'Cruise Control in Operation'})
     check('set-speed oracle is physical km/h', rows['Memory Vehicle Speed']['conversion']['unit'] == 'km/h' and rows['Memory Vehicle Speed']['conversion']['mul'] == rows['Memory Vehicle Speed']['conversion']['div'] == 1)
     check('follow-distance dictionary exact', rows['Set Vehicle Interval Time']['pattern_values'] == {'1': 'Set Vehicle Interval Time4', '2': 'Set Vehicle Interval Time3', '3': 'Set Vehicle Interval Time2', '4': 'Set Vehicle Interval Time1'})
-    check('diagnostic semantics remain wire-unmapped', cruise['classification'] == 'diagnostic semantics narrowed; live CAN mapping not closed' and 'no CAN field may be promoted' in cruise['boundary'])
+    check('diagnostic transport remains a direct optional RDBI oracle', all(x in cruise['diagnostic_transport_boundary'] for x in ('ordinary SID 0x22 ReadDataByIdentifier', 'optional semantic oracles', 'not prerequisites')))
+
     print('\n== implementation boundary ==')
     safe = art['implementation_consequence']['safe_now']
     unsafe = art['implementation_consequence']['not_safe_yet']
-    check('Ready input is safe for inspection', any(('0x51E B0[7]' in x for x in safe)))
-    check('production cruise remains neutral', any(('cruiseState.available/enabled/set-speed neutral' in x for x in safe)))
-    check('B0[3] promotion explicitly prohibited', any(('0x176 B0[3]' in x for x in unsafe)))
-    check('P/R/N/B promotion explicitly prohibited', any(('P/R/N/B' in x for x in unsafe)))
-    check('capture recipe is concrete and directly pollable', all((any((data_id in x for x in cruise['capture_recipe'])) for data_id in ('0x1905', '0x1906', '0x1914', '0x1901', '0x1912'))) and all(('UDS 22' in x and 'require 62' in x for x in cruise['capture_recipe'])))
-    check('P5 selected Data IDs are proved as direct UDS RDBI', all((x in cruise['diagnostic_transport_boundary'] for x in ('ordinary SID 0x22 ReadDataByIdentifier', 'matching 0x62', 'outer DiagnosticSessionControl', 'not statically proved'))))
+    check('Ready input is safe for inspection', any('0x51E B0[7]' in x for x in safe))
+    check('gear carriers are safe for production CarState', any('0x127 GEAR_PACKET_HYBRID' in x and '0x3BF' in x for x in safe))
+    check('native cruise available/enabled/standstill is safe', any('0x08A ACC_STATE/B22' in x and 'standstill' in x for x in safe))
+    check('retained set speed is safe with native floor', any('0x251 B2' in x and '19-mph' in x for x in safe))
+    check('B0[3] promotion explicitly prohibited', any('0x176 B0[3]' in x for x in unsafe))
+    check('fault-policy overreach remains prohibited', any('temporary/permanent' in x and 'fault' in x for x in unsafe))
 
 _section_corolla_hf_nonsteering_engagement_state()
 print()

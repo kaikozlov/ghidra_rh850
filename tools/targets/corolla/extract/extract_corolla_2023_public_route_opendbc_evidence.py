@@ -40,6 +40,7 @@ STATE_IDS = {
     0x1A2: "CRUISE_RELATED",
     0x1D3: "PCM_CRUISE_2",
     0x24D: "PCM_CRUISE_4 / cruise-switch SecOC prior art",
+    0x2A1: "TSS3 Corolla gear-position corroboration",
     0x260: "STEER_TORQUE_SENSOR",
     0x262: "EPS_STATUS",
     0x283: "PRE_COLLISION",
@@ -50,6 +51,7 @@ STATE_IDS = {
     0x399: "PCM_CRUISE_SM",
     0x3B7: "ESP_CONTROL",
     0x3BC: "GEAR_PACKET",
+    0x3BF: "TSS3 Corolla gear packet",
     0x3F6: "BSM",
     0x411: "PCS_HUD",
     0x412: "LKAS_HUD",
@@ -201,6 +203,27 @@ def main() -> int:
     gas = frames.get((1, 0x116, 8), [])
     gas_user = [be_raw(dat, 15, 8) * 0.005 for _, dat in gas]
 
+    gear_3bf = frames.get((1, 0x3BF, 8), [])
+    gear_2a1 = frames.get((1, 0x2A1, 8), [])
+
+    def value_transitions(rows: list[tuple[int, bytes]], byte_index: int) -> list[dict[str, Any]]:
+        out: list[dict[str, Any]] = []
+        last: int | None = None
+        for t, dat in rows:
+            value = dat[byte_index]
+            if value == last:
+                continue
+            out.append({
+                "elapsed_s": ((t - first_t) * 1e-9) if first_t is not None else None,
+                "raw": value,
+                "payload": dat.hex(),
+            })
+            last = value
+        return out
+
+    gear_3bf_transitions = value_transitions(gear_3bf, 0)
+    gear_2a1_transitions = value_transitions(gear_2a1, 4)
+
     def preceding(rows: list[tuple[int, bytes]], t: int) -> bytes | None:
         if not rows:
             return None
@@ -292,6 +315,22 @@ def main() -> int:
             "0x116": {
                 "wire": "classic 8-byte GAS_PEDAL with Toyota classic SecOC trailer",
                 "gas_pedal_user": stats(gas_user),
+            },
+            "0x3BF": {
+                "wire": "classic 8-byte generation-native Corolla gear packet; byte 0 is one-hot",
+                "frame_count": len(gear_3bf),
+                "raw_values": unique([dat[0] for _, dat in gear_3bf]),
+                "transitions": gear_3bf_transitions,
+                "direct_observed_labels": {"0x80": "P", "0x40": "R", "0x10": "D"},
+                "boundary": "The route itself transitions P -> R -> D in that order while byte 0 moves 0x80 -> 0x40 -> 0x10. N is not exercised in this segment; 0x20 is the remaining one-hot value and is corroborated separately by Toyota GTS+ P5/P6 P/R/N/D ordering.",
+            },
+            "0x2A1": {
+                "wire": "classic 8-byte Corolla gear corroboration packet; byte 4 is one-hot",
+                "frame_count": len(gear_2a1),
+                "raw_values": unique([dat[4] for _, dat in gear_2a1]),
+                "transitions": gear_2a1_transitions,
+                "direct_observed_labels": {"0x01": "P", "0x02": "R", "0x04": "D"},
+                "boundary": "This independent route carrier changes on the same R and D transitions as 0x3BF. It is retained as corroboration rather than the production CarState source.",
             },
             "0x176": {
                 "wire": "classic 8-byte PCM_CRUISE with Toyota additive checksum",

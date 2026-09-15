@@ -7,6 +7,7 @@ import hashlib
 import json
 import re
 import struct
+import zipfile
 from pathlib import Path
 from tools.targets.corolla.support.corolla_h_constants import CODEFLASH as H_CODEFLASH
 
@@ -21,6 +22,10 @@ TECH_CRUISE_TRANSPORT = REPO / "data/generated/techstream_v18/tss3_cruise_live_t
 PUBLIC = REPO / "data/generated/corolla_2023_public_route_opendbc_evidence.json"
 SPAN = REPO / "data/generated/corolla_2025_span_discord_rlog_opendbc_evidence.json"
 EQ = REPO / "data/generated/corolla_8965F1208000_vs_8965H1202000_codeflash_equivalence.json"
+ALBINO_ARCH = REPO / "community/albinoelephant/albinoelephant_discord_PORT_ARCHITECTURE.md"
+ALBINO_PORT = REPO / "community/albinoelephant/Corolla_Fingerprint_v1.zip"
+ALBINO_DBC_MEMBER = r"Corolla_Fingerprint\port\files\opendbc_repo\opendbc\dbc\toyota_corolla_tss3_pt.dbc"
+GTS_REGISTRY = REPO / "data/generated/gtsplus_2026/toyota_diag_registry_camry_2026.json"
 OUT = REPO / "data/generated/corolla_hf_nonsteering_engagement_state.json"
 
 
@@ -47,6 +52,19 @@ def route_inventory(route: dict) -> dict[str, dict]:
     return {x["can_id"]: x for x in rows}
 
 
+def find_gts_signal(registry: dict, source: str, name: str) -> dict:
+    stack = [registry]
+    while stack:
+        item = stack.pop()
+        if isinstance(item, dict):
+            if item.get("source") == source and item.get("name") == name and "signal_info" in item:
+                return item
+            stack.extend(item.values())
+        elif isinstance(item, list):
+            stack.extend(item)
+    raise ValueError(f"missing GTS+ signal {source}:{name}")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--out", type=Path, default=OUT)
@@ -62,6 +80,27 @@ def main() -> int:
     public = load(PUBLIC)
     span = load(SPAN)
     eq = load(EQ)
+    albino_arch = ALBINO_ARCH.read_text()
+    with zipfile.ZipFile(ALBINO_PORT) as zf:
+        albino_dbc = zf.read(ALBINO_DBC_MEMBER).decode("utf-8", "replace")
+    gts_registry = load(GTS_REGISTRY)
+    gts_hv_gear = find_gts_signal(gts_registry, "HV_P5.ddb", "Shift Position")
+    if gts_hv_gear["signal_info"]["pattern_display"] != {"0": "P", "2": "R", "4": "N", "6": "D", "8": "B"}:
+        raise ValueError("GTS+ P5 hybrid shift-position semantics drift")
+    for marker in (
+        "Longitudinal (follow, speed, stop-and-go to 0 + hold, resume): VALIDATED on car",
+        "acc_main_on = msg->data[7] != 0U",
+        "Lateral: IN PROGRESS",
+    ):
+        if marker not in albino_arch:
+            raise ValueError(f"Albino retained architecture drift: {marker}")
+    for marker in (
+        'CM_ SG_ 138 ACC_STATE "byte 7. DECODED FROM REAL DRIVES',
+        'CM_ SG_ 138 ACC_STANDSTILL "byte 7 mask 0x20.',
+        'CM_ SG_ 593 SET_SPEED "byte 2, mph, factor 1.0',
+    ):
+        if marker not in albino_dbc:
+            raise ValueError(f"Albino retained live-drive note drift: {marker}")
 
     if len(image) != 0x100000 or sha(image) != eng["image"]["sha256"]:
         raise ValueError("exact-H image/evidence identity drift")
@@ -167,8 +206,20 @@ def main() -> int:
         raise ValueError("0x51E route Ready Status corroboration drift")
 
     gear = span["direct_reuse_evidence"]["0x127"]
+    span_3bf = span["direct_reuse_evidence"]["0x3BF"]
+    public_3bf = public["direct_reuse_evidence"]["0x3BF"]
+    public_2a1 = public["direct_reuse_evidence"]["0x2A1"]
+    span_acc = span["direct_reuse_evidence"]["0x08A_acc"]
+    span_set_speed = span["direct_reuse_evidence"]["0x251"]
     if not (gear["frame_count"] == gear["checksum_valid"] == 3662 and gear["gear_raw_values"] == [3] and gear["prior_art_decoded_values"] == ["D"]):
         raise ValueError("Span 0x127 raw3/prior-art-D evidence drift")
+    if not (span_3bf["raw_values"] == [0x10] and public_3bf["direct_observed_labels"] == {"0x10": "D", "0x40": "R", "0x80": "P"} and
+            [x["raw"] for x in public_3bf["transitions"]] == [0x80, 0x40, 0x10] and
+            [x["raw"] for x in public_2a1["transitions"]] == [1, 2, 4]):
+        raise ValueError("generation-native Corolla gear transition evidence drift")
+    if not (span_acc["acc_engaged_frames"] == 37 and span_acc["acc_disengaged_frames"] == 2363 and
+            span_acc["state_when_engaged"] == [0x5D] and span_acc["state_when_disengaged"] == [0x12]):
+        raise ValueError("Span native 0x08A ACC-state evidence drift")
 
     out = {
         "schema": "corolla-hf-nonsteering-engagement-state-v1",
@@ -199,23 +250,47 @@ def main() -> int:
             "boundary": "Both operational captures show only value 1; value 0 and a Ready transition remain uncaptured. This is an incoming Ready Status field, not proof that an EPS Tx PDU republishes the same boolean.",
         },
         "gear": {
-            "classification": "carrier/layout retained; raw 3 observed and prior-art-compatible with D; target-native enum semantics not independently validated",
-            "can_id": "0x127",
-            "length": 8,
-            "h_rx_descriptor_index": 20,
-            "h_signal_ids": pdu25_signals,
-            "h_scalar_extractions": [
-                {"signal_id": 123, "wire": "B0[7:2]", "length": 6},
-                {"signal_id": 125, "wire": "B1[3]", "length": 1},
-                {"signal_id": 129, "wire": "B3/B4 signed11 domain", "length": 11},
-            ],
-            "legacy_gear_field": {"wire": "B5[3:0]", "prior_art_values": {"0": "P", "1": "R", "2": "N", "3": "D", "4": "B"}},
-            "h_static_boundary": "Exact H retains 0x127 and three scalar fields at the same wire positions as the older SecOC Toyota family, but its generated scalar unpacker does not consume the legacy B5[3:0] gear nibble. The EPS therefore cannot statically validate P/R/N/B enum semantics.",
-            "span_dynamic": {"frames": gear["frame_count"], "checksum_valid": gear["checksum_valid"], "raw_values": gear["gear_raw_values"], "prior_art_decoded_values": gear["prior_art_decoded_values"], "decode_basis": gear["decode_basis"]},
-            "production_boundary": "Raw value 3 is operationally observed and compatible with the retained Toyota prior-art D enum, but the MOCK rlog provides no independent gear-state oracle. Treat target-native D semantics as bounded until an independent gear oracle or explicit transition confirms them; P/R/N/B still require live transitions.",
+            "classification": "core CarState gear semantics closed from generation-native route transitions plus Toyota ordering",
+            "preferred_carriers": {
+                "retained_hybrid_shape": "0x127 GEAR_PACKET_HYBRID",
+                "generation_native_fallback": "0x3BF byte0 one-hot",
+            },
+            "exact_h_0x127": {
+                "can_id": "0x127",
+                "length": 8,
+                "h_rx_descriptor_index": 20,
+                "h_signal_ids": pdu25_signals,
+                "h_scalar_extractions": [
+                    {"signal_id": 123, "wire": "B0[7:2]", "length": 6},
+                    {"signal_id": 125, "wire": "B1[3]", "length": 1},
+                    {"signal_id": 129, "wire": "B3/B4 signed11 domain", "length": 11},
+                ],
+                "legacy_gear_field": {"wire": "B5[3:0]", "prior_art_values": {"0": "P", "1": "R", "2": "N", "3": "D", "4": "B"}},
+                "static_boundary": "Exact H retains 0x127, but its EPS scalar unpacker does not consume the legacy B5[3:0] gear nibble; whole-vehicle route/GTS evidence therefore owns CarState gear semantics.",
+            },
+            "span_0x127": {
+                "frames": gear["frame_count"],
+                "checksum_valid": gear["checksum_valid"],
+                "raw_values": gear["gear_raw_values"],
+                "decoded_values": gear["prior_art_decoded_values"],
+                "decode_basis": gear["decode_basis"],
+            },
+            "generation_native_0x3bf": {
+                "public_2023": public_3bf,
+                "span_2025": span_3bf,
+                "enum": {"0x80": "P", "0x40": "R", "0x20": "N", "0x10": "D"},
+                "boundary": "P/R/D are directly observed on the retained public route and D is independently repeated in Span's moving 2025 segment. N=0x20 is the remaining one-hot value and preserves Toyota's P/R/N/D ordering; it is corroborated by GTS+ rather than a retained N transition.",
+            },
+            "corroborating_0x2a1": public_2a1,
+            "gts_p5_hybrid_ordering": {
+                "source": gts_hv_gear["source"],
+                "name": gts_hv_gear["name"],
+                "pattern_display": gts_hv_gear["signal_info"]["pattern_display"],
+            },
+            "production_boundary": "The base port no longer needs a gear-discovery experiment. Use 0x127 where the retained hybrid carrier is present and 0x3BF otherwise; preserve the stated N/0x127-unexercised-value evidence boundaries rather than inventing new enums.",
         },
         "cruise": {
-            "classification": "diagnostic semantics narrowed; live CAN mapping not closed",
+            "classification": "core generation-native CarState mapping closed; optional detailed ACC UI/follow fields remain open",
             "retained_wire_prior_art": {
                 "0x176": {
                     "public_2023_frames": pub176["frame_count"],
@@ -224,7 +299,7 @@ def main() -> int:
                     "legacy_cruise_active_values": [False],
                     "legacy_cruise_state_values": [0],
                     "b0_bit3_values": [0, 1],
-                    "b0_bit3_interpretation": "Strongly tracks accelerator-release/driver-input context in both captures. Without an independent cruise-state oracle this does not disprove every possible cruise-related meaning, but it is insufficient evidence to promote B0[3] as TSS3 main/active cruise state.",
+                    "b0_bit3_interpretation": "Rejected as the TSS3 active/main source: B0[3] tracks accelerator-release/brake context while the old CRUISE_ACTIVE/STATE fields stay inactive.",
                     "public_2023_b0_bit3_context": pub176["b0_bit3_context"],
                     "span_2025_b0_bit3_context": span176["b0_bit3_context"],
                 },
@@ -232,42 +307,50 @@ def main() -> int:
                     "public_2023_frames": pub24d["frame_count"],
                     "span_2025_frames": span24d["frame_count"],
                     "legacy_button_fields": {k: [0] for k in pub24d["prior_art_button_values"]},
-                    "boundary": "The carrier survives, but neither segment exercises a cruise-switch transition, so old button semantics remain a prior-art lead only.",
+                    "boundary": "The carrier survives, but neither retained segment exercises a cruise-switch transition; old button semantics remain prior-art only.",
                 },
+            },
+            "native_wire_mapping": {
+                "available": "0x08A ACC_STATE (B7) != 0; retained states 0x12 idle and 0x5D engaged, and the validated contributor Panda path uses B7!=0 as acc_main_on",
+                "enabled": "0x08A B22 bit0x10; Span directly observes 2,363 clear / 37 asserted frames with exact 0x12/0x5D state separation",
+                "standstill": "0x08A ACC_STATE B7 bit0x20; contributor live-drive evidence records 0x67 engaged+standstill hold and validates stop-and-go hold/resume",
+                "set_speed": "0x251 B2, mph factor 1.0; contributor live-drive evidence records one-mph +/- changes and a 19-mph floor",
+                "span_0x08a": span_acc,
+                "span_0x251": span_set_speed,
             },
             "legacy_ids_absent_in_both_captures": old_cruise_ids,
             "techstream_p5_frc_oracles": tech_cruise["frc_p5"]["monitors"],
             "openpilot_oracle_mapping": tech_cruise["frc_p5"]["openpilot_oracle_mapping"],
             "supporting_p5_oracles": tech_cruise["supporting_p5"],
             "wire_mapping_status": {
-                "cruise_available": "open: diagnose against Main Switch Recognition Flag and Cruise Control Permission Flag",
-                "cruise_enabled": "open: diagnose against ACC Control in Operation Flag",
-                "set_speed": "open: diagnose against Memory Vehicle Speed; Current Vehicle Speed is an independent reference",
-                "acc_not_available_or_fault": "open: diagnose against ACC Not Available Icon Lighting Request Flag and permission state",
-                "follow_distance": "open: diagnose against Set Vehicle Interval Time",
+                "cruise_available": "closed on generation-native 0x08A ACC_STATE presence",
+                "cruise_enabled": "closed on generation-native 0x08A B22 bit0x10",
+                "cruise_standstill": "closed from contributor live-drive 0x08A B7 bit0x20 / state0x67",
+                "set_speed": "closed from contributor live-drive 0x251 B2 mph",
+                "acc_not_available_or_fault": "optional/open: exact FRC_P5 diagnostic oracle exists, but no base-control CAN mapping is required",
+                "follow_distance": "optional/open: exact FRC_P5 Set Vehicle Interval Time oracle exists",
             },
             "capture_recipe": [
-                "Poll FRC_P5 0x1905 directly with UDS 22 19 05 and require 62 19 05 before decoding Cruise Control Permission Flag while toggling cruise main and engagement.",
-                "Poll FRC_P5 0x1906 directly with UDS 22 19 06 and require 62 19 06 before decoding Main Switch Recognition / Set-Cancel / ACC Not Available synchronized with all-bus CAN.",
-                "Poll FRC_P5 0x1914 directly with UDS 22 19 14 and require 62 19 14 before decoding ACC Control in Operation through disengaged -> engaged -> cancelled transitions.",
-                "Poll FRC_P5 0x1901 directly with UDS 22 19 01 and require 62 19 01 before decoding Current/Memory Vehicle Speed while changing set speed.",
-                "Poll FRC_P5 0x1912 directly with UDS 22 19 12 and require 62 19 12 before decoding Set Vehicle Interval Time while cycling following distance.",
+                "Use FRC_P5 0x1905/0x1906/0x1914 only to extend optional permission/fault UI semantics; core available/enabled no longer requires a diagnostic discovery pass.",
+                "Use FRC_P5 0x1912 only if exposing following-distance state is desired.",
+                "Retain 0x1901 Current/Memory Vehicle Speed as a diagnostic cross-check for 0x251 set speed rather than a required runtime input.",
             ],
-            "diagnostic_transport_boundary": "Current GTS+ proves the selected FRC_P5 0x1901/0x1905/0x1906/0x1912/0x1914 Data IDs are ordinary SID 0x22 ReadDataByIdentifier requests. For an independent capture, require the matching 0x62||DID positive prefix before decoding. A named outer DiagnosticSessionControl or SecurityAccess prerequisite is not statically proved.",
-            "boundary": "Neither retained route supplies an independent cruise-main/engagement oracle. Exact Toyota diagnostics now define what each missing semantic must correlate with, but no CAN field may be promoted to available/enabled/set-speed/fault until a wire-to-oracle transition is observed or statically recovered from the producer firmware.",
+            "diagnostic_transport_boundary": "Current GTS+ proves selected FRC_P5 0x1901/0x1905/0x1906/0x1912/0x1914 Data IDs are ordinary SID 0x22 ReadDataByIdentifier requests. They are now optional semantic oracles, not prerequisites for core CarState.",
+            "retained_contributor_boundary": "The retained contributor architecture explicitly says longitudinal follow/speed/stop-and-go-to-0/hold/resume was VALIDATED on car while lateral remained IN PROGRESS. Only the longitudinal/state observations are used here.",
+            "boundary": "Core openpilot cruise state is closed from retained generation-native CAN plus validated contributor live-drive evidence. Detailed ACC-not-available UI and follow-distance remain optional unmapped state.",
         },
         "implementation_consequence": {
             "safe_now": [
-                "Add/inspect 0x51E B0[7] as target-native Ready Status input.",
-                "The current read-only parser may retain prior-art raw3->D decoding as an observation aid, but do not call D target-native validated; preserve P/R/N/B as unvalidated prior-art enums.",
-                "Keep TSS3 cruiseState.available/enabled/set-speed neutral in production CarState.",
-                "Poll the exact FRC P5 cruise Data-ID oracle set directly with the recovered SID 0x22 requests during the next synchronized capture instead of guessing replacement CAN bits.",
+                "Use 0x51E B0[7] as target-native Ready Status input; keep Ready=0 fault policy dynamic until exercised.",
+                "Use 0x127 GEAR_PACKET_HYBRID on the retained hybrid shape and generation-native 0x3BF one-hot gear otherwise.",
+                "Use 0x08A ACC_STATE/B22 for cruise available/enabled and the contributor-validated B7 bit0x20 standstill state.",
+                "Use retained 0x251 B2 as set speed in mph; preserve the native 19-mph set-speed floor and manual resume from hold.",
+                "Keep optional follow-distance and detailed ACC-unavailable UI unmapped until needed; their FRC_P5 diagnostic oracles are already known.",
             ],
             "not_safe_yet": [
                 "Treat 0x176 B0[3] as cruise main/active state.",
                 "Assume surviving 0x24D button bit semantics without a button transition.",
-                "Map diagnostic permission/main/active/fault/set-speed semantics to CAN without a producer/static or synchronized live join.",
-                "Promote P/R/N/B gear enums without live transitions.",
+                "Map Ready=0 or native steering fault states to temporary/permanent openpilot faults without an exercised recovery/latched transition.",
             ],
         },
         "evidence_sources": {
@@ -279,6 +362,9 @@ def main() -> int:
             "techstream_cruise_live_transport": {"path": str(TECH_CRUISE_TRANSPORT.relative_to(REPO)), "sha256": sha(TECH_CRUISE_TRANSPORT.read_bytes())},
             "public_route": {"path": str(PUBLIC.relative_to(REPO)), "sha256": sha(PUBLIC.read_bytes())},
             "span_route": {"path": str(SPAN.relative_to(REPO)), "sha256": sha(SPAN.read_bytes())},
+            "albino_architecture": {"path": str(ALBINO_ARCH.relative_to(REPO)), "sha256": sha(ALBINO_ARCH.read_bytes())},
+            "albino_port_package": {"path": str(ALBINO_PORT.relative_to(REPO)), "sha256": sha(ALBINO_PORT.read_bytes()), "dbc_member": ALBINO_DBC_MEMBER},
+            "gts_registry": {"path": str(GTS_REGISTRY.relative_to(REPO)), "sha256": sha(GTS_REGISTRY.read_bytes())},
         },
     }
     args.out.parent.mkdir(parents=True, exist_ok=True)

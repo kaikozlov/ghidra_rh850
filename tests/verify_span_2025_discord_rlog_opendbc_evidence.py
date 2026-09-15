@@ -95,8 +95,14 @@ for wheel, max_expected in (("FR", 24.01), ("FL", 23.5), ("RR", 24.05), ("RL", 2
 check("0x101 old brake bit and checksum survive", reuse["0x101"]["brake_pressed_values"] == [0, 1] and reuse["0x101"]["checksum_valid"] == reuse["0x101"]["frame_count"] == 3000)
 check("0x116 old user-pedal field is dynamic", reuse["0x116"]["gas_pedal_user"] == move["gas_pedal_user"])
 gear = reuse["0x127"]
-check("0x127 carrier/checksum/raw3 prior-art-D compatibility survives", gear["frame_count"] == gear["checksum_valid"] == 3662 and gear["gear_raw_values"] == [3] and gear["prior_art_decoded_values"] == ["D"] and gear["prior_art_value_map"] == {"0": "P", "1": "R", "2": "N", "3": "D", "4": "B"} and "MOCK" in gear["decode_basis"])
-check("0x127 target-native gear semantics remain bounded", all(x in gear["boundary"] for x in ("raw value 3", "prior-art D enum", "not independently validated", "P/R/N/B transitions")))
+check("0x127 carrier/checksum/raw3 D is independently corroborated", gear["frame_count"] == gear["checksum_valid"] == 3662 and gear["gear_raw_values"] == [3] and gear["prior_art_decoded_values"] == ["D"] and gear["prior_art_value_map"] == {"0": "P", "1": "R", "2": "N", "3": "D", "4": "B"} and all(x in gear["decode_basis"] for x in ("parallel", "0x3BF", "0x10", "D")))
+check("0x127 unexercised enum values stay prior-art bounded", all(x in gear["boundary"] for x in ("only raw value 3", "0x3BF D", "P/R/N/B", "prior-art")))
+gear3bf = reuse["0x3BF"]
+check("Span 0x3BF independently corroborates D", gear3bf["frame_count"] == 60 and gear3bf["raw_values"] == [16] and gear3bf["direct_decoded_values"] == ["D"] and all(x in gear3bf["boundary"] for x in ("2025", "0x10", "public Corolla route", "0x80=P", "0x40=R")))
+acc = reuse["0x08A_acc"]
+check("Span 0x08A directly closes the native ACC engaged gate", acc["acc_state_values"] == [18, 93] and acc["acc_engaged_bit_values"] == [0, 1] and acc["acc_engaged_frames"] == 37 and acc["acc_disengaged_frames"] == 2363 and acc["state_when_engaged"] == [93] and acc["state_when_disengaged"] == [18] and all(x in acc["boundary"] for x in ("byte22 bit0x10", "0x5D", "0x12", "direct on-vehicle")))
+set_speed = reuse["0x251"]
+check("Span retains 0x251 cruise-display carrier but does not exercise set-speed changes", set_speed["frame_count"] == 60 and set_speed["byte2_values"] == [0] and all(x in set_speed["boundary"] for x in ("does not exercise", "byte2 stays zero", "carrier presence/shape")))
 cruise = reuse["0x176"]
 check("0x176 checksum survives but active cruise stays open", cruise["frame_count"] == cruise["checksum_valid"] == 1890 and cruise["cruise_active_values"] == [False] and cruise["cruise_state_values"] == [0] and "no independent cruise-main/engagement oracle" in cruise["dynamic_boundary"])
 ctx176 = cruise["b0_bit3_context"]

@@ -45,6 +45,7 @@ ROLE_IDS = {
     0x1A2: "CRUISE_RELATED",
     0x1D3: "PCM_CRUISE_2",
     0x24D: "PCM_CRUISE_4 / cruise-switch SecOC prior art",
+    0x251: "TSS3 cruise display / retained set speed",
     0x260: "STEER_TORQUE_SENSOR",
     0x262: "EPS_STATUS",
     0x283: "PRE_COLLISION",
@@ -55,6 +56,7 @@ ROLE_IDS = {
     0x399: "PCM_CRUISE_SM",
     0x3B7: "ESP_CONTROL",
     0x3BC: "GEAR_PACKET",
+    0x3BF: "TSS3 Corolla gear packet",
     0x3F6: "BSM",
     0x411: "PCS_HUD",
     0x412: "LKAS_HUD",
@@ -233,6 +235,13 @@ def main() -> int:
     gas_user = [be_raw(dat, 15, 8) * 0.005 for _, dat in gas]
     gear = rows(0x127, 8)
     gear_values = [be_raw(dat, 47, 4) for _, dat in gear]
+    gear_3bf = rows(0x3BF, 8)
+    gear_3bf_values = [dat[0] for _, dat in gear_3bf]
+    acc = rows(0x08A, 32)
+    acc_state = [dat[7] for _, dat in acc]
+    acc_engaged = [1 if (dat[22] & 0x10) else 0 for _, dat in acc]
+    cruise_display = rows(0x251, 8)
+    cruise_set_speed = [dat[2] for _, dat in cruise_display]
     cruise = rows(0x176, 8)
     cruise_active = [bool((dat[0] >> 5) & 1) for _, dat in cruise]
     cruise_state = [be_raw(dat, 31, 4) for _, dat in cruise]
@@ -497,10 +506,33 @@ def main() -> int:
                 "gear_raw_values": unique(gear_values),
                 "prior_art_value_map": {str(k): v for k, v in GEAR_PRIOR_ART.items()},
                 "prior_art_decoded_values": unique([GEAR_PRIOR_ART.get(x, f"UNKNOWN_{x}") for x in gear_values]),
-                "decode_basis": "The D label comes only from the retained Toyota prior-art GEAR_PACKET_HYBRID enum; embedded carParams is MOCK and supplies no independent gear-state oracle.",
+                "decode_basis": "The retained segment is forward-driving and the parallel generation-native 0x3BF carrier is fixed at its independently observed D value 0x10, closing raw 3 as D without relying only on the embedded MOCK CarState.",
                 "checksum_valid": sum(toyota_checksum(0x127, dat) == dat[-1] for _, dat in gear),
                 "frame_count": len(gear),
-                "boundary": "This forward-driving capture exercises only raw value 3. Carrier, bit position, checksum, and compatibility with the prior-art D enum are supported; target-native D semantics are not independently validated, and P/R/N/B transitions still require live validation.",
+                "boundary": "This segment exercises only raw value 3 on 0x127, but the simultaneous 0x3BF D value plus the public route's direct P/R/D transitions provide an independent generation-native gear oracle for D. P/R/N/B on 0x127 retain Toyota prior-art ordering rather than direct Span transitions.",
+            },
+            "0x3BF": {
+                "wire": "classic 8-byte generation-native Corolla gear packet; byte 0 is one-hot",
+                "frame_count": len(gear_3bf),
+                "raw_values": unique(gear_3bf_values),
+                "direct_decoded_values": ["D"] if unique(gear_3bf_values) == [0x10] else [],
+                "boundary": "Span's moving 2025 segment carries 0x10 throughout while the car is driving forward; the retained public Corolla route independently observes 0x80=P, 0x40=R, 0x10=D transitions on this same carrier.",
+            },
+            "0x08A_acc": {
+                "wire": "0x08A/32 generation-native Corolla ACC state",
+                "acc_state_values": unique(acc_state),
+                "acc_engaged_bit_values": unique(acc_engaged),
+                "acc_engaged_frames": sum(acc_engaged),
+                "acc_disengaged_frames": sum(1 - x for x in acc_engaged),
+                "state_when_engaged": unique([state for state, engaged in zip(acc_state, acc_engaged) if engaged]),
+                "state_when_disengaged": unique([state for state, engaged in zip(acc_state, acc_engaged) if not engaged]),
+                "boundary": "In the retained Span segment byte22 bit0x10 asserts for every 0x5D state frame and is clear for every 0x12 state frame. This is a direct on-vehicle engaged-state join; contributor longitudinal evidence separately exercises 0x47 engaged and 0x67 standstill/hold states.",
+            },
+            "0x251": {
+                "wire": "classic 8-byte TSS3 cruise-display carrier",
+                "frame_count": len(cruise_display),
+                "byte2_values": unique(cruise_set_speed),
+                "boundary": "Span's retained segment does not exercise set-speed changes (byte2 stays zero). Contributor live-drive evidence independently identifies byte2 as the retained dash set speed in mph; this segment only confirms carrier presence/shape.",
             },
             "0x176": {
                 "wire": "classic 8-byte PCM_CRUISE with Toyota additive checksum",

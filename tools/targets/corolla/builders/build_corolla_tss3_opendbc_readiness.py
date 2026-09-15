@@ -44,6 +44,8 @@ POWER_GATE = REPO / "data/generated/corolla_8965H1202000_power_supply_monitor_ga
 AUTH_WIRE = REPO / "data/generated/corolla_hf_cooperative_authority_wire_visibility.json"
 FAULT_STATE = REPO / "data/generated/corolla_hf_fault_state_contract.json"
 REMAINING_STATUS = REPO / "data/generated/corolla_hf_remaining_status_contract.json"
+ALBINO_ARCH = REPO / "community/albinoelephant/albinoelephant_discord_PORT_ARCHITECTURE.md"
+GTS_REGISTRY = REPO / "data/generated/gtsplus_2026/toyota_diag_registry_camry_2026.json"
 
 
 def sha256_bytes(data: bytes) -> str:
@@ -138,6 +140,20 @@ def row(role: str, status: str, old: str, tss3: str, evidence: str, blocker: str
     }
 
 
+def find_gts_shift_position(registry: dict[str, Any], source: str, name: str) -> dict[str, Any]:
+    """Return one exact GTS+ signal record without depending on catalog numbering."""
+    stack: list[Any] = [registry]
+    while stack:
+        item = stack.pop()
+        if isinstance(item, dict):
+            if item.get("source") == source and item.get("name") == name and "signal_info" in item:
+                return item
+            stack.extend(item.values())
+        elif isinstance(item, list):
+            stack.extend(item)
+    raise ValueError(f"missing GTS+ signal {source}:{name}")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--output", type=Path, default=DEFAULT_OUT)
@@ -164,6 +180,20 @@ def main() -> int:
     remaining_status = json.loads(REMAINING_STATUS.read_text())
     power_gate = json.loads(POWER_GATE.read_text())
     auth_wire = json.loads(AUTH_WIRE.read_text())
+    albino_arch = ALBINO_ARCH.read_text()
+    gts_registry = json.loads(GTS_REGISTRY.read_text())
+    gts_hv_gear = find_gts_shift_position(gts_registry, "HV_P5.ddb", "Shift Position")
+    expected_gts_gear = {"0": "P", "2": "R", "4": "N", "6": "D", "8": "B"}
+    if gts_hv_gear["signal_info"]["pattern_display"] != expected_gts_gear:
+        raise ValueError("GTS+ P5 hybrid shift-position semantics drift")
+    for marker in (
+        "0x160 is protected by a keyless CRC",
+        "modify-and-forward",
+        "Longitudinal (follow, speed, stop-and-go to 0 + hold, resume): VALIDATED on car",
+        "Lateral: IN PROGRESS",
+    ):
+        if marker not in albino_arch:
+            raise ValueError(f"retained Albino architecture boundary drift: {marker}")
     if carrier["schema"] != "corolla-hf-command5-runtime-carrier-v1" or not carrier["boundary"]["static_target_native_carrier_candidate_closed"]:
         raise ValueError("H/F command5 carrier contract drift")
     if carrier["boundary"]["live_retention_closed"] or carrier["boundary"]["live_slot4_permission_closed"]:
@@ -246,11 +276,11 @@ def main() -> int:
         ),
         row(
             "cruise engaged",
-            "wire_reuse_dynamic_semantics_open",
-            "SecOC Toyota Panda/CarState uses 0x176 PCM_CRUISE.CRUISE_ACTIVE/CRUISE_STATE",
-            "Public route has 0x176/8 at ~30 Hz and all 1,855 frames pass the existing Toyota additive checksum. Span's moving rlog independently has 1,890/1,890 checksum-valid frames. Cruise remains inactive in both segments. 0x176 B0[3] is specifically rejected as a cruise replacement because it tracks accelerator-release/brake context in both captures.",
-            "public route + Span moving rlog raw checksum + non-steering engagement contract",
-            "Capture cruise main/engage/standstill transitions on a firmware-identified target before treating active/state values as production-ready.",
+            "generation_native_can_closed",
+            "Older Toyota uses 0x176 PCM_CRUISE.CRUISE_ACTIVE/CRUISE_STATE",
+            "0x176 is explicitly rejected as the TSS3 engagement source: its old active/state fields stay inactive and B0[3] tracks accelerator-release/brake context. Span's retained 2025 rlog directly closes 0x08A B22 bit 0x10 instead: 2,363 clear frames are all ACC_STATE=0x12 and 37 asserted frames are all ACC_STATE=0x5D. Albino's validated longitudinal implementation independently uses the same 0x08A engaged bit for host and Panda gating.",
+            "Span moving rlog + retained Albino on-car longitudinal implementation",
+            "No core CarState engagement-field blocker remains; exact-target replay remains the normal final validation step.",
         ),
         row(
             "steering angle / rate",
@@ -278,19 +308,19 @@ def main() -> int:
         ),
         row(
             "gear",
-            "strong_reuse_candidate_partial_dynamic",
+            "generation_native_carstate_closed",
             "Current SecOC Toyota CarState uses 0x127 GEAR_PACKET_HYBRID; older non-SecOC profiles use 0x3BC",
-            "The public 2023 route lacks 0x127, but Span's moving Discord rlog carries 3,662 0x127/8 frames; all 3,662 pass the existing Toyota additive checksum and raw value 3 maps to D only through the retained Toyota prior-art GEAR enum. Embedded carParams is MOCK, so there is no independent gear-state oracle. Exact H retains 0x127/8 and its generated receive layout, but its scalar unpacker does not consume the legacy B5[3:0] gear nibble.",
-            "Span moving rlog raw bytes + exact H receive layout + current opendbc prior art",
-            "Obtain an independent gear-state oracle or explicit D transition, validate P/R/N/B transitions, and bind the capture to exact target firmware before declaring any target-native gear enum production-ready.",
+            "The public 2023 Corolla route directly observes 0x3BF byte0 transitions 0x80=P -> 0x40=R -> 0x10=D, with independent 0x2A1 byte4 transitions 1=P -> 2=R -> 4=D at the same boundaries. Span's moving 2025 segment independently carries 0x3BF=0x10 while driving and 3,662 checksum-valid 0x127 frames at raw3. N=0x20 completes the 0x3BF one-hot domain and Toyota GTS+ HV_P5 independently preserves the P/R/N/D/B ordinal ordering. Production CarState can therefore use 0x127 on the retained hybrid shape and 0x3BF as the generation-native fallback.",
+            "2023 public route direct transitions + Span moving rlog + GTS+ HV_P5 Shift Position",
+            "No core gear-state blocker remains; unexercised 0x127 P/R/N/B values retain Toyota's established enum rather than a new TSS3 inference.",
         ),
         row(
             "cruise availability / set speed / ACC faults / follow distance",
-            "diagnostic_oracles_closed_wire_mapping_open",
+            "core_carstate_closed_optional_acc_ui_open",
             "0x1D3 PCM_CRUISE_2 and 0x399 PCM_CRUISE_SM supply main availability, set speed, fault, lockout, distance and cluster set speed",
-            "0x1D3/0x399 are absent from both retained routes; 0x177/0x1A2 are also absent. Techstream FRC_P5 supplies exact P5 Data-ID oracles: 0x1905 Cruise Control Permission, 0x1906 Main Switch Recognition / Set-Cancel / ACC Not Available icon, 0x1914 ACC Control in Operation, 0x1901 Current/Memory Vehicle Speed, and 0x1912 Set Vehicle Interval Time. Current GTS+ independently proves those selected Data IDs are issued as ordinary SID 0x22 RDBI requests.",
-            "public route + Span moving rlog + exact Techstream FRC_P5 Data-ID semantics",
-            "Synchronize all-bus CAN with direct FRC SID-0x22 oracle polling to identify generation-native CAN fields for available/enabled/set speed/fault/follow distance; preserve the outer-session prerequisite as unknown unless the live target proves one.",
+            "The old 0x1D3/0x399 family is absent. Core TSS3 CarState is instead generation-native: 0x08A ACC_STATE is nonzero in retained idle/engaged states, B22 bit0x10 is the direct engaged gate, and contributor live drives identify ACC_STATE bit0x20/0x67 as standstill hold. Retained contributor evidence identifies 0x251 byte2 as the dash set speed in mph and the validated on-car port reports a 19-mph set-speed floor. GTS+ FRC_P5 independently provides the diagnostic semantic oracles 0x1901/0x1905/0x1906/0x1912/0x1914. Follow-distance and detailed ACC-unavailable UI state remain optional unmapped fields, not base-control blockers.",
+            "Span moving rlog + retained Albino live-drive evidence + GTS+ FRC_P5 semantics",
+            "Optional follow-distance and detailed ACC-unavailable UI mapping remain open; they are not required for base engagement, set speed, standstill, or actuation.",
         ),
         row(
             "brake hold / stability state",
@@ -334,19 +364,19 @@ def main() -> int:
         ),
         row(
             "radar / object state",
-            "new_tss3_parser_required",
+            "optional_parser_not_required_for_base_port",
             "Older Toyota radar parser expects 0x123/7 status plus TSS2 0x180..0x19F/8 object halves",
             "Public TSS3 route has 0x123/16 and a 22-ID CAN-FD baseline including 0x180..0x18B/64 and 0x18C/48. Both the older Span UDS-sweep capture and Span's moving Discord rlog repeat exactly the same 22 ID/DLC set on buses 0/2; the moving rlog also has byte-identical bus0/bus2 payload sequences.",
             "2023 public route + Span static capture + Span moving rlog",
-            "Recover field semantics and producer ownership before implementing a TSS3 RadarInterface. CAN ID reuse is not semantic continuity.",
+            "The base port should keep radarUnavailable/model-lead operation. Recover this namespace only if a native TSS3 RadarInterface is desired; CAN ID reuse is not semantic continuity.",
         ),
         row(
             "longitudinal command / stock ACC ownership",
-            "open_separate_architecture",
+            "validated_modify_forward_core_aeb_open",
             "Older TSS2 uses 0x343; known SecOC profiles can move signed acceleration into 0x183/8 while preserving 0x343 coordination",
-            "Public TSS3 route has no 0x343 and carries 0x183 as 64-byte CAN-FD in the 20-Hz FD family; this directly disproves old wire-shape transfer.",
-            "public route + upstream prior art",
-            "Identify TSS3 ACC producer, command fields/cadence, AEB/brake arbitration, authentication and stock-source suppression. This remains OQ-052.",
+            "The old 0x343 wire contract does not transfer. Albino's retained on-car port instead validates the TSS3 architecture end-to-end: camera-origin 0x160/32 at 40 Hz, keyless AUTOSAR E2E CRC16/CCITT with DataID 0x444A, signed15 B4:B5 acceleration at 0.001 m/s²/count, modify-and-forward on the CAN0/CAN2 relay pair, camera-counter preservation, sole-emitter suppression while engaged, and stock ownership below ~1 mph. The contributor status explicitly reports follow, speed, stop-and-go to 0 + hold, and resume validated on car. Span's retained network reproduces the same 0x160/32 FD carrier.",
+            "retained Albino architecture/live validation + cross-year retained 0x160 network geometry",
+            "Core longitudinal transport/ownership is closed. Production validation still needs an exercised PCS/AEB event while 0x160 replacement is active to prove emergency-braking coexistence; do not infer that from ordinary ACC drives.",
         ),
     ]
 
@@ -399,6 +429,23 @@ def main() -> int:
                 "identity_boundary": span_rlog["source"]["identity_boundary"],
                 "harness_observation_boundary": span_rlog["harness_observation_boundary"],
                 "exact_h_f_visibility": span_rlog["exact_h_f_visibility"],
+                "native_acc_gate": span_rlog["direct_reuse_evidence"]["0x08A_acc"],
+                "gear_0x3bf": span_rlog["direct_reuse_evidence"]["0x3BF"],
+            },
+            "public_route_gear": {
+                "0x3BF": public["direct_reuse_evidence"]["0x3BF"],
+                "0x2A1": public["direct_reuse_evidence"]["0x2A1"],
+            },
+            "gts_p5_hybrid_shift_position": {
+                "source": gts_hv_gear["source"],
+                "name": gts_hv_gear["name"],
+                "pattern_display": gts_hv_gear["signal_info"]["pattern_display"],
+            },
+            "retained_albino_longitudinal": {
+                "path": str(ALBINO_ARCH.relative_to(REPO)),
+                "sha256": sha256_file(ALBINO_ARCH),
+                "validated_status": "Longitudinal (follow, speed, stop-and-go to 0 + hold, resume): VALIDATED on car",
+                "boundary": "Use the retained contributor architecture for its on-car longitudinal result and topology/E2E observations. Its own status says lateral remained IN PROGRESS, so it is not evidence for any later 0x160/0x1A0 steering claim.",
             },
             "command5_runtime_carrier": {
                 "static_candidate": carrier["carrier_geometry"],
@@ -460,42 +507,36 @@ def main() -> int:
         },
         "forced_old_profile": public["forced_old_profile_result"],
         "implementation_readiness": {
-            "can_scaffold_now": [
-                "Add an explicit TSS3 control-generation axis independent of the existing SECOC security flag.",
-                "Define a TSS3 0x025/32 DBC PDU carrying the firmware-proved steering angle/fraction/rate fields.",
-                "Decode live 0x030 physical Steering Wheel Torque and its raw fault/validity gates; B6[1] is additionally bounded to a Q-axis-current monitor whose exact-H threshold detector is calibration-disabled. Do not import legacy override thresholds or 0x262 fault classes.",
-                "Carry forward 0x0AA/0x101/0x116/0x176 only behind generation-specific validation; do not copy the entire old DBC, and do not relabel 0x176 B0[3] as cruise state.",
-                "Expose incoming 0x51E B0[7] as target-native Ready Status for read-only observation without yet mapping Ready=0 to an openpilot fault/engagement policy.",
-                "Treat the recovered 0x030 B6[3]/B10[3]/B13[4] bits only as coarse system-mode diagnostics; do not use them as exact cooperative-authority feedback because raw modes 0 and 1 collapse in that path while FEBEACBD distinguishes them.",
-                "Scaffold 0x127 GEAR_PACKET_HYBRID only as a read-only reuse candidate: carrier/checksum/raw3 are observed and raw3 is prior-art-compatible with D, while target-native gear semantics remain gated on an independent oracle/transitions.",
-                "Model exact H/F B6 signal254/255/261 receiver requirements, nominal 35-ms loss cutout, the EPS-consumer minimal ID11 companion candidate, and the authenticated-0x00F replacement freshness state machine without enabling live actuation.",
-                "Create a new TSS3 radar/CAN-FD namespace rather than extending the old 8-byte TSS2 radar DBC by ID.",
+            "implemented_from_retained_evidence": [
+                "Generation-specific TSS3 platform selection, Toyota-B bus placement, and exact Corolla EPS firmware matching.",
+                "0x025/32 steering angle/rate, 0x030 driver torque/validity, 0x0AA wheel speed, 0x101 brake, 0x116 gas, 0x51E Ready Status, and generation-native Corolla gear parsing (0x127 hybrid shape with 0x3BF fallback).",
+                "0x08A native ACC available/enabled/standstill state and 0x251 retained set-speed decode, with the native 19-mph set-speed floor and manual resume from stock hold.",
+                "Validated 0x160 longitudinal modify-and-forward: live camera template/counter pacing, E2E recomputation, accel-only substitution, selective stock suppression, and below-~1-mph stock hold handoff.",
+                "Exact H/F B6 lateral receiver contract, target-angle scaling, request profile, freshness reconstruction, native angle limits, bounded host sideband, and Panda angle safety for the EPS-resident signer design.",
+                "Model-lead/radarUnavailable base operation; a native TSS3 radar parser is optional rather than a Corolla port prerequisite.",
             ],
             "blocks_production_lateral": [
-                "Firmware-identified H/F-family capture with the Toyota-B CAN0/CAN1 network physically relay-correct and stock LTA exercised off -> active -> off.",
-                "B6 stock/minimal secondary-field cross-ECU validation, stock sender cadence/physical route, and a working slot-4 signing path: key or the audited 462-byte H/F command-5 proxy after the exact same-car direct 332-byte canary tool proves live retention and selector-4 permission/latency is measured.",
-                "Stock-source suppression/interception point on Toyota-B topology.",
-                "Conservative Panda/openpilot driver-override policy dynamic validation, Q-current actuator-response policy if desired, Ready/fault recovery-to-openpilot temporary/permanent policy mapping, and final relay-correct actuator validation. Exact 0x394 DEM class/DTC families and 0x351 force-7 source topology are already statically closed; no Toyota EPS physical-driver-torque comparator remains to recover under the promoted static census.",
+                "Live same-car validation of the retained EPS-resident signer/helper: confirm command-5 carrier retention/slot-4 signing, native B6 output, and steering response on the exact Corolla H/F family before treating host-side completion as production actuation proof.",
+                "Relay-correct stock-LTA off -> active -> off capture to close the physical stock B6 producer/suppression point and confirm the minimal secondary-field template under real cooperative steering.",
+                "Conservative Panda/openpilot driver-override dynamic validation and final Ready/fault recovery policy. Exact target-angle, receiver freshness, steering limits, driver-torque telemetry, 0x394 DEM classes, and 0x351 source topology are already statically closed.",
             ],
             "blocks_normal_carstate": [
-                "Validate P/R/N/B transitions on the retained 0x127 GEAR_PACKET_HYBRID carrier and bind them to the exact target.",
-                "Cruise CAN-field mapping for available/enabled/set speed/follow distance/ACC not-available state; exact FRC_P5 Data-ID semantics and their direct SID-0x22 polling transport are already recovered.",
-                "Operational steering-fault/readiness policy mapping: static 0x394 class/DTC families are closed, but Ready=0 and recoverable-vs-latched transitions must define the final openpilot temporary/permanent policy. Driver-torque physical scaling is already closed.",
-                "Dynamic validation of retained body/UI fields used by openpilot.",
+                "Operational steering-fault/readiness policy only: capture Ready=0 and recoverable-versus-latched fault transitions before mapping TSS3 native states into openpilot temporary/permanent fault classes.",
+                "Optional body/UI fields that were static in retained routes should remain unmapped or prior-art-only until exercised; they are not actuation blockers.",
             ],
             "blocks_radar": [
-                "TSS3 0x123/16 and 0x180-family FD field semantics, validity/status and object association.",
+                "Only a future native RadarInterface is blocked on 0x123/16 and 0x180-family FD semantics. The base Corolla port intentionally uses radarUnavailable/model leads.",
             ],
             "blocks_longitudinal": [
-                "TSS3 ACC producer/ownership, command+feedback payload, cadence, integrity/authentication, AEB/brake coexistence and safe stock suppression (OQ-052).",
+                "Exercise a real PCS/AEB intervention while openpilot owns 0x160 and verify emergency-braking coexistence/priority across the downstream brake path. Ordinary ACC validation does not close this safety case.",
             ],
         },
         "highest_value_next_evidence": [
-            "On the isolated exact Albino H/F specimen, run exploit/ephemeral_runtime/corolla_hf_direct_canary.py first: it replays the same-car telescope-proven zero-DID FEBF0000 bootstrap, pins both application/boot F181, and requires FEBFFB80 heartbeat progression. After reset-to-stock is separately confirmed, use exploit/ephemeral_runtime/corolla_hf_direct_command5.py for the guarded 462-byte fixed-36-byte selector-4 probe; only then measure slot-4 latency, still without vehicle actuation.",
-            "Capture an exact H/F-family vehicle with carFw/F181 preserved, the Toyota-B CAN0/CAN1 network physically repinned onto the CAN0/CAN2 relay pair, and all buses logged during stock LTA off->active->off, steering input, cruise main/engage, brake/gas and P/R/N/D transitions; simultaneously record 0x51E Ready and directly poll the exact FRC_P5 0x1901/0x1905/0x1906/0x1912/0x1914 SID-0x22 oracles.",
-            "Acquire matched category-435 07B0 Brake/EPB firmware and 0792 FRC_P5 firmware; join planner state -> upstream FD traffic -> protected B6 -> EPS response and signer/freshness ownership.",
-            "Use that firmware-identified relay-correct capture to choose TSS3 CarState/Panda input buses, validate 0x127 gear enums, and recover the missing 0x1D3/0x399/0x260/0x262 roles before implementing production safety.",
-            "Treat longitudinal as a separate architecture and close OQ-052 rather than inferring it from lateral/FRC progress.",
+            "On the isolated exact H/F specimen, run exploit/ephemeral_runtime/corolla_hf_direct_canary.py first, then the guarded selector-4 command-5 probe after reset-to-stock confirmation; this is the remaining live prerequisite for the EPS-resident B6 signer used by the openpilot branch.",
+            "On the vehicle, preserve F181 and capture the relay-correct stock-LTA off -> active -> off transition, then validate that the resident helper emits native authenticated B6 and that EPS response follows openpilot's bounded target-angle sideband.",
+            "Exercise a real PCS/AEB intervention during openpilot 0x160 ownership and verify emergency braking still wins cleanly through the downstream Brake/EPB path.",
+            "Capture Ready=0 plus recoverable and latched steering faults to finish openpilot temporary/permanent fault policy. Gear, core cruise state, set speed, driver torque, and longitudinal command discovery are no longer evidence blockers.",
+            "Recover the 0x123/0x180-family radar FD semantics only if a native TSS3 RadarInterface is desired; model-lead operation does not depend on it.",
         ],
     }
 

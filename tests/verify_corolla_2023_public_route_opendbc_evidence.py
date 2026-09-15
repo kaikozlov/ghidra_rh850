@@ -43,6 +43,8 @@ for cid, dlc, count in (
     ("0x116", 8, 2499),
     ("0x176", 8, 1855),
     ("0x24D", 8, 59),
+    ("0x2A1", 8, 61),
+    ("0x3BF", 8, 64),
     ("0x51E", 8, 59),
 ):
     i = instance(cid, bus=1, dlc=dlc)
@@ -74,6 +76,11 @@ check("0x0AA four wheel speeds remain coherent", all(v["count"] == 5888 and v["m
 check("0x0AA wheel fault bits are all clear in segment", all(v == [0] for v in reuse["0x0AA"]["fault_values"].values()))
 check("0x101 old brake bit toggles", reuse["0x101"]["brake_pressed_values"] == [0, 1])
 check("0x116 old user-pedal field has dynamic range", reuse["0x116"]["gas_pedal_user"]["unique_count"] == 76 and reuse["0x116"]["gas_pedal_user"]["max"] == 0.375)
+gear3bf = reuse["0x3BF"]
+check("0x3BF directly observes Corolla P/R/D transitions", gear3bf["raw_values"] == [16, 64, 128] and gear3bf["direct_observed_labels"] == {"0x10": "D", "0x40": "R", "0x80": "P"} and [x["raw"] for x in gear3bf["transitions"]] == [128, 64, 16] and [x["payload"] for x in gear3bf["transitions"]] == ["8000010074d0de47", "400001006f306582", "100001005fc18f5f"])
+check("0x3BF N remains bounded but one-hot/GTS-corroborated", all(x in gear3bf["boundary"] for x in ("P -> R -> D", "0x80 -> 0x40 -> 0x10", "N is not exercised", "0x20", "GTS+")))
+gear2a1 = reuse["0x2A1"]
+check("0x2A1 independently corroborates the same gear transitions", gear2a1["raw_values"] == [1, 2, 4] and [x["raw"] for x in gear2a1["transitions"]] == [1, 2, 4] and gear2a1["direct_observed_labels"] == {"0x01": "P", "0x02": "R", "0x04": "D"})
 check("all 0x176 checksums validate", reuse["0x176"]["checksum_valid"] == reuse["0x176"]["frame_count"] == 1855)
 check("0x176 active semantics remain dynamically untested", reuse["0x176"]["cruise_active_values"] == [False] and reuse["0x176"]["cruise_state_values"] == [0] and "no independent cruise-main/engagement oracle" in reuse["0x176"]["dynamic_boundary"])
 ctx176 = reuse["0x176"]["b0_bit3_context"]

@@ -1,21 +1,53 @@
 {
   "cruise": {
-    "boundary": "Neither retained route supplies an independent cruise-main/engagement oracle. Exact Toyota diagnostics now define what each missing semantic must correlate with, but no CAN field may be promoted to available/enabled/set-speed/fault until a wire-to-oracle transition is observed or statically recovered from the producer firmware.",
+    "boundary": "Core openpilot cruise state is closed from retained generation-native CAN plus validated contributor live-drive evidence. Detailed ACC-not-available UI and follow-distance remain optional unmapped state.",
     "capture_recipe": [
-      "Poll FRC_P5 0x1905 directly with UDS 22 19 05 and require 62 19 05 before decoding Cruise Control Permission Flag while toggling cruise main and engagement.",
-      "Poll FRC_P5 0x1906 directly with UDS 22 19 06 and require 62 19 06 before decoding Main Switch Recognition / Set-Cancel / ACC Not Available synchronized with all-bus CAN.",
-      "Poll FRC_P5 0x1914 directly with UDS 22 19 14 and require 62 19 14 before decoding ACC Control in Operation through disengaged -> engaged -> cancelled transitions.",
-      "Poll FRC_P5 0x1901 directly with UDS 22 19 01 and require 62 19 01 before decoding Current/Memory Vehicle Speed while changing set speed.",
-      "Poll FRC_P5 0x1912 directly with UDS 22 19 12 and require 62 19 12 before decoding Set Vehicle Interval Time while cycling following distance."
+      "Use FRC_P5 0x1905/0x1906/0x1914 only to extend optional permission/fault UI semantics; core available/enabled no longer requires a diagnostic discovery pass.",
+      "Use FRC_P5 0x1912 only if exposing following-distance state is desired.",
+      "Retain 0x1901 Current/Memory Vehicle Speed as a diagnostic cross-check for 0x251 set speed rather than a required runtime input."
     ],
-    "classification": "diagnostic semantics narrowed; live CAN mapping not closed",
-    "diagnostic_transport_boundary": "Current GTS+ proves the selected FRC_P5 0x1901/0x1905/0x1906/0x1912/0x1914 Data IDs are ordinary SID 0x22 ReadDataByIdentifier requests. For an independent capture, require the matching 0x62||DID positive prefix before decoding. A named outer DiagnosticSessionControl or SecurityAccess prerequisite is not statically proved.",
+    "classification": "core generation-native CarState mapping closed; optional detailed ACC UI/follow fields remain open",
+    "diagnostic_transport_boundary": "Current GTS+ proves selected FRC_P5 0x1901/0x1905/0x1906/0x1912/0x1914 Data IDs are ordinary SID 0x22 ReadDataByIdentifier requests. They are now optional semantic oracles, not prerequisites for core CarState.",
     "legacy_ids_absent_in_both_captures": [
       "0x177",
       "0x1A2",
       "0x1D3",
       "0x399"
     ],
+    "native_wire_mapping": {
+      "available": "0x08A ACC_STATE (B7) != 0; retained states 0x12 idle and 0x5D engaged, and the validated contributor Panda path uses B7!=0 as acc_main_on",
+      "enabled": "0x08A B22 bit0x10; Span directly observes 2,363 clear / 37 asserted frames with exact 0x12/0x5D state separation",
+      "set_speed": "0x251 B2, mph factor 1.0; contributor live-drive evidence records one-mph +/- changes and a 19-mph floor",
+      "span_0x08a": {
+        "acc_disengaged_frames": 2363,
+        "acc_engaged_bit_values": [
+          0,
+          1
+        ],
+        "acc_engaged_frames": 37,
+        "acc_state_values": [
+          18,
+          93
+        ],
+        "boundary": "In the retained Span segment byte22 bit0x10 asserts for every 0x5D state frame and is clear for every 0x12 state frame. This is a direct on-vehicle engaged-state join; contributor longitudinal evidence separately exercises 0x47 engaged and 0x67 standstill/hold states.",
+        "state_when_disengaged": [
+          18
+        ],
+        "state_when_engaged": [
+          93
+        ],
+        "wire": "0x08A/32 generation-native Corolla ACC state"
+      },
+      "span_0x251": {
+        "boundary": "Span's retained segment does not exercise set-speed changes (byte2 stays zero). Contributor live-drive evidence independently identifies byte2 as the retained dash set speed in mph; this segment only confirms carrier presence/shape.",
+        "byte2_values": [
+          0
+        ],
+        "frame_count": 60,
+        "wire": "classic 8-byte TSS3 cruise-display carrier"
+      },
+      "standstill": "0x08A ACC_STATE B7 bit0x20; contributor live-drive evidence records 0x67 engaged+standstill hold and validates stop-and-go hold/resume"
+    },
     "openpilot_oracle_mapping": {
       "brake_control_activity": [
         "ACC Brake Control in Operation"
@@ -49,9 +81,10 @@
         "Memory Vehicle Speed"
       ]
     },
+    "retained_contributor_boundary": "The retained contributor architecture explicitly says longitudinal follow/speed/stop-and-go-to-0/hold/resume was VALIDATED on car while lateral remained IN PROGRESS. Only the longitudinal/state observations are used here.",
     "retained_wire_prior_art": {
       "0x176": {
-        "b0_bit3_interpretation": "Strongly tracks accelerator-release/driver-input context in both captures. Without an independent cruise-state oracle this does not disprove every possible cruise-related meaning, but it is insufficient evidence to promote B0[3] as TSS3 main/active cruise state.",
+        "b0_bit3_interpretation": "Rejected as the TSS3 active/main source: B0[3] tracks accelerator-release/brake context while the old CRUISE_ACTIVE/STATE fields stay inactive.",
         "b0_bit3_values": [
           0,
           1
@@ -139,7 +172,7 @@
         "span_2025_frames": 1890
       },
       "0x24D": {
-        "boundary": "The carrier survives, but neither segment exercises a cruise-switch transition, so old button semantics remain a prior-art lead only.",
+        "boundary": "The carrier survives, but neither retained segment exercises a cruise-switch transition; old button semantics remain prior-art only.",
         "legacy_button_fields": {
           "cancel": [
             0
@@ -624,14 +657,28 @@
       }
     ],
     "wire_mapping_status": {
-      "acc_not_available_or_fault": "open: diagnose against ACC Not Available Icon Lighting Request Flag and permission state",
-      "cruise_available": "open: diagnose against Main Switch Recognition Flag and Cruise Control Permission Flag",
-      "cruise_enabled": "open: diagnose against ACC Control in Operation Flag",
-      "follow_distance": "open: diagnose against Set Vehicle Interval Time",
-      "set_speed": "open: diagnose against Memory Vehicle Speed; Current Vehicle Speed is an independent reference"
+      "acc_not_available_or_fault": "optional/open: exact FRC_P5 diagnostic oracle exists, but no base-control CAN mapping is required",
+      "cruise_available": "closed on generation-native 0x08A ACC_STATE presence",
+      "cruise_enabled": "closed on generation-native 0x08A B22 bit0x10",
+      "cruise_standstill": "closed from contributor live-drive 0x08A B7 bit0x20 / state0x67",
+      "follow_distance": "optional/open: exact FRC_P5 Set Vehicle Interval Time oracle exists",
+      "set_speed": "closed from contributor live-drive 0x251 B2 mph"
     }
   },
   "evidence_sources": {
+    "albino_architecture": {
+      "path": "community/albinoelephant/albinoelephant_discord_PORT_ARCHITECTURE.md",
+      "sha256": "760143f4f8fe53518eaa30af4de58a13c3ab2564acc5f7b7b010b545649aefe0"
+    },
+    "albino_port_package": {
+      "dbc_member": "Corolla_Fingerprint\\port\\files\\opendbc_repo\\opendbc\\dbc\\toyota_corolla_tss3_pt.dbc",
+      "path": "community/albinoelephant/Corolla_Fingerprint_v1.zip",
+      "sha256": "247ac13d7fd412418cf052e87c98ef15ef50ca6fc91a2741c5c0e2ed4f955fc6"
+    },
+    "gts_registry": {
+      "path": "data/generated/gtsplus_2026/toyota_diag_registry_camry_2026.json",
+      "sha256": "fb54d0dc559ff95490267652492b5f2c86722e10c80746935f51bd08c9c9fbc1"
+    },
     "h_decompiler": {
       "path": "data/generated/corolla_8965H1202000_nonsteering_engagement_decompiler_evidence.json",
       "sha256": "4d61edde9ae0c56fe6fc5920658b0c7005dd6c38de6821b9af871ee8dfd348b6"
@@ -642,11 +689,11 @@
     },
     "public_route": {
       "path": "data/generated/corolla_2023_public_route_opendbc_evidence.json",
-      "sha256": "bf6a22911fd8f4fff77793a565debc81c48443047e653342d554af6a8e2b592c"
+      "sha256": "26a36536f203ebd89641a0179414952b7d79f714f6fbf3d8b1f62db7b292c933"
     },
     "span_route": {
       "path": "data/generated/corolla_2025_span_discord_rlog_opendbc_evidence.json",
-      "sha256": "65af33b876067984cdc2d2ab8c900cfeaefae57de67bdf6ab0da634b3c57ee08"
+      "sha256": "09313e41c0f8f96399f10003e6d2a934c0f628a16fac9613d39bf374603717d6"
     },
     "state_bridge": {
       "path": "data/generated/corolla_8965H1202000_openpilot_state_bridge.json",
@@ -666,58 +713,159 @@
     }
   },
   "gear": {
-    "can_id": "0x127",
-    "classification": "carrier/layout retained; raw 3 observed and prior-art-compatible with D; target-native enum semantics not independently validated",
-    "h_rx_descriptor_index": 20,
-    "h_scalar_extractions": [
-      {
-        "length": 6,
-        "signal_id": 123,
-        "wire": "B0[7:2]"
+    "classification": "core CarState gear semantics closed from generation-native route transitions plus Toyota ordering",
+    "corroborating_0x2a1": {
+      "boundary": "This independent route carrier changes on the same R and D transitions as 0x3BF. It is retained as corroboration rather than the production CarState source.",
+      "direct_observed_labels": {
+        "0x01": "P",
+        "0x02": "R",
+        "0x04": "D"
       },
-      {
-        "length": 1,
-        "signal_id": 125,
-        "wire": "B1[3]"
-      },
-      {
-        "length": 11,
-        "signal_id": 129,
-        "wire": "B3/B4 signed11 domain"
-      }
-    ],
-    "h_signal_ids": [
-      123,
-      124,
-      125,
-      126,
-      127,
-      128,
-      129,
-      130,
-      131,
-      132
-    ],
-    "h_static_boundary": "Exact H retains 0x127 and three scalar fields at the same wire positions as the older SecOC Toyota family, but its generated scalar unpacker does not consume the legacy B5[3:0] gear nibble. The EPS therefore cannot statically validate P/R/N/B enum semantics.",
-    "legacy_gear_field": {
-      "prior_art_values": {
-        "0": "P",
-        "1": "R",
-        "2": "N",
-        "3": "D",
-        "4": "B"
-      },
-      "wire": "B5[3:0]"
+      "frame_count": 61,
+      "raw_values": [
+        1,
+        2,
+        4
+      ],
+      "transitions": [
+        {
+          "elapsed_s": 0.830018541,
+          "payload": "0f0000000100008e",
+          "raw": 1
+        },
+        {
+          "elapsed_s": 6.496363747,
+          "payload": "0f0000000200008e",
+          "raw": 2
+        },
+        {
+          "elapsed_s": 15.859245567,
+          "payload": "0f0000000400008f",
+          "raw": 4
+        }
+      ],
+      "wire": "classic 8-byte Corolla gear corroboration packet; byte 4 is one-hot"
     },
-    "length": 8,
-    "production_boundary": "Raw value 3 is operationally observed and compatible with the retained Toyota prior-art D enum, but the MOCK rlog provides no independent gear-state oracle. Treat target-native D semantics as bounded until an independent gear oracle or explicit transition confirms them; P/R/N/B still require live transitions.",
-    "span_dynamic": {
+    "exact_h_0x127": {
+      "can_id": "0x127",
+      "h_rx_descriptor_index": 20,
+      "h_scalar_extractions": [
+        {
+          "length": 6,
+          "signal_id": 123,
+          "wire": "B0[7:2]"
+        },
+        {
+          "length": 1,
+          "signal_id": 125,
+          "wire": "B1[3]"
+        },
+        {
+          "length": 11,
+          "signal_id": 129,
+          "wire": "B3/B4 signed11 domain"
+        }
+      ],
+      "h_signal_ids": [
+        123,
+        124,
+        125,
+        126,
+        127,
+        128,
+        129,
+        130,
+        131,
+        132
+      ],
+      "legacy_gear_field": {
+        "prior_art_values": {
+          "0": "P",
+          "1": "R",
+          "2": "N",
+          "3": "D",
+          "4": "B"
+        },
+        "wire": "B5[3:0]"
+      },
+      "length": 8,
+      "static_boundary": "Exact H retains 0x127, but its EPS scalar unpacker does not consume the legacy B5[3:0] gear nibble; whole-vehicle route/GTS evidence therefore owns CarState gear semantics."
+    },
+    "generation_native_0x3bf": {
+      "boundary": "P/R/D are directly observed on the retained public route and D is independently repeated in Span's moving 2025 segment. N=0x20 is the remaining one-hot value and preserves Toyota's P/R/N/D ordering; it is corroborated by GTS+ rather than a retained N transition.",
+      "enum": {
+        "0x10": "D",
+        "0x20": "N",
+        "0x40": "R",
+        "0x80": "P"
+      },
+      "public_2023": {
+        "boundary": "The route itself transitions P -> R -> D in that order while byte 0 moves 0x80 -> 0x40 -> 0x10. N is not exercised in this segment; 0x20 is the remaining one-hot value and is corroborated separately by Toyota GTS+ P5/P6 P/R/N/D ordering.",
+        "direct_observed_labels": {
+          "0x10": "D",
+          "0x40": "R",
+          "0x80": "P"
+        },
+        "frame_count": 64,
+        "raw_values": [
+          16,
+          64,
+          128
+        ],
+        "transitions": [
+          {
+            "elapsed_s": 0.9499165620000001,
+            "payload": "8000010074d0de47",
+            "raw": 128
+          },
+          {
+            "elapsed_s": 6.496363747,
+            "payload": "400001006f306582",
+            "raw": 64
+          },
+          {
+            "elapsed_s": 15.859245567,
+            "payload": "100001005fc18f5f",
+            "raw": 16
+          }
+        ],
+        "wire": "classic 8-byte generation-native Corolla gear packet; byte 0 is one-hot"
+      },
+      "span_2025": {
+        "boundary": "Span's moving 2025 segment carries 0x10 throughout while the car is driving forward; the retained public Corolla route independently observes 0x80=P, 0x40=R, 0x10=D transitions on this same carrier.",
+        "direct_decoded_values": [
+          "D"
+        ],
+        "frame_count": 60,
+        "raw_values": [
+          16
+        ],
+        "wire": "classic 8-byte generation-native Corolla gear packet; byte 0 is one-hot"
+      }
+    },
+    "gts_p5_hybrid_ordering": {
+      "name": "Shift Position",
+      "pattern_display": {
+        "0": "P",
+        "2": "R",
+        "4": "N",
+        "6": "D",
+        "8": "B"
+      },
+      "source": "HV_P5.ddb"
+    },
+    "preferred_carriers": {
+      "generation_native_fallback": "0x3BF byte0 one-hot",
+      "retained_hybrid_shape": "0x127 GEAR_PACKET_HYBRID"
+    },
+    "production_boundary": "The base port no longer needs a gear-discovery experiment. Use 0x127 where the retained hybrid carrier is present and 0x3BF otherwise; preserve the stated N/0x127-unexercised-value evidence boundaries rather than inventing new enums.",
+    "span_0x127": {
       "checksum_valid": 3662,
-      "decode_basis": "The D label comes only from the retained Toyota prior-art GEAR_PACKET_HYBRID enum; embedded carParams is MOCK and supplies no independent gear-state oracle.",
-      "frames": 3662,
-      "prior_art_decoded_values": [
+      "decode_basis": "The retained segment is forward-driving and the parallel generation-native 0x3BF carrier is fixed at its independently observed D value 0x10, closing raw 3 as D without relying only on the embedded MOCK CarState.",
+      "decoded_values": [
         "D"
       ],
+      "frames": 3662,
       "raw_values": [
         3
       ]
@@ -727,14 +875,14 @@
     "not_safe_yet": [
       "Treat 0x176 B0[3] as cruise main/active state.",
       "Assume surviving 0x24D button bit semantics without a button transition.",
-      "Map diagnostic permission/main/active/fault/set-speed semantics to CAN without a producer/static or synchronized live join.",
-      "Promote P/R/N/B gear enums without live transitions."
+      "Map Ready=0 or native steering fault states to temporary/permanent openpilot faults without an exercised recovery/latched transition."
     ],
     "safe_now": [
-      "Add/inspect 0x51E B0[7] as target-native Ready Status input.",
-      "The current read-only parser may retain prior-art raw3->D decoding as an observation aid, but do not call D target-native validated; preserve P/R/N/B as unvalidated prior-art enums.",
-      "Keep TSS3 cruiseState.available/enabled/set-speed neutral in production CarState.",
-      "Poll the exact FRC P5 cruise Data-ID oracle set directly with the recovered SID 0x22 requests during the next synchronized capture instead of guessing replacement CAN bits."
+      "Use 0x51E B0[7] as target-native Ready Status input; keep Ready=0 fault policy dynamic until exercised.",
+      "Use 0x127 GEAR_PACKET_HYBRID on the retained hybrid shape and generation-native 0x3BF one-hot gear otherwise.",
+      "Use 0x08A ACC_STATE/B22 for cruise available/enabled and the contributor-validated B7 bit0x20 standstill state.",
+      "Use retained 0x251 B2 as set speed in mph; preserve the native 19-mph set-speed floor and manual resume from hold.",
+      "Keep optional follow-distance and detailed ACC-unavailable UI unmapped until needed; their FRC_P5 diagnostic oracles are already known."
     ]
   },
   "ready_status": {

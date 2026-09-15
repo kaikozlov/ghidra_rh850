@@ -301,6 +301,26 @@
       },
       "wire": "32-byte generation-native EPS telemetry/status PDU"
     },
+    "0x08A_acc": {
+      "acc_disengaged_frames": 2363,
+      "acc_engaged_bit_values": [
+        0,
+        1
+      ],
+      "acc_engaged_frames": 37,
+      "acc_state_values": [
+        18,
+        93
+      ],
+      "boundary": "In the retained Span segment byte22 bit0x10 asserts for every 0x5D state frame and is clear for every 0x12 state frame. This is a direct on-vehicle engaged-state join; contributor longitudinal evidence separately exercises 0x47 engaged and 0x67 standstill/hold states.",
+      "state_when_disengaged": [
+        18
+      ],
+      "state_when_engaged": [
+        93
+      ],
+      "wire": "0x08A/32 generation-native Corolla ACC state"
+    },
     "0x0AA": {
       "fault_values": {
         "FL": [
@@ -363,9 +383,9 @@
       "wire": "classic 8-byte GAS_PEDAL with Toyota classic SecOC trailer"
     },
     "0x127": {
-      "boundary": "This forward-driving capture exercises only raw value 3. Carrier, bit position, checksum, and compatibility with the prior-art D enum are supported; target-native D semantics are not independently validated, and P/R/N/B transitions still require live validation.",
+      "boundary": "This segment exercises only raw value 3 on 0x127, but the simultaneous 0x3BF D value plus the public route's direct P/R/D transitions provide an independent generation-native gear oracle for D. P/R/N/B on 0x127 retain Toyota prior-art ordering rather than direct Span transitions.",
       "checksum_valid": 3662,
-      "decode_basis": "The D label comes only from the retained Toyota prior-art GEAR_PACKET_HYBRID enum; embedded carParams is MOCK and supplies no independent gear-state oracle.",
+      "decode_basis": "The retained segment is forward-driving and the parallel generation-native 0x3BF carrier is fixed at its independently observed D value 0x10, closing raw 3 as D without relying only on the embedded MOCK CarState.",
       "frame_count": 3662,
       "gear_raw_values": [
         3
@@ -455,6 +475,25 @@
         ]
       },
       "wire": "classic 8-byte PCM_CRUISE_4 / SecOC cruise-switch prior-art carrier"
+    },
+    "0x251": {
+      "boundary": "Span's retained segment does not exercise set-speed changes (byte2 stays zero). Contributor live-drive evidence independently identifies byte2 as the retained dash set speed in mph; this segment only confirms carrier presence/shape.",
+      "byte2_values": [
+        0
+      ],
+      "frame_count": 60,
+      "wire": "classic 8-byte TSS3 cruise-display carrier"
+    },
+    "0x3BF": {
+      "boundary": "Span's moving 2025 segment carries 0x10 throughout while the car is driving forward; the retained public Corolla route independently observes 0x80=P, 0x40=R, 0x10=D transitions on this same carrier.",
+      "direct_decoded_values": [
+        "D"
+      ],
+      "frame_count": 60,
+      "raw_values": [
+        16
+      ],
+      "wire": "classic 8-byte generation-native Corolla gear packet; byte 0 is one-hot"
     },
     "0x51E": {
       "boundary": "Exact H firmware independently joins B0[7] to Techstream DID 0x1033 Ready Status. Span's moving capture corroborates Ready Status=1 operationally, but carParams is MOCK and the rlog is not an exact F181-to-firmware identity join; Ready Status=0 is not exercised.",
@@ -761,6 +800,19 @@
       "role": "PCM_CRUISE_4 / cruise-switch SecOC prior art"
     },
     {
+      "can_id": "0x251",
+      "instances": [
+        {
+          "bus": 1,
+          "count": 60,
+          "dlc": 8,
+          "first_payload": "a00000488068a080",
+          "rate_hz": 0.9998275282601069
+        }
+      ],
+      "role": "TSS3 cruise display / retained set speed"
+    },
+    {
       "can_id": "0x260",
       "instances": [],
       "role": "STEER_TORQUE_SENSOR"
@@ -817,6 +869,19 @@
       "can_id": "0x3BC",
       "instances": [],
       "role": "GEAR_PACKET"
+    },
+    {
+      "can_id": "0x3BF",
+      "instances": [
+        {
+          "bus": 1,
+          "count": 60,
+          "dlc": 8,
+          "first_payload": "100001005d8d31d4",
+          "rate_hz": 0.9994931751372895
+        }
+      ],
+      "role": "TSS3 Corolla gear packet"
     },
     {
       "can_id": "0x3F6",

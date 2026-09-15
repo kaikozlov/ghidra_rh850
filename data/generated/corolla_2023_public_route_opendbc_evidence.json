@@ -328,6 +328,70 @@
       },
       "wire": "classic 8-byte PCM_CRUISE_4 / SecOC cruise-switch prior-art carrier"
     },
+    "0x2A1": {
+      "boundary": "This independent route carrier changes on the same R and D transitions as 0x3BF. It is retained as corroboration rather than the production CarState source.",
+      "direct_observed_labels": {
+        "0x01": "P",
+        "0x02": "R",
+        "0x04": "D"
+      },
+      "frame_count": 61,
+      "raw_values": [
+        1,
+        2,
+        4
+      ],
+      "transitions": [
+        {
+          "elapsed_s": 0.830018541,
+          "payload": "0f0000000100008e",
+          "raw": 1
+        },
+        {
+          "elapsed_s": 6.496363747,
+          "payload": "0f0000000200008e",
+          "raw": 2
+        },
+        {
+          "elapsed_s": 15.859245567,
+          "payload": "0f0000000400008f",
+          "raw": 4
+        }
+      ],
+      "wire": "classic 8-byte Corolla gear corroboration packet; byte 4 is one-hot"
+    },
+    "0x3BF": {
+      "boundary": "The route itself transitions P -> R -> D in that order while byte 0 moves 0x80 -> 0x40 -> 0x10. N is not exercised in this segment; 0x20 is the remaining one-hot value and is corroborated separately by Toyota GTS+ P5/P6 P/R/N/D ordering.",
+      "direct_observed_labels": {
+        "0x10": "D",
+        "0x40": "R",
+        "0x80": "P"
+      },
+      "frame_count": 64,
+      "raw_values": [
+        16,
+        64,
+        128
+      ],
+      "transitions": [
+        {
+          "elapsed_s": 0.9499165620000001,
+          "payload": "8000010074d0de47",
+          "raw": 128
+        },
+        {
+          "elapsed_s": 6.496363747,
+          "payload": "400001006f306582",
+          "raw": 64
+        },
+        {
+          "elapsed_s": 15.859245567,
+          "payload": "100001005fc18f5f",
+          "raw": 16
+        }
+      ],
+      "wire": "classic 8-byte generation-native Corolla gear packet; byte 0 is one-hot"
+    },
     "0x51E": {
       "boundary": "Exact H firmware independently joins B0[7] to Techstream DID 0x1033 Ready Status. This route supplies operational-state corroboration only because it has no carFw/F181 identity join and does not exercise Ready Status=0.",
       "frame_count": 59,
@@ -569,6 +633,20 @@
       "required_by_older_toyota_contract": false
     },
     {
+      "can_id": "0x2A1",
+      "instances": [
+        {
+          "bus": 1,
+          "count": 61,
+          "dlc": 8,
+          "first_payload": "0f0000000100008e",
+          "rate_hz": 0.9995139181904306
+        }
+      ],
+      "older_toyota_role": "TSS3 Corolla gear-position corroboration",
+      "required_by_older_toyota_contract": false
+    },
+    {
       "can_id": "0x260",
       "instances": [],
       "older_toyota_role": "STEER_TORQUE_SENSOR",
@@ -635,6 +713,20 @@
       "instances": [],
       "older_toyota_role": "GEAR_PACKET",
       "required_by_older_toyota_contract": true
+    },
+    {
+      "can_id": "0x3BF",
+      "instances": [
+        {
+          "bus": 1,
+          "count": 64,
+          "dlc": 8,
+          "first_payload": "8000010074d0de47",
+          "rate_hz": 1.049299766781806
+        }
+      ],
+      "older_toyota_role": "TSS3 Corolla gear packet",
+      "required_by_older_toyota_contract": false
     },
     {
       "can_id": "0x3F6",
