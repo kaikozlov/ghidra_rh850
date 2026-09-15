@@ -61,16 +61,16 @@ with tempfile.TemporaryDirectory(prefix="verify-crown-f30-signer-") as td:
               "measured_reconstruct": "0x000CB640", "measured_republish": "0x000CB730",
           } and "1787 / 512" in scale["measured_internal_relation"] and "same 0xB76/0x400 gain" in scale["matched_controller"])
     side = contract["sideband_candidate"]
-    check("0x1DA sideband is explicitly candidate/live-gated",
-          side["status"] == "firmware-qualified-live-conflict-gated" and side["unused_wire_bytes"] == [1,2,3,4,5,6,7] and
+    check("0x1DA private-mailbox premise is explicitly rejected",
+          side["status"] == "rejected-as-idle-private-mailbox" and side["unused_wire_bytes"] == [1,2,3,4,5,6,7] and
           side["direct_snapshot_readers"] == [] and side["direct_raw_buffer_references"] == [] and
-          "live preflight is mandatory" in side["boundary"])
+          "Do not transmit active 0x1DA sideband frames" in side["boundary"])
     guard = contract["vehicle_state_guard"]
     check("Crown READY/stationary guard is target-native and does not import F33 gear",
           guard["ready"] == {"can_id": "0x51E", "signal": 155, "unpacker": "0x0004ACD2", "wire": "B0[7]"} and
           guard["wheel_speed"]["raw_zero"] == 6767 and guard["wheel_speed"]["signals"] == [193,195,197,199] and
           "operator-confirmed" in guard["park"])
-    check("Camry XCP/C7 ingress is not silently transferred", side["can_id"] == "0x1DA" and side["format"] == "classic")
+    check("legacy prototype carrier remains distinct from Camry C7 ingress", side["can_id"] == "0x1DA" and side["format"] == "classic")
 
     out = root / "build"
     result = subprocess.run([sys.executable, str(SIGNER_BUILDER), "--output-dir", str(out)], cwd=ROOT, check=True, capture_output=True, text=True)

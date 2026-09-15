@@ -555,7 +555,7 @@ def main() -> int:
             "runtime_policy": "Park remains explicit operator confirmation; do not turn upstream gear enum into an exact-Crown safety claim",
         },
         "sideband_candidate": {
-            "status": "firmware-qualified-live-conflict-gated",
+            "status": "rejected-as-idle-private-mailbox",
             "can_id": "0x1DA", "format": "classic", "dlc": 8, "pdu_id": SIDEBAND_PDU,
             "raw_buffer": f"0x{SIDEBAND_RAW:08X}", "raw_generation": f"0x{SIDEBAND_GENERATION:08X}",
             "configured_signal": {"signal": SIDEBAND_SIGNAL, "wire": "B0[3:0]", "value": f"0x{SIDEBAND_SIGNAL_VALUE:08X}", "generation": f"0x{SIDEBAND_SIGNAL_GENERATION:08X}", "status": f"0x{SIDEBAND_SIGNAL_STATUS:08X}"},
@@ -564,8 +564,8 @@ def main() -> int:
             "direct_raw_buffer_references": side_raw_refs,
             "loader_frame": "00 C6 5A word_le32 index",
             "runtime_frame": "00 C7 5A target_hi target_lo 00 00 seq",
-            "live_gate": "before any 0x1DA transmission, observe stock bus1 and refuse if native 0x1DA is present",
-            "boundary": "Generated-COM configuration proves B1..B7 have no configured scalar extraction and no direct reader of the sole B0-low4 snapshot. It does not prove the vehicle never publishes native 0x1DA or exclude pointer/DMA/computed consumers; live preflight is mandatory.",
+            "live_gate": "contributor preflight observed FEBE4E91 movement; exact firmware trace closes that byte to normal PDU45/0x1DA receive delivery",
+            "boundary": "Generated-COM configuration still proves B1..B7 have no configured scalar extraction and no direct reader of the sole B0-low4 snapshot, but the original private-idle-mailbox premise is false on the contributor Crown. Do not transmit active 0x1DA sideband frames; preserve the proven Camry C7 protocol while resolving/restoring a dedicated Crown ingress.",
         },
         "vehicle_state_guard": {
             "ready": {"can_id": "0x51E", "wire": "B0[7]", "signal": 155, "unpacker": "0x0004ACD2"},
@@ -578,8 +578,8 @@ def main() -> int:
         },
         "port_boundary": {
             "closed": ["RAM geometry", "startup/foreground replay", "post-receive/pre-SecOC hook", "B6 queue/buffer", "freshness state", "slot4 command5", "B6 mutation tuple", "B6 controller-equivalent target scale", "application SID23 readback", "Crown READY/stationary guard"],
-            "live_required": ["0x1DA source-conflict negative", "resident startup survival", "native B6 presence", "no-mutation native trailer equality", "stationary one-shot replacement"],
-            "not_claimed": ["literal OEM B6 engineering-unit label", "road actuation", "native 0x1DA absence"],
+            "live_required": ["dedicated host-to-resident control ingress", "resident startup survival", "native B6 presence", "no-mutation native trailer equality", "stationary one-shot replacement"],
+            "not_claimed": ["literal OEM B6 engineering-unit label", "road actuation", "safe active 0x1DA overlay"],
         },
     }
     args.out.parent.mkdir(parents=True, exist_ok=True)

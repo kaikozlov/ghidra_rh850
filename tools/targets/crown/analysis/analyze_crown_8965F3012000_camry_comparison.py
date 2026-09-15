@@ -66,6 +66,10 @@ def count_word(data: bytes, value: int) -> int:
         start = hit + 1
 
 
+def acceptance_ids(data: bytes, base: int, count: int) -> list[int]:
+    return [u32(data, base + i * 16) for i in range(count)]
+
+
 def build() -> dict:
     crown = CROWN_PATH.read_bytes()
     camry = CAMRY_PATH.read_bytes()
@@ -156,10 +160,35 @@ def build() -> dict:
             "callback_delta_histogram": {str(k): v for k, v in sorted(deltas.items(), key=lambda kv: (-kv[1], kv[0]))},
         },
         "c7_ingress_boundary": {
-            "camry_hardware_extended_id_word": "0x9FDC0002",
-            "camry_raw_occurrences": count_word(camry, 0x9FDC0002),
-            "crown_raw_occurrences": count_word(crown, 0x9FDC0002),
-            "interpretation": "The Camry C7/XCP ingress identifier is not a raw Crown CodeFlash constant; Crown control ingress must be resolved target-natively before porting the resident.",
+            "camry": {
+                "family_routes_address": "0x0002195C",
+                "family_routes": list(camry[0x2195C:0x21962]),
+                "family_counts_address": "0x00021A48",
+                "family_counts": list(struct.unpack_from("<6H", camry, 0x21A48)),
+                "family5_route": camry[0x21961],
+                "family5_count": struct.unpack_from("<H", camry, 0x21A52)[0],
+                "acceptance_rule_base": "0x000230B8",
+                "acceptance_rule_count": 47,
+                "acceptance_ids": [f"0x{x:08X}" for x in acceptance_ids(camry, 0x230B8, 47)],
+                "xcp_rule_index": 46,
+                "xcp_rule_raw_gaflid": f"0x{u32(camry, 0x230B8 + 46 * 16):08X}",
+                "request_word_occurrences": count_word(camry, 0x9FDC0002),
+                "response_word_occurrences": count_word(camry, 0x9FE00002),
+            },
+            "crown": {
+                "family_routes_address": "0x00021948",
+                "family_routes": list(crown[0x21948:0x2194E]),
+                "family_counts_address": "0x00021A6C",
+                "family_counts": list(struct.unpack_from("<6H", crown, 0x21A6C)),
+                "family5_route": crown[0x2194D],
+                "family5_count": struct.unpack_from("<H", crown, 0x21A76)[0],
+                "acceptance_rule_base": "0x00022C4C",
+                "acceptance_rule_count": 44,
+                "acceptance_ids": [f"0x{x:08X}" for x in acceptance_ids(crown, 0x22C4C, 44)],
+                "request_word_occurrences": count_word(crown, 0x9FDC0002),
+                "response_word_occurrences": count_word(crown, 0x9FE00002),
+            },
+            "interpretation": "The common generated-COM transport architecture remains, but exact Crown production configuration disables family 5 (count 0, route 0xFF), omits the Camry XCP RX rule, and carries neither 0x9FDC0002 nor 0x9FE00002. This is stronger than literal absence: the stock Camry XCP/C7 transport is configured out on 8965F3012000.",
         },
     }
 

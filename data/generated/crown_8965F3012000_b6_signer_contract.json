@@ -107,7 +107,7 @@
       "Crown READY/stationary guard"
     ],
     "live_required": [
-      "0x1DA source-conflict negative",
+      "dedicated host-to-resident control ingress",
       "resident startup survival",
       "native B6 presence",
       "no-mutation native trailer equality",
@@ -116,7 +116,7 @@
     "not_claimed": [
       "literal OEM B6 engineering-unit label",
       "road actuation",
-      "native 0x1DA absence"
+      "safe active 0x1DA overlay"
     ]
   },
   "runtime": {
@@ -273,7 +273,7 @@
     }
   },
   "sideband_candidate": {
-    "boundary": "Generated-COM configuration proves B1..B7 have no configured scalar extraction and no direct reader of the sole B0-low4 snapshot. It does not prove the vehicle never publishes native 0x1DA or exclude pointer/DMA/computed consumers; live preflight is mandatory.",
+    "boundary": "Generated-COM configuration still proves B1..B7 have no configured scalar extraction and no direct reader of the sole B0-low4 snapshot, but the original private-idle-mailbox premise is false on the contributor Crown. Do not transmit active 0x1DA sideband frames; preserve the proven Camry C7 protocol while resolving/restoring a dedicated Crown ingress.",
     "can_id": "0x1DA",
     "configured_signal": {
       "generation": "0xFEBE7BB7",
@@ -286,13 +286,13 @@
     "direct_snapshot_readers": [],
     "dlc": 8,
     "format": "classic",
-    "live_gate": "before any 0x1DA transmission, observe stock bus1 and refuse if native 0x1DA is present",
+    "live_gate": "contributor preflight observed FEBE4E91 movement; exact firmware trace closes that byte to normal PDU45/0x1DA receive delivery",
     "loader_frame": "00 C6 5A word_le32 index",
     "pdu_id": 45,
     "raw_buffer": "0xFEBE4A61",
     "raw_generation": "0xFEBE4E91",
     "runtime_frame": "00 C7 5A target_hi target_lo 00 00 seq",
-    "status": "firmware-qualified-live-conflict-gated",
+    "status": "rejected-as-idle-private-mailbox",
     "unused_wire_bytes": [
       1,
       2,
