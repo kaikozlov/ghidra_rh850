@@ -218,6 +218,13 @@ with tempfile.TemporaryDirectory(prefix="verify-crown-f30-signer-") as td:
           (kit / "runtime/tools/targets/crown/live/crown_f30_diag_mailbox_probe.py").is_file() and
           (kit / "runtime/tools/targets/crown/live/crown_f30_resident_soak.py").is_file() and
           (kit / "ram_payloads/crown_f30_b6_inline_signer_payload.bin").is_file())
+    source_commit = (kit / "SOURCE_COMMIT").read_text(encoding="utf-8").strip()
+    testing_text = (kit / "TESTING.txt").read_text(encoding="utf-8")
+    check("field kit carries source revision and self-contained current instructions",
+          kit_meta["source_commit"] == source_commit and len(source_commit) == 40 and
+          "stock functional diagnostic path on classic CAN 0x777" in testing_text and
+          "qualified=true" in testing_text and "stock_functional_mailbox_live" in testing_text and
+          "safe_to_experiment" not in testing_text)
     check("field kit usage orders mailbox preflight before install",
           kit_meta["usage"].index("NRTD/Park: ./crown-tss3-signer preflight /tmp/crown-preflight.json") <
           kit_meta["usage"].index("NRTD/Park: ./crown-tss3-signer install /tmp/crown-install.json"))

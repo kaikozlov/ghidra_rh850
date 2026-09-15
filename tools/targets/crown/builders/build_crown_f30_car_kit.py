@@ -35,6 +35,66 @@ def copy(src: Path, dst: Path) -> None:
     shutil.copy2(src, dst)
 
 
+def source_commit() -> str:
+    return subprocess.run(
+        ["git", "rev-parse", "HEAD"], cwd=ROOT, check=True, capture_output=True, text=True,
+    ).stdout.strip()
+
+
+def testing_text(commit: str) -> str:
+    return f"""Toyota Crown 8965F3012000 volatile B6 signer qualification kit
+Source commit: {commit}
+
+This is a standalone field qualification kit. It does not require a Crown openpilot port.
+It uses the openpilot checkout on the comma device only for the existing Python panda/opendbc environment.
+The resident and helper are RAM-only; a full EPS power cycle removes them.
+The active control ingress is the stock functional diagnostic path on classic CAN 0x777; this kit does not patch Crown CodeFlash.
+
+Run from this directory on the comma device:
+
+  ./crown-tss3-signer doctor
+
+NRTD / Park:
+
+  ./crown-tss3-signer preflight /tmp/crown-preflight.json
+
+Continue only if preflight reports:
+
+  qualified=true
+  verdict=stock_functional_mailbox_live
+
+The preflight sends one unsupported functional diagnostic single frame on 0x777, then verifies the stock DCM mailbox through physical SID23. It performs no RAM execution, CodeFlash write, or actuation request.
+
+Still NRTD / Park:
+
+  ./crown-tss3-signer install /tmp/crown-install.json
+
+Require verdict=inline_signer_resident_live_loader_ready.
+Then transition directly to READY / Park WITHOUT turning the EPS off.
+
+  ./crown-tss3-signer load-arm /tmp/crown-arm.json
+
+Require native_verification.native_verified=true. This is the no-mutation oracle:
+the Crown's own slot-4 signing path must reproduce Toyota's native B6 trailer byte-for-byte.
+
+First bounded replacement, READY / Park / stationary:
+
+  ./crown-tss3-signer replace-current /tmp/crown-replace-current.json
+
+This requests the current measured steering angle, not an offset.
+
+Optional repeated qualification before any openpilot integration:
+
+  ./crown-tss3-signer soak-current /tmp/crown-soak.json
+
+This repeats current-angle replacements for one second with the SAME resident.
+It does not intentionally request steering movement.
+
+At any point, a full EPS power cycle removes the resident/helper and returns the ECU to stock RAM state.
+Please retain/send back all /tmp/crown-*.json outputs.
+"""
+
+
 def build(out: Path) -> dict:
     if out.exists():
         retained = sorted(p for p in out.rglob("*") if p.is_file())
@@ -62,9 +122,14 @@ def build(out: Path) -> dict:
     copy(LAUNCHER, launcher)
     launcher.chmod(0o755)
 
+    commit = source_commit()
+    (out / "SOURCE_COMMIT").write_text(commit + "\n", encoding="utf-8")
+    (out / "TESTING.txt").write_text(testing_text(commit), encoding="utf-8")
+
     manifest = {
         "schema": "crown-f30-car-kit-v1",
         "created_at": datetime.now(UTC).isoformat(timespec="seconds"),
+        "source_commit": commit,
         "target": meta["target"],
         "review_status": meta["review_status"],
         "control": meta["loader"],
