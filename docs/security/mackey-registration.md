@@ -430,11 +430,17 @@ the Toyota routine address plus the independent sibling firmware; it is still
 not proven that the ordinary live `0x792` MACKey UDS handler itself executes on
 R4 rather than handing off from another core. Likewise, the exact
 R4/application↔`HSM_CM3` mailbox/shared-memory/service ABI is not public in the
-recovered sibling sample: that CR4 image contains the flash GCOMM service but no
-active HSM command client or obvious software AES/SHE implementation. The
-remaining decisive evidence is therefore decoded Toyota FRC R4/application
-code, a raw camera NOR dump, or a live key-update trace—not more inference from
-CPU vendor names.
+recovered sibling sample. That negative is now structural, not string-based:
+the CR4 image's static GCOMM table contains only sixteen A53-node-`0..7` <->
+R4DL0-node-`8` shared-buffer entries, its running program registers only receive
+endpoint `0x0008` and replies on `0x0800`, and service class `1` implements only
+`erase/write/read`. The library has callback-only plumbing for special logical
+participants `9/10/11`, but this image registers none of them and provides no
+data-buffer route to those participants. Thus the public CR4 artifact is a
+flash proxy, not the missing 64-byte `M1||M2||M3` HSM client. The remaining
+decisive evidence is therefore decoded Toyota FRC fixed R4/application code, a
+raw camera NOR/boot-region dump, or direct HSM/debug evidence—not more inference
+from CPU vendor names.
 
 We still need that evidence to prove the FRC's RID-`0x3002` handler-to-HSM call,
 identify the SHE slot/AuthID used for the ECU Security Key, and determine whether

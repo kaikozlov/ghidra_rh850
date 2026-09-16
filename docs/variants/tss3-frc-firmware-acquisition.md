@@ -258,6 +258,26 @@ The sibling firmware gives three unusually strong address-domain joins:
    zero) and reads from **`0x08000000 + offset`**. Thus this sibling maps serial
    NOR through a concrete `0x08000000` XIP aperture.
 
+The same binary now gives a useful **negative HSM boundary** rather than merely
+failing to reveal a recognizable crypto string. Its GCOMM shared-buffer table is
+exactly sixteen directional entries: logical nodes `0..7 -> 8` use
+`0x80000000`-side buffers and `8 -> 0..7` use `0x80100000`-side buffers. The
+running flash image registers exactly one receive callback, packed endpoint
+`0x0008`, and sends its reply on `0x0800`. The command parser accepts only
+service class `1`; the second word is exclusively `0=erase`, `1=write`, or
+`2=read`. The generic library can install callback-only interrupt hooks for
+three additional logical participants `9/10/11`, but this image never registers
+one of those hooks and has no data-buffer entry for them. Their exact hardware
+identities are therefore deliberately left unnamed.
+
+Consequently public `cr4dl0.img` is not an HSM command client hidden behind
+stripped names: it is a narrowly recovered **A53<->R4 flash RPC service**. In
+particular, this image contains no active path capable of transporting the
+64-byte `M1||M2||M3` SHE update object to `HSM_CM3` or returning the 48-byte
+`M4||M5` proof. This does not prove that Toyota uses a different inter-core
+mechanism; it proves only that the public sibling flash-service image is the
+wrong firmware artifact from which to recover that ABI.
+
 That makes the Toyota CUW address geometry substantially less mysterious. Its
 85,458,944-byte application target **`0x08E80000..0x0E000000`** sits naturally
 inside the sibling platform's `0x08xxxxxx` serial-NOR/XIP domain, while its
@@ -289,12 +309,18 @@ For the exact Camry, a raw `8646C06091` camera NOR dump or a matching
 `8646F3315000` CUW/boot image is therefore the highest-value static acquisition.
 It should be searched first for:
 
-1. ReproStd `10F5/10F6` handlers and DFI encryption-method-1 dispatch;
-2. the payload decrypt key/KDF/IV source;
-3. RequiredSpec04 256-byte signature verification and public-key material;
-4. the normalized `LTA/LDA -> TSS request -> arbitration result` copy/select
+1. the fixed boot/R4 region **outside** the CUW-updated `0x08E80000..0x0E000000`
+   span, rather than assuming the 81.5-MiB application body owns secure services;
+2. the current key-management `10 4F` / RID-`0x3002` handler and its exact
+   `M1||M2||M3 -> HSM_CM3 -> M4||M5` marshalling/shared-memory/doorbell path;
+3. the SHE slot/AuthID/UID/counter mapping and the nonvolatile backing used by
+   `HSM_CM3` for mutable key state;
+4. ReproStd `10F5/10F6` handlers and DFI encryption-method-1 dispatch;
+5. the payload decrypt key/KDF/IV source;
+6. RequiredSpec04 256-byte signature verification and public-key material;
+7. the normalized `LTA/LDA -> TSS request -> arbitration result` copy/select
    graph exposed by recorder IDs `5631/5531 -> 5282 -> 5285/57DE`;
-5. the downstream handoff that ultimately becomes the protected steering command
+8. the downstream handoff that ultimately becomes the protected steering command
    accepted by EPS.
 
 Until that image is decoded, the most direct FRC implementation oracle is the
