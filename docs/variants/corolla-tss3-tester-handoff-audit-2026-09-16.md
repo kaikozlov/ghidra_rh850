@@ -189,3 +189,28 @@ ready. Signing agreement alone does not prove steering acceptance or safe
 vehicle behavior. Current comma safety documentation separately describes
 software-in-the-loop, hardware-in-the-loop, and in-vehicle testing:
 <https://docs.comma.ai/concepts/safety/>.
+
+## Independent recheck of the unchanged runtime
+
+A subsequent review of the same runtime/opendbc revisions reran the Toyota,
+firmware-fingerprinting and Toyota safety suites: **324 passed, 262 skipped,
+8,106 subtests passed**. No live interface or controller output was exercised.
+
+A receive-only CarInterface fixture explicitly asserted the decoded
+`EPS_FAULT_INHIBIT` field and preserved the additive-byte increment. The parser
+reported the field as 1 and `canValid=true`, while both `steerFaultTemporary`
+and `steerFaultPermanent` remained false. This confirms the missing fault
+reporting as executable behavior, not just a source-comment concern.
+
+AST-isolated passive tester functions independently reproduced acceptance of
+all four asserted wheel-fault flags, and acceptance of wheel/angle samples
+approximately 1.99 seconds older than READY. The healthy fixture was accepted
+and the missing-angle fixture was rejected. No signer module, payload, Panda
+connection or transmit path was used. The HYBRID-identity/absent-ordinal-carrier
+fixture again selected only the ordinal gear parser, not the one-hot fallback.
+
+These checks leave the disposition unchanged. Existing green tests do not
+cover all required behavior; the kit and port are not ready for an
+install-then-drive assurance. The architecture and runtime README now link
+this audit at the previously advertised tester handoff. No runtime fixes,
+kit rebuild or vehicle validation are claimed by this documentation update.

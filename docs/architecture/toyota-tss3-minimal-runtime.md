@@ -177,6 +177,12 @@ native B6 MAC with Toyota command 5, and only then permit C7 replacement. The
 old target-specific extended-family-5 signers remain in the tree as historical
 and recovery artifacts, not as the normal openpilot control transport.
 
+> **Tester-handoff audit, 2026-09-16:** the following is the intended flow,
+> not a qualified install-then-drive procedure. The current Corolla kit has
+> unresolved post-startup identity-check, sensor-validation and failure-path
+> defects; the port also has incomplete steering-fault/cancel handling. See
+> [the offline audit](../variants/corolla-tss3-tester-handoff-audit-2026-09-16.md).
+
 For a tester using the maintained `kai-openpilot` TSS3 branch, the portable kit
 packages that ladder behind a guided launcher. Build the exact target on the
 analysis checkout, copy the output directory to comma hardware, and run:
