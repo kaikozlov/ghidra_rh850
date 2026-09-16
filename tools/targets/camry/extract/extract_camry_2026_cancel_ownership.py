@@ -17,9 +17,14 @@ from collections import Counter, deque
 from itertools import chain
 from pathlib import Path
 
-from tools.targets.camry.extract.extract_camry_2026_cancel_windows import WINDOWS
-
 ROOT = Path(__file__).resolve().parents[4]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from tools.targets.camry.extract.extract_camry_2026_cancel_windows import (
+    WINDOWS,
+)
+
 FIXTURES = ROOT / 'tests/fixtures'
 ROUTES = (
     ('2026-09-01', '00000037--dec6fe39cb'),

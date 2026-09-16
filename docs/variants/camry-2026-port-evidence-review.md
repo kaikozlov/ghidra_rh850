@@ -567,8 +567,8 @@ appropriate original metadata/schema evidence.
   portable source reduction and complete evidence needed by the new tests.
 
 Run `tools/test camry_2026_cancel_ownership camry_2026_cancel_evidence`.
-The new suite contains 16 tests, including the positive-control classifier
-cases. Receiver acceptance remains explicitly absent from the result; passing
+The new suite contains 17 tests, including the standalone extractor and
+positive-control classifier cases. Receiver acceptance remains explicitly absent from the result; passing
 these tests is not presented as completed automatic cancellation.
 
 Both new fixtures were independently re-extracted from the original rlogs into
@@ -584,3 +584,63 @@ Discriminating between them requires the relevant receiver's implementation
 or an independent acceptance observation. The available exact EPS application
 is not a substitute for that cruise-receiver implementation. No claim of
 sender completion follows from the new passive mappings.
+
+### Independent control-layer cancellation causality
+
+An additional reduction starts at the ordinary
+`carControl.cruiseControl.cancel` rising edge, rather than discovering episodes
+from a particular outgoing CAN identifier. Its 79 explicitly retained requests
+come from 71 SHA-256-checked original rlogs across 16 routes. This is a different
+population from the 58 actual `sendcan 0x101` episodes described above; the two
+counts must not be added or described as interchangeable.
+
+Every one of the 79 requests is preceded by a source-real physical driver
+assertion: 53 CANCEL-switch cases and 26 brake cases. The observed lead is
+4.498020..8.364384 ms (median 5.259704 ms). All windows contain correct-bus
+switch and brake observations on both sides of the host request. Historical
+repin sources use physical input bus0 and native cruise bus2; the 11 retained
+stock-harness requests use bus1 for both. Returned TX copies and other buses
+are not used as driver inputs. The reducer verifies the brake additive
+checksum and the recovered switch's complementary bit predicate; it does not
+claim cryptographic verification of the protected switch trailer.
+
+Native cruise is active before all 79 requests. Of those, 76 have an observed
+release within 500 ms. Three have no release in that interval and are retained
+as such, not converted into successful cancellation. In every release case,
+the already preceding driver input prevents attributing release to an
+independently initiated host command. `sendcan` is recorded as an attempt,
+never as a receiving ECU acknowledgement. Missing event names in the old
+`onroadEvents` message do not overcome this raw-CAN timing evidence.
+
+The analysis also distinguishes a driver input between host request and cruise
+release, an input only after release, missing input coverage, already-inactive
+cruise, and an unwitnessed/held host flag. Even a release without a competing
+observed driver input is only a candidate for further analysis, not an automatic
+acceptance claim: unobserved causes and receiver ownership still matter.
+These are offline evidence classifications, not new controller timing policy.
+
+Reproduction uses
+`tools/targets/camry/analysis/analyze_camry_2026_cancel_request_causality.py`,
+`tests/fixtures/camry_2026_cancel_request_causality.jsonl.gz`, and
+`data/generated/camry_2026_cancel_request_causality.json`. The extractor has
+reproduced the fixture and report byte-for-byte from the original source files.
+The 12 regression tests in
+`tests/verify_camry_2026_cancel_request_causality.py` cover both the real windows
+and independent synthetic counterexamples. Run
+`tools/test camry_2026_cancel_request_causality camry_2026_cancel_evidence`.
+
+The configured North-American Toyota ECU-supply-change lookup entry was also
+checked through its ordinary public web entry. It redirected to a login page;
+no account session, calibration result, or receiver firmware was acquired.
+No calibration URL is inferred from a current software number. The available
+EPS image cannot establish the cruise receiver's behavior, and the locally
+retained Camry node0724 Engine/MG update is not an exact FRC/Brake receiver image.
+This follow-up therefore adds no cancellation transmitter or vehicle mutation.
+
+All three new cancellation fixtures were finally re-extracted from their
+original rlogs and matched byte-for-byte, including the all-bus windows, the
+463-segment host-transmission census, and the 79 control-layer request windows.
+The three selected cancellation suites pass with zero failures or skips; the
+new ownership and request-causality suites contain 17 and 12 tests respectively.
+The direct extraction command also runs from outside the repository after
+fixing its project-root import bootstrap. Python lint and diff checks pass.

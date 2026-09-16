@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -163,6 +164,12 @@ class TestWitnessClassifier(unittest.TestCase):
 
     def test_initially_asserted_mirror_is_not_a_rising_edge(self):
         self.assertEqual(evidence.edges([(0, b'\x20'), (1, b'\x20'), (2, b'\x00')], 5), [])
+
+    def test_extractor_cli_bootstraps_repo_from_another_directory(self):
+        script = ROOT / 'tools/targets/camry/extract/extract_camry_2026_cancel_ownership.py'
+        with tempfile.TemporaryDirectory() as temp:
+            subprocess.run([sys.executable, str(script), '--help'], cwd=temp,
+                           capture_output=True, text=True, check=True, timeout=15)
 
     def test_fixture_compression_is_deterministic_and_preserves_equal_timestamps(self):
         rows = [[0, self.T, 'can', []], [0, self.T, 'sendcan', []]]

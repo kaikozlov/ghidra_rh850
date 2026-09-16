@@ -1148,3 +1148,6 @@ tests = ["tests/verify_camry_2026_cancel_evidence.py"]
 
 [suite.camry_2026_cancel_ownership]
 tests = ["tests/verify_camry_2026_cancel_ownership.py"]
+
+[suite.camry_2026_cancel_request_causality]
+tests = ["tests/verify_camry_2026_cancel_request_causality.py"]
