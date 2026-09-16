@@ -32,6 +32,7 @@ RUNTIME_FILES = (
     "exploit/ephemeral_runtime/f33_panda_lease.sh",
     "tools/targets/crown/live/crown_f30_diag_mailbox_probe.py",
     "tools/targets/crown/live/crown_f30_resident_soak.py",
+    "tools/targets/crown/live/crown_f30_authority_probe.py",
 )
 
 
@@ -100,6 +101,15 @@ Optional repeated qualification before any openpilot integration:
 This repeats current-angle replacements for one second with the SAME resident.
 It does not intentionally request steering movement.
 
+Only after the current-angle soak is clean, the next moving authority discriminator is:
+
+  ./crown-tss3-signer authority-pulse 1.0 /tmp/crown-authority-plus1.json
+
+This derives a target from the fresh measured 0x025 angle, holds +1.0 degree for
+250 ms while the car is already moving, records bus-1 0x025/0x0AA/READY throughout,
+then stops C7 so native B6 resumes unchanged. It requires observable wheel motion but
+does not hard-code an unrecovered Crown minimum-speed threshold.
+
 At any point, a full EPS power cycle removes the resident/helper and returns the ECU to stock RAM state.
 Please retain/send back all /tmp/crown-*.json outputs.
 """
@@ -167,6 +177,7 @@ def build(out: Path) -> dict:
             "continue only if native_verification.native_verified=true",
             "READY/Park/stationary: ./crown-tss3-signer replace-current /tmp/crown-replace-current.json",
             "optional repeated qualification without an openpilot port: ./crown-tss3-signer soak-current /tmp/crown-soak.json",
+            "moving authority discriminator only after clean soak: ./crown-tss3-signer authority-pulse 1.0 /tmp/crown-authority-plus1.json",
             "preflight/install/load/control use stock functional UDS 0x777; no Crown CodeFlash patch is used",
             "replace-current/soak-current use the fresh Crown 0x025 measured angle; full EPS power cycle removes the resident",
         ],

@@ -7,6 +7,7 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -14,6 +15,7 @@ sys.path.insert(0, str(ROOT))
 from exploit.ephemeral_runtime import crown_f30_b6_inline_signer as host
 from tools.targets.crown.live import crown_f30_resident_soak as soak
 from tools.targets.crown.live import crown_f30_diag_mailbox_probe as mailbox_probe
+from tools.targets.crown.live import crown_f30_authority_probe as authority_probe
 
 CONTRACT_BUILDER = ROOT / "tools/targets/crown/builders/build_crown_8965F3012000_b6_signer_contract.py"
 CONTRACT = ROOT / "data/generated/crown_8965F3012000_b6_signer_contract.json"
@@ -147,6 +149,42 @@ with tempfile.TemporaryDirectory(prefix="verify-crown-f30-signer-") as td:
           "monitor._alloutput_mode" not in host_source and host_source.count("set_canfd_auto(CONTROL_BUS, False)") == 2)
     check("plan makes functional mailbox proof the first vehicle action", "prove stock functional 0x777 mailbox delivery" in plan["sequence"][0])
     check("standalone mailbox probe frame exact", mailbox_probe.PROBE_FRAME == bytes.fromhex("07c7c7a512340000"))
+    check("authority pulse remains a separate bounded host-side probe",
+          authority_probe.BASELINE_SECONDS == 0.350 and authority_probe.PULSE_DURATION_SECONDS == 0.250 and
+          authority_probe.RATE_HZ == 50.0 and authority_probe.MAX_ABS_OFFSET_DEG == 1.0 and
+          authority_probe.DIRECTIONAL_RESPONSE_DEG == 0.2)
+    raw, deg = authority_probe.offset_target(start_deg=-3.8, offset_deg=1.0)
+    check("authority pulse derives target from fresh measured angle",
+          raw == host.target_raw_from_degrees(-2.8) and abs(deg - host.target_degrees_from_raw(raw)) < 1e-15)
+    check("authority pulse direction metric is sign-correct",
+          authority_probe.directional_delta(start_deg=0.0, offset_deg=1.0, angles=[-0.1, 0.1, 0.4]) == 0.4 and
+          authority_probe.directional_delta(start_deg=0.0, offset_deg=-1.0, angles=[0.1, -0.2, -0.5]) == 0.5)
+    class AuthorityPanda:
+        def __init__(self, rows):
+            self.rows = list(rows)
+        def can_recv(self):
+            rows, self.rows = self.rows, []
+            return rows
+    moving_wheel = bytes.fromhex("1ad31ad31ad31ad3")
+    authority_angle = bytes(32)
+    authority_rows = [
+        (host.READY_CAN_ID, 0, bytes.fromhex("8000000000000000"), 1),
+        (host.WHEEL_SPEED_CAN_ID, 0, moving_wheel, 1),
+        (host.STEERING_ANGLE_CAN_ID, 0, authority_angle, 1),
+    ]
+    authority_samples = []
+    with mock.patch.object(authority_probe, "BASELINE_SECONDS", 0.001):
+        baseline = authority_probe.moving_baseline(AuthorityPanda(authority_rows), origin=__import__("time").monotonic(), samples=authority_samples)
+    check("authority pulse baseline requires READY and observable wheel motion",
+          baseline["ready"]["ready"] == 1 and max(abs(x) for x in baseline["wheel_speed"]["centered_raw"]) == 100 and
+          baseline["steering_angle"]["angle_deg"] == 0.0)
+    for bad in (0.0, 1.01, -1.01):
+        try:
+            authority_probe.offset_target(start_deg=0.0, offset_deg=bad)
+        except authority_probe.AuthorityProbeError:
+            pass
+        else:
+            raise AssertionError(f"authority offset bound accepted {bad}")
     post_replace_raw = bytearray(0x20)
     post_replace_raw[0x08:0x0C] = bytes.fromhex("d4a56f15")
     post_replace_raw[0x0C:0x10] = bytes.fromhex("11223344")
@@ -225,6 +263,7 @@ with tempfile.TemporaryDirectory(prefix="verify-crown-f30-signer-") as td:
           (kit / "crown-tss3-signer").is_file() and
           (kit / "runtime/tools/targets/crown/live/crown_f30_diag_mailbox_probe.py").is_file() and
           (kit / "runtime/tools/targets/crown/live/crown_f30_resident_soak.py").is_file() and
+          (kit / "runtime/tools/targets/crown/live/crown_f30_authority_probe.py").is_file() and
           (kit / "runtime/tsk/lib/programming.py").is_file() and
           (kit / "runtime/tsk/lib/diagnostic_route.py").is_file() and
           (kit / "ram_payloads/crown_f30_b6_inline_signer_payload.bin").is_file())
@@ -278,6 +317,9 @@ with tempfile.TemporaryDirectory(prefix="verify-crown-f30-signer-") as td:
     check("field kit exposes repeated current-angle qualification without changing the resident",
           "soak-current" in launcher_text and
           any("soak-current" in row for row in kit_meta["usage"]))
+    check("field kit exposes bounded moving authority pulse without changing resident",
+          "authority-pulse" in launcher_text and
+          any("authority-pulse 1.0" in row for row in kit_meta["usage"]))
     soak_tool = kit / "runtime/tools/targets/crown/live/crown_f30_resident_soak.py"
     soak_plan = subprocess.run([
         sys.executable, str(soak_tool),
