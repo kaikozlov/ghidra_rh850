@@ -3731,23 +3731,43 @@ Current GTS+ adds a direct official `MAC_01` RID-`0x1010` route in its pinned
 - the same DLL also contains the newer `31 01/03 30 02` helpers, so both
   transports intentionally coexist.
 
-The current host frontend does not statically expose which selected ECU chooses
-which route. `UtilityPlusFrontNK.dll` imports `UtilityGene.dll` ordinals
-98/99/100 and calls them as the generic MACKey validation/update-before/
-update-after wrappers. Those `UtilityGene` exports resolve to RVAs `0xE510`,
-`0xE2C0`, and `0xDF20`, but the shipped `UtilityGene.dll` has only the first
-`0x1000` bytes of its much larger virtual `.text` raw-backed; all three wrappers
-fall outside that raw-backed prefix. Therefore the package proves both wire
-implementations and the generic frontend orchestration, but it does **not**
-provide a static category/FRC-to-RID selector body. A live trace or target
-firmware is still required for that join. This boundary is pinned in
-`tests/verify_gtsplus_mackey_rid1010.py`.
+The current frontend selection is now instruction-closed. `UtilityPlusFrontNK.dll`
+imports `UtilityGene.dll` ordinals 98/99/100 and calls them as MACKey
+validation/update-before/update-after for command cases `0x15/0x16/0x17`.
+Although the installed `UtilityGene.dll` is a hollow Crackproof image, TMS-081's
+same-release installer recovery yields Toyota's original plaintext twin
+(SHA-256 `a844d3045b2cb780a63e3959ec04bd27baab4ea7195080876bbdf6d2cf86c4cc`).
+The recovered wrappers close the selected current network flow:
+
+- master endpoint `0x763` enters `10 4F` and uses `27 41/42` with a 16-byte
+  seed/key;
+- topology discovery checks participant `22 1000` bit0 and reads the admitted
+  endpoint's 16-byte `22 1010` identity;
+- `Ex2MAC_01_S_KeyUpdate_after` reconnects each selected ECU, enters `10 4F`,
+  sends `31 01 30 02 || M1[16] || M2[32] || M3[16]`, and polls
+  `31 03 30 02` for the result/proof.
+
+Thus **RID `0x3002` is the implementation selected by the current
+`UtilityPlusFrontNK -> UtilityGene` Update-ECU-Security-Key path**. The separate
+RID-`0x1010` state machine in current `UtilityExNK2.dll` remains genuine
+multi-generation/alternate support, but it is not selected by these frontend
+command cases. `tests/verify_gtsplus_mackey_rid1010.py` now recovers the
+installer plaintext independently and pins both the coexistence and selected
+flow.
+
+One camera-specific boundary remains: ordinary `FRC_P5` uses DID `0x1010` for
+FOE-origin/roll calibration and exposes no ordinary Data-Monitor DID `0x1000`.
+The MACKey `22 1000/1010` participant namespace therefore cannot be equated to
+ordinary FRC application DIDs. A live camera key-update transcript or decoded
+FRC handler is still required to prove how the FRC is admitted/addressed inside
+this generic `0x3002` workflow.
 
 That current-GTS result closes a previous over-bounding statement: Toyota
 service tooling **does** have an exact diagnostic join to the RID-`0x1010`
 M1–M5 routine used by Sienna firmware and by the yc 2021 Venza SRS firmware.
-It still does not prove which family branch a specific live vehicle selects
-without a transcript.
+The current UtilityPlusFront network-update branch is now statically selected as
+RID `0x3002`; a transcript is still required to prove a specific ECU's
+participant admission and any alternate-family use outside that branch.
 
 This remains distinct from ordinary UDS SecurityAccess and from CUW reflash
 authorization. The `M1/M2/M3 -> M4/M5` object is the **standard AUTOSAR SHE

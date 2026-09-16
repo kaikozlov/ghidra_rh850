@@ -262,19 +262,37 @@ The same GTS+ DLL still carries the newer `0x3002` start/result helpers, so this
 is deliberate multi-generation support rather than a replacement of one
 protocol by the other.
 
-The remaining live-family selector is hidden one layer higher. Current
+The current front-end selector is now recovered one layer higher. Current
 `UtilityPlusFrontNK.dll` (SHA-256
 `3472091a3c2f8df114fbab491dc442c3aee25a3485ce6390653413cb029d871a`)
-imports and calls the generic `UtilityGene.dll` MACKey wrappers by ordinals
+imports and calls only the `UtilityGene.dll` MACKey wrappers by ordinals
 98/99/100: `Ex2MAC_01_S_KeyValidation`, `...KeyUpdate_before`, and
-`...KeyUpdate_after`. The corresponding exports in `UtilityGene.dll` (SHA-256
-`7412d320fcde90fff48c6511e638633e123e1068a4e54399a80c63d3c11c007e`)
-are RVAs `0xE510`, `0xE2C0`, and `0xDF20`. All three lie inside virtual `.text`
-but beyond that image's raw-backed `.text` prefix (`RVA 0x1000..0x1FFF`; virtual
-extent through `0x32FFF`). The shipped file therefore does not contain the
-wrapper bodies needed to statically join a specific selected ECU/family to the
-RID-`0x1010` versus RID-`0x3002` backend. This is a packaging/static-evidence
-boundary, not evidence that either route is unreachable.
+`...KeyUpdate_after`. The installed `UtilityGene.dll` is a Crackproof hollow PE
+(SHA-256 `7412d320...c007e`), but Toyota's exact same-release installer carries
+the original plaintext `GTSPlus\bin\UtilityGene.dll`; the already-verified
+body-recovery path reproduces it at SHA-256
+`a844d3045b2cb780a63e3959ec04bd27baab4ea7195080876bbdf6d2cf86c4cc`.
+Its ordinals 98/99/100 are the same RVAs `0xE510`, `0xE2C0`, and `0xDF20`.
+
+That recovered body closes the **current UtilityPlusFront-selected network key
+update** rather than merely showing two available backends:
+
+- the security master is opened at diagnostic address `0x763`;
+- key-management mode is entered with `10 4F`;
+- SecurityAccess is `27 41 -> 16-byte seed`, then `27 42 || key[16]`;
+- topology discovery walks the master `0x1100` family, opens discovered ECU
+  endpoints, tests `22 10 00` bit 0, and reads a 16-byte `22 10 10` identity for
+  admitted participants;
+- after Toyota's server supplies each selected participant's exchange record,
+  the per-ECU updater reconnects to that endpoint, enters `10 4F`, sends
+  **`31 01 30 02 || M1[16] || M2[32] || M3[16]`**, and polls
+  **`31 03 30 02`** for state plus `M4[32] || M5[16]`.
+
+Current `UtilityExNK2.dll` still contains the independent RID-`0x1010` MACKey
+state machine described above, so RID `0x1010` remains a real supported Toyota
+protocol family. It is **not**, however, the implementation selected by the
+current `UtilityPlusFrontNK -> UtilityGene` command-`0x15/0x16/0x17` path. The
+former "wrapper bodies unavailable" boundary is withdrawn.
 
 The firmware comparison is now:
 
@@ -324,17 +342,25 @@ M1--M5 exchange-key family:
 31 01 10 10 || M1 || M2 || M3    / 31 03 10 10
 ```
 
-Consequently the best current model is that a P5 FRC receives the **standard
-AUTOSAR SHE `CMD_LOAD_KEY` memory-update package**, carried inside a
-Toyota-selected RoutineControl transport and terminated by a target-local
-secure-key backend. We do **not** yet have a retained `0x792` key-write trace or
-decoded FRC application implementation, so the exact camera selector (`0x1010`
-versus `0x3002`), its local SHE/HSM implementation, and the relation among
-`SafekeyNumber`, Toyota's server-side MCU ID, and the SHE UID remain unproved.
-The `UtilityPlusFrontNK -> UtilityGene` static pass above exhausts the obvious
-current-GTS host join: the family-selector wrappers are imported and invoked,
-but their shipped `UtilityGene` bodies are not raw-backed, so the FRC RID cannot
-be recovered honestly from this package alone.
+Consequently the P5 FRC receives the **standard AUTOSAR SHE `CMD_LOAD_KEY`
+memory-update object**; current service tooling's selected network-wide update
+implementation carries selected ECU updates over `10 4F` + RID `0x3002` as
+shown above. The remaining FRC-specific boundary is narrower: we do **not** yet
+have a retained `0x792` key-write trace or decoded FRC application proving that
+the camera is one of the `22 1000`-admitted endpoints in that exact transaction,
+or showing its local UDS-to-HSM call ABI.
+
+That distinction matters because the ordinary current `FRC_P5` diagnostic
+catalog uses DID `0x1010` for **Field FOE Origin X/Y gap / Roll Angle Gap** and
+publishes no ordinary Data-Monitor DID `0x1000`. Therefore the generic MACKey
+`22 1000`/`22 1010` discovery records must not be identified with the camera's
+ordinary application DIDs from the DDB. The key-management flow may expose a
+special namespace/context after `10 4F`, may address a security endpoint rather
+than the ordinary application catalog, or the camera may be admitted through a
+different topology path. A live Update-ECU-Security-Key trace or decoded FRC
+handler is required to choose among those mechanisms. `SafekeyNumber`, Toyota's
+server-side MCU ID, and the SHE UID likewise remain related but not yet proven
+equal.
 
 Nothing in that conclusion requires Renesas hardware. `M1..M5` are the
 hardware-neutral **SHE protocol contract**; Renesas ICU-S is only one concrete

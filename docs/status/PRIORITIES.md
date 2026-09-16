@@ -190,11 +190,22 @@ CBC differential oracle (best top-candidate two-chain 64-KiB identity ~0.434%,
 zero >=1%). Do not spend another pass combining the same CUW metadata/EPS roots;
 new decoder/root evidence is required. The retained same-generation TSS3 Prius teardown
 (`REFERENCE/tss3_camera_report`) identifies a TMPV7706XBG plus S25HS01GT
-128-MiB serial NOR, making a **full raw NOR dump from a matching/sacrificial
-camera** the preferred next static acquisition; do not assume a virtual-to-NOR
-offset until the full dump or target-native map proves one. Do not look for
-those handlers in the tracked Sienna/H EPS, where TMS-029 already closes
-standard ReproStd `10F5/10F6` as absent/rejected.
+128-MiB serial NOR. DTS Insight's public TMPV770 startup guide now independently
+identifies hidden Core0 **`HSM_CM3`** and its dedicated secure-debug gate, so the
+FRC platform's protected key backend is concrete: the missing software boundary
+is the diagnostic/application-core -> HSM Cortex-M3 service ABI. Separately,
+current GTS+'s recovered plaintext `UtilityGene.dll` closes the selected network
+**Update ECU Security Key** frontend as master `0x763`, `10 4F`, `27 41/42`,
+participant `22 1000`/16-byte `22 1010`, then per-selected-ECU `10 4F` +
+`31 01/03 30 02` SHE M1--M5. Current `FRC_P5` ordinary DID `0x1010` is FOE/roll
+calibration and has no ordinary `0x1000` row, so a live key-update trace or decoded
+camera handler is still needed to identify the FRC's special participant namespace.
+A **full raw NOR dump from a matching/sacrificial camera** remains the preferred
+next static acquisition because it can expose the R4/A53 diagnostic client and
+fixed boot/HSM-IPC code omitted from CUW. Do not assume a virtual-to-NOR offset
+until the full dump or target-native map proves one. Do not look for those handlers
+in the tracked Sienna/H EPS, where TMS-029 already closes standard ReproStd
+`10F5/10F6` as absent/rejected.
 The V18 Unified CID path now gives a concrete identity checklist for that
 acquisition: preserve generic F181, F18C, the package/current CID, and especially
 the camera-special direct `0x792→0x79A` `22 1F FF` / `62 1F FF` SWIN response
