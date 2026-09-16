@@ -1504,12 +1504,27 @@ A same-generation TSS3 hardware teardown retained locally under
 `REFERENCE/tss3_camera_report` supplies physical acquisition context without
 being promoted to an exact-Corolla board identity: the 2023 Prius/Denso
 `8646C-47130` front camera uses Toshiba **TMPV7706XBG (Visconti5)** plus an
-Infineon **S25HS01GT 128-MiB serial NOR**.  The CUW updates only the logical
-`0x08E80000..0x0E000000` target span and a small routine range, so a raw **full
-128-MiB NOR acquisition** from a matching/sacrificial camera is higher-value
-than another host-side CUW pass: it can recover fixed boot/programming regions
-omitted from the CUW and may expose the encryption-method-1 / `10F5` / `10F6`
-consumer.  The tempting `0x08000000` NOR-aperture interpretation (which would
+Infineon **S25HS01GT 128-MiB serial NOR**.  DTS Insight's public TMPV770 startup
+guide independently exposes the SoC's otherwise-undocumented security core:
+its Cortex-M3 + dual-Cortex-R4 AMP target calls Core 0 **`HSM_CM3`**, provides a
+dedicated `SDAUTH.DAPSEL` HSM/CM3 JTAG selection, and requires SoC-addon
+security authentication when the TMPV770 security gate is closed.  The pinned
+workspace source is `StartupGuide_S046_TMPV770_j01.pdf`, SHA-256
+`2a2a3a0e64d1c9b578c16e48a89f731ae0541becaba032a42318f4965bde1af5`, indexed
+at <https://support.dts-insight.co.jp/product/support_advice_trqer/download/>.
+This identifies an on-die protected **HSM Cortex-M3** as the concrete secure
+backend available to Denso's FRC platform; it still does not prove the Toyota
+UDS→HSM service ABI or which application/real-time core owns diagnostics.
+
+The CUW updates only the logical `0x08E80000..0x0E000000` target span and a
+small routine range, so a raw **full 128-MiB NOR acquisition** from a
+matching/sacrificial camera is now the preferred next static artifact: if
+ReproStd encryption method 1 is transport decryption before programming, that
+dump can expose plaintext R4/A53 boot/application code plus fixed regions omitted
+from the CUW; if the NOR itself remains encrypted, it still supplies the boot
+headers and non-updated consumer needed to recover the transform.  Either way it
+is the shortest path to the `10F5`/`10F6` decoder and the UDS→`HSM_CM3` call
+boundary.  The tempting `0x08000000` NOR-aperture interpretation (which would
 map the CUW span to physical offsets `0x00E80000..0x06000000`) is only a layout
 hypothesis until target-native mapping or a dump proves it; acquisition should
 therefore read the entire device rather than assume that mapping.

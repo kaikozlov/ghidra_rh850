@@ -341,9 +341,32 @@ hardware-neutral **SHE protocol contract**; Renesas ICU-S is only one concrete
 implementation of that contract. The yc Venza SRS specimen is the useful
 control: it accepts the same standard RID-`0x1010` `M1/M2/M3 -> M4/M5` memory
 update while reaching its secure subsystem through a different local
-secure-service ABI than the tracked EPS. A non-Renesas FRC can therefore
-implement the same SHE semantics in another HSM/security engine or equivalent
-protected subsystem. The exact FRC SoC/HSM remains outside the decoded corpus.
+secure-service ABI than the tracked EPS.
+
+For the same-generation Denso/TSS3 front-camera platform we now have a concrete
+non-Renesas secure-hardware candidate rather than a generic possibility. The
+retained TechInsights teardown of Denso camera `8646C-47130` identifies Toshiba
+**TMPV7706XBG / Visconti5** as the image-recognition SoC. DTS Insight's public
+`StartupGuide_S046_TMPV770_j01.pdf` (2020-02-20; locally retained workspace copy
+SHA-256 `2a2a3a0e64d1c9b578c16e48a89f731ae0541becaba032a42318f4965bde1af5`)
+then exposes a core deliberately omitted from Toshiba's ordinary Visconti5
+marketing table: its Cortex-M3 + dual-Cortex-R4 AMP configuration names **Core 0
+`HSM_CM3`**. The guide gives that HSM/CM3 a dedicated debug selection and
+security-gate path (`SDAUTH.DAPSEL` selects the HSM/CM3 JTAG interface), and says
+a closed TMPV770 security gate requires SoC-addon authentication before the
+core can be attached. Its debugger view uses Cortex-M3/AHB-AP with `APSel=2`,
+APB-AP `APSel=1`, and AXI-AP `APSel=0`. The public guide is indexed by DTS
+Insight at <https://support.dts-insight.co.jp/product/support_advice_trqer/download/>.
+
+That closes the **hardware-backend** question at the platform level: TMPV770
+contains an on-die protected Cortex-M3 hardware-security-module domain capable
+of being the FRC's SHE key store/crypto endpoint. It does **not yet close the
+Toyota software call path**. We still need decoded FRC boot/application code or
+a live trace to prove that the camera's RID-`0x1010`/`0x3002` handler forwards
+`M1/M2/M3` to `HSM_CM3`, recover the mailbox/shared-memory/service ABI, identify
+the SHE slot/AuthID used for the ECU Security Key, and determine whether the
+same HSM also owns runtime SecOC CMAC generation. Do not assign the UDS handler
+to Cortex-R4 versus Cortex-A53 from the core topology alone.
 
 This provisioning result must remain separate from **runtime protected-message
 signing**. The captured native FRC-side Bus-1 periodic family is exact AUTOSAR
