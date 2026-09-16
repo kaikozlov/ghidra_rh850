@@ -1077,10 +1077,31 @@ longitudinal can be reconsidered only after a clean `0x08A` source-ownership pat
 qualified—source suppression/sole-emitter control or an equivalent pre-signing handoff—
 because stock Toyota-B exposes this request family on the unsplit chassis network.
 
-This correction does **not** change Corolla identification. Both retained exact EPS
-F181 records remain direct specimen observations (`8965F1208000 / 8A3111202000` and
-`8965F1208000 / 8A3111213000`), and the current GTS+ fleet tables independently map the
-curated NA Corolla/Corolla-HV vehicle-type set to the same H/F platform family.
+This correction does **not** split Corolla identification into separate openpilot
+platforms. Both retained exact EPS F181 records remain direct specimen observations
+(`8965F1208000 / 8A3111202000` and `8965F1208000 / 8A3111213000`), and current GTS+
+independently shows the supported NA identities sharing the same core TSS3 stack while
+preserving the powertrain subtype:
+
+- ICE: vehicle types `12512/12513/12516/12821/12822/12827`, install family
+  `EMPS+ABS+FRC` (`405/435/498`);
+- HV: vehicle types `12514/12515/12823/12824`, install family
+  `EMPS+ABS+BRKBST+FRC` (`405/435/466/498`).
+
+Thus ICE/HV remain one `TOYOTA_COROLLA_TSS3` control platform; HV adds category 466
+Brake Booster rather than changing the recovered EPS API. Runtime subtype detection is
+positive-evidence based: a queried Hybrid Control ECU or the generation-native `0x127`
+gear PDU sets `ToyotaFlags.HYBRID`; a category-466 `electricBrakeBooster` `carFw` entry
+is also accepted when available. The implementation normalizes Cap'n Proto `CarFw.ecu`
+to its raw integer before set membership: `_DynamicEnum` compares equal to the integer
+Ecu enum but has a different hash, so the former `{fw.ecu}` membership test could
+silently miss an actually queried Hybrid Control ECU. No extra category-466 startup
+probe is added merely for subtype detection.
+
+The GTS compatibility bridge remains deliberately curated to those ten identities tied
+to retained H/F evidence. Other current GTS rows named Corolla are not promoted solely
+from a similar install-set label; later rows include a different `EMPS+FRC` architecture
+and require their own compatibility evidence.
 
 ## 10. Production boundary
 
@@ -1097,7 +1118,7 @@ actuation. Before a real H/F openpilot port, recover and validate:
   retains native signal261 and secondary fields, and `awaiting-native-b6` is a
   hard carrier failure for this construction rather than permission to create a
   second B6 sender;
-- live proof that the split 522-byte resident / 460-byte helper survives into
+- live proof that the 522-byte resident / 458-byte helper survives into
   healthy application scheduling, then confirmation that provisioned slot4
   permits command 5 with acceptable latency through the C7/SID23 workflow (or
   recover the slot4 secret/another approved MAC path); and
