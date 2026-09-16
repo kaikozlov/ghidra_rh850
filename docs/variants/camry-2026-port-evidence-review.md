@@ -238,3 +238,9 @@ differential cases substitute deterministic callback results to compare the
 new helper with the archived one; they do not emulate or validate ICU-S silicon.
 The standalone `build/out/camry-f33-car-kit-v17-audit` bundle passes `doctor`
 and offline `plan`, with the supervised helper SHA pinned in its manifest.
+
+Final targeted analysis result: **8 verification scripts passed, zero failures,
+zero skips**. This includes byte-identical regeneration from the original
+stock-topology and consolidated rlogs, all 121,941 selected radar source frames
+passing Profile-5 CRC, the v17 kit build, and the compiled-helper positive plus
+historical-negative regressions. No hardware execution was performed.
