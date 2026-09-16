@@ -343,8 +343,9 @@ def analyze_target(name: str, cfg: dict) -> dict:
             "unsupported_service_nrc": "0x11",
             "functional_nrc11_suppressed": True,
             "wire": {
-                "loader": "07 C6 index 00 word_le32",
-                "runtime": "07 C7 seq 00 target_hi target_lo 00 00",
+                "loader": "07 C6 C6 index word_le32",
+                "runtime": "07 C7 C7 seq target_hi target_lo 00 00",
+                "tag_policy": "B0 is the UDS SID used for stock unsupported-service dispatch; duplicate C6/C7 in N-SDU B1 so recurring resident code can key on the durable tail after DCM teardown",
             },
             "functions": {k: hx(v) for k, v in cfg["functions"].items()},
             "decompiler_semantic_hashes": {

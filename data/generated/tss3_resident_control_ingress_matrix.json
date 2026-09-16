@@ -221,8 +221,9 @@
         "service_table": "0x00025C54",
         "unsupported_service_nrc": "0x11",
         "wire": {
-          "loader": "07 C6 index 00 word_le32",
-          "runtime": "07 C7 seq 00 target_hi target_lo 00 00"
+          "loader": "07 C6 C6 index word_le32",
+          "runtime": "07 C7 C7 seq target_hi target_lo 00 00",
+          "tag_policy": "B0 is the UDS SID used for stock unsupported-service dispatch; duplicate C6/C7 in N-SDU B1 so recurring resident code can key on the durable tail after DCM teardown"
         }
       },
       "software_id": "8965F3307000",
@@ -362,8 +363,9 @@
         "service_table": "0x00025B38",
         "unsupported_service_nrc": "0x11",
         "wire": {
-          "loader": "07 C6 index 00 word_le32",
-          "runtime": "07 C7 seq 00 target_hi target_lo 00 00"
+          "loader": "07 C6 C6 index word_le32",
+          "runtime": "07 C7 C7 seq target_hi target_lo 00 00",
+          "tag_policy": "B0 is the UDS SID used for stock unsupported-service dispatch; duplicate C6/C7 in N-SDU B1 so recurring resident code can key on the durable tail after DCM teardown"
         }
       },
       "software_id": "8965F1208000",
@@ -503,8 +505,9 @@
         "service_table": "0x00025B38",
         "unsupported_service_nrc": "0x11",
         "wire": {
-          "loader": "07 C6 index 00 word_le32",
-          "runtime": "07 C7 seq 00 target_hi target_lo 00 00"
+          "loader": "07 C6 C6 index word_le32",
+          "runtime": "07 C7 C7 seq target_hi target_lo 00 00",
+          "tag_policy": "B0 is the UDS SID used for stock unsupported-service dispatch; duplicate C6/C7 in N-SDU B1 so recurring resident code can key on the durable tail after DCM teardown"
         }
       },
       "software_id": "8965H1202000",
@@ -644,8 +647,9 @@
         "service_table": "0x00025990",
         "unsupported_service_nrc": "0x11",
         "wire": {
-          "loader": "07 C6 index 00 word_le32",
-          "runtime": "07 C7 seq 00 target_hi target_lo 00 00"
+          "loader": "07 C6 C6 index word_le32",
+          "runtime": "07 C7 C7 seq target_hi target_lo 00 00",
+          "tag_policy": "B0 is the UDS SID used for stock unsupported-service dispatch; duplicate C6/C7 in N-SDU B1 so recurring resident code can key on the durable tail after DCM teardown"
         }
       },
       "software_id": "8965F3012000",

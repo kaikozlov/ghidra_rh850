@@ -1121,6 +1121,10 @@ tests = ["tests/verify_camry_f33_post_install_recovery.py"]
 [suite.camry_f33_signer_host_liveness]
 tests = ["tests/verify_camry_f33_signer_host_liveness.py"]
 
+[suite.tss3_unified_b6_signer]
+tests = ["tests/verify_tss3_unified_b6_signer.py"]
+timeout = 600
+
 [suite.camry_2026_stock_harness_topology]
 tests = ["tests/verify_camry_2026_stock_harness_topology.py"]
 

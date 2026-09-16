@@ -132,10 +132,12 @@ resident's existing post-receive hook:
 | Corolla `8965F1208000` | `FEBE563D` | `0x1FDC0002` enabled | `FEBE4B20` |
 | Crown `8965F3012000` | `FEBE527D` | family 5 disabled | — |
 
-The Crown vehicle has dynamically proved the functional form with
+The Crown vehicle first dynamically proved the functional transport with
 `07 C7 A5 00 12 34 00 00`: the DCM mailbox tail matched and no `0x7A9` NRC was
-emitted. Camry and Corolla functional ingress are firmware-closed but have not
-been separately live-qualified because they do not need that fallback. The
+emitted. Follow-up showed stock DCM teardown may clear N-SDU B0, so the active
+Crown signer duplicates its C6/C7 tag into durable B1. The unified runtime adopts
+that corrected tail-tag shape on every target. Camry and Corolla functional
+ingress are firmware-closed but have not yet been separately live-qualified. The
 deterministic matrix is
 [`tss3_resident_control_ingress_matrix.json`](../../data/generated/tss3_resident_control_ingress_matrix.json).
 
@@ -155,6 +157,38 @@ Classical-TX/`canfd_auto` requirement. The smaller architecture is therefore:
 use the dedicated family-5 carrier where the target already configures it, and
 use the stock functional-Diagnostic C6/C7 path as the no-CodeFlash fallback
 where that carrier is absent.
+
+#### Parallel unified functional runtime
+
+The cross-variant closure is strong enough to test a second architecture directly
+instead of continuing to reason about it abstractly. A new **parallel** runtime now
+uses the stock functional `0x777` path on all four exact targets while leaving the
+existing Camry/Corolla/Crown implementations in the tree unchanged. Its common
+wire contract is:
+
+```text
+helper loader (where needed):  07 C6 C6 index word_le32
+runtime control:               07 C7 C7 seq target_hi target_lo 00 00
+```
+
+`build_tss3_unified_b6_signer.py` emits exact-target bundles for Camry F33,
+Corolla H/F, and Crown F30; `tss3_unified_b6_signer.py` provides the common
+preflight/install/qualify/control harness. The resident and helper are now **one
+maintained source pair**, with SHA-bound compile macros selecting the exact F3 or
+Corolla scheduler/RAM geometry. This is intentionally not one byte-identical
+multi-calibration binary: exact call/RAM addresses differ, and Corolla's two-byte
+high-tail headroom requires its existing embedded-helper startup strategy. Camry
+and Crown retain their post-startup split-helper load geometry; Corolla retains
+its embedded-helper install geometry. Target-specific B6 mutation tuples, freshness
+cells, command-5 addresses, and scheduler replay remain target-local.
+
+The common first vehicle test is deliberately transport-only: bind exact F181,
+enter EXTENDED over physical `0x7A1`, snapshot the target-specific functional DCM
+buffer with SID23, send one `07 C7 C7 A5 12 34 00 00` frame on `0x777`, and
+require the durable mailbox tail plus suppressed NRC11 behavior. Only after that
+does the harness install RAM and attempt the native-MAC oracle. This makes the
+unified carrier falsifiable on Camry/Corolla without discarding the road-proven
+dedicated F33 path or the current Corolla family-5 implementation.
 
 ### Why Panda still needs a generic fix
 

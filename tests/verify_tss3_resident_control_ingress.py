@@ -47,7 +47,10 @@ for name, (functional_buffer, xcp_enabled, xcp_staging) in expected.items():
     check(f"{name}: C6/C7 use unsupported-functional-service behavior",
           functional["functional_service_ids"] == ["0x10", "0x14", "0x28", "0x31", "0x3E", "0x85"] and
           functional["c6_configured"] is False and functional["c7_configured"] is False and
-          functional["unsupported_service_nrc"] == "0x11" and functional["functional_nrc11_suppressed"] is True)
+          functional["unsupported_service_nrc"] == "0x11" and functional["functional_nrc11_suppressed"] is True and
+          functional["wire"]["loader"] == "07 C6 C6 index word_le32" and
+          functional["wire"]["runtime"] == "07 C7 C7 seq target_hi target_lo 00 00" and
+          "durable tail" in functional["wire"]["tag_policy"])
     check(f"{name}: dedicated family5 disposition",
           xcp["enabled"] is xcp_enabled and xcp["staging"] == xcp_staging)
     if xcp_enabled:
