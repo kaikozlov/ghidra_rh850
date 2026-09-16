@@ -24,6 +24,18 @@ TARGETS = {
     "crown-8965F3012000": ("0xFEBE527D", "split-functional-loader", 522, 588, 600),
 }
 
+# These are the byte identities produced by the live-debugged target-specific
+# Crown runtime after moving C6/C7 discrimination into durable DCM B1.  The
+# unified Crown specialization must remain byte-identical until that proven
+# implementation is intentionally superseded.
+CROWN_LIVE_CORRECTED_SHA256 = {
+    "resident": "66d510c215379c3bef83efcf8cc48def3903c5526c79bee545502d07c026eed7",
+    "helper": "f53e15393fcd1670bf321fd06cbc7e97c6ccbd395a2a9d5be635d4a9619a4351",
+    "helper_image": "b04f441d0fc8a36d2a056eb03ea205dc06bb1aaf2cf10e7459a4b9caeb3100a6",
+    "payload": "028ef56f5d22fb9b29c6287de2cb03f2c37d8702e818fe627f62fbe7c2616e62",
+    "staging": "3e3843769adc9da820e0e4f76a659c9ea7ef6676e29b80baf4753c96766acf29",
+}
+
 
 def check(label: str, condition: object) -> None:
     if not condition:
@@ -104,6 +116,9 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
         check(f"{target}: unified plan selects functional mailbox first",
               p["sequence"][0].startswith("NRTD/Park: prove exact-target stock functional 0x777") and
               p["old_implementations_retained"] is True)
+        if target == "crown-8965F3012000":
+            check("Crown unified artifacts stay byte-identical to live-corrected target runtime",
+                  meta["artifacts_sha256"] == CROWN_LIVE_CORRECTED_SHA256)
         built[target] = (meta, metas[0])
 
     # Behavioral fixture for the common mailbox proof. DCM teardown may clear
