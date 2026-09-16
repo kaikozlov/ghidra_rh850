@@ -9,6 +9,13 @@ intact camera B12 predicts the chassis-side `0x0CA` result-like field better tha
 the replacement B12. The previous claim that this trial "proves influence" is
 withdrawn: it omitted the intact native comparator.
 
+**Answer to "right target or echo?":** the evidence favors an FRC-owned
+state publication over the current direct-demand interpretation. B4:B5 is
+strongly measured-motion-like; B12 is consistent with a selected-state export.
+The actual longitudinal receiver/command and a literal originating command for
+any echo are not identified. This is a reason to withdraw the current mapping
+as an established control interface, not merely to add a road-test caveat.
+
 This is work package 4 of the Camry openpilot completion plan. Transport,
 request semantics, receiver acceptance, and physical authority are separate
 questions. The contributor's Corolla result does not establish the same field
@@ -70,6 +77,62 @@ explain these stock starts: the vehicle is already accelerating while the fine
 field remains zero. A measured-acceleration/estimated-motion role is the
 stronger interpretation. This is a **bounded semantic classification**, not
 recovery of an OEM field name or proof that the entire PDU is read-only.
+
+### Independent chassis-state and ego-speed cross-check
+
+A second reduction in the maintained motion-audit producer now checks the two
+complete August captures against raw chassis messages, rather than relying
+only on the wheel-speed derivative or the current port's signal names. Inputs
+are already tracked; regeneration needs neither `REFERENCE/` nor `build/`.
+
+| Cross-check | Drive A | Drive B |
+|---|---:|---:|
+| Fine B4:B5 vs native `0x13C` acceleration-like word, all samples: r | 0.979516 | 0.989355 |
+| Same comparison, cruise off: r | 0.979857 | 0.988391 |
+| Cruise-off median absolute difference (m/s²) | 0.005 | 0.013 |
+| Packed speed vs valid raw wheels above 2 m/s: r | 0.999758 | 0.999936 |
+| Speed median absolute difference (m/s) | 0.018750 | 0.020139 |
+| Moving speed samples | 8,930 | 14,413 |
+
+The packed speed candidate spans B7:B9. Its observed numerical encoding is
+compatible with the existing Toyota wheel-speed representation; this is an
+ego-speed match, not a new OEM name or command definition. Invalid wheel flags
+are rejected. The acceleration comparison uses the preceding chassis sample
+within 100 ms; speed uses the preceding wheel sample within 80 ms. Neither
+joins across original source files or consumes a future sample at the queried
+instant. The `0x13C` word remains described structurally; the independently
+derived physical acceleration and stock-start evidence are what anchor its
+measured-motion interpretation.
+
+This substantially strengthens the **ego-state publication** interpretation
+of the PDU. It does not prove all its other fields are telemetry, that only a
+radar consumes it, or that changing reported state could have no indirect
+control effect. In particular, our DBC name `TSS3_LONGITUDINAL_REQUEST` is a
+project-assigned hypothesis, not Toyota evidence.
+
+### B12 timing favors a return-derived quantity, but does not measure a path delay
+
+A native-sample sweep, restricted to the stock cruise-operating intervals,
+aligns B12 best with `0x0CA` **50 ms earlier in both complete drives**:
+r=0.951994 and 0.989911. However, same-time r is already 0.951673 and 0.989495.
+The peak is shallow. The separately reviewed fixed-25-ms-grid role reducer
+places its maxima at -50/-75 ms; this sampling dependence is another reason
+not to claim an exact 50-ms or 75-ms ECU delay or causal chain.
+
+The supported statement is narrower: the data does not show B12 uniquely
+leading the result-like chassis channel. The three stock starts and the
+intact-native comparator below provide more discriminating evidence than the
+lag maximum alone. A state export derived from an already selected result, or
+parallel outputs of a common internal calculation, both remain compatible.
+There is no established byte-copy from a different FRC command.
+
+The follow-up independently re-extracted the 28-source role-audit fixture
+from the original rlogs: **306,071 publication events** reproduce byte-for-byte
+(SHA-256 `5a1a454517016ad6a3db15a66b28f11ee0c274c497d0cf0c02f0921ab398ed54`).
+The companion role audit below was completed separately during this review.
+The maintained motion-audit producer and its seven-source fixture independently
+own the core physical-motion, native-comparator, resume, and direction checks;
+the new cross-checks above use the already tracked full August captures.
 
 ### Combined replacement does not establish host influence
 

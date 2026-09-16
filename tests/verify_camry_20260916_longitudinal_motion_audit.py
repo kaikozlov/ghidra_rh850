@@ -4,15 +4,17 @@ from __future__ import annotations
 
 import binascii
 import json
-from pathlib import Path
 import sys
 import unittest
+from pathlib import Path
 
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from tools.targets.camry.analysis import analyze_camry_20260916_longitudinal_motion_audit as audit
+from tools.targets.camry.analysis import (
+    analyze_camry_20260916_longitudinal_motion_audit as audit,
+)
 
 
 def sample(counter=0, fine_raw=0, coarse_raw=0, flag=True):
@@ -35,6 +37,16 @@ class TestOfflinePrimitives(unittest.TestCase):
             data = np.array([list(sample(coarse_raw=raw))], dtype=np.uint8)
             self.assertAlmostEqual(audit.coarse(data)[0], -raw * .1)
 
+    def test_packed_ego_speed_is_separate_from_fine_acceleration(self):
+        data = np.array([list(bytes.fromhex('210e2082800040034de813007fe8008000a000f005b000040000000000000000'))], dtype=np.uint8)
+        self.assertAlmostEqual(audit.packed_speed(data)[0], 0.)
+        data[0, 4:6] = [0x82, 0x0a]
+        self.assertAlmostEqual(audit.fine(data)[0], .522)
+        self.assertAlmostEqual(audit.packed_speed(data)[0], 0.)
+        raw = round((36 + 67.67) * 100)
+        data[0, 7:10] = list((raw << 5).to_bytes(3, 'big'))
+        self.assertAlmostEqual(audit.packed_speed(data)[0], 10.)
+
     def test_source_labels_accept_relative_and_external_fixture_paths(self):
         self.assertEqual(audit.source_path(audit.FIXTURE), str(audit.FIXTURE.relative_to(ROOT)))
         relative = Path('tests/fixtures/camry_20260916_longitudinal_motion_audit.jsonl.gz')
@@ -51,7 +63,7 @@ class TestOfflinePrimitives(unittest.TestCase):
 
     def test_wheel_offset_units_and_invalid_bit(self):
         # Four independent 36 km/h samples, corresponding to 10 m/s.
-        word = int(round((36 + 67.67) * 100)).to_bytes(2, 'big')
+        word = round((36 + 67.67) * 100).to_bytes(2, 'big')
         data = np.array([list(word * 4)], dtype=np.uint8)
         value, valid = audit.wheel_speed(data)
         self.assertAlmostEqual(value[0], 10)
@@ -134,6 +146,21 @@ class TestRetainedRoleEvidence(unittest.TestCase):
             self.assertGreater(observed['pearson_r'], .97)
             self.assertTrue(.95 < observed['slope_y_per_x'] < 1.02)
             self.assertLess(abs(observed['intercept']), .01)
+
+    def test_native_motion_channels_repeat_with_cruise_off(self):
+        for d in self.report['august_motion'].values():
+            check = d['native_feedback_crosscheck']
+            accel = check['fine_vs_native_13c']['cruise_off']
+            self.assertGreater(accel['n'], 18000)
+            self.assertGreater(accel['pearson_r'], .97)
+            self.assertLess(accel['median_absolute_error'], .02)
+            speed = check['packed_speed_vs_valid_wheels_above_2mps']
+            self.assertGreater(speed['n'], 8000)
+            self.assertGreater(speed['pearson_r'], .999)
+            self.assertLess(speed['median_absolute_error'], .03)
+            peak = check['b12_vs_native_ca']['peak']
+            self.assertLess(peak['lag_ms'], 0)
+            self.assertGreater(peak['pearson_r'], .95)
 
     def test_every_trial_frame_has_a_fresh_same_counter_source_and_exact_tx_return(self):
         trial = self.report['combined_trial']

@@ -9,12 +9,12 @@ from __future__ import annotations
 import argparse
 import binascii
 import bisect
-from collections import Counter, defaultdict
 import gzip
 import hashlib
 import json
-from pathlib import Path
 import sys
+from collections import Counter, defaultdict
+from pathlib import Path
 
 import numpy as np
 
@@ -196,18 +196,71 @@ def physical_motion(s, wheels, cruise):
     return result
 
 
+def packed_speed(data):
+    """Observed ego-speed candidate, not a recovered OEM signal name."""
+    d = np.asarray(data, dtype=np.int64)
+    raw = (((d[:, 7] << 16) | (d[:, 8] << 8) | d[:, 9]) >> 5) & 32767
+    return (raw * .01 - 67.67) / 3.6
+
+
+def feedback_crosscheck(s, brake, wheels, ca, cruise):
+    """Compare camera fields with independent native chassis publications.
+
+    All joins stay within a source file. For every queried instant, only the
+    most recent preceding native observation is used. Lag sweeps are descriptive
+    alignment tests, not an inference of physical causation or actuator delay.
+    """
+    def metric(x, y):
+        result = stats(x, y)
+        if len(x):
+            error = np.abs(np.asarray(x) - np.asarray(y))
+            result.update(median_absolute_error=round(float(np.median(error)), 9),
+                          p95_absolute_error=round(float(np.quantile(error, .95)), 9))
+        return result
+
+    bi, bok = nearest(s, brake, preceding=True, max_gap_ns=100_000_000)
+    ai, aok = nearest(s, cruise, preceding=True, max_gap_ns=100_000_000)
+    active = (cruise['data'][ai, 3] & 8) != 0
+    x, y = fine(s['data']), word(brake['data'][bi], 0, 15) * .001
+    acceleration = {}
+    for name, mode in [('all', np.ones(len(x), dtype=bool)), ('cruise_off', ~active), ('cruise_on', active)]:
+        valid = bok & aok & mode
+        acceleration[name] = metric(x[valid], y[valid])
+
+    v, wheel_ok = wheel_speed(wheels['data'])
+    wi, wok = nearest(s, wheels, preceding=True, max_gap_ns=80_000_000)
+    speed_valid = wok & wheel_ok[wi] & (v[wi] > 2.)
+    speed = metric(packed_speed(s['data'])[speed_valid], v[wi[speed_valid]])
+
+    profile = []
+    for lag_ms in range(-250, 251, 25):
+        ci, cok = nearest(s, ca, shift_ns=lag_ms * 1_000_000,
+                          preceding=True, max_gap_ns=100_000_000)
+        valid = cok & aok & active
+        profile.append({'lag_ms': lag_ms,
+                        **metric(coarse(s['data'])[valid], word(ca['data'][ci[valid]], 7) * .001)})
+    peak = max(profile, key=lambda row: row['pearson_r'] if row['pearson_r'] is not None else -2.)
+    return {'fine_vs_native_13c': acceleration,
+            'packed_speed_vs_valid_wheels_above_2mps': speed,
+            'b12_vs_native_ca': {
+                'convention': 'corr(B12(t), CA(t+lag)); negative lag aligns B12 with an earlier chassis publication.',
+                'peak': peak, 'sweep': profile,
+                'limit': 'Temporal co-movement, quantization, smoothing and publication delay do not establish a unique producer/consumer path.'},
+            'semantic_limit': 'Numerical ego-state matches are not OEM names, a full-PDU telemetry proof, or a literal byte-copy proof.'}
+
+
 def load_august(path):
     rows, rejected = defaultdict(list), Counter()
     with gzip.open(path, 'rt') as f:
         for line in f:
             seg, t, bus, a, text = json.loads(line)
-            if not ((a == 0x160 and bus == 1) or (a in (0x0AA, 0x08A, 0x0C9) and bus == 0)):
+            if not ((a == 0x160 and bus == 1) or (a in (0x0AA, 0x08A, 0x0C9, 0x13C, 0x0CA) and bus == 0)):
                 continue
             d = bytes.fromhex(text)
             if a == 0x160 and not valid_160(d):
                 rejected['bad_0x160_crc_or_length'] += 1
                 continue
-            if len(d) != (8 if a == 0x0AA else 32):
+            if len(d) != (8 if a in (0x0AA, 0x13C) else 32):
                 rejected['bad_length'] += 1
                 continue
             rows[a].append((seg, t, d))
@@ -326,7 +379,8 @@ def build(fixture=FIXTURE):
         c9 = data[0x0C9]['data']
         august[name] = {'path': source_path(path), 'sha256': sha256(path), 'valid_0x160_frames': len(data[0x160]['time']), 'rejected': rejected,
                          'c9_shape': {'frames': len(c9), 'frames_nonzero_outside_b12_b13': int(np.any(np.delete(c9, [12, 13], axis=1) != 0, axis=1).sum())},
-                         'measured_motion_time_shift_ms': physical_motion(data[0x160], data[0x0AA], data[0x08A])}
+                         'measured_motion_time_shift_ms': physical_motion(data[0x160], data[0x0AA], data[0x08A]),
+                         'native_feedback_crosscheck': feedback_crosscheck(data[0x160], data[0x13C], data[0x0AA], data[0x0CA], data[0x08A])}
     return {'schema': 'camry-longitudinal-motion-audit-v1', 'vehicle_access': False,
             'fixture': {'path': source_path(fixture), 'sha256': sha256(fixture), 'sources': header['sources']},
             'methods': {

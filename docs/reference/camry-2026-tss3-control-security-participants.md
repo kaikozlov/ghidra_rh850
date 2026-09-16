@@ -14,6 +14,16 @@ The table deliberately separates four different claims:
 
 Those are not interchangeable.
 
+> **Historical-model warning, September 16:** the graph below predates the
+> source/direction and longitudinal-role audits. Do not read it as a proved
+> `0x160 -> 0x0CA` request-to-signer path. `0x0CA` is observed chassis-to-camera
+> on the open relay, and the two edited `0x160` fields are now feedback/state-like
+> rather than a verified Camry command. The FRC normal-Tx dependency also does
+> not identify which internal processor emits each network publication. Use the
+> [current longitudinal evidence packet](../variants/camry-2026-longitudinal-evidence.md)
+> for that assessment; the old participant/proxy hypotheses below are retained
+> as history, not current proof.
+
 ## Network/control overview
 
 ```text

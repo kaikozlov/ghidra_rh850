@@ -811,3 +811,22 @@ and reproduction commands are in
 The tracked raw fixture and `camry_20260916_longitudinal_motion_audit.json` make this
 correction reproducible without external September logs or ignored workspaces.
 No production sender, safety policy, or vehicle firmware changed in this audit.
+
+## September 16 follow-up: 0x160 is not a verified longitudinal command
+
+The maintained [longitudinal evidence packet](camry-2026-longitudinal-evidence.md)
+now includes an independent cross-check of camera B4:B5 against native chassis
+`0x13C`, packed ego speed against valid raw wheels, and B12 alignment against
+native `0x0CA`. Cruise-off fine-field correlations are 0.979857/0.988391 and
+moving speed correlations are 0.999758/0.999936. These are affirmative
+state-publication evidence, not just an absence of command acceptance.
+
+The B12 lag advantage is shallow and sample-grid dependent; it is not a
+measured ECU latency. The original replacement trial still does not establish
+host influence when the untouched native camera value is included. No different
+command, exact OEM field names, or complete receiver contract has been recovered.
+The current Camry encoder must remain an unqualified hypothesis; neither
+Corolla's reported behavior nor the project's DBC name establishes Camry demand
+semantics. This follow-up changes only offline analysis, its tests/results,
+and documentation. The companion role audit was independently completed; its
+files were not staged or changed by this follow-up.
