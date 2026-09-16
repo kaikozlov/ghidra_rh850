@@ -214,3 +214,55 @@ cover all required behavior; the kit and port are not ready for an
 install-then-drive assurance. The architecture and runtime README now link
 this audit at the previously advertised tester handoff. No runtime fixes,
 kit rebuild or vehicle validation are claimed by this documentation update.
+
+
+## Post-audit resolution
+
+The audit findings above describe analysis/openpilot revisions `4d8006d8` /
+`53b95d0dd` / `7dce3659`. Subsequent same-day fixes close the host-side defects
+without changing the resident/helper wire contract:
+
+- Corolla post-startup attestation no longer hashes the intentionally reclaimed
+  one-shot prefix as immutable code. It requires live state magic in the mutable
+  prefix and byte-exact equality from the compiled `foreground_entry` through
+  the end of the resident. Split Camry/Crown residents retain full-image
+  attestation.
+- `preflight` now proves NRTD before the functional-mailbox probe and refuses the
+  probe when the same unified resident is already installed.
+- Qualification and both replacement commands use the same live vehicle guard.
+  The guard rejects asserted `0x0AA` wheel fault flags, requires fresh wheel and
+  `0x025` angle samples, and on Corolla requires a fresh decoded Park value from
+  `0x127` (`P=0`) or the retained one-hot `0x3BF` (`P=0x80`).
+- Any path that has transmitted an active C7 generation performs best-effort
+  explicit sequence-zero cleanup in `finally`; successful pulses still require
+  the released state to be observed.
+- Requested output files are overwritten with a structured failure record when
+  the command fails, and guided `bringup` refuses a non-empty evidence directory.
+- Exact H/F `EPS_FAULT_INHIBIT` is now mapped to openpilot
+  `steerFaultTemporary`; `steerFaultPermanent` remains false because the retained
+  evidence does not justify a restart-required/permanent taxonomy.
+
+`tools/test tss3_unified_b6_signer` passes with executable regressions for the
+post-startup mutable-prefix attestation, immutable-code rejection, healthy
+READY/Park/current-angle acceptance, wheel-fault rejection, non-Park rejection,
+and stale motion/angle rejection. The broader Toyota/fingerprint/safety suite
+passes **325 tests, 262 skipped, 8,106 subtests** after the fault-reporting fix.
+
+These fixes change the disposition from “do not use the reviewed kit” to
+**stationary qualification candidate**. They do not close two broader vehicle
+contracts identified by the audit:
+
+1. `controlsd` can request software cancellation of stock ACC, but the Corolla
+   TSS3 controller has no qualified source-real cancel transmit path. Retained
+   Corolla `0x101` is a native ~50-Hz bus-1 producer; unlike the separately
+   qualified Camry relay-side cancel shape, injecting a competing same-ID source
+   on Corolla is not justified by the evidence. `0x24D` also lacks a retained
+   button-transition contract. No cancel PDU is guessed.
+2. The current Corolla cruise-availability rule and some hold/display semantics
+   remain evidence-bounded. Both retained passive replays keep availability true
+   and therefore do not independently exercise main-OFF versus main-ON.
+
+Physical qualification also remains mandatory: live F/H installation,
+NRTD-to-READY survival, native B6 arrival/cadence, command-5 native-MAC equality,
+signed replacement, steering response, driver override, recovery behavior, and
+stock LTA/LDA/LCA/AEB coexistence are not established by these offline fixes.

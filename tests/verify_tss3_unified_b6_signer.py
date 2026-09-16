@@ -138,7 +138,7 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
           built["corolla-8965F1208000"][0]["helper"]["sha256"])
 
     # Execute the exact compiled Corolla H helper's C7 lease gates in the
-    # target Ghidra emulator. This protects continuous 50-Hz host ownership,
+    # target Ghidra emulator. This protects continuous 100-Hz host ownership,
     # seven-tick host-loss expiry, zero release, and empty-queue aging.
     corolla_meta, corolla_meta_path = built["corolla-8965H1202000"]
     corolla_helper = corolla_meta_path.parent / corolla_meta["artifacts"]["helper"]
@@ -171,7 +171,9 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
     panda = FakePanda()
     reads = iter((bytes(7), bytes.fromhex("00c7a512340000")))
     clock = iter(i / 1000 for i in range(10000))
-    with (mock.patch.object(host, "_open_app", return_value=(panda, object(), object(), bundle.target["application_f181_hex"], "fixture", None)),
+    with (mock.patch.object(host, "verify_nrtd_ready", return_value={"ready_values": [0]}),
+          mock.patch.object(host, "_open_app", return_value=(panda, object(), object(), bundle.target["application_f181_hex"], "fixture", None)),
+          mock.patch.object(host, "_resident_already_present", return_value=False),
           mock.patch.object(host, "_read_memory", side_effect=lambda *a, **k: next(reads)),
           mock.patch.object(host.time, "monotonic", side_effect=lambda: next(clock)),
           mock.patch.object(host.time, "monotonic_ns", return_value=123456789),
@@ -200,21 +202,81 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
           all(cmd in launcher for cmd in ("preflight", "install", "qualify", "bringup", "replace-current", "replace-once")))
 
     class GuardPanda:
-        def __init__(self):
-            self.once = True
+        def __init__(self, *, fault=False, gear=0, stale=False):
+            self.calls = 0
+            self.fault = fault
+            self.gear = gear
+            self.stale = stale
         def can_recv(self):
-            if not self.once:
+            import time
+            self.calls += 1
+            wheel = bytearray.fromhex("1a6f1a6f1a6f1a6f")
+            if self.fault:
+                for i in (0, 2, 4, 6): wheel[i] |= 0x80
+            angle = bytes(32)
+            gear127 = bytes((0, 0, 0, 0, 0, (self.gear & 0x0F) << 4, 0, 0))
+            if self.stale:
+                if self.calls == 1:
+                    return [(host.WHEEL_SPEED_CAN_ID, bytes(wheel), host.CONTROL_BUS),
+                            (host.STEERING_ANGLE_CAN_ID, angle, host.CONTROL_BUS),
+                            (0x127, gear127, host.CONTROL_BUS)]
+                if self.calls == 2:
+                    time.sleep(0.11)
+                    return [(host.READY_CAN_ID, bytes.fromhex("8000000000000000"), host.CONTROL_BUS)]
                 return []
-            self.once = False
+            if self.calls > 1:
+                return []
             return [
                 (host.READY_CAN_ID, bytes.fromhex("8000000000000000"), host.CONTROL_BUS),
-                (host.WHEEL_SPEED_CAN_ID, bytes.fromhex("1a6f1a6f1a6f1a6f"), host.CONTROL_BUS),
-                (host.STEERING_ANGLE_CAN_ID, bytes.fromhex("0000000000000000000000000000000000000000000000000000000000000000"), host.CONTROL_BUS),
+                (host.WHEEL_SPEED_CAN_ID, bytes(wheel), host.CONTROL_BUS),
+                (host.STEERING_ANGLE_CAN_ID, angle, host.CONTROL_BUS),
+                (0x127, gear127, host.CONTROL_BUS),
             ]
 
-    guard = host.verify_ready_stationary_current_angle(GuardPanda())
-    check("unified current-angle guard derives a zero no-offset target while READY and stationary",
+    guard = host.verify_ready_stationary_current_angle(GuardPanda(), target_family="corolla-hf")
+    check("unified current-angle guard derives a zero no-offset target while READY, Park, and stationary",
           guard["ready_values"] == [1] and guard["wheel_centered_raw"] == [0, 0, 0, 0] and
+          guard["wheel_faults"] == [False, False, False, False] and guard["gear"]["park"] is True and
           guard["steering_angle_deg"] == 0.0 and guard["recommended_current_target_raw"] == 0)
+
+    for label, fixture in (("wheel fault", GuardPanda(fault=True)), ("not Park", GuardPanda(gear=3))):
+        try:
+            host.verify_ready_stationary_current_angle(fixture, target_family="corolla-hf", timeout=0.15)
+        except host.UnifiedSignerError:
+            pass
+        else:
+            raise AssertionError(f"current-angle guard accepted {label}")
+    check("unified current-angle guard rejects wheel faults and non-Park Corolla state", True)
+
+    try:
+        host.verify_ready_stationary_current_angle(GuardPanda(stale=True), target_family="corolla-hf", timeout=0.15)
+    except host.UnifiedSignerError:
+        pass
+    else:
+        raise AssertionError("current-angle guard accepted stale wheel/angle samples")
+    check("unified current-angle guard rejects stale motion/angle samples", True)
+
+    # Corolla startup intentionally reuses the one-shot resident prefix as state/scratch.
+    # Attestation must therefore pin the immutable foreground suffix plus live state magic,
+    # not compare the mutable prefix against the pristine build image.
+    _, corolla_meta_path = built["corolla-8965F1208000"]
+    corolla_bundle = host.load_bundle(corolla_meta_path)
+    observed = bytearray(corolla_bundle.resident)
+    immutable_offset = int(corolla_bundle.meta["layout"]["foreground_entry"], 0) - int(corolla_bundle.meta["resident"]["base"], 0)
+    observed[:immutable_offset] = bytes([0xA5]) * immutable_offset
+    observed[0:4] = host.COROLLA_STATE_MAGIC.to_bytes(4, "little")
+    attestation = host._resident_attestation(corolla_bundle, bytes(observed))
+    check("Corolla resident attestation accepts mutable startup prefix and pins immutable foreground",
+          attestation["mode"] == "mutable-prefix+immutable-foreground" and
+          attestation["mutable_prefix_size"] == immutable_offset and attestation["state"]["resident_present"] is True)
+    observed[immutable_offset] ^= 1
+    try:
+        host._resident_attestation(corolla_bundle, bytes(observed))
+    except host.UnifiedSignerError:
+        pass
+    else:
+        raise AssertionError("Corolla resident attestation accepted immutable-code mutation")
+    check("Corolla resident attestation rejects immutable foreground mutation", True)
+
 
 print("Unified TSS3 functional B6 signer verification passed.")

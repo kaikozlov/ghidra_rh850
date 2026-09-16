@@ -175,3 +175,28 @@ stock-owned. Do not revive `0x160` as an actuator path. Close or explicitly
 resolve the fault-reporting and automatic-cancellation gaps, correct the gear
 fallback/subtype claims, and retain physical qualification as a separate
 requirement. This audit does not implement or validate those remaining items.
+
+
+## Same-day implementation follow-up
+
+The immediate steering-fault gap is now partially closed in the justified
+openpilot shape: exact H/F `EPS_FAULT_INHIBIT` reports
+`steerFaultTemporary=True`, while no permanent class is invented. The unified
+signer tester's post-startup attestation, live sensor freshness/validity, Corolla
+Park enforcement, NRTD preflight ordering, failure-path release, and failure
+recording defects are also fixed and covered by the unified signer regression.
+
+The automatic stock-ACC cancellation finding remains open. Corolla's native
+`0x101` brake carrier and Toyota's `Brake Cancel Switch` vocabulary are useful
+semantics, but the retained Corolla topology does not provide the source
+suppression/relay-side ownership proof that exists for the Camry implementation.
+The current port therefore must not synthesize a same-ID `0x101` cancel on the
+shared bus merely to satisfy `controlsd`.
+
+The hybrid `0x3BF` item is retained as a coverage boundary rather than a known
+Span-car failure: Span's retained hybrid supplies 3,662 valid `0x127` frames.
+Likewise the cruise-main availability rule remains bounded pending an OFF/ON
+capture. The corrected status is therefore: nominal identification/CarState/C7
+software is strong and a bounded stationary signer qualification is warranted,
+but road qualification still has both an unresolved automatic-cancel contract
+and the usual live actuation/coexistence work.

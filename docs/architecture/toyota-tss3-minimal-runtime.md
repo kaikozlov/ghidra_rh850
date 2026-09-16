@@ -177,11 +177,17 @@ native B6 MAC with Toyota command 5, and only then permit C7 replacement. The
 old target-specific extended-family-5 signers remain in the tree as historical
 and recovery artifacts, not as the normal openpilot control transport.
 
-> **Tester-handoff audit, 2026-09-16:** the following is the intended flow,
-> not a qualified install-then-drive procedure. The current Corolla kit has
-> unresolved post-startup identity-check, sensor-validation and failure-path
-> defects; the port also has incomplete steering-fault/cancel handling. See
-> [the offline audit](../variants/corolla-tss3-tester-handoff-audit-2026-09-16.md).
+> **Tester-handoff audit, 2026-09-16:** the audit found real host-side defects in
+> post-startup resident attestation, sensor freshness/validity, Park enforcement,
+> retry/preflight phase handling, explicit release, and failure evidence. Those
+> host defects are now fixed and regression-tested. Exact H/F
+> `EPS_FAULT_INHIBIT` is also reported as an ordinary temporary steering fault in
+> opendbc. This makes the kit suitable for the bounded **stationary signer
+> qualification** below; it is still not an install-then-drive all-clear because
+> software-requested stock-ACC cancellation has no qualified Corolla transmit
+> contract, cruise-main availability remains evidence-bounded, and physical
+> steering/coexistence behavior is untested. See
+> [the audit](../variants/corolla-tss3-tester-handoff-audit-2026-09-16.md).
 
 For a tester using the maintained `kai-openpilot` TSS3 branch, the portable kit
 packages that ladder behind a guided launcher. Build the exact target on the
@@ -206,8 +212,10 @@ holds the cooperative Panda lease across the operator's NRTD-to-READY transition
 `replace-current` is the first mutation test: it requires READY plus stationary
 `0x0AA`, derives the current measured angle from `0x025`, converts that angle to
 the common B6 target domain, sends one fresh C7 generation, observes a signed
-replacement, then sends sequence zero to release. Park remains an explicit
-operator confirmation. A full EPS power cycle removes the resident and requires
+replacement, then sends sequence zero to release. On Corolla the guard also
+requires a fresh decoded Park state from `0x127` or the retained `0x3BF` fallback
+carrier; wheel-fault flags and stale motion/angle samples are rejected. A full
+EPS power cycle removes the resident and requires
 `bringup` again. The launcher cooperatively hands Panda ownership back to the
 managed `pandad` from the maintained openpilot branch when each command exits.
 
