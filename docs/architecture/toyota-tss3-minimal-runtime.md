@@ -177,6 +177,34 @@ native B6 MAC with Toyota command 5, and only then permit C7 replacement. The
 old target-specific extended-family-5 signers remain in the tree as historical
 and recovery artifacts, not as the normal openpilot control transport.
 
+For a tester using the maintained `kai-openpilot` TSS3 branch, the portable kit
+packages that ladder behind a guided launcher. Build the exact target on the
+analysis checkout, copy the output directory to comma hardware, and run:
+
+```bash
+uv run --locked python tools/targets/tss3/builders/build_tss3_unified_b6_signer_kit.py \
+  --target corolla-8965F1208000 --out EMPTY_KIT_DIRECTORY
+
+# on comma, with Kai's TSS3 openpilot checkout at /data/openpilot
+./tss3-unified-signer doctor
+# vehicle already in NRTD / READY=0 / Park:
+./tss3-unified-signer bringup /tmp/tss3-bringup
+# after the command prompts: transition directly to READY/Park without OFF,
+# remain stationary, then press Enter
+./tss3-unified-signer replace-current /tmp/tss3-replace-current.json
+```
+
+`bringup` retains the individual fail-closed gates: stock functional-mailbox
+preflight, exact-F181 NRTD install, then the READY native-MAC oracle. It merely
+holds the cooperative Panda lease across the operator's NRTD-to-READY transition.
+`replace-current` is the first mutation test: it requires READY plus stationary
+`0x0AA`, derives the current measured angle from `0x025`, converts that angle to
+the common B6 target domain, sends one fresh C7 generation, observes a signed
+replacement, then sends sequence zero to release. Park remains an explicit
+operator confirmation. A full EPS power cycle removes the resident and requires
+`bringup` again. The launcher cooperatively hands Panda ownership back to the
+managed `pandad` from the maintained openpilot branch when each command exits.
+
 ### Why Panda still needs a generic fix
 
 The Toyota-B relay remains open in the normal comma topology. Stock traffic is

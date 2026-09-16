@@ -197,6 +197,24 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
     launcher = (kit / "tss3-unified-signer").read_text(encoding="utf-8")
     check("unified kit prefers vendored runtime and exposes common test ladder",
           'PYTHONPATH="$KIT_ROOT/runtime:$OPENPILOT_ROOT"' in launcher and
-          all(cmd in launcher for cmd in ("preflight", "install", "qualify", "replace-once")))
+          all(cmd in launcher for cmd in ("preflight", "install", "qualify", "bringup", "replace-current", "replace-once")))
+
+    class GuardPanda:
+        def __init__(self):
+            self.once = True
+        def can_recv(self):
+            if not self.once:
+                return []
+            self.once = False
+            return [
+                (host.READY_CAN_ID, bytes.fromhex("8000000000000000"), host.CONTROL_BUS),
+                (host.WHEEL_SPEED_CAN_ID, bytes.fromhex("1a6f1a6f1a6f1a6f"), host.CONTROL_BUS),
+                (host.STEERING_ANGLE_CAN_ID, bytes.fromhex("0000000000000000000000000000000000000000000000000000000000000000"), host.CONTROL_BUS),
+            ]
+
+    guard = host.verify_ready_stationary_current_angle(GuardPanda())
+    check("unified current-angle guard derives a zero no-offset target while READY and stationary",
+          guard["ready_values"] == [1] and guard["wheel_centered_raw"] == [0, 0, 0, 0] and
+          guard["steering_angle_deg"] == 0.0 and guard["recommended_current_target_raw"] == 0)
 
 print("Unified TSS3 functional B6 signer verification passed.")
