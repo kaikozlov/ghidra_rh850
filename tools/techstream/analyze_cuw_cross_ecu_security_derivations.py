@@ -14,12 +14,14 @@ backend ECU roots.  For every modern descriptor carrying ServiceAuthKey it:
 
 It also tests the recovered EPS payload-build root against every retained CUW
 that exposes the legacy/Unified ``SeedKey + Nonce + S-record`` image grammar.
-That gives a direct CMAC oracle for cross-package root reuse. Finally, two
-bounded negatives avoid obvious dead ends: working keys are compared against
-simple DiagID KDFs under the three recovered EPS roots, and selected ReproStd
-image pairs are tested against a small explicit set of one-step AES image-key
-guesses. These negatives do not identify the actual ReproStd image transform or
-disprove a shared backend root.
+That gives a direct CMAC oracle for cross-package root reuse. Finally, bounded
+negatives avoid obvious dead ends: working keys are compared against simple
+DiagID KDFs under the three recovered EPS roots, selected ReproStd image pairs
+are tested against a small explicit set of one-step AES image-key guesses, and
+the two closed FRC update chains provide a stronger CBC differential oracle for
+a deterministic family of package/known-root KDF candidates. These negatives do
+not identify the actual ReproStd image transform or disprove a shared backend
+root.
 """
 from __future__ import annotations
 
@@ -59,7 +61,18 @@ IMAGE_PAIR_SPECS = (
     ("frc_same_nonce", "T-0062-23.cuw", "T-0149-24.cuw"),
     ("hv_different_nonce", "T-0003-25.cuw", "T-0005-25.cuw"),
 )
+# Both locally closed FRC update chains use the same family ServiceAuthKey,
+# working key, Nonce and target range.  If DFI encryption-method-1 is CBC under
+# one family image key, the correct key must undo the ciphertext avalanche and
+# recover adjacent-revision plaintext similarity on *both* pairs.
+FRC_CBC_KDF_PAIR_SPECS = (
+    ("frc_f420_62_to_149", "T-0062-23.cuw", "T-0149-24.cuw"),
+    ("frc_f160_61_to_150", "T-0061-23.cuw", "T-0150-24.cuw"),
+)
 IMAGE_SAMPLE_BYTES = 0x10000
+FRC_KDF_SPARSE_BLOCKS = 128
+FRC_KDF_FULL_SCORE_TOP_N = 16
+FRC_KDF_INTERESTING_IDENTITY = 0.01
 EPS_PAYLOAD_GRAMMAR_PACKAGES = ("T-0015-20.cuw", "T-0035-22.cuw", "T-0036-22.cuw")
 
 
@@ -218,6 +231,275 @@ def candidate_image_keys(service_auth: bytes, working_key: bytes) -> dict[str, b
         "working_key": working_key,
         "AES-ENC(eps_payload_root,working_key)": AES.new(EPS_PAYLOAD_BUILD_ROOT, AES.MODE_ECB).encrypt(working_key),
         "AES-DEC(eps_payload_root,working_key)": AES.new(EPS_PAYLOAD_BUILD_ROOT, AES.MODE_ECB).decrypt(working_key),
+    }
+
+
+def _pad_ascii_16(value: str) -> bytes:
+    raw = value.encode("ascii")
+    return (raw + bytes(16))[:16]
+
+
+def _digest_atoms(label: str, value: bytes) -> dict[str, bytes]:
+    digest = hashlib.sha256(value).digest()
+    return {
+        f"md5({label})": hashlib.md5(value, usedforsecurity=False).digest(),
+        f"sha256_lo({label})": digest[:16],
+        f"sha256_hi({label})": digest[16:],
+    }
+
+
+def _dedupe_named_blocks(rows: dict[str, bytes]) -> dict[str, bytes]:
+    by_value: dict[bytes, str] = {}
+    for name, value in rows.items():
+        if len(value) != 16:
+            raise ValueError(f"{name}: KDF atom is not 16 bytes")
+        by_value.setdefault(value, name)
+    return {name: value for value, name in by_value.items()}
+
+
+def _frc_family_kdf_atoms(
+    attach: dict[str, dict[str, str]],
+    packages: dict[str, dict],
+    ciphertext: bytes,
+) -> dict[str, bytes]:
+    """Build the explicit stable-metadata atom set for the FRC CBC KDF search.
+
+    This is intentionally a bounded grammar, not a password cracker.  The raw
+    atoms are values genuinely available from the FRC CUW/host model or roots
+    already recovered from Toyota EPS/Techstream. MD5 and SHA-256 halves cover
+    the obvious 16-byte digest adapters, and a small set of semantically natural
+    concatenations covers the most likely package/family contexts.
+    """
+    row = packages[FRC_CBC_KDF_PAIR_SPECS[0][1]]
+    lb_name, lb = first_logical_block(attach)
+    area_name = "ReproData" + lb_name.removeprefix("LogicalBlock")
+    area = attach[area_name]
+    diag_id = attach["Node01"]["DiagID"]
+    start = int(area["StartAddress"], 16)
+    length = int(area["Length"], 16)
+    service_auth = bytes.fromhex(row["service_auth_key"])
+    working_key = bytes.fromhex(row["working_key"])
+    nonce = bytes.fromhex(row["nonce"])
+    predicted_ecu_auth = bytes.fromhex(row["eps_boot_root_hypothesis_ecu_auth_key"])
+
+    raw = {
+        "zero": bytes(16),
+        "ff": bytes([0xFF]) * 16,
+        "service_auth": service_auth,
+        "working_key": working_key,
+        "nonce": nonce,
+        "techstream_wrap_key": SECURITY_UP_WRAP_KEY,
+        "eps_payload_root": EPS_PAYLOAD_BUILD_ROOT,
+        "eps_boot_sa_root": EPS_BOOT_SA_ROOT,
+        "eps_application_sa_root": EPS_APPLICATION_SA_ROOT,
+        "predicted_ecu_auth": predicted_ecu_auth,
+        "diag_ascii": _pad_ascii_16(diag_id),
+        "diag_be_left": int(diag_id, 16).to_bytes(2, "big") + bytes(14),
+        "diag_be_right": bytes(14) + int(diag_id, 16).to_bytes(2, "big"),
+        "start_be": start.to_bytes(16, "big"),
+        "start_le": start.to_bytes(16, "little"),
+        "length_be": length.to_bytes(16, "big"),
+        "length_le": length.to_bytes(16, "little"),
+        "security_property2_ascii": _pad_ascii_16(lb.get("SecurityProperty2", "")),
+        "repro_method_ascii": _pad_ascii_16(lb.get("ReproMethod", "")),
+        "contact_type_ascii": _pad_ascii_16(attach.get("Vehicle", {}).get("ContactType", "")),
+        "cipher_block0": ciphertext[:16],
+        "cipher_block1": ciphertext[16:32],
+    }
+    atoms = dict(raw)
+    for name, value in raw.items():
+        atoms.update(_digest_atoms(name, value))
+
+    concatenations = {
+        "service_auth||nonce": service_auth + nonce,
+        "working_key||nonce": working_key + nonce,
+        "nonce||working_key": nonce + working_key,
+        "service_auth||working_key": service_auth + working_key,
+        "working_key||service_auth": working_key + service_auth,
+        "diag_ascii||nonce": diag_id.encode("ascii") + nonce,
+        "start||length_be": start.to_bytes(16, "big") + length.to_bytes(16, "big"),
+        "cipher_block0||cipher_block1": ciphertext[:32],
+    }
+    for name, value in concatenations.items():
+        atoms.update(_digest_atoms(name, value))
+    return _dedupe_named_blocks(atoms)
+
+
+def _frc_kdf_candidates(atoms: dict[str, bytes]) -> dict[bytes, str]:
+    """Enumerate one-step AES/CMAC/XOR candidates over the named atom set."""
+    out: dict[bytes, str] = {}
+
+    def add(name: str, value: bytes) -> None:
+        out.setdefault(value, name)
+
+    items = list(atoms.items())
+    for name, value in items:
+        add(name, value)
+    for left_name, left in items:
+        cipher = AES.new(left, AES.MODE_ECB)
+        for right_name, right in items:
+            add(f"AES-ENC({left_name},{right_name})", cipher.encrypt(right))
+            add(f"AES-DEC({left_name},{right_name})", cipher.decrypt(right))
+            add(f"CMAC({left_name},{right_name})", cmac(left, right))
+    for index, (left_name, left) in enumerate(items):
+        for right_name, right in items[index + 1:]:
+            add(f"XOR({left_name},{right_name})", bytes(a ^ b for a, b in zip(left, right)))
+    return out
+
+
+def _sparse_block_indexes(block_count: int, count: int) -> list[int]:
+    """Spread block samples over the image sample, always excluding blocks 0/1."""
+    if block_count <= 2 or count <= 0:
+        raise ValueError("invalid sparse-block geometry")
+    usable = block_count - 2
+    count = min(count, usable)
+    if count == 1:
+        return [2]
+    indexes = {
+        2 + round(i * (usable - 1) / (count - 1))
+        for i in range(count)
+    }
+    if len(indexes) != count:
+        raise ValueError("sparse-block index collision")
+    return sorted(indexes)
+
+
+def _cbc_plaintext_blocks(ciphertext: bytes, key: bytes, indexes: list[int]) -> bytes:
+    current = b"".join(ciphertext[16 * i:16 * (i + 1)] for i in indexes)
+    previous = b"".join(ciphertext[16 * (i - 1):16 * i] for i in indexes)
+    decrypted = AES.new(key, AES.MODE_ECB).decrypt(current)
+    return bytes(a ^ b for a, b in zip(decrypted, previous))
+
+
+def _cbc_pair_identity(left: bytes, right: bytes, key: bytes, indexes: list[int]) -> float:
+    left_plain = _cbc_plaintext_blocks(left, key, indexes)
+    right_plain = _cbc_plaintext_blocks(right, key, indexes)
+    return sum(a == b for a, b in zip(left_plain, right_plain)) / len(left_plain)
+
+
+def _load_frc_pair_samples(
+    packages: dict[str, dict],
+) -> tuple[list[dict], dict[str, dict[str, str]]]:
+    rows = []
+    first_attach: dict[str, dict[str, str]] | None = None
+    common: tuple[str, str, str, str, str, str] | None = None
+    for name, left_name, right_name in FRC_CBC_KDF_PAIR_SPECS:
+        pair = []
+        for filename in (left_name, right_name):
+            path = CUW_CORPUS_ROOT / filename
+            attach, format_type, first_end = read_attach(path)
+            lb_name, lb = first_logical_block(attach)
+            area_name = "ReproData" + lb_name.removeprefix("LogicalBlock")
+            area = attach[area_name]
+            start = int(area["StartAddress"], 16)
+            payload_offset, payload_len, member = read_first_tail_member_header(path, first_end, format_type)
+            sample = materialize_srec_sample(path, payload_offset, payload_len, start, IMAGE_SAMPLE_BYTES)
+            family = (
+                packages[filename]["diag_id"],
+                packages[filename]["service_auth_key"],
+                packages[filename]["working_key"],
+                packages[filename]["nonce"],
+                lb.get("SecurityProperty2", ""),
+                lb.get("ReproMethod", ""),
+            )
+            if common is None:
+                common = family
+                first_attach = attach
+            elif family != common:
+                raise ValueError(f"{filename}: FRC CBC KDF family metadata drift")
+            pair.append((filename, member, start, sample))
+        if pair[0][2] != pair[1][2]:
+            raise ValueError(f"{name}: FRC pair start-address drift")
+        rows.append({
+            "name": name,
+            "left": pair[0][0],
+            "right": pair[1][0],
+            "left_member": pair[0][1],
+            "right_member": pair[1][1],
+            "reprodata_start": f"0x{pair[0][2]:X}",
+            "left_sample": pair[0][3],
+            "right_sample": pair[1][3],
+        })
+    if first_attach is None:
+        raise ValueError("no FRC CBC KDF pairs")
+    return rows, first_attach
+
+
+def frc_cbc_kdf_search(packages: dict[str, dict]) -> dict:
+    """Bound the obvious FRC family image-key derivations with two update oracles."""
+    pairs, attach = _load_frc_pair_samples(packages)
+    atoms = _frc_family_kdf_atoms(attach, packages, pairs[0]["left_sample"])
+    candidates = _frc_kdf_candidates(atoms)
+    indexes = _sparse_block_indexes(IMAGE_SAMPLE_BYTES // 16, FRC_KDF_SPARSE_BLOCKS)
+
+    sparse_rows = []
+    for key, name in candidates.items():
+        identities = {
+            pair["name"]: _cbc_pair_identity(pair["left_sample"], pair["right_sample"], key, indexes)
+            for pair in pairs
+        }
+        sparse_rows.append((min(identities.values()), name, key, identities))
+    sparse_rows.sort(key=lambda row: (-row[0], row[1]))
+
+    full_indexes = list(range(2, IMAGE_SAMPLE_BYTES // 16))
+    full_rows = []
+    for _sparse_min, name, key, sparse_identities in sparse_rows[:FRC_KDF_FULL_SCORE_TOP_N]:
+        identities = {
+            pair["name"]: _cbc_pair_identity(pair["left_sample"], pair["right_sample"], key, full_indexes)
+            for pair in pairs
+        }
+        full_rows.append({
+            "candidate": name,
+            "key_hex": key.hex(),
+            "sparse_min_identity": min(sparse_identities.values()),
+            "sparse_pair_identities": sparse_identities,
+            "full_min_identity": min(identities.values()),
+            "full_pair_identities": identities,
+        })
+    full_rows.sort(key=lambda row: (-row["full_min_identity"], row["candidate"]))
+    interesting = [
+        row for row in full_rows
+        if row["full_min_identity"] >= FRC_KDF_INTERESTING_IDENTITY
+    ]
+    return {
+        "hypothesis": (
+            "If FRC DFI encryption-method-1 is AES-CBC under one family image key, a correct key must undo "
+            "the post-block-2 ciphertext avalanche and recover adjacent-revision plaintext similarity on "
+            "both closed FRC update chains. For CBC blocks >=2 this comparison is independent of the IV."
+        ),
+        "pairs": [
+            {
+                key: value for key, value in pair.items()
+                if key not in ("left_sample", "right_sample")
+            }
+            | {
+                "encoded_byte_identity_after_32": byte_identity(pair["left_sample"], pair["right_sample"]),
+                "left_sample_sha256": sha256(pair["left_sample"]),
+                "right_sample_sha256": sha256(pair["right_sample"]),
+            }
+            for pair in pairs
+        ],
+        "sample_bytes_per_image": IMAGE_SAMPLE_BYTES,
+        "sparse_block_count": len(indexes),
+        "base_atom_count": len(atoms),
+        "base_atoms": list(atoms),
+        "candidate_value_count": len(candidates),
+        "candidate_grammar": (
+            "identity atoms plus all ordered AES-128-ECB-ENC, AES-128-ECB-DEC and AES-CMAC pairs, plus "
+            "unordered XOR pairs; atoms are stable FRC package/family fields, known Toyota roots, common "
+            "ciphertext-prefix blocks, and MD5/SHA-256 16-byte digest adapters of those fields and selected "
+            "natural concatenations"
+        ),
+        "full_score_top_n": FRC_KDF_FULL_SCORE_TOP_N,
+        "interesting_identity_threshold": FRC_KDF_INTERESTING_IDENTITY,
+        "top_full_results": full_rows,
+        "candidates_at_or_above_threshold": interesting,
+        "best_full_min_identity": full_rows[0]["full_min_identity"],
+        "boundary": (
+            "No threshold hit rejects only this explicit one-step metadata/known-root KDF grammar under the "
+            "AES-CBC hypothesis. It is not an exhaustive KDF search, does not prove AES-CBC, and does not "
+            "exclude an ECU-protected root, a different cipher/mode, or a more complex derivation."
+        ),
     }
 
 
@@ -457,6 +739,7 @@ def build() -> dict:
 
     payload_trials = [eps_payload_root_trial(CUW_CORPUS_ROOT / filename) for filename in EPS_PAYLOAD_GRAMMAR_PACKAGES]
     pair_trials = [image_pair_trial(name, left, right, packages) for name, left, right in IMAGE_PAIR_SPECS]
+    frc_kdf_search = frc_cbc_kdf_search(packages)
     for trial in pair_trials:
         # Random byte identity is 1/256 ~= 0.003906.  Keep a generous ceiling:
         # these are merely dead-end guards, not a statistical cryptanalysis claim.
@@ -505,10 +788,11 @@ def build() -> dict:
             "boundary": "This proves payload-build-root reuse only for packages whose own SeedKey/Nonce grammar validates under the recovered EPS root. A CMAC failure can reflect a different root or a different generation-specific payload construction; it is not evidence about ReproStd packages that omit SeedKey.",
         },
         "reprostd_image_key_trials": pair_trials,
+        "frc_reprostd_cbc_kdf_search": frc_kdf_search,
         "conclusion": {
             "verified": "Techstream/CUW exposes stable effective SecurityAccess working keys for several non-EPS ReproStd families. The T-0035 EPS control specimen exactly validates the frontend/backend wrapping algebra under the recovered EPS boot root. Separately, the recovered EPS payload-build root CMAC-validates every encrypted body/erase region in both T-0035-22 and T-0036-22, while the older T-0015-20 RAV4 EPS package rejects that same root on every region.",
             "hypothesis": "If that backend root and wrapper algebra are shared cross-ECU, the predicted ECUAuthKey-shaped values are concrete firmware-search fingerprints for FRC/HV/MG.",
-            "not_proved": "The corpus alone cannot decide whether a ReproStd ECU stores Kwork directly, stores the predicted wrapper under a universal root, derives it another way, or uses a different backend root. The tested simple ReproStd image-key guesses also do not identify the image transform or settle payload-build-root reuse.",
+            "not_proved": "The corpus alone cannot decide whether a ReproStd ECU stores Kwork directly, stores the predicted wrapper under a universal root, derives it another way, or uses a different backend root. The simple image-key trials and expanded FRC CBC differential reject only their explicit candidate grammars; they do not identify the image transform or settle payload-build-root reuse.",
         },
     }
 

@@ -185,11 +185,25 @@ for its DFI-low-nibble-1 payload path, so AES-CBC is the strongest concrete
 cross-family candidate. Neither fact proves that the TMPV770 FRC uses the same
 cipher, key derivation, or IV.
 
-Direct tests of the obvious public/package material (`ServiceAuthKey`, its
-unwrapped working key, descriptor Nonce, known EPS roots, and simple one-step
-AES combinations) do not produce plaintext. Brute-force guessing those inputs
-is no longer a productive path; the missing evidence is ECU-side decoder code
-or a raw plaintext/runtime image.
+The two closed FRC update chains let us test candidate image keys more directly
+than inspecting decrypted entropy. Under the CBC hypothesis, blocks from index 2
+onward do not require the IV for an old/new plaintext comparison. The tracked
+corpus analyzer now tests **43,845 unique one-step key candidates** built from
+112 stable FRC/package/known-root atoms through AES-ECB encrypt/decrypt,
+AES-CMAC, XOR, and explicit 16-byte MD5/SHA-256 adapters. It scores both
+`T-0062->T-0149` and `T-0061->T-0150`, then fully rescans the first 64 KiB
+for the strongest sparse candidates. No candidate recovers even 1% common
+plaintext across both chains; the best minimum result is ~0.434%, essentially
+random 1/256 behavior.
+
+That is a substantially stronger negative than trying `ServiceAuthKey`, its
+unwrapped working key, descriptor Nonce, or the known EPS roots one at a time.
+It still is not exhaustive cryptanalysis: a protected camera root, another
+cipher/mode, or a more complex KDF can trivially sit outside the tested grammar.
+The useful conclusion is narrower and operational: **the FRC image key is not
+an obvious one-step derivation from the package-visible values and Toyota roots
+we already possess.** More combinatorial guessing is lower-value than acquiring
+the ECU-side decoder/boot code or a raw plaintext/runtime image.
 
 ## 5. Physical-firmware acquisition boundary
 

@@ -1,7 +1,7 @@
 {
   "conclusion": {
     "hypothesis": "If that backend root and wrapper algebra are shared cross-ECU, the predicted ECUAuthKey-shaped values are concrete firmware-search fingerprints for FRC/HV/MG.",
-    "not_proved": "The corpus alone cannot decide whether a ReproStd ECU stores Kwork directly, stores the predicted wrapper under a universal root, derives it another way, or uses a different backend root. The tested simple ReproStd image-key guesses also do not identify the image transform or settle payload-build-root reuse.",
+    "not_proved": "The corpus alone cannot decide whether a ReproStd ECU stores Kwork directly, stores the predicted wrapper under a universal root, derives it another way, or uses a different backend root. The simple image-key trials and expanded FRC CBC differential reject only their explicit candidate grammars; they do not identify the image transform or settle payload-build-root reuse.",
     "verified": "Techstream/CUW exposes stable effective SecurityAccess working keys for several non-EPS ReproStd families. The T-0035 EPS control specimen exactly validates the frontend/backend wrapping algebra under the recovered EPS boot root. Separately, the recovered EPS payload-build root CMAC-validates every encrypted body/erase region in both T-0035-22 and T-0036-22, while the older T-0015-20 RAV4 EPS package rejects that same root on every region."
   },
   "credential_groups": [
@@ -293,6 +293,383 @@
     "verified_shared_root_packages": [
       "T-0035-22.cuw",
       "T-0036-22.cuw"
+    ]
+  },
+  "frc_reprostd_cbc_kdf_search": {
+    "base_atom_count": 112,
+    "base_atoms": [
+      "zero",
+      "ff",
+      "service_auth",
+      "working_key",
+      "nonce",
+      "techstream_wrap_key",
+      "eps_payload_root",
+      "eps_boot_sa_root",
+      "eps_application_sa_root",
+      "predicted_ecu_auth",
+      "diag_ascii",
+      "diag_be_left",
+      "diag_be_right",
+      "start_be",
+      "start_le",
+      "length_be",
+      "length_le",
+      "security_property2_ascii",
+      "repro_method_ascii",
+      "contact_type_ascii",
+      "cipher_block0",
+      "cipher_block1",
+      "md5(zero)",
+      "sha256_lo(zero)",
+      "sha256_hi(zero)",
+      "md5(ff)",
+      "sha256_lo(ff)",
+      "sha256_hi(ff)",
+      "md5(service_auth)",
+      "sha256_lo(service_auth)",
+      "sha256_hi(service_auth)",
+      "md5(working_key)",
+      "sha256_lo(working_key)",
+      "sha256_hi(working_key)",
+      "md5(nonce)",
+      "sha256_lo(nonce)",
+      "sha256_hi(nonce)",
+      "md5(techstream_wrap_key)",
+      "sha256_lo(techstream_wrap_key)",
+      "sha256_hi(techstream_wrap_key)",
+      "md5(eps_payload_root)",
+      "sha256_lo(eps_payload_root)",
+      "sha256_hi(eps_payload_root)",
+      "md5(eps_boot_sa_root)",
+      "sha256_lo(eps_boot_sa_root)",
+      "sha256_hi(eps_boot_sa_root)",
+      "md5(eps_application_sa_root)",
+      "sha256_lo(eps_application_sa_root)",
+      "sha256_hi(eps_application_sa_root)",
+      "md5(predicted_ecu_auth)",
+      "sha256_lo(predicted_ecu_auth)",
+      "sha256_hi(predicted_ecu_auth)",
+      "md5(diag_ascii)",
+      "sha256_lo(diag_ascii)",
+      "sha256_hi(diag_ascii)",
+      "md5(diag_be_left)",
+      "sha256_lo(diag_be_left)",
+      "sha256_hi(diag_be_left)",
+      "md5(diag_be_right)",
+      "sha256_lo(diag_be_right)",
+      "sha256_hi(diag_be_right)",
+      "md5(start_be)",
+      "sha256_lo(start_be)",
+      "sha256_hi(start_be)",
+      "md5(start_le)",
+      "sha256_lo(start_le)",
+      "sha256_hi(start_le)",
+      "md5(length_be)",
+      "sha256_lo(length_be)",
+      "sha256_hi(length_be)",
+      "md5(length_le)",
+      "sha256_lo(length_le)",
+      "sha256_hi(length_le)",
+      "md5(security_property2_ascii)",
+      "sha256_lo(security_property2_ascii)",
+      "sha256_hi(security_property2_ascii)",
+      "md5(repro_method_ascii)",
+      "sha256_lo(repro_method_ascii)",
+      "sha256_hi(repro_method_ascii)",
+      "md5(contact_type_ascii)",
+      "sha256_lo(contact_type_ascii)",
+      "sha256_hi(contact_type_ascii)",
+      "md5(cipher_block0)",
+      "sha256_lo(cipher_block0)",
+      "sha256_hi(cipher_block0)",
+      "md5(cipher_block1)",
+      "sha256_lo(cipher_block1)",
+      "sha256_hi(cipher_block1)",
+      "md5(service_auth||nonce)",
+      "sha256_lo(service_auth||nonce)",
+      "sha256_hi(service_auth||nonce)",
+      "md5(working_key||nonce)",
+      "sha256_lo(working_key||nonce)",
+      "sha256_hi(working_key||nonce)",
+      "md5(nonce||working_key)",
+      "sha256_lo(nonce||working_key)",
+      "sha256_hi(nonce||working_key)",
+      "md5(service_auth||working_key)",
+      "sha256_lo(service_auth||working_key)",
+      "sha256_hi(service_auth||working_key)",
+      "md5(working_key||service_auth)",
+      "sha256_lo(working_key||service_auth)",
+      "sha256_hi(working_key||service_auth)",
+      "md5(diag_ascii||nonce)",
+      "sha256_lo(diag_ascii||nonce)",
+      "sha256_hi(diag_ascii||nonce)",
+      "md5(start||length_be)",
+      "sha256_lo(start||length_be)",
+      "sha256_hi(start||length_be)",
+      "md5(cipher_block0||cipher_block1)",
+      "sha256_lo(cipher_block0||cipher_block1)",
+      "sha256_hi(cipher_block0||cipher_block1)"
+    ],
+    "best_full_min_identity": 0.004335613092330239,
+    "boundary": "No threshold hit rejects only this explicit one-step metadata/known-root KDF grammar under the AES-CBC hypothesis. It is not an exhaustive KDF search, does not prove AES-CBC, and does not exclude an ECU-protected root, a different cipher/mode, or a more complex derivation.",
+    "candidate_grammar": "identity atoms plus all ordered AES-128-ECB-ENC, AES-128-ECB-DEC and AES-CMAC pairs, plus unordered XOR pairs; atoms are stable FRC package/family fields, known Toyota roots, common ciphertext-prefix blocks, and MD5/SHA-256 16-byte digest adapters of those fields and selected natural concatenations",
+    "candidate_value_count": 43845,
+    "candidates_at_or_above_threshold": [],
+    "full_score_top_n": 16,
+    "hypothesis": "If FRC DFI encryption-method-1 is AES-CBC under one family image key, a correct key must undo the post-block-2 ciphertext avalanche and recover adjacent-revision plaintext similarity on both closed FRC update chains. For CBC blocks >=2 this comparison is independent of the IV.",
+    "interesting_identity_threshold": 0.01,
+    "pairs": [
+      {
+        "encoded_byte_identity_after_32": 0.003953957010258915,
+        "left": "T-0062-23.cuw",
+        "left_member": "01-8646F4206400.xx",
+        "left_sample_sha256": "9545e99195cd15d8d1361f3608b50484a71c7f23fc7473fe4d3d9529db88e0c0",
+        "name": "frc_f420_62_to_149",
+        "reprodata_start": "0x8E80000",
+        "right": "T-0149-24.cuw",
+        "right_member": "01-8646F4206700.xx",
+        "right_sample_sha256": "470b301441512a42667f3be9fab3a7e8ea2e9e5e3709c3bb85e1423f2047ece2"
+      },
+      {
+        "encoded_byte_identity_after_32": 0.003755495847581827,
+        "left": "T-0061-23.cuw",
+        "left_member": "01-8646F1606300.xx",
+        "left_sample_sha256": "999eb91e0372a764807e079a97587b2d36d1d5f5d6d70513b283d0ab915db69b",
+        "name": "frc_f160_61_to_150",
+        "reprodata_start": "0x8E80000",
+        "right": "T-0150-24.cuw",
+        "right_member": "01-8646F1611200.xx",
+        "right_sample_sha256": "56e7a3c0383aeef565d8887728ad05e9e372c469f7a487d52b2829aefb3b4fdd"
+      }
+    ],
+    "sample_bytes_per_image": 65536,
+    "sparse_block_count": 128,
+    "top_full_results": [
+      {
+        "candidate": "AES-DEC(md5(eps_application_sa_root),sha256_lo(eps_application_sa_root))",
+        "full_min_identity": 0.004335613092330239,
+        "full_pair_identities": {
+          "frc_f160_61_to_150": 0.004335613092330239,
+          "frc_f420_62_to_149": 0.004350879335613092
+        },
+        "key_hex": "6f755788a32beeb7ce5a08baa8a558bd",
+        "sparse_min_identity": 0.0068359375,
+        "sparse_pair_identities": {
+          "frc_f160_61_to_150": 0.0078125,
+          "frc_f420_62_to_149": 0.0068359375
+        }
+      },
+      {
+        "candidate": "AES-DEC(md5(nonce),sha256_hi(cipher_block0||cipher_block1))",
+        "full_min_identity": 0.004152418172936004,
+        "full_pair_identities": {
+          "frc_f160_61_to_150": 0.00428981436248168,
+          "frc_f420_62_to_149": 0.004152418172936004
+        },
+        "key_hex": "ae32d3768943ea5b943f393698eea32d",
+        "sparse_min_identity": 0.0068359375,
+        "sparse_pair_identities": {
+          "frc_f160_61_to_150": 0.0068359375,
+          "frc_f420_62_to_149": 0.00732421875
+        }
+      },
+      {
+        "candidate": "AES-ENC(md5(length_le),md5(nonce||working_key))",
+        "full_min_identity": 0.004137151929653151,
+        "full_pair_identities": {
+          "frc_f160_61_to_150": 0.004137151929653151,
+          "frc_f420_62_to_149": 0.004473009281875916
+        },
+        "key_hex": "0020e3f0938975ea7b75548bfe4252cd",
+        "sparse_min_identity": 0.00732421875,
+        "sparse_pair_identities": {
+          "frc_f160_61_to_150": 0.00732421875,
+          "frc_f420_62_to_149": 0.00732421875
+        }
+      },
+      {
+        "candidate": "AES-DEC(md5(eps_boot_sa_root),sha256_lo(zero))",
+        "full_min_identity": 0.004076086956521739,
+        "full_pair_identities": {
+          "frc_f160_61_to_150": 0.004091353199804592,
+          "frc_f420_62_to_149": 0.004076086956521739
+        },
+        "key_hex": "62aa24ca26c9c31edb0424981a033009",
+        "sparse_min_identity": 0.0068359375,
+        "sparse_pair_identities": {
+          "frc_f160_61_to_150": 0.0068359375,
+          "frc_f420_62_to_149": 0.0068359375
+        }
+      },
+      {
+        "candidate": "AES-DEC(sha256_hi(diag_ascii||nonce),md5(service_auth||working_key))",
+        "full_min_identity": 0.003999755740107474,
+        "full_pair_identities": {
+          "frc_f160_61_to_150": 0.003999755740107474,
+          "frc_f420_62_to_149": 0.004488275525158769
+        },
+        "key_hex": "d679fbb9f8333f4c392e26c798339df3",
+        "sparse_min_identity": 0.00732421875,
+        "sparse_pair_identities": {
+          "frc_f160_61_to_150": 0.00732421875,
+          "frc_f420_62_to_149": 0.0078125
+        }
+      },
+      {
+        "candidate": "AES-DEC(md5(diag_be_right),sha256_hi(eps_payload_root))",
+        "full_min_identity": 0.003953957010258915,
+        "full_pair_identities": {
+          "frc_f160_61_to_150": 0.003953957010258915,
+          "frc_f420_62_to_149": 0.00418295065950171
+        },
+        "key_hex": "c8b556240c1c02b4074bb5d1344f6fcd",
+        "sparse_min_identity": 0.0068359375,
+        "sparse_pair_identities": {
+          "frc_f160_61_to_150": 0.00732421875,
+          "frc_f420_62_to_149": 0.0068359375
+        }
+      },
+      {
+        "candidate": "CMAC(sha256_lo(cipher_block0),md5(security_property2_ascii))",
+        "full_min_identity": 0.003938690766976062,
+        "full_pair_identities": {
+          "frc_f160_61_to_150": 0.004228749389350269,
+          "frc_f420_62_to_149": 0.003938690766976062
+        },
+        "key_hex": "b7cb39addbefa738772803dddd2f220e",
+        "sparse_min_identity": 0.00732421875,
+        "sparse_pair_identities": {
+          "frc_f160_61_to_150": 0.00927734375,
+          "frc_f420_62_to_149": 0.00732421875
+        }
+      },
+      {
+        "candidate": "AES-ENC(md5(length_be),eps_payload_root)",
+        "full_min_identity": 0.0039081582804103565,
+        "full_pair_identities": {
+          "frc_f160_61_to_150": 0.0039081582804103565,
+          "frc_f420_62_to_149": 0.003953957010258915
+        },
+        "key_hex": "77e09fab0e777d7b26e64fc4fc4e58fd",
+        "sparse_min_identity": 0.00732421875,
+        "sparse_pair_identities": {
+          "frc_f160_61_to_150": 0.00732421875,
+          "frc_f420_62_to_149": 0.0078125
+        }
+      },
+      {
+        "candidate": "AES-ENC(security_property2_ascii,sha256_hi(working_key||nonce))",
+        "full_min_identity": 0.0039081582804103565,
+        "full_pair_identities": {
+          "frc_f160_61_to_150": 0.004060820713238886,
+          "frc_f420_62_to_149": 0.0039081582804103565
+        },
+        "key_hex": "4eb783aef64e6db647fe7d698a0e9cca",
+        "sparse_min_identity": 0.00732421875,
+        "sparse_pair_identities": {
+          "frc_f160_61_to_150": 0.0078125,
+          "frc_f420_62_to_149": 0.00732421875
+        }
+      },
+      {
+        "candidate": "AES-DEC(md5(ff),sha256_hi(security_property2_ascii))",
+        "full_min_identity": 0.0038318270639960917,
+        "full_pair_identities": {
+          "frc_f160_61_to_150": 0.003969223253541768,
+          "frc_f420_62_to_149": 0.0038318270639960917
+        },
+        "key_hex": "548d26eb863f82a215d39b731e681856",
+        "sparse_min_identity": 0.0068359375,
+        "sparse_pair_identities": {
+          "frc_f160_61_to_150": 0.00732421875,
+          "frc_f420_62_to_149": 0.0068359375
+        }
+      },
+      {
+        "candidate": "CMAC(sha256_lo(cipher_block0||cipher_block1),predicted_ecu_auth)",
+        "full_min_identity": 0.0038318270639960917,
+        "full_pair_identities": {
+          "frc_f160_61_to_150": 0.0038318270639960917,
+          "frc_f420_62_to_149": 0.004167684416218857
+        },
+        "key_hex": "342e998997e7928f69a7e28eab02ad6a",
+        "sparse_min_identity": 0.00732421875,
+        "sparse_pair_identities": {
+          "frc_f160_61_to_150": 0.00732421875,
+          "frc_f420_62_to_149": 0.00732421875
+        }
+      },
+      {
+        "candidate": "XOR(md5(diag_ascii),md5(nonce||working_key))",
+        "full_min_identity": 0.0038318270639960917,
+        "full_pair_identities": {
+          "frc_f160_61_to_150": 0.0038318270639960917,
+          "frc_f420_62_to_149": 0.004121885686370298
+        },
+        "key_hex": "6d795057eafe8b0eddf70e9d412f8e36",
+        "sparse_min_identity": 0.00732421875,
+        "sparse_pair_identities": {
+          "frc_f160_61_to_150": 0.00732421875,
+          "frc_f420_62_to_149": 0.00732421875
+        }
+      },
+      {
+        "candidate": "CMAC(sha256_hi(eps_payload_root),sha256_lo(ff))",
+        "full_min_identity": 0.003724963361016121,
+        "full_pair_identities": {
+          "frc_f160_61_to_150": 0.0042592818759159745,
+          "frc_f420_62_to_149": 0.003724963361016121
+        },
+        "key_hex": "1935881c71304d67840da22d38b54ca8",
+        "sparse_min_identity": 0.00732421875,
+        "sparse_pair_identities": {
+          "frc_f160_61_to_150": 0.00732421875,
+          "frc_f420_62_to_149": 0.0078125
+        }
+      },
+      {
+        "candidate": "CMAC(start_le,md5(techstream_wrap_key))",
+        "full_min_identity": 0.003709697117733268,
+        "full_pair_identities": {
+          "frc_f160_61_to_150": 0.003709697117733268,
+          "frc_f420_62_to_149": 0.003969223253541768
+        },
+        "key_hex": "142ce8cae0caee48d68febcf80bef1fa",
+        "sparse_min_identity": 0.00732421875,
+        "sparse_pair_identities": {
+          "frc_f160_61_to_150": 0.00732421875,
+          "frc_f420_62_to_149": 0.0087890625
+        }
+      },
+      {
+        "candidate": "CMAC(md5(diag_be_right),sha256_hi(diag_ascii||nonce))",
+        "full_min_identity": 0.0035723009281875915,
+        "full_pair_identities": {
+          "frc_f160_61_to_150": 0.003953957010258915,
+          "frc_f420_62_to_149": 0.0035723009281875915
+        },
+        "key_hex": "94fa4ce7320f749baeeddd50f600e08f",
+        "sparse_min_identity": 0.00732421875,
+        "sparse_pair_identities": {
+          "frc_f160_61_to_150": 0.0078125,
+          "frc_f420_62_to_149": 0.00732421875
+        }
+      },
+      {
+        "candidate": "AES-ENC(md5(working_key||nonce),md5(diag_be_right))",
+        "full_min_identity": 0.0034959697117733267,
+        "full_pair_identities": {
+          "frc_f160_61_to_150": 0.004228749389350269,
+          "frc_f420_62_to_149": 0.0034959697117733267
+        },
+        "key_hex": "a613d0248476588a32c463c4481ad951",
+        "sparse_min_identity": 0.0078125,
+        "sparse_pair_identities": {
+          "frc_f160_61_to_150": 0.0078125,
+          "frc_f420_62_to_149": 0.0087890625
+        }
+      }
     ]
   },
   "high_value_non_eps_predictions": {

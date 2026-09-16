@@ -906,8 +906,26 @@ and Hybrid format-`0x67` image pairs remain at chance-level byte identity after
 trying the known EPS roots, `ServiceAuthKey`, `Kwork`, and one-step
 payload-root/`Kwork` derivatives under CBC/CFB/OFB/CTR with each package's
 Nonce. Therefore the opaque ReproStd image representation is **not** explained
-by those simple EPS payload-KDF guesses. This does *not* disprove reuse of the
-EPS payload-build root; the actual ECU-side image transform remains unknown.
+by those simple EPS payload-KDF guesses.
+
+The two closed FRC update chains provide a much stronger bounded image-key
+oracle under the leading CBC hypothesis. For CBC block `i >= 2`, plaintext is
+`AES-DEC(K,C[i]) XOR C[i-1]`, so old/new plaintext similarity can be tested
+without knowing the IV. The deterministic search builds **112 unique 16-byte
+atoms** from stable FRC family/package values (ServiceAuthKey, `Kwork`, Nonce,
+SecurityUp wrap key, the three recovered EPS roots, predicted ECUAuthKey,
+DiagID/range/method metadata, the shared first two ciphertext blocks), plus
+MD5/SHA-256 16-byte adapters and selected natural concatenations. It then
+enumerates every one-step identity, ordered AES-ECB encrypt/decrypt, AES-CMAC,
+and unordered XOR construction over those atoms: **43,845 unique candidate
+keys**. Sparse scoring is performed across both `T-0062->T-0149` and
+`T-0061->T-0150`; the best 16 candidates are then rescored across the complete
+first 64 KiB of both images. **Zero** candidate reaches 1% plaintext identity
+on both chains; the best minimum full-sample identity is only about **0.434%**,
+indistinguishable from the 1/256 random baseline. This materially rejects the
+obvious metadata/known-root one-step KDF family while still leaving an
+ECU-protected root, a different cipher/mode, or a more complex derivation open.
+It does *not* prove CBC or disprove reuse of the EPS payload-build root.
 
 The deterministic corpus calculation is
 `tools/techstream/analyze_cuw_cross_ecu_security_derivations.py`; its artifact is

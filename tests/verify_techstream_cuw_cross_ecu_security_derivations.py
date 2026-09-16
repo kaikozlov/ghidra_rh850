@@ -54,4 +54,21 @@ assert all(
 )
 assert all(trial["best_candidate"]["byte_identity_after_32"] < 0.01 for trial in actual["reprostd_image_key_trials"])
 
+frc_kdf = actual["frc_reprostd_cbc_kdf_search"]
+assert frc_kdf["sample_bytes_per_image"] == 0x10000
+assert frc_kdf["sparse_block_count"] == 128
+assert frc_kdf["base_atom_count"] == 112
+assert frc_kdf["candidate_value_count"] == 43845
+assert frc_kdf["full_score_top_n"] == 16
+assert frc_kdf["interesting_identity_threshold"] == 0.01
+assert [row["name"] for row in frc_kdf["pairs"]] == [
+    "frc_f420_62_to_149",
+    "frc_f160_61_to_150",
+]
+assert all(row["encoded_byte_identity_after_32"] < 0.01 for row in frc_kdf["pairs"])
+assert frc_kdf["candidates_at_or_above_threshold"] == []
+assert frc_kdf["best_full_min_identity"] < 0.005
+assert all(row["full_min_identity"] < 0.005 for row in frc_kdf["top_full_results"])
+assert "not an exhaustive KDF search" in frc_kdf["boundary"]
+
 print("CUW cross-ECU SecurityAccess derivations: PASS")

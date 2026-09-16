@@ -183,7 +183,12 @@ transfer, and the RequiredSpec04 integrity object is a 256-byte signature. TMS-0
 proves the 23TC01 Corolla **package** is already local, so the missing consumer is
 now specifically FRC bootloader/programming-decoder firmware (cipher/key/IV,
 `10F5/10F6`, delta application, signature verification) or a plaintext/runtime
-camera dump. The retained same-generation TSS3 Prius teardown
+camera dump. TMS-088 now also closes the obvious package-visible key-guessing
+dead end: the two closed FRC update chains reject **43,845** one-step
+AES/CMAC/XOR candidates built from 112 stable package/known-root atoms under the
+CBC differential oracle (best top-candidate two-chain 64-KiB identity ~0.434%,
+zero >=1%). Do not spend another pass combining the same CUW metadata/EPS roots;
+new decoder/root evidence is required. The retained same-generation TSS3 Prius teardown
 (`REFERENCE/tss3_camera_report`) identifies a TMPV7706XBG plus S25HS01GT
 128-MiB serial NOR, making a **full raw NOR dump from a matching/sacrificial
 camera** the preferred next static acquisition; do not assume a virtual-to-NOR
