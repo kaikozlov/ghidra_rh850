@@ -716,3 +716,79 @@ Camry receiver. Neither the EPS image, MG update, switch mirror nor the
 confounded historical host attempts currently establishes automatic-cancel
 acceptance. No sender, Panda permission, diagnostic control or vehicle command
 was added in this investigation. The production feature remains unimplemented.
+
+### Follow-up: select native releases, not host requests or physical CANCEL
+
+The next pass changes the selection criterion. It scans every native chassis-side
+`0x08A` cruise-latch falling edge in the **463 hash-checked sources across the ten
+routes already enumerated by the host-attempt corpus**. This is independent of
+whether the driver pressed CANCEL or openpilot requested cancellation. There are
+**1,103,695 native cruise frames and 77 continuous active-to-inactive edges**.
+The 500-ms preceding window contains a recovered CANCEL, main-switch, or brake
+assertion at 74 edges. Three have continuous observations but no such assertion.
+These counts describe this ten-route selection; they are not the same population
+as the separate 79 rising host requests across sixteen routes.
+
+The detector evaluates the whole CAN publication before attributing a release,
+keeps malformed or missing input unknown, and does not carry an engaged state
+across a cruise observation gap exceeding 100 ms. The 100-ms observation-gap and
+500-ms context limits are declared analysis screens, not runtime control policy.
+It retains raw pre-edge context for every release, original source identities,
+and all native CAN, host sendcan, carControl and speed observations within three
+seconds of the three selected edges. The new fixture is 621 KiB compressed;
+none of the interpretation depends on an ignored scratch file.
+
+| Selected route/segment | Native release timestamp (ns) | Recorded speed near edge | Source context |
+|---|---:|---:|---|
+| September 4 `0000003b--62262eb7a1`, segment 90 | 5499618127901 | 6.328 m/s | Adaptive mode; brake `0x101` B0[3] clear, but unnamed B1 takes 0/1/2/3 before release versus baseline 0/1 |
+| September 7 `00000045--805b7ca6ab`, segment 4 | 671199398420 | 19.022 m/s | Adaptive mode; B0[3] clear, but unnamed brake B1 rises from baseline 0 to 3..7 in the preceding window |
+| September 10 `0000008d--a9f348691a`, segment 6 | 3110034985633 | 8.084 m/s | Raw `0x251 B0` goes conventional-active `0x90` to conventional-available `0x88`; preceding brake B0[3] and B1 remain zero |
+
+**None is an independent host-cancel acceptance observation.** All three have
+no recorded `carControl.cruiseControl.cancel` assertion throughout their retained
+six-second windows, no host sendcan on the enumerated cancel-candidate IDs, and
+no assertion of the recovered `0x1B2` CANCEL mirror. The low-speed conventional
+case is compatible with a stock operating-limit cancellation, but the source does
+not establish its exact cause, threshold, or receiving command. Raw native mode
+bytes take precedence over the historical `carState.nonAdaptive` default.
+
+The two adaptive examples must not be named "automatic cancellations with no
+driver input": the brake-byte variation is unresolved context. Conversely, B1
+must not become a speculative `brakePressed` predicate. The reference images and
+GTS descriptions available here do not establish what that byte represents,
+whether its change is a cause or response, or an OEM threshold. The current
+production brake decoder is therefore not changed by this analysis.
+
+The retained `T-0051-26` Engine/MG package was reconsidered instead of rejected
+solely for being node `0724`. Its twenty already-unpacked application/routine
+regions are still opaque at this checkpoint; outer CUW and S-record decoding do
+not provide an executable cruise receiver. This is distinct from saying that
+Engine/MG cannot participate in cruise. The available exact EPS receive map and
+brake consumers likewise do not establish FRC/Hybrid cruise-command acceptance.
+
+Reproduction:
+
+```sh
+# Re-reduce the portable retained fixture and run classifier/source regressions.
+uv run python tools/targets/camry/analysis/analyze_camry_2026_native_cruise_release.py
+tools/test camry_2026_native_cruise_release
+
+# Explicit full original-source scan, using the existing openpilot LogReader environment.
+../kai-openpilot/.venv/bin/python \
+  tools/targets/camry/analysis/analyze_camry_2026_native_cruise_release.py --extract
+```
+
+Artifacts are `data/generated/camry_2026_native_cruise_release.json` and
+`tests/fixtures/camry_2026_native_cruise_release.jsonl.gz`. The executable tests
+check missing/stale/corrupt input handling, source-bus and TX-echo exclusion,
+input/host ordering, unclassified brake bytes, raw mode distinctions, native
+release witnesses, and Profile-5 integrity of the retained ADAS request frames.
+
+**Cancellation is not implemented or qualified by this follow-up.** The remaining
+fact is an ordinary cancel input accepted by the actual cruise receiver, with its
+format and ownership established. An isolated accepted-command observation or a
+readable matching receiver implementation can close that fact; another search
+of button mirrors cannot substitute for it. No production openpilot/opendbc or
+Panda code, authentication path, EPS image, or vehicle state was changed.
+
+Validation for this follow-up: **15 new native-release tests pass**. The native-release, existing host-request-causality and existing cancellation-ownership suites all pass (**3 suites, no failures or skips**). Targeted Python lint and `git diff --check` pass. These are analysis results, not a cancellation-feature qualification.

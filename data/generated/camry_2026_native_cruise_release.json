@@ -1,0 +1,848 @@
+{
+  "boundaries": [
+    "This scan is selected by native 0x08A falling edges, not by physical buttons or host cancel requests.",
+    "A <=100ms continuous cruise edge is required; absent/malformed inputs are unknown, never deasserted.",
+    "Publication ordering is not physical bus arbitration ordering.",
+    "Neither a native release nor a switch mirror is proof that an injected command is accepted.",
+    "No cancel sender, diagnostic operation, ECU fault, or vehicle write is performed."
+  ],
+  "dispositions": {
+    "decoded_driver_input_observed": 74,
+    "no_decoded_driver_input_observed": 3
+  },
+  "fixture_sha256": "66e2a8f833871146b935fef98cf49ca09ab6aecec0750e9c3c9553da54e13c79",
+  "release_count": 77,
+  "routes": [
+    {
+      "counts": {
+        "decoded_driver_input_observed": 7,
+        "native_0x08a": 15262,
+        "releases": 7
+      },
+      "route": "00000037--dec6fe39cb",
+      "source_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ]
+    },
+    {
+      "counts": {
+        "decoded_driver_input_observed": 23,
+        "native_0x08a": 263265,
+        "no_decoded_driver_input_observed": 1,
+        "releases": 24
+      },
+      "route": "0000003b--62262eb7a1",
+      "source_indices": [
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69,
+        70,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        78,
+        79,
+        80,
+        81,
+        82,
+        83,
+        84,
+        85,
+        86,
+        87,
+        88,
+        89,
+        90,
+        91,
+        92,
+        93,
+        94,
+        95,
+        96,
+        97,
+        98,
+        99,
+        100,
+        101,
+        102,
+        103,
+        104,
+        105,
+        106,
+        107,
+        108,
+        109,
+        110,
+        111,
+        112,
+        113,
+        114,
+        115,
+        116
+      ]
+    },
+    {
+      "counts": {
+        "decoded_driver_input_observed": 9,
+        "native_0x08a": 193390,
+        "releases": 9
+      },
+      "route": "0000003c--97b9e7a69a",
+      "source_indices": [
+        117,
+        118,
+        119,
+        120,
+        121,
+        122,
+        123,
+        124,
+        125,
+        126,
+        127,
+        128,
+        129,
+        130,
+        131,
+        132,
+        133,
+        134,
+        135,
+        136,
+        137,
+        138,
+        139,
+        140,
+        141,
+        142,
+        143,
+        144,
+        145,
+        146,
+        147,
+        148,
+        149,
+        150,
+        151,
+        152,
+        153,
+        154,
+        155,
+        156,
+        157,
+        158,
+        159,
+        160,
+        161,
+        162,
+        163,
+        164,
+        165,
+        166,
+        167,
+        168,
+        169,
+        170,
+        171,
+        172,
+        173,
+        174,
+        175,
+        176,
+        177,
+        178,
+        179,
+        180,
+        181,
+        182,
+        183,
+        184,
+        185,
+        186,
+        187,
+        188,
+        189,
+        190,
+        191,
+        192,
+        193,
+        194,
+        195,
+        196,
+        197
+      ]
+    },
+    {
+      "counts": {
+        "decoded_driver_input_observed": 2,
+        "native_0x08a": 148567,
+        "releases": 2
+      },
+      "route": "0000003d--0e812cecba",
+      "source_indices": [
+        198,
+        199,
+        200,
+        201,
+        202,
+        203,
+        204,
+        205,
+        206,
+        207,
+        208,
+        209,
+        210,
+        211,
+        212,
+        213,
+        214,
+        215,
+        216,
+        217,
+        218,
+        219,
+        220,
+        221,
+        222,
+        223,
+        224,
+        225,
+        226,
+        227,
+        228,
+        229,
+        230,
+        231,
+        232,
+        233,
+        234,
+        235,
+        236,
+        237,
+        238,
+        239,
+        240,
+        241,
+        242,
+        243,
+        244,
+        245,
+        246,
+        247,
+        248,
+        249,
+        250,
+        251,
+        252,
+        253,
+        254,
+        255,
+        256,
+        257,
+        258,
+        259
+      ]
+    },
+    {
+      "counts": {
+        "decoded_driver_input_observed": 3,
+        "native_0x08a": 187216,
+        "releases": 3
+      },
+      "route": "0000003e--1a2f20417d",
+      "source_indices": [
+        260,
+        261,
+        262,
+        263,
+        264,
+        265,
+        266,
+        267,
+        268,
+        269,
+        270,
+        271,
+        272,
+        273,
+        274,
+        275,
+        276,
+        277,
+        278,
+        279,
+        280,
+        281,
+        282,
+        283,
+        284,
+        285,
+        286,
+        287,
+        288,
+        289,
+        290,
+        291,
+        292,
+        293,
+        294,
+        295,
+        296,
+        297,
+        298,
+        299,
+        300,
+        301,
+        302,
+        303,
+        304,
+        305,
+        306,
+        307,
+        308,
+        309,
+        310,
+        311,
+        312,
+        313,
+        314,
+        315,
+        316,
+        317,
+        318,
+        319,
+        320,
+        321,
+        322,
+        323,
+        324,
+        325,
+        326,
+        327,
+        328,
+        329,
+        330,
+        331,
+        332,
+        333,
+        334,
+        335,
+        336,
+        337
+      ]
+    },
+    {
+      "counts": {
+        "decoded_driver_input_observed": 8,
+        "native_0x08a": 200559,
+        "releases": 8
+      },
+      "route": "0000003f--36e72f5fdc",
+      "source_indices": [
+        338,
+        339,
+        340,
+        341,
+        342,
+        343,
+        344,
+        345,
+        346,
+        347,
+        348,
+        349,
+        350,
+        351,
+        352,
+        353,
+        354,
+        355,
+        356,
+        357,
+        358,
+        359,
+        360,
+        361,
+        362,
+        363,
+        364,
+        365,
+        366,
+        367,
+        368,
+        369,
+        370,
+        371,
+        372,
+        373,
+        374,
+        375,
+        376,
+        377,
+        378,
+        379,
+        380,
+        381,
+        382,
+        383,
+        384,
+        385,
+        386,
+        387,
+        388,
+        389,
+        390,
+        391,
+        392,
+        393,
+        394,
+        395,
+        396,
+        397,
+        398,
+        399,
+        400,
+        401,
+        402,
+        403,
+        404,
+        405,
+        406,
+        407,
+        408,
+        409,
+        410,
+        411,
+        412,
+        413,
+        414,
+        415,
+        416,
+        417,
+        418,
+        419,
+        420,
+        421
+      ]
+    },
+    {
+      "counts": {
+        "decoded_driver_input_observed": 8,
+        "native_0x08a": 35001,
+        "no_decoded_driver_input_observed": 1,
+        "releases": 9
+      },
+      "route": "00000045--805b7ca6ab",
+      "source_indices": [
+        422,
+        423,
+        424,
+        425,
+        426,
+        427,
+        428,
+        429,
+        430,
+        431,
+        432,
+        433,
+        434,
+        435,
+        436
+      ]
+    },
+    {
+      "counts": {
+        "decoded_driver_input_observed": 6,
+        "native_0x08a": 17532,
+        "releases": 6
+      },
+      "route": "00000048--709f22277b",
+      "source_indices": [
+        437,
+        438,
+        439,
+        440,
+        441,
+        442,
+        443,
+        444
+      ]
+    },
+    {
+      "counts": {
+        "decoded_driver_input_observed": 7,
+        "native_0x08a": 26065,
+        "no_decoded_driver_input_observed": 1,
+        "releases": 8
+      },
+      "route": "0000008d--a9f348691a",
+      "source_indices": [
+        445,
+        446,
+        447,
+        448,
+        449,
+        450,
+        451,
+        452,
+        453,
+        454,
+        455
+      ]
+    },
+    {
+      "counts": {
+        "decoded_driver_input_observed": 1,
+        "native_0x08a": 16838,
+        "releases": 1
+      },
+      "route": "00000093--4066e7ae51",
+      "source_indices": [
+        456,
+        457,
+        458,
+        459,
+        460,
+        461,
+        462
+      ]
+    }
+  ],
+  "schema": "camry-native-cruise-release-v1",
+  "selected_windows": [
+    {
+      "boundary": "Brake B1 is retained as an unnamed raw byte. Conventional mode and nearby speed do not identify a cancellation threshold or receiver command.",
+      "brake_assertion_offsets_ms": [],
+      "brake_b1_baseline_values": [
+        0,
+        1
+      ],
+      "brake_b1_pre_values": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "brake_pre_changes": [
+        {
+          "offset_ms": -483.413802,
+          "payload": "800000000000008a"
+        },
+        {
+          "offset_ms": -263.16,
+          "payload": "800000010000008b"
+        },
+        {
+          "offset_ms": -243.500312,
+          "payload": "800000020000008c"
+        },
+        {
+          "offset_ms": -222.580573,
+          "payload": "800000050000008f"
+        },
+        {
+          "offset_ms": -203.027916,
+          "payload": "800000040000008e"
+        },
+        {
+          "offset_ms": -183.309948,
+          "payload": "800000020000008c"
+        },
+        {
+          "offset_ms": -163.308541,
+          "payload": "800100010000008c"
+        },
+        {
+          "offset_ms": -122.943333,
+          "payload": "800000010000008b"
+        },
+        {
+          "offset_ms": -103.429375,
+          "payload": "800100010000008c"
+        },
+        {
+          "offset_ms": -69.261406,
+          "payload": "800300010000008e"
+        },
+        {
+          "offset_ms": -40.780989,
+          "payload": "800300000000008d"
+        },
+        {
+          "offset_ms": -29.654791,
+          "payload": "800200000000008c"
+        },
+        {
+          "offset_ms": -9.784844,
+          "payload": "800100000000008b"
+        }
+      ],
+      "classification": {
+        "disposition": "no_decoded_driver_input_observed",
+        "first_observed_input": null,
+        "host_cancel_asserted_in_pre_window": false,
+        "host_cancel_coverage": {
+          "complete": true,
+          "count": 50,
+          "max_gap_ns": 12485989
+        },
+        "input_coverage": {
+          "0x0FE": {
+            "complete": true,
+            "count": 16,
+            "max_gap_ns": 39719375
+          },
+          "0x101": {
+            "complete": true,
+            "count": 25,
+            "max_gap_ns": 28480417
+          }
+        },
+        "last_host_cancel": {
+          "nanos": 5499613284099,
+          "value": false
+        },
+        "malformed_inputs": {},
+        "observed_input_kinds": []
+      },
+      "first_post_mode": 160,
+      "host_cancel_shaped_sends": [],
+      "host_request_offsets_ms": [],
+      "last_pre_mode": 160,
+      "mirror_cancel_offsets_ms": [],
+      "mode_from_native_0x251_b0": "adaptive",
+      "release_nanos": 5499618127901,
+      "route": "0000003b--62262eb7a1",
+      "source_index": 97,
+      "state_sample": {
+        "brake_pressed": false,
+        "gas_pressed": false,
+        "offset_ms": 1.265521,
+        "v_ego": 6.328016757965088
+      }
+    },
+    {
+      "boundary": "Brake B1 is retained as an unnamed raw byte. Conventional mode and nearby speed do not identify a cancellation threshold or receiver command.",
+      "brake_assertion_offsets_ms": [],
+      "brake_b1_baseline_values": [
+        0
+      ],
+      "brake_b1_pre_values": [
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "brake_pre_changes": [
+        {
+          "offset_ms": -482.243444,
+          "payload": "800300010000008e"
+        },
+        {
+          "offset_ms": -421.928594,
+          "payload": "800400010000008f"
+        },
+        {
+          "offset_ms": -362.664755,
+          "payload": "8005000100000090"
+        },
+        {
+          "offset_ms": -302.318603,
+          "payload": "8006000100000091"
+        },
+        {
+          "offset_ms": -222.135376,
+          "payload": "8007000100000092"
+        },
+        {
+          "offset_ms": -60.557343,
+          "payload": "8006000100000091"
+        },
+        {
+          "offset_ms": -19.819889,
+          "payload": "8005000100000090"
+        },
+        {
+          "offset_ms": 0.0,
+          "payload": "800400010000008f"
+        }
+      ],
+      "classification": {
+        "disposition": "no_decoded_driver_input_observed",
+        "first_observed_input": null,
+        "host_cancel_asserted_in_pre_window": false,
+        "host_cancel_coverage": {
+          "complete": true,
+          "count": 50,
+          "max_gap_ns": 13435076
+        },
+        "input_coverage": {
+          "0x0FE": {
+            "complete": true,
+            "count": 16,
+            "max_gap_ns": 40830212
+          },
+          "0x101": {
+            "complete": true,
+            "count": 25,
+            "max_gap_ns": 21783581
+          }
+        },
+        "last_host_cancel": {
+          "nanos": 671194947509,
+          "value": false
+        },
+        "malformed_inputs": {},
+        "observed_input_kinds": []
+      },
+      "first_post_mode": 160,
+      "host_cancel_shaped_sends": [],
+      "host_request_offsets_ms": [],
+      "last_pre_mode": 160,
+      "mirror_cancel_offsets_ms": [],
+      "mode_from_native_0x251_b0": "adaptive",
+      "release_nanos": 671199398420,
+      "route": "00000045--805b7ca6ab",
+      "source_index": 426,
+      "state_sample": {
+        "brake_pressed": false,
+        "gas_pressed": false,
+        "offset_ms": 1.385585,
+        "v_ego": 19.021852493286133
+      }
+    },
+    {
+      "boundary": "Brake B1 is retained as an unnamed raw byte. Conventional mode and nearby speed do not identify a cancellation threshold or receiver command.",
+      "brake_assertion_offsets_ms": [],
+      "brake_b1_baseline_values": [
+        0
+      ],
+      "brake_b1_pre_values": [
+        0
+      ],
+      "brake_pre_changes": [
+        {
+          "offset_ms": -492.043083,
+          "payload": "800000000000008a"
+        }
+      ],
+      "classification": {
+        "disposition": "no_decoded_driver_input_observed",
+        "first_observed_input": null,
+        "host_cancel_asserted_in_pre_window": false,
+        "host_cancel_coverage": {
+          "complete": true,
+          "count": 50,
+          "max_gap_ns": 12635585
+        },
+        "input_coverage": {
+          "0x0FE": {
+            "complete": true,
+            "count": 15,
+            "max_gap_ns": 40479382
+          },
+          "0x101": {
+            "complete": true,
+            "count": 25,
+            "max_gap_ns": 22177195
+          }
+        },
+        "last_host_cancel": {
+          "nanos": 3110028749454,
+          "value": false
+        },
+        "malformed_inputs": {},
+        "observed_input_kinds": []
+      },
+      "first_post_mode": 136,
+      "host_cancel_shaped_sends": [],
+      "host_request_offsets_ms": [],
+      "last_pre_mode": 144,
+      "mirror_cancel_offsets_ms": [],
+      "mode_from_native_0x251_b0": "conventional",
+      "release_nanos": 3110034985633,
+      "route": "0000008d--a9f348691a",
+      "source_index": 451,
+      "state_sample": {
+        "brake_pressed": false,
+        "gas_pressed": false,
+        "offset_ms": 1.407327,
+        "v_ego": 8.084360122680664
+      }
+    }
+  ],
+  "source_count": 463
+}
