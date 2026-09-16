@@ -1292,6 +1292,19 @@ probe above.
 
 ## 7. Native longitudinal integration consequence of the Bus-1 E2E candidate
 
+> **September-16 supersession:** the historical `0x160` demand interpretation
+> below is no longer the current Camry contract. Retained F33 motion and
+> replacement evidence classify its implemented B4:B5/B12 mapping as
+> state/result-related rather than a demonstrated actuator ingress. The leading
+> direct chassis-facing candidate is now protected Bus-4 `0x08A` B8:B9/B11:B12,
+> whose signed16 ×0.001 shape matches Toyota's upper/lower TSS acceleration
+> request vocabulary. Exact upper/lower identity and the preferred
+> pre-protection FRC/proxy carrier are still unresolved. Camry therefore keeps
+> stock longitudinal ownership and does **not** advertise Alpha Long. See
+> `camry-2026-longitudinal-evidence.md` for the current evidence and topology
+> normalization. The remainder of this section is retained as historical design
+> context for why a proved upstream request carrier would fit native openpilot.
+
 A 2026-09-05 comparison against current upstream openpilot
 `a4f7c50d2a52a5865a40da2ebc5004c82929a0ef` and opendbc
 `3e92d112129507debe45364891954db70238997a` clarifies what a proved Camry

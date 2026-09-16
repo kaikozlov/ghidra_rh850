@@ -127,8 +127,8 @@ parallel outputs of a common internal calculation, both remain compatible.
 There is no established byte-copy from a different FRC command.
 
 The follow-up independently re-extracted the 28-source role-audit fixture
-from the original rlogs: **306,071 publication events** reproduce byte-for-byte
-(SHA-256 `5a1a454517016ad6a3db15a66b28f11ee0c274c497d0cf0c02f0921ab398ed54`).
+from the original rlogs: **306,073 publication events** reproduce byte-for-byte
+(SHA-256 `4e5646c636d71750bd28713b439eafad8f493bdfea37e507c7ebec2b2f4fc936`).
 The companion role audit below was completed separately during this review.
 The maintained motion-audit producer and its seven-source fixture independently
 own the core physical-motion, native-comparator, resume, and direction checks;
@@ -241,10 +241,10 @@ four-second neighborhoods around the three stock-resume landmarks. This is a
 selection of source files/windows, not a claim to have reviewed every Camry
 route or every message in those files.
 
-Re-extraction produced **306,071 original publication events** and was
+Re-extraction produced **306,073 original publication events** and was
 byte-identical to the existing expanded local fixture
 `tests/fixtures/camry_2026_longitudinal_role.jsonl.gz`
-(SHA-256 `5a1a454517016ad6a3db15a66b28f11ee0c274c497d0cf0c02f0921ab398ed54`).
+(SHA-256 `4e5646c636d71750bd28713b439eafad8f493bdfea37e507c7ebec2b2f4fc936`).
 Both `tools/test camry_20260916_longitudinal_motion_audit` and the existing
 worktree suite `tools/test camry_2026_longitudinal_role` passed. The expanded
 role files were already pending at the start of this review and were not
@@ -290,9 +290,9 @@ controller, Panda rule, firmware, or experimental-mode default was changed.
 ## Expanded passive review: physical source is not control authority
 
 The pending role audit was independently re-extracted from **28 original rlog
-segments**. Its **306,071 retained publication events** reproduce the existing
+segments**. Its **306,073 retained publication events** reproduce the existing
 fixture byte-for-byte (SHA-256
-`5a1a454517016ad6a3db15a66b28f11ee0c274c497d0cf0c02f0921ab398ed54`). Both complete
+`4e5646c636d71750bd28713b439eafad8f493bdfea37e507c7ebec2b2f4fc936`). Both complete
 August captures were then reprocessed independently of those September logs.
 The expanded evidence lives in:
 
@@ -396,7 +396,100 @@ request. Brake `0x10A1..0x10A4` name TSS requests, but no retained synchronized
 CAN/DID sample assigns these names to B4:B5 or B12. The current checked-in
 firmware inventory contains EPS applications, not the relevant Camry
 longitudinal producer/receiver implementation. EPS receive behavior cannot fill
-that provenance gap. No alternative sender is identified or enabled here.
+that provenance gap. The candidate re-rank below identifies a protected
+chassis-facing request carrier, but not yet the preferred upstream replacement
+carrier.
+
+### Longitudinal candidate re-rank after topology normalization
+
+The earlier search mixed three harness eras too easily. Raw Panda bus numbers are
+therefore normalized to Toyota network role before any candidate is compared:
+
+| Capture era | Panda CAN0/CAN2 relay pair | Panda bus 1 | Longitudinal interpretation |
+|---|---|---|---|
+| Stock Toyota-B before the temporary repin | Toyota Bus 1 camera/ADAS: source side bus2 -> downstream bus0 | Toyota Bus 4 Brake/EPS/chassis, unsplit | Same physical wiring as the restored configuration below; direct-Panda ELM327 mux state is a separate axis |
+| Temporary CAN0/CAN1 repin (Aug-27 through lateral development) | **Toyota Bus 4**: upstream `0x08A/0x0C9` on bus2 -> chassis bus0; `0x0CA` returns bus0 -> bus2 | **Toyota Bus 1** camera/radar/FRC P05 family | Healthy Sep-4 DRCC routes `3b/3c` are in this era |
+| Stock Toyota-B restored in the Sep-11 integration cleanup | **Toyota Bus 1** camera/ADAS: FRC `0x020/0x160/0x230/0x440` source bus2 -> downstream bus0 | **Toyota Bus 4** request/result/chassis family `0x08A/0x0C9/0x0CA`, unsplit | Current production-shaped topology |
+
+`harnessStatus=flipped` means harness/cable orientation, **not** the physical
+CAN0/CAN1 repin. Likewise Panda sources 128/130 are returned host-TX echoes, not
+additional ECU transmitters. The regenerated stock-topology artifact checks all
+seven request/result candidate IDs explicitly rather than inferring this mapping
+from unrelated state messages.
+
+With that normalization, protected Bus-4 **`0x08A` is the strongest direct
+chassis-facing longitudinal candidate**. It was already recovered as a
+multi-function TSS request/state PDU carrying Target Lateral ID and target
+steering angle. The complete August captures add a second, independent shape:
+
+- B8:B9 and B11:B12 are signed16 words and are **identical in 44,617/44,617
+  source-side frames** across the two complete drives;
+- their raw ranges are -1146..+995 and -1102..+1070, naturally giving
+  -1.146..+0.995 and -1.102..+1.070 m/s² at 0.001 m/s²/count;
+- the prior complete-capture census independently bounded these words away from
+  simple measured-motion/steering interpretations: all four joins against
+  wheel-derived acceleration, steering angle, driver torque, and target-angle
+  rate have `|r| <= 0.0967`;
+- in all three no-driver-input Sep-4 stock resumes, the B8/B11 value is already
+  positive **500 ms before wheel motion** (+0.350, +0.277, +0.391 m/s²) and has
+  risen to +0.828/+0.605/+0.590 m/s² at the wheel-defined onset. The duplicated
+  words remain equal throughout these retained neighborhoods.
+
+Toyota's own GTS surface supplies an unusually exact semantic template. Current
+P5 Brake/Booster/EPB dictionaries expose `0x10A1` **Request Acceleration of
+Upper Limit from Toyota Safety Sense** and `0x10A2` **...Lower Limit...**, both
+signed16 at 0.001 m/s², plus 6-bit upper/lower request IDs (`0x10A3/0x10A4`).
+The FRC-hosted PCS Operation-FFD recorder independently contains record `5280`
+"TSS required acceleration (lower limit)" and `5281` "TSS request acceleration
+(upper limit)", again signed16 at 0.001 m/s², as well as longitudinal IDs,
+braking/driving-force allocation, and arbitration-result records.
+
+This is **not yet a byte-name proof**. Because B8:B9 == B11:B12 in every retained
+complete-drive frame, the evidence cannot assign one word to upper and the other
+to lower, prove that either is literally DID `0x10A1/0x10A2`, or locate the two
+6-bit request IDs. The correct bounded statement is that these two `0x08A` words
+are the strongest retained acceleration-request candidates and match Toyota's
+TSS request contract in direction, width, scale, and pre-motion behavior.
+
+The alternatives now rank as follows:
+
+1. **Protected `0x08A` B8:B9/B11:B12** — strongest direct downstream TSS
+   acceleration-request candidate.
+2. **The unrecovered FRC -> arbitration/signing precursor that produces the
+   protected `0x08A` request** — preferred stock-harness replacement boundary,
+   because final stock Toyota-B leaves Bus 4 unsplit.
+3. **`0x0C9`** — upstream-to-chassis and therefore directionally plausible as
+   sideband/request metadata, but B12:B13 correlates only weakly with `0x0CA`
+   (best |r| 0.265/0.140 in the two complete drives) and remains `0x1838`
+   through the early portion of all three stock-resume ramps. It is not the
+   leading acceleration-magnitude carrier.
+4. **`0x0CA`** — strong result/acceleration semantics but the wrong physical
+   direction: native chassis -> upstream on the repinned split. Treat it as a
+   result/feedback return, not an FRC request target.
+
+The direct FRC Toyota-Bus-1 P05 candidates `0x020/0x160/0x230/0x440` were also
+screened against the protected `0x08A` request word using every byte-aligned
+8/16/24/32-bit signed/unsigned BE/LE field and +/-300 ms lags. `0x020`, `0x230`,
+and `0x440` have **no** same-sign field reproducing at |r| >= 0.25 in both
+complete drives. `0x160` has moderate state-related correlations (best
+min-|r| 0.631), but those maximize at the **+300 ms search boundary** and overlap
+its already recovered ego-state structure. This does not recover a simple
+pre-protection copy. A multivariate/multiplexed transform, a different protected
+FRC-dependent PDU, or an internal/private FRC-to-proxy handoff remains possible.
+
+This distinction matters for the port. On the temporary repin, `0x08A` sat on
+the intercept pair and its source side was observable separately. On final
+stock Toyota-B it sits on **unsplit Panda bus1 with the stock sender and chassis
+consumer together**. Therefore "just transmit modified `0x08A`" is not a clean
+production replacement strategy even if its acceleration fields are fully
+recovered. The next reverse-engineering target is the **pre-protection
+FRC/proxy request handoff or another legitimate sole-emitter boundary**, not a
+return to the disproved Camry `0x160` B4:B5+B12 encoder.
+
+The reproducible reduction is
+`data/generated/camry_2026_longitudinal_request_candidates.json`, generated by
+`tools/targets/camry/analysis/analyze_camry_2026_longitudinal_request_candidates.py`
+and protected by `tools/test camry_2026_longitudinal_request_candidates`.
 
 Reproduce the portable reductions:
 

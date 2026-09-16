@@ -13,7 +13,7 @@ OUTPUT = ROOT / 'data/generated/camry_2026_stock_harness_topology.json'
 LOG_ROOT = Path('/Users/kai/dev/inspect/logs/camry-2026/2026-09-11')
 OPENPILOT = Path('/Users/kai/dev/inspect/repos/kai-openpilot')
 ROUTES = ('000000d1--ad906be282', '000000d4--327b2c4bb8')
-IDS = (0x025, 0x030, 0x101, 0x160, *range(0x180, 0x186), 0x412)
+IDS = (0x020, 0x025, 0x030, 0x08A, 0x0C9, 0x0CA, 0x101, 0x160, *range(0x180, 0x186), 0x230, 0x412, 0x440)
 
 
 def analyze(log_root: Path, openpilot: Path) -> dict:
@@ -38,9 +38,20 @@ def analyze(log_root: Path, openpilot: Path) -> dict:
                 'native_messages': [{'address': hex(a), 'bus': b, 'length': n, 'count': count, **samples[a, b, n]}
                                     for (a, b, n), count in sorted(counts.items())],
             })
-    return {'schema': 'camry-stock-harness-topology-v1', 'sources': sources,
+    return {'schema': 'camry-stock-harness-topology-v2', 'sources': sources,
             'boundary': 'incident-era native traffic proves message placement, not healthy EPS operation or actuation; EPS 0x030 is absent',
-            'parser_bus': {'radar_objects': 0, 'camera_0x160': 2, 'chassis_0x025_0x101_0x412': 1},
+            'parser_bus': {'radar_objects': 0, 'camera_frc_0x020_0x160_0x230_0x440': 2,
+                           'bus4_0x08a_0x0c9_0x0ca_and_chassis_0x025_0x101_0x412': 1},
+            'physical_network_roles': {
+                'panda_bus0': 'stock Toyota-B downstream side of the CAN0/CAN2 Toyota Bus-1 camera/ADAS relay pair',
+                'panda_bus2': 'stock Toyota-B source/camera side of the CAN0/CAN2 Toyota Bus-1 camera/ADAS relay pair',
+                'panda_bus1': 'stock Toyota-B unsplit Toyota Bus-4 Brake/EPS/chassis network',
+            },
+            'candidate_direction': {
+                'direct_frc_bus1_pdus': {'toyota_network': 'Bus 1', 'panda_bus': 2, 'ids': ['0x020', '0x160', '0x230', '0x440']},
+                'protected_bus4_request_result_family': {'toyota_network': 'Bus 4', 'panda_bus': 1,
+                                                         'ids': ['0x08A', '0x0C9', '0x0CA']},
+            },
             'hud_cancel_replacement_on_adas_relay_qualified': False}
 
 

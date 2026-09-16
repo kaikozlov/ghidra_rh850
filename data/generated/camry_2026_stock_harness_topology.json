@@ -1,15 +1,49 @@
 {
   "boundary": "incident-era native traffic proves message placement, not healthy EPS operation or actuation; EPS 0x030 is absent",
+  "candidate_direction": {
+    "direct_frc_bus1_pdus": {
+      "ids": [
+        "0x020",
+        "0x160",
+        "0x230",
+        "0x440"
+      ],
+      "panda_bus": 2,
+      "toyota_network": "Bus 1"
+    },
+    "protected_bus4_request_result_family": {
+      "ids": [
+        "0x08A",
+        "0x0C9",
+        "0x0CA"
+      ],
+      "panda_bus": 1,
+      "toyota_network": "Bus 4"
+    }
+  },
   "hud_cancel_replacement_on_adas_relay_qualified": false,
   "parser_bus": {
-    "camera_0x160": 2,
-    "chassis_0x025_0x101_0x412": 1,
+    "bus4_0x08a_0x0c9_0x0ca_and_chassis_0x025_0x101_0x412": 1,
+    "camera_frc_0x020_0x160_0x230_0x440": 2,
     "radar_objects": 0
   },
-  "schema": "camry-stock-harness-topology-v1",
+  "physical_network_roles": {
+    "panda_bus0": "stock Toyota-B downstream side of the CAN0/CAN2 Toyota Bus-1 camera/ADAS relay pair",
+    "panda_bus1": "stock Toyota-B unsplit Toyota Bus-4 Brake/EPS/chassis network",
+    "panda_bus2": "stock Toyota-B source/camera side of the CAN0/CAN2 Toyota Bus-1 camera/ADAS relay pair"
+  },
+  "schema": "camry-stock-harness-topology-v2",
   "sources": [
     {
       "native_messages": [
+        {
+          "address": "0x20",
+          "bus": 2,
+          "count": 1200,
+          "length": 12,
+          "mono_ns": 216134519733,
+          "payload": "0a45f1f10000000000000000"
+        },
         {
           "address": "0x25",
           "bus": 1,
@@ -17,6 +51,30 @@
           "length": 32,
           "mono_ns": 216105226496,
           "payload": "01160000600100a500000000000000000000000000000000000000006cc42fad"
+        },
+        {
+          "address": "0x8a",
+          "bus": 1,
+          "count": 2400,
+          "length": 32,
+          "mono_ns": 216105226496,
+          "payload": "000000008000001200ce0000ce7fff007fff00000000000000003a00eb90232a"
+        },
+        {
+          "address": "0xc9",
+          "bus": 1,
+          "count": 1875,
+          "length": 32,
+          "mono_ns": 216114001728,
+          "payload": "0000000000000000000000001838000000000000000000000000000000000000"
+        },
+        {
+          "address": "0xca",
+          "bus": 1,
+          "count": 2548,
+          "length": 32,
+          "mono_ns": 216105226496,
+          "payload": "0d9b11febbf164feb800000000000000000000000000000000000000ac13183b"
         },
         {
           "address": "0x101",
@@ -83,12 +141,28 @@
           "payload": "fad1f0f6000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
         },
         {
+          "address": "0x230",
+          "bus": 2,
+          "count": 1200,
+          "length": 64,
+          "mono_ns": 216123756523,
+          "payload": "8c75f1c0000000000000000000000000000000000000000000000000000000000000c1d4f9fe2ffa8bfcaa8f000200003a94047749dd27749dd2f60100000000"
+        },
+        {
           "address": "0x412",
           "bus": 1,
           "count": 60,
           "length": 8,
           "mono_ns": 217058315124,
           "payload": "4000000000ee9307"
+        },
+        {
+          "address": "0x440",
+          "bus": 2,
+          "count": 120,
+          "length": 32,
+          "mono_ns": 216475515884,
+          "payload": "f81d4cff017b3ec7edf41dfff840ffe0fff0fff60040571478f14a3200000000"
         }
       ],
       "path": "000000d1--ad906be282/rlog-3.zst",
@@ -97,12 +171,44 @@
     {
       "native_messages": [
         {
+          "address": "0x20",
+          "bus": 2,
+          "count": 1200,
+          "length": 12,
+          "mono_ns": 276140088169,
+          "payload": "f2bea1a10000000000000000"
+        },
+        {
           "address": "0x25",
           "bus": 1,
           "count": 6000,
           "length": 32,
           "mono_ns": 276107465777,
           "payload": "0ffe00004ff5007e00000000000000000000000000000000000000006541ea36"
+        },
+        {
+          "address": "0x8a",
+          "bus": 1,
+          "count": 2400,
+          "length": 32,
+          "mono_ns": 276120592639,
+          "payload": "0000000880002d4700152400157fff007fff0000c000100000001a00e4fcf352"
+        },
+        {
+          "address": "0xc9",
+          "bus": 1,
+          "count": 1875,
+          "length": 32,
+          "mono_ns": 276120592639,
+          "payload": "000000000000000000000000f9be000000000000000000000000000000000000"
+        },
+        {
+          "address": "0xca",
+          "bus": 1,
+          "count": 2548,
+          "length": 32,
+          "mono_ns": 276120592639,
+          "payload": "4f62050aeaff0affdf00000000000000000000000000000000000000a1f18fba"
         },
         {
           "address": "0x101",
@@ -169,12 +275,28 @@
           "payload": "f13da0a6003e6cff000903003e6df3040103003e6c00800902003e6af2040300003e710a00090300000000000000000000000000000000000000000000000000"
         },
         {
+          "address": "0x230",
+          "bus": 2,
+          "count": 1200,
+          "length": 64,
+          "mono_ns": 276129258829,
+          "payload": "ebfda1c00000000000000000000000000000000000000000000000000000000000005a14048afe2bf8afe2bf000000007a16048cfe33f8cfe33f050100000000"
+        },
+        {
           "address": "0x412",
           "bus": 1,
           "count": 60,
           "length": 8,
           "mono_ns": 277062941922,
           "payload": "4000000000ee9307"
+        },
+        {
+          "address": "0x440",
+          "bus": 2,
+          "count": 120,
+          "length": 32,
+          "mono_ns": 276479842907,
+          "payload": "64b1c4ff017b3ec7edf41dfff840ffe0fff0fff60040571478f14a3200000000"
         }
       ],
       "path": "000000d1--ad906be282/rlog-4.zst",
@@ -183,12 +305,44 @@
     {
       "native_messages": [
         {
+          "address": "0x20",
+          "bus": 2,
+          "count": 1200,
+          "length": 12,
+          "mono_ns": 3967382086449,
+          "payload": "15de2f2f0000000000000000"
+        },
+        {
           "address": "0x25",
           "bus": 1,
           "count": 5999,
           "length": 32,
           "mono_ns": 3967372362689,
           "payload": "01020000bfa600950000000000000000000000000000000000000000102265cc"
+        },
+        {
+          "address": "0x8a",
+          "bus": 1,
+          "count": 2399,
+          "length": 32,
+          "mono_ns": 3967391821355,
+          "payload": "0000000080000012010c00010c7fff007fff00000000000000003700d284342b"
+        },
+        {
+          "address": "0xc9",
+          "bus": 1,
+          "count": 1874,
+          "length": 32,
+          "mono_ns": 3967391821355,
+          "payload": "0000000000000000000000001838000000000000000000000000000000000000"
+        },
+        {
+          "address": "0xca",
+          "bus": 1,
+          "count": 2547,
+          "length": 32,
+          "mono_ns": 3967391821355,
+          "payload": "71eb17fecdf19afed800000000000000000000000000000000000000df6291c8"
         },
         {
           "address": "0x101",
@@ -255,12 +409,28 @@
           "payload": "e0f92e3400003b000009020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
         },
         {
+          "address": "0x230",
+          "bus": 2,
+          "count": 1199,
+          "length": 64,
+          "mono_ns": 3967412987429,
+          "payload": "49f92f80000000000000000000000000000000000000000000000000000000000000ca9404c1d3074c1d307400080000e93c01ff03fc0d302dc001fb00000000"
+        },
+        {
           "address": "0x412",
           "bus": 1,
           "count": 60,
           "length": 8,
           "mono_ns": 3967442479204,
           "payload": "4000000000ee9307"
+        },
+        {
+          "address": "0x440",
+          "bus": 2,
+          "count": 119,
+          "length": 32,
+          "mono_ns": 3967857447815,
+          "payload": "950e6cff017b3ec7edf41dfff840ffe0fff0fff60042571478f14a3200000000"
         }
       ],
       "path": "000000d4--327b2c4bb8/rlog-3.zst",
@@ -269,12 +439,44 @@
     {
       "native_messages": [
         {
+          "address": "0x20",
+          "bus": 2,
+          "count": 1200,
+          "length": 12,
+          "mono_ns": 4027390910177,
+          "payload": "3cc2dfdf0000000000000000"
+        },
+        {
           "address": "0x25",
           "bus": 1,
           "count": 5999,
           "length": 32,
           "mono_ns": 4027361608609,
           "payload": "00010000300a00680000000000000000000000000000000000000000da2cae0f"
+        },
+        {
+          "address": "0x8a",
+          "bus": 1,
+          "count": 2400,
+          "length": 32,
+          "mono_ns": 4027361608609,
+          "payload": "0000000080000012fffd00fffd7fff007fff00000000000000001600953bef24"
+        },
+        {
+          "address": "0xc9",
+          "bus": 1,
+          "count": 1875,
+          "length": 32,
+          "mono_ns": 4027361608609,
+          "payload": "0000000000000000000000001369000000000000000000000000000000000000"
+        },
+        {
+          "address": "0xca",
+          "bus": 1,
+          "count": 2547,
+          "length": 32,
+          "mono_ns": 4027371423676,
+          "payload": "c3e60a109dfec3fec400000000000000000000000000000000000000db6e337c"
         },
         {
           "address": "0x101",
@@ -341,12 +543,28 @@
           "payload": "18ecdde30000000000000000000000000000000000000000000000000000000000000000000000043f8602618200000000000000000000000000000000000000"
         },
         {
+          "address": "0x230",
+          "bus": 2,
+          "count": 1200,
+          "length": 64,
+          "mono_ns": 4027361608609,
+          "payload": "cb3ede600000000000000000000000000000000000000000000000000000000000003a140442fd0bf42fd0bf00ff0000aa1604ceff3bfceff3bf00f900000000"
+        },
+        {
           "address": "0x412",
           "bus": 1,
           "count": 60,
           "length": 8,
           "mono_ns": 4027441250312,
           "payload": "4000000000ee9307"
+        },
+        {
+          "address": "0x440",
+          "bus": 2,
+          "count": 120,
+          "length": 32,
+          "mono_ns": 4027361608609,
+          "payload": "9979e3ff017b3ec7edf41dfff840ffe0fff0fff60043571478f14a3200000000"
         }
       ],
       "path": "000000d4--327b2c4bb8/rlog-4.zst",

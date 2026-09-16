@@ -1160,3 +1160,6 @@ tests = ["tests/verify_camry_2026_longitudinal_role.py"]
 
 [suite.camry_20260916_longitudinal_motion_audit]
 tests = ["tests/verify_camry_20260916_longitudinal_motion_audit.py"]
+
+[suite.camry_2026_longitudinal_request_candidates]
+tests = ["tests/verify_camry_2026_longitudinal_request_candidates.py"]

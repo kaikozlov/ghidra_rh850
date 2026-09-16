@@ -19,7 +19,7 @@ ROOT = Path(__file__).resolve().parents[4]
 DEFAULT_FIXTURE = ROOT / 'tests/fixtures/camry_2026_longitudinal_role.jsonl.gz'
 TRIAL_IDS = {0x08A, 0x0AA, 0x0CA, 0x13C, 0x160, 0x251}
 DIRECTION_IDS = {0x08A, 0x0CA, 0x0C9, 0x160}
-RESUME_IDS = {0x0AA, 0x0CA, 0x0FE, 0x101, 0x13C, 0x160}
+RESUME_IDS = {0x08A, 0x0AA, 0x0C9, 0x0CA, 0x0FE, 0x101, 0x13C, 0x160, 0x251}
 GROUPS = (
     ('d1', 'logs/camry-2026/2026-09-11/000000d1--ad906be282', (3, 4, 5, 6, 9, 10, 11, 12), ()),
     ('d4', 'logs/camry-2026/2026-09-11/000000d4--327b2c4bb8', tuple(range(7)), ()),

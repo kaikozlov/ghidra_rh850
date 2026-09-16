@@ -1,0 +1,1842 @@
+{
+  "direct_frc_bus1_precursor_screen": {
+    "boundary": "Correlation is a screening bound, not source-code dataflow proof. Closed-loop ego-state fields can correlate strongly at long lags.",
+    "lag_convention": "positive lag means the direct FRC PDU field is compared to a later protected 0x08A request word",
+    "method": "Every byte-aligned 8/16/24/32-bit BE/LE signed+unsigned field; nearest protected 0x08A B8:B9 request-word candidate at source time + lag; lags -300..+300 ms/25 ms; <=30 ms join; cruise latch B3[3] asserted; segment-local only.",
+    "per_id": {
+      "0x020": {
+        "best_reproduced_same_sign": [
+          {
+            "address": "0x020",
+            "drive_a": {
+              "abs_r": 0.096143186,
+              "address": "0x020",
+              "field": "B1:B2/u16/little",
+              "lag_ms": 300,
+              "n": 917,
+              "r": 0.096143186,
+              "source_frames": 10270,
+              "unique": 256
+            },
+            "drive_b": {
+              "abs_r": 0.067309892,
+              "address": "0x020",
+              "field": "B1:B2/u16/little",
+              "lag_ms": -300,
+              "n": 2253,
+              "r": 0.067309892,
+              "source_frames": 11999,
+              "unique": 256
+            },
+            "field": "B1:B2/u16/little",
+            "min_abs_r": 0.067309892
+          },
+          {
+            "address": "0x020",
+            "drive_a": {
+              "abs_r": 0.096143109,
+              "address": "0x020",
+              "field": "B0:B2/u24/little",
+              "lag_ms": 300,
+              "n": 917,
+              "r": 0.096143109,
+              "source_frames": 10270,
+              "unique": 256
+            },
+            "drive_b": {
+              "abs_r": 0.067309834,
+              "address": "0x020",
+              "field": "B0:B2/u24/little",
+              "lag_ms": -300,
+              "n": 2253,
+              "r": 0.067309834,
+              "source_frames": 11999,
+              "unique": 256
+            },
+            "field": "B0:B2/u24/little",
+            "min_abs_r": 0.067309834
+          },
+          {
+            "address": "0x020",
+            "drive_a": {
+              "abs_r": 0.096174287,
+              "address": "0x020",
+              "field": "B0:B3/u32/little",
+              "lag_ms": 300,
+              "n": 917,
+              "r": 0.096174287,
+              "source_frames": 10270,
+              "unique": 256
+            },
+            "drive_b": {
+              "abs_r": 0.067305951,
+              "address": "0x020",
+              "field": "B0:B3/u32/little",
+              "lag_ms": -300,
+              "n": 2253,
+              "r": 0.067305951,
+              "source_frames": 11999,
+              "unique": 256
+            },
+            "field": "B0:B3/u32/little",
+            "min_abs_r": 0.067305951
+          },
+          {
+            "address": "0x020",
+            "drive_a": {
+              "abs_r": 0.096174287,
+              "address": "0x020",
+              "field": "B1:B3/u24/little",
+              "lag_ms": 300,
+              "n": 917,
+              "r": 0.096174287,
+              "source_frames": 10270,
+              "unique": 256
+            },
+            "drive_b": {
+              "abs_r": 0.067305951,
+              "address": "0x020",
+              "field": "B1:B3/u24/little",
+              "lag_ms": -300,
+              "n": 2253,
+              "r": 0.067305951,
+              "source_frames": 11999,
+              "unique": 256
+            },
+            "field": "B1:B3/u24/little",
+            "min_abs_r": 0.067305951
+          },
+          {
+            "address": "0x020",
+            "drive_a": {
+              "abs_r": 0.096174287,
+              "address": "0x020",
+              "field": "B1:B4/s32/little",
+              "lag_ms": 300,
+              "n": 917,
+              "r": 0.096174287,
+              "source_frames": 10270,
+              "unique": 256
+            },
+            "drive_b": {
+              "abs_r": 0.067305951,
+              "address": "0x020",
+              "field": "B1:B4/s32/little",
+              "lag_ms": -300,
+              "n": 2253,
+              "r": 0.067305951,
+              "source_frames": 11999,
+              "unique": 256
+            },
+            "field": "B1:B4/s32/little",
+            "min_abs_r": 0.067305951
+          }
+        ],
+        "reproduced_abs_r_ge_0p25": 0
+      },
+      "0x160": {
+        "best_reproduced_same_sign": [
+          {
+            "address": "0x160",
+            "drive_a": {
+              "abs_r": 0.63125549,
+              "address": "0x160",
+              "field": "B8:B8/s8/big",
+              "lag_ms": 300,
+              "n": 1834,
+              "r": -0.63125549,
+              "source_frames": 20510,
+              "unique": 256
+            },
+            "drive_b": {
+              "abs_r": 0.670124628,
+              "address": "0x160",
+              "field": "B8:B8/s8/big",
+              "lag_ms": 300,
+              "n": 4503,
+              "r": -0.670124628,
+              "source_frames": 23998,
+              "unique": 256
+            },
+            "field": "B8:B8/s8/big",
+            "min_abs_r": 0.63125549
+          },
+          {
+            "address": "0x160",
+            "drive_a": {
+              "abs_r": 0.63125549,
+              "address": "0x160",
+              "field": "B8:B8/s8/little",
+              "lag_ms": 300,
+              "n": 1834,
+              "r": -0.63125549,
+              "source_frames": 20510,
+              "unique": 256
+            },
+            "drive_b": {
+              "abs_r": 0.670124628,
+              "address": "0x160",
+              "field": "B8:B8/s8/little",
+              "lag_ms": 300,
+              "n": 4503,
+              "r": -0.670124628,
+              "source_frames": 23998,
+              "unique": 256
+            },
+            "field": "B8:B8/s8/little",
+            "min_abs_r": 0.63125549
+          },
+          {
+            "address": "0x160",
+            "drive_a": {
+              "abs_r": 0.631251242,
+              "address": "0x160",
+              "field": "B5:B8/s32/little",
+              "lag_ms": 300,
+              "n": 1834,
+              "r": -0.631251242,
+              "source_frames": 20510,
+              "unique": 9293
+            },
+            "drive_b": {
+              "abs_r": 0.670119955,
+              "address": "0x160",
+              "field": "B5:B8/s32/little",
+              "lag_ms": 300,
+              "n": 4503,
+              "r": -0.670119955,
+              "source_frames": 23998,
+              "unique": 8468
+            },
+            "field": "B5:B8/s32/little",
+            "min_abs_r": 0.631251242
+          },
+          {
+            "address": "0x160",
+            "drive_a": {
+              "abs_r": 0.63125123,
+              "address": "0x160",
+              "field": "B6:B8/s24/little",
+              "lag_ms": 300,
+              "n": 1834,
+              "r": -0.63125123,
+              "source_frames": 20510,
+              "unique": 618
+            },
+            "drive_b": {
+              "abs_r": 0.670119953,
+              "address": "0x160",
+              "field": "B6:B8/s24/little",
+              "lag_ms": 300,
+              "n": 4503,
+              "r": -0.670119953,
+              "source_frames": 23998,
+              "unique": 905
+            },
+            "field": "B6:B8/s24/little",
+            "min_abs_r": 0.63125123
+          },
+          {
+            "address": "0x160",
+            "drive_a": {
+              "abs_r": 0.63125123,
+              "address": "0x160",
+              "field": "B7:B8/s16/little",
+              "lag_ms": 300,
+              "n": 1834,
+              "r": -0.63125123,
+              "source_frames": 20510,
+              "unique": 617
+            },
+            "drive_b": {
+              "abs_r": 0.670119953,
+              "address": "0x160",
+              "field": "B7:B8/s16/little",
+              "lag_ms": 300,
+              "n": 4503,
+              "r": -0.670119953,
+              "source_frames": 23998,
+              "unique": 905
+            },
+            "field": "B7:B8/s16/little",
+            "min_abs_r": 0.63125123
+          }
+        ],
+        "reproduced_abs_r_ge_0p25": 38
+      },
+      "0x230": {
+        "best_reproduced_same_sign": [
+          {
+            "address": "0x230",
+            "drive_a": {
+              "abs_r": 0.155367095,
+              "address": "0x230",
+              "field": "B44:B45/u16/big",
+              "lag_ms": 300,
+              "n": 917,
+              "r": -0.155367095,
+              "source_frames": 10256,
+              "unique": 697
+            },
+            "drive_b": {
+              "abs_r": 0.114875837,
+              "address": "0x230",
+              "field": "B44:B45/u16/big",
+              "lag_ms": 300,
+              "n": 2250,
+              "r": -0.114875837,
+              "source_frames": 11999,
+              "unique": 949
+            },
+            "field": "B44:B45/u16/big",
+            "min_abs_r": 0.114875837
+          },
+          {
+            "address": "0x230",
+            "drive_a": {
+              "abs_r": 0.155367095,
+              "address": "0x230",
+              "field": "B44:B46/u24/big",
+              "lag_ms": 300,
+              "n": 917,
+              "r": -0.155367095,
+              "source_frames": 10256,
+              "unique": 697
+            },
+            "drive_b": {
+              "abs_r": 0.114875837,
+              "address": "0x230",
+              "field": "B44:B46/u24/big",
+              "lag_ms": 300,
+              "n": 2250,
+              "r": -0.114875837,
+              "source_frames": 11999,
+              "unique": 949
+            },
+            "field": "B44:B46/u24/big",
+            "min_abs_r": 0.114875837
+          },
+          {
+            "address": "0x230",
+            "drive_a": {
+              "abs_r": 0.155367095,
+              "address": "0x230",
+              "field": "B44:B47/u32/big",
+              "lag_ms": 300,
+              "n": 917,
+              "r": -0.155367095,
+              "source_frames": 10256,
+              "unique": 749
+            },
+            "drive_b": {
+              "abs_r": 0.114875837,
+              "address": "0x230",
+              "field": "B44:B47/u32/big",
+              "lag_ms": 300,
+              "n": 2250,
+              "r": -0.114875837,
+              "source_frames": 11999,
+              "unique": 1051
+            },
+            "field": "B44:B47/u32/big",
+            "min_abs_r": 0.114875837
+          },
+          {
+            "address": "0x230",
+            "drive_a": {
+              "abs_r": 0.154825656,
+              "address": "0x230",
+              "field": "B41:B44/u32/little",
+              "lag_ms": 300,
+              "n": 917,
+              "r": -0.154825656,
+              "source_frames": 10256,
+              "unique": 4252
+            },
+            "drive_b": {
+              "abs_r": 0.114632532,
+              "address": "0x230",
+              "field": "B41:B44/u32/little",
+              "lag_ms": 300,
+              "n": 2250,
+              "r": -0.114632532,
+              "source_frames": 11999,
+              "unique": 6367
+            },
+            "field": "B41:B44/u32/little",
+            "min_abs_r": 0.114632532
+          },
+          {
+            "address": "0x230",
+            "drive_a": {
+              "abs_r": 0.154825662,
+              "address": "0x230",
+              "field": "B42:B44/u24/little",
+              "lag_ms": 300,
+              "n": 917,
+              "r": -0.154825662,
+              "source_frames": 10256,
+              "unique": 4234
+            },
+            "drive_b": {
+              "abs_r": 0.114632531,
+              "address": "0x230",
+              "field": "B42:B44/u24/little",
+              "lag_ms": 300,
+              "n": 2250,
+              "r": -0.114632531,
+              "source_frames": 11999,
+              "unique": 6352
+            },
+            "field": "B42:B44/u24/little",
+            "min_abs_r": 0.114632531
+          }
+        ],
+        "reproduced_abs_r_ge_0p25": 0
+      },
+      "0x440": {
+        "best_reproduced_same_sign": [],
+        "reproduced_abs_r_ge_0p25": 0
+      }
+    },
+    "top_reproduced": [
+      {
+        "address": "0x160",
+        "drive_a": {
+          "abs_r": 0.63125549,
+          "address": "0x160",
+          "field": "B8:B8/s8/big",
+          "lag_ms": 300,
+          "n": 1834,
+          "r": -0.63125549,
+          "source_frames": 20510,
+          "unique": 256
+        },
+        "drive_b": {
+          "abs_r": 0.670124628,
+          "address": "0x160",
+          "field": "B8:B8/s8/big",
+          "lag_ms": 300,
+          "n": 4503,
+          "r": -0.670124628,
+          "source_frames": 23998,
+          "unique": 256
+        },
+        "field": "B8:B8/s8/big",
+        "min_abs_r": 0.63125549
+      },
+      {
+        "address": "0x160",
+        "drive_a": {
+          "abs_r": 0.63125549,
+          "address": "0x160",
+          "field": "B8:B8/s8/little",
+          "lag_ms": 300,
+          "n": 1834,
+          "r": -0.63125549,
+          "source_frames": 20510,
+          "unique": 256
+        },
+        "drive_b": {
+          "abs_r": 0.670124628,
+          "address": "0x160",
+          "field": "B8:B8/s8/little",
+          "lag_ms": 300,
+          "n": 4503,
+          "r": -0.670124628,
+          "source_frames": 23998,
+          "unique": 256
+        },
+        "field": "B8:B8/s8/little",
+        "min_abs_r": 0.63125549
+      },
+      {
+        "address": "0x160",
+        "drive_a": {
+          "abs_r": 0.631251242,
+          "address": "0x160",
+          "field": "B5:B8/s32/little",
+          "lag_ms": 300,
+          "n": 1834,
+          "r": -0.631251242,
+          "source_frames": 20510,
+          "unique": 9293
+        },
+        "drive_b": {
+          "abs_r": 0.670119955,
+          "address": "0x160",
+          "field": "B5:B8/s32/little",
+          "lag_ms": 300,
+          "n": 4503,
+          "r": -0.670119955,
+          "source_frames": 23998,
+          "unique": 8468
+        },
+        "field": "B5:B8/s32/little",
+        "min_abs_r": 0.631251242
+      },
+      {
+        "address": "0x160",
+        "drive_a": {
+          "abs_r": 0.63125123,
+          "address": "0x160",
+          "field": "B6:B8/s24/little",
+          "lag_ms": 300,
+          "n": 1834,
+          "r": -0.63125123,
+          "source_frames": 20510,
+          "unique": 618
+        },
+        "drive_b": {
+          "abs_r": 0.670119953,
+          "address": "0x160",
+          "field": "B6:B8/s24/little",
+          "lag_ms": 300,
+          "n": 4503,
+          "r": -0.670119953,
+          "source_frames": 23998,
+          "unique": 905
+        },
+        "field": "B6:B8/s24/little",
+        "min_abs_r": 0.63125123
+      },
+      {
+        "address": "0x160",
+        "drive_a": {
+          "abs_r": 0.63125123,
+          "address": "0x160",
+          "field": "B7:B8/s16/little",
+          "lag_ms": 300,
+          "n": 1834,
+          "r": -0.63125123,
+          "source_frames": 20510,
+          "unique": 617
+        },
+        "drive_b": {
+          "abs_r": 0.670119953,
+          "address": "0x160",
+          "field": "B7:B8/s16/little",
+          "lag_ms": 300,
+          "n": 4503,
+          "r": -0.670119953,
+          "source_frames": 23998,
+          "unique": 905
+        },
+        "field": "B7:B8/s16/little",
+        "min_abs_r": 0.63125123
+      },
+      {
+        "address": "0x160",
+        "drive_a": {
+          "abs_r": 0.631213925,
+          "address": "0x160",
+          "field": "B8:B9/s16/big",
+          "lag_ms": 300,
+          "n": 1834,
+          "r": -0.631213925,
+          "source_frames": 20510,
+          "unique": 4751
+        },
+        "drive_b": {
+          "abs_r": 0.670038216,
+          "address": "0x160",
+          "field": "B8:B9/s16/big",
+          "lag_ms": 300,
+          "n": 4503,
+          "r": -0.670038216,
+          "source_frames": 23998,
+          "unique": 4522
+        },
+        "field": "B8:B9/s16/big",
+        "min_abs_r": 0.631213925
+      },
+      {
+        "address": "0x160",
+        "drive_a": {
+          "abs_r": 0.631211149,
+          "address": "0x160",
+          "field": "B8:B10/s24/big",
+          "lag_ms": 300,
+          "n": 1834,
+          "r": -0.631211149,
+          "source_frames": 20510,
+          "unique": 8361
+        },
+        "drive_b": {
+          "abs_r": 0.670039323,
+          "address": "0x160",
+          "field": "B8:B10/s24/big",
+          "lag_ms": 300,
+          "n": 4503,
+          "r": -0.670039323,
+          "source_frames": 23998,
+          "unique": 7071
+        },
+        "field": "B8:B10/s24/big",
+        "min_abs_r": 0.631211149
+      },
+      {
+        "address": "0x160",
+        "drive_a": {
+          "abs_r": 0.631211149,
+          "address": "0x160",
+          "field": "B8:B11/s32/big",
+          "lag_ms": 300,
+          "n": 1834,
+          "r": -0.631211149,
+          "source_frames": 20510,
+          "unique": 8361
+        },
+        "drive_b": {
+          "abs_r": 0.670039323,
+          "address": "0x160",
+          "field": "B8:B11/s32/big",
+          "lag_ms": 300,
+          "n": 4503,
+          "r": -0.670039323,
+          "source_frames": 23998,
+          "unique": 7071
+        },
+        "field": "B8:B11/s32/big",
+        "min_abs_r": 0.631211149
+      },
+      {
+        "address": "0x160",
+        "drive_a": {
+          "abs_r": 0.370604533,
+          "address": "0x160",
+          "field": "B18:B20/u24/little",
+          "lag_ms": -300,
+          "n": 1834,
+          "r": -0.370604533,
+          "source_frames": 20510,
+          "unique": 6859
+        },
+        "drive_b": {
+          "abs_r": 0.434561941,
+          "address": "0x160",
+          "field": "B18:B20/u24/little",
+          "lag_ms": -175,
+          "n": 4512,
+          "r": -0.434561941,
+          "source_frames": 23998,
+          "unique": 4485
+        },
+        "field": "B18:B20/u24/little",
+        "min_abs_r": 0.370604533
+      },
+      {
+        "address": "0x160",
+        "drive_a": {
+          "abs_r": 0.370604532,
+          "address": "0x160",
+          "field": "B17:B20/u32/little",
+          "lag_ms": -300,
+          "n": 1834,
+          "r": -0.370604532,
+          "source_frames": 20510,
+          "unique": 6917
+        },
+        "drive_b": {
+          "abs_r": 0.434561941,
+          "address": "0x160",
+          "field": "B17:B20/u32/little",
+          "lag_ms": -175,
+          "n": 4512,
+          "r": -0.434561941,
+          "source_frames": 23998,
+          "unique": 4496
+        },
+        "field": "B17:B20/u32/little",
+        "min_abs_r": 0.370604532
+      },
+      {
+        "address": "0x160",
+        "drive_a": {
+          "abs_r": 0.370603176,
+          "address": "0x160",
+          "field": "B19:B20/u16/little",
+          "lag_ms": -300,
+          "n": 1834,
+          "r": -0.370603176,
+          "source_frames": 20510,
+          "unique": 732
+        },
+        "drive_b": {
+          "abs_r": 0.434561901,
+          "address": "0x160",
+          "field": "B19:B20/u16/little",
+          "lag_ms": -175,
+          "n": 4512,
+          "r": -0.434561901,
+          "source_frames": 23998,
+          "unique": 1050
+        },
+        "field": "B19:B20/u16/little",
+        "min_abs_r": 0.370603176
+      },
+      {
+        "address": "0x160",
+        "drive_a": {
+          "abs_r": 0.369873131,
+          "address": "0x160",
+          "field": "B20:B20/u8/big",
+          "lag_ms": -300,
+          "n": 1834,
+          "r": -0.369873131,
+          "source_frames": 20510,
+          "unique": 29
+        },
+        "drive_b": {
+          "abs_r": 0.434457052,
+          "address": "0x160",
+          "field": "B20:B20/u8/big",
+          "lag_ms": -175,
+          "n": 4512,
+          "r": -0.434457052,
+          "source_frames": 23998,
+          "unique": 43
+        },
+        "field": "B20:B20/u8/big",
+        "min_abs_r": 0.369873131
+      },
+      {
+        "address": "0x160",
+        "drive_a": {
+          "abs_r": 0.369873131,
+          "address": "0x160",
+          "field": "B20:B20/u8/little",
+          "lag_ms": -300,
+          "n": 1834,
+          "r": -0.369873131,
+          "source_frames": 20510,
+          "unique": 29
+        },
+        "drive_b": {
+          "abs_r": 0.434457052,
+          "address": "0x160",
+          "field": "B20:B20/u8/little",
+          "lag_ms": -175,
+          "n": 4512,
+          "r": -0.434457052,
+          "source_frames": 23998,
+          "unique": 43
+        },
+        "field": "B20:B20/u8/little",
+        "min_abs_r": 0.369873131
+      },
+      {
+        "address": "0x160",
+        "drive_a": {
+          "abs_r": 0.369667048,
+          "address": "0x160",
+          "field": "B20:B21/u16/big",
+          "lag_ms": -300,
+          "n": 1834,
+          "r": -0.369667048,
+          "source_frames": 20510,
+          "unique": 300
+        },
+        "drive_b": {
+          "abs_r": 0.434469731,
+          "address": "0x160",
+          "field": "B20:B21/u16/big",
+          "lag_ms": -175,
+          "n": 4512,
+          "r": -0.434469731,
+          "source_frames": 23998,
+          "unique": 362
+        },
+        "field": "B20:B21/u16/big",
+        "min_abs_r": 0.369667048
+      },
+      {
+        "address": "0x160",
+        "drive_a": {
+          "abs_r": 0.369660187,
+          "address": "0x160",
+          "field": "B20:B22/u24/big",
+          "lag_ms": -300,
+          "n": 1834,
+          "r": -0.369660187,
+          "source_frames": 20510,
+          "unique": 1794
+        },
+        "drive_b": {
+          "abs_r": 0.434470482,
+          "address": "0x160",
+          "field": "B20:B22/u24/big",
+          "lag_ms": -175,
+          "n": 4512,
+          "r": -0.434470482,
+          "source_frames": 23998,
+          "unique": 2009
+        },
+        "field": "B20:B22/u24/big",
+        "min_abs_r": 0.369660187
+      },
+      {
+        "address": "0x160",
+        "drive_a": {
+          "abs_r": 0.369660187,
+          "address": "0x160",
+          "field": "B20:B23/u32/big",
+          "lag_ms": -300,
+          "n": 1834,
+          "r": -0.369660187,
+          "source_frames": 20510,
+          "unique": 5735
+        },
+        "drive_b": {
+          "abs_r": 0.434470483,
+          "address": "0x160",
+          "field": "B20:B23/u32/big",
+          "lag_ms": -175,
+          "n": 4512,
+          "r": -0.434470483,
+          "source_frames": 23998,
+          "unique": 4648
+        },
+        "field": "B20:B23/u32/big",
+        "min_abs_r": 0.369660187
+      },
+      {
+        "address": "0x160",
+        "drive_a": {
+          "abs_r": 0.626550171,
+          "address": "0x160",
+          "field": "B3:B4/s16/big",
+          "lag_ms": -300,
+          "n": 1834,
+          "r": -0.626550171,
+          "source_frames": 20510,
+          "unique": 16
+        },
+        "drive_b": {
+          "abs_r": 0.287654346,
+          "address": "0x160",
+          "field": "B3:B4/s16/big",
+          "lag_ms": -300,
+          "n": 4505,
+          "r": -0.287654346,
+          "source_frames": 23998,
+          "unique": 19
+        },
+        "field": "B3:B4/s16/big",
+        "min_abs_r": 0.287654346
+      },
+      {
+        "address": "0x160",
+        "drive_a": {
+          "abs_r": 0.626550171,
+          "address": "0x160",
+          "field": "B3:B4/s16/little",
+          "lag_ms": -300,
+          "n": 1834,
+          "r": -0.626550171,
+          "source_frames": 20510,
+          "unique": 16
+        },
+        "drive_b": {
+          "abs_r": 0.287654346,
+          "address": "0x160",
+          "field": "B3:B4/s16/little",
+          "lag_ms": -300,
+          "n": 4505,
+          "r": -0.287654346,
+          "source_frames": 23998,
+          "unique": 19
+        },
+        "field": "B3:B4/s16/little",
+        "min_abs_r": 0.287654346
+      },
+      {
+        "address": "0x160",
+        "drive_a": {
+          "abs_r": 0.626550171,
+          "address": "0x160",
+          "field": "B3:B4/u16/big",
+          "lag_ms": -300,
+          "n": 1834,
+          "r": -0.626550171,
+          "source_frames": 20510,
+          "unique": 16
+        },
+        "drive_b": {
+          "abs_r": 0.287654346,
+          "address": "0x160",
+          "field": "B3:B4/u16/big",
+          "lag_ms": -300,
+          "n": 4505,
+          "r": -0.287654346,
+          "source_frames": 23998,
+          "unique": 19
+        },
+        "field": "B3:B4/u16/big",
+        "min_abs_r": 0.287654346
+      },
+      {
+        "address": "0x160",
+        "drive_a": {
+          "abs_r": 0.626550171,
+          "address": "0x160",
+          "field": "B3:B4/u16/little",
+          "lag_ms": -300,
+          "n": 1834,
+          "r": -0.626550171,
+          "source_frames": 20510,
+          "unique": 16
+        },
+        "drive_b": {
+          "abs_r": 0.287654346,
+          "address": "0x160",
+          "field": "B3:B4/u16/little",
+          "lag_ms": -300,
+          "n": 4505,
+          "r": -0.287654346,
+          "source_frames": 23998,
+          "unique": 19
+        },
+        "field": "B3:B4/u16/little",
+        "min_abs_r": 0.287654346
+      },
+      {
+        "address": "0x160",
+        "drive_a": {
+          "abs_r": 0.626550171,
+          "address": "0x160",
+          "field": "B4:B4/s8/big",
+          "lag_ms": -300,
+          "n": 1834,
+          "r": -0.626550171,
+          "source_frames": 20510,
+          "unique": 15
+        },
+        "drive_b": {
+          "abs_r": 0.287654346,
+          "address": "0x160",
+          "field": "B4:B4/s8/big",
+          "lag_ms": -300,
+          "n": 4505,
+          "r": -0.287654346,
+          "source_frames": 23998,
+          "unique": 19
+        },
+        "field": "B4:B4/s8/big",
+        "min_abs_r": 0.287654346
+      },
+      {
+        "address": "0x160",
+        "drive_a": {
+          "abs_r": 0.626550171,
+          "address": "0x160",
+          "field": "B4:B4/s8/little",
+          "lag_ms": -300,
+          "n": 1834,
+          "r": -0.626550171,
+          "source_frames": 20510,
+          "unique": 15
+        },
+        "drive_b": {
+          "abs_r": 0.287654346,
+          "address": "0x160",
+          "field": "B4:B4/s8/little",
+          "lag_ms": -300,
+          "n": 4505,
+          "r": -0.287654346,
+          "source_frames": 23998,
+          "unique": 19
+        },
+        "field": "B4:B4/s8/little",
+        "min_abs_r": 0.287654346
+      },
+      {
+        "address": "0x160",
+        "drive_a": {
+          "abs_r": 0.626550171,
+          "address": "0x160",
+          "field": "B4:B4/u8/big",
+          "lag_ms": -300,
+          "n": 1834,
+          "r": -0.626550171,
+          "source_frames": 20510,
+          "unique": 15
+        },
+        "drive_b": {
+          "abs_r": 0.287654346,
+          "address": "0x160",
+          "field": "B4:B4/u8/big",
+          "lag_ms": -300,
+          "n": 4505,
+          "r": -0.287654346,
+          "source_frames": 23998,
+          "unique": 19
+        },
+        "field": "B4:B4/u8/big",
+        "min_abs_r": 0.287654346
+      },
+      {
+        "address": "0x160",
+        "drive_a": {
+          "abs_r": 0.626550171,
+          "address": "0x160",
+          "field": "B4:B4/u8/little",
+          "lag_ms": -300,
+          "n": 1834,
+          "r": -0.626550171,
+          "source_frames": 20510,
+          "unique": 15
+        },
+        "drive_b": {
+          "abs_r": 0.287654346,
+          "address": "0x160",
+          "field": "B4:B4/u8/little",
+          "lag_ms": -300,
+          "n": 4505,
+          "r": -0.287654346,
+          "source_frames": 23998,
+          "unique": 19
+        },
+        "field": "B4:B4/u8/little",
+        "min_abs_r": 0.287654346
+      },
+      {
+        "address": "0x160",
+        "drive_a": {
+          "abs_r": 0.626548236,
+          "address": "0x160",
+          "field": "B2:B4/s24/little",
+          "lag_ms": -300,
+          "n": 1834,
+          "r": -0.626548236,
+          "source_frames": 20510,
+          "unique": 2280
+        },
+        "drive_b": {
+          "abs_r": 0.287652785,
+          "address": "0x160",
+          "field": "B2:B4/s24/little",
+          "lag_ms": -300,
+          "n": 4505,
+          "r": -0.287652785,
+          "source_frames": 23998,
+          "unique": 3394
+        },
+        "field": "B2:B4/s24/little",
+        "min_abs_r": 0.287652785
+      },
+      {
+        "address": "0x160",
+        "drive_a": {
+          "abs_r": 0.626548236,
+          "address": "0x160",
+          "field": "B2:B4/u24/little",
+          "lag_ms": -300,
+          "n": 1834,
+          "r": -0.626548236,
+          "source_frames": 20510,
+          "unique": 2280
+        },
+        "drive_b": {
+          "abs_r": 0.287652785,
+          "address": "0x160",
+          "field": "B2:B4/u24/little",
+          "lag_ms": -300,
+          "n": 4505,
+          "r": -0.287652785,
+          "source_frames": 23998,
+          "unique": 3394
+        },
+        "field": "B2:B4/u24/little",
+        "min_abs_r": 0.287652785
+      },
+      {
+        "address": "0x160",
+        "drive_a": {
+          "abs_r": 0.626548236,
+          "address": "0x160",
+          "field": "B1:B4/s32/little",
+          "lag_ms": -300,
+          "n": 1834,
+          "r": -0.626548236,
+          "source_frames": 20510,
+          "unique": 16586
+        },
+        "drive_b": {
+          "abs_r": 0.287652784,
+          "address": "0x160",
+          "field": "B1:B4/s32/little",
+          "lag_ms": -300,
+          "n": 4505,
+          "r": -0.287652784,
+          "source_frames": 23998,
+          "unique": 22180
+        },
+        "field": "B1:B4/s32/little",
+        "min_abs_r": 0.287652784
+      },
+      {
+        "address": "0x160",
+        "drive_a": {
+          "abs_r": 0.626548236,
+          "address": "0x160",
+          "field": "B1:B4/u32/little",
+          "lag_ms": -300,
+          "n": 1834,
+          "r": -0.626548236,
+          "source_frames": 20510,
+          "unique": 16586
+        },
+        "drive_b": {
+          "abs_r": 0.287652784,
+          "address": "0x160",
+          "field": "B1:B4/u32/little",
+          "lag_ms": -300,
+          "n": 4505,
+          "r": -0.287652784,
+          "source_frames": 23998,
+          "unique": 22180
+        },
+        "field": "B1:B4/u32/little",
+        "min_abs_r": 0.287652784
+      },
+      {
+        "address": "0x160",
+        "drive_a": {
+          "abs_r": 0.625441231,
+          "address": "0x160",
+          "field": "B3:B5/s24/big",
+          "lag_ms": -300,
+          "n": 1834,
+          "r": -0.625441231,
+          "source_frames": 20510,
+          "unique": 2088
+        },
+        "drive_b": {
+          "abs_r": 0.287311848,
+          "address": "0x160",
+          "field": "B3:B5/s24/big",
+          "lag_ms": -300,
+          "n": 4505,
+          "r": -0.287311848,
+          "source_frames": 23998,
+          "unique": 2513
+        },
+        "field": "B3:B5/s24/big",
+        "min_abs_r": 0.287311848
+      },
+      {
+        "address": "0x160",
+        "drive_a": {
+          "abs_r": 0.625441231,
+          "address": "0x160",
+          "field": "B3:B5/u24/big",
+          "lag_ms": -300,
+          "n": 1834,
+          "r": -0.625441231,
+          "source_frames": 20510,
+          "unique": 2088
+        },
+        "drive_b": {
+          "abs_r": 0.287311848,
+          "address": "0x160",
+          "field": "B3:B5/u24/big",
+          "lag_ms": -300,
+          "n": 4505,
+          "r": -0.287311848,
+          "source_frames": 23998,
+          "unique": 2513
+        },
+        "field": "B3:B5/u24/big",
+        "min_abs_r": 0.287311848
+      }
+    ]
+  },
+  "gts_semantic_template": {
+    "boundary": "The diagnostic/recorder vocabulary establishes Toyota semantics and width/scale, not the 0x08A byte assignment or SecOC publisher identity.",
+    "brake_tss_receive": {
+      "0x10A1": {
+        "bit_width": 16,
+        "decimal_point_count": 3,
+        "name": "Request Acceleration of Upper Limit from Toyota Safety Sense",
+        "signed": true,
+        "unit": "m/s^2"
+      },
+      "0x10A2": {
+        "bit_width": 16,
+        "decimal_point_count": 3,
+        "name": "Request Acceleration of Lower Limit from Toyota Safety Sense",
+        "signed": true,
+        "unit": "m/s^2"
+      },
+      "0x10A3": {
+        "bit_width": 6,
+        "decimal_point_count": 0,
+        "name": "Request Acceleration and Deceleration ID of Upper Limit from Toyota Safety Sense",
+        "signed": false,
+        "unit": null
+      },
+      "0x10A4": {
+        "bit_width": 6,
+        "decimal_point_count": 0,
+        "name": "Request Acceleration and Deceleration ID of Lower Limit from Toyota Safety Sense",
+        "signed": false,
+        "unit": null
+      }
+    },
+    "pcs_arbitration_result_acceleration": [
+      {
+        "bit_length": 16,
+        "bit_position": 7,
+        "byte_position": 1,
+        "lsb": "0.001",
+        "name": "Arbitration result Acceleration",
+        "offset": "0",
+        "point": 3,
+        "type": "s"
+      }
+    ],
+    "pcs_arbitration_result_id": [
+      {
+        "bit_length": 8,
+        "bit_position": 7,
+        "byte_position": 1,
+        "lsb": "1",
+        "name": "Arbitration result_longitudinal ID",
+        "offset": "0",
+        "point": 0,
+        "type": "u"
+      }
+    ],
+    "pcs_operation_ffd_5280_lower": [
+      {
+        "bit_length": 8,
+        "bit_position": 7,
+        "byte_position": 1,
+        "lsb": "1",
+        "name": "TSS required longitudinal ID (lower limit)",
+        "offset": "0",
+        "point": 0,
+        "type": "u"
+      },
+      {
+        "bit_length": 16,
+        "bit_position": 7,
+        "byte_position": 2,
+        "lsb": "0.001",
+        "name": "TSS required acceleration (lower limit)",
+        "offset": "0",
+        "point": 3,
+        "type": "s"
+      },
+      {
+        "bit_length": 8,
+        "bit_position": 7,
+        "byte_position": 4,
+        "lsb": "1",
+        "name": "TSS braking/driving force distribution method (lower limit)",
+        "offset": "0",
+        "point": 0,
+        "type": "u"
+      },
+      {
+        "bit_length": 8,
+        "bit_position": 7,
+        "byte_position": 5,
+        "lsb": "1",
+        "name": "TSS shift range request",
+        "offset": "0",
+        "point": 0,
+        "type": "u"
+      },
+      {
+        "bit_length": 8,
+        "bit_position": 7,
+        "byte_position": 6,
+        "lsb": "1",
+        "name": "TSS EPB request",
+        "offset": "0",
+        "point": 0,
+        "type": "u"
+      },
+      {
+        "bit_length": 8,
+        "bit_position": 7,
+        "byte_position": 7,
+        "lsb": "1",
+        "name": "TSS accelerator override prohibition flag",
+        "offset": "0",
+        "point": 0,
+        "type": "u"
+      },
+      {
+        "bit_length": 8,
+        "bit_position": 7,
+        "byte_position": 8,
+        "lsb": "1",
+        "name": "TSS acceleration request low priority flag",
+        "offset": "0",
+        "point": 0,
+        "type": "u"
+      }
+    ],
+    "pcs_operation_ffd_5281_upper": [
+      {
+        "bit_length": 8,
+        "bit_position": 7,
+        "byte_position": 1,
+        "lsb": "1",
+        "name": "TSS request longitudinal ID (upper limit)",
+        "offset": "0",
+        "point": 0,
+        "type": "u"
+      },
+      {
+        "bit_length": 16,
+        "bit_position": 7,
+        "byte_position": 2,
+        "lsb": "0.001",
+        "name": "TSS request acceleration (upper limit)",
+        "offset": "0",
+        "point": 3,
+        "type": "s"
+      },
+      {
+        "bit_length": 8,
+        "bit_position": 7,
+        "byte_position": 4,
+        "lsb": "1",
+        "name": "TSS braking/driving force distribution method instruction (upper limit)",
+        "offset": "0",
+        "point": 0,
+        "type": "u"
+      }
+    ],
+    "static_join": "FRC_P5 contains the upper-limit requester/acceleration/allocation/permission source vocabulary; brake-domain ECUs expose upper/lower acceleration and requester IDs explicitly named 'from Toyota Safety Sense'; and the FRC-hosted PCS recorder contains both request halves plus arbitration-result longitudinal ID/acceleration. This closes the diagnostic source->brake-sink architecture, but not copy direction, wire encoding, SecOC ownership, or arbitration execution."
+  },
+  "implementation_boundary": "Do not restore Camry 0x160 longitudinal output and do not inject 0x08A from this analysis alone. On stock Toyota-B, 0x08A is on unsplit Bus 4, so clean source replacement requires recovering the pre-protection FRC/proxy handoff or another legitimate sole-emitter boundary. No runtime or Panda policy is authorized here.",
+  "other_candidates": {
+    "0x0C9": {
+      "b12_b13_vs_0x0ca": {
+        "drive_a": {
+          "intercept": 0.04932313,
+          "lag_ms": -25,
+          "n": 16022,
+          "r": 0.265217872,
+          "slope": 3.539e-06
+        },
+        "drive_b": {
+          "intercept": 0.145199596,
+          "lag_ms": -300,
+          "n": 18661,
+          "r": 0.140067463,
+          "slope": 2.353e-06
+        }
+      },
+      "direction": "upstream -> chassis on Toyota Bus 4 during repin",
+      "disposition": "possible longitudinal sideband/state metadata; weak magnitude candidate and remains static through early stock-resume ramp"
+    },
+    "0x0CA": {
+      "direction": "chassis -> upstream on Toyota Bus 4 during repin",
+      "disposition": "result/feedback-like return; not promoted to an FRC request target"
+    },
+    "0x160": {
+      "direction": "FRC -> camera/ADAS Toyota Bus 1",
+      "disposition": "longitudinal-related state publication; known fine field is measurement-like and prior B12 command mapping is withdrawn"
+    }
+  },
+  "protected_0x08a_acceleration_candidate": {
+    "drives": {
+      "drive_a": {
+        "b8_b9_equals_b11_b12": 20618,
+        "cruise_active_frames": 1834,
+        "cruise_active_scaled_mps2_range": [
+          -0.442,
+          0.228
+        ],
+        "equality_fraction": 1.0,
+        "frames": 20618,
+        "scaled_mps2_range": [
+          -1.146,
+          0.995
+        ],
+        "signed16_raw_range": [
+          -1146,
+          995
+        ]
+      },
+      "drive_b": {
+        "b8_b9_equals_b11_b12": 23999,
+        "cruise_active_frames": 4526,
+        "cruise_active_scaled_mps2_range": [
+          -0.513,
+          0.389
+        ],
+        "equality_fraction": 1.0,
+        "frames": 23999,
+        "scaled_mps2_range": [
+          -1.102,
+          1.07
+        ],
+        "signed16_raw_range": [
+          -1102,
+          1070
+        ]
+      }
+    },
+    "interpretation": "B8:B9 and B11:B12 are the strongest retained chassis-facing longitudinal request candidates: duplicated signed16 words with a natural 0.001 m/s^2 scale, upstream-to-chassis direction, pre-motion behavior, and an exact width/scale semantic match to Toyota TSS upper/lower request vocabulary. Upper-versus-lower byte identity and request-ID fields are not recovered.",
+    "prior_census_boundary": "Structural names (CRUISE_*, REQUEST_WORD_B8, LATERAL_REQUEST_LEVEL, COOPERATIVE_SUBSTATE_FLAG, RESERVED_16BIT_*) are census-bounded, not OEM-joined. B21/B26 six-bit boundaries remain encoding assumptions. The percent unit on B24 is bounded from the observed 0/50/100 value set.",
+    "prior_independence_checks": {
+      "drive_a": {
+        "driver_torque_030": -0.0342,
+        "speed_accel": 0.0967,
+        "steer_angle_025": -0.0763,
+        "target_angle_rate": -0.0235
+      },
+      "drive_b": {
+        "driver_torque_030": 0.0658,
+        "speed_accel": 0.0229,
+        "steer_angle_025": -0.0295,
+        "target_angle_rate": -0.0274
+      }
+    },
+    "stock_resume_evidence": [
+      {
+        "driver_inputs_minus1_to_plus0p5_seconds": {
+          "brake_asserted_samples": 0,
+          "cancel_asserted_frames": 0,
+          "carState_samples": 149,
+          "gas_asserted_samples": 0,
+          "res_asserted_frames": 0,
+          "set_asserted_frames": 0,
+          "switch_frames": 47
+        },
+        "group": "3b",
+        "samples": [
+          {
+            "acc_state": 71,
+            "c9_b12_b13_raw": 6200,
+            "ca_resultlike_mps2": 0.076,
+            "offset_from_wheel_onset_ms": -700,
+            "request_word_b11_b12_mps2": 0.15,
+            "request_word_b8_b9_mps2": 0.15,
+            "target_lateral_id_low6": 11
+          },
+          {
+            "acc_state": 71,
+            "c9_b12_b13_raw": 6200,
+            "ca_resultlike_mps2": 0.41,
+            "offset_from_wheel_onset_ms": -500,
+            "request_word_b11_b12_mps2": 0.35,
+            "request_word_b8_b9_mps2": 0.35,
+            "target_lateral_id_low6": 11
+          },
+          {
+            "acc_state": 71,
+            "c9_b12_b13_raw": 6200,
+            "ca_resultlike_mps2": 0.854,
+            "offset_from_wheel_onset_ms": -300,
+            "request_word_b11_b12_mps2": 0.55,
+            "request_word_b8_b9_mps2": 0.55,
+            "target_lateral_id_low6": 11
+          },
+          {
+            "acc_state": 71,
+            "c9_b12_b13_raw": 6200,
+            "ca_resultlike_mps2": 1.055,
+            "offset_from_wheel_onset_ms": -200,
+            "request_word_b11_b12_mps2": 0.648,
+            "request_word_b8_b9_mps2": 0.648,
+            "target_lateral_id_low6": 11
+          },
+          {
+            "acc_state": 71,
+            "c9_b12_b13_raw": 6200,
+            "ca_resultlike_mps2": 1.129,
+            "offset_from_wheel_onset_ms": -100,
+            "request_word_b11_b12_mps2": 0.738,
+            "request_word_b8_b9_mps2": 0.738,
+            "target_lateral_id_low6": 11
+          },
+          {
+            "acc_state": 71,
+            "c9_b12_b13_raw": 6200,
+            "ca_resultlike_mps2": 1.228,
+            "offset_from_wheel_onset_ms": 0,
+            "request_word_b11_b12_mps2": 0.828,
+            "request_word_b8_b9_mps2": 0.828,
+            "target_lateral_id_low6": 11
+          },
+          {
+            "acc_state": 71,
+            "c9_b12_b13_raw": 6200,
+            "ca_resultlike_mps2": 1.281,
+            "offset_from_wheel_onset_ms": 100,
+            "request_word_b11_b12_mps2": 0.895,
+            "request_word_b8_b9_mps2": 0.895,
+            "target_lateral_id_low6": 11
+          },
+          {
+            "acc_state": 71,
+            "c9_b12_b13_raw": 6200,
+            "ca_resultlike_mps2": 1.337,
+            "offset_from_wheel_onset_ms": 200,
+            "request_word_b11_b12_mps2": 0.885,
+            "request_word_b8_b9_mps2": 0.885,
+            "target_lateral_id_low6": 11
+          },
+          {
+            "acc_state": 71,
+            "c9_b12_b13_raw": 6200,
+            "ca_resultlike_mps2": 1.359,
+            "offset_from_wheel_onset_ms": 300,
+            "request_word_b11_b12_mps2": 0.809,
+            "request_word_b8_b9_mps2": 0.809,
+            "target_lateral_id_low6": 11
+          },
+          {
+            "acc_state": 71,
+            "c9_b12_b13_raw": 64542,
+            "ca_resultlike_mps2": 1.224,
+            "offset_from_wheel_onset_ms": 500,
+            "request_word_b11_b12_mps2": 0.787,
+            "request_word_b8_b9_mps2": 0.787,
+            "target_lateral_id_low6": 11
+          },
+          {
+            "acc_state": 71,
+            "c9_b12_b13_raw": 64542,
+            "ca_resultlike_mps2": 1.185,
+            "offset_from_wheel_onset_ms": 700,
+            "request_word_b11_b12_mps2": 0.799,
+            "request_word_b8_b9_mps2": 0.799,
+            "target_lateral_id_low6": 11
+          }
+        ],
+        "wheel_onset_ns": 5122234978566
+      },
+      {
+        "driver_inputs_minus1_to_plus0p5_seconds": {
+          "brake_asserted_samples": 0,
+          "cancel_asserted_frames": 0,
+          "carState_samples": 149,
+          "gas_asserted_samples": 0,
+          "res_asserted_frames": 0,
+          "set_asserted_frames": 0,
+          "switch_frames": 47
+        },
+        "group": "3c",
+        "samples": [
+          {
+            "acc_state": 71,
+            "c9_b12_b13_raw": 6200,
+            "ca_resultlike_mps2": 0.0,
+            "offset_from_wheel_onset_ms": -700,
+            "request_word_b11_b12_mps2": 0.097,
+            "request_word_b8_b9_mps2": 0.097,
+            "target_lateral_id_low6": 11
+          },
+          {
+            "acc_state": 71,
+            "c9_b12_b13_raw": 6200,
+            "ca_resultlike_mps2": 0.245,
+            "offset_from_wheel_onset_ms": -500,
+            "request_word_b11_b12_mps2": 0.277,
+            "request_word_b8_b9_mps2": 0.277,
+            "target_lateral_id_low6": 11
+          },
+          {
+            "acc_state": 71,
+            "c9_b12_b13_raw": 6200,
+            "ca_resultlike_mps2": 0.627,
+            "offset_from_wheel_onset_ms": -300,
+            "request_word_b11_b12_mps2": 0.457,
+            "request_word_b8_b9_mps2": 0.457,
+            "target_lateral_id_low6": 11
+          },
+          {
+            "acc_state": 71,
+            "c9_b12_b13_raw": 6200,
+            "ca_resultlike_mps2": 0.793,
+            "offset_from_wheel_onset_ms": -200,
+            "request_word_b11_b12_mps2": 0.521,
+            "request_word_b8_b9_mps2": 0.521,
+            "target_lateral_id_low6": 11
+          },
+          {
+            "acc_state": 71,
+            "c9_b12_b13_raw": 6200,
+            "ca_resultlike_mps2": 0.835,
+            "offset_from_wheel_onset_ms": -100,
+            "request_word_b11_b12_mps2": 0.565,
+            "request_word_b8_b9_mps2": 0.565,
+            "target_lateral_id_low6": 11
+          },
+          {
+            "acc_state": 71,
+            "c9_b12_b13_raw": 6200,
+            "ca_resultlike_mps2": 0.866,
+            "offset_from_wheel_onset_ms": 0,
+            "request_word_b11_b12_mps2": 0.605,
+            "request_word_b8_b9_mps2": 0.605,
+            "target_lateral_id_low6": 11
+          },
+          {
+            "acc_state": 71,
+            "c9_b12_b13_raw": 6200,
+            "ca_resultlike_mps2": 0.881,
+            "offset_from_wheel_onset_ms": 100,
+            "request_word_b11_b12_mps2": 0.639,
+            "request_word_b8_b9_mps2": 0.639,
+            "target_lateral_id_low6": 11
+          },
+          {
+            "acc_state": 71,
+            "c9_b12_b13_raw": 6200,
+            "ca_resultlike_mps2": 0.896,
+            "offset_from_wheel_onset_ms": 200,
+            "request_word_b11_b12_mps2": 0.668,
+            "request_word_b8_b9_mps2": 0.668,
+            "target_lateral_id_low6": 11
+          },
+          {
+            "acc_state": 71,
+            "c9_b12_b13_raw": 6200,
+            "ca_resultlike_mps2": 0.892,
+            "offset_from_wheel_onset_ms": 300,
+            "request_word_b11_b12_mps2": 0.592,
+            "request_word_b8_b9_mps2": 0.592,
+            "target_lateral_id_low6": 11
+          },
+          {
+            "acc_state": 71,
+            "c9_b12_b13_raw": 6200,
+            "ca_resultlike_mps2": 0.762,
+            "offset_from_wheel_onset_ms": 500,
+            "request_word_b11_b12_mps2": 0.506,
+            "request_word_b8_b9_mps2": 0.506,
+            "target_lateral_id_low6": 11
+          },
+          {
+            "acc_state": 71,
+            "c9_b12_b13_raw": 6200,
+            "ca_resultlike_mps2": 0.69,
+            "offset_from_wheel_onset_ms": 700,
+            "request_word_b11_b12_mps2": 0.507,
+            "request_word_b8_b9_mps2": 0.507,
+            "target_lateral_id_low6": 11
+          }
+        ],
+        "wheel_onset_ns": 9068013139769
+      },
+      {
+        "driver_inputs_minus1_to_plus0p5_seconds": {
+          "brake_asserted_samples": 0,
+          "cancel_asserted_frames": 0,
+          "carState_samples": 149,
+          "gas_asserted_samples": 0,
+          "res_asserted_frames": 0,
+          "set_asserted_frames": 0,
+          "switch_frames": 48
+        },
+        "group": "3c",
+        "samples": [
+          {
+            "acc_state": 71,
+            "c9_b12_b13_raw": 6200,
+            "ca_resultlike_mps2": 0.096,
+            "offset_from_wheel_onset_ms": -700,
+            "request_word_b11_b12_mps2": 0.2,
+            "request_word_b8_b9_mps2": 0.2,
+            "target_lateral_id_low6": 11
+          },
+          {
+            "acc_state": 71,
+            "c9_b12_b13_raw": 6200,
+            "ca_resultlike_mps2": 0.476,
+            "offset_from_wheel_onset_ms": -500,
+            "request_word_b11_b12_mps2": 0.391,
+            "request_word_b8_b9_mps2": 0.391,
+            "target_lateral_id_low6": 11
+          },
+          {
+            "acc_state": 71,
+            "c9_b12_b13_raw": 6200,
+            "ca_resultlike_mps2": 0.853,
+            "offset_from_wheel_onset_ms": -300,
+            "request_word_b11_b12_mps2": 0.483,
+            "request_word_b8_b9_mps2": 0.483,
+            "target_lateral_id_low6": 11
+          },
+          {
+            "acc_state": 71,
+            "c9_b12_b13_raw": 6200,
+            "ca_resultlike_mps2": 0.945,
+            "offset_from_wheel_onset_ms": -200,
+            "request_word_b11_b12_mps2": 0.526,
+            "request_word_b8_b9_mps2": 0.526,
+            "target_lateral_id_low6": 11
+          },
+          {
+            "acc_state": 71,
+            "c9_b12_b13_raw": 6200,
+            "ca_resultlike_mps2": 0.968,
+            "offset_from_wheel_onset_ms": -100,
+            "request_word_b11_b12_mps2": 0.56,
+            "request_word_b8_b9_mps2": 0.56,
+            "target_lateral_id_low6": 11
+          },
+          {
+            "acc_state": 71,
+            "c9_b12_b13_raw": 6200,
+            "ca_resultlike_mps2": 0.987,
+            "offset_from_wheel_onset_ms": 0,
+            "request_word_b11_b12_mps2": 0.59,
+            "request_word_b8_b9_mps2": 0.59,
+            "target_lateral_id_low6": 11
+          },
+          {
+            "acc_state": 71,
+            "c9_b12_b13_raw": 6200,
+            "ca_resultlike_mps2": 0.995,
+            "offset_from_wheel_onset_ms": 100,
+            "request_word_b11_b12_mps2": 0.618,
+            "request_word_b8_b9_mps2": 0.618,
+            "target_lateral_id_low6": 11
+          },
+          {
+            "acc_state": 71,
+            "c9_b12_b13_raw": 6200,
+            "ca_resultlike_mps2": 1.008,
+            "offset_from_wheel_onset_ms": 200,
+            "request_word_b11_b12_mps2": 0.593,
+            "request_word_b8_b9_mps2": 0.593,
+            "target_lateral_id_low6": 11
+          },
+          {
+            "acc_state": 71,
+            "c9_b12_b13_raw": 6200,
+            "ca_resultlike_mps2": 0.987,
+            "offset_from_wheel_onset_ms": 300,
+            "request_word_b11_b12_mps2": 0.496,
+            "request_word_b8_b9_mps2": 0.496,
+            "target_lateral_id_low6": 11
+          },
+          {
+            "acc_state": 71,
+            "c9_b12_b13_raw": 59136,
+            "ca_resultlike_mps2": 0.85,
+            "offset_from_wheel_onset_ms": 500,
+            "request_word_b11_b12_mps2": 0.472,
+            "request_word_b8_b9_mps2": 0.472,
+            "target_lateral_id_low6": 11
+          },
+          {
+            "acc_state": 71,
+            "c9_b12_b13_raw": 59136,
+            "ca_resultlike_mps2": 0.805,
+            "offset_from_wheel_onset_ms": 700,
+            "request_word_b11_b12_mps2": 0.485,
+            "request_word_b8_b9_mps2": 0.485,
+            "target_lateral_id_low6": 11
+          }
+        ],
+        "wheel_onset_ns": 9147495671718
+      }
+    ]
+  },
+  "ranking": [
+    {
+      "candidate": "protected 0x08A B8:B9 and B11:B12",
+      "rank": 1,
+      "role": "direct downstream TSS acceleration-request candidate",
+      "status": "strong bounded candidate; wire field identity not yet OEM-joined"
+    },
+    {
+      "candidate": "unrecovered FRC -> proxy/signing precursor for protected 0x08A",
+      "rank": 2,
+      "role": "preferred stock-harness replacement boundary",
+      "status": "architecture supported; exact carrier/encoding unresolved"
+    },
+    {
+      "candidate": "0x0C9",
+      "rank": 3,
+      "role": "possible sideband/request metadata",
+      "status": "weak magnitude candidate"
+    },
+    {
+      "candidate": "0x0CA",
+      "rank": 4,
+      "role": "chassis result/feedback return",
+      "status": "wrong physical direction for direct FRC request"
+    }
+  ],
+  "schema": "camry-longitudinal-request-candidates-v1",
+  "sources": {
+    "august_drives": {
+      "drive_a": {
+        "path": "targets/camry-2026/raw-20260827/camry_relay_route_can_20260827.ndjson.gz",
+        "sha256": "be0c02946818fafc48b7d3e2be5d2fde31d796e057ab29d8bf59a879c7553db5"
+      },
+      "drive_b": {
+        "path": "targets/camry-2026/raw-20260827/camry_relay_lta_confirm_route_can_20260827.ndjson.gz",
+        "sha256": "641eee57eaffc579002708185178ea08c189155527354712dd43a1f0e309bb3a"
+      }
+    },
+    "gts_surface": {
+      "path": "data/generated/gtsplus_2026/tss3_control_ownership_surface.json",
+      "sha256": "66b40a5393539c519a69bd94f1d992b2986457244cc46a5811447e1f54d68ec5"
+    },
+    "role_fixture": {
+      "path": "tests/fixtures/camry_2026_longitudinal_role.jsonl.gz",
+      "sha256": "4e5646c636d71750bd28713b439eafad8f493bdfea37e507c7ebec2b2f4fc936",
+      "source_count": 28
+    },
+    "role_report": {
+      "path": "data/generated/camry_2026_longitudinal_role.json",
+      "sha256": "c079629f8ca72e1be0322670ebe3f310fe3e0455874cfba6e44f2ab9a2ee94e8"
+    },
+    "stock_topology": {
+      "path": "data/generated/camry_2026_stock_harness_topology.json",
+      "sha256": "05f07875bbc003847ec20add9fa002dd8056cb8598ad04fd457f8b3b983eace7"
+    },
+    "upstream_request_census": {
+      "path": "data/generated/camry_2026_upstream_request_field_census.json",
+      "sha256": "02677a4f85fcd82d9691ff8ffc1736015821195bf355b905207201bcac7e1188"
+    }
+  },
+  "topology_normalization": {
+    "current_stock_candidate_planes": {
+      "direct_frc_bus1_pdus": {
+        "ids": [
+          "0x020",
+          "0x160",
+          "0x230",
+          "0x440"
+        ],
+        "panda_bus": 2,
+        "toyota_network": "Bus 1"
+      },
+      "protected_bus4_request_result_family": {
+        "ids": [
+          "0x08A",
+          "0x0C9",
+          "0x0CA"
+        ],
+        "panda_bus": 1,
+        "toyota_network": "Bus 4"
+      }
+    },
+    "historical_repin": {
+      "panda_bus0_bus2": "Toyota Bus-4 Brake/EPS/chassis relay pair; native upstream 0x08A/0x0C9 on bus2, native chassis 0x0CA on bus0",
+      "panda_bus1": "Toyota Bus-1 camera/radar/ADAS; direct FRC 0x020/0x160/0x230/0x440 observed here"
+    },
+    "rule": "Compare Toyota network role and physical direction first; raw Panda bus number is era-dependent.",
+    "stock_toyota_b": {
+      "panda_bus0": "stock Toyota-B downstream side of the CAN0/CAN2 Toyota Bus-1 camera/ADAS relay pair",
+      "panda_bus1": "stock Toyota-B unsplit Toyota Bus-4 Brake/EPS/chassis network",
+      "panda_bus2": "stock Toyota-B source/camera side of the CAN0/CAN2 Toyota Bus-1 camera/ADAS relay pair"
+    }
+  },
+  "vehicle_access": false
+}

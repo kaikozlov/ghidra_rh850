@@ -3,7 +3,7 @@
   "vehicle_access": false,
   "fixture": {
     "path": "tests/fixtures/camry_2026_longitudinal_role.jsonl.gz",
-    "sha256": "5a1a454517016ad6a3db15a66b28f11ee0c274c497d0cf0c02f0921ab398ed54"
+    "sha256": "4e5646c636d71750bd28713b439eafad8f493bdfea37e507c7ebec2b2f4fc936"
   },
   "sources": [
     {

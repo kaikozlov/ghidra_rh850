@@ -8,7 +8,7 @@ its detailed reasoning and reproducible sources are in
 
 The exact target remains EPS `8965F3307000 / 8A3113303100`. No vehicle commands,
 RAM installation, or persistent firmware writes were performed during this audit.
-Openpilot `6d175daf9` pins opendbc `4f91b600`; ordinary openpilot engagement,
+Openpilot `7bf1298f9` pins opendbc `6b3d09cc`; ordinary openpilot engagement,
 CarState/CarController ownership, and Toyota Panda safety remain the architecture.
 
 ## Current capability matrix
@@ -21,11 +21,11 @@ CarState/CarController ownership, and Toyota Panda safety remain the architectur
 | Vehicle model | Absolute steering-ratio default 15.3; **tire-stiffness baseline remains 0.7933** because paramsd's ~1.0 is a multiplier of CP stiffness; actuator-delay default remains 0.18 s | Identical cached lagd estimates on two routes are not independent delay measurements |
 | Historical lateral authority | September-10 C7/resident/native-B6 configuration physically steered on routes `8d` and `93` | Temporary repin and historical helper/image; selected working intervals use conventional cruise, not demonstrated adaptive cruise |
 | Host-command loss | New 598-byte supervised helper fits existing 600-byte transfer; changed C7 generation renews seven nominal 5-ms foreground ticks; unchanged generation expires; zero releases immediately | 86 compiled-instruction assertions include 34 liveness and 52 differential/error cases; crypto callees are stubbed in differential tests, not a hardware signing proof. New helper is **not live-qualified** |
-| Stock harness | Source-pinned September-11 logs put radar objects on Panda bus0, FRC `0x160` on bus2, chassis `0x025/0x101/0x412` on unsplit bus1 | These incident-era logs have no EPS `0x030`; they establish placement, not healthy steering. C7 remains on bus1 pending healthy-rack qualification |
+| Stock harness | Source-pinned September-11 logs put Toyota Bus-1 FRC `0x020/0x160/0x230/0x440` on camera/source bus2, radar objects downstream on bus0, and Toyota Bus-4 `0x08A/0x0C9/0x0CA` plus chassis `0x025/0x101/0x412` on unsplit bus1 | These incident-era logs establish placement, not healthy steering. Raw Panda bus numbers from the temporary repin must not be compared without network-role normalization; C7 remains on bus1 pending healthy-rack qualification |
 | HUD and automatic cruise cancel | Native unsplit-bus messages are preserved; read-only HUD state uses bus1. Wrong-bus `0x412`/`0x101` transmissions and safety permissions removed | **A genuine automatic-cancel command remains unresolved.** Full three-bus analysis recovers `0x1B2` switch-event mirrors, not receiver acceptance; all 58 historical host-cancel episodes are confounded by physical driver input. A separate 77-native-release scan finds three edges without decoded driver assertions, but none contains a host cancel request or establishes a sender contract. The same-generation factory circuit identifies Hybrid Control as the primary cruise-switch owner; the retained Camry MG update is a different ECU. HUD replacement is also unqualified; neither is solved by a wrong-bus duplicate |
 | Stock-ACC coexistence / recovery | Packaged recovery preserves pre-clear DTC evidence, validates ISO-TP/DID lengths, requires distance-control mode plus genuine FRC permission and clear ACC-unavailable state | Same-cycle DRCC restoration with RAM signer retained is not observed; historical lateral proof does not close this combination |
-| Alpha longitudinal | Source-counter-paced `0x160` replacement; B4:B5 and Camry B12-low7 treatment; B12 high bit preserved; canonical P05 validation; planner/controller/Panda bounds agree at −1.5..+1.3 m/s² | September-16 role audit: fine field is feedback-like and combined-trial influence is confounded by the intact camera source; even the Camry command-field identity remains unqualified. Physical authority, cancellation, hold, and PCS/AEB coexistence remain open; stock ACC stays default and `autoResumeSng=False` |
-| Stock longitudinal handback | Byte-exact latest valid native `0x160` may pass unchanged outside host-command bounds while longitudinal permission remains valid; altered frames remain bounded and CRC-checked | Required because retained native field values legitimately exceed the host envelope; source timing/handback still needs physical qualification |
+| Native longitudinal | **Not advertised on Camry after the September-16 role audit.** The former source-counter-paced `0x160` encoder remains historical/RE code, but F33 `alphaLongitudinalAvailable=False` and stock longitudinal ownership is retained. Protected `0x08A` B8:B9/B11:B12 are now the strongest direct TSS acceleration-request candidates; Toyota GTS independently exposes signed16 ×0.001 upper/lower TSS acceleration requests | Exact 0x08A upper/lower field identity, request IDs, arbitration/signing ownership, and the preferred pre-protection FRC→proxy replacement carrier remain unresolved. Do not restore Camry output by relabeling `0x160` or injecting a competing unsplit-bus `0x08A` |
+| Stock longitudinal ownership | Native `0x160` is parsed for evidence/state only; Camry keeps Toyota `STOCK_LONGITUDINAL` even when the Alpha Long toggle is requested | Former modified-`0x160` handoff behavior is dormant on F33. Corolla remains a separate platform with independent on-car `0x160` validation |
 | Radar decoder and lifecycle | Normal bus0 radar path enabled for exact Camry: independently anchored units/sign; source start/end flags, raw-state-zero rejection, complete-cycle assembly and track retirement on data loss. 20,323 held-out updates with zero reported CAN errors | On-vehicle fusion/control qualification remains; individual nonzero state names and optional confidence/class metadata are unassigned; signed13/14 velocity widths remain indistinguishable |
 | Panda enforcement | Absolute ±1745-raw C7 limit now enforced in addition to rate limits; CRC-checked longitudinal source/TX; unsplit HUD/brake TX rejected | Unit/replay validation is not an on-car safety qualification |
 | Deployment | Camry car-kit **v17** selects the supervised helper; same resident/staging/authenticated payload as before; no persistent patch or SecOC-result bypass required by its intended contract | Exact stock-CodeFlash combination, native-MAC oracle, cadence, command loss and recovery must be qualified together; historical artifacts remain separate |
@@ -69,11 +69,12 @@ untouched-native-MAC equality, command-loss/zero release, and genuine DRCC
 coexistence. An automatic cruise-cancel mechanism still needs a supported
 implementation; the earlier fake replacement is not a qualification candidate.
 
-**Native longitudinal remains alpha.** Do not promote it based only on message
-construction, Panda TX returns, or influence on a downstream protected request.
-Its physical response, gas/brake/cancel handoff, delayed hold and PCS/AEB behavior
-remain distinct questions. The retained non-causal request/aEgo correlation does
-not supply a causal actuator-delay calibration.
+**Camry native longitudinal is no longer advertised as alpha.** The retained
+role audit invalidates the implemented F33 `0x160` field mapping as a demonstrated
+actuator interface, so the platform stays stock-longitudinal even when the Alpha
+Long toggle is requested. Protected `0x08A` now supplies the strongest direct
+request-plane candidate, while the stock-harness-friendly pre-protection carrier
+remains unrecovered. Corolla's independently validated `0x160` path is unchanged.
 
 **Radar source lifecycle and the available live fault projection are now
 implemented.** The source-driven radar decoder is enabled for Camry, with

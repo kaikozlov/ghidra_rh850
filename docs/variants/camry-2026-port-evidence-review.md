@@ -830,3 +830,43 @@ Corolla's reported behavior nor the project's DBC name establishes Camry demand
 semantics. This follow-up changes only offline analysis, its tests/results,
 and documentation. The companion role audit was independently completed; its
 files were not staged or changed by this follow-up.
+
+
+## September 16 follow-up: protected 0x08A is the leading longitudinal request candidate
+
+Normalizing all retained captures by **Toyota network role** rather than raw
+Panda bus number resolves the stock -> repinned -> stock ambiguity. During the
+temporary CAN0/CAN1 repin, Toyota Bus 4 was the CAN0/CAN2 relay pair: protected
+`0x08A/0x0C9` were native upstream on Panda bus2 and `0x0CA` was native chassis
+return on bus0. After the Sep-11 restoration to stock Toyota-B, that Bus-4
+request/result family is again on unsplit Panda bus1, while Toyota Bus-1 camera
+FRC `0x020/0x160/0x230/0x440` uses source bus2 -> downstream bus0. The updated
+stock-topology verifier pins those candidate families directly.
+
+Against that corrected topology, `0x08A` B8:B9 and B11:B12 are the strongest
+direct longitudinal candidates. Across both complete Aug-27 drives the two
+signed16 words are identical in **44,617/44,617** source-side frames, span
+roughly -1.15..+1.07 m/s² at 0.001 m/s²/count, and are independently bounded
+away from simple measured-motion/steering identities. In all three retained
+no-driver-input stock resumes they are already positive 500 ms before wheel
+motion. Toyota's P5 Brake/Booster/EPB DDBs independently name upper/lower
+"Request Acceleration ... from Toyota Safety Sense" as signed16 ×0.001, while
+the FRC-hosted PCS recorder contains matching lower/upper TSS acceleration
+request records plus IDs/allocation/arbitration results.
+
+This is a strong **structural/semantic candidate**, not a byte-name proof:
+upper versus lower cannot be assigned because the two words are equal in the
+retained complete drives, and the 6-bit request IDs are still unmapped. The
+direct FRC P05 streams `0x020/0x230/0x440` have no simple byte-aligned field that
+reproduces the protected request word across both complete drives; `0x160` has
+only state-related long-lag correlations and remains disqualified as the
+implemented Camry demand interface. `0x0C9` is at most sideband/request metadata;
+`0x0CA` is a chassis-to-upstream result/feedback return.
+
+Because stock Toyota-B leaves protected `0x08A` on an **unsplit** network, the
+preferred integration target is now the unrecovered **FRC -> arbitration/signing
+precursor that produces 0x08A**, or another legitimate sole-emitter boundary.
+Competing 0x08A injection is not authorized by this evidence. The Camry platform
+therefore no longer advertises Alpha Long; stock longitudinal ownership remains
+in force until a real actuator ingress is recovered. See the longitudinal
+evidence packet and `data/generated/camry_2026_longitudinal_request_candidates.json`.
