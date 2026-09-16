@@ -3188,6 +3188,32 @@ light-stalk combination (`TAIL_LIGHT=1`, `HEADLIGHT_MODE=1`, `PARKING_LIGHT=1`,
 unmapped bits are plausible additional stalk state but are deliberately left
 unnamed without an independent wiper/washer/light oracle.
 
+**Focused wiper-status follow-up (2026-09-16).** Current GTS+ does not expose a
+`Wiper Operation Status` Data List item on `FRC_P5`: the current FRC surface has
+behavior `X2076 Wiper Malfunction` plus its own `0x10B1 Camera Low Visibility Flag`
+and `0x10B2` blockage/fog/bad-weather visibility levels.  The explicit seven-state
+`0x1036 Wiper Operation Status` monitor (`Stop/INT/LO/HI/Storage/Service/Malfunction`)
+exists on the older `Fr_RadSen_P5` architecture instead.  That generation split means
+the former assumption that the TSS3 FRC must receive a continuously decoded wiper
+mode is not established by Toyota diagnostics.
+
+The retained CAN does not close the gap.  `0x622` byte 5 has two long-lived raw
+states in the road corpus (`0x31` on routes `37/3b/45/48`, `0x73` on `3c/3d`) while
+other mapped light-stalk bytes change independently, so byte 5 remains a plausible
+unmapped column/wiper-family field.  But `3c` and `3d` both show the `0x31 -> 0x73`
+change during the first second of startup rather than at an independently observed
+wiper action.  An all-22-stream Bus-1 edge search around those two transitions is
+therefore dominated by synchronized startup/cycle changes and yields no uniquely
+usable application-state mirror.  A tempting `0x1A0` byte-14 cross-drive correlation
+is explicitly rejected: that byte subsequently walks through multiple values while
+`0x622` byte 5 remains fixed.
+
+**Wiper boundary:** no native Toyota-B/Panda-bus1 field in the retained corpus is
+currently identified as FRC wiper-operation status.  This is a bounded negative, not
+proof that no private, multiplexed, gateway-published, or presently unnamed wiper
+state exists on Bus 1.  A synchronized physical wiper ON/OFF/INT/LO/HI exercise (or
+exact source-ECU/EWD evidence) is required before assigning one.
+
 `0x614` is also column-state-compatible but has a weaker transmitter attribution.
 On route `3d` its retained `TURN_SIGNALS` raw field visits values `1`, `2`, and `3`
 on **146 / 265 / 3,916** native-bus0 frames; the current fork consumes `1/2` as
