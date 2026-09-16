@@ -13,16 +13,22 @@
           "EraseAndReproRoutine101": {
             "cmac_empty": false,
             "crc_empty": true,
+            "digital_signature_encoding": "",
             "digital_signature_length": 0,
             "digital_signature_sha256": "",
+            "digital_signature_wire_ascii_length": 0,
+            "digital_signature_wire_ascii_sha256": "",
             "length": "00000800",
             "start_address": "FEEF7800"
           },
           "ReproData101": {
             "cmac_empty": false,
             "crc_empty": true,
+            "digital_signature_encoding": "",
             "digital_signature_length": 0,
             "digital_signature_sha256": "",
+            "digital_signature_wire_ascii_length": 0,
+            "digital_signature_wire_ascii_sha256": "",
             "length": "00280000",
             "start_address": "00018000"
           }
@@ -90,16 +96,22 @@
           "EraseAndReproRoutine101": {
             "cmac_empty": false,
             "crc_empty": true,
+            "digital_signature_encoding": "",
             "digital_signature_length": 0,
             "digital_signature_sha256": "",
+            "digital_signature_wire_ascii_length": 0,
+            "digital_signature_wire_ascii_sha256": "",
             "length": "00000800",
             "start_address": "FEEF7800"
           },
           "ReproData101": {
             "cmac_empty": false,
             "crc_empty": true,
+            "digital_signature_encoding": "",
             "digital_signature_length": 0,
             "digital_signature_sha256": "",
+            "digital_signature_wire_ascii_length": 0,
+            "digital_signature_wire_ascii_sha256": "",
             "length": "00280000",
             "start_address": "00018000"
           }
@@ -167,16 +179,22 @@
           "EraseAndReproRoutine101": {
             "cmac_empty": false,
             "crc_empty": false,
+            "digital_signature_encoding": "",
             "digital_signature_length": 0,
             "digital_signature_sha256": "",
+            "digital_signature_wire_ascii_length": 0,
+            "digital_signature_wire_ascii_sha256": "",
             "length": "00000B90",
             "start_address": "FEBE4000"
           },
           "ReproData101": {
             "cmac_empty": false,
             "crc_empty": false,
+            "digital_signature_encoding": "",
             "digital_signature_length": 0,
             "digital_signature_sha256": "",
+            "digital_signature_wire_ascii_length": 0,
+            "digital_signature_wire_ascii_sha256": "",
             "length": "00A13A10",
             "start_address": "02000000"
           }
@@ -271,16 +289,22 @@
           "EraseAndReproRoutine101": {
             "cmac_empty": false,
             "crc_empty": false,
+            "digital_signature_encoding": "",
             "digital_signature_length": 0,
             "digital_signature_sha256": "",
+            "digital_signature_wire_ascii_length": 0,
+            "digital_signature_wire_ascii_sha256": "",
             "length": "000002F0",
             "start_address": "40000520"
           },
           "ReproData101": {
             "cmac_empty": false,
             "crc_empty": false,
+            "digital_signature_encoding": "",
             "digital_signature_length": 0,
             "digital_signature_sha256": "",
+            "digital_signature_wire_ascii_length": 0,
+            "digital_signature_wire_ascii_sha256": "",
             "length": "001BDBF0",
             "start_address": "00FC0400"
           }
@@ -348,16 +372,22 @@
           "EraseAndReproRoutine101": {
             "cmac_empty": false,
             "crc_empty": false,
+            "digital_signature_encoding": "",
             "digital_signature_length": 0,
             "digital_signature_sha256": "",
+            "digital_signature_wire_ascii_length": 0,
+            "digital_signature_wire_ascii_sha256": "",
             "length": "00000800",
             "start_address": "FEEFB800"
           },
           "ReproData101": {
             "cmac_empty": false,
             "crc_empty": false,
+            "digital_signature_encoding": "",
             "digital_signature_length": 0,
             "digital_signature_sha256": "",
+            "digital_signature_wire_ascii_length": 0,
+            "digital_signature_wire_ascii_sha256": "",
             "length": "00098000",
             "start_address": "00020000"
           }
@@ -625,32 +655,44 @@
           "DeltaEraseAndReproRoutine101": {
             "cmac_empty": true,
             "crc_empty": true,
-            "digital_signature_length": 512,
-            "digital_signature_sha256": "375f9862be4c06ac579d0193b19abad70a09c592fb708ca6b730c62f36439a87",
+            "digital_signature_encoding": "ascii-hex",
+            "digital_signature_length": 256,
+            "digital_signature_sha256": "743a089220e6a9309c8c708766bc64a961ce114b513119db7fd95bbf3e5dad63",
+            "digital_signature_wire_ascii_length": 512,
+            "digital_signature_wire_ascii_sha256": "375f9862be4c06ac579d0193b19abad70a09c592fb708ca6b730c62f36439a87",
             "length": "00000570",
             "start_address": "008F6C00"
           },
           "DeltaReproData101": {
             "cmac_empty": true,
             "crc_empty": true,
-            "digital_signature_length": 512,
-            "digital_signature_sha256": "88524e2f8dc9dee187d1be1e2886c0425fd7f13f384f588c41354bba509f72c6",
+            "digital_signature_encoding": "ascii-hex",
+            "digital_signature_length": 256,
+            "digital_signature_sha256": "9b6686f0da6df76b947bd05e1b3d7ebb2e588a74b171ff63ba995adb629fe38e",
+            "digital_signature_wire_ascii_length": 512,
+            "digital_signature_wire_ascii_sha256": "88524e2f8dc9dee187d1be1e2886c0425fd7f13f384f588c41354bba509f72c6",
             "length": "05180000",
             "start_address": "08E80000"
           },
           "EraseAndReproRoutine101": {
             "cmac_empty": true,
             "crc_empty": true,
-            "digital_signature_length": 512,
-            "digital_signature_sha256": "375f9862be4c06ac579d0193b19abad70a09c592fb708ca6b730c62f36439a87",
+            "digital_signature_encoding": "ascii-hex",
+            "digital_signature_length": 256,
+            "digital_signature_sha256": "743a089220e6a9309c8c708766bc64a961ce114b513119db7fd95bbf3e5dad63",
+            "digital_signature_wire_ascii_length": 512,
+            "digital_signature_wire_ascii_sha256": "375f9862be4c06ac579d0193b19abad70a09c592fb708ca6b730c62f36439a87",
             "length": "00000570",
             "start_address": "008F6C00"
           },
           "ReproData101": {
             "cmac_empty": true,
             "crc_empty": true,
-            "digital_signature_length": 512,
-            "digital_signature_sha256": "88524e2f8dc9dee187d1be1e2886c0425fd7f13f384f588c41354bba509f72c6",
+            "digital_signature_encoding": "ascii-hex",
+            "digital_signature_length": 256,
+            "digital_signature_sha256": "9b6686f0da6df76b947bd05e1b3d7ebb2e588a74b171ff63ba995adb629fe38e",
+            "digital_signature_wire_ascii_length": 512,
+            "digital_signature_wire_ascii_sha256": "88524e2f8dc9dee187d1be1e2886c0425fd7f13f384f588c41354bba509f72c6",
             "length": "05180000",
             "start_address": "08E80000"
           }
@@ -808,32 +850,44 @@
           "DeltaEraseAndReproRoutine101": {
             "cmac_empty": true,
             "crc_empty": true,
-            "digital_signature_length": 512,
-            "digital_signature_sha256": "375f9862be4c06ac579d0193b19abad70a09c592fb708ca6b730c62f36439a87",
+            "digital_signature_encoding": "ascii-hex",
+            "digital_signature_length": 256,
+            "digital_signature_sha256": "743a089220e6a9309c8c708766bc64a961ce114b513119db7fd95bbf3e5dad63",
+            "digital_signature_wire_ascii_length": 512,
+            "digital_signature_wire_ascii_sha256": "375f9862be4c06ac579d0193b19abad70a09c592fb708ca6b730c62f36439a87",
             "length": "00000570",
             "start_address": "008F6C00"
           },
           "DeltaReproData101": {
             "cmac_empty": true,
             "crc_empty": true,
-            "digital_signature_length": 512,
-            "digital_signature_sha256": "88524e2f8dc9dee187d1be1e2886c0425fd7f13f384f588c41354bba509f72c6",
+            "digital_signature_encoding": "ascii-hex",
+            "digital_signature_length": 256,
+            "digital_signature_sha256": "9b6686f0da6df76b947bd05e1b3d7ebb2e588a74b171ff63ba995adb629fe38e",
+            "digital_signature_wire_ascii_length": 512,
+            "digital_signature_wire_ascii_sha256": "88524e2f8dc9dee187d1be1e2886c0425fd7f13f384f588c41354bba509f72c6",
             "length": "05180000",
             "start_address": "08E80000"
           },
           "EraseAndReproRoutine101": {
             "cmac_empty": true,
             "crc_empty": true,
-            "digital_signature_length": 512,
-            "digital_signature_sha256": "375f9862be4c06ac579d0193b19abad70a09c592fb708ca6b730c62f36439a87",
+            "digital_signature_encoding": "ascii-hex",
+            "digital_signature_length": 256,
+            "digital_signature_sha256": "743a089220e6a9309c8c708766bc64a961ce114b513119db7fd95bbf3e5dad63",
+            "digital_signature_wire_ascii_length": 512,
+            "digital_signature_wire_ascii_sha256": "375f9862be4c06ac579d0193b19abad70a09c592fb708ca6b730c62f36439a87",
             "length": "00000570",
             "start_address": "008F6C00"
           },
           "ReproData101": {
             "cmac_empty": true,
             "crc_empty": true,
-            "digital_signature_length": 512,
-            "digital_signature_sha256": "88524e2f8dc9dee187d1be1e2886c0425fd7f13f384f588c41354bba509f72c6",
+            "digital_signature_encoding": "ascii-hex",
+            "digital_signature_length": 256,
+            "digital_signature_sha256": "9b6686f0da6df76b947bd05e1b3d7ebb2e588a74b171ff63ba995adb629fe38e",
+            "digital_signature_wire_ascii_length": 512,
+            "digital_signature_wire_ascii_sha256": "88524e2f8dc9dee187d1be1e2886c0425fd7f13f384f588c41354bba509f72c6",
             "length": "05180000",
             "start_address": "08E80000"
           }
@@ -980,32 +1034,44 @@
           "DeltaEraseAndReproRoutine101": {
             "cmac_empty": true,
             "crc_empty": true,
-            "digital_signature_length": 512,
-            "digital_signature_sha256": "375f9862be4c06ac579d0193b19abad70a09c592fb708ca6b730c62f36439a87",
+            "digital_signature_encoding": "ascii-hex",
+            "digital_signature_length": 256,
+            "digital_signature_sha256": "743a089220e6a9309c8c708766bc64a961ce114b513119db7fd95bbf3e5dad63",
+            "digital_signature_wire_ascii_length": 512,
+            "digital_signature_wire_ascii_sha256": "375f9862be4c06ac579d0193b19abad70a09c592fb708ca6b730c62f36439a87",
             "length": "00000570",
             "start_address": "008F6C00"
           },
           "DeltaReproData101": {
             "cmac_empty": true,
             "crc_empty": true,
-            "digital_signature_length": 512,
-            "digital_signature_sha256": "8ffa0003cbeb89b6d844e3bbdfa34679c09b89b39d94ea55607273be3d2eb7c2",
+            "digital_signature_encoding": "ascii-hex",
+            "digital_signature_length": 256,
+            "digital_signature_sha256": "c83ff9ca8dd6f02111f55c5fbdedee6626dbcb2d01f9fb3209a24a34db4a3c48",
+            "digital_signature_wire_ascii_length": 512,
+            "digital_signature_wire_ascii_sha256": "8ffa0003cbeb89b6d844e3bbdfa34679c09b89b39d94ea55607273be3d2eb7c2",
             "length": "05180000",
             "start_address": "08E80000"
           },
           "EraseAndReproRoutine101": {
             "cmac_empty": true,
             "crc_empty": true,
-            "digital_signature_length": 512,
-            "digital_signature_sha256": "375f9862be4c06ac579d0193b19abad70a09c592fb708ca6b730c62f36439a87",
+            "digital_signature_encoding": "ascii-hex",
+            "digital_signature_length": 256,
+            "digital_signature_sha256": "743a089220e6a9309c8c708766bc64a961ce114b513119db7fd95bbf3e5dad63",
+            "digital_signature_wire_ascii_length": 512,
+            "digital_signature_wire_ascii_sha256": "375f9862be4c06ac579d0193b19abad70a09c592fb708ca6b730c62f36439a87",
             "length": "00000570",
             "start_address": "008F6C00"
           },
           "ReproData101": {
             "cmac_empty": true,
             "crc_empty": true,
-            "digital_signature_length": 512,
-            "digital_signature_sha256": "8ffa0003cbeb89b6d844e3bbdfa34679c09b89b39d94ea55607273be3d2eb7c2",
+            "digital_signature_encoding": "ascii-hex",
+            "digital_signature_length": 256,
+            "digital_signature_sha256": "c83ff9ca8dd6f02111f55c5fbdedee6626dbcb2d01f9fb3209a24a34db4a3c48",
+            "digital_signature_wire_ascii_length": 512,
+            "digital_signature_wire_ascii_sha256": "8ffa0003cbeb89b6d844e3bbdfa34679c09b89b39d94ea55607273be3d2eb7c2",
             "length": "05180000",
             "start_address": "08E80000"
           }
@@ -1152,32 +1218,44 @@
           "DeltaEraseAndReproRoutine101": {
             "cmac_empty": true,
             "crc_empty": true,
-            "digital_signature_length": 512,
-            "digital_signature_sha256": "375f9862be4c06ac579d0193b19abad70a09c592fb708ca6b730c62f36439a87",
+            "digital_signature_encoding": "ascii-hex",
+            "digital_signature_length": 256,
+            "digital_signature_sha256": "743a089220e6a9309c8c708766bc64a961ce114b513119db7fd95bbf3e5dad63",
+            "digital_signature_wire_ascii_length": 512,
+            "digital_signature_wire_ascii_sha256": "375f9862be4c06ac579d0193b19abad70a09c592fb708ca6b730c62f36439a87",
             "length": "00000570",
             "start_address": "008F6C00"
           },
           "DeltaReproData101": {
             "cmac_empty": true,
             "crc_empty": true,
-            "digital_signature_length": 512,
-            "digital_signature_sha256": "b743d282c552d6bc3c04123ff52e81b38f28b0834813678f63b3b2799861e896",
+            "digital_signature_encoding": "ascii-hex",
+            "digital_signature_length": 256,
+            "digital_signature_sha256": "8a00a42dbbbe1a48b9eefb04c2845397c6724d7e54d6e333a94bf0aac464e262",
+            "digital_signature_wire_ascii_length": 512,
+            "digital_signature_wire_ascii_sha256": "b743d282c552d6bc3c04123ff52e81b38f28b0834813678f63b3b2799861e896",
             "length": "05180000",
             "start_address": "08E80000"
           },
           "EraseAndReproRoutine101": {
             "cmac_empty": true,
             "crc_empty": true,
-            "digital_signature_length": 512,
-            "digital_signature_sha256": "375f9862be4c06ac579d0193b19abad70a09c592fb708ca6b730c62f36439a87",
+            "digital_signature_encoding": "ascii-hex",
+            "digital_signature_length": 256,
+            "digital_signature_sha256": "743a089220e6a9309c8c708766bc64a961ce114b513119db7fd95bbf3e5dad63",
+            "digital_signature_wire_ascii_length": 512,
+            "digital_signature_wire_ascii_sha256": "375f9862be4c06ac579d0193b19abad70a09c592fb708ca6b730c62f36439a87",
             "length": "00000570",
             "start_address": "008F6C00"
           },
           "ReproData101": {
             "cmac_empty": true,
             "crc_empty": true,
-            "digital_signature_length": 512,
-            "digital_signature_sha256": "b743d282c552d6bc3c04123ff52e81b38f28b0834813678f63b3b2799861e896",
+            "digital_signature_encoding": "ascii-hex",
+            "digital_signature_length": 256,
+            "digital_signature_sha256": "8a00a42dbbbe1a48b9eefb04c2845397c6724d7e54d6e333a94bf0aac464e262",
+            "digital_signature_wire_ascii_length": 512,
+            "digital_signature_wire_ascii_sha256": "b743d282c552d6bc3c04123ff52e81b38f28b0834813678f63b3b2799861e896",
             "length": "05180000",
             "start_address": "08E80000"
           }
@@ -1324,32 +1402,44 @@
           "DeltaEraseAndReproRoutine101": {
             "cmac_empty": true,
             "crc_empty": true,
-            "digital_signature_length": 512,
-            "digital_signature_sha256": "375f9862be4c06ac579d0193b19abad70a09c592fb708ca6b730c62f36439a87",
+            "digital_signature_encoding": "ascii-hex",
+            "digital_signature_length": 256,
+            "digital_signature_sha256": "743a089220e6a9309c8c708766bc64a961ce114b513119db7fd95bbf3e5dad63",
+            "digital_signature_wire_ascii_length": 512,
+            "digital_signature_wire_ascii_sha256": "375f9862be4c06ac579d0193b19abad70a09c592fb708ca6b730c62f36439a87",
             "length": "00000570",
             "start_address": "008F6C00"
           },
           "DeltaReproData101": {
             "cmac_empty": true,
             "crc_empty": true,
-            "digital_signature_length": 512,
-            "digital_signature_sha256": "52dc8b80f6b2ff1f27a4e059183d91a7b46156e4f5a1aaf3bb4309aaec931b4d",
+            "digital_signature_encoding": "ascii-hex",
+            "digital_signature_length": 256,
+            "digital_signature_sha256": "82a1744fbf95f9ffd876f9c4a3d73b8001f31f86ecef866a77516e8d45e55f18",
+            "digital_signature_wire_ascii_length": 512,
+            "digital_signature_wire_ascii_sha256": "52dc8b80f6b2ff1f27a4e059183d91a7b46156e4f5a1aaf3bb4309aaec931b4d",
             "length": "05180000",
             "start_address": "08E80000"
           },
           "EraseAndReproRoutine101": {
             "cmac_empty": true,
             "crc_empty": true,
-            "digital_signature_length": 512,
-            "digital_signature_sha256": "375f9862be4c06ac579d0193b19abad70a09c592fb708ca6b730c62f36439a87",
+            "digital_signature_encoding": "ascii-hex",
+            "digital_signature_length": 256,
+            "digital_signature_sha256": "743a089220e6a9309c8c708766bc64a961ce114b513119db7fd95bbf3e5dad63",
+            "digital_signature_wire_ascii_length": 512,
+            "digital_signature_wire_ascii_sha256": "375f9862be4c06ac579d0193b19abad70a09c592fb708ca6b730c62f36439a87",
             "length": "00000570",
             "start_address": "008F6C00"
           },
           "ReproData101": {
             "cmac_empty": true,
             "crc_empty": true,
-            "digital_signature_length": 512,
-            "digital_signature_sha256": "52dc8b80f6b2ff1f27a4e059183d91a7b46156e4f5a1aaf3bb4309aaec931b4d",
+            "digital_signature_encoding": "ascii-hex",
+            "digital_signature_length": 256,
+            "digital_signature_sha256": "82a1744fbf95f9ffd876f9c4a3d73b8001f31f86ecef866a77516e8d45e55f18",
+            "digital_signature_wire_ascii_length": 512,
+            "digital_signature_wire_ascii_sha256": "52dc8b80f6b2ff1f27a4e059183d91a7b46156e4f5a1aaf3bb4309aaec931b4d",
             "length": "05180000",
             "start_address": "08E80000"
           }
@@ -1496,32 +1586,44 @@
           "DeltaEraseAndReproRoutine101": {
             "cmac_empty": true,
             "crc_empty": true,
-            "digital_signature_length": 512,
-            "digital_signature_sha256": "375f9862be4c06ac579d0193b19abad70a09c592fb708ca6b730c62f36439a87",
+            "digital_signature_encoding": "ascii-hex",
+            "digital_signature_length": 256,
+            "digital_signature_sha256": "743a089220e6a9309c8c708766bc64a961ce114b513119db7fd95bbf3e5dad63",
+            "digital_signature_wire_ascii_length": 512,
+            "digital_signature_wire_ascii_sha256": "375f9862be4c06ac579d0193b19abad70a09c592fb708ca6b730c62f36439a87",
             "length": "00000570",
             "start_address": "008F6C00"
           },
           "DeltaReproData101": {
             "cmac_empty": true,
             "crc_empty": true,
-            "digital_signature_length": 512,
-            "digital_signature_sha256": "de4d63632dc9c54488b55a10d78c52fa436f3351b46106e5415e4ad943ba076c",
+            "digital_signature_encoding": "ascii-hex",
+            "digital_signature_length": 256,
+            "digital_signature_sha256": "d4ecb84f637954f3f5695f83e81e34fc96372937adbb71229a496328acbafd6e",
+            "digital_signature_wire_ascii_length": 512,
+            "digital_signature_wire_ascii_sha256": "de4d63632dc9c54488b55a10d78c52fa436f3351b46106e5415e4ad943ba076c",
             "length": "05180000",
             "start_address": "08E80000"
           },
           "EraseAndReproRoutine101": {
             "cmac_empty": true,
             "crc_empty": true,
-            "digital_signature_length": 512,
-            "digital_signature_sha256": "375f9862be4c06ac579d0193b19abad70a09c592fb708ca6b730c62f36439a87",
+            "digital_signature_encoding": "ascii-hex",
+            "digital_signature_length": 256,
+            "digital_signature_sha256": "743a089220e6a9309c8c708766bc64a961ce114b513119db7fd95bbf3e5dad63",
+            "digital_signature_wire_ascii_length": 512,
+            "digital_signature_wire_ascii_sha256": "375f9862be4c06ac579d0193b19abad70a09c592fb708ca6b730c62f36439a87",
             "length": "00000570",
             "start_address": "008F6C00"
           },
           "ReproData101": {
             "cmac_empty": true,
             "crc_empty": true,
-            "digital_signature_length": 512,
-            "digital_signature_sha256": "de4d63632dc9c54488b55a10d78c52fa436f3351b46106e5415e4ad943ba076c",
+            "digital_signature_encoding": "ascii-hex",
+            "digital_signature_length": 256,
+            "digital_signature_sha256": "d4ecb84f637954f3f5695f83e81e34fc96372937adbb71229a496328acbafd6e",
+            "digital_signature_wire_ascii_length": 512,
+            "digital_signature_wire_ascii_sha256": "de4d63632dc9c54488b55a10d78c52fa436f3351b46106e5415e4ad943ba076c",
             "length": "05180000",
             "start_address": "08E80000"
           }
@@ -2005,13 +2107,61 @@
       }
     ]
   },
-  "schema_version": 2,
+  "reprostd_nonce_differential": {
+    "bounded_interpretation": "The two 0x7D2 ReproStd packages share family ServiceAuthKey plus the same declared erase/repro routine address/length and 16-byte CMAC, but carry different descriptor Nonces and chance-correlated stored routine bytes. This proves the serialized encrypted routine representation is not fixed by target address/length/CMAC + ServiceAuthKey alone. It does not prove Nonce causality, the plaintext routine identity, or the exact cipher/IV/KDF. Combined with the selected ReproStd host route's lack of explicit Nonce transfer, any package-specific crypto context must be embedded/derived or otherwise ECU-local.",
+    "different_nonce": true,
+    "packages": [
+      {
+        "diag_id": "07D2",
+        "filename": "T-0003-25.cuw",
+        "new_cid": "8A2520E01200",
+        "nonce": "082163A560054CADEA32BD2A5871FC08",
+        "routine_cmac": "882F6665A00877DEBC93A83F38C31280",
+        "routine_length": "00000800",
+        "routine_start": "FEEF7800",
+        "routine_stored_first_32_bytes_hex": "cf61d72c72ab630fc4c5e09a9bdbeeb41a9367098c200c5512fd8f66e58f253a",
+        "routine_stored_sha256": "4f45346fa016ceade7d2cece031b29ed2623eb73339327ba8793752103720f32",
+        "service_auth_key": "A34C53C7B1FD7ADE8B51BBE1E0EFEF57"
+      },
+      {
+        "diag_id": "07D2",
+        "filename": "T-0005-25.cuw",
+        "new_cid": "8A2523002400",
+        "nonce": "2C0AF3AD32DC8B28B85104E02B900B67",
+        "routine_cmac": "882F6665A00877DEBC93A83F38C31280",
+        "routine_length": "00000800",
+        "routine_start": "FEEF7800",
+        "routine_stored_first_32_bytes_hex": "342986179ce3d4cb8cc7a877fea4478ff9e129cbfb132d8f8d29f8de29f52601",
+        "routine_stored_sha256": "b280b85ba23ae7230e336c91a80cb5dacb5fea061b417a2640a6c5edf8c98164",
+        "service_auth_key": "A34C53C7B1FD7ADE8B51BBE1E0EFEF57"
+      }
+    ],
+    "routine_stored_expected_chance_fraction": 0.003906,
+    "routine_stored_identical_fraction": 0.002441,
+    "routine_stored_shared_16b_blocks": 0,
+    "same_diag_id": true,
+    "same_routine_cmac": true,
+    "same_routine_target": true,
+    "same_service_auth_key": true
+  },
+  "schema_version": 3,
   "transform_boundary": {
-    "datx_members": "DeltaReproData payload; downloaded by the ReproStd writer with RequestDownload DFI 0x21 as the ECU-side delta input; exact representation grammar and transform are unknown.",
-    "entropy_support": "decoded flash body is high-entropy throughout (T-0058: global 7.9999977 bits/byte, minimum complete 4-KiB window 7.93098; routine range 7.8798 over 1392 B); this supports opacity of the encoded body only and does not distinguish any specific cryptographic transform.",
-    "host_transform": "host parses S-record framing for .xx members and passes the decoded payload bytes; .datx remains an opaque raw member buffer. No host-side decryption/decompression of the encoded payload body is recovered in the pinned path.",
+    "cbc_shape_hypothesis": "All five distinct FRC target images share exactly the first two 16-byte stored blocks and first differ at byte 32, then the two locally closed small-delta updates remain chance-correlated for the rest of the 85,458,944-byte image. Fixed-key/fixed-IV CBC with two common plaintext header blocks followed by a changed third block produces exactly this prefix-then-avalanche shape and is a better fit than a whole-image rekey, which would not naturally preserve the identical ciphertext prefix. This is a structural hypothesis only: a custom chaining transform, partially clear/encrypted envelope, or another construction can reproduce the same observation; no FRC key/plaintext/cipher implementation has been recovered.",
+    "data_format_identifier": {
+      "bounded_conclusion": "all ReproStd payload families here use manufacturer-specific encryptingMethod 1; compression method 1 is Toyota CompressionRepro and compression method 2 is Toyota DeltaRepro",
+      "compression": "0x11",
+      "delta": "0x21",
+      "toyota_host_names": "whole/default -> 0x01; CompressionRepro -> 0x11; DeltaRepro -> 0x21",
+      "uds_semantics": "high nibble=compressionMethod, low nibble=encryptingMethod; 0 means no transform and nonzero values are manufacturer-specific",
+      "whole_or_routine": "0x01"
+    },
+    "datx_members": "DeltaReproData payload; ReproStd downloads it with DFI 0x21. UDS assigns the high nibble to compressionMethod and the low nibble to encryptingMethod; Toyota host code independently names high-nibble method 2 as DeltaRepro, so this is Toyota delta method 2 layered with the same manufacturer-specific encryption method 1.",
+    "digital_signature": "RequiredSpecReproVer04 FRC descriptors carry 512 deobfuscated ASCII-hex characters encoding a 256-byte signature. The ReproStd RoutineControl builder selects the alternate integrity field and declares length 0x0100; RequiredSpec03 instead declares a 0x0010 CMAC. Whole/delta entries share the same target signature, so the exact signed object is not either serialized member byte stream directly.",
+    "entropy_support": "encrypted flash body is high-entropy throughout (T-0058: global 7.9999977 bits/byte, minimum complete 4-KiB window 7.93098; routine range 7.8798 over 1392 B). The two corpus-internal updates carry only 1,503,040 B and 1,254,976 B of delta input (1.76% and 1.47% of the 85,458,944-B target span) while their stored whole-image bytes decorrelate to chance immediately after a shared 32-byte prefix. Localized plaintext edits therefore do not remain localized in the stored representation.",
+    "host_transform": "host parses S-record framing for .xx members and passes the decoded encrypted payload bytes; .datx remains an opaque raw member buffer. No host-side payload decryption/decompression is recovered in the selected ReproStd path.",
     "member_read_path": "format-0x67 members are raw length+CRC32 payloads; the CUW.dll read path is a chunked fread(dst,1,0xFFF) loop (reader 0x1002BEB0, push site 0x1002BF83) with a whole-file CRC32 gate (0x1002A3B0, called from loader 0x10031A20 at 0x10031C0C; mismatch -> Error FileCRC); CDeltaReproArchiveCtrlr (RTTI 0x1008A9A0, vtable 0x1007C918, single deleting-dtor virtual 0x10066DC0, global instance 0x1008CA0C) holds only 0xAC-stride path/name/count entries with no payload pointer or byte fields - orchestration-only; CAES encrypt/decrypt callers are only 0x1001B9B2/0x1005AC52/0x1005AD02 (INI parameter decode, SecurityUp helpers), never the member path; TCUWCalibrationFile.dll and TCUWCanReproStdFlashWriter.dll have no crypto or compression imports.",
-    "routine_member": "byte-identical high-entropy encoded blob in all six packages; exact representation, transform, and ECU-side interpretation are unknown.",
-    "xx_members": "Motorola S-record framing only; decoded flash data is high-entropy and its exact encoding is unknown (no plaintext claim)."
+    "routine_member": "byte-identical encrypted blob in all six packages; it decodes from S-record framing to the same 1392 stored bytes every whole image carries at 0x008F6C00. Exact plaintext/ECU-side interpretation remain unknown.",
+    "selected_route_key_material": "The selected ReproStd prepare path enters 10 02, sends bare 27 01, extracts exactly 16 seed bytes from 67 01, calls CalcSeedKey with GetServiceAuthKey + that seed, then sends 27 02 plus a 16-byte key and expects 67 02. It imports GetServiceAuthKey but not GetNonce/GetSeedKey/GetECUAuthKey/GetSecurityProperty2; ReproStd flash imports only GetReproMethodType from these security/format getters. The recovered prepare/flash send grammar has no explicit Nonce/SeedKey transfer, so the selected route supplies no host-side nonce/seed material to the FRC payload decoder. This does not prove the package-generation Nonce is cryptographically irrelevant.",
+    "xx_members": "Motorola S-record framing carrying an encrypted target representation. ReproStd downloads whole/routine data with UDS RequestDownload DFI 0x01; by the UDS dataFormatIdentifier definition that is compression method 0 plus manufacturer-specific encryption method 1. The exact FRC cipher/key/IV remain unknown."
   }
 }

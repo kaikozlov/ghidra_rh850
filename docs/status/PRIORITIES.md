@@ -175,11 +175,21 @@ suppression, and producer topology.
 TMS-042 makes the same acquisition the highest-value reprogramming target too: modern GTS+ proves the FRC `ReproMethod=07` path
 uploads the package routine with DFI `0x01` / `10F5`, then the compact
 `DeltaReproData` with DFI `0x21` / `10F6`, while the host treats `.datx` as
-opaque bytes. TMS-052 proves the 23TC01 Corolla **package** is already local, so the
-missing consumer is now specifically FRC bootloader/programming-decoder firmware
-or an executable camera dump that can explain the routine/blob transform and delta
-representation; do not look for those handlers in the tracked Sienna/H EPS,
-where TMS-029 already closes standard ReproStd `10F5/10F6` as absent/rejected.
+opaque bytes. UDS DFI semantics now sharpen that boundary: `0x01` is
+manufacturer-specific **encryption method 1** with no compression, while `0x21`
+is Toyota `DeltaRepro` method 2 under the same encryption-method-1 layer. The
+selected ReproStd prepare/flash pair has no explicit package Nonce/SeedKey
+transfer, and the RequiredSpec04 integrity object is a 256-byte signature. TMS-052
+proves the 23TC01 Corolla **package** is already local, so the missing consumer is
+now specifically FRC bootloader/programming-decoder firmware (cipher/key/IV,
+`10F5/10F6`, delta application, signature verification) or a plaintext/runtime
+camera dump. The retained same-generation TSS3 Prius teardown
+(`REFERENCE/tss3_camera_report`) identifies a TMPV7706XBG plus S25HS01GT
+128-MiB serial NOR, making a **full raw NOR dump from a matching/sacrificial
+camera** the preferred next static acquisition; do not assume a virtual-to-NOR
+offset until the full dump or target-native map proves one. Do not look for
+those handlers in the tracked Sienna/H EPS, where TMS-029 already closes
+standard ReproStd `10F5/10F6` as absent/rejected.
 The V18 Unified CID path now gives a concrete identity checklist for that
 acquisition: preserve generic F181, F18C, the package/current CID, and especially
 the camera-special direct `0x792→0x79A` `22 1F FF` / `62 1F FF` SWIN response

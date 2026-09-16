@@ -1256,12 +1256,20 @@ the branch).  Members are exactly `01-<NewCID>.xx`,
 All six carry the **same** index-subtraction-obfuscated `ServiceAuthKey`
 (Node section; decodes to ASCII `3A8A90AE0ED81B6C37E21C1C5179A93E`) and
 `Nonce` (LogicalBlock section; `5587BF845F3FF525E610A8A5EC9BD6E5`).  Area
-descriptors: `ReproData`/`DeltaReproData` share one 512-byte
-`DigitalSignature` (flash area `08E80000/05180000`),
-`EraseAndReproRoutine`/`DeltaEraseAndReproRoutine` share another
-(`008F6C00/00000570`); CRC/CMAC empty.  The whole/delta entries for each
-target area share the same 512-byte `DigitalSignature`, so it is **not a direct
-signature of the differing serialized member bytes**; the exact signed object remains bounded.
+descriptors: `ReproData`/`DeltaReproData` share one `DigitalSignature` for the
+flash area `08E80000/05180000`, while
+`EraseAndReproRoutine`/`DeltaEraseAndReproRoutine` share another for
+`008F6C00/00000570`; CRC/CMAC are empty.  The signature field was previously
+mis-sized: after index subtraction it is **512 ASCII hex characters**, which
+hex-decode to **256 binary bytes**.  The ReproStd RoutineControl builder closes
+the wire width independently: RequiredSpec03 selects the CMAC branch and emits
+`00 10` (16 bytes), while the alternate branch used by these RequiredSpec04 FRC
+packages emits `01 00` (256 bytes) before the decoded signature bytes.  Thus the
+FRC integrity object is 256 bytes (consistent with a 2048-bit signature width,
+without identifying the signature algorithm).  Whole/delta entries for the
+same target share that signature despite different serialized member bytes, so
+the exact signed object is **not either member byte stream directly** and remains
+bounded.
 
 **2023 Corolla campaign/package correlation (TMS-052).** Toyota's official
 23TC01 technical instructions independently publish the Corolla/Corolla
@@ -1277,31 +1285,63 @@ the missing FRC problem is **decoding/exact target identity**, not finding any
 2023 Corolla `0792` CUW. This still is not a VIN-level join to the albinoelephant
 or Span specimens.
 
-**Payload boundary (verified/bounded).** The `01-….xx` members are plain
+**Payload boundary (verified/bounded).** The `01-….xx` members are
 Motorola S-record **framing** (5,341,273 records, zero invalid, two ranges:
 the `0x8F6C00` routine slot and flash `0x08E80000..0x0E000000` = 85,458,944
-B); the **decoded data is high-entropy with unknown encoding** — T-0058
-global entropy 7.9999977 bits/byte, minimum complete 4-KiB window 7.93098
-(no plaintext island), printable/00/FF fractions random-like; the same
-holds on all six.  The `Delta-…-routine.xx` member is byte-identical in all
-six packages (sha256 `5baa1feb…430f`), decodes to exactly the same 1,392 B
-(`161fd56d…cedb`) that every whole image embeds at `0x8F6C00`, and is itself
-high-entropy (7.8798) — a byte-identical deterministic encoded
-representation whose interpretation/transform is unknown.  The `write.datx`
-members are 16-byte
-multiples, share exactly one leading 16-byte block
+B) around an **encrypted target representation**, not plaintext firmware.  The
+recovered ReproStd writer sends these whole/routine bytes with UDS
+`dataFormatIdentifier=0x01`.  UDS defines the high DFI nibble as
+`compressionMethod` and the low nibble as `encryptingMethod`; zero means no
+transform and nonzero values are manufacturer-specific.  Therefore `0x01`
+means no compression plus Toyota/Denso **encryption method 1**.  The bytes are
+consistent with that declaration: T-0058 global entropy is 7.9999977
+bits/byte, the minimum complete 4-KiB window is 7.93098 (no plaintext island),
+and printable/00/FF fractions are random-like; the same holds on all six.
+The exact FRC cipher, key derivation, IV construction, and plaintext format are
+still unknown.
+
+The `Delta-…-routine.xx` member is byte-identical in all six packages (sha256
+`5baa1feb…430f`), decodes from S-record framing to exactly the same 1,392 stored
+bytes (`161fd56d…cedb`) that every whole image embeds at `0x8F6C00`, and is
+itself high-entropy (7.8798).  The `write.datx` members are 16-byte multiples,
+share exactly one leading 16-byte block
 (`0a4aba7f300a8745e2acb15b5b59a046`), and have **zero** interior block
 collisions across packages; sizes scale with version distance
-(8,272–1,503,040 B).  Consecutive-version stored images are statistically
-independent: both corpus-internal chains (`T-0062→T-0149`, `T-0061→T-0150`)
-show byte identity 0.00390–0.00391 (chance is 0.003906), zero shared
-16-byte blocks beyond the 32-byte constant image prefix
-(`8b273e82…d23dfc`), and no identical run ≥ 8 beyond it — the stored
-representation changes globally rather than as localized edits; the exact
-transform remains bounded.  Five further format-`0x67` camera
-packages (Tundra/Crown/Camry/GH, DiagID `07D2/07506D/07500F/0724`) carry
+(8,272–1,503,040 B).
+
+The corpus-internal update pairs sharpen the crypto boundary.  `T-0062→T-0149`
+needs only 1,503,040 bytes of delta input and `T-0061→T-0150` only 1,254,976
+bytes — about **1.76% and 1.47%** of the 85,458,944-byte whole target span — yet
+the corresponding stored whole images decorrelate to chance immediately after
+an exactly shared 32-byte prefix: byte identity 0.00390–0.00391 (chance
+0.003906), zero shared 16-byte blocks beyond the prefix, and no identical run
+≥8.  Localized update data therefore does **not** remain localized in the stored
+whole-image representation.  The exact prefix geometry makes one hypothesis
+materially stronger than a generic "encrypted blob" description: **all five
+distinct targets share exactly two 16-byte stored blocks and first differ at byte
+32**.  Fixed-key/fixed-IV CBC with two common plaintext header blocks followed
+by a changed third block produces exactly that prefix-then-avalanche shape;
+a whole-image rekey would not naturally preserve the identical ciphertext
+prefix.  This remains a structural hypothesis, not a recovered FRC cipher: a
+custom chaining transform, partially clear/encrypted envelope, or another
+construction can reproduce the same observation.  Five further format-`0x67` camera packages
+(Tundra/Crown/Camry/GH, DiagID `07D2/07506D/07500F/0724`) carry
 `ReproMethod=01`/`SecurityProperty2=98`/`IsControlledBySCC=0` and no delta
-sections — the pinned whole-repro contrast set.
+sections — the pinned whole-repro contrast set.  That contrast set supplies an
+additional crypto differential: `T-0003-25` and `T-0005-25` are both DiagID
+`07D2`, reuse the same `ServiceAuthKey`, and declare the same erase/repro routine
+range `FEEF7800..FEEF8000` with the exact same 16-byte CMAC
+`882F6665A00877DEBC93A83F38C31280`, but carry different descriptor Nonces
+(`082163A5…FC08` vs `2C0AF3AD…0B67`).  Their 2,048-byte stored routine
+representations are chance-correlated — only 5 equal byte positions and zero
+shared 16-byte blocks, with SHA-256 `4f45346f…0f32` vs `b280b85b…8164`.
+Therefore target range + integrity value + family `ServiceAuthKey` do **not**
+uniquely determine the serialized encrypted routine.  This is a useful oracle,
+not a proof that descriptor `Nonce` alone causes the change or that the
+underlying routine plaintexts are byte-identical.  Joined to the host negative
+below, any per-package decrypt context needed at programming time must be
+embedded/derived or otherwise ECU-local rather than sent as an explicit
+ReproStd Nonce/SeedKey field.
 
 **Modern host (recovered, from the statically unpacked GTS+ CUWPlus
 binaries in `software/Techstream/gtsplus/cuwplus`; provenance and SHA-256 pins are
@@ -1355,20 +1395,45 @@ pinned images (image base `0x10000000`):
   execute or jump to the `0x8F6C00` bytes; it downloads them and invokes the
   ECU via RoutineControl.  No erase/verify semantics are claimed for
   `10F5`/`10F6` without ECU firmware.
-- **DFI semantics are named by host code (not ISO nibble speculation)**:
-  `TCUWP6CanReprostdFlashWriter.dll` compares the ReproMethod string
-  against imported `mlptrReproMethod_CompressionReproPhase6` → DFI `0x11`
+- **DFI semantics now close the encryption layer**: UDS assigns the DFI high
+  nibble to `compressionMethod` and low nibble to `encryptingMethod` (zero = no
+  transform; nonzero values manufacturer-specific).  Independently,
+  `TCUWP6CanReprostdFlashWriter.dll` compares the ReproMethod string against
+  imported `mlptrReproMethod_CompressionReproPhase6` → DFI `0x11`
   (`0x10004063`), `mlptrReproMethod_DeltaReproPhase6` → DFI `0x21`
   (`0x10004086`, `cmovne`), default/Whole Phase6 → `0x01` (`0x10004043`).
-  Toyota's own code names `0x21` the delta-data DFI and `0x11` the
-  compression-data DFI; the ReproStd FRC matrix is routine-PackageDL
-  tag0→`0x01`, whole-data tag1→`0x01`, delta-data tag2→`0x21`,
-  compression-data tag3→`0x11`.  No high/low nibble meaning is claimed
-  beyond what these code paths name.
-- **What the `0x21` bytes are**: the compact **delta representation** the
-  ECU consumes as its delta input.  The exact transform (decryption,
-  decompression, patch grammar) is **unknown** — "decrypted ECU-side" is not claimed, and
-  no host-side decryption exists in the pinned writer anchors.
+  Toyota therefore uses high-nibble method 1 for `CompressionRepro`, method 2
+  for `DeltaRepro`, and low-nibble **encryption method 1 for every case**.  The
+  FRC matrix is routine-PackageDL tag0→`0x01`, whole-data tag1→`0x01`,
+  delta-data tag2→`0x21`, compression-data tag3→`0x11`.  Exact P1M-E EPS
+  firmware provides useful cross-family context: its accepted DFI-low-nibble-1
+  download path dispatches TransferData through AES-128-CBC decryption.  That
+  makes AES-CBC a concrete Toyota/Denso method-1 precedent, **not proof that the
+  TMPV770 FRC uses the same cipher/root/IV construction**.
+- **What the `0x21` bytes are**: Toyota's compact **delta method 2** input,
+  additionally protected by the same DFI encryption-method-1 layer as whole
+  data.  The patch grammar, plaintext delta bytes, exact decryptor, key, and IV
+  remain unknown; no host-side payload decryption exists in the pinned writer
+  anchors.
+- **ReproStd SecurityAccess is complete host-side, but does not explicitly
+  provision payload nonce/seed material**: the selected prepare writer first
+  sends `10 02 -> 50 02`, then a bare `27 01 -> 67 01 || seed[16]`; it copies
+  exactly 16 seed bytes, calls `CUnifiedUtils::CalcSeedKey(ServiceAuthKey,
+  seed[16])`, and sends `27 02 || key[16] -> 67 02`.  TMS-088 independently
+  closes the frontend transform for this family as
+  `Kwork=AES-128-ECB-DEC(Kwrap,ServiceAuthKey)`, response
+  `AES-128-ECB-ENC(Kwork,seed)`, giving the retained FRC family working key
+  `9318e0bfa4be96b787365ea2b5e26f3f`.  This unlock key is **not** thereby the
+  payload-encryption key.  `TCUWCanReproStdPrepareWriter.dll` imports
+  `GetServiceAuthKey` but not `GetNonce`, `GetSeedKey`, `GetECUAuthKey`, or
+  `GetSecurityProperty2`;
+  `TCUWCanReproStdFlashWriter.dll` imports `GetReproMethodType` but none of those
+  package-security getters.  Its recovered send grammar has no `0201/0202`
+  equivalent.  Thus the selected FRC route uses `ServiceAuthKey` for the
+  preparation/SecurityAccess path but supplies no explicit package Nonce or
+  SeedKey to the ECU payload decoder.  The descriptor `Nonce` may still have
+  participated when Toyota built the encrypted package; this negative only
+  closes the **host-to-ECU transfer path**.
 - **The host treats `.datx` as opaque bytes end-to-end (bounded closure)**:
   format-`0x67` members are raw length+CRC32 payloads (T-0058 `write.datx`:
   offset 256,387,015, length 9,184, stored CRC == computed, sha256
@@ -1417,12 +1482,29 @@ pinned images (image base `0x10000000`):
   prove that every vehicle exposes all auxiliary identity reads on the same
   route.
 
+A same-generation TSS3 hardware teardown retained locally under
+`REFERENCE/tss3_camera_report` supplies physical acquisition context without
+being promoted to an exact-Corolla board identity: the 2023 Prius/Denso
+`8646C-47130` front camera uses Toshiba **TMPV7706XBG (Visconti5)** plus an
+Infineon **S25HS01GT 128-MiB serial NOR**.  The CUW updates only the logical
+`0x08E80000..0x0E000000` target span and a small routine range, so a raw **full
+128-MiB NOR acquisition** from a matching/sacrificial camera is higher-value
+than another host-side CUW pass: it can recover fixed boot/programming regions
+omitted from the CUW and may expose the encryption-method-1 / `10F5` / `10F6`
+consumer.  The tempting `0x08000000` NOR-aperture interpretation (which would
+map the CUW span to physical offsets `0x00E80000..0x06000000`) is only a layout
+hypothesis until target-native mapping or a dump proves it; acquisition should
+therefore read the entire device rather than assume that mapping.
+
 Boundary: this closes the host-side container/descriptor/route/writer
-grammar, the payload *representation* facts, and the host-side opaque-byte
-handling of `.datx` (raw read + CRC + verbatim pass, orchestration-only
-archive controller); it does **not** recover the `.datx`/image decoding,
-the routine blob's transform/format, `10F5`/`10F6` ECU-side semantics, or any
-other ECU behavior, and none of it is EPS-specific (Corolla front camera,
+grammar, proves that the FRC whole/routine/delta payloads request UDS
+manufacturer-specific **encryption method 1**, corrects the FRC integrity object
+to a 256-byte signature, and closes the selected host route's lack of explicit
+Nonce/SeedKey provisioning.  It does **not** recover the encryption-method-1
+cipher/key/IV, plaintext image, delta patch grammar, `10F5`/`10F6` ECU-side
+implementation, or signature algorithm/signed object.  Those are now an
+**ECU-side decoder/boot-firmware acquisition problem**, not a CUW-container or
+Techstream-host parsing problem, and none of it is EPS-specific (Corolla front camera,
 not the tracked Sienna/Corolla-H EPS Unified routes of TMS-032/TMS-036).
 
 #### 5.2.2 Retained Toyota F340 manufacturer erase/program payload

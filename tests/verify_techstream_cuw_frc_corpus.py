@@ -13,11 +13,12 @@ compact DFI 0x21 selector, JudgeReproGWNodeForP4AndP5, and the RKS 27 21/22
 sink.
 
 Evidence boundaries asserted here (do not weaken):
-- `.xx` members are Motorola S-record framing only; decoded data is
-  high-entropy with unknown encoding (no plaintext claim).
-- `.datx` is the DeltaReproData payload downloaded with DFI 0x21 (compact
-  delta representation) and consumed ECU-side as its delta input; the exact
-  transform/semantics are unknown and "decrypted" is not claimed.
+- `.xx` members are Motorola S-record framing around an encrypted target
+  representation; DFI 0x01 proves manufacturer-specific encryption method 1,
+  but the exact FRC cipher/key/IV and plaintext remain unknown.
+- `.datx` is the DeltaReproData payload downloaded with DFI 0x21: Toyota delta
+  method 2 layered with the same manufacturer-specific encryption method 1.
+  The exact delta grammar/decryptor remain unknown.
 - IsControlledBySCC does NOT select RKS; RKS selection is the runtime
   JudgeReproGWNode result.
 """
@@ -198,14 +199,24 @@ for name, (size, digest) in FRC_PACKAGES.items():
     routine = desc["LogicalBlock101"]["DeltaEraseAndReproRoutineFileName"]
     check(f"{name}: members match descriptor filenames",
           [m["name"] for m in members] == [whole, datx, routine])
-    # area descriptors: whole/delta pairs share one DigitalSignature; CRC/CMAC empty
+    # Area descriptors: whole/delta pairs share one DigitalSignature; CRC/CMAC
+    # are empty.  The index-deobfuscated descriptor value is 512 ASCII hex
+    # characters, which encode the actual 256-byte cryptographic signature.
     for whole_sec, delta_sec in (("ReproData101", "DeltaReproData101"),
                                  ("EraseAndReproRoutine101", "DeltaEraseAndReproRoutine101")):
         w, dl = desc[whole_sec], desc[delta_sec]
-        sig_w = decode_index_obfuscated_hex(w["DigitalSignature"]) if w["DigitalSignature"] else b""
-        sig_d = decode_index_obfuscated_hex(dl["DigitalSignature"]) if dl["DigitalSignature"] else b""
-        check(f"{name}: {whole_sec}/{delta_sec} share one 512-byte area signature",
-              len(sig_w) == 512 and sig_w == sig_d)
+        sig_ascii_w = decode_index_obfuscated_hex(w["DigitalSignature"]) if w["DigitalSignature"] else b""
+        sig_ascii_d = decode_index_obfuscated_hex(dl["DigitalSignature"]) if dl["DigitalSignature"] else b""
+        try:
+            sig_w = bytes.fromhex(sig_ascii_w.decode("ascii"))
+            sig_d = bytes.fromhex(sig_ascii_d.decode("ascii"))
+        except (UnicodeDecodeError, ValueError):
+            sig_w = sig_d = b""
+        check(f"{name}: {whole_sec}/{delta_sec} share one 512-char ASCII-hex signature field",
+              len(sig_ascii_w) == 512 and sig_ascii_w == sig_ascii_d
+              and all(c in b"0123456789ABCDEF" for c in sig_ascii_w))
+        check(f"{name}: {whole_sec}/{delta_sec} encode one 256-byte cryptographic signature",
+              len(sig_w) == 256 and sig_w == sig_d)
         check(f"{name}: {whole_sec} area is CRC/CMAC empty",
               w["CRC"] == "" and w["CMAC"] == "")
     check(f"{name}: routine area pinned at 0x8F6C00/0x570",
@@ -348,6 +359,52 @@ for name, (size, digest) in CONTRAST_PACKAGES.items():
     check(f"{name}: no Delta sections (whole-repro only)",
           "DeltaReproData101" not in desc and "DeltaEraseAndReproRoutine101" not in desc)
 
+print("\n== ReproStd nonce/routine-integrity differential ==")
+nonce_pair = ("T-0003-25.cuw", "T-0005-25.cuw")
+nonce_evidence = []
+for name in nonce_pair:
+    data = (CORPUS / name).read_bytes()
+    parsed = parse_container(data)
+    end = parsed["first_member_end"]
+    desc = parse_attach(data[end - parsed["payload_length"]:end])
+    whole_name = desc["LogicalBlock101"]["WholeReproFileName"]
+    member = next(m for m in parsed["format67_members"] if m["name"] == whole_name)
+    _, chunks = scan_srec(data[member["payload_offset"]:member["payload_offset"] + member["payload_length"]])
+    routine_area = desc["EraseAndReproRoutine101"]
+    routine_range = (int(routine_area["StartAddress"], 16),
+                     int(routine_area["StartAddress"], 16) + int(routine_area["Length"], 16))
+    routine = chunks[routine_range]
+    nonce_evidence.append({
+        "name": name,
+        "diag": desc["Node01"]["DiagID"],
+        "service": decode_index_obfuscated_hex(desc["Node01"]["ServiceAuthKey"]).decode("ascii"),
+        "nonce": decode_index_obfuscated_hex(desc["LogicalBlock101"]["Nonce"]).decode("ascii"),
+        "range": routine_range,
+        "cmac": bytes.fromhex(decode_index_obfuscated_hex(routine_area["CMAC"]).decode("ascii")),
+        "routine": routine,
+    })
+left, right = nonce_evidence
+check("0x7D2 pair shares DiagID, ServiceAuthKey, routine target and routine CMAC",
+      left["diag"] == right["diag"] == "07D2"
+      and left["service"] == right["service"] == "A34C53C7B1FD7ADE8B51BBE1E0EFEF57"
+      and left["range"] == right["range"] == (0xFEEF7800, 0xFEEF8000)
+      and left["cmac"] == right["cmac"] == bytes.fromhex("882F6665A00877DEBC93A83F38C31280"))
+check("0x7D2 pair carries different descriptor Nonces",
+      left["nonce"] == "082163A560054CADEA32BD2A5871FC08"
+      and right["nonce"] == "2C0AF3AD32DC8B28B85104E02B900B67")
+check("0x7D2 same-integrity routine stored representations are independently pinned",
+      sha256(left["routine"]) == "4f45346fa016ceade7d2cece031b29ed2623eb73339327ba8793752103720f32"
+      and sha256(right["routine"]) == "b280b85ba23ae7230e336c91a80cb5dacb5fea061b417a2640a6c5edf8c98164")
+routine_same = sum(a == b for a, b in zip(left["routine"], right["routine"]))
+routine_shared_blocks = sum(
+    1 for o in range(0, len(right["routine"]), 16)
+    if blake8(right["routine"][o:o + 16])
+    in {blake8(left["routine"][i:i + 16]) for i in range(0, len(left["routine"]), 16)}
+)
+check("0x7D2 same-integrity routines are chance-correlated encrypted bytes",
+      routine_same == 5 and routine_shared_blocks == 0,
+      f"{routine_same}/2048 equal bytes; {routine_shared_blocks} shared 16-byte blocks")
+
 print("\n== complete local CUW acquisition inventory ==")
 EXPECTED_REFERENCE_IDENTITIES = {
     'T-0002-21 - 04A72.cuw': (2521231, '8329b19f4e02d6902bb1702b156a6890f578f87f83888c3a641e46ee1bc4847b'),
@@ -413,7 +470,7 @@ check("local CUW corpus has positive FRC/EPS controls but no category-435 07B0 p
 
 print("\n== generated artifact self-check ==")
 if ev:
-    check("artifact schema/counts", ev["schema_version"] == 2
+    check("artifact schema/counts", ev["schema_version"] == 3
           and ev["corpus"]["frc_package_count"] == 6
           and ev["corpus"]["contrast_format67_package_count"] == 5)
     ref_inv = ev["reference_inventory"]
@@ -461,17 +518,39 @@ if ev:
           and probe["min_window_entropy_bits"] == 7.93098
           and probe["window_count"] == 20864
           and probe["routine_range_entropy_bits"] == 7.879802)
-    check("artifact: entropy wording bounded (no crypto-transform claim)",
-          "does not distinguish any specific cryptographic transform"
+    check("artifact: encryption differential wording remains bounded",
+          "Localized plaintext edits therefore do not remain localized"
           in ev["transform_boundary"]["entropy_support"])
-    check("artifact: boundary wording pinned", ev["transform_boundary"]["datx_members"].startswith(
-          "DeltaReproData payload; downloaded by the ReproStd writer with RequestDownload DFI 0x21")
-          and "unknown" in ev["transform_boundary"]["xx_members"])
+    check("artifact: exact-two-block CBC shape is hypothesis-graded",
+          "share exactly the first two 16-byte stored blocks" in ev["transform_boundary"]["cbc_shape_hypothesis"]
+          and "Fixed-key/fixed-IV CBC" in ev["transform_boundary"]["cbc_shape_hypothesis"]
+          and "structural hypothesis only" in ev["transform_boundary"]["cbc_shape_hypothesis"])
+    tb = ev["transform_boundary"]
+    check("artifact: DFI encryption/delta boundary pinned",
+          "encrypted target representation" in tb["xx_members"]
+          and "DFI 0x21" in tb["datx_members"]
+          and tb["data_format_identifier"]["whole_or_routine"] == "0x01"
+          and tb["data_format_identifier"]["delta"] == "0x21"
+          and "low nibble=encryptingMethod" in tb["data_format_identifier"]["uds_semantics"])
+    check("artifact: selected ReproStd route has no explicit Nonce/SeedKey provisioning",
+          "GetServiceAuthKey" in tb["selected_route_key_material"]
+          and "no host-side nonce/seed material" in tb["selected_route_key_material"])
+    check("artifact: FRC signature width corrected to 256 binary bytes",
+          "512 deobfuscated ASCII-hex characters" in tb["digital_signature"]
+          and "256-byte signature" in tb["digital_signature"]
+          and "length 0x0100" in tb["digital_signature"])
     check("artifact: member read path recorded as orchestration-only",
           "CDeltaReproArchiveCtrlr" in ev["transform_boundary"]["member_read_path"]
           and "no crypto or compression imports" in ev["transform_boundary"]["member_read_path"])
     cmp_rows = {(c["old_package"], c["new_package"]): c for c in ev["direct_update_comparisons"]}
     check("artifact: direct comparisons recorded", set(cmp_rows) == set(chains))
+    nd = ev["reprostd_nonce_differential"]
+    check("artifact: ReproStd nonce/routine-integrity differential pinned",
+          nd["same_diag_id"] and nd["same_service_auth_key"] and nd["different_nonce"]
+          and nd["same_routine_target"] and nd["same_routine_cmac"]
+          and nd["routine_stored_identical_fraction"] == round(5 / 2048, 6)
+          and nd["routine_stored_shared_16b_blocks"] == 0
+          and "does not prove Nonce causality" in nd["bounded_interpretation"])
 else:
     check("generated artifact present", False)
 
@@ -577,10 +656,52 @@ else:
     check("writer: DFI jump table maps 0/1->0x01, 2->0x21, 3->0x11",
           raw(FW_DLL, 0x10003410, 16) == jt)
 
-    # P6 ReproStd names the DFI semantics by ReproMethod string comparison:
-    # CompressionReproPhase6 -> 0x11, DeltaReproPhase6 -> 0x21, default/Whole
-    # Phase6 -> 0x01.  This is Toyota host code naming 0x21 as the delta-data
-    # DFI and 0x11 as the compression-data DFI; no ISO nibble semantics claimed.
+    # The selected P5-Unified04 ReproStd pair has no package Nonce/SeedKey
+    # getter edge.  Prepare consumes ServiceAuthKey; flash consumes only the
+    # ReproMethod selector from this field family.  This closes explicit host
+    # nonce/seed transfer without claiming the package-generation Nonce is
+    # cryptographically irrelevant.
+    def import_names(fn: str) -> set[str]:
+        pe_i = pefile.PE(str(UNPACK / fn))
+        return {
+            (imp.name or b"").decode("ascii", "replace")
+            for entry in pe_i.DIRECTORY_ENTRY_IMPORT
+            for imp in entry.imports
+        }
+
+    PREP_DLL = "TCUWCanReproStdPrepareWriter.unpack.dll"
+    # Exact selected ReproStd prepare handshake: programming session 10 02,
+    # bare 27 01, 16-byte seed extraction, CalcSeedKey(ServiceAuthKey, seed),
+    # then 27 02 || 16-byte key.  These are host-side unlock semantics only.
+    check("ReproStd prepare enters programming session 10 02 / expects 50 02",
+          raw(PREP_DLL, 0x10002D92, 10) == bytes.fromhex("66c7843d30cfffff1002")
+          and raw(PREP_DLL, 0x10002DB8, 10) == bytes.fromhex("66c7843da0efffff5002"))
+    check("ReproStd prepare sends bare 27 01 / expects 67 01",
+          raw(PREP_DLL, 0x1000155D, 10) == bytes.fromhex("66c7841d20c7ffff2701")
+          and raw(PREP_DLL, 0x1000157E, 10) == bytes.fromhex("66c7841d58d7ffff6701"))
+    check("ReproStd prepare extracts exactly 16 seed bytes and calls ServiceAuthKey/CalcSeedKey",
+          raw(PREP_DLL, 0x1000161D, 2) == bytes.fromhex("6a10")
+          and raw(PREP_DLL, 0x10001658, 6) == bytes.fromhex("ff1574500010")
+          and raw(PREP_DLL, 0x1000166F, 6) == bytes.fromhex("ff153c510010"))
+    check("ReproStd prepare sends 27 02 key / expects 67 02 with 16-byte key payload",
+          raw(PREP_DLL, 0x1000169C, 10) == bytes.fromhex("66c7841de8b6ffff2702")
+          and raw(PREP_DLL, 0x100016D3, 10) == bytes.fromhex("66c7841d58d7ffff6702")
+          and raw(PREP_DLL, 0x10001733, 2) == bytes.fromhex("6a11"))
+
+    prep_imports = import_names(PREP_DLL)
+    flash_imports = import_names(FW_DLL)
+    package_security_getters = ("GetNonce", "GetSeedKey", "GetECUAuthKey", "GetSecurityProperty2")
+    check("ReproStd prepare imports ServiceAuthKey but no Nonce/SeedKey/ECUAuthKey/SecurityProperty2 getter",
+          any("GetServiceAuthKey" in name for name in prep_imports)
+          and not any(any(getter in name for getter in package_security_getters) for name in prep_imports))
+    check("ReproStd flash imports ReproMethodType but no Nonce/SeedKey/ECUAuthKey/SecurityProperty2 getter",
+          any("GetReproMethodType" in name for name in flash_imports)
+          and not any(any(getter in name for getter in package_security_getters) for name in flash_imports))
+
+    # P6 ReproStd names the manufacturer-specific high-nibble methods by
+    # ReproMethod string comparison: CompressionReproPhase6 -> 0x11,
+    # DeltaReproPhase6 -> 0x21, default/Whole Phase6 -> 0x01.  Under UDS DFI
+    # grammar, all three retain low-nibble encryptingMethod=1.
     P6_DLL = "TCUWP6CanReprostdFlashWriter.unpack.dll"
     pe6 = pefile.PE(str(UNPACK / P6_DLL))
     imp6 = {}
@@ -624,6 +745,16 @@ else:
           raw(FW_DLL, 0x10002BE9, 7) == bytes.fromhex("c78510c3ffff4d")
           and raw(FW_DLL, 0x10002C03, 7) == bytes.fromhex("c78510c3ffff45")
           and raw(FW_DLL, 0x10002C16, 7) == bytes.fromhex("c78510c3ffff56"))
+    # RequiredSpec03 advances the integrity-source argument by +0x48 and emits
+    # a big-endian 0x0010 length; the alternate/FRC RequiredSpec04 branch
+    # advances it by +0x60 and emits big-endian 0x0100.  The imported
+    # CBytes(const char*) conversion is the already-pinned ASCII-hex decoder,
+    # so descriptor widths 32/512 chars become 16/256 binary integrity bytes
+    # on the RoutineControl request.
+    check("writer: RequiredSpec03 integrity source +0x48 declares 16-byte CMAC (00 10)",
+          raw(FW_DLL, 0x10002DC4, 13) == bytes.fromhex("83c04866c7843dc2ebffff0010"))
+    check("writer: alternate/FRC integrity source +0x60 declares 256-byte signature (01 00)",
+          raw(FW_DLL, 0x10002E06, 13) == bytes.fromhex("83c06066c7843dc2ebffff0100"))
 
     # CDeltaReproArchiveCtrlr is orchestration-only and the member read path is
     # raw + CRC-gated: the host never parses/transforms/decompresses/decrypts

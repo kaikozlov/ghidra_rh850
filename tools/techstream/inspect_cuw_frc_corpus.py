@@ -195,9 +195,26 @@ def descriptor_summary(attach: dict[str, dict[str, str]]) -> dict[str, Any]:
             "cmac_empty": raw.get("CMAC", "") == "",
         }
         sig = raw.get("DigitalSignature", "")
-        decoded = decode_index_obfuscated_hex(sig) if sig else b""
-        out["digital_signature_length"] = len(decoded)
-        out["digital_signature_sha256"] = sha256(decoded) if decoded else ""
+        # CUW descriptor string fields are first index-obfuscated.  For the
+        # FRC DigitalSignature field the deobfuscated value is itself ASCII
+        # hex: 512 wire/descriptor characters encode a 256-byte signature.
+        # Keep the transport representation and cryptographic object distinct.
+        decoded_ascii = decode_index_obfuscated_hex(sig) if sig else b""
+        signature = b""
+        encoding = ""
+        if decoded_ascii:
+            try:
+                signature = bytes.fromhex(decoded_ascii.decode("ascii"))
+                encoding = "ascii-hex"
+            except (UnicodeDecodeError, ValueError):
+                # Preserve unknown descriptor encodings without silently
+                # reclassifying their byte length as a crypto-object width.
+                encoding = "opaque"
+        out["digital_signature_encoding"] = encoding
+        out["digital_signature_wire_ascii_length"] = len(decoded_ascii)
+        out["digital_signature_wire_ascii_sha256"] = sha256(decoded_ascii) if decoded_ascii else ""
+        out["digital_signature_length"] = len(signature)
+        out["digital_signature_sha256"] = sha256(signature) if signature else ""
         return out
 
     areas = {name: area(name) for name in (
@@ -475,6 +492,74 @@ def main() -> int:
             "prefix32_is_exactly_shared": prefix_shared,
         })
 
+    # ReproStd whole-image contrast with a useful crypto differential.  The two
+    # 0x7D2 packages use the same family ServiceAuthKey and declare the same
+    # erase/repro routine target + CMAC, but carry different descriptor Nonces.
+    # Their stored routine representations are chance-correlated.  This is a
+    # bounded correlation/oracle: it does not prove that Nonce alone causes the
+    # ciphertext change or identify the exact integrity object/cipher.
+    nonce_pair_names = ("T-0003-25.cuw", "T-0005-25.cuw")
+    nonce_rows: list[dict[str, Any]] = []
+    for name in nonce_pair_names:
+        path = args.corpus / name
+        data = path.read_bytes()
+        parsed = parse_container(data)
+        end = parsed["first_member_end"]
+        desc = parse_attach_bytes(data[end - parsed["payload_length"]:end])
+        members = parsed.get("format67_members") or []
+        whole_name = desc["LogicalBlock101"]["WholeReproFileName"]
+        member = next(m for m in members if m["name"] == whole_name)
+        payload = data[member["payload_offset"]:member["payload_offset"] + member["payload_length"]]
+        scan = scan_srec(payload)
+        routine_area = desc["EraseAndReproRoutine101"]
+        routine_range = (int(routine_area["StartAddress"], 16),
+                         int(routine_area["StartAddress"], 16) + int(routine_area["Length"], 16))
+        routine = scan["range_bytes"][routine_range]
+        cmac_ascii = decode_index_obfuscated_hex(routine_area["CMAC"])
+        cmac = bytes.fromhex(cmac_ascii.decode("ascii"))
+        nonce_rows.append({
+            "filename": name,
+            "diag_id": desc["Node01"]["DiagID"],
+            "new_cid": desc["LogicalBlock101"]["NewCID"],
+            "service_auth_key": decode_index_obfuscated_hex(desc["Node01"]["ServiceAuthKey"]).decode("ascii"),
+            "nonce": decode_index_obfuscated_hex(desc["LogicalBlock101"]["Nonce"]).decode("ascii"),
+            "routine_start": routine_area["StartAddress"],
+            "routine_length": routine_area["Length"],
+            "routine_cmac": cmac.hex().upper(),
+            "routine_stored_sha256": sha256(routine),
+            "routine_stored_first_32_bytes_hex": routine[:32].hex(),
+            "routine_stored_bytes": routine,
+        })
+    left, right = nonce_rows
+    lr = left.pop("routine_stored_bytes")
+    rr = right.pop("routine_stored_bytes")
+    same_routine_bytes = sum(a == b for a, b in zip(lr, rr))
+    left_blocks = set(block_digests(lr))
+    shared_routine_blocks = sum(1 for d in block_digests(rr) if d in left_blocks)
+    reprostd_nonce_differential = {
+        "packages": nonce_rows,
+        "same_diag_id": left["diag_id"] == right["diag_id"] == "07D2",
+        "same_service_auth_key": left["service_auth_key"] == right["service_auth_key"],
+        "different_nonce": left["nonce"] != right["nonce"],
+        "same_routine_target": (
+            left["routine_start"] == right["routine_start"]
+            and left["routine_length"] == right["routine_length"]
+        ),
+        "same_routine_cmac": left["routine_cmac"] == right["routine_cmac"],
+        "routine_stored_identical_fraction": round(same_routine_bytes / len(lr), 6),
+        "routine_stored_expected_chance_fraction": round(1 / 256, 6),
+        "routine_stored_shared_16b_blocks": shared_routine_blocks,
+        "bounded_interpretation": (
+            "The two 0x7D2 ReproStd packages share family ServiceAuthKey plus the same declared "
+            "erase/repro routine address/length and 16-byte CMAC, but carry different descriptor Nonces "
+            "and chance-correlated stored routine bytes. This proves the serialized encrypted routine "
+            "representation is not fixed by target address/length/CMAC + ServiceAuthKey alone. It does "
+            "not prove Nonce causality, the plaintext routine identity, or the exact cipher/IV/KDF. "
+            "Combined with the selected ReproStd host route's lack of explicit Nonce transfer, any "
+            "package-specific crypto context must be embedded/derived or otherwise ECU-local."
+        ),
+    }
+
     # datx corpus census
     datx_first_blocks = {fn: p[:16].hex() for fn, p in datx_by_pkg.items()}
     datx_shared_first_block = len(set(datx_first_blocks.values())) == 1
@@ -487,7 +572,7 @@ def main() -> int:
             cross_datx_shared_blocks += sum(1 for d in block_digests(datx_list[j][1])[1:] if d in set_a)
 
     result = {
-        "schema_version": 2,
+        "schema_version": 3,
         "reference_inventory": {
             "package_count": len(reference_inventory),
             "diag_id_counts": dict(sorted(diag_counts.items())),
@@ -549,13 +634,25 @@ def main() -> int:
         },
         "delta_chains": chains,
         "direct_update_comparisons": direct_comparisons,
+        "reprostd_nonce_differential": reprostd_nonce_differential,
         "transform_boundary": {
-            "xx_members": "Motorola S-record framing only; decoded flash data is high-entropy and its exact encoding is unknown (no plaintext claim).",
-            "datx_members": "DeltaReproData payload; downloaded by the ReproStd writer with RequestDownload DFI 0x21 as the ECU-side delta input; exact representation grammar and transform are unknown.",
-            "routine_member": "byte-identical high-entropy encoded blob in all six packages; exact representation, transform, and ECU-side interpretation are unknown.",
-            "host_transform": "host parses S-record framing for .xx members and passes the decoded payload bytes; .datx remains an opaque raw member buffer. No host-side decryption/decompression of the encoded payload body is recovered in the pinned path.",
+            "xx_members": "Motorola S-record framing carrying an encrypted target representation. ReproStd downloads whole/routine data with UDS RequestDownload DFI 0x01; by the UDS dataFormatIdentifier definition that is compression method 0 plus manufacturer-specific encryption method 1. The exact FRC cipher/key/IV remain unknown.",
+            "datx_members": "DeltaReproData payload; ReproStd downloads it with DFI 0x21. UDS assigns the high nibble to compressionMethod and the low nibble to encryptingMethod; Toyota host code independently names high-nibble method 2 as DeltaRepro, so this is Toyota delta method 2 layered with the same manufacturer-specific encryption method 1.",
+            "routine_member": "byte-identical encrypted blob in all six packages; it decodes from S-record framing to the same 1392 stored bytes every whole image carries at 0x008F6C00. Exact plaintext/ECU-side interpretation remain unknown.",
+            "data_format_identifier": {
+                "whole_or_routine": "0x01",
+                "compression": "0x11",
+                "delta": "0x21",
+                "uds_semantics": "high nibble=compressionMethod, low nibble=encryptingMethod; 0 means no transform and nonzero values are manufacturer-specific",
+                "toyota_host_names": "whole/default -> 0x01; CompressionRepro -> 0x11; DeltaRepro -> 0x21",
+                "bounded_conclusion": "all ReproStd payload families here use manufacturer-specific encryptingMethod 1; compression method 1 is Toyota CompressionRepro and compression method 2 is Toyota DeltaRepro",
+            },
+            "host_transform": "host parses S-record framing for .xx members and passes the decoded encrypted payload bytes; .datx remains an opaque raw member buffer. No host-side payload decryption/decompression is recovered in the selected ReproStd path.",
+            "selected_route_key_material": "The selected ReproStd prepare path enters 10 02, sends bare 27 01, extracts exactly 16 seed bytes from 67 01, calls CalcSeedKey with GetServiceAuthKey + that seed, then sends 27 02 plus a 16-byte key and expects 67 02. It imports GetServiceAuthKey but not GetNonce/GetSeedKey/GetECUAuthKey/GetSecurityProperty2; ReproStd flash imports only GetReproMethodType from these security/format getters. The recovered prepare/flash send grammar has no explicit Nonce/SeedKey transfer, so the selected route supplies no host-side nonce/seed material to the FRC payload decoder. This does not prove the package-generation Nonce is cryptographically irrelevant.",
             "member_read_path": "format-0x67 members are raw length+CRC32 payloads; the CUW.dll read path is a chunked fread(dst,1,0xFFF) loop (reader 0x1002BEB0, push site 0x1002BF83) with a whole-file CRC32 gate (0x1002A3B0, called from loader 0x10031A20 at 0x10031C0C; mismatch -> Error FileCRC); CDeltaReproArchiveCtrlr (RTTI 0x1008A9A0, vtable 0x1007C918, single deleting-dtor virtual 0x10066DC0, global instance 0x1008CA0C) holds only 0xAC-stride path/name/count entries with no payload pointer or byte fields - orchestration-only; CAES encrypt/decrypt callers are only 0x1001B9B2/0x1005AC52/0x1005AD02 (INI parameter decode, SecurityUp helpers), never the member path; TCUWCalibrationFile.dll and TCUWCanReproStdFlashWriter.dll have no crypto or compression imports.",
-            "entropy_support": "decoded flash body is high-entropy throughout (T-0058: global 7.9999977 bits/byte, minimum complete 4-KiB window 7.93098; routine range 7.8798 over 1392 B); this supports opacity of the encoded body only and does not distinguish any specific cryptographic transform.",
+            "entropy_support": "encrypted flash body is high-entropy throughout (T-0058: global 7.9999977 bits/byte, minimum complete 4-KiB window 7.93098; routine range 7.8798 over 1392 B). The two corpus-internal updates carry only 1,503,040 B and 1,254,976 B of delta input (1.76% and 1.47% of the 85,458,944-B target span) while their stored whole-image bytes decorrelate to chance immediately after a shared 32-byte prefix. Localized plaintext edits therefore do not remain localized in the stored representation.",
+            "cbc_shape_hypothesis": "All five distinct FRC target images share exactly the first two 16-byte stored blocks and first differ at byte 32, then the two locally closed small-delta updates remain chance-correlated for the rest of the 85,458,944-byte image. Fixed-key/fixed-IV CBC with two common plaintext header blocks followed by a changed third block produces exactly this prefix-then-avalanche shape and is a better fit than a whole-image rekey, which would not naturally preserve the identical ciphertext prefix. This is a structural hypothesis only: a custom chaining transform, partially clear/encrypted envelope, or another construction can reproduce the same observation; no FRC key/plaintext/cipher implementation has been recovered.",
+            "digital_signature": "RequiredSpecReproVer04 FRC descriptors carry 512 deobfuscated ASCII-hex characters encoding a 256-byte signature. The ReproStd RoutineControl builder selects the alternate integrity field and declares length 0x0100; RequiredSpec03 instead declares a 0x0010 CMAC. Whole/delta entries share the same target signature, so the exact signed object is not either serialized member byte stream directly.",
         },
     }
     args.output.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
