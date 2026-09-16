@@ -142,7 +142,7 @@ def build() -> dict:
         header = json.loads(next(f))
         windows = [defaultdict(list) for _ in header['windows']]
         for line in f:
-            window, segment, nanos, frames = json.loads(line)
+            window, _segment, nanos, frames = json.loads(line)
             for bus, address, hx in frames:
                 data = bytes.fromhex(hx)
                 windows[window][(bus, address, len(data))].append((nanos, data))

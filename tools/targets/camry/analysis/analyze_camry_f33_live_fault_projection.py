@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """Describe the exact F33 live fault projection, separate from latched history."""
 from __future__ import annotations
+
 import hashlib
 import json
 from pathlib import Path
-from tools.targets.camry.support.camry_f33_corpus import IMAGE, IMAGE_SHA256, CORPUS
+
+from tools.targets.camry.support.camry_f33_corpus import CORPUS, IMAGE, IMAGE_SHA256
 
 ROOT = Path(__file__).resolve().parents[4]
 OUTPUT = ROOT / 'data/generated/camry_f33_live_fault_projection.json'
@@ -44,7 +46,8 @@ def build() -> dict:
                             'recovery': '0x51D5E decrements a previously active class via 0x514BC, saturating at zero',
                             'history': '0xFEBE82A3/82A4/82A5 latched class history is NOT read by this live projection'},
         'openpilot_mapping': {'platform': 'TOYOTA_CAMRY_TSS3',
-                              'steerFaultTemporary': 'current EPS_FAULT_INHIBIT value',
+                              'steerFaultTemporary': 'current EPS_FAULT_INHIBIT contribution OR the separately recovered cooperative-command and angle inhibits',
+                              'cooperative_evidence': 'data/generated/camry_f33_cooperative_fault_projection.json',
                               'steerFaultPermanent': 'not supplied by this one-bit current-state projection',
                               'interpretation': 'Temporary means current steering unavailability in the ordinary openpilot interface, not a prediction that every underlying hardware fault will self-repair.',
                               'missing_coverage': 'Only selected classes/statuses are represented. Other fault classes and restart-required causes cannot be reconstructed from this bit.',

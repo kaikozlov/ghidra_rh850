@@ -307,7 +307,7 @@ assertion path `51C66 -> 50FC8` increments a newly active class; recovery
 
 `VerifyCamryFaultProjection.java` executes the **stock instructions**, after
 checking the working Ghidra image byte-for-byte against the verified CodeFlash.
-Its 85 assertions cover all64 source combinations, each class assertion and
+Its 85 assertions cover all 64 source combinations, each class assertion and
 recovery, exclusion of history-only state, multiple active faults, and
 non-underflow after final recovery. Only interrupt save/restore callees are
 substituted; there is no concurrent actor in this emulator-local test.
@@ -329,7 +329,7 @@ Reproducible proof:
 
 The combined Toyota, CAN, Toyota safety, generic interface, documentation,
 platform and vehicle-model selection passes **615 tests and 3,183 subtests**,
-with262 pre-existing skips in that selection. Toyota lint passes. New radar
+with 262 pre-existing skips in that selection. Toyota lint passes. New radar
 adversarial coverage includes batching, deletion/replacement, unqualified
 retained geometry, duplicate/wrapped/skipped cycles, CRC, truncation, timeout,
 startup spread across publications, and wrong-bus traffic. Exact-F33 CarState
@@ -342,7 +342,7 @@ none of these changes restores the invalid unsplit-bus fake-brake sender.
 Exact F33 also reports `CAFC` at `0x030 B16[0]` and `CAD9` at `0x030 B19[0]`.
 These are separate from the selected hardware/DEM aggregate at B6[2]. Fresh
 stock-code tracing closes their RTE staging through `D0D7C -> BF3AA -> 4C2DC ->
-4C97A`; generated-COM signals 25 and31 bind them to those wire locations.
+4C97A`; generated-COM signals 25 and 31 bind them to those wire locations.
 `CE772` requires both clear before entering ready, and `CE7A6` leaves ready
 when either asserts. Camry CarState now reports all three through ordinary
 `steerFaultTemporary`, without changing Panda, the controller, or engagement
@@ -379,18 +379,28 @@ Original source hashes and both sides of each state transition are in
 regenerates the fixture byte-for-byte from the original rlogs, including the
 one window spanning a segment boundary.
 
-The analysis tests **4,464 fully covered single-bit/polarity hypotheses** across
-the retained non-object ADAS streams. No stable-before/asserted-after bit
-reproduces in every window, even allowing a brief pulse anywhere in the 500 ms
-post-edge window. A second screen tests **21,210 contiguous short-field
-layouts**: widths 2/3/4/8/12, both endian directions, every bit start after the
-CRC/counter prefix, in the seven streams with complete pre/post coverage.
-No common new value appears after every cancellation while being absent in
-every pre-window. The highest coverage in the `0x160` short-field screen is
-only 10/21. These are method-bounded negatives, not proof that an automatic
-cancel command is absent. They do not exclude another encoding, sparse traffic
-outside the windows, or a command not exercised by physical-switch cancellation.
-The 13 object-family PDUs are not part of this durable non-object field screen.
+The expanded fixture preserves **all 22 periodic ADAS ID/DLC streams** in
+every event, including all 13 object-family PDUs; all **16,526 ADAS frames**
+pass native Profile-5 CRC. The principal comparison uses a pre-window of
+−1,000..−25 ms and a post-window of 0..1,000 ms relative to the physical
+switch edge. Publication timestamps do not establish CAN arbitration order.
+
+The literal-edge screen tests **17,824 fully covered single-bit/polarity
+hypotheses**. No stable-before/asserted-after bit reproduces in every window,
+even allowing a brief pulse anywhere in the post-window; the highest coverage
+is 10/21. The broader enum screen tests **279,904 contiguous 1..16-bit field
+layouts**, both big/MSB-first and little/LSB-first, at every bit start after
+B2 across all 22 streams. It permits different or changing pre-cancel values
+and requires a common post-only value in every event. **No candidate survives.**
+A separate shorter-window screen (−300..−25 ms, 0..250 ms) covers 80,532 short
+field layouts over the 20 streams with complete coverage and also yields no
+fully reproduced candidate.
+
+These are method-bounded negatives, not proof that an automatic-cancel command
+is absent. They do not exclude noncontiguous or context-dependent encodings,
+sparse traffic outside the windows, or an automatic command not exercised by
+physical-switch cancellation. The search must not turn a post-cancel state
+echo into an accepted command merely because its timing is correlated.
 
 The current FRC catalogue has 69 routine Active-Test candidates and no direct
 Active-Test table. Its only cancel-named test is **PDA Cancel Notification
@@ -414,9 +424,10 @@ No automatic-cancel sender is added in this checkpoint.
 Source/reducer: `tools/targets/camry/extract/extract_camry_2026_cancel_windows.py`,
 `tools/targets/camry/analysis/analyze_camry_2026_cancel_evidence.py`,
 `data/generated/camry_2026_cancel_evidence.json` (v2), and
-`tests/verify_camry_2026_cancel_evidence.py`. Synthetic pulse tests independently
-check that both endian search directions recover a known short pulse and
-reject an otherwise identical non-reproducing event.
+`tests/verify_camry_2026_cancel_evidence.py`. Synthetic positive controls independently
+check that both endian search directions recover a one-frame pulse, including
+a 16-bit field crossing three bytes, and reject an otherwise identical
+non-reproducing event or a pulse supplied only by a CRC-corrupt frame.
 
 ### Final software checkpoint and reproducible replay
 

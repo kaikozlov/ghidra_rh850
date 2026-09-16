@@ -80,8 +80,8 @@ implemented.** The source-driven radar decoder is enabled for Camry, with
 separate held-out replay and adversarial tests; vehicle-level fusion/control
 qualification is not claimed. Current hardware and cooperative-control inhibits drive the normal
 `steerFaultTemporary` interface after exact stock-code assertion/recovery proof.
-This selected one-bit projection cannot identify every fault or manufacture a
-restart-required `steerFaultPermanent` classification.
+These lossy current-state projections cannot identify every fault or manufacture
+a restart-required `steerFaultPermanent` classification.
 
 The port is still classified **Custom**, not plug-and-play or production-ready.
 These boundaries preserve the real steering result without conflating a working
