@@ -2470,6 +2470,11 @@ Deterministic evidence: `tools/targets/camry/analysis/analyze_camry_2026_08a_pro
 
 ## 42. Bus-1 camera/radar output is plaintext; GTS+ names the quantities, not a CAN DBC (VAR-093)
 
+**September-15 correction:** the earlier 0.01-m range inference below is
+superseded by independent vision/gyro anchors: the CAN range LSB is 0.005 m.
+Diagnostic FFD encodings are not wire-scale evidence. See the corrected audit
+section immediately before §70 and the current v5 generated report.
+
 Panda bus 1 is sniffed in both retained drives. The 22 periodic streams are readable as raw bytes. GTS+ still has **no** `BO_ 384` field map: it is DID/FFD keyed. The decode is a join from those OEM scales onto the wire.
 
 **Inventory** (drive B; drive A is the same ID/DLC set): `0x180..0x18B/64` and `0x18C/48` at ~20 Hz, `0x160/32` at ~40 Hz, plus `0x020/12`, `0x123/16`, `0x1A0/48`, `0x200/0x201/64`, `0x230/64`, `0x440/0x450/32`. Authenticated `0x00F` is absent. Last-4 of `0x180` is constant `00000000` (not ordinary-P5 MAC28).
@@ -5896,94 +5901,60 @@ Machine-readable proof is
 independent verifier are `tools/targets/camry/analysis/analyze_camry_8965F3307000_b6_ingress_closure.py` and
 `tests/verify_camry_8965F3307000_b6_ingress_closure.py`.
 
-### 2026-09-15: retained-route tuning closes the F33 steering-ratio default
+### 2026-09-15: corrected vehicle model and radar audit
 
-The successful C7 routes also provide the missing vehicle-model tuning check.
-Their embedded `carParams` still carry the inherited TSS2 defaults
-`steerRatio=13.7` and `steerActuatorDelay=0.18 s`, while openpilot's online
-vehicle/lag estimators provide independent observations of the actual plant.
+The earlier same-day completion pass misinterpreted three evidence transfers.
+Its text is retained in git history but is superseded here and by
+[the port evidence review](camry-2026-port-evidence-review.md).
 
-Across the three long 2026-09-04 routes, learned steering ratio spans roughly
-15.1..15.8; route medians are 15.70, 15.40, and 15.56. The September-10 working
-steering routes settle lower and much more tightly: route `8d` has p5/median/p95
-15.258/15.322/15.394 and ends at 15.258; route `93` has
-15.254/15.258/15.268 and ends at **15.254**. The new F33 CarSpecs default is
-therefore **15.3**, rather than continuing to make paramsd correct a roughly
-12% low TSS2 default.
+**Vehicle model.** Learned steering ratio is an absolute quantity: the long
+September-4 routes span roughly 15.1..15.8, and the September-10 working routes
+settle near 15.254, supporting the 15.3 default rather than inherited 13.7.
+However, paramsd's learned stiffness is a **multiplier of CP front/rear tire
+stiffness**, not a replacement for `CP.tireStiffnessFactor`. Its ~1.0 therefore
+supports keeping 0.7933, not changing it to 1.0. Both working routes repeat the
+same cached lag estimate 0.3837597 s; those repeats are not two independent
+fresh lag measurements. The 0.18-s actuator default is left unchanged.
 
-The same direct configured-vs-learned check closes the inherited tire-stiffness
-factor. The working route `8d` has stiffness p5/median/p95 `1.0000 / 1.0026 /
-1.0030` and ends at `1.0030`; route `93` has `1.0000 / 1.0002 / 1.0003` and ends
-at `1.0003`. openpilot's own vehicle-dynamics PlotJuggler layout labels
-`carParams.tireStiffnessFactor` versus `vehicleParameters.stiffnessFactor` as a
-configured-initial / online-learned comparison and directs setting the former
-to the learned value. F33 therefore now uses **1.0**, not the inherited TSS2
-`0.7933`.
+**Radar units and lifecycle.** The full body has three banks of eight slots,
+each spread across four seven-byte records (`180/183/186/189`,
+`181/184/187/18A`, `182/185/188/18B`). The empty geometry sentinel remains
+`fff8000000ffff`. Repeated B2/B3 cycle values are not unique across a drive:
+using them as a dictionary identity without time/consumption lost earlier
+occurrences. The corrected time-bounded reconstruction retains 30,532 / 35,994
+complete bank bursts.
 
-The delay result goes the other direction: keep the existing `0.18 s` actuator
-delay. Current openpilot `lagd` defines its total initial lag as
-`CP.steerActuatorDelay + 0.2 s`; both successful routes report an estimated
-`lateralDelay=0.3837597 s` with 21 valid blocks and zero reported estimator
-standard deviation. That corresponds to about **0.184 s** actuator delay, while
-a separate command-rate/response-rate scan of the clean road segments places
-the dominant closed-loop phase delay broadly in the expected ~0.3-0.5 s total
-range. The existing 0.18 s CarParams value is therefore consistent with the
-current openpilot lag model; changing it to the raw ~0.4 s angle-correlation lag
-would double-count the model's 0.2 s smoothing/latency term.
+The prior direct GTS FFD scale transfer was wrong. Independent vision, ego-speed
+and calibrated-gyro anchors now support range B0:B1 × **0.005 m**, signed12
+lateral B2:B3[7:4] × **0.04 m, left-positive**, and low14 B1:B2 of the motion
+record × **0.025 m/s**. At least 13 velocity bits are needed; retained signed13
+and signed14 interpretations agree, so their precise boundary remains bounded.
+The original doubled range and doubled velocity could agree in a derivative
+regression without either having the right units.
 
-### 2026-09-15: TSS3 object bank closed far enough for RadarPoint
+The independent raw-object-byte fixture pins 17 rlogs. Range/vision agreement
+is r=0.998518 over 1,953 associations, slope=1.029071; held-out lateral has
+slope=0.982563 over 240 off-center associations; 27,602 inferred-stationary gyro
+pairs give r=0.843106 and implied lateral LSB=0.038909. Every source radar PDU
+is CRC-checked during extraction. These are cross-sensor anchors, not proof
+of OEM object confidence, validity, or silent same-slot reassignment.
 
-A fresh retained-corpus pass closes the three quantities openpilot actually needs
-for `RadarData.RadarPoint` without importing the old TSS2 8-byte track DBC.
-The shared Profile-5 B2:B3 burst counter joins `0x180..0x18B` into three banks
-of eight objects and four 7-byte records per object:
+`camry_2026_bus1_camera_output.json` is now schema **v5** and the independent
+anchor report is `camry_2026_radar_anchors.json`. The candidate parser uses the
+**stock-harness bus0**, validates P05 and matching cycles, rejects truncated
+frames, and issues new track generations after empty-slot retirement.
+**Production radar remains disabled** until validity/lifecycle is established.
+The old “only lateral sign needs an on-car check” completion statement is
+withdrawn; sign itself is now independently supported.
 
-- bank 0: `0x180 / 0x183 / 0x186 / 0x189`;
-- bank 1: `0x181 / 0x184 / 0x187 / 0x18A`;
-- bank 2: `0x182 / 0x185 / 0x188 / 0x18B`.
-
-The first record's exact empty sentinel remains `ff f8 00 00 00 ff ff`.
-Occupied first records now decode as:
-
-- `B0:B1`: unsigned big-endian distance, `0.01 m/count`;
-- `B2:B3[7:4]`: signed 12-bit lateral position, `0.05 m/count`.
-
-The lateral width/scale is not a free statistical fit: GTS+ Operation-FFD
-`0x57BA`, **Lateral position for camera target [m]**, is exactly signed 12-bit
-at `0.05 m/count`. A representative retained burst decodes eight bank-0 objects
-at roughly `+0.8, +4.9, -6.5, +0.2, -0.45, -4.1, -5.3, +4.5 m`, which is a
-physically coherent multi-lane object spread rather than the impossible
-hundreds-of-metres result produced by the older rejected s16 overlay.
-
-The second 7-byte record closes relative velocity. Its
-`B1[2:0] || B2[7:1]` field is signed 10-bit at `0.1 m/s/count`, exactly matching
-Operation-FFD `0x573C`, **Relative speed for control target [m/s]**. The mapping
-is independently checked against finite-difference range rate only after
-requiring the same bank/slot to remain continuous in both range and lateral
-position:
-
-| retained drive | continuity witnesses | Pearson r | fit `dRange/dt = a*vRel+b` | median |error| |
-|---|---:|---:|---:|---:|
-| relay route | 21,685 | 0.912359 | `a=0.994375`, `b=+0.069844 m/s` | 1.192327 m/s |
-| LTA-confirm route | 30,894 | 0.956321 | `a=0.990272`, `b=-0.009856 m/s` | 1.216007 m/s |
-
-That near-unit slope/near-zero intercept across two independent drives is the
-key discriminator: this is the wire relative-speed field, not merely another
-correlated object attribute. `0x573D/0x573E/0x573F` additionally provide Toyota
-u5 object-number/u5 target-number/u3 object-type vocabulary, but their exact
-CAN packing is not needed for the first openpilot RadarInterface and remains
-unassigned.
-
-`data/generated/camry_2026_bus1_camera_output.json` is now schema v3 and records
-all three bank joins and kinematic witnesses. `tools/test
-camry_2026_bus1_camera_output` regenerates it byte-identically. The corresponding
-opendbc implementation uses `0x180..0x182` geometry plus `0x183..0x185` motion
-at 20 Hz on Panda bus 1; the 24 bank/slot indices serve as stable track IDs and
-the exact `0xFFF8` distance sentinel removes empty tracks. The wire lateral sign
-is converted with the established Toyota radar convention (`RadarPoint.yRel`
-left-positive, Toyota wire lateral right-positive); this sign orientation is the
-one remaining field detail worth checking visually on-car, but it does not
-change the recovered bit packing or magnitude.
+**Stock topology and lateral lifecycle.** Four September-11 rlogs independently
+place `0x412` and `0x101` on unsplit bus1, so their duplicate transmissions on
+the ADAS relay did not replace those sources and were removed. Historical
+working steering samples use conventional cruise, not an already demonstrated
+adaptive-cruise combination. The new seven-tick supervised helper fixes stale
+host-command retention; it is compiled/emulation-tested, not road-qualified.
+See the current capability matrix for the real automatic-cancel, DRCC,
+longitudinal and fault-status boundaries.
 
 ## 70. Bounded exact-F33 ICU-S command-5 permission probe (VAR-154)
 

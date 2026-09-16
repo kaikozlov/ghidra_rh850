@@ -1,5 +1,13 @@
 # 2026 Camry TSS3 openpilot/opendbc port
 
+> **September-15 evidence-audit supersession:** historical steering evidence
+> remains valid, but the preceding production-completeness, radar units,
+> tire-stiffness, HUD/cancel ownership, cached-lag, and continuous-command-loss
+> claims are corrected in [the current capability matrix](camry-2026-capability-matrix.md)
+> and [the evidence review](camry-2026-port-evidence-review.md). The v17
+> supervised helper is not road-qualified; working steering samples do not
+> establish an adaptive-cruise combination.
+
 **Target:** maintainer 2026 Toyota Camry Hybrid, EPS application F181
 `8965F3307000 / 8A3113303100`.
 

@@ -1117,3 +1117,12 @@ tests = ["tests/verify_camry_2026_radar_anchors.py"]
 
 [suite.camry_f33_post_install_recovery]
 tests = ["tests/verify_camry_f33_post_install_recovery.py"]
+
+[suite.camry_f33_signer_host_liveness]
+tests = ["tests/verify_camry_f33_signer_host_liveness.py"]
+
+[suite.camry_2026_stock_harness_topology]
+tests = ["tests/verify_camry_2026_stock_harness_topology.py"]
+
+[suite.camry_20260915_port_evidence_audit]
+tests = ["tests/verify_camry_20260915_port_evidence_audit.py"]

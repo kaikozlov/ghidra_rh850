@@ -7,6 +7,7 @@ Diagnostic FFD encodings are NOT treated as CAN wire layouts.
 """
 from __future__ import annotations
 import argparse
+import binascii
 import gzip
 import hashlib
 import io
@@ -68,7 +69,9 @@ def extract(fixture: Path, log_root: Path, openpilot: Path) -> None:
             date = "2026-09-04" if route == ROUTE3B else "2026-09-10"
             path = log_root / date / route / f"rlog-{segment}.zst"
             source_index = len(source_rows)
-            source_rows.append({"path": str(path.relative_to(log_root)), "sha256": digest(path)})
+            source = {"path": str(path.relative_to(log_root)), "sha256": digest(path),
+                      "radar_crc_valid": 0, "radar_crc_invalid": 0}
+            source_rows.append(source)
             cal = PoseCalibrator()
             speed, yaw, objects = [], [], []
             packets, last_pair = {}, {}
@@ -90,7 +93,15 @@ def extract(fixture: Path, log_root: Path, openpilot: Path) -> None:
                         # here is ADAS, not the final stock-Toyota-B parser bus.
                         if frame.src != 1 or not 0x180 <= frame.address <= 0x185 or len(frame.dat) != 64:
                             continue
-                        packets[frame.address] = (t, bytes(frame.dat))
+                        payload = bytes(frame.dat)
+                        valid = int.from_bytes(payload[:2], "little") == binascii.crc_hqx(
+                            payload[2:] + frame.address.to_bytes(2, "little"), 0xFFFF,
+                        )
+                        source["radar_crc_valid" if valid else "radar_crc_invalid"] += 1
+                        if not valid:
+                            packets.pop(frame.address, None)
+                            continue
+                        packets[frame.address] = (t, payload)
                         bank = (frame.address - 0x180) % 3
                         if 0x180 + bank not in packets or 0x183 + bank not in packets:
                             continue

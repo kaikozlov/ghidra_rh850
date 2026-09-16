@@ -1,5 +1,13 @@
 # Toyota TSS3 openpilot bounty evidence
 
+> **September-15 evidence-audit supersession:** historical steering evidence
+> remains valid, but the preceding production-completeness, radar units,
+> tire-stiffness, HUD/cancel ownership, cached-lag, and continuous-command-loss
+> claims are corrected in [the current capability matrix](camry-2026-capability-matrix.md)
+> and [the evidence review](camry-2026-port-evidence-review.md). The v17
+> supervised helper is not road-qualified; working steering samples do not
+> establish an adaptive-cruise combination.
+
 **Issue:** [commaai/opendbc#3695 — Toyota TSS3 car port](https://github.com/commaai/opendbc/issues/3695)
 
 **Status:** bounty-level control evidence assembled; exact working Camry runtime

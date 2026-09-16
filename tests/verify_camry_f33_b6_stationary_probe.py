@@ -1026,7 +1026,7 @@ with tempfile.TemporaryDirectory() as td:
     runbook = (out / "RUNBOOK.md").read_text(encoding="utf-8")
     patch_runbook = (out / "FIRMWARE_PATCH.md").read_text(encoding="utf-8")
     check("kit copies the exact standalone probe", copied.read_bytes() == MODULE_PATH.read_bytes())
-    check("kit manifest is self-contained v16 and binds exact stock-Toyota-B route", manifest["schema"] == "camry-f33-car-kit-v16" and manifest["target"] == {
+    check("kit manifest is self-contained v17 and binds exact stock-Toyota-B route", manifest["schema"] == "camry-f33-car-kit-v17" and manifest["target"] == {
         "eps_f181": "8965F3307000",
         "eps_diag": "0x7A1->0x7A9 bus1 (stock Toyota-B unsplit EPS/Brake network)",
         "b6": "0x0B6/32 FD bus1 (native EPS/Brake network; resident replaces internally)",
@@ -1037,7 +1037,7 @@ with tempfile.TemporaryDirectory() as td:
         "crc_prefix": "0x1960380A", "crc_fixup": "0xE69FC7F5", "observed_at": "2026-09-01",
         "note": "historical maintainer-rack state only; do not infer the currently installed rack/image from this record",
     })
-    check("kit makes the continuous RAM signer independent of persistent stage5 policy",
+    check("kit makes the supervised RAM signer independent of persistent stage5 policy",
           manifest["runtime_firmware_contract"]["software_id"] == "8965F3307000" and
           manifest["runtime_firmware_contract"]["persistent_patch_required"] is False and
           manifest["runtime_firmware_contract"]["stage5_receiver_bypass_required"] is False and
@@ -1049,7 +1049,7 @@ with tempfile.TemporaryDirectory() as td:
           inline["resident_sha256"] == "31b1b2c31007f130d6b4679a0c99f5903a58f748daf11978f9c52f504aea3a3a" and
           inline["helper_base"] == "0xFEBF0000" and inline["helper_padded_size"] == 600 and
           inline["helper_word_count"] == 150 and
-          inline["helper_padded_sha256"] == "b417e12dde0dc7d6478ea6f242fe9eaa246a00a9fbbcc711a5d2d3adcf159a28" and
+          inline["helper_padded_sha256"] == "c28489ffa9278cab45f24cede1d9eefda0a70c45a1cfb254dd7c00e52e62c288" and
           inline["state"]["base"] == "0xFEBF025C" and inline["state"]["magic"] == "0x53364249" and
           inline["telemetry"]["base"] == "0xFEBF0268" and inline["telemetry"]["size"] == 0x20 and
           inline["scratch"] == {"base": "0xFEBF0288", "size": 0x48, "sid23_readable": False} and
@@ -1063,12 +1063,17 @@ with tempfile.TemporaryDirectory() as td:
           inline["mutation_boundary"]["secoc_result_override"] is False and
           inline["mutation_boundary"]["can_transmit"] is False and
           inline["persistent_flash_write"] is False and inline["stage5_receiver_bypass_required"] is False and
-          inline["live_qualified"] is True and inline["live_qualification"]["route"] == "0000008d--a9f348691a" and
-          inline["live_qualification"]["helper_padded_sha256"] == "b417e12dde0dc7d6478ea6f242fe9eaa246a00a9fbbcc711a5d2d3adcf159a28" and
+          inline["host_liveness"]["receive_loss_ticks"] == 7 and
+          inline["host_liveness"]["repeated_sequence_renews"] is False and
+          inline["live_qualified"] is False and inline["historical_continuous_qualification"]["route"] == "0000008d--a9f348691a" and
+          inline["historical_continuous_qualification"]["helper_padded_sha256"] == "b417e12dde0dc7d6478ea6f242fe9eaa246a00a9fbbcc711a5d2d3adcf159a28" and
           inline["same_cycle_drcc_recovery"]["command"] == "./f33-secoc recover-drcc" and
           inline["same_cycle_drcc_recovery"]["live_qualified_clear_transport"] is True and
           inline["same_cycle_drcc_recovery"]["live_qualified_after_signer_bootstrap"] is False and
           manifest["ram_experiments"]["order"][0].startswith("b6_inline_signer is the production-shaped volatile path"))
+    check("kit bundles the real programming handoff and its transitive dependency",
+          all((out / "runtime" / rel).read_bytes() == (ROOT / rel).read_bytes() for rel in (
+              "tsk/__init__.py", "tsk/lib/__init__.py", "tsk/lib/programming.py", "tsk/lib/diagnostic_route.py")))
     mid = manifest["ram_experiments"]["b6_midaggregate_observer"]
     signer = manifest["ram_experiments"]["command5_probe"]
     check("kit packages bounded high-tail command5 permission probe",

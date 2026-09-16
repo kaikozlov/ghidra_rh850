@@ -1,0 +1,356 @@
+{
+  "boundary": "incident-era native traffic proves message placement, not healthy EPS operation or actuation; EPS 0x030 is absent",
+  "hud_cancel_replacement_on_adas_relay_qualified": false,
+  "parser_bus": {
+    "camera_0x160": 2,
+    "chassis_0x025_0x101_0x412": 1,
+    "radar_objects": 0
+  },
+  "schema": "camry-stock-harness-topology-v1",
+  "sources": [
+    {
+      "native_messages": [
+        {
+          "address": "0x25",
+          "bus": 1,
+          "count": 5999,
+          "length": 32,
+          "mono_ns": 216105226496,
+          "payload": "01160000600100a500000000000000000000000000000000000000006cc42fad"
+        },
+        {
+          "address": "0x101",
+          "bus": 1,
+          "count": 3000,
+          "length": 8,
+          "mono_ns": 216114001728,
+          "payload": "800000020000008c"
+        },
+        {
+          "address": "0x160",
+          "bus": 2,
+          "count": 2400,
+          "length": 32,
+          "mono_ns": 216105226496,
+          "payload": "c358e182ff7b400320abfb0001a82680012f80c0000fbc140000000000000000"
+        },
+        {
+          "address": "0x180",
+          "bus": 0,
+          "count": 1200,
+          "length": 64,
+          "mono_ns": 216144341141,
+          "payload": "10aff1f70445fce055ff290d2606e0e4ff340233fc603fff0b09ec0550ffff1407f40530c2ff1206a2048079ff1006ce03809dffff0311f91044ffff00000000"
+        },
+        {
+          "address": "0x181",
+          "bus": 0,
+          "count": 1199,
+          "length": 64,
+          "mono_ns": 216144341141,
+          "payload": "e14ff1f7fff8000000ffff0376003055ff1505bff750a4ff0b0839eff0adffff0ef607b0dcff13fff8000000fffffff8000000fffffff8000000ffff00000000"
+        },
+        {
+          "address": "0x182",
+          "bus": 0,
+          "count": 1200,
+          "length": 64,
+          "mono_ns": 216105226496,
+          "payload": "795af0f6fff8000000fffffff8000000fffffff8000000fffffff8000000fffffff8000000fffffff8000000fffffff8000000fffffff8000000ffff00000000"
+        },
+        {
+          "address": "0x183",
+          "bus": 0,
+          "count": 1200,
+          "length": 64,
+          "mono_ns": 216105226496,
+          "payload": "f236f0f600002d00040b0208000b0200030200002509008a0000001b05000b0200000a02008a0000001a00000a0000001800040b0000002900048b4000000000"
+        },
+        {
+          "address": "0x184",
+          "bus": 0,
+          "count": 1200,
+          "length": 64,
+          "mono_ns": 216105226496,
+          "payload": "e0e3f0f600001300040342124028fe00820008005f000009020000790104090200000a00000a0200000000000000000000000000000000000000000000000000"
+        },
+        {
+          "address": "0x185",
+          "bus": 0,
+          "count": 1200,
+          "length": 64,
+          "mono_ns": 216105226496,
+          "payload": "fad1f0f6000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+          "address": "0x412",
+          "bus": 1,
+          "count": 60,
+          "length": 8,
+          "mono_ns": 217058315124,
+          "payload": "4000000000ee9307"
+        }
+      ],
+      "path": "000000d1--ad906be282/rlog-3.zst",
+      "sha256": "18f4af1974cf95c8b397353ac7b5f4b4739db283b5dffaec254a295568cf2781"
+    },
+    {
+      "native_messages": [
+        {
+          "address": "0x25",
+          "bus": 1,
+          "count": 6000,
+          "length": 32,
+          "mono_ns": 276107465777,
+          "payload": "0ffe00004ff5007e00000000000000000000000000000000000000006541ea36"
+        },
+        {
+          "address": "0x101",
+          "bus": 1,
+          "count": 3000,
+          "length": 8,
+          "mono_ns": 276120592639,
+          "payload": "800000010000008b"
+        },
+        {
+          "address": "0x160",
+          "bus": 2,
+          "count": 2400,
+          "length": 32,
+          "mono_ns": 276107465777,
+          "payload": "94914182fff140051aeff300074ffa80022267f8500001e40000000000000000"
+        },
+        {
+          "address": "0x180",
+          "bus": 0,
+          "count": 1199,
+          "length": 64,
+          "mono_ns": 276149882678,
+          "payload": "b41ea1a70539f9eff424064e02046fccff000451f9bfea0f0f565ffaefcbffff1b90043ff2ff8017ee04dfedff00112c04eff430ff3c94070fd9ff0000000000"
+        },
+        {
+          "address": "0x181",
+          "bus": 0,
+          "count": 1200,
+          "length": 64,
+          "mono_ns": 276107465777,
+          "payload": "eaa3a0a60c0df8effd0f061e31d7700eff3d2341e45026ff110d7a05fffaff45105207201e0f1913a404dff8b9ff0c2806400039064bda088ffaffff00000000"
+        },
+        {
+          "address": "0x182",
+          "bus": 0,
+          "count": 1200,
+          "length": 64,
+          "mono_ns": 276107465777,
+          "payload": "c6a8a0a608ac0760012e001254062ff073ff0a4008a0041e0852d0004ff4ffff09c205900d3800fff8000000fffffff8000000fffffff8000000ffff00000000"
+        },
+        {
+          "address": "0x183",
+          "bus": 0,
+          "count": 1200,
+          "length": 64,
+          "mono_ns": 276107465777,
+          "payload": "e923a0a6003e6900809a01003e68f3040300003e651d000b01007e6beb000200003e6300841102283e6df4000103003e6bf4040303003e6af700020000000000"
+        },
+        {
+          "address": "0x184",
+          "bus": 0,
+          "count": 1200,
+          "length": 64,
+          "mono_ns": 276107465777,
+          "payload": "4cbba0a6003e6900801b020c7e6f00801b02003e7700801b02003e6c00801103103e67f8000103003e6ff3040103003e6d0100090300fe68f304030000000000"
+        },
+        {
+          "address": "0x185",
+          "bus": 0,
+          "count": 1200,
+          "length": 64,
+          "mono_ns": 276107465777,
+          "payload": "f13da0a6003e6cff000903003e6df3040103003e6c00800902003e6af2040300003e710a00090300000000000000000000000000000000000000000000000000"
+        },
+        {
+          "address": "0x412",
+          "bus": 1,
+          "count": 60,
+          "length": 8,
+          "mono_ns": 277062941922,
+          "payload": "4000000000ee9307"
+        }
+      ],
+      "path": "000000d1--ad906be282/rlog-4.zst",
+      "sha256": "dfdd325c874752b5035ef62b6f2e84630eb64784ebc9dba41698531539e54cdc"
+    },
+    {
+      "native_messages": [
+        {
+          "address": "0x25",
+          "bus": 1,
+          "count": 5999,
+          "length": 32,
+          "mono_ns": 3967372362689,
+          "payload": "01020000bfa600950000000000000000000000000000000000000000102265cc"
+        },
+        {
+          "address": "0x101",
+          "bus": 1,
+          "count": 3000,
+          "length": 8,
+          "mono_ns": 3967372362689,
+          "payload": "880f0004000000a5"
+        },
+        {
+          "address": "0x160",
+          "bus": 2,
+          "count": 2399,
+          "length": 32,
+          "mono_ns": 3967382086449,
+          "payload": "631d5d8281594003200bfb007e883280012f80c0000fbea40000000000000000"
+        },
+        {
+          "address": "0x180",
+          "bus": 0,
+          "count": 1200,
+          "length": 64,
+          "mono_ns": 3967402617941,
+          "payload": "f8632e34071c0d30fdff180cac10814bff000dd0130177ff5a0d9fee40cbffff0529f4107dff00053201408bff1905c9f6e070ffff0cabffb111ff1200000000"
+        },
+        {
+          "address": "0x181",
+          "bus": 0,
+          "count": 1200,
+          "length": 64,
+          "mono_ns": 3967402617941,
+          "payload": "3e842e34075405d0ccff1309d5f490a8ffff04a3f6206aff0003b7fef069ff1308a808b0edff180391fb4052ffff0617fd809bff1f1967f1115eff7400000000"
+        },
+        {
+          "address": "0x182",
+          "bus": 0,
+          "count": 1199,
+          "length": 64,
+          "mono_ns": 3967402617941,
+          "payload": "ba9d2e3404dbfaa070ff02fff8000000fffffff8000000fffffff8000000fffffff8000000fffffff8000000fffffff8000000fffffff8000000ffff00000000"
+        },
+        {
+          "address": "0x183",
+          "bus": 0,
+          "count": 1199,
+          "length": 64,
+          "mono_ns": 3967402617941,
+          "payload": "406b2e34003fe6fe008a02003fa3fe000942003f85f6000b0200006cfd04090203c04f1c000b020800230000030220002bf800090200002dff00010200000000"
+        },
+        {
+          "address": "0x184",
+          "bus": 0,
+          "count": 1199,
+          "length": 64,
+          "mono_ns": 3967412987429,
+          "payload": "9ef22e34117ff9fc008b000080590000090208004a08000b0230002f01008200000012fd008a20000032fe0409020000370000010202406c0080090200000000"
+        },
+        {
+          "address": "0x185",
+          "bus": 0,
+          "count": 1199,
+          "length": 64,
+          "mono_ns": 3967412987429,
+          "payload": "e0f92e3400003b000009020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+          "address": "0x412",
+          "bus": 1,
+          "count": 60,
+          "length": 8,
+          "mono_ns": 3967442479204,
+          "payload": "4000000000ee9307"
+        }
+      ],
+      "path": "000000d4--327b2c4bb8/rlog-3.zst",
+      "sha256": "d9da1cfd888b17a47a2771e197a06f923670f5cc2681e9a8ea3dc3f1f5a5c3bd"
+    },
+    {
+      "native_messages": [
+        {
+          "address": "0x25",
+          "bus": 1,
+          "count": 5999,
+          "length": 32,
+          "mono_ns": 4027361608609,
+          "payload": "00010000300a00680000000000000000000000000000000000000000da2cae0f"
+        },
+        {
+          "address": "0x101",
+          "bus": 1,
+          "count": 3000,
+          "length": 8,
+          "mono_ns": 4027371423676,
+          "payload": "800000010000008b"
+        },
+        {
+          "address": "0x160",
+          "bus": 2,
+          "count": 2400,
+          "length": 32,
+          "mono_ns": 4027361608609,
+          "payload": "6c63bc82ff774005c328130004480880022f80c0000fffb40000000000000000"
+        },
+        {
+          "address": "0x180",
+          "bus": 0,
+          "count": 1199,
+          "length": 64,
+          "mono_ns": 4027401555492,
+          "payload": "815edee40d02143ffb6fff2659eddff6ff430f1c15400067ff090ffb10070f0a0d82198000ffff0d85f9f003480a05d3fa803e48073d3e0d3000ff0900000000"
+        },
+        {
+          "address": "0x181",
+          "bus": 0,
+          "count": 1199,
+          "length": 64,
+          "mono_ns": 4027401555492,
+          "payload": "630edee41317fb5004ff19fff8000000fffffff8000000ffff33220ed007ff1d3f83f02013ff3dfff8000000fffffff8000000fffffff8000000ffff00000000"
+        },
+        {
+          "address": "0x182",
+          "bus": 0,
+          "count": 1200,
+          "length": 64,
+          "mono_ns": 4027361608609,
+          "payload": "2fd9dde3fff8000000fffffff8000000fffffff8000000fffffff8000000fffffff8000000ffff371402c086ff66fff8000000fffffff8000000ffff00000000"
+        },
+        {
+          "address": "0x183",
+          "bus": 0,
+          "count": 1200,
+          "length": 64,
+          "mono_ns": 4027361608609,
+          "payload": "a2b3dde3003dd02e000b03003dc80c008200783dcb1a000b02003dcd11000903003dd400801902003dcc0f000102003ddd14000902003dcc1100030200000000"
+        },
+        {
+          "address": "0x184",
+          "bus": 0,
+          "count": 1200,
+          "length": 64,
+          "mono_ns": 4027361608609,
+          "payload": "2740dde3003dcb08040102007dcc7f000b0000000000001000583dcb08000302003dccfe00030200000000000000000000000000000000000000000000000000"
+        },
+        {
+          "address": "0x185",
+          "bus": 0,
+          "count": 1200,
+          "length": 64,
+          "mono_ns": 4027361608609,
+          "payload": "18ecdde30000000000000000000000000000000000000000000000000000000000000000000000043f8602618200000000000000000000000000000000000000"
+        },
+        {
+          "address": "0x412",
+          "bus": 1,
+          "count": 60,
+          "length": 8,
+          "mono_ns": 4027441250312,
+          "payload": "4000000000ee9307"
+        }
+      ],
+      "path": "000000d4--327b2c4bb8/rlog-4.zst",
+      "sha256": "1e08c6318fad0325621627bab6b19b3ba0ac439a122fdc908f72ca1af2edf1a0"
+    }
+  ]
+}

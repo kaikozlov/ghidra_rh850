@@ -84,3 +84,157 @@ and the failure instead of discarding the diagnostic evidence. Six offline
 regression tests cover these cases, including an injected mid-clear failure
 and final Panda ownership cleanup. Same-cycle physical DRCC restoration is
 still a vehicle observation, not established by these tests.
+
+## Completed host-loss correction
+
+The v17 Camry kit selects a new **598-byte supervised helper**, padded to the
+same 600-byte loader transfer. The 524-byte resident, staging image, and
+boot-authenticated payload are byte-identical to the preceding runtime; no
+CodeFlash patch or new memory region was introduced. The helper consumes a
+changed host generation as a seven-foreground-tick lease, polls it even when
+no native B6 is queued, never renews an unchanged generation, and leaves native
+B6 untouched on expiry or sequence zero. At the nominal 5-ms foreground period,
+this is 35 ms of host-command receive-loss supervision, not a new engagement
+policy in openpilot.
+
+`VerifyCamrySignerHostLiveness.java` executes the actual linked instructions in
+Ghidra emulator-local memory. All 34 liveness assertions pass, including held-command
+expiry, empty-queue aging, sequence wrap, zero release, normal 50-Hz updates,
+and no resurrection across 520 further scheduler invocations. The archived
+continuous helper fails the same expiry assertion. The emulator intercepts
+NOP's custom pcode operation with its architectural no-op behavior and stops
+before the first stock memory-copy/crypto call: this is a host-admission/liveness
+test, not silicon command-5, full ECU scheduling, or vehicle validation.
+
+The replacement method now rejects `replace-once` before sending a C7
+substitution when a continuous/supervised helper is selected. Those helpers can legitimately
+replace multiple native frames during one host generation; labeling that as a
+one-frame experiment was incorrect. Historical binaries remain unchanged.
+
+## Completed integration and safety corrections
+
+The stock-harness source census places `0x412` and `0x101` on unsplit Panda bus
+1, `0x160` on camera-side bus 2, and perception `0x180..0x185` on bus 0. The
+previous controller's HUD-to-bus0 and brake-cancel-to-bus2 packets therefore did
+not replace the native sources. They and their Panda permissions are removed;
+CarState reads the HUD from its real PT-side parser. Automatic cancellation and
+any stock-HUD replacement remain unresolved rather than merely “waiting for a
+visual test.” See `camry_2026_stock_harness_topology.json` and the source-hashed
+`camry_20260915_port_evidence_audit.json` for the independent retained census.
+
+The actual successful steering segments report conventional cruise (`0x251`
+B0 `0x88/0x90`), not adaptive operation. Camry now reports that through ordinary
+`cruiseState.nonAdaptive`; unmodified openpilot `car_events.py` maps it to
+`wrongCruiseMode`. This intentionally prevents treating the historical
+conventional-cruise steering demonstration as a completed stock-DRCC port.
+No synthetic engagement flag or new controller veto was added.
+
+The generic angle-rate checker did not enforce an active absolute angle cap.
+TSS3 now explicitly rejects targets outside ±1745 raw in addition to its usual
+rate checks; the regression approaches the boundary in legal increments, so it
+cannot pass merely because a large jump was rejected. CarController keeps its
+sequence across inactive periods while emitting wire sequence zero, so a
+subsequent engagement does not reuse a previously consumed generation.
+
+Planner acceleration bounds now agree with the Camry actuator envelope
+(−1.5..+1.3 m/s²). Both Python parsing and Panda verify native E2E Profile 5
+CRC, using init FFFF and Data ID equal to the CAN address; this is wire-equivalent
+to the old init-zero/Data-ID-444A expression for the fixed 32-byte `0x160` only.
+The encoder preserves the unassigned high bit of B12.
+
+Across the complete two August captures, **127/20,510 and 1,373/23,998** native
+`0x160` frames exceed one or both host acceleration-field bounds. When the
+controller intentionally hands back the native low-speed frame, rejecting that
+copy while suppressing the original is a transport defect. Panda now recognizes
+only a byte-exact copy of the latest valid camera frame for native passthrough;
+modified requests retain the ordinary host limits and CRC requirements.
+This does not establish unknown AEB priority or the causal Camry command scale.
+
+## Final validation and scope
+
+Openpilot `3f9f3c061` pins opendbc `093125ab`. The combined named suites passed
+615 tests / 11,049 subtests, with 404 existing skips. Both debug and non-debug
+H7 application ELF cross-builds pass `-Werror`. No build was deployed. The
+17 original radar rlogs were independently re-extracted and reproduced the
+committed raw-object fixture exactly.
+
+The healthy-EPS original segment has 5,477/5,477 valid post-startup parser
+samples after an explicit test-only topology translation; the stock-harness
+recording correctly remains invalid in 5,476/5,476 samples solely because EPS
+`0x030` is absent. Two compact, source-hashed opendbc fixtures retain the original
+frame cadence, buses, and bytes and regression-test both outcomes.
+
+These results substantially improve the implementation, but supersede rather
+than confirm the earlier “offline/software essentially complete” assessment.
+The [current capability matrix](camry-2026-capability-matrix.md) records the
+remaining specific integration/semantic boundaries. No vehicle commands,
+persistent firmware changes, or on-road tests were performed in this audit.
+
+The compiled-helper suite also runs **52 golden differential/error cases**
+against the archived continuous binary: all 16 received/committed low-counter
+combinations at three target angles, three command-5 failure modes, and an epoch
+mismatch. It compares the actual helper's domain, call-boundary inputs,
+freshness witness, and final queue image. Encoder/crypto callees are supplied
+identical deterministic stubs, not mistaken for a silicon CMAC oracle. All 86
+compiled-instruction assertions pass; the intended change is command expiry,
+not a changed signing construction or native-frame mutation tuple.
+
+## Stock topology and ordinary controller/safety corrections
+
+The four-original-rlog topology reducer pins radar bus0 / camera 0x160 bus2 /
+chassis 0x025,0x101,0x412 bus1. It deliberately records the lack of EPS 0x030 in
+these incident-era captures. The earlier wrong-bus HUD and fake-brake cancel
+transmitters are removed rather than presented as a successful source
+replacement. A genuine automatic-cancel ingress remains unresolved on stock
+Toyota-B; reading a state mirror does not make it a command.
+
+The seven-segment consolidated reducer additionally pins configured CP
+stiffness 0.7933, learned multipliers near 1.0, repeated cached lag estimates,
+and conventional cruise in the selected working steering samples. It also
+finds 127/20,510 and 1,373/23,998 native August 0x160 frames outside the narrower
+host-command envelope, all CRC-valid. Byte-exact native handback therefore
+must not be clipped or rejected as though it were a modified host command.
+
+The maintained opendbc changes align planner/controller/Panda bounds at
+Camry −1.5..+1.3 m/s², preserve B12 bit7 while changing only the recovered low 7
+request bits, validate Profile-5 RX/TX, allow only the byte-exact latest valid
+native handback outside those bounds, enforce actual ±1745-raw C7 angle limits
+in addition to rate limits, and preserve the host sequence across inactive
+periods. Read-only conventional cruise is exposed through the normal
+`cruiseState.nonAdaptive` field. No second engagement policy was added.
+
+## Verification and committed integration
+
+Current openpilot `3f9f3c061` pins opendbc `093125ab`. This combined command passes
+**598 tests / 3,172 subtests**, with 262 existing selection skips:
+
+```sh
+cd /Users/kai/dev/inspect/repos/kai-openpilot/opendbc_repo
+uv run pytest -q opendbc/car/toyota/tests opendbc/can/tests \
+  opendbc/safety/tests/test_toyota.py \
+  opendbc/car/tests/test_car_interfaces.py opendbc/car/tests/test_docs.py \
+  opendbc/car/tests/test_platform_configs.py opendbc/car/tests/test_vehicle_model.py
+uv run ruff check opendbc/car/toyota opendbc/can/dbc.py
+```
+
+Analysis verification is explicit and offline:
+
+```sh
+cd /Users/kai/dev/inspect/repos/ghidra_rh850_analysis
+tools/test camry_f33_signer_host_liveness camry_f33_b6_stationary_probe \
+  camry_f33_post_install_recovery camry_2026_radar_anchors \
+  camry_2026_bus1_camera_output camry_2026_stock_harness_topology \
+  camry_20260915_port_evidence_audit --jobs 2
+```
+
+The remaining adaptive-cruise/supervised-signer combination, genuine cancel
+mechanism, fault classification, radar validity/lifecycle, and physical
+longitudinal/AEB/hold behavior are not declared solved by these offline tests.
+The corrected current capability matrix distinguishes each boundary.
+
+The final analysis-side run passed all eight selected verification scripts,
+including 86 compiled-helper liveness/differential/error assertions. The
+differential cases substitute deterministic callback results to compare the
+new helper with the archived one; they do not emulate or validate ICU-S silicon.
+The standalone `build/out/camry-f33-car-kit-v17-audit` bundle passes `doctor`
+and offline `plan`, with the supervised helper SHA pinned in its manifest.

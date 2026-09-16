@@ -191,77 +191,48 @@ but actuator field semantics, scaling, limits, signer RAM locations, and the EPS
 payload remain exact-target facts and must not transfer merely from the shared
 carrier.
 
-## Current cleanup checkpoint
+## Current Camry audit checkpoint
 
-The current upstream-shaped stock-harness port has moved beyond the original
-`3c79d935` checkpoint. It now includes target-native Camry state, exact-EPS
-fingerprinting, C7 bus-1 lateral control, normal Toyota HUD/cancel ownership,
-alpha `0x160` longitudinal replacement, target-specific Panda limits, a
-retained-route-tuned 15.3 steering-ratio and 1.0 tire-stiffness defaults (with
-the existing 0.18 s actuator delay independently consistent with `lagd`), and a
-native TSS3 RadarInterface. The retained Bus-1 family closes three banks of
-eight objects: `0x180..0x182` provide u16×0.01 m range plus s12×0.05 m lateral
-geometry and `0x183..0x185` provide s10×0.1 m/s relative speed. The latter is
-independently validated against finite-difference range in both retained drives
-(r=0.912/0.956, fitted slope ~0.99). The latest focused Camry+Corolla TSS3 suite
-passes 28/28 and the full Toyota unit set passes 46 tests / 205 subtests; CAN/
-DBC/docs/platform validation passes 56 tests / 2,959 subtests and the generic
-car-interface suite passes 252 tests at the September 15 checkpoint.
+The September-15 retained-evidence audit supersedes the preceding “essentially
+complete” assessment. The maintained C7 architecture is unchanged, but its
+implementation and evidence boundaries are corrected:
 
-The parent openpilot tree still has only the target-scoped transport exception
-needed to keep short C7 Classical on exact-F33 bus 1. Panda retains the generic
-forwarded-frame format corrections. The stock-topology software is therefore
-reviewable as ordinary openpilot architecture; what remains is vehicle
-qualification, not another control stack.
+- Stock Toyota-B radar objects originate on bus0, FRC `0x160` on bus2, and
+  `0x025/0x101/0x412` on unsplit bus1. HUD/brake duplicates on the ADAS relay
+  therefore did not replace the stock source. Those transmissions are removed;
+  automatic cruise cancellation remains a genuine integration gap.
+- The 15.3 absolute learned steering ratio is retained. Tire stiffness returns
+  to 0.7933 because paramsd's learned ~1.0 multiplies the configured CP
+  stiffnesses. Identical cached lagd values do not constitute new independent
+  delay estimates; the 0.18-s default is left unchanged.
+- The Camry v17 kit uses a 598-byte supervised helper with seven-foreground-tick
+  host-command loss supervision. The existing resident/staging/authenticated
+  payload are unchanged. 86 compiled-instruction assertions cover liveness and
+  differential/error behavior; this new helper is not vehicle-qualified.
+- The radar candidate uses independently anchored 0.005-m range, 0.04-m
+  left-positive lateral, and 0.025-m/s low14 velocity. Production CarParams
+  leaves radar unavailable until object validity and reassignment are known.
+- Planner, controller and Panda share the Camry −1.5..+1.3-m/s² host envelope.
+  A CRC-valid byte-exact native handback is preserved without clipping Toyota's
+  own request. This does not establish native longitudinal authority.
 
-Deployment tooling now defaults to the byte-exact continuous helper from the
-September 10 successful steering handoff. A fresh exact-F33 application-loader
-audit also closes the tempting READY-mode shortcut: stock XCP extended ingress
-reaches staging, but fixed CodeFlash `0x30D68=0x5A` rejects protocol dispatch
-before CONNECT; configured UDS 0x34/0x36/0x37 hand off to disruptive programming;
-and the recovered WDBI/RoutineControl/AB/BA/reset/callback/exception/DMA/page
-surfaces expose no tester-chosen RAM-PC transfer. There is therefore no proved
-stock READY-mode placement+execution primitive to replace the NRTD bootstrap;
-using one would currently invent an unproved pivot rather than complete the
-port.
+The historical successful steering samples used conventional cruise. They do
+not prove the final supervised runtime plus adaptive cruise. The revised
+`recover-drcc` preserves its pre-clear evidence before mutation, rejects short
+DID/ISO-TP responses, and requires distance-control mode **and** genuine cruise
+permission with ACC-not-available clear. Its same-cycle vehicle result remains
+unobserved.
 
-The car kit also contains a bounded
-`f33-secoc recover-drcc` operation: after volatile signer bootstrap it preserves
-DTC state, runs the exact physical-SID14 plus functional-Mode04 clear already
-proved on the maintainer car, verifies no known responder retains
-`status&0xAF`, and reads FRC DIDs `1903/1905/1906`. This is the explicit test of
-whether stock DRCC can be restored in the same ignition cycle **without**
-powering off the EPS and losing the RAM signer. The clear transport is proven;
-DRCC restoration after signer bootstrap is not yet live-qualified.
+Current status and reproducible validation are centralized in the
+[capability matrix](../variants/camry-2026-capability-matrix.md) and
+[port evidence review](../variants/camry-2026-port-evidence-review.md). A new
+transport alone does not solve command lifetime, native cruise cancellation,
+object validity, or physical actuator qualification. The parallel unified
+functional runtime described above remains a separate workstream; its carrier
+closure must not silently transfer the old Camry helper's road qualification.
 
-## Remaining qualification order
-
-1. On the replacement rack with **stock Toyota-B pinning and stock CodeFlash**,
-   run the v16 car-kit volatile lifecycle: NRTD `install` -> direct READY
-   `load-arm`. Require exact helper readback and native-trailer equality.
-2. Run `f33-secoc recover-drcc`. A positive result must show zero post-clear
-   `status&0xAF` records and FRC cruise permission restored while the resident
-   remains alive. This closes the only known conflict between volatile signer
-   bootstrap and release-default stock ACC.
-3. Parked, verify C7 reaches the EPS on stock bus 1 and that sequence zero is a
-   native-B6 no-op. Then perform a short controlled lateral A/B and compare it
-   with the retained September 10 route.
-4. Validate the current HUD/cancel replacement on the stock harness, including
-   openpilot `steerRequired` presentation and stock-cruise cancellation.
-5. Test alpha longitudinal separately: first parked/template ownership, then a
-   bounded road acceleration/deceleration A/B. Require downstream vehicle
-   response, source suppression, gas/brake disengagement behavior, causal
-   actuator-delay measurement, and PCS/AEB coexistence. Passive stock-ACC logs
-   cannot identify actuator lag—the closed-loop `0x160` request and `aEgo`
-   correlate with an apparent ~-60 ms timestamp optimum—so do not replace the
-   inherited 0.05 s longitudinal delay from that non-causal correlation. Keep
-   release-default stock ACC until these are closed.
-6. Capture one delayed (>5 s) stop/restart cycle. Do not set `autoResumeSng`
-   unless openpilot can release Toyota's long-stop hold without driver input.
-7. Keep `steerFaultTemporary`/`steerFaultPermanent` unmapped until a controlled
-   asserted/recovery capture distinguishes the exact F33 native states; do not
-   invent policy from static DTC classes.
-
-The direct-Panda lease and installer remain deployment tooling until the signer
-load can be expressed without modifying openpilot runtime. They must not become
-an engagement gate or a second permission system.
+The direct-Panda lease and installer remain deployment tooling. They must not
+become a second engagement policy in openpilot. No proved nondisruptive stock
+READY-mode RAM placement-plus-execution path has replaced the exact NRTD
+bootstrap; the earlier XCP/callback audit remains a bounded recovered-surface
+negative, not a proof that no alternative could exist.

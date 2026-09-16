@@ -98,7 +98,6 @@ class TestRecovery(unittest.TestCase):
 
     def test_failure_preserves_preclear_evidence_and_releases_panda(self):
         panda = FakePanda()
-        factory = types.SimpleNamespace(list=lambda: ["offline"], __call__=None)
         class Factory:
             @staticmethod
             def list(): return ["offline"]

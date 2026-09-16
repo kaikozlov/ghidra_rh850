@@ -19,6 +19,12 @@ class TestIndependentRadarAnchors(unittest.TestCase):
     def test_report_regenerates_exactly(self):
         self.assertEqual(self.report, json.loads(anchors.OUTPUT.read_text()))
 
+    def test_every_source_radar_frame_passes_independent_p05(self):
+        sources = self.report['fixture']['sources']
+        self.assertEqual(len(sources), 17)
+        self.assertGreater(sum(s['radar_crc_valid'] for s in sources), 100000)
+        self.assertEqual(sum(s['radar_crc_invalid'] for s in sources), 0)
+
     def test_range_scale_has_an_independent_vision_anchor(self):
         r = self.report['vision_range']
         self.assertGreater(r['n'], 1900)

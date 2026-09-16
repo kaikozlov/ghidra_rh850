@@ -1,0 +1,1835 @@
+{
+  "boundaries": [
+    "Stock-harness samples have an absent EPS and cannot qualify healthy-stock-harness steering.",
+    "The working steering samples use conventional cruise, not a demonstrated adaptive-cruise lifecycle.",
+    "Repeated cached lag estimates are not fresh independent lag measurements.",
+    "GTS meanings for Control Mode/Permission/ACC Not Available remain diagnostic fields, not CAN overlays."
+  ],
+  "native_longitudinal_handoff": [
+    {
+      "b12_high_bit_set": 0,
+      "bad_crc": 0,
+      "boundary": "Native copies must not be clipped to host request limits; quantity names/causal Camry command mapping are not proved by this census.",
+      "examples": [
+        {
+          "coarse_scaled_100": -1300,
+          "data": "8e78bf82fa04400537281b000da81280022f80c0000fffc40000000000000000",
+          "fine_raw": -1532,
+          "segment": 4,
+          "timestamp_ns": 308202253232
+        },
+        {
+          "coarse_scaled_100": -1200,
+          "data": "5765c082fa1a400535681b000c880c80022f80c0000000040000000000000000",
+          "fine_raw": -1510,
+          "segment": 4,
+          "timestamp_ns": 308221930409
+        },
+        {
+          "coarse_scaled_100": -1300,
+          "data": "1bfcc282f9f7400532a81b000de82280022f80c0000000040000000000000000",
+          "fine_raw": -1545,
+          "segment": 4,
+          "timestamp_ns": 308271381004
+        }
+      ],
+      "frames": 20510,
+      "outside_host_command_bounds": 127,
+      "sha256": "be0c02946818fafc48b7d3e2be5d2fde31d796e057ab29d8bf59a879c7553db5",
+      "source": "targets/camry-2026/raw-20260827/camry_relay_route_can_20260827.ndjson.gz"
+    },
+    {
+      "b12_high_bit_set": 0,
+      "bad_crc": 0,
+      "boundary": "Native copies must not be clipped to host request limits; quantity names/causal Camry command mapping are not proved by this census.",
+      "examples": [
+        {
+          "coarse_scaled_100": 900,
+          "data": "c5bd7982851e4004200c030077efb280023ffc281e3f7e040000000000000000",
+          "fine_raw": 1310,
+          "segment": 17,
+          "timestamp_ns": 1106492533861
+        },
+        {
+          "coarse_scaled_100": 900,
+          "data": "0f567a82851e4004200c030077efb280023ffc281e3f7e040000000000000000",
+          "fine_raw": 1310,
+          "segment": 17,
+          "timestamp_ns": 1106512373561
+        },
+        {
+          "coarse_scaled_100": 900,
+          "data": "a7f87c82851d4004222c0300778fba80023ffbc81e5f87b40000000000000000",
+          "fine_raw": 1309,
+          "segment": 17,
+          "timestamp_ns": 1106562466594
+        }
+      ],
+      "frames": 23998,
+      "outside_host_command_bounds": 1373,
+      "sha256": "641eee57eaffc579002708185178ea08c189155527354712dd43a1f0e309bb3a",
+      "source": "targets/camry-2026/raw-20260827/camry_relay_lta_confirm_route_can_20260827.ndjson.gz"
+    }
+  ],
+  "route_groups": {
+    "stock_harness_combined_long": [
+      {
+        "bytes": 10080897,
+        "cruise_mode_b0": [
+          {
+            "bus": 1,
+            "n": 76,
+            "value": "0xE0"
+          }
+        ],
+        "lag_estimates": {
+          "distinct": 1,
+          "max": 0.3799999952316284,
+          "median": 0.3799999952316284,
+          "min": 0.3799999952316284,
+          "n": 240
+        },
+        "lag_status": [
+          {
+            "n": 240,
+            "status": "unestimated",
+            "valid_blocks": 0
+          }
+        ],
+        "learned_steer_ratio": {
+          "distinct": 751,
+          "max": 16.424314498901367,
+          "median": 16.36312198638916,
+          "min": 16.35972785949707,
+          "n": 1200
+        },
+        "learned_stiffness_multiplier": {
+          "distinct": 562,
+          "max": 1.0000859498977661,
+          "median": 0.9999989867210388,
+          "min": 0.9997299313545227,
+          "n": 1200
+        },
+        "native_can": [
+          {
+            "address": "0x025",
+            "bus": 1,
+            "data": "01020000bfa600950000000000000000000000000000000000000000102265cc",
+            "length": 32,
+            "n": 5999,
+            "timestamp_ns": 3967372362689
+          },
+          {
+            "address": "0x08A",
+            "bus": 1,
+            "data": "0000000080000012010c00010c7fff007fff00000000000000003700d284342b",
+            "length": 32,
+            "n": 2399,
+            "timestamp_ns": 3967391821355
+          },
+          {
+            "address": "0x0AA",
+            "bus": 1,
+            "data": "1c3b1bdd1c101bae",
+            "length": 8,
+            "n": 5999,
+            "timestamp_ns": 3967372362689
+          },
+          {
+            "address": "0x0FE",
+            "bus": 1,
+            "data": "fe9f533f0000c3e2f19afecdfecdfecd6540000000ff000000000000514de578",
+            "length": 32,
+            "n": 1890,
+            "timestamp_ns": 3967391821355
+          },
+          {
+            "address": "0x101",
+            "bus": 1,
+            "data": "880f0004000000a5",
+            "length": 8,
+            "n": 3000,
+            "timestamp_ns": 3967372362689
+          },
+          {
+            "address": "0x116",
+            "bus": 1,
+            "data": "00000000de4ad6ea",
+            "length": 8,
+            "n": 2547,
+            "timestamp_ns": 3967382086449
+          },
+          {
+            "address": "0x127",
+            "bus": 1,
+            "data": "0017ff07e9110a51",
+            "length": 8,
+            "n": 3662,
+            "timestamp_ns": 3967372362689
+          },
+          {
+            "address": "0x160",
+            "bus": 2,
+            "data": "631d5d8281594003200bfb007e883280012f80c0000fbea40000000000000000",
+            "length": 32,
+            "n": 2399,
+            "timestamp_ns": 3967382086449
+          },
+          {
+            "address": "0x180",
+            "bus": 0,
+            "data": "f8632e34071c0d30fdff180cac10814bff000dd0130177ff5a0d9fee40cbffff0529f4107dff00053201408bff1905c9f6e070ffff0cabffb111ff1200000000",
+            "length": 64,
+            "n": 1200,
+            "timestamp_ns": 3967402617941
+          },
+          {
+            "address": "0x183",
+            "bus": 0,
+            "data": "406b2e34003fe6fe008a02003fa3fe000942003f85f6000b0200006cfd04090203c04f1c000b020800230000030220002bf800090200002dff00010200000000",
+            "length": 64,
+            "n": 1199,
+            "timestamp_ns": 3967402617941
+          },
+          {
+            "address": "0x185",
+            "bus": 0,
+            "data": "e0f92e3400003b000009020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+            "length": 64,
+            "n": 1199,
+            "timestamp_ns": 3967412987429
+          },
+          {
+            "address": "0x251",
+            "bus": 1,
+            "data": "e000004880000080",
+            "length": 8,
+            "n": 76,
+            "timestamp_ns": 3967422985906
+          },
+          {
+            "address": "0x3B7",
+            "bus": 1,
+            "data": "0000000020000008",
+            "length": 8,
+            "n": 200,
+            "timestamp_ns": 3967552308923
+          },
+          {
+            "address": "0x3F6",
+            "bus": 1,
+            "data": "a0ea6e00a1fa4808",
+            "length": 8,
+            "n": 60,
+            "timestamp_ns": 3968157015109
+          },
+          {
+            "address": "0x412",
+            "bus": 1,
+            "data": "4000000000ee9307",
+            "length": 8,
+            "n": 60,
+            "timestamp_ns": 3967442479204
+          },
+          {
+            "address": "0x51E",
+            "bus": 1,
+            "data": "80008a0000000000",
+            "length": 8,
+            "n": 60,
+            "timestamp_ns": 3967634741167
+          },
+          {
+            "address": "0x610",
+            "bus": 1,
+            "data": "0000044ed0fffc00",
+            "length": 8,
+            "n": 195,
+            "timestamp_ns": 3967522986299
+          },
+          {
+            "address": "0x614",
+            "bus": 1,
+            "data": "0000423000004316",
+            "length": 8,
+            "n": 65,
+            "timestamp_ns": 3968067151139
+          },
+          {
+            "address": "0x620",
+            "bus": 1,
+            "data": "000000008000000a",
+            "length": 8,
+            "n": 200,
+            "timestamp_ns": 3967582358307
+          },
+          {
+            "address": "0x622",
+            "bus": 1,
+            "data": "0000000000310000",
+            "length": 8,
+            "n": 60,
+            "timestamp_ns": 3968207353304
+          }
+        ],
+        "p05": [
+          {
+            "address": "0x160",
+            "n": 2399,
+            "valid": true
+          },
+          {
+            "address": "0x180",
+            "n": 1200,
+            "valid": true
+          },
+          {
+            "address": "0x183",
+            "n": 1199,
+            "valid": true
+          },
+          {
+            "address": "0x185",
+            "n": 1199,
+            "valid": true
+          }
+        ],
+        "recorded_car_params": {
+          "steerActuatorDelay": 0.18000000715255737,
+          "steerRatio": 13.699999809265137,
+          "tireStiffnessFactor": 0.7932999730110168,
+          "tireStiffnessFront": 163310.546875,
+          "tireStiffnessRear": 202840.5625
+        },
+        "sha256": "d9da1cfd888b17a47a2771e197a06f923670f5cc2681e9a8ea3dc3f1f5a5c3bd",
+        "source": "2026-09-11/000000d4--327b2c4bb8/rlog-3.zst",
+        "upstream_lateral_id": [
+          {
+            "bus": 1,
+            "id": 0,
+            "n": 2399
+          }
+        ]
+      }
+    ],
+    "stock_harness_eps_absent": [
+      {
+        "bytes": 10094235,
+        "cruise_mode_b0": [
+          {
+            "bus": 1,
+            "n": 39,
+            "value": "0x88"
+          },
+          {
+            "bus": 1,
+            "n": 23,
+            "value": "0x90"
+          }
+        ],
+        "lag_estimates": {
+          "distinct": 1,
+          "max": 0.3799999952316284,
+          "median": 0.3799999952316284,
+          "min": 0.3799999952316284,
+          "n": 240
+        },
+        "lag_status": [
+          {
+            "n": 240,
+            "status": "unestimated",
+            "valid_blocks": 0
+          }
+        ],
+        "learned_steer_ratio": {
+          "distinct": 640,
+          "max": 13.784008026123047,
+          "median": 13.700279235839844,
+          "min": 13.699432373046875,
+          "n": 1200
+        },
+        "learned_stiffness_multiplier": {
+          "distinct": 509,
+          "max": 1.0000338554382324,
+          "median": 1.0,
+          "min": 0.9997535943984985,
+          "n": 1200
+        },
+        "native_can": [
+          {
+            "address": "0x025",
+            "bus": 1,
+            "data": "01160000600100a500000000000000000000000000000000000000006cc42fad",
+            "length": 32,
+            "n": 5999,
+            "timestamp_ns": 216105226496
+          },
+          {
+            "address": "0x08A",
+            "bus": 1,
+            "data": "000000008000001200ce0000ce7fff007fff00000000000000003a00eb90232a",
+            "length": 32,
+            "n": 2400,
+            "timestamp_ns": 216105226496
+          },
+          {
+            "address": "0x0AA",
+            "bus": 1,
+            "data": "1c3c1bdb1c0b1ba2",
+            "length": 8,
+            "n": 6000,
+            "timestamp_ns": 216105226496
+          },
+          {
+            "address": "0x0FE",
+            "bus": 1,
+            "data": "1e56a13f0000c362f166febbfebbfebb6540000000ff00000000000024c181ef",
+            "length": 32,
+            "n": 1891,
+            "timestamp_ns": 216105226496
+          },
+          {
+            "address": "0x101",
+            "bus": 1,
+            "data": "800000020000008c",
+            "length": 8,
+            "n": 3000,
+            "timestamp_ns": 216114001728
+          },
+          {
+            "address": "0x116",
+            "bus": 1,
+            "data": "00000000a4d2fa61",
+            "length": 8,
+            "n": 2547,
+            "timestamp_ns": 216123756523
+          },
+          {
+            "address": "0x127",
+            "bus": 1,
+            "data": "0017ff07e61279be",
+            "length": 8,
+            "n": 3662,
+            "timestamp_ns": 216114001728
+          },
+          {
+            "address": "0x160",
+            "bus": 2,
+            "data": "c358e182ff7b400320abfb0001a82680012f80c0000fbc140000000000000000",
+            "length": 32,
+            "n": 2400,
+            "timestamp_ns": 216105226496
+          },
+          {
+            "address": "0x180",
+            "bus": 0,
+            "data": "10aff1f70445fce055ff290d2606e0e4ff340233fc603fff0b09ec0550ffff1407f40530c2ff1206a2048079ff1006ce03809dffff0311f91044ffff00000000",
+            "length": 64,
+            "n": 1200,
+            "timestamp_ns": 216144341141
+          },
+          {
+            "address": "0x183",
+            "bus": 0,
+            "data": "f236f0f600002d00040b0208000b0200030200002509008a0000001b05000b0200000a02008a0000001a00000a0000001800040b0000002900048b4000000000",
+            "length": 64,
+            "n": 1200,
+            "timestamp_ns": 216105226496
+          },
+          {
+            "address": "0x185",
+            "bus": 0,
+            "data": "fad1f0f6000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+            "length": 64,
+            "n": 1200,
+            "timestamp_ns": 216105226496
+          },
+          {
+            "address": "0x251",
+            "bus": 1,
+            "data": "880000488000a080",
+            "length": 8,
+            "n": 62,
+            "timestamp_ns": 217047981015
+          },
+          {
+            "address": "0x3B7",
+            "bus": 1,
+            "data": "0000000020000008",
+            "length": 8,
+            "n": 200,
+            "timestamp_ns": 216358486890
+          },
+          {
+            "address": "0x3F6",
+            "bus": 1,
+            "data": "a0ea6e00a1fa4808",
+            "length": 8,
+            "n": 60,
+            "timestamp_ns": 216134519733
+          },
+          {
+            "address": "0x412",
+            "bus": 1,
+            "data": "4000000000ee9307",
+            "length": 8,
+            "n": 60,
+            "timestamp_ns": 217058315124
+          },
+          {
+            "address": "0x51E",
+            "bus": 1,
+            "data": "8000850000000000",
+            "length": 8,
+            "n": 60,
+            "timestamp_ns": 216605722464
+          },
+          {
+            "address": "0x610",
+            "bus": 1,
+            "data": "0000044ed0002200",
+            "length": 8,
+            "n": 187,
+            "timestamp_ns": 216283843984
+          },
+          {
+            "address": "0x614",
+            "bus": 1,
+            "data": "00004230000042f0",
+            "length": 8,
+            "n": 64,
+            "timestamp_ns": 216324310110
+          },
+          {
+            "address": "0x620",
+            "bus": 1,
+            "data": "000000008000000a",
+            "length": 8,
+            "n": 200,
+            "timestamp_ns": 216234393879
+          },
+          {
+            "address": "0x622",
+            "bus": 1,
+            "data": "0000000000310000",
+            "length": 8,
+            "n": 60,
+            "timestamp_ns": 216756350092
+          }
+        ],
+        "p05": [
+          {
+            "address": "0x160",
+            "n": 2400,
+            "valid": true
+          },
+          {
+            "address": "0x180",
+            "n": 1200,
+            "valid": true
+          },
+          {
+            "address": "0x183",
+            "n": 1200,
+            "valid": true
+          },
+          {
+            "address": "0x185",
+            "n": 1200,
+            "valid": true
+          }
+        ],
+        "recorded_car_params": {
+          "steerActuatorDelay": 0.18000000715255737,
+          "steerRatio": 13.699999809265137,
+          "tireStiffnessFactor": 0.7932999730110168,
+          "tireStiffnessFront": 163310.546875,
+          "tireStiffnessRear": 202840.5625
+        },
+        "sha256": "18f4af1974cf95c8b397353ac7b5f4b4739db283b5dffaec254a295568cf2781",
+        "source": "2026-09-11/000000d1--ad906be282/rlog-3.zst",
+        "upstream_lateral_id": [
+          {
+            "bus": 1,
+            "id": 0,
+            "n": 2400
+          }
+        ]
+      },
+      {
+        "bytes": 9851227,
+        "cruise_mode_b0": [
+          {
+            "bus": 1,
+            "n": 58,
+            "value": "0x88"
+          },
+          {
+            "bus": 1,
+            "n": 4,
+            "value": "0x90"
+          }
+        ],
+        "lag_estimates": {
+          "distinct": 1,
+          "max": 0.3799999952316284,
+          "median": 0.3799999952316284,
+          "min": 0.3799999952316284,
+          "n": 240
+        },
+        "lag_status": [
+          {
+            "n": 240,
+            "status": "unestimated",
+            "valid_blocks": 0
+          }
+        ],
+        "learned_steer_ratio": {
+          "distinct": 351,
+          "max": 15.416626930236816,
+          "median": 15.38693904876709,
+          "min": 15.386786460876465,
+          "n": 1200
+        },
+        "learned_stiffness_multiplier": {
+          "distinct": 303,
+          "max": 0.9846137166023254,
+          "median": 0.9845892190933228,
+          "min": 0.9822986125946045,
+          "n": 1200
+        },
+        "native_can": [
+          {
+            "address": "0x025",
+            "bus": 1,
+            "data": "0ffd00003ffb00730000000000000000000000000000000000000000ab1f46e8",
+            "length": 32,
+            "n": 5999,
+            "timestamp_ns": 576108646188
+          },
+          {
+            "address": "0x08A",
+            "bus": 1,
+            "data": "0000000080000012fe3900fe397fff007fff000000000000000039002022f3fb",
+            "length": 32,
+            "n": 2400,
+            "timestamp_ns": 576108646188
+          },
+          {
+            "address": "0x0AA",
+            "bus": 1,
+            "data": "1a6f1a6f1a6f1a6f",
+            "length": 8,
+            "n": 6000,
+            "timestamp_ns": 576108646188
+          },
+          {
+            "address": "0x0FE",
+            "bus": 1,
+            "data": "4220ee3f0000c3620000000000000000e740000000ff0000000000006d6b9b6f",
+            "length": 32,
+            "n": 1890,
+            "timestamp_ns": 576118391233
+          },
+          {
+            "address": "0x101",
+            "bus": 1,
+            "data": "800000010000008b",
+            "length": 8,
+            "n": 3000,
+            "timestamp_ns": 576108646188
+          },
+          {
+            "address": "0x116",
+            "bus": 1,
+            "data": "00000000e7cf8ec9",
+            "length": 8,
+            "n": 2547,
+            "timestamp_ns": 576118391233
+          },
+          {
+            "address": "0x127",
+            "bus": 1,
+            "data": "001000000024c226",
+            "length": 8,
+            "n": 3662,
+            "timestamp_ns": 576108646188
+          },
+          {
+            "address": "0x160",
+            "bus": 2,
+            "data": "1a582182800040034defe3007fc8008001bfff100a5000040000000000000000",
+            "length": 32,
+            "n": 2399,
+            "timestamp_ns": 576129499960
+          },
+          {
+            "address": "0x180",
+            "bus": 0,
+            "data": "29ac10160385f88ff4ff20022dff9000ff08fff8000000ffff0d3204eff4ff030768031010ff3e0791f73ff2ff57fff8000000fffffff8000000ffff00000000",
+            "length": 64,
+            "n": 1200,
+            "timestamp_ns": 576129499960
+          },
+          {
+            "address": "0x183",
+            "bus": 0,
+            "data": "d2951016003ff601000a40104000000082000000000000000000000100000102083ffe00000102003ffa00000b42000000000000000000000000000000000000",
+            "length": 64,
+            "n": 1200,
+            "timestamp_ns": 576129499960
+          },
+          {
+            "address": "0x185",
+            "bus": 0,
+            "data": "f2511016000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+            "length": 64,
+            "n": 1200,
+            "timestamp_ns": 576129499960
+          },
+          {
+            "address": "0x251",
+            "bus": 1,
+            "data": "881016488000a080",
+            "length": 8,
+            "n": 62,
+            "timestamp_ns": 577073768783
+          },
+          {
+            "address": "0x3B7",
+            "bus": 1,
+            "data": "0000000020000008",
+            "length": 8,
+            "n": 200,
+            "timestamp_ns": 576379371057
+          },
+          {
+            "address": "0x3F6",
+            "bus": 1,
+            "data": "a0ea6e00a1fa4808",
+            "length": 8,
+            "n": 60,
+            "timestamp_ns": 576148754948
+          },
+          {
+            "address": "0x412",
+            "bus": 1,
+            "data": "4000000000ee9307",
+            "length": 8,
+            "n": 60,
+            "timestamp_ns": 577084015437
+          },
+          {
+            "address": "0x51E",
+            "bus": 1,
+            "data": "8000860000000000",
+            "length": 8,
+            "n": 60,
+            "timestamp_ns": 576771805835
+          },
+          {
+            "address": "0x610",
+            "bus": 1,
+            "data": "0000004ed0fffd00",
+            "length": 8,
+            "n": 140,
+            "timestamp_ns": 576279316995
+          },
+          {
+            "address": "0x614",
+            "bus": 1,
+            "data": "00004230000042fd",
+            "length": 8,
+            "n": 63,
+            "timestamp_ns": 576308770511
+          },
+          {
+            "address": "0x620",
+            "bus": 1,
+            "data": "000000008000000a",
+            "length": 8,
+            "n": 200,
+            "timestamp_ns": 576208801292
+          },
+          {
+            "address": "0x622",
+            "bus": 1,
+            "data": "0000000000310000",
+            "length": 8,
+            "n": 60,
+            "timestamp_ns": 576429304652
+          }
+        ],
+        "p05": [
+          {
+            "address": "0x160",
+            "n": 2399,
+            "valid": true
+          },
+          {
+            "address": "0x180",
+            "n": 1200,
+            "valid": true
+          },
+          {
+            "address": "0x183",
+            "n": 1200,
+            "valid": true
+          },
+          {
+            "address": "0x185",
+            "n": 1200,
+            "valid": true
+          }
+        ],
+        "recorded_car_params": {
+          "steerActuatorDelay": 0.18000000715255737,
+          "steerRatio": 13.699999809265137,
+          "tireStiffnessFactor": 0.7932999730110168,
+          "tireStiffnessFront": 163310.546875,
+          "tireStiffnessRear": 202840.5625
+        },
+        "sha256": "b9e93439983bdfa14dace05e7f4329124c001f61b6506ec7e9d060bedc26f61c",
+        "source": "2026-09-11/000000d1--ad906be282/rlog-9.zst",
+        "upstream_lateral_id": [
+          {
+            "bus": 1,
+            "id": 0,
+            "n": 2400
+          }
+        ]
+      }
+    ],
+    "working_repin": [
+      {
+        "bytes": 10554048,
+        "cruise_mode_b0": [
+          {
+            "bus": 2,
+            "n": 1,
+            "value": "0x80"
+          },
+          {
+            "bus": 2,
+            "n": 16,
+            "value": "0x88"
+          },
+          {
+            "bus": 2,
+            "n": 21,
+            "value": "0x90"
+          },
+          {
+            "bus": 2,
+            "n": 32,
+            "value": "0xE0"
+          }
+        ],
+        "lag_estimates": {
+          "distinct": 1,
+          "max": 0.3837597370147705,
+          "median": 0.3837597370147705,
+          "min": 0.3837597370147705,
+          "n": 240
+        },
+        "lag_status": [
+          {
+            "n": 240,
+            "status": "estimated",
+            "valid_blocks": 21
+          }
+        ],
+        "learned_steer_ratio": {
+          "distinct": 946,
+          "max": 15.395804405212402,
+          "median": 15.3895902633667,
+          "min": 15.322717666625977,
+          "n": 1200
+        },
+        "learned_stiffness_multiplier": {
+          "distinct": 477,
+          "max": 1.0022592544555664,
+          "median": 1.0000247955322266,
+          "min": 1.0000020265579224,
+          "n": 1200
+        },
+        "native_can": [
+          {
+            "address": "0x025",
+            "bus": 0,
+            "data": "0ff80000cfff00020000000000000000000000000000000000000000287bbe7d",
+            "length": 32,
+            "n": 6000,
+            "timestamp_ns": 2816686109687
+          },
+          {
+            "address": "0x030",
+            "bus": 0,
+            "data": "f70000ff89007027f7ff80ff21c000c0020e0000ff2200a300000000e6158944",
+            "length": 32,
+            "n": 6000,
+            "timestamp_ns": 2816686109687
+          },
+          {
+            "address": "0x08A",
+            "bus": 2,
+            "data": "0000000080000012ff7c00ff7c7fff007fffff1d0000000000002f006a83e52e",
+            "length": 32,
+            "n": 2400,
+            "timestamp_ns": 2816686109687
+          },
+          {
+            "address": "0x0AA",
+            "bus": 0,
+            "data": "242a243324242438",
+            "length": 8,
+            "n": 6000,
+            "timestamp_ns": 2816686109687
+          },
+          {
+            "address": "0x0FE",
+            "bus": 0,
+            "data": "6764e73f0000c3e2ff51109dff51ff512340000000ff000000000000ebcb132f",
+            "length": 32,
+            "n": 1890,
+            "timestamp_ns": 2816686109687
+          },
+          {
+            "address": "0x101",
+            "bus": 0,
+            "data": "8800000600000098",
+            "length": 8,
+            "n": 3000,
+            "timestamp_ns": 2816686109687
+          },
+          {
+            "address": "0x116",
+            "bus": 0,
+            "data": "00000000293e64f6",
+            "length": 8,
+            "n": 2547,
+            "timestamp_ns": 2816705802381
+          },
+          {
+            "address": "0x127",
+            "bus": 0,
+            "data": "00100007f13985f6",
+            "length": 8,
+            "n": 3662,
+            "timestamp_ns": 2816686109687
+          },
+          {
+            "address": "0x160",
+            "bus": 1,
+            "data": "7c9bd582fd95400486af9b00070ffe80023fc4c82feff2e40000000000000000",
+            "length": 32,
+            "n": 2400,
+            "timestamp_ns": 2816686109687
+          },
+          {
+            "address": "0x180",
+            "bus": 1,
+            "data": "f2d4eaf029b3fce073ffff06f1fba01d0fff3afff280adffff30c9ef5081ffff0113fc000613ff277bfeb04dffff0f1811c034c2ff0af9fa802a3c0b00000000",
+            "length": 64,
+            "n": 1200,
+            "timestamp_ns": 2816725651479
+          },
+          {
+            "address": "0x183",
+            "bus": 1,
+            "data": "f987eaf0003eed07040300003eeb0a040903003ef907040302003ef707040340003eec7f040902003eeb08040302283ed70c040902003eed0600010200000000",
+            "length": 64,
+            "n": 1200,
+            "timestamp_ns": 2816725651479
+          },
+          {
+            "address": "0x185",
+            "bus": 1,
+            "data": "acb3eaf0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+            "length": 64,
+            "n": 1200,
+            "timestamp_ns": 2816725651479
+          },
+          {
+            "address": "0x251",
+            "bus": 2,
+            "data": "e000004880000080",
+            "length": 8,
+            "n": 70,
+            "timestamp_ns": 2816735639568
+          },
+          {
+            "address": "0x3B7",
+            "bus": 0,
+            "data": "0000000020000008",
+            "length": 8,
+            "n": 202,
+            "timestamp_ns": 2816815611055
+          },
+          {
+            "address": "0x3F6",
+            "bus": 2,
+            "data": "80ea6e0080ba4808",
+            "length": 8,
+            "n": 60,
+            "timestamp_ns": 2816879194438
+          },
+          {
+            "address": "0x412",
+            "bus": 2,
+            "data": "4800002200ee9307",
+            "length": 8,
+            "n": 60,
+            "timestamp_ns": 2816745454848
+          },
+          {
+            "address": "0x51E",
+            "bus": 0,
+            "data": "8000940000000000",
+            "length": 8,
+            "n": 60,
+            "timestamp_ns": 2817500678310
+          },
+          {
+            "address": "0x610",
+            "bus": 0,
+            "data": "0000174ed000aa00",
+            "length": 8,
+            "n": 221,
+            "timestamp_ns": 2817147609595
+          },
+          {
+            "address": "0x614",
+            "bus": 0,
+            "data": "00004230000042b1",
+            "length": 8,
+            "n": 68,
+            "timestamp_ns": 2816715597140
+          },
+          {
+            "address": "0x620",
+            "bus": 0,
+            "data": "00000000c000000a",
+            "length": 8,
+            "n": 200,
+            "timestamp_ns": 2816897875792
+          },
+          {
+            "address": "0x622",
+            "bus": 0,
+            "data": "0000083000310000",
+            "length": 8,
+            "n": 61,
+            "timestamp_ns": 2816715597140
+          }
+        ],
+        "p05": [
+          {
+            "address": "0x160",
+            "n": 2400,
+            "valid": true
+          },
+          {
+            "address": "0x180",
+            "n": 1200,
+            "valid": true
+          },
+          {
+            "address": "0x183",
+            "n": 1200,
+            "valid": true
+          },
+          {
+            "address": "0x185",
+            "n": 1200,
+            "valid": true
+          }
+        ],
+        "recorded_car_params": {
+          "steerActuatorDelay": 0.18000000715255737,
+          "steerRatio": 13.699999809265137,
+          "tireStiffnessFactor": 0.7932999730110168,
+          "tireStiffnessFront": 163310.546875,
+          "tireStiffnessRear": 202840.5625
+        },
+        "sha256": "591c4097f6156d01b97f1b414cbc8c815c84a3541a96f5b2dc1cd0422ebdc4a3",
+        "source": "2026-09-10/0000008d--a9f348691a/rlog-2.zst",
+        "upstream_lateral_id": [
+          {
+            "bus": 2,
+            "id": 0,
+            "n": 2400
+          }
+        ]
+      },
+      {
+        "bytes": 10446367,
+        "cruise_mode_b0": [
+          {
+            "bus": 2,
+            "n": 17,
+            "value": "0x88"
+          },
+          {
+            "bus": 2,
+            "n": 54,
+            "value": "0x90"
+          }
+        ],
+        "lag_estimates": {
+          "distinct": 1,
+          "max": 0.3837597370147705,
+          "median": 0.3837597370147705,
+          "min": 0.3837597370147705,
+          "n": 240
+        },
+        "lag_status": [
+          {
+            "n": 240,
+            "status": "estimated",
+            "valid_blocks": 21
+          }
+        ],
+        "learned_steer_ratio": {
+          "distinct": 963,
+          "max": 15.362265586853027,
+          "median": 15.35682487487793,
+          "min": 15.333619117736816,
+          "n": 1200
+        },
+        "learned_stiffness_multiplier": {
+          "distinct": 532,
+          "max": 1.0023915767669678,
+          "median": 1.0021830797195435,
+          "min": 1.0019363164901733,
+          "n": 1200
+        },
+        "native_can": [
+          {
+            "address": "0x025",
+            "bus": 0,
+            "data": "000400005fff008f00000000000000000000000000000000000000002d329012",
+            "length": 32,
+            "n": 6000,
+            "timestamp_ns": 2876690242759
+          },
+          {
+            "address": "0x030",
+            "bus": 0,
+            "data": "0500000049ffd055060040005dc0ffa8020c0000005effee000000002a64bb8f",
+            "length": 32,
+            "n": 6001,
+            "timestamp_ns": 2876690242759
+          },
+          {
+            "address": "0x08A",
+            "bus": 2,
+            "data": "0000000080000012fd7800fd787fff007fff005f0000000000000f0062e59b27",
+            "length": 32,
+            "n": 2400,
+            "timestamp_ns": 2876690242759
+          },
+          {
+            "address": "0x0AA",
+            "bus": 0,
+            "data": "2d022cfa2ced2cea",
+            "length": 8,
+            "n": 6000,
+            "timestamp_ns": 2876690242759
+          },
+          {
+            "address": "0x0FE",
+            "bus": 0,
+            "data": "2f3f493f0000c066ff000f1606df06dfc360000000ff000000000000ecfb0a54",
+            "length": 32,
+            "n": 1891,
+            "timestamp_ns": 2876690242759
+          },
+          {
+            "address": "0x101",
+            "bus": 0,
+            "data": "800000000000008a",
+            "length": 8,
+            "n": 3000,
+            "timestamp_ns": 2876690242759
+          },
+          {
+            "address": "0x116",
+            "bus": 0,
+            "data": "4e5000002b168f71",
+            "length": 8,
+            "n": 2548,
+            "timestamp_ns": 2876690242759
+          },
+          {
+            "address": "0x127",
+            "bus": 0,
+            "data": "001029006333acab",
+            "length": 8,
+            "n": 3662,
+            "timestamp_ns": 2876690242759
+          },
+          {
+            "address": "0x160",
+            "bus": 1,
+            "data": "e2e53582861640059c883b00730844800220f7c0800005f40000000000000000",
+            "length": 32,
+            "n": 2400,
+            "timestamp_ns": 2876690242759
+          },
+          {
+            "address": "0x180",
+            "bus": 1,
+            "data": "97e89aa009d1fb4fee0f000bf1fb5fe2ff0252c00c1fb4fffa2d2c0edfc5ffff13c9fbcfe8ffff1513f68fe0ffff06d9fb7fed20013b6c10cfbfffff00000000",
+            "length": 64,
+            "n": 1200,
+            "timestamp_ns": 2876729960772
+          },
+          {
+            "address": "0x183",
+            "bus": 1,
+            "data": "97fe9aa0003decf7000103003deefa000102003df6df000302003df6ef040302003df1ef040102003dedf2040102003def06000903003dfcef04030000000000",
+            "length": 64,
+            "n": 1200,
+            "timestamp_ns": 2876729960772
+          },
+          {
+            "address": "0x185",
+            "bus": 1,
+            "data": "06a29aa00000000000000000000000000000003df0f2000902003dfffa0003020000000000000000000000000000000000000000000000000000000000000000",
+            "length": 64,
+            "n": 1199,
+            "timestamp_ns": 2876729960772
+          },
+          {
+            "address": "0x251",
+            "bus": 2,
+            "data": "88101a488000a080",
+            "length": 8,
+            "n": 71,
+            "timestamp_ns": 2876740240947
+          },
+          {
+            "address": "0x3B7",
+            "bus": 0,
+            "data": "0000000020000008",
+            "length": 8,
+            "n": 200,
+            "timestamp_ns": 2876819445622
+          },
+          {
+            "address": "0x3F6",
+            "bus": 2,
+            "data": "80ea6e0080ba4808",
+            "length": 8,
+            "n": 60,
+            "timestamp_ns": 2876880278718
+          },
+          {
+            "address": "0x412",
+            "bus": 2,
+            "data": "4800002200ee9307",
+            "length": 8,
+            "n": 61,
+            "timestamp_ns": 2876749039997
+          },
+          {
+            "address": "0x51E",
+            "bus": 0,
+            "data": "8000940000000000",
+            "length": 8,
+            "n": 60,
+            "timestamp_ns": 2877532452323
+          },
+          {
+            "address": "0x610",
+            "bus": 0,
+            "data": "0000314ed0004800",
+            "length": 8,
+            "n": 204,
+            "timestamp_ns": 2876899133675
+          },
+          {
+            "address": "0x614",
+            "bus": 0,
+            "data": "00004230000042b5",
+            "length": 8,
+            "n": 67,
+            "timestamp_ns": 2876710166244
+          },
+          {
+            "address": "0x620",
+            "bus": 0,
+            "data": "00000000c000000a",
+            "length": 8,
+            "n": 200,
+            "timestamp_ns": 2876839800871
+          },
+          {
+            "address": "0x622",
+            "bus": 0,
+            "data": "0000083000310000",
+            "length": 8,
+            "n": 60,
+            "timestamp_ns": 2877664364786
+          }
+        ],
+        "p05": [
+          {
+            "address": "0x160",
+            "n": 2400,
+            "valid": true
+          },
+          {
+            "address": "0x180",
+            "n": 1200,
+            "valid": true
+          },
+          {
+            "address": "0x183",
+            "n": 1200,
+            "valid": true
+          },
+          {
+            "address": "0x185",
+            "n": 1199,
+            "valid": true
+          }
+        ],
+        "recorded_car_params": {
+          "steerActuatorDelay": 0.18000000715255737,
+          "steerRatio": 13.699999809265137,
+          "tireStiffnessFactor": 0.7932999730110168,
+          "tireStiffnessFront": 163310.546875,
+          "tireStiffnessRear": 202840.5625
+        },
+        "sha256": "1c02da61c8c3ce2e2e0dd6ceaa872ee0f34e22b256aabe7eb359b2bba5d43882",
+        "source": "2026-09-10/0000008d--a9f348691a/rlog-3.zst",
+        "upstream_lateral_id": [
+          {
+            "bus": 2,
+            "id": 0,
+            "n": 2400
+          }
+        ]
+      },
+      {
+        "bytes": 10459084,
+        "cruise_mode_b0": [
+          {
+            "bus": 2,
+            "n": 19,
+            "value": "0x88"
+          },
+          {
+            "bus": 2,
+            "n": 53,
+            "value": "0x90"
+          }
+        ],
+        "lag_estimates": {
+          "distinct": 1,
+          "max": 0.3837597370147705,
+          "median": 0.3837597370147705,
+          "min": 0.3837597370147705,
+          "n": 240
+        },
+        "lag_status": [
+          {
+            "n": 240,
+            "status": "estimated",
+            "valid_blocks": 21
+          }
+        ],
+        "learned_steer_ratio": {
+          "distinct": 1073,
+          "max": 15.358956336975098,
+          "median": 15.317520141601562,
+          "min": 15.264668464660645,
+          "n": 1201
+        },
+        "learned_stiffness_multiplier": {
+          "distinct": 760,
+          "max": 1.00299072265625,
+          "median": 1.0027880668640137,
+          "min": 1.0025371313095093,
+          "n": 1201
+        },
+        "native_can": [
+          {
+            "address": "0x025",
+            "bus": 0,
+            "data": "0ffb00000004003b00000000000000000000000000000000000000006deb21bf",
+            "length": 32,
+            "n": 6001,
+            "timestamp_ns": 3056696833421
+          },
+          {
+            "address": "0x030",
+            "bus": 0,
+            "data": "fe0000ffb40000e9feffb0ff84000000220f0000ff840003000000006f94a28b",
+            "length": 32,
+            "n": 6000,
+            "timestamp_ns": 3056696833421
+          },
+          {
+            "address": "0x08A",
+            "bus": 2,
+            "data": "0000000880002d47ff3627ff367fff007fffff84c000100000002f00a8fddcd6",
+            "length": 32,
+            "n": 2400,
+            "timestamp_ns": 3056706936896
+          },
+          {
+            "address": "0x0AA",
+            "bus": 0,
+            "data": "2a4b2a5f2a412a4d",
+            "length": 8,
+            "n": 6000,
+            "timestamp_ns": 3056696833421
+          },
+          {
+            "address": "0x0FE",
+            "bus": 0,
+            "data": "eb47700b0000c362ff040aea01bcff046340000000ff0000000000002d94327e",
+            "length": 32,
+            "n": 1890,
+            "timestamp_ns": 3056706936896
+          },
+          {
+            "address": "0x101",
+            "bus": 0,
+            "data": "800000000000008a",
+            "length": 8,
+            "n": 3000,
+            "timestamp_ns": 3056706936896
+          },
+          {
+            "address": "0x116",
+            "bus": 0,
+            "data": "28000000679f35e1",
+            "length": 8,
+            "n": 2548,
+            "timestamp_ns": 3056706936896
+          },
+          {
+            "address": "0x127",
+            "bus": 0,
+            "data": "00100a001a31fd92",
+            "length": 8,
+            "n": 3662,
+            "timestamp_ns": 3056706936896
+          },
+          {
+            "address": "0x160",
+            "bus": 1,
+            "data": "cdcc5582ffe240054a0fc3007d8ff080023f96c86ffff4040000000000000000",
+            "length": 32,
+            "n": 2400,
+            "timestamp_ns": 3056706936896
+          },
+          {
+            "address": "0x180",
+            "bus": 1,
+            "data": "47dba9af075417aff86eff08da0fa00d5a1215be11e028ffff0481fc501a2801411003209aff2507fffc50200f021cc411003eff000badf9002aff0900000000",
+            "length": 64,
+            "n": 1200,
+            "timestamp_ns": 3056696833421
+          },
+          {
+            "address": "0x183",
+            "bus": 1,
+            "data": "8838a9af003e5f0f040902023e353a0009027abe3e06000b02003e4110000903683e38fd000202003e3e0000010301fe2c0e000b03003e3f0400090200000000",
+            "length": 64,
+            "n": 1200,
+            "timestamp_ns": 3056696833421
+          },
+          {
+            "address": "0x185",
+            "bus": 1,
+            "data": "c6a1a9af00000000000000383e3407000b0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+            "length": 64,
+            "n": 1200,
+            "timestamp_ns": 3056696833421
+          },
+          {
+            "address": "0x251",
+            "bus": 2,
+            "data": "901019908000a080",
+            "length": 8,
+            "n": 72,
+            "timestamp_ns": 3056756531572
+          },
+          {
+            "address": "0x3B7",
+            "bus": 0,
+            "data": "0000000020000008",
+            "length": 8,
+            "n": 200,
+            "timestamp_ns": 3056826801891
+          },
+          {
+            "address": "0x3F6",
+            "bus": 2,
+            "data": "80ea6e0080ba4808",
+            "length": 8,
+            "n": 60,
+            "timestamp_ns": 3056896984762
+          },
+          {
+            "address": "0x412",
+            "bus": 2,
+            "data": "4000000000ee9307",
+            "length": 8,
+            "n": 60,
+            "timestamp_ns": 3056766312499
+          },
+          {
+            "address": "0x51E",
+            "bus": 0,
+            "data": "8000940000000000",
+            "length": 8,
+            "n": 60,
+            "timestamp_ns": 3057611539371
+          },
+          {
+            "address": "0x610",
+            "bus": 0,
+            "data": "0000294ed0013d00",
+            "length": 8,
+            "n": 148,
+            "timestamp_ns": 3056746439243
+          },
+          {
+            "address": "0x614",
+            "bus": 0,
+            "data": "00004230000042c3",
+            "length": 8,
+            "n": 65,
+            "timestamp_ns": 3056706936896
+          },
+          {
+            "address": "0x620",
+            "bus": 0,
+            "data": "00000000c000000a",
+            "length": 8,
+            "n": 200,
+            "timestamp_ns": 3056978898381
+          },
+          {
+            "address": "0x622",
+            "bus": 0,
+            "data": "0000083000310000",
+            "length": 8,
+            "n": 60,
+            "timestamp_ns": 3057501381865
+          }
+        ],
+        "p05": [
+          {
+            "address": "0x160",
+            "n": 2400,
+            "valid": true
+          },
+          {
+            "address": "0x180",
+            "n": 1200,
+            "valid": true
+          },
+          {
+            "address": "0x183",
+            "n": 1200,
+            "valid": true
+          },
+          {
+            "address": "0x185",
+            "n": 1200,
+            "valid": true
+          }
+        ],
+        "recorded_car_params": {
+          "steerActuatorDelay": 0.18000000715255737,
+          "steerRatio": 13.699999809265137,
+          "tireStiffnessFactor": 0.7932999730110168,
+          "tireStiffnessFront": 163310.546875,
+          "tireStiffnessRear": 202840.5625
+        },
+        "sha256": "87ec47f75bf4ab45463cd70dbc0ba79e5aa339f9ec55493629931499c6fb4832",
+        "source": "2026-09-10/0000008d--a9f348691a/rlog-6.zst",
+        "upstream_lateral_id": [
+          {
+            "bus": 2,
+            "id": 0,
+            "n": 2400
+          }
+        ]
+      }
+    ],
+    "working_repin_corroboration": [
+      {
+        "bytes": 10436676,
+        "cruise_mode_b0": [
+          {
+            "bus": 2,
+            "n": 1,
+            "value": "0x80"
+          },
+          {
+            "bus": 2,
+            "n": 14,
+            "value": "0x88"
+          },
+          {
+            "bus": 2,
+            "n": 19,
+            "value": "0x90"
+          },
+          {
+            "bus": 2,
+            "n": 32,
+            "value": "0xE0"
+          }
+        ],
+        "lag_estimates": {
+          "distinct": 1,
+          "max": 0.3837597370147705,
+          "median": 0.3837597370147705,
+          "min": 0.3837597370147705,
+          "n": 240
+        },
+        "lag_status": [
+          {
+            "n": 240,
+            "status": "estimated",
+            "valid_blocks": 21
+          }
+        ],
+        "learned_steer_ratio": {
+          "distinct": 714,
+          "max": 15.26900577545166,
+          "median": 15.260658264160156,
+          "min": 15.251760482788086,
+          "n": 1200
+        },
+        "learned_stiffness_multiplier": {
+          "distinct": 397,
+          "max": 1.000303864479065,
+          "median": 1.0002120733261108,
+          "min": 0.9997667670249939,
+          "n": 1200
+        },
+        "native_can": [
+          {
+            "address": "0x025",
+            "bus": 0,
+            "data": "000100002001004f00000000000000000000000000000000000000005dd29357",
+            "length": 32,
+            "n": 5999,
+            "timestamp_ns": 3819647129742
+          },
+          {
+            "address": "0x030",
+            "bus": 0,
+            "data": "0300000013ffb0fd030010002080ff79020100000021006600000000146bbe6c",
+            "length": 32,
+            "n": 6000,
+            "timestamp_ns": 3819647129742
+          },
+          {
+            "address": "0x08A",
+            "bus": 2,
+            "data": "0000000080000012028b00028b7fff007fff00220000000000002300570beb17",
+            "length": 32,
+            "n": 2399,
+            "timestamp_ns": 3819668110287
+          },
+          {
+            "address": "0x0AA",
+            "bus": 0,
+            "data": "1a6f1a6f1a6f1a6f",
+            "length": 8,
+            "n": 5999,
+            "timestamp_ns": 3819647129742
+          },
+          {
+            "address": "0x0FE",
+            "bus": 0,
+            "data": "b2ae523f0000c3e2029e0aea029e029e2340000000ff0000000000009a6289be",
+            "length": 32,
+            "n": 1890,
+            "timestamp_ns": 3819658177287
+          },
+          {
+            "address": "0x101",
+            "bus": 0,
+            "data": "886600120000000a",
+            "length": 8,
+            "n": 3000,
+            "timestamp_ns": 3819647129742
+          },
+          {
+            "address": "0x116",
+            "bus": 0,
+            "data": "0000000012559817",
+            "length": 8,
+            "n": 2547,
+            "timestamp_ns": 3819658177287
+          },
+          {
+            "address": "0x127",
+            "bus": 0,
+            "data": "00100000003cb02c",
+            "length": 8,
+            "n": 3662,
+            "timestamp_ns": 3819647129742
+          },
+          {
+            "address": "0x160",
+            "bus": 1,
+            "data": "37138982800040034de8130006cfe680023fff100a5fffc40000000000000000",
+            "length": 32,
+            "n": 2399,
+            "timestamp_ns": 3819668110287
+          },
+          {
+            "address": "0x180",
+            "bus": 1,
+            "data": "2a4e434945161e001eff0c508243000effff1897ff2025ffff069bf71fedffff0e05f95ff8ff120437fd800bff033bf62a0005ff370fa7fd702dff0000000000",
+            "length": 64,
+            "n": 1200,
+            "timestamp_ns": 3819658177287
+          },
+          {
+            "address": "0x183",
+            "bus": 1,
+            "data": "8d054349003ffbf1000202003ffd00040b0230400200000142007ffb00040b02003fffd200010218c001e9000902003ffefb000a00000002fc00010200000000",
+            "length": 64,
+            "n": 1200,
+            "timestamp_ns": 3819658177287
+          },
+          {
+            "address": "0x185",
+            "bus": 1,
+            "data": "edb14349000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+            "length": 64,
+            "n": 1200,
+            "timestamp_ns": 3819658177287
+          },
+          {
+            "address": "0x251",
+            "bus": 2,
+            "data": "e000004880000080",
+            "length": 8,
+            "n": 66,
+            "timestamp_ns": 3820060138141
+          },
+          {
+            "address": "0x3B7",
+            "bus": 0,
+            "data": "0000000020000008",
+            "length": 8,
+            "n": 200,
+            "timestamp_ns": 3819758117909
+          },
+          {
+            "address": "0x3F6",
+            "bus": 2,
+            "data": "80ea6e0080ba4808",
+            "length": 8,
+            "n": 60,
+            "timestamp_ns": 3819907568958
+          },
+          {
+            "address": "0x412",
+            "bus": 2,
+            "data": "4200002202ee9307",
+            "length": 8,
+            "n": 61,
+            "timestamp_ns": 3820070087233
+          },
+          {
+            "address": "0x51E",
+            "bus": 0,
+            "data": "8000940000000000",
+            "length": 8,
+            "n": 60,
+            "timestamp_ns": 3819959502314
+          },
+          {
+            "address": "0x610",
+            "bus": 0,
+            "data": "0000004ed0fffd00",
+            "length": 8,
+            "n": 137,
+            "timestamp_ns": 3820139563702
+          },
+          {
+            "address": "0x614",
+            "bus": 0,
+            "data": "00004230000042ca",
+            "length": 8,
+            "n": 65,
+            "timestamp_ns": 3819687770625
+          },
+          {
+            "address": "0x620",
+            "bus": 0,
+            "data": "00000000c000000a",
+            "length": 8,
+            "n": 200,
+            "timestamp_ns": 3819758117909
+          },
+          {
+            "address": "0x622",
+            "bus": 0,
+            "data": "0000083000310000",
+            "length": 8,
+            "n": 60,
+            "timestamp_ns": 3819777690963
+          }
+        ],
+        "p05": [
+          {
+            "address": "0x160",
+            "n": 2399,
+            "valid": true
+          },
+          {
+            "address": "0x180",
+            "n": 1200,
+            "valid": true
+          },
+          {
+            "address": "0x183",
+            "n": 1200,
+            "valid": true
+          },
+          {
+            "address": "0x185",
+            "n": 1200,
+            "valid": true
+          }
+        ],
+        "recorded_car_params": {
+          "steerActuatorDelay": 0.18000000715255737,
+          "steerRatio": 13.699999809265137,
+          "tireStiffnessFactor": 0.7932999730110168,
+          "tireStiffnessFront": 163310.546875,
+          "tireStiffnessRear": 202840.5625
+        },
+        "sha256": "65bc4e824580628cb8409d92b72e15e0626b92e1a2553b304d3e81db209ca2ad",
+        "source": "2026-09-10/00000093--4066e7ae51/rlog-3.zst",
+        "upstream_lateral_id": [
+          {
+            "bus": 2,
+            "id": 0,
+            "n": 2399
+          }
+        ]
+      }
+    ]
+  },
+  "schema": "camry-port-evidence-audit-v1",
+  "scope": "seven source-pinned rlog segments plus both complete August-27 CAN captures; not a full-fleet qualification",
+  "vehicle_access": false
+}

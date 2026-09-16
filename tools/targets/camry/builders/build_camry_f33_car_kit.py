@@ -51,13 +51,12 @@ PREAGG_MONITOR_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_runtime
 INTERTICK_MONITOR_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_runtime_monitor_intertick.bin"
 MIDAGG_OBSERVER_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_midaggregate_observer.bin"
 COMMAND5_PROBE_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_command5_probe.bin"
-# The default car-kit signer is the byte-exact continuous helper from the
-# September 10 working-steering handoff.  Keep the one-shot audited bundle as
-# analysis prior art, but do not make a user override three environment
-# variables to reproduce the configuration that actually steered the car.
-INLINE_SIGNER_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_inline_signer_continuous.bin"
-INLINE_SIGNER_HELPER = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_inline_signer_continuous_helper_padded.bin"
-INLINE_SIGNER_META = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_b6_inline_signer_continuous_build.json"
+# Supervised continuous substitution preserves the road helper's steady-state
+# behavior, but stops after seven foreground ticks without a changed host
+# generation. Its new identity has instruction-level, not vehicle, validation.
+INLINE_SIGNER_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_inline_signer_supervised.bin"
+INLINE_SIGNER_HELPER = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_inline_signer_supervised_helper_padded.bin"
+INLINE_SIGNER_META = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_b6_inline_signer_supervised_build.json"
 ICUS_RAMKEY_HELPER9 = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_icus_ramkey_cmd9_helper_padded.bin"
 ICUS_RAMKEY_HELPER10 = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_icus_ramkey_cmd10_helper_padded.bin"
 ICUS_RAMKEY_META = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_icus_ramkey_probe.json"
@@ -65,6 +64,10 @@ INGRESS_HELPER = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_ingress_
 INGRESS_META = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_b6_ingress_helper_build.json"
 DEFAULT_OPENPILOT = Path("/Users/kai/dev/inspect/repos/kai-openpilot")
 RUNTIME_FILES = [
+    "tsk/__init__.py",
+    "tsk/lib/__init__.py",
+    "tsk/lib/programming.py",
+    "tsk/lib/diagnostic_route.py",
     "exploit/common/payload_package.py",
     "exploit/common/ram_exec.py",
     "exploit/ephemeral_runtime/camry_f33_b6_transaction_observer.py",
@@ -439,7 +442,7 @@ def build(out: Path, openpilot: Path) -> dict:
     for path in sorted(p for p in persistent_dir.rglob("*") if p.is_file()):
         files[str(path.relative_to(out))] = {"sha256": sha256(path)}
     manifest = {
-        "schema": "camry-f33-car-kit-v16",
+        "schema": "camry-f33-car-kit-v17",
         "created_at": datetime.now(UTC).isoformat(timespec="seconds"),
         "target": {
             "eps_f181": "8965F3307000",
@@ -458,9 +461,10 @@ def build(out: Path, openpilot: Path) -> dict:
             "software_id": "8965F3307000",
             "persistent_patch_required": False,
             "stage5_receiver_bypass_required": False,
-            "reason": "the continuous RAM helper installs a locally generated valid FV4+CMAC28 trailer before the untouched stock SecOC consumer",
+            "reason": "the supervised RAM helper installs a locally generated valid FV4+CMAC28 trailer before the untouched stock SecOC consumer",
             "live_qualified_on_stock_codeflash": False,
-            "live_qualified_configuration": "continuous RAM signer on the historical stage-5 image; stock-CodeFlash use is structurally independent of stage 5 but still awaits same-car validation",
+            "live_qualified_configuration": "historical continuous RAM signer on the stage-5 image only; the supervised default and stock-CodeFlash combination require qualification",
+            "historical_continuous_not_a_production_default": "unchanged C7 mailbox target survives host loss indefinitely",
         },
         "persistent_b6_signer": {
             "launcher": "f33-persist",
@@ -534,7 +538,7 @@ def build(out: Path, openpilot: Path) -> dict:
                 "control_can_id": inline_meta["loader"]["can_id"],
                 "state": inline_meta["loader"]["state"],
                 "telemetry": inline_meta["loader"]["telemetry"],
-                "operation": "post-startup helper load; first prove local slot-4 signing against an untouched native B6, then continuously replace/re-sign each distinct native B6 while the latest nonzero C7 command remains active",
+                "operation": "post-startup helper load; first prove local slot-4 signing against an untouched native B6, then replace/re-sign native B6 only while a changed nonzero C7 generation has renewed the seven-tick lease",
                 "trigger": inline_meta["signer"]["trigger"],
                 "domain": inline_meta["signer"]["domain"],
                 "freshness_owner": inline_meta["signer"]["freshness_owner"],
@@ -549,16 +553,17 @@ def build(out: Path, openpilot: Path) -> dict:
                     "./f33-secoc load-arm in READY/Park/stationary; require native Toyota trailer == locally computed trailer",
                     "./f33-secoc recover-drcc in READY/Park/stationary; preserve DTCs, run the exact physical-SID14 + functional-Mode04 clear, require zero post-clear fault bits, and observe FRC DRCC permission",
                     "./f33-secoc quiet-source in READY/Park/stationary to measure distinct native B6 rate with host C7 neutral",
-                    "return Panda ownership to openpilot; CarController C7 sequence zero leaves native B6 untouched and nonzero latActive C7 continuously replaces/re-signs native B6",
+                    "return Panda ownership to openpilot; CarController C7 sequence zero leaves native B6 untouched; each changed nonzero sequence renews seven foreground ticks; unchanged/zero commands cannot sustain replacement indefinitely",
                 ],
                 "persistent_flash_write": False,
                 "stage5_receiver_bypass_required": False,
-                "live_qualified": True,
-                "live_qualification": {
+                "live_qualified": False,
+                "host_liveness": inline_meta["signer"]["host_liveness"],
+                "historical_continuous_qualification": {
                     "route": "0000008d--a9f348691a",
                     "corroborating_route": "00000093--4066e7ae51",
                     "helper_padded_sha256": "b417e12dde0dc7d6478ea6f242fe9eaa246a00a9fbbcc711a5d2d3adcf159a28",
-                    "boundary": "the exact continuous helper identity is joined from the contemporaneous install/status handoff; the route records C7 and vehicle response but not EPS LocalRAM bytes",
+                    "boundary": "historical continuous helper only, not the current supervised default; the route records C7 and vehicle response but not EPS LocalRAM bytes",
                 },
                 "same_cycle_drcc_recovery": {
                     "command": "./f33-secoc recover-drcc",
@@ -786,7 +791,7 @@ def build(out: Path, openpilot: Path) -> dict:
                 "requires_before_arm": "first prove the exact injected ID63 frame reaches profile2 with b6_midaggregate_observer; bridge is a later controlled transformation experiment",
             },
             "order": [
-                "b6_inline_signer is the production-shaped volatile path: on stock Toyota-B bus 1 install the retained resident in NRTD, transition directly to READY, load/readback/arm the exact continuous helper, prove local signing against one untouched native B6 trailer, then return Panda ownership to openpilot; nonzero C7 drives continuous signed replacement and sequence zero returns to native B6",
+                "b6_inline_signer is the production-shaped volatile path: on stock Toyota-B bus 1 install the retained resident in NRTD, transition directly to READY, load/readback/arm the exact supervised helper, prove local signing against one untouched native B6 trailer, then return Panda ownership to openpilot; changed C7 generations renew the seven-tick host-loss supervision; expiry or sequence zero returns native B6 unchanged",
                 "command5_probe is retained as the already-live-qualified diagnostic oracle and is no longer the continuous signing architecture",
                 "b6_ingress_observer is the live-qualified two-stage topology discriminator; its 2026-09-10 D7-positive marker run closed bounded negative for direct Panda ID63 at post-CanIf/pre-SecOC",
                 "the original b6_midaggregate_observer full-runtime install failed before initialization and is retained only as a superseded artifact",
