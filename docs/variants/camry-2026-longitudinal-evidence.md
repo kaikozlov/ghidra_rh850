@@ -224,6 +224,129 @@ This follow-up changed the review only. No vehicle interaction, sender,
 controller, Panda rule, firmware, or experimental-mode default was changed.
 `REFERENCE/` and `build/` remain ignored and were not staged.
 
+## Expanded passive review: physical source is not control authority
+
+The pending role audit was independently re-extracted from **28 original rlog
+segments**. Its **306,071 retained publication events** reproduce the existing
+fixture byte-for-byte (SHA-256
+`5a1a454517016ad6a3db15a66b28f11ee0c274c497d0cf0c02f0921ab398ed54`). Both complete
+August captures were then reprocessed independently of those September logs.
+The expanded evidence lives in:
+
+- `tools/targets/camry/extract/extract_camry_2026_longitudinal_role.py`
+- `tools/targets/camry/analysis/analyze_camry_2026_longitudinal_role.py`
+- `tests/fixtures/camry_2026_longitudinal_role.jsonl.gz`
+- `data/generated/camry_2026_longitudinal_role.json`
+
+**Working diagnosis:** the examined Camry fields fit an FRC publication of ego
+motion and selected longitudinal state better than a direct independent
+acceleration-demand interface. A perception/radar-side state report is the
+leading architectural interpretation, **not a recovered receiver contract**.
+Neither "every field is telemetry" nor "the packet can never influence control"
+follows. It is also not established that this is an exact echo of some other
+FRC-origin command: the correlated `0x0CA` channel travels from the chassis
+side toward the camera on the historical split.
+
+### Independent ego-state comparisons
+
+With no additional unit fit, the fine field agrees with the acceleration-like
+quantity in chassis `0x13C`: all-sample correlations **0.979516 / 0.989355**, with
+median absolute differences **0.006 / 0.014 m/s²** in August A/B. This names the
+observed chassis channel, **not its physical ECU owner or an OEM signal**. The
+independent wheel derivative and cruise-off moving results above avoid circularly
+validating one presumed command against another presumed command.
+
+A separate packed speed-like field in `0x160` follows mean wheel speed with
+correlations **0.999789 / 0.999942** and median absolute differences about
+**0.019 / 0.020 m/s**, above the declared low-speed cut. The selected packet
+therefore contains ego-state information, not merely an acceleration-shaped
+number. Its validity/sentinel semantics and every other field remain unmapped.
+Invalid wheel flags are excluded rather than interpreted as zero speed.
+
+In the restored-harness d1/d4 captures, with cruise disengaged and speed above
+2 m/s, the fine field also agrees with the independently wheel-derived
+`carState.aEgo`: **r=0.970690 / 0.957737**, using **6,096 / 6,503** samples.
+
+### B12 timing is consistent with a report, but is not a causal clock
+
+The complete native sweeps align B12 best with `0x0CA` **50 / 75 ms earlier**.
+However, the level-correlation gain over zero lag is only
+**0.000258 / 0.000472**; correlations of 200-ms changes peak at just
+**0.185 / 0.455**. The peaks are broad, the series autocorrelated, and rlog
+publication timestamps are shared by a CAN batch. Do not turn the maximizing
+lag into an exact gateway delay or proof of an internal dataflow edge.
+
+The actual start neighborhoods are more useful. Relative to the first three
+consecutive raw-wheel samples above 0.025 m/s:
+
+| Stock resume | `0x0CA` result-like field persistently >0.5 m/s² | Fine field persistently >0.05 m/s² |
+|---|---:|---:|
+| 3b / 5122.256 s neighborhood | −441 ms | +272 ms |
+| 3c / 9068.054 s neighborhood | −372 ms | +263 ms |
+| 3c / 9147.517 s neighborhood | −482 ms | +262 ms |
+
+These definitions differ from the 0.1 m/s onset / first-nonzero-field table
+above; they are not contradictory estimates. No gas, brake, RES, SET, or CANCEL
+assertion is present in the declared −1.0 to +0.5 s windows. At the −500-ms
+landmarks, `0x0CA` is already positive while B12 is still at its preceding
+baseline. **B12 preceding wheel motion is not evidence that it precedes the
+native longitudinal decision.** Different resolutions and filtering still
+prevent an exact copy/transform claim.
+
+### Actual replacements and the native comparator
+
+The expanded d1 selection contains **10,259** host frames, **10,228** changed
+fine fields, and no B12 modifications. The d4 selection contains **1,249** host
+frames, **1,243** changed fine fields, and **970** changed B12 fields. Every host
+frame has a source/time/counter-matched native template and valid CRC; d4 has
+**1,249/1,249** exact returned TX payloads. All changed bytes are confined to the
+historical encoder's declared fields and CRC. These establish transport only.
+
+At a common 25-ms grid during d4 replacement, native B12 versus the `0x0CA`
+result-like channel has **r=0.931904**, while replacement B12 has **r=0.699657**
+(**1,244** observations). All 1,244 have a preceding conventional-active `0x90`
+mode observation within 1.5 s. The age bound reflects the slow mode message;
+unknown-mode observations remain explicitly counted instead of silently labeled.
+No healthy adaptive-mode acceptance claim follows from this trial.
+
+The host and stock controllers share a moving scene, and the camera continues
+to observe the car while its ADAS-side output is being replaced. Either closed
+loop can correlate with the same motion. The better intact-source fit defeats
+the previous correlation-only proof of host authority; it does not prove zero
+possible influence or identify a particular acceptance gate.
+
+### Source ownership, vocabulary, and remaining information boundary
+
+The September-1 notebook §19 records `0x160` **40 → 0 → 40** under FRC normal-Tx
+suppression/restoration on the observed ADAS network. This supports the FRC
+publication source, not a propulsion/brake destination. The full six-segment
+historical relay capture has `0x0CA` **13,756 native bus-0 RXs** and **13,256
+returned bus-2 TXs**, versus only 503 startup/native bus-2 observations. FRC-side
+`0x08A` has the opposite dominant direction. On the restored stock harness,
+`0x160` is the camera-side ADAS source and `0x0CA` remains on the unsplit chassis
+network. Panda bus indices are not Toyota network numbers.
+
+Direct GTS DDB queries reproduce `FRC_P5` DID `0x1253` (estimated acceleration)
+and `0x1B08` (separate driver, limit and output accelerations). `0x1B03..0x1B07`
+are ISA-specific request/permission observables, not a generic decoded DRCC
+request. Brake `0x10A1..0x10A4` name TSS requests, but no retained synchronized
+CAN/DID sample assigns these names to B4:B5 or B12. The current checked-in
+firmware inventory contains EPS applications, not the relevant Camry
+longitudinal producer/receiver implementation. EPS receive behavior cannot fill
+that provenance gap. No alternative sender is identified or enabled here.
+
+Reproduce the portable reductions:
+
+```bash
+uv run python tools/targets/camry/analysis/analyze_camry_2026_longitudinal_role.py
+tools/test camry_2026_longitudinal_role camry_20260916_longitudinal_motion_audit
+```
+
+This review changes only passive evidence tooling and documentation. No ECU,
+Panda, authentication, vehicle-control, or firmware operation is performed.
+The local research bundle under `REFERENCE/camry_2026_0x160_role_audit/` and
+all re-extraction workspace files under `build/` remain ignored/untracked.
+
 ---
 
 The following historical record predates this role audit. Its transport and
