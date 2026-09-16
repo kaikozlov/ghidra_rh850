@@ -114,8 +114,12 @@ lateral request semantics and the core lower/upper longitudinal request packages
 Toyota US20200070849A1 supplies the architecture that explains this shape: applications
 publish standardized lower/upper longitudinal bounds and a lateral request to the Vehicle
 Movement Manager. FFD `5280/5281/5282` independently names those request packages. The
-physical Bus-1 application-data -> protected Bus-4 publication/signing hop remains open;
-that is a transport/security-ownership question, not a missing semantic command.
+repin experiment additionally closes direction: protected `0x08A` is native on the
+FRC/camera-side endpoint of the intercepted Toyota Bus-4 pair and crosses the relay toward
+Brake byte-for-byte; it is already authenticated before the split. FRC normal-Tx
+suppression removes it. Thus the secured publisher/signing boundary is inside the FRC
+assembly, although the exact internal SoC/HSM or network-security controller is not yet
+identified.
 
 ### Brake arbitration/result plane: `0x081/32`
 
@@ -172,9 +176,11 @@ Use these buckets rather than one undifferentiated "TSK participant" list:
   F33 names the missing B6 peer Brake System Control Module; GTS puts category 435 on
   Bus 4 through No.2 Global CAN Junction and EPS on an `EBU`-labelled attachment;
   `ABS_P5` has a separate Power-Steering `ch2` communication DTC.
-- **Request-plane protected publication/signing (`0x08A` and related families):**
-  Skid/ABS 435, Brake Booster 466, Central Gateway, and FRC private-preauthentication
-  remain distinguishable until producer firmware/trace closes the exact path.
+- **Request-plane protected publication/signing (`0x08A`):** the repin + CommunicationControl
+  evidence places the protected publisher inside the FRC ECU/assembly diagnostic boundary.
+  `0x08A` is native on the FRC-side endpoint and forwarded unchanged toward Brake. The exact
+  FRC-internal signing engine/key slot remains open; Brake/Booster/CGW are no longer the
+  leading physical `0x08A` publisher candidates.
 
 Do not convert the `EBU` attachment token into another ECU in the roster.
 

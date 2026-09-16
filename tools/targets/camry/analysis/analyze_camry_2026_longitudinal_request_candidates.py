@@ -519,7 +519,7 @@ def build() -> dict:
         'request_plane_architecture': {
             'logical_request': ('0x08A is already the recovered upstream TSS request-side plane and is FRC-normal-Tx-dependent. FRC normal-Tx suppression removes '
                                 '0x08A, while the Brake-owned 0x081 result/reference publication survives FRC loss and asserts its '
-                                'request-loss response. A downstream signer/proxy may physically publish protected 0x08A, but that '
+                                'request-loss response. The repin/source experiment places protected 0x08A publication inside the FRC assembly; that '
                                 'does not create a second semantic request layer.'),
             'selected_result': ('0x081 is the established Brake/chassis-side selected/result/reference publication for lateral. '
                                 'The corresponding longitudinal result may be distributed across 0x0CA/0x5AF/0x5F7 or other fields; '

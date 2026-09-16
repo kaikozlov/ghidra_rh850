@@ -39,11 +39,10 @@ and [the minimal runtime contract](../architecture/toyota-tss3-minimal-runtime.m
 geometry, the software integration, and the development B6 sender/safety envelope.
 The September 10 route establishes steering for the exact C7/RAM configuration;
 it does not qualify direct host-B6 transmission or make the Camry adapter a
-universal TSS3 interface. CORR-129/VAR-081 identify **73.303384 s of retained `0x08A` ID11 LTA/LCA request state with zero B6**; this is not a direct winner/grant oracle. CORR-134 recovers B21 as Target Lateral ID and B18:B19 as the signed request-angle quantity; CORR-135 rejects a presumed `0x08A -> B6` transform. Exact F33 neither accepts `0x08A` nor transmits it, while its B6-inactive internal path reaches physical steering; that makes zero B6 architecturally possible but does not prove the retained request was granted. VAR-091/CORR-136 place authenticated `0x08A` on captured Bus 4 and observed E2E-only camera/radar PDUs on Bus 1; batched rlog timestamps still cannot identify the downstream physical transmitter/proxy. **CORR-194 supersedes CORR-149's key-holder exclusion:** FRC-family ECU-Security-Key provisioning is positive evidence, so private FRC pre-authentication versus downstream CMAC generation remains open even though a downstream Brake/Skid/Central-Gateway participant must physically publish the Bus-4 PDU. VAR-094 proves consecutive `5282` is absent from native Bus-1 CAN; CORR-138 retracts the former standing-echo interpretation of `0x160[22]`. VAR-101 proves the authenticated publication continues at zero request, not that the CMAC engine is downstream.
+universal TSS3 interface. CORR-129/VAR-081 identify **73.303384 s of retained `0x08A` ID11 LTA/LCA request state with zero B6**; this is not a direct winner/grant oracle. CORR-134 recovers B21 as Target Lateral ID and B18:B19 as the signed request-angle quantity; CORR-135 rejects a presumed `0x08A -> B6` transform. Exact F33 neither accepts `0x08A` nor transmits it, while its B6-inactive internal path reaches physical steering; that makes zero B6 architecturally possible but does not prove the retained request was granted. VAR-091/CORR-136 place authenticated `0x08A` on the intercepted chassis network while observed Toyota-Bus-1 camera/radar PDUs use E2E. The later repin/source experiment resolves the source ambiguity those older rows could not: with the relay open, protected `0x08A` is native on the **FRC/camera-side endpoint** and forwarded byte-for-byte toward Brake, while `0x081` is native on the Brake/chassis side and returns toward FRC. FRC CommunicationControl removes `0x08A`; therefore the secured publisher/signing boundary is inside the FRC assembly, even though the exact internal key/HSM owner remains open. VAR-094 proves consecutive `5282` is absent from native Bus-1 CAN; CORR-138 retracts the former standing-echo interpretation of `0x160[22]`. VAR-101 proves the authenticated publication continues at zero request, not that the CMAC engine is downstream.
 
 The integration and stock-architecture questions are deliberately separate.
-OQ-054 still tracks the private FRC request handoff and exact Bus-4 `0x08A`
-signer. That attribution is **not** a prerequisite for the demonstrated C7 ->
+OQ-054 now tracks the **internal FRC `0x08A` signer/key/freshness path** and the downstream Brake verification/arbitration->B6 path. That attribution is **not** a prerequisite for the demonstrated C7 ->
 native-B6 ingress. Exact-F33 Gate-2 compare neutralization and the historical
 zero-MAC/wrong-key host-B6 senders remain useful failure-localization evidence,
 but they are not the current sender. VAR-155/156 and the September 10 road handoff
@@ -1272,14 +1271,7 @@ bounded execution path is independent of Toyota's unresolved stock FRC pipeline:
 
 OQ-054 remains valuable for an elegant stock-compatible architecture: synchronized FRC
 Operation FFD `5282/5631/5285/57DE/5265/560D`, matched FRC/Brake firmware, or source-identifying
-capture must still reveal the request handoff/encoding and the exact Brake/Skid/CGW signer.
-Native Bus 1 has 22 frequent periodic camera/radar streams; `0x180..0x182` carry recovered
-perception-object slots, but per-ID FRC-versus-radar ownership is not named. The 28-byte `0x08A`
-application and consecutive `5282` layout are absent. VAR-113/CORR-153 bound direct
-single-field linear/monotonic carriers within declared sweeps but leave transformed,
-multi-field, multiplexed, sparse/event, and genuinely private/non-CAN handoffs open. We
-therefore know what FRC computes, not the transport/encoding that carries those semantics to
-the downstream proxy. That attribution does **not** block the independent B6 development
+capture must still reveal the exact application-request selection before the FRC signs `0x08A`, and exact FRC firmware/HSM evidence must identify the key/freshness/CMAC implementation. Native Bus 1 has 22 frequent periodic camera/radar streams; `0x180..0x182` carry recovered perception-object slots, but those are a separate FRC interface. The protected `0x08A` request itself is already native at the FRC-side Bus-4 endpoint. The downstream unknown is no longer an external `0x08A` proxy signer; it is Brake verification/arbitration and B6 generation/routing. That attribution does **not** block the independent B6 development
 probe above.
 - `data/generated/camry_8965F3307000_tss3_tx_decompiler_evidence.json`
 - `data/generated/camry_8965F3307000_tss3_opendbc_port.json`

@@ -138,12 +138,22 @@ publishing `0x08A`; `0x08A` must not be over-described as the untouched output o
 single application.
 
 There is also **no proved unsigned/pre-protection injection point before `0x08A`**. The
-September FRC normal-Tx suppression proves that the protected `0x08A` publication depends
-on the FRC request side, but it does not reveal the handoff representation or CMAC owner.
-The first externally realized application-request interface may already be protected
-`0x08A`; alternatively, a private FRC handoff may carry request semantics and/or a
-pre-authenticator to a Bus-4 publisher. Do not assume that replacing some upstream value
-will cause an OEM downstream signer to authenticate arbitrary replacement requests.
+September repin/direction experiment closes more of the physical source than the older
+GTS-only topology model did. With the Toyota-B relay open, `0x08A` is native on the
+**FRC/camera-side electrical endpoint** of the intercepted pair (Panda bus2) and is
+forwarded byte-for-byte toward the chassis side (bus0); `0x081` is native in the reverse
+direction on the **Brake/chassis-side endpoint**. The intercepted pair is the repinned
+Toyota Bus-4 chassis network; Panda bus1 is the separate Toyota Bus-1 camera/radar family.
+Standard FRC CommunicationControl normal-Tx suppression removes the protected `0x08A`
+publication, while Brake CommunicationControl removes `0x081` and Brake continues
+`0x081` with request-loss supervision when FRC request traffic disappears.
+
+Therefore the protected `0x08A` publisher is inside the **FRC ECU/assembly diagnostic
+boundary**, and the frame is already authenticated before it reaches the accessible
+relay split. The exact FRC-internal signer remains open: it may be the main TSS compute
+SoC/HSM or another network/security controller inside the FRC module. This does **not**
+leave an external Brake/CGW `0x08A` signer as the leading model. It also does not prove
+an accessible unsigned request API before the FRC's signing step.
 
 ## 3. Request arbitration is per package, not per ECU
 

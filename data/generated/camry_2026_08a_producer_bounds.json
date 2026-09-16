@@ -1,5 +1,5 @@
 {
- "schema": "camry-2026-08a-producer-bounds-v4",
+ "schema": "camry-2026-08a-producer-bounds-v5",
  "drives": {
   "drive_a": {
    "source": "targets/camry-2026/raw-20260827/camry_relay_route_can_20260827.ndjson.gz",
@@ -234,8 +234,8 @@
  "classification": {
   "recorder_object": "FRC-hosted TSS recorder objects 5282/5631; Bus-4 0x08A carries the same ID/pinion/assist subset",
   "not_exact_f33": "exact F33 generated-COM Tx is only 0x030/0x351/0x394/0x4A3/0x4C8; 0x08A is absent",
-  "wire_placement": "zero retained 0x08A on panda bus 1; Front Camera Module is GTS+ Bus 1 only; 0x08A is observed on captured Bus 4, but CAN event timestamps and GTS+ topology do not identify its physical transmitter",
-  "camera_output_auth_boundary": "panda bus 1 is sniffed in both retained drives. Zero 0x00F. Every periodic Bus-1 stream has a near-constant last-4 (max unique fraction <0.002) while Bus-4 0x08A last-4 is frame-unique. The observed Bus-1 PDUs do not carry an ordinary-P5 FV4||MAC28 trailer. This proves only that the public/native Bus-1 camera family is outside the observed SecOC publication. Current FRC_P5 diagnostics and Toyota replacement procedure prove camera-family ECU-Security-Key provisioning, so a private FRC pre-authentication step cannot be excluded from Bus-1 framing or silicon assumptions alone. A downstream Bus-4 participant must still proxy/physically publish 0x08A",
+  "wire_placement": "The repin/source experiment resolves the physical direction that the older GTS-only bound could not: 0x08A is native on the FRC/camera-side endpoint of the intercepted Toyota Bus-4 pair (Panda bus2) and is forwarded toward chassis bus0; 0x081 is native Brake/chassis bus0 and returns upstream toward bus2. GTS placing Front Camera Module on logical Bus 1 does not make every physical pair at the FRC connector Bus 1.",
+  "camera_output_auth_boundary": "panda bus 1 is sniffed in both retained drives. Zero 0x00F. Every periodic Bus-1 stream has a near-constant last-4 (max unique fraction <0.002) while Bus-4 0x08A last-4 is frame-unique. The observed Bus-1 PDUs do not carry an ordinary-P5 FV4||MAC28 trailer. This proves only that the public/native Bus-1 camera family is a different interface from the protected request. The repin direction result supersedes the old external-proxy inference: protected 0x08A is already present on the FRC-side electrical endpoint, so its secured publisher is inside the FRC assembly diagnostic boundary.",
   "timestamp_attribution_boundary": "rlog Event.logMonoTime is shared by multi-frame CAN publication batches. The apparent 0x08A 20/30 ms mix versus 0x0D7 cannot reject a shared controller, TX queue, or scheduler",
   "secoc": "ordinary Toyota-P5 FV4||MAC28 trailer on Bus-4 0x08A only, synced to authenticated 0x00F on the chassis buses; Bus 1 is outside that domain; key/profile/CMAC unrecovered",
   "bus4_native_nodes": [
@@ -246,7 +246,13 @@
    "Spiral cable (Steering Angle Sensor)"
   ],
   "bus1_includes_front_camera": true,
-  "physical_tx_and_signer_bounds": "Exact F33 is excluded as generated-COM transmitter. GTS+ Bus-4 placement leaves Skid Control, Brake Booster, and Central Gateway as architecture candidates for the downstream proxy/physical publisher of 0x08A; the captures do not provide transmitter fingerprints. Cryptographic ownership is a separate bound: camera-family ECU-Security-Key provisioning keeps private FRC pre-authentication open, while downstream CMAC generation is also possible. The SecOC profile, key-selection/CMAC location, and final Tx descriptor remain unidentified",
+  "physical_tx_and_signer_bounds": "Protected 0x08A physically originates at the FRC/camera-side endpoint of the intercepted Bus-4 pair and FRC normal-Tx suppression removes that publication. The secured publisher is therefore inside the FRC ECU/assembly boundary. The remaining signer question is internal to that module: main TSS SoC/HSM versus another network/security controller, plus exact SecOC profile, key slot, CMAC service, freshness owner, and Tx descriptor. Brake/Booster/CGW are no longer the leading physical 0x08A publisher candidates.",
+  "repin_direction": {
+   "0x081": "native Brake/chassis Panda bus0 -> upstream bus2 on Toyota Bus 4",
+   "0x08A": "native upstream Panda bus2 -> chassis bus0 on Toyota Bus 4",
+   "capture_era": "temporary CAN0/CAN1 repin",
+   "stock_toyota_b": "Toyota Bus 4 returns to unsplit Panda bus1; compare Toyota network role, not raw Panda bus number"
+  },
   "regression_rule": "Do not label 0x08A a Bus-1 camera frame. Do not send 0x08A to EPS. No 0x08A->B6 stock-LTA transform (CORR-135). No output authorized"
  }
 }

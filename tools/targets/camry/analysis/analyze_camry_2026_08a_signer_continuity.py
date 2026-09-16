@@ -18,10 +18,9 @@ intervals carry `B21 == 11` (LTA/LCA) while the stationary capture carries
 `B21 == 0`. The secured publication's cadence/freshness statistics are compared
 between the zero-request and active-request regimes.
 
-Grades: observed structural continuity is `observed`; physical Bus-4 publication
-is topology-bounded to a downstream chassis/gateway participant; CMAC generation
-and key ownership remain open after CORR-194 because the FRC itself is an
-ECU-Security-Key provisioning participant.
+Grades: observed structural continuity is `observed`. The later repin/source result
+places the protected publisher inside the FRC ECU/assembly boundary; the exact
+FRC-internal CMAC engine, key slot and freshness owner remain open.
 """
 from __future__ import annotations
 
@@ -39,6 +38,7 @@ DRIVES = {
     "drive_b": REPO / "targets/camry-2026/raw-20260827/camry_relay_lta_confirm_route_can_20260827.ndjson.gz",
 }
 DEFAULT_OUT = REPO / "data/generated/camry_2026_08a_signer_continuity.json"
+REQUEST_PLANE = REPO / "data/generated/camry_2026_longitudinal_request_plane.json"
 
 
 def _sync_epoch(dat: bytes) -> tuple[int, int]:
@@ -122,13 +122,18 @@ def analyze_drive(path: Path) -> dict:
 def build() -> dict:
     ready = analyze_ready()
     drives = {name: analyze_drive(path) for name, path in DRIVES.items()}
+    request_plane = json.loads(REQUEST_PLANE.read_text())
+    repin = request_plane["topology"]
+    if repin["0x08A"] != "native upstream Panda bus2 -> chassis bus0 on Toyota Bus 4":
+        raise RuntimeError("0x08A repin direction drift")
+    if repin["0x081"] != "native Brake/chassis Panda bus0 -> upstream bus2 on Toyota Bus 4":
+        raise RuntimeError("0x081 repin direction drift")
     return {
-        "schema": "camry-2026-08a-signer-continuity-v1",
+        "schema": "camry-2026-08a-signer-continuity-v2",
         "question": (
             "Does the authenticated Bus-4 0x08A publication continue at zero lateral "
-            "request, and what can that continuity say about physical publication versus "
-            "CMAC ownership? CORR-194 keeps FRC private pre-authentication open because "
-            "the camera family itself participates in ECU-Security-Key provisioning."
+            "request, and what remains open after the repin/source experiment places its "
+            "protected publisher inside the FRC assembly?"
         ),
         "zero_request_result": {
             "regime": "stationary READY, B21=0 (No Request) in every retained frame",
@@ -146,12 +151,11 @@ def build() -> dict:
                 "with respect to the request state; this does not locate the CMAC engine."
             ),
             "boundary": (
-                "Structural security-envelope continuity does not identify the signer or "
-                "key holder. VAR-091/096 bound the physical Bus-4 publisher/proxy to the "
-                "brake family (ABS 435 / Brake Booster 466) or Central Gateway. CORR-194 "
-                "reopens private FRC pre-authentication because camera-family "
-                "ECU-Security-Key provisioning is now positive evidence. Producer "
-                "firmware plus FRC key-update/private-link evidence remain decisive."
+                "Structural security-envelope continuity alone does not identify a CMAC engine, "
+                "but the repin direction result does identify the secured publisher boundary: "
+                "0x08A is native on the FRC-side endpoint before the accessible relay split. "
+                "The unresolved identity is therefore which chip/HSM inside the FRC assembly "
+                "owns the key, freshness and MAC operation."
             ),
         },
         "active_request_contrast": {
@@ -163,34 +167,33 @@ def build() -> dict:
             for name, d in drives.items()
         },
         "signer_identity": {
-            "grade": "open",
+            "grade": "frc-assembly-boundary-observed/internal-engine-open",
             "verdict": (
-                "Physical publication hypothesis: a brake-family node (Skid Control ABS / "
-                "Brake Booster) or the Central Gateway proxies and transmits 0x08A on Bus "
-                "4. Cryptographic ownership is unresolved: CMAC may be generated in that "
-                "downstream participant or supplied through an unseen/private FRC "
-                "pre-authentication path. GTS+ places the camera on Bus 1 and the brake "
-                "family on Bus 4, but topology does not locate the key/CMAC operation."
+                "The protected 0x08A publisher is inside the FRC ECU/assembly diagnostic "
+                "boundary: it is native on the FRC/camera-side endpoint of the intercepted "
+                "Toyota Bus-4 pair and FRC normal-Tx suppression removes it. The exact "
+                "internal signer is still open: main TSS compute SoC/HSM or another "
+                "network/security controller inside the FRC module."
             ),
             "decisive_evidence": (
-                "Exact downstream producer firmware can identify the 0x08A Tx descriptor "
-                "and any local SecOC generation profile. Exact FRC firmware, a live FRC "
-                "M1-M5 key-update trace, or private-link capture is additionally required "
-                "to exclude or prove upstream camera pre-authentication."
+                "Exact FRC firmware or a live FRC key-update/HSM-service trace is required "
+                "to identify the internal SecOC key selector, freshness owner, CMAC call and "
+                "Tx descriptor. Brake firmware remains decisive for 0x08A verification/"
+                "arbitration and downstream B6 generation, not for locating the 0x08A publisher."
             ),
             "frc_branch_disposition": (
-                "FRC-side private TSK/SecOC pre-authentication is open after CORR-194. "
-                "Current FRC_P5 diagnostics and Toyota replacement procedure prove that "
-                "the camera family participates in ECU-Security-Key provisioning. Native "
-                "Bus-1 Profile-5 framing proves only that the observed public camera PDUs "
-                "are not themselves the Bus-4 SecOC publication."
+                "The old external Brake/Booster/CGW physical-publisher hypothesis is superseded "
+                "by the repin direction result. Native public Bus-1 Profile-5 PDUs are simply a "
+                "different FRC interface; they do not negate the protected Bus-4-side request "
+                "emitted from the same FRC assembly."
             ),
             "grades": {
                 "zero_request_signing_continuity": "observed",
-                "signer_identity_brake_family_or_cgw": "physical-publisher-hypothesis-only",
-                "frc_excluded_as_key_holder": "withdrawn-by-corr194",
+                "physical_publisher_frc_assembly": "observed",
+                "frc_internal_cmac_engine": "open",
             },
         },
+        "repin_direction": repin,
         "stationary_ready_detail": ready,
         "production_output_authorized": False,
     }

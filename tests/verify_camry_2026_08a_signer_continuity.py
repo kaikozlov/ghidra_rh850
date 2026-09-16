@@ -34,7 +34,7 @@ with tempfile.TemporaryDirectory() as td:
           proc.stderr[-200:] if proc.returncode else "")
     check("artifact regenerates byte-identically",
           proc.returncode == 0 and out.read_bytes() == ART.read_bytes())
-check("schema is v1", art["schema"] == "camry-2026-08a-signer-continuity-v1")
+check("schema is v2", art["schema"] == "camry-2026-08a-signer-continuity-v2")
 check("production output remains unauthorized", art["production_output_authorized"] is False)
 
 print("\n== zero-request signing continuity (stationary READY, B21=0) ==")
@@ -82,26 +82,29 @@ check("signing_continues is true at zero request", res["signing_continues"] is T
 check("continuity interpretation is recorded without locating CMAC",
       "authenticated publication/security pipeline is therefore always-on" in res["interpretation"]
       and "does not locate the CMAC engine" in res["interpretation"])
-check("boundary keeps signer/key identity open",
-      "does not identify the signer or key holder" in res["boundary"]
-      and "private FRC pre-authentication" in res["boundary"])
+check("boundary places publisher at FRC while internal CMAC engine stays open",
+      "secured publisher boundary" in res["boundary"]
+      and "FRC-side endpoint" in res["boundary"]
+      and "which chip/HSM inside the FRC assembly" in res["boundary"])
 ident = art["signer_identity"]
-check("identity verdict is explicitly open",
-      ident["grade"] == "open")
-check("physical-publisher hypothesis names the downstream candidate set",
-      "brake-family node" in ident["verdict"] and "Central Gateway" in ident["verdict"]
-      and "Cryptographic ownership is unresolved" in ident["verdict"])
-check("decisive evidence names both downstream and FRC evidence",
-      "downstream producer firmware" in ident["decisive_evidence"]
-      and "FRC firmware" in ident["decisive_evidence"]
-      and "key-update trace" in ident["decisive_evidence"])
-check("FRC private pre-authentication is reopened",
-      "is open after CORR-194" in ident["frc_branch_disposition"]
-      and "ECU-Security-Key provisioning" in ident["frc_branch_disposition"])
-check("legacy grade keys record corrected evidence boundaries",
+check("identity grade separates assembly publisher from internal engine",
+      ident["grade"] == "frc-assembly-boundary-observed/internal-engine-open")
+check("publisher verdict is FRC assembly",
+      "inside the FRC ECU/assembly diagnostic boundary" in ident["verdict"]
+      and "FRC/camera-side endpoint" in ident["verdict"]
+      and "main TSS compute SoC/HSM" in ident["verdict"])
+check("decisive evidence moves signer RE to FRC and B6 RE to Brake",
+      "Exact FRC firmware" in ident["decisive_evidence"]
+      and "Brake firmware remains decisive" in ident["decisive_evidence"])
+check("old external publisher hypothesis is superseded",
+      "external Brake/Booster/CGW physical-publisher hypothesis is superseded" in ident["frc_branch_disposition"])
+check("grade keys retain physical/internal distinction",
       ident["grades"]["zero_request_signing_continuity"] == "observed"
-      and ident["grades"]["signer_identity_brake_family_or_cgw"] == "physical-publisher-hypothesis-only"
-      and ident["grades"]["frc_excluded_as_key_holder"] == "withdrawn-by-corr194")
+      and ident["grades"]["physical_publisher_frc_assembly"] == "observed"
+      and ident["grades"]["frc_internal_cmac_engine"] == "open")
+check("repin direction is exact",
+      art["repin_direction"]["0x08A"] == "native upstream Panda bus2 -> chassis bus0 on Toyota Bus 4"
+      and art["repin_direction"]["0x081"] == "native Brake/chassis Panda bus0 -> upstream bus2 on Toyota Bus 4")
 
 print(f"\n{passed} passed, {failed} failed")
 sys.exit(1 if failed else 0)

@@ -1,15 +1,18 @@
 #!/usr/bin/env python3
 """Bound who transmits / SecOC-protects retained Bus-4 0x08A.
 
-Offline over the two relay-correct Camry drives plus current GTS+ canbus
-placement for vehicle type 12984. No vehicle I/O. Does not recover the
-signer key or name a single remaining Bus-4 origin CPU.
+Offline over the two relay-correct Camry drives, current GTS+ canbus placement,
+and the verified repin request/result topology artifact. No vehicle I/O. The
+repin/source result supersedes the earlier GTS-only downstream-publisher bound:
+protected 0x08A is native on the FRC/camera-side endpoint of the intercepted pair.
+The exact FRC-internal CMAC engine/key remains unresolved.
 """
 from __future__ import annotations
 
 import argparse
 import gzip
 import hashlib
+import itertools
 import json
 import subprocess
 from collections import defaultdict
@@ -22,6 +25,7 @@ DRIVES = {
     "drive_b": RAW / "camry_relay_lta_confirm_route_can_20260827.ndjson.gz",
 }
 F33_TX = REPO / "data/generated/camry_8965F3307000_tss3_opendbc_port.json"
+REQUEST_PLANE = REPO / "data/generated/camry_2026_longitudinal_request_plane.json"
 WATCH = {0x025, 0x030, 0x081, 0x08A, 0x090, 0x00F, 0x0D7, 0x180}
 PERIODIC_N = 50
 MACLIKE_LAST4_FRAC = 0.5
@@ -38,7 +42,7 @@ def sha256(path: Path) -> str:
 def cadence(times: list[int]) -> dict:
     if len(times) < 3:
         return {"n": len(times)}
-    dts = [(b - a) / 1e6 for a, b in zip(times, times[1:]) if 0 < (b - a) < 2e9]
+    dts = [(b - a) / 1e6 for a, b in itertools.pairwise(times) if 0 < (b - a) < 2e9]
     dts_sorted = sorted(dts)
     n20 = sum(18 <= g <= 22 for g in dts)
     n30 = sum(28 <= g <= 32 for g in dts)
@@ -244,8 +248,15 @@ def main() -> int:
     bus4 = set(canbus["domains_by_bus"].get("Bus 4", []))
     tx = f33_tx_ids()
 
+    request_plane = json.loads(REQUEST_PLANE.read_text())
+    repin_topology = request_plane["topology"]
+    if repin_topology["0x08A"] != "native upstream Panda bus2 -> chassis bus0 on Toyota Bus 4":
+        raise RuntimeError("0x08A repin direction drift")
+    if repin_topology["0x081"] != "native Brake/chassis Panda bus0 -> upstream bus2 on Toyota Bus 4":
+        raise RuntimeError("0x081 repin direction drift")
+
     artifact = {
-        "schema": "camry-2026-08a-producer-bounds-v4",
+        "schema": "camry-2026-08a-producer-bounds-v5",
         "drives": drives,
         "f33_generated_com_tx": tx,
         "gtsplus_canbus_12984": canbus,
@@ -259,21 +270,21 @@ def main() -> int:
                 "0x08A is absent"
             ),
             "wire_placement": (
-                "zero retained 0x08A on panda bus 1; Front Camera Module is GTS+ "
-                "Bus 1 only; 0x08A is observed on captured Bus 4, but CAN event "
-                "timestamps and GTS+ topology do not identify its physical transmitter"
+                "The repin/source experiment resolves the physical direction that the older GTS-only "
+                "bound could not: 0x08A is native on the FRC/camera-side endpoint of the intercepted "
+                "Toyota Bus-4 pair (Panda bus2) and is forwarded toward chassis bus0; 0x081 is native "
+                "Brake/chassis bus0 and returns upstream toward bus2. GTS placing Front Camera Module "
+                "on logical Bus 1 does not make every physical pair at the FRC connector Bus 1."
             ),
             "camera_output_auth_boundary": (
                 "panda bus 1 is sniffed in both retained drives. Zero 0x00F. Every "
                 "periodic Bus-1 stream has a near-constant last-4 (max unique fraction "
                 "<0.002) while Bus-4 0x08A last-4 is frame-unique. The observed "
                 "Bus-1 PDUs do not carry an ordinary-P5 FV4||MAC28 trailer. This proves "
-                "only that the public/native Bus-1 camera family is outside the observed "
-                "SecOC publication. Current FRC_P5 diagnostics and Toyota replacement "
-                "procedure prove camera-family ECU-Security-Key provisioning, so a "
-                "private FRC pre-authentication step cannot be excluded from Bus-1 "
-                "framing or silicon assumptions alone. A downstream Bus-4 participant "
-                "must still proxy/physically publish 0x08A"
+                "only that the public/native Bus-1 camera family is a different interface from the "
+                "protected request. The repin direction result supersedes the old external-proxy "
+                "inference: protected 0x08A is already present on the FRC-side electrical endpoint, "
+                "so its secured publisher is inside the FRC assembly diagnostic boundary."
             ),
             "timestamp_attribution_boundary": (
                 "rlog Event.logMonoTime is shared by multi-frame CAN publication "
@@ -288,15 +299,15 @@ def main() -> int:
             "bus4_native_nodes": sorted(bus4),
             "bus1_includes_front_camera": "Front Camera Module" in bus1,
             "physical_tx_and_signer_bounds": (
-                "Exact F33 is excluded as generated-COM transmitter. GTS+ Bus-4 "
-                "placement leaves Skid Control, Brake Booster, and Central Gateway as "
-                "architecture candidates for the downstream proxy/physical publisher of "
-                "0x08A; the captures do not provide transmitter fingerprints. "
-                "Cryptographic ownership is a separate bound: camera-family "
-                "ECU-Security-Key provisioning keeps private FRC pre-authentication open, "
-                "while downstream CMAC generation is also possible. The SecOC profile, "
-                "key-selection/CMAC location, and final Tx descriptor remain unidentified"
+                "Protected 0x08A physically originates at the FRC/camera-side endpoint of the "
+                "intercepted Bus-4 pair and FRC normal-Tx suppression removes that publication. "
+                "The secured publisher is therefore inside the FRC ECU/assembly boundary. The "
+                "remaining signer question is internal to that module: main TSS SoC/HSM versus "
+                "another network/security controller, plus exact SecOC profile, key slot, CMAC "
+                "service, freshness owner, and Tx descriptor. Brake/Booster/CGW are no longer the "
+                "leading physical 0x08A publisher candidates."
             ),
+            "repin_direction": repin_topology,
             "regression_rule": (
                 "Do not label 0x08A a Bus-1 camera frame. Do not send 0x08A to EPS. "
                 "No 0x08A->B6 stock-LTA transform (CORR-135). No output authorized"
