@@ -1,0 +1,1044 @@
+{
+  "august_motion": {
+    "drive_a": {
+      "c9_shape": {
+        "frames": 16099,
+        "frames_nonzero_outside_b12_b13": 0
+      },
+      "measured_motion_time_shift_ms": {
+        "-100": {
+          "all_moving": {
+            "intercept": -0.001883712,
+            "n": 8866,
+            "pearson_r": 0.966444276,
+            "slope_y_per_x": 0.964013082,
+            "x_minmax": [
+              -2.081,
+              1.266
+            ],
+            "y_minmax": [
+              -2.36805,
+              1.161525
+            ]
+          },
+          "cruise_latch_clear": {
+            "intercept": -0.000761353,
+            "n": 7032,
+            "pearson_r": 0.971345204,
+            "slope_y_per_x": 0.966845005,
+            "x_minmax": [
+              -2.081,
+              1.266
+            ],
+            "y_minmax": [
+              -2.36805,
+              1.161525
+            ]
+          },
+          "cruise_latch_set": {
+            "intercept": -0.007970906,
+            "n": 1834,
+            "pearson_r": 0.616232015,
+            "slope_y_per_x": 0.716655676,
+            "x_minmax": [
+              -0.404,
+              0.235
+            ],
+            "y_minmax": [
+              -0.552205,
+              0.555436
+            ]
+          }
+        },
+        "0": {
+          "all_moving": {
+            "intercept": -0.00272731,
+            "n": 8865,
+            "pearson_r": 0.961218268,
+            "slope_y_per_x": 0.958555037,
+            "x_minmax": [
+              -2.081,
+              1.266
+            ],
+            "y_minmax": [
+              -2.370632,
+              1.162543
+            ]
+          },
+          "cruise_latch_clear": {
+            "intercept": -0.001725117,
+            "n": 7031,
+            "pearson_r": 0.965798476,
+            "slope_y_per_x": 0.961230117,
+            "x_minmax": [
+              -2.081,
+              1.266
+            ],
+            "y_minmax": [
+              -2.370632,
+              1.162543
+            ]
+          },
+          "cruise_latch_set": {
+            "intercept": -0.008257775,
+            "n": 1834,
+            "pearson_r": 0.629453372,
+            "slope_y_per_x": 0.724793163,
+            "x_minmax": [
+              -0.404,
+              0.235
+            ],
+            "y_minmax": [
+              -0.554129,
+              0.47369
+            ]
+          }
+        }
+      },
+      "path": "targets/camry-2026/raw-20260827/camry_relay_route_can_20260827.ndjson.gz",
+      "rejected": {},
+      "sha256": "be0c02946818fafc48b7d3e2be5d2fde31d796e057ab29d8bf59a879c7553db5",
+      "valid_0x160_frames": 20510
+    },
+    "drive_b": {
+      "c9_shape": {
+        "frames": 18749,
+        "frames_nonzero_outside_b12_b13": 0
+      },
+      "measured_motion_time_shift_ms": {
+        "-100": {
+          "all_moving": {
+            "intercept": -0.000251329,
+            "n": 14316,
+            "pearson_r": 0.986666942,
+            "slope_y_per_x": 0.975162121,
+            "x_minmax": [
+              -2.36,
+              2.174
+            ],
+            "y_minmax": [
+              -2.382885,
+              1.904001
+            ]
+          },
+          "cruise_latch_clear": {
+            "intercept": -0.002508112,
+            "n": 9822,
+            "pearson_r": 0.988850736,
+            "slope_y_per_x": 0.970300966,
+            "x_minmax": [
+              -2.36,
+              2.174
+            ],
+            "y_minmax": [
+              -2.382885,
+              1.904001
+            ]
+          },
+          "cruise_latch_set": {
+            "intercept": -0.001823423,
+            "n": 4494,
+            "pearson_r": 0.966899566,
+            "slope_y_per_x": 1.015943739,
+            "x_minmax": [
+              -0.455,
+              1.791
+            ],
+            "y_minmax": [
+              -0.515369,
+              1.61471
+            ]
+          }
+        },
+        "0": {
+          "all_moving": {
+            "intercept": -0.002568484,
+            "n": 14316,
+            "pearson_r": 0.984331557,
+            "slope_y_per_x": 0.973366376,
+            "x_minmax": [
+              -2.36,
+              2.174
+            ],
+            "y_minmax": [
+              -2.384688,
+              1.90367
+            ]
+          },
+          "cruise_latch_clear": {
+            "intercept": -0.005610732,
+            "n": 9822,
+            "pearson_r": 0.986154148,
+            "slope_y_per_x": 0.968393672,
+            "x_minmax": [
+              -2.36,
+              2.174
+            ],
+            "y_minmax": [
+              -2.384688,
+              1.90367
+            ]
+          },
+          "cruise_latch_set": {
+            "intercept": -0.002264764,
+            "n": 4494,
+            "pearson_r": 0.967072235,
+            "slope_y_per_x": 1.012947812,
+            "x_minmax": [
+              -0.455,
+              1.791
+            ],
+            "y_minmax": [
+              -0.515257,
+              1.614884
+            ]
+          }
+        }
+      },
+      "path": "targets/camry-2026/raw-20260827/camry_relay_lta_confirm_route_can_20260827.ndjson.gz",
+      "rejected": {},
+      "sha256": "641eee57eaffc579002708185178ea08c189155527354712dd43a1f0e309bb3a",
+      "valid_0x160_frames": 23998
+    }
+  },
+  "boundaries": [
+    "No 0x160 receiver implementation in this audit; EPS firmware does not establish a longitudinal contract.",
+    "B4 measured-motion tracking and zero-until-after-motion are feedback-like, not an OEM field-name recovery.",
+    "The intact native source defeats the earlier combined-trial correlation as independent proof of host influence.",
+    "State mirror, parallel output, mode-dependent request, or mixed-role PDU remain incompletely distinguished.",
+    "Panda TX returns prove transport only, not receiver acceptance; no alternative FRC command is identified."
+  ],
+  "combined_trial": {
+    "b12_changed_from_counter_matched_native": 970,
+    "b4_changed_from_counter_matched_native": 1243,
+    "boundary": "Predictive comparison, not a causal effect estimate. Conventional mode and absent EPS do not qualify healthy DRCC.",
+    "byte_identical_nearby_returned_tx": 1249,
+    "ca_time_shift_ms": {
+      "-100": {
+        "b12_disagreement_only": {
+          "host_b12_hypothesis": {
+            "intercept": 0.1601412,
+            "n": 970,
+            "pearson_r": 0.664958985,
+            "slope_y_per_x": 0.408490009,
+            "x_minmax": [
+              -1.2,
+              0.4
+            ],
+            "y_minmax": [
+              -0.338,
+              0.511
+            ]
+          },
+          "native_b12_hypothesis": {
+            "intercept": 0.1306957,
+            "n": 970,
+            "pearson_r": 0.92914233,
+            "slope_y_per_x": 1.029889674,
+            "x_minmax": [
+              -0.6,
+              0.4
+            ],
+            "y_minmax": [
+              -0.338,
+              0.511
+            ]
+          }
+        },
+        "host_b12_hypothesis": {
+          "intercept": 0.148221817,
+          "n": 1249,
+          "pearson_r": 0.671456939,
+          "slope_y_per_x": 0.434384179,
+          "x_minmax": [
+            -1.2,
+            0.4
+          ],
+          "y_minmax": [
+            -0.338,
+            0.511
+          ]
+        },
+        "host_b4": {
+          "intercept": 0.148830422,
+          "n": 1249,
+          "pearson_r": 0.674843659,
+          "slope_y_per_x": 0.437277321,
+          "x_minmax": [
+            -1.2,
+            0.367
+          ],
+          "y_minmax": [
+            -0.338,
+            0.511
+          ]
+        },
+        "native_b12_hypothesis": {
+          "intercept": 0.131322625,
+          "n": 1249,
+          "pearson_r": 0.93200356,
+          "slope_y_per_x": 1.024406312,
+          "x_minmax": [
+            -0.6,
+            0.4
+          ],
+          "y_minmax": [
+            -0.338,
+            0.511
+          ]
+        },
+        "native_b4": {
+          "intercept": 0.116359846,
+          "n": 1249,
+          "pearson_r": 0.865999628,
+          "slope_y_per_x": 1.456233893,
+          "x_minmax": [
+            -0.437,
+            0.286
+          ],
+          "y_minmax": [
+            -0.338,
+            0.511
+          ]
+        }
+      },
+      "0": {
+        "b12_disagreement_only": {
+          "host_b12_hypothesis": {
+            "intercept": 0.163480043,
+            "n": 970,
+            "pearson_r": 0.696919217,
+            "slope_y_per_x": 0.426067759,
+            "x_minmax": [
+              -1.2,
+              0.4
+            ],
+            "y_minmax": [
+              -0.338,
+              0.511
+            ]
+          },
+          "native_b12_hypothesis": {
+            "intercept": 0.129275063,
+            "n": 970,
+            "pearson_r": 0.926554082,
+            "slope_y_per_x": 1.022089399,
+            "x_minmax": [
+              -0.6,
+              0.4
+            ],
+            "y_minmax": [
+              -0.338,
+              0.511
+            ]
+          }
+        },
+        "host_b12_hypothesis": {
+          "intercept": 0.151867947,
+          "n": 1249,
+          "pearson_r": 0.700464603,
+          "slope_y_per_x": 0.451236166,
+          "x_minmax": [
+            -1.2,
+            0.4
+          ],
+          "y_minmax": [
+            -0.338,
+            0.511
+          ]
+        },
+        "host_b4": {
+          "intercept": 0.152467162,
+          "n": 1249,
+          "pearson_r": 0.703749397,
+          "slope_y_per_x": 0.454081377,
+          "x_minmax": [
+            -1.2,
+            0.367
+          ],
+          "y_minmax": [
+            -0.338,
+            0.511
+          ]
+        },
+        "native_b12_hypothesis": {
+          "intercept": 0.131053032,
+          "n": 1249,
+          "pearson_r": 0.930229725,
+          "slope_y_per_x": 1.018138267,
+          "x_minmax": [
+            -0.6,
+            0.4
+          ],
+          "y_minmax": [
+            -0.338,
+            0.511
+          ]
+        },
+        "native_b4": {
+          "intercept": 0.115725118,
+          "n": 1249,
+          "pearson_r": 0.857458907,
+          "slope_y_per_x": 1.435782378,
+          "x_minmax": [
+            -0.437,
+            0.286
+          ],
+          "y_minmax": [
+            -0.338,
+            0.511
+          ]
+        }
+      },
+      "100": {
+        "b12_disagreement_only": {
+          "host_b12_hypothesis": {
+            "intercept": 0.166683337,
+            "n": 970,
+            "pearson_r": 0.726193567,
+            "slope_y_per_x": 0.442672527,
+            "x_minmax": [
+              -1.2,
+              0.4
+            ],
+            "y_minmax": [
+              -0.338,
+              0.511
+            ]
+          },
+          "native_b12_hypothesis": {
+            "intercept": 0.127681053,
+            "n": 970,
+            "pearson_r": 0.918472249,
+            "slope_y_per_x": 1.010224948,
+            "x_minmax": [
+              -0.6,
+              0.4
+            ],
+            "y_minmax": [
+              -0.338,
+              0.511
+            ]
+          }
+        },
+        "host_b12_hypothesis": {
+          "intercept": 0.155492333,
+          "n": 1249,
+          "pearson_r": 0.727055208,
+          "slope_y_per_x": 0.466804989,
+          "x_minmax": [
+            -1.2,
+            0.4
+          ],
+          "y_minmax": [
+            -0.338,
+            0.511
+          ]
+        },
+        "host_b4": {
+          "intercept": 0.156076276,
+          "n": 1249,
+          "pearson_r": 0.730193398,
+          "slope_y_per_x": 0.4695739,
+          "x_minmax": [
+            -1.2,
+            0.367
+          ],
+          "y_minmax": [
+            -0.338,
+            0.511
+          ]
+        },
+        "native_b12_hypothesis": {
+          "intercept": 0.130682357,
+          "n": 1249,
+          "pearson_r": 0.923147557,
+          "slope_y_per_x": 1.007019929,
+          "x_minmax": [
+            -0.6,
+            0.4
+          ],
+          "y_minmax": [
+            -0.338,
+            0.511
+          ]
+        },
+        "native_b4": {
+          "intercept": 0.11493101,
+          "n": 1249,
+          "pearson_r": 0.841984099,
+          "slope_y_per_x": 1.405172316,
+          "x_minmax": [
+            -0.437,
+            0.286
+          ],
+          "y_minmax": [
+            -0.338,
+            0.511
+          ]
+        }
+      }
+    },
+    "host_frames": 1249,
+    "matching_return_offset_ms": [
+      3.891793,
+      8.129889,
+      21.304972
+    ],
+    "mode_coverage_frames": 1249,
+    "native_source_age_ms": [
+      1.619407,
+      1.878656,
+      2.733442
+    ],
+    "preceding_mode_byte_counts": {
+      "0x88": 2,
+      "0x90": 1247
+    },
+    "source_counter_matched": 1249
+  },
+  "fixture": {
+    "path": "tests/fixtures/camry_20260916_longitudinal_motion_audit.jsonl.gz",
+    "sha256": "b7e4946b7250d9b30b876ba6f7d4dfbb6f1882ab5949e0e73be301ca3eb5b258",
+    "sources": [
+      {
+        "group": "combined_trial",
+        "path": "2026-09-11/000000d4--327b2c4bb8/rlog-2.zst",
+        "sha256": "22ebe0d05e85da708511d0653ae923176f4538ce80a886df1a2106f5bdca3975"
+      },
+      {
+        "group": "combined_trial",
+        "path": "2026-09-11/000000d4--327b2c4bb8/rlog-3.zst",
+        "sha256": "d9da1cfd888b17a47a2771e197a06f923670f5cc2681e9a8ea3dc3f1f5a5c3bd"
+      },
+      {
+        "group": "combined_trial",
+        "path": "2026-09-11/000000d4--327b2c4bb8/rlog-4.zst",
+        "sha256": "1e08c6318fad0325621627bab6b19b3ba0ac439a122fdc908f72ca1af2edf1a0"
+      },
+      {
+        "group": "combined_trial",
+        "path": "2026-09-11/000000d4--327b2c4bb8/rlog-5.zst",
+        "sha256": "6b1275a487b6a3f5460de1e1194336de0236c2ef6a3722812076813a24176151"
+      },
+      {
+        "group": "stock_3b",
+        "path": "2026-09-04/0000003b--62262eb7a1/rlog-84.zst",
+        "sha256": "080687d4b3e2f2f0faf37ee4bf0f5a91b770832dfd7ae96d5ac24eb3640c6ab7"
+      },
+      {
+        "group": "stock_3c",
+        "path": "2026-09-04/0000003c--97b9e7a69a/rlog-26.zst",
+        "sha256": "19705ccc7473dc2aac94b69d6a6ee63185a059f295fabd9d052c1d752535a006"
+      },
+      {
+        "group": "stock_3c",
+        "path": "2026-09-04/0000003c--97b9e7a69a/rlog-27.zst",
+        "sha256": "256f364190e11f4f174c682f3a8beaf35d61d48ffe12a031451166b91501c92d"
+      }
+    ]
+  },
+  "fixture_can_census": [
+    {
+      "address": "0x8a",
+      "group": "combined_trial",
+      "n": 9599,
+      "panda_src": 1,
+      "service": "can"
+    },
+    {
+      "address": "0xaa",
+      "group": "combined_trial",
+      "n": 23999,
+      "panda_src": 1,
+      "service": "can"
+    },
+    {
+      "address": "0xc9",
+      "group": "combined_trial",
+      "n": 7499,
+      "panda_src": 1,
+      "service": "can"
+    },
+    {
+      "address": "0xca",
+      "group": "combined_trial",
+      "n": 10190,
+      "panda_src": 1,
+      "service": "can"
+    },
+    {
+      "address": "0x251",
+      "group": "combined_trial",
+      "n": 282,
+      "panda_src": 1,
+      "service": "can"
+    },
+    {
+      "address": "0x160",
+      "group": "combined_trial",
+      "n": 9599,
+      "panda_src": 2,
+      "service": "can"
+    },
+    {
+      "address": "0x160",
+      "group": "combined_trial",
+      "n": 9599,
+      "panda_src": 128,
+      "service": "can"
+    },
+    {
+      "address": "0x160",
+      "group": "combined_trial",
+      "n": 1249,
+      "panda_src": 0,
+      "service": "sendcan"
+    },
+    {
+      "address": "0xaa",
+      "group": "stock_3b",
+      "n": 5998,
+      "panda_src": 0,
+      "service": "can"
+    },
+    {
+      "address": "0xca",
+      "group": "stock_3b",
+      "n": 2547,
+      "panda_src": 0,
+      "service": "can"
+    },
+    {
+      "address": "0x160",
+      "group": "stock_3b",
+      "n": 2400,
+      "panda_src": 1,
+      "service": "can"
+    },
+    {
+      "address": "0x8a",
+      "group": "stock_3b",
+      "n": 2399,
+      "panda_src": 2,
+      "service": "can"
+    },
+    {
+      "address": "0xc9",
+      "group": "stock_3b",
+      "n": 1874,
+      "panda_src": 2,
+      "service": "can"
+    },
+    {
+      "address": "0x251",
+      "group": "stock_3b",
+      "n": 72,
+      "panda_src": 2,
+      "service": "can"
+    },
+    {
+      "address": "0x8a",
+      "group": "stock_3b",
+      "n": 2399,
+      "panda_src": 128,
+      "service": "can"
+    },
+    {
+      "address": "0xc9",
+      "group": "stock_3b",
+      "n": 1874,
+      "panda_src": 128,
+      "service": "can"
+    },
+    {
+      "address": "0x251",
+      "group": "stock_3b",
+      "n": 72,
+      "panda_src": 128,
+      "service": "can"
+    },
+    {
+      "address": "0xaa",
+      "group": "stock_3b",
+      "n": 5998,
+      "panda_src": 130,
+      "service": "can"
+    },
+    {
+      "address": "0xca",
+      "group": "stock_3b",
+      "n": 2547,
+      "panda_src": 130,
+      "service": "can"
+    },
+    {
+      "address": "0xaa",
+      "group": "stock_3c",
+      "n": 11999,
+      "panda_src": 0,
+      "service": "can"
+    },
+    {
+      "address": "0xca",
+      "group": "stock_3c",
+      "n": 5094,
+      "panda_src": 0,
+      "service": "can"
+    },
+    {
+      "address": "0x160",
+      "group": "stock_3c",
+      "n": 4799,
+      "panda_src": 1,
+      "service": "can"
+    },
+    {
+      "address": "0x8a",
+      "group": "stock_3c",
+      "n": 4799,
+      "panda_src": 2,
+      "service": "can"
+    },
+    {
+      "address": "0xc9",
+      "group": "stock_3c",
+      "n": 3750,
+      "panda_src": 2,
+      "service": "can"
+    },
+    {
+      "address": "0x251",
+      "group": "stock_3c",
+      "n": 135,
+      "panda_src": 2,
+      "service": "can"
+    },
+    {
+      "address": "0x8a",
+      "group": "stock_3c",
+      "n": 4799,
+      "panda_src": 128,
+      "service": "can"
+    },
+    {
+      "address": "0xc9",
+      "group": "stock_3c",
+      "n": 3750,
+      "panda_src": 128,
+      "service": "can"
+    },
+    {
+      "address": "0x251",
+      "group": "stock_3c",
+      "n": 135,
+      "panda_src": 128,
+      "service": "can"
+    },
+    {
+      "address": "0xaa",
+      "group": "stock_3c",
+      "n": 11999,
+      "panda_src": 130,
+      "service": "can"
+    },
+    {
+      "address": "0xca",
+      "group": "stock_3c",
+      "n": 5094,
+      "panda_src": 130,
+      "service": "can"
+    }
+  ],
+  "invalid_0x160": [],
+  "methods": {
+    "b12_units": "-0.1*signed7(B12) is the old comparison convention, not an independently calibrated demand.",
+    "motion": "Signed15 B4 x0.001 versus 400-ms centered derivative of independent mean wheel speed; speed>2m/s, fixed -100/0ms shifts. Invalid wheels, gaps, extrapolation and cross-file joins excluded.",
+    "negative_shift": "Later field versus earlier measured motion; publication and filtering delays are not actuator latency.",
+    "resume": "First mean-wheel speed>0.1m/s within300ms of prior stock-resume landmark; no new proof about unrecorded driver inputs.",
+    "trial": "Preceding same-counter native frame <=75ms old in same file; CA nearest within40ms at stated shifts."
+  },
+  "schema": "camry-longitudinal-motion-audit-v1",
+  "stock_resumes": [
+    {
+      "b4_first_nonzero_after_motion_ms": 261.860573,
+      "group": "stock_3b",
+      "prior_report_motion_landmark_s": 5122.256,
+      "samples": [
+        {
+          "b12_hypothesis": 0.1,
+          "b4_fine": 0.0,
+          "ca_result_like": 0.108,
+          "offset_ms": -700,
+          "wheel_speed_mps": 0.0
+        },
+        {
+          "b12_hypothesis": 0.1,
+          "b4_fine": 0.0,
+          "ca_result_like": 0.453,
+          "offset_ms": -500,
+          "wheel_speed_mps": 0.0
+        },
+        {
+          "b12_hypothesis": 0.1,
+          "b4_fine": 0.0,
+          "ca_result_like": 0.691,
+          "offset_ms": -400,
+          "wheel_speed_mps": 0.0
+        },
+        {
+          "b12_hypothesis": 0.4,
+          "b4_fine": 0.0,
+          "ca_result_like": 0.919,
+          "offset_ms": -300,
+          "wheel_speed_mps": 0.0
+        },
+        {
+          "b12_hypothesis": 0.7,
+          "b4_fine": 0.0,
+          "ca_result_like": 1.08,
+          "offset_ms": -200,
+          "wheel_speed_mps": 0.0
+        },
+        {
+          "b12_hypothesis": 0.7,
+          "b4_fine": 0.0,
+          "ca_result_like": 1.16,
+          "offset_ms": -100,
+          "wheel_speed_mps": 0.0
+        },
+        {
+          "b12_hypothesis": 0.8,
+          "b4_fine": 0.0,
+          "ca_result_like": 1.228,
+          "offset_ms": 0,
+          "wheel_speed_mps": 0.111111
+        },
+        {
+          "b12_hypothesis": 0.8,
+          "b4_fine": 0.0,
+          "ca_result_like": 1.29,
+          "offset_ms": 100,
+          "wheel_speed_mps": 0.336806
+        },
+        {
+          "b12_hypothesis": 0.9,
+          "b4_fine": 0.0,
+          "ca_result_like": 1.344,
+          "offset_ms": 200,
+          "wheel_speed_mps": 0.479167
+        },
+        {
+          "b12_hypothesis": 0.9,
+          "b4_fine": 0.522,
+          "ca_result_like": 1.345,
+          "offset_ms": 300,
+          "wheel_speed_mps": 0.596528
+        },
+        {
+          "b12_hypothesis": 0.9,
+          "b4_fine": 0.903,
+          "ca_result_like": 1.216,
+          "offset_ms": 500,
+          "wheel_speed_mps": 0.829861
+        },
+        {
+          "b12_hypothesis": 0.8,
+          "b4_fine": 0.819,
+          "ca_result_like": 1.181,
+          "offset_ms": 700,
+          "wheel_speed_mps": 1.027778
+        }
+      ],
+      "source_index": 4,
+      "wheel_onset_ns": 5122245082576
+    },
+    {
+      "b4_first_nonzero_after_motion_ms": 222.946511,
+      "group": "stock_3c",
+      "prior_report_motion_landmark_s": 9068.054,
+      "samples": [
+        {
+          "b12_hypothesis": -0.1,
+          "b4_fine": 0.0,
+          "ca_result_like": 0.016,
+          "offset_ms": -700,
+          "wheel_speed_mps": 0.0
+        },
+        {
+          "b12_hypothesis": -0.1,
+          "b4_fine": 0.0,
+          "ca_result_like": 0.335,
+          "offset_ms": -500,
+          "wheel_speed_mps": 0.0
+        },
+        {
+          "b12_hypothesis": 0.1,
+          "b4_fine": 0.0,
+          "ca_result_like": 0.55,
+          "offset_ms": -400,
+          "wheel_speed_mps": 0.0
+        },
+        {
+          "b12_hypothesis": 0.3,
+          "b4_fine": 0.0,
+          "ca_result_like": 0.717,
+          "offset_ms": -300,
+          "wheel_speed_mps": 0.0
+        },
+        {
+          "b12_hypothesis": 0.4,
+          "b4_fine": 0.0,
+          "ca_result_like": 0.822,
+          "offset_ms": -200,
+          "wheel_speed_mps": 0.0
+        },
+        {
+          "b12_hypothesis": 0.5,
+          "b4_fine": 0.0,
+          "ca_result_like": 0.846,
+          "offset_ms": -100,
+          "wheel_speed_mps": 0.0
+        },
+        {
+          "b12_hypothesis": 0.5,
+          "b4_fine": 0.0,
+          "ca_result_like": 0.87,
+          "offset_ms": 0,
+          "wheel_speed_mps": 0.11875
+        },
+        {
+          "b12_hypothesis": 0.5,
+          "b4_fine": 0.0,
+          "ca_result_like": 0.888,
+          "offset_ms": 100,
+          "wheel_speed_mps": 0.361111
+        },
+        {
+          "b12_hypothesis": 0.5,
+          "b4_fine": 0.0,
+          "ca_result_like": 0.905,
+          "offset_ms": 200,
+          "wheel_speed_mps": 0.471528
+        },
+        {
+          "b12_hypothesis": 0.6,
+          "b4_fine": 0.552,
+          "ca_result_like": 0.876,
+          "offset_ms": 300,
+          "wheel_speed_mps": 0.56875
+        },
+        {
+          "b12_hypothesis": 0.5,
+          "b4_fine": 0.606,
+          "ca_result_like": 0.726,
+          "offset_ms": 500,
+          "wheel_speed_mps": 0.734028
+        },
+        {
+          "b12_hypothesis": 0.4,
+          "b4_fine": 0.519,
+          "ca_result_like": 0.684,
+          "offset_ms": 700,
+          "wheel_speed_mps": 0.875694
+        }
+      ],
+      "source_index": 5,
+      "wheel_onset_ns": 9068052800498
+    },
+    {
+      "b4_first_nonzero_after_motion_ms": 252.374584,
+      "group": "stock_3c",
+      "prior_report_motion_landmark_s": 9147.517,
+      "samples": [
+        {
+          "b12_hypothesis": -0.0,
+          "b4_fine": 0.0,
+          "ca_result_like": 0.135,
+          "offset_ms": -700,
+          "wheel_speed_mps": 0.0
+        },
+        {
+          "b12_hypothesis": -0.0,
+          "b4_fine": 0.0,
+          "ca_result_like": 0.516,
+          "offset_ms": -500,
+          "wheel_speed_mps": 0.0
+        },
+        {
+          "b12_hypothesis": 0.2,
+          "b4_fine": 0.0,
+          "ca_result_like": 0.693,
+          "offset_ms": -400,
+          "wheel_speed_mps": 0.0
+        },
+        {
+          "b12_hypothesis": 0.5,
+          "b4_fine": 0.0,
+          "ca_result_like": 0.889,
+          "offset_ms": -300,
+          "wheel_speed_mps": 0.0
+        },
+        {
+          "b12_hypothesis": 0.6,
+          "b4_fine": 0.0,
+          "ca_result_like": 0.952,
+          "offset_ms": -200,
+          "wheel_speed_mps": 0.0
+        },
+        {
+          "b12_hypothesis": 0.6,
+          "b4_fine": 0.0,
+          "ca_result_like": 0.978,
+          "offset_ms": -100,
+          "wheel_speed_mps": 0.0
+        },
+        {
+          "b12_hypothesis": 0.6,
+          "b4_fine": 0.0,
+          "ca_result_like": 0.991,
+          "offset_ms": 0,
+          "wheel_speed_mps": 0.1375
+        },
+        {
+          "b12_hypothesis": 0.6,
+          "b4_fine": 0.0,
+          "ca_result_like": 0.996,
+          "offset_ms": 100,
+          "wheel_speed_mps": 0.356944
+        },
+        {
+          "b12_hypothesis": 0.6,
+          "b4_fine": 0.0,
+          "ca_result_like": 1.011,
+          "offset_ms": 200,
+          "wheel_speed_mps": 0.471528
+        },
+        {
+          "b12_hypothesis": 0.6,
+          "b4_fine": 0.456,
+          "ca_result_like": 0.97,
+          "offset_ms": 300,
+          "wheel_speed_mps": 0.564583
+        },
+        {
+          "b12_hypothesis": 0.5,
+          "b4_fine": 0.531,
+          "ca_result_like": 0.84,
+          "offset_ms": 500,
+          "wheel_speed_mps": 0.711111
+        },
+        {
+          "b12_hypothesis": 0.5,
+          "b4_fine": 0.479,
+          "ca_result_like": 0.804,
+          "offset_ms": 700,
+          "wheel_speed_mps": 0.838194
+        }
+      ],
+      "source_index": 6,
+      "wheel_onset_ns": 9147505648280
+    }
+  ],
+  "vehicle_access": false
+}

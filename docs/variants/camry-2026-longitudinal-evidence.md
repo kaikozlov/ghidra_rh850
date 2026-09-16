@@ -1,13 +1,177 @@
 # 2026 Camry longitudinal evidence packet and status (WP4)
 
-**Scope:** work package 4 of the Camry openpilot completion plan. The `tss3`
-integration branch now contains a native-shape `0x160` controller and Panda
-handoff for bench/vehicle testing. Corolla establishes the selected B4:B5
-command mapping causally. The September 11 dead-EPS drive establishes that the
-protected Camry longitudinal plane responds partially to combined B4:B5+B12
-replacement while stock DRCC is unavailable, but the response is clamped and
-does not track the requested stopping deceleration. A downstream DRCC-mode gate
-therefore remains a live explanation rather than a closed negative.
+**Current disposition — September 16 role audit:** `0x160` is an FRC-origin,
+longitudinal-related PDU, but the existing Camry B4:B5+B12 encoder is **not a
+verified longitudinal-command interface**. The native fine field closely
+tracks measured motion even with cruise disengaged and remains zero until
+223–262 ms after motion begins in three stock resumes. In the combined trial,
+intact camera B12 predicts the chassis-side `0x0CA` result-like field better than
+the replacement B12. The previous claim that this trial "proves influence" is
+withdrawn: it omitted the intact native comparator.
+
+This is work package 4 of the Camry openpilot completion plan. Transport,
+request semantics, receiver acceptance, and physical authority are separate
+questions. The contributor's Corolla result does not establish the same field
+role on Camry. A mode-dependent acceptance gate remains possible, but so do a
+feedback/status field and a parallel output; this evidence does not select a
+particular receiver mechanism. See the reproducible audit immediately below.
+
+## September 16: command versus feedback audit
+
+Inputs are both complete tracked August-27 CAN captures and seven original
+rlog segments: September-11 combined trial `000000d4--327b2c4bb8`, segments
+2–5, and September-4 stock routes `0000003b--62262eb7a1` segment 84 and
+`0000003c--97b9e7a69a` segments 26–27. Selected original frames, publication
+timestamps, source-file identities, and SHA-256 values are retained in
+`tests/fixtures/camry_20260916_longitudinal_motion_audit.jsonl.gz`. No live vehicle access,
+new sender, firmware change, or production port change is part of this audit.
+
+The reducer is
+`tools/targets/camry/analysis/analyze_camry_20260916_longitudinal_motion_audit.py`; its
+portable result is `data/generated/camry_20260916_longitudinal_motion_audit.json`.
+
+### B4:B5 is feedback-like on this Camry
+
+The existing signed-15/0.001 interpretation closely reproduces a derivative of
+independent `0x0AA` wheel speed. This is not a comparison against our own
+controller request or against another presumed command field. At speeds above
+2 m/s and with the native cruise-operating latch clear:
+
+| Complete capture | Samples | Correlation with measured acceleration | Fitted measured/field slope | Intercept (m/s²) |
+|---|---:|---:|---:|---:|
+| August drive A | 7,032 | 0.971345 | 0.966845 | −0.000761 |
+| August drive B | 9,822 | 0.988851 | 0.970301 | −0.002508 |
+
+These figures compare the field against a 400-ms centered wheel-speed
+derivative 100 ms earlier. The same-time correlations are also high:
+0.965798 and 0.986154. The all-moving populations give 0.966444 and 0.986667
+at the −100-ms shift. The cruise-active subset of drive A has little excitation
+and a much weaker relationship (r=0.616232); do not hide it or claim universal
+per-regime precision. Both complete PDU streams pass the recovered CRC:
+20,510 and 23,998 frames.
+
+The negative shift is consistent with estimated/filtered motion being
+reported after the physical change. It is **not a measured ECU or actuator
+latency**: CAN publication times and the derivative filter both contribute.
+The analysis rejects invalid wheel samples, long interpolation gaps,
+extrapolation, future cruise-state samples, and joins across source files.
+
+The stock start transients are a separate discriminator. Using the first
+mean-wheel speed above 0.1 m/s near each previously identified resume:
+
+| Stock resume | First nonzero B4:B5 after motion | B4:B5 at +200 ms | Mean wheel speed at +200 ms |
+|---|---:|---:|---:|
+| `3b`, near 5122.256 s | 261.861 ms | 0 | 0.479 m/s |
+| `3c`, near 9068.054 s | 222.947 ms | 0 | 0.472 m/s |
+| `3c`, near 9147.517 s | 252.375 ms | 0 | 0.472 m/s |
+
+An unconstrained acceleration-demand interpretation for this field does not
+explain these stock starts: the vehicle is already accelerating while the fine
+field remains zero. A measured-acceleration/estimated-motion role is the
+stronger interpretation. This is a **bounded semantic classification**, not
+recovery of an OEM field name or proof that the entire PDU is read-only.
+
+### Combined replacement does not establish host influence
+
+All **1,249** host frames can be paired to a CRC-valid preceding camera frame
+with the **same B2 counter** in the same original source file. Source ages are
+1.619–2.733 ms (median 1.879 ms). This is a local time-bounded match, not a
+whole-route dictionary indexed by an 8-bit wrapping counter. All 1,249 have a
+byte-identical returned Panda TX within 3.892–21.305 ms. Thus this audit is not
+mistaking a host send request for proof that the frame was actually transmitted.
+The returned TX still does **not** acknowledge receiver acceptance.
+
+B4:B5 differs from its native source in 1,243 frames; B12 differs in 970.
+Comparing the result-like `0x0CA B7:B8` with the intact source and replacement:
+
+| `0x0CA` observation time relative to host | Intact native B12 correlation | Replacement B12 correlation |
+|---|---:|---:|
+| −100 ms | 0.932004 | 0.671457 |
+| Nearest time | 0.930230 | 0.700465 |
+| +100 ms | 0.923148 | 0.727055 |
+
+Correlations use the historical `−0.1 × signed7(B12)` convention to align the
+sign. The assumed magnitude is not a newly proved actuation scale. Restricting
+to the **970 frames where the two B12 values actually disagree** preserves the
+result: at nearest time native r=0.926554 versus host r=0.696919.
+
+The native quantity is still the better predictor, including of a result
+published before the host frame. Closed-loop co-movement can explain the
+previously quoted host/result correlation without the modified field causing
+it. This does **not** prove an effect is exactly zero; it invalidates that
+correlation as independent evidence of acceptance, and it invalidates "DRCC
+clamping" as an established explanation. The preceding cruise mode is
+conventional-active `0x90` for 1,247 frames and conventional-available `0x88`
+for two transition frames. Healthy adaptive-mode behavior is not represented.
+
+### B12-before-motion is not B12-before-the-native-output
+
+At 500 ms before the wheel-defined motion onsets, the three `0x0CA` result-like
+values are already **+0.453, +0.335, and +0.516 m/s²**, while B12 remains at its
+preceding baseline (+0.1, −0.1, and 0 under the historical comparison convention)
+and B4:B5 remains zero. B12 changes later but still before wheel motion.
+The complete neighborhoods, not only threshold-crossing timestamps, are in the
+result artifact. Different quantization/filtering and parallel calculations
+prevent treating this temporal order as a unique internal dataflow proof.
+Nevertheless, "B12 changes before the car moves" cannot identify it as the
+upstream command: an export of an already selected native acceleration can do
+that too.
+
+The three stock segments also directly separate native traffic from Panda
+returns: `0x0CA` has **7,641 native bus0 frames and 7,641 returned bus2 TXs
+(src=130)**, with no native bus2 copy. It is a chassis-to-camera publication on
+the temporary repin, not a proven FRC-origin acceleration request. In these
+same captures `0x160` is native on bus1. On the restored stock harness, the
+camera link is the split bus2→bus0 pair and `0x0CA` is on unsplit bus1.
+Toyota network numbers and Panda indices must not be mixed across harnesses.
+The exact chassis ECU that publishes `0x0CA` remains unassigned here.
+
+### What GTS and the source inventory do—and do not—establish
+
+Direct reads of the retained `FRC_P5.ddb` expose both estimated motion and
+request/output vocabulary. DID `0x1253` names **Estimate Vehicle Acceleration**.
+DID `0x1B08` contains **Driver Acceleration for Output**, **Acceleration Limit
+for Output**, and **Acceleration for Output**. Those names are diagnostic
+observables, not an assignment to a particular byte of `0x160`.
+
+The previously proposed `0x1B03..0x1B07` join is specifically an **ISA**
+upper-limit/permission surface. It must not be described as a proved generic
+DRCC demand decoder. Brake `0x10A1..0x10A4` and the TSS operation-FFD request
+and arbitration records provide additional semantic candidates, but no retained
+synchronized sample or receiver implementation binds them to these CAN fields.
+
+The September-1 source-isolation notebook supports FRC normal-Tx ownership of
+`0x160`; it does not prove every quantity in an FRC transmission is a request.
+The `0x0C9` member of the same recorded source group was also checked rather
+than promoted by ID adjacency: in the two August captures its only changing
+application word is B12:B13, with zero header/counter/trailer. It is **not** a
+SecOC-shaped alternative command in those captures. No alternate FRC command
+is identified by this audit.
+
+**Implementation consequence:** keep the Camry alpha encoder explicitly
+unqualified. Do not call its current fine/coarse field writes production-ready,
+rename them as OEM demand signals, remove the intact native comparator from
+future analyses, or replace this hypothesis with a speculative different
+sender. A mixed-role PDU or a mode-dependent request remains possible. The
+available data supports exported/feedback-like quantities more strongly than
+it supports the claimed direct control path, but does not prove `0x160` can
+never carry a usable command on this or another Toyota.
+
+Reproduce without `REFERENCE/`, `build/`, original September rlogs, or a car:
+
+```bash
+uv run python tools/targets/camry/analysis/analyze_camry_20260916_longitudinal_motion_audit.py
+tools/test camry_20260916_longitudinal_motion_audit
+```
+
+The optional `--extract-fixture` path rereads the seven external originals using
+an existing openpilot Python environment; it does not call vehicle tooling.
+
+---
+
+The following historical record predates this role audit. Its transport and
+observational results remain useful; any earlier causal interpretation is
+superseded by the intact-source comparison above.
 
 ## Discovery record
 
@@ -45,20 +209,20 @@ relaying the camera request byte-exact. Panda blocks the camera copy only while
 its normal longitudinal-allowed state authorizes the replacement and bounds
 both Camry request quantities independently. The 2026-09-11 trial below proved
 the transport path and disproved B4:B5 alone as a sufficient Camry mapping; the
-later dead-EPS trial then observed a limited protected-result response to the
-combined encoder under conventional cruise, without the requested physical
-stopping behavior.
+later dead-EPS trial observed protected-result co-movement during combined
+replacement under conventional cruise, without the requested physical stopping
+behavior. The September-16 audit does not attribute that co-movement to the host.
 
 ## Evidence matrix (FRC `0x160` request plane)
 
 | Question | Status | Evidence |
 |---|---|---|
 | Wire geometry | **established** (firmware-static + captures) | 32-byte PDU; B0:B1 CRC-16/CCITT, B2 mod-256 counter, no secret; `tools/targets/camry/live/camry_frc_request_poc.py` clones/recomputes offline. The recovered init=`0xFFFF`/Data-ID=`0x0160` expression and the contributor's init=`0`/Data-ID=`0x444A` expression are deterministically wire-equivalent for this fixed PDU length. |
-| Selected controller field | **B4:B5-alone disproved; combined B4:B5+B12 reaches the protected plane but is insufficient without DRCC** | The independent Corolla road implementation causally establishes signed-15 B4:B5 at 0.001 m/s²/count. Route `000000d1--ad906be282` replaced 10,228 Camry frames with B4:B5 modifications while leaving B12 stock; the protected result continued tracking B12. In route `000000d4--327b2c4bb8`, 1,249 combined replacements changed B4:B5 and inverse signed-7 B12. Protected `0x0CA` responded, but strong requested braking was clamped and did not produce the requested stop-sign response while stock DRCC was unavailable. |
-| Command semantics | **partial protected-result influence observed; full command authority open** | In three no-driver-input stock auto-resumes, B12 ramps in the acceleration direction 351–433 ms before ego motion. At the start of the combined trial, openpilot's B12 and protected `0x0CA` moved in the expected direction, but across strong-braking samples requested acceleration correlated only `r=0.276` with the protected result and `r=0.176` with measured acceleration. |
-| Scale/sign | **sign supported; conventional-mode shaping/gating unresolved** | Synthetic B12 and protected `0x0CA` result correlate negatively across the complete replacement windows, but when openpilot requested as much as −1.2 m/s² under conventional cruise, the protected result remained roughly −0.15 to −0.34 m/s². This does not prove a literal 0.1 m/s²/count physical scale or full authority. |
-| Validity/counter rules | **synthetic frames reach downstream processing** | Profile-5 counter/CRC are observed; one-for-one synthetic frames paced from the live camera counter influence the protected plane without an integrity fault. Gap, replay, authority, and fault thresholds remain untested. |
-| Receiver acceptance | **partial processing observed with a genuine conventional latch; `0x251` substitution disproved as an arming mechanism** | FRC DRCC attempts were rejected and the successful cruise latch in route `000000d4--327b2c4bb8` was conventional (`0x251` B0=`0x90`). Panda suppressed the stock downstream copy and transmitted the combined replacements, but the requested stopping deceleration was not applied. In route `000000d9--a1a459c5b5`, accepted synthetic `0x251` `0xA0/0xC0` frames did not make authenticated `0x08A` active even once; stock `0x251=0xE0` also continued on the unsplit bus. |
+| Selected controller field | **Camry command mapping unproved; fine field is feedback-like; combined-trial causality withdrawn** | The independent Corolla road implementation causally establishes signed-15 B4:B5 at 0.001 m/s²/count. Route `000000d1--ad906be282` replaced 10,228 Camry frames with B4:B5 modifications while leaving B12 stock; the protected result continued tracking B12. In route `000000d4--327b2c4bb8`, 1,249 combined replacements changed B4:B5 and inverse signed-7 B12. Protected `0x0CA` varied, but the intact native camera value predicts it better than the replacement; the desired stop-sign response did not occur while stock DRCC was unavailable. |
+| Command semantics | **correlation observed; host influence and full command authority unproved** | In three no-driver-input stock auto-resumes, B12 ramps in the acceleration direction 351–433 ms before ego motion. At the start of the combined trial, openpilot's B12 and protected `0x0CA` moved in the expected direction, but across strong-braking samples requested acceleration correlated only `r=0.276` with the protected result and `r=0.176` with measured acceleration. |
+| Scale/sign | **comparison sign supported; request meaning/scale and gating unresolved** | Synthetic B12 and protected `0x0CA` result correlate negatively across the complete replacement windows, but when openpilot requested as much as −1.2 m/s² under conventional cruise, the protected result remained roughly −0.15 to −0.34 m/s². This does not prove a literal 0.1 m/s²/count physical scale or full authority. |
+| Validity/counter rules | **transport observed, receiver processing unproved** | Profile-5 counter/CRC and one-for-one source-counter-paced TX are observed; absence of an observed integrity fault does not establish acceptance. Gap, replay, authority, and fault thresholds remain untested. |
+| Receiver acceptance | **processing/authority unproved with a genuine conventional latch; `0x251` substitution did not establish engagement** | FRC DRCC attempts were rejected and the successful cruise latch in route `000000d4--327b2c4bb8` was conventional (`0x251` B0=`0x90`). Panda suppressed the stock downstream copy and transmitted the combined replacements, but the requested stopping deceleration was not applied. In route `000000d9--a1a459c5b5`, accepted synthetic `0x251` `0xA0/0xC0` frames did not make authenticated `0x08A` active even once; stock `0x251=0xE0` also continued on the unsplit bus. |
 | Source ownership | **FRC transmit side observed; downstream receiver unresolved** | The 2026-09-01 selective normal-Tx suppression run isolates `0x160` as a 40-Hz FRC normal-Tx PDU. Which downstream participant accepts/transforms it, and its exact replacement/fallback contract, remain open. |
 | Physical response | **combined synthetic stopping response negative without DRCC** | Four captured short stock stops auto-resume without gas/brake/RES/SET; in three examples B12 ramps before motion and protected `0x0CA` exceeds +0.5 m/s² 413–503 ms before motion. In the combined trial, measured acceleration closely followed the limited protected result (`r=0.912` over strong-braking samples), not openpilot's substantially stronger requested deceleration; the driver directly observed that the car did not slow for the modeled stop sign. |
 | Release/override | **partially closed** | Short-stop auto-resume works natively. After ~5.2–9.3 s stopped, Toyota enters a delayed hold state (`0x08A` B7 `0x67`, `0x66` on accelerator override); all three retained long-hold exits require accelerator input, and hold clears before motion. The command-side hold/release semantic is not yet mapped. |
@@ -114,9 +278,9 @@ SecOC-shaped switch PDU (VAR-127) and cannot be forged without the key story.
 Route `000000d4--327b2c4bb8` was captured after the EPS stopped providing its
 normal `0x030` traffic. MAIN attempts first produced the already-observed
 DRCC-unavailable/rejection state; the later successful latch was conventional
-cruise (`0x251` B0=`0x90`), not stock DRCC. This makes the route a direct test
-of whether the downstream longitudinal stack requires the FRC's healthy-DRCC
-state before granting full authority to a replaced request.
+cruise (`0x251` B0=`0x90`), not stock DRCC. This limits the route to a conventional-cruise observation. It does not
+distinguish a DRCC-mode permission requirement from an ineffective field
+substitution or a parallel/feedback publication.
 
 During two `CC.longActive` windows, openpilot emitted **1,249**
 combined B4:B5+B12 `0x160` frames at the camera-counter rate. The Panda relay
@@ -134,8 +298,11 @@ protected 0x0CA result          -0.320  ...  +0.397 m/s²
 ```
 
 Across both windows, synthetic B12 versus the protected result gives
-`r=-0.705` at nearest time and `r=-0.730` at +100 ms. That proves influence on
-the protected plane, not full authority. Over the strong-braking subset,
+`r=-0.705` at nearest time and `r=-0.730` at +100 ms in the original reduction.
+The September-16 counter-matched analysis reproduces comparable host
+correlations but shows a substantially stronger intact-native correlation.
+The earlier claim that this proves influence is withdrawn; it does not
+establish either acceptance or full authority. Over the strong-braking subset,
 openpilot requested as much as `-1.2 m/s²`, while the protected result remained
 roughly `-0.15..-0.34 m/s²`; requested acceleration correlates only `r=0.276`
 with the protected result and `r=0.176` with measured acceleration. Measured
@@ -248,16 +415,16 @@ arbitration/SecOC participants untouched.
 owns encoding and camera-counter pacing; Panda owns the TX whitelist, normal
 longitudinal bounds, and selective forwarding. No second permission state or
 legacy Toyota PCM compensation loop remains. Corolla can exercise the
-road-proven field and handoff. Camry combined-request influence is observed at
-the protected plane under conventional cruise, but full requested authority is
-not. The exact-Camry branch again derives cruise availability and engagement
+contributor-reported field and handoff. Camry combined-request transport is
+observed under conventional cruise; independent host influence and full
+requested authority are not established. The exact-Camry branch again derives cruise availability and engagement
 from Toyota's source-real state and does not transmit `0x251`.
 
 ## Next evidence steps
 
-1. Preserve a genuine conventional operating latch and identify which request
-   ID, allocation, validity, or permission fields accompany the acceleration
-   quantity before changing any additional PDU. `0x251` is no longer a candidate
+1. Establish which quantities are requests versus measured/selected-state
+   exports, and identify the relevant receiver contract before changing another
+   PDU or treating conventional-mode co-movement as acceptance. `0x251` is no longer a candidate
    authority input.
 2. Run the existing synchronized FRC/Brake request capture during stock DRCC,
    including a short stop, delayed hold, release, and (if naturally observed)
@@ -272,8 +439,9 @@ from Toyota's source-real state and does not transmit `0x251`.
 
 **Exit status:** the historical B12 offline generator remains verified evidence,
 and the test branch now implements the Corolla-validated B4:B5 request plus the
-gap-free stock-Toyota-B replacement topology. For Camry, combined B4:B5+B12
-influence is observed at the downstream protected plane, but the requested
-stopping authority is absent without DRCC. The `0x251` mode-middleman and
+gap-free stock-Toyota-B replacement topology. For Camry, B4:B5 is strongly feedback-like in the retained evidence and the
+combined B4:B5+B12 trial does not establish independent influence on the
+protected plane. The requested stopping response did not occur; its cause
+is not selected by this trial. The `0x251` mode-middleman and
 virtual engagement path are disproved and removed; delayed-hold release, the
 missing request/permission semantics, and PCS/AEB coexistence remain open.

@@ -792,3 +792,22 @@ of button mirrors cannot substitute for it. No production openpilot/opendbc or
 Panda code, authentication path, EPS image, or vehicle state was changed.
 
 Validation for this follow-up: **15 new native-release tests pass**. The native-release, existing host-request-causality and existing cancellation-ownership suites all pass (**3 suites, no failures or skips**). Targeted Python lint and `git diff --check` pass. These are analysis results, not a cancellation-feature qualification.
+
+
+## September 16: 0x160 role and causality correction
+
+The retained evidence does not establish the current Camry fine/coarse encoder
+as a direct longitudinal-command interface. Independent wheel acceleration
+matches native B4:B5 closely with cruise off (r=0.971345/0.988851 in the two
+complete August captures), and B4:B5 stays zero until 223–262 ms after wheel
+motion in three stock resumes. In all 1,249 counter-exact combined-trial pairs,
+intact native B12 predicts the chassis result better than replacement B12
+(r=0.930230 versus 0.700465 at nearest time). TX returns establish transport,
+not receiver acceptance. The former "proves influence" wording is withdrawn.
+
+Full source populations, timing/selection limits, GTS vocabulary boundaries,
+and reproduction commands are in
+[the longitudinal evidence report](camry-2026-longitudinal-evidence.md#september-16-command-versus-feedback-audit).
+The tracked raw fixture and `camry_20260916_longitudinal_motion_audit.json` make this
+correction reproducible without external September logs or ignored workspaces.
+No production sender, safety policy, or vehicle firmware changed in this audit.

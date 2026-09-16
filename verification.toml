@@ -1154,3 +1154,6 @@ tests = ["tests/verify_camry_2026_cancel_request_causality.py"]
 
 [suite.camry_2026_native_cruise_release]
 tests = ["tests/verify_camry_2026_native_cruise_release.py"]
+
+[suite.camry_20260916_longitudinal_motion_audit]
+tests = ["tests/verify_camry_20260916_longitudinal_motion_audit.py"]
