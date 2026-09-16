@@ -5,7 +5,7 @@ This does not install RAM code and does not modify CodeFlash. It binds the exact
 8965F3012000 application over physical UDS, snapshots DCM channel1 with SID23,
 then sends one classic functional ISO-TP single frame on 0x777:
 
-    07 C7 A5 00 12 34 00 00
+    07 C7 C7 A5 12 34 00 00
 
 Exact Crown firmware routes the seven-byte N-SDU to FEBE527D. SID C7 is absent
 from the configured service table, and functional NRC 0x11 is suppressed. The
@@ -41,7 +41,7 @@ from exploit.ephemeral_runtime.crown_f30_b6_inline_signer import (  # noqa: E402
     ROUTE,
 )
 
-PROBE_FRAME = bytes.fromhex("07c7a50012340000")
+PROBE_FRAME = bytes.fromhex("07c7c7a512340000")
 MAILBOX_LENGTH = 7
 OBSERVE_SECONDS = 0.080
 SETTLE_SECONDS = 0.020
@@ -115,7 +115,7 @@ def run() -> dict[str, Any]:
         "probe": {
             "frame_hex": PROBE_FRAME.hex(),
             "sent_monotonic_ns": sent_at,
-            "meaning": "ISO-TP SF len7; unsupported functional SID C7; sequence A5; sentinel 0012340000",
+            "meaning": "ISO-TP SF len7; unsupported functional SID C7; durable tail tag C7; sequence A5; sentinel 12340000",
         },
         "mailbox": {
             "address": f"0x{FUNCTIONAL_DCM_BUFFER_BASE:08X}",

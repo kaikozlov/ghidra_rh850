@@ -77,8 +77,8 @@ with tempfile.TemporaryDirectory(prefix="verify-crown-f30-signer-") as td:
     check("stock functional 0x777 ingress is closed through DCM",
           ingress["can_id"] == "0x777" and ingress["wire"] == {
               "isotp": "single frame, PCI=0x07",
-              "loader": "07 C6 index 00 word_le32",
-              "runtime": "07 C7 seq 00 target_hi target_lo 00 00",
+              "loader": "07 C6 C6 index word_le32",
+              "runtime": "07 C7 C7 seq target_hi target_lo 00 00",
           } and ingress["application_route"]["cantp_rx_pdu"] == "0x0805" and
           ingress["application_route"]["pdur_rx_pdu"] == "0x0803" and
           ingress["application_route"]["dcm_buffer"] == "0xFEBE527D" and
@@ -138,18 +138,18 @@ with tempfile.TemporaryDirectory(prefix="verify-crown-f30-signer-") as td:
     check("host binds stock-wire bus1 route", host.ROUTE.bus == 1 and host.ROUTE.elm327_param == 1)
     check("host exact F181 includes both Crown records",
           host.EXPECTED_F181_HEX == "023839363546333031323030300000000038413331313330303830303000000000")
-    check("loader frame exact", host.loader_frame(word_index=3, word=bytes.fromhex("11223344")) == bytes.fromhex("07c6030011223344"))
-    check("arm frame exact", host.loader_frame(word_index=0xFF) == bytes.fromhex("07c6ff0000000000"))
-    check("runtime C7 frame preserves Camry C7 N-SDU semantics", host.replacement_frame(sequence=7, target_angle_raw=0x1234) == bytes.fromhex("07c7070012340000"))
+    check("loader frame exact", host.loader_frame(word_index=3, word=bytes.fromhex("11223344")) == bytes.fromhex("07c6c60311223344"))
+    check("arm frame exact", host.loader_frame(word_index=0xFF) == bytes.fromhex("07c6c6ff00000000"))
+    check("runtime C7 frame preserves Camry C7 N-SDU semantics", host.replacement_frame(sequence=7, target_angle_raw=0x1234) == bytes.fromhex("07c7c70712340000"))
     check("host control uses stock ELM diagnostic address", host.CONTROL_CAN_ID == 0x777 and host.FUNCTIONAL_DCM_BUFFER_BASE == 0xFEBE527D)
     host_source = (ROOT / "exploit/ephemeral_runtime/crown_f30_b6_inline_signer.py").read_text(encoding="utf-8")
     check("active Crown host stays on ELM327 and explicitly disables auto-FD",
           "monitor._alloutput_mode" not in host_source and host_source.count("set_canfd_auto(CONTROL_BUS, False)") == 2)
     check("plan makes functional mailbox proof the first vehicle action", "prove stock functional 0x777 mailbox delivery" in plan["sequence"][0])
-    check("standalone mailbox probe frame exact", mailbox_probe.PROBE_FRAME == bytes.fromhex("07c7a50012340000"))
+    check("standalone mailbox probe frame exact", mailbox_probe.PROBE_FRAME == bytes.fromhex("07c7c7a512340000"))
     check("mailbox tail witness tolerates stock DCM first-byte reset",
-          mailbox_probe.mailbox_tail_matches(bytes.fromhex("00a50012340000")) and
-          mailbox_probe.mailbox_tail_matches(bytes.fromhex("c7a50012340000")))
+          mailbox_probe.mailbox_tail_matches(bytes.fromhex("00c7a512340000")) and
+          mailbox_probe.mailbox_tail_matches(bytes.fromhex("c7c7a512340000")))
 
     class GuardPanda:
         def __init__(self, rows): self.rows = list(rows)

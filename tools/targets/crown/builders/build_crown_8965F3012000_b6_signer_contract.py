@@ -673,8 +673,8 @@ def main() -> int:
             "dlc": 8,
             "wire": {
                 "isotp": "single frame, PCI=0x07",
-                "loader": "07 C6 index 00 word_le32",
-                "runtime": "07 C7 seq 00 target_hi target_lo 00 00",
+                "loader": "07 C6 C6 index word_le32",
+                "runtime": "07 C7 C7 seq target_hi target_lo 00 00",
             },
             "application_route": {
                 "address_row": f"0x{functional_address_row:08X}",
