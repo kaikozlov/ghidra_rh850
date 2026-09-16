@@ -644,3 +644,75 @@ The three selected cancellation suites pass with zero failures or skips; the
 new ownership and request-causality suites contain 17 and 12 tests respectively.
 The direct extraction command also runs from outside the repository after
 fixing its project-root import bootstrap. Python lint and diff checks pass.
+
+
+### September 16: factory cruise input ownership and the missing receiver
+
+The 2025 Camry service information, with procedures applicable from April
+2024, gives a more specific investigation target than the earlier generic
+"FRC/Brake receiver" wording. This is a same-generation 2025 circuit reference,
+**not** proof that the maintainer's 2026 ECU has identical software or a given
+CAN receive contract.
+
+The factory Steering Pad Switch Circuit description assigns primary cruise
+control to the **hybrid vehicle control ECU**. Its driving-assist, +RES,
+minus and CANCEL switches use the CCS/CCSG resistor circuit. The wiring drawing
+`GTY1267549` connects that circuit through the spiral cable to H63, while the
+separate mode-select/LTA/distance circuit terminates at the forward recognition
+camera's LKSW input. The hybrid system drawing `GTY1263732` also shows a direct
+stop-light-switch input to the hybrid controller. These are circuit/ownership
+facts; neither drawing supplies arbitration IDs or a CAN cancellation decoder.
+
+Sources reviewed directly, including the drawings:
+
+- [Camry Steering Pad Switch Circuit description](https://lemon-manuals.la/Toyota/2025/Camry%20SE%2C%202.5L%20Eng%20VIN%20A/Repair%20and%20Diagnosis/Accessories%20%26%20Equipment/Collision%2FAvoidance/Front%20Camera%20System%20-%20Diagnostic%20Codes%20%26%20Circuit%20Tests/Front%20Camera%20System/Steering%20Pad%20Switch%20Circuit%20%5B04%2F2024%20-%20%5D/Description/)
+- [Camry Steering Pad Switch Circuit wiring, GTY1267549](https://lemon-manuals.la/Toyota/2025/Camry%20SE%2C%202.5L%20Eng%20VIN%20A/Repair%20and%20Diagnosis/Accessories%20%26%20Equipment/Collision%2FAvoidance/Front%20Camera%20System%20-%20Diagnostic%20Codes%20%26%20Circuit%20Tests/Front%20Camera%20System/Steering%20Pad%20Switch%20Circuit%20%5B04%2F2024%20-%20%5D/Wiring%20Diagram/)
+- [Camry Hybrid Control System diagram, GTY1263732/GTY1268708/GTY1263832](https://lemon-manuals.la/Toyota/2025/Camry%20SE%2C%202.5L%20Eng%20VIN%20A/Repair%20and%20Diagnosis/Hybrid%2FElectric%20Powertrain/Testing%20and%20Diagnosis/Hybrid%20Control%20System%20-%20Diagnostics%20-%20Introduction/Hybrid%20Control%20System/System%20Diagram%20%5B04%2F2024%20-%20%5D/System%20Diagram%20%5B04%2F2024%20-%20%5D/)
+
+This matters to the retained cancellation evidence. A primary physical button
+or brake input can cancel cruise locally and subsequently appear on CAN. A
+camera-side switch-event mirror remains an observable output until its
+accepting receiver is established. Conversely, the direct circuit does **not**
+prove that the hybrid controller lacks an additional CAN cancellation input,
+and unsplit-bus placement alone does not exclude a cancel-only request.
+`0x1B2` therefore remains a candidate requiring receiver evidence, not a proved
+command or a disproved command.
+
+The actual retained GTS registry keeps the following nodes distinct:
+
+| Node | GTS category/database | Role |
+|---|---|---|
+| `0x724` | 395 / `MG_P5.ddb` | Motor Generator |
+| `0x7D2` | 397 / `HV_P5.ddb` | Hybrid Control |
+| `0x792` | 498 / `FRC_P5.ddb` | Front Recognition Camera |
+| `0x7B0` | 435 / `ABS_P5.ddb` | Brake/EPB |
+
+The source is `data/generated/gtsplus_2026/toyota_diag_registry_camry_2026.json`,
+`profile.ecus` and the corresponding category bindings. The retained
+`T-0051-26.cuw` is **node0724 Motor Generator**, not the hybrid-control node07D2.
+The earlier convenient "Engine/MG" shorthand must not be interpreted as
+possession of the cruise controller's application.
+
+All ten members of that package were inspected through the existing validated
+CUW parser and S-record decoder. Their records pass framing/checksum validation,
+but the resulting application and routine bodies remain opaque; executable
+receiver code was not recovered. The package names `8A2810602100`,
+`8A2A10602100` and `8A2910601100` describe the MG package's logical blocks, not
+a recovered exact-Camry hybrid-control application. Do not search these opaque
+bytes for a coincidental CAN ID and call it a receive descriptor.
+
+The ordinary current GTS Active-Test catalogues were checked for the retained
+Engine, MG, Hybrid, Brake and FRC categories. No normal cruise-cancel actuator
+was recovered. The separate `CCS_P5` and `HV_CCS_P5` views have data/diagnostic
+and history tables but no direct or routine Active-Test tables in this corpus.
+That is a bounded host-tool result, not proof of firmware absence. FRC's
+"PDA Cancel Notification Display" remains a display test, not a DRCC command.
+
+**Disposition:** prioritize the Hybrid Control receiver (`0x7D2`) and its
+camera/brake request interfaces when acquiring additional firmware or receiver
+specifications. Exact ECU identity/compatibility must still be established;
+a related Crown or Grand Highlander node07D2 package is not automatically a
+Camry receiver. Neither the EPS image, MG update, switch mirror nor the
+confounded historical host attempts currently establishes automatic-cancel
+acceptance. No sender, Panda permission, diagnostic control or vehicle command
+was added in this investigation. The production feature remains unimplemented.
