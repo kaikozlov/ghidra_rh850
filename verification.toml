@@ -1136,3 +1136,12 @@ tests = ["tests/verify_camry_2026_radar_lifecycle.py"]
 
 [suite.camry_f33_live_fault_projection]
 tests = ["tests/verify_camry_f33_live_fault_projection.py"]
+
+[suite.camry_2026_radar_lifecycle_external]
+tests = ["tests/verify_camry_2026_radar_lifecycle_external.py"]
+
+[suite.camry_f33_cooperative_fault_projection]
+tests = ["tests/verify_camry_f33_cooperative_fault_projection.py"]
+
+[suite.camry_2026_cancel_evidence]
+tests = ["tests/verify_camry_2026_cancel_evidence.py"]

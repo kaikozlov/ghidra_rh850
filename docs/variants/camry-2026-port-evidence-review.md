@@ -336,3 +336,106 @@ startup spread across publications, and wrong-bus traffic. Exact-F33 CarState
 fault assertion/recovery and unrelated status-bit separation are covered too.
 Automatic cruise cancellation remains a separate receiver/ownership question;
 none of these changes restores the invalid unsplit-bus fake-brake sender.
+
+### Cooperative-control faults: two additional source-real inhibits
+
+Exact F33 also reports `CAFC` at `0x030 B16[0]` and `CAD9` at `0x030 B19[0]`.
+These are separate from the selected hardware/DEM aggregate at B6[2]. Fresh
+stock-code tracing closes their RTE staging through `D0D7C -> BF3AA -> 4C2DC ->
+4C97A`; generated-COM signals 25 and31 bind them to those wire locations.
+`CE772` requires both clear before entering ready, and `CE7A6` leaves ready
+when either asserts. Camry CarState now reports all three through ordinary
+`steerFaultTemporary`, without changing Panda, the controller, or engagement
+policy. The original unit-test telemetry was not healthy: its B19[0] flag is
+set. A separately retained operating zero-torque frame replaces that default,
+and an explicit regression preserves the original initializing/inhibited case.
+
+The permanent/transient distinction is provably lossy at this projection:
+`CEC72` ORs `CAFB==1` and `CAFD==1`. `CEE7C` clears the request-failure source
+in inactive profile 7, whereas `CEF26` retains the asserted rate-latch source;
+`CEC0C` clears both during subsystem initialization. These two causes publish
+the same command-inhibit bit. Assigning a restart-required boolean from that
+bit would therefore invent information. This does not rule out a distinct,
+as-yet-unrecovered status or diagnostic source.
+
+The additional verifier executes stock OR, RTE, readiness and recovery code;
+only scalar packing/status submission is replaced by argument observation.
+It checks the actual stock packer arguments and both values, not merely a
+Python reconstruction of the RTE chain. **59 assertions pass**, adding to the
+85 live hardware-fault assertions. Source, generated evidence and runnable
+verifier are `analyze_camry_f33_cooperative_fault_projection.py`,
+`data/generated/camry_f33_cooperative_fault_projection.json`, and
+`tests/verify_camry_f33_cooperative_fault_projection.py`.
+
+### Cancellation: the remaining command contract is not recovered
+
+The durable reduction now retains **21 switch-CANCEL edges followed by genuine
+cruise-latch release**, drawn from all three September 4 highway routes. Every
+window has preceding cruise engagement and no overlapping brake assertion.
+The observed publication-batch delay to release is 29.756..172.179 ms, with a
+70.439 ms median; these timestamps are not physical CAN arbitration timing.
+Original source hashes and both sides of each state transition are in
+`tests/fixtures/camry_2026_cancel_windows.jsonl.gz`. Its tracked extractor
+regenerates the fixture byte-for-byte from the original rlogs, including the
+one window spanning a segment boundary.
+
+The analysis tests **4,464 fully covered single-bit/polarity hypotheses** across
+the retained non-object ADAS streams. No stable-before/asserted-after bit
+reproduces in every window, even allowing a brief pulse anywhere in the 500 ms
+post-edge window. A second screen tests **21,210 contiguous short-field
+layouts**: widths 2/3/4/8/12, both endian directions, every bit start after the
+CRC/counter prefix, in the seven streams with complete pre/post coverage.
+No common new value appears after every cancellation while being absent in
+every pre-window. The highest coverage in the `0x160` short-field screen is
+only 10/21. These are method-bounded negatives, not proof that an automatic
+cancel command is absent. They do not exclude another encoding, sparse traffic
+outside the windows, or a command not exercised by physical-switch cancellation.
+The 13 object-family PDUs are not part of this durable non-object field screen.
+
+The current FRC catalogue has 69 routine Active-Test candidates and no direct
+Active-Test table. Its only cancel-named test is **PDA Cancel Notification
+Display**, not a cruise cancel actuator. DID 1B01 is grouped with ISA switch
+recognition/output monitors; diagnostic bit positions do not establish CAN
+positions or writable DRCC commands. No maintenance/test routine, artificial
+fault, ECU communication suppression, or replay of a protected switch packet
+is substituted for normal cancellation.
+
+Retained comparison-source review does not supply the missing contract:
+legacy Toyota implementations send their established `0x343`/PCM cancel
+commands, whereas the retained TSS3 Corolla branch returns from its TSS3
+controller before that legacy path. Neither constitutes target-native Camry
+receiver evidence. The local Camry CUW `T-0051-26` is node 0724 Engine/MG, not
+FRC or Brake/Skid; the repository's exact EPS firmware is not the missing
+cruise-command receiver image. The next unresolved software fact is an
+ordinary, accepted cancellation command and its receiver/transport ownership,
+not whether the deleted wrong-bus fake-brake implementation passes a road test.
+No automatic-cancel sender is added in this checkpoint.
+
+Source/reducer: `tools/targets/camry/extract/extract_camry_2026_cancel_windows.py`,
+`tools/targets/camry/analysis/analyze_camry_2026_cancel_evidence.py`,
+`data/generated/camry_2026_cancel_evidence.json` (v2), and
+`tests/verify_camry_2026_cancel_evidence.py`. Synthetic pulse tests independently
+check that both endian search directions recover a known short pulse and
+reject an otherwise identical non-reproducing event.
+
+### Final software checkpoint and reproducible replay
+
+Openpilot **`6d175daf9`** pins opendbc **`4f91b600`**, including radar lifecycle
+commit `b579c04d` and the additional F33 cooperative fault reporting. The combined
+Toyota/CAN/Toyota-safety/generic-interface/docs/platform/vehicle-model selection
+passes **617 tests and 3,186 subtests**, with 262 existing skips in that selection.
+Toyota Python lint passes. No EPS image, signer/runtime loader or Panda safety
+policy was changed in this follow-up, and nothing was installed in a vehicle.
+
+`tests/verify_camry_2026_radar_lifecycle_external.py` now makes the actual-parser
+replay reproducible through the maintained sibling opendbc environment. Besides
+the 17-source held-out reduction, it preserves original CAN publication
+boundaries on six raw-source segments. Two are stock-harness bus0 captures,
+and each produces 1,199 complete updates with zero reported CAN errors. Historical
+repin inputs are explicitly remapped by the test; stock-harness sources are not.
+This verifies source placement and parser behavior, not healthy EPS operation
+in the incident-era stock-harness captures or a road qualification of fusion.
+
+The six explicitly selected analysis suites all pass: radar anchors,
+radar lifecycle reduction, actual-opendbc radar replay, current hardware-fault
+projection, cooperative-fault projection, and cancellation evidence reduction.

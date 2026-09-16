@@ -8,20 +8,21 @@ its detailed reasoning and reproducible sources are in
 
 The exact target remains EPS `8965F3307000 / 8A3113303100`. No vehicle commands,
 RAM installation, or persistent firmware writes were performed during this audit.
-Openpilot `3f9f3c061` pins opendbc `093125ab`; ordinary openpilot engagement,
+Openpilot `6d175daf9` pins opendbc `4f91b600`; ordinary openpilot engagement,
 CarState/CarController ownership, and Toyota Panda safety remain the architecture.
 
 ## Current capability matrix
 
 | Capability | Implemented / demonstrated | Actual remaining boundary |
 |---|---|---|
-| Identity and vehicle state | Exact F181 table/resolver; target-native angle/rate, driver torque, wheels, READY, gear, cruise state, body/BSM; conventional `0x251=0x88/0x90` exposed through `cruiseState.nonAdaptive` | Other firmware needs its own identity/compatibility evidence; selected live EPS inhibit now drives the ordinary temporary-unavailability flag; a restart-required/permanent classification is not inferred |
+| Identity and vehicle state | Exact F181 table/resolver; target-native angle/rate, driver torque, wheels, READY, gear, cruise state, body/BSM; conventional `0x251=0x88/0x90` exposed through `cruiseState.nonAdaptive` | Other firmware needs its own identity/compatibility evidence; exact-F33 current fault reporting is described separately below |
+| Steering faults | Current `0x030 B6[2]`, cooperative command inhibit B16[0], and angle inhibit B19[0] feed normal temporary-unavailability reporting; 144 stock-instruction assertions cover sources, RTE/wire binding, readiness and recovery | Lossy command-inhibit projection merges a self-clearing failure and a latched failure. Do not invent a permanent-fault classification or transfer F33-specific bits to another calibration |
 | Driver interaction | Same-car torque sign and 0.6 N·m steering-pressed policy retained | Physical override/release on the final runtime still needs qualification; this threshold is not an OEM single-comparator claim |
 | Vehicle model | Absolute steering-ratio default 15.3; **tire-stiffness baseline remains 0.7933** because paramsd's ~1.0 is a multiplier of CP stiffness; actuator-delay default remains 0.18 s | Identical cached lagd estimates on two routes are not independent delay measurements |
 | Historical lateral authority | September-10 C7/resident/native-B6 configuration physically steered on routes `8d` and `93` | Temporary repin and historical helper/image; selected working intervals use conventional cruise, not demonstrated adaptive cruise |
 | Host-command loss | New 598-byte supervised helper fits existing 600-byte transfer; changed C7 generation renews seven nominal 5-ms foreground ticks; unchanged generation expires; zero releases immediately | 86 compiled-instruction assertions include 34 liveness and 52 differential/error cases; crypto callees are stubbed in differential tests, not a hardware signing proof. New helper is **not live-qualified** |
 | Stock harness | Source-pinned September-11 logs put radar objects on Panda bus0, FRC `0x160` on bus2, chassis `0x025/0x101/0x412` on unsplit bus1 | These incident-era logs have no EPS `0x030`; they establish placement, not healthy steering. C7 remains on bus1 pending healthy-rack qualification |
-| HUD and automatic cruise cancel | Native unsplit-bus messages are preserved; read-only HUD state uses bus1. Wrong-bus `0x412`/`0x101` transmissions and safety permissions removed | **A genuine automatic-cancel ingress is still unresolved.** HUD replacement is also unqualified; neither is solved by transmitting a duplicate on the ADAS relay |
+| HUD and automatic cruise cancel | Native unsplit-bus messages are preserved; read-only HUD state uses bus1. Wrong-bus `0x412`/`0x101` transmissions and safety permissions removed | **A genuine automatic-cancel command remains unresolved.** 21 independent source windows plus single-bit and multibit pulse screens recover no supported sender contract. HUD replacement is also unqualified; neither is solved by a wrong-bus duplicate |
 | Stock-ACC coexistence / recovery | Packaged recovery preserves pre-clear DTC evidence, validates ISO-TP/DID lengths, requires distance-control mode plus genuine FRC permission and clear ACC-unavailable state | Same-cycle DRCC restoration with RAM signer retained is not observed; historical lateral proof does not close this combination |
 | Alpha longitudinal | Source-counter-paced `0x160` replacement; B4:B5 and Camry B12-low7 treatment; B12 high bit preserved; canonical P05 validation; planner/controller/Panda bounds agree at −1.5..+1.3 m/s² | Physical authority, cancellation, stop behavior, causal delay, and PCS/AEB coexistence remain unqualified; stock ACC remains default and `autoResumeSng=False` |
 | Stock longitudinal handback | Byte-exact latest valid native `0x160` may pass unchanged outside host-command bounds while longitudinal permission remains valid; altered frames remain bounded and CRC-checked | Required because retained native requests legitimately exceed the host envelope; source timing/handback still needs physical qualification |
@@ -53,7 +54,7 @@ join consumes repeated counter occurrences rather than overwriting them:
 
 The combined Toyota state/controller tests, CAN tests, Toyota safety tests,
 generic car interfaces, docs, platform configurations and vehicle-model tests
-pass **615 tests with 3,183 subtests**; 262 existing tests are skipped by that
+pass **617 tests with 3,186 subtests**; 262 existing tests are skipped by that
 selection. Toyota Python lint passes. The dedicated Camry firmware/package,
 compiled-helper liveness, independent radar anchors, full object reconstruction,
 recovery transport, and original-log topology checks also pass. The exact
@@ -77,7 +78,7 @@ not supply a causal actuator-delay calibration.
 **Radar source lifecycle and the available live fault projection are now
 implemented.** The source-driven radar decoder is enabled for Camry, with
 separate held-out replay and adversarial tests; vehicle-level fusion/control
-qualification is not claimed. Current EPS fault/inhibit drives the normal
+qualification is not claimed. Current hardware and cooperative-control inhibits drive the normal
 `steerFaultTemporary` interface after exact stock-code assertion/recovery proof.
 This selected one-bit projection cannot identify every fault or manufacture a
 restart-required `steerFaultPermanent` classification.

@@ -95,9 +95,10 @@ The road-proven temporary-repin route contained only Classical host TX and put
 C7 on bus 0. The **current stock-Toyota-B candidate** is:
 
 - C7 `0x1FDC0002`, **bus 1**, 8 bytes;
-- HUD `0x412`, bus 0, 8 bytes;
-- cancel `0x101`, bus 2, 8 bytes;
 - alpha-long `0x160`, bus 0, 32-byte CAN-FD.
+
+The former HUD `0x412`/brake-cancel `0x101` transmissions are removed: they
+did not replace their stock unsplit-bus sources.
 
 The same network carries 32-byte FD `0x08A`. Route 45 directly showed that
 upstream's sticky bus-global `canfd_auto` promoted native-Classical replacement
@@ -243,9 +244,15 @@ implementation and evidence boundaries are corrected:
   host-command loss supervision. The existing resident/staging/authenticated
   payload are unchanged. 86 compiled-instruction assertions cover liveness and
   differential/error behavior; this new helper is not vehicle-qualified.
-- The radar candidate uses independently anchored 0.005-m range, 0.04-m
-  left-positive lateral, and 0.025-m/s low14 velocity. Production CarParams
-  leaves radar unavailable until object validity and reassignment are known.
+- Camry radar now uses independently anchored 0.005-m range, 0.04-m
+  left-positive lateral, and 0.025-m/s low14 velocity plus source-driven
+  new/end-track flags and raw-state-zero rejection. Complete-cycle handling,
+  loss/duplicate recovery and held-out replay are tested; the normal Camry
+  radar interface is enabled. No other TSS3 radar platform is inferred.
+- Exact F33 current hardware and cooperative-control inhibits feed ordinary
+  `steerFaultTemporary`. Their assertion, RTE/wire binding, readiness and
+  recovery are tested through stock instructions. A one-bit aggregate that
+  merges transient and latched causes cannot supply a permanent-fault class.
 - Planner, controller and Panda share the Camry −1.5..+1.3-m/s² host envelope.
   A CRC-valid byte-exact native handback is preserved without clipping Toyota's
   own request. This does not establish native longitudinal authority.

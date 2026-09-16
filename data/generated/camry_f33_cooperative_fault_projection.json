@@ -1,0 +1,126 @@
+{
+  "angle_inhibit": {
+    "bit": 0,
+    "byte": 19,
+    "can_id": "0x030",
+    "generated_signal": 31,
+    "producer_state": "FEBECAD9",
+    "rte_functions": [
+      "0xD0D7C",
+      "0xBF3AA",
+      "0x4C2DC",
+      "0x4C97A"
+    ],
+    "rte_path": [
+      "FEBECAD9",
+      "FEBEAD4B",
+      "FEBEE83A",
+      "FEBE80E0",
+      "FEBE8C47"
+    ],
+    "structural_name": "F33_COOPERATIVE_ANGLE_INHIBIT"
+  },
+  "command_inhibit": {
+    "bit": 0,
+    "byte": 16,
+    "can_id": "0x030",
+    "expression": "u8(FEBECAFB) OR u8(FEBECAFD)",
+    "generated_signal": 25,
+    "producer": "0xCEC72",
+    "rte_functions": [
+      "0xD0D7C",
+      "0xBF3AA",
+      "0x4C2DC",
+      "0x4C97A"
+    ],
+    "rte_path": [
+      "FEBECAFC",
+      "FEBEAD42",
+      "FEBEE834",
+      "FEBE80EC",
+      "FEBE8C43"
+    ],
+    "structural_name": "F33_COOPERATIVE_COMMAND_INHIBIT"
+  },
+  "consumer_contract": {
+    "active_exit": "0xCE7A6 exits ready immediately when either inhibit is one",
+    "normal_clear_case": "both flags zero neither block entry nor force exit when other predicates pass",
+    "ready_entry": "0xCE772 returns ready only when both inhibits are zero and its other predicates pass"
+  },
+  "openpilot_mapping": {
+    "platform": "TOYOTA_CAMRY_TSS3 only",
+    "semantics": "current steering unavailability, not a guarantee of automatic repair; no host-side persistence timer or new engagement policy",
+    "steerFaultPermanent": "not inferred from these lossy projections",
+    "steerFaultTemporary": "current selected hardware fault OR cooperative command inhibit OR cooperative angle inhibit"
+  },
+  "recovery_information_loss": {
+    "boundary": "these transmitted bits cannot independently select restart-required versus self-clearing causes; other diagnostic/status surfaces are not ruled out",
+    "rate_latch": "0xCEF26 retains asserted FEBECAFD even in inactive profile bank 7",
+    "request_failure": "0xCEE7C clears FEBECAFB in inactive profile bank 7",
+    "subsystem_initialization": "0xCEC0C clears both sources and their combined flag",
+    "wire_collision": "CAFB=1/CAFD=0 and CAFB=0/CAFD=1 both publish the same command-inhibit bit"
+  },
+  "schema": "camry-f33-cooperative-fault-projection-v1",
+  "source": {
+    "functions": [
+      {
+        "entry": "0x0004C2DC",
+        "sha256": "f9590058dea41bacca84f81e079497d9438bc63a7c2e30f1ab0f42aef931b329",
+        "size": 56
+      },
+      {
+        "entry": "0x0004C97A",
+        "sha256": "f79978b2cdf683c326076a26f46243e3c20535858eaf3eea3733790809eed6ba",
+        "size": 1162
+      },
+      {
+        "entry": "0x000BF3AA",
+        "sha256": "458d3dea1ae398a442393759f0fad4385bb2ebd7dcf1482ee2d1b5d1336215d8",
+        "size": 1392
+      },
+      {
+        "entry": "0x000CE772",
+        "sha256": "d3cdbb8206cae1180c9cc820d78961ec53ea626983ffd83c207c98f69ccbdc1d",
+        "size": 52
+      },
+      {
+        "entry": "0x000CE7A6",
+        "sha256": "8c8dda296e9d91a2e5a60393df54e1f05e37e1647684d290318af90772e359d7",
+        "size": 88
+      },
+      {
+        "entry": "0x000CEC0C",
+        "sha256": "0f33b03300e5a7b0903292f06b9182154aa90ad071720d1d6310c5fb0453e568",
+        "size": 102
+      },
+      {
+        "entry": "0x000CEC72",
+        "sha256": "ef5b555dd48ea29a735255e3f9b5531aa5be10ae68d6781ef3e4c8dfc94e847d",
+        "size": 24
+      },
+      {
+        "entry": "0x000CEE7C",
+        "sha256": "6daac14656be82660ae0a31d48004351866f760162b7f5b1b1af77c22ee340ce",
+        "size": 146
+      },
+      {
+        "entry": "0x000CEF26",
+        "sha256": "2e0335c9f729c98cbfcce664ee8ac94ea94f8d0c654763b96d572dc9e3082b8f",
+        "size": 126
+      },
+      {
+        "entry": "0x000D0D7C",
+        "sha256": "72fbbd909ed7037fb27544e5fda7541704b173520f0a68c03968a4b5276a37d4",
+        "size": 368
+      }
+    ],
+    "path": "firmware/camry-8965F3307000/CodeFlash.bin",
+    "sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7"
+  },
+  "verification": {
+    "assertions": 59,
+    "boundary": "scalar packer/status-submit callbacks are substituted; no CAN hardware or vehicle is exercised",
+    "method": "stock OR, RTE, readiness and recovery instructions; generated-COM argument capture at the packer boundary",
+    "script": "ghidra/scripts/verify/VerifyCamryCooperativeFaultProjection.java"
+  }
+}
