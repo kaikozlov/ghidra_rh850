@@ -217,8 +217,73 @@ That physical flash capacity matters independently of the exact address map:
 the TSS3 FRC CUW target span is only 85,458,944 bytes (~81.5 MiB), so a package
 of this shape cannot be a complete 128-MiB NOR image. There is enough flash
 outside the CUW-updated body to hold boot/programming/security code. The exact
-TMPV770 address-to-NOR-offset mapping is still unproved and must not be inferred
-from the S-record virtual addresses alone.
+**Toyota TMPV7706** address-to-NOR-offset mapping is still unproved and must not
+be promoted from package S-record addresses alone.
+
+### 5.1 Public Visconti5 sibling firmware localizes the programming service to the R4/flash domains
+
+A public Labforge Bottlenose firmware bundle supplies the missing platform-level
+control without being mistaken for Toyota firmware. Release `v0.2.134`
+(`firmware-bottlenose-v0.2.134.tar`, published 2024-03-12, SHA-256
+`9945ee81bcc7d02618856b26945a12378e862ba3e1320211be2fbafc751065de`)
+contains an unstripped Linux image plus a real-time image `cr4dl0.img` whose
+52,776-byte payload SHA-256 is
+`6cfe5eb572bce81b9f6641f6b90fcf47bcdfdea8439467e032c8b6aa48325af3`.
+The same payload is present in public releases as early as `v0.1.91`, so this is
+a stable board-support component rather than a one-release accident.
+
+Despite the `tmpv7706-bn3` filename convention in that bundle, its root device
+tree explicitly identifies **`toshiba,tmpv7708-bn3`, `toshiba,tmpv7708`**. It
+is therefore **TMPV7708 sibling-platform evidence**, not an exact TMPV7706XBG
+camera image. This distinction is mandatory. The value of the image is the
+shared Visconti5 execution/interconnect model, not target identity.
+
+The sibling firmware gives three unusually strong address-domain joins:
+
+1. `cr4dl0.img` is a legacy U-Boot firmware image with **load address and entry
+   point `0x00800000`**. Thus `0x00xxxxxx` is a concrete Cortex-R4 executable
+   domain on this Visconti5 implementation. The Toyota FRC package's downloaded
+   routine target **`0x008F6C00`** lies in that same address domain.
+2. Its device tree exposes Toshiba **GCOMM at `0x24040000`** and two 1-MiB
+   shared-memory FIFOs at A53 physical addresses `0x4_80000000` and
+   `0x4_80100000`. The R4 image contains the corresponding 32-bit aliases
+   `0x80000000` and `0x80100000`; its active flash service registers receive
+   endpoint `0x0008`, reply endpoint `0x0800`, and a GCOMM interrupt/callback
+   path inside the same `0x2404xxxx` controller block.
+3. Linux does not drive this platform's serial flash directly. Its unstripped
+   kernel exposes `tmpv7700-mbox-flash` over GCOMM. The exact R4 consumer is
+   recovered: after the outer GCOMM length word, service word `1` dispatches
+   operation `0=erase`, `1=write`, `2=read` with `address`, `length`, and optional
+   data. The R4 read path subtracts its configured flash base (initialized to
+   zero) and reads from **`0x08000000 + offset`**. Thus this sibling maps serial
+   NOR through a concrete `0x08000000` XIP aperture.
+
+That makes the Toyota CUW address geometry substantially less mysterious. Its
+85,458,944-byte application target **`0x08E80000..0x0E000000`** sits naturally
+inside the sibling platform's `0x08xxxxxx` serial-NOR/XIP domain, while its
+1,392-byte programming routine sits in the sibling platform's `0x00xxxxxx`
+Cortex-R4 execution domain. The strongest current implementation hypothesis is
+therefore:
+
+```text
+Toyota ReproStd / programming service
+        |
+        | encrypted DFI=1 download
+        v
+TMPV770 Cortex-R4 execution domain       (routine target 0x008F6C00)
+        |
+        +--> serial-NOR/XIP domain       (Toyota target 0x08E80000..0x0E000000)
+        |
+        +--> protected TMPV770 security services / HSM_CM3   (exact ABI open)
+```
+
+The first two arrows are strongly supported by independent package and sibling
+platform address evidence; the final R4-to-HSM edge is the remaining software
+join. This still does **not** prove the exact Toyota TMPV7706 flash aperture,
+R4 firmware layout, UDS task placement, or HSM command ABI. It does make an
+A53/Linux-side payload decryptor a poor next target: the actual FRC package
+loads a routine into the R4 address domain, and a closely related Visconti5
+platform already uses R4/GCOMM services to mediate the serial NOR.
 
 For the exact Camry, a raw `8646C06091` camera NOR dump or a matching
 `8646F3315000` CUW/boot image is therefore the highest-value static acquisition.

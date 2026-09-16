@@ -386,13 +386,59 @@ Insight at <https://support.dts-insight.co.jp/product/support_advice_trqer/downl
 
 That closes the **hardware-backend** question at the platform level: TMPV770
 contains an on-die protected Cortex-M3 hardware-security-module domain capable
-of being the FRC's SHE key store/crypto endpoint. It does **not yet close the
-Toyota software call path**. We still need decoded FRC boot/application code or
-a live trace to prove that the camera's RID-`0x1010`/`0x3002` handler forwards
-`M1/M2/M3` to `HSM_CM3`, recover the mailbox/shared-memory/service ABI, identify
-the SHE slot/AuthID used for the ECU Security Key, and determine whether the
-same HSM also owns runtime SecOC CMAC generation. Do not assign the UDS handler
-to Cortex-R4 versus Cortex-A53 from the core topology alone.
+of being the FRC's SHE key store/crypto endpoint. A second independent public
+artifact now narrows the software side as well. Labforge's Bottlenose
+`v0.2.134` firmware bundle contains a stable 52,776-byte Visconti5 Cortex-R4
+image (SHA-256 `6cfe5eb5…25af3`) whose U-Boot header loads/enters at
+`0x00800000`. Its DT identifies the board as **TMPV7708**, so this is sibling
+platform evidence rather than exact Toyota TMPV7706 firmware.
+
+That sibling R4 firmware and its unstripped Linux image recover a complete
+A53↔R4 storage-service boundary. Linux uses Toshiba GCOMM at `0x24040000` and
+shared FIFOs `0x4_80000000/0x4_80100000` to access
+`toshiba,mbox-flash-tmpv7700`; the R4 side aliases those FIFOs at
+`0x80000000/0x80100000`, dispatches service `1` operations
+`erase/write/read`, and reads serial NOR through `0x08000000 + offset`. This is
+a byte-level example of the platform's normal-world service partition, not an
+HSM API guess.
+
+The Toyota FRC package aligns with both sibling address domains: its downloaded
+programming routine targets `0x008F6C00` (the sibling's R4 execution domain),
+while its encrypted application target is `0x08E80000..0x0E000000` (inside the
+sibling's `0x08xxxxxx` serial-NOR/XIP domain). Consequently the current FRC
+software model is sharper than “some non-Renesas HSM”:
+
+```text
+Toyota key-management UDS context (`10 4F`, selected RID `0x3002`)
+        |
+        v
+FRC diagnostic / real-time service layer
+        |\
+        | +--> serial NOR / application management
+        |
+        +----?> TMPV770 `HSM_CM3`       (exact Toyota service ABI still open)
+                    |
+                    v
+          SHE `CMD_LOAD_KEY(M1,M2,M3)`
+                    |
+                    v
+          protected key slot -> M4/M5 proof
+```
+
+The **R4 placement is strongly supported for the programming/decoder path** by
+the Toyota routine address plus the independent sibling firmware; it is still
+not proven that the ordinary live `0x792` MACKey UDS handler itself executes on
+R4 rather than handing off from another core. Likewise, the exact
+R4/application↔`HSM_CM3` mailbox/shared-memory/service ABI is not public in the
+recovered sibling sample: that CR4 image contains the flash GCOMM service but no
+active HSM command client or obvious software AES/SHE implementation. The
+remaining decisive evidence is therefore decoded Toyota FRC R4/application
+code, a raw camera NOR dump, or a live key-update trace—not more inference from
+CPU vendor names.
+
+We still need that evidence to prove the FRC's RID-`0x3002` handler-to-HSM call,
+identify the SHE slot/AuthID used for the ECU Security Key, and determine whether
+the same HSM also owns runtime SecOC CMAC generation.
 
 This provisioning result must remain separate from **runtime protected-message
 signing**. The captured native FRC-side Bus-1 periodic family is exact AUTOSAR
