@@ -6352,14 +6352,28 @@ jittered block the resident advanced observation/D7/native-B6 by `434/109/217`,
 but ID63 advanced **zero** and no transmitted signature was stored. The verdict
 is therefore `id63_not_seen_at_midaggregate_boundary`.
 
-This is a **bounded dynamic negative** for that exact treatment: the
-Panda-transmitted ID63 B6 did not reach exact-F33's normal post-CanIf/pre-SecOC
-boundary. SecOC rejection and EPS post-ingress rewriting cannot explain its
-absence there. The result does not distinguish an upstream gateway/proxy filter,
-a non-exposed physical B6 delivery segment, or loss below the observer in
-hardware/low-level receive admission. It also does not prove that an
-application-valid ID11 with a valid MAC would receive identical upstream
-treatment.
+This is a **bounded dynamic negative** for that exact treatment, and the subsequent
+raw RSCFD/CanIf re-audit localizes it one layer farther upstream. Exact F33's B6
+acceptance is ordinary rule39: `GAFLID=0x0B6`, mask selector0 ->
+`GAFLM=0xC00007FF`, receive-FIFO destination2, followed by descriptor39
+`0x400000B6 / DLC32`. `0x090`, `0x0D7`, and B6 use the same mask selector and
+destination. The RSCFD adapter's CanIf identity is exactly `FD | 0x0B6` under a
+`0xFFFFFFFF` mask; BRS is not represented in that software key. The pre-SecOC receive
+path has no application-byte, Target-Lateral-ID, authenticator, or transmitter-node-identity discriminator; PDU44's legacy checksum
+hook is non-enforcing. Thus any standard 32-byte CAN-FD B6 **successfully decoded by
+F33 controller1** must pass the software ring/CanIf boundary observed by this helper.
+
+The direct Panda marker therefore disappears **before successful F33 controller1
+decode/CanIf admission**. EPS SecOC, PduR, generated COM, and B6 application logic
+are excluded as the selective drop point. A physical/link decode failure before GAFL
+matching remains the narrow receiver-side residue; otherwise the drop is external to
+F33 on the path from the Panda-visible Bus-4 trunk to the EPS-local B6 receive segment.
+Current GTS supplies a compatible topology clue without closing the hardware: Skid
+Control is logical Bus 4 through `No. 2 Global CAN Junction Connector`, whereas EPS is
+also logical Bus 4 but has junction label `EBU`. `Bus 4` is therefore not promoted to
+proof of one transparent electrical segment, and `EBU` is not yet promoted to the exact
+active filter. Exact category-435 Brake firmware `F152633K0000` or equivalent physical
+tracing is still required to identify that concrete bridge/filter/transmit implementation.
 
 Joined with §70.2's continuing internal native B6 source, Toyota patent
 US20200070849A1 and current GTS now close the **logical** architecture that had

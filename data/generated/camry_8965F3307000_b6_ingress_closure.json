@@ -41,6 +41,46 @@
     "function_count_after": 6065,
     "function_count_before": 6062
   },
+  "drop_localization": {
+    "exact_component_still_unproved": true,
+    "leading_physical_model": "A Brake/VMM/EBU-domain routing boundary exposes ordinary Bus-4 diagnostics/service traffic to the EPS while the final Brake-owned B6 steering target is generated or forwarded on a non-Panda-visible local path to the EPS. Exact category-435 Brake firmware is required to identify the concrete bridge/filter/transmit routine.",
+    "live_source": {
+      "d7_queue_delta_selfcheck": 102,
+      "host_marker_f33_hits": 0,
+      "host_marker_panda_returns": 121,
+      "host_marker_tx": 121,
+      "native_b6_queue_delta_during_treatment": 217,
+      "native_b6_queue_delta_selfcheck": 205,
+      "observer_boundary": "after 0x79EDE/0x809FE receive-ring drain and before the untouched 0x7A272 tail reaches 0x6A410 SecOC",
+      "path": "targets/camry-2026/raw-20260910/f33-ingress/session-summary.json",
+      "sha256": "f4fc77c28909a9e0a9409c28a7bea9bb9f54119d4b73f097820a633378c71493"
+    },
+    "localized_boundary": "The Sep-10 Panda marker disappears before successful F33 controller1 decode/CanIf admission. It is not dropped by EPS SecOC, PduR, generated COM, or B6 application logic. The remaining receiver-side residue is physical/link-layer decode before GAFL acceptance; otherwise the drop is in the external routing boundary between the Panda-visible Bus-4 trunk and the EPS-local B6 delivery segment.",
+    "receiver_contract": "Once a standard-data CAN-FD ID 0x0B6/DLC32 frame is successfully decoded by exact-F33 controller1, rule39 and descriptor39 admit it through the ordinary software ring to PDU44. The recovered path has no pre-observer B6 application-field, Target-Lateral-ID, SecOC-tag, or transmitter-identity rejection.",
+    "topology_source": {
+      "boundary": "GTS Bus 4 is a logical network domain. EPS junction label EBU versus Skid's numbered passive junction is a topology clue, not proof that EBU is the active filter implementation.",
+      "eps": {
+        "bus_index": 32,
+        "bus_name": "Bus 4",
+        "component_index": "0x32",
+        "ecu_domain": "Power Steering (EPS)",
+        "junction_name": "EBU",
+        "raw_hex": "6ad24d0067a402002000000000003200",
+        "subbus_sequence": "0x33"
+      },
+      "path": "data/generated/gtsplus_2026/camry_8965F3307000_emps_semantics.json",
+      "sha256": "f1e204b1eaed562e2c8ce5746df8792381e211f2deed013641657f7d96c7218c",
+      "skid": {
+        "bus_index": 32,
+        "bus_name": "Bus 4",
+        "component_index": "0x29",
+        "ecu_domain": "Skid Control (ABS/VSC/TRAC)",
+        "junction_name": "No. 2 Global CAN Junction Connector",
+        "raw_hex": "6ad24d00331a02002000000000002900",
+        "subbus_sequence": "0x2A"
+      }
+    }
+  },
   "function_evidence": {
     "0x0004BD46": {
       "body_sha256": "db4f6577d4a3250c7277730ee2f3c3e3fb71ffa83c6103ff1cd4c5b982f65b62",
@@ -198,6 +238,12 @@
       "decompiled_c_sha256": "51f2dcc81a7967f29a7cb0c0892812d28844ef9711dad2efdb760f1f1106c614",
       "role": "RSCFD group receive wrapper"
     },
+    "0x000847A4": {
+      "body_sha256": "c547bafb72d3b9e29161df03317926141e8396936c00c1610931d4e9c9e2a5e6",
+      "body_size": 120,
+      "decompiled_c_sha256": "c30f333cf6b9a8a4fd9a14aebc03d5bd8caf0b2731f7f13d1ab48770bfba1ad7",
+      "role": "RSCFD global acceptance-filter programmer"
+    },
     "0x0008E772": {
       "body_sha256": "d216bc64825096ddf60a10f32c6110a939b1cab7ba066c1bf7891e58cbafd46f",
       "body_size": 30,
@@ -303,6 +349,42 @@
   },
   "next_experiment_policy": "Do not return to the car merely to rediscover software routing. Only a receiver-side observation ordered inside 7A254 (after the software-ring drain and before SecOC consume), or an earlier interrupt/CanIf witness with equivalent proven ordering, can answer TX-echo -> exact receiver admission. Re-audit static open questions first.",
   "physical_ingress": {
+    "acceptance_filter": {
+      "b6_specific_pre_secoc_payload_filter_recovered": false,
+      "canif_identity": {
+        "b6_key": "0x400000B6",
+        "construction": "RSCFD adapter keeps CAN identifier/IDE state and adds bit30 for CAN-FD; BRS is not encoded in the CanIf identity key.",
+        "controller0_mask_pointer": "0x00021918",
+        "controller0_match_mask": "0xFFFFFFFF"
+      },
+      "mask_selector": 0,
+      "mask_semantics": "P1M-E GAFL mask0 matches IDE/RTR plus the exact 11-bit standard CAN identifier; the rule has no application-payload or transmitter-node identity input.",
+      "mask_word": "0xC00007FF",
+      "peer_rules": {
+        "0x090": {
+          "destination_word": "0x00000002",
+          "ga_fl_id": "0x00000090",
+          "label_word": "0x002C0000",
+          "mask_selector": 0,
+          "rule_index": 35
+        },
+        "0x0B6": {
+          "destination_word": "0x00000002",
+          "ga_fl_id": "0x000000B6",
+          "label_word": "0x00300000",
+          "mask_selector": 0,
+          "rule_index": 39
+        },
+        "0x0D7": {
+          "destination_word": "0x00000002",
+          "ga_fl_id": "0x000000D7",
+          "label_word": "0x002D0000",
+          "mask_selector": 0,
+          "rule_index": 36
+        }
+      },
+      "programmer": "0x000847A4"
+    },
     "all_generic_rx_objects_to_software_controller0": true,
     "all_normal_rules_equal_descriptor_order": true,
     "b6_descriptor": {
@@ -367,7 +449,7 @@
     ]
   },
   "runtime_only_boundaries": [
-    "Whether a particular Panda-transmitted B6 is physically observed by F33 rule39 on the installed harness/topology. Panda TX echo proves local transmission, not receiver admission.",
+    "The exact physical/link-layer reason a Panda B6 fails to become an F33 controller1 receive object: an unobserved/routed physical segment is the leading model, while a link-decode failure before GAFL acceptance remains the narrow receiver-side residue.",
     "The physical provenance of the profile2 deliveries that advanced route44 during the retained zero-host-B6-TX control. Static software proves their route, not which external node/link produced the received frame.",
     "ICU-S silicon-internal cryptographic behavior beyond the recovered software-visible command/result contract.",
     "Final motor/PWM/plant response after the already-recovered software command/current funnel."
@@ -389,7 +471,7 @@
     "same_invocation_order": "ring drain/enqueue precedes SecOC consumer",
     "secoc_consumer_call_site": "0x0007A2B4"
   },
-  "schema": "camry-8965f3307000-b6-ingress-closure-v1",
+  "schema": "camry-8965f3307000-b6-ingress-closure-v2",
   "secoc_receive": {
     "b6_profile": 2,
     "enqueue_path": [
@@ -448,7 +530,9 @@
     "The software Rx drain that can enqueue B6 occurs before the SecOC receive consumer inside the same 7A254 foreground invocation, so a monitor that samples only between foreground invocations can miss a complete 0->32->0 queue lifetime.",
     "Successful profile2 delivery re-resolves the same family1/profile2 secured buffer and publishes output route44 through 90204 -> 81CA6 -> table-selected 7D72C, which copies into FEBE4BFF and advances FEBE5364.",
     "No autonomous software route44 generation path was recovered: 8E772 has only 7D72C as a direct caller, and upper route publication is rooted in SecOC receive delivery. The observed no-host-TX route44 activity therefore implies an actual profile2 delivery source or an unrecovered mechanism; generation activity alone does not identify the physical source.",
-    "The separate 8ED8E/8FABA insertion path uses SecOC queue family0 and cannot by itself explain family1/profile2 B6 receive-queue contents."
+    "The separate 8ED8E/8FABA insertion path uses SecOC queue family0 and cannot by itself explain family1/profile2 B6 receive-queue contents.",
+    "B6 rule39 uses the same exact-ID/IDE/RTR mask selector and receive-FIFO destination as neighboring ordinary/protected FD rules; no recovered pre-SecOC filter can inspect Target Lateral ID, authentication bytes, or transmitter identity before the Sep-10 observer boundary.",
+    "Joined to the Sep-10 ID63 marker experiment, the direct Panda B6 disappears before successful F33 controller1 decode/CanIf admission while native B6 continues to reach the same family1/profile2 queue."
   ],
   "target": {
     "canonical_function_count": 6065,

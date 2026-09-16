@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import itertools
 import json
 import re
 import struct
@@ -19,6 +20,8 @@ ROOT = Path(__file__).resolve().parents[4]
 IMAGE = ROOT / "firmware/camry-8965F3307000/CodeFlash.bin"
 CORPUS = ROOT / "data/generated/camry-8965F3307000/decompilations.jsonl"
 DEFAULT_OUT = ROOT / "data/generated/camry_8965F3307000_b6_ingress_closure.json"
+LIVE_INGRESS = ROOT / "targets/camry-2026/raw-20260910/f33-ingress/session-summary.json"
+TOPOLOGY = ROOT / "data/generated/gtsplus_2026/camry_8965F3307000_emps_semantics.json"
 SHA = "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7"
 COUNT = 6065
 
@@ -34,6 +37,7 @@ ROLE = {
     0x83EDA: "RSCFD group receive wrapper",
     0x83E0C: "RSCFD FIFO drain",
     0x83D14: "RSCFD rule-to-generic-Rx adapter",
+    0x847A4: "RSCFD global acceptance-filter programmer",
     0x80B42: "generic Rx admission/ring writer",
     0x80A4A: "software Rx ring writer",
     0x667E6: "foreground communications/application aggregate",
@@ -118,7 +122,7 @@ def direct_calls(text: str) -> set[int]:
 
 
 def call_path(funcs: dict[int, dict[str, Any]], path: list[int]) -> bool:
-    return all(b in direct_calls(funcs[a]["decompiled_c"]) for a, b in zip(path, path[1:]))
+    return all(b in direct_calls(funcs[a]["decompiled_c"]) for a, b in itertools.pairwise(path))
 
 
 def refs_to(funcs: dict[int, dict[str, Any]], target: int, typ: str | None = None) -> list[dict[str, str]]:
@@ -157,6 +161,40 @@ def analyze() -> dict[str, Any]:
     b6 = descriptors[39]
     need(b6 == {"index":39,"raw":0x400000B6,"can_id":0xB6,"fd":True,"length":32,"pdu":44}, "B6 descriptor drift")
     need(rules[39] == (0xB6, 0x00300000, 2, 0), f"B6 RSCFD rule drift: {rules[39]}")
+
+    # The application programs each hardware GAFL record from exactly four table
+    # values: ID, selected mask, label/routing word, destination word.  B6 uses
+    # the same mask selector and receive-FIFO destination as its neighboring
+    # protected/ordinary FD peers.  There is no payload or source-node identity
+    # field in this acceptance record.
+    b6_rule_off = 0x230B8 + 39 * 16
+    b6_mask_selector = img[b6_rule_off + 12]
+    mask0 = u32(img, 0x22E68)
+    need(b6_mask_selector == 0 and mask0 == 0xC00007FF,
+         f"B6 acceptance-mask drift: selector={b6_mask_selector} mask=0x{mask0:08X}")
+    need(all(x in c[0x847A4] for x in ("DAT_00022e68", "DAT_000230c4", "PTR_DAT_000230a4")),
+         "RSCFD GAFL programmer dataflow drift")
+    peer_indices = {"0x090": 35, "0x0D7": 36, "0x0B6": 39}
+    peer_rules = {}
+    for name, index in peer_indices.items():
+        off = 0x230B8 + index * 16
+        row = rules[index]
+        peer_rules[name] = {
+            "rule_index": index,
+            "ga_fl_id": f"0x{row[0]:08X}",
+            "label_word": f"0x{row[1]:08X}",
+            "destination_word": f"0x{row[2]:08X}",
+            "mask_selector": img[off + 12],
+        }
+    need(all(row["mask_selector"] == 0 and row["destination_word"] == "0x00000002"
+             for row in peer_rules.values()), f"protected-peer GAFL routing drift: {peer_rules}")
+    need("0x40000000" in c[0x83E0C] and "0x9fffffff" in c[0x83E0C],
+         "RSCFD CAN-ID/FDF metadata construction drift")
+    canif_mask_ptr = u32(img, 0x21A70)
+    canif_match_mask = u32(img, canif_mask_ptr)
+    need(canif_mask_ptr == 0x21918 and canif_match_mask == 0xFFFFFFFF,
+         f"CanIf controller0 identity mask drift: ptr=0x{canif_mask_ptr:08X} mask=0x{canif_match_mask:08X}")
+
     need(img[0x219AC:0x219AC+47] == b"\0"*47, "generic Rx objects no longer map wholly to software controller0")
     need(img[0x219DC:0x219DC+43] == b"\x01"*43, "normal Rx callback selector drift")
     need(img[0x21970] == 1, "software Rx controller count drift")
@@ -268,6 +306,31 @@ def analyze() -> dict[str, Any]:
     need(set(upper_census["0x0008F546"]) == {"0x0008F596","0x0008F906"}, f"8F546 caller drift: {upper_census}")
     need(upper_census["0x0008F34A"] == ["0x0008EE7C"], f"8F34A caller drift: {upper_census}")
 
+    # 7) Join the exact pre-SecOC receive contract to the Sep-10 marker experiment
+    # and Toyota's current Camry topology.  This localizes the drop without
+    # pretending that the GTS logical Bus-4 label proves one transparent copper
+    # segment or that the string "EBU" identifies a specific silicon bridge.
+    live = json.loads(LIVE_INGRESS.read_text())
+    marker = live["marker"]
+    selfcheck = live["selfcheck"]
+    need(live["target"]["eps_f181"] == "8965F3307000" and live["target"]["panda_bus"] == 0,
+         "Sep-10 ingress target identity drift")
+    need(marker["tx_count"] == marker["accepted_return_count"] == 121 and marker["rejected_return_count"] == 0,
+         "Sep-10 marker TX-return geometry drift")
+    need(marker["counter_deltas"]["id63_marker_count"] == 0 and marker["counter_deltas"]["b6_queue32_count"] > 0
+         and selfcheck["counter_deltas"]["b6_queue32_count"] > 0 and selfcheck["counter_deltas"]["d7_queue32_count"] > 0,
+         "Sep-10 native-positive/host-marker discriminator drift")
+    need(all(marker["can_health"][k] == 0 for k in ("bus_off", "receive_error_count", "transmit_error_count", "tx_lost_count")),
+         "Sep-10 marker CAN-health boundary drift")
+
+    topology = json.loads(TOPOLOGY.read_text())
+    placement = topology["current_camry_can_topology"]["critical_placement"]
+    eps_place = placement["power_steering_eps"]
+    skid_place = placement["skid_control_abs_vsc_trac"]
+    need(eps_place["bus_name"] == skid_place["bus_name"] == "Bus 4", "Camry Bus-4 topology drift")
+    need(eps_place["junction_name"] == "EBU" and skid_place["junction_name"] == "No. 2 Global CAN Junction Connector",
+         "Camry EPS/Skid junction-label topology drift")
+
     # Function evidence pins the proof to canonical corpus bytes, not documentation labels.
     evidence = {}
     for a, role in ROLE.items():
@@ -283,16 +346,18 @@ def analyze() -> dict[str, Any]:
         "Successful profile2 delivery re-resolves the same family1/profile2 secured buffer and publishes output route44 through 90204 -> 81CA6 -> table-selected 7D72C, which copies into FEBE4BFF and advances FEBE5364.",
         "No autonomous software route44 generation path was recovered: 8E772 has only 7D72C as a direct caller, and upper route publication is rooted in SecOC receive delivery. The observed no-host-TX route44 activity therefore implies an actual profile2 delivery source or an unrecovered mechanism; generation activity alone does not identify the physical source.",
         "The separate 8ED8E/8FABA insertion path uses SecOC queue family0 and cannot by itself explain family1/profile2 B6 receive-queue contents.",
+        "B6 rule39 uses the same exact-ID/IDE/RTR mask selector and receive-FIFO destination as neighboring ordinary/protected FD rules; no recovered pre-SecOC filter can inspect Target Lateral ID, authentication bytes, or transmitter identity before the Sep-10 observer boundary.",
+        "Joined to the Sep-10 ID63 marker experiment, the direct Panda B6 disappears before successful F33 controller1 decode/CanIf admission while native B6 continues to reach the same family1/profile2 queue.",
     ]
     runtime_only = [
-        "Whether a particular Panda-transmitted B6 is physically observed by F33 rule39 on the installed harness/topology. Panda TX echo proves local transmission, not receiver admission.",
+        "The exact physical/link-layer reason a Panda B6 fails to become an F33 controller1 receive object: an unobserved/routed physical segment is the leading model, while a link-decode failure before GAFL acceptance remains the narrow receiver-side residue.",
         "The physical provenance of the profile2 deliveries that advanced route44 during the retained zero-host-B6-TX control. Static software proves their route, not which external node/link produced the received frame.",
         "ICU-S silicon-internal cryptographic behavior beyond the recovered software-visible command/result contract.",
         "Final motor/PWM/plant response after the already-recovered software command/current funnel.",
     ]
 
     return {
-        "schema": "camry-8965f3307000-b6-ingress-closure-v1",
+        "schema": "camry-8965f3307000-b6-ingress-closure-v2",
         "target": {"software_id":"8965F3307000","codeflash_sha256":sha(img),
                    "canonical_function_count":len(funcs),
                    "canonical_inventory_sha256":meta["project_inventory_sha256"]},
@@ -307,6 +372,57 @@ def analyze() -> dict[str, Any]:
             "b6_descriptor":b6,"all_normal_rules_equal_descriptor_order":True,
             "all_generic_rx_objects_to_software_controller0":True,
             "hardware_to_ring_path":[f"0x{x:08X}" for x in irq_path],
+            "acceptance_filter": {
+                "programmer": "0x000847A4",
+                "mask_selector": b6_mask_selector,
+                "mask_word": f"0x{mask0:08X}",
+                "mask_semantics": "P1M-E GAFL mask0 matches IDE/RTR plus the exact 11-bit standard CAN identifier; the rule has no application-payload or transmitter-node identity input.",
+                "peer_rules": peer_rules,
+                "canif_identity": {
+                    "controller0_mask_pointer": f"0x{canif_mask_ptr:08X}",
+                    "controller0_match_mask": f"0x{canif_match_mask:08X}",
+                    "b6_key": "0x400000B6",
+                    "construction": "RSCFD adapter keeps CAN identifier/IDE state and adds bit30 for CAN-FD; BRS is not encoded in the CanIf identity key.",
+                },
+                "b6_specific_pre_secoc_payload_filter_recovered": False,
+            },
+        },
+        "drop_localization": {
+            "live_source": {
+                "path": str(LIVE_INGRESS.relative_to(ROOT)),
+                "sha256": sha(LIVE_INGRESS.read_bytes()),
+                "observer_boundary": live["live_qualified_two_stage_observer"]["observation_boundary"],
+                "host_marker_tx": marker["tx_count"],
+                "host_marker_panda_returns": marker["accepted_return_count"],
+                "host_marker_f33_hits": marker["counter_deltas"]["id63_marker_count"],
+                "native_b6_queue_delta_during_treatment": marker["counter_deltas"]["b6_queue32_count"],
+                "native_b6_queue_delta_selfcheck": selfcheck["counter_deltas"]["b6_queue32_count"],
+                "d7_queue_delta_selfcheck": selfcheck["counter_deltas"]["d7_queue32_count"],
+            },
+            "receiver_contract": (
+                "Once a standard-data CAN-FD ID 0x0B6/DLC32 frame is successfully decoded by exact-F33 controller1, "
+                "rule39 and descriptor39 admit it through the ordinary software ring to PDU44. The recovered path has no "
+                "pre-observer B6 application-field, Target-Lateral-ID, SecOC-tag, or transmitter-identity rejection."
+            ),
+            "localized_boundary": (
+                "The Sep-10 Panda marker disappears before successful F33 controller1 decode/CanIf admission. It is not dropped by "
+                "EPS SecOC, PduR, generated COM, or B6 application logic. The remaining receiver-side residue is physical/link-layer "
+                "decode before GAFL acceptance; otherwise the drop is in the external routing boundary between the Panda-visible "
+                "Bus-4 trunk and the EPS-local B6 delivery segment."
+            ),
+            "topology_source": {
+                "path": str(TOPOLOGY.relative_to(ROOT)),
+                "sha256": sha(TOPOLOGY.read_bytes()),
+                "eps": eps_place,
+                "skid": skid_place,
+                "boundary": "GTS Bus 4 is a logical network domain. EPS junction label EBU versus Skid's numbered passive junction is a topology clue, not proof that EBU is the active filter implementation.",
+            },
+            "leading_physical_model": (
+                "A Brake/VMM/EBU-domain routing boundary exposes ordinary Bus-4 diagnostics/service traffic to the EPS while the final "
+                "Brake-owned B6 steering target is generated or forwarded on a non-Panda-visible local path to the EPS. Exact category-435 "
+                "Brake firmware is required to identify the concrete bridge/filter/transmit routine."
+            ),
+            "exact_component_still_unproved": True,
         },
         "canif_pdur": {
             "foreground_ring_drain_path":[f"0x{x:08X}" for x in fg_rx_path],

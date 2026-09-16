@@ -331,13 +331,35 @@ The Sep-10 direct marker experiment is now easier to place:
 - **none of the Panda B6 markers appeared at F33's deterministic post-CanIf/pre-SecOC
   boundary**.
 
-That failure happened **before EPS SecOC verification and before application parsing**.
-The patent does not reveal the physical Camry network/filter implementation, but it tells
-us the logical contract being attempted: B6 is a Brake/VMM-generated final steering
-instruction.  Sending a peer frame from the Panda tap is therefore not equivalent to
-becoming Toyota's request-generation source.  The remaining physical explanation space
-is a non-exposed BSCM->EPS segment, gateway/source admission, or another lower transport
-boundary—not an unknown EPS interpretation of `0x08A`.
+That failure is now localized more tightly than the original Sep-10 conclusion. Exact
+F33 programs B6 as ordinary RSCFD acceptance **rule39**: standard data-frame CAN ID
+`0x0B6`, mask selector 0 (`GAFLM=0xC00007FF`), the same receive-FIFO destination used by
+neighboring `0x090` and `0x0D7`, followed by CanIf descriptor39
+`0x400000B6 / DLC32`.  The recovered pre-SecOC path can distinguish CAN ID, standard vs
+extended/data-frame state, CAN-FD format and length; its CanIf identity is exactly
+`0x400000B6` under mask `0xFFFFFFFF`, and **BRS is not part of that software key**. It has **no transmitter-node
+identity and no B6 application-field/Target-Lateral-ID/SecOC-tag filter before the
+observer**.  PDU44's legacy Toyota-checksum hook is configured non-enforcing.
+
+Therefore a 32-byte standard CAN-FD B6 that is successfully decoded by F33 controller1
+would reach the Sep-10 post-ring/pre-SecOC observer.  The 121 host markers did not, while
+native B6 advanced that same queue by 217 deliveries during the treatment and by 205
+during the positive-control block.  The direct-Panda frame is consequently lost **before
+successful F33 controller1 decode/CanIf admission**, not in EPS SecOC, PduR, generated
+COM, or B6 application logic.  The only receiver-side residue is a physical/link decode
+failure before GAFL matching; otherwise the loss is outside F33, between the
+Panda-visible Bus-4 trunk and the EPS-local B6 delivery path.
+
+Current GTS topology is consistent with such a boundary without proving its exact
+implementation: Skid Control is listed on logical Bus 4 through `No. 2 Global CAN
+Junction Connector`, while Power Steering is also Bus 4 but its junction label is
+`EBU`.  Toyota's `Bus 4` label is therefore treated as a logical network domain, not
+proof of one transparent copper segment.  Combined with the patent and F33's B6-loss
+DTC naming the Brake System Control Module, the leading physical model is a
+Brake/VMM/EBU-domain routing boundary that passes ordinary diagnostics/service traffic
+but locally generates or forwards final B6 toward EPS.  **The exact component/filter
+routine is still unproved** until the Camry category-435 Brake application
+`F152633K0000` is acquired or equivalent physical tracing identifies the hop.
 
 The successful development fallback proves the complementary point.  The EPS-resident
 helper waits for an **already-admitted native B6**, replaces its target/application bytes,

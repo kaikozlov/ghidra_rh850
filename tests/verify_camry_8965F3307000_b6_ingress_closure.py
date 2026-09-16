@@ -39,6 +39,7 @@ with tempfile.TemporaryDirectory() as td:
 
 image = IMAGE.read_bytes()
 art = json.loads(ART.read_text())
+check("schema v2", art["schema"] == "camry-8965f3307000-b6-ingress-closure-v2")
 metadata = None
 functions: dict[int, dict] = {}
 for line in CORPUS.read_text().splitlines():
@@ -62,6 +63,11 @@ check("three previously omitted real entries have complete bodies",
 rule39 = struct.unpack_from("<IIII", image, 0x230B8 + 39 * 16)
 descriptor39 = struct.unpack_from("<II", image, 0x21FE8 + 39 * 8)
 check("controller-1 rule39 accepts B6 into FIFO2", rule39 == (0xB6, 0x00300000, 2, 0))
+check("B6 uses ordinary exact-ID GAFL mask/routing",
+      image[0x230B8 + 39 * 16 + 12] == 0
+      and struct.unpack_from("<I", image, 0x22E68)[0] == 0xC00007FF
+      and all(struct.unpack_from("<I", image, 0x230B8 + i * 16 + 8)[0] == 2 for i in (35, 36, 39))
+      and all(image[0x230B8 + i * 16 + 12] == 0 for i in (35, 36, 39)))
 check("CanIf descriptor39 is 32-byte FD B6/PDU44",
       descriptor39 == (0x400000B6, 32) and 5 + 39 == 44)
 check("PduR lower and generated-COM upper callbacks are exact",
@@ -97,9 +103,35 @@ check("successful receive is the only recovered route44 publication root",
 check("family0 insertion cannot fabricate the family1 B6 receive queue",
       art["secoc_receive"]["opposite_family_insert_path"]
       == ["0x0008ED8E", "0x0008FABA", "0x0008E9C6(family0)"])
-check("static/runtime boundary rejects TX-echo overclaim",
-      any("Panda TX echo proves local transmission" in x for x in art["runtime_only_boundaries"])
-      and any("No autonomous software route44 generation path" in x for x in art["static_conclusions"]))
+flt = art["physical_ingress"]["acceptance_filter"]
+check("pre-SecOC B6 admission has no recovered payload/source-node filter",
+      flt["programmer"] == "0x000847A4" and flt["mask_selector"] == 0
+      and flt["mask_word"] == "0xC00007FF"
+      and flt["canif_identity"] == {
+          "controller0_mask_pointer": "0x00021918",
+          "controller0_match_mask": "0xFFFFFFFF",
+          "b6_key": "0x400000B6",
+          "construction": "RSCFD adapter keeps CAN identifier/IDE state and adds bit30 for CAN-FD; BRS is not encoded in the CanIf identity key.",
+      }
+      and flt["b6_specific_pre_secoc_payload_filter_recovered"] is False
+      and {k: (v["mask_selector"], v["destination_word"]) for k, v in flt["peer_rules"].items()}
+      == {"0x090": (0, "0x00000002"), "0x0D7": (0, "0x00000002"), "0x0B6": (0, "0x00000002")})
+loc = art["drop_localization"]
+check("Sep-10 marker localizes direct B6 loss before CanIf/SecOC",
+      loc["live_source"]["host_marker_tx"] == loc["live_source"]["host_marker_panda_returns"] == 121
+      and loc["live_source"]["host_marker_f33_hits"] == 0
+      and loc["live_source"]["native_b6_queue_delta_during_treatment"] == 217
+      and loc["live_source"]["native_b6_queue_delta_selfcheck"] == 205
+      and loc["live_source"]["d7_queue_delta_selfcheck"] == 102
+      and "before successful F33 controller1 decode/CanIf admission" in loc["localized_boundary"])
+check("GTS topology retains Bus4 logical-domain / EBU boundary instead of overclaiming it",
+      loc["topology_source"]["eps"]["bus_name"] == "Bus 4"
+      and loc["topology_source"]["eps"]["junction_name"] == "EBU"
+      and loc["topology_source"]["skid"]["junction_name"] == "No. 2 Global CAN Junction Connector"
+      and loc["exact_component_still_unproved"] is True)
+check("static/runtime boundary is narrowed to pre-GAFL physical/link admission",
+      any("link-layer reason" in x for x in art["runtime_only_boundaries"])
+      and any("direct Panda B6 disappears before successful F33 controller1 decode" in x for x in art["static_conclusions"]))
 
 print(f"\nResults: {passed} passed, {failed} failed")
 raise SystemExit(1 if failed else 0)
