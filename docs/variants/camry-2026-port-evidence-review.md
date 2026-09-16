@@ -860,8 +860,11 @@ retained complete drives, and the 6-bit request IDs are still unmapped. The
 direct FRC P05 streams `0x020/0x230/0x440` have no simple byte-aligned field that
 reproduces the protected request word across both complete drives; `0x160` has
 only state-related long-lag correlations and remains disqualified as the
-implemented Camry demand interface. `0x0C9` is at most sideband/request metadata;
-`0x0CA` is a chassis-to-upstream result/feedback return.
+implemented Camry demand interface. The exhaustive FRC-dependent protected-domain
+screen finds no second same-scale signed16 acceleration carrier. `0x5AF` B26 and
+low-rate `0x5F7` B7 instead behave as coarse, lagging longitudinal companions;
+`0x0C9` is at most sideband/request metadata and `0x0CA` is a chassis-to-upstream
+result/feedback return.
 
 Because stock Toyota-B leaves protected `0x08A` on an **unsplit** network, the
 preferred integration target is now the unrecovered **FRC -> arbitration/signing

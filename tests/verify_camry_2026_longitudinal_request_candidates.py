@@ -22,6 +22,7 @@ class CandidateEvidence(unittest.TestCase):
     cls.report = build()
 
   def test_portable_regeneration(self):
+    self.assertEqual(self.report['schema'], 'camry-longitudinal-request-candidates-v2')
     self.assertEqual(self.report, json.loads(ARTIFACT.read_text()))
 
   def test_current_stock_topology_is_role_normalized(self):
@@ -29,6 +30,9 @@ class CandidateEvidence(unittest.TestCase):
     self.assertEqual(t['current_stock_candidate_planes']['direct_frc_bus1_pdus']['panda_bus'], 2)
     self.assertEqual(t['current_stock_candidate_planes']['protected_bus4_request_result_family']['panda_bus'], 1)
     self.assertIn('era-dependent', t['rule'])
+    self.assertIn('native 0x160/FRC-P05 source on bus2', t['route_classification_signatures']['stock_toyota_b'])
+    self.assertIn('native upstream 0x08A/0x0C9 on bus2', t['route_classification_signatures']['temporary_repin'])
+    self.assertIn('src>=128', t['route_classification_signatures']['echo_rule'])
 
   def test_08a_has_two_identical_signed16_candidate_words(self):
     for drive in self.report['protected_0x08a_acceleration_candidate']['drives'].values():
@@ -82,6 +86,22 @@ class CandidateEvidence(unittest.TestCase):
     self.assertEqual(top['drive_a']['lag_ms'], 300)
     self.assertEqual(top['drive_b']['lag_ms'], 300)
     self.assertGreater(top['min_abs_r'], .6)
+
+  def test_protected_domain_has_coarse_lagging_companions_not_a_second_direct_magnitude(self):
+    coarse = self.report['protected_0x5af_coarse_companion']['drives']
+    self.assertEqual(coarse['drive_a']['signed6_b26_values'], [-1, 0, 1])
+    self.assertEqual(coarse['drive_b']['signed6_b26_values'], [-2, -1, 0, 1])
+    for drive, expected_lag in [('drive_a', -50), ('drive_b', -75)]:
+      fit = coarse[drive]['best_vs_0x08a_request_word']
+      self.assertEqual(fit['lag_ms'], expected_lag)
+      self.assertGreater(fit['r'], .75)
+      self.assertGreater(fit['slope'], .24)
+      self.assertLess(fit['slope'], .26)
+    screen = self.report['protected_bus4_companion_screen']['reproduced_same_sign']
+    self.assertEqual((screen[0]['address'], screen[0]['field']), ('0x5AF', 'B26/s6'))
+    self.assertEqual((screen[1]['address'], screen[1]['field']), ('0x5F7', 'B7/s6'))
+    self.assertIn('No second same-scale signed16 acceleration carrier',
+                  self.report['protected_bus4_companion_screen']['interpretation'])
 
   def test_c9_is_weak_and_ca_is_reverse_direction(self):
     c9 = self.report['other_candidates']['0x0C9']['b12_b13_vs_0x0ca']

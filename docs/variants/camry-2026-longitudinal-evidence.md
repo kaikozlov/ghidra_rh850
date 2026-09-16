@@ -128,7 +128,7 @@ There is no established byte-copy from a different FRC command.
 
 The follow-up independently re-extracted the 28-source role-audit fixture
 from the original rlogs: **306,073 publication events** reproduce byte-for-byte
-(SHA-256 `4e5646c636d71750bd28713b439eafad8f493bdfea37e507c7ebec2b2f4fc936`).
+(SHA-256 `c15b4e9544fc73624fe8aff09c2f40cda8196039de4eb83cee038605f37c2833`).
 The companion role audit below was completed separately during this review.
 The maintained motion-audit producer and its seven-source fixture independently
 own the core physical-motion, native-comparator, resume, and direction checks;
@@ -244,7 +244,7 @@ route or every message in those files.
 Re-extraction produced **306,073 original publication events** and was
 byte-identical to the existing expanded local fixture
 `tests/fixtures/camry_2026_longitudinal_role.jsonl.gz`
-(SHA-256 `4e5646c636d71750bd28713b439eafad8f493bdfea37e507c7ebec2b2f4fc936`).
+(SHA-256 `c15b4e9544fc73624fe8aff09c2f40cda8196039de4eb83cee038605f37c2833`).
 Both `tools/test camry_20260916_longitudinal_motion_audit` and the existing
 worktree suite `tools/test camry_2026_longitudinal_role` passed. The expanded
 role files were already pending at the start of this review and were not
@@ -292,7 +292,7 @@ controller, Panda rule, firmware, or experimental-mode default was changed.
 The pending role audit was independently re-extracted from **28 original rlog
 segments**. Its **306,073 retained publication events** reproduce the existing
 fixture byte-for-byte (SHA-256
-`4e5646c636d71750bd28713b439eafad8f493bdfea37e507c7ebec2b2f4fc936`). Both complete
+`c15b4e9544fc73624fe8aff09c2f40cda8196039de4eb83cee038605f37c2833`). Both complete
 August captures were then reprocessed independently of those September logs.
 The expanded evidence lives in:
 
@@ -458,12 +458,22 @@ The alternatives now rank as follows:
 2. **The unrecovered FRC -> arbitration/signing precursor that produces the
    protected `0x08A` request** — preferred stock-harness replacement boundary,
    because final stock Toyota-B leaves Bus 4 unsplit.
-3. **`0x0C9`** — upstream-to-chassis and therefore directionally plausible as
+3. **Protected `0x5AF` B26** — a coarse longitudinal companion, not a
+   replacement for the `0x08A` magnitude. Interpreting B26 as signed 6-bit gives
+   a reproducible fit of **0.251/0.246 m/s² per count** against the `0x08A`
+   request word (r=0.756/0.857), but its best alignment is **50/75 ms after**
+   `0x08A`. Around the three stock resumes it steps through small signed values
+   as the fine request rises. Low-rate `0x5F7` B7 shows a similar coarse family
+   (raw signed6 values are multiples of four; fitted scale is ~0.062 per raw
+   count, i.e. ~0.25 per four-count step) and likewise does not lead `0x08A`.
+   These are better treated as quantized request/result/status companions than
+   as the originating acceleration command; no OEM field name is assigned.
+4. **`0x0C9`** — upstream-to-chassis and therefore directionally plausible as
    sideband/request metadata, but B12:B13 correlates only weakly with `0x0CA`
    (best |r| 0.265/0.140 in the two complete drives) and remains `0x1838`
    through the early portion of all three stock-resume ramps. It is not the
    leading acceleration-magnitude carrier.
-4. **`0x0CA`** — strong result/acceleration semantics but the wrong physical
+5. **`0x0CA`** — strong result/acceleration semantics but the wrong physical
    direction: native chassis -> upstream on the repinned split. Treat it as a
    result/feedback return, not an FRC request target.
 
@@ -473,9 +483,17 @@ screened against the protected `0x08A` request word using every byte-aligned
 and `0x440` have **no** same-sign field reproducing at |r| >= 0.25 in both
 complete drives. `0x160` has moderate state-related correlations (best
 min-|r| 0.631), but those maximize at the **+300 ms search boundary** and overlap
-its already recovered ego-state structure. This does not recover a simple
-pre-protection copy. A multivariate/multiplexed transform, a different protected
-FRC-dependent PDU, or an internal/private FRC-to-proxy handoff remains possible.
+its already recovered ego-state structure.
+
+A second screen covers all **47 recurring protected Bus-4 PDUs** that vanished
+under the Sep-1 FRC CommunicationControl normal-Tx suppression. `0x08A` itself
+is excluded as the reference. Every byte-aligned signed16-BE field plus
+signed-low6 fields is compared in both complete drives. This recovers the
+coarse `0x5AF`/`0x5F7` companions above, but **no second same-scale signed16
+acceleration carrier**. Thus there is still no simple pre-protection copy in the
+observable FRC-dependent protected domain. A multivariate/multiplexed transform,
+a different representation, or an internal/private FRC-to-proxy handoff remains
+possible.
 
 This distinction matters for the port. On the temporary repin, `0x08A` sat on
 the intercept pair and its source side was observable separately. On final
