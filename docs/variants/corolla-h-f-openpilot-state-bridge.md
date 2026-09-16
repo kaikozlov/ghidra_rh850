@@ -1123,6 +1123,13 @@ and require their own compatibility evidence.
 
 ## 10. Production boundary
 
+**2026-09-16 readiness correction:** the [offline confidence
+audit](corolla-tss3-offline-audit-2026-09-16.md) replays both retained Corolla logs
+successfully, but confirms remaining software gaps: ignored Corolla fault/inhibit reporting, no
+software-requested stock ACC cancellation, and no implemented hybrid `0x3BF` fallback. GTS
+subtype is still not propagated directly into CarParams. Earlier broad completion claims and
+references to a general cross-powertrain fallback should be read with these explicit limits.
+
 The candidate safety math is now substantially closed, but it still does not authorize
 actuation. Before a real H/F openpilot port, recover and validate:
 
