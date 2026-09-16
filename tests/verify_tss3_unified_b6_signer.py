@@ -19,8 +19,8 @@ BUILDER = ROOT / "exploit/ephemeral_runtime/build_tss3_unified_b6_signer.py"
 KIT_BUILDER = ROOT / "tools/targets/tss3/builders/build_tss3_unified_b6_signer_kit.py"
 TARGETS = {
     "camry-8965F3307000": ("0xFEBE5751", "split-functional-loader", 522, 596, 600, "supervised-continuous", 7),
-    "corolla-8965H1202000": ("0xFEBE563D", "embedded-helper-functional-control", 522, 460, 460, "fresh-generation-single-use", 0),
-    "corolla-8965F1208000": ("0xFEBE563D", "embedded-helper-functional-control", 522, 460, 460, "fresh-generation-single-use", 0),
+    "corolla-8965H1202000": ("0xFEBE563D", "embedded-helper-functional-control", 522, 458, 458, "supervised-continuous", 7),
+    "corolla-8965F1208000": ("0xFEBE563D", "embedded-helper-functional-control", 522, 458, 458, "supervised-continuous", 7),
     "crown-8965F3012000": ("0xFEBE527D", "split-functional-loader", 522, 596, 600, "supervised-continuous", 7),
 }
 
@@ -132,6 +132,31 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
             check("Crown unified artifacts pin the supervised functional runtime",
                   meta["artifacts_sha256"] == CROWN_SUPERVISED_UNIFIED_SHA256)
         built[target] = (meta, metas[0])
+
+    check("Corolla H/F unified helpers share the same supervised runtime bytes",
+          built["corolla-8965H1202000"][0]["helper"]["sha256"] ==
+          built["corolla-8965F1208000"][0]["helper"]["sha256"])
+
+    # Execute the exact compiled Corolla H helper's C7 lease gates in the
+    # target Ghidra emulator. This protects continuous 50-Hz host ownership,
+    # seven-tick host-loss expiry, zero release, and empty-queue aging.
+    corolla_meta, corolla_meta_path = built["corolla-8965H1202000"]
+    corolla_helper = corolla_meta_path.parent / corolla_meta["artifacts"]["helper"]
+    liveness_result = root / "corolla-unified-liveness.json"
+    liveness_script = ROOT / "ghidra/scripts/verify/VerifyCorollaUnifiedSignerHostLiveness.java"
+    liveness = subprocess.run(
+        [str(ROOT / "tools/gtarget"), "corolla-8965H1202000", "script", "run", str(liveness_script), "--",
+         str(corolla_helper), str(liveness_result)],
+        cwd=ROOT, check=True, capture_output=True, text=True, timeout=90,
+    )
+    liveness_record = json.loads(liveness_result.read_text(encoding="utf-8"))
+    check("Corolla unified compiled helper has continuous supervised C7 liveness",
+          liveness_record["passed"] == 36 and liveness_record["vehicle_executed"] is False and
+          liveness_record["helper_sha256"] == corolla_meta["helper"]["sha256"] and
+          "normal 50 Hz host remains continuously admitted" in liveness_record["tests"] and
+          "host loss expires at seventh tick" in liveness_record["tests"] and
+          "returning native B6 after empty-queue expiry stays native" in liveness_record["tests"] and
+          liveness.returncode == 0)
 
     # Behavioral fixture for the common mailbox proof. DCM teardown may clear
     # service byte 0 while the six-byte tail remains the durable witness.

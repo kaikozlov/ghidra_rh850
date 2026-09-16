@@ -161,11 +161,15 @@ Receiver behavior is target-local:
   foreground ticks; repeated mailbox contents do not renew the lease; expiry
   or sequence zero leaves the native B6 untouched. The 600-byte transfer image
   still fits the exact 604-byte low-RAM slot.
-- **Corolla H/F:** the exact low helper remains 460 bytes in its 464-byte
-  target-native pocket. Each changed nonzero C7 generation is consumed once;
-  repeating a stale generation cannot cause another replacement. Openpilot's
-  continuously changing 50-Hz generation therefore gives continuous control,
-  while host loss naturally fails back after the last one-shot replacement.
+- **Corolla H/F:** the exact low helper is now 458 bytes in its 464-byte
+  target-native pocket after compacting state access and freshness arithmetic.
+  It uses the same seven-nominal-5-ms host lease as Camry/Crown: a changed
+  nonzero C7 generation snapshots the target and grants seven foreground ticks,
+  repeated mailbox contents cannot renew the lease, and sequence zero releases
+  immediately. Lease aging occurs before the native-B6 queue gate, so a stale
+  command expires after nominal 35 ms even when no B6 is queued; a later B6
+  cannot resurrect it. The compiled exact-H helper is emulator-regression-tested
+  against a 50-Hz host / 200-Hz foreground schedule.
 
 The common qualification ladder remains conservative: bind exact F181, prove
 functional mailbox delivery, install only volatile RAM, reproduce one untouched
