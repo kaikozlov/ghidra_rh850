@@ -352,7 +352,9 @@
           11
         ],
         "all_frames_exactly_stopped": true,
-        "boundary": "dynamic stock-ACC resume-required/hold interpretation: the state enters only after several seconds already stopped and all three retained episodes clear with accelerator input before motion; no RES-button clear join is established. B7 bit5 alone is explicitly rejected because moving 0x65 transition state exists",
+        "b4_bit5_set_frames_with_cruise_latch": 152,
+        "b4_bit5_vs_legacy_b7_66_67_xor_violations": 0,
+        "boundary": "dynamic stock-ACC resume-required/hold interpretation: B4[5] is an exact structural hold-state discriminator in the retained routes; the packed request-B state is ID25/allocation2-or-3. The state enters only after several seconds already stopped and all three retained episodes clear with accelerator input before motion; no RES-button clear join is established. OEM recorder name for B4[5] remains unknown.",
         "cruise_substate_pair_counts": {
           "44,102": 4,
           "44,70": 26120,
@@ -399,7 +401,7 @@
           }
         ],
         "frames": 152,
-        "wire_state": "native bus2 0x08A with CRUISE_OPERATING_LATCH=1 and CRUISE_SUBSTATE_2 in {102,103}"
+        "wire_state": "native bus2 0x08A delayed hold: B4[5]=1 with packed request-B ID25/allocation2-or-3"
       },
       "warning_candidate": {
         "carrier": "native Panda bus2 0x371/32 B19 bit6",
@@ -757,7 +759,9 @@
           11
         ],
         "all_frames_exactly_stopped": true,
-        "boundary": "dynamic stock-ACC resume-required/hold interpretation: the state enters only after several seconds already stopped and all three retained episodes clear with accelerator input before motion; no RES-button clear join is established. B7 bit5 alone is explicitly rejected because moving 0x65 transition state exists",
+        "b4_bit5_set_frames_with_cruise_latch": 46,
+        "b4_bit5_vs_legacy_b7_66_67_xor_violations": 0,
+        "boundary": "dynamic stock-ACC resume-required/hold interpretation: B4[5] is an exact structural hold-state discriminator in the retained routes; the packed request-B state is ID25/allocation2-or-3. The state enters only after several seconds already stopped and all three retained episodes clear with accelerator input before motion; no RES-button clear join is established. OEM recorder name for B4[5] remains unknown.",
         "cruise_substate_pair_counts": {
           "44,102": 2,
           "44,70": 4430,
@@ -785,7 +789,7 @@
           }
         ],
         "frames": 46,
-        "wire_state": "native bus2 0x08A with CRUISE_OPERATING_LATCH=1 and CRUISE_SUBSTATE_2 in {102,103}"
+        "wire_state": "native bus2 0x08A delayed hold: B4[5]=1 with packed request-B ID25/allocation2-or-3"
       },
       "warning_candidate": {
         "carrier": "native Panda bus2 0x371/32 B19 bit6",
@@ -1151,14 +1155,16 @@
       "stock_acc_standstill_candidate": {
         "all_episode_target_lateral_ids": [],
         "all_frames_exactly_stopped": true,
-        "boundary": "dynamic stock-ACC resume-required/hold interpretation: the state enters only after several seconds already stopped and all three retained episodes clear with accelerator input before motion; no RES-button clear join is established. B7 bit5 alone is explicitly rejected because moving 0x65 transition state exists",
+        "b4_bit5_set_frames_with_cruise_latch": 0,
+        "b4_bit5_vs_legacy_b7_66_67_xor_violations": 0,
+        "boundary": "dynamic stock-ACC resume-required/hold interpretation: B4[5] is an exact structural hold-state discriminator in the retained routes; the packed request-B state is ID25/allocation2-or-3. The state enters only after several seconds already stopped and all three retained episodes clear with accelerator input before motion; no RES-button clear join is established. OEM recorder name for B4[5] remains unknown.",
         "cruise_substate_pair_counts": {
           "44,70": 8688,
           "45,71": 85170
         },
         "episodes": [],
         "frames": 0,
-        "wire_state": "native bus2 0x08A with CRUISE_OPERATING_LATCH=1 and CRUISE_SUBSTATE_2 in {102,103}"
+        "wire_state": "native bus2 0x08A delayed hold: B4[5]=1 with packed request-B ID25/allocation2-or-3"
       },
       "warning_candidate": {
         "carrier": "native Panda bus2 0x371/32 B19 bit6",
@@ -1663,14 +1669,16 @@
       "stock_acc_standstill_candidate": {
         "all_episode_target_lateral_ids": [],
         "all_frames_exactly_stopped": true,
-        "boundary": "dynamic stock-ACC resume-required/hold interpretation: the state enters only after several seconds already stopped and all three retained episodes clear with accelerator input before motion; no RES-button clear join is established. B7 bit5 alone is explicitly rejected because moving 0x65 transition state exists",
+        "b4_bit5_set_frames_with_cruise_latch": 0,
+        "b4_bit5_vs_legacy_b7_66_67_xor_violations": 0,
+        "boundary": "dynamic stock-ACC resume-required/hold interpretation: B4[5] is an exact structural hold-state discriminator in the retained routes; the packed request-B state is ID25/allocation2-or-3. The state enters only after several seconds already stopped and all three retained episodes clear with accelerator input before motion; no RES-button clear join is established. OEM recorder name for B4[5] remains unknown.",
         "cruise_substate_pair_counts": {
           "44,70": 5798,
           "45,71": 123394
         },
         "episodes": [],
         "frames": 0,
-        "wire_state": "native bus2 0x08A with CRUISE_OPERATING_LATCH=1 and CRUISE_SUBSTATE_2 in {102,103}"
+        "wire_state": "native bus2 0x08A delayed hold: B4[5]=1 with packed request-B ID25/allocation2-or-3"
       },
       "warning_candidate": {
         "carrier": "native Panda bus2 0x371/32 B19 bit6",
@@ -2222,14 +2230,16 @@
       "stock_acc_standstill_candidate": {
         "all_episode_target_lateral_ids": [],
         "all_frames_exactly_stopped": true,
-        "boundary": "dynamic stock-ACC resume-required/hold interpretation: the state enters only after several seconds already stopped and all three retained episodes clear with accelerator input before motion; no RES-button clear join is established. B7 bit5 alone is explicitly rejected because moving 0x65 transition state exists",
+        "b4_bit5_set_frames_with_cruise_latch": 0,
+        "b4_bit5_vs_legacy_b7_66_67_xor_violations": 0,
+        "boundary": "dynamic stock-ACC resume-required/hold interpretation: B4[5] is an exact structural hold-state discriminator in the retained routes; the packed request-B state is ID25/allocation2-or-3. The state enters only after several seconds already stopped and all three retained episodes clear with accelerator input before motion; no RES-button clear join is established. OEM recorder name for B4[5] remains unknown.",
         "cruise_substate_pair_counts": {
           "44,70": 9760,
           "45,71": 122866
         },
         "episodes": [],
         "frames": 0,
-        "wire_state": "native bus2 0x08A with CRUISE_OPERATING_LATCH=1 and CRUISE_SUBSTATE_2 in {102,103}"
+        "wire_state": "native bus2 0x08A delayed hold: B4[5]=1 with packed request-B ID25/allocation2-or-3"
       },
       "warning_candidate": {
         "carrier": "native Panda bus2 0x371/32 B19 bit6",
@@ -2262,5 +2272,5 @@
       }
     }
   },
-  "schema_version": 6
+  "schema_version": 7
 }

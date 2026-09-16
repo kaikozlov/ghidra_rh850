@@ -45,7 +45,7 @@ check("3f 0x412 native heartbeat is approximately 1 Hz",
 check("3f 0x412 has event-driven publications but no sub-75-ms burst",
       75 <= timing3f["interval_min_ms"] < 100 and timing3f["payload_change_interval_count"] > 300)
 
-check("report schema includes state-machine, HUD timing, stock-ACC hold, and lane-orientation bounds", report["schema_version"] == 6)
+check("report schema includes state-machine, HUD timing, stock-ACC hold, and lane-orientation bounds", report["schema_version"] == 7)
 
 hold3b = routes["3b"]["stock_acc_standstill_candidate"]
 hold3c = routes["3c"]["stock_acc_standstill_candidate"]
@@ -57,6 +57,11 @@ check("3b stock-ACC standstill states are exactly 45/103 and 44/102",
 check("3c stock-ACC standstill states are exactly 45/103 and 44/102",
       hold3c["cruise_substate_pair_counts"].get("45,103") == 44 and
       hold3c["cruise_substate_pair_counts"].get("44,102") == 2)
+check("B4[5] is exact delayed-hold state across 3b/3c",
+      hold3b["b4_bit5_set_frames_with_cruise_latch"] == 152 and
+      hold3c["b4_bit5_set_frames_with_cruise_latch"] == 46 and
+      hold3b["b4_bit5_vs_legacy_b7_66_67_xor_violations"] == 0 and
+      hold3c["b4_bit5_vs_legacy_b7_66_67_xor_violations"] == 0)
 check("all retained stock-ACC hold frames are exactly stopped",
       hold3b["all_frames_exactly_stopped"] and hold3c["all_frames_exactly_stopped"])
 check("stock-ACC hold remains native LTA/LCA ID11", hold3b["all_episode_target_lateral_ids"] == [11] and

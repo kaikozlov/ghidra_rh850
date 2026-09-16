@@ -1338,7 +1338,7 @@
     },
     "0x0CA": {
       "direction": "chassis -> upstream on Toyota Bus 4 during repin",
-      "disposition": "result/feedback-like return; not promoted to an FRC request target"
+      "disposition": "other protected longitudinal/chassis state; the cleaner arbitration-result ID/acceleration pair is in Brake-owned 0x081"
     },
     "0x160": {
       "direction": "FRC -> camera/ADAS Toyota Bus 1",
@@ -2447,8 +2447,8 @@
     {
       "candidate": "0x0CA",
       "rank": 4,
-      "role": "chassis result/feedback return",
-      "status": "wrong physical direction for direct FRC request"
+      "role": "other protected longitudinal/chassis state",
+      "status": "wrong direction for direct FRC request; superseded as the primary arbitration-result interpretation by 0x081"
     }
   ],
   "request_plane_architecture": {

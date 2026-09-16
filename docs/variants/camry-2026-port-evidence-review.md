@@ -854,17 +854,23 @@ motion. Toyota's P5 Brake/Booster/EPB DDBs independently name upper/lower
 the FRC-hosted PCS recorder contains matching lower/upper TSS acceleration
 request records plus IDs/allocation/arbitration results.
 
-This is a strong **structural/semantic candidate**, not a byte-name proof:
-upper versus lower cannot be assigned because the two words are equal in the
-retained complete drives, and the 6-bit request IDs are still unmapped. The
+This is a strong **structural/semantic mapping**, but upper versus lower A/B
+ordering remains unresolved because the two acceleration words are equal in the
+retained complete drives. The request-ID geometry is now tighter: `0x08A B6`
+and `B7` each split exactly into a six-bit request-ID candidate in bits7:2 plus
+a two-bit allocation-method candidate in bits1:0, matching Brake 0x10A3/0x10A4
+and Toyota's 0..3 allocation enum. During active cruise candidate A is ID11 and
+candidate B ID17; Brake's selected result ID11 overwhelmingly selects candidate A. The
 direct FRC P05 streams `0x020/0x230/0x440` have no simple byte-aligned field that
 reproduces the protected request word across both complete drives; `0x160` has
 only state-related long-lag correlations and remains disqualified as the
 implemented Camry demand interface. The exhaustive FRC-dependent protected-domain
 screen finds no second same-scale signed16 acceleration carrier. `0x5AF` B26 and
 low-rate `0x5F7` B7 instead behave as coarse, lagging longitudinal companions;
-`0x0C9` is at most sideband/request metadata and `0x0CA` is a chassis-to-upstream
-result/feedback return.
+`0x0C9` is at most sideband/request metadata. `0x0CA` remains other protected
+longitudinal/chassis state; the cleaner arbitration result is in Brake-owned
+`0x081`, where B6[5:0] is the strongest selected-longitudinal-ID candidate and
+B20:B21 the strongest signed16 ×0.001 result-acceleration candidate.
 
 Because stock Toyota-B leaves protected `0x08A` on an **unsplit** network, the
 remaining integration problem is **source suppression / sole-emitter ownership
@@ -881,7 +887,9 @@ output lives in `0x08A`. The PDU is the central recovered continuous control
 request plane: lateral request identity/angle is already closed there and its
 duplicated signed16 words are now the strongest longitudinal acceleration-request
 candidates. Toyota's recorder schema additionally exposes longitudinal request
-IDs, force-allocation, shift/EPB, override/priority and other request metadata
-whose exact wire homes are not all recovered, while ordinary FRC state/display
+IDs, force-allocation, shift/EPB, override/priority and other request metadata.
+The ID/allocation pair now has strong B6/B7 structural candidates, but its upper/
+lower ordering plus shift/EPB/override/priority and 57D3 validity remain unresolved,
+while ordinary FRC state/display
 and ego-motion publications exist on separate PDUs. Treat `0x08A` as the central
 request envelope, not as an exhaustive inventory of FRC egress.

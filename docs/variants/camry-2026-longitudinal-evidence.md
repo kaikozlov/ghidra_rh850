@@ -23,6 +23,20 @@ role on Camry. A mode-dependent acceptance gate remains possible, but so do a
 feedback/status field and a parallel output; this evidence does not select a
 particular receiver mechanism. See the reproducible audit immediately below.
 
+
+**September 16 request/result-plane closure:** later retained evidence supersedes
+all historical uses below of `0x0CA B7:B8` as the primary arbitration result.
+The established TSS3 graph is `0x08A` upstream/FRC request -> Brake arbitration ->
+`0x081` selected/result/reference feedback. The new byte-level audit maps the
+lateral request/result tuples into that pair and finds the same architecture for
+longitudinal: `0x08A B8:B9/B11:B12` are the indistinguishable signed16 x0.001
+upper/lower acceleration-request candidates; `0x081 B6[5:0]` is the strongest
+`5284` longitudinal-result-ID candidate and `0x081 B20:B21` the strongest `57DB`
+result-acceleration candidate. Result ID63 tracks the request essentially exactly,
+while result ID11 materially diverges, which is direct arbitration-like behavior.
+`0x0CA` remains protected longitudinal/chassis state but is no longer the primary
+result interpretation. See `data/generated/camry_2026_longitudinal_request_plane.json`.
+
 ## September 16: command versus feedback audit
 
 Inputs are both complete tracked August-27 CAN captures and seven original
@@ -438,7 +452,11 @@ steering angle. The complete August captures add a second, independent shape:
 Toyota's own GTS surface supplies an unusually exact semantic template. Current
 P5 Brake/Booster/EPB dictionaries expose `0x10A1` **Request Acceleration of
 Upper Limit from Toyota Safety Sense** and `0x10A2` **...Lower Limit...**, both
-signed16 at 0.001 m/s², plus 6-bit upper/lower request IDs (`0x10A3/0x10A4`).
+signed16 at 0.001 m/s², plus 6-bit upper/lower request IDs (`0x10A3/0x10A4`) explicitly occupying bits7:2.
+That geometry gives a new structural join: `0x08A B6` and `B7` each split exactly
+as a six-bit request-ID candidate in bits7:2 plus a two-bit 0..3 allocation-method
+candidate in bits1:0. Active Camry cruise uses `(ID11, allocation1)` and
+`(ID17, allocation3)`; the Brake-side selected result is overwhelmingly ID11.
 The FRC-hosted PCS Operation-FFD recorder independently contains record `5280`
 "TSS required acceleration (lower limit)" and `5281` "TSS request acceleration
 (upper limit)", again signed16 at 0.001 m/s², as well as longitudinal IDs,
@@ -446,10 +464,11 @@ braking/driving-force allocation, and arbitration-result records.
 
 This is **not yet a byte-name proof**. Because B8:B9 == B11:B12 in every retained
 complete-drive frame, the evidence cannot assign one word to upper and the other
-to lower, prove that either is literally DID `0x10A1/0x10A2`, or locate the two
-6-bit request IDs. The correct bounded statement is that these two `0x08A` words
-are the strongest retained acceleration-request candidates and match Toyota's
-TSS request contract in direction, width, scale, and pre-motion behavior.
+to lower, prove that either is literally DID `0x10A1/0x10A2`, or assign A/B to Toyota's
+upper versus lower record. The correct bounded statement is that the acceleration
+words and packed B6/B7 ID/allocation bytes match Toyota's TSS request contract in
+direction, width, scale, bit geometry, and pre-motion behavior; only the A/B
+upper/lower ordering remains open.
 
 The alternatives now rank as follows:
 
@@ -470,9 +489,9 @@ The alternatives now rank as follows:
    (best |r| 0.265/0.140 in the two complete drives) and remains `0x1838`
    through the early portion of all three stock-resume ramps. It is not the
    leading acceleration-magnitude carrier.
-4. **`0x0CA`** — strong result/acceleration semantics but the wrong physical
-   direction: native chassis -> upstream on the repinned split. Treat it as a
-   result/feedback return, not an FRC request target.
+4. **`0x0CA`** — other protected longitudinal/chassis state in the wrong
+   direction for an FRC request. The newer `0x081` request/result audit supersedes
+   the old B3:B4/B5:B6/B7:B8 arbitration-result interpretation.
 
 The direct FRC Toyota-Bus-1 P05 candidates `0x020/0x160/0x230/0x440` were also
 screened against the protected `0x08A` request word using every byte-aligned
@@ -514,6 +533,72 @@ override/priority and other request metadata whose exact wire locations are not
 all mapped. Ordinary FRC state/display/ego-motion publications (`0x020`,
 `0x160`, `0x230`, `0x440`, `0x371`, `0x412`, etc.) also exist outside `0x08A`.
 The bounded claim is **central control-request plane**, not exhaustive FRC output.
+
+
+### Request/result recorder layout: what is actually mapped
+
+The recorder schema and wire evidence now line up as follows. "Strong candidate"
+means the width/scale, topology, and dynamic arbitration behavior match, but no
+synchronized diagnostic/FFD value directly names that wire field.
+
+| Toyota recorder quantity | Wire disposition | Evidence status |
+|---|---|---|
+| `5280` lower longitudinal request ID | one of `0x08A B6[7:2]` / `B7[7:2]` | strong structural candidate; A/B upper-vs-lower assignment unresolved |
+| `5280` lower acceleration | one of `0x08A B8:B9` / `B11:B12`, s16 x0.001 m/s² | mapped as indistinguishable pair |
+| `5280` force distribution | paired `B6[1:0]` / `B7[1:0]` with its ID byte | strong structural candidate; 0..3 exactly matches Toyota allocation enum; A/B ordering unresolved |
+| `5280` shift / EPB / override / priority | unresolved | complete-drive byte census does not justify an OEM-name assignment |
+| `5281` upper longitudinal request ID | the other of `0x08A B6[7:2]` / `B7[7:2]` | strong structural candidate; A/B upper-vs-lower assignment unresolved |
+| `5281` upper acceleration | the other of `0x08A B8:B9` / `B11:B12`, s16 x0.001 m/s² | mapped as indistinguishable pair |
+| `5281` upper force distribution | the other of `B6[1:0]` / `B7[1:0]` | strong structural candidate; no synchronized upper/lower oracle |
+| `5282` lateral request ID | `0x08A B21[5:0]` | recovered |
+| `5282` requested pinion angle | `0x08A B18:B19` | recovered; controller scale is 0.00100012 rad/count versus recorder 0.001 |
+| `5282` steering assist gain | `0x08A B24` x0.01 | strong structural join |
+| `5282` damping gain | `0x08A B25` x0.01 | bounded; zero in both complete drives |
+| `5284` arbitration-result longitudinal ID | `0x081 B6[5:0]` | strong candidate; observed values 11 and 63 |
+| `5285` arbitration-result lateral ID | `0x081 B13[5:0]` | recovered |
+| `57D3` acceleration-valid flag | unresolved | `0x081 B11[4]` is proven request-loss supervision, but is not OEM-joined to `57D3` |
+| `57DB` arbitration-result acceleration | `0x081 B20:B21`, s16 x0.001 m/s² | strong candidate |
+| `57DE` arbitration-result pinion angle | `0x081 B16:B17` | recovered |
+
+The packed-ID interpretation has an independent arbitration check. In the same
+pairs, selected `0x081` result ID11 equals `0x08A B6[7:2]` in **1,525/1,529**
+Drive-A and **3,276/3,281** Drive-B ID11 samples; it never equals the B7 candidate.
+Every selected ID63 sample (**15,544 / 16,718**) has ID63 absent from both request
+A/B fields, consistent with a separate arbitration source; Toyota's ISA-specific
+vocabulary independently uses 63 for Driver Operation. This does not name A as
+upper or lower, but strongly supports B6/B7 as the two packed request-ID/allocation
+bytes rather than generic ACC-state bytes.
+
+The retained delayed-stop corpus gives a second dynamic check and supersedes the
+old raw-byte `ACC_STATE` description. Ordinary active cruise is
+`B6/B7=0x2D/0x47`, which decodes to request A `(ID11, allocation1)` and request B
+`(ID17, allocation3)`. Accelerator override produces `0x2C/0x46`, preserving IDs
+11/17 while changing allocation methods to 0/2. The three delayed hold episodes
+contain **198** frames of `0x2D/0x67` or `0x2C/0x66`: request B changes to ID25
+while the same allocation 3/2 distinction remains. Independently, `0x08A B4[5]`
+is set on **198/198** of those delayed-hold frames and clear on every other native
+`0x08A` frame in the complete `3b/3c` routes (zero XOR violations). A moving
+retained `B7=0x65` is ID25/allocation1 with B4[5] clear, proving ID25 alone is not
+a standstill flag. Camry runtime therefore uses the source-real B4[5] structural
+hold state; the ID25/allocation2-or-3 tuple is its independent request-state
+corroboration. The exact OEM recorder name for B4[5] remains unknown.
+
+Across 17,073 / 19,999 request-result pairs in the complete A/B drives,
+`0x081 B20:B21` correlates with the request at r=0.941674 / 0.836884. The more
+discriminating result-ID split is stronger: for selected ID63 the median
+result-minus-request is **0.000 m/s²** in both drives (p10/p90 only a few
+milligravity-scale counts apart), while selected ID11 gives median deltas
+**-0.181 / -0.435 m/s²**. That is exactly the behavior expected of a selected
+arbitration result rather than a second request echo.
+
+This closes `0x08A` as the **unified observed continuous TSS3 request envelope**
+for the recovered lateral tuple plus longitudinal request magnitudes. It does
+*not* close the entire `5280/5281` metadata record into that PDU: the two request
+ID/allocation bytes are now structurally located but their upper/lower ordering is
+unresolved, while shift/EPB/override/priority and validity remain unmapped. Correspondingly, `0x081`
+is the unified Brake-owned selected/result/reference envelope, with the
+longitudinal result fields now visible alongside the previously recovered lateral
+result.
 
 The reproducible reduction is
 `data/generated/camry_2026_longitudinal_request_candidates.json`, generated by

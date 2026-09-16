@@ -2377,7 +2377,7 @@ questions; the B6 DTC attribution to the Brake System Control Module domain
 (§"external lateral ingress") remains the only positively attributed immediate
 source domain.
 
-The fork's opendbc `toyota_tss3_pt` `0x08A` entry (`TSS3_LATERAL_REQUEST`) now
+The fork's opendbc `toyota_tss3_pt` `0x08A` entry (`TSS3_CONTROL_REQUEST`) now
 carries the complete census-bounded field set — cruise latch/sub-states,
 duplicated request word, set speed, sentinel slots, cruise mirrors, cooperative
 substate flag, request level, sequence, and the `FV4+MAC28` trailer geometry —
@@ -3376,12 +3376,30 @@ request ID/pinion angle, while `0x081 B13[5:0]` / B16:B17 maps to selected resul
 ID/pinion angle. The recovered steering scale `1024/17870 deg/count` is
 0.00100012 rad/count, matching recorder `5282/57DE`'s 0.001-rad geometry.
 
-The full recorder record is **not** byte-complete yet. The `5280/5281` request
-IDs, force-allocation, shift/EPB, override/priority fields and `57D3` acceleration
-validity remain unresolved; the retained byte census does not justify guessing
-their wire positions. The correct current claim is therefore: `0x08A` is the
-unified observed continuous TSS3 request envelope, and `0x081` is the unified
-Brake-owned selected/result/reference envelope.
+The full recorder record is **not** byte-complete yet. `0x08A B6/B7` now
+strongly fit the two packed request-ID/allocation bytes: each upper six bits match
+Brake `0x10A3/0x10A4` request-ID geometry and each low two bits stay inside the
+0..3 FRC allocation-method enum. Upper-vs-lower A/B ordering, shift/EPB,
+override/priority fields and `57D3` acceleration validity remain unresolved.
+The result plane independently validates the packed-ID interpretation: selected
+`0x081 B6[5:0]` ID11 equals request candidate A (`0x08A B6[7:2]`) in
+**1,525/1,529** and **3,276/3,281** ID11 samples across the two drives, while
+every selected ID63 result is absent from both request-ID candidates. Candidate B
+is ID17 during active cruise. This supports the two-input arbitration model without
+resolving which candidate is Toyota's upper versus lower record.
+
+The delayed-hold corpus independently decomposes the old composite raw-B7 states:
+ordinary `0x2D/0x47` is A `(ID11,method1)` / B `(ID17,method3)`, delayed hold
+`0x2D/0x67` changes B to ID25, and accelerator override changes the allocation
+methods to A0/B2 (`0x2C/0x66`) while preserving the request IDs. The full-frame
+re-read additionally finds `0x08A B4[5]` asserted on all **198** delayed-hold
+frames and nowhere else in complete routes `3b/3c`. A moving `B7=0x65` =
+ID25/method1 has B4[5] clear. Camry runtime uses this exact structural hold bit;
+its OEM recorder name remains unassigned.
+
+The correct current claim is therefore: `0x08A` is the unified observed continuous
+TSS3 request envelope, and `0x081` is the unified Brake-owned selected/result/reference
+envelope.
 
 ## 51. Native Bus-1 framing is exact AUTOSAR E2E Profile 5, not cryptographic authentication (VAR-107)
 

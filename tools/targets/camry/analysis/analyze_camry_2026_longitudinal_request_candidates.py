@@ -512,7 +512,7 @@ def build() -> dict:
             '0x0C9': {'direction': 'upstream -> chassis on Toyota Bus 4 during repin', 'b12_b13_vs_0x0ca': c9_vs_ca(loaded),
                       'disposition': 'possible longitudinal sideband/state metadata; weak magnitude candidate and remains static through early stock-resume ramp'},
             '0x0CA': {'direction': 'chassis -> upstream on Toyota Bus 4 during repin',
-                      'disposition': 'result/feedback-like return; not promoted to an FRC request target'},
+                      'disposition': 'other protected longitudinal/chassis state; the cleaner arbitration-result ID/acceleration pair is in Brake-owned 0x081'},
             '0x160': {'direction': 'FRC -> camera/ADAS Toyota Bus 1',
                       'disposition': 'longitudinal-related state publication; known fine field is measurement-like and prior B12 command mapping is withdrawn'},
         },
@@ -537,7 +537,7 @@ def build() -> dict:
             {'rank': 2, 'candidate': 'protected 0x5AF B26 signed6', 'role': 'coarse longitudinal request/result companion',
              'status': 'tracks 0x08A at about 0.25 m/s^2/count but lags it; not a primary request magnitude'},
             {'rank': 3, 'candidate': '0x0C9', 'role': 'possible sideband/request metadata', 'status': 'weak magnitude candidate'},
-            {'rank': 4, 'candidate': '0x0CA', 'role': 'chassis result/feedback return', 'status': 'wrong physical direction for direct FRC request'},
+            {'rank': 4, 'candidate': '0x0CA', 'role': 'other protected longitudinal/chassis state', 'status': 'wrong direction for direct FRC request; superseded as the primary arbitration-result interpretation by 0x081'},
         ],
         'implementation_boundary': (
             'Do not restore Camry 0x160 longitudinal output and do not inject a competing 0x08A from this analysis alone. '

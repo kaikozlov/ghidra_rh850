@@ -257,13 +257,16 @@ The dedicated Camry tests replay source-real retained payloads for:
 Their absence is distinguished from a real all-zero packet. They are not required for
 CAN-alive checking and are not yet mapped to public openpilot fault policy.
 
-VAR-088 completes the `0x08A` `TSS3_LATERAL_REQUEST` DBC entry with the full
-census-bounded field set — cruise latch/sub-state mirrors, the byte-identical
-duplicated signed16 request word, set speed, `0x7FFF` sentinel slots, the
-cooperative substate flag, the 0/50/100 request level, and the `FV4+MAC28`
-trailer geometry — plus the full 19-value Target Lateral ID dictionary on both
-`0x08A` and B6 (live-baseline §39). These remain passive observables; the
-producer/security and stock-LTA authority questions of OQ-054 are unchanged.
+VAR-088 established the byte-complete `0x08A` census; the September-16 follow-up
+renames the DBC entry `TSS3_CONTROL_REQUEST` and maps the unified request/result
+structure. B6/B7 split into two six-bit longitudinal request-ID candidates plus
+two-bit allocation-method candidates, B8:B9/B11:B12 are the indistinguishable
+signed16 x0.001 longitudinal acceleration-request pair, and B18:B19/B21/B24/B25
+carry the lateral request tuple. Brake-owned `0x081` is now `TSS3_CONTROL_RESULT`,
+with selected longitudinal ID B6[5:0], selected lateral ID B13[5:0], lateral
+result pinion B16:B17, and longitudinal result acceleration B20:B21. Upper-vs-
+lower A/B ordering and the remaining shift/EPB/override/priority/validity metadata
+stay bounded rather than guessed.
 
 ### 3.3 B6 candidate construction and freshness/signing interfaces
 
@@ -1150,40 +1153,45 @@ RAM-only path.
 Verification: `tests/verify_camry_f33_steering_state_capture.py`; the in-car packaging
 path is `tools/targets/camry/builders/build_camry_f33_car_kit.py`.
 
-### 4.11 Stock ACC standstill / resume-required state (VAR-140)
+### 4.11 Stock ACC delayed hold is request-ID/allocation state (VAR-140 supersession)
 
-The September road corpus closes another previously default-valued `CarState` field without
-reusing legacy Toyota PCM status. Native FRC-side `0x08A` has an exact delayed stop/hold
-state in `CRUISE_SUBSTATE_2`: ordinary active cruise uses B7=`0x47` (or `0x46` during
-accelerator override), while the stock-ACC hold state uses **`0x67`** and its
-accelerator-override companion **`0x66`**.
+The September road corpus originally exposed the delayed stop/hold condition as
+raw `0x08A B7={0x66,0x67}`. The unified request-layout recovery now explains that
+byte rather than treating it as an opaque ACC state. `B6` and `B7` each pack a
+six-bit longitudinal request ID in bits7:2 plus a two-bit braking/driving-force
+allocation method in bits1:0. A full-frame re-read adds a cleaner structural
+state bit: `0x08A B4[5]` is asserted on **198/198** retained delayed-hold frames
+and clear on every other native `0x08A` frame in complete routes `3b/3c`.
 
-Routes `3b` and `3c` contain three independent hold episodes totaling **198 native bus-2
-frames**: route `3b` has 148 `B6/B7=45/103` plus 4 `44/102` frames across two episodes;
-route `3c` has 44 plus 2 across one episode. Every one of those frames is at effectively
-exactly 0 m/s and remains Target Lateral ID 11. The state is not merely a vehicle-stop bit:
-for roughly five or more seconds before each episode, the vehicle is already stopped while
-`0x08A` remains in ordinary `45/71`. At resume, the hold state clears on accelerator input
-while speed is still zero, before the vehicle starts moving. Routes `3d/3e/3f` contain no
-such hold frames because their retained cruise intervals do not reach the same delayed
-zero-speed state.
+The retained states decompose as follows:
 
-A bit-only interpretation is explicitly rejected. Route `3b` contains a moving transition
-`B6/B7=0x47/0x65` at about 12.48 m/s; therefore B7 bit5 by itself is not a standstill flag.
-The exact observed contract is the B7 byte state `{0x66,0x67}` while the cruise-operating
-latch is asserted. Current GTS+ independently exposes FRC Operation-FFD `525E Stop holding
-status`, which corroborates the concept but is not claimed as a static DID-to-wire join.
+| Raw B6/B7 | Request A | Request B | Dynamic state |
+|---|---|---|---|
+| `0x2D / 0x47` | ID11 / Engine+Brake1 | ID17 / Brake Only | ordinary active cruise |
+| `0x2C / 0x46` | ID11 / Engine Only | ID17 / Engine+Brake2 | active accelerator override |
+| `0x2D / 0x67` | ID11 / Engine+Brake1 | ID25 / Brake Only | delayed zero-speed hold |
+| `0x2C / 0x66` | ID11 / Engine Only | ID25 / Engine+Brake2 | delayed hold with accelerator override |
+| `0x47 / 0x65` | ID17 / Brake Only | ID25 / Engine+Brake1 | moving counterexample |
 
-Fork opendbc therefore maps `CRUISE_OPERATING_LATCH && CRUISE_SUBSTATE_2 in {0x66,0x67}`
-to normal `cruiseState.standstill`. Source-real regression fixtures cover ordinary stopped
-`0x47` (false), held `0x67` (true), held accelerator override `0x66` (true), and the moving
-`0x65` counterexample (false). No RES+/resume command is synthesized from this mapping; it
-only restores the standard stock-ACC state semantic.
+Routes `3b` and `3c` contain three independent delayed-hold episodes totaling
+**198** native request frames: 192 `0x2D/0x67` plus six `0x2C/0x66`. Every hold
+frame is effectively 0 m/s, enters only after the vehicle has already remained
+stopped for more than five seconds, and all three episodes clear with accelerator
+input before vehicle motion. No RES-button clear join is established. The moving
+`B7=0x65` witness rejects both the old B7-bit5 rule and request-B ID25 alone as a
+standstill predicate.
 
-Evidence: `tools/targets/camry/analysis/analyze_camry_20260906_hands_off_warning.py`,
-`data/generated/camry_20260906_hands_off_warning_audit.json`,
-`tests/verify_camry_20260906_hands_off_warning.py`, and fork
-`opendbc/car/toyota/tests/test_tss3_camry.py`.
+Fork opendbc therefore reports Camry stock-ACC standstill from the cruise latch
+plus source-real structural `B4[5]`. Request-B ID25/allocation2-or-3 remains the
+independent decoded-state corroboration, and the moving ID25/allocation1 witness
+keeps that ID from being promoted to a standstill flag by itself. Corolla, where
+B4[5] hold behavior is not independently retained, uses the decoded ID25 plus
+allocation2/3 contract. No resume command is synthesized.
+
+Evidence: `data/generated/camry_20260906_hands_off_warning_audit.json`,
+`data/generated/camry_2026_longitudinal_request_plane.json`,
+`tests/verify_camry_2026_longitudinal_request_plane.py`, and fork
+`opendbc/car/toyota/tests/test_tss3_{camry,corolla}.py`.
 
 ### 4.12 Source-real parser liveness across the long routes (VAR-141)
 
@@ -1298,10 +1306,14 @@ probe above.
 > state/result-related rather than a demonstrated actuator ingress. The leading
 > direct chassis-facing candidate is now protected Bus-4 `0x08A` B8:B9/B11:B12,
 > whose signed16 ×0.001 shape matches Toyota's upper/lower TSS acceleration
-> request vocabulary. Exact upper/lower identity and additional request metadata
-> are still unresolved. The semantic request plane itself is `0x08A`; what
-> remains unresolved is the clean physical source/suppression boundary (including
-> any FRC-to-signer/proxy publication handoff). Camry therefore keeps
+> request vocabulary. Brake-owned `0x081` now supplies the matching result plane:
+> B6[5:0] is the strongest selected-longitudinal-ID candidate and B20:B21 the
+> strongest selected-acceleration candidate, superseding the older `0x0CA` result
+> interpretation. Exact upper/lower request-word order and additional request
+> metadata are partly closed: B6/B7 strongly fit the two packed request-ID/allocation
+> bytes, but their upper/lower A/B ordering and shift/EPB/override/priority fields
+> remain unresolved. The semantic request plane itself is `0x08A`;
+> what remains unresolved is the clean physical source/suppression boundary. Camry therefore keeps
 > stock longitudinal ownership and does **not** advertise Alpha Long. See
 > `camry-2026-longitudinal-evidence.md` for the current evidence and topology
 > normalization. The remainder of this section is retained as historical design

@@ -26,7 +26,6 @@ from __future__ import annotations
 import argparse
 import bisect
 import json
-import statistics
 import sys
 from collections import Counter
 from pathlib import Path
@@ -180,6 +179,8 @@ def analyze_route(LogReader, route_dir: Path, label: str) -> dict:
   warning_episode = None
   warning_episodes: list[dict] = []
   cruise_substate_pairs: Counter[tuple[int, int]] = Counter()
+  cruise_hold_b4_bit5_set = 0
+  cruise_hold_b4_bit5_xor_violations = 0
   cruise_hold_episode = None
   cruise_hold_episodes: list[dict] = []
 
@@ -266,6 +267,9 @@ def analyze_route(LogReader, route_dir: Path, label: str) -> dict:
               pair = (dat[6], dat[7])
               cruise_substate_pairs[pair] += 1
               hold = dat[7] in (0x66, 0x67)
+              b4_hold = bool(dat[4] & 0x20)
+              cruise_hold_b4_bit5_set += int(b4_hold)
+              cruise_hold_b4_bit5_xor_violations += int(b4_hold != hold)
               if hold:
                 if cruise_hold_episode is None:
                   cruise_hold_episode = {
@@ -443,7 +447,7 @@ def analyze_route(LogReader, route_dir: Path, label: str) -> dict:
     }
 
   threshold_sweep = []
-  for i in range(0, 201):
+  for i in range(201):
     threshold = i / 100
     tp = sum(value >= threshold and detected for value, detected in driver_detect_samples)
     tn = sum(value < threshold and not detected for value, detected in driver_detect_samples)
@@ -486,13 +490,15 @@ def analyze_route(LogReader, route_dir: Path, label: str) -> dict:
     "b19_values_in_clean_stock_lta": {f"0x{k:02X}": v for k, v in sorted(b19_values.items())},
     "native_source_counts": {f"0x{addr:03X}/src{src}": count for (addr, src), count in sorted(source_counts.items())},
     "stock_acc_standstill_candidate": {
-      "wire_state": "native bus2 0x08A with CRUISE_OPERATING_LATCH=1 and CRUISE_SUBSTATE_2 in {102,103}",
+      "wire_state": "native bus2 0x08A delayed hold: B4[5]=1 with packed request-B ID25/allocation2-or-3",
       "cruise_substate_pair_counts": {f"{a},{b}": n for (a, b), n in sorted(cruise_substate_pairs.items())},
+      "b4_bit5_set_frames_with_cruise_latch": cruise_hold_b4_bit5_set,
+      "b4_bit5_vs_legacy_b7_66_67_xor_violations": cruise_hold_b4_bit5_xor_violations,
       "frames": sum(episode["frames"] for episode in cruise_hold_episodes_out),
       "episodes": cruise_hold_episodes_out,
       "all_frames_exactly_stopped": all(episode["max_abs_speed_m_s"] < 1e-6 for episode in cruise_hold_episodes_out),
       "all_episode_target_lateral_ids": sorted({lid for episode in cruise_hold_episodes_out for lid in episode["target_lateral_ids"]}),
-      "boundary": "dynamic stock-ACC resume-required/hold interpretation: the state enters only after several seconds already stopped and all three retained episodes clear with accelerator input before motion; no RES-button clear join is established. B7 bit5 alone is explicitly rejected because moving 0x65 transition state exists",
+      "boundary": "dynamic stock-ACC resume-required/hold interpretation: B4[5] is an exact structural hold-state discriminator in the retained routes; the packed request-B state is ID25/allocation2-or-3. The state enters only after several seconds already stopped and all three retained episodes clear with accelerator input before motion; no RES-button clear join is established. OEM recorder name for B4[5] remains unknown.",
     },
     "native_state_machine_candidate": {
       "driver_steering_candidate": "native bus2 0x371 B20 bit4",
@@ -595,7 +601,7 @@ def main() -> int:
     routes[short] = analyze_route(LogReader, args.log_root / day / route, label)
 
   payload = {
-    "schema_version": 6,
+    "schema_version": 7,
     "method": {
       "touch_proxy": f"abs(carState.steeringTorque) >= {TOUCH_TORQUE_NM} N.m",
       "clean_stock_lta": f"carState cruise enabled, vEgo > {MIN_SPEED_MS} m/s, no blinker, latest native bus2 0x08A B21 low6 == 11",
