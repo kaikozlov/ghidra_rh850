@@ -14,8 +14,9 @@ bodies. It is verified deterministically by
 `tests/verify_techstream_mackey.py`; generated evidence lives in
 `data/generated/techstream_v18/mackey_vehicle_protocol.json` and
 `mackey_state_machine.csv`. Applicability to the Sienna `8965B4512000` EPS is
-**bounded**: the cryptographic envelope matches, but the diagnostic service and
-procedure do not.
+**bounded** at the Toyota transport-selection layer: both sides carry the same
+standard SHE M1--M5 memory-update object, but Techstream V18's recovered carrier
+is RID `0x3002` while the Sienna application exposes RID `0x1010`.
 
 ## End-to-end flow
 
@@ -43,6 +44,49 @@ each selected master/slave ECU
 The vehicle-facing layer is in `UtilityExNK2.dll`, reached through twelve named
 `Ex2MAC_01_*` imports in `IT3UtilityNK.dll`. This closes the former unnamed
 companion-DLL boundary.
+
+## Protocol identity: AUTOSAR SHE Memory Update Protocol
+
+The `M1..M5` update object delivered to an ECU in Toyota's ECU Security Key
+workflow is **not a Toyota-defined cryptographic envelope**. It is the standard
+Secure Hardware Extensions (SHE) memory-update protocol used by `CMD_LOAD_KEY`. AUTOSAR FO
+R22-11, *Specification of Secure Hardware Extensions*, §4.7.7 and §4.9/§4.9.1
+define the same parameter widths and roles recovered here:
+
+| SHE field | Width | Direction | Standard role |
+|---|---:|---|---|
+| `M1` | 128 bits / 16 bytes | in | addressed SHE `UID' || ID || AuthID` |
+| `M2` | 256 bits / 32 bytes | in | encrypted new counter, flags, and new key |
+| `M3` | 128 bits / 16 bytes | in | `CMAC_K2(M1 || M2)` request authenticator |
+| `M4` | 256 bits / 32 bytes | out | successful-update verification material |
+| `M5` | 128 bits / 16 bytes | out | successful-update verification authenticator |
+
+The standard authorization construction is also important for interpreting the
+Toyota backend. The external issuer knows the existing authentication secret
+`KEY_AuthID`, derives `K1 = KDF(KEY_AuthID, KEY_UPDATE_ENC_C)` and
+`K2 = KDF(KEY_AuthID, KEY_UPDATE_MAC_C)`, encrypts the replacement key/counter/
+flags into `M2`, and authenticates `M1 || M2` as `M3`. The secure module checks
+write policy, `AuthID`, UID/wildcard policy, `M3`, and the monotonic update
+counter before storing the new key and returning `M4/M5`. The vehicle
+application CPU therefore need only relay the opaque package; neither the
+replacement key nor `KEY_AuthID` needs to appear in plaintext in the ECU's UDS/
+application path. The external provisioning backend necessarily knows the
+material required to construct the package.
+
+Toyota's proprietary layer is the **orchestration around that standard SHE
+object**: vehicle/topology discovery, VIN and `SafekeyNumber` collection, the
+online Toyota exchange-key service, mapping an ECU identity to the backend's
+SHE UID/AuthID/counter/key state, and the UDS RoutineControl carrier
+(`0x1010` or `0x3002`). In particular, the recovered 16-byte Toyota
+`SafekeyNumber` is an association value supplied to the backend; no retained
+artifact proves that it is byte-for-byte the SHE UID field used inside `M1`.
+The independently reported Toyota “MCU ID” requirement is therefore highly
+relevant to standard SHE package construction, but the exact
+`MCU ID -> SHE UID -> SafekeyNumber` relation remains open.
+
+External specification:
+[AUTOSAR FO R22-11 — Specification of Secure Hardware Extensions](https://www.autosar.org/fileadmin/standards/R22-11/FO/AUTOSAR_TR_SecureHardwareExtensions.pdf),
+§4.7.7 and §4.9/§4.9.1.
 
 ## Vehicle request producers
 
@@ -280,25 +324,26 @@ M1--M5 exchange-key family:
 31 01 10 10 || M1 || M2 || M3    / 31 03 10 10
 ```
 
-Consequently the best current model is that a P5 FRC receives the **same logical
-Toyota ECU-Security-Key / SHE-compatible authenticated key envelope**, with a
-target-family-specific RoutineControl transport and a target-local secure-key
-backend. We do **not** yet have a retained `0x792` key-write trace or decoded FRC
-application implementation, so the exact camera selector (`0x1010` versus
-`0x3002`), its M1--M5 verification/storage implementation, and the relation
-between `SafekeyNumber` and the server-side MCU ID remain unproved. The
-`UtilityPlusFrontNK -> UtilityGene` static pass above exhausts the obvious
+Consequently the best current model is that a P5 FRC receives the **standard
+AUTOSAR SHE `CMD_LOAD_KEY` memory-update package**, carried inside a
+Toyota-selected RoutineControl transport and terminated by a target-local
+secure-key backend. We do **not** yet have a retained `0x792` key-write trace or
+decoded FRC application implementation, so the exact camera selector (`0x1010`
+versus `0x3002`), its local SHE/HSM implementation, and the relation among
+`SafekeyNumber`, Toyota's server-side MCU ID, and the SHE UID remain unproved.
+The `UtilityPlusFrontNK -> UtilityGene` static pass above exhausts the obvious
 current-GTS host join: the family-selector wrappers are imported and invoked,
 but their shipped `UtilityGene` bodies are not raw-backed, so the FRC RID cannot
 be recovered honestly from this package alone.
 
-Nothing in that conclusion requires Renesas hardware. The M1--M5 envelope is a
-wire/provisioning contract, not an ICU-S MMIO ABI. The yc Venza SRS specimen is
-the concrete control: it accepts the same RID-`0x1010` `M1/M2/M3 -> M4/M5`
-envelope while reaching its secure subsystem through a different local
-secure-service ABI than the tracked EPS. A non-Renesas FRC can therefore satisfy
-the Toyota contract with another HSM/security engine or equivalent protected
-implementation. The exact FRC SoC/HSM remains outside the decoded corpus.
+Nothing in that conclusion requires Renesas hardware. `M1..M5` are the
+hardware-neutral **SHE protocol contract**; Renesas ICU-S is only one concrete
+implementation of that contract. The yc Venza SRS specimen is the useful
+control: it accepts the same standard RID-`0x1010` `M1/M2/M3 -> M4/M5` memory
+update while reaching its secure subsystem through a different local
+secure-service ABI than the tracked EPS. A non-Renesas FRC can therefore
+implement the same SHE semantics in another HSM/security engine or equivalent
+protected subsystem. The exact FRC SoC/HSM remains outside the decoded corpus.
 
 This provisioning result must remain separate from **runtime protected-message
 signing**. The captured native FRC-side Bus-1 periodic family is exact AUTOSAR

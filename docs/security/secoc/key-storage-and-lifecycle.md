@@ -66,7 +66,7 @@ command-8 submitter — the RID-`0x100E` bank-0 crypto test fed by CAN
 [application-chain.md §5.10](application-chain.md#510-bank-0-crypto-test-rid-0x100e--can-0x130x1a--command-8-secoc-047048). The lower driver splits
 the request as `16+32+16` and the response as `32+16`, exactly matching the
 AUTOSAR SHE M1/M2/M3 → M4/M5 memory-update protocol. This corrects the prior
-claim that the image had no SHE-shaped parser or ICU key-update route. It does
+claim that the image had no standard-SHE parser or ICU key-update route. It does
 not rehabilitate the old `0x65CD8 → 0x72F58` NvM misclassification.
 
 ## 1. Conclusive NvM service identification
@@ -375,13 +375,16 @@ M4: 32 bytes
 M5: 16 bytes
 ```
 
-Those widths and directions exactly match the AUTOSAR SHE authenticated memory
-update used by `CMD_LOAD_KEY`. M1 identifies the target slot and AuthID; M2
-protects the new key, counter, and flags; M3 authenticates M1/M2; M4/M5 provide
-proof of completion. The target key selector is therefore inside the
-cryptographic package rather than a separate CPU argument. Command 8 is capable
-of targeting slot 4 if M1 names slot 4 and ICU-S accepts the AuthID, counter,
-flags, and lifecycle policy.
+This is the **standard AUTOSAR SHE Memory Update Protocol** used by
+`CMD_LOAD_KEY`, not merely a proprietary package with matching lengths. In the
+standard construction, `M1 = UID' || ID || AuthID`; the issuer derives `K1` and
+`K2` from `KEY_AuthID` using `KEY_UPDATE_ENC_C` / `KEY_UPDATE_MAC_C`; `M2`
+contains the encrypted new counter, flags, and replacement key; and
+`M3 = CMAC_K2(M1 || M2)`. Successful storage produces the `M4/M5` verification
+proof. The target key selector is therefore carried inside `M1` rather than as
+a separate CPU argument. Command 8 is capable of targeting slot 4 if `M1` names
+slot 4 and ICU-S accepts the AuthID, UID/wildcard policy, counter, flags, and
+lifecycle policy. See AUTOSAR FO R22-11 §4.7.7 and §4.9/§4.9.1.
 
 The RoutineControl RID entry at `0x26B34` is enabled. Its per-RID policy permits only
 extended session `0x03` and has zero Dcm SecurityAccess levels. This is not an
@@ -539,12 +542,13 @@ Consequently:
 
 ### How is the SecOC key injected?
 
-The image contains a concrete SHE-compatible provisioning candidate: enabled
-RoutineControl RID `0x1010` submits M1/M2/M3-shaped input to ICU-S command 8 and returns
-M4/M5-shaped proof. A valid package can identify slot 4 without exposing the new
-key to MainPE. Static analysis does not prove that Toyota's dealer workflow
-actually invokes this DID, nor does it reveal the required authorization key,
-slot counter, or accepted policy flags.
+The image contains a concrete implementation of the standard SHE provisioning
+primitive: enabled RoutineControl RID `0x1010` transports `M1/M2/M3` to ICU-S
+command 8 (`CMD_LOAD_KEY`) and returns `M4/M5` proof. A valid package can identify
+slot 4 without exposing the replacement key to MainPE. Static analysis does not
+prove that Toyota's dealer workflow invokes this DID for this exact EPS, nor
+does it reveal `KEY_AuthID`, the backend's UID mapping, current slot counter, or
+accepted policy flags.
 
 On related variants, a usable SecOC key is also persisted in object 15's
 raw/XOR55/XORAA NvM copies. Whether those variants use the same command-8 path
@@ -613,7 +617,7 @@ that the RAM field held a valid key at capture time.
 | command-8 request/result widths are 16+32+16 / 32+16 | **Definitive** |
 | RID `0x1010` wire contract is control-type-1 start plus control-type-3 result read | **Definitive structural behavior** |
 | result status `01/02/FF` means pending/complete/failed; proof is exposed only with `02` | **Definitive** |
-| command 8 is a SHE-compatible authenticated memory/key update | **Recovered** |
+| command 8 implements the standard SHE `CMD_LOAD_KEY` authenticated memory/key update | **Recovered** |
 | RID `0x1010` per-RID policy is extended session, no Dcm SA level | **Definitive** |
 | command 8 is statically fixed to slot 4 | **Disproved; target is package-carried** |
 | current GTS+ contains a `MAC_01` RoutineControl RID `0x1010` M1–M5 transport | **Definitive host-static** |

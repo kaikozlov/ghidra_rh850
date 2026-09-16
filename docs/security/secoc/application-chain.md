@@ -1104,7 +1104,7 @@ exact-EPS branch selection and package target remain dynamic questions.
 | `FEBE526A..FEBE5299` M4/M5 have no stock reader and are scrubbed at finalization | **Recovered; disclosure-audit bounded** |
 | Command-8 completion state is routed solely by `FEBE5085`, so a diagnostic start between bank-0 submit and completion yields status `0x02` with zero M4/M5 for an envelope never submitted | **Recovered (SECOC-048; reproduced by deterministic composition model)** |
 | The composition race is a key bypass or exposes M4/M5 remotely | **Disproved for this graph; classification is state misattribution only** |
-| Command 8 is the SHE-compatible authenticated key-update service | **Recovered** |
+| Command 8 is the standard SHE `CMD_LOAD_KEY` authenticated Memory Update Protocol | **Recovered** |
 | DID `0x1010` is statically fixed to slot 4 | **Disproved; the target is package-carried** |
 | current GTS+ contains a matching RID `0x1010` `MAC_01` transport | **Definitive host-static** |
 | a live dealer session uses RID `0x1010` to rekey this exact EPS / slot 4 | **Requires dynamic observation** |

@@ -20,8 +20,9 @@ sole policy-index-1 record and remains extended-session-only (`3`).
 
 This is a Dcm authentication result, not a claim that every routine succeeds
 unconditionally. Individual RIDs still contain runtime precondition logic.
-RID `0x1010` additionally authenticates its SHE-compatible key-update package
-inside ICU-S, independent of the empty Dcm SecurityAccess table.
+RID `0x1010` additionally transports the standard SHE `CMD_LOAD_KEY` M1--M5
+Memory Update Protocol and authenticates it inside ICU-S, independent of the
+empty Dcm SecurityAccess table.
 
 The practical consequence for policy-0 records is stronger than previously
 documented: no `10 03` session transition and no successful `27 xx`

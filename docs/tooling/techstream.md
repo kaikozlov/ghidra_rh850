@@ -3607,12 +3607,16 @@ It still does not prove which family branch a specific live vehicle selects
 without a transcript.
 
 This remains distinct from ordinary UDS SecurityAccess and from CUW reflash
-authorization. In the yc airbag, the `0x1010` package is routed to the local
-secure subsystem as an authenticated key-update operation; its application
-SecOC MAC paths use key selectors into the same secure-service boundary. Thus
-MACKey Registration is now directly relevant to **key provisioning/lifecycle**,
-while still exposing neither the plaintext runtime SecOC key nor the ordinary
-SecOC verify/generate traffic.
+authorization. The `M1/M2/M3 -> M4/M5` object is the **standard AUTOSAR SHE
+Memory Update Protocol / `CMD_LOAD_KEY` contract**; Toyota's additions are the
+online exchange-key service, ECU identity/topology association, and the UDS
+RoutineControl carrier. In the yc airbag, the `0x1010` package is routed to the
+local secure subsystem as that authenticated key-update operation, while its
+application SecOC MAC paths use key selectors into the same secure-service
+boundary. Thus MACKey Registration is directly relevant to **key
+provisioning/lifecycle**, while still exposing neither the plaintext runtime
+SecOC key nor the ordinary SecOC verify/generate traffic. AUTOSAR FO R22-11
+§4.7.7 and §4.9/§4.9.1 define the M1--M5 construction.
 
 ### 7.1 Representation-bounded secret census
 

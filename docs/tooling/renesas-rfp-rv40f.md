@@ -57,8 +57,9 @@ which commands an R7F701381/P1M-E mask ROM advertises, nor that standard RFP is
 the manufacturing path used for Toyota/Denso SecOC provisioning.
 
 The Sienna application has a separate, directly recovered key-update service:
-RoutineControl RID `0x1010` drives MainPE ICU command 8 with a SHE-compatible
-M1/M2/M3 → M4/M5 envelope. That application service is **not** any of the RFP
+RoutineControl RID `0x1010` drives MainPE ICU command 8 with the standard SHE
+`CMD_LOAD_KEY` M1/M2/M3 → M4/M5 Memory Update Protocol. That application
+service is **not** any of the RFP
 serial commands below.
 
 ## 1. Pinned source and family boundary

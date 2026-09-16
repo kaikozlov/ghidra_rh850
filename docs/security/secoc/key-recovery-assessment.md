@@ -284,9 +284,12 @@ unless the candidate key validates stock SecOC frames.
 
 ### 1.5 Command 8 is rekey, not recovery
 
-DID `0x1010` passes an opaque SHE-compatible `M1[16] || M2[32] || M3[16]`
-package to command 8 and returns `M4[32] || M5[16]`. ICU-S authenticates and
-unwraps the package. MainPE never receives the current key or plaintext new key.
+DID `0x1010` transports the standard SHE `CMD_LOAD_KEY` memory-update object,
+`M1[16] || M2[32] || M3[16]`, to command 8 and returns the standard
+`M4[32] || M5[16]` verification proof. ICU-S authenticates `M3`, applies the
+UID/AuthID and monotonic-counter policy, decrypts `M2`, and commits the requested
+key internally. MainPE never receives `KEY_AuthID` or the plaintext replacement
+key.
 
 A captured provisioning exchange is valuable only if it leads to a weaker
 endpoint: a backend log containing plaintext, an authorization key in a tool, or
@@ -815,8 +818,10 @@ The most valuable follow-up targets are:
 - the same package delivered to another ECU with weaker storage;
 - pre- and post-provisioning peer dumps that reveal a changed CPU-visible object.
 
-M1-M5 should not be advertised as a recovered SecOC key. SHE deliberately
-protects the new key and authenticating key inside that envelope.
+M1-M5 should not be advertised as a recovered SecOC key. In the standard SHE
+protocol the replacement key is encrypted inside `M2`, while `M3` is authorized
+through keys derived from the pre-existing `KEY_AuthID`; a captured exchange is
+designed to disclose neither secret.
 
 ## 8. Decision tree
 

@@ -2462,7 +2462,18 @@ The two relay-correct drives plus GTS+ canbus for Camry HV type **12984** close 
 
 **Observed Bus-1 envelope.** Bus 1 contains zero `0x00F`. Every periodic Bus-1 stream (n≥50) has a near-constant last-4 (max unique fraction <0.002); FRC vision `0x180/64` last-4 is constant. These observed PDUs do not end in ordinary-P5 `FV4||MAC28`. Bus-4 `0x08A` does: B28..B31 remain on the vehicle `0x00F` reset domain (CORR-135) and the last-4 is frame-unique.
 
-**Authentication boundary.** The tracked EPS/SRS implementations prove SHE-compatible M1--M5 ECU-Security-Key provisioning and protected AES-CMAC use, but ICU-S is an implementation detail rather than a requirement of the Toyota wire envelope. VAR-107 proves the FRC's **observed native Bus-1** output is E2E Profile 5 rather than SecOC-wrapped. Current `FRC_P5` key-registration state plus Toyota camera-replacement procedure nevertheless prove the camera family itself receives an ECU Security Key (CORR-194). Therefore native Bus-1 framing cannot identify the `0x08A` CMAC owner: an unseen/private FRC pre-authentication handoff and downstream CMAC generation are both open. The only hard topology conclusion is that a downstream Bus-4 participant must construct/forward and physically publish the chassis-domain PDU.
+**Authentication boundary.** The tracked EPS/SRS implementations carry the
+standard AUTOSAR SHE `CMD_LOAD_KEY` M1--M5 memory-update protocol for ECU Security
+Key provisioning. Renesas ICU-S is therefore one secure-engine implementation,
+not part of Toyota's wire-level prerequisite. VAR-107 proves the FRC's
+**observed native Bus-1** output is E2E Profile 5 rather than SecOC-wrapped.
+Current `FRC_P5` key-registration state plus Toyota camera-replacement procedure
+nevertheless prove the camera family itself receives an ECU Security Key
+(CORR-194). Therefore native Bus-1 framing cannot identify the `0x08A` CMAC
+owner: an unseen/private FRC pre-authentication handoff and downstream CMAC
+generation are both open. The only hard topology conclusion is that a downstream
+Bus-4 participant must construct/forward and physically publish the chassis-domain
+PDU.
 
 **Closed vs open.** The FRC-hosted recorder carries `5282/5631`; Bus-4 `0x08A` carries the same ID/pinion/assist subset; exact F33 is neither transmitter nor consumer; native Bus-1 CAN does not carry `0x08A`. The downstream proxy/physical-transmitter candidates by topology are Skid Control, Brake Booster, and Central Gateway, but none is selected. OQ-054 must identify **which downstream participant receives/repacks and publishes `0x08A`**, and independently whether SecOC key selection/CMAC generation occurs there or in an upstream/private FRC step. Do not send `0x08A` to EPS.
 
@@ -3232,7 +3243,12 @@ That is a strong ordinary-P5 `FV4 || MAC28` structural match. It does not recove
 the key/profile/CMAC inputs, but it is enough to reject using `0x0CA` as evidence
 for an unsigned pre-sign PDU.
 
-### 50.2 The application words look like longitudinal upper/lower/result arbitration
+### 50.2 Historical interpretation: `0x0CA` application words looked upper/lower/result-like
+
+> **September-16 supersession:** the dedicated request/result audit now finds the
+> cleaner arbitration result in Brake-owned `0x081`: B6[5:0] selected longitudinal
+> ID and B20:B21 signed16 x0.001 result acceleration. The `0x0CA` triplet below is
+> retained as historical evidence only and is no longer the current result mapping.
 
 During the stock-cruise latch, signed big-endian words B3:B4, B5:B6, and B7:B8
 all occupy physically plausible acceleration ranges at **0.001 m/s²/count**.
@@ -3262,7 +3278,11 @@ This supports an **upper/lower/result-like** interpretation of the three `0x0CA`
 words. It still does not assign `10A1`, `10A2`, and `57DB` byte-for-byte until a
 synchronized diagnostic/Operation-FFD capture overlays the values directly.
 
-### 50.3 Native Bus-1 `0x160 B12` is the first serious pre-protection candidate
+### 50.3 Historical interpretation: native Bus-1 `0x160 B12` as a pre-protection candidate
+
+> **Superseded:** the September-16 motion/role audit classifies the Camry `0x160`
+> implementation fields as state/result-related, while `0x08A` is the established
+> FRC-side semantic request plane.
 
 `0x160/32` is the inverse placement: it appears only on native Panda bus 1
 (**20,510 / 23,998** A/B frames), has a B2 rolling counter, and its last four
@@ -3288,7 +3308,10 @@ direction of the relation. `0x160` remains only source-bounded to the native
 camera/radar domain; feedback/perception or another correlated arbitration input
 remain live alternatives.
 
-### 50.4 What this means for an OEM-signer interception architecture
+### 50.4 Historical integration consequence
+
+> **Superseded:** source suppression is still an integration problem, but not
+> because a different semantic request must be found before `0x08A`.
 
 The desired architecture is now plausible for longitudinal control but not yet
 closed:
@@ -3327,6 +3350,38 @@ Deterministic evidence:
 `data/generated/camry_2026_longitudinal_request_plane.json`, and
 `tests/verify_camry_2026_longitudinal_request_plane.py`. No control output is
 authorized by this finding.
+
+
+### 50.5 Current closure: unified `0x08A` request / `0x081` result plane
+
+The September-16 v2 request-plane reduction supersedes the historical semantic
+claims in §§50.2-50.4 while retaining their raw topology and protected-envelope
+observations. FRC normal-Tx suppression already establishes `0x08A` as the
+upstream request plane; Brake owns `0x081` and continues it with B11[4] request-loss
+supervision when the FRC request disappears.
+
+The two complete relay-correct drives now provide the longitudinal join. `0x08A`
+B8:B9 and B11:B12 are equal in **44,617/44,617** frames and have the exact
+signed16 x0.001 geometry Toyota assigns to recorder `5280/5281` lower/upper
+acceleration requests. `0x081 B6[5:0]` has only selected values 11 and 63 and is
+the strongest `5284` result-ID candidate. `0x081 B20:B21` has the exact signed16
+x0.001 result geometry; its request correlation is r=0.941674/0.836884, and the
+selected-ID split is decisive: ID63 has median result-minus-request 0.000 m/s² in
+both drives, whereas ID11 differs by -0.181/-0.435 m/s². This is arbitration-like
+selection behavior. The old `0x0CA B3:B4/B5:B6/B7:B8` triplet does not reproduce
+this result and is demoted to other protected longitudinal/chassis state.
+
+The lateral half is the positive control: `0x08A B21[5:0]` / B18:B19 maps to
+request ID/pinion angle, while `0x081 B13[5:0]` / B16:B17 maps to selected result
+ID/pinion angle. The recovered steering scale `1024/17870 deg/count` is
+0.00100012 rad/count, matching recorder `5282/57DE`'s 0.001-rad geometry.
+
+The full recorder record is **not** byte-complete yet. The `5280/5281` request
+IDs, force-allocation, shift/EPB, override/priority fields and `57D3` acceleration
+validity remain unresolved; the retained byte census does not justify guessing
+their wire positions. The correct current claim is therefore: `0x08A` is the
+unified observed continuous TSS3 request envelope, and `0x081` is the unified
+Brake-owned selected/result/reference envelope.
 
 ## 51. Native Bus-1 framing is exact AUTOSAR E2E Profile 5, not cryptographic authentication (VAR-107)
 

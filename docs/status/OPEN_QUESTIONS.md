@@ -694,8 +694,8 @@ ledger context is useful.
   silicon effect on P1M-E is observed. See CORR-092.
   See [../tooling/renesas-rfp-rv40f.md](../tooling/renesas-rfp-rv40f.md).
 - **OQ-034 — DID `0x1010` production use and slot-4 package.** Static firmware now
-  recovers a SHE-compatible command-8 key-update service behind RoutineControl RID
-  `0x1010`; selector `01` starts the 64-byte M1–M3 update and selector `03`
+  recovers the standard SHE `CMD_LOAD_KEY` command-8 Memory Update Protocol behind
+  RoutineControl RID `0x1010`; selector `01` starts the 64-byte M1–M3 update and selector `03`
   reads status `01/02/FF` plus M4/M5 on success. Capture a legitimate
   provisioning/rekey session and process it with
   `tools/security/decode_icus_key_update_trace.py` to determine whether Toyota/Denso

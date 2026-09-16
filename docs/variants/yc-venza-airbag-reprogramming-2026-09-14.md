@@ -55,10 +55,12 @@ The network-authentication key itself is represented only by that selector at
 the application boundary. The crypto request is queued through shared `0xFE...`
 RAM and the RH850 system-reserved `0xFF1F...` window to the P1x-C secure
 subsystem. More importantly, application RoutineControl RID `0x1010` accepts exactly the
-SHE-compatible authenticated-key-update envelope `M1[16] || M2[32] || M3[16]`
-and returns status plus `M4[32] || M5[16]`. The asynchronous worker routes that
+**standard AUTOSAR SHE `CMD_LOAD_KEY` Memory Update Protocol** request
+`M1[16] || M2[32] || M3[16]` and returns status plus the standard
+`M4[32] || M5[16]` verification proof. The asynchronous worker routes that
 64-byte package through the same secure subsystem instead of manipulating a
-plaintext key in CodeFlash.
+plaintext key in CodeFlash. Toyota has supplied the UDS carrier and backend
+orchestration; the cryptographic M1--M5 construction itself is standard SHE.
 
 Current GTS+ independently closes the host side of that path. Its
 `UtilityExNK2.dll` `MAC_01` implementation contains a direct
@@ -457,9 +459,10 @@ standard four-bit key-ID namespace reserves `0x0` for `SECRET_KEY`, `0x1` for
 **`0x4` is `KEY_1`, the first general-purpose nonvolatile application key**.
 `0x5..0xD` are `KEY_2..KEY_10` and `0xE` is `RAM_KEY`. Renesas publicly states
 that both ICU-S and ICU-M secure-boot designs can be based on the AUTOSAR/HIS
-SHE model. Combined with this airbag's SHE-shaped M1/M2/M3 -> M4/M5 key-update
-protocol, the selector-4 match strongly supports the interpretation that Toyota
-is using the standard SHE logical namespace and placing its TSK/SecOC key in
+SHE model. Combined with this airbag's standard SHE M1/M2/M3 -> M4/M5
+`CMD_LOAD_KEY` protocol, the selector-4 match strongly supports the
+interpretation that Toyota is using the standard SHE logical namespace and
+placing its TSK/SecOC key in
 `KEY_1`, not choosing an unexplained fourth Toyota-specific slot.
 
 That does **not** reveal the actual contents of IDs `1..3` on this specimen.
@@ -599,9 +602,9 @@ RID table index 9
   -> 0xBD69E -> secure-service boundary
 ```
 
-The offsets make the SHE-compatible envelope explicit: the 64-byte request is
-`16 + 32 + 16`, and the successful 48-byte proof/result is `32 + 16`. The result
-path is:
+The offsets make the standard SHE envelope explicit: the 64-byte request is
+`16 + 32 + 16`, and the successful 48-byte proof/result is `32 + 16`, exactly
+matching AUTOSAR `CMD_LOAD_KEY` (`M1/M2/M3` in, `M4/M5` out). The result path is:
 
 ```text
 31 03 10 10

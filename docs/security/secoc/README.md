@@ -23,8 +23,8 @@ What is established:
   patch; the stock bank also fixes the MAC input to 16 bytes, while this image's
   SecOC domains are 7/12/36 bytes, so the stock bank is not itself a production
   SecOC signing oracle (SECOC-069);
-- RID `0x1010` carries a 64-byte SHE-shaped command-8 request and 48-byte
-  result;
+- RID `0x1010` carries the standard SHE `CMD_LOAD_KEY` 64-byte M1--M3 request
+  and 48-byte M4--M5 result;
 - RID `0x100E` arms a second command-8 client assembled from CAN
   `0x13..0x1A`;
 - the two command-8 clients share a completion-attribution bug (SECOC-048),
