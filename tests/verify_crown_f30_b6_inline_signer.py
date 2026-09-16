@@ -186,7 +186,7 @@ with tempfile.TemporaryDirectory(prefix="verify-crown-f30-signer-") as td:
         else:
             raise AssertionError(f"authority offset bound accepted {bad}")
     post_replace_raw = bytearray(0x20)
-    post_replace_raw[0x08:0x0C] = bytes.fromhex("d4a56f15")
+    post_replace_raw[0x08:0x0C] = bytes.fromhex("d4a561f5")
     post_replace_raw[0x0C:0x10] = bytes.fromhex("11223344")
     post_replace_raw[0x11] = 1
     post_replace = host.decode_signer_telemetry(bytes(post_replace_raw))

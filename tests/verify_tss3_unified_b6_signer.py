@@ -48,7 +48,7 @@ check("unified wire frames exact",
       host.loader_frame(0xFF) == bytes.fromhex("07c6c6ff00000000") and
       host.replacement_frame(7, 0x1234) == bytes.fromhex("07c7c70712340000"))
 post_replace_raw = bytearray(host.SPLIT_TELEMETRY_SIZE)
-post_replace_raw[8:12] = bytes.fromhex("d4a56f15")
+post_replace_raw[8:12] = bytes.fromhex("d4a561f5")
 post_replace_raw[12:16] = bytes.fromhex("11223344")
 post_replace_raw[17] = 1
 post_replace = host.decode_split_telemetry(bytes(post_replace_raw))
