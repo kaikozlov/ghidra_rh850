@@ -111,7 +111,7 @@ class CandidateEvidence(unittest.TestCase):
   def test_no_runtime_authority_claim(self):
     self.assertIn('Do not restore Camry 0x160 longitudinal output', self.report['implementation_boundary'])
     self.assertIn('do not inject a competing 0x08A', self.report['implementation_boundary'])
-    self.assertIn('already the recovered upstream/FRC-side request plane', self.report['request_plane_architecture']['logical_request'])
+    self.assertIn('already the recovered upstream TSS request-side plane', self.report['request_plane_architecture']['logical_request'])
     self.assertIn('not proved to contain every authoritative', self.report['request_plane_architecture']['exhaustiveness_boundary'])
 
 

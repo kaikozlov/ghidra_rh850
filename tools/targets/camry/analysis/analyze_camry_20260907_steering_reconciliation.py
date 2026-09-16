@@ -483,7 +483,7 @@ def scan(LogReader, route: Path) -> dict[str, Any]:
         "reference_minus_stock_deg": qstats([float(r["reference_deg"]) - float(r["stock_deg"]) for r in stock0_b611_authority_rows]),
         "reference_minus_b6_deg": qstats([float(r["reference_deg"]) - float(r["b6_deg"]) for r in stock0_b611_authority_rows]),
       },
-      "interpretation": "0x081 remains on Toyota's upstream request/reference plane. Exact F33 receives neither 0x08A nor 0x081, so this observation is not an EPS-side B6 blend or authority discriminator; B6 enters F33 separately.",
+      "interpretation": "0x081 is Toyota result/status feedback from the Brake/Vehicle-Movement-Manager domain toward the TSS applications. Exact F33 receives neither 0x08A nor 0x081, so this observation is not an EPS-side B6 blend or authority discriminator; final steering target B6 enters F33 on the separate downstream instruction interface.",
     },
     "stock_id0_reference_plane": {
       "selection": "stock ID0 + B6 ID0; vEgo>10 m/s; abs(measured)<20 deg; abs(rate)<5 deg/s; abs(B6)<30 deg",

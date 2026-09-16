@@ -517,7 +517,7 @@ def build() -> dict:
                       'disposition': 'longitudinal-related state publication; known fine field is measurement-like and prior B12 command mapping is withdrawn'},
         },
         'request_plane_architecture': {
-            'logical_request': ('0x08A is already the recovered upstream/FRC-side request plane. FRC normal-Tx suppression removes '
+            'logical_request': ('0x08A is already the recovered upstream TSS request-side plane and is FRC-normal-Tx-dependent. FRC normal-Tx suppression removes '
                                 '0x08A, while the Brake-owned 0x081 result/reference publication survives FRC loss and asserts its '
                                 'request-loss response. A downstream signer/proxy may physically publish protected 0x08A, but that '
                                 'does not create a second semantic request layer.'),
@@ -532,7 +532,7 @@ def build() -> dict:
                                         'publications also exist outside 0x08A.'),
         },
         'ranking': [
-            {'rank': 1, 'candidate': 'protected 0x08A B8:B9 and B11:B12', 'role': 'FRC-side TSS acceleration-request fields',
+            {'rank': 1, 'candidate': 'protected 0x08A B8:B9 and B11:B12', 'role': 'TSS longitudinal bound-package acceleration-request fields',
              'status': 'strong bounded candidate inside the already-established 0x08A request plane; exact upper/lower wire identity remains open'},
             {'rank': 2, 'candidate': 'protected 0x5AF B26 signed6', 'role': 'coarse longitudinal request/result companion',
              'status': 'tracks 0x08A at about 0.25 m/s^2/count but lags it; not a primary request magnitude'},

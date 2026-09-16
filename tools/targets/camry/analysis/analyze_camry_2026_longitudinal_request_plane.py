@@ -329,7 +329,7 @@ def hold_semantics() -> dict:
 def recorder_rows() -> dict:
   managed = json.loads(GTS.read_text())
   rows = managed["operation_ffd"]["detail_rows"]
-  wanted = {"5280", "5281", "5282", "5284", "5285", "57D3", "57DB", "57DE"}
+  wanted = {"5252", "5253", "525D", "525E", "5261", "526A", "5280", "5281", "5282", "5284", "5285", "57D3", "57DB", "57DE"}
   out = {did: [] for did in sorted(wanted)}
   for row in rows:
     did = str(row.get("DataID", "")).upper()
@@ -416,9 +416,12 @@ def requester_id_namespace(drive_reports: dict[str, dict], hold: dict) -> dict:
     },
     "model": {
       "id_is_not_priority": "Requester/result IDs identify an application/request source; the numeric value is not an ordinal priority.",
-      "axis_boundary": ("Toyota uses sparse requester IDs on both longitudinal and lateral interfaces, but the retained evidence disproves blindly "
-                        "copying the lateral enum to longitudinal. Numeric reuse can be deliberate without implying identical axis-local labels."),
-      "upper_lower_boundary": "Candidate A/B are the two selected longitudinal application-ID/allocation slots; their upper-vs-lower ordering remains unresolved.",
+      "application_id_semantics": ("Toyota's vehicle-movement architecture defines both longitudinal request IDs and the lateral request ID as identifiers of applications. "
+                                   "This supports a coordinated/shared application-ID namespace model, while the static diagnostic corpus still does not expose a complete longitudinal value table."),
+      "axis_boundary": ("Numeric reuse across axes is now treated as potentially intentional application identity, not an automatic coincidence. "
+                        "Axis-local diagnostic labels may still describe different roles/phases of the same application, so equal numbers do not by themselves prove identical display labels."),
+      "upper_lower_boundary": ("Candidate A/B are the two selected longitudinal bound-package ID/allocation slots; their upper-vs-lower ordering remains unresolved. "
+                               "The bounds are independently arbitrated and can therefore carry different application IDs."),
     },
     "camry_observed": {
       "request_candidate_A_counts": {str(k): v for k, v in sorted(observed_a.items())},
@@ -474,9 +477,10 @@ def requester_id_namespace(drive_reports: dict[str, dict], hold: dict) -> dict:
         "lateral": lateral_ids.get("23"), "grade": "cross-platform observation only",
       },
       "25": {
-        "longitudinal": "Observed Camry candidate B during delayed ACC hold; allocation method distinguishes held vs moving ID25 states.",
+        "longitudinal": ("Observed Camry candidate B during delayed ACC hold; allocation method distinguishes held vs moving ID25 states. "
+                         "Under the application-ID architecture this is an unresolved semantic clue, not evidence that longitudinal/lateral namespaces are unrelated."),
         "lateral": lateral_ids.get("25"),
-        "grade": "observed counterexample to universal lateral->longitudinal enum copying",
+        "grade": "observed longitudinal application ID; exact shared-application meaning unresolved",
       },
       "36": {
         "longitudinal": "Observed Camry startup-only candidate B; no active authority and no OEM label recovered.",
@@ -484,11 +488,11 @@ def requester_id_namespace(drive_reports: dict[str, dict], hold: dict) -> dict:
       },
       "41": {
         "longitudinal": "P6 MaaS lower-limit longitudinal requester explicitly names 41 = Request 1 of MaaS Autonomous Driving System.",
-        "lateral": lateral_ids.get("41"), "grade": "OEM cross-generation axis-specific counterexample",
+        "lateral": lateral_ids.get("41"), "grade": "OEM cross-generation shared-application candidate",
       },
       "45": {
         "longitudinal": "P6 MaaS lower-limit longitudinal requester explicitly names 45 = Request 2 of MaaS Autonomous Driving System.",
-        "lateral": lateral_ids.get("45"), "grade": "OEM cross-generation axis-specific counterexample",
+        "lateral": lateral_ids.get("45"), "grade": "OEM cross-generation shared-application candidate",
       },
       "63": {
         "longitudinal": ("P5 FRC ISA vertical ID explicitly names 63 = Driver Operation; Camry and retained Corolla 0x081 result use 63 when "
@@ -497,20 +501,51 @@ def requester_id_namespace(drive_reports: dict[str, dict], hold: dict) -> dict:
       },
     },
     "cross_axis_assessment": {
-      "supports_coordinated_namespace": [
+      "supports_shared_application_namespace": [
+        "Toyota's architecture explicitly defines both longitudinal and lateral request IDs as application identifiers.",
         "0 is the no-request/manual anchor on both recovered interfaces.",
         "63 is OEM-labeled Driver Operation on both the P5 longitudinal/vertical and lateral Target ID surfaces.",
-        "Camry longitudinal ID11 is the ordinary DRCC application source while lateral ID11 is OEM LTA/LCA, making 11 a notable TSS continuous-driving coincidence.",
+        "Camry longitudinal ID11 is the ordinary DRCC application source while lateral ID11 is OEM LTA/LCA, making 11 a strong shared TSS continuous-driving application-ID candidate.",
+        "P6 longitudinal IDs 41/45 are MaaS autonomous-driving Request 1/2 while the lateral table labels 41/45 AD(Lv.4)/DES(Lv.4); these may be axis-specific views of shared automated-driving application identities rather than contradictory namespaces.",
       ],
-      "rejects_one_universal_label_table": [
-        "Camry longitudinal ID25 is a delayed-ACC-hold requester while lateral ID25 is OEM AP.",
-        "P6 MaaS longitudinal IDs 41/45 are Request 1/2, while the generation-20 lateral dictionary labels 41 AD(Lv.4) and 45 DES(Lv.4).",
+      "unresolved_numeric_labels": [
+        "The static corpus does not publish a complete longitudinal 0..63 value table.",
+        "Camry longitudinal ID25 is used during delayed ACC hold while lateral ID25 is AP; this needs a feature-local recorder or firmware join before naming, and does not by itself disprove shared application identity.",
       ],
-      "current_hypothesis": ("Toyota appears to coordinate sparse application/request-source codes across motion axes, with some common identities "
-                             "(certainly 0/63 and plausibly 11) but axis-/interface-specific meanings for other codes. Longitudinal ID11=DRCC/TSS3 "
-                             "and lateral ID11=LTA/LCA is therefore worth treating as a strong hypothesis, not an enum fact."),
+      "current_hypothesis": ("A coordinated/shared application-ID namespace is now the leading model. Longitudinal and lateral labels can describe different control roles of the same application, "
+                             "so numeric identity is meaningful but exact longitudinal labels remain evidence-graded. Camry longitudinal ID11 is therefore a strong DRCC/TSS3 application-ID candidate aligned with lateral ID11 LTA/LCA."),
     },
   }
+
+
+def vehicle_motion_control_did_surface() -> dict:
+  """Extract the Brake diagnostic request -> Vehicle Motion Control target split."""
+  techstream_tools = REPO / "tools/techstream"
+  if str(techstream_tools) not in sys.path:
+    sys.path.insert(0, str(techstream_tools))
+  from ddb_semantics import monitor_rows  # type: ignore[import-not-found]
+  from ddb_strings import load_string_db  # type: ignore[import-not-found]
+  from parse_ddb import DDBParser  # type: ignore[import-not-found]
+
+  parser = DDBParser()
+  strings = load_string_db(parser, DDB_ROOT / "M_English.ddb")
+  db = parser.parse_ecu_db(DDB_ROOT / "ABS_P5.ddb")
+  wanted = set(range(0x10A1, 0x10AB))
+  out = {}
+  for row in monitor_rows(db, strings, "ABS_P5.ddb", deduplicate=True, include_signal_info=True):
+    did = int(row["primary_did"])
+    if did not in wanted:
+      continue
+    info = row.get("signal_info") or {}
+    out[f"0x{did:04X}"] = {
+      "name": row["name"],
+      "bit_width": info.get("bit_width"),
+      "signed": info.get("signed"),
+      "unit": info.get("unit"),
+      "mul": info.get("mul"),
+      "decimal_point_count": info.get("decimal_point_count"),
+    }
+  return out
 
 
 def layout_disposition() -> dict:
@@ -556,7 +591,7 @@ def build() -> dict:
   hold = hold_semantics()
   namespace = requester_id_namespace(drive_reports, hold)
   return {
-    "schema": "camry-2026-longitudinal-request-plane-v3",
+    "schema": "camry-2026-longitudinal-request-plane-v4",
     "vehicle_access": False,
     "topology": {
       "capture_era": "temporary CAN0/CAN1 repin",
@@ -565,22 +600,29 @@ def build() -> dict:
       "stock_toyota_b": "Toyota Bus 4 returns to unsplit Panda bus1; compare Toyota network role, not raw Panda bus number",
     },
     "gts_recorder_schema": {"source": str(GTS.relative_to(REPO)), "sha256": sha256(GTS), "rows": recorder_rows()},
+    "gts_vehicle_motion_control_surface": {
+      "source": str((DDB_ROOT / "ABS_P5.ddb").relative_to(REPO)),
+      "sha256": sha256(DDB_ROOT / "ABS_P5.ddb"),
+      "dids": vehicle_motion_control_did_surface(),
+      "interpretation": ("0x10A1..0x10A4 are Toyota-Safety-Sense request acceleration/IDs; 0x10A5..0x10AA are Vehicle-Motion-Control target acceleration/IDs/driving force. "
+                         "This preserves the request -> post-arbitration request-generation boundary in Toyota diagnostics."),
+    },
     "hold_request_semantics": hold,
     "requester_id_namespace": namespace,
     "layout": layout_disposition(),
     "drives": drive_reports,
     "conclusion": {
-      "request_plane": ("0x08A is the unified observed continuous TSS request envelope: the lateral 5282 tuple is recovered there and the duplicated "
-                        "signed16 B8:B9/B11:B12 words match the 5280/5281 longitudinal acceleration-request geometry and pre-motion behavior."),
+      "request_plane": ("0x08A is the unified observed continuous TSS request-side envelope: the lateral 5282 tuple is recovered there and the duplicated "
+                        "signed16 B8:B9/B11:B12 words occupy the 5280/5281 longitudinal lower/upper bound-package geometry. Exact placement before versus after internal TSS application selection remains unresolved."),
       "result_plane": ("0x081 is the unified Brake-owned employed-result/reference/supervision envelope: its lateral selected ID/reference are recovered, "
                        "B6[5:0] is the strongest 5284 longitudinal employed-source-ID candidate, and B20:B21 is the strongest 57DB result-acceleration candidate. "
-                       "Publication ownership does not place every selection step inside the Brake ECU."),
+                       "Toyota's architecture distinguishes the lateral arbitration winner from the longitudinal source actually employed after driver/application comparison."),
       "not_fully_mapped": ("The entire 5280/5281 recorder model is NOT yet byte-named. B6/B7 are now strongly recovered structurally as the two packed "
                            "request-ID/allocation bytes (bits7:2 ID, bits1:0 allocation), including active/hold/override transitions; "
                            "upper-vs-lower A/B assignment is unresolved, and shift/EPB, override-prohibition and priority remain unmapped."),
       "0x0CA": "Supersede the old upper/lower/result-triplet interpretation; 0x0CA remains other protected longitudinal/chassis state.",
-      "integration": ("For Camry, do not revive 0x160 Alpha Long. 0x08A is the semantic request target; stock-harness integration still needs a clean "
-                      "source-suppression/sole-emitter path for the protected request PDU."),
+      "integration": ("For Camry, do not revive 0x160 Alpha Long. The OEM-native integration target is the TSS application/request side feeding Toyota's Vehicle Movement Manager, not direct powertrain/brake actuator synthesis. "
+                      "0x08A is the strongest observed request-side carrier, while the downstream Vehicle Motion Control target interface and source-suppression/security path remain to be recovered."),
     },
   }
 

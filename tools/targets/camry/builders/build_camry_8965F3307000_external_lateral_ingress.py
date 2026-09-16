@@ -17,7 +17,12 @@ import re
 import struct
 from pathlib import Path
 
-from tools.targets.camry.support.camry_f33_corpus import CORPUS, IMAGE, IMAGE_SHA256, REPO
+from tools.targets.camry.support.camry_f33_corpus import (
+    CORPUS,
+    IMAGE,
+    IMAGE_SHA256,
+    REPO,
+)
 
 OUT = REPO / "data/generated/camry_8965F3307000_external_lateral_ingress.json"
 GTS = REPO / "data/generated/gtsplus_2026/camry_8965F3307000_emps_semantics.json"
@@ -147,7 +152,6 @@ def build() -> dict:
     funcs = corpus_map()
     need(len(funcs) == 6065, "F33 corpus function count drift")
     gts = json.loads(GTS.read_text())
-    b6 = json.loads(B6.read_text())
     fault = json.loads(FAULT.read_text())
 
     # Exact normal application receive descriptors, PDU IDs 5..47.
@@ -217,7 +221,7 @@ def build() -> dict:
     pdu_off = [struct.unpack_from("<H", image, PDU_OFFSETS + 2 * i)[0] for i in range(48)]
     call_re = re.compile(
         r"FUN_0007d12a\((0x[0-9a-f]+|\d+),(0x[0-9a-f]+|\d+),(0x[0-9a-f]+|\d+),"
-        r"(0x[0-9a-f]+|\d+),(0x[0-9a-f]+|\d+),([^;]+)\);", re.I
+        r"(0x[0-9a-f]+|\d+),(0x[0-9a-f]+|\d+),([^;]+)\);", re.IGNORECASE
     )
     scalar = []
     for entry, row in funcs.items():
@@ -484,8 +488,8 @@ def build() -> dict:
         "live_intersection": live,
         "conclusion": {
             "normal_com": "Exact controller-1 rules 0..42 equal the 43 normal generated-COM descriptors one-for-one; rules 43..46 are diagnostics/XCP only. The corrected pinned scalar copy-edge census has exactly 19 nonempty signals out of 116 and 97 empty: B6 signal261 is the sole mode selector and B6 signal262 the sole command magnitude; all non-B6 members are feedback, monitors, plausibility inputs, or gates. Signal243 uses the explicit 0x4BB62 stack-RMW path to FEBE80A0 -> FEBEF094 -> FEBEACCD. No observed ordinary EPS-CAN field besides B6 is identified as an external steering target/command, and there is no hidden controller-1 acceptance ID outside the normal COM table.",
-            "b6": "Protected 0x0B6 remains the only positively recovered external target-steering-angle ingress. Exact F33 communication-monitor row5 independently maps PDU44/B6 loss to DTC index82, which GTS+ names U012987 Lost Communication with Brake System Control Module / Missing Message, so the EPS expects B6 from the brake-system source domain. This is an external cooperative-control interface, not proof that factory LTA uses B6: the retained machine-identified LTA/LCA intervals contain zero B6 and exact F33 has a separate B6-independent internal assist path into the physical command funnel.",
-            "next": "Do not search another arbitrary accepted EPS CAN ID or infer an 0x08A-to-B6 translation. Factory LTA with zero B6 is already machine-proved and compatible with exact F33's D0218->CC48->CC60->CC50 internal assist path. Trace the exact external/local snapshot leaves that select or modulate that path during the LTA/LCA transition; treat 0x08A producer/SecOC ownership as a separate network-ownership question.",
+            "b6": "Protected 0x0B6 remains the only positively recovered external target-steering-angle ingress. Exact F33 communication-monitor row5 independently maps PDU44/B6 loss to DTC index82, which GTS+ names U012987 Lost Communication with Brake System Control Module / Missing Message, so the EPS expects the final steering-target PDU from the brake-system source domain. Later Sep-8/Sep-10 internal captures supersede the old Panda-visible zero-B6 inference: native B6/profile2 deliveries exist at F33 even when older external rlogs saw no B6. Toyota's vehicle-movement architecture independently places post-arbitration steering request generation in the Brake-hosted vehicle-movement-manager domain, strongly explaining this source relationship without locating the exact Camry physical hop.",
+            "next": "Do not search another arbitrary accepted EPS CAN ID. Treat 0x08A as the upstream TSS application/request-side package, 0x081 as result/status feedback, and B6 as the downstream steering-controller target/instruction interface. Recover the exact Brake/VMM request-generation, physical transport/source-admission, suppression, and SecOC ownership between those layers; the logical request->result->target architecture is no longer the open question.",
             "production_output_authorized": False,
         },
         "boundary": [

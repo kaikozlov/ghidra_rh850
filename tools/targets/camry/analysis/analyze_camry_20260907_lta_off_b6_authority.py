@@ -164,10 +164,10 @@ def scan(LogReader, route: Path) -> dict[str, Any]:
           elif addr == 0x0B6 and len(dat) == 32:
             if src == 128:
               b6_tx_echo += 1
-              b6_tx_echo_fd += int(bool(fr.fd))
+              b6_tx_echo_fd += int(len(fr.dat) > 8)
             elif src == 192:
               b6_rejected += 1
-              b6_rejected_fd += int(bool(fr.fd))
+              b6_rejected_fd += int(len(fr.dat) > 8)
       elif which == "pandaStates" and len(e.pandaStates):
         ps = e.pandaStates[0]
         states = []
@@ -204,7 +204,7 @@ def scan(LogReader, route: Path) -> dict[str, Any]:
           if int(fr.address) != 0x0B6 or int(fr.src) != 0 or len(dat) != 32:
             continue
           b6_sendcan += 1
-          b6_sendcan_fd += int(bool(fr.fd))
+          b6_sendcan_fd += int(len(fr.dat) > 8)
           b6_sendcan_zero_mac28 += int((int.from_bytes(dat[28:32], "big") & 0x0FFFFFFF) == 0)
           if latest_panda_states is not None:
             b6_with_preceding_panda += 1
@@ -324,7 +324,7 @@ def scan(LogReader, route: Path) -> dict[str, Any]:
       "longest_episodes": [summarize_run(x) for x in sorted(suppressed_runs, key=lambda x: x[-1]["time_ns"] - x[0]["time_ns"], reverse=True)[:5]],
     },
     "request_plane_off_b6_response": {
-      "selection": "upstream Toyota request/reference plane 0x08A ID0 + 0x081 ID0 + cruise latch on + B6 ID11 + latActive; vEgo>10m/s; no blinker; abs(driver torque)<0.3Nm",
+      "selection": "Toyota TSS request/result state 0x08A request ID0 + 0x081 result ID0 + cruise latch on + B6 ID11 + latActive; vEgo>10m/s; no blinker; abs(driver torque)<0.3Nm",
       "large_error_threshold_deg": 3.0,
       "large_error_rows": len(low_torque_large_error),
       "large_error_motor_abs_raw": qstats([abs(float(r["motor_raw"])) for r in low_torque_large_error]),
@@ -345,9 +345,9 @@ def scan(LogReader, route: Path) -> dict[str, Any]:
       "route_proves_all_ordinary_f33_assist_terms_absent": False,
       "route_proves_b6_effective_eps_authority": False,
       "interpretation": (
-        "Route 48 proves the upstream Toyota 0x08A/0x081 request/reference plane stays ID0 for long intervals while DRCC and openpilot remain active and B6 stays ID11. "
+        "Route 48 proves Toyota request-side 0x08A and result/status 0x081 both stay ID0 for long intervals while DRCC and openpilot remain active and B6 stays ID11. "
         "Large comma target errors can persist for seconds with near-zero driver torque, near-zero steering rate, and very small EPS motor-feedback proxy, while same-route upstream stock-ID11 request error produces a much larger motor response. "
-        "Because exact F33 receives neither 0x08A nor 0x081, this is not a full EPS-authority isolation experiment and does not prove ordinary F33 assist/current terms are absent; it localizes the observed non-response without using upstream request-plane state as an EPS arbitration oracle."
+        "Because exact F33 receives neither 0x08A nor 0x081, this is not a full EPS-authority isolation experiment and does not prove ordinary F33 assist/current terms are absent; it localizes the observed non-response without using request/result state as an EPS final-instruction authority oracle."
       ),
     },
   }

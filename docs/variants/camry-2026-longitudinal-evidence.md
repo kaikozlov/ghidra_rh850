@@ -525,7 +525,7 @@ coarse `0x5AF`/`0x5F7` companions above, but **no second same-scale signed16
 acceleration carrier**. Thus there is no second same-scale request magnitude hiding in the
 observed FRC-dependent protected domain. This does **not** mean a different semantic
 request must exist before `0x08A`: the retained CommunicationControl experiment
-already establishes `0x08A` as the upstream/FRC-side request plane. A proxy or
+already establishes `0x08A` as the upstream TSS request-side plane. A proxy or
 signer may physically publish the protected Bus-4 PDU, but that is a
 transport/cryptographic ownership question, not a second request layer.
 
@@ -552,6 +552,23 @@ The bounded claim is **central control-request plane**, not exhaustive FRC outpu
 
 
 ### Request/result recorder layout: what is actually mapped
+
+Toyota's architecture changes the meaning of the longitudinal pair. The lower and
+upper packages are independently arbitrated **bounds** on allowed acceleration, not
+two redundant acceleration commands. The downstream powertrain compares driver demand
+with those bounds and clips it into the selected range; the longitudinal result ID then
+reports the request source whose acceleration was actually employed. This explains why
+result ID63 (`Driver Operation`) can appear while neither `0x08A` bound-package ID is
+63. Equality of the two retained acceleration words means the observed bounds collapse
+to the same value in those states, or that a remaining wire/order assumption needs
+refinement; it must not be described as intentional duplication by design.
+
+GTS independently preserves the request-generation boundary described by Toyota.
+Brake-domain P5/P6 databases expose `0x10A1..0x10A4` as upper/lower requests **from
+Toyota Safety Sense**, then separately expose `0x10A5..0x10AA` as upper/lower target
+acceleration, target ID, and target driving force **from Vehicle Motion Control**. That
+is the diagnostic equivalent of application request -> arbitration/request generation
+-> controller target.
 
 The recorder schema and wire evidence now line up as follows. "Strong candidate"
 means the width/scale, topology, and dynamic arbitration behavior match, but no
@@ -623,20 +640,22 @@ The working namespace is:
 | **17** | Camry active request B; retained 2025 Corolla active request A | no lateral label | repeatable cross-platform active longitudinal requester; OEM name unknown |
 | **18** | not observed in Camry longitudinal A/B | SDG; P6 PDA-SA lateral request also uses 18 | lateral-only named anchor; no longitudinal transfer |
 | **23** | retained 2025 Corolla active request B | no lateral label | observed longitudinal requester; OEM name unknown |
-| **25** | Camry delayed ACC-hold request B (with allocation state distinguishing held/moving use) | AP | **counterexample to one universal lateral->longitudinal enum** |
+| **25** | Camry delayed ACC-hold request B (with allocation state distinguishing held/moving use) | AP | unresolved application identity; no longer treated as a namespace counterexample |
 | **36** | 33-frame (~0.79 s) Camry startup-only request-B state; zero request acceleration; result stays 63 | no lateral label | startup/initialization requester; OEM name unknown |
-| **41** | P6 MaaS lower-limit longitudinal ID = `Request 1 of MaaS Autonomous Driving System` | AD (Lv.4) | axis-specific reuse; disproves blind label transfer |
-| **45** | P6 MaaS lower-limit longitudinal ID = `Request 2 of MaaS Autonomous Driving System` | DES (Lv.4) | axis-specific reuse; disproves blind label transfer |
+| **41** | P6 MaaS lower-limit longitudinal ID = `Request 1 of MaaS Autonomous Driving System` | AD (Lv.4) | plausible shared automated-driving application identity |
+| **45** | P6 MaaS lower-limit longitudinal ID = `Request 2 of MaaS Autonomous Driving System` | DES (Lv.4) | plausible shared automated-driving application identity |
 | **63** | P5 FRC ISA Vertical ID explicitly names `Driver Operation`; Camry and retained Corolla `0x081` result use 63 | Driver Operation | common driver-operation anchor |
 
-The ID11 coincidence is therefore materially interesting. Toyota's own
-architecture calls both longitudinal and lateral IDs **application identifiers**,
-and 0/63 are demonstrably common semantic anchors across the axes. Camry ID11 is
-the ordinary DRCC longitudinal application source while generation-20 lateral
-ID11 is LTA/LCA. That makes a coordinated TSS3 continuous-driving identity a
-strong hypothesis. It is **not** yet enough to rename longitudinal 11 to
-`DRCC`, because ID25 and the P6 41/45 examples prove that equal numeric codes do
-not globally imply the same axis-local label.
+Toyota's architecture materially strengthens the ID11 observation: it defines both
+the longitudinal request ID and the lateral request ID as the **identifier of an
+application**. The leading model is therefore a coordinated/shared application-ID
+namespace, not two unrelated numeric enums. Camry ID11 is the ordinary DRCC
+longitudinal application source while generation-20 lateral ID11 is LTA/LCA, making
+ID11 a strong TSS continuous-driving application-identity candidate. This is still not
+an OEM label assignment for the longitudinal field: the static corpus does not publish
+the complete longitudinal value dictionary. ID25 and P6 41/45 are retained as semantic
+clues, not counterexamples—axis-local labels can describe different control roles of
+the same application.
 
 Toyota also exposes feature-specific longitudinal-ID recorder fields that can
 supply future direct joins: `5271` **IFU request vertical ID (lower limit)**,
@@ -669,7 +688,7 @@ than a second request echo. In Toyota's documented architecture, the selected
 application upper/lower request may still be constrained or superseded by the
 driver request in the powertrain/brake execution layer.
 
-This closes `0x08A` as the **unified observed continuous TSS3 request envelope**
+This closes `0x08A` as the **unified observed continuous TSS3 request-side envelope**
 for the recovered lateral tuple plus longitudinal request magnitudes. It does
 *not* close the entire `5280/5281` metadata record into that PDU: the two request
 ID/allocation bytes are now structurally located but their upper/lower ordering is

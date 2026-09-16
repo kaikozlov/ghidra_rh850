@@ -434,7 +434,7 @@
         },
         "reference_position_ratio_definition": "(0x081 - stock_0x08A) / (B6 - stock_0x08A); geometric reference-plane ratio only, not an EPS B6 blend fraction"
       },
-      "interpretation": "0x081 remains on Toyota's upstream request/reference plane. Exact F33 receives neither 0x08A nor 0x081, so this observation is not an EPS-side B6 blend or authority discriminator; B6 enters F33 separately.",
+      "interpretation": "0x081 is Toyota result/status feedback from the Brake/Vehicle-Movement-Manager domain toward the TSS applications. Exact F33 receives neither 0x08A nor 0x081, so this observation is not an EPS-side B6 blend or authority discriminator; final steering target B6 enters F33 on the separate downstream instruction interface.",
       "reference_081_role": "chassis-side published reference/result plane; exact F33 does not receive 0x081",
       "selection": "B6 ID11 + stock 0x08A ID11 + latActive; vEgo>10m/s; abs(driver torque)<0.7Nm; no blinker; <=40/50ms freshness",
       "stock_id0_b6_id11_low_torque": {
@@ -547,6 +547,6 @@
       "stock_vs_b6_minus_live_offset_correlation": 0.717748383
     }
   },
-  "openpilot_parser_commit": "bb6c03ce707d843e038f4b9510196a029d216d2d",
+  "openpilot_parser_commit": "abe6b230231a7a548a3ecddd3bd460003ceeafb1",
   "schema": "camry-20260907-steering-reconciliation-v3"
 }

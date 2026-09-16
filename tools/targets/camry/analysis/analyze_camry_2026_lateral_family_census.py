@@ -2,10 +2,10 @@
 """Census every road-observed Camry TSS3 Target-Lateral-ID steering-family request.
 
 The report keeps the three relevant planes separate:
-  * native FRC-side 0x08A request/reference publications;
-  * native chassis-side 0x081 returned/reference identity (B13 low 6); and
-  * exact-F33 external ingress 0x0B6, distinguishing native receive traffic from
-    openpilot sendcan and Panda TX/reject echoes.
+  * native/FRC-normal-Tx-dependent 0x08A TSS request-side publications;
+  * native chassis-side 0x081 result/status identity (B13 low 6); and
+  * exact-F33 external 0x0B6 final steering-target ingress, distinguishing native
+    receive traffic from openpilot sendcan and Panda TX/reject echoes.
 
 It also records exact-F33 selector/gating structure from the canonical complete
 CodeFlash decompilation corpus. Raw road logs stay outside the git repository.
@@ -338,7 +338,7 @@ def exact_f33() -> dict:
   expected_bank_map = {1: 0, 4: 1, 10: 3, 11: 2, 18: 5, 19: 4}
   literals = {1: r'\\x01', 4: r'\\x04', 10: r'\\n', 11: r'\\v', 18: r'\\x12', 19: r'\\x13'}
   for lid, bank in expected_bank_map.items():
-    if not re.search(rf"DAT_febeadb0 == '{literals[lid]}'.*?DAT_febecb00 = {bank};", ceffc, re.S):
+    if not re.search(rf"DAT_febeadb0 == '{literals[lid]}'.*?DAT_febecb00 = {bank};", ceffc, re.DOTALL):
       raise RuntimeError(f'exact F33 selector mapping missing ID {lid} -> bank {bank}')
 
   rx_art = json.loads((REPO / 'data/generated/camry_8965F3307000_external_lateral_ingress.json').read_text())
@@ -520,7 +520,7 @@ def main() -> None:
     },
     'routes': routes,
     'interpretation': {
-      'request_plane': '0x08A is the FRC-side request/reference carrier; it is not accepted by exact F33.',
+      'request_plane': '0x08A is the TSS request-side request/reference carrier and is FRC-normal-Tx-dependent; it is not accepted by exact F33.',
       'eps_ingress': '0x0B6/PDU44 is exact F33 external Target-Lateral-ID/target-angle ingress and is expected from the brake-system source domain. Native B6 absence therefore must not be conflated with absence of FRC steering requests.',
       'profile_switching': 'A newly delivered healthy B6 generation can replace the current Target Lateral ID without a recovered previous-ID ownership check. The common controller retains ordinary filters/slew/supervision state across ticks.',
     },

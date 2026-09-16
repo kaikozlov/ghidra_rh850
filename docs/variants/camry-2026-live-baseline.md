@@ -2256,7 +2256,7 @@ This closes VAR-084 **E2 within recovered application dataflow**. Arbitrary unkn
 corruption or a hardware fault remains outside the claim; no separate destination-register
 programmer is recovered.
 
-Together E1+E2 remove two strong “Ghidra missed a hidden writer” explanations inside F33. CORR-135 corrects the later network-boundary interpretation: `0x08A` carries Target Lateral ID plus a target angle and strongly matches Toyota ordinary-P5 SecOC framing, but exact F33 does not accept it and **no `0x08A -> B6` stock-LTA transform is proved or needed**. The B6-inactive `D0218` path itself reaches actuation. Current work therefore traces F33 authority/mode state into that path and tracks `0x08A` producer/security ownership separately.
+Together E1+E2 remove two strong “Ghidra missed a hidden writer” explanations inside F33. This paragraph's original architectural conclusion is superseded by §71: `0x08A` carries the TSS request-side lateral application ID plus requested angle, while Toyota's Vehicle Movement Manager architecture separately generates a final steering-controller target matching B6. Exact F33 still does not accept `0x08A`, but the logical request->arbitration/request-generation->B6 relation is now strongly supported; the open problem is its exact Camry physical/security implementation. The local B6-independent `D0218` terms remain real contributors to the EPS command funnel, but later internal captures also prove native B6 delivery exists and therefore invalidate “factory LTA with zero B6” as a system-level architecture conclusion.
 
 Deterministic evidence is
 `data/generated/camry_8965F3307000_hidden_ingress_residuals.json`, backed by the two
@@ -3354,7 +3354,7 @@ authorized by this finding.
 
 ### 50.5 Current closure: unified `0x08A` request / `0x081` result plane
 
-The September-16 v3 request-plane reduction supersedes the historical semantic
+The September-16 v4 request-plane reduction supersedes the historical semantic
 claims in §§50.2-50.4 while retaining their raw topology and protected-envelope
 observations. FRC normal-Tx suppression establishes `0x08A` as the upstream TSS
 request/instruction plane; Brake owns `0x081` and continues it with B11[4]
@@ -3720,9 +3720,11 @@ that coexistence as a controller-replacement defect and concluded that Panda had
 forwarded `0x08A` before B6 could have exclusive authority.
 
 That authority inference was at the wrong layer. Exact F33 receives neither `0x08A` nor
-`0x081`; those publications belong to Toyota's request/reference processing. Comma B6
-enters F33 separately through protected PDU44 and therefore does not participate in the
-processing that generates `0x081`. VAR-148 then closes the downstream EPS behavior from
+`0x081`; §71 now identifies them as different Vehicle Movement Manager interfaces:
+`0x08A` is TSS request-side traffic and `0x081` is result/status feedback toward the
+applications. Comma B6 enters F33 separately as the downstream steering-controller
+target/instruction and therefore does not participate in generation of the upstream
+result publication `0x081`. VAR-148 then closes the downstream EPS behavior from
 CodeFlash: accepted ID11 maps to `CB00=2`, its target controller reaches `CB38`, and
 `D0218` adds that term inside the ordinary EPS command sum before the one shared final
 current-command funnel. Blocking `0x08A` at the Panda relay cannot establish that those
@@ -3737,8 +3739,8 @@ messages openpilot actually replaces/transmits (`0x0B6` and `0x412`), not the ob
 `0x08A` relay-malfunction authority proxy, and no second lateral permission system.
 
 Route 48 remains useful, but only with its corrected scope (§62): turning Toyota LTA off
-held the **upstream request/reference plane** at ID0 for long intervals while comma B6
-remained ID11 and the steering plant did not follow B6. That observation rules out a
+held both the **request-side `0x08A` and result/status `0x081` identities** at ID0 for long
+intervals while comma B6 remained ID11 and the steering plant did not follow B6. That observation rules out a
 simultaneous upstream ID11 request as a prerequisite for the observed non-response; it
 does not isolate all EPS authority. The useful next localization is B6 physical receive /
 SecOC queue / route44 raw-COM / application publication and common controller-health
@@ -4868,22 +4870,24 @@ near-field path and steering request continued farther toward that same side.
 The path still retained >1 m of detected-line margin, so the display can look
 wrongly edge-seeking without mathematically crossing the lane boundary.
 
-The authority reconciliation is **not** a stock-vs-comma decode question, and CORR-179
-corrects the earlier layer assignment. Exact F33 receives neither `0x08A` nor `0x081`;
-those frames belong to Toyota's upstream request/reference processing. Comma B6 enters
-F33 separately through protected PDU44. The fact that current safety forwards `0x08A`
+The authority reconciliation is **not** a stock-vs-comma decode question, and CORR-195
+now gives the stronger layer assignment. Exact F33 receives neither `0x08A` nor `0x081`:
+`0x08A` is TSS request-side traffic and `0x081` is Vehicle-Movement-Manager result/status
+feedback toward the applications. Comma B6 enters F33 separately through protected
+PDU44 as the downstream steering-controller target/instruction. The fact that current safety forwards `0x08A`
 therefore does not make `0x08A` an EPS command carrier, and blocking that relay copy is
 not by itself an F33 authority-isolation experiment.
 
-The `0x081` statistics remain useful only as a **reference-plane** result. Restricting
+The `0x081` statistics remain useful as a **result/status-plane** observation. Restricting
 to latActive, >10 m/s, no blinker, <0.7 N.m driver torque and fresh both-ID11 samples,
 there are **8,235** rows where B6 and stock `0x08A` differ by at least 0.5 deg. `0x081`
 is closer to stock in **8,229/8,235** and closer to B6 in only 6; median
 `0x081-stock` is exactly 0.000 deg. At >=2.5-deg divergence it is stock-closer in
 **53/53**. In stock-ID0/B6-ID11 low-torque windows, `0x081` remains ID0 in **225/228**.
-This proves that `0x081` follows the Toyota request/reference plane. It says nothing
-about whether B6 is later combined inside the EPS, because B6 never participates in the
-processing that generates `0x081`.
+This proves that `0x081` follows Toyota's selected request/result state rather than the
+comma B6 target. Under §71 that is expected: `0x081` is application-facing result/status
+feedback, while B6 is generated later on the steering-controller instruction interface.
+The comparison therefore says nothing about EPS-side B6 composition.
 
 VAR-148 now answers that EPS-side question directly from CodeFlash instead. Accepted
 ID11 maps to `CB00=2`, its target-angle controller reaches `CB38`, and `D0218` adds
@@ -6357,20 +6361,34 @@ hardware/low-level receive admission. It also does not prove that an
 application-valid ID11 with a valid MAC would receive identical upstream
 treatment.
 
-Joined with §70.2's continuing internal native B6 source and the established
-request/result fields, the leading architecture hypothesis is now:
+Joined with §70.2's continuing internal native B6 source, Toyota patent
+US20200070849A1 and current GTS now close the **logical** architecture that had
+previously been only a hypothesis. Toyota separates (1) an application request IF,
+(2) a request-arbitration result/status IF, and (3) a post-arbitration
+request-generation instruction to the steering controller. The disclosed vehicle
+movement manager is preferably co-located with the Brake ECU. Current Toyota names
+join those stages independently: FFD `5282` is `TSS request - lateral ID` / request
+pinion, FFD `5285/57DE` is arbitration-result lateral ID/pinion, while EMPS `1CEE`
+is `Target Lateral ID` / `Target Steering Angle After Output Compensation`. Exact
+F33 independently expects B6/PDU44 from the Brake System Control Module domain.
 
 ```text
-0x08A Target Lateral ID + target angle request
-  -> Brake/Skid/CGW-domain arbitration/proxy
-       -> 0x081 selected/result feedback
-       -> separately constructed/authenticated B6 on a non-observed path to F33
+0x08A / FFD 5282       Brake/VMM request arbitration       0x081 / FFD 5285
+TSS request-side  ---> + result/status output -----------> application feedback
+                       + request generation
+                                 |
+                                 +-------------------------> B6 -> F33 EPS
+                                            final steering target/instruction
 ```
 
-`0x08A`/`0x081` request/result identity is supported by the retained field joins;
-the final `0x08A -> B6` edge remains a **hypothesis** until a synchronized stock-
-LTA run observes internal native B6 ID/target content. Exact field results and
-artifact identities are retained in
+The exact Camry **physical** `0x08A -> VMM -> B6` implementation is still open: we
+do not yet know which ECU/core performs each sub-block, the hidden/source-admitted
+B6 transport path, the exact request-to-target transform, or SecOC ownership. But
+“is B6 logically downstream of Toyota request arbitration?” is no longer the open
+question. The direct-Panda marker failed before F33's post-CanIf boundary because it
+did not enter the admitted Brake/VMM steering-instruction path; the EPS-resident
+helper later succeeded by modifying an already-admitted native B6 after that boundary.
+Exact field results and artifact identities are retained in
 `targets/camry-2026/raw-20260910/f33-ingress/session-summary.json`.
 
 ### 70.6 Normal-boot development signer construction
@@ -6562,3 +6580,72 @@ mechanisms remain unknown, not claimed recovery methods or proven absent.
 `tools/targets/camry/analysis/analyze_f33_recovery_structure.py` regenerates
 `data/generated/camry_f33_recovery_structure.json` from the exact stock image;
 it makes no ECU connection and emits no flash image or executable payload.
+
+
+## 71. Toyota Vehicle Movement Manager patent closes the logical request/arbitration/target architecture
+
+Toyota patent application **US 2020/0070849 A1** is now a primary architecture
+source for this work, not a naming footnote. The full joined analysis is maintained in
+[the TSS3 vehicle-movement-arbitration architecture report](../architecture/toyota-tss3-vehicle-movement-arbitration.md).
+The local source PDF is retained under ignored `REFERENCE/`; no external-source asset is
+tracked in Git.
+
+The patent resolves three interfaces that earlier sections of this notebook sometimes
+collapsed. Applications send standardized longitudinal/lateral **request** packages to a
+request arbiter. The arbiter sends rich **result/status** information back to applications.
+Separate request-generation units turn selected requests into controller-specific
+**target/instruction** packages. A distinct Vehicle Movement Controller may directly
+instruct powertrain, brake and steering for stability functions with priority over
+ordinary application/driver requests. In the disclosed embodiment the request arbiter,
+request-generation units and VMC form a vehicle movement manager located in the same ECU
+as the brake controller.
+
+The exact-Camry evidence now has an unusually direct three-stage join:
+
+| Logical layer | Toyota source vocabulary | Camry evidence |
+|---|---|---|
+| TSS/application request | FFD `5280/5281`; FFD `5282 TSS request - lateral ID/pinion` | protected `0x08A`; B21/B18:B19/B24/B25 plus longitudinal bound-package fields |
+| result/status back to apps | FFD `5284/5285`, `57DB/57DE`, plus vehicle/driver state | Brake-owned `0x081`; lateral result ID/reference recovered, longitudinal employed-source/result candidates |
+| steering-controller instruction | patent Fig. 6; EMPS `1CEE Target Lateral ID / Target Steering Angle After Output Compensation` | protected B6/PDU44; exact F33 receiver and command funnel |
+
+Exact F33's U012987 **Lost Communication with Brake System Control Module** monitor for
+B6 is therefore architecture-consistent source attribution, not an arbitrary DTC clue.
+The patent explicitly explains why Toyota prefers the vehicle movement manager in the
+brake ECU: friction braking and direct wheel-speed inputs remain available for safe-state
+control after inter-ECU failures.
+
+This supersedes every earlier inference that “Panda-visible zero B6” meant factory LTA
+operated without B6. Those captures remain valid observations of the Panda-visible
+networks at the time, but later no-host-TX route44 activity and the Sep-10 deterministic
+post-CanIf observer prove native B6/profile2 delivery exists inside F33. The correct
+boundary is **unobserved/admitted B6 transport**, not B6 absence. Likewise, the earlier
+statement that an `0x08A -> B6` logical relation was “not required” is superseded: the
+request->arbitration->request-generation relation is now the leading Toyota-authored
+architecture; only its exact F33 physical implementation remains to be recovered.
+
+Longitudinal is also reinterpreted. Toyota defines lower and upper requested acceleration
+as independently arbitrated **bounds** and explicitly describes the powertrain clipping
+driver request into that range. The longitudinal result ID names the source whose
+acceleration was actually employed; when driver demand wins, a driver discriminator is
+returned. This makes Camry result ID63 natural rather than mysterious, because Toyota
+independently names 63 `Driver Operation`. Brake GTS exposes both the TSS request side
+(`10A1..10A4`) and the post-arbitration **Vehicle Motion Control** target side
+(`10A5..10AA`), exactly mirroring the patent's request->request-generation split.
+
+Finally, the patent defines both longitudinal and lateral request IDs as identifiers of
+**applications**. The prior argument that ID25 and P6 41/45 prove unrelated axis-specific
+namespaces is withdrawn. A coordinated/shared application-ID namespace is now the leading
+model, with ID11 particularly compelling: ordinary Camry DRCC uses longitudinal ID11 while
+the lateral dictionary names 11 `LTA/LCA`. Exact labels for the incomplete longitudinal
+namespace remain evidence-graded; shared numeric identity is not by itself permission to
+copy every lateral display label.
+
+### Integration consequence
+
+The preferred production architecture is now explicit: openpilot should ideally replace
+or become the **application/request source** feeding Toyota's movement manager, then let
+Toyota perform request arbitration, driver/stability mediation, request generation and
+controller output. The EPS-resident B6 signer remains a demonstrated development fallback
+because it modifies an already-admitted final steering instruction downstream of the
+unresolved physical source-admission boundary. It is not evidence that bypassing the
+Vehicle Movement Manager is the preferred production design.

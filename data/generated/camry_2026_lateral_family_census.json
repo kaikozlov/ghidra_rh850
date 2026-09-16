@@ -269,7 +269,7 @@
   "interpretation": {
     "eps_ingress": "0x0B6/PDU44 is exact F33 external Target-Lateral-ID/target-angle ingress and is expected from the brake-system source domain. Native B6 absence therefore must not be conflated with absence of FRC steering requests.",
     "profile_switching": "A newly delivered healthy B6 generation can replace the current Target Lateral ID without a recovered previous-ID ownership check. The common controller retains ordinary filters/slew/supervision state across ticks.",
-    "request_plane": "0x08A is the FRC-side request/reference carrier; it is not accepted by exact F33."
+    "request_plane": "0x08A is the TSS request-side request/reference carrier and is FRC-normal-Tx-dependent; it is not accepted by exact F33."
   },
   "oem_target_lateral_id_dictionary": {
     "0": "No Request (Manual Operation)",
@@ -1509,17 +1509,17 @@
         "src_0_1_2_id_counts_raw": {},
         "unmatched_native_candidate_id_counts": {}
       },
-      "duration_s": 121.032537,
+      "duration_s": 324.476388,
       "first_08a_id": 0,
       "first_mono_s": 59.542857893,
       "id_transition_counts": {
         "0->11": 4,
         "0->18": 1,
-        "11->0": 3,
+        "11->0": 4,
         "18->0": 1
       },
-      "last_08a_id": 11,
-      "last_mono_s": 180.575394821,
+      "last_08a_id": 0,
+      "last_mono_s": 384.01924602,
       "native_081_id_counts": {
         "0": 8472,
         "11": 2084,

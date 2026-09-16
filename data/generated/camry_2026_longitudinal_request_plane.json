@@ -1,10 +1,10 @@
 {
   "conclusion": {
     "0x0CA": "Supersede the old upper/lower/result-triplet interpretation; 0x0CA remains other protected longitudinal/chassis state.",
-    "integration": "For Camry, do not revive 0x160 Alpha Long. 0x08A is the semantic request target; stock-harness integration still needs a clean source-suppression/sole-emitter path for the protected request PDU.",
+    "integration": "For Camry, do not revive 0x160 Alpha Long. The OEM-native integration target is the TSS application/request side feeding Toyota's Vehicle Movement Manager, not direct powertrain/brake actuator synthesis. 0x08A is the strongest observed request-side carrier, while the downstream Vehicle Motion Control target interface and source-suppression/security path remain to be recovered.",
     "not_fully_mapped": "The entire 5280/5281 recorder model is NOT yet byte-named. B6/B7 are now strongly recovered structurally as the two packed request-ID/allocation bytes (bits7:2 ID, bits1:0 allocation), including active/hold/override transitions; upper-vs-lower A/B assignment is unresolved, and shift/EPB, override-prohibition and priority remain unmapped.",
-    "request_plane": "0x08A is the unified observed continuous TSS request envelope: the lateral 5282 tuple is recovered there and the duplicated signed16 B8:B9/B11:B12 words match the 5280/5281 longitudinal acceleration-request geometry and pre-motion behavior.",
-    "result_plane": "0x081 is the unified Brake-owned employed-result/reference/supervision envelope: its lateral selected ID/reference are recovered, B6[5:0] is the strongest 5284 longitudinal employed-source-ID candidate, and B20:B21 is the strongest 57DB result-acceleration candidate. Publication ownership does not place every selection step inside the Brake ECU."
+    "request_plane": "0x08A is the unified observed continuous TSS request-side envelope: the lateral 5282 tuple is recovered there and the duplicated signed16 B8:B9/B11:B12 words occupy the 5280/5281 longitudinal lower/upper bound-package geometry. Exact placement before versus after internal TSS application selection remains unresolved.",
+    "result_plane": "0x081 is the unified Brake-owned employed-result/reference/supervision envelope: its lateral selected ID/reference are recovered, B6[5:0] is the strongest 5284 longitudinal employed-source-ID candidate, and B20:B21 is the strongest 57DB result-acceleration candidate. Toyota's architecture distinguishes the lateral arbitration winner from the longitudinal source actually employed after driver/application comparison."
   },
   "drives": {
     "drive_a": {
@@ -473,6 +473,98 @@
   },
   "gts_recorder_schema": {
     "rows": {
+      "5252": [
+        {
+          "BitLength": 32,
+          "BitPosition": 7,
+          "BytePosition": 1,
+          "DataName": "Brake pedal driver request acceleration",
+          "Lsb": "1",
+          "Offset": "0",
+          "Point": 3,
+          "Type": "f"
+        }
+      ],
+      "5253": [
+        {
+          "BitLength": 32,
+          "BitPosition": 7,
+          "BytePosition": 1,
+          "DataName": "Estimated vehicle acceleration",
+          "Lsb": "1",
+          "Offset": "0",
+          "Point": 3,
+          "Type": "f"
+        },
+        {
+          "BitLength": 8,
+          "BitPosition": 7,
+          "BytePosition": 5,
+          "DataName": "Estimated vehicle acceleration status",
+          "Lsb": "1",
+          "Offset": "0",
+          "Point": 0,
+          "Type": "u"
+        }
+      ],
+      "525D": [
+        {
+          "BitLength": 1,
+          "BitPosition": 7,
+          "BytePosition": 2,
+          "DataName": "Cruise brake control in progress",
+          "Lsb": "1",
+          "Offset": "0",
+          "Point": 0,
+          "Type": "u"
+        }
+      ],
+      "525E": [
+        {
+          "BitLength": 8,
+          "BitPosition": 7,
+          "BytePosition": 1,
+          "DataName": "Stop holding status",
+          "Lsb": "1",
+          "Offset": "0",
+          "Point": 0,
+          "Type": "u"
+        }
+      ],
+      "5261": [
+        {
+          "BitLength": 32,
+          "BitPosition": 7,
+          "BytePosition": 1,
+          "DataName": "Estimated on-ground acceleration information when accelerator fully closed",
+          "Lsb": "1",
+          "Offset": "0",
+          "Point": 3,
+          "Type": "f"
+        }
+      ],
+      "526A": [
+        {
+          "BitLength": 8,
+          "BitPosition": 7,
+          "BytePosition": 1,
+          "DataName": "Shift position information",
+          "Lsb": "1",
+          "Offset": "0",
+          "Point": 0,
+          "Type": "u"
+        },
+        {
+          "BitLength": 8,
+          "BitPosition": 7,
+          "BytePosition": 2,
+          "DataName": "Current shift range",
+          "Lsb": "1",
+          "Offset": "0",
+          "Point": 0,
+          "Type": "u"
+        }
+      ],
       "5280": [
         {
           "BitLength": 8,
@@ -682,6 +774,93 @@
     },
     "sha256": "0d594c8e61ecb406aaf2a33320449b5aa24962877b71d95a0cd2018034cc4905",
     "source": "data/generated/gtsplus_2026/pcs_data_viewer_tss3_managed_semantics.json"
+  },
+  "gts_vehicle_motion_control_surface": {
+    "dids": {
+      "0x10A1": {
+        "bit_width": 16,
+        "decimal_point_count": 3,
+        "mul": 1,
+        "name": "Request Acceleration of Upper Limit from Toyota Safety Sense",
+        "signed": true,
+        "unit": "m/s^2"
+      },
+      "0x10A2": {
+        "bit_width": 16,
+        "decimal_point_count": 3,
+        "mul": 1,
+        "name": "Request Acceleration of Lower Limit from Toyota Safety Sense",
+        "signed": true,
+        "unit": "m/s^2"
+      },
+      "0x10A3": {
+        "bit_width": 6,
+        "decimal_point_count": 0,
+        "mul": 1,
+        "name": "Request Acceleration and Deceleration ID of Upper Limit from Toyota Safety Sense",
+        "signed": false,
+        "unit": null
+      },
+      "0x10A4": {
+        "bit_width": 6,
+        "decimal_point_count": 0,
+        "mul": 1,
+        "name": "Request Acceleration and Deceleration ID of Lower Limit from Toyota Safety Sense",
+        "signed": false,
+        "unit": null
+      },
+      "0x10A5": {
+        "bit_width": 16,
+        "decimal_point_count": 2,
+        "mul": 4,
+        "name": "Target Acceleration of Upper Limit from Vehicle Motion Control",
+        "signed": true,
+        "unit": "m/s^2"
+      },
+      "0x10A6": {
+        "bit_width": 16,
+        "decimal_point_count": 2,
+        "mul": 4,
+        "name": "Target Acceleration of Lower Limit from Vehicle Motion Control",
+        "signed": true,
+        "unit": "m/s^2"
+      },
+      "0x10A7": {
+        "bit_width": 6,
+        "decimal_point_count": 0,
+        "mul": 1,
+        "name": "Target Acceleration and Deceleration ID of Upper Limit from Vehicle Motion Control",
+        "signed": false,
+        "unit": null
+      },
+      "0x10A8": {
+        "bit_width": 6,
+        "decimal_point_count": 0,
+        "mul": 1,
+        "name": "Target Acceleration and Deceleration ID of Lower Limit from Vehicle Motion Control",
+        "signed": false,
+        "unit": null
+      },
+      "0x10A9": {
+        "bit_width": 16,
+        "decimal_point_count": 0,
+        "mul": 2,
+        "name": "Target Driving Force of Upper Limit from Vehicle Motion Control",
+        "signed": true,
+        "unit": "N"
+      },
+      "0x10AA": {
+        "bit_width": 16,
+        "decimal_point_count": 0,
+        "mul": 2,
+        "name": "Target Driving Force of Lower Limit from Vehicle Motion Control",
+        "signed": true,
+        "unit": "N"
+      }
+    },
+    "interpretation": "0x10A1..0x10A4 are Toyota-Safety-Sense request acceleration/IDs; 0x10A5..0x10AA are Vehicle-Motion-Control target acceleration/IDs/driving force. This preserves the request -> post-arbitration request-generation boundary in Toyota diagnostics.",
+    "sha256": "a7a6e4a66025a2ef0ef98746a9d3bce606d9ea1071bb884d46bc790e5fa0faf2",
+    "source": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/NA/DB/Gen/ABS_P5.ddb"
   },
   "hold_request_semantics": {
     "decoded_states": {
@@ -966,15 +1145,17 @@
       }
     },
     "cross_axis_assessment": {
-      "current_hypothesis": "Toyota appears to coordinate sparse application/request-source codes across motion axes, with some common identities (certainly 0/63 and plausibly 11) but axis-/interface-specific meanings for other codes. Longitudinal ID11=DRCC/TSS3 and lateral ID11=LTA/LCA is therefore worth treating as a strong hypothesis, not an enum fact.",
-      "rejects_one_universal_label_table": [
-        "Camry longitudinal ID25 is a delayed-ACC-hold requester while lateral ID25 is OEM AP.",
-        "P6 MaaS longitudinal IDs 41/45 are Request 1/2, while the generation-20 lateral dictionary labels 41 AD(Lv.4) and 45 DES(Lv.4)."
-      ],
-      "supports_coordinated_namespace": [
+      "current_hypothesis": "A coordinated/shared application-ID namespace is now the leading model. Longitudinal and lateral labels can describe different control roles of the same application, so numeric identity is meaningful but exact longitudinal labels remain evidence-graded. Camry longitudinal ID11 is therefore a strong DRCC/TSS3 application-ID candidate aligned with lateral ID11 LTA/LCA.",
+      "supports_shared_application_namespace": [
+        "Toyota's architecture explicitly defines both longitudinal and lateral request IDs as application identifiers.",
         "0 is the no-request/manual anchor on both recovered interfaces.",
         "63 is OEM-labeled Driver Operation on both the P5 longitudinal/vertical and lateral Target ID surfaces.",
-        "Camry longitudinal ID11 is the ordinary DRCC application source while lateral ID11 is OEM LTA/LCA, making 11 a notable TSS continuous-driving coincidence."
+        "Camry longitudinal ID11 is the ordinary DRCC application source while lateral ID11 is OEM LTA/LCA, making 11 a strong shared TSS continuous-driving application-ID candidate.",
+        "P6 longitudinal IDs 41/45 are MaaS autonomous-driving Request 1/2 while the lateral table labels 41/45 AD(Lv.4)/DES(Lv.4); these may be axis-specific views of shared automated-driving application identities rather than contradictory namespaces."
+      ],
+      "unresolved_numeric_labels": [
+        "The static corpus does not publish a complete longitudinal 0..63 value table.",
+        "Camry longitudinal ID25 is used during delayed ACC hold while lateral ID25 is AP; this needs a feature-local recorder or firmware join before naming, and does not by itself disprove shared application identity."
       ]
     },
     "feature_specific_recorder_id_fields_without_enum": [
@@ -1016,9 +1197,10 @@
       }
     ],
     "model": {
-      "axis_boundary": "Toyota uses sparse requester IDs on both longitudinal and lateral interfaces, but the retained evidence disproves blindly copying the lateral enum to longitudinal. Numeric reuse can be deliberate without implying identical axis-local labels.",
+      "application_id_semantics": "Toyota's vehicle-movement architecture defines both longitudinal request IDs and the lateral request ID as identifiers of applications. This supports a coordinated/shared application-ID namespace model, while the static diagnostic corpus still does not expose a complete longitudinal value table.",
+      "axis_boundary": "Numeric reuse across axes is now treated as potentially intentional application identity, not an automatic coincidence. Axis-local diagnostic labels may still describe different roles/phases of the same application, so equal numbers do not by themselves prove identical display labels.",
       "id_is_not_priority": "Requester/result IDs identify an application/request source; the numeric value is not an ordinal priority.",
-      "upper_lower_boundary": "Candidate A/B are the two selected longitudinal application-ID/allocation slots; their upper-vs-lower ordering remains unresolved."
+      "upper_lower_boundary": "Candidate A/B are the two selected longitudinal bound-package ID/allocation slots; their upper-vs-lower ordering remains unresolved. The bounds are independently arbitrated and can therefore carry different application IDs."
     },
     "source_files": {
       "adcu_p6_ddb": {
@@ -1069,9 +1251,9 @@
         "longitudinal": "Observed retained Corolla active candidate B; no OEM longitudinal label recovered."
       },
       "25": {
-        "grade": "observed counterexample to universal lateral->longitudinal enum copying",
+        "grade": "observed longitudinal application ID; exact shared-application meaning unresolved",
         "lateral": "AP",
-        "longitudinal": "Observed Camry candidate B during delayed ACC hold; allocation method distinguishes held vs moving ID25 states."
+        "longitudinal": "Observed Camry candidate B during delayed ACC hold; allocation method distinguishes held vs moving ID25 states. Under the application-ID architecture this is an unresolved semantic clue, not evidence that longitudinal/lateral namespaces are unrelated."
       },
       "36": {
         "grade": "bounded startup state",
@@ -1084,12 +1266,12 @@
         "longitudinal": "Observed Camry candidate B idle; no OEM longitudinal feature name recovered."
       },
       "41": {
-        "grade": "OEM cross-generation axis-specific counterexample",
+        "grade": "OEM cross-generation shared-application candidate",
         "lateral": "AD (Lv.4)",
         "longitudinal": "P6 MaaS lower-limit longitudinal requester explicitly names 41 = Request 1 of MaaS Autonomous Driving System."
       },
       "45": {
-        "grade": "OEM cross-generation axis-specific counterexample",
+        "grade": "OEM cross-generation shared-application candidate",
         "lateral": "DES (Lv.4)",
         "longitudinal": "P6 MaaS lower-limit longitudinal requester explicitly names 45 = Request 2 of MaaS Autonomous Driving System."
       },
@@ -1105,7 +1287,7 @@
       }
     }
   },
-  "schema": "camry-2026-longitudinal-request-plane-v3",
+  "schema": "camry-2026-longitudinal-request-plane-v4",
   "topology": {
     "0x081": "native Brake/chassis Panda bus0 -> upstream bus2 on Toyota Bus 4",
     "0x08A": "native upstream Panda bus2 -> chassis bus0 on Toyota Bus 4",

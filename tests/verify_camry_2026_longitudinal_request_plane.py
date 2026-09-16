@@ -28,7 +28,7 @@ def approx(a: float, b: float, eps: float = 1e-9) -> bool:
 
 
 art = json.loads(ART.read_text())
-check("schema", art["schema"] == "camry-2026-longitudinal-request-plane-v3")
+check("schema", art["schema"] == "camry-2026-longitudinal-request-plane-v4")
 
 print("== deterministic regeneration ==")
 with tempfile.TemporaryDirectory() as td:
@@ -107,6 +107,15 @@ check("5284/57DB longitudinal result candidates live in Brake-owned 0x081",
       layout["5284_longitudinal_result_id"]["wire"] == "0x081 B6[5:0]"
       and layout["57DB_result_acceleration"]["wire"].startswith("0x081 B20:B21"))
 check("57D3 remains explicitly unresolved", layout["57D3_acceleration_valid"]["status"] == "unresolved")
+check("GTS preserves TSS request versus Vehicle Motion Control target boundary",
+      art["gts_vehicle_motion_control_surface"]["dids"]["0x10A1"]["name"] == "Request Acceleration of Upper Limit from Toyota Safety Sense"
+      and art["gts_vehicle_motion_control_surface"]["dids"]["0x10A5"]["name"] == "Target Acceleration of Upper Limit from Vehicle Motion Control"
+      and art["gts_vehicle_motion_control_surface"]["dids"]["0x10A7"]["name"] == "Target Acceleration and Deceleration ID of Upper Limit from Vehicle Motion Control"
+      and art["gts_vehicle_motion_control_surface"]["dids"]["0x10A9"]["name"] == "Target Driving Force of Upper Limit from Vehicle Motion Control")
+check("FFD result/state vocabulary matches vehicle-movement result packet",
+      art["gts_recorder_schema"]["rows"]["5253"][0]["DataName"] == "Estimated vehicle acceleration"
+      and art["gts_recorder_schema"]["rows"]["525E"][0]["DataName"] == "Stop holding status"
+      and any(x["DataName"] == "Current shift range" for x in art["gts_recorder_schema"]["rows"]["526A"]))
 hold = art["hold_request_semantics"]
 check("raw ACC hold states decompose into request IDs and allocation methods",
       hold["hold_episode_frames"] == 198
@@ -124,14 +133,15 @@ check("moving ID25 counterexample proves hold needs allocation state too",
       hold["decoded_states"]["moving_ID25_counterexample"]["request_id_B"] == 25
       and hold["decoded_states"]["moving_ID25_counterexample"]["allocation_B"] == 1)
 check("0x08A is unified request envelope but not full 5280/5281 byte map",
-      "unified observed continuous TSS request envelope" in art["conclusion"]["request_plane"]
+      "unified observed continuous TSS request-side envelope" in art["conclusion"]["request_plane"]
       and "NOT yet byte-named" in art["conclusion"]["not_fully_mapped"])
 check("0x0CA old triplet interpretation is superseded", "Supersede" in art["conclusion"]["0x0CA"])
 
 namespace = art["requester_id_namespace"]
 working = namespace["working_table"]
-check("longitudinal IDs are modeled as requester identities rather than priorities",
-      "not an ordinal priority" in namespace["model"]["id_is_not_priority"])
+check("longitudinal IDs are modeled as application identities rather than priorities",
+      "not an ordinal priority" in namespace["model"]["id_is_not_priority"]
+      and "identifiers of applications" in namespace["model"]["application_id_semantics"])
 check("P5 longitudinal/vertical namespace names driver operation ID63",
       namespace["authoritative_sparse_names"]["p5_frc_isa_vertical_id"]["patterns"] == {"0": "No Request", "63": "Driver Operation"})
 check("cross-generation sparse long anchors include ISA9 and MaaS41/45",
@@ -141,10 +151,10 @@ check("ID11 shared-axis hypothesis is explicit but not promoted to an OEM longit
       working["11"]["lateral"] == "LTA/LCA"
       and "ordinary DRCC" in working["11"]["longitudinal"]
       and "hypothesis" in working["11"]["grade"])
-check("ID25 disproves blind lateral enum transfer",
+check("ID25 remains an unresolved shared-application clue rather than an axis-namespace disproof",
       working["25"]["lateral"] == "AP"
       and "delayed ACC hold" in working["25"]["longitudinal"]
-      and "counterexample" in working["25"]["grade"])
+      and "unresolved" in working["25"]["grade"])
 check("Camry startup ID36 is bounded and not active authority",
       namespace["camry_observed"]["id36_startup_frames"] == 33
       and "not observed as active cruise authority" in namespace["camry_observed"]["id36_boundary"])

@@ -1,7 +1,7 @@
 {
   "evidence": {
     "conclusion": {
-      "interpretation": "Route 48 proves the upstream Toyota 0x08A/0x081 request/reference plane stays ID0 for long intervals while DRCC and openpilot remain active and B6 stays ID11. Large comma target errors can persist for seconds with near-zero driver torque, near-zero steering rate, and very small EPS motor-feedback proxy, while same-route upstream stock-ID11 request error produces a much larger motor response. Because exact F33 receives neither 0x08A nor 0x081, this is not a full EPS-authority isolation experiment and does not prove ordinary F33 assist/current terms are absent; it localizes the observed non-response without using upstream request-plane state as an EPS arbitration oracle.",
+      "interpretation": "Route 48 proves Toyota request-side 0x08A and result/status 0x081 both stay ID0 for long intervals while DRCC and openpilot remain active and B6 stays ID11. Large comma target errors can persist for seconds with near-zero driver torque, near-zero steering rate, and very small EPS motor-feedback proxy, while same-route upstream stock-ID11 request error produces a much larger motor response. Because exact F33 receives neither 0x08A nor 0x081, this is not a full EPS-authority isolation experiment and does not prove ordinary F33 assist/current terms are absent; it localizes the observed non-response without using request/result state as an EPS final-instruction authority oracle.",
       "route_proves_all_ordinary_f33_assist_terms_absent": false,
       "route_proves_b6_effective_eps_authority": false,
       "simultaneous_upstream_stock_id11_required_for_b6_nonresponse": false,
@@ -100,7 +100,7 @@
         "rows": 270,
         "segment": 3
       },
-      "selection": "upstream Toyota request/reference plane 0x08A ID0 + 0x081 ID0 + cruise latch on + B6 ID11 + latActive; vEgo>10m/s; no blinker; abs(driver torque)<0.3Nm"
+      "selection": "Toyota TSS request/result state 0x08A request ID0 + 0x081 result ID0 + cruise latch on + B6 ID11 + latActive; vEgo>10m/s; no blinker; abs(driver torque)<0.3Nm"
     },
     "same_route_stock_lta_positive_control": {
       "motor_abs_raw": {
@@ -349,6 +349,6 @@
       }
     }
   },
-  "openpilot_parser_commit": "bb6c03ce707d843e038f4b9510196a029d216d2d",
+  "openpilot_parser_commit": "abe6b230231a7a548a3ecddd3bd460003ceeafb1",
   "schema": "camry-20260907-lta-off-b6-authority-v2"
 }

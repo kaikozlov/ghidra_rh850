@@ -80,7 +80,7 @@ again the normal CAN0/CAN2 relay pair (stock source bus2, openpilot replacement
 bus0), while Toyota Bus-4 / EPS-Brake is the unsplit Panda **bus 1**. Exact-F33
 EPS UDS and C7 therefore use bus1 with ELM327 param1 for direct diagnostics.
 The resident never host-transmits B6; it replaces/re-signs the EPS's internally
-native B6. Do not send `0x08A` to EPS and do not infer an `0x08A -> B6` transform.
+native B6. Do not send `0x08A` to EPS. Toyota's Vehicle Movement Manager architecture now strongly supports a logical request-side `0x08A` -> arbitration/request-generation -> final B6 relationship; what remains unresolved is the exact Camry physical/security handoff, not whether those interfaces occupy different stages.
 The stock topology is software/test complete but still needs the parked and short
 road revalidation called out in the capability matrix.
 

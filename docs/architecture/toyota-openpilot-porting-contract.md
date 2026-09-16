@@ -522,6 +522,25 @@ maintained forks. What still cannot be made production-ready is the **deployment
 
 ## 5. The concrete TSS3 investigation roadmap
 
+### Architecture rule: enter Toyota's request pipeline, not an arbitrary actuator layer
+
+Toyota patent US20200070849A1 plus the current GTS/F33 joins close a missing
+architecture distinction. TSS3 has separate **application request**, **arbitration
+result/status**, and **post-arbitration controller instruction** interfaces. On the
+Camry, `0x08A` aligns with the request side, `0x081` with result/status, and protected
+B6 with the final steering-controller target/instruction. Exact F33 also attributes B6
+loss to the Brake System Control Module, matching Toyota's disclosed Vehicle Movement
+Manager placement in the brake domain. See
+[toyota-tss3-vehicle-movement-arbitration.md](toyota-tss3-vehicle-movement-arbitration.md).
+
+For production integration, prefer replacing/becoming the application request source
+while retaining Toyota's arbitration, driver/stability mediation, request generation and
+actuator controllers. Direct final-instruction B6 injection remains a useful development
+fallback, not the preferred architecture, unless the request-side replacement/suppression
+point proves unavailable. Do not require B6 to become exclusive EPS authority: Toyota's
+architecture explicitly permits local/controller and priority Vehicle Movement Control
+intervention.
+
 The next TSS3 analysis should proceed in this order. Each stage produces facts
 needed by the next; none is replaced by possession of a SecOC key.
 
@@ -586,21 +605,30 @@ A candidate graduates only when command value, enable/mode, cadence, validity,
 feedback, and fault behavior are all joined. This is the TSS3 equivalent of the
 older `STEERING_LKA` + `STEER_TORQUE_SENSOR` + `EPS_STATUS` contract.
 
-### D. Recover longitudinal as a separate architecture
+### D. Recover longitudinal through the Vehicle Movement Manager contract
 
-Do not assume the lateral producer owns ACC. Establish whether FRC, radar, ADS,
-or another controller sends the stock acceleration/spacing command. Then recover:
+Do not reduce TSS3 longitudinal control to one scalar acceleration command. Toyota's
+architecture defines independently arbitrated **lower and upper acceleration bounds**,
+application IDs and policy fields; powertrain/brake request-generation converts them to
+target force/power, and the powertrain then mediates driver demand against the selected
+range. The result ID reports the source actually employed. Current Camry `0x08A` matches
+the request-bound geometry while Brake GTS separately exposes TSS request DIDs
+`0x10A1..0x10A4` and post-arbitration Vehicle Motion Control targets
+`0x10A5..0x10AA`.
 
-- acceleration/deceleration setpoint and enable/cancel semantics;
-- lead/distance/standstill behavior;
-- brake/gas/AEB arbitration and fault state;
+Recover and validate:
+
+- upper/lower request ordering, application IDs, acceleration bounds and policy fields;
+- the request->Vehicle-Motion-Control target handoff and exact physical publisher;
+- driver acceleration, standstill/hold, AEB/stability and powertrain/brake mediation;
+- result/status feedback (`5284/57DB/57D3` / `0x081`) and source-employment semantics;
 - command cadence and integrity/authentication; and
-- the safe stock-source disable or Panda forwarding-substitution point.
+- the safe request-source suppression/replacement point.
 
 Only after this should an opendbc TSS3 longitudinal builder or safety whitelist be
-written. This is tracked separately as
-[OQ-052](../status/OPEN_QUESTIONS.md), so completion of the FRC lateral path cannot
-accidentally be treated as completion of the TSS3 vehicle port.
+written. Do not revive the disproved Camry `0x160` encoder or synthesize a direct
+powertrain/brake command merely to bypass Toyota's movement manager. This remains
+tracked as [OQ-052](../status/OPEN_QUESTIONS.md).
 
 ### E. Recover the production safety envelope
 
