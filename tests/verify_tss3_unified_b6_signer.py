@@ -47,6 +47,14 @@ check("unified wire frames exact",
       host.loader_frame(3, bytes.fromhex("11223344")) == bytes.fromhex("07c6c60311223344") and
       host.loader_frame(0xFF) == bytes.fromhex("07c6c6ff00000000") and
       host.replacement_frame(7, 0x1234) == bytes.fromhex("07c7c70712340000"))
+post_replace_raw = bytearray(host.SPLIT_TELEMETRY_SIZE)
+post_replace_raw[8:12] = bytes.fromhex("d4a56f15")
+post_replace_raw[12:16] = bytes.fromhex("11223344")
+post_replace_raw[17] = 1
+post_replace = host.decode_split_telemetry(bytes(post_replace_raw))
+check("unified split telemetry distinguishes sticky oracle from latest trailer equality",
+      post_replace["oracle_latched"] is True and post_replace["native_verified"] is True and
+      post_replace["latest_trailer_equality"] is False and post_replace["native_signature_match"] is False)
 check("legacy target-specific implementations remain in tree",
       all((ROOT / p).is_file() for p in (
           "exploit/ephemeral_runtime/build_camry_f33_b6_inline_signer.py",

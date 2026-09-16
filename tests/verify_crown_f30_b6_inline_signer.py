@@ -147,6 +147,14 @@ with tempfile.TemporaryDirectory(prefix="verify-crown-f30-signer-") as td:
           "monitor._alloutput_mode" not in host_source and host_source.count("set_canfd_auto(CONTROL_BUS, False)") == 2)
     check("plan makes functional mailbox proof the first vehicle action", "prove stock functional 0x777 mailbox delivery" in plan["sequence"][0])
     check("standalone mailbox probe frame exact", mailbox_probe.PROBE_FRAME == bytes.fromhex("07c7c7a512340000"))
+    post_replace_raw = bytearray(0x20)
+    post_replace_raw[0x08:0x0C] = bytes.fromhex("d4a56f15")
+    post_replace_raw[0x0C:0x10] = bytes.fromhex("11223344")
+    post_replace_raw[0x11] = 1
+    post_replace = host.decode_signer_telemetry(bytes(post_replace_raw))
+    check("sticky native oracle remains valid when latest replacement trailer differs",
+          post_replace["oracle_latched"] is True and post_replace["native_verified"] is True and
+          post_replace["latest_trailer_equality"] is False and post_replace["native_signature_match"] is False)
     check("mailbox tail witness tolerates stock DCM first-byte reset",
           mailbox_probe.mailbox_tail_matches(bytes.fromhex("00c7a512340000")) and
           mailbox_probe.mailbox_tail_matches(bytes.fromhex("c7c7a512340000")))
