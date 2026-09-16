@@ -884,10 +884,10 @@ nonzero C7 generation snapshots its target and grants seven nominal 5-ms ticks;
 repeated mailbox contents do not renew the lease; sequence zero releases
 immediately. Crucially, the lease ages before the native-B6 queue gate, so host
 loss expires after nominal 35 ms even through a gap in native B6 and a later
-returning B6 cannot revive the stale command. Openpilot's 50-Hz changed C7
+returning B6 cannot revive the stale command. Openpilot's native 100-Hz changed C7
 generation is therefore continuously admitted inside the 35-ms lease rather
 than alternating with stock B6. The exact compiled H helper is exercised in a
-Ghidra emulator against this 50-Hz/200-Hz schedule, expiry, zero-release, wrap,
+Ghidra emulator against this 100-Hz/200-Hz schedule, expiry, zero-release, wrap,
 and empty-queue cases. The helper still mutates only ID and target (B3..B5),
 retaining native H/F secondary fields and signal261 rather than copying
 Camry-specific B6/B8/B9 values. C6 is not a Corolla runtime steering command

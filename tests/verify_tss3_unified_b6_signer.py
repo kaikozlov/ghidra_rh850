@@ -153,7 +153,7 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
     check("Corolla unified compiled helper has continuous supervised C7 liveness",
           liveness_record["passed"] == 36 and liveness_record["vehicle_executed"] is False and
           liveness_record["helper_sha256"] == corolla_meta["helper"]["sha256"] and
-          "normal 50 Hz host remains continuously admitted" in liveness_record["tests"] and
+          "normal 100 Hz host remains continuously admitted" in liveness_record["tests"] and
           "host loss expires at seventh tick" in liveness_record["tests"] and
           "returning native B6 after empty-queue expiry stays native" in liveness_record["tests"] and
           liveness.returncode == 0)

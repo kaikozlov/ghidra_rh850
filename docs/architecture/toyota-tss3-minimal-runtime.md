@@ -152,8 +152,8 @@ addresses. It is intentionally not one byte-identical multi-calibration binary:
 exact call/RAM addresses and the installation geometry differ.
 
 The recurring host API is nevertheless identical. While `CC.latActive`,
-openpilot emits a changed nonzero C7 generation at its normal 50-Hz TSS3
-steering cadence. When lateral control is inactive it emits sequence zero.
+openpilot emits a changed nonzero C7 generation at the native 100-Hz
+car-control cadence. When lateral control is inactive it emits sequence zero.
 Receiver behavior is target-local:
 
 - **Camry F33 / Crown F30:** the 596-byte split helper uses the road-proven
@@ -169,7 +169,7 @@ Receiver behavior is target-local:
   immediately. Lease aging occurs before the native-B6 queue gate, so a stale
   command expires after nominal 35 ms even when no B6 is queued; a later B6
   cannot resurrect it. The compiled exact-H helper is emulator-regression-tested
-  against a 50-Hz host / 200-Hz foreground schedule.
+  against a 100-Hz host / 200-Hz foreground schedule.
 
 The common qualification ladder remains conservative: bind exact F181, prove
 functional mailbox delivery, install only volatile RAM, reproduce one untouched

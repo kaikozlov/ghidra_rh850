@@ -91,15 +91,17 @@ public class VerifyCorollaUnifiedSignerHostLiveness extends GhidraScript {
             for (int i = 1; i <= 6; i++) check("empty queue ages host command " + i, !tick(e, 3, false));
             check("returning native B6 after empty-queue expiry stays native", !tick(e, 3, true));
 
-            // openpilot's 50-Hz C7 stream changes generation every four
-            // nominal 5-ms foreground ticks, comfortably inside the 7-tick lease.
+            // Native openpilot control is 100 Hz, so C7 changes generation every
+            // two nominal 5-ms foreground ticks, comfortably inside the lease.
+            int lastStreamSeq = 0;
             for (int i = 0; i < 100; i++) {
-                int seq = 10 + i / 4;
-                if (!tick(e, seq, true)) throw new Exception("normal 50 Hz host / 200 Hz scheduler dropout " + i);
+                int seq = 10 + i / 2;
+                lastStreamSeq = seq;
+                if (!tick(e, seq, true)) throw new Exception("normal 100 Hz host / 200 Hz scheduler dropout " + i);
             }
-            check("normal 50 Hz host remains continuously admitted", true);
+            check("normal 100 Hz host remains continuously admitted", true);
             check("lease saturates at zero after host loss", get(e, STATE + 5) > 0); // active after final fresh stream
-            for (int i = 0; i < 7; i++) tick(e, 34, false);
+            for (int i = 0; i < 7; i++) tick(e, lastStreamSeq, false);
             check("lease reaches zero without wrap", get(e, STATE + 5) == 0);
             var afterBlock = currentProgram.getMemory().getBlock(toAddr(BASE));
             check("program memory mapping unchanged", originalBlock == afterBlock &&
