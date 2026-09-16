@@ -1098,6 +1098,24 @@ Ecu enum but has a different hash, so the former `{fw.ecu}` membership test coul
 silently miss an actually queried Hybrid Control ECU. No extra category-466 startup
 probe is added merely for subtype detection.
 
+The gear source remains intentionally powertrain-specific rather than following the
+later contributor branch's switch to `0x3BF` for the hybrid. Current GTS+ exposes
+hybrid **Shift Position** in `HV_P5.ddb` DID `0x1061` (alternate `0x3061`): the primary
+byte uses `0=P,2=R,4=N,6=D,8=B`, while the parallel **Shift Position (Meter)** byte is
+one-hot `1=P,2=R,4=N,8=D,16=B`. ICE `Engine_P5.ddb` exposes **Shift Position (Current
+Position)** in DID `0x1424` and **Shift Position (Control Position)** in DID `0x1428`,
+with the latter preserving the same `0/2/4/6/8` P/R/N/D/B-family ordering. These are
+OEM diagnostic semantics, not direct CAN-ID mappings, but they confirm separate
+powertrain owners with common shift meaning.
+
+The retained wire evidence then selects the practical CarState carrier. Span's moving
+2025 hybrid segment has 3,662 checksum-valid `0x127` frames in about 60 s (~61 Hz), while
+its `0x3BF` appears only 60 times (~1 Hz); the 2023 public Corolla route also carries
+`0x3BF` at about 1 Hz and directly observes `0x80=P -> 0x40=R -> 0x10=D`. Therefore use
+`0x127` as the primary hybrid gear source when present and `0x3BF` as the generation-native
+ICE/fallback source. `0x3BF` remains valuable cross-powertrain corroboration, but making
+it the primary hybrid source would throw away a much higher-rate valid carrier.
+
 The GTS compatibility bridge remains deliberately curated to those ten identities tied
 to retained H/F evidence. Other current GTS rows named Corolla are not promoted solely
 from a similar install-set label; later rows include a different `EMPS+FRC` architecture
