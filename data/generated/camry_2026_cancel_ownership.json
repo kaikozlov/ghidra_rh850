@@ -1,0 +1,3117 @@
+{
+  "all_buses": {
+    "adas_p05": {
+      "valid": 16526
+    },
+    "boundary": "A cancellation-linked output is not automatically a cancel input. Native2 identifies the FRC-side link, not exclusive logical ECU ownership behind it.",
+    "common_stream_count_by_bus": {
+      "0": 92,
+      "1": 22,
+      "2": 54
+    },
+    "early_screen": {
+      "candidates": [
+        {
+          "address": "0x081",
+          "asserted": 0,
+          "bit": 3,
+          "bus": 0,
+          "byte": 13,
+          "length": 32
+        },
+        {
+          "address": "0x081",
+          "asserted": 0,
+          "bit": 1,
+          "bus": 0,
+          "byte": 13,
+          "length": 32
+        },
+        {
+          "address": "0x081",
+          "asserted": 0,
+          "bit": 0,
+          "bus": 0,
+          "byte": 13,
+          "length": 32
+        },
+        {
+          "address": "0x0FE",
+          "asserted": 1,
+          "bit": 6,
+          "bus": 0,
+          "byte": 4,
+          "length": 32
+        },
+        {
+          "address": "0x0FE",
+          "asserted": 0,
+          "bit": 5,
+          "bus": 0,
+          "byte": 7,
+          "length": 32
+        },
+        {
+          "address": "0x08A",
+          "asserted": 0,
+          "bit": 3,
+          "bus": 2,
+          "byte": 3,
+          "length": 32
+        },
+        {
+          "address": "0x08A",
+          "asserted": 0,
+          "bit": 5,
+          "bus": 2,
+          "byte": 6,
+          "length": 32
+        },
+        {
+          "address": "0x08A",
+          "asserted": 0,
+          "bit": 3,
+          "bus": 2,
+          "byte": 6,
+          "length": 32
+        },
+        {
+          "address": "0x08A",
+          "asserted": 0,
+          "bit": 2,
+          "bus": 2,
+          "byte": 6,
+          "length": 32
+        },
+        {
+          "address": "0x08A",
+          "asserted": 0,
+          "bit": 6,
+          "bus": 2,
+          "byte": 7,
+          "length": 32
+        },
+        {
+          "address": "0x08A",
+          "asserted": 1,
+          "bit": 4,
+          "bus": 2,
+          "byte": 7,
+          "length": 32
+        },
+        {
+          "address": "0x08A",
+          "asserted": 0,
+          "bit": 2,
+          "bus": 2,
+          "byte": 7,
+          "length": 32
+        },
+        {
+          "address": "0x08A",
+          "asserted": 0,
+          "bit": 6,
+          "bus": 2,
+          "byte": 20,
+          "length": 32
+        },
+        {
+          "address": "0x08A",
+          "asserted": 0,
+          "bit": 3,
+          "bus": 2,
+          "byte": 21,
+          "length": 32
+        },
+        {
+          "address": "0x08A",
+          "asserted": 0,
+          "bit": 1,
+          "bus": 2,
+          "byte": 21,
+          "length": 32
+        },
+        {
+          "address": "0x08A",
+          "asserted": 0,
+          "bit": 0,
+          "bus": 2,
+          "byte": 21,
+          "length": 32
+        },
+        {
+          "address": "0x08A",
+          "asserted": 0,
+          "bit": 4,
+          "bus": 2,
+          "byte": 22,
+          "length": 32
+        },
+        {
+          "address": "0x371",
+          "asserted": 0,
+          "bit": 4,
+          "bus": 2,
+          "byte": 9,
+          "length": 32
+        },
+        {
+          "address": "0x371",
+          "asserted": 0,
+          "bit": 5,
+          "bus": 2,
+          "byte": 25,
+          "length": 32
+        }
+      ],
+      "fully_sampled_stream_count_by_bus": {
+        "0": 32,
+        "1": 20,
+        "2": 15
+      },
+      "post_ns": [
+        -100000000,
+        200000000
+      ],
+      "pre_ns": [
+        -1000000000,
+        -150000000
+      ],
+      "scope": "all payload bits, including B0..B2; raw observations without a SecOC-authentication claim; stable pre-state and at least one opposite post-state in every event"
+    },
+    "events": [
+      {
+        "index": 0,
+        "mirror_cancel_intervals_ns": [
+          [
+            110194062,
+            704309739
+          ]
+        ],
+        "mode_before": [
+          192
+        ],
+        "native_drop_ns": 29932812,
+        "non_cancel_counterexamples": [],
+        "sources": [
+          {
+            "path": "2026-09-04/0000003b--62262eb7a1/rlog-14.zst",
+            "sha256": "bd977d659ff8ffd878bb88614995e4dd00037071d7c396121acee090c49b978a"
+          }
+        ]
+      },
+      {
+        "index": 1,
+        "mirror_cancel_intervals_ns": [
+          [
+            91165833,
+            692739739
+          ]
+        ],
+        "mode_before": [
+          192
+        ],
+        "native_drop_ns": 70239687,
+        "non_cancel_counterexamples": [],
+        "sources": [
+          {
+            "path": "2026-09-04/0000003b--62262eb7a1/rlog-28.zst",
+            "sha256": "24b8cba6cb7b08469ce9e4747021284cdd5d9792beb23ce22d67f1e97a3424e9"
+          }
+        ]
+      },
+      {
+        "index": 2,
+        "mirror_cancel_intervals_ns": [
+          [
+            130965000,
+            732065364
+          ]
+        ],
+        "mode_before": [
+          192
+        ],
+        "native_drop_ns": 70368281,
+        "non_cancel_counterexamples": [],
+        "sources": [
+          {
+            "path": "2026-09-04/0000003b--62262eb7a1/rlog-40.zst",
+            "sha256": "51df741aaba5ccbe9dfa3d8338de087fd3b0bd6771e991d41278f546a2b98218"
+          }
+        ]
+      },
+      {
+        "index": 3,
+        "mirror_cancel_intervals_ns": [
+          [
+            79377812,
+            681138750
+          ]
+        ],
+        "mode_before": [
+          192
+        ],
+        "native_drop_ns": 79377812,
+        "non_cancel_counterexamples": [],
+        "sources": [
+          {
+            "path": "2026-09-04/0000003b--62262eb7a1/rlog-54.zst",
+            "sha256": "534898db70a83fd9343fd8c65d7bb74e07acbc8acd9528acadc9d6aa4e09b79c"
+          }
+        ]
+      },
+      {
+        "index": 4,
+        "mirror_cancel_intervals_ns": [
+          [
+            189175417,
+            590799479
+          ]
+        ],
+        "mode_before": [
+          192
+        ],
+        "native_drop_ns": 79381250,
+        "non_cancel_counterexamples": [],
+        "sources": [
+          {
+            "path": "2026-09-04/0000003b--62262eb7a1/rlog-56.zst",
+            "sha256": "632e0295eef16618736aea06784fbb630eccb0a677f1b9c9d9473f1c2fd60cb6"
+          }
+        ]
+      },
+      {
+        "index": 5,
+        "mirror_cancel_intervals_ns": [
+          [
+            199905052,
+            602014271
+          ]
+        ],
+        "mode_before": [
+          192
+        ],
+        "native_drop_ns": 99730937,
+        "non_cancel_counterexamples": [],
+        "sources": [
+          {
+            "path": "2026-09-04/0000003b--62262eb7a1/rlog-65.zst",
+            "sha256": "59b025230c1f9b6a8d93da9bcb594b3ce96740db42a48de06ac75dd2e63b26e9"
+          },
+          {
+            "path": "2026-09-04/0000003b--62262eb7a1/rlog-66.zst",
+            "sha256": "6469a7979e2f190e4cdbab36624ed00d779111ea92ab80c42250f20fe53916dd"
+          }
+        ]
+      },
+      {
+        "index": 6,
+        "mirror_cancel_intervals_ns": [
+          [
+            30003125,
+            632361823
+          ]
+        ],
+        "mode_before": [
+          192
+        ],
+        "native_drop_ns": 39953854,
+        "non_cancel_counterexamples": [],
+        "sources": [
+          {
+            "path": "2026-09-04/0000003b--62262eb7a1/rlog-73.zst",
+            "sha256": "3220c75f428dffc4f07dc38c06438e499cfa0fd8c169529730cf9f537d099be0"
+          }
+        ]
+      },
+      {
+        "index": 7,
+        "mirror_cancel_intervals_ns": [
+          [
+            212066094,
+            613318333
+          ]
+        ],
+        "mode_before": [
+          192
+        ],
+        "native_drop_ns": 72177344,
+        "non_cancel_counterexamples": [],
+        "sources": [
+          {
+            "path": "2026-09-04/0000003b--62262eb7a1/rlog-77.zst",
+            "sha256": "50caa8ec01951d0fd063ba8b88a7e9ffe8a081a97c605d676d1af32edace2477"
+          }
+        ]
+      },
+      {
+        "index": 8,
+        "mirror_cancel_intervals_ns": [
+          [
+            60534479,
+            664206093
+          ]
+        ],
+        "mode_before": [
+          192
+        ],
+        "native_drop_ns": 70439062,
+        "non_cancel_counterexamples": [],
+        "sources": [
+          {
+            "path": "2026-09-04/0000003b--62262eb7a1/rlog-78.zst",
+            "sha256": "9544f815b68675e8e1312661b761403205ca95e9362e20bb92e5678e89633c6c"
+          }
+        ]
+      },
+      {
+        "index": 9,
+        "mirror_cancel_intervals_ns": [
+          [
+            161959010,
+            764187239
+          ]
+        ],
+        "mode_before": [
+          192
+        ],
+        "native_drop_ns": 80061042,
+        "non_cancel_counterexamples": [],
+        "sources": [
+          {
+            "path": "2026-09-04/0000003b--62262eb7a1/rlog-90.zst",
+            "sha256": "48c55b274d76f30e1384a3fda15a9b8d5ea51bb96acfdddd57253439dee9ac55"
+          }
+        ]
+      },
+      {
+        "index": 10,
+        "mirror_cancel_intervals_ns": [
+          [
+            180432656,
+            582293958
+          ]
+        ],
+        "mode_before": [
+          192
+        ],
+        "native_drop_ns": 40627708,
+        "non_cancel_counterexamples": [],
+        "sources": [
+          {
+            "path": "2026-09-04/0000003b--62262eb7a1/rlog-96.zst",
+            "sha256": "c6ceb5bb99ce901ffe0958ff90517ba62278c69dde02bb548883ead337989e6a"
+          }
+        ]
+      },
+      {
+        "index": 11,
+        "mirror_cancel_intervals_ns": [
+          [
+            179247344,
+            581531094
+          ]
+        ],
+        "mode_before": [
+          192
+        ],
+        "native_drop_ns": 39470000,
+        "non_cancel_counterexamples": [
+          {
+            "address": "0x198",
+            "asserted_before_cancel": 9,
+            "bit": 3,
+            "byte": 4,
+            "concurrent_engaged_cruise_frames": 34,
+            "first_ns": -964999062,
+            "first_payload": "1b46fff40847fd60",
+            "last_ns": -163366666
+          },
+          {
+            "address": "0x19C",
+            "asserted_before_cancel": 9,
+            "bit": 1,
+            "byte": 0,
+            "concurrent_engaged_cruise_frames": 34,
+            "first_ns": -964999062,
+            "first_payload": "0a000000000003f0",
+            "last_ns": -163366666
+          }
+        ],
+        "sources": [
+          {
+            "path": "2026-09-04/0000003b--62262eb7a1/rlog-97.zst",
+            "sha256": "a349b45ed60980112e4d33ca73bb7f46fb8482f9c0b99e97257f991e4f08247e"
+          }
+        ]
+      },
+      {
+        "index": 12,
+        "mirror_cancel_intervals_ns": [
+          [
+            89664740,
+            693541406
+          ]
+        ],
+        "mode_before": [
+          192
+        ],
+        "native_drop_ns": 59669584,
+        "non_cancel_counterexamples": [],
+        "sources": [
+          {
+            "path": "2026-09-04/0000003c--97b9e7a69a/rlog-16.zst",
+            "sha256": "d177afc1fd182b23e90393214f7dc3fe152e6856c8abca58456d5239f5813ca5"
+          }
+        ]
+      },
+      {
+        "index": 13,
+        "mirror_cancel_intervals_ns": [
+          [
+            142420521,
+            743774270
+          ]
+        ],
+        "mode_before": [
+          192
+        ],
+        "native_drop_ns": 72570312,
+        "non_cancel_counterexamples": [],
+        "sources": [
+          {
+            "path": "2026-09-04/0000003c--97b9e7a69a/rlog-39.zst",
+            "sha256": "cb17c772732b0a5e1789b3071e09a9e11a18f44b356476635f9613f1defe1fbc"
+          }
+        ]
+      },
+      {
+        "index": 14,
+        "mirror_cancel_intervals_ns": [
+          [
+            142851458,
+            745342656
+          ]
+        ],
+        "mode_before": [
+          192
+        ],
+        "native_drop_ns": 172179323,
+        "non_cancel_counterexamples": [],
+        "sources": [
+          {
+            "path": "2026-09-04/0000003c--97b9e7a69a/rlog-42.zst",
+            "sha256": "9871f75a7749ca871657ccf76e169742eadb15847500d71c290119f5d6e92b96"
+          }
+        ]
+      },
+      {
+        "index": 15,
+        "mirror_cancel_intervals_ns": [
+          [
+            210298802,
+            602340938
+          ]
+        ],
+        "mode_before": [
+          192
+        ],
+        "native_drop_ns": 29755677,
+        "non_cancel_counterexamples": [],
+        "sources": [
+          {
+            "path": "2026-09-04/0000003c--97b9e7a69a/rlog-50.zst",
+            "sha256": "3d29c08fa662a46a23d4ec75748f0e501ef5254ebcf428fd704339fb305078cf"
+          }
+        ]
+      },
+      {
+        "index": 16,
+        "mirror_cancel_intervals_ns": [
+          [
+            129844115,
+            725374323
+          ]
+        ],
+        "mode_before": [
+          192
+        ],
+        "native_drop_ns": 60263750,
+        "non_cancel_counterexamples": [],
+        "sources": [
+          {
+            "path": "2026-09-04/0000003c--97b9e7a69a/rlog-53.zst",
+            "sha256": "06a905dcab9e91e709a31bb0de3dbc97b99686921555eb9dfb3dc220f658dd94"
+          }
+        ]
+      },
+      {
+        "index": 17,
+        "mirror_cancel_intervals_ns": [
+          [
+            142765208,
+            745844427
+          ]
+        ],
+        "mode_before": [
+          192
+        ],
+        "native_drop_ns": 80352604,
+        "non_cancel_counterexamples": [],
+        "sources": [
+          {
+            "path": "2026-09-04/0000003c--97b9e7a69a/rlog-54.zst",
+            "sha256": "4c99349161399307880cf30bd8bf71813ed19e15b4098a93d4d3acc3ede2f5c8"
+          }
+        ]
+      },
+      {
+        "index": 18,
+        "mirror_cancel_intervals_ns": [
+          [
+            230756250,
+            632911563
+          ]
+        ],
+        "mode_before": [
+          192
+        ],
+        "native_drop_ns": 109875834,
+        "non_cancel_counterexamples": [],
+        "sources": [
+          {
+            "path": "2026-09-04/0000003c--97b9e7a69a/rlog-59.zst",
+            "sha256": "706b2fd1f5b0452709c14142e57db6658533552f7d4d65d3c9ccff240a34c8de"
+          }
+        ]
+      },
+      {
+        "index": 19,
+        "mirror_cancel_intervals_ns": [
+          [
+            159330104,
+            761990156
+          ]
+        ],
+        "mode_before": [
+          192
+        ],
+        "native_drop_ns": 70098490,
+        "non_cancel_counterexamples": [],
+        "sources": [
+          {
+            "path": "2026-09-04/0000003d--0e812cecba/rlog-18.zst",
+            "sha256": "e6cdc371a14dffd3282915b6b6d8b21d0e28b582cc430a42058d5e343547df35"
+          }
+        ]
+      },
+      {
+        "index": 20,
+        "mirror_cancel_intervals_ns": [
+          [
+            250090156,
+            652004531
+          ]
+        ],
+        "mode_before": [
+          192
+        ],
+        "native_drop_ns": 79020677,
+        "non_cancel_counterexamples": [],
+        "sources": [
+          {
+            "path": "2026-09-04/0000003d--0e812cecba/rlog-49.zst",
+            "sha256": "15371ad9cbaa02c369e2209afda81ea6faaf6c6696d0e24c8ae323c08f9b87a2"
+          }
+        ]
+      }
+    ],
+    "fixture": {
+      "path": "tests/fixtures/camry_2026_cancel_all_buses.jsonl.gz",
+      "sha256": "3c2973005684f7ccff87ce1e7057d50a933aa4522e48fcfc2f7a55994d9c2c8e"
+    },
+    "long_screen": {
+      "candidates": [
+        {
+          "address": "0x081",
+          "asserted": 0,
+          "bit": 3,
+          "bus": 0,
+          "byte": 13,
+          "length": 32
+        },
+        {
+          "address": "0x081",
+          "asserted": 0,
+          "bit": 1,
+          "bus": 0,
+          "byte": 13,
+          "length": 32
+        },
+        {
+          "address": "0x081",
+          "asserted": 0,
+          "bit": 0,
+          "bus": 0,
+          "byte": 13,
+          "length": 32
+        },
+        {
+          "address": "0x0FE",
+          "asserted": 1,
+          "bit": 6,
+          "bus": 0,
+          "byte": 4,
+          "length": 32
+        },
+        {
+          "address": "0x0FE",
+          "asserted": 0,
+          "bit": 5,
+          "bus": 0,
+          "byte": 7,
+          "length": 32
+        },
+        {
+          "address": "0x08A",
+          "asserted": 0,
+          "bit": 3,
+          "bus": 2,
+          "byte": 3,
+          "length": 32
+        },
+        {
+          "address": "0x08A",
+          "asserted": 0,
+          "bit": 5,
+          "bus": 2,
+          "byte": 6,
+          "length": 32
+        },
+        {
+          "address": "0x08A",
+          "asserted": 0,
+          "bit": 3,
+          "bus": 2,
+          "byte": 6,
+          "length": 32
+        },
+        {
+          "address": "0x08A",
+          "asserted": 0,
+          "bit": 2,
+          "bus": 2,
+          "byte": 6,
+          "length": 32
+        },
+        {
+          "address": "0x08A",
+          "asserted": 0,
+          "bit": 6,
+          "bus": 2,
+          "byte": 7,
+          "length": 32
+        },
+        {
+          "address": "0x08A",
+          "asserted": 1,
+          "bit": 4,
+          "bus": 2,
+          "byte": 7,
+          "length": 32
+        },
+        {
+          "address": "0x08A",
+          "asserted": 0,
+          "bit": 2,
+          "bus": 2,
+          "byte": 7,
+          "length": 32
+        },
+        {
+          "address": "0x08A",
+          "asserted": 0,
+          "bit": 6,
+          "bus": 2,
+          "byte": 20,
+          "length": 32
+        },
+        {
+          "address": "0x08A",
+          "asserted": 0,
+          "bit": 3,
+          "bus": 2,
+          "byte": 21,
+          "length": 32
+        },
+        {
+          "address": "0x08A",
+          "asserted": 0,
+          "bit": 1,
+          "bus": 2,
+          "byte": 21,
+          "length": 32
+        },
+        {
+          "address": "0x08A",
+          "asserted": 0,
+          "bit": 0,
+          "bus": 2,
+          "byte": 21,
+          "length": 32
+        },
+        {
+          "address": "0x08A",
+          "asserted": 0,
+          "bit": 4,
+          "bus": 2,
+          "byte": 22,
+          "length": 32
+        },
+        {
+          "address": "0x1B2",
+          "asserted": 1,
+          "bit": 5,
+          "bus": 2,
+          "byte": 0,
+          "length": 32
+        },
+        {
+          "address": "0x1B2",
+          "asserted": 0,
+          "bit": 1,
+          "bus": 2,
+          "byte": 0,
+          "length": 32
+        },
+        {
+          "address": "0x371",
+          "asserted": 0,
+          "bit": 4,
+          "bus": 2,
+          "byte": 9,
+          "length": 32
+        },
+        {
+          "address": "0x371",
+          "asserted": 0,
+          "bit": 1,
+          "bus": 2,
+          "byte": 20,
+          "length": 32
+        },
+        {
+          "address": "0x371",
+          "asserted": 0,
+          "bit": 5,
+          "bus": 2,
+          "byte": 25,
+          "length": 32
+        },
+        {
+          "address": "0x5F6",
+          "asserted": 1,
+          "bit": 7,
+          "bus": 2,
+          "byte": 4,
+          "length": 8
+        }
+      ],
+      "fully_sampled_stream_count_by_bus": {
+        "0": 40,
+        "1": 22,
+        "2": 16
+      },
+      "post_ns": [
+        -100000000,
+        1000000000
+      ],
+      "pre_ns": [
+        -1000000000,
+        -150000000
+      ],
+      "scope": "all payload bits, including B0..B2; raw observations without a SecOC-authentication claim; stable pre-state and at least one opposite post-state in every event"
+    },
+    "stock_placement": [
+      {
+        "sources": [
+          {
+            "path": "2026-09-11/000000d1--ad906be282/rlog-3.zst",
+            "sha256": "18f4af1974cf95c8b397353ac7b5f4b4739db283b5dffaec254a295568cf2781"
+          }
+        ],
+        "streams": [
+          {
+            "address": "0x0FE",
+            "bus": 1,
+            "count": 32,
+            "first_payload": "1e56a13f0000c362f166febbfebbfebb6540000000ff00000000000024c181ef",
+            "length": 32
+          },
+          {
+            "address": "0x101",
+            "bus": 1,
+            "count": 50,
+            "first_payload": "800000020000008c",
+            "length": 8
+          },
+          {
+            "address": "0x198",
+            "bus": 1,
+            "count": 10,
+            "first_payload": "3398fff600000000",
+            "length": 8
+          },
+          {
+            "address": "0x19C",
+            "bus": 1,
+            "count": 10,
+            "first_payload": "00000000000003f0",
+            "length": 8
+          },
+          {
+            "address": "0x1B2",
+            "bus": 1,
+            "count": 5,
+            "first_payload": "1000040000000000000000000000000000000000000000000000000000000000",
+            "length": 32
+          },
+          {
+            "address": "0x371",
+            "bus": 1,
+            "count": 5,
+            "first_payload": "00000000000000434410000000000000000100200401e1e1e01e01e8de000000",
+            "length": 32
+          },
+          {
+            "address": "0x5F6",
+            "bus": 1,
+            "count": 2,
+            "first_payload": "0000fe001f640000",
+            "length": 8
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "path": "2026-09-11/000000d1--ad906be282/rlog-4.zst",
+            "sha256": "dfdd325c874752b5035ef62b6f2e84630eb64784ebc9dba41698531539e54cdc"
+          }
+        ],
+        "streams": [
+          {
+            "address": "0x0FE",
+            "bus": 1,
+            "count": 31,
+            "first_payload": "ef7e040b0000c362ff0a0aeafff1ff0a6340000000ff00000000000064a591f4",
+            "length": 32
+          },
+          {
+            "address": "0x101",
+            "bus": 1,
+            "count": 50,
+            "first_payload": "800000010000008b",
+            "length": 8
+          },
+          {
+            "address": "0x198",
+            "bus": 1,
+            "count": 10,
+            "first_payload": "1df8fff600000000",
+            "length": 8
+          },
+          {
+            "address": "0x19C",
+            "bus": 1,
+            "count": 22,
+            "first_payload": "0000000000000030",
+            "length": 8
+          },
+          {
+            "address": "0x1B2",
+            "bus": 1,
+            "count": 5,
+            "first_payload": "1624240000000000000000000000000000000000000000000000000000000000",
+            "length": 32
+          },
+          {
+            "address": "0x371",
+            "bus": 1,
+            "count": 5,
+            "first_payload": "00000000000000434410000000000000000100200001e1e1e01e01e8de000000",
+            "length": 32
+          },
+          {
+            "address": "0x5F6",
+            "bus": 1,
+            "count": 2,
+            "first_payload": "0000fe001f640000",
+            "length": 8
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "path": "2026-09-11/000000d4--327b2c4bb8/rlog-3.zst",
+            "sha256": "d9da1cfd888b17a47a2771e197a06f923670f5cc2681e9a8ea3dc3f1f5a5c3bd"
+          }
+        ],
+        "streams": [
+          {
+            "address": "0x0FE",
+            "bus": 1,
+            "count": 32,
+            "first_payload": "fe9f533f0000c3e2f19afecdfecdfecd6540000000ff000000000000514de578",
+            "length": 32
+          },
+          {
+            "address": "0x101",
+            "bus": 1,
+            "count": 51,
+            "first_payload": "880f0004000000a5",
+            "length": 8
+          },
+          {
+            "address": "0x198",
+            "bus": 1,
+            "count": 10,
+            "first_payload": "c59bfff600000000",
+            "length": 8
+          },
+          {
+            "address": "0x19C",
+            "bus": 1,
+            "count": 10,
+            "first_payload": "00000000000003f0",
+            "length": 8
+          },
+          {
+            "address": "0x1B2",
+            "bus": 1,
+            "count": 5,
+            "first_payload": "0900040000000000000000000000000000000000000000000000000000000000",
+            "length": 32
+          },
+          {
+            "address": "0x371",
+            "bus": 1,
+            "count": 6,
+            "first_payload": "00000000000000434410000000000000000100200401e1e1e01e01e8de000000",
+            "length": 32
+          },
+          {
+            "address": "0x5F6",
+            "bus": 1,
+            "count": 2,
+            "first_payload": "0000fe801f640000",
+            "length": 8
+          }
+        ]
+      },
+      {
+        "sources": [
+          {
+            "path": "2026-09-11/000000d4--327b2c4bb8/rlog-4.zst",
+            "sha256": "1e08c6318fad0325621627bab6b19b3ba0ac439a122fdc908f72ca1af2edf1a0"
+          }
+        ],
+        "streams": [
+          {
+            "address": "0x0FE",
+            "bus": 1,
+            "count": 31,
+            "first_payload": "58cdb53f0000c362fec3109dfec3fec32340000000ff00000000000054f4f846",
+            "length": 32
+          },
+          {
+            "address": "0x101",
+            "bus": 1,
+            "count": 50,
+            "first_payload": "800000010000008b",
+            "length": 8
+          },
+          {
+            "address": "0x198",
+            "bus": 1,
+            "count": 10,
+            "first_payload": "affcfff400080000",
+            "length": 8
+          },
+          {
+            "address": "0x19C",
+            "bus": 1,
+            "count": 10,
+            "first_payload": "00000000000003f0",
+            "length": 8
+          },
+          {
+            "address": "0x1B2",
+            "bus": 1,
+            "count": 5,
+            "first_payload": "0500330000000000000000000000000000000000000000000000000000000000",
+            "length": 32
+          },
+          {
+            "address": "0x371",
+            "bus": 1,
+            "count": 5,
+            "first_payload": "00000000000000434410000000000000000100200001e1e1e01e01888e000000",
+            "length": 32
+          },
+          {
+            "address": "0x5F6",
+            "bus": 1,
+            "count": 2,
+            "first_payload": "0000fe801f640000",
+            "length": 8
+          }
+        ]
+      }
+    ]
+  },
+  "conclusion": {
+    "missing_fact": "Which ordinary received command the cruise controller accepts to cancel, and on which receiver path.",
+    "new_wire_fact": "0x1B2 B0 bits7/6/5 mirror RES-plus/SET-minus/CANCEL events independently of cruise operation.",
+    "runtime_changed": false,
+    "sender_recovered": false,
+    "topology_correction": "Unsplit placement prevents replacing a source stream but does not by itself rule out a cancel-only event command. That generic possibility is not target-specific acceptance evidence.",
+    "vehicle_commands_sent": false
+  },
+  "host_attempts": {
+    "boundary": "Only actual sendcan frames count as host attempts. Physical input before native release confounds attribution; a TX echo alone proves neither ECU parsing nor cancellation.",
+    "episodes": [
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 105,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": -21979947,
+            "input": "brake",
+            "payload": "8800000300000095"
+          }
+        ],
+        "first_send_ns": 67114559607,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 2,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 30519115,
+        "payload_matching_host_returns": 3,
+        "physical_inputs_fresh": true,
+        "route": "00000037--dec6fe39cb",
+        "selfdrive_alerts": {
+          "pedalPressed/userDisable": 21
+        },
+        "sources": [
+          {
+            "path": "2026-09-01/00000037--dec6fe39cb/rlog-0.zst",
+            "sha256": "f5a5d50958047dcab53956254b11672ad607385d712b1e525cc7b58e68676634"
+          }
+        ],
+        "unconfounded_observation": false
+      },
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 2,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": -12113385,
+            "input": "cancel",
+            "payload": "eec88f0b4000c342ff0109030144ff01e340000000ff000000000000494a022f"
+          }
+        ],
+        "first_send_ns": 147084846972,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 2,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 17688542,
+        "payload_matching_host_returns": 2,
+        "physical_inputs_fresh": true,
+        "route": "00000037--dec6fe39cb",
+        "selfdrive_alerts": {
+          "buttonCancel/userDisable": 21
+        },
+        "sources": [
+          {
+            "path": "2026-09-01/00000037--dec6fe39cb/rlog-1.zst",
+            "sha256": "8cb2eb3f2358971bc0feda816fbff35c69f0d6c0b5073f7020f9fe6bbf302530"
+          }
+        ],
+        "unconfounded_observation": false
+      },
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 4,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": -11716354,
+            "input": "cancel",
+            "payload": "b62a3e0b4000c342ff03109b0127ff036340000000ff0000000000009a859f16"
+          }
+        ],
+        "first_send_ns": 201399462004,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 4,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 58466458,
+        "payload_matching_host_returns": 4,
+        "physical_inputs_fresh": true,
+        "route": "00000037--dec6fe39cb",
+        "selfdrive_alerts": {
+          "buttonCancel/userDisable": 21
+        },
+        "sources": [
+          {
+            "path": "2026-09-01/00000037--dec6fe39cb/rlog-2.zst",
+            "sha256": "da6af2b9e12076eaf801c8b3bc902100a10a3cfde14028b7bf43bb4f2cb8d798"
+          }
+        ],
+        "unconfounded_observation": false
+      },
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 13,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": -21659896,
+            "input": "cancel",
+            "payload": "4d3e710b4000c342ff08105903e8ff08a340000000ff000000000000fcae95d6"
+          }
+        ],
+        "first_send_ns": 235531039022,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 3,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 38413594,
+        "payload_matching_host_returns": 3,
+        "physical_inputs_fresh": true,
+        "route": "00000037--dec6fe39cb",
+        "selfdrive_alerts": {
+          "buttonCancel/userDisable": 21
+        },
+        "sources": [
+          {
+            "path": "2026-09-01/00000037--dec6fe39cb/rlog-3.zst",
+            "sha256": "99d0aba120fe9df779ce06b356d229973c6aa2a277799fef8dbacb2428e58658"
+          }
+        ],
+        "unconfounded_observation": false
+      },
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 3,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": -10494375,
+            "input": "cancel",
+            "payload": "5744340b4000c342ff010c930097ff01e340000000ff00000000000067103352"
+          }
+        ],
+        "first_send_ns": 322979021072,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 3,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 48373542,
+        "payload_matching_host_returns": 3,
+        "physical_inputs_fresh": true,
+        "route": "00000037--dec6fe39cb",
+        "selfdrive_alerts": {
+          "buttonCancel/userDisable": 21
+        },
+        "sources": [
+          {
+            "path": "2026-09-01/00000037--dec6fe39cb/rlog-4.zst",
+            "sha256": "88f5744d3048acc7821c179f76bfbcd9dad5515494f2dfa5909315aec58d78c7"
+          }
+        ],
+        "unconfounded_observation": false
+      },
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 1,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": -21705156,
+            "input": "cancel",
+            "payload": "a5d36b0b4000c342ff0b0895ff53ff0b2340000000ff00000000000063e0a28b"
+          }
+        ],
+        "first_send_ns": 944199023910,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 1,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 8227656,
+        "payload_matching_host_returns": 1,
+        "physical_inputs_fresh": true,
+        "route": "0000003b--62262eb7a1",
+        "selfdrive_alerts": {
+          "buttonCancel/userDisable": 21
+        },
+        "sources": [
+          {
+            "path": "2026-09-04/0000003b--62262eb7a1/rlog-14.zst",
+            "sha256": "bd977d659ff8ffd878bb88614995e4dd00037071d7c396121acee090c49b978a"
+          }
+        ],
+        "unconfounded_observation": false
+      },
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 4,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": -12947968,
+            "input": "cancel",
+            "payload": "43fa813f4000c042ff0706d403d903d9a360000000ff0000000000004461cd79"
+          }
+        ],
+        "first_send_ns": 1765687024273,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 4,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 57291719,
+        "payload_matching_host_returns": 4,
+        "physical_inputs_fresh": true,
+        "route": "0000003b--62262eb7a1",
+        "selfdrive_alerts": {
+          "buttonCancel/userDisable": 21,
+          "gasPressedOverride/overrideLongitudinal": 156
+        },
+        "sources": [
+          {
+            "path": "2026-09-04/0000003b--62262eb7a1/rlog-28.zst",
+            "sha256": "24b8cba6cb7b08469ce9e4747021284cdd5d9792beb23ce22d67f1e97a3424e9"
+          }
+        ],
+        "unconfounded_observation": false
+      },
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 3,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": -22372031,
+            "input": "cancel",
+            "payload": "3e0caa0b4000c342ff0a05d3016eff0a6340000000ff00000000000025ce9912"
+          }
+        ],
+        "first_send_ns": 2506529094303,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 3,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 47996250,
+        "payload_matching_host_returns": 3,
+        "physical_inputs_fresh": true,
+        "route": "0000003b--62262eb7a1",
+        "selfdrive_alerts": {
+          "buttonCancel/userDisable": 21
+        },
+        "sources": [
+          {
+            "path": "2026-09-04/0000003b--62262eb7a1/rlog-40.zst",
+            "sha256": "51df741aaba5ccbe9dfa3d8338de087fd3b0bd6771e991d41278f546a2b98218"
+          }
+        ],
+        "unconfounded_observation": false
+      },
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 4,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": -21344427,
+            "input": "cancel",
+            "payload": "89dc810b4000c342ff0b05a90137ff0ba340000000ff000000000000099321c5"
+          }
+        ],
+        "first_send_ns": 3301659652125,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 4,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 58033385,
+        "payload_matching_host_returns": 4,
+        "physical_inputs_fresh": true,
+        "route": "0000003b--62262eb7a1",
+        "selfdrive_alerts": {
+          "buttonCancel/userDisable": 21
+        },
+        "sources": [
+          {
+            "path": "2026-09-04/0000003b--62262eb7a1/rlog-54.zst",
+            "sha256": "534898db70a83fd9343fd8c65d7bb74e07acbc8acd9528acadc9d6aa4e09b79c"
+          }
+        ],
+        "unconfounded_observation": false
+      },
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 4,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": -11079948,
+            "input": "cancel",
+            "payload": "01eede0b4000c342fe7e0703fe7efe7e2340000000ff000000000000b275ad7c"
+          }
+        ],
+        "first_send_ns": 3442758465092,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 4,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 68301302,
+        "payload_matching_host_returns": 4,
+        "physical_inputs_fresh": true,
+        "route": "0000003b--62262eb7a1",
+        "selfdrive_alerts": {
+          "buttonCancel/userDisable": 21
+        },
+        "sources": [
+          {
+            "path": "2026-09-04/0000003b--62262eb7a1/rlog-56.zst",
+            "sha256": "632e0295eef16618736aea06784fbb630eccb0a677f1b9c9d9473f1c2fd60cb6"
+          }
+        ],
+        "unconfounded_observation": false
+      },
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 5,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": -21930052,
+            "input": "cancel",
+            "payload": "9279d73f4000c342fe340a69fea0fea06360000000ff000000000000ec9e260b"
+          }
+        ],
+        "first_send_ns": 4011412601698,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 5,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 77800885,
+        "payload_matching_host_returns": 5,
+        "physical_inputs_fresh": true,
+        "route": "0000003b--62262eb7a1",
+        "selfdrive_alerts": {
+          "buttonCancel/userDisable": 21,
+          "gasPressedOverride/overrideLongitudinal": 7
+        },
+        "sources": [
+          {
+            "path": "2026-09-04/0000003b--62262eb7a1/rlog-65.zst",
+            "sha256": "59b025230c1f9b6a8d93da9bcb594b3ce96740db42a48de06ac75dd2e63b26e9"
+          },
+          {
+            "path": "2026-09-04/0000003b--62262eb7a1/rlog-66.zst",
+            "sha256": "6469a7979e2f190e4cdbab36624ed00d779111ea92ab80c42250f20fe53916dd"
+          }
+        ],
+        "unconfounded_observation": false
+      },
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 141,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": -11935416,
+            "input": "brake",
+            "payload": "8801000600000099"
+          }
+        ],
+        "first_send_ns": 4081929948650,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 57,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 1123419114,
+        "payload_matching_host_returns": 79,
+        "physical_inputs_fresh": true,
+        "route": "0000003b--62262eb7a1",
+        "selfdrive_alerts": {
+          "gasPressedOverride/overrideLongitudinal": 59,
+          "pedalPressed/userDisable": 21
+        },
+        "sources": [
+          {
+            "path": "2026-09-04/0000003b--62262eb7a1/rlog-67.zst",
+            "sha256": "305654c1044347877297cd6fa003821a53f45b0e730f41c9ab532645253db718"
+          }
+        ],
+        "unconfounded_observation": false
+      },
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 2,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": -12253646,
+            "input": "cancel",
+            "payload": "7bb59a3f4000c042fe860c58ff29ff29a360000000ff0000000000003c0a331f"
+          }
+        ],
+        "first_send_ns": 4480823811363,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 2,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 27700208,
+        "payload_matching_host_returns": 2,
+        "physical_inputs_fresh": true,
+        "route": "0000003b--62262eb7a1",
+        "selfdrive_alerts": {
+          "buttonCancel/userDisable": 21,
+          "gasPressedOverride/overrideLongitudinal": 93
+        },
+        "sources": [
+          {
+            "path": "2026-09-04/0000003b--62262eb7a1/rlog-73.zst",
+            "sha256": "3220c75f428dffc4f07dc38c06438e499cfa0fd8c169529730cf9f537d099be0"
+          }
+        ],
+        "unconfounded_observation": false
+      },
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 51,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": -21518282,
+            "input": "brake",
+            "payload": "8800000500000097"
+          }
+        ],
+        "first_send_ns": 4646858294633,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 4,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 57899843,
+        "payload_matching_host_returns": 8,
+        "physical_inputs_fresh": true,
+        "route": "0000003b--62262eb7a1",
+        "selfdrive_alerts": {
+          "pedalPressed/userDisable": 21
+        },
+        "sources": [
+          {
+            "path": "2026-09-04/0000003b--62262eb7a1/rlog-76.zst",
+            "sha256": "a87d4e97a5738ee0d349c4b3d0070ef5158ec5f89e13fda0bf7edf9468af5ca8"
+          }
+        ],
+        "unconfounded_observation": false
+      },
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 4,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": -11920313,
+            "input": "cancel",
+            "payload": "3fed260b4000c342ffde0d71006affde6340000000ff00000000000065d4c902"
+          }
+        ],
+        "first_send_ns": 4729070194289,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 4,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 60257031,
+        "payload_matching_host_returns": 4,
+        "physical_inputs_fresh": true,
+        "route": "0000003b--62262eb7a1",
+        "selfdrive_alerts": {
+          "buttonCancel/userDisable": 21,
+          "gasPressedOverride/overrideLongitudinal": 98
+        },
+        "sources": [
+          {
+            "path": "2026-09-04/0000003b--62262eb7a1/rlog-77.zst",
+            "sha256": "50caa8ec01951d0fd063ba8b88a7e9ffe8a081a97c605d676d1af32edace2477"
+          },
+          {
+            "path": "2026-09-04/0000003b--62262eb7a1/rlog-78.zst",
+            "sha256": "9544f815b68675e8e1312661b761403205ca95e9362e20bb92e5678e89633c6c"
+          }
+        ],
+        "unconfounded_observation": false
+      },
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 3,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": -21862656,
+            "input": "cancel",
+            "payload": "80d20f3f4000c042ff0108f5025e025ee360000000ff0000000000006a1d63b8"
+          }
+        ],
+        "first_send_ns": 4785240230153,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 3,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 48576406,
+        "payload_matching_host_returns": 3,
+        "physical_inputs_fresh": true,
+        "route": "0000003b--62262eb7a1",
+        "selfdrive_alerts": {
+          "buttonCancel/userDisable": 21,
+          "gasPressedOverride/overrideLongitudinal": 197
+        },
+        "sources": [
+          {
+            "path": "2026-09-04/0000003b--62262eb7a1/rlog-78.zst",
+            "sha256": "9544f815b68675e8e1312661b761403205ca95e9362e20bb92e5678e89633c6c"
+          }
+        ],
+        "unconfounded_observation": false
+      },
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 79,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": -11607656,
+            "input": "brake",
+            "payload": "8800000500000097"
+          }
+        ],
+        "first_send_ns": 4823676397482,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 4,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 57673177,
+        "payload_matching_host_returns": 4,
+        "physical_inputs_fresh": true,
+        "route": "0000003b--62262eb7a1",
+        "selfdrive_alerts": {
+          "gasPressedOverride/overrideLongitudinal": 126,
+          "pedalPressed/userDisable": 21
+        },
+        "sources": [
+          {
+            "path": "2026-09-04/0000003b--62262eb7a1/rlog-79.zst",
+            "sha256": "afcfd8a45b716d285bad60c764b8f89c882b21925d13651330d691aa26d0d2aa"
+          }
+        ],
+        "unconfounded_observation": false
+      },
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 238,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": -22349062,
+            "input": "brake",
+            "payload": "880000090000009b"
+          }
+        ],
+        "first_send_ns": 4877598311784,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 113,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 2247448854,
+        "payload_matching_host_returns": 162,
+        "physical_inputs_fresh": true,
+        "route": "0000003b--62262eb7a1",
+        "selfdrive_alerts": {
+          "gasPressedOverride/overrideLongitudinal": 85,
+          "pedalPressed/userDisable": 21
+        },
+        "sources": [
+          {
+            "path": "2026-09-04/0000003b--62262eb7a1/rlog-80.zst",
+            "sha256": "189734f785992e01e40c05d87b43b4f94db35f05c849105122caddd8815d3052"
+          }
+        ],
+        "unconfounded_observation": false
+      },
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 4,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": -21518490,
+            "input": "cancel",
+            "payload": "da3f210b4000c342ff0f0aeaff0fff0f6340000000ff000000000000dfff221d"
+          }
+        ],
+        "first_send_ns": 5452206923701,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 4,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 58542552,
+        "payload_matching_host_returns": 4,
+        "physical_inputs_fresh": true,
+        "route": "0000003b--62262eb7a1",
+        "selfdrive_alerts": {
+          "buttonCancel/userDisable": 21
+        },
+        "sources": [
+          {
+            "path": "2026-09-04/0000003b--62262eb7a1/rlog-89.zst",
+            "sha256": "305cb6645d13c9500f39248e14cdd625e99c722efa01efdd86d7187de7b6c829"
+          },
+          {
+            "path": "2026-09-04/0000003b--62262eb7a1/rlog-90.zst",
+            "sha256": "48c55b274d76f30e1384a3fda15a9b8d5ea51bb96acfdddd57253439dee9ac55"
+          }
+        ],
+        "unconfounded_observation": false
+      },
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 2,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": -11436042,
+            "input": "cancel",
+            "payload": "4734ce0b4000c342ff000dc8033eff002340000000ff00000000000062bb8c24"
+          }
+        ],
+        "first_send_ns": 5864026855002,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 2,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 29191666,
+        "payload_matching_host_returns": 2,
+        "physical_inputs_fresh": true,
+        "route": "0000003b--62262eb7a1",
+        "selfdrive_alerts": {
+          "buttonCancel/userDisable": 21
+        },
+        "sources": [
+          {
+            "path": "2026-09-04/0000003b--62262eb7a1/rlog-96.zst",
+            "sha256": "c6ceb5bb99ce901ffe0958ff90517ba62278c69dde02bb548883ead337989e6a"
+          }
+        ],
+        "unconfounded_observation": false
+      },
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 125,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": -11660156,
+            "input": "brake",
+            "payload": "8800000200000094"
+          }
+        ],
+        "first_send_ns": 5887512806503,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 13,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 248384792,
+        "payload_matching_host_returns": 30,
+        "physical_inputs_fresh": true,
+        "route": "0000003b--62262eb7a1",
+        "selfdrive_alerts": {
+          "pcmEnable/enable": 21,
+          "pedalPressed/userDisable": 21
+        },
+        "sources": [
+          {
+            "path": "2026-09-04/0000003b--62262eb7a1/rlog-97.zst",
+            "sha256": "a349b45ed60980112e4d33ca73bb7f46fb8482f9c0b99e97257f991e4f08247e"
+          }
+        ],
+        "unconfounded_observation": false
+      },
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 2,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": -10968750,
+            "input": "cancel",
+            "payload": "70b6cb3f4000c042ff10109d01ec01ec6360000000ff000000000000a3c57aad"
+          }
+        ],
+        "first_send_ns": 5896433204208,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 2,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 28501250,
+        "payload_matching_host_returns": 2,
+        "physical_inputs_fresh": true,
+        "route": "0000003b--62262eb7a1",
+        "selfdrive_alerts": {
+          "buttonCancel/userDisable": 21,
+          "gasPressedOverride/overrideLongitudinal": 177
+        },
+        "sources": [
+          {
+            "path": "2026-09-04/0000003b--62262eb7a1/rlog-97.zst",
+            "sha256": "a349b45ed60980112e4d33ca73bb7f46fb8482f9c0b99e97257f991e4f08247e"
+          }
+        ],
+        "unconfounded_observation": false
+      },
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 3,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": -21844115,
+            "input": "cancel",
+            "payload": "e722300b4000c342ff02074c0112ff02e340000000ff000000000000347c0bd5"
+          }
+        ],
+        "first_send_ns": 8480018064004,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 3,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 37825469,
+        "payload_matching_host_returns": 3,
+        "physical_inputs_fresh": true,
+        "route": "0000003c--97b9e7a69a",
+        "selfdrive_alerts": {
+          "buttonCancel/userDisable": 21
+        },
+        "sources": [
+          {
+            "path": "2026-09-04/0000003c--97b9e7a69a/rlog-16.zst",
+            "sha256": "d177afc1fd182b23e90393214f7dc3fe152e6856c8abca58456d5239f5813ca5"
+          }
+        ],
+        "unconfounded_observation": false
+      },
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 45,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": -21130208,
+            "input": "brake",
+            "payload": "8800000400000096"
+          }
+        ],
+        "first_send_ns": 9554503697500,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 27,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 520831354,
+        "payload_matching_host_returns": 38,
+        "physical_inputs_fresh": true,
+        "route": "0000003c--97b9e7a69a",
+        "selfdrive_alerts": {
+          "pedalPressed/userDisable": 21
+        },
+        "sources": [
+          {
+            "path": "2026-09-04/0000003c--97b9e7a69a/rlog-34.zst",
+            "sha256": "1f28ce2751abd6bbda1b3c9b68568934200f4df945147dccbabc40c99cb3266f"
+          }
+        ],
+        "unconfounded_observation": false
+      },
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 4,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": -11902448,
+            "input": "cancel",
+            "payload": "e4fb600b4000c342ff0304d0ff38ff03a340000000ff0000000000000b98d9e5"
+          }
+        ],
+        "first_send_ns": 9838701388017,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 4,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 60667864,
+        "payload_matching_host_returns": 4,
+        "physical_inputs_fresh": true,
+        "route": "0000003c--97b9e7a69a",
+        "selfdrive_alerts": {
+          "buttonCancel/userDisable": 21
+        },
+        "sources": [
+          {
+            "path": "2026-09-04/0000003c--97b9e7a69a/rlog-39.zst",
+            "sha256": "cb17c772732b0a5e1789b3071e09a9e11a18f44b356476635f9613f1defe1fbc"
+          }
+        ],
+        "unconfounded_observation": false
+      },
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 8,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": -21756198,
+            "input": "cancel",
+            "payload": "7a5d610b4000c342fe330a4cfe33fe33e340000000ff000000000000076e2e18"
+          }
+        ],
+        "first_send_ns": 10017533511126,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 8,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 150423125,
+        "payload_matching_host_returns": 8,
+        "physical_inputs_fresh": true,
+        "route": "0000003c--97b9e7a69a",
+        "selfdrive_alerts": {
+          "buttonCancel/userDisable": 21
+        },
+        "sources": [
+          {
+            "path": "2026-09-04/0000003c--97b9e7a69a/rlog-41.zst",
+            "sha256": "b786ef4e3e5f1ea95603bd020ff4fd4a0cd212b5b3b3ae07f8567867656722b2"
+          },
+          {
+            "path": "2026-09-04/0000003c--97b9e7a69a/rlog-42.zst",
+            "sha256": "9871f75a7749ca871657ccf76e169742eadb15847500d71c290119f5d6e92b96"
+          }
+        ],
+        "unconfounded_observation": false
+      },
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 1,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": -21878438,
+            "input": "cancel",
+            "payload": "34b26d0b4000c342ff0406f901b6ff04a340000000ff0000000000007c6d73fe"
+          }
+        ],
+        "first_send_ns": 10505525933023,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 1,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 7877239,
+        "payload_matching_host_returns": 1,
+        "physical_inputs_fresh": true,
+        "route": "0000003c--97b9e7a69a",
+        "selfdrive_alerts": {
+          "buttonCancel/userDisable": 21
+        },
+        "sources": [
+          {
+            "path": "2026-09-04/0000003c--97b9e7a69a/rlog-50.zst",
+            "sha256": "3d29c08fa662a46a23d4ec75748f0e501ef5254ebcf428fd704339fb305078cf"
+          }
+        ],
+        "unconfounded_observation": false
+      },
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 3,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": -21305157,
+            "input": "cancel",
+            "payload": "a91e150b4000c342ff0506e90101ff056340000000ff0000000000006ceb23d3"
+          }
+        ],
+        "first_send_ns": 10714026131329,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 3,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 38958593,
+        "payload_matching_host_returns": 3,
+        "physical_inputs_fresh": true,
+        "route": "0000003c--97b9e7a69a",
+        "selfdrive_alerts": {
+          "buttonCancel/userDisable": 21
+        },
+        "sources": [
+          {
+            "path": "2026-09-04/0000003c--97b9e7a69a/rlog-53.zst",
+            "sha256": "06a905dcab9e91e709a31bb0de3dbc97b99686921555eb9dfb3dc220f658dd94"
+          }
+        ],
+        "unconfounded_observation": false
+      },
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 4,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": -12164427,
+            "input": "cancel",
+            "payload": "4c8f4e0b4000c342ff0407a900eeff042340000000ff00000000000018734600"
+          }
+        ],
+        "first_send_ns": 10740202318975,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 4,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 68188177,
+        "payload_matching_host_returns": 4,
+        "physical_inputs_fresh": true,
+        "route": "0000003c--97b9e7a69a",
+        "selfdrive_alerts": {
+          "buttonCancel/userDisable": 21
+        },
+        "sources": [
+          {
+            "path": "2026-09-04/0000003c--97b9e7a69a/rlog-54.zst",
+            "sha256": "4c99349161399307880cf30bd8bf71813ed19e15b4098a93d4d3acc3ede2f5c8"
+          }
+        ],
+        "unconfounded_observation": false
+      },
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 92,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": -22431094,
+            "input": "cancel",
+            "payload": "19b8fe0b4000c342fe32095bfe32fe32e340000000ff000000000000b1cc3b54"
+          }
+        ],
+        "first_send_ns": 11038365156934,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 5,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 87444740,
+        "payload_matching_host_returns": 5,
+        "physical_inputs_fresh": true,
+        "route": "0000003c--97b9e7a69a",
+        "selfdrive_alerts": {
+          "buttonCancel/userDisable": 21
+        },
+        "sources": [
+          {
+            "path": "2026-09-04/0000003c--97b9e7a69a/rlog-59.zst",
+            "sha256": "706b2fd1f5b0452709c14142e57db6658533552f7d4d65d3c9ccff240a34c8de"
+          }
+        ],
+        "unconfounded_observation": false
+      },
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 4,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": -11588750,
+            "input": "cancel",
+            "payload": "2a186a0b4000c342ff0306ed013eff03e340000000ff0000000000009bb4353f"
+          }
+        ],
+        "first_send_ns": 22984189699356,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 4,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 58509740,
+        "payload_matching_host_returns": 4,
+        "physical_inputs_fresh": true,
+        "route": "0000003d--0e812cecba",
+        "selfdrive_alerts": {
+          "buttonCancel/userDisable": 21
+        },
+        "sources": [
+          {
+            "path": "2026-09-04/0000003d--0e812cecba/rlog-18.zst",
+            "sha256": "e6cdc371a14dffd3282915b6b6d8b21d0e28b582cc430a42058d5e343547df35"
+          }
+        ],
+        "unconfounded_observation": false
+      },
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 4,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": -21866354,
+            "input": "cancel",
+            "payload": "eee85c0b4000c342ff0b05d4010dff0ba340000000ff000000000000ea33c7a8"
+          }
+        ],
+        "first_send_ns": 24852922498539,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 4,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 57154323,
+        "payload_matching_host_returns": 4,
+        "physical_inputs_fresh": true,
+        "route": "0000003d--0e812cecba",
+        "selfdrive_alerts": {
+          "buttonCancel/userDisable": 21
+        },
+        "sources": [
+          {
+            "path": "2026-09-04/0000003d--0e812cecba/rlog-49.zst",
+            "sha256": "15371ad9cbaa02c369e2209afda81ea6faaf6c6696d0e24c8ae323c08f9b87a2"
+          }
+        ],
+        "unconfounded_observation": false
+      },
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 3,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": -21611354,
+            "input": "cancel",
+            "payload": "6ef5320b4000c342ff070384ff7dff076340000000ff000000000000c476e33e"
+          }
+        ],
+        "first_send_ns": 4027228089737,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 3,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 48575573,
+        "payload_matching_host_returns": 3,
+        "physical_inputs_fresh": true,
+        "route": "0000003e--1a2f20417d",
+        "selfdrive_alerts": {
+          "buttonCancel/userDisable": 21,
+          "gasPressedOverride/overrideLongitudinal": 6,
+          "laneChange/warning": 73,
+          "steerOverride/overrideLateral": 22
+        },
+        "sources": [
+          {
+            "path": "2026-09-06/0000003e--1a2f20417d/0000003e--1a2f20417d--65/rlog.zst",
+            "sha256": "a1e1f723da82bf83a661badd6cc2f7cb9730f4d40a9caf416abb7e7a85d4305a"
+          }
+        ],
+        "unconfounded_observation": false
+      },
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 1,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": -21615104,
+            "input": "cancel",
+            "payload": "21bc603f4000c042ff0108cd018b018ba360000000ff0000000000004a643acc"
+          }
+        ],
+        "first_send_ns": 5756370742411,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 1,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 8009062,
+        "payload_matching_host_returns": 1,
+        "physical_inputs_fresh": true,
+        "route": "0000003f--36e72f5fdc",
+        "selfdrive_alerts": {
+          "buttonCancel/userDisable": 21,
+          "gasPressedOverride/overrideLongitudinal": 160,
+          "steerOverride/overrideLateral": 31
+        },
+        "sources": [
+          {
+            "path": "2026-09-06/0000003f--36e72f5fdc/0000003f--36e72f5fdc--14/rlog.zst",
+            "sha256": "8c40a9489764735549ab0ad9a1305c2d7753f9e1757af6edf213c8f9fad7c260"
+          }
+        ],
+        "unconfounded_observation": false
+      },
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 106,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": -13015104,
+            "input": "brake",
+            "payload": "88000014000000a6"
+          }
+        ],
+        "first_send_ns": 5833535406183,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 3,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 47066042,
+        "payload_matching_host_returns": 3,
+        "physical_inputs_fresh": true,
+        "route": "0000003f--36e72f5fdc",
+        "selfdrive_alerts": {
+          "pedalPressed/userDisable": 21,
+          "steerOverride/overrideLateral": 30
+        },
+        "sources": [
+          {
+            "path": "2026-09-06/0000003f--36e72f5fdc/0000003f--36e72f5fdc--15/rlog.zst",
+            "sha256": "d7ccefc8f3a961bcd56232571221ba5aec0060fc4e2010bab840e0468fbaa6f9"
+          }
+        ],
+        "unconfounded_observation": false
+      },
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 2,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": -21697604,
+            "input": "cancel",
+            "payload": "c4929a0b4000c342ff050711008fff05a340000000ff00000000000084966262"
+          }
+        ],
+        "first_send_ns": 5880113461374,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 2,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 27770104,
+        "payload_matching_host_returns": 2,
+        "physical_inputs_fresh": true,
+        "route": "0000003f--36e72f5fdc",
+        "selfdrive_alerts": {
+          "buttonCancel/userDisable": 21
+        },
+        "sources": [
+          {
+            "path": "2026-09-06/0000003f--36e72f5fdc/0000003f--36e72f5fdc--16/rlog.zst",
+            "sha256": "ca5cbaeb1b9fa8ae0942e217484836515605fb5823cbe7c6f539e2fe5d46fcdd"
+          }
+        ],
+        "unconfounded_observation": false
+      },
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 4,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": -11577396,
+            "input": "cancel",
+            "payload": "3c4bb10b4000c342ff0706b50119ff072340000000ff0000000000003b07b340"
+          }
+        ],
+        "first_send_ns": 5913339631622,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 4,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 57526093,
+        "payload_matching_host_returns": 4,
+        "physical_inputs_fresh": true,
+        "route": "0000003f--36e72f5fdc",
+        "selfdrive_alerts": {
+          "buttonCancel/userDisable": 21,
+          "steerOverride/overrideLateral": 3
+        },
+        "sources": [
+          {
+            "path": "2026-09-06/0000003f--36e72f5fdc/0000003f--36e72f5fdc--16/rlog.zst",
+            "sha256": "ca5cbaeb1b9fa8ae0942e217484836515605fb5823cbe7c6f539e2fe5d46fcdd"
+          },
+          {
+            "path": "2026-09-06/0000003f--36e72f5fdc/0000003f--36e72f5fdc--17/rlog.zst",
+            "sha256": "0c5f7eb0fc68abebee8d1ff274f4a36828bd929dac71fe3bd6d5aa38e4c71a7f"
+          }
+        ],
+        "unconfounded_observation": false
+      },
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 2,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": -21989114,
+            "input": "cancel",
+            "payload": "ab35a60b4000c342ff02081b02a8ff026340000000ff000000000000c594e785"
+          }
+        ],
+        "first_send_ns": 6140546872368,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 2,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 27246875,
+        "payload_matching_host_returns": 2,
+        "physical_inputs_fresh": true,
+        "route": "0000003f--36e72f5fdc",
+        "selfdrive_alerts": {
+          "buttonCancel/userDisable": 21,
+          "steerOverride/overrideLateral": 25
+        },
+        "sources": [
+          {
+            "path": "2026-09-06/0000003f--36e72f5fdc/0000003f--36e72f5fdc--20/rlog.zst",
+            "sha256": "e9ec1ccc67db62ef71e0c52a1e84b00f04b4c384600a756dbe1b0510f6271b8e"
+          }
+        ],
+        "unconfounded_observation": false
+      },
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 2,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": -22101458,
+            "input": "cancel",
+            "payload": "bb1d0a0b4000c342ff0b062501e1ff0ba340000000ff000000000000bef82ff6"
+          }
+        ],
+        "first_send_ns": 7533409369441,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 2,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 27479792,
+        "payload_matching_host_returns": 2,
+        "physical_inputs_fresh": true,
+        "route": "0000003f--36e72f5fdc",
+        "selfdrive_alerts": {
+          "buttonCancel/userDisable": 21
+        },
+        "sources": [
+          {
+            "path": "2026-09-06/0000003f--36e72f5fdc/0000003f--36e72f5fdc--43/rlog.zst",
+            "sha256": "7ebb532e30789c0dc051b8260ebc81e7fd5a8e87879216b36af44e3f7b40791c"
+          },
+          {
+            "path": "2026-09-06/0000003f--36e72f5fdc/0000003f--36e72f5fdc--44/rlog.zst",
+            "sha256": "fcbd4afb1f8f6010a61e337c90cbfcf1157f39b028bb1108a210f005b85cc329"
+          }
+        ],
+        "unconfounded_observation": false
+      },
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 1,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": -21788698,
+            "input": "cancel",
+            "payload": "609aa20b4000c342ff08067b00b9ff08a340000000ff0000000000001bca12a8"
+          }
+        ],
+        "first_send_ns": 9236730571135,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 1,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 7962083,
+        "payload_matching_host_returns": 1,
+        "physical_inputs_fresh": true,
+        "route": "0000003f--36e72f5fdc",
+        "selfdrive_alerts": {
+          "buttonCancel/userDisable": 21
+        },
+        "sources": [
+          {
+            "path": "2026-09-06/0000003f--36e72f5fdc/0000003f--36e72f5fdc--72/rlog.zst",
+            "sha256": "a40da1edd670614e6658cab0f4f4032beafe1d4974a3c149f58f594064e4b970"
+          }
+        ],
+        "unconfounded_observation": false
+      },
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 2,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": -11882064,
+            "input": "cancel",
+            "payload": "f15c1d0b4000c342ff0108d80257ff016340000000ff0000000000005a59c417"
+          }
+        ],
+        "first_send_ns": 584068498890,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 2,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 27740667,
+        "payload_matching_host_returns": 2,
+        "physical_inputs_fresh": true,
+        "route": "00000045--805b7ca6ab",
+        "selfdrive_alerts": {
+          "buttonCancel/userDisable": 21,
+          "steerOverride/overrideLateral": 14
+        },
+        "sources": [
+          {
+            "path": "2026-09-07/00000045--805b7ca6ab/00000045--805b7ca6ab--3/rlog.zst",
+            "sha256": "708c61673781ea0623542a8e63039cea5733f2e765565fb776739c3dbc5e2c0d"
+          }
+        ],
+        "unconfounded_observation": false
+      },
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 62,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": -22616906,
+            "input": "cancel",
+            "payload": "69f8460b4000c342ff01077e00a0ff012340000000ff0000000000004fa5cce0"
+          }
+        ],
+        "first_send_ns": 739785234155,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 2,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 17393253,
+        "payload_matching_host_returns": 2,
+        "physical_inputs_fresh": true,
+        "route": "00000045--805b7ca6ab",
+        "selfdrive_alerts": {
+          "buttonCancel/userDisable": 21
+        },
+        "sources": [
+          {
+            "path": "2026-09-07/00000045--805b7ca6ab/00000045--805b7ca6ab--5/rlog.zst",
+            "sha256": "12e8774fd94a8436d75c52767e27c6a18dd1546278ef0298a5f680eeeb31ead1"
+          },
+          {
+            "path": "2026-09-07/00000045--805b7ca6ab/00000045--805b7ca6ab--6/rlog.zst",
+            "sha256": "e840d7bafb7d56cf112e930fbeef14b06a80778684e4c2fafe2cde520dabc3a0"
+          }
+        ],
+        "unconfounded_observation": false
+      },
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 4,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": -11917891,
+            "input": "cancel",
+            "payload": "e482d23f4000c042feec078d007700772360000000ff00000000000087d3f483"
+          }
+        ],
+        "first_send_ns": 768594740259,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 4,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 58443181,
+        "payload_matching_host_returns": 4,
+        "physical_inputs_fresh": true,
+        "route": "00000045--805b7ca6ab",
+        "selfdrive_alerts": {
+          "buttonCancel/userDisable": 21,
+          "gasPressedOverride/overrideLongitudinal": 8,
+          "steerOverride/overrideLateral": 189
+        },
+        "sources": [
+          {
+            "path": "2026-09-07/00000045--805b7ca6ab/00000045--805b7ca6ab--6/rlog.zst",
+            "sha256": "e840d7bafb7d56cf112e930fbeef14b06a80778684e4c2fafe2cde520dabc3a0"
+          }
+        ],
+        "unconfounded_observation": false
+      },
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 3,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": -21702513,
+            "input": "cancel",
+            "payload": "db4a560b4000c342ff01079f00c7ff012340000000ff000000000000a9386043"
+          }
+        ],
+        "first_send_ns": 1122233993624,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 3,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 48381447,
+        "payload_matching_host_returns": 3,
+        "physical_inputs_fresh": true,
+        "route": "00000045--805b7ca6ab",
+        "selfdrive_alerts": {
+          "buttonCancel/userDisable": 21
+        },
+        "sources": [
+          {
+            "path": "2026-09-07/00000045--805b7ca6ab/00000045--805b7ca6ab--12/rlog.zst",
+            "sha256": "8e6256d280ffab2084c88ad94922df36132fa9148ea70ce6c35c78c1b59d6551"
+          }
+        ],
+        "unconfounded_observation": false
+      },
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 2,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": -12093627,
+            "input": "cancel",
+            "payload": "9c3ab33f4000c042ff16109d03140314a360000000ff0000000000007cef87b4"
+          }
+        ],
+        "first_send_ns": 377823129926,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 2,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 27803740,
+        "payload_matching_host_returns": 2,
+        "physical_inputs_fresh": true,
+        "route": "00000048--709f22277b",
+        "selfdrive_alerts": {
+          "buttonCancel/userDisable": 21,
+          "gasPressedOverride/overrideLongitudinal": 68,
+          "steerOverride/overrideLateral": 124
+        },
+        "sources": [
+          {
+            "path": "2026-09-07/00000048--709f22277b/00000048--709f22277b--1/rlog.zst",
+            "sha256": "658858a05cb6411bc99105526f0744560f3316467cd68901ff1bedd567aaaf13"
+          }
+        ],
+        "unconfounded_observation": false
+      },
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 4,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": -11749522,
+            "input": "cancel",
+            "payload": "81509b0b4000c342fee80d33ff6efee8e340000000ff000000000000af9ff30f"
+          }
+        ],
+        "first_send_ns": 433939158931,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 4,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 68153603,
+        "payload_matching_host_returns": 4,
+        "physical_inputs_fresh": true,
+        "route": "00000048--709f22277b",
+        "selfdrive_alerts": {
+          "buttonCancel/userDisable": 21,
+          "steerOverride/overrideLateral": 133
+        },
+        "sources": [
+          {
+            "path": "2026-09-07/00000048--709f22277b/00000048--709f22277b--2/rlog.zst",
+            "sha256": "b0f40c38941e4b92e89c549cbc7e692730fcea3cd345c236f08bc203a6acb82c"
+          }
+        ],
+        "unconfounded_observation": false
+      },
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 82,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": -11855670,
+            "input": "brake",
+            "payload": "8800000300000095"
+          }
+        ],
+        "first_send_ns": 439079428526,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 2,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 27809981,
+        "payload_matching_host_returns": 2,
+        "physical_inputs_fresh": true,
+        "route": "00000048--709f22277b",
+        "selfdrive_alerts": {
+          "pedalPressed/userDisable": 21,
+          "steerOverride/overrideLateral": 6
+        },
+        "sources": [
+          {
+            "path": "2026-09-07/00000048--709f22277b/00000048--709f22277b--2/rlog.zst",
+            "sha256": "b0f40c38941e4b92e89c549cbc7e692730fcea3cd345c236f08bc203a6acb82c"
+          }
+        ],
+        "unconfounded_observation": false
+      },
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 103,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": 17576313,
+            "input": "brake",
+            "payload": "8801000600000099"
+          },
+          {
+            "first_relative_ns": -21955742,
+            "input": "cancel",
+            "payload": "981b1c0b4000c342ff010e24001dff012340000000ff000000000000473ed074"
+          }
+        ],
+        "first_send_ns": 511188269680,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 2,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 17576313,
+        "payload_matching_host_returns": 2,
+        "physical_inputs_fresh": true,
+        "route": "00000048--709f22277b",
+        "selfdrive_alerts": {
+          "buttonCancel/userDisable": 21,
+          "steerOverride/overrideLateral": 54
+        },
+        "sources": [
+          {
+            "path": "2026-09-07/00000048--709f22277b/00000048--709f22277b--3/rlog.zst",
+            "sha256": "0fa15a5d1db36a0518357fcdfbe56e93e5a1e6ca5619f724cd22e45f1299b0d2"
+          }
+        ],
+        "unconfounded_observation": false
+      },
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 2,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": -12142185,
+            "input": "cancel",
+            "payload": "09ffca0b4000c342ff0109ad0356ff012340000000ff000000000000a945bfd4"
+          }
+        ],
+        "first_send_ns": 622344566596,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 2,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 17513060,
+        "payload_matching_host_returns": 2,
+        "physical_inputs_fresh": true,
+        "route": "00000048--709f22277b",
+        "selfdrive_alerts": {
+          "buttonCancel/userDisable": 21,
+          "steerOverride/overrideLateral": 29
+        },
+        "sources": [
+          {
+            "path": "2026-09-07/00000048--709f22277b/00000048--709f22277b--5/rlog.zst",
+            "sha256": "5697dbb235f1b9303b5cee30580eb80f536a5e4e4507be35027fbce3dde71fb4"
+          }
+        ],
+        "unconfounded_observation": false
+      },
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 67,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": -22149891,
+            "input": "cancel",
+            "payload": "950c9b0b4000c342ff050aea0045ff05e340000000ff0000000000005bcb04d3"
+          }
+        ],
+        "first_send_ns": 693996374351,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 2,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 17700663,
+        "payload_matching_host_returns": 2,
+        "physical_inputs_fresh": true,
+        "route": "00000048--709f22277b",
+        "selfdrive_alerts": {
+          "buttonCancel/userDisable": 21,
+          "steerOverride/overrideLateral": 195
+        },
+        "sources": [
+          {
+            "path": "2026-09-07/00000048--709f22277b/00000048--709f22277b--6/rlog.zst",
+            "sha256": "61b31463a086483d49857e2d952dca6d82a0115e3bee804c032719a28b797548"
+          }
+        ],
+        "unconfounded_observation": false
+      },
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 106,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": -12823526,
+            "input": "brake",
+            "payload": "8800000300000095"
+          }
+        ],
+        "first_send_ns": 2862960114357,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 3,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 47288478,
+        "payload_matching_host_returns": 4,
+        "physical_inputs_fresh": true,
+        "route": "0000008d--a9f348691a",
+        "selfdrive_alerts": {
+          "pedalPressed/userDisable": 21,
+          "steerOverride/overrideLateral": 34
+        },
+        "sources": [
+          {
+            "path": "2026-09-10/0000008d--a9f348691a/rlog-2.zst",
+            "sha256": "591c4097f6156d01b97f1b414cbc8c815c84a3541a96f5b2dc1cd0422ebdc4a3"
+          }
+        ],
+        "unconfounded_observation": false
+      },
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 91,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": -21844922,
+            "input": "cancel",
+            "payload": "18f9190b4000c342feff0aea00edfeff6340000000ff00000000000062e83caa"
+          }
+        ],
+        "first_send_ns": 2899560618142,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 4,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 58059188,
+        "payload_matching_host_returns": 4,
+        "physical_inputs_fresh": true,
+        "route": "0000008d--a9f348691a",
+        "selfdrive_alerts": {
+          "buttonCancel/userDisable": 21,
+          "steerOverride/overrideLateral": 35
+        },
+        "sources": [
+          {
+            "path": "2026-09-10/0000008d--a9f348691a/rlog-3.zst",
+            "sha256": "1c02da61c8c3ce2e2e0dd6ceaa872ee0f34e22b256aabe7eb359b2bba5d43882"
+          }
+        ],
+        "unconfounded_observation": false
+      },
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 35,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": -22749352,
+            "input": "cancel",
+            "payload": "05cae30b4000c342ff010d17ffc6ff016340000000ff0000000000004a2d9389"
+          }
+        ],
+        "first_send_ns": 2970990481860,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 2,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 28018193,
+        "payload_matching_host_returns": 2,
+        "physical_inputs_fresh": true,
+        "route": "0000008d--a9f348691a",
+        "selfdrive_alerts": {
+          "buttonCancel/userDisable": 21,
+          "steerOverride/overrideLateral": 11
+        },
+        "sources": [
+          {
+            "path": "2026-09-10/0000008d--a9f348691a/rlog-4.zst",
+            "sha256": "ea352b715c200f09384cd8612ee01ff936e858cf045ad065bbc9362f88bbf48d"
+          }
+        ],
+        "unconfounded_observation": false
+      },
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 1,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": -21567601,
+            "input": "cancel",
+            "payload": "36025c0b4000c342ff050aea0179ff05a340000000ff000000000000a2f6f8ab"
+          }
+        ],
+        "first_send_ns": 2999216659479,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 1,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 7776364,
+        "payload_matching_host_returns": 1,
+        "physical_inputs_fresh": true,
+        "route": "0000008d--a9f348691a",
+        "selfdrive_alerts": {
+          "buttonCancel/userDisable": 21,
+          "steerOverride/overrideLateral": 72
+        },
+        "sources": [
+          {
+            "path": "2026-09-10/0000008d--a9f348691a/rlog-5.zst",
+            "sha256": "3a4cde197759e76b13f0bbb0b9b2ac43b425a2395e01c1748d86cb2140e7f15a"
+          }
+        ],
+        "unconfounded_observation": false
+      },
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 47,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": -12102875,
+            "input": "cancel",
+            "payload": "9a015a0b4000c342fe360aeafe36fe362340000000ff000000000000fb978bf6"
+          }
+        ],
+        "first_send_ns": 3023521471197,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 6,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 108174481,
+        "payload_matching_host_returns": 6,
+        "physical_inputs_fresh": true,
+        "route": "0000008d--a9f348691a",
+        "selfdrive_alerts": {
+          "buttonCancel/userDisable": 21
+        },
+        "sources": [
+          {
+            "path": "2026-09-10/0000008d--a9f348691a/rlog-5.zst",
+            "sha256": "3a4cde197759e76b13f0bbb0b9b2ac43b425a2395e01c1748d86cb2140e7f15a"
+          }
+        ],
+        "unconfounded_observation": false
+      },
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 66,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": -21888602,
+            "input": "cancel",
+            "payload": "219ee10b4000c342ff05109d02f8ff05e340000000ff000000000000e25be69c"
+          }
+        ],
+        "first_send_ns": 3092823068402,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 4,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 58547346,
+        "payload_matching_host_returns": 4,
+        "physical_inputs_fresh": true,
+        "route": "0000008d--a9f348691a",
+        "selfdrive_alerts": {
+          "buttonCancel/userDisable": 21
+        },
+        "sources": [
+          {
+            "path": "2026-09-10/0000008d--a9f348691a/rlog-6.zst",
+            "sha256": "87ec47f75bf4ab45463cd70dbc0ba79e5aa339f9ec55493629931499c6fb4832"
+          }
+        ],
+        "unconfounded_observation": false
+      },
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 92,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": -25961996,
+            "input": "cancel",
+            "payload": "fc7f000b4000c342ff1915befffcff196340000000ff000000000000b0d29c7d"
+          }
+        ],
+        "first_send_ns": 3118195840103,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 3,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 37427596,
+        "payload_matching_host_returns": 3,
+        "physical_inputs_fresh": true,
+        "route": "0000008d--a9f348691a",
+        "selfdrive_alerts": {
+          "buttonCancel/userDisable": 21,
+          "pcmEnable/enable": 21,
+          "steerOverride/overrideLateral": 52
+        },
+        "sources": [
+          {
+            "path": "2026-09-10/0000008d--a9f348691a/rlog-6.zst",
+            "sha256": "87ec47f75bf4ab45463cd70dbc0ba79e5aa339f9ec55493629931499c6fb4832"
+          },
+          {
+            "path": "2026-09-10/0000008d--a9f348691a/rlog-7.zst",
+            "sha256": "d0e1cbd60a9430046d6032e64fd8b179702fa930d42786eea746d4653576a4a6"
+          }
+        ],
+        "unconfounded_observation": false
+      },
+      {
+        "brake_asserted_rejections": 0,
+        "brake_asserted_tx_echoes": 84,
+        "competing_driver_inputs": [
+          {
+            "first_relative_ns": -12842050,
+            "input": "cancel",
+            "payload": "d1e7610b4000c342ff060aea0052ff06e340000000ff000000000000db9b9f13"
+          }
+        ],
+        "first_send_ns": 3868902024089,
+        "host_buses": [
+          2
+        ],
+        "host_checksum_valid": true,
+        "host_frames": 3,
+        "native_cruise_engaged_before": true,
+        "native_drop_relative_ns": 37503260,
+        "payload_matching_host_returns": 3,
+        "physical_inputs_fresh": true,
+        "route": "00000093--4066e7ae51",
+        "selfdrive_alerts": {
+          "buttonCancel/userDisable": 21
+        },
+        "sources": [
+          {
+            "path": "2026-09-10/00000093--4066e7ae51/rlog-3.zst",
+            "sha256": "65bc4e824580628cb8409d92b72e15e0626b92e1a2553b304d3e81db209ca2ad"
+          }
+        ],
+        "unconfounded_observation": false
+      }
+    ],
+    "fixture": {
+      "path": "tests/fixtures/camry_2026_cancel_host_attempts.jsonl.gz",
+      "sha256": "f4ea5332a4df02925a1781ee0048af071b812a436fa7ff8bd4905148f16f8f28"
+    },
+    "host_frames_from_full_route_census": 375,
+    "original_segments": 463,
+    "routes": 10,
+    "unconfounded_observations": 0
+  },
+  "schema": "camry-2026-cancel-ownership-v1",
+  "stationary_mirror": {
+    "bindings": [
+      {
+        "gts_first_ns": 11724300059,
+        "gts_oracle": {
+          "bit": 7,
+          "byte": 3,
+          "did": "0x1906",
+          "name": "Up Switch"
+        },
+        "gts_payload": "e080e0808000",
+        "mirror_bit": 7,
+        "mirror_byte": 0,
+        "mirror_intervals_ns": [
+          [
+            11830835369,
+            12430782986
+          ]
+        ],
+        "physical_button": "res_plus",
+        "switch_first_ns": 11698642894,
+        "switch_last_ns": 11825743903
+      },
+      {
+        "gts_first_ns": 13624379422,
+        "gts_oracle": {
+          "bit": 6,
+          "byte": 3,
+          "did": "0x1906",
+          "name": "Down Switch"
+        },
+        "gts_payload": "e080e0408000",
+        "mirror_bit": 6,
+        "mirror_byte": 0,
+        "mirror_intervals_ns": [
+          [
+            13831003552,
+            14230746732
+          ]
+        ],
+        "physical_button": "set_minus",
+        "switch_first_ns": 13571697159,
+        "switch_last_ns": 13701992811
+      },
+      {
+        "gts_first_ns": 15285071383,
+        "gts_oracle": {
+          "bit": 5,
+          "byte": 3,
+          "did": "0x1906",
+          "name": "Cancellation Switch Condition"
+        },
+        "gts_payload": "e080e0208000",
+        "mirror_bit": 5,
+        "mirror_byte": 0,
+        "mirror_intervals_ns": [
+          [
+            15431114972,
+            15830940592
+          ]
+        ],
+        "physical_button": "cancel",
+        "switch_first_ns": 15255693479,
+        "switch_last_ns": 15349544241
+      }
+    ],
+    "boundary": "These isolated inputs identify a switch-event mirror, not a writable cruise-controller input. All retained cruise-state frames are inactive.",
+    "cruise_enabled_frames": 0,
+    "cruise_frames": 1475,
+    "gts_oracle_metadata": {
+      "ddb_source": {
+        "bytes": 86714,
+        "sha256": "57ecfef044f57709d97fe8588ea84d6045f9c555e49ef041537724a679e99fce"
+      },
+      "registry": "data/generated/gtsplus_2026/toyota_diag_registry_camry_2026.json"
+    },
+    "mirror_frames": 184,
+    "mirror_tail_zero_frames": 184,
+    "secondary_cancel_mirror": {
+      "address": "0x5F6",
+      "bit": 7,
+      "byte": 4,
+      "intervals_ns": [
+        [
+          15696307407,
+          16196191812
+        ]
+      ]
+    },
+    "source": {
+      "path": "targets/camry-2026/raw-20260826/camry_nrtd_cruise_can_sync_20260826.json.gz",
+      "sha256": "083435105745d928ceea5dea2a614b7a1fbd32341ba4c94987c73ef6287e87fa"
+    }
+  }
+}

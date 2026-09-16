@@ -450,3 +450,137 @@ in the incident-era stock-harness captures or a road qualification of fusion.
 The six explicitly selected analysis suites all pass: radar anchors,
 radar lifecycle reduction, actual-opendbc radar replay, current hardware-fault
 projection, cooperative-fault projection, and cancellation evidence reduction.
+
+## September 15 cancellation ownership follow-up
+
+**Automatic cancellation is not solved by this follow-up.** It recovers a
+previously omitted switch-event mirror and tests the historical host attempts
+for an independent acceptance witness. No controller, Panda whitelist, ECU
+image, or runtime installation is changed.
+
+### Correct the search domain and the topology argument
+
+The prior cancellation sweep covered the historical-repin **ADAS bus1**. It did
+not cover all FRC-side **chassis bus2** outputs. An all-native-bus extraction of
+the same 21 physical CANCEL windows now retains 168 shared address/length/bus
+streams: 92 on bus0, 22 on bus1, and 54 on bus2. The single-bit screen includes
+B0..B2 and starts its post-window 100 ms **before** the sampled button report,
+so an earlier-published event is not excluded merely by choice of time origin.
+The existing ADAS CRC result remains 16,526 valid frames and zero failures.
+
+The expanded screen finds cancellation-related chassis outputs, including
+`0x1B2` and `0x5F6`, that the old ADAS-only negative did not cover. It does not
+recover a new ADAS-bus cancellation bit even with this earlier window. Timing
+is host-publication timing, not an arbitration-level causal ordering.
+
+Likewise, **an unsplit bus does not by itself make an event-only cancellation
+command impossible**. It prevents suppressing and replacing a native source
+stream. An accepted, cancel-only event could in principle coexist with native
+traffic. Current upstream Hyundai/Volkswagen button encoders illustrate that
+architectural distinction; their receiver behavior is not evidence that this
+Toyota accepts the same technique. The removed brake-copy implementation is
+still not qualified, and a bus-number change alone would not qualify it.
+
+### `0x1B2` is a switch-event mirror, not an established control API
+
+The original stationary recording
+`targets/camry-2026/raw-20260826/camry_nrtd_cruise_can_sync_20260826.json.gz`
+contains three isolated physical switch operations, independent FRC `0x1906`
+responses, and their later `0x1B2` indications:
+
+| Physical operation | Raw `0x1B2` indication | Independent FRC monitor |
+|---|---|---|
+| RES/+ | B0[7] | DID1906 B3[7], **Up Switch** |
+| SET/- | B0[6] | DID1906 B3[6], **Down Switch** |
+| CANCEL | B0[5] | DID1906 B3[5], **Cancellation Switch Condition** |
+
+All 1,475 retained `0x08A` samples in that stationary recording report cruise
+inactive. Therefore the mirror indications cannot be explained solely as a
+consequence of an engaged cruise controller stopping. They represent the
+recognized switch events. The three mirror pulses outlast the physical switch
+assertions; this is not a direct unlatched copy of the switch level. A second
+stationary cancellation indication appears at `0x5F6 B4[7]`.
+
+The 184 stationary `0x1B2/32` frames have zeros after byte2. That is an observed
+payload property, **not** proof that every possible receiver accepts unauthenticated
+commands on this identifier. No signed/unsigned receiver policy follows from
+zeros in a recorded trailer.
+
+On the historical repin, `0x1B2` is observed on the FRC-side chassis link, bus2.
+Four original stock-harness source windows place `0x1B2`, `0x5F6`, `0x198`,
+`0x19C`, and the physical `0x0FE/0x101` traffic on unsplit bus1. This closes the
+physical observation location, not logical receiver ownership behind the link.
+
+The material missing fact is still **an ordinary receiver that acts on an
+externally supplied cancel event**. The OEM diagnostic name and the recovered
+wire mirror do not prove that the FRC, brake, or hybrid controller consumes the
+mirror as a command. No `CANCEL_REQ` actuator field or production transmitter
+is created from these observations.
+
+### A concrete counterexample to two attractive candidates
+
+`0x198 B4[3]` and `0x19C B0[1]` change in 20 of the 21 cancellation windows.
+In route `3b`, segment97, before cancellation at `5896422235458 ns`, both are
+already asserted across the pre-window. There are nine asserted samples of
+each candidate spanning approximately 802 ms, alongside 34 native `0x08A`
+samples that remain engaged. This excludes treating either bit, on its own,
+as an unconditional current-cancellation indication. It does not prove that
+no context-dependent receiver contract involving those PDUs exists.
+
+### Historical host attempts do not establish acceptance
+
+A separate extraction enumerates **all 463 complete original rlog segments**
+across ten specified September1/4/6/7/10 routes. It discovers **375 actual
+`sendcan 0x101` frames**, grouped into **58 episodes**. Native forwarding/TX
+returns are not used to discover an attempted host command.
+
+Every episode has fresh native switch/brake observations, cruise engaged
+before the first host send, and a subsequent native cruise release. Every
+one also has a raw physical CANCEL or brake assertion **at or before the first
+host send**. All 375 host payloads satisfy the ordinary `0x101` additive
+checksum. Thus payload construction and subsequent release are both observed,
+but **none of the 58 episodes separates host-command acceptance from the
+already sufficient physical driver action**. A TX echo does not supply the
+missing ECU-acceptance observation.
+
+The classifier has synthetic positive controls for a host attempt followed by
+a release without a competing button/brake input. It separately rejects
+forwarded-only echoes, missing release, missing correct-bus input coverage,
+and competing driver input before release. A driver action after release does
+not retroactively confound the earlier observation. These synthetic cases
+validate the classifier, not a Toyota receiver.
+
+The current cereal schema does not expose the former `fd` field. This
+extraction deliberately makes **no new FDF/BRS claim** from a defaulted
+`getattr(..., 'fd', False)`. Historic CAN-FD investigations must use their own
+appropriate original metadata/schema evidence.
+
+### Durable artifacts and verification
+
+- `tools/targets/camry/extract/extract_camry_2026_cancel_ownership.py`:
+  original-rlog extraction, with deterministic compression and source hashes.
+- `tools/targets/camry/analysis/analyze_camry_2026_cancel_ownership.py`:
+  stationary OEM correlation, all-bus screen, counterexamples, and host-attempt
+  attribution without vehicle I/O.
+- `data/generated/camry_2026_cancel_ownership.json` and the corresponding
+  `tests/fixtures/camry_2026_cancel_{all_buses,host_attempts}.jsonl.gz`:
+  portable source reduction and complete evidence needed by the new tests.
+
+Run `tools/test camry_2026_cancel_ownership camry_2026_cancel_evidence`.
+The new suite contains 16 tests, including the positive-control classifier
+cases. Receiver acceptance remains explicitly absent from the result; passing
+these tests is not presented as completed automatic cancellation.
+
+Both new fixtures were independently re-extracted from the original rlogs into
+`build/out/cancel-ownership-regeneration` and compared byte-for-byte with their
+tracked copies. Both comparisons pass. All 16 new regression tests and the
+existing cancellation-evidence suite pass; lint and `git diff --check` pass.
+
+The remaining uncertainty is not resolved by more accurate decoding of the
+mirror itself. A controller that consumes only the original physical-switch
+input and publishes `0x1B2` for observers, and a controller that also accepts
+`0x1B2` as an external input, can both reproduce the retained observations.
+Discriminating between them requires the relevant receiver's implementation
+or an independent acceptance observation. The available exact EPS application
+is not a substitute for that cruise-receiver implementation. No claim of
+sender completion follows from the new passive mappings.

@@ -1145,3 +1145,6 @@ tests = ["tests/verify_camry_f33_cooperative_fault_projection.py"]
 
 [suite.camry_2026_cancel_evidence]
 tests = ["tests/verify_camry_2026_cancel_evidence.py"]
+
+[suite.camry_2026_cancel_ownership]
+tests = ["tests/verify_camry_2026_cancel_ownership.py"]
