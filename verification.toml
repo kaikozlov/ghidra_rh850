@@ -1130,3 +1130,9 @@ tests = ["tests/verify_camry_2026_stock_harness_topology.py"]
 
 [suite.camry_20260915_port_evidence_audit]
 tests = ["tests/verify_camry_20260915_port_evidence_audit.py"]
+
+[suite.camry_2026_radar_lifecycle]
+tests = ["tests/verify_camry_2026_radar_lifecycle.py"]
+
+[suite.camry_f33_live_fault_projection]
+tests = ["tests/verify_camry_f33_live_fault_projection.py"]

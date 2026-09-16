@@ -15,7 +15,7 @@ CarState/CarController ownership, and Toyota Panda safety remain the architectur
 
 | Capability | Implemented / demonstrated | Actual remaining boundary |
 |---|---|---|
-| Identity and vehicle state | Exact F181 table/resolver; target-native angle/rate, driver torque, wheels, READY, gear, cruise state, body/BSM; conventional `0x251=0x88/0x90` exposed through `cruiseState.nonAdaptive` | Other firmware needs its own identity/compatibility evidence; temporary/permanent EPS fault classes are not fabricated from a selected inhibit bit |
+| Identity and vehicle state | Exact F181 table/resolver; target-native angle/rate, driver torque, wheels, READY, gear, cruise state, body/BSM; conventional `0x251=0x88/0x90` exposed through `cruiseState.nonAdaptive` | Other firmware needs its own identity/compatibility evidence; selected live EPS inhibit now drives the ordinary temporary-unavailability flag; a restart-required/permanent classification is not inferred |
 | Driver interaction | Same-car torque sign and 0.6 N·m steering-pressed policy retained | Physical override/release on the final runtime still needs qualification; this threshold is not an OEM single-comparator claim |
 | Vehicle model | Absolute steering-ratio default 15.3; **tire-stiffness baseline remains 0.7933** because paramsd's ~1.0 is a multiplier of CP stiffness; actuator-delay default remains 0.18 s | Identical cached lagd estimates on two routes are not independent delay measurements |
 | Historical lateral authority | September-10 C7/resident/native-B6 configuration physically steered on routes `8d` and `93` | Temporary repin and historical helper/image; selected working intervals use conventional cruise, not demonstrated adaptive cruise |
@@ -25,7 +25,7 @@ CarState/CarController ownership, and Toyota Panda safety remain the architectur
 | Stock-ACC coexistence / recovery | Packaged recovery preserves pre-clear DTC evidence, validates ISO-TP/DID lengths, requires distance-control mode plus genuine FRC permission and clear ACC-unavailable state | Same-cycle DRCC restoration with RAM signer retained is not observed; historical lateral proof does not close this combination |
 | Alpha longitudinal | Source-counter-paced `0x160` replacement; B4:B5 and Camry B12-low7 treatment; B12 high bit preserved; canonical P05 validation; planner/controller/Panda bounds agree at −1.5..+1.3 m/s² | Physical authority, cancellation, stop behavior, causal delay, and PCS/AEB coexistence remain unqualified; stock ACC remains default and `autoResumeSng=False` |
 | Stock longitudinal handback | Byte-exact latest valid native `0x160` may pass unchanged outside host-command bounds while longitudinal permission remains valid; altered frames remain bounded and CRC-checked | Required because retained native requests legitimately exceed the host envelope; source timing/handback still needs physical qualification |
-| Radar decoder | Candidate bus0 decoder: range word×0.005 m; signed12 lateral×0.04 m, left-positive; low14 velocity×0.025 m/s; P05, cycle, truncation and empty-track checks | **Production radar remains disabled.** Object validity/confidence and silent slot reassignment are unresolved; signed13/14 velocity widths are indistinguishable in retained data |
+| Radar decoder and lifecycle | Normal bus0 radar path enabled for exact Camry: independently anchored units/sign; source start/end flags, raw-state-zero rejection, complete-cycle assembly and track retirement on data loss. 20,323 held-out updates with zero reported CAN errors | On-vehicle fusion/control qualification remains; individual nonzero state names and optional confidence/class metadata are unassigned; signed13/14 velocity widths remain indistinguishable |
 | Panda enforcement | Absolute ±1745-raw C7 limit now enforced in addition to rate limits; CRC-checked longitudinal source/TX; unsplit HUD/brake TX rejected | Unit/replay validation is not an on-car safety qualification |
 | Deployment | Camry car-kit **v17** selects the supervised helper; same resident/staging/authenticated payload as before; no persistent patch or SecOC-result bypass required by its intended contract | Exact stock-CodeFlash combination, native-MAC oracle, cadence, command loss and recovery must be qualified together; historical artifacts remain separate |
 
@@ -53,7 +53,7 @@ join consumes repeated counter occurrences rather than overwriting them:
 
 The combined Toyota state/controller tests, CAN tests, Toyota safety tests,
 generic car interfaces, docs, platform configurations and vehicle-model tests
-pass **598 tests with 3,172 subtests**; 262 existing tests are skipped by that
+pass **615 tests with 3,183 subtests**; 262 existing tests are skipped by that
 selection. Toyota Python lint passes. The dedicated Camry firmware/package,
 compiled-helper liveness, independent radar anchors, full object reconstruction,
 recovery transport, and original-log topology checks also pass. The exact
@@ -74,10 +74,13 @@ Its physical response, gas/brake/cancel handoff, delayed hold and PCS/AEB behavi
 remain distinct questions. The retained non-causal request/aEgo correlation does
 not supply a causal actuator-delay calibration.
 
-**Radar remains an optional, disabled decoder until validity/lifecycle is
-closed.** Correct units and sign are necessary, but not sufficient, for enabling
-production radar/vision fusion. Fault classes likewise stay explicitly unmapped
-until their source and recovery semantics support the normal openpilot contract.
+**Radar source lifecycle and the available live fault projection are now
+implemented.** The source-driven radar decoder is enabled for Camry, with
+separate held-out replay and adversarial tests; vehicle-level fusion/control
+qualification is not claimed. Current EPS fault/inhibit drives the normal
+`steerFaultTemporary` interface after exact stock-code assertion/recovery proof.
+This selected one-bit projection cannot identify every fault or manufacture a
+restart-required `steerFaultPermanent` classification.
 
 The port is still classified **Custom**, not plug-and-play or production-ready.
 These boundaries preserve the real steering result without conflating a working

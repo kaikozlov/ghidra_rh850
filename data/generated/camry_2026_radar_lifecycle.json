@@ -1,0 +1,523 @@
+{
+  "datasets": {
+    "august_a": {
+      "counts": {
+        "bank_cycles": 30540,
+        "birth": 1462,
+        "birth_end": 0,
+        "birth_start": 1462,
+        "death": 1460,
+        "death_end": 1460,
+        "death_start": 0,
+        "empty_state_nonzero": 0,
+        "large_change": 4931,
+        "large_change_end": 4930,
+        "large_change_start": 4930,
+        "nonempty_state_zero": 9,
+        "object_samples": 244320,
+        "occupied": 105671,
+        "occupied_end_and_start": 5454,
+        "steady": 95887,
+        "steady_end": 6,
+        "steady_start": 6
+      },
+      "examples": {
+        "birth": {
+          "after": [
+            "0147ffe000ff0f",
+            "00000000808200"
+          ],
+          "bank": 0,
+          "before": [
+            "fff8000000ffff",
+            "00000000000000"
+          ],
+          "slot": 0,
+          "source": 0,
+          "time_ns": 54145182686
+        },
+        "death": {
+          "after": [
+            "fff8000000ffff",
+            "00000000001000"
+          ],
+          "bank": 0,
+          "before": [
+            "0df606c000ff97",
+            "00000000800102"
+          ],
+          "slot": 2,
+          "source": 0,
+          "time_ns": 54346951279
+        },
+        "large_change": {
+          "after": [
+            "0a4a06d125ff10",
+            "480008a9000340"
+          ],
+          "bank": 0,
+          "before": [
+            "08aa0210ddffff",
+            "88001e01000300"
+          ],
+          "slot": 4,
+          "source": 3,
+          "time_ns": 259836687657
+        },
+        "occupied_replacement": {
+          "after": [
+            "0874087001ff06",
+            "00000000801902"
+          ],
+          "bank": 0,
+          "before": [
+            "029ff89fffffff",
+            "003fff00040b00"
+          ],
+          "slot": 1,
+          "source": 1,
+          "time_ns": 154838336476
+        },
+        "steady": {
+          "after": [
+            "0147ffe000ff0f",
+            "00c00000008200"
+          ],
+          "bank": 0,
+          "before": [
+            "0147ffe000ff0f",
+            "00000000808200"
+          ],
+          "slot": 0,
+          "source": 0,
+          "time_ns": 54195875863
+        }
+      },
+      "integrity": {
+        "crc_valid": 61527
+      },
+      "path": "targets/camry-2026/raw-20260827/camry_relay_route_can_20260827.ndjson.gz",
+      "raw_state_counts": {
+        "empty_state_0": 138649,
+        "occupied_state_0": 9,
+        "occupied_state_1": 55523,
+        "occupied_state_2": 12811,
+        "occupied_state_3": 37328
+      },
+      "sha256": "be0c02946818fafc48b7d3e2be5d2fde31d796e057ab29d8bf59a879c7553db5"
+    },
+    "august_b": {
+      "counts": {
+        "bank_cycles": 35997,
+        "birth": 2384,
+        "birth_end": 0,
+        "birth_start": 2384,
+        "death": 2387,
+        "death_end": 2387,
+        "death_start": 0,
+        "empty_state_nonzero": 0,
+        "large_change": 7888,
+        "large_change_end": 7874,
+        "large_change_start": 7874,
+        "nonempty_state_zero": 15,
+        "object_samples": 287976,
+        "occupied": 149793,
+        "occupied_end_and_start": 8703,
+        "steady": 134788,
+        "steady_end": 21,
+        "steady_start": 21
+      },
+      "examples": {
+        "birth": {
+          "after": [
+            "028ffae000ff18",
+            "00000000808a00"
+          ],
+          "bank": 0,
+          "before": [
+            "fff8000000ffff",
+            "00000000000000"
+          ],
+          "slot": 0,
+          "source": 16,
+          "time_ns": 1015936287210
+        },
+        "death": {
+          "after": [
+            "fff8000000ffff",
+            "00000000001000"
+          ],
+          "bank": 0,
+          "before": [
+            "0291fae000ffff",
+            "00000000048b40"
+          ],
+          "slot": 5,
+          "source": 16,
+          "time_ns": 1014881958419
+        },
+        "large_change": {
+          "after": [
+            "3e1bfc27ffffff",
+            "39ffb906040300"
+          ],
+          "bank": 0,
+          "before": [
+            "3d65f6d7ffffff",
+            "703ffe00840300"
+          ],
+          "slot": 7,
+          "source": 17,
+          "time_ns": 1104687490316
+        },
+        "occupied_replacement": {
+          "after": [
+            "0441f57008ff06",
+            "00002500809a40"
+          ],
+          "bank": 0,
+          "before": [
+            "0895feb000ff3d",
+            "00002400800102"
+          ],
+          "slot": 6,
+          "source": 16,
+          "time_ns": 1039737001839
+        },
+        "steady": {
+          "after": [
+            "074e012003ffff",
+            "08000000040142"
+          ],
+          "bank": 0,
+          "before": [
+            "074a010003ff0a",
+            "08000000000142"
+          ],
+          "slot": 0,
+          "source": 16,
+          "time_ns": 1014732084623
+        }
+      },
+      "integrity": {
+        "crc_valid": 71994
+      },
+      "path": "targets/camry-2026/raw-20260827/camry_relay_lta_confirm_route_can_20260827.ndjson.gz",
+      "raw_state_counts": {
+        "empty_state_0": 138183,
+        "occupied_state_0": 15,
+        "occupied_state_1": 76841,
+        "occupied_state_2": 13258,
+        "occupied_state_3": 59679
+      },
+      "sha256": "641eee57eaffc579002708185178ea08c189155527354712dd43a1f0e309bb3a"
+    },
+    "september_holdout": {
+      "counts": {
+        "bank_cycles": 60969,
+        "birth": 3789,
+        "birth_end": 0,
+        "birth_start": 3789,
+        "death": 3800,
+        "death_end": 3800,
+        "death_start": 0,
+        "empty_state_nonzero": 0,
+        "large_change": 16616,
+        "large_change_end": 16591,
+        "large_change_start": 16591,
+        "nonempty_state_zero": 97,
+        "object_samples": 487752,
+        "occupied": 308208,
+        "occupied_end_and_start": 17886,
+        "steady": 280758,
+        "steady_end": 24,
+        "steady_start": 24
+      },
+      "examples": {
+        "birth": {
+          "after": [
+            "0be4128202c400",
+            "493e7500800902"
+          ],
+          "bank": 0,
+          "before": [
+            "fff8000000ffff",
+            "00000000000000"
+          ],
+          "slot": 5,
+          "source": 0,
+          "time_ns": 50296115084
+        },
+        "death": {
+          "after": [
+            "fff8000000ffff",
+            "00000000001000"
+          ],
+          "bank": 0,
+          "before": [
+            "1317ff1328ffff",
+            "003f5c00841102"
+          ],
+          "slot": 5,
+          "source": 0,
+          "time_ns": 50104255657
+        },
+        "large_change": {
+          "after": [
+            "7fa058c800ff00",
+            "003f95fe008a00"
+          ],
+          "bank": 0,
+          "before": [
+            "7f945ef800ff08",
+            "003ff100809a00"
+          ],
+          "slot": 0,
+          "source": 0,
+          "time_ns": 101804750064
+        },
+        "occupied_replacement": {
+          "after": [
+            "0445f4315eff00",
+            "00000400801902"
+          ],
+          "bank": 0,
+          "before": [
+            "0d95fde28aff3c",
+            "483f79fc000302"
+          ],
+          "slot": 1,
+          "source": 0,
+          "time_ns": 49652025397
+        },
+        "steady": {
+          "after": [
+            "059a0b11740f00",
+            "687ec41f000902"
+          ],
+          "bank": 0,
+          "before": [
+            "05d60a61810f00",
+            "803ecc13000902"
+          ],
+          "slot": 0,
+          "source": 0,
+          "time_ns": 49652025397
+        }
+      },
+      "fixture_sha256": "7ba8937bdc7499c7c3724b7c8f91c72697bff4a8578609c7e85e699b9b854715",
+      "header": {
+        "schema": "camry-radar-lifecycle-holdout-v1",
+        "source_bus": 1,
+        "source_counts": [
+          {
+            "banks": 3372,
+            "crc_valid": 6744
+          },
+          {
+            "banks": 3600,
+            "crc_valid": 7200
+          },
+          {
+            "banks": 3600,
+            "crc_valid": 7200
+          },
+          {
+            "banks": 3600,
+            "crc_valid": 7200
+          },
+          {
+            "banks": 3600,
+            "crc_valid": 7200
+          },
+          {
+            "banks": 3600,
+            "crc_valid": 7200
+          },
+          {
+            "banks": 3600,
+            "crc_valid": 7200
+          },
+          {
+            "banks": 3600,
+            "crc_valid": 7200
+          },
+          {
+            "banks": 3600,
+            "crc_valid": 7200
+          },
+          {
+            "banks": 3600,
+            "crc_valid": 7200
+          },
+          {
+            "banks": 3600,
+            "crc_valid": 7201
+          },
+          {
+            "banks": 3600,
+            "crc_valid": 7201
+          },
+          {
+            "banks": 3600,
+            "crc_valid": 7200
+          },
+          {
+            "banks": 3600,
+            "crc_valid": 7200
+          },
+          {
+            "banks": 3597,
+            "crc_valid": 7195
+          },
+          {
+            "banks": 3600,
+            "crc_valid": 7200
+          },
+          {
+            "banks": 3600,
+            "crc_valid": 7200
+          }
+        ],
+        "source_topology": "historical repin",
+        "sources": [
+          {
+            "path": "2026-09-04/0000003b--62262eb7a1/rlog-0.zst",
+            "radar_crc_invalid": 0,
+            "radar_crc_valid": 6744,
+            "sha256": "d3ecfb93361134238fcb7f84731e034d39adbf3bfc3d2eaeba05a894eb078bf4"
+          },
+          {
+            "path": "2026-09-04/0000003b--62262eb7a1/rlog-9.zst",
+            "radar_crc_invalid": 0,
+            "radar_crc_valid": 7200,
+            "sha256": "8542fb754c5e64bcdb28fe0063e84617e14168969a022aa52489733f28683f51"
+          },
+          {
+            "path": "2026-09-04/0000003b--62262eb7a1/rlog-18.zst",
+            "radar_crc_invalid": 0,
+            "radar_crc_valid": 7200,
+            "sha256": "31adfd09c5099fccd3230ab54ee4d470a5c12e835071475bc7ccbfeb95d29a1c"
+          },
+          {
+            "path": "2026-09-04/0000003b--62262eb7a1/rlog-27.zst",
+            "radar_crc_invalid": 0,
+            "radar_crc_valid": 7200,
+            "sha256": "ad6fd57672e0a82ca280799646c21a5e8c792c1136c490454145b3bffbd5358d"
+          },
+          {
+            "path": "2026-09-04/0000003b--62262eb7a1/rlog-36.zst",
+            "radar_crc_invalid": 0,
+            "radar_crc_valid": 7200,
+            "sha256": "b02d12aaf38f4080957113a25fea15499cc209bbca14cef26b3895620a61ed71"
+          },
+          {
+            "path": "2026-09-04/0000003b--62262eb7a1/rlog-45.zst",
+            "radar_crc_invalid": 0,
+            "radar_crc_valid": 7200,
+            "sha256": "6e3368995f7cc805c5e3517d944383f15db942c95cb5dbd63f6ba2badb5673cd"
+          },
+          {
+            "path": "2026-09-04/0000003b--62262eb7a1/rlog-54.zst",
+            "radar_crc_invalid": 0,
+            "radar_crc_valid": 7200,
+            "sha256": "534898db70a83fd9343fd8c65d7bb74e07acbc8acd9528acadc9d6aa4e09b79c"
+          },
+          {
+            "path": "2026-09-04/0000003b--62262eb7a1/rlog-63.zst",
+            "radar_crc_invalid": 0,
+            "radar_crc_valid": 7200,
+            "sha256": "b5ebd87baec8912c47a96a1693c9969f606da5f391ac0d8080c2b8b40503f373"
+          },
+          {
+            "path": "2026-09-04/0000003b--62262eb7a1/rlog-72.zst",
+            "radar_crc_invalid": 0,
+            "radar_crc_valid": 7200,
+            "sha256": "dca156da65a75debf5e9bb0811089fa156a4a1b3c7945fc63e75702e67289b80"
+          },
+          {
+            "path": "2026-09-04/0000003b--62262eb7a1/rlog-81.zst",
+            "radar_crc_invalid": 0,
+            "radar_crc_valid": 7200,
+            "sha256": "e17e1e9a157f0404b2aa3fae299f0a0657adfc6baa5f0c5886d28d570b353eb2"
+          },
+          {
+            "path": "2026-09-04/0000003b--62262eb7a1/rlog-90.zst",
+            "radar_crc_invalid": 0,
+            "radar_crc_valid": 7201,
+            "sha256": "48c55b274d76f30e1384a3fda15a9b8d5ea51bb96acfdddd57253439dee9ac55"
+          },
+          {
+            "path": "2026-09-04/0000003b--62262eb7a1/rlog-99.zst",
+            "radar_crc_invalid": 0,
+            "radar_crc_valid": 7201,
+            "sha256": "90b7e0c1f8361e6238ba6df69d2646998887680eb24e95d7d7d5446f55ef348e"
+          },
+          {
+            "path": "2026-09-04/0000003b--62262eb7a1/rlog-108.zst",
+            "radar_crc_invalid": 0,
+            "radar_crc_valid": 7200,
+            "sha256": "47e7497b9383b102df0be352ea94280229b5728fab9c08bfa642e4494ab661e4"
+          },
+          {
+            "path": "2026-09-10/0000008d--a9f348691a/rlog-2.zst",
+            "radar_crc_invalid": 0,
+            "radar_crc_valid": 7200,
+            "sha256": "591c4097f6156d01b97f1b414cbc8c815c84a3541a96f5b2dc1cd0422ebdc4a3"
+          },
+          {
+            "path": "2026-09-10/0000008d--a9f348691a/rlog-4.zst",
+            "radar_crc_invalid": 0,
+            "radar_crc_valid": 7195,
+            "sha256": "ea352b715c200f09384cd8612ee01ff936e858cf045ad065bbc9362f88bbf48d"
+          },
+          {
+            "path": "2026-09-10/0000008d--a9f348691a/rlog-6.zst",
+            "radar_crc_invalid": 0,
+            "radar_crc_valid": 7200,
+            "sha256": "87ec47f75bf4ab45463cd70dbc0ba79e5aa339f9ec55493629931499c6fb4832"
+          },
+          {
+            "path": "2026-09-10/00000093--4066e7ae51/rlog-3.zst",
+            "radar_crc_invalid": 0,
+            "radar_crc_valid": 7200,
+            "sha256": "65bc4e824580628cb8409d92b72e15e0626b92e1a2553b304d3e81db209ca2ad"
+          }
+        ]
+      },
+      "raw_state_counts": {
+        "empty_state_0": 179544,
+        "occupied_state_0": 97,
+        "occupied_state_1": 87051,
+        "occupied_state_2": 96241,
+        "occupied_state_3": 124819
+      }
+    }
+  },
+  "interpretation": {
+    "boundary": "These are passive wire/lifecycle observations. The precise nonzero state labels and additional object-class/confidence fields are not recovered.",
+    "lifecycle": "Birth, deletion and occupied-to-occupied replacement are source flags, not motion thresholds.",
+    "loss": "An unobserved cycle may contain a one-frame end/start event; restart identities rather than silently bridge it.",
+    "processing_order": "End old identity, then start replacement; both flags may be set in one occupied record.",
+    "qualifier": "Reject empty/sentinel range and raw state zero. Keep states1/2/3 unnamed; no confidence percentage or radar-versus-camera attribution is inferred."
+  },
+  "motion_screen": {
+    "adjacent_seconds": [
+      0.035,
+      0.075
+    ],
+    "counter_delta": 1,
+    "large_change": "range residual>5m OR lateral delta>3m OR relative-speed delta>8m/s",
+    "purpose": "corroboration only; these thresholds are NOT controller/parser policy",
+    "steady": "range residual<0.5m AND lateral delta<0.5m AND relative-speed delta<1m/s"
+  },
+  "schema": "camry-2026-radar-lifecycle-v1",
+  "wire": {
+    "cycle": "both PDU bytes2 and3 increment independently modulo256",
+    "end_previous": "record B byte5 bit4",
+    "geometry_empty_sentinel": "fff8000000ffff",
+    "motion_record_bytes": 7,
+    "raw_state": "record B byte5 low2; zero is not a qualified measurement",
+    "start": "record B byte4 bit7"
+  }
+}

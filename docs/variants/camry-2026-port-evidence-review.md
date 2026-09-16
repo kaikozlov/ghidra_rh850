@@ -244,3 +244,95 @@ zero skips**. This includes byte-identical regeneration from the original
 stock-topology and consolidated rlogs, all 121,941 selected radar source frames
 passing Profile-5 CRC, the v17 kit build, and the compiled-helper positive plus
 historical-negative regressions. No hardware execution was performed.
+
+## September 15 follow-up: source lifecycle and live steering-fault projection
+
+The subsequent offline pass resolves two previously unimplemented surfaces.
+No vehicle command, EPS patch, signer change, or Panda-policy change is involved.
+
+### Source-driven object lifecycle
+
+The ordinary motion PDU for each bank (`0x183..0x185`) has eight seven-byte
+records. In each record, byte4 bit7 starts a new track; byte5 bit4 ends the
+**previous** track. Both flags occur together on occupied-to-occupied slot
+replacement. Treating that combination as an empty slot is wrong, as is
+preserving the old `trackId` because the distance never became the empty sentinel.
+
+Both complete August captures establish the fields; a separate fixture from
+17 September rlog segments verifies them without refitting. Across 1,020,048
+object records, every one of 7,635 observed births has the start flag, every
+one of 7,647 observed deletions has the end flag, and 32,043 occupied records
+carry both flags. The raw low-two-bit state in motion byte5 is zero in every
+empty record; 121 nonempty records also carry zero and must not be accepted
+merely because the geometry bytes remain populated. The parser filters state
+zero and sentinel/zero ranges. Nonzero states 1/2/3 remain structurally named;
+no unsupported confidence percentage or sensor-source enum is assigned.
+
+The decoder now consumes **every** source cycle in a host publication, so an
+intermediate deletion/new-track flag is not lost by reading only the last CAN
+parser value. Both cycle bytes increment independently modulo256, not as a
+16-bit counter. Missing cycles retire identity because they may hide a one-frame
+lifecycle event. Duplicates, mixed-cycle geometry/motion, bad CRC, truncation and
+wrong buses cannot manufacture an update; ordinary CAN timeout clears stale
+tracks and publishes a CAN error rather than waiting forever for a missing
+trigger PDU. End-old/start-new ordering is explicit.
+
+The actual opendbc parser replays all 60,969 held-out bank pairs as **20,323
+complete updates**, **308,111 qualified point observations**, **17,868 observed
+identity replacements**, and **zero reported CAN errors**. This is a source
+replay result, not a new on-vehicle fusion/control qualification. Together with
+the already independent distance, speed and lateral-sign anchors, the supported
+Camry decoder is now selected by normal `CarParams` (`radarUnavailable=False`).
+Corolla has no radar DBC assignment and remains model-only; no cross-variant
+transfer is assumed. The exact signed13-versus-signed14 velocity boundary and
+optional object-class/confidence labels remain bounded as before.
+
+Reproducible source reduction:
+`tools/targets/camry/analysis/analyze_camry_2026_radar_lifecycle.py`,
+`data/generated/camry_2026_radar_lifecycle.json`, and
+`tests/fixtures/camry_2026_radar_lifecycle_holdout.jsonl.gz`.
+The extractor verifies original rlog hashes and P05 integrity before writing
+its deterministic fixture. `tests/verify_camry_2026_radar_lifecycle.py` checks
+both discovery captures and the independent holdout.
+
+### Current fault versus a restart-required failure
+
+Fresh exact-F33 decompilation/disassembly closes `0x4C000` as the producer of
+`FEBE80DE`; `0x4C97A` publishes it through `FEBE8C35` as `0x030 B6[2]`. It is
+an OR of three **active** class counters (`82BA/82C2/82C4`, classes02/10/20)
+and three current status comparisons (`E857/E858/E859 == 0x22`). The event
+assertion path `51C66 -> 50FC8` increments a newly active class; recovery
+`51D5E -> 514BC` decrements it without underflow. Historical class latches at
+`82A3/82A4/82A5` are separate and do not assert this bit after active counts clear.
+
+`VerifyCamryFaultProjection.java` executes the **stock instructions**, after
+checking the working Ghidra image byte-for-byte against the verified CodeFlash.
+Its 85 assertions cover all64 source combinations, each class assertion and
+recovery, exclusion of history-only state, multiple active faults, and
+non-underflow after final recovery. Only interrupt save/restore callees are
+substituted; there is no concurrent actor in this emulator-local test.
+
+Camry `CarState.steerFaultTemporary` now reports this current fault/inhibit
+aggregate through the ordinary upstream interface. "Temporary" is current
+steering-unavailability semantics, **not** a prediction that a physical defect
+will repair itself. `steerFaultPermanent` is not fabricated from the same
+one-bit aggregate: neither exact cause nor restart-required status can be
+reconstructed from it. Other unrepresented classes remain outside this selected
+fault projection. H/F and Crown are not assigned the F33 policy by analogy.
+
+Reproducible proof:
+`tools/targets/camry/analysis/analyze_camry_f33_live_fault_projection.py`,
+`data/generated/camry_f33_live_fault_projection.json`, and
+`tests/verify_camry_f33_live_fault_projection.py`.
+
+### Validation
+
+The combined Toyota, CAN, Toyota safety, generic interface, documentation,
+platform and vehicle-model selection passes **615 tests and 3,183 subtests**,
+with262 pre-existing skips in that selection. Toyota lint passes. New radar
+adversarial coverage includes batching, deletion/replacement, unqualified
+retained geometry, duplicate/wrapped/skipped cycles, CRC, truncation, timeout,
+startup spread across publications, and wrong-bus traffic. Exact-F33 CarState
+fault assertion/recovery and unrelated status-bit separation are covered too.
+Automatic cruise cancellation remains a separate receiver/ownership question;
+none of these changes restores the invalid unsplit-bus fake-brake sender.
