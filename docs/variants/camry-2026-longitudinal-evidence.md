@@ -1,41 +1,57 @@
 # 2026 Camry longitudinal evidence packet and status (WP4)
 
-**Current disposition — September 16 role audit:** `0x160` is an FRC-origin,
-longitudinal-related PDU, but the existing Camry B4:B5+B12 encoder is **not a
-verified longitudinal-command interface**. The native fine field closely
-tracks measured motion even with cruise disengaged and remains zero until
-223–262 ms after motion begins in three stock resumes. In the combined trial,
-intact camera B12 predicts the chassis-side `0x0CA` result-like field better than
-the replacement B12. The previous claim that this trial "proves influence" is
-withdrawn: it omitted the intact native comparator.
+**Current disposition — September 16 request/result closure:** `0x160` is an
+FRC-origin longitudinal/ego-state publication, not the demonstrated Camry
+actuator ingress. The central chassis-control surface is `0x08A`: it carries the
+selected upper/lower longitudinal request packages plus the recovered lateral
+request tuple. Brake-owned `0x081` publishes the selected/employed result state.
+The Camry `0x160` B4:B5+B12 encoder remains withdrawn.
 
-**Answer to "right target or echo?":** the evidence favors an FRC-owned
-state publication over the current direct-demand interpretation. B4:B5 is
-strongly measured-motion-like; B12 is consistent with a selected-state export.
-The actual longitudinal receiver/command and a literal originating command for
-any echo are not identified. This is a reason to withdraw the current mapping
-as an established control interface, not merely to add a road-test caveat.
+The current architecture is more precise than the earlier shorthand
+"FRC request -> Brake arbitration." Toyota Motor Corporation's
+US20200070849A1 describes a generic vehicle-movement interface in which each
+**request longitudinal ID is the identifier of an application**. A request
+arbitration unit independently selects lower- and upper-limit longitudinal IF
+packages from the applications; request-generation units then carry the
+selected application IDs/accelerations toward the powertrain and brake
+controllers. The powertrain additionally compares the selected application
+request with the driver's accelerator request. The reported
+`arbitration result_longitudinal ID` is the selected application's ID when the
+application request is employed, or a distinct value that identifies a driver
+request when the driver wins. The patent also defines the analogous lateral ID
+as an application identifier. This is generic Toyota architecture, not by
+itself a byte-level proof for F33, but it matches the recovered `0x08A/0x081`
+behavior unusually closely.
 
-This is work package 4 of the Camry openpilot completion plan. Transport,
-request semantics, receiver acceptance, and physical authority are separate
-questions. The contributor's Corolla result does not establish the same field
-role on Camry. A mode-dependent acceptance gate remains possible, but so do a
-feedback/status field and a parallel output; this evidence does not select a
-particular receiver mechanism. See the reproducible audit immediately below.
+That distinction explains an otherwise confusing observation: result ID63 does
+not need to exist in either `0x08A` longitudinal slot. On the Camry, `0x08A`
+request candidate A is ID11 during ordinary DRCC and candidate B is ID17, while
+`0x081` can report ID63. Toyota independently names `63 = Driver Operation` on
+the P5 FRC longitudinal/"Vertical ID" diagnostic surface. The strongest current
+model is therefore **selected application package(s) in `0x08A`, employed source
+feedback in `0x081`**, not a second hidden FRC command chosen by Brake from the
+same packet.
 
+The retained source document is local-only under
+`REFERENCE/toyota_vehicle_movement_arbitration_patent/US20200070849A1.pdf`
+(`REFERENCE/` remains intentionally ignored). Public source:
+<https://patents.google.com/patent/US20200070849A1/en>.
 
-**September 16 request/result-plane closure:** later retained evidence supersedes
-all historical uses below of `0x0CA B7:B8` as the primary arbitration result.
-The established TSS3 graph is `0x08A` upstream/FRC request -> Brake arbitration ->
-`0x081` selected/result/reference feedback. The new byte-level audit maps the
-lateral request/result tuples into that pair and finds the same architecture for
-longitudinal: `0x08A B8:B9/B11:B12` are the indistinguishable signed16 x0.001
-upper/lower acceleration-request candidates; `0x081 B6[5:0]` is the strongest
-`5284` longitudinal-result-ID candidate and `0x081 B20:B21` the strongest `57DB`
-result-acceleration candidate. Result ID63 tracks the request essentially exactly,
-while result ID11 materially diverges, which is direct arbitration-like behavior.
-`0x0CA` remains protected longitudinal/chassis state but is no longer the primary
-result interpretation. See `data/generated/camry_2026_longitudinal_request_plane.json`.
+Transport, request semantics, physical publication/security ownership, and
+actuator authority remain separate questions. The protected physical publisher
+of `0x08A`, the exact location of the application-arbitration implementation,
+and the upper-vs-lower A/B ordering are still not assigned by this architecture
+reference.
+
+**Request/result wire closure:** FRC normal-Tx suppression establishes `0x08A`
+as the upstream TSS request/instruction plane; Brake owns `0x081` and continues
+publishing it with request-loss supervision if the FRC request disappears. The
+byte-level audit maps `0x08A B8:B9/B11:B12` to the indistinguishable signed16
+x0.001 upper/lower acceleration-request pair, and maps `0x081 B6[5:0]` /
+B20:B21 as the strongest `5284` employed-source-ID / `57DB` result-acceleration
+pair. `0x0CA` remains protected longitudinal/chassis state but is no longer the
+primary result interpretation. See
+`data/generated/camry_2026_longitudinal_request_plane.json`.
 
 ## September 16: command versus feedback audit
 
@@ -564,10 +580,12 @@ The packed-ID interpretation has an independent arbitration check. In the same
 pairs, selected `0x081` result ID11 equals `0x08A B6[7:2]` in **1,525/1,529**
 Drive-A and **3,276/3,281** Drive-B ID11 samples; it never equals the B7 candidate.
 Every selected ID63 sample (**15,544 / 16,718**) has ID63 absent from both request
-A/B fields, consistent with a separate arbitration source; Toyota's ISA-specific
-vocabulary independently uses 63 for Driver Operation. This does not name A as
-upper or lower, but strongly supports B6/B7 as the two packed request-ID/allocation
-bytes rather than generic ACC-state bytes.
+A/B fields. Toyota's P5 FRC longitudinal/Vertical-ID vocabulary independently
+names `63 = Driver Operation`, and Toyota's movement-control patent explicitly
+allows the result longitudinal ID to carry a driver discriminator when the
+driver request is employed. This does not name A as upper or lower, but it
+strongly supports B6/B7 as packed selected application-ID/allocation bytes rather
+than generic ACC-state bytes.
 
 The retained delayed-stop corpus gives a second dynamic check and supersedes the
 old raw-byte `ACC_STATE` description. Ordinary active cruise is
@@ -583,22 +601,82 @@ a standstill flag. Camry runtime therefore uses the source-real B4[5] structural
 hold state; the ID25/allocation2-or-3 tuple is its independent request-state
 corroboration. The exact OEM recorder name for B4[5] remains unknown.
 
+### Longitudinal requester-ID namespace: current enumeration
+
+The numeric IDs are **application/request-source identities, not priorities and
+not ECU addresses**. The current Toyota corpus does not contain one complete
+longitudinal 0..63 enum analogous to EMPS `Target Lateral ID`. A six-region sweep
+of current GTS+ and Techstream V18 (NA/EU/JP; 3,207 DDB files total) found the
+same sparse named anchors but no hidden complete `5280/5281/5284`, `0x1284`, or
+P6 longitudinal-arbitration value dictionary. The tracked request-plane producer
+now extracts the relevant labels directly from Toyota DDBs rather than hard-coding
+them.
+
+The working namespace is:
+
+| ID | Longitudinal evidence | Lateral comparison | Current disposition |
+|---:|---|---|---|
+| **0** | P5 FRC ISA Vertical ID names `No Request`; Camry request A uses 0 while idle | `No Request (Manual Operation)` | common no-request anchor |
+| **4** | Camry request B idle/default | LDA | longitudinal OEM name unknown; lateral label must not be copied |
+| **9** | P6 Speed Limiter Requesting Vertical ID explicitly names `ISA` | no generation-20 lateral label | named cross-generation longitudinal/vertical anchor; not observed on Camry `0x08A` |
+| **11** | Camry request A during ordinary DRCC; `0x081` result ID11 when that application request is employed | LTA/LCA | **strong shared-TSS-application-ID hypothesis**, not yet an OEM longitudinal enum name |
+| **17** | Camry active request B; retained 2025 Corolla active request A | no lateral label | repeatable cross-platform active longitudinal requester; OEM name unknown |
+| **18** | not observed in Camry longitudinal A/B | SDG; P6 PDA-SA lateral request also uses 18 | lateral-only named anchor; no longitudinal transfer |
+| **23** | retained 2025 Corolla active request B | no lateral label | observed longitudinal requester; OEM name unknown |
+| **25** | Camry delayed ACC-hold request B (with allocation state distinguishing held/moving use) | AP | **counterexample to one universal lateral->longitudinal enum** |
+| **36** | 33-frame (~0.79 s) Camry startup-only request-B state; zero request acceleration; result stays 63 | no lateral label | startup/initialization requester; OEM name unknown |
+| **41** | P6 MaaS lower-limit longitudinal ID = `Request 1 of MaaS Autonomous Driving System` | AD (Lv.4) | axis-specific reuse; disproves blind label transfer |
+| **45** | P6 MaaS lower-limit longitudinal ID = `Request 2 of MaaS Autonomous Driving System` | DES (Lv.4) | axis-specific reuse; disproves blind label transfer |
+| **63** | P5 FRC ISA Vertical ID explicitly names `Driver Operation`; Camry and retained Corolla `0x081` result use 63 | Driver Operation | common driver-operation anchor |
+
+The ID11 coincidence is therefore materially interesting. Toyota's own
+architecture calls both longitudinal and lateral IDs **application identifiers**,
+and 0/63 are demonstrably common semantic anchors across the axes. Camry ID11 is
+the ordinary DRCC longitudinal application source while generation-20 lateral
+ID11 is LTA/LCA. That makes a coordinated TSS3 continuous-driving identity a
+strong hypothesis. It is **not** yet enough to rename longitudinal 11 to
+`DRCC`, because ID25 and the P6 41/45 examples prove that equal numeric codes do
+not globally imply the same axis-local label.
+
+Toyota also exposes feature-specific longitudinal-ID recorder fields that can
+supply future direct joins: `5271` **IFU request vertical ID (lower limit)**,
+`5A04` **PDA(OAA) Request Vertical ID**, and `5B07` **Longitudinal Request ID of
+Lower Limit from PDA(DA)**, in addition to generic `5280/5281/5284`. The retained
+same-car Operation-FFD samples do not contain those longitudinal records, so no
+numeric values can yet be attached to those feature names. A future stock
+capture that exercises them is a much better enum oracle than inferring names
+from numeric coincidence.
+
+The retained FRC CUWs do not currently solve the missing names. Their ReproStd
+`.xx` members are Motorola-S-record framing around a manufacturer-encrypted
+target representation (DFI encryption method 1); the selected host path does
+not decrypt/decompress that application payload. Until that transform is
+recovered, the FRC application image cannot be searched as plaintext for an ID
+table, and **absence of a firmware enum has not been established**.
+
+The cross-platform Corolla evidence is now owned by its tracked rlog reducer:
+idle A/B are 0/4, active A/B are 17/23, and its `0x081` result stays ID63 across
+all 2,000 retained result frames. That reinforces the requester-identity model
+without assigning 17 or 23 an OEM feature name.
+
 Across 17,073 / 19,999 request-result pairs in the complete A/B drives,
 `0x081 B20:B21` correlates with the request at r=0.941674 / 0.836884. The more
 discriminating result-ID split is stronger: for selected ID63 the median
 result-minus-request is **0.000 m/s²** in both drives (p10/p90 only a few
 milligravity-scale counts apart), while selected ID11 gives median deltas
-**-0.181 / -0.435 m/s²**. That is exactly the behavior expected of a selected
-arbitration result rather than a second request echo.
+**-0.181 / -0.435 m/s²**. That is the behavior expected of an employed-source/result publication rather
+than a second request echo. In Toyota's documented architecture, the selected
+application upper/lower request may still be constrained or superseded by the
+driver request in the powertrain/brake execution layer.
 
 This closes `0x08A` as the **unified observed continuous TSS3 request envelope**
 for the recovered lateral tuple plus longitudinal request magnitudes. It does
 *not* close the entire `5280/5281` metadata record into that PDU: the two request
 ID/allocation bytes are now structurally located but their upper/lower ordering is
-unresolved, while shift/EPB/override/priority and validity remain unmapped. Correspondingly, `0x081`
-is the unified Brake-owned selected/result/reference envelope, with the
-longitudinal result fields now visible alongside the previously recovered lateral
-result.
+unresolved, while shift/EPB/override/priority and validity remain unmapped. Correspondingly, `0x081` is the Brake-owned selected/employed-result/reference
+envelope, with the longitudinal result fields now visible alongside the previously
+recovered lateral result. Physical publication ownership does not by itself prove
+that every selection step executes inside the Brake ECU.
 
 The reproducible reduction is
 `data/generated/camry_2026_longitudinal_request_candidates.json`, generated by

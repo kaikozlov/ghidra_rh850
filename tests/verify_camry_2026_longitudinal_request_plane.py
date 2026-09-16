@@ -28,7 +28,7 @@ def approx(a: float, b: float, eps: float = 1e-9) -> bool:
 
 
 art = json.loads(ART.read_text())
-check("schema", art["schema"] == "camry-2026-longitudinal-request-plane-v2")
+check("schema", art["schema"] == "camry-2026-longitudinal-request-plane-v3")
 
 print("== deterministic regeneration ==")
 with tempfile.TemporaryDirectory() as td:
@@ -77,7 +77,7 @@ for label, e in expected.items():
         and "11" in packed["candidate_A"]["request_id_counts"]
         and "17" in packed["candidate_B"]["request_id_counts"])
   relation = result_id["relation_to_request_ids"]
-  check(f"{label}: selected ID11 names request candidate A and ID63 is external arbitration",
+  check(f"{label}: selected ID11 names request candidate A and ID63 is outside the TSS application slots",
         relation["selected_ID11_equals_candidate_A_frames"] >= relation["selected_ID11_frames"] - 5
         and relation["selected_equals_candidate_B_frames"] == 0
         and relation["selected_63_absent_from_A_B_frames"] == e["result_ids"]["63"])
@@ -127,6 +127,40 @@ check("0x08A is unified request envelope but not full 5280/5281 byte map",
       "unified observed continuous TSS request envelope" in art["conclusion"]["request_plane"]
       and "NOT yet byte-named" in art["conclusion"]["not_fully_mapped"])
 check("0x0CA old triplet interpretation is superseded", "Supersede" in art["conclusion"]["0x0CA"])
+
+namespace = art["requester_id_namespace"]
+working = namespace["working_table"]
+check("longitudinal IDs are modeled as requester identities rather than priorities",
+      "not an ordinal priority" in namespace["model"]["id_is_not_priority"])
+check("P5 longitudinal/vertical namespace names driver operation ID63",
+      namespace["authoritative_sparse_names"]["p5_frc_isa_vertical_id"]["patterns"] == {"0": "No Request", "63": "Driver Operation"})
+check("cross-generation sparse long anchors include ISA9 and MaaS41/45",
+      namespace["authoritative_sparse_names"]["cross_generation_examples"]["Speed Limiter Requesting Vertical ID (Upper Limit)"]["patterns"] == {"0": "No Request", "9": "ISA"}
+      and namespace["authoritative_sparse_names"]["cross_generation_examples"]["MaaS Longitudinal Request ID of Lower Limit From IFU"]["patterns"] == {"0": "No Request of MaaS Autonomous Driving System", "41": "Request 1 of MaaS Autonomous Driving System", "45": "Request 2 of MaaS Autonomous Driving System"})
+check("ID11 shared-axis hypothesis is explicit but not promoted to an OEM longitudinal name",
+      working["11"]["lateral"] == "LTA/LCA"
+      and "ordinary DRCC" in working["11"]["longitudinal"]
+      and "hypothesis" in working["11"]["grade"])
+check("ID25 disproves blind lateral enum transfer",
+      working["25"]["lateral"] == "AP"
+      and "delayed ACC hold" in working["25"]["longitudinal"]
+      and "counterexample" in working["25"]["grade"])
+check("Camry startup ID36 is bounded and not active authority",
+      namespace["camry_observed"]["id36_startup_frames"] == 33
+      and "not observed as active cruise authority" in namespace["camry_observed"]["id36_boundary"])
+check("retained Corolla independently exercises active requester IDs 17 and 23 with result63",
+      namespace["corolla_cross_platform"]["request_candidate_A_counts"] == {"0": 2363, "17": 37}
+      and namespace["corolla_cross_platform"]["request_candidate_B_counts"] == {"4": 2363, "23": 37}
+      and namespace["corolla_cross_platform"]["result_id_counts"] == {"63": 2000})
+check("feature-specific recorder IDs expose more longitudinal requester surfaces without enums",
+      {(row["data_id"], row["name"]) for row in namespace["feature_specific_recorder_id_fields_without_enum"]} >= {
+        ("5271", "IFU request vertical ID (lower limit)"),
+        ("5280", "TSS required longitudinal ID (lower limit)"),
+        ("5281", "TSS request longitudinal ID (upper limit)"),
+        ("5284", "Arbitration result_longitudinal ID"),
+        ("5A04", "PDA(OAA) Request Vertical ID"),
+        ("5B07", "Longitudinal Request ID of Lower Limit from PDA(DA)"),
+      })
 
 print(f"Summary: {passed} passed, {failed} failed")
 raise SystemExit(1 if failed else 0)

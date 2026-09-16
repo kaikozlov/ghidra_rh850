@@ -4,7 +4,7 @@
     "integration": "For Camry, do not revive 0x160 Alpha Long. 0x08A is the semantic request target; stock-harness integration still needs a clean source-suppression/sole-emitter path for the protected request PDU.",
     "not_fully_mapped": "The entire 5280/5281 recorder model is NOT yet byte-named. B6/B7 are now strongly recovered structurally as the two packed request-ID/allocation bytes (bits7:2 ID, bits1:0 allocation), including active/hold/override transitions; upper-vs-lower A/B assignment is unresolved, and shift/EPB, override-prohibition and priority remain unmapped.",
     "request_plane": "0x08A is the unified observed continuous TSS request envelope: the lateral 5282 tuple is recovered there and the duplicated signed16 B8:B9/B11:B12 words match the 5280/5281 longitudinal acceleration-request geometry and pre-motion behavior.",
-    "result_plane": "0x081 is the unified Brake-owned result/reference/supervision envelope: its lateral selected ID/reference are recovered, B6[5:0] is the strongest 5284 longitudinal-result-ID candidate, and B20:B21 is the strongest 57DB result-acceleration candidate."
+    "result_plane": "0x081 is the unified Brake-owned employed-result/reference/supervision envelope: its lateral selected ID/reference are recovered, B6[5:0] is the strongest 5284 longitudinal employed-source-ID candidate, and B20:B21 is the strongest 57DB result-acceleration candidate. Publication ownership does not place every selection step inside the Brake ECU."
   },
   "drives": {
     "drive_a": {
@@ -150,7 +150,7 @@
             "0x47": 1834,
             "0x92": 33
           },
-          "boundary": "The complete-drive value census is insufficient to assign the 5280/5281 request IDs, force-allocation, shift, EPB, override or priority fields. B7 is independently exercised as ACC/hold state; B20/B22 mirror cruise state; B4 is nearly constant. Do not OEM-name those bytes from resemblance."
+          "boundary": "B6/B7 are now structurally split into two six-bit request IDs plus two-bit allocation methods. The complete-drive census does not establish upper-vs-lower ordering or assign the remaining shift, EPB, override-prohibition or priority fields. B20/B22 mirror cruise state. Do not OEM-name unresolved bytes from resemblance."
         }
       },
       "result_0x081": {
@@ -210,7 +210,7 @@
             "1": 8258
           },
           "relation_to_request_ids": {
-            "interpretation": "Selected ID11 overwhelmingly names request candidate A (0x08A B6[7:2]); selected ID63 is a separate arbitration source, consistent with Toyota's independently named Driver Operation ID63. This supports the packed request-ID interpretation.",
+            "interpretation": "Selected ID11 overwhelmingly names request candidate A (0x08A B6[7:2]); selected ID63 is absent from both TSS request slots and consistent with Toyota's independently named Driver Operation ID63. This supports the packed request-ID interpretation.",
             "selected_63_absent_from_A_B_frames": 15544,
             "selected_ID11_equals_candidate_A_frames": 1525,
             "selected_ID11_frames": 1529,
@@ -380,7 +380,7 @@
             "0x46": 604,
             "0x47": 3922
           },
-          "boundary": "The complete-drive value census is insufficient to assign the 5280/5281 request IDs, force-allocation, shift, EPB, override or priority fields. B7 is independently exercised as ACC/hold state; B20/B22 mirror cruise state; B4 is nearly constant. Do not OEM-name those bytes from resemblance."
+          "boundary": "B6/B7 are now structurally split into two six-bit request IDs plus two-bit allocation methods. The complete-drive census does not establish upper-vs-lower ordering or assign the remaining shift, EPB, override-prohibition or priority fields. B20/B22 mirror cruise state. Do not OEM-name unresolved bytes from resemblance."
         }
       },
       "result_0x081": {
@@ -440,7 +440,7 @@
             "1": 5310
           },
           "relation_to_request_ids": {
-            "interpretation": "Selected ID11 overwhelmingly names request candidate A (0x08A B6[7:2]); selected ID63 is a separate arbitration source, consistent with Toyota's independently named Driver Operation ID63. This supports the packed request-ID interpretation.",
+            "interpretation": "Selected ID11 overwhelmingly names request candidate A (0x08A B6[7:2]); selected ID63 is absent from both TSS request slots and consistent with Toyota's independently named Driver Operation ID63. This supports the packed request-ID interpretation.",
             "selected_63_absent_from_A_B_frames": 16718,
             "selected_ID11_equals_candidate_A_frames": 3276,
             "selected_ID11_frames": 3281,
@@ -872,7 +872,240 @@
       "wire": "0x081 B16:B17 signed16"
     }
   },
-  "schema": "camry-2026-longitudinal-request-plane-v2",
+  "requester_id_namespace": {
+    "authoritative_sparse_names": {
+      "cross_generation_examples": {
+        "MaaS Longitudinal Request ID of Lower Limit From IFU": {
+          "alternate_did": "0x3486",
+          "database": "ADCU_P6.ddb",
+          "patterns": {
+            "0": "No Request of MaaS Autonomous Driving System",
+            "41": "Request 1 of MaaS Autonomous Driving System",
+            "45": "Request 2 of MaaS Autonomous Driving System"
+          },
+          "primary_did": "0x0000"
+        },
+        "PDA-SA Lateral Control Request ID": {
+          "alternate_did": "0x0000",
+          "database": "ADCU_P6.ddb",
+          "patterns": {
+            "0": "No Request",
+            "18": "Request"
+          },
+          "primary_did": "0x1EC2"
+        },
+        "Speed Limiter Requesting Vertical ID (Upper Limit)": {
+          "alternate_did": "0x0000",
+          "database": "ADCU_P6.ddb",
+          "patterns": {
+            "0": "No Request",
+            "9": "ISA"
+          },
+          "primary_did": "0x1982"
+        }
+      },
+      "lateral_target_id_dictionary": {
+        "0": "No Request (Manual Operation)",
+        "1": "PCS",
+        "10": "Hands Off LTA",
+        "11": "LTA/LCA",
+        "13": "DESA (Slow Deceleration Control)",
+        "15": "DESA (Deceleration Stop Control)",
+        "18": "SDG",
+        "19": "PDA",
+        "25": "AP",
+        "27": "Remote Parking",
+        "35": "AD (Lv.3)",
+        "37": "EM (Lv.3)",
+        "39": "DES (Lv.3)",
+        "4": "LDA",
+        "41": "AD (Lv.4)",
+        "43": "EM (Lv.4)",
+        "45": "DES (Lv.4)",
+        "49": "Self-Propelled Transport",
+        "63": "Driver Operation"
+      },
+      "p5_frc_isa_vertical_id": {
+        "meaning": "P5 FRC ordinary Data Monitor; exact longitudinal/vertical requester labels.",
+        "patterns": {
+          "0": "No Request",
+          "63": "Driver Operation"
+        }
+      }
+    },
+    "camry_observed": {
+      "id25_delayed_hold_frames": 198,
+      "id36_boundary": "ID36 appears only in drive A request candidate B for 33 frames (~0.79 s at startup), with candidate A ID0, zero request acceleration, and result ID63; it is not observed as active cruise authority.",
+      "id36_startup_frames": 33,
+      "request_candidate_A_counts": {
+        "0": 38257,
+        "11": 6360
+      },
+      "request_candidate_B_counts": {
+        "17": 6360,
+        "36": 33,
+        "4": 38224
+      },
+      "result_id_counts": {
+        "11": 4810,
+        "63": 32262
+      }
+    },
+    "corolla_cross_platform": {
+      "boundary": "Cross-platform structural decode using the same six-bit requester-ID plus two-bit allocation geometry recovered on Camry. The retained Span minute does not establish which A/B slot is upper versus lower or prove that either request wins: 0x081 result ID remains 63 throughout.",
+      "request_candidate_A_counts": {
+        "0": 2363,
+        "17": 37
+      },
+      "request_candidate_B_counts": {
+        "23": 37,
+        "4": 2363
+      },
+      "result_id_counts": {
+        "63": 2000
+      }
+    },
+    "cross_axis_assessment": {
+      "current_hypothesis": "Toyota appears to coordinate sparse application/request-source codes across motion axes, with some common identities (certainly 0/63 and plausibly 11) but axis-/interface-specific meanings for other codes. Longitudinal ID11=DRCC/TSS3 and lateral ID11=LTA/LCA is therefore worth treating as a strong hypothesis, not an enum fact.",
+      "rejects_one_universal_label_table": [
+        "Camry longitudinal ID25 is a delayed-ACC-hold requester while lateral ID25 is OEM AP.",
+        "P6 MaaS longitudinal IDs 41/45 are Request 1/2, while the generation-20 lateral dictionary labels 41 AD(Lv.4) and 45 DES(Lv.4)."
+      ],
+      "supports_coordinated_namespace": [
+        "0 is the no-request/manual anchor on both recovered interfaces.",
+        "63 is OEM-labeled Driver Operation on both the P5 longitudinal/vertical and lateral Target ID surfaces.",
+        "Camry longitudinal ID11 is the ordinary DRCC application source while lateral ID11 is OEM LTA/LCA, making 11 a notable TSS continuous-driving coincidence."
+      ]
+    },
+    "feature_specific_recorder_id_fields_without_enum": [
+      {
+        "bit_length": 8,
+        "byte_position": 1,
+        "data_id": "5271",
+        "name": "IFU request vertical ID (lower limit)"
+      },
+      {
+        "bit_length": 8,
+        "byte_position": 1,
+        "data_id": "5280",
+        "name": "TSS required longitudinal ID (lower limit)"
+      },
+      {
+        "bit_length": 8,
+        "byte_position": 1,
+        "data_id": "5281",
+        "name": "TSS request longitudinal ID (upper limit)"
+      },
+      {
+        "bit_length": 8,
+        "byte_position": 1,
+        "data_id": "5284",
+        "name": "Arbitration result_longitudinal ID"
+      },
+      {
+        "bit_length": 6,
+        "byte_position": 1,
+        "data_id": "5A04",
+        "name": "PDA(OAA) Request Vertical ID"
+      },
+      {
+        "bit_length": 8,
+        "byte_position": 1,
+        "data_id": "5B07",
+        "name": "Longitudinal Request ID of Lower Limit from PDA(DA)"
+      }
+    ],
+    "model": {
+      "axis_boundary": "Toyota uses sparse requester IDs on both longitudinal and lateral interfaces, but the retained evidence disproves blindly copying the lateral enum to longitudinal. Numeric reuse can be deliberate without implying identical axis-local labels.",
+      "id_is_not_priority": "Requester/result IDs identify an application/request source; the numeric value is not an ordinal priority.",
+      "upper_lower_boundary": "Candidate A/B are the two selected longitudinal application-ID/allocation slots; their upper-vs-lower ordering remains unresolved."
+    },
+    "source_files": {
+      "adcu_p6_ddb": {
+        "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/NA/DB/Gen/ADCU_P6.ddb",
+        "sha256": "3fd9458d8825858fb052b7c5ebdfa7707cccae524f61767f0f52d6118d448cc2"
+      },
+      "control_ownership": {
+        "path": "data/generated/gtsplus_2026/tss3_control_ownership_surface.json",
+        "sha256": "66b40a5393539c519a69bd94f1d992b2986457244cc46a5811447e1f54d68ec5"
+      },
+      "corolla_span": {
+        "path": "data/generated/corolla_2025_span_discord_rlog_opendbc_evidence.json",
+        "sha256": "427e59fa4bc1a97fa30c939a50f5e9859d37ffc50b3519a3d90a6ec1f25b8192"
+      },
+      "english_strings_ddb": {
+        "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/NA/DB/Gen/M_English.ddb",
+        "sha256": "458a7039851fc66dc2385fff2efa910337218b8b23985b3c1afc0db7bc5f8014"
+      },
+      "lateral_dictionary": {
+        "path": "data/generated/camry_2026_upstream_request_field_census.json",
+        "sha256": "02677a4f85fcd82d9691ff8ffc1736015821195bf355b905207201bcac7e1188"
+      }
+    },
+    "working_table": {
+      "0": {
+        "grade": "named anchor / observed",
+        "lateral": "No Request (Manual Operation)",
+        "longitudinal": "No Request is OEM-named on P5 ISA vertical ID; observed as Camry candidate A idle."
+      },
+      "11": {
+        "grade": "strong cross-axis shared-application-ID hypothesis; not OEM-named longitudinally",
+        "lateral": "LTA/LCA",
+        "longitudinal": "Observed Camry candidate A during ordinary DRCC and selected result ID11 when the application request is employed. No static longitudinal enum row names 11."
+      },
+      "17": {
+        "grade": "cross-platform active-request observation",
+        "lateral": null,
+        "longitudinal": "Observed Camry active candidate B and retained Corolla active candidate A; no OEM longitudinal label recovered."
+      },
+      "18": {
+        "grade": "OEM lateral/PDA-SA anchor only; do not transfer to longitudinal",
+        "lateral": "SDG",
+        "longitudinal": "No Camry longitudinal observation in the complete-drive request slots."
+      },
+      "23": {
+        "grade": "cross-platform observation only",
+        "lateral": null,
+        "longitudinal": "Observed retained Corolla active candidate B; no OEM longitudinal label recovered."
+      },
+      "25": {
+        "grade": "observed counterexample to universal lateral->longitudinal enum copying",
+        "lateral": "AP",
+        "longitudinal": "Observed Camry candidate B during delayed ACC hold; allocation method distinguishes held vs moving ID25 states."
+      },
+      "36": {
+        "grade": "bounded startup state",
+        "lateral": null,
+        "longitudinal": "Observed Camry startup-only candidate B; no active authority and no OEM label recovered."
+      },
+      "4": {
+        "grade": "observed longitudinal; lateral comparison only",
+        "lateral": "LDA",
+        "longitudinal": "Observed Camry candidate B idle; no OEM longitudinal feature name recovered."
+      },
+      "41": {
+        "grade": "OEM cross-generation axis-specific counterexample",
+        "lateral": "AD (Lv.4)",
+        "longitudinal": "P6 MaaS lower-limit longitudinal requester explicitly names 41 = Request 1 of MaaS Autonomous Driving System."
+      },
+      "45": {
+        "grade": "OEM cross-generation axis-specific counterexample",
+        "lateral": "DES (Lv.4)",
+        "longitudinal": "P6 MaaS lower-limit longitudinal requester explicitly names 45 = Request 2 of MaaS Autonomous Driving System."
+      },
+      "63": {
+        "grade": "OEM named on both axes / observed result",
+        "lateral": "Driver Operation",
+        "longitudinal": "P5 FRC ISA vertical ID explicitly names 63 = Driver Operation; Camry and retained Corolla 0x081 result use 63 when the employed longitudinal source is outside the FRC/TSS application slots."
+      },
+      "9": {
+        "grade": "OEM cross-generation longitudinal/vertical anchor",
+        "lateral": null,
+        "longitudinal": "P6 Speed Limiter Requesting Vertical ID explicitly names 9 = ISA; not observed in Camry 0x08A corpus."
+      }
+    }
+  },
+  "schema": "camry-2026-longitudinal-request-plane-v3",
   "topology": {
     "0x081": "native Brake/chassis Panda bus0 -> upstream bus2 on Toyota Bus 4",
     "0x08A": "native upstream Panda bus2 -> chassis bus0 on Toyota Bus 4",

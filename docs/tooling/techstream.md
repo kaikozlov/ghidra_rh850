@@ -3185,6 +3185,34 @@ surface:
 - `0x5631`: LTA Lateral ID + LTA Control Request Pinion Angle;
 - `0x57DB/0x57DE`: arbitration-result acceleration / pinion angle.
 
+The longitudinal requester-ID vocabulary is **sparse, not absent**. A September-16
+requester-ID sweep across current GTS+ and Techstream V18 NA/EU/JP (3,207 DDBs)
+finds no complete longitudinal 0..63 pattern table on `5280/5281/5284`, FRC
+`0x1284`, Brake `0x10A3/0x10A4`, or the successor longitudinal arbitration IDs.
+The available OEM labels are distributed across feature-specific requester fields:
+
+- P5 FRC `0x1B03` ISA Requesting Vertical ID: `0=No Request`, **`63=Driver Operation`**;
+- P6 ADCU `0x1982` Speed Limiter Requesting Vertical ID: `0=No Request`, **`9=ISA`**;
+- P6 ADCU MaaS lower-limit longitudinal requester: `0=No Request`, **`41=Request 1`**,
+  **`45=Request 2`** of MaaS Autonomous Driving System;
+- P6 PDA-SA lateral requester: `0=No Request`, `18=Request`.
+
+The PCS Operation-FFD dictionary also exposes additional feature-specific requester-ID
+oracles without static value enums: `5271` **IFU request vertical ID (lower limit)**,
+`5A04` **PDA(OAA) Request Vertical ID**, and `5B07` **Longitudinal Request ID of Lower
+Limit from PDA(DA)**. These are high-value dynamic enum oracles: a same-car EB13 record
+containing one of them beside generic `5280/5281/5284` can attach a feature name to a
+numeric requester ID without guessing from the lateral table.
+
+The generation-20 EMPS lateral dictionary remains much richer (19 named IDs), but it
+must not be copied wholesale to longitudinal. Current dynamic Camry evidence already
+provides a counterexample: longitudinal request ID25 is exercised by delayed ACC hold,
+whereas lateral ID25 is `AP`. P6 supplies another axis-specific example: longitudinal
+MaaS 41/45 are Request1/Request2, while the generation-20 lateral table uses 41/45 for
+AD(Lv.4)/DES(Lv.4). Numeric coincidences such as longitudinal DRCC ID11 versus lateral
+`11=LTA/LCA` are therefore useful **shared-application-ID hypotheses**, not automatic
+enum transfers. The tracked Camry request-plane artifact owns the current working table.
+
 The shipped PCS executable still has protector-zeroed managed bodies, but the generic
 CP decoder now recovers a clean analysis PE with **22,447/22,447 executable `MethodDef`
 bodies materialized**. That closes the previously missing `DetailBitAssignInfo` and

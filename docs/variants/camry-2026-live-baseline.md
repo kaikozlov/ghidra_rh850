@@ -3354,11 +3354,18 @@ authorized by this finding.
 
 ### 50.5 Current closure: unified `0x08A` request / `0x081` result plane
 
-The September-16 v2 request-plane reduction supersedes the historical semantic
+The September-16 v3 request-plane reduction supersedes the historical semantic
 claims in §§50.2-50.4 while retaining their raw topology and protected-envelope
-observations. FRC normal-Tx suppression already establishes `0x08A` as the
-upstream request plane; Brake owns `0x081` and continues it with B11[4] request-loss
-supervision when the FRC request disappears.
+observations. FRC normal-Tx suppression establishes `0x08A` as the upstream TSS
+request/instruction plane; Brake owns `0x081` and continues it with B11[4]
+request-loss supervision when the FRC request disappears. Toyota patent
+US20200070849A1 supplies the generic architecture vocabulary: longitudinal and
+lateral request IDs are **application identifiers**; lower/upper longitudinal
+application packages are arbitrated separately; request-generation then sends
+the selected IDs/targets toward powertrain/brake; the final result-longitudinal
+ID reports the application whose acceleration is actually employed, or a driver
+discriminator when driver demand wins. This architecture is a semantic oracle,
+not proof of exact F33 software placement.
 
 The two complete relay-correct drives now provide the longitudinal join. `0x08A`
 B8:B9 and B11:B12 are equal in **44,617/44,617** frames and have the exact
@@ -3385,8 +3392,10 @@ The result plane independently validates the packed-ID interpretation: selected
 `0x081 B6[5:0]` ID11 equals request candidate A (`0x08A B6[7:2]`) in
 **1,525/1,529** and **3,276/3,281** ID11 samples across the two drives, while
 every selected ID63 result is absent from both request-ID candidates. Candidate B
-is ID17 during active cruise. This supports the two-input arbitration model without
-resolving which candidate is Toyota's upper versus lower record.
+is ID17 during active cruise. P5 FRC diagnostics independently name
+`63=Driver Operation`, so the current model is selected lower/upper application
+packages followed by controller/driver selection feedback—not a mysterious third
+FRC request hidden from `0x08A`. Upper-versus-lower A/B ordering remains unresolved.
 
 The delayed-hold corpus independently decomposes the old composite raw-B7 states:
 ordinary `0x2D/0x47` is A `(ID11,method1)` / B `(ID17,method3)`, delayed hold
@@ -3397,9 +3406,24 @@ frames and nowhere else in complete routes `3b/3c`. A moving `B7=0x65` =
 ID25/method1 has B4[5] clear. Camry runtime uses this exact structural hold bit;
 its OEM recorder name remains unassigned.
 
+The requester-ID namespace is now separately bounded. Camry observes request IDs
+A `{0,11}`, request IDs B `{4,17,25,36}`, and result IDs `{11,63}`; ID25 is the
+delayed-ACC-hold requester and ID36 is a 33-frame startup-only state. The retained
+2025 Corolla independently uses idle A/B `0/4`, active A/B `17/23`, while result
+ID stays 63. Toyota statically names only sparse longitudinal/vertical anchors in
+the available corpus: P5 `0=No Request,63=Driver Operation`; P6 speed-limiter
+`9=ISA`; P6 MaaS longitudinal `41/45=Request 1/2`. The full generation-20 lateral
+ID dictionary uses `11=LTA/LCA`, making Camry longitudinal ID11 during DRCC a
+strong **shared TSS application-ID hypothesis**, but not an OEM longitudinal name.
+A universal lateral->longitudinal label table is disproved by longitudinal ID25
+(delayed ACC hold) versus lateral ID25 (AP), and by axis-specific P6 41/45 names.
+The retained FRC ReproStd CUWs remain manufacturer-encrypted, so their application
+plaintext cannot yet be searched for the missing table.
+
 The correct current claim is therefore: `0x08A` is the unified observed continuous
-TSS3 request envelope, and `0x081` is the unified Brake-owned selected/result/reference
-envelope.
+TSS3 selected-request/instruction envelope, and `0x081` is the Brake-owned
+selected/employed-result/reference envelope. Brake publication ownership does not
+locate every arbitration/selection operation inside the Brake ECU.
 
 ## 51. Native Bus-1 framing is exact AUTOSAR E2E Profile 5, not cryptographic authentication (VAR-107)
 

@@ -9,15 +9,23 @@ exact H/F firmware-derived rules.
 from __future__ import annotations
 
 import argparse
-from bisect import bisect_right
 import collections
+import itertools
 import json
 import re
 import sys
+from bisect import bisect_right
 from pathlib import Path
 from typing import Any
 
-from tools.toyota_support.toyota_route_opendbc_common import be_raw, lateral_reference_family, rate_hz, sha256, stats, toyota_checksum
+from tools.toyota_support.toyota_route_opendbc_common import (
+    be_raw,
+    lateral_reference_family,
+    rate_hz,
+    sha256,
+    stats,
+    toyota_checksum,
+)
 
 REPO = Path(__file__).resolve().parents[4]
 LOCK = REPO / "external-references.lock.json"
@@ -240,6 +248,12 @@ def main() -> int:
     acc = rows(0x08A, 32)
     acc_state = [dat[7] for _, dat in acc]
     acc_engaged = [1 if (dat[22] & 0x10) else 0 for _, dat in acc]
+    acc_request_id_a = [dat[6] >> 2 for _, dat in acc]
+    acc_request_id_b = [dat[7] >> 2 for _, dat in acc]
+    acc_allocation_a = [dat[6] & 0x03 for _, dat in acc]
+    acc_allocation_b = [dat[7] & 0x03 for _, dat in acc]
+    control_result = rows(0x081, 32)
+    longitudinal_result_ids = [dat[6] & 0x3F for _, dat in control_result]
     cruise_display = rows(0x251, 8)
     cruise_set_speed = [dat[2] for _, dat in cruise_display]
     cruise = rows(0x176, 8)
@@ -310,7 +324,7 @@ def main() -> int:
         dat[h030_rule["wire_byte"]] == ((sum(dat[: h030_last_data_byte + 1]) + h030_addend) & 0xFF)
         for _, dat in fd30
     )
-    fd30_intervals_ms = [(b[0] - a[0]) / 1e6 for a, b in zip(fd30, fd30[1:])]
+    fd30_intervals_ms = [(b[0] - a[0]) / 1e6 for a, b in itertools.pairwise(fd30)]
     fd30_mean_interval_ms = (
         (fd30[-1][0] - fd30[0][0]) / 1e6 / (len(fd30) - 1)
         if len(fd30) > 1 else None
@@ -526,7 +540,15 @@ def main() -> int:
                 "acc_disengaged_frames": sum(1 - x for x in acc_engaged),
                 "state_when_engaged": unique([state for state, engaged in zip(acc_state, acc_engaged) if engaged]),
                 "state_when_disengaged": unique([state for state, engaged in zip(acc_state, acc_engaged) if not engaged]),
-                "boundary": "In the retained Span segment byte22 bit0x10 asserts for every 0x5D state frame and is clear for every 0x12 state frame. This is a direct on-vehicle engaged-state join; contributor longitudinal evidence separately exercises 0x47 engaged and 0x67 standstill/hold states.",
+                "request_id_allocation": {
+                    "candidate_A_id_counts": {str(k): v for k, v in sorted(collections.Counter(acc_request_id_a).items())},
+                    "candidate_A_allocation_counts": {str(k): v for k, v in sorted(collections.Counter(acc_allocation_a).items())},
+                    "candidate_B_id_counts": {str(k): v for k, v in sorted(collections.Counter(acc_request_id_b).items())},
+                    "candidate_B_allocation_counts": {str(k): v for k, v in sorted(collections.Counter(acc_allocation_b).items())},
+                    "result_id_counts": {str(k): v for k, v in sorted(collections.Counter(longitudinal_result_ids).items())},
+                    "boundary": "Cross-platform structural decode using the same six-bit requester-ID plus two-bit allocation geometry recovered on Camry. The retained Span minute does not establish which A/B slot is upper versus lower or prove that either request wins: 0x081 result ID remains 63 throughout.",
+                },
+                "boundary": "In the retained Span segment byte22 bit0x10 asserts for every 0x5D state frame and is clear for every 0x12 state frame. This is a direct on-vehicle engaged-state join; contributor longitudinal evidence separately exercises Camry 0x47 engaged and 0x67 delayed-hold states.",
             },
             "0x251": {
                 "wire": "classic 8-byte TSS3 cruise-display carrier",
