@@ -23,11 +23,15 @@ Earlier passive/direct-B6 checkpoints below remain useful history, but they do
 not supersede that working result.
 
 **2026-09-16 runtime checkpoint:** the current production-shaped candidate no
-longer host-transmits B6 or depends on a dummy/zero MAC. `CarController` sends a
-short Classical C7 sideband on **stock Toyota-B Panda bus 1**; the volatile
-continuous resident edits an already-native B6 inside the EPS and obtains a
-native-valid FV4+CMAC28 through the EPS ICU-S command-5 path. Sequence zero
-returns ownership to untouched native B6. Longitudinal remains entirely Toyota-owned:
+longer host-transmits B6 or depends on a dummy/zero MAC. `CarController` sends
+the unified Classical functional C7 frame `07 C7 C7 seq target_hi target_lo 00
+00` on **stock Toyota-B Panda bus 1 / CAN `0x777`**; Panda permits only that
+bounded envelope. The volatile continuous resident edits an already-native B6
+inside the EPS and obtains a native-valid FV4+CMAC28 through the EPS ICU-S
+command-5 path. Changed nonzero generations renew a seven-foreground-tick host
+lease; expiry or sequence zero returns ownership to untouched native B6. C6 is
+used only to load/arm the split helper and is not a steering command.
+Longitudinal remains entirely Toyota-owned:
 openpilot advertises no TSS3 Alpha Long, does not synthesize or suppress `0x160`,
 and does not transmit `0x08A`. HUD/cancel transmission claims from the older
 integration are likewise bounded by the current capability matrix. The intended

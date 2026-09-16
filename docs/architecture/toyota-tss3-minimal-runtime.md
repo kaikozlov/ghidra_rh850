@@ -73,17 +73,27 @@ the only runtime path.
 
 ### Why the remaining openpilot transport exception is lateral-only
 
-The road-proven temporary-repin route contained only Classical host TX and put
-C7 on bus 0. In the current stock-Toyota-B candidate the only TSS3 host control
-PDU is the 8-byte Classical C7 `0x1FDC0002` sideband on bus 1. The former HUD
-`0x412`, brake-cancel `0x101`, and longitudinal `0x160` transmissions are not
-part of the runtime control surface.
+The current TSS3 host-control PDU is the 8-byte Classical functional frame
+`0x777` on stock Toyota-B Panda bus 1:
+
+```text
+07 C7 C7 seq target_hi target_lo 00 00
+```
+
+The first `07` is the ISO-TP single-frame PCI length. CanTp removes it and
+places the seven-byte N-SDU `C7 C7 seq target_hi target_lo 00 00` in the EPS
+functional DCM buffer. Panda permits only this exact bounded C7 envelope; it
+does **not** expose arbitrary functional diagnostics while driving. The former
+HUD `0x412`, brake-cancel `0x101`, longitudinal `0x160`, and historical
+extended-family-5 `0x1FDC0002` steering transmissions are not part of the
+current openpilot runtime surface.
 
 The same physical network carries native CAN-FD traffic including `0x08A`.
 Route 45 showed that sticky bus-global `canfd_auto` can promote a short
-Classical host frame to FD, so C7 must retain the target-scoped transport
-exception on bus 1. No equivalent host transport exception is currently needed
-for longitudinal because openpilot emits neither `0x08A` nor `0x160`.
+Classical host frame to FD, so functional C7 still needs the target-scoped
+Classical transport treatment on bus 1. No equivalent host transport exception
+is currently needed for longitudinal because openpilot emits neither `0x08A`
+nor `0x160`.
 
 Adding `CanData.fd` remains useful for exact logging and arbitrary short FD
 host TX, but the demonstrated controller sends no short FD PDU. It is a
@@ -91,80 +101,77 @@ transport enhancement, not a dependency of this lateral baseline.
 
 ### Cross-variant resident control ingress
 
-The Crown bring-up closed a second stock host-to-resident transport that is
-present on all four tracked TSS3 EPS images. Exact Camry F33, Corolla H,
-Corolla F, and Crown F30 each configure classic functional request `0x777` as
-DCM request type 1. Their functional service set is identically
-`10,14,28,31,3E,85`; `C6` and `C7` are absent. The common service lookup
-therefore assigns NRC `0x11` to either control SID, and each exact response
-selector suppresses that NRC for a functional request. CanTp/PduR delivers the
-complete seven-byte N-SDU to the target's channel-1 DCM buffer before the
-resident's existing post-receive hook:
+The Crown bring-up closed a stock host-to-resident transport that is present on
+all four tracked TSS3 EPS images. Exact Camry F33, Corolla H, Corolla F, and
+Crown F30 each configure classic functional request `0x777` as DCM request type
+1. Their functional service set is identically `10,14,28,31,3E,85`; `C6` and
+`C7` are absent. The common service lookup therefore assigns NRC `0x11` to
+either control SID, and each exact response selector suppresses that NRC for a
+functional request. CanTp/PduR delivers the complete seven-byte N-SDU to the
+target's channel-1 DCM buffer before the resident's existing post-receive hook:
 
-| target | functional DCM buffer | dedicated family-5 ingress | dedicated staging |
-|---|---:|---|---:|
-| Camry `8965F3307000` | `FEBE5751` | `0x1FDC0002` enabled | `FEBE4C34` |
-| Corolla `8965H1202000` | `FEBE563D` | `0x1FDC0002` enabled | `FEBE4B20` |
-| Corolla `8965F1208000` | `FEBE563D` | `0x1FDC0002` enabled | `FEBE4B20` |
-| Crown `8965F3012000` | `FEBE527D` | family 5 disabled | — |
+| target | functional DCM buffer | historical dedicated family-5 ingress | install strategy |
+|---|---:|---|---|
+| Camry `8965F3307000` | `FEBE5751` | `0x1FDC0002` enabled | split helper, loaded with C6 |
+| Corolla `8965H1202000` | `FEBE563D` | `0x1FDC0002` enabled | helper embedded before application startup |
+| Corolla `8965F1208000` | `FEBE563D` | `0x1FDC0002` enabled | helper embedded before application startup |
+| Crown `8965F3012000` | `FEBE527D` | family 5 disabled | split helper, loaded with C6 |
 
-The Crown vehicle first dynamically proved the functional transport with
-`07 C7 A5 00 12 34 00 00`: the DCM mailbox tail matched and no `0x7A9` NRC was
-emitted. Follow-up showed stock DCM teardown may clear N-SDU B0, so the active
-Crown signer duplicates its C6/C7 tag into durable B1. The unified runtime adopts
-that corrected tail-tag shape on every target. Camry and Corolla functional
-ingress are firmware-closed but have not yet been separately live-qualified. The
-deterministic matrix is
+The Crown vehicle first dynamically proved the functional transport. Follow-up
+showed stock DCM teardown may clear N-SDU B0, so the maintained wire format
+duplicates the private tag into durable B1. Thus loader traffic is
+`07 C6 C6 index word_le32` and steering control is
+`07 C7 C7 seq target_hi target_lo 00 00`. **C6 is never the recurring steering
+command**; it exists only to transfer/arm the split helper on Camry and Crown.
+The deterministic firmware matrix is
 [`tss3_resident_control_ingress_matrix.json`](../../data/generated/tss3_resident_control_ingress_matrix.json).
 
-This means **Corolla does not need an unoccupied CAN mailbox hunt**. Both H and
-F already carry the same configured dedicated extended-CAN family as F33; the
-current Corolla signer uses `0x1FDC0002 -> FEBE4B20`. The functional `0x777`
-route is available as a second stock-firmware ingress if a future calibration
-compiles family 5 out, as Crown does.
+The historical family-5 paths remain valuable evidence and recovery tooling,
+but they are no longer the cross-variant openpilot contract. Crown production
+firmware compiles family 5 out entirely, while functional `0x777` exists on all
+four exact targets. Keeping one host wire/API therefore removes a gratuitous
+Camry/Corolla-versus-Crown split without changing any target-local B6,
+freshness, command-5, or RAM facts.
 
-For F33 there is likewise no present reason to replace the road-proven
-`0x1FDC0002 -> FEBE4C34` runtime with functional diagnostics. `0x777` is a
-functional diagnostic endpoint, not a dedicated signer transport, so a normal
-driving integration would have to grant only the exact C7 envelope rather than
-arbitrary diagnostic TX. It would also still be an 8-byte Classical PDU on the
-same mixed/FD bus, so switching carriers would **not** remove the bus-1
-Classical-TX/`canfd_auto` requirement. The smaller architecture is therefore:
-use the dedicated family-5 carrier where the target already configures it, and
-use the stock functional-Diagnostic C6/C7 path as the no-CodeFlash fallback
-where that carrier is absent.
+#### Unified functional runtime
 
-#### Parallel unified functional runtime
-
-The cross-variant closure is strong enough to test a second architecture directly
-instead of continuing to reason about it abstractly. A new **parallel** runtime now
-uses the stock functional `0x777` path on all four exact targets while leaving the
-existing Camry/Corolla/Crown implementations in the tree unchanged. Its common
-wire contract is:
+The maintained runtime now uses functional `0x777` on all four exact targets.
+Its common wire contract is:
 
 ```text
-helper loader (where needed):  07 C6 C6 index word_le32
-runtime control:               07 C7 C7 seq target_hi target_lo 00 00
+helper loader (Camry/Crown only): 07 C6 C6 index word_le32
+runtime steering control:         07 C7 C7 seq target_hi target_lo 00 00
+inactive / explicit release:      07 C7 C7 00  00        00        00 00
 ```
 
 `build_tss3_unified_b6_signer.py` emits exact-target bundles for Camry F33,
 Corolla H/F, and Crown F30; `tss3_unified_b6_signer.py` provides the common
-preflight/install/qualify/control harness. The resident and helper are now **one
-maintained source pair**, with SHA-bound compile macros selecting the exact F3 or
-Corolla scheduler/RAM geometry. This is intentionally not one byte-identical
-multi-calibration binary: exact call/RAM addresses differ, and Corolla's two-byte
-high-tail headroom requires its existing embedded-helper startup strategy. Camry
-and Crown retain their post-startup split-helper load geometry; Corolla retains
-its embedded-helper install geometry. Target-specific B6 mutation tuples, freshness
-cells, command-5 addresses, and scheduler replay remain target-local.
+preflight/install/qualify/control harness. The resident and helper are one
+maintained source pair with SHA-bound compile macros selecting exact target
+addresses. It is intentionally not one byte-identical multi-calibration binary:
+exact call/RAM addresses and the installation geometry differ.
 
-The common first vehicle test is deliberately transport-only: bind exact F181,
-enter EXTENDED over physical `0x7A1`, snapshot the target-specific functional DCM
-buffer with SID23, send one `07 C7 C7 A5 12 34 00 00` frame on `0x777`, and
-require the durable mailbox tail plus suppressed NRC11 behavior. Only after that
-does the harness install RAM and attempt the native-MAC oracle. This makes the
-unified carrier falsifiable on Camry/Corolla without discarding the road-proven
-dedicated F33 path or the current Corolla family-5 implementation.
+The recurring host API is nevertheless identical. While `CC.latActive`,
+openpilot emits a changed nonzero C7 generation at its normal 50-Hz TSS3
+steering cadence. When lateral control is inactive it emits sequence zero.
+Receiver behavior is target-local:
+
+- **Camry F33 / Crown F30:** the 596-byte split helper uses the road-proven
+  supervised shape. A changed nonzero generation grants seven nominal 5-ms
+  foreground ticks; repeated mailbox contents do not renew the lease; expiry
+  or sequence zero leaves the native B6 untouched. The 600-byte transfer image
+  still fits the exact 604-byte low-RAM slot.
+- **Corolla H/F:** the exact low helper remains 460 bytes in its 464-byte
+  target-native pocket. Each changed nonzero C7 generation is consumed once;
+  repeating a stale generation cannot cause another replacement. Openpilot's
+  continuously changing 50-Hz generation therefore gives continuous control,
+  while host loss naturally fails back after the last one-shot replacement.
+
+The common qualification ladder remains conservative: bind exact F181, prove
+functional mailbox delivery, install only volatile RAM, reproduce one untouched
+native B6 MAC with Toyota command 5, and only then permit C7 replacement. The
+old target-specific extended-family-5 signers remain in the tree as historical
+and recovery artifacts, not as the normal openpilot control transport.
 
 ### Why Panda still needs a generic fix
 
@@ -190,16 +197,15 @@ dependency.
 `ToyotaFlags.TSS3` describes the state/network generation. It does not grant
 actuation and does not imply one authentication scheme.
 
-`ToyotaSafetyFlags.F33` selects the exact actuator/safety contract proven on
-this calibration: the C7 sideband, its angle scaling, and the corresponding
-RX/TX set. Keeping this flag target-specific prevents another TSS3 platform
-from inheriting F33 behavior merely because it is newer Toyota hardware.
+`ToyotaSafetyFlags.TSS3_SIGNER` selects the bounded resident-signer actuator
+contract; `F33` remains its source-compatible alias. The host transport is the
+common functional `0x777` C7 envelope, while target identity still determines
+exact EPS scaling, RX requirements, resident placement, and signer image.
 
-The reusable architecture is the normal openpilot division of ownership. The
-dedicated `0x1FDC0002` C7 transport has now transferred exactly to Corolla H/F,
-but actuator field semantics, scaling, limits, signer RAM locations, and the EPS
-payload remain exact-target facts and must not transfer merely from the shared
-carrier.
+The reusable architecture is the normal openpilot division of ownership.
+Functional `0x777` is the shared host carrier; actuator field semantics,
+scaling, limits, signer RAM locations, freshness cells, and the EPS payload
+remain target-local facts and must not transfer merely from that shared carrier.
 
 ## Current Camry audit checkpoint
 
@@ -243,9 +249,10 @@ Current status and reproducible validation are centralized in the
 [capability matrix](../variants/camry-2026-capability-matrix.md) and
 [port evidence review](../variants/camry-2026-port-evidence-review.md). A new
 transport alone does not solve command lifetime, native cruise cancellation,
-object validity, or physical actuator qualification. The parallel unified
-functional runtime described above remains a separate workstream; its carrier
-closure must not silently transfer the old Camry helper's road qualification.
+object validity, or physical actuator qualification. The unified functional
+runtime described above is now the maintained host transport; that transport
+migration does not silently transfer the historical Camry helper's road
+qualification to the new `0x777` runtime or to Corolla/Crown.
 
 The direct-Panda lease and installer remain deployment tooling. They must not
 become a second engagement policy in openpilot. No proved nondisruptive stock

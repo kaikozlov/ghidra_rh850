@@ -872,18 +872,22 @@ decompiler evidence:
 
 ### H/F command-5 portability and target-native carrier candidate
 
-**2026-09-11 supersession.** The earlier 462-byte direct command-5 probe below
-depended on an XCP mailbox and is not the current Corolla steering workflow.
-The current split resident uses extended `0x1FDC0002` C7 frames on Toyota-B bus
-1 for control and application UDS SID `0x23` RMBA for attestation/status. Its
-copyable car kit contains no XCP client. The 522-byte high resident and 460-byte
-low helper are built by
-`exploit/ephemeral_runtime/build_corolla_hf_b6_inline_signer.py`; live Corolla
-command-5/MAC/timing qualification remains open. The helper mutates only ID and
-target (B3..B5), retaining the native H/F secondary fields and signal261 rather
-than copying Camry's target-specific B6/B8/B9 values. The retained native tuple
-must be captured and compared with the firmware-derived minimal ID11 candidate
-before interpreting a steering result.
+**2026-09-16 supersession.** The earlier 462-byte direct command-5 probe and
+later extended-family-5 `0x1FDC0002` carrier are retained as historical
+bring-up paths, not the current Corolla openpilot transport. The maintained H/F
+runtime now uses the cross-variant functional request `0x777` on Toyota-B bus 1
+with raw frame `07 C7 C7 seq target_hi target_lo 00 00`. Exact H/F keep the
+522-byte high resident and 460-byte low helper; because only four bytes remain
+in the proven low pocket, the helper intentionally retains fresh-generation
+single-use semantics rather than importing Camry/Crown's larger seven-tick
+lease. Each changed nonzero C7 generation can replace one native B6 and cannot
+be reused; openpilot's 50-Hz changing generation supplies continuous control,
+and host loss fails back after the final consumed generation. Sequence zero is
+the common explicit release frame. The helper still mutates only ID and target
+(B3..B5), retaining native H/F secondary fields and signal261 rather than
+copying Camry-specific B6/B8/B9 values. C6 is not a Corolla runtime steering
+command and is not needed for installation because H/F embed the helper before
+application startup.
 
 The useful **software** part of the Sienna command-5 signing work transfers to
 H/F. Exact H record 0 at `0x27C88` selects completion `0x82F5C`, adapter

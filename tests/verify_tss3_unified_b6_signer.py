@@ -12,28 +12,28 @@ from unittest import mock
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from exploit.ephemeral_runtime import tss3_unified_b6_signer as host
 from exploit.ephemeral_runtime import build_tss3_unified_b6_signer as unified_builder
+from exploit.ephemeral_runtime import tss3_unified_b6_signer as host
 
 BUILDER = ROOT / "exploit/ephemeral_runtime/build_tss3_unified_b6_signer.py"
 KIT_BUILDER = ROOT / "tools/targets/tss3/builders/build_tss3_unified_b6_signer_kit.py"
 TARGETS = {
-    "camry-8965F3307000": ("0xFEBE5751", "split-functional-loader", 522, 588, 600),
-    "corolla-8965H1202000": ("0xFEBE563D", "embedded-helper-functional-control", 522, 460, 460),
-    "corolla-8965F1208000": ("0xFEBE563D", "embedded-helper-functional-control", 522, 460, 460),
-    "crown-8965F3012000": ("0xFEBE527D", "split-functional-loader", 522, 588, 600),
+    "camry-8965F3307000": ("0xFEBE5751", "split-functional-loader", 522, 596, 600, "supervised-continuous", 7),
+    "corolla-8965H1202000": ("0xFEBE563D", "embedded-helper-functional-control", 522, 460, 460, "fresh-generation-single-use", 0),
+    "corolla-8965F1208000": ("0xFEBE563D", "embedded-helper-functional-control", 522, 460, 460, "fresh-generation-single-use", 0),
+    "crown-8965F3012000": ("0xFEBE527D", "split-functional-loader", 522, 596, 600, "supervised-continuous", 7),
 }
 
-# These are the byte identities produced by the live-debugged target-specific
-# Crown runtime after moving C6/C7 discrimination into durable DCM B1.  The
-# unified Crown specialization must remain byte-identical until that proven
-# implementation is intentionally superseded.
-CROWN_LIVE_CORRECTED_SHA256 = {
-    "resident": "66d510c215379c3bef83efcf8cc48def3903c5526c79bee545502d07c026eed7",
-    "helper": "f53e15393fcd1670bf321fd06cbc7e97c6ccbd395a2a9d5be635d4a9619a4351",
-    "helper_image": "b04f441d0fc8a36d2a056eb03ea205dc06bb1aaf2cf10e7459a4b9caeb3100a6",
-    "payload": "028ef56f5d22fb9b29c6287de2cb03f2c37d8702e818fe627f62fbe7c2616e62",
-    "staging": "3e3843769adc9da820e0e4f76a659c9ea7ef6676e29b80baf4753c96766acf29",
+# This intentionally supersedes yesterday's live-corrected one-shot Crown
+# helper while preserving its functional-0x777 DCM geometry. The new split
+# helper carries the same seven-tick host-loss lease as the road-proven Camry
+# supervised runtime.
+CROWN_SUPERVISED_UNIFIED_SHA256 = {
+    "resident": "6942f152a698d2656848727a2c0624c3dd4c5a7e820524a70c389ddf0f18a417",
+    "helper": "962f55958aa681904f89824e8e289efd55f062457c6ea2aafbb51c2ca0ab8345",
+    "helper_image": "35aa8d097410d3a6847f6427c4aacc6a137f88aac7aaeac3bce05f356b5addaa",
+    "payload": "90b3b2e27b238bcf26d96d5cab735d0e792c3a1e603c30db208ca943422e132a",
+    "staging": "a62a3a580b079a8f5e8bc28f804686c50848be0bdf819d520b210c36d82ba74e",
 }
 
 
@@ -46,7 +46,8 @@ def check(label: str, condition: object) -> None:
 check("unified wire frames exact",
       host.loader_frame(3, bytes.fromhex("11223344")) == bytes.fromhex("07c6c60311223344") and
       host.loader_frame(0xFF) == bytes.fromhex("07c6c6ff00000000") and
-      host.replacement_frame(7, 0x1234) == bytes.fromhex("07c7c70712340000"))
+      host.replacement_frame(7, 0x1234) == bytes.fromhex("07c7c70712340000") and
+      host.release_frame() == bytes.fromhex("07c7c70000000000"))
 post_replace_raw = bytearray(host.SPLIT_TELEMETRY_SIZE)
 post_replace_raw[8:12] = bytes.fromhex("d4a561f5")
 post_replace_raw[12:16] = bytes.fromhex("11223344")
@@ -85,7 +86,7 @@ check("Crown unified target config matches live-corrected durable tail offsets",
 built: dict[str, tuple[dict, Path]] = {}
 with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
     root = Path(td)
-    for target, (buffer, strategy, resident_size, helper_size, helper_image_size) in TARGETS.items():
+    for target, (buffer, strategy, resident_size, helper_size, helper_image_size, runtime_mode, host_loss_ticks) in TARGETS.items():
         out = root / target
         proc = subprocess.run(
             [sys.executable, str(BUILDER), "--target", target, "--output-dir", str(out)],
@@ -101,6 +102,9 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
               meta["control"]["can_id"] == "0x777" and meta["control"]["bus"] == 1 and
               meta["control"]["extended"] is False and meta["control"]["dcm_buffer"] == buffer and
               meta["control"]["runtime_frame"] == "07 C7 C7 seq target_hi target_lo 00 00" and
+              meta["control"]["runtime_mode"] == runtime_mode and
+              meta["control"]["host_loss_ticks"] == host_loss_ticks and
+              meta["control"]["release_sequence_zero"] is True and
               meta["control"]["functional_nrc11_suppressed"] is True and
               meta["install_strategy"] == strategy)
         check(f"{target}: bundle uses the single maintained resident/helper sources",
@@ -125,8 +129,8 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
               p["sequence"][0].startswith("NRTD/Park: prove exact-target stock functional 0x777") and
               p["old_implementations_retained"] is True)
         if target == "crown-8965F3012000":
-            check("Crown unified artifacts stay byte-identical to live-corrected target runtime",
-                  meta["artifacts_sha256"] == CROWN_LIVE_CORRECTED_SHA256)
+            check("Crown unified artifacts pin the supervised functional runtime",
+                  meta["artifacts_sha256"] == CROWN_SUPERVISED_UNIFIED_SHA256)
         built[target] = (meta, metas[0])
 
     # Behavioral fixture for the common mailbox proof. DCM teardown may clear
