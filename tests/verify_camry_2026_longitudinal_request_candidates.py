@@ -22,7 +22,7 @@ class CandidateEvidence(unittest.TestCase):
     cls.report = build()
 
   def test_portable_regeneration(self):
-    self.assertEqual(self.report['schema'], 'camry-longitudinal-request-candidates-v2')
+    self.assertEqual(self.report['schema'], 'camry-longitudinal-request-candidates-v3')
     self.assertEqual(self.report, json.loads(ARTIFACT.read_text()))
 
   def test_current_stock_topology_is_role_normalized(self):
@@ -77,8 +77,8 @@ class CandidateEvidence(unittest.TestCase):
       self.assertEqual(sample_m500['c9_b12_b13_raw'], 0x1838)
       self.assertEqual(sample_zero['c9_b12_b13_raw'], 0x1838)
 
-  def test_simple_direct_frc_precursor_search_is_negative_except_state_related_160(self):
-    s = self.report['direct_frc_bus1_precursor_screen']['per_id']
+  def test_simple_direct_frc_duplicate_search_is_negative_except_state_related_160(self):
+    s = self.report['direct_frc_bus1_duplicate_request_screen']['per_id']
     for address in ('0x020', '0x230', '0x440'):
       self.assertEqual(s[address]['reproduced_abs_r_ge_0p25'], 0)
     self.assertGreater(s['0x160']['reproduced_abs_r_ge_0p25'], 0)
@@ -110,7 +110,9 @@ class CandidateEvidence(unittest.TestCase):
 
   def test_no_runtime_authority_claim(self):
     self.assertIn('Do not restore Camry 0x160 longitudinal output', self.report['implementation_boundary'])
-    self.assertIn('do not inject 0x08A', self.report['implementation_boundary'])
+    self.assertIn('do not inject a competing 0x08A', self.report['implementation_boundary'])
+    self.assertIn('already the recovered upstream/FRC-side request plane', self.report['request_plane_architecture']['logical_request'])
+    self.assertIn('not proved to contain every authoritative', self.report['request_plane_architecture']['exhaustiveness_boundary'])
 
 
 if __name__ == '__main__':

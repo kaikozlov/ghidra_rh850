@@ -867,9 +867,21 @@ low-rate `0x5F7` B7 instead behave as coarse, lagging longitudinal companions;
 result/feedback return.
 
 Because stock Toyota-B leaves protected `0x08A` on an **unsplit** network, the
-preferred integration target is now the unrecovered **FRC -> arbitration/signing
-precursor that produces 0x08A**, or another legitimate sole-emitter boundary.
-Competing 0x08A injection is not authorized by this evidence. The Camry platform
+remaining integration problem is **source suppression / sole-emitter ownership
+for the already-established `0x08A` request plane**. A physically separate
+FRC-to-signer/proxy handoff may exist and would be a useful interception point,
+but it is not a second semantic request layer. Competing `0x08A` injection is
+not authorized by this evidence. The Camry platform
 therefore no longer advertises Alpha Long; stock longitudinal ownership remains
 in force until a real actuator ingress is recovered. See the longitudinal
 evidence packet and `data/generated/camry_2026_longitudinal_request_candidates.json`.
+
+The same evidence does **not** establish that every authoritative TSS3 FRC
+output lives in `0x08A`. The PDU is the central recovered continuous control
+request plane: lateral request identity/angle is already closed there and its
+duplicated signed16 words are now the strongest longitudinal acceleration-request
+candidates. Toyota's recorder schema additionally exposes longitudinal request
+IDs, force-allocation, shift/EPB, override/priority and other request metadata
+whose exact wire homes are not all recovered, while ordinary FRC state/display
+and ego-motion publications exist on separate PDUs. Treat `0x08A` as the central
+request envelope, not as an exhaustive inventory of FRC egress.

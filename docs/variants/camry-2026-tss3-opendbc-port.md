@@ -1298,8 +1298,10 @@ probe above.
 > state/result-related rather than a demonstrated actuator ingress. The leading
 > direct chassis-facing candidate is now protected Bus-4 `0x08A` B8:B9/B11:B12,
 > whose signed16 ×0.001 shape matches Toyota's upper/lower TSS acceleration
-> request vocabulary. Exact upper/lower identity and the preferred
-> pre-protection FRC/proxy carrier are still unresolved. Camry therefore keeps
+> request vocabulary. Exact upper/lower identity and additional request metadata
+> are still unresolved. The semantic request plane itself is `0x08A`; what
+> remains unresolved is the clean physical source/suppression boundary (including
+> any FRC-to-signer/proxy publication handoff). Camry therefore keeps
 > stock longitudinal ownership and does **not** advertise Alpha Long. See
 > `camry-2026-longitudinal-evidence.md` for the current evidence and topology
 > normalization. The remainder of this section is retained as historical design

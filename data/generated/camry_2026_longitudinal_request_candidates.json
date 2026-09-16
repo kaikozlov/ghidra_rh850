@@ -1,5 +1,5 @@
 {
-  "direct_frc_bus1_precursor_screen": {
+  "direct_frc_bus1_duplicate_request_screen": {
     "boundary": "Correlation is a screening bound, not source-code dataflow proof. Closed-loop ego-state fields can correlate strongly at long lags.",
     "lag_convention": "positive lag means the direct FRC PDU field is compared to a later protected 0x08A request word",
     "method": "Every byte-aligned 8/16/24/32-bit BE/LE signed+unsigned field; nearest protected 0x08A B8:B9 request-word candidate at source time + lag; lags -300..+300 ms/25 ms; <=30 ms join; cruise latch B3[3] asserted; segment-local only.",
@@ -1314,7 +1314,7 @@
     ],
     "static_join": "FRC_P5 contains the upper-limit requester/acceleration/allocation/permission source vocabulary; brake-domain ECUs expose upper/lower acceleration and requester IDs explicitly named 'from Toyota Safety Sense'; and the FRC-hosted PCS recorder contains both request halves plus arbitration-result longitudinal ID/acceleration. This closes the diagnostic source->brake-sink architecture, but not copy direction, wire encoding, SecOC ownership, or arbitration execution."
   },
-  "implementation_boundary": "Do not restore Camry 0x160 longitudinal output and do not inject 0x08A from this analysis alone. On stock Toyota-B, 0x08A is on unsplit Bus 4, so clean source replacement requires recovering the pre-protection FRC/proxy handoff or another legitimate sole-emitter boundary. No runtime or Panda policy is authorized here.",
+  "implementation_boundary": "Do not restore Camry 0x160 longitudinal output and do not inject a competing 0x08A from this analysis alone. The semantic request plane is already 0x08A. On stock Toyota-B that protected PDU is on unsplit Bus 4, so production integration still needs a clean source-suppression/sole-emitter boundary or the physical FRC-to-signer publication handoff. That is a transport/ownership problem, not evidence of a different upstream command. No runtime or Panda policy is authorized here.",
   "other_candidates": {
     "0x0C9": {
       "b12_b13_vs_0x0ca": {
@@ -2429,35 +2429,34 @@
     {
       "candidate": "protected 0x08A B8:B9 and B11:B12",
       "rank": 1,
-      "role": "direct downstream TSS acceleration-request candidate",
-      "status": "strong bounded candidate; wire field identity not yet OEM-joined"
-    },
-    {
-      "candidate": "unrecovered FRC -> proxy/signing precursor for protected 0x08A",
-      "rank": 2,
-      "role": "preferred stock-harness replacement boundary",
-      "status": "architecture supported; exact carrier/encoding unresolved"
+      "role": "FRC-side TSS acceleration-request fields",
+      "status": "strong bounded candidate inside the already-established 0x08A request plane; exact upper/lower wire identity remains open"
     },
     {
       "candidate": "protected 0x5AF B26 signed6",
-      "rank": 3,
+      "rank": 2,
       "role": "coarse longitudinal request/result companion",
-      "status": "tracks 0x08A at about 0.25 m/s^2/count but lags it; not a primary command candidate"
+      "status": "tracks 0x08A at about 0.25 m/s^2/count but lags it; not a primary request magnitude"
     },
     {
       "candidate": "0x0C9",
-      "rank": 4,
+      "rank": 3,
       "role": "possible sideband/request metadata",
       "status": "weak magnitude candidate"
     },
     {
       "candidate": "0x0CA",
-      "rank": 5,
+      "rank": 4,
       "role": "chassis result/feedback return",
       "status": "wrong physical direction for direct FRC request"
     }
   ],
-  "schema": "camry-longitudinal-request-candidates-v2",
+  "request_plane_architecture": {
+    "exhaustiveness_boundary": "0x08A is the central observed continuous TSS request PDU and carries the recovered lateral request plus the strongest longitudinal acceleration-request candidates. It is not proved to contain every authoritative TSS3 control parameter: Toyota recorder semantics also expose upper/lower longitudinal request IDs, force-allocation, shift/EPB, override/priority and other request metadata whose exact wire locations are not all mapped. Ordinary FRC state/display/ego publications also exist outside 0x08A.",
+    "logical_request": "0x08A is already the recovered upstream/FRC-side request plane. FRC normal-Tx suppression removes 0x08A, while the Brake-owned 0x081 result/reference publication survives FRC loss and asserts its request-loss response. A downstream signer/proxy may physically publish protected 0x08A, but that does not create a second semantic request layer.",
+    "selected_result": "0x081 is the established Brake/chassis-side selected/result/reference publication for lateral. The corresponding longitudinal result may be distributed across 0x0CA/0x5AF/0x5F7 or other fields; this audit does not assign one PDU as the complete longitudinal analogue."
+  },
+  "schema": "camry-longitudinal-request-candidates-v3",
   "sources": {
     "august_drives": {
       "drive_a": {

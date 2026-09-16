@@ -473,7 +473,7 @@ def build() -> dict:
     a8 = summarize_08a(loaded, census)
     resumes = resume_evidence(role_report, groups)
     return {
-        'schema': 'camry-longitudinal-request-candidates-v2',
+        'schema': 'camry-longitudinal-request-candidates-v3',
         'vehicle_access': False,
         'sources': {
             'august_drives': {name: {'path': str(path.relative_to(ROOT)), 'sha256': sha(path)} for name, path in DRIVES.items()},
@@ -505,7 +505,7 @@ def build() -> dict:
                                'Upper-versus-lower byte identity and request-ID fields are not recovered.'),
         },
         'gts_semantic_template': gts_join(gts),
-        'direct_frc_bus1_precursor_screen': direct,
+        'direct_frc_bus1_duplicate_request_screen': direct,
         'protected_bus4_companion_screen': screen_protected_bus4(loaded),
         'protected_0x5af_coarse_companion': coarse_5af_companion(loaded),
         'other_candidates': {
@@ -516,20 +516,34 @@ def build() -> dict:
             '0x160': {'direction': 'FRC -> camera/ADAS Toyota Bus 1',
                       'disposition': 'longitudinal-related state publication; known fine field is measurement-like and prior B12 command mapping is withdrawn'},
         },
+        'request_plane_architecture': {
+            'logical_request': ('0x08A is already the recovered upstream/FRC-side request plane. FRC normal-Tx suppression removes '
+                                '0x08A, while the Brake-owned 0x081 result/reference publication survives FRC loss and asserts its '
+                                'request-loss response. A downstream signer/proxy may physically publish protected 0x08A, but that '
+                                'does not create a second semantic request layer.'),
+            'selected_result': ('0x081 is the established Brake/chassis-side selected/result/reference publication for lateral. '
+                                'The corresponding longitudinal result may be distributed across 0x0CA/0x5AF/0x5F7 or other fields; '
+                                'this audit does not assign one PDU as the complete longitudinal analogue.'),
+            'exhaustiveness_boundary': ('0x08A is the central observed continuous TSS request PDU and carries the recovered lateral '
+                                        'request plus the strongest longitudinal acceleration-request candidates. It is not proved '
+                                        'to contain every authoritative TSS3 control parameter: Toyota recorder semantics also expose '
+                                        'upper/lower longitudinal request IDs, force-allocation, shift/EPB, override/priority and other '
+                                        'request metadata whose exact wire locations are not all mapped. Ordinary FRC state/display/ego '
+                                        'publications also exist outside 0x08A.'),
+        },
         'ranking': [
-            {'rank': 1, 'candidate': 'protected 0x08A B8:B9 and B11:B12', 'role': 'direct downstream TSS acceleration-request candidate',
-             'status': 'strong bounded candidate; wire field identity not yet OEM-joined'},
-            {'rank': 2, 'candidate': 'unrecovered FRC -> proxy/signing precursor for protected 0x08A', 'role': 'preferred stock-harness replacement boundary',
-             'status': 'architecture supported; exact carrier/encoding unresolved'},
-            {'rank': 3, 'candidate': 'protected 0x5AF B26 signed6', 'role': 'coarse longitudinal request/result companion',
-             'status': 'tracks 0x08A at about 0.25 m/s^2/count but lags it; not a primary command candidate'},
-            {'rank': 4, 'candidate': '0x0C9', 'role': 'possible sideband/request metadata', 'status': 'weak magnitude candidate'},
-            {'rank': 5, 'candidate': '0x0CA', 'role': 'chassis result/feedback return', 'status': 'wrong physical direction for direct FRC request'},
+            {'rank': 1, 'candidate': 'protected 0x08A B8:B9 and B11:B12', 'role': 'FRC-side TSS acceleration-request fields',
+             'status': 'strong bounded candidate inside the already-established 0x08A request plane; exact upper/lower wire identity remains open'},
+            {'rank': 2, 'candidate': 'protected 0x5AF B26 signed6', 'role': 'coarse longitudinal request/result companion',
+             'status': 'tracks 0x08A at about 0.25 m/s^2/count but lags it; not a primary request magnitude'},
+            {'rank': 3, 'candidate': '0x0C9', 'role': 'possible sideband/request metadata', 'status': 'weak magnitude candidate'},
+            {'rank': 4, 'candidate': '0x0CA', 'role': 'chassis result/feedback return', 'status': 'wrong physical direction for direct FRC request'},
         ],
         'implementation_boundary': (
-            'Do not restore Camry 0x160 longitudinal output and do not inject 0x08A from this analysis alone. '
-            'On stock Toyota-B, 0x08A is on unsplit Bus 4, so clean source replacement requires recovering the pre-protection '
-            'FRC/proxy handoff or another legitimate sole-emitter boundary. No runtime or Panda policy is authorized here.'),
+            'Do not restore Camry 0x160 longitudinal output and do not inject a competing 0x08A from this analysis alone. '
+            'The semantic request plane is already 0x08A. On stock Toyota-B that protected PDU is on unsplit Bus 4, so production '
+            'integration still needs a clean source-suppression/sole-emitter boundary or the physical FRC-to-signer publication handoff. '
+            'That is a transport/ownership problem, not evidence of a different upstream command. No runtime or Panda policy is authorized here.'),
     }
 
 
