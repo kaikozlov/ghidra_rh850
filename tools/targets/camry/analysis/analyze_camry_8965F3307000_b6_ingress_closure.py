@@ -22,6 +22,7 @@ CORPUS = ROOT / "data/generated/camry-8965F3307000/decompilations.jsonl"
 DEFAULT_OUT = ROOT / "data/generated/camry_8965F3307000_b6_ingress_closure.json"
 LIVE_INGRESS = ROOT / "targets/camry-2026/raw-20260910/f33-ingress/session-summary.json"
 TOPOLOGY = ROOT / "data/generated/gtsplus_2026/camry_8965F3307000_emps_semantics.json"
+EBU_TOPOLOGY = ROOT / "data/generated/camry_2026_ebu_topology.json"
 SHA = "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7"
 COUNT = 6065
 
@@ -330,6 +331,11 @@ def analyze() -> dict[str, Any]:
     need(eps_place["bus_name"] == skid_place["bus_name"] == "Bus 4", "Camry Bus-4 topology drift")
     need(eps_place["junction_name"] == "EBU" and skid_place["junction_name"] == "No. 2 Global CAN Junction Connector",
          "Camry EPS/Skid junction-label topology drift")
+    ebu_topology = json.loads(EBU_TOPOLOGY.read_text())
+    need(ebu_topology["schema"] == "camry-2026-ebu-topology-v1", "Camry EBU topology schema drift")
+    need(ebu_topology["exact_camry"]["ebu_ecu_component_present"] is False
+         and ebu_topology["exact_camry"]["critical_brake_eps_junctions_invariant_across_all_options"] is True,
+         "Camry EBU component/junction boundary drift")
 
     # Function evidence pins the proof to canonical corpus bytes, not documentation labels.
     evidence = {}
@@ -415,12 +421,15 @@ def analyze() -> dict[str, Any]:
                 "sha256": sha(TOPOLOGY.read_bytes()),
                 "eps": eps_place,
                 "skid": skid_place,
-                "boundary": "GTS Bus 4 is a logical network domain. EPS junction label EBU versus Skid's numbered passive junction is a topology clue, not proof that EBU is the active filter implementation.",
+                "boundary": "GTS Bus 4 is a logical network domain. EBU is the junction/attachment label on the EPS row, not an installed exact-Camry ECU component; do not model a separate EBU filter ECU from this table.",
+                "ebu_topology_path": str(EBU_TOPOLOGY.relative_to(ROOT)),
+                "ebu_topology_sha256": sha(EBU_TOPOLOGY.read_bytes()),
             },
             "leading_physical_model": (
-                "A Brake/VMM/EBU-domain routing boundary exposes ordinary Bus-4 diagnostics/service traffic to the EPS while the final "
-                "Brake-owned B6 steering target is generated or forwarded on a non-Panda-visible local path to the EPS. Exact category-435 "
-                "Brake firmware is required to identify the concrete bridge/filter/transmit routine."
+                "The strongest model is an upstream Brake/Skid Vehicle-Movement-Manager request-generation/routing boundary: the category-435 "
+                "brake domain receives the shared logical Bus-4 side, locally constructs/authenticates or selectively forwards final B6, and feeds "
+                "the EPS through the EBU-labelled attachment over F33's single CAN receive path. No separate EBU ECU is required or supported by "
+                "the exact Camry GTS component set. Exact F152633K0000 firmware is still required to name the bridge/filter/transmit routine."
             ),
             "exact_component_still_unproved": True,
         },

@@ -350,16 +350,68 @@ COM, or B6 application logic.  The only receiver-side residue is a physical/link
 failure before GAFL matching; otherwise the loss is outside F33, between the
 Panda-visible Bus-4 trunk and the EPS-local B6 delivery path.
 
-Current GTS topology is consistent with such a boundary without proving its exact
-implementation: Skid Control is listed on logical Bus 4 through `No. 2 Global CAN
-Junction Connector`, while Power Steering is also Bus 4 but its junction label is
-`EBU`.  Toyota's `Bus 4` label is therefore treated as a logical network domain, not
-proof of one transparent copper segment.  Combined with the patent and F33's B6-loss
-DTC naming the Brake System Control Module, the leading physical model is a
-Brake/VMM/EBU-domain routing boundary that passes ordinary diagnostics/service traffic
-but locally generates or forwards final B6 toward EPS.  **The exact component/filter
-routine is still unproved** until the Camry category-435 Brake application
-`F152633K0000` is acquired or equivalent physical tracing identifies the hop.
+Current GTS topology is more specific than a generic "EBU-domain boundary." In
+`CDbCanBusComponentTable`, `EBU` is literally the **junction/attachment field on the
+Power Steering (EPS) component row**. Across all 18 exact-Camry option rows, Brake
+Booster `0x28` and Skid Control `0x29` are Bus 4 via `No. 2 Global CAN Junction
+Connector`, while EPS `0x32` is Bus 4 via `EBU`. There is **no installed EBU ECU
+component** in the exact-Camry component set; component `0x65`, which appears in some
+other Toyota topology sets, is absent here. The current GTS English database also does
+not spell the acronym out.
+
+Toyota-authored terminology supplies the expansion independently: Toyota Motor
+Engineering & Manufacturing North America patent US20210323519A1 calls an EBU an
+**"electronic brake module or unit"** and uses `EBU` for that brake-domain unit
+(https://patents.google.com/patent/US20210323519A1/en). Thus **Electronic Brake Unit**
+is the best Toyota-supported expansion for the GTS token, while the exact GTS table
+itself proves only the literal `EBU` attachment label. Brake-family GTS vocabulary independently contains wheel-speed/G/yaw copies named
+`(EBU node)` in `ABS_P5`, `Brk_Bst_P5`, `EPB_P5`, and successor `BSCM_B_P6`.
+The successor split sharpens that: `BSCM_A_P6 = Brake/EPB` exposes native
+`FR Wheel Speed` / `Lateral G`, while `BSCM_B_P6 = Brake Booster` exposes the
+corresponding `...(EBU node)` copy. That strongly favors **the EBU node being the
+Brake/EPB / skid-control side itself**, not a third ECU. `ABS_P5` additionally
+distinguishes U013187 **Lost Communication with Power Steering Control Module** from
+U11B187 **Lost Communication with Power Steering Control Module "A" (ch2)** and exposes
+DID `0x102F` **EPS/Steering Control Actuator ECU Communication Open**. Together these are
+strong static clues for a secondary/local Brake->EPS communication path; successor/DDB
+capability alone still does not prove exact-Camry B6 uses `ch2`.
+
+The resulting leading physical model is therefore **not**
+`No.2 junction -> separate EBU filtering ECU -> EPS`. It is:
+
+```text
+Panda-visible / shared logical Bus-4 domain
+             |
+             +-- No.2 Global CAN Junction -- Brake Booster
+             |                           \-- Skid Control / Brake actuator
+             |                                (category 435)
+             |                                VMM/request generation
+             |                                B6 generation/auth/routing  [leading]
+             |                                      |
+             |                                      v
+             +--------------------------- EBU-labelled EPS attachment
+                                                    |
+                                                    v
+                                                F33 EPS
+                                          one CAN receive path
+```
+
+The serial Skid->EPS arrow is the leading **inference**, not a literal route encoded by
+the GTS rows. It is favored by three independent facts: Toyota places VMM request
+generation in the Brake ECU; F33 diagnoses loss of B6 as loss of the Brake System
+Control Module; and contemporary Toyota repair procedures require ECU-Security-Key
+update when the skid-control ECU/brake-actuator assembly is replaced. A distinct,
+serviceable EBU filter ECU is neither present in the exact Camry GTS component set nor
+needed to explain the evidence. An integrated internal EBU sub-node inside the brake
+assembly remains possible and would not require a separately serviceable ECU identity.
+
+This model is completely compatible with exact F33 having only **one** application CAN
+controller. The segmentation/selection happens upstream; EPS sees only its one local
+CAN input. Ordinary diagnostics and selected Bus-4 traffic can be routed onto that leg
+while externally injected B6 is withheld and locally generated Brake/VMM B6 is admitted.
+**The exact bridge/filter routine is still unproved** until Camry category-435 Brake
+application `F152633K0000` is acquired or equivalent physical tracing identifies the hop.
+Machine-readable GTS-only evidence is `data/generated/camry_2026_ebu_topology.json`.
 
 The successful development fallback proves the complementary point.  The EPS-resident
 helper waits for an **already-admitted native B6**, replaces its target/application bytes,

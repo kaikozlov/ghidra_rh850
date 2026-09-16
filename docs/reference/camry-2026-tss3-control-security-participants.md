@@ -14,58 +14,62 @@ The table deliberately separates four different claims:
 
 Those are not interchangeable.
 
-> **Historical-model warning, September 16:** the graph below predates the
-> source/direction and longitudinal-role audits. Do not read it as a proved
-> `0x160 -> 0x0CA` request-to-signer path. `0x0CA` is observed chassis-to-camera
-> on the open relay, and the two edited `0x160` fields are now feedback/state-like
-> rather than a verified Camry command. The FRC normal-Tx dependency also does
-> not identify which internal processor emits each network publication. Use the
-> [current longitudinal evidence packet](../variants/camry-2026-longitudinal-evidence.md)
-> for that assessment; the old participant/proxy hypotheses below are retained
-> as history, not current proof.
+## Current network/control overview
 
-## Network/control overview
+Toyota's Vehicle Movement Manager architecture and the exact Camry topology now support
+a more specific model than the older proxy graph. Keep **logical Toyota bus identity**
+separate from a claim of one electrically transparent pair.
 
 ```text
-Toyota Bus 1: ADAS/request side
+Toyota Bus 1: ADAS / application side
 
   FRC / Front Recognition Camera 2 (498, 0x792)
         |
-        | request/object traffic
-        | observed native Bus-1 family = reproducible E2E integrity
-        | + alive counter, no secret-bearing MAC
+        | application request semantics / recorder ownership
+        | native observed periodic family = AUTOSAR E2E Profile 5
         v
-  unresolved FRC -> proxy/arbitration handoff
-  (native Bus-1 transformed/multi-field, multiplexed, or private-link
-   transport all remain possible within current evidence bounds)
+  request-side publication / handoff
         |
         v
 
-Toyota Bus 4: chassis protected-control side
+Toyota logical Bus 4: chassis / Vehicle-Movement-Manager domain
 
-  Central Gateway / Skid-ABS / Brake Booster   <- exact proxy still unresolved
+  Panda-visible shared/trunk side
         |
-        | ordinary Toyota-P5 FV4 || MAC28 protected publications
-        | e.g. lateral 0x08A, longitudinal 0x0CA
-        +--------------------------+
-        |                          |
-        v                          v
-      EPS                      brake / longitudinal arbitration
-  (0x7A1, proven              (0x7B0 Brake/EPB is the positively
-   ICU-S verifier)             attributed immediate B6 source domain)
-                                   |
-                                   v
+        +-- No. 2 Global CAN Junction Connector
+        |       +-- Brake Booster (0x28)
+        |       +-- Skid Control / Brake-EPB (0x29, category 435)
+        |               |
+        |               | VMM arbitration + request generation [leading owner]
+        |               +---- 0x081 result/status publication
+        |               +---- final protected B6 steering target [leading path]
+        |                              |
+        |                              v
+        +--------------------- EPS attachment labelled `EBU` by GTS
+                                       |
+                                       v
+                            EPS / EMPS_P5 (0x32, 0x7A1)
+                            one exact-F33 application CAN controller
 
-Toyota Bus 2: propulsion side (confirmed HV/MG placement)
-
-        Hybrid Vehicle Control (397, 0x7D2)
-                  |
-                  v
-        Motor Generator (395, 0x724)
-
-  Engine (372, 0x700) is a separate live powertrain endpoint; its exact
-  canonical bus-placement row is not promoted here.
+  0x08A = TSS request-side control envelope
+  0x081 = Brake-owned arbitration/result/reference envelope
+  B6    = final steering-controller target/instruction
 ```
+
+`EBU` is **not an installed ECU component row** on the exact Camry. It is the
+`CDbCanBusComponentTable` junction/attachment string on the EPS row. Toyota-authored
+US20210323519A1 uses the phrase **"electronic brake module or unit" (EBU)**; current
+GTS itself does not spell the acronym out. Brake-family DDBs independently expose
+`(EBU node)` dynamics. Successor `BSCM_A_P6 = Brake/EPB` exposes native wheel/G
+values while `BSCM_B_P6 = Brake Booster` exposes their `(EBU node)` copies, strongly
+favoring the EBU node as the Brake/EPB / skid-control side rather than a third ECU.
+`ABS_P5` additionally distinguishes ordinary Power Steering communication from
+**Power Steering Control Module "A" (ch2)** and exposes
+`EPS/Steering Control Actuator ECU Communication Open`. Thus the leading physical
+model is an upstream Brake/Skid local-routing boundary feeding F33's single CAN input,
+not a second EPS CAN controller and not a separately installed EBU filter ECU. Exact
+`F152633K0000` producer firmware is still required to prove the concrete channel,
+filter, signing and freshness implementation.
 
 **Important bus-name warning:** Panda bus 2 is not Toyota Bus 2. The Toyota-B
 harness relay pair exposes the Toyota Bus-4 chassis segment on Panda buses 0/2;
@@ -77,10 +81,10 @@ Generator and is not the split relay segment.
 | ECU / role | Exact Camry identity / endpoint | Toyota network | Control role | TSK / SecOC status | MCU / security-hardware status |
 |---|---|---|---|---|---|
 | **Front Recognition Camera 2 / FRC_P5 (498)** | `0x792 -> 0x79A`; F181 `8646F3315000`; DID0105 `8646C06091` | **Bus 1** | Sole installed TSS3 ADAS compute ECU on this architecture. Hosts the TSS3 Operation/Image FFD recorder and the normalized lateral/longitudinal request vocabulary (`5280..5285`, `57DB`, `57DE`, etc.). | **ECU-Security-Key provisioning participant at the FRC family level; exact runtime key use/CMAC ownership unresolved.** Current `FRC_P5` owns `0x10AF` **ECU Security Key Registered Incomplete Flag** and `XF01B ECU Security Key Not Registered`, while Toyota's camera-replacement procedure requires updating that key. Native observed Bus-1 periodic traffic is exact non-secret E2E Profile 5, not Toyota `FV4||MAC28` SecOC, so a downstream Bus-4 participant must still proxy/physically publish the protected chassis PDU. The camera's key participation means an unseen/private FRC pre-authentication step can no longer be excluded solely from silicon assumptions or native Bus-1 framing. Exact Camry `0x763` roster membership, FRC rekey RID, and `0x08A` CMAC-generation location remain unmeasured. | Exact application MCU/HSM remains outside the decoded corpus. ECU-Security-Key registration does **not** imply Renesas/ICU-S: M1--M5 is the standard AUTOSAR SHE `CMD_LOAD_KEY` protocol and can terminate in another HSM/security engine or equivalent protected implementation. |
-| **Skid Control / Brake-EPB / ABS_P5 (435)** | `0x7B0 -> 0x7B8`; F181 `F152633K0000`; DID0105 `8954147040`; F18C `8954147040CFC1800985` | **Bus 4** | Brake/VSC/TRAC domain. Exposes Toyota-Safety-Sense upper/lower acceleration-request observers `10A1..10A4`. Exact EPS B6-loss semantics attribute the immediate protected B6 source domain to **Brake System Control Module/category 435**. | **Strongest confirmed brake-side protected-control participant family.** B6 source-domain attribution is positive; exact `F152633K0000` CMAC-generation/key ownership is still unproved because its application firmware is not local. It is also a leading `0x08A`/`0x0CA` proxy candidate, not yet the uniquely identified transmitter. | Exact silicon unknown. An ICU-S/ICUSE-capable RH850 chassis MCU is a current hardware hypothesis if this exact ECU proves to own the Toyota TSK CMAC path; do not promote the derivative without firmware or package marking. |
-| **Brake Booster / Brk_Bst_P5 (466)** | Installed in exact Camry architecture; exact physical diagnostic address/F181 not yet resolved | **Bus 4** | Separately installed brake actuator/booster participant. Its GTS DDB exposes the same TSS upper/lower acceleration observer family `10A1..10A4`. | **Downstream proxy/signer candidate.** Exact Camry TSK roster membership, CMAC ownership, and `0x08A`/`0x0CA` Tx ownership remain unproved. | Exact silicon unknown. If it is the TSK signer, the recovered Toyota implementation implies ICU-S/ICUSE-class SHE functionality or an equivalent implementation; this is not yet a part-number identification. |
-| **Electric Power Steering / EMPS_P5 (405)** | `0x7A1 -> 0x7A9`; F181 `8965F3307000`; second SW `8A3113303100`; F18C `8965033K9011J2740743` | **Bus 4** | Steering actuator / protected external steering-request receiver. | **Proven TSK/SecOC participant and verifier.** Exact firmware implements ICU-S command 7 CMAC verify, command 5 CMAC generate capability, command 8 standard SHE `CMD_LOAD_KEY` M1/M2/M3 update with M4/M5 result, protected key-slot selection, and Toyota FV4/MAC28 receive handling. | **Renesas RH850/P1M-E**, exact known target family; ICU-S/ICUSE security block recovered directly from firmware/MMIO behavior. |
-| **Central Gateway** | Installed topology role; Techstream security logic performs a related gateway check at `0x7A2`, but `0x7A2` is **not** treated here as a proven Central-Gateway identity | Gateway between Toyota network domains | Carries/interconnects the Bus-1/Bus-4 topology and remains a plausible request repacker/proxy. | **Candidate only** for `0x08A`/`0x0CA` assembly/signing. No current evidence selects it over Skid/Brake Booster as the AES-CMAC owner. | Exact security MCU/HSM unresolved. Do not assume ICU-S until firmware/hardware or exact TSK-provisioning evidence identifies it. |
+| **Skid Control / Brake-EPB / ABS_P5 (435)** | `0x7B0 -> 0x7B8`; F181 `F152633K0000`; DID0105 `8954147040`; F18C `8954147040CFC1800985` | **Bus 4 via No. 2 Global CAN Junction Connector** | Brake/VSC/TRAC domain and leading exact-Camry Vehicle-Movement-Manager/request-generation owner. Exposes TSS upper/lower acceleration-request observers `10A1..10A4`, `EPS/Steering Control Actuator ECU Communication Open`, and separate ordinary/ch2 Power-Steering missing-message vocabulary. Exact EPS B6-loss semantics attribute the immediate protected B6 source domain to **Brake System Control Module/category 435**. | **Strongest confirmed brake-side protected-control participant family.** Contemporary Toyota brake-actuator procedures require ECU-Security-Key update when the skid-control ECU/brake-actuator assembly is replaced, consistent with this serviceable domain owning authenticated local-network relationships. Exact `F152633K0000` B6 CMAC/freshness ownership remains unproved until its application firmware is acquired. | Exact silicon unknown. An ICU-S/ICUSE-capable RH850 chassis MCU remains a hardware hypothesis if this ECU proves to own Toyota TSK CMAC; do not promote a derivative without firmware/package evidence. |
+| **Brake Booster / Brk_Bst_P5 (466)** | Installed in exact Camry architecture; exact physical diagnostic address/F181 not yet resolved | **Bus 4 via No. 2 Global CAN Junction Connector** | Separately installed brake actuator/booster participant. Its GTS DDB exposes `10A1..10A4` and `(EBU node)` dynamics. | Protected-control/signing participant candidate, but category 435 Skid/Brake is now the leading B6 request-generation/routing owner. Exact Camry TSK roster membership and CMAC ownership remain unproved. | Exact silicon unknown. |
+| **Electric Power Steering / EMPS_P5 (405)** | `0x7A1 -> 0x7A9`; F181 `8965F3307000`; second SW `8A3113303100`; F18C `8965033K9011J2740743` | **Bus 4 via GTS attachment `EBU`** | Steering actuator / protected final-target receiver. Exact F33 has one configured application CAN controller; B6 is ordinary rule39/PDU44 on that controller. `EBU` is an attachment label, not a separate installed ECU. | **Proven TSK/SecOC participant and verifier.** Exact firmware implements ICU-S command 7 CMAC verify, command 5 CMAC generate, command 8 SHE `CMD_LOAD_KEY`, protected key-slot selection, and Toyota FV4/MAC28 receive handling. | **Renesas RH850/P1M-E**, exact known target family; ICU-S/ICUSE recovered directly from firmware/MMIO. |
+| **Central Gateway** | Installed topology role; Techstream security logic performs a related gateway check at `0x7A2`, but `0x7A2` is **not** a proven Central-Gateway identity | Interconnects Toyota network domains | Still relevant to Bus-1 -> Bus-4 application-request transport/proxying. It is **not** the leading immediate B6 filter/source after the Vehicle-Movement-Manager, B6-loss-DTC, EBU-attachment and Brake `ch2` joins. | `0x08A` publication/signing/private-preauth participation remains possible where not otherwise closed; exact key ownership unresolved. | Exact security MCU/HSM unresolved. |
 | **Hybrid Vehicle Control / HV_P5 (397)** | **`0x7D2`** live diagnostic endpoint | **Bus 2** | High-level hybrid propulsion coordinator. GTS exposes `Target Engine Power`, `Request Engine Torque`, `Directly Transmitted Engine Torque`, and requested/executed regenerative-brake torque. This is the strongest current candidate for the final **positive-driving-force coordinator** downstream of the TSS acceleration arbitration. | **Exact Camry TSK membership is unresolved.** Older/current P5 Toyota security vocabulary explicitly includes `Communication Error by ECU Security Key Not Registered (Hybrid/EV Powertrain Control Module)`, so HV control is a real ECU-Security-Key participant class in Toyota P5 architectures; do not yet promote that cross-vehicle fact to the exact Camry roster. | Exact MCU/HSM unresolved. If the exact Camry HV ECU is on the TSK roster, identify whether it uses ICU-S/SHE or another implementation from firmware/part evidence rather than assuming from function. |
 | **Engine / Engine_P5 (372)** | **`0x700`** live diagnostic endpoint | Powertrain domain; exact canonical component placement should be treated separately from the confirmed HV/MG Bus-2 rows | Combustion propulsion executor. Current GTS includes `Requested Engine Torque`, `Request Engine Torque`, actual torque, and related hybrid engine-demand signals. | **Exact Camry TSK membership unresolved.** Toyota P5 security vocabulary explicitly includes `Communication Error by ECU Security Key Not Registered (Engine Control Module)`, proving that Engine is a key-provisioned participant class on relevant P5 architectures, not that this exact Camry endpoint has already been enumerated in the live roster. | Exact MCU/HSM unresolved. |
 | **Motor Generator / MG_P5 (395)** | **`0x724`** live diagnostic endpoint | **Bus 2** | Electric propulsion/inverter-side executor under hybrid control. | Exact Camry TSK/ECU-Security-Key membership is **unknown**. No current evidence should promote it merely because it executes positive torque. | Exact MCU/HSM unresolved. |
@@ -88,75 +92,65 @@ Generator and is not the split relay segment.
 
 ## Message/security planes
 
-### FRC-side / pre-protection candidate: `0x160/32`
+### Bus-1 FRC state: `0x160/32`
 
-The retained relay-correct drives place `0x160` only on native Toyota Bus 1.
-Across the complete observed Bus-1 periodic family, committed VAR-107 proves a
-wire-reproducible, non-secret integrity relation plus an 8-bit rolling freshness
-counter. The same visible suffix does not produce competing integrity words, and
-retained complete counter cycles repeat. This is **not** the ordinary Toyota
-`FV4 || MAC28` SecOC boundary seen on Bus 4.
+`0x160` is FRC-origin Bus-1 state, but the former Camry command interpretation is
+withdrawn. Its signed B4:B5 field follows measured/ego acceleration and lags motion
+on clean resumes; it is not the recovered longitudinal command. The native Bus-1
+FRC family uses AUTOSAR E2E Profile 5 rather than Toyota `FV4 || MAC28` SecOC.
 
-`0x160 B12` interpreted as signed 7-bit correlates very strongly with the
-protected longitudinal `0x0CA B7:B8` quantity during stock cruise
-(`r=-0.951664` / `-0.989396` in the two retained drives). It is therefore a
-high-value **pre-protection cross-plane candidate**, but its exact OEM field
-name, transmitter, direction, and receiver acceptance contract remain open.
-Do not call it the FRC acceleration command until synchronized diagnostics or
-producer firmware proves that mapping.
+Canonical evidence: VAR-107 and the current Camry longitudinal evidence packet.
 
-Canonical evidence: VAR-106, VAR-107.
+### Unified TSS request plane: `0x08A/32`
 
-### Protected longitudinal plane: `0x0CA/32`
+`0x08A` is the recovered **FRC-side TSS control-request envelope**. It carries both
+lateral request semantics and the core lower/upper longitudinal request packages:
 
-`0x0CA` is present on the captured Toyota Bus-4 relay pair and absent from
-native Bus 1. Its trailer has the ordinary Toyota-P5 protected shape:
+- lateral request ID + requested pinion angle + assist gain;
+- two packed longitudinal request-ID/allocation-method fields;
+- two signed16 `0.001 m/s^2` acceleration-request words;
+- request/hold state and protected freshness/authentication trailer.
 
-- FV4 phases 0..15;
-- reset/message freshness behavior linked to the protected `0x00F` epoch;
-- candidate 28-bit authenticator that is nearly frame-unique;
-- B27 zero before the `FV4 || MAC28` trailer.
+Toyota US20200070849A1 supplies the architecture that explains this shape: applications
+publish standardized lower/upper longitudinal bounds and a lateral request to the Vehicle
+Movement Manager. FFD `5280/5281/5282` independently names those request packages. The
+physical Bus-1 application-data -> protected Bus-4 publication/signing hop remains open;
+that is a transport/security-ownership question, not a missing semantic command.
 
-The application contains three signed big-endian words at Toyota's exact
-`0.001 m/s^2` diagnostic scale. During stock cruise they behave as an
-upper/lower/result-like triplet, with the result-like word bounded by the other
-two on 97.9% / 94.4% of retained frames. It is genuinely bidirectional:
-retained stock-cruise `B7:B8` reaches **+1.693 m/s^2**, so this protected plane
-carries positive acceleration as well as deceleration.
+### Brake arbitration/result plane: `0x081/32`
 
-GTS independently names the architecture that explains this:
+`0x081` is Brake-owned and persists when FRC normal transmission is suppressed. Its
+lateral result ID/reference closely follows the selected `0x08A` request; request loss
+sets an independent Brake supervision bit. Longitudinally, B6[5:0] is the strongest
+`5284 Arbitration result_longitudinal ID` candidate and B20:B21 the strongest `57DB`
+result-acceleration candidate. This is the result/status side of Toyota's Vehicle
+Movement Manager, not a passive relay.
 
-- FRC/PCS recorder: lower request `5280`, upper request `5281`, arbitration
-  result longitudinal ID `5284`, result acceleration `57DB`, validity `57D3`;
-- FRC ordinary monitor: longitudinal request/permission/allocation surface
-  `1B03..1B07`;
-- Brake-domain observer: `10A1/10A2` upper/lower TSS request acceleration and
-  `10A3/10A4` upper/lower request IDs;
-- Toyota's **Braking Force and Driving Force Allocation Method** explicitly
-  distinguishes `Engine Only`, `Engine and Brake 1`, `Engine and Brake 2`, and
-  `Brake Only`.
+### Other protected longitudinal/chassis state: `0x0CA/32`
 
-Therefore the TSS3 longitudinal domain is not a brake-only controller: it
-requests acceleration and chooses braking/driving-force allocation. The exact
-`0x0CA` byte-to-GTS-field assignment, physical transmitter, final arbitration
-executor, SecOC profile/key owner, and Bus-4 -> powertrain handoff remain open.
+`0x0CA` remains a protected chassis->upstream longitudinal-state/result-related PDU,
+but its old "upper/lower/result triplet" interpretation is superseded by the much
+cleaner `0x08A` request / `0x081` result architecture. Its exact field assignments and
+producer remain useful secondary RE targets; do not use it as the primary TSS request.
 
-Canonical evidence: TMS-085, VAR-106.
+### Final steering-controller instruction: protected `0x0B6/32`
 
-### Protected lateral plane: `0x08A/32`
+B6 is downstream of application arbitration. Patent Figure 6's steering instruction and
+EMPS DID `0x1CEE` independently name **Target Lateral ID** and final target steering
+quantity, matching exact-F33 B6. F33 maps B6 loss to U012987 **Lost Communication with
+Brake System Control Module**. Sep-10 receiver instrumentation proves native B6 reaches
+F33 while a Panda-injected B6 on the shared/logical Bus-4 side disappears before
+successful F33 controller admission.
 
-`0x08A` is the corresponding observed Bus-4 lateral request publication with
-ordinary-P5 `FV4 || MAC28` structure. Exact F33 EPS neither transmits nor
-receives it. The FRC hosts the matching request object but its observed native
-Bus-1 family uses non-secret E2E integrity/freshness rather than Toyota SecOC. Current topology therefore bounds the
-proxy/transmitter candidates to **Skid Control / Brake Booster / Central
-Gateway**. The FRC→proxy request handoff itself remains unresolved: the retained
-Bus-1 sweeps exclude several direct single-field/literal encodings only within
-their declared bounds and do not exclude transformed, multi-field, nonlinear,
-multiplexed, or private-link transport. Do not infer `0x08A -> B6`; that stock
-transform is disproved.
+The physical model is therefore request-side `0x08A` -> Brake/Skid VMM arbitration and
+request generation -> result/status `0x081` + final B6 -> EPS. Exact GTS attaches Brake
+Booster and Skid Control to Bus 4 through No.2 Global CAN Junction, but attaches EPS to
+Bus 4 through `EBU`; `EBU` is an attachment value, not a separate installed ECU. The
+leading implementation is category-435 Skid/Brake generating/routing B6 onto an EPS-local
+leg feeding F33's single CAN controller. Exact `F152633K0000` firmware is still needed
+to prove the concrete channel/filter/signing implementation.
 
-Canonical evidence: VAR-091, VAR-094, VAR-101, VAR-107, VAR-113, CORR-149, CORR-153.
+Canonical evidence: VAR-161/162, CORR-195/196/197, OQ-054.
 
 ## Current TSK roster: what is actually known
 
@@ -172,14 +166,17 @@ Use these buckets rather than one undifferentiated "TSK participant" list:
   semantics identify the immediate protected B6 source domain; exact
   `F152633K0000` CMAC-generation ownership awaits producer firmware.
 
-**Exact-Camry downstream Bus-4 proxy / physical-publisher candidates**
+**Physical publication / routing boundary**
 
-- Skid/ABS 435;
-- Brake Booster 466;
-- Central Gateway.
+- **B6 immediate source/routing:** category-435 Skid/Brake is the leading target. Exact
+  F33 names the missing B6 peer Brake System Control Module; GTS puts category 435 on
+  Bus 4 through No.2 Global CAN Junction and EPS on an `EBU`-labelled attachment;
+  `ABS_P5` has a separate Power-Steering `ch2` communication DTC.
+- **Request-plane protected publication/signing (`0x08A` and related families):**
+  Skid/ABS 435, Brake Booster 466, Central Gateway, and FRC private-preauthentication
+  remain distinguishable until producer firmware/trace closes the exact path.
 
-These are bounded by bus/install topology for the **physical chassis
-publication**, not yet for cryptographic CMAC ownership.
+Do not convert the `EBU` attachment token into another ECU in the roster.
 
 **FRC ECU-Security-Key status**
 

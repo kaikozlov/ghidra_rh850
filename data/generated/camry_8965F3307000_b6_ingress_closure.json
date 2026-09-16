@@ -43,7 +43,7 @@
   },
   "drop_localization": {
     "exact_component_still_unproved": true,
-    "leading_physical_model": "A Brake/VMM/EBU-domain routing boundary exposes ordinary Bus-4 diagnostics/service traffic to the EPS while the final Brake-owned B6 steering target is generated or forwarded on a non-Panda-visible local path to the EPS. Exact category-435 Brake firmware is required to identify the concrete bridge/filter/transmit routine.",
+    "leading_physical_model": "The strongest model is an upstream Brake/Skid Vehicle-Movement-Manager request-generation/routing boundary: the category-435 brake domain receives the shared logical Bus-4 side, locally constructs/authenticates or selectively forwards final B6, and feeds the EPS through the EBU-labelled attachment over F33's single CAN receive path. No separate EBU ECU is required or supported by the exact Camry GTS component set. Exact F152633K0000 firmware is still required to name the bridge/filter/transmit routine.",
     "live_source": {
       "d7_queue_delta_selfcheck": 102,
       "host_marker_f33_hits": 0,
@@ -58,7 +58,9 @@
     "localized_boundary": "The Sep-10 Panda marker disappears before successful F33 controller1 decode/CanIf admission. It is not dropped by EPS SecOC, PduR, generated COM, or B6 application logic. The remaining receiver-side residue is physical/link-layer decode before GAFL acceptance; otherwise the drop is in the external routing boundary between the Panda-visible Bus-4 trunk and the EPS-local B6 delivery segment.",
     "receiver_contract": "Once a standard-data CAN-FD ID 0x0B6/DLC32 frame is successfully decoded by exact-F33 controller1, rule39 and descriptor39 admit it through the ordinary software ring to PDU44. The recovered path has no pre-observer B6 application-field, Target-Lateral-ID, SecOC-tag, or transmitter-identity rejection.",
     "topology_source": {
-      "boundary": "GTS Bus 4 is a logical network domain. EPS junction label EBU versus Skid's numbered passive junction is a topology clue, not proof that EBU is the active filter implementation.",
+      "boundary": "GTS Bus 4 is a logical network domain. EBU is the junction/attachment label on the EPS row, not an installed exact-Camry ECU component; do not model a separate EBU filter ECU from this table.",
+      "ebu_topology_path": "data/generated/camry_2026_ebu_topology.json",
+      "ebu_topology_sha256": "a1d42adc6d82e5dadda6d66f433700e4f4071fbf9a7b99e1de4e8e5668f71c3f",
       "eps": {
         "bus_index": 32,
         "bus_name": "Bus 4",

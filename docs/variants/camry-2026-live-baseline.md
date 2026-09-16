@@ -1312,7 +1312,7 @@ parallel. Deterministic evidence is
 `tests/verify_camry_8965F3307000_external_lateral_ingress.py`. Production output remains
 disabled.
 
-## 19. Current GTS+ CAN topology closes the B6 bus question
+## 19. Current GTS+ closes logical Bus-4 membership; CORR-197 separates physical transparency
 
 The zero-B6 result in §16 raised a hardware-topology alternative: perhaps the Toyota-B
 camera connector exposes only an ADAS/gateway view while protected B6 actually lives on
@@ -1344,38 +1344,48 @@ cable, Airbag, Skid Control, and EPS. `CDbCanBusNameTable` names indices 29/32
 **Central Gateway**. This is Toyota's own current Camry network model, not a CAN-ID
 correlation.
 
-Exact F33 independently collapses the EPS-side escape hatch. The target has one configured
-CanIf controller (`0x21970 = 1`), and its normal receive/transmit interrupt wrappers at
-`0x83F30` and `0x8583E` both invoke their workers with controller/channel argument **1**.
-B6 is controller-1 acceptance rule 39 inside the same 47-rule span whose tail contains
-EPS diagnostics `0x7A1/0x777/0x7A0`. Thus the exact EPS does **not** have a second
-application CAN controller on which B6 could secretly arrive.
+Exact F33 independently collapses only the **EPS-controller** escape hatch. The target
+has one configured CanIf controller (`0x21970 = 1`), and its normal receive/transmit
+interrupt wrappers at `0x83F30` and `0x8583E` both invoke their workers with
+controller/channel argument **1**. B6 is controller-1 acceptance rule 39 inside the same
+47-rule span whose tail contains EPS diagnostics `0x7A1/0x777/0x7A0`. Thus exact EPS does
+**not** have a second application CAN controller. CORR-197 sharpens the consequence: a
+single EPS controller does **not** exclude an upstream brake-domain bridge/local leg that
+feeds that one controller.
 
-Joined to the retained harness evidence, this closes the practical wiring question. Before
-the physical Toyota-B CAN0/CAN1 exchange, the large steering/chassis network was exposed
-on the unsplit Panda bus 1 while the separate 22-ID ADAS-FD family occupied the relay
-pair. After the exchange, the steering/chassis family moved onto CAN0/CAN2 and the 22-ID
-family moved to bus 1. The moved family contains exact-F33-produced `0x030`, protected
-Brake-domain `0x0D7`, `0x025` steering state and the EPS diagnostic route; the 22-ID
-family contains the `0x180..0x18C` 64-byte sensor/object vocabulary. That composition is
-exactly the direction predicted by Toyota's **Bus 4 chassis / Bus 1 camera-radar** split.
-The repin therefore moved the B6-capable Brake/EPS network onto the comma relay pair as
-intended; a simple wrong-Panda-bus or hidden-second-EPS-bus explanation for the repeated
-zero-B6 capture is rejected.
+The retained harness evidence still closes the logical-network mapping. Before the
+physical Toyota-B CAN0/CAN1 exchange, the large steering/chassis network was exposed on
+the unsplit Panda bus 1 while the separate 22-ID ADAS-FD family occupied the relay pair.
+After the exchange, the steering/chassis family moved onto CAN0/CAN2 and the 22-ID family
+moved to bus 1. The moved family contains exact-F33-produced `0x030`, protected
+Brake-domain `0x0D7`, `0x025` steering state and the EPS diagnostic route; the 22-ID family
+contains the `0x180..0x18C` 64-byte sensor/object vocabulary. That composition is exactly
+the direction predicted by Toyota's **Bus 4 chassis / Bus 1 camera-radar** split. A simple
+wrong-Panda-bus or hidden **second EPS CAN controller** explanation is rejected.
 
-There is one deliberately retained boundary. GTS+ `Bus 1`/`Bus 4` are Central-Gateway
-network identities, not connector cavity numbers, and passive CAN cannot mathematically
-exclude a perfectly transparent external gateway that republishes an entire native EPS
-bus. The retained data provide no positive evidence for such a mirror: post-repin
-CAN0/CAN2 have identical stream sets with only small per-port receive-loss differences,
-exact F33 `0x030` and EPS UDS responses are present on that network, and the Toyota model
-already places Brake/Skid and EPS on one shared Bus-4 segment. The supported engineering
-conclusion is therefore **Bus 4 is the Brake/EPS B6 segment and the relay-correct Toyota-B
-capture reaches it**. Section 20 subsequently recovers cruise operation and a repeated
-lateral/HUD state directly from the retained CAN while B6 remains absent. What still lacks
-machine synchronization is Toyota's exact **`LTA Control Condition` name**, not evidence
-that the vehicle entered meaningful cruise/ADAS request state. Whether that request won
-and received active-steering grant remains a separate Operation-FFD question.
+What is *not* closed is electrical transparency across the whole logical Bus-4 domain.
+The `CDbCanBusComponentTable` field formerly rendered generically as `via ...` is decisive
+here: across all 18 exact-Camry option rows, Brake Booster `0x28` and Skid Control `0x29`
+are Bus 4 via `No. 2 Global CAN Junction Connector`, but EPS `0x32` is Bus 4 via literal
+**`EBU`**. `EBU` is a junction/attachment value, not an installed exact-Camry ECU-domain
+component; there is no EBU component row and component `0x65` is absent on this Camry.
+Toyota-authored patent terminology independently uses EBU for **electronic brake module or
+unit**. Current GTS itself does not spell out the acronym. Brake-family DDBs also contain wheel-speed/G/yaw replicas explicitly named `(EBU node)`.
+Successor `BSCM_A_P6 = Brake/EPB` carries the native wheel/G values while
+`BSCM_B_P6 = Brake Booster` carries their `(EBU node)` mirrors, strongly favoring EBU as
+the Brake/EPB/skid-control-side node. `ABS_P5` further has distinct ordinary and **Power
+Steering Control Module "A" (ch2)** missing-message vocabulary plus `EPS/Steering Control
+Actuator ECU Communication Open`, consistent with a brake-domain secondary/local EPS leg.
+
+Joined with the later Sep-10 first-divergence proof (§70.5), the old conclusion that the
+relay pair necessarily reaches one transparent Brake↔EPS copper segment is superseded.
+The supported model is now: Panda reaches the **shared/logical Bus-4 trunk** and can reach
+F33 diagnostics/service traffic, while the serviceable Brake/Skid domain can still route
+the final B6 target onto an EPS-local leg feeding F33's **one** CAN controller. This
+requires no second EPS network interface and no separate serviceable EBU filter ECU.
+Exact category-435 `F152633K0000` firmware or physical tracing is required to prove the
+concrete bridge/filter/signing implementation. Machine-readable GTS evidence is
+`data/generated/camry_2026_ebu_topology.json`.
 
 Deterministic topology evidence is promoted inside
 `data/generated/gtsplus_2026/camry_8965F3307000_emps_semantics.json` and verified by
@@ -6394,12 +6404,17 @@ decode/CanIf admission**. EPS SecOC, PduR, generated COM, and B6 application log
 are excluded as the selective drop point. A physical/link decode failure before GAFL
 matching remains the narrow receiver-side residue; otherwise the drop is external to
 F33 on the path from the Panda-visible Bus-4 trunk to the EPS-local B6 receive segment.
-Current GTS supplies a compatible topology clue without closing the hardware: Skid
-Control is logical Bus 4 through `No. 2 Global CAN Junction Connector`, whereas EPS is
-also logical Bus 4 but has junction label `EBU`. `Bus 4` is therefore not promoted to
-proof of one transparent electrical segment, and `EBU` is not yet promoted to the exact
-active filter. Exact category-435 Brake firmware `F152633K0000` or equivalent physical
-tracing is still required to identify that concrete bridge/filter/transmit implementation.
+Current GTS supplies a stronger topology clue without naming the final hardware routine.
+Across all 18 exact-Camry options, Brake Booster and Skid Control are Bus 4 via `No. 2
+Global CAN Junction Connector`, while EPS is Bus 4 via literal `EBU`. The latter is a
+**junction/attachment field**, not an installed ECU component: the exact Camry component
+set contains no EBU ECU row. Toyota-authored terminology expands EBU as an **electronic
+brake module or unit**, while current GTS itself leaves the acronym literal; Brake-family
+DDBs independently carry `(EBU node)` dynamics. The leading physical model is therefore
+an upstream Brake/Skid VMM request-generation/routing boundary feeding EPS through its
+single EBU-labelled local CAN attachment—not `No.2 junction -> separate EBU ECU -> EPS`.
+Exact category-435 Brake firmware `F152633K0000` or equivalent physical tracing is still
+required to identify the concrete bridge/filter/transmit/signing implementation.
 
 Joined with §70.2's continuing internal native B6 source, Toyota patent
 US20200070849A1 and current GTS now close the **logical** architecture that had

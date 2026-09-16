@@ -1,0 +1,687 @@
+{
+  "exact_camry": {
+    "bus4_placements": [
+      {
+        "bus_index": 32,
+        "bus_name": "Bus 4",
+        "component_index": "0x28",
+        "ecu_domain": "Brake Booster",
+        "gateway_names": [
+          "Central Gateway"
+        ],
+        "junction_name": "No. 2 Global CAN Junction Connector",
+        "raw_hex": "6ad24d00331a02002000000000002800"
+      },
+      {
+        "bus_index": 32,
+        "bus_name": "Bus 4",
+        "component_index": "0x29",
+        "ecu_domain": "Skid Control (ABS/VSC/TRAC)",
+        "gateway_names": [
+          "Central Gateway"
+        ],
+        "junction_name": "No. 2 Global CAN Junction Connector",
+        "raw_hex": "6ad24d00331a02002000000000002900"
+      },
+      {
+        "bus_index": 32,
+        "bus_name": "Bus 4",
+        "component_index": "0x32",
+        "ecu_domain": "Power Steering (EPS)",
+        "gateway_names": [
+          "Central Gateway"
+        ],
+        "junction_name": "EBU",
+        "raw_hex": "6ad24d0067a402002000000000003200"
+      },
+      {
+        "bus_index": 32,
+        "bus_name": "Bus 4",
+        "component_index": "0x47",
+        "ecu_domain": "Airbag",
+        "gateway_names": [
+          "Central Gateway"
+        ],
+        "junction_name": "No. 7 Global CAN Junction Connector",
+        "raw_hex": "6ad24d00381a02002000000000004700"
+      },
+      {
+        "bus_index": 32,
+        "bus_name": "Bus 4",
+        "component_index": "0xF0",
+        "ecu_domain": "Spiral cable (Steering Angle Sensor)",
+        "gateway_names": [
+          "Central Gateway"
+        ],
+        "junction_name": "No. 7 Global CAN Junction Connector",
+        "raw_hex": "6ad24d00381a0200200000000000f000"
+      }
+    ],
+    "can_bus_car_id": "0x00A7D910",
+    "component_0x65_present": false,
+    "component_count": 31,
+    "critical_brake_eps_junctions_invariant_across_all_options": true,
+    "ebu_ecu_component_present": false,
+    "ebu_junction_rows": [
+      {
+        "bus_index": 32,
+        "bus_name": "Bus 4",
+        "component_index": "0x32",
+        "ecu_domain": "Power Steering (EPS)",
+        "gateway_names": [
+          "Central Gateway"
+        ],
+        "junction_name": "EBU",
+        "raw_hex": "6ad24d0067a402002000000000003200"
+      }
+    ],
+    "junction_attachment_variant_count": 12,
+    "literal_table_fact": "In current GTS+ CDbCanBusComponentTable, EBU is the string-valued junction/attachment field on the exact Camry EPS component row. It is not an installed ECU-domain/component row.",
+    "network_membership_variant_count": 1,
+    "option_count": 18,
+    "vehicle_types": [
+      {
+        "id": 12704,
+        "name": "Camry HV"
+      },
+      {
+        "id": 12862,
+        "name": "Camry HV"
+      },
+      {
+        "id": 12984,
+        "name": "Camry HV"
+      }
+    ]
+  },
+  "gts_vocabulary": {
+    "brake_to_eps_channel_vocabulary": {
+      "abs_p5_dtc_rows": {
+        "U013187": {
+          "description": "Lost Communication with Power Steering Control Module",
+          "enabled": true,
+          "failure": "Missing Message"
+        },
+        "U11B187": {
+          "description": "Lost Communication with Power Steering Control Module \"A\" (ch2)",
+          "enabled": true,
+          "failure": "Missing Message"
+        }
+      },
+      "eps_communication_open_monitor": [
+        {
+          "alternate_did": "0x302F",
+          "bit_range": [
+            74,
+            74
+          ],
+          "name": "EPS/Steering Control Actuator ECU Communication Open",
+          "primary_did": "0x102F"
+        }
+      ],
+      "interpretation_boundary": "ABS_P5 explicitly distinguishes ordinary Power Steering communication from a Power Steering Control Module A (ch2) missing-message code and exposes an EPS/Steering Control Actuator ECU Communication Open bit. This supports a brake-domain secondary/local EPS communication path, but static DDB capability does not prove which channel exact Camry uses for B6."
+    },
+    "ebu_node_monitor_rows": {
+      "abs_p5": [
+        {
+          "alternate_did": "0x308D",
+          "bit_range": [
+            0,
+            15
+          ],
+          "name": "FR Wheel Speed (EBU node)",
+          "primary_did": "0x108D"
+        },
+        {
+          "alternate_did": "0x308D",
+          "bit_range": [
+            16,
+            31
+          ],
+          "name": "FL Wheel Speed (EBU node)",
+          "primary_did": "0x108D"
+        },
+        {
+          "alternate_did": "0x308D",
+          "bit_range": [
+            32,
+            47
+          ],
+          "name": "RR Wheel Speed (EBU node)",
+          "primary_did": "0x108D"
+        },
+        {
+          "alternate_did": "0x308D",
+          "bit_range": [
+            48,
+            63
+          ],
+          "name": "RL Wheel Speed (EBU node)",
+          "primary_did": "0x108D"
+        },
+        {
+          "alternate_did": "0x0000",
+          "bit_range": [
+            0,
+            7
+          ],
+          "name": "FR Wheel Acceleration (EBU node)",
+          "primary_did": "0x108E"
+        },
+        {
+          "alternate_did": "0x0000",
+          "bit_range": [
+            8,
+            15
+          ],
+          "name": "FL Wheel Acceleration (EBU node)",
+          "primary_did": "0x108E"
+        },
+        {
+          "alternate_did": "0x0000",
+          "bit_range": [
+            16,
+            23
+          ],
+          "name": "RR Wheel Acceleration (EBU node)",
+          "primary_did": "0x108E"
+        },
+        {
+          "alternate_did": "0x0000",
+          "bit_range": [
+            24,
+            31
+          ],
+          "name": "RL Wheel Acceleration (EBU node)",
+          "primary_did": "0x108E"
+        },
+        {
+          "alternate_did": "0x308F",
+          "bit_range": [
+            0,
+            7
+          ],
+          "name": "Lateral G (EBU node)",
+          "primary_did": "0x108F"
+        },
+        {
+          "alternate_did": "0x308F",
+          "bit_range": [
+            8,
+            15
+          ],
+          "name": "Forward and Rearward G (EBU node)",
+          "primary_did": "0x108F"
+        },
+        {
+          "alternate_did": "0x0000",
+          "bit_range": [
+            0,
+            7
+          ],
+          "name": "Zero Point of Deceleration2 (EBU node)",
+          "primary_did": "0x1090"
+        },
+        {
+          "alternate_did": "0x0000",
+          "bit_range": [
+            8,
+            15
+          ],
+          "name": "Zero Point of Deceleration (EBU node)",
+          "primary_did": "0x1090"
+        },
+        {
+          "alternate_did": "0x3091",
+          "bit_range": [
+            0,
+            7
+          ],
+          "name": "Yaw Rate Sensor Value (EBU node)",
+          "primary_did": "0x1091"
+        },
+        {
+          "alternate_did": "0x0000",
+          "bit_range": [
+            0,
+            7
+          ],
+          "name": "Zero Point of Yaw Rate Sensor (EBU node)",
+          "primary_did": "0x1092"
+        },
+        {
+          "alternate_did": "0x0000",
+          "bit_range": [
+            0,
+            7
+          ],
+          "name": "Zero Point of Yaw Rate Sensor2 (EBU node)",
+          "primary_did": "0x1093"
+        }
+      ],
+      "brake_booster_p5": [
+        {
+          "alternate_did": "0x308D",
+          "bit_range": [
+            0,
+            15
+          ],
+          "name": "FR Wheel Speed (EBU node)",
+          "primary_did": "0x108D"
+        },
+        {
+          "alternate_did": "0x308D",
+          "bit_range": [
+            16,
+            31
+          ],
+          "name": "FL Wheel Speed (EBU node)",
+          "primary_did": "0x108D"
+        },
+        {
+          "alternate_did": "0x308D",
+          "bit_range": [
+            32,
+            47
+          ],
+          "name": "RR Wheel Speed (EBU node)",
+          "primary_did": "0x108D"
+        },
+        {
+          "alternate_did": "0x308D",
+          "bit_range": [
+            48,
+            63
+          ],
+          "name": "RL Wheel Speed (EBU node)",
+          "primary_did": "0x108D"
+        },
+        {
+          "alternate_did": "0x0000",
+          "bit_range": [
+            0,
+            7
+          ],
+          "name": "FR Wheel Acceleration (EBU node)",
+          "primary_did": "0x108E"
+        },
+        {
+          "alternate_did": "0x0000",
+          "bit_range": [
+            8,
+            15
+          ],
+          "name": "FL Wheel Acceleration (EBU node)",
+          "primary_did": "0x108E"
+        },
+        {
+          "alternate_did": "0x0000",
+          "bit_range": [
+            16,
+            23
+          ],
+          "name": "RR Wheel Acceleration (EBU node)",
+          "primary_did": "0x108E"
+        },
+        {
+          "alternate_did": "0x0000",
+          "bit_range": [
+            24,
+            31
+          ],
+          "name": "RL Wheel Acceleration (EBU node)",
+          "primary_did": "0x108E"
+        },
+        {
+          "alternate_did": "0x308F",
+          "bit_range": [
+            0,
+            7
+          ],
+          "name": "Lateral G (EBU node)",
+          "primary_did": "0x108F"
+        },
+        {
+          "alternate_did": "0x308F",
+          "bit_range": [
+            8,
+            15
+          ],
+          "name": "Forward and Rearward G (EBU node)",
+          "primary_did": "0x108F"
+        },
+        {
+          "alternate_did": "0x0000",
+          "bit_range": [
+            0,
+            7
+          ],
+          "name": "Zero Point of Deceleration2 (EBU node)",
+          "primary_did": "0x1090"
+        },
+        {
+          "alternate_did": "0x0000",
+          "bit_range": [
+            8,
+            15
+          ],
+          "name": "Zero Point of Deceleration (EBU node)",
+          "primary_did": "0x1090"
+        },
+        {
+          "alternate_did": "0x3091",
+          "bit_range": [
+            0,
+            7
+          ],
+          "name": "Yaw Rate Sensor Value (EBU node)",
+          "primary_did": "0x1091"
+        },
+        {
+          "alternate_did": "0x0000",
+          "bit_range": [
+            0,
+            7
+          ],
+          "name": "Zero Point of Yaw Rate Sensor (EBU node)",
+          "primary_did": "0x1092"
+        },
+        {
+          "alternate_did": "0x0000",
+          "bit_range": [
+            0,
+            7
+          ],
+          "name": "Zero Point of Yaw Rate Sensor2 (EBU node)",
+          "primary_did": "0x1093"
+        }
+      ],
+      "bscm_a_p6": [],
+      "bscm_b_p6": [
+        {
+          "alternate_did": "0x0000",
+          "bit_range": [
+            0,
+            7
+          ],
+          "name": "FR Wheel Acceleration (EBU node)",
+          "primary_did": "0x108E"
+        },
+        {
+          "alternate_did": "0x0000",
+          "bit_range": [
+            8,
+            15
+          ],
+          "name": "FL Wheel Acceleration (EBU node)",
+          "primary_did": "0x108E"
+        },
+        {
+          "alternate_did": "0x0000",
+          "bit_range": [
+            16,
+            23
+          ],
+          "name": "RR Wheel Acceleration (EBU node)",
+          "primary_did": "0x108E"
+        },
+        {
+          "alternate_did": "0x0000",
+          "bit_range": [
+            24,
+            31
+          ],
+          "name": "RL Wheel Acceleration (EBU node)",
+          "primary_did": "0x108E"
+        },
+        {
+          "alternate_did": "0x108D",
+          "bit_range": [
+            0,
+            15
+          ],
+          "name": "FR Wheel Speed (EBU node)",
+          "primary_did": "0x108D"
+        },
+        {
+          "alternate_did": "0x108D",
+          "bit_range": [
+            16,
+            31
+          ],
+          "name": "FL Wheel Speed (EBU node)",
+          "primary_did": "0x108D"
+        },
+        {
+          "alternate_did": "0x108D",
+          "bit_range": [
+            32,
+            47
+          ],
+          "name": "RR Wheel Speed (EBU node)",
+          "primary_did": "0x108D"
+        },
+        {
+          "alternate_did": "0x108D",
+          "bit_range": [
+            48,
+            63
+          ],
+          "name": "RL Wheel Speed (EBU node)",
+          "primary_did": "0x108D"
+        }
+      ],
+      "epb_p5": [
+        {
+          "alternate_did": "0x308D",
+          "bit_range": [
+            0,
+            15
+          ],
+          "name": "FR Wheel Speed (EBU node)",
+          "primary_did": "0x108D"
+        },
+        {
+          "alternate_did": "0x308D",
+          "bit_range": [
+            16,
+            31
+          ],
+          "name": "FL Wheel Speed (EBU node)",
+          "primary_did": "0x108D"
+        },
+        {
+          "alternate_did": "0x308D",
+          "bit_range": [
+            32,
+            47
+          ],
+          "name": "RR Wheel Speed (EBU node)",
+          "primary_did": "0x108D"
+        },
+        {
+          "alternate_did": "0x308D",
+          "bit_range": [
+            48,
+            63
+          ],
+          "name": "RL Wheel Speed (EBU node)",
+          "primary_did": "0x108D"
+        },
+        {
+          "alternate_did": "0x0000",
+          "bit_range": [
+            0,
+            7
+          ],
+          "name": "FR Wheel Acceleration (EBU node)",
+          "primary_did": "0x108E"
+        },
+        {
+          "alternate_did": "0x0000",
+          "bit_range": [
+            8,
+            15
+          ],
+          "name": "FL Wheel Acceleration (EBU node)",
+          "primary_did": "0x108E"
+        },
+        {
+          "alternate_did": "0x0000",
+          "bit_range": [
+            16,
+            23
+          ],
+          "name": "RR Wheel Acceleration (EBU node)",
+          "primary_did": "0x108E"
+        },
+        {
+          "alternate_did": "0x0000",
+          "bit_range": [
+            24,
+            31
+          ],
+          "name": "RL Wheel Acceleration (EBU node)",
+          "primary_did": "0x108E"
+        },
+        {
+          "alternate_did": "0x308F",
+          "bit_range": [
+            0,
+            7
+          ],
+          "name": "Lateral G (EBU node)",
+          "primary_did": "0x108F"
+        },
+        {
+          "alternate_did": "0x308F",
+          "bit_range": [
+            8,
+            15
+          ],
+          "name": "Forward and Rearward G (EBU node)",
+          "primary_did": "0x108F"
+        },
+        {
+          "alternate_did": "0x0000",
+          "bit_range": [
+            0,
+            7
+          ],
+          "name": "Zero Point of Deceleration2 (EBU node)",
+          "primary_did": "0x1090"
+        },
+        {
+          "alternate_did": "0x0000",
+          "bit_range": [
+            8,
+            15
+          ],
+          "name": "Zero Point of Deceleration (EBU node)",
+          "primary_did": "0x1090"
+        },
+        {
+          "alternate_did": "0x3091",
+          "bit_range": [
+            0,
+            7
+          ],
+          "name": "Yaw Rate Sensor Value (EBU node)",
+          "primary_did": "0x1091"
+        },
+        {
+          "alternate_did": "0x0000",
+          "bit_range": [
+            0,
+            7
+          ],
+          "name": "Zero Point of Yaw Rate Sensor (EBU node)",
+          "primary_did": "0x1092"
+        },
+        {
+          "alternate_did": "0x0000",
+          "bit_range": [
+            0,
+            7
+          ],
+          "name": "Zero Point of Yaw Rate Sensor2 (EBU node)",
+          "primary_did": "0x1093"
+        }
+      ]
+    },
+    "expansion_search_hits": {
+      "Electric Brake Unit": [],
+      "Electronic Brake Module": [],
+      "Electronic Brake Unit": []
+    },
+    "literal_ebu_expansion_present": false,
+    "p6_ebu_identity_probe": {
+      "bscm_a_native": [
+        {
+          "name": "FR Wheel Speed",
+          "primary_did": "0x1002"
+        },
+        {
+          "name": "Lateral G",
+          "primary_did": "0x1008"
+        }
+      ],
+      "bscm_b_ebu_mirror": [
+        {
+          "name": "FR Wheel Speed (EBU node)",
+          "primary_did": "0x108D"
+        }
+      ],
+      "interpretation": "Successor BSCM_A=Brake/EPB exposes the native wheel/G quantities while BSCM_B=Brake Booster exposes an EBU-node copy. This strongly favors EBU as the Brake/EPB/skid-control-side node rather than a third ECU, but it is successor contextual evidence, not an exact-P5 Camry wiring proof."
+    },
+    "p6_successor_category_control": {
+      "6004": {
+        "database": "BSCM_A_P6.ddb",
+        "name": "Brake/EPB"
+      },
+      "6005": {
+        "database": "BSCM_B_P6.ddb",
+        "name": "Brake Booster"
+      },
+      "boundary": "Successor naming is context for the brake-domain split, not an exact-P5 Camry ownership transfer."
+    }
+  },
+  "interpretation": {
+    "discrete_ebu_filter_ecu_supported_by_exact_camry_topology": false,
+    "leading_physical_model": "The exact topology supports an EPS attachment through an EBU-labelled brake-domain node/branch, not a second installed EBU ECU. Combined with the one-controller F33 receiver and direct-B6 pre-admission loss, the leading model is an upstream Brake/Skid request-generation/routing boundary feeding the EPS over its single local CAN path. The P6 A/B split strongly favors the EBU node as the Brake/EPB/skid-control side, and ABS_P5's explicit Power-Steering ch2/missing-message vocabulary is consistent with that two-sided brake-domain topology.",
+    "one_eps_controller_compatible_with_upstream_segmentation": true,
+    "unresolved": "Current GTS does not identify the exact electrical bridge, whether the EBU-labelled attachment is internal to the brake actuator assembly, or the concrete B6 filter/forwarder/signing routine. Exact category-435 F152633K0000 firmware or physical wiring/trace evidence is required for that promotion."
+  },
+  "schema": "camry-2026-ebu-topology-v1",
+  "sources": {
+    "abs_p5": {
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/NA/DB/Gen/ABS_P5.ddb",
+      "sha256": "a7a6e4a66025a2ef0ef98746a9d3bce606d9ea1071bb884d46bc790e5fa0faf2"
+    },
+    "brake_booster_p5": {
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/NA/DB/Gen/Brk_Bst_P5.ddb",
+      "sha256": "c51993e0235f543a2637b3a38d625d09fdc418e411693612cb27fb1dd8c7a211"
+    },
+    "bscm_a_p6": {
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/NA/DB/Gen/BSCM_A_P6.ddb",
+      "sha256": "dc0fca971e3e0ed7a68a2fd52e231fa06165df6fcda710d89807258ca8153b14"
+    },
+    "bscm_b_p6": {
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/NA/DB/Gen/BSCM_B_P6.ddb",
+      "sha256": "4f688f405cbcef06697503c511a1ad33d53441dca17c409b99037a565afafa3d"
+    },
+    "epb_p5": {
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/NA/DB/Gen/EPB_P5.ddb",
+      "sha256": "36c1ab2a1e4b63df2ec6841649011264dff11b16d1a4781267f3cb2e61ca19bb"
+    },
+    "master": {
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/NA/DB/Gen/Toyota.ddb",
+      "sha256": "f11e820968ac383a8fc5105b65322f0b9c3673df2c8dac46c9847e3d691b39b1"
+    },
+    "strings": {
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/NA/DB/Gen/M_English.ddb",
+      "sha256": "458a7039851fc66dc2385fff2efa910337218b8b23985b3c1afc0db7bc5f8014"
+    }
+  },
+  "title": "2026 Camry GTS EBU attachment and brake-domain topology boundary"
+}
