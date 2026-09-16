@@ -229,8 +229,13 @@ control without being mistaken for Toyota firmware. Release `v0.2.134`
 contains an unstripped Linux image plus a real-time image `cr4dl0.img` whose
 52,776-byte payload SHA-256 is
 `6cfe5eb572bce81b9f6641f6b90fcf47bcdfdea8439467e032c8b6aa48325af3`.
-The same payload is present in public releases as early as `v0.1.91`, so this is
-a stable board-support component rather than a one-release accident.
+The same payload is not merely present in an old release: sampled public bundles
+`v0.1.91`, `v0.1.92`, `v0.1.98`, `v0.2.117`, `v0.2.132`, and `v0.2.134` all
+contain a **byte-identical 52,776-byte CR4 payload** with that same SHA-256. None
+of those bundles ships a separate HSM/CM3 firmware image. The public R4 artifact
+is therefore a stable board-support component across years, and release-history
+mining does not expose an alternate/older HSM client hidden in another Bottlenose
+firmware bundle.
 
 Despite the `tmpv7706-bn3` filename convention in that bundle, its root device
 tree explicitly identifies **`toshiba,tmpv7708-bn3`, `toshiba,tmpv7708`**. It
@@ -257,6 +262,19 @@ The sibling firmware gives three unusually strong address-domain joins:
    data. The R4 read path subtracts its configured flash base (initialized to
    zero) and reads from **`0x08000000 + offset`**. Thus this sibling maps serial
    NOR through a concrete `0x08000000` XIP aperture.
+
+The platform-level HSM identity is independently stronger than the sibling
+firmware itself. DTS Insight's TMPV770 startup guide names **Core 0 `HSM_CM3`**,
+uses `SDAUTH.DAPSEL` specifically to select the HSM/CM3 JTAG interface, and
+assigns the Cortex-M3 AHB debug access port `APSel=2`. Independently, Labforge's
+public OpenOCD TMPV770 target (commit
+`d104b493381ef04724b763751b1439124eaf7f9b`, 2022-07-20) instantiates
+`tmpv770...hsm` as a real `cortex_m` target on **DAP AP 2** with CoreSight debug
+base **`0xE000E000`**, alongside the two Cortex-R4 targets on AP 1 and the A53
+complex. Thus `HSM_CM3` is not a marketing-name inference or a debugger UI
+artifact: two independent TMPV770 debug implementations expose the same
+physically separate Cortex-M security/debug domain. What remains unavailable is
+its Toyota normal-world client ABI and protected firmware/key state.
 
 The same binary now gives a useful **negative HSM boundary** rather than merely
 failing to reveal a recognizable crypto string. Its GCOMM shared-buffer table is

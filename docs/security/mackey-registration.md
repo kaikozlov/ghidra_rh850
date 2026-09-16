@@ -383,6 +383,13 @@ a closed TMPV770 security gate requires SoC-addon authentication before the
 core can be attached. Its debugger view uses Cortex-M3/AHB-AP with `APSel=2`,
 APB-AP `APSel=1`, and AXI-AP `APSel=0`. The public guide is indexed by DTS
 Insight at <https://support.dts-insight.co.jp/product/support_advice_trqer/download/>.
+Labforge independently reaches the same hardware conclusion in its public
+TMPV770 OpenOCD port: commit
+`d104b493381ef04724b763751b1439124eaf7f9b` creates a distinct `cortex_m`
+`...hsm` target on **DAP AP 2** with CoreSight base **`0xE000E000`**, separate
+from the two R4 targets on AP 1 and the A53 complex. This is independent direct
+confirmation that `HSM_CM3` is a real TMPV770 on-die debug/security domain, not
+just a name in one proprietary debugger UI.
 
 That closes the **hardware-backend** question at the platform level: TMPV770
 contains an on-die protected Cortex-M3 hardware-security-module domain capable
@@ -390,8 +397,12 @@ of being the FRC's SHE key store/crypto endpoint. A second independent public
 artifact now narrows the software side as well. Labforge's Bottlenose
 `v0.2.134` firmware bundle contains a stable 52,776-byte Visconti5 Cortex-R4
 image (SHA-256 `6cfe5eb5…25af3`) whose U-Boot header loads/enters at
-`0x00800000`. Its DT identifies the board as **TMPV7708**, so this is sibling
-platform evidence rather than exact Toyota TMPV7706 firmware.
+`0x00800000`. Sampled releases `v0.1.91`, `v0.1.92`, `v0.1.98`, `v0.2.117`,
+`v0.2.132`, and `v0.2.134` all contain that **exact same R4 payload**, and none
+contains a separate HSM/CM3 firmware member. Its DT identifies the board as
+**TMPV7708**, so this is sibling platform evidence rather than exact Toyota
+TMPV7706 firmware; the release-history negative also means public Bottlenose
+bundles do not provide an older alternate HSM client to mine.
 
 That sibling R4 firmware and its unstripped Linux image recover a complete
 A53↔R4 storage-service boundary. Linux uses Toshiba GCOMM at `0x24040000` and
