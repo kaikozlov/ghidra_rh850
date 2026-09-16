@@ -137,6 +137,14 @@ implementation may already aggregate/select internal TSS application packages be
 publishing `0x08A`; `0x08A` must not be over-described as the untouched output of one
 single application.
 
+There is also **no proved unsigned/pre-protection injection point before `0x08A`**. The
+September FRC normal-Tx suppression proves that the protected `0x08A` publication depends
+on the FRC request side, but it does not reveal the handoff representation or CMAC owner.
+The first externally realized application-request interface may already be protected
+`0x08A`; alternatively, a private FRC handoff may carry request semantics and/or a
+pre-authenticator to a Bus-4 publisher. Do not assume that replacing some upstream value
+will cause an OEM downstream signer to authenticate arbitrary replacement requests.
+
 ## 3. Request arbitration is per package, not per ECU
 
 Patent paragraphs 148–152 explicitly arbitrate three objects independently:
