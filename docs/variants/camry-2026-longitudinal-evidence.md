@@ -167,6 +167,63 @@ tools/test camry_20260916_longitudinal_motion_audit
 The optional `--extract-fixture` path rereads the seven external originals using
 an existing openpilot Python environment; it does not call vehicle tooling.
 
+
+### Independent original-source recheck and the meaning of "echo"
+
+The follow-up review reread the **28 original rlogs** selected by the expanded
+local role analysis: September-11 `d1` segments 3–6 and 9–12, `d4` segments 0–6,
+historical relay-direction route `2d` segments 0–5, September-4 `3b` segments
+83–85, and `3c` segments 25–28. The last two groups retain the declared
+four-second neighborhoods around the three stock-resume landmarks. This is a
+selection of source files/windows, not a claim to have reviewed every Camry
+route or every message in those files.
+
+Re-extraction produced **306,071 original publication events** and was
+byte-identical to the existing expanded local fixture
+`tests/fixtures/camry_2026_longitudinal_role.jsonl.gz`
+(SHA-256 `5a1a454517016ad6a3db15a66b28f11ee0c274c497d0cf0c02f0921ab398ed54`).
+Both `tools/test camry_20260916_longitudinal_motion_audit` and the existing
+worktree suite `tools/test camry_2026_longitudinal_role` passed. The expanded
+role files were already pending at the start of this review and were not
+staged or altered; the committed seven-source motion audit above remains the
+portable source for its reported conclusions.
+
+The expanded comparison supplies useful independent corroboration: native
+B4:B5 agrees with the chassis `0x13C` signed-15 numerical channel in both August
+captures (r=0.979516/0.989355; median absolute difference 0.006/0.014 m/s²), and
+a separate packed speed candidate in `0x160` agrees with raw wheel speed
+(r=0.999789/0.999942). These are numerical/behavioral matches, **not** OEM
+signal-name assignments or proof of a byte-for-byte forwarding operation.
+The wheel-derivative audit and stock starts remain important because merely
+matching a second presumed command would not resolve the original question.
+
+The disposition must distinguish four claims:
+
+- **FRC-origin publication:** supported by source isolation and camera-side
+  observations. Sender identity alone says nothing about request authority.
+- **Fine acceleration field:** motion/feedback-like on the captured Camry;
+  treating B4:B5 as a demonstrated independent acceleration demand is not
+  supported.
+- **B12:** related to a native longitudinal result that can precede physical
+  motion. Its best native alignment follows `0x0CA`, and the untouched native
+  comparator outperforms the replacement during the combined trial. This
+  favors an exported state/result interpretation, but does not recover the
+  exact consumer or exclude mode-dependent use.
+- **Entire PDU / alternative command:** neither "all 32 bytes are telemetry"
+  nor "a byte-exact echo of another FRC command" is established. A mixed-role
+  PDU is still possible. No replacement longitudinal command is identified by
+  this review, and `0x0CA` must not silently be promoted to that role either.
+
+The leading working model is an FRC publication of ego-motion and
+longitudinal-state information onto the ADAS link, potentially for other
+perception participants. The recipient and internal transformation remain
+unrecovered. Even an observed vehicle response to altered state information
+would not, by itself, establish a proper acceleration-demand interface.
+
+This follow-up changed the review only. No vehicle interaction, sender,
+controller, Panda rule, firmware, or experimental-mode default was changed.
+`REFERENCE/` and `build/` remain ignored and were not staged.
+
 ---
 
 The following historical record predates this role audit. Its transport and
