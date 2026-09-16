@@ -10,10 +10,11 @@ reproduce the demonstrated lateral path on the exact F33 with the smallest
 upstream-shaped runtime. Features can be added only after that baseline is
 understood and preserved.
 
-Longitudinal is a separate build-up layer, but message generation is not
-missing: this repository already contains a deterministic offline Camry
-`0x160` request constructor, and the independent Corolla field report records
-a live controller using that native command on stock Toyota-B.
+Longitudinal is a separate build-up layer and remains stock-owned. The
+September-16 request-plane audit supersedes the former `0x160` actuator
+interpretation: `0x08A` is the shared TSS3 application-request carrier for both
+lateral and longitudinal requests, while `0x160` is retained only as FRC-origin
+state/evidence.
 
 ## Runtime boundary
 
@@ -47,68 +48,42 @@ material, not the intended deployment architecture.
 
 ## Current longitudinal layer
 
-[`camry_frc_request_poc.py`](../../tools/targets/camry/live/camry_frc_request_poc.py)
-was the bare message-generation primitive for the observed Camry Toyota-B
-request family. That wire contract is now integrated into the normal opendbc
-controller as an **alpha longitudinal** path: `CarState` retains the live
-camera `0x160` template/counter, `CarController` owns the frame while stock
-cruise is engaged, applies the exact Camry B4:B5 signed-15 request plus the
-inverted signed-7 B12 companion, and recomputes AUTOSAR E2E Profile-5 CRC/Data
-ID `0x444A`. Panda blocks the stock bus-2 copy only while longitudinal control
-is allowed and accepts the bus-0 replacement under the exact target range
-`-1.5..+1.3 m/s²`.
+Native longitudinal is deliberately **not advertised** on the current TSS3
+platforms. The recovered request/result split places the TSS application
+request in `0x08A`: B6/B7 carry the two request-ID/allocation tuples and
+B8:B9/B11:B12 carry the two signed16 ×0.001 m/s² acceleration requests. The
+same PDU also carries the lateral request tuple. Brake-owned `0x081` is the
+corresponding chassis-side result/reference family.
 
-Below the retained low-speed override boundary the controller relays Toyota's
-live request unchanged rather than claiming standstill/hold ownership. This is
-why `autoResumeSng` is deliberately false: short-stop restart is observed, but
-release from Toyota's delayed long-stop hold is not proved. Full physical DRCC
-acceleration authority and PCS/AEB coexistence also remain vehicle-validation
-items, so release-default operation continues to use stock ACC.
+The earlier `camry_frc_request_poc.py` and contributor Corolla `0x160`
+modify-and-forward work remain historical RE/field evidence, not the current
+actuator contract. `0x160` is still useful as an FRC-origin Profile-5
+state/evidence PDU, but opendbc no longer parses it as a live command template,
+constructs it, blocks it, or whitelists it for host replacement. Both Camry and
+Corolla therefore keep Toyota `STOCK_LONGITUDINAL` even when Alpha Long is
+requested.
 
-No longitudinal planner, `controlsd`, or second permission-system change is
-indicated. The Corolla field result establishes that a TSS3 target can use the
-unprotected `0x160` command on stock Toyota-B without the Camry lateral repin.
-The contributor's now-retained
-[`PORT_ARCHITECTURE`](../../community/albinoelephant/albinoelephant_discord_PORT_ARCHITECTURE.md)
-reference reports the concrete Corolla mapping: signed 15-bit B4:B5 at
-0.001 m/s²/count, B2 counter, CRC-16/CCITT Data ID `0x444A`, camera template on
-bus 2, replacement on bus 0, and a frame-for-frame/camera-counter handoff with
-stock relay below roughly 1 mph. The exact source checkout/patch and road rlog
-remain external. More importantly, these Corolla wire details differ from the
-retained Camry B12/Data-ID contract, so they are evidence for the reusable
-ownership pattern, not values to substitute into the Camry encoder.
+The remaining blocker is source ownership, not planner math. On stock Toyota-B
+the `0x08A` request family is visible on the unsplit chassis network, so the
+normal CAN0/CAN2 relay cannot simply make openpilot the sole emitter. A future
+native-long implementation needs a qualified suppression/sole-emitter boundary
+or an equivalent pre-signing/request-generation handoff, followed by normal
+Brake/PCS/AEB coexistence validation. Until then stock Toyota longitudinal is
+the only runtime path.
 
-For the maintainer Camry, the prior session also closed the intended harness
-shape. The successful lateral drive used a development CAN0/CAN1 repin. Undoing
-that repin returns Toyota Bus-1 and `0x160` to Panda's CAN0/CAN2 relay pair, so
-the stock frame can be blocked and replaced. Toyota Bus-4/EPS returns to the
-unsplit Panda bus 1, which had already reached the EPS directly before the
-repin; the F33 C7 signer sideband now moves there. The combined candidate is
-therefore ordinary Toyota-B hardware, with `0x160` replacement on bus 0 and C7
-lateral control on bus 1. This software remapping is implemented; it still
-needs a parked transport check before it replaces the post-repin road-proven
-configuration.
-
-### Why one openpilot transport exception remains
+### Why the remaining openpilot transport exception is lateral-only
 
 The road-proven temporary-repin route contained only Classical host TX and put
-C7 on bus 0. The **current stock-Toyota-B candidate** is:
+C7 on bus 0. In the current stock-Toyota-B candidate the only TSS3 host control
+PDU is the 8-byte Classical C7 `0x1FDC0002` sideband on bus 1. The former HUD
+`0x412`, brake-cancel `0x101`, and longitudinal `0x160` transmissions are not
+part of the runtime control surface.
 
-- C7 `0x1FDC0002`, **bus 1**, 8 bytes;
-- alpha-long `0x160`, bus 0, 32-byte CAN-FD.
-
-The former HUD `0x412`/brake-cancel `0x101` transmissions are removed: they
-did not replace their stock unsplit-bus sources.
-
-The same network carries 32-byte FD `0x08A`. Route 45 directly showed that
-upstream's sticky bus-global `canfd_auto` promoted native-Classical replacement
-frames to FD. C7 is also an 8-byte Classical PDU and must not inherit that
-format. The old post-repin lateral-only candidate disabled auto promotion on the buses
-used by that experiment. In the intended stock-harness topology, the short
-Classical C7 sideband is on bus 1, so the target-scoped exception is now only
-there; buses 0 and 2 retain normal mixed/FD transport for the 32-byte `0x160`
-path and forwarded vehicle traffic. Neither form alters fingerprinting or
-unrelated cars.
+The same physical network carries native CAN-FD traffic including `0x08A`.
+Route 45 showed that sticky bus-global `canfd_auto` can promote a short
+Classical host frame to FD, so C7 must retain the target-scoped transport
+exception on bus 1. No equivalent host transport exception is currently needed
+for longitudinal because openpilot emits neither `0x08A` nor `0x160`.
 
 Adding `CanData.fd` remains useful for exact logging and arbitrary short FD
 host TX, but the demonstrated controller sends no short FD PDU. It is a

@@ -1,12 +1,13 @@
 # 2026 Camry TSS3 openpilot/opendbc port
 
-> **September-15 evidence-audit supersession:** historical steering evidence
-> remains valid, but the preceding production-completeness, radar units,
-> tire-stiffness, HUD/cancel ownership, cached-lag, and continuous-command-loss
-> claims are corrected in [the current capability matrix](camry-2026-capability-matrix.md)
-> and [the evidence review](camry-2026-port-evidence-review.md). The v17
-> supervised helper is not road-qualified; working steering samples do not
-> establish an adaptive-cruise combination.
+> **September-16 evidence-audit supersession:** historical steering and `0x160`
+> field experiments remain retained, but the current runtime contract is the one
+> in [the capability matrix](camry-2026-capability-matrix.md),
+> [the evidence review](camry-2026-port-evidence-review.md), and
+> [the TSS3 arbitration note](../architecture/toyota-tss3-vehicle-movement-arbitration.md).
+> In particular, `0x160` is no longer a native-long actuator candidate: `0x08A`
+> is the shared TSS3 application-request plane, and both current TSS3 platforms
+> keep Toyota stock longitudinal until clean `0x08A` source ownership exists.
 
 **Target:** maintainer 2026 Toyota Camry Hybrid, EPS application F181
 `8965F3307000 / 8A3113303100`.
@@ -21,19 +22,20 @@ the independent TSS3 Corolla longitudinal proof of concept are summarized in
 Earlier passive/direct-B6 checkpoints below remain useful history, but they do
 not supersede that working result.
 
-**2026-09-15 runtime checkpoint:** the current production-shaped candidate no
+**2026-09-16 runtime checkpoint:** the current production-shaped candidate no
 longer host-transmits B6 or depends on a dummy/zero MAC. `CarController` sends a
 short Classical C7 sideband on **stock Toyota-B Panda bus 1**; the volatile
 continuous resident edits an already-native B6 inside the EPS and obtains a
 native-valid FV4+CMAC28 through the EPS ICU-S command-5 path. Sequence zero
-returns ownership to untouched native B6. Release mode retains stock ACC;
-alpha-long owns camera `0x160` through the ordinary bus2->bus0 relay replacement.
-HUD `0x412` and stock-shaped cancel `0x101` are integrated through normal Toyota
-controller/safety ownership. The intended runtime requires **no persistent EPS
-CodeFlash patch**; the stage-5 receiver bypass and persistent signer below are
-historical development artifacts. Current qualification status and exact next
-vehicle tests are maintained in [camry-2026-capability-matrix.md](camry-2026-capability-matrix.md)
-and [the minimal runtime contract](../architecture/toyota-tss3-minimal-runtime.md).
+returns ownership to untouched native B6. Longitudinal remains entirely Toyota-owned:
+openpilot advertises no TSS3 Alpha Long, does not synthesize or suppress `0x160`,
+and does not transmit `0x08A`. HUD/cancel transmission claims from the older
+integration are likewise bounded by the current capability matrix. The intended
+lateral runtime requires **no persistent EPS CodeFlash patch**; the stage-5
+receiver bypass and persistent signer below are historical development artifacts.
+Current qualification status and exact next vehicle tests are maintained in
+[camry-2026-capability-matrix.md](camry-2026-capability-matrix.md) and
+[the minimal runtime contract](../architecture/toyota-tss3-minimal-runtime.md).
 
 **Evidence boundary:** this report closes the exact-F33 generated-COM transmit
 geometry, the software integration, and the development B6 sender/safety envelope.
@@ -1328,50 +1330,27 @@ controller frame maps `actuators.accel` through Toyota-specific compensation int
 speed-selection UI; openpilot does not need to synthesize the RES/SET switch PDU in
 order to own acceleration.
 
-That architecture transfers cleanly to the Camry **if** VAR-106's native-Bus-1
-`0x160 B12` candidate is promoted to an actual request field and the receiver accepts
-synthetic Profile-5 traffic. The implementation should keep the normal ownership
-boundary: `controlsd` still owns `CC.longActive` and `CC.actuators.accel`; the TSS3
-Toyota `CarController` would encode the recovered FRC-side request PDU; Panda would
-apply the ordinary longitudinal command bounds and TX whitelist. `pcmCruise=True`
-can remain initially, so the physical Toyota RES/SET buttons and the already parsed
-`0x08A`/`0x251` stock set-speed state continue to choose `vCruise`. The inability to
-forge authenticated `0x0FE` therefore does **not** by itself block native openpilot
-longitudinal control. The current TSS3 `radarUnavailable=True` setting is likewise
-not a planner blocker: the generic radar interface publishes an empty radar-point
-set and `radard` continues producing model-lead `radarState`, so the existing
-vision-based longitudinal planner remains usable.
+The September-16 request-plane recovery supersedes the old proposal to promote
+`0x160 B12` into a native-long command. `0x08A` is the shared TSS3 application
+request PDU: its packed request-ID/allocation fields and signed16 acceleration pair
+sit in the same message as the lateral request tuple, while Brake-owned `0x081`
+provides the corresponding result/reference family. `0x160` remains useful as an
+FRC-origin Profile-5 state/evidence PDU, but its historical B4:B5/B12 correlations
+and successful host modification do not establish authoritative command ingress.
 
-The current fork is deliberately not wired this way yet. Camry TSS3 returns
-`openpilotLongitudinalControl=False`, sets Toyota `STOCK_LONGITUDINAL`, and its
-special TSS3 `CarController.update()` returns after the B6/cancel path before the
-ordinary Toyota longitudinal block. Current TSS3 Panda safety whitelists only
-`0x0B6` on bus0 and brake-cancel `0x101` on bus2. A native-long port therefore needs
-an explicit TSS3 longitudinal encoder plus matching Panda TX/safety support; merely
-flipping `openpilotLongitudinalControl=True` would not transmit a longitudinal
-request.
+The current fork is therefore intentionally stricter than this historical design
+proposal. TSS3 returns `openpilotLongitudinalControl=False`,
+`alphaLongitudinalAvailable=False`, and sets Toyota `STOCK_LONGITUDINAL` on both
+Camry and Corolla. `CarController` emits no longitudinal PDU; Panda whitelists
+neither host `0x08A` nor 32-byte `0x160`; and the bus2->bus0 forwarding path does not
+suppress `0x160`. The offline `camry_frc_request_poc.py` remains only a deterministic
+reproducer for the old `0x160` field hypothesis and its exact Profile-5 transform.
 
-The recovered wire support is already sufficient for an **offline** native-shape
-builder: `0x160` is a 32-byte native-Bus-1 PDU using exact AUTOSAR E2E Profile 5,
-with B0:B1 CRC-16/CCITT, B2 modulo-256 counter, Data ID equal to CAN ID, and no
-secret. `tools/targets/camry/live/camry_frc_request_poc.py` can clone an observed frame, alter only B12
-and the counter, and recompute the CRC. What is not yet sufficient for a driving
-port is semantics/ownership: B12 is still only a high-value signed-7 candidate, its
-physical command scale and companion request fields are not closed, producer/source
-direction is not proved, and no modified-frame receiver acceptance test exists.
-The two retained drives give a strong B12-to-protected-`0x0CA` result correlation
-(`r=-0.9517/-0.9894`), but that is not a command calibration.
-
-Finally, source suppression is a hard integration requirement. The present Toyota-B
-installation leaves Panda CAN1 unsplit. Stock `0x160` therefore remains present on
-the same network; injecting a second independently countered `0x160` stream would
-produce competing Profile-5 state (and potentially same-ID CAN contention) rather
-than a clean replacement sender. Production native long needs either an inline
-Bus-1 interception/suppression point or a proved later handoff where the stock source
-can be replaced. Once request semantics, receiver acceptance, and suppression are
-closed, this path is sufficient in principle for **native openpilot longitudinal**:
-openpilot chooses desired acceleration, the TSS3 encoder publishes the FRC-style
-request, and Toyota's downstream brake/gateway arbitration remains in the plant.
-Do not reuse the legacy Toyota PCM compensation loop blindly; whether
-`CC.actuators.accel` maps directly or needs vehicle-specific shaping depends on the
-final recovered `0x160` request semantics.
+The actual native-long blocker is clean ownership of the `0x08A` request source on
+stock Toyota-B. Because this request family is visible on the unsplit chassis
+network, a production implementation needs a source-suppression/sole-emitter boundary
+or an equivalent pre-signing/request-generation handoff before openpilot can safely
+publish acceleration requests. Only after that boundary is recovered should the
+normal openpilot longitudinal stack be connected to the two TSS3 acceleration
+requests and then qualified against Brake/VMC selection, PCS/AEB priority,
+standstill/hold behavior, and the `0x081` result plane.

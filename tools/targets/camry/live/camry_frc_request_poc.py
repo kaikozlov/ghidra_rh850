@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
-"""Offline proof-of-concept builder for the Camry native-Bus-1 0x160 request PDU.
+"""Historical offline builder for the Camry 0x160 Profile-5 field hypothesis.
 
 This intentionally does not transmit CAN.  It starts from an observed 32-byte
-0x160 template, changes only the candidate signed-7 request at B12 and the B2
-alive counter, then recomputes the exact AUTOSAR E2E Profile-5 CRC recovered in
-VAR-107.  See the standards note beside CAN_ID below for the recovered Profile-5
-wire parameters used by this Toyota family.
+0x160 template, changes only the formerly hypothesized signed-7 request at B12
+and the B2 alive counter, then recomputes the exact AUTOSAR E2E Profile-5 CRC
+recovered in VAR-107.  See the standards note beside CAN_ID below for the
+recovered Profile-5 wire parameters used by this Toyota family.
 
-The tool does *not* claim that B12 is the final OEM longitudinal request field
-or that a downstream receiver will accept synthetic traffic.  Those remain
-live/source-attribution questions.
+VAR-161/VAR-163 supersede using this PoC as an actuator contract: `0x08A` is the
+shared TSS3 application-request plane and `0x160` is retained as FRC-origin
+state/evidence. This tool remains only to reproduce the historical 0x160 field
+experiment and its exact Profile-5 transform; it is not a production native-long
+sender candidate.
 """
 from __future__ import annotations
 
@@ -124,7 +126,7 @@ def parse_int(text: str) -> int:
 
 def main() -> int:
     ap = argparse.ArgumentParser(
-        description="Offline Camry FRC-style 0x160 request constructor (no CAN transmission)"
+        description="Historical offline Camry 0x160 field-hypothesis constructor (no CAN transmission)"
     )
     ap.add_argument("--template-hex", required=True, help="observed 32-byte 0x160 payload")
     ap.add_argument(

@@ -1,14 +1,15 @@
 # 2026 Camry openpilot capability matrix and qualification handoff
 
-**Current checkpoint: September 15, 2026, after the retained-evidence audit.**
-This replaces the earlier “offline/software side essentially complete” assessment.
-The audit found real implementation defects and unsupported evidence transfers;
-its detailed reasoning and reproducible sources are in
-[the port evidence review](camry-2026-port-evidence-review.md).
+**Current checkpoint: September 16, 2026, after the shared TSS3 request-plane audit.**
+This incorporates the retained-evidence review plus the later correction that removes
+`0x160` from the native-long actuator contract on both Camry and Corolla. Detailed
+reasoning and reproducible sources are in
+[the port evidence review](camry-2026-port-evidence-review.md) and the
+[TSS3 vehicle-movement arbitration note](../architecture/toyota-tss3-vehicle-movement-arbitration.md).
 
 The exact target remains EPS `8965F3307000 / 8A3113303100`. No vehicle commands,
 RAM installation, or persistent firmware writes were performed during this audit.
-Openpilot `7bf1298f9` pins opendbc `6b3d09cc`; ordinary openpilot engagement,
+Openpilot `73c0e2992` pins opendbc `4f90c758`; ordinary openpilot engagement,
 CarState/CarController ownership, and Toyota Panda safety remain the architecture.
 
 ## Current capability matrix
@@ -25,9 +26,9 @@ CarState/CarController ownership, and Toyota Panda safety remain the architectur
 | HUD and automatic cruise cancel | Native unsplit-bus messages are preserved; read-only HUD state uses bus1. Wrong-bus `0x412`/`0x101` transmissions and safety permissions removed | **A genuine automatic-cancel command remains unresolved.** Full three-bus analysis recovers `0x1B2` switch-event mirrors, not receiver acceptance; all 58 historical host-cancel episodes are confounded by physical driver input. A separate 77-native-release scan finds three edges without decoded driver assertions, but none contains a host cancel request or establishes a sender contract. The same-generation factory circuit identifies Hybrid Control as the primary cruise-switch owner; the retained Camry MG update is a different ECU. HUD replacement is also unqualified; neither is solved by a wrong-bus duplicate |
 | Stock-ACC coexistence / recovery | Packaged recovery preserves pre-clear DTC evidence, validates ISO-TP/DID lengths, requires distance-control mode plus genuine FRC permission and clear ACC-unavailable state | Same-cycle DRCC restoration with RAM signer retained is not observed; historical lateral proof does not close this combination |
 | Native longitudinal | **Not advertised on Camry after the September-16 role audit.** The former `0x160` encoder is historical/RE code. `0x08A` is the established TSS request-side plane; B8:B9/B11:B12 form the indistinguishable signed16 ×0.001 upper/lower acceleration-request pair. Brake-owned `0x081` adds employed-source longitudinal ID B6[5:0] and result acceleration B20:B21 candidates, giving the first coherent selected-request→employed-result layout | Exact upper/lower A/B ordering remains unresolved. B6/B7 now strongly fit the two packed request-ID/allocation bytes (ID bits7:2, allocation bits1:0); shift/EPB/override/priority metadata and `57D3` validity remain unresolved. Stock Toyota-B leaves `0x08A` unsplit, so a clean source-suppression/sole-emitter boundary is still required before native long. Do not revive `0x160` or compete with stock `0x08A` |
-| Stock longitudinal ownership | Native `0x160` is parsed for evidence/state only; Camry keeps Toyota `STOCK_LONGITUDINAL` even when the Alpha Long toggle is requested | Former modified-`0x160` handoff behavior is dormant on F33. Corolla remains a separate platform with independent on-car `0x160` validation |
+| Stock longitudinal ownership | Native `0x160` is retained for evidence/state only; Camry and Corolla both keep Toyota `STOCK_LONGITUDINAL` even when the Alpha Long toggle is requested | The former modified-`0x160` handoff is historical on both platforms. Native long now depends on obtaining clean ownership of the shared `0x08A` request plane, not reviving the old encoder |
 | Radar decoder and lifecycle | Normal bus0 radar path enabled for exact Camry: independently anchored units/sign; source start/end flags, raw-state-zero rejection, complete-cycle assembly and track retirement on data loss. 20,323 held-out updates with zero reported CAN errors | On-vehicle fusion/control qualification remains; individual nonzero state names and optional confidence/class metadata are unassigned; signed13/14 velocity widths remain indistinguishable |
-| Panda enforcement | Absolute ±1745-raw C7 limit now enforced in addition to rate limits; CRC-checked longitudinal source/TX; unsplit HUD/brake TX rejected | Unit/replay validation is not an on-car safety qualification |
+| Panda enforcement | Absolute ±1745-raw C7 limit is enforced in addition to rate limits; the TSS3 host TX surface is reduced to the bounded C7 lateral sideband and rejects host `0x08A`/32-byte `0x160` replacement; unsplit HUD/brake TX remains rejected | Unit/replay validation is not an on-car safety qualification |
 | Deployment | Camry car-kit **v17** selects the supervised helper; same resident/staging/authenticated payload as before; no persistent patch or SecOC-result bypass required by its intended contract | Exact stock-CodeFlash combination, native-MAC oracle, cadence, command loss and recovery must be qualified together; historical artifacts remain separate |
 
 ## Independent radar evidence
@@ -75,8 +76,10 @@ actuator interface, so the platform stays stock-longitudinal even when the Alpha
 Long toggle is requested. Protected `0x08A` is the already-established TSS request-side
 request plane and now also supplies the strongest longitudinal acceleration
 candidates; the unresolved problem is clean physical source ownership/suppression
-on the stock harness, not a different upstream semantic command. Corolla's
-independently validated `0x160` path is unchanged.
+on the stock harness, not a different upstream semantic command. The same correction
+now applies to Corolla: its historical `0x160` modify-and-forward result is retained as
+field evidence, but the port no longer treats that PDU as authoritative longitudinal
+command ingress.
 
 **Radar source lifecycle and the available live fault projection are now
 implemented.** The source-driven radar decoder is enabled for Camry, with

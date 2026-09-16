@@ -372,11 +372,11 @@ def main() -> int:
         ),
         row(
             "longitudinal command / stock ACC ownership",
-            "validated_modify_forward_core_aeb_open",
-            "Older TSS2 uses 0x343; known SecOC profiles can move signed acceleration into 0x183/8 while preserving 0x343 coordination",
-            "The old 0x343 wire contract does not transfer. Albino's retained on-car port instead validates the TSS3 architecture end-to-end: camera-origin 0x160/32 at 40 Hz, keyless AUTOSAR E2E CRC16/CCITT with DataID 0x444A, signed15 B4:B5 acceleration at 0.001 m/s²/count, modify-and-forward on the CAN0/CAN2 relay pair, camera-counter preservation, sole-emitter suppression while engaged, and stock ownership below ~1 mph. The contributor status explicitly reports follow, speed, stop-and-go to 0 + hold, and resume validated on car. Span's retained network reproduces the same 0x160/32 FD carrier.",
-            "retained Albino architecture/live validation + cross-year retained 0x160 network geometry",
-            "Core longitudinal transport/ownership is closed. Production validation still needs an exercised PCS/AEB event while 0x160 replacement is active to prove emergency-braking coexistence; do not infer that from ordinary ACC drives.",
+            "stock_owned_shared_08a_request_plane_source_ownership_open",
+            "Older TSS2 uses 0x343; Toyota's TSS3 vehicle-movement architecture instead separates application request, selected/result, and controller-target planes",
+            "The old 0x343 wire contract does not transfer, and the retained contributor 0x160 modify-and-forward result no longer establishes command ingress. Cross-generation TSS3 recovery identifies 0x08A as the shared application-request plane: its two packed longitudinal request-ID/allocation bytes accompany two signed16 acceleration requests at 0.001 m/s²/count while the same PDU carries the lateral request tuple. Span's 37 retained ACC-engaged frames are request A ID17/allocation3 plus request B ID23/allocation1; their two acceleration slots are equal frame-for-frame and sweep 15 values from -0.387 to +0.082 m/s². Native 0x160 remains useful FRC-origin Profile-5 state/evidence but is not qualified as a writable longitudinal actuator contract.",
+            "retained Corolla 0x08A road traffic + cross-generation Camry/Toyota request-result architecture + historical Albino 0x160 field experiment",
+            "Keep Toyota stock longitudinal authoritative. A native-long port first needs a qualified 0x08A source-suppression/sole-emitter boundary or equivalent pre-signing handoff on the unsplit Toyota-B network, then Brake/PCS/AEB coexistence and result-plane validation. Do not revive the 0x160 encoder from the historical field experiment.",
         ),
     ]
 
@@ -445,7 +445,7 @@ def main() -> int:
                 "path": str(ALBINO_ARCH.relative_to(REPO)),
                 "sha256": sha256_file(ALBINO_ARCH),
                 "validated_status": "Longitudinal (follow, speed, stop-and-go to 0 + hold, resume): VALIDATED on car",
-                "boundary": "Use the retained contributor architecture for its on-car longitudinal result and topology/E2E observations. Its own status says lateral remained IN PROGRESS, so it is not evidence for any later 0x160/0x1A0 steering claim.",
+                "boundary": "Use the retained contributor architecture as historical evidence for the reported on-car longitudinal behavior plus 0x160 topology/E2E observations. The September-16 cross-system request-plane recovery supersedes the inference that 0x160 itself is authoritative longitudinal command ingress. Its own status also says lateral remained IN PROGRESS, so it is not evidence for any later 0x160/0x1A0 steering claim.",
             },
             "command5_runtime_carrier": {
                 "static_candidate": carrier["carrier_geometry"],
@@ -511,7 +511,7 @@ def main() -> int:
                 "Generation-specific TSS3 platform selection, Toyota-B bus placement, and exact Corolla EPS firmware matching.",
                 "0x025/32 steering angle/rate, 0x030 driver torque/validity, 0x0AA wheel speed, 0x101 brake, 0x116 gas, 0x51E Ready Status, and generation-native Corolla gear parsing (0x127 hybrid shape with 0x3BF fallback).",
                 "0x08A native ACC available/enabled/standstill state and 0x251 retained set-speed decode, with the native 19-mph set-speed floor and manual resume from stock hold.",
-                "Validated 0x160 longitudinal modify-and-forward: live camera template/counter pacing, E2E recomputation, accel-only substitution, selective stock suppression, and below-~1-mph stock hold handoff.",
+                "Shared 0x08A longitudinal request geometry and native ACC state are decoded; historical 0x160 modify-and-forward remains evidence only. Runtime keeps Toyota stock longitudinal authoritative and does not synthesize or suppress 0x160.",
                 "Exact H/F B6 lateral receiver contract, target-angle scaling, request profile, freshness reconstruction, native angle limits, bounded host sideband, and Panda angle safety for the EPS-resident signer design.",
                 "Model-lead/radarUnavailable base operation; a native TSS3 radar parser is optional rather than a Corolla port prerequisite.",
             ],
@@ -528,14 +528,14 @@ def main() -> int:
                 "Only a future native RadarInterface is blocked on 0x123/16 and 0x180-family FD semantics. The base Corolla port intentionally uses radarUnavailable/model leads.",
             ],
             "blocks_longitudinal": [
-                "Exercise a real PCS/AEB intervention while openpilot owns 0x160 and verify emergency-braking coexistence/priority across the downstream brake path. Ordinary ACC validation does not close this safety case.",
+                "Recover a clean 0x08A source-ownership boundary on stock Toyota-B (source suppression/sole emitter or an equivalent pre-signing handoff), then validate selected/result behavior and PCS/AEB priority before enabling native longitudinal. The historical 0x160 modify-and-forward path is not a production candidate.",
             ],
         },
         "highest_value_next_evidence": [
             "On the isolated exact H/F specimen, run exploit/ephemeral_runtime/corolla_hf_direct_canary.py first, then the guarded selector-4 command-5 probe after reset-to-stock confirmation; this is the remaining live prerequisite for the EPS-resident B6 signer used by the openpilot branch.",
             "On the vehicle, preserve F181 and capture the relay-correct stock-LTA off -> active -> off transition, then validate that the resident helper emits native authenticated B6 and that EPS response follows openpilot's bounded target-angle sideband.",
-            "Exercise a real PCS/AEB intervention during openpilot 0x160 ownership and verify emergency braking still wins cleanly through the downstream Brake/EPB path.",
-            "Capture Ready=0 plus recoverable and latched steering faults to finish openpilot temporary/permanent fault policy. Gear, core cruise state, set speed, driver torque, and longitudinal command discovery are no longer evidence blockers.",
+            "Recover the physical Corolla 0x08A producer/pre-signing path and establish how openpilot could become the sole qualified request source without competing on the unsplit network; only then stage native-long and PCS/AEB coexistence validation.",
+            "Capture Ready=0 plus recoverable and latched steering faults to finish openpilot temporary/permanent fault policy. Gear, core cruise state, set speed, driver torque, and longitudinal request semantics are no longer evidence blockers; request-source ownership remains open.",
             "Recover the 0x123/0x180-family radar FD semantics only if a native TSS3 RadarInterface is desired; model-lead operation does not depend on it.",
         ],
     }

@@ -65,13 +65,13 @@
   "highest_value_next_evidence": [
     "On the isolated exact H/F specimen, run exploit/ephemeral_runtime/corolla_hf_direct_canary.py first, then the guarded selector-4 command-5 probe after reset-to-stock confirmation; this is the remaining live prerequisite for the EPS-resident B6 signer used by the openpilot branch.",
     "On the vehicle, preserve F181 and capture the relay-correct stock-LTA off -> active -> off transition, then validate that the resident helper emits native authenticated B6 and that EPS response follows openpilot's bounded target-angle sideband.",
-    "Exercise a real PCS/AEB intervention during openpilot 0x160 ownership and verify emergency braking still wins cleanly through the downstream Brake/EPB path.",
-    "Capture Ready=0 plus recoverable and latched steering faults to finish openpilot temporary/permanent fault policy. Gear, core cruise state, set speed, driver torque, and longitudinal command discovery are no longer evidence blockers.",
+    "Recover the physical Corolla 0x08A producer/pre-signing path and establish how openpilot could become the sole qualified request source without competing on the unsplit network; only then stage native-long and PCS/AEB coexistence validation.",
+    "Capture Ready=0 plus recoverable and latched steering faults to finish openpilot temporary/permanent fault policy. Gear, core cruise state, set speed, driver torque, and longitudinal request semantics are no longer evidence blockers; request-source ownership remains open.",
     "Recover the 0x123/0x180-family radar FD semantics only if a native TSS3 RadarInterface is desired; model-lead operation does not depend on it."
   ],
   "implementation_readiness": {
     "blocks_longitudinal": [
-      "Exercise a real PCS/AEB intervention while openpilot owns 0x160 and verify emergency-braking coexistence/priority across the downstream brake path. Ordinary ACC validation does not close this safety case."
+      "Recover a clean 0x08A source-ownership boundary on stock Toyota-B (source suppression/sole emitter or an equivalent pre-signing handoff), then validate selected/result behavior and PCS/AEB priority before enabling native longitudinal. The historical 0x160 modify-and-forward path is not a production candidate."
     ],
     "blocks_normal_carstate": [
       "Operational steering-fault/readiness policy only: capture Ready=0 and recoverable-versus-latched fault transitions before mapping TSS3 native states into openpilot temporary/permanent fault classes.",
@@ -89,7 +89,7 @@
       "Generation-specific TSS3 platform selection, Toyota-B bus placement, and exact Corolla EPS firmware matching.",
       "0x025/32 steering angle/rate, 0x030 driver torque/validity, 0x0AA wheel speed, 0x101 brake, 0x116 gas, 0x51E Ready Status, and generation-native Corolla gear parsing (0x127 hybrid shape with 0x3BF fallback).",
       "0x08A native ACC available/enabled/standstill state and 0x251 retained set-speed decode, with the native 19-mph set-speed floor and manual resume from stock hold.",
-      "Validated 0x160 longitudinal modify-and-forward: live camera template/counter pacing, E2E recomputation, accel-only substitution, selective stock suppression, and below-~1-mph stock hold handoff.",
+      "Shared 0x08A longitudinal request geometry and native ACC state are decoded; historical 0x160 modify-and-forward remains evidence only. Runtime keeps Toyota stock longitudinal authoritative and does not synthesize or suppress 0x160.",
       "Exact H/F B6 lateral receiver contract, target-angle scaling, request profile, freshness reconstruction, native angle limits, bounded host sideband, and Panda angle safety for the EPS-resident signer design.",
       "Model-lead/radarUnavailable base operation; a native TSS3 radar parser is optional rather than a Corolla port prerequisite."
     ]
@@ -224,12 +224,12 @@
       "tss3_corolla_evidence": "Public TSS3 route has 0x123/16 and a 22-ID CAN-FD baseline including 0x180..0x18B/64 and 0x18C/48. Both the older Span UDS-sweep capture and Span's moving Discord rlog repeat exactly the same 22 ID/DLC set on buses 0/2; the moving rlog also has byte-identical bus0/bus2 payload sequences."
     },
     {
-      "evidence": "retained Albino architecture/live validation + cross-year retained 0x160 network geometry",
-      "older_toyota_contract": "Older TSS2 uses 0x343; known SecOC profiles can move signed acceleration into 0x183/8 while preserving 0x343 coordination",
-      "remaining_blocker": "Core longitudinal transport/ownership is closed. Production validation still needs an exercised PCS/AEB event while 0x160 replacement is active to prove emergency-braking coexistence; do not infer that from ordinary ACC drives.",
+      "evidence": "retained Corolla 0x08A road traffic + cross-generation Camry/Toyota request-result architecture + historical Albino 0x160 field experiment",
+      "older_toyota_contract": "Older TSS2 uses 0x343; Toyota's TSS3 vehicle-movement architecture instead separates application request, selected/result, and controller-target planes",
+      "remaining_blocker": "Keep Toyota stock longitudinal authoritative. A native-long port first needs a qualified 0x08A source-suppression/sole-emitter boundary or equivalent pre-signing handoff on the unsplit Toyota-B network, then Brake/PCS/AEB coexistence and result-plane validation. Do not revive the 0x160 encoder from the historical field experiment.",
       "role": "longitudinal command / stock ACC ownership",
-      "status": "validated_modify_forward_core_aeb_open",
-      "tss3_corolla_evidence": "The old 0x343 wire contract does not transfer. Albino's retained on-car port instead validates the TSS3 architecture end-to-end: camera-origin 0x160/32 at 40 Hz, keyless AUTOSAR E2E CRC16/CCITT with DataID 0x444A, signed15 B4:B5 acceleration at 0.001 m/s\u00b2/count, modify-and-forward on the CAN0/CAN2 relay pair, camera-counter preservation, sole-emitter suppression while engaged, and stock ownership below ~1 mph. The contributor status explicitly reports follow, speed, stop-and-go to 0 + hold, and resume validated on car. Span's retained network reproduces the same 0x160/32 FD carrier."
+      "status": "stock_owned_shared_08a_request_plane_source_ownership_open",
+      "tss3_corolla_evidence": "The old 0x343 wire contract does not transfer, and the retained contributor 0x160 modify-and-forward result no longer establishes command ingress. Cross-generation TSS3 recovery identifies 0x08A as the shared application-request plane: its two packed longitudinal request-ID/allocation bytes accompany two signed16 acceleration requests at 0.001 m/s\u00b2/count while the same PDU carries the lateral request tuple. Span's 37 retained ACC-engaged frames are request A ID17/allocation3 plus request B ID23/allocation1; their two acceleration slots are equal frame-for-frame and sweep 15 values from -0.387 to +0.082 m/s\u00b2. Native 0x160 remains useful FRC-origin Profile-5 state/evidence but is not qualified as a writable longitudinal actuator contract."
     }
   ],
   "schema": "corolla-tss3-opendbc-readiness-v1",
@@ -1129,7 +1129,7 @@
       }
     },
     "retained_albino_longitudinal": {
-      "boundary": "Use the retained contributor architecture for its on-car longitudinal result and topology/E2E observations. Its own status says lateral remained IN PROGRESS, so it is not evidence for any later 0x160/0x1A0 steering claim.",
+      "boundary": "Use the retained contributor architecture as historical evidence for the reported on-car longitudinal behavior plus 0x160 topology/E2E observations. The September-16 cross-system request-plane recovery supersedes the inference that 0x160 itself is authoritative longitudinal command ingress. Its own status also says lateral remained IN PROGRESS, so it is not evidence for any later 0x160/0x1A0 steering claim.",
       "path": "community/albinoelephant/albinoelephant_discord_PORT_ARCHITECTURE.md",
       "sha256": "760143f4f8fe53518eaa30af4de58a13c3ab2564acc5f7b7b010b545649aefe0",
       "validated_status": "Longitudinal (follow, speed, stop-and-go to 0 + hold, resume): VALIDATED on car"
@@ -1200,7 +1200,74 @@
           18,
           93
         ],
-        "boundary": "In the retained Span segment byte22 bit0x10 asserts for every 0x5D state frame and is clear for every 0x12 state frame. This is a direct on-vehicle engaged-state join; contributor longitudinal evidence separately exercises 0x47 engaged and 0x67 standstill/hold states.",
+        "boundary": "In the retained Span segment byte22 bit0x10 asserts for every 0x5D state frame and is clear for every 0x12 state frame. This is a direct on-vehicle engaged-state join; contributor longitudinal evidence separately exercises Camry 0x47 engaged and 0x67 delayed-hold states.",
+        "request_id_allocation": {
+          "boundary": "Cross-platform structural decode using the same six-bit requester-ID plus two-bit allocation geometry recovered on Camry. The retained Span minute does not establish which A/B slot is upper versus lower or prove that either request wins: 0x081 result ID remains 63 throughout.",
+          "candidate_A_allocation_counts": {
+            "0": 2363,
+            "3": 37
+          },
+          "candidate_A_id_counts": {
+            "0": 2363,
+            "17": 37
+          },
+          "candidate_B_allocation_counts": {
+            "1": 37,
+            "2": 2363
+          },
+          "candidate_B_id_counts": {
+            "23": 37,
+            "4": 2363
+          },
+          "engaged_accel_mps2_range": [
+            -0.387,
+            0.082
+          ],
+          "engaged_accel_pair_equal_frames": 37,
+          "engaged_accel_raw_range": [
+            -387,
+            82
+          ],
+          "engaged_accel_raw_values": {
+            "candidate_A": [
+              -387,
+              -349,
+              -330,
+              -312,
+              -293,
+              -274,
+              -255,
+              -237,
+              -200,
+              -162,
+              -125,
+              0,
+              6,
+              44,
+              82
+            ],
+            "candidate_B": [
+              -387,
+              -349,
+              -330,
+              -312,
+              -293,
+              -274,
+              -255,
+              -237,
+              -200,
+              -162,
+              -125,
+              0,
+              6,
+              44,
+              82
+            ]
+          },
+          "result_id_counts": {
+            "63": 2000
+          }
+        },
         "state_when_disengaged": [
           18
         ],

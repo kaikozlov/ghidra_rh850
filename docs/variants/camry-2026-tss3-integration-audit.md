@@ -1,12 +1,12 @@
 # 2026 Camry TSS3 integration replay audit and upstream comparison (WP2)
 
-> **September-15 evidence-audit supersession:** historical steering evidence
-> remains valid, but the preceding production-completeness, radar units,
-> tire-stiffness, HUD/cancel ownership, cached-lag, and continuous-command-loss
-> claims are corrected in [the current capability matrix](camry-2026-capability-matrix.md)
-> and [the evidence review](camry-2026-port-evidence-review.md). The v17
-> supervised helper is not road-qualified; working steering samples do not
-> establish an adaptive-cruise combination.
+> **September-16 evidence-audit supersession:** historical steering/replay
+> evidence remains valid, but present-tense integration claims are governed by
+> [the current capability matrix](camry-2026-capability-matrix.md),
+> [the evidence review](camry-2026-port-evidence-review.md), and
+> [the TSS3 arbitration note](../architecture/toyota-tss3-vehicle-movement-arbitration.md).
+> In particular, the former `0x160` Alpha Long path is withdrawn; `0x08A` is the
+> shared request plane and TSS3 longitudinal remains Toyota-owned.
 
 **Scope:** work package 2 of the Camry openpilot completion plan
 (REFERENCE/CAMRY_OPENPILOT_COMPLETION_PLAN.md): field-level vehicle-interface
@@ -41,19 +41,20 @@ the September 10 C7/RAM-resident path edits an already-native B6 inside the EPS 
 steered the car. The old direct-B6/source-transform investigation is retained below as
 historical localization evidence, not as the current blocker.
 
-**2026-09-15 current-state update.** The production-shaped candidate is now the stock-Toyota-B
+**2026-09-16 current-state update.** The production-shaped candidate is the stock-Toyota-B
 port summarized in [the capability matrix](camry-2026-capability-matrix.md) and
 [`toyota-tss3-minimal-runtime.md`](../architecture/toyota-tss3-minimal-runtime.md): C7 on
 unsplit Panda bus 1, exact-EPS fingerprinting, normal `CarState`/`CarController` ownership,
-HUD `0x412` replacement, stock-shaped `0x101` cancel, release-default stock ACC, and an alpha
-native-long `0x160` replacement path. The intended lateral runtime uses the byte-exact
-continuous RAM helper from the successful steering handoff and generates a **native-valid**
-B6 FV4+CMAC28 trailer; the historical stage-5 receiver bypass and persistent signer are not
-runtime requirements. Any section below that calls the current sender zero-MAC, places current
-C7 on bus 0, calls lateral receiver-unqualified, or says native-long integration is absent is a
-dated Sep-7/Sep-10 checkpoint. The remaining vehicle questions are stock-topology/stock-CodeFlash
-revalidation, same-cycle DRCC recovery after volatile signer bootstrap, and alpha-long physical
-qualification.
+and Toyota stock longitudinal. The intended lateral runtime uses the byte-exact continuous RAM
+helper from the successful steering handoff and generates a **native-valid** B6 FV4+CMAC28
+trailer; the historical stage-5 receiver bypass and persistent signer are not runtime
+requirements. The September-16 request-plane audit also withdraws the former Alpha Long
+`0x160` replacement: openpilot emits neither `0x160` nor `0x08A`, Panda permits neither as a
+TSS3 host longitudinal command, and stock `0x160` is not suppressed. Any section below that
+promotes `0x160` as the current actuator path, calls the current sender zero-MAC, places current
+C7 on bus 0, or calls lateral receiver-unqualified is a dated checkpoint. Native longitudinal
+now blocks on recovering clean `0x08A` source ownership/pre-signing handoff and then validating
+Brake/VMC/PCS/AEB coexistence.
 
 All three fork trees were clean at the final audit point. Upstream has **no** Toyota TSS3
 platform, no `0x025/0x030/0x08A/0x0B6` Toyota CAN-FD messages, and no

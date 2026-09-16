@@ -252,6 +252,8 @@ def main() -> int:
     acc_request_id_b = [dat[7] >> 2 for _, dat in acc]
     acc_allocation_a = [dat[6] & 0x03 for _, dat in acc]
     acc_allocation_b = [dat[7] & 0x03 for _, dat in acc]
+    acc_request_accel_a = [int.from_bytes(dat[8:10], "big", signed=True) for _, dat in acc]
+    acc_request_accel_b = [int.from_bytes(dat[11:13], "big", signed=True) for _, dat in acc]
     control_result = rows(0x081, 32)
     longitudinal_result_ids = [dat[6] & 0x3F for _, dat in control_result]
     cruise_display = rows(0x251, 8)
@@ -545,6 +547,19 @@ def main() -> int:
                     "candidate_A_allocation_counts": {str(k): v for k, v in sorted(collections.Counter(acc_allocation_a).items())},
                     "candidate_B_id_counts": {str(k): v for k, v in sorted(collections.Counter(acc_request_id_b).items())},
                     "candidate_B_allocation_counts": {str(k): v for k, v in sorted(collections.Counter(acc_allocation_b).items())},
+                    "engaged_accel_raw_values": {
+                        "candidate_A": unique([raw for raw, engaged in zip(acc_request_accel_a, acc_engaged) if engaged]),
+                        "candidate_B": unique([raw for raw, engaged in zip(acc_request_accel_b, acc_engaged) if engaged]),
+                    },
+                    "engaged_accel_raw_range": [
+                        min(raw for raw, engaged in zip(acc_request_accel_a, acc_engaged) if engaged),
+                        max(raw for raw, engaged in zip(acc_request_accel_a, acc_engaged) if engaged),
+                    ],
+                    "engaged_accel_mps2_range": [-0.387, 0.082],
+                    "engaged_accel_pair_equal_frames": sum(
+                        1 for a, b, engaged in zip(acc_request_accel_a, acc_request_accel_b, acc_engaged)
+                        if engaged and a == b
+                    ),
                     "result_id_counts": {str(k): v for k, v in sorted(collections.Counter(longitudinal_result_ids).items())},
                     "boundary": "Cross-platform structural decode using the same six-bit requester-ID plus two-bit allocation geometry recovered on Camry. The retained Span minute does not establish which A/B slot is upper versus lower or prove that either request wins: 0x081 result ID remains 63 throughout.",
                 },

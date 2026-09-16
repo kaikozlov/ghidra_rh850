@@ -73,7 +73,7 @@ expected_status = {
     "gear": "generation_native_carstate_closed",
     "cruise availability / set speed / ACC faults / follow distance": "core_carstate_closed_optional_acc_ui_open",
     "radar / object state": "optional_parser_not_required_for_base_port",
-    "longitudinal command / stock ACC ownership": "validated_modify_forward_core_aeb_open",
+    "longitudinal command / stock ACC ownership": "stock_owned_shared_08a_request_plane_source_ownership_open",
 }
 for role, status in expected_status.items():
     check(f"{role} disposition", roles[role]["status"] == status)
@@ -85,7 +85,9 @@ check("old 0x262 fault enums stay nonportable", "Old numeric fault enums" in rol
 check("gear core state is closed from direct transitions plus GTS ordering", all(x in roles["gear"]["tss3_corolla_evidence"] for x in ("0x3BF", "0x80=P", "0x40=R", "0x10=D", "0x2A1", "0x127", "GTS+ HV_P5")) and "No core gear-state blocker" in roles["gear"]["remaining_blocker"])
 check("native ACC engagement is closed on 0x08A", all(x in roles["cruise engaged"]["tss3_corolla_evidence"] for x in ("0x08A", "B22 bit 0x10", "2,363", "37", "0x12", "0x5D")) and "No core CarState engagement-field blocker" in roles["cruise engaged"]["remaining_blocker"])
 check("core cruise state is closed while optional UI fields remain open", all(x in roles["cruise availability / set speed / ACC faults / follow distance"]["tss3_corolla_evidence"] for x in ("ACC_STATE", "B22 bit0x10", "0x67", "0x251", "19-mph", "0x1901", "0x1905", "0x1906", "0x1912", "0x1914")) and all(x in roles["cruise availability / set speed / ACC faults / follow distance"]["remaining_blocker"] for x in ("Optional follow-distance", "not required")))
-check("longitudinal core is the validated 0x160 modify-forward path", all(x in roles["longitudinal command / stock ACC ownership"]["tss3_corolla_evidence"] for x in ("0x160/32", "CRC16/CCITT", "0x444A", "B4:B5", "0.001", "modify-and-forward", "sole-emitter", "stop-and-go to 0 + hold", "resume validated on car")) and all(x in roles["longitudinal command / stock ACC ownership"]["remaining_blocker"] for x in ("PCS/AEB", "emergency-braking coexistence")))
+check("longitudinal stays stock-owned on the shared 0x08A request plane",
+      all(x in roles["longitudinal command / stock ACC ownership"]["tss3_corolla_evidence"] for x in ("0x08A", "ID17/allocation3", "ID23/allocation1", "-0.387", "+0.082", "0x160", "not qualified")) and
+      all(x in roles["longitudinal command / stock ACC ownership"]["remaining_blocker"] for x in ("stock longitudinal", "0x08A", "source-suppression", "PCS/AEB", "Do not revive")))
 check("native radar parser is optional for base port", roles["radar / object state"]["status"] == "optional_parser_not_required_for_base_port" and "radarUnavailable/model-lead" in roles["radar / object state"]["remaining_blocker"])
 check("lateral receiver/replacement freshness closed while signer/topology remain open", roles["lateral command"]["status"] == "eps_receiver_replacement_freshness_and_static_carrier_closed_live_signer_open" and all(x in roles["lateral command"]["tss3_corolla_evidence"] for x in ("35 ms", "minimal ID11", "replacement freshness")) and all(x in roles["lateral command"]["remaining_blocker"] for x in ("slot-4 signing", "live-validate", "inert canary", "stock sender cadence", "stock source")))
 
@@ -120,12 +122,12 @@ impl = ART["implementation_readiness"]
 implemented = impl["implemented_from_retained_evidence"]
 check("base state plumbing is implemented from retained evidence", any(all(tok in x for tok in ("0x025/32", "0x030", "0x127", "0x3BF")) for x in implemented))
 check("native Corolla cruise state is implemented", any(all(tok in x for tok in ("0x08A", "0x251", "19-mph")) for x in implemented))
-check("validated 0x160 longitudinal architecture is implemented", any(all(tok in x for tok in ("0x160", "modify-and-forward", "E2E", "stock hold")) for x in implemented))
+check("shared 0x08A longitudinal request plane is implemented stock-owned", any(all(tok in x for tok in ("0x08A", "0x160", "stock longitudinal", "does not synthesize")) for x in implemented))
 check("B6 signer host architecture is implemented", any(all(tok in x for tok in ("B6", "target-angle", "Panda angle safety")) for x in implemented))
 check("production lateral now blocks on live signer and stock-source proof", any(all(tok in x for tok in ("resident signer/helper", "native B6", "steering response")) for x in impl["blocks_production_lateral"]) and any(all(tok in x for tok in ("stock-LTA", "suppression point")) for x in impl["blocks_production_lateral"]))
 check("normal CarState no longer blocks on gear/cruise discovery", all("gear" not in x.lower() and "set speed" not in x.lower() for x in impl["blocks_normal_carstate"]) and any("Ready=0" in x and "temporary/permanent" in x for x in impl["blocks_normal_carstate"]))
 check("radar is optional for base model-lead port", any("radarUnavailable/model leads" in x for x in impl["blocks_radar"]))
-check("longitudinal remaining blocker is exercised AEB coexistence", len(impl["blocks_longitudinal"]) == 1 and all(tok in impl["blocks_longitudinal"][0] for tok in ("PCS/AEB", "0x160", "emergency-braking coexistence")))
+check("longitudinal remaining blocker is 0x08A source ownership before AEB validation", len(impl["blocks_longitudinal"]) == 1 and all(tok in impl["blocks_longitudinal"][0] for tok in ("0x08A", "source-ownership", "sole emitter", "PCS/AEB", "0x160")))
 
 check("readiness carries power-supply cooperative gate", ART["specimen_boundaries"]["power_supply_cooperative_gate"]["classification"]["distinct_from_b6_loss"].endswith("FEBEADB9 -> FEBEC26D path."))
 check("readiness rejects coarse 0x030 authority substitution", ART["specimen_boundaries"]["cooperative_authority_wire_visibility"]["exact_authority_negative"]["exact_wire_visible_cooperative_authority_bit_recovered"] is False)
@@ -137,7 +139,7 @@ check("readiness operationalizes exact same-car direct canary", direct["tool"] =
 direct_cmd5 = ART["specimen_boundaries"]["command5_runtime_carrier"]["direct_command5"]
 check("readiness operationalizes guarded exact-H/F command5 second stage", direct_cmd5["tool"] == "exploit/ephemeral_runtime/corolla_hf_direct_command5.py" and direct_cmd5["package"]["payload_sha256"] == "a94979704010758dd09acc0e137977c8eed5003822eababa39eb8a7e5e9d5a58" and direct_cmd5["probe"]["command5"]["input_length"] == 36 and direct_cmd5["live_guards"]["successful_canary_result_required"] and direct_cmd5["live_guards"]["reset_to_stock_confirmation_required"] and direct_cmd5["live_guards"]["steering_can_transmit_used"] is False)
 check("highest-value evidence starts with guarded signer validation", "corolla_hf_direct_canary.py" in ART["highest_value_next_evidence"][0] and "selector-4" in ART["highest_value_next_evidence"][0])
-check("highest-value evidence includes live B6 and AEB validation", any("native authenticated B6" in x and "EPS response" in x for x in ART["highest_value_next_evidence"]) and any("PCS/AEB" in x and "0x160" in x for x in ART["highest_value_next_evidence"]))
+check("highest-value evidence includes live B6 and 0x08A ownership closure", any("native authenticated B6" in x and "EPS response" in x for x in ART["highest_value_next_evidence"]) and any("0x08A" in x and "sole qualified request source" in x and "PCS/AEB" in x for x in ART["highest_value_next_evidence"]))
 check("radar remains optional future work", any("0x123/0x180-family" in x and "model-lead" in x for x in ART["highest_value_next_evidence"]))
 
 print(f"\n== RESULT: {passed} passed, {failed} failed ==")

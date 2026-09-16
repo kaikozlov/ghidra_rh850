@@ -107,6 +107,12 @@ check("Span shares the Camry six-bit requester/two-bit allocation shape",
       packed_long["candidate_A_allocation_counts"] == {"0": 2363, "3": 37} and
       packed_long["candidate_B_id_counts"] == {"4": 2363, "23": 37} and
       packed_long["candidate_B_allocation_counts"] == {"1": 37, "2": 2363})
+check("Span active ACC carries the shared signed16 acceleration-request pair",
+      packed_long["engaged_accel_raw_range"] == [-387, 82] and
+      packed_long["engaged_accel_mps2_range"] == [-0.387, 0.082] and
+      packed_long["engaged_accel_pair_equal_frames"] == 37 and
+      packed_long["engaged_accel_raw_values"]["candidate_A"] == packed_long["engaged_accel_raw_values"]["candidate_B"] and
+      len(packed_long["engaged_accel_raw_values"]["candidate_A"]) == 15)
 check("Span longitudinal result remains driver/default ID63 through the active request sample",
       packed_long["result_id_counts"] == {"63": 2000} and
       all(x in packed_long["boundary"] for x in ("upper versus lower", "result ID remains 63")))
