@@ -218,6 +218,20 @@ The same GTS+ DLL still carries the newer `0x3002` start/result helpers, so this
 is deliberate multi-generation support rather than a replacement of one
 protocol by the other.
 
+The remaining live-family selector is hidden one layer higher. Current
+`UtilityPlusFrontNK.dll` (SHA-256
+`3472091a3c2f8df114fbab491dc442c3aee25a3485ce6390653413cb029d871a`)
+imports and calls the generic `UtilityGene.dll` MACKey wrappers by ordinals
+98/99/100: `Ex2MAC_01_S_KeyValidation`, `...KeyUpdate_before`, and
+`...KeyUpdate_after`. The corresponding exports in `UtilityGene.dll` (SHA-256
+`7412d320fcde90fff48c6511e638633e123e1068a4e54399a80c63d3c11c007e`)
+are RVAs `0xE510`, `0xE2C0`, and `0xDF20`. All three lie inside virtual `.text`
+but beyond that image's raw-backed `.text` prefix (`RVA 0x1000..0x1FFF`; virtual
+extent through `0x32FFF`). The shipped file therefore does not contain the
+wrapper bodies needed to statically join a specific selected ECU/family to the
+RID-`0x1010` versus RID-`0x3002` backend. This is a packaging/static-evidence
+boundary, not evidence that either route is unreachable.
+
 The firmware comparison is now:
 
 | Property | Techstream V18 recovered path | GTS+ 2026 `MAC_01` alternate path | Sienna `8965B4512000` | yc Venza SRS `89170-48E30` |
@@ -239,6 +253,71 @@ The `22 10 10` `SafekeyNumber` read remains a separate 16-byte identity read. A
 shared numeric `0x1010` does not make that DID the RoutineControl payload. What
 has changed is that current Toyota tooling now proves a genuine RoutineControl
 RID-`0x1010` MACKey transport exists.
+
+## Front Recognition Camera applicability
+
+The current Toyota/GTS+ camera evidence now closes a distinction that was left
+too broad in earlier TSS3 architecture notes. Category 498 `FRC_P5` exposes DID
+`0x10AF` (alternate `0x30AF`) as **ECU Security Key Registered Incomplete Flag**
+with the OEM `OFF / ON / Not Fixed` state domain, and the same database exposes
+`XF01B ECU Security Key Not Registered`. The older `Fr_Camera_P5` family exposes
+DID `0x1119` (alternate `0x3119`) as **ECU Security Key Registered Status**.
+Toyota service documentation independently requires **Update ECU Security Key**
+after forward-recognition-camera replacement and describes the security key as
+the credential required for a replacement ECU to communicate on the vehicle
+network. The front-camera key state is therefore the camera ECU's own
+provisioning state; it is not merely an observer of another ECU's registration.
+
+The recovered `MAC_01` host model is deliberately multi-ECU: it discovers a
+master plus slave endpoints, reads a 16-byte `SafekeyNumber` from each selected
+endpoint, matches the Toyota-server `ExchangeKey` record by that identity, then
+writes that ECU's `M1[16] || M2[32] || M3[16]` package and polls `M4[32] ||
+M5[16]`. Current GTS+ contains both wire transports for that same logical
+M1--M5 exchange-key family:
+
+```text
+31 01 30 02 || M1 || M2 || M3    / 31 03 30 02
+31 01 10 10 || M1 || M2 || M3    / 31 03 10 10
+```
+
+Consequently the best current model is that a P5 FRC receives the **same logical
+Toyota ECU-Security-Key / SHE-compatible authenticated key envelope**, with a
+target-family-specific RoutineControl transport and a target-local secure-key
+backend. We do **not** yet have a retained `0x792` key-write trace or decoded FRC
+application implementation, so the exact camera selector (`0x1010` versus
+`0x3002`), its M1--M5 verification/storage implementation, and the relation
+between `SafekeyNumber` and the server-side MCU ID remain unproved. The
+`UtilityPlusFrontNK -> UtilityGene` static pass above exhausts the obvious
+current-GTS host join: the family-selector wrappers are imported and invoked,
+but their shipped `UtilityGene` bodies are not raw-backed, so the FRC RID cannot
+be recovered honestly from this package alone.
+
+Nothing in that conclusion requires Renesas hardware. The M1--M5 envelope is a
+wire/provisioning contract, not an ICU-S MMIO ABI. The yc Venza SRS specimen is
+the concrete control: it accepts the same RID-`0x1010` `M1/M2/M3 -> M4/M5`
+envelope while reaching its secure subsystem through a different local
+secure-service ABI than the tracked EPS. A non-Renesas FRC can therefore satisfy
+the Toyota contract with another HSM/security engine or equivalent protected
+implementation. The exact FRC SoC/HSM remains outside the decoded corpus.
+
+This provisioning result must remain separate from **runtime protected-message
+signing**. The captured native FRC-side Bus-1 periodic family is exact AUTOSAR
+E2E Profile 5 and carries no Toyota `FV4 || MAC28` SecOC authenticator. That
+proves only that the observed native Bus-1 PDUs are not the protected chassis
+publication. Because the FRC is a real ECU-Security-Key participant, an unseen
+private handoff carrying an FRC-generated authenticator, or some other use of
+that provisioned key, can no longer be rejected merely from the camera's silicon
+vendor or the plaintext/E2E shape of its public Bus-1 traffic. A downstream
+Bus-4 participant is still required to proxy/physically publish `0x08A`, but the
+location of CMAC generation/key selection is open until producer firmware or a
+key-update/runtime trace joins it. Provisioning membership, physical
+transmission, and cryptographic signing ownership are three different claims.
+
+The FRC CUW/ReproStd SecurityAccess path is separate again. Its retained
+`0x0792` packages use a stable family SecurityAccess working key and a bare
+`27 01` seed request, which independently demonstrates ECU-local persistent
+cryptographic state but does not identify the network-key M1--M5 backend or the
+SecOC key slot.
 
 ## Remaining dynamic questions
 

@@ -2327,7 +2327,7 @@ CORR-135 removes the architecture assumption that accumulated after the `0x08A` 
 2. **Zero B6 does not require a missing cooperative packet.** Exact `FUN_000D0218` has an ordinary B6-inactive branch that computes `FEBECC48` from eight internal assist terms, and the exact `CC48 -> ... -> motor-control` chain reaches physical current control. The retained 73.303384 s is machine-identified **request state** (`0x08A` ID11/LTA-LCA), not a direct grant oracle: zero B6 is architecturally consistent with F33 continuing to actuate, but the logs do not prove that this internal path carried autonomous lane-centering authority. Operation FFD `5285/57DE/5265` is the missing grant discriminator.
 3. **B6 remains a separate protected external cooperative-control ingress.** Exact F33 really does accept B6 and consume its target/mode when active. That makes B6 a possible future openpilot actuation interface, but stock LTA does not prove that Toyota converts `0x08A` into B6. If B6 is chosen, its signer/freshness/suppression/arbitration contract must be recovered on its own evidence.
 
-The current work is therefore three-way. VAR-091/CORR-149 close observed bus placement **and the FRC side of the TSK boundary**: the FRC is the request-side participant, not the TSK key holder, so the remaining stock-path question is which downstream Brake/Skid/CGW proxy receives the request and publishes the authenticated Bus-4 PDU. VAR-090/092 close default-bank `D0218` as not an F33 COM copy of the published milliradian. Synchronized FRC Operation FFD must separately determine whether the retained ID11 request was selected/granted. Protected B6 remains an independent candidate openpilot ingress.
+The current work is therefore three-way. VAR-091/CORR-149 close observed bus placement and the **native Bus-1 framing**; CORR-194 corrects the former overreach on the FRC key boundary. The FRC is the request-side participant on observed Bus 1 and is also an ECU-Security-Key provisioning participant at the camera-family level. A downstream Brake/Skid/CGW participant must still proxy/physically publish the authenticated Bus-4 PDU, but FRC-side private pre-authentication versus downstream CMAC generation is open. VAR-090/092 close default-bank `D0218` as not an F33 COM copy of the published milliradian. Synchronized FRC Operation FFD must separately determine whether the retained ID11 request was selected/granted. Protected B6 remains an independent candidate openpilot ingress.
 
 **Regression rule:** do not infer or document an `0x08A -> B6` stock-LTA transform from matching scale, bus topology, or F33's `0x08A` exclusion. Such a transform may be considered only if producer firmware or synchronized evidence positively recovers it.
 
@@ -2450,9 +2450,9 @@ Deterministic evidence: `exploit/ephemeral_runtime/camry_f33_b6_bridge.c`,
 `exploit/ephemeral_runtime/audited_camry_f33_b6_bridge_build.json`, and
 `tests/verify_camry_8965F3307000.py --section b6_receive_bridge`.
 
-## 41. `0x08A` placement/authentication bounds: downstream proxy transmitter/signer remains open (VAR-091 / CORR-136 / CORR-149)
+## 41. `0x08A` placement/authentication bounds: downstream transmitter and CMAC owner remain open (VAR-091 / CORR-136 / CORR-149 / CORR-194)
 
-The two relay-correct drives plus GTS+ canbus for Camry HV type **12984** close bus placement and the observed trailer shape. Combined with the recovered Toyota TSK hardware architecture, they also close the FRC side of the trust boundary: **the FRC is not a TSK key-holder/signing participant; a downstream TSK-capable chassis/gateway participant must proxy the FRC request into the authenticated Bus-4 domain.** The remaining identity question is which downstream participant performs that assembly/signing and physical publication.
+The two relay-correct drives plus GTS+ canbus for Camry HV type **12984** close bus placement and the observed trailer shape. They prove that a downstream Bus-4 chassis/gateway participant must proxy/physically publish the FRC request into the authenticated Bus-4 domain. **CORR-194 withdraws the former stronger claim that this also excluded the FRC from ECU-Security-Key ownership or private pre-authentication.** Current FRC diagnostics/service procedure prove camera-family key provisioning, so physical transmitter identity and cryptographic CMAC-generation/key-selection ownership must be tracked separately.
 
 **Placement.** Every retained `0x08A/32` is on the Toyota Bus-4 capture (panda bus 0 / relay mirror 2); Bus 1 count is **zero**. GTS+ `canbus 12984` places **Front Camera Module on Bus 1 only**. Bus 4 native application nodes are Airbag, Brake Booster, Power Steering (EPS), Skid Control, and SAS, all behind Central Gateway. This is a topology candidate set, not an arbitration-ID source map. Post-repin FRC UDS `0x792` on panda bus 0 is diagnostic gatewaying, not proof that FRC is a Bus-4 application node.
 
@@ -2462,9 +2462,9 @@ The two relay-correct drives plus GTS+ canbus for Camry HV type **12984** close 
 
 **Observed Bus-1 envelope.** Bus 1 contains zero `0x00F`. Every periodic Bus-1 stream (n≥50) has a near-constant last-4 (max unique fraction <0.002); FRC vision `0x180/64` last-4 is constant. These observed PDUs do not end in ordinary-P5 `FV4||MAC28`. Bus-4 `0x08A` does: B28..B31 remain on the vehicle `0x00F` reset domain (CORR-135) and the last-4 is frame-unique.
 
-**Authentication boundary.** Toyota's recovered TSK path keeps the AES-CMAC key in protected Renesas ICU-S storage on TSK-capable network participants. The FRC request domain is not such a key-holder/signing participant, and its observed Bus-1 output is E2E-protected rather than SecOC-wrapped (VAR-107). Therefore the FRC cannot be the source of the Bus-4 TSK authenticator: its semantic request must cross a private or differently packed handoff into a downstream TSK-capable participant, which then constructs/authenticates the chassis-domain publication.
+**Authentication boundary.** The tracked EPS/SRS implementations prove SHE-compatible M1--M5 ECU-Security-Key provisioning and protected AES-CMAC use, but ICU-S is an implementation detail rather than a requirement of the Toyota wire envelope. VAR-107 proves the FRC's **observed native Bus-1** output is E2E Profile 5 rather than SecOC-wrapped. Current `FRC_P5` key-registration state plus Toyota camera-replacement procedure nevertheless prove the camera family itself receives an ECU Security Key (CORR-194). Therefore native Bus-1 framing cannot identify the `0x08A` CMAC owner: an unseen/private FRC pre-authentication handoff and downstream CMAC generation are both open. The only hard topology conclusion is that a downstream Bus-4 participant must construct/forward and physically publish the chassis-domain PDU.
 
-**Closed vs open.** The FRC-hosted recorder carries `5282/5631`; Bus-4 `0x08A` carries the same ID/pinion/assist subset; exact F33 is neither transmitter nor consumer; native Bus-1 CAN does not carry `0x08A`. The downstream proxy/transmitter candidates by topology are Skid Control, Brake Booster, and Central Gateway, but none is selected. OQ-054 is now specifically to identify **which of those downstream participants receives the FRC request, arbitrates/repacks it, owns the TSK profile/key selection, and publishes `0x08A`**. Do not send `0x08A` to EPS.
+**Closed vs open.** The FRC-hosted recorder carries `5282/5631`; Bus-4 `0x08A` carries the same ID/pinion/assist subset; exact F33 is neither transmitter nor consumer; native Bus-1 CAN does not carry `0x08A`. The downstream proxy/physical-transmitter candidates by topology are Skid Control, Brake Booster, and Central Gateway, but none is selected. OQ-054 must identify **which downstream participant receives/repacks and publishes `0x08A`**, and independently whether SecOC key selection/CMAC generation occurs there or in an upstream/private FRC step. Do not send `0x08A` to EPS.
 
 Deterministic evidence: `tools/targets/camry/analysis/analyze_camry_2026_08a_producer_bounds.py`, `data/generated/camry_2026_08a_producer_bounds.json` schema v4, `tests/verify_camry_2026_08a_producer_bounds.py`.
 
@@ -2795,7 +2795,7 @@ The decisive live ownership discriminator remains the synchronized FRC
 Operation-FFD capture (`REFERENCE/CAMRY_TSS3_OPERATION_FFD_PLAN.md`); it is no
 longer a physical-routing oracle.
 
-## 47. The 0x08A signer is always-on: the secured family signs at zero lateral request (VAR-101)
+## 47. The 0x08A authenticated publication is always-on at zero lateral request (VAR-101 / CORR-194)
 
 ### 47.1 Observed result
 
@@ -2812,34 +2812,39 @@ Yet the secured envelope runs exactly as in the active drives:
 - all 16 FV4 phases cycle evenly;
 - MAC28 is frame-unique (last-4 unique fraction 1.0).
 
-`0x0D7` shows the same always-on signing pattern in the same capture. The
-relay-correct drives supply the active-request contrast — B26 `+1` at
-0.9915/1.0000 and last-4 unique 1.0 across B21 0/11/18 regimes — so the
-signer's structural cadence is **regime-independent**.
+`0x0D7` shows the same always-on authenticated-publication pattern in the same
+capture. The relay-correct drives supply the active-request contrast — B26 `+1`
+at 0.9915/1.0000 and last-4 unique 1.0 across B21 0/11/18 regimes — so the
+secured publication's structural cadence is **regime-independent**.
 
 ### 47.2 Interpretation and boundary
 
-The recovered TSK hardware boundary independently excludes the front camera
-from the SecOC key-holder/signing role: the FRC is the request producer, while a
-downstream ICU-S-equipped participant must own the protected chassis publication.
-The zero-request capture then adds an orthogonal dynamic result: that downstream
-publisher is **always-on**, maintaining authenticated `0x08A` cadence even while
-FRC Target Lateral ID is 0. OQ-054 therefore narrows from "who signs" to "which
-always-on Bus-4 node holds the slot-class key": the brake family (ABS 435 /
-Brake Booster 466) or the Central Gateway (VAR-096's install-set bound). Current GTS+ ADCU_P6 vocabulary names the OEM request/arbitrate/sign
-pattern explicitly (`Lateral Arbitration ID`, `Lateral Control ID of Arbitrated
-Result`); that is architecture corroboration only —
-P6 names are not transferred onto this gen-20 P5 car.
+The zero-request capture proves an orthogonal dynamic result: the authenticated
+`0x08A` publication/security pipeline is **always-on with respect to request
+state**, maintaining the protected envelope even while FRC Target Lateral ID is
+0. It does **not** locate the key holder or CMAC engine. CORR-194 supersedes the
+former hardware-only exclusion of the camera: current `FRC_P5` diagnostics and
+Toyota replacement procedure prove camera-family ECU-Security-Key provisioning,
+so an unseen/private FRC pre-authentication step is again a live branch.
 
-The observed continuity does not identify the signer. The decisive evidence
-remains exact producer firmware: decode the brake-family Tx descriptors and
-SecOC generation profile (search order tracked in
-`data/generated/gtsplus_2026/camry_f152633k0000_brake_acquisition.json`;
-acquisition route TMS-049/050). A `0x08A` Tx descriptor plus SecOC generation
-in `F152633K0000` or Skid Control firmware closes OQ-054 deterministically.
+Topology still requires a downstream Bus-4 participant to proxy/physically
+publish `0x08A`; candidates remain the brake family (ABS 435 / Brake Booster
+466) or Central Gateway (VAR-096's install-set bound). Current GTS+ ADCU_P6
+vocabulary names the OEM request/arbitrate/sign pattern explicitly (`Lateral
+Arbitration ID`, `Lateral Control ID of Arbitrated Result`); that is architecture
+corroboration only — P6 names are not transferred onto this gen-20 P5 car.
 
-Signer identity is **hypothesis**; zero-request signing continuity is
-**observed**. No output authorized.
+The observed continuity therefore does not identify cryptographic ownership.
+Exact downstream producer firmware can close physical publication and show any
+local SecOC generation profile; exact FRC firmware, a live FRC M1--M5 key-update
+trace, or private-link capture is additionally required to exclude or prove
+upstream camera pre-authentication. Search order for the brake side remains
+tracked in `data/generated/gtsplus_2026/camry_f152633k0000_brake_acquisition.json`
+(acquisition route TMS-049/050).
+
+Zero-request authenticated-publication continuity is **observed**; physical
+publisher identity is topology-bounded; CMAC/key ownership is **open**. No output
+authorized.
 
 Canonical evidence: `data/generated/camry_2026_08a_signer_continuity.json`;
 `tests/verify_camry_2026_08a_signer_continuity.py`.

@@ -76,7 +76,7 @@ Generator and is not the split relay segment.
 
 | ECU / role | Exact Camry identity / endpoint | Toyota network | Control role | TSK / SecOC status | MCU / security-hardware status |
 |---|---|---|---|---|---|
-| **Front Recognition Camera 2 / FRC_P5 (498)** | `0x792 -> 0x79A`; F181 `8646F3315000`; DID0105 `8646C06091` | **Bus 1** | Sole installed TSS3 ADAS compute ECU on this architecture. Hosts the TSS3 Operation/Image FFD recorder and the normalized lateral/longitudinal request vocabulary (`5280..5285`, `57DB`, `57DE`, etc.). | **Not a TSK key-holder/signing participant in the current recovered architecture.** Native observed Bus-1 periodic traffic has reproducible non-secret E2E integrity plus rolling freshness, not Toyota FV4/MAC28 SecOC. A semantic FRC request therefore has to cross into a downstream TSK-capable proxy before authenticated Bus-4 publication. | Exact application MCU/HSM remains outside the current firmware corpus. Do not infer ICU-S merely because the FRC supervises ECU Security Key state or records security DTCs. |
+| **Front Recognition Camera 2 / FRC_P5 (498)** | `0x792 -> 0x79A`; F181 `8646F3315000`; DID0105 `8646C06091` | **Bus 1** | Sole installed TSS3 ADAS compute ECU on this architecture. Hosts the TSS3 Operation/Image FFD recorder and the normalized lateral/longitudinal request vocabulary (`5280..5285`, `57DB`, `57DE`, etc.). | **ECU-Security-Key provisioning participant at the FRC family level; exact runtime key use/CMAC ownership unresolved.** Current `FRC_P5` owns `0x10AF` **ECU Security Key Registered Incomplete Flag** and `XF01B ECU Security Key Not Registered`, while Toyota's camera-replacement procedure requires updating that key. Native observed Bus-1 periodic traffic is exact non-secret E2E Profile 5, not Toyota `FV4||MAC28` SecOC, so a downstream Bus-4 participant must still proxy/physically publish the protected chassis PDU. The camera's key participation means an unseen/private FRC pre-authentication step can no longer be excluded solely from silicon assumptions or native Bus-1 framing. Exact Camry `0x763` roster membership, FRC rekey RID, and `0x08A` CMAC-generation location remain unmeasured. | Exact application MCU/HSM remains outside the decoded corpus. ECU-Security-Key registration does **not** imply Renesas/ICU-S: the M1--M5 provisioning contract can terminate in another HSM/security engine or equivalent protected implementation. |
 | **Skid Control / Brake-EPB / ABS_P5 (435)** | `0x7B0 -> 0x7B8`; F181 `F152633K0000`; DID0105 `8954147040`; F18C `8954147040CFC1800985` | **Bus 4** | Brake/VSC/TRAC domain. Exposes Toyota-Safety-Sense upper/lower acceleration-request observers `10A1..10A4`. Exact EPS B6-loss semantics attribute the immediate protected B6 source domain to **Brake System Control Module/category 435**. | **Strongest confirmed brake-side protected-control participant family.** B6 source-domain attribution is positive; exact `F152633K0000` CMAC-generation/key ownership is still unproved because its application firmware is not local. It is also a leading `0x08A`/`0x0CA` proxy candidate, not yet the uniquely identified transmitter. | Exact silicon unknown. An ICU-S/ICUSE-capable RH850 chassis MCU is a current hardware hypothesis if this exact ECU proves to own the Toyota TSK CMAC path; do not promote the derivative without firmware or package marking. |
 | **Brake Booster / Brk_Bst_P5 (466)** | Installed in exact Camry architecture; exact physical diagnostic address/F181 not yet resolved | **Bus 4** | Separately installed brake actuator/booster participant. Its GTS DDB exposes the same TSS upper/lower acceleration observer family `10A1..10A4`. | **Downstream proxy/signer candidate.** Exact Camry TSK roster membership, CMAC ownership, and `0x08A`/`0x0CA` Tx ownership remain unproved. | Exact silicon unknown. If it is the TSK signer, the recovered Toyota implementation implies ICU-S/ICUSE-class SHE functionality or an equivalent implementation; this is not yet a part-number identification. |
 | **Electric Power Steering / EMPS_P5 (405)** | `0x7A1 -> 0x7A9`; F181 `8965F3307000`; second SW `8A3113303100`; F18C `8965033K9011J2740743` | **Bus 4** | Steering actuator / protected external steering-request receiver. | **Proven TSK/SecOC participant and verifier.** Exact firmware implements ICU-S command 7 CMAC verify, command 5 CMAC generate capability, command 8 SHE-compatible M1/M2/M3 key update with M4/M5 result, protected key-slot selection, and Toyota FV4/MAC28 receive handling. | **Renesas RH850/P1M-E**, exact known target family; ICU-S/ICUSE security block recovered directly from firmware/MMIO behavior. |
@@ -172,11 +172,25 @@ Use these buckets rather than one undifferentiated "TSK participant" list:
   semantics identify the immediate protected B6 source domain; exact
   `F152633K0000` CMAC-generation ownership awaits producer firmware.
 
-**Exact-Camry downstream signer/proxy candidates**
+**Exact-Camry downstream Bus-4 proxy / physical-publisher candidates**
 
 - Skid/ABS 435;
 - Brake Booster 466;
 - Central Gateway.
+
+These are bounded by bus/install topology for the **physical chassis
+publication**, not yet for cryptographic CMAC ownership.
+
+**FRC ECU-Security-Key status**
+
+- FRC / Front Recognition Camera 2 is the request-side ADAS compute node on
+  observed Bus 1. Current `FRC_P5` owns the camera-local ECU-Security-Key
+  incomplete flag / not-registered behavior, and Toyota replacement procedure
+  requires an ECU Security Key update for the camera family. Observed native
+  Bus-1 output uses non-secret E2E Profile 5 rather than the Bus-4 SecOC
+  envelope, but that does **not** exclude an unseen/private FRC
+  pre-authentication step. Exact Camry live `0x763` roster membership, rekey RID,
+  secure backend, and runtime key use remain to be read.
 
 **Toyota P5 ECU-Security-Key participant classes whose exact Camry roster
 membership still needs to be read**
@@ -187,13 +201,6 @@ membership still needs to be read**
 **Installed propulsion participant with no current key-roster proof**
 
 - Motor Generator.
-
-**Explicitly not the TSK signer in the recovered Camry architecture**
-
-- FRC / Front Recognition Camera 2. It is the request-side ADAS compute node;
-  observed native output uses non-secret E2E integrity/freshness rather than
-  Toyota SecOC, and authenticated chassis publication requires a downstream
-  TSK-capable proxy.
 
 ## Brake CUW shape / acquisition boundary
 
@@ -239,6 +246,9 @@ ownership.
 Current silicon status:
 
 - EPS: RH850/P1M-E + ICU-S, proven;
+- FRC: ECU-Security-Key registration participation is proven at the camera-family
+  level, but exact SoC/HSM and live Camry roster membership are unresolved; do
+  not infer Renesas/ICU-S from the vendor-neutral M1--M5 provisioning contract;
 - Brake/ABS: ICU-S-capable RH850 chassis family is a strong hypothesis; exact
   derivative unproved;
 - Brake Booster / Central Gateway / HV / Engine / MG: unresolved.

@@ -4,16 +4,22 @@ from __future__ import annotations
 
 import hashlib
 import struct
+
+import pefile
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 DLL = REPO / "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/bin/UtilityExNK2.dll"
 DLL_SHA = "d9868c8a9a69ffbab26ea7d4431e290372cd207e84e7b4aed27446aeb4c12ec1"
+PLUS_FRONT = DLL.parent / "UtilityPlusFrontNK.dll"
+PLUS_FRONT_SHA = "3472091a3c2f8df114fbab491dc442c3aee25a3485ce6390653413cb029d871a"
+UTILITY_GENE = DLL.parent / "UtilityGene.dll"
+UTILITY_GENE_SHA = "7412d320fcde90fff48c6511e638633e123e1068a4e54399a80c63d3c11c007e"
 IMAGE_BASE = 0x10000000
 TEXT_RVA = 0x1000
 TEXT_RAW = 0x400
 
-if not DLL.exists():
+if not DLL.exists() or not PLUS_FRONT.exists() or not UTILITY_GENE.exists():
     print("[SKIP] GTS+ unpacked tree is not present")
     raise SystemExit(77)
 
@@ -66,6 +72,64 @@ check("newer start helper embeds 31 01 30 02", gts[0x12C58D:0x12C591] == bytes.f
 check("newer poll helper embeds 31 03 30 02", gts[0x12B04C:0x12B050] == bytes.fromhex("31 03 30 02"))
 check("RID-0x3002 result helper is byte-pinned", sha256(gts[0x12B010:0x12B12C]) == "40ae4fc66a2a512a80ebbd72170a2df77a8949979ed4305b34d206e6bee41bf9")
 check("RID-0x3002 start helper is byte-pinned", sha256(gts[0x12C570:0x12C664]) == "cc2903dda7ff92b583daf8544e69069d3bff9174534cde3fd671c87b4ad0fa63")
+
+print("\n== host frontend selector boundary ==")
+plus_bytes = PLUS_FRONT.read_bytes()
+gene_bytes = UTILITY_GENE.read_bytes()
+check("UtilityPlusFrontNK.dll SHA-256 is exact", sha256(plus_bytes) == PLUS_FRONT_SHA)
+check("UtilityGene.dll SHA-256 is exact", sha256(gene_bytes) == UTILITY_GENE_SHA)
+
+plus_pe = pefile.PE(data=plus_bytes, fast_load=False)
+gene_pe = pefile.PE(data=gene_bytes, fast_load=False)
+
+gene_imports = next(
+    desc for desc in plus_pe.DIRECTORY_ENTRY_IMPORT if desc.dll.lower() == b"utilitygene.dll"
+)
+ordinal_iat = {imp.ordinal: imp.address for imp in gene_imports.imports if imp.ordinal is not None}
+check(
+    "UtilityPlusFront imports generic MACKey validation/before/after wrappers by ordinals 98/99/100",
+    {ordinal: ordinal_iat.get(ordinal) for ordinal in (98, 99, 100)}
+    == {98: 0x100070AC, 99: 0x100070B0, 100: 0x100070B4},
+)
+check(
+    "frontend calls validation wrapper through ordinal-98 IAT",
+    plus_bytes[0x3E37:0x3E3D] == bytes.fromhex("FF 15 AC 70 00 10"),
+)
+check(
+    "frontend calls key-update-before wrapper through ordinal-99 IAT",
+    plus_bytes[0x3ED8:0x3EDE] == bytes.fromhex("FF 15 B0 70 00 10"),
+)
+check(
+    "frontend calls key-update-after wrapper through ordinal-100 IAT",
+    plus_bytes[0x40A9:0x40AF] == bytes.fromhex("FF 15 B4 70 00 10"),
+)
+
+gene_exports = {
+    sym.name: (sym.ordinal, sym.address)
+    for sym in gene_pe.DIRECTORY_ENTRY_EXPORT.symbols
+    if sym.name is not None
+}
+expected_gene_exports = {
+    b"Ex2MAC_01_S_KeyValidation": (98, 0xE510),
+    b"Ex2MAC_01_S_KeyUpdate_before": (99, 0xE2C0),
+    b"Ex2MAC_01_S_KeyUpdate_after": (100, 0xDF20),
+}
+check("UtilityGene exports the three generic MACKey wrappers at pinned RVAs", all(
+    gene_exports.get(name) == value for name, value in expected_gene_exports.items()
+))
+gene_text = next(sec for sec in gene_pe.sections if sec.Name.rstrip(b"\0") == b".text")
+raw_backed_end = gene_text.VirtualAddress + gene_text.SizeOfRawData
+virtual_end = gene_text.VirtualAddress + gene_text.Misc_VirtualSize
+check(
+    "all three UtilityGene MACKey wrapper RVAs are virtual .text but outside its raw-backed prefix",
+    all(raw_backed_end <= rva < virtual_end for _, rva in expected_gene_exports.values()),
+    detail=f"raw-backed RVA end=0x{raw_backed_end:X}, virtual end=0x{virtual_end:X}",
+)
+check(
+    "shipped UtilityGene raw image therefore does not expose the wrapper bodies needed to map frontend selection to RID",
+    gene_text.SizeOfRawData == 0x1000 and gene_text.Misc_VirtualSize == 0x32000,
+    detail=f"raw=0x{gene_text.SizeOfRawData:X}, virtual=0x{gene_text.Misc_VirtualSize:X}",
+)
 
 print(f"\nResults: {passed} passed, {failed} failed")
 raise SystemExit(1 if failed else 0)

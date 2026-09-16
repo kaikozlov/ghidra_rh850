@@ -79,24 +79,29 @@ for name, exp in expected_b21.items():
 print("\n== interpretation boundaries ==")
 res = art["zero_request_result"]
 check("signing_continues is true at zero request", res["signing_continues"] is True)
-check("continuity interpretation is recorded",
-      "always-on chassis engine" in res["interpretation"])
-check("boundary keeps signer identity open",
-      "does not identify the signer" in res["boundary"])
+check("continuity interpretation is recorded without locating CMAC",
+      "authenticated publication/security pipeline is therefore always-on" in res["interpretation"]
+      and "does not locate the CMAC engine" in res["interpretation"])
+check("boundary keeps signer/key identity open",
+      "does not identify the signer or key holder" in res["boundary"]
+      and "private FRC pre-authentication" in res["boundary"])
 ident = art["signer_identity"]
-check("identity verdict is hypothesis-graded",
-      ident["grade"] == "hypothesis")
-check("brake-family/CGW hypothesis names the candidate set",
-      "brake family" in ident["verdict"] and "Central Gateway" in ident["verdict"])
-check("decisive evidence names producer firmware",
-      "producer firmware" in ident["decisive_evidence"])
-check("FRC is excluded from the TSK signing branch",
-      "TSK pre-authentication is excluded" in ident["frc_branch_disposition"]
-      and "downstream brake/gateway participant" in ident["frc_branch_disposition"])
-check("grades separate observed continuity, bounded FRC exclusion, and hypothesis identity",
+check("identity verdict is explicitly open",
+      ident["grade"] == "open")
+check("physical-publisher hypothesis names the downstream candidate set",
+      "brake-family node" in ident["verdict"] and "Central Gateway" in ident["verdict"]
+      and "Cryptographic ownership is unresolved" in ident["verdict"])
+check("decisive evidence names both downstream and FRC evidence",
+      "downstream producer firmware" in ident["decisive_evidence"]
+      and "FRC firmware" in ident["decisive_evidence"]
+      and "key-update trace" in ident["decisive_evidence"])
+check("FRC private pre-authentication is reopened",
+      "is open after CORR-194" in ident["frc_branch_disposition"]
+      and "ECU-Security-Key provisioning" in ident["frc_branch_disposition"])
+check("legacy grade keys record corrected evidence boundaries",
       ident["grades"]["zero_request_signing_continuity"] == "observed"
-      and ident["grades"]["signer_identity_brake_family_or_cgw"] == "hypothesis"
-      and ident["grades"]["frc_excluded_as_key_holder"] == "architecture-bounded")
+      and ident["grades"]["signer_identity_brake_family_or_cgw"] == "physical-publisher-hypothesis-only"
+      and ident["grades"]["frc_excluded_as_key_holder"] == "withdrawn-by-corr194")
 
 print(f"\n{passed} passed, {failed} failed")
 sys.exit(1 if failed else 0)

@@ -3588,6 +3588,18 @@ Current GTS+ adds a direct official `MAC_01` RID-`0x1010` route in its pinned
 - the same DLL also contains the newer `31 01/03 30 02` helpers, so both
   transports intentionally coexist.
 
+The current host frontend does not statically expose which selected ECU chooses
+which route. `UtilityPlusFrontNK.dll` imports `UtilityGene.dll` ordinals
+98/99/100 and calls them as the generic MACKey validation/update-before/
+update-after wrappers. Those `UtilityGene` exports resolve to RVAs `0xE510`,
+`0xE2C0`, and `0xDF20`, but the shipped `UtilityGene.dll` has only the first
+`0x1000` bytes of its much larger virtual `.text` raw-backed; all three wrappers
+fall outside that raw-backed prefix. Therefore the package proves both wire
+implementations and the generic frontend orchestration, but it does **not**
+provide a static category/FRC-to-RID selector body. A live trace or target
+firmware is still required for that join. This boundary is pinned in
+`tests/verify_gtsplus_mackey_rid1010.py`.
+
 That current-GTS result closes a previous over-bounding statement: Toyota
 service tooling **does** have an exact diagnostic join to the RID-`0x1010`
 M1–M5 routine used by Sienna firmware and by the yc 2021 Venza SRS firmware.

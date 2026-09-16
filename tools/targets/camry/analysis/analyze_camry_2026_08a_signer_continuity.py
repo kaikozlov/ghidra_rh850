@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Deterministic 0x08A signer-continuity artifact for the 2026 Camry.
 
-Answers one bounded question from OQ-054: is the Bus-4 `0x08A` signer
-on-demand (active only when FRC has a lateral request) or always-on?
+Answers one bounded question from OQ-054: does the authenticated Bus-4 `0x08A`
+publication/security envelope continue when the lateral request itself is zero?
 
 Primary evidence is the retained 2026-08-26 stationary NRTD->READY capture
 (`camry_ready_gear_20260826.json.gz`, bus 1), which aggregates the secured
@@ -10,17 +10,18 @@ chassis family on the pre-repin development plane. With the vehicle
 stationary and `B21` (Target Lateral ID) equal to zero in every frame, the
 artifact records whether the FV4 freshness still tracks the live `0x00F`
 epoch, whether B26 still advances +1 mod 64, and whether the MAC28 stays
-frame-unique — the structural signature of an always-on signing engine
-independent of the FRC request lifecycle.
+frame-unique — the structural signature of an always-on authenticated
+publication. This does not locate the CMAC engine.
 
 The two relay-correct drives supply the active-request contrast: their ID11
 intervals carry `B21 == 11` (LTA/LCA) while the stationary capture carries
-`B21 == 0`. The signer's cadence/freshness statistics are compared between
-the zero-request and active-request regimes.
+`B21 == 0`. The secured publication's cadence/freshness statistics are compared
+between the zero-request and active-request regimes.
 
-Grades: observed structural facts are `observed`; the signer identity
-inference (brake family / Central Gateway, FRC excluded as key holder) is
-`hypothesis` pending producer firmware, consistent with VAR-091/096.
+Grades: observed structural continuity is `observed`; physical Bus-4 publication
+is topology-bounded to a downstream chassis/gateway participant; CMAC generation
+and key ownership remain open after CORR-194 because the FRC itself is an
+ECU-Security-Key provisioning participant.
 """
 from __future__ import annotations
 
@@ -124,10 +125,10 @@ def build() -> dict:
     return {
         "schema": "camry-2026-08a-signer-continuity-v1",
         "question": (
-            "Is the Bus-4 0x08A signer always-on (signing at zero lateral request) "
-            "or request-gated? The recovered Toyota TSK hardware boundary independently "
-            "excludes the FRC as key holder; always-on zero-request signing tests whether "
-            "the observed publisher instead behaves like a downstream chassis proxy."
+            "Does the authenticated Bus-4 0x08A publication continue at zero lateral "
+            "request, and what can that continuity say about physical publication versus "
+            "CMAC ownership? CORR-194 keeps FRC private pre-authentication open because "
+            "the camera family itself participates in ECU-Security-Key provisioning."
         ),
         "zero_request_result": {
             "regime": "stationary READY, B21=0 (No Request) in every retained frame",
@@ -138,18 +139,19 @@ def build() -> dict:
                 and ready["mac28_last4_unique_fraction"] >= 0.98
             ),
             "interpretation": (
-                "The secured 0x08A family signs continuously at zero lateral request: "
+                "The secured 0x08A publication continues at zero lateral request: "
                 "B21=0 in 100% of stationary frames while FV4 reset-low2 tracks the "
                 "live 0x00F epoch, B26 advances +1 mod 64, and MAC28 stays frame-unique. "
-                "The signer is an always-on chassis engine whose output is independent "
-                "of the FRC request lifecycle."
+                "The authenticated publication/security pipeline is therefore always-on "
+                "with respect to the request state; this does not locate the CMAC engine."
             ),
             "boundary": (
-                "Structural signing continuity does not identify the signer. VAR-091/096 "
-                "bound candidates to the brake family (ABS 435 / Brake Booster 466) or "
-                "Central Gateway; FRC is excluded as generated-COM transmitter and as a "
-                "plausible always-on key holder. Producer firmware remains the decisive "
-                "evidence (acquisition route TMS-049/050)."
+                "Structural security-envelope continuity does not identify the signer or "
+                "key holder. VAR-091/096 bound the physical Bus-4 publisher/proxy to the "
+                "brake family (ABS 435 / Brake Booster 466) or Central Gateway. CORR-194 "
+                "reopens private FRC pre-authentication because camera-family "
+                "ECU-Security-Key provisioning is now positive evidence. Producer "
+                "firmware plus FRC key-update/private-link evidence remain decisive."
             ),
         },
         "active_request_contrast": {
@@ -161,35 +163,32 @@ def build() -> dict:
             for name, d in drives.items()
         },
         "signer_identity": {
-            "grade": "hypothesis",
+            "grade": "open",
             "verdict": (
-                "Hypothesis: a brake-family node (Skid Control ABS / Brake Booster) or "
-                "the Central Gateway signs 0x08A; the FRC publishes the request into the "
-                "chassis domain and cannot be the key holder. Architectural support: TSK "
-                "AES-CMAC keys live in ICU-S protected storage (F33-class RH850 parts); "
-                "the FRC is not an ICU-S key-store part in any retained evidence; GTS+ "
-                "places the brake family and EPS on Bus 4 where 0x08A appears; ADCU_P6 "
-                "vocabulary names the OEM request/arbitrate/sign pattern explicitly "
-                "(Lateral Arbitration ID / Lateral Control ID of Arbitrated Result)."
+                "Physical publication hypothesis: a brake-family node (Skid Control ABS / "
+                "Brake Booster) or the Central Gateway proxies and transmits 0x08A on Bus "
+                "4. Cryptographic ownership is unresolved: CMAC may be generated in that "
+                "downstream participant or supplied through an unseen/private FRC "
+                "pre-authentication path. GTS+ places the camera on Bus 1 and the brake "
+                "family on Bus 4, but topology does not locate the key/CMAC operation."
             ),
             "decisive_evidence": (
-                "Exact producer firmware: decode the brake-family Tx descriptors "
-                "(search order in camry_f152633k0000_brake_acquisition.json). A "
-                "0x08A Tx descriptor + SecOC generation profile in F152633K0000 or "
-                "Skid Control firmware identifies the signer deterministically."
+                "Exact downstream producer firmware can identify the 0x08A Tx descriptor "
+                "and any local SecOC generation profile. Exact FRC firmware, a live FRC "
+                "M1-M5 key-update trace, or private-link capture is additionally required "
+                "to exclude or prove upstream camera pre-authentication."
             ),
             "frc_branch_disposition": (
-                "FRC-side TSK pre-authentication is excluded by the recovered Toyota TSK "
-                "hardware architecture: the protected AES-CMAC key resides in Renesas "
-                "ICU-S on TSK-capable chassis participants, while the FRC request domain "
-                "is not an ICU-S key-holder/signing participant. The remaining unknown is "
-                "which downstream brake/gateway participant proxies the FRC request into "
-                "the authenticated Bus-4 publisher."
+                "FRC-side private TSK/SecOC pre-authentication is open after CORR-194. "
+                "Current FRC_P5 diagnostics and Toyota replacement procedure prove that "
+                "the camera family participates in ECU-Security-Key provisioning. Native "
+                "Bus-1 Profile-5 framing proves only that the observed public camera PDUs "
+                "are not themselves the Bus-4 SecOC publication."
             ),
             "grades": {
                 "zero_request_signing_continuity": "observed",
-                "signer_identity_brake_family_or_cgw": "hypothesis",
-                "frc_excluded_as_key_holder": "architecture-bounded",
+                "signer_identity_brake_family_or_cgw": "physical-publisher-hypothesis-only",
+                "frc_excluded_as_key_holder": "withdrawn-by-corr194",
             },
         },
         "stationary_ready_detail": ready,

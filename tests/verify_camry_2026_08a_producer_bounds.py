@@ -121,18 +121,20 @@ check(
 )
 check("SecOC remains 0x00F-domain FV4||MAC28", "FV4||MAC28" in cl["secoc"] and "unrecovered" in cl["secoc"])
 check(
-    "camera Bus-1 output terminates before the TSK signing boundary",
+    "camera public Bus-1 output is non-SecOC without excluding private FRC pre-auth",
     "do not carry an ordinary-P5 FV4||MAC28 trailer" in cl["camera_output_auth_boundary"]
-    and "FRC is not a TSK key-holder/signing participant" in cl["camera_output_auth_boundary"]
-    and "downstream TSK-capable proxy" in cl["camera_output_auth_boundary"],
+    and "ECU-Security-Key provisioning" in cl["camera_output_auth_boundary"]
+    and "private FRC pre-authentication step cannot be excluded" in cl["camera_output_auth_boundary"]
+    and "downstream Bus-4 participant" in cl["camera_output_auth_boundary"],
 )
 check(
-    "physical transmitter/proxy signer remains bounded to downstream chassis candidates",
-    "FRC is excluded as the TSK key holder/signer" in cl["physical_tx_and_signer_bounds"]
-    and "Skid Control" in cl["physical_tx_and_signer_bounds"]
+    "physical publisher is downstream while cryptographic ownership remains separate",
+    "Skid Control" in cl["physical_tx_and_signer_bounds"]
     and "Brake Booster" in cl["physical_tx_and_signer_bounds"]
     and "Central Gateway" in cl["physical_tx_and_signer_bounds"]
-    and "remains unidentified" in cl["physical_tx_and_signer_bounds"],
+    and "private FRC pre-authentication open" in cl["physical_tx_and_signer_bounds"]
+    and "downstream CMAC generation is also possible" in cl["physical_tx_and_signer_bounds"]
+    and "remain unidentified" in cl["physical_tx_and_signer_bounds"],
 )
 check("regression forbids sending 0x08A to EPS", "Do not send 0x08A to EPS" in cl["regression_rule"])
 
