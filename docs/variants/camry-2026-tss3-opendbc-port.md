@@ -64,6 +64,32 @@ preexisting wire implementation.
 
 **September-17 `0x08A` sender-experiment checkpoint:** the exact F33 car kit now packages two deliberately separate, non-actuating discriminators. `f33-sign verify-native-08a` asks the already-live-qualified selector-4 command-5 path to reproduce stock `0x08A` MAC28 without transmitting `0x08A`. After a full EPS power-off, `f33-08a-route` installs a different volatile resident/helper and replays one unchanged stock Target-Lateral-ID0 `0x08A` through exact HTH0 lower object 47 / writer `0x85112`; the helper uses special software handle `0x00F0` and `FEBE502A` departure as a physical-completion witness. Both host and resident reject a nonzero Target Lateral ID and one successful EPS transmit closes the probe for that boot. The routing result distinguishes an EPS-local Tx path that reaches Panda from a selectively forwarded EBU/local segment. It does not yet create a new sender freshness stream or authorize longitudinal output. Runbook: [the F33 `0x08A` sender experiments](../../exploit/ephemeral_runtime/camry_f33_08a_sender_experiments.md).
 
+**September-17 same-cycle DRCC checkpoint:** application reappearance after the
+volatile bootstrap is not sufficient evidence that the rest of the vehicle has
+returned to its pre-bootstrap state. The current loader intentionally enters the
+EPS programming bootloader, so normal EPS application traffic disappears while the
+boot transition, SecurityAccess, 4-KiB download, verify, and FF00 execution run.
+The host path additionally retains a 700-ms extended-session settle before the
+handoff. Toyota's own Unified prepare writer confirms that this outage is expected
+for reprogramming rather than hidden from peer ECUs: it sends suppressed
+`85 02` (DTCSettingOff) and `28 01 01` (normal-communication Tx suppression) as
+part of preparation. Consequently the working hypothesis is **peer fail-safe /
+communication-loss state that survives EPS application return**, with bootstrap
+latency as an aggravating factor rather than the sole explanation.
+
+The immediate exact-F33 experiment is therefore recovery, not another steering
+pulse. The unified field kit now exposes `tss3-unified-signer recover-drcc` after
+the resident has returned in READY/Park. It preserves the RAM resident, saves the
+pre-clear SID19 evidence, performs the already-qualified physical SID14 plus
+functional Mode04 maintenance clear, requires no remaining current fault bits, and
+then reads FRC `0x1903/0x1905/0x1906`; success requires observed DRCC permission and
+no ACC-not-available indication. A pass would establish a viable same-ignition
+bootstrap/recovery sequence. A failure with healthy EPS application traffic would
+instead strengthen the case that production deployment needs an application-context
+resident installation/control-transfer path that never takes the EPS scheduler and
+normal CAN publishers offline. Merely shortening the bootloader path is retained as
+a timing discriminator, not assumed to be the final continuity fix.
+
 **Current execution boundary:** VAR-155 proves the live native profile-2 B6 boundary and
 byte-exact local slot-4 signing. VAR-156 then deliberately installed the preserved
 native-application trailer on the modified ID11/target/100/100 application: all six samples
