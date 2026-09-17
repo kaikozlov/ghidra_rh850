@@ -255,62 +255,169 @@ def airbag_ddr_grip_surface(parser: DDBParser, root: Path) -> dict[str, Any]:
     if [(row["primary_key"], row["name"]) for row in matched] != expected:
         raise ValueError(f"A_B_CAN_P5 grip DDR rows changed: {matched!r}")
 
+    address_section = db.sections[149]
+    if address_section.decoded_record_size != 0x10:
+        raise ValueError(f"unexpected CDbDDRAddressTable record size {address_section.decoded_record_size}")
+    grip_keys = {key for key, _ in expected}
+    address_rows = []
+    for index, raw in enumerate(records(address_section)):
+        monitor_key = u16(raw, 0x04)
+        if monitor_key not in grip_keys:
+            continue
+        address_rows.append({
+            "record": index,
+            "monitor_key": monitor_key,
+            "field_0_u32": u32(raw, 0x00),
+            "field_6_u16": u16(raw, 0x06),
+            "exception_handler_id": u16(raw, 0x08),
+            "selector_0": raw[0x0A],
+            "selector_1": raw[0x0B],
+            "exception_handler_flag": raw[0x0C],
+            "raw": raw.hex(),
+        })
+    address_rows.sort(key=lambda row: row["record"])
+    expected_address = [
+        (2137, 5501, 0x24, 0x16, 0x02),
+        (2138, 5502, 0x24, 0x16, 0x02),
+        (2139, 5504, 0x24, 0x16, 0x02),
+        (2699, 5500, 0x60, 0x19, 0x02),
+        (2700, 5503, 0x60, 0x19, 0x02),
+        (2701, 5505, 0x60, 0x19, 0x02),
+        (3095, 5500, 0x60, 0x1B, 0x02),
+        (3096, 5503, 0x60, 0x1B, 0x02),
+        (3097, 5505, 0x60, 0x1B, 0x02),
+    ]
+    observed_address = [
+        (row["record"], row["monitor_key"], row["field_6_u16"], row["selector_0"], row["selector_1"])
+        for row in address_rows
+    ]
+    if observed_address != expected_address:
+        raise ValueError(f"A_B_CAN_P5 grip DDR address rows changed: {observed_address!r}")
+
+    invalid_section = db.sections[150]
+    if invalid_section.decoded_record_size != 0x10:
+        raise ValueError(f"unexpected CDbDDRInvalidConditionTable record size {invalid_section.decoded_record_size}")
+    invalid_rows = []
+    for index, raw in enumerate(records(invalid_section)):
+        monitor_key = u16(raw, 0x04)
+        if monitor_key not in grip_keys:
+            continue
+        invalid_rows.append({
+            "record": index,
+            "monitor_key": monitor_key,
+            "invalid_key": u16(raw, 0x06),
+            "raw": raw.hex(),
+        })
+    invalid_rows.sort(key=lambda row: row["monitor_key"])
+    expected_invalid = {5500: 5505, 5501: 5504, 5502: 5504, 5503: 5505, 5504: 5504, 5505: 5505}
+    if {row["monitor_key"]: row["invalid_key"] for row in invalid_rows} != expected_invalid:
+        raise ValueError(f"A_B_CAN_P5 grip invalid-condition map changed: {invalid_rows!r}")
+
     pe_path = root / "Bin/KgpDataCtrl.dll"
     pe = pefile.PE(str(pe_path), fast_load=False)
     exports = {
         (sym.name or b"").decode(errors="replace"): int(sym.address)
         for sym in pe.DIRECTORY_ENTRY_EXPORT.symbols
     }
-    layout_exports = {
+    monitor_exports = {
         "find": "?FindDbItem1@CDbDDRMonitorTable@@MAEKKPAXKPAPAXPAK@Z",
         "compare": "?ComparativeKey@CDbDDRMonitorTable@@MAEFPAXPAPAXKK@Z",
         "exception_id": "?GetExceptahandId@CDbDDRMonitorTable@@MAEGPAXK@Z",
         "exception_flag": "?GetExceptahandFlag@CDbDDRMonitorTable@@MAEEPAXK@Z",
     }
-    rvas = {name: exports[export] for name, export in layout_exports.items()}
-    if rvas != {"find": 0xA4130, "compare": 0xA42F0, "exception_id": 0xA42B0, "exception_flag": 0xA4270}:
-        raise ValueError(f"CDbDDRMonitorTable host RVAs changed: {rvas!r}")
+    monitor_rvas = {name: exports[export] for name, export in monitor_exports.items()}
+    if monitor_rvas != {"find": 0xA4130, "compare": 0xA42F0, "exception_id": 0xA42B0, "exception_flag": 0xA4270}:
+        raise ValueError(f"CDbDDRMonitorTable host RVAs changed: {monitor_rvas!r}")
+
+    address_exports = {
+        "find_selector_0": "?FindDbItem1@CDbDDRAddressTable@@MAEKKPAXKPAPAXPAK@Z",
+        "find_selector_1": "?FindDbItem2@CDbDDRAddressTable@@MAEKKPAXKPAPAXPAK@Z",
+        "compare": "?ComparativeKey@CDbDDRAddressTable@@MAEFPAXPAPAXKK@Z",
+        "exception_id": "?GetExceptahandId@CDbDDRAddressTable@@MAEGPAXK@Z",
+        "exception_flag": "?GetExceptahandFlag@CDbDDRAddressTable@@MAEEPAXK@Z",
+    }
+    address_rvas = {name: exports[export] for name, export in address_exports.items()}
+    if address_rvas != {
+        "find_selector_0": 0x9ED00,
+        "find_selector_1": 0x9EE00,
+        "compare": 0x9EFC0,
+        "exception_id": 0x9EF80,
+        "exception_flag": 0x9EF40,
+    }:
+        raise ValueError(f"CDbDDRAddressTable host RVAs changed: {address_rvas!r}")
 
     def body(rva: int, size: int) -> bytes:
         off = pe.get_offset_from_rva(rva)
         return pe.__data__[off:off + size]
 
-    # Machine-code witnesses, avoiding a disassembler dependency:
-    #   FindDbItem1/ComparativeKey read word [row+0x18].
-    #   GetExceptahandId reads word [row+0x28].
-    #   GetExceptahandFlag reads byte [row+0x2D].
-    find_body = body(rvas["find"], 0x100)
-    compare_body = body(rvas["compare"], 0xC0)
-    exception_id_body = body(rvas["exception_id"], 0x40)
-    exception_flag_body = body(rvas["exception_flag"], 0x40)
-    witnesses = {
-        "primary_key_plus_0x18_in_find": bytes.fromhex("0fb74218") in find_body,
-        "primary_key_plus_0x18_in_compare": bytes.fromhex("0fb74218") in compare_body and bytes.fromhex("0fb75118") in compare_body,
-        "exception_id_plus_0x28": bytes.fromhex("668b440a28") in exception_id_body,
-        "exception_flag_plus_0x2d": bytes.fromhex("8a440a2d") in exception_flag_body,
+    # Machine-code witnesses, avoiding a disassembler dependency.
+    monitor_find_body = body(monitor_rvas["find"], 0x100)
+    monitor_compare_body = body(monitor_rvas["compare"], 0xC0)
+    monitor_exception_id_body = body(monitor_rvas["exception_id"], 0x40)
+    monitor_exception_flag_body = body(monitor_rvas["exception_flag"], 0x40)
+    monitor_witnesses = {
+        "primary_key_plus_0x18_in_find": bytes.fromhex("0fb74218") in monitor_find_body,
+        "primary_key_plus_0x18_in_compare": bytes.fromhex("0fb74218") in monitor_compare_body and bytes.fromhex("0fb75118") in monitor_compare_body,
+        "exception_id_plus_0x28": bytes.fromhex("668b440a28") in monitor_exception_id_body,
+        "exception_flag_plus_0x2d": bytes.fromhex("8a440a2d") in monitor_exception_flag_body,
     }
-    if not all(witnesses.values()):
-        raise ValueError(f"CDbDDRMonitorTable host field witnesses changed: {witnesses!r}")
+    if not all(monitor_witnesses.values()):
+        raise ValueError(f"CDbDDRMonitorTable host field witnesses changed: {monitor_witnesses!r}")
+
+    address_find0_body = body(address_rvas["find_selector_0"], 0x100)
+    address_find1_body = body(address_rvas["find_selector_1"], 0x100)
+    address_compare_body = body(address_rvas["compare"], 0x150)
+    address_exception_id_body = body(address_rvas["exception_id"], 0x40)
+    address_exception_flag_body = body(address_rvas["exception_flag"], 0x40)
+    address_witnesses = {
+        "selector_0_plus_0x0a": bytes.fromhex("0fb6420a") in address_find0_body,
+        "selector_1_plus_0x0b": bytes.fromhex("0fb6420b") in address_find1_body,
+        "compare_selector_0_plus_0x0a": bytes.fromhex("0fb6420a") in address_compare_body and bytes.fromhex("0fb6510a") in address_compare_body,
+        "compare_selector_1_plus_0x0b": bytes.fromhex("0fb6480b") in address_compare_body and bytes.fromhex("0fb6420b") in address_compare_body,
+        "compare_monitor_key_plus_0x04": bytes.fromhex("0fb75104") in address_compare_body and bytes.fromhex("0fb74804") in address_compare_body,
+        "exception_id_plus_0x08": bytes.fromhex("668b440a08") in address_exception_id_body,
+        "exception_flag_plus_0x0c": bytes.fromhex("8a440a0c") in address_exception_flag_body,
+    }
+    if not all(address_witnesses.values()):
+        raise ValueError(f"CDbDDRAddressTable host field witnesses changed: {address_witnesses!r}")
 
     return {
         "database": "A_B_CAN_P5.ddb",
         "table": 147,
         "record_size": section.decoded_record_size,
         "rows": matched,
+        "address_table": {
+            "table": 149,
+            "record_size": address_section.decoded_record_size,
+            "rows": address_rows,
+            "invalid_condition_table": {
+                "table": 150,
+                "record_size": invalid_section.decoded_record_size,
+                "rows": invalid_rows,
+            },
+            "conclusion": (
+                "Grip monitor keys 5500..5505 are reused in multiple CDbDDRAddressTable selector contexts. "
+                "The current host looks the table up by byte +0x0A, byte +0x0B, then local monitor key +0x04. "
+                "The same grip key therefore maps to different recorder-layout rows across selectors; this table "
+                "is DDR payload-address metadata, not a CAN arbitration-ID or vehicle-PDU routing table."
+            ),
+        },
         "host_layout_proof": {
             "kgp_data_ctrl": {
                 "path": str(pe_path.relative_to(root)).replace("\\", "/"),
                 "sha256": sha256_file(pe_path),
             },
-            "export_rvas": {key: f"0x{value:08X}" for key, value in rvas.items()},
-            "field_witnesses": witnesses,
+            "monitor_export_rvas": {key: f"0x{value:08X}" for key, value in monitor_rvas.items()},
+            "monitor_field_witnesses": monitor_witnesses,
+            "address_export_rvas": {key: f"0x{value:08X}" for key, value in address_rvas.items()},
+            "address_field_witnesses": address_witnesses,
             "conclusion": (
-                "The current host indexes/sorts CDbDDRMonitorTable rows by the u16 at +0x18. Therefore "
-                "5500..5505 here are A_B_CAN_P5 DDR monitor keys, not CAN arbitration IDs."
+                "CDbDDRMonitorTable uses the u16 at +0x18 as its local monitor key. CDbDDRAddressTable is "
+                "independently keyed by selector bytes +0x0A/+0x0B and local monitor key +0x04. Therefore "
+                "5500..5505 and their address rows describe the SRS DDR recorder schema, not CAN IDs."
             ),
         },
     }
-
 
 def steering_category_boundary(parser: DDBParser, root: Path) -> dict[str, Any]:
     per_region = {}

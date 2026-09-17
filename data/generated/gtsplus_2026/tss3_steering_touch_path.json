@@ -1,23 +1,187 @@
 {
   "airbag_ddr_grip_surface": {
+    "address_table": {
+      "conclusion": "Grip monitor keys 5500..5505 are reused in multiple CDbDDRAddressTable selector contexts. The current host looks the table up by byte +0x0A, byte +0x0B, then local monitor key +0x04. The same grip key therefore maps to different recorder-layout rows across selectors; this table is DDR payload-address metadata, not a CAN arbitration-ID or vehicle-PDU routing table.",
+      "invalid_condition_table": {
+        "record_size": 16,
+        "rows": [
+          {
+            "invalid_key": 5505,
+            "monitor_key": 5500,
+            "raw": "010000007c1581150100000000010000",
+            "record": 656
+          },
+          {
+            "invalid_key": 5504,
+            "monitor_key": 5501,
+            "raw": "010000007d1580150100000000010000",
+            "record": 657
+          },
+          {
+            "invalid_key": 5504,
+            "monitor_key": 5502,
+            "raw": "010000007e1580150100000000010000",
+            "record": 658
+          },
+          {
+            "invalid_key": 5505,
+            "monitor_key": 5503,
+            "raw": "010000007f1581150100000000010000",
+            "record": 659
+          },
+          {
+            "invalid_key": 5504,
+            "monitor_key": 5504,
+            "raw": "01000000801580150100000000010000",
+            "record": 660
+          },
+          {
+            "invalid_key": 5505,
+            "monitor_key": 5505,
+            "raw": "01000000811581150100000000010000",
+            "record": 661
+          }
+        ],
+        "table": 150
+      },
+      "record_size": 16,
+      "rows": [
+        {
+          "exception_handler_flag": 0,
+          "exception_handler_id": 0,
+          "field_0_u32": 94,
+          "field_6_u16": 36,
+          "monitor_key": 5501,
+          "raw": "5e0000007d1524000000160200000000",
+          "record": 2137,
+          "selector_0": 22,
+          "selector_1": 2
+        },
+        {
+          "exception_handler_flag": 0,
+          "exception_handler_id": 0,
+          "field_0_u32": 95,
+          "field_6_u16": 36,
+          "monitor_key": 5502,
+          "raw": "5f0000007e1524000000160200000000",
+          "record": 2138,
+          "selector_0": 22,
+          "selector_1": 2
+        },
+        {
+          "exception_handler_flag": 0,
+          "exception_handler_id": 0,
+          "field_0_u32": 95,
+          "field_6_u16": 36,
+          "monitor_key": 5504,
+          "raw": "5f000000801524000000160200000000",
+          "record": 2139,
+          "selector_0": 22,
+          "selector_1": 2
+        },
+        {
+          "exception_handler_flag": 0,
+          "exception_handler_id": 0,
+          "field_0_u32": 166,
+          "field_6_u16": 96,
+          "monitor_key": 5500,
+          "raw": "a60000007c1560000000190200000000",
+          "record": 2699,
+          "selector_0": 25,
+          "selector_1": 2
+        },
+        {
+          "exception_handler_flag": 0,
+          "exception_handler_id": 0,
+          "field_0_u32": 166,
+          "field_6_u16": 96,
+          "monitor_key": 5503,
+          "raw": "a60000007f1560000000190200000000",
+          "record": 2700,
+          "selector_0": 25,
+          "selector_1": 2
+        },
+        {
+          "exception_handler_flag": 0,
+          "exception_handler_id": 0,
+          "field_0_u32": 153,
+          "field_6_u16": 96,
+          "monitor_key": 5505,
+          "raw": "99000000811560000000190200000000",
+          "record": 2701,
+          "selector_0": 25,
+          "selector_1": 2
+        },
+        {
+          "exception_handler_flag": 0,
+          "exception_handler_id": 0,
+          "field_0_u32": 164,
+          "field_6_u16": 96,
+          "monitor_key": 5500,
+          "raw": "a40000007c15600000001b0200000000",
+          "record": 3095,
+          "selector_0": 27,
+          "selector_1": 2
+        },
+        {
+          "exception_handler_flag": 0,
+          "exception_handler_id": 0,
+          "field_0_u32": 164,
+          "field_6_u16": 96,
+          "monitor_key": 5503,
+          "raw": "a40000007f15600000001b0200000000",
+          "record": 3096,
+          "selector_0": 27,
+          "selector_1": 2
+        },
+        {
+          "exception_handler_flag": 0,
+          "exception_handler_id": 0,
+          "field_0_u32": 151,
+          "field_6_u16": 96,
+          "monitor_key": 5505,
+          "raw": "970000008115600000001b0200000000",
+          "record": 3097,
+          "selector_0": 27,
+          "selector_1": 2
+        }
+      ],
+      "table": 149
+    },
     "database": "A_B_CAN_P5.ddb",
     "host_layout_proof": {
-      "conclusion": "The current host indexes/sorts CDbDDRMonitorTable rows by the u16 at +0x18. Therefore 5500..5505 here are A_B_CAN_P5 DDR monitor keys, not CAN arbitration IDs.",
-      "export_rvas": {
+      "address_export_rvas": {
+        "compare": "0x0009EFC0",
+        "exception_flag": "0x0009EF40",
+        "exception_id": "0x0009EF80",
+        "find_selector_0": "0x0009ED00",
+        "find_selector_1": "0x0009EE00"
+      },
+      "address_field_witnesses": {
+        "compare_monitor_key_plus_0x04": true,
+        "compare_selector_0_plus_0x0a": true,
+        "compare_selector_1_plus_0x0b": true,
+        "exception_flag_plus_0x0c": true,
+        "exception_id_plus_0x08": true,
+        "selector_0_plus_0x0a": true,
+        "selector_1_plus_0x0b": true
+      },
+      "conclusion": "CDbDDRMonitorTable uses the u16 at +0x18 as its local monitor key. CDbDDRAddressTable is independently keyed by selector bytes +0x0A/+0x0B and local monitor key +0x04. Therefore 5500..5505 and their address rows describe the SRS DDR recorder schema, not CAN IDs.",
+      "kgp_data_ctrl": {
+        "path": "Bin/KgpDataCtrl.dll",
+        "sha256": "19e709e12e53f485a84ccfbf6b226922b88502206c34b767db543c7f3df101f8"
+      },
+      "monitor_export_rvas": {
         "compare": "0x000A42F0",
         "exception_flag": "0x000A4270",
         "exception_id": "0x000A42B0",
         "find": "0x000A4130"
       },
-      "field_witnesses": {
+      "monitor_field_witnesses": {
         "exception_flag_plus_0x2d": true,
         "exception_id_plus_0x28": true,
         "primary_key_plus_0x18_in_compare": true,
         "primary_key_plus_0x18_in_find": true
-      },
-      "kgp_data_ctrl": {
-        "path": "Bin/KgpDataCtrl.dll",
-        "sha256": "19e709e12e53f485a84ccfbf6b226922b88502206c34b767db543c7f3df101f8"
       }
     },
     "record_size": 48,

@@ -102,8 +102,32 @@ def main() -> int:
         ],
     )
     check(
-        "host field access proves +0x18 is the DDR primary key, not a CAN ID",
-        all(ddr["host_layout_proof"]["field_witnesses"].values()),
+        "host field access proves +0x18 is the DDR monitor key, not a CAN ID",
+        all(ddr["host_layout_proof"]["monitor_field_witnesses"].values()),
+    )
+    address = ddr["address_table"]
+    check(
+        "DDR address table has nine grip-key mappings across recorder selector contexts",
+        [(row["record"], row["monitor_key"], row["field_6_u16"], row["selector_0"], row["selector_1"]) for row in address["rows"]] == [
+            (2137, 5501, 0x24, 0x16, 0x02),
+            (2138, 5502, 0x24, 0x16, 0x02),
+            (2139, 5504, 0x24, 0x16, 0x02),
+            (2699, 5500, 0x60, 0x19, 0x02),
+            (2700, 5503, 0x60, 0x19, 0x02),
+            (2701, 5505, 0x60, 0x19, 0x02),
+            (3095, 5500, 0x60, 0x1B, 0x02),
+            (3096, 5503, 0x60, 0x1B, 0x02),
+            (3097, 5505, 0x60, 0x1B, 0x02),
+        ],
+    )
+    check(
+        "DDR address host lookup is selector+selector+local-key rather than CAN routing",
+        all(ddr["host_layout_proof"]["address_field_witnesses"].values()),
+    )
+    check(
+        "DDR invalid-condition table pairs left/right grip values with local validity keys",
+        {row["monitor_key"]: row["invalid_key"] for row in address["invalid_condition_table"]["rows"]}
+        == {5500: 5505, 5501: 5504, 5502: 5504, 5503: 5505, 5504: 5504, 5505: 5505},
     )
 
     cats = stored["standalone_wheel_category_boundary"]

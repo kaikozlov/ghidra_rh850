@@ -896,10 +896,15 @@ two grip-validity records. Current `KgpDataCtrl.dll` independently proves the
 `CDbDDRMonitorTable` key is the `u16` at row `+0x18` (`FindDbItem1` and
 `ComparativeKey` both consume it); `GetExceptahandId` instead reads `+0x28` and
 `GetExceptahandFlag` reads `+0x2D`. Therefore these decimal `5500..5505` values
-are **SRS DDR-local monitor keys, not CAN IDs**. This distinction matters because
-the TSS3 FRC Operation-FFD namespace independently uses numeric IDs `5501` and
-`5505` for unrelated LDA state/failure records. Numeric recorder IDs are not a
-cross-ECU wire namespace.
+are **SRS DDR-local monitor keys, not CAN IDs**. Following those keys into table
+149 `CDbDDRAddressTable` does not reveal a wire carrier either: the host looks
+that table up by selector bytes `+0x0A/+0x0B` and then local monitor key `+0x04`,
+and the same grip key appears in multiple selector contexts with different
+recorder-layout fields (`0x24` vs `0x60`). Table 150 independently pairs the
+left/right values with local validity keys. This closes the GTS DDR-address path
+as **recorder payload geometry**, not CAN routing. The TSS3 FRC Operation-FFD
+namespace independently uses numeric IDs `5501` and `5505` for unrelated LDA
+state/failure records, so numeric recorder IDs are not a cross-ECU wire namespace.
 
 A tempting CAN candidate was explicitly rejected. The tracked 2021 Venza SRS
 CodeFlash has four live SecOC receive profiles; the `0x024` profile maps to
