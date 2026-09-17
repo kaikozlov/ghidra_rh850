@@ -183,10 +183,12 @@ and recovery artifacts, not as the normal openpilot control transport.
 > host defects are now fixed and regression-tested. Exact H/F
 > `EPS_FAULT_INHIBIT` is also reported as an ordinary temporary steering fault in
 > opendbc. This makes the kit suitable for the bounded **stationary signer
-> qualification** below; it is still not an install-then-drive all-clear because
-> software-requested stock-ACC cancellation has no qualified Corolla transmit
-> contract, cruise-main availability remains evidence-bounded, and physical
-> steering/coexistence behavior is untested. See
+> qualification** below; it is still not an install-then-drive all-clear.
+> Corolla now implements software-requested stock-ACC cancellation in the normal
+> openpilot shape by cloning native bus-1 `0x101`, asserting only
+> `BRAKE_PRESSED`, and recomputing the Toyota checksum. That receiver behavior is
+> not yet live-qualified on Corolla; cruise-main availability also remains
+> evidence-bounded, and physical steering/coexistence behavior is untested. See
 > [the audit](../variants/corolla-tss3-tester-handoff-audit-2026-09-16.md).
 
 For a tester using the maintained `kai-openpilot` TSS3 branch, the portable kit

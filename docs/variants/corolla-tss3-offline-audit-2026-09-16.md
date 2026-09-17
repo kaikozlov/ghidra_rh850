@@ -97,7 +97,7 @@ is still needed; this finding does not authorize guessing Toyota's full
 permanent/temporary fault classification. It is not accurate to describe this
 as only a cosmetic future improvement.
 
-### 2. Software-requested stock ACC cancellation is unimplemented
+### 2. Software-requested stock ACC cancellation was unimplemented at the audited revision
 
 `kai-openpilot/openpilot/selfdrive/controls/controlsd.py:161–163` requests cruise
 cancellation when stock cruise is enabled and openpilot is not enabled. The TSS3
@@ -105,11 +105,12 @@ branch in `opendbc/car/toyota/carcontroller.py:80–113` returns before the ordi
 Toyota cancellation handling beginning at line 118. That branch has no stock
 ACC cancel sender.
 
-Consequently the current implementation has no mechanism to honor that request
+Consequently the audited implementation had no mechanism to honor that request
 by cancelling Toyota longitudinal control. Releasing lateral control is not
 stock ACC cancellation. This is distinct from the driver's physical brake or
 cancel action, and the audit makes no claim that those physical controls are
-disabled. No speculative replacement cancel message is proposed here.
+disabled. This finding is superseded by the same-day implementation follow-up
+below; Corolla receiver acceptance remains a live qualification item.
 
 ### 3. The claimed hybrid gear fallback is not implemented
 
@@ -186,17 +187,22 @@ signer tester's post-startup attestation, live sensor freshness/validity, Coroll
 Park enforcement, NRTD preflight ordering, failure-path release, and failure
 recording defects are also fixed and covered by the unified signer regression.
 
-The automatic stock-ACC cancellation finding remains open. Corolla's native
-`0x101` brake carrier and Toyota's `Brake Cancel Switch` vocabulary are useful
-semantics, but the retained Corolla topology does not provide the source
-suppression/relay-side ownership proof that exists for the Camry implementation.
-The current port therefore must not synthesize a same-ID `0x101` cancel on the
-shared bus merely to satisfy `controlsd`.
+The software gap in automatic stock-ACC cancellation is now closed in the normal
+openpilot ownership shape. Opendbc `37d6021e` snapshots Corolla's live bus-1
+`0x101` Brake Module state, and when `controlsd` sets `CC.cruiseControl.cancel`
+CarController clones that stock frame, asserts only `BRAKE_PRESSED`, and lets the
+DBC recompute Toyota's checksum. Panda permits only bus-1 `0x101` with the cancel
+bit asserted and a valid Toyota checksum; it adds no speed, cruise-state, timer,
+or separate permission policy. Both retained ICE/hybrid Corolla routes carry the
+same checksum-valid ordinary `0x101` family, while exact Camry evidence proves
+the homologous `0x101 B0[3]` assertion causes the protected cruise request to
+drop. Corolla receiver acceptance is still a live qualification item, not an
+offline-proven fact.
 
 The hybrid `0x3BF` item is retained as a coverage boundary rather than a known
 Span-car failure: Span's retained hybrid supplies 3,662 valid `0x127` frames.
 Likewise the cruise-main availability rule remains bounded pending an OFF/ON
 capture. The corrected status is therefore: nominal identification/CarState/C7
 software is strong and a bounded stationary signer qualification is warranted,
-but road qualification still has both an unresolved automatic-cancel contract
-and the usual live actuation/coexistence work.
+but road qualification still needs live confirmation of the implemented cancel
+carrier plus the usual live actuation/coexistence work.

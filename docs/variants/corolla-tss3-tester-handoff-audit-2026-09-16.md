@@ -107,15 +107,15 @@ that aggregate from a complete OEM fault taxonomy is necessary, but leaving both
 outputs constant is not a completed fault-handling contract. This observation
 does not imply Toyota's internal EPS protection is absent.
 
-### Automatic stock-cruise cancellation
+### Automatic stock-cruise cancellation at the audited revision
 
 At kai-openpilot `53b95d0dd`,
 `openpilot/selfdrive/controls/controlsd.py:161-163` requests cancellation when
-stock cruise is enabled and openpilot is disabled. The TSS3 branch in opendbc
-`carcontroller.py:80-113` returns before the ordinary Toyota cancellation path
-starting at line 118, without handling that request. Lateral release is not
-stock ACC cancellation. This does not establish any failure of the physical
-brake pedal or factory cancel switch.
+stock cruise is enabled and openpilot is disabled. The audited TSS3 branch
+returned before the ordinary Toyota cancellation path and did not handle that
+request. Lateral release is not stock ACC cancellation. Same-day opendbc
+`37d6021e` supersedes this software defect with a native-shape Corolla bus-1
+`0x101` Brake Module cancel. Receiver acceptance remains vehicle-unqualified.
 
 ### Gear-source and identity claims
 
@@ -183,9 +183,11 @@ wire-semantic proof.
 
 The work is beyond a speculative parser, but not beyond all offline blockers.
 The reviewed tarball should remain an unqualified development artifact. The
-post-startup lifecycle, sensor validity/freshness, phase/retry behavior, failure
-recording, and fault/cancel handling need resolution before calling the handoff
-ready. Signing agreement alone does not prove steering acceptance or safe
+post-startup lifecycle, sensor validity/freshness, phase/retry behavior, and
+failure recording defects are now fixed; fault inhibit reporting and native-shape
+software cancel are implemented. Corolla cancel receiver behavior and physical
+steering/coexistence still require vehicle qualification before calling the
+handoff road-ready. Signing agreement alone does not prove steering acceptance or safe
 vehicle behavior. Current comma safety documentation separately describes
 software-in-the-loop, hardware-in-the-loop, and in-vehicle testing:
 <https://docs.comma.ai/concepts/safety/>.
