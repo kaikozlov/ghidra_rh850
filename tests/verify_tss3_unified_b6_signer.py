@@ -238,7 +238,7 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
           (kit / "runtime/tsk/lib/programming.py").is_file() and
           (kit / "runtime/exploit/ephemeral_runtime/camry_f33_post_install_recovery.py").is_file())
     launcher = (kit / "tss3-unified-signer").read_text(encoding="utf-8")
-    check("unified kit prefers vendored runtime and exposes common test ladder plus exact-F33 DRCC recovery",
+    check("unified kit prefers vendored runtime and exposes common test ladder plus exact-F33 DRCC diagnostic clear",
           'PYTHONPATH="$KIT_ROOT/runtime:$OPENPILOT_ROOT"' in launcher and
           "camry_f33_post_install_recovery.py" in launcher and "require_camry_recovery" in launcher and
           all(cmd in launcher for cmd in ("preflight", "install", "qualify", "bringup", "recover-drcc", "replace-current", "replace-once")))

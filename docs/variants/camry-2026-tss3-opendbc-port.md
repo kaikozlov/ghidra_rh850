@@ -77,18 +77,36 @@ part of preparation. Consequently the working hypothesis is **peer fail-safe /
 communication-loss state that survives EPS application return**, with bootstrap
 latency as an aggravating factor rather than the sole explanation.
 
-The immediate exact-F33 experiment is therefore recovery, not another steering
-pulse. The unified field kit now exposes `tss3-unified-signer recover-drcc` after
-the resident has returned in READY/Park. It preserves the RAM resident, saves the
-pre-clear SID19 evidence, performs the already-qualified physical SID14 plus
-functional Mode04 maintenance clear, requires no remaining current fault bits, and
-then reads FRC `0x1903/0x1905/0x1906`; success requires observed DRCC permission and
-no ACC-not-available indication. A pass would establish a viable same-ignition
-bootstrap/recovery sequence. A failure with healthy EPS application traffic would
-instead strengthen the case that production deployment needs an application-context
-resident installation/control-transfer path that never takes the EPS scheduler and
-normal CAN publishers offline. Merely shortening the bootloader path is retained as
-a timing discriminator, not assumed to be the final continuity fix.
+The exact-F33 same-cycle outcome is already negative. The parked/READY diagnostic
+clear can remove the communication-warning/DTC state while leaving the RAM resident
+intact, but **DRCC did not re-enable after that clear in the same ignition cycle**.
+Only a full vehicle restart restored DRCC, which also removed the RAM signer. The
+historical `recover-drcc` command remains useful for preserving SID19 evidence and
+reading FRC `0x1903/0x1905/0x1906`, but it is diagnostic/forensic tooling rather
+than a runtime recovery strategy.
+
+Production deployment must therefore either prevent the peer fail-safe/latch from
+being entered or recover a deeper peer state than DTC memory. The current leading
+path is a nondisruptive application-context resident installation/control-transfer
+mechanism that never takes the EPS scheduler and normal CAN publishers offline.
+Shortening the existing bootloader path remains useful as a timing discriminator,
+but the timing boundary must be stated correctly. In the retained Aug-27 stock-handoff
+run, boot F181 was present at `00:30:56.232`, the four-block 4-KiB payload completed at
+`00:30:56.779`, FF00 was sent at `00:30:56.796`, and application F181 reappeared at
+`00:30:57.219`: **987 ms from boot-endpoint observation to application identity return**,
+including 547 ms to complete the payload and 423 ms from FF00 to application F181. The
+host's 700-ms extended-session settle occurs before the programming request and is not
+therefore proven EPS-CAN downtime. The decisive measurement is still the physical
+last-normal-EPS-Tx → first-normal-EPS-Tx gap during bootstrap.
+
+A separate Sep-11 parked discriminator already exists for the other obvious
+continuity hypothesis: while native `0x030/32` is absent, replay retained stock
+`0x030` at 100 Hz, clear FRC U0131, and observe `0x1903/0x1905/0x1906` plus
+`0x251`. **No live result artifact exists for that probe.** Because `0x030` is an
+EPS-owned SecOC transmit PDU, replaying old captured frames is only a bounded test
+of peer tolerance to stale protected traffic; a production bridge would need either
+fresh authenticated EPS status or an outage short enough that the peer supervision
+never expires.
 
 **Current execution boundary:** VAR-155 proves the live native profile-2 B6 boundary and
 byte-exact local slot-4 signing. VAR-156 then deliberately installed the preserved

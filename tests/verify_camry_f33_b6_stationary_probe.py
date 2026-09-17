@@ -1068,8 +1068,10 @@ with tempfile.TemporaryDirectory() as td:
           inline["live_qualified"] is False and inline["historical_continuous_qualification"]["route"] == "0000008d--a9f348691a" and
           inline["historical_continuous_qualification"]["helper_padded_sha256"] == "b417e12dde0dc7d6478ea6f242fe9eaa246a00a9fbbcc711a5d2d3adcf159a28" and
           inline["same_cycle_drcc_recovery"]["command"] == "./f33-secoc recover-drcc" and
+          inline["same_cycle_drcc_recovery"]["role"] == "diagnostic_only" and
           inline["same_cycle_drcc_recovery"]["live_qualified_clear_transport"] is True and
           inline["same_cycle_drcc_recovery"]["live_qualified_after_signer_bootstrap"] is False and
+          inline["same_cycle_drcc_recovery"]["observed_vehicle_result"] == "dtc_clear_did_not_restore_drcc_same_ignition_cycle" and
           manifest["ram_experiments"]["order"][0].startswith("b6_inline_signer is the production-shaped volatile path"))
     check("kit bundles the real programming handoff and its transitive dependency",
           all((out / "runtime" / rel).read_bytes() == (ROOT / rel).read_bytes() for rel in (

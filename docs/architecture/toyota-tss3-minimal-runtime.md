@@ -293,11 +293,14 @@ implementation and evidence boundaries are corrected:
   own request. This does not establish native longitudinal authority.
 
 The historical successful steering samples used conventional cruise. They do
-not prove the final supervised runtime plus adaptive cruise. The revised
-`recover-drcc` preserves its pre-clear evidence before mutation, rejects short
-DID/ISO-TP responses, and requires distance-control mode **and** genuine cruise
-permission with ACC-not-available clear. Its same-cycle vehicle result remains
-unobserved.
+not prove the final supervised runtime plus adaptive cruise. The exact Camry
+vehicle result is already negative: after the EPS programming transition, the
+known parked/READY DTC-clear sequence could clear the communication-warning
+state but **did not re-enable DRCC in the same ignition cycle**. A full vehicle
+restart restored DRCC, but also removed the volatile RAM signer. The historical
+`recover-drcc` command remains useful only as diagnostic/forensic tooling: it
+preserves pre-clear evidence, performs the proven clear transports, and reads
+FRC `0x1903/0x1905/0x1906`; it is not part of the maintained recovery strategy.
 
 Current status and reproducible validation are centralized in the
 [capability matrix](../variants/camry-2026-capability-matrix.md) and

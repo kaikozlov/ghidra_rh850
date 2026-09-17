@@ -165,7 +165,7 @@
   "operational_caveats": [
     "Entering EPS programming mode causes a Toyota system-malfunction state for the ignition cycle and disables TSS/DRCC longitudinal engagement.",
     "The successful drive engaged openpilot after selecting normal non-adaptive cruise; stock TSS3 longitudinal was unavailable during that cycle.",
-    "On this exact car, a parked/READY physical-UDS plus functional-OBD clear previously removed the historical U0131 warning state without an ignition cycle. EPS SID 14 is an application DTC-clear operation, not an ECU reset, so it does not inherently remove the LocalRAM signer; same-cycle DRCC recovery remains unproven.",
+    "On this exact car, a parked/READY physical-UDS plus functional-OBD clear removed the historical U0131 warning state without an ignition cycle while preserving the LocalRAM signer, but the operator-observed DRCC state remained unavailable in that same ignition cycle. EPS SID 14 is an application DTC-clear operation, not an ECU reset; clearing DTC memory did not re-enable DRCC.",
     "A full vehicle restart restores DRCC but also removes the RAM resident.",
     "A stale duplicate openpilot manager/pandad tree can leave sensord without IMU ownership and produce Sensor Data Invalid; run exactly one clean launch tree after returning the Panda lease.",
     "The later bad-MAC stage-5 carrier admitted application data but did not produce steering; preserve the valid command-5 signer in the working fallback."

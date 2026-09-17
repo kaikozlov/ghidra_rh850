@@ -6348,8 +6348,10 @@ physical UDS `14 FF FF FF` on the six supported physical addresses followed by
 functional `0x7DF` OBD Mode 04. Exact-F33 SID 14 dispatches DTC-clear machinery; it
 is not an ECU-reset or flash operation and does not target the helper/resident RAM
 ranges. Same-cycle warning removal is therefore supported without EPS power-off.
-Whether Toyota DRCC availability unlatches in that same cycle is **not** established;
-the known successful steering drive used normal non-adaptive cruise.
+However, the exact-car operator result is also negative for cruise recovery:
+**DRCC remained unavailable after the DTC clear in that ignition cycle**. A full
+vehicle restart restored DRCC but removed the RAM resident. The known successful
+steering drive therefore used normal non-adaptive cruise.
 
 The parent openpilot tree was `ddd1f6fac47e`, with opendbc base
 `baec01c15ac3`; critically, the working C7 integration was an uncommitted delta

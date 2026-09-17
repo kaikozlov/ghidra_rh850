@@ -584,7 +584,6 @@ def build(out: Path, openpilot: Path) -> dict:
                     "./f33-secoc install in NRTD/Park/stationary",
                     "direct NRTD->READY without OFF",
                     "./f33-secoc load-arm in READY/Park/stationary; require native Toyota trailer == locally computed trailer",
-                    "./f33-secoc recover-drcc in READY/Park/stationary; preserve DTCs, run the exact physical-SID14 + functional-Mode04 clear, require zero post-clear fault bits, and observe FRC DRCC permission",
                     "./f33-secoc quiet-source in READY/Park/stationary to measure distinct native B6 rate with host C7 neutral",
                     "return Panda ownership to openpilot; CarController C7 sequence zero leaves native B6 untouched; each changed nonzero sequence renews seven foreground ticks; unchanged/zero commands cannot sustain replacement indefinitely",
                 ],
@@ -600,6 +599,7 @@ def build(out: Path, openpilot: Path) -> dict:
                 },
                 "same_cycle_drcc_recovery": {
                     "command": "./f33-secoc recover-drcc",
+                    "role": "diagnostic_only",
                     "tool": "runtime/exploit/ephemeral_runtime/camry_f33_post_install_recovery.py",
                     "physical_clear": "14FFFFFF on the six exact-car responders that accepted it",
                     "functional_clear": "0x7DF Mode 04 on Panda bus 0; require 0x7E8/7EA/7EB/7ED/7EE positive 44",
@@ -608,7 +608,8 @@ def build(out: Path, openpilot: Path) -> dict:
                     "persistent_flash_write": False,
                     "live_qualified_clear_transport": True,
                     "live_qualified_after_signer_bootstrap": False,
-                    "remaining_question": "does the proven same-cycle clear restore DRCC after NRTD volatile-signer installation while the signer remains resident?",
+                    "observed_vehicle_result": "dtc_clear_did_not_restore_drcc_same_ignition_cycle",
+                    "restoration_observed_only_after": "full vehicle restart (also removes RAM signer)",
                 },
             },
             "command5_probe": {

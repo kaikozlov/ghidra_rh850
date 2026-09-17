@@ -82,8 +82,12 @@ The pre-clear snapshot is written atomically **before** the first clearing
 request. A later timeout preserves that snapshot, completed clear responses,
 and the failure instead of discarding the diagnostic evidence. Six offline
 regression tests cover these cases, including an injected mid-clear failure
-and final Panda ownership cleanup. Same-cycle physical DRCC restoration is
-still a vehicle observation, not established by these tests.
+and final Panda ownership cleanup. The vehicle-level outcome is already known:
+although the communication-warning/DTC state could be cleared, **DRCC did not
+re-enable in the same ignition cycle after the EPS programming transition**.
+A full vehicle restart restored DRCC and simultaneously removed the volatile
+signer. These tests therefore preserve diagnostic evidence; they do not define
+a recovery path.
 
 ## Completed host-loss correction
 

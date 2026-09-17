@@ -396,8 +396,9 @@ the result with 893/893 successful active commands over 17.94 seconds. Entering
 EPS programming mode leaves Toyota TSS/DRCC unavailable for that ignition cycle, so this
 drive engaged openpilot using normal non-adaptive cruise. The exact-car parked/READY DTC
 clear can remove the historical U0131 warning without resetting the EPS or inherently
-removing the RAM signer, but same-cycle DRCC restoration is unproven. A full restart restores
-DRCC but also removes the RAM signer. Exact route-segment hashes, deployed source hashes,
+removing the RAM signer, but the operator-observed same-cycle result is negative: **DRCC did
+not re-enable after the clear**. A full restart restores DRCC but also removes the RAM signer.
+Exact route-segment hashes, deployed source hashes,
 command format, and operational caveats are in
 `raw-20260910/working-steering/summary.json`.
 

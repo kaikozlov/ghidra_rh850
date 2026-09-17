@@ -101,6 +101,7 @@ cycle by sending physical UDS `14 FF FF FF` to `0x7A1`, `0x7B3`, `0x7C4`,
 `01 04 00 00 00 00 00 00` on `0x7DF`.  Clearing DTC state does not reset the
 EPS and therefore does not inherently remove its LocalRAM resident/helper.
 
-That live clear is proven to remove the historical warning state, but it is not
-yet proven to restore DRCC availability in the same ignition cycle.  DRCC may
-remain latched unavailable until restart even after the dash warning clears.
+That live clear removes the historical warning state, but the exact-car
+operator result is negative for cruise recovery: **DRCC remained unavailable in
+the same ignition cycle after the clear**. A full vehicle restart restored DRCC
+and simultaneously removed the LocalRAM resident/helper.

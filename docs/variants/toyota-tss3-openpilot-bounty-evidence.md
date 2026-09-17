@@ -189,15 +189,18 @@ Mode 04 on `0x7DF` for the five legislated P5 responders. Exact-F33 SID 14 is
 DTC-clear processing, not ECU reset or flash programming, so it does not
 inherently remove the RAM signer.
 
-Car-kit v16 packages this as `./f33-secoc recover-drcc`. The command first
-preserves SID19 state from all 11 known responders, dynamically binds each
-physical address to the responding stock-Toyota-B diagnostic bus, executes the
-proved clear transports, requires zero remaining `status&0xAF` records, then
-reads FRC DIDs `0x1903`, `0x1905`, and `0x1906`. Its positive verdict requires
-FRC cruise permission and no ACC-not-available indication. The clear transport
-is already live-proven; **same-cycle DRCC restoration after volatile signer
-bootstrap remains the unperformed acceptance test**, now reduced to this one
-bounded command rather than another reverse-engineering task.
+Car-kit v16 packages the maintenance/diagnostic sequence as
+`./f33-secoc recover-drcc`. The command first preserves SID19 state from all 11
+known responders, dynamically binds each physical address to the responding
+stock-Toyota-B diagnostic bus, executes the proved clear transports, requires
+zero remaining `status&0xAF` records, then reads FRC DIDs `0x1903`, `0x1905`,
+and `0x1906`. Its positive verdict would require FRC cruise permission and no
+ACC-not-available indication. The vehicle-level result is nevertheless already
+negative: **clearing the communication-warning/DTC state did not re-enable DRCC
+in the same ignition cycle after the volatile-signer programming bootstrap**.
+Only a full vehicle restart restored DRCC, which also removed the RAM signer.
+The command is therefore retained for evidence collection, not as the proposed
+runtime recovery mechanism.
 
 ## 3. Corolla TSS3 longitudinal proof of concept
 
