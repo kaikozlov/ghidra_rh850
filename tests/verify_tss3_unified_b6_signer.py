@@ -31,8 +31,8 @@ def check(label: str, condition: object) -> None:
     print(f"[PASS] {label}")
 
 
-check("unified wire is C7-only",
-      not hasattr(host, "loader_frame") and
+check("C7 is recurring control and C6 is split-target installation only",
+      host.loader_frame(3, bytes.fromhex("11223344")) == bytes.fromhex("07c6c60311223344") and
       host.replacement_frame(7, 0x1234) == bytes.fromhex("07c7c70712340000") and
       host.release_frame() == bytes.fromhex("07c7c70000000000"))
 post_replace_raw = bytearray(host.SPLIT_TELEMETRY_SIZE)
@@ -54,11 +54,13 @@ check("legacy target-specific implementations remain in tree",
       )))
 
 resident_source = (ROOT / "exploit/ephemeral_runtime/tss3_unified_b6_signer_resident.S").read_text()
+field_resident_source = (ROOT / "exploit/ephemeral_runtime/tss3_unified_b6_signer_field_resident.S").read_text()
 helper_source = (ROOT / "exploit/ephemeral_runtime/tss3_unified_b6_signer_helper.S").read_text()
-check("one maintained source pair covers all scheduler shapes with no C6 resident loader",
+check("experimental one-shot and field split-loader residents remain separate",
       "#ifdef TSS3_COROLLA_HF" in resident_source and "#ifdef TSS3_COROLLA_HF" in helper_source and
-      "TSS3_DCM_TAG_OFF" in helper_source and "C6 C6" not in resident_source and
-      ".L_parse_loader" not in resident_source and "FEF07C00" in resident_source)
+      "FEF07C00" in resident_source and ".L_parse_loader" not in resident_source and
+      "C6 C6" in field_resident_source and ".L_parse_loader" in field_resident_source and
+      "FEF07C00" not in field_resident_source)
 check("Camry/Crown helper keeps call-spanning locals in ABI-preserved registers",
       "prepare {r20-r21,lp}, 0" in helper_source and
       "mov 2, r20                   /* operation = replace; callee-saved */" in helper_source and
@@ -179,7 +181,7 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
         plan = host.plan(bundle)
         check(f"{target}: plan is one-shot install followed only by C7 runtime control",
               plan["sequence"][0].startswith("NRTD/Park: prove exact-target stock functional 0x777") and
-              "self-installed helper" in plan["sequence"][2] and
+              "helper" in plan["sequence"][2] and "native command-5 MAC oracle" in plan["sequence"][2] and
               meta["artifacts"]["payload"] == universal["payload"]["path"] and
               plan["old_implementations_retained"] is True)
         built[target] = (meta, meta_path)
@@ -248,10 +250,16 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
     check("unified field kit packages one exact target and common launcher",
           kit_meta["schema"] == "tss3-unified-b6-signer-kit-v1" and
           kit_meta["target"]["name"] == "crown-8965F3012000" and
-          kit_meta["install_strategy"] == "exact-target-one-shot" and
-          packaged_meta["install_strategy"] == "exact-target-one-shot" and
+          kit_meta["install_strategy"] == "split-functional-loader" and
+          packaged_meta["install_strategy"] == "split-functional-loader" and
+          packaged_meta["control"]["loader_frame"] == "07 C6 C6 index word_le32" and
+          packaged_meta["control"]["runtime_frame"] == "07 C7 C7 seq target_hi target_lo 00 00" and
+          packaged_meta["layout"]["helper_transfer"]["strategy"] == "functional-c6-after-startup" and
+          packaged_meta["layout"]["helper_transfer"]["boot_context_globalram_write"] is False and
+          packaged_meta["helper"]["image_size"] == 600 and
           packaged_meta["exact_target_payload"]["dispatcher"]["mode"] == "host-exact-f181-bound" and
           packaged_meta["exact_target_payload"]["dispatcher"]["codeflash_data_reads_before_resident"] is False and
+          packaged_meta["exact_target_payload"]["dispatcher"]["boot_context_globalram_write"] is False and
           packaged_meta["exact_target_payload"]["dispatcher"]["boot_calls"] ==
               ["0x00000C9A", "0x00000E54", "0x00000F80", "0x000010C6", "0x0000119E"] and
           (kit / "tss3-unified-signer").is_file() and (kit / "bundle/unified.json").is_file() and
@@ -262,6 +270,27 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
           'PYTHONPATH="$KIT_ROOT/runtime:$OPENPILOT_ROOT"' in launcher and
           "camry_f33_post_install_recovery.py" in launcher and "require_camry_recovery" in launcher and
           all(cmd in launcher for cmd in ("preflight", "install", "qualify", "bringup", "recover-drcc", "replace-current", "replace-once")))
+
+    field_bundle = host.load_bundle(kit / "bundle/unified.json")
+    check("split field bundle carries the exact padded 150-word helper image",
+          field_bundle.strategy == "split-functional-loader" and
+          len(field_bundle.helper_image) == 600 and len(field_bundle.helper_image) // 4 == 150)
+    loader_session = object.__new__(host.Session)
+    loader_session.bundle = field_bundle
+    loader_session.client = object(); loader_session.uds_mod = object()
+    loader_session.panda = FakePanda()
+    init_state = {"initialized": True, "armed": False, "armed_raw": 0, "next_index": 0, "last_command5_rc": 0, "signed_count": 0}
+    loaded_state = {"initialized": True, "armed": False, "armed_raw": 0, "next_index": 150, "last_command5_rc": 0, "signed_count": 0}
+    armed_state = {"initialized": True, "armed": True, "armed_raw": 1, "next_index": 150, "last_command5_rc": 0, "signed_count": 0}
+    loader_session.split_state = mock.Mock(side_effect=(init_state, loaded_state, armed_state))
+    with (mock.patch.object(host, "_read_memory_retry", return_value=field_bundle.helper_image),
+          mock.patch.object(host.time, "sleep", return_value=None)):
+        loaded = loader_session.load_and_arm_split_helper()
+    check("split field loader sends 150 repeated C6 words then explicit arm and verifies readback",
+          loaded["helper_byte_exact"] is True and loaded["state"] == armed_state and
+          len(loader_session.panda.sent) == 150 * host.WORD_REPEAT_COUNT + 1 and
+          loader_session.panda.sent[0] == (0x777, host.loader_frame(0, field_bundle.helper_image[:4]), 1) and
+          loader_session.panda.sent[-1] == (0x777, host.loader_frame(host.ARM_INDEX), 1))
 
     class GuardPanda:
         def __init__(self, *, fault=False, gear=0, stale=False):

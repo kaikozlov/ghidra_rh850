@@ -1,0 +1,366 @@
+{
+  "b6_transmit": false,
+  "command5_call": false,
+  "execution": {
+    "boot_f181_ascii": "\u0002!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+    "boot_f181_hex": "022121212121212121212121212121212121212121212121212121212121212121",
+    "boot_sid23_probe": {
+      "error": "NegativeResponseError",
+      "status": "rejected"
+    },
+    "direct_bootloader": false,
+    "f181_ascii": "\u00028965F3307000\u0000\u0000\u0000\u00008A3113303100",
+    "f181_hex": "023839363546333330373030300000000038413331313333303331303000000000",
+    "handler_done": false,
+    "initial_f181_ascii": "\u00028965F3307000\u0000\u0000\u0000\u00008A3113303100",
+    "initial_f181_hex": "023839363546333330373030300000000038413331313333303331303000000000",
+    "programming_handoff": {
+      "health_after_reappearance": {
+        "bus": 1,
+        "can_health": {
+          "brs_enabled": 1,
+          "bus_off": 0,
+          "bus_off_cnt": 0,
+          "can_core_reset_count": 12,
+          "can_data_speed": 2000,
+          "can_speed": 500,
+          "canfd_enabled": 1,
+          "canfd_non_iso": 0,
+          "error_passive": 0,
+          "error_warning": 0,
+          "irq0_call_rate": 0,
+          "irq1_call_rate": 0,
+          "irq2_call_rate": 0,
+          "last_data_error": "No error",
+          "last_data_stored_error": "No error",
+          "last_error": "No error",
+          "last_stored_error": "Form error",
+          "receive_error_cnt": 0,
+          "total_error_cnt": 0,
+          "total_fwd_cnt": 0,
+          "total_rx_cnt": 38583,
+          "total_rx_lost_cnt": 0,
+          "total_tx_checksum_error_cnt": 0,
+          "total_tx_cnt": 157,
+          "total_tx_lost_cnt": 0,
+          "transmit_error_cnt": 0
+        },
+        "health": {
+          "alternative_experience": 0,
+          "car_harness_status": 2,
+          "controls_allowed": false,
+          "current": 340,
+          "fan_power": 30,
+          "fault_status": 0,
+          "faults": 0,
+          "heartbeat_lost": false,
+          "ignition_can": false,
+          "ignition_line": true,
+          "interrupt_load": 0.12156862745098039,
+          "power_save_enabled": false,
+          "rx_buffer_overflow": 1875,
+          "safety_mode": 3,
+          "safety_param": 1,
+          "safety_rx_checks_invalid": false,
+          "safety_rx_invalid": 0,
+          "safety_tx_blocked": 0,
+          "sbu1_voltage_mV": 104,
+          "sbu2_voltage_mV": 322,
+          "som_reset_triggered": false,
+          "sound_output_level": 1,
+          "spi_error_count": 69,
+          "temperature": 51.0,
+          "tx_buffer_overflow": 0,
+          "uptime": 203,
+          "voltage": 12001
+        }
+      },
+      "health_after_request": {
+        "bus": 1,
+        "can_health": {
+          "brs_enabled": 1,
+          "bus_off": 0,
+          "bus_off_cnt": 0,
+          "can_core_reset_count": 11,
+          "can_data_speed": 2000,
+          "can_speed": 500,
+          "canfd_enabled": 1,
+          "canfd_non_iso": 0,
+          "error_passive": 0,
+          "error_warning": 0,
+          "irq0_call_rate": 1194,
+          "irq1_call_rate": 5,
+          "irq2_call_rate": 0,
+          "last_data_error": "No error",
+          "last_data_stored_error": "No error",
+          "last_error": "No error",
+          "last_stored_error": "Form error",
+          "receive_error_cnt": 0,
+          "total_error_cnt": 0,
+          "total_fwd_cnt": 0,
+          "total_rx_cnt": 38516,
+          "total_rx_lost_cnt": 0,
+          "total_tx_checksum_error_cnt": 0,
+          "total_tx_cnt": 152,
+          "total_tx_lost_cnt": 0,
+          "transmit_error_cnt": 0
+        },
+        "health": {
+          "alternative_experience": 0,
+          "car_harness_status": 2,
+          "controls_allowed": false,
+          "current": 350,
+          "fan_power": 30,
+          "fault_status": 0,
+          "faults": 0,
+          "heartbeat_lost": false,
+          "ignition_can": false,
+          "ignition_line": true,
+          "interrupt_load": 0.12156862745098039,
+          "power_save_enabled": false,
+          "rx_buffer_overflow": 1875,
+          "safety_mode": 3,
+          "safety_param": 1,
+          "safety_rx_checks_invalid": false,
+          "safety_rx_invalid": 0,
+          "safety_tx_blocked": 0,
+          "sbu1_voltage_mV": 107,
+          "sbu2_voltage_mV": 325,
+          "som_reset_triggered": false,
+          "sound_output_level": 1,
+          "spi_error_count": 69,
+          "temperature": 50.0,
+          "tx_buffer_overflow": 0,
+          "uptime": 203,
+          "voltage": 12001
+        }
+      },
+      "health_before": {
+        "bus": 1,
+        "can_health": {
+          "brs_enabled": 1,
+          "bus_off": 0,
+          "bus_off_cnt": 0,
+          "can_core_reset_count": 11,
+          "can_data_speed": 2000,
+          "can_speed": 500,
+          "canfd_enabled": 1,
+          "canfd_non_iso": 0,
+          "error_passive": 0,
+          "error_warning": 0,
+          "irq0_call_rate": 0,
+          "irq1_call_rate": 0,
+          "irq2_call_rate": 0,
+          "last_data_error": "No error",
+          "last_data_stored_error": "No error",
+          "last_error": "No error",
+          "last_stored_error": "Form error",
+          "receive_error_cnt": 0,
+          "total_error_cnt": 0,
+          "total_fwd_cnt": 0,
+          "total_rx_cnt": 37405,
+          "total_rx_lost_cnt": 0,
+          "total_tx_checksum_error_cnt": 0,
+          "total_tx_cnt": 149,
+          "total_tx_lost_cnt": 0,
+          "transmit_error_cnt": 0
+        },
+        "health": {
+          "alternative_experience": 0,
+          "car_harness_status": 2,
+          "controls_allowed": false,
+          "current": 614,
+          "fan_power": 30,
+          "fault_status": 0,
+          "faults": 0,
+          "heartbeat_lost": false,
+          "ignition_can": false,
+          "ignition_line": true,
+          "interrupt_load": 0.09019607843137255,
+          "power_save_enabled": false,
+          "rx_buffer_overflow": 1875,
+          "safety_mode": 3,
+          "safety_param": 1,
+          "safety_rx_checks_invalid": false,
+          "safety_rx_invalid": 0,
+          "safety_tx_blocked": 0,
+          "sbu1_voltage_mV": 107,
+          "sbu2_voltage_mV": 325,
+          "som_reset_triggered": false,
+          "sound_output_level": 1,
+          "spi_error_count": 69,
+          "temperature": 51.0,
+          "tx_buffer_overflow": 0,
+          "uptime": 202,
+          "voltage": 11770
+        }
+      },
+      "programming_response_timeout": false,
+      "route_after": {
+        "elm327_param": 1,
+        "eps_bus": 1,
+        "eps_rx": "0x7a9",
+        "eps_rx_bus": 1,
+        "eps_tx": "0x7a1",
+        "semantic_path": "normal-harness"
+      },
+      "route_before": {
+        "elm327_param": 1,
+        "eps_bus": 1,
+        "eps_rx": "0x7a9",
+        "eps_rx_bus": 1,
+        "eps_tx": "0x7a1",
+        "semantic_path": "normal-harness"
+      }
+    },
+    "ram_exec_geometry": {
+      "evidence": "dynamic:camry-8965F3307000-20260826",
+      "load_addr": 4273930240,
+      "load_size": 4096
+    },
+    "route": {
+      "bus": 1,
+      "cpu_index": 0,
+      "elm327_param": 1,
+      "uds_variant": "old"
+    },
+    "security_access": {
+      "secret_value_recorded": false,
+      "seed_length": 16
+    },
+    "telemetry_frames": 0,
+    "timed_out": true,
+    "unidentified_app_handoff_allowed": false
+  },
+  "nrtd_guard": {
+    "can_id": "0x51E",
+    "ready_values": [
+      0
+    ],
+    "samples": [
+      {
+        "bus": 1,
+        "data_hex": "00007e0000000000",
+        "ready": 0
+      }
+    ]
+  },
+  "payload_sha256": "48f269aec2c95fbf33217db67a201faad2716985784f5e196ba5ddeade46d8dd",
+  "persistent_flash_writes": false,
+  "post_snapshot_f181": {
+    "attempts": [
+      {
+        "at_monotonic": 262.461701798,
+        "f181_ascii": "\u00028965F3307000\u0000\u0000\u0000\u00008A3113303100",
+        "f181_hex": "023839363546333330373030300000000038413331313333303331303000000000",
+        "ok": true
+      }
+    ],
+    "first_success": {
+      "at_monotonic": 262.461701798,
+      "f181_ascii": "\u00028965F3307000\u0000\u0000\u0000\u00008A3113303100",
+      "f181_hex": "023839363546333330373030300000000038413331313333303331303000000000",
+      "ok": true
+    },
+    "ok": true
+  },
+  "pre_snapshot_f181": {
+    "attempts": [
+      {
+        "at_monotonic": 261.150735584,
+        "f181_ascii": null,
+        "f181_hex": null,
+        "ok": false
+      },
+      {
+        "at_monotonic": 261.261140396,
+        "f181_ascii": "\u00028965F3307000\u0000\u0000\u0000\u00008A3113303100",
+        "f181_hex": "023839363546333330373030300000000038413331313333303331303000000000",
+        "ok": true
+      }
+    ],
+    "first_success": {
+      "at_monotonic": 261.261140396,
+      "f181_ascii": "\u00028965F3307000\u0000\u0000\u0000\u00008A3113303100",
+      "f181_hex": "023839363546333330373030300000000038413331313333303331303000000000",
+      "ok": true
+    },
+    "ok": true
+  },
+  "resident_sha256": "26e13ab455f9580e005cb50fc5ef1bb26d6214f3cbc9ff02056ad6af2ebb7ba9",
+  "runtime_attestation": {
+    "attempts": [
+      {
+        "f181_ascii": "\u00028965F3307000\u0000\u0000\u0000\u00008A3113303100",
+        "f181_hex": "023839363546333330373030300000000038413331313333303331303000000000",
+        "mailbox": {
+          "coherent": true,
+          "fields": {
+            "AC2B_diag_gate": 0,
+            "BF3C_assist_term": -134,
+            "C3BA_assist_term": 0,
+            "C43C_assist_term": 0,
+            "C4C0_assist_term": 0,
+            "C5EE_moving_term": 0,
+            "C7BF_b6_active": 0,
+            "CB38_assist_term": 0,
+            "CBE8_assist_term": 0,
+            "CC2C_assist_term": 0,
+            "CC48_d0218_output": -134
+          },
+          "generation_end": 255,
+          "generation_start": 255,
+          "magic": "0x52504C59",
+          "magic_ok": true,
+          "raw_hex": "594c5052ff00000b00000000000000000000f6ff00000000000000007affffff7affffffff"
+        },
+        "resident": {
+          "base": "0xFEBFF9F0",
+          "byte_exact": true,
+          "expected_sha256": "26e13ab455f9580e005cb50fc5ef1bb26d6214f3cbc9ff02056ad6af2ebb7ba9",
+          "sha256": "26e13ab455f9580e005cb50fc5ef1bb26d6214f3cbc9ff02056ad6af2ebb7ba9",
+          "size": 406
+        }
+      }
+    ],
+    "attestation": {
+      "f181_ascii": "\u00028965F3307000\u0000\u0000\u0000\u00008A3113303100",
+      "f181_hex": "023839363546333330373030300000000038413331313333303331303000000000",
+      "mailbox": {
+        "coherent": true,
+        "fields": {
+          "AC2B_diag_gate": 0,
+          "BF3C_assist_term": -134,
+          "C3BA_assist_term": 0,
+          "C43C_assist_term": 0,
+          "C4C0_assist_term": 0,
+          "C5EE_moving_term": 0,
+          "C7BF_b6_active": 0,
+          "CB38_assist_term": 0,
+          "CBE8_assist_term": 0,
+          "CC2C_assist_term": 0,
+          "CC48_d0218_output": -134
+        },
+        "generation_end": 255,
+        "generation_start": 255,
+        "magic": "0x52504C59",
+        "magic_ok": true,
+        "raw_hex": "594c5052ff00000b00000000000000000000f6ff00000000000000007affffff7affffffff"
+      },
+      "resident": {
+        "base": "0xFEBFF9F0",
+        "byte_exact": true,
+        "expected_sha256": "26e13ab455f9580e005cb50fc5ef1bb26d6214f3cbc9ff02056ad6af2ebb7ba9",
+        "sha256": "26e13ab455f9580e005cb50fc5ef1bb26d6214f3cbc9ff02056ad6af2ebb7ba9",
+        "size": 406
+      }
+    },
+    "ok": true
+  },
+  "schema": "camry-f33-runtime-replay-discriminator-run-v3",
+  "secoc_bypass": false,
+  "staging_sha256": "0e0d6cc19c8fe8a4f04d216a1b85d73c41dce6e283d5d18d6a80d9da2937b1e6",
+  "steering_can_transmit": false,
+  "trigger_return_monotonic": 260.906745244,
+  "verdict": "abi_preserving_runtime_and_source_terms_live"
+}

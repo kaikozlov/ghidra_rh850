@@ -109,28 +109,35 @@ NRC `0x11`, and suppressed on the functional response path. CanTp/PduR still
 performs the complete seven-byte N-SDU copy before the resident's exact
 post-receive hook.
 
-| exact target | functional DCM buffer | unified runtime profile | field bootstrap |
+| exact target | functional DCM buffer | unified runtime profile | field installation |
 |---|---:|---|---|
-| Camry `8965F3307000` | `FEBE5751` | `camry-f33` | exact-F181-bound one-shot |
-| Corolla `8965H1202000` | `FEBE563D` | `corolla-hf` | exact-F181-bound one-shot |
-| Corolla `8965F1208000` | `FEBE563D` | `corolla-hf` | exact-F181-bound one-shot |
-| Crown `8965F3012000` | `FEBE527D` | `crown-f30` | exact-F181-bound one-shot |
+| Camry `8965F3307000` | `FEBE5751` | `camry-f33` | exact-F181 high-tail resident + post-startup functional C6 helper load |
+| Corolla `8965H1202000` | `FEBE563D` | `corolla-hf` | exact-F181 resident + helper embedded in authenticated LocalRAM payload |
+| Corolla `8965F1208000` | `FEBE563D` | `corolla-hf` | exact-F181 resident + helper embedded in authenticated LocalRAM payload |
+| Crown `8965F3012000` | `FEBE527D` | `crown-f30` | exact-F181 high-tail resident + post-startup functional C6 helper load |
 
-The former C6 helper-loader proved useful during bring-up, but it is no longer
-part of the maintained field-kit installation contract. The recurring C7
-runtime remains unified, but **the tester bootstrap is now exact-target**: the
-host binds exact application F181 before entering programming mode, and the
-authenticated callback uses the selected target boot init and validity addresses
-directly. It performs no CodeFlash data read before copying the resident.
+The recurring steering-control contract is unified C7, but the field installation
+path is deliberately target-shaped. Camry/Crown use functional C6 only as a
+post-startup helper transport: the authenticated boot callback installs the
+high-tail resident, the resident reaches the qualified count-224 boundary, and
+the host then transfers the padded helper as `07 C6 C6 index word_le32` before
+arming it. C7 remains the only recurring steering-control tag. Corolla H/F keep
+their earlier embedded-helper shape because the exact low helper pocket survives
+startup. No packaged field target writes the helper to GlobalRAM from the boot
+callback.
 
-The separate experimental all-target payload is retained for architecture work.
-Its first healthy-F33 attempt read application identity before boot reinit and
-returned to stock application with the high-tail resident absent. A corrected
-revision first classified the boot family at low CodeFlash `0x0C80`, ran that
-family boot init and validity sequence, then read `0x20860`; a second healthy-F33
-attempt again returned to stock application with `FEBFF9F0` effectively zero.
-Therefore boot-time CodeFlash self-dispatch is **not** a qualified field path and
-is no longer packaged by the tester-kit builder.
+This boundary was restored after two 2026-09-17 healthy-F33 one-shot attempts
+returned to stock application with `FEBFF9F0` cleared. A direct A/B on the same
+replacement rack then ran the exact previously live-qualified 4-KiB F33 replay
+payload (`48f269ae...`) and recovered its 406-byte resident byte-exact with
+`verdict=abi_preserving_runtime_and_source_terms_live`; retained raw record: `targets/camry-2026/raw-20260917/replacement-rack-old-replay/run.json`. That proves the
+replacement rack, exact F33 boot calls, and high-tail retention still work. It
+does **not** by itself distinguish a fault in the newer resident from a fault in
+the subsequent boot-context helper staging, but it invalidates the field design's
+GlobalRAM justification: `FEF07C00` had only been proven under recovered
+**application** MPU contexts, not the active boot callback context. The
+self-dispatching/GlobalRAM payload remains an experimental artifact, not a field
+install path.
 
 The selected resident is copied to the common retained high tail
 `FEBFF9F0..FEBFFBFB`. The selected helper is temporarily parked at
@@ -161,13 +168,13 @@ operator to enter READY unless those checks pass. This was added after the first
 healthy-F33 one-shot attempt returned to the stock application but later showed
 a missing resident.
 
-#### Unified runtime with exact-target field bootstrap
+#### Unified C7 runtime with target-shaped field installation
 
 The experimental all-target payload contains all three compiled runtime profiles
 and currently uses **3,822 bytes of the 4,048-byte authenticated plaintext
-shellcode budget**. The packaged exact-target field payload contains only the
-selected profile; the current Camry F33 stage is **1,420 bytes** before the fixed
-authenticated envelope. The profile components are:
+shellcode budget**. It is retained only for research. The current Camry field
+stage is **650 bytes**, contains only the high resident, and leaves helper
+transfer to functional C6 after startup. The profile components are:
 
 - Camry F33: 462-byte resident + 572-byte helper;
 - Crown F30: 462-byte resident + 572-byte helper;
