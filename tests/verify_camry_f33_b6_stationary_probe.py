@@ -1026,7 +1026,7 @@ with tempfile.TemporaryDirectory() as td:
     runbook = (out / "RUNBOOK.md").read_text(encoding="utf-8")
     patch_runbook = (out / "FIRMWARE_PATCH.md").read_text(encoding="utf-8")
     check("kit copies the exact standalone probe", copied.read_bytes() == MODULE_PATH.read_bytes())
-    check("kit manifest is self-contained v17 and binds exact stock-Toyota-B route", manifest["schema"] == "camry-f33-car-kit-v17" and manifest["target"] == {
+    check("kit manifest is self-contained v18 and binds exact stock-Toyota-B route", manifest["schema"] == "camry-f33-car-kit-v18" and manifest["target"] == {
         "eps_f181": "8965F3307000",
         "eps_diag": "0x7A1->0x7A9 bus1 (stock Toyota-B unsplit EPS/Brake network)",
         "b6": "0x0B6/32 FD bus1 (native EPS/Brake network; resident replaces internally)",
@@ -1115,7 +1115,7 @@ with tempfile.TemporaryDirectory() as td:
           live_ingress["mutation_boundary"]["receive_state_write"] is False and
           live_ingress["live_qualified"] is True and
           "id63_not_seen_at_midaggregate_boundary" in live_ingress["live_result"] and
-          manifest["ram_experiments"]["order"][2].startswith("b6_ingress_observer is the live-qualified"))
+          any(row.startswith("b6_ingress_observer is the live-qualified") for row in manifest["ram_experiments"]["order"]))
     mon = manifest["ram_experiments"]["runtime_monitor"]
     check("kit retains generic external-control monitor for downstream A-G localization",
           mon["payload_sha256"] == monitor.EXPECTED_PAYLOAD_SHA256 and
@@ -1349,11 +1349,31 @@ with tempfile.TemporaryDirectory() as td:
           sign_plan_obj.get("payload", {}).get("sha256") == command5_probe.EXPECTED_PAYLOAD_SHA256 and
           sign_plan_obj.get("boundaries", {}).get("b6_transmit") is False and
           sign_plan_obj.get("boundaries", {}).get("key_extraction") is False, sign_plan.stderr[-300:])
+    eps08a = manifest["ram_experiments"]["eps_origin_08a_routing_probe"]
+    eps08a_launcher = out / "f33-08a-route"
+    eps08a_doctor = subprocess.run([str(eps08a_launcher), "doctor"], cwd=out, env=env, capture_output=True, text=True, check=False)
+    check("kit packages the non-actuating EPS-origin 0x08A routing discriminator",
+          eps08a["launcher"] == "f33-08a-route" and
+          eps08a["payload_sha256"] == "7c901e819b2d7f2f54badd2c3467678797aaaf743119210721d3aad6fae874f3" and
+          eps08a["lower_can_write"] == "0x00085112" and eps08a["canif_hth_index"] == 0 and
+          eps08a["lower_driver_object_id"] == 47 and eps08a["lower_driver_node"] == 1 and
+          eps08a["lower_driver_mailbox"] == 0 and eps08a["pending_handle_cell"] == "0xFEBE502A" and
+          eps08a["software_pdu_handle"] == "0x00F0" and "successor may be idle 0xFFFF or stock 0x030" in eps08a["completion_witness"] and
+          eps08a["can_id_word"] == "0x4000008A" and eps08a["live_qualified"] is False and
+          eps08a["mutation_boundary"]["eps_08a_transmit_max"] == 1 and
+          eps08a["mutation_boundary"]["frame_mutation_inside_eps"] is False and
+          eps08a["field_sequence"][0].startswith("first run ./f33-sign verify-native-08a"))
+    check("built 0x08A routing launcher doctor validates exact payload without Panda access",
+          eps08a_doctor.returncode == 0 and "f33-08a-route doctor: PASS" in eps08a_doctor.stdout and
+          eps08a["payload_sha256"] in eps08a_doctor.stdout, eps08a_doctor.stderr[-300:])
+
     check("kit manifest hashes launchers and root runbook",
           manifest["files"]["f33"]["sha256"] == sha(launcher.read_bytes()) and
           manifest["files"]["f33-pre"]["sha256"] == sha(pre_launcher.read_bytes()) and
           manifest["files"]["f33-ingress"]["sha256"] == sha(ingress_launcher.read_bytes()) and
           manifest["files"]["f33-sign"]["sha256"] == sha(sign_launcher.read_bytes()) and
+          manifest["files"]["f33-08a-route"]["sha256"] == sha(eps08a_launcher.read_bytes()) and
+          manifest["files"]["08A_SENDER_EXPERIMENTS.md"]["sha256"] == sha((out / "08A_SENDER_EXPERIMENTS.md").read_bytes()) and
           manifest["files"]["RUNBOOK.md"]["sha256"] == sha((out / "RUNBOOK.md").read_bytes()))
 
 print(f"\nResults: {passed} passed, {failed} failed")

@@ -18,27 +18,42 @@ from exploit.common.ram_exec import (
     TOYOTA_P1ME_BOOT_SECURITY_ACCESS_SECRET,
     TOYOTA_P1ME_PAYLOAD_BUILD_SECRET,
 )
+from exploit.ephemeral_runtime import camry_f33_08a_tx_probe as eps08a_probe
 from exploit.ephemeral_runtime import camry_f33_b6_bridge_install as bridge_install
-from exploit.ephemeral_runtime import camry_f33_runtime_replay_discriminator as replay_discriminator
-from exploit.ephemeral_runtime import camry_f33_runtime_monitor as runtime_monitor
-from exploit.ephemeral_runtime import camry_f33_runtime_monitor_preaggregate as preaggregate_monitor
-from exploit.ephemeral_runtime import camry_f33_runtime_monitor_intertick as intertick_monitor
-from exploit.ephemeral_runtime import camry_f33_b6_midaggregate_observer as midaggregate_observer
-from exploit.ephemeral_runtime import camry_f33_command5_probe as command5_probe
+from exploit.ephemeral_runtime import (
+    camry_f33_b6_midaggregate_observer as midaggregate_observer,
+)
 from exploit.ephemeral_runtime import (
     camry_f33_b6_transaction_observer_install as observer_install,
 )
+from exploit.ephemeral_runtime import camry_f33_command5_probe as command5_probe
+from exploit.ephemeral_runtime import camry_f33_runtime_monitor as runtime_monitor
+from exploit.ephemeral_runtime import (
+    camry_f33_runtime_monitor_intertick as intertick_monitor,
+)
+from exploit.ephemeral_runtime import (
+    camry_f33_runtime_monitor_preaggregate as preaggregate_monitor,
+)
+from exploit.ephemeral_runtime import (
+    camry_f33_runtime_replay_discriminator as replay_discriminator,
+)
 from tools.targets.camry.builders import build_camry_f33_crypto_result_patch as stage5
-from tools.targets.camry.builders import build_camry_f33_gate2_root_result_patch as stage3
-from tools.targets.camry.builders import build_camry_f33_persistent_signer_patch as persistent_patch
+from tools.targets.camry.builders import (
+    build_camry_f33_gate2_root_result_patch as stage3,
+)
+from tools.targets.camry.builders import (
+    build_camry_f33_persistent_signer_patch as persistent_patch,
+)
 
 PROBE = ROOT / "exploit/behavioral_proof/camry_f33_b6_stationary_probe.py"
 RUNBOOK_TEMPLATE = ROOT / "exploit/ephemeral_runtime/camry_f33_runtime_monitor_runbook.md"
 PERSISTENT_RUNBOOK = ROOT / "exploit/ephemeral_runtime/camry_f33_persistent_signer_runbook.md"
+EPS08A_RUNBOOK = ROOT / "exploit/ephemeral_runtime/camry_f33_08a_sender_experiments.md"
 FIELD_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_field_launcher.sh"
 PREAGG_FIELD_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_field_preaggregate_launcher.sh"
 MIDAGG_FIELD_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_field_midaggregate_launcher.sh"
 COMMAND5_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_command5_launcher.sh"
+EPS08A_TX_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_08a_tx_probe_launcher.sh"
 INLINE_SIGNER_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_b6_inline_signer_launcher.sh"
 ICUS_RAMKEY_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_icus_ramkey_probe_launcher.sh"
 PERSISTENT_SIGNER_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_persistent_signer_launcher.sh"
@@ -51,6 +66,8 @@ PREAGG_MONITOR_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_runtime
 INTERTICK_MONITOR_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_runtime_monitor_intertick.bin"
 MIDAGG_OBSERVER_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_midaggregate_observer.bin"
 COMMAND5_PROBE_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_command5_probe.bin"
+EPS08A_TX_PROBE_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_08a_tx_probe.bin"
+EPS08A_TX_PROBE_META = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_08a_tx_probe_build.json"
 # Supervised continuous substitution preserves the road helper's steady-state
 # behavior, but stops after seven foreground ticks without a changed host
 # generation. Its new identity has instruction-level, not vehicle, validation.
@@ -80,6 +97,7 @@ RUNTIME_FILES = [
     "exploit/ephemeral_runtime/camry_f33_b6_midaggregate_observer.py",
     "exploit/ephemeral_runtime/camry_f33_b6_ingress_helper.py",
     "exploit/ephemeral_runtime/camry_f33_command5_probe.py",
+    "exploit/ephemeral_runtime/camry_f33_08a_tx_probe.py",
     "exploit/ephemeral_runtime/camry_f33_b6_inline_signer.py",
     "exploit/ephemeral_runtime/camry_f33_post_install_recovery.py",
     "exploit/ephemeral_runtime/camry_f33_icus_ramkey_probe.py",
@@ -325,6 +343,11 @@ def build(out: Path, openpilot: Path) -> dict:
     intertick_monitor_payload = package_shellcode(INTERTICK_MONITOR_BIN.read_bytes(), secret=TOYOTA_P1ME_PAYLOAD_BUILD_SECRET)
     midaggregate_observer_payload = package_shellcode(MIDAGG_OBSERVER_BIN.read_bytes(), secret=TOYOTA_P1ME_PAYLOAD_BUILD_SECRET)
     command5_probe_payload = package_shellcode(COMMAND5_PROBE_BIN.read_bytes(), secret=TOYOTA_P1ME_PAYLOAD_BUILD_SECRET)
+    eps08a_tx_meta = json.loads(EPS08A_TX_PROBE_META.read_text(encoding="utf-8"))
+    eps08a_tx_stage = EPS08A_TX_PROBE_BIN.read_bytes()
+    if hashlib.sha256(eps08a_tx_stage).hexdigest() != eps08a_tx_meta["staging"]["sha256"]:
+        raise RuntimeError("0x08A Tx probe audited staging identity drift")
+    eps08a_tx_payload = package_shellcode(eps08a_tx_stage, secret=TOYOTA_P1ME_PAYLOAD_BUILD_SECRET)
     inline_meta = json.loads(INLINE_SIGNER_META.read_text(encoding="utf-8"))
     inline_staging = INLINE_SIGNER_BIN.read_bytes()
     inline_helper = INLINE_SIGNER_HELPER.read_bytes()
@@ -377,6 +400,8 @@ def build(out: Path, openpilot: Path) -> dict:
         raise RuntimeError("mid-aggregate observer authenticated payload identity drift")
     if hashlib.sha256(command5_probe_payload).hexdigest() != command5_probe.EXPECTED_PAYLOAD_SHA256:
         raise RuntimeError("command-5 probe authenticated payload identity drift")
+    if hashlib.sha256(eps08a_tx_payload).hexdigest() != eps08a_probe.EXPECTED_PAYLOAD_SHA256:
+        raise RuntimeError("0x08A Tx probe authenticated payload identity drift")
     if hashlib.sha256(inline_signer_payload).hexdigest() != inline_meta["authenticated_payload"]["sha256"]:
         raise RuntimeError("inline signer authenticated payload identity drift")
     (ram_dir / "camry_f33_b6_transaction_observer_payload.bin").write_bytes(observer_payload)
@@ -387,6 +412,8 @@ def build(out: Path, openpilot: Path) -> dict:
     (ram_dir / "camry_f33_runtime_monitor_intertick_payload.bin").write_bytes(intertick_monitor_payload)
     (ram_dir / "camry_f33_b6_midaggregate_observer_payload.bin").write_bytes(midaggregate_observer_payload)
     (ram_dir / "camry_f33_command5_probe_payload.bin").write_bytes(command5_probe_payload)
+    (ram_dir / "camry_f33_08a_tx_probe_payload.bin").write_bytes(eps08a_tx_payload)
+    (ram_dir / "camry_f33_08a_tx_probe.json").write_text(json.dumps(eps08a_tx_meta, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     (ram_dir / "camry_f33_b6_inline_signer_payload.bin").write_bytes(inline_signer_payload)
     (ram_dir / "camry_f33_b6_inline_signer_helper_padded.bin").write_bytes(inline_helper)
     (ram_dir / "camry_f33_b6_inline_signer.json").write_text(json.dumps(inline_meta, indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -400,6 +427,7 @@ def build(out: Path, openpilot: Path) -> dict:
 
     shutil.copy2(RUNBOOK_TEMPLATE, out / "RUNBOOK.md")
     shutil.copy2(PERSISTENT_RUNBOOK, out / "PERSISTENT_SIGNER.md")
+    shutil.copy2(EPS08A_RUNBOOK, out / "08A_SENDER_EXPERIMENTS.md")
     launcher = out / "f33"
     shutil.copy2(FIELD_LAUNCHER, launcher)
     launcher.chmod(0o755)
@@ -412,6 +440,9 @@ def build(out: Path, openpilot: Path) -> dict:
     command5_launcher = out / "f33-sign"
     shutil.copy2(COMMAND5_LAUNCHER, command5_launcher)
     command5_launcher.chmod(0o755)
+    eps08a_tx_launcher = out / "f33-08a-route"
+    shutil.copy2(EPS08A_TX_LAUNCHER, eps08a_tx_launcher)
+    eps08a_tx_launcher.chmod(0o755)
     inline_signer_launcher = out / "f33-secoc"
     shutil.copy2(INLINE_SIGNER_LAUNCHER, inline_signer_launcher)
     inline_signer_launcher.chmod(0o755)
@@ -426,10 +457,12 @@ def build(out: Path, openpilot: Path) -> dict:
         "FIRMWARE_PATCH.md": {"sha256": sha256(out / "FIRMWARE_PATCH.md")},
         "RUNBOOK.md": {"sha256": sha256(out / "RUNBOOK.md")},
         "PERSISTENT_SIGNER.md": {"sha256": sha256(out / "PERSISTENT_SIGNER.md")},
+        "08A_SENDER_EXPERIMENTS.md": {"sha256": sha256(out / "08A_SENDER_EXPERIMENTS.md")},
         "f33": {"sha256": sha256(launcher)},
         "f33-pre": {"sha256": sha256(preagg_launcher)},
         "f33-ingress": {"sha256": sha256(ingress_launcher)},
         "f33-sign": {"sha256": sha256(command5_launcher)},
+        "f33-08a-route": {"sha256": sha256(eps08a_tx_launcher)},
         "f33-secoc": {"sha256": sha256(inline_signer_launcher)},
         "f33-icus-ramkey": {"sha256": sha256(icus_ramkey_launcher)},
         "f33-persist": {"sha256": sha256(persistent_signer_launcher)},
@@ -442,7 +475,7 @@ def build(out: Path, openpilot: Path) -> dict:
     for path in sorted(p for p in persistent_dir.rglob("*") if p.is_file()):
         files[str(path.relative_to(out))] = {"sha256": sha256(path)}
     manifest = {
-        "schema": "camry-f33-car-kit-v17",
+        "schema": "camry-f33-car-kit-v18",
         "created_at": datetime.now(UTC).isoformat(timespec="seconds"),
         "target": {
             "eps_f181": "8965F3307000",
@@ -623,6 +656,41 @@ def build(out: Path, openpilot: Path) -> dict:
                 "live_result": "2026-09-09 selector4 command5 generated 16-byte CMAC for exact 36-byte B6 domain on first attempt",
                 "live_zero_domain_cmac": "00d0b1eca59d0760eddc5efb5b58d1d5",
             },
+            "eps_origin_08a_routing_probe": {
+                "launcher": "f33-08a-route",
+                "payload": "ram_payloads/camry_f33_08a_tx_probe_payload.bin",
+                "payload_sha256": eps08a_probe.EXPECTED_PAYLOAD_SHA256,
+                "staging_sha256": eps08a_probe.EXPECTED_STAGING_SHA256,
+                "resident_sha256": eps08a_probe.EXPECTED_RESIDENT_SHA256,
+                "helper_sha256": eps08a_probe.EXPECTED_HELPER_SHA256,
+                "resident_base": f"0x{eps08a_probe.RESIDENT_BASE:08X}",
+                "resident_size": eps08a_probe.RESIDENT_SIZE,
+                "helper_base": f"0x{eps08a_probe.HELPER_BASE:08X}",
+                "helper_size": eps08a_probe.HELPER_SIZE,
+                "operation": "capture one fresh stock Target-Lateral-ID0 0x08A and replay the exact unchanged 32-byte FV4+MAC-bearing frame once through the EPS stock lower CAN-FD writer",
+                "lower_can_write": eps08a_tx_meta["tx"]["stock_lower_write"],
+                "canif_hth_index": eps08a_tx_meta["tx"]["canif_hth_index"],
+                "lower_driver_object_id": eps08a_tx_meta["tx"]["lower_driver_object_id"],
+                "lower_driver_node": eps08a_tx_meta["tx"]["lower_driver_node"],
+                "lower_driver_mailbox": eps08a_tx_meta["tx"]["lower_driver_mailbox"],
+                "pending_handle_cell": eps08a_tx_meta["tx"]["pending_handle_cell"],
+                "software_pdu_handle": eps08a_tx_meta["tx"]["sw_pdu_handle"],
+                "completion_witness": eps08a_tx_meta["tx"]["tx_confirmation"],
+                "can_id_word": eps08a_tx_meta["tx"]["can_id_word"],
+                "pre_tx_uniqueness": "require the exact captured frame to be absent from a bounded pre-Tx 0x08A window before interpreting a post-Tx duplicate",
+                "positive_verdict": "eps_origin_08a_visible_at_panda",
+                "negative_verdict": "eps_origin_08a_not_observed_at_panda",
+                "field_sequence": [
+                    "first run ./f33-sign verify-native-08a and require every stock sample MAC28 to reproduce",
+                    "./f33-08a-route install in NRTD/Park/stationary",
+                    "direct NRTD->READY without OFF",
+                    "./f33-08a-route route-native-id0 in READY/Park/stationary",
+                ],
+                "mutation_boundary": eps08a_tx_meta["mutation_boundary"],
+                "proves": "whether the EPS-local lower CAN-FD 0x08A path reaches the Panda-visible Bus-4 domain",
+                "does_not_prove": ["Brake accepts a newly fresh EPS-origin 0x08A", "stock SecOC-Tx profile retargeting", "longitudinal actuation"],
+                "live_qualified": False,
+            },
             "b6_midaggregate_observer": {
                 "payload": "ram_payloads/camry_f33_b6_midaggregate_observer_payload.bin",
                 "payload_sha256": midaggregate_observer.EXPECTED_PAYLOAD_SHA256,
@@ -793,6 +861,7 @@ def build(out: Path, openpilot: Path) -> dict:
             "order": [
                 "b6_inline_signer is the production-shaped volatile path: on stock Toyota-B bus 1 install the retained resident in NRTD, transition directly to READY, load/readback/arm the exact supervised helper, prove local signing against one untouched native B6 trailer, then return Panda ownership to openpilot; changed C7 generations renew the seven-tick host-loss supervision; expiry or sequence zero returns native B6 unchanged",
                 "command5_probe is retained as the already-live-qualified diagnostic oracle and is no longer the continuous signing architecture",
+                "eps_origin_08a_routing_probe is the non-actuating topology discriminator: after passive native-0x08A MAC reproduction, replay one unchanged stock ID0 frame from the EPS lower CAN-FD path and observe whether that exact FV4+MAC frame reaches Panda",
                 "b6_ingress_observer is the live-qualified two-stage topology discriminator; its 2026-09-10 D7-positive marker run closed bounded negative for direct Panda ID63 at post-CanIf/pre-SecOC",
                 "the original b6_midaggregate_observer full-runtime install failed before initialization and is retained only as a superseded artifact",
                 "runtime_monitor_preaggregate and runtime_monitor_intertick are retained only as timing-insufficient/superseded predecessors and should not be rerun",

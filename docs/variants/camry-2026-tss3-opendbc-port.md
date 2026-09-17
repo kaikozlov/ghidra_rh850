@@ -62,6 +62,8 @@ ownership stays inside the EPS. Upstream comma opendbc still has no Camry TSS3
 platform, so the comparison target remains upstream architecture rather than a
 preexisting wire implementation.
 
+**September-17 `0x08A` sender-experiment checkpoint:** the exact F33 car kit now packages two deliberately separate, non-actuating discriminators. `f33-sign verify-native-08a` asks the already-live-qualified selector-4 command-5 path to reproduce stock `0x08A` MAC28 without transmitting `0x08A`. After a full EPS power-off, `f33-08a-route` installs a different volatile resident/helper and replays one unchanged stock Target-Lateral-ID0 `0x08A` through exact HTH0 lower object 47 / writer `0x85112`; the helper uses special software handle `0x00F0` and `FEBE502A` departure as a physical-completion witness. Both host and resident reject a nonzero Target Lateral ID and one successful EPS transmit closes the probe for that boot. The routing result distinguishes an EPS-local Tx path that reaches Panda from a selectively forwarded EBU/local segment. It does not yet create a new sender freshness stream or authorize longitudinal output. Runbook: [the F33 `0x08A` sender experiments](../../exploit/ephemeral_runtime/camry_f33_08a_sender_experiments.md).
+
 **Current execution boundary:** VAR-155 proves the live native profile-2 B6 boundary and
 byte-exact local slot-4 signing. VAR-156 then deliberately installed the preserved
 native-application trailer on the modified ID11/target/100/100 application: all six samples

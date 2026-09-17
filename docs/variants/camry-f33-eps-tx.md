@@ -350,3 +350,28 @@ In particular:
 - `0x4C8` should remain unnamed beyond its recovered structural role until Toyota semantics are closed.
 
 The machine-readable artifact should be treated as the canonical exact-F33 transmit inventory for subsequent DBC and openpilot work.
+## 12. Bounded `0x08A` sender experiments
+
+The recovered production Tx stack now has a field-ready discriminator for the
+open question that this report leaves at the EBU boundary. The existing F33
+command-5 probe first has a non-transmitting `verify-native-08a` mode that asks
+selector 4 to reproduce captured stock `0x08A` MAC28 values. A separate volatile
+RAM probe then replays **one byte-exact stock Target-Lateral-ID0 `0x08A`** through
+`FUN_00085112`, HTH0 / lower driver object 47 (node 1, mailbox 0), with CAN ID word `0x4000008A`. Its software-PDU handle is
+`0x00F0`; exact F33 lower object 47 stores that value in pending-handle cell
+`FEBE502A`, and physical Tx completion removes that unique ownership before
+dispatching no-op `0x8152E`. Because stock `0x030` shares HTH0, the next sampled
+handle can already belong to the successor stock Tx rather than idle `0xFFFF`.
+The probe therefore uses departure from `0x00F0` as its completion witness and
+cannot forge an upper-layer `0x030` confirmation. It permits one successful
+Tx per boot and refuses nonzero Target Lateral ID; it does not sign, alter
+freshness, touch B6, or write flash.
+
+The second experiment is intentionally a routing test, not an actuation or
+receiver-acceptance test. If the otherwise-unique captured FV4+MAC frame becomes
+visible at Panda only after EPS lower-driver completion, the EPS-local Tx path
+reaches the observed Bus-4 domain. If the lower driver physically completes the
+replay but Panda never sees the exact frame, selective EBU/Brake-domain forwarding remains the leading
+explanation and a comma-side sender with the EPS used only as a MAC oracle stays
+the simpler architecture. Detailed field ordering and proof boundaries are in
+[`../../exploit/ephemeral_runtime/camry_f33_08a_sender_experiments.md`](../../exploit/ephemeral_runtime/camry_f33_08a_sender_experiments.md).
