@@ -1,0 +1,225 @@
+{
+  "conclusion": "Exact F33 EPS is the 0x030 producer. Generated-COM builds the 28-byte application payload, the configured SecOC Tx profile authenticates DataID 0x0030 plus payload plus full freshness with ICU-S command 5 using live selector 4, packs four transmitted freshness bits followed by a 28-bit authenticator into B28..B31, and then submits the 32-byte CAN-FD PDU.",
+  "firmware": {
+    "identity": "8965F3307000",
+    "sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7"
+  },
+  "function_evidence": {
+    "0x04C97A": {
+      "body_size": 1162,
+      "decompiled_c_sha256": "b20ba679d5723ecdeb235c3f646604780b9e461943ac82f937fbb8ce12e79d10",
+      "role": "generated-COM PDU0/0x030 application packer"
+    },
+    "0x07DF14": {
+      "body_size": 306,
+      "decompiled_c_sha256": "37065bd2474b9b769b024a2796c8c6d0cb5d269b661027f79b8145e4f586b595",
+      "role": "generated-COM transmit dispatcher"
+    },
+    "0x081A7E": {
+      "body_size": 26,
+      "decompiled_c_sha256": "01d68e17a84f0ac1fc78bc75b4a5165d2731a1fe3b0d1df5f37e743d92e58e24",
+      "role": "PduR transmit shim"
+    },
+    "0x081AB2": {
+      "body_size": 112,
+      "decompiled_c_sha256": "1e7494d94ead68f7bef494f652d51c4f9b302f9a343a1c34fdf01548b9a02eaa",
+      "role": "PduR lower-route dispatcher"
+    },
+    "0x088B84": {
+      "body_size": 178,
+      "decompiled_c_sha256": "d02bcaddd859ce6dd64f031a075a0d642c164a036a12218a5da977a01c05d5ec",
+      "role": "ICU-S command-5 job preparation"
+    },
+    "0x088D60": {
+      "body_size": 92,
+      "decompiled_c_sha256": "acddc51cd1de4b90cbb625f3d5af7ed526f4b9471a91cec6c7d12bbd3646e2b6",
+      "role": "ICU-S command-5 start wrapper"
+    },
+    "0x089440": {
+      "body_size": 150,
+      "decompiled_c_sha256": "259172dc7db0ba52b710828fc79cc0f7083217de9075795e39b8d06bfe7febff",
+      "role": "CryptoIf record dispatcher"
+    },
+    "0x089BC2": {
+      "body_size": 138,
+      "decompiled_c_sha256": "019271326624c9c43b046dca5aa7953297d662b18f4629a7981dc8d4cf920951",
+      "role": "serialized MAC-generation wrapper"
+    },
+    "0x08A720": {
+      "body_size": 274,
+      "decompiled_c_sha256": "398c85f38fe1323134eb3bb309d5caa556e088e4ff58e65600f9592c0c476f62",
+      "role": "ICU-S command-5 hardware submit"
+    },
+    "0x08ECB2": {
+      "body_size": 98,
+      "decompiled_c_sha256": "114a7cf4b6ad8380b17f528d12b215486587f759357c71259f7b261b2b63ee71",
+      "role": "DataID/payload/freshness authentication-input builder"
+    },
+    "0x08ED8E": {
+      "body_size": 88,
+      "decompiled_c_sha256": "18c75c67e26409b64a3b6705c8639b2fdfba114b03f3172e6bbbba123032cbba",
+      "role": "SecOC Tx ingress for generated-COM PDU0"
+    },
+    "0x08F19A": {
+      "body_size": 54,
+      "decompiled_c_sha256": "21a551ef96105320b0d8f41c1354d047dbc211d7b11f2dc5cf2f694766b09871",
+      "role": "Tx key-selector descriptor lookup"
+    },
+    "0x08FA5A": {
+      "body_size": 44,
+      "decompiled_c_sha256": "56a99b215574d7df30676ae8db775177ac6bb6c04fdaa78d4ccd6062ebbfadcc",
+      "role": "SecOC Tx source/lower-PDU profile mapper"
+    },
+    "0x08FABA": {
+      "body_size": 152,
+      "decompiled_c_sha256": "4de42c4237abe4911dd800b2bd85feca410e7f47d131ccae5240faae2c872e8c",
+      "role": "SecOC Tx authentic-payload queue"
+    },
+    "0x08FCCA": {
+      "body_size": 58,
+      "decompiled_c_sha256": "c313889d32f12b112e1691017308e905af0cc0c41336ffaff8bbdb05ae281bc8",
+      "role": "CryptoIf MAC-generation entry"
+    },
+    "0x08FD90": {
+      "body_size": 320,
+      "decompiled_c_sha256": "95bcaf3ca67b0c07c230c73d2c5ed44b5305bae59b93bd1267b4bef4371338cc",
+      "role": "SecOC Tx authentication coordinator"
+    },
+    "0x08FED0": {
+      "body_size": 266,
+      "decompiled_c_sha256": "1b09d1e49f2bc27f231c361b5807fff47c9996761dc0a0ddef1b756ea6f0e0f8",
+      "role": "FV/authenticator trailer bit packer"
+    },
+    "0x08FFDA": {
+      "body_size": 152,
+      "decompiled_c_sha256": "68883b21ba15347ec67d7a6523fc12f49c19b7cd20c02271e8dcc1185f1325a3",
+      "role": "secured-PDU assembly and lower transmit"
+    },
+    "0x090736": {
+      "body_size": 116,
+      "decompiled_c_sha256": "c54da5a984cd69b067c8879a219fff628adc84aab5324ff4a5e8045e154201cf",
+      "role": "ordinary FV4/full-freshness decoder"
+    }
+  },
+  "live_crypto": {
+    "descriptor_address": "0xFEBE5504",
+    "descriptor_hex": "0100000004000000000000000000000000000000",
+    "descriptor_mode": 1,
+    "icu_s_command": 5,
+    "icu_s_key_selector": 4,
+    "path": [
+      "0x8F19A",
+      "0x8FCCA",
+      "0x89BC2",
+      "0x89440",
+      "0x88B84",
+      "0x88D60",
+      "0x8A720"
+    ],
+    "submit_register_expression": "ICUSCMD = (selector << 16) | 5"
+  },
+  "mac_domain": {
+    "application_payload_bytes": 28,
+    "composition": "DataID_be16 || application_payload[28] || full_freshness[6]",
+    "data_id": "0x0030",
+    "full_freshness_bits": 46,
+    "full_freshness_storage_bytes": 6,
+    "total_bytes": 36
+  },
+  "ram_vs_wire": {
+    "closest_oracle_B28_B31_hex": "b6a71e8c",
+    "closest_oracle_application_equal_bytes": 27,
+    "closest_oracle_frame_hex": "000000004500017e0000400071820000000000010000fff600000000b6a71e8c",
+    "generated_com_B28_B31_hex": "00000000",
+    "generated_com_buffer_address": "0xFEBE4A48",
+    "generated_com_buffer_hex": "000000004500017e0000400071800000000000010000fff60000000000000000",
+    "interpretation": "the generated-COM application slice is zero in B28..B31; the exact SecOC Tx path reserves four bytes and appends FV4||MAC28 below the application packer"
+  },
+  "schema": "camry-f33-030-secoc-tx-v1",
+  "secoc_tx_profile": {
+    "authentic_payload_bytes": 28,
+    "authenticator_bits": 28,
+    "crypto_job_id": 0,
+    "data_id": 48,
+    "freshness_value_id": 3,
+    "full_freshness_bits": 46,
+    "full_freshness_storage_bytes": 6,
+    "key_selector_descriptor_id": 0,
+    "lower_pdu_id": 0,
+    "mac_input": "DataID_be16 || application_payload[28] || full_freshness[6]",
+    "mac_input_bytes": 36,
+    "profile_index": 0,
+    "security_trailer_bytes": 4,
+    "transmitted_freshness_bits": 4,
+    "tx_freshness_callback": "0x0903F6"
+  },
+  "tracked_oracle": {
+    "bus": 1,
+    "frame_count": 6189,
+    "inner_additive_b7_rule": {
+      "formula": "B7 = low8(sum(B0..B6) + 0x38)",
+      "matches": 6189
+    },
+    "outer_trailer": {
+      "FV4_high_nibble_values": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ],
+      "first_message_low2_per_observed_epoch": {
+        "0": 1,
+        "2": 21,
+        "3": 186
+      },
+      "preceding_0x00F_reset_low2": {
+        "eligible": 6180,
+        "fraction": 0.936245954693,
+        "matches": 5786,
+        "mismatches": {
+          "0->1": 99,
+          "1->0": 3,
+          "1->2": 97,
+          "2->3": 97,
+          "3->0": 98
+        }
+      },
+      "same_reset_message_low2_deltas": {
+        "1": 5981
+      },
+      "timestamp_boundary": "the retained oracle batches CAN publication; adjacent reset-low2 mismatches are not a firmware-format contradiction",
+      "unique_B28_B31": 6189,
+      "unique_MAC28_candidates": 6189
+    },
+    "sync_count": 618
+  },
+  "tx_identity": {
+    "can_fd": true,
+    "can_id": "0x030",
+    "canif0_descriptor_hex": "3000004000000000",
+    "canif_id_word": "0x40000030",
+    "generated_com_pdu": 0,
+    "pdu0_descriptor_hex": "0200000020000003",
+    "route": "PDU0 -> 0x7DF14 -> 0x81A7E/0x81AB2 -> SecOC Tx 0x8ED8E -> lower PDU0",
+    "wire_length": 32
+  },
+  "wire_layout": {
+    "application": "B0..B27",
+    "authenticator": "28-bit MSB-truncated AES-CMAC generated by ICU-S command 5",
+    "fv4_split": "B28[7:6]=message counter low2; B28[5:4]=reset counter low2",
+    "inner_application_integrity": "B7 additive byte: low8(sum(B0..B6)+0x38)",
+    "outer_security": "B28[7:4]=FV4; B28[3:0]||B29||B30||B31=MAC28"
+  }
+}
