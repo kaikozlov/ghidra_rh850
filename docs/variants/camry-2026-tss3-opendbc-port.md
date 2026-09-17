@@ -259,6 +259,23 @@ structurally named (`MOTOR_CURRENT_ALT`, mapped motor-feedback proxy) — not be
 the source relationship is unknown, but because the lookup and runtime scale mean the
 wire values are not DID1151 units, amperes, or commanded torque.
 
+### 1.5 Complete exact-F33 EPS transmit inventory
+
+The full exact-F33 Tx surface is now closed separately in
+`docs/variants/camry-f33-eps-tx.md`. In addition to `0x030` and `0x4A3`, the exact
+normal generated-COM table contains `0x351`, `0x394`, and `0x4C8`; the document and
+its machine-readable reducer recover every direct application field, PDU period, group
+activation state, PduR/CanIf route, the `0x030` SecOC profile, diagnostic responses
+`0x7A9/0x7A8`, and the stock-gated extended `0x1FE00002` response endpoint.
+
+One runtime boundary remains explicit rather than guessed: retained PE1 RAM proves all
+five normal PDUs were scheduler-armed, while retained external CAN captures expose
+`0x030` but not the four classic sibling PDUs. The classic messages use a valid sibling
+HTH on the same lower driver node; idle HTH state `0x69` is not a disabled flag. The
+reason for the capture/runtime discrepancy is therefore left unresolved below CanIf or
+in external topology/capture visibility. Deterministic evidence is
+`data/generated/camry_8965F3307000_eps_tx.json` and suite `camry_f33_eps_tx`.
+
 ## 2. Canonical first-class source-reference census
 
 The earlier scratch-project census evolved in two steps: VAR-056 initially found four

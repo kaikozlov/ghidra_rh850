@@ -1073,6 +1073,9 @@ tests = ["tests/verify_camry_b6_freshness_contract.py"]
 [suite.camry_f33_030_secoc_tx]
 tests = ["tests/verify_camry_f33_030_secoc_tx.py"]
 
+[suite.camry_f33_eps_tx]
+tests = ["tests/verify_camry_f33_eps_tx.py"]
+
 [suite.camry_f33_b6_mac_equivalence]
 tests = ["tests/verify_camry_f33_b6_mac_equivalence.py"]
 

@@ -1,0 +1,1642 @@
+{
+  "canif_hardware_routes": {
+    "hth_descriptors": [
+      [
+        13,
+        258,
+        0,
+        47,
+        0
+      ],
+      [
+        7,
+        258,
+        3,
+        50,
+        1
+      ],
+      [
+        7,
+        2,
+        6,
+        53,
+        2
+      ],
+      [
+        7,
+        2,
+        7,
+        54,
+        3
+      ],
+      [
+        102,
+        258,
+        8,
+        55,
+        4
+      ]
+    ],
+    "hth_table_address": "0x21ACC",
+    "interpretation": "0x030 and the four classic PDUs use sibling hardware objects on the same lower CAN-driver node; retained HTH state 0x69 means idle/available, not disabled",
+    "normal_pdu_routes": [
+      {
+        "can_id": "0x030",
+        "canif_handle": 0,
+        "driver_mailbox": 0,
+        "driver_node": 1,
+        "driver_object_id": 47,
+        "hth_index": 0,
+        "lower_writer": "0x8549E CAN-FD"
+      },
+      {
+        "can_id": "0x351",
+        "canif_handle": 1,
+        "driver_mailbox": 3,
+        "driver_node": 1,
+        "driver_object_id": 50,
+        "hth_index": 1,
+        "lower_writer": "0x853AA classic CAN"
+      },
+      {
+        "can_id": "0x394",
+        "canif_handle": 1,
+        "driver_mailbox": 3,
+        "driver_node": 1,
+        "driver_object_id": 50,
+        "hth_index": 1,
+        "lower_writer": "0x853AA classic CAN"
+      },
+      {
+        "can_id": "0x4A3",
+        "canif_handle": 1,
+        "driver_mailbox": 3,
+        "driver_node": 1,
+        "driver_object_id": 50,
+        "hth_index": 1,
+        "lower_writer": "0x853AA classic CAN"
+      },
+      {
+        "can_id": "0x4C8",
+        "canif_handle": 1,
+        "driver_mailbox": 3,
+        "driver_node": 1,
+        "driver_object_id": 50,
+        "hth_index": 1,
+        "lower_writer": "0x853AA classic CAN"
+      }
+    ]
+  },
+  "dynamic_observations": {
+    "boundary": "tracked retained-log evidence; absence is an observation for these captures, not proof that a configured PDU can never transmit",
+    "parked_censuses": {
+      "post_repin_nrtd": {
+        "absent_carriers": {
+          "0x0B6": 0,
+          "0x131": 0,
+          "0x2E4": 0,
+          "0x351": 0,
+          "0x394": 0,
+          "0x4A3": 0,
+          "0x4C8": 0
+        },
+        "controls": {
+          "0x030": 2000,
+          "0x081": 666
+        },
+        "frames": 31758,
+        "source": "targets/camry-2026/raw-20260827/camry_post_repin_nrtd_20260827.json.gz"
+      },
+      "post_repin_ready": {
+        "absent_carriers": {
+          "0x0B6": 0,
+          "0x131": 0,
+          "0x2E4": 0,
+          "0x351": 0,
+          "0x394": 0,
+          "0x4A3": 0,
+          "0x4C8": 0
+        },
+        "controls": {
+          "0x030": 2115,
+          "0x081": 697
+        },
+        "frames": 33598,
+        "source": "targets/camry-2026/raw-20260827/camry_post_repin_ready_20260827.json.gz"
+      }
+    },
+    "saved_log_positive_native_frames": [
+      {
+        "address": "0x030",
+        "count": 6000,
+        "duration_s": 59.993426,
+        "event": "can",
+        "first_relative_s": 0.0,
+        "last_relative_s": 59.993426,
+        "length": 32,
+        "path": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-8.zst",
+        "src": 0
+      }
+    ]
+  },
+  "evidence_boundary": "Raw CodeFlash closes configuration, pack geometry, direct pack calls and routing. GTS joins are only used for explicitly named diagnostics. The whole canonical decompiler corpus proves no literal generated-pack-helper calls for configured-only signals 36/37/55/283, but computed indirect calls, DMA or unrecovered code remain outside that bounded negative. Retained logs show runtime behavior for captures we possess; absence of a configured cyclic PDU in those logs is not proof it can never be enabled.",
+  "executive_summary": {
+    "diagnostic_response_ids": [
+      "0x7A9",
+      "0x7A8"
+    ],
+    "normal_generated_com_count": 5,
+    "normal_ids": [
+      "0x030",
+      "0x351",
+      "0x394",
+      "0x4A3",
+      "0x4C8"
+    ],
+    "only_secoc_protected_normal_tx": "0x030",
+    "semantic_boundary": "complete structural transmit surface; unresolved OEM field names stay explicitly unresolved",
+    "special_extended_response_id": "0x1FE00002"
+  },
+  "function_evidence": {
+    "0x04C000": {
+      "body_size": 232,
+      "decompiled_c_sha256": "073c8a1d516a6d39f078a311face21590863a98d57fa2c95501a0bb49c588b49",
+      "role": "0x030/0x4A3 inhibit and feedback preparation"
+    },
+    "0x04C14E": {
+      "body_size": 114,
+      "decompiled_c_sha256": "2f29006b36366bb10e1de9cd442e7bb3ae48d13f5da9c0e04f3cf39a7324f713",
+      "role": "0x4A3 application staging"
+    },
+    "0x04C1C0": {
+      "body_size": 86,
+      "decompiled_c_sha256": "4caccd7f20f01298e61d87fe0ec281d5d20de1265ded064f76625744ce367f58",
+      "role": "0x351 debounce/state preparation"
+    },
+    "0x04C216": {
+      "body_size": 34,
+      "decompiled_c_sha256": "0d369cf6e9354020c0cb08932364624ed1bada9d3d51be1e3e786e670cd9712c",
+      "role": "0x351 status/force producer"
+    },
+    "0x04C24A": {
+      "body_size": 74,
+      "decompiled_c_sha256": "81fcbefdcb1ee4c1e07ab63c6c36719dcda43ac51d00a6062995a28d7902bdc7",
+      "role": "0x394 classifier projection"
+    },
+    "0x04C294": {
+      "body_size": 10,
+      "decompiled_c_sha256": "10cda3933316841369448beff2f9f14085e6afcdc25e6605f519fcae39ed6489",
+      "role": "0x030 status snapshot"
+    },
+    "0x04C2DC": {
+      "body_size": 56,
+      "decompiled_c_sha256": "b1bad6c4539cc40d11bd869da1535e4b7c24b5959294c4f06d5447bd6964c773",
+      "role": "0x030 cooperative-status projection"
+    },
+    "0x04C380": {
+      "body_size": 82,
+      "decompiled_c_sha256": "bdab868637d262a0d061b2ab27b83b60edb0b00d3e7d5513ad5086acd82f9ca4",
+      "role": "0x030 signed feedback scaling"
+    },
+    "0x04C3D2": {
+      "body_size": 190,
+      "decompiled_c_sha256": "f9e3c0ea93e65dbb84ec315852caf9f26793ea2e2f6fdf7fb2ba4a2cc31d7a6a",
+      "role": "0x030 position/status projection"
+    },
+    "0x04C490": {
+      "body_size": 256,
+      "decompiled_c_sha256": "e786e765e4368d807864c8129957fcbd116e5e89cb47447a6008647d97e7cc78",
+      "role": "0x030 torque/current staging"
+    },
+    "0x04C738": {
+      "body_size": 58,
+      "decompiled_c_sha256": "635d332fad7e9eef33f2713932e7fd1c6f56b8b7cf84937a0b035e037322f9bc",
+      "role": "0x030 supervisory code producer"
+    },
+    "0x04C772": {
+      "body_size": 18,
+      "decompiled_c_sha256": "c96af2c753a0b9f3fcecf256152da03afc45912c36f2b03c427fbba57e84561a",
+      "role": "0x030 status-byte staging"
+    },
+    "0x04C7AA": {
+      "body_size": 306,
+      "decompiled_c_sha256": "50a30aa917414fb075e70683321f09796a4a6f10fa6260fdbc20214864a9a544",
+      "role": "0x4A3 generated-COM packer"
+    },
+    "0x04C8E0": {
+      "body_size": 150,
+      "decompiled_c_sha256": "b3c0bdd3e531326e4678089dc7319a0d512c84fe775d64864fe85130e332a769",
+      "role": "0x4C8 generated-COM packer"
+    },
+    "0x04C97A": {
+      "body_size": 1162,
+      "decompiled_c_sha256": "b20ba679d5723ecdeb235c3f646604780b9e461943ac82f937fbb8ce12e79d10",
+      "role": "0x030 generated-COM packer"
+    },
+    "0x04CE08": {
+      "body_size": 196,
+      "decompiled_c_sha256": "2a1618e07577a0431028bfdf105a8f0d59c1c0c38f29454074704e5a63aa7531",
+      "role": "0x394 generated-COM packer"
+    },
+    "0x04CED0": {
+      "body_size": 136,
+      "decompiled_c_sha256": "48c511ac21c4a686b0c0202dc64c35c382482fe0a6f1551e101f8c3ca991a573",
+      "role": "0x351 generated-COM packer"
+    },
+    "0x07BC42": {
+      "body_size": 20,
+      "decompiled_c_sha256": "98d9fbb467c996b265606c4128bf2f41541fe74598ee23685059d1510fb6323d",
+      "role": "validated BswM/communication group-mask reader"
+    },
+    "0x07BF60": {
+      "body_size": 176,
+      "decompiled_c_sha256": "6ea221c798e3a589c8975ba63ecd7a35d00796b1c8b4feff300932218bbdb047",
+      "role": "generated-COM group-mask distributor"
+    },
+    "0x07D1DC": {
+      "body_size": 322,
+      "decompiled_c_sha256": "b574f04af72c483ead02a21a0a90a073560310825e1eca38e12f6626ba523436",
+      "role": "generated-COM change-aware pack helper"
+    },
+    "0x07D31E": {
+      "body_size": 184,
+      "decompiled_c_sha256": "adc9223e8e5a6e29c67556776dbdc6108c1b2beac730bcd06543a9c571549349",
+      "role": "generated-COM raw pack helper"
+    },
+    "0x07D8AE": {
+      "body_size": 520,
+      "decompiled_c_sha256": "1bfdc30ca154e77f9a338373dea9153a4863bd9672726b99c4aaa483d9cb9698",
+      "role": "generated-COM group activation / timer arming"
+    },
+    "0x07DB0C": {
+      "body_size": 404,
+      "decompiled_c_sha256": "efc5e1b865be96566b9299d50329fe6f0a49398a1fe6bf75c181ef70e86989c0",
+      "role": "generated-COM cyclic timer service"
+    },
+    "0x07DF14": {
+      "body_size": 306,
+      "decompiled_c_sha256": "37065bd2474b9b769b024a2796c8c6d0cb5d269b661027f79b8145e4f586b595",
+      "role": "generated-COM transmit dispatcher"
+    },
+    "0x07E13A": {
+      "body_size": 92,
+      "decompiled_c_sha256": "bfd91449dc42859e81f1619d9688e0b2a3b613a0ea47da8a0f0e83cf2542eb3d",
+      "role": "generated-COM pending-transmit service"
+    },
+    "0x07FEF8": {
+      "body_size": 160,
+      "decompiled_c_sha256": "7b0cf834a7637a5420aa7b4e8967b343db7dcae5203d46034194929bc0f668f1",
+      "role": "direct CanIf transmit class dispatcher"
+    },
+    "0x0805C6": {
+      "body_size": 222,
+      "decompiled_c_sha256": "919ae5fec15693142b29b20527e708e43867e3986555da655cd943814445815a",
+      "role": "CanIf HTH runtime initialization"
+    },
+    "0x081A7E": {
+      "body_size": 26,
+      "decompiled_c_sha256": "01d68e17a84f0ac1fc78bc75b4a5165d2731a1fe3b0d1df5f37e743d92e58e24",
+      "role": "PduR transmit shim"
+    },
+    "0x081AB2": {
+      "body_size": 112,
+      "decompiled_c_sha256": "1e7494d94ead68f7bef494f652d51c4f9b302f9a343a1c34fdf01548b9a02eaa",
+      "role": "PduR lower-route dispatcher"
+    },
+    "0x085112": {
+      "body_size": 166,
+      "decompiled_c_sha256": "3de31311c0c378b0bea0b4fc0b95719bf9034691e8022b3f298ed7e8c567d2cc",
+      "role": "lower CAN driver transmit dispatcher"
+    },
+    "0x0853AA": {
+      "body_size": 244,
+      "decompiled_c_sha256": "b0cea8c6d22b7e3638b198e4cb8c1295c0f29f4cbe575e6adfa0d98ffd91fe7e",
+      "role": "classic CAN transmit writer"
+    },
+    "0x08549E": {
+      "body_size": 342,
+      "decompiled_c_sha256": "9f291a595ca97e766cb93f85026b14ae3f4db7d384121e0e1078c387fac90e96",
+      "role": "CAN-FD transmit writer"
+    },
+    "0x08ED8E": {
+      "body_size": 88,
+      "decompiled_c_sha256": "18c75c67e26409b64a3b6705c8639b2fdfba114b03f3172e6bbbba123032cbba",
+      "role": "SecOC transmit ingress"
+    }
+  },
+  "generated_configuration": {
+    "class_counts": [
+      5,
+      0,
+      4,
+      0,
+      0,
+      1
+    ],
+    "class_pointers": [
+      "0x21F58",
+      "0x218BC",
+      "0x21F80",
+      "0x218C4",
+      "0x218CC",
+      "0x21F48"
+    ],
+    "direct_pack_call_census": {
+      "0": [
+        "0x04C97A"
+      ],
+      "1": [
+        "0x04C97A"
+      ],
+      "10": [
+        "0x04C97A"
+      ],
+      "11": [
+        "0x04C97A"
+      ],
+      "12": [
+        "0x04C97A"
+      ],
+      "13": [
+        "0x04C97A"
+      ],
+      "14": [
+        "0x04C97A"
+      ],
+      "15": [
+        "0x04C97A"
+      ],
+      "16": [
+        "0x04C97A"
+      ],
+      "17": [
+        "0x04C97A"
+      ],
+      "18": [
+        "0x04C97A"
+      ],
+      "19": [
+        "0x04C97A"
+      ],
+      "2": [
+        "0x04C97A"
+      ],
+      "20": [
+        "0x04C97A"
+      ],
+      "21": [
+        "0x04C97A"
+      ],
+      "22": [
+        "0x04C97A"
+      ],
+      "23": [
+        "0x04C97A"
+      ],
+      "24": [
+        "0x04C97A"
+      ],
+      "25": [
+        "0x04C97A"
+      ],
+      "26": [
+        "0x04C97A"
+      ],
+      "27": [
+        "0x04C97A"
+      ],
+      "28": [
+        "0x04C97A"
+      ],
+      "283": [],
+      "29": [
+        "0x04C97A"
+      ],
+      "3": [
+        "0x04C97A"
+      ],
+      "30": [
+        "0x04C97A"
+      ],
+      "31": [
+        "0x04C97A"
+      ],
+      "32": [
+        "0x04C97A"
+      ],
+      "33": [
+        "0x04C97A"
+      ],
+      "34": [
+        "0x04C97A"
+      ],
+      "35": [
+        "0x04C97A"
+      ],
+      "36": [],
+      "37": [],
+      "38": [
+        "0x04CED0"
+      ],
+      "39": [
+        "0x04CED0"
+      ],
+      "4": [
+        "0x04C97A"
+      ],
+      "40": [
+        "0x04CE08"
+      ],
+      "41": [
+        "0x04CE08"
+      ],
+      "42": [
+        "0x04CE08"
+      ],
+      "43": [
+        "0x04CE08"
+      ],
+      "44": [
+        "0x04C7AA"
+      ],
+      "45": [
+        "0x04C7AA"
+      ],
+      "46": [
+        "0x04C7AA"
+      ],
+      "47": [
+        "0x04C7AA"
+      ],
+      "48": [
+        "0x04C7AA"
+      ],
+      "49": [
+        "0x04C7AA"
+      ],
+      "5": [
+        "0x04C97A"
+      ],
+      "50": [
+        "0x04C7AA"
+      ],
+      "51": [
+        "0x04C7AA"
+      ],
+      "52": [
+        "0x04C8E0"
+      ],
+      "53": [
+        "0x04C8E0"
+      ],
+      "54": [
+        "0x04C8E0"
+      ],
+      "55": [],
+      "6": [
+        "0x04C97A"
+      ],
+      "7": [
+        "0x04C97A"
+      ],
+      "8": [
+        "0x04C97A"
+      ],
+      "9": [
+        "0x04C97A"
+      ]
+    },
+    "foreground_scheduler_evidence": "exact F33 TAUJ0 CH3 target-native proof in docs/variants/camry-2026-live-baseline.md \u00a712.1",
+    "foreground_scheduler_ms": 5.0,
+    "normal_tx_records": [
+      {
+        "can_id": "0x030",
+        "confirmation_route": 0,
+        "controller": 0,
+        "raw_id_word": "0x40000030",
+        "reserved": 0
+      },
+      {
+        "can_id": "0x351",
+        "confirmation_route": 1,
+        "controller": 0,
+        "raw_id_word": "0x00000351",
+        "reserved": 0
+      },
+      {
+        "can_id": "0x394",
+        "confirmation_route": 1,
+        "controller": 0,
+        "raw_id_word": "0x00000394",
+        "reserved": 0
+      },
+      {
+        "can_id": "0x4A3",
+        "confirmation_route": 1,
+        "controller": 0,
+        "raw_id_word": "0x000004A3",
+        "reserved": 0
+      },
+      {
+        "can_id": "0x4C8",
+        "confirmation_route": 1,
+        "controller": 0,
+        "raw_id_word": "0x000004C8",
+        "reserved": 0
+      }
+    ],
+    "pdu_descriptors": [
+      [
+        2,
+        0,
+        0,
+        32,
+        0,
+        3
+      ],
+      [
+        200,
+        0,
+        0,
+        4,
+        0,
+        3
+      ],
+      [
+        60,
+        0,
+        0,
+        3,
+        0,
+        3
+      ],
+      [
+        100,
+        0,
+        0,
+        8,
+        0,
+        3
+      ],
+      [
+        196,
+        0,
+        0,
+        8,
+        0,
+        3
+      ]
+    ],
+    "signal_ownership": {
+      "0": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        283
+      ],
+      "1": [
+        38,
+        39
+      ],
+      "2": [
+        40,
+        41,
+        42,
+        43
+      ],
+      "3": [
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51
+      ],
+      "4": [
+        52,
+        53,
+        54,
+        55
+      ]
+    },
+    "slice_offsets": [
+      0,
+      32,
+      36,
+      39,
+      47
+    ]
+  },
+  "noncyclic_transmit": {
+    "diagnostic_transport": {
+      "interpretation": "ISO-TP/UDS application responses: primary/functional paths use 0x7A9; secondary physical endpoint uses 0x7A8",
+      "rx_ids": [
+        "0x7A1",
+        "0x777",
+        "0x7A0"
+      ],
+      "tx_records": [
+        {
+          "can_id": "0x7A9",
+          "controller": 0,
+          "route": 0,
+          "source_pdu": "0x0800"
+        },
+        {
+          "can_id": "0x7A9",
+          "controller": 0,
+          "route": 0,
+          "source_pdu": "0x0801"
+        },
+        {
+          "can_id": "0x7A8",
+          "controller": 0,
+          "route": 1,
+          "source_pdu": "0x0802"
+        },
+        {
+          "can_id": "0x7A8",
+          "controller": 0,
+          "route": 1,
+          "source_pdu": "0x0803"
+        }
+      ]
+    },
+    "xcp_shaped_extended": {
+      "paired_request_extended_can_id": "0x1FDC0002",
+      "paired_request_raw_hardware_id_word": "0x9FDC0002",
+      "response_extended_can_id": "0x1FE00002",
+      "response_raw_hardware_id_word": "0x9FE00002",
+      "response_source_pdu": "0xF800",
+      "stock_reachability": "request ingress exists, but exact F33 fixed CodeFlash 0x30D68=0x5A causes 0x98E80 to reject protocol execution before CONNECT/opcode dispatch"
+    }
+  },
+  "normal_messages": [
+    {
+      "assigned_signal_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        283
+      ],
+      "can_fd": true,
+      "can_id": "0x030",
+      "configured_only_note": "signals 36, 37 and 283 are assigned to PDU0 by the exact signal->PDU table but no literal call to either generated pack helper exists anywhere in the 6,065-function canonical corpus; no wire field is invented for them",
+      "configured_without_direct_pack_call": [
+        36,
+        37,
+        283
+      ],
+      "cycle_ticks": 2,
+      "direct_packed_signal_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35
+      ],
+      "fields": [
+        {
+          "grade": "firmware",
+          "producer": "0x4C490",
+          "role": "coarse signed steering-wheel-torque projection (/10 path)",
+          "signal": 0,
+          "source": "0xFEBE8136",
+          "wire": "B0"
+        },
+        {
+          "grade": "firmware",
+          "producer": "0x4C97A",
+          "role": "constant-clear application bit",
+          "signal": 1,
+          "source": "constant 0",
+          "wire": "B2[1]"
+        },
+        {
+          "grade": "firmware",
+          "producer": "0x4C490",
+          "role": "source-status boolean from FEBE65D3",
+          "signal": 2,
+          "source": "0xFEBE8137",
+          "wire": "B2[0]"
+        },
+        {
+          "grade": "firmware",
+          "producer": "0x4C3D2",
+          "role": "signed12 quotient of E948-derived position/angle-family quantity",
+          "signal": 3,
+          "source": "0xFEBE8164",
+          "wire": "B3:B4[7:4]"
+        },
+        {
+          "grade": "firmware",
+          "producer": "0x4C3D2",
+          "role": "signed4 remainder paired with signal 3",
+          "signal": 4,
+          "source": "0xFEBE8138",
+          "wire": "B4[3:0]"
+        },
+        {
+          "grade": "firmware",
+          "producer": "0x4C380",
+          "role": "signed12 clamped projection of FEBE6776/8",
+          "signal": 5,
+          "source": "0xFEBE8166",
+          "wire": "B5:B6[7:4]"
+        },
+        {
+          "grade": "firmware",
+          "producer": "0x4C3D2",
+          "role": "E888==0x5A validity/status mirror",
+          "signal": 6,
+          "source": "0xFEBE8139",
+          "wire": "B6[3]"
+        },
+        {
+          "grade": "firmware",
+          "producer": "0x4C000",
+          "role": "steering/current fault-or-inhibit aggregate",
+          "signal": 7,
+          "source": "0xFEBE80DE",
+          "wire": "B6[2]"
+        },
+        {
+          "grade": "firmware",
+          "producer": "0x4C294",
+          "role": "status snapshot copied from FEBEE848",
+          "signal": 8,
+          "source": "0xFEBE80E3",
+          "wire": "B6[1]"
+        },
+        {
+          "grade": "firmware",
+          "producer": "0x4C000",
+          "role": "operational/status inhibit",
+          "signal": 9,
+          "source": "0xFEBE80E2",
+          "wire": "B6[0]"
+        },
+        {
+          "grade": "firmware",
+          "producer": "0x4C97A",
+          "role": "inner additive checksum: low8(sum(B0..B6)+0x38)",
+          "signal": 10,
+          "source": "computed",
+          "wire": "B7"
+        },
+        {
+          "grade": "GTS+firmware",
+          "oem": "Steering Wheel Torque",
+          "producer": "0x4C490",
+          "role": "Steering Wheel Torque coarse component, signed8 * 0.1 N.m",
+          "signal": 11,
+          "source": "0xFEBE813A",
+          "wire": "B8"
+        },
+        {
+          "grade": "firmware",
+          "producer": "0x4C3D2",
+          "role": "copy of signal-3 signed12 quotient",
+          "signal": 12,
+          "source": "0xFEBE8168",
+          "wire": "B9:B10[7:4]"
+        },
+        {
+          "grade": "firmware",
+          "producer": "0x4C3D2",
+          "role": "E888==0x5A validity/status mirror",
+          "signal": 13,
+          "source": "0xFEBE813B",
+          "wire": "B10[3]"
+        },
+        {
+          "grade": "firmware",
+          "producer": "0x4C3D2",
+          "role": "signed18 clamped projection of FEBEE94C",
+          "signal": 14,
+          "source": "0xFEBE8174",
+          "wire": "B11:B12:B13[7:6]"
+        },
+        {
+          "grade": "firmware",
+          "producer": "0x4C490",
+          "role": "second source-status boolean from FEBE65D3",
+          "signal": 15,
+          "source": "0xFEBE813C",
+          "wire": "B13[5]"
+        },
+        {
+          "grade": "firmware",
+          "producer": "0x4C3D2",
+          "role": "E888==0x5A validity/status",
+          "signal": 16,
+          "source": "0xFEBE813D",
+          "wire": "B13[4]"
+        },
+        {
+          "grade": "firmware",
+          "producer": "0x4C490",
+          "role": "transition/validity state derived from FEBE8050/FEBE8051 family",
+          "signal": 17,
+          "source": "0xFEBE813E",
+          "wire": "B13[3]"
+        },
+        {
+          "grade": "firmware",
+          "producer": "0x4C490",
+          "role": "status mirror from FEBE7475",
+          "signal": 18,
+          "source": "0xFEBE813F",
+          "wire": "B13[2]"
+        },
+        {
+          "grade": "firmware",
+          "producer": "0x4C738",
+          "role": "2-bit cooperative supervisory/readiness code; normal readiness requires <2",
+          "signal": 19,
+          "source": "0xFEBE817C",
+          "wire": "B13[1:0]"
+        },
+        {
+          "grade": "firmware",
+          "producer": "0x4C380",
+          "role": "signed16 scaled projection of FEBE6776",
+          "signal": 20,
+          "source": "0xFEBE816A",
+          "wire": "B14:B15"
+        },
+        {
+          "grade": "firmware",
+          "producer": "0x4C2DC",
+          "role": "cooperative-control status mirror from FEBEE82F",
+          "signal": 21,
+          "source": "0xFEBE80F6",
+          "wire": "B16[5]"
+        },
+        {
+          "grade": "firmware",
+          "producer": "0x4C2DC",
+          "role": "cooperative-control status mirror from FEBEE83D",
+          "signal": 22,
+          "source": "0xFEBE80F7",
+          "wire": "B16[4]"
+        },
+        {
+          "grade": "firmware",
+          "producer": "0x4C2DC",
+          "role": "cooperative-control status mirror from FEBEE83B",
+          "signal": 23,
+          "source": "0xFEBE80F8",
+          "wire": "B16[3]"
+        },
+        {
+          "grade": "firmware",
+          "producer": "0x4C2DC",
+          "role": "2-bit cooperative-control state from FEBEE83C",
+          "signal": 24,
+          "source": "0xFEBE80F9",
+          "wire": "B16[2:1]"
+        },
+        {
+          "grade": "firmware",
+          "producer": "0x4C2DC",
+          "role": "cooperative-command inhibit (CAFC family)",
+          "signal": 25,
+          "source": "0xFEBE80EC",
+          "wire": "B16[0]"
+        },
+        {
+          "grade": "firmware",
+          "producer": "0x4C490",
+          "role": "status mirror from FEBE80E7",
+          "signal": 26,
+          "source": "0xFEBE8140",
+          "wire": "B17[7]"
+        },
+        {
+          "grade": "firmware",
+          "producer": "0x4C490",
+          "role": "status mirror from FEBE80E6",
+          "signal": 27,
+          "source": "0xFEBE8141",
+          "wire": "B17[6]"
+        },
+        {
+          "grade": "firmware",
+          "producer": "0x4C772",
+          "role": "status mirror from FEBEE88D",
+          "signal": 28,
+          "source": "0xFEBE818E",
+          "wire": "B17[5]"
+        },
+        {
+          "grade": "firmware",
+          "producer": "0x4C772",
+          "role": "status mirror from FEBEE88C",
+          "signal": 29,
+          "source": "0xFEBE818D",
+          "wire": "B17[4]"
+        },
+        {
+          "grade": "GTS+firmware",
+          "oem": "Steering Wheel Torque",
+          "producer": "0x4C490",
+          "role": "Steering Wheel Torque fine signed4 component, *0.01 N.m",
+          "signal": 30,
+          "source": "0xFEBE8142",
+          "wire": "B17[3:0]"
+        },
+        {
+          "grade": "firmware",
+          "producer": "0x4C2DC",
+          "role": "cooperative-angle inhibit (CAD9 family)",
+          "signal": 31,
+          "source": "0xFEBE80E0",
+          "wire": "B19[0]"
+        },
+        {
+          "grade": "firmware",
+          "producer": "0x4C2DC",
+          "role": "signed steering-control/angle-family feedback from FEBEE8BC",
+          "signal": 32,
+          "source": "0xFEBE8156",
+          "wire": "B20:B21"
+        },
+        {
+          "grade": "GTS+firmware",
+          "producer": "0x4C490",
+          "role": "signed motor-feedback/current-family proxy; related to, but not identical units with, DID1151 Q-axis current",
+          "signal": 33,
+          "source": "0xFEBE816C",
+          "wire": "B22:B23"
+        },
+        {
+          "grade": "firmware",
+          "producer": "0x4C490",
+          "role": "constant-clear in normal producer",
+          "signal": 34,
+          "source": "0xFEBE8150",
+          "wire": "B27[1]"
+        },
+        {
+          "grade": "firmware",
+          "producer": "0x4C490",
+          "role": "constant-clear in normal producer",
+          "signal": 35,
+          "source": "0xFEBE8151",
+          "wire": "B27[0]"
+        }
+      ],
+      "initial_application_bytes": "0000000000000100000000000008000000000000000000000000000000000000",
+      "name": "EPS protected status/feedback/control-state",
+      "nominal_cycle_ms": 10.0,
+      "nominal_hz": 100.0,
+      "packer": "0x04C97A",
+      "pdu": 0,
+      "protection": {
+        "application_bytes": "B0..B27",
+        "authenticator_bits": 28,
+        "data_id": "0x0030",
+        "freshness_bits_full": 46,
+        "freshness_bits_transmitted": 4,
+        "icu_s_command": 5,
+        "icu_s_key_selector": 4,
+        "inner_checksum": "B7=low8(sum(B0..B6)+0x38)",
+        "kind": "SecOC + inner additive checksum",
+        "outer_trailer": "B28[7:4]=FV4; B28[3:0]||B29..B31=MAC28",
+        "route": "PDU0 -> PduR -> 0x8ED8E SecOC Tx -> lower PDU0 -> CanIf"
+      },
+      "unwritten_application_regions": [
+        "B1",
+        "B2[7:2]",
+        "B10[2:0]",
+        "B16[7:6]",
+        "B18",
+        "B19[7:1]",
+        "B24:B26",
+        "B27[7:2]"
+      ],
+      "wire_length": 32
+    },
+    {
+      "assigned_signal_ids": [
+        38,
+        39
+      ],
+      "can_fd": false,
+      "can_id": "0x351",
+      "configured_without_direct_pack_call": [],
+      "cycle_ticks": 200,
+      "direct_packed_signal_ids": [
+        38,
+        39
+      ],
+      "fault_join": {
+        "base_monitor_state": "FEBEBDE4 -> FEBEE82B -> 0x4C1C0 -> FEBE8100",
+        "boundary": "the force-7 path is a distinct broad status override; do not rename it C159B49 or temporary/permanent",
+        "debounce_count": 7,
+        "force_path": "0x4C216 writes code 7 and flag 1 when (FEBE6764&3)!=0 and FEBE8143!=0",
+        "related_techstream_dtc": {
+          "code": "C159B49",
+          "description": "Power Steering Motor \"B\" Terminal Voltage Detect Circuit",
+          "failure": "Internal Electronic Failure"
+        }
+      },
+      "fields": [
+        {
+          "grade": "firmware",
+          "producer": "0x4C1C0/0x4C216",
+          "role": "debounced electrical-monitor/status code; force path writes 7",
+          "signal": 38,
+          "source": "0xFEBE8100",
+          "wire": "B2[7:5]"
+        },
+        {
+          "grade": "firmware",
+          "producer": "0x4C216",
+          "role": "companion force/special-status flag",
+          "signal": 39,
+          "source": "0xFEBE8101",
+          "wire": "B2[4]"
+        }
+      ],
+      "initial_application_bytes": "00000000",
+      "name": "EPS electrical-monitor/status projection",
+      "nominal_cycle_ms": 1000.0,
+      "nominal_hz": 1.0,
+      "packer": "0x04CED0",
+      "pdu": 1,
+      "protection": {
+        "application_integrity_field": null,
+        "kind": "direct generated-COM/CanIf; no configured SecOC Tx profile",
+        "route": "PDU1 -> PduR direct fallback -> 0x7FEF8 CanIf"
+      },
+      "wire_length": 4
+    },
+    {
+      "assigned_signal_ids": [
+        40,
+        41,
+        42,
+        43
+      ],
+      "can_fd": false,
+      "can_id": "0x394",
+      "classifier": {
+        "boundary": "classifier state 0 is the deepest recovered clear/normal state, but is not itself the OEM DID Ready Status",
+        "internal_state_count": 17,
+        "projection": "0x4C24A exports columns 4,1,2,3 as signals 40..43; the projection is lossy",
+        "table_address": "0x2A19C",
+        "table_rows": [
+          [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            4,
+            3,
+            0,
+            0,
+            0
+          ],
+          [
+            4,
+            7,
+            0,
+            0,
+            0
+          ],
+          [
+            5,
+            3,
+            0,
+            0,
+            0
+          ],
+          [
+            4,
+            3,
+            0,
+            0,
+            0
+          ],
+          [
+            1,
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            3,
+            3,
+            2,
+            1,
+            2
+          ],
+          [
+            3,
+            3,
+            2,
+            1,
+            0
+          ],
+          [
+            6,
+            3,
+            3,
+            0,
+            2
+          ],
+          [
+            6,
+            3,
+            3,
+            0,
+            0
+          ],
+          [
+            3,
+            7,
+            1,
+            1,
+            1
+          ],
+          [
+            3,
+            7,
+            4,
+            1,
+            1
+          ],
+          [
+            6,
+            7,
+            7,
+            0,
+            1
+          ],
+          [
+            6,
+            7,
+            6,
+            0,
+            1
+          ],
+          [
+            6,
+            7,
+            5,
+            0,
+            1
+          ],
+          [
+            2,
+            2,
+            0,
+            0,
+            0
+          ],
+          [
+            4,
+            7,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "configured_without_direct_pack_call": [],
+      "cycle_ticks": 60,
+      "direct_packed_signal_ids": [
+        40,
+        41,
+        42,
+        43
+      ],
+      "fields": [
+        {
+          "grade": "firmware",
+          "producer": "0x4C24A",
+          "role": "classifier table column 4",
+          "signal": 40,
+          "source": "0xFEBE8105",
+          "wire": "B1[7:6]"
+        },
+        {
+          "grade": "firmware",
+          "producer": "0x4C24A",
+          "role": "classifier table column 1",
+          "signal": 41,
+          "source": "0xFEBE8106",
+          "wire": "B1[5:3]"
+        },
+        {
+          "grade": "firmware",
+          "producer": "0x4C24A",
+          "role": "classifier table column 2",
+          "signal": 42,
+          "source": "0xFEBE8107",
+          "wire": "B2[3:1]"
+        },
+        {
+          "grade": "firmware",
+          "producer": "0x4C24A",
+          "role": "classifier table column 3",
+          "signal": 43,
+          "source": "0xFEBE8109",
+          "wire": "B2[0]"
+        }
+      ],
+      "initial_application_bytes": "000000",
+      "name": "EPS internal fault/state classifier projection",
+      "nominal_cycle_ms": 300.0,
+      "nominal_hz": 3.3333333333333335,
+      "packer": "0x04CE08",
+      "pdu": 2,
+      "protection": {
+        "application_integrity_field": null,
+        "kind": "direct generated-COM/CanIf; no configured SecOC Tx profile",
+        "route": "PDU2 -> PduR direct fallback -> 0x7FEF8 CanIf"
+      },
+      "wire_length": 3
+    },
+    {
+      "assigned_signal_ids": [
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51
+      ],
+      "can_fd": false,
+      "can_id": "0x4A3",
+      "configured_without_direct_pack_call": [],
+      "cycle_ticks": 100,
+      "direct_packed_signal_ids": [
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51
+      ],
+      "fields": [
+        {
+          "grade": "firmware",
+          "producer": "0x4C14E",
+          "role": "status/inhibit byte: FEBE80DE OR 0x20 marker",
+          "signal": 44,
+          "source": "0xFEBE810B",
+          "wire": "B0"
+        },
+        {
+          "grade": "firmware",
+          "producer": "0x4C14E",
+          "role": "signed12 coarse received 0x025 steering-angle-family source (FEBE8048), high byte",
+          "signal": 45,
+          "source": "0xFEBE810C",
+          "wire": "B1"
+        },
+        {
+          "grade": "firmware",
+          "producer": "0x4C14E",
+          "role": "signed12 coarse received 0x025 steering-angle-family source (FEBE8048), low byte",
+          "signal": 46,
+          "source": "0xFEBE810D",
+          "wire": "B2"
+        },
+        {
+          "grade": "GTS+firmware",
+          "oem": "Steering Angle",
+          "producer": "0x4C14E",
+          "role": "signed12 filtered/voted Steering Angle high nibble; source FEBE7D46",
+          "signal": 47,
+          "source": "0xFEBE810E",
+          "wire": "B3"
+        },
+        {
+          "grade": "GTS+firmware",
+          "oem": "Steering Angle",
+          "producer": "0x4C14E",
+          "role": "signed12 filtered/voted Steering Angle low byte; source FEBE7D46",
+          "signal": 48,
+          "source": "0xFEBE810F",
+          "wire": "B4"
+        },
+        {
+          "grade": "GTS+firmware",
+          "oem": "Steering Wheel Torque",
+          "producer": "0x4C14E",
+          "role": "signed steering-wheel-torque projection, 0.1 N.m/count",
+          "signal": 49,
+          "source": "0xFEBE8110",
+          "wire": "B5"
+        },
+        {
+          "grade": "firmware",
+          "producer": "0x4C14E",
+          "role": "motor-feedback/current-family proxy high byte",
+          "signal": 50,
+          "source": "0xFEBE8111",
+          "wire": "B6"
+        },
+        {
+          "grade": "firmware",
+          "producer": "0x4C14E",
+          "role": "motor-feedback/current-family proxy low byte",
+          "signal": 51,
+          "source": "0xFEBE8112",
+          "wire": "B7"
+        }
+      ],
+      "initial_application_bytes": "0000000000000000",
+      "name": "EPS redundant angle/torque/motor-feedback status",
+      "nominal_cycle_ms": 500.0,
+      "nominal_hz": 2.0,
+      "packer": "0x04C7AA",
+      "pdu": 3,
+      "protection": {
+        "application_integrity_field": null,
+        "kind": "direct generated-COM/CanIf; no configured SecOC Tx profile",
+        "route": "PDU3 -> PduR direct fallback -> 0x7FEF8 CanIf"
+      },
+      "semantic_join": {
+        "motor_feedback": "B6:B7 derive from FEBE6718-family feedback; not a steering command and not literal DID1151 amp units",
+        "steering_angle_source": "FEBE7D46; also used by exact GTS DID1037 Steering Angle",
+        "steering_wheel_torque": "B5 signed projection at 0.1 N.m/count"
+      },
+      "wire_length": 8
+    },
+    {
+      "assigned_signal_ids": [
+        52,
+        53,
+        54,
+        55
+      ],
+      "can_fd": false,
+      "can_id": "0x4C8",
+      "configured_without_direct_pack_call": [
+        55
+      ],
+      "constant_template": {
+        "normal_packer_result": "09 00 00 00 00 00 00 00",
+        "oem_semantic": "unresolved",
+        "signal55": "assigned by configuration but has no direct generated pack call in the canonical corpus; B4..B7 stay at their zero initial image absent an unrecovered dynamic/raw writer"
+      },
+      "cycle_ticks": 196,
+      "direct_packed_signal_ids": [
+        52,
+        53,
+        54
+      ],
+      "fields": [
+        {
+          "grade": "firmware",
+          "producer": "0x4C8E0",
+          "role": "constant template byte",
+          "signal": 52,
+          "source": "constant 0x09",
+          "wire": "B0"
+        },
+        {
+          "grade": "firmware",
+          "producer": "0x4C8E0",
+          "role": "constant-clear bit",
+          "signal": 53,
+          "source": "constant 0",
+          "wire": "B1[7]"
+        },
+        {
+          "grade": "firmware",
+          "producer": "0x4C8E0",
+          "role": "constant-clear 16-bit field",
+          "signal": 54,
+          "source": "constant 0",
+          "wire": "B2:B3"
+        }
+      ],
+      "initial_application_bytes": "0900000000000000",
+      "name": "EPS constant/status template (OEM role unresolved)",
+      "nominal_cycle_ms": 980.0,
+      "nominal_hz": 1.0204081632653061,
+      "packer": "0x04C8E0",
+      "pdu": 4,
+      "protection": {
+        "application_integrity_field": null,
+        "kind": "direct generated-COM/CanIf; no configured SecOC Tx profile",
+        "route": "PDU4 -> PduR direct fallback -> 0x7FEF8 CanIf"
+      },
+      "wire_length": 8
+    }
+  ],
+  "scheduler": {
+    "group_0": {
+      "communication_mask": "0x10",
+      "membership_masks": [
+        16,
+        16,
+        16,
+        16,
+        16
+      ],
+      "pdu_count": 5,
+      "start_pdu": 0
+    },
+    "packing_semantics": {
+      "0x7D1DC": "change-aware pack; on a changed value calls 0x7E196(pdu,0x80) to request event transmission",
+      "0x7D31E": "raw bit pack; does not request change-triggered transmit",
+      "event_triggered_pdus": [
+        "0x351",
+        "0x394"
+      ],
+      "periodic_only_at_direct-pack layer": [
+        "0x030",
+        "0x4A3",
+        "0x4C8"
+      ]
+    },
+    "periodic_cycle_ms": [
+      10.0,
+      1000.0,
+      300.0,
+      500.0,
+      980.0
+    ],
+    "periodic_cycle_ticks": [
+      2,
+      200,
+      60,
+      100,
+      196
+    ],
+    "runtime_snapshot": {
+      "bswm_mask_and_complement": [
+        16,
+        239
+      ],
+      "bswm_secondary_mask_and_complement": [
+        16,
+        239
+      ],
+      "canif_hth_state_bytes": [
+        90,
+        105,
+        105,
+        105,
+        105
+      ],
+      "group_current_mask": 16,
+      "group_desired_mask": 16,
+      "minimum_delay_countdowns": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "pdu_state_bytes": [
+        129,
+        129,
+        129,
+        129,
+        129
+      ],
+      "periodic_countdowns": [
+        2,
+        139,
+        23,
+        31,
+        143
+      ],
+      "source": "targets/camry-2026/raw-20260826/secoc-recovery/ram/local_ram_pe1.bin"
+    },
+    "tx_group_count": 1
+  },
+  "schema": "camry-f33-eps-tx-v1",
+  "secoc_030_crosscheck": {
+    "authenticator_bits": 28,
+    "data_id": 48,
+    "icu_s_key_selector": 4,
+    "schema": "camry-f33-030-secoc-tx-v1",
+    "security_trailer_bytes": 4,
+    "tracked_oracle_frame_count": 6189
+  },
+  "target": {
+    "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
+    "scope": "exact F33 EPS application image only",
+    "software_id": "8965F3307000"
+  }
+}
