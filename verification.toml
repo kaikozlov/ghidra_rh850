@@ -81,6 +81,11 @@ tests = ["tests/verify_gtsplus_tss3_control_ownership.py"]
 requires_external = ["gtsplus"]
 modes = ["local"]
 
+[suite.gtsplus_tss3_steering_touch_path]
+tests = ["tests/verify_gtsplus_tss3_steering_touch_path.py"]
+requires_external = ["gtsplus"]
+modes = ["local"]
+
 [suite.gtsplus_vehicle_resolver]
 tests = ["tests/verify_gtsplus_vehicle_resolver.py"]
 requires_external = ["gtsplus"]

@@ -1,0 +1,874 @@
+{
+  "airbag_ddr_grip_surface": {
+    "database": "A_B_CAN_P5.ddb",
+    "host_layout_proof": {
+      "conclusion": "The current host indexes/sorts CDbDDRMonitorTable rows by the u16 at +0x18. Therefore 5500..5505 here are A_B_CAN_P5 DDR monitor keys, not CAN arbitration IDs.",
+      "export_rvas": {
+        "compare": "0x000A42F0",
+        "exception_flag": "0x000A4270",
+        "exception_id": "0x000A42B0",
+        "find": "0x000A4130"
+      },
+      "field_witnesses": {
+        "exception_flag_plus_0x2d": true,
+        "exception_id_plus_0x28": true,
+        "primary_key_plus_0x18_in_compare": true,
+        "primary_key_plus_0x18_in_find": true
+      },
+      "kgp_data_ctrl": {
+        "path": "Bin/KgpDataCtrl.dll",
+        "sha256": "19e709e12e53f485a84ccfbf6b226922b88502206c34b767db543c7f3df101f8"
+      }
+    },
+    "record_size": 48,
+    "rows": [
+      {
+        "exception_handler_flag": 0,
+        "exception_handler_id": 0,
+        "name": "Grip Sensor Value (Left)",
+        "primary_key": 5500,
+        "primary_key_hex": "0x157C",
+        "record": 595
+      },
+      {
+        "exception_handler_flag": 0,
+        "exception_handler_id": 0,
+        "name": "Grip Sensor Value (Left)",
+        "primary_key": 5501,
+        "primary_key_hex": "0x157D",
+        "record": 596
+      },
+      {
+        "exception_handler_flag": 0,
+        "exception_handler_id": 0,
+        "name": "Grip Sensor Value (Right)",
+        "primary_key": 5502,
+        "primary_key_hex": "0x157E",
+        "record": 597
+      },
+      {
+        "exception_handler_flag": 0,
+        "exception_handler_id": 0,
+        "name": "Grip Sensor Value (Right)",
+        "primary_key": 5503,
+        "primary_key_hex": "0x157F",
+        "record": 598
+      },
+      {
+        "exception_handler_flag": 0,
+        "exception_handler_id": 0,
+        "name": "Grip Sensor Value Invalid Flag",
+        "primary_key": 5504,
+        "primary_key_hex": "0x1580",
+        "record": 599
+      },
+      {
+        "exception_handler_flag": 0,
+        "exception_handler_id": 0,
+        "name": "Grip Sensor Value Invalid Flag",
+        "primary_key": 5505,
+        "primary_key_hex": "0x1581",
+        "record": 600
+      }
+    ],
+    "table": 147
+  },
+  "diagnostic_semantics": {
+    "frc_p5": {
+      "touch_sensor_dtc": {
+        "code": "C1A7796",
+        "description": "Steering Touch Sensor",
+        "failure": "Component Internal Failure"
+      },
+      "wheel_meter_cxpi_behaviors": [
+        {
+          "name": "Communication Error from Steering Switch Control Module to Instrument Panel Cluster Control Module",
+          "signature": "X20B9"
+        },
+        {
+          "name": "CXPI Communication Error (Ais)",
+          "signature": "X20BF"
+        },
+        {
+          "name": "CXPI Communication Error (CMB)",
+          "signature": "X2501"
+        }
+      ]
+    },
+    "p5_predecessor_oracles": {
+      "fr_camera_grip_presence": {
+        "alternate_did": "0x3023",
+        "bit_end": 8,
+        "bit_start": 8,
+        "bit_width": 1,
+        "name": "Grip Detection Sensor Information",
+        "patterns": {
+          "0": "Absence",
+          "1": "Presence"
+        },
+        "primary_did": "0x1023",
+        "unit": null
+      },
+      "lda_torque_judgment": {
+        "alternate_did": "0x3044",
+        "bit_end": 7,
+        "bit_start": 0,
+        "bit_width": 8,
+        "name": "Not Holding Steering Wheel Judgment Status (Torque Sensor)",
+        "patterns": {
+          "0": "Detected",
+          "1": "Not Detected"
+        },
+        "primary_did": "0x1044",
+        "unit": null
+      },
+      "lda_touch_judgment": {
+        "alternate_did": "0x3045",
+        "bit_end": 7,
+        "bit_start": 0,
+        "bit_width": 8,
+        "name": "Not Holding Steering Wheel Judgment Status (Touch Sensor)",
+        "patterns": {
+          "0": "Detected",
+          "1": "Not Detected"
+        },
+        "primary_did": "0x1045",
+        "unit": null
+      }
+    },
+    "p6_successor_oracles": {
+      "steering_touch_sensor_dtc": [
+        {
+          "code": "C1A7796",
+          "description": "Steering Touch Sensor",
+          "failure": "Component Internal Failure"
+        }
+      ],
+      "steering_wheel_hold_detection": {
+        "alternate_did": null,
+        "bit_end": 7,
+        "bit_start": 0,
+        "bit_width": 8,
+        "name": "Steering Wheel Hold Detection",
+        "patterns": {
+          "0": "Release Detection",
+          "1": "Hold Detection (Steering Touch Sensor)",
+          "2": "Hold Detection (Torque Sensor)",
+          "3": "Hold Detection (Steering Touch Sensor and Torque Sensor)"
+        },
+        "primary_did": "0x1B10",
+        "unit": null
+      },
+      "zone_ecu_left_right_grip": [
+        {
+          "alternate_did": null,
+          "bit_end": 56,
+          "bit_start": 56,
+          "bit_width": 1,
+          "name": "Steering Switch (Left Steering Grip Operation Information)",
+          "patterns": {
+            "0": "OFF",
+            "1": "ON"
+          },
+          "primary_did": "0x1C01",
+          "unit": null
+        },
+        {
+          "alternate_did": null,
+          "bit_end": 57,
+          "bit_start": 57,
+          "bit_width": 1,
+          "name": "Steering Switch (Right Steering Grip Operation Information)",
+          "patterns": {
+            "0": "OFF",
+            "1": "ON"
+          },
+          "primary_did": "0x1C01",
+          "unit": null
+        }
+      ]
+    },
+    "transfer_boundary": "P5 predecessor and P6 successor rows prove Toyota treats torque and steering-touch as distinct, combinable hands-on inputs. They are semantic oracles only; their DIDs/bit positions are not transferred onto FRC_P5 vehicle-network frames."
+  },
+  "recovered_path": {
+    "bounded_network_model": "steering-wheel touch subnode -> meter-side subnetwork -> Combination Meter -> vehicle CAN/gateway -> FRC/SRS consumers",
+    "known": [
+      "steering touch sensing is an explicit TSS3 configuration dimension (Operation-FFD 5222)",
+      "Toyota models touch and torque as distinct and combinable hands-on inputs",
+      "FRC_P5 diagnoses the Steering Touch Sensor and wheel/meter CXPI communication path",
+      "current TSS3 CAN Bus Check exposes the Combination Meter as a CAN node but no standalone touch/grip ECU",
+      "current SRS DDR consumes left/right grip values and receive-validity state as first-class recorder inputs"
+    ],
+    "still_open": "The exact post-meter CAN arbitration ID, payload bits, gateway transform, and FRC parser for left/right grip remain unresolved. Closing them requires a touch-equipped vehicle capture or plaintext meter/FRC firmware; current encrypted FRC CUWs do not expose the application parser."
+  },
+  "representative_canbus_topology": {
+    "region": "NA",
+    "shared_shape": "Front Camera Module=Bus 1; Combination Meter=Bus 3; Power Steering and Spiral cable/SAS=Bus 4; no explicit touch/grip ECU appears in CAN Bus Check.",
+    "vehicles": {
+      "camry_hv": {
+        "explicit_touch_or_grip_topology_nodes": [],
+        "placements": [
+          {
+            "bus_index": 32,
+            "bus_name": "Bus 4",
+            "component_hex": "0x32",
+            "component_index": 50,
+            "ecu_domain": "Power Steering (EPS)"
+          },
+          {
+            "bus_index": 31,
+            "bus_name": "Bus 3",
+            "component_hex": "0x62",
+            "component_index": 98,
+            "ecu_domain": "Combination Meter"
+          },
+          {
+            "bus_index": 29,
+            "bus_name": "Bus 1",
+            "component_hex": "0x6D",
+            "component_index": 109,
+            "ecu_domain": "Front Camera Module"
+          },
+          {
+            "bus_index": 32,
+            "bus_name": "Bus 4",
+            "component_hex": "0xF0",
+            "component_index": 240,
+            "ecu_domain": "Spiral cable (Steering Angle Sensor)"
+          }
+        ],
+        "vehicle_name": "Camry HV",
+        "vehicle_type": 12984
+      },
+      "grand_highlander": {
+        "explicit_touch_or_grip_topology_nodes": [],
+        "placements": [
+          {
+            "bus_index": 32,
+            "bus_name": "Bus 4",
+            "component_hex": "0x32",
+            "component_index": 50,
+            "ecu_domain": "Power Steering (EPS)"
+          },
+          {
+            "bus_index": 31,
+            "bus_name": "Bus 3",
+            "component_hex": "0x62",
+            "component_index": 98,
+            "ecu_domain": "Combination Meter"
+          },
+          {
+            "bus_index": 29,
+            "bus_name": "Bus 1",
+            "component_hex": "0x6D",
+            "component_index": 109,
+            "ecu_domain": "Front Camera Module"
+          },
+          {
+            "bus_index": 32,
+            "bus_name": "Bus 4",
+            "component_hex": "0xF0",
+            "component_index": 240,
+            "ecu_domain": "Spiral cable (Steering Angle Sensor)"
+          }
+        ],
+        "vehicle_name": "Grand Highlander",
+        "vehicle_type": 12970
+      },
+      "prius": {
+        "explicit_touch_or_grip_topology_nodes": [],
+        "placements": [
+          {
+            "bus_index": 32,
+            "bus_name": "Bus 4",
+            "component_hex": "0x32",
+            "component_index": 50,
+            "ecu_domain": "Power Steering (EPS)"
+          },
+          {
+            "bus_index": 31,
+            "bus_name": "Bus 3",
+            "component_hex": "0x62",
+            "component_index": 98,
+            "ecu_domain": "Combination Meter"
+          },
+          {
+            "bus_index": 29,
+            "bus_name": "Bus 1",
+            "component_hex": "0x6D",
+            "component_index": 109,
+            "ecu_domain": "Front Camera Module"
+          },
+          {
+            "bus_index": 32,
+            "bus_name": "Bus 4",
+            "component_hex": "0xF0",
+            "component_index": 240,
+            "ecu_domain": "Spiral cable (Steering Angle Sensor)"
+          }
+        ],
+        "vehicle_name": "Prius",
+        "vehicle_type": 12933
+      },
+      "rx350h": {
+        "explicit_touch_or_grip_topology_nodes": [],
+        "placements": [
+          {
+            "bus_index": 32,
+            "bus_name": "Bus 4",
+            "component_hex": "0x32",
+            "component_index": 50,
+            "ecu_domain": "Power Steering (EPS)"
+          },
+          {
+            "bus_index": 31,
+            "bus_name": "Bus 3",
+            "component_hex": "0x62",
+            "component_index": 98,
+            "ecu_domain": "Combination Meter"
+          },
+          {
+            "bus_index": 29,
+            "bus_name": "Bus 1",
+            "component_hex": "0x6D",
+            "component_index": 109,
+            "ecu_domain": "Front Camera Module"
+          },
+          {
+            "bus_index": 32,
+            "bus_name": "Bus 4",
+            "component_hex": "0xF0",
+            "component_index": 240,
+            "ecu_domain": "Spiral cable (Steering Angle Sensor)"
+          }
+        ],
+        "vehicle_name": "RX350h",
+        "vehicle_type": 12968
+      }
+    }
+  },
+  "schema": "gtsplus-tss3-steering-touch-path-v1",
+  "standalone_wheel_category_boundary": {
+    "candidate_category_ids": [
+      30,
+      31,
+      174,
+      180,
+      254,
+      257,
+      258,
+      259,
+      811,
+      2011,
+      2022,
+      2123,
+      3032,
+      3079,
+      3087,
+      3088
+    ],
+    "conclusion": "Current NA/EU/JP install sets contain no steering-pad/combination-switch/under-wheel-switch diagnostic category alongside category 498 FRC_P5. The steering-touch wheel is therefore not represented as a standalone TSS3 GTS ECU category.",
+    "regions": {
+      "EU": {
+        "candidate_categories": [
+          {
+            "category_498_cooccurrence_count": 0,
+            "category_id": 30,
+            "database": "Stpad_P3.ddb",
+            "generation": 3,
+            "install_row_count": 17,
+            "name": "Steering Pad Switch"
+          },
+          {
+            "category_498_cooccurrence_count": 0,
+            "category_id": 31,
+            "database": "CombiSW_P3.ddb",
+            "generation": 3,
+            "install_row_count": 136,
+            "name": "Combination Switch"
+          },
+          {
+            "category_498_cooccurrence_count": 0,
+            "category_id": 174,
+            "database": "Stpad_P4.ddb",
+            "generation": 4,
+            "install_row_count": 24,
+            "name": "Steering Pad Switch"
+          },
+          {
+            "category_498_cooccurrence_count": 0,
+            "category_id": 180,
+            "database": "CombiSW_P4.ddb",
+            "generation": 4,
+            "install_row_count": 24,
+            "name": "Combination Switch"
+          },
+          {
+            "category_498_cooccurrence_count": 0,
+            "category_id": 254,
+            "database": "",
+            "generation": 4,
+            "install_row_count": 0,
+            "name": "Steering Pad Switch1"
+          },
+          {
+            "category_498_cooccurrence_count": 0,
+            "category_id": 257,
+            "database": "",
+            "generation": 4,
+            "install_row_count": 0,
+            "name": "Combination Switch1"
+          },
+          {
+            "category_498_cooccurrence_count": 0,
+            "category_id": 258,
+            "database": "",
+            "generation": 4,
+            "install_row_count": 0,
+            "name": "Steering Pad Switch2"
+          },
+          {
+            "category_498_cooccurrence_count": 0,
+            "category_id": 259,
+            "database": "",
+            "generation": 4,
+            "install_row_count": 0,
+            "name": "Combination Switch2"
+          },
+          {
+            "category_498_cooccurrence_count": 0,
+            "category_id": 811,
+            "database": "SwitchMdl_PSA.ddb",
+            "generation": 19,
+            "install_row_count": 3,
+            "name": "Switch Module under the Steering Wheel"
+          },
+          {
+            "category_498_cooccurrence_count": 0,
+            "category_id": 2011,
+            "database": "",
+            "generation": 4,
+            "install_row_count": 0,
+            "name": "Combination Switch"
+          },
+          {
+            "category_498_cooccurrence_count": 0,
+            "category_id": 2022,
+            "database": "",
+            "generation": 4,
+            "install_row_count": 0,
+            "name": "Steering Pad / Acoustic Vehicle Alerting System"
+          },
+          {
+            "category_498_cooccurrence_count": 0,
+            "category_id": 2123,
+            "database": "",
+            "generation": 4,
+            "install_row_count": 0,
+            "name": "Combination Switch"
+          },
+          {
+            "category_498_cooccurrence_count": 0,
+            "category_id": 3032,
+            "database": "",
+            "generation": 4,
+            "install_row_count": 0,
+            "name": "Steering Pad1"
+          },
+          {
+            "category_498_cooccurrence_count": 0,
+            "category_id": 3079,
+            "database": "",
+            "generation": 4,
+            "install_row_count": 0,
+            "name": "Combination Switch1"
+          },
+          {
+            "category_498_cooccurrence_count": 0,
+            "category_id": 3087,
+            "database": "",
+            "generation": 4,
+            "install_row_count": 0,
+            "name": "Steering Pad2"
+          },
+          {
+            "category_498_cooccurrence_count": 0,
+            "category_id": 3088,
+            "database": "",
+            "generation": 4,
+            "install_row_count": 0,
+            "name": "Combination Switch2"
+          }
+        ],
+        "frc_p5_install_row_count": 460
+      },
+      "JP": {
+        "candidate_categories": [
+          {
+            "category_498_cooccurrence_count": 0,
+            "category_id": 30,
+            "database": "Stpad_P3.ddb",
+            "generation": 3,
+            "install_row_count": 330,
+            "name": "Steering Pad Switch"
+          },
+          {
+            "category_498_cooccurrence_count": 0,
+            "category_id": 31,
+            "database": "CombiSW_P3.ddb",
+            "generation": 3,
+            "install_row_count": 206,
+            "name": "Combination Switch"
+          },
+          {
+            "category_498_cooccurrence_count": 0,
+            "category_id": 174,
+            "database": "Stpad_P4.ddb",
+            "generation": 4,
+            "install_row_count": 13,
+            "name": "Steering Pad Switch"
+          },
+          {
+            "category_498_cooccurrence_count": 0,
+            "category_id": 180,
+            "database": "CombiSW_P4.ddb",
+            "generation": 4,
+            "install_row_count": 13,
+            "name": "Combination Switch"
+          },
+          {
+            "category_498_cooccurrence_count": 0,
+            "category_id": 254,
+            "database": "",
+            "generation": 4,
+            "install_row_count": 0,
+            "name": "Steering Pad Switch1"
+          },
+          {
+            "category_498_cooccurrence_count": 0,
+            "category_id": 257,
+            "database": "",
+            "generation": 4,
+            "install_row_count": 0,
+            "name": "Combination Switch1"
+          },
+          {
+            "category_498_cooccurrence_count": 0,
+            "category_id": 258,
+            "database": "",
+            "generation": 4,
+            "install_row_count": 0,
+            "name": "Steering Pad Switch2"
+          },
+          {
+            "category_498_cooccurrence_count": 0,
+            "category_id": 259,
+            "database": "",
+            "generation": 4,
+            "install_row_count": 0,
+            "name": "Combination Switch2"
+          },
+          {
+            "category_498_cooccurrence_count": 0,
+            "category_id": 811,
+            "database": "",
+            "generation": 19,
+            "install_row_count": 0,
+            "name": "Switch Module under the Steering Wheel"
+          },
+          {
+            "category_498_cooccurrence_count": 0,
+            "category_id": 2011,
+            "database": "",
+            "generation": 4,
+            "install_row_count": 0,
+            "name": "Combination Switch"
+          },
+          {
+            "category_498_cooccurrence_count": 0,
+            "category_id": 2022,
+            "database": "",
+            "generation": 4,
+            "install_row_count": 0,
+            "name": "Steering Pad / Acoustic Vehicle Alerting System"
+          },
+          {
+            "category_498_cooccurrence_count": 0,
+            "category_id": 2123,
+            "database": "",
+            "generation": 4,
+            "install_row_count": 0,
+            "name": "Combination Switch"
+          },
+          {
+            "category_498_cooccurrence_count": 0,
+            "category_id": 3032,
+            "database": "",
+            "generation": 4,
+            "install_row_count": 0,
+            "name": "Steering Pad1"
+          },
+          {
+            "category_498_cooccurrence_count": 0,
+            "category_id": 3079,
+            "database": "",
+            "generation": 4,
+            "install_row_count": 0,
+            "name": "Combination Switch1"
+          },
+          {
+            "category_498_cooccurrence_count": 0,
+            "category_id": 3087,
+            "database": "",
+            "generation": 4,
+            "install_row_count": 0,
+            "name": "Steering Pad2"
+          },
+          {
+            "category_498_cooccurrence_count": 0,
+            "category_id": 3088,
+            "database": "",
+            "generation": 4,
+            "install_row_count": 0,
+            "name": "Combination Switch2"
+          }
+        ],
+        "frc_p5_install_row_count": 213
+      },
+      "NA": {
+        "candidate_categories": [
+          {
+            "category_498_cooccurrence_count": 0,
+            "category_id": 30,
+            "database": "Stpad_P3.ddb",
+            "generation": 3,
+            "install_row_count": 30,
+            "name": "Steering Pad Switch"
+          },
+          {
+            "category_498_cooccurrence_count": 0,
+            "category_id": 31,
+            "database": "CombiSW_P3.ddb",
+            "generation": 3,
+            "install_row_count": 184,
+            "name": "Combination Switch"
+          },
+          {
+            "category_498_cooccurrence_count": 0,
+            "category_id": 174,
+            "database": "Stpad_P4.ddb",
+            "generation": 4,
+            "install_row_count": 40,
+            "name": "Steering Pad Switch"
+          },
+          {
+            "category_498_cooccurrence_count": 0,
+            "category_id": 180,
+            "database": "CombiSW_P4.ddb",
+            "generation": 4,
+            "install_row_count": 40,
+            "name": "Combination Switch"
+          },
+          {
+            "category_498_cooccurrence_count": 0,
+            "category_id": 254,
+            "database": "",
+            "generation": 4,
+            "install_row_count": 0,
+            "name": "Steering Pad Switch1"
+          },
+          {
+            "category_498_cooccurrence_count": 0,
+            "category_id": 257,
+            "database": "",
+            "generation": 4,
+            "install_row_count": 0,
+            "name": "Combination Switch1"
+          },
+          {
+            "category_498_cooccurrence_count": 0,
+            "category_id": 258,
+            "database": "",
+            "generation": 4,
+            "install_row_count": 0,
+            "name": "Steering Pad Switch2"
+          },
+          {
+            "category_498_cooccurrence_count": 0,
+            "category_id": 259,
+            "database": "",
+            "generation": 4,
+            "install_row_count": 0,
+            "name": "Combination Switch2"
+          },
+          {
+            "category_498_cooccurrence_count": 0,
+            "category_id": 811,
+            "database": "",
+            "generation": 19,
+            "install_row_count": 0,
+            "name": "Switch Module under the Steering Wheel"
+          },
+          {
+            "category_498_cooccurrence_count": 0,
+            "category_id": 2011,
+            "database": "",
+            "generation": 4,
+            "install_row_count": 0,
+            "name": "Combination Switch"
+          },
+          {
+            "category_498_cooccurrence_count": 0,
+            "category_id": 2022,
+            "database": "",
+            "generation": 4,
+            "install_row_count": 0,
+            "name": "Steering Pad / Acoustic Vehicle Alerting System"
+          },
+          {
+            "category_498_cooccurrence_count": 0,
+            "category_id": 2123,
+            "database": "",
+            "generation": 4,
+            "install_row_count": 0,
+            "name": "Combination Switch"
+          },
+          {
+            "category_498_cooccurrence_count": 0,
+            "category_id": 3032,
+            "database": "",
+            "generation": 4,
+            "install_row_count": 0,
+            "name": "Steering Pad1"
+          },
+          {
+            "category_498_cooccurrence_count": 0,
+            "category_id": 3079,
+            "database": "",
+            "generation": 4,
+            "install_row_count": 0,
+            "name": "Combination Switch1"
+          },
+          {
+            "category_498_cooccurrence_count": 0,
+            "category_id": 3087,
+            "database": "",
+            "generation": 4,
+            "install_row_count": 0,
+            "name": "Steering Pad2"
+          },
+          {
+            "category_498_cooccurrence_count": 0,
+            "category_id": 3088,
+            "database": "",
+            "generation": 4,
+            "install_row_count": 0,
+            "name": "Combination Switch2"
+          }
+        ],
+        "frc_p5_install_row_count": 256
+      }
+    }
+  },
+  "title": "Toyota TSS3 steering-touch, torque hands-on, and wheel-subnode architecture",
+  "tss3_operation_surface": {
+    "namespace_boundary": "TSS3 Operation-FFD DataIDs are recorder-local identifiers. Numeric equality with a DataID in another ECU/recorder schema does not imply a shared wire signal or shared semantic meaning.",
+    "recorder_local_id_collision_examples": [
+      {
+        "bit_length": 8,
+        "bit_position": 7,
+        "byte_position": 1,
+        "data_id": "5501",
+        "name": "LDA Customize Status Flag"
+      },
+      {
+        "bit_length": 8,
+        "bit_position": 7,
+        "byte_position": 2,
+        "data_id": "5501",
+        "name": "LDA Control Status"
+      },
+      {
+        "bit_length": 8,
+        "bit_position": 7,
+        "byte_position": 1,
+        "data_id": "5505",
+        "name": "LDA Fail Status"
+      },
+      {
+        "bit_length": 8,
+        "bit_position": 7,
+        "byte_position": 2,
+        "data_id": "5505",
+        "name": "LDA EPS Fail Status"
+      },
+      {
+        "bit_length": 8,
+        "bit_position": 7,
+        "byte_position": 3,
+        "data_id": "5505",
+        "name": "LDA Fail Hold Flag"
+      }
+    ],
+    "touch_sensor_presence": {
+      "bit_length": 8,
+      "bit_position": 7,
+      "byte_position": 1,
+      "data_id": "5222",
+      "data_size": 1,
+      "name": "Touch sensor presence",
+      "support_did": 0
+    }
+  },
+  "venza_srs_024_boundary": {
+    "boundary": "The tracked 2021 Venza SRS firmware proves 0x024 is a real authenticated CAN-FD receive PDU: its SecOC row maps to application Rx PDU 14, and both the normal Rx descriptor and hardware acceptance table map PDU 14 to CAN 0x024. Nothing in this firmware statically identifies 0x024 as steering grip; it must not be promoted to a touch-sensor carrier without an independent semantic join.",
+    "candidate_0x024": {
+      "application_rx_pdu": 14,
+      "configured_length": 32,
+      "grip_semantic_join_proved": false,
+      "hardware_acceptance_can_id": "0x024",
+      "normal_rx_can_id": "0x024",
+      "physical_can_id_proved": true,
+      "profile_offset": "0x1D7B8",
+      "secoc_data_id": "0x024"
+    },
+    "profiles": [
+      {
+        "application_rx_pdu": 0,
+        "configured_length": 8,
+        "hardware_acceptance_can_id": "0x00F",
+        "normal_rx_can_id": "0x00F",
+        "profile_offset": "0x1D6C8",
+        "secoc_data_id": "0x00F"
+      },
+      {
+        "application_rx_pdu": 16,
+        "configured_length": 32,
+        "hardware_acceptance_can_id": "0x090",
+        "normal_rx_can_id": "0x090",
+        "profile_offset": "0x1D718",
+        "secoc_data_id": "0x090"
+      },
+      {
+        "application_rx_pdu": 18,
+        "configured_length": 32,
+        "hardware_acceptance_can_id": "0x0D7",
+        "normal_rx_can_id": "0x0D7",
+        "profile_offset": "0x1D768",
+        "secoc_data_id": "0x0D7"
+      },
+      {
+        "application_rx_pdu": 14,
+        "configured_length": 32,
+        "hardware_acceptance_can_id": "0x024",
+        "normal_rx_can_id": "0x024",
+        "profile_offset": "0x1D7B8",
+        "secoc_data_id": "0x024"
+      }
+    ],
+    "source": {
+      "path": "community/yc/venza/cflash.bin",
+      "sha256": "2dfaf7ce21cb04af1126192f574103f63802352f8717fa0f03986d5a11d067f9"
+    }
+  }
+}
