@@ -101,14 +101,18 @@ Optional repeated qualification before any openpilot integration:
 This repeats current-angle replacements for one second with the SAME resident.
 It does not intentionally request steering movement.
 
-Only after the current-angle soak is clean, the next moving authority discriminator is:
+Only after the current-angle soak is clean, the next moving signed-delivery/authority probe is:
 
-  ./crown-tss3-signer authority-pulse 1.0 /tmp/crown-authority-plus1.json
+  ./crown-tss3-signer authority-pulse 0.5 /tmp/crown-authority-plus05.json
 
-This derives a target from the fresh measured 0x025 angle, holds +1.0 degree for
-250 ms while the car is already moving, records bus-1 0x025/0x0AA/READY throughout,
-then stops C7 so native B6 resumes unchanged. It requires observable wheel motion but
-does not hard-code an unrecovered Crown minimum-speed threshold.
+This derives a target from the fresh measured 0x025 angle, holds the requested
+bounded offset for 250 ms while the car is already moving, records bus-1
+0x025/0x0AA/READY throughout, then stops C7 so native B6 resumes unchanged. The
+baseline waits at least 350 ms and up to 2.5 s for the required witnesses. It
+requires observable wheel motion but does not hard-code an unrecovered Crown
+minimum-speed threshold. Its verdict qualifies signed delivery only; steering
+motion remains a separately interpreted timeline because driver/road motion can
+confound physical authority.
 
 At any point, a full EPS power cycle removes the resident/helper and returns the ECU to stock RAM state.
 Please retain/send back all /tmp/crown-*.json outputs.
@@ -177,7 +181,7 @@ def build(out: Path) -> dict:
             "continue only if native_verification.native_verified=true",
             "READY/Park/stationary: ./crown-tss3-signer replace-current /tmp/crown-replace-current.json",
             "optional repeated qualification without an openpilot port: ./crown-tss3-signer soak-current /tmp/crown-soak.json",
-            "moving authority discriminator only after clean soak: ./crown-tss3-signer authority-pulse 1.0 /tmp/crown-authority-plus1.json",
+            "moving signed-delivery/authority probe only after clean soak: ./crown-tss3-signer authority-pulse 0.5 /tmp/crown-authority-plus05.json",
             "preflight/install/load/control use stock functional UDS 0x777; no Crown CodeFlash patch is used",
             "replace-current/soak-current use the fresh Crown 0x025 measured angle; full EPS power cycle removes the resident",
         ],

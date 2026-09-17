@@ -150,21 +150,35 @@ with tempfile.TemporaryDirectory(prefix="verify-crown-f30-signer-") as td:
     check("plan makes functional mailbox proof the first vehicle action", "prove stock functional 0x777 mailbox delivery" in plan["sequence"][0])
     check("standalone mailbox probe frame exact", mailbox_probe.PROBE_FRAME == bytes.fromhex("07c7c7a512340000"))
     check("authority pulse remains a separate bounded host-side probe",
-          authority_probe.BASELINE_SECONDS == 0.350 and authority_probe.PULSE_DURATION_SECONDS == 0.250 and
-          authority_probe.RATE_HZ == 50.0 and authority_probe.MAX_ABS_OFFSET_DEG == 1.0 and
-          authority_probe.DIRECTIONAL_RESPONSE_DEG == 0.2)
+          authority_probe.BASELINE_MIN_SECONDS == 0.350 and authority_probe.BASELINE_TIMEOUT_SECONDS == 2.5 and
+          authority_probe.PULSE_DURATION_SECONDS == 0.250 and authority_probe.RATE_HZ == 50.0 and
+          authority_probe.MAX_ABS_OFFSET_DEG == 1.0 and authority_probe.DIRECTIONAL_RESPONSE_DEG == 0.2)
     raw, deg = authority_probe.offset_target(start_deg=-3.8, offset_deg=1.0)
     check("authority pulse derives target from fresh measured angle",
           raw == host.target_raw_from_degrees(-2.8) and abs(deg - host.target_degrees_from_raw(raw)) < 1e-15)
     check("authority pulse direction metric is sign-correct",
           authority_probe.directional_delta(start_deg=0.0, offset_deg=1.0, angles=[-0.1, 0.1, 0.4]) == 0.4 and
           authority_probe.directional_delta(start_deg=0.0, offset_deg=-1.0, angles=[0.1, -0.2, -0.5]) == 0.5)
+    angle_summary = authority_probe.summarize_angle_windows(
+        samples=[
+            {"t_seconds": 0.003, "kind": "steering_angle", "angle_deg": 5.0},
+            {"t_seconds": 0.340, "kind": "steering_angle", "angle_deg": 0.0},
+            {"t_seconds": 0.360, "kind": "steering_angle", "angle_deg": 0.1},
+            {"t_seconds": 0.590, "kind": "steering_angle", "angle_deg": 0.6},
+            {"t_seconds": 0.800, "kind": "steering_angle", "angle_deg": 3.0},
+        ],
+        pulse_start_t=0.350, pulse_end_t=0.600, offset_deg=0.5, fallback_start_deg=0.0,
+    )
+    check("authority analysis excludes baseline and post-pulse motion from pulse-window response",
+          angle_summary["pulse_reference_deg"] == 0.0 and
+          abs(angle_summary["pulse_window_directional_delta_deg"] - 0.6) < 1e-12 and
+          abs(angle_summary["pulse_end_directional_delta_deg"] - 0.6) < 1e-12 and
+          abs(angle_summary["post_pulse_continuation_deg"] - 2.4) < 1e-12)
     class AuthorityPanda:
-        def __init__(self, rows):
-            self.rows = list(rows)
+        def __init__(self, *batches):
+            self.batches = [list(rows) for rows in batches]
         def can_recv(self):
-            rows, self.rows = self.rows, []
-            return rows
+            return self.batches.pop(0) if self.batches else []
     moving_wheel = bytes.fromhex("1ad31ad31ad31ad3")
     authority_angle = bytes(32)
     authority_rows = [
@@ -173,9 +187,14 @@ with tempfile.TemporaryDirectory(prefix="verify-crown-f30-signer-") as td:
         (host.STEERING_ANGLE_CAN_ID, 0, authority_angle, 1),
     ]
     authority_samples = []
-    with mock.patch.object(authority_probe, "BASELINE_SECONDS", 0.001):
-        baseline = authority_probe.moving_baseline(AuthorityPanda(authority_rows), origin=__import__("time").monotonic(), samples=authority_samples)
-    check("authority pulse baseline requires READY and observable wheel motion",
+    with (
+        mock.patch.object(authority_probe, "BASELINE_MIN_SECONDS", 0.001),
+        mock.patch.object(authority_probe, "BASELINE_TIMEOUT_SECONDS", 0.050),
+    ):
+        baseline = authority_probe.moving_baseline(
+            AuthorityPanda([], authority_rows), origin=__import__("time").monotonic(), samples=authority_samples
+        )
+    check("authority pulse baseline retries missing first-window traffic and accepts READY plus motion",
           baseline["ready"]["ready"] == 1 and max(abs(x) for x in baseline["wheel_speed"]["centered_raw"]) == 100 and
           baseline["steering_angle"]["angle_deg"] == 0.0)
     for bad in (0.0, 1.01, -1.01):
@@ -319,7 +338,21 @@ with tempfile.TemporaryDirectory(prefix="verify-crown-f30-signer-") as td:
           any("soak-current" in row for row in kit_meta["usage"]))
     check("field kit exposes bounded moving authority pulse without changing resident",
           "authority-pulse" in launcher_text and
-          any("authority-pulse 1.0" in row for row in kit_meta["usage"]))
+          any("authority-pulse 0.5" in row for row in kit_meta["usage"]))
+    authority_tool = kit / "runtime/tools/targets/crown/live/crown_f30_authority_probe.py"
+    (fake_host / "tools").mkdir(exist_ok=True)
+    (fake_host / "tools/__init__.py").write_text("# host regular tools package\n", encoding="utf-8")
+    authority_plan = subprocess.run([
+        sys.executable, str(authority_tool),
+        "--payload", str(kit / "ram_payloads/crown_f30_b6_inline_signer_payload.bin"),
+        "--helper", str(kit / "ram_payloads/crown_f30_b6_inline_signer_helper_padded.bin"),
+        "--meta", str(kit / "ram_payloads/crown_f30_b6_inline_signer.json"),
+        "--offset-deg", "0.5",
+    ], cwd=kit, env={**__import__("os").environ, "PYTHONPATH": f"{kit / 'runtime'}:{fake_host}"},
+       capture_output=True, text=True)
+    check("authority probe remains standalone when host provides a conflicting regular tools package",
+          authority_plan.returncode == 0 and
+          json.loads(authority_plan.stdout)["schema"] == "crown-f30-b6-moving-authority-pulse-plan-v1")
     soak_tool = kit / "runtime/tools/targets/crown/live/crown_f30_resident_soak.py"
     soak_plan = subprocess.run([
         sys.executable, str(soak_tool),
