@@ -64,12 +64,25 @@ class TestRecovery(unittest.TestCase):
                     self.assertEqual(recovery.drcc_permission_observed(oracles), mode in (1, 2, 4) and allowed and not unavailable)
 
     def test_missing_fields_never_mean_no_fault(self):
-        for did, required in ((0x1903, 1), (0x1905, 2), (0x1906, 6)):
+        for did, required in ((0x1B09, 6), (0x1903, 1), (0x1905, 2), (0x1906, 6)):
             for size in range(required):
                 with self.assertRaises(recovery.RecoveryError):
                     recovery.decode_frc_did(did, b"\x62" + did.to_bytes(2, "big") + bytes(size))
+        for did, required in ((0x102D, 8), (0x102F, 10)):
+            for size in range(required):
+                with self.assertRaises(recovery.RecoveryError):
+                    recovery.decode_brake_did(did, b"\x62" + did.to_bytes(2, "big") + bytes(size))
         with self.assertRaises(KeyError):
             recovery.drcc_permission_observed({"0x1903": {"control_mode": 1}, "0x1905": {"cruise_control_allowed": True}, "0x1906": {}})
+
+    def test_gts_fault_state_decoders(self):
+        frc = recovery.decode_frc_did(0x1B09, bytes.fromhex("621b09010203040506"))
+        self.assertEqual(frc["fail_safe_factors"], {"b1a": 1, "b1b": 2, "b2": 3, "c1": 4, "c2": 5, "d1": 6})
+        brake_102d = recovery.decode_brake_did(0x102D, bytes.fromhex("62102d0000000000000060"))
+        self.assertTrue(brake_102d["fail_status"])
+        self.assertTrue(brake_102d["fail_control"])
+        brake_102f = recovery.decode_brake_did(0x102F, bytes.fromhex("62102f00000000000000000020"))
+        self.assertTrue(brake_102f["eps_communication_open"])
 
     def test_pending_and_unrelated_reply_do_not_finish_request(self):
         panda = FakePanda()
@@ -107,6 +120,18 @@ class TestRecovery(unittest.TestCase):
                 return bytes.fromhex("62f181") + recovery.EXPECTED_EPS_F181
             if pdu == bytes.fromhex("1902ff"):
                 return bytes.fromhex("5902bdc13187ac")
+            if pdu == bytes.fromhex("221b09"):
+                return bytes.fromhex("621b09010203040506")
+            if pdu == bytes.fromhex("221903"):
+                return bytes.fromhex("62190301")
+            if pdu == bytes.fromhex("221905"):
+                return bytes.fromhex("6219050080")
+            if pdu == bytes.fromhex("221906"):
+                return bytes.fromhex("621906008000000000")
+            if pdu == bytes.fromhex("22102d"):
+                return bytes.fromhex("62102d0000000000000060")
+            if pdu == bytes.fromhex("22102f"):
+                return bytes.fromhex("62102f00000000000000000020")
             if pdu == bytes.fromhex("14ffffff"):
                 # The durable pre-clear file must precede even the first clear.
                 saved = json.loads(output.read_text())

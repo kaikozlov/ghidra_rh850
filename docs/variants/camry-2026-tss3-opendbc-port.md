@@ -81,9 +81,59 @@ The exact-F33 same-cycle outcome is already negative. The parked/READY diagnosti
 clear can remove the communication-warning/DTC state while leaving the RAM resident
 intact, but **DRCC did not re-enable after that clear in the same ignition cycle**.
 Only a full vehicle restart restored DRCC, which also removed the RAM signer. The
-historical `recover-drcc` command remains useful for preserving SID19 evidence and
-reading FRC `0x1903/0x1905/0x1906`, but it is diagnostic/forensic tooling rather
-than a runtime recovery strategy.
+historical `recover-drcc` command remains useful for preserving SID19 evidence, but
+it is diagnostic/forensic tooling rather than a runtime recovery strategy.
+
+Current GTS+ exposes several state layers below DTC storage. `ABS_P5` DID `0x102D`
+provides live `Fail Status` (MSB0 bit57) and `Fail Control` (bit58), while DID
+`0x102F` provides `EPS/Steering Control Actuator ECU Communication Open` at MSB0
+bit74 with OEM states `Normal` / `Under intermittent`; these fields are also in the
+Brake/EPB generic freeze-frame schema. FRC still exposes the immediate ACC consequence
+through `0x1903 Control Mode`, `0x1905 Cruise Control Permission Flag`, and `0x1906`
+`ACC Not Available Icon Lighting Request Flag`. `FRC_P5` DID `0x1B09` additionally
+contains six unsigned bytes named `Fail-Safe Factor B1a`, `B1b`, `B2`, `C1`, `C2`,
+and `D1`, and GTS+ snapshots them in FRC freeze frames. However, these bytes sit in the
+`0x1B03..0x1B09` ISA/speed-limiter request block, and successor `ADCU_P6` explicitly
+names the same six-factor shape `... for Speed Limiter`. They are therefore useful
+ancillary fail-safe evidence but **not identified as the DRCC latch**.
+
+The strongest DRCC-specific GTS+ state is in the exact Camry-installed Hybrid-Control
+`HV_P5` RoB schema. Returned RoB DID `0x55FE` contains `Request Manual Cancel`
+(MSB0 bit12), `Request Automatic Cancel` (bit13), `Cruise Brake Control Permission
+Condition` (bit14, `NG/OK`), and `Cruise Control Permission Condition` (bit15,
+`NG/OK`). RoB DID `0x55FF` carries `Cruise Control Condition` at bits80..87 with the
+exact Toyota enum `1=No Control`, `2=Constant Speed Control Mode - Ready`,
+`3=...Controlling`, `4=Vehicle Distance Control Mode - Ready`, `5=...Controlling`,
+`6=Termination Control`, `7=Suspend`, `8=Abnormal Stop`. These are not ordinary
+Data-List DIDs; they are behavior-record snapshots. Current GTS+ role `0xA0`
+`GetRoBP5_DT.dll` retrieves them read-only by enumerating behavior codes with
+`AB01/AB11`, frame IDs with `AB02/AB12`, and records with `AB03/AB13`; each returned
+record is a set of DID/length/data blocks. The behavior dictionaries themselves
+also provide useful named event classes: Hybrid includes `X0586 Shift Operation during
+Power Steering System Preparation` and `X05A8 Lack of Advanced Drive Torque`; FRC
+includes `X216E Front Recognition Camera => BRK Communication Invalid` and `X2400
+Lateral Control System Malfunction`; Brake includes `X208E Power Steering Control
+Module Malfunction`. Presence of one of those returned behavior codes is event-history
+evidence, not by itself proof of the live gating owner. The maintained
+`toyota-diagnostics` `health-check` implementation already executes and decodes that
+exact current-GTS+ RoB protocol, so `toyota --profile camry-2026-f33 health-check
+--out <file>` can capture FRC/Hybrid/Brake behavior history without a new vehicle
+probe protocol. The same Health Check also issues the recovered ordinary-P5 per-DTC
+freeze-frame request `19 04 <DTC:3> FF`, retaining and decoding returned snapshot
+DID blocks. A post-bootstrap capture can therefore preserve both the U0131-specific
+snapshot at fault time and the independent RoB behavior history before any DTC clear.
+
+The current FRC Active-Test catalog has 69 routine candidates but no fail-safe/ACC
+recovery or reset routine; its relevant entries are display/buzzer/steering-vibration
+operations. Thus GTS+ currently gives us **observability, not an obvious unlatch
+command**. `camry_f33_post_install_recovery.py` now snapshots the FRC and Brake live
+state DIDs before and after the known DTC clear, treating newly added DDB-derived DIDs
+as best-effort until exact-car support is observed. The higher-value paired capture is
+a before/after `health-check`: if DTC bits clear and Brake EPS communication has
+returned normal while Hybrid RoB records show cruise permission `NG`, automatic cancel,
+`Suspend`, or `Abnormal Stop`, the persistent denial is in the cruise-control state
+machine rather than DTC memory. If Brake `Fail Control` or EPS communication-open stays
+asserted, the brake-domain dependency remains active instead.
 
 Production deployment must therefore either prevent the peer fail-safe/latch from
 being entered or recover a deeper peer state than DTC memory. The current leading
