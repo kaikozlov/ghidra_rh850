@@ -21,7 +21,7 @@ Profiles:
   semantic-coverage            Export/review semantic coverage ledger + summary
   project-inventory            Export normalized project inventory (build/out or build/tmp only)
 
-PROJECT_DIR defaults to build/work/project. Profile-specific environment
+PROJECT_DIR defaults to the selected target's registered work_dir. Profile-specific environment
 variables (MAP, CSV_OUT, SUMMARY_OUT) remain supported where they existed.
 EOF
 }

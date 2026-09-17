@@ -5,11 +5,11 @@ RH850/P1M-E EPS firmware and the surrounding TSS3 control stack. The repository
 combines firmware analysis, Toyota GTS+/Techstream reverse engineering,
 vehicle-bound captures, diagnostic tooling, and reproducible runtime experiments.
 
-The Sienna EPS calibration **`8965B4512000`** remains the primary reference image
-for deep P1M-E internals, but the project is no longer a single-firmware study.
-The 2026 Camry F33, two newer Corolla EPS calibrations, and the 2024 Crown are
-first-class analysis targets with their own firmware, Ghidra projects, generated
-evidence, and live or field evidence.
+The maintainer's 2026 Camry F33 EPS **`8965F3307000`** is the primary/default
+analysis target. The older Sienna `8965B4512000` is retained as a legacy
+reference for deep P1M-E/SecOC internals, while two Corolla calibrations and the
+2024 Crown remain first-class comparison targets with their own firmware, Ghidra
+projects, generated evidence, and live or field evidence.
 
 The evidence rule is unchanged: **firmware bytes and deterministic verification
 are authoritative**. Generated artifacts, Ghidra annotations, captures, external
@@ -63,14 +63,15 @@ For the live execution queue, read
 **[docs/status/PRIORITIES.md](docs/status/PRIORITIES.md)**. For the exact Camry
 control result, start with
 **[docs/variants/toyota-tss3-openpilot-bounty-evidence.md](docs/variants/toyota-tss3-openpilot-bounty-evidence.md)**.
-The older Sienna-centric technical overview remains useful for the reference
-firmware in **[docs/OVERVIEW.md](docs/OVERVIEW.md)**.
+The project-level technical orientation is **[docs/OVERVIEW.md](docs/OVERVIEW.md)**;
+the former Sienna-specific overview is retained under `docs/variants/`.
 
 ## Start here
 
 | Goal | Read / run |
 |---|---|
-| Understand the Sienna reference firmware | [docs/OVERVIEW.md](docs/OVERVIEW.md) |
+| Understand the current project / primary Camry target | [docs/OVERVIEW.md](docs/OVERVIEW.md) |
+| Understand the legacy Sienna reference firmware | [docs/variants/sienna-8965B4512000-overview.md](docs/variants/sienna-8965B4512000-overview.md) |
 | Understand the TSS3/openpilot control result | [docs/variants/toyota-tss3-openpilot-bounty-evidence.md](docs/variants/toyota-tss3-openpilot-bounty-evidence.md) |
 | See the exact 2026 Camry evidence and target history | [targets/camry-2026/README.md](targets/camry-2026/README.md) |
 | See the minimal TSS3 runtime boundary | [docs/architecture/toyota-tss3-minimal-runtime.md](docs/architecture/toyota-tss3-minimal-runtime.md) |
@@ -90,10 +91,11 @@ set is:
 
 | Target | Role | Vehicle / calibration |
 |---|---|---|
-| `sienna-8965B4512000` | primary reference | Toyota Sienna `8965B4512000` |
-| `camry-8965F3307000` | first-class | 2026 Toyota Camry Hybrid `8965F3307000` |
-| `corolla-8965H1202000` | first-class | 2023 Toyota Corolla `8965H1202000` |
+| `camry-8965F3307000` | **primary/default** | 2026 Toyota Camry Hybrid `8965F3307000` |
 | `crown-8965F3012000` | first-class | 2024 Toyota Crown Limited `8965F3012000` |
+| `corolla-8965F1208000` | first-class | 2025 Toyota Corolla `8965F1208000` |
+| `corolla-8965H1202000` | first-class | 2023 Toyota Corolla `8965H1202000` |
+| `sienna-8965B4512000` | legacy reference | Toyota Sienna `8965B4512000` |
 
 Do not infer equivalence from the common P1M-E/SecOC architecture. A signal,
 address, secret, freshness slot, diagnostic route, or control behavior belongs to
@@ -125,15 +127,15 @@ Explore firmware through the target-aware analysis surface:
 ```bash
 tools/gtarget list
 tools/gtarget show camry-8965F3307000
-tools/g inspect 0x8db22 --decompile --callers --callees --xrefs --disasm 40
-tools/pseudo security_access --list
+tools/g inspect 0x8549e --decompile --callers --callees --xrefs --disasm 40
+tools/pseudo 0x8549e
 tools/gts search LTA
 tools/toyota capabilities
 ```
 
-For the primary Sienna project, `tools/g` materializes the safe working copy
-itself. **Never daemon-open committed `project/` or `projects/` directly.** Those
-are snapshots; mutable analysis belongs under ignored `build/`. Read
+For the primary Camry project, `tools/g` materializes the safe registered working
+copy itself. **Never daemon-open committed `projects/` directly.** Those are
+snapshots; mutable analysis belongs under ignored `build/`. Read
 [AGENTS.md](AGENTS.md) before changing the repository and
 [docs/WORKFLOW.md](docs/WORKFLOW.md) for the full lifecycle.
 
@@ -142,8 +144,7 @@ are snapshots; mutable analysis belongs under ignored `build/`. Read
 | Path | Role |
 |---|---|
 | `firmware/` | Exact committed firmware inputs — highest evidence authority |
-| `project/` | Committed Sienna Ghidra snapshot |
-| `projects/` | Committed first-class variant Ghidra snapshots |
+| `projects/` | Committed packed Ghidra snapshots for every registered target |
 | `targets/` | Vehicle-bound captures, manifests, runtime evidence, and target-local provenance |
 | `tests/` | Deterministic binary/tooling verification |
 | `data/` | Curated and generated machine-readable evidence |

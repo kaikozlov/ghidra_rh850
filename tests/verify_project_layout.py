@@ -228,10 +228,10 @@ print("== committed snapshot repository invariant ==")
 if TOOL.exists():
     result = run(
         "validate-snapshot",
-        "--snapshot-dir", str(REPO / "project"),
+        "--snapshot-dir", str(REPO / "projects" / "sienna-8965B4512000"),
         "--project-name", NAME,
     )
-    check("repository project/ uses non-live names", result.returncode == 0, result.stderr)
+    check("repository Sienna snapshot uses non-live names", result.returncode == 0, result.stderr)
 else:
     check("project layout tool exists", False, str(TOOL))
 

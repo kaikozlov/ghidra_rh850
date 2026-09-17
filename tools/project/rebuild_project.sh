@@ -22,7 +22,7 @@ usage() {
 Usage: tools/project/rebuild_project.sh [options]
 
 Options:
-  --project-dir DIR   Output directory (default: build/work/project)
+  --project-dir DIR   Output directory (default: registered Sienna work_dir)
   --ghidra-home DIR  Ghidra installation root (or set GHIDRA_HOME)
   --force            Remove an existing output project first
   --refresh-diagnostic-vocabulary
@@ -30,7 +30,7 @@ Options:
   -h, --help         Show this help
 
 The output must resolve to a dedicated directory below build/work/. Committed
-project/, cache/output namespaces, and arbitrary external paths are never rebuild destinations.
+projects/, cache/output namespaces, and arbitrary external paths are never rebuild destinations.
 EOF
 }
 

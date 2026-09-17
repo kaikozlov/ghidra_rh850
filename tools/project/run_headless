@@ -18,7 +18,7 @@ usage() {
 Usage: tools/project/run_headless --project-dir DIR --project NAME [options] -- ARGS...
 
 Options:
-  --project-dir DIR  Project directory (canonicalized; committed project/ rejected)
+  --project-dir DIR  Project directory (canonicalized; committed projects/ rejected)
   --project NAME     Ghidra project name
   --log PATH         Durable complete log (default: temporary log)
   --label TEXT       Stage label used in diagnostics
@@ -59,7 +59,7 @@ for arg in "$@"; do
   esac
 done
 
-PROJECT_DIR=$(python3 - "$PROJECT_DIR" "$ROOT/project" <<'PY'
+PROJECT_DIR=$(python3 - "$PROJECT_DIR" "$ROOT/projects" <<'PY'
 from pathlib import Path
 import sys
 path = Path(sys.argv[1]).expanduser().resolve(strict=False)

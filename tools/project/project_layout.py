@@ -2,8 +2,8 @@
 """Convert between committed snapshot names and a live Ghidra project layout.
 
 Committed snapshots deliberately use ``.gpr.snapshot`` / ``.rep.snapshot`` so
-raw Ghidra cannot open and compact ``project/``. Working copies use normal
-``.gpr`` / ``.rep`` names under ``build/work/project``.
+raw Ghidra cannot open and compact committed ``projects/<target>/`` snapshots.
+Working copies use normal ``.gpr`` / ``.rep`` names under ``build/work/``.
 """
 from __future__ import annotations
 

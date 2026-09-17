@@ -33,7 +33,7 @@ tools/annotations add function 0x8db22 uds_security_access_handler --apply
 ```
 
 `--apply` and `apply` always go through `tools/g`, then cleanly stop the bridge so
-the working-copy edit is durable. The committed `project/` snapshot remains
+the working-copy edit is durable. The committed `projects/sienna-8965B4512000/` snapshot remains
 non-openable and protected by the normal lifecycle guard. A
 working-project replay is for the edit loop; the canonical proof remains a fresh
 `make rebuild-project` followed by project-parity verification and normal

@@ -1,8 +1,10 @@
 # Variants
 
-Sienna `8965B4512000` is the primary analyzed calibration. Related variants do
-not inherit its findings automatically: each transfer remains a hypothesis until
-checked against that variant's own evidence. The tracked 2023-Corolla corpus historically labelled `8965H1202000` is now
+Camry `8965F3307000` is the primary/default analysis target. Sienna
+`8965B4512000` remains the legacy deep-reference calibration for P1M-E/SecOC
+internals. No target inherits another target's findings automatically: each
+transfer remains a hypothesis until checked against that target's own evidence.
+The tracked 2023-Corolla corpus historically labelled `8965H1202000` is now
 the first exact foreign image used for such checks; its later direct application
 F181 is `8965F1208000/8A3111202000`, while `8965H1202000` belongs to the
 auxiliary DID-2032 identity. Span's distinct physical `8965F1208000` specimen has
@@ -11,11 +13,11 @@ wider TSS 3.0 family keep their own narrower evidence boundaries.
 
 | Variant | Firmware | Status | Report |
 |---|---|---|---|
-| Sienna (China) | `8965B4512000` | Fully analyzed (this repo) | [sienna-8965B4512000.md](sienna-8965B4512000.md) |
+| Sienna (China) | `8965B4512000` | Legacy deep-reference calibration | [sienna-8965B4512000.md](sienna-8965B4512000.md) · [legacy overview](sienna-8965B4512000-overview.md) |
 | Sienna (Vance partner) | `8965B4514000` | External field report pinned; firmware/raw outputs unavailable | [sienna-8965B4514000.md](sienna-8965B4514000.md) |
 | Corolla | `8965F1208000` / `8A3111213000`; auxiliary DID2032 `8965H1213000` | First-class R7F701383 firmware/DataFlash/project snapshot and 5,811-function canonical corpus; persisted 2026-08-21 full memory acquisition; H/F application equivalence and active `0xA000` unit calibration closed | [corolla-8965F1208000.md](corolla-8965F1208000.md) |
 | Corolla (reported 2023 US / albinoelephant) | direct app F181 `8965F1208000` / `8A3111202000`; auxiliary DID2032 `8965H1202000` | First-class R7F701383 firmware/DataFlash/project snapshot and 5,811-function canonical corpus; complete memory corpus + same-car eps-telescope probe retained; direct F181/MCU/live Gate-2/boot-RAM-exec joins verified; the 2026-09-10 external field report records openpilot `0x160` modification/transmission with reported lead-following behavior, but the September-16 shared-request-plane audit supersedes using that result as proof that `0x160` is authoritative longitudinal command ingress; the contributor architecture/change reference remains retained as historical topology/E2E evidence | [corolla-2023-us-public-route.md](corolla-2023-us-public-route.md) · [Toyota TSS3 bounty evidence](toyota-tss3-openpilot-bounty-evidence.md) |
-| Camry (first-class maintainer target) | EPS F181 `8965F3307000` / `8A3113303100`; exact 1-MiB CodeFlash SHA-256 `42dce8ef…d9b0e7`; canonical 6,062-function Ghidra corpus; FRC `8646F3315000`; Brake/EPB `F152633K0000` | First-class firmware/DataFlash/project snapshot; target-native B6/SecOC receiver, timing, limits, Ready/gear/cruise state and authenticated boot RAM path closed; September 10 route demonstrates C7/RAM-resident openpilot lateral control with Toyota LTA off | [camry-2026-live-baseline.md](camry-2026-live-baseline.md) · [Toyota TSS3 bounty evidence](toyota-tss3-openpilot-bounty-evidence.md) |
+| Camry (**primary/default maintainer target**) | EPS F181 `8965F3307000` / `8A3113303100`; exact 1-MiB CodeFlash SHA-256 `42dce8ef…d9b0e7`; canonical 6,062-function Ghidra corpus; FRC `8646F3315000`; Brake/EPB `F152633K0000` | First-class firmware/DataFlash/project snapshot; target-native B6/SecOC receiver, timing, limits, Ready/gear/cruise state and authenticated boot RAM path closed; September 10 route demonstrates C7/RAM-resident openpilot lateral control with Toyota LTA off | [camry-2026-live-baseline.md](camry-2026-live-baseline.md) · [Toyota TSS3 bounty evidence](toyota-tss3-openpilot-bounty-evidence.md) |
 | Camry F33 TSS3 fault/status contract | `8965F3307000` | Exact target-native `0x394` classifier/DEM/DTC/aging closure; openpilot temp/permanent mapping remains live-policy bounded | [camry-2026-tss3-fault-status.md](camry-2026-tss3-fault-status.md) |
 | TSS3 Front Recognition Camera acquisition | Camry FRC `8646F3315000`; local Corolla FRC CUW family `8646F1...` | FRC request/arbitration recorder stages recovered; ReproStd image encryption boundary closed; exact Camry application plaintext/boot decoder still pending | [tss3-frc-firmware-acquisition.md](tss3-frc-firmware-acquisition.md) |
 | Camry openpilot integration | software revisions pinned in-doc | 2026-09-10 road demonstration closes exact development lateral control with Toyota LTA off; ordinary port contract, replay audit, longitudinal evidence, capability boundaries, and bounty review summary retained | [Toyota TSS3 bounty evidence](toyota-tss3-openpilot-bounty-evidence.md) · [camry-2026-tss3-integration-audit.md](camry-2026-tss3-integration-audit.md) · [camry-2026-longitudinal-evidence.md](camry-2026-longitudinal-evidence.md) · [camry-2026-capability-matrix.md](camry-2026-capability-matrix.md) |

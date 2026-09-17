@@ -9,10 +9,20 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from project.generate_decompiler_corpus import DEFAULT_OUTPUT, DEFAULT_VIEW, materialize_view
+from project.generate_decompiler_corpus import DEFAULT_VIEW, materialize_view
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_INVENTORY = ROOT / "data/ghidra_project_inventory.baseline.jsonl"
+REGISTRY = ROOT / "data/analysis_targets.json"
+
+
+def resolve_target(name: str | None) -> tuple[str, dict[str, Any]]:
+    registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
+    resolved = name or registry["default_target"]
+    try:
+        row = registry["targets"][resolved]
+    except KeyError as exc:
+        raise SystemExit(f"unknown analysis target: {resolved}") from exc
+    return resolved, row
 
 
 def load_corpus(path: Path) -> tuple[dict[str, Any], list[dict[str, Any]]]:
@@ -172,13 +182,14 @@ def print_code(records: list[dict[str, Any]], *, separators: bool) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("query", nargs="?", help="function address, exact name, or name substring")
+    parser.add_argument("--target", help="registered analysis target; defaults to data/analysis_targets.json primary")
     parser.add_argument(
         "--data-ref", metavar="ADDRESS",
         help="find functions whose canonical Ghidra data-reference graph targets ADDRESS",
     )
-    parser.add_argument("--corpus", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument("--corpus", type=Path)
     parser.add_argument(
-        "--inventory", type=Path, default=DEFAULT_INVENTORY,
+        "--inventory", type=Path,
         help="project inventory used for exact interior-address containment",
     )
     parser.add_argument("--all", action="store_true", help="print pseudocode for every substring match")
@@ -191,8 +202,15 @@ def main() -> int:
     )
     parser.add_argument("--view-dir", type=Path, default=DEFAULT_VIEW)
     args = parser.parse_args()
-
-    metadata, functions = load_corpus(args.corpus)
+    _target_name, target_row = resolve_target(args.target)
+    corpus = args.corpus or (ROOT / target_row["decompiler_corpus"])
+    metadata, functions = load_corpus(corpus)
+    if args.inventory is not None:
+        inventory = args.inventory
+    elif args.corpus is not None and isinstance(metadata.get("project_inventory_path"), str):
+        inventory = ROOT / metadata["project_inventory_path"]
+    else:
+        inventory = ROOT / target_row["inventory_baseline"]
 
     if args.query is not None and args.data_ref is not None:
         parser.error("query and --data-ref are mutually exclusive")
@@ -225,7 +243,7 @@ def main() -> int:
         parser.error("query is required unless --data-ref, --stats, or --materialize is used")
 
     matches, exact = find_matches(
-        args.query, functions, corpus_metadata=metadata, inventory_path=args.inventory
+        args.query, functions, corpus_metadata=metadata, inventory_path=inventory
     )
     if not matches:
         raise SystemExit(f"no pseudocode function matches {args.query!r}")

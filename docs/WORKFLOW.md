@@ -124,33 +124,30 @@ durable on disk until the daemon shuts down cleanly**.
 
 ## Working copy vs. committed snapshot
 
-The legacy primary Sienna lives in committed snapshot `project/`. Additional
-first-class targets live in independent committed `projects/<target>/` snapshots;
-this separation is intentional because Sienna snapshot promotion uses an exact
-`rsync --delete` mirror. Every snapshot stores `.gpr.snapshot` / `.rep.snapshot`
-non-live names that raw Ghidra cannot recognize. `tools/g` refuses both committed
-snapshot namespaces. All interactive work happens under registered gitignored
-`build/work/` paths:
+Every committed Ghidra snapshot lives in one namespace: `projects/<target>/`.
+The snapshots store `.gpr.snapshot` / `.rep.snapshot` non-live names that raw
+Ghidra cannot recognize, and `tools/g` / `run_headless` refuse the entire
+committed `projects/` tree. All interactive work happens under registered,
+gitignored `build/work/` paths. `data/analysis_targets.json` owns the target
+priority and paths; the current default/primary target is the 2026 Camry F33.
 
-- `make work-project` — materialize the default Sienna into `build/work/project/`;
-  add `TARGET=camry-8965F3307000` (or another registered target) to materialize
-  that target's registered work path and snapshot.
+- `make work-project` — materialize the registry-default Camry working project;
+  add `TARGET=<target>` to select another registered target.
 - `make rebuild-project` — fresh from-scratch rebuild using the selected target's
-  staged rebuild profile.
+  registered rebuild path. The legacy Sienna keeps its mature specialized rebuild
+  script, but it is selected because the target is Sienna, not because it is the
+  default.
 - `make verify-project-parity` — export the selected live project and compare it
   byte-for-byte to that target's tracked normalized inventory baseline.
 - `make generate-decompiler-corpus` — regenerate the selected target's canonical
   corpus only after live inventory parity succeeds.
 - `make snapshot-project` — the **only** path that promotes the selected working
-  project into its committed non-live snapshot. Non-default first promotions
+  project into its committed non-live snapshot. First staged-target promotions
   require `PARITY_PROJECT_DIR` from an independent rebuild; later promotions
   compare directly to the tracked target baseline.
 - `make finalize-project` — orchestrated end-of-session promotion: stops the
-  daemon, waits for exit, verifies the working project, invokes the snapshot
-  path, and prints the staged project diff summary. This is an explicit
-  promotion command: it always verifies and snapshots the selected working
-  project, even if no mutation marker exists. Use this instead of
-  manually running `tools/g stop` + `make snapshot-project`.
+  selected target daemon, verifies the working project, invokes the snapshot path,
+  and prints the staged project diff summary.
 
 Mutation markers are project-affine records under
 `build/work/ghidra-session-dirty/`; each records the canonical working-project path.
@@ -168,17 +165,16 @@ only when missing or stale — you never need to source
 `build/cache/ghidra-processor.env`.
 
 ```bash
-# Legacy/default Sienna
+# Default / primary Camry F33
 make work-project
-tools/g decompile 0x8db22
+tools/g decompile 0x4e848
+tools/pseudo 0x4e848
 
-# First-class Camry F33
-make work-project TARGET=camry-8965F3307000
-tools/gtarget camry-8965F3307000 decompile 0x4e848
-make verify-project-parity TARGET=camry-8965F3307000
-make generate-decompiler-corpus TARGET=camry-8965F3307000
+# Explicit legacy Sienna
+make work-project TARGET=sienna-8965B4512000
+tools/gtarget sienna-8965B4512000 decompile 0x8db22
 
-# Generic registered-target spelling
+# Generic explicit-target spelling
 tools/gtarget camry-8965F3307000 x-ref to 0xfebe66a8
 ```
 
@@ -186,10 +182,10 @@ For the common multi-command read paths, prefer the compound CLI operations:
 
 ```bash
 # Single-target output is unchanged; two or more targets return an ordered aggregate.
-tools/g inspect 0xc853a 0x8db22 --decompile --callees --disasm 40
+tools/g inspect 0x8549e 0x8f850 --decompile --callees --disasm 40
 
 # Exact refs-to census, unique containing functions, and owner decompilations.
-tools/g x-ref trace-to 0xfebef02a --disasm 20
+tools/g x-ref trace-to 0xfebe5504 --disasm 20
 
 # No temporary batch file; every command is parsed and checked before command 1 runs.
 printf 'stats\nquery functions --count\n' | tools/g batch --read-only -
@@ -399,16 +395,16 @@ project from the reconstructed derivative; use the reconstruction only for
 explicit CRC/semantic experiments.
 
 ```bash
-make rebuild-project                                  # into build/work/project/
-make rebuild-project PROJECT_DIR="$PWD/build/work/parity-project"  # disposable sibling
+make rebuild-project                                  # registry-default Camry work path
+make rebuild-project PROJECT_DIR="$PWD/build/work/parity-project"  # disposable alternate
 ```
 
 Rebuild destinations are deliberately constrained to dedicated directories
 below `build/work/`; this keeps `--force` incapable of deleting committed or
-unrelated trees. To replace an existing disposable working build:
-`tools/project/rebuild_project.sh --project-dir "$PWD/build/work/project" --force`.
-Never point the rebuild at committed `project/`; promote only with
-`make snapshot-project`.
+unrelated trees. For the legacy Sienna rebuild specifically,
+`tools/project/rebuild_project.sh --project-dir "$PWD/build/work/project" --force`
+remains available. Never point any rebuild at committed `projects/`; promote only
+with `make snapshot-project`.
 
 Rebuilds consume the tracked diagnostic-vocabulary artifact by default; an
 ignored local Techstream tree is never an implicit input. To deliberately

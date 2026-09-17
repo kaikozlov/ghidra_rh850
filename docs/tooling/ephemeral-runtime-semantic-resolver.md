@@ -46,7 +46,7 @@ in a disposable workspace, while the output manifest preserves both source and
 normalized hashes. Any other oversized/truncated geometry fails closed. The
 wrapper creates a disposable project below
 `build/work/ephemeral-runtime-targets/<normalized-sha>/`; it never opens or changes
-committed `project/` and never modifies the input image.
+committed `projects/` and never modifies the input image.
 
 The same fresh import runs, in order:
 

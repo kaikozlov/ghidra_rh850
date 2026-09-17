@@ -8,8 +8,11 @@ BUILD_OUT ?= $(BUILD_ROOT)/out
 BUILD_LOGS ?= $(BUILD_ROOT)/logs
 BUILD_TMP ?= $(BUILD_ROOT)/tmp
 export BUILD_ROOT BUILD_CACHE BUILD_WORK BUILD_OUT BUILD_LOGS BUILD_TMP
-TARGET ?= sienna-8965B4512000
-DEFAULT_TARGET := sienna-8965B4512000
+DEFAULT_TARGET := $(shell python3 -c 'import json; print(json.load(open("data/analysis_targets.json"))["default_target"])')
+TARGET ?= $(DEFAULT_TARGET)
+LEGACY_SIENNA_TARGET := sienna-8965B4512000
+LEGACY_SIENNA_WORK_DIR := $(shell python3 tools/project/analysis_target.py "$(LEGACY_SIENNA_TARGET)" --field work_dir)
+LEGACY_SIENNA_PROJECT_DIR := $(CURDIR)/$(LEGACY_SIENNA_WORK_DIR)
 TARGET_WORK_DIR := $(shell python3 tools/project/analysis_target.py "$(TARGET)" --field work_dir)
 TARGET_SNAPSHOT_DIR := $(shell python3 tools/project/analysis_target.py "$(TARGET)" --field snapshot_dir)
 TARGET_INVENTORY_BASELINE := $(shell python3 tools/project/analysis_target.py "$(TARGET)" --field inventory_baseline)
@@ -22,7 +25,7 @@ SNAPSHOT_DIR ?= $(CURDIR)/$(TARGET_SNAPSHOT_DIR)
 # Canonical parity paths are not command-line overrides: allowing the current
 # output to alias the tracked baseline would turn verification into self-compare.
 override PROJECT_INVENTORY_BASELINE := $(CURDIR)/$(TARGET_INVENTORY_BASELINE)
-ifeq ($(TARGET),$(DEFAULT_TARGET))
+ifeq ($(TARGET),$(LEGACY_SIENNA_TARGET))
 override PROJECT_INVENTORY := $(BUILD_OUT)/ghidra_project_inventory.jsonl
 else
 override PROJECT_INVENTORY := $(BUILD_OUT)/targets/$(TARGET)/project_inventory.jsonl
@@ -121,8 +124,10 @@ generate-diagnostic-vocabulary: generate-techstream-corpus
 	cd tools/techstream && $(PYTHON) extract_catalog.py
 	cd tools/diagnostics && $(PYTHON) correlate_vocabulary.py
 
+# These global artifacts predate the target registry and are Sienna-owned. Keep
+# them explicitly pinned so changing the registry default cannot retarget them.
 generate-application-receive-evidence:
-	tools/project/export_ghidra_project.sh application-rx-signals
+	GHIDRA_ANALYSIS_TARGET="$(LEGACY_SIENNA_TARGET)" PROJECT_DIR="$(LEGACY_SIENNA_PROJECT_DIR)" tools/project/export_ghidra_project.sh application-rx-signals
 
 generate-application-receive: generate-application-receive-evidence
 	$(PYTHON) tools/firmware/generate_application_rx_map.py
@@ -134,39 +139,31 @@ generate-processor-fixture:
 	$(PYTHON) tools/testing/processor/build_processor_fixture.py
 
 generate-function-discovery:
-	tools/project/export_ghidra_project.sh outside-functions
+	GHIDRA_ANALYSIS_TARGET="$(LEGACY_SIENNA_TARGET)" PROJECT_DIR="$(LEGACY_SIENNA_PROJECT_DIR)" tools/project/export_ghidra_project.sh outside-functions
 
 generate-semantic-coverage:
-	tools/project/export_ghidra_project.sh semantic-coverage
+	GHIDRA_ANALYSIS_TARGET="$(LEGACY_SIENNA_TARGET)" PROJECT_DIR="$(LEGACY_SIENNA_PROJECT_DIR)" tools/project/export_ghidra_project.sh semantic-coverage
 
 generate-semantic-sweep:
-	$(PYTHON) tools/project/generate_semantic_sweep.py --project-dir "$(PROJECT_DIR)"
+	$(PYTHON) tools/project/generate_semantic_sweep.py --project-dir "$(LEGACY_SIENNA_PROJECT_DIR)"
 
 generate-decompiler-corpus:
-ifeq ($(TARGET),$(DEFAULT_TARGET))
+ifeq ($(TARGET),$(LEGACY_SIENNA_TARGET))
 	$(PYTHON) tools/project/generate_decompiler_corpus.py --project-dir "$(PROJECT_DIR)"
 else
 	$(PYTHON) tools/project/generate_target_decompiler_corpus.py --target "$(TARGET)" --project-dir "$(PROJECT_DIR)" --output "$(CURDIR)/$(TARGET_DECOMPILER_CORPUS)"
 endif
 
 pseudocode:
-	$(PYTHON) tools/pseudo --materialize
+	$(PYTHON) tools/pseudo --target "$(TARGET)" --materialize
 
 generate-project-inventory:
-ifeq ($(TARGET),$(DEFAULT_TARGET))
-	tools/project/export_ghidra_project.sh project-inventory "$(PROJECT_INVENTORY)"
-else
 	GHIDRA_ANALYSIS_TARGET="$(TARGET)" PROJECT_DIR="$(PROJECT_DIR)" tools/project/export_ghidra_project.sh project-inventory "$(PROJECT_INVENTORY)"
-endif
 
 # Exact normalized parity: aggregate floors remain the fast collapse detector;
 # this catches substitutions and metadata drift that equal totals cannot.
 verify-project-parity:
-ifeq ($(TARGET),$(DEFAULT_TARGET))
-	tools/project/export_ghidra_project.sh project-inventory "$(PROJECT_INVENTORY)"
-else
 	GHIDRA_ANALYSIS_TARGET="$(TARGET)" PROJECT_DIR="$(PROJECT_DIR)" tools/project/export_ghidra_project.sh project-inventory "$(PROJECT_INVENTORY)"
-endif
 	$(PYTHON) tools/project/project_inventory.py compare \
 		"$(PROJECT_INVENTORY_BASELINE)" "$(PROJECT_INVENTORY)"
 
@@ -182,10 +179,10 @@ update-project-baseline:
 		echo "PROJECT_DIR_A and PROJECT_DIR_B must be independent rebuilds" >&2; \
 		exit 2; \
 	fi
-ifeq ($(TARGET),$(DEFAULT_TARGET))
-	PROJECT_DIR="$(PROJECT_DIR_A)" tools/project/export_ghidra_project.sh project-inventory \
+ifeq ($(TARGET),$(LEGACY_SIENNA_TARGET))
+	GHIDRA_ANALYSIS_TARGET="$(TARGET)" PROJECT_DIR="$(PROJECT_DIR_A)" tools/project/export_ghidra_project.sh project-inventory \
 		"$(BUILD_OUT)/ghidra_project_inventory.rebuild-a.jsonl"
-	PROJECT_DIR="$(PROJECT_DIR_B)" tools/project/export_ghidra_project.sh project-inventory \
+	GHIDRA_ANALYSIS_TARGET="$(TARGET)" PROJECT_DIR="$(PROJECT_DIR_B)" tools/project/export_ghidra_project.sh project-inventory \
 		"$(BUILD_OUT)/ghidra_project_inventory.rebuild-b.jsonl"
 	$(PYTHON) tools/project/project_inventory.py update \
 		"$(BUILD_OUT)/ghidra_project_inventory.rebuild-a.jsonl" \
@@ -205,14 +202,14 @@ endif
 	@echo "Updated $(PROJECT_INVENTORY_BASELINE); review before committing."
 
 rebuild-project:
-ifeq ($(TARGET),$(DEFAULT_TARGET))
+ifeq ($(TARGET),$(LEGACY_SIENNA_TARGET))
 	tools/project/rebuild_project.sh --project-dir "$(PROJECT_DIR)"
 else
 	tools/project/rebuild_target_project.sh --target "$(TARGET)" --project-dir "$(PROJECT_DIR)"
 endif
 
 # Materialize a gitignored working project from the registered committed snapshot.
-# TARGET defaults to the canonical Sienna; non-default first-class targets resolve
+# TARGET defaults to the registry primary (Camry); every target resolves
 # project/snapshot names through data/analysis_targets.json.
 work-project:
 	@if [ -d "$(PROJECT_DIR)/$(PROJECT_NAME).rep" ]; then \
@@ -234,17 +231,17 @@ work-project:
 	fi
 
 snapshot-project:
-ifeq ($(TARGET),$(DEFAULT_TARGET))
+ifeq ($(TARGET),$(LEGACY_SIENNA_TARGET))
 	tools/project/snapshot_project.sh --project-dir "$(PROJECT_DIR)" --snapshot-dir "$(SNAPSHOT_DIR)"
 else
 	tools/project/snapshot_target_project.sh --target "$(TARGET)" --project-dir "$(PROJECT_DIR)" $(if $(PARITY_PROJECT_DIR),--parity-project-dir "$(PARITY_PROJECT_DIR)",)
 endif
 
-# Deliberate end-of-session promotion. The default Sienna preserves the mature
-# orchestration path; registered non-default targets stop their own daemon and
-# then run target parity/corpus/snapshot promotion.
+# Deliberate end-of-session promotion. Legacy Sienna preserves its mature
+# orchestration path; staged targets stop their own daemon and then run
+# target parity/corpus/snapshot promotion.
 finalize-project:
-ifeq ($(TARGET),$(DEFAULT_TARGET))
+ifeq ($(TARGET),$(LEGACY_SIENNA_TARGET))
 	tools/project/finalize_project.sh
 else
 	GHIDRA_ANALYSIS_TARGET="$(TARGET)" GHIDRA_PROJECT="$(PROJECT_DIR)" tools/g stop || true

@@ -30,11 +30,13 @@ fi
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
 # shellcheck disable=SC1091
 source "$ROOT/tools/lib/build_paths.sh"
-PROJECT_DIR="${PROJECT_DIR:-$BUILD_WORK/project}"
-SNAPSHOT_DIR="$ROOT/project"
-PROJECT_NAME="rh850_p1me_mapped"
-PROGRAM_NAME="RH850_P1M-E_CodeFlash.bin"
-DAEMON_RE='AnalyzeHeadless.*rh850_p1me_mapped'
+TARGET="sienna-8965B4512000"
+field(){ python3 "$ROOT/tools/project/analysis_target.py" "$TARGET" --field "$1"; }
+PROJECT_DIR="${PROJECT_DIR:-$ROOT/$(field work_dir)}"
+SNAPSHOT_DIR="$ROOT/$(field snapshot_dir)"
+PROJECT_NAME=$(field project_name)
+PROGRAM_NAME=$(field program_name)
+DAEMON_RE="AnalyzeHeadless.*${PROJECT_NAME}"
 
 PROJECT_DIR=$(python3 - "$PROJECT_DIR" <<'PY'
 from pathlib import Path
@@ -58,7 +60,7 @@ fi
 daemon_pids=$(pgrep -f "$DAEMON_RE" || true)
 if [[ -n "$daemon_pids" ]]; then
   echo "==> [1/5] Stopping interactive daemon..."
-  GHIDRA_PROJECT="$PROJECT_DIR" "$ROOT/tools/g" stop || true
+  GHIDRA_ANALYSIS_TARGET="$TARGET" GHIDRA_PROJECT="$PROJECT_DIR" "$ROOT/tools/g" stop || true
 else
   echo "==> [1/5] No daemon running."
 fi
@@ -124,8 +126,8 @@ staged_count=$(git -C "$ROOT" diff --cached --name-only -- "$SNAPSHOT_DIR/" | wc
 echo "$staged_count file(s) staged in $SNAPSHOT_DIR/"
 echo
 echo "Finalization complete. Review and commit:"
-echo "  git status --short project/"
+echo "  git status --short $SNAPSHOT_DIR"
 echo "  git diff --cached --stat"
 echo
 echo "If this was wrong, unstage with:"
-echo "  git restore --staged project/"
+echo "  git restore --staged $SNAPSHOT_DIR"

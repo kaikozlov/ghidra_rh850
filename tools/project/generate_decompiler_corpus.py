@@ -20,7 +20,7 @@ BUILD_WORK = Path(os.environ.get("BUILD_WORK", BUILD_ROOT / "work")).expanduser(
 BUILD_OUT = Path(os.environ.get("BUILD_OUT", BUILD_ROOT / "out")).expanduser().resolve()
 BUILD_LOGS = Path(os.environ.get("BUILD_LOGS", BUILD_ROOT / "logs")).expanduser().resolve()
 BUILD_TMP = Path(os.environ.get("BUILD_TMP", BUILD_ROOT / "tmp")).expanduser().resolve()
-COMMITTED_PROJECT = REPO / "project"
+COMMITTED_PROJECT = REPO / "projects"
 PROJECT_NAME = "rh850_p1me_mapped"
 PROGRAM_NAME = "RH850_P1M-E_CodeFlash.bin"
 INVENTORY = REPO / "data/ghidra_project_inventory.baseline.jsonl"
@@ -366,6 +366,7 @@ def main() -> int:
 
     project_dir = validate_project(args.project_dir)
     environment = os.environ.copy()
+    environment["GHIDRA_ANALYSIS_TARGET"] = "sienna-8965B4512000"
     environment["GHIDRA_PROJECT"] = str(project_dir)
 
     # A daemon cannot safely share the project with a read-only headless export.

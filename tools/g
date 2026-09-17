@@ -5,7 +5,7 @@
 # Fully self-contained: resolves the repo root, bootstraps the isolated Ghidra
 # environment (processor extension, Java options, fingerprint), materializes the
 # working project if absent, selects the pinned vendored CLI binary, and refuses
-# to operate against the committed project/ snapshot.
+# to operate against any committed projects/ snapshot.
 #
 # You never need to `source build/cache/ghidra-processor.env` before running this.
 #
@@ -22,7 +22,7 @@
 #
 # Environment:
 #   GHIDRA_AGENT=1            Force compact JSON output (for scripted/agent consumption).
-#   GHIDRA_PROJECT            Override the working project directory (default: build/work/project).
+#   GHIDRA_PROJECT            Override the selected target's registered working project directory.
 #   GHIDRA_ANALYSIS_TARGET   Registered analysis target; omitted means registry default.
 #   GHIDRA_ALLOW_SYSTEM_CLI=1 Allow falling back to a system-installed ghidra binary.
 #   GHIDRA_NO_BOOTSTRAP=1     Skip processor env bootstrap (assumes env already sourced).
@@ -55,12 +55,6 @@ import sys
 print(Path(sys.argv[1]).expanduser().resolve(strict=False))
 PY
 )
-COMMITTED_PROJECT_ROOT=$(python3 - "$ROOT/project" <<'PY'
-from pathlib import Path
-import sys
-print(Path(sys.argv[1]).resolve(strict=False))
-PY
-)
 COMMITTED_PROJECTS_ROOT=$(python3 - "$ROOT/projects" <<'PY'
 from pathlib import Path
 import sys
@@ -72,10 +66,10 @@ PY
 source "$ROOT/tools/lib/project_marker.sh"
 MUTATION_MARKER=$(project_mutation_marker "$ROOT" "$ABS_PROJECT_DIR")
 
-# --- Guard against committed project/ -----------------------------------------
+# --- Guard against committed projects/ ----------------------------------------
 
 case "$ABS_PROJECT_DIR" in
-  "$COMMITTED_PROJECT_ROOT"|"$COMMITTED_PROJECT_ROOT"/*|"$COMMITTED_PROJECTS_ROOT"|"$COMMITTED_PROJECTS_ROOT"/*)
+  "$COMMITTED_PROJECTS_ROOT"|"$COMMITTED_PROJECTS_ROOT"/*)
     echo "REFUSING: working project resolves inside a committed project snapshot namespace." >&2
     echo "Use the registered build/work target path or set GHIDRA_PROJECT to a disposable path." >&2
     exit 1

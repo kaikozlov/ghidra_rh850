@@ -8,7 +8,7 @@ Operating contract for changing this repository. What the firmware *is*:
 1. **Firmware bytes and deterministic verification** (`firmware/`, `tests/`)
 2. **Generated artifacts** (`data/` generated CSVs — regenerate, never hand-edit)
 3. **Curated evidence tables** (`data/` hand-maintained CSVs — edit intentionally, validate with tests)
-4. **Annotated Ghidra project** (`project/` committed snapshot)
+4. **Annotated Ghidra projects** (`projects/<target>/` committed snapshots)
 5. **Narrative documentation** (`docs/`), then historical notes (`docs/status/CORRECTIONS.md`)
 
 The firmware is the single source of truth; the docs are falsifiable
@@ -25,9 +25,8 @@ invitation to add policy. -- The goal is native openpilot/comma integrattion.
 
 ## Non-negotiable hazards
 
-- **Never open committed `project/` or `projects/` with a Ghidra daemon** — any
-  open compacts the DB and dirties the tree. Work in `build/work/project/`
-  (`make work-project`).
+- **Never open committed `projects/` with a Ghidra daemon** — any open compacts
+  the DB and dirties the tree. Work only in the selected target's registered `build/work/` path (`make work-project`).
 - **Stop the relevant daemon before copying, staging, or snapshotting its
   working project** — only clean teardown persists in-memory edits durably.
   Ordinary source/documentation commits are safe while daemons run because
@@ -35,7 +34,7 @@ invitation to add policy. -- The goal is native openpilot/comma integrattion.
   `build/`. Confirm the daemon for every project being promoted is stopped;
   use the global `pgrep -f 'AnalyzeHeadless.*rh850'` check only when promoting
   multiple/default projects whose ownership is ambiguous.
-- **Never point a rebuild at `project/` or `projects/`.** Promote only with
+- **Never point a rebuild at `projects/`.** Promote only with
   `make snapshot-project` (end of session: `make finalize-project`).
 - **SIENNA CodeFlash VA = file offset − `0x8000`** (DataFlash prefix).
 - **`build/` is workspace state, never evidence authority.** Portable
@@ -104,15 +103,15 @@ environment and materializes the working project itself. **Never** `source
 build/cache/ghidra-processor.env` manually.
 
 ```bash
-tools/g decompile 0x8db22
-tools/g inspect 0xc853a --decompile --callers --callees --xrefs --disasm 40
-tools/g x-ref trace-to 0xfebef02a --disasm 20
+tools/g decompile 0x8549e
+tools/g inspect 0x8549e --decompile --callers --callees --xrefs --disasm 40
+tools/g x-ref trace-to 0xfebe5504 --disasm 20
 printf 'stats\nquery functions --count\n' | tools/g batch --read-only -
 tools/g session-status   # daemon state, mutation marker, snapshot diff
 tools/g stop             # persist working-copy edits (does NOT promote)
 ```
 
-It refuses committed `project/`/`projects/` namespaces. `GHIDRA_AGENT=1`
+It refuses the committed `projects/` namespace. `GHIDRA_AGENT=1`
 gives compact JSON output. To promote a finished working copy into the
 committed snapshot, use `make finalize-project`.
 

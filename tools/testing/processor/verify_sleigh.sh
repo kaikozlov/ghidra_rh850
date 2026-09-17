@@ -61,18 +61,18 @@ grep -Eq 'Language.*v850e3:LE:32:default|v850e3:LE:32:default' "$RESOLVE_LOG" ||
 
 # Physical snapshot hardening: the committed database is stored under names
 # Ghidra cannot recognize. This deliberately bypasses tools/project/run_headless to
-# prove a raw/subagent analyzeHeadless invocation cannot open project/.
+# prove a raw/subagent analyzeHeadless invocation cannot open the committed Sienna snapshot.
 python3 "$ROOT/tools/project/project_layout.py" validate-snapshot \
-  --snapshot-dir "$ROOT/project" --project-name rh850_p1me_mapped
+  --snapshot-dir "$ROOT/projects/sienna-8965B4512000" --project-name rh850_p1me_mapped
 RAW_OPEN_LOG="$BUILD_LOGS/sleigh/committed-snapshot-raw-open.log"
 set +e
-"$GHIDRA_HOME/support/analyzeHeadless" "$ROOT/project" rh850_p1me_mapped \
+"$GHIDRA_HOME/support/analyzeHeadless" "$ROOT/projects/sienna-8965B4512000" rh850_p1me_mapped \
   -process RH850_P1M-E_CodeFlash.bin -noanalysis -readOnly \
   >"$RAW_OPEN_LOG" 2>&1
 raw_open_rc=$?
 set -e
 if ((raw_open_rc == 0)) || ! grep -q 'Could not find project' "$RAW_OPEN_LOG"; then
-  echo "committed project/ was unexpectedly openable by raw analyzeHeadless" >&2
+  echo "committed Sienna snapshot was unexpectedly openable by raw analyzeHeadless" >&2
   cat "$RAW_OPEN_LOG" >&2
   exit 1
 fi

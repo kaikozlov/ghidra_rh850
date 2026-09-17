@@ -1,8 +1,14 @@
-# First-class non-default Ghidra snapshots
+# Committed Ghidra snapshots
 
-`projects/` contains packed, **non-openable** committed Ghidra snapshots for
-first-class analysis targets other than the legacy primary Sienna snapshot in
-`project/`. Never point Ghidra or `analyzeHeadless` at these committed trees.
-Materialize a working copy with `make work-project TARGET=<target>` and promote a
-verified copy with `make snapshot-project TARGET=<target>`. Target identity and
-paths are defined by `data/analysis_targets.json`.
+`projects/<target>/` is the single committed namespace for packed Ghidra
+snapshots. Every target, including the legacy Sienna reference, uses the same
+layout.
+
+These trees are deliberately stored under non-openable `.gpr.snapshot` /
+`.rep.snapshot` names. Never point Ghidra, `analyzeHeadless`, or `tools/g` at the
+committed `projects/` namespace. Materialize a disposable working copy with
+`make work-project [TARGET=<target>]`; target identity, priority, snapshot paths,
+and working paths are defined by `data/analysis_targets.json`.
+
+The registry default is the 2026 Camry F33 target. Use `tools/gtarget list` to see
+all registered targets and `tools/gtarget <target> ...` for an explicit one.

@@ -1,4 +1,4 @@
-"""Registry-backed primary Sienna target files used by cross-variant tools."""
+"""Registry-backed legacy Sienna reference files used by cross-variant tools."""
 from __future__ import annotations
 
 from tools.project.analysis_target import REPO, target, verified_file

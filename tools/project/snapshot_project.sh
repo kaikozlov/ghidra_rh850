@@ -1,31 +1,32 @@
 #!/usr/bin/env bash
-# Push the working project (build/work/project) into the committed snapshot
-# (project/) and stage it for commit. This is the ONLY path that mutates the
-# committed project/ directory.
+# Push the legacy Sienna working project into its committed packed snapshot
+# under projects/sienna-8965B4512000/ and stage it for commit.
 #
 # Why this exists: any `ghidra` daemon open of the committed project compacts
 # its DB (db.N.gbf -> db.N+1) and rewrites the change buffers on clean stop,
-# producing tree churn even when no analysis edit was made. So the committed
-# project/ is treated as a pure snapshot that is never daemon-opened; all
-# interactive work happens in the gitignored build/work/project/, and this script
+# producing tree churn even when no analysis edit was made. The committed
+# projects/ namespace is therefore snapshot-only; interactive work stays under build/work/.
 # mirrors a finished, verified build back into the snapshot.
 set -euo pipefail
 
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
 # shellcheck disable=SC1091
 source "$ROOT/tools/lib/build_paths.sh"
-PROJECT_DIR="$BUILD_WORK/project"
-SNAPSHOT_DIR="$ROOT/project"
-PROJECT_NAME="rh850_p1me_mapped"
-PROGRAM_NAME="RH850_P1M-E_CodeFlash.bin"
+TARGET="sienna-8965B4512000"
+field(){ python3 "$ROOT/tools/project/analysis_target.py" "$TARGET" --field "$1"; }
+PROJECT_DIR="$ROOT/$(field work_dir)"
+REGISTERED_SNAPSHOT_DIR="$ROOT/$(field snapshot_dir)"
+SNAPSHOT_DIR="$REGISTERED_SNAPSHOT_DIR"
+PROJECT_NAME=$(field project_name)
+PROGRAM_NAME=$(field program_name)
 
 usage() {
   cat <<'EOF'
 Usage: tools/project/snapshot_project.sh [options]
 
 Options:
-  --project-dir DIR    Working project to snapshot from (default: build/work/project)
-  --snapshot-dir DIR   Committed snapshot to write; must resolve to repository project/
+  --project-dir DIR    Working project to snapshot from (default: registered Sienna work_dir)
+  --snapshot-dir DIR   Committed Sienna snapshot to write; must match the registered snapshot_dir
   -h, --help           Show this help
 EOF
 }
@@ -39,12 +40,16 @@ while (($#)); do
   esac
 done
 
-[[ ! -L "$ROOT/project" ]] || {
-  echo "REFUSING: committed repository project root must not be a symlink: $ROOT/project" >&2
+[[ ! -L "$ROOT/projects" ]] || {
+  echo "REFUSING: committed projects root must not be a symlink: $ROOT/projects" >&2
+  exit 2
+}
+[[ ! -L "$SNAPSHOT_DIR" ]] || {
+  echo "REFUSING: committed snapshot must not be a symlink: $SNAPSHOT_DIR" >&2
   exit 2
 }
 
-EXPECTED_SNAPSHOT_DIR=$(python3 - "$ROOT/project" <<'PY'
+EXPECTED_SNAPSHOT_DIR=$(python3 - "$REGISTERED_SNAPSHOT_DIR" <<'PY'
 from pathlib import Path
 import sys
 print(Path(sys.argv[1]).resolve(strict=False))
@@ -131,7 +136,7 @@ else
 fi
 
 echo "Verifying exact normalized project parity before snapshot..."
-PROJECT_DIR="$PROJECT_DIR" \
+GHIDRA_ANALYSIS_TARGET="$TARGET" PROJECT_DIR="$PROJECT_DIR" \
   "$ROOT/tools/project/export_ghidra_project.sh" project-inventory "$BUILD_OUT/ghidra_project_inventory.snapshot.jsonl"
 python3 "$ROOT/tools/project/project_inventory.py" compare \
   "$ROOT/data/ghidra_project_inventory.baseline.jsonl" \
@@ -165,5 +170,5 @@ cleanup_packed
 
 echo
 echo "Snapshot staged. Review and commit, e.g.:"
-echo "  git status --short project/"
+echo "  git status --short $SNAPSHOT_DIR"
 echo "  git diff --cached --stat"

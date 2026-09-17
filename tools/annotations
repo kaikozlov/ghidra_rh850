@@ -346,9 +346,12 @@ def apply_ledger(path: Path) -> int:
         return 2
     runner = str(REPO_ROOT / "tools" / "g")
     script = str(REPO_ROOT / "ghidra" / "scripts" / "annotate" / "ApplyAnnotationLedger.java")
+    env = os.environ.copy()
+    env["GHIDRA_ANALYSIS_TARGET"] = "sienna-8965B4512000"
     return subprocess.run(
         [runner, "script", "run", "--save", script, "--", str(path.resolve())],
         cwd=REPO_ROOT,
+        env=env,
         check=False,
     ).returncode
 
@@ -375,7 +378,7 @@ def _add_name_parser(sub: argparse._SubParsersAction, op: str, help_text: str) -
     parser.add_argument(
         "--apply",
         action="store_true",
-        help="replay the updated complete ledger into build/work/project and save it",
+        help="replay the updated complete ledger into the registered Sienna work project and save it",
     )
     return parser
 
@@ -408,7 +411,7 @@ def main(argv: list[str] | None = None) -> int:
     add_comment.add_argument(
         "--apply",
         action="store_true",
-        help="replay the updated complete ledger into build/work/project and save it",
+        help="replay the updated complete ledger into the registered Sienna work project and save it",
     )
     add_comment.set_defaults(func=cmd_add, name=None)
 
@@ -436,7 +439,7 @@ def main(argv: list[str] | None = None) -> int:
     validate_cmd.set_defaults(func=cmd_validate)
 
     apply_cmd = sub.add_parser(
-        "apply", help="replay the complete ledger into build/work/project and save it"
+        "apply", help="replay the complete ledger into the registered Sienna work project and save it"
     )
     apply_cmd.set_defaults(func=cmd_apply)
 

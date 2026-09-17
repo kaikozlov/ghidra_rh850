@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Resolve first-class analysis-target metadata from data/analysis_targets.json."""
+"""Resolve registered analysis-target metadata from data/analysis_targets.json."""
 from __future__ import annotations
 import argparse, json
 from pathlib import Path

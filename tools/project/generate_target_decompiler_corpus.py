@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate a provenance-locked canonical decompiler corpus for a registered non-default target."""
+"""Generate a provenance-locked canonical decompiler corpus for a registered staged target."""
 from __future__ import annotations
 import argparse, hashlib, json, os, subprocess, sys, tempfile
 from pathlib import Path
@@ -12,7 +12,6 @@ EXPORTER=REPO/'ghidra/scripts/verify/ExportDecompilerCorpus.java'
 def sha(p:Path)->str:return hashlib.sha256(p.read_bytes()).hexdigest()
 def registry_target(name:str)->dict:
     o=json.loads((REPO/'data/analysis_targets.json').read_text())
-    if name==o['default_target']: raise SystemExit('use tools/project/generate_decompiler_corpus.py for the default Sienna target')
     try:return o['targets'][name]
     except KeyError:raise SystemExit(f'unknown analysis target: {name}')
 def run(cmd:list[str],env=None):
@@ -54,7 +53,7 @@ def canonicalize(raw:Path,inv:dict[str,dict[str,Any]]):
     return sorted(out,key=lambda r:int(r['entry_addr'],16))
 def main()->int:
     ap=argparse.ArgumentParser(description=__doc__); ap.add_argument('--target',required=True); ap.add_argument('--project-dir',type=Path); ap.add_argument('--output',type=Path); ap.add_argument('--timeout-seconds',type=int,default=60); a=ap.parse_args()
-    t=registry_target(a.target); project=(a.project_dir or REPO/t['work_dir']).expanduser().resolve(); work=BUILD_WORK.resolve(); committed=(REPO/'project').resolve()
+    t=registry_target(a.target); project=(a.project_dir or REPO/t['work_dir']).expanduser().resolve(); work=BUILD_WORK.resolve(); committed=(REPO/'projects').resolve()
     if project==work or work not in project.parents:raise SystemExit(f'refusing project outside build/work descendant: {project}')
     if project==committed or committed in project.parents:raise SystemExit(f'refusing committed snapshot project: {project}')
     pname=t['project_name']; prog=t['program_name'];

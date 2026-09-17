@@ -29,7 +29,7 @@ def within(child: Path, parent: Path) -> bool:
 
 obj = json.loads(REGISTRY.read_text())
 check("registry schema exact", obj.get("schema") == "ghidra-rh850-analysis-targets-v1")
-check("Sienna remains default", obj.get("default_target") == "sienna-8965B4512000")
+check("Camry is the default analysis target", obj.get("default_target") == "camry-8965F3307000")
 targets = obj.get("targets", {})
 expected_targets = {
     "sienna-8965B4512000",
@@ -63,7 +63,7 @@ for name, row in targets.items():
     work = ROOT / row["work_dir"]; snap = ROOT / row["snapshot_dir"]
     work_paths.append(work); snapshot_paths.append(snap)
     check(f"{name} work path isolated below build/work", within(work, ROOT / "build/work"))
-    check(f"{name} snapshot is committed, not build state", not within(snap, ROOT / "build") and (snap == ROOT / "project" or within(snap, ROOT / "projects")))
+    check(f"{name} snapshot is committed below projects/", not within(snap, ROOT / "build") and within(snap, ROOT / "projects"))
     baseline = ROOT / row["inventory_baseline"]; corpus = ROOT / row["decompiler_corpus"]
     check(f"{name} inventory baseline tracked", baseline.is_file() and baseline.stat().st_size > 0)
     check(f"{name} decompiler corpus tracked", corpus.is_file() and corpus.stat().st_size > 0)
@@ -75,14 +75,17 @@ resolved_snaps = [p.resolve(strict=False) for p in snapshot_paths]
 check("snapshot roots unique and non-nested", len(set(resolved_snaps)) == len(resolved_snaps) and all(a not in b.parents and b not in a.parents for i,a in enumerate(resolved_snaps) for b in resolved_snaps[i+1:]))
 
 camry = targets["camry-8965F3307000"]
-check("Camry is first-class", camry["status"] == "first_class" and camry["capture_root"] == "targets/camry-2026")
+check("Camry is primary", camry["status"] == "primary" and camry["capture_root"] == "targets/camry-2026")
 stage_fields = ("function_seeds", "device_profile_script", "entry_seed_script", "diagnostic_seed_script", "recovered_seed_script")
 for name, row in targets.items():
-    if name == obj["default_target"]:
+    if name == "sienna-8965B4512000":
         continue
-    check(f"{name} is first-class", row["status"] == "first_class")
+    check(f"{name} is staged target", row["status"] in {"primary", "first_class"})
     for field in stage_fields:
         check(f"{name} target rebuild metadata has {field}", bool(row.get(field)))
+sienna = targets["sienna-8965B4512000"]
+check("Sienna is legacy reference", sienna["status"] == "legacy_reference")
+check("Sienna snapshot shares projects namespace", sienna["snapshot_dir"] == "projects/sienna-8965B4512000")
 check("Camry registered function seeds exist", (ROOT / camry["function_seeds"]).is_file())
 raw_cf = ROOT / "targets/camry-2026/raw-20260826/codeflash/camry_8965F3307000_codeflash_20260826T213719Z.bin"
 check("Camry canonical CodeFlash equals acquired lower MiB", raw_cf.is_file() and raw_cf.read_bytes()[:0x100000] == (ROOT / camry["codeflash"]).read_bytes())
@@ -135,14 +138,21 @@ for target, row in targets.items():
     r = subprocess.run([str(ROOT / "tools/g"), "session-status"], cwd=ROOT, env=env, capture_output=True, text=True)
     check(f"{target} committed snapshot guard", r.returncode != 0 and "REFUSING" in r.stderr)
 
+r = subprocess.run([str(ROOT / "tools/g"), "session-status"], cwd=ROOT, capture_output=True, text=True)
+check(
+    "plain tools/g resolves to Camry work project",
+    r.returncode == 0 and str(ROOT / camry["work_dir"]) in r.stdout,
+    r.stderr.strip(),
+)
+
 rebuild = (ROOT / "tools/project/rebuild_target_project.sh").read_text()
-check("non-default rebuild preserves four-stage analysis", all(x in rebuild for x in ("1/4", "2/4", "3/4", "4/4", "4b")))
+check("staged-target rebuild preserves four-stage analysis", all(x in rebuild for x in ("1/4", "2/4", "3/4", "4/4", "4b")))
 check("target rebuild resolves registered stage scripts", all(token in rebuild for token in ("field function_seeds", "field device_profile_script", "field entry_seed_script", "field diagnostic_seed_script", "field recovered_seed_script")))
 check("target rebuild has no Camry path/profile coupling", "data/targets/camry-8965F3307000" not in rebuild and "camry_f33_v1" not in rebuild)
-check("non-default destructive rebuild is build/work bounded", "refusing target rebuild destination outside dedicated build/work descendant" in rebuild and "is_symlink" in rebuild)
+check("staged-target destructive rebuild is build/work bounded", "refusing target rebuild destination outside dedicated build/work descendant" in rebuild and "is_symlink" in rebuild)
 snapshot = (ROOT / "tools/project/snapshot_target_project.sh").read_text()
 check("first promotion requires independent parity build", "first target promotion requires --parity-project-dir" in snapshot and "independent target rebuild inventories differ" in snapshot)
-check("canonical corpus rechecks tracked baseline", "generate_target_decompiler_corpus.py" in snapshot)
+check("canonical staged-target corpus rechecks tracked baseline", "generate_target_decompiler_corpus.py" in snapshot)
 check("target snapshot has no Camry profile coupling", "camry_f33_v1" not in snapshot)
 makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
 check(
@@ -153,6 +163,17 @@ check(
     )
     and 'PROJECT_NAME := rh850_p1me_mapped' not in makefile
     and 'PROGRAM_NAME := RH850_P1M-E_CodeFlash.bin' not in makefile,
+)
+check(
+    "Makefile registry default and legacy Sienna semantics are decoupled",
+    'TARGET ?= $(DEFAULT_TARGET)' in makefile
+    and 'LEGACY_SIENNA_TARGET := sienna-8965B4512000' in makefile
+    and 'ifeq ($(TARGET),$(LEGACY_SIENNA_TARGET))' in makefile,
+)
+check(
+    "legacy Sienna global Ghidra exports are explicitly pinned",
+    'GHIDRA_ANALYSIS_TARGET="$(LEGACY_SIENNA_TARGET)" PROJECT_DIR="$(LEGACY_SIENNA_PROJECT_DIR)" tools/project/export_ghidra_project.sh application-rx-signals' in makefile
+    and 'tools/project/generate_semantic_sweep.py --project-dir "$(LEGACY_SIENNA_PROJECT_DIR)"' in makefile,
 )
 r = subprocess.run([str(ROOT / "tools/gtarget"), "list"], cwd=ROOT, capture_output=True, text=True)
 check("gtarget lists configured targets", r.returncode == 0 and all(name in r.stdout for name in expected_targets))

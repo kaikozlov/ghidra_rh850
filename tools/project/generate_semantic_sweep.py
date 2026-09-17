@@ -41,7 +41,7 @@ def main() -> int:
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     args = parser.parse_args()
     project_dir = args.project_dir.resolve()
-    committed = (REPO / "project").resolve()
+    committed = (REPO / "projects").resolve()
     if project_dir == committed or committed in project_dir.parents:
         raise SystemExit(f"refusing committed project: {project_dir}")
     if not (project_dir / "rh850_p1me_mapped.rep").is_dir():
@@ -51,7 +51,7 @@ def main() -> int:
         selected = [row for row in csv.DictReader(stream)
                     if row["selected_for_sweep"] == "true"]
     environment = os.environ.copy()
-    environment.update({"GHIDRA_AGENT": "1", "GHIDRA_PROJECT": str(project_dir)})
+    environment.update({"GHIDRA_AGENT": "1", "GHIDRA_ANALYSIS_TARGET": "sienna-8965B4512000", "GHIDRA_PROJECT": str(project_dir)})
     (REPO / "build" / "tmp").mkdir(parents=True, exist_ok=True)
     # Refuse to attribute the committed inventory hash to an unrelated live
     # project.  Export and compare the selected project before decompiling it.

@@ -201,7 +201,7 @@ with tempfile.TemporaryDirectory() as td:
 
     result = invoke(
         fake_home,
-        "--project-dir", str(REPO / "project"),
+        "--project-dir", str(REPO / "projects"),
         "--project", "rh850_p1me_mapped",
         "--",
         "-process", "program",

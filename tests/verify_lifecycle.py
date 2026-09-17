@@ -11,7 +11,7 @@ Scope (no Ghidra required):
   2. Mutation marker is written for `script run` subcommands.
   3. Mutation marker is written for `analyze` subcommands.
   4. Mutation marker is NOT written for read-only commands (decompile, x-ref).
-  5. tools/g refuses to operate against committed project/ via GHIDRA_PROJECT.
+  5. tools/g refuses to operate against committed projects/ via GHIDRA_PROJECT.
   6. finalize_project.sh treats explicit marker-free promotion as required.
   7. Mutation markers and daemon stop commands are project-affine.
   8. snapshot_project.sh clears the mutation marker on success.
@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import atexit
 import hashlib
+import json
 import os
 import shutil
 import subprocess
@@ -80,7 +81,11 @@ def run(cmd: list[str], env: dict | None = None, timeout: int = 30) -> subproces
 
 BUILD_WORK = (REPO / "build" / "work").resolve()
 BUILD_TMP = (REPO / "build" / "tmp").resolve()
-DEFAULT_PROJECT = (BUILD_WORK / "project").resolve()
+_REGISTRY = json.loads((REPO / "data" / "analysis_targets.json").read_text())
+_DEFAULT_TARGET = _REGISTRY["default_target"]
+_DEFAULT_ROW = _REGISTRY["targets"][_DEFAULT_TARGET]
+DEFAULT_PROJECT = (REPO / _DEFAULT_ROW["work_dir"]).resolve()
+DEFAULT_PROJECT_NAME = _DEFAULT_ROW["project_name"]
 
 
 def marker_for(project: Path) -> Path:
@@ -215,7 +220,7 @@ with tempfile.TemporaryDirectory() as td:
 result = run(
     [
         "bash", str(REPO / "tools" / "g"), "decompile", "0",
-        "--projects-dir", str(REPO / "project"), "--help",
+        "--projects-dir", str(REPO / "projects"), "--help",
     ],
     env={"GHIDRA_NO_BOOTSTRAP": "1"},
     timeout=10,
@@ -227,7 +232,7 @@ check(
 )
 
 result = run(
-    ["bash", str(REPO / "tools" / "g"), "project", "delete", "rh850_p1me_mapped"],
+    ["bash", str(REPO / "tools" / "g"), "project", "delete", DEFAULT_PROJECT_NAME],
     env={"GHIDRA_NO_BOOTSTRAP": "1"},
     timeout=10,
 )
@@ -403,14 +408,14 @@ with tempfile.TemporaryDirectory(dir=BUILD_TMP, prefix="lifecycle-alt-project-")
     )
     alternate_marker.unlink(missing_ok=True)
 
-# --- Test 5: Refuses committed project/ via GHIDRA_PROJECT --------------------
+# --- Test 5: Refuses committed projects/ via GHIDRA_PROJECT --------------------
 result = run(
     ["bash", str(REPO / "tools" / "g"), "decompile", "0x0"],
-    env={"GHIDRA_PROJECT": str(REPO / "project")},
+    env={"GHIDRA_PROJECT": str(REPO / "projects")},
     timeout=10,
 )
 check(
-    "Refuses committed project/ via GHIDRA_PROJECT",
+    "Refuses committed projects/ via GHIDRA_PROJECT",
     result.returncode != 0 and "REFUSING" in result.stderr,
     f"rc={result.returncode}, stderr={result.stderr[:200]}",
 )
@@ -418,11 +423,11 @@ check(
 # Also test subdirectory of project/
 result = run(
     ["bash", str(REPO / "tools" / "g"), "decompile", "0x0"],
-    env={"GHIDRA_PROJECT": str(REPO / "project" / "subdir")},
+    env={"GHIDRA_PROJECT": str(REPO / "projects" / "subdir")},
     timeout=10,
 )
 check(
-    "Refuses project/ subdir via GHIDRA_PROJECT",
+    "Refuses projects/ subdir via GHIDRA_PROJECT",
     result.returncode != 0 and "REFUSING" in result.stderr,
     f"rc={result.returncode}, stderr={result.stderr[:200]}",
 )
@@ -463,7 +468,7 @@ check(
 )
 check(
     "snapshot promotion rejects a symlinked repository project root",
-    '[[ ! -L "$ROOT/project" ]]' in snap_content,
+    '[[ ! -L "$ROOT/projects" ]]' in snap_content,
 )
 check(
     "snapshot installs exit cleanup before stats can fail",
@@ -551,7 +556,7 @@ check(
 
 rebuild_unsafe = run([
     "bash", str(REPO / "tools" / "project" / "rebuild_project.sh"),
-    "--project-dir", str(REPO / "project"), "--force",
+    "--project-dir", str(REPO / "projects"), "--force",
 ])
 check(
     "rebuild refuses committed and external destinations before deletion",
