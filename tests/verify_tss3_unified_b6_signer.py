@@ -244,9 +244,16 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
         cwd=ROOT, check=True, capture_output=True, text=True,
     )
     kit_meta = json.loads(kit_proc.stdout)
+    packaged_meta = json.loads((kit / "bundle/unified.json").read_text(encoding="utf-8"))
     check("unified field kit packages one exact target and common launcher",
           kit_meta["schema"] == "tss3-unified-b6-signer-kit-v1" and
           kit_meta["target"]["name"] == "crown-8965F3012000" and
+          kit_meta["install_strategy"] == "exact-target-one-shot" and
+          packaged_meta["install_strategy"] == "exact-target-one-shot" and
+          packaged_meta["exact_target_payload"]["dispatcher"]["mode"] == "host-exact-f181-bound" and
+          packaged_meta["exact_target_payload"]["dispatcher"]["codeflash_data_reads_before_resident"] is False and
+          packaged_meta["exact_target_payload"]["dispatcher"]["boot_calls"] ==
+              ["0x00000C9A", "0x00000E54", "0x00000F80", "0x000010C6", "0x0000119E"] and
           (kit / "tss3-unified-signer").is_file() and (kit / "bundle/unified.json").is_file() and
           (kit / "runtime/tsk/lib/programming.py").is_file() and
           (kit / "runtime/exploit/ephemeral_runtime/camry_f33_post_install_recovery.py").is_file())
@@ -321,10 +328,18 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
         if isinstance(value, Exception):
             raise value
         return value
+    class RetryClient:
+        def __init__(self): self.sessions = []
+        def diagnostic_session_control(self, session): self.sessions.append(session)
+    class RetryUds:
+        class SESSION_TYPE:
+            EXTENDED_DIAGNOSTIC = 3
+    retry_client = RetryClient()
     with mock.patch.object(host, "_read_memory", side_effect=flaky_read):
-        retried = host._read_memory_retry(object(), object(), 0xFEBFF9F0, len(camry_bundle.resident),
+        retried = host._read_memory_retry(retry_client, RetryUds, 0xFEBFF9F0, len(camry_bundle.resident),
                                           label="fixture resident", timeout=0.2)
-    check("resident readback retries transient post-startup diagnostic timeouts", retried == camry_bundle.resident)
+    check("resident readback retries startup DCM reset by re-entering extended session",
+          retried == camry_bundle.resident and retry_client.sessions == [3])
 
     damaged = bytearray(camry_bundle.resident); damaged[7] ^= 1
     try:

@@ -109,29 +109,28 @@ NRC `0x11`, and suppressed on the functional response path. CanTp/PduR still
 performs the complete seven-byte N-SDU copy before the resident's exact
 post-receive hook.
 
-| exact target | functional DCM buffer | universal runtime profile | installation |
+| exact target | functional DCM buffer | unified runtime profile | field bootstrap |
 |---|---:|---|---|
-| Camry `8965F3307000` | `FEBE5751` | `camry-f33` | one authenticated universal payload |
-| Corolla `8965H1202000` | `FEBE563D` | `corolla-hf` | one authenticated universal payload |
-| Corolla `8965F1208000` | `FEBE563D` | `corolla-hf` | one authenticated universal payload |
-| Crown `8965F3012000` | `FEBE527D` | `crown-f30` | one authenticated universal payload |
+| Camry `8965F3307000` | `FEBE5751` | `camry-f33` | exact-F181-bound one-shot |
+| Corolla `8965H1202000` | `FEBE563D` | `corolla-hf` | exact-F181-bound one-shot |
+| Corolla `8965F1208000` | `FEBE563D` | `corolla-hf` | exact-F181-bound one-shot |
+| Crown `8965F3012000` | `FEBE527D` | `crown-f30` | exact-F181-bound one-shot |
 
 The former C6 helper-loader proved useful during bring-up, but it is no longer
-part of the maintained installation contract. The one-size-fits-all artifact is
-a single authenticated **4-KiB payload with identical bytes for every target**.
-At boot execution it first reads a four-byte **low-bootloader family
-signature** at `0x0C80`: exact Camry/Crown F3 use `0x9D230D21`, while exact
-Corolla H/F use `0x0030F6F3`. It then runs that family's already-qualified four
-boot initialization calls plus application-validity check. Only after that
-known-good initialization boundary does it read the 12-byte application-family
-identity at CodeFlash `0x20860`, fail-close on an unknown identity, and select
-one of three exact profiles: Camry F33, Crown F30, or the shared Corolla H/F
-runtime. This ordering matters because the authenticated callback executes from
-the active boot programming/erase context; the first universal revision read
-application CodeFlash before boot reinitialization and did not survive its first
-healthy-F33 live install on 2026-09-17. Target-specific CodeFlash call addresses
-and RAM offsets remain data/code inside the common payload, so no target-specific
-host executable is required.
+part of the maintained field-kit installation contract. The recurring C7
+runtime remains unified, but **the tester bootstrap is now exact-target**: the
+host binds exact application F181 before entering programming mode, and the
+authenticated callback uses the selected target boot init and validity addresses
+directly. It performs no CodeFlash data read before copying the resident.
+
+The separate experimental all-target payload is retained for architecture work.
+Its first healthy-F33 attempt read application identity before boot reinit and
+returned to stock application with the high-tail resident absent. A corrected
+revision first classified the boot family at low CodeFlash `0x0C80`, ran that
+family boot init and validity sequence, then read `0x20860`; a second healthy-F33
+attempt again returned to stock application with `FEBFF9F0` effectively zero.
+Therefore boot-time CodeFlash self-dispatch is **not** a qualified field path and
+is no longer packaged by the tester-kit builder.
 
 The selected resident is copied to the common retained high tail
 `FEBFF9F0..FEBFFBFB`. The selected helper is temporarily parked at
@@ -162,11 +161,13 @@ operator to enter READY unless those checks pass. This was added after the first
 healthy-F33 one-shot attempt returned to the stock application but later showed
 a missing resident.
 
-#### Universal one-shot runtime
+#### Unified runtime with exact-target field bootstrap
 
-The one payload contains all three compiled runtime profiles and currently uses
-**3,822 bytes of the 4,048-byte authenticated plaintext shellcode budget**. The
-profile components are:
+The experimental all-target payload contains all three compiled runtime profiles
+and currently uses **3,822 bytes of the 4,048-byte authenticated plaintext
+shellcode budget**. The packaged exact-target field payload contains only the
+selected profile; the current Camry F33 stage is **1,420 bytes** before the fixed
+authenticated envelope. The profile components are:
 
 - Camry F33: 462-byte resident + 572-byte helper;
 - Crown F30: 462-byte resident + 572-byte helper;
