@@ -18,10 +18,10 @@ from exploit.ephemeral_runtime import tss3_unified_b6_signer as host
 BUILDER = ROOT / "exploit/ephemeral_runtime/build_tss3_unified_b6_signer.py"
 KIT_BUILDER = ROOT / "tools/targets/tss3/builders/build_tss3_unified_b6_signer_kit.py"
 TARGETS = {
-    "camry-8965F3307000": ("0xFEBE5751", "split-telemetry", 462, 572, "supervised-continuous", 7),
+    "camry-8965F3307000": ("0xFEBE5751", "split-telemetry", 462, 596, "supervised-continuous", 7),
     "corolla-8965H1202000": ("0xFEBE563D", "corolla-resident-prefix", 522, 458, "supervised-continuous", 7),
     "corolla-8965F1208000": ("0xFEBE563D", "corolla-resident-prefix", 522, 458, "supervised-continuous", 7),
-    "crown-8965F3012000": ("0xFEBE527D", "split-telemetry", 462, 572, "supervised-continuous", 7),
+    "crown-8965F3012000": ("0xFEBE527D", "split-telemetry", 462, 596, "supervised-continuous", 7),
 }
 
 
@@ -68,6 +68,11 @@ check("Camry/Crown helper keeps call-spanning locals in ABI-preserved registers"
       "st.h r21, 0x4a8e[gp]" in helper_source and
       "dispose 0, {r20-r21,lp}, lp" in helper_source and
       "st.b r6, 0x4ad0[gp]" not in helper_source and "st.h r6, 0x4ad2[gp]" not in helper_source)
+check("native oracle retries freshness skew and command5 rc2 before terminal failure",
+      "Keep oracle state 0 while the snapshot/result is still retryable" in helper_source and
+      "be .L_return              /* rc2 = transient busy/poll timeout; retry next native frame */" in helper_source and
+      ".L_terminal_fail:" in helper_source and
+      "st.b r6, 0x4a79[gp]" in helper_source)
 check("Camry/Crown resident no longer depends on functional-loader offsets",
       unified_builder.TARGETS["camry-8965F3307000"]["resident_macros"] == {} and
       unified_builder.TARGETS["crown-8965F3012000"]["resident_macros"] == {} and

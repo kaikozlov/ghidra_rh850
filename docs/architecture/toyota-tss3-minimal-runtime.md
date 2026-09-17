@@ -153,32 +153,25 @@ pocket.
 
 Corolla can install its 458-byte helper into `FEBF0000..FEBF01C9` before
 application startup because exact H/F startup-survival analysis excludes that
-range from startup writes. Camry/Crown replay startup first and defer their
-572-byte helper copy into `FEBF0000` until the already-qualified foreground
-count-224 boundary; before that point the helper is absent and cannot execute.
-This removes the old C6 post-startup transfer while preserving the startup
-lifetime boundary that originally motivated the split design.
+range from startup writes. Camry/Crown instead use the restored split field
+path: the high resident reaches count 224 first, then the host transfers the
+current helper over functional C6 and arms it. This keeps helper installation out
+of the boot callback while preserving C7 as the recurring steering-control wire.
 
-The host now treats this delayed helper installation as part of **install**, not
-qualification: after the application reappears it retries transient SID23
-readback, verifies the high resident byte-for-byte, waits through the F33/F30
-count-224 boundary, requires initialized+armed state, reads the complete helper
-back byte-for-byte, and re-attests the resident. `bringup` does not prompt the
-operator to enter READY unless those checks pass. This was added after the first
-healthy-F33 one-shot attempt returned to the stock application but later showed
-a missing resident.
+For F33/F30, `install` therefore proves only resident survival/initialization;
+`qualify` performs the C6 helper transfer, byte-exact readback, arm, and native
+MAC oracle. The oracle treats freshness skew and command-5 rc2 as retryable and
+latches failure only after a non-retryable command-5/completion error or a clean
+MAC mismatch.
 
 #### Unified C7 runtime with target-shaped field installation
 
-The experimental all-target payload contains all three compiled runtime profiles
-and currently uses **3,822 bytes of the 4,048-byte authenticated plaintext
-shellcode budget**. It is retained only for research. The current Camry field
-stage is **650 bytes**, contains only the high resident, and leaves helper
-transfer to functional C6 after startup. The profile components are:
+The experimental all-target payload remains retained for research. The field
+path is target-shaped. Current field component sizes are:
 
-- Camry F33: 462-byte resident + 572-byte helper;
-- Crown F30: 462-byte resident + 572-byte helper;
-- Corolla H/F: 522-byte resident + 458-byte helper.
+- Camry F33: 522-byte resident + 594-byte helper, padded to 600 bytes for C6;
+- Crown F30: 522-byte resident + 594-byte helper, padded to 600 bytes for C6;
+- Corolla H/F: 522-byte resident + 458-byte embedded helper.
 
 The recurring host API is consequently only:
 
