@@ -332,7 +332,9 @@ Therefore the precise current statement is:
 
 > `0x351`, `0x394`, `0x4A3`, and `0x4C8` are genuine, scheduler-armed EPS transmit PDUs in exact F33 firmware, but they have not been observed in the retained external CAN captures we currently possess.
 
-The final reason for that static/runtime-vs-capture discrepancy is not yet closed. It may live below the recovered COM/PduR/CanIf scheduling layer or in external topology/capture visibility. We should not paper over that with a fabricated “disabled” flag: the retained HTH idle state is normal, and the firmware evidence says the transmit routes are live.
+The final reason for that static/runtime-vs-capture discrepancy is not yet statically closed. The **leading topology hypothesis** is selective forwarding at the EBU/arbitration junction between the EPS-native chassis segment and the Bus-4 segment visible to Panda/FRC: the EPS transmits all five PDUs locally, while the EBU forwards `0x030` onto Bus 4 because upstream ADAS consumers need its steering-wheel-torque/control-status information and does not forward the four classic sibling status PDUs because they have no Bus-4 consumer. Under that model, the retained captures are observing the far side of a selective gateway rather than the EPS's native transmit segment.
+
+This interpretation fits all currently recovered evidence: the generated-COM scheduler, PduR, CanIf, and lower driver objects are live inside the EPS, yet only `0x030` appears at our external Bus-4 observation point. It remains a **hypothesis**, not a recovered routing fact, until the EBU RX→TX/gateway table or equivalent junction logic is reconstructed. The practical next question is therefore not “why does the EPS fail to send these four PDUs?” but **“which EPS-origin PDUs does the EBU/arbitration junction forward onto Bus 4?”** We should not paper over the discrepancy with a fabricated EPS-side “disabled” flag: the retained HTH idle state is normal, and the firmware evidence says the transmit routes are live.
 
 ## 11. Consequence for DBC work
 
