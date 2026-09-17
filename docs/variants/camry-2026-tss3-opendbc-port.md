@@ -814,6 +814,39 @@ but not Toyota's driver-camera-backed hands-free LTA capability. For the ordinar
 Camry LTA nag, the relevant Toyota vocabulary is the explicit
 judgment/message/buzzer/cancel-by-hands-off family above.
 
+Current GTS+ also makes clear that **TSS3 hands-on sensing is not intrinsically
+torque-only across the fleet**. The recovered TSS3 PCS Operation-FFD dictionary
+contains `5222 = Touch sensor presence` (`タッチセンサ有無`) as an explicit
+TSS3 configuration datum, and the current category-498 `FRC_P5` DTC table contains
+`C1A7796 Steering Touch Sensor / Component Internal Failure`. The ordinary
+`FRC_P5` Data List does not expose a corresponding `touch vs torque` mode selector,
+so those two facts prove TSS3/FRC support for steering-touch hardware but do not,
+by themselves, prove whether a particular calibration uses touch **instead of**
+torque or fuses both inputs. Toyota's 2026 Camry product matrix independently
+closes the production-hardware side: TSS 3.0 is standard across the listed Camry
+trims, while an XSE steering-wheel package is explicitly offered **with touch
+sensor**. See the official [2026 Camry eBrochure](https://www.toyota.com/content/dam/toyota/brochures/pdf/2026/camry_ebrochure.pdf).
+
+The wider diagnostic corpus supplies useful boundaries for that configuration.
+Same-generation `LDA_P5` (a predecessor semantic oracle, not a production
+category-498 peer) exposes two independent judgments: DID `0x1044` **Not Holding
+Steering Wheel Judgment Status (Torque Sensor)** and DID `0x1045` **... (Touch
+Sensor)**. Successor `ADCU_P6` makes the source model explicit at DID `0x1B10`
+**Steering Wheel Hold Detection**: `0=Release Detection`, `1=Hold Detection
+(Steering Touch Sensor)`, `2=Hold Detection (Torque Sensor)`, and `3=Hold Detection
+(Steering Touch Sensor and Torque Sensor)`. P6 is terminology-only evidence for
+TSS3, but the four-state enum shows Toyota treats touch and torque as separable,
+combinable hands-on inputs rather than synonyms.
+
+Driver-camera attention is a third, separate dimension. Current `FRC_P5` exposes
+DID `0x1210` **Drive Monitor Equipped** and DID `0x2129` **PCS Drive Monitor Early
+Warning Function**; the TSS3 recorder separately carries `5509 LDA Driver Monitor
+Camera Collaboration Exist`, `5609 LTA Driver Monitor Camera Collaboration Exist`,
+and `5633 Driver Monitor Camera Warning Reasons`. These must not be collapsed into
+the wheel-contact detector: a vehicle may have torque/touch hands-on sensing,
+driver-monitor-camera functions, or both, and this exact Camry's retained `5609`
+record says the LTA driver-monitor-camera collaboration feature is absent.
+
 The September-6 CAN corpus also exposes the reset side of the ordinary nag state
 machine. In clean ID11 LTA, `0x371 B20[4]` is a strong low-sensitivity
 **driver-steering-detected candidate**, while `B17[0]` is its exact structural
