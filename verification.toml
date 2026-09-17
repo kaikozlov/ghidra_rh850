@@ -486,6 +486,9 @@ tests = ["tests/verify_camry_tss3_request_capture.py"]
 [suite.camry_frc_operation_ffd_capture]
 tests = ["tests/verify_camry_frc_operation_ffd_capture.py"]
 
+[suite.camry_2026_driver_steering_threshold_split]
+tests = ["tests/verify_camry_2026_driver_steering_threshold_split.py"]
+
 [suite.camry_frc_drcc_gate_probe]
 tests = ["tests/verify_camry_frc_drcc_gate_probe.py"]
 

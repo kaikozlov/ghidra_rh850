@@ -900,18 +900,69 @@ prioritizing `560D`, `5601`, `5612`, `5615`, `5632`, and `550D`; a later
 post-warning `AB11/AB12/AB13` read can also reveal whether the cancel/late-hands-on
 RoB families become retained on this calibration.
 
-A tempting workaround would be to alter the EPS-origin `0x030` torque fields and let the
-EPS's now-recovered SecOC-Tx path sign a periodic synthetic "touch" value above the observed
-detector transition. That experiment is intentionally **not** part of the port. The current
-OEM schema is a reason not to infer that this is equivalent to a harmless hands-on
-acknowledgment: the same recorder family exposes `LTA Driver Steering Control prohibited`
-(`560D`) and `LDA Warning Inhibition by Driver Steering` (`550D`). Synthetic torque can
-therefore enter Toyota's driver-override/inhibition logic as well as reset the nag timer, and
-it fabricates a physical sensor state rather than using a recovered control interface. Do not
-add a periodic synthetic-`0x030` keepalive to `CarController`, Panda safety, or the resident
-signer. Until a synchronized warning FFD capture separates the relevant states or an OEM
-nudge-reset/control surface is recovered, `0x030` spoofing is not a qualified nag-disable
-interface.
+The torque path is more nuanced than a single "driver touched / override" threshold. Current
+Toyota diagnostic vocabulary explicitly separates the two concepts. On this exact P5/FRC
+recorder, `560D` contains both **Driver Steering Control Detection Status** and a separate
+**LTA Driver Steering Control prohibited** byte, while recorder objects `5774` and `5776`
+are independently named **Driver steering override** and **Driver steering override for
+steering**. For `5774/5776`, `SupportDID=1` is **not** a claim that SID `22` can read
+those recorder IDs directly: recovered PCS Viewer `MeasuredValue::CheckSupportDataID` uses it
+as a record-local support-bit gate in the byte immediately preceding the value. The read-only
+Operation-FFD decoder now applies that gate. The current P6 successor likewise exposes separate
+`LTA Driver Hands-On Flag` and `LTA Inhibition By Steering Override` monitors. An independent P5 Advanced-Drive
+record (`ADS_Eth_P5`, DID `0x1E0F`) makes Toyota's intended state split especially explicit:
+its repeated Driver Steering Condition snapshots use the three-value dictionary
+**Not Steering / Steering(Low) / Steering(High)**. Those cross-system names do not transfer
+a numeric threshold to this Camry, but they strongly reject the model that the first
+hands-on detection necessarily implies steering override.
+
+Same-car CAN supports the low side of that split. `0x371 B20[4]` has median physical-torque
+set/release transitions of about **0.67 / 0.34--0.37 N.m**; in routes `3e/3f` its
+assertion probability is already **90.1% / 86.4% at 0.75--1.0 N.m** and
+**95.7% / 94.2% at 1.0--1.25 N.m**. Thus there is a plausible low-steering operating band in which a torque
+observation can reset the ordinary hands-off timer without necessarily reaching Toyota's
+higher steering-override/prohibition state. The exact upper boundary, duration filter and
+sign dependence of that higher state are still unrecovered.
+
+The public request plane does **not** provide that missing threshold. A full 12-route road
+scan found nine direct `0x08A` ID11->ID0 transitions while cruise remained latched and no
+blinker was active. Seven occurred with both model lane probabilities >=0.7, but their
+instantaneous absolute EPS torques span **0.23..1.37 N.m** and several occur with the
+low-sensitivity `B20[4]` detector itself clear. Therefore an ID11->ID0 edge is not a clean
+"steering override" oracle; request withdrawal has other causes. Likewise the exact-F33
+EPS contains a separate 2.00-N.m torque predicate in its own service/diagnostic logic, but
+there is no evidence connecting that EPS-local predicate to the FRC LTA override threshold.
+
+This reopens the synthetic-`0x030` idea as a **bounded experiment**, not as production code.
+The useful discriminator is to characterize the low/high split directly. Current GTS+ gives
+us a particularly promising trigger candidate: FRC RoB **`0x209D = LCS Steer Override`** is
+configured at 0.2-s sampling with 36 pre-trigger and 8 post-trigger samples. No retained
+same-car `209D` record has been observed yet, so its relationship to ordinary ID11 LTA remains
+a dynamic join rather than an assumed threshold oracle. Neighboring RoBs independently
+name **`0x2845 = LTA Hands Free Cancel`**, **`0x2846 = CSF Hands Free Warning Operation`**,
+**`0x229C = Late hands-on timing`**, and **`0x229F = End of hands-off control`**. A slow real-
+torque sweep during ordinary ID11 LTA, with native `0x030/0x371/0x08A/0x081/0x412` capture,
+can therefore test whether `209D` fires at the high/override transition; if it does, the retained
+pre/post window brackets that transition directly, and fetching the stored Operation-FFD record
+can search for `560D`, `5774`, and `5776` around the same event, honoring each field's
+record-local support bit when present. This is a much cleaner
+experimental discriminator than treating any public request withdrawal as override. The
+existing read-only `camry_frc_operation_ffd_capture.py` already defaults to `209D` and now
+highlights `550D/560D/5774/5776`; after such a road event the focused fetch is simply
+`--rob 0x209D`. Only after the physical low/high boundaries are pinned should an
+ephemeral one-shot `0x030` substitution test whether a small signed EPS-origin torque value
+is interpreted identically by the FRC. That test must also preserve the packet's **inner B7
+additive checksum**: changing only B8 in the already-packed COM buffer and then letting SecOC
+sign it produces an authenticated but internally inconsistent `0x030`. The clean experiment
+is either to alter the torque staging value before `0x4C97A` packs PDU0, or to update B8 and
+recompute B7 before the recovered SecOC-Tx path consumes B0..B27. A periodic keepalive should
+remain out of `CarController`, Panda safety, and the resident signer until that discriminator
+is complete; the reason is now **unknown higher-threshold behavior**, not an assumption that
+every synthetic torque sample triggers override.
+
+The retained reduction is generated by
+`tools/targets/camry/analysis/analyze_camry_2026_driver_steering_threshold_split.py` into
+`data/generated/camry_2026_driver_steering_threshold_split.json`.
 
 Current upstream Toyota explains how comma normally removes the wheel-nudge nag.
 `0x412` is a camera-owned replacement message in Toyota Panda safety

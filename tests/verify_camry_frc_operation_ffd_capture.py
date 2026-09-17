@@ -80,7 +80,11 @@ check("560D EPS pinion angle decode", sig("0x560D", "EPS Pinion Angle")["physica
 # MSB0 bit extraction matters for support/under-control flags.  The current
 # 5265 metadata locates the seven one-bit fields at MSB positions in its payload.
 flag_payload = bytearray(14)
+# Support bytes precede each value byte for SupportDID==1 fields.
+flag_payload[0] = 0x80
 flag_payload[1] = 0x80
+flag_payload[2] = 0x80
+flag_payload[12] = 0x80
 flag_payload[13] = 0x80
 flag_block = cap.RecorderBlock(0x5265, bytes(flag_payload))
 flags = cap.decode_blocks([flag_block], semantics)[0]["decoded"]
@@ -88,6 +92,18 @@ flags_by_name = {row["name"]: row for row in flags}
 check("5265 ABS under-control MSB0 decode", flags_by_name["ABS under-control"]["raw"] == 1)
 check("5265 active-steering under-control MSB0 decode", flags_by_name["Active steering under-control flag"]["raw"] == 1)
 check("5265 unset VSC under-control decode", flags_by_name["VSC under-control"]["raw"] == 0)
+
+# SupportDID==1 is a recorder-local support bit. 5774/5776 use byte1 bit7
+# to qualify the value in byte2 bit7; it is not evidence for SID22 support.
+override_defs = semantics[0x5774]
+check("5774 has one support-gated override definition",
+      len(override_defs) == 1 and override_defs[0]["SupportDID"] == 1)
+override_supported = cap.decode_signal(bytes.fromhex("8080"), override_defs[0])
+override_unsupported = cap.decode_signal(bytes.fromhex("0080"), override_defs[0])
+check("5774 support bit admits asserted override value",
+      override_supported["supported"] is True and override_supported["raw"] == 1)
+check("5774 missing support bit suppresses value decode",
+      override_unsupported == {"name": "Driver steering override", "supported": False, "support_did": 1})
 
 check("UDS negative parser", cap.negative_response(bytes.fromhex("7fab31")) == {
     "request_sid": "0xAB", "nrc": "0x31", "raw": "7fab31"
@@ -104,7 +120,10 @@ check("plan has no SecurityAccess/RC/WDBI/flash/active-test/vehicle-control TX",
           "security_access", "routine_control", "write_data_by_identifier",
           "flash_write", "active_test", "vehicle_control_tx")))
 check("plan includes request/arbitration/plant-state DIDs",
-      {"0x5282", "0x5631", "0x5285", "0x57DE", "0x5265", "0x560D"} <= set(plan["focus_dids"]))
+      {"0x5282", "0x5631", "0x5285", "0x57DE", "0x5265", "0x560D",
+       "0x550D", "0x5774", "0x5776"} <= set(plan["focus_dids"]))
+check("plan defaults include steering-override and hands-off warning RoBs",
+      {"0x209D", "0x2845", "0x2846", "0x229C", "0x229F"} <= set(plan["default_robs"]))
 
 proc = subprocess.run(
     [sys.executable, str(REPO / "tools/targets/camry/live/camry_frc_operation_ffd_capture.py")],

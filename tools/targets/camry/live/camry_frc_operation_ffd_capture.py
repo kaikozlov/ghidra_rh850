@@ -64,6 +64,7 @@ DEFAULT_ROBS = (
     0x2818,  # Steering Angle Speed Threshold Exceeded
     0x2844,  # Lane Departure Warning Operation under LTA
     0x2845,  # LTA Hands Free Cancel
+    0x2846,  # CSF Hands Free Warning Operation
     0x240E,  # LCA Reject
     0x240F,  # LCA Cancel
     0x229B, 0x229C, 0x229D, 0x229E, 0x229F,  # hands-off family
@@ -75,8 +76,8 @@ FOCUS_DIDS = {
     0x0501, 0x0502, 0x0507, 0x0511,  # recorder trip/time metadata
     0x5202, 0x5265,
     0x5280, 0x5281, 0x5282, 0x5284, 0x5285,
-    0x5531, 0x560D, 0x5631,
-    0x57DB, 0x57DE,
+    0x550D, 0x5531, 0x560D, 0x5631,
+    0x5774, 0x5776, 0x57DB, 0x57DE,
     0x5271, 0x5A04, 0x5B07,
 }
 
@@ -217,7 +218,32 @@ def _extract_bits_msb0(data: bytes, byte_position: int, bit_position: int, bit_l
     return (whole >> shift) & ((1 << bit_length) - 1)
 
 
+def _support_data_id_present(data: bytes, row: dict[str, Any]) -> bool:
+    """Mirror PCS Viewer TSS3 MeasuredValue.CheckSupportDataID.
+
+    SupportDID==1 is a record-local support-bit gate, not a UDS ReadDataByIdentifier
+    capability declaration.  The host reads the byte immediately preceding the
+    field byte and tests the same numeric bit position.
+    """
+    if int(row.get("SupportDID", 0)) != 1:
+        return True
+    byte_position = int(row["BytePosition"])
+    bit_position = int(row["BitPosition"])
+    support_index = byte_position - 2
+    if support_index < 0 or support_index >= len(data) or not 0 <= bit_position <= 7:
+        raise ValueError("support-DID bit geometry exceeds recorder payload")
+    return bool((data[support_index] >> bit_position) & 1)
+
+
 def decode_signal(data: bytes, row: dict[str, Any]) -> dict[str, Any]:
+    supported = _support_data_id_present(data, row)
+    if not supported:
+        return {
+            "name": row["DataName"],
+            "supported": False,
+            "support_did": int(row.get("SupportDID", 0)),
+        }
+
     bit_length = int(row["BitLength"])
     raw_unsigned = _extract_bits_msb0(
         data, int(row["BytePosition"]), int(row["BitPosition"]), bit_length)
@@ -256,6 +282,7 @@ def decode_signal(data: bytes, row: dict[str, Any]) -> dict[str, Any]:
         "raw": raw,
         "physical": physical_text,
         "invalid": invalid,
+        "supported": True,
         "geometry": {
             "byte_position": row["BytePosition"],
             "bit_position": row["BitPosition"],
@@ -263,6 +290,7 @@ def decode_signal(data: bytes, row: dict[str, Any]) -> dict[str, Any]:
             "type": kind,
             "lsb": row["Lsb"],
             "offset": row["Offset"],
+            "support_did": int(row.get("SupportDID", 0)),
         },
     }
 

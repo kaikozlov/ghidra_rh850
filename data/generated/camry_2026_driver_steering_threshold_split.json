@@ -1,0 +1,411 @@
+{
+  "bounded_conclusion": {
+    "candidate_experiment_band": "roughly 0.75-1.0 N.m is already strongly associated with the low detector on both retained September-6 drives; this is not yet a qualified synthetic-torque value",
+    "high_override_threshold": "unrecovered",
+    "low_band_exists": "supported structurally and dynamically",
+    "next_discriminator": "slow physical torque sweep with synchronized 0x030/0x371/0x08A/0x081/0x412 and FRC Operation-FFD 560D/5774/5776, followed only then by a one-shot ephemeral 0x030 substitution test",
+    "production_boundary": "do not add a periodic synthetic 0x030 keepalive until higher-threshold magnitude, dwell/hysteresis, sign behavior, and synthetic-vs-physical equivalence are measured"
+  },
+  "request_withdrawal_negative": {
+    "direct_id11_to_id0_count": 9,
+    "events": [
+      {
+        "abs_eps_torque_nm": 0.93,
+        "driver_detect_b20_bit4": true,
+        "eps_torque_nm": -0.93,
+        "lane_line_probs": [
+          0.982,
+          0.995
+        ],
+        "request_b23": 0,
+        "request_b24": 100,
+        "request_target_raw": -41,
+        "route": "3b",
+        "segment": 52,
+        "t_mono_s": 3183.202425,
+        "warning_b19_bit6": false
+      },
+      {
+        "abs_eps_torque_nm": 0.23,
+        "driver_detect_b20_bit4": false,
+        "eps_torque_nm": 0.23,
+        "lane_line_probs": [
+          0.996,
+          0.991
+        ],
+        "request_b23": 0,
+        "request_b24": 100,
+        "request_target_raw": -10,
+        "route": "3b",
+        "segment": 56,
+        "t_mono_s": 3442.776229,
+        "warning_b19_bit6": false
+      },
+      {
+        "abs_eps_torque_nm": 0.64,
+        "driver_detect_b20_bit4": false,
+        "eps_torque_nm": -0.64,
+        "lane_line_probs": [
+          0.993,
+          0.985
+        ],
+        "request_b23": 0,
+        "request_b24": 100,
+        "request_target_raw": 4,
+        "route": "3b",
+        "segment": 66,
+        "t_mono_s": 4011.440487,
+        "warning_b19_bit6": false
+      },
+      {
+        "abs_eps_torque_nm": 1.03,
+        "driver_detect_b20_bit4": true,
+        "eps_torque_nm": -1.03,
+        "lane_line_probs": [
+          0.931,
+          0.903
+        ],
+        "request_b23": 0,
+        "request_b24": 100,
+        "request_target_raw": -93,
+        "route": "3b",
+        "segment": 69,
+        "t_mono_s": 4235.672027,
+        "warning_b19_bit6": false
+      },
+      {
+        "abs_eps_torque_nm": 1.37,
+        "driver_detect_b20_bit4": true,
+        "eps_torque_nm": -1.37,
+        "lane_line_probs": [
+          0.98,
+          0.95
+        ],
+        "request_b23": 0,
+        "request_b24": 100,
+        "request_target_raw": 0,
+        "route": "3b",
+        "segment": 74,
+        "t_mono_s": 4495.599335,
+        "warning_b19_bit6": false
+      },
+      {
+        "abs_eps_torque_nm": 0.64,
+        "driver_detect_b20_bit4": false,
+        "eps_torque_nm": 0.64,
+        "lane_line_probs": [
+          0.979,
+          0.954
+        ],
+        "request_b23": 0,
+        "request_b24": 100,
+        "request_target_raw": -4,
+        "route": "3c",
+        "segment": 42,
+        "t_mono_s": 10017.583993,
+        "warning_b19_bit6": false
+      },
+      {
+        "abs_eps_torque_nm": 0.33,
+        "driver_detect_b20_bit4": false,
+        "eps_torque_nm": -0.33,
+        "lane_line_probs": [
+          0.975,
+          0.137
+        ],
+        "request_b23": 0,
+        "request_b24": 100,
+        "request_target_raw": 12,
+        "route": "3c",
+        "segment": 59,
+        "t_mono_s": 11038.402976,
+        "warning_b19_bit6": false
+      },
+      {
+        "abs_eps_torque_nm": 1.03,
+        "driver_detect_b20_bit4": true,
+        "eps_torque_nm": 1.03,
+        "lane_line_probs": [
+          0.917,
+          0.817
+        ],
+        "request_b23": 0,
+        "request_b24": 100,
+        "request_target_raw": 62,
+        "route": "3e",
+        "segment": 24,
+        "t_mono_s": 1535.297174,
+        "warning_b19_bit6": false
+      },
+      {
+        "abs_eps_torque_nm": 1.29,
+        "driver_detect_b20_bit4": true,
+        "eps_torque_nm": 1.29,
+        "lane_line_probs": [
+          0.5,
+          0.569
+        ],
+        "request_b23": 0,
+        "request_b24": 100,
+        "request_target_raw": 67,
+        "route": "3e",
+        "segment": 59,
+        "t_mono_s": 3640.675876,
+        "warning_b19_bit6": false
+      }
+    ],
+    "high_lane_abs_torque_max_nm": 1.37,
+    "high_lane_abs_torque_min_nm": 0.23,
+    "high_lane_count": 7,
+    "high_lane_definition": "both modelV2 inner-lane probabilities >= 0.7 within 200 ms at the direct ID11->ID0 edge",
+    "interpretation": "0x08A ID11->ID0 withdrawal is not a unique steering-override oracle: it occurs across low and higher torque and with the low-sensitivity detector both clear and asserted",
+    "routes_scanned": [
+      "1c",
+      "27",
+      "29",
+      "2a",
+      "2c",
+      "2d",
+      "37",
+      "3b",
+      "3c",
+      "3d",
+      "3e",
+      "3f"
+    ],
+    "segment_counts": {
+      "1c": 5,
+      "27": 32,
+      "29": 12,
+      "2a": 10,
+      "2c": 26,
+      "2d": 6,
+      "37": 7,
+      "3b": 110,
+      "3c": 81,
+      "3d": 62,
+      "3e": 78,
+      "3f": 84
+    }
+  },
+  "same_car_low_sensitivity_detector": {
+    "carrier": "native FRC-side 0x371 B20[4]",
+    "interpretation": "driver-steering/hands-on candidate with hysteretic set/release behavior; not the higher steering-override/prohibition state",
+    "routes": {
+      "3e": {
+        "fraction_0p75_to_1p0": {
+          "driver_detect_fraction": 0.900692841,
+          "driver_detect_frames": 1560,
+          "frames": 1732
+        },
+        "fraction_1p0_to_1p25": {
+          "driver_detect_fraction": 0.957232704,
+          "driver_detect_frames": 761,
+          "frames": 795
+        },
+        "release_abs_eps_torque_nm": {
+          "p10": 0.09,
+          "p50": 0.37,
+          "p90": 0.58
+        },
+        "set_abs_eps_torque_nm": {
+          "p10": 0.42,
+          "p50": 0.67,
+          "p90": 1.01
+        }
+      },
+      "3f": {
+        "fraction_0p75_to_1p0": {
+          "driver_detect_fraction": 0.863973064,
+          "driver_detect_frames": 1283,
+          "frames": 1485
+        },
+        "fraction_1p0_to_1p25": {
+          "driver_detect_fraction": 0.941775837,
+          "driver_detect_frames": 647,
+          "frames": 687
+        },
+        "release_abs_eps_torque_nm": {
+          "p10": 0.07,
+          "p50": 0.34,
+          "p90": 0.62
+        },
+        "set_abs_eps_torque_nm": {
+          "p10": 0.38,
+          "p50": 0.67,
+          "p90": 1.08
+        }
+      }
+    },
+    "source_torque": "exact-F33 EPS-origin 0x030 Steering Wheel Torque"
+  },
+  "schema": "camry-2026-driver-steering-threshold-split-v1",
+  "toyota_semantic_split": {
+    "camry_frc_operation_ffd": {
+      "550D": [
+        {
+          "bit_length": 8,
+          "bit_position": 7,
+          "byte_position": 2,
+          "name": "LDA Inhibition by Steering Override",
+          "support_did": 0
+        },
+        {
+          "bit_length": 8,
+          "bit_position": 7,
+          "byte_position": 10,
+          "name": "LDA Warning Inhibition by Driver Steering",
+          "support_did": 0
+        }
+      ],
+      "560D": [
+        {
+          "bit_length": 8,
+          "bit_position": 7,
+          "byte_position": 1,
+          "name": "Driver Steering Control Detection Status",
+          "support_did": 0
+        },
+        {
+          "bit_length": 8,
+          "bit_position": 7,
+          "byte_position": 2,
+          "name": "LTA Driver Steering Control prohibited",
+          "support_did": 0
+        }
+      ],
+      "5774": [
+        {
+          "bit_length": 1,
+          "bit_position": 7,
+          "byte_position": 2,
+          "name": "Driver steering override",
+          "support_did": 1
+        }
+      ],
+      "5776": [
+        {
+          "bit_length": 1,
+          "bit_position": 7,
+          "byte_position": 2,
+          "name": "Driver steering override for steering",
+          "support_did": 1
+        }
+      ]
+    },
+    "interpretation": "Toyota diagnostic vocabulary independently separates low/hands-on detection from higher steering override/inhibition",
+    "p5_low_high_vocabulary": {
+      "boundary": "cross-system Toyota vocabulary only; the Low/High labels do not transfer numeric thresholds to the Camry FRC",
+      "database": "ADS_Eth_P5.ddb",
+      "did": "0x1E0F",
+      "snapshot_count": 4,
+      "snapshots": [
+        {
+          "bit_end": 35,
+          "bit_start": 34,
+          "name": "Driver Steering Condition when Each Warning/LC Stop (Cancellation) Occurred 1200 msec Before",
+          "pattern_display": {
+            "0": "Not Steering",
+            "1": "Steering(Low)",
+            "2": "Steering(High)"
+          }
+        },
+        {
+          "bit_end": 43,
+          "bit_start": 42,
+          "name": "Driver Steering Condition when Each Warning/LC Stop (Cancellation) Occurred 800 msec Before",
+          "pattern_display": {
+            "0": "Not Steering",
+            "1": "Steering(Low)",
+            "2": "Steering(High)"
+          }
+        },
+        {
+          "bit_end": 51,
+          "bit_start": 50,
+          "name": "Driver Steering Condition when Each Warning/LC Stop (Cancellation) Occurred 400 msec Before",
+          "pattern_display": {
+            "0": "Not Steering",
+            "1": "Steering(Low)",
+            "2": "Steering(High)"
+          }
+        },
+        {
+          "bit_end": 59,
+          "bit_start": 58,
+          "name": "Driver Steering Condition when Each Warning/LC Stop (Cancellation) Occurred",
+          "pattern_display": {
+            "0": "Not Steering",
+            "1": "Steering(Low)",
+            "2": "Steering(High)"
+          }
+        }
+      ]
+    },
+    "p6_successor": [
+      {
+        "bit_end": 15,
+        "bit_start": 8,
+        "name": "LTA Inhibition By Steering Override",
+        "pattern_display": {},
+        "primary_did": "0x1B10",
+        "source": null
+      },
+      {
+        "bit_end": 15,
+        "bit_start": 8,
+        "name": "LTA Driver Hands-On Flag",
+        "pattern_display": {},
+        "primary_did": "0x1E34",
+        "source": null
+      }
+    ],
+    "rob_discriminators": [
+      {
+        "group": 2,
+        "name": "LCS Steer Override",
+        "post_trigger_samples": 8,
+        "pre_trigger_samples": 36,
+        "rob_code": "209D",
+        "sampling_s": 0.2,
+        "system": "LDA"
+      },
+      {
+        "group": 12,
+        "name": "Late hands-on timing",
+        "post_trigger_samples": 6,
+        "pre_trigger_samples": 6,
+        "rob_code": "229C",
+        "sampling_s": 0.5,
+        "system": "LDA"
+      },
+      {
+        "group": 15,
+        "name": "End of hands-off control",
+        "post_trigger_samples": 11,
+        "pre_trigger_samples": 6,
+        "rob_code": "229F",
+        "sampling_s": 0.5,
+        "system": "LDA"
+      },
+      {
+        "group": 6,
+        "name": "LTA Hands Free Cancel",
+        "post_trigger_samples": 7,
+        "pre_trigger_samples": 3,
+        "rob_code": "2845",
+        "sampling_s": 1.0,
+        "system": "LDA"
+      },
+      {
+        "group": 7,
+        "name": "CSF Hands Free Warning Operation",
+        "post_trigger_samples": 0,
+        "pre_trigger_samples": 0,
+        "rob_code": "2846",
+        "sampling_s": 0.0,
+        "system": "LDA"
+      }
+    ]
+  }
+}
