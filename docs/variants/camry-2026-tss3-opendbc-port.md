@@ -844,6 +844,19 @@ closes the production-hardware side: TSS 3.0 is standard across the listed Camry
 trims, while an XSE steering-wheel package is explicitly offered **with touch
 sensor**. See the official [2026 Camry eBrochure](https://www.toyota.com/content/dam/toyota/brochures/pdf/2026/camry_ebrochure.pdf).
 
+The XW60 Prius parts catalog supplies a stronger configuration join than trim
+marketing. Toyota names the wheel controller `864A1A Computer, Multiplex Network
+Steering` and splits its applications by safety package: `864A1-47010` appears in
+TSS3 **BASIC** / cold-area combinations, while `864A1-47020`, `-47021`, and
+`-47030` are explicitly listed for **ACTIVE SAFETY PACKAGE-TSS3 EXPANDED**
+applications (with `-47031` superseding `-47030` in some applications). The
+service manual independently shows the same controller has separate connectors
+for **w/ Steering Touch Sensor** and **w/ Steering Heater**. This makes `5222`
+look exactly like what its OEM name says: a vehicle/configuration presence datum,
+not a continuously varying touch state. Sources:
+[XW60 steering-wheel parts matrix](https://www.toyotapartsdeal.com/parts-list/2024-toyota-prius/power_train_chassis/steering_wheel.html) and
+[XW60 controller service procedure](https://www.mytoyo.com/heated_steering_wheel_controller-2728.html).
+
 The wider diagnostic corpus supplies useful boundaries for that configuration.
 Same-generation `LDA_P5` (a predecessor semantic oracle, not a production
 category-498 peer) exposes two independent judgments: DID `0x1044` **Not Holding
