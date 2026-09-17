@@ -6706,3 +6706,32 @@ controller output. The EPS-resident B6 signer remains a demonstrated development
 because it modifies an already-admitted final steering instruction downstream of the
 unresolved physical source-admission boundary. It is not evidence that bypassing the
 Vehicle Movement Manager is the preferred production design.
+
+## 72. 2026-09-17 openpilot NRTD-start fingerprint regression
+
+A live stock-Toyota-B startup on the maintainer Camry reproduced a software-only
+fallback to openpilot dashcam mode when `card` began fingerprinting while the
+vehicle was still NRTD. The live preflight sampled `0x51E` with Ready value 0;
+the subsequent openpilot FW query recovered the exact Brake/ABS F181
+`F152633K0000` but no EPS F181, then logged `car_fingerprint=None` and fell
+through to `MOCK`, yielding `dashcamOnly=True`, `passive=True`, and Panda
+`noOutput`. After the vehicle transitioned to READY, `0x51E` was observed with
+B0 `0x80`, but openpilot did not re-fingerprint during that same manager run.
+
+This exposed an integration regression introduced by opendbc `01b6d1886`:
+Camry had been removed from the EPS non-essential list while remaining in the
+ABS non-essential list, despite the bus-1 query comment still documenting the
+opposite fallback. The earlier `d0bc7aaa6` behavior was the correct startup
+shape for this target: an absent EPS diagnostic response may be transient, while
+the exact F33 ABS identity can retain the platform. This does **not** ignore a
+responding EPS: the generic exact matcher still rejects Camry if an EPS F181 is
+present and mismatched.
+
+opendbc `8a970bd9` restores that identity behavior without reintroducing the old
+runtime capability downgrade. Its regression test covers normal EPS+ABS
+startup, ABS-only NRTD startup, and present-but-wrong EPS rejection. The parent
+openpilot pin is `6c22ffb5c`. The focused Toyota suite passed 34 tests and 213
+subtests. This is an openpilot identification/lifecycle finding, not evidence
+that NRTD changes the physical Toyota-B bus topology or makes EPS F181
+fundamentally unreadable; the dedicated TSS3 preflight has independently read
+the exact EPS F181 while Ready=0.
