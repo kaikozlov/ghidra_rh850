@@ -135,6 +135,27 @@ returned normal while Hybrid RoB records show cruise permission `NG`, automatic 
 machine rather than DTC memory. If Brake `Fail Control` or EPS communication-open stays
 asserted, the brake-domain dependency remains active instead.
 
+**Retained-log coverage:** some useful healthy/faulted baselines already exist, but not
+the decisive post-bootstrap Hybrid state. The Aug-26 exact-car cruise-oracle captures
+sample FRC `0x1905=8080` continuously across MAIN/RES+/SET-/CANCEL/distance exercises;
+`0x1906` is normally `e080e0008000` with only the expected momentary switch-bit changes,
+and its ACC-not-available byte remains clear. The same session records Brake `0x102F =
+f700fd007c00a9000000`, decoded as `EPS/Steering Control Actuator ECU Communication =
+Normal`. Sep-1 repeats that exact `0x102F` value before, during, and after deliberate FRC
+normal-Tx suppression while every named Brake communication-open item stays `Normal`.
+Yet after the broader source-isolation campaign the FRC itself remains in a disabled/
+invalid feature state (`0x1501=0101`, `0x1601=01010000`, `0x1703=f020`, `0x1705=ff3a`)
+after ordinary traffic is restored, demonstrating that a higher-level feature/fail-safe
+state can outlive transport restoration and ordinary Brake communication-open state.
+No retained structured capture contains FRC `0x1903`, Brake `0x102D`, or Hybrid RoB
+DIDs `0x55FE/0x55FF`; an address-aware scan of retained NDJSON finds no Hybrid
+`0x7D2/0x7DA` `AB01/11` RoB transaction. The Sep-1 `AB11/12/13` capture is FRC Operation
+FFD only. Sep-10 working-steering artifacts retain the DRCC-unavailable outcome but no
+corresponding diagnostic/RoB snapshot, so `Suspend` versus `Abnormal Stop` cannot be
+recovered retroactively from those files. Later dead-EPS routes do preserve the CAN-side
+consequence (`0x251=0xE0` unavailable; a successful latch is conventional `0x90`), but
+not the internal Hybrid/FRC/Brake cause.
+
 Production deployment must therefore either prevent the peer fail-safe/latch from
 being entered or recover a deeper peer state than DTC memory. The current leading
 path is a nondisruptive application-context resident installation/control-transfer
