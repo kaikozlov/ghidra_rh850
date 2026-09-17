@@ -119,11 +119,19 @@ post-receive hook.
 The former C6 helper-loader proved useful during bring-up, but it is no longer
 part of the maintained installation contract. The one-size-fits-all artifact is
 a single authenticated **4-KiB payload with identical bytes for every target**.
-At boot execution it reads the 12-byte application-family identity beginning at
-CodeFlash `0x20860`, fail-closes on an unknown family, and internally selects one
-of three exact profiles: Camry F33, Crown F30, or the shared Corolla H/F runtime.
-Target-specific CodeFlash call addresses and RAM offsets are data/code inside the
-payload; they do not require a target-specific executable from the host.
+At boot execution it first reads a four-byte **low-bootloader family
+signature** at `0x0C80`: exact Camry/Crown F3 use `0x9D230D21`, while exact
+Corolla H/F use `0x0030F6F3`. It then runs that family's already-qualified four
+boot initialization calls plus application-validity check. Only after that
+known-good initialization boundary does it read the 12-byte application-family
+identity at CodeFlash `0x20860`, fail-close on an unknown identity, and select
+one of three exact profiles: Camry F33, Crown F30, or the shared Corolla H/F
+runtime. This ordering matters because the authenticated callback executes from
+the active boot programming/erase context; the first universal revision read
+application CodeFlash before boot reinitialization and did not survive its first
+healthy-F33 live install on 2026-09-17. Target-specific CodeFlash call addresses
+and RAM offsets remain data/code inside the common payload, so no target-specific
+host executable is required.
 
 The selected resident is copied to the common retained high tail
 `FEBFF9F0..FEBFFBFB`. The selected helper is temporarily parked at
@@ -145,10 +153,19 @@ count-224 boundary; before that point the helper is absent and cannot execute.
 This removes the old C6 post-startup transfer while preserving the startup
 lifetime boundary that originally motivated the split design.
 
+The host now treats this delayed helper installation as part of **install**, not
+qualification: after the application reappears it retries transient SID23
+readback, verifies the high resident byte-for-byte, waits through the F33/F30
+count-224 boundary, requires initialized+armed state, reads the complete helper
+back byte-for-byte, and re-attests the resident. `bringup` does not prompt the
+operator to enter READY unless those checks pass. This was added after the first
+healthy-F33 one-shot attempt returned to the stock application but later showed
+a missing resident.
+
 #### Universal one-shot runtime
 
 The one payload contains all three compiled runtime profiles and currently uses
-**3,566 bytes of the 4,048-byte authenticated plaintext shellcode budget**. The
+**3,822 bytes of the 4,048-byte authenticated plaintext shellcode budget**. The
 profile components are:
 
 - Camry F33: 462-byte resident + 572-byte helper;

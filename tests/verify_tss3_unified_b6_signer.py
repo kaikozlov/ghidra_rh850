@@ -76,6 +76,16 @@ check("Corolla H/F select one shared runtime profile",
       unified_builder.TARGETS["corolla-8965F1208000"]["profile"] == "corolla-hf" and
       unified_builder.PROFILE_RUNTIME_IDENTITIES["corolla-hf"] == "8965F1208000")
 
+for target, spec in unified_builder.TARGETS.items():
+    image = Path(spec["image"]).read_bytes()
+    signature = int.from_bytes(
+        image[unified_builder.BOOT_FAMILY_PROBE_ADDR:unified_builder.BOOT_FAMILY_PROBE_ADDR + 4], "little"
+    )
+    check(
+        f"{target}: universal dispatcher has an exact low-CodeFlash boot-family discriminator",
+        signature == unified_builder.BOOT_FAMILY_SIGNATURES[spec["boot_family"]],
+    )
+
 # The temporary helper transit is deliberately the last 1 KiB of exact GlobalRAM.
 # Every supported image is SHA-bound separately by the builder; independently pin
 # the useful negative that no aligned CodeFlash pointer targets the transit span.
@@ -120,7 +130,10 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
           len(payload) == 0x1000 and universal["payload"]["size"] == 0x1000 and
           universal["staging"]["size"] == len(stage) < unified_builder.UNIVERSAL_STAGING_LIMIT and
           set(universal["profiles"]) == {"camry-f33", "crown-f30", "corolla-hf"} and
+          universal["dispatcher"]["boot_family_probe_address"] == "0x00000C80" and
+          universal["dispatcher"]["boot_family_signatures"] == {"f3": "0x9D230D21", "corolla": "0x0030F6F3"} and
           universal["dispatcher"]["identity_address"] == "0x00020860" and
+          universal["dispatcher"]["ordering"] == "low boot-family signature -> exact family boot init/validity -> application identity" and
           universal["helper_transit"]["base"] == "0xFEF07C00")
     transit_mpu = universal["helper_transit"]["mpu"]
     check("universal GlobalRAM transit is MPU R/W/X in both recovered application contexts",
@@ -297,6 +310,55 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
     else:
         raise AssertionError("current-angle guard accepted stale wheel/angle samples")
     check("unified current-angle guard rejects stale motion/angle samples", True)
+
+    # Application diagnostics can be briefly unavailable while the replayed application
+    # settles. Normalize that into a bounded retry instead of leaking a raw UDS timeout.
+    meta, camry_meta_path = built["camry-8965F3307000"]
+    camry_bundle = host.load_bundle(camry_meta_path)
+    read_attempts = iter((TimeoutError("startup transient"), camry_bundle.resident))
+    def flaky_read(*_args, **_kwargs):
+        value = next(read_attempts)
+        if isinstance(value, Exception):
+            raise value
+        return value
+    with mock.patch.object(host, "_read_memory", side_effect=flaky_read):
+        retried = host._read_memory_retry(object(), object(), 0xFEBFF9F0, len(camry_bundle.resident),
+                                          label="fixture resident", timeout=0.2)
+    check("resident readback retries transient post-startup diagnostic timeouts", retried == camry_bundle.resident)
+
+    damaged = bytearray(camry_bundle.resident); damaged[7] ^= 1
+    try:
+        host._resident_attestation(camry_bundle, bytes(damaged))
+    except host.UnifiedSignerError as exc:
+        mismatch_text = str(exc)
+    else:
+        raise AssertionError("Camry resident attestation accepted a byte mismatch")
+    check("Camry resident mismatch reports hashes and first differing offset",
+          "observed_sha256=" in mismatch_text and "expected_sha256=" in mismatch_text and
+          "first_offset=0x7" in mismatch_text)
+
+    # Install is not complete merely because the application answers F181. For split
+    # targets it must cross count 224, arm, read the full helper back, and re-attest
+    # the high resident before bringup is allowed to prompt for READY.
+    session = object.__new__(host.Session)
+    session.bundle = camry_bundle
+    session.client = object(); session.uds_mod = object()
+    state0 = {"initialized": False, "armed": False}
+    state1 = {"initialized": True, "armed": True}
+    session.split_state = mock.Mock(side_effect=(state0, state1))
+    helper_base = int(camry_bundle.meta["helper"]["base"], 0)
+    resident_base = int(camry_bundle.meta["resident"]["base"], 0)
+    def installed_read(_client, _uds, address, size, **_kwargs):
+        if address == helper_base:
+            return camry_bundle.helper_image
+        if address == resident_base:
+            return camry_bundle.resident
+        raise AssertionError(f"unexpected self-install read 0x{address:X}/0x{size:X}")
+    with mock.patch.object(host, "_read_memory_retry", side_effect=installed_read):
+        self_install = session.wait_self_install(timeout=0.2)
+    check("split install gate requires armed state, byte-exact helper, and post-boundary resident",
+          self_install["state"] == state1 and self_install["helper"]["byte_exact"] is True and
+          self_install["resident_attestation"]["byte_exact"] is True and session.split_state.call_count == 2)
 
     # Corolla startup intentionally reuses the one-shot resident prefix as state/scratch.
     # Attestation must therefore pin the immutable foreground suffix plus live state magic,
