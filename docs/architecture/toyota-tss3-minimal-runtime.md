@@ -156,7 +156,7 @@ openpilot emits a changed nonzero C7 generation at the native 100-Hz
 car-control cadence. When lateral control is inactive it emits sequence zero.
 Receiver behavior is target-local:
 
-- **Camry F33 / Crown F30:** the 596-byte split helper uses the road-proven
+- **Camry F33 / Crown F30:** the 572-byte split helper uses the road-proven
   supervised shape. A changed nonzero generation grants seven nominal 5-ms
   foreground ticks; repeated mailbox contents do not renew the lease; expiry
   or sequence zero leaves the native B6 untouched. The 600-byte transfer image

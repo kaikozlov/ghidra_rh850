@@ -18,10 +18,10 @@ from exploit.ephemeral_runtime import tss3_unified_b6_signer as host
 BUILDER = ROOT / "exploit/ephemeral_runtime/build_tss3_unified_b6_signer.py"
 KIT_BUILDER = ROOT / "tools/targets/tss3/builders/build_tss3_unified_b6_signer_kit.py"
 TARGETS = {
-    "camry-8965F3307000": ("0xFEBE5751", "split-functional-loader", 522, 596, 600, "supervised-continuous", 7),
+    "camry-8965F3307000": ("0xFEBE5751", "split-functional-loader", 522, 572, 600, "supervised-continuous", 7),
     "corolla-8965H1202000": ("0xFEBE563D", "embedded-helper-functional-control", 522, 458, 458, "supervised-continuous", 7),
     "corolla-8965F1208000": ("0xFEBE563D", "embedded-helper-functional-control", 522, 458, 458, "supervised-continuous", 7),
-    "crown-8965F3012000": ("0xFEBE527D", "split-functional-loader", 522, 596, 600, "supervised-continuous", 7),
+    "crown-8965F3012000": ("0xFEBE527D", "split-functional-loader", 522, 572, 600, "supervised-continuous", 7),
 }
 
 # This intentionally supersedes yesterday's live-corrected one-shot Crown
@@ -30,8 +30,8 @@ TARGETS = {
 # supervised runtime.
 CROWN_SUPERVISED_UNIFIED_SHA256 = {
     "resident": "6942f152a698d2656848727a2c0624c3dd4c5a7e820524a70c389ddf0f18a417",
-    "helper": "962f55958aa681904f89824e8e289efd55f062457c6ea2aafbb51c2ca0ab8345",
-    "helper_image": "35aa8d097410d3a6847f6427c4aacc6a137f88aac7aaeac3bce05f356b5addaa",
+    "helper": "1580cf681aeb9976521fa3cedc436b5bd8a3cd7e71331ad5f4645fec371a6a55",
+    "helper_image": "05eab6442199564bb92577412f62a6781772c4be4444949dd269f01b31854bb8",
     "payload": "90b3b2e27b238bcf26d96d5cab735d0e792c3a1e603c30db208ca943422e132a",
     "staging": "a62a3a580b079a8f5e8bc28f804686c50848be0bdf819d520b210c36d82ba74e",
 }
@@ -71,6 +71,13 @@ helper_source = (ROOT / "exploit/ephemeral_runtime/tss3_unified_b6_signer_helper
 check("one maintained resident/helper source covers F3 and Corolla scheduler shapes",
       "#ifdef TSS3_COROLLA_HF" in resident_source and "#ifdef TSS3_COROLLA_HF" in helper_source and
       "TSS3_DCM_TAG_OFF" in resident_source and "TSS3_DCM_TAG_OFF" in helper_source)
+check("split helper keeps call-spanning locals in ABI-preserved registers",
+      "prepare {r20-r21,lp}, 0" in helper_source and
+      "mov 2, r20                   /* operation = replace; callee-saved */" in helper_source and
+      "ld.hu TSS3_DCM_TARGET_OFF[gp], r21" in helper_source and
+      "st.h r21, 0x4a8e[gp]" in helper_source and
+      "dispose 0, {r20-r21,lp}, lp" in helper_source and
+      "st.b r6, 0x4ad0[gp]" not in helper_source and "st.h r6, 0x4ad2[gp]" not in helper_source)
 check("Camry unified target config uses durable functional DCM tail offsets",
       unified_builder.TARGETS["camry-8965F3307000"]["resident_macros"] == {
           "TSS3_DCM_TAG_OFF": -0x60AE, "TSS3_DCM_INDEX_OFF": -0x60AD, "TSS3_DCM_WORD_OFF": -0x60AC,
