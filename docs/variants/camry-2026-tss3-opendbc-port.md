@@ -125,12 +125,26 @@ snapshot at fault time and the independent RoB behavior history before any DTC c
 
 The current FRC Active-Test catalog has 69 routine candidates but no fail-safe/ACC
 recovery or reset routine; its relevant entries are display/buzzer/steering-vibration
-operations. Thus GTS+ currently gives us **observability, not an obvious unlatch
-command**. `camry_f33_post_install_recovery.py` now snapshots the FRC and Brake live
-state DIDs before and after the known DTC clear, treating newly added DDB-derived DIDs
-as best-effort until exact-car support is observed. The higher-value paired capture is
-a before/after `health-check`: if DTC bits clear and Brake EPS communication has
-returned normal while Hybrid RoB records show cruise permission `NG`, automatic cancel,
+operations. Current GTS+ category-498 master frames likewise contain no `11 xx`
+ECUReset request, and no retained Camry capture contains a physical FRC `11 01`
+experiment. That is a host-surface negative, not proof the FRC application rejects
+UDS SID `0x11`. A parked selective-reset discriminator therefore remains open: after
+the EPS application/resident is stable, send physical FRC hard-reset `11 01` and test
+whether the camera reappears with DRCC permission restored while the EPS LocalRAM
+resident survives. The maintained diagnostics CLI can issue that exact raw request as
+`toyota --profile camry-2026-f33 uds raw frc 0x11 --subfunction 0x01 --force`.
+Because an FRC reset itself creates a fresh FRC communication outage, a positive result
+would support an FRC-local volatile latch; a negative result would not distinguish
+unsupported ECUReset from a Brake/Hybrid-owned or newly retriggered fail-safe without
+pre/post fault-state capture. Conventional cruise remaining usable while DRCC is denied
+makes this discriminator particularly relevant, but it is not yet live-qualified.
+
+Thus GTS+ currently gives us **observability, not an obvious unlatch command**.
+`camry_f33_post_install_recovery.py` now snapshots the FRC and Brake live state DIDs
+before and after the known DTC clear, treating newly added DDB-derived DIDs as
+best-effort until exact-car support is observed. The higher-value paired capture is a
+before/after `health-check`: if DTC bits clear and Brake EPS communication has returned
+normal while Hybrid RoB records show cruise permission `NG`, automatic cancel,
 `Suspend`, or `Abnormal Stop`, the persistent denial is in the cruise-control state
 machine rather than DTC memory. If Brake `Fail Control` or EPS communication-open stays
 asserted, the brake-domain dependency remains active instead.
