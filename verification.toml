@@ -1176,3 +1176,6 @@ tests = ["tests/verify_camry_20260916_longitudinal_motion_audit.py"]
 
 [suite.camry_2026_longitudinal_request_candidates]
 tests = ["tests/verify_camry_2026_longitudinal_request_candidates.py"]
+
+[suite.camry_20260907_hands_off_cancel]
+tests = ["tests/verify_camry_20260907_hands_off_cancel.py"]

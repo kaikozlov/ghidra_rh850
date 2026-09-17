@@ -1,0 +1,1767 @@
+{
+  "all_latch_falls": [
+    {
+      "brake_0x101_after": {
+        "lag_s": 0.0,
+        "raw": "800000010000008b"
+      },
+      "brake_0x101_before": {
+        "lag_s": 0.0,
+        "raw": "800000010000008b"
+      },
+      "car_state_before": {
+        "age_s": 0.008387,
+        "brake": false,
+        "cruise_available": true,
+        "cruise_enabled": true,
+        "gas": false,
+        "steering_pressed": true,
+        "steering_torque_nm": -1.28,
+        "v_ego_m_s": 9.668125
+      },
+      "chassis_0x0ca_after": {
+        "lag_s": 0.010928,
+        "raw": "876bb2146bff0cff8d00000000000000000000000000000000000000ce116e1e"
+      },
+      "chassis_0x0ca_before": {
+        "lag_s": -0.009736,
+        "raw": "ae04b1146dff0cff8f0000000000000000000000000000000000000085bf2938"
+      },
+      "classification": "stock_pcm_disable_other",
+      "cruise_display_0x251_after": null,
+      "cruise_display_0x251_before": {
+        "decoded": {
+          "cruise_main_state": 1,
+          "mode_byte": 160,
+          "ui_set_speed": 22
+        },
+        "lag_s": -0.009736,
+        "raw": "a01016488048a080"
+      },
+      "frc_0x160_after": {
+        "lag_s": 0.010928,
+        "raw": "aca1ce82ffcf400501cf4b00024fc880023fddf04fdfe0340000000000000000"
+      },
+      "frc_0x160_before": {
+        "lag_s": -0.009736,
+        "raw": "b530cd82ffe04005000f4b00012fc080023fde404fdfe0040000000000000000"
+      },
+      "hud_escalation_stage": null,
+      "late_final_stage_candidate": null,
+      "late_final_stage_clear": null,
+      "latest_driver_detect_rise": {
+        "age_s": 0.945078,
+        "b19": 32,
+        "b20": 17,
+        "raw": "00000000000000222120000000000001fe6c00201101e1e1e01e01e8de000000"
+      },
+      "onroad_events_near_edge": [
+        {
+          "lag_s": 0.00354,
+          "names": [
+            "steerOverride",
+            "pcmDisable"
+          ]
+        }
+      ],
+      "openpilot_0x101_in_preceding_250ms": [],
+      "pcm_disable_event": {
+        "lag_s": 0.00354,
+        "names": [
+          "steerOverride",
+          "pcmDisable"
+        ]
+      },
+      "request_after": {
+        "cruise_operating_latch": 0,
+        "delayed_hold_state": 0,
+        "lateral_assist_gain": 0.0,
+        "lateral_damping_gain": 0.0,
+        "lateral_request_id": 0,
+        "lateral_request_pinion_raw": -415,
+        "longitudinal_accel_a_m_s2": -0.249,
+        "longitudinal_accel_b_m_s2": -0.249,
+        "longitudinal_allocation_a": 0,
+        "longitudinal_allocation_b": 2,
+        "longitudinal_request_id_a": 0,
+        "longitudinal_request_id_b": 4,
+        "raw": "0000000080000012ff0700ff077fff007ffffe610000000000002700c75d46fd",
+        "request_sequence": 39,
+        "set_speed_kph": 0
+      },
+      "request_before": {
+        "cruise_operating_latch": 1,
+        "delayed_hold_state": 0,
+        "lateral_assist_gain": 0.0,
+        "lateral_damping_gain": 0.0,
+        "lateral_request_id": 0,
+        "lateral_request_pinion_raw": -415,
+        "longitudinal_accel_a_m_s2": -0.109,
+        "longitudinal_accel_b_m_s2": -0.109,
+        "longitudinal_allocation_a": 1,
+        "longitudinal_allocation_b": 3,
+        "longitudinal_request_id_a": 11,
+        "longitudinal_request_id_b": 17,
+        "raw": "0000000880002d47ff9322ff937fff007ffffe61c000100000002600899e3e9a",
+        "request_sequence": 38,
+        "set_speed_kph": 34
+      },
+      "result_driver_operation_id63_after": {
+        "decoded": {
+          "lateral_result_id": 0,
+          "lateral_result_pinion_raw": -411,
+          "longitudinal_result_accel_m_s2": -0.272,
+          "longitudinal_result_id": 63,
+          "request_loss_status": 0
+        },
+        "lag_s": 0.09,
+        "raw": "00000018fef03fce0000000400000000fe65fef0fef0129dfef000008538bee2"
+      },
+      "result_first_after": {
+        "decoded": {
+          "lateral_result_id": 0,
+          "lateral_result_pinion_raw": -415,
+          "longitudinal_result_accel_m_s2": -0.249,
+          "longitudinal_result_id": 11,
+          "request_loss_status": 0
+        },
+        "lag_s": 0.0,
+        "raw": "00000018ff940b3f0000000400000000fe61ff94ff071711ff070000c811a09b"
+      },
+      "result_lateral_id0_after": {
+        "decoded": {
+          "lateral_result_id": 0,
+          "lateral_result_pinion_raw": -415,
+          "longitudinal_result_accel_m_s2": -0.249,
+          "longitudinal_result_id": 11,
+          "request_loss_status": 0
+        },
+        "lag_s": 0.0,
+        "raw": "00000018ff940b3f0000000400000000fe61ff94ff071711ff070000c811a09b"
+      },
+      "segment": 1,
+      "t_mono_s": 474.597197,
+      "warning_stage": null
+    },
+    {
+      "brake_0x101_after": {
+        "lag_s": 0.0,
+        "raw": "800000010000008b"
+      },
+      "brake_0x101_before": {
+        "lag_s": 0.0,
+        "raw": "800000010000008b"
+      },
+      "car_state_before": {
+        "age_s": 0.008486,
+        "brake": false,
+        "cruise_available": true,
+        "cruise_enabled": true,
+        "gas": false,
+        "steering_pressed": false,
+        "steering_torque_nm": 0.5,
+        "v_ego_m_s": 19.82704
+      },
+      "chassis_0x0ca_after": {
+        "lag_s": 0.0,
+        "raw": "6f24db08d1ff01025400000000000000000000000000000000000000d821869b"
+      },
+      "chassis_0x0ca_before": {
+        "lag_s": 0.0,
+        "raw": "6f24db08d1ff01025400000000000000000000000000000000000000d821869b"
+      },
+      "classification": "openpilot_button_cancel",
+      "cruise_display_0x251_after": {
+        "decoded": {
+          "cruise_main_state": 1,
+          "mode_byte": 160,
+          "ui_set_speed": 46
+        },
+        "lag_s": 0.0,
+        "raw": "a0102e488048a080"
+      },
+      "cruise_display_0x251_before": {
+        "decoded": {
+          "cruise_main_state": 1,
+          "mode_byte": 160,
+          "ui_set_speed": 46
+        },
+        "lag_s": 0.0,
+        "raw": "a0102e488048a080"
+      },
+      "frc_0x160_after": {
+        "lag_s": 0.020155,
+        "raw": "b027ea82805a4006cba80b007c280e80022f80c0000fffb40000000000000000"
+      },
+      "frc_0x160_before": {
+        "lag_s": -0.009881,
+        "raw": "233ae982803b4006cca80b007da80480022f80c0000000140000000000000000"
+      },
+      "hud_escalation_stage": null,
+      "late_final_stage_candidate": null,
+      "late_final_stage_clear": null,
+      "latest_driver_detect_rise": {
+        "age_s": 1.959068,
+        "b19": 32,
+        "b20": 19,
+        "raw": "00000000000000222130000000000001fff400201301e1e1e03e00017a000000"
+      },
+      "onroad_events_near_edge": [
+        {
+          "lag_s": -0.035279,
+          "names": [
+            "buttonCancel"
+          ]
+        },
+        {
+          "lag_s": 0.003386,
+          "names": [
+            "pcmDisable"
+          ]
+        }
+      ],
+      "openpilot_0x101_in_preceding_250ms": [
+        {
+          "bus": 2,
+          "lag_s": -0.027741,
+          "raw": "8800000100000093"
+        },
+        {
+          "bus": 2,
+          "lag_s": -0.007845,
+          "raw": "8800000100000093"
+        }
+      ],
+      "pcm_disable_event": {
+        "lag_s": 0.003386,
+        "names": [
+          "pcmDisable"
+        ]
+      },
+      "request_after": {
+        "cruise_operating_latch": 0,
+        "delayed_hold_state": 0,
+        "lateral_assist_gain": 1.0,
+        "lateral_damping_gain": 0.0,
+        "lateral_request_id": 0,
+        "lateral_request_pinion_raw": 7,
+        "longitudinal_accel_a_m_s2": -0.855,
+        "longitudinal_accel_b_m_s2": -0.855,
+        "longitudinal_allocation_a": 0,
+        "longitudinal_allocation_b": 2,
+        "longitudinal_request_id_a": 0,
+        "longitudinal_request_id_b": 4,
+        "raw": "0000000080000012fca900fca97fff007fff000700000000640003001088c70c",
+        "request_sequence": 3,
+        "set_speed_kph": 0
+      },
+      "request_before": {
+        "cruise_operating_latch": 1,
+        "delayed_hold_state": 0,
+        "lateral_assist_gain": 1.0,
+        "lateral_damping_gain": 0.0,
+        "lateral_request_id": 11,
+        "lateral_request_pinion_raw": 8,
+        "longitudinal_accel_a_m_s2": 0.11,
+        "longitudinal_accel_b_m_s2": 0.11,
+        "longitudinal_allocation_a": 1,
+        "longitudinal_allocation_b": 3,
+        "longitudinal_request_id_a": 11,
+        "longitudinal_request_id_b": 17,
+        "raw": "0000000880002d47006e48006e7fff007fff0008c00b100064000200dae62fd5",
+        "request_sequence": 2,
+        "set_speed_kph": 72
+      },
+      "result_driver_operation_id63_after": {
+        "decoded": {
+          "lateral_result_id": 0,
+          "lateral_result_pinion_raw": 8,
+          "longitudinal_result_accel_m_s2": -0.831,
+          "longitudinal_result_id": 63,
+          "request_loss_status": 0
+        },
+        "lag_s": 0.090284,
+        "raw": "00000018fcc13f9d00000004000000000008fcc1fcc107d1fcc100009dcba33f"
+      },
+      "result_first_after": {
+        "decoded": {
+          "lateral_result_id": 11,
+          "lateral_result_pinion_raw": 8,
+          "longitudinal_result_accel_m_s2": -0.857,
+          "longitudinal_result_id": 11,
+          "request_loss_status": 0
+        },
+        "lag_s": 0.0,
+        "raw": "0000001800680b1400000004000b000000080068fca707b9fca70000d5e05acc"
+      },
+      "result_lateral_id0_after": {
+        "decoded": {
+          "lateral_result_id": 0,
+          "lateral_result_pinion_raw": 8,
+          "longitudinal_result_accel_m_s2": -0.829,
+          "longitudinal_result_id": 11,
+          "request_loss_status": 0
+        },
+        "lag_s": 0.030326,
+        "raw": "0000001800870b33000000040000000000080087fcc307d6fcc300001b92a728"
+      },
+      "segment": 3,
+      "t_mono_s": 584.09624,
+      "warning_stage": null
+    },
+    {
+      "brake_0x101_after": {
+        "lag_s": 0.0,
+        "raw": "800400010000008f"
+      },
+      "brake_0x101_before": {
+        "lag_s": 0.0,
+        "raw": "800400010000008f"
+      },
+      "car_state_before": {
+        "age_s": 0.008413,
+        "brake": false,
+        "cruise_available": true,
+        "cruise_enabled": true,
+        "gas": false,
+        "steering_pressed": false,
+        "steering_torque_nm": 0.5,
+        "v_ego_m_s": 19.029139
+      },
+      "chassis_0x0ca_after": {
+        "lag_s": 0.019881,
+        "raw": "d1a34e07dcff01ff02000000000000000000000000000000000000003c545e97"
+      },
+      "chassis_0x0ca_before": {
+        "lag_s": -0.009823,
+        "raw": "20a14d07daff01ff0100000000000000000000000000000000000000fd9678b0"
+      },
+      "classification": "stock_pcm_disable_other",
+      "cruise_display_0x251_after": null,
+      "cruise_display_0x251_before": {
+        "decoded": {
+          "cruise_main_state": 1,
+          "mode_byte": 160,
+          "ui_set_speed": 45
+        },
+        "lag_s": -0.050737,
+        "raw": "a0102d488048a080"
+      },
+      "frc_0x160_after": {
+        "lag_s": 0.019881,
+        "raw": "55258682fd8e4006a5a80300040ffc80023eae31000ff9b40000000000000000"
+      },
+      "frc_0x160_before": {
+        "lag_s": -0.009823,
+        "raw": "68658582fd744006a8cff300058ff280022f80c0000ffba40000000000000000"
+      },
+      "hud_escalation_stage": {
+        "age_s": 18.905872,
+        "raw": "140c404401ee9307"
+      },
+      "late_final_stage_candidate": {
+        "age_s": 15.862399,
+        "b19": 96,
+        "b20": 3,
+        "raw": "00000000000000222130000000000001fffb00600301e1e1e03e0000fe000000"
+      },
+      "late_final_stage_clear": {
+        "age_s": 0.854407,
+        "b19": 132,
+        "b20": 67,
+        "raw": "00000000000000222130000000000000001100844301e1e1e03e0000fe000000"
+      },
+      "latest_driver_detect_rise": {
+        "age_s": 0.050737,
+        "b19": 32,
+        "b20": 83,
+        "raw": "00000000000000222120000000000001ff9c00205301e1e1e01e000080000000"
+      },
+      "onroad_events_near_edge": [
+        {
+          "lag_s": 0.003595,
+          "names": [
+            "steerOverride",
+            "pcmDisable"
+          ]
+        }
+      ],
+      "openpilot_0x101_in_preceding_250ms": [],
+      "pcm_disable_event": {
+        "lag_s": 0.003595,
+        "names": [
+          "steerOverride",
+          "pcmDisable"
+        ]
+      },
+      "request_after": {
+        "cruise_operating_latch": 0,
+        "delayed_hold_state": 0,
+        "lateral_assist_gain": 1.0,
+        "lateral_damping_gain": 0.0,
+        "lateral_request_id": 0,
+        "lateral_request_pinion_raw": -25,
+        "longitudinal_accel_a_m_s2": -0.45,
+        "longitudinal_accel_b_m_s2": -0.45,
+        "longitudinal_allocation_a": 0,
+        "longitudinal_allocation_b": 2,
+        "longitudinal_request_id_a": 0,
+        "longitudinal_request_id_b": 4,
+        "raw": "0000000080000012fe3e00fe3e7fff007fffffe70000000064001f003b6c57d9",
+        "request_sequence": 31,
+        "set_speed_kph": 0
+      },
+      "request_before": {
+        "cruise_operating_latch": 1,
+        "delayed_hold_state": 0,
+        "lateral_assist_gain": 1.0,
+        "lateral_damping_gain": 0.0,
+        "lateral_request_id": 0,
+        "lateral_request_pinion_raw": -42,
+        "longitudinal_accel_a_m_s2": -0.439,
+        "longitudinal_accel_b_m_s2": 0.0,
+        "longitudinal_allocation_a": 1,
+        "longitudinal_allocation_b": 3,
+        "longitudinal_request_id_a": 13,
+        "longitudinal_request_id_b": 20,
+        "raw": "0000000880043553fe490000007fff007fffffd60000100064001e00f7a9d952",
+        "request_sequence": 30,
+        "set_speed_kph": 0
+      },
+      "result_driver_operation_id63_after": {
+        "decoded": {
+          "lateral_result_id": 0,
+          "lateral_result_pinion_raw": 24,
+          "longitudinal_result_accel_m_s2": -0.466,
+          "longitudinal_result_id": 63,
+          "request_loss_status": 0
+        },
+        "lag_s": 0.079438,
+        "raw": "00000018fe2e3f0c00000004000000000018fe2efe2e0829fe2e0000736a9c6c"
+      },
+      "result_first_after": {
+        "decoded": {
+          "lateral_result_id": 0,
+          "lateral_result_pinion_raw": -3,
+          "longitudinal_result_accel_m_s2": -0.463,
+          "longitudinal_result_id": 13,
+          "request_loss_status": 0
+        },
+        "lag_s": 0.019881,
+        "raw": "00000018fe310ddd0000000400000000fffdfe31fe310825fe310000fa22bf46"
+      },
+      "result_lateral_id0_after": {
+        "decoded": {
+          "lateral_result_id": 0,
+          "lateral_result_pinion_raw": -3,
+          "longitudinal_result_accel_m_s2": -0.463,
+          "longitudinal_result_id": 13,
+          "request_loss_status": 0
+        },
+        "lag_s": 0.019881,
+        "raw": "00000018fe310ddd0000000400000000fffdfe31fe310825fe310000fa22bf46"
+      },
+      "segment": 4,
+      "t_mono_s": 671.199398,
+      "warning_stage": {
+        "age_s": 24.862943,
+        "b19": 64,
+        "b20": 3,
+        "raw": "00000000000000222130000000000001fff700400301e1e1e03e000100000000"
+      }
+    },
+    {
+      "brake_0x101_after": {
+        "lag_s": 0.0,
+        "raw": "800000010000008b"
+      },
+      "brake_0x101_before": {
+        "lag_s": 0.0,
+        "raw": "800000010000008b"
+      },
+      "car_state_before": {
+        "age_s": 0.008522,
+        "brake": false,
+        "cruise_available": true,
+        "cruise_enabled": true,
+        "gas": false,
+        "steering_pressed": false,
+        "steering_torque_nm": 0.0,
+        "v_ego_m_s": 19.755196
+      },
+      "chassis_0x0ca_after": {
+        "lag_s": 0.0,
+        "raw": "f877ae077dff01009f00000000000000000000000000000000000000c7b72e6d"
+      },
+      "chassis_0x0ca_before": {
+        "lag_s": 0.0,
+        "raw": "f877ae077dff01009f00000000000000000000000000000000000000c7b72e6d"
+      },
+      "classification": "openpilot_button_cancel",
+      "cruise_display_0x251_after": {
+        "decoded": {
+          "cruise_main_state": 1,
+          "mode_byte": 160,
+          "ui_set_speed": 46
+        },
+        "lag_s": 0.0,
+        "raw": "a0102e488048a080"
+      },
+      "cruise_display_0x251_before": {
+        "decoded": {
+          "cruise_main_state": 1,
+          "mode_byte": 160,
+          "ui_set_speed": 46
+        },
+        "lag_s": 0.0,
+        "raw": "a0102e488048a080"
+      },
+      "frc_0x160_after": {
+        "lag_s": 0.019909,
+        "raw": "68f33e82ffef4006c668130000a84c80022f80c0000003640000000000000000"
+      },
+      "frc_0x160_before": {
+        "lag_s": -0.009926,
+        "raw": "75353d82fff84006c608130000884280022f80c0000002d40000000000000000"
+      },
+      "hud_escalation_stage": {
+        "age_s": 9.708293,
+        "raw": "140c404401ee9307"
+      },
+      "late_final_stage_candidate": {
+        "age_s": 6.656232,
+        "b19": 96,
+        "b20": 67,
+        "raw": "00000000000000222130000000000000001500604301e1e1e03e009f80000000"
+      },
+      "late_final_stage_clear": {
+        "age_s": 5.662964,
+        "b19": 32,
+        "b20": 83,
+        "raw": "00000000000000222130000000000001ffee00205301e1e1e03e00800007e000"
+      },
+      "latest_driver_detect_rise": {
+        "age_s": 4.458669,
+        "b19": 32,
+        "b20": 83,
+        "raw": "00000000000000222130000000000001ffd600205301e1e1e03e001f0007c000"
+      },
+      "onroad_events_near_edge": [
+        {
+          "lag_s": -0.035771,
+          "names": [
+            "buttonCancel"
+          ]
+        },
+        {
+          "lag_s": 0.003944,
+          "names": [
+            "pcmDisable"
+          ]
+        }
+      ],
+      "openpilot_0x101_in_preceding_250ms": [
+        {
+          "bus": 2,
+          "lag_s": -0.017393,
+          "raw": "8800000100000093"
+        }
+      ],
+      "pcm_disable_event": {
+        "lag_s": 0.003944,
+        "names": [
+          "pcmDisable"
+        ]
+      },
+      "request_after": {
+        "cruise_operating_latch": 0,
+        "delayed_hold_state": 0,
+        "lateral_assist_gain": 1.0,
+        "lateral_damping_gain": 0.0,
+        "lateral_request_id": 0,
+        "lateral_request_pinion_raw": 39,
+        "longitudinal_accel_a_m_s2": -0.48,
+        "longitudinal_accel_b_m_s2": -0.48,
+        "longitudinal_allocation_a": 0,
+        "longitudinal_allocation_b": 2,
+        "longitudinal_request_id_a": 0,
+        "longitudinal_request_id_b": 4,
+        "raw": "0000000080000012fe2000fe207fff007fff002700000000640017000293c62e",
+        "request_sequence": 23,
+        "set_speed_kph": 0
+      },
+      "request_before": {
+        "cruise_operating_latch": 1,
+        "delayed_hold_state": 0,
+        "lateral_assist_gain": 1.0,
+        "lateral_damping_gain": 0.0,
+        "lateral_request_id": 11,
+        "lateral_request_pinion_raw": 47,
+        "longitudinal_accel_a_m_s2": -0.014,
+        "longitudinal_accel_b_m_s2": -0.014,
+        "longitudinal_allocation_a": 1,
+        "longitudinal_allocation_b": 3,
+        "longitudinal_request_id_a": 11,
+        "longitudinal_request_id_b": 17,
+        "raw": "0000000880002d47fff247fff27fff007fff002fc00b100064001600c111d5c0",
+        "request_sequence": 22,
+        "set_speed_kph": 71
+      },
+      "result_driver_operation_id63_after": {
+        "decoded": {
+          "lateral_result_id": 0,
+          "lateral_result_pinion_raw": 42,
+          "longitudinal_result_accel_m_s2": -0.475,
+          "longitudinal_result_id": 63,
+          "request_loss_status": 0
+        },
+        "lag_s": 0.092125,
+        "raw": "00000018fe253f030000000400000000002afe25fe2507b1fe2500008b56d1fc"
+      },
+      "result_first_after": {
+        "decoded": {
+          "lateral_result_id": 11,
+          "lateral_result_pinion_raw": 47,
+          "longitudinal_result_accel_m_s2": -0.48,
+          "longitudinal_result_id": 11,
+          "request_loss_status": 0
+        },
+        "lag_s": 0.0,
+        "raw": "00000018fff30b9e00000004000b0000002ffff3fe2007acfe200000c0c305f1"
+      },
+      "result_lateral_id0_after": {
+        "decoded": {
+          "lateral_result_id": 0,
+          "lateral_result_pinion_raw": 42,
+          "longitudinal_result_accel_m_s2": -0.475,
+          "longitudinal_result_id": 11,
+          "request_loss_status": 0
+        },
+        "lag_s": 0.02999,
+        "raw": "00000018fff50ba00000000400000000002afff5fe2507b1fe25000009d5b799"
+      },
+      "segment": 5,
+      "t_mono_s": 739.802627,
+      "warning_stage": {
+        "age_s": 15.657864,
+        "b19": 64,
+        "b20": 67,
+        "raw": "00000000000000222130000000000001fffd00404301e1e1e03e008004000000"
+      }
+    },
+    {
+      "brake_0x101_after": {
+        "lag_s": 0.009761,
+        "raw": "800000010000008b"
+      },
+      "brake_0x101_before": {
+        "lag_s": -0.010955,
+        "raw": "800000010000008b"
+      },
+      "car_state_before": {
+        "age_s": 0.00968,
+        "brake": false,
+        "cruise_available": true,
+        "cruise_enabled": true,
+        "gas": true,
+        "steering_pressed": true,
+        "steering_torque_nm": 1.01,
+        "v_ego_m_s": 19.611843
+      },
+      "chassis_0x0ca_after": {
+        "lag_s": 0.0,
+        "raw": "f727770790feee00790000000000000000000000000000000000000043757010"
+      },
+      "chassis_0x0ca_before": {
+        "lag_s": 0.0,
+        "raw": "f727770790feee00790000000000000000000000000000000000000043757010"
+      },
+      "classification": "openpilot_button_cancel",
+      "cruise_display_0x251_after": {
+        "decoded": {
+          "cruise_main_state": 1,
+          "mode_byte": 160,
+          "ui_set_speed": 39
+        },
+        "lag_s": 0.0,
+        "raw": "a01027488048a080"
+      },
+      "cruise_display_0x251_before": {
+        "decoded": {
+          "cruise_main_state": 1,
+          "mode_byte": 160,
+          "ui_set_speed": 39
+        },
+        "lag_s": 0.0,
+        "raw": "a01027488048a080"
+      },
+      "frc_0x160_after": {
+        "lag_s": 0.0,
+        "raw": "77efbf82ffaa4006c3a8130000e83880022f80c0000001e40000000000000000"
+      },
+      "frc_0x160_before": {
+        "lag_s": 0.0,
+        "raw": "77efbf82ffaa4006c3a8130000e83880022f80c0000001e40000000000000000"
+      },
+      "hud_escalation_stage": {
+        "age_s": 38.558849,
+        "raw": "140c404401ee9307"
+      },
+      "late_final_stage_candidate": {
+        "age_s": 35.506788,
+        "b19": 96,
+        "b20": 67,
+        "raw": "00000000000000222130000000000000001500604301e1e1e03e009f80000000"
+      },
+      "late_final_stage_clear": {
+        "age_s": 34.51352,
+        "b19": 32,
+        "b20": 83,
+        "raw": "00000000000000222130000000000001ffee00205301e1e1e03e00800007e000"
+      },
+      "latest_driver_detect_rise": {
+        "age_s": 2.510435,
+        "b19": 32,
+        "b20": 83,
+        "raw": "0000000000000022213000000000005c002800205301e1e1e03e000080000000"
+      },
+      "onroad_events_near_edge": [
+        {
+          "lag_s": -0.066617,
+          "names": [
+            "buttonCancel",
+            "gasPressedOverride",
+            "steerOverride"
+          ]
+        },
+        {
+          "lag_s": -0.056369,
+          "names": [
+            "gasPressedOverride",
+            "steerOverride"
+          ]
+        },
+        {
+          "lag_s": -0.046938,
+          "names": [
+            "gasPressedOverride",
+            "steerOverride"
+          ]
+        },
+        {
+          "lag_s": 0.004141,
+          "names": [
+            "gasPressedOverride",
+            "steerOverride",
+            "pcmDisable"
+          ]
+        }
+      ],
+      "openpilot_0x101_in_preceding_250ms": [
+        {
+          "bus": 2,
+          "lag_s": -0.058443,
+          "raw": "8800000100000093"
+        },
+        {
+          "bus": 2,
+          "lag_s": -0.038424,
+          "raw": "8800000100000093"
+        },
+        {
+          "bus": 2,
+          "lag_s": -0.01872,
+          "raw": "8800000100000093"
+        }
+      ],
+      "pcm_disable_event": {
+        "lag_s": 0.004141,
+        "names": [
+          "gasPressedOverride",
+          "steerOverride",
+          "pcmDisable"
+        ]
+      },
+      "request_after": {
+        "cruise_operating_latch": 0,
+        "delayed_hold_state": 0,
+        "lateral_assist_gain": 1.0,
+        "lateral_damping_gain": 0.0,
+        "lateral_request_id": 0,
+        "lateral_request_pinion_raw": 14,
+        "longitudinal_accel_a_m_s2": -0.596,
+        "longitudinal_accel_b_m_s2": -0.596,
+        "longitudinal_allocation_a": 0,
+        "longitudinal_allocation_b": 2,
+        "longitudinal_request_id_a": 0,
+        "longitudinal_request_id_b": 4,
+        "raw": "0000000080000012fdac00fdac7fff007fff000e00000000640019008d27f3e3",
+        "request_sequence": 25,
+        "set_speed_kph": 0
+      },
+      "request_before": {
+        "cruise_operating_latch": 1,
+        "delayed_hold_state": 0,
+        "lateral_assist_gain": 1.0,
+        "lateral_damping_gain": 0.0,
+        "lateral_request_id": 11,
+        "lateral_request_pinion_raw": -2,
+        "longitudinal_accel_a_m_s2": -0.593,
+        "longitudinal_accel_b_m_s2": -0.593,
+        "longitudinal_allocation_a": 0,
+        "longitudinal_allocation_b": 2,
+        "longitudinal_request_id_a": 11,
+        "longitudinal_request_id_b": 17,
+        "raw": "0000000880002c46fdaf3cfdaf7fff007ffffffec00b1020640018004f86d267",
+        "request_sequence": 24,
+        "set_speed_kph": 60
+      },
+      "result_driver_operation_id63_after": {
+        "decoded": {
+          "lateral_result_id": 11,
+          "lateral_result_pinion_raw": -2,
+          "longitudinal_result_accel_m_s2": -0.592,
+          "longitudinal_result_id": 63,
+          "request_loss_status": 0
+        },
+        "lag_s": 0.009761,
+        "raw": "00000018ff693f4800000004000b0000fffeff69fdb00766ff69000041b3c314"
+      },
+      "result_first_after": {
+        "decoded": {
+          "lateral_result_id": 11,
+          "lateral_result_pinion_raw": -2,
+          "longitudinal_result_accel_m_s2": -0.592,
+          "longitudinal_result_id": 63,
+          "request_loss_status": 0
+        },
+        "lag_s": 0.009761,
+        "raw": "00000018ff693f4800000004000b0000fffeff69fdb00766ff69000041b3c314"
+      },
+      "result_lateral_id0_after": {
+        "decoded": {
+          "lateral_result_id": 0,
+          "lateral_result_pinion_raw": 13,
+          "longitudinal_result_accel_m_s2": -0.592,
+          "longitudinal_result_id": 63,
+          "request_loss_status": 0
+        },
+        "lag_s": 0.039531,
+        "raw": "00000018ff6a3f490000000400000000000dff6afdb0076bff6a000083f98931"
+      },
+      "segment": 6,
+      "t_mono_s": 768.653183,
+      "warning_stage": {
+        "age_s": 44.50842,
+        "b19": 64,
+        "b20": 67,
+        "raw": "00000000000000222130000000000001fffd00404301e1e1e03e008004000000"
+      }
+    },
+    {
+      "brake_0x101_after": {
+        "lag_s": 0.0,
+        "raw": "800000010000008b"
+      },
+      "brake_0x101_before": {
+        "lag_s": 0.0,
+        "raw": "800000010000008b"
+      },
+      "car_state_before": {
+        "age_s": 0.009448,
+        "brake": false,
+        "cruise_available": true,
+        "cruise_enabled": true,
+        "gas": false,
+        "steering_pressed": false,
+        "steering_torque_nm": -0.39,
+        "v_ego_m_s": 19.328585
+      },
+      "chassis_0x0ca_after": {
+        "lag_s": 0.019922,
+        "raw": "619e790d0aff0100dc00000000000000000000000000000000000000e415c7e2"
+      },
+      "chassis_0x0ca_before": {
+        "lag_s": -0.010794,
+        "raw": "775e780d09ff0100dc00000000000000000000000000000000000000a9d6364c"
+      },
+      "classification": "stock_pcm_disable_other",
+      "cruise_display_0x251_after": null,
+      "cruise_display_0x251_before": {
+        "decoded": {
+          "cruise_main_state": 1,
+          "mode_byte": 160,
+          "ui_set_speed": 45
+        },
+        "lag_s": -0.010794,
+        "raw": "a0102d488048a080"
+      },
+      "frc_0x160_after": {
+        "lag_s": 0.009945,
+        "raw": "f9899882804c4006b3a80b007fc82880022f80c0000000340000000000000000"
+      },
+      "frc_0x160_before": {
+        "lag_s": -0.010794,
+        "raw": "e1949782805a4006b4880b007fc82c80022f80c0000000340000000000000000"
+      },
+      "hud_escalation_stage": {
+        "age_s": 159.173704,
+        "raw": "140c404401ee9307"
+      },
+      "late_final_stage_candidate": {
+        "age_s": 156.121644,
+        "b19": 96,
+        "b20": 67,
+        "raw": "00000000000000222130000000000000001500604301e1e1e03e009f80000000"
+      },
+      "late_final_stage_clear": {
+        "age_s": 155.128376,
+        "b19": 32,
+        "b20": 83,
+        "raw": "00000000000000222130000000000001ffee00205301e1e1e03e00800007e000"
+      },
+      "latest_driver_detect_rise": {
+        "age_s": 0.322039,
+        "b19": 32,
+        "b20": 83,
+        "raw": "00000000000000222130000000000000001400205301e1e1e03e000000000000"
+      },
+      "onroad_events_near_edge": [
+        {
+          "lag_s": -0.136567,
+          "names": [
+            "steerOverride"
+          ]
+        },
+        {
+          "lag_s": 0.004421,
+          "names": [
+            "pcmDisable"
+          ]
+        }
+      ],
+      "openpilot_0x101_in_preceding_250ms": [],
+      "pcm_disable_event": {
+        "lag_s": 0.004421,
+        "names": [
+          "pcmDisable"
+        ]
+      },
+      "request_after": {
+        "cruise_operating_latch": 0,
+        "delayed_hold_state": 0,
+        "lateral_assist_gain": 1.0,
+        "lateral_damping_gain": 0.0,
+        "lateral_request_id": 0,
+        "lateral_request_pinion_raw": 8,
+        "longitudinal_accel_a_m_s2": -0.438,
+        "longitudinal_accel_b_m_s2": -0.438,
+        "longitudinal_allocation_a": 0,
+        "longitudinal_allocation_b": 2,
+        "longitudinal_request_id_a": 0,
+        "longitudinal_request_id_b": 4,
+        "raw": "0000000080000012fe4a00fe4a7fff007fff00080000000064003100edff5578",
+        "request_sequence": 49,
+        "set_speed_kph": 0
+      },
+      "request_before": {
+        "cruise_operating_latch": 1,
+        "delayed_hold_state": 0,
+        "lateral_assist_gain": 1.0,
+        "lateral_damping_gain": 0.0,
+        "lateral_request_id": 11,
+        "lateral_request_pinion_raw": 14,
+        "longitudinal_accel_a_m_s2": 0.097,
+        "longitudinal_accel_b_m_s2": 0.097,
+        "longitudinal_allocation_a": 1,
+        "longitudinal_allocation_b": 3,
+        "longitudinal_request_id_a": 11,
+        "longitudinal_request_id_b": 17,
+        "raw": "0000000880002d4700614600617fff007fff000ec00b100064003000a3e08561",
+        "request_sequence": 48,
+        "set_speed_kph": 70
+      },
+      "result_driver_operation_id63_after": {
+        "decoded": {
+          "lateral_result_id": 0,
+          "lateral_result_pinion_raw": 9,
+          "longitudinal_result_accel_m_s2": -0.422,
+          "longitudinal_result_id": 63,
+          "request_loss_status": 0
+        },
+        "lag_s": 0.089951,
+        "raw": "00000018fe5a3f3800000004000000000009fe5afe5a0e21fe5a00006cb7f582"
+      },
+      "result_first_after": {
+        "decoded": {
+          "lateral_result_id": 11,
+          "lateral_result_pinion_raw": 14,
+          "longitudinal_result_accel_m_s2": -0.438,
+          "longitudinal_result_id": 11,
+          "request_loss_status": 0
+        },
+        "lag_s": 0.0,
+        "raw": "0000001800600b0c00000004000b0000000e0060fe4a0e12fe4a0000a117b10e"
+      },
+      "result_lateral_id0_after": {
+        "decoded": {
+          "lateral_result_id": 0,
+          "lateral_result_pinion_raw": 9,
+          "longitudinal_result_accel_m_s2": -0.421,
+          "longitudinal_result_id": 11,
+          "request_loss_status": 0
+        },
+        "lag_s": 0.029653,
+        "raw": "0000001800710b1d000000040000000000090071fe5b0e23fe5b0000e79794d7"
+      },
+      "segment": 8,
+      "t_mono_s": 889.268039,
+      "warning_stage": {
+        "age_s": 165.123276,
+        "b19": 64,
+        "b20": 67,
+        "raw": "00000000000000222130000000000001fffd00404301e1e1e03e008004000000"
+      }
+    },
+    {
+      "brake_0x101_after": {
+        "lag_s": 0.009819,
+        "raw": "800000010000008b"
+      },
+      "brake_0x101_before": {
+        "lag_s": -0.009792,
+        "raw": "800000010000008b"
+      },
+      "car_state_before": {
+        "age_s": 0.008356,
+        "brake": false,
+        "cruise_available": true,
+        "cruise_enabled": true,
+        "gas": false,
+        "steering_pressed": false,
+        "steering_torque_nm": -0.4,
+        "v_ego_m_s": 19.463121
+      },
+      "chassis_0x0ca_after": {
+        "lag_s": 0.0,
+        "raw": "8164b507a0ff0100bb0000000000000000000000000000000000000001ada2d6"
+      },
+      "chassis_0x0ca_before": {
+        "lag_s": 0.0,
+        "raw": "8164b507a0ff0100bb0000000000000000000000000000000000000001ada2d6"
+      },
+      "classification": "stock_pcm_disable_other",
+      "cruise_display_0x251_after": {
+        "decoded": {
+          "cruise_main_state": 1,
+          "mode_byte": 160,
+          "ui_set_speed": 45
+        },
+        "lag_s": 0.0,
+        "raw": "a0102d488048a080"
+      },
+      "cruise_display_0x251_before": {
+        "decoded": {
+          "cruise_main_state": 1,
+          "mode_byte": 160,
+          "ui_set_speed": 45
+        },
+        "lag_s": 0.0,
+        "raw": "a0102d488048a080"
+      },
+      "frc_0x160_after": {
+        "lag_s": 0.020179,
+        "raw": "52e82e82fff34006bbc80b0000481280022f80c0000fff640000000000000000"
+      },
+      "frc_0x160_before": {
+        "lag_s": -0.009792,
+        "raw": "f34d2d82ffea4006ba080b0000680c80022f80c0000fffa40000000000000000"
+      },
+      "hud_escalation_stage": {
+        "age_s": 22.709581,
+        "raw": "140c404401ee9307"
+      },
+      "late_final_stage_candidate": {
+        "age_s": 19.6646,
+        "b19": 96,
+        "b20": 67,
+        "raw": "00000000000000222130000000000000000d00604301e1e1e03e009f80000000"
+      },
+      "late_final_stage_clear": {
+        "age_s": 19.022641,
+        "b19": 32,
+        "b20": 83,
+        "raw": "00000000000000222130000000000000000000205301e1e1e03e009f80000000"
+      },
+      "latest_driver_detect_rise": {
+        "age_s": 5.661743,
+        "b19": 32,
+        "b20": 83,
+        "raw": "00000000000000222130000000000001fffe00205301e1e1e03e009f80000000"
+      },
+      "onroad_events_near_edge": [
+        {
+          "lag_s": 0.004373,
+          "names": [
+            "pcmDisable"
+          ]
+        }
+      ],
+      "openpilot_0x101_in_preceding_250ms": [],
+      "pcm_disable_event": {
+        "lag_s": 0.004373,
+        "names": [
+          "pcmDisable"
+        ]
+      },
+      "request_after": {
+        "cruise_operating_latch": 0,
+        "delayed_hold_state": 0,
+        "lateral_assist_gain": 1.0,
+        "lateral_damping_gain": 0.0,
+        "lateral_request_id": 0,
+        "lateral_request_pinion_raw": -3,
+        "longitudinal_accel_a_m_s2": -0.484,
+        "longitudinal_accel_b_m_s2": -0.484,
+        "longitudinal_allocation_a": 0,
+        "longitudinal_allocation_b": 2,
+        "longitudinal_request_id_a": 0,
+        "longitudinal_request_id_b": 4,
+        "raw": "0000000080000012fe1c00fe1c7fff007ffffffd00000000640007004249cffa",
+        "request_sequence": 7,
+        "set_speed_kph": 0
+      },
+      "request_before": {
+        "cruise_operating_latch": 1,
+        "delayed_hold_state": 0,
+        "lateral_assist_gain": 1.0,
+        "lateral_damping_gain": 0.0,
+        "lateral_request_id": 11,
+        "lateral_request_pinion_raw": -2,
+        "longitudinal_accel_a_m_s2": 0.016,
+        "longitudinal_accel_b_m_s2": 0.016,
+        "longitudinal_allocation_a": 1,
+        "longitudinal_allocation_b": 3,
+        "longitudinal_request_id_a": 11,
+        "longitudinal_request_id_b": 17,
+        "raw": "0000000880002d4700104600107fff007ffffffec00b10006400060006cfe7e3",
+        "request_sequence": 6,
+        "set_speed_kph": 70
+      },
+      "result_driver_operation_id63_after": {
+        "decoded": {
+          "lateral_result_id": 0,
+          "lateral_result_pinion_raw": -3,
+          "longitudinal_result_accel_m_s2": -0.496,
+          "longitudinal_result_id": 63,
+          "request_loss_status": 0
+        },
+        "lag_s": 0.049927,
+        "raw": "00000018fe103fee0000000400000000fffdfe10fe1007c5fe100000885f692d"
+      },
+      "result_first_after": {
+        "decoded": {
+          "lateral_result_id": 0,
+          "lateral_result_pinion_raw": -3,
+          "longitudinal_result_accel_m_s2": -0.496,
+          "longitudinal_result_id": 11,
+          "request_loss_status": 0
+        },
+        "lag_s": 0.020179,
+        "raw": "0000001800020bae0000000400000000fffd0002fe1007c2fe100000489e7ba9"
+      },
+      "result_lateral_id0_after": {
+        "decoded": {
+          "lateral_result_id": 0,
+          "lateral_result_pinion_raw": -3,
+          "longitudinal_result_accel_m_s2": -0.496,
+          "longitudinal_result_id": 11,
+          "request_loss_status": 0
+        },
+        "lag_s": 0.020179,
+        "raw": "0000001800020bae0000000400000000fffd0002fe1007c2fe100000489e7ba9"
+      },
+      "segment": 9,
+      "t_mono_s": 957.015094,
+      "warning_stage": {
+        "age_s": 28.663485,
+        "b19": 64,
+        "b20": 67,
+        "raw": "00000000000000222130000000000000000b00404301e1e1e03e0000fc000000"
+      }
+    },
+    {
+      "brake_0x101_after": {
+        "lag_s": 0.009765,
+        "raw": "800000010000008b"
+      },
+      "brake_0x101_before": {
+        "lag_s": -0.009995,
+        "raw": "800000010000008b"
+      },
+      "car_state_before": {
+        "age_s": 0.008667,
+        "brake": false,
+        "cruise_available": true,
+        "cruise_enabled": true,
+        "gas": false,
+        "steering_pressed": false,
+        "steering_torque_nm": 0.19,
+        "v_ego_m_s": 19.897783
+      },
+      "chassis_0x0ca_after": {
+        "lag_s": 0.02084,
+        "raw": "c86fb1076aff01010a0000000000000000000000000000000000000053cde8a9"
+      },
+      "chassis_0x0ca_before": {
+        "lag_s": -0.009995,
+        "raw": "8d3cb0076bff01010800000000000000000000000000000000000000165430e5"
+      },
+      "classification": "strong_hands_off_cancel_witness",
+      "cruise_display_0x251_after": {
+        "decoded": {
+          "cruise_main_state": 1,
+          "mode_byte": 160,
+          "ui_set_speed": 46
+        },
+        "lag_s": 0.0,
+        "raw": "a0102e488048a080"
+      },
+      "cruise_display_0x251_before": {
+        "decoded": {
+          "cruise_main_state": 1,
+          "mode_byte": 160,
+          "ui_set_speed": 46
+        },
+        "lag_s": 0.0,
+        "raw": "a0102e488048a080"
+      },
+      "frc_0x160_after": {
+        "lag_s": 0.02084,
+        "raw": "00625a82800d4006ce680b007f482080022f80c0000001640000000000000000"
+      },
+      "frc_0x160_before": {
+        "lag_s": -0.009995,
+        "raw": "df295982fff64006cd480b007fc81e80022f80c0000001040000000000000000"
+      },
+      "hud_escalation_stage": {
+        "age_s": 8.605508,
+        "raw": "140c404401ee9307"
+      },
+      "late_final_stage_candidate": {
+        "age_s": 5.563167,
+        "b19": 96,
+        "b20": 67,
+        "raw": "00000000000000222130000000000000001500604301e1e1e03e00017c000000"
+      },
+      "late_final_stage_clear": {
+        "age_s": 4.159527,
+        "b19": 32,
+        "b20": 83,
+        "raw": "00000000000000222130000000000000001400205301e1e1e03e0000fe000000"
+      },
+      "latest_driver_detect_rise": {
+        "age_s": 4.159527,
+        "b19": 32,
+        "b20": 83,
+        "raw": "00000000000000222130000000000000001400205301e1e1e03e0000fe000000"
+      },
+      "onroad_events_near_edge": [
+        {
+          "lag_s": 0.004511,
+          "names": [
+            "pcmDisable"
+          ]
+        }
+      ],
+      "openpilot_0x101_in_preceding_250ms": [],
+      "pcm_disable_event": {
+        "lag_s": 0.004511,
+        "names": [
+          "pcmDisable"
+        ]
+      },
+      "request_after": {
+        "cruise_operating_latch": 0,
+        "delayed_hold_state": 0,
+        "lateral_assist_gain": 1.0,
+        "lateral_damping_gain": 0.0,
+        "lateral_request_id": 0,
+        "lateral_request_pinion_raw": 22,
+        "longitudinal_accel_a_m_s2": -0.578,
+        "longitudinal_accel_b_m_s2": -0.578,
+        "longitudinal_allocation_a": 0,
+        "longitudinal_allocation_b": 2,
+        "longitudinal_request_id_a": 0,
+        "longitudinal_request_id_b": 4,
+        "raw": "0000000080000012fdbe00fdbe7fff007fff0016000000006400330051e15a76",
+        "request_sequence": 51,
+        "set_speed_kph": 0
+      },
+      "request_before": {
+        "cruise_operating_latch": 1,
+        "delayed_hold_state": 0,
+        "lateral_assist_gain": 1.0,
+        "lateral_damping_gain": 0.0,
+        "lateral_request_id": 11,
+        "lateral_request_pinion_raw": 19,
+        "longitudinal_accel_a_m_s2": 0.011,
+        "longitudinal_accel_b_m_s2": 0.011,
+        "longitudinal_allocation_a": 1,
+        "longitudinal_allocation_b": 3,
+        "longitudinal_request_id_a": 11,
+        "longitudinal_request_id_b": 17,
+        "raw": "0000000880002d47000b48000b7fff007fff0013c00b10006400320015b8b069",
+        "request_sequence": 50,
+        "set_speed_kph": 72
+      },
+      "result_driver_operation_id63_after": {
+        "decoded": {
+          "lateral_result_id": 0,
+          "lateral_result_pinion_raw": 22,
+          "longitudinal_result_accel_m_s2": -0.582,
+          "longitudinal_result_id": 63,
+          "request_loss_status": 0
+        },
+        "lag_s": 0.050637,
+        "raw": "00000018fdba3f9700000004000000000016fdbafdba072ffdba000090ae650e"
+      },
+      "result_first_after": {
+        "decoded": {
+          "lateral_result_id": 0,
+          "lateral_result_pinion_raw": 22,
+          "longitudinal_result_accel_m_s2": -0.582,
+          "longitudinal_result_id": 11,
+          "request_loss_status": 0
+        },
+        "lag_s": 0.02084,
+        "raw": "0000001800070bb3000000040000000000160007fdba0730fdba000057008765"
+      },
+      "result_lateral_id0_after": {
+        "decoded": {
+          "lateral_result_id": 0,
+          "lateral_result_pinion_raw": 22,
+          "longitudinal_result_accel_m_s2": -0.582,
+          "longitudinal_result_id": 11,
+          "request_loss_status": 0
+        },
+        "lag_s": 0.02084,
+        "raw": "0000001800070bb3000000040000000000160007fdba0730fdba000057008765"
+      },
+      "segment": 10,
+      "t_mono_s": 1041.31867,
+      "warning_stage": {
+        "age_s": 14.563771,
+        "b19": 64,
+        "b20": 67,
+        "raw": "00000000000000222130000000000000000d00404301e1e1e03e00807e000000"
+      }
+    },
+    {
+      "brake_0x101_after": {
+        "lag_s": 0.00995,
+        "raw": "800000000000008a"
+      },
+      "brake_0x101_before": {
+        "lag_s": -0.010809,
+        "raw": "800000000000008a"
+      },
+      "car_state_before": {
+        "age_s": 0.009408,
+        "brake": false,
+        "cruise_available": true,
+        "cruise_enabled": true,
+        "gas": false,
+        "steering_pressed": false,
+        "steering_torque_nm": 0.07,
+        "v_ego_m_s": 19.458197
+      },
+      "chassis_0x0ca_after": {
+        "lag_s": 0.0,
+        "raw": "7b241e07a2ff0100c700000000000000000000000000000000000000ff513808"
+      },
+      "chassis_0x0ca_before": {
+        "lag_s": 0.0,
+        "raw": "7b241e07a2ff0100c700000000000000000000000000000000000000ff513808"
+      },
+      "classification": "openpilot_button_cancel",
+      "cruise_display_0x251_after": null,
+      "cruise_display_0x251_before": {
+        "decoded": {
+          "cruise_main_state": 1,
+          "mode_byte": 160,
+          "ui_set_speed": 45
+        },
+        "lag_s": -0.010809,
+        "raw": "a0102d488048a080"
+      },
+      "frc_0x160_after": {
+        "lag_s": 0.00995,
+        "raw": "b9340082ffd04006b9c80b0000a82a80022f80c0000001340000000000000000"
+      },
+      "frc_0x160_before": {
+        "lag_s": -0.020583,
+        "raw": "d21bff82fffd4006bb480b0000482a80022f80c0000000f40000000000000000"
+      },
+      "hud_escalation_stage": {
+        "age_s": 8.062832,
+        "raw": "140c404401ee9307"
+      },
+      "late_final_stage_candidate": {
+        "age_s": 4.921306,
+        "b19": 96,
+        "b20": 67,
+        "raw": "00000000000000222130000000000000001900604301e1e1e03e0080fe000000"
+      },
+      "late_final_stage_clear": {
+        "age_s": 3.715792,
+        "b19": 32,
+        "b20": 83,
+        "raw": "00000000000000222130000000000000000800205301e1e1e03e0080fe000000"
+      },
+      "latest_driver_detect_rise": {
+        "age_s": 3.715792,
+        "b19": 32,
+        "b20": 83,
+        "raw": "00000000000000222130000000000000000800205301e1e1e03e0080fe000000"
+      },
+      "onroad_events_near_edge": [
+        {
+          "lag_s": -0.065804,
+          "names": [
+            "buttonCancel"
+          ]
+        },
+        {
+          "lag_s": 0.003621,
+          "names": [
+            "pcmDisable"
+          ]
+        }
+      ],
+      "openpilot_0x101_in_preceding_250ms": [
+        {
+          "bus": 2,
+          "lag_s": -0.048381,
+          "raw": "8800000000000092"
+        },
+        {
+          "bus": 2,
+          "lag_s": -0.028113,
+          "raw": "8800000000000092"
+        },
+        {
+          "bus": 2,
+          "lag_s": -0.008865,
+          "raw": "8800000000000092"
+        }
+      ],
+      "pcm_disable_event": {
+        "lag_s": 0.003621,
+        "names": [
+          "pcmDisable"
+        ]
+      },
+      "request_after": {
+        "cruise_operating_latch": 0,
+        "delayed_hold_state": 0,
+        "lateral_assist_gain": 1.0,
+        "lateral_damping_gain": 0.0,
+        "lateral_request_id": 0,
+        "lateral_request_pinion_raw": 11,
+        "longitudinal_accel_a_m_s2": -0.499,
+        "longitudinal_accel_b_m_s2": -0.499,
+        "longitudinal_allocation_a": 0,
+        "longitudinal_allocation_b": 2,
+        "longitudinal_request_id_a": 0,
+        "longitudinal_request_id_b": 4,
+        "raw": "0000000080000012fe0d00fe0d7fff007fff000b0000000064001900f13cc89a",
+        "request_sequence": 25,
+        "set_speed_kph": 0
+      },
+      "request_before": {
+        "cruise_operating_latch": 1,
+        "delayed_hold_state": 0,
+        "lateral_assist_gain": 1.0,
+        "lateral_damping_gain": 0.0,
+        "lateral_request_id": 11,
+        "lateral_request_pinion_raw": 7,
+        "longitudinal_accel_a_m_s2": 0.011,
+        "longitudinal_accel_b_m_s2": 0.011,
+        "longitudinal_allocation_a": 1,
+        "longitudinal_allocation_b": 3,
+        "longitudinal_request_id_a": 11,
+        "longitudinal_request_id_b": 17,
+        "raw": "0000000880002d47000b46000b7fff007fff0007c00b100064001800be0a32c0",
+        "request_sequence": 24,
+        "set_speed_kph": 70
+      },
+      "result_driver_operation_id63_after": {
+        "decoded": {
+          "lateral_result_id": 0,
+          "lateral_result_pinion_raw": 8,
+          "longitudinal_result_accel_m_s2": -0.493,
+          "longitudinal_result_id": 63,
+          "request_loss_status": 0
+        },
+        "lag_s": 0.089117,
+        "raw": "00000018fe133ff100000004000000000008fe13fe1307cafe130000be0e2dd1"
+      },
+      "result_first_after": {
+        "decoded": {
+          "lateral_result_id": 11,
+          "lateral_result_pinion_raw": 7,
+          "longitudinal_result_accel_m_s2": -0.499,
+          "longitudinal_result_id": 11,
+          "request_loss_status": 0
+        },
+        "lag_s": 0.0,
+        "raw": "00000018000b0bb700000004000b00000007000bfe0d07c0fe0d0000f7dc1ecc"
+      },
+      "result_lateral_id0_after": {
+        "decoded": {
+          "lateral_result_id": 0,
+          "lateral_result_pinion_raw": 10,
+          "longitudinal_result_accel_m_s2": -0.493,
+          "longitudinal_result_id": 11,
+          "request_loss_status": 0
+        },
+        "lag_s": 0.029734,
+        "raw": "00000018000f0bbb0000000400000000000a000ffe1307c7fe1300003d7e3e42"
+      },
+      "segment": 12,
+      "t_mono_s": 1122.282375,
+      "warning_stage": {
+        "age_s": 13.919847,
+        "b19": 64,
+        "b20": 67,
+        "raw": "00000000000000222130000000000001fff900404301e1e1e03e0080fe000000"
+      }
+    }
+  ],
+  "classification_counts": {
+    "openpilot_button_cancel": 4,
+    "stock_pcm_disable_other": 4,
+    "strong_hands_off_cancel_witness": 1
+  },
+  "interpretation": {
+    "bounded_state": "0x371 B19=0x60 is a repeatable late/final-stage hands-off candidate after the earlier B19=0x40 warning and 0x412 B2[6] escalation. Its exact OEM bit name and whether it alone commits cancellation remain unproved.",
+    "chassis_response": "0x081 follows the FRC withdrawal: lateral result ID becomes 0 first, then longitudinal result ID becomes 63 (Driver Operation); request-loss remains clear.",
+    "negative_evidence": "Native 0x101 remains a non-brake frame and no sendcan 0x101 precedes the strong witness; 0x251 cruise-main availability remains asserted. This is therefore not the normal brake/button cancel path and not loss-of-request supervision.",
+    "verified_dynamic": "The strongest retained hands-off cancellation is a native FRC 0x08A request withdrawal, not an openpilot 0x101 cancel: the operating latch clears, Target Lateral ID 11 becomes 0, both longitudinal request packages change, and set speed clears before controls sees pcmDisable."
+  },
+  "latch_fall_count": 9,
+  "native_bus_assignment": {
+    "chassis_result_and_brake": {
+      "bus": 0,
+      "messages": [
+        "0x081",
+        "0x0CA",
+        "0x101"
+      ]
+    },
+    "frc_request_and_state": {
+      "bus": 2,
+      "messages": [
+        "0x08A",
+        "0x371",
+        "0x412",
+        "0x251"
+      ]
+    }
+  },
+  "native_source_counts": {
+    "0x081/src0": 29172,
+    "0x081/src2": 325,
+    "0x08A/src0": 383,
+    "0x08A/src2": 35001,
+    "0x0CA/src0": 37152,
+    "0x0CA/src2": 408,
+    "0x101/src0": 43755,
+    "0x101/src2": 487,
+    "0x160/src1": 34887,
+    "0x251/src0": 12,
+    "0x251/src2": 926,
+    "0x371/src0": 50,
+    "0x371/src2": 4682,
+    "0x412/src0": 14,
+    "0x412/src2": 939
+  },
+  "schema": "camry-20260907-hands-off-cancel-v1",
+  "source": {
+    "openpilot_commit": "f8bd956a4b23eb4992c6abbe899e72b27cd91d80",
+    "route": "00000045--805b7ca6ab",
+    "segments": 15
+  },
+  "stock_active_lta_drop_count": 3,
+  "strong_hands_off_witness_count": 1,
+  "strong_hands_off_witnesses": [
+    {
+      "brake_0x101_after": {
+        "lag_s": 0.009765,
+        "raw": "800000010000008b"
+      },
+      "brake_0x101_before": {
+        "lag_s": -0.009995,
+        "raw": "800000010000008b"
+      },
+      "car_state_before": {
+        "age_s": 0.008667,
+        "brake": false,
+        "cruise_available": true,
+        "cruise_enabled": true,
+        "gas": false,
+        "steering_pressed": false,
+        "steering_torque_nm": 0.19,
+        "v_ego_m_s": 19.897783
+      },
+      "chassis_0x0ca_after": {
+        "lag_s": 0.02084,
+        "raw": "c86fb1076aff01010a0000000000000000000000000000000000000053cde8a9"
+      },
+      "chassis_0x0ca_before": {
+        "lag_s": -0.009995,
+        "raw": "8d3cb0076bff01010800000000000000000000000000000000000000165430e5"
+      },
+      "classification": "strong_hands_off_cancel_witness",
+      "cruise_display_0x251_after": {
+        "decoded": {
+          "cruise_main_state": 1,
+          "mode_byte": 160,
+          "ui_set_speed": 46
+        },
+        "lag_s": 0.0,
+        "raw": "a0102e488048a080"
+      },
+      "cruise_display_0x251_before": {
+        "decoded": {
+          "cruise_main_state": 1,
+          "mode_byte": 160,
+          "ui_set_speed": 46
+        },
+        "lag_s": 0.0,
+        "raw": "a0102e488048a080"
+      },
+      "frc_0x160_after": {
+        "lag_s": 0.02084,
+        "raw": "00625a82800d4006ce680b007f482080022f80c0000001640000000000000000"
+      },
+      "frc_0x160_before": {
+        "lag_s": -0.009995,
+        "raw": "df295982fff64006cd480b007fc81e80022f80c0000001040000000000000000"
+      },
+      "hud_escalation_stage": {
+        "age_s": 8.605508,
+        "raw": "140c404401ee9307"
+      },
+      "late_final_stage_candidate": {
+        "age_s": 5.563167,
+        "b19": 96,
+        "b20": 67,
+        "raw": "00000000000000222130000000000000001500604301e1e1e03e00017c000000"
+      },
+      "late_final_stage_clear": {
+        "age_s": 4.159527,
+        "b19": 32,
+        "b20": 83,
+        "raw": "00000000000000222130000000000000001400205301e1e1e03e0000fe000000"
+      },
+      "latest_driver_detect_rise": {
+        "age_s": 4.159527,
+        "b19": 32,
+        "b20": 83,
+        "raw": "00000000000000222130000000000000001400205301e1e1e03e0000fe000000"
+      },
+      "onroad_events_near_edge": [
+        {
+          "lag_s": 0.004511,
+          "names": [
+            "pcmDisable"
+          ]
+        }
+      ],
+      "openpilot_0x101_in_preceding_250ms": [],
+      "pcm_disable_event": {
+        "lag_s": 0.004511,
+        "names": [
+          "pcmDisable"
+        ]
+      },
+      "request_after": {
+        "cruise_operating_latch": 0,
+        "delayed_hold_state": 0,
+        "lateral_assist_gain": 1.0,
+        "lateral_damping_gain": 0.0,
+        "lateral_request_id": 0,
+        "lateral_request_pinion_raw": 22,
+        "longitudinal_accel_a_m_s2": -0.578,
+        "longitudinal_accel_b_m_s2": -0.578,
+        "longitudinal_allocation_a": 0,
+        "longitudinal_allocation_b": 2,
+        "longitudinal_request_id_a": 0,
+        "longitudinal_request_id_b": 4,
+        "raw": "0000000080000012fdbe00fdbe7fff007fff0016000000006400330051e15a76",
+        "request_sequence": 51,
+        "set_speed_kph": 0
+      },
+      "request_before": {
+        "cruise_operating_latch": 1,
+        "delayed_hold_state": 0,
+        "lateral_assist_gain": 1.0,
+        "lateral_damping_gain": 0.0,
+        "lateral_request_id": 11,
+        "lateral_request_pinion_raw": 19,
+        "longitudinal_accel_a_m_s2": 0.011,
+        "longitudinal_accel_b_m_s2": 0.011,
+        "longitudinal_allocation_a": 1,
+        "longitudinal_allocation_b": 3,
+        "longitudinal_request_id_a": 11,
+        "longitudinal_request_id_b": 17,
+        "raw": "0000000880002d47000b48000b7fff007fff0013c00b10006400320015b8b069",
+        "request_sequence": 50,
+        "set_speed_kph": 72
+      },
+      "result_driver_operation_id63_after": {
+        "decoded": {
+          "lateral_result_id": 0,
+          "lateral_result_pinion_raw": 22,
+          "longitudinal_result_accel_m_s2": -0.582,
+          "longitudinal_result_id": 63,
+          "request_loss_status": 0
+        },
+        "lag_s": 0.050637,
+        "raw": "00000018fdba3f9700000004000000000016fdbafdba072ffdba000090ae650e"
+      },
+      "result_first_after": {
+        "decoded": {
+          "lateral_result_id": 0,
+          "lateral_result_pinion_raw": 22,
+          "longitudinal_result_accel_m_s2": -0.582,
+          "longitudinal_result_id": 11,
+          "request_loss_status": 0
+        },
+        "lag_s": 0.02084,
+        "raw": "0000001800070bb3000000040000000000160007fdba0730fdba000057008765"
+      },
+      "result_lateral_id0_after": {
+        "decoded": {
+          "lateral_result_id": 0,
+          "lateral_result_pinion_raw": 22,
+          "longitudinal_result_accel_m_s2": -0.582,
+          "longitudinal_result_id": 11,
+          "request_loss_status": 0
+        },
+        "lag_s": 0.02084,
+        "raw": "0000001800070bb3000000040000000000160007fdba0730fdba000057008765"
+      },
+      "segment": 10,
+      "t_mono_s": 1041.31867,
+      "warning_stage": {
+        "age_s": 14.563771,
+        "b19": 64,
+        "b20": 67,
+        "raw": "00000000000000222130000000000000000d00404301e1e1e03e00807e000000"
+      }
+    }
+  ]
+}
