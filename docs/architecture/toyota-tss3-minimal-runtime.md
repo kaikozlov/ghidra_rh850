@@ -101,75 +101,81 @@ transport enhancement, not a dependency of this lateral baseline.
 
 ### Cross-variant resident control ingress
 
-The Crown bring-up closed a stock host-to-resident transport that is present on
-all four tracked TSS3 EPS images. Exact Camry F33, Corolla H, Corolla F, and
-Crown F30 each configure classic functional request `0x777` as DCM request type
-1. Their functional service set is identically `10,14,28,31,3E,85`; `C6` and
-`C7` are absent. The common service lookup therefore assigns NRC `0x11` to
-either control SID, and each exact response selector suppresses that NRC for a
-functional request. CanTp/PduR delivers the complete seven-byte N-SDU to the
-target's channel-1 DCM buffer before the resident's existing post-receive hook:
+Exact Camry F33, Corolla H, Corolla F, and Crown F30 all expose the same normal
+runtime control ingress: classic functional request `0x777`, DCM request type 1.
+Their configured functional service set is identically `10,14,28,31,3E,85`;
+private C7 is therefore staged into the target's channel-1 DCM buffer, assigned
+NRC `0x11`, and suppressed on the functional response path. CanTp/PduR still
+performs the complete seven-byte N-SDU copy before the resident's exact
+post-receive hook.
 
-| target | functional DCM buffer | historical dedicated family-5 ingress | install strategy |
+| exact target | functional DCM buffer | universal runtime profile | installation |
 |---|---:|---|---|
-| Camry `8965F3307000` | `FEBE5751` | `0x1FDC0002` enabled | split helper, loaded with C6 |
-| Corolla `8965H1202000` | `FEBE563D` | `0x1FDC0002` enabled | helper embedded before application startup |
-| Corolla `8965F1208000` | `FEBE563D` | `0x1FDC0002` enabled | helper embedded before application startup |
-| Crown `8965F3012000` | `FEBE527D` | family 5 disabled | split helper, loaded with C6 |
+| Camry `8965F3307000` | `FEBE5751` | `camry-f33` | one authenticated universal payload |
+| Corolla `8965H1202000` | `FEBE563D` | `corolla-hf` | one authenticated universal payload |
+| Corolla `8965F1208000` | `FEBE563D` | `corolla-hf` | one authenticated universal payload |
+| Crown `8965F3012000` | `FEBE527D` | `crown-f30` | one authenticated universal payload |
 
-The Crown vehicle first dynamically proved the functional transport. Follow-up
-showed stock DCM teardown may clear N-SDU B0, so the maintained wire format
-duplicates the private tag into durable B1. Thus loader traffic is
-`07 C6 C6 index word_le32` and steering control is
-`07 C7 C7 seq target_hi target_lo 00 00`. **C6 is never the recurring steering
-command**; it exists only to transfer/arm the split helper on Camry and Crown.
-The deterministic firmware matrix is
-[`tss3_resident_control_ingress_matrix.json`](../../data/generated/tss3_resident_control_ingress_matrix.json).
+The former C6 helper-loader proved useful during bring-up, but it is no longer
+part of the maintained installation contract. The one-size-fits-all artifact is
+a single authenticated **4-KiB payload with identical bytes for every target**.
+At boot execution it reads the 12-byte application-family identity beginning at
+CodeFlash `0x20860`, fail-closes on an unknown family, and internally selects one
+of three exact profiles: Camry F33, Crown F30, or the shared Corolla H/F runtime.
+Target-specific CodeFlash call addresses and RAM offsets are data/code inside the
+payload; they do not require a target-specific executable from the host.
 
-The historical family-5 paths remain valuable evidence and recovery tooling,
-but they are no longer the cross-variant openpilot contract. Crown production
-firmware compiles family 5 out entirely, while functional `0x777` exists on all
-four exact targets. Keeping one host wire/API therefore removes a gratuitous
-Camry/Corolla-versus-Crown split without changing any target-local B6,
-freshness, command-5, or RAM facts.
+The selected resident is copied to the common retained high tail
+`FEBFF9F0..FEBFFBFB`. The selected helper is temporarily parked at
+`FEF07C00..FEF07FFF`, the final 1 KiB of GlobalRAM. Exact supported images have
+zero aligned CodeFlash pointer literals and zero recovered application data
+references into that transit span. Their byte-identical MPU table places the
+span in region 12 (`FEC00000..FFFFFFFC`) with MPAT `0xB8` in both recovered
+application contexts, so the high resident can read it after startup. Cold-reset
+initialization clears all GlobalRAM before the authenticated payload runs, so it
+precedes rather than clobbers this staging write. The transit buffer is used only
+until the selected resident installs its helper into the target-native low-RAM
+pocket.
 
-#### Unified functional runtime
+Corolla can install its 458-byte helper into `FEBF0000..FEBF01C9` before
+application startup because exact H/F startup-survival analysis excludes that
+range from startup writes. Camry/Crown replay startup first and defer their
+572-byte helper copy into `FEBF0000` until the already-qualified foreground
+count-224 boundary; before that point the helper is absent and cannot execute.
+This removes the old C6 post-startup transfer while preserving the startup
+lifetime boundary that originally motivated the split design.
 
-The maintained runtime now uses functional `0x777` on all four exact targets.
-Its common wire contract is:
+#### Universal one-shot runtime
+
+The one payload contains all three compiled runtime profiles and currently uses
+**3,566 bytes of the 4,048-byte authenticated plaintext shellcode budget**. The
+profile components are:
+
+- Camry F33: 462-byte resident + 572-byte helper;
+- Crown F30: 462-byte resident + 572-byte helper;
+- Corolla H/F: 522-byte resident + 458-byte helper.
+
+The recurring host API is consequently only:
 
 ```text
-helper loader (Camry/Crown only): 07 C6 C6 index word_le32
-runtime steering control:         07 C7 C7 seq target_hi target_lo 00 00
-inactive / explicit release:      07 C7 C7 00  00        00        00 00
+runtime steering control:  07 C7 C7 seq target_hi target_lo 00 00
+inactive / explicit release: 07 C7 C7 00  00        00        00 00
 ```
 
-`build_tss3_unified_b6_signer.py` emits exact-target bundles for Camry F33,
-Corolla H/F, and Crown F30; `tss3_unified_b6_signer.py` provides the common
-preflight/install/qualify/control harness. The resident and helper are one
-maintained source pair with SHA-bound compile macros selecting exact target
-addresses. It is intentionally not one byte-identical multi-calibration binary:
-exact call/RAM addresses and the installation geometry differ.
+While `CC.latActive`, openpilot emits a changed nonzero C7 generation at the
+native 100-Hz car-control cadence. When lateral control is inactive it emits
+sequence zero. Every profile uses the same seven-nominal-5-ms supervised lease:
+changed nonzero generations renew it, repeated mailbox contents do not, and
+expiry or sequence zero leaves native B6 untouched. Corolla's compiled helper
+continues to have the emulator regression covering the 100-Hz host / 200-Hz
+foreground schedule, seventh-tick expiry, zero release, wrap, and empty-queue
+aging.
 
-The recurring host API is nevertheless identical. While `CC.latActive`,
-openpilot emits a changed nonzero C7 generation at the native 100-Hz
-car-control cadence. When lateral control is inactive it emits sequence zero.
-Receiver behavior is target-local:
-
-- **Camry F33 / Crown F30:** the 572-byte split helper uses the road-proven
-  supervised shape. A changed nonzero generation grants seven nominal 5-ms
-  foreground ticks; repeated mailbox contents do not renew the lease; expiry
-  or sequence zero leaves the native B6 untouched. The 600-byte transfer image
-  still fits the exact 604-byte low-RAM slot.
-- **Corolla H/F:** the exact low helper is now 458 bytes in its 464-byte
-  target-native pocket after compacting state access and freshness arithmetic.
-  It uses the same seven-nominal-5-ms host lease as Camry/Crown: a changed
-  nonzero C7 generation snapshots the target and grants seven foreground ticks,
-  repeated mailbox contents cannot renew the lease, and sequence zero releases
-  immediately. Lease aging occurs before the native-B6 queue gate, so a stale
-  command expires after nominal 35 ms even when no B6 is queued; a later B6
-  cannot resurrect it. The compiled exact-H helper is emulator-regression-tested
-  against a 100-Hz host / 200-Hz foreground schedule.
+`build_tss3_unified_b6_signer.py --target all` emits one universal staging image,
+one 4-KiB authenticated payload, and thin exact-target metadata wrappers used
+only for F181/DCM-buffer attestation and tester presentation. All four wrappers
+pin the same staging SHA and the same payload SHA. Legacy target-specific and C6
+loader implementations remain in the tree only as historical/recovery tooling.
 
 The common qualification ladder remains conservative: bind exact F181, prove
 functional mailbox delivery, install only volatile RAM, reproduce one untouched

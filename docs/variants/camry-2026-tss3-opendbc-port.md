@@ -29,8 +29,10 @@ the unified Classical functional C7 frame `07 C7 C7 seq target_hi target_lo 00
 bounded envelope. The volatile continuous resident edits an already-native B6
 inside the EPS and obtains a native-valid FV4+CMAC28 through the EPS ICU-S
 command-5 path. Changed nonzero generations renew a seven-foreground-tick host
-lease; expiry or sequence zero returns ownership to untouched native B6. C6 is
-used only to load/arm the split helper and is not a steering command.
+lease; expiry or sequence zero returns ownership to untouched native B6. The
+current installer is a single cross-variant 4-KiB authenticated payload that
+self-selects the exact F33/Crown/Corolla profile; F33 stages its helper through
+`FEF07C00` and installs it at count 224, so no C6 loading phase remains.
 Longitudinal remains entirely Toyota-owned:
 openpilot advertises no TSS3 Alpha Long, does not synthesize or suppress `0x160`,
 and does not transmit `0x08A`. HUD/cancel transmission claims from the older

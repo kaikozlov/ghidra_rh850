@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify the parallel unified functional-0x777 TSS3 signer implementation."""
+"""Verify the one-payload functional-0x777 TSS3 signer implementation."""
 from __future__ import annotations
 
 import json
@@ -18,22 +18,10 @@ from exploit.ephemeral_runtime import tss3_unified_b6_signer as host
 BUILDER = ROOT / "exploit/ephemeral_runtime/build_tss3_unified_b6_signer.py"
 KIT_BUILDER = ROOT / "tools/targets/tss3/builders/build_tss3_unified_b6_signer_kit.py"
 TARGETS = {
-    "camry-8965F3307000": ("0xFEBE5751", "split-functional-loader", 522, 572, 600, "supervised-continuous", 7),
-    "corolla-8965H1202000": ("0xFEBE563D", "embedded-helper-functional-control", 522, 458, 458, "supervised-continuous", 7),
-    "corolla-8965F1208000": ("0xFEBE563D", "embedded-helper-functional-control", 522, 458, 458, "supervised-continuous", 7),
-    "crown-8965F3012000": ("0xFEBE527D", "split-functional-loader", 522, 572, 600, "supervised-continuous", 7),
-}
-
-# This intentionally supersedes yesterday's live-corrected one-shot Crown
-# helper while preserving its functional-0x777 DCM geometry. The new split
-# helper carries the same seven-tick host-loss lease as the road-proven Camry
-# supervised runtime.
-CROWN_SUPERVISED_UNIFIED_SHA256 = {
-    "resident": "6942f152a698d2656848727a2c0624c3dd4c5a7e820524a70c389ddf0f18a417",
-    "helper": "1580cf681aeb9976521fa3cedc436b5bd8a3cd7e71331ad5f4645fec371a6a55",
-    "helper_image": "05eab6442199564bb92577412f62a6781772c4be4444949dd269f01b31854bb8",
-    "payload": "90b3b2e27b238bcf26d96d5cab735d0e792c3a1e603c30db208ca943422e132a",
-    "staging": "a62a3a580b079a8f5e8bc28f804686c50848be0bdf819d520b210c36d82ba74e",
+    "camry-8965F3307000": ("0xFEBE5751", "split-telemetry", 462, 572, "supervised-continuous", 7),
+    "corolla-8965H1202000": ("0xFEBE563D", "corolla-resident-prefix", 522, 458, "supervised-continuous", 7),
+    "corolla-8965F1208000": ("0xFEBE563D", "corolla-resident-prefix", 522, 458, "supervised-continuous", 7),
+    "crown-8965F3012000": ("0xFEBE527D", "split-telemetry", 462, 572, "supervised-continuous", 7),
 }
 
 
@@ -43,9 +31,8 @@ def check(label: str, condition: object) -> None:
     print(f"[PASS] {label}")
 
 
-check("unified wire frames exact",
-      host.loader_frame(3, bytes.fromhex("11223344")) == bytes.fromhex("07c6c60311223344") and
-      host.loader_frame(0xFF) == bytes.fromhex("07c6c6ff00000000") and
+check("unified wire is C7-only",
+      not hasattr(host, "loader_frame") and
       host.replacement_frame(7, 0x1234) == bytes.fromhex("07c7c70712340000") and
       host.release_frame() == bytes.fromhex("07c7c70000000000"))
 post_replace_raw = bytearray(host.SPLIT_TELEMETRY_SIZE)
@@ -53,11 +40,11 @@ post_replace_raw[8:12] = bytes.fromhex("d4a561f5")
 post_replace_raw[12:16] = bytes.fromhex("11223344")
 post_replace_raw[17] = 1
 post_replace = host.decode_split_telemetry(bytes(post_replace_raw))
-check("unified split telemetry distinguishes sticky oracle from latest trailer equality",
+check("Camry/Crown telemetry distinguishes sticky oracle from latest trailer equality",
       post_replace["oracle_latched"] is True and post_replace["native_verified"] is True and
       post_replace["latest_trailer_equality"] is False and post_replace["native_signature_match"] is False)
 check("legacy target-specific implementations remain in tree",
-      all((ROOT / p).is_file() for p in (
+      all((ROOT / path).is_file() for path in (
           "exploit/ephemeral_runtime/build_camry_f33_b6_inline_signer.py",
           "exploit/ephemeral_runtime/build_corolla_hf_b6_inline_signer.py",
           "exploit/ephemeral_runtime/build_crown_f30_b6_inline_signer.py",
@@ -68,81 +55,127 @@ check("legacy target-specific implementations remain in tree",
 
 resident_source = (ROOT / "exploit/ephemeral_runtime/tss3_unified_b6_signer_resident.S").read_text()
 helper_source = (ROOT / "exploit/ephemeral_runtime/tss3_unified_b6_signer_helper.S").read_text()
-check("one maintained resident/helper source covers F3 and Corolla scheduler shapes",
+check("one maintained source pair covers all scheduler shapes with no C6 resident loader",
       "#ifdef TSS3_COROLLA_HF" in resident_source and "#ifdef TSS3_COROLLA_HF" in helper_source and
-      "TSS3_DCM_TAG_OFF" in resident_source and "TSS3_DCM_TAG_OFF" in helper_source)
-check("split helper keeps call-spanning locals in ABI-preserved registers",
+      "TSS3_DCM_TAG_OFF" in helper_source and "C6 C6" not in resident_source and
+      ".L_parse_loader" not in resident_source and "FEF07C00" in resident_source)
+check("Camry/Crown helper keeps call-spanning locals in ABI-preserved registers",
       "prepare {r20-r21,lp}, 0" in helper_source and
       "mov 2, r20                   /* operation = replace; callee-saved */" in helper_source and
       "ld.hu TSS3_DCM_TARGET_OFF[gp], r21" in helper_source and
       "st.h r21, 0x4a8e[gp]" in helper_source and
       "dispose 0, {r20-r21,lp}, lp" in helper_source and
       "st.b r6, 0x4ad0[gp]" not in helper_source and "st.h r6, 0x4ad2[gp]" not in helper_source)
-check("Camry unified target config uses durable functional DCM tail offsets",
-      unified_builder.TARGETS["camry-8965F3307000"]["resident_macros"] == {
-          "TSS3_DCM_TAG_OFF": -0x60AE, "TSS3_DCM_INDEX_OFF": -0x60AD, "TSS3_DCM_WORD_OFF": -0x60AC,
-      } and unified_builder.TARGETS["camry-8965F3307000"]["helper_macros"]["TSS3_DCM_SEQ_OFF"] == -0x60AD)
-check("Corolla unified target config selects common Corolla branch",
-      unified_builder.TARGETS["corolla-8965H1202000"]["resident_macros"] == {"TSS3_COROLLA_HF": 1} and
-      unified_builder.TARGETS["corolla-8965F1208000"]["helper_macros"] == {"TSS3_COROLLA_HF": 1})
-check("Crown unified target config matches live-corrected durable tail offsets",
-      unified_builder.TARGETS["crown-8965F3012000"]["resident_macros"] == {
-          "TSS3_DCM_TAG_OFF": -0x6582, "TSS3_DCM_INDEX_OFF": -0x6581, "TSS3_DCM_WORD_OFF": -0x6580,
-      } and unified_builder.TARGETS["crown-8965F3012000"]["helper_macros"]["TSS3_DCM_SEQ_OFF"] == -0x6581)
+check("Camry/Crown resident no longer depends on functional-loader offsets",
+      unified_builder.TARGETS["camry-8965F3307000"]["resident_macros"] == {} and
+      unified_builder.TARGETS["crown-8965F3012000"]["resident_macros"] == {} and
+      unified_builder.TARGETS["camry-8965F3307000"]["helper_macros"]["TSS3_DCM_SEQ_OFF"] == -0x60AD and
+      unified_builder.TARGETS["crown-8965F3012000"]["helper_macros"]["TSS3_DCM_SEQ_OFF"] == -0x6581)
+check("Corolla H/F select one shared runtime profile",
+      unified_builder.TARGETS["corolla-8965H1202000"]["profile"] == "corolla-hf" and
+      unified_builder.TARGETS["corolla-8965F1208000"]["profile"] == "corolla-hf" and
+      unified_builder.PROFILE_RUNTIME_IDENTITIES["corolla-hf"] == "8965F1208000")
+
+# The temporary helper transit is deliberately the last 1 KiB of exact GlobalRAM.
+# Every supported image is SHA-bound separately by the builder; independently pin
+# the useful negative that no aligned CodeFlash pointer targets the transit span.
+for target, spec in unified_builder.TARGETS.items():
+    image = Path(spec["image"]).read_bytes()
+    refs = []
+    for off in range(0, len(image) - 3, 4):
+        value = int.from_bytes(image[off:off + 4], "little")
+        if unified_builder.UNIVERSAL_HELPER_TRANSIT_BASE <= value < (
+                unified_builder.UNIVERSAL_HELPER_TRANSIT_BASE + unified_builder.UNIVERSAL_HELPER_TRANSIT_LIMIT):
+            refs.append((off, value))
+    check(f"{target}: universal GlobalRAM helper transit has no aligned pointer literal", refs == [])
+    corpus = ROOT / "data/generated" / target / "decompilations.jsonl"
+    check(f"{target}: tracked decompiler corpus available for GlobalRAM transit audit", corpus.is_file())
+    data_refs = []
+    for line in corpus.read_text(encoding="utf-8").splitlines():
+        row = json.loads(line)
+        if row.get("record") != "function":
+            continue
+        for ref in row.get("data_references", []):
+            address = int(ref["to_addr"], 16)
+            if unified_builder.UNIVERSAL_HELPER_TRANSIT_BASE <= address < (
+                    unified_builder.UNIVERSAL_HELPER_TRANSIT_BASE + unified_builder.UNIVERSAL_HELPER_TRANSIT_LIMIT):
+                data_refs.append((row["entry_addr"], ref["from_addr"], ref["to_addr"], ref["ref_type"]))
+    check(f"{target}: recovered application graph has no direct GlobalRAM transit reference", data_refs == [])
 
 built: dict[str, tuple[dict, Path]] = {}
 with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
     root = Path(td)
-    for target, (buffer, strategy, resident_size, helper_size, helper_image_size, runtime_mode, host_loss_ticks) in TARGETS.items():
-        out = root / target
-        proc = subprocess.run(
-            [sys.executable, str(BUILDER), "--target", target, "--output-dir", str(out)],
-            cwd=ROOT, check=True, capture_output=True, text=True,
-        )
-        printed = json.loads(proc.stdout)
-        metas = list(out.glob("*.json"))
-        check(f"{target}: one unified metadata artifact", len(metas) == 1)
-        meta = json.loads(metas[0].read_text())
-        check(f"{target}: stdout/meta byte contract", printed == meta)
+    out = root / "universal"
+    proc = subprocess.run(
+        [sys.executable, str(BUILDER), "--target", "all", "--output-dir", str(out)],
+        cwd=ROOT, check=True, capture_output=True, text=True,
+    )
+    printed = json.loads(proc.stdout)
+    check("builder emits one universal build set", printed["schema"] == "tss3-universal-b6-signer-build-set-v1")
+    universal = printed["universal"]
+    payload_path = out / universal["payload"]["path"]
+    stage_path = out / universal["staging"]["path"]
+    payload = payload_path.read_bytes(); stage = stage_path.read_bytes()
+    check("one authenticated payload contains all three runtime profiles",
+          len(payload) == 0x1000 and universal["payload"]["size"] == 0x1000 and
+          universal["staging"]["size"] == len(stage) < unified_builder.UNIVERSAL_STAGING_LIMIT and
+          set(universal["profiles"]) == {"camry-f33", "crown-f30", "corolla-hf"} and
+          universal["dispatcher"]["identity_address"] == "0x00020860" and
+          universal["helper_transit"]["base"] == "0xFEF07C00")
+    transit_mpu = universal["helper_transit"]["mpu"]
+    check("universal GlobalRAM transit is MPU R/W/X in both recovered application contexts",
+          set(transit_mpu) == set(unified_builder.TARGETS) and
+          all(row["mpu_region"] == 12 and row["mpu_bounds"] == ["0xFEC00000", "0xFFFFFFFC"] and
+              row["ctx0_mpat"] == row["ctx1_mpat"] == "0x000000B8" and
+              row["aligned_codeflash_pointer_hits"] == [] for row in transit_mpu.values()))
+    for profile, row in universal["profiles"].items():
+        resident = (out / row["resident_path"]).read_bytes()
+        helper = (out / row["helper_path"]).read_bytes()
+        check(f"{profile}: profile bytes are embedded byte-exact in universal staging",
+              stage[row["resident_offset"]:row["resident_offset"] + len(resident)] == resident and
+              stage[row["helper_offset"]:row["helper_offset"] + len(helper)] == helper)
+
+    common_payload_sha = universal["payload"]["sha256"]
+    common_staging_sha = universal["staging"]["sha256"]
+    for target, (buffer, state_model, resident_size, helper_size, runtime_mode, host_loss_ticks) in TARGETS.items():
+        meta = printed["targets"][target]
+        meta_path = out / f"{target.replace('-', '_')}_unified_b6_signer.json"
+        check(f"{target}: target wrapper written byte-for-byte", json.loads(meta_path.read_text()) == meta)
         check(f"{target}: exact common functional control",
               meta["schema"] == "tss3-unified-b6-signer-build-v1" and
               meta["control"]["can_id"] == "0x777" and meta["control"]["bus"] == 1 and
               meta["control"]["extended"] is False and meta["control"]["dcm_buffer"] == buffer and
+              meta["control"]["loader_frame"] is None and
               meta["control"]["runtime_frame"] == "07 C7 C7 seq target_hi target_lo 00 00" and
               meta["control"]["runtime_mode"] == runtime_mode and
               meta["control"]["host_loss_ticks"] == host_loss_ticks and
               meta["control"]["release_sequence_zero"] is True and
               meta["control"]["functional_nrc11_suppressed"] is True and
-              meta["install_strategy"] == strategy)
-        check(f"{target}: bundle uses the single maintained resident/helper sources",
-              meta["sources"]["resident"]["path"] == "exploit/ephemeral_runtime/tss3_unified_b6_signer_resident.S" and
-              meta["sources"]["helper"]["path"] == "exploit/ephemeral_runtime/tss3_unified_b6_signer_helper.S" and
-              meta["compile_macros"]["resident"] == unified_builder.TARGETS[target]["resident_macros"] and
-              meta["compile_macros"]["helper"] == unified_builder.TARGETS[target]["helper_macros"])
-        check(f"{target}: no persistent target mutation",
-              meta["mutation_boundary"] == {
-                  "firmware_patch": False, "native_mac_oracle_required": True,
-                  "persistent_flash_write": False, "resident_can_transmit": False,
-                  "secoc_result_override": False,
-              })
+              meta["install_strategy"] == "universal-one-shot" and meta["state_model"] == state_model)
+        check(f"{target}: wrapper references the exact same universal executable",
+              meta["artifacts_sha256"]["payload"] == common_payload_sha and
+              meta["artifacts_sha256"]["staging"] == common_staging_sha and
+              meta["universal_payload"]["sha256"] == common_payload_sha and
+              meta["layout"]["helper_transfer"]["host_loader"] is False)
         check(f"{target}: resident/helper reproduce reviewed exact sizes",
               meta["resident"]["size"] == resident_size and meta["resident"]["headroom"] == 524 - resident_size and
-              meta["helper"]["size"] == helper_size and meta["helper"]["image_size"] == helper_image_size and
+              meta["helper"]["size"] == helper_size and meta["helper"]["image_size"] == helper_size and
               meta["helper"]["headroom"] == meta["helper"]["limit"] - helper_size and
               meta["resident"]["relocations"] == meta["helper"]["relocations"] == 0)
-        bundle = host.load_bundle(metas[0])
-        p = host.plan(bundle)
-        check(f"{target}: unified plan selects functional mailbox first",
-              p["sequence"][0].startswith("NRTD/Park: prove exact-target stock functional 0x777") and
-              p["old_implementations_retained"] is True)
-        if target == "crown-8965F3012000":
-            check("Crown unified artifacts pin the supervised functional runtime",
-                  meta["artifacts_sha256"] == CROWN_SUPERVISED_UNIFIED_SHA256)
-        built[target] = (meta, metas[0])
+        bundle = host.load_bundle(meta_path)
+        plan = host.plan(bundle)
+        check(f"{target}: plan is one-shot install followed only by C7 runtime control",
+              plan["sequence"][0].startswith("NRTD/Park: prove exact-target stock functional 0x777") and
+              "self-installed helper" in plan["sequence"][2] and
+              meta["artifacts"]["payload"] == universal["payload"]["path"] and
+              plan["old_implementations_retained"] is True)
+        built[target] = (meta, meta_path)
 
-    check("Corolla H/F unified helpers share the same supervised runtime bytes",
-          built["corolla-8965H1202000"][0]["helper"]["sha256"] ==
-          built["corolla-8965F1208000"][0]["helper"]["sha256"])
+    check("all target wrappers use one payload SHA",
+          {meta["artifacts_sha256"]["payload"] for meta, _ in built.values()} == {common_payload_sha})
+    check("Corolla H/F wrappers share the same resident and helper runtime bytes",
+          built["corolla-8965H1202000"][0]["resident"]["sha256"] == built["corolla-8965F1208000"][0]["resident"]["sha256"] and
+          built["corolla-8965H1202000"][0]["helper"]["sha256"] == built["corolla-8965F1208000"][0]["helper"]["sha256"])
 
     # Execute the exact compiled Corolla H helper's C7 lease gates in the
     # target Ghidra emulator. This protects continuous 100-Hz host ownership,
