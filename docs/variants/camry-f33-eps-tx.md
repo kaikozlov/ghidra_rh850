@@ -491,3 +491,13 @@ at 27.239 ms, with 16.553 ms spent waiting FF->flow-control. CF batch submission
 was normally below 1 ms. The remaining bounded discriminator is therefore one
 non-actuating KAT that submits FF+all five CFs in a single Panda batch without
 waiting for FC; if accepted, the final host-side handshake jitter is removable.
+
+### 12.6 Immediate FF+CF burst is too early; fixed-delay receiver readiness is next
+
+The one-batch FF+five-CF no-FC probe timed out and resident counters remained
+42/42/42, proving the physical CanTp receiver did not complete the N-SDU. F33
+therefore needs some interval after FF before accepting CFs even though the host
+need not necessarily wait to *receive* FC. The next bounded test sends FF, waits
+a fixed 5 ms, then submits all five CFs in one Panda batch; this leaves the live
+resident and authenticated domain unchanged and tests receiver readiness rather
+than host-observed FC latency.

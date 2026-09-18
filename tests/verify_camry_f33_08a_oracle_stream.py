@@ -202,6 +202,16 @@ def main() -> int:
     assert no_fc["flow_control_frames"] == ["3000280000000000"]
     assert no_fc["advertised_stmin_ms"] == 40.0 and no_fc["stmin_violated"] is True
 
+    fake_delay = FakePanda40()
+    delayed = oracle.send_oracle_request(
+        fake_delay, seq=0x13, domain=oracle.KNOWN_DOMAIN, cf_gap_ms=0.0,
+        skip_flow_control=True, pre_cf_delay_ms=5.0,
+    )  # type: ignore[arg-type]
+    assert delayed["status"] == 0 and delayed["mac28_hex"] == oracle.KNOWN_MAC28
+    assert delayed["flow_control_waited"] is False
+    assert delayed["request_batch_included_ff"] is False
+    assert delayed["pre_cf_delay_ms"] == 5.0
+
     class RawBatch:
         def __init__(self):
             self.calls = []
@@ -247,6 +257,7 @@ def main() -> int:
     assert "./f33-08a-oracle known-answer [OUTPUT_JSON]" in launcher
     assert "./f33-08a-oracle transport-probe CF_GAP_MS [OUTPUT_JSON]" in launcher
     assert "./f33-08a-oracle transport-probe-no-fc [OUTPUT_JSON]" in launcher
+    assert "./f33-08a-oracle transport-probe-fixed-delay DELAY_MS [OUTPUT_JSON]" in launcher
     assert "./f33-08a-oracle benchmark [COUNT] [OUTPUT_JSON]" in launcher
     assert "./f33-08a-oracle benchmark-fast [COUNT] [OUTPUT_JSON]" in launcher
     assert 'benchmark-fast --count "$count" --period-ms 25 --cf-gap-ms 0' in launcher
