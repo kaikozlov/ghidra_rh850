@@ -276,9 +276,12 @@ uv run --locked python tools/targets/tss3/builders/build_tss3_unified_b6_signer_
 preflight, exact-F181 NRTD install, then READY runtime qualification. On exact
 Camry, peer recovery is deliberately **operator paced** rather than chained:
 `bringup` returns Panda ownership after EPS qualification and waits for the operator
-before restarting Brake/EPB only; after exact `F152633K0000` returns it releases
-Panda again and waits before restarting FRC only; after exact `8646F3315000`
-returns it releases Panda again and waits before final DRCC-state verification.
+before restarting Brake/EPB only. The Brake stage performs no post-reset diagnostics:
+its exact identity is checked only before `10 02 -> 11 01`, then Panda is released
+immediately even if the reset response is not observed. There is no Brake F181 polling
+and no reset retry. The operator waits as long as needed before restarting FRC only;
+after exact `8646F3315000` returns the launcher releases Panda again and waits before
+final DRCC-state verification.
 The operator can wait arbitrarily long between stages. No DTC clear, SecurityAccess,
 EPS reset, or EPS power cycle is part of this guided recovery. Final FRC
 `0x1903/0x1905/0x1906` must show distance-control mode, Cruise Control Permission
@@ -368,8 +371,9 @@ reset set because the initial FRC probe was part of the same session. A later
 operator-paced field run reached the same final healthy FRC state after Brake and
 then FRC were restarted with long quiet intervals. The maintained launcher therefore
 stops trying to infer a fixed automatic cadence: it exposes/operator-prompts the
-Brake and FRC stages separately, releases Panda after each, and lets the operator
-decide when the network has settled before continuing. The subsequent route
+Brake and FRC stages separately, performs **no post-reset Brake application polling**,
+releases Panda after each stage, and lets the operator decide when the network has
+settled before continuing. The subsequent route
 `0000010c--506d7277c7` demonstrates 919.572 s / 19.772 km of stock adaptive cruise
 overlapping openpilot lateral with factory lateral request/result IDs at 0 and
 openpilot `longActive` false. The historical `recover-drcc` command remains for

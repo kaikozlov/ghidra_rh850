@@ -128,11 +128,9 @@ class TestRecovery(unittest.TestCase):
                 if address == recovery.FRC_TX:
                     return bytes.fromhex("62f181") + recovery.EXPECTED_FRC_F181
                 if address == recovery.BRAKE_TX:
-                    # After the first timed-out Brake reset, model the live
-                    # programming-context identity until the retry 11 01.
-                    if brake_reset_attempts["value"] == 1:
+                    if brake_reset_attempts["value"]:
                         brake_programming_poll["value"] += 1
-                        return bytes.fromhex("62f18101") + bytes.fromhex("21" * 16)
+                        self.fail("Brake F181 was polled after reset dispatch")
                     return bytes.fromhex("62f181") + recovery.EXPECTED_BRAKE_F181
             if pdu == bytes.fromhex("1002"):
                 return bytes.fromhex("5002003201f4")
@@ -142,10 +140,8 @@ class TestRecovery(unittest.TestCase):
                     return bytes.fromhex("5101")
                 if address == recovery.BRAKE_TX and phase["value"] == 1:
                     brake_reset_attempts["value"] += 1
-                    if brake_reset_attempts["value"] == 1:
-                        raise TimeoutError("live Brake programming handoff race")
                     phase["value"] = 2
-                    return bytes.fromhex("5101")
+                    raise TimeoutError("Brake reset response intentionally not observed")
                 if address == recovery.FRC_TX and phase["value"] == 2:
                     phase["value"] = 3
                     return bytes.fromhex("5101")
@@ -173,10 +169,10 @@ class TestRecovery(unittest.TestCase):
             saved = json.loads(output.read_text())
 
         self.assertEqual(phase["value"], 3)
-        self.assertEqual(brake_reset_attempts["value"], 2)
+        self.assertEqual(brake_reset_attempts["value"], 1)
         self.assertEqual(brake_programming_poll["value"], 0)
         fixed_waits = [call.args[0] for call in sleep_mock.call_args_list if call.args]
-        self.assertGreaterEqual(fixed_waits.count(recovery.RESET_APP_RETURN_INITIAL_WAIT_SECONDS), 3)
+        self.assertGreaterEqual(fixed_waits.count(recovery.RESET_APP_RETURN_INITIAL_WAIT_SECONDS), 2)
         self.assertGreaterEqual(fixed_waits.count(recovery.DOMAIN_SETTLE_SECONDS), 3)
         self.assertEqual(result["verdict"], "control_domains_restarted_drcc_permission_restored")
         self.assertTrue(result["drcc_permission_observed"])
@@ -191,11 +187,54 @@ class TestRecovery(unittest.TestCase):
         self.assertEqual(reset_calls, [
             (recovery.FRC_TX, "1101"),
             (recovery.BRAKE_TX, "1101"),
-            (recovery.BRAKE_TX, "1101"),
             (recovery.FRC_TX, "1101"),
         ])
         self.assertEqual(saved["verdict"], result["verdict"])
         self.assertEqual(panda.safety[-1], (recovery.SILENT_SAFETY,))
+        self.assertTrue(panda.closed)
+
+    def test_brake_single_domain_has_no_post_reset_diagnostics(self):
+        panda = FakePanda()
+        class Factory:
+            @staticmethod
+            def list(): return ["offline"]
+            def __new__(cls, serial): return panda
+
+        calls = []
+        reset_sent = {"value": False}
+        def respond(_panda, address, bus, pdu, **kwargs):
+            calls.append((address, bus, pdu.hex()))
+            if reset_sent["value"]:
+                self.fail(f"post-reset diagnostic sent after Brake 11 01: addr=0x{address:03X} pdu={pdu.hex()}")
+            if pdu == bytes.fromhex("22f181") and address == recovery.EPS_TX:
+                return bytes.fromhex("62f181") + recovery.EXPECTED_EPS_F181
+            if pdu == bytes.fromhex("22f181") and address == recovery.BRAKE_TX:
+                return bytes.fromhex("62f181") + recovery.EXPECTED_BRAKE_F181
+            if pdu == bytes.fromhex("1002") and address == recovery.BRAKE_TX:
+                return bytes.fromhex("5002003201f4")
+            if pdu == bytes.fromhex("1101") and address == recovery.BRAKE_TX:
+                reset_sent["value"] = True
+                raise TimeoutError("response disappears during reset")
+            self.fail(f"unexpected request address=0x{address:03X} pdu={pdu.hex()}")
+
+        with tempfile.TemporaryDirectory() as td:
+            output = Path(td) / "brake.json"
+            with (patch.dict(sys.modules, {"panda": types.SimpleNamespace(Panda=Factory)}),
+                  patch.object(recovery, "isotp_request", side_effect=respond)):
+                result = recovery.restart_one_domain("brake", output)
+            saved = json.loads(output.read_text())
+
+        self.assertEqual(calls, [
+            (recovery.EPS_TX, recovery.EPS_BUS, "22f181"),
+            (recovery.BRAKE_TX, recovery.BRAKE_BUS, "22f181"),
+            (recovery.BRAKE_TX, recovery.BRAKE_BUS, "1002"),
+            (recovery.BRAKE_TX, recovery.BRAKE_BUS, "1101"),
+        ])
+        self.assertEqual(result["verdict"], "brake_reset_dispatched_no_post_reset_diagnostics")
+        self.assertFalse(result["restart"]["application_return_verified"])
+        self.assertEqual(result["restart"]["post_reset_diagnostics"], "none")
+        self.assertIsNone(result["eps_identity_after"])
+        self.assertEqual(saved["verdict"], result["verdict"])
         self.assertTrue(panda.closed)
 
     def test_exact_control_domain_identity_is_required_before_reset(self):
