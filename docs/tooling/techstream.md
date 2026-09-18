@@ -468,6 +468,45 @@ the 128-bit ECU root invertible.
 The executable reproducer is `tools/techstream/cuw_security_up.py`; the raw-PE
 proof is `tests/verify_techstream_cuw_security_up.py`.
 
+##### Current GTS+ (2026): selector-0 moved into `SecretInfo.dll`
+
+The current CUWPlus release preserves the same SecurityUp algebra but moves the
+selector table out of `TCUWCanCommonPrepareWriter.dll`. In the recovered current
+`CalcSeedKeyForSecurityUp @ 0x100014A0`, selector `0` is passed to
+`SecretInfo.dll!GetSecretInfo`; the returned 32-character value then feeds the
+same decrypt-then-encrypt callback shape. Recovered `SecretInfo.dll` SHA-256 is
+`5e716b861605c06f95cfb9682afa22602a38d569d9cac5f57cf8d86c8a2cb42b`.
+Its selector-0 record is unchanged:
+
+```text
+B45B26D6344FD60E80BC01D63C7584A0
+```
+
+`AuthorizeSecretInfo` is only a table-access gate. It compares its caller string
+against the literal `Q1VXKw==`; current `CUW.dll` passes that exact literal and
+then immediately requests selector 0. The table contains 72 selector records,
+67 carrying 16-byte hex values. It does **not** contain the recovered P1M-E EPS
+payload/boot-SA roots or the yc Venza SRS payload/boot-SA roots.
+
+The current secure-airbag route also confirms that airbag is not a separate
+cryptographic architecture. Recovered `TCUWP4CanSecurityAirbagPrepareWriter`
+imports `GetECUAuthKey`, `GetServiceAuthKey`, and `CalcSeedKeyForSecurityUp`;
+the paired flash writer imports `GetSeedKey`, `GetNonce`, `SendSeedKey`, and
+`SendNonce`. This makes a matching secure-airbag CUW an offline oracle for both
+recovered Venza roots without requiring a restraint-ECU write.
+
+A bounded join against all 67 current AES-128 `SecretInfo` entries finds no
+one-step XOR/AES-ECB/AES-CMAC relationship to either EPS root or either Venza
+SRS root, and no ordered pair of table entries produces any of those four roots
+under XOR/AES-ECB/AES-CMAC. Consequently the current host table is evidence for
+frontend credential wrapping, not evidence that Techstream derives the
+firmware-resident roots. Any common root KDF remains upstream Toyota/Denso
+build/provisioning machinery unless another artifact exposes it.
+
+Reproducer and committed result:
+`tools/techstream/analyze_reprogramming_root_pairs.py` and
+`data/generated/gtsplus_2026/reprogramming_root_pair_analysis.json`.
+
 The reproducible representation-aware census now enumerates all 6,620 files
 (670 PE candidates) in the extracted distribution. It finds nine exact AES
 S-box byte sequences: seven across the six diagnostic DLL implementations

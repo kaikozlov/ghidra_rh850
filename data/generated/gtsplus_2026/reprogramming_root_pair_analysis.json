@@ -1,0 +1,256 @@
+{
+  "boundary": "Both firmware families store the payload-build and boot SecurityAccess roots as literal adjacent 16-byte CodeFlash constants consumed by their crypto workers. No runtime root derivation is present in either dumped ECU. Current GTS+ contains frontend wrapping secrets but none of the four firmware roots, and the bounded SecretInfo tests find no one-step relation. Any common root derivation therefore remains an upstream Toyota/Denso build/provisioning hypothesis, not a recovered ECU or Techstream algorithm.",
+  "cross_family_relationship_tests": {
+    "fingerprints": {
+      "eps": {
+        "aes_dec_key_payload_msg_sa": "9cabaafb1a586b347fe759f1df2a6454",
+        "aes_dec_key_sa_msg_payload": "1b3220c5937b51b5d9a32815a96f06ec",
+        "aes_enc_key_payload_msg_sa": "7adcd3ccae839284f47abd8ca455a3e1",
+        "aes_enc_key_sa_msg_payload": "182462cdd7186ed6cd954185824e8bf9",
+        "cmac_key_payload_msg_sa": "b8038d7f195d034a9a0a2f1e003f1e40",
+        "cmac_key_sa_msg_payload": "2b510d6e9e8ccbdb00336ee31c50758c",
+        "payload_xor_sa": "4a5a12822f083c7a1565c8720136c7f4"
+      },
+      "srs": {
+        "aes_dec_key_payload_msg_sa": "cd7e4d5a62dcdb3bc3bab31650a29d5f",
+        "aes_dec_key_sa_msg_payload": "e1edab439e48d11ccfd8acbd77117b0b",
+        "aes_enc_key_payload_msg_sa": "716db105b23eeeaad705885d1758240d",
+        "aes_enc_key_sa_msg_payload": "b5a492a8296d6060800875a6b8549bec",
+        "cmac_key_payload_msg_sa": "83cd55b38c2e204741eb9fa91be90d7e",
+        "cmac_key_sa_msg_payload": "4efd562d7374ad7473caa35129cff85d",
+        "payload_xor_sa": "059b22aca6924d581919132ea0f31ed5"
+      }
+    },
+    "hamming_bits": {
+      "eps_payload_vs_eps_sa": 55,
+      "eps_payload_vs_srs_payload": 66,
+      "eps_sa_vs_srs_sa": 66,
+      "srs_payload_vs_srs_sa": 57
+    },
+    "interpretation": "No listed XOR/AES/CMAC pair fingerprint repeats across EPS and SRS. This rejects those simple fixed-constant pair relationships but cannot rule out an upstream KDF with unknown master material or domain inputs.",
+    "shared_simple_fingerprints": []
+  },
+  "current_gtsplus": {
+    "recovery": {
+      "files": {
+        "SecretInfo.dll": {
+          "output_sha256": "5e716b861605c06f95cfb9682afa22602a38d569d9cac5f57cf8d86c8a2cb42b",
+          "sidecar_sha256": "088e46f48b0a8b6f722238c98695a34b51a4cef122eed42ba1556e5ca3e498c7",
+          "stub_sha256": "5ce795cf4d3419b365b56fff262e2a6f208c114befdc55ba70bf21055a798551"
+        },
+        "TCUWCanCommonPrepareWriter.dll": {
+          "output_sha256": "cf71cdeeef6639a6689211d5d2d3c6051acc9e766aed934d21bf10538963a823",
+          "sidecar_sha256": "1e6cfcf52d4983febca3267476dbfce2b9f3aa69d2d133530f57e1fdb8a6caf7",
+          "stub_sha256": "8cdcf0c20a2784a3f3fa14b1cbd125f6f2d9029bdba6c555123de750fff6f49f"
+        },
+        "TCUWP4CanSecurityAirbagFlashWriter.dll": {
+          "output_sha256": "17635ef8b2a815d044b1749d2c3ae6c40c38d549fec4dab15cc73e232070d92d",
+          "sidecar_sha256": "6cc707e229cd1db79cc4d70965f09abd4f0b62dbb4a06a6487459e47e91df352",
+          "stub_sha256": "8fd34277a72f7e85ba4ae7db07c1ade1883931c8a9bd4ba7deff5d6b23a4e73b"
+        },
+        "TCUWP4CanSecurityAirbagPrepareWriter.dll": {
+          "output_sha256": "979234ccd29a86ae66a012a6cae5a19ebbde6a0b9e0f6e370f32b1a36ea6c1c3",
+          "sidecar_sha256": "a8025a2495aca2c6abcb1fc5114eee86895996f2e65f6c096e7da6a00431209f",
+          "stub_sha256": "92f6f25da093f6b520d6dc03f9c1f2daf4d641a3ff27cba1a1d462c18a57a42c"
+        }
+      },
+      "format": "gtsplus-cp-body-recovery-v1"
+    },
+    "secret_info": {
+      "authorize_literal": "Q1VXKw==",
+      "get_secret_info": {
+        "aes128_entry_count": 67,
+        "entry_count": 72,
+        "entry_id_offset": "0x204",
+        "entry_size": 520,
+        "selector0": "B45B26D6344FD60E80BC01D63C7584A0",
+        "table_sha256": "0b9ad34d984f295eb88f2eb2a58acb8a59fdbe5a090dd3df56569f8b9c0cdfc2",
+        "table_va": "0x100030A8"
+      },
+      "selector_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69,
+        70,
+        71
+      ],
+      "sha256": "5e716b861605c06f95cfb9682afa22602a38d569d9cac5f57cf8d86c8a2cb42b"
+    },
+    "secret_info_relation_tests": {
+      "aes128_entry_count": 67,
+      "one_step_formulas": [
+        "payload=sa_xor_key",
+        "payload=aes_enc(key,sa)",
+        "payload=aes_dec(key,sa)",
+        "sa=aes_enc(key,payload)",
+        "sa=aes_dec(key,payload)",
+        "payload=cmac(key,sa)",
+        "sa=cmac(key,payload)",
+        "payload=aes_enc(sa,key)",
+        "payload=aes_dec(sa,key)",
+        "sa=aes_enc(payload,key)",
+        "sa=aes_dec(payload,key)",
+        "payload=cmac(sa,key)",
+        "sa=cmac(payload,key)"
+      ],
+      "one_step_root_pair_hits": [],
+      "pairwise_table_operations": [
+        "xor",
+        "aes_enc",
+        "aes_dec",
+        "cmac"
+      ],
+      "pairwise_table_to_root_hits": [],
+      "scope": "These are bounded falsification tests, not a proof that no upstream KDF exists. They reject only the listed one-step relationships involving current SecretInfo AES-128 entries."
+    },
+    "security_airbag_flash": {
+      "meaning": "current host passes package SeedKey and Nonce through the secure-airbag flash path",
+      "required_imports": [
+        "?GetNonce@CalibrationFile@@QAEPBEH@Z",
+        "?GetSeedKey@CalibrationFile@@QAEPBEH@Z",
+        "?SendNonce@CCanCommonFlashWriter@@QAEXABVCBytes@@0PBEI@Z",
+        "?SendSeedKey@CCanCommonFlashWriter@@QAEXABVCBytes@@0PBEI@Z"
+      ]
+    },
+    "security_airbag_prepare": {
+      "meaning": "current host reads ECUAuthKey and ServiceAuthKey and delegates the 16-byte SecurityUp calculation",
+      "required_imports": [
+        "?CalcSeedKeyForSecurityUp@CCanCommonPrepareWriter@@QAE?AVCBytes@@PBE0@Z",
+        "?GetECUAuthKey@CalibrationFile@@QAEPBEXZ",
+        "?GetServiceAuthKey@CalibrationFile@@QAEPBEXZ"
+      ]
+    }
+  },
+  "firmware_roots": {
+    "eps": {
+      "adjacent_payload_then_sa": true,
+      "boot_security_access": {
+        "offset": "0xBFE8",
+        "value": "f05f36b7d78c03e24ab4faef2a57d044"
+      },
+      "payload_build": {
+        "offset": "0xBFD8",
+        "value": "ba052435f8843f985fd1329d2b6117b0"
+      },
+      "source": "firmware/RH850_P1M-E_CodeFlash.bin",
+      "source_sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde"
+    },
+    "srs": {
+      "adjacent_payload_then_sa": true,
+      "boot_security_access": {
+        "offset": "0xC3BC",
+        "value": "8f69e6dc2a4b80b45054b4827a5ab622"
+      },
+      "payload_build": {
+        "offset": "0xC3AC",
+        "value": "8af2c4708cd9cdec494da7acdaa9a8f7"
+      },
+      "source": "community/yc/venza/cflash.bin",
+      "source_sha256": "2dfaf7ce21cb04af1126192f574103f63802352f8717fa0f03986d5a11d067f9"
+    }
+  },
+  "schema": "ghidra-rh850-reprogramming-root-pairs-v1",
+  "tracked_eps_reuse": {
+    "matching_target_count": 5,
+    "meaning": "The exact 32-byte payload-root || boot-SA-root pair occurs at 0xBFD8 in every currently registered EPS CodeFlash target, despite distinct software IDs. That rules out a direct per-software-ID root KDF.",
+    "targets": [
+      {
+        "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
+        "pair_offset": "0xBFD8",
+        "software_id": "8965F3307000",
+        "target": "camry-8965F3307000"
+      },
+      {
+        "codeflash_sha256": "5b89fdbc69edc2f66ef8a557f88b08c758e3146bd4e90067320d7966812b1273",
+        "pair_offset": "0xBFD8",
+        "software_id": "8965F3012000",
+        "target": "crown-8965F3012000"
+      },
+      {
+        "codeflash_sha256": "fdb35b76891cf84a8b89e0a05c9c7c5cfcd27994cf85ccc01ff32828f53091f6",
+        "pair_offset": "0xBFD8",
+        "software_id": "8965F1208000",
+        "target": "corolla-8965F1208000"
+      },
+      {
+        "codeflash_sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
+        "pair_offset": "0xBFD8",
+        "software_id": "8965H1202000",
+        "target": "corolla-8965H1202000"
+      },
+      {
+        "codeflash_sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde",
+        "pair_offset": "0xBFD8",
+        "software_id": "8965B4512000",
+        "target": "sienna-8965B4512000"
+      }
+    ]
+  }
+}

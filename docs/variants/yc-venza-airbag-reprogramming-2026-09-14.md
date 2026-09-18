@@ -670,6 +670,74 @@ cannot synthesize an arbitrary new network key merely from this CodeFlash dump.
 A live GTS key-write capture is now the highest-value way to bind the exact
 2021 Venza service transaction and server material.
 
+### 5.8 Cross-family root derivation assessment: two independent pairs, no recovered root KDF
+
+The Venza RPRG image now gives a second independent payload/SecurityAccess root
+pair to compare with the P1M-E EPS family:
+
+| Family | payload-build root | boot SecurityAccess root | CodeFlash layout |
+|---|---|---|---|
+| P1M-E EPS | `ba052435f8843f985fd1329d2b6117b0` | `f05f36b7d78c03e24ab4faef2a57d044` | `0xBFD8`, then `0xBFE8` |
+| Venza SRS | `8af2c4708cd9cdec494da7acdaa9a8f7` | `8f69e6dc2a4b80b45054b4827a5ab622` | `0xC3AC`, then `0xC3BC` |
+
+The common structure is significant, but it is a **configuration-layout**
+relationship rather than a recovered key derivation. In both firmware families
+the two 16-byte values are literal adjacent CodeFlash constants. The payload
+worker initializes AES directly from the first root, while the boot
+SecurityAccess worker initializes AES directly from the second. Neither image
+contains a runtime step that derives either root from a part number, software
+ID, ECU class, or the neighboring root.
+
+The EPS corpus makes a direct per-software-ID KDF especially unlikely. The exact
+32-byte `payload-root || boot-SA-root` pair occurs at `0xBFD8` in every currently
+registered EPS CodeFlash target — Camry `8965F3307000`, Crown `8965F3012000`,
+Corolla `8965F1208000`, Corolla `8965H1202000`, and Sienna `8965B4512000` —
+despite the distinct software IDs.
+
+A bounded cross-family cryptographic pass also rejects the obvious pair
+relationships. `payload XOR SA`, AES-ECB in both directions with either member
+as key/input, and one-block AES-CMAC in both directions produce different
+fingerprints for EPS and SRS. Thus there is no evidence for a simple fixed
+constant such as `payload = AES(SA, C)` or a shared XOR delta. This is a
+falsification result for those shapes only; an upstream KDF with unknown master
+material and domain inputs remains possible.
+
+Current GTS+ adds a useful host-side negative. Its recovered
+`TCUWCanCommonPrepareWriter.dll` still implements `CalcSeedKeyForSecurityUp`,
+but selector-0 secret lookup is now delegated to `SecretInfo.dll`. The recovered
+`SecretInfo.dll` contains 72 selector records, 67 of which decode to 16-byte
+values. Selector 0 is still the known SecurityUp wrapping key
+`B45B26D6344FD60E80BC01D63C7584A0`. None of the four EPS/SRS firmware roots is
+present in that table. Testing every 16-byte table entry against both firmware
+root pairs under one-step XOR/AES-ECB/AES-CMAC relationships yields no match;
+likewise, applying XOR/AES-ECB/AES-CMAC to every ordered pair of table entries
+produces none of the four firmware roots. The table therefore supplies frontend
+CUW wrapping credentials, not a recovered firmware-root derivation surface.
+
+The current secure-airbag writers line up exactly with the firmware-side
+architecture. `TCUWP4CanSecurityAirbagPrepareWriter.dll` imports
+`GetECUAuthKey`, `GetServiceAuthKey`, and `CalcSeedKeyForSecurityUp`;
+`TCUWP4CanSecurityAirbagFlashWriter.dll` imports `GetSeedKey`, `GetNonce`,
+`SendSeedKey`, and `SendNonce`. A matching Venza `SecurityAirbag` CUW would
+therefore permit a fully offline two-part validation:
+
+1. unwrap its `ServiceAuthKey` through the host selector-0 key and require that
+   the resulting `Kwork` also equals `AES-DEC(Venza_SA_root, ECUAuthKey)`; and
+2. use its `SeedKey`/`Nonce` and encrypted package to validate the recovered
+   Venza payload-build root against the actual Toyota payload.
+
+That is the preferred validation boundary for this artifact. The recovered
+roots are sufficient to reproduce the cryptography of the **exact dumped Venza
+RPRG image**, but one specimen does not establish that another SRS part number
+or software generation reuses the same roots. Because this ECU controls the
+restraint system, cross-vehicle/family reuse should be established from another
+firmware image or matching CUW before any live reprogramming experiment is
+considered.
+
+The deterministic analysis is
+`tools/techstream/analyze_reprogramming_root_pairs.py`; its committed result is
+`data/generated/gtsplus_2026/reprogramming_root_pair_analysis.json`.
+
 ## 6. What the yc image changes for F33 EPS recovery
 
 ### It disproves one tempting interpretation
