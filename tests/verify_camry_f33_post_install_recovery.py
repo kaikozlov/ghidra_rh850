@@ -35,7 +35,7 @@ class FakePanda:
     def set_safety_mode(self, *args):
         self.safety.append(args)
 
-    def set_can_fd_auto(self, *args):
+    def set_canfd_auto(self, *args):
         pass
 
     def can_recv(self):
