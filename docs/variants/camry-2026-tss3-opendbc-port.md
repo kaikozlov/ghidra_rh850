@@ -214,11 +214,25 @@ last-normal-EPS-Tx → first-normal-EPS-Tx gap during bootstrap.
 A separate Sep-11 parked discriminator already exists for the other obvious
 continuity hypothesis: while native `0x030/32` is absent, replay retained stock
 `0x030` at 100 Hz, clear FRC U0131, and observe `0x1903/0x1905/0x1906` plus
-`0x251`. **No live result artifact exists for that probe.** Because `0x030` is an
-EPS-owned SecOC transmit PDU, replaying old captured frames is only a bounded test
-of peer tolerance to stale protected traffic; a production bridge would need either
-fresh authenticated EPS status or an outage short enough that the peer supervision
-never expires.
+`0x251`. **No live result artifact exists for that post-latch probe.** Because `0x030`
+is an EPS-owned SecOC transmit PDU, replaying old captured frames is only a bounded
+test of peer tolerance to stale protected traffic.
+
+The stronger prevention experiment is now packaged separately in the unified F33
+field kit. On a **fresh ignition cycle in NRTD/Park**, the bridged installer requires a
+healthy pre-bootstrap FRC state (`0x1903` DRCC mode, `0x1905` permission allowed,
+`0x1906` ACC-not-available clear), enters the exact EPS DEFAULT→EXTENDED preparation,
+then captures the final genuine **bus1** `0x030/32` immediately before application
+`10 02`. It repeats that one exact protected frame at 100 Hz on the same unsplit bus1
+while the EPS application is absent, performs the normal authenticated 4-KiB resident
+bootstrap, and keeps replay active until the exact application F181 has returned **and
+a new native bus1 `0x030` has been observed**. It then stops replay and rereads the FRC
+oracles without any DTC clear. The field-kit command
+`bringup-stale-030-bridge` refuses to continue to READY qualification unless FRC cruise
+permission remains allowed and ACC-not-available remains clear. This deliberately tests
+whether message-presence supervision can be kept alive by stale authenticated-looking
+traffic; it does not assume the FRC accepts the repeated SecOC freshness/MAC and is not a
+production keepalive design.
 
 **Current execution boundary:** VAR-155 proves the live native profile-2 B6 boundary and
 byte-exact local slot-4 signing. VAR-156 then deliberately installed the preserved

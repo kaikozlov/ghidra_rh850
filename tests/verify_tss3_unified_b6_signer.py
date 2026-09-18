@@ -53,6 +53,43 @@ check("post-auth telemetry reports native publications and application overrides
       postauth["native_publication_count"] == 7 and postauth["override_count"] == 5 and
       postauth["last_control_seq"] == 23 and postauth["native_publication_observed"] is True and
       postauth["command5_attempts"] == 0 and postauth["native_signature_match"] is False)
+healthy_frc = {
+    "0x1903": host._decode_frc_bootstrap_did(0x1903, bytes.fromhex("01")),
+    "0x1905": host._decode_frc_bootstrap_did(0x1905, bytes.fromhex("8080")),
+    "0x1906": host._decode_frc_bootstrap_did(0x1906, bytes.fromhex("e080e0008000")),
+}
+faulted_frc = {
+    "0x1903": host._decode_frc_bootstrap_did(0x1903, bytes.fromhex("01")),
+    "0x1905": host._decode_frc_bootstrap_did(0x1905, bytes.fromhex("8000")),
+    "0x1906": host._decode_frc_bootstrap_did(0x1906, bytes.fromhex("e080e0008080")),
+}
+check("stale-030 bootstrap gate distinguishes healthy DRCC permission from observed denial",
+      host._healthy_frc_drcc_baseline(healthy_frc) is True and
+      host._healthy_frc_drcc_baseline(faulted_frc) is False)
+
+class CapturePanda:
+    def __init__(self):
+        self.frame = bytes.fromhex("000000ffc400201b00ffc0ff9e00003f22000000ff9e007000000000b96152f6")
+    def can_recv(self):
+        return [(0x030, self.frame, 1)]
+
+class CaptureClock:
+    def __init__(self): self.t = 0.0
+    def monotonic(self):
+        self.t += 0.01
+        return self.t
+    def monotonic_ns(self): return int(self.t * 1e9)
+
+capture_clock = CaptureClock()
+with (mock.patch.object(host.time, "monotonic", side_effect=capture_clock.monotonic),
+      mock.patch.object(host.time, "monotonic_ns", side_effect=capture_clock.monotonic_ns),
+      mock.patch.object(host.time, "sleep", return_value=None)):
+    captured_030 = host._capture_latest_native_030(CapturePanda(), duration=0.18)
+check("bootstrap bridge captures a fresh exact native bus1 0x030 before programming handoff",
+      captured_030["count"] >= host.BOOTSTRAP_030_MIN_CAPTURE_FRAMES and
+      captured_030["bus"] == 1 and captured_030["can_id"] == "0x030" and
+      captured_030["frame_hex"] == CapturePanda().frame.hex() and captured_030["age_ms"] <= 30.0)
+
 check("legacy target-specific implementations remain in tree",
       all((ROOT / path).is_file() for path in (
           "exploit/ephemeral_runtime/build_camry_f33_b6_inline_signer.py",
@@ -300,7 +337,9 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
     check("unified kit prefers vendored runtime and exposes common test ladder plus exact-F33 DRCC diagnostic clear",
           'PYTHONPATH="$KIT_ROOT/runtime:$OPENPILOT_ROOT"' in launcher and
           "camry_f33_post_install_recovery.py" in launcher and "require_camry_recovery" in launcher and
-          all(cmd in launcher for cmd in ("preflight", "install", "qualify", "bringup", "recover-drcc", "replace-current", "replace-once")))
+          all(cmd in launcher for cmd in ("preflight", "install", "install-stale-030-bridge", "qualify", "bringup",
+                                           "bringup-stale-030-bridge", "recover-drcc", "replace-current", "replace-once")) and
+          "FRC DRCC permission did not survive bridged bootstrap; STOP before READY qualification" in launcher)
 
     field_bundle = host.load_bundle(kit / "bundle/unified.json")
     check("split field bundle carries the exact padded 150-word helper image",
