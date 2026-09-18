@@ -164,11 +164,32 @@ def main() -> int:
     for _, frame, _ in fake.tx[1:]:
         assembled += frame[1:]
     assert assembled[:40] == request
+    assert result["advertised_stmin_ms"] == 0.0
+    assert result["effective_cf_gap_ms"] == 0.0
+    assert result["stmin_override_used"] is False
+
+    class FakePanda40(FakePanda):
+        def can_send(self, addr, dat, bus, **_kwargs):
+            frame = bytes(dat)
+            self.tx.append((int(addr), frame, int(bus)))
+            if frame[0] >> 4 == 1:
+                self.rx.append([(oracle.RESPONSE_ADDR, bytes.fromhex("3000280000000000"), oracle.BUS)])
+            elif frame[0] >> 4 == 2:
+                self.cf_count += 1
+                if self.cf_count == 5:
+                    self.rx.append([(oracle.RESPONSE_ADDR, bytes.fromhex("07c91300d64e2a50"), oracle.BUS)])
+
+    fake40 = FakePanda40()
+    fast = oracle.send_oracle_request(fake40, seq=0x13, domain=oracle.KNOWN_DOMAIN, cf_gap_ms=0.0)  # type: ignore[arg-type]
+    assert fast["advertised_stmin_ms"] == 40.0
+    assert fast["effective_cf_gap_ms"] == 0.0
+    assert fast["stmin_override_used"] is True and fast["stmin_violated"] is True
 
     print("== launcher contract ==")
     launcher = (ROOT / "exploit/ephemeral_runtime/camry_f33_08a_oracle_stream_launcher.sh").read_text()
     assert oracle.EXPECTED_PAYLOAD_SHA256 in launcher
     assert "./f33-08a-oracle known-answer [OUTPUT_JSON]" in launcher
+    assert "./f33-08a-oracle transport-probe CF_GAP_MS [OUTPUT_JSON]" in launcher
     assert "./f33-08a-oracle benchmark [COUNT] [OUTPUT_JSON]" in launcher
     assert "--period-ms 25" in launcher
     plan = oracle.plan(None)

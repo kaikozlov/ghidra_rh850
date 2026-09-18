@@ -442,3 +442,21 @@ B0:B1=`C9 C9`. The oracle now follows the already-live C6/C7 rule and keys only
 on durable N-SDU **B1=`C9`**, because B0 is the unsupported SID and is not a
 stable recurring-carrier byte. Field procedure:
 [`camry_f33_08a_oracle_stream.md`](../../exploit/ephemeral_runtime/camry_f33_08a_oracle_stream.md).
+
+### 12.3 Live oracle KAT closes crypto; CanTp STmin is now the bottleneck
+
+The corrected `961750c2` runtime completed the retained Experiment-A domain with
+MAC28 `d64e2a5` exactly, and resident telemetry recorded command5 rc0/done1/status0,
+output length 16, response lower-Tx rc0, and one request/success/response. This
+closes the streaming command5 path itself.
+
+The physical `0x7A1` CanTp receiver advertised flow-control `30 00 28`, i.e.
+block-size zero and **STmin 40 ms**. Honoring that value across five Consecutive
+Frames produced ~244.5 ms request-start→response, whereas final-CF→signed reply
+was ~27 ms. Exact F33's dedicated `0x1FDC0002` ingress is not a CAN-FD escape:
+`0x830D0` rejects lengths greater than 8 before copying to `FEBE4C34`.
+
+The next discriminator is therefore host-only: one identical known-answer request
+with CF spacing overridden below advertised STmin, beginning at 0 ms. It remains
+non-actuating and requires no resident reinstall. Only if F33 CanTp accepts the
+faster burst should cadence benchmarking continue.
