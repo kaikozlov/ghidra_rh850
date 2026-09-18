@@ -126,18 +126,28 @@ snapshot at fault time and the independent RoB behavior history before any DTC c
 The current FRC Active-Test catalog has 69 routine candidates but no fail-safe/ACC
 recovery or reset routine; its relevant entries are display/buzzer/steering-vibration
 operations. Current GTS+ category-498 master frames likewise contain no `11 xx`
-ECUReset request, and no retained Camry capture contains a physical FRC `11 01`
-experiment. That is a host-surface negative, not proof the FRC application rejects
-UDS SID `0x11`. A parked selective-reset discriminator therefore remains open: after
-the EPS application/resident is stable, send physical FRC hard-reset `11 01` and test
-whether the camera reappears with DRCC permission restored while the EPS LocalRAM
-resident survives. The maintained diagnostics CLI can issue that exact raw request as
-`toyota --profile camry-2026-f33 uds raw frc 0x11 --subfunction 0x01 --force`.
-Because an FRC reset itself creates a fresh FRC communication outage, a positive result
-would support an FRC-local volatile latch; a negative result would not distinguish
-unsupported ECUReset from a Brake/Hybrid-owned or newly retriggered fail-safe without
-pre/post fault-state capture. Conventional cruise remaining usable while DRCC is denied
-makes this discriminator particularly relevant, but it is not yet live-qualified.
+ECUReset request. A 2026-09-17 parked exact-car probe now closes the default-session
+case. On the restored stock Toyota-B harness the live FRC route is Panda bus1; F181
+returned `8646F3315000`. Before the reset attempt, `0x1903=01` reported DRCC all-speed
+mode, `0x1905=8000` had Cruise Control Permission denied, and
+`0x1906=e080e0008080` had the ACC-not-available indication asserted. Physical
+`11 01` returned **`7F 11 7F`** and F181 remained continuously responsive, with all
+three state DIDs unchanged afterward. NRC `0x7F` is `serviceNotSupportedInActiveSession`,
+so this disproves a default-session hard reset but does **not** disprove ECUReset in an
+extended/programming session. An extended-session `10 03 -> 11 01` discriminator is
+therefore a cleaner next software test before adding hardware.
+
+The stock comma harness cannot power-cycle the FRC. Panda's production `drive_relay`
+controls the harness-box solid-state CAN0/CAN2 intercept pair only. The second
+firmware control named `ignition_relay` is explicitly debug/test-only and drives the
+SBU ignition-sense line; the open-source harness-box schematic shows no switched FRC
+power path. Toyota-B carries the camera's brown `IGN` conductor straight through the
+harness, and the harness box uses `IGN_12` as a hard-wired power/sense net. A true
+selective FRC power cycle would therefore require an external/in-line relay or high-side
+switch in that brown `IGN` conductor (or equivalent physical camera-power interruption),
+not the existing CAN intercept relay. Such a test remains attractive because it would
+leave the EPS LocalRAM resident powered, but it should follow the extended-session
+ECUReset probe rather than be treated as an existing software capability.
 
 Thus GTS+ currently gives us **observability, not an obvious unlatch command**.
 `camry_f33_post_install_recovery.py` now snapshots the FRC and Brake live state DIDs
