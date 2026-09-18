@@ -188,6 +188,26 @@ the patent prioritizes Lv.4 EM above Lv.4 AD while GTS identifies them as 43 and
 The six-bit `0x08A B21[5:0]` / `0x081 B13[5:0]` request/result fields therefore fit a
 preset application-identity namespace, not a rank or ECU address.
 
+The retained road logs now expose natural application handoffs that fit this model. Across
+the 12-route / 513-segment lateral census, `0x08A` changes `18 SDG -> 11 LTA/LCA` 28
+times and never directly `11 -> 18`; it changes `11 LTA/LCA -> 4 LDA` twice and
+`18 SDG -> 4 LDA` once. Two clean cruise-active ID4 episodes show `11 -> 4 -> 11`
+while cruise remains enabled, with `0x081 B13` following the new lateral result after a
+separate publication interval. One route-3c witness holds ID4 for 2.530639 s and one
+route-3e witness for 1.225830 s. This directed graph is consistent with
+US20220219711A1's example priority order LDA > LKA > steering-wheel guidance, although
+request eligibility can produce the same graph and the exact F33 stored priority table is
+not recovered.
+
+The aggregate request/result join is stronger: 1,015,978 of 1,016,141 fresh `0x081`
+pairings (99.9839589%) carry the current `0x08A` lateral ID. Every one of the 163
+mismatches is transition-shaped: the request has already changed while the result still
+carries the immediately previous ID. No retained stable interval shows the chassis result
+persistently selecting an unrelated lateral client. This makes `0x081 B13` a useful
+**native handoff/acceptance oracle**: healthy Toyota application changes move the request
+ID first and the result ID follows while request-loss remains clear. Logger batching keeps
+the observed ~10-40 ms raw examples from being promoted to an exact ECU deadline.
+
 This materially changes how the Camry ID namespace should be interpreted.  Toyota uses
 the same concept—an application identifier—for longitudinal and lateral IDs.  It is now
 reasonable to treat numeric reuse as intentional until contradicted, while still avoiding

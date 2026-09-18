@@ -245,6 +245,119 @@ The patent still does **not** disclose Toyota's numeric application-ID table.
 The numeric mapping above comes from current GTS+ and dynamic Camry evidence,
 not from US20220219711A1 itself.
 
+#### Retained Camry logs show the application handoff in motion
+
+A re-check against the retained road corpus makes this patent materially more
+useful than a static naming crosswalk. The existing 12-route / 513-segment
+lateral-family reduction contains **1,219,584 native `0x08A` request frames**:
+
+- `512,847` ID0 (No Request);
+- `653,586` ID11 (LTA/LCA);
+- `52,853` ID18 (SDG);
+- `298` ID4 (LDA).
+
+Across those routes there are **473 request-ID transitions**. The directed
+transition graph is not random:
+
+| request transition | count |
+|---|---:|
+| `0 -> 11` | 136 |
+| `11 -> 0` | 164 |
+| `0 -> 18` | 81 |
+| `18 -> 0` | 52 |
+| **`18 -> 11`** | **28** |
+| **`11 -> 18`** | **0** |
+| **`11 -> 4`** | **2** |
+| **`18 -> 4`** | **1** |
+| `4 -> 11` | 2 |
+| `4 -> 0` | 4 |
+| `0 -> 4` | 3 |
+
+The shape is strikingly consistent with the follow-on patent's ordinary-client
+priority order: LDA/lane-deviation above LKA/lane-keeping above steering-wheel
+operation guidance. It is not by itself proof of the stored priority table,
+because application eligibility can produce the same directed graph, but the
+natural preemption edges are exactly the edges the patent would predict:
+`SDG -> LTA`, `SDG -> LDA`, and `LTA -> LDA`.
+
+The result plane independently shows that these are real handoffs rather than
+display-only ID changes. Across **1,016,141** `0x081` samples paired with a
+fresh `0x08A` request, **1,015,978 (99.9839589%)** carry the same lateral ID.
+All **163** mismatches are transition-shaped: every `(new request ID -> old
+result ID)` mismatch has the reverse edge in the actual request-transition
+graph. No retained stable interval shows `0x081` persistently selecting an
+unrelated lateral application over the current `0x08A` request.
+
+Three raw-log witnesses make the ordering concrete:
+
+1. **Route 27, segment 2, 227.534515 s:** native `0x08A` changes
+   `18 SDG -> 11 LTA/LCA`, simultaneously changing the cruise/request regime.
+   `0x081` still reports lateral result 18 in the transition batch, reports 11
+   about **30 ms** later, while its longitudinal result remains 63
+   (`Driver Operation`) until about **90 ms** after the request transition and
+   then becomes 11. Lateral and longitudinal employed-source state therefore
+   change independently.
+2. **Route 3c, segment 40, 9912.166062 s:** while cruise remains enabled at
+   about 21.36 m/s with neither blinker active, `0x08A` changes
+   **`11 LTA/LCA -> 4 LDA`**. `0x081` remains result 11 for the first
+   post-transition sample and changes to result 4 about **40 ms** later; the
+   longitudinal result remains 11. The ID4 request persists for **2.530639 s**
+   and then `4 -> 11`, with `0x081` returning to 11 about **40 ms** later.
+3. **Route 3e, segment 54:** an independent cruise-active witness repeats the
+   same `11 -> 4 -> 11` sequence at about 33.1 m/s, with the result plane
+   following in roughly **31 ms** on entry and **10 ms** on release. The LDA
+   episode lasts **1.225830 s**. A separate route-3b witness shows
+   `18 SDG -> 4 LDA` for a 0.280962-s request while longitudinal result remains
+   63.
+
+The two cruise-active ID4 episodes are especially useful: the ordinary cruise
+state remains alive while one lateral application temporarily replaces another.
+That is a much cleaner natural model for application arbitration than an
+ignition, cruise-cancel, or fault transition.
+
+The September-7 hands-off-cancel route supplies a different but complementary
+handoff. Immediately before the native withdrawal, `0x08A` carries lateral
+ID11 plus longitudinal request IDs 11/17. The FRC then changes lateral ID
+`11 -> 0`, the longitudinal request slots to `0/4`, clears the cruise operating
+latch/set speed, and does so without a physical brake/gas input or an
+openpilot/native brake-cancel frame. About **20.84 ms** later `0x081` has
+already moved its lateral result to 0 while the longitudinal result is still
+11; about **50.64 ms** after the withdrawal the longitudinal result becomes
+**63 = Driver Operation**. The `0x081` request-loss bit remains clear. This is
+direct dynamic evidence that normal Toyota source withdrawal and result
+handoff are distinct from request-loss supervision.
+
+These observations sharpen the physical model:
+
+- `0x08A` is already a **single current application/request publication** on
+  the accessible FRC-facing request plane; the old logs do not expose multiple
+  simultaneous per-application lateral requests on separate CAN frames;
+- `0x081 B13[5:0]` behaves as the downstream **lateral arbitration/result
+  identity** with a separate update cadence, not as a bit-for-bit echo;
+- Toyota's feature-local arbitration can therefore occur upstream of the
+  generic `0x08A` publication, with a second chassis/VMM result stage reflected
+  by `0x081`;
+- the healthy native handoff oracle is not merely physical steering response:
+  a request-ID change is followed by the corresponding result-ID change while
+  request-loss stays clear.
+
+This suggests a concrete acceptance criterion for future non-invasive takeover
+work: after an intentional request-source transition, observe whether
+`0x081 B13` follows the requested application identity in the same shape as the
+native `18 -> 11`, `11 -> 4`, and withdrawal transitions. Logger batching
+prevents treating the observed 10-40 ms examples as an exact ECU deadline, but
+a result that remains on the old ID or enters request-loss is qualitatively
+different from every healthy native handoff above.
+
+The missing discriminator is now very specific. The old road logs contain the
+generic request/result planes but not synchronized Operation-FFD feature-local
+objects. A future natural **ID4/LDA-over-ID11/LTA** event should capture
+`5531` (LDA request), `5631` (LTA request), generic `5282`, result `5285/57DE`,
+raw `0x08A`, and raw `0x081`. If both feature-local requests coexist while
+generic `5282`/`0x08A` selects ID4, that would directly expose the
+US20220219711A1-style application priority arbitration rather than merely its
+output.
+
 ### 2.3 A missing forwarded value does not imply a missing arbitration stage
 
 US20200070873A1 is especially important for physical-topology reasoning, but a
