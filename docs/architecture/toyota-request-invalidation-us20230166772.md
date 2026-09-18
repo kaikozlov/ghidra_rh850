@@ -640,7 +640,254 @@ If a candidate policy command is found, determine whether it is:
 The patent's Figure-4/Figure-5 design specifically predicts a **set/cancel
 latch**.
 
-## 12. Bottom line
+## 12. Retained Camry logs: the generic request/result boundary is now much tighter
+
+The retained healthy road corpus gives a useful answer to where the patent's
+"losing application continues to request" behavior is **not** visible.
+
+A fresh transition-aligned scan over the repository's 12 selected Camry road
+routes (1c/27/29/2a/2c/2d/37/3b/3c/3d/3e/3f) compared native FRC-side
+0x08A B21[5:0] request IDs with Brake-side 0x081 B13[5:0] result IDs.
+
+There are **473 request-ID transitions** in those routes:
+
+| request transition | count | result-transition median lag | maximum lag |
+|---|---:|---:|---:|
+| 0 -> 4 | 3 | 29.819 ms | 39.779 ms |
+| 0 -> 11 | 136 | 29.756 ms | 40.819 ms |
+| 0 -> 18 | 81 | 29.711 ms | 42.893 ms |
+| 4 -> 0 | 4 | 24.911 ms | 30.365 ms |
+| 4 -> 11 | 2 | 24.684 ms | 39.484 ms |
+| 11 -> 0 | 164 | 21.074 ms | 42.577 ms |
+| 11 -> 4 | 2 | 35.315 ms | 39.773 ms |
+| 18 -> 0 | 52 | 29.373 ms | 40.485 ms |
+| 18 -> 4 | 1 | 10.777 ms | 10.777 ms |
+| 18 -> 11 | 28 | 24.727 ms | 39.669 ms |
+
+Every one of the 473 request transitions has the **same old-ID -> new-ID result
+transition within 100 ms**; there are zero unmatched transitions. The maximum
+observed lag is 42.893 ms. In the high-volume 27/3b/3c/3d/3e/3f subset, no
+request/result-ID disagreement episode lasts 50 ms.
+
+This is consistent with the different publication cadences. Across routes 3b
+and 3c, 0x08A is roughly a 40-Hz-class publication (median observed interval
+about 22.8 ms with rlog batching/jitter) while 0x081 is tightly about 30 ms
+(about 33-Hz-class). The short old-ID/new-ID mismatch is therefore a normal
+request->result pipeline delay, not evidence that a request is being rejected.
+
+The angle values reinforce that interpretation. When request/result IDs match,
+0x081 B16:B17 tracks the newest 0x08A B18:B19 request extremely tightly. For
+active ID11 in routes 27/3b/3c/3d/3e/3f, the median absolute raw-word
+difference is zero and the latest nearest-sample scan gives p90 = 1 raw count
+on every one of those routes.
+
+### 12.1 Direct application-to-application handoff exists with no ID0 gap
+
+The most patent-relevant natural events are the nonzero-to-nonzero transitions.
+
+There are 28 direct **ID18 SDG/PDA-SA -> ID11 LTA/LCA** transitions. A
+representative route-27 event changes request ID18 -> ID11 at time zero while
+the Brake result remains ID18 for one result cycle and then becomes ID11
+30.025 ms later. 0x081 B11 stays 0x04; there is no request-loss state. The
+result angle changes from the old ID18 value to the new ID11 request family at
+the same result update.
+
+Route 3b shows the same handoff with a 12.995-ms result lag. Across all 28
+events the result follows in <=39.669 ms.
+
+The cleaner isolation is the rare **ID11 <-> ID4** handoff. In a route-3c
+ID11 -> ID4 event:
+
+    time       0x08A request                  0x081 result
+    ---------  -----------------------------  --------------------------
+    -19.7 ms   ID11, angle -48               ID11, angle -48
+      0.0 ms   ID4,  angle -48               -
+     +9.8 ms                                  ID11, angle -48
+    +30.1 ms   ID4,  angle -39               -
+    +39.8 ms                                  ID4,  angle -39
+
+Within request bytes B20:B24 that event changes
+40 0B 10 20 64 -> 40 04 10 20 64: in that five-byte slice only the recovered
+application ID changes. Cruise state and request level remain unchanged. The
+result then publishes the new application ID and the **latest** ID4 angle at its
+own cadence.
+
+This is direct dynamic evidence for the GTS distinction between request
+application ID (5282) and arbitration-result application ID (5285), while also
+showing that normal Toyota handoff does not require a no-request interval.
+
+### 12.2 What the healthy logs do *not* show
+
+Healthy retained CAN never shows a generic 0x08A lateral request continuing for
+a meaningful interval while a different 0x081 application ID wins. The only
+disagreements are the one-result-cycle transition delays above.
+
+Therefore the patent's most interesting state -- application B continues
+producing its plan while the manager deliberately excludes B and application A
+wins -- is not observable as two competing application requests on the generic
+0x08A wire surface in the retained healthy corpus.
+
+Two interpretations remain consistent with the evidence:
+
+1. feature/application eligibility is resolved **upstream of the generic
+   5282 / 0x08A publication**, so the generic tuple already represents the
+   currently admitted TSS lateral client; or
+2. only one lateral client is ordinarily presented to the downstream
+   Brake/VMM arbiter at a time, so its arbitration is a pass-through in these
+   captures.
+
+The CAN logs alone cannot distinguish those cases.
+
+Current GTS strongly supports looking one layer upstream. It exposes separate
+feature-local request/state objects:
+
+- 5531 -- LDA lateral ID / request pinion / assist / damping;
+- 5631 -- LTA lateral ID / request pinion / assist / damping;
+- 5A09/5A0A/5A0D -- PDA(OAA) lateral ID / pinion / gains;
+- 550D -- LDA inhibition/control-state information;
+- 560D -- driver-steering detection, **LTA Driver Steering Control
+  prohibited**, LTA DDR control state;
+- 5681/5685/568E -- LCA control/fail/cancel-condition state;
+- 5A0F -- PDA(OAA) invalid flags for sensor, control-continue,
+  brake/powertrain, and EPS conditions;
+- 5D8D -- PDA(SA) DDR control state.
+
+The generic 5282 and downstream 5285/57DE then sit naturally after those
+feature-local objects.
+
+Same-car stored Operation FFD already proves the layers are real. The
+2844 Lane Departure Warning Operation under LTA records contain an active
+feature-local 5531 request while 5631 is zero and EPS pinion follows the 5531
+request, but those records do not include generic 5282/5285. Conversely
+2294/0001 contains generic request ID18 in 5282 and matching result ID18 in
+5285. What is still missing is one synchronized record containing a **nonzero
+losing feature-local request plus a different generic/result winner**.
+
+### 12.3 A still-unresolved request-side bit looks driver-steering-related, not like the policy latch
+
+The transition review also gives one useful bound on unresolved 0x08A metadata.
+Across the existing 12-route lateral census, request byte B23 has only values
+0x00 and 0x20 for the known active lateral clients:
+
+| request ID | B23=0x00 | B23=0x20 |
+|---|---:|---:|
+| 4 LDA | 208 | 90 |
+| 11 LTA/LCA | 560,161 | 93,425 |
+| 18 SDG/PDA-SA | 0 | 52,853 |
+
+For ID11 specifically, a synchronized scan against exact-FRC-side
+0x371 B20[4] (the recovered low-sensitivity driver-steering/hands-on candidate)
+and exact-EPS steering torque shows B23[5] is strongly steering-related:
+
+- B23[5]=0: low detector asserted on 23.3% of matched frames; median
+  |steering torque| = 0.28 N.m;
+- B23[5]=1: low detector asserted on 79.0% of matched frames; median
+  |steering torque| = 0.86 N.m and p90 = 1.33 N.m;
+- when the low detector is clear, B23[5] is set only 4.9% of the time;
+- when the low detector is set, B23[5] is set 38.8% of the time.
+
+B23 edges tend to occur hundreds of milliseconds after the nearest same-direction
+low-detector edge, and nine retained direct ID11->ID0 withdrawal events all have
+B23=0 despite spanning both lower and higher driver-torque conditions. Therefore
+B23[5] is **not** a simple lateral-request withdrawal/invalidation bit.
+
+This is interesting in the broader Toyota VMM family because US20200070849A1
+defines a one-bit **driver steering flag** inside the lateral request package and
+copies the selected flag into the post-arbitration steering instruction. B23[5]
+is now a plausible wire candidate for a driver-steering/override-related request
+attribute, especially because PDA-SA/SDG (ID18) has it permanently asserted in
+the retained corpus. It remains a hypothesis: exact OEM naming still requires a
+GTS/firmware/dynamic join, and it should not be repurposed as the
+US20230166772A1 eligibility/priority input.
+
+### 12.4 Faulted September-17 drives separate communication health from fail class
+
+The post-bootstrap routes e9, ec, and ee provide an important negative control
+against conflating request loss, arbitration loss, and actuator/fail state.
+
+With the restored stock harness topology, all three routes continue carrying
+native 0x08A and 0x081 on logical bus1:
+
+| route | 0x08A frames | request ID | 0x081 frames | B11 | B13 |
+|---|---:|---:|---:|---:|---:|
+| e9 | 14,890 | 0 | 12,407 | 0x04 throughout | 0xC0 throughout |
+| ec | 44,330 | 0 | 36,943 | 0x04 throughout | 0xC0 throughout |
+| ee | 40,720 | 0 | 33,936 | 0x04 throughout | 0xC0 throughout |
+
+Interpreting the already recovered/candidate fields:
+
+- B11 does **not** enter the 0x14 request-loss state;
+- B13 low six bits remain result ID0;
+- B13 high two bits remain candidate fail class 3;
+- the result/reference angle still tracks the latest request/reference with
+  median raw difference zero (p90 33/9/6 counts on e9/ec/ee).
+
+So Toyota can maintain a healthy request/result transport relationship while
+the lateral system is in a failure-decided state. That is distinct from the
+separate FRC-normal-Tx suppression experiment, where complete request loss sets
+0x081 B11 from 0x04 to 0x14 while B13's fail-class candidate remains healthy.
+
+The current evidence therefore separates three observable states:
+
+| state | request publication | B11 request-loss | B13 fail class | request/result IDs |
+|---|---|---|---|---|
+| healthy handoff | alive | clear | healthy | differ only for one result cycle |
+| complete FRC request loss | absent | asserted | can remain healthy | no normal request/result handoff |
+| EPS/lateral failure-decided | alive | clear | candidate 3 | ID0 -> ID0 in retained routes |
+
+The patent predicts a fourth state worth hunting: a healthy policy rejection
+where the losing feature remains alive internally, request-loss stays clear,
+the fail class stays healthy, another application intentionally wins, and the
+losing client receives rejection/status feedback.
+
+### 12.5 Best next passive capture
+
+The highest-value experiment is no longer another whole-frame block. It is a
+**natural client handoff** with synchronized FRC Operation FFD and CAN.
+
+The best candidates are:
+
+1. direct ID18 -> ID11 (PDA-SA/SDG -> LTA/LCA), already seen 28 times;
+2. ID11 <-> ID4, because the request profile can remain otherwise unchanged;
+3. 240E LCA Reject / 240F LCA Cancel, whose Toyota recorder definition already
+   retains 20 pre-trigger and 5 post-trigger samples at 0.2 s.
+
+For those events capture, if the record family permits:
+
+    feature-local:
+      550D  LDA inhibition/control state
+      5531  LDA request tuple
+      560D  LTA driver-steering/prohibition/control state
+      5631  LTA request tuple
+      5681  LCA control state
+      5685  LCA fail state
+      568E  LCA cancel condition
+      5A09/5A0A/5A0D/5A0F  PDA(OAA) request + invalid state
+      5D8D  PDA(SA) state
+
+    generic/result:
+      5282  generic lateral request
+      5283  lateral fail class
+      5285  arbitration-result lateral ID
+      57DE  arbitration-result pinion angle
+      57D4  PCS->BRK request logical error
+
+    wire:
+      0x08A
+      0x081
+
+The patent-signature observation would be:
+
+1. one feature-local request stays nonzero;
+2. its eligibility/prohibition/priority state changes;
+3. generic 5282 and/or result 5285 selects another client;
+4. 5283_1 stays healthy and 0x081 B11 stays out of request-loss;
+5. ideally a separate rejection/reason/status item explains the losing client.
+
+That would distinguish intentional arbitration policy from ordinary request
+withdrawal, communication loss, and actuator failure.
+
+## 13. Bottom line
 
 US20230166772A1 changes the most useful question from:
 

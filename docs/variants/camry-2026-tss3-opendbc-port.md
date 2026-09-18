@@ -246,6 +246,35 @@ records, and FRC_P5 `0x1B06 ISA Speed Change Priority Request (Upper Limit)`—
 but no lateral invalidation/priority input or manager->suppressed-client
 rejection feedback has yet been recovered. The resulting search target is now a
 healthy **eligibility/priority control plane**, not a missing native request.
+
+A transition-aligned scan of the retained 12-route native road corpus tightens
+that boundary. All **473** observed `0x08A` lateral-request-ID transitions are
+followed by the identical old-ID -> new-ID transition on `0x081` within
+**42.893 ms**; none is unmatched within 100 ms, and the high-volume route
+subset has no request/result-ID mismatch lasting 50 ms. Direct nonzero client
+handoffs occur without an ID0/request-loss gap: there are 28 ID18 SDG/PDA-SA ->
+ID11 LTA/LCA transitions plus rare ID11 <-> ID4 LDA transitions. In a clean
+route-3c ID11 -> ID4 example, `0x08A B20:B24` changes only
+`40 0B 10 20 64 -> 40 04 10 20 64` at the first switch sample; `0x081`
+retains ID11 for one result cycle, then publishes ID4 with the newest ID4 angle
+39.773 ms later while B11 remains `0x04`. Thus healthy wire-level mismatch is
+bounded as result-publication latency, not a sustained rejected request.
+
+This strongly suggests that the feature-client competition of interest is
+**upstream of the single generic `5282`/`0x08A` lateral slot** (or otherwise not
+visible as simultaneous lateral candidates on that wire). GTS provides the
+right upstream surfaces: LDA `5531/550D`, LTA `5631/560D`, LCA
+`5681/5685/568E`, and PDA `5A09/5A0A/5A0D/5A0F`/`5D8D`, followed by generic
+`5282` and result `5285/57DE`. The best passive discriminator is therefore a
+natural client handoff or `240E LCA Reject` capture containing those
+feature-local objects and generic/result objects together.
+
+The September-17 faulted e9/ec/ee routes supply the complementary negative
+control: native request/result traffic remains alive with request ID0/result
+ID0 and B11=`0x04`, while B13 remains `0xC0` (candidate lateral fail class 3).
+So request-loss, application handoff, and lateral failure-decided are already
+three distinct observable states.
+
 See
 [`../architecture/toyota-request-invalidation-us20230166772.md`](../architecture/toyota-request-invalidation-us20230166772.md).
 
