@@ -722,6 +722,17 @@ host-Tx watchdog restores stock FRC forwarding. In request-plane mode Panda also
 the old C7/B6 control sideband, so the two architectures cannot command lateral
 simultaneously.
 
+**Reset-boundary rule:** `0x00F` and protected `0x08A` are asynchronous publishers. A normal
+`RESET_CNT` increment can therefore appear on `0x00F` before the next native `0x08A` stops
+carrying the preceding reset-low2/FV4. Latest `0x00F` is not an admissibility oracle for a
+particular replacement frame. Panda matches host output to the actual unconsumed native
+`0x08A` generation and compares FV4 to that generation directly. The host uses `0x00F` only
+to reconstruct the nearby full freshness epoch, resolving the native reset-low2 against
+current/adjacent epochs; ownership and message-counter progression continue through normal
+reset increments. Regression tests explicitly cover `0x00F(N+1) -> native 0x08A(N) -> host
+replacement(N) -> native 0x08A(N+1)` for the transparent legacy proxy, current signed
+request proxy, and Panda safety boundary.
+
 The path no longer uses the private `ToyotaTss308aId0` / `ToyotaTss308aSignedId0`
 rollout Params or a runtime parser rebuild. Exact F33 selects the host path during normal
 `CarParams` construction when fingerprint topology contains chassis `0x025` on bus0 and
