@@ -6735,3 +6735,71 @@ subtests. This is an openpilot identification/lifecycle finding, not evidence
 that NRTD changes the physical Toyota-B bus topology or makes EPS F181
 fundamentally unreadable; the dedicated TSS3 preflight has independently read
 the exact EPS F181 while Ready=0.
+
+## 73. 2026-09-17 replacement-rack road drive: temporary lateral loss is the F33 target-step request-failure gate
+
+The first road drive after qualifying the replacement-rack split resident/helper
+produced working lateral authority together with intermittent openpilot
+`steerFaultTemporary` drops. The complete seven-segment route
+`000000e9--deaaad5774` is retained locally under
+`build/logs/camry-20260917-e9-deaaad5774/`; a privacy-minimized, hash-bound event
+summary is tracked at
+`targets/camry-2026/raw-20260917/lateral-dropouts/summary.json`.
+
+There are **11 moving fault rises**. Every one is the exact-F33 cooperative
+**command inhibit** `0x030 B16[0]`; the hardware/DEM aggregate `B6[2]` and the
+independent angle inhibit `B19[0]` remain clear. The inhibit lasts only about
+20--31 ms and recovers without reset. `canValid` stays true, no CAN timeout is
+present, and there is no Panda-TX-block explanation. A separate stopped/parked
+rise is `B19[0]` and is not part of the road-dropout pattern.
+
+That wire bit is `FEBECAFC`. Exact `0xCEC72` publishes
+`CAFC = (CAFB == 1) || (CAFD == 1)`. `CAFD` is the separately recovered latched
+rate-fault source at `0xCEF26`; repeated self-clearing 20--31-ms pulses therefore
+exclude it. The road events are the recoverable `CAFB` request-failure source
+from `0xCEE7C`.
+
+The individual `0xCEE7C` branches can be eliminated against the route and exact
+calibration:
+
+- the ID11 absolute target limit is **1745 raw**; all fault-rise C7 targets are
+  only 140..630 raw in magnitude;
+- the persistent measured-feedback monitor is exact `0x025` signal189,
+  **Steering Angle Velocity**, with threshold `abs(raw)>100` for 79 cycles;
+  the recent measured rates at every rise are below 100;
+- the second persistent monitor is the steering-wheel-torque source
+  `FEBE66A8` / DID1035, paired with the first monitor rather than sufficient by
+  itself;
+- the independent `CAF5` path requires `0x13B` signal223 / `FEBEACD6 == 1`
+  for 87 cycles; that wire signal is zero throughout the 600-ms windows before
+  every moving rise;
+- profile 7 clears `CAFB` and the `CAB6` preserve leg cannot create a 0->1
+  transition.
+
+The remaining branch is therefore the exact ID11 **target-step plausibility
+check**. `0xCEC8A` derives the effective modulo-64 B6 sequence gap and `0xCEE7C`
+allows **78 target raw counts per effective sequence step**. This is the same
+78-count ID11 step calibration already recovered from the target conditioner.
+
+The host request is not causing that discontinuity. At all 11 rises, nonzero C7
+is fresh (roughly 5--12 ms old), and the largest observed C7 target change in
+the preceding 80 ms is only a few raw counts. Thus the >78 discontinuity occurs
+**after the functional-C7 mailbox, inside the B6 replacement transaction**.
+
+The current helper has a direct mechanism that can produce exactly that shape:
+it modifies a native Toyota B6 only after synchronous command-5 signing succeeds.
+If a command-5 operation is transiently busy/times out or otherwise does not
+complete, the helper returns without replacing that native B6 and the untouched
+Toyota request continues through the stock receive tail. The next successful
+replacement can then jump from Toyota's native target back to openpilot's target
+by more than 78 raw counts, causing `0xCEE7C -> CAFB -> CAFC`, which removes EPS
+cooperative-ready state for approximately one native-B6 interval. The observed
+20--31-ms inhibit pulses are consistent with that mechanism.
+
+The route does not contain resident-private `command5_attempts` / `signed_count`
+telemetry, so **the specific skipped-frame cause remains bounded rather than
+observed**. Command-5 transient/non-clean completion is the leading cause because
+C7 lease expiry is contradicted by the fresh 100-Hz host traffic and the other
+`0xCEE7C` branches are closed above. A follow-up runtime should count replacement
+skip reasons (at minimum command-5 rc2, other rc, and completion-contract failure)
+or retry transient command-5 work before allowing a native target discontinuity.
