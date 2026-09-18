@@ -1,0 +1,450 @@
+{
+  "application_return": {
+    "attempts": [
+      {
+        "at_monotonic_ns": 2490989309533,
+        "f181_ascii": null,
+        "f181_hex": null
+      },
+      {
+        "at_monotonic_ns": 2491036735235,
+        "f181_ascii": "\u00028965F3307000\u0000\u0000\u0000\u00008A3113303100",
+        "f181_hex": "023839363546333330373030300000000038413331313333303331303000000000"
+      }
+    ],
+    "f181_ascii": "\u00028965F3307000\u0000\u0000\u0000\u00008A3113303100",
+    "f181_hex": "023839363546333330373030300000000038413331313333303331303000000000",
+    "ok": true
+  },
+  "boot": {
+    "f181_ascii": "\u0002!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+    "f181_hex": "022121212121212121212121212121212121212121212121212121212121212121",
+    "sid23_probe": {
+      "error": "NegativeResponseError",
+      "status": "rejected"
+    }
+  },
+  "bridge": {
+    "bus": 1,
+    "can_id": "0x030",
+    "error": null,
+    "first_send_monotonic_ns": 2489754737605,
+    "frame_hex": "000000002b000164000020002d420000000000010000000c0000000014ff61af",
+    "last_send_monotonic_ns": 2491034927177,
+    "max_send_gap_ms": 15.842056,
+    "missed_slots": 0,
+    "period_ms": 10.0,
+    "sent": 129
+  },
+  "can_health_after": {
+    "brs_enabled": 1,
+    "bus_off": 0,
+    "bus_off_cnt": 0,
+    "can_core_reset_count": 19,
+    "can_data_speed": 2000,
+    "can_speed": 500,
+    "canfd_enabled": 1,
+    "canfd_non_iso": 0,
+    "error_passive": 0,
+    "error_warning": 0,
+    "irq0_call_rate": 1365,
+    "irq1_call_rate": 591,
+    "irq2_call_rate": 0,
+    "last_data_error": "No error",
+    "last_data_stored_error": "Stuff error",
+    "last_error": "No error",
+    "last_stored_error": "No error",
+    "receive_error_cnt": 0,
+    "total_error_cnt": 1,
+    "total_fwd_cnt": 0,
+    "total_rx_cnt": 587936,
+    "total_rx_lost_cnt": 0,
+    "total_tx_checksum_error_cnt": 0,
+    "total_tx_cnt": 29070,
+    "total_tx_lost_cnt": 0,
+    "transmit_error_cnt": 0
+  },
+  "can_health_before": {
+    "brs_enabled": 1,
+    "bus_off": 0,
+    "bus_off_cnt": 0,
+    "can_core_reset_count": 19,
+    "can_data_speed": 2000,
+    "can_speed": 500,
+    "canfd_enabled": 1,
+    "canfd_non_iso": 0,
+    "error_passive": 0,
+    "error_warning": 0,
+    "irq0_call_rate": 970,
+    "irq1_call_rate": 8,
+    "irq2_call_rate": 0,
+    "last_data_error": "No error",
+    "last_data_stored_error": "Stuff error",
+    "last_error": "No error",
+    "last_stored_error": "No error",
+    "receive_error_cnt": 0,
+    "total_error_cnt": 1,
+    "total_fwd_cnt": 0,
+    "total_rx_cnt": 586152,
+    "total_rx_lost_cnt": 0,
+    "total_tx_checksum_error_cnt": 0,
+    "total_tx_cnt": 28313,
+    "total_tx_lost_cnt": 0,
+    "transmit_error_cnt": 0
+  },
+  "captured_native_030": {
+    "age_ms": 2.12368,
+    "bus": 1,
+    "can_id": "0x030",
+    "count": 88,
+    "frame_hex": "000000002b000164000020002d420000000000010000000c0000000014ff61af",
+    "last_monotonic_ns": 2489743379157
+  },
+  "dtc_clear_performed": false,
+  "f181_before": {
+    "ascii": "\u00028965F3307000\u0000\u0000\u0000\u00008A3113303100",
+    "hex": "023839363546333330373030300000000038413331313333303331303000000000"
+  },
+  "frc_after": {
+    "0x1903": {
+      "control_mode": 1,
+      "control_mode_label": "DRCC all speed",
+      "did": "0x1903",
+      "raw": "01"
+    },
+    "0x1905": {
+      "cruise_control_allowed": true,
+      "did": "0x1905",
+      "raw": "8080"
+    },
+    "0x1906": {
+      "acc_not_available_icon": true,
+      "did": "0x1906",
+      "main_switch_recognized": true,
+      "raw": "e080e0008080"
+    }
+  },
+  "frc_before": {
+    "0x1903": {
+      "control_mode": 1,
+      "control_mode_label": "DRCC all speed",
+      "did": "0x1903",
+      "raw": "01"
+    },
+    "0x1905": {
+      "cruise_control_allowed": true,
+      "did": "0x1905",
+      "raw": "8080"
+    },
+    "0x1906": {
+      "acc_not_available_icon": false,
+      "did": "0x1906",
+      "main_switch_recognized": true,
+      "raw": "e080e0008000"
+    }
+  },
+  "frc_verdict": "frc_drcc_denial_entered_despite_stale_030_bridge",
+  "initial_state": {
+    "resident_attestation": {
+      "byte_exact": true,
+      "mode": "full-image",
+      "sha256": "ea5bd5231ddd740a10875c955548a61acbaf096703c30281a9718cfa45c414fb"
+    },
+    "state": {
+      "armed": false,
+      "armed_raw": 0,
+      "initialized": true,
+      "initialized_raw": 1,
+      "last_command5_rc": 0,
+      "magic": "0x53364249",
+      "next_index": 0,
+      "raw_hex": "494236530001000000000000",
+      "signed_count": 0
+    },
+    "strategy": "split-functional-loader",
+    "telemetry": {
+      "command5_attempts": 0,
+      "computed_trailer_hex": "00000000",
+      "last_command_status": 0,
+      "last_control_seq": 0,
+      "last_done_flag": 0,
+      "latest_trailer_equality": false,
+      "native_frame_count": 0,
+      "native_publication_count": 0,
+      "native_publication_observed": false,
+      "native_signature_match": false,
+      "native_trailer_hex": "00000000",
+      "native_verified": false,
+      "native_verified_raw": 0,
+      "oracle_latched": false,
+      "override_count": 0,
+      "raw_hex": "0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  },
+  "native_030_return": {
+    "frame_hex": "00000000000009410000080000120000000000010000000400000000d0606b39",
+    "gap_ms_from_last_pre_handoff": 1293.293943,
+    "monotonic_ns": 2491036673100,
+    "ok": true
+  },
+  "nrtd_guard": {
+    "can_id": "0x51E",
+    "ready_values": [
+      0
+    ],
+    "samples": [
+      {
+        "bus": 1,
+        "data_hex": "0000800000000000",
+        "ready": 0
+      }
+    ]
+  },
+  "persistent_flash_writes": false,
+  "programming_handoff": {
+    "f181_attempts": [
+      {
+        "at_monotonic_ns": 2489846120859,
+        "f181_ascii": "\u0002!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+        "f181_hex": "022121212121212121212121212121212121212121212121212121212121212121"
+      }
+    ],
+    "health_after_reappearance": {
+      "bus": 1,
+      "can_health": {
+        "brs_enabled": 1,
+        "bus_off": 0,
+        "bus_off_cnt": 0,
+        "can_core_reset_count": 19,
+        "can_data_speed": 2000,
+        "can_speed": 500,
+        "canfd_enabled": 1,
+        "canfd_non_iso": 0,
+        "error_passive": 0,
+        "error_warning": 0,
+        "irq0_call_rate": 970,
+        "irq1_call_rate": 8,
+        "irq2_call_rate": 0,
+        "last_data_error": "No error",
+        "last_data_stored_error": "Stuff error",
+        "last_error": "No error",
+        "last_stored_error": "No error",
+        "receive_error_cnt": 0,
+        "total_error_cnt": 1,
+        "total_fwd_cnt": 0,
+        "total_rx_cnt": 586296,
+        "total_rx_lost_cnt": 0,
+        "total_tx_checksum_error_cnt": 0,
+        "total_tx_cnt": 28326,
+        "total_tx_lost_cnt": 0,
+        "transmit_error_cnt": 0
+      },
+      "health": {
+        "alternative_experience": 0,
+        "car_harness_status": 2,
+        "controls_allowed": true,
+        "current": 204,
+        "fan_power": 30,
+        "fault_status": 0,
+        "faults": 0,
+        "heartbeat_lost": false,
+        "ignition_can": false,
+        "ignition_line": true,
+        "interrupt_load": 0.11372549019607843,
+        "power_save_enabled": false,
+        "rx_buffer_overflow": 1730,
+        "safety_mode": 17,
+        "safety_param": 1,
+        "safety_rx_checks_invalid": false,
+        "safety_rx_invalid": 0,
+        "safety_tx_blocked": 0,
+        "sbu1_voltage_mV": 108,
+        "sbu2_voltage_mV": 324,
+        "som_reset_triggered": false,
+        "sound_output_level": 1,
+        "spi_error_count": 146,
+        "temperature": 48.0,
+        "tx_buffer_overflow": 0,
+        "uptime": 1875,
+        "voltage": 12045
+      }
+    },
+    "health_after_request": {
+      "bus": 1,
+      "can_health": {
+        "brs_enabled": 1,
+        "bus_off": 0,
+        "bus_off_cnt": 0,
+        "can_core_reset_count": 19,
+        "can_data_speed": 2000,
+        "can_speed": 500,
+        "canfd_enabled": 1,
+        "canfd_non_iso": 0,
+        "error_passive": 0,
+        "error_warning": 0,
+        "irq0_call_rate": 970,
+        "irq1_call_rate": 8,
+        "irq2_call_rate": 0,
+        "last_data_error": "No error",
+        "last_data_stored_error": "Stuff error",
+        "last_error": "No error",
+        "last_stored_error": "No error",
+        "receive_error_cnt": 0,
+        "total_error_cnt": 1,
+        "total_fwd_cnt": 0,
+        "total_rx_cnt": 586279,
+        "total_rx_lost_cnt": 0,
+        "total_tx_checksum_error_cnt": 0,
+        "total_tx_cnt": 28323,
+        "total_tx_lost_cnt": 0,
+        "transmit_error_cnt": 0
+      },
+      "health": {
+        "alternative_experience": 0,
+        "car_harness_status": 2,
+        "controls_allowed": true,
+        "current": 178,
+        "fan_power": 30,
+        "fault_status": 0,
+        "faults": 0,
+        "heartbeat_lost": false,
+        "ignition_can": false,
+        "ignition_line": true,
+        "interrupt_load": 0.11372549019607843,
+        "power_save_enabled": false,
+        "rx_buffer_overflow": 1730,
+        "safety_mode": 17,
+        "safety_param": 1,
+        "safety_rx_checks_invalid": false,
+        "safety_rx_invalid": 0,
+        "safety_tx_blocked": 0,
+        "sbu1_voltage_mV": 108,
+        "sbu2_voltage_mV": 324,
+        "som_reset_triggered": false,
+        "sound_output_level": 1,
+        "spi_error_count": 146,
+        "temperature": 47.0,
+        "tx_buffer_overflow": 0,
+        "uptime": 1875,
+        "voltage": 12078
+      }
+    },
+    "health_before": {
+      "bus": 1,
+      "can_health": {
+        "brs_enabled": 1,
+        "bus_off": 0,
+        "bus_off_cnt": 0,
+        "can_core_reset_count": 19,
+        "can_data_speed": 2000,
+        "can_speed": 500,
+        "canfd_enabled": 1,
+        "canfd_non_iso": 0,
+        "error_passive": 0,
+        "error_warning": 0,
+        "irq0_call_rate": 970,
+        "irq1_call_rate": 8,
+        "irq2_call_rate": 0,
+        "last_data_error": "No error",
+        "last_data_stored_error": "Stuff error",
+        "last_error": "NoChange",
+        "last_stored_error": "No error",
+        "receive_error_cnt": 0,
+        "total_error_cnt": 1,
+        "total_fwd_cnt": 0,
+        "total_rx_cnt": 586154,
+        "total_rx_lost_cnt": 0,
+        "total_tx_checksum_error_cnt": 0,
+        "total_tx_cnt": 28313,
+        "total_tx_lost_cnt": 0,
+        "transmit_error_cnt": 0
+      },
+      "health": {
+        "alternative_experience": 0,
+        "car_harness_status": 2,
+        "controls_allowed": true,
+        "current": 160,
+        "fan_power": 30,
+        "fault_status": 0,
+        "faults": 0,
+        "heartbeat_lost": false,
+        "ignition_can": false,
+        "ignition_line": true,
+        "interrupt_load": 0.11372549019607843,
+        "power_save_enabled": false,
+        "rx_buffer_overflow": 1730,
+        "safety_mode": 17,
+        "safety_param": 1,
+        "safety_rx_checks_invalid": false,
+        "safety_rx_invalid": 0,
+        "safety_tx_blocked": 0,
+        "sbu1_voltage_mV": 108,
+        "sbu2_voltage_mV": 324,
+        "som_reset_triggered": false,
+        "sound_output_level": 1,
+        "spi_error_count": 146,
+        "temperature": 49.0,
+        "tx_buffer_overflow": 0,
+        "uptime": 1875,
+        "voltage": 12067
+      }
+    },
+    "programming_response_timeout": false,
+    "rediscovery_mode": "same-bus-f181-preserve-safety",
+    "route_after": {
+      "elm327_param": 1,
+      "eps_bus": 1,
+      "eps_rx": "0x7a9",
+      "eps_rx_bus": 1,
+      "eps_tx": "0x7a1",
+      "semantic_path": "normal-harness"
+    },
+    "route_before": {
+      "elm327_param": 1,
+      "eps_bus": 1,
+      "eps_rx": "0x7a9",
+      "eps_rx_bus": 1,
+      "eps_tx": "0x7a1",
+      "semantic_path": "normal-harness"
+    }
+  },
+  "replay_scope": "single last genuine stock 0x030 repeated at 100 Hz only across EPS application outage",
+  "safety_tx_blocked_delta": 0,
+  "schema": "tss3-unified-b6-signer-install-stale-030-bridge-v1",
+  "security_access": {
+    "secret_value_recorded": false,
+    "seed_length": 16
+  },
+  "security_access_secret_source": "builtin:toyota-p1me-codeflash-0xBFE8",
+  "self_install": {
+    "helper": {
+      "deferred_to_qualify": true,
+      "transport": "functional-c6-after-startup"
+    },
+    "resident_attestation": {
+      "byte_exact": true,
+      "mode": "full-image",
+      "sha256": "ea5bd5231ddd740a10875c955548a61acbaf096703c30281a9718cfa45c414fb"
+    },
+    "state": {
+      "armed": false,
+      "armed_raw": 0,
+      "initialized": true,
+      "initialized_raw": 1,
+      "last_command5_rc": 0,
+      "magic": "0x53364249",
+      "next_index": 0,
+      "raw_hex": "494236530001000000000000",
+      "signed_count": 0
+    }
+  },
+  "target": {
+    "application_f181_hex": "023839363546333330373030300000000038413331313333303331303000000000",
+    "boot_f181_hex": "022121212121212121212121212121212121212121212121212121212121212121",
+    "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
+    "family": "camry-f33",
+    "name": "camry-8965F3307000",
+    "software_id": "8965F3307000",
+    "universal_profile": "camry-f33"
+  }
+}

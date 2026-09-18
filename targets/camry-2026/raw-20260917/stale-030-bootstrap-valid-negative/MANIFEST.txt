@@ -1,0 +1,44 @@
+2026-09-17 exact-Camry stale-0x030 bootstrap prevention experiment (VALID NEGATIVE)
+
+Vehicle: maintainer 2026 Toyota Camry Hybrid
+EPS: 8965F3307000 / 8A3113303100
+Kit source commit: 7165bde920e247b21adc0fec54abccc8d0bdb7c3
+Mode: fresh ignition cycle, NRTD/READY=0, Park
+Command: ./tss3-unified-signer bringup-stale-030-bridge /tmp/tss3-030-bridge-2
+
+Pre-bootstrap FRC state:
+  1903 = 01                DRCC all speed
+  1905 = 8080              Cruise Control Permission allowed
+  1906 = e080e0008000      ACC Not Available clear
+
+Bridge:
+  source/tx bus: 1
+  CAN ID/DLC: 0x030/32
+  source frame: 000000002b000164000020002d420000000000010000000c0000000014ff61af
+  source capture count: 88
+  source-frame age before bridge: 2.123680 ms
+  bridge frames sent: 129
+  nominal cadence: 10 ms / 100 Hz
+  missed_slots: 0
+  max observed host send gap: 15.842056 ms
+  Panda safety_tx_blocked delta: 0
+  CAN bus-off: 0 before/after
+  CAN TX lost: 0 before/after
+  native 0x030 resumed: yes, 1293.293943 ms after last pre-handoff native frame
+  DTC clear: none
+
+Post-bootstrap FRC state:
+  1903 = 01                DRCC all speed (unchanged)
+  1905 = 8080              Cruise Control Permission allowed (unchanged)
+  1906 = e080e0008080      ACC Not Available ASSERTED
+
+Verdict:
+  Repeating the single last genuine protected 0x030 at 100 Hz across the EPS outage is
+  insufficient to preserve the FRC ACC-available state. This is a valid negative for
+  raw/stale 0x030 presence as the complete prevention mechanism. It does not distinguish
+  receiver SecOC freshness/MAC rejection from another EPS-dependent startup/state input.
+
+Additional exact-F33 static bound after the run:
+  Ghidra xrefs to ICU-S command register 0xFFC5D000 are only at 0x8A26A..0x8AECC in
+  application crypto-driver code. No boot-area (<0x9200) ICUSCMD xref exists. Therefore
+  the existing bootloader does not provide a directly recovered command-5 signing path.

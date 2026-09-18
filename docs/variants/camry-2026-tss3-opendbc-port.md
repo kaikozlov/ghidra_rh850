@@ -245,6 +245,28 @@ the already-qualified stock Toyota-B bus1 route. This preserves the diagnostic p
 route without changing Panda safety while `0x030` replay is active. The invalid attempt
 is retained under `targets/camry-2026/raw-20260917/stale-030-bootstrap-invalid/`.
 
+The corrected `7165bde9` run is a **valid negative** for stale `0x030` presence as the
+complete prevention mechanism. The fresh-cycle NRTD baseline was healthy:
+`0x1903=01`, `0x1905=8080` (Cruise Control Permission allowed), and
+`0x1906=e080e0008000` (ACC Not Available clear). The tool captured 88 native bus1
+`0x030` frames and repeated the final genuine frame
+`000000002b000164000020002d420000000000010000000c0000000014ff61af`
+at nominal 100 Hz across the outage. It sent 129 bridge frames with zero missed slots,
+zero Panda TX blocks, zero CAN TX loss, and no bus-off; application F181 returned and a
+new native `0x030` resumed 1293.294 ms after the last pre-handoff native frame. No DTC
+clear occurred. Post-bootstrap `0x1903` and `0x1905` remained `01/8080`, but
+`0x1906` changed to `e080e0008080`: **ACC Not Available asserted despite the stale
+100-Hz bridge**. This rules out simple raw-message-presence supervision as sufficient.
+It does not by itself distinguish receiver rejection of stale SecOC freshness/MAC from
+a separate private/non-Panda-visible EPS startup dependency. The freshness/authentication
+explanation is now the leading visible-network hypothesis because healthy exact-Camry
+captures show `0x030` at ~103 Hz on bus1 while all four other exact-F33 normal-Tx siblings
+`0x351/0x394/0x4A3/0x4C8` are absent there. Exact-F33 Ghidra xrefs further show every
+recovered `ICUSCMD` access in application crypto-driver code (`0x8A26A..0x8AECC`) and
+**no boot-area (<0x9200) `ICUSCMD` xref**, so the existing bootloader does not expose a
+recovered command-5 signing path for a fresh-`0x030` bridge. The valid negative is
+retained under `targets/camry-2026/raw-20260917/stale-030-bootstrap-valid-negative/`.
+
 **Current execution boundary:** VAR-155 proves the live native profile-2 B6 boundary and
 byte-exact local slot-4 signing. VAR-156 then deliberately installed the preserved
 native-application trailer on the modified ID11/target/100/100 application: all six samples
