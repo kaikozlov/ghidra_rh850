@@ -196,59 +196,78 @@ class TestRecovery(unittest.TestCase):
         self.assertEqual(panda.safety[-1], (recovery.SILENT_SAFETY,))
         self.assertTrue(panda.closed)
 
-    def test_brake_single_domain_retries_only_reset_and_has_no_post_reset_diagnostics(self):
-        panda = FakePanda()
-        class Factory:
-            @staticmethod
-            def list(): return ["offline"]
-            def __new__(cls, serial): return panda
+    def test_brake_single_domain_matches_field_proven_udsclient_block(self):
+        class FakePandaExact:
+            def __init__(self):
+                self.safety = []
+                self.closed = False
+            def set_safety_mode(self, *args): self.safety.append(args)
+            def close(self): self.closed = True
 
-        calls = []
+        panda = FakePandaExact()
+        ctor_calls = []
+        events = []
         reset_attempts = {"value": 0}
-        second_reset_done = {"value": False}
-        def respond(_panda, address, bus, pdu, **kwargs):
-            calls.append((address, bus, pdu.hex()))
-            if second_reset_done["value"]:
-                self.fail(f"post-reset diagnostic sent after Brake retry 11 01: addr=0x{address:03X} pdu={pdu.hex()}")
-            if pdu == bytes.fromhex("22f181") and address == recovery.EPS_TX:
-                return bytes.fromhex("62f181") + recovery.EXPECTED_EPS_F181
-            if pdu == bytes.fromhex("22f181") and address == recovery.BRAKE_TX:
-                if reset_attempts["value"]:
-                    self.fail("Brake F181 was polled between reset attempts")
-                return bytes.fromhex("62f181") + recovery.EXPECTED_BRAKE_F181
-            if pdu == bytes.fromhex("1002") and address == recovery.BRAKE_TX:
-                return bytes.fromhex("5002003201f4")
-            if pdu == bytes.fromhex("1101") and address == recovery.BRAKE_TX:
+        f181_reads = {"value": 0}
+
+        class FakeUdsClient:
+            def __init__(self, p, tx, *, rx_addr, bus, timeout, response_pending_timeout):
+                self.p = p; self.tx = tx; self.rx_addr = rx_addr; self.bus = bus
+                self.timeout = timeout; self.response_pending_timeout = response_pending_timeout
+                ctor_calls.append((tx, rx_addr, bus, timeout, response_pending_timeout))
+            def diagnostic_session_control(self, session):
+                events.append(("session", session))
+            def ecu_reset(self, reset_type):
                 reset_attempts["value"] += 1
+                events.append(("reset", reset_attempts["value"], reset_type))
                 if reset_attempts["value"] == 1:
-                    raise TimeoutError("first reset response disappears")
-                if reset_attempts["value"] == 2:
-                    second_reset_done["value"] = True
-                    return bytes.fromhex("5101")
-                self.fail("more than two Brake reset attempts")
-            self.fail(f"unexpected request address=0x{address:03X} pdu={pdu.hex()}")
+                    raise RuntimeError("first reset response disappears")
+                return None
+            def read_data_by_identifier(self, did):
+                f181_reads["value"] += 1
+                events.append(("f181", f181_reads["value"], did))
+                if f181_reads["value"] == 1:
+                    raise RuntimeError("still restarting")
+                return recovery.EXPECTED_BRAKE_F181
+
+        fake_uds = types.SimpleNamespace(
+            UdsClient=FakeUdsClient,
+            SESSION_TYPE=types.SimpleNamespace(PROGRAMMING=2),
+            RESET_TYPE=types.SimpleNamespace(HARD=1),
+            DATA_IDENTIFIER_TYPE=types.SimpleNamespace(APPLICATION_SOFTWARE_IDENTIFICATION=0xF181),
+        )
+        clock = {"t": 0.0}
+        def monotonic():
+            clock["t"] += 0.01
+            return clock["t"]
 
         with tempfile.TemporaryDirectory() as td:
             output = Path(td) / "brake.json"
-            with (patch.dict(sys.modules, {"panda": types.SimpleNamespace(Panda=Factory)}),
-                  patch.object(recovery, "isotp_request", side_effect=respond)):
+            with (patch.dict(sys.modules, {
+                      "panda": types.SimpleNamespace(Panda=lambda: panda),
+                      "opendbc.car.uds": fake_uds,
+                  }),
+                  patch.object(recovery.time, "monotonic", side_effect=monotonic),
+                  patch.object(recovery.time, "sleep", return_value=None) as sleep_mock):
                 result = recovery.restart_one_domain("brake", output)
             saved = json.loads(output.read_text())
 
-        self.assertEqual(calls, [
-            (recovery.EPS_TX, recovery.EPS_BUS, "22f181"),
-            (recovery.BRAKE_TX, recovery.BRAKE_BUS, "22f181"),
-            (recovery.BRAKE_TX, recovery.BRAKE_BUS, "1002"),
-            (recovery.BRAKE_TX, recovery.BRAKE_BUS, "1101"),
-            (recovery.BRAKE_TX, recovery.BRAKE_BUS, "1101"),
+        self.assertEqual(panda.safety, [(recovery.DIAG_SAFETY, recovery.DIAG_SAFETY_PARAM)])
+        self.assertEqual(ctor_calls[:3], [
+            (recovery.BRAKE_TX, recovery.BRAKE_TX + 8, recovery.BRAKE_BUS, 1.0, 2.0),
+            (recovery.BRAKE_TX, recovery.BRAKE_TX + 8, recovery.BRAKE_BUS, 0.35, 0.35),
+            (recovery.BRAKE_TX, recovery.BRAKE_TX + 8, recovery.BRAKE_BUS, 0.35, 0.35),
         ])
+        self.assertIn((recovery.BRAKE_TX, recovery.BRAKE_TX + 8, recovery.BRAKE_BUS, 0.25, 0.25), ctor_calls)
         self.assertEqual(reset_attempts["value"], 2)
-        self.assertEqual(result["verdict"], "brake_reset_dispatched_no_post_reset_diagnostics")
-        self.assertFalse(result["restart"]["application_return_verified"])
-        self.assertEqual(result["restart"]["post_reset_diagnostics"], "none")
-        self.assertEqual(len(result["restart"]["reset_attempts"]), 2)
-        self.assertIsNone(result["eps_identity_after"])
-        self.assertEqual(saved["verdict"], result["verdict"])
+        self.assertGreaterEqual(f181_reads["value"], 2)
+        waits = [c.args[0] for c in sleep_mock.call_args_list if c.args]
+        self.assertIn(0.05, waits)
+        self.assertIn(2.0, waits)
+        self.assertIn(0.25, waits)
+        self.assertEqual(result["verdict"], "brake_application_returned")
+        self.assertEqual(result["application_f181"], recovery.EXPECTED_BRAKE_F181.hex())
+        self.assertEqual(saved["verdict"], "brake_application_returned")
         self.assertTrue(panda.closed)
 
     def test_exact_control_domain_identity_is_required_before_reset(self):
