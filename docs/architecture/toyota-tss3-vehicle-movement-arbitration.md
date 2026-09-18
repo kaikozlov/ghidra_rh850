@@ -365,6 +365,30 @@ consumer behavior must be joined before assigning those OEM names.  In particula
 B8/B9's recovered percentage-like behavior must not be renamed merely because a patent
 field exists.
 
+### Parallel Toyota realization: selected source ID + direct request stream
+
+Toyota filed a closely related but materially different architecture one day earlier:
+US20200070873A1.  In that embodiment each application puts an application ID plus its
+request value on the network, the movement manager selects an **application ID**, and
+the actuator receives both planes.  After the selection arrives, the actuator uses the
+latest matching request received **after** the selection event.  The request sample the
+manager arbitrated and the request sample the actuator executes may therefore differ.
+The application ID is explicitly separate from `CAN_ID`.
+
+This is a latency optimization, not the physical realization recovered at exact F33's
+external EPS boundary.  F33 receives neither `0x08A` nor `0x081`; its recovered
+external target-bearing cooperative-control ingress is B6.  There is no recovered
+second direct application-request stream at F33 that would make B6 merely the selector
+from US20200070873A1.  Therefore the current `0x08A` request -> Brake/VMM -> B6 target
+model remains the better exact-F33 fit.
+
+The parallel patent is nevertheless important for architecture reasoning: Toyota can
+separate request-value transport from arbitration authority, and an application ID can
+act as a grant over future samples rather than merely label the one sample that was
+arbitrated.  Do not assume every Toyota actuator receives a manager-forwarded copy of
+the exact winning request value.  Recover that physical choice per actuator/platform.
+See [the selected-ID/direct-request close read](toyota-selected-id-direct-request-arbitration.md).
+
 ## 6. Why the Brake module arbitrates and why B6 comes from that domain
 
 The patent answers the question that originally looked architecturally strange.
@@ -601,7 +625,8 @@ FRC / TSS3 applications
 - whether `0x08A` is the raw per-application request or an already-aggregated TSS request;
 - exact physical BSCM/CGW/FRC hop that puts `0x08A`, `0x081` and B6 on their observed
   segments;
-- the exact `0x08A` -> selected package -> B6 transformation and cadence;
+- the exact relation/cadence between `0x08A`, Brake/VMM selection/request generation,
+  and B6 (without assuming a byte/value-preserving transform);
 - which node owns each SecOC signing operation and source suppression;
 - B6 secondary-field OEM names;
 - longitudinal A/B upper-versus-lower ordering and remaining policy bits.

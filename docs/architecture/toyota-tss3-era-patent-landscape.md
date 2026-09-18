@@ -38,7 +38,7 @@ Accordingly:
 |---|---:|---|---|---|
 | **US20230082947A1**, Motion manager, vehicle, vehicle control method... | 2021-09-15 | Toyota | Actuator systems report reliability to the motion manager; steering state includes reliability, driver grip, steering torque and steering-wheel angle. The manager generates named fail classes, including **lateral control system fail class**, with semantic states normal / protective-control / abnormal-but-not-confirmed-and-invalid / confirmed failure. Additional failure information can describe influenced vehicle-speed range, malfunctioning portion, and operation mode; a malfunctioning portion can be inter-actuator communication. | Exceptional semantic hit for GTS recorder **5283_1 Lateral control system fail class status** and the current X2400 investigation. Gives companion vocabulary to search in GTS and a state model to test dynamically without assuming numeric encodings. |
 | **US20220219711A1 / US12071145B2**, Control device for vehicle, manager... | 2021-01-14 | Toyota + ADVICS | ADAS applications send **application IDs** with kinematic requests; priority is stored by application ID and may change with vehicle, driver, or availability state. Explicit examples include PCS, ACC, LKA/LTA, AEB, LDA and steering guidance. EPS is an example actuator for a steered-angle request. | Strong follow-on support that Toyota TSS request/result IDs are IDs of software applications/clients rather than CAN identifiers. Useful for interpreting 5280/5281/5282 and 5284/5285. |
-| **US20200070873A1 / US11643089B2**, Vehicle control system | 2018-08-29; pub. 2020 | Toyota | Applications put request values plus unique IDs directly on the in-vehicle network. The movement manager selects an **ID** and sends a control signal carrying at least that ID. The actuator controller receives application requests independently and uses the latest request matching the selected ID. Claim 4 explicitly covers EPS/lateral motion. | Critical alternative physical realization: the manager does not necessarily forward the selected physical value. This cautions against inferring the logical request-to-target architecture solely from which intermediate value is visible on one bus. |
+| **US20200070873A1 / US11643089B2**, Vehicle control system | 2018-08-29; pub. 2020 | Toyota | Applications put request values plus payload-level application IDs directly on the network; the patent explicitly distinguishes those IDs from `CAN_ID`. The manager selects an application ID, while the actuator waits for the selection and then consumes the **newest matching request received after that selection event**. The arbitration sample and the actuated sample may therefore be different. Claim 4 explicitly covers EPS/lateral motion. | Critical alternative physical realization: arbitration can be a selected-source plane separate from the request-value data plane. Exact F33 does **not** instantiate the claimed direct-request EPS boundary on its recovered external CAN surface because it receives neither `0x08A` nor `0x081`; B6 remains its recovered target-bearing ingress. See the dedicated close read. |
 | **US20200070802A1 / US11161496B2 / US12005882B2**, Control device | 2018-08-30; pub. 2020 | Toyota | Brake control ECU contains request arbitration, command distribution, feedback control, and optionally vehicle-motion control. It feeds measured **control record values** and summarized actuator operation/soundness information back to requesting applications; direct wheel-speed inputs and preferential stability control are explicit. | Reinforces Brake/VMM ownership and gives a reason for the rich result/status plane: applications need realized motion plus actuator soundness, not only the selected request. |
 | **US20220315018A1 / US12280788B2**, Control apparatus, manager... | 2021-04-06 | Toyota + ADVICS | Applications supply information about whether a kinematic plan remains an **arbitration target**. A request that is about to terminate can be excluded or handled specially so a new request is not delayed. | Concrete vocabulary for handoff/disengagement and source-suppression RE: search for arbitration-target, termination, low-priority, degeneration and handoff state rather than modeling every request as simply present/absent. |
 | **US20230166772A1 / US12534110B2**, Motion manager, autonomous driving apparatus... | 2021-11-30 | Toyota | A manager can intentionally invalidate a PCS/other ADAS request and return **request rejection information** so the suppressed application does not diagnose an abnormal condition merely because its plan is not selected. The disclosed invalidation target can also be AEB, ACC, ASL, or another application. | High-value conceptual clue for the persistent TSS3 fault-state problem. Clean source replacement may require a result/rejection/status contract in addition to suppressing the source request. Do not assume exact Camry has this exact ADS embodiment. |
@@ -247,18 +247,34 @@ not from US20220219711A1 itself.
 
 ### 2.3 A missing forwarded value does not imply a missing arbitration stage
 
-US20200070873A1 is especially important for physical-topology reasoning. In its
-disclosed architecture, applications transmit their requests to the network,
-the movement manager chooses an application **identifier**, and the actuator
-controller independently consumes the application request that matches the
-chosen identifier. This arrangement is explicitly meant to avoid the latency
-of receiving and retransmitting the entire chosen request through the manager.
+US20200070873A1 is especially important for physical-topology reasoning, but a
+close read makes its scope narrower and more interesting than "the manager sends
+the winner ID." Toyota explicitly distinguishes the payload-level
+application/request ID from the frame `CAN_ID`. The manager arbitrates an older
+set of request samples, sends a control signal containing at least the selected
+application ID, and the actuator then selects the latest matching request
+**received after that control signal**. The request that caused the arbitration
+winner and the request actually actuated can therefore be different samples.
 
-Therefore the logical application-request -> arbitration -> actuator-realization
-graph does not imply a physical graph in which the request value itself must be
-visible on every manager-to-actuator link. This family should stay in mind when
-interpreting hidden/local Brake/VMM routing and the apparent absence of some
-intermediate target values at the Panda-visible junction.
+The resulting architecture is a **request-value data plane plus a source-selection
+plane**. It still pays the initial request -> manager -> selection delay before a
+new source may actuate, but subsequent request values from the selected source
+reach the actuator with only the direct network-hop age. Toyota explicitly says
+this is especially useful for steering and separately describes actuator-side
+rate/gradient limiting to smooth a source handoff.
+
+That architecture is an important alternative realization of the same logical
+request/arbitration problem, not a direct map of exact F33. Exact F33 receives
+neither `0x08A` nor `0x081`, while B6 is its recovered external target-bearing
+cooperative-steering ingress. Therefore `0x081` must not be reinterpreted as
+this patent's manager->EPS selected-ID signal and B6 must not be demoted to an
+ID-only selector without a separately recovered direct request stream.
+
+The broader lesson remains: the logical application-request -> arbitration ->
+actuator-realization graph does not require the manager to relay every exact
+physical request sample. Recover the physical realization per actuator and per
+platform. Detailed analysis:
+[toyota-selected-id-direct-request-arbitration.md](toyota-selected-id-direct-request-arbitration.md).
 
 ### 2.4 Clean source suppression probably has a status half
 
