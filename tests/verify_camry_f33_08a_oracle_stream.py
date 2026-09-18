@@ -45,6 +45,8 @@ def main() -> int:
     assert json.loads(audited_meta.read_text()) == meta
 
     assert meta["schema"] == "camry-f33-08a-oracle-stream-build-v1"
+    assert oracle.DIAG_BUS == 1 and oracle.BUS == oracle.DIAG_BUS
+    assert oracle.STATE_BUS == 0 and oracle.ROUTE.bus == oracle.DIAG_BUS
     assert meta["target"] == {"software_id": "8965F3307000", "codeflash_sha256": build.IMAGE_SHA256}
     assert (len(resident), sha(resident)) == (oracle.RESIDENT_SIZE, oracle.EXPECTED_RESIDENT_SHA256)
     assert (len(helper), sha(helper)) == (oracle.HELPER_SIZE, oracle.EXPECTED_HELPER_SHA256)
