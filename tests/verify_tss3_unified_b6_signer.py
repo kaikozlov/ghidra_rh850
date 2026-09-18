@@ -6,6 +6,7 @@ import json
 import subprocess
 import sys
 import tempfile
+import types
 from pathlib import Path
 from unittest import mock
 
@@ -14,6 +15,7 @@ sys.path.insert(0, str(ROOT))
 
 from exploit.ephemeral_runtime import build_tss3_unified_b6_signer as unified_builder
 from exploit.ephemeral_runtime import tss3_unified_b6_signer as host
+from exploit.ephemeral_runtime import camry_f33_runtime_replay_discriminator as replay_guard
 
 BUILDER = ROOT / "exploit/ephemeral_runtime/build_tss3_unified_b6_signer.py"
 KIT_BUILDER = ROOT / "tools/targets/tss3/builders/build_tss3_unified_b6_signer_kit.py"
@@ -35,6 +37,40 @@ check("C7 is recurring control and C6 is split-target installation only",
       host.loader_frame(3, bytes.fromhex("11223344")) == bytes.fromhex("07c6c60311223344") and
       host.replacement_frame(7, 0x1234) == bytes.fromhex("07c7c70712340000") and
       host.release_frame() == bytes.fromhex("07c7c70000000000"))
+
+class NrtdGuardPanda:
+    instance = None
+    def __init__(self):
+        type(self).instance = self
+        self.calls = 0
+        self.closed = False
+    def set_safety_mode(self, *_args): pass
+    def can_recv(self):
+        self.calls += 1
+        if self.calls == 1:
+            return [(replay_guard.READY_CAN_ID, bytes.fromhex("8000000000000000"), 1)]
+        if self.calls < 6:
+            return []
+        return [(replay_guard.READY_CAN_ID, bytes.fromhex("00007f0000000000"), 1)]
+    def close(self): self.closed = True
+
+class NrtdGuardClock:
+    def __init__(self): self.t = 0.0
+    def monotonic(self):
+        self.t += 0.01
+        return self.t
+
+nrtd_clock = NrtdGuardClock()
+with (mock.patch.dict(sys.modules, {"panda": types.SimpleNamespace(Panda=NrtdGuardPanda)}),
+      mock.patch.object(replay_guard, "ensure_boardd_stopped", return_value=None),
+      mock.patch.object(replay_guard.time, "monotonic", side_effect=nrtd_clock.monotonic),
+      mock.patch.object(replay_guard.time, "sleep", return_value=None)):
+    nrtd_guard = replay_guard.verify_nrtd_ready(
+        timeout=0.5, route=types.SimpleNamespace(elm327_param=1), ready_buses=frozenset({1}),
+    )
+check("NRTD guard drains stale READY backlog before evaluating fresh 0x51E",
+      nrtd_guard["ready_values"] == [0] and nrtd_guard["rx_backlog_drained"] is True and
+      NrtdGuardPanda.instance is not None and NrtdGuardPanda.instance.closed is True)
 post_replace_raw = bytearray(host.SPLIT_TELEMETRY_SIZE)
 post_replace_raw[8:12] = bytes.fromhex("d4a561f5")
 post_replace_raw[12:16] = bytes.fromhex("11223344")
