@@ -6844,3 +6844,54 @@ to the stock functional DCM path the leading operational difference worth testin
 before redesigning the signer. It is not yet proved that the 100-Hz functional
 traffic causes command-5 misses; the resident-private miss reason was not logged
 on either historical or current road route.
+
+### 73.2 Post-authenticated route44 override removes the per-frame signer race
+
+The road-fault localization changes the field architecture rather than weakening
+F33's request-failure policy. Exact F33 already provides a clean trust boundary
+between SecOC and application consumption. Successful native B6 verification
+reaches `8F906 -> 8F546 -> 90204 -> 81CA6 -> 7D72C`; `7D72C` copies the
+authenticated 32-byte PDU44 into route44 raw COM at `FEBE4BFF` and advances sole
+route generation `FEBE5364`. Only later does `4BD46` unpack raw B3/B4:B5 and
+companions into generated COM, followed by `58074` staging and `BCD62` snapshot.
+
+The exact stock foreground order around that seam is also closed. Aggregate
+`667E6` executes receive work, SecOC aggregate `988C2`, communications follow-up
+`69E7C`, application aggregate `58B5E`, then `66512`. The resident already
+replays this aggregate. The new Camry field helper therefore replaces only the
+post-receive aggregate tail after it is armed:
+
+```text
+receive drain -> stock SecOC 988C2 -> stock follow-up 69E7C
+             -> post-auth C7 application override
+             -> stock 58B5E -> stock 66512
+```
+
+With no live C7 lease the helper changes nothing. A changed nonzero C7
+generation atomically caches its target for the full seven-tick lease, so later
+C6/other DCM traffic cannot expose one native target. While that lease is live it
+modifies only the route44 application copy: B3 low6 becomes ID11 while native
+high bits are retained; B4:B5 receive the cached C7 target byte-for-byte; B6
+signal265 is cleared; B8/B9 become 100. Native B7 sequence is not touched, and
+neither the secured queue, B28..B31 trailer, freshness records, nor ICU-S result
+is modified. `4BD46` subsequently consumes this already-authenticated application
+copy in the ordinary way.
+
+This removes command 5 from the Camry **driving** path entirely. There is no
+per-native-B6 signing attempt and therefore no command-5 miss that can allow a
+Toyota target to appear for one frame between openpilot targets. C6 remains only
+the post-startup helper loader and C7 remains the supervised host command. The
+field build is 522 bytes at `FEBFF9F0` plus a 218-byte helper padded to the fixed
+600-byte C6 image. Before C6 arm, the resident explicitly uses the exact stock
+aggregate tail; the low helper cannot execute uninitialized. Loader C6 traffic is
+also excluded from runtime generation state by requiring the durable DCM tag to
+be C7 before accepting a sequence.
+
+The implementation is firmware-closed and regression-built but, at this
+checkpoint, **not yet live-qualified**. Qualification no longer asks command 5 to
+reproduce a native MAC. It requires byte-exact install/arm, observes at least one
+stock authenticated route44 B6 publication while C7 is released, and requires
+zero post-auth override count before permitting a bounded C7 pulse. A later
+`0x08A` request-plane implementation remains desirable once clean sole-source
+ownership is recovered; it is not required to remove the present B6 continuity
+failure.

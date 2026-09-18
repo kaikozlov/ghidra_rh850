@@ -43,6 +43,16 @@ post_replace = host.decode_split_telemetry(bytes(post_replace_raw))
 check("Camry/Crown telemetry distinguishes sticky oracle from latest trailer equality",
       post_replace["oracle_latched"] is True and post_replace["native_verified"] is True and
       post_replace["latest_trailer_equality"] is False and post_replace["native_signature_match"] is False)
+postauth_raw = bytearray(host.SPLIT_TELEMETRY_SIZE)
+postauth_raw[0:4] = (7).to_bytes(4, "little")
+postauth_raw[4:8] = (5).to_bytes(4, "little")
+postauth_raw[16] = 23
+postauth_raw[17] = 1
+postauth = host.decode_postauth_telemetry(bytes(postauth_raw))
+check("post-auth telemetry reports native publications and application overrides without inventing command5 work",
+      postauth["native_publication_count"] == 7 and postauth["override_count"] == 5 and
+      postauth["last_control_seq"] == 23 and postauth["native_publication_observed"] is True and
+      postauth["command5_attempts"] == 0 and postauth["native_signature_match"] is False)
 check("legacy target-specific implementations remain in tree",
       all((ROOT / path).is_file() for path in (
           "exploit/ephemeral_runtime/build_camry_f33_b6_inline_signer.py",
@@ -56,6 +66,7 @@ check("legacy target-specific implementations remain in tree",
 resident_source = (ROOT / "exploit/ephemeral_runtime/tss3_unified_b6_signer_resident.S").read_text()
 field_resident_source = (ROOT / "exploit/ephemeral_runtime/tss3_unified_b6_signer_field_resident.S").read_text()
 helper_source = (ROOT / "exploit/ephemeral_runtime/tss3_unified_b6_signer_helper.S").read_text()
+postauth_helper_source = (ROOT / "exploit/ephemeral_runtime/camry_f33_b6_postauth_override_helper.S").read_text()
 check("experimental one-shot and field split-loader residents remain separate",
       "#ifdef TSS3_COROLLA_HF" in resident_source and "#ifdef TSS3_COROLLA_HF" in helper_source and
       "FEF07C00" in resident_source and ".L_parse_loader" not in resident_source and
@@ -73,6 +84,21 @@ check("native oracle retries freshness skew and command5 rc2 before terminal fai
       "be .L_return              /* rc2 = transient busy/poll timeout; retry next native frame */" in helper_source and
       ".L_terminal_fail:" in helper_source and
       "st.b r6, 0x4a79[gp]" in helper_source)
+check("Camry field post-auth backend leaves native SecOC untouched and overrides only route44 application bytes",
+      "jarl32 secoc_aggregate, lp" in postauth_helper_source and
+      "jarl32 comm_after_secoc, lp" in postauth_helper_source and
+      "jarl32 application_aggregate, lp" in postauth_helper_source and
+      "jarl32 aggregate_final, lp" in postauth_helper_source and
+      "command5_sync" not in postauth_helper_source and "freshness_encode" not in postauth_helper_source and
+      all(token in postauth_helper_source for token in (
+          "TSS3_RAW_B3_OFF", "TSS3_RAW_B4_OFF", "TSS3_RAW_B5_OFF",
+          "TSS3_RAW_B6_OFF", "TSS3_RAW_B8_OFF", "TSS3_RAW_B9_OFF")) and
+      "TSS3_RAW_B7_OFF" not in postauth_helper_source and "TSS3_B6_TRAILER_OFF" not in postauth_helper_source)
+check("Camry post-auth resident cannot execute low helper before C6 arm",
+      "#ifdef TSS3_CAMRY_POSTAUTH_OVERRIDE" in field_resident_source and
+      "tst1 0, 0x4a62[gp]" in field_resident_source and
+      "be .L_postauth_stock_tail" in field_resident_source and
+      "jr32 target_stock_aggregate_tail" in field_resident_source)
 check("Camry/Crown resident no longer depends on functional-loader offsets",
       unified_builder.TARGETS["camry-8965F3307000"]["resident_macros"] == {} and
       unified_builder.TARGETS["crown-8965F3012000"]["resident_macros"] == {} and
@@ -296,6 +322,60 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
           len(loader_session.panda.sent) == 150 * host.WORD_REPEAT_COUNT + 1 and
           loader_session.panda.sent[0] == (0x777, host.loader_frame(0, field_bundle.helper_image[:4]), 1) and
           loader_session.panda.sent[-1] == (0x777, host.loader_frame(host.ARM_INDEX), 1))
+
+    camry_kit = root / "camry-postauth-kit"
+    camry_kit_proc = subprocess.run(
+        [sys.executable, str(KIT_BUILDER), "--target", "camry-8965F3307000", "--out", str(camry_kit)],
+        cwd=ROOT, check=True, capture_output=True, text=True,
+    )
+    camry_kit_meta = json.loads(camry_kit_proc.stdout)
+    camry_field_meta = json.loads((camry_kit / "bundle/unified.json").read_text(encoding="utf-8"))
+    camry_field_bundle = host.load_bundle(camry_kit / "bundle/unified.json")
+    camry_plan = host.plan(camry_field_bundle)
+    check("Camry field kit uses post-auth raw-COM ownership with no command5 runtime dependency",
+          camry_kit_meta["target"]["name"] == "camry-8965F3307000" and
+          camry_field_meta["runtime_backend"] == "postauth-raw-com" and
+          camry_field_meta["resident"]["size"] == 522 and camry_field_meta["helper"]["size"] == 218 and
+          camry_field_meta["helper"]["image_size"] == 600 and
+          camry_field_meta["sources"]["helper"]["path"].endswith("camry_f33_b6_postauth_override_helper.S") and
+          camry_field_meta["mutation_boundary"]["postauth_raw_com_override"] is True and
+          camry_field_meta["mutation_boundary"]["native_secoc_bytes_mutated"] is False and
+          camry_field_meta["mutation_boundary"]["command5_runtime_required"] is False and
+          camry_field_meta["mutation_boundary"]["native_mac_oracle_required"] is False and
+          camry_field_meta["layout"]["postauth_override"]["raw_com_base"] == "0xFEBE4BFF" and
+          "native authenticated route44 publication" in camry_plan["sequence"][2] and
+          "command-5 MAC oracle" not in camry_plan["sequence"][2])
+
+    postauth_qual_session = object.__new__(host.Session)
+    postauth_qual_session.bundle = camry_field_bundle
+    postauth_qual_session.wait_self_install = mock.Mock(return_value={"state": {"initialized": True}})
+    postauth_qual_session.load_and_arm_split_helper = mock.Mock(return_value={"passes": [], "state": {"armed": True}, "helper_byte_exact": True})
+    postauth_qual_session.split_state = mock.Mock(return_value={
+        "initialized": True, "armed": True, "signed_count": 0, "last_command5_rc": 0,
+    })
+    postauth_qual_session.split_telemetry = mock.Mock(return_value={
+        "native_publication_count": 3, "override_count": 0, "last_control_seq": 0,
+        "native_publication_observed": True, "native_verified_raw": 1,
+    })
+    postauth_qualified = postauth_qual_session.qualify()
+    check("Camry post-auth qualification proves released native publication without invoking command5 oracle",
+          postauth_qualified["qualified"] is True and postauth_qualified["runtime_backend"] == "postauth-raw-com" and
+          postauth_qual_session.split_telemetry.call_count == 1)
+
+    postauth_emu_result = root / "camry-postauth-override-emulation.json"
+    postauth_emu_script = ROOT / "ghidra/scripts/verify/VerifyCamryPostauthOverrideHelper.java"
+    postauth_emu = subprocess.run(
+        [str(ROOT / "tools/gtarget"), "camry-8965F3307000", "script", "run", str(postauth_emu_script), "--",
+         str(camry_kit / "bundle" / camry_field_meta["artifacts"]["helper"]), str(postauth_emu_result)],
+        cwd=ROOT, check=True, capture_output=True, text=True, timeout=90,
+    )
+    postauth_emu_record = json.loads(postauth_emu_result.read_text(encoding="utf-8"))
+    check("compiled Camry post-auth helper enforces exclusive cached C7 ownership in the F33 emulator",
+          postauth_emu_record["passed"] == 18 and postauth_emu_record["vehicle_executed"] is False and
+          postauth_emu_record["helper_sha256"] == camry_field_meta["helper"]["sha256"] and
+          "unrelated DCM traffic cannot leak native target during live lease" in postauth_emu_record["tests"] and
+          "same C7 generation cannot change cached target" in postauth_emu_record["tests"] and
+          "seventh held tick expires to stock target" in postauth_emu_record["tests"] and postauth_emu.returncode == 0)
 
     class GuardPanda:
         def __init__(self, *, fault=False, gear=0, stale=False):

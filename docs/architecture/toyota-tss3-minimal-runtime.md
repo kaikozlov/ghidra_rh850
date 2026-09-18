@@ -153,24 +153,27 @@ pocket.
 
 Corolla can install its 458-byte helper into `FEBF0000..FEBF01C9` before
 application startup because exact H/F startup-survival analysis excludes that
-range from startup writes. Camry/Crown instead use the restored split field
-path: the high resident reaches count 224 first, then the host transfers the
-current helper over functional C6 and arms it. This keeps helper installation out
-of the boot callback while preserving C7 as the recurring steering-control wire.
+range from startup writes. Camry/Crown instead use the restored split field path: the high resident reaches
+count 224 first, then the host transfers the helper over functional C6 and arms
+it. This keeps helper installation out of the boot callback while preserving C7
+as the recurring steering-control wire. The runtime backends now deliberately
+diverge after that common install boundary. Crown retains the pre-SecOC command-5
+signer. Exact Camry F33 uses the post-authenticated route44 backend described
+below and does **not** invoke command 5 during lateral control.
 
-For F33/F30, `install` therefore proves only resident survival/initialization;
-`qualify` performs the C6 helper transfer, byte-exact readback, arm, and native
-MAC oracle. The oracle treats freshness skew and command-5 rc2 as retryable and
-latches failure only after a non-retryable command-5/completion error or a clean
-MAC mismatch.
+For F33/F30, `install` therefore proves only resident survival/initialization and
+`qualify` performs the C6 helper transfer plus byte-exact readback/arm. Crown then
+qualifies its native command-5 MAC oracle. Camry instead waits for an ordinary
+Toyota B6 to pass stock SecOC and reach route44 while C7 is released, proving the
+post-auth hook is observing native authenticated publication without mutating it.
 
 #### Unified C7 runtime with target-shaped field installation
 
 The experimental all-target payload remains retained for research. The field
 path is target-shaped. Current field component sizes are:
 
-- Camry F33: 522-byte resident + 594-byte helper, padded to 600 bytes for C6;
-- Crown F30: 522-byte resident + 594-byte helper, padded to 600 bytes for C6;
+- Camry F33: 522-byte resident + 218-byte post-auth helper, padded to 600 bytes for C6;
+- Crown F30: 522-byte resident + 594-byte command-5 helper, padded to 600 bytes for C6;
 - Corolla H/F: 522-byte resident + 458-byte embedded helper.
 
 The recurring host API is consequently only:
@@ -195,11 +198,45 @@ only for F181/DCM-buffer attestation and tester presentation. All four wrappers
 pin the same staging SHA and the same payload SHA. Legacy target-specific and C6
 loader implementations remain in the tree only as historical/recovery tooling.
 
-The common qualification ladder remains conservative: bind exact F181, prove
-functional mailbox delivery, install only volatile RAM, reproduce one untouched
-native B6 MAC with Toyota command 5, and only then permit C7 replacement. The
-old target-specific extended-family-5 signers remain in the tree as historical
-and recovery artifacts, not as the normal openpilot control transport.
+The field qualification ladder remains conservative: bind exact F181, prove
+functional mailbox delivery, and install only volatile RAM. Crown/Corolla retain
+their command-5 native-MAC qualification. Camry F33 instead proves a native B6
+has completed stock SecOC and route44 publication while C7 is released. Only
+then may C7 own the application target. The old target-specific extended-family-5
+signers remain in the tree as historical and recovery artifacts.
+
+#### Camry F33 post-authenticated B6 ownership
+
+The Sep-17 road trace exposed the remaining flaw in the pre-SecOC signer model:
+an occasional command-5 miss left one Toyota-native B6 target untouched, and the
+next openpilot replacement crossed F33's 78-raw/effective-sequence target-step
+plausibility limit. The replacement-rack route recorded 11 recoverable
+`CEE7C -> CAFB -> CAFC -> 0x030 B16[0]` events while C7 itself remained smooth
+(maximum observed recent step 3 raw). Historical route `8d` contains the same raw
+inhibit four times; the older CarState simply did not report it.
+
+The field Camry backend therefore removes per-frame signing from runtime. Stock
+B6 now runs unchanged through the exact native receive/SecOC path:
+
+```text
+native B6 -> profile-2 queue -> stock freshness/MAC verification
+          -> 8F906/8F546 -> 7D72C -> route44 raw COM at FEBE4BFF
+          -> [volatile post-auth helper: B3/B4:B5/B6.bit2/B8/B9 only]
+          -> 4BD46 generated-COM unpack -> 58074 stage -> BCD62 snapshot
+          -> ordinary F33 cooperative controller
+```
+
+A changed nonzero C7 generation caches its target for the complete supervised
+lease, so later C6/other DCM traffic cannot leak one native target. While that
+lease is live, the helper preserves native B3 high bits, selects Target Lateral
+ID11, copies the cached C7 target byte-exact into raw B4:B5,
+clears signal265, and sets contributions B8/B9 to 100. Native B7 application
+sequence, B28..B31 SecOC trailer, secured queue bytes, freshness records, and
+ICU-S result are never modified. With C7 zero/expired, the raw route44 payload is
+left stock. Consequently there is no command-5 latency/failure path capable of
+letting a different native target appear between openpilot targets. This backend
+is firmware-closed/regression-built and requires the next live stationary/road
+qualification; it is not yet claimed live merely from static ordering.
 
 > **Tester-handoff audit, 2026-09-16:** the audit found real host-side defects in
 > post-startup resident attestation, sensor freshness/validity, Park enforcement,
