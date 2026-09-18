@@ -191,15 +191,26 @@ it is now the primary semantic join for the manual's skid/brake
 `lateral-control-system-unachievable` condition.
 
 A Toyota follow-on motion-manager patent adds an unusually strong independent
-semantic match. US20230082947A1 names a **lateral control system fail class**
-and describes four semantic states: normal, protective-control, abnormal but
-not yet confirmed with control invalid, and confirmed failure. It also says
-actuator reliability can carry an influenced vehicle-speed range, a
-malfunctioning portion, and an operation mode, with inter-actuator
-communication explicitly allowed as the malfunctioning portion. This does not
-supply the F33 numeric encoding: the patent example uses a compact state value,
-whereas GTS exposes `5283_1` as a u8 recorder field. It does give us a concrete
-state model and search vocabulary for the onset capture.
+semantic match. US20230082947A1 separates **raw actuator reliability** from the
+**application-facing fail class**: steering sends `STR2` reliability/state to
+the Brake-hosted motion manager, and the manager's generation unit synthesizes
+`PLN2` fail-class information back to the driver-assistance applications. The
+steering reliability model distinguishes normal, protective-control, abnormal
+but not yet confirmed with control invalid, and confirmed failure. Its
+application-setting metadata can include influenced vehicle-speed range,
+malfunctioning portion, and post-abnormality operation mode; communication
+between steering and brake is explicitly one example of a malfunctioning
+portion.
+
+The patent permits a two-bit numerical representation for a fail class but does
+not assign particular binary values to those four states. Independent Toyota
+diagnostic vocabulary closes part of that gap: `DRS_P5` DID `0x100A DRS Fail
+Class` is stored as u8 but has valid values only `0..3`, with `0 = steering
+control request executable`, `1 = reserved`, `2 = steering control request not
+executable (temporary)`, and `3 = steering control request not executable (with
+failure decided)`. The same enum appears in rear-steering P6/P6F. This does not
+prove the F33 lateral fail-class coding, but it makes `2` versus `3` a strong
+Toyota-family temporary-versus-confirmed-failure oracle.
 
 A patent-guided GTS corpus search also surfaced the master strings **`Driving
 Force Lower Limit Request Rejection Factors`**, **`Driving Force Upper Limit
@@ -226,14 +237,29 @@ Sep-10 working route `8d` is likewise `C0` on 22,128/22,128 frames, while later
 same-build route `93` is `00` on 14,355/14,355 even though its cruise-state traffic
 still contains `0x251=E0` unavailable and conventional `0x90` latch states.
 
-Do **not** name B13 bit6 itself `lateral control system unachievable` yet. Successor
-`ADCU_P6` exposes `0x1ED3 Lateral Control ID of Arbitrated Result` as the full **u8**
-quantity, so `C0` may be a special arbitration-result/status code rather than two
-independent flags. The exact supported conclusion is that `C0` is a highly
-fault-correlated Brake->FRC result state and a strong candidate for the Toyota
-unachievable indication. Route `93` also shows that the Brake result can return to
-`00` while the higher-level cruise system remains unavailable; `C0` therefore is not
-the persistent DRCC latch itself.
+The deeper patent/GTS join changes the leading interpretation of B13. Do
+**not** name B13 bit6 alone `lateral control system unachievable`. Instead, the
+stronger structured hypothesis is:
+
+```text
+B13[5:0] = arbitration-result lateral application ID   (already recovered)
+B13[7:6] = two-bit lateral fail class                  (candidate)
+```
+
+That packing explains the retained values unusually well. Healthy `00`/`0B` have
+high bits `00`. The rare healthy transient `80` has high bits `10`.
+Dead-EPS traffic contains `80` and then overwhelmingly `C0` (`11`), while the
+post-bootstrap faulted routes remain at `C0`. Toyota's independent `DRS Fail Class`
+enum assigns value `2` to temporary steering-request non-executability and value `3`
+to non-executability with failure decided, exactly the semantic progression that
+`0x80 -> 0xC0` would represent if the high two bits are the lateral fail class.
+
+This remains **unproved**. US20230082947A1 does not assign binary values to its four
+semantic states, and successor `ADCU_P6` exposes `0x1ED3 Lateral Control ID of Arbitrated Result`
+as a raw full u8 without decomposing the high bits. The decisive proof remains a
+synchronous `5283_1` / raw-`0x081` capture or an exact F33/P5 decoder join.
+Route `93` still proves that `C0` is not the persistent DRCC latch itself:
+B13 can return to `00` while higher-level cruise remains unavailable.
 
 This creates a concrete suppression experiment but rules out the naive version.
 `0x081` is ordinary-P5-SecOC-shaped (`FV4||MAC28` candidate), so a B13 replacement

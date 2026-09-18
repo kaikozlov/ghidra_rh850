@@ -85,17 +85,52 @@ shift-control fail class. Its lateral class represents four semantic states:
 3. abnormality detected but failure not confirmed, with control invalid;
 4. confirmed failure.
 
-This is close enough to be an immediate experimental oracle. It is **not**
-permission to decode the exact GTS byte as the patent example two-bit value:
-GTS stores 5283_1 as an 8-bit recorder item and the exact F33 encoding remains
-unrecovered.
+The close reading materially sharpens the architecture. Raw actuator
+reliability and application-facing fail class are **different interfaces**.
+Powertrain/brake/steering send `ACL2`/`BRK2`/`STR2` state to the motion manager;
+`STR2` explicitly includes steering-system reliability, driver grip,
+steering-wheel operating torque, and steering-wheel angle. The motion manager's
+generation unit then synthesizes `PLN2` back to the driver-assistance
+applications, including the fail classes. In other words, the lateral fail
+class is manager-produced application status, not simply a raw EPS diagnostic
+bit.
 
-The same patent says the manager actuator-state inputs can carry **influenced
-vehicle velocity range**, **malfunctioning portion**, and **operation mode after
-the abnormality**. Those phrases should be searched in GTS/DDB/recorder
-metadata. Of particular interest, malfunctioning portion can identify
-communication between actuator systems. That is directly relevant to the EPS
-outage -> Brake/FRC X2400 path.
+For steering reliability the embodiment distinguishes four semantic states:
+normal, protective control, abnormality detected but failure not yet confirmed
+with control invalid, and confirmed failure. The patent allows a two-bit
+numerical representation but does **not** assign those four meanings to
+particular `00/01/10/11` values. Current TSS3 GTS stores `5283_1` as an 8-bit
+recorder item, so the exact F33 encoding still requires a wire/recorder join.
+
+There is, however, an important independent Toyota diagnostic clue:
+`DRS_P5.ddb` DID `0x100A` **DRS Fail Class** is an 8-bit diagnostic field whose
+valid values are only `0..3` and whose display mapping is `0 = Steering control
+request is executable`, `1 = Reserved`, `2 = Steering control request is not
+executable (temporary)`, `3 = Steering control request is not executable (with
+failure decided)`. The same `0..3` mapping survives in rear-steering P6/P6F.
+That does not prove the F33 lateral fail-class encoding, but it gives strong
+Toyota-family evidence that values `2` and `3` mean temporary invalidity versus
+confirmed failure.
+
+The same patent says the information for setting application behavior after an
+abnormality can include **influenced vehicle velocity range**,
+**malfunctioning portion**, and **operation mode after the abnormality**. The
+example malfunctioning-portion namespace explicitly includes communication
+between powertrain and brake and communication between steering and brake. This
+is directly relevant to the EPS outage -> Brake/FRC X2400 path and makes
+inter-actuator communication failure a first-class candidate cause rather than
+a side effect.
+
+The current `0x081` evidence now supports a stronger, still-unproved packing
+hypothesis. `B13[5:0]` is already joined to `5285` arbitration-result lateral
+ID; healthy traffic uses `00`/`0B` with only rare `80`, while dead-EPS and
+post-bootstrap faulted traffic progresses to or remains at `C0`. A compact
+interpretation consistent with both the patent and the independent DRS enum is
+therefore **`B13[7:6]` as a two-bit lateral fail-class candidate**, with `10`
+matching a temporary/not-executable state and `11` matching
+failure-decided/confirmed. `01` would remain an unresolved protective/degraded
+state if F33 uses it. This is a hypothesis, not a rename: it must be joined
+against `5283_1` or an exact decoder before being promoted to wire truth.
 
 ### 2.2 Request/result IDs really are first-class application identifiers
 

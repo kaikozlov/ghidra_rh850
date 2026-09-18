@@ -246,6 +246,54 @@ publication toward the TSS applications**, not as a dumb echo:
 The remaining acceleration-like `0x081` fields should be investigated against the full
 Figure-4/FFD state packet before assigning them ad-hoc names.
 
+### Fault-state feedback is synthesized by the manager
+
+Toyota's later US20230082947A1 refines the result/status side of this graph and
+separates two layers that should not be conflated.
+
+The actuator systems first report raw state to the motion manager. In that
+embodiment, steering signal `STR2` includes steering-system reliability,
+driver-grip state, steering-wheel operating torque, and steering-wheel angle.
+Steering reliability distinguishes normal operation, protective control,
+abnormality detected but failure not yet confirmed with control invalid, and a
+confirmed failed state. Brake and powertrain have analogous reliability
+information.
+
+The motion manager then generates application-facing signal `PLN2`. That signal
+contains **fail classes** synthesized from the actuator reliability/state rather
+than simply forwarding a raw EPS bit. The named example classes include lateral
+control, driver brake input, autonomous braking main/sub, driving system, and
+shift control. The lateral class is two bits in the disclosed example.
+
+When an abnormality exists, the manager can augment the fail class with
+information for deciding how the application should behave:
+
+- influenced vehicle-velocity range;
+- malfunctioning portion; and
+- post-abnormality operation mode.
+
+The disclosed malfunctioning-portion namespace explicitly includes
+powertrain<->brake and steering<->brake communication. This is important for the
+exact Camry fault cascade: an EPS application/communication outage can be
+interpreted inside Brake/VMM and converted into an application-facing lateral
+fail class before the FRC decides that the lateral system is unavailable.
+
+The current F33 wire evidence gives a strong packing hypothesis for that class.
+`0x081 B13[5:0]` is already recovered as the lateral arbitration-result ID.
+The two unused high bits behave as `00` in ordinary healthy states, occasionally
+`10` transiently, and overwhelmingly `11` in dead-EPS/post-bootstrap fault
+states. Independently, current Toyota `DRS_P5` diagnostics expose an 8-bit
+`DRS Fail Class` with valid values only `0..3`: value 0 means steering control
+is executable, 2 means not executable temporarily, and 3 means not executable
+with failure decided (value 1 is reserved). This makes **`B13[7:6]` a strong
+candidate two-bit lateral fail class**, with observed `10 -> 11` matching
+temporary invalidity -> confirmed failure.
+
+That mapping remains a hypothesis. The patent does not assign particular
+`00/01/10/11` values to its four semantic states, and successor ADCU P6 exposes
+the full result-ID byte without decomposing its high bits. A synchronous
+`5283_1` + raw-`0x081` onset capture or exact decoder join is still required.
+
 ## 5. Interface C: post-arbitration controller instructions
 
 After request arbitration, Toyota inserts a **request-generation** layer that converts
