@@ -313,6 +313,28 @@ That mapping remains a hypothesis. The patent does not assign particular
 the full result-ID byte without decomposing its high bits. A synchronous
 `5283_1` + raw-`0x081` onset capture or exact decoder join is still required.
 
+The retained raw logs nevertheless make the hypothesis substantially stronger.
+Across healthy routes `37/3b/3c/3d/3e/3f/45`, 871,888 logged `0x081`
+observations use high2=`00` except for 246 observations in four cold-start
+episodes at high2=`10`; high2=`01` and `11` are never observed healthy.
+Those cold-start `0x80` episodes recover to `0x00` after roughly 0.87--0.95 s.
+Dead-EPS route `d4`, by contrast, starts at `0x80`, has no EPS `0x030`,
+then transitions after 3.725304 s to `0xC0` and remains there. The immediately
+adjacent application payloads differ only at B13. Dead-EPS routes `d0/d1/d2`
+begin already at `0xC0`.
+
+Four healthy cold starts add an actuator-state timing join: `0x030 B6[0]`, the
+recovered driver-torque-invalid gate, clears 19.856--40.711 ms before B13 clears
+from `0x80` to the ordinary healthy result. That ordering is highly repeatable,
+but it does not prove B6[0] is the sole reliability input. The existing stale
+`0x030` bridge does not close that question because the exact frame it repeated
+has B6=`0x01`: it preserved the invalid gate as well as stale SecOC freshness.
+Its negative result therefore rules out message presence alone, not
+fresh/accepted/semantically healthy EPS-status continuity.
+
+The detailed retained chronology is
+`targets/camry-2026/raw-20260917/brake-frc-081-fault-status/startup-fail-class-analysis.json`.
+
 ## 5. Interface C: post-arbitration controller instructions
 
 After request arbitration, Toyota inserts a **request-generation** layer that converts

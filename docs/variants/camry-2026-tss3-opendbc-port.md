@@ -285,6 +285,44 @@ synchronous `5283_1` / raw-`0x081` capture or an exact F33/P5 decoder join.
 Route `93` still proves that `C0` is not the persistent DRCC latch itself:
 B13 can return to `00` while higher-level cruise remains unavailable.
 
+A 2026-09-18 re-read of the retained raw rlogs turns that structural hypothesis
+into a much stronger **state-transition** result. Across healthy routes
+`37/3b/3c/3d/3e/3f/45`, 871,888 logged `0x081` observations contain only
+high-two-bit classes `00` and `10`: `00` on 871,642 observations and `10`
+on 246 observations confined to four cold-start episodes. No healthy observation
+uses `01` or `11`. Those four startup episodes hold `B13=0x80` for
+approximately 0.87--0.95 s and then clear to an ordinary `0x00` result.
+
+Dead-EPS route `d4` captures the complementary transition. Its first
+`0x081` appears with `B13=0x80`; with **zero `0x030` for the entire route**,
+that state persists for 3.725304 s and then changes once to `0xC0`, where it
+remains. The immediately adjacent 28-byte application payloads are byte-identical
+except for B13 (`80 -> C0`); the security trailer changes normally. In a +/-2-s
+window around that transition, `0x08A` remains lateral ID0 / pinion 0,
+`0x081 B11` remains `0x04`, B13 low6 remains 0, and the sampled
+`0x0D7/0x025/0x251` states do not step at the boundary. Dead-EPS routes
+`d0/d1/d2` contain 9,882 / 5,873 / 9,104 `0x081` observations respectively,
+all `B13=0xC0` and zero `0x030`.
+
+The healthy cold starts provide a second independent timing join. In routes
+`3c/3d/3f/45`, the recovered EPS `0x030 B6[0]` driver-torque-invalid gate
+starts asserted and clears shortly before the Brake result returns healthy:
+B13 clears **39.215 / 20.779 / 40.711 / 19.856 ms** after B6[0] clears,
+respectively. `0x030 B6[2]` and B16[0] are already clear at those transitions,
+while B19[0] remains asserted, so B6[0] is the only one of those recovered EPS
+status bits with the observed transition ordering. This is a strong temporal
+join, not proof that B6[0] is the sole steering-reliability input.
+
+This also changes the interpretation of the valid stale-`0x030` bridge negative.
+The exact repeated frame has B6=`0x01`: it continuously reports
+**driver torque invalid** while it is being replayed. The experiment therefore
+proves that raw `0x030` **presence** is insufficient, but it does not isolate
+stale SecOC freshness as the only failure mechanism and does not test continuity
+of a semantically healthy EPS status. The first changed/native application-return
+frame in the later unproven early-`0x030` run has B6=`0x09`, so B6[0] is still
+asserted there as well. Payload validity/reliability state and freshness remain
+confounded until a fresh accepted healthy-status publication is observed.
+
 This creates a concrete suppression experiment but rules out the naive version.
 `0x081` is ordinary-P5-SecOC-shaped (`FV4||MAC28` candidate), so a B13 replacement
 must not assume acceptance without reproducing the native tag; dropping the complete
@@ -391,9 +429,12 @@ clear occurred. Post-bootstrap `0x1903` and `0x1905` remained `01/8080`, but
 `0x1906` changed to `e080e0008080`: **ACC Not Available asserted despite the stale
 100-Hz bridge**. This rules out simple raw-message-presence supervision as sufficient.
 It does not by itself distinguish receiver rejection of stale SecOC freshness/MAC from
-a separate private/non-Panda-visible EPS startup dependency. The freshness/authentication
-explanation is now the leading visible-network hypothesis because healthy exact-Camry
-captures show `0x030` at ~103 Hz on bus1 while all four other exact-F33 normal-Tx siblings
+payload/state validity or a separate private/non-Panda-visible EPS startup dependency.
+The replayed frame itself has B6=`0x01`, so the recovered driver-torque-invalid gate
+remained asserted throughout the bridge; the 2026-09-18 startup chronology independently
+shows healthy B13 recovery 20--41 ms after that gate clears in four cold starts. Thus the
+valid negative closes **message presence only**, not fresh/healthy `0x030` continuity.
+Healthy exact-Camry captures show `0x030` at ~103 Hz on bus1 while all four other exact-F33 normal-Tx siblings
 `0x351/0x394/0x4A3/0x4C8` are absent there. Exact-F33 Ghidra xrefs further show every
 recovered `ICUSCMD` access in application crypto-driver code (`0x8A26A..0x8AECC`) and
 **no boot-area (<0x9200) `ICUSCMD` xref**, so the existing bootloader does not expose a

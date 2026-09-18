@@ -16,10 +16,28 @@ Known semantic join:
   Current successor ADCU_P6 diagnostic vocabulary calls the corresponding full
   8-bit field "Lateral Control ID of Arbitrated Result".
 
-Therefore C0 is the leading wire-level candidate for the Brake-side
-"lateral control system unachievable" state described by Toyota repair-manual
-X2400 logic, but the exact OEM encoding is not yet proven and the individual high
-bits must remain unnamed.
+A 2026-09-18 patent-guided chronology pass substantially strengthens the
+packing hypothesis:
+
+  B13[5:0] = arbitration-result lateral application ID (recovered)
+  B13[7:6] = two-bit lateral fail class (strong candidate, not yet OEM-proven)
+
+Across healthy routes 37/3b/3c/3d/3e/3f/45 there are 871,888 logged 0x081
+observations: high2 is 00 on 871,642 and 10 on 246 startup observations; 01 and
+11 never occur. The four captured healthy startup episodes hold B13=80 for
+~0.87..0.95 s and then clear to 00.
+
+Dead-EPS route d4 starts at B13=80 for 3.725304 s and then changes once to C0
+and remains there. Exact adjacent 0x081 application payloads differ only at B13.
+There is no EPS 0x030 anywhere in d4. Dead-EPS routes d0/d1/d2 begin and remain
+at C0, with no 0x030.
+
+Independent Toyota DRS_P5 DID 0x100A maps fail-class value 2 to
+"Steering control request is not executable (temporary)" and value 3 to
+"...not executable (with failure decided)". This is not exact-F33 proof, but the
+observed 80(high2=2) -> C0(high2=3) chronology is a strong semantic match.
+
+The detailed retained result is startup-fail-class-analysis.json.
 
 0x081 is ordinary-P5-SecOC-shaped; exact DataID/key acceptance is not yet proven.
 The passive verify-native-081 probe deliberately tests candidate DataID 0x0081.

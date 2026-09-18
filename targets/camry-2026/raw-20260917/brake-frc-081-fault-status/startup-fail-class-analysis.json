@@ -1,0 +1,209 @@
+{
+  "schema": "camry-f33-081-lateral-fail-class-startup-v1",
+  "date": "2026-09-18",
+  "question": "Does retained exact-Camry traffic support 0x081 B13[7:6] as the lateral fail class described by Toyota US20230082947A1, and what does the startup/failure timing reveal?",
+  "known_wire": {
+    "can_id": "0x081",
+    "direction": "Brake/chassis result/status toward FRC/application side",
+    "lateral_result_id": "B13[5:0] = Operation-FFD 0x5285 arbitration-result lateral ID",
+    "candidate_fail_class": "B13[7:6]"
+  },
+  "toyota_semantic_oracles": {
+    "patent": {
+      "publication": "US20230082947A1",
+      "states": [
+        "normal",
+        "protective control",
+        "abnormality detected / failure not yet confirmed / control invalid",
+        "confirmed failure"
+      ],
+      "note": "The patent permits a two-bit fail class but does not assign binary values to the four semantic states."
+    },
+    "drs_p5": {
+      "did": "0x100A",
+      "name": "DRS Fail Class",
+      "storage_bits": 8,
+      "valid_values": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "display": {
+        "0": "Steering control request is executable",
+        "1": "Reserved",
+        "2": "Steering control request is not executable (temporary)",
+        "3": "Steering control request is not executable (with failure decided)"
+      },
+      "boundary": "Independent Toyota steering-family diagnostic vocabulary; not exact-F33 proof."
+    }
+  },
+  "healthy_corpus": {
+    "routes": [
+      "37",
+      "3b",
+      "3c",
+      "3d",
+      "3e",
+      "3f",
+      "45"
+    ],
+    "logged_081_observations": 871888,
+    "b13_high2_counts": {
+      "0": 871642,
+      "1": 0,
+      "2": 246,
+      "3": 0
+    },
+    "interpretation": "Across the declared healthy corpus, high2=2 appears only in four startup episodes; high2=1 and high2=3 never appear.",
+    "startup_episodes": [
+      {
+        "route": "3c",
+        "duration_s": 0.874555,
+        "first_030_rel_s": 0.240438,
+        "b13_clear_rel_s": 0.994946,
+        "driver_torque_invalid_clear_rel_s": 0.955731,
+        "b13_clear_after_torque_valid_ms": 39.215,
+        "unique_030_frames_before_clear": 76
+      },
+      {
+        "route": "3d",
+        "duration_s": 0.871579,
+        "first_030_rel_s": 0.242282,
+        "b13_clear_rel_s": 0.994433,
+        "driver_torque_invalid_clear_rel_s": 0.973654,
+        "b13_clear_after_torque_valid_ms": 20.779,
+        "unique_030_frames_before_clear": 75
+      },
+      {
+        "route": "3f",
+        "duration_s": 0.874752,
+        "first_030_rel_s": 0.20038,
+        "b13_clear_rel_s": 0.954537,
+        "driver_torque_invalid_clear_rel_s": 0.913826,
+        "b13_clear_after_torque_valid_ms": 40.711,
+        "unique_030_frames_before_clear": 76
+      },
+      {
+        "route": "45",
+        "duration_s": 0.95451,
+        "first_030_rel_s": 0.211064,
+        "b13_clear_rel_s": 1.044417,
+        "driver_torque_invalid_clear_rel_s": 1.024561,
+        "b13_clear_after_torque_valid_ms": 19.856,
+        "unique_030_frames_before_clear": 84
+      }
+    ],
+    "route45_startup": {
+      "first_can_mono_s": 379.801025906,
+      "first_081_rel_s": 0.060279,
+      "first_030_rel_s": 0.211064,
+      "ready_assert_rel_s": 0.914363,
+      "driver_torque_invalid_clear_rel_s": 1.024561,
+      "b13_transition": "0x80 -> 0x00",
+      "b13_clear_rel_s": 1.044417,
+      "adjacent_application_payload_difference": "B13 only; security trailer changes as expected"
+    }
+  },
+  "dead_eps_corpus": {
+    "routes": {
+      "d0": {
+        "frames_081": 9882,
+        "b13_counts": {
+          "0xC0": 9882
+        },
+        "frames_030": 0
+      },
+      "d1": {
+        "frames_081": 5873,
+        "b13_counts": {
+          "0xC0": 5873
+        },
+        "frames_030": 0
+      },
+      "d2": {
+        "frames_081": 9104,
+        "b13_counts": {
+          "0xC0": 9104
+        },
+        "frames_030": 0
+      },
+      "d4": {
+        "frames_081": 13620,
+        "b13_counts": {
+          "0x80": 124,
+          "0xC0": 13496
+        },
+        "frames_030": 0
+      }
+    },
+    "d4_startup": {
+      "first_can_mono_s": 3785.784974815,
+      "first_081_rel_s": 0.060712,
+      "ready_assert_rel_s": 0.82383,
+      "first_b13_c0_rel_s": 3.786015,
+      "b13_80_to_c0_elapsed_s": 3.725304,
+      "transition": "0x80 -> 0xC0 and remains 0xC0",
+      "immediate_pre_application_hex": "00000018ffaebf0d00000004008000000000ffaeffaeffaeffae0000",
+      "immediate_post_application_hex": "00000018ffaebf0d0000000400c000000000ffaeffaeffaeffae0000",
+      "immediate_payload_difference": "B13 only",
+      "surrounding_state": {
+        "request_0x08a": "lateral ID 0 and pinion angle 0 both before and after transition",
+        "result_0x081_b11": "0x04 both before and after transition",
+        "result_0x081_low6": "0 both before and after transition",
+        "id_0x0d7_first8": "00000000000000df both before and after",
+        "id_0x025_first8": "00040000900000c1 both before and after",
+        "id_0x251_first8": "8000000080000080 both before and after in immediate +/-2 s window"
+      }
+    }
+  },
+  "request_loss_negative_control": {
+    "experiment": "FRC normal-Tx suppression with EPS/Brake alive",
+    "result": "0x081 B11 changes 0x04 -> 0x14 while B13 remains 0 and B16:B17 remains 59; state recovers when FRC Tx returns.",
+    "interpretation": "Brake has a request/source-loss supervisor distinct from the B13 steering-actuator/fail-class path."
+  },
+  "stale_030_bridge_reinterpretation": {
+    "artifact": "targets/camry-2026/raw-20260917/stale-030-bootstrap-valid-negative/install-stale-030-bridge.json",
+    "replayed_frame_hex": "000000002b000164000020002d420000000000010000000c0000000014ff61af",
+    "replayed_b6_hex": "0x01",
+    "replayed_driver_torque_invalid_bit": 1,
+    "sent_frames": 129,
+    "missed_slots": 0,
+    "native_030_return_gap_ms": 1293.293943,
+    "frc_after_acc_not_available": true,
+    "interpretation": [
+      "The experiment validly rules out mere raw 0x030 message presence as sufficient.",
+      "It does not isolate SecOC freshness as the only cause: the repeated payload itself kept the recovered B6[0] torque-validity/invalid gate asserted.",
+      "A fresh, accepted, semantically healthy EPS status continuity test remains distinct from the stale-presence test."
+    ],
+    "early030_unproven_support": {
+      "captured_native_030_hex": "0000000010000149000010001bc20000000000010000ffff0000000073092b96",
+      "captured_native_b6_hex": "0x01",
+      "first_non_replay_030_hex": "00000000000009410000080000120000000000010000000800000000498b5e61",
+      "first_non_replay_b6_hex": "0x09",
+      "note": "Both have B6[0]=1, so the first application-return publication is still in the torque-invalid/startup-validity state."
+    }
+  },
+  "strongest_inferences": [
+    "B13[7:6] is now a very strong candidate lateral fail-class field rather than an arbitrary whole-byte result ID extension.",
+    "Observed high2=2 behaves as a temporary/startup non-executable state; observed high2=3 behaves as failure-decided/confirmed in dead-EPS and post-bootstrap faulted states.",
+    "The exact 0x80->0xC0 d4 transition changes only B13 inside the 0x081 application payload, while the request plane and known request-loss supervisor stay stable.",
+    "The healthy startup resolution of high2=2 follows 0x030 B6[0] clearing by 19.856..40.711 ms in four independent starts. This is a strong temporal join, not proof that B6[0] is the sole reliability input.",
+    "The stale-030 negative should no longer be described as favoring freshness alone; payload validity and freshness remain confounded."
+  ],
+  "boundaries": {
+    "exact_b13_high2_oem_name_proven": false,
+    "exact_5283_to_b13_wire_join_proven": false,
+    "binary_value_1_semantics_proven": false,
+    "b6_bit0_is_sole_brake_reliability_input_proven": false,
+    "x2400_trigger_value_proven": false,
+    "production_masking_or_spoofing_authorized": false
+  },
+  "next_actions": [
+    "Add passive bootstrap logging for 0x081 B13[7:6], 0x030 B6[0], 0x030 B6[2]/B16[0]/B19[0], 0x51E READY, and FRC 0x1905/0x1906.",
+    "Recover or capture Operation-FFD 0x5283_1 synchronously with raw 0x081 to close the wire mapping directly.",
+    "Treat the existing stale-030 replay as a message-presence negative, not a healthy-status-continuity negative.",
+    "If testing prevention, distinguish a valid/fresh semantically healthy EPS status path from stale replay; do not promote any synthetic status masking to production behavior.",
+    "A bounded parked diagnostic that re-signs only the candidate 0x081 fail-class bits could test whether FRC X2400 consumes this field, but it would be a diagnostic causal test rather than a production fix."
+  ]
+}
