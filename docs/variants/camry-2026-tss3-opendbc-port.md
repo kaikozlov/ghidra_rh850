@@ -319,6 +319,28 @@ cadence now persists the already-collected non-replay frame/F181/FRC evidence in
 throwing it away. The invalid first run is retained under
 `targets/camry-2026/raw-20260917/early030-bootstrap-invalid-host-starvation/`.
 
+The next `8c36d5c8` live run is **bridge-valid but not yet a conclusive early-one-shot
+result**. The stale bridge sent 156 frames with zero missed slots and zero Panda TX blocks.
+Relative to the final real pre-handoff `0x030`, boot F181 appeared at +118.015 ms,
+FF00 send completed at +1066.095 ms, and the first non-replay `0x030` appeared only at
++1519.432 ms (+453.337 ms after FF00). An F181 request immediately after that frame already
+returned the exact application identity. Post-bootstrap FRC state was `0x1905=8000`
+(permission denied) and `0x1906=e080e0008080` (ACC Not Available asserted). However,
+the prior stale-only run's first native-return frame has the same startup payload shape, so
+the changed frame cannot be attributed uniquely to the explicit resident one-shot. The
+old runner also waited through an F181 transaction before stopping stale replay, extending
+stale traffic by roughly 42 ms after the first changed frame. This run is therefore stored
+as `early030-bootstrap-bridge-valid-oneshot-unproven`, not as a definitive negative on the
+one-shot itself.
+
+The follow-up resident keeps a compact 8-byte self-attestation record in the final proven
+retained high-tail bytes `FEBFFBF4..FEBFFBFB`: freshness callback RC, command-5 RC,
+lower-PDU Tx RC, transmitted-FV byte, and the exact forced `FV4||MAC28` trailer. The host
+now stops stale replay immediately on the first changed bus1 `0x030`, before any F181 read,
+then RMBA-reads that telemetry and requires the forced trailer to equal the first observed
+wire trailer. Only that byte-exact match plus three zero return codes qualifies the
+`early_fresh_030` hypothesis as actually exercised.
+
 **Current execution boundary:** VAR-155 proves the live native profile-2 B6 boundary and
 byte-exact local slot-4 signing. VAR-156 then deliberately installed the preserved
 native-application trailer on the modified ID11/target/100/100 application: all six samples

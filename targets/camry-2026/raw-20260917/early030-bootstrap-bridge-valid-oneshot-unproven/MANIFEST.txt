@@ -1,0 +1,54 @@
+2026-09-17 exact-Camry early-fresh-0x030 startup discriminator
+BRIDGE VALID / FRC FAULTED / ONE-SHOT WIRE IDENTITY UNPROVEN
+
+Vehicle: maintainer 2026 Toyota Camry Hybrid
+EPS: 8965F3307000 / 8A3113303100
+Kit source commit: 8c36d5c82bec829d68ebcf3c7c25394fd64e2107
+Mode: fresh ignition cycle, NRTD/READY=0, Park
+
+Pre-bootstrap FRC:
+  1903 = 01
+  1905 = 8080  (Cruise Control Permission allowed)
+  1906 = e080e0008000  (ACC Not Available clear)
+
+Stale bridge validity:
+  sent=156
+  missed_slots=0
+  max_send_gap_ms=17.535035
+  safety_tx_blocked_delta=0
+  CAN bus_off=0; total_tx_lost=0
+
+Timeline relative to last real pre-handoff 0x030 @ 1794060188680:
+  boot F181:                    +118.015 ms
+  upload/verify/trigger begin:  +221.729 ms
+  FF00 trigger send complete:  +1066.095 ms
+  first non-replay 0x030:      +1519.432 ms (+453.337 ms after trigger send)
+  later application F181 poll: +1764.939 ms
+
+First non-replay frame:
+  00000000000009410000080000120000000000010000000800000000498b5e61
+An immediate F181 request after that frame already returned exact application identity.
+The prior stale-only valid-negative run's first native-return frame had the same startup
+payload shape (000000000000094100000800001200000000000100000004...), so this run does
+not prove that the observed changed frame was the resident's explicit one-shot rather than
+ordinary stock startup publication.
+
+Post-bootstrap FRC:
+  1903 = 01
+  1905 = 8000  (Cruise Control Permission denied)
+  1906 = e080e0008080  (ACC Not Available asserted)
+
+Interpretation boundary:
+- Valid evidence that stale 0x030 cadence continuity was maintained through the outage.
+- Valid evidence that FRC ended in ACC-unavailable / cruise-permission-denied state.
+- NOT yet valid evidence that the resident's explicit early fresh 0x030 reached the wire.
+- Old runner also performed the immediate F181 transaction before stopping stale replay;
+  replay continued ~42 ms after first changed frame, which is undesirable after a possible
+  freshness advance.
+
+Follow-up instrumentation:
+- compact resident telemetry at FEBFFBF4..FEBFFBFB records freshness RC, command5 RC,
+  lower-Tx RC, transmitted FV byte, and exact forced FV4||MAC28 trailer;
+- host stops stale replay immediately upon first changed 0x030, before F181;
+- host RMBA-reads telemetry and requires exact forced-trailer == first wire trailer before
+  calling the early-one-shot hypothesis tested.
