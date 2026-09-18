@@ -166,8 +166,22 @@ not the existing CAN intercept relay. Such a test remains attractive because it 
 leave the EPS LocalRAM resident powered, but it should follow the extended-session
 ECUReset probe rather than be treated as an existing software capability.
 
-Thus GTS+ currently gives us **observability, not an obvious unlatch command**.
-`camry_f33_post_install_recovery.py` now snapshots the FRC and Brake live state DIDs
+A 2026-09-18 parked exact-car probe closes the remaining software-reset branch. The
+FRC accepts **programming session `10 02 -> 50 02 00 32 01 F4`**, and in the same
+continuous UDS session accepts **hard reset `11 01` without SecurityAccess**. Immediately
+after the reset, four F181 probes returned negative responses before application F181
+`8646F3315000` reappeared about **0.38 s** after the reset call returned, establishing a
+real selective FRC restart while the EPS remained powered. The restart did **not** recover
+DRCC/ACC: `1903/1905/1906` returned to `01 / 8000 / e080e0008080`, LDA remained disabled
+(`1501=0101`), PCS availability remained disabled (`1703=f020`), and PCS ESA/AES invalid
+flags remained asserted (`1705=ff18`). After restarting openpilot, `carState` remained
+Park/0 m/s with `cruiseAvailable=false`; the EPS resident path survived, with 299 neutral
+C7 frames observed in 3 s. Therefore the fault is not a simple volatile FRC application
+latch cleared by restarting that ECU; it is retained or immediately reconstructed from
+peer/persistent state. Raw summary: `targets/camry-2026/raw-20260918/frc-programming-reset/summary.json`.
+
+Thus GTS+ plus the programming-session probe now give us **a selective FRC restart, but
+not an unlatch/recovery command**. `camry_f33_post_install_recovery.py` now snapshots the FRC and Brake live state DIDs
 before and after the known DTC clear, treating newly added DDB-derived DIDs as
 best-effort until exact-car support is observed. The higher-value paired capture is a
 before/after `health-check`: if DTC bits clear and Brake EPS communication has returned

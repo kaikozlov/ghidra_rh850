@@ -1,0 +1,64 @@
+{
+  "date": "2026-09-18",
+  "vehicle": "2026 Toyota Camry Hybrid",
+  "frc": {
+    "request_id": "0x792",
+    "response_id": "0x79A",
+    "f181": "8646F3315000"
+  },
+  "preconditions": {
+    "vehicle_speed_control_value_kph": 0.0,
+    "parked_confirmed_by_operator": true,
+    "eps_ram_resident_bootstrapped": true,
+    "frc_fault_state": {
+      "1903": "01",
+      "1905": "8000",
+      "1906": "e080e0008080"
+    }
+  },
+  "probe": {
+    "programming_session_request": "1002",
+    "programming_session_response": "5002003201f4",
+    "continuous_sequence": ["10 02", "11 01"],
+    "hard_reset_accepted": true,
+    "post_reset_f181_negative_samples": 4,
+    "first_application_f181_after_reset_ms": 377.6,
+    "returned_f181": "8646F3315000"
+  },
+  "post_reset_frc_state": {
+    "1903": "01",
+    "1905": "8000",
+    "1906": "e080e0008080",
+    "1501": "0101",
+    "1601": "00000000",
+    "1703": "f020",
+    "1705": "ff18"
+  },
+  "decoded_post_reset_state": {
+    "cruise_control_permission": "not allowed",
+    "acc_not_available_icon": "on",
+    "lda_control": "disabled",
+    "lta_control": "enabled but switch off",
+    "pcs_availability": "disabled",
+    "pcs_esa_invalid": "on",
+    "pcs_aes_invalid": "on"
+  },
+  "openpilot_restart": {
+    "car_state": {
+      "vEgo_mps": 0.0,
+      "standstill": true,
+      "gear": "park",
+      "cruise_available": false,
+      "cruise_enabled": false,
+      "steer_fault_temporary": false,
+      "steer_fault_permanent": false,
+      "car_not_ready": false
+    },
+    "c7_observation": {
+      "window_seconds": 3.0,
+      "count": 299,
+      "sample": "07c7c70000260000"
+    }
+  },
+  "conclusion": "The exact Camry FRC accepts 10 02 and then 11 01 without SecurityAccess, producing a selective FRC restart while the EPS remains powered. The FRC returns to the same application identity after roughly 0.38 s, but the DRCC/ACC fault state remains or is immediately reconstructed. Restarting openpilot resumes neutral C7 traffic and does not erase the EPS RAM-resident setup."
+}
