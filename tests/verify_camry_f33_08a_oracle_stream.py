@@ -48,10 +48,10 @@ def main() -> int:
     assert meta["target"] == {"software_id": "8965F3307000", "codeflash_sha256": build.IMAGE_SHA256}
     assert (len(resident), sha(resident)) == (oracle.RESIDENT_SIZE, oracle.EXPECTED_RESIDENT_SHA256)
     assert (len(helper), sha(helper)) == (oracle.HELPER_SIZE, oracle.EXPECTED_HELPER_SHA256)
-    assert sha(stage) == oracle.EXPECTED_STAGING_SHA256 and len(stage) == 1140
+    assert sha(stage) == oracle.EXPECTED_STAGING_SHA256 and len(stage) == 1136
     assert sha(payload) == oracle.EXPECTED_PAYLOAD_SHA256 and len(payload) == 0x1000
     assert meta["resident"]["headroom"] == 112
-    assert meta["helper"]["headroom"] == 680 and meta["helper"]["word_count"] == 86 and meta["helper"]["execution"] == "direct-from-GlobalRAM" and meta["helper"]["base"] == "0xFEF07C00"
+    assert meta["helper"]["headroom"] == 684 and meta["helper"]["word_count"] == 85 and meta["helper"]["execution"] == "direct-from-GlobalRAM" and meta["helper"]["base"] == "0xFEF07C00"
     assert meta["staging"]["resident_offset"] == 0x180 and meta["staging"]["helper_offset"] == 0x31C
 
     print("== firmware-pinned transport ==")
@@ -79,6 +79,8 @@ def main() -> int:
     assert int.from_bytes(image[0x25E94:0x25E98], "little") == 0xFEBE5651
     assert int.from_bytes(image[0x25E98:0x25E9C], "little") == 0x100
     helper_source = build.HELPER_SOURCE.read_text()
+    assert "ld.bu -0x61ae[gp]" in helper_source  # durable physical DCM B1 tag
+    assert "ld.hu -0x61af[gp]" not in helper_source  # B0 SID is not durable
     assert helper_source.count("jarl32 command5_sync, lp") == 1
     assert helper_source.count("jarl32 lower_can_write, lp") == 1
     assert "movea 53, r0, r6" in helper_source and "movea 0x00f0, r0, r6" in helper_source

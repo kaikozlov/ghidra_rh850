@@ -435,5 +435,10 @@ application but then read back an all-zero high-tail resident/state and no low
 helper installation. The corrected carrier therefore does not copy executable
 code after startup: the helper stays at the already-live-qualified executable
 GlobalRAM slot `FEF07C00` and is invoked there directly; low RAM is data/state
-only. The superseded payload must not be rerun. Field procedure:
+only. The superseded payload must not be rerun. The subsequent live retry proved the
+corrected resident survives and initializes, but its first C9 request left
+`request_count=0`; the ingress tag check was still incorrectly requiring DCM
+B0:B1=`C9 C9`. The oracle now follows the already-live C6/C7 rule and keys only
+on durable N-SDU **B1=`C9`**, because B0 is the unsupported SID and is not a
+stable recurring-carrier byte. Field procedure:
 [`camry_f33_08a_oracle_stream.md`](../../exploit/ephemeral_runtime/camry_f33_08a_oracle_stream.md).
