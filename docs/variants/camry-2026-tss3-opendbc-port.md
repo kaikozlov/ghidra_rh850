@@ -694,7 +694,7 @@ sideband. Do not send `0x08A` to EPS: the EPS contributes only selector-4 comman
 service, while comma is the final chassis-bus sender.
 
 **Implementation checkpoint — selective ID11 replacement (not yet a road result):**
-`kai-openpilot@ddbb1be25` with nested opendbc `38a8068f` implements the request-plane
+`kai-openpilot@0f45d16d3` with nested opendbc `8f302af9` implements the request-plane
 shape selected by the September-18 oracle experiments. The key invariant is that the FRC
 continues to own the complete native `0x08A` application envelope. For each observed
 source generation:
