@@ -236,7 +236,7 @@ def main() -> int:
             self.calls = []
         def read_state(self):
             return dict(self.state)
-        def sign(self, domain, *, seq, cf_gap_ms=None):
+        def sign(self, domain, *, seq, cf_gap_ms=None, skip_flow_control=False, pre_cf_delay_ms=0.0):
             self.calls.append((domain, seq, cf_gap_ms))
             self.state["last_seq"] = seq
             return {
@@ -250,6 +250,13 @@ def main() -> int:
     assert bench["cf_gap_ms"] == 0.0 and bench["stmin_override_used"] is True
     assert [x[1:] for x in fs.calls] == [(8, 0.0), (9, 0.0), (10, 0.0)]
     assert all("scheduled_start_lateness_ms" in row for row in bench["rows"])
+    fs2 = FakeSession()
+    bench_fixed = oracle.benchmark(
+        fs2, count=2, period_ms=25.0, cf_gap_ms=0.0,
+        skip_flow_control=True, pre_cf_delay_ms=2.0,
+    )  # type: ignore[arg-type]
+    assert bench_fixed["skip_flow_control"] is True and bench_fixed["pre_cf_delay_ms"] == 2.0
+    assert [x[1:] for x in fs2.calls] == [(8, 0.0), (9, 0.0)]
 
     print("== launcher contract ==")
     launcher = (ROOT / "exploit/ephemeral_runtime/camry_f33_08a_oracle_stream_launcher.sh").read_text()
@@ -260,6 +267,7 @@ def main() -> int:
     assert "./f33-08a-oracle transport-probe-fixed-delay DELAY_MS [OUTPUT_JSON]" in launcher
     assert "./f33-08a-oracle benchmark [COUNT] [OUTPUT_JSON]" in launcher
     assert "./f33-08a-oracle benchmark-fast [COUNT] [OUTPUT_JSON]" in launcher
+    assert "./f33-08a-oracle benchmark-fixed-delay [COUNT] [OUTPUT_JSON]" in launcher
     assert 'benchmark-fast --count "$count" --period-ms 25 --cf-gap-ms 0' in launcher
     assert "--period-ms 25" in launcher
     plan = oracle.plan(None)

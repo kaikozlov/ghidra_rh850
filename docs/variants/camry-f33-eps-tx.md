@@ -501,3 +501,11 @@ need not necessarily wait to *receive* FC. The next bounded test sends FF, waits
 a fixed 5 ms, then submits all five CFs in one Panda batch; this leaves the live
 resident and authenticated domain unchanged and tests receiver readiness rather
 than host-observed FC latency.
+
+### 12.7 Receiver-readiness threshold is 1.5-2.0 ms on the live sample
+
+Single KATs without waiting for host receipt of FC established a sharp boundary:
+0/1.0/1.5-ms FF->CF delays failed before the resident, while 2.0 ms and 5.0 ms
+succeeded with full RTTs of 13.538 ms and 16.282 ms respectively. The sustained
+candidate therefore uses a conservative 2-ms fixed delay, native Panda CF batch,
+and the unchanged non-actuating known-answer domain on a 25-ms schedule.
