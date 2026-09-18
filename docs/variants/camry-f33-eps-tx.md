@@ -606,10 +606,12 @@ confirmation, and the resulting signed ID0 transmit.
 Neither development Param is enabled by default, and release builds refuse both activation
 paths. The field order is therefore strictly:
 
-1. install the already-qualified EPS oracle resident in NRTD, then NRTD→READY without OFF;
-2. first enable/test **transparent** `ToyotaTss308aId0` stationary and verify source suppression,
-   bus-0 publication, `0x081`, DTCs, and absence of duplicate `0x08A` downstream;
-3. disable transparent mode, enable **signed** `ToyotaTss308aSignedId0`, and require successful
-   native MAC recovery/verification before the first arm;
+1. with **no EPS oracle resident required**, enable/test transparent
+   `ToyotaTss308aId0` stationary and verify source suppression, byte-exact Bus-0 publication,
+   `0x081`, DTCs, and absence of duplicate `0x08A` downstream;
+2. disable transparent mode and fully power-cycle before the signed phase;
+3. for signed mode only, install the already-qualified EPS oracle resident in NRTD, enable
+   `ToyotaTss308aSignedId0`, then transition NRTD→READY without an EPS power-off and require
+   successful native MAC recovery/verification before the first arm;
 4. keep Target Lateral ID 0 throughout; only after that synthetic stream is native-clean should
    any longitudinal request/application field be introduced.
