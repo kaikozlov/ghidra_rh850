@@ -10,6 +10,7 @@ Boot flow, execution architecture, and the control/safety partition.
 | [toyota-openpilot-porting-contract.md](toyota-openpilot-porting-contract.md) | Pinned comma Toyota prior art translated into the TSS3 command/state/ownership/safety roadmap |
 | [toyota-tss3-minimal-runtime.md](toyota-tss3-minimal-runtime.md) | Evidence-bounded openpilot/opendbc/Panda minimum for the exact-F33 lateral path |
 | [toyota-tss3-vehicle-movement-arbitration.md](toyota-tss3-vehicle-movement-arbitration.md) | Toyota vehicle-movement-manager request/arbitration/result/target architecture joined to TSS3 `0x08A` / `0x081` / B6 |
+| [toyota-tss3-era-patent-landscape.md](toyota-tss3-era-patent-landscape.md) | 2019-2026 Toyota/Toyota-affiliated patent families for VMM arbitration, fail classes, source rejection, gateway topology, SecOC, steering, and attention tracking |
 | [system-mode-cluster.md](system-mode-cluster.md) | System-mode cluster: shutdown/reset mode machinery and handoff paths |
 
 These reports describe *how the firmware runs*. For what the firmware *stores*,

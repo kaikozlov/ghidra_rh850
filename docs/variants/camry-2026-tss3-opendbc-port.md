@@ -190,6 +190,30 @@ fail-class state. `5283` is recorder-domain data, not yet a CAN-byte mapping, bu
 it is now the primary semantic join for the manual's skid/brake
 `lateral-control-system-unachievable` condition.
 
+A Toyota follow-on motion-manager patent adds an unusually strong independent
+semantic match. US20230082947A1 names a **lateral control system fail class**
+and describes four semantic states: normal, protective-control, abnormal but
+not yet confirmed with control invalid, and confirmed failure. It also says
+actuator reliability can carry an influenced vehicle-speed range, a
+malfunctioning portion, and an operation mode, with inter-actuator
+communication explicitly allowed as the malfunctioning portion. This does not
+supply the F33 numeric encoding: the patent example uses a compact state value,
+whereas GTS exposes `5283_1` as a u8 recorder field. It does give us a concrete
+state model and search vocabulary for the onset capture.
+
+A patent-guided GTS corpus search also surfaced the master strings **`Driving
+Force Lower Limit Request Rejection Factors`**, **`Driving Force Upper Limit
+Request Rejection Factors`**, and **`PCS Rejection Request Determination Based
+On Functional Safety`**. Separately, Toyota US20230166772A1 describes a motion
+manager intentionally invalidating an ADAS request and returning request
+rejection information so the suppressed application does not diagnose an
+abnormality merely because its plan is not selected. The three GTS strings are
+not yet mapped to an exact F33 ECU/DID/recorder item, so they do not prove the
+Camry uses that exact mechanism. They do make request-rejection/status feedback
+a concrete Toyota concept to investigate alongside source suppression rather
+than treating native-request blocking as the whole takeover contract. See
+[`../architecture/toyota-tss3-era-patent-landscape.md`](../architecture/toyota-tss3-era-patent-landscape.md).
+
 The strongest exact-Camry candidate is now Brake-owned, ordinary-P5-SecOC-shaped **`0x081 B13`**.
 Its low six bits were already recovered as Toyota Operation-FFD `5285` arbitration-result
 lateral ID. Two healthy pre-brick controls never set B13 bit6: route
