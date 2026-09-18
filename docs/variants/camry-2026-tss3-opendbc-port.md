@@ -681,9 +681,9 @@ integration architecture. The production-shaped F33 path uses the measured relay
 Toyota-B repin:
 
 ```text
-Panda bus0: chassis / Brake state and 0x081 result plane
+Panda bus0: chassis / Brake state, 0x081 result plane, and post-repin EPS diagnostics / MAC-oracle transport (0x7A1 -> 0x7A9)
 Panda bus2: FRC source plane, including protected native 0x08A
-Panda bus1: radar/object traffic plus EPS diagnostics / MAC-oracle transport
+Panda bus1: radar/object traffic
 ```
 
 The chain remains **FRC-internal feature-owner selection -> generic request `5282` /
@@ -691,10 +691,10 @@ protected `0x08A` egress -> downstream Brake/VMM request arbitration -> `0x081`
 arbitration result/status + post-arbitration request generation -> final B6**. Openpilot
 now enters at that native request boundary rather than bypassing it with a direct B6
 sideband. Do not send `0x08A` to EPS: the EPS contributes only selector-4 command-5 CMAC
-service, while comma is the final chassis-bus sender.
+service, while comma is the final chassis-bus sender. The EPS diagnostic/oracle route follows the repin too: `0x7A1 -> 0x7A9` is on Panda bus0, not bus1. The September-18 installer/runtime bug that still used bus1 caused both the NRTD/F181 install failure and would have broken the on-road oracle worker; the installer, host worker, Panda TX whitelist, kit manifest, and audited oracle metadata are now all bound to bus0.
 
 **Implementation checkpoint — selective ID11 replacement (not yet a road result):**
-`kai-openpilot@0f45d16d3` with nested opendbc `8f302af9` implements the request-plane
+`kai-openpilot@d42ecbb24` with nested opendbc `feb0c379` implements the request-plane
 shape selected by the September-18 oracle experiments. The key invariant is that the FRC
 continues to own the complete native `0x08A` application envelope. For each observed
 source generation:
