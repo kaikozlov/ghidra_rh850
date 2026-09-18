@@ -82,12 +82,13 @@ The pre-clear snapshot is written atomically **before** the first clearing
 request. A later timeout preserves that snapshot, completed clear responses,
 and the failure instead of discarding the diagnostic evidence. Six offline
 regression tests cover these cases, including an injected mid-clear failure
-and final Panda ownership cleanup. The vehicle-level outcome is already known:
-although the communication-warning/DTC state could be cleared, **DRCC did not
-re-enable in the same ignition cycle after the EPS programming transition**.
-A full vehicle restart restored DRCC and simultaneously removed the volatile
-signer. These tests therefore preserve diagnostic evidence; they do not define
-a recovery path.
+and final Panda ownership cleanup. The historical vehicle result remains useful:
+DTC clear alone did **not** re-enable DRCC in the same ignition cycle after the
+EPS programming transition. September-18 live work supersedes the older conclusion
+that only a full vehicle restart could recover it: Brake/EPB `10 02 -> 11 01`
+followed by FRC `10 02 -> 11 01` restores cruise permission/LDA/PCS state while
+leaving the EPS RAM resident powered. Route `0000010c--506d7277c7` then road-
+qualifies that recovery under stock adaptive cruise plus openpilot lateral.
 
 ## Completed host-loss correction
 
@@ -126,12 +127,15 @@ any stock-HUD replacement remain unresolved rather than merely “waiting for a
 visual test.” See `camry_2026_stock_harness_topology.json` and the source-hashed
 `camry_20260915_port_evidence_audit.json` for the independent retained census.
 
-The actual successful steering segments report conventional cruise (`0x251`
-B0 `0x88/0x90`), not adaptive operation. Camry now reports that through ordinary
-`cruiseState.nonAdaptive`; unmodified openpilot `car_events.py` maps it to
-`wrongCruiseMode`. This intentionally prevents treating the historical
-conventional-cruise steering demonstration as a completed stock-DRCC port.
-No synthetic engagement flag or new controller veto was added.
+The September-10 steering witnesses report conventional cruise (`0x251` B0
+`0x88/0x90`) and remain valid historical authority evidence. September-18 route
+`0000010c--506d7277c7` closes the previously missing adaptive case: during the
+919.572-s stock-adaptive-cruise + openpilot-lateral overlap, raw `0x251 B0` is
+`0xC0` on 1,100 samples and `0xA0` twice, with **zero** `0x88/0x90` conventional
+frames. `carState.cruiseState.nonAdaptive` is false throughout the 91,707
+cruise-enabled samples, `carControl.longActive` remains false, and factory lateral
+request/result IDs remain 0. No synthetic engagement flag or new controller veto
+was added.
 
 The generic angle-rate checker did not enforce an active absolute angle cap.
 TSS3 now explicitly rejects targets outside ±1745 raw in addition to its usual

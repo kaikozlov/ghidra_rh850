@@ -1,17 +1,17 @@
 # Toyota TSS3 openpilot bounty evidence
 
-> **September-15 evidence-audit supersession:** historical steering evidence
-> remains valid, but the preceding production-completeness, radar units,
-> tire-stiffness, HUD/cancel ownership, cached-lag, and continuous-command-loss
-> claims are corrected in [the current capability matrix](camry-2026-capability-matrix.md)
-> and [the evidence review](camry-2026-port-evidence-review.md). The v17
-> supervised helper is not road-qualified; working steering samples do not
-> establish an adaptive-cruise combination.
+> **September-18 road-qualification supersession:** the September-10 steering
+> witnesses remain valid historical authority evidence, while route
+> `0000010c--506d7277c7` now closes the previously missing same-ignition stock-
+> adaptive-cruise coexistence case after the Brake→FRC recovery sequence. Current
+> capability boundaries remain in [the capability matrix](camry-2026-capability-matrix.md)
+> and [the evidence review](camry-2026-port-evidence-review.md).
 
 **Issue:** [commaai/opendbc#3695 — Toyota TSS3 car port](https://github.com/commaai/opendbc/issues/3695)
 
-**Status:** bounty-level control evidence assembled; exact working Camry runtime
-preserved; upstream cleanup and review packaging remain.
+**Status:** exact-Camry openpilot lateral and stock-adaptive-cruise coexistence are
+road-demonstrated in the same ignition cycle; exact working runtime and recovery
+artifacts are preserved; upstream cleanup/review packaging remain.
 
 **Evidence sources:** direct same-car rlog (`firmware-static` is used only for the
 target-specific F33 wire/security boundary) plus an independent Corolla field
@@ -32,7 +32,48 @@ separates the control result from the development mechanism used to obtain it:
 
 ## 1. Camry lateral: direct route evidence
 
-### Primary result
+### September 18 final-integration coexistence result
+
+Route `0000010c--506d7277c7` is the strongest current exact-Camry integration
+record. It was captured immediately after the parked same-ignition recovery sequence
+that selectively reset **Brake/EPB first and FRC second** while leaving the EPS
+RAM-resident lateral helper powered. Across 30 rlogs / 1,743.811 s, the route contains
+13 openpilot lateral-active episodes totaling **919.594 s** and **19.772 km**.
+Stock adaptive cruise overlaps those intervals for **919.572 s**; all 91,707
+cruise-enabled `carState` samples are adaptive (`nonAdaptive=false`), while
+`carControl.longActive` is never asserted.
+
+The steering result is stronger than the historical route because it is both longer
+and coexists with normal Toyota DRCC. There are 91,570 active functional-C7 commands;
+91,568 receive successful Panda TX returns. The two rejected nonzero C7 frames occur
+only after `latActive` has already fallen false at disengagement transitions. Active
+sequence progression has zero mismatches, with a 9.845-ms median / 13.523-ms p99
+inter-command interval. Target angle spans -31.746..25.328 deg and measured steering
+-31.3..24.8 deg. Across the full active population the best tested command lead is
+260 ms, with **r=0.9939** and **0.505-deg MAE**; with `steeringPressed=false` and
+|driver torque|<=0.5 N.m, the result is **r=0.9962 / 0.455 deg**.
+
+Toyota's own request/result traffic separates the two controllers. During openpilot
+`latActive`, all **36,779** native `0x08A` lateral request IDs and all **30,652**
+`0x081` lateral result IDs are `0` (No Request / manual lateral), while Toyota
+longitudinal request IDs remain active. During the adaptive+latActive overlap,
+`0x08A` upper longitudinal request ID is 11 on 36,777/36,779 samples, lower request
+ID is primarily 17 (36,709 samples), and `0x081` returns longitudinal result ID11 on
+26,339 samples. Raw cruise display `0x251 B0` is `0xC0` on 1,100 overlap frames and
+`0xA0` twice, with zero historical conventional `0x88/0x90` frames. The route also
+includes a **15.871-s** stop below 0.5 m/s while the adaptive+lateral overlap remains
+selected.
+
+No permanent steering fault occurs. Thirteen temporary-fault samples are confined
+to segment 29 after the drive, in Park with `latActive=false`, alongside parked
+shutdown TX rejects; they are not a road-control dropout. The route records openpilot
+`2768fa575fe16e79e1b9817b2c33d76183a05dd0`, branch `tss3`, version `0.11.2`.
+All 30 source-rlog SHA-256 values and the reduction are retained at
+`targets/camry-2026/raw-20260918/recovered-road-drive/summary.json`; the raw rlogs/qlogs
+are archived outside git at
+`/Users/kai/dev/inspect/logs/camry-2026/2026-09-18/0000010c--506d7277c7/`.
+
+### Historical primary authority result
 
 Route `0000008d--a9f348691a` is the primary working-lateral record. Across 11
 segments it contains eight lateral-active episodes totaling 167.289 seconds and
@@ -180,27 +221,24 @@ longer reachable at preservation time, but rebuilding the recovered source emits
 the complete recorded SHA-256 exactly; the retained binary is therefore the same
 recorded identity under the ordinary SHA-256 collision assumption.
 
-Entering EPS programming recorded historical U0131-87 faults and disabled Toyota
-TSS/DRCC for the demonstrated ignition cycle, so normal non-adaptive cruise was
-used for engagement. On this exact car, the already-proven parked/READY DTC-clear
-sequence can remove that dash-warning state without cycling EPS power: physical
-UDS `14 FF FF FF` on the six controllers that accept it, then functional OBD
-Mode 04 on `0x7DF` for the five legislated P5 responders. Exact-F33 SID 14 is
-DTC-clear processing, not ECU reset or flash programming, so it does not
-inherently remove the RAM signer.
+Entering EPS programming can record U0131-87 and place Toyota TSS/DRCC in a
+peer fail-safe state. The previously proven DTC-clear path removes the warning/DTC
+memory but, by itself, did not restore DRCC in the same ignition cycle. September-18
+live probing recovered the missing stateful restart sequence without cycling EPS:
 
-Car-kit v16 packages the maintenance/diagnostic sequence as
-`./f33-secoc recover-drcc`. The command first preserves SID19 state from all 11
-known responders, dynamically binds each physical address to the responding
-stock-Toyota-B diagnostic bus, executes the proved clear transports, requires
-zero remaining `status&0xAF` records, then reads FRC DIDs `0x1903`, `0x1905`,
-and `0x1906`. Its positive verdict would require FRC cruise permission and no
-ACC-not-available indication. The vehicle-level result is nevertheless already
-negative: **clearing the communication-warning/DTC state did not re-enable DRCC
-in the same ignition cycle after the volatile-signer programming bootstrap**.
-Only a full vehicle restart restored DRCC, which also removed the RAM signer.
-The command is therefore retained for evidence collection, not as the proposed
-runtime recovery mechanism.
+1. Brake/EPB `0x7B0`: `10 02 -> 11 01` (no SecurityAccess required);
+2. wait for application F181 `F152633K0000` to return (~1.46 s);
+3. FRC `0x792`: `10 02 -> 11 01` (no SecurityAccess required);
+4. wait for F181 `8646F3315000` to return (~0.38 s).
+
+Brake reset alone clears the FRC PCS-availability / ESA-AES-invalid inputs but leaves
+DRCC permission denied. Resetting FRC after Brake is healthy changes `1905` from
+`8000` to `8080` (Cruise Control Allowed), clears the ACC-not-available request,
+enables LDA, and leaves PCS availability/invalid state healthy. The EPS RAM resident
+survives throughout. Route `0000010c--506d7277c7` is the subsequent road proof that
+this is a real recovery mechanism rather than only a parked diagnostic-state change.
+The older `recover-drcc` DTC-clear command remains useful for preserving diagnostic
+evidence, but the dependency-ordered resets are the actual same-ignition recovery.
 
 ## 3. Corolla TSS3 longitudinal proof of concept
 

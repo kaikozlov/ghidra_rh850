@@ -77,12 +77,12 @@ part of preparation. Consequently the working hypothesis is **peer fail-safe /
 communication-loss state that survives EPS application return**, with bootstrap
 latency as an aggravating factor rather than the sole explanation.
 
-The exact-F33 same-cycle outcome is already negative. The parked/READY diagnostic
-clear can remove the communication-warning/DTC state while leaving the RAM resident
-intact, but **DRCC did not re-enable after that clear in the same ignition cycle**.
-Only a full vehicle restart restored DRCC, which also removed the RAM signer. The
-historical `recover-drcc` command remains useful for preserving SID19 evidence, but
-it is diagnostic/forensic tooling rather than a runtime recovery strategy.
+The original DTC-clear-only same-cycle experiment was negative. The parked/READY
+diagnostic clear can remove the communication-warning/DTC state while leaving the
+RAM resident intact, but **DRCC did not re-enable after that clear by itself**. The
+historical `recover-drcc` command therefore remains useful for preserving SID19
+evidence rather than being the recovery mechanism. September-18 live work below
+supersedes the earlier conclusion that a full vehicle power cycle was required.
 
 Current GTS+ exposes several state layers below DTC storage. `ABS_P5` DID `0x102D`
 provides live `Fail Status` (MSB0 bit57) and `Fail Control` (bit58), while DID
@@ -146,13 +146,13 @@ new session; the flash writer's `10 81` is likewise suppressed-response default 
 session or Toyota-private DiagnosticSessionControl value. The ReproStd sequence enters
 `10 02`, then performs level-1 SecurityAccess (`27 01 -> 67 01 || seed[16]`, followed
 by `27 02 || key[16] -> 67 02`) before the flash flow, whose tail later issues `11 01`.
-That makes **programming + SecurityAccess** the strongest remaining software-only reset
-candidate. The repository does not contain the exact `8646F3315000` CUW, so its exact
-ServiceAuthKey is unproved. Six available `0x792` FRC CUWs (`8646F1.../F4...` families)
-all share ServiceAuthKey `3A8A90AE0ED81B6C37E21C1C5179A93E`, SecurityProperty2
-`0x9C`, and ReproMethod `0x07`; this is useful cross-family evidence but must not be
-promoted to the exact Camry without a live/key-validation join. Programming-session
-behavior on the exact Camry remains untested.
+That made **programming + SecurityAccess** the strongest software-only reset
+candidate before the live probe. The repository does not contain the exact
+`8646F3315000` CUW; six available `0x792` FRC CUWs (`8646F1.../F4...` families)
+share ServiceAuthKey `3A8A90AE0ED81B6C37E21C1C5179A93E`, SecurityProperty2
+`0x9C`, and ReproMethod `0x07`. The September-18 exact-car probe below makes the
+credential transfer unnecessary for reset: programming-session `10 02` followed
+by `11 01` is accepted without SecurityAccess.
 
 The stock comma harness cannot power-cycle the FRC. Panda's production `drive_relay`
 controls the harness-box solid-state CAN0/CAN2 intercept pair only. The second
@@ -197,8 +197,34 @@ simultaneous**: reset Brake/VMM first, then reset FRC. FRC-only reset leaves the
 Brake-only reset clears the upstream PCS invalid input but leaves the FRC DRCC/LDA latch.
 Raw summary: `targets/camry-2026/raw-20260918/brake-frc-recovery/summary.json`.
 
+The subsequent road route `0000010c--506d7277c7` closes the practical recovery
+question rather than stopping at parked diagnostics. Its 30 rlogs span 1,743.811 s
+and contain 13 openpilot lateral-active episodes totaling **919.594 s** and
+**19.772 km** while stock adaptive cruise overlaps for **919.572 s**. Openpilot
+`longActive` is never asserted. C7 contributes 91,570 active commands at ~100 Hz;
+91,568 have successful Panda TX returns, and the two rejected nonzero frames occur
+only after `latActive` has already fallen false at disengagement transitions. Active
+sequence continuity has zero mismatches. C7 target angle spans -31.746..25.328 deg,
+measured steering spans -31.3..24.8 deg, and the full active population has Pearson
+r=0.9939 / 0.505-deg MAE at the best tested 260-ms command lead; the low-driver subset
+improves to r=0.9962 / 0.455 deg. No permanent steering fault occurs; the 13 temporary
+fault samples are all parked/inactive shutdown samples in segment 29.
+
+The coexistence classification is independently visible on Toyota traffic. During
+openpilot `latActive`, all 36,779 native `0x08A` lateral request IDs and all 30,652
+`0x081` lateral result IDs are **0**, so factory LTA is not the steering source.
+At the same time stock longitudinal is active: during the adaptive-cruise overlap,
+`0x08A` upper request ID is 11 on 36,777/36,779 frames, the lower request is primarily
+ID17 (36,709 frames), and `0x081` returns longitudinal result ID11 on 26,339 samples.
+The route also contains a 15.871-s <0.5-m/s stop while the adaptive+lateral overlap
+remains selected. Source hashes and the complete derived reduction are retained in
+`targets/camry-2026/raw-20260918/recovered-road-drive/summary.json`; the 30 rlogs and
+30 qlogs are archived outside git under
+`/Users/kai/dev/inspect/logs/camry-2026/2026-09-18/0000010c--506d7277c7/`.
+
 Thus GTS+ plus the programming-session probes now provide a concrete **same-ignition
-recovery sequence that preserves the EPS RAM resident**. `camry_f33_post_install_recovery.py` now snapshots the FRC and Brake live state DIDs
+recovery sequence that preserves the EPS RAM resident**, and route `10c` road-qualifies
+that recovery with stock adaptive cruise. `camry_f33_post_install_recovery.py` now snapshots the FRC and Brake live state DIDs
 before and after the known DTC clear, treating newly added DDB-derived DIDs as
 best-effort until exact-car support is observed. The higher-value paired capture is a
 before/after `health-check`: if DTC bits clear and Brake EPS communication has returned
