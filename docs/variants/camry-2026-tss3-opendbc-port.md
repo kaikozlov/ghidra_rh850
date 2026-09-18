@@ -182,7 +182,13 @@ describes FRC behavior record `X2400 Lateral Control System Malfunction` as the 
 **lateral-control-system-unachievable signal from the skid/brake controller**; the
 associated fail-safe chart requires the malfunction to be resolved and the ignition
 cycled before normal operation returns. Current GTS+ independently supplies the exact
-`X2400` behavior name but not that wire-field encoding.
+`X2400` behavior name but not that wire-field encoding. The recovered current TSS3
+recorder supplies a stronger intermediate semantic oracle: **`5283` byte 1 =
+`Lateral control system fail class status`**. Its remaining bytes separately carry
+drivetrain, auto-brake, parking-brake, driver-brake, and stand-still-control
+fail-class state. `5283` is recorder-domain data, not yet a CAN-byte mapping, but
+it is now the primary semantic join for the manual's skid/brake
+`lateral-control-system-unachievable` condition.
 
 The strongest exact-Camry candidate is now Brake-owned, ordinary-P5-SecOC-shaped **`0x081 B13`**.
 Its low six bits were already recovered as Toyota Operation-FFD `5285` arbitration-result
@@ -218,6 +224,13 @@ prerequisite for a **selective `C0 -> healthy-result` re-signing**
 experiment. It still does not solve the first programming-bootstrap interval before the
 resident exists; preventing that first bad publication or eliminating application
 downtime remains the preferred architecture.
+
+The decisive onset capture should therefore sample **`5283` together with
+`5285/57DE`, raw `0x081`, FRC `1905/1906`, and Brake `102D/102F`** across the
+first EPS application outage. If `5283_1` changes before/with `0x081 B13=C0`,
+that joins Toyota's named fail class to the network symptom. If `5283_1` stays
+healthy while B13 becomes `C0`, the result ID is a different state and should
+not be filtered as though it were the manual's unachievable signal.
 
 Retained comparison:
 `targets/camry-2026/raw-20260917/brake-frc-081-fault-status/`.

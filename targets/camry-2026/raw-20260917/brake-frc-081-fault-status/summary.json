@@ -138,5 +138,18 @@
     "stock_harness": "restored Toyota-B topology observes Bus-4 on unsplit Panda bus1, so native 0x081 cannot be suppressed by the stock CAN0/CAN2 relay",
     "whole_frame_drop": "not preferred: sustained loss risks replacing X2400 with a communication/missing-message fail-safe"
   },
+  "toyota_recorder_oracle": {
+    "boundary": "recorder-domain semantic state; no CAN-byte mapping is claimed",
+    "byte1": "Lateral control system fail class status",
+    "data_id": "0x5283",
+    "next_join": [
+      "0x5283 byte1",
+      "0x5285 arbitration-result lateral ID",
+      "0x57DE arbitration-result pinion angle",
+      "raw 0x081 B13",
+      "FRC 0x1905/0x1906",
+      "Brake 0x102D/0x102F"
+    ]
+  },
   "vehicle": "2026 Toyota Camry Hybrid, exact maintainer car"
 }

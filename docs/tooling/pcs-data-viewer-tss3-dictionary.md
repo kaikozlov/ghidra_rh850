@@ -55,6 +55,13 @@ The most important contiguous dictionary block is `0x5280..0x5285`:
 | `5282_2` | **TSS request - pinion angle** |
 | `5282_3` | Steering assist gain |
 | `5282_4` | Damping control gain |
+| `5283_1` | **Lateral control system fail class status** |
+| `5283_2` | Drivetrain fail-class (convenience) status |
+| `5283_3` | Drivetrain fail-class (safety) status |
+| `5283_4..7` | Auto-brake fail-class Main/Sub convenience/safety status |
+| `5283_8` | Parking brake fail-class status |
+| `5283_9` | Driver brake fail-class status |
+| `5283_10` | Stand-still-control fail-class status of advanced safety functions |
 | `5284` | **Arbitration result_longitudinal ID** |
 | `5285` | **Arbitration result_lateral ID** |
 
@@ -63,7 +70,12 @@ layer**. Longitudinal requests have independent lower/upper-limit sources and
 carry a requester/control ID plus acceleration and brake/drivetrain policy.
 Lateral requests carry a lateral requester ID, requested pinion angle, steering
 assist gain, and damping gain. Separate recorder fields hold the arbitration
-winner/result for each axis.
+winner/result for each axis. The intervening `5283` block is equally important
+for fail-safe work: byte 1 is Toyota's exact **`Lateral control system fail class
+status`**, followed by drivetrain, auto-brake, parking-brake, driver-brake, and
+stand-still-control fail-class bytes. This is recorder-domain state rather than a
+CAN byte mapping, but it is the most direct current Toyota vocabulary for the
+failure class that must be joined to the live Brake->FRC traffic.
 
 The same recorder exposes the arbitration outputs themselves:
 
