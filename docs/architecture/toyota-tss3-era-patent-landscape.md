@@ -420,19 +420,31 @@ the better source for that path.
 
 Priority 2020-07-01, Toyota.
 
-Discloses automated steering with:
+Discloses hands-off automated steering with distinct state channels for
+steering-wheel holding/contact and driver attention. A dependent embodiment
+uses a **steering touch sensor** to produce hands-on/hands-off "steering holding
+information"; a separate driver monitor can verify surrounding-confirmation
+behavior. The request controller periodically asks for hands-on or a surrounding
+check and can vary that interval with traffic/environment/map/driver-warning
+context.
 
-- a hands-on request and a surrounding-confirmation request;
-- repeated notifications based on elapsed time;
-- a **steering touch sensor** used to determine hands-on and reset the timer;
-- a driver monitor used to determine surrounding-confirmation behavior.
+The patent itself contains **no torque-sensor disclosure and no torque
+threshold**. The touch-vs-torque fusion conclusion comes from Toyota's diagnostic
+corpus, not from this document. Its illustrative ~10-minute hands-off interval
+and ~4-second confirmation dwell are also not a behavioral match for the exact
+F33 ordinary-LTA ~13-second torque-backed nag.
 
 Source:
 https://patents.google.com/patent/US20220001874A1/en
 
-This confirms that Toyota TSS-era design work explicitly includes touch
-hands-on sensing as an alternative or complement to torque and camera-based
-driver monitoring. It does not prove which TSS3 trims implement the sensor.
+Deep review:
+[toyota-driver-monitoring-us20220001874.md](toyota-driver-monitoring-us20220001874.md)
+
+For TSS3 this is strongest as architecture vocabulary: wheel holding/contact,
+driver-monitor attention, the attention timer, and HMI request are separate
+concepts. It does not prove which TSS3 trims implement touch sensing, and the
+exact maintainer Camry's retained 5609 state says its LTA driver-monitor-camera
+collaboration and Toyota hands-off capability are absent.
 
 US20230082947A1 independently places **whether the driver grips the steering
 wheel**, steering-wheel operating torque, steering-wheel rotation angle, and

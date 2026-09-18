@@ -1314,6 +1314,17 @@ the wheel-contact detector: a vehicle may have torque/touch hands-on sensing,
 driver-monitor-camera functions, or both, and this exact Camry's retained `5609`
 record says the LTA driver-monitor-camera collaboration feature is absent.
 
+Toyota patent US20220001874A1 (priority 2020-07-01) independently documents that
+same conceptual split for a hands-off-capable automated-steering system: a
+**steering touch sensor** produces separate hands-on/hands-off "steering holding
+information", while a **driver monitor** separately verifies surrounding/visual
+confirmation and can influence the notification timer. The patent contains no
+steering-torque sensor or torque threshold, and its illustrative ~10-minute
+hands-off prompt interval is not the exact F33 ordinary-LTA ~13-second state
+machine. It is therefore architecture/terminology corroboration, not a timer or
+sensor implementation transferred onto this Camry. Deep review:
+[`../architecture/toyota-driver-monitoring-us20220001874.md`](../architecture/toyota-driver-monitoring-us20220001874.md).
+
 The steering-touch transport can now be bounded much more tightly. Toyota's XW60
 Prius service data identifies the wheel electronics as a **Multiplex Network
 Steering ECU (Touch Sensor)** inside the steering-wheel assembly; its terminal
