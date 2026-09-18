@@ -1,0 +1,49 @@
+{
+  "date": "2026-09-18",
+  "target": "camry-8965F3307000",
+  "comma_active_path": "/data/tss3-unified-no-cmd5",
+  "comma_backup_path": "/data/tss3-unified-no-cmd5.known-good-311a3a3f",
+  "known_good_source_commit": "311a3a3f30fb5dc4e41c788628f98b7126f59b53",
+  "deployed_source_commit": "9b764d5966914add0b27df2e3cd86424eaffe002",
+  "bringup_sequence": [
+    "NRTD/Park functional-0x777 preflight",
+    "EPS RAM-resident install/attestation",
+    "transition directly to READY/Park without EPS power-off",
+    "EPS helper install/runtime qualification",
+    "Brake/EPB 0x7B0: exact F181 F152633K0000, then 10 02 -> 11 01, wait for exact F181 return",
+    "FRC 0x792: exact F181 8646F3315000, then 10 02 -> 11 01, wait for exact F181 return",
+    "require FRC 0x1903/0x1905/0x1906 DRCC permission healthy",
+    "re-read EPS resident status"
+  ],
+  "control_domain_restart": {
+    "order": ["Brake/EPB", "FRC"],
+    "security_access_required": false,
+    "eps_reset": false,
+    "eps_power_cycle": false,
+    "standalone_command": "./tss3-unified-signer restart-control-domains [OUTPUT]",
+    "automatic_in_normal_bringup": true
+  },
+  "critical_artifacts_match_known_good": true,
+  "critical_artifacts": {
+    "bundle/tss3_field_b6_signer.bin": "dc674077a4393e751375b135014edeac82be422b4f36116d372a94a164fadb04",
+    "bundle/tss3_field_b6_signer_payload.bin": "de7a3632cec80d76050c169a9f743a59bec6a6044c940dba4ff973968932050e",
+    "bundle/tss3_field_camry_f33_resident.bin": "ea5bd5231ddd740a10875c955548a61acbaf096703c30281a9718cfa45c414fb",
+    "bundle/tss3_field_camry_f33_helper.bin": "268ed8559e41782d383b1511e4db92162772df07fca46065ed37678d0fa7c9b9",
+    "bundle/tss3_field_camry_f33_helper_image.bin": "912af6b4b3539ae3896fc8b0504e0492ba26e4df4829ce79209b31d8fba4f6e7",
+    "bundle/unified.json": "df4a4e4f59d1b7cfad8f8af8f216685343133aa5aa26ff7cf8e9a79421e713ac"
+  },
+  "host_runtime_delta_from_known_good": {
+    "tss3_unified_b6_signer_py": "380 insertions, 0 deletions; additive stale-0x030 experiment, existing field install/qualify path retained",
+    "new_recovery_behavior": "camry_f33_post_install_recovery.py restart-control-domains plus launcher integration"
+  },
+  "verification": [
+    "tools/test camry_f33_post_install_recovery: PASS",
+    "tools/test tss3_unified_b6_signer: PASS",
+    "staged comma kit bash syntax + Python compile: PASS",
+    "staged comma ./tss3-unified-signer doctor: PASS",
+    "active comma ./tss3-unified-signer doctor after atomic swap: PASS",
+    "active-vs-known-good critical artifact SHA-256 comparison: all MATCH"
+  ],
+  "panda_lease": "The launcher holds one cooperative direct-Panda lease until command exit, so EPS qualification, Brake reset, FRC reset, and post-recovery resident status occur under one ownership handoff.",
+  "road_evidence": "targets/camry-2026/raw-20260918/recovered-road-drive/summary.json"
+}
