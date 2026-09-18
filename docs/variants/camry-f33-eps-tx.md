@@ -428,5 +428,12 @@ A retained Experiment-A domain/MAC pair (`d64e2a5`) is the mandatory live
 known-answer gate. Only after that matches should the bounded 20-request / 25-ms
 benchmark be used to determine whether this RPC satisfies the observed ~40-Hz
 stock `0x08A` cadence. The runtime contains no host or EPS `0x08A` transmit,
-no B6 transmit, no SecOC-result bypass, and no key extraction. Field procedure:
+no B6 transmit, no SecOC-result bypass, and no key extraction.
+
+The first field carrier (`3799d97e`, payload `178cd81b…993bd`) returned the stock
+application but then read back an all-zero high-tail resident/state and no low
+helper installation. The corrected carrier therefore does not copy executable
+code after startup: the helper stays at the already-live-qualified executable
+GlobalRAM slot `FEF07C00` and is invoked there directly; low RAM is data/state
+only. The superseded payload must not be rerun. Field procedure:
 [`camry_f33_08a_oracle_stream.md`](../../exploit/ephemeral_runtime/camry_f33_08a_oracle_stream.md).

@@ -48,11 +48,11 @@ def main() -> int:
     assert meta["target"] == {"software_id": "8965F3307000", "codeflash_sha256": build.IMAGE_SHA256}
     assert (len(resident), sha(resident)) == (oracle.RESIDENT_SIZE, oracle.EXPECTED_RESIDENT_SHA256)
     assert (len(helper), sha(helper)) == (oracle.HELPER_SIZE, oracle.EXPECTED_HELPER_SHA256)
-    assert sha(stage) == oracle.EXPECTED_STAGING_SHA256 and len(stage) == 1176
+    assert sha(stage) == oracle.EXPECTED_STAGING_SHA256 and len(stage) == 1140
     assert sha(payload) == oracle.EXPECTED_PAYLOAD_SHA256 and len(payload) == 0x1000
-    assert meta["resident"]["headroom"] == 78
-    assert meta["helper"]["headroom"] == 260 and meta["helper"]["word_count"] == 86
-    assert meta["staging"]["resident_offset"] == 0x180 and meta["staging"]["helper_offset"] == 0x340
+    assert meta["resident"]["headroom"] == 112
+    assert meta["helper"]["headroom"] == 680 and meta["helper"]["word_count"] == 86 and meta["helper"]["execution"] == "direct-from-GlobalRAM" and meta["helper"]["base"] == "0xFEF07C00"
+    assert meta["staging"]["resident_offset"] == 0x180 and meta["staging"]["helper_offset"] == 0x31C
 
     print("== firmware-pinned transport ==")
     assert meta["request"] == {
