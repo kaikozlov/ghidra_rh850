@@ -1,0 +1,100 @@
+{
+  "date": "2026-09-18",
+  "vehicle": "2026 Toyota Camry Hybrid",
+  "preconditions": {
+    "parked_confirmed_by_operator": true,
+    "vehicle_speed_control_value_kph": 0.0,
+    "eps_ram_resident_bootstrapped": true,
+    "openpilot_stopped_for_direct_panda_diagnostics": true
+  },
+  "initial_fault_state": {
+    "frc": {
+      "address": "0x792",
+      "f181": "8646F3315000",
+      "1903": "01",
+      "1905": "8000",
+      "1906": "e080e0008080",
+      "1501": "0101",
+      "1601": "00000000",
+      "1703": "f020",
+      "1705": "ff18"
+    },
+    "brake": {
+      "address": "0x7B0",
+      "f181": "F152633K0000",
+      "0105": "8954147040",
+      "102D": "30106f00ff001d00bf048000d0106840",
+      "102F": "f700fd007c00a9000000",
+      "fail_status": "OFF",
+      "fail_control": "OFF",
+      "eps_communication_open": "Normal"
+    }
+  },
+  "brake_reset": {
+    "sequence": ["10 02", "11 01"],
+    "security_access_required": false,
+    "programming_session_accepted": true,
+    "hard_reset_accepted": true,
+    "application_offline_interval_before_f181_return_ms": 1457.9,
+    "returned_f181": "F152633K0000",
+    "frc_state_after_brake_reset": {
+      "1905": "8000",
+      "1906": "e080e0008080",
+      "1501": "0101",
+      "1601": "00000000",
+      "1703": "f000",
+      "1705": "ff00"
+    },
+    "decoded_effect": {
+      "pcs_availability": "Enabled",
+      "pcs_esa_invalid": "OFF",
+      "pcs_aes_invalid": "OFF",
+      "cruise_control_permission": "Not Allowed",
+      "acc_not_available_icon": "ON",
+      "lda_control": "Disabled"
+    }
+  },
+  "frc_reset_after_brake_recovery": {
+    "sequence": ["10 02", "11 01"],
+    "security_access_required": false,
+    "programming_session_accepted": true,
+    "hard_reset_accepted": true,
+    "application_offline_interval_before_f181_return_ms": 377.5,
+    "returned_f181": "8646F3315000",
+    "final_frc_state": {
+      "1903": "01",
+      "1905": "8080",
+      "1906": "e080e0008000",
+      "1501": "0100",
+      "1601": "00000000",
+      "1703": "f000",
+      "1705": "ff00"
+    },
+    "decoded_effect": {
+      "cruise_control_permission": "Allowed",
+      "acc_not_available_icon": "OFF",
+      "lda_control": "Enabled",
+      "lta_control": "Enabled (switch OFF)",
+      "pcs_availability": "Enabled",
+      "pcs_esa_invalid": "OFF",
+      "pcs_aes_invalid": "OFF"
+    }
+  },
+  "openpilot_after_recovery": {
+    "eps_resident_c7_survived": true,
+    "c7_window_seconds": 3.0,
+    "c7_count": 299,
+    "sample_c7": "07c7c70000180000",
+    "car_state_snapshot": {
+      "vEgo_mps": 0.0,
+      "standstill": true,
+      "gear": "park",
+      "steer_fault_temporary": false,
+      "steer_fault_permanent": false,
+      "car_not_ready": false,
+      "cruise_available": false
+    },
+    "cruise_available_note": "openpilot cruiseAvailable is derived from normal cruise-display CAN state, not FRC DID 0x1905; the final diagnostic FRC state itself was healthy/allowed before openpilot restart"
+  },
+  "conclusion": "The recovery requires dependency-order reset, not simultaneous reset: reset Brake/EPB first to clear the peer/VMM-side PCS invalid state, then reset FRC to clear its latched DRCC/LDA denial. Resetting FRC alone does not recover. Resetting Brake alone clears PCS invalidity but leaves DRCC permission denied. Brake then FRC recovers the full observed FRC diagnostic feature state while preserving the powered EPS RAM-resident signer."
+}

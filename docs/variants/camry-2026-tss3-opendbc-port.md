@@ -180,8 +180,25 @@ C7 frames observed in 3 s. Therefore the fault is not a simple volatile FRC appl
 latch cleared by restarting that ECU; it is retained or immediately reconstructed from
 peer/persistent state. Raw summary: `targets/camry-2026/raw-20260918/frc-programming-reset/summary.json`.
 
-Thus GTS+ plus the programming-session probe now give us **a selective FRC restart, but
-not an unlatch/recovery command**. `camry_f33_post_install_recovery.py` now snapshots the FRC and Brake live state DIDs
+A same-session follow-up immediately closes the higher-value dependency-order recovery.
+The category-435 Brake/EPB ECU (`0x7B0`, F181 `F152633K0000`) likewise accepts
+**`10 02 -> 11 01` without SecurityAccess** and stays off the normal F181 application
+interface for about **1.46 s** before returning. Before reset, Brake `0x102D` already had
+`Fail Status=OFF` and `Fail Control=OFF`, while `0x102F` reported EPS communication
+`Normal`; nevertheless the FRC remained faulted (`1905=8000`, `1906=e080e0008080`,
+`1703=f020`, `1705=ff18`). Resetting Brake alone changed the FRC PCS-facing state to
+healthy (`1703=f000`, `1705=ff00`) but left DRCC permission denied and LDA disabled.
+A **second selective FRC reset after Brake had recovered** then changed the FRC state to
+`1905=8080` (**Cruise Control Allowed**), `1906=e080e0008000` (**ACC Not Available OFF**),
+`1501=0100` (**LDA Enabled**), `1703=f000`, and `1705=ff00`. The EPS remained powered
+through both resets; after restarting openpilot, the resident path still produced 299
+neutral C7 frames in 3 s. This proves the required recovery is **dependency ordered, not
+simultaneous**: reset Brake/VMM first, then reset FRC. FRC-only reset leaves the fault;
+Brake-only reset clears the upstream PCS invalid input but leaves the FRC DRCC/LDA latch.
+Raw summary: `targets/camry-2026/raw-20260918/brake-frc-recovery/summary.json`.
+
+Thus GTS+ plus the programming-session probes now provide a concrete **same-ignition
+recovery sequence that preserves the EPS RAM resident**. `camry_f33_post_install_recovery.py` now snapshots the FRC and Brake live state DIDs
 before and after the known DTC clear, treating newly added DDB-derived DIDs as
 best-effort until exact-car support is observed. The higher-value paired capture is a
 before/after `health-check`: if DTC bits clear and Brake EPS communication has returned
