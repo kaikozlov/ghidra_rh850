@@ -675,24 +675,68 @@ that the exact development path can steer. VAR-148/CORR-179 close the ID11 compo
 semantics statically: accepted B6 is co-modulated inside the ordinary EPS sum, not an
 exclusive replacement mode.
 
-**Current physical routing decision (supersedes the temporary CORR-139 repin as
-a deployment topology):** the September steering proof used a development
-CAN0/CAN1 repin and therefore carried C7 on Panda bus 0. The Sep-11 integration
-cleanup returned to **stock Toyota-B pinning**. Toyota Bus-1 / camera `0x160` is
-again the normal CAN0/CAN2 relay pair (stock source bus2, openpilot replacement
-bus0), while Toyota Bus-4 / EPS-Brake is the unsplit Panda **bus 1**. Exact-F33
-EPS UDS and C7 therefore use bus1 with ELM327 param1 for direct diagnostics.
-The resident never host-transmits B6; it replaces/re-signs the EPS's internally
-native B6. Do not send `0x08A` to EPS. The current exact-Camry chain is
-**FRC-internal feature-owner selection -> generic request `5282` / protected `0x08A`
-egress -> downstream Brake/VMM request arbitration -> `0x081` arbitration result/status
-+ post-arbitration request generation -> final B6**. LTA, LDA, LCA and PDA feature
-ownership is already decided before `0x08A`, but `0x08A` is still a request into the VMM
-arbiter. What remains unresolved is the downstream Camry physical/security arbitration/
-request-generation implementation and transform, not an external competition among raw
-FRC feature clients.
-The stock topology is software/test complete but still needs the parked and short
-road revalidation called out in the capability matrix.
+**Current physical routing decision (2026-09-18 request-plane supersession):**
+the direct-B6 development proof is retained as evidence, but it is no longer the
+integration architecture. The production-shaped F33 path uses the measured relay-correct
+Toyota-B repin:
+
+```text
+Panda bus0: chassis / Brake state and 0x081 result plane
+Panda bus2: FRC source plane, including protected native 0x08A
+Panda bus1: radar/object traffic plus EPS diagnostics / MAC-oracle transport
+```
+
+The chain remains **FRC-internal feature-owner selection -> generic request `5282` /
+protected `0x08A` egress -> downstream Brake/VMM request arbitration -> `0x081`
+arbitration result/status + post-arbitration request generation -> final B6**. Openpilot
+now enters at that native request boundary rather than bypassing it with a direct B6
+sideband. Do not send `0x08A` to EPS: the EPS contributes only selector-4 command-5 CMAC
+service, while comma is the final chassis-bus sender.
+
+**Implementation checkpoint — selective ID11 replacement (not yet a road result):**
+`kai-openpilot@ddbb1be25` with nested opendbc `38a8068f` implements the request-plane
+shape selected by the September-18 oracle experiments. The key invariant is that the FRC
+continues to own the complete native `0x08A` application envelope. For each observed
+source generation:
+
+- Target Lateral ID **11 (LTA/LCA)** + normal openpilot `CC.latActive`: copy the native
+  application and replace only `B18:B19` (`LATERAL_REQUEST_PINION_ANGLE`); preserve the
+  native lateral ID, B24/B25 gains, B26 request sequence, both longitudinal request
+  tuples, cruise/hold state and every other application byte;
+- every non-ID11 application (observed ID0/ID4/ID18 and any future native identity), and
+  ID11 while openpilot lateral is inactive: transmit the native 32-byte frame exactly;
+- for a modified ID11 frame, preserve the source frame's exact FV4 freshness nibble and
+  ask the live-qualified EPS oracle to recompute only MAC28 for that exact observed
+  generation; there is no N+1/N+2 application prediction; and
+- retain source order. A later exact-clone frame may become ready while an earlier ID11
+  frame is awaiting command-5, but it is not transmitted until the earlier generation is
+  signed. On signing/transport failure, pending generations are flushed as untouched
+  native clones before relay ownership is released back to stock forwarding.
+
+Panda independently enforces the same ownership boundary. It retains the three newest
+native bus2 `0x08A` generations and accepts each at most once from the host. An exact clone
+is always source-preserving. A modified frame is accepted only when the matched source is
+ID11, all application bytes except B18:B19 are byte-exact, FV4 is byte-generation exact,
+and ordinary `controls_allowed` plus the recovered F33 angle/rate envelope pass. A 40-ms
+host-Tx watchdog restores stock FRC forwarding. In request-plane mode Panda also rejects
+the old C7/B6 control sideband, so the two architectures cannot command lateral
+simultaneously.
+
+The path no longer uses the private `ToyotaTss308aId0` / `ToyotaTss308aSignedId0`
+rollout Params or a runtime parser rebuild. Exact F33 selects the host path during normal
+`CarParams` construction when fingerprint topology contains chassis `0x025` on bus0 and
+native FRC `0x08A` on bus2; stock/unrepinned topology therefore remains distinct.
+`CarController` keeps the standard 100-Hz angle limiter, but only advances the F33 host
+request target while the current native application is ID11; across other Toyota request
+identities it returns that limiter to measured steering so ID11 re-entry cannot inherit an
+unsent accumulated target.
+
+The volatile EPS oracle resident is still a deployment prerequisite rather than an
+openpilot-installed component. Without a qualified oracle response, the host never sends
+the ownership arm and Panda continues forwarding stock `0x08A`; request-plane openpilot
+lateral therefore remains unavailable rather than falling back to direct B6. This is the
+remaining software/deployment boundary before parked and road qualification of the new
+path, not a reason to add another steering-permission policy.
 
 Working session notes for the GTS+ vehicle-type → install-set → family-`.ddb` → GetSupport funnel (not a claim ledger): [../history/2026-08/CAMRY_GTS_LATERAL_FUNNEL_2026-08-29.md](../history/2026-08/CAMRY_GTS_LATERAL_FUNNEL_2026-08-29.md).
 
@@ -2259,19 +2303,17 @@ provides the corresponding result/reference family. `0x160` remains useful as an
 FRC-origin Profile-5 state/evidence PDU, but its historical B4:B5/B12 correlations
 and successful host modification do not establish authoritative command ingress.
 
-The current fork is therefore intentionally stricter than this historical design
-proposal. TSS3 returns `openpilotLongitudinalControl=False`,
-`alphaLongitudinalAvailable=False`, and sets Toyota `STOCK_LONGITUDINAL` on both
-Camry and Corolla. `CarController` emits no longitudinal PDU; Panda whitelists
-neither host `0x08A` nor 32-byte `0x160`; and the bus2->bus0 forwarding path does not
-suppress `0x160`. The offline `camry_frc_request_poc.py` remains only a deterministic
-reproducer for the old `0x160` field hypothesis and its exact Profile-5 transform.
+The current fork remains intentionally stock-longitudinal. TSS3 returns
+`openpilotLongitudinalControl=False`, `alphaLongitudinalAvailable=False`, and sets Toyota
+`STOCK_LONGITUDINAL` on both Camry and Corolla. The F33 relay-correct path now does own the
+complete `0x08A` carrier on behalf of the FRC, but every longitudinal field is copied
+byte-for-byte from the matched native source generation; `CarController` emits no host
+longitudinal request and `0x160` remains non-actuating evidence/state traffic. The offline
+`camry_frc_request_poc.py` remains only a deterministic reproducer for the old `0x160`
+field hypothesis and its exact Profile-5 transform.
 
-The actual native-long blocker is clean ownership of the `0x08A` request source on
-stock Toyota-B. Because this request family is visible on the unsplit chassis
-network, a production implementation needs a source-suppression/sole-emitter boundary
-or an equivalent pre-signing/request-generation handoff before openpilot can safely
-publish acceleration requests. Only after that boundary is recovered should the
-normal openpilot longitudinal stack be connected to the two TSS3 acceleration
-requests and then qualified against Brake/VMC selection, PCS/AEB priority,
-standstill/hold behavior, and the `0x081` result plane.
+Thus clean `0x08A` source ownership is no longer the native-long blocker on the repinned
+F33 path. What remains is the longitudinal semantic/safety qualification: exact upper/lower
+request mapping, Brake/VMC selection and feedback, PCS/AEB priority, driver override,
+standstill/hold behavior, and the `0x081` result plane. Only after those are closed should
+normal openpilot longitudinal output be connected to the two TSS3 acceleration requests.
