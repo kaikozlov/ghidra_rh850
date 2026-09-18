@@ -233,6 +233,18 @@ pre-provisioned material. **Do not project that part backward** into the Camry:
 exact firmware/dynamic evidence remains authoritative for its key/profile
 behavior.
 
+The patent is intentionally broad about how the derived key becomes usable by
+the ECU. Do **not** infer a programmable-HSM KDF or a new HSM firmware path from
+it. Exact F33 already proves Toyota uses the standard AUTOSAR SHE Memory Update
+Protocol (`M1/M2/M3 -> CMD_LOAD_KEY -> M4/M5`) for ECU Security Key provisioning,
+and AUTOSAR explicitly permits that secure update protocol to target the
+volatile `RAM_KEY` slot while clearing the plain-key flag. On a fixed-state
+ICU-S/SHE implementation, a per-ignition working key could therefore be
+installed as an authenticated key envelope into volatile protected key storage
+without changing HSM firmware. Whether any later Toyota platform actually does
+that each ignition remains unproved; it is simply a substantially more credible
+implementation model than assuming an OEM-programmable KDF-to-slot primitive.
+
 Source:
 https://patents.google.com/patent/US20250300993A1/en
 
