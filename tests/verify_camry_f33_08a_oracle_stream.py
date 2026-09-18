@@ -258,6 +258,62 @@ def main() -> int:
     assert bench_fixed["skip_flow_control"] is True and bench_fixed["pre_cf_delay_ms"] == 2.0
     assert [x[1:] for x in fs2.calls] == [(8, 0.0), (9, 0.0)]
 
+    print("== pipelined benchmark contract ==")
+    class FakePipelinePanda:
+        def __init__(self):
+            import threading
+            self.lock = threading.Lock()
+            self.rx = []
+            self.current_seq = 0
+            self.responses_sent = 0
+            self.tx = []
+        def can_recv(self):
+            import time
+            with self.lock:
+                if self.rx:
+                    rows = list(self.rx)
+                    self.rx.clear()
+                    return rows
+            time.sleep(0.0001)
+            return []
+        def can_send(self, addr, dat, bus, **_kwargs):
+            frame = bytes(dat)
+            with self.lock:
+                self.tx.append((int(addr), frame, int(bus)))
+                if frame[0] >> 4 == 1:
+                    self.current_seq = frame[4]
+                    self.rx.append((oracle.RESPONSE_ADDR, bytes.fromhex("3000280000000000"), oracle.BUS))
+        def can_send_many(self, arr, **_kwargs):
+            with self.lock:
+                for addr, dat, bus in arr:
+                    self.tx.append((int(addr), bytes(dat), int(bus)))
+                seq = self.current_seq
+                self.rx.append((
+                    oracle.RESPONSE_ADDR,
+                    bytes((0x07, oracle.PRIVATE_SID, seq, 0x00)) + bytes.fromhex("d64e2a5e"),
+                    oracle.BUS,
+                ))
+                self.responses_sent += 1
+        class _Raw:
+            pass
+    class FakePipelineSession:
+        def __init__(self):
+            import threading
+            self.panda = FakePipelinePanda()
+            # Make _send_many_batched take the public fallback in this fake.
+            self.panda._send_lock = threading.Lock()
+        def read_state(self):
+            n = self.panda.responses_sent
+            return {"last_seq": self.panda.current_seq, "request_count": n, "success_count": n, "response_count": n}
+    fps = FakePipelineSession()
+    pipe = oracle.benchmark_pipelined(
+        fps, count=3, period_ms=5.0, pre_cf_delay_ms=2.0, drain_timeout_s=0.2,
+    )  # type: ignore[arg-type]
+    assert pipe["success_count"] == 3 and pipe["responses_received"] == 3
+    assert pipe["resident_counter_deltas"] == {"request_count": 3, "success_count": 3, "response_count": 3}
+    assert pipe["boundaries"]["sender_waits_for_response"] is False
+    assert pipe["boundaries"]["dedicated_receiver_thread"] is True
+
     print("== launcher contract ==")
     launcher = (ROOT / "exploit/ephemeral_runtime/camry_f33_08a_oracle_stream_launcher.sh").read_text()
     assert oracle.EXPECTED_PAYLOAD_SHA256 in launcher
@@ -268,6 +324,8 @@ def main() -> int:
     assert "./f33-08a-oracle benchmark [COUNT] [OUTPUT_JSON]" in launcher
     assert "./f33-08a-oracle benchmark-fast [COUNT] [OUTPUT_JSON]" in launcher
     assert "./f33-08a-oracle benchmark-fixed-delay [COUNT] [OUTPUT_JSON]" in launcher
+    assert "./f33-08a-oracle benchmark-pipelined [COUNT] [OUTPUT_JSON]" in launcher
+    assert 'benchmark-pipelined --count "$count" --period-ms 25 --delay-ms 5' in launcher
     assert 'benchmark-fast --count "$count" --period-ms 25 --cf-gap-ms 0' in launcher
     assert "--period-ms 25" in launcher
     plan = oracle.plan(None)

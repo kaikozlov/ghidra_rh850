@@ -509,3 +509,17 @@ Single KATs without waiting for host receipt of FC established a sharp boundary:
 succeeded with full RTTs of 13.538 ms and 16.282 ms respectively. The sustained
 candidate therefore uses a conservative 2-ms fixed delay, native Panda CF batch,
 and the unchanged non-actuating known-answer domain on a 25-ms schedule.
+
+### 12.8 Stable transport uses 5-ms receiver readiness plus asynchronous response collection
+
+A 2-ms fixed FF->CF delay was unstable under sustained load (17/20), while 5 ms
+completed 20/20 with all RTTs below 20 ms. A subsequent 100-request 5-ms soak
+completed 100/100 with coherent resident counters, median RTT 15.896 ms, p95
+21.718 ms, and p99 23.993 ms. One ~80-ms host-observed stall caused the blocking
+benchmark to slip its send schedule despite no oracle loss.
+
+The integration candidate therefore decouples send cadence from response receipt:
+a sender emits FF on a strict 25-ms schedule, waits fixed 5 ms, then batches the
+five CFs; a separate receiver continuously drains `0x7A9` and matches MAC replies
+by sequence. The final non-actuating gate is a 100-request pipelined soak requiring
+100 responses and resident request/success/response deltas of 100.
