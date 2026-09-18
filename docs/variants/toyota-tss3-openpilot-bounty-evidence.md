@@ -3,7 +3,7 @@
 > **September-18 road-qualification supersession:** the September-10 steering
 > witnesses remain valid historical authority evidence, while route
 > `0000010c--506d7277c7` now closes the previously missing same-ignition stock-
-> adaptive-cruise coexistence case after the Brake→FRC recovery sequence. Current
+> adaptive-cruise coexistence case after the FRC→Brake→FRC recovery sequence. Current
 > capability boundaries remain in [the capability matrix](camry-2026-capability-matrix.md)
 > and [the evidence review](camry-2026-port-evidence-review.md).
 
@@ -226,10 +226,12 @@ peer fail-safe state. The previously proven DTC-clear path removes the warning/D
 memory but, by itself, did not restore DRCC in the same ignition cycle. September-18
 live probing recovered the missing stateful restart sequence without cycling EPS:
 
-1. Brake/EPB `0x7B0`: `10 02 -> 11 01` (no SecurityAccess required);
-2. wait for application F181 `F152633K0000` to return (~1.46 s);
-3. FRC `0x792`: `10 02 -> 11 01` (no SecurityAccess required);
-4. wait for F181 `8646F3315000` to return (~0.38 s).
+1. FRC `0x792`: `10 02 -> 11 01` (no SecurityAccess required);
+2. wait for F181 `8646F3315000` to return; DRCC may remain denied;
+3. Brake/EPB `0x7B0`: `10 02 -> 11 01` (no SecurityAccess required);
+4. wait for application F181 `F152633K0000` to return;
+5. FRC `0x792`: `10 02 -> 11 01` again;
+6. wait for F181 `8646F3315000` and require healthy DRCC state.
 
 Brake reset alone clears the FRC PCS-availability / ESA-AES-invalid inputs but leaves
 DRCC permission denied. Resetting FRC after Brake is healthy changes `1905` from

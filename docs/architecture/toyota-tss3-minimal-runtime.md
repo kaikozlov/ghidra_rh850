@@ -360,7 +360,7 @@ The September-10 steering samples used conventional cruise, but that boundary is
 now superseded by the September-18 exact-car recovery and road qualification.
 DTC clear alone still does **not** recover DRCC after the EPS programming
 transition. The live-proven recovery is stateful and dependency ordered:
-Brake/EPB `10 02 -> 11 01` first, then FRC `10 02 -> 11 01`, with the EPS kept
+FRC `10 02 -> 11 01` first, then Brake/EPB `10 02 -> 11 01`, then FRC `10 02 -> 11 01` again, with the EPS kept
 powered. Resetting FRC alone does not recover; resetting Brake alone clears the
 upstream PCS invalid state but leaves the FRC DRCC/LDA latch. The subsequent
 route `0000010c--506d7277c7` demonstrates 919.572 s / 19.772 km of stock adaptive

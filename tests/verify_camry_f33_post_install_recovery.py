@@ -109,7 +109,7 @@ class TestRecovery(unittest.TestCase):
         with self.assertRaises(recovery.RecoveryError):
             recovery.isotp_request(panda, 0x792, 0, b"\x22\x19\x06")
 
-    def test_control_domain_restart_is_brake_then_frc_and_restores_drcc(self):
+    def test_control_domain_restart_is_frc_brake_frc_and_restores_drcc(self):
         panda = FakePanda()
         class Factory:
             @staticmethod
@@ -118,6 +118,8 @@ class TestRecovery(unittest.TestCase):
 
         phase = {"value": 0}
         calls = []
+        brake_reset_attempts = {"value": 0}
+        brake_programming_poll = {"value": 0}
         def respond(_panda, address, bus, pdu, **kwargs):
             calls.append((address, bus, pdu.hex()))
             if pdu == bytes.fromhex("22f181"):
@@ -126,27 +128,36 @@ class TestRecovery(unittest.TestCase):
                 if address == recovery.FRC_TX:
                     return bytes.fromhex("62f181") + recovery.EXPECTED_FRC_F181
                 if address == recovery.BRAKE_TX:
+                    # After the first timed-out Brake reset, model the live
+                    # programming-context identity until the retry 11 01.
+                    if brake_reset_attempts["value"] == 1:
+                        brake_programming_poll["value"] += 1
+                        return bytes.fromhex("62f18101") + bytes.fromhex("21" * 16)
                     return bytes.fromhex("62f181") + recovery.EXPECTED_BRAKE_F181
             if pdu == bytes.fromhex("1002"):
                 return bytes.fromhex("5002003201f4")
             if pdu == bytes.fromhex("1101"):
-                if address == recovery.BRAKE_TX:
-                    self.assertEqual(phase["value"], 0)
+                if address == recovery.FRC_TX and phase["value"] == 0:
                     phase["value"] = 1
-                elif address == recovery.FRC_TX:
-                    self.assertEqual(phase["value"], 1)
+                    return bytes.fromhex("5101")
+                if address == recovery.BRAKE_TX and phase["value"] == 1:
+                    brake_reset_attempts["value"] += 1
+                    if brake_reset_attempts["value"] == 1:
+                        raise TimeoutError("live Brake programming handoff race")
                     phase["value"] = 2
-                else:
-                    self.fail(f"unexpected reset address 0x{address:03X}")
-                return bytes.fromhex("5101")
+                    return bytes.fromhex("5101")
+                if address == recovery.FRC_TX and phase["value"] == 2:
+                    phase["value"] = 3
+                    return bytes.fromhex("5101")
+                self.fail(f"unexpected reset address=0x{address:03X} phase={phase['value']}")
             if pdu == bytes.fromhex("221b09"):
                 return bytes.fromhex("621b09000000000000")
             if pdu == bytes.fromhex("221903"):
                 return bytes.fromhex("62190301")
             if pdu == bytes.fromhex("221905"):
-                return bytes.fromhex("62190500") + bytes((0x80 if phase["value"] >= 2 else 0x00,))
+                return bytes.fromhex("62190500") + bytes((0x80 if phase["value"] >= 3 else 0x00,))
             if pdu == bytes.fromhex("221906"):
-                return bytes.fromhex("6219060080000000") + bytes((0x00 if phase["value"] >= 2 else 0x80,))
+                return bytes.fromhex("6219060080000000") + bytes((0x00 if phase["value"] >= 3 else 0x80,))
             if pdu == bytes.fromhex("22102d"):
                 return bytes.fromhex("62102d0000000000000000")
             if pdu == bytes.fromhex("22102f"):
@@ -155,21 +166,31 @@ class TestRecovery(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as td:
             output = Path(td) / "restart.json"
-            with patch.dict(sys.modules, {"panda": types.SimpleNamespace(Panda=Factory)}), patch.object(recovery, "isotp_request", side_effect=respond):
+            with (patch.dict(sys.modules, {"panda": types.SimpleNamespace(Panda=Factory)}),
+                  patch.object(recovery, "isotp_request", side_effect=respond),
+                  patch.object(recovery.time, "sleep", return_value=None)):
                 result = recovery.restart_control_domains(output)
             saved = json.loads(output.read_text())
 
-        self.assertEqual(phase["value"], 2)
+        self.assertEqual(phase["value"], 3)
+        self.assertEqual(brake_reset_attempts["value"], 2)
+        self.assertGreater(brake_programming_poll["value"], 0)
         self.assertEqual(result["verdict"], "control_domains_restarted_drcc_permission_restored")
         self.assertTrue(result["drcc_permission_observed"])
+        self.assertFalse(result["frc_prereset"]["security_access_used"])
         self.assertFalse(result["brake_restart"]["security_access_used"])
-        self.assertFalse(result["frc_restart"]["security_access_used"])
+        self.assertFalse(result["frc_final_restart"]["security_access_used"])
+        self.assertFalse(result["after_frc_prereset_fault_state"]["frc"]["0x1905"]["cruise_control_allowed"])
         self.assertFalse(result["after_brake_fault_state"]["frc"]["0x1905"]["cruise_control_allowed"])
-        self.assertTrue(result["after_brake_fault_state"]["frc"]["0x1906"]["acc_not_available_icon"])
         self.assertTrue(result["after_frc_fault_state"]["frc"]["0x1905"]["cruise_control_allowed"])
         self.assertFalse(result["after_frc_fault_state"]["frc"]["0x1906"]["acc_not_available_icon"])
         reset_calls = [(addr, pdu) for addr, _bus, pdu in calls if pdu == "1101"]
-        self.assertEqual(reset_calls, [(recovery.BRAKE_TX, "1101"), (recovery.FRC_TX, "1101")])
+        self.assertEqual(reset_calls, [
+            (recovery.FRC_TX, "1101"),
+            (recovery.BRAKE_TX, "1101"),
+            (recovery.BRAKE_TX, "1101"),
+            (recovery.FRC_TX, "1101"),
+        ])
         self.assertEqual(saved["verdict"], result["verdict"])
         self.assertEqual(panda.safety[-1], (recovery.SILENT_SAFETY,))
         self.assertTrue(panda.closed)

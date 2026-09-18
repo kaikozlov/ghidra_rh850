@@ -404,7 +404,7 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
     camry_field_meta = json.loads((camry_kit / "bundle/unified.json").read_text(encoding="utf-8"))
     camry_field_bundle = host.load_bundle(camry_kit / "bundle/unified.json")
     camry_launcher = (camry_kit / "tss3-unified-signer").read_text(encoding="utf-8")
-    check("Camry guided bringup qualifies EPS first, then restarts Brake -> FRC, then rechecks resident",
+    check("Camry guided bringup qualifies EPS first, then runs FRC -> Brake -> FRC recovery, then rechecks resident",
           camry_launcher.index('run_tool qualify --execute --output "$out_dir/qualify.json"') <
           camry_launcher.index('restart-control-domains --execute --ready-parked-confirmed') <
           camry_launcher.index('post-recovery-status.json') and

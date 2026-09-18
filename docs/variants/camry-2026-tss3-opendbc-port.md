@@ -191,10 +191,11 @@ healthy (`1703=f000`, `1705=ff00`) but left DRCC permission denied and LDA disab
 A **second selective FRC reset after Brake had recovered** then changed the FRC state to
 `1905=8080` (**Cruise Control Allowed**), `1906=e080e0008000` (**ACC Not Available OFF**),
 `1501=0100` (**LDA Enabled**), `1703=f000`, and `1705=ff00`. The EPS remained powered
-through both resets; after restarting openpilot, the resident path still produced 299
-neutral C7 frames in 3 s. This proves the required recovery is **dependency ordered, not
-simultaneous**: reset Brake/VMM first, then reset FRC. FRC-only reset leaves the fault;
-Brake-only reset clears the upstream PCS invalid input but leaves the FRC DRCC/LDA latch.
+through all three selective resets; after restarting openpilot, the resident path still
+produced 299 neutral C7 frames in 3 s. The complete live sequence was **FRC -> Brake/VMM
+-> FRC**: the first FRC reset left the fault intact, the Brake reset cleared the upstream
+PCS invalid state, and the final FRC reset cleared its remaining DRCC/LDA latch. No DTC
+clear occurred in this successful sequence.
 Raw summary: `targets/camry-2026/raw-20260918/brake-frc-recovery/summary.json`.
 
 The subsequent road route `0000010c--506d7277c7` closes the practical recovery

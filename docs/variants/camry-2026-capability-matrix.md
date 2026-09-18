@@ -1,6 +1,6 @@
 # 2026 Camry openpilot capability matrix and qualification handoff
 
-**Current checkpoint: September 18, 2026, after same-ignition Brake→FRC recovery and stock-adaptive-cruise road qualification of the post-authenticated B6 ownership design.**
+**Current checkpoint: September 18, 2026, after same-ignition FRC→Brake→FRC recovery and stock-adaptive-cruise road qualification of the post-authenticated B6 ownership design.**
 This incorporates the retained-evidence review, the correction that removes `0x160`
 from the native-long actuator contract on both Camry and Corolla, and the move from
 target-specific extended C7 ingress to the common functional-`0x777` C7 contract. Detailed
@@ -68,7 +68,7 @@ commands and final evidence identities are recorded in the review document.
 
 **Lateral authority plus stock adaptive cruise is now demonstrated on the final
 stock-Toyota-B installation.** Route `0000010c--506d7277c7` closes same-ignition
-DRCC coexistence after the dependency-ordered Brake→FRC reset while preserving the
+DRCC coexistence after the dependency-ordered FRC→Brake→FRC reset while preserving the
 EPS RAM resident. The remaining completion work is narrower: automate the recovered
 lifecycle cleanly, retain command-loss/zero-release and driver-override qualification,
 and implement a supported automatic cruise-cancel mechanism. The earlier fake

@@ -31,7 +31,10 @@
     }
   },
   "brake_reset": {
-    "sequence": ["10 02", "11 01"],
+    "sequence": [
+      "10 02",
+      "11 01"
+    ],
     "security_access_required": false,
     "programming_session_accepted": true,
     "hard_reset_accepted": true,
@@ -55,7 +58,10 @@
     }
   },
   "frc_reset_after_brake_recovery": {
-    "sequence": ["10 02", "11 01"],
+    "sequence": [
+      "10 02",
+      "11 01"
+    ],
     "security_access_required": false,
     "programming_session_accepted": true,
     "hard_reset_accepted": true,
@@ -96,5 +102,15 @@
     },
     "cruise_available_note": "openpilot cruiseAvailable is derived from normal cruise-display CAN state, not FRC DID 0x1905; the final diagnostic FRC state itself was healthy/allowed before openpilot restart"
   },
-  "conclusion": "The recovery requires dependency-order reset, not simultaneous reset: reset Brake/EPB first to clear the peer/VMM-side PCS invalid state, then reset FRC to clear its latched DRCC/LDA denial. Resetting FRC alone does not recover. Resetting Brake alone clears PCS invalidity but leaves DRCC permission denied. Brake then FRC recovers the full observed FRC diagnostic feature state while preserving the powered EPS RAM-resident signer."
+  "conclusion": "The complete live-proven same-ignition recovery sequence was FRC reset -> Brake/EPB reset -> FRC reset, with no DTC clear and no EPS power cycle. The first FRC reset alone did not recover DRCC; the subsequent Brake reset cleared the peer/VMM-side PCS invalid state; the final FRC reset cleared the remaining DRCC/LDA latch. The shorter Brake->FRC wording in the original summary omitted the immediately preceding FRC pre-reset.",
+  "sequence_context": {
+    "prior_frc_prereset_artifact": "targets/camry-2026/raw-20260918/frc-programming-reset/summary.json",
+    "complete_live_sequence": [
+      "FRC reset",
+      "Brake/EPB reset",
+      "FRC reset"
+    ],
+    "dtc_clear_used": false,
+    "correction": "This artifact originally summarized only the latter Brake->FRC portion and omitted the immediately preceding FRC-only reset from the same live session."
+  }
 }
