@@ -135,9 +135,99 @@ against `5283_1` or an exact decoder before being promoted to wire truth.
 ### 2.2 Request/result IDs really are first-class application identifiers
 
 The original US20200070849A1 already says the request IDs identify
-applications. US20220219711A1 goes further: priority is indexed by explicit
-application IDs and the text names PCS, ACC, LKA/LTA, AEB, LDA and steering
-guidance as candidate clients.
+applications. US20220219711A1 is a direct follow-on to JP2020-032894 and makes
+the identity/priority split much more explicit:
+
+- each driving-assistance application emits its **kinematic-plan request plus a
+  preset application ID that uniquely identifies the requesting application**
+  (paragraph 23);
+- a single ECU may host multiple applications -- the patent explicitly gives
+  ACC, LKA and AEB in one ADAS ECU as an example (paragraph 24);
+- the manager (`ADAS-MGR`, `Vehicle-MGR`, etc.) receives both the request and
+  the application ID, looks the ID up in a separately stored priority table,
+  and arbitrates from that result (paragraphs 25-31);
+- application priority can change with vehicle state, driver state or
+  availability without changing the application identity (paragraph 30,
+  claims 1/5);
+- the embodiment is primarily lateral and names a steered-angle request with
+  EPS as the actuator, but the patent expressly extends the same priority
+  scheme to longitudinal-acceleration and shift-position arbitration
+  (paragraphs 42-44).
+
+The figures make one critical boundary visually explicit: **application ID and
+priority level are different columns/namespaces**. Figure 2 assigns priority
+levels 1..11 while leaving the application-ID column undisclosed. Figure 5 then
+changes parking/autonomous-driving priorities while the application identities
+remain conceptually the same. Therefore an observed Toyota ID value must never
+be read as an ordinal priority.
+
+That matters because current GTS+ independently supplies the numeric
+generation-20 `EMPS_P5 0x1CEE Target Lateral ID` dictionary. Its labels line
+up unusually well with the patent's Figure-2 application set even though the
+patent itself does not reveal the numeric IDs:
+
+| Patent application/function | GTS Target Lateral ID | Join |
+|---|---:|---|
+| collision avoidance assistance (the text explicitly gives PCS as the example) | `1 = PCS` | direct semantic match |
+| autonomous driving Lv.4, AD | `41 = AD (Lv.4)` | exact label/function match |
+| autonomous driving Lv.4, EM | `43 = EM (Lv.4)` | exact label/function match |
+| autonomous driving Lv.3, AD | `35 = AD (Lv.3)` | exact label/function match |
+| autonomous driving Lv.3, EM | `37 = EM (Lv.3)` | exact label/function match |
+| automatic parking | `25 = AP`, `27 = Remote Parking` | direct family match; GTS splits variants |
+| lane deviation warning / LDA | `4 = LDA` | direct acronym/semantic match |
+| lane keeping assistance / LKA-LTA | `10 = Hands Off LTA`, `11 = LTA/LCA` | direct family match; GTS splits modes |
+| pedestrian risk avoidance | `19 = PDA` | strong functional candidate, abbreviation not expanded by this patent |
+| steering-wheel operation guidance | `18 = SDG` | strong role candidate, acronym not expanded by this patent |
+| self-traveling transport | `49 = Self-Propelled Transport` | near-literal translation match |
+
+The remaining exact GTS values (`13/15` DESA modes, `39/45` DES modes,
+`63` Driver Operation and `0` No Request) are extensions/sentinels not
+enumerated in the patent's example priority table.
+
+The crosswalk is more important than any one label. The patent's priority order
+puts Lv.4 **EM before AD**, while GTS uses IDs `43` and `41`; it puts Lv.3
+**EM before AD**, while GTS uses `37` and `35`; LDA is priority 7 but GTS
+ID 4. So numeric ID ordering demonstrably does not encode priority. Toyota's
+actual implementation is much more naturally modeled as:
+
+```text
+preset application identity
+        |
+        v
+{ application ID, kinematic request }
+        |
+        v
+manager lookup: application ID -> current priority/policy
+        |
+        v
+arbitration
+```
+
+This also explains why the six-bit Camry wire field is so compelling. GTS
+defines the target-ID range as `0..63`, the current Camry `0x08A B21[5:0]`
+carries values such as `11 = LTA/LCA` and `18 = SDG`, and the returning
+`0x081 B13[5:0]` is already joined to the arbitration-result lateral ID. The
+patent does not specify a six-bit wire encoding, but the semantic model, exact
+GTS range and observed wire width now triangulate cleanly.
+
+A second useful nuance is that Toyota's "application" is not synonymous with an
+ECU or necessarily with one user-facing feature. The patent allows several
+applications in one ECU and separately prioritizes multiple functions of an
+autonomous-driving application (EM versus AD). The GTS dictionary's distinct
+Lv.3/Lv.4 AD/EM/DES IDs are strongly consistent with that finer-grained
+arbitration-client model.
+
+The patent's arbitration policy is also not simply "smallest ID wins" or even
+"highest static priority always wins." Figure 3 first groups functions by
+safety/operational role, then breaks conflicts by control-range velocity and
+safety phase; for one application with multiple functions it uses safety
+response and controllability. Paragraph 39 additionally permits ASIL to guide
+priority. Applied Example 2 shows longitudinal arbitration where the physical
+request value (minimum requested acceleration) is primary and application
+priority can stabilize selection when candidate accelerations are nearly equal.
+That is a useful model for the current `5280/5281` upper/lower-bound work:
+application identity is policy metadata layered on top of the kinematic
+request, not a replacement for request-value arbitration itself.
 
 That strengthens the working semantic join:
 
@@ -151,9 +241,9 @@ That strengthens the working semantic join:
 | 0x081 | result/status package |
 | B6 / EMPS target surface | post-arbitration steering-controller target/instruction |
 
-No patent found in this pass provides the numeric Toyota ID table. The route
-from an observed value such as 11, 18, 25, or 63 to a particular application
-still requires GTS or dynamic evidence.
+The patent still does **not** disclose Toyota's numeric application-ID table.
+The numeric mapping above comes from current GTS+ and dynamic Camry evidence,
+not from US20220219711A1 itself.
 
 ### 2.3 A missing forwarded value does not imply a missing arbitration stage
 

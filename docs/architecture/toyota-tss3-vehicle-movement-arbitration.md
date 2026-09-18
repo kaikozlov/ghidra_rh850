@@ -169,6 +169,25 @@ not ECUs and not ordinal priorities.  Selection can be based on magnitude and ot
 predefined rules; the patent gives minimum-value selection as one example rather than a
 mandatory Toyota calibration rule.
 
+Toyota/ADVICS follow-on US20220219711A1 makes the ID/priority distinction explicit.
+Each application emits a preset ID that uniquely identifies the requesting application;
+a single ADAS ECU may host multiple applications (ACC, LKA and AEB are the patent's
+example), and the manager looks the ID up in a separately stored priority table.  Figures
+2/5 deliberately show **Application ID** and **Priority Level** as different columns, and
+the priority order can change with vehicle/driver state or availability without changing
+the application identity.  The patent leaves its application-ID column blank, so its
+priority numbers 1..11 are not Toyota ID values.
+
+Current GTS+ fills in the otherwise-missing numeric side independently.  `EMPS_P5
+0x1CEE Target Lateral ID` is a 0..63 enum whose labels closely mirror the follow-on
+patent's application set: `1 PCS`, `4 LDA`, `10 Hands Off LTA`, `11 LTA/LCA`, `18 SDG`,
+`19 PDA`, `25 AP`, `27 Remote Parking`, Lv.3 `35/37/39 = AD/EM/DES`, Lv.4 `41/43/45 =
+AD/EM/DES`, `49 Self-Propelled Transport`, and `63 Driver Operation`.  The mismatch
+between numeric order and the patent's priority order is itself decisive: for example,
+the patent prioritizes Lv.4 EM above Lv.4 AD while GTS identifies them as 43 and 41.
+The six-bit `0x08A B21[5:0]` / `0x081 B13[5:0]` request/result fields therefore fit a
+preset application-identity namespace, not a rank or ECU address.
+
 This materially changes how the Camry ID namespace should be interpreted.  Toyota uses
 the same concept—an application identifier—for longitudinal and lateral IDs.  It is now
 reasonable to treat numeric reuse as intentional until contradicted, while still avoiding
