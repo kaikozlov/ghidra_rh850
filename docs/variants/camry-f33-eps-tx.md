@@ -640,3 +640,20 @@ relay-correct host mode is now explicit in opendbc `ec401d56` and parent `e31c85
 The full Toyota regression after the topology correction is 276 passed / 120 skipped / 10 subtests,
 and the parent host/Param suite is 33 passed. The next transparent field attempt therefore requires
 the already-known physical CAN0/CAN1 repin before READY. No EPS resident is involved in this phase.
+
+### 12.12 Final relay-correct software gate requires valid downstream state
+
+The relay-topology implementation is finalized in opendbc `ec401d56` and parent
+`e31c85e84`, with parent follow-up `7cfbaff88` adding the final host-side topology
+health gate. In host-replacement mode exact Camry consumes chassis/state from
+bus0, authoritative FRC `0x08A/0x00F` from bus2, and keeps TSS3 radar on its
+already-correct bus0 parser. `card` refreshes only the Toyota CarState/CANParser
+after applying the development safety flag so the initialization-order boundary
+cannot leave the parser on stock-harness bus1.
+
+Both transparent and signed host workers now require `CarState.canValid` in
+addition to Park and standstill before qualification/ownership. This prevents a
+half-repinned or otherwise unhealthy downstream topology from arming even if
+some bus2 source frames are visible. Parent host/Param tests are 35 passed; the
+full Toyota regression for the relay-correct opendbc change is 276 passed / 120
+skipped / 10 subtests.
