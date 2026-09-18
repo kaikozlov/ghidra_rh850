@@ -45,7 +45,7 @@ def main() -> int:
     assert json.loads(audited_meta.read_text()) == meta
 
     assert meta["schema"] == "camry-f33-08a-oracle-stream-build-v1"
-    assert oracle.DIAG_BUS == 1 and oracle.BUS == oracle.DIAG_BUS
+    assert oracle.DIAG_BUS == 0 and oracle.BUS == oracle.DIAG_BUS
     assert oracle.STATE_BUS == 0 and oracle.ROUTE.bus == oracle.DIAG_BUS
     assert meta["target"] == {"software_id": "8965F3307000", "codeflash_sha256": build.IMAGE_SHA256}
     assert (len(resident), sha(resident)) == (oracle.RESIDENT_SIZE, oracle.EXPECTED_RESIDENT_SHA256)
@@ -58,13 +58,13 @@ def main() -> int:
 
     print("== firmware-pinned transport ==")
     assert meta["request"] == {
-        "can_id": "0x7A1", "bus": 1, "transport": "stock classic ISO-TP / CanTp reassembly",
+        "can_id": "0x7A1", "bus": 0, "transport": "stock classic ISO-TP / CanTp reassembly",
         "dcm_buffer": "0xFEBE5651", "dcm_capacity": 0x100, "nsdu_length": 40,
         "layout": "C9 C9 seq || 00 8A || application[28] || freshness[6] || (seq XOR FF)",
         "authenticated_domain_offset": 3, "authenticated_domain_length": 36,
     }
     assert meta["response"] == {
-        "can_id": "0x7A9", "bus": 1,
+        "can_id": "0x7A9", "bus": 0,
         "transport": "one classic 8-byte lower-driver frame shaped as ISO-TP SF",
         "lower_object": 53, "lower_node": 1, "lower_mailbox": 6,
         "pending_handle": "0xFEBE5036", "software_handle": "0x00F0",

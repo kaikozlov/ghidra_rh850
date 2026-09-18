@@ -497,7 +497,7 @@ def build(out: Path, openpilot: Path) -> dict:
         "created_at": datetime.now(UTC).isoformat(timespec="seconds"),
         "target": {
             "eps_f181": "8965F3307000",
-            "eps_diag": "0x7A1->0x7A9 bus1 (EPS diagnostics and 0x08A MAC-oracle transport)",
+            "eps_diag": "0x7A1->0x7A9 bus0 (post-repin EPS diagnostics and 0x08A MAC-oracle transport)",
             "request_source": "0x08A/32 FD bus2 (FRC native source on relay-correct repin)",
             "request_sink": "0x08A/32 FD bus0 (host replacement toward chassis/Brake)",
         },
@@ -537,7 +537,7 @@ def build(out: Path, openpilot: Path) -> dict:
             "required_preflight": "f33-sign verify-native-08a must match every captured native sample",
             "install_order": persistent_package["ordering"]["install"],
             "remove_order": persistent_package["ordering"]["remove"],
-            "diagnostic_route": "0x7A1->0x7A9 on unsplit Panda bus 1, ELM327 param 1",
+            "diagnostic_route": "0x7A1->0x7A9 on post-repin Panda bus 0, ELM327 param 1",
             "control_route": "extended 0x1FDC0002 C7 sideband on unsplit Panda bus 1",
             "openpilot_requirement": "exact-F33 stock-Toyota-B support with Classical C7 on Panda bus 1",
             "development_only": True,
