@@ -742,6 +742,17 @@ request target while the current native application is ID11; across other Toyota
 identities it returns that limiter to measured steering so ID11 re-entry cannot inherit an
 unsent accumulated target.
 
+The live post-repin bus0 oracle transport was re-qualified after moving the EPS diagnostic
+route from stale bus1 assumptions to the actual repinned `0x7A1 -> 0x7A9` bus0 path. A
+100-request production-shaped pipelined run completed 100/100 with resident deltas
++100/+100/+100, zero NRCs, zero RX errors, median RTT 18.073 ms and p95 19.192 ms. One
+reply took 34.407 ms; when combined with the preceding frame's completion time, the
+source-ordered host-output gap reached 46.237 ms. The former 40-ms Panda replacement
+watchdog was therefore too tight for the measured transport. `opendbc@841b2854` raises
+that watchdog to 75 ms (three native ~25-ms `0x08A` periods), while the host oracle worker
+still fails open independently on signing error or its 120-ms oracle timeout. Parent
+`kai-openpilot@e9dcefca1` carries that safety revision.
+
 The volatile EPS oracle resident is still a deployment prerequisite rather than an
 openpilot-installed component. Without a qualified oracle response, the host never sends
 the ownership arm and Panda continues forwarding stock `0x08A`; request-plane openpilot
