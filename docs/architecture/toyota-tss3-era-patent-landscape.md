@@ -392,6 +392,9 @@ the narrower threat model it actually improves.
 Source:
 https://patents.google.com/patent/US20250300993A1/en
 
+A dedicated claim/threat-model/F33 comparison is in
+[`../security/secoc/us20250300993-dynamic-key-patent.md`](../security/secoc/us20250300993-dynamic-key-patent.md).
+
 For the existing F33 work the useful part is Toyota-authored terminology around
 MAC verification, freshness, truncated security fields, receiver rejection,
 and startup synchronization. It is a conceptual cross-check for the recovered

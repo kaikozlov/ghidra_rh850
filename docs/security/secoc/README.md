@@ -47,6 +47,7 @@ See [../../status/PRIORITIES.md](../../status/PRIORITIES.md).
 | [software-path-assessment.md](software-path-assessment.md) | Software attack surface, command-5/8 experiments, diagnostic/XCP intersections |
 | [key-storage-and-lifecycle.md](key-storage-and-lifecycle.md) | NvM/object-15 model, ICU-S lifecycle, command-8 provisioning semantics |
 | [key-recovery-assessment.md](key-recovery-assessment.md) | Existing-key recovery routes and their evidence boundaries |
+| [us20250300993-dynamic-key-patent.md](us20250300993-dynamic-key-patent.md) | Toyota 2024-priority dynamic SecOC-key patent: claim scope, threat model, HSM/SHE implications, and exact-F33 comparison |
 | [candidate-f05-payload.md](candidate-f05-payload.md) | Vance candidate-f05 DataFlash-dump payload semantics/provenance |
 
 ## Important boundaries
