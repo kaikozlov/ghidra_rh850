@@ -611,6 +611,40 @@ check("native 0x08A oracle verifier stops on the matching freshness without tran
       all(data_id == bytes.fromhex("008a") for _, data_id in fake_08a.calls) and
       native_08a_result["boundaries"]["transmitted_08a"] is False and
       native_08a_result["boundaries"]["proves_realtime_08a_replacement"] is False)
+native_081 = command5_app + bytes.fromhex("d1234567")
+native_081_domain = command5_probe.build_secoc_domain(
+    bytes.fromhex("0081"), command5_app, 0x1234, 0x56789, 0xAB,
+)
+
+class Fake081OracleSession:
+    def __init__(self):
+        self.calls = []
+    def capture_native_081(self):
+        return {
+            "trip_counter": 0x1234, "reset_counter": 0x56789,
+            "sync_bus": 1, "frame_bus": 1,
+            "sync_hex": "00" * 8, "frame_hex": native_081.hex(),
+            "sync_age_ms": 1.0, "frame_age_ms": 1.0,
+        }
+    def generate(self, domain, *, expected_data_id):
+        self.calls.append((bytes(domain), bytes(expected_data_id)))
+        matched = bytes(domain) == native_081_domain
+        return {
+            "outcome": "generated",
+            "output_mac28_hex": "1234567" if matched else "7654321",
+            "timing": {"total_wall_s": 0.001},
+        }
+
+fake_081 = Fake081OracleSession()
+native_081_result = command5_probe.verify_native_081(fake_081, samples=1)
+check("native 0x081 oracle verifier uses Brake-result DataID and never transmits",
+      native_081_result["outcome"] == "native_081_mac_reproduced" and
+      native_081_result["samples_matched"] == 1 and
+      native_081_result["samples"][0]["match"]["domain_hex"] == native_081_domain.hex() and
+      native_081_result["data_id_hex"] == "0081" and
+      all(data_id == bytes.fromhex("0081") for _, data_id in fake_081.calls) and
+      native_081_result["boundaries"]["transmitted_081"] is False and
+      native_081_result["boundaries"]["proves_realtime_081_replacement"] is False)
 freshness_record = (
     (0x1234).to_bytes(4, "little") + (0x56789).to_bytes(4, "little") +
     (0xAB).to_bytes(2, "little") + bytes.fromhex("5a00")
@@ -707,6 +741,10 @@ check("command-5 launcher exposes bounded non-transmitting native 0x08A verifica
       "./f33-sign verify-native-08a [OUTPUT_JSON]" in command5_launcher_text and
       "run_probe_bounded 180 verify-native-08a --execute --parked-stationary-confirmed --samples 3" in command5_launcher_text and
       command5_launcher_text.count("verify-native-08a)") == 1)
+check("command-5 launcher exposes bounded non-transmitting native 0x081 verification",
+      "./f33-sign verify-native-081 [OUTPUT_JSON]" in command5_launcher_text and
+      "run_probe_bounded 180 verify-native-081 --execute --parked-stationary-confirmed --samples 3" in command5_launcher_text and
+      command5_launcher_text.count("verify-native-081)") == 1)
 panda_lease_text = (
     ROOT / "exploit/ephemeral_runtime/f33_panda_lease.sh"
 ).read_text(encoding="utf-8")

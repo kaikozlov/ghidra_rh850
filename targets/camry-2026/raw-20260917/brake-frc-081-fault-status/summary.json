@@ -1,0 +1,142 @@
+{
+  "application_bit_scan": {
+    "interpretation": "B13[7:6] are the only near-binary healthy/fault discriminators. The next shift is much smaller and remains high in route93 where B13 is normal, so it is not a cleaner persistent-fault candidate.",
+    "largest_shifts": [
+      {
+        "absolute_occupancy_shift": 0.9978,
+        "dead_d4": 1.0,
+        "fault_e9": 1.0,
+        "field": "B13[7]",
+        "healthy": 0.0022,
+        "route93": 0.0
+      },
+      {
+        "absolute_occupancy_shift": 0.9954,
+        "dead_d4": 0.9909,
+        "fault_e9": 1.0,
+        "field": "B13[6]",
+        "healthy": 0.0,
+        "route93": 0.0
+      },
+      {
+        "absolute_occupancy_shift": 0.4339,
+        "dead_d4": 0.8076,
+        "fault_e9": 0.6751,
+        "field": "B22[4]",
+        "healthy": 0.3074,
+        "route93": 0.7987
+      }
+    ],
+    "scope": "all 224 application bits B0..B27, healthy route 45 versus mean of dead-EPS d4 and faulted e9 occupancy"
+  },
+  "boundaries": {
+    "exact_oem_semantics_of_0xc0_proven": false,
+    "modified_081_transmitted": false,
+    "steering_actuation_performed_for_this_analysis": false,
+    "x2400_latch_owner_proven": false
+  },
+  "can_id": "0x081",
+  "date": "2026-09-17",
+  "direction": "Brake/chassis result/status toward FRC/application side",
+  "interpretation": [
+    "0xC0 is a strong Brake-to-FRC arbitration-result/fail-state candidate: healthy pre-brick traffic uses ordinary result IDs such as 0x00 and 0x0B and never asserts B13 bit6, while dead-EPS and multiple post-bootstrap faulted routes overwhelmingly or exclusively use 0xC0.",
+    "Do not yet name B13 bit6 alone 'lateral control system unachievable'. Toyota successor diagnostics define the full byte as the lateral-control ID of arbitrated result, so 0xC0 may be a special encoded result/status value.",
+    "Route 93 has B13=0x00 throughout while its native cruise-state traffic still includes 0x251=0xE0 (unavailable) and conventional 0x90 latch states. Thus 0xC0 is not the persistent DRCC latch itself; it is more plausibly a Brake-side trigger/input or contemporaneous fail state.",
+    "The known 0x081 B11[4] request-loss supervisor is not the persistent fault discriminator: it is clear on 13616/13620 dead-EPS frames and shows the same rare transient assertions in healthy traffic."
+  ],
+  "known_field": {
+    "byte": 13,
+    "high_bits": "unmapped on exact P5; successor ADCU_P6 exposes the full 8-bit field as 'Lateral Control ID of Arbitrated Result'",
+    "low_six_bits": "arbitration-result lateral ID (joined to Toyota Operation FFD 0x5285)"
+  },
+  "route_observations": [
+    {
+      "b13_bit6_asserted_fraction": 0.0,
+      "b13_bit7_asserted_fraction": 0.0022375156795606333,
+      "b13_counts": {
+        "0x00": 18424,
+        "0x0B": 11007,
+        "0x80": 66
+      },
+      "frames": 29497,
+      "role": "healthy pre-brick control",
+      "route": "00000045--805b7ca6ab"
+    },
+    {
+      "b13_bit6_asserted_fraction": 0.9908957415565345,
+      "b13_bit7_asserted_fraction": 1.0,
+      "b13_counts": {
+        "0x80": 124,
+        "0xC0": 13496
+      },
+      "frames": 13620,
+      "role": "dead-EPS / DRCC-unavailable control",
+      "route": "000000d4--327b2c4bb8"
+    },
+    {
+      "b13_bit6_asserted_fraction": 1.0,
+      "b13_bit7_asserted_fraction": 1.0,
+      "b13_counts": {
+        "0xC0": 22128
+      },
+      "frames": 22128,
+      "role": "Sep-10 working lateral, post-programming faulted ignition",
+      "route": "0000008d--a9f348691a"
+    },
+    {
+      "b13_bit6_asserted_fraction": 0.0,
+      "b13_bit7_asserted_fraction": 0.0,
+      "b13_counts": {
+        "0x00": 14355
+      },
+      "cruise_0x251_b0_counts": {
+        "0x80": 2,
+        "0x88": 144,
+        "0x90": 19,
+        "0xA0": 3,
+        "0xE0": 291
+      },
+      "frames": 14355,
+      "role": "later same-build working-lateral corroboration; native cruise-state traffic includes unavailable/conventional-latch states",
+      "route": "00000093--4066e7ae51"
+    },
+    {
+      "b13_bit6_asserted_fraction": 1.0,
+      "b13_bit7_asserted_fraction": 1.0,
+      "b13_counts": {
+        "0xC0": 12407
+      },
+      "frames": 12407,
+      "role": "Sep-17 replacement-rack post-bootstrap road route",
+      "route": "000000e9--deaaad5774"
+    },
+    {
+      "b13_bit6_asserted_fraction": 1.0,
+      "b13_bit7_asserted_fraction": 1.0,
+      "b13_counts": {
+        "0xC0": 36943
+      },
+      "frames": 36943,
+      "role": "Sep-17 replacement-rack post-bootstrap road route, stock LTA reported off",
+      "route": "000000ec--7407849e1a"
+    },
+    {
+      "b13_bit6_asserted_fraction": 1.0,
+      "b13_bit7_asserted_fraction": 1.0,
+      "b13_counts": {
+        "0xC0": 33936
+      },
+      "frames": 33936,
+      "role": "Sep-17 replacement-rack post-auth lateral route",
+      "route": "000000ee--65bdece411"
+    }
+  ],
+  "schema": "camry-f33-brake-frc-081-fault-status-v1",
+  "substitution_constraints": {
+    "next_passive_prerequisite": "./f33-sign verify-native-081 tests candidate DataID 0x0081 against native tags; a positive match proves that EPS ICU-S slot 4 can reproduce this Brake-owned 0x081 domain before any substitution experiment",
+    "secoc": "0x081 is ordinary-P5-SecOC-shaped (FV4||MAC28 candidate); a payload substitution should not assume acceptance without reproducing the native tag. Candidate DataID 0x0081 is not yet independently proven.",
+    "stock_harness": "restored Toyota-B topology observes Bus-4 on unsplit Panda bus1, so native 0x081 cannot be suppressed by the stock CAN0/CAN2 relay",
+    "whole_frame_drop": "not preferred: sustained loss risks replacing X2400 with a communication/missing-message fail-safe"
+  },
+  "vehicle": "2026 Toyota Camry Hybrid, exact maintainer car"
+}

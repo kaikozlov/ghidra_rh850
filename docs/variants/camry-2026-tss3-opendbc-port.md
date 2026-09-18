@@ -176,6 +176,52 @@ normal while Hybrid RoB records show cruise permission `NG`, automatic cancel,
 machine rather than DTC memory. If Brake `Fail Control` or EPS communication-open stays
 asserted, the brake-domain dependency remains active instead.
 
+A September-17 retained-route comparison adds a much narrower Brake->FRC wire lead.
+Toyota Prius 2023-2026 service-manual data (https://www.mytoyo.com/front_camera_system-1160.html)
+describes FRC behavior record `X2400 Lateral Control System Malfunction` as the camera receiving a
+**lateral-control-system-unachievable signal from the skid/brake controller**; the
+associated fail-safe chart requires the malfunction to be resolved and the ignition
+cycled before normal operation returns. Current GTS+ independently supplies the exact
+`X2400` behavior name but not that wire-field encoding.
+
+The strongest exact-Camry candidate is now Brake-owned, ordinary-P5-SecOC-shaped **`0x081 B13`**.
+Its low six bits were already recovered as Toyota Operation-FFD `5285` arbitration-result
+lateral ID. Two healthy pre-brick controls never set B13 bit6: route
+`00000045--805b7ca6ab` has 29,497 native `0x081` frames with B13 `00` (18,424),
+`0B` (11,007), and only 66 transient `80`; an independent Sep-4 control likewise has
+zero bit6 assertions. In dead-EPS route `000000d4--327b2c4bb8`, B13 is **`C0` on
+13,496/13,620 frames** and `80` on the remaining 124. Replacement-rack post-bootstrap
+routes `e9`, `ec`, and `ee` contain **83,286/83,286 `0x081` frames at B13=`C0`**.
+Sep-10 working route `8d` is likewise `C0` on 22,128/22,128 frames, while later
+same-build route `93` is `00` on 14,355/14,355 even though its cruise-state traffic
+still contains `0x251=E0` unavailable and conventional `0x90` latch states.
+
+Do **not** name B13 bit6 itself `lateral control system unachievable` yet. Successor
+`ADCU_P6` exposes `0x1ED3 Lateral Control ID of Arbitrated Result` as the full **u8**
+quantity, so `C0` may be a special arbitration-result/status code rather than two
+independent flags. The exact supported conclusion is that `C0` is a highly
+fault-correlated Brake->FRC result state and a strong candidate for the Toyota
+unachievable indication. Route `93` also shows that the Brake result can return to
+`00` while the higher-level cruise system remains unavailable; `C0` therefore is not
+the persistent DRCC latch itself.
+
+This creates a concrete suppression experiment but rules out the naive version.
+`0x081` is ordinary-P5-SecOC-shaped (`FV4||MAC28` candidate), so a B13 replacement
+must not assume acceptance without reproducing the native tag; dropping the complete
+frame risks replacing `X2400` with a communication fail-safe. The restored Toyota-B topology also observes Bus 4 on unsplit Panda bus1,
+so the production harness cannot suppress the native `0x081` in-place without another
+inline path / the prior Bus-4 relay repin. The command-5 probe now exposes passive
+`verify-native-081`, which captures stock `0x081 + 0x00F` and tests candidate DataID
+`0x0081` by asking EPS ICU-S slot 4 to reproduce the native MAC28 without transmitting
+anything. A positive live result proves that candidate domain and is the cryptographic
+prerequisite for a **selective `C0 -> healthy-result` re-signing**
+experiment. It still does not solve the first programming-bootstrap interval before the
+resident exists; preventing that first bad publication or eliminating application
+downtime remains the preferred architecture.
+
+Retained comparison:
+`targets/camry-2026/raw-20260917/brake-frc-081-fault-status/`.
+
 **Retained-log coverage:** some useful healthy/faulted baselines already exist, but not
 the decisive post-bootstrap Hybrid state. The Aug-26 exact-car cruise-oracle captures
 sample FRC `0x1905=8080` continuously across MAIN/RES+/SET-/CANCEL/distance exercises;

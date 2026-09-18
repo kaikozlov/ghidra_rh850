@@ -1,0 +1,27 @@
+2026-09-17 exact-Camry Brake->FRC 0x081 fail-state comparison
+
+This artifact compares retained native 0x081 traffic from healthy pre-brick,
+dead-EPS, and post-bootstrap routes. It is a CAN-side observed correlation, not an
+OEM field-name proof.
+
+Key result:
+  healthy route 45: B13[6] asserted 0 / 29,497; B13 values 00/0B with 66 transient 80
+  dead-EPS route d4: B13 C0 on 13,496 / 13,620; remaining 124 are 80
+  Sep-17 post-bootstrap e9/ec/ee: every retained 0x081 has B13=C0
+  Sep-10 route 8d: every retained 0x081 has B13=C0
+  Sep-10 route 93: every retained 0x081 has B13=00
+
+Known semantic join:
+  0x081 B13[5:0] = Toyota Operation FFD 5285 arbitration-result lateral ID.
+  Current successor ADCU_P6 diagnostic vocabulary calls the corresponding full
+  8-bit field "Lateral Control ID of Arbitrated Result".
+
+Therefore C0 is the leading wire-level candidate for the Brake-side
+"lateral control system unachievable" state described by Toyota repair-manual
+X2400 logic, but the exact OEM encoding is not yet proven and the individual high
+bits must remain unnamed.
+
+0x081 is ordinary-P5-SecOC-shaped; exact DataID/key acceptance is not yet proven.
+The passive verify-native-081 probe deliberately tests candidate DataID 0x0081.
+
+No CAN transmission or vehicle mutation was performed to produce this artifact.
