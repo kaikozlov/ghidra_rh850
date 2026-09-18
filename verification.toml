@@ -1081,6 +1081,11 @@ tests = ["tests/verify_camry_f33_030_secoc_tx.py"]
 [suite.camry_f33_eps_tx]
 tests = ["tests/verify_camry_f33_eps_tx.py"]
 
+
+[suite.camry_f33_08a_oracle_stream]
+tests = ["tests/verify_camry_f33_08a_oracle_stream.py"]
+timeout = 600
+
 [suite.camry_f33_08a_tx_probe]
 tests = ["tests/verify_camry_f33_08a_tx_probe.py"]
 timeout = 600

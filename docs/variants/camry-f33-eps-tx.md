@@ -410,3 +410,23 @@ were observed in the 120-ms uniqueness window, and the post-treatment stream
 continued with monotonically advancing B26 low-6 sequence values, consistent with
 approximately **40 Hz / 25 ms** native publication. That is the rate target for a
 real-time oracle transport.
+
+### 12.2 High-rate oracle transport candidate
+
+The selected A-positive/B-negative architecture now has an exact-F33 runtime
+candidate: `camry_f33_08a_oracle_stream`. It deliberately does **not** transmit
+`0x08A`. Host requests use the stock physical `0x7A1` CanTp/PduR reassembly path
+into DCM buffer `FEBE5651`; after the exact `0x79EDE` receive drain, the resident
+passes the complete 36-byte `00 8A || application[28] || freshness[6]` domain to
+stock command 5 / selector 4. The first four CMAC bytes are returned on `0x7A9`
+through exact diagnostic HTH2 lower object 53 (node 1 / mailbox 6) using special
+no-op completion handle `0x00F0`, so the private reply does not fabricate a
+CanTp TxConfirmation.
+
+The host protocol is fixed at a 40-byte request N-SDU and one 8-byte response.
+A retained Experiment-A domain/MAC pair (`d64e2a5`) is the mandatory live
+known-answer gate. Only after that matches should the bounded 20-request / 25-ms
+benchmark be used to determine whether this RPC satisfies the observed ~40-Hz
+stock `0x08A` cadence. The runtime contains no host or EPS `0x08A` transmit,
+no B6 transmit, no SecOC-result bypass, and no key extraction. Field procedure:
+[`camry_f33_08a_oracle_stream.md`](../../exploit/ephemeral_runtime/camry_f33_08a_oracle_stream.md).
