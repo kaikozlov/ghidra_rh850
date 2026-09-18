@@ -276,38 +276,69 @@ physical request sample. Recover the physical realization per actuator and per
 platform. Detailed analysis:
 [toyota-selected-id-direct-request-arbitration.md](toyota-selected-id-direct-request-arbitration.md).
 
-### 2.4 Clean source suppression probably has a status half
+### 2.4 Clean source suppression is an arbitration-policy operation
 
-US20230166772A1 is the strongest patent clue for the current "disable one native
-control source and the system faults" problem. In the disclosed
-autonomous-driving embodiment, the manager intentionally rejects the PCS
-kinematic plan and tells PCS that its request was **rejected/invalidated**.
-Receiving that information prevents PCS from deciding that its own request is
-being ignored due to a system abnormality.
+A close read of US20230166772A1 sharpens the earlier source-suppression model.
+Toyota does **not** make PCS disappear from the network. PCS continues supplying
+its kinematic plan and application ID to the motion manager. A different client
+(the autonomous-driving application in the main embodiment) sends a separate
+**invalidation request**. The manager latches that state, receives the PCS plan
+normally, then excludes only PCS from the downstream arbitration input while
+other clients remain eligible.
 
-The exact F33 mechanism may differ, but the architecture tells us to look for
-two coupled operations:
+A second signal runs in the opposite direction: while PCS is intentionally
+excluded, the manager outputs **request rejection information** to PCS.
+Paragraph [0106] says this lets PCS restrict a determination that an
+abnormality has occurred merely because its plan was not selected. A separate
+cancellation request clears the manager's invalidation flag. Toyota later
+generalizes the policy input from literal invalidation to a request giving the
+first application's plan **higher priority** than the second.
 
-1. stop/admit/replace the native application request;
-2. provide whatever arbitration-result/rejection/status feedback tells the
-   source that non-selection is intentional and healthy.
+This changes the useful F33 question. Complete protected-`0x08A` loss is much
+lower-level than the patented healthy handoff: it removes the request
+publication itself and can legitimately trigger communication/request-loss
+supervision. If P5/F33 contains an analogous mechanism, the better search target
+is an **eligibility/priority control plane that keeps the ordinary
+request/result contract alive**, plus whatever result/status tells the losing
+client that non-selection is intentional.
 
-That makes 0x081, 5284/5285, and any request-rejection/invalidation state more
-important to the source-suppression experiment than a simple CAN block.
+The patent also explicitly generalizes the mechanism from acceleration to
+steering-angle plans and names LKA/LTA as example steering clients, so the
+architecture is directly relevant to lateral takeover rather than merely a
+PCS/longitudinal curiosity.
 
-A patent-guided GTS search on 2026-09-18 immediately produced three important
-master-vocabulary hits:
+The GTS vocabulary is now more tightly bounded than the first survey suggested:
 
-- **Driving Force Lower Limit Request Rejection Factors**;
-- **Driving Force Upper Limit Request Rejection Factors**;
-- **PCS Rejection Request Determination Based On Functional Safety**.
+- **PCS Rejection Request Determination Based On Functional Safety** is not an
+  orphan master string. It is referenced only by current `ADCU_P6/P6F`
+  table 167 (`CDbDDRFreezeFrameTable`) and resolves to
+  `DID$20D4-byte16-bit$FF`. The next row is
+  **Arbitration Result (Vertical ID Value)** at
+  `DID$20D4-byte25-bit$FF`. Its wording is conceptually closer to the
+  patent's requester->manager invalidation/priority decision than to the
+  manager->PCS rejection-feedback signal.
+- **Driving Force Lower Limit Request Rejection Factors** and
+  **Driving Force Upper Limit Request Rejection Factors** are referenced by
+  current `HE_PCM_A_P6` RoB freeze-frame rows immediately after
+  **Required Driving Force Lower/Upper Limit ID**. The four rows occupy
+  successive 8-bit ranges in one recorder group. This is strong P6 evidence
+  that requester identity and rejection cause are paired status, but it is not
+  an exact P5/F33 mapping.
+- Exact P5/TSS3 already exposes priority vocabulary:
+  `5280_7 TSS acceleration request low priority flag`, multiple PDA
+  priority-request fields, and FRC_P5
+  `0x1B06 ISA Speed Change Priority Request (Upper Limit)`. No equivalent
+  lateral invalidation/priority field or manager->suppressed-client rejection
+  feedback has yet been recovered.
+- `240E LCA Reject` is an Operation-FFD feature-event trigger, not evidence
+  that it carries the patent's request-rejection feedback.
 
-At present these three are recovered as strings in M_English.ddb, not resolved
-to an exact F33 ECU/DID/recorder field. They therefore do not yet prove the
-wire mechanism, but they materially strengthen the hypothesis that request
-rejection is an explicit Toyota control-state concept rather than wording that
-exists only in the patent. The next GTS task is to recover the owning table or
-consumer for these strings and look for a lateral counterpart.
+The two patent directions therefore remain separate recovery problems:
+**requester -> manager policy request** and **manager -> suppressed-client
+intentional-non-selection feedback**. Do not infer one from finding the other.
+
+Detailed close read and cross-generation GTS joins:
+[toyota-request-invalidation-us20230166772.md](toyota-request-invalidation-us20230166772.md).
 
 The same vocabulary pass also finds the FRC behavior **X2351 PDA (DA) Brake
 Control Invalid Condition**, providing another concrete control-invalid state

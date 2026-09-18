@@ -10,6 +10,7 @@ Boot flow, execution architecture, and the control/safety partition.
 | [toyota-openpilot-porting-contract.md](toyota-openpilot-porting-contract.md) | Pinned comma Toyota prior art translated into the TSS3 command/state/ownership/safety roadmap |
 | [toyota-tss3-minimal-runtime.md](toyota-tss3-minimal-runtime.md) | Evidence-bounded openpilot/opendbc/Panda minimum for the exact-F33 lateral path |
 | [toyota-tss3-vehicle-movement-arbitration.md](toyota-tss3-vehicle-movement-arbitration.md) | Toyota vehicle-movement-manager request/arbitration/result/target architecture joined to TSS3 `0x08A` / `0x081` / B6 |
+| [toyota-request-invalidation-us20230166772.md](toyota-request-invalidation-us20230166772.md) | Close read of US20230166772A1: selective client invalidation/priority, latched handoff, and rejection feedback joined to TSS3/P6 evidence |
 | [toyota-selected-id-direct-request-arbitration.md](toyota-selected-id-direct-request-arbitration.md) | Close read of US20200070873A1: Toyota's selected-application-ID + direct-request latency optimization and its exact-F33 boundary |
 | [toyota-tss3-era-patent-landscape.md](toyota-tss3-era-patent-landscape.md) | 2019-2026 Toyota/Toyota-affiliated patent families for VMM arbitration, fail classes, source rejection, gateway topology, SecOC, steering, and attention tracking |
 | [toyota-driver-monitoring-us20220001874.md](toyota-driver-monitoring-us20220001874.md) | Deep review of Toyota US20220001874A1: steering touch, driver-monitor attention, hands-off timers, and exact-F33 transfer boundaries |

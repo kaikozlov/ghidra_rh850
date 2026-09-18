@@ -212,18 +212,42 @@ failure decided)`. The same enum appears in rear-steering P6/P6F. This does not
 prove the F33 lateral fail-class coding, but it makes `2` versus `3` a strong
 Toyota-family temporary-versus-confirmed-failure oracle.
 
-A patent-guided GTS corpus search also surfaced the master strings **`Driving
-Force Lower Limit Request Rejection Factors`**, **`Driving Force Upper Limit
-Request Rejection Factors`**, and **`PCS Rejection Request Determination Based
-On Functional Safety`**. Separately, Toyota US20230166772A1 describes a motion
-manager intentionally invalidating an ADAS request and returning request
-rejection information so the suppressed application does not diagnose an
-abnormality merely because its plan is not selected. The three GTS strings are
-not yet mapped to an exact F33 ECU/DID/recorder item, so they do not prove the
-Camry uses that exact mechanism. They do make request-rejection/status feedback
-a concrete Toyota concept to investigate alongside source suppression rather
-than treating native-request blocking as the whole takeover contract. See
-[`../architecture/toyota-tss3-era-patent-landscape.md`](../architecture/toyota-tss3-era-patent-landscape.md).
+A deeper read of Toyota US20230166772A1 makes the source-suppression
+lesson more specific. In its main embodiment PCS continues sending its
+kinematic plan and application ID; a different application sends the motion
+manager a separate invalidation request. The manager latches that policy,
+receives PCS normally, but excludes only PCS from the ordinary arbitration
+input. While that state is active it separately returns **request rejection
+information** to PCS so PCS can avoid interpreting repeated non-selection as a
+system abnormality. A distinct cancellation request restores ordinary
+arbitration. Toyota explicitly generalizes the policy from literal invalidation
+to a higher-priority request and extends the same architecture to steering
+plans including LKA/LTA.
+
+That is materially different from dropping the complete protected `0x08A`
+publication: the patented healthy handoff preserves source communication and
+changes eligibility **inside arbitration**. Complete FRC request loss can
+legitimately exercise Brake/FRC communication/request-loss supervision instead.
+
+The patent-guided GTS vocabulary is now resolved more tightly. **`PCS Rejection
+Request Determination Based On Functional Safety`** is a P6 ADCU DDR
+freeze-frame field at `DID$20D4-byte16-bit$FF`; the same packed snapshot has
+**`Arbitration Result (Vertical ID Value)`** at byte 25. Its wording is
+conceptually closer to the requester->manager rejection/priority decision than
+to the manager->PCS feedback signal, so it must not be used as proof that we
+have found the latter. Separately, P6 Hybrid/EV PCM RoB rows pair **Required
+Driving Force Lower/Upper Limit ID** with **Driving Force Lower/Upper Limit
+Request Rejection Factors** in four consecutive 8-bit slots. These are strong
+successor-generation semantics, not exact F33 fields.
+
+Exact P5/TSS3 does independently expose priority vocabulary—most notably
+`5280_7 TSS acceleration request low priority flag`, PDA priority-request
+records, and FRC_P5 `0x1B06 ISA Speed Change Priority Request (Upper Limit)`—
+but no lateral invalidation/priority input or manager->suppressed-client
+rejection feedback has yet been recovered. The resulting search target is now a
+healthy **eligibility/priority control plane**, not a missing native request.
+See
+[`../architecture/toyota-request-invalidation-us20230166772.md`](../architecture/toyota-request-invalidation-us20230166772.md).
 
 The strongest exact-Camry candidate is now Brake-owned, ordinary-P5-SecOC-shaped **`0x081 B13`**.
 Its low six bits were already recovered as Toyota Operation-FFD `5285` arbitration-result
