@@ -277,9 +277,10 @@ preflight, exact-F181 NRTD install, then READY runtime qualification. On exact
 Camry, peer recovery is deliberately **operator paced** rather than chained:
 `bringup` returns Panda ownership after EPS qualification and waits for the operator
 before restarting Brake/EPB only. The Brake stage performs no post-reset diagnostics:
-its exact identity is checked only before `10 02 -> 11 01`, then Panda is released
-immediately even if the reset response is not observed. There is no Brake F181 polling
-and no reset retry. The operator waits as long as needed before restarting FRC only;
+its exact identity is checked only before `10 02 -> 11 01`. If the first `11 01`
+times out, the only permitted follow-up is one immediate second `11 01`, with no F181,
+DID, sleep, session change, or other diagnostic traffic between attempts. After that
+second attempt there is no Brake F181 polling or any other post-reset diagnostic traffic. The operator waits as long as needed before restarting FRC only;
 after exact `8646F3315000` returns the launcher releases Panda again and waits before
 final DRCC-state verification.
 The operator can wait arbitrarily long between stages. No DTC clear, SecurityAccess,
