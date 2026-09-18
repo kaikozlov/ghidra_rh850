@@ -541,3 +541,75 @@ MAC replies asynchronously, and maintains one signed-frame lookahead. The next
 work is host-owned freshness/application construction and an ID0-only
 comma-origin authenticated `0x08A` stream; no further oracle transport RE is a
 prerequisite.
+
+### 12.10 ID0 replacement implementation is now split into transparent and signed phases
+
+The openpilot fork now carries the first complete downstream-ownership implementation,
+with source suppression and content synthesis deliberately separated so field bring-up can
+prove one boundary at a time.
+
+**Phase 0 — transparent exact-frame proxy.** Parent commit `07e93e38c` adds the
+`ToyotaTss308aId0` development-only Param and a `card`-resident exact-F33 proxy. After eight
+consecutive native Bus-2 ID0 `0x08A` generations in Park/standstill with live `0x00F`
+reset-low2 agreement, host sends a private `0x777` arm admin. Panda then blocks native
+Bus-2→Bus-0 forwarding and `card` retransmits the **same 32 bytes** on Bus 0. No application,
+freshness, FV4, or MAC bit is changed. Host waits for Panda's returned TX echo before treating
+ownership as active; if the target generation arrives before confirmation, it explicitly
+releases rather than risking ambiguous duplicate/suppressed ownership. Motion, non-ID0,
+B26 discontinuity, reset-epoch change, rejected host TX, explicit shutdown, or a 40-ms
+replacement watchdog all fail open to stock forwarding.
+
+The corresponding opendbc safety series is `f4c20d0e` → `dfe606d0` → `9b5cc835`. It allows
+only the private admin/transport envelope and an FD 32-byte ID0 replacement whose B0..B27
+application bytes equal the current native template except B26, whose B26 sequence is exact,
+and whose FV4 reset/message-low2 progression is coherent. The path is exact-Camry and
+stationary-only. Parent commit `a3c761b04` also makes host `sendcan` CAN-FD explicit in C++
+`pandad`; this is separate from the already-solved Panda-firmware mixed classic/FD forwarding
+preservation (`5bc72a28`, `0c8d6248`, `c89d14a6`).
+
+**Phase 1 — signed ID0 lookahead.** Parent commit `e4bd61be7` adds the
+`ToyotaTss308aSignedId0` development-only Param and the production-shaped EPS-oracle worker.
+The opendbc boundary is `5de1b56a`. Signed mode keeps all Phase-0 constraints and adds only a
+bounded two-generation application lookback; B26, FV4, format, stationary, watchdog, and
+source-ownership checks remain exact.
+
+The signed worker does the following while stock forwarding remains authoritative:
+
+1. observes eight consecutive native ID0 source generations and live `0x00F`;
+2. reconstructs the nearest reset epoch from transmitted reset-low2;
+3. recovers the full native 8-bit message counter by asking EPS selector-4 command 5 to sign
+   the 64 candidates congruent with transmitted message-low2 until MAC28 matches the captured
+   native frame;
+4. replays intervening B26 generations to catch the tracker up, then independently re-signs
+   the latest exact native domain and requires another MAC28 match before qualification;
+5. on later reset epochs, seeds message8 from the first transmitted low2 and requires the same
+   exact-native verification again before re-arming;
+6. signs generation `n+2` from native application template `n`, using the exact ordinary-P5
+   freshness packer
+   `>HI(trip16, reset20<<12 | message8<<4 | reset_low2<<2)`;
+7. arms only once a valid signed frame for the **next** native B26 generation is already cached;
+8. when that native generation arrives and Panda suppresses it, transmits the pre-signed frame
+   immediately on Bus 0.
+
+Two-generation lookahead gives the already-qualified oracle up to 50 ms without decoupling the
+replacement cadence from the FRC source clock. If the signed cache ever misses its target, host
+sends the exact blocked OEM frame once, releases ownership, clears the signed queue, and
+requires a fresh native MAC verification before another arm. The worker never changes Target
+Lateral ID from 0 and remains Park/stationary-only.
+
+The live KAT remains the canonical packer check: trip `620`, reset `1109`, message `8` produces
+freshness `02 6c 00 45 50 84`; selector-4 returns CMAC prefix `d64e2a5e`, producing wire
+trailer `1d64e2a5`. The host unit test freezes that exact domain, the six-frame ISO-TP request,
+full-message recovery `0 -> 4 -> 8`, current-native verification, lookahead signing, Panda arm
+confirmation, and the resulting signed ID0 transmit.
+
+Neither development Param is enabled by default, and release builds refuse both activation
+paths. The field order is therefore strictly:
+
+1. install the already-qualified EPS oracle resident in NRTD, then NRTD→READY without OFF;
+2. first enable/test **transparent** `ToyotaTss308aId0` stationary and verify source suppression,
+   bus-0 publication, `0x081`, DTCs, and absence of duplicate `0x08A` downstream;
+3. disable transparent mode, enable **signed** `ToyotaTss308aSignedId0`, and require successful
+   native MAC recovery/verification before the first arm;
+4. keep Target Lateral ID 0 throughout; only after that synthetic stream is native-clean should
+   any longitudinal request/application field be introduced.
