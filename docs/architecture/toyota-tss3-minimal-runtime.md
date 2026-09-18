@@ -234,9 +234,12 @@ clears signal265, and sets contributions B8/B9 to 100. Native B7 application
 sequence, B28..B31 SecOC trailer, secured queue bytes, freshness records, and
 ICU-S result are never modified. With C7 zero/expired, the raw route44 payload is
 left stock. Consequently there is no command-5 latency/failure path capable of
-letting a different native target appear between openpilot targets. This backend
-is firmware-closed/regression-built and requires the next live stationary/road
-qualification; it is not yet claimed live merely from static ordering.
+letting a different native target appear between openpilot targets. This backend was then road-qualified on exact F33 route
+`000000ee--65bdece411`: 57,437 active C7 frames over ~574 s of active lateral and
+101,809 `0x030` frames produced **zero** B16 command-inhibit assertions, versus
+11 moving B16 rises in ~147 s on the immediately preceding pre-fix route. The fix
+therefore remains at the native ~100-Hz C7 cadence and is live-demonstrated for
+the continuity failure it was designed to remove.
 
 > **Tester-handoff audit, 2026-09-16:** the audit found real host-side defects in
 > post-startup resident attestation, sensor freshness/validity, Park enforcement,

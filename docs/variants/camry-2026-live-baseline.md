@@ -6895,3 +6895,49 @@ zero post-auth override count before permitting a bounded C7 pulse. A later
 `0x08A` request-plane implementation remains desirable once clean sole-source
 ownership is recovered; it is not required to remove the present B6 continuity
 failure.
+
+### 73.3 Live road qualification: post-auth route44 ownership removes the B16 dropout pattern
+
+Route `000000ee--65bdece411` is the first extended road qualification of commit
+`311a3a3f` (`postauth-raw-com`) on the replacement rack. All 17 rlog segments are
+retained locally under `build/logs/camry-20260917-ee-65bdece411/`; the tracked,
+privacy-minimized summary and per-segment SHA-256 identities are at
+`targets/camry-2026/raw-20260917/postauth-road-qualification/summary.json`.
+
+The result directly closes the failure pattern from §73:
+
+- **574.37 s** / **57,437 samples** of active lateral control;
+- **57,437 active C7 frames**, median active interval **9.849 ms** and maximum
+  sub-second gap **17.376 ms**;
+- maximum observed adjacent C7 target change remains only **3 raw**;
+- **101,809 exact-F33 `0x030` frames**, all with the tuple
+  `B6[2]=0, B16[0]=0, B19[0]=0`;
+- **zero** `carState.steerFaultTemporary` rises and zero permanent steering
+  faults;
+- zero CAN timeouts, zero CAN-invalid samples while lateral was active, and zero
+  Panda `safetyRxInvalid` samples.
+
+The direct comparison is decisive for the original problem. The pre-fix route
+`000000e9--deaaad5774` produced **11 moving `B16[0]` command-inhibit rises in
+~146.88 s** of active lateral. The post-auth route produced **0 in ~574.37 s** --
+roughly 3.9x the active-control exposure with no recurrence. This is achieved at
+the unchanged ~100-Hz functional-C7 cadence; no 50-Hz workaround is involved.
+
+One Panda `safetyTxBlocked` counter increment appears at route time ~6552.45 s,
+but the corresponding `CarControl` state is already `latActive=false` / disabled
+and `carState.canValid=true`, so it is unrelated to lateral continuity. The only
+visible steering warnings are ordinary `steerSaturated` / `turn exceeds limit`
+events around ~6707.33 s and ~7218.45 s, not F33 cooperative-command or hardware
+faults.
+
+A coarse nearest-sample comparison of commanded versus measured steering angle
+during active lateral gives median absolute error **0.493 deg**, p90 **1.444 deg**,
+p99 **3.013 deg**, and max **5.544 deg**. These are vehicle-response observations,
+not a new actuator-model calibration claim.
+
+This live route upgrades the exact Camry post-auth backend from
+firmware-closed/regression-built to **live road demonstrated** for the failure it
+was designed to remove. Native B6 authentication remains Toyota-owned, while C7
+owns only the authenticated route44 application copy. `0x08A` remains the desired
+longer-term upstream request-plane architecture once clean source ownership is
+available, but is no longer required to obtain continuous Camry lateral control.

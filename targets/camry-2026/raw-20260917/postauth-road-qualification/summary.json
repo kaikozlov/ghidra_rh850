@@ -1,0 +1,148 @@
+{
+  "comparison_to_pre_fix_route": {
+    "lat_active_seconds_approx": 146.88,
+    "moving_command_inhibit_rises": 11,
+    "postauth_lat_active_seconds_approx": 574.37,
+    "postauth_route_command_inhibit_rises": 0,
+    "route": "000000e9--deaaad5774"
+  },
+  "conclusion": "Post-authenticated route44 ownership eliminated the observed F33 cooperative-command-inhibit failure in this drive: 101809 EPS 0x030 frames all have B6[2]=0, B16[0]=0, B19[0]=0 across approximately 574 s of active lateral. No steerFaultTemporary rise occurred. Functional C7 remained at ~100 Hz with max observed target step 3 raw, so the fix does not depend on reducing control cadence.",
+  "control": {
+    "active_c7_frames": 57437,
+    "max_abs_c7_target_step_raw": 3,
+    "max_active_c7_gap_under_1s_ms": 17.376,
+    "median_active_c7_interval_ms": 9.849
+  },
+  "drive": {
+    "carcontrol_samples": 101108,
+    "lat_active_samples": 57437,
+    "lat_active_seconds_approx": 574.37,
+    "route_duration_s": 1015.536
+  },
+  "eps_030": {
+    "angle_inhibit_b19_assertions": 0,
+    "command_inhibit_b16_assertions": 0,
+    "flag_tuple_counts": {
+      "hw=0,command=0,angle=0": 101809
+    },
+    "frames": 101809,
+    "hardware_inhibit_b6_assertions": 0
+  },
+  "local_log_copy": "build/logs/camry-20260917-ee-65bdece411",
+  "openpilot": {
+    "can_invalid_samples": 84,
+    "can_invalid_while_lat_active": 0,
+    "can_timeout_samples": 0,
+    "panda_safety_rx_invalid_samples": 0,
+    "panda_safety_tx_blocked_transitions": [
+      {
+        "controls_allowed": false,
+        "lat_active": false,
+        "route_mono_s": 6355.112979083,
+        "safety_tx_blocked": 0,
+        "segment": 0
+      },
+      {
+        "controls_allowed": false,
+        "lat_active": false,
+        "route_mono_s": 6552.448248997,
+        "safety_tx_blocked": 1,
+        "segment": 3
+      }
+    ],
+    "steer_fault_temporary_rises": 0,
+    "steer_saturation_rises": [
+      {
+        "route_mono_s": 6707.320183412,
+        "segment": 5
+      },
+      {
+        "route_mono_s": 7216.052061036,
+        "segment": 14
+      },
+      {
+        "route_mono_s": 7217.228008791,
+        "segment": 14
+      },
+      {
+        "route_mono_s": 7217.469712488,
+        "segment": 14
+      },
+      {
+        "route_mono_s": 7217.793478483,
+        "segment": 14
+      },
+      {
+        "route_mono_s": 7218.245486101,
+        "segment": 14
+      },
+      {
+        "route_mono_s": 7218.395291341,
+        "segment": 14
+      },
+      {
+        "route_mono_s": 7218.847204483,
+        "segment": 14
+      },
+      {
+        "route_mono_s": 7218.99728612,
+        "segment": 14
+      }
+    ],
+    "visible_text_alert_edges": [
+      {
+        "route_mono_s": 6370.637298937,
+        "segment": 0,
+        "text1": "Reverse",
+        "text2": "",
+        "type": "reverseGear/permanent"
+      },
+      {
+        "route_mono_s": 6707.328848878,
+        "segment": 5,
+        "text1": "take control",
+        "text2": "turn exceeds limit",
+        "type": "steerSaturated/warning"
+      },
+      {
+        "route_mono_s": 7218.452170341,
+        "segment": 14,
+        "text1": "take control",
+        "text2": "turn exceeds limit",
+        "type": "steerSaturated/warning"
+      }
+    ]
+  },
+  "route": "000000ee--65bdece411",
+  "runtime_backend": "postauth-raw-com",
+  "runtime_commit": "311a3a3f30fb5dc4e41c788628f98b7126f59b53",
+  "schema": "camry-f33-postauth-road-qualification-v1",
+  "segment_sha256": {
+    "0-rlog.zst": "480e7cc4d626222750586c1077bf83a3b3039e8217f5b915cc49d479ee0eba94",
+    "1-rlog.zst": "3bca2a9e21b9cd21d79920b26b0c535b9eaf8f6daae33e96eb135d2b19ff71e9",
+    "10-rlog.zst": "a80eb451e24b9c7ecadefa790d758d8a72ac36b7e12df81a83c47a047b8559f3",
+    "11-rlog.zst": "685edc76ff494c6cbfebb662a4a825d55860ca329ba4d1b031cde053708253e9",
+    "12-rlog.zst": "4d6e9eb29c721d1ff9a325899f82bd9a6ce02439f6c982be39181ec5768a6953",
+    "13-rlog.zst": "5a4fa073cef8d91404f0d5ce5a794a330370031a7fc1a6dba42eb09360eac340",
+    "14-rlog.zst": "9f189da57e2e80db152ed5b523c8757a664f4268f4bd5b7d5c8f4b312db4d8af",
+    "15-rlog.zst": "3988b22088b28dd318c3195a9aa58571be98e98d5b486d542e42e9689ac4397e",
+    "16-rlog.zst": "ff78b9ba8ac3b7e9d22d129ab6e6e7d2f84f4a41fb1a78a5b7f3550561e65d15",
+    "2-rlog.zst": "97439fcb0647592c104e0e4293bccdaac133160dda52628e4c4816223517abd5",
+    "3-rlog.zst": "3b61021aea062295f7e2983fa182b8f20178cada8cf5253ef3f818196fd560ec",
+    "4-rlog.zst": "bc411921dd71b6d84a631aa670ab89ede67d209ee99606577cd267b73f588ebd",
+    "5-rlog.zst": "d91d9b284562e2da4253045d296278e8d7c8e3ade50cd511d00eb7f57cbbe343",
+    "6-rlog.zst": "0fb98ef9f1a1e17bf8ae33678c6eaceffeaa827d4e58d4759bd8c0eb3c1b3ec3",
+    "7-rlog.zst": "cc3e93438011d243ea8b18c8ffe4ba2a46d304244db3ac37089e5072659119b7",
+    "8-rlog.zst": "124ef4221fb8a17720fa511692476d903f10cc3fbb909ae4d41f471c8d471800",
+    "9-rlog.zst": "b5366ef87d3863ef59b3157fea2ded1779af2c06fa3e31c369db4fd50781dfe6"
+  },
+  "segments": 17,
+  "tracking": {
+    "abs_steering_angle_error_deg": {
+      "max": 5.544,
+      "median": 0.493,
+      "p90": 1.444,
+      "p99": 3.013
+    }
+  }
+}
