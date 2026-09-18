@@ -684,3 +684,37 @@ The full Toyota regression after this split is 292 passed / 120 skipped / 16 sub
 regression remains 35 passed. The comma is deployed at parent `03fbbab6d`, opendbc `20b4e37b`,
 Panda `c89d14a6`, with transparent mode enabled and signed mode disabled. Offroad reboot completed
 normally; Panda firmware signature remains `0cc8a00dfc8ac6f6` and matches the expected build.
+
+### 12.14 Host-generation prediction removed; Panda now owns the handoff atomically
+
+The first live transparent arm attempts on the correct repin topology exposed a pure host/Panda
+race. `card` observed native generation N and sent an arm naming N+1, but the normal
+`card -> sendcan -> pandad -> Panda` path delivered that admin after native N+1 had already
+reached Panda. Safety therefore correctly expected N+2 and rejected the request. Three live
+samples reproduced this exactly; stock forwarding remained authoritative throughout.
+
+The fix is **not** to hard-code a larger host lead. The handoff protocol is now generation-free
+from the host side in opendbc `2cf0322a` / parent `740031c93`:
+
+- the private arm admin contains only `arm/release`; byte 4 is canonical zero;
+- Panda validates ID0/sync/stationary state and, at the instant it accepts the arm, sets its own
+  `next_b26 = current_native_b26 + 1`;
+- while arm is pending, `card` offers an exact clone of every native source `0x08A` on bus0;
+- safety rejects those clones while stock forwarding still owns the path, so no duplicate reaches
+  the chassis;
+- once Panda's atomic arm takes effect, it blocks the next native source frame and accepts that
+  frame's exact host clone;
+- **the first returned host `0x08A` TX echo**, not the admin echo, is the host's proof that ownership
+  actually crossed;
+- malformed/mistimed replacements immediately clear Panda replacement ownership and fail open to
+  stock forwarding.
+
+Signed mode now uses the same ownership protocol. Before ownership is proven it may offer exact OEM
+frames; after ownership, a missing synthetic cache entry simply preserves continuity with the exact
+OEM frame while signing continues ahead. Thus neither transparent nor signed mode predicts the
+handoff generation in Python.
+
+The atomic safety regression is 293 passed / 120 skipped / 16 subtests, and the host/Param suite is
+35 passed. The comma is deployed at parent `740031c93`, opendbc `2cf0322a`, Panda `c89d14a6`, with
+transparent mode enabled and signed mode disabled. Offroad startup rebuilt/flashed Panda safety from
+old signature `0cc8a00dfc8ac6f6` to expected `8d776c4f8bd73381` and pandad reconnected normally.
