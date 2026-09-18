@@ -16,8 +16,11 @@ explicit target is supplied.
 
 Current Camry work spans the complete TSS3 control path rather than only the EPS:
 
-- native lateral control is demonstrated through the volatile EPS-resident B6
-  rewrite/signing path;
+- native lateral control is demonstrated through the volatile EPS-resident
+  **post-auth** route44 raw-COM path: stock B6 completes SecOC verification
+  unchanged, then the application control fields are overridden before the
+  cooperative controller consumes them; the current Camry backend does not
+  re-sign B6 or invoke command 5 at runtime;
 - `0x08A` is the FRC-side TSS application request plane and `0x081` the
   Brake/VMM result/status plane;
 - protected `0x0B6` is the downstream steering-controller instruction received by

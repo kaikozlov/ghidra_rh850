@@ -27,16 +27,21 @@ path rather than a single steering message.
   `0x08A` is the TSS application-request plane, Brake/VMM-owned `0x081` is the
   corresponding result/reference plane, and protected `0x0B6` is the final
   steering-controller instruction received by the EPS. The working development
-  path sends a bounded C7 target through normal Toyota safety, rewrites an
-  already-native B6 inside the EPS, and re-signs it with the EPS's ICU-S
-  command-5 / selector-4 key path. Current deployment work uses a volatile RAM
-  runtime; persistent receiver-bypass patches are historical bring-up artifacts,
-  not the intended architecture.
-- **The TSS3 RAM runtime is now cross-target and one-shot.** Camry F33, Crown F30,
-  and Corolla H/F share one authenticated 4-KiB payload that self-selects the
-  exact target profile and exposes the same recurring functional-`0x777` C7
-  host contract. Target-local addresses and RAM geometry stay inside the
-  payload; openpilot does not need a different steering protocol per vehicle.
+  path sends a bounded C7 target through normal Toyota safety, lets native B6
+  complete the stock receive/SecOC path, then takes ownership **post-auth** at
+  route44 raw COM in volatile RAM before the cooperative controller consumes the
+  application fields. Native freshness/MAC state, the B6 SecOC trailer, and the
+  ICU-S result are left untouched; command-5 re-signing is no longer part of the
+  Camry field backend. Persistent receiver-bypass patches remain historical
+  bring-up artifacts, not the intended architecture.
+- **The TSS3 RAM runtime keeps one cross-target host contract, with target-native
+  post-install backends.** Camry F33, Crown F30, and Corolla H/F use the same
+  authenticated 4-KiB bootstrap/profile selection and the same recurring
+  functional-`0x777` C7 control contract. Camry F33 now qualifies native authenticated
+  route44 publication and installs a post-auth raw-COM override helper; Crown and
+  Corolla retain their command-5/native-MAC signer paths. Target-local addresses
+  and RAM geometry stay behind the shared host interface, so openpilot does not
+  need a different steering protocol per vehicle.
 - **The exact F33 EPS has a real production SecOC transmit stack.** `0x030` is an
   EPS-origin 32-byte CAN-FD PDU protected by sender freshness plus Toyota
   `FV4 || MAC28`; the firmware constructs
