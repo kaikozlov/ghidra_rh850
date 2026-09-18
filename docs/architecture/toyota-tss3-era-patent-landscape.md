@@ -238,12 +238,31 @@ the ECU. Do **not** infer a programmable-HSM KDF or a new HSM firmware path from
 it. Exact F33 already proves Toyota uses the standard AUTOSAR SHE Memory Update
 Protocol (`M1/M2/M3 -> CMD_LOAD_KEY -> M4/M5`) for ECU Security Key provisioning,
 and AUTOSAR explicitly permits that secure update protocol to target the
-volatile `RAM_KEY` slot while clearing the plain-key flag. On a fixed-state
-ICU-S/SHE implementation, a per-ignition working key could therefore be
-installed as an authenticated key envelope into volatile protected key storage
-without changing HSM firmware. Whether any later Toyota platform actually does
-that each ignition remains unproved; it is simply a substantially more credible
-implementation model than assuming an OEM-programmable KDF-to-slot primitive.
+volatile `RAM_KEY` slot while clearing the plain-key flag.
+
+That does **not** automatically make per-ignition rotation stronger. AUTOSAR's
+own SHE specification warns that keys loaded into `RAM_KEY` from outside SHE
+are not fully under SHE control and are vulnerable to replay and denial-of-
+service attacks. For `RAM_KEY` secure updates, the update counter and flags are
+fixed/ignored rather than providing the monotonic anti-replay state used by
+nonvolatile key slots. Therefore a captured UID-specific `M1/M2/M3` transcript
+for a volatile session key can be a replay/rollback artifact if an attacker can
+reach the corresponding `CMD_LOAD_KEY` path; the envelope still protects the
+plaintext key cryptographically, but it adds persistent protocol material and
+state that do not exist when the operational SecOC key simply remains in a
+non-exportable hardware slot.
+
+The patent's literal per-ECU derivation embodiment has a different tradeoff: it
+avoids distributing a session-key envelope, but requires every participant to
+possess enough common long-term material and boot-context/OTP logic to derive
+the same key independently. The patent expressly allows the passcode generator
+and key-derivation module to be implemented as ordinary processor-executed
+software/firmware and allows the master seed to reside in ECU memory or
+firmware. If realized that way, it expands the trusted/reverse-engineerable
+CodeFlash surface around a root secret whose compromise still defeats all
+future rotations. Neither implementation should be described as an inherent
+security improvement over a well-contained static HSM key without identifying
+the narrower threat model it actually improves.
 
 Source:
 https://patents.google.com/patent/US20250300993A1/en
