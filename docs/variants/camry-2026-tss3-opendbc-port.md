@@ -734,9 +734,19 @@ unsent accumulated target.
 The volatile EPS oracle resident is still a deployment prerequisite rather than an
 openpilot-installed component. Without a qualified oracle response, the host never sends
 the ownership arm and Panda continues forwarding stock `0x08A`; request-plane openpilot
-lateral therefore remains unavailable rather than falling back to direct B6. This is the
-remaining software/deployment boundary before parked and road qualification of the new
-path, not a reason to add another steering-permission policy.
+lateral therefore remains unavailable rather than falling back to direct B6.
+
+A parked qualification cannot exercise the selective lateral branch: the maintainer Camry
+does not publish a usable native ID11 LTA/LCA request while parked, so openpilot cannot
+engage the real ID11 substitution there. Park/READY can still prove the carrier mechanics
+with the native inactive request stream: oracle qualification, relay ownership, exact-clone
+continuity, source ordering, watchdog/release and fail-open behavior. The first actual
+B18:B19 substitution must therefore be a short moving test during a genuine native ID11
+interval with normal `CC.latActive`. That road test should begin with the smallest ordinary
+openpilot angle demand and verify source-ID continuity, modified-only-B18:B19 shape,
+returned host TX, `0x081` result response and absence of new faults before broader driving.
+This is the remaining software/deployment boundary, not a reason to add another
+steering-permission policy.
 
 Working session notes for the GTS+ vehicle-type → install-set → family-`.ddb` → GetSupport funnel (not a claim ledger): [../history/2026-08/CAMRY_GTS_LATERAL_FUNNEL_2026-08-29.md](../history/2026-08/CAMRY_GTS_LATERAL_FUNNEL_2026-08-29.md).
 
