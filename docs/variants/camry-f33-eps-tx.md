@@ -375,3 +375,38 @@ replay but Panda never sees the exact frame, selective EBU/Brake-domain forwardi
 explanation and a comma-side sender with the EPS used only as a MAC oracle stays
 the simpler architecture. Detailed field ordering and proof boundaries are in
 [`../../exploit/ephemeral_runtime/camry_f33_08a_sender_experiments.md`](../../exploit/ephemeral_runtime/camry_f33_08a_sender_experiments.md).
+
+### 12.1 Live result — 2026-09-18
+
+Both discriminators have now run on the exact maintained F33 vehicle.
+
+**Experiment A closed positive.** `verify-native-08a` completed all three requested
+stock samples with `samples_matched=3/3`. For sample 3, the captured native MAC28
+`d64e2a5` was reproduced exactly by EPS ICU-S selector 4 over domain
+`008a || B0..B27 || freshness48`, with trip `620`, reset `1109`, and reconstructed
+message counter `8`. This dynamically verifies the exact F33 EPS slot-4 command-5
+path as a valid MAC oracle for stock `0x08A`; the remaining oracle problem is
+transport/latency, not key-domain compatibility or authenticated-input framing.
+
+**Experiment B closed negative for outward routing.** The EPS helper replayed one
+byte-exact stock ID0 frame
+`0000000080000012ffae00ffae7fff007fff004b0000000000002e0088f34177`
+through HTH0 / lower object 47. The lower writer returned `0`, enqueue count became
+`1`, the unique pending software handle `0x00F0` completed and returned to successor
+`0xFFFF`, and the helper recorded `completion_count=1`. Thus the exact F33 lower
+CAN path physically completed the requested transmit. The Panda-visible Bus-4
+stream remained healthy but contained zero copies of the replayed frame, yielding
+`eps_origin_08a_not_observed_at_panda`.
+
+This closes the practical topology discriminator: **the current EPS-local Tx path
+is not a usable final `0x08A` sender to the Panda-visible/Brake-side Bus-4 domain.**
+The observation is consistent with selective EBU/junction forwarding or an
+equivalent downstream routing boundary; it does not by itself identify the
+forwarding implementation. The preferred integration shape is therefore EPS as
+a TSK/CMAC oracle and comma as final `0x08A` emitter at the visible Bus-4 boundary.
+
+The same run also gives a direct stock cadence bound. Five native `0x08A` frames
+were observed in the 120-ms uniqueness window, and the post-treatment stream
+continued with monotonically advancing B26 low-6 sequence values, consistent with
+approximately **40 Hz / 25 ms** native publication. That is the rate target for a
+real-time oracle transport.
