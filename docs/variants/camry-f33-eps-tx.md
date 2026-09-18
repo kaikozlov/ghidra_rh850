@@ -657,3 +657,30 @@ half-repinned or otherwise unhealthy downstream topology from arming even if
 some bus2 source frames are visible. Parent host/Param tests are 35 passed; the
 full Toyota regression for the relay-correct opendbc change is 276 passed / 120
 skipped / 10 subtests.
+
+### 12.13 Live relay-correct topology is three-way: state bus0, FRC source bus2, radar bus1
+
+The first post-repin READY capture resolved the physical/logical topology precisely. The split is
+not a simple "all downstream on bus0 / all upstream on bus2" partition:
+
+- **bus0** carries the downstream chassis/state family needed by CarState, including `0x025`,
+  `0x030`, `0x081`, `0x0AA`, `0x101`, `0x116`, `0x127`, and the ordinary body/state frames;
+- **bus2** carries the FRC-owned source vocabulary required by the host-replacement path, including
+  authoritative native `0x08A`, `0x251` cruise display, `0x412` LKAS HUD, and `0x3F6` BSM;
+- **bus1** remains the unsplit TSS3 object/radar network: `0x180..0x185` stayed there after the
+  repin.
+
+This live capture explained the initial `CarState.canValid=false` after the hardware change: the
+first relay-correct parser revision had moved the whole Camry PT parser to bus0, thereby requiring
+source-only `0x08A/0x251/0x412` downstream where they do not exist. The final parser model is now
+implemented in opendbc `20b4e37b` / parent `03fbbab6d`:
+
+- exact-F33 CarState uses a **bus0 chassis/state parser** plus a **bus2 FRC-source parser**;
+- `CarState.canValid` requires both sides of that physical split to be healthy;
+- TSS3 radar uses **bus1** in relay-correct host mode;
+- card rebuilds both CarState/CANParser and RadarInterface after applying the development host flag.
+
+The full Toyota regression after this split is 292 passed / 120 skipped / 16 subtests. Host/Param
+regression remains 35 passed. The comma is deployed at parent `03fbbab6d`, opendbc `20b4e37b`,
+Panda `c89d14a6`, with transparent mode enabled and signed mode disabled. Offroad reboot completed
+normally; Panda firmware signature remains `0cc8a00dfc8ac6f6` and matches the expected build.
