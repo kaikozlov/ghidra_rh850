@@ -718,3 +718,27 @@ The atomic safety regression is 293 passed / 120 skipped / 16 subtests, and the 
 35 passed. The comma is deployed at parent `740031c93`, opendbc `2cf0322a`, Panda `c89d14a6`, with
 transparent mode enabled and signed mode disabled. Offroad startup rebuilt/flashed Panda safety from
 old signature `0cc8a00dfc8ac6f6` to expected `8d776c4f8bd73381` and pandad reconnected normally.
+
+### 12.15 Freshness sync originates on bus0, not bus2
+
+The first atomic-handoff READY attempt still produced rejected canonical arm admins even though
+CarState, Park/standstill, and native ID0 continuity were valid. Live correlation around each
+rejection showed the remaining topology mistake: `0x00F` is not an FRC-source-side PDU after the
+repin. It originates on **bus0** and appears on bus2 only as a forwarded echo (`src=130`), while
+native authoritative `0x08A` originates on **bus2** and appears downstream as the bus0 forward
+return (`src=128`).
+
+Because Panda safety and both host workers were listening for `0x00F` on bus2, their freshness
+sync state never became valid. The arm rejections were therefore correct and stock forwarding
+remained authoritative. The final correction is opendbc `5d24d939` / parent `030e55ccc`:
+
+- native authoritative `0x08A` source remains bus2;
+- SecOC synchronization `0x00F` is consumed from bus0;
+- both transparent and signed host workers follow bus0 `0x00F`;
+- Panda safety tracks the same bus0 reset counter for arm qualification and epoch release.
+
+The full Toyota regression after this correction is 293 passed / 120 skipped / 16 subtests and
+the host/Param suite is 35 passed. The comma is deployed at parent `030e55ccc`, opendbc
+`5d24d939`, Panda `c89d14a6`, with transparent mode enabled and signed mode disabled. Offroad
+startup rebuilt/flashed Panda safety from `8d776c4f8bd73381` to expected `5f313ff3824f4d18`, and
+pandad reconnected normally.
