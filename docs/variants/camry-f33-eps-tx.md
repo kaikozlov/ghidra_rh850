@@ -523,3 +523,21 @@ a sender emits FF on a strict 25-ms schedule, waits fixed 5 ms, then batches the
 five CFs; a separate receiver continuously drains `0x7A9` and matches MAC replies
 by sequence. The final non-actuating gate is a 100-request pipelined soak requiring
 100 responses and resident request/success/response deltas of 100.
+
+### 12.9 Pipelined oracle transport is closed on the live F33
+
+The final production-shaped 100-request pipeline completed 100/100 replies with
+resident request/success/response deltas all exactly +100, zero receiver errors,
+and no stock NRCs. Sender cadence was decoupled from response receipt: median
+scheduled-start lateness was 0.134 ms, p95 3.373 ms, max 5.219 ms. Reply RTT was
+17.445 ms median, 24.094 ms p95, 28.854 ms p99, and 28.946 ms max. Five replies
+crossed the 25-ms boundary, but none crossed 30 ms and they did not delay later
+requests.
+
+This closes the high-rate EPS MAC-oracle transport for the exact maintained F33.
+The integration contract is now: sender issues one oracle request each 25 ms,
+uses the proven 5-ms FF->CF receiver-readiness delay, batches five CFs, receives
+MAC replies asynchronously, and maintains one signed-frame lookahead. The next
+work is host-owned freshness/application construction and an ID0-only
+comma-origin authenticated `0x08A` stream; no further oracle transport RE is a
+prerequisite.
