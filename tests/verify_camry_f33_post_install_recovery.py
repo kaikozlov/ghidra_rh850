@@ -52,6 +52,11 @@ class FakePanda:
 
 
 class TestRecovery(unittest.TestCase):
+    def test_current_repin_routes_all_control_domain_diagnostics_on_bus0(self):
+        self.assertEqual((recovery.EPS_TX, recovery.EPS_BUS), (0x7A1, 0))
+        self.assertEqual((recovery.FRC_TX, recovery.FRC_BUS), (0x792, 0))
+        self.assertEqual((recovery.BRAKE_TX, recovery.BRAKE_BUS), (0x7B0, 0))
+
     def test_gts_permission_requires_distance_control_mode(self):
         for mode in range(6):
             for allowed in (False, True):

@@ -942,8 +942,10 @@ check("inline signer replacement control is exact stock-harness C7 signed16 big-
       inline_signer.CONTROL_BUS == 1 and
       inline_signer.replacement_frame(sequence=0x2A, target_angle_raw=-13) == bytes.fromhex("00c72a00fff30000"))
 recovery_plan = post_recovery.plan()
-check("post-install recovery pins the exact stock-harness EPS identity and proven split clear",
-      post_recovery.EPS_BUS == 1 and post_recovery.EPS_TX == 0x7A1 and
+check("post-install recovery pins the exact post-repin control-domain routes and proven split clear",
+      post_recovery.EPS_BUS == 0 and post_recovery.EPS_TX == 0x7A1 and
+      post_recovery.FRC_BUS == 0 and post_recovery.FRC_TX == 0x792 and
+      post_recovery.BRAKE_BUS == 0 and post_recovery.BRAKE_TX == 0x7B0 and
       post_recovery.OBD_CLEAR_BUS == 0 and post_recovery.OBD_CLEAR_TX == 0x7DF and
       recovery_plan["physical_clear"]["request"] == "14FFFFFF" and
       recovery_plan["functional_clear"]["required_positive_responders"] ==
@@ -1067,7 +1069,7 @@ with tempfile.TemporaryDirectory() as td:
     check("kit copies the exact standalone probe", copied.read_bytes() == MODULE_PATH.read_bytes())
     check("kit manifest is self-contained v19 and binds relay-correct request-plane route", manifest["schema"] == "camry-f33-car-kit-v19" and manifest["target"] == {
         "eps_f181": "8965F3307000",
-        "eps_diag": "0x7A1->0x7A9 bus1 (EPS diagnostics and 0x08A MAC-oracle transport)",
+        "eps_diag": "0x7A1->0x7A9 bus0 (post-repin EPS diagnostics and 0x08A MAC-oracle transport)",
         "request_source": "0x08A/32 FD bus2 (FRC native source on relay-correct repin)",
         "request_sink": "0x08A/32 FD bus0 (host replacement toward chassis/Brake)",
     })
@@ -1085,6 +1087,12 @@ with tempfile.TemporaryDirectory() as td:
           manifest["runtime_firmware_contract"]["request_plane_road_qualified"] is False and
           manifest["runtime_firmware_contract"]["current_lateral_path"].startswith("relay-correct FRC 0x08A"))
     oracle = manifest["ram_experiments"]["08a_mac_oracle"]
+    oracle_launcher_text = (out / "f33-08a-oracle").read_text(encoding="utf-8")
+    check("oracle launcher exposes post-repin Brake then FRC recovery under one Panda lease",
+          "reset-brake" in oracle_launcher_text and "reset-frc" in oracle_launcher_text and "recover-peers" in oracle_launcher_text and
+          oracle_launcher_text.index('restart-domain --domain brake') < oracle_launcher_text.index('restart-domain --domain frc') and
+          'quiesce_panda_owner' in oracle_launcher_text and 'camry_f33_post_install_recovery.py' in oracle_launcher_text)
+
     check("kit packages the live-qualified generic 0x08A MAC oracle as the production signer service",
           oracle["launcher"] == "f33-08a-oracle" and
           oracle["payload_sha256"] == eps08a_oracle.EXPECTED_PAYLOAD_SHA256 and
