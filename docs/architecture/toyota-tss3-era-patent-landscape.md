@@ -41,7 +41,7 @@ Accordingly:
 | **US20200070873A1 / US11643089B2**, Vehicle control system | 2018-08-29; pub. 2020 | Toyota | Applications put request values plus payload-level application IDs directly on the network; the patent explicitly distinguishes those IDs from `CAN_ID`. The manager selects an application ID, while the actuator waits for the selection and then consumes the **newest matching request received after that selection event**. The arbitration sample and the actuated sample may therefore be different. Claim 4 explicitly covers EPS/lateral motion. | Critical alternative physical realization: arbitration can be a selected-source plane separate from the request-value data plane. Exact F33 does **not** instantiate the claimed direct-request EPS boundary on its recovered external CAN surface because it receives neither `0x08A` nor `0x081`; B6 remains its recovered target-bearing ingress. See the dedicated close read. |
 | **US20200070802A1 / US11161496B2 / US12005882B2**, Control device | 2018-08-30; pub. 2020 | Toyota | Brake control ECU contains request arbitration, command distribution, feedback control, and optionally vehicle-motion control. It feeds measured **control record values** and summarized actuator operation/soundness information back to requesting applications; direct wheel-speed inputs and preferential stability control are explicit. | Reinforces Brake/VMM ownership and gives a reason for the rich result/status plane: applications need realized motion plus actuator soundness, not only the selected request. |
 | **US20220315018A1 / US12280788B2**, Control apparatus, manager... | 2021-04-06 | Toyota + ADVICS | Applications supply information about whether a kinematic plan remains an **arbitration target**. A request that is about to terminate can be excluded or handled specially so a new request is not delayed. | Concrete vocabulary for handoff/disengagement and source-suppression RE: search for arbitration-target, termination, low-priority, degeneration and handoff state rather than modeling every request as simply present/absent. |
-| **US20230166772A1 / US12534110B2**, Motion manager, autonomous driving apparatus... | 2021-11-30 | Toyota | A manager can intentionally invalidate a PCS/other ADAS request and return **request rejection information** so the suppressed application does not diagnose an abnormal condition merely because its plan is not selected. The disclosed invalidation target can also be AEB, ACC, ASL, or another application. | High-value conceptual clue for the persistent TSS3 fault-state problem. Clean source replacement may require a result/rejection/status contract in addition to suppressing the source request. Do not assume exact Camry has this exact ADS embodiment. |
+| **US20230166772A1 / US12534110B2**, Motion manager, autonomous driving apparatus... | 2021-11-30 | Toyota | A manager can intentionally invalidate a PCS/other ADAS request and return **request rejection information** so the suppressed application does not diagnose an abnormal condition merely because its plan is not selected. The disclosed invalidation target can also be AEB, ACC, ASL, or another application. | High-value vocabulary for the exact Camry's **FRC-internal feature selector**: LTA/LDA/LCA/PDA/PCS coexist inside FRC, and an analogous priority/invalidation state can choose which feature populates generic `5282` before `0x08A` egress. Any rejection acknowledgment can be internal to FRC; do not project the patent into an external Brake-side lateral-client policy PDU. |
 | **US20220274616A1 / US12060069B2**, Manager, control method... | 2021-03-01 | Toyota + ADVICS | Manager accepts application IDs plus kinematic plans and outputs the motion request to an actuator system **corresponding to the application ID**, preventing an inappropriate actuator from being used for an unexpected application request. | Supports treating application ID as policy/routing metadata, not merely a display label. |
 | **US11780500B2**, Control device, manager, method... | 2020-02-05 | Toyota | Manager converts/arbitrates requests and sends **actual steering angle** back to the driver-assistance system. | Useful for the 0x081/result-plane interpretation and for distinguishing requested pinion angle, selected target, and realized steering state. |
 | **US11834037B2**, Control device, method... | 2020-03-18 | Toyota | Manager distributes converted motion requests and returns steering-actuator **middle-point / neutral-point** information to applications; updates are coordinated so clients do not disagree across handoffs. | Search oracle for steering center/middle-point synchronization, calibration, and discontinuity handling. |
@@ -245,7 +245,7 @@ The patent still does **not** disclose Toyota's numeric application-ID table.
 The numeric mapping above comes from current GTS+ and dynamic Camry evidence,
 not from US20220219711A1 itself.
 
-#### Retained Camry logs show the application handoff in motion
+#### Retained Camry logs show the FRC-internal application handoff on egress
 
 A re-check against the retained road corpus makes this patent materially more
 useful than a static naming crosswalk. The existing 12-route / 513-segment
@@ -273,12 +273,14 @@ transition graph is not random:
 | `4 -> 0` | 4 |
 | `0 -> 4` | 3 |
 
-The shape is strikingly consistent with the follow-on patent's ordinary-client
-priority order: LDA/lane-deviation above LKA/lane-keeping above steering-wheel
-operation guidance. It is not by itself proof of the stored priority table,
-because application eligibility can produce the same directed graph, but the
-natural preemption edges are exactly the edges the patent would predict:
-`SDG -> LTA`, `SDG -> LDA`, and `LTA -> LDA`.
+The shape is strikingly consistent with an **FRC-internal feature priority/
+eligibility state machine**: LDA/lane-deviation can temporarily replace LTA,
+and LTA can replace SDG/PDA-SA when its operating conditions become active.
+Toyota's follow-on patent supplies useful priority terminology, but these edges
+are not Brake choosing among separate network clients. LTA, LDA, LCA,
+PDA/SDG and PCS are functions inside the FRC application, and `0x08A` is the
+external expression of whichever FRC lateral function currently owns the
+generic request.
 
 The result plane independently shows that these are real handoffs rather than
 display-only ID changes. Across **1,016,141** `0x081` samples paired with a
@@ -329,17 +331,19 @@ handoff are distinct from request-loss supervision.
 
 These observations sharpen the physical model:
 
-- `0x08A` is already a **single current application/request publication** on
-  the accessible FRC-facing request plane; the old logs do not expose multiple
-  simultaneous per-application lateral requests on separate CAN frames;
-- `0x081 B13[5:0]` behaves as the downstream **lateral arbitration/result
-  identity** with a separate update cadence, not as a bit-for-bit echo;
-- Toyota's feature-local arbitration can therefore occur upstream of the
-  generic `0x08A` publication, with a second chassis/VMM result stage reflected
-  by `0x081`;
+- `0x08A` is the **FRC-selected generic TSS request egress**. It is not a bus on
+  which LTA/LDA/PDA applications compete; those applications coexist inside
+  the FRC software and the FRC state machine selects the current owner before
+  publication;
+- `0x081 B13[5:0]` behaves as the downstream **Brake/VMM result identity** with
+  a separate update cadence, not as a bit-for-bit echo and not as the site of
+  LTA-vs-LDA-vs-PDA selection;
+- the current exact-Camry layering is therefore FRC feature-local state -> FRC
+  internal owner selection -> generic `5282`/`0x08A` -> Brake/VMM result and
+  actuator-target generation -> `0x081`/B6;
 - the healthy native handoff oracle is not merely physical steering response:
-  a request-ID change is followed by the corresponding result-ID change while
-  request-loss stays clear.
+  an FRC request-owner change is followed by the corresponding downstream
+  result-ID change while request-loss stays clear.
 
 This suggests a concrete acceptance criterion for future non-invasive takeover
 work: after an intentional request-source transition, observe whether
@@ -352,11 +356,12 @@ different from every healthy native handoff above.
 The missing discriminator is now very specific. The old road logs contain the
 generic request/result planes but not synchronized Operation-FFD feature-local
 objects. A future natural **ID4/LDA-over-ID11/LTA** event should capture
-`5531` (LDA request), `5631` (LTA request), generic `5282`, result `5285/57DE`,
-raw `0x08A`, and raw `0x081`. If both feature-local requests coexist while
-generic `5282`/`0x08A` selects ID4, that would directly expose the
-US20220219711A1-style application priority arbitration rather than merely its
-output.
+`5531` (LDA request), `5631` (LTA request), their enable/inhibition states,
+generic `5282`, result `5285/57DE`, raw `0x08A`, and raw `0x081`. If both
+features remain enabled while one feature-local request becomes preferred and
+`5282`/`0x08A` changes from ID11 to ID4, that would directly expose the **FRC
+application selector** rather than merely its output. It would not be evidence
+that Brake arbitrates LDA versus LTA.
 
 ### 2.3 A missing forwarded value does not imply a missing arbitration stage
 
@@ -407,13 +412,14 @@ cancellation request clears the manager's invalidation flag. Toyota later
 generalizes the policy input from literal invalidation to a request giving the
 first application's plan **higher priority** than the second.
 
-This changes the useful F33 question. Complete protected-`0x08A` loss is much
-lower-level than the patented healthy handoff: it removes the request
-publication itself and can legitimately trigger communication/request-loss
-supervision. If P5/F33 contains an analogous mechanism, the better search target
-is an **eligibility/priority control plane that keeps the ordinary
-request/result contract alive**, plus whatever result/status tells the losing
-client that non-selection is intentional.
+For the exact Camry, the functional analogue belongs **inside the FRC
+application**. Complete protected-`0x08A` loss is much lower-level than a healthy
+feature handoff: it removes the FRC's already-selected request publication and
+can legitimately trigger communication/request-loss supervision. The useful
+search target is therefore the FRC-local eligibility/priority/owner state that
+produces `5282`/`0x08A`, plus any FRC-local rejection/cancel bookkeeping for the
+losing feature. The patent does not require either direction to appear as a
+separate external CAN signal on this implementation.
 
 The patent also explicitly generalizes the mechanism from acceleration to
 steering-angle plans and names LKA/LTA as example steering clients, so the
@@ -446,9 +452,11 @@ The GTS vocabulary is now more tightly bounded than the first survey suggested:
 - `240E LCA Reject` is an Operation-FFD feature-event trigger, not evidence
   that it carries the patent's request-rejection feedback.
 
-The two patent directions therefore remain separate recovery problems:
-**requester -> manager policy request** and **manager -> suppressed-client
-intentional-non-selection feedback**. Do not infer one from finding the other.
+The two patent directions therefore remain separate recovery problems, but on
+the Camry they should be sought first **inside the FRC application**:
+feature/requester -> FRC selection policy, and FRC selection policy -> losing
+feature intentional-non-selection state. Do not infer one from finding the
+other, and do not assume either direction crosses the FRC<->Brake CAN boundary.
 
 Detailed close read and cross-generation GTS joins:
 [toyota-request-invalidation-us20230166772.md](toyota-request-invalidation-us20230166772.md).
@@ -676,26 +684,33 @@ High-value strings and near-synonyms:
 The first cluster is especially likely to extend the current 5283 fail-class
 dictionary into a richer failure-cause/status surface.
 
-### C. Recover the application-ID table empirically
+### C. Recover the FRC application-owner table/state machine empirically
 
-Create controlled captures where only one relevant factory client changes at a
-time: LTA, LDA, ACC/DRCC, PCS where safely observable, PDA/OAA, and driver
-operation. Correlate feature-local request ID -> 5280/5281/5282 request ID ->
-5284/5285 arbitration-result ID -> 57DB/57DE selected result -> 0x081
-result/status -> B6/final actuator instruction where observable.
+Create controlled captures where the FRC's current feature owner changes while
+other features remain enabled: LTA, LDA, LCA, PDA/OAA/SA, PCS where safely
+observable, and longitudinal ACC/DRCC clients separately. Correlate
+feature-local FRC request/state -> generic `5280/5281/5282` owner -> protected
+`0x08A` egress -> downstream `5284/5285` / `57DB/57DE` result -> `0x081` ->
+B6/final actuator instruction where observable.
 
-US20220219711A1 makes this a much more promising exercise because Toyota
-explicitly treats these IDs as application identities used by arbitration
-policy.
+US20220219711A1 makes this useful because Toyota explicitly treats application
+identity and priority/eligibility as separate concepts. On the exact Camry, the
+lateral feature-owner decision should be recovered in the **FRC application**,
+not by looking for simultaneous LTA/LDA/PDA request PDUs at Brake.
 
-### D. Examine healthy source suppression, not only frame blocking
+### D. Examine healthy FRC feature preemption, not only frame blocking
 
-Search for a native sequence with request active -> request marked non-target
-or invalidated -> result/rejection returned to source -> alternate application
-wins -> source does not enter abnormal state.
+Search the FRC recorder/state for a native sequence where one feature remains
+enabled/alive -> its eligibility/inhibition/priority state changes -> another
+feature becomes the generic `5282` owner -> protected `0x08A` expresses the new
+owner -> downstream `5285`/`0x081` follows without request-loss or fail-class
+transition. Any intentional-rejection status for the losing feature may remain
+entirely inside the FRC application.
 
-This is the patent-guided experiment most directly relevant to avoiding the
-current FRC/Brake fault state while taking control.
+This is the patent-guided experiment most directly relevant to understanding
+Toyota's healthy handoff semantics. It also explains why blocking the whole
+`0x08A` egress is the wrong abstraction: that destroys the result of the FRC
+state machine instead of changing its selected feature.
 
 ### E. Check hands-on state at the manager boundary
 

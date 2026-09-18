@@ -18,11 +18,19 @@ path:
 4. Vehicle Movement Controller -> actuator controllers (**priority stability IF**),
    bypassing ordinary application-request arbitration.
 
-The current Camry evidence maps naturally onto those layers.  The strongest working
-crosswalk is **`0x08A` = request-side TSS package, `0x081` = result/status package,
-B6 = final steering-controller target/instruction**.  The logical architecture is now
-strongly constrained; exact Camry physical placement, security ownership and the
-wire/private-link transformation between these layers remain separate questions.
+The current Camry evidence maps naturally onto those layers, but the patent's
+logical `applications -> arbiter` drawing must not be mistaken for the Camry's external
+network topology. **LTA, LDA, LCA, PDA/SDG, PCS and the other TSS features are
+applications inside the FRC application software. They can be enabled simultaneously;
+the FRC state machine selects which one currently owns the generic lateral request.**
+The first external representation of that selected request is protected `0x08A`.
+
+The strongest exact-Camry crosswalk is therefore **FRC feature-local state -> FRC
+internal owner selection -> `5282` / protected `0x08A` selected request egress ->
+Brake/VMM `0x081` result/status and downstream B6 target generation**. B6 is the final
+steering-controller target/instruction interface at EPS. Exact FRC selector code,
+internal security ownership, and the downstream Brake request-to-target transform remain
+separate questions; the location of the LTA/LDA/LCA/PDA ownership decision does not.
 
 ## 1. Toyota's disclosed control graph
 
@@ -130,12 +138,57 @@ The FRC-hosted TSS3 Operation-FFD dictionary mirrors this request vocabulary:
 This is why `0x08A` should be described as the **TSS request-side package**, not the
 final EPS command.  Exact F33 does not receive `0x08A`.
 
-One implementation detail remains important: patent Figure 3 is the conceptual
-per-application interface.  The Camry's `0x08A` can carry different IDs in its two
-longitudinal bound slots (for example 11 and 17).  Therefore the exact Toyota
-implementation may already aggregate/select internal TSS application packages before
-publishing `0x08A`; `0x08A` must not be over-described as the untouched output of one
-single application.
+The exact Camry implementation is now clearer than the patent's conceptual
+per-application drawing.  **LTA, LDA, LCA, PDA/SDG, PCS and the other TSS functions are
+applications inside the FRC application software, not separate network clients arriving
+at Brake.**  Their enable/configuration states can coexist.  The FRC's own application
+logic decides which feature currently supplies the generic lateral request, and `5282`
+records that already-selected generic request inside the FRC-hosted Operation FFD.
+Protected `0x08A` is the first externally observable publication of that FRC-selected
+request on the intercepted chassis network (apart from feature settings/configuration
+inputs themselves).
+
+The retained direct ID18->ID11 and ID11<->ID4 transitions are therefore **FRC-internal
+application-owner changes expressed on egress**, not evidence that Brake is choosing
+between simultaneous LTA/LDA/PDA network requests.  The same point applies to the two
+longitudinal bound slots: the FRC may synthesize each bound from different internal
+applications before publishing the generic TSS request package.  `0x08A` must not be
+over-described as an untouched output of one feature, but neither should it be described
+as the bus on which those FRC-resident features compete.
+
+The current exact-Camry model is:
+
+```text
+FRC application software
+  LTA      LDA      LCA      PDA/SDG      PCS ...
+   |        |        |          |          |
+   +--------+--------+----------+----------+
+                    |
+         feature-local state machines
+         settings / perception / driver / vehicle state
+                    |
+                    v
+       FRC internal request-owner selection
+                    |
+          generic TSS request objects
+          5280 / 5281 / 5282
+                    |
+                    v
+                 0x08A
+             FRC secured egress
+                    |
+                    v
+            Brake / VMM boundary
+      acceptance / result / target generation
+             |                 |
+             v                 v
+          0x081                B6
+      result/status       EPS target/instruction
+```
+
+Feature enablement is therefore distinct from current request ownership: LTA, LDA and
+PDA can all be enabled while only one lateral application ID appears in the generic
+`5282`/`0x08A` slot at a given instant.
 
 There is also **no proved unsigned/pre-protection injection point before `0x08A`**. The
 September repin/direction experiment closes more of the physical source than the older
@@ -155,7 +208,7 @@ SoC/HSM or another network/security controller inside the FRC module. This does 
 leave an external Brake/CGW `0x08A` signer as the leading model. It also does not prove
 an accessible unsigned request API before the FRC's signing step.
 
-## 3. Request arbitration is per package, not per ECU
+## 3. Patent arbitration semantics versus the exact Camry's FRC-internal application selection
 
 Patent paragraphs 148–152 explicitly arbitrate three objects independently:
 
@@ -188,24 +241,29 @@ the patent prioritizes Lv.4 EM above Lv.4 AD while GTS identifies them as 43 and
 The six-bit `0x08A B21[5:0]` / `0x081 B13[5:0]` request/result fields therefore fit a
 preset application-identity namespace, not a rank or ECU address.
 
-The retained road logs now expose natural application handoffs that fit this model. Across
-the 12-route / 513-segment lateral census, `0x08A` changes `18 SDG -> 11 LTA/LCA` 28
-times and never directly `11 -> 18`; it changes `11 LTA/LCA -> 4 LDA` twice and
-`18 SDG -> 4 LDA` once. Two clean cruise-active ID4 episodes show `11 -> 4 -> 11`
-while cruise remains enabled, with `0x081 B13` following the new lateral result after a
-separate publication interval. One route-3c witness holds ID4 for 2.530639 s and one
-route-3e witness for 1.225830 s. This directed graph is consistent with
-US20220219711A1's example priority order LDA > LKA > steering-wheel guidance, although
-request eligibility can produce the same graph and the exact F33 stored priority table is
-not recovered.
+The retained road logs now expose the **FRC's selected lateral application changing on
+egress**. Across the 12-route / 513-segment lateral census, `0x08A` changes
+`18 SDG -> 11 LTA/LCA` 28 times and never directly `11 -> 18`; it changes
+`11 LTA/LCA -> 4 LDA` twice and `18 SDG -> 4 LDA` once. Two clean cruise-active ID4
+episodes show `11 -> 4 -> 11` while cruise remains enabled, with `0x081 B13` following
+the new FRC request after a separate publication interval. One route-3c witness holds ID4
+for 2.530639 s and one route-3e witness for 1.225830 s.
+
+These transitions are not Brake-side arbitration among separate LTA/LDA/PDA senders.
+Those features are simultaneously available FRC-resident functions; the current owner is
+chosen by the FRC application state machine from feature settings, perception, driver and
+vehicle state, and feature-local inhibition/priority conditions. The resulting generic
+request is then published as `5282`/`0x08A`. Toyota's patent priority/eligibility language
+is still highly relevant to **that internal selector**, but the exact F33 stored priority
+table and implementation remain unrecovered.
 
 The aggregate request/result join is stronger: 1,015,978 of 1,016,141 fresh `0x081`
 pairings (99.9839589%) carry the current `0x08A` lateral ID. Every one of the 163
-mismatches is transition-shaped: the request has already changed while the result still
-carries the immediately previous ID. No retained stable interval shows the chassis result
-persistently selecting an unrelated lateral client. This makes `0x081 B13` a useful
-**native handoff/acceptance oracle**: healthy Toyota application changes move the request
-ID first and the result ID follows while request-loss remains clear. Logger batching keeps
+mismatches is transition-shaped: the FRC egress request has already changed while the
+Brake/chassis result still carries the immediately previous ID. No retained stable
+interval shows Brake persistently selecting a different FRC lateral application. This
+makes `0x081 B13` a useful **downstream acceptance/result oracle for the already-selected
+FRC request**, not evidence of where LTA/LDA/PDA selection occurs. Logger batching keeps
 the observed ~10-40 ms raw examples from being promoted to an exact ECU deadline.
 
 This materially changes how the Camry ID namespace should be interpreted.  Toyota uses
@@ -663,13 +721,16 @@ FRC / TSS3 applications
 
 **Still unresolved on this exact Camry:**
 
-- which exact ECU/core implements each VMM sub-block;
-- whether `0x08A` is the raw per-application request or an already-aggregated TSS request;
-- exact physical BSCM/CGW/FRC hop that puts `0x08A`, `0x081` and B6 on their observed
-  segments;
-- the exact relation/cadence between `0x08A`, Brake/VMM selection/request generation,
-  and B6 (without assuming a byte/value-preserving transform);
-- which node owns each SecOC signing operation and source suppression;
+- the exact FRC functions/state variables implementing feature eligibility, priority and
+  current request ownership before `5282`;
+- the internal FRC packer/security-core/HSM split that turns the selected generic request
+  into protected `0x08A`;
+- the exact Brake/VMM verification, result, and request-generation transform from the
+  already-selected `0x08A` request to `0x081` and B6 (without assuming a
+  byte/value-preserving transform);
+- the exact physical/security implementation of native B6 delivery from Brake to EPS;
+- which internal node owns each SecOC freshness/signing operation and the clean external
+  replacement/suppression boundary;
 - B6 secondary-field OEM names;
 - longitudinal A/B upper-versus-lower ordering and remaining policy bits.
 
@@ -680,19 +741,23 @@ joins.
 ## 11. Openpilot design consequence
 
 The preferred native integration target is no longer “find a CAN command that moves the
-actuator.”  It is:
+actuator.” On this exact Camry, openpilot is **not** naturally another Brake-visible
+lateral application beside LTA/LDA/PDA; those applications live inside the FRC. The
+architecture-preserving choices are therefore:
 
 ```text
-openpilot as an application/request source
-        -> Toyota request arbitration / Vehicle Movement Manager
-        -> Toyota request-generation outputs
-        -> Toyota powertrain/brake/steering controllers
+(A) join/replace the FRC's internal selected-request stage, if an internal interface is
+    recovered
+
+or
+
+(B) replace the already-selected protected 0x08A generic request egress while preserving
+    the downstream Brake/VMM result, stability, availability and actuator-target contracts
 ```
 
-That preserves Toyota's native arbitration, driver override, stability/VMC priority,
-powertrain/brake allocation, actuator availability and result feedback.  The successful
-EPS-resident B6 signer remains the development fallback because it bypasses the unknown
-source-admission hop, but it is downstream of the architecture we should ideally join.
+Either approach respects the actual placement of Toyota's feature selector. The
+successful EPS-resident B6 signer remains a development fallback because it enters much
+farther downstream at the actuator-target layer.
 
 Accordingly:
 
@@ -702,9 +767,10 @@ Accordingly:
 - do not require B6 to become exclusive EPS authority;
 - do not infer “stock LTA uses no B6” from Panda-visible absence—the later internal
   capture proves native B6 delivery exists at F33;
-- prioritize recovering the Brake/VMM request-generation and source-suppression boundary,
-  including the exact relation of `0x08A` to native B6 and the Vehicle Motion Control
-  `0x10A5..0x10AA` target surface.
+- recover the FRC feature-owner selector and `5282` -> protected-`0x08A` pack/sign path;
+- separately recover the Brake/VMM verification/result/request-generation boundary,
+  including the exact relation of the already-selected `0x08A` request to native B6 and
+  the Vehicle Motion Control `0x10A5..0x10AA` target surface.
 
 ## 12. Patent section map for future RE
 

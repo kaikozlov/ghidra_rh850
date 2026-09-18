@@ -3507,12 +3507,14 @@ longitudinal brake arbitration ID, lateral arbitration ID), which remains a term
 oracle rather than transferable P5 implementation evidence. Consequently the FRC-hosted
 recorder is the current P5 host-visible source for arbitration-result values.
 
-The static boundary is now precise. GTS+ proves recorder hosting and the longitudinal
-diagnostic source/sink model, but it does **not** prove the vehicle-network frame,
-32-bit-FRC-to-16-bit-brake transformation/copy order, final arbitration executor, SecOC
-signer/freshness owner, cadence, or stock-source suppression point. Those facts require
-exact-target firmware or synchronized live FRC/brake/recorder/CAN evidence; do not infer
-them from recorder hosting. The exact Camry acquisition boundary is already pinned by
+The **GTS-only** static boundary is precise. GTS+ proves recorder hosting and the
+longitudinal diagnostic source/sink model, but by itself does **not** prove the
+vehicle-network frame, 32-bit-FRC-to-16-bit-brake transformation/copy order, downstream
+Brake result/request-generation implementation, SecOC signer/freshness owner, cadence,
+or stock-source suppression point. Later exact-Camry source-direction evidence closes a
+separate question that this static pass could not: **lateral LTA/LDA/LCA/PDA/PCS ownership
+is selected inside the FRC application before protected `0x08A` egress**. Do not use the
+remaining downstream uncertainty to reopen that feature-selection placement. The exact Camry acquisition boundary is already pinned by
 VAR-069/070: Brake is `0x7B0->0x7B8`, F181 `F152633K0000`, DID0105
 `8954147040`, but the 26-package local CUW corpus has **zero `DiagID=07B0`** packages.
 VAR-069 now additionally scans every raw CUW and 46 recognized decoded CPU members

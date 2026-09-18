@@ -504,21 +504,19 @@ remains complementary live evidence.
 The original stock-B6-capture blocker in this section is superseded by
 VAR-081/CORR-134. The retained relay-correct drives already contain complete
 LTA/LCA-active intervals with zero B6 and recover Bus-4 `0x08A` as the lateral-
-request representation. The current blockers are therefore narrower and
-producer-directed:
+request representation. The current blockers are therefore narrower and split by side:
 
-1. identify who produces the observed Bus-4 `0x08A`; its absence from Panda bus 1
-   means the retained capture does not distinguish a Bus-1-side request transformed
-   before observation from a Bus-4-side producer/echo;
-2. recover `0x08A`/`0x081` producer, integrity/authentication, and arbitration ownership
-   without assuming either frame is transformed into exact-F33 B6;
-3. recover the stock chassis/reference-to-steering-assembly authority handoff that
-   produces factory steering with B6 absent; evaluate B6 separately as an optional
-   external cooperative-control ingress rather than as the stock-LTA transport;
+1. recover the **FRC-internal feature-owner state machine** that selects among
+   simultaneously enableable LTA/LDA/LCA/PDA/PCS state and populates generic `5282`;
+2. recover the internal FRC packer/SecOC/freshness path that emits the already-selected
+   request as protected `0x08A`; ECU-level publisher ownership is already closed to FRC;
+3. recover the downstream Brake verification/result/request-generation and the
+   chassis/reference-to-steering-assembly authority handoff; evaluate B6 separately as an
+   optional external cooperative-control ingress rather than as the stock-LTA transport;
 4. only after that chain is known, validate signing latency/jitter, driver-override
    and motor-current response policy, and `0x351/0x394/0x4A3` fault/recovery behavior;
-5. perform a bounded relay-correct steering experiment only after those producer,
-   protection, arbitration, and safety gates close. FRC `0x1601/0x1914` remains
+5. perform a bounded relay-correct steering experiment only after those selector,
+   protection, downstream-result, and safety gates close. FRC `0x1601/0x1914` remains
    useful independent corroboration, not a prerequisite for identifying the retained
    LTA/LCA interval.
 
@@ -1496,11 +1494,13 @@ evidence instead identifies an **upstream lateral request carrier**: B21 is Targ
 Lateral ID and B18:B19 is its signed target angle at the exact downstream B6 scale.
 B21/B26 upper two bits are zero in all 89,231 retained frames and the current GTS+
 diagnostic field is 8-bit, so any 6-bit field boundary is an encoding assumption, not a
-proved producer layout. Every retained `0x08A` frame is on the Bus-4 capture itself
-(Panda bus 0: 44,614 / relay mirror bus 2: 44,617 / bus 1: zero); current GTS+ topology
-places Front Camera on Toyota Bus 1 and Brake/EPS together on Bus 4, while exact F33
-accepts protected B6 on the latter. Physical transmitter and signer are unknown, so
-`0x08A` must not be labeled a native Bus-1 frame. The retained bytes close the request representation without making it an EPS ingress or grant oracle. Exact F33's B6-independent internal path proves only that ordinary assist/current control can continue with zero B6; VAR-111/CORR-151 now close the recovered autonomous-target branch as B6-only and reject the earlier implication that this internal path itself explains stock lane-centering authority. The remaining authority handoff is outside the recovered F33 external-command surface (CORR-137 / VAR-095).
+proved producer layout. Every retained `0x08A` frame is on the intercepted chassis-side capture
+(Panda bus 0: 44,614 / relay mirror bus 2: 44,617 / native Toyota Bus 1: zero); current
+GTS+ topology places logical Front Camera on Bus 1 and Brake/EPS on Bus 4, while exact
+F33 accepts protected B6 on the latter. **Later relay-open direction plus FRC
+CommunicationControl closes the apparent topology paradox: the secured `0x08A` publisher
+is inside the FRC assembly and its chassis-facing egress is distinct from native Bus 1.**
+The exact internal FRC signer/key/freshness owner remains open. The retained bytes close the request representation without making it an EPS ingress or grant oracle. Exact F33's B6-independent internal path proves only that ordinary assist/current control can continue with zero B6; VAR-111/CORR-151 now close the recovered autonomous-target branch as B6-only and reject the earlier implication that this internal path itself explains stock lane-centering authority. The remaining authority handoff is outside the recovered F33 external-command surface (CORR-137 / VAR-095).
 
 Historical Toyota names `LTA_RELATED` for `0x371` and `LKAS_HUD` for `0x412` are
 corroboration only; no historical signal layout is transferred. Current FRC_P5 `LTA
@@ -1511,7 +1511,7 @@ same-car MAIN/RES+/SET-/CANCEL controls. The operator's report of a green LTA in
 and steering assistance during the first drive is retained as separate human
 corroboration, not machine evidence and not part of the numeric proof.
 
-This supersedes VAR-067's “generic lateral/HUD candidate” wording (CORR-129), the later state/display-only interpretation (CORR-134), and the interim `0x08A -> B6` stock-LTA assumption (CORR-135). The trailer is now structurally much tighter: B28 candidate reset-low2 matches preceding authenticated `0x00F` on 19,868/20,615 drive-A frames and 23,093/23,996 eligible drive-B frames, comparable to known protected `0x0D7/0x090`; on all 18,727 A / 21,989 B same-reset, same-segment B26+1 pairs, candidate message-low2 advances +1. B27 is always zero and the remaining 28 trailer bits are effectively frame-unique. This strongly supports Toyota ordinary-P5 `FV4 || MAC28` framing while leaving exact sender profile/key/CMAC and producer ownership unrecovered. It does not establish or require an `0x08A -> B6` stock-LTA transform, and it does not authorize steering output.
+This supersedes VAR-067's “generic lateral/HUD candidate” wording (CORR-129), the later state/display-only interpretation (CORR-134), and the interim `0x08A -> B6` stock-LTA assumption (CORR-135). The trailer is now structurally much tighter: B28 candidate reset-low2 matches preceding authenticated `0x00F` on 19,868/20,615 drive-A frames and 23,093/23,996 eligible drive-B frames, comparable to known protected `0x0D7/0x090`; on all 18,727 A / 21,989 B same-reset, same-segment B26+1 pairs, candidate message-low2 advances +1. B27 is always zero and the remaining 28 trailer bits are effectively frame-unique. This strongly supports Toyota ordinary-P5 `FV4 || MAC28` framing. Later source evidence closes producer ownership to the FRC assembly; the exact internal sender profile/key/CMAC implementation remains unrecovered. It does not establish or require an `0x08A -> B6` stock-LTA transform, and it does not authorize steering output.
 Deterministic evidence is
 `data/generated/camry_2026_lta_state_reconciliation.json`, regenerated by
 `tools/targets/camry/analysis/analyze_camry_2026_lta_state_reconciliation.py` and verified by
@@ -2149,7 +2149,7 @@ healthy selector 1 is the only distinct 0x220-byte bank, selectors 0/2/3 alias, 
 fallback banks alias, and route-zero ordinary sig160 can reach only equivalent selector
 0/2. None of those ordinary model inputs supplies an independently recovered lane target.
 
-The former “upstream contradiction” framing is now superseded by CORR-135. These exact functions show only that B6-independent assist/current-control values reach the physical current funnel; VAR-111/CORR-151 supersede the stronger inference that this path itself explains autonomous lane-centering during the retained zero-B6 request intervals. CORR-134/VAR-081 separately recover Bus-4 `0x08A` Target Lateral ID plus target angle while exact F33 excludes `0x08A`. The current questions are therefore **where the chassis/reference plane hands autonomous authority into the steering assembly outside the recovered F33 external-command surface** and, independently, **who produces/security-protects `0x08A`/`0x081`**. No `0x08A -> B6` stock-LTA transform is established or required. Nothing here authorizes output.
+The former “upstream contradiction” framing is now superseded by CORR-135. These exact functions show only that B6-independent assist/current-control values reach the physical current funnel; VAR-111/CORR-151 supersede the stronger inference that this path itself explains autonomous lane-centering during the retained zero-B6 request intervals. CORR-134/VAR-081 separately recover Bus-4 `0x08A` Target Lateral ID plus target angle while exact F33 excludes `0x08A`. The current questions are therefore **where the downstream Brake/reference plane hands autonomous authority into the steering assembly outside the recovered F33 external-command surface** and, independently, **how the FRC internally selects/signs protected `0x08A` and how Brake constructs/signs its `0x081`/B6 outputs**. ECU-level publication is already closed to FRC for `0x08A` and Brake for `0x081`. No `0x08A -> B6` stock-LTA transform is established or required. Nothing here authorizes output.
 
 Deterministic evidence is carried by
 `data/generated/camry_8965F3307000_internal_assist_oracles.json` and
@@ -2376,16 +2376,16 @@ Operation), 2070 *Cooperative Control in Progress Flag* (bits 8-15, 0=OFF/1=ON),
 target is not directly pollable on this car; `0x1C3E/0x1C38/0x1C4A/0x1C50`
 remain the internal-assist RDBI proxies (§32).
 
-Producer attribution gained a bounded negative: the Bus-4 ECU dictionaries
+The DDB-only producer search had a bounded negative: the Bus-4 ECU dictionaries
 (`ABS_P5`, `Brk_Bst_P5`, `EPB_P5`, `BSCM_A_P6`) carry **no lateral-request DID
 vocabulary** (only Lateral-G observers and Vehicle-Motion-Control longitudinal
-limits), and "Cooperative" DIDs exist only in `EMPS/EMPS2`. GTS+ therefore
-cannot name the `0x08A` producer from DID semantics — consistent with
-`tss3_control_ownership_surface`'s exhausted static search. Producer/SecOC
-ownership and the F33 stock-LTA authority selector remain OQ-054's open
-questions; the B6 DTC attribution to the Brake System Control Module domain
-(§"external lateral ingress") remains the only positively attributed immediate
-source domain.
+limits), and "Cooperative" DIDs exist only in `EMPS/EMPS2`. GTS+ therefore could
+not name the `0x08A` producer from DID semantics. **Later physical source evidence
+supersedes that static ambiguity and places protected `0x08A` egress inside the FRC
+assembly.** OQ-054 now asks for the FRC-internal feature selector plus SecOC
+packer/key/freshness implementation, and separately the Brake downstream
+verification/result/request-generation path. The B6 DTC attribution to the Brake System
+Control Module domain remains the immediate downstream source-domain anchor.
 
 The fork's opendbc `toyota_tss3_pt` `0x08A` entry (`TSS3_CONTROL_REQUEST`) now
 carries the complete census-bounded field set — cruise latch/sub-states,
@@ -2460,11 +2460,23 @@ Deterministic evidence: `exploit/ephemeral_runtime/camry_f33_b6_bridge.c`,
 `exploit/ephemeral_runtime/audited_camry_f33_b6_bridge_build.json`, and
 `tests/verify_camry_8965F3307000.py --section b6_receive_bridge`.
 
-## 41. `0x08A` placement/authentication bounds: downstream transmitter and CMAC owner remain open (VAR-091 / CORR-136 / CORR-149 / CORR-194)
+## 41. `0x08A` placement/authentication bounds: FRC publisher closed; internal signer split remains open (VAR-091 / later source correction)
 
-The two relay-correct drives plus GTS+ canbus for Camry HV type **12984** close bus placement and the observed trailer shape. They prove that a downstream Bus-4 chassis/gateway participant must proxy/physically publish the FRC request into the authenticated Bus-4 domain. **CORR-194 withdraws the former stronger claim that this also excluded the FRC from ECU-Security-Key ownership or private pre-authentication.** Current FRC diagnostics/service procedure prove camera-family key provisioning, so physical transmitter identity and cryptographic CMAC-generation/key-selection ownership must be tracked separately.
+The original VAR-091 topology-only pass concluded that a downstream Bus-4 participant had
+to proxy/publish the FRC request. **That physical-publisher inference is superseded.** The
+later relay-open source experiment sees protected `0x08A` natively on the FRC-side endpoint,
+and FRC CommunicationControl normal-Tx suppression removes it. Therefore the secured
+`0x08A` publisher is inside the **FRC assembly**. Current FRC diagnostics/service procedure
+also prove camera-family ECU-Security-Key provisioning. What remains open is the internal
+module/core split: which FRC main/security/HSM component packs the selected request,
+maintains freshness, and computes the CMAC.
 
-**Placement.** Every retained `0x08A/32` is on the Toyota Bus-4 capture (panda bus 0 / relay mirror 2); Bus 1 count is **zero**. GTS+ `canbus 12984` places **Front Camera Module on Bus 1 only**. Bus 4 native application nodes are Airbag, Brake Booster, Power Steering (EPS), Skid Control, and SAS, all behind Central Gateway. This is a topology candidate set, not an arbitration-ID source map. Post-repin FRC UDS `0x792` on panda bus 0 is diagnostic gatewaying, not proof that FRC is a Bus-4 application node.
+**Placement.** Every retained `0x08A/32` is on the intercepted Toyota Bus-4 capture;
+native Toyota Bus-1 count is **zero**. GTS+ still places the logical Front Camera Module on
+Bus 1, but the later physical split/source experiment proves the FRC assembly also owns the
+secured chassis-facing `0x08A` egress. The GTS logical component map therefore must not be
+used to reassign physical publication to Brake/CGW. Post-repin FRC UDS gatewaying is not
+by itself the proof; FRC normal-Tx suppression plus relay-open direction is.
 
 **Not EPS.** Exact F33's generated-COM Tx set is only `0x030/0x351/0x394/0x4A3/0x4C8`; its normal Rx and complete acceptance surface also exclude `0x08A`.
 
@@ -2477,15 +2489,18 @@ standard AUTOSAR SHE `CMD_LOAD_KEY` M1--M5 memory-update protocol for ECU Securi
 Key provisioning. Renesas ICU-S is therefore one secure-engine implementation,
 not part of Toyota's wire-level prerequisite. VAR-107 proves the FRC's
 **observed native Bus-1** output is E2E Profile 5 rather than SecOC-wrapped.
-Current `FRC_P5` key-registration state plus Toyota camera-replacement procedure
-nevertheless prove the camera family itself receives an ECU Security Key
-(CORR-194). Therefore native Bus-1 framing cannot identify the `0x08A` CMAC
-owner: an unseen/private FRC pre-authentication handoff and downstream CMAC
-generation are both open. The only hard topology conclusion is that a downstream
-Bus-4 participant must construct/forward and physically publish the chassis-domain
-PDU.
+Current `FRC_P5` key-registration state plus Toyota camera-replacement procedure prove
+the camera family itself receives an ECU Security Key (CORR-194). Native Bus-1 E2E framing
+still does not identify the internal `0x08A` CMAC implementation, but the ECU-level publisher
+is no longer open: it is inside the FRC assembly. Any pre-authentication handoff is therefore
+**internal to FRC**, not evidence for a downstream Brake/CGW `0x08A` publisher.
 
-**Closed vs open.** The FRC-hosted recorder carries `5282/5631`; Bus-4 `0x08A` carries the same ID/pinion/assist subset; exact F33 is neither transmitter nor consumer; native Bus-1 CAN does not carry `0x08A`. The downstream proxy/physical-transmitter candidates by topology are Skid Control, Brake Booster, and Central Gateway, but none is selected. OQ-054 must identify **which downstream participant receives/repacks and publishes `0x08A`**, and independently whether SecOC key selection/CMAC generation occurs there or in an upstream/private FRC step. Do not send `0x08A` to EPS.
+**Closed vs open.** FRC-hosted feature-local state feeds generic `5282`; protected `0x08A`
+carries that already-selected request and is FRC-owned egress; exact F33 is neither its
+transmitter nor consumer; native Bus 1 does not carry it. Open questions are the exact FRC
+selector/packer/security-core path and the downstream Brake verification/result/
+request-generation path to B6. Skid/Brake/CGW are no longer candidate publishers of
+`0x08A` itself. Do not send `0x08A` to EPS.
 
 Deterministic evidence: `tools/targets/camry/analysis/analyze_camry_2026_08a_producer_bounds.py`, `data/generated/camry_2026_08a_producer_bounds.json` schema v4, `tests/verify_camry_2026_08a_producer_bounds.py`.
 
@@ -2521,15 +2536,28 @@ that angle reaches EPS is §43 / VAR-094.
 
 Deterministic evidence: `tools/targets/camry/analysis/analyze_camry_2026_bus1_camera_output.py`, `data/generated/camry_2026_bus1_camera_output.json`, `tests/verify_camry_2026_bus1_camera_output.py` (VAR-093/094).
 
-## 43. Middle hop: FRC-hosted `5282`; no consecutive Bus-1 layout; authenticated request appears beside EPS (VAR-094)
+## 43. FRC feature selection -> generic `5282` -> secured `0x08A` egress (VAR-094, superseded placement corrected)
 
-This bounds camera-bus contents and EPS ingress. It does not identify the private transport, physical Bus-4 transmitter, or signer.
+The original VAR-094 pass correctly separated camera-bus contents from EPS ingress, but
+its open "private transport / downstream Bus-4 transmitter" model is superseded by the
+later relay-open source experiment. Protected `0x08A` is native on the **FRC-side** of the
+intercepted pair and FRC CommunicationControl removes it, so the secured publisher is
+inside the FRC assembly.
 
-**Recorder object.** FRC is the TSS recorder host. Operation-FFD `5282` / LTA `5631` (LDA `5531` has the same shape) stores Target Lateral ID, signed pinion at 0.001 LSB, assist gain at 0.01, and damping gain at 0.01. Ordinary FRC Data List exposes LTA switch/control (`0x1601`) but not this four-field object. Named CAN observers include measured SAS `0x025` (FFD `2E8D` / `5273`) echoed onto Bus 1 as `0x160[22]`, EPS torque `0x030` (FFD `2E94` / `5247`), and the perception objects in VAR-093. Diagnostic `0x792` serves the recorder. Host location does not by itself prove final arbitration, wire packing, or CMAC ownership.
+**Recorder/application objects.** FRC is the TSS recorder host **and the application host
+for the lateral feature family**. Operation FFD exposes feature-local request/state for
+LDA (`550D/5531`), LTA (`560D/5631`), LCA (`568x`), PDA/OAA (`5Axx`) and PDA/SA-SDG
+(`5D8D`), followed by generic request `5282`. These features can be enabled
+simultaneously; enablement is distinct from current request ownership. The FRC application
+state machine selects the current lateral owner from those feature states, writes the
+generic `5282` request, and the first external representation of that decision is
+protected `0x08A`. Diagnostic `0x792` serves the recorder. Exact FRC code placement of
+the selector and the internal CMAC/HSM owner remain unrecovered, but the **feature
+selection -> egress placement is no longer open**.
 
-**Observed route boundary.** The consecutive recorder layout `ID || pinion_s16be || assist` is absent from native Bus 1: 200 spread ID11 samples with `|B18|≥20` per drive yield zero hits inside ±25 ms and zero global four-byte hits. Scattered two-byte collisions (22/200 A, 40/200 B) never concentrate on one `(CAN ID, offset)`. Bus 4 separately carries the matching subset in `0x08A`. The transport between the FRC-hosted object and Bus 4 may be private or differently packed; retained CAN does not select **which downstream CGW/Skid/Brake proxy receives, repacks/arbitrates, and signs it**.
+**Observed route boundary.** The consecutive recorder layout `ID || pinion_s16be || assist` is absent from native Toyota Bus 1: 200 spread ID11 samples with `|B18|>=20` per drive yield zero hits inside +/-25 ms and zero global four-byte hits. Scattered two-byte collisions never concentrate on one `(CAN ID, offset)`. That does **not** imply an inter-ECU request-selection hop: Bus 1 is the FRC perception/radar network, while the selected generic request is packaged inside the FRC assembly and emitted as secured `0x08A` on the intercepted chassis side.
 
-**Observed packing relation.** `0x08A` retains ID + pinion + assist as B21 / B18:B19 / B24, omits damping (B25=0), adds a cruise sidecar, and carries ordinary-P5 `FV4||MAC28`. That structural relation does not prove which ECU performed each step. Dual-pinion record `1B40_2` is the live milliradian at B18; `1B40_3` is unpublished (`0x7FFF` at B13:B14 and B16:B17). Winner `5285`/`57DE` is not a distinct Bus-4 s16. Grant `5265` remains FFD-only.
+**Observed packing relation.** `0x08A` retains generic FRC request ID + pinion + assist as B21 / B18:B19 / B24, omits damping (B25=0), adds sidecar state, and carries ordinary-P5 `FV4||MAC28`. The exact internal FRC packer/security-controller split remains open; the ECU-level ownership does not. Dual-pinion record `1B40_2` is the live milliradian at B18; `1B40_3` is unpublished (`0x7FFF` at B13:B14 and B16:B17). Downstream result `5285`/`57DE` is represented by Brake-owned `0x081`, not another simultaneous lateral candidate on `0x08A`. Grant `5265` remains FFD-only.
 
 **Steering angle, and whether any of it is relayed to EPS.**
 
@@ -2538,11 +2566,16 @@ This bounds camera-bus contents and EPS ingress. It does not identify the privat
 | `0x160[22]` candidate | Former SAS-echo reading is retracted by CORR-138: full-drive correlation is only +0.086/-0.091 and the field remains unnamed. | No F33 ingress join; do not use it as a request or plant oracle. |
 | Requested pinion | No consecutive `5282` layout is observed. | Bus 4 publishes the quantity as `0x08A` B18 **beside** EPS. Exact F33 does not Rx `0x08A`; protected B6 is idle in the retained ID11 intervals; `1B40_3` is unpublished; default-bank `D0218` is not this milliradian. The captures therefore do not show this requested angle entering F33 as COM. |
 
-Remainder: private request transport, downstream Bus-4 proxy/transmitter identity, exact SecOC profile/key-selection owner, and whether ID11 was actually granted. The proxy identity needs producer/private-link evidence; the grant needs synchronized Operation FFD `5282/5285/57DE/5265`. Do not hunt another EPS CAN field or send `0x08A` to EPS.
+Remainder: exact **FRC-internal** feature-selector implementation, `5282` -> `0x08A`
+packing/signing details, exact SecOC key/freshness owner inside the FRC assembly, and the
+downstream Brake verification/result/request-generation -> B6 transform. Synchronized
+feature-local FFD + `5282` can expose the FRC owner transition; `5285/57DE/5265` +
+`0x081` expose downstream acceptance/result. Do not hunt another EPS CAN field or send
+`0x08A` to EPS.
 
 Deterministic evidence: same artifact/test as VAR-093 (`request_object_on_bus1` in schema v2).
 
-## 44. Install-set closure: the FRC is the sole diagnostically present ADAS compute ECU; the authenticated transmitter must be brake-family or gateway (VAR-096)
+## 44. Install-set closure: FRC consolidates the ADAS applications; old brake/gateway `0x08A` transmitter inference is superseded (VAR-096)
 
 The "which box processes TSS" question is closed at install-set granularity by current
 GTS+ master data, composing three already-verified surfaces
@@ -2562,14 +2595,15 @@ GTS+ master data, composing three already-verified surfaces
   peers (405+435+498: 98 rows; 405+498: 36 rows); the two extras are the non-production
   `MAC` row set (4 rows, transitional: adds ADCU_P6 6037, LDA_P5 418, Fr_Camera_P5 430,
   Steering Actuator 499, 476/477) and `TEST` (1 row).
-- **Consequence (bounded composition).** No separate arbitration/request ECU is
-  diagnostically present on this car. The FRC is the consolidated compute unit — it
-  demonstrably computes lateral and longitudinal requests (recorder `5282/5280/5281`,
-  monitors `0x1B03..0x1B07`) — and the only co-installed peers are actuation/chassis
-  ECUs. Therefore the MAC-authenticated Bus-4 transmission role (`0x08A`, and protected
-  B6 per the U012987 brake-domain attribution) must live in the co-installed **brake
-  family (ABS 435 / BrakeBooster 466) or the Central Gateway**, not in any ADAS peer.
-  This narrows OQ-054's candidate set; it does not identify the transmitter.
+- **Consequence (placement corrected by later source evidence).** No separate
+  arbitration/request ECU is diagnostically present on this car. The FRC is the
+  consolidated ADAS compute unit: LTA/LDA/LCA/PDA/PCS live as FRC applications, their
+  feature-local state is recorded there, and the FRC chooses the current generic request
+  owner before `5282`/`0x08A` egress. The old inference that MAC-authenticated `0x08A`
+  therefore had to be physically transmitted by Brake or Central Gateway is **superseded**:
+  the relay-open source experiment and FRC CommunicationControl now place the secured
+  `0x08A` publisher inside the FRC assembly. Brake/category 435 remains the positively
+  attributed immediate B6 source domain and downstream result/request-generation peer.
 - **Generation-22 direction.** `ADCU_P6` re-consolidates compute plus direct camera
   links (LVDS/GVIF/MIPI), internally dropping the Driving Support ECU / Pre-Collision
   Control / Image Processing / Cruise Control module vocabulary — a successor oracle
@@ -2582,19 +2616,18 @@ carry a separate radar (`OBJECT_0/1`) plus **DSU** arbiter (`LEAD_INFO`, `ACC_CO
 `STEERING_LKA (0x2E4, 5 bytes)` torque commands on the PT bus — the camera is brain and
 mouth, which is exactly why openpilot TSS2 lateral is a message spoof;
 `toyota_secoc_pt_generated.dbc` retains the names into the MAC era; our
-`toyota_tss3_pt_generated.dbc` defines `0x08A` passively. The trajectory — separate
-arbiter, then camera absorbs it and commands plaintext, then camera keeps compute but
-loses the authenticated mouth, then ADCU re-consolidates — frames VAR-091/094: compute
-stayed in the camera while transmission moved behind a key holder. Hyundai documents
-the same split inside opendbc itself (HDA2: "Camera sends LKA steering message, ADAS
-DRV ECU forwards it as LFA to MDPS"), supporting — not proving — the relay hypothesis
-(hypothesis grade).
+`toyota_tss3_pt_generated.dbc` defines `0x08A` passively. The later Camry source result
+means the relevant trajectory is simpler than the old relay hypothesis: the FRC retains
+both the application compute and the secured `0x08A` egress boundary, while Brake owns
+the downstream result/actuator-target side. The exact security controller/HSM split
+*inside* the FRC assembly remains open. Cross-OEM forwarding analogies are therefore no
+longer needed to explain `0x08A` ownership.
 
 Deterministic evidence: `tests/verify_gtsplus_p5_adas_p6_migration.py` (498 install
 architecture assertions); zero co-occurrence is additionally asserted by
 `tests/verify_gtsplus_tss3_crossvehicle_surface.py`.
 
-## 45. FRC request pipeline and absorbed `DSSystem_P5` / `PCS2_P5` roles: no Bus-1 self-loop; final arbiter remains FRC versus Brake (VAR-097)
+## 45. FRC request pipeline and absorbed `DSSystem_P5` / `PCS2_P5` roles: feature selection is FRC-local; Brake is downstream (VAR-097, placement corrected)
 
 This section is grounded in direct current-GTS+ DDB/plugin queries and the
 recovered PCS initializer, not the narrative architecture alone. The
@@ -2605,7 +2638,7 @@ Representative discovery commands are `tools/gts category 428/432/498 --json`,
 `tools/gts did FRC_P5 --limit 1000 --json`, `tools/gts dtc FRC_P5 --json`, and
 `tools/gts canbus 12984 --json`.
 
-### 45.1 The recorder exposes a normalized request pipeline, not a proven ECU boundary
+### 45.1 The recorder exposes the FRC-local feature -> generic-request boundary
 
 The recovered `DIDDataDefine::.cctor` rows distinguish four stages:
 
@@ -2616,23 +2649,24 @@ The recovered `DIDDataDefine::.cctor` rows distinguish four stages:
 | arbitration result | `5285` is result lateral ID; `57DE` is result pinion angle |
 | execution/plant feedback | `5265` includes `Active steering under-control flag`; `560D` includes EPS pinion angle and LTA driver/control state |
 
-This supports an internal software grammar
-`feature request -> generic request -> arbitration result -> feedback`. It does
-**not** locate final arbitration. The FRC-hosted recorder also contains
-unambiguously external ABS/VSC and EPS observations, so recorder presence is
-not producer evidence.
+This supports two distinct boundaries that should no longer be collapsed into one
+"arbitration" label. The **feature request -> generic request** step is FRC-local:
+LTA/LDA/LCA/PDA/PCS are FRC applications that can be enabled simultaneously, and the
+FRC state machine selects which feature currently populates generic `5282`. The
+**generic request -> result/target/feedback** step is downstream: protected `0x08A`
+leaves the FRC, Brake returns result/status on `0x081`, and Brake-domain logic generates
+the actuator-side target path. The recorder also contains external ABS/VSC and EPS
+observations, so recorder presence alone still does not prove where every downstream
+result is computed.
 
-There is no observed CAN self-loop. On Toyota Bus 1, the retained captures
-contain the plaintext `0x180..0x18C` perception family and other camera-domain
-state; CORR-138 retracts the former standing `0x160[22]` delayed-SAS-echo
-identity. They contain **zero `0x08A`** and
-zero consecutive `5282` `ID || pinion || assist` layouts. Thus no evidence
-supports “FRC serializes its request onto Bus 1, reads the same frame back, and
-then produces a final package.” The simpler bounded model is that the FRC uses
-its internal vision/object state directly, combines it with received plant
-observers, and hands a compact request to an unobserved private/inter-ECU
-boundary. Whether that handoff already contains an arbitration result or is
-only a candidate request remains open.
+There is no observed CAN self-loop. On Toyota Bus 1, the retained captures contain
+the plaintext `0x180..0x18C` perception family and other camera-domain state; they
+contain **zero `0x08A`** and zero consecutive `5282` `ID || pinion || assist` layouts.
+That is expected: the FRC uses its internal vision/object state plus received plant
+observers to run the feature applications, selects the generic request internally, then
+packages/signs protected `0x08A` on its chassis-facing egress. There is no reason to
+invent a Bus-1 round trip or an external ECU that decides whether LTA, LDA or PDA owns
+the request.
 
 ### 45.2 `DSSystem_P5` is a sparse supervisor; its dependency and request roles continue in FRC
 
@@ -2678,40 +2712,34 @@ The physical front and front-side radars remain separate Bus-1 nodes.
 ```mermaid
 flowchart LR
   IMG["FRC image-processing MCU"] --> STATE["internal object / lane state"]
-  RAD["front + side radar"] --> B1["Toyota Bus 1<br/>plaintext perception + plant feedback"]
+  RAD["front + side radar"] --> B1["Toyota Bus 1<br/>perception + plant feedback"]
   B1 --> STATE
-  STATE --> MAIN["FRC main MCU<br/>LDA/LTA/PDA feature requests"]
-  MAIN --> REQ["generic request 5282"]
+  STATE --> APPS["FRC applications<br/>LTA / LDA / LCA / PDA / PCS / ..."]
+  CFG["feature settings + driver / vehicle state"] --> APPS
+  APPS --> SEL["FRC internal<br/>eligibility / priority / owner selection"]
+  SEL --> REQ["generic TSS request<br/>5280 / 5281 / 5282"]
+  REQ --> O8["protected 0x08A<br/>FRC secured egress"]
 
-  REQ --> A["Model A<br/>FRC selects 5285 / 57DE"]
-  A --> TX["Brake / Skid / CGW<br/>signing or physical-Tx boundary"]
-
-  REQ --> B["Model B<br/>Brake / Skid selects winner<br/>and signs"]
-  B --> TX
-
-  TX --> O8["Bus-4 0x08A<br/>secured request publication<br/>not F33 ingress"]
-  TX -. "separate cooperative-control contract" .-> B6["protected B6<br/>known EPS external ingress"]
-
-  CHASSIS["Brake / EPS chassis state"] --> FB["recorder result / status observations<br/>5285 / 57DE / 5265 / 560D"]
-  FB --> MAIN
+  O8 --> BRK["Brake / VMM<br/>validation + result + request generation"]
+  BRK --> O81["0x081<br/>result / status back to FRC"]
+  BRK --> B6["protected B6<br/>steering-controller target"]
+  B6 --> EPS["EPS / F33"]
+  O81 --> APPS
 ```
 
-The diagram is deliberately two-model. Exact F33/B6 evidence makes Brake the
-only positively attributed immediate protected-command source domain, while
-the `0x08A` physical transmitter, final arbitration executor, and downstream
-TSK proxy's CMAC/freshness ownership remain unidentified. FRC-side TSK
-pre-authentication is not a live branch. `0x08A` must not be drawn as an EPS
-input or as an established `0x08A -> B6` transform. The
-retained ID11 intervals are request state without a verified `5285/57DE/5265`
-winner/grant and contain zero B6.
+There is no longer a two-model FRC-vs-Brake question for **lateral feature ownership**.
+The feature applications live in the FRC and their owner is selected before `0x08A`
+egress. What remains open is downstream implementation: the exact FRC packer/security
+controller, Brake verification/result/request-generation transform, B6 Tx/freshness/CMAC
+owner, and the final physical routing into EPS. `0x08A` must not be drawn as EPS ingress
+or as a bus carrying simultaneous LTA/LDA/PDA candidates.
 
-The decisive dynamic discriminator is one synchronized FRC Operation-FFD +
-all-bus capture comparing `5531/5631`, `5282`, `5285/57DE`, `0x08A`, and
-`5265/560D`.
-If the result settles before the Bus-4 publication, FRC-local arbitration
-strengthens; if request leads the Bus-4 publication and result returns later,
-external Brake/Skid arbitration strengthens. The decisive static discriminator
-remains matched category-435 Brake firmware plus the exact `0x792` FRC image.
+The decisive dynamic discriminator for the FRC selector is synchronized Operation FFD
+across feature-local state (`550D/5531`, `560D/5631`, `568x`, `5Axx/5D8D`) and generic
+`5282` during a natural handoff. `5285/57DE`, raw `0x081`, and `5265/560D` then test the
+separate downstream result/plant path. The decisive static work is correspondingly split:
+recover the exact `0x792` FRC application's selector/packer/signing path and acquire
+matched category-435 Brake firmware for the downstream transform.
 
 Deterministic guards:
 `tests/verify_gtsplus_p5_adas_p6_migration.py`,
@@ -3456,10 +3484,13 @@ A universal lateral->longitudinal label table is disproved by longitudinal ID25
 The retained FRC ReproStd CUWs remain manufacturer-encrypted, so their application
 plaintext cannot yet be searched for the missing table.
 
-The correct current claim is therefore: `0x08A` is the unified observed continuous
-TSS3 selected-request/instruction envelope, and `0x081` is the Brake-owned
-selected/employed-result/reference envelope. Brake publication ownership does not
-locate every arbitration/selection operation inside the Brake ECU.
+The correct current claim is therefore: `0x08A` is the FRC's unified observed
+continuous **selected generic TSS request** envelope, and `0x081` is the Brake-owned
+selected/employed-result/reference envelope. For lateral control, application ownership
+has already been selected inside the FRC before `0x08A` egress. Brake may still perform
+downstream vehicle-motion/controller arbitration (especially longitudinal driver/
+actuator constraints), but it does not choose among the FRC's LTA/LDA/LCA/PDA feature
+applications.
 
 ## 51. Native Bus-1 framing is exact AUTOSAR E2E Profile 5, not cryptographic authentication (VAR-107)
 

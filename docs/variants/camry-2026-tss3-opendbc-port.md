@@ -50,7 +50,7 @@ it does not qualify direct host-B6 transmission or make the Camry adapter a
 universal TSS3 interface. CORR-129/VAR-081 identify **73.303384 s of retained `0x08A` ID11 LTA/LCA request state with zero B6**; this is not a direct winner/grant oracle. CORR-134 recovers B21 as Target Lateral ID and B18:B19 as the signed request-angle quantity; CORR-135 rejects a presumed `0x08A -> B6` transform. Exact F33 neither accepts `0x08A` nor transmits it, while its B6-inactive internal path reaches physical steering; that makes zero B6 architecturally possible but does not prove the retained request was granted. VAR-091/CORR-136 place authenticated `0x08A` on the intercepted chassis network while observed Toyota-Bus-1 camera/radar PDUs use E2E. The later repin/source experiment resolves the source ambiguity those older rows could not: with the relay open, protected `0x08A` is native on the **FRC/camera-side endpoint** and forwarded byte-for-byte toward Brake, while `0x081` is native on the Brake/chassis side and returns toward FRC. FRC CommunicationControl removes `0x08A`; therefore the secured publisher/signing boundary is inside the FRC assembly, even though the exact internal key/HSM owner remains open. VAR-094 proves consecutive `5282` is absent from native Bus-1 CAN; CORR-138 retracts the former standing-echo interpretation of `0x160[22]`. VAR-101 proves the authenticated publication continues at zero request, not that the CMAC engine is downstream.
 
 The integration and stock-architecture questions are deliberately separate.
-OQ-054 now tracks the **internal FRC `0x08A` signer/key/freshness path** and the downstream Brake verification/arbitration->B6 path. That attribution is **not** a prerequisite for the demonstrated C7 ->
+OQ-054 now tracks the **internal FRC feature-owner + `0x08A` signer/key/freshness path** and the downstream Brake verification/result/request-generation -> B6 path. That attribution is **not** a prerequisite for the demonstrated C7 ->
 native-B6 ingress. Exact-F33 Gate-2 compare neutralization and the historical
 zero-MAC/wrong-key host-B6 senders remain useful failure-localization evidence,
 but they are not the current sender. VAR-155/156 and the September 10 road handoff
@@ -225,9 +225,12 @@ to a higher-priority request and extends the same architecture to steering
 plans including LKA/LTA.
 
 That is materially different from dropping the complete protected `0x08A`
-publication: the patented healthy handoff preserves source communication and
-changes eligibility **inside arbitration**. Complete FRC request loss can
-legitimately exercise Brake/FRC communication/request-loss supervision instead.
+publication. On this Camry, LTA/LDA/LCA/PDA/PCS are **FRC-resident feature
+applications** and their ownership state is selected inside the FRC application
+before `0x08A` is published. A healthy feature handoff therefore preserves the
+FRC's request egress and changes the selected application ID on that egress;
+complete FRC request loss instead exercises Brake/FRC communication/request-loss
+supervision.
 
 The patent-guided GTS vocabulary is now resolved more tightly. **`PCS Rejection
 Request Determination Based On Functional Safety`** is a P6 ADCU DDR
@@ -240,12 +243,14 @@ Driving Force Lower/Upper Limit ID** with **Driving Force Lower/Upper Limit
 Request Rejection Factors** in four consecutive 8-bit slots. These are strong
 successor-generation semantics, not exact F33 fields.
 
-Exact P5/TSS3 does independently expose priority vocabulary—most notably
+Exact P5/TSS3 independently exposes priority vocabulary—most notably
 `5280_7 TSS acceleration request low priority flag`, PDA priority-request
-records, and FRC_P5 `0x1B06 ISA Speed Change Priority Request (Upper Limit)`—
-but no lateral invalidation/priority input or manager->suppressed-client
-rejection feedback has yet been recovered. The resulting search target is now a
-healthy **eligibility/priority control plane**, not a missing native request.
+records, and FRC_P5 `0x1B06 ISA Speed Change Priority Request (Upper Limit)`.
+For lateral, the missing object is now specifically the **FRC-internal
+eligibility/priority/owner state** that chooses which feature populates generic
+`5282`; any intentional-rejection feedback to the losing feature can likewise
+remain internal to the FRC application. We should not keep looking for a
+separate external lateral-client policy PDU at Brake without new evidence.
 
 A transition-aligned scan of the retained 12-route native road corpus tightens
 that boundary. All **473** observed `0x08A` lateral-request-ID transitions are
@@ -260,14 +265,16 @@ retains ID11 for one result cycle, then publishes ID4 with the newest ID4 angle
 39.773 ms later while B11 remains `0x04`. Thus healthy wire-level mismatch is
 bounded as result-publication latency, not a sustained rejected request.
 
-This strongly suggests that the feature-client competition of interest is
-**upstream of the single generic `5282`/`0x08A` lateral slot** (or otherwise not
-visible as simultaneous lateral candidates on that wire). GTS provides the
-right upstream surfaces: LDA `5531/550D`, LTA `5631/560D`, LCA
-`5681/5685/568E`, and PDA `5A09/5A0A/5A0D/5A0F`/`5D8D`, followed by generic
-`5282` and result `5285/57DE`. The best passive discriminator is therefore a
-natural client handoff or `240E LCA Reject` capture containing those
-feature-local objects and generic/result objects together.
+The ownership boundary is inside the FRC application. LDA `5531/550D`, LTA
+`5631/560D`, LCA `5681/5685/568E`, and PDA
+`5A09/5A0A/5A0D/5A0F`/`5D8D` are feature-local FRC state/request surfaces;
+those functions can be enabled simultaneously. The FRC state machine selects
+the current lateral owner and writes the generic `5282` request, whose first
+external representation is protected `0x08A`. Brake then returns downstream
+result/status through `5285/57DE` / `0x081` and generates the actuator-side
+target path. The best passive discriminator is therefore a natural FRC feature
+handoff or `240E LCA Reject` capture containing feature-local objects and
+`5282` together—not a search for multiple competing lateral requests at Brake.
 
 The September-17 faulted e9/ec/ee routes supply the complementary negative
 control: native request/result traffic remains alive with request ID0/result
@@ -618,7 +625,12 @@ again the normal CAN0/CAN2 relay pair (stock source bus2, openpilot replacement
 bus0), while Toyota Bus-4 / EPS-Brake is the unsplit Panda **bus 1**. Exact-F33
 EPS UDS and C7 therefore use bus1 with ELM327 param1 for direct diagnostics.
 The resident never host-transmits B6; it replaces/re-signs the EPS's internally
-native B6. Do not send `0x08A` to EPS. Toyota's Vehicle Movement Manager architecture now strongly supports a logical request-side `0x08A` -> arbitration/request-generation -> final B6 relationship; what remains unresolved is the exact Camry physical/security handoff, not whether those interfaces occupy different stages.
+native B6. Do not send `0x08A` to EPS. The current exact-Camry chain is
+**FRC-internal feature selection -> generic request `5282` / protected `0x08A`
+egress -> Brake/VMM validation/result/request generation -> final B6**. LTA,
+LDA, LCA and PDA ownership is already decided before `0x08A`; what remains
+unresolved is the downstream Camry physical/security handoff and transform, not
+an external lateral-feature arbitration stage.
 The stock topology is software/test complete but still needs the parked and short
 road revalidation called out in the capability matrix.
 
@@ -1890,15 +1902,17 @@ bring-up runs. This extends the earlier zero-native-B6 result without conflating
 sender with factory traffic.
 
 The resulting architectural model is therefore sharper than "find the LTA command":
-Toyota's FRC exposes a **general lateral arbitration/request family** whose road-observed
-clients include LDA, LTA/LCA and SDG/PDA-SA, while exact F33 exposes corresponding
-profiles inside one protected external B6 controller and does not independently
-revalidate DRCC/LTA engagement when choosing that profile. Factory steering still does
-not prove an `0x08A -> B6` transform: exact F33 receives neither `0x08A` nor `0x081`,
-and the retained stock family operates with no unmatched native B6. The unresolved
-factory step remains the generic chassis request/reference arbitration and final
-steering-assembly authority handoff between the protected `0x08A/0x081` family and the
-physical actuator path.
+Toyota's FRC hosts a **general lateral feature/request family** whose road-observed
+current owners include LDA, LTA/LCA and SDG/PDA-SA. Those feature applications can be
+enabled simultaneously; the FRC application state machine chooses the current owner and
+publishes that already-selected generic request on `0x08A`. Exact F33 exposes
+corresponding profiles inside one protected external B6 controller and does not
+independently revalidate DRCC/LTA engagement when choosing that profile. Factory steering
+still does not prove the exact `0x08A -> B6` transform: exact F33 receives neither
+`0x08A` nor `0x081`, and the retained stock family operates with no unmatched native B6.
+The unresolved factory step is therefore **downstream** of FRC feature selection: Brake
+verification/result/request generation plus the final steering-assembly authority handoff
+between the protected `0x08A/0x081` family and the physical actuator path.
 
 Deterministic reduction and verification:
 `tools/targets/camry/analysis/analyze_camry_2026_lateral_family_census.py`,
@@ -2109,10 +2123,18 @@ bounded execution path is independent of Toyota's unresolved stock FRC pipeline:
    before another on-road B6 test. VAR-148/CORR-179 already close the exact ID11 composition
    semantics: accepted B6 is co-modulated in the ordinary EPS sum, not made exclusive.
 
-OQ-054 remains valuable for an elegant stock-compatible architecture: synchronized FRC
-Operation FFD `5282/5631/5285/57DE/5265/560D`, matched FRC/Brake firmware, or source-identifying
-capture must still reveal the exact application-request selection before the FRC signs `0x08A`, and exact FRC firmware/HSM evidence must identify the key/freshness/CMAC implementation. Native Bus 1 has 22 frequent periodic camera/radar streams; `0x180..0x182` carry recovered perception-object slots, but those are a separate FRC interface. The protected `0x08A` request itself is already native at the FRC-side Bus-4 endpoint. The downstream unknown is no longer an external `0x08A` proxy signer; it is Brake verification/arbitration and B6 generation/routing. That attribution does **not** block the independent B6 development
-probe above.
+OQ-054 remains valuable for an elegant stock-compatible architecture. Synchronized FRC
+Operation FFD should now target the **FRC-internal selector** directly: feature-local
+`550D/5531`, `560D/5631`, `568x`, `5Axx/5D8D` state against generic `5282`, while
+`5285/57DE/5265` and raw `0x081` provide the downstream Brake result. Exact FRC
+firmware/HSM evidence must identify both the feature-owner state machine that populates
+`5282` and the key/freshness/CMAC implementation that publishes protected `0x08A`.
+Native Bus 1 has 22 frequent periodic camera/radar streams; `0x180..0x182` carry
+recovered perception-object slots, but those are a separate FRC interface. The protected
+`0x08A` request itself is already native at the FRC-side Bus-4 endpoint and is **post
+feature-selection**. The downstream unknown is Brake verification/result/request
+generation and B6 routing, not LTA-vs-LDA-vs-PDA selection. That attribution does **not**
+block the independent B6 development probe above.
 - `data/generated/camry_8965F3307000_tss3_tx_decompiler_evidence.json`
 - `data/generated/camry_8965F3307000_tss3_opendbc_port.json`
 - `data/generated/camry_8965F3307000_external_lateral_ingress.json`
