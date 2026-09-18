@@ -134,6 +134,10 @@ def main() -> int:
         def can_recv(self):
             return self.rx.pop(0) if self.rx else []
 
+        def can_send_many(self, arr, **_kwargs):
+            for addr, dat, bus in arr:
+                self.can_send(addr, dat, bus, **_kwargs)
+
         def can_send(self, addr, dat, bus, **_kwargs):
             frame = bytes(dat)
             self.tx.append((int(addr), frame, int(bus)))
@@ -184,6 +188,25 @@ def main() -> int:
     assert fast["advertised_stmin_ms"] == 40.0
     assert fast["effective_cf_gap_ms"] == 0.0
     assert fast["stmin_override_used"] is True and fast["stmin_violated"] is True
+    assert fast["cf_batch_used"] is True
+    assert "ff_send_to_fc_ms" in fast and "cf_submit_ms" in fast
+
+    class RawBatch:
+        def __init__(self):
+            self.calls = []
+        def can_send_many(self, arr):
+            self.calls.append(list(arr))
+    class TapBatch:
+        def __init__(self):
+            import threading
+            self._panda = RawBatch()
+            self._send_lock = threading.Lock()
+        def can_send_many(self, _arr):
+            raise AssertionError("fallback path should not be used")
+    tap = TapBatch()
+    sample_batch = [(oracle.REQUEST_ADDR, bytes.fromhex("2100000000000000"), oracle.BUS)]
+    oracle._send_many_batched(tap, sample_batch)  # type: ignore[arg-type]
+    assert tap._panda.calls == [sample_batch]
 
     print("== fast benchmark contract ==")
     class FakeSession:

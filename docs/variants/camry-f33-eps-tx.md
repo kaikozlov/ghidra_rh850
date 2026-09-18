@@ -464,3 +464,20 @@ advanced coherently from 1/1/1 to 2/2/2. Thus the complete non-actuating oracle
 transaction fits within the observed ~25-ms native `0x08A` period on this sample.
 The next gate is a sustained 20-request / 25-ms schedule using the same 0-ms CF
 gap, with per-transaction RTT and scheduler lateness recorded.
+
+### 12.4 Sustained oracle reliability closes; host batching is the remaining cadence optimization
+
+The 20-request fast-CF benchmark completed all 20 transactions successfully with
+resident counters advancing coherently to 22 requests / 22 successes / 22
+responses. Median full RTT was 22.721 ms, p95 28.980 ms, and max 39.244 ms; six
+of 20 exceeded the 25-ms native period. Median final-CF->signed-response was only
+7.219 ms (p95 12.314, max 13.124), while host scheduled-start lateness reached
+24.651 ms.
+
+Inspection of the host path found that the shared `PandaTap.can_send_many()`
+implementation was not actually batching: it looped over individual
+`can_send()` calls, causing five Panda USB writes for each five-CF request. The
+oracle host path now bypasses that wrapper behavior locally and invokes Panda's
+native `can_send_many()` under the existing send lock, leaving the live resident,
+authenticated domain, and response path unchanged. Additional timing splits
+measure FF->FC, CF batch submission, and final-CF->response independently.
