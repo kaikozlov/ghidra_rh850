@@ -273,9 +273,15 @@ uv run --locked python tools/targets/tss3/builders/build_tss3_unified_b6_signer_
 ```
 
 `bringup` retains the individual fail-closed gates: stock functional-mailbox
-preflight, exact-F181 NRTD install, then the READY native-MAC oracle. It merely
-holds the cooperative Panda lease across the operator's NRTD-to-READY transition.
-`replace-current` is the first mutation test: it requires READY plus stationary
+preflight, exact-F181 NRTD install, then READY runtime qualification. On exact
+Camry, it now continues with the live-proven same-ignition dependency recovery:
+Brake/EPB `0x7B0` enters programming session and hard-resets first, its exact
+`F152633K0000` application identity must return, then FRC `0x792` does the same
+and exact `8646F3315000` must return. Final FRC `0x1903/0x1905/0x1906` must show
+distance-control mode, Cruise Control Permission allowed, and ACC-not-available
+clear. No SecurityAccess, EPS reset, or EPS power cycle is used, and the launcher
+re-reads resident status after the two peer resets. Non-Camry targets skip this
+Camry-specific lifecycle step. `replace-current` is the first mutation test: it requires READY plus stationary
 `0x0AA`, derives the current measured angle from `0x025`, converts that angle to
 the common B6 target domain, sends one fresh C7 generation, observes a signed
 replacement, then sends sequence zero to release. On Corolla the guard also
@@ -350,15 +356,18 @@ implementation and evidence boundaries are corrected:
   A CRC-valid byte-exact native handback is preserved without clipping Toyota's
   own request. This does not establish native longitudinal authority.
 
-The historical successful steering samples used conventional cruise. They do
-not prove the final supervised runtime plus adaptive cruise. The exact Camry
-vehicle result is already negative: after the EPS programming transition, the
-known parked/READY DTC-clear sequence could clear the communication-warning
-state but **did not re-enable DRCC in the same ignition cycle**. A full vehicle
-restart restored DRCC, but also removed the volatile RAM signer. The historical
-`recover-drcc` command remains useful only as diagnostic/forensic tooling: it
-preserves pre-clear evidence, performs the proven clear transports, and reads
-FRC `0x1903/0x1905/0x1906`; it is not part of the maintained recovery strategy.
+The September-10 steering samples used conventional cruise, but that boundary is
+now superseded by the September-18 exact-car recovery and road qualification.
+DTC clear alone still does **not** recover DRCC after the EPS programming
+transition. The live-proven recovery is stateful and dependency ordered:
+Brake/EPB `10 02 -> 11 01` first, then FRC `10 02 -> 11 01`, with the EPS kept
+powered. Resetting FRC alone does not recover; resetting Brake alone clears the
+upstream PCS invalid state but leaves the FRC DRCC/LDA latch. The subsequent
+route `0000010c--506d7277c7` demonstrates 919.572 s / 19.772 km of stock adaptive
+cruise overlapping openpilot lateral with factory lateral request/result IDs at
+0 and openpilot `longActive` false. The historical `recover-drcc` command remains
+for diagnostic/DTC evidence; `restart-control-domains` is the maintained
+same-ignition recovery and normal Camry `bringup` invokes it automatically.
 
 Current status and reproducible validation are centralized in the
 [capability matrix](../variants/camry-2026-capability-matrix.md) and
