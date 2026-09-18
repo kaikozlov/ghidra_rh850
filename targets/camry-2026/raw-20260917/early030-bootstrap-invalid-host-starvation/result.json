@@ -1,0 +1,5 @@
+{
+  "error": "ProbeError: stale bridge missed slots: {'bus': 1, 'can_id': '0x030', 'period_ms': 10.0, 'frame_hex': '0000000010000149000010001bc200000000000100000000000000003fdf2cf9', 'sent': 155, 'missed_slots': 7, 'first_send_monotonic_ns': 1093153768522, 'last_send_monotonic_ns': 1094763588945, 'max_send_gap_ms': 40.54218, 'error': None}",
+  "schema": "camry-f33-early030-bootstrap-probe-failure-v1",
+  "success": false
+}

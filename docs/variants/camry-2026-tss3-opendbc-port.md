@@ -296,6 +296,29 @@ justify optimizing the one-shot into the 522-byte signer; a negative result woul
 that even one valid fresh `0x030` at the earliest recovered SecOC-ready startup point is
 insufficient to prevent the FRC ACC-unavailable latch.
 
+The first live early-`0x030` attempt from `6203caad` is **invalid due to host replay
+starvation**, not a result on the ECU hypothesis. The same-process Python bridge sent 155
+stale frames but missed seven native 10-ms slots, with a 40.542-ms maximum send gap.
+Comma 4 exposes the Panda only over SPI (`usb=[]`, `spi=[3a0007000151343435333330]`).
+`PandaSpiHandle` serializes each complete transaction with both an in-process
+`threading.Lock` and an OS `flock`; the synchronous UDS/ISO-TP path busy-polls
+`can_recv()`, so the bridge thread could starve behind repeated SPI acquisitions. The
+error was reached only after the old runner had observed a non-replay `0x030`, application
+return, and FRC post-state, but that exception path discarded those partial fields; they
+are therefore not authoritative/recoverable for this attempt.
+
+The corrected host architecture moves the stale-`0x030` writer into a separate spawned
+process with its own Panda SPI handle, relying on the existing OS `flock` to serialize
+whole cross-process SPI transfers. The main receive path additionally yields 1.5 ms after
+each complete `can_recv()` transaction so the writer can acquire the kernel lock between
+ISO-TP polls. A parked read-only contention stress run exercised 760 main-process SPI
+receive polls over 2.2 s while the worker completed 249 scheduled 100-Hz SPI health
+transactions: zero missed slots and a 14.539-ms maximum observed completion-to-completion
+gap. The live probe still requires `missed_slots == 0` and zero Panda TX blocks; invalid
+cadence now persists the already-collected non-replay frame/F181/FRC evidence instead of
+throwing it away. The invalid first run is retained under
+`targets/camry-2026/raw-20260917/early030-bootstrap-invalid-host-starvation/`.
+
 **Current execution boundary:** VAR-155 proves the live native profile-2 B6 boundary and
 byte-exact local slot-4 signing. VAR-156 then deliberately installed the preserved
 native-application trailer on the modified ID11/target/100/100 application: all six samples

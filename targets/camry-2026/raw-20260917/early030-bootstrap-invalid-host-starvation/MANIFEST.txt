@@ -1,0 +1,35 @@
+2026-09-17 exact-Camry early-fresh-0x030 startup discriminator (INVALID: host replay starvation)
+
+Vehicle: maintainer 2026 Toyota Camry Hybrid
+EPS: 8965F3307000 / 8A3113303100
+Kit source commit: 6203caadd552ccb8acede165aac2d6924f54caff
+Mode: fresh ignition cycle, NRTD/READY=0, Park
+Command: ./camry-f33-early030 probe /tmp/camry-f33-early030-run.json
+
+The run is not evidence for or against the early-fresh-0x030 hypothesis. The original
+host implementation kept stale 0x030 continuity in a Python thread sharing the same
+SPI Panda object/transport with synchronous UDS/bootstrap traffic. On Comma 4 the
+Panda is SPI-only. PandaSpiHandle serializes each transaction under an in-process
+threading.Lock plus an OS flock. The main ISO-TP path busy-polls can_recv(), and the
+same-process bridge thread was starved behind repeated SPI acquisitions.
+
+Observed bridge status:
+  replay frame: 0000000010000149000010001bc200000000000100000000000000003fdf2cf9
+  sent: 155
+  missed_slots: 7
+  max_send_gap_ms: 40.54218
+  period_ms: 10.0
+
+Because the old runner checked continuity only after observing a non-replay 0x030,
+application return, and FRC post-state, reaching this error proves those stages executed,
+but the old exception path discarded their partial fields. They are therefore not
+recoverable/authoritative for this run.
+
+Host fix:
+- stale bridge moved to a separate spawned process with its own Panda SPI handle;
+- Panda's existing OS flock serializes complete cross-process SPI transactions;
+- main receive polling yields 1.5 ms after each complete can_recv() transaction;
+- parked read-only contention stress: 760 main can_recv polls in 2.2 s while worker
+  performed 249 scheduled 100-Hz SPI health transactions: missed_slots=0,
+  max_send_gap_ms=14.53873;
+- invalid cadence now persists all partial evidence and returns a nonzero exit status.

@@ -23,8 +23,11 @@ check('one-shot uses recovered native primitives', all(x in s for x in ('jarl32 
 check('one-shot returns to stock startup/foreground', 'jarl32 app_startup_final_init, lp' in s and 'jarl32 stock_foreground, lp' in s)
 check('no B6 steering path in discriminator', '0x0b6' not in s.lower())
 h=HOST.read_text()
-check('host requires healthy FRC and stale bridge', '_healthy_frc_drcc_baseline' in h and '_Stale030Bridge' in h)
+check('host requires healthy FRC and independent stale bridge', '_healthy_frc_drcc_baseline' in h and '_Process030Bridge' in h)
+check('bridge uses separate process and SPI flock boundary', 'multiprocessing.get_context("spawn")' in h and 'transport": "separate-process-spi-flock"' in h)
+check('main SPI receive path yields between polls', 'SPI_RECV_YIELD_SECONDS = 0.0015' in h and 'class _YieldingPandaTap' in h)
 check('host classifies first non-replay 0x030 after trigger', '_poll_first_changed_030' in h and 'ms_after_trigger_send' in h)
+check('invalid cadence preserves partial evidence instead of throwing it away', 'invalid_bridge_continuity' in h and 'validity_errors' in h)
 check('Ghidra seed pins 0x903F6 callback body', '0x000903F6L' in SEED.read_text() and '0x00090429L' in SEED.read_text())
 with tempfile.TemporaryDirectory(prefix='early030-test-') as td:
  p=subprocess.run([sys.executable,str(BUILDER),'--output-dir',td],cwd=ROOT,check=True,capture_output=True,text=True)
