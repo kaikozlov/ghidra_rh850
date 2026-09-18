@@ -480,6 +480,103 @@ The same vocabulary pass also finds the FRC behavior **X2351 PDA (DA) Brake
 Control Invalid Condition**, providing another concrete control-invalid state
 to compare with the fail-class model.
 
+### 2.5 Bootstrap fault persistence: FRC eligibility versus Brake/VMM fail state
+
+The post-programming bootstrap problem should now be split into **failure
+generation** and **failure persistence**.  The retained evidence does not support
+treating persistent DRCC unavailability as identical to a persistent
+Brake/VMM lateral fail class.
+
+The strongest current discriminator is September-10 route
+`00000093--4066e7ae51`.  That same-ignition drive followed the EPS programming
+transition and used conventional cruise because Toyota TSS/DRCC remained
+unavailable.  Nevertheless all **14,355/14,355** retained Brake-owned `0x081`
+frames have B13=`0x00`: the recovered arbitration-result lateral ID is zero and
+the candidate B13[7:6] fail class is also zero.  Native `0x251` simultaneously
+contains unavailable (`0xE0`) and conventional-cruise (`0x90`) states.  This
+does **not** prove every Brake/VMM eligibility input was healthy, but it does
+show that the persistent DRCC restriction can outlive the specific
+`0x081 B13[7:6]` failure indication.
+
+The September-17 valid stale-`0x030` bridge supplies the complementary FRC-side
+observation.  Before the bootstrap handoff, FRC `0x1903` reported DRCC
+all-speed, `0x1905` reported cruise allowed, and `0x1906` had the ACC-not-
+available icon clear.  After the approximately **1.293-s** interruption,
+`0x1903` and `0x1905` were unchanged while `0x1906` asserted
+ACC-not-available.  The resident was unarmed and no DTC clear occurred.  That
+experiment proves that bootstrap alone can leave an FRC-visible unavailable
+state even after EPS application publication returns; it does not yet identify
+whether the retained state is FRC-local or is another peer status latched by
+the FRC.
+
+The leading lifecycle hypothesis is therefore:
+
+```text
+EPS service interruption
+    -> Brake/VMM sees steering reliability loss
+    -> temporary/confirmed lateral fail classification
+    -> FRC receives/records an unavailable condition
+
+EPS application returns
+    -> Brake/VMM fail class may recover
+    -> FRC / cruise-eligibility state can remain unavailable for the ignition cycle
+```
+
+The decisive next capture is same-ignition and synchronized.  Observe
+`0x030` validity/inhibit state, raw `0x081` B13[7:6] and request-loss,
+Operation-FFD `5283_1` and `5285`, FRC `0x1905/0x1906`, Brake
+`0x102D/0x102F`, and native `0x251` from interruption through stable EPS
+application return.  The outcomes separate the domains:
+
+- if raw `0x081`, `5283_1`, and the Brake status surface recover while FRC
+  availability remains restricted, persistence is upstream of the live
+  Brake/VMM fail classification and an FRC/eligibility latch becomes the
+  primary target;
+- if `0x081 B13[7:6]` remains at the failure-decided candidate state, the
+  arbitration domain itself has not requalified;
+- if raw `0x081` clears but `5283_1` remains failed, the FRC is retaining a
+  manager-result/fail-class copy rather than merely reflecting the current
+  Brake publication.
+
+This distinction has a direct openpilot architecture consequence.  The Panda
+relay already sits electrically between the FRC-side and chassis/Brake-side
+Toyota Bus-4 endpoints.  If the downstream Brake/VMM domain has requalified
+while only the FRC/requester domain remains restricted, openpilot can in
+principle take ownership **downstream of the FRC and upstream of Brake/VMM**:
+suppress the native FRC copy of `0x08A`, preserve its cadence/freshness as the
+initial transport template, modify only the intended application-request
+fields, re-authenticate the modified frame, and let Toyota's ordinary
+Brake/VMM arbitration/result/request-generation path remain intact.
+
+The cryptographic prerequisite is already stronger than a shared-key
+hypothesis.  On the exact Camry, EPS ICU-S selector 4 reproduced **3/3** captured
+native FRC `0x08A` trailers byte-exact using live `0x00F` synchronization,
+while the separate B6 work proves selector-4 command 5 can generate a distinct
+MAC over modified application content.  A modified `0x08A` has not yet been
+transmitted/accepted, so receiver acceptance and real-time oracle latency remain
+dynamic gates.  For the first takeover discriminator, reuse each intercepted
+native `0x08A` freshness/cadence rather than inventing an independent sender
+epoch.
+
+A safe stationary acceptance probe can therefore be narrower than a steering
+test: with EPS and Brake status recovered but FRC DRCC still unavailable,
+replace a short run of native `0x08A` one-for-one with a validly authenticated
+ID11 request whose target equals the measured current steering angle, while
+preserving the native longitudinal/request metadata.  Success is not physical
+motion; it is the downstream result plane following the injected application
+identity in the normal native shape — `0x081 B13[5:0]` / `5285` moves to the
+requested ID without request-loss or fail-class assertion.  That would directly
+prove that the FRC's persistent unavailability is bypassable at the request
+boundary.
+
+This does not automatically restore **stock** DRCC.  If the faulted FRC no
+longer supplies a usable longitudinal request, lateral-only `0x08A`
+replacement can recover lateral request authority while stock ACC remains
+unavailable.  Full comma authority would then require separately qualifying the
+already-recovered `0x08A` longitudinal request fields and Toyota's
+longitudinal arbitration/hold/release semantics.  Avoiding the FRC latch remains
+preferable if stock-longitudinal coexistence is the objective.
+
 ## 3. Network/gateway families
 
 ### US20220055556A1 — In-vehicle network system
