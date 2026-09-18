@@ -326,9 +326,13 @@ FRC assembly
     v
 Brake / Vehicle Movement Manager domain
     |
-    +---- protected 0x081 result/status ----> FRC
+    | request arbitration
     |
-    +---- B6 final steering target ---------> exact F33 EPS
+    +---- protected 0x081 arbitration result/status ----> FRC
+    |
+    +---- post-arbitration request generation
+               |
+               +---- B6 final steering target ----------> exact F33 EPS
 ~~~
 
 Exact F33's recovered receive surface accepts B6/profile2 but excludes both

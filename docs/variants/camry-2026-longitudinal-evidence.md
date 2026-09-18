@@ -2,9 +2,9 @@
 
 **Current disposition — September 16 request/result closure:** `0x160` is an
 FRC-origin longitudinal/ego-state publication, not the demonstrated Camry
-actuator ingress. The central chassis-control surface is `0x08A`: it carries the
-selected upper/lower longitudinal request packages plus the recovered lateral
-request tuple. Brake-owned `0x081` publishes the selected/employed result state.
+actuator ingress. The central request surface is `0x08A`: it carries the
+FRC-submitted upper/lower longitudinal request packages plus the recovered lateral
+request tuple. Brake-owned `0x081` publishes the downstream selected/employed result state.
 The Camry `0x160` B4:B5+B12 encoder remains withdrawn.
 
 The current architecture is more precise than the earlier shorthand
@@ -28,20 +28,21 @@ not need to exist in either `0x08A` longitudinal slot. On the Camry, `0x08A`
 request candidate A is ID11 during ordinary DRCC and candidate B is ID17, while
 `0x081` can report ID63. Toyota independently names `63 = Driver Operation` on
 the P5 FRC longitudinal/"Vertical ID" diagnostic surface. The strongest current
-model is therefore **selected application package(s) in `0x08A`, employed source
-feedback in `0x081`**, not a second hidden FRC command chosen by Brake from the
-same packet.
+model is therefore **FRC-submitted application request package(s) in `0x08A`,
+downstream arbitration/employed-source feedback in `0x081`**, not a final VMM
+winner already encoded in the request packet.
 
 The retained source document is local-only under
-`REFERENCE/toyota_vehicle_movement_arbitration_patent/US20200070849A1.pdf`
+`REFERENCE/patents/toyota_vehicle_movement_arbitration_patent/US20200070849A1.pdf`
 (`REFERENCE/` remains intentionally ignored). Public source:
 <https://patents.google.com/patent/US20200070849A1/en>.
 
 Transport, request semantics, physical publication/security ownership, and
-actuator authority remain separate questions. The protected physical publisher
-of `0x08A`, the exact location of the application-arbitration implementation,
-and the upper-vs-lower A/B ordering are still not assigned by this architecture
-reference.
+actuator authority remain separate questions. Later source-direction evidence
+places protected `0x08A` publication inside the FRC assembly, while the recovered
+Toyota architecture places request arbitration downstream in the Brake/VMM
+layer. The exact Brake code implementing that arbitration, the security/physical
+handoff, and the upper-vs-lower A/B ordering remain unresolved.
 
 **Request/result wire closure:** FRC normal-Tx suppression establishes `0x08A`
 as the upstream TSS request/instruction plane; Brake owns `0x081` and continues

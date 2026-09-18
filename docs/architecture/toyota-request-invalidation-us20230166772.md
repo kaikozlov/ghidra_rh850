@@ -497,12 +497,12 @@ Thus the evidence state is:
 |---|---|---|---|
 | application plans + IDs | explicit | explicit successor vocabulary | **recovered** 5280/5281/5282 |
 | per-client priority/invalidation request | explicit | **PCS rejection request determination** | priority vocabulary recovered longitudinally; lateral control unknown |
-| manager latches policy until cancel | explicit | not yet mapped | **functional analogue belongs inside FRC application state** |
-| client excluded inside arbitration | explicit | consistent with FRC feature-local state + generic request egress | **internal FRC selection, exact implementation unrecovered** |
+| manager latches policy until cancel | explicit | not yet mapped | **exact P5/F33 mapping unknown; patent places this in the motion manager** |
+| client excluded inside arbitration | explicit | successor manager vocabulary | **if transferred, belongs at the downstream VMM arbitration stage after request reception; exact Camry implementation unproved** |
 | arbitration result ID | explicit VMM-family concept | 0x20D4 byte25 vertical result | **recovered downstream 5284/5285 result surface** |
 | result physical value | explicit VMM-family concept | successor data exists | **recovered downstream 57DB/57DE result surface** |
 | rejection reason/factors | explicit semantic concept | **recovered** longitudinal P6 RoB fields | exact P5 internal/external realization not mapped |
-| manager -> suppressed-client intentional-rejection feedback | **explicit** | no exact directional join yet | **if present for lateral feature competition, likely internal to FRC rather than an FRC<->Brake wire field** |
+| manager -> suppressed-client intentional-rejection feedback | **explicit** | no exact directional join yet | **if transferred, this is downstream-manager feedback toward the requesting application/FRC; exact P5 carrier is unknown** |
 
 ## 10. What this changes about the current F33 fault-state hypothesis
 
@@ -521,29 +521,26 @@ healthy version of this mechanism. It removes much more than one client's
 eligibility and can legitimately activate communication/request-loss
 supervision.
 
-### Exact-Camry correction: the lateral eligibility/priority control plane is inside the FRC application
+### Exact-Camry correction: FRC feature selection and VMM arbitration are separate stages
 
-The earlier wording treated the patent as though an external FRC->Brake policy
-signal might decide which of LTA/LDA/LCA/PDA wins. That is the wrong exact-Camry
-model.
+The exact Camry does add one stage that must not be confused with the patent's
+motion-manager arbitration. LTA, LDA, LCA, PDA/SDG, PCS and the other TSS
+features are **simultaneously enableable applications inside the FRC
+application software**. Their enable/configuration state is not their current
+request-owner state, and the FRC state machine determines which feature
+currently populates the generic lateral request. The first externally observed
+representation of that feature-selected request is protected `0x08A`.
 
-These functions are **simultaneously enableable applications inside the FRC
-application software**. LTA continuously centers, LDA can intervene on a lane
-departure, LCA handles lane-change assistance, PDA/SDG provides proactive
-steering, PCS has its own steering path, and so on. Their enable/configuration
-state is not their current ownership state. The FRC's internal state machine
-selects which feature currently supplies the generic lateral request.
-
-The first external representation of that decision is protected `0x08A`:
+But `0x08A` is still an **application request into the downstream Vehicle
+Movement Manager**. The patent's invalidation/priority operation lives in that
+manager, after request reception and before the arbitration result/request-
+generation stages. The corrected layering is:
 
 ```text
 FRC internal applications
   LTA / LDA / LCA / PDA / PCS / ...
           |
-          | feature settings + perception + driver + vehicle state
-          v
-  FRC internal eligibility / priority / owner selection
-          |
+          | FRC feature-owner state machine
           v
   5282 generic TSS lateral request
           |
@@ -551,30 +548,37 @@ FRC internal applications
        0x08A egress
           |
           v
-      Brake / VMM
+  Brake / VMM request arbitration
+      |                  |
+      v                  v
+  5285 / 0x081      request generation -> B6
+  result/status
+      |
+      +----------------------> feedback toward FRC/applications
 ```
 
-Therefore the relevant search target is **the FRC application state and code that
-produces `5282`/`0x08A`**, not a new external policy PDU between FRC and Brake.
-The patent's invalidation-vs-priority distinction remains useful for naming the
-internal selection semantics. It does not imply that its Arrow A must exist on
-vehicle CAN in this implementation.
+So there are **two different selection questions**. The FRC decides which of
+its resident features authors the request it submits. The downstream VMM then
+arbitrates the submitted request against the manager's other inputs/policies.
+The patent is direct evidence for the second stage, not proof that the FRC's
+local feature-owner state machine implements the same invalidation mechanism.
 
-### Separate question: how does the FRC represent a losing feature internally?
+### Separate question: where would intentional-rejection feedback appear?
 
 The patent says a suppressed application can be told that non-selection is
-intentional so it does not diagnose an abnormality. On the exact Camry, that
-feature-to-feature relationship is inside the FRC application. Any equivalent
-rejection acknowledgment can therefore be an internal software state, return
-value, shared object, or recorder-visible field; it does **not** need to cross
-the FRC<->Brake network boundary.
+intentional so it does not diagnose an abnormality. If exact P5/F33 implements
+an analogous path, the source-derived placement is **manager -> requesting
+system/application**. Since the requesting TSS applications reside in the FRC,
+that feedback could return from Brake/VMM toward the FRC over a result/status
+interface or another unrecovered path. It could then become FRC-internal state,
+but that is downstream feedback, not proof of an FRC-local Arrow B.
 
-`5284/5285`, `57DB/57DE`, and Brake-owned `0x081` remain downstream
-result/status surfaces for the generic request. They can feed FRC application
-state, but they should no longer be presented as the leading location for the
-patent's manager->suppressed-client Arrow B. Finding Arrow B, if an equivalent
-exists, now means tracing the FRC's feature-local state machines and their
-selection/rejection bookkeeping.
+`5284/5285`, `57DB/57DE`, and Brake-owned `0x081` are therefore relevant
+places to look for the downstream arbitration/result side. No recovered field
+is yet identified as the patent's specific request-rejection-information bit or
+reason. Separately, the FRC's own feature inhibition/cancel bookkeeping remains
+worth recovering, but it must not be labeled as this patent's manager-side
+invalidation feedback without a direct join.
 
 ## 11. Smallest discriminating experiments/searches
 
@@ -613,10 +617,12 @@ FRC internal owner / eligibility selection
 5285 / 57DE downstream result -> 0x081
 ```
 
-The key signature is a feature-local requester that remains enabled or active
-while the FRC's generic `5282` owner changes to another application, with no
-request-loss or fail-class transition. That is the exact-car analogue of the
-patent's client invalidation/priority behavior.
+That capture recovers the **FRC feature-owner state machine**, which is useful
+context but is not by itself the patent's manager-side invalidation behavior.
+The patent-specific downstream signature would instead require a submitted
+`5282`/`0x08A` request to remain present while the VMM result deliberately does
+not select it (or explicitly reports rejection), with request-loss and fail
+class remaining healthy.
 
 ### B. Search state-change semantics, not just value carriers
 
@@ -635,34 +641,42 @@ Patent-guided terms:
 
 The exact P5 corpus already justifies "priority" as a high-value search term.
 
-### C. Treat Arrow A and Arrow B as separate **FRC-internal** recovery problems
+### C. Treat Arrow A and Arrow B as separate **downstream-manager** recovery problems
 
-Do not infer one from the other, and do not assume either arrow is a vehicle-CAN
-signal on this car.
+Do not infer one from the other, and do not assume either arrow has already been
+identified on P5 CAN.
 
-**Arrow A question:** what FRC-local setting/state/policy makes one feature
-ineligible or lower priority than another?
+**Arrow A question:** does some system/application send the Brake/VMM a policy
+request that changes the eligibility or priority of another still-present
+kinematic plan? If so, what is its carrier/state?
 
-**Arrow B question:** what FRC-local state tells the losing feature that its
-non-selection is intentional rather than a broken downstream actuator path?
+**Arrow B question:** what does Brake/VMM return toward the suppressed requesting
+system so that intentional non-selection is not diagnosed as an actuator/control
+failure?
 
-The external `0x08A`/`0x081` pair brackets this internal state machine: `0x08A`
-is its selected-request egress and `0x081` is downstream result/status feedback.
-The feature-selection arrows themselves can remain entirely inside the FRC
-application.
+The observed `0x08A`/`0x081` pair is a natural place to bracket this question:
+`0x08A` is the FRC-submitted request and `0x081` is downstream
+arbitration-result/status feedback. The patent does not prove that either of its
+specific policy/rejection arrows is encoded inside those two PDUs, so the exact
+carrier remains open.
 
-### D. Look for a latched transition
+The **separate** FRC-local question is how LTA/LDA/LCA/PDA/PCS state chooses
+which feature populates `5282`/`0x08A`. Recover that too, but do not use it as a
+substitute for the downstream manager mechanism disclosed by this patent.
 
-If a candidate FRC-local policy/state transition is found, determine whether it is:
+### D. Look for a latched manager-policy transition
 
-- continuously evaluated from feature state;
+If a candidate downstream priority/invalidation state is found, determine whether it is:
+
+- continuously evaluated from requester state;
 - edge-triggered / one-shot;
 - latched until explicit cancellation;
 - automatically cleared by mode/ignition/fault.
 
 The patent's Figure-4/Figure-5 design specifically predicts a **set/cancel
-latch**, but the exact Camry may realize the same semantics as ordinary FRC
-application state rather than an explicit externally commanded latch.
+latch** in the requester/manager policy path. Whether exact Camry uses that
+mechanism is unproved; ordinary FRC feature-state transitions must not be
+mistaken for this latch merely because they are stateful.
 
 ## 12. Retained Camry logs: the generic request/result boundary is now much tighter
 
@@ -746,18 +760,22 @@ Healthy retained CAN never shows a generic 0x08A lateral request continuing for
 a meaningful interval while a different 0x081 application ID wins. The only
 disagreements are the one-result-cycle transition delays above.
 
-That is expected once the ECU ownership is stated correctly. LTA, LDA, LCA,
-PDA/SDG and PCS are FRC-resident functions. Their competition is resolved by the
-**FRC application state machine before `5282`/`0x08A` is published**. The patent's
-interesting state -- one application remaining enabled/alive while another has
-priority -- can therefore exist entirely inside the FRC while the external wire
-shows only the currently selected generic request.
+The healthy logs therefore show **two stages**, not one. LTA, LDA, LCA,
+PDA/SDG and PCS are FRC-resident functions, and their feature-owner transition is
+already visible when `5282`/`0x08A` changes ID. Brake then receives that
+feature-selected but not yet VMM-arbitrated request; the downstream Vehicle
+Movement Manager performs request arbitration and returns the result/status on
+`5285`/`0x081` before post-arbitration request generation toward the actuator
+controllers.
 
-Brake receives that already-selected FRC lateral request. It can still validate
-it, combine it with vehicle-motion/stability constraints, generate downstream
-actuator targets, and return result/status; what the retained Camry evidence does
-not support is treating Brake as the place where LTA versus LDA versus PDA is
-chosen.
+In every retained healthy handoff, the downstream result follows the submitted
+FRC request after only the normal publication-cycle delay. That is evidence for
+the ordinary **request wins arbitration** path. It is not evidence that the
+patent's intentional invalidation/rejection state occurred inside the FRC. A
+true patent-style rejection on this car would require evidence that a still-
+present submitted request is deliberately not selected downstream, ideally with
+an accompanying rejection/priority reason or feedback while request-loss and
+fail class remain healthy.
 
 Current GTS exposes exactly the FRC-local state we should inspect around that
 selection boundary:
@@ -774,8 +792,9 @@ selection boundary:
 - 5D8D -- PDA(SA) DDR control state.
 
 The generic `5282` object and protected `0x08A` egress sit after those
-feature-local objects. Downstream `5285/57DE` and `0x081` then report the
-Brake/VMM result of the FRC-selected generic request.
+feature-local objects but **before the downstream VMM arbitration result**.
+Downstream `5285/57DE` and `0x081` then report the Brake/VMM arbitration result
+of the feature-selected generic request.
 
 Same-car stored Operation FFD already proves the layers are real. The
 `2844 Lane Departure Warning Operation under LTA` records contain an active
@@ -860,10 +879,11 @@ The current evidence therefore separates three observable states:
 | complete FRC request loss | absent | asserted | can remain healthy | no normal request/result handoff |
 | EPS/lateral failure-decided | alive | clear | candidate 3 | ID0 -> ID0 in retained routes |
 
-The patent predicts a fourth state worth hunting: a healthy policy rejection
-where the losing feature remains alive internally, request-loss stays clear,
-the fail class stays healthy, another application intentionally wins, and the
-losing client receives rejection/status feedback.
+The patent predicts a fourth state worth hunting: a healthy **downstream policy
+rejection** where the FRC request remains present, request-loss stays clear, the
+fail class stays healthy, the VMM intentionally selects/permits something other
+than that submitted plan, and the requesting system receives rejection/status
+feedback explaining the non-selection.
 
 ### 12.5 Best next passive capture
 
@@ -901,42 +921,48 @@ For those events capture, if the record family permits:
       0x08A
       0x081
 
-The patent-signature observation would be:
+That capture can answer **two different questions**:
 
-1. multiple FRC features remain enabled/available;
-2. one feature-local request/state remains alive while an inhibition/priority or
-   trigger condition changes;
-3. the FRC's generic `5282` owner changes to another application and `0x08A`
-   immediately expresses that new owner;
-4. downstream `5285`/`0x081` follows the new FRC-selected request while
-   `5283_1` stays healthy and `0x081 B11` stays out of request-loss;
-5. ideally an FRC-local rejection/cancel/reason state explains why the losing
-   feature did not own `5282`.
+1. feature-local FRC state (`5531/5631/568x/5Axx/5D8D`) explains why the FRC
+   changes which feature owns generic `5282`/`0x08A`;
+2. `5285/57DE` and raw `0x081` show what the downstream Brake/VMM arbiter does
+   with the resulting submitted request.
 
-That would distinguish intentional **FRC application selection** from ordinary
-request withdrawal, communication loss, downstream Brake rejection, and actuator
-failure.
+For an ordinary healthy feature handoff, we expect the result to follow the new
+request as it does in the retained logs. The stronger **patent-signature** event
+would instead keep a request present while downstream arbitration intentionally
+does not select it, with `5283_1` healthy, `0x081` out of request-loss, and some
+manager-side priority/rejection state or feedback explaining the non-selection.
+That would distinguish manager policy rejection from FRC feature-owner changes,
+ordinary withdrawal, communication loss, and actuator failure.
 
 ## 13. Bottom line
 
-US20230166772A1 changes the most useful question from:
+US20230166772A1 changes the most useful downstream question from:
 
 > "Which native command do we have to block?"
 
 to:
 
-> "How does the FRC application decide which simultaneously enabled TSS feature
-> owns the generic request, and how does it represent intentional non-selection
-> to the losing feature?"
+> "Can the Vehicle Movement Manager intentionally de-prioritize or invalidate a
+> still-present application request, and what feedback tells the requester that
+> the non-selection is intentional rather than a fault?"
 
-The patent supplies Toyota's vocabulary for that kind of eligibility/priority
-state machine. The exact Camry supplies the placement: LTA/LDA/LCA/PDA/PCS are
-FRC-resident applications; feature-local recorder objects precede the generic
-`5282` request; protected `0x08A` is the first external egress of the selected
-request; Brake-owned `0x081` is downstream result/status.
+The exact Camry adds a **separate upstream question**: how the FRC chooses which
+simultaneously enableable LTA/LDA/LCA/PDA/PCS feature populates the generic
+request. Feature-local recorder objects precede `5282`; protected `0x08A` is the
+first external egress of that feature-selected request. The Brake/VMM request
+arbiter remains downstream of `0x08A`, and Brake-owned `0x081` is the recovered
+arbitration-result/status feedback surface.
 
-What remains unrecovered is the **FRC application implementation** of that
-selection: the exact state variables, priority/inhibition rules, transition
-functions, and any internal intentional-rejection feedback. We should not keep
-searching for a separate external lateral-client arbitration control plane at
-Brake unless new evidence requires one.
+So the two recovery targets must remain distinct:
+
+- **FRC:** recover the feature-owner state machine and the selected-request
+  pack/sign path into `5282`/`0x08A`;
+- **Brake/VMM:** recover request arbitration, including any priority/invalidation
+  policy and intentional-rejection feedback, then the post-arbitration request-
+  generation path to B6.
+
+The patent directly informs the second target. It is only an analogy for the
+first unless FRC code or recorder state independently proves that Toyota reused
+the same invalidation mechanism internally.

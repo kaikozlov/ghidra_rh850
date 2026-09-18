@@ -4,7 +4,7 @@
 uses Toyota patent application **US 2020/0070849 A1, “Information Processing
 Apparatus”** as an external architecture source and then keeps the exact-Camry wire,
 firmware and GTS joins separate.  The retained source PDF is local-only at
-`REFERENCE/toyota_vehicle_movement_arbitration_patent/US20200070849A1.pdf`;
+`REFERENCE/patents/toyota_vehicle_movement_arbitration_patent/US20200070849A1.pdf`;
 `REFERENCE/` is intentionally untracked.
 
 This source resolves a long-standing conceptual error in the TSS3 work: Toyota does
@@ -26,11 +26,14 @@ the FRC state machine selects which one currently owns the generic lateral reque
 The first external representation of that selected request is protected `0x08A`.
 
 The strongest exact-Camry crosswalk is therefore **FRC feature-local state -> FRC
-internal owner selection -> `5282` / protected `0x08A` selected request egress ->
-Brake/VMM `0x081` result/status and downstream B6 target generation**. B6 is the final
-steering-controller target/instruction interface at EPS. Exact FRC selector code,
-internal security ownership, and the downstream Brake request-to-target transform remain
-separate questions; the location of the LTA/LDA/LCA/PDA ownership decision does not.
+internal feature-owner selection -> `5282` / protected `0x08A` request egress ->
+Brake/VMM request arbitration -> `0x081` arbitration-result/status feedback +
+post-arbitration request generation -> B6 steering-controller target/instruction**.
+`0x08A` is therefore *feature-selected by the FRC*, but it is **not yet the VMM
+arbitration result**. B6 is the final recovered steering-controller target/instruction
+interface at EPS. Exact FRC selector code, internal security ownership, and the downstream
+Brake arbitration/request-generation transform remain separate questions; the location
+of the LTA/LDA/LCA/PDA feature-owner decision does not.
 
 ## 1. Toyota's disclosed control graph
 
@@ -143,7 +146,7 @@ per-application drawing.  **LTA, LDA, LCA, PDA/SDG, PCS and the other TSS functi
 applications inside the FRC application software, not separate network clients arriving
 at Brake.**  Their enable/configuration states can coexist.  The FRC's own application
 logic decides which feature currently supplies the generic lateral request, and `5282`
-records that already-selected generic request inside the FRC-hosted Operation FFD.
+records that feature-selected generic request inside the FRC-hosted Operation FFD.
 Protected `0x08A` is the first externally observable publication of that FRC-selected
 request on the intercepted chassis network (apart from feature settings/configuration
 inputs themselves).
@@ -179,11 +182,16 @@ FRC application software
                     |
                     v
             Brake / VMM boundary
-      acceptance / result / target generation
-             |                 |
-             v                 v
-          0x081                B6
-      result/status       EPS target/instruction
+            request arbitration
+                    |
+        +-----------+-----------+
+        |                       |
+        v                       v
+     0x081                request generation
+ arbitration result/             |
+ status back to FRC              v
+                                B6
+                         EPS target/instruction
 ```
 
 Feature enablement is therefore distinct from current request ownership: LTA, LDA and
@@ -249,22 +257,27 @@ episodes show `11 -> 4 -> 11` while cruise remains enabled, with `0x081 B13` fol
 the new FRC request after a separate publication interval. One route-3c witness holds ID4
 for 2.530639 s and one route-3e witness for 1.225830 s.
 
-These transitions are not Brake-side arbitration among separate LTA/LDA/PDA senders.
-Those features are simultaneously available FRC-resident functions; the current owner is
-chosen by the FRC application state machine from feature settings, perception, driver and
-vehicle state, and feature-local inhibition/priority conditions. The resulting generic
-request is then published as `5282`/`0x08A`. Toyota's patent priority/eligibility language
-is still highly relevant to **that internal selector**, but the exact F33 stored priority
-table and implementation remain unrecovered.
+These transitions are not evidence that Brake sees separate simultaneous LTA/LDA/PDA
+network senders and chooses among them. Those features are simultaneously available
+FRC-resident functions; the current feature owner is chosen by the FRC application state
+machine from feature settings, perception, driver and vehicle state, and feature-local
+inhibition/priority conditions. The resulting generic request is then published as
+`5282`/`0x08A`. **That request still enters the downstream Brake/VMM request-arbitration
+unit.** The two decisions are different: FRC feature-owner selection chooses what request
+the FRC submits; VMM arbitration decides the downstream result from the submitted request
+and the manager's other arbitration inputs. Toyota's patent priority/eligibility language
+is relevant to both layers, but the exact F33 implementation of either policy remains
+unrecovered.
 
 The aggregate request/result join is stronger: 1,015,978 of 1,016,141 fresh `0x081`
 pairings (99.9839589%) carry the current `0x08A` lateral ID. Every one of the 163
 mismatches is transition-shaped: the FRC egress request has already changed while the
 Brake/chassis result still carries the immediately previous ID. No retained stable
-interval shows Brake persistently selecting a different FRC lateral application. This
-makes `0x081 B13` a useful **downstream acceptance/result oracle for the already-selected
-FRC request**, not evidence of where LTA/LDA/PDA selection occurs. Logger batching keeps
-the observed ~10-40 ms raw examples from being promoted to an exact ECU deadline.
+interval shows the downstream result persistently disagreeing with the current FRC
+request. This makes `0x081 B13` a useful **downstream VMM arbitration-result oracle for
+the feature-selected FRC request**, not evidence of where LTA/LDA/PDA feature ownership
+is chosen. Logger batching keeps the observed ~10-40 ms raw examples from being promoted
+to an exact ECU deadline.
 
 This materially changes how the Camry ID namespace should be interpreted.  Toyota uses
 the same concept—an application identifier—for longitudinal and lateral IDs.  It is now
@@ -725,8 +738,8 @@ FRC / TSS3 applications
   current request ownership before `5282`;
 - the internal FRC packer/security-core/HSM split that turns the selected generic request
   into protected `0x08A`;
-- the exact Brake/VMM verification, result, and request-generation transform from the
-  already-selected `0x08A` request to `0x081` and B6 (without assuming a
+- the exact Brake/VMM verification, request-arbitration, result, and request-generation transform from the
+  feature-selected but pre-VMM-arbitration `0x08A` request to `0x081` and B6 (without assuming a
   byte/value-preserving transform);
 - the exact physical/security implementation of native B6 delivery from Brake to EPS;
 - which internal node owns each SecOC freshness/signing operation and the clean external
@@ -751,8 +764,8 @@ architecture-preserving choices are therefore:
 
 or
 
-(B) replace the already-selected protected 0x08A generic request egress while preserving
-    the downstream Brake/VMM result, stability, availability and actuator-target contracts
+(B) replace the feature-selected protected 0x08A generic request egress while preserving
+    the downstream Brake/VMM arbitration, result, stability, availability and actuator-target contracts
 ```
 
 Either approach respects the actual placement of Toyota's feature selector. The
@@ -768,8 +781,8 @@ Accordingly:
 - do not infer “stock LTA uses no B6” from Panda-visible absence—the later internal
   capture proves native B6 delivery exists at F33;
 - recover the FRC feature-owner selector and `5282` -> protected-`0x08A` pack/sign path;
-- separately recover the Brake/VMM verification/result/request-generation boundary,
-  including the exact relation of the already-selected `0x08A` request to native B6 and
+- separately recover the Brake/VMM verification/request-arbitration/result/request-generation boundary,
+  including the exact relation of the feature-selected `0x08A` request to native B6 and
   the Vehicle Motion Control `0x10A5..0x10AA` target surface.
 
 ## 12. Patent section map for future RE

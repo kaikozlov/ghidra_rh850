@@ -50,7 +50,7 @@ it does not qualify direct host-B6 transmission or make the Camry adapter a
 universal TSS3 interface. CORR-129/VAR-081 identify **73.303384 s of retained `0x08A` ID11 LTA/LCA request state with zero B6**; this is not a direct winner/grant oracle. CORR-134 recovers B21 as Target Lateral ID and B18:B19 as the signed request-angle quantity; CORR-135 rejects a presumed `0x08A -> B6` transform. Exact F33 neither accepts `0x08A` nor transmits it, while its B6-inactive internal path reaches physical steering; that makes zero B6 architecturally possible but does not prove the retained request was granted. VAR-091/CORR-136 place authenticated `0x08A` on the intercepted chassis network while observed Toyota-Bus-1 camera/radar PDUs use E2E. The later repin/source experiment resolves the source ambiguity those older rows could not: with the relay open, protected `0x08A` is native on the **FRC/camera-side endpoint** and forwarded byte-for-byte toward Brake, while `0x081` is native on the Brake/chassis side and returns toward FRC. FRC CommunicationControl removes `0x08A`; therefore the secured publisher/signing boundary is inside the FRC assembly, even though the exact internal key/HSM owner remains open. VAR-094 proves consecutive `5282` is absent from native Bus-1 CAN; CORR-138 retracts the former standing-echo interpretation of `0x160[22]`. VAR-101 proves the authenticated publication continues at zero request, not that the CMAC engine is downstream.
 
 The integration and stock-architecture questions are deliberately separate.
-OQ-054 now tracks the **internal FRC feature-owner + `0x08A` signer/key/freshness path** and the downstream Brake verification/result/request-generation -> B6 path. That attribution is **not** a prerequisite for the demonstrated C7 ->
+OQ-054 now tracks the **internal FRC feature-owner + `0x08A` signer/key/freshness path** and the downstream Brake/VMM verification/request-arbitration/result/request-generation -> B6 path. That attribution is **not** a prerequisite for the demonstrated C7 ->
 native-B6 ingress. Exact-F33 Gate-2 compare neutralization and the historical
 zero-MAC/wrong-key host-B6 senders remain useful failure-localization evidence,
 but they are not the current sender. VAR-155/156 and the September 10 road handoff
@@ -626,11 +626,13 @@ bus0), while Toyota Bus-4 / EPS-Brake is the unsplit Panda **bus 1**. Exact-F33
 EPS UDS and C7 therefore use bus1 with ELM327 param1 for direct diagnostics.
 The resident never host-transmits B6; it replaces/re-signs the EPS's internally
 native B6. Do not send `0x08A` to EPS. The current exact-Camry chain is
-**FRC-internal feature selection -> generic request `5282` / protected `0x08A`
-egress -> Brake/VMM validation/result/request generation -> final B6**. LTA,
-LDA, LCA and PDA ownership is already decided before `0x08A`; what remains
-unresolved is the downstream Camry physical/security handoff and transform, not
-an external lateral-feature arbitration stage.
+**FRC-internal feature-owner selection -> generic request `5282` / protected `0x08A`
+egress -> downstream Brake/VMM request arbitration -> `0x081` arbitration result/status
++ post-arbitration request generation -> final B6**. LTA, LDA, LCA and PDA feature
+ownership is already decided before `0x08A`, but `0x08A` is still a request into the VMM
+arbiter. What remains unresolved is the downstream Camry physical/security arbitration/
+request-generation implementation and transform, not an external competition among raw
+FRC feature clients.
 The stock topology is software/test complete but still needs the parked and short
 road revalidation called out in the capability matrix.
 
@@ -1905,14 +1907,15 @@ The resulting architectural model is therefore sharper than "find the LTA comman
 Toyota's FRC hosts a **general lateral feature/request family** whose road-observed
 current owners include LDA, LTA/LCA and SDG/PDA-SA. Those feature applications can be
 enabled simultaneously; the FRC application state machine chooses the current owner and
-publishes that already-selected generic request on `0x08A`. Exact F33 exposes
+publishes that feature-selected, pre-VMM-arbitration generic request on `0x08A`. Exact F33 exposes
 corresponding profiles inside one protected external B6 controller and does not
 independently revalidate DRCC/LTA engagement when choosing that profile. Factory steering
 still does not prove the exact `0x08A -> B6` transform: exact F33 receives neither
 `0x08A` nor `0x081`, and the retained stock family operates with no unmatched native B6.
-The unresolved factory step is therefore **downstream** of FRC feature selection: Brake
-verification/result/request generation plus the final steering-assembly authority handoff
-between the protected `0x08A/0x081` family and the physical actuator path.
+The unresolved factory step is therefore **downstream** of FRC feature selection: Brake/VMM
+verification/request arbitration, `0x081` arbitration-result production, post-arbitration
+request generation, plus the final steering-assembly authority handoff between the protected
+`0x08A/0x081` family and the physical actuator path.
 
 Deterministic reduction and verification:
 `tools/targets/camry/analysis/analyze_camry_2026_lateral_family_census.py`,
@@ -2132,7 +2135,7 @@ firmware/HSM evidence must identify both the feature-owner state machine that po
 Native Bus 1 has 22 frequent periodic camera/radar streams; `0x180..0x182` carry
 recovered perception-object slots, but those are a separate FRC interface. The protected
 `0x08A` request itself is already native at the FRC-side Bus-4 endpoint and is **post
-feature-selection**. The downstream unknown is Brake verification/result/request
+feature-selection**. The downstream unknown is Brake/VMM verification/request arbitration/result/request
 generation and B6 routing, not LTA-vs-LDA-vs-PDA selection. That attribution does **not**
 block the independent B6 development probe above.
 - `data/generated/camry_8965F3307000_tss3_tx_decompiler_evidence.json`
