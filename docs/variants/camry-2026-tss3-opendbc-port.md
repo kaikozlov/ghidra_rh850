@@ -138,8 +138,21 @@ The FRC again returned **`7F 11 7F`**. F181 answered every 100 ms across the fol
 2 s with no gap or identity change, and `0x1903/0x1905/0x1906` remained
 `01 / 8000 / e080e0008080`. Thus ECUReset type `0x01` is unavailable in both tested
 default and extended application sessions on this exact FRC; no hidden reset occurred.
-Programming-session behavior remains a separate, untested question and should not be
-assumed from this result.
+Toyota's FRC ReproStd reprogramming path proves a third distinct session exists:
+**programming session `10 02 -> 50 02`**. The same preparer also contains `10 83`, but
+that is extended session `0x03` with the UDS suppress-positive-response bit set, not a
+new session; the flash writer's `10 81` is likewise suppressed-response default session
+`0x01`. No current FRC host/CUW evidence identifies a distinct `0x04` safety-system
+session or Toyota-private DiagnosticSessionControl value. The ReproStd sequence enters
+`10 02`, then performs level-1 SecurityAccess (`27 01 -> 67 01 || seed[16]`, followed
+by `27 02 || key[16] -> 67 02`) before the flash flow, whose tail later issues `11 01`.
+That makes **programming + SecurityAccess** the strongest remaining software-only reset
+candidate. The repository does not contain the exact `8646F3315000` CUW, so its exact
+ServiceAuthKey is unproved. Six available `0x792` FRC CUWs (`8646F1.../F4...` families)
+all share ServiceAuthKey `3A8A90AE0ED81B6C37E21C1C5179A93E`, SecurityProperty2
+`0x9C`, and ReproMethod `0x07`; this is useful cross-family evidence but must not be
+promoted to the exact Camry without a live/key-validation join. Programming-session
+behavior on the exact Camry remains untested.
 
 The stock comma harness cannot power-cycle the FRC. Panda's production `drive_relay`
 controls the harness-box solid-state CAN0/CAN2 intercept pair only. The second
