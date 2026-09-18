@@ -1,0 +1,56 @@
+{
+  "f181_ascii": "\u00028965F3307000\u0000\u0000\u0000\u00008A3113303100",
+  "f181_hex": "023839363546333330373030300000000038413331313333303331303000000000",
+  "functional_response": {
+    "expected": "suppressed NRC11",
+    "observed_0x7a9_frames": []
+  },
+  "mailbox": {
+    "address": "0xFEBE5751",
+    "after_hex": "00c7a512340000",
+    "before_hex": "00c70000340000",
+    "expected_tail_hex": "c7a512340000",
+    "first_service_byte_may_be_cleared": true,
+    "tail_match": true
+  },
+  "mutation_boundary": {
+    "actuation_request": false,
+    "firmware_patch": false,
+    "flash_write": false,
+    "ram_exec": false
+  },
+  "nrtd_guard": {
+    "can_id": "0x51E",
+    "ready_values": [
+      0
+    ],
+    "samples": [
+      {
+        "bus": 1,
+        "data_hex": "0000830000000000",
+        "ready": 0
+      }
+    ]
+  },
+  "probe": {
+    "frame_hex": "07c7c7a512340000",
+    "sent_monotonic_ns": 1957928083474
+  },
+  "qualified": true,
+  "route": {
+    "bus": 1,
+    "elm327_param": 1,
+    "functional_can_id": "0x777"
+  },
+  "schema": "tss3-unified-functional-mailbox-probe-v1",
+  "target": {
+    "application_f181_hex": "023839363546333330373030300000000038413331313333303331303000000000",
+    "boot_f181_hex": "022121212121212121212121212121212121212121212121212121212121212121",
+    "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
+    "family": "camry-f33",
+    "name": "camry-8965F3307000",
+    "software_id": "8965F3307000",
+    "universal_profile": "camry-f33"
+  },
+  "verdict": "stock_functional_mailbox_live"
+}

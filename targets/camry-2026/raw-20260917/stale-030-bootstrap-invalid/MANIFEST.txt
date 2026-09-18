@@ -1,0 +1,17 @@
+2026-09-17 exact-Camry stale-0x030 bootstrap prevention attempt (INVALID)
+
+Vehicle: maintainer 2026 Toyota Camry Hybrid, exact EPS 8965F3307000 / 8A3113303100
+Kit source commit: 474222b00fb42094ce66ab7278efa2dd930d8e70
+Mode: fresh ignition cycle, NRTD/READY=0, Park
+Command: ./tss3-unified-signer bringup-stale-030-bridge /tmp/tss3-030-bridge
+
+Preflight passed: stock functional 0x777 mailbox live, exact application F181 bound, READY=0.
+The run is NOT evidence for or against stale 0x030 continuity. During the programming
+handoff the shared bootloader rediscovery helper called rediscover_route(), which re-applied
+ELM327 safety. ELM327 blocks host-created CAN-FD 0x030, producing safety_tx_blocked delta
++125. The installer failed closed with:
+
+  Panda blocked TX during bootstrap 0x030 bridge: before=0 after=125
+
+Root-cause fix: bridged handoff must keep allOutput ownership and poll exact boot F181 on
+the already-known stock Toyota-B bus1 route without calling ELM327 route rediscovery.

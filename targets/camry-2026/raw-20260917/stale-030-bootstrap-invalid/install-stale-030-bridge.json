@@ -1,0 +1,6 @@
+{
+  "command": "install-stale-030-bridge",
+  "error": "UnifiedSignerError: Panda blocked TX during bootstrap 0x030 bridge: before=0 after=125",
+  "schema": "tss3-unified-b6-signer-failure-v1",
+  "success": false
+}

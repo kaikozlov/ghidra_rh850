@@ -90,6 +90,38 @@ check("bootstrap bridge captures a fresh exact native bus1 0x030 before programm
       captured_030["bus"] == 1 and captured_030["can_id"] == "0x030" and
       captured_030["frame_hex"] == CapturePanda().frame.hex() and captured_030["age_ms"] <= 30.0)
 
+class PreservePanda:
+    def __init__(self): self.safety_changes = []
+    def set_safety_mode(self, *args): self.safety_changes.append(args)
+
+class PreserveClient:
+    def __init__(self): self.sessions = []
+    def diagnostic_session_control(self, session): self.sessions.append(session)
+
+class PreserveSessionType:
+    PROGRAMMING = 2
+
+class PreserveUds:
+    SESSION_TYPE = PreserveSessionType
+    class InvalidServiceIdError(Exception): pass
+    class MessageTimeoutError(Exception): pass
+    class NegativeResponseError(Exception): pass
+
+preserve_panda = PreservePanda()
+preserve_client = PreserveClient()
+preserve_reads = iter(((None, None), ("022121212121212121212121212121212121212121212121212121212121212121", None)))
+with (mock.patch.object(host, "_make_uds_client", return_value=preserve_client),
+      mock.patch.object(host, "_read_f181", side_effect=lambda *a, **k: next(preserve_reads)),
+      mock.patch.object(host, "panda_health_snapshot", return_value={"health": {}, "can_health": {}}),
+      mock.patch.object(host.time, "sleep", return_value=None)):
+    boot_route, preserve_telemetry = host._enter_programming_preserve_safety(
+        type("B", (), {"target": {"boot_f181_hex": "022121212121212121212121212121212121212121212121212121212121212121"}})(),
+        preserve_panda, PreserveUds(), reappearance_timeout=1.0,
+    )
+check("bridged boot rediscovery preserves allOutput instead of re-entering ELM327",
+      preserve_panda.safety_changes == [] and preserve_client.sessions == [2] and
+      boot_route["tx_bus"] == 1 and preserve_telemetry["rediscovery_mode"] == "same-bus-f181-preserve-safety")
+
 check("legacy target-specific implementations remain in tree",
       all((ROOT / path).is_file() for path in (
           "exploit/ephemeral_runtime/build_camry_f33_b6_inline_signer.py",

@@ -234,6 +234,17 @@ whether message-presence supervision can be kept alive by stale authenticated-lo
 traffic; it does not assume the FRC accepts the repeated SecOC freshness/MAC and is not a
 production keepalive design.
 
+The first live attempt with kit source `474222b0` is explicitly **invalid**, not a
+negative stale-replay result. The stock functional-mailbox preflight passed, but the
+shared programming helper's boot rediscovery called `rediscover_route()`, which re-applied
+ELM327 safety after the bridge thread had started. ELM327 then rejected every host-created
+CAN-FD `0x030`; the installer caught `safety_tx_blocked 0 -> 125` and failed closed. The
+corrected bridged handoff therefore never calls route rediscovery during the outage. It
+keeps allOutput ownership, sends application `10 02`, and polls exact boot F181 only on
+the already-qualified stock Toyota-B bus1 route. This preserves the diagnostic physical
+route without changing Panda safety while `0x030` replay is active. The invalid attempt
+is retained under `targets/camry-2026/raw-20260917/stale-030-bootstrap-invalid/`.
+
 **Current execution boundary:** VAR-155 proves the live native profile-2 B6 boundary and
 byte-exact local slot-4 signing. VAR-156 then deliberately installed the preserved
 native-application trailer on the modified ID11/target/100/100 application: all six samples
