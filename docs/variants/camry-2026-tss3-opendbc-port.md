@@ -267,6 +267,35 @@ recovered `ICUSCMD` access in application crypto-driver code (`0x8A26A..0x8AECC`
 recovered command-5 signing path for a fresh-`0x030` bridge. The valid negative is
 retained under `targets/camry-2026/raw-20260917/stale-030-bootstrap-valid-negative/`.
 
+The next prevention discriminator is now implemented as a separate exact-F33 kit rather
+than being squeezed into the production signer resident. Exact static recovery closes the
+native PDU0 path needed for this experiment: startup target `startup_18 = 0x666BC` calls
+`0x8ED14`, which initializes SecOC Tx and finally writes `FEBE54F4 = 0xFE01`; before
+that state, `0x8ED8E` rejects generated-COM Tx. The formerly uncarved Tx-freshness callback
+at `0x903F6..0x90429` is now reproducibly seeded/decompiled and has the exact five-argument
+ABI used by profile 0: freshness-value ID 3, full-freshness buffer + bit-capacity pointer,
+and transmitted-freshness buffer + bit-capacity pointer. Its lower worker emits the exact
+46-bit full freshness and 4-bit transmitted freshness used by `0x030`.
+
+`camry_f33_early030_discriminator_resident.S` therefore replays stock application startup
+through `startup_18`, calls `0x4C590/0x4C97A` to build PDU0, advances Toyota's own Tx
+freshness through `0x903F6`, builds `00 30 || payload[28] || full_freshness[6]`, invokes
+the field-proven synchronous selector-4 command-5 wrapper `0x89BC2`, packs
+`FV4 || MAC28`, and submits lower PDU0 through `0x901D2`. It then runs `startup_19`,
+`startup_20`, `0x701EA`, enables interrupts, and enters the unmodified stock foreground
+loop at `0x66062`. The resident is **432 bytes** in the exact 524-byte retained high-tail
+window (92 bytes headroom), the staging shell is 560/776 bytes, and the authenticated
+payload remains the stock-proven 4-KiB RAM envelope. The live host runner deliberately
+keeps the last real `0x030` replay active through boot, stops it on the first different
+bus1 `0x030` observed after FF00, immediately probes application F181 to determine whether
+the forced frame beat normal DCM readiness, then reads FRC `0x1905/0x1906` with no DTC
+clear. The mutation boundary is exactly one protected `0x030`; there is no B6 transmit,
+steering actuation, CodeFlash write, or persistent flash mutation. This is a startup-timing
+and freshness discriminator, not the production signer resident. A positive result would
+justify optimizing the one-shot into the 522-byte signer; a negative result would show
+that even one valid fresh `0x030` at the earliest recovered SecOC-ready startup point is
+insufficient to prevent the FRC ACC-unavailable latch.
+
 **Current execution boundary:** VAR-155 proves the live native profile-2 B6 boundary and
 byte-exact local slot-4 signing. VAR-156 then deliberately installed the preserved
 native-application trailer on the modified ID11/target/100/100 application: all six samples
