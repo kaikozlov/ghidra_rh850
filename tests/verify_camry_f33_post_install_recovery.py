@@ -168,13 +168,16 @@ class TestRecovery(unittest.TestCase):
             output = Path(td) / "restart.json"
             with (patch.dict(sys.modules, {"panda": types.SimpleNamespace(Panda=Factory)}),
                   patch.object(recovery, "isotp_request", side_effect=respond),
-                  patch.object(recovery.time, "sleep", return_value=None)):
+                  patch.object(recovery.time, "sleep", return_value=None) as sleep_mock):
                 result = recovery.restart_control_domains(output)
             saved = json.loads(output.read_text())
 
         self.assertEqual(phase["value"], 3)
         self.assertEqual(brake_reset_attempts["value"], 2)
-        self.assertGreater(brake_programming_poll["value"], 0)
+        self.assertEqual(brake_programming_poll["value"], 0)
+        fixed_waits = [call.args[0] for call in sleep_mock.call_args_list if call.args]
+        self.assertGreaterEqual(fixed_waits.count(recovery.RESET_APP_RETURN_INITIAL_WAIT_SECONDS), 3)
+        self.assertGreaterEqual(fixed_waits.count(recovery.DOMAIN_SETTLE_SECONDS), 3)
         self.assertEqual(result["verdict"], "control_domains_restarted_drcc_permission_restored")
         self.assertTrue(result["drcc_permission_observed"])
         self.assertFalse(result["frc_prereset"]["security_access_used"])

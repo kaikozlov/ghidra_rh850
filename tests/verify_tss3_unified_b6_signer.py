@@ -406,8 +406,8 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
           'PYTHONPATH="$KIT_ROOT/runtime:$OPENPILOT_ROOT"' in launcher and
           "camry_f33_post_install_recovery.py" in launcher and "require_camry_recovery" in launcher and
           all(cmd in launcher for cmd in ("preflight", "install", "install-stale-030-bridge", "qualify", "bringup",
-                                           "bringup-stale-030-bridge", "restart-control-domains", "recover-drcc",
-                                           "replace-current", "replace-once")) and
+                                           "bringup-stale-030-bridge", "restart-brake", "restart-frc", "recovery-state",
+                                           "restart-control-domains", "recover-drcc", "replace-current", "replace-once")) and
           "FRC DRCC permission did not survive bridged bootstrap; STOP before READY qualification" in launcher)
 
     field_bundle = host.load_bundle(kit / "bundle/unified.json")
@@ -440,11 +440,15 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
     camry_field_meta = json.loads((camry_kit / "bundle/unified.json").read_text(encoding="utf-8"))
     camry_field_bundle = host.load_bundle(camry_kit / "bundle/unified.json")
     camry_launcher = (camry_kit / "tss3-unified-signer").read_text(encoding="utf-8")
-    check("Camry guided bringup qualifies EPS first, then runs FRC -> Brake -> FRC recovery, then rechecks resident",
-          camry_launcher.index('run_tool qualify --execute --output "$out_dir/qualify.json"') <
-          camry_launcher.index('restart-control-domains --execute --ready-parked-confirmed') <
-          camry_launcher.index('post-recovery-status.json') and
-          'Brake/EPB -> FRC' in camry_launcher and 'is_camry_target' in camry_launcher)
+    bringup_block = camry_launcher.split("  bringup)\n", 1)[1].split("  bringup-stale-030-bridge)", 1)[0]
+    check("Camry guided bringup is operator-paced EPS -> Brake -> FRC with Panda released between stages",
+          bringup_block.index('run_tool qualify --execute --output "$out_dir/qualify.json"') <
+          bringup_block.index('restart-domain --domain brake') <
+          bringup_block.index('restart-domain --domain frc') <
+          bringup_block.index('state --output "$out_dir/control-domain-state.json"') <
+          bringup_block.index('post-recovery-status.json') and
+          bringup_block.count('release_panda_owner') >= 4 and
+          'wait as long as you want' in bringup_block and 'No peer reset will happen until you explicitly continue' in bringup_block)
     camry_plan = host.plan(camry_field_bundle)
     check("Camry field kit uses post-auth raw-COM ownership with no command5 runtime dependency",
           camry_kit_meta["target"]["name"] == "camry-8965F3307000" and

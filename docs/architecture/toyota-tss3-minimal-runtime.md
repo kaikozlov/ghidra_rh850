@@ -274,14 +274,16 @@ uv run --locked python tools/targets/tss3/builders/build_tss3_unified_b6_signer_
 
 `bringup` retains the individual fail-closed gates: stock functional-mailbox
 preflight, exact-F181 NRTD install, then READY runtime qualification. On exact
-Camry, it now continues with the live-proven same-ignition dependency recovery:
-Brake/EPB `0x7B0` enters programming session and hard-resets first, its exact
-`F152633K0000` application identity must return, then FRC `0x792` does the same
-and exact `8646F3315000` must return. Final FRC `0x1903/0x1905/0x1906` must show
-distance-control mode, Cruise Control Permission allowed, and ACC-not-available
-clear. No SecurityAccess, EPS reset, or EPS power cycle is used, and the launcher
-re-reads resident status after the two peer resets. Non-Camry targets skip this
-Camry-specific lifecycle step. `replace-current` is the first mutation test: it requires READY plus stationary
+Camry, peer recovery is deliberately **operator paced** rather than chained:
+`bringup` returns Panda ownership after EPS qualification and waits for the operator
+before restarting Brake/EPB only; after exact `F152633K0000` returns it releases
+Panda again and waits before restarting FRC only; after exact `8646F3315000`
+returns it releases Panda again and waits before final DRCC-state verification.
+The operator can wait arbitrarily long between stages. No DTC clear, SecurityAccess,
+EPS reset, or EPS power cycle is part of this guided recovery. Final FRC
+`0x1903/0x1905/0x1906` must show distance-control mode, Cruise Control Permission
+allowed, and ACC-not-available clear before the guided command succeeds.
+Non-Camry targets skip this lifecycle step. `replace-current` is the first mutation test: it requires READY plus stationary
 `0x0AA`, derives the current measured angle from `0x025`, converts that angle to
 the common B6 target domain, sends one fresh C7 generation, observes a signed
 replacement, then sends sequence zero to release. On Corolla the guard also
@@ -359,15 +361,19 @@ implementation and evidence boundaries are corrected:
 The September-10 steering samples used conventional cruise, but that boundary is
 now superseded by the September-18 exact-car recovery and road qualification.
 DTC clear alone still does **not** recover DRCC after the EPS programming
-transition. The live-proven recovery is stateful and dependency ordered:
-FRC `10 02 -> 11 01` first, then Brake/EPB `10 02 -> 11 01`, then FRC `10 02 -> 11 01` again, with the EPS kept
-powered. Resetting FRC alone does not recover; resetting Brake alone clears the
-upstream PCS invalid state but leaves the FRC DRCC/LDA latch. The subsequent
-route `0000010c--506d7277c7` demonstrates 919.572 s / 19.772 km of stock adaptive
-cruise overlapping openpilot lateral with factory lateral request/result IDs at
-0 and openpilot `longActive` false. The historical `recover-drcc` command remains
-for diagnostic/DTC evidence; `restart-control-domains` is the maintained
-same-ignition recovery and normal Camry `bringup` invokes it automatically.
+transition. The first successful recovery session's chronology was FRC reset,
+then Brake/EPB reset, then FRC reset again; that chronology proves the relevant
+state is volatile and dependency-sensitive, but it did not isolate the minimum
+reset set because the initial FRC probe was part of the same session. A later
+operator-paced field run reached the same final healthy FRC state after Brake and
+then FRC were restarted with long quiet intervals. The maintained launcher therefore
+stops trying to infer a fixed automatic cadence: it exposes/operator-prompts the
+Brake and FRC stages separately, releases Panda after each, and lets the operator
+decide when the network has settled before continuing. The subsequent route
+`0000010c--506d7277c7` demonstrates 919.572 s / 19.772 km of stock adaptive cruise
+overlapping openpilot lateral with factory lateral request/result IDs at 0 and
+openpilot `longActive` false. The historical `recover-drcc` command remains for
+DTC evidence only.
 
 Current status and reproducible validation are centralized in the
 [capability matrix](../variants/camry-2026-capability-matrix.md) and
