@@ -1,0 +1,5 @@
+{
+  "error": "ProbeError: no non-replay native 0x030 observed after early030 payload trigger",
+  "schema": "camry-f33-early030-bootstrap-probe-failure-v1",
+  "success": false
+}

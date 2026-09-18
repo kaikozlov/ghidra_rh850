@@ -360,14 +360,35 @@ The completion path is now closed statically rather than worked around. Exact re
 `FEBF13BC=1`. After hardware submit, the stock periodic crypto service `0x88700` invokes
 the callback pointer at `FEBF1194`; for this command that pointer is `0x88D04`, whose path
 services ICU-S status through `0x8AF10`, copies the result, and propagates completion to
-record 0. The current resident therefore handles only wrapper RC `2` by keeping its stack
-and output buffers alive and calling **stock service `0x88700`** with Toyota's own `0x9C4`
+record 0. The resident therefore handles only wrapper RC `2` by keeping its stack and
+output buffers alive and calling **stock service `0x88700`** with Toyota's own `0x9C4`
 poll bound until the real `FEBF13BC` bit becomes set. It then consumes real `FEBF13BD`
 status and proceeds only on zero. It never synthesizes done/status and does not enable
-interrupts early. The telemetry read now enters EXTENDED only after stale replay has already
+interrupts early. The telemetry read enters EXTENDED only after stale replay has already
 stopped, so diagnostic session choice cannot affect the startup timing under test. The
 salvaged timeout attempt is retained under
 `targets/camry-2026/raw-20260917/early030-pre-ei-command5-timeout/`.
+
+The first completion-pump build (`5896547a`) is also **invalid due to a self-attestation
+layout bug**, not an ECU-side negative. Its resident was 520 bytes at `FEBFF9F0`, so the
+executable body occupied `FEBFF9F0..FEBFFBF7`, but its eight-byte telemetry slot began at
+`FEBFFBF4`. Exact linked disassembly shows `FEBFFBF4` is the final
+`dispose 20,{r20-r21,lp},lp` return instruction. The resident wrote telemetry there before
+returning and therefore self-modified its own exit path. The host saw no changed `0x030`
+within its two-second window. A same-cycle read-only salvage later found exact application
+F181 and a healthy FRC (`1905=8080`, `1906=e080e0008000`), but that outcome cannot be
+attributed to the intended one-shot because control flow was corrupted. The invalid run is
+retained under `targets/camry-2026/raw-20260917/early030-self-overlap-invalid/`.
+
+The corrected resident removes per-stage RC telemetry and is **488/524 bytes**, leaving 36
+bytes of real executable headroom. Self-attestation is reduced to the exact four-byte
+forced `FV4||MAC28` trailer and moved to `FEBFFBF8..FEBFFBFB`, wholly outside executable
+bytes but still inside the proven retained high-tail window. The builder/test now assert
+`resident_end <= telemetry_start` and `telemetry_end <= retained_limit`; the host proves the
+one-shot only when that nonzero retained trailer equals the first changed bus1 `0x030`
+trailer byte-for-byte. If no changed frame appears, the run no longer throws away the
+remaining application/FRC/telemetry evidence; it stops stale replay at the bounded timeout,
+collects the rest, and marks the one-shot unproven.
 
 **Current execution boundary:** VAR-155 proves the live native profile-2 B6 boundary and
 byte-exact local slot-4 signing. VAR-156 then deliberately installed the preserved

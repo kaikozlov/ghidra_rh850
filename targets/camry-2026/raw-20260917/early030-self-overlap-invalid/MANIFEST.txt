@@ -1,0 +1,43 @@
+2026-09-17 exact-Camry early-fresh-0x030 startup discriminator
+INVALID: SELF-ATTESTATION OVERLAPPED RESIDENT RETURN INSTRUCTION
+
+Vehicle: maintainer 2026 Toyota Camry Hybrid
+EPS: 8965F3307000 / 8A3113303100
+Kit source commit: 5896547add6c49cd3b81d85c998360c28dcd3876
+Mode: fresh ignition cycle, NRTD/READY=0, Park
+
+Host result:
+  ProbeError: no non-replay native 0x030 observed after early030 payload trigger
+
+Root cause:
+  resident base      = FEBFF9F0
+  resident size      = 520 (0x208)
+  resident end       = FEBFFBF7
+  telemetry address  = FEBFFBF4 / 8
+
+Thus telemetry bytes FEBFFBF4..FEBFFBF7 overlapped the resident's final four executable
+bytes. Exact disassembly shows FEBFFBF4 contains the function return:
+
+  FEBFFBF4: dispose 20, {r20-r21,lp}, lp
+
+The resident wrote telemetry at FEBFFBF4 before returning, self-modifying that instruction.
+The run therefore does not test the intended command5-completion-pump or early-0x030 path.
+
+Same-cycle read-only salvage after the host returned:
+  EPS F181 = exact 8965F3307000 / 8A3113303100
+  overlapping telemetry raw = 0000000000000000   (not authoritative)
+  FRC 1903 = 01
+  FRC 1905 = 8080
+  FRC 1906 = e080e0008000
+
+The healthy FRC state is noteworthy but cannot be attributed to the intended one-shot
+because the resident return path was corrupted. It is retained only as an observation from
+an invalid run.
+
+Corrective design:
+- shrink resident by removing RC telemetry stores;
+- resident becomes 488/524 bytes;
+- self-attestation becomes only the exact forced FV4||MAC28 trailer (4 bytes);
+- attestation moves to FEBFFBF8..FEBFFBFB, wholly after resident end;
+- builder/test assert resident_end <= telemetry_start and telemetry_end <= retained_limit;
+- host preserves application/FRC/telemetry evidence even if no non-replay 0x030 is seen.
