@@ -132,10 +132,14 @@ returned `8646F3315000`. Before the reset attempt, `0x1903=01` reported DRCC all
 mode, `0x1905=8000` had Cruise Control Permission denied, and
 `0x1906=e080e0008080` had the ACC-not-available indication asserted. Physical
 `11 01` returned **`7F 11 7F`** and F181 remained continuously responsive, with all
-three state DIDs unchanged afterward. NRC `0x7F` is `serviceNotSupportedInActiveSession`,
-so this disproves a default-session hard reset but does **not** disprove ECUReset in an
-extended/programming session. An extended-session `10 03 -> 11 01` discriminator is
-therefore a cleaner next software test before adding hardware.
+three state DIDs unchanged afterward. A follow-up same-car probe then entered extended
+session successfully (`10 03 -> 50 03 00 32 01 F4`) and immediately retried `11 01`.
+The FRC again returned **`7F 11 7F`**. F181 answered every 100 ms across the following
+2 s with no gap or identity change, and `0x1903/0x1905/0x1906` remained
+`01 / 8000 / e080e0008080`. Thus ECUReset type `0x01` is unavailable in both tested
+default and extended application sessions on this exact FRC; no hidden reset occurred.
+Programming-session behavior remains a separate, untested question and should not be
+assumed from this result.
 
 The stock comma harness cannot power-cycle the FRC. Panda's production `drive_relay`
 controls the harness-box solid-state CAN0/CAN2 intercept pair only. The second
