@@ -441,14 +441,18 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
     camry_field_bundle = host.load_bundle(camry_kit / "bundle/unified.json")
     camry_launcher = (camry_kit / "tss3-unified-signer").read_text(encoding="utf-8")
     bringup_block = camry_launcher.split("  bringup)\n", 1)[1].split("  bringup-stale-030-bridge)", 1)[0]
-    check("Camry guided bringup is operator-paced EPS -> Brake -> FRC with Panda released between stages",
+    check("Camry guided bringup is operator-paced EPS -> Brake -> FRC under one Panda lease",
+          bringup_block.index('quiesce_panda_owner') <
+          bringup_block.index('run_tool preflight --output "$out_dir/preflight.json"') <
           bringup_block.index('run_tool qualify --execute --output "$out_dir/qualify.json"') <
           bringup_block.index('restart-domain --domain brake') <
           bringup_block.index('restart-domain --domain frc') <
           bringup_block.index('state --output "$out_dir/control-domain-state.json"') <
           bringup_block.index('post-recovery-status.json') and
-          bringup_block.count('release_panda_owner') >= 4 and
-          'wait as long as you want' in bringup_block and 'No peer reset will happen until you explicitly continue' in bringup_block)
+          bringup_block.count('quiesce_panda_owner') == 1 and
+          'release_panda_owner' not in bringup_block and
+          'Panda lease remains held' in bringup_block and
+          'wait as long as you want' in bringup_block and 'no peer reset will happen until you explicitly continue' in bringup_block)
     camry_plan = host.plan(camry_field_bundle)
     check("Camry field kit uses post-auth raw-COM ownership with no command5 runtime dependency",
           camry_kit_meta["target"]["name"] == "camry-8965F3307000" and
