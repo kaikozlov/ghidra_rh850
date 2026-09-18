@@ -6941,3 +6941,35 @@ was designed to remove. Native B6 authentication remains Toyota-owned, while C7
 owns only the authenticated route44 application copy. `0x08A` remains the desired
 longer-term upstream request-plane architecture once clean source ownership is
 available, but is no longer required to obtain continuous Camry lateral control.
+
+### 73.4 Pre-fix stock-LTA-off drive supports the native-target leakage model
+
+The user identifies preceding route `000000ec--7407849e1a` as the drive where
+stock LTA was disabled from the vehicle control. Raw route analysis does not yet
+independently identify the button-state bit, so that attribution remains
+user-provided, but the behavioral difference is measurable.
+
+At the same ~100-Hz functional-C7 architecture and before the post-auth fix, route
+`ec` accumulated **11 B16 command-inhibit rises over ~453.49 s active lateral**,
+versus **11 over ~146.88 s** on earlier route `e9`: roughly a threefold lower
+fault rate. The native request/openpilot target relationship is also much quieter:
+
+- `e9`: median `|C7 - 0x08A B18:B19|` 14 raw, p90 76, p99 250; **9.7%** of matched
+  active pairs exceed the F33 78-raw step allowance;
+- `ec`: median 3 raw, p90 14, p99 128; only **2.7%** exceed 78 raw;
+- post-auth `ee`: median 4 raw, p90 11, p99 32; **0.1%** exceed 78 raw and there
+  are **zero** B16 events.
+
+Every one of the 11 moving B16 rises on both `e9` and `ec` occurs with the nearest
+native `0x08A` target more than 78 raw away from the current C7 target. This is
+strong dynamic support for the pre-fix failure model: an occasional untouched
+native B6 application target could jump across the ID11 step-plausibility limit.
+Disabling stock LTA appears to have reduced how often the native request plane was
+far from openpilot, so leakage was less likely to trip the fault, but leakage
+still occurred.
+
+The post-auth route is the stronger causal discriminator. Even when its C7 and
+native `0x08A` targets occasionally differ by more than 78 raw, F33 no longer
+asserts B16 because the native request-plane target is never allowed to become
+the cooperative application target while C7 owns lateral. That is the root-cause
+fix; the LTA-off behavior was only a reduction in exposure.

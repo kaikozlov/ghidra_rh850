@@ -1,0 +1,57 @@
+{
+  "fault_event_join": {
+    "e9": "all 11 moving B16 rises have |C7-0x08A target| > 78 raw at the nearest preceding native 0x08A sample",
+    "ec": "all 11 moving B16 rises have |C7-0x08A target| > 78 raw at the nearest preceding native 0x08A sample"
+  },
+  "interpretation": [
+    "The EC drive has a substantially quieter native-request/openpilot target relationship and a roughly threefold lower B16 event rate per active-lateral second than E9.",
+    "This is consistent with disabling stock LTA reducing the chance that a leaked native target differs enough from openpilot to cross F33 ID11 step plausibility, but the route alone does not prove the causal button-state signal.",
+    "EE demonstrates the actual root fix: post-auth route44 ownership produces zero B16 events even though some C7-vs-0x08A pairs still exceed 78 raw, because native request-plane disagreement no longer enters the F33 application target path."
+  ],
+  "routes": {
+    "e9_pre_fix": {
+      "active_lateral_s_approx": 146.88,
+      "b16_rises": 11,
+      "c7_vs_08a_abs_raw": {
+        "gt78_count": 1425,
+        "gt78_fraction": 0.0971,
+        "max": 374,
+        "median": 14.0,
+        "p90": 76,
+        "p99": 250,
+        "pairs": 14678
+      },
+      "route": "000000e9--deaaad5774"
+    },
+    "ec_user_reports_stock_lta_off": {
+      "active_lateral_s_approx": 453.49,
+      "b16_rises": 11,
+      "c7_vs_08a_abs_raw": {
+        "gt78_count": 1238,
+        "gt78_fraction": 0.0273,
+        "max": 386,
+        "median": 3.0,
+        "p90": 14,
+        "p99": 128,
+        "pairs": 45345
+      },
+      "note": "User reports this was the drive with stock LTA disabled from the steering-wheel/button control; raw route analysis does not independently identify the button-state bit here.",
+      "route": "000000ec--7407849e1a"
+    },
+    "ee_postauth": {
+      "active_lateral_s_approx": 574.37,
+      "b16_rises": 0,
+      "c7_vs_08a_abs_raw": {
+        "gt78_count": 32,
+        "gt78_fraction": 0.00056,
+        "max": 108,
+        "median": 4.0,
+        "p90": 11,
+        "p99": 32,
+        "pairs": 57434
+      },
+      "route": "000000ee--65bdece411"
+    }
+  },
+  "schema": "camry-f33-lta-off-pre-postauth-comparison-v1"
+}
