@@ -19,7 +19,10 @@ def check(name,cond,detail=''):
   failed+=1; print('[FAIL]',name,detail)
 s=SRC.read_text()
 check('exact insertion is startup18 -> early030 -> startup19', s.index('jarl32 startup_18, lp') < s.index('jarl32 early_030_once, lp') < s.index('jarl32 startup_19, lp'))
-check('one-shot uses recovered native primitives', all(x in s for x in ('jarl32 tx_freshness, lp','jarl32 command5_sync, lp','jarl32 lower_pdu_tx, lp','mov 0x3000, r1')))
+check('one-shot uses recovered native primitives', all(x in s for x in ('jarl32 tx_freshness, lp','jarl32 command5_sync, lp','jarl32 command5_service, lp','jarl32 lower_pdu_tx, lp','mov 0x3000, r1')))
+check('pre-EI command5 timeout is serviced only through stock callback dispatcher',
+      all(x in s for x in ('addi -2, r10, r0','movea 0x9c4, r0, r20','tst1 0, 0x5bbc[gp]','ld.bu 0x5bbd[gp], r10')) and
+      'jarl32 command5_service, lp' in s and 'ei\n    jarl32 stock_foreground' in s)
 check('one-shot returns to stock startup/foreground', 'jarl32 app_startup_final_init, lp' in s and 'jarl32 stock_foreground, lp' in s)
 check('no B6 steering path in discriminator', '0x0b6' not in s.lower())
 h=HOST.read_text()
@@ -29,18 +32,21 @@ check('main SPI receive path yields between polls', 'SPI_RECV_YIELD_SECONDS = 0.
 check('host stops stale replay before post-frame F181', h.index('bridge_result=bridge.stop()') < h.index('application_f181_immediately_after'))
 check('host classifies first non-replay 0x030 after trigger', '_poll_first_changed_030' in h and 'ms_after_trigger_send' in h)
 check('host attests forced trailer against first non-replay frame', 'one_shot_proven_on_wire' in h and 'trailer_matches_first_non_replay' in h and 'EARLY030_TELEMETRY_ADDR = 0xFEBFFBF4' in h)
+check('telemetry RMBA explicitly enters extended session after replay stops',
+      'app_client.diagnostic_session_control(uds_mod.SESSION_TYPE.EXTENDED_DIAGNOSTIC)' in h and
+      h.index('bridge_result=bridge.stop()') < h.index('app_client.diagnostic_session_control(uds_mod.SESSION_TYPE.EXTENDED_DIAGNOSTIC)'))
 check('invalid cadence/unproven one-shot preserves partial evidence', 'invalid_or_unproven_early_030' in h and 'validity_errors' in h)
 check('Ghidra seed pins 0x903F6 callback body', '0x000903F6L' in SEED.read_text() and '0x00090429L' in SEED.read_text())
 with tempfile.TemporaryDirectory(prefix='early030-test-') as td:
  p=subprocess.run([sys.executable,str(BUILDER),'--output-dir',td],cwd=ROOT,check=True,capture_output=True,text=True)
  m=json.loads(p.stdout)
  rb=(Path(td)/m['resident']['path']).read_bytes(); payload=(Path(td)/m['authenticated_payload']['path']).read_bytes()
- check('resident fits retained high tail with headroom', len(rb)==m['resident']['size']==474 and m['resident']['headroom']==50)
+ check('resident fits retained high tail with headroom', len(rb)==m['resident']['size']==520 and m['resident']['headroom']==4)
  check('authenticated payload exact 4KiB', len(payload)==0x1000)
  ins=inspect_payload(payload,secret=TOYOTA_P1ME_PAYLOAD_BUILD_SECRET)
  check('authenticated payload CRC/CMAC/callback valid', ins.crc_residue==0xffffffff and ins.cmac_valid and ins.callback_address==0xFEBF0000)
  e=m['early_030']
- check('exact early030 contract', e['freshness_callback']=='0x000903F6' and e['freshness_id']==3 and e['selector']==4 and e['lower_pdu_id']==0 and e['wire_can_id']=='0x030')
+ check('exact early030 contract', e['freshness_callback']=='0x000903F6' and e['freshness_id']==3 and e['selector']==4 and e['lower_pdu_id']==0 and e['wire_can_id']=='0x030' and e['command5_pre_ei_completion_service']=='0x00088700' and e['command5_done_flag']=='0xFEBF13BC' and e['command5_status_flag']=='0xFEBF13BD')
  mut=m['mutation_boundary']
  check('mutation boundary is one 0x030, no steering/flash', mut['can_transmit']==['one protected 0x030 before stock foreground'] and not mut['b6_transmit'] and not mut['steering_actuation'] and not mut['codeflash_write'])
 print(f'\nSummary: {passed} passed, {failed} failed')

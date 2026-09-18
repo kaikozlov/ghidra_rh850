@@ -283,9 +283,11 @@ freshness through `0x903F6`, builds `00 30 || payload[28] || full_freshness[6]`,
 the field-proven synchronous selector-4 command-5 wrapper `0x89BC2`, packs
 `FV4 || MAC28`, and submits lower PDU0 through `0x901D2`. It then runs `startup_19`,
 `startup_20`, `0x701EA`, enables interrupts, and enters the unmodified stock foreground
-loop at `0x66062`. The resident is **432 bytes** in the exact 524-byte retained high-tail
-window (92 bytes headroom), the staging shell is 560/776 bytes, and the authenticated
-payload remains the stock-proven 4-KiB RAM envelope. The live host runner deliberately
+loop at `0x66062`. The original resident was 432 bytes in the exact 524-byte retained
+high-tail window; the current self-attesting/pre-EI-completion-pump resident is **520/524
+bytes** with zero relocations. The staging shell remains inside the 776-byte authenticated
+low-stage bound, and the authenticated payload remains the stock-proven 4-KiB RAM envelope.
+The live host runner deliberately
 keeps the last real `0x030` replay active through boot, stops it on the first different
 bus1 `0x030` observed after FF00, immediately probes application F181 to determine whether
 the forced frame beat normal DCM readiness, then reads FRC `0x1905/0x1906` with no DTC
@@ -340,6 +342,32 @@ now stops stale replay immediately on the first changed bus1 `0x030`, before any
 then RMBA-reads that telemetry and requires the forced trailer to equal the first observed
 wire trailer. Only that byte-exact match plus three zero return codes qualifies the
 `early_fresh_030` hypothesis as actually exercised.
+
+The first self-attesting `ce8f3b83` attempt closed another missing startup dependency rather
+than testing the FRC hypothesis. The host initially failed only because it attempted the
+post-startup telemetry SID23 read from default session; the same ignition cycle was salvaged
+by rebinding exact application F181, entering EXTENDED, and reading `FEBFFBF4/8` directly.
+The retained bytes were exactly `0002ff4000000000`: Tx freshness callback RC `0`,
+command-5 wrapper RC `2`, lower-PDU Tx RC `0xFF` (never reached), transmitted-FV byte
+`0x40`, and no forced trailer. FRC was already `1905=8000`, `1906=e080e0008080`. Thus
+`0x903F6` is usable at the `startup_18` boundary, but the explicit one-shot did **not**
+transmit: `0x89BC2` submitted the record-0 command-5 job and exhausted its synchronous
+`0xE07` done-flag polling window while global interrupts were still disabled.
+
+The completion path is now closed statically rather than worked around. Exact record 0 at
+`0x27DA4` binds adapter `0x88DBC`, async worker `0x88EC0`, and completion callback
+`0x89C4C`; `0x89C4C` writes status to `FEBF13BD` and then sets the real done flag
+`FEBF13BC=1`. After hardware submit, the stock periodic crypto service `0x88700` invokes
+the callback pointer at `FEBF1194`; for this command that pointer is `0x88D04`, whose path
+services ICU-S status through `0x8AF10`, copies the result, and propagates completion to
+record 0. The current resident therefore handles only wrapper RC `2` by keeping its stack
+and output buffers alive and calling **stock service `0x88700`** with Toyota's own `0x9C4`
+poll bound until the real `FEBF13BC` bit becomes set. It then consumes real `FEBF13BD`
+status and proceeds only on zero. It never synthesizes done/status and does not enable
+interrupts early. The telemetry read now enters EXTENDED only after stale replay has already
+stopped, so diagnostic session choice cannot affect the startup timing under test. The
+salvaged timeout attempt is retained under
+`targets/camry-2026/raw-20260917/early030-pre-ei-command5-timeout/`.
 
 **Current execution boundary:** VAR-155 proves the live native profile-2 B6 boundary and
 byte-exact local slot-4 signing. VAR-156 then deliberately installed the preserved

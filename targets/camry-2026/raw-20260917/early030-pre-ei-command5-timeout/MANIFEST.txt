@@ -1,0 +1,48 @@
+2026-09-17 exact-Camry early-fresh-0x030 startup discriminator
+PRE-EI COMMAND-5 COMPLETION TIMEOUT (ONE-SHOT DID NOT TRANSMIT)
+
+Vehicle: maintainer 2026 Toyota Camry Hybrid
+EPS: 8965F3307000 / 8A3113303100
+Kit source commit: ce8f3b8352e2ecf671207145d867ba4e72c5603c
+Mode: fresh ignition cycle, NRTD/READY=0, Park
+Command: ./camry-f33-early030 probe /tmp/camry-f33-early030-run3.json
+
+The host run itself terminated only when its post-startup telemetry RMBA was attempted in
+default diagnostic session and exact F33 returned service-not-supported-in-active-session.
+The same ignition cycle was then salvaged live by reacquiring Panda, binding exact EPS F181,
+entering EXTENDED, reading FEBFFBF4/8, and reading FRC 1903/1905/1906.
+
+Salvaged exact telemetry:
+  FEBFFBF4/8 raw = 0002ff4000000000
+  freshness_rc   = 0
+  command5_rc    = 2
+  lower_tx_rc    = 0xFF (stage never reached)
+  fv4_byte       = 0x40
+  forced_trailer = 00000000
+
+Salvaged FRC state:
+  1903 = 01
+  1905 = 8000
+  1906 = e080e0008080
+
+Interpretation:
+- Toyota Tx freshness callback 0x903F6 succeeds at the startup_18 boundary.
+- The early resident reaches the serialized command-5 wrapper 0x89BC2.
+- 0x89BC2 returns 2 and the lower PDU transmit is never reached; therefore no explicit
+  early fresh 0x030 was emitted by this resident.
+- At this pre-EI point the wrapper's record-0 completion flag FEBF13BC remains unset.
+  The wrapper submits through 0x89440/record0 but then tight-polls done for 0xE07 iterations;
+  with global interrupts still disabled the ordinary crypto completion service does not run.
+- Record0 at 0x27DA4 binds completion callback 0x89C4C, adapter 0x88DBC, async worker
+  0x88EC0. 0x89C4C writes status to FEBF13BD then done=1 to FEBF13BC.
+- The stock crypto periodic service 0x88700 invokes the registered callback pointer at
+  FEBF1194. After command-5 submit that pointer is 0x88D04, whose path services ICU-S
+  status through 0x8AF10 and propagates completion to the record callback.
+
+Follow-up implementation:
+- if 0x89BC2 returns 2 at this exact pre-EI point, retain the live stack/output buffers and
+  call stock service 0x88700 with the same 0x9C4 poll bound used by Toyota ICU helpers;
+- watch the real FEBF13BC done flag and consume real FEBF13BD status; never synthesize them;
+- only continue to trailer/lower-PDU transmit on status 0;
+- keep global interrupts disabled until normal stock final startup;
+- telemetry RMBA is moved to EXTENDED session after stale replay has already stopped.
