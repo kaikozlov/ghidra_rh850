@@ -185,12 +185,36 @@ def main() -> int:
     assert fast["effective_cf_gap_ms"] == 0.0
     assert fast["stmin_override_used"] is True and fast["stmin_violated"] is True
 
+    print("== fast benchmark contract ==")
+    class FakeSession:
+        def __init__(self):
+            self.state = {"last_seq": 7}
+            self.calls = []
+        def read_state(self):
+            return dict(self.state)
+        def sign(self, domain, *, seq, cf_gap_ms=None):
+            self.calls.append((domain, seq, cf_gap_ms))
+            self.state["last_seq"] = seq
+            return {
+                "seq": seq, "status": 0, "mac28_hex": oracle.KNOWN_MAC28,
+                "request_start_to_response_ms": 19.0,
+                "final_cf_to_response_ms": 4.0,
+            }
+    fs = FakeSession()
+    bench = oracle.benchmark(fs, count=3, period_ms=25.0, cf_gap_ms=0.0)  # type: ignore[arg-type]
+    assert bench["success_count"] == 3 and bench["within_25ms_all_successes"] is True
+    assert bench["cf_gap_ms"] == 0.0 and bench["stmin_override_used"] is True
+    assert [x[1:] for x in fs.calls] == [(8, 0.0), (9, 0.0), (10, 0.0)]
+    assert all("scheduled_start_lateness_ms" in row for row in bench["rows"])
+
     print("== launcher contract ==")
     launcher = (ROOT / "exploit/ephemeral_runtime/camry_f33_08a_oracle_stream_launcher.sh").read_text()
     assert oracle.EXPECTED_PAYLOAD_SHA256 in launcher
     assert "./f33-08a-oracle known-answer [OUTPUT_JSON]" in launcher
     assert "./f33-08a-oracle transport-probe CF_GAP_MS [OUTPUT_JSON]" in launcher
     assert "./f33-08a-oracle benchmark [COUNT] [OUTPUT_JSON]" in launcher
+    assert "./f33-08a-oracle benchmark-fast [COUNT] [OUTPUT_JSON]" in launcher
+    assert 'benchmark-fast --count "$count" --period-ms 25 --cf-gap-ms 0' in launcher
     assert "--period-ms 25" in launcher
     plan = oracle.plan(None)
     assert plan["transport"]["target_period_ms"] == 25

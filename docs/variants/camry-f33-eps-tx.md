@@ -456,7 +456,11 @@ Frames produced ~244.5 ms request-start→response, whereas final-CF→signed re
 was ~27 ms. Exact F33's dedicated `0x1FDC0002` ingress is not a CAN-FD escape:
 `0x830D0` rejects lengths greater than 8 before copying to `FEBE4C34`.
 
-The next discriminator is therefore host-only: one identical known-answer request
-with CF spacing overridden below advertised STmin, beginning at 0 ms. It remains
-non-actuating and requires no resident reinstall. Only if F33 CanTp accepts the
-faster burst should cadence benchmarking continue.
+The host-only 0-ms CF-spacing probe then succeeded byte-for-byte. F33 still
+advertised 40-ms STmin, but accepted the five CFs with no host delay and returned
+the same MAC28 `d64e2a5`. Full request-start→response fell to **19.071 ms** and
+final-CF→signed reply to **3.957 ms**; resident request/success/response counters
+advanced coherently from 1/1/1 to 2/2/2. Thus the complete non-actuating oracle
+transaction fits within the observed ~25-ms native `0x08A` period on this sample.
+The next gate is a sustained 20-request / 25-ms schedule using the same 0-ms CF
+gap, with per-transaction RTT and scheduler lateness recorded.
