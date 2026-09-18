@@ -402,6 +402,32 @@ Exact route-segment hashes, deployed source hashes,
 command format, and operational caveats are in
 `raw-20260910/working-steering/summary.json`.
 
+## Current request-plane steering setup (2026-09-18)
+
+The September-10 direct-B6 configuration above is retained as the first steering proof,
+but it is no longer the integration path. Current F33 openpilot uses the relay-correct
+`0x08A` request plane: FRC-native `0x08A` arrives on Panda bus2, chassis/Brake state and
+`0x081` live on bus0, and EPS diagnostics plus the CMAC oracle remain on bus1.
+
+The volatile EPS setup is now only:
+
+```bash
+# full EPS OFF first; then NRTD / Park / stationary
+./f33-08a-oracle doctor
+./f33-08a-oracle install
+# transition directly NRTD -> READY without OFF
+```
+
+The installed resident is the audited generic DataID-`0x008A` command-5 oracle. It does
+not transmit `0x08A` or B6 and contains no ID11 policy. openpilot observes each native
+FRC request generation; non-ID11 requests are copied exactly, while native ID11 with
+`CC.latActive` changes only B18:B19 and obtains a replacement MAC28 from the resident.
+Panda enforces native-generation matching and ordinary steering limits.
+
+Do **not** run `f33-secoc load-arm` or the persistent B6 signer for this configuration.
+Those tools are historical/direct-B6 development paths and would create a second lateral
+command architecture. Full EPS power-off removes the `0x08A` oracle resident.
+
 ## Direct-B6 ingress discriminator (2026-09-10)
 
 The original 498-byte full-runtime observer failed before initialization and produced no

@@ -18,6 +18,7 @@ from exploit.common.ram_exec import (
     TOYOTA_P1ME_BOOT_SECURITY_ACCESS_SECRET,
     TOYOTA_P1ME_PAYLOAD_BUILD_SECRET,
 )
+from exploit.ephemeral_runtime import camry_f33_08a_oracle_stream as eps08a_oracle
 from exploit.ephemeral_runtime import camry_f33_08a_tx_probe as eps08a_probe
 from exploit.ephemeral_runtime import camry_f33_b6_bridge_install as bridge_install
 from exploit.ephemeral_runtime import (
@@ -54,6 +55,7 @@ PREAGG_FIELD_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_field_preagg
 MIDAGG_FIELD_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_field_midaggregate_launcher.sh"
 COMMAND5_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_command5_launcher.sh"
 EPS08A_TX_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_08a_tx_probe_launcher.sh"
+EPS08A_ORACLE_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_08a_oracle_stream_launcher.sh"
 INLINE_SIGNER_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_b6_inline_signer_launcher.sh"
 ICUS_RAMKEY_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_icus_ramkey_probe_launcher.sh"
 PERSISTENT_SIGNER_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_persistent_signer_launcher.sh"
@@ -68,6 +70,8 @@ MIDAGG_OBSERVER_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_mid
 COMMAND5_PROBE_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_command5_probe.bin"
 EPS08A_TX_PROBE_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_08a_tx_probe.bin"
 EPS08A_TX_PROBE_META = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_08a_tx_probe_build.json"
+EPS08A_ORACLE_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_08a_oracle_stream.bin"
+EPS08A_ORACLE_META = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_08a_oracle_stream_build.json"
 # Supervised continuous substitution preserves the road helper's steady-state
 # behavior, but stops after seven foreground ticks without a changed host
 # generation. Its new identity has instruction-level, not vehicle, validation.
@@ -98,6 +102,7 @@ RUNTIME_FILES = [
     "exploit/ephemeral_runtime/camry_f33_b6_ingress_helper.py",
     "exploit/ephemeral_runtime/camry_f33_command5_probe.py",
     "exploit/ephemeral_runtime/camry_f33_08a_tx_probe.py",
+    "exploit/ephemeral_runtime/camry_f33_08a_oracle_stream.py",
     "exploit/ephemeral_runtime/camry_f33_b6_inline_signer.py",
     "exploit/ephemeral_runtime/camry_f33_post_install_recovery.py",
     "exploit/ephemeral_runtime/camry_f33_icus_ramkey_probe.py",
@@ -348,6 +353,13 @@ def build(out: Path, openpilot: Path) -> dict:
     if hashlib.sha256(eps08a_tx_stage).hexdigest() != eps08a_tx_meta["staging"]["sha256"]:
         raise RuntimeError("0x08A Tx probe audited staging identity drift")
     eps08a_tx_payload = package_shellcode(eps08a_tx_stage, secret=TOYOTA_P1ME_PAYLOAD_BUILD_SECRET)
+    eps08a_oracle_meta = json.loads(EPS08A_ORACLE_META.read_text(encoding="utf-8"))
+    eps08a_oracle_stage = EPS08A_ORACLE_BIN.read_bytes()
+    if hashlib.sha256(eps08a_oracle_stage).hexdigest() != eps08a_oracle_meta["staging"]["sha256"]:
+        raise RuntimeError("0x08A oracle audited staging identity drift")
+    eps08a_oracle_payload = package_shellcode(eps08a_oracle_stage, secret=TOYOTA_P1ME_PAYLOAD_BUILD_SECRET)
+    if hashlib.sha256(eps08a_oracle_payload).hexdigest() != eps08a_oracle_meta["authenticated_payload"]["sha256"]:
+        raise RuntimeError("0x08A oracle authenticated payload identity drift")
     inline_meta = json.loads(INLINE_SIGNER_META.read_text(encoding="utf-8"))
     inline_staging = INLINE_SIGNER_BIN.read_bytes()
     inline_helper = INLINE_SIGNER_HELPER.read_bytes()
@@ -414,6 +426,8 @@ def build(out: Path, openpilot: Path) -> dict:
     (ram_dir / "camry_f33_command5_probe_payload.bin").write_bytes(command5_probe_payload)
     (ram_dir / "camry_f33_08a_tx_probe_payload.bin").write_bytes(eps08a_tx_payload)
     (ram_dir / "camry_f33_08a_tx_probe.json").write_text(json.dumps(eps08a_tx_meta, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    (ram_dir / "camry_f33_08a_oracle_stream_payload.bin").write_bytes(eps08a_oracle_payload)
+    (ram_dir / "camry_f33_08a_oracle_stream.json").write_text(json.dumps(eps08a_oracle_meta, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     (ram_dir / "camry_f33_b6_inline_signer_payload.bin").write_bytes(inline_signer_payload)
     (ram_dir / "camry_f33_b6_inline_signer_helper_padded.bin").write_bytes(inline_helper)
     (ram_dir / "camry_f33_b6_inline_signer.json").write_text(json.dumps(inline_meta, indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -443,6 +457,9 @@ def build(out: Path, openpilot: Path) -> dict:
     eps08a_tx_launcher = out / "f33-08a-route"
     shutil.copy2(EPS08A_TX_LAUNCHER, eps08a_tx_launcher)
     eps08a_tx_launcher.chmod(0o755)
+    eps08a_oracle_launcher = out / "f33-08a-oracle"
+    shutil.copy2(EPS08A_ORACLE_LAUNCHER, eps08a_oracle_launcher)
+    eps08a_oracle_launcher.chmod(0o755)
     inline_signer_launcher = out / "f33-secoc"
     shutil.copy2(INLINE_SIGNER_LAUNCHER, inline_signer_launcher)
     inline_signer_launcher.chmod(0o755)
@@ -463,6 +480,7 @@ def build(out: Path, openpilot: Path) -> dict:
         "f33-ingress": {"sha256": sha256(ingress_launcher)},
         "f33-sign": {"sha256": sha256(command5_launcher)},
         "f33-08a-route": {"sha256": sha256(eps08a_tx_launcher)},
+        "f33-08a-oracle": {"sha256": sha256(eps08a_oracle_launcher)},
         "f33-secoc": {"sha256": sha256(inline_signer_launcher)},
         "f33-icus-ramkey": {"sha256": sha256(icus_ramkey_launcher)},
         "f33-persist": {"sha256": sha256(persistent_signer_launcher)},
@@ -475,12 +493,13 @@ def build(out: Path, openpilot: Path) -> dict:
     for path in sorted(p for p in persistent_dir.rglob("*") if p.is_file()):
         files[str(path.relative_to(out))] = {"sha256": sha256(path)}
     manifest = {
-        "schema": "camry-f33-car-kit-v18",
+        "schema": "camry-f33-car-kit-v19",
         "created_at": datetime.now(UTC).isoformat(timespec="seconds"),
         "target": {
             "eps_f181": "8965F3307000",
-            "eps_diag": "0x7A1->0x7A9 bus1 (stock Toyota-B unsplit EPS/Brake network)",
-            "b6": "0x0B6/32 FD bus1 (native EPS/Brake network; resident replaces internally)",
+            "eps_diag": "0x7A1->0x7A9 bus1 (EPS diagnostics and 0x08A MAC-oracle transport)",
+            "request_source": "0x08A/32 FD bus2 (FRC native source on relay-correct repin)",
+            "request_sink": "0x08A/32 FD bus0 (host replacement toward chassis/Brake)",
         },
         "last_observed_firmware": {
             "stage": 5,
@@ -494,13 +513,16 @@ def build(out: Path, openpilot: Path) -> dict:
             "software_id": "8965F3307000",
             "persistent_patch_required": False,
             "stage5_receiver_bypass_required": False,
-            "reason": "the supervised RAM helper installs a locally generated valid FV4+CMAC28 trailer before the untouched stock SecOC consumer",
-            "live_qualified_on_stock_codeflash": False,
-            "live_qualified_configuration": "historical continuous RAM signer on the stage-5 image only; the supervised default and stock-CodeFlash combination require qualification",
-            "historical_continuous_not_a_production_default": "unchanged C7 mailbox target survives host loss indefinitely",
+            "current_lateral_path": "relay-correct FRC 0x08A source replacement; EPS resident is CMAC service only",
+            "reason": "the live-qualified volatile oracle runs stock ICU-S command 5 selector 4 over the host-supplied exact 0x008A SecOC domain; it does not bypass the EPS receiver or transmit the request",
+            "live_qualified_oracle_on_current_exact_f33": True,
+            "request_plane_road_qualified": False,
+            "historical_direct_b6_path": "retained as development evidence only; do not arm f33-secoc or f33-persist alongside the 0x08A request-plane path",
         },
         "persistent_b6_signer": {
             "launcher": "f33-persist",
+            "historical_only": True,
+            "superseded_by": "volatile 0x08A MAC oracle + host selective native-ID11 request replacement",
             "package": "persistent_patch/package.json",
             "stage6_sha256": persistent_package["stage6_resident"]["sha256"],
             "stage7_sha256": persistent_package["stage7_hook"]["sha256"],
@@ -557,6 +579,34 @@ def build(out: Path, openpilot: Path) -> dict:
                 "volatile_ram_key_modified_until_reset": True,
                 "live_qualified": False,
             },
+            "08a_mac_oracle": {
+                "launcher": "f33-08a-oracle",
+                "payload": "ram_payloads/camry_f33_08a_oracle_stream_payload.bin",
+                "payload_sha256": eps08a_oracle_meta["authenticated_payload"]["sha256"],
+                "staging_sha256": eps08a_oracle_meta["staging"]["sha256"],
+                "resident_base": eps08a_oracle_meta["resident"]["base"],
+                "resident_size": eps08a_oracle_meta["resident"]["size"],
+                "resident_sha256": eps08a_oracle_meta["resident"]["sha256"],
+                "helper_base": eps08a_oracle_meta["helper"]["base"],
+                "helper_size": eps08a_oracle_meta["helper"]["size"],
+                "helper_sha256": eps08a_oracle_meta["helper"]["sha256"],
+                "request": eps08a_oracle_meta["request"],
+                "response": eps08a_oracle_meta["response"],
+                "command5": eps08a_oracle_meta["command5"],
+                "state": eps08a_oracle_meta["state"],
+                "mutation_boundary": eps08a_oracle_meta["mutation_boundary"],
+                "operation": "generic DataID-0x008A CMAC service for host-owned native-generation request replacement; no ID0/ID11/application-field policy exists in the resident",
+                "field_sequence": [
+                    "./f33-08a-oracle install in NRTD/Park/stationary",
+                    "direct NRTD->READY without OFF; openpilot then owns normal Panda access",
+                    "request-plane host qualifies native MAC/freshness before arming 0x08A relay ownership",
+                    "while moving, only native ID11 + CC.latActive is re-signed after B18:B19 substitution; all other requests are exact clones",
+                    "full EPS power-off removes the resident",
+                ],
+                "persistent_flash_write": False,
+                "live_qualified": True,
+                "live_result": "2026-09-18 production-shaped 100-request 25-ms pipeline: 100/100 responses, resident counters +100/+100/+100, p95 24.094 ms, max 28.946 ms",
+            },
             "b6_inline_signer": {
                 "launcher": "f33-secoc",
                 "payload": "ram_payloads/camry_f33_b6_inline_signer_payload.bin",
@@ -590,6 +640,8 @@ def build(out: Path, openpilot: Path) -> dict:
                 "persistent_flash_write": False,
                 "stage5_receiver_bypass_required": False,
                 "live_qualified": False,
+                "historical_only": True,
+                "superseded_by": "08a_mac_oracle + selective native ID11 request-plane replacement",
                 "host_liveness": inline_meta["signer"]["host_liveness"],
                 "historical_continuous_qualification": {
                     "route": "0000008d--a9f348691a",
@@ -860,8 +912,9 @@ def build(out: Path, openpilot: Path) -> dict:
                 "requires_before_arm": "first prove the exact injected ID63 frame reaches profile2 with b6_midaggregate_observer; bridge is a later controlled transformation experiment",
             },
             "order": [
-                "b6_inline_signer is the production-shaped volatile path: on stock Toyota-B bus 1 install the retained resident in NRTD, transition directly to READY, load/readback/arm the exact supervised helper, prove local signing against one untouched native B6 trailer, then return Panda ownership to openpilot; changed C7 generations renew the seven-tick host-loss supervision; expiry or sequence zero returns native B6 unchanged",
-                "command5_probe is retained as the already-live-qualified diagnostic oracle and is no longer the continuous signing architecture",
+                "08a_mac_oracle is the production volatile signer service: install in NRTD, transition directly to READY without OFF, then openpilot signs exact observed native 0x08A generations through the generic DataID-0x008A command-5 oracle while Panda owns relay replacement",
+                "b6_inline_signer is retained only as historical direct-B6 development evidence and must not be armed alongside the request-plane path",
+                "command5_probe is retained as the earlier bounded diagnostic oracle; the 0x08A streaming oracle is the continuous signing service",
                 "eps_origin_08a_routing_probe is the non-actuating topology discriminator: after passive native-0x08A MAC reproduction, replay one unchanged stock ID0 frame from the EPS lower CAN-FD path and observe whether that exact FV4+MAC frame reaches Panda",
                 "b6_ingress_observer is the live-qualified two-stage topology discriminator; its 2026-09-10 D7-positive marker run closed bounded negative for direct Panda ID63 at post-CanIf/pre-SecOC",
                 "the original b6_midaggregate_observer full-runtime install failed before initialization and is retained only as a superseded artifact",

@@ -98,6 +98,16 @@ def main() -> int:
     assert request[:3] == bytes.fromhex("c9c912")
     assert request[3:39] == oracle.KNOWN_DOMAIN
     assert request[39] == 0xED
+    # The oracle is application-agnostic inside DataID 0x008A. Exercise an
+    # ID11-shaped domain with changed lateral and longitudinal application bytes;
+    # only the DataID/total length are part of the resident transport policy.
+    id11_domain = bytearray(oracle.KNOWN_DOMAIN)
+    id11_domain[2 + 18:2 + 20] = bytes.fromhex("0123")
+    id11_domain[2 + 21] = (id11_domain[2 + 21] & 0xC0) | 11
+    id11_domain[2 + 7] ^= 0x55
+    id11_request = oracle.build_request(0x22, bytes(id11_domain))
+    assert id11_request[3:39] == bytes(id11_domain)
+
     try:
         oracle.build_request(1, b"\x00\xb6" + bytes(34))
     except oracle.OracleStreamError:

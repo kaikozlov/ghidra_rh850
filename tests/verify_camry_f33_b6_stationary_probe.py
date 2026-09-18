@@ -477,6 +477,7 @@ print("\n== deterministic mid-aggregate B6 ingress observer ==")
 from exploit.ephemeral_runtime import camry_f33_b6_midaggregate_observer as midagg
 from exploit.ephemeral_runtime import build_camry_f33_command5_probe as command5_build
 from exploit.ephemeral_runtime import camry_f33_command5_probe as command5_probe
+from exploit.ephemeral_runtime import camry_f33_08a_oracle_stream as eps08a_oracle
 midagg_source_path = ROOT / "exploit/ephemeral_runtime/camry_f33_b6_midaggregate_observer.S"
 midagg_builder_path = ROOT / "exploit/ephemeral_runtime/build_camry_f33_b6_midaggregate_observer.py"
 midagg_audit_path = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_b6_midaggregate_observer_build.json"
@@ -1064,10 +1065,11 @@ with tempfile.TemporaryDirectory() as td:
     runbook = (out / "RUNBOOK.md").read_text(encoding="utf-8")
     patch_runbook = (out / "FIRMWARE_PATCH.md").read_text(encoding="utf-8")
     check("kit copies the exact standalone probe", copied.read_bytes() == MODULE_PATH.read_bytes())
-    check("kit manifest is self-contained v18 and binds exact stock-Toyota-B route", manifest["schema"] == "camry-f33-car-kit-v18" and manifest["target"] == {
+    check("kit manifest is self-contained v19 and binds relay-correct request-plane route", manifest["schema"] == "camry-f33-car-kit-v19" and manifest["target"] == {
         "eps_f181": "8965F3307000",
-        "eps_diag": "0x7A1->0x7A9 bus1 (stock Toyota-B unsplit EPS/Brake network)",
-        "b6": "0x0B6/32 FD bus1 (native EPS/Brake network; resident replaces internally)",
+        "eps_diag": "0x7A1->0x7A9 bus1 (EPS diagnostics and 0x08A MAC-oracle transport)",
+        "request_source": "0x08A/32 FD bus2 (FRC native source on relay-correct repin)",
+        "request_sink": "0x08A/32 FD bus0 (host replacement toward chassis/Brake)",
     })
     check("kit retains stage5 only as the last-observed historical firmware state", manifest["last_observed_firmware"] == {
         "stage": 5,
@@ -1075,13 +1077,35 @@ with tempfile.TemporaryDirectory() as td:
         "crc_prefix": "0x1960380A", "crc_fixup": "0xE69FC7F5", "observed_at": "2026-09-01",
         "note": "historical maintainer-rack state only; do not infer the currently installed rack/image from this record",
     })
-    check("kit makes the supervised RAM signer independent of persistent stage5 policy",
+    check("kit makes the request-plane oracle independent of persistent stage5 policy",
           manifest["runtime_firmware_contract"]["software_id"] == "8965F3307000" and
           manifest["runtime_firmware_contract"]["persistent_patch_required"] is False and
           manifest["runtime_firmware_contract"]["stage5_receiver_bypass_required"] is False and
-          manifest["runtime_firmware_contract"]["live_qualified_on_stock_codeflash"] is False)
+          manifest["runtime_firmware_contract"]["live_qualified_oracle_on_current_exact_f33"] is True and
+          manifest["runtime_firmware_contract"]["request_plane_road_qualified"] is False and
+          manifest["runtime_firmware_contract"]["current_lateral_path"].startswith("relay-correct FRC 0x08A"))
+    oracle = manifest["ram_experiments"]["08a_mac_oracle"]
+    check("kit packages the live-qualified generic 0x08A MAC oracle as the production signer service",
+          oracle["launcher"] == "f33-08a-oracle" and
+          oracle["payload_sha256"] == eps08a_oracle.EXPECTED_PAYLOAD_SHA256 and
+          oracle["staging_sha256"] == eps08a_oracle.EXPECTED_STAGING_SHA256 and
+          oracle["resident_base"] == f"0x{eps08a_oracle.RESIDENT_BASE:08X}" and
+          oracle["resident_size"] == eps08a_oracle.RESIDENT_SIZE and
+          oracle["resident_sha256"] == eps08a_oracle.EXPECTED_RESIDENT_SHA256 and
+          oracle["helper_base"] == f"0x{eps08a_oracle.HELPER_BASE:08X}" and
+          oracle["helper_size"] == eps08a_oracle.HELPER_SIZE and
+          oracle["helper_sha256"] == eps08a_oracle.EXPECTED_HELPER_SHA256 and
+          oracle["request"]["layout"] == "C9 C9 seq || 00 8A || application[28] || freshness[6] || (seq XOR FF)" and
+          oracle["command5"] == {"config_type": 1, "input_length": 36, "output_length": 16, "record": 0, "selector": 4, "wrapper": "0x00089BC2"} and
+          oracle["mutation_boundary"]["accepted_data_id"] == "0x008A only" and
+          oracle["mutation_boundary"]["host_08a_transmit"] is False and
+          oracle["mutation_boundary"]["eps_08a_transmit"] is False and
+          oracle["persistent_flash_write"] is False and oracle["live_qualified"] is True and
+          manifest["ram_experiments"]["order"][0].startswith("08a_mac_oracle is the production volatile signer service") and
+          (out / "f33-08a-oracle").is_file() and
+          (out / "ram_payloads/camry_f33_08a_oracle_stream_payload.bin").is_file())
     inline = manifest["ram_experiments"]["b6_inline_signer"]
-    check("kit packages native-B6 verify/replace signer as the primary fast path",
+    check("kit retains native-B6 verify/replace signer only as historical development tooling",
           inline["launcher"] == "f33-secoc" and
           inline["resident_base"] == "0xFEBFF9F0" and inline["resident_size"] == 524 and
           inline["resident_sha256"] == "31b1b2c31007f130d6b4679a0c99f5903a58f748daf11978f9c52f504aea3a3a" and
@@ -1103,14 +1127,16 @@ with tempfile.TemporaryDirectory() as td:
           inline["persistent_flash_write"] is False and inline["stage5_receiver_bypass_required"] is False and
           inline["host_liveness"]["receive_loss_ticks"] == 7 and
           inline["host_liveness"]["repeated_sequence_renews"] is False and
-          inline["live_qualified"] is False and inline["historical_continuous_qualification"]["route"] == "0000008d--a9f348691a" and
+          inline["live_qualified"] is False and inline["historical_only"] is True and
+          inline["superseded_by"].startswith("08a_mac_oracle") and
+          inline["historical_continuous_qualification"]["route"] == "0000008d--a9f348691a" and
           inline["historical_continuous_qualification"]["helper_padded_sha256"] == "b417e12dde0dc7d6478ea6f242fe9eaa246a00a9fbbcc711a5d2d3adcf159a28" and
           inline["same_cycle_drcc_recovery"]["command"] == "./f33-secoc recover-drcc" and
           inline["same_cycle_drcc_recovery"]["role"] == "diagnostic_only" and
           inline["same_cycle_drcc_recovery"]["live_qualified_clear_transport"] is True and
           inline["same_cycle_drcc_recovery"]["live_qualified_after_signer_bootstrap"] is False and
           inline["same_cycle_drcc_recovery"]["observed_vehicle_result"] == "dtc_clear_did_not_restore_drcc_same_ignition_cycle" and
-          manifest["ram_experiments"]["order"][0].startswith("b6_inline_signer is the production-shaped volatile path"))
+          manifest["ram_experiments"]["order"][1].startswith("b6_inline_signer is retained only as historical"))
     check("kit bundles the real programming handoff and its transitive dependency",
           all((out / "runtime" / rel).read_bytes() == (ROOT / rel).read_bytes() for rel in (
               "tsk/__init__.py", "tsk/lib/__init__.py", "tsk/lib/programming.py", "tsk/lib/diagnostic_route.py")))
@@ -1128,7 +1154,7 @@ with tempfile.TemporaryDirectory() as td:
           signer["resident_b6_transmit"] is False and signer["secoc_bypass"] is False and
           "cooperative exact-token lease" in signer["panda_ownership"] and
           "without reset/recovery/flash" in signer["panda_ownership"] and
-          manifest["ram_experiments"]["order"][1].startswith("command5_probe is retained as the already-live-qualified"))
+          manifest["ram_experiments"]["order"][2].startswith("command5_probe is retained as the earlier bounded diagnostic oracle"))
     check("kit retains failed full-runtime observer only as a superseded artifact",
           mid["payload_sha256"] == midagg.EXPECTED_PAYLOAD_SHA256 and
           mid["staging_sha256"] == midagg.EXPECTED_STAGING_SHA256 and
