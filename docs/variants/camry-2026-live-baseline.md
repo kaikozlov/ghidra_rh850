@@ -6803,3 +6803,44 @@ C7 lease expiry is contradicted by the fresh 100-Hz host traffic and the other
 `0xCEE7C` branches are closed above. A follow-up runtime should count replacement
 skip reasons (at minimum command-5 rc2, other rc, and completion-contract failure)
 or retry transient command-5 work before allowing a native target discontinuity.
+
+### 73.1 Historical working-route comparison: the raw inhibit existed before CarState exposed it
+
+A direct re-read of the retained September-10 working routes corrects an important
+interpretation boundary. At the time of routes `0000008d--a9f348691a` and
+`00000093--4066e7ae51`, openpilot did **not** yet map exact-F33 `0x030 B16[0]`
+(`F33_COOPERATIVE_COMMAND_INHIBIT`) into `carState.steerFaultTemporary`; that
+mapping was added later by opendbc commit `4f91b600` on 2026-09-15. Therefore the
+historical route reductions reporting zero `carState` steering faults do not imply
+that the raw cooperative inhibit was always clear.
+
+Re-analysis of the original rlogs finds four B16[0] episodes while `latActive` on
+primary working route `8d`, at route monotonic times approximately `2862.798`,
+`2988.198`, `3047.895`, and `3052.698` s. Their raw durations are approximately
+180, 280, 280, and 282 ms. Route `93` has **zero** B16[0] assertions anywhere.
+No historical episode asserts `0x030 B6[2]` or B19[0]. As in the Sep-17 route,
+the host C7 target is smooth at the historical rises (maximum recent per-send
+change 5--6 raw counts), so these are not host-angle rate-limit jumps.
+
+The historical and current control paths differ materially:
+
+- Sep-10 working route: extended `0x1FDC0002` C7 on Panda bus 0, nominal **50 Hz**
+  (`~19.9 ms` median active interval), direct EPS extended-CAN mailbox, 588-byte
+  continuous helper;
+- Sep-17 replacement-rack route: stock functional `0x777` C7 on bus 1, nominal
+  **100 Hz** (`~9.9 ms` median active interval), stock DCM/CanTp/PduR mailbox,
+  594-byte unified helper with a seven-foreground-tick lease.
+
+The actual replacement-signing structure is otherwise the same in the relevant
+respect: both helpers process each distinct native B6 and call the same exact-F33
+synchronous ICU-S command-5 wrapper; a nonzero wrapper result leaves that native
+B6 unmodified. Thus the Sep-17 fault mechanism is not newly introduced by the
+split helper architecture itself. The new route simply exposes the raw inhibit to
+openpilot and shows a higher event rate: 11 moving episodes over ~147 s active
+versus 4 over ~167 s on route `8d` (and 0 over ~18 s on route `93`).
+
+This makes the doubled C7 rate plus the switch from a direct extended-CAN mailbox
+to the stock functional DCM path the leading operational difference worth testing
+before redesigning the signer. It is not yet proved that the 100-Hz functional
+traffic causes command-5 misses; the resident-private miss reason was not logged
+on either historical or current road route.
