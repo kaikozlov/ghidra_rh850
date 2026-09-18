@@ -615,3 +615,28 @@ paths. The field order is therefore strictly:
    successful native MAC recovery/verification before the first arm;
 4. keep Target Lateral ID 0 throughout; only after that synthetic stream is native-clean should
    any longitudinal request/application field be introduced.
+
+### 12.11 First transparent field attempt confirms the repin prerequisite and closes software topology
+
+The first live transparent-ID0 attempt was intentionally started on the **unrepinned** Toyota-B
+layout. Runtime guards were otherwise correct: READY, Park, `vEgo=0`, no steering faults, and
+Panda was in Toyota safety with the host-replacement flag present. A three-second capture showed
+native `0x08A` only on logical bus 1, with no private `C9 A8` arm admin ever emitted. The proxy
+therefore remained inert and stock traffic was untouched. This is the expected fail-closed result:
+logical bus1 is the unsplit Toyota-B path and cannot support source suppression.
+
+That field result exposed one remaining software assumption before the physical repin: exact-Camry
+`CarState` and the TSS3 safety-state sampler were still hard-coded to the stock-harness bus1. The
+relay-correct host mode is now explicit in opendbc `ec401d56` and parent `e31c85e84`:
+
+- authoritative native FRC `0x08A` and `0x00F` are observed on upstream bus2;
+- chassis/state `0x025/0x0AA/0x101/0x116/0x08A` are consumed downstream on bus0;
+- exact-Camry `CarState` switches its PT parser to bus0 only when the host-replacement safety flag
+  is present; stock/unrepinned mode remains bus1;
+- `card` refreshes only `CarState`/CAN parsers after applying the development flag, because
+  `get_car()` constructs the interface before card-level development Params are applied;
+- TSS3 radar already used bus0 and required no change.
+
+The full Toyota regression after the topology correction is 276 passed / 120 skipped / 10 subtests,
+and the parent host/Param suite is 33 passed. The next transparent field attempt therefore requires
+the already-known physical CAN0/CAN1 repin before READY. No EPS resident is involved in this phase.
