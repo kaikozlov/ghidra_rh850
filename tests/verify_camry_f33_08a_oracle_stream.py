@@ -191,6 +191,17 @@ def main() -> int:
     assert fast["cf_batch_used"] is True
     assert "ff_send_to_fc_ms" in fast and "cf_submit_ms" in fast
 
+    fake_no_fc = FakePanda40()
+    no_fc = oracle.send_oracle_request(
+        fake_no_fc, seq=0x13, domain=oracle.KNOWN_DOMAIN, cf_gap_ms=0.0, skip_flow_control=True,
+    )  # type: ignore[arg-type]
+    assert no_fc["status"] == 0 and no_fc["mac28_hex"] == oracle.KNOWN_MAC28
+    assert no_fc["flow_control_waited"] is False
+    assert no_fc["request_batch_included_ff"] is True
+    assert no_fc["cf_batch_used"] is True
+    assert no_fc["flow_control_frames"] == ["3000280000000000"]
+    assert no_fc["advertised_stmin_ms"] == 40.0 and no_fc["stmin_violated"] is True
+
     class RawBatch:
         def __init__(self):
             self.calls = []
@@ -235,6 +246,7 @@ def main() -> int:
     assert oracle.EXPECTED_PAYLOAD_SHA256 in launcher
     assert "./f33-08a-oracle known-answer [OUTPUT_JSON]" in launcher
     assert "./f33-08a-oracle transport-probe CF_GAP_MS [OUTPUT_JSON]" in launcher
+    assert "./f33-08a-oracle transport-probe-no-fc [OUTPUT_JSON]" in launcher
     assert "./f33-08a-oracle benchmark [COUNT] [OUTPUT_JSON]" in launcher
     assert "./f33-08a-oracle benchmark-fast [COUNT] [OUTPUT_JSON]" in launcher
     assert 'benchmark-fast --count "$count" --period-ms 25 --cf-gap-ms 0' in launcher

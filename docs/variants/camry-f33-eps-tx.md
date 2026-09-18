@@ -481,3 +481,13 @@ oracle host path now bypasses that wrapper behavior locally and invokes Panda's
 native `can_send_many()` under the existing send lock, leaving the live resident,
 authenticated domain, and response path unchanged. Additional timing splits
 measure FF->FC, CF batch submission, and final-CF->response independently.
+
+### 12.5 Native Panda batching leaves only the FC handshake as the cadence outlier
+
+The native-Panda CF batching follow-up again completed 20/20 oracle transactions.
+Median full RTT fell to 20.355 ms, p95 to 23.531 ms, and max scheduled-start
+lateness to 3.919 ms. Exactly one transaction exceeded the 25-ms period: seq 28
+at 27.239 ms, with 16.553 ms spent waiting FF->flow-control. CF batch submission
+was normally below 1 ms. The remaining bounded discriminator is therefore one
+non-actuating KAT that submits FF+all five CFs in a single Panda batch without
+waiting for FC; if accepted, the final host-side handshake jitter is removable.
