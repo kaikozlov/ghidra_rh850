@@ -693,34 +693,49 @@ now enters at that native request boundary rather than bypassing it with a direc
 sideband. Do not send `0x08A` to EPS: the EPS contributes only selector-4 command-5 CMAC
 service, while comma is the final chassis-bus sender. The EPS diagnostic/oracle route follows the repin too: `0x7A1 -> 0x7A9` is on Panda bus0, not bus1. The September-18 installer/runtime bug that still used bus1 caused both the NRTD/F181 install failure and would have broken the on-road oracle worker; the installer, host worker, Panda TX whitelist, kit manifest, and audited oracle metadata are now all bound to bus0.
 
-**Implementation checkpoint — selective ID11 replacement (not yet a road result):**
-`kai-openpilot@d42ecbb24` with nested opendbc `feb0c379` implements the request-plane
-shape selected by the September-18 oracle experiments. The key invariant is that the FRC
-continues to own the complete native `0x08A` application envelope. For each observed
-source generation:
+**Road-qualified request-plane checkpoint — ID0/ID11 lateral ownership:**
+route `00000135--dc6b4d88c4` (15 copied rlog/qlog segments) is the first moving request-plane
+run after the bus/controls-mismatch fixes. It contains 36,036 authoritative native bus2
+`0x08A` generations: 30,260 ID0 and 5,776 ID11. While openpilot `latActive=True`, Toyota
+spent 2,799 native generations in ID0 (~69.98 s at 40 Hz) and 5,768 in ID11 (~144.2 s).
+The old ID11-only host policy therefore left a large fraction of valid openpilot lateral
+control time unable to command simply because Toyota's own lane-based application had
+selected ID0.
 
-- Target Lateral ID **11 (LTA/LCA)** + normal openpilot `CC.latActive`: copy the native
-  application and replace only `B18:B19` (`LATERAL_REQUEST_PINION_ANGLE`); preserve the
-  native lateral ID, B24/B25 gains, B26 request sequence, both longitudinal request
-  tuples, cruise/hold state and every other application byte;
-- every non-ID11 application (observed ID0/ID4/ID18 and any future native identity), and
-  ID11 while openpilot lateral is inactive: transmit the native 32-byte frame exactly;
-- for a modified ID11 frame, preserve the source frame's exact FV4 freshness nibble and
-  ask the live-qualified EPS oracle to recompute only MAC28 for that exact observed
-  generation; there is no N+1/N+2 application prediction; and
-- retain source order. A later exact-clone frame may become ready while an earlier ID11
-  frame is awaiting command-5, but it is not transmitted until the earlier generation is
-  signed. On signing/transport failure, pending generations are flushed as untouched
-  native clones before relay ownership is released back to stock forwarding.
+The same route proves comma did reach the request plane. Nine signed ID11 substitutions
+were attempted; four were Panda-accepted and appeared downstream as returned bus0 TX
+echoes. Those accepted frames differed from their matched native generation only in
+`B18:B19` plus the recomputed MAC28; examples include native raw `-12 -> -2`, `-4 -> 5`,
+`4 -> 9`, and `12 -> 15`. Thus comma-authored protected `0x08A` lateral requests reached
+the chassis side. Five later modified frames were rejected after `latActive` transitions:
+while lateral was inactive the proxy had continued exact-cloning Toyota ID11 and Panda
+reset its angle-rate baseline to Toyota's native request; CarController independently
+reset to measured steering, so the next OP target resumed from a different baseline.
 
-Panda independently enforces the same ownership boundary. It retains the three newest
-native bus2 `0x08A` generations and accepts each at most once from the host. An exact clone
-is always source-preserving. A modified frame is accepted only when the matched source is
-ID11, all application bytes except B18:B19 are byte-exact, FV4 is byte-generation exact,
-and ordinary `controls_allowed` plus the recovered F33 angle/rate envelope pass. A 40-ms
-host-Tx watchdog restores stock FRC forwarding. In request-plane mode Panda also rejects
-the old C7/B6 control sideband, so the two architectures cannot command lateral
-simultaneously.
+`kai-openpilot@65dcda237` with nested opendbc `f70060d9` corrects both limitations. The
+current rule for each native source generation is:
+
+- `CC.latActive` + native **ID0**: preserve the complete native application except set
+  `B21[5:0] 0 -> 11` and replace `B18:B19` with the normal rate-limited openpilot pinion
+  target; preserve the high two bits of B21, B24/B25 gains, B26 request sequence, both
+  longitudinal request tuples, cruise/hold state, FV4 and every other application byte;
+- `CC.latActive` + native **ID11**: preserve ID11 and replace only `B18:B19`;
+- native ID4/ID18/other Toyota applications are never promoted and remain Toyota-owned;
+- when `CC.latActive` becomes false, release relay ownership immediately and let stock
+  forwarding resume instead of proxying exact frames through the override/disengagement;
+- on the next active transition, reacquire atomically; Panda treats the first exact handoff
+  clone as a relay witness and seeds its angle-rate baseline from measured steering, matching
+  CarController's normal inactive-to-active behavior; and
+- every modified generation is signed for the exact observed native freshness generation
+  through the EPS command-5 oracle. There is still no N+1/N+2 prediction.
+
+Panda retains the three newest native bus2 `0x08A` generations and accepts each at most
+once. For an ID0 source, the only newly permitted semantic edit is low-six-bit ID0->ID11;
+for an ID11 source the ID remains byte-exact. In both cases only B18:B19 and MAC28 may
+otherwise differ, FV4 must match the exact source generation, and ordinary
+`controls_allowed` plus the F33 angle/rate envelope still apply. The host ownership
+watchdog is 75 ms (three native periods), based on the measured bus0 oracle pipeline.
+The old C7/B6 sideband remains blocked in request-plane mode.
 
 **Reset-boundary rule:** `0x00F` and protected `0x08A` are asynchronous publishers. A normal
 `RESET_CNT` increment can therefore appear on `0x00F` before the next native `0x08A` stops
@@ -737,10 +752,10 @@ The path no longer uses the private `ToyotaTss308aId0` / `ToyotaTss308aSignedId0
 rollout Params or a runtime parser rebuild. Exact F33 selects the host path during normal
 `CarParams` construction when fingerprint topology contains chassis `0x025` on bus0 and
 native FRC `0x08A` on bus2; stock/unrepinned topology therefore remains distinct.
-`CarController` keeps the standard 100-Hz angle limiter, but only advances the F33 host
-request target while the current native application is ID11; across other Toyota request
-identities it returns that limiter to measured steering so ID11 re-entry cannot inherit an
-unsent accumulated target.
+`CarController` keeps the standard 100-Hz angle limiter across native ID0 and ID11 while
+`CC.latActive`; ID0 is now an available host carrier because the proxy promotes it to ID11.
+Across Toyota-owned ID4/ID18/other applications, or whenever `CC.latActive` is false, the
+normal limiter returns to measured steering.
 
 The live post-repin bus0 oracle transport was re-qualified after moving the EPS diagnostic
 route from stale bus1 assumptions to the actual repinned `0x7A1 -> 0x7A9` bus0 path. A
