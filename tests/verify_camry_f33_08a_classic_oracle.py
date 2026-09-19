@@ -39,8 +39,8 @@ def check(name: str, cond: object) -> None:
 check("audited build is byte/metadata exact",
       json.loads(AUDIT.read_text()) == meta and AUDITED_STAGE.read_bytes() == stage)
 check("resident/helper fit proven RAM geometry",
-      len(resident) == 412 and meta["resident"]["headroom"] == 112 and
-      len(helper) == 852 and meta["helper"]["headroom"] == 172 and
+      len(resident) == 424 and meta["resident"]["headroom"] == 100 and
+      len(helper) == 848 and meta["helper"]["headroom"] == 176 and
       meta["resident"]["relocations"] == 0 and meta["helper"]["relocations"] == 0)
 check("artifact hashes self-consistent",
       sha(resident) == meta["resident"]["sha256"] and
@@ -58,7 +58,7 @@ check("dead XCP hardware endpoint is dedicated raw-classic request carrier",
           "rfifo_payload_bytes": 32,
           "rule": 46,
       })
-check("software RX ring preserves each classic fragment before staging",
+check("software RX ring exposes independent producer geometry",
       fw["rx_ring"]["base"] == "0xFEBE4038" and
       fw["rx_ring"]["end_inclusive"] == "0xFEBE48D7" and
       fw["rx_ring"]["capacity_words"] == 0x228 and
@@ -167,8 +167,9 @@ check("no diagnostic transport or RSCFD mutation remains",
 
 resident_src = build.RESIDENT_SOURCE.read_text()
 helper_src = build.HELPER_SOURCE.read_text()
-check("resident peeks before stock receive drain",
-      resident_src.index("jarl32 helper_entry, lp") < resident_src.index("jarl32 target_rx_3, lp"))
+check("resident private tap runs after stock receive drain",
+      resident_src.index("jarl32 target_rx_3, lp") < resident_src.index("jarl32 helper_entry, lp") and
+      "ld.hu -0x6f08[gp]" in resident_src and "st.h r7, 0x4a7c[gp]" in resident_src)
 check("helper matches only exact classic rule46 ring record",
       "mov 0x00002008" in helper_src and "mov 0x9fdc0002" in helper_src and
       "movea 0xc9, r0, r8" in helper_src and "movea 0xa8, r0, r8" in helper_src and
@@ -178,10 +179,11 @@ check("helper has no truncated cmp-immediate literals",
 check("helper uses local freshness and fixed selector4",
       "ld.w -0x623c[gp]" in helper_src and "ld.w -0x6240[gp]" in helper_src and
       "jarl32 freshness_encode, lp" in helper_src and "jarl32 command5_sync, lp" in helper_src)
-check("helper preserves post-request ring cursor across synchronous signing",
-      "prepare {r20-r23,lp}" in helper_src and "mov r18, r22" in helper_src and
-      "mov r19, r23" in helper_src and "mov r22, r18" in helper_src and
-      "mov r23, r19" in helper_src and "br .L_scan" in helper_src)
+check("helper advances an independent producer cursor across stock drains and signing",
+      "ld.hu -0x6f08[gp]" in helper_src and "ld.hu 0x4a7c[gp]" in helper_src and
+      "st.h r18, 0x4a7c[gp]" in helper_src and "st.h r19, 0x4a7e[gp]" in helper_src and
+      "br .L_reload_scan" in helper_src and "ld.hu -0x6f06[gp]" not in helper_src and
+      "ld.hu -0x6f04[gp]" not in helper_src)
 check("response bypasses XCP protocol completion",
       "movea 0x00f0" in helper_src and "movea 55, r0, r6" in helper_src and
       "jarl32 lower_can_write, lp" in helper_src)

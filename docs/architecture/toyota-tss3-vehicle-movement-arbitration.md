@@ -594,9 +594,12 @@ Therefore the open problem is not a blanket “Panda-visible path cannot carry F
 why **Panda-generated** FD fails where native Panda-visible FD succeeds. The current 0x08A
 integration does not need that discriminator solved in order to remove ISO-TP latency: its
 private EPS signing sideband now uses five self-contained classic `0x1FDC0002/8` fragments
-submitted as one Panda batch and assembled from F33's pre-staging RX ring. Only the final
-complete ordered fragment set invokes command 5; there is no FF/FC/CF state, no retry state,
-and no attempt to make a Panda-created FD carrier traverse the unresolved boundary.
+submitted as one Panda batch and assembled from F33's pre-staging RX ring. The resident tracks
+that ring with an independent producer cursor after the stock drain, eliminating the observed
+foreground consumer race without mutating Toyota's queue state. Only the final complete
+ordered fragment set invokes command 5; there is no FF/FC/CF state. If a private reply is
+lost, the host retries the same source generation without releasing request-plane authority;
+there is no attempt to make a Panda-created FD carrier traverse the unresolved boundary.
 
 
 ### 8.1 Native-FD versus Panda-created-FD differential audit

@@ -1734,24 +1734,27 @@ measurements already put five classic CF submissions at roughly 0.6--0.8 ms host
 removed latency was the receiver-controlled ISO-TP FF->FC wait, not the five-frame wire burst.
 The new carrier therefore removes DCM/CanTp, FF/FC/CF semantics, and every transport retry
 while preserving exact application/freshness input to command 5. `tools/test
-camry_f33_08a_classic_oracle` rebuilds and byte-compares the 412-byte resident, 852-byte
+camry_f33_08a_classic_oracle` rebuilds and byte-compares the 424-byte resident, 848-byte
 helper, staging image and authenticated payload and verifies the exact classic rule46/ring/
 response-handle contract. Recovering the Brake/EBU classic-to-local-FD regeneration path
 remains the deeper OEM-shaped alternative, not a prerequisite for this carrier.
 
 The corresponding host/Panda implementation is offline-qualified end to end. The focused
-proxy suite passes **15/15** and the complete Camry TSS3 module passes **48 tests + 8
+proxy suite now passes **17/17** and the complete Camry TSS3 module passes **48 tests + 8
 subtests**. Full route149 replay completes the original **5 arms / 5 releases**, with 7,387
 owned source generations represented by exactly **36,935 accepted classic oracle fragments**,
 7,384 active ID11 outputs, zero native leaks and valid Panda safety throughout. Mixed route135
 completes **8 arms / 8 releases**, 8,559 oracle batches / **42,795 accepted fragments** and
-8,553 active ID11 outputs with the same zero-leak/safety result. Dropping sign response 500 on
-route149 produces exactly one `oracle_response_timeout`, one bounded release/re-arm, and no
-rest-of-drive lockout or source-owner mixing. Repeating both full routes with a fixed **24-ms
-oracle response delay** also passes at the original 5/5 and 8/8 authority windows, with all
-7,387 / 8,559 request batches admitted, zero native leaks and valid Panda safety. Thus the
-software path remains source-cadence-stable near the 25-ms generation period without any FC
-serialization.
+8,553 active ID11 outputs with the same zero-leak/safety result. Injecting one lost signer
+response no longer releases authority: `kai-openpilot@9fb841d0a` retries the **same source
+generation** with a fresh private sequence, buffers later signed generations in order, and
+retains the original 5/5 and 8/8 authority windows with zero native leaks. A later observed
+response is itself sufficient to trigger immediate retry of the older blocking generation;
+a 50-ms timer is only the fallback retry trigger. Only a sustained unresolved gap beyond
+120 ms is promoted to `oracle_dead`, after Panda's unchanged 100-ms replacement watchdog has
+already had time to fail open. Repeating both full routes with a fixed **24-ms oracle response
+delay** also passes at the original authority windows. Thus a single private-transport loss is
+no longer treated as steering-authority loss.
 
 The first parked live known-answer attempt then exposed a deterministic helper-assembly bug,
 not a transport failure. F33 state showed fragment 0 had armed sequence 1, fragment 4
@@ -1772,12 +1775,34 @@ with mean 11.29 ms, median 10.62 ms, p95 15.88 ms, p99 25.49 ms and max **36.27 
 Resident request/success/response counters advanced exactly +20 and +100 respectively, and all
 responses carried status 0. The transport and command-5 path are therefore live-qualified.
 
-The 36.27-ms successful tail also disproves the host's former 30-ms response deadline as a
-valid failure boundary. `kai-openpilot@e7dff9eb8` raises only
-`ORACLE_RESPONSE_TIMEOUT_S` from 30 to **50 ms**; 40 ms is explicitly retained as valid in
-the focused test, while 51 ms still triggers the existing bounded fail-open. The Panda
-100-ms replacement watchdog is unchanged, so this adds measured transport margin without
-changing request-plane ownership or failure semantics.
+The 36.27-ms successful tail disproved the host's former 30-ms response deadline as a valid
+failure boundary. `kai-openpilot@e7dff9eb8` first moved that deadline to 50 ms. Route165 then
+showed that **any per-request release deadline was the wrong abstraction**: a missing private
+reply does not establish that steering authority is dead. `kai-openpilot@9fb841d0a` therefore
+uses 50 ms only as a retry interval and reserves authority release for the hard 120-ms dead
+condition; the Panda 100-ms replacement watchdog remains unchanged.
+
+The first moving raw-classic route, `00000165--97064ab212`, isolates the remaining transport
+race. Segment 1 contains five `toyota_f33_request_plane_failure` events, all
+`oracle_response_timeout`, and five matching ~40-ms `steerTempUnavailableSilent` intervals.
+A sixth ~19-ms silent interval at the beginning is merely the initial ownership handoff:
+`latActive` rose, arm was sent, and the first clone completed before any failure event. Across
+the route there were **7,250** five-fragment host request batches but only **7,245** resident
+requests/successes/responses and exactly **7,245** visible `0x1FE00002` replies. Each of the
+five missing transactions nevertheless had all five Panda TX returns. Therefore the five
+alerts were not EPS command-5 failures, response-Tx failures, or steering-inhibit faults; they
+were five requests that never assembled in the resident.
+
+The cause is the original non-mutating **stock-consumer peek**. The helper ran immediately
+before `0x79EDE -> 0x809FE -> 0x808D6`. If a five-frame burst straddled that foreground
+boundary, the helper could see only the prefix; stock drain could then consume trailing
+fragments before the next helper invocation. The replacement resident no longer consults the
+stock consumer (`FEBE48FA`) or used count (`FEBE48FC`). Exact producer `0x80A4A` advances
+`FEBE48F8` for each committed RX record, so the resident now initializes a private cursor to
+that producer, lets the stock drain run first, then walks every newly committed ring record
+from its private cursor. Drained records remain in ring memory; records arriving while
+command5 runs are picked up after a producer reload. Stock queue indices are never modified.
+This removes the drain-window race rather than adding duplicate fragments or timing guesses.
 
 The volatile EPS oracle resident is still a deployment prerequisite rather than an
 openpilot-installed component. Without a qualified oracle response, the host never sends
