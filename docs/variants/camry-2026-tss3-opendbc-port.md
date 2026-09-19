@@ -873,9 +873,10 @@ command-5 responses before replay begins. Route `13c` supplies 19 hardware ancho
 rather than being hidden behind a synthetic CMAC.
 
 The strict authority invariant is now explicit: **while `proxy.active` is true, every host
-lateral `0x08A` is authenticated ID11; there is no exact-ID0 timeout fallback.** Exact native
-frames are permitted only for the atomic handoff witness or after logical steering authority
-has ended while the still-owned relay is being restored/released. The replay fails on any
+lateral `0x08A` is authenticated ID11; there is no exact-ID0 timeout fallback.** The only
+Toyota frame admitted during an owned interval is the single exact atomic-handoff witness;
+pending blocked source generations are discarded at release rather than replayed as Toyota
+before the relay changes owner. The replay fails on any
 Panda TX rejection, native `0x08A` leak while owned, host non-ID11 authority frame, safety-RX
 invalidity, freshness/sign mismatch, unexpected arm/release cycle, or unresolved oracle
 truth.
@@ -1216,68 +1217,75 @@ projection remained false. This is therefore not a parser/UI failure: repeated r
 continuity loss reached Toyota's arbitration/control domain and was followed by an FRC
 cruise-main shutdown.
 
-The exact failure mechanism has two coupled parts. First, the EPS command-5 oracle is not a
-reliable one-response-per-native-generation transport: successful private `0x7A9` responses
-in the failing window commonly returned in roughly 15--30 ms, while isolated request
-sequences received no private response even though surrounding requests succeeded. The
-latest-generation queue turned those misses into **holes** in the owned downstream `0x08A`
-stream. Route149's `0x081 REQUEST_LOSS_STATUS` is direct dynamic evidence that those omitted
-FRC generations are semantically observable downstream. Second, an exact Toyota fallback
-changes the steering baseline actually delivered to the actuator. A native ID11 fallback
-commands Toyota's B18:B19 pinion target; native ID0/other applications carry no openpilot
-lateral request and therefore return the baseline to measured steering. Keeping a hidden
-CarController target across either handoff made the next signed ID11 jump relative to what
-Panda/actuator had actually seen, which Panda correctly rejected and which restarted the
-release/re-arm loop.
+The exact failure mechanism has two coupled parts. First, the EPS command-5 **service** is
+fast enough, but the host's speculative ISO-TP ingress is imperfect: successful private
+`0x7A9` responses in the failing window commonly returned in roughly 15--30 ms while
+isolated requests received FC but no private reply. The later latest-generation queue turned
+those admission misses into **holes** in the owned downstream `0x08A` stream. Route149's
+`0x081 REQUEST_LOSS_STATUS` is direct dynamic evidence that those omitted FRC generations
+are semantically observable downstream. The earlier serialized whole-transaction retry
+avoided overlap, but a new FF/retry attacked the wrong layer and could accumulate multiple
+source generations of latency.
 
-The corrected request-plane contract is consequently much simpler:
+A short-lived September-19 fallback implementation then made the opposite mistake: on a
+late/missing MAC it forwarded the exact authenticated Toyota source generation. That did
+preserve cadence, but it **broke the chain of authority**. If Toyota selected ID0, comma's
+lateral request disappeared for that generation; native ID11 could submit Toyota's different
+pinion target; native ID4/LDA or ID18/SDG could submit a different Toyota application owner
+to Brake/VMM. Re-basing CarController/Panda afterward made the software internally
+consistent but did not fix the architectural error: Brake had already received Toyota's
+request. Commits `04ad114db` / `fd9ac33e` and their fallback interpretation are therefore
+superseded and must not be used for a road test.
 
-- while the relay is owned, **every source-real FRC `0x08A` generation gets exactly one
-  downstream representation in source order**;
-- if the MAC is ready before that generation's deadline, the downstream representation is
-  the exact source envelope with only the bounded ID11 lateral substitution and fresh MAC;
-- if signing is late or fails, that generation is forwarded as its exact authenticated Toyota
-  source frame rather than omitted; a late MAC is discarded and never replays the generation;
-- an exact Toyota fallback is also a steering-state handoff. Native ID11 rebases the proxy,
-  CarController and Panda to Toyota's actual target; ID0/other applications rebase them to
-  measured steering. The next openpilot target therefore continues from what the actuator
-  actually received, not from a hidden trajectory;
-- Panda still requires the first owned host generation to be an exact clone for the atomic
-  handoff witness. Modified ID11 rate checking uses the ordinary 100-Hz Toyota angle limits
-  integrated over the **actual elapsed source-generation time**, not a hard-coded four-tick
-  transport assumption;
-- the proxy no longer treats brake state or the native cruise-operating bit as independent
-  permission state machines. `controlsd` owns `CC.latActive`; Panda owns
-  `controls_allowed`/TX enforcement. CAN validity, freshness qualification and exact
-  source-generation matching remain transport requirements rather than engagement policy.
+The corrected ownership contract is strict:
 
-The exact route149 production replay is now the regression gate. With one injected lost sign
-response and 20-ms synthetic successful-oracle latency it reproduces all five recorded
-lateral windows with **5 arms / 5 releases**, **7,392 accepted host `0x08A` generations**,
-3,960 modified ID11 frames, 3,427 transparent Toyota generations, zero Panda rejects, zero
-native leaks, zero safety invalidity and zero failures. A deliberately harsh 30-ms run with
-both attempts for one selected sign generation dropped still has exactly **5 arms / 5
-releases** and **7,392 accepted host generations**; only 35 generations are modified while
-7,352 cross transparently, yet there are again zero rejects, leaks or failures. This proves
-that slow/unreliable oracle service now degrades steering availability for individual
-source generations without degrading request-plane continuity or ownership state.
+- the exact source frame is used once as the **atomic handoff witness**; after that, while
+  comma owns the relay and `CC.latActive`, every lateral host `0x08A` is ID11;
+- all four lateral owners observed in the 12-route Camry corpus are takeover inputs, not
+  pass-through modes: ID0 No Request, ID4 LDA, ID11 LTA/LCA, and ID18 SDG/PDA-SA are all
+  converted to comma ID11 on the **same source generation** and re-signed;
+- ID4 already carries B24=100 in every retained frame. ID18 uses B24=25/50, so ID18->ID11
+  takeover explicitly normalizes B24 to the observed ID11 gain raw 100 while preserving all
+  other source-envelope bytes except B18:B19, B21-low6, B24, and MAC28;
+- an unexpected lateral ID is an authority failure, never an exact Toyota fallback;
+- on disengage, cruise withdrawal, or unrecoverable signing failure, blocked pending source
+  generations are dropped and the relay is released. Toyota resumes on the **next** native
+  publication after the ownership boundary; no stale Toyota request is replayed through the
+  host before release;
+- Panda independently enforces the same rule: first host frame is the exact handoff clone;
+  after that, exact ID0/ID4/ID18 is rejected while controls are allowed. Exact ID11 remains
+  acceptable when it is byte-identical because its lateral semantics already equal comma's
+  ID11 request.
 
-The focused software gates after this closure are **28 proxy tests** and the complete
-**48-test Camry TSS3 module**, plus both full-route route149 replay profiles above. The
-important invariant is no longer "sign every frame" or "skip stale frames"; it is **one
-source generation in, one coherent downstream generation out**, with the steering baseline
-explicitly synchronized at every Toyota/Openpilot handoff.
+The transport repair now stays inside the same command-5 transaction. Active signing remains
+one-transaction-at-a-time and source ordered. The normal fast path sends FF then the five CFs
+after 5 ms. If the EPS's real `0x7A9` ISO-TP FC arrives **without** the private `07 C9` reply
+in that same incoming CAN batch, the host repeats only CF1..CF5 once for the still-open
+FF/session. It does **not** allocate a new private sequence, send a new FF, skip a source
+generation, or substitute Toyota. Panda bounds the surface to at most two CF trains per FF.
+If the repaired session still does not return the MAC within its bounded response deadline,
+the whole comma authority interval is released rather than mixing owners.
 
-Deployment after the route149 closure is `kai-openpilot@04ad114db`, nested
-`opendbc@fd9ac33e`, with Panda source still `21701e3f`. The comma was explicitly offroad
-(`deviceState.started=false`, ignition line/CAN false, `noOutput`) for the update. Panda was
-rebuilt against the new nested opendbc tree; the signed firmware SHA-256 is
-`1c7f097d4dc38c1b63056948257caae7651e7798fbf324a9ce785e4625386585`. After reboot,
-pandad performed the normal signature-checked application update. A cooperative direct-Panda
-lease then read the live 128-byte firmware signature and it matched the newly built expected
-signature byte-for-byte. Live health after the lease returned to pandad showed zero faults,
-zero TX blocks, no heartbeat loss, valid RX-check state, controls disallowed and ignition
-off; pandad resumed normally with no lease files left behind.
+The exact route149 replay now exercises this strict shape. At 20-ms synthetic successful
+oracle latency with the selected sign reply deliberately omitted until EPS FC triggers the
+same-session CF repair, all five recorded lateral windows complete with **5 arms / 5
+releases**, **7,387/7,387 owned native generations blocked**, **7,387 accepted host `0x08A`**,
+7,382 active host ID11 frames, zero owned non-ID11 transmissions, zero Panda rejects, zero
+native leaks, zero safety invalidity and zero failures. The same route passes at a
+conservative 24-ms synthetic reply latency. Mixed route `135` also passes the injected-loss
+repair with **8 arms / 8 releases**, 8,550 active host ID11 frames, and zero non-ID11 owned
+transmissions/rejects/leaks/failures, exercising the older Toyota lateral-owner transitions.
+
+Focused gates after the correction are **26 proxy tests** and the complete **47-test Camry
+TSS3 module**, plus route149 at 20/24 ms and mixed route135. The key invariant is no longer
+"keep a frame on the wire somehow". It is: **one lateral authority owner per interval; while
+comma owns, Toyota's application choice is input data only and Brake/VMM sees comma ID11.**
+
+The short-lived fallback build was flashed while the vehicle was offroad and its live Panda
+signature was verified, but it is superseded by this correction. The corrected strict build
+must replace it before any moving test. Same-session CF repair is software/replay-qualified;
+its next hardware qualification is a parked EPS-oracle loss/admission test after the volatile
+resident is installed, before road use.
 
 The volatile EPS oracle resident is still a deployment prerequisite rather than an
 openpilot-installed component. Without a qualified oracle response, the host never sends
