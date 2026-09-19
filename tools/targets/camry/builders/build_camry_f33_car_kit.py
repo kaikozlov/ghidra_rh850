@@ -361,7 +361,7 @@ def build(out: Path, openpilot: Path) -> dict:
     command5_probe_payload = package_shellcode(COMMAND5_PROBE_BIN.read_bytes(), secret=TOYOTA_P1ME_PAYLOAD_BUILD_SECRET)
     route40_meta = json.loads(ROUTE40_OBSERVER_META.read_text(encoding="utf-8"))
     route40_stage = ROUTE40_OBSERVER_BIN.read_bytes()
-    if route40_meta.get("schema") != "camry-f33-route40-observer-build-v1":
+    if route40_meta.get("schema") != "camry-f33-route40-observer-build-v2":
         raise RuntimeError("route40 observer audited metadata schema drift")
     if hashlib.sha256(route40_stage).hexdigest() != route40_meta["staging"]["sha256"]:
         raise RuntimeError("route40 observer audited staging identity drift")
@@ -536,7 +536,7 @@ def build(out: Path, openpilot: Path) -> dict:
     for path in sorted(p for p in persistent_dir.rglob("*") if p.is_file()):
         files[str(path.relative_to(out))] = {"sha256": sha256(path)}
     manifest = {
-        "schema": "camry-f33-car-kit-v21",
+        "schema": "camry-f33-car-kit-v22",
         "created_at": datetime.now(UTC).isoformat(timespec="seconds"),
         "target": {
             "eps_f181": "8965F3307000",
@@ -783,16 +783,19 @@ def build(out: Path, openpilot: Path) -> dict:
                 "resident_sha256": route40_observer.EXPECTED_RESIDENT_SHA256,
                 "resident_base": f"0x{route40_observer.RESIDENT_BASE:08X}",
                 "resident_size": route40_observer.RESIDENT_SIZE,
+                "helper_base": f"0x{route40_observer.HELPER_BASE:08X}",
+                "helper_size": route40_observer.HELPER_SIZE,
+                "helper_sha256": route40_observer.EXPECTED_HELPER_SHA256,
                 "mailbox": f"0x{route40_observer.MAILBOX_BASE:08X}..0x{route40_observer.MAILBOX_BASE + route40_observer.MAILBOX_SIZE - 1:08X}",
                 "route40_raw_com": "0xFEBE4BAF..0xFEBE4BCE",
                 "route40_generation": "0xFEBE5360",
                 "route40_invalid_checksum_counter": "0xFEBE53C0",
-                "operation": "prepare one future slot-4-authenticated, valid-B7 0x090 under the command5 resident; replace it with a non-bypassing sticky route40 observer; transmit message2 immediately after native message1",
+                "operation": "one NRTD-installed resident/helper signs a future valid-B7 0x090 after READY, arms sticky route40 observation, and transmits message2 immediately after native message1",
                 "field_sequence": [
-                    "./f33-sign prepare-native-090-route-probe OUTPUT_JSON in READY/Park/stationary",
-                    "transition to NRTD without fully powering EPS off; ./f33-route40 install",
-                    "direct NRTD->READY without OFF",
-                    "./f33-route40 run OUTPUT_JSON [RESULT_JSON] in READY/Park/stationary",
+                    "OFF -> NRTD; ./f33-route40 install",
+                    "NRTD -> READY without OFF",
+                    "./f33-route40 run [RESULT_JSON] in READY/Park/stationary",
+                    "READY -> OFF to remove the resident",
                 ],
                 "positive_verdict": "valid_authenticated_090_reached_f33_route40_raw_com",
                 "bounded_negative_verdict": "valid_authenticated_090_not_latched_while_native_route40_remained_live",
