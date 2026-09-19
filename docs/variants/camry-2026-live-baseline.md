@@ -4916,6 +4916,43 @@ bad-MAC `0x025` is rejected. Transparent forwarding without validation remains a
 alternative until an upstream invalid/valid-MAC discriminator or upstream firmware
 analysis closes it.
 
+The subsequent September-19 one-boot route-40 treatment materially narrows that
+boundary without locating it. Exact-F33 command 5 generated a fresh selector-4
+MAC28 for DataID `0x0090`; the host paired it with valid reset/message freshness
+and the exact route-40 B7 checksum, transmitted message 2 before Toyota's native
+message 2, and received a clean Panda TX return. F33's native route-40 generation
+continued, but its raw COM destination `FEBE4BAF` never latched the unique host
+trailer. The retained outcome is
+`valid_authenticated_090_not_latched_while_native_route40_remained_live` under
+`targets/camry-2026/raw-20260919/f33-090-route40-valid-auth-negative/`.
+
+Thus invalid MAC28, stale freshness, and invalid B7 are disproved as sufficient
+causes for this direct-Panda loss. This is also not a standard-versus-extended
+CAN-ID issue: native and host frames were both standard-ID `0x090` FD32. The
+negative does not prove that an upstream validator accepted and then discarded
+the payload; a source/port/ingress rule is the leading explanation, while an
+additional application-semantic check on the deliberately unique host field
+remains possible.
+
+The integration consequence is a network-seam distinction, not a blanket
+CAN-FD incapability. Panda bus 0 is already the chassis-facing side of the
+FRC/comma split, while bus 2 is the FRC side; changing between those two ports
+does not bypass a downstream Brake/VMM/EBU attachment. The current camera tap is
+well placed to replace the protected FRC request plane (`0x08A`) if its native
+authentication and arbitration contract can be reproduced. It is not yet shown
+to be a valid injection point for the post-arbitration B6/EPS instruction plane.
+The alternatives are an authenticated request-plane integration, a tap on the
+EPS-local side of the Brake/VMM boundary, recovery of the Brake/VMM producer and
+signer, or the existing EPS-resident admitted-B6 rewrite as a development-only
+mechanism.
+
+The next software discriminator is an exact-frame latch at F33's earliest
+RSCFD/CanIf boundary for route 40. The definitive topology test is simultaneous
+passive capture on Panda bus 0 and the EPS/EBU CAN attachment, then a stationary
+repetition of this authenticated treatment from the downstream attachment. A
+route-40 latch only there would prove that the camera/chassis trunk and the
+EPS-local admitted segment are not equivalent injection points.
+
 
 ## 61. Route-45 stock/comma steering reconciliation (VAR-144)
 
