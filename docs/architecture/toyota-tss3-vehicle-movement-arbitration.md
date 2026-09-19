@@ -590,6 +590,48 @@ in retained captures and enters F33's direct-COM path with only the ordinary add
 gate. Therefore the open problem is not a blanket “Panda-visible path cannot carry FD” rule;
 it is why **Panda-generated** FD fails where native Panda-visible FD succeeds.
 
+
+### 8.1 Native-FD versus Panda-created-FD differential audit
+
+The direct-FD failure now has a much smaller candidate set.  Exact F33, the retained
+Camry captures, and the current Panda implementation give the following comparison:
+
+| property | native F33-received / Toyota FD | Panda-created failed private FD | status |
+|---|---|---|---|
+| CAN identifier form | all four exact-F33 normal FD Rx PDUs are **standard 11-bit**: `0x025/0x090/0x0D7/0x0B6` | `0x1FDC0002` is **extended 29-bit** | **leading open discriminator** |
+| native extended-FD precedent | retained Sep road fixture census has **zero** `addr>=0x800 && DLC>8` frames | extended + FDF was explicitly requested | **no Toyota precedent recovered** |
+| FDF | present on native FD; F33 CanIf words are `0x400000ID` | explicitly set by Panda host packet and M_CAN Tx element | matched |
+| DLC | native accepted examples are 32 bytes; camera family also uses 48/64 | FD32 failed, and FD8 also failed | **DLC ruled out as sole cause** |
+| SecOC | `0x025/0x090` do not route through F33 SecOC; `0x0D7/B6` do | private rule46 has no SecOC gate before the observer | **security ruled out as prerequisite** |
+| BRS | Toyota's own F33 FD Tx writer supports explicit FDF/BRS; retained node-1 state `FEBE5027=0x3C` selects its `0x6 = FDF|BRS` form | BRS-on failed; BRS-off/500-kbit/s FD8 also failed | **BRS ruled out as sole cause** |
+| nominal timing | F33 500 kbit/s, 80% sample point | deployed Panda 500 kbit/s, 80% sample point | matched |
+| 2-Mbit/s data timing | F33 70% sample point, SJW6 | deployed Panda `21701e3f` is upstream-like 80% SP; older `panda/kai` commit `0e3f1c92` matches F33 70% | real mismatch for BRS-on only; **cannot explain no-BRS failure** |
+| receive-edge filtering | F33 `REFE=1` | deployed Panda lacks the older `53ad20d0` M_CAN `EFBI` match | real controller-config difference; not a frame-format explanation for the no-BRS result |
+| ISO / non-ISO FD | F33 evidence and Toyota tooling use ordinary ISO CAN-FD | Panda health reports `canfd_non_iso=0` | matched |
+| ESI | healthy Toyota transmitters are expected error-active; exact per-frame ESI is not retained in comma logs | Panda was error-active with TEC=0; M_CAN supplies ESI from controller error state and Panda exposes no host ESI override | no positive mismatch recovered |
+| per-frame BRS representation | Panda RX hardware sees native BRS and the internal forwarder preserves it | host `CANPacket_t` has no BRS field; host BRS comes from bus-global state | representation differs, but both BRS states were live-tested |
+| RSCFD rule filtering | F33 GAFL matching compares ID/IDE/RTR through `GAFLID/GAFLM`; no FDF/BRS filter is recovered | rule46 accepts the same extended ID in classic form | no exact-F33 software/hardware rule explains classic-pass/FD-drop |
+| physical/source route | `0x025` is overwhelmingly native on the Panda-visible chassis side and F33 consumes it; B6 is separately local/hidden | Panda injects from the intercepted host side | **route/port policy remains open** |
+
+The strongest structural fact is therefore the identifier/route class.  Toyota's observed
+Camry traffic uses **standard IDs for application CAN-FD** and extended IDs for the
+classic diagnostic/XCP-style surface.  The exact F33 RSCFD itself is capable of both
+extended identifiers and CAN-FD, and its GAFL rule does not recover a classical-only bit;
+nevertheless no native extended-ID CAN-FD frame has been observed in the retained road
+corpus.  An intermediate Brake/EBU routing implementation that has separate
+“standard application FD” and “extended classic diagnostic” routes would explain every
+current live result without requiring SecOC-aware filtering.
+
+The clean discriminator is therefore a **known native standard-ID FD route**, not another
+extended private-ID experiment.  `0x090/32` is the preferred parked probe because exact
+F33 routes it through an ordinary additive-checksum gate rather than SecOC.  A resident
+observer should latch the frame at the software-ring/pre-checksum boundary, and the host
+should send one deliberately checksum-invalid, uniquely marked `0x090` FD32.  Start with
+BRS off so the complete frame stays at the already-matched 500-kbit/s nominal timing.  A
+positive observation would localize the problem to extended-FD / configured route class; a
+negative observation would prove a deeper host-transmitter / source-port distinction and
+justify repeating under the matched `panda/kai` 70%-SP + EFBI controller configuration.
+
 Current GTS topology is more specific than a generic "EBU-domain boundary." In
 `CDbCanBusComponentTable`, `EBU` is literally the **junction/attachment field on the
 Power Steering (EPS) component row**. Across all 18 exact-Camry option rows, Brake
