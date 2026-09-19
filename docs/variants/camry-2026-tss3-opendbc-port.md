@@ -1575,6 +1575,16 @@ three warning/event tests. Normal full-route results are:
   host rejects remain the ordinary `controls_allowed=false` disengagement ordering already
   seen in the recorded route.
 
+The minimum path is deployed as parent `kai-openpilot@88eb9a4e5`, nested
+`opendbc@1b7ab1c1`, Panda source `21701e3f`. The rebuilt signed Panda image is SHA-256
+`f5e08f61f77c033c608c7a8e8581b90af93deccac0c37cfcac95314cd866c0ec`.
+After an offroad reboot, a cooperative direct-Panda lease read live signature
+`6b8046a0f3f27de92c7941db355630b606901789d13bf2a851b7f1bed9a45470124516b1f36fb3be221b8245df214b22d533c01c474fb5afc5eb780e356ac6320a46f18db0b56f6d2cb084d0ff212ae06da164b402e3e31e3b69a66834fe45c459171550b9a8fed7ff104b62f3afc8d5b44cec44821bb36b0bc0106879eba5b0`, exactly matching the new expected signature. Live health was ignition line/CAN false,
+`controls_allowed=false`, zero safety TX blocks, zero faults, no heartbeat loss and valid RX
+checks. The cooperative lease was removed and both the Python pandad wrapper and native
+`./pandad` child resumed normally; cereal subsequently reported a valid offroad Panda in
+`noOutput` with no faults.
+
 This is still software/replay qualification, not proof of live EPS transport. The next
 hardware gate is now much narrower: with the volatile resident installed and the car parked,
 prove that **FF -> real EPS FC -> one CF train -> private response** sustains the native stream
