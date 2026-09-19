@@ -1064,6 +1064,51 @@ subsequently booted on those exact Git heads and started pandad/card/controlsd/s
 a final messaging-only parked observation remains the post-reboot verification boundary if
 network access is temporarily unavailable.
 
+**September-19 post-serialization drive (`00000144--ec7cf2b209`):** the warning-only path
+worked as intended: `CarState.steerFaultTemporary` remained false while
+`steerFaultTemporarySilent` carried the visible warning and `latActive` stayed true. The
+remaining limpness was therefore not caused by the UI warning. In the analyzed active
+segments the host produced **3,281** ID11/B24=100 frames; Panda accepted **3,174** and
+rejected **107**, while Brake/VMM selected `0x081` result-ID11 **2,866** times. There were
+117 unique request-plane failures: 107 `host_08a_rejected`, nine `oracle_sign_failure`, and
+one startup `oracle_recovery_failure`.
+
+Matching each rejected host frame back to its source generation shows the dominant failure
+was the target-specific Panda buffering contract itself: rejected requests were only
+**5–7 native generations / ~140–185 ms old**. The six-generation history therefore discarded
+otherwise exact, single-use, in-order source generations before their MAC arrived. This is
+not Toyota receiver policy and not an upstream steering authority rule. It was bring-up
+scaffolding. `opendbc@805cb8f1` removes that narrow transport policy by treating history as
+capacity rather than authority: the exact-generation FIFO is enlarged to **16 generations**,
+while matching remains source-exact, single-use, and **oldest-unconsumed-first**. The
+replacement fail-open watchdog moves from 100 to **250 ms**, long enough for serialized
+command-5 catch-up while still restoring stock forwarding if the host stops producing
+replacement traffic entirely. Ordinary `controls_allowed`, angle/rate checks, source
+matching, source ordering, and one-use consumption are unchanged.
+
+The same drive still contained nine cases where a source generation received ISO-TP flow
+control on both the first sign attempt and its retry but no private `07 C9` response. The
+surrounding serialized transactions resumed normally. `kai-openpilot@4fb0dfd4d` therefore
+allows **two retries / three total serialized attempts** for the exact same source generation
+before releasing that authority interval. It does not skip, predict, or replace generations.
+The production replay tool now supports `--drop-sign-attempts 2` so this exact double-loss
+class is exercised explicitly.
+
+With the narrow Panda buffering policy removed, the complete local `144` route replay
+(segments 0–8) passes at 24-ms synthetic oracle service time while deliberately dropping the
+first **two** sign responses for generation 500: **4,268 modified ID11**, 4,273 owned native
+generations, zero Panda TX rejects, zero native leaks, zero safety invalidity, zero
+freshness/sign failures, and normal arm/release count. The older mixed route `135` also
+passes the same double-loss injection with **8,432 modified ID11** and zero failures. Unit
+gates remain **40 proxy/car-event tests** and **275 Toyota/Panda safety tests + 8 subtests**.
+
+Deployed heads after this transport-policy removal are `kai-openpilot@4fb0dfd4d`, nested
+`opendbc@805cb8f1`, and `panda@21701e3f`. Panda was rebuilt/flashed from that exact nested
+opendbc state and its live firmware signature matched. After the comma reboot, a lease-free
+12-second parked observation captured **481** native ID0 generations with zero B26/timing
+gaps, Toyota safety param 53833, valid RX checks, no Panda faults, no request-plane warning,
+and no unexpected host/ownership/oracle traffic.
+
 The volatile EPS oracle resident is still a deployment prerequisite rather than an
 openpilot-installed component. Without a qualified oracle response, the host never sends
 the ownership arm and Panda continues forwarding stock `0x08A`; request-plane openpilot
