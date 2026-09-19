@@ -632,6 +632,17 @@ positive observation would localize the problem to extended-FD / configured rout
 negative observation would prove a deeper host-transmitter / source-port distinction and
 justify repeating under the matched `panda/kai` 70%-SP + EFBI controller configuration.
 
+The field implementation is `f33-fd-ingress`.  Its resident preserves the stock `0x79EDE`
+prologue, executes the inert `0x7C60A` pre-call, then invokes a zero-call read-only helper and
+jumps directly into stock at **`0x79EE6`**, immediately before `0x809FE` drains the software
+RX ring.  This placement is intentionally later than the earlier rule46/XCP observer so the
+normal-Rx interrupt/service path cannot enqueue `0x090` after the peek but before the drain.
+The helper counts every `0x40000090` / DLC32 record as the positive control and latches only
+a `PFD090!!` host marker; it does not mutate queue, checksum, COM, SecOC, or RSCFD state.
+Exact application SID23 accepts the resident state prefix only through `FEBF027B`, so host
+attestation reads the required 32-byte prefix at `FEBF025C..FEBF027B`; the unreadable tail is
+not needed for the pass/fail verdict.
+
 Current GTS topology is more specific than a generic "EBU-domain boundary." In
 `CDbCanBusComponentTable`, `EBU` is literally the **junction/attachment field on the
 Power Steering (EPS) component row**. Across all 18 exact-Camry option rows, Brake

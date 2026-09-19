@@ -38,7 +38,7 @@ def check(name: str, cond: object) -> None:
 
 check("audited build exact", json.loads(AUDIT.read_text()) == meta and AUDITED_STAGE.read_bytes() == stage)
 check("resident/helper fit RAM",
-      len(resident) == 412 and meta["resident"]["headroom"] == 112 and
+      len(resident) == 428 and meta["resident"]["headroom"] == 96 and
       len(helper) == 232 and meta["helper"]["headroom"] == 792 and
       meta["resident"]["relocations"] == 0 and meta["helper"]["relocations"] == 0)
 check("hashes self-consistent",
@@ -79,7 +79,7 @@ marker = host.build_marker(native)
 check("host marker exact",
       len(marker) == 32 and marker[:8] == b"PFD090!!" and marker[8:] == native[8:] and marker != native)
 
-raw = bytearray(host.STATE_SIZE)
+raw = bytearray(host.STATE_READ_SIZE)
 raw[0:4] = host.STATE_MAGIC.to_bytes(4, "little")
 raw[4] = host.STATE_VERSION
 raw[5] = 1
@@ -87,19 +87,17 @@ raw[8:12] = (123).to_bytes(4, "little")
 raw[12:16] = (1).to_bytes(4, "little")
 raw[16:20] = (0x00000120).to_bytes(4, "little")
 raw[20:24] = (0x40000090).to_bytes(4, "little")
-raw[24:56] = marker
-raw[56:60] = int.from_bytes(marker[:4], "little").to_bytes(4, "little")
-raw[60:64] = int.from_bytes(marker[4:8], "little").to_bytes(4, "little")
+raw[24:32] = marker[:8]
 state = host.decode_state(bytes(raw))
 check("state decoder exact",
       state["magic_ok"] and state["version_ok"] and state["initialized"] and
       state["fd090_count"] == 123 and state["marker_count"] == 1 and
-      state["last_id_word"] == "0x40000090" and state["last_marker_payload_hex"] == marker.hex())
+      state["last_id_word"] == "0x40000090" and state["last_marker_prefix_hex"] == marker[:8].hex())
 
 resident_src = build.RESIDENT_SOURCE.read_text()
 helper_src = build.HELPER_SOURCE.read_text()
-check("helper runs before stock drain",
-      resident_src.index("jarl32 helper_entry, lp") < resident_src.index("jarl32 target_rx_3, lp"))
+check("helper runs at latest pre-drain splice",
+      resident_src.index("jarl32 target_rx_drain_pre, lp") < resident_src.index("jarl32 helper_entry, lp") < resident_src.index("jr32 target_rx_drain_tail"))
 check("helper exact-matches standard FD090",
       "mov 0x40000090" in helper_src and "PFD090!!" in helper_src and
       "cmp 32, r11" in helper_src)
