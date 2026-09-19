@@ -925,6 +925,26 @@ same Toyota companion gate shape seen in native ID11 (`B22=0x10`, B20 predominan
 B21-low6 ID0->ID11 when required, and MAC28. No additional companion-byte synthesis was
 introduced.
 
+**Downstream low-speed arbitration evidence:** the retained September-7 Camry corpus contains
+504 source-real native ID4/LDA request generations. Joining them to fresh `0x081` and
+`CarState` shows Brake/VMM selecting `LATERAL_RESULT_ID=4` on **318/504** frames, including
+source-real selection at essentially **0 mph** and throughout single-digit vehicle speeds.
+The ID4 request carries the same relevant companion gate shape used by native ID11
+(`B20=0xC0`, `B22=0x10`, B24=100, B25=0). Result-ID0 intervals coexist with driver-steering
+activity, which is consistent with arbitration/override rather than a global speed floor.
+The September-6 corpus independently contributes 50 additional native ID4 generations
+(49/50 selecting result ID4, albeit at ~74 mph).
+
+Natural ID11 is still only observed down to ~27.1 mph in the retained source-real routes;
+therefore the corpus does not directly prove that Brake has no *ID11-specific* low-speed
+rule. It does, however, rule out a generic downstream lateral-control minimum-speed gate:
+the Brake/VMM request/result layer is demonstrably capable of selecting lateral authority
+at standstill. Combined with the recovered architecture in which FRC chooses LTA/LDA/PDA
+before protected `0x08A` egress, this strongly places Toyota's ordinary LTA speed floor in
+the upstream FRC feature-selection policy rather than in the generic Brake/VMM lateral
+arbiter. That is the exact policy boundary the ID0->ID11 host substitution is intended to
+supersede.
+
 The volatile EPS oracle resident is still a deployment prerequisite rather than an
 openpilot-installed component. Without a qualified oracle response, the host never sends
 the ownership arm and Panda continues forwarding stock `0x08A`; request-plane openpilot
