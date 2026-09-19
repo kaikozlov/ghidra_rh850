@@ -1252,10 +1252,12 @@ The corrected ownership contract is strict:
   generations are dropped and the relay is released. Toyota resumes on the **next** native
   publication after the ownership boundary; no stale Toyota request is replayed through the
   host before release;
-- Panda independently enforces the same rule: first host frame is the exact handoff clone;
-  after that, exact ID0/ID4/ID18 is rejected while controls are allowed. Exact ID11 remains
-  acceptable when it is byte-identical because its lateral semantics already equal comma's
-  ID11 request.
+- Panda independently enforces the same rule: the first host frame is the one exact handoff
+  witness. After that there is **no exact-clone/pass-through authority category at all**.
+  Every host generation is validated only as comma's bounded ID11 request against the matched
+  source generation. Byte equality with Toyota's ID11 has no authority meaning and is not a
+  separate acceptance condition; the proxy still sends that generation through the EPS
+  signing path even when comma's requested application bytes happen to equal Toyota's.
 
 The transport repair now stays inside the same command-5 transaction. Active signing remains
 one-transaction-at-a-time and source ordered. The normal fast path sends FF then the five CFs
