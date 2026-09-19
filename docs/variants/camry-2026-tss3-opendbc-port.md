@@ -1166,6 +1166,42 @@ captured **481** native ID0 generations with zero B26/timing gaps, Toyota safety
 valid RX checks, no Panda faults, no warning-only steering fault, and no unexpected
 host/ownership/oracle traffic.
 
+**September-19 zero-steering regression (`00000148--f8f011b74d`):** the first drive after
+`0ec4e2b3d/97f0f1f7` had **no host `0x08A` at all** and no ownership-admin `0x777` frames.
+Across seven segments the route contains 15,451 native source `0x08A`, 12,874 downstream
+`0x081`, but **zero** host steering frames. The only request-plane failure was a startup
+`oracle_recovery_failure` while parked. A second recovery attempt then did receive valid
+private command-5 responses and reconstructed the tracker, but the following one-shot
+**verify** request lost its private `07 C9` response. The proxy had no verify-failure branch:
+`tracker` remained valid, `qualified=false`, `recovery_active=false`, no verify/recovery job
+was queued, and no arm was possible for the rest of the drive. This is the exact cause of
+"no steering at all" in route148.
+
+The same bug also explains why the comma gave no useful indication during the drive. The
+startup failure pulse occurred before engagement and expired while parked; later
+`CC.latActive=true` with `qualified=false` produced no new event. `kai-openpilot@468458ce1`
+fixes both behaviors without changing Panda/opendbc. A failed verify is retried against the
+**current** tracker event/message counter (native freshness may have advanced while the prior
+verify was in flight); after two failed verify retries the proxy performs a full fail-open
+recovery instead of becoming stranded. Separately, the warning-only steering-unavailable
+surface now remains asserted whenever `CC.latActive` is true and the proxy has neither
+active authority nor an atomic handoff pending. Thus an unqualified/no-authority state can
+no longer be silently limp.
+
+The unit regression directly drops a verify response and proves a retry can subsequently
+qualify. The production replay tool now has `--drop-verify-response`; replaying the exact
+route148 with the first verify response deliberately dropped still reaches **6 authority
+windows**, **4,397 modified ID11** frames, zero Panda rejects, zero native leaks, zero
+freshness/sign failures, and normal release count. Unit gates after this fix are **44
+proxy/car-event tests**. This change is parent-Python only; nested `opendbc@97f0f1f7` and
+Panda firmware remain unchanged, so no Panda reflash is required.
+
+Deployed heads are `kai-openpilot@468458ce1`, nested `opendbc@97f0f1f7`, and
+`panda@21701e3f`. After comma reboot, parked messaging showed Toyota safety param 53833,
+valid RX checks, no Panda faults, no steering warning, and no ongoing oracle churn. The
+current boot log shows startup recovery/verification traffic followed by silence rather than
+the route148 stranded state.
+
 The volatile EPS oracle resident is still a deployment prerequisite rather than an
 openpilot-installed component. Without a qualified oracle response, the host never sends
 the ownership arm and Panda continues forwarding stock `0x08A`; request-plane openpilot
