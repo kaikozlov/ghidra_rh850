@@ -811,6 +811,40 @@ sync-after-native backlog ordering. After deployment/reboot, parked runtime obse
 showed no repeated `0x7A1` recovery traffic over 12 seconds, confirming recovery had
 completed and the proxy was idle rather than looping.
 
+Route `0000013c--4f85421eeb` is the first drive after the native-gap recovery fix and
+finally reaches the ID0->ID11 path. It contains 10,484 native source `0x08A`, all ID0;
+the host emitted 29 downstream `0x08A` frames: 20 exact clones and 9 promoted ID11.
+Panda accepted 8 exact clones and 2 promoted ID11, rejecting 12 exact clones and 7
+promotions as ownership repeatedly collapsed. All retained `0x081` frames stayed at
+`LATERAL_RESULT_ID=0`; the two accepted promoted frames occurred at ~15.6 mph while
+`steeringPressed=true`, so they are not a clean downstream-arbitration rejection test.
+Their source envelopes already carried the normal Toyota ID11 companion shape
+(`B20=0xC0`, `B22=0x10`, `B24=100`, `B25=0`), so no additional request-byte mutation is
+justified from this route.
+
+Two host-side failures explain the collapse. First, CarController continued advancing its
+normal rate-limited angle while the request proxy was still qualifying/rearming. Panda's
+atomic handoff correctly seeded its safety baseline from measured steering, but the first
+post-handoff host target could already be several degrees away (for example measured
+~ -5.6 deg versus controller output ~ -9.7 deg), causing immediate angle-rate rejection.
+`opendbc@ad23a31b` adds only one ownership input to the existing F33 controller: while the
+request proxy does not actually own `0x08A`, the angle limiter remains pinned to measured
+steering; after ownership is confirmed it resumes the normal 100-Hz limiter from the same
+baseline. `kai-openpilot@f5842b9ff` supplies that existing proxy-active state to
+CarController before `CI.apply()`; no second permission state machine is introduced.
+
+Second, the EPS command-5 transport occasionally loses a single private `0x7A9` response
+while subsequent transactions succeed normally. In the first active interval, seq 11/12
+completed in ~25 ms, seq 13 had no visible response, then seq 14..17 again completed in
+~23-27 ms. The old proxy waited 120 ms on that one missing sign response, exceeding the
+75-ms Panda ownership watchdog, then fail-open flushed stale exact clones which Panda
+correctly rejected. `kai-openpilot@f341259c0` gives sign jobs one bounded retry: after
+40 ms without a response, the exact same native-generation signing domain is resubmitted
+immediately under a fresh private transaction sequence; only a second miss fails open.
+Recovery/verify timeout policy remains unchanged. This stays within the observed command-5
+RTT distribution and preserves exact source generation/order without loosening angle or
+ownership safety limits.
+
 The volatile EPS oracle resident is still a deployment prerequisite rather than an
 openpilot-installed component. Without a qualified oracle response, the host never sends
 the ownership arm and Panda continues forwarding stock `0x08A`; request-plane openpilot
