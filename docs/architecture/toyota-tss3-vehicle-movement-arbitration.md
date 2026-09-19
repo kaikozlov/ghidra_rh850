@@ -663,11 +663,27 @@ pairs; the first `0x090` in each of 12 inspected reset epochs has message-low2=1
 remaining 28 trailer bits are effectively frame-unique. This is the ordinary Toyota-P5
 `FV4 || MAC28` shape. Sienna P1M-E independently defines CAN-FD `0x090` as an ordinary
 SecOC profile authenticating `DataID 0x0090 || payload[28] || full freshness[6]` and
-transmitting the upper 28 CMAC bits. Exact F33 does **not** run its local SecOC verifier on
-route40, so the natural next discriminator is whether an upstream Brake/EBU boundary validates
-that P5 envelope before the frame reaches F33. The generic `f33-sign` tooling now includes
-`verify-native-090` to ask exact-F33 selector-4 command5 whether its slot4 key reproduces a
-captured native `0x090` MAC28 without transmitting `0x090`.
+transmitting the upper 28 CMAC bits.
+
+The September-19 live `f33-sign verify-native-090` run closes the cryptographic identity:
+**3/3 captured native Camry `0x090` frames were reproduced exactly by exact-F33 ICU-S
+selector-4 command5 using DataID `0x0090` and reconstructed full freshness**. Sample 1 matched
+immediately at `(trip=642, reset=221, message=1)` with native/computed MAC28 `ab1fd39`;
+sample 2 matched message28 with `e38337d`; sample 3 matched message14 with `8e7bab4`.
+Therefore the native Bus-4 `0x090` trailer is not merely SecOC-shaped: it is the exact slot-4
+ordinary-P5 MAC28 domain accessible from this EPS. This strongly supports a shared key/profile
+across the relevant Toyota arbitration domain, while not by itself identifying which upstream
+component enforces it.
+
+Exact F33 still does **not** run its local SecOC verifier on route40. The decisive follow-up is
+therefore one frame with a **valid fresh P5 MAC28 but deliberately invalid local B7**. The
+probe copies a native application, flips only application byte B6 (not consumed by the exact
+F33 `0x090` unpacker), leaves B7 stale, pre-signs message3 for a future reset, waits for native
+message1 of that exact reset, and transmits once. If `FEBE53C0` increments, the authenticated
+frame passed the upstream Brake/VMC/EBU boundary and reached F33's local checksum checker,
+proving that stale-MAC frames were being rejected before EPS delivery. If the sticky counter
+remains unchanged despite a TX return and valid freshness/MAC, a source/port/routing rule
+remains independently necessary.
 
 Current GTS topology is more specific than a generic "EBU-domain boundary." In
 `CDbCanBusComponentTable`, `EBU` is literally the **junction/attachment field on the
