@@ -693,7 +693,7 @@ now enters at that native request boundary rather than bypassing it with a direc
 sideband. Do not send `0x08A` to EPS: the EPS contributes only selector-4 command-5 CMAC
 service, while comma is the final chassis-bus sender. The EPS diagnostic/oracle route follows the repin too: `0x7A1 -> 0x7A9` is on Panda bus0, not bus1. The September-18 installer/runtime bug that still used bus1 caused both the NRTD/F181 install failure and would have broken the on-road oracle worker; the installer, host worker, Panda TX whitelist, kit manifest, and audited oracle metadata are now all bound to bus0.
 
-**Road-qualified request-plane checkpoint — ID0/ID11 lateral ownership:**
+**Road evidence checkpoint — ID0/ID11 lateral ownership (pre-final replay gate):**
 route `00000135--dc6b4d88c4` (15 copied rlog/qlog segments) is the first moving request-plane
 run after the bus/controls-mismatch fixes. It contains 36,036 authoritative native bus2
 `0x08A` generations: 30,260 ID0 and 5,776 ID11. While openpilot `latActive=True`, Toyota
@@ -737,16 +737,27 @@ otherwise differ, FV4 must match the exact source generation, and ordinary
 watchdog is 75 ms (three native periods), based on the measured bus0 oracle pipeline.
 The old C7/B6 sideband remains blocked in request-plane mode.
 
-**Reset-boundary rule:** `0x00F` and protected `0x08A` are asynchronous publishers. A normal
+**Reset/freshness rule:** `0x00F` and protected `0x08A` are asynchronous publishers. A normal
 `RESET_CNT` increment can therefore appear on `0x00F` before the next native `0x08A` stops
 carrying the preceding reset-low2/FV4. Latest `0x00F` is not an admissibility oracle for a
 particular replacement frame. Panda matches host output to the actual unconsumed native
 `0x08A` generation and compares FV4 to that generation directly. The host uses `0x00F` only
 to reconstruct the nearby full freshness epoch, resolving the native reset-low2 against
-current/adjacent epochs; ownership and message-counter progression continue through normal
-reset increments. Regression tests explicitly cover `0x00F(N+1) -> native 0x08A(N) -> host
-replacement(N) -> native 0x08A(N+1)` for the transparent legacy proxy, current signed
-request proxy, and Panda safety boundary.
+current/adjacent epochs.
+
+The September-19 full-route replay also corrects a more fundamental earlier assumption:
+the 8-bit SecOC message counter is **local to each reset-counter epoch**, not continuous
+across reset increments. On a source-real reset transition the first `0x08A` generation
+uses full message counter **1**; later generations in that same reset epoch increment with
+the native B26 sequence. Route `0000013c--4f85421eeb` contains **874** resolved reset
+transitions whose first new-epoch frame has message-low2 `1` with zero exceptions. The
+complete rule reproduces **9,962** consecutive generations after the first oracle seed and
+matches all **19** independent EPS-command-5 full-counter anchors in that route. The older
+mixed route `00000135--dc6b4d88c4` contributes **62** independently matched hardware
+anchors across 35 reset epochs and agrees with the same reset-local rule. If the first
+observed generation in a new reset epoch is not low2 `1`, the boundary was missed and the
+host must recover the full counter instead of extrapolating across it. Regression tests
+cover both the normal reset-to-message-1 transition and the missed-boundary recovery case.
 
 The path no longer uses the private `ToyotaTss308aId0` / `ToyotaTss308aSignedId0`
 rollout Params or a runtime parser rebuild. Exact F33 selects the host path during normal
@@ -845,22 +856,90 @@ Recovery/verify timeout policy remains unchanged. This stays within the observed
 RTT distribution and preserves exact source generation/order without loosening angle or
 ownership safety limits.
 
+**September-19 production-path replay gate — no road test until this passes:**
+`kai-openpilot@71703da35` converts the retained road corpus into an executable integration
+gate at `openpilot/tools/replay/toyota_f33_request_plane_replay.py`. The tool does not
+replay prior host output. It feeds source-real CAN and recorded `CarControl` through the
+**current** `CarInterface`/`CarController`, current authenticated request proxy, and the
+actual C Panda Toyota safety hooks (`rx`, `fwd`, `tx`, timer/watchdog). Host TX accept/reject
+echoes are fed back to the proxy exactly as the board does. The oracle stub is not allowed
+to invent freshness: it reconstructs the native full counter independently per reset epoch
+from source B26/FV4 phase and cross-checks that truth against the route's retained real EPS
+command-5 responses before replay begins. Route `13c` supplies 19 hardware anchors; route
+`135` supplies 62. A wrong reconstructed epoch/message counter therefore fails the gate
+rather than being hidden behind a synthetic CMAC.
+
+The strict authority invariant is now explicit: **while `proxy.active` is true, every host
+lateral `0x08A` is authenticated ID11; there is no exact-ID0 timeout fallback.** Exact native
+frames are permitted only for the atomic handoff witness or after logical steering authority
+has ended while the still-owned relay is being restored/released. The replay fails on any
+Panda TX rejection, native `0x08A` leak while owned, host non-ID11 authority frame, safety-RX
+invalidity, freshness/sign mismatch, unexpected arm/release cycle, or unresolved oracle
+truth.
+
+That gate exposed and fixed three remaining structural defects before another road drive:
+
+1. **Reset-local full message counter.** `NativeFreshnessTracker` now sets message counter
+   `1` on a source-real reset epoch transition and increments only within the epoch. A missed
+   boundary forces recovery. The prior cross-reset `message += B26 delta` model was wrong.
+2. **Oracle sender phase drift.** Scheduling the next command-5 request as `now + 25 ms`
+   accumulated every thread wake delay. After hundreds of generations a valid signed frame
+   could be ~112 ms / four native generations old, outside Panda's three-generation matcher.
+   The sender is now phase-locked to the previous deadline; only a true overrun resets phase.
+3. **Authority-boundary races.** The proxy now mirrors the same source-real authority inputs
+   Panda uses: native `CRUISE_OPERATING_LATCH` and fresh `CarState.brakePressed`, in addition
+   to `CC.latActive`. Brake reached Panda about 4 ms before one rejected host frame while
+   controlsd's `latActive=False` arrived ~1.5 ms later. The proxy now releases immediately on
+   that fresh brake boundary, clears queued/in-flight sign work from the ended authority
+   interval, and refuses re-arm until the native cruise latch is valid again. Logical
+   `proxy.active` is cleared before exact restoration frames are emitted.
+
+The final clean replay results are:
+
+- **`0000013c--4f85421eeb` (all native ID0):** 51,179 replay events, 10,484 native
+  `0x08A`, 875 resolved reset epochs, 19 hardware oracle anchors, 2 authority windows,
+  **1,190 modified host ID11**, 1,193 native generations blocked while owned, **0 native
+  leaks, 0 Panda TX rejects, 0 safety invalidity, 0 freshness/sign failures**.
+- **`00000135--dc6b4d88c4` (mixed native ID0/ID11):** 178,359 replay events, 36,036
+  native `0x08A`, 3,004 resolved reset epochs, 62 hardware oracle anchors, 8 authority
+  windows, **8,434 modified host ID11**, 8,559 native generations blocked while owned,
+  **0 native leaks, 0 Panda TX rejects, 0 safety invalidity, 0 freshness/sign failures**.
+
+Fault injection is part of the same gate. `--drop-sign-response N` drops the Nth
+first-attempt command-5 sign response and requires that exact source generation to be retried
+under authority. Route `13c` passes injected losses at sign generations **100, 500, and
+1000**; route `135` passes **500, 2000, 4000, and 8000**. Every injected run preserves the
+normal arm/release count and reports zero rejects/leaks/freshness failures. Representative
+commands are:
+
+```text
+python openpilot/tools/replay/toyota_f33_request_plane_replay.py /Users/kai/dev/inspect/logs/0000013c--4f85421eeb
+python openpilot/tools/replay/toyota_f33_request_plane_replay.py /Users/kai/dev/inspect/logs/0000013c--4f85421eeb --drop-sign-response 500
+python openpilot/tools/replay/toyota_f33_request_plane_replay.py /Users/kai/dev/inspect/logs/00000135--dc6b4d88c4
+python openpilot/tools/replay/toyota_f33_request_plane_replay.py /Users/kai/dev/inspect/logs/00000135--dc6b4d88c4 --drop-sign-response 4000
+```
+
+The narrow request mutation remains unchanged. Engaged native ID0 periods already carry the
+same Toyota companion gate shape seen in native ID11 (`B22=0x10`, B20 predominantly
+`0xC0`/sometimes `0x40`, B24=100, B25=0), so the host still modifies only B18:B19,
+B21-low6 ID0->ID11 when required, and MAC28. No additional companion-byte synthesis was
+introduced.
+
 The volatile EPS oracle resident is still a deployment prerequisite rather than an
 openpilot-installed component. Without a qualified oracle response, the host never sends
 the ownership arm and Panda continues forwarding stock `0x08A`; request-plane openpilot
 lateral therefore remains unavailable rather than falling back to direct B6.
 
-A parked qualification cannot exercise the selective lateral branch: the maintainer Camry
-does not publish a usable native ID11 LTA/LCA request while parked, so openpilot cannot
-engage the real ID11 substitution there. Park/READY can still prove the carrier mechanics
-with the native inactive request stream: oracle qualification, relay ownership, exact-clone
-continuity, source ordering, watchdog/release and fail-open behavior. The first actual
-B18:B19 substitution must therefore be a short moving test during a genuine native ID11
-interval with normal `CC.latActive`. That road test should begin with the smallest ordinary
-openpilot angle demand and verify source-ID continuity, modified-only-B18:B19 shape,
-returned host TX, `0x081` result response and absence of new faults before broader driving.
-This is the remaining software/deployment boundary, not a reason to add another
-steering-permission policy.
+A parked vehicle still cannot prove downstream Brake/VMM steering selection or wheel motion,
+but another road drive is **not** the next software-debug step. The full-route production
+replay above is now the mandatory software gate and passes both the latest all-ID0 route and
+the older mixed ID0/ID11 route, including bounded dropped-oracle-response injection. The
+remaining pre-road work is a parked live deployment qualification only: reinstall/attest the
+volatile EPS oracle after vehicle OFF, perform the already-established Brake->FRC recovery,
+verify normal Toyota safety plus steady `0x7A9` oracle service, and confirm the proxy reaches
+qualified/idle state without recovery churn. Only after that parked gate is clean should a
+moving test be used for the one thing offline replay cannot prove: downstream `0x081`
+selection/physical steering response to sustained authenticated host ID11.
 
 Working session notes for the GTS+ vehicle-type → install-set → family-`.ddb` → GetSupport funnel (not a claim ledger): [../history/2026-08/CAMRY_GTS_LATERAL_FUNNEL_2026-08-29.md](../history/2026-08/CAMRY_GTS_LATERAL_FUNNEL_2026-08-29.md).
 
