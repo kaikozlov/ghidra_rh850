@@ -1747,8 +1747,12 @@ owned source generations represented by exactly **36,935 accepted classic oracle
 completes **8 arms / 8 releases**, 8,559 oracle batches / **42,795 accepted fragments** and
 8,553 active ID11 outputs with the same zero-leak/safety result. Dropping sign response 500 on
 route149 produces exactly one `oracle_response_timeout`, one bounded release/re-arm, and no
-rest-of-drive lockout or source-owner mixing. These are replay/software results; live parked
-mailbox latency and native-MAC equality remain the next hardware qualification.
+rest-of-drive lockout or source-owner mixing. Repeating both full routes with a fixed **24-ms
+oracle response delay** also passes at the original 5/5 and 8/8 authority windows, with all
+7,387 / 8,559 request batches admitted, zero native leaks and valid Panda safety. Thus the
+software path remains source-cadence-stable near the 25-ms generation period without any FC
+serialization. These are replay/software results; live parked mailbox latency and native-MAC
+equality remain the next hardware qualification.
 
 The volatile EPS oracle resident is still a deployment prerequisite rather than an
 openpilot-installed component. Without a qualified oracle response, the host never sends
