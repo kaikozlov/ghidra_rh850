@@ -1714,13 +1714,41 @@ frame cannot be classic to one receiver and FD to another; a one-frame host carr
 requires an intermediate Toyota component to regenerate/translate the frame onto the EPS-local
 FD link.
 
-Consequently the selected near-term sideband should stay **classic**. The minimum custom
-replacement for ISO-TP is a fixed raw classic-fragment mailbox on the already-proven
-`0x1FDC0002` endpoint: accumulate a small fixed sequence of eight-byte frames in the resident,
-invoke selector-4 once complete, and return one classic `0x1FE00002` response. That removes
-CanTp/DCM, FF/FC/CF semantics and flow-control latency while respecting the observed physical
-routing boundary. Recovering the Brake/EBU classic-to-local-FD regeneration path remains the
-deeper OEM-shaped alternative.
+The replacement carrier is now implemented as a **stateless five-frame raw-classic mailbox**
+on that already-proven endpoint. One source generation is encoded as five extended classic
+`0x1FDC0002/8` frames. Fragments 0--3 carry the complete 28-byte application image, seven
+bytes per frame; fragment 4 carries `message8`, source `reset_low8`, and a fixed transaction
+trailer. The five-bit transaction sequence is carried in each fragment header together with
+the fragment index. All five frames are submitted in one Panda batch. The resident consumes
+them from the **pre-staging software RX ring**, not the single eight-byte XCP staging cell,
+so batching cannot overwrite intermediate fragments. A new fragment 0 unconditionally
+restarts assembly; missing or malformed fragments never invoke command 5 and require no retry
+or recovery state. Only a complete ordered request calls selector-4 once and returns one
+classic `0x1FE00002/8` response.
+
+This is intentionally not a resident mirror/delta protocol. Route149 shows most native
+application generations change only a few bytes, so a delta encoding could often fit in one
+classic frame, but it would make host/resident mirror synchronization another authority state
+machine. The fixed five-frame request is per-generation self-contained. Prior Panda batching
+measurements already put five classic CF submissions at roughly 0.6--0.8 ms host-side; the
+removed latency was the receiver-controlled ISO-TP FF->FC wait, not the five-frame wire burst.
+The new carrier therefore removes DCM/CanTp, FF/FC/CF semantics, and every transport retry
+while preserving exact application/freshness input to command 5. `tools/test
+camry_f33_08a_classic_oracle` rebuilds and byte-compares the 412-byte resident, 832-byte
+helper, staging image and authenticated payload and verifies the exact classic rule46/ring/
+response-handle contract. Recovering the Brake/EBU classic-to-local-FD regeneration path
+remains the deeper OEM-shaped alternative, not a prerequisite for this carrier.
+
+The corresponding host/Panda implementation is offline-qualified end to end. The focused
+proxy suite passes **15/15** and the complete Camry TSS3 module passes **48 tests + 8
+subtests**. Full route149 replay completes the original **5 arms / 5 releases**, with 7,387
+owned source generations represented by exactly **36,935 accepted classic oracle fragments**,
+7,384 active ID11 outputs, zero native leaks and valid Panda safety throughout. Mixed route135
+completes **8 arms / 8 releases**, 8,559 oracle batches / **42,795 accepted fragments** and
+8,553 active ID11 outputs with the same zero-leak/safety result. Dropping sign response 500 on
+route149 produces exactly one `oracle_response_timeout`, one bounded release/re-arm, and no
+rest-of-drive lockout or source-owner mixing. These are replay/software results; live parked
+mailbox latency and native-MAC equality remain the next hardware qualification.
 
 The volatile EPS oracle resident is still a deployment prerequisite rather than an
 openpilot-installed component. Without a qualified oracle response, the host never sends
@@ -1733,7 +1761,7 @@ replay above is now the mandatory software gate and passes both the latest all-I
 the older mixed ID0/ID11 route, including bounded dropped-oracle-response injection. The
 remaining pre-road work is a parked live deployment qualification only: reinstall/attest the
 volatile EPS oracle after vehicle OFF, perform the already-established Brake->FRC recovery,
-verify normal Toyota safety plus steady `0x7A9` oracle service, and confirm the proxy reaches
+verify normal Toyota safety plus steady `0x1FE00002` oracle service, and confirm the proxy reaches
 qualified/idle state without recovery churn. Only after that parked gate is clean should a
 moving test be used for the one thing offline replay cannot prove: downstream `0x081`
 selection/physical steering response to sustained authenticated host ID11.

@@ -19,7 +19,7 @@ from exploit.common.ram_exec import (
     TOYOTA_P1ME_PAYLOAD_BUILD_SECRET,
 )
 from exploit.ephemeral_runtime import camry_f33_08a_oracle_stream as eps08a_oracle
-from exploit.ephemeral_runtime import camry_f33_08a_fd_oracle as eps08a_fd_oracle
+from exploit.ephemeral_runtime import camry_f33_08a_classic_oracle as eps08a_classic_oracle
 from exploit.ephemeral_runtime import camry_f33_08a_tx_probe as eps08a_probe
 from exploit.ephemeral_runtime import camry_f33_b6_bridge_install as bridge_install
 from exploit.ephemeral_runtime import (
@@ -29,6 +29,7 @@ from exploit.ephemeral_runtime import (
     camry_f33_b6_transaction_observer_install as observer_install,
 )
 from exploit.ephemeral_runtime import camry_f33_command5_probe as command5_probe
+from exploit.ephemeral_runtime import camry_f33_route40_observer as route40_observer
 from exploit.ephemeral_runtime import camry_f33_runtime_monitor as runtime_monitor
 from exploit.ephemeral_runtime import (
     camry_f33_runtime_monitor_intertick as intertick_monitor,
@@ -55,9 +56,10 @@ FIELD_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_field_launcher.sh"
 PREAGG_FIELD_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_field_preaggregate_launcher.sh"
 MIDAGG_FIELD_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_field_midaggregate_launcher.sh"
 COMMAND5_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_command5_launcher.sh"
+ROUTE40_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_route40_observer_launcher.sh"
 EPS08A_TX_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_08a_tx_probe_launcher.sh"
 EPS08A_ORACLE_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_08a_oracle_stream_launcher.sh"
-EPS08A_FD_ORACLE_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_08a_fd_oracle_launcher.sh"
+EPS08A_CLASSIC_ORACLE_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_08a_classic_oracle_launcher.sh"
 INLINE_SIGNER_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_b6_inline_signer_launcher.sh"
 ICUS_RAMKEY_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_icus_ramkey_probe_launcher.sh"
 PERSISTENT_SIGNER_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_persistent_signer_launcher.sh"
@@ -70,12 +72,14 @@ PREAGG_MONITOR_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_runtime
 INTERTICK_MONITOR_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_runtime_monitor_intertick.bin"
 MIDAGG_OBSERVER_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_midaggregate_observer.bin"
 COMMAND5_PROBE_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_command5_probe.bin"
+ROUTE40_OBSERVER_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_route40_observer.bin"
+ROUTE40_OBSERVER_META = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_route40_observer_build.json"
 EPS08A_TX_PROBE_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_08a_tx_probe.bin"
 EPS08A_TX_PROBE_META = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_08a_tx_probe_build.json"
 EPS08A_ORACLE_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_08a_oracle_stream.bin"
 EPS08A_ORACLE_META = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_08a_oracle_stream_build.json"
-EPS08A_FD_ORACLE_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_08a_fd_oracle.bin"
-EPS08A_FD_ORACLE_META = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_08a_fd_oracle_build.json"
+EPS08A_CLASSIC_ORACLE_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_08a_classic_oracle.bin"
+EPS08A_CLASSIC_ORACLE_META = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_08a_classic_oracle_build.json"
 # Supervised continuous substitution preserves the road helper's steady-state
 # behavior, but stops after seven foreground ticks without a changed host
 # generation. Its new identity has instruction-level, not vehicle, validation.
@@ -105,9 +109,10 @@ RUNTIME_FILES = [
     "exploit/ephemeral_runtime/camry_f33_b6_midaggregate_observer.py",
     "exploit/ephemeral_runtime/camry_f33_b6_ingress_helper.py",
     "exploit/ephemeral_runtime/camry_f33_command5_probe.py",
+    "exploit/ephemeral_runtime/camry_f33_route40_observer.py",
     "exploit/ephemeral_runtime/camry_f33_08a_tx_probe.py",
     "exploit/ephemeral_runtime/camry_f33_08a_oracle_stream.py",
-    "exploit/ephemeral_runtime/camry_f33_08a_fd_oracle.py",
+    "exploit/ephemeral_runtime/camry_f33_08a_classic_oracle.py",
     "exploit/ephemeral_runtime/camry_f33_b6_inline_signer.py",
     "exploit/ephemeral_runtime/camry_f33_post_install_recovery.py",
     "exploit/ephemeral_runtime/camry_f33_icus_ramkey_probe.py",
@@ -353,6 +358,13 @@ def build(out: Path, openpilot: Path) -> dict:
     intertick_monitor_payload = package_shellcode(INTERTICK_MONITOR_BIN.read_bytes(), secret=TOYOTA_P1ME_PAYLOAD_BUILD_SECRET)
     midaggregate_observer_payload = package_shellcode(MIDAGG_OBSERVER_BIN.read_bytes(), secret=TOYOTA_P1ME_PAYLOAD_BUILD_SECRET)
     command5_probe_payload = package_shellcode(COMMAND5_PROBE_BIN.read_bytes(), secret=TOYOTA_P1ME_PAYLOAD_BUILD_SECRET)
+    route40_meta = json.loads(ROUTE40_OBSERVER_META.read_text(encoding="utf-8"))
+    route40_stage = ROUTE40_OBSERVER_BIN.read_bytes()
+    if route40_meta.get("schema") != "camry-f33-route40-observer-build-v1":
+        raise RuntimeError("route40 observer audited metadata schema drift")
+    if hashlib.sha256(route40_stage).hexdigest() != route40_meta["staging"]["sha256"]:
+        raise RuntimeError("route40 observer audited staging identity drift")
+    route40_payload = package_shellcode(route40_stage, secret=TOYOTA_P1ME_PAYLOAD_BUILD_SECRET)
     eps08a_tx_meta = json.loads(EPS08A_TX_PROBE_META.read_text(encoding="utf-8"))
     eps08a_tx_stage = EPS08A_TX_PROBE_BIN.read_bytes()
     if hashlib.sha256(eps08a_tx_stage).hexdigest() != eps08a_tx_meta["staging"]["sha256"]:
@@ -365,13 +377,13 @@ def build(out: Path, openpilot: Path) -> dict:
     eps08a_oracle_payload = package_shellcode(eps08a_oracle_stage, secret=TOYOTA_P1ME_PAYLOAD_BUILD_SECRET)
     if hashlib.sha256(eps08a_oracle_payload).hexdigest() != eps08a_oracle_meta["authenticated_payload"]["sha256"]:
         raise RuntimeError("0x08A oracle authenticated payload identity drift")
-    eps08a_fd_oracle_meta = json.loads(EPS08A_FD_ORACLE_META.read_text(encoding="utf-8"))
-    eps08a_fd_oracle_stage = EPS08A_FD_ORACLE_BIN.read_bytes()
-    if hashlib.sha256(eps08a_fd_oracle_stage).hexdigest() != eps08a_fd_oracle_meta["staging"]["sha256"]:
-        raise RuntimeError("0x08A raw-FD oracle audited staging identity drift")
-    eps08a_fd_oracle_payload = package_shellcode(eps08a_fd_oracle_stage, secret=TOYOTA_P1ME_PAYLOAD_BUILD_SECRET)
-    if hashlib.sha256(eps08a_fd_oracle_payload).hexdigest() != eps08a_fd_oracle_meta["authenticated_payload"]["sha256"]:
-        raise RuntimeError("0x08A raw-FD oracle authenticated payload identity drift")
+    eps08a_classic_oracle_meta = json.loads(EPS08A_CLASSIC_ORACLE_META.read_text(encoding="utf-8"))
+    eps08a_classic_oracle_stage = EPS08A_CLASSIC_ORACLE_BIN.read_bytes()
+    if hashlib.sha256(eps08a_classic_oracle_stage).hexdigest() != eps08a_classic_oracle_meta["staging"]["sha256"]:
+        raise RuntimeError("0x08A raw-classic oracle audited staging identity drift")
+    eps08a_classic_oracle_payload = package_shellcode(eps08a_classic_oracle_stage, secret=TOYOTA_P1ME_PAYLOAD_BUILD_SECRET)
+    if hashlib.sha256(eps08a_classic_oracle_payload).hexdigest() != eps08a_classic_oracle_meta["authenticated_payload"]["sha256"]:
+        raise RuntimeError("0x08A raw-classic oracle authenticated payload identity drift")
     inline_meta = json.loads(INLINE_SIGNER_META.read_text(encoding="utf-8"))
     inline_staging = INLINE_SIGNER_BIN.read_bytes()
     inline_helper = INLINE_SIGNER_HELPER.read_bytes()
@@ -424,6 +436,8 @@ def build(out: Path, openpilot: Path) -> dict:
         raise RuntimeError("mid-aggregate observer authenticated payload identity drift")
     if hashlib.sha256(command5_probe_payload).hexdigest() != command5_probe.EXPECTED_PAYLOAD_SHA256:
         raise RuntimeError("command-5 probe authenticated payload identity drift")
+    if hashlib.sha256(route40_payload).hexdigest() != route40_observer.EXPECTED_PAYLOAD_SHA256:
+        raise RuntimeError("route40 observer authenticated payload identity drift")
     if hashlib.sha256(eps08a_tx_payload).hexdigest() != eps08a_probe.EXPECTED_PAYLOAD_SHA256:
         raise RuntimeError("0x08A Tx probe authenticated payload identity drift")
     if hashlib.sha256(inline_signer_payload).hexdigest() != inline_meta["authenticated_payload"]["sha256"]:
@@ -436,12 +450,16 @@ def build(out: Path, openpilot: Path) -> dict:
     (ram_dir / "camry_f33_runtime_monitor_intertick_payload.bin").write_bytes(intertick_monitor_payload)
     (ram_dir / "camry_f33_b6_midaggregate_observer_payload.bin").write_bytes(midaggregate_observer_payload)
     (ram_dir / "camry_f33_command5_probe_payload.bin").write_bytes(command5_probe_payload)
+    (ram_dir / "camry_f33_route40_observer_payload.bin").write_bytes(route40_payload)
+    (ram_dir / "camry_f33_route40_observer.json").write_text(
+        json.dumps(route40_meta, indent=2, sort_keys=True) + "\n", encoding="utf-8",
+    )
     (ram_dir / "camry_f33_08a_tx_probe_payload.bin").write_bytes(eps08a_tx_payload)
     (ram_dir / "camry_f33_08a_tx_probe.json").write_text(json.dumps(eps08a_tx_meta, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     (ram_dir / "camry_f33_08a_oracle_stream_payload.bin").write_bytes(eps08a_oracle_payload)
     (ram_dir / "camry_f33_08a_oracle_stream.json").write_text(json.dumps(eps08a_oracle_meta, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    (ram_dir / "camry_f33_08a_fd_oracle_payload.bin").write_bytes(eps08a_fd_oracle_payload)
-    (ram_dir / "camry_f33_08a_fd_oracle.json").write_text(json.dumps(eps08a_fd_oracle_meta, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    (ram_dir / "camry_f33_08a_classic_oracle_payload.bin").write_bytes(eps08a_classic_oracle_payload)
+    (ram_dir / "camry_f33_08a_classic_oracle.json").write_text(json.dumps(eps08a_classic_oracle_meta, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     (ram_dir / "camry_f33_b6_inline_signer_payload.bin").write_bytes(inline_signer_payload)
     (ram_dir / "camry_f33_b6_inline_signer_helper_padded.bin").write_bytes(inline_helper)
     (ram_dir / "camry_f33_b6_inline_signer.json").write_text(json.dumps(inline_meta, indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -468,15 +486,18 @@ def build(out: Path, openpilot: Path) -> dict:
     command5_launcher = out / "f33-sign"
     shutil.copy2(COMMAND5_LAUNCHER, command5_launcher)
     command5_launcher.chmod(0o755)
+    route40_launcher = out / "f33-route40"
+    shutil.copy2(ROUTE40_LAUNCHER, route40_launcher)
+    route40_launcher.chmod(0o755)
     eps08a_tx_launcher = out / "f33-08a-route"
     shutil.copy2(EPS08A_TX_LAUNCHER, eps08a_tx_launcher)
     eps08a_tx_launcher.chmod(0o755)
     eps08a_oracle_launcher = out / "f33-08a-oracle"
     shutil.copy2(EPS08A_ORACLE_LAUNCHER, eps08a_oracle_launcher)
     eps08a_oracle_launcher.chmod(0o755)
-    eps08a_fd_oracle_launcher = out / "f33-08a-fd-oracle"
-    shutil.copy2(EPS08A_FD_ORACLE_LAUNCHER, eps08a_fd_oracle_launcher)
-    eps08a_fd_oracle_launcher.chmod(0o755)
+    eps08a_classic_oracle_launcher = out / "f33-08a-classic-oracle"
+    shutil.copy2(EPS08A_CLASSIC_ORACLE_LAUNCHER, eps08a_classic_oracle_launcher)
+    eps08a_classic_oracle_launcher.chmod(0o755)
     inline_signer_launcher = out / "f33-secoc"
     shutil.copy2(INLINE_SIGNER_LAUNCHER, inline_signer_launcher)
     inline_signer_launcher.chmod(0o755)
@@ -496,9 +517,10 @@ def build(out: Path, openpilot: Path) -> dict:
         "f33-pre": {"sha256": sha256(preagg_launcher)},
         "f33-ingress": {"sha256": sha256(ingress_launcher)},
         "f33-sign": {"sha256": sha256(command5_launcher)},
+        "f33-route40": {"sha256": sha256(route40_launcher)},
         "f33-08a-route": {"sha256": sha256(eps08a_tx_launcher)},
         "f33-08a-oracle": {"sha256": sha256(eps08a_oracle_launcher)},
-        "f33-08a-fd-oracle": {"sha256": sha256(eps08a_fd_oracle_launcher)},
+        "f33-08a-classic-oracle": {"sha256": sha256(eps08a_classic_oracle_launcher)},
         "f33-secoc": {"sha256": sha256(inline_signer_launcher)},
         "f33-icus-ramkey": {"sha256": sha256(icus_ramkey_launcher)},
         "f33-persist": {"sha256": sha256(persistent_signer_launcher)},
@@ -511,11 +533,12 @@ def build(out: Path, openpilot: Path) -> dict:
     for path in sorted(p for p in persistent_dir.rglob("*") if p.is_file()):
         files[str(path.relative_to(out))] = {"sha256": sha256(path)}
     manifest = {
-        "schema": "camry-f33-car-kit-v19",
+        "schema": "camry-f33-car-kit-v21",
         "created_at": datetime.now(UTC).isoformat(timespec="seconds"),
         "target": {
             "eps_f181": "8965F3307000",
-            "eps_diag": "0x7A1->0x7A9 bus0 (post-repin EPS diagnostics and 0x08A MAC-oracle transport)",
+            "eps_diag": "0x7A1->0x7A9 bus0 (post-repin EPS diagnostics; historical ISO-TP oracle transport only)",
+            "oracle_sideband": "extended classic 0x1FDC0002->0x1FE00002 bus0 (selected raw-classic 0x08A CMAC transport)",
             "request_source": "0x08A/32 FD bus2 (FRC native source on relay-correct repin)",
             "request_sink": "0x08A/32 FD bus0 (host replacement toward chassis/Brake)",
         },
@@ -532,8 +555,10 @@ def build(out: Path, openpilot: Path) -> dict:
             "persistent_patch_required": False,
             "stage5_receiver_bypass_required": False,
             "current_lateral_path": "relay-correct FRC 0x08A source replacement; EPS resident is CMAC service only",
-            "reason": "the live-qualified volatile oracle runs stock ICU-S command 5 selector 4 over the host-supplied exact 0x008A SecOC domain; it does not bypass the EPS receiver or transmit the request",
-            "live_qualified_oracle_on_current_exact_f33": True,
+            "reason": "stock ICU-S command 5 selector 4 is live-qualified for exact 0x008A CMAC generation; the selected raw-classic carrier changes only host-to-resident transport and does not bypass the EPS receiver or transmit the request",
+            "command5_oracle_primitive_live_qualified": True,
+            "selected_oracle_transport": "raw-classic five-fragment 0x1FDC0002 request / 0x1FE00002 response",
+            "selected_oracle_transport_live_qualified": False,
             "request_plane_road_qualified": False,
             "historical_direct_b6_path": "retained as development evidence only; do not arm f33-secoc or f33-persist alongside the 0x08A request-plane path",
         },
@@ -625,22 +650,22 @@ def build(out: Path, openpilot: Path) -> dict:
                 "live_qualified": True,
                 "live_result": "2026-09-18 production-shaped 100-request 25-ms pipeline: 100/100 responses, resident counters +100/+100/+100, p95 24.094 ms, max 28.946 ms",
             },
-            "08a_fd_mac_oracle": {
-                "launcher": "f33-08a-fd-oracle",
-                "payload": "ram_payloads/camry_f33_08a_fd_oracle_payload.bin",
-                "payload_sha256": eps08a_fd_oracle_meta["authenticated_payload"]["sha256"],
-                "staging_sha256": eps08a_fd_oracle_meta["staging"]["sha256"],
-                "resident": eps08a_fd_oracle_meta["resident"],
-                "helper": eps08a_fd_oracle_meta["helper"],
-                "request": eps08a_fd_oracle_meta["request"],
-                "response": eps08a_fd_oracle_meta["response"],
-                "command5": eps08a_fd_oracle_meta["command5"],
-                "mutation_boundary": eps08a_fd_oracle_meta["mutation_boundary"],
+            "08a_classic_mac_oracle": {
+                "launcher": "f33-08a-classic-oracle",
+                "payload": "ram_payloads/camry_f33_08a_classic_oracle_payload.bin",
+                "payload_sha256": eps08a_classic_oracle_meta["authenticated_payload"]["sha256"],
+                "staging_sha256": eps08a_classic_oracle_meta["staging"]["sha256"],
+                "resident": eps08a_classic_oracle_meta["resident"],
+                "helper": eps08a_classic_oracle_meta["helper"],
+                "request": eps08a_classic_oracle_meta["request"],
+                "response": eps08a_classic_oracle_meta["response"],
+                "command5": eps08a_classic_oracle_meta["command5"],
+                "mutation_boundary": eps08a_classic_oracle_meta["mutation_boundary"],
                 "field_sequence": [
-                    "./f33-08a-fd-oracle install in NRTD/Park/stationary",
+                    "./f33-08a-classic-oracle install in NRTD/Park/stationary",
                     "direct NRTD->READY without OFF",
-                    "./f33-08a-fd-oracle known-answer in READY/Park/stationary",
-                    "only after known-answer passes: ./f33-08a-fd-oracle benchmark 20",
+                    "./f33-08a-classic-oracle known-answer in READY/Park/stationary",
+                    "only after known-answer passes: ./f33-08a-classic-oracle benchmark 20",
                 ],
                 "persistent_flash_write": False,
                 "live_qualified": False,
@@ -746,6 +771,41 @@ def build(out: Path, openpilot: Path) -> dict:
                 "live_qualified": True,
                 "live_result": "2026-09-09 selector4 command5 generated 16-byte CMAC for exact 36-byte B6 domain on first attempt",
                 "live_zero_domain_cmac": "00d0b1eca59d0760eddc5efb5b58d1d5",
+            },
+            "valid_090_route40_experiment": {
+                "launcher": "f33-route40",
+                "payload": "ram_payloads/camry_f33_route40_observer_payload.bin",
+                "payload_sha256": route40_observer.EXPECTED_PAYLOAD_SHA256,
+                "staging_sha256": route40_observer.EXPECTED_STAGING_SHA256,
+                "resident_sha256": route40_observer.EXPECTED_RESIDENT_SHA256,
+                "resident_base": f"0x{route40_observer.RESIDENT_BASE:08X}",
+                "resident_size": route40_observer.RESIDENT_SIZE,
+                "mailbox": f"0x{route40_observer.MAILBOX_BASE:08X}..0x{route40_observer.MAILBOX_BASE + route40_observer.MAILBOX_SIZE - 1:08X}",
+                "route40_raw_com": "0xFEBE4BAF..0xFEBE4BCE",
+                "route40_generation": "0xFEBE5360",
+                "route40_invalid_checksum_counter": "0xFEBE53C0",
+                "operation": "prepare one future slot-4-authenticated, valid-B7 0x090 under the command5 resident; replace it with a non-bypassing sticky route40 observer; transmit message2 immediately after native message1",
+                "field_sequence": [
+                    "./f33-sign prepare-native-090-route-probe OUTPUT_JSON in READY/Park/stationary",
+                    "transition to NRTD without fully powering EPS off; ./f33-route40 install",
+                    "direct NRTD->READY without OFF",
+                    "./f33-route40 run OUTPUT_JSON [RESULT_JSON] in READY/Park/stationary",
+                ],
+                "positive_verdict": "valid_authenticated_090_reached_f33_route40_raw_com",
+                "bounded_negative_verdict": "valid_authenticated_090_not_latched_while_native_route40_remained_live",
+                "observer_match": "exact prepared B28..B31 trailer; on match latch all 32 bytes and require full-frame equality",
+                "content_controls": [
+                    "byte-exact captured native 0x090 application",
+                    "exact-F33 local B7 checksum valid",
+                    "exact-F33 slot-4 DataID 0x0090 MAC28",
+                    "target-reset native message1 followed by probe message2",
+                ],
+                "mutation_boundary": route40_meta["mutation_boundary"],
+                "observer_can_transmit": False,
+                "observer_route_table_patch": False,
+                "observer_secoc_bypass": False,
+                "persistent_flash_write": False,
+                "live_qualified": False,
             },
             "eps_origin_08a_routing_probe": {
                 "launcher": "f33-08a-route",
@@ -950,9 +1010,11 @@ def build(out: Path, openpilot: Path) -> dict:
                 "requires_before_arm": "first prove the exact injected ID63 frame reaches profile2 with b6_midaggregate_observer; bridge is a later controlled transformation experiment",
             },
             "order": [
-                "08a_mac_oracle is the production volatile signer service: install in NRTD, transition directly to READY without OFF, then openpilot signs exact observed native 0x08A generations through the generic DataID-0x008A command-5 oracle while Panda owns relay replacement",
+                "08a_classic_mac_oracle is the selected volatile signer transport: install in NRTD, transition directly to READY without OFF, prove native-MAC equality and 25-ms cadence, then openpilot signs exact observed native 0x08A generations through the raw-classic mailbox while Panda owns relay replacement",
+                "08a_mac_oracle is the live-qualified historical ISO-TP command-5 transport and remains useful as primitive evidence, not the selected driving carrier",
                 "b6_inline_signer is retained only as historical direct-B6 development evidence and must not be armed alongside the request-plane path",
-                "command5_probe is retained as the earlier bounded diagnostic oracle; the 0x08A streaming oracle is the continuous signing service",
+                "command5_probe is retained as the earlier bounded diagnostic oracle",
+                "valid_090_route40_experiment is the current routing discriminator for a host-origin 0x090 after both exact P5/MAC28 and local B7 conditions are satisfied",
                 "eps_origin_08a_routing_probe is the non-actuating topology discriminator: after passive native-0x08A MAC reproduction, replay one unchanged stock ID0 frame from the EPS lower CAN-FD path and observe whether that exact FV4+MAC frame reaches Panda",
                 "b6_ingress_observer is the live-qualified two-stage topology discriminator; its 2026-09-10 D7-positive marker run closed bounded negative for direct Panda ID63 at post-CanIf/pre-SecOC",
                 "the original b6_midaggregate_observer full-runtime install failed before initialization and is retained only as a superseded artifact",

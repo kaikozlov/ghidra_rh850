@@ -847,6 +847,9 @@ tests = [
   "tests/verify_camry_f33_b6_midaggregate_observer.py",
 ]
 
+[suite.camry_f33_route40_observer]
+tests = ["tests/verify_camry_f33_route40_observer.py"]
+
 [suite.camry_f33_icus_ramkey_probe]
 tests = ["tests/verify_camry_f33_icus_ramkey_probe.py"]
 
@@ -1088,6 +1091,10 @@ timeout = 600
 
 [suite.camry_f33_08a_fd_oracle]
 tests = ["tests/verify_camry_f33_08a_fd_oracle.py"]
+timeout = 600
+
+[suite.camry_f33_08a_classic_oracle]
+tests = ["tests/verify_camry_f33_08a_classic_oracle.py"]
 timeout = 600
 
 [suite.camry_f33_08a_tx_probe]
