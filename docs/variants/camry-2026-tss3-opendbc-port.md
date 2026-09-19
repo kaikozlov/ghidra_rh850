@@ -1090,9 +1090,10 @@ The same drive still contained nine cases where a source generation received ISO
 control on both the first sign attempt and its retry but no private `07 C9` response. The
 surrounding serialized transactions resumed normally. `kai-openpilot@4fb0dfd4d` therefore
 allows **two retries / three total serialized attempts** for the exact same source generation
-before releasing that authority interval. It does not skip, predict, or replace generations.
-The production replay tool now supports `--drop-sign-attempts 2` so this exact double-loss
-class is exercised explicitly.
+before releasing that authority interval. The later coalescing change below supersedes the
+"must eventually send every source generation" part of this interim design; generation
+prediction remains forbidden. The production replay tool supports `--drop-sign-attempts 2`
+so this exact double-loss class is exercised explicitly.
 
 With the narrow Panda buffering policy removed, the complete local `144` route replay
 (segments 0–8) passes at 24-ms synthetic oracle service time while deliberately dropping the
@@ -1108,6 +1109,62 @@ opendbc state and its live firmware signature matched. After the comma reboot, a
 12-second parked observation captured **481** native ID0 generations with zero B26/timing
 gaps, Toyota safety param 53833, valid RX checks, no Panda faults, no request-plane warning,
 and no unexpected host/ownership/oracle traffic.
+
+**September-19 route `00000146--e87b3278be`: stale-generation backlog closure.** This is the
+first drive after the 16-generation/250-ms policy removal. In the six retained segments the
+host emitted 318 ID11/B24=100 frames; Panda accepted **316** and rejected only **2**, while
+Brake/VMM selected `0x081` result-ID11 **295** times. There were four unique request-plane
+failures: one startup `oracle_recovery_failure`, two `host_08a_rejected`, and one
+`oracle_sign_failure`. The two host rejects were exact signed source generations that had
+aged to roughly **404 ms / lag 16** and **425 ms / lag 17** respectively. This proved that
+merely enlarging the FIFO continued to treat transport backlog as something steering should
+wait for rather than eliminating the backlog itself.
+
+The same route also characterizes the command-5 transport directly. Across 365 production
+requests, 325 private `07 C9` responses succeeded and 40 did not. Successful RTT was median
+**18.42 ms**, p95 **27.99 ms**, max **38.95 ms**. Every failure class still showed ISO-TP
+flow control, but the fast transport sends all five CFs roughly **5.1 ms** after FF, before
+flow control normally arrives. FC latency in this route was median ~16.8 ms and failures
+were strongly concentrated when FC arrived late (26–30 ms). A parked normal-pandad benchmark
+confirmed the throughput/reliability tradeoff: 5-ms pre-CF produced 72/80 successes, 8 ms
+75/80, 10 ms 75/80, and 12 ms 79/80. Waiting long enough for near-perfect admission on every
+request would therefore reduce service rate below the 40-Hz native stream. The fix cannot be
+"wait longer for every generation".
+
+`kai-openpilot@0ec4e2b3d` therefore changes the active signer from a FIFO of every native
+source generation to a **monotonic latest-generation queue**. At most one sign transaction is
+in flight and one newest unsent generation is retained. When another native generation
+arrives, older not-yet-started sign jobs are marked superseded and never sent. If an
+in-flight sign times out while a newer generation already waits, the stale generation is
+abandoned immediately and the newest source generation is serviced instead of spending
+additional retries on steering that is already obsolete. No skipped generation is forwarded
+as native Toyota ID0; comma retains request-plane authority. The recovered freshness tracker
+still advances over every source-real generation, so the newest domain remains exact.
+
+Nested `opendbc@97f0f1f7` makes the corresponding Panda matching rule monotonic rather than
+contiguous: the host may send any **newer exact unconsumed** native generation, and successful
+matching atomically consumes that generation plus all older skipped generations. Newer
+history remains available. Replay/backward movement, duplicate consumption, fabricated
+freshness, arbitrary application edits, controls-disallowed steering, and angle/rate
+violations remain rejected. This removes the last "every generation must be host-transmitted"
+bring-up policy without removing ordinary Panda steering safety.
+
+The new regression suite explicitly covers both sides: a timed-out in-flight generation with
+a newer queued source is superseded with no authority failure/warning, and Panda accepts a
+forward exact-generation skip but rejects any attempt to replay an older skipped generation.
+The exact `146` route then passes full production replay at 24-ms synthetic oracle service
+with an injected lost sign response: **387 modified ID11**, 390 owned native generations,
+zero Panda rejects, zero native leaks, zero freshness/sign failures, and zero authority
+failures. The older mixed `135` route also passes the same injected-loss gate with **8,430**
+modified ID11 and zero failures. Unit gates after this closure are **42 proxy/car-event
+checks** and **275 Toyota/Panda safety tests + 8 subtests**.
+
+Deployed heads are now `kai-openpilot@0ec4e2b3d`, nested `opendbc@97f0f1f7`, and
+`panda@21701e3f`. Panda was rebuilt/flashed from that exact nested opendbc state and the live
+firmware signature matched. After comma reboot, a lease-free 12-second parked observation
+captured **481** native ID0 generations with zero B26/timing gaps, Toyota safety param 53833,
+valid RX checks, no Panda faults, no warning-only steering fault, and no unexpected
+host/ownership/oracle traffic.
 
 The volatile EPS oracle resident is still a deployment prerequisite rather than an
 openpilot-installed component. Without a qualified oracle response, the host never sends
