@@ -961,6 +961,22 @@ qualified/idle state without recovery churn. Only after that parked gate is clea
 moving test be used for the one thing offline replay cannot prove: downstream `0x081`
 selection/physical steering response to sustained authenticated host ID11.
 
+**Parked live gate, September 18 evening:** after oracle reinstall and operator-completed
+Brake->FRC recovery, the deployed heads were `kai-openpilot@71703da35`, nested
+`opendbc@ad23a31b`, and `panda@21701e3f`. Live state was Park, `vEgo=0`,
+`standstill=true`, `canValid=true`, Toyota safety param `53833`, flipped harness,
+`safetyRxChecksInvalid=false`, and no Panda faults. A lease-free 30-second observation
+captured exactly **1,200** source bus2 ID0 `0x08A` generations (40 Hz) with **zero**
+B26/timing discontinuities, **zero** host `0x08A`, **zero** ownership-admin `0x777`, and
+**zero** oracle/recovery traffic. This is the expected qualified/idle parked state.
+
+An earlier short recovery burst in the same boot followed a **3.54-second native CAN hole**
+caused by direct Panda-lease diagnostic activity during setup/inspection. Immediately after
+that discontinuity the runtime re-qualified in three oracle transactions and returned to
+silence; it is therefore classified as a diagnostic-tool-induced continuity break, not
+steady-state proxy churn. Future parked qualification should avoid direct Panda lease/status
+operations after the final recovery gate and use cereal/messaging observation only.
+
 Working session notes for the GTS+ vehicle-type → install-set → family-`.ddb` → GetSupport funnel (not a claim ledger): [../history/2026-08/CAMRY_GTS_LATERAL_FUNNEL_2026-08-29.md](../history/2026-08/CAMRY_GTS_LATERAL_FUNNEL_2026-08-29.md).
 
 ## 1. Exact F33 generated-COM Tx carriers
