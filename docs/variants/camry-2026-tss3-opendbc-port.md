@@ -1298,6 +1298,76 @@ The final signed Panda image is SHA-256
 offroad reboot, a cooperative direct-Panda lease read live signature
 `13e1abff7abaee8117d601418e8ba2398c733430ae88ef22fb5e28554b4b5fec199ff8b0a189662e00b8fc4bdb92ed3320b0417909f98a6787be42e688071d29ea4d50a7d41e266664b8d53f8e484db69d5b093007f9b6b05a36bcf5288f227234f3fecfef39ef0d9aaed251fc7e1ba3a6d6f9aafd2de9ff15a2e90cd62fd3f2`, exactly matching the newly built expected signature. Live post-lease health was ignition line/CAN false, `controls_allowed=false`, zero safety TX blocks, zero faults, no heartbeat loss, and valid RX-check state; pandad resumed and no lease files remained.
 
+### September-19 request-plane simplification audit
+
+A post-route149 code audit treated every F33-specific state variable and branch as suspect
+unless it protected one of four concrete boundaries: source freshness, atomic relay handoff,
+MAC transport, or Panda TX safety. This removed a substantial amount of bring-up policy that
+had accumulated while the path was still being discovered. Nested `opendbc@5c481f89` and
+parent `kai-openpilot@e3df394eb` are the resulting simplified implementation.
+
+The following scaffolding is now **deleted**, not merely disabled:
+
+- proxy-local brake and native-cruise permission gates. `CC.latActive` is the sole normal
+  lateral ownership input from controlsd; Panda independently owns ordinary brake/cruise
+  safety. The proxy no longer runs a second engagement state machine;
+- the persistent `CarController.tss3_request_plane_active` permission/veto input and private
+  `CarState.tss3_lateral_request_id` plumbing. CarController runs ordinary angle limiting.
+  The only request-plane synchronization is one one-shot measured-angle baseline reset after
+  the handoff clone is actually accepted;
+- native-frame fallback/restoration slots, transparent active output, `PendingOutput`
+  wrapper state, and the old transparent ID0 proxy/runtime/test suite;
+- the separate `TSS3_08A_SIGNED` rollout/safety flag. Relay-correct F33 request-plane mode is
+  one mode now, `TSS3_08A_HOST`; current relay-correct safety param is therefore
+  **`0x5249` / 21065**, not the historical `0xD249` / 53833;
+- the second post-recovery oracle **verify** transaction and its retries. A successful native
+  MAC equality match already identifies the full message counter; deterministic replay of
+  retained consecutive native generations directly qualifies the tracker. The redundant
+  verify gate was the exact mechanism that stranded route148 with zero steering after one
+  missing private response;
+- the arbitrary 2-second recovery cooldown, missing-generation tolerance (`B26` gaps up to
+  eight), and the arbitrary four-recovery-error threshold. Freshness now requires strict
+  source `B26 +1`; all observed gaps in routes 149 and 135 occur while lateral is inactive.
+  A recovery transport error aborts that attempt immediately and retries only after the
+  existing eight-clean-source gate;
+- the one-second authority-warning latch. UI state is now derived directly: authority is
+  unavailable iff controlsd still requests lateral control and the proxy is neither active
+  nor completing a handoff. A Panda host-TX reject is logged as TX telemetry and releases
+  ownership; it is not automatically promoted into a second timed fault state;
+- the separate admin-accepted boolean/index/data ceremony. The accepted handoff clone itself
+  proves Panda armed the relay. Exactly one native source generation may be cloned for that
+  handoff; if another native generation arrives before its echo, the handoff aborts rather
+  than emitting multiple Toyota clones.
+
+Panda's old **16-generation / 250-ms** source buffer/watchdog was also a relic of the
+serialized whole-transaction retry backlog. Same-session CF repair no longer creates that
+backlog. Panda now retains only **four** source generations and fails open after **100 ms**
+without accepted host replacement traffic. Exact generation matching remains because it is
+a real safety boundary: `0x08A` carries longitudinal fields too, so Panda must prove the host
+changed only the bounded lateral fields for the exact FRC freshness generation.
+
+What deliberately remains custom is correspondingly small:
+
+1. reconstruct the native SecOC freshness counter, using eight consecutive source frames
+   before recovery after a gap;
+2. one exact source clone as the atomic relay handoff witness;
+3. one source-ordered command-5 sign transaction in flight, with one same-session CF repair
+   if the EPS's real `30 00 28` flow-control arrives after the speculative 5-ms CF batch;
+4. comma ID11 construction from observed FRC lateral owners `{0,4,11,18}` on the same source
+   generation;
+5. Panda exact-source binding, ordinary steering-angle safety, a four-generation transport
+   window, and the 100-ms relay fail-open watchdog.
+
+The simplified implementation still passes **28 proxy tests**, **46 Camry TSS3 tests**, and
+three warning/event tests. Full production replay remains clean with an injected missing
+sign reply repaired in-place. Route149 completes its five real lateral windows with
+**5 arms / 5 releases**, 7,387 owned native generations blocked, 7,382 active host ID11
+outputs, zero native leaks, zero safety invalidity and zero unexpected failures. The one
+Panda-rejected ID11 occurs only after `controls_allowed=false` at the normal disengagement
+edge and is classified as that safety-owned boundary, not an authority fault. Mixed route135
+likewise completes **8 arms / 8 releases**, 8,552 active host ID11 outputs and zero unexpected
+failures; its two Panda rejects are the same controls-disallowed disengagement ordering.
+
 Same-session CF repair is software/replay-qualified but not yet live-EPS-qualified. Its next
 hardware qualification is a **parked** oracle admission-loss test after the volatile resident
 is installed. No moving test should precede that parked qualification.
