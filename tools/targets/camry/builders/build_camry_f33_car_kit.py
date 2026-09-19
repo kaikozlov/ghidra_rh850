@@ -19,6 +19,7 @@ from exploit.common.ram_exec import (
     TOYOTA_P1ME_PAYLOAD_BUILD_SECRET,
 )
 from exploit.ephemeral_runtime import camry_f33_08a_oracle_stream as eps08a_oracle
+from exploit.ephemeral_runtime import camry_f33_08a_fd_oracle as eps08a_fd_oracle
 from exploit.ephemeral_runtime import camry_f33_08a_tx_probe as eps08a_probe
 from exploit.ephemeral_runtime import camry_f33_b6_bridge_install as bridge_install
 from exploit.ephemeral_runtime import (
@@ -56,6 +57,7 @@ MIDAGG_FIELD_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_field_midagg
 COMMAND5_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_command5_launcher.sh"
 EPS08A_TX_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_08a_tx_probe_launcher.sh"
 EPS08A_ORACLE_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_08a_oracle_stream_launcher.sh"
+EPS08A_FD_ORACLE_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_08a_fd_oracle_launcher.sh"
 INLINE_SIGNER_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_b6_inline_signer_launcher.sh"
 ICUS_RAMKEY_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_icus_ramkey_probe_launcher.sh"
 PERSISTENT_SIGNER_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_persistent_signer_launcher.sh"
@@ -72,6 +74,8 @@ EPS08A_TX_PROBE_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_08a_tx
 EPS08A_TX_PROBE_META = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_08a_tx_probe_build.json"
 EPS08A_ORACLE_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_08a_oracle_stream.bin"
 EPS08A_ORACLE_META = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_08a_oracle_stream_build.json"
+EPS08A_FD_ORACLE_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_08a_fd_oracle.bin"
+EPS08A_FD_ORACLE_META = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_08a_fd_oracle_build.json"
 # Supervised continuous substitution preserves the road helper's steady-state
 # behavior, but stops after seven foreground ticks without a changed host
 # generation. Its new identity has instruction-level, not vehicle, validation.
@@ -103,6 +107,7 @@ RUNTIME_FILES = [
     "exploit/ephemeral_runtime/camry_f33_command5_probe.py",
     "exploit/ephemeral_runtime/camry_f33_08a_tx_probe.py",
     "exploit/ephemeral_runtime/camry_f33_08a_oracle_stream.py",
+    "exploit/ephemeral_runtime/camry_f33_08a_fd_oracle.py",
     "exploit/ephemeral_runtime/camry_f33_b6_inline_signer.py",
     "exploit/ephemeral_runtime/camry_f33_post_install_recovery.py",
     "exploit/ephemeral_runtime/camry_f33_icus_ramkey_probe.py",
@@ -360,6 +365,13 @@ def build(out: Path, openpilot: Path) -> dict:
     eps08a_oracle_payload = package_shellcode(eps08a_oracle_stage, secret=TOYOTA_P1ME_PAYLOAD_BUILD_SECRET)
     if hashlib.sha256(eps08a_oracle_payload).hexdigest() != eps08a_oracle_meta["authenticated_payload"]["sha256"]:
         raise RuntimeError("0x08A oracle authenticated payload identity drift")
+    eps08a_fd_oracle_meta = json.loads(EPS08A_FD_ORACLE_META.read_text(encoding="utf-8"))
+    eps08a_fd_oracle_stage = EPS08A_FD_ORACLE_BIN.read_bytes()
+    if hashlib.sha256(eps08a_fd_oracle_stage).hexdigest() != eps08a_fd_oracle_meta["staging"]["sha256"]:
+        raise RuntimeError("0x08A raw-FD oracle audited staging identity drift")
+    eps08a_fd_oracle_payload = package_shellcode(eps08a_fd_oracle_stage, secret=TOYOTA_P1ME_PAYLOAD_BUILD_SECRET)
+    if hashlib.sha256(eps08a_fd_oracle_payload).hexdigest() != eps08a_fd_oracle_meta["authenticated_payload"]["sha256"]:
+        raise RuntimeError("0x08A raw-FD oracle authenticated payload identity drift")
     inline_meta = json.loads(INLINE_SIGNER_META.read_text(encoding="utf-8"))
     inline_staging = INLINE_SIGNER_BIN.read_bytes()
     inline_helper = INLINE_SIGNER_HELPER.read_bytes()
@@ -428,6 +440,8 @@ def build(out: Path, openpilot: Path) -> dict:
     (ram_dir / "camry_f33_08a_tx_probe.json").write_text(json.dumps(eps08a_tx_meta, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     (ram_dir / "camry_f33_08a_oracle_stream_payload.bin").write_bytes(eps08a_oracle_payload)
     (ram_dir / "camry_f33_08a_oracle_stream.json").write_text(json.dumps(eps08a_oracle_meta, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    (ram_dir / "camry_f33_08a_fd_oracle_payload.bin").write_bytes(eps08a_fd_oracle_payload)
+    (ram_dir / "camry_f33_08a_fd_oracle.json").write_text(json.dumps(eps08a_fd_oracle_meta, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     (ram_dir / "camry_f33_b6_inline_signer_payload.bin").write_bytes(inline_signer_payload)
     (ram_dir / "camry_f33_b6_inline_signer_helper_padded.bin").write_bytes(inline_helper)
     (ram_dir / "camry_f33_b6_inline_signer.json").write_text(json.dumps(inline_meta, indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -460,6 +474,9 @@ def build(out: Path, openpilot: Path) -> dict:
     eps08a_oracle_launcher = out / "f33-08a-oracle"
     shutil.copy2(EPS08A_ORACLE_LAUNCHER, eps08a_oracle_launcher)
     eps08a_oracle_launcher.chmod(0o755)
+    eps08a_fd_oracle_launcher = out / "f33-08a-fd-oracle"
+    shutil.copy2(EPS08A_FD_ORACLE_LAUNCHER, eps08a_fd_oracle_launcher)
+    eps08a_fd_oracle_launcher.chmod(0o755)
     inline_signer_launcher = out / "f33-secoc"
     shutil.copy2(INLINE_SIGNER_LAUNCHER, inline_signer_launcher)
     inline_signer_launcher.chmod(0o755)
@@ -481,6 +498,7 @@ def build(out: Path, openpilot: Path) -> dict:
         "f33-sign": {"sha256": sha256(command5_launcher)},
         "f33-08a-route": {"sha256": sha256(eps08a_tx_launcher)},
         "f33-08a-oracle": {"sha256": sha256(eps08a_oracle_launcher)},
+        "f33-08a-fd-oracle": {"sha256": sha256(eps08a_fd_oracle_launcher)},
         "f33-secoc": {"sha256": sha256(inline_signer_launcher)},
         "f33-icus-ramkey": {"sha256": sha256(icus_ramkey_launcher)},
         "f33-persist": {"sha256": sha256(persistent_signer_launcher)},
@@ -606,6 +624,26 @@ def build(out: Path, openpilot: Path) -> dict:
                 "persistent_flash_write": False,
                 "live_qualified": True,
                 "live_result": "2026-09-18 production-shaped 100-request 25-ms pipeline: 100/100 responses, resident counters +100/+100/+100, p95 24.094 ms, max 28.946 ms",
+            },
+            "08a_fd_mac_oracle": {
+                "launcher": "f33-08a-fd-oracle",
+                "payload": "ram_payloads/camry_f33_08a_fd_oracle_payload.bin",
+                "payload_sha256": eps08a_fd_oracle_meta["authenticated_payload"]["sha256"],
+                "staging_sha256": eps08a_fd_oracle_meta["staging"]["sha256"],
+                "resident": eps08a_fd_oracle_meta["resident"],
+                "helper": eps08a_fd_oracle_meta["helper"],
+                "request": eps08a_fd_oracle_meta["request"],
+                "response": eps08a_fd_oracle_meta["response"],
+                "command5": eps08a_fd_oracle_meta["command5"],
+                "mutation_boundary": eps08a_fd_oracle_meta["mutation_boundary"],
+                "field_sequence": [
+                    "./f33-08a-fd-oracle install in NRTD/Park/stationary",
+                    "direct NRTD->READY without OFF",
+                    "./f33-08a-fd-oracle known-answer in READY/Park/stationary",
+                    "only after known-answer passes: ./f33-08a-fd-oracle benchmark 20",
+                ],
+                "persistent_flash_write": False,
+                "live_qualified": False,
             },
             "b6_inline_signer": {
                 "launcher": "f33-secoc",
