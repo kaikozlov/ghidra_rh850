@@ -1565,7 +1565,7 @@ calls the adapter inactive so asynchronous signing cannot outlive openpilot's co
 `authority_unavailable` remains a derived observation only (`CC.latActive` requested but the
 request plane is not actually active); `arm_pending` is not reported as successful steering.
 
-Focused gates for this minimum path are **16 adapter tests**, **46 Camry TSS3 tests**, and the
+Focused gates for this minimum path are **16 adapter tests**, **48 Camry TSS3 tests**, and the
 three warning/event tests. Normal full-route results are:
 
 - route149: **5 arms / 5 releases**, 7,387 owned native generations, 7,381 active host ID11
@@ -1575,11 +1575,20 @@ three warning/event tests. Normal full-route results are:
   host rejects remain the ordinary `controls_allowed=false` disengagement ordering already
   seen in the recorded route.
 
-The minimum path is deployed as parent `kai-openpilot@88eb9a4e5`, nested
-`opendbc@1b7ab1c1`, Panda source `21701e3f`. The rebuilt signed Panda image is SHA-256
-`f5e08f61f77c033c608c7a8e8581b90af93deccac0c37cfcac95314cd866c0ec`.
+A final ordinary-CarControl pass restored the already-recovered **Camry stock-ACC cancel**
+path that had been lost during a later stock-harness topology correction. On relay-correct
+F33 the Brake Module is native on bus0; `CC.cruiseControl.cancel` now clones live `0x101` to
+bus2 with only `BRAKE_PRESSED` asserted and the Toyota checksum repaired. Panda permits only
+that Camry host-mode stock shape (B0=`0x88`, observed zero companion bytes, valid checksum).
+No protected `0x0FE`, `0x0C9` or `0x0CA` message is spoofed. Current route replays exercise
+this normal contract directly: route149 produces 18 accepted cancel frames and route135 31,
+without changing the five/eight lateral authority windows.
+
+The final minimum path is deployed as parent `kai-openpilot@a381cea58`, nested
+`opendbc@5217e0dd`, Panda source `21701e3f`. The rebuilt signed Panda image is SHA-256
+`d3eb78b0159b292503f54405d7cbe824e290a26f2b414f2b64db78cc5cbe3e98`.
 After an offroad reboot, a cooperative direct-Panda lease read live signature
-`6b8046a0f3f27de92c7941db355630b606901789d13bf2a851b7f1bed9a45470124516b1f36fb3be221b8245df214b22d533c01c474fb5afc5eb780e356ac6320a46f18db0b56f6d2cb084d0ff212ae06da164b402e3e31e3b69a66834fe45c459171550b9a8fed7ff104b62f3afc8d5b44cec44821bb36b0bc0106879eba5b0`, exactly matching the new expected signature. Live health was ignition line/CAN false,
+`2cf91dcebae77744afd7a137779d90cb6df6834d5ff44ce81c703f4f370aaf8294262a4d745fd91096c9ea5d7548c023410947c3e8808c77f3648cf70923069b5643a84af9665361def93bb2d9a5433820906355922833df5c1ea724cc9ae8d07afec0739eaf7a978889d7ed355429dfd4df254159f7559da398d85119305041`, exactly matching the new expected signature. Live health was ignition line/CAN false,
 `controls_allowed=false`, zero safety TX blocks, zero faults, no heartbeat loss and valid RX
 checks. The cooperative lease was removed and both the Python pandad wrapper and native
 `./pandad` child resumed normally; cereal subsequently reported a valid offroad Panda in
