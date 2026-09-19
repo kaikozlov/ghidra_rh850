@@ -789,6 +789,28 @@ in an 8-second sample, 66 `30 00 28` flow-control responses and 64 completed `07
 private replies, with `safetyRxChecksInvalid=false` and no Panda faults. This is the
 required steady-state oracle path; no ELM/allOutput driving mode or relay override is used.
 
+Route `0000013b--39a7512088` exposed one further host-freshness bug after the transport
+fix. The route contained 21,561 native `0x08A` generations and 3,490 native generations
+while openpilot `latActive=True`, but host `sendcan 0x08A` remained zero. Oracle transport
+was healthy (115 completed private `07 C9` responses), and offline reconstruction found a
+valid recovery match plus verify match, so crypto and counter reconstruction were not the
+problem. Qualification was later destroyed by a real ~3-second native delivery gap at
+1003.725 s: native `B26` jumped `26 -> 5` while reset advanced `0x48D8 -> 0x48E1`.
+The first post-gap `0x08A` frames arrived before the matching `0x00F` frames in the same
+backlog. The old code immediately restarted recovery from that first stale-sync frame;
+`resolve_epoch()` therefore selected nearby reset `0x48D9`, and every recovery probe used
+the wrong epoch even though `0x00F` caught up to `0x48E1/0x48E2` immediately afterward.
+
+`kai-openpilot@84b254702` removes that premature recovery. On a tracker discontinuity the
+proxy now fails open, drops the tracker, and waits for the existing eight-consecutive-native
+cadence gate before starting recovery again. This uses the then-current `0x00F` state
+instead of guessing forward epochs. Replaying the exact route through the patched proxy
+starts post-gap recovery at native `B26=13`, reset `0x48E2`, candidate message 3; the old
+runtime started from stale reset `0x48D9`. The regression suite covers this exact
+sync-after-native backlog ordering. After deployment/reboot, parked runtime observation
+showed no repeated `0x7A1` recovery traffic over 12 seconds, confirming recovery had
+completed and the proxy was idle rather than looping.
+
 The volatile EPS oracle resident is still a deployment prerequisite rather than an
 openpilot-installed component. Without a qualified oracle response, the host never sends
 the ownership arm and Panda continues forwarding stock `0x08A`; request-plane openpilot
