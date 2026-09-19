@@ -1131,15 +1131,17 @@ confirmed the throughput/reliability tradeoff: 5-ms pre-CF produced 72/80 succes
 request would therefore reduce service rate below the 40-Hz native stream. The fix cannot be
 "wait longer for every generation".
 
-`kai-openpilot@0ec4e2b3d` therefore changes the active signer from a FIFO of every native
-source generation to a **monotonic latest-generation queue**. At most one sign transaction is
-in flight and one newest unsent generation is retained. When another native generation
-arrives, older not-yet-started sign jobs are marked superseded and never sent. If an
-in-flight sign times out while a newer generation already waits, the stale generation is
-abandoned immediately and the newest source generation is serviced instead of spending
-additional retries on steering that is already obsolete. No skipped generation is forwarded
-as native Toyota ID0; comma retains request-plane authority. The recovered freshness tracker
-still advances over every source-real generation, so the newest domain remains exact.
+`kai-openpilot@0ec4e2b3d` changed the active signer from a FIFO of every native source
+generation to a **monotonic latest-generation queue**. At most one sign transaction was in
+flight and one newest unsent generation was retained; older not-yet-started sign jobs were
+marked superseded and omitted from the downstream stream. At the time this was treated as a
+transport optimization: no skipped generation was forwarded as native Toyota ID0 while the
+recovered freshness tracker still advanced over every source-real generation.
+
+**This omission policy is superseded by the route-149 result below.** It was useful for
+eliminating stale signing backlog, but it incorrectly assumed downstream arbitration cared
+only about freshness of the latest request rather than continuity of every FRC publication
+generation.
 
 Nested `opendbc@97f0f1f7` makes the corresponding Panda matching rule monotonic rather than
 contiguous: the host may send any **newer exact unconsumed** native generation, and successful
@@ -1201,6 +1203,70 @@ Deployed heads are `kai-openpilot@468458ce1`, nested `opendbc@97f0f1f7`, and
 valid RX checks, no Panda faults, no steering warning, and no ongoing oracle churn. The
 current boot log shows startup recovery/verification traffic followed by silence rather than
 the route148 stranded state.
+
+**Route `00000149--82d77c5bdd`: downstream continuity and handoff closure.** The next road
+drive disproved the remaining "latest generation is enough" assumption. Steering did work,
+but only intermittently: while `CC.latActive` remained asserted, Panda repeatedly rejected
+host `0x08A`, the proxy repeatedly released/re-armed ownership, and Brake/VMM `0x081`
+asserted `REQUEST_LOSS_STATUS=1`. Near the final failure, the FRC's own `0x251`
+`CRUISE_MAIN_STATE` changed from 1 (`c0 10 17 48 80 28 a0 80`) to 0
+(`e0 00 00 48 80 08 00 80`); `CarState.cruiseState.available` fell with that source-real
+change and did not recover during the drive. `accFaulted` and the permanent steering-fault
+projection remained false. This is therefore not a parser/UI failure: repeated request-plane
+continuity loss reached Toyota's arbitration/control domain and was followed by an FRC
+cruise-main shutdown.
+
+The exact failure mechanism has two coupled parts. First, the EPS command-5 oracle is not a
+reliable one-response-per-native-generation transport: successful private `0x7A9` responses
+in the failing window commonly returned in roughly 15--30 ms, while isolated request
+sequences received no private response even though surrounding requests succeeded. The
+latest-generation queue turned those misses into **holes** in the owned downstream `0x08A`
+stream. Route149's `0x081 REQUEST_LOSS_STATUS` is direct dynamic evidence that those omitted
+FRC generations are semantically observable downstream. Second, an exact Toyota fallback
+changes the steering baseline actually delivered to the actuator. A native ID11 fallback
+commands Toyota's B18:B19 pinion target; native ID0/other applications carry no openpilot
+lateral request and therefore return the baseline to measured steering. Keeping a hidden
+CarController target across either handoff made the next signed ID11 jump relative to what
+Panda/actuator had actually seen, which Panda correctly rejected and which restarted the
+release/re-arm loop.
+
+The corrected request-plane contract is consequently much simpler:
+
+- while the relay is owned, **every source-real FRC `0x08A` generation gets exactly one
+  downstream representation in source order**;
+- if the MAC is ready before that generation's deadline, the downstream representation is
+  the exact source envelope with only the bounded ID11 lateral substitution and fresh MAC;
+- if signing is late or fails, that generation is forwarded as its exact authenticated Toyota
+  source frame rather than omitted; a late MAC is discarded and never replays the generation;
+- an exact Toyota fallback is also a steering-state handoff. Native ID11 rebases the proxy,
+  CarController and Panda to Toyota's actual target; ID0/other applications rebase them to
+  measured steering. The next openpilot target therefore continues from what the actuator
+  actually received, not from a hidden trajectory;
+- Panda still requires the first owned host generation to be an exact clone for the atomic
+  handoff witness. Modified ID11 rate checking uses the ordinary 100-Hz Toyota angle limits
+  integrated over the **actual elapsed source-generation time**, not a hard-coded four-tick
+  transport assumption;
+- the proxy no longer treats brake state or the native cruise-operating bit as independent
+  permission state machines. `controlsd` owns `CC.latActive`; Panda owns
+  `controls_allowed`/TX enforcement. CAN validity, freshness qualification and exact
+  source-generation matching remain transport requirements rather than engagement policy.
+
+The exact route149 production replay is now the regression gate. With one injected lost sign
+response and 20-ms synthetic successful-oracle latency it reproduces all five recorded
+lateral windows with **5 arms / 5 releases**, **7,392 accepted host `0x08A` generations**,
+3,960 modified ID11 frames, 3,427 transparent Toyota generations, zero Panda rejects, zero
+native leaks, zero safety invalidity and zero failures. A deliberately harsh 30-ms run with
+both attempts for one selected sign generation dropped still has exactly **5 arms / 5
+releases** and **7,392 accepted host generations**; only 35 generations are modified while
+7,352 cross transparently, yet there are again zero rejects, leaks or failures. This proves
+that slow/unreliable oracle service now degrades steering availability for individual
+source generations without degrading request-plane continuity or ownership state.
+
+The focused software gates after this closure are **28 proxy tests** and the complete
+**48-test Camry TSS3 module**, plus both full-route route149 replay profiles above. The
+important invariant is no longer "sign every frame" or "skip stale frames"; it is **one
+source generation in, one coherent downstream generation out**, with the steering baseline
+explicitly synchronized at every Toyota/Openpilot handoff.
 
 The volatile EPS oracle resident is still a deployment prerequisite rather than an
 openpilot-installed component. Without a qualified oracle response, the host never sends
