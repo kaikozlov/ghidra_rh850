@@ -582,13 +582,16 @@ Panda reports no transmit-error growth.
 
 Do **not** generalize that result into “all EPS FD is hidden behind the VMC/EBU domain.” B6 is
 special because its native producer is inside the Brake/VMC-to-EPS path and it is absent from
-comma logs. Exact F33 also receives native **unprotected** FD32 PDUs `0x025` (PDU35) and
-`0x090` (PDU40), and both are visible in retained Panda/comma captures. `0x025` is especially
-clear: after the repin it is overwhelmingly native on Panda bus0 and forwarded to bus2, while
-F33 consumes that same FD32 PDU as measured steering angle. `0x090` likewise appears natively
-in retained captures and enters F33's direct-COM path with only the ordinary additive-checksum
-gate. Therefore the open problem is not a blanket “Panda-visible path cannot carry FD” rule;
-it is why **Panda-generated** FD fails where native Panda-visible FD succeeds.
+comma logs. Exact F33 also receives native FD32 PDUs `0x025` (PDU35) and `0x090` (PDU40)
+which are **not EPS-locally SecOC-validated**, and both are visible in retained Panda/comma
+captures. That wording is deliberately narrower than “unprotected”: both received PDUs retain
+Toyota-P5 `FV4 || MAC28` material in B28..B31 even though neither appears in F33's local SecOC
+profile table. `0x025` is especially clear: after the repin it is overwhelmingly native on
+Panda bus0 and forwarded to bus2, while F33 consumes that same complete FD32 PDU as measured
+steering angle. `0x090` likewise appears natively in retained captures and enters F33's
+direct-COM path with an ordinary additive-checksum gate rather than the EPS SecOC verifier.
+Therefore the open problem is not a blanket “Panda-visible path cannot carry FD” rule; it is
+why **Panda-generated** FD fails where native Panda-visible FD succeeds.
 
 
 ### 8.1 Native-FD versus Panda-created-FD differential audit
@@ -602,7 +605,7 @@ Camry captures, and the current Panda implementation give the following comparis
 | native extended-FD precedent | retained Sep road fixture census has **zero** `addr>=0x800 && DLC>8` frames | extended + FDF was explicitly requested | **no Toyota precedent recovered** |
 | FDF | present on native FD; F33 CanIf words are `0x400000ID` | explicitly set by Panda host packet and M_CAN Tx element | matched |
 | DLC | native accepted examples are 32 bytes; camera family also uses 48/64 | FD32 failed, and FD8 also failed | **DLC ruled out as sole cause** |
-| protection | F33 locally routes `0x025/0x090` outside its SecOC verifier, but both carry P5-shaped FV4/MAC28 tails on the wire; Sienna independently defines `0x090` as an ordinary SecOC FD profile | host test frames changed application/checksum but had no valid native MAC28 | **upstream authentication is now a leading open discriminator** |
+| protection | F33 locally routes `0x025/0x090` outside its SecOC verifier, but Route 45 validates P5 `FV4 || MAC28` progression on both received PDUs; exact-F33 command 5 additionally reproduces native `0x090` MAC28 3/3 | host test frames changed application/checksum but had no valid native MAC28 | **upstream authentication is now a leading open discriminator** |
 | BRS | Toyota's own F33 FD Tx writer supports explicit FDF/BRS; retained node-1 state `FEBE5027=0x3C` selects its `0x6 = FDF|BRS` form | test Panda sent both BRS-on and host-forced BRS-off FD32 with exact TX returns | **BRS ruled out as sufficient cause** |
 | nominal timing | F33 500 kbit/s, 80% sample point | deployed Panda 500 kbit/s, 80% sample point | matched |
 | 2-Mbit/s data timing | F33 70% sample point, TSEG1=13/TSEG2=6/SJW6 | test Panda `54369098+` reproduced that exact timing and still failed the route-40 validator discriminator | **timing mismatch disproved as sufficient cause** |
@@ -656,6 +659,17 @@ cleared only by startup initializer `0x8E74E`; normal valid frames do not clear 
 a post-send `FEBE53C0` delta is a valid sticky witness for a frame that reaches the local
 route-40 checksum validator.
 
+The non-SecOC EPS route classification does **not** mean that the received I-PDUs lack SecOC
+material. The complete Route-45 capture contains 87,501 native bus0 `0x025/32` frames and
+87,510 native bus0 `0x090/32` frames. Both use B28[7:4] as transmitted FV4: all 16 nibble
+states occur, message-low2 advances `+1 mod4` on 84,563/84,569 same-reset `0x025` transitions
+and 84,572/84,578 same-reset `0x090` transitions, and reset-low2 tracks the preceding native
+`0x00F` epoch on 86,819/87,438 and 87,096/87,444 timestamp-eligible frames respectively.
+The remaining 28 trailer bits are effectively frame-unique in both streams. Thus an EPS Rx
+PDU may contain an intact SecOC envelope even though the EPS application does not locally
+authenticate that PDU. The exact Route-45 evidence and interpretation boundary are retained
+in the Camry live baseline, §60.1.
+
 Native Camry `0x090` has a second, independent protection layer on the wire. Across the
 retained Sep-1 capture, B28[7:4] reset-low2 matches preceding authenticated `0x00F` on
 **364/364** eligible frames and message-low2 advances `+1 mod4` on **355/355** same-reset
@@ -674,6 +688,16 @@ Therefore the native Bus-4 `0x090` trailer is not merely SecOC-shaped: it is the
 ordinary-P5 MAC28 domain accessible from this EPS. This strongly supports a shared key/profile
 across the relevant Toyota arbitration domain, while not by itself identifying which upstream
 component enforces it.
+
+The resulting topology hypothesis is that protection may be checked **before** the PDU reaches
+the F33 application, potentially at the VMC/Brake/EBU forwarding boundary, after which the
+original authenticated 32-byte PDU is forwarded intact and the EPS consumes only its ordinary
+application fields. This would explain why the EPS receives FV4/MAC28 bytes without having a
+local `0x025` or `0x090` SecOC profile. It remains a hypothesis: the captures prove preserved
+SecOC material and the `0x090` command-5 result proves a real MAC domain, but neither identifies
+the enforcing ECU nor proves that `0x025` is rejected upstream on a bad MAC. Transparent
+forwarding without enforcement remains possible until a valid-MAC/invalid-MAC discriminator or
+the relevant upstream firmware closes the gate.
 
 Exact F33 still does **not** run its local SecOC verifier on route40. The decisive follow-up is
 therefore one frame with a **valid fresh P5 MAC28 but deliberately invalid local B7**. The

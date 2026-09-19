@@ -4875,6 +4875,47 @@ address/DLC signature and B6 is still host-only.  This does not prove absence on
 an electrically unobserved segment, and the rlog still cannot identify native
 per-frame BRS.
 
+### 60.1 `0x025` and `0x090` retain FV4/MAC28 in the EPS receive PDU without EPS-local SecOC validation
+
+The same complete Route-45 capture closes an important distinction which the
+phrase “unprotected EPS Rx” obscured. Exact F33's local SecOC receive table still
+contains only `0x00F`, `0x0D7`, and `0x0B6`; PDU35/`0x025` and PDU40/`0x090`
+remain outside that verifier. Nevertheless, **both complete 32-byte PDUs carry
+Toyota-P5 SecOC material in B28..B31 when received on the wire**:
+
+| native bus0 stream | FD32 frames | same-reset FV4 message-low2 `+1 mod4` | reset-low2 equals preceding `0x00F` | distinct candidate MAC28 values |
+|---|---:|---:|---:|---:|
+| `0x025` | 87,501 | 84,563 / 84,569 | 86,819 / 87,438 eligible | 87,487 |
+| `0x090` | 87,510 | 84,572 / 84,578 | 87,096 / 87,444 eligible | 87,494 |
+
+All 16 B28 high-nibble values occur in both streams. A representative native
+`0x025` run ends in `4de5887e`, `80334cd3`, `cf829222`, `09e70d7e`: the transmitted
+FV4 nibble advances `4 -> 8 -> C -> 0` while reset-low2 remains zero, and the lower
+28 bits change as the candidate MAC28. The six non-advancing same-reset transitions
+in each full-route stream are consistent with capture loss/event gaps rather than
+a competing counter layout. The reset comparison is not expected to be perfect at
+epoch publication boundaries; the same-frame progression is the stronger structural
+test.
+
+For `0x090`, this is no longer merely a structural classification. The September-19
+exact-F33 ICU-S selector-4 command-5 probe reproduced the native MAC28 exactly for
+3/3 captured frames using DataID `0x0090` and reconstructed full freshness. For
+`0x025`, the log closes the same `FV4 || 28-bit tag` wire geometry and freshness
+progression, but an exact command-5/key-domain reproduction has not yet been run;
+the MAC28 identity therefore remains structural rather than cryptographically
+reproduced.
+
+The receive/application boundary is the central result: **an EPS Rx PDU can retain
+an intact SecOC envelope even when the EPS application does not validate it through
+its local SecOC stack.** An upstream validator may authenticate the original PDU and
+then forward all 32 bytes unchanged. The VMC/Brake/EBU junction before the EPS is a
+leading candidate for that operation and would explain the direct-Panda FD rejection,
+but this location and enforcement are still hypotheses. The logs prove retained
+SecOC material; they do not prove which upstream component validates it, or that a
+bad-MAC `0x025` is rejected. Transparent forwarding without validation remains an
+alternative until an upstream invalid/valid-MAC discriminator or upstream firmware
+analysis closes it.
+
 
 ## 61. Route-45 stock/comma steering reconciliation (VAR-144)
 
