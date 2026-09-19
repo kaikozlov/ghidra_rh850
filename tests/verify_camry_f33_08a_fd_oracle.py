@@ -40,7 +40,7 @@ check("audited build is byte/metadata exact",
       json.loads(AUDIT.read_text()) == meta and AUDITED_STAGE.read_bytes() == stage)
 check("resident/helper fit proven RAM geometry",
       len(resident) == 412 and meta["resident"]["headroom"] == 112 and
-      len(helper) == 636 and meta["helper"]["headroom"] == 388 and
+      len(helper) == 676 and meta["helper"]["headroom"] == 348 and
       meta["resident"]["relocations"] == 0 and meta["helper"]["relocations"] == 0)
 check("artifact hashes self-consistent",
       sha(resident) == meta["resident"]["sha256"] and
@@ -165,7 +165,7 @@ helper_src = build.HELPER_SOURCE.read_text()
 check("resident peeks before stock receive drain",
       resident_src.index("jarl32 helper_entry, lp") < resident_src.index("jarl32 target_rx_3, lp"))
 check("helper matches only exact FD rule46 ring record",
-      "mov 0x00372020" in helper_src and "mov 0xdfdc0002" in helper_src)
+      "mov 0x00002020" in helper_src and "mov 0xdfdc0002" in helper_src)
 check("helper uses local freshness and fixed selector4",
       "ld.w -0x623c[gp]" in helper_src and "ld.w -0x6240[gp]" in helper_src and
       "jarl32 freshness_encode, lp" in helper_src and "jarl32 command5_sync, lp" in helper_src)

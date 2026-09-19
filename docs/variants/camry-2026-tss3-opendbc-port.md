@@ -1636,7 +1636,9 @@ Toyota's own ring format is reused exactly. Controller0 has one 552-word ring at
 `FEBE4038..FEBE48D7`, producer `FEBE48F8`, consumer `FEBE48FA`, and used-word count
 `FEBE48FC`. A 32-byte FD frame is an 11-word/44-byte record: two header/complement words,
 CAN ID/control, then the complete 32-byte payload. The resident accepts only the exact rule46
-record `word0=0x00372020` and FD extended identity `word2=0xDFDC0002`. Native B6 independently
+record `word0=0x00002020` and FD extended identity `word2=0xDFDC0002`. `0x80B42 -> 0x80A4A`
+proves that this software-ring word is **route_tag=0, callback selector=0x20, length=32**;
+the hardware GAFL label `0x37` does not occupy the high halfword. Native B6 independently
 proves why the unchanged rule46 GAFL entry accepts FD: B6's hardware GAFLID is plain
 `0x000000B6`, while the post-RSCFD CanIf identity becomes `0x400000B6`; FDF is represented in
 the receive descriptor after identifier acceptance, not by rewriting GAFLID.
@@ -1676,11 +1678,11 @@ The static artifact is complete and deterministic:
 
 - high-tail resident: **412 bytes / 112 bytes headroom**, SHA-256
   `e86bffe020fd4a28ef45b9120d1dce75d83e799e8258635aacfa3469f367ac84`;
-- GlobalRAM helper: **636 bytes / 388 bytes headroom**, SHA-256
-  `fa2d7fddd10727f525625c892c3f70468fc458213ff83bf1e87fdfb1c93d9f25`;
-- staging image SHA-256 `1dcda6237ccbbdf8f39e1a24b5d8cfadcba95f3bbf69fb09cc3fec7e4298495a`;
+- GlobalRAM helper: **676 bytes / 348 bytes headroom**, SHA-256
+  `33052c5866709356b0bc0e02e382b94675f79d9e1b82bfb2c12555934cfb322e`;
+- staging image SHA-256 `9c6f467beed08fd449ea487a17bc0c143f6c4e681a93a5bfe57f9617846e87d6`;
 - authenticated 4-KiB payload SHA-256
-  `ae2e62d0ecae437c7a623910dce733117720061ecfca1a427ebb763831b3b99a`;
+  `d05802132897909de933896194225e77675ac02c65d6f1adfe5adbdf98669d33`;
 - both resident/helper have zero relocations; helper's only external calls are exact stock
   `freshness_encode 0x90566`, `command5_sync 0x89BC2`, and `lower_can_write 0x85112`.
 
