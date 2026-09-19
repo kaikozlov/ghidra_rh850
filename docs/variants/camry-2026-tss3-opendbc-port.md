@@ -1368,6 +1368,14 @@ edge and is classified as that safety-owned boundary, not an authority fault. Mi
 likewise completes **8 arms / 8 releases**, 8,552 active host ID11 outputs and zero unexpected
 failures; its two Panda rejects are the same controls-disallowed disengagement ordering.
 
+The simplification audit is deployed on the comma as parent `kai-openpilot@e3df394eb`,
+nested `opendbc@5c481f89`, Panda source `21701e3f`. The rebuilt signed Panda image is
+SHA-256 `d7c60228ca1cc10168b4504a5306f01fe15dbf5d50fdaae0faedc02386355c06`.
+After an offroad reboot, a cooperative direct-Panda lease read live signature
+`adef92bb94dbff01bf9f9935cf0bcf1b3b7977d5f4c53921143c1cb8f3e6392410fa383f3a2ced324bb336c21f9f90796e16dd3d45bd72116028c866b01b5ef5e25af83152de3518f88908948f848bf867aff22ebd153fe04b3fb10b5c19c4c79536475e4160191c200442d753789aeb127ac9149bd706c22091a404a0194c05`, exactly matching the new expected signature. Live health was ignition line/CAN false,
+`controls_allowed=false`, zero safety TX blocks, zero faults, no heartbeat loss, valid RX
+checks, and no direct-lease files left behind.
+
 Same-session CF repair is software/replay-qualified but not yet live-EPS-qualified. Its next
 hardware qualification is a **parked** oracle admission-loss test after the volatile resident
 is installed. No moving test should precede that parked qualification.
