@@ -1298,6 +1298,135 @@ The final signed Panda image is SHA-256
 offroad reboot, a cooperative direct-Panda lease read live signature
 `13e1abff7abaee8117d601418e8ba2398c733430ae88ef22fb5e28554b4b5fec199ff8b0a189662e00b8fc4bdb92ed3320b0417909f98a6787be42e688071d29ea4d50a7d41e266664b8d53f8e484db69d5b093007f9b6b05a36bcf5288f227234f3fecfef39ef0d9aaed251fc7e1ba3a6d6f9aafd2de9ff15a2e90cd62fd3f2`, exactly matching the newly built expected signature. Live post-lease health was ignition line/CAN false, `controls_allowed=false`, zero safety TX blocks, zero faults, no heartbeat loss, and valid RX-check state; pandad resumed and no lease files remained.
 
+### September-19 minimum-runtime reassessment: lifecycle and evidence limits
+
+This is a source-level design review of `kai-openpilot@e3df394eb` and nested
+`opendbc@5c481f89`, not another runtime modification or a vehicle qualification.
+It supersedes the broad claims below that the simplified path has no further
+coordination problems or that the custom replay proves a working transport.
+No vehicle connection, actuation change, authentication change, safety relaxation,
+or deployment was performed for this review.
+
+**Minimum code means fewer independent responsibilities and assumptions, not just
+fewer lines or shorter timeouts.** The previous cleanup removed scaffolding but
+retained a distributed control lifecycle: `card`, the worker thread, Panda, and
+the vehicle each have a different view of progress. The actual requirements are
+bounded-age requests, ordered and observable lifecycle transitions, normal driver
+cancellation, preserved non-lateral behavior, and independent safety enforcement.
+
+#### Direct implementation findings
+
+Paths below are relative to the openpilot checkout at the revisions above.
+These are static findings; they do not establish which path caused a particular
+road event.
+
+- `opendbc_repo/opendbc/car/toyota/carcontroller.py:117-130`: the TSS3 branch
+  handles `CC.cruiseControl.cancel` only for Corolla and then returns. Camry
+  therefore has no cancel output in this controller branch. Letting go of lateral
+  replacement is not proof that stock longitudinal cruise has been cancelled.
+  This is missing lifecycle behavior, not a reason to disable a safeguard.
+- `openpilot/selfdrive/car/toyota_tss3_08a_signed.py:290-301,433-435,521-548,
+  696-707,732-745`: incoming source events capture control snapshots into an
+  unbounded work deque and separate pending-output map. The response timeout
+  starts at dispatch, not when that control snapshot was created. A response can
+  be prompt relative to dispatch but the command can still be old. Panda's
+  forwarding watchdog measures time since accepted host TX, not command age.
+- `openpilot/selfdrive/car/card.py:176-191,253-266`: incoming source traffic is
+  processed before the latest control subscription is refreshed; control updates
+  are skipped when that subscription is no longer alive. The proxy has a cached
+  activity/target and an independent worker. An explicit integration test must
+  establish that loss of the control producer cannot leave that cached intent
+  producing work. Other existing safety layers may intervene; this review does
+  not claim an observed continued-steering event.
+- `openpilot/selfdrive/car/toyota_tss3_08a_signed.py:763-786,808-814`: the sender
+  takes work under a lock, then sends and sleeps outside that lock. Clearing
+  queued/in-flight bookkeeping does not cancel work already taken by the sender.
+  The shutdown path needs a tested no-output-after-cancellation property. A
+  mutex around publication alone is not such a property.
+- `openpilot/selfdrive/car/toyota_tss3_08a_signed.py:696-715` together with
+  `_job_failure_locked` and `_abort_recovery_locked`: the timeout loop first
+  collects expired keys, then pops them one by one. Recovery failure clears the
+  in-flight map. If more than one recovery job expired, a later pop can therefore
+  refer to a key just removed by the first failure. This is a static worker-crash
+  risk, not a measured crash attribution.
+- `openpilot/selfdrive/car/toyota_tss3_08a_signed.py:338-342,604-609` and
+  `openpilot/selfdrive/car/card.py:181-186,254-265`: handoff pending suppresses
+  the unavailable indication; a local TX echo sets active; the controller's
+  baseline reset happens later in `card`. These are separate events, not one
+  atomic end-to-end transfer acknowledged by the vehicle. Requested, queued,
+  transmitted, and physically effective are distinct facts.
+
+The safety source still has a fixed four-controller-tick angle allowance
+(`opendbc_repo/opendbc/safety/modes/toyota.h:316-330`). The previous elapsed-time
+implementation was reverted. The claimed timing consistency must not be assumed
+from historical prose. Likewise, reducing history from sixteen entries to four
+and a watchdog from 250 ms to 100 ms does not itself establish a receiver timing
+contract. Keep driver override, cancellation, and actuation protections; establish
+one consistent timing model rather than loosening protection to fit a replay.
+
+#### What the custom replay actually proves
+
+`openpilot/tools/replay/toyota_f33_request_plane_replay.py`:
+
+- lines 223-225 and 319-323 use a hard-coded historical safety parameter, recorded
+  CarParams, and `start_thread=False`. This is not a rebuild of the full deployed
+  configuration or an execution of the production sender thread.
+- lines 258-286 synthesize local TX echoes immediately from the safety-hook
+  return. These are not device queue, bus-transmission, or receiver acknowledgements.
+- lines 289-315 validate selected metadata but return a fixed stand-in for newly
+  authored message authentication. Vehicle authentication and arbitration are not
+  being exercised.
+- lines 332-383 implement a different scheduler and explicitly manufacture a
+  successful response after the chosen repair branch. This proves behavior under
+  the model's assumption; it cannot prove that the real transport repair works.
+- lines 264-271 classify any relevant rejection while controls are disallowed as
+  expected, without proving a particular normal disengagement caused it.
+- lines 432-444 replay recorded CarControl; lines 505-518 assert local ownership,
+  generation, and safety invariants. There is no closed-loop vehicle response or
+  rerun of the engagement controller against the new output.
+
+The replay remains useful regression coverage. The earlier blanket descriptions
+of zero unexpected failures and successful repair must be read within those
+limits. In particular, local transmission acceptance is not vehicle acceptance,
+and preserving source bytes does not preserve stock longitudinal *timing* when
+an entire shared request message is delayed by the lateral path.
+
+#### Minimal design target and decision order
+
+Use the existing engagement and controller processes, a thin vehicle adapter, and
+one explicit bounded-I/O boundary. Reuse normal driver cancellation, fault
+reporting, and independent Panda enforcement. Setup/qualification is a separate
+lifecycle from active control, not an additional policy engine embedded in each
+control update. No new framework, daemon, registry, or general-purpose scheduler
+is implied by this separation.
+
+Measure complexity by independent state owners, asynchronous handoffs, clocks,
+and inferred permissions. Do not optimize for line deletion while keeping the
+same coordination problem. A single transport completion must not be promoted
+to proof of steering effectiveness, nor should an uncertain response become an
+unconditional permanent-disable policy.
+
+First establish the complete disable/cancel contract, including producer death,
+and truthful output/progress reporting in a non-actuating harness. Next test the
+actual production scheduling and cancellation behavior with delayed/batched
+acknowledgements and worker failures. Measure the full control-to-output age,
+not just service RTT. Then establish receiver-side timing and selection from
+independent evidence before changing buffer policy or interpreting all missing
+messages as the same fault.
+
+For a generic serial service, waiting time obeys
+`W[n+1] = max(0, W[n] + service_time[n] - arrival_interval[n])`. A service that
+cannot keep up cannot be made real-time by deeper buffering, shorter watchdogs,
+or counting eventual completions. The choices require a validated interface
+contract; neither arbitrary generation skipping nor native fallback is justified
+by this review.
+
+The claim that every native generation must receive a counterpart, and the claim
+that one exact clone is sufficient for semantic ownership, remain implementation
+assumptions rather than independently recovered receiver specifications. Do not
+remove their checks blindly; separate actual protocol requirements from the
+current host design and test each boundary without further road deployment.
+
 ### September-19 request-plane simplification audit
 
 A post-route149 code audit treated every F33-specific state variable and branch as suspect
