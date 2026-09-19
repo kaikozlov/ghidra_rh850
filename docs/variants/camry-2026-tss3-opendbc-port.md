@@ -768,6 +768,27 @@ that watchdog to 75 ms (three native ~25-ms `0x08A` periods), while the host ora
 still fails open independently on signing error or its 120-ms oracle timeout. Parent
 `kai-openpilot@e9dcefca1` carries that safety revision.
 
+A later no-steering run (`00000137--2d16ff3a64`) exposed a separate flipped-harness
+transport bug after the ID0->ID11 code was deployed. In that route the proxy never armed:
+15,493 native bus2 `0x08A` frames were observed (all ID0), including 2,377 while
+`latActive=True`, but host `sendcan 0x08A` and ownership-admin `0x777` were both zero.
+The oracle worker emitted 4,259 `0x7A1` ISO-TP frames, all Panda-accepted, yet saw zero
+`0x7A9` flow-control/private replies. The resident itself remained healthy and signed the
+same road domain directly, so the failure was below the oracle protocol.
+
+The root cause was Panda control request `0xE8` (`set_canfd_auto`). On a flipped harness,
+logical bus0 maps to physical CAN controller 2 via `CAN_NUM_FROM_BUS_NUM(0)`, but the
+handler wrote `bus_config[req->param1].canfd_auto` directly. Thus pandad's F33 request to
+keep logical bus0 host diagnostics classic disabled auto-FD on physical CAN0 instead of
+the controller actually carrying logical bus0. Direct Panda tools masked the bug because
+the Python constructor disables auto-FD on all three controllers. `panda@21701e3f` fixes
+`0xE8` to update `bus_config[CAN_NUM_FROM_BUS_NUM(logical_bus)]`; parent
+`kai-openpilot@c20b906cd` carries that Panda revision while retaining `opendbc@f70060d9`.
+Live verification on the flipped vehicle under normal Toyota safety produced 67 requests
+in an 8-second sample, 66 `30 00 28` flow-control responses and 64 completed `07 C9`
+private replies, with `safetyRxChecksInvalid=false` and no Panda faults. This is the
+required steady-state oracle path; no ELM/allOutput driving mode or relay override is used.
+
 The volatile EPS oracle resident is still a deployment prerequisite rather than an
 openpilot-installed component. Without a qualified oracle response, the host never sends
 the ownership arm and Panda continues forwarding stock `0x08A`; request-plane openpilot
