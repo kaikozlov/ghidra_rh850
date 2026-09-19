@@ -1090,10 +1090,6 @@ timeout = 600
 tests = ["tests/verify_camry_f33_08a_fd_oracle.py"]
 timeout = 600
 
-[suite.camry_f33_fd_ingress_probe]
-tests = ["tests/verify_camry_f33_fd_ingress_probe.py"]
-timeout = 600
-
 [suite.camry_f33_08a_tx_probe]
 tests = ["tests/verify_camry_f33_08a_tx_probe.py"]
 timeout = 600

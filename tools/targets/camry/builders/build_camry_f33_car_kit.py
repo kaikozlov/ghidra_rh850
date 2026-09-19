@@ -20,7 +20,6 @@ from exploit.common.ram_exec import (
 )
 from exploit.ephemeral_runtime import camry_f33_08a_oracle_stream as eps08a_oracle
 from exploit.ephemeral_runtime import camry_f33_08a_fd_oracle as eps08a_fd_oracle
-from exploit.ephemeral_runtime import camry_f33_fd_ingress_probe as fd_ingress_probe
 from exploit.ephemeral_runtime import camry_f33_08a_tx_probe as eps08a_probe
 from exploit.ephemeral_runtime import camry_f33_b6_bridge_install as bridge_install
 from exploit.ephemeral_runtime import (
@@ -59,7 +58,6 @@ COMMAND5_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_command5_launche
 EPS08A_TX_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_08a_tx_probe_launcher.sh"
 EPS08A_ORACLE_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_08a_oracle_stream_launcher.sh"
 EPS08A_FD_ORACLE_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_08a_fd_oracle_launcher.sh"
-FD_INGRESS_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_fd_ingress_probe_launcher.sh"
 INLINE_SIGNER_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_b6_inline_signer_launcher.sh"
 ICUS_RAMKEY_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_icus_ramkey_probe_launcher.sh"
 PERSISTENT_SIGNER_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_persistent_signer_launcher.sh"
@@ -78,8 +76,6 @@ EPS08A_ORACLE_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_08a_orac
 EPS08A_ORACLE_META = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_08a_oracle_stream_build.json"
 EPS08A_FD_ORACLE_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_08a_fd_oracle.bin"
 EPS08A_FD_ORACLE_META = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_08a_fd_oracle_build.json"
-FD_INGRESS_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_fd_ingress_probe.bin"
-FD_INGRESS_META = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_fd_ingress_probe_build.json"
 # Supervised continuous substitution preserves the road helper's steady-state
 # behavior, but stops after seven foreground ticks without a changed host
 # generation. Its new identity has instruction-level, not vehicle, validation.
@@ -112,7 +108,6 @@ RUNTIME_FILES = [
     "exploit/ephemeral_runtime/camry_f33_08a_tx_probe.py",
     "exploit/ephemeral_runtime/camry_f33_08a_oracle_stream.py",
     "exploit/ephemeral_runtime/camry_f33_08a_fd_oracle.py",
-    "exploit/ephemeral_runtime/camry_f33_fd_ingress_probe.py",
     "exploit/ephemeral_runtime/camry_f33_b6_inline_signer.py",
     "exploit/ephemeral_runtime/camry_f33_post_install_recovery.py",
     "exploit/ephemeral_runtime/camry_f33_icus_ramkey_probe.py",
@@ -377,13 +372,6 @@ def build(out: Path, openpilot: Path) -> dict:
     eps08a_fd_oracle_payload = package_shellcode(eps08a_fd_oracle_stage, secret=TOYOTA_P1ME_PAYLOAD_BUILD_SECRET)
     if hashlib.sha256(eps08a_fd_oracle_payload).hexdigest() != eps08a_fd_oracle_meta["authenticated_payload"]["sha256"]:
         raise RuntimeError("0x08A raw-FD oracle authenticated payload identity drift")
-    fd_ingress_meta = json.loads(FD_INGRESS_META.read_text(encoding="utf-8"))
-    fd_ingress_stage = FD_INGRESS_BIN.read_bytes()
-    if hashlib.sha256(fd_ingress_stage).hexdigest() != fd_ingress_meta["staging"]["sha256"]:
-        raise RuntimeError("FD ingress probe audited staging identity drift")
-    fd_ingress_payload = package_shellcode(fd_ingress_stage, secret=TOYOTA_P1ME_PAYLOAD_BUILD_SECRET)
-    if hashlib.sha256(fd_ingress_payload).hexdigest() != fd_ingress_meta["authenticated_payload"]["sha256"]:
-        raise RuntimeError("FD ingress probe authenticated payload identity drift")
     inline_meta = json.loads(INLINE_SIGNER_META.read_text(encoding="utf-8"))
     inline_staging = INLINE_SIGNER_BIN.read_bytes()
     inline_helper = INLINE_SIGNER_HELPER.read_bytes()
@@ -454,8 +442,6 @@ def build(out: Path, openpilot: Path) -> dict:
     (ram_dir / "camry_f33_08a_oracle_stream.json").write_text(json.dumps(eps08a_oracle_meta, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     (ram_dir / "camry_f33_08a_fd_oracle_payload.bin").write_bytes(eps08a_fd_oracle_payload)
     (ram_dir / "camry_f33_08a_fd_oracle.json").write_text(json.dumps(eps08a_fd_oracle_meta, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    (ram_dir / "camry_f33_fd_ingress_probe_payload.bin").write_bytes(fd_ingress_payload)
-    (ram_dir / "camry_f33_fd_ingress_probe.json").write_text(json.dumps(fd_ingress_meta, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     (ram_dir / "camry_f33_b6_inline_signer_payload.bin").write_bytes(inline_signer_payload)
     (ram_dir / "camry_f33_b6_inline_signer_helper_padded.bin").write_bytes(inline_helper)
     (ram_dir / "camry_f33_b6_inline_signer.json").write_text(json.dumps(inline_meta, indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -491,9 +477,6 @@ def build(out: Path, openpilot: Path) -> dict:
     eps08a_fd_oracle_launcher = out / "f33-08a-fd-oracle"
     shutil.copy2(EPS08A_FD_ORACLE_LAUNCHER, eps08a_fd_oracle_launcher)
     eps08a_fd_oracle_launcher.chmod(0o755)
-    fd_ingress_launcher = out / "f33-fd-ingress"
-    shutil.copy2(FD_INGRESS_LAUNCHER, fd_ingress_launcher)
-    fd_ingress_launcher.chmod(0o755)
     inline_signer_launcher = out / "f33-secoc"
     shutil.copy2(INLINE_SIGNER_LAUNCHER, inline_signer_launcher)
     inline_signer_launcher.chmod(0o755)
@@ -516,7 +499,6 @@ def build(out: Path, openpilot: Path) -> dict:
         "f33-08a-route": {"sha256": sha256(eps08a_tx_launcher)},
         "f33-08a-oracle": {"sha256": sha256(eps08a_oracle_launcher)},
         "f33-08a-fd-oracle": {"sha256": sha256(eps08a_fd_oracle_launcher)},
-        "f33-fd-ingress": {"sha256": sha256(fd_ingress_launcher)},
         "f33-secoc": {"sha256": sha256(inline_signer_launcher)},
         "f33-icus-ramkey": {"sha256": sha256(icus_ramkey_launcher)},
         "f33-persist": {"sha256": sha256(persistent_signer_launcher)},
@@ -659,26 +641,6 @@ def build(out: Path, openpilot: Path) -> dict:
                     "direct NRTD->READY without OFF",
                     "./f33-08a-fd-oracle known-answer in READY/Park/stationary",
                     "only after known-answer passes: ./f33-08a-fd-oracle benchmark 20",
-                ],
-                "persistent_flash_write": False,
-                "live_qualified": False,
-            },
-            "standard_fd_ingress_probe": {
-                "launcher": "f33-fd-ingress",
-                "payload": "ram_payloads/camry_f33_fd_ingress_probe_payload.bin",
-                "payload_sha256": fd_ingress_meta["authenticated_payload"]["sha256"],
-                "staging_sha256": fd_ingress_meta["staging"]["sha256"],
-                "resident": fd_ingress_meta["resident"],
-                "helper": fd_ingress_meta["helper"],
-                "state": fd_ingress_meta["state"],
-                "firmware_contract": fd_ingress_meta["firmware_contract"],
-                "marker_prefix_hex": fd_ingress_meta["marker_prefix_hex"],
-                "mutation_boundary": fd_ingress_meta["mutation_boundary"],
-                "field_sequence": [
-                    "./f33-fd-ingress install in NRTD/Park/stationary",
-                    "./f33-fd-ingress status; require native fd090_count > 0",
-                    "./f33-fd-ingress probe in NRTD/Park/stationary; exactly one host standard-ID FD32 frame",
-                    "positive result closes standard-vs-extended route-class discriminator; negative must be repeated with matched F33 70-percent Panda data timing before promotion",
                 ],
                 "persistent_flash_write": False,
                 "live_qualified": False,

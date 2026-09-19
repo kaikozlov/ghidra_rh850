@@ -598,50 +598,76 @@ Camry captures, and the current Panda implementation give the following comparis
 
 | property | native F33-received / Toyota FD | Panda-created failed private FD | status |
 |---|---|---|---|
-| CAN identifier form | all four exact-F33 normal FD Rx PDUs are **standard 11-bit**: `0x025/0x090/0x0D7/0x0B6` | `0x1FDC0002` is **extended 29-bit** | **leading open discriminator** |
+| CAN identifier form | all four exact-F33 normal FD Rx PDUs are **standard 11-bit**: `0x025/0x090/0x0D7/0x0B6` | private carrier was extended, then a native-shaped standard `0x090` was also tested | **identifier width disproved as sufficient cause** |
 | native extended-FD precedent | retained Sep road fixture census has **zero** `addr>=0x800 && DLC>8` frames | extended + FDF was explicitly requested | **no Toyota precedent recovered** |
 | FDF | present on native FD; F33 CanIf words are `0x400000ID` | explicitly set by Panda host packet and M_CAN Tx element | matched |
 | DLC | native accepted examples are 32 bytes; camera family also uses 48/64 | FD32 failed, and FD8 also failed | **DLC ruled out as sole cause** |
-| SecOC | `0x025/0x090` do not route through F33 SecOC; `0x0D7/B6` do | private rule46 has no SecOC gate before the observer | **security ruled out as prerequisite** |
-| BRS | Toyota's own F33 FD Tx writer supports explicit FDF/BRS; retained node-1 state `FEBE5027=0x3C` selects its `0x6 = FDF|BRS` form | BRS-on failed; BRS-off/500-kbit/s FD8 also failed | **BRS ruled out as sole cause** |
+| protection | F33 locally routes `0x025/0x090` outside its SecOC verifier, but both carry P5-shaped FV4/MAC28 tails on the wire; Sienna independently defines `0x090` as an ordinary SecOC FD profile | host test frames changed application/checksum but had no valid native MAC28 | **upstream authentication is now a leading open discriminator** |
+| BRS | Toyota's own F33 FD Tx writer supports explicit FDF/BRS; retained node-1 state `FEBE5027=0x3C` selects its `0x6 = FDF|BRS` form | test Panda sent both BRS-on and host-forced BRS-off FD32 with exact TX returns | **BRS ruled out as sufficient cause** |
 | nominal timing | F33 500 kbit/s, 80% sample point | deployed Panda 500 kbit/s, 80% sample point | matched |
-| 2-Mbit/s data timing | F33 70% sample point, SJW6 | deployed Panda `21701e3f` is upstream-like 80% SP; older `panda/kai` commit `0e3f1c92` matches F33 70% | real mismatch for BRS-on only; **cannot explain no-BRS failure** |
+| 2-Mbit/s data timing | F33 70% sample point, TSEG1=13/TSEG2=6/SJW6 | test Panda `54369098+` reproduced that exact timing and still failed the route-40 validator discriminator | **timing mismatch disproved as sufficient cause** |
 | receive-edge filtering | F33 `REFE=1` | deployed Panda lacks the older `53ad20d0` M_CAN `EFBI` match | real controller-config difference; not a frame-format explanation for the no-BRS result |
 | ISO / non-ISO FD | F33 evidence and Toyota tooling use ordinary ISO CAN-FD | Panda health reports `canfd_non_iso=0` | matched |
 | ESI | healthy Toyota transmitters are expected error-active; exact per-frame ESI is not retained in comma logs | Panda was error-active with TEC=0; M_CAN supplies ESI from controller error state and Panda exposes no host ESI override | no positive mismatch recovered |
-| per-frame BRS representation | Panda RX hardware sees native BRS and the internal forwarder preserves it | host `CANPacket_t` has no BRS field; host BRS comes from bus-global state | representation differs, but both BRS states were live-tested |
+| per-frame BRS representation | Panda RX hardware sees native BRS and the internal forwarder preserves it | test-only Panda `f8f5a8f6` forced host BRS from manual/auto FD policy while keeping DBTP fixed | **both host BRS states live-tested** |
 | RSCFD rule filtering | F33 GAFL matching compares ID/IDE/RTR through `GAFLID/GAFLM`; no FDF/BRS filter is recovered | rule46 accepts the same extended ID in classic form | no exact-F33 software/hardware rule explains classic-pass/FD-drop |
 | physical/source route | `0x025` is overwhelmingly native on the Panda-visible chassis side and F33 consumes it; B6 is separately local/hidden | Panda injects from the intercepted host side | **route/port policy remains open** |
 
-The strongest structural fact is therefore the identifier/route class.  Toyota's observed
-Camry traffic uses **standard IDs for application CAN-FD** and extended IDs for the
-classic diagnostic/XCP-style surface.  The exact F33 RSCFD itself is capable of both
-extended identifiers and CAN-FD, and its GAFL rule does not recover a classical-only bit;
-nevertheless no native extended-ID CAN-FD frame has been observed in the retained road
-corpus.  An intermediate Brake/EBU routing implementation that has separate
-“standard application FD” and “extended classic diagnostic” routes would explain every
-current live result without requiring SecOC-aware filtering.
+Toyota's observed Camry traffic still uses **standard IDs for application CAN-FD** and
+extended IDs for the classic diagnostic/XCP-style surface, but the standard-ID `0x090`
+discriminator disproves identifier width as the missing condition. The exact F33 RSCFD itself
+is capable of both extended identifiers and CAN-FD and its GAFL rules expose no source-node
+predicate. The remaining distinction is upstream of F33 admission: source/port/routing policy
+and, critically, the protection envelope carried by native FD traffic.
 
 The clean discriminator is therefore a **known native standard-ID FD route**, not another
 extended private-ID experiment.  `0x090/32` is the preferred parked probe because exact
-F33 routes it through an ordinary additive-checksum gate rather than SecOC.  A resident
-observer should latch the frame at the software-ring/pre-checksum boundary, and the host
-should send one deliberately checksum-invalid, uniquely marked `0x090` FD32.  Start with
-BRS off so the complete frame stays at the already-matched 500-kbit/s nominal timing.  A
-positive observation would localize the problem to extended-FD / configured route class; a
-negative observation would prove a deeper host-transmitter / source-port distinction and
-justify repeating under the matched `panda/kai` 70%-SP + EFBI controller configuration.
+F33 routes it through an ordinary additive-checksum gate rather than SecOC.
 
-The field implementation is `f33-fd-ingress`.  Its resident preserves the stock `0x79EDE`
-prologue, executes the inert `0x7C60A` pre-call, then invokes a zero-call read-only helper and
-jumps directly into stock at **`0x79EE6`**, immediately before `0x809FE` drains the software
-RX ring.  This placement is intentionally later than the earlier rule46/XCP observer so the
-normal-Rx interrupt/service path cannot enqueue `0x090` after the peek but before the drain.
-The helper counts every `0x40000090` / DLC32 record as the positive control and latches only
-a `PFD090!!` host marker; it does not mutate queue, checksum, COM, SecOC, or RSCFD state.
-Exact application SID23 accepts the resident state prefix only through `FEBF027B`, so host
-attestation reads the required 32-byte prefix at `FEBF025C..FEBF027B`; the unreadable tail is
-not needed for the pass/fail verdict.
+The September-19 live discriminator now closes that branch. A current native `0x090/32`
+was captured on Panda bus0 and its first 8-byte Toyota additive check was verified exactly:
+`B7 = sum(B0..B6) + CAN-ID(0x90) + length(8) (mod 256)`. The host flipped only B0 bit0
+and left B7 unchanged, making the frame deterministically invalid while retaining the native
+32-byte shape. Panda transmitted that **standard-ID CAN-FD** frame and returned the exact
+payload; TEC, REC, total-error count and bus-off state were unchanged. Exact F33 route-40's
+validator-failure counter at `FEBE53C0` remained **0 -> 0**. Therefore the host frame did not
+reach the existing route-40 integrity validator. This disproves **extended-ID FD versus
+standard-ID FD** as a sufficient explanation for the earlier private-endpoint failure.
+
+The timing/BRS follow-up closes the remaining obvious transmitter-format knobs. Test Panda
+`54369098` changed 2-Mbit/s DBTP from upstream 80% to exact-F33 70%
+(TSEG1=13/TSEG2=6/SJW6). Test Panda `f8f5a8f6` additionally allowed back-to-back host
+BRS-on and host-forced-BRS-off FD32 sends while holding that timing fixed. In both cases the
+exact invalid `0x090` payload had a Panda TX return, zero safety blocks and zero TEC/REC/error
+growth, while the F33 route-40 validation-failure byte did not move. Thus **ID width, BRS,
+nominal/data timing, ISO mode, DLC and the local additive-checksum construction are not
+sufficient explanations**. Source/port/routing regeneration and an upstream authentication
+gate remain.
+
+The earlier `f33-fd-ingress` transient-ring observer is superseded by the simpler stock
+validator/counter analysis. Exact route construction is descriptor index35 + base5 = **route
+40**. Route byte `0x21FB8[40]=0x10` enables the generic integrity callback. Global gates
+`0x28FD6/0x28FD7` are both `0x5A`, and integrity record22 at `0x28FE4+22*8` is
+`28 00 00 0B B8 01 02 5A`, enabling `0x6A3BE -> 0x6A32C` for route40.
+`0x6A32C` reads only payload B0..B7 and accepts exactly
+`B7 == (sum(B0..B6) + low8(CAN-ID) + ID[10:8] + 8) mod 256`; on mismatch it calls
+`0x8E7BA(40)`, which increments **`FEBE5398+40 = FEBE53C0`**. That counter bank is
+cleared only by startup initializer `0x8E74E`; normal valid frames do not clear it. Therefore
+a post-send `FEBE53C0` delta is a valid sticky witness for a frame that reaches the local
+route-40 checksum validator.
+
+Native Camry `0x090` has a second, independent protection layer on the wire. Across the
+retained Sep-1 capture, B28[7:4] reset-low2 matches preceding authenticated `0x00F` on
+**364/364** eligible frames and message-low2 advances `+1 mod4` on **355/355** same-reset
+pairs; the first `0x090` in each of 12 inspected reset epochs has message-low2=1. The
+remaining 28 trailer bits are effectively frame-unique. This is the ordinary Toyota-P5
+`FV4 || MAC28` shape. Sienna P1M-E independently defines CAN-FD `0x090` as an ordinary
+SecOC profile authenticating `DataID 0x0090 || payload[28] || full freshness[6]` and
+transmitting the upper 28 CMAC bits. Exact F33 does **not** run its local SecOC verifier on
+route40, so the natural next discriminator is whether an upstream Brake/EBU boundary validates
+that P5 envelope before the frame reaches F33. The generic `f33-sign` tooling now includes
+`verify-native-090` to ask exact-F33 selector-4 command5 whether its slot4 key reproduces a
+captured native `0x090` MAC28 without transmitting `0x090`.
 
 Current GTS topology is more specific than a generic "EBU-domain boundary." In
 `CDbCanBusComponentTable`, `EBU` is literally the **junction/attachment field on the
