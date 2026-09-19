@@ -155,6 +155,19 @@ TX blocks; `FEBE5004/5005` remained clear and `FEBE4EE6` remained `0x5A`. Theref
 frame passes physical CAN, rule 46, FIFO1, owner-0 receive routing, `0x8312E`, and
 `0x830D0` staging.
 
+A September-19 lower-layer audit adds an important bounded transport fact. RFIFO1 is
+configured for **8 payload words = 32 bytes**, while the upper XCP callback `0x830D0`
+separately caps only its staging copy to `CodeFlash[0x22ABD]=8`. Exact receive producer
+`0x80A4A` writes the complete received payload into the controller software ring
+`FEBE4038..FEBE48D7` before foreground drain `0x79EDE -> 0x809FE -> 0x808D6`. A 32-byte
+FD record occupies 11 words / 44 bytes there. Native B6 independently proves FDF is carried
+in the post-RSCFD descriptor (`0x400000B6`) while the GAFL rule itself remains plain
+`0x000000B6`; therefore rule46 does not need a different GAFLID to receive FD. This makes a
+32-byte FD private mailbox on the existing extended endpoint statically viable below XCP
+staging. The new raw-FD oracle artifact peeks that ring before stock drain and performs no
+RSCFD reconfiguration. **FD32 rule46 ingress itself has not yet been live-probed**, so this is
+firmware-static closure pending the parked dynamic test.
+
 The reason CONNECT still cannot run is an independent fixed-CodeFlash gate.
 `0x821D6` calls `0x830C0 -> 0x98E80` before parsing any XCP command. `0x98E80` reads
 CodeFlash byte **`0x30D68`**, which is **`0x5A`** in `8965F3307000`; any nonzero value

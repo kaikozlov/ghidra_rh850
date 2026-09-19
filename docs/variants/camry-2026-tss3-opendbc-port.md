@@ -1594,11 +1594,108 @@ checks. The cooperative lease was removed and both the Python pandad wrapper and
 `./pandad` child resumed normally; cereal subsequently reported a valid offroad Panda in
 `noOutput` with no faults.
 
-This is still software/replay qualification, not proof of live EPS transport. The next
-hardware gate is now much narrower: with the volatile resident installed and the car parked,
-prove that **FF -> real EPS FC -> one CF train -> private response** sustains the native stream
-without recovery traffic or request loss. No moving test should precede that parked live
-qualification.
+This is still software/replay qualification, not proof of live EPS transport. The classic
+ISO-TP carrier described above is now superseded by the exact-F33 raw-CAN-FD carrier below;
+no moving test should precede its parked live qualification.
+
+### September-19 raw CAN-FD oracle carrier: DCM/CanTp removed entirely
+
+A firmware-first receive-path audit closes a simpler transport than either speculative or
+well-formed ISO-TP. The key correction is architectural: **DCM/CanTp does not own the EPS CAN
+receiver.** Exact F33 receives RSCFD traffic into one software RX ring first, then foreground
+dispatch selects normal, special, diagnostic, or XCP consumers. The private MAC service can
+therefore consume one ordinary FD frame before the XCP/diagnostic upper layers and never enter
+either protocol stack.
+
+The already-live-proven application-XCP physical endpoint is the best carrier. Exact F33
+controller-1 rule46 accepts extended `0x1FDC0002`, attaches hardware label `0x37`, and routes
+to dedicated RFIFO1. Stock XCP command execution is independently disabled by fixed
+CodeFlash `0x30D68=0x5A`, so this endpoint is physically active but application-protocol dead.
+RFIFO1 is configured for **8 payload words = 32 bytes**, exactly enough for the new request;
+no RSCFD register or acceptance-rule mutation is required.
+
+The exact lower receive geometry is:
+
+```text
+rule46 / ext 0x1FDC0002 / RFIFO1 / label 0x37
+        -> application software RX ring FEBE4038..FEBE48D7
+        -> producer 0x80A4A
+        -> foreground drain 0x79EDE -> 0x809FE -> 0x808D6
+        -> stock XCP route 0x8312E -> 0x830D0
+```
+
+`0x830D0` itself is still capped at 8 bytes by CodeFlash `0x22ABD=8`; this was the reason the
+older analysis incorrectly concluded that the extended endpoint could not carry the oracle.
+The important point is that the **full FD payload exists in the software RX ring before that
+8-byte XCP staging callback**. The resident now peeks that ring immediately before stock
+`0x79EDE` drains it, without changing producer/consumer indices, used-word count, receive
+rules, or the queued record. Stock firmware consumes/discards the same dead-XCP frame
+normally afterward.
+
+Toyota's own ring format is reused exactly. Controller0 has one 552-word ring at
+`FEBE4038..FEBE48D7`, producer `FEBE48F8`, consumer `FEBE48FA`, and used-word count
+`FEBE48FC`. A 32-byte FD frame is an 11-word/44-byte record: two header/complement words,
+CAN ID/control, then the complete 32-byte payload. The resident accepts only the exact rule46
+record `word0=0x00372020` and FD extended identity `word2=0xDFDC0002`. Native B6 independently
+proves why the unchanged rule46 GAFL entry accepts FD: B6's hardware GAFLID is plain
+`0x000000B6`, while the post-RSCFD CanIf identity becomes `0x400000B6`; FDF is represented in
+the receive descriptor after identifier acceptance, not by rewriting GAFLID.
+
+The request is one **extended CAN-FD / 32-byte** frame on bus0:
+
+```text
+0x1FDC0002 FD32
+B0..B27  exact 0x08A application[28]
+B28      full message counter (message8)
+B29      source reset counter low8
+B30      transaction sequence
+B31      sequence XOR 0xFF
+```
+
+The 36-byte selector-4 authentication domain does not need to cross the bus. The resident
+hardcodes DataID `00 8A`, copies the 28 application bytes, reads the EPS's authenticated
+current trip/reset state already used by the live-qualified B6 signer, resolves the source
+reset to the nearest low8 match, and calls Toyota's stock freshness encoder `0x90566`. It then
+calls the already-live-qualified command-5 synchronous wrapper `0x89BC2` with fixed
+`{type=1, selector=4}`, input length 36, output length 16. There is no host freshness search,
+ISO-TP framing, flow-control wait, CF pacing, or diagnostic session state.
+
+The response is one **extended classic 8-byte** frame on paired stock endpoint `0x1FE00002`:
+
+```text
+C9  seq  status  (seq XOR FF)  cmac0 cmac1 cmac2 cmac3
+```
+
+Status is only `0=success`, `1=command5 error`, `2=transient/busy`. The resident transmits
+through stock lower writer `0x85112` using hardware handle **55 (`0x37`) -> controller1 /
+resource8**, the exact configured XCP response object. Software confirmation tag `0x00F0`
+selects the already-proven no-op completion path, so no XCP TxConfirmation or protocol state is
+manufactured.
+
+The static artifact is complete and deterministic:
+
+- high-tail resident: **412 bytes / 112 bytes headroom**, SHA-256
+  `e86bffe020fd4a28ef45b9120d1dce75d83e799e8258635aacfa3469f367ac84`;
+- GlobalRAM helper: **636 bytes / 388 bytes headroom**, SHA-256
+  `fa2d7fddd10727f525625c892c3f70468fc458213ff83bf1e87fdfb1c93d9f25`;
+- staging image SHA-256 `1dcda6237ccbbdf8f39e1a24b5d8cfadcba95f3bbf69fb09cc3fec7e4298495a`;
+- authenticated 4-KiB payload SHA-256
+  `ae2e62d0ecae437c7a623910dce733117720061ecfca1a427ebb763831b3b99a`;
+- both resident/helper have zero relocations; helper's only external calls are exact stock
+  `freshness_encode 0x90566`, `command5_sync 0x89BC2`, and `lower_can_write 0x85112`.
+
+`tools/test camry_f33_08a_fd_oracle` rebuilds the complete artifact, requires byte-for-byte
+identity with the audited copy, verifies all rule/RFIFO/ring/TX-handle firmware pins, and
+exercises the host request/response codec. The mutation contract explicitly forbids flash
+writes, RSCFD reconfiguration, RX-ring mutation, XCP protocol dispatch, DCM/CanTp use,
+SecOC-result bypass, key extraction, or any `0x08A`/B6 transmit by the resident.
+
+This carrier is **static-ready but not yet live-qualified**. The next hardware discriminator
+is now one parked test, not another transport experiment: install/attest the resident, send one
+known-answer request with `panda.can_send(0x1FDC0002, request32, bus0, fd=True)`, require the
+paired `0x1FE00002` response and known CMAC, then run a short 40-Hz request benchmark. The
+current deployed openpilot remains on the classic ISO-TP oracle until that parked raw-FD test
+passes; only then should production transport be switched to the one-frame carrier.
 
 The volatile EPS oracle resident is still a deployment prerequisite rather than an
 openpilot-installed component. Without a qualified oracle response, the host never sends
