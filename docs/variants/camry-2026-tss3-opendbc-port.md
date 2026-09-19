@@ -1285,11 +1285,18 @@ comma owns, Toyota's application choice is input data only and Brake/VMM sees co
 
 The short-lived fallback build was flashed while the vehicle was offroad and its live Panda
 signature was verified, but it is superseded by this correction. It has now been replaced on
-the comma by the strict build: parent `kai-openpilot@737ed8391`, nested
-`opendbc@df9fc94c`, Panda source `21701e3f`. The corrected signed Panda image is SHA-256
-`8b75b3a837bfd0cfb38223453b440e785894c03118fbbb65966fcafa66d5db36`; after an
+the comma by the strict build, then tightened once more to remove the useless post-handoff
+byte-equality shortcut entirely. Final deployed heads are parent `kai-openpilot@f2c6b23a3`,
+nested `opendbc@e75bb17d`, Panda source `21701e3f`. In this final shape the proxy always
+queues an EPS signing job for every owned generation after the handoff witness, even when
+comma's ID11 application bytes happen to equal Toyota's source ID11 application. Panda has
+no post-handoff `exact_clone`/pass-through classifier; it validates every later generation
+only through the bounded comma-ID11 command path.
+
+The final signed Panda image is SHA-256
+`8568b69724ca42ec9f24f1f3e0df1a761bdc598b9cddc1a18381d00f0e462cc5`; after an
 offroad reboot, a cooperative direct-Panda lease read live signature
-`056e4e14e6536866d9e432bdfb6f1b2fd9c755635b2f21940ea63f0b39d2681c9da9e763247784d0a77f417579c090ed33699357add86e62d367165c931a6a763f5f460afca5ec3b88ca81d910a23271b72568e8d2b4bd4f922d09f717418a15c17b60a414fecbe66bafec0aae4660e5676b607409d681493c9c665696f1adc6`, exactly matching the newly built expected signature. Live post-lease health was ignition line/CAN false, `controls_allowed=false`, zero safety TX blocks, zero faults, no heartbeat loss, and valid RX-check state; pandad resumed and no lease files remained.
+`13e1abff7abaee8117d601418e8ba2398c733430ae88ef22fb5e28554b4b5fec199ff8b0a189662e00b8fc4bdb92ed3320b0417909f98a6787be42e688071d29ea4d50a7d41e266664b8d53f8e484db69d5b093007f9b6b05a36bcf5288f227234f3fecfef39ef0d9aaed251fc7e1ba3a6d6f9aafd2de9ff15a2e90cd62fd3f2`, exactly matching the newly built expected signature. Live post-lease health was ignition line/CAN false, `controls_allowed=false`, zero safety TX blocks, zero faults, no heartbeat loss, and valid RX-check state; pandad resumed and no lease files remained.
 
 Same-session CF repair is software/replay-qualified but not yet live-EPS-qualified. Its next
 hardware qualification is a **parked** oracle admission-loss test after the volatile resident
