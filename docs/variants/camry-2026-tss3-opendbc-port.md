@@ -715,10 +715,11 @@ reset to measured steering, so the next OP target resumed from a different basel
 `kai-openpilot@65dcda237` with nested opendbc `f70060d9` corrects both limitations. The
 current rule for each native source generation is:
 
-- `CC.latActive` + native **ID0**: preserve the complete native application except set
-  `B21[5:0] 0 -> 11` and replace `B18:B19` with the normal rate-limited openpilot pinion
-  target; preserve the high two bits of B21, B24/B25 gains, B26 request sequence, both
-  longitudinal request tuples, cruise/hold state, FV4 and every other application byte;
+- `CC.latActive` + native **ID0**: promote the request to Toyota's observed LTA/LCA shape:
+  set `B21[5:0] 0 -> 11`, replace `B18:B19` with the normal rate-limited openpilot pinion
+  target, and set **B24 raw 100 = assist gain 1.00**; preserve B21 high bits, B25 damping,
+  B26 request sequence, both longitudinal request tuples, cruise/hold state, FV4 and every
+  other application byte;
 - `CC.latActive` + native **ID11**: preserve ID11 and replace only `B18:B19`;
 - native ID4/ID18/other Toyota applications are never promoted and remain Toyota-owned;
 - when `CC.latActive` becomes false, release relay ownership immediately and let stock
@@ -729,13 +730,15 @@ current rule for each native source generation is:
 - every modified generation is signed for the exact observed native freshness generation
   through the EPS command-5 oracle. There is still no N+1/N+2 prediction.
 
-Panda retains the three newest native bus2 `0x08A` generations and accepts each at most
-once. For an ID0 source, the only newly permitted semantic edit is low-six-bit ID0->ID11;
-for an ID11 source the ID remains byte-exact. In both cases only B18:B19 and MAC28 may
-otherwise differ, FV4 must match the exact source generation, and ordinary
-`controls_allowed` plus the F33 angle/rate envelope still apply. The host ownership
-watchdog is 75 ms (three native periods), based on the measured bus0 oracle pipeline.
-The old C7/B6 sideband remains blocked in request-plane mode.
+Panda now retains the **six newest** native bus2 `0x08A` generations and accepts each at
+most once, **oldest unconsumed first**. This depth covers the measured one-retry oracle
+pipeline without allowing host output to skip/reorder source generations. For an ID0
+source, the permitted semantic edits are B18:B19, low-six-bit ID0->ID11, **B24=100**, and
+MAC28; any other assist gain is rejected. Native ID11 retains its source-real ID and B24.
+FV4 must match the exact source generation and ordinary `controls_allowed` plus the F33
+angle/rate envelope still apply. The host ownership watchdog is **100 ms**, sized above the
+measured ~80-ms lost-response retry gap while remaining bounded. The old C7/B6 sideband
+remains blocked in request-plane mode.
 
 **Reset/freshness rule:** `0x00F` and protected `0x08A` are asynchronous publishers. A normal
 `RESET_CNT` increment can therefore appear on `0x00F` before the next native `0x08A` stops
@@ -919,11 +922,12 @@ python openpilot/tools/replay/toyota_f33_request_plane_replay.py /Users/kai/dev/
 python openpilot/tools/replay/toyota_f33_request_plane_replay.py /Users/kai/dev/inspect/logs/00000135--dc6b4d88c4 --drop-sign-response 4000
 ```
 
-The narrow request mutation remains unchanged. Engaged native ID0 periods already carry the
-same Toyota companion gate shape seen in native ID11 (`B22=0x10`, B20 predominantly
-`0xC0`/sometimes `0x40`, B24=100, B25=0), so the host still modifies only B18:B19,
-B21-low6 ID0->ID11 when required, and MAC28. No additional companion-byte synthesis was
-introduced.
+The request mutation is intentionally narrow but now includes the missing Toyota assist
+request. Engaged native ID0 periods already carry the same gate state used by lateral
+requests (`B22=0x10`, B20 predominantly `0xC0`/sometimes `0x40`, B25=0), but **ID0 B24 is
+0 while native LTA/LCA ID11 uses B24=100**. Therefore ID0->ID11 promotion modifies exactly
+B18:B19, B21-low6, **B24=100**, and MAC28. Native ID11 continues to preserve its source-real
+B24. No other companion-byte synthesis is introduced.
 
 **Downstream low-speed arbitration evidence:** the retained September-7 Camry corpus contains
 504 source-real native ID4/LDA request generations. Joining them to fresh `0x081` and
@@ -944,6 +948,56 @@ before protected `0x08A` egress, this strongly places Toyota's ordinary LTA spee
 the upstream FRC feature-selection policy rather than in the generic Brake/VMM lateral
 arbiter. That is the exact policy boundary the ID0->ID11 host substitution is intended to
 supersede.
+
+**September-19 limp-run closure (`00000140--7bec8dde3f`):** this route finally proves the
+low-speed downstream path itself. It contains 24,391 source bus2 `0x08A` generations, all
+native ID0. During the ~18-mph active interval the host produced 31 promoted ID11 frames;
+27 were Panda-accepted, and **26/27 fresh downstream `0x081` results selected
+`LATERAL_RESULT_ID=11`**. The result pinion reference followed the host request, and measured
+steering moved in the requested direction. Therefore Brake/VMM accepts and selects the
+comma-authored ID11 at ~18 mph; the prior "limp" behavior was not a downstream low-speed
+veto.
+
+The same route exposed two real remaining defects. First, every selected promoted ID11
+carried **B24=0**, inherited from native ID0, while the retained Toyota corpus shows native
+LTA/LCA ID11 with **B24=100 / assist gain 1.00**. `kai-openpilot@7654d1cc0` now builds
+ID0->ID11 with B24=100, while nested `opendbc@43754107` requires exactly B24=100 for that
+promotion and preserves source-real B24 on native ID11. Second, individual private `0x7A9`
+responses are occasionally absent. In the limp interval, seq22 was lost while seq23
+succeeded; the source-order retry of seq22 completed only after the source generation had
+aged to roughly 80 ms, causing the old three-generation/75-ms Panda contract to reject it
+and collapse ownership. The current safety contract retains six generations oldest-first
+and uses a 100-ms ownership watchdog, covering this measured retry geometry without
+permitting source reordering.
+
+Request-plane failure semantics are also changed. A **Panda TX reject, arm/admin reject,
+handoff-clone reject, or second sign failure no longer destroys SecOC qualification**.
+Those events end only the current authority interval, clear its queued/in-flight sign work,
+release stock forwarding, and automatically re-arm on the next eligible native generation
+using the still-valid freshness tracker. Only genuine native freshness loss/CAN invalidity
+forces full recovery. Requalification itself now clears stale in-flight oracle jobs so old
+transactions cannot occupy the sender window. Every real request-plane failure increments a
+counter, records an exact reason in `logMessage/errorLogMessage` as
+`toyota_f33_request_plane_failure`, and pulses the standard
+`CarState.steerFaultTemporary` surface for one second so the driver sees **Steering Assist
+Temporarily Unavailable** instead of silent limpness.
+
+The updated production replay gate now accepts `--oracle-response-delay-ms`. At **30-ms
+successful oracle latency** the new code passes all three retained drive shapes with zero
+Panda TX rejects, zero native leaks, and zero freshness/sign failures: route `140` sustains
+1,906 modified ID11 generations over two authority windows; route `13c` sustains 1,189;
+route `135` sustains 8,429 over eight authority windows. Injected dropped sign responses
+(`140` #500, `13c` #500, `135` #4000) are retried under authority and all three replays
+still pass. The dedicated unit regression also proves an explicit active-host Panda reject
+preserves qualification and begins a fresh atomic handoff on the next native generation.
+
+Deployed heads after this closure are `kai-openpilot@7654d1cc0`, nested
+`opendbc@43754107`, and `panda@21701e3f`; the Panda firmware was rebuilt/flashed and its
+live signature matched the new image before the comma reboot. The first boot recorded one
+visible `oracle_recovery_failure` during startup while the resident was not yet answering;
+it subsequently requalified normally. A later lease-free parked observation showed Toyota
+safety param 53833, valid RX checks, no Panda faults, no active failure warning, and no
+unexpected request-plane traffic while parked.
 
 The volatile EPS oracle resident is still a deployment prerequisite rather than an
 openpilot-installed component. Without a qualified oracle response, the host never sends
