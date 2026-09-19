@@ -1734,7 +1734,7 @@ measurements already put five classic CF submissions at roughly 0.6--0.8 ms host
 removed latency was the receiver-controlled ISO-TP FF->FC wait, not the five-frame wire burst.
 The new carrier therefore removes DCM/CanTp, FF/FC/CF semantics, and every transport retry
 while preserving exact application/freshness input to command 5. `tools/test
-camry_f33_08a_classic_oracle` rebuilds and byte-compares the 412-byte resident, 832-byte
+camry_f33_08a_classic_oracle` rebuilds and byte-compares the 412-byte resident, 852-byte
 helper, staging image and authenticated payload and verifies the exact classic rule46/ring/
 response-handle contract. Recovering the Brake/EBU classic-to-local-FD regeneration path
 remains the deeper OEM-shaped alternative, not a prerequisite for this carrier.
@@ -1751,8 +1751,21 @@ rest-of-drive lockout or source-owner mixing. Repeating both full routes with a 
 oracle response delay** also passes at the original 5/5 and 8/8 authority windows, with all
 7,387 / 8,559 request batches admitted, zero native leaks and valid Panda safety. Thus the
 software path remains source-cadence-stable near the 25-ms generation period without any FC
-serialization. These are replay/software results; live parked mailbox latency and native-MAC
-equality remain the next hardware qualification.
+serialization.
+
+The first parked live known-answer attempt then exposed a deterministic helper-assembly bug,
+not a transport failure. F33 state showed fragment 0 had armed sequence 1, fragment 4
+`0x81` was observed at rule46 with length 8, and manually spaced fragments advanced the
+resident assembly state exactly `1 -> 2 -> 3 -> 4`; nevertheless `request_count` remained
+zero. Disassembly closed the cause: RH850 `cmp imm5,reg` has a signed five-bit immediate, and
+GNU as had silently encoded source `cmp 0xC9,r6`, `0xA8`, `0x5A`, `0xA5` as comparisons
+against `9`, `8`, `-6`, `5`. The later `cmp 16,r8` output-length check likewise encoded
+`-16`. The corrected helper loads every out-of-range constant into a register before `cmp`,
+and the builder now rejects any numeric compare immediate outside `[-16,15]`. The rebuilt
+helper is 852/1024 bytes; live known-answer retry remains pending after resident reinstall.
+
+These are replay/software results plus parked ingress/assembly observation; live parked mailbox
+latency and native-MAC equality remain the next hardware qualification.
 
 The volatile EPS oracle resident is still a deployment prerequisite rather than an
 openpilot-installed component. Without a qualified oracle response, the host never sends
