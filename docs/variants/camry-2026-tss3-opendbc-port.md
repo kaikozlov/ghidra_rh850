@@ -976,11 +976,14 @@ Those events end only the current authority interval, clear its queued/in-flight
 release stock forwarding, and automatically re-arm on the next eligible native generation
 using the still-valid freshness tracker. Only genuine native freshness loss/CAN invalidity
 forces full recovery. Requalification itself now clears stale in-flight oracle jobs so old
-transactions cannot occupy the sender window. Every real request-plane failure increments a
-counter, records an exact reason in `logMessage/errorLogMessage` as
-`toyota_f33_request_plane_failure`, and pulses the standard
-`CarState.steerFaultTemporary` surface for one second so the driver sees **Steering Assist
-Temporarily Unavailable** instead of silent limpness.
+transactions cannot occupy the sender window. Every real request-plane failure increments a counter and records an exact reason in
+`logMessage/errorLogMessage` as `toyota_f33_request_plane_failure`. The original visible
+implementation incorrectly reused `CarState.steerFaultTemporary`, which can generate a
+soft-disable and therefore convert a brief authority drop into an approximately one-second
+lateral limp interval. `kai-openpilot@dfc2c6662` replaces that with the additive generic
+`CarState.steerFaultTemporarySilent` field from `opendbc@6dc2b5d3`; `CarEvents` maps it only
+to the existing warning-only `steerTempUnavailableSilent` event. The driver still sees a
+steering warning, but the notification itself no longer changes `latActive` or control state.
 
 The updated production replay gate now accepts `--oracle-response-delay-ms`. At **30-ms
 successful oracle latency** the new code passes all three retained drive shapes with zero
@@ -998,6 +1001,68 @@ visible `oracle_recovery_failure` during startup while the resident was not yet 
 it subsequently requalified normally. A later lease-free parked observation showed Toyota
 safety param 53833, valid RX checks, no Panda faults, no active failure warning, and no
 unexpected request-plane traffic while parked.
+
+**September-19 sustained-steering route (`00000142--2e058e3fef`):** after the B24=100 and
+same-drive recovery changes, this 11-segment route proves sustained low-speed physical
+steering and also quantifies the remaining interruptions. It contains **24,914** native
+bus2 `0x08A` generations, all ID0. The host emitted 1,422 promoted ID11 frames with
+**B24=100** plus 36 exact clones; Panda returned **1,392 accepted ID11** and 30 rejected
+ID11. Downstream Brake/VMM published **1,256 `0x081` result-ID11** frames. Accepted-ID11
+runs span roughly 13–29 mph and repeatedly last 1–3.3 seconds; measured steering follows
+the selected pinion reference, so the low-speed request-plane actuation path is now directly
+observed, not inferred.
+
+There are **26 unique request-plane failures** in the route (each cloudlog event appears in
+both `logMessage` and `errorLogMessage`, so raw log-message count is doubled): 15
+`host_08a_rejected`, 9 `oracle_sign_failure`, one `handoff_clone_rejected`, and one startup
+`oracle_recovery_failure`. All transient failures retain `qualified=true`, confirming that
+the new same-drive recovery semantics work. In the old notification build, however, every
+failure's one-second `steerFaultTemporary` pulse frequently became
+`steerTempUnavailable/softDisable`; the next accepted ID11 therefore appeared about
+**1.05 s** after most failures. That delay was notification-induced, not requalification.
+
+The host-frame rejects were a second independent timing issue. Matching every rejected ID11
+to its source generation shows source ages of **120.3–170.7 ms** and lags of **4–6 native
+generations**. Accepted frames routinely reached 70–140 ms / lag 2–5. The stream was
+therefore operating with essentially no backlog margin. Separately, the actual source
+`0x08A` intervals are not a fixed 25 ms: mapped consecutive generations cluster around
+20/30 ms and reach ~34 ms. CarController consequently produces legitimate adjacent source
+samples up to **10 raw angle counts = 0.573 deg** apart. The earlier Panda request-plane
+angle envelope assumed at most three 100-Hz controller ticks and could allow only about
+eight raw counts in the tighter direction; three clean serialized-replay rejects were
+exactly this one-count/two-count mismatch. `opendbc@6dc2b5d3` changes only the F33 request-
+plane Panda envelope to the exact **four-controller-tick** bound: 0.60/0.30 deg up and
+0.72/0.52 deg down (low/high-speed lookup). The 100-Hz CarController limit itself is
+unchanged and remains tighter.
+
+The nine real `oracle_sign_failure` episodes identify the remaining backlog source. The
+successful command-5 RTT distribution across this route is **mean 22.30 ms, median 22.45
+ms, p95 31.91 ms, max 39.13 ms**. The old worker nonetheless launched a new sign request
+at ~25-ms cadence even when the preceding one was still outstanding. In every sign-failure
+episode the missing request still received ISO-TP flow control (`30 00 28`), but its private
+`07 C9` response disappeared while a newer request was in flight; the retry was then also
+sent while that newer transaction remained outstanding. `kai-openpilot@dfc2c6662` makes
+**active sign jobs strictly one-in-flight and response-driven**. A successful response wakes
+the sender immediately, so the observed 22.3-ms mean service time provides real catch-up
+capacity against 25-ms native cadence instead of accumulating source age. Recovery/verify
+retain their already-qualified pipelined startup transport. Sign timeout is raised narrowly
+from 40 to **45 ms**, just above the observed 39.13-ms successful maximum.
+
+The updated replay gate reproduces the full route through current CarController, proxy, and
+C Panda safety. With serialized signing and a conservative fixed **24-ms** synthetic oracle
+latency, route `142` passes with **1,541 modified ID11**, 1,570 owned native generations,
+zero native leaks, zero Panda TX rejects, zero safety invalidity, and zero freshness/sign
+failures. The same route also passes an injected dropped sign response at generation 500,
+which is retried under authority. Older routes `140` and `135` continue to pass under the
+same serialized-signing model. Unit gates after this change are **40 proxy/car-event tests**
+and **275 Toyota/Panda safety tests + 8 subtests**.
+
+The resulting deployed heads are `kai-openpilot@dfc2c6662`, nested `opendbc@6dc2b5d3`,
+and `panda@21701e3f`. The Panda safety image was rebuilt/flashed from that exact nested
+opendbc state and its live firmware signature matched before the comma reboot. The comma
+subsequently booted on those exact Git heads and started pandad/card/controlsd/selfdrived;
+a final messaging-only parked observation remains the post-reboot verification boundary if
+network access is temporarily unavailable.
 
 The volatile EPS oracle resident is still a deployment prerequisite rather than an
 openpilot-installed component. Without a qualified oracle response, the host never sends
