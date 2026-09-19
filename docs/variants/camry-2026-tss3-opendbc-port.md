@@ -1505,9 +1505,81 @@ After an offroad reboot, a cooperative direct-Panda lease read live signature
 `controls_allowed=false`, zero safety TX blocks, zero faults, no heartbeat loss, valid RX
 checks, and no direct-lease files left behind.
 
-Same-session CF repair is software/replay-qualified but not yet live-EPS-qualified. Its next
-hardware qualification is a **parked** oracle admission-loss test after the volatile resident
-is installed. No moving test should precede that parked qualification.
+### September-19 minimum-path rewrite
+
+The audit above still left two pieces of bring-up machinery that were not actually required:
+**runtime freshness brute-force** and **speculative ISO-TP CF transmission with a repair path**.
+`kai-openpilot@88eb9a4e5` with nested `opendbc@1b7ab1c1` removes both. This section
+supersedes the previous "eight-clean-source recovery" and "same-session CF repair" runtime
+architecture.
+
+**Freshness is now passive.** Native F33 `0x08A` resets its full message counter to `1` on a
+new resolved reset epoch and then advances one-for-one with source B26. The host therefore
+needs no command-5 MAC search to discover the hidden high message-counter bits. On startup or
+a source discontinuity it simply observes the always-on native stream until the next clean
+reset boundary, seeds `message8=1`, and tracks `+1` thereafter. Retained-route reset epochs
+arrive at about 0.301 s cadence: route149 p99 is 0.309 s / max 0.331 s; route135 p99 is
+0.310 s / max 0.521 s. Full-route replay continuously compares the production tracker's full
+counter against an independently reconstructed route truth, including while lateral control
+is inactive. Route149 and route135 both remain exact. There are therefore **zero recovery
+oracle jobs in driving code**.
+
+**The MAC transport now uses ordinary ISO-TP sequencing.** Route146's recorded EPS
+flow-control timing makes the old 5-ms speculative CF batch indefensible: FF->FC minimum was
+8.07 ms, median 16.76 ms, p90 18.77 ms, p95 26.77 ms and maximum 33.63 ms. In other words,
+the old 5-ms batch always preceded the receiver's real FC and the later repair state machine
+was compensating for that self-inflicted protocol violation. The new path is simply:
+
+1. send one FF;
+2. wait for the EPS's actual `30 00 28` flow-control;
+3. send CF1..CF5 exactly once;
+4. accept the sequence-tagged private `07 C9` result.
+
+The host allows only one request to be waiting for FC at a time, but previous private replies
+may remain outstanding after their CF batch is sent. This is the important throughput split:
+**FC service time, not total CMAC response time, gates the next source generation.** Route149
+passes with a synthetic sustained 20-ms FF->FC plus 15-ms FC->reply delay (35-ms total),
+while a synthetic 30-ms FC for every generation correctly overloads a ~40-Hz source stream
+rather than invoking a retry/backlog state machine. A missing private reply now causes one
+bounded fail-open release; passive freshness remains valid and the next clean opportunity
+re-arms. Injecting one lost reply at sign generation 500 on route149 produces exactly one
+`oracle_response_timeout`, one extra release/re-arm, and no rest-of-drive lockout.
+
+The remaining runtime adapter has one job: **turn the current normal openpilot angle target
+into a signed ID11 on each exact native source generation.** Its state is limited to the
+current native freshness, one handoff attempt, queued source-ordered sign jobs, one FF waiting
+for FC, sequence-tagged replies waiting for completion, and source-order output slots. There
+is no recovery mode, retry mode, cooldown, speculative-CF mode, transparent mode, rollout
+mode, permission copy, or generation epoch. The old `toyota_tss3_08a.py` helper module is
+also deleted; there is one F33 request-plane adapter file.
+
+One cross-layer hook deliberately remains: after the exact handoff clone is accepted,
+CarController's angle baseline is reset once to measured steering. This is not a permission
+signal. Removing that one-shot synchronization in a controlled replay regresses route149 to
+31 arm/release cycles and 26 Panda angle-rate rejects, because CarController can advance its
+normal `last_angle` while the relay handoff is pending whereas Panda seeds its rate baseline
+from measured steering. The persistent proxy-active controller veto remains deleted.
+
+CarControl liveness is explicit: if `card` loses the normal `carControl` stream, it immediately
+calls the adapter inactive so asynchronous signing cannot outlive openpilot's command stream.
+`authority_unavailable` remains a derived observation only (`CC.latActive` requested but the
+request plane is not actually active); `arm_pending` is not reported as successful steering.
+
+Focused gates for this minimum path are **16 adapter tests**, **46 Camry TSS3 tests**, and the
+three warning/event tests. Normal full-route results are:
+
+- route149: **5 arms / 5 releases**, 7,387 owned native generations, 7,381 active host ID11
+  outputs, zero native leaks, zero safety invalidity, zero request-plane failures;
+- route135: **8 arms / 8 releases**, 8,559 owned native generations, 8,551 active host ID11
+  outputs, zero native leaks, zero safety invalidity, zero request-plane failures. Its two
+  host rejects remain the ordinary `controls_allowed=false` disengagement ordering already
+  seen in the recorded route.
+
+This is still software/replay qualification, not proof of live EPS transport. The next
+hardware gate is now much narrower: with the volatile resident installed and the car parked,
+prove that **FF -> real EPS FC -> one CF train -> private response** sustains the native stream
+without recovery traffic or request loss. No moving test should precede that parked live
+qualification.
 
 The volatile EPS oracle resident is still a deployment prerequisite rather than an
 openpilot-installed component. Without a qualified oracle response, the host never sends
