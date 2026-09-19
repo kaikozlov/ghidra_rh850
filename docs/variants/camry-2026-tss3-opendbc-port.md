@@ -1282,10 +1282,16 @@ TSS3 module**, plus route149 at 20/24 ms and mixed route135. The key invariant i
 comma owns, Toyota's application choice is input data only and Brake/VMM sees comma ID11.**
 
 The short-lived fallback build was flashed while the vehicle was offroad and its live Panda
-signature was verified, but it is superseded by this correction. The corrected strict build
-must replace it before any moving test. Same-session CF repair is software/replay-qualified;
-its next hardware qualification is a parked EPS-oracle loss/admission test after the volatile
-resident is installed, before road use.
+signature was verified, but it is superseded by this correction. It has now been replaced on
+the comma by the strict build: parent `kai-openpilot@737ed8391`, nested
+`opendbc@df9fc94c`, Panda source `21701e3f`. The corrected signed Panda image is SHA-256
+`8b75b3a837bfd0cfb38223453b440e785894c03118fbbb65966fcafa66d5db36`; after an
+offroad reboot, a cooperative direct-Panda lease read live signature
+`056e4e14e6536866d9e432bdfb6f1b2fd9c755635b2f21940ea63f0b39d2681c9da9e763247784d0a77f417579c090ed33699357add86e62d367165c931a6a763f5f460afca5ec3b88ca81d910a23271b72568e8d2b4bd4f922d09f717418a15c17b60a414fecbe66bafec0aae4660e5676b607409d681493c9c665696f1adc6`, exactly matching the newly built expected signature. Live post-lease health was ignition line/CAN false, `controls_allowed=false`, zero safety TX blocks, zero faults, no heartbeat loss, and valid RX-check state; pandad resumed and no lease files remained.
+
+Same-session CF repair is software/replay-qualified but not yet live-EPS-qualified. Its next
+hardware qualification is a **parked** oracle admission-loss test after the volatile resident
+is installed. No moving test should precede that parked qualification.
 
 The volatile EPS oracle resident is still a deployment prerequisite rather than an
 openpilot-installed component. Without a qualified oracle response, the host never sends
