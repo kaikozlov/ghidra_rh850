@@ -1,0 +1,489 @@
+comma@comma-688f218c:/data/camry-f33-car-kit$  ./f33-route40 run /tmp/f33-090-route40-result.json
+INFO: connecting to panda 3a0007000151343435333330
+{
+  "arm": {
+    "frame_hex": "00f50b10bc1b3785",
+    "sequence": 11,
+    "state": {
+      "armed": true,
+      "command_state": 2,
+      "command_status": 0,
+      "config_selector": 4,
+      "config_type": 1,
+      "domain_hex": "009001ff02000200019dffff000000010001000000000000000000000000028400cbb02c",
+      "done_flag": 1,
+      "expected_trailer_hex": "bc1b3785",
+      "generation_at_match": 0,
+      "input_bitmap": 511,
+      "last_sequence": 11,
+      "latched_frame_hex": "0000000000000000000000000000000000000000000000000000000000000000",
+      "magic": "0x52303946",
+      "magic_ok": true,
+      "matched": false,
+      "output_hex": "c1b3785a0ea3762bb9b144234d23d5a6",
+      "output_length": 16,
+      "raw_hex": "46393052010b0200ff01000110000000009001ff02000200019dffff000000010001000000000000000000000000028400cbb02cc1b3785a0ea3762bb9b144234d23d5a6010000000100000004000000bc1b37850000000000000000000000000000000000000000000000000000000000000000",
+      "version": 1,
+      "version_ok": true,
+      "wrapper_return_code": 0
+    }
+  },
+  "boundaries": {
+    "frame_count": 1,
+    "persistent_flash_write": false,
+    "route_table_patch": false,
+    "secoc_bypass": false,
+    "single_nrtd_to_ready_transition": true,
+    "valid_f33_b7": true,
+    "valid_p5_mac28": true
+  },
+  "captured_native": {
+    "frame_hex": "01ff02000200009cffff0000000100010000000000000000000000007d60fe9f",
+    "reset_counter": 3195,
+    "sync_hex": "028400c7bb3f4d80",
+    "trip_counter": 644
+  },
+  "domain_hex": "009001ff02000200019dffff000000010001000000000000000000000000028400cbb02c",
+  "frame_hex": "01ff02000200019dffff000000010001000000000000000000000000bc1b3785",
+  "generation": {
+    "cmac_hex": "c1b3785a0ea3762bb9b144234d23d5a6",
+    "commands": [
+      {
+        "frame_hex": "00f50130009001ff",
+        "sequence": 1,
+        "state": {
+          "armed": false,
+          "command_state": 0,
+          "command_status": 0,
+          "config_selector": 0,
+          "config_type": 0,
+          "domain_hex": "009001ff0000000000000000000000000000000000000000000000000000000000000000",
+          "done_flag": 0,
+          "expected_trailer_hex": "00000000",
+          "generation_at_match": 0,
+          "input_bitmap": 1,
+          "last_sequence": 1,
+          "latched_frame_hex": "0000000000000000000000000000000000000000000000000000000000000000",
+          "magic": "0x52303946",
+          "magic_ok": true,
+          "matched": false,
+          "output_hex": "00000000000000000000000000000000",
+          "output_length": 0,
+          "raw_hex": "46393052010100000100000000000000009001ff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+          "version": 1,
+          "version_ok": true,
+          "wrapper_return_code": 0
+        }
+      },
+      {
+        "frame_hex": "00f5023102000200",
+        "sequence": 2,
+        "state": {
+          "armed": false,
+          "command_state": 0,
+          "command_status": 0,
+          "config_selector": 0,
+          "config_type": 0,
+          "domain_hex": "009001ff0200020000000000000000000000000000000000000000000000000000000000",
+          "done_flag": 0,
+          "expected_trailer_hex": "00000000",
+          "generation_at_match": 0,
+          "input_bitmap": 3,
+          "last_sequence": 2,
+          "latched_frame_hex": "0000000000000000000000000000000000000000000000000000000000000000",
+          "magic": "0x52303946",
+          "magic_ok": true,
+          "matched": false,
+          "output_hex": "00000000000000000000000000000000",
+          "output_length": 0,
+          "raw_hex": "46393052010200000300000000000000009001ff020002000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+          "version": 1,
+          "version_ok": true,
+          "wrapper_return_code": 0
+        }
+      },
+      {
+        "frame_hex": "00f50332019dffff",
+        "sequence": 3,
+        "state": {
+          "armed": false,
+          "command_state": 0,
+          "command_status": 0,
+          "config_selector": 0,
+          "config_type": 0,
+          "domain_hex": "009001ff02000200019dffff000000000000000000000000000000000000000000000000",
+          "done_flag": 0,
+          "expected_trailer_hex": "00000000",
+          "generation_at_match": 0,
+          "input_bitmap": 7,
+          "last_sequence": 3,
+          "latched_frame_hex": "0000000000000000000000000000000000000000000000000000000000000000",
+          "magic": "0x52303946",
+          "magic_ok": true,
+          "matched": false,
+          "output_hex": "00000000000000000000000000000000",
+          "output_length": 0,
+          "raw_hex": "46393052010300000700000000000000009001ff02000200019dffff00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+          "version": 1,
+          "version_ok": true,
+          "wrapper_return_code": 0
+        }
+      },
+      {
+        "frame_hex": "00f5043300000001",
+        "sequence": 4,
+        "state": {
+          "armed": false,
+          "command_state": 0,
+          "command_status": 0,
+          "config_selector": 0,
+          "config_type": 0,
+          "domain_hex": "009001ff02000200019dffff000000010000000000000000000000000000000000000000",
+          "done_flag": 0,
+          "expected_trailer_hex": "00000000",
+          "generation_at_match": 0,
+          "input_bitmap": 15,
+          "last_sequence": 4,
+          "latched_frame_hex": "0000000000000000000000000000000000000000000000000000000000000000",
+          "magic": "0x52303946",
+          "magic_ok": true,
+          "matched": false,
+          "output_hex": "00000000000000000000000000000000",
+          "output_length": 0,
+          "raw_hex": "46393052010400000f00000000000000009001ff02000200019dffff00000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+          "version": 1,
+          "version_ok": true,
+          "wrapper_return_code": 0
+        }
+      },
+      {
+        "frame_hex": "00f5053400010000",
+        "sequence": 5,
+        "state": {
+          "armed": false,
+          "command_state": 0,
+          "command_status": 0,
+          "config_selector": 0,
+          "config_type": 0,
+          "domain_hex": "009001ff02000200019dffff000000010001000000000000000000000000000000000000",
+          "done_flag": 0,
+          "expected_trailer_hex": "00000000",
+          "generation_at_match": 0,
+          "input_bitmap": 31,
+          "last_sequence": 5,
+          "latched_frame_hex": "0000000000000000000000000000000000000000000000000000000000000000",
+          "magic": "0x52303946",
+          "magic_ok": true,
+          "matched": false,
+          "output_hex": "00000000000000000000000000000000",
+          "output_length": 0,
+          "raw_hex": "46393052010500001f00000000000000009001ff02000200019dffff00000001000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+          "version": 1,
+          "version_ok": true,
+          "wrapper_return_code": 0
+        }
+      },
+      {
+        "frame_hex": "00f5063500000000",
+        "sequence": 6,
+        "state": {
+          "armed": false,
+          "command_state": 0,
+          "command_status": 0,
+          "config_selector": 0,
+          "config_type": 0,
+          "domain_hex": "009001ff02000200019dffff000000010001000000000000000000000000000000000000",
+          "done_flag": 0,
+          "expected_trailer_hex": "00000000",
+          "generation_at_match": 0,
+          "input_bitmap": 63,
+          "last_sequence": 6,
+          "latched_frame_hex": "0000000000000000000000000000000000000000000000000000000000000000",
+          "magic": "0x52303946",
+          "magic_ok": true,
+          "matched": false,
+          "output_hex": "00000000000000000000000000000000",
+          "output_length": 0,
+          "raw_hex": "46393052010600003f00000000000000009001ff02000200019dffff00000001000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+          "version": 1,
+          "version_ok": true,
+          "wrapper_return_code": 0
+        }
+      },
+      {
+        "frame_hex": "00f5073600000000",
+        "sequence": 7,
+        "state": {
+          "armed": false,
+          "command_state": 0,
+          "command_status": 0,
+          "config_selector": 0,
+          "config_type": 0,
+          "domain_hex": "009001ff02000200019dffff000000010001000000000000000000000000000000000000",
+          "done_flag": 0,
+          "expected_trailer_hex": "00000000",
+          "generation_at_match": 0,
+          "input_bitmap": 127,
+          "last_sequence": 7,
+          "latched_frame_hex": "0000000000000000000000000000000000000000000000000000000000000000",
+          "magic": "0x52303946",
+          "magic_ok": true,
+          "matched": false,
+          "output_hex": "00000000000000000000000000000000",
+          "output_length": 0,
+          "raw_hex": "46393052010700007f00000000000000009001ff02000200019dffff00000001000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+          "version": 1,
+          "version_ok": true,
+          "wrapper_return_code": 0
+        }
+      },
+      {
+        "frame_hex": "00f5083700000284",
+        "sequence": 8,
+        "state": {
+          "armed": false,
+          "command_state": 0,
+          "command_status": 0,
+          "config_selector": 0,
+          "config_type": 0,
+          "domain_hex": "009001ff02000200019dffff000000010001000000000000000000000000028400000000",
+          "done_flag": 0,
+          "expected_trailer_hex": "00000000",
+          "generation_at_match": 0,
+          "input_bitmap": 255,
+          "last_sequence": 8,
+          "latched_frame_hex": "0000000000000000000000000000000000000000000000000000000000000000",
+          "magic": "0x52303946",
+          "magic_ok": true,
+          "matched": false,
+          "output_hex": "00000000000000000000000000000000",
+          "output_length": 0,
+          "raw_hex": "4639305201080000ff00000000000000009001ff02000200019dffff00000001000100000000000000000000000002840000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+          "version": 1,
+          "version_ok": true,
+          "wrapper_return_code": 0
+        }
+      },
+      {
+        "frame_hex": "00f5093800cbb02c",
+        "sequence": 9,
+        "state": {
+          "armed": false,
+          "command_state": 0,
+          "command_status": 0,
+          "config_selector": 0,
+          "config_type": 0,
+          "domain_hex": "009001ff02000200019dffff000000010001000000000000000000000000028400cbb02c",
+          "done_flag": 0,
+          "expected_trailer_hex": "00000000",
+          "generation_at_match": 0,
+          "input_bitmap": 511,
+          "last_sequence": 9,
+          "latched_frame_hex": "0000000000000000000000000000000000000000000000000000000000000000",
+          "magic": "0x52303946",
+          "magic_ok": true,
+          "matched": false,
+          "output_hex": "00000000000000000000000000000000",
+          "output_length": 0,
+          "raw_hex": "4639305201090000ff01000000000000009001ff02000200019dffff000000010001000000000000000000000000028400cbb02c00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+          "version": 1,
+          "version_ok": true,
+          "wrapper_return_code": 0
+        }
+      }
+    ],
+    "state": {
+      "armed": false,
+      "command_state": 2,
+      "command_status": 0,
+      "config_selector": 4,
+      "config_type": 1,
+      "domain_hex": "009001ff02000200019dffff000000010001000000000000000000000000028400cbb02c",
+      "done_flag": 1,
+      "expected_trailer_hex": "00000000",
+      "generation_at_match": 0,
+      "input_bitmap": 511,
+      "last_sequence": 10,
+      "latched_frame_hex": "0000000000000000000000000000000000000000000000000000000000000000",
+      "magic": "0x52303946",
+      "magic_ok": true,
+      "matched": false,
+      "output_hex": "c1b3785a0ea3762bb9b144234d23d5a6",
+      "output_length": 16,
+      "raw_hex": "46393052010a0200ff01000110000000009001ff02000200019dffff000000010001000000000000000000000000028400cbb02cc1b3785a0ea3762bb9b144234d23d5a6000000000100000004000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "version": 1,
+      "version_ok": true,
+      "wrapper_return_code": 0
+    },
+    "success": true
+  },
+  "mutation": {
+    "after": 1,
+    "b7_after": 157,
+    "b7_before": 156,
+    "before": 0,
+    "byte": 6
+  },
+  "native_090_after_tx": [
+    {
+      "bus": 0,
+      "data_hex": "020002000200009e0001ffff00030003000000000000000000000000bc424eb5",
+      "relative_to_tx_us": 7146.079
+    },
+    {
+      "bus": 0,
+      "data_hex": "020002000200009e0001ffff00030003000000000000000000000000f6fd9c2b",
+      "relative_to_tx_us": 16713.593
+    },
+    {
+      "bus": 0,
+      "data_hex": "01ff02000200009cffff0000000400040000000000000000000000003d41b039",
+      "relative_to_tx_us": 26959.263
+    },
+    {
+      "bus": 0,
+      "data_hex": "020002000200009e000100000004000400000000000000000000000076a18bf8",
+      "relative_to_tx_us": 37524.818
+    }
+  ],
+  "outcome": "valid_authenticated_090_not_latched_while_native_route40_remained_live",
+  "panda_health_after": {
+    "brs_enabled": 1,
+    "bus_off": 0,
+    "bus_off_cnt": 0,
+    "can_core_reset_count": 1,
+    "can_data_speed": 2000,
+    "can_speed": 500,
+    "canfd_enabled": 1,
+    "canfd_non_iso": 0,
+    "error_passive": 0,
+    "error_warning": 0,
+    "irq0_call_rate": 220,
+    "irq1_call_rate": 1166,
+    "irq2_call_rate": 0,
+    "last_data_error": "No error",
+    "last_data_stored_error": "Stuff error",
+    "last_error": "No error",
+    "last_stored_error": "Form error",
+    "receive_error_cnt": 0,
+    "total_error_cnt": 1050,
+    "total_fwd_cnt": 143751,
+    "total_rx_cnt": 323054,
+    "total_rx_lost_cnt": 1,
+    "total_tx_checksum_error_cnt": 0,
+    "total_tx_cnt": 753228,
+    "total_tx_lost_cnt": 0,
+    "transmit_error_cnt": 0
+  },
+  "panda_health_before": {
+    "brs_enabled": 1,
+    "bus_off": 0,
+    "bus_off_cnt": 0,
+    "can_core_reset_count": 1,
+    "can_data_speed": 2000,
+    "can_speed": 500,
+    "canfd_enabled": 1,
+    "canfd_non_iso": 0,
+    "error_passive": 0,
+    "error_warning": 0,
+    "irq0_call_rate": 220,
+    "irq1_call_rate": 1166,
+    "irq2_call_rate": 0,
+    "last_data_error": "No error",
+    "last_data_stored_error": "Stuff error",
+    "last_error": "No error",
+    "last_stored_error": "Form error",
+    "receive_error_cnt": 0,
+    "total_error_cnt": 1050,
+    "total_fwd_cnt": 143701,
+    "total_rx_cnt": 323004,
+    "total_rx_lost_cnt": 1,
+    "total_tx_checksum_error_cnt": 0,
+    "total_tx_cnt": 752900,
+    "total_tx_lost_cnt": 0,
+    "transmit_error_cnt": 0
+  },
+  "panda_visible_native_frame_collision": false,
+  "route40_counters": {
+    "after": {
+      "generation": 196,
+      "invalid_checksum": 0
+    },
+    "before": {
+      "generation": 14,
+      "invalid_checksum": 0
+    },
+    "generation_delta_mod256": 182
+  },
+  "route40_witness": {
+    "armed": true,
+    "command_state": 2,
+    "command_status": 0,
+    "config_selector": 4,
+    "config_type": 1,
+    "domain_hex": "009001ff02000200019dffff000000010001000000000000000000000000028400cbb02c",
+    "done_flag": 1,
+    "expected_trailer_hex": "bc1b3785",
+    "generation_at_match": 0,
+    "input_bitmap": 511,
+    "last_sequence": 11,
+    "latched_frame_hex": "0000000000000000000000000000000000000000000000000000000000000000",
+    "magic": "0x52303946",
+    "magic_ok": true,
+    "matched": false,
+    "output_hex": "c1b3785a0ea3762bb9b144234d23d5a6",
+    "output_length": 16,
+    "raw_hex": "46393052010b0200ff01000110000000009001ff02000200019dffff000000010001000000000000000000000000028400cbb02cc1b3785a0ea3762bb9b144234d23d5a6010000000100000004000000bc1b37850000000000000000000000000000000000000000000000000000000000000000",
+    "version": 1,
+    "version_ok": true,
+    "wrapper_return_code": 0
+  },
+  "schema": "camry-f33-valid-090-route40-experiment-v2",
+  "signed_epoch": {
+    "future_reset_lead": 64,
+    "message_counter": 2,
+    "reset_counter": 3259,
+    "trip_counter": 644
+  },
+  "target_sync": {
+    "data_hex": "028400cbbf98598a",
+    "monotonic_ns": 1154816780969,
+    "reset_counter": 3259,
+    "trip_counter": 644
+  },
+  "transmitted_090": true,
+  "trigger_native_message1": {
+    "data_hex": "01ff02000200009cffff0000000300030000000000000000000000007d3a54ea",
+    "fv4": 7,
+    "monotonic_ns": 1154824285005
+  },
+  "tx_echoes": [
+    {
+      "bus": 128,
+      "data_hex": "01ff02000200019dffff000000010001000000000000000000000000bc1b3785",
+      "relative_to_tx_us": 1568.181
+    }
+  ],
+  "tx_monotonic_ns": 1154826761386,
+  "vehicle_guard_before": {
+    "gear": 0,
+    "ready_samples": [
+      {
+        "address": "0x51E",
+        "bus": 0,
+        "data_hex": "8000840000000000",
+        "ready": 1
+      }
+    ],
+    "ready_values": [
+      1
+    ],
+    "wheel_speeds_kph": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ]
+  }
+}
+comma@comma-688f218c:/data/camry-f33-car-kit$
