@@ -155,18 +155,31 @@ TX blocks; `FEBE5004/5005` remained clear and `FEBE4EE6` remained `0x5A`. Theref
 frame passes physical CAN, rule 46, FIFO1, owner-0 receive routing, `0x8312E`, and
 `0x830D0` staging.
 
-A September-19 lower-layer audit adds an important bounded transport fact. RFIFO1 is
-configured for **8 payload words = 32 bytes**, while the upper XCP callback `0x830D0`
-separately caps only its staging copy to `CodeFlash[0x22ABD]=8`. Exact receive producer
-`0x80A4A` writes the complete received payload into the controller software ring
-`FEBE4038..FEBE48D7` before foreground drain `0x79EDE -> 0x809FE -> 0x808D6`. A 32-byte
-FD record occupies 11 words / 44 bytes there. Native B6 independently proves FDF is carried
-in the post-RSCFD descriptor (`0x400000B6`) while the GAFL rule itself remains plain
-`0x000000B6`; therefore rule46 does not need a different GAFLID to receive FD. This makes a
-32-byte FD private mailbox on the existing extended endpoint statically viable below XCP
-staging. The new raw-FD oracle artifact peeks that ring before stock drain and performs no
-RSCFD reconfiguration. **FD32 rule46 ingress itself has not yet been live-probed**, so this is
-firmware-static closure pending the parked dynamic test.
+A September-19 lower-layer audit showed why the endpoint initially looked suitable for a
+single-frame private mailbox. RFIFO1 is configured for **8 payload words = 32 bytes**, while
+the upper XCP callback `0x830D0` separately caps only its staging copy to
+`CodeFlash[0x22ABD]=8`. Exact receive producer `0x80A4A` writes the complete received payload
+into the controller software ring `FEBE4038..FEBE48D7`; a 32-byte FD record would occupy
+11 words / 44 bytes there. Native B6 independently proves FDF is represented in the
+post-RSCFD descriptor (`0x400000B6`) while the GAFL identifier remains plain `0x000000B6`.
+
+The parked live discriminator nevertheless **rejects direct FD use of rule46 on the current
+Panda-visible path**. A classic extended `0x1FDC0002` / 8-byte marker was observed by the
+resident at the exact software-ring boundary with `ID/control nibble=0x9`, callback selector
+`0x20`, and length `8`. An FD32 request with 2-Mbit/s BRS produced no rule46 observation;
+resident request/success/response counters stayed zero. Repeating the same identifier as FD8
+with **BRS disabled and the data phase forced to the nominal 500-kbit/s rate** likewise did not
+change the resident telemetry. Panda showed the exact host Tx return and no transmit-error or
+total-error growth around the no-BRS probe. Therefore the 32-byte RFIFO storage capacity is
+real but is not sufficient to make the Panda-facing rule46 route FD-transparent in practice.
+The frame is lost before the exact F33 software-ring boundary.
+
+This matches the earlier direct-Panda B6 marker result: native FD B6 reaches exact F33, while
+host-injected FD B6 did not reach the deterministic post-CanIf observer. The combined evidence
+supports an external Brake/EBU link-format/routing boundary between the Panda-visible Bus-4
+trunk and the EPS-local native-FD delivery path, with only a narrow EPS-physical-decode residue
+remaining. The direct raw-FD oracle is therefore disproved for the present topology; a classic
+raw-fragment sideband or an OEM-shaped upstream regeneration path is required.
 
 The reason CONNECT still cannot run is an independent fixed-CodeFlash gate.
 `0x821D6` calls `0x830C0 -> 0x98E80` before parsing any XCP command. `0x98E80` reads

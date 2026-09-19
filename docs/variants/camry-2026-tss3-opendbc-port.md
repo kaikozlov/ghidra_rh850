@@ -1692,12 +1692,35 @@ exercises the host request/response codec. The mutation contract explicitly forb
 writes, RSCFD reconfiguration, RX-ring mutation, XCP protocol dispatch, DCM/CanTp use,
 SecOC-result bypass, key extraction, or any `0x08A`/B6 transmit by the resident.
 
-This carrier is **static-ready but not yet live-qualified**. The next hardware discriminator
-is now one parked test, not another transport experiment: install/attest the resident, send one
-known-answer request with `panda.can_send(0x1FDC0002, request32, bus0, fd=True)`, require the
-paired `0x1FE00002` response and known CMAC, then run a short 40-Hz request benchmark. The
-current deployed openpilot remains on the classic ISO-TP oracle until that parked raw-FD test
-passes; only then should production transport be switched to the one-frame carrier.
+The September-19 parked live test **disproves this direct raw-FD carrier on the current
+Panda-visible path**. The resident itself installed cleanly and remained live. A classic
+extended eight-byte `0x1FDC0002` marker reached the exact rule46 software-ring path and latched
+`ID/control high nibble=0x9`, callback selector `0x20`, length `8`, proving the resident's
+ring observation and the classic XCP physical endpoint. In contrast, both an extended FD32
+request with ordinary 2-Mbit/s BRS and an extended FD8 request with BRS disabled / the data
+phase forced to the nominal 500-kbit/s rate produced Panda TX returns but **no rule46 ring
+observation at all**; resident `request_count` remained zero. Panda bus health showed no TEC
+or error-count growth around the FD probe. Thus BRS/data-phase timing is not the explanation,
+and the loss occurs before the rule46 software-ring boundary.
+
+Joined with the earlier direct-Panda B6 marker result, this is now a repeated pattern: native
+FD B6 reaches F33, but host-injected FD B6 did not reach F33's deterministic post-CanIf
+observer; now host FD on an independently live-proven classic endpoint likewise disappears
+before F33 software admission. Exact F33 itself supports FD reception and native B6 proves
+that capability. The leading boundary is therefore **external link-format routing between the
+Panda-visible Bus-4/trunk side and the EPS-local EBU-labelled delivery path**, with only a
+narrow receiver-side physical/link-decode residue remaining. A same-wire standards-compliant
+frame cannot be classic to one receiver and FD to another; a one-frame host carrier therefore
+requires an intermediate Toyota component to regenerate/translate the frame onto the EPS-local
+FD link.
+
+Consequently the selected near-term sideband should stay **classic**. The minimum custom
+replacement for ISO-TP is a fixed raw classic-fragment mailbox on the already-proven
+`0x1FDC0002` endpoint: accumulate a small fixed sequence of eight-byte frames in the resident,
+invoke selector-4 once complete, and return one classic `0x1FE00002` response. That removes
+CanTp/DCM, FF/FC/CF semantics and flow-control latency while respecting the observed physical
+routing boundary. Recovering the Brake/EBU classic-to-local-FD regeneration path remains the
+deeper OEM-shaped alternative.
 
 The volatile EPS oracle resident is still a deployment prerequisite rather than an
 openpilot-installed component. Without a qualified oracle response, the host never sends

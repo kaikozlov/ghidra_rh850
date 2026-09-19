@@ -572,6 +572,16 @@ COM, or B6 application logic.  The only receiver-side residue is a physical/link
 failure before GAFL matching; otherwise the loss is outside F33, between the
 Panda-visible Bus-4 trunk and the EPS-local B6 delivery path.
 
+A September-19 independent private-endpoint discriminator now reproduces the same boundary
+without using B6. Exact F33 rule46's extended `0x1FDC0002` endpoint accepts a classic
+8-byte host marker and exposes it in the application software RX ring (`control nibble 0x9`,
+callback selector `0x20`, length `8`). Changing only the link format to CAN-FD makes the
+frame disappear before that boundary. This remains true with BRS disabled and the FD data
+phase held at the nominal 500-kbit/s rate, excluding the obvious 2-Mbit/s timing explanation.
+Panda reports no transmit-error growth. The repeated classic-pass/FD-drop behavior therefore
+strengthens the external-format-routing interpretation: the Panda-visible path to EPS is not a
+transparent FD wire even though the EPS-local native B6 path is CAN-FD.
+
 Current GTS topology is more specific than a generic "EBU-domain boundary." In
 `CDbCanBusComponentTable`, `EBU` is literally the **junction/attachment field on the
 Power Steering (EPS) component row**. Across all 18 exact-Camry option rows, Brake
