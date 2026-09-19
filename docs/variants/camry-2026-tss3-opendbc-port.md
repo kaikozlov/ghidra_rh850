@@ -1268,6 +1268,17 @@ important invariant is no longer "sign every frame" or "skip stale frames"; it i
 source generation in, one coherent downstream generation out**, with the steering baseline
 explicitly synchronized at every Toyota/Openpilot handoff.
 
+Deployment after the route149 closure is `kai-openpilot@04ad114db`, nested
+`opendbc@fd9ac33e`, with Panda source still `21701e3f`. The comma was explicitly offroad
+(`deviceState.started=false`, ignition line/CAN false, `noOutput`) for the update. Panda was
+rebuilt against the new nested opendbc tree; the signed firmware SHA-256 is
+`1c7f097d4dc38c1b63056948257caae7651e7798fbf324a9ce785e4625386585`. After reboot,
+pandad performed the normal signature-checked application update. A cooperative direct-Panda
+lease then read the live 128-byte firmware signature and it matched the newly built expected
+signature byte-for-byte. Live health after the lease returned to pandad showed zero faults,
+zero TX blocks, no heartbeat loss, valid RX-check state, controls disallowed and ignition
+off; pandad resumed normally with no lease files left behind.
+
 The volatile EPS oracle resident is still a deployment prerequisite rather than an
 openpilot-installed component. Without a qualified oracle response, the host never sends
 the ownership arm and Panda continues forwarding stock `0x08A`; request-plane openpilot
