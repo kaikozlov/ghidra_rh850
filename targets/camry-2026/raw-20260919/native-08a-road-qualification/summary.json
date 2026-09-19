@@ -1,0 +1,111 @@
+{
+  "conclusion": "Observed live-road qualification of the exact-F33 native 0x08A request-plane port. On the clean route, openpilot sustained 204.17 s of lateral-active control across five engagements; all 8194 host ID11 0x08A frames had byte-identical Panda TX returns, Toyota safety recorded no TX block or RX-invalid/check failure, and no temporary, silent-temporary, or permanent steering fault was sampled while lateral was active. Measured steering followed the authenticated request targets. This is dynamic-probe evidence, not a deterministic firmware test.",
+  "deployment": {
+    "branch": "tss3",
+    "openpilot_commit": "b55418744a5b47160f3684a7d71dff8ca29718d1",
+    "openpilot_dirty_in_pandad_context": false,
+    "openpilot_version": "0.11.2",
+    "opendbc_commit": "a68ac144931ae115c50b1a579b5cad43f3820082",
+    "panda_expected_signature_prefix": "32552a6a9b148633",
+    "panda_previous_signature_prefix": "ad1e7f3f3a740e5a",
+    "panda_signed_artifact_sha256_on_device": "f5e4031101efc4462ad6a81de47715d0deb74ae9ab18c1d2a8d96e1a3fb6663b",
+    "panda_safety_model": "toyota",
+    "panda_safety_param": 21065
+  },
+  "flash_evidence": {
+    "local_log_copy": "~/dev/inspect/logs/camry-20260919-panda-flash-b55418744",
+    "observations": [
+      "pandad identified running signature ad1e7f3f3a740e5a and expected signature 32552a6a9b148633",
+      "pandad logged that Panda firmware was out of date and an update was required",
+      "pandad logged Done flashing approximately 2.96 seconds later"
+    ],
+    "swaglog_sha256": {
+      "swaglog.0000003455": "699361470482f37ad639df7edbb2bcf141a840c84c2d2ad42c1585f6568bf155",
+      "swaglog.0000003456": "693f719c2e99755f22b27ae5b1b13aadc5205deac87bb967cf9acb02a6b9d21f"
+    }
+  },
+  "qualification_route": {
+    "authenticated_id11_08a": {
+      "byte_identical_panda_tx_returns": 8194,
+      "host_sends": 8194,
+      "target_angle_deg_max": 44.295,
+      "target_angle_deg_min": -20.4,
+      "unmatched_host_sends": 0
+    },
+    "drive": {
+      "engagement_rises": 5,
+      "lat_active_samples": 20417,
+      "lat_active_seconds_approx": 204.17,
+      "route_duration_s": 510.833067
+    },
+    "faults": {
+      "steer_fault_permanent_samples_while_lat_active": 0,
+      "steer_fault_temporary_samples_while_lat_active": 0,
+      "steer_fault_temporary_silent_samples_while_lat_active": 0,
+      "steering_unavailable_alert_samples": 0,
+      "terminal_offroad_steer_fault_temporary_samples": 15
+    },
+    "local_log_copy": "~/dev/inspect/logs/0000016b--0565634434--<segment>/rlog.zst",
+    "measured_steering_angle_deg_max_while_lat_active": 33.3,
+    "measured_steering_angle_deg_min_while_lat_active": -17.6,
+    "panda_toyota_safety": {
+      "safety_rx_checks_invalid_true_samples": 0,
+      "safety_rx_invalid_max": 0,
+      "safety_tx_blocked_max": 0
+    },
+    "route": "0000016b--0565634434",
+    "segments": 9,
+    "tracking_observation": {
+      "lag_s": 0.2,
+      "matched_samples": 8158,
+      "median_absolute_error_deg": 0.766,
+      "pearson_r": 0.988,
+      "qualification": "Coarse nearest-sample road observation, not an actuator-model calibration"
+    }
+  },
+  "qualification_route_segment_sha256": {
+    "0-rlog.zst": "e7e507e9b69e98fce6ee5c286b685d1c70a65d1edb92562f680950c044e894d5",
+    "1-rlog.zst": "fd26a2255d7b4178b5c388815a1f81fd14e166727c5265ccf5a709a81e8bee0a",
+    "2-rlog.zst": "863e1d0eb85a70d20c9f368a6c81da1dfb73a496c8c10888c9bf33d2d5f93176",
+    "3-rlog.zst": "0ecfed80c0309bb456528ac7f80c0e8a8c17903c900ce9bc42a12b4b6935e0c1",
+    "4-rlog.zst": "aef89d38fe57a15c05393dc26d2db6e3a5a763e8351dd31209e514e2c6c1cfb4",
+    "5-rlog.zst": "5782fe1420d40f1eae372b05fac87949575a523f227d694516deb7e416cfd18c",
+    "6-rlog.zst": "52d43030e6955a343842fa71df608239d1325ace07c83081af65b82d162c5be0",
+    "7-rlog.zst": "7a26a11f636de87c76188e2cd27af4eb170675b71e41119677819ba5db4dc261",
+    "8-rlog.zst": "865241adfafff7679a8a63bc1745a06b846db425f89b0d53438222bbe692aa9c"
+  },
+  "schema": "camry-f33-native-08a-road-qualification-v1",
+  "transition_route": {
+    "authenticated_id11_08a_byte_identical_panda_tx_returns": 13833,
+    "authenticated_id11_08a_host_sends": 13833,
+    "engagement_rises": 5,
+    "lat_active_samples": 34450,
+    "lat_active_seconds_approx": 344.5,
+    "local_log_copy": "~/dev/inspect/logs/0000016a--7575b2b16e--<segment>/rlog.zst",
+    "panda_safety_rx_checks_invalid_true_samples": 0,
+    "panda_safety_rx_invalid_max": 0,
+    "panda_safety_tx_blocked_max": 1,
+    "qualification": "The single cumulative TX-block increment was not an ID11 0x08A rejection: every host ID11 0x08A send had a byte-identical TX return.",
+    "route": "0000016a--7575b2b16e",
+    "route_duration_s": 661.991011,
+    "segments": 12,
+    "steer_fault_permanent_samples_while_lat_active": 0,
+    "steer_fault_temporary_samples_while_lat_active": 0,
+    "steer_fault_temporary_silent_samples_while_lat_active": 0,
+    "steering_unavailable_alert_samples": 0
+  },
+  "transition_route_segment_sha256": {
+    "0-rlog.zst": "9557849797d7965223149c00c319ec8a1be119323820740396df48ed6c715f5a",
+    "1-rlog.zst": "55435a3b603a14af8073a1f87acc6e84482f491965ffc8e992231d6083ff5efb",
+    "10-rlog.zst": "c9d6564d9cd21eb7b56cd1f2d7f322212b165924299a3d578d23b157fd4ae91e",
+    "11-rlog.zst": "65f921bae7c14b9ea8a54b9cdae704ba9be4d23642f819dbcfce8dc7a7170701",
+    "2-rlog.zst": "05c817effc6087101aa4477f4629b778982da60c17ef268d2eabc826096590f4",
+    "3-rlog.zst": "d03f3d444b47174dd15a30a6ed3a2bd8a4baf4a6866cae4863d427b9377105fb",
+    "4-rlog.zst": "202171422aced391593de52c022ffb4f4fe25e3a3d02c93c61663bb1ede8e559",
+    "5-rlog.zst": "12f2ac52dcf7bd6e4e4056ff631ba3a37e7a403f90c69be3a4d61acaba86df30",
+    "6-rlog.zst": "9a2f1e30247d07084c77cc1a467ab2581348a3cb88eb97925f551b58ca1a1631",
+    "7-rlog.zst": "b8f8ad3e39f985b5fdbf08b76196e0ddf342818ff3ae110c6a9debeda2a03912",
+    "8-rlog.zst": "b89481d838f248a19ee94a046a2657be256f8fdf1e5f38f8643658312198ea44",
+    "9-rlog.zst": "e3e933954cfc27b0ac6b1a9a2bb376c1588cce15f58b7b4b69975e49d98423d0"
+  }
+}

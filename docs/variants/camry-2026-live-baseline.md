@@ -7118,3 +7118,69 @@ native `0x08A` targets occasionally differ by more than 78 raw, F33 no longer
 asserts B16 because the native request-plane target is never allowed to become
 the cooperative application target while C7 owns lateral. That is the root-cause
 fix; the LTA-off behavior was only a reduction in exposure.
+
+## 74. 2026-09-19 native `0x08A` request-plane road qualification
+
+The exact-F33 native request-plane port is now **observed working on the road**.
+The clean qualification route is `0000016b--0565634434`; all nine rlog segments
+are retained under `~/dev/inspect/logs/`, and the privacy-minimized reduction plus
+per-segment SHA-256 identities is tracked at
+`targets/camry-2026/raw-20260919/native-08a-road-qualification/summary.json`.
+
+This route ran clean openpilot commit
+`b55418744a5b47160f3684a7d71dff8ca29718d1`, opendbc
+`a68ac144931ae115c50b1a579b5cad43f3820082`, branch `tss3`, and openpilot
+`0.11.2`. It contains **204.17 s** of lateral-active control across five
+engagements. During that exposure:
+
+- openpilot sent **8,194** authenticated ID11 `0x08A` requests, and Panda
+  returned all **8,194** byte-for-byte;
+- Panda Toyota safety parameter `21065` accumulated **zero** TX blocks, zero RX
+  invalids, and zero invalid-check samples;
+- there were zero temporary, silent-temporary, or permanent steering-fault
+  samples while lateral was active, and no steering-unavailable alert;
+- authenticated `0x08A` targets spanned approximately **-20.40..+44.30 deg**,
+  while measured steering during active control spanned
+  **-17.60..+33.30 deg**; and
+- a coarse 200-ms-lag nearest-sample comparison gives `r=0.988` and median
+  absolute error `0.766 deg` over 8,158 pairs. This is a road-response
+  observation, not a new actuator-model calibration.
+
+Fifteen `steerFaultTemporary` samples appear only at the terminal offroad tail
+of segment 8, with `latActive=false`; they produced no steering-unavailable
+alert and are outside the driving qualification. The only steering-related
+alert during the drive is ordinary driver `steerOverride/overrideLateral`.
+
+The immediately preceding transition route `0000016a--7575b2b16e` independently
+adds **344.50 s** of lateral-active control across five engagements. All
+**13,833/13,833** host ID11 `0x08A` sends have byte-identical Panda returns, with
+zero active steering-fault samples and no steering-unavailable alert. Its Panda
+TX-block counter increments once, but that increment cannot be an ID11 `0x08A`
+rejection because every such frame is present in the returned stream. Route
+`16b` is retained as the clean qualification because its Toyota-safety TX-block
+counter remains zero throughout.
+
+### 74.1 The stale-Panda incident was deployment, not vehicle rejection
+
+The failed drive immediately before this result ran an old Panda safety image.
+The retained pandad logs under
+`~/dev/inspect/logs/camry-20260919-panda-flash-b55418744/` record running
+signature prefix `ad1e7f3f3a740e5a`, expected prefix `32552a6a9b148633`,
+"firmware out of date," and then "Done flashing." The flashed signed artifact
+on both the live and staged device trees has SHA-256
+`f5e4031101efc4462ad6a81de47715d0deb74ae9ab18c1d2a8d96e1a3fb6663b`.
+
+The deployment defect was an ignored generated
+`panda/board/obj/panda_h7.bin.signed` plus a SCons cache capable of restoring a
+stale safety-bearing object. Parent commits `1f96c5691` and `b55418744` remove
+the prebuilt marker, invalidate Panda application/safety outputs at startup, and
+disable the SCons cache for that build. Pandad then saw the signature mismatch
+and actually flashed the rebuilt image. The post-flash road routes show the
+opposite of the earlier failure: sustained accepted host `0x08A`, healthy Panda
+safety state, no active F33 steering fault, and corresponding measured steering.
+
+This is **dynamic-probe / observed** evidence. It upgrades the native `0x08A`
+request-plane backend from replay/unit-qualified to live-road demonstrated on
+the maintainer F33 Camry. It does not turn one drive into a deterministic proof
+of every operating condition, nor does it transfer automatically to another
+calibration.
