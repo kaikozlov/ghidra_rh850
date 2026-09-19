@@ -79,6 +79,72 @@ resp = host.parse_response(bytes.fromhex("c9670098d64e2a5e"), expected_seq=0x67)
 check("host response decoder matches resident layout",
       resp.seq == 0x67 and resp.status == 0 and resp.cmac4 == bytes.fromhex("d64e2a5e"))
 
+# Application RMBA cannot read the FEF0.... GlobalRAM helper span. Installer
+# attestation must therefore read only the LocalRAM resident/state and defer
+# helper execution proof to the live native-MAC known-answer.
+state = bytearray(host.STATE_SIZE)
+state[0:4] = host.STATE_MAGIC.to_bytes(4, "little")
+state[4] = host.STATE_VERSION
+state[5] = 1
+orig_read_exact = host._read_exact
+reads: list[int] = []
+def fake_read_exact(_client, _uds_mod, address: int, size: int, *, label: str, attempts: int = 4) -> bytes:
+    reads.append(address)
+    if address == host.RESIDENT_BASE:
+        return resident
+    if address == host.STATE_BASE:
+        return bytes(state)
+    raise AssertionError(f"unexpected RMBA read 0x{address:08X} ({label})")
+host._read_exact = fake_read_exact
+try:
+    sess = host.FdOracleSession.__new__(host.FdOracleSession)
+    sess.meta = meta
+    sess.client = object()
+    sess.uds_mod = object()
+    att = sess._attest()
+finally:
+    host._read_exact = orig_read_exact
+check("live attestation never RMBA-reads GlobalRAM helper",
+      reads == [host.RESIDENT_BASE, host.STATE_BASE] and
+      att["resident_sha256"] == meta["resident"]["sha256"] and
+      att["helper_attestation"] == "deferred_to_known_answer_execution")
+
+# Native truth is captured at a real reset boundary where message8 is known to
+# restart at one; this avoids pretending a historical freshness tuple is valid today.
+def sync_frame(trip: int, reset: int) -> bytes:
+    data = bytearray(8)
+    data[0:2] = trip.to_bytes(2, "big")
+    data[2] = (reset >> 12) & 0xFF
+    data[3] = (reset >> 4) & 0xFF
+    data[4] = (reset & 0xF) << 4
+    return bytes(data)
+
+def native_frame(b26: int, reset: int, message: int, mac28: int) -> bytes:
+    app = bytearray(range(28))
+    app[26] = (app[26] & 0xC0) | (b26 & 0x3F)
+    fv4 = ((message & 0x3) << 2) | (reset & 0x3)
+    return bytes(app) + ((fv4 << 28) | mac28).to_bytes(4, "big")
+
+class FakePanda:
+    def __init__(self, rows): self.rows = rows
+    def can_recv(self):
+        rows, self.rows = self.rows, []
+        return rows
+
+trip = 0x026C
+reset0, reset1 = 0x12344, 0x12345
+mac1 = 0x1234567
+fake = FakePanda([
+    (host.SYNC_ID, sync_frame(trip, reset0), host.SYNC_BUS),
+    (host.NATIVE_08A_ID, native_frame(10, reset0, 0, 0x7654321), host.NATIVE_08A_BUS),
+    (host.SYNC_ID, sync_frame(trip, reset1), host.SYNC_BUS),
+    (host.NATIVE_08A_ID, native_frame(11, reset1, 1, mac1), host.NATIVE_08A_BUS),
+])
+vector = host.capture_native_vector(fake, timeout=0.1)
+check("known-answer captures live native reset-boundary truth",
+      vector.message_counter == 1 and vector.reset_counter == reset1 and
+      vector.b26 == 11 and vector.native_mac28 == f"{mac1:07x}")
+
 check("no diagnostic transport or RSCFD mutation remains",
       meta["request"]["diagnostic_stack_used"] is False and
       meta["request"]["stock_xcp_protocol_used"] is False and
