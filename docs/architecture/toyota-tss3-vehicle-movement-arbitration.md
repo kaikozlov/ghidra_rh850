@@ -578,9 +578,17 @@ without using B6. Exact F33 rule46's extended `0x1FDC0002` endpoint accepts a cl
 callback selector `0x20`, length `8`). Changing only the link format to CAN-FD makes the
 frame disappear before that boundary. This remains true with BRS disabled and the FD data
 phase held at the nominal 500-kbit/s rate, excluding the obvious 2-Mbit/s timing explanation.
-Panda reports no transmit-error growth. The repeated classic-pass/FD-drop behavior therefore
-strengthens the external-format-routing interpretation: the Panda-visible path to EPS is not a
-transparent FD wire even though the EPS-local native B6 path is CAN-FD.
+Panda reports no transmit-error growth.
+
+Do **not** generalize that result into “all EPS FD is hidden behind the VMC/EBU domain.” B6 is
+special because its native producer is inside the Brake/VMC-to-EPS path and it is absent from
+comma logs. Exact F33 also receives native **unprotected** FD32 PDUs `0x025` (PDU35) and
+`0x090` (PDU40), and both are visible in retained Panda/comma captures. `0x025` is especially
+clear: after the repin it is overwhelmingly native on Panda bus0 and forwarded to bus2, while
+F33 consumes that same FD32 PDU as measured steering angle. `0x090` likewise appears natively
+in retained captures and enters F33's direct-COM path with only the ordinary additive-checksum
+gate. Therefore the open problem is not a blanket “Panda-visible path cannot carry FD” rule;
+it is why **Panda-generated** FD fails where native Panda-visible FD succeeds.
 
 Current GTS topology is more specific than a generic "EBU-domain boundary." In
 `CDbCanBusComponentTable`, `EBU` is literally the **junction/attachment field on the
