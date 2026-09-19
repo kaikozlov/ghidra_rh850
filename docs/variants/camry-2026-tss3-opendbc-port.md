@@ -1762,10 +1762,22 @@ GNU as had silently encoded source `cmp 0xC9,r6`, `0xA8`, `0x5A`, `0xA5` as comp
 against `9`, `8`, `-6`, `5`. The later `cmp 16,r8` output-length check likewise encoded
 `-16`. The corrected helper loads every out-of-range constant into a register before `cmp`,
 and the builder now rejects any numeric compare immediate outside `[-16,15]`. The rebuilt
-helper is 852/1024 bytes; live known-answer retry remains pending after resident reinstall.
+helper is 852/1024 bytes.
 
-These are replay/software results plus parked ingress/assembly observation; live parked mailbox
-latency and native-MAC equality remain the next hardware qualification.
+The corrected resident then passed the parked live gate. Native known-answer matched exactly
+(`MAC28 4cbe1ea`, status 0) in **10.30 ms**, with request/success/response counters all
+advancing `0 -> 1`. A 20-request 25-ms-cadence benchmark completed **20/20** with mean
+12.33 ms, p95 16.10 ms and max 17.74 ms; a subsequent 100-request run completed **100/100**
+with mean 11.29 ms, median 10.62 ms, p95 15.88 ms, p99 25.49 ms and max **36.27 ms**.
+Resident request/success/response counters advanced exactly +20 and +100 respectively, and all
+responses carried status 0. The transport and command-5 path are therefore live-qualified.
+
+The 36.27-ms successful tail also disproves the host's former 30-ms response deadline as a
+valid failure boundary. `kai-openpilot@e7dff9eb8` raises only
+`ORACLE_RESPONSE_TIMEOUT_S` from 30 to **50 ms**; 40 ms is explicitly retained as valid in
+the focused test, while 51 ms still triggers the existing bounded fail-open. The Panda
+100-ms replacement watchdog is unchanged, so this adds measured transport margin without
+changing request-plane ownership or failure semantics.
 
 The volatile EPS oracle resident is still a deployment prerequisite rather than an
 openpilot-installed component. Without a qualified oracle response, the host never sends
