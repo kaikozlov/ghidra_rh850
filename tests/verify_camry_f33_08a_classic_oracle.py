@@ -287,8 +287,7 @@ check("UI backend verifies healthy peers and oracle KAT without mandatory peer r
 native_marker = {
     "schema": "tss3-oracle-native-catch-v1",
     "target": "TOYOTA_CAMRY_TSS3",
-    "armed_monotonic_ns": 100,
-    "ignition_observed_monotonic_ns": 200,
+    "ignition_monotonic_ns": 100,
     "first_extended_tx_monotonic_ns": 110,
     "positive_extended_monotonic_ns": 300,
     "programming_tx_monotonic_ns": 310,
