@@ -631,6 +631,31 @@ is capable of both extended identifiers and CAN-FD and its GAFL rules expose no 
 predicate. The remaining distinction is upstream of F33 admission: source/port/routing policy
 and, critically, the protection envelope carried by native FD traffic.
 
+A Toyota/Sumitomo relay-patent cluster now gives that upstream-policy branch concrete OEM
+precedent rather than leaving it as a generic gateway possibility. WO2024029195A1 /
+US20260032181A1 (priority 2022-08-02; Toyota Motor Corp, Sumitomo Wiring Systems,
+AutoNetworks Technologies, and Sumitomo Electric) explicitly allows the disclosed relay
+architecture to operate over **CAN FD** and makes relay/functional-unit setting information
+include **filtering, communication bandwidth, frame priority, and frame data size**. The relay
+can proxy an entire downstream network as one functional unit and translate settings into the
+hidden network. Closely related WO2024024230A1 / US20260019294A1 (priority 2022-07-29;
+same Toyota/Sumitomo assignee group) is even more discriminating: a relay detects a newly
+added functional unit, restricts/discards frames from it while authentication/network-setting
+processing is incomplete, and relaxes relay restrictions only after setup completes; the
+disclosure again expressly permits CAN/CAN-FD networks. Its worked filtering example is
+Ethernet/IEEE 802.1Qci, so this is **external architectural support, not proof that exact Camry
+BRK1/EBU implements the patented mechanism or uses that exact classifier**.
+
+That distinction fits the live boundary unusually well. A Panda TX return proves only that a
+frame was acknowledged on the sender's physical CAN segment; it does not prove that a
+segmented relay forwarded the frame to F33. Native FD32 reaches F33, the same private ID in
+classic form reaches F33, while Panda-created FD disappears before F33's RX ring with no local
+format-rule explanation. A relay policy keyed by ingress/port, admitted functional-unit state,
+frame format/size, protection state, or a combination of those properties can produce exactly
+that shape while remaining invisible to the F33 GAFL/CanIf analysis. The patents therefore
+materially strengthen **source/port/routing admission** as the leading class of explanations,
+but do not yet select it over an upstream SecOC/authentication check on the exact Camry.
+
 The clean discriminator is therefore a **known native standard-ID FD route**, not another
 extended private-ID experiment.  `0x090/32` is the preferred parked probe because exact
 F33 routes it through an ordinary additive-checksum gate rather than SecOC.
