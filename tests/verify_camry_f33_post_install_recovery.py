@@ -68,6 +68,41 @@ class TestRecovery(unittest.TestCase):
                     }
                     self.assertEqual(recovery.drcc_permission_observed(oracles), mode in (1, 2, 4) and allowed and not unavailable)
 
+    def test_peer_health_ignores_transient_cruise_permission_and_main_switch(self):
+        def state(*, allowed: bool, main: bool, unavailable: bool = False,
+                  fail_status: bool = False, fail_control: bool = False, comm_open: bool = False):
+            return {
+                "frc": {
+                    "0x1903": {"available": True, "control_mode": 1},
+                    "0x1905": {"available": True, "cruise_control_allowed": allowed},
+                    "0x1906": {
+                        "available": True,
+                        "main_switch_recognized": main,
+                        "acc_not_available_icon": unavailable,
+                    },
+                },
+                "brake": {
+                    "0x102D": {
+                        "available": True,
+                        "fail_status": fail_status,
+                        "fail_control": fail_control,
+                    },
+                    "0x102F": {
+                        "available": True,
+                        "eps_communication_open": comm_open,
+                    },
+                },
+            }
+
+        # Exact live 2026-09-20 startup behavior: cruise permission and MAIN
+        # were initially false, then became true later with no ECU reset.
+        self.assertTrue(recovery.peer_health_observed(state(allowed=False, main=False)))
+        self.assertTrue(recovery.peer_health_observed(state(allowed=True, main=True)))
+
+        self.assertFalse(recovery.peer_health_observed(state(allowed=False, main=False, fail_status=True)))
+        self.assertFalse(recovery.peer_health_observed(state(allowed=False, main=False, fail_control=True)))
+        self.assertFalse(recovery.peer_health_observed(state(allowed=False, main=False, comm_open=True)))
+
     def test_missing_fields_never_mean_no_fault(self):
         for did, required in ((0x1B09, 6), (0x1903, 1), (0x1905, 2), (0x1906, 6)):
             for size in range(required):

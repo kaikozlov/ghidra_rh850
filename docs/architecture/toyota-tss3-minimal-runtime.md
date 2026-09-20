@@ -298,22 +298,32 @@ The historical direct-B6 signer remains available for either host wiring with
 `--topology camry-post-repin` (Panda bus 0). Oracle and direct-B6 signer are
 alternative volatile runtime architectures; do not install or operate both.
 
-`bringup` retains the individual fail-closed gates: stock functional-mailbox
-preflight, exact-F181 NRTD install, then READY runtime qualification. On exact
-Camry, peer recovery is deliberately **operator paced** rather than chained:
-`bringup` keeps one cooperative Panda lease across the complete guided command and
-waits for the operator before restarting Brake/EPB only. The Brake stage is intentionally kept identical
-to the field-proven standalone UdsClient procedure: `10 02` with a 1.0/2.0 s client,
-then up to two `11 01` attempts using fresh 0.35/0.35 s clients with a 50-ms pause
-after the first exception, followed by a 2-s quiet wait and bounded F181 polling using
-fresh 0.25/0.25 s clients every 250 ms for up to 6 s. No additional EPS/F181 pre-reads,
-custom ISO-TP helper, CAN-FD-auto changes, or other diagnostics are inserted. The operator waits as long as needed before restarting FRC only;
-after exact `8646F3315000` returns the launcher simply waits before final
-DRCC-state verification; Panda ownership remains unchanged until the command exits.
-The operator can wait arbitrarily long between stages. No DTC clear, SecurityAccess,
-EPS reset, or EPS power cycle is part of this guided recovery. Final FRC
-`0x1903/0x1905/0x1906` must show distance-control mode, Cruise Control Permission
-allowed, and ACC-not-available clear before the guided command succeeds.
+The historical `bringup` path still retains its individual fail-closed gates:
+stock functional-mailbox preflight, exact-F181 NRTD install, READY qualification,
+and (on exact Camry) operator-paced Brake/FRC recovery when that older programming
+path actually leaves peer state unhealthy. The field-proven Brake/FRC restart
+commands remain available as explicit recovery tools, not as the normal startup
+contract.
+
+The maintained exact-Camry classic-`0x08A` path is now `oracle-ui-bringup`. It is
+armed while the vehicle is fully OFF, repeatedly offers application EXTENDED, waits
+for the first completed `50 03`, sends one `10 02`, and installs the volatile oracle
+directly from the caught exact bootloader. After the application returns it requires
+READY/Park/stationary, then checks **peer health without resetting either peer** and
+runs one native-`0x08A` oracle known-answer. The 2026-09-20 live runs proved that this
+startup-caught path can preserve healthy Brake/FRC state across installation.
+
+FRC `0x1905` **Cruise Control Permission Flag** and `0x1906` **Main Switch
+Recognition Flag** are operational cruise state, not persistent health latches. In a
+verified healthy startup run they were initially false (`1905=8000`,
+`1906=e000e0008000`) and later became true (`8080` / `e080e0008000`) after a normal
+drive with **no ECU reset**. Therefore startup success does not require those bits to
+already be asserted. They remain telemetry. The startup peer-health gate instead uses
+exact peer identities plus Brake `0x102D` fail-status/fail-control clear and `0x102F`
+EPS-communication-open clear; the succeeding native-`0x08A` known-answer supplies the
+functional FRC-side proof. No DTC clear, peer reset, EPS reset, or EPS power cycle is
+part of a healthy `oracle-ui-bringup` run.
+
 Non-Camry targets skip this lifecycle step. `replace-current` is the first mutation test: it requires READY plus stationary
 `0x0AA`, derives the current measured angle from `0x025`, converts that angle to
 the common B6 target domain, sends one fresh C7 generation, observes a signed

@@ -1,0 +1,43 @@
+2026-09-20 exact-Camry F33 startup UI false DRCC verdict
+
+Context
+- Startup-caught oracle bringup succeeded through exact bootloader entry, RAM-oracle install, application return, and READY/Park/stationary guard.
+- The UI/backend then declared failure because the immediate control-domain snapshot had drcc_permission_observed=false.
+- No Brake reset or FRC reset was performed.
+- The vehicle subsequently completed a normal drive.
+- A read-only post-drive state snapshot was then taken, still with no peer reset.
+
+Immediate post-install snapshot
+- FRC 0x1903 control_mode=1 (DRCC all speed).
+- FRC 0x1905 raw=8000, Cruise Control Permission Flag=false.
+- FRC 0x1906 raw=e000e0008000, Main Switch Recognition Flag=false.
+- FRC 0x1906 ACC Not Available Icon Lighting Request Flag=false.
+- Brake 0x102D fail_status=false, fail_control=false.
+- Brake 0x102F eps_communication_open=false.
+- Legacy verdict: drcc_permission_denied.
+
+Post-drive snapshot, with no ECU reset in between
+- FRC 0x1903 remained control_mode=1 (DRCC all speed).
+- FRC 0x1905 changed to raw=8080, Cruise Control Permission Flag=true.
+- FRC 0x1906 changed to raw=e080e0008000, Main Switch Recognition Flag=true.
+- ACC Not Available Icon remained false.
+- Brake fault/communication flags remained healthy.
+- Legacy verdict became drcc_permission_healthy.
+
+Interpretation
+Verified dynamic correction: FRC 0x1905 Cruise Control Permission Flag and the
+0x1906 Main Switch Recognition Flag are operational cruise state, not persistent
+peer-health latches. They can legitimately be false immediately after READY and
+later become true without any ECU restart. A startup bringup must not fail solely
+because these bits are false.
+
+Maintained fix
+- Preserve drcc_permission_observed as live cruise-state telemetry for recovery/debugging.
+- Add a separate peer-health predicate based on actual Brake/EPS fault and communication monitors:
+  0x102D fail_status=false, 0x102D fail_control=false, 0x102F eps_communication_open=false.
+- Exact peer identities remain required by control_domain_state.
+- Native 0x08A oracle known-answer provides the functional FRC-side proof after startup.
+
+Files
+- control-domain-state-immediate.json
+- control-domain-state-post-drive.json

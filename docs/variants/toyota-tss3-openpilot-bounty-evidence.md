@@ -240,7 +240,14 @@ enables LDA, and leaves PCS availability/invalid state healthy. The EPS RAM resi
 survives throughout. Route `0000010c--506d7277c7` is the subsequent road proof that
 this is a real recovery mechanism rather than only a parked diagnostic-state change.
 The older `recover-drcc` DTC-clear command remains useful for preserving diagnostic
-evidence, but the dependency-ordered resets are the actual same-ignition recovery.
+evidence, but the dependency-ordered resets are the actual same-ignition recovery
+**for that faulted legacy programming path**. A later 2026-09-20 startup-catch flow
+entered programming before the normal READY transition, installed the same volatile
+oracle, and preserved healthy peer state without any Brake/FRC reset. In that healthy
+run FRC `0x1905` was initially `8000` and `0x1906` Main Switch Recognition was false,
+then both became asserted after a normal drive with no ECU reset. Those two fields are
+therefore live cruise-state telemetry and must not be used alone as a post-install
+peer-health gate.
 
 ## 3. Corolla TSS3 longitudinal proof of concept
 
