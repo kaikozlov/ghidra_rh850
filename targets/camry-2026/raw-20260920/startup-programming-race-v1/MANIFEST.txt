@@ -1,0 +1,57 @@
+2026-09-20 exact-Camry F33 startup PROGRAMMING race v1
+
+Target
+- 2026 Toyota Camry Hybrid
+- EPS application F181 8965F3307000 / 8A3113303100
+- relay-correct Toyota-B topology, EPS diagnostic route bus0 0x7A1 -> 0x7A9
+
+Question
+Can an already-armed host win the normal OFF -> POWER startup by repeatedly
+placing the EPS into EXTENDED and PROGRAMMING before the READY-associated
+application transition closes the programming handoff?
+
+Procedure
+- Vehicle initially fully OFF/Park.
+- Host acquired the cooperative direct-Panda lease and disabled Panda power-save.
+- No identity pre-read was performed.
+- Host repeatedly transmitted raw single-frame 10 03 then, about 4 ms later,
+  raw single-frame 10 02, with a nominal ~14 ms pair period.
+- Operator then pressed brake + POWER normally.
+- No SecurityAccess, payload upload, RoutineControl, reset, memory write, or
+  persistent write was performed.
+- After the race loop the host stopped session-control traffic and read only F181.
+
+Result
+- Final F181 was the exact stock application identity, so v1 did not enter bootloader.
+- 167 native bus0 responses were exact positive EXTENDED replies:
+    06 50 03 00 32 01 f4 00
+- No 7F negative response and no 50 02 response was observed.
+- First positive 50 03: 28552.883204 ms after probe start.
+- First native bus0 0x51E: 28844.342946 ms, payload 20 00 01 00 00 00 00 00.
+- First native EPS 0x030: 28927.859840 ms.
+- First native bus0 0x51E with Ready bit set: 29428.885480 ms,
+  payload 80 00 35 00 00 00 00 00.
+- Therefore first positive EXTENDED preceded:
+    first 0x51E by 291.460 ms,
+    first EPS 0x030 by 374.977 ms,
+    READY=1 by 876.002 ms.
+- Positive 50 03 response latency from the latest preceding 10 03 was variable;
+  median 12.021 ms, observed range 1.876..15.308 ms under the overlapping-request
+  flood.
+- For the first positive 50 03, the paired 10 02 had already been transmitted
+  9.366 ms before the positive EXTENDED response completed. The next four sampled
+  cycles likewise sent 10 02 4.875..8.266 ms before their 50 03 replies.
+
+Interpretation
+V1 is not evidence that the startup programming race is unwinnable. It is a
+request-sequencing failure: the host deliberately overlapped 10 02 with an
+outstanding 10 03 transaction, while the EPS DCM was still producing 50 03.
+The fact that the EPS accepted and answered EXTENDED roughly 0.88 s before READY
+is positive evidence for a usable startup diagnostic window.
+
+Next experiment
+Transmit 10 03 repeatedly only until the first exact 50 03 is observed. Stop all
+10 03 traffic immediately, then transmit one 10 02 as soon as that positive
+response completes. Do not pre-read F181 and do not add an arbitrary settle delay.
+Then stop session-control TX and identify whether bootloader or application F181
+reappears. No payload/SA/reset should be used in the race-isolation run.
