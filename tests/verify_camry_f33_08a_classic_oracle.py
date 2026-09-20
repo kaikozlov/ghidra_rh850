@@ -7,6 +7,7 @@ import json
 import subprocess
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -123,6 +124,19 @@ check("parked benchmark reports deterministic distribution statistics",
       {name: round(value, 3) for name, value in summary.items()} == {
           "mean_ms": 2.5, "median_ms": 2.5, "p95_ms": 3.85, "p99_ms": 3.97, "max_ms": 4.0,
       })
+
+class FakeDiagnosticClient:
+    def __init__(self): self.sessions = []
+    def diagnostic_session_control(self, session): self.sessions.append(session)
+
+diagnostic_session = host.ClassicOracleSession.__new__(host.ClassicOracleSession)
+diagnostic_session.client = FakeDiagnosticClient()
+diagnostic_session.uds_mod = SimpleNamespace(
+    SESSION_TYPE=SimpleNamespace(EXTENDED_DIAGNOSTIC="extended"),
+)
+diagnostic_session.refresh_extended_session()
+check("benchmark can refresh extended diagnostic after a long timing run",
+      diagnostic_session.client.sessions == ["extended"])
 
 # Application RMBA cannot read the FEF0.... GlobalRAM helper span. Installer
 # attestation must therefore read only the LocalRAM resident/state and defer
