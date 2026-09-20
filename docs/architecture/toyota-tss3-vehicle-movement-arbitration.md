@@ -745,6 +745,19 @@ three are the leading class because the failure is format-selective: classic tra
 same private endpoint reaches F33 while Panda-created FD does not. The valid-MAC negative is
 therefore evidence for a network-admission seam, not for missing cryptographic correctness.
 
+An important implementation variant is **positive publication rather than negative filtering**.
+The Brake/EBU domain need not accept an arbitrary trunk-side application PDU and decide whether
+to forward it. It may instead receive/own the relevant application state, then originate or
+regenerate the authorized EPS-side CAN-FD publication on its local attachment; classic UDS/XCP
+traffic can cross through a separate diagnostic-proxy route. Under that model, a host-generated
+`0x090` with a perfect MAC is still irrelevant because no configured application-data route
+consumes that ingress as an authoritative source. The native `0x090` visible on the shared
+chassis side and the native `0x090` consumed by F33 could be two publications of the same
+functional PDU/domain rather than the same physical CAN frame transparently forwarded. The
+same model naturally accommodates native B6 existing only on the EPS-local side. Exact
+byte/timing attribution on both sides of the seam is still needed to distinguish regeneration
+from selective forwarding, so do not assume either mechanism yet.
+
 Current GTS topology is more specific than a generic "EBU-domain boundary." In
 `CDbCanBusComponentTable`, `EBU` is literally the **junction/attachment field on the
 Power Steering (EPS) component row**. Across all 18 exact-Camry option rows, Brake
