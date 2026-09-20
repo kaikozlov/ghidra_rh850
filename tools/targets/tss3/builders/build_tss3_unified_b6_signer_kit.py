@@ -31,6 +31,8 @@ RUNTIME_FILES = (
 )
 CAMRY_ORACLE_RUNTIME_FILES = (
     "exploit/ephemeral_runtime/camry_f33_08a_classic_oracle.py",
+    "exploit/ephemeral_runtime/camry_f33_startup_programming.py",
+    "exploit/ephemeral_runtime/camry_f33_oracle_ui_bringup.py",
 )
 
 
@@ -83,7 +85,8 @@ def build(target: str, out: Path) -> dict:
     commit = source_commit(); (out / "SOURCE_COMMIT").write_text(commit + "\n", encoding="utf-8")
     if target == "camry-8965F3307000":
         flow = """2. Choose exactly one runtime architecture.
-   Current relay-correct 0x08A request plane: ./tss3-unified-signer oracle-bringup /tmp/tss3-oracle-bringup
+   Current relay-correct 0x08A request plane (legacy NRTD): ./tss3-unified-signer oracle-bringup /tmp/tss3-oracle-bringup
+   On-device startup catcher/UI backend: ./tss3-unified-signer oracle-ui-bringup /tmp/tss3-oracle-ui
    Direct-B6 signer, ordinary harness: ./tss3-unified-signer --topology stock bringup /tmp/tss3-bringup
    Direct-B6 signer, relay-correct repin: ./tss3-unified-signer --topology camry-post-repin bringup /tmp/tss3-bringup
 3. For signer bringup, put the vehicle in NRTD/READY=0 and Park.
@@ -110,6 +113,7 @@ Camry F33 recovery note: the field result is timing-sensitive. Exact application
 Manual equivalent on Camry: preflight -> install in NRTD -> direct NRTD->READY without OFF -> qualify EPS -> wait -> restart-brake -> wait -> restart-frc -> wait -> recovery-state -> status.
 C7 is the only recurring steering-control tag. Camry/Crown field kits use functional C6 only as the post-startup helper loader; Corolla embeds its helper in the authenticated payload. Camry field runtime is post-authenticated route44 application override and does not invoke command 5 during lateral control. This runtime does not patch CodeFlash.
 A full EPS power cycle removes the RAM resident and requires bringup again.
+For exact Camry, `oracle-ui-bringup` replaces the manual NRTD ceremony: arm while fully OFF, press brake+POWER normally, catch the first completed 50 03, send one 10 02, install directly from exact bootloader F181, then advance the Brake/FRC settle checkpoints from the UI.
 """
     (out / "TESTING.txt").write_text(testing, encoding="utf-8")
     oracle = None

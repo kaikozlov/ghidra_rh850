@@ -8,6 +8,7 @@ import subprocess
 import sys
 from pathlib import Path
 from types import SimpleNamespace
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -248,6 +249,37 @@ check("helper advances an independent producer cursor across stock drains and si
 check("response bypasses XCP protocol completion",
       "movea 0x00f0" in helper_src and "movea 55, r0, r6" in helper_src and
       "jarl32 lower_can_write, lp" in helper_src)
+
+class _FakeOracleSession:
+    def __init__(self, *_args, **_kwargs):
+        self.attestation = {"state": {"initialized": True}}
+    def close(self):
+        pass
+
+with (mock.patch.object(host, "verify_nrtd_ready", side_effect=AssertionError("NRTD guard must be skipped from exact boot")),
+      mock.patch.object(host, "execute_ram_payload", return_value={"direct_bootloader": True}) as execute,
+      mock.patch.object(host, "wait_for_f181", return_value={"ok": True}),
+      mock.patch.object(host, "ClassicOracleSession", _FakeOracleSession),
+      mock.patch.object(host.time, "sleep", return_value=None)):
+    direct = host.install(OUT / meta["authenticated_payload"]["path"], OUT / "camry_f33_08a_classic_oracle.json", direct_boot=True)
+check("classic oracle can continue directly from exact caught bootloader without NRTD recheck",
+      direct["entry_condition"] == "exact_bootloader_f181" and direct["nrtd_guard"] is None and
+      direct["verdict"] == "runtime_08a_classic_oracle_resident_live_helper_pending_known_answer" and
+      execute.call_args.kwargs["allow_direct_boot"] is True)
+
+startup_src = (ROOT / "exploit/ephemeral_runtime/camry_f33_startup_programming.py").read_text(encoding="utf-8")
+ui_src = (ROOT / "exploit/ephemeral_runtime/camry_f33_oracle_ui_bringup.py").read_text(encoding="utf-8")
+check("startup catcher uses the field-proven response-synchronized minimum ladder",
+      'EXTENDED_FRAME = bytes.fromhex("0210030000000000")' in startup_src and
+      'PROGRAMMING_FRAME = bytes.fromhex("0210020000000000")' in startup_src and
+      'POSITIVE_EXTENDED_FRAME = bytes.fromhex("065003003201f400")' in startup_src and
+      startup_src.index('data == POSITIVE_EXTENDED_FRAME') < startup_src.index('panda.can_send(TX_ADDR, PROGRAMMING_FRAME, BUS)') and
+      'SecurityAccess' in startup_src and 'persistent_flash_writes' in startup_src)
+check("UI backend preserves operator-paced Brake then FRC recovery after direct-boot install",
+      ui_src.index('race_to_bootloader()') < ui_src.index('install(payload, meta, direct_boot=True)') <
+      ui_src.index('ready_guard = wait_ready_parked') < ui_src.index('restart_brake_known_good(output_dir') <
+      ui_src.index('restart_one_domain("frc"') < ui_src.index('state = control_domain_state') < ui_src.index('kat = known_answer(meta)') and
+      ui_src.count('wait_for_continue(') >= 4)
 
 launcher = LAUNCHER.read_text(encoding="utf-8")
 recovery = launcher.split("  recover-peers)\n", 1)[1].split("  status)", 1)[0]
