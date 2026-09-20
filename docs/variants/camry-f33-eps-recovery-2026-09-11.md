@@ -1165,7 +1165,12 @@ normally continuous Bus-4 daisy chain that becomes two ~120-ohm halves when unpl
 A direct tester on A30-34/35 can still access the EPS-side harness in isolation, but that
 physical isolation must not be described as bypassing a proved A30 gateway/filter. Unpowered
 A30 `CA1H->DC1H` / `CA1L->DC1L` continuity or PCB inspection is required to classify the
-node as passive pass-through versus an active bridge.
+node as passive pass-through versus an active bridge. Importantly, later exact-car dynamics
+show that the **overall Panda-visible Bus-4 -> F33 path cannot be one transparent passive
+segment**: native B6 reaches F33 while remaining absent from 253 segments of Panda-visible
+native traffic, and Panda-created FD disappears before F33 admission while classic traffic on
+the same private endpoint reaches it. Thus a passive A30 result would not eliminate an active
+EBU/attachment boundary; it would move that boundary farther down the EPS-side leg.
 
 A30 is a sealed underhood connector on the upper/rear brake-booster electronics
 in the left-rear engine compartment; full booster removal is not a prerequisite

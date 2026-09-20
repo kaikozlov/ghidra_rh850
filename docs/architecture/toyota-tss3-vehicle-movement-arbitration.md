@@ -786,14 +786,30 @@ store-and-forward gateway. It also explains why unplugging an inline node can le
 120 ohms visible on each separated harness half: each half can see one end termination even
 when the plugged ECU normally joins them into the usual ~60-ohm two-termination bus.
 
-Therefore do **not** equate `DC1` or the A30 two-pair connector with the unresolved EBU
-admission/filter boundary. The cheapest decisive hardware discriminator on a sacrificial
-47050/47210 assembly is unpowered continuity from `CA1H -> DC1H` and `CA1L -> DC1L`, plus
-PCB inspection for one tapped CAN-FD transceiver versus two independently routed
-transceivers/switches. Near-direct continuity would make A30's daisy-chain function passive;
-an open or active-device path would reopen an A30 bridge/filter hypothesis. Until that is
-measured, the selective Panda-FD loss must remain localized only to **some boundary upstream
-of F33 admission**, not specifically to A30.
+The Denso precedent prevents `DC1` from being treated as proof of an active bridge **from
+naming alone**, but the exact-car dynamic evidence independently proves that the complete
+Panda->F33 path is not one transparent electrical CAN segment. Native B6 is delivered inside
+F33 while a 253-segment Panda census contains zero native `0x0B6`; conversely, distinctive
+Panda B6 frames are transmitted on the Panda-visible chassis side but never appear at F33's
+post-ring/pre-SecOC boundary. A separate discriminator shows classic `0x1FDC0002/8` from
+Panda reaching F33 rule46 while the same endpoint sent as CAN-FD disappears before the RX
+ring. On a single passive broadcast segment, a native B6 emitted anywhere on that segment
+would also be observable upstream, and an ACKed standards-compliant host FD frame would not
+be selectively hidden from one receiver by sender identity. Therefore **some active
+segmentation/admission/regeneration boundary exists between the Panda-visible chassis side
+and F33**, unless the remaining narrow alternative is a receiver-specific analog/link-decode
+failure affecting Panda-created FD.
+
+This does not yet prove that A30 itself implements that active boundary. A30 could use the
+Denso-style passive `CA1<->DC1` continuation while another integrated EBU sub-node or later
+attachment performs the selective routing. But if physical tracing shows that A30's DC1 pair
+is the only path from the shared Bus-4 side to C50/EPS, then direct CA1<->DC1 continuity would
+conflict with the hidden-native-B6 observation and force a search for another inline element
+on that downstream leg. Conversely, two independently routed transceivers/switches inside the
+47050/47210 assembly would fit the dynamic evidence immediately. The cheapest discriminator
+remains unpowered `CA1H -> DC1H` / `CA1L -> DC1L` continuity plus PCB inspection, but the
+prior probability is no longer neutral: **the vehicle data already requires an active boundary
+somewhere on this physical route.**
 
 Toyota-authored terminology supplies the expansion independently: Toyota Motor
 Engineering & Manufacturing North America patent US20210323519A1 calls an EBU an
