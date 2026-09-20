@@ -332,7 +332,11 @@ cooperative direct-Panda lease and runs `oracle-ui-bringup` without operator
 input. Starting/restarting the watcher while ignition is already true does not
 trigger installation; it waits for the next complete OFF->ON cycle. Each auto
 run records Panda message time, watcher receipt, backend launch, first completed
-`50 03`, and `10 02` dispatch in `auto-trigger.json`. This 10-Hz watcher is the
+`50 03`, and `10 02` dispatch in `auto-trigger.json`. The backend exclusively owns
+its per-run output directory: the watcher chooses a fresh non-existent path but
+never creates it before launch; daemon stdout is a sibling `*.auto-daemon.log`
+sidecar, and a pre-existing run name is resolved with a numeric suffix. This avoids
+self-failing the backend's intentional empty-output-directory guard. This 10-Hz watcher is the
 minimum-intrusion implementation; if field timing shows insufficient margin,
 only the latency-sensitive startup catcher should move into native `pandad`,
 while RAM upload/attestation/KAT remain in the existing backend.
