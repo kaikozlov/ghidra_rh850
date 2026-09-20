@@ -772,6 +772,29 @@ between its termination resistors. The separate A31/44050 Brake/EPB ECU remains 
 VMM/request-generation candidate and can still be the producer/controller of traffic that
 A30 forwards onto the EPS attachment.
 
+A Denso physical-layer disclosure materially narrows what `DC1` itself means. Denso
+US10829062 describes a high-speed CAN/CAN-FD **physical daisy chain** in which two twisted
+pairs terminate at an intermediate ECU, but the first-pair CANH and second-pair CANH are
+joined by a PCB conductor pattern and the two CANL wires are joined the same way; the ECU's
+single CAN transceiver simply taps that continued line. The result is physically daisy-chained
+wiring but one logical CAN bus, explicitly including CAN FD. Current Prius service material
+uses the same brake-ECU pin vocabulary and numbering (`DC1H/DC1L` on 34/35 and
+`CA1H/CA1L` on 36/37) while treating those wires as opposite portions of a Bus-4 main line.
+This is strong same-generation precedent that the Camry A30 `DC1` pair may be a **passive
+main-line continuation for CAN-FD signal integrity**, not a second CAN controller or
+store-and-forward gateway. It also explains why unplugging an inline node can leave about
+120 ohms visible on each separated harness half: each half can see one end termination even
+when the plugged ECU normally joins them into the usual ~60-ohm two-termination bus.
+
+Therefore do **not** equate `DC1` or the A30 two-pair connector with the unresolved EBU
+admission/filter boundary. The cheapest decisive hardware discriminator on a sacrificial
+47050/47210 assembly is unpowered continuity from `CA1H -> DC1H` and `CA1L -> DC1L`, plus
+PCB inspection for one tapped CAN-FD transceiver versus two independently routed
+transceivers/switches. Near-direct continuity would make A30's daisy-chain function passive;
+an open or active-device path would reopen an A30 bridge/filter hypothesis. Until that is
+measured, the selective Panda-FD loss must remain localized only to **some boundary upstream
+of F33 admission**, not specifically to A30.
+
 Toyota-authored terminology supplies the expansion independently: Toyota Motor
 Engineering & Manufacturing North America patent US20210323519A1 calls an EBU an
 **"electronic brake module or unit"** and uses `EBU` for that brake-domain unit
@@ -809,8 +832,10 @@ Panda-visible / shared logical Bus-4 domain
                                           one CAN receive path
 ```
 
-The serial Skid->EPS arrow is the leading **inference**, not a literal route encoded by
-the GTS rows. It is favored by three independent facts: Toyota places VMM request
+The serial Skid->EPS arrow is the leading **logical/source-domain inference**, not a literal
+store-and-forward route encoded by the GTS rows. In particular, the Denso daisy-chain
+precedent above means the A30 `CA1/DC1` path may simply be one continuous Bus-4 main line.
+The source-domain inference is favored by three independent facts: Toyota places VMM request
 generation in the Brake ECU; F33 diagnoses loss of B6 as loss of the Brake System
 Control Module; and contemporary Toyota repair procedures require ECU-Security-Key
 update when the skid-control ECU/brake-actuator assembly is replaced. A distinct,

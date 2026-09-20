@@ -1154,10 +1154,18 @@ The CAN-system A30 terminal page is
 The system diagram is `https://lemon-manuals.la/images25/GTY1267625/`; the
 A30 terminal face is `https://lemon-manuals.la/images25/GTY1267223/`; and the
 power-steering branch is shown in `https://lemon-manuals.la/images25/GTY1267483/`.
-The specified resistance on both disconnected legs independently establishes
-two terminated physical segments. A direct tester on A30-34/35 can therefore
-bypass the A30 bridge and every upstream gateway while leaving the rack
-installed and closed.
+The specified resistance on both disconnected harness halves establishes that each
+separated half sees a termination, but it **does not establish an active A30 bridge**.
+Denso US10829062 documents a CAN-FD physical daisy-chain construction in which an
+intermediate ECU joins incoming/outgoing CANH directly by PCB conductor pattern and does
+the same for CANL while a single transceiver taps the continued line. Current Prius brake
+service material uses the same `DC1H/DC1L` 34/35 and `CA1H/CA1L` 36/37 vocabulary for
+opposite portions of a CAN main line. The Camry A30 pair can therefore be consistent with a
+normally continuous Bus-4 daisy chain that becomes two ~120-ohm halves when unplugged.
+A direct tester on A30-34/35 can still access the EPS-side harness in isolation, but that
+physical isolation must not be described as bypassing a proved A30 gateway/filter. Unpowered
+A30 `CA1H->DC1H` / `CA1L->DC1L` continuity or PCB inspection is required to classify the
+node as passive pass-through versus an active bridge.
 
 A30 is a sealed underhood connector on the upper/rear brake-booster electronics
 in the left-rear engine compartment; full booster removal is not a prerequisite
