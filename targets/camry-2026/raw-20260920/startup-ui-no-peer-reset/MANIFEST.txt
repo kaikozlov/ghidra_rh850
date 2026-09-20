@@ -58,3 +58,12 @@ Files
 - ready-guard.json
 - control-domain-state-no-reset.json
 - oracle-known-answer-no-reset.json
+
+Post-openpilot-restart attestation
+- The comma/openpilot managed process tree was restarted without powering the vehicle/EPS off.
+- The RAM oracle remained resident across that host-side restart.
+- Exact application F181 remained 8965F3307000 / 8A3113303100.
+- Resident SHA remained 6899e1ce7d1d9e4249d753f18c4f449af702ebdd83b86a26ee57eb9d6b18250d.
+- Oracle state remained initialized with request/response/success counters 1/1/1 from the prior KAT.
+- Fresh guard after restart: READY=1, Park, all four wheel speeds 0.0 km/h.
+- Evidence: oracle-status-after-ui-restart.json.

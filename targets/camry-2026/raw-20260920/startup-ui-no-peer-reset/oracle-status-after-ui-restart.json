@@ -1,0 +1,77 @@
+{
+  "attestation": {
+    "helper_attestation": "deferred_to_known_answer_execution",
+    "helper_expected_sha256": "77ac983369d8d1c6a21c06d2e9ba9ab070230c2561420f06b8c6f52388ae4df9",
+    "resident_sha256": "6899e1ce7d1d9e4249d753f18c4f449af702ebdd83b86a26ee57eb9d6b18250d",
+    "state": {
+      "assembly_seq": 1,
+      "initialized": true,
+      "last_cmac_first4_hex": "302c1c31",
+      "last_command5_rc": 0,
+      "last_command_status": 0,
+      "last_done_flag": 1,
+      "last_fragment_header": 129,
+      "last_output_length": 16,
+      "last_response_tx_rc": 0,
+      "last_rule46_length": 8,
+      "last_status": 0,
+      "magic": "0x4C433841",
+      "magic_ok": true,
+      "next_fragment": 0,
+      "raw_hex": "4138434c0101010001000000010000000100000000010010302c1c310081080083018301",
+      "request_count": 1,
+      "response_count": 1,
+      "success_count": 1,
+      "tap_cursor": 387,
+      "tap_producer": 387,
+      "version": 1,
+      "version_ok": true
+    }
+  },
+  "f181_hex": "023839363546333330373030300000000038413331313333303331303000000000",
+  "schema": "camry-f33-08a-classic-oracle-status-v1",
+  "state": {
+    "assembly_seq": 1,
+    "initialized": true,
+    "last_cmac_first4_hex": "302c1c31",
+    "last_command5_rc": 0,
+    "last_command_status": 0,
+    "last_done_flag": 1,
+    "last_fragment_header": 129,
+    "last_output_length": 16,
+    "last_response_tx_rc": 0,
+    "last_rule46_length": 8,
+    "last_status": 0,
+    "magic": "0x4C433841",
+    "magic_ok": true,
+    "next_fragment": 0,
+    "raw_hex": "4138434c0101010001000000010000000100000000010010302c1c31008108002a012a01",
+    "request_count": 1,
+    "response_count": 1,
+    "success_count": 1,
+    "tap_cursor": 298,
+    "tap_producer": 298,
+    "version": 1,
+    "version_ok": true
+  },
+  "vehicle_guard": {
+    "gear": 0,
+    "ready_samples": [
+      {
+        "address": "0x51E",
+        "bus": 0,
+        "data_hex": "80008d0000000000",
+        "ready": 1
+      }
+    ],
+    "ready_values": [
+      1
+    ],
+    "wheel_speeds_kph": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ]
+  }
+}
