@@ -1,0 +1,64 @@
+{
+  "brake_identity": {
+    "address": "0x7B0",
+    "bus": 0,
+    "f181": "01463135323633334b3030303000000000"
+  },
+  "drcc_permission_observed": true,
+  "eps_identity": {
+    "address": "0x7A1",
+    "bus": 0,
+    "f181": "023839363546333330373030300000000038413331313333303331303000000000"
+  },
+  "fault_state": {
+    "brake": {
+      "0x102D": {
+        "available": true,
+        "did": "0x102D",
+        "fail_control": false,
+        "fail_status": false,
+        "raw": "30106f00ff001d00bf048000d0106840"
+      },
+      "0x102F": {
+        "available": true,
+        "did": "0x102F",
+        "eps_communication_open": false,
+        "raw": "f700fd007c00a9000000"
+      }
+    },
+    "frc": {
+      "0x1903": {
+        "available": true,
+        "control_mode": 1,
+        "control_mode_label": "DRCC all speed",
+        "did": "0x1903",
+        "raw": "01"
+      },
+      "0x1905": {
+        "available": true,
+        "cruise_control_allowed": true,
+        "did": "0x1905",
+        "raw": "8080"
+      },
+      "0x1906": {
+        "acc_not_available_icon": false,
+        "available": true,
+        "did": "0x1906",
+        "main_switch_recognized": true,
+        "raw": "e080e0008000"
+      },
+      "0x1B09": {
+        "available": false,
+        "did": "0x1B09",
+        "error": "RecoveryError: UDS 0x22 negative response: NRC 0x31"
+      }
+    }
+  },
+  "frc_identity": {
+    "address": "0x792",
+    "bus": 0,
+    "f181": "0138363436463333313530303000000000"
+  },
+  "schema": "camry-f33-control-domain-state-v1",
+  "verdict": "drcc_permission_healthy"
+}

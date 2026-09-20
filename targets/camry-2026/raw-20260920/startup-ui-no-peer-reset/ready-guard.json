@@ -1,0 +1,20 @@
+{
+  "gear": 0,
+  "ready_samples": [
+    {
+      "address": "0x51E",
+      "bus": 0,
+      "data_hex": "8000350000000000",
+      "ready": 1
+    }
+  ],
+  "ready_values": [
+    1
+  ],
+  "wheel_speeds_kph": [
+    0.0,
+    0.0,
+    0.0,
+    0.0
+  ]
+}

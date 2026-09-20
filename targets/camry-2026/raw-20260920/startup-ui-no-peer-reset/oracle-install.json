@@ -1,0 +1,104 @@
+{
+  "attestation": {
+    "helper_attestation": "deferred_to_known_answer_execution",
+    "helper_expected_sha256": "77ac983369d8d1c6a21c06d2e9ba9ab070230c2561420f06b8c6f52388ae4df9",
+    "resident_sha256": "6899e1ce7d1d9e4249d753f18c4f449af702ebdd83b86a26ee57eb9d6b18250d",
+    "state": {
+      "assembly_seq": 0,
+      "initialized": true,
+      "last_cmac_first4_hex": "00000000",
+      "last_command5_rc": 0,
+      "last_command_status": 0,
+      "last_done_flag": 0,
+      "last_fragment_header": 0,
+      "last_output_length": 0,
+      "last_response_tx_rc": 0,
+      "last_rule46_length": 0,
+      "last_status": 0,
+      "magic": "0x4C433841",
+      "magic_ok": true,
+      "next_fragment": 0,
+      "raw_hex": "4138434c01010000000000000000000000000000000000000000000000000000a301a301",
+      "request_count": 0,
+      "response_count": 0,
+      "success_count": 0,
+      "tap_cursor": 419,
+      "tap_producer": 419,
+      "version": 1,
+      "version_ok": true
+    }
+  },
+  "entry_condition": "exact_bootloader_f181",
+  "execution": {
+    "boot_f181_ascii": "\u0002!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+    "boot_f181_hex": "022121212121212121212121212121212121212121212121212121212121212121",
+    "boot_sid23_probe": {
+      "error": "NegativeResponseError",
+      "status": "rejected"
+    },
+    "direct_bootloader": true,
+    "f181_ascii": null,
+    "f181_hex": null,
+    "handler_done": false,
+    "initial_f181_ascii": "\u0002!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+    "initial_f181_hex": "022121212121212121212121212121212121212121212121212121212121212121",
+    "programming_handoff": {
+      "boot_f181_hex": "022121212121212121212121212121212121212121212121212121212121212121",
+      "direct_bootloader": true,
+      "route": {
+        "elm327_param": 1,
+        "rx": 1961,
+        "rx_bus": 0,
+        "semantic_path": "normal-harness",
+        "tx": 1953,
+        "tx_bus": 0
+      }
+    },
+    "ram_exec_geometry": {
+      "evidence": "dynamic:camry-8965F3307000-20260826",
+      "load_addr": 4273930240,
+      "load_size": 4096
+    },
+    "route": {
+      "bus": 0,
+      "cpu_index": 0,
+      "elm327_param": 1,
+      "uds_variant": "old"
+    },
+    "security_access": {
+      "secret_value_recorded": false,
+      "seed_length": 16
+    },
+    "telemetry_frames": 0,
+    "timed_out": true,
+    "unidentified_app_handoff_allowed": false
+  },
+  "nrtd_guard": null,
+  "payload_sha256": "cc4e41e5ec82b57c801d3b2e4df1542418c6e4fa7a86040aba543d3aac47b535",
+  "persistent_flash_writes": false,
+  "pre_helper_f181": {
+    "attempts": [
+      {
+        "at_monotonic": 100.159200258,
+        "f181_ascii": null,
+        "f181_hex": null,
+        "ok": false
+      },
+      {
+        "at_monotonic": 100.272805979,
+        "f181_ascii": "\u00028965F3307000\u0000\u0000\u0000\u00008A3113303100",
+        "f181_hex": "023839363546333330373030300000000038413331313333303331303000000000",
+        "ok": true
+      }
+    ],
+    "first_success": {
+      "at_monotonic": 100.272805979,
+      "f181_ascii": "\u00028965F3307000\u0000\u0000\u0000\u00008A3113303100",
+      "f181_hex": "023839363546333330373030300000000038413331313333303331303000000000",
+      "ok": true
+    },
+    "ok": true
+  },
+  "schema": "camry-f33-08a-classic-oracle-install-v1",
+  "verdict": "runtime_08a_classic_oracle_resident_live_helper_pending_known_answer"
+}

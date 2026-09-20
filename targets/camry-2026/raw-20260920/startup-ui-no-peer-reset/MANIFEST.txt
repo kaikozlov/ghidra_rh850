@@ -1,0 +1,60 @@
+2026-09-20 exact-Camry F33 startup-catch oracle bringup — no peer resets required
+
+Target
+- 2026 Toyota Camry Hybrid
+- EPS application F181 8965F3307000 / 8A3113303100
+- relay-correct Toyota-B topology, EPS diagnostic route bus0 0x7A1 -> 0x7A9
+
+Procedure
+- Vehicle began fully OFF/Park.
+- UI-backed startup catcher was armed before POWER.
+- Operator pressed brake + POWER normally.
+- Catcher repeatedly offered EXTENDED, waited for the first completed positive
+  50 03, then sent one 10 02.
+- Exact bootloader F181 was confirmed.
+- Classic 0x08A RAM oracle was installed directly from the caught bootloader.
+- After the application returned, READY/Park/stationary was verified.
+- The guided backend paused before its legacy Brake/FRC recovery checkpoints.
+- No Brake reset and no FRC reset were performed.
+- The waiting backend was terminated at that safe pause, releasing Panda.
+- A read-only control-domain-state check and one oracle known-answer were then
+  run with no peer resets.
+
+Observed result
+- Startup PROGRAMMING race verdict: exact_f33_bootloader_caught_during_normal_startup.
+- Completed 50 03 -> 10 02 transmit delta: 0.060880 ms.
+- Exact bootloader F181: 02 || 0x21 * 32.
+- Oracle install verdict: runtime_08a_classic_oracle_resident_live_helper_pending_known_answer.
+- Install entry condition: exact_bootloader_f181 (no NRTD guard).
+- READY guard: 0x51E B0[7]=1, Park gear code 0, all four wheel speeds 0.0 km/h.
+- Control-domain verdict WITHOUT resets: drcc_permission_healthy.
+- FRC 0x1903: DRCC all speed.
+- FRC 0x1905: cruise_control_allowed=true.
+- FRC 0x1906: main_switch_recognized=true, acc_not_available_icon=false.
+- Brake 0x102D: fail_control=false, fail_status=false.
+- Brake 0x102F: eps_communication_open=false.
+- Oracle known-answer matched=true.
+- Native MAC28 302c1c3; oracle returned 302c1c3 in 9.746272 ms.
+
+Interpretation
+Verified dynamically for this exact startup path: the old Brake/FRC restart
+ceremony is not required after startup-caught direct-boot oracle installation
+when the post-install control-domain state is already healthy. The normal
+startup flow should therefore verify peer state and oracle KAT directly and
+only retain peer-reset commands as explicit recovery tooling for an actually
+unhealthy state, not as mandatory bringup steps.
+
+Mutation boundary
+- No CodeFlash write.
+- No persistent flash write.
+- No Brake reset.
+- No FRC reset.
+- No peer DTC clear.
+- EPS RAM resident only; full EPS power cycle removes it.
+
+Files
+- startup-programming.json
+- oracle-install.json
+- ready-guard.json
+- control-domain-state-no-reset.json
+- oracle-known-answer-no-reset.json
