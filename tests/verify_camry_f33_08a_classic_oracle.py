@@ -193,7 +193,7 @@ launcher = LAUNCHER.read_text(encoding="utf-8")
 recovery = launcher.split("  recover-peers)\n", 1)[1].split("  status)", 1)[0]
 check("standalone classic-oracle kit includes guarded Brake then FRC peer recovery",
       "camry_f33_post_install_recovery.py" in launcher and
-      "--nrtd-confirmed" not in launcher and "READY allowed" in launcher and
+      "--nrtd-confirmed" in launcher and "NRTD / Park / stationary" in launcher and
       recovery.index("quiesce_panda_owner") <
       recovery.index("restart-domain --domain brake") <
       recovery.index("restart-domain --domain frc") <

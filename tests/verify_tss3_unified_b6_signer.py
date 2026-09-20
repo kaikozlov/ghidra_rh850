@@ -7,6 +7,7 @@ import json
 import subprocess
 import sys
 import tempfile
+import types
 from pathlib import Path
 from unittest import mock
 
@@ -15,6 +16,7 @@ sys.path.insert(0, str(ROOT))
 
 from exploit.ephemeral_runtime import build_tss3_unified_b6_signer as unified_builder
 from exploit.ephemeral_runtime import tss3_unified_b6_signer as host
+from exploit.ephemeral_runtime import camry_f33_runtime_replay_discriminator as replay_guard
 
 BUILDER = ROOT / "exploit/ephemeral_runtime/build_tss3_unified_b6_signer.py"
 KIT_BUILDER = ROOT / "tools/targets/tss3/builders/build_tss3_unified_b6_signer_kit.py"
@@ -51,6 +53,40 @@ stock = host.configure_topology(host.TOPOLOGY_STOCK, target_name=host.CAMRY_F33_
 check("ordinary topology remains the default bus1 route",
       stock == {"name": "stock", "control_bus": 1, "diagnostic_bus": 1} and
       host.CONTROL_BUS == 1 and host.ROUTE.bus == 1)
+
+class NrtdGuardPanda:
+    instance = None
+    def __init__(self):
+        type(self).instance = self
+        self.calls = 0
+        self.closed = False
+    def set_safety_mode(self, *_args): pass
+    def can_recv(self):
+        self.calls += 1
+        if self.calls == 1:
+            return [(replay_guard.READY_CAN_ID, bytes.fromhex("8000000000000000"), 1)]
+        if self.calls < 6:
+            return []
+        return [(replay_guard.READY_CAN_ID, bytes.fromhex("00007f0000000000"), 1)]
+    def close(self): self.closed = True
+
+class NrtdGuardClock:
+    def __init__(self): self.t = 0.0
+    def monotonic(self):
+        self.t += 0.01
+        return self.t
+
+nrtd_clock = NrtdGuardClock()
+with (mock.patch.dict(sys.modules, {"panda": types.SimpleNamespace(Panda=NrtdGuardPanda)}),
+      mock.patch.object(replay_guard, "ensure_boardd_stopped", return_value=None),
+      mock.patch.object(replay_guard.time, "monotonic", side_effect=nrtd_clock.monotonic),
+      mock.patch.object(replay_guard.time, "sleep", return_value=None)):
+    nrtd_guard = replay_guard.verify_nrtd_ready(
+        timeout=0.5, route=types.SimpleNamespace(elm327_param=1), ready_buses=frozenset({1}),
+    )
+check("NRTD guard drains stale READY backlog before evaluating fresh 0x51E",
+      nrtd_guard["ready_values"] == [0] and nrtd_guard["rx_backlog_drained"] is True and
+      NrtdGuardPanda.instance is not None and NrtdGuardPanda.instance.closed is True)
 post_replace_raw = bytearray(host.SPLIT_TELEMETRY_SIZE)
 post_replace_raw[8:12] = bytes.fromhex("d4a561f5")
 post_replace_raw[12:16] = bytes.fromhex("11223344")
@@ -296,7 +332,7 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
         bundle = host.load_bundle(meta_path)
         plan = host.plan(bundle)
         check(f"{target}: plan is one-shot install followed only by C7 runtime control",
-              plan["sequence"][0].startswith("Park/stationary (READY allowed)") and
+              plan["sequence"][0].startswith("NRTD/Park: prove exact-target stock functional 0x777") and
               "helper" in plan["sequence"][2] and "native command-5 MAC oracle" in plan["sequence"][2] and
               meta["artifacts"]["payload"] == universal["payload"]["path"] and
               plan["old_implementations_retained"] is True)
@@ -342,7 +378,8 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
     panda = FakePanda()
     reads = iter((bytes(7), bytes.fromhex("00c7a512340000")))
     clock = iter(i / 1000 for i in range(10000))
-    with (mock.patch.object(host, "_open_app", return_value=(panda, object(), object(), bundle.target["application_f181_hex"], "fixture", None)),
+    with (mock.patch.object(host, "verify_nrtd_ready", return_value={"ready_values": [0]}),
+          mock.patch.object(host, "_open_app", return_value=(panda, object(), object(), bundle.target["application_f181_hex"], "fixture", None)),
           mock.patch.object(host, "_resident_already_present", return_value=False),
           mock.patch.object(host, "_read_memory", side_effect=lambda *a, **k: next(reads)),
           mock.patch.object(host.time, "monotonic", side_effect=lambda: next(clock)),
@@ -392,7 +429,7 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
           all(cmd in launcher for cmd in ("oracle-bringup", "oracle-install", "recover-peers",
                                            "oracle-status", "oracle-known-answer", "oracle-benchmark")) and
           "--topology stock|camry-post-repin" in launcher and
-          "--nrtd-confirmed" not in launcher and "READY is allowed" in launcher and
+          "--nrtd-confirmed" in launcher and "NRTD/READY=0" in launcher and
           "FRC DRCC permission did not survive bridged bootstrap; STOP before READY qualification" in launcher)
 
     field_bundle = host.load_bundle(kit / "bundle/unified.json")

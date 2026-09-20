@@ -86,10 +86,10 @@ def build(target: str, out: Path) -> dict:
    Current relay-correct 0x08A request plane: ./tss3-unified-signer oracle-bringup /tmp/tss3-oracle-bringup
    Direct-B6 signer, ordinary harness: ./tss3-unified-signer --topology stock bringup /tmp/tss3-bringup
    Direct-B6 signer, relay-correct repin: ./tss3-unified-signer --topology camry-post-repin bringup /tmp/tss3-bringup
-3. For signer bringup, put the vehicle in Park and keep it stationary; READY is allowed.
+3. For signer bringup, put the vehicle in NRTD/READY=0 and Park.
 4. ./tss3-unified-signer [--topology ...] bringup /tmp/tss3-bringup"""
     else:
-        flow = """2. Put the vehicle in Park and keep it stationary; READY is allowed.
+        flow = """2. Put the vehicle in NRTD/READY=0 and Park.
 3. ./tss3-unified-signer bringup /tmp/tss3-bringup"""
     testing = f"""Unified TSS3 functional-0x777 signer test kit
 Target: {target}
@@ -99,7 +99,7 @@ Preferred tester flow:
 1. ./tss3-unified-signer doctor
 {flow}
    The command takes one cooperative Panda lease, proves the stock 0x777 mailbox, installs/attests the volatile EPS resident, and keeps that same lease across all operator-paced stages until the command exits.
-   Keep EPS powered; if not already READY, enter READY/Park, remain stationary, and press Enter to qualify the runtime helper.
+   Transition directly to READY/Park WITHOUT powering EPS off, remain stationary, and press Enter to qualify the runtime helper.
    On exact Camry, bringup then becomes deliberately operator-paced while retaining the same Panda lease: it waits for you before restarting Brake/EPB only. The Brake stage uses the exact field-proven standalone UdsClient procedure: 10 02 with timeout 1.0/2.0, up to two fresh-client 11 01 attempts at 0.35/0.35 with a 50-ms pause after the first exception, then a 2-s quiet wait and F181 polling every 250 ms using 0.25/0.25 clients for up to 6 s. No extra EPS/Brake pre-reads, custom ISO-TP requests, or canfd_auto changes are inserted. Only after you decide the vehicle has had enough quiet time does bringup restart FRC. After the FRC application returns it waits for you to decide when the Toyota network has settled before final DRCC/EPS-resident verification. There is no chained automatic peer reset and no DTC clear.
    The individual Camry commands are also exposed as `restart-brake`, `restart-frc`, and `recovery-state`.
 Next, READY/Park/stationary: ./tss3-unified-signer [--topology ...] replace-current /tmp/tss3-replace-current.json
@@ -107,7 +107,7 @@ Next, READY/Park/stationary: ./tss3-unified-signer [--topology ...] replace-curr
 
 Camry F33 recovery note: the field result is timing-sensitive. Exact application F181 returning proves the ECU application is back, not that every peer-facing state machine has finished initializing. The maintained guided flow therefore lets each stage finish while retaining one cooperative Panda lease; Panda ownership is not treated as a recovery primitive. `recover-drcc` remains legacy DTC-evidence tooling and is not part of this recovery.
 
-Manual equivalent on Camry: Park/stationary preflight -> install (READY allowed) -> keep EPS powered -> qualify EPS -> wait -> restart-brake -> wait -> restart-frc -> wait -> recovery-state -> status.
+Manual equivalent on Camry: preflight -> install in NRTD -> direct NRTD->READY without OFF -> qualify EPS -> wait -> restart-brake -> wait -> restart-frc -> wait -> recovery-state -> status.
 C7 is the only recurring steering-control tag. Camry/Crown field kits use functional C6 only as the post-startup helper loader; Corolla embeds its helper in the authenticated payload. Camry field runtime is post-authenticated route44 application override and does not invoke command 5 during lateral control. This runtime does not patch CodeFlash.
 A full EPS power cycle removes the RAM resident and requires bringup again.
 """

@@ -34,8 +34,8 @@ controller or permission system. The production-shaped candidate is now the
 **volatile continuous RAM signer**: it generates a native-valid FV4+CMAC28
 trailer with the EPS's own ICU-S path and therefore does not require the
 historical stage-5 receiver bypass or any persistent CodeFlash change. Full EPS
-power loss removes it and requires another Park/stationary install/load-arm;
-READY mode is allowed. The old persistent signer remains historical development
+power loss removes it and requires the bounded NRTD -> READY install/load-arm
+lifecycle again. The old persistent signer remains historical development
 material, not the intended deployment architecture.
 
 ## Minimum by repository
@@ -265,9 +265,9 @@ uv run --locked python tools/targets/tss3/builders/build_tss3_unified_b6_signer_
 
 # on comma, with Kai's TSS3 openpilot checkout at /data/openpilot
 ./tss3-unified-signer doctor
-# vehicle in Park and stationary; READY is allowed:
+# vehicle already in NRTD / READY=0 / Park:
 ./tss3-unified-signer bringup /tmp/tss3-bringup
-# after the command prompts: keep EPS powered, enter READY/Park if needed,
+# after the command prompts: transition directly to READY/Park without OFF,
 # remain stationary, then press Enter
 ./tss3-unified-signer replace-current /tmp/tss3-replace-current.json
 ```
@@ -282,12 +282,12 @@ the guided path instead of the direct-B6 signer path:
 uv run --locked python tools/targets/tss3/builders/build_tss3_unified_b6_signer_kit.py \
   --target camry-8965F3307000 --out EMPTY_KIT_DIRECTORY
 
-# Park / stationary; READY is allowed. Full EPS OFF only clears an older resident.
+# full EPS OFF first; then NRTD / READY=0 / Park / stationary
 ./tss3-unified-signer oracle-bringup /tmp/tss3-oracle-bringup
 ```
 
-`oracle-bringup` installs and attests the volatile classic oracle, keeps EPS
-powered, performs the maintained Brake/EPB then FRC peer
+`oracle-bringup` installs and attests the volatile classic oracle, prompts for
+the direct transition to READY, performs the maintained Brake/EPB then FRC peer
 recovery while retaining the Panda lease, requires healthy DRCC state, and ends
 with a live native-`0x08A` MAC known-answer. `recover-peers` exposes that recovery
 step separately. The standalone `f33-08a-classic-oracle` launcher exposes the
@@ -299,8 +299,7 @@ The historical direct-B6 signer remains available for either host wiring with
 alternative volatile runtime architectures; do not install or operate both.
 
 `bringup` retains the individual fail-closed gates: stock functional-mailbox
-preflight, exact-F181 install, then READY runtime qualification. Installation is
-allowed while READY; Park/stationary remains the operator boundary. On exact
+preflight, exact-F181 NRTD install, then READY runtime qualification. On exact
 Camry, peer recovery is deliberately **operator paced** rather than chained:
 `bringup` keeps one cooperative Panda lease across the complete guided command and
 waits for the operator before restarting Brake/EPB only. The Brake stage is intentionally kept identical
@@ -419,8 +418,8 @@ migration does not silently transfer the historical Camry helper's road
 qualification to the new `0x777` runtime or to Corolla/Crown.
 
 The direct-Panda lease and installer remain deployment tooling. They must not
-become a second engagement policy in openpilot. Repeated live transitions have
-put EPS, Brake/EPB, and FRC into programming and returned them to application
-while the car remained READY, so NRTD is not an installer prerequisite. The
-transition is still disruptive ECU lifecycle work and remains bounded to a
-parked, stationary vehicle.
+become a second engagement policy in openpilot. Although EPS, Brake/EPB, and FRC
+can enter and leave programming while the car remains READY, that does not make
+the authenticated EPS RAM-payload bootstrap a READY-mode install path. The
+maintained installer therefore retains the exact NRTD prerequisite and direct
+NRTD-to-READY transition without EPS power loss.
