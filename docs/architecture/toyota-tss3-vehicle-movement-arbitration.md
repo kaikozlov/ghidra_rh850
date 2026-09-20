@@ -751,6 +751,27 @@ component** in the exact-Camry component set; component `0x65`, which appears in
 other Toyota topology sets, is absent here. The current GTS English database also does
 not spell the acronym out.
 
+The exact 04/2024-onward 2025-Camry service material puts real hardware behind those GTS
+names. Connector **A30** is the **No. 1 skid control ECU (brake booster with master
+cylinder assembly)**. Its terminal table names A30-34/35 `DC1H/DC1L` **Daisy chain
+communication line (H/L)** and A30-36/37 `CA1H/CA1L` **CAN communication line 1
+(H/L)**. Connector **A31** belongs to the separate **No. 2 skid control ECU (brake
+actuator assembly)**. This maps naturally onto GTS category 466 `Brake Booster`
+(`Brk_Bst_P5`) versus category 435 `Brake/EPB` (`ABS_P5`), respectively. Toyota's parts
+catalog makes both computers serviceable only as larger electrohydraulic assemblies:
+**47050-06040** is the 2025--2026 brake booster/master-cylinder assembly and explicitly
+includes an ABS control module; **44050-06691** is the 2025 ABS hydraulic/brake-actuator
+assembly and includes the ABS control module, modulator, pump and motor (superseding
+44050-06690). Thus there is no separate catalogued "EBU box" to buy on this Camry. The
+most direct physical candidate for the EPS attachment boundary is the A30/47050 assembly,
+because both the ordinary CAN1 pair and the explicitly named daisy-chain pair terminate at
+that ECU connector. **That does not yet prove an active bridge/filter inside 47050-06040**:
+the service manual calls both pairs Bus-4 main-line circuitry, and the prior disconnected
+~120-ohm measurements are also consistent with a normally continuous daisy chain split
+between its termination resistors. The separate A31/44050 Brake/EPB ECU remains the leading
+VMM/request-generation candidate and can still be the producer/controller of traffic that
+A30 forwards onto the EPS attachment.
+
 Toyota-authored terminology supplies the expansion independently: Toyota Motor
 Engineering & Manufacturing North America patent US20210323519A1 calls an EBU an
 **"electronic brake module or unit"** and uses `EBU` for that brake-domain unit
