@@ -1,0 +1,34 @@
+{
+  "schema": "f33-prestart-passive-v1",
+  "read_only": true,
+  "host_tx": false,
+  "phases": {
+    "armed_ms": 2017.573641
+  },
+  "baseline": [],
+  "post": [],
+  "specials": {
+    "0x101": {
+      "count": 0,
+      "first": null,
+      "last": null
+    },
+    "0x030": {
+      "count": 0,
+      "first": null,
+      "last": null
+    },
+    "0x51E": {
+      "count": 0,
+      "first": null,
+      "last": null
+    },
+    "0x7A9": {
+      "count": 0,
+      "first": null,
+      "last": null
+    }
+  },
+  "total_native_frames": 0,
+  "frames": []
+}

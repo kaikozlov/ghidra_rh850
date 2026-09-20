@@ -1,0 +1,67 @@
+2026-09-20 exact-Camry F33 pre-start brake-wake experiment
+
+Target
+- 2026 Toyota Camry Hybrid
+- EPS application F181 expected: 8965F3307000 / 8A3113303100
+- relay-correct Toyota-B topology, EPS diagnostic route bus0 0x7A1 -> 0x7A9
+
+Question
+Does pressing and holding the brake while the power switch remains OFF wake the
+EPS application/DCM early enough to make its diagnostic endpoint reachable before
+the driver presses POWER?
+
+Operator procedure
+- Vehicle remained fully OFF/Park throughout.
+- POWER button was never pressed.
+- Operator pressed and held the brake only after the host printed ARMED, held it
+  for ~10 s, then released it.
+- Operator separately observed that the combination-meter screen normally wakes
+  on brake press; that observation is contextual only, not machine-timestamped.
+
+Probe
+- f33_prestart_wake_probe.py
+- Cooperative direct-Panda lease; openpilot Panda ownership restored afterward.
+- Panda power-save explicitly disabled before the capture so all three CAN
+  controllers/transceivers were available.
+- ELM327 safety param 1, exact EPS route bus0 0x7A1 -> 0x7A9.
+- Only active request was read-only SID 0x22 DID F181. No session change,
+  programming transition, reset, SecurityAccess, memory read/write, or actuation.
+- 3 s pre-brake baseline, then 18 s post-ARMED polling/capture.
+
+Machine result
+- Panda health after explicit wake: power_save_enabled=false,
+  ignition_line=false, ignition_can=false, harness_status=2.
+- Baseline: 17/17 F181 reads timed out.
+- Post-brake: 99/99 F181 reads timed out.
+- 0x7A9 EPS diagnostic responses: 0.
+- native 0x030 EPS frames: 0.
+- native 0x101 Brake Module frames: 0.
+- native 0x51E Ready Status frames: 0.
+- Before ARMED/brake, 58 native (bus,address) streams were already visible after
+  forcing Panda out of power-save (29 IDs mirrored byte-for-byte on buses 0/2).
+- After ARMED/brake, the exact same 58 native streams remained visible; zero new
+  native (bus,address) stream first appeared after ARMED.
+- Host F181 requests appear as returned-TX 0x7A1 rows on bus 2; they never receive
+  a matching 0x7A9 response.
+
+Interpretation
+Observed/disproved for this topology and state: brake-only wake while POWER
+remains OFF does not make the exact F33 application diagnostic endpoint reachable
+and does not produce normal 0x030/0x51E/0x101 traffic on the comma-visible control
+segments. The combination-meter/body wake therefore does not, by itself, prove an
+EPS application wake.
+
+Boundary
+This does not prove every internal EPS power domain is electrically asleep; it
+proves only that the ordinary F33 application/DCM path is unavailable to the
+normal-harness bus0 diagnostic route during this brake-only state. The next
+relevant experiment is an OFF -> normal POWER startup capture with a worker
+already armed, to timestamp first EPS 0x030/F181 against first 0x51E Ready=1 and
+measure whether a usable programming-transition window exists before READY.
+
+Files
+- f33-prestart-wake-probe.json: authoritative active read-only capture/result.
+- f33_prestart_wake_probe.py: exact probe used for the authoritative run.
+- f33-prestart-passive.json: preliminary passive run made while Panda inherited
+  offroad power-save; it saw zero frames and is retained only as an explicitly
+  non-authoritative setup attempt.
