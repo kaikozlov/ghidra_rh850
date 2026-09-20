@@ -2,11 +2,11 @@
 """Verify the one-payload functional-0x777 TSS3 signer implementation."""
 from __future__ import annotations
 
+import hashlib
 import json
 import subprocess
 import sys
 import tempfile
-import types
 from pathlib import Path
 from unittest import mock
 
@@ -15,7 +15,6 @@ sys.path.insert(0, str(ROOT))
 
 from exploit.ephemeral_runtime import build_tss3_unified_b6_signer as unified_builder
 from exploit.ephemeral_runtime import tss3_unified_b6_signer as host
-from exploit.ephemeral_runtime import camry_f33_runtime_replay_discriminator as replay_guard
 
 BUILDER = ROOT / "exploit/ephemeral_runtime/build_tss3_unified_b6_signer.py"
 KIT_BUILDER = ROOT / "tools/targets/tss3/builders/build_tss3_unified_b6_signer_kit.py"
@@ -38,39 +37,20 @@ check("C7 is recurring control and C6 is split-target installation only",
       host.replacement_frame(7, 0x1234) == bytes.fromhex("07c7c70712340000") and
       host.release_frame() == bytes.fromhex("07c7c70000000000"))
 
-class NrtdGuardPanda:
-    instance = None
-    def __init__(self):
-        type(self).instance = self
-        self.calls = 0
-        self.closed = False
-    def set_safety_mode(self, *_args): pass
-    def can_recv(self):
-        self.calls += 1
-        if self.calls == 1:
-            return [(replay_guard.READY_CAN_ID, bytes.fromhex("8000000000000000"), 1)]
-        if self.calls < 6:
-            return []
-        return [(replay_guard.READY_CAN_ID, bytes.fromhex("00007f0000000000"), 1)]
-    def close(self): self.closed = True
-
-class NrtdGuardClock:
-    def __init__(self): self.t = 0.0
-    def monotonic(self):
-        self.t += 0.01
-        return self.t
-
-nrtd_clock = NrtdGuardClock()
-with (mock.patch.dict(sys.modules, {"panda": types.SimpleNamespace(Panda=NrtdGuardPanda)}),
-      mock.patch.object(replay_guard, "ensure_boardd_stopped", return_value=None),
-      mock.patch.object(replay_guard.time, "monotonic", side_effect=nrtd_clock.monotonic),
-      mock.patch.object(replay_guard.time, "sleep", return_value=None)):
-    nrtd_guard = replay_guard.verify_nrtd_ready(
-        timeout=0.5, route=types.SimpleNamespace(elm327_param=1), ready_buses=frozenset({1}),
-    )
-check("NRTD guard drains stale READY backlog before evaluating fresh 0x51E",
-      nrtd_guard["ready_values"] == [0] and nrtd_guard["rx_backlog_drained"] is True and
-      NrtdGuardPanda.instance is not None and NrtdGuardPanda.instance.closed is True)
+post_repin = host.configure_topology(host.TOPOLOGY_CAMRY_POST_REPIN, target_name=host.CAMRY_F33_TARGET)
+check("exact Camry can select the relay-correct post-repin host route",
+      post_repin == {"name": "camry-post-repin", "control_bus": 0, "diagnostic_bus": 0} and
+      host.CONTROL_BUS == 0 and host.ROUTE.bus == 0)
+try:
+    host.configure_topology(host.TOPOLOGY_CAMRY_POST_REPIN, target_name="crown-8965F3012000")
+except host.UnifiedSignerError:
+    pass
+else:
+    raise AssertionError("non-Camry target accepted Camry post-repin topology")
+stock = host.configure_topology(host.TOPOLOGY_STOCK, target_name=host.CAMRY_F33_TARGET)
+check("ordinary topology remains the default bus1 route",
+      stock == {"name": "stock", "control_bus": 1, "diagnostic_bus": 1} and
+      host.CONTROL_BUS == 1 and host.ROUTE.bus == 1)
 post_replace_raw = bytearray(host.SPLIT_TELEMETRY_SIZE)
 post_replace_raw[8:12] = bytes.fromhex("d4a561f5")
 post_replace_raw[12:16] = bytes.fromhex("11223344")
@@ -316,7 +296,7 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
         bundle = host.load_bundle(meta_path)
         plan = host.plan(bundle)
         check(f"{target}: plan is one-shot install followed only by C7 runtime control",
-              plan["sequence"][0].startswith("NRTD/Park: prove exact-target stock functional 0x777") and
+              plan["sequence"][0].startswith("Park/stationary (READY allowed)") and
               "helper" in plan["sequence"][2] and "native command-5 MAC oracle" in plan["sequence"][2] and
               meta["artifacts"]["payload"] == universal["payload"]["path"] and
               plan["old_implementations_retained"] is True)
@@ -362,8 +342,7 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
     panda = FakePanda()
     reads = iter((bytes(7), bytes.fromhex("00c7a512340000")))
     clock = iter(i / 1000 for i in range(10000))
-    with (mock.patch.object(host, "verify_nrtd_ready", return_value={"ready_values": [0]}),
-          mock.patch.object(host, "_open_app", return_value=(panda, object(), object(), bundle.target["application_f181_hex"], "fixture", None)),
+    with (mock.patch.object(host, "_open_app", return_value=(panda, object(), object(), bundle.target["application_f181_hex"], "fixture", None)),
           mock.patch.object(host, "_resident_already_present", return_value=False),
           mock.patch.object(host, "_read_memory", side_effect=lambda *a, **k: next(reads)),
           mock.patch.object(host.time, "monotonic", side_effect=lambda: next(clock)),
@@ -400,7 +379,9 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
               ["0x00000C9A", "0x00000E54", "0x00000F80", "0x000010C6", "0x0000119E"] and
           (kit / "tss3-unified-signer").is_file() and (kit / "bundle/unified.json").is_file() and
           (kit / "runtime/tsk/lib/programming.py").is_file() and
-          (kit / "runtime/exploit/ephemeral_runtime/camry_f33_post_install_recovery.py").is_file())
+          (kit / "runtime/exploit/ephemeral_runtime/camry_f33_post_install_recovery.py").is_file() and
+          not (kit / "bundle/oracle").exists() and
+          kit_meta["camry_classic_08a_oracle"] is None)
     launcher = (kit / "tss3-unified-signer").read_text(encoding="utf-8")
     check("unified kit prefers vendored runtime and exposes common test ladder plus exact-F33 DRCC diagnostic clear",
           'PYTHONPATH="$KIT_ROOT/runtime:$OPENPILOT_ROOT"' in launcher and
@@ -408,6 +389,10 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
           all(cmd in launcher for cmd in ("preflight", "install", "install-stale-030-bridge", "qualify", "bringup",
                                            "bringup-stale-030-bridge", "restart-brake", "restart-frc", "recovery-state",
                                            "restart-control-domains", "recover-drcc", "replace-current", "replace-once")) and
+          all(cmd in launcher for cmd in ("oracle-bringup", "oracle-install", "recover-peers",
+                                           "oracle-status", "oracle-known-answer", "oracle-benchmark")) and
+          "--topology stock|camry-post-repin" in launcher and
+          "--nrtd-confirmed" not in launcher and "READY is allowed" in launcher and
           "FRC DRCC permission did not survive bridged bootstrap; STOP before READY qualification" in launcher)
 
     field_bundle = host.load_bundle(kit / "bundle/unified.json")
@@ -440,6 +425,24 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
     camry_field_meta = json.loads((camry_kit / "bundle/unified.json").read_text(encoding="utf-8"))
     camry_field_bundle = host.load_bundle(camry_kit / "bundle/unified.json")
     camry_launcher = (camry_kit / "tss3-unified-signer").read_text(encoding="utf-8")
+    camry_oracle_meta = json.loads((camry_kit / "bundle/oracle/classic.json").read_text(encoding="utf-8"))
+    camry_oracle_payload = (camry_kit / "bundle/oracle/classic_payload.bin").read_bytes()
+    check("Camry unified kit carries only the classic-oracle deployment pair plus its runtime",
+          camry_kit_meta["camry_classic_08a_oracle"]["metadata"] == "bundle/oracle/classic.json" and
+          camry_kit_meta["camry_classic_08a_oracle"]["payload"] == "bundle/oracle/classic_payload.bin" and
+          camry_oracle_meta["schema"] == "camry-f33-08a-classic-oracle-build-v1" and
+          len(camry_oracle_payload) == 0x1000 and
+          hashlib.sha256(camry_oracle_payload).hexdigest() == camry_oracle_meta["authenticated_payload"]["sha256"] and
+          (camry_kit / "runtime/exploit/ephemeral_runtime/camry_f33_08a_classic_oracle.py").is_file() and
+          not (camry_kit / "bundle/oracle/camry_f33_08a_classic_oracle_resident.bin").exists())
+    oracle_bringup_block = camry_launcher.split("  oracle-bringup)\n", 1)[1].split("  recover-peers)", 1)[0]
+    check("Camry oracle bringup installs, recovers Brake then FRC, and gates on a native known-answer",
+          oracle_bringup_block.index('quiesce_panda_owner') <
+          oracle_bringup_block.index('install --payload "$ORACLE_PAYLOAD"') <
+          oracle_bringup_block.index('run_peer_recovery "$out_dir"') <
+          oracle_bringup_block.index('known-answer --meta "$ORACLE_META"') and
+          "runtime_08a_classic_oracle_resident_live_helper_pending_known_answer" in oracle_bringup_block and
+          "r.get('matched') is not True" in oracle_bringup_block)
     bringup_block = camry_launcher.split("  bringup)\n", 1)[1].split("  bringup-stale-030-bridge)", 1)[0]
     check("Camry guided bringup is operator-paced EPS -> Brake -> FRC under one Panda lease",
           bringup_block.index('quiesce_panda_owner') <

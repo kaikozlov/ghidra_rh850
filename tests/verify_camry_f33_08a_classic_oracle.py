@@ -17,6 +17,7 @@ from exploit.ephemeral_runtime import camry_f33_08a_classic_oracle as host
 OUT = ROOT / "build/out/ephemeral-runtime/camry-f33-08a-classic-oracle"
 AUDIT = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_08a_classic_oracle_build.json"
 AUDITED_STAGE = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_08a_classic_oracle.bin"
+LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_08a_classic_oracle_launcher.sh"
 
 subprocess.run([sys.executable, str(build.BUILDER)], cwd=ROOT, check=True, stdout=subprocess.DEVNULL)
 meta = json.loads((OUT / "camry_f33_08a_classic_oracle.json").read_text())
@@ -187,5 +188,16 @@ check("helper advances an independent producer cursor across stock drains and si
 check("response bypasses XCP protocol completion",
       "movea 0x00f0" in helper_src and "movea 55, r0, r6" in helper_src and
       "jarl32 lower_can_write, lp" in helper_src)
+
+launcher = LAUNCHER.read_text(encoding="utf-8")
+recovery = launcher.split("  recover-peers)\n", 1)[1].split("  status)", 1)[0]
+check("standalone classic-oracle kit includes guarded Brake then FRC peer recovery",
+      "camry_f33_post_install_recovery.py" in launcher and
+      "--nrtd-confirmed" not in launcher and "READY allowed" in launcher and
+      recovery.index("quiesce_panda_owner") <
+      recovery.index("restart-domain --domain brake") <
+      recovery.index("restart-domain --domain frc") <
+      recovery.index("state --output") and
+      "output directory is not empty" in recovery)
 
 print("PASS camry F33 raw classic-CAN 0x08A oracle")
