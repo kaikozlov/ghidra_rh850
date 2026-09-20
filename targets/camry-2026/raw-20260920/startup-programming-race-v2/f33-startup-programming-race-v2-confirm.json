@@ -1,0 +1,15 @@
+{
+  "schema": "f33-startup-programming-race-v2-confirm-v1",
+  "wall_utc": "2026-09-20T19:33:13Z",
+  "route": {
+    "bus": 0,
+    "tx": "0x7A1",
+    "rx": "0x7A9"
+  },
+  "f181_hex": "022121212121212121212121212121212121212121212121212121212121212121",
+  "interpretation": "exact known F33 bootloader identity",
+  "read_only": true,
+  "security_access": false,
+  "payload_upload": false,
+  "persistent_writes": false
+}

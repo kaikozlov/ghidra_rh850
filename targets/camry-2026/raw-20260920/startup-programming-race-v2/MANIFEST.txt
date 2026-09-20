@@ -1,0 +1,76 @@
+2026-09-20 exact-Camry F33 startup PROGRAMMING race v2 — SUCCESS
+
+Target
+- 2026 Toyota Camry Hybrid
+- EPS application F181: 8965F3307000 / 8A3113303100
+- Known bootloader F181: 02 || 0x21 * 32
+- Relay-correct Toyota-B topology, EPS diagnostic route bus0 0x7A1 -> 0x7A9
+
+Question
+Can a host already armed while the vehicle is fully OFF enter the F33 bootloader
+on a normal brake+POWER startup by avoiding any application identity pre-read and
+sending PROGRAMMING immediately after the first completed EXTENDED response?
+
+Precondition
+- Vehicle was confirmed electrically OFF immediately before arming:
+  openpilot deviceState.started=false, Panda ignitionLine=false,
+  ignitionCan=false.
+- Vehicle remained in Park.
+
+Strategy
+1. Repeatedly transmit raw single-frame 10 03 at 20 ms cadence while the EPS is
+   absent/asleep.
+2. Wait for the first exact positive EXTENDED response on bus0 0x7A9:
+     06 50 03 00 32 01 f4 00
+3. Stop sending 10 03 immediately.
+4. Transmit one raw single-frame 10 02 immediately after that completed 50 03.
+5. Do not perform SecurityAccess, RequestDownload, payload upload, RoutineControl,
+   ECUReset, memory writes, or persistent writes.
+6. Independently identify the resulting diagnostic endpoint using read-only F181.
+
+Authoritative timing from f33-startup-programming-race-v2.json
+- ARMED: 306.582825 ms after probe start.
+- First completed positive 50 03: 5128.182884 ms.
+- Single 10 02 transmit: 5128.209499 ms.
+- 50 03 completion -> 10 02 transmit: 0.026615 ms (26.615 microseconds).
+
+Outcome
+- The deployed v2 script crashed immediately after transmitting 10 02 because a
+  diagnostic print statement referenced programming_after_50_03_ms as a Python
+  variable instead of as the result-dict key. This occurred after the critical
+  10 02 transmit and therefore prevented the script itself from recording the
+  asynchronous handoff outcome.
+- An independent read-only F181 probe immediately afterward returned exactly:
+    02 21 21 21 21 21 21 21 21 21 21 21 21 21 21 21
+       21 21 21 21 21 21 21 21 21 21 21 21 21 21 21 21 21
+  i.e. the exact known F33 bootloader identity.
+- Therefore the startup PROGRAMMING race SUCCEEDED.
+- No SecurityAccess, authenticated RAM upload, flash access, reset, or persistent
+  write occurred in this experiment.
+- The vehicle was subsequently turned fully OFF; openpilot confirmed
+  deviceState.started=false, ignitionLine=false, ignitionCan=false, with Panda
+  returned to power-save.
+
+Interpretation
+Verified dynamically: an already-armed host can catch the exact F33 application
+on a normal OFF -> brake+POWER startup and enter PROGRAMMING before the ordinary
+startup/READY transition closes the handoff. No F181 pre-read, 0x030 trigger, or
+arbitrary EXTENDED settle delay is required. The correct synchronization point is
+the first completed positive 50 03 response.
+
+Evidence files
+- f33-startup-programming-race-v2.json
+  Exact output from the deployed race worker. It proves the first 50 03 timing and
+  the 26.615-us-later 10 02 transmit, then records the post-TX logging exception.
+- f33-startup-programming-race-v2-confirm.json
+  Independent read-only exact bootloader F181 confirmation.
+- f33_startup_programming_race_v2_deployed.py
+  Byte-for-byte source copied from the worker that actually ran, including the
+  post-TX print typo.
+- f33_startup_programming_race_v2.py
+  Same worker with only that post-TX logging typo corrected for future reuse.
+
+Safety / recovery boundary
+This race-isolation run deliberately stops at stock bootloader entry. A normal
+full vehicle OFF cycle is the recovery path used here. Do not drive while the EPS
+is left in bootloader state.
