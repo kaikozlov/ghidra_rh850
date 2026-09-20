@@ -6,6 +6,7 @@ import hashlib
 import json
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 from types import SimpleNamespace
 from unittest import mock
@@ -15,6 +16,7 @@ sys.path.insert(0, str(ROOT))
 
 from exploit.ephemeral_runtime import build_camry_f33_08a_classic_oracle as build
 from exploit.ephemeral_runtime import camry_f33_08a_classic_oracle as host
+from exploit.ephemeral_runtime import camry_f33_oracle_ui_bringup as ui_bringup
 
 OUT = ROOT / "build/out/ephemeral-runtime/camry-f33-08a-classic-oracle"
 FAST_OUT = ROOT / "build/out/ephemeral-runtime/camry-f33-08a-classic-oracle-idle-fast"
@@ -281,6 +283,29 @@ check("UI backend verifies healthy peers and oracle KAT without mandatory peer r
       ui_src.index('kat = known_answer(meta)') and
       'restart_brake_known_good' not in ui_src and 'restart_one_domain' not in ui_src and
       'peer_resets_performed": False' in ui_src)
+
+native_marker = {
+    "schema": "tss3-oracle-native-catch-v1",
+    "target": "TOYOTA_CAMRY_TSS3",
+    "armed_monotonic_ns": 100,
+    "ignition_observed_monotonic_ns": 200,
+    "first_extended_tx_monotonic_ns": 110,
+    "positive_extended_monotonic_ns": 300,
+    "programming_tx_monotonic_ns": 310,
+    "verdict": "programming_request_sent_after_exact_50_03",
+}
+with tempfile.TemporaryDirectory() as td:
+    marker_path = Path(td) / "native-catch.json"
+    marker_path.write_text(json.dumps(native_marker), encoding="utf-8")
+    check("UI resume accepts only an ordered exact-F33 native startup catch",
+          ui_bringup.load_native_catch(marker_path) == native_marker)
+    marker_path.write_text(json.dumps({**native_marker, "target": "TOYOTA_COROLLA_TSS3"}), encoding="utf-8")
+    try:
+        ui_bringup.load_native_catch(marker_path)
+    except ui_bringup.UiBringupError:
+        pass
+    else:
+        raise AssertionError("UI resume accepted a non-F33 native startup catch")
 
 launcher = LAUNCHER.read_text(encoding="utf-8")
 recovery = launcher.split("  recover-peers)\n", 1)[1].split("  status)", 1)[0]

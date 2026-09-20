@@ -426,7 +426,7 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
           all(cmd in launcher for cmd in ("preflight", "install", "install-stale-030-bridge", "qualify", "bringup",
                                            "bringup-stale-030-bridge", "restart-brake", "restart-frc", "recovery-state",
                                            "restart-control-domains", "recover-drcc", "replace-current", "replace-once")) and
-          all(cmd in launcher for cmd in ("oracle-bringup", "oracle-ui-bringup", "oracle-install", "recover-peers",
+          all(cmd in launcher for cmd in ("oracle-bringup", "oracle-ui-bringup", "oracle-ui-resume", "oracle-install", "recover-peers",
                                            "oracle-status", "oracle-known-answer", "oracle-benchmark")) and
           "--topology stock|camry-post-repin" in launcher and
           "--nrtd-confirmed" in launcher and "NRTD/READY=0" in launcher and
@@ -474,11 +474,17 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
           (camry_kit / "runtime/exploit/ephemeral_runtime/camry_f33_startup_programming.py").is_file() and
           (camry_kit / "runtime/exploit/ephemeral_runtime/camry_f33_oracle_ui_bringup.py").is_file() and
           not (camry_kit / "bundle/oracle/camry_f33_08a_classic_oracle_resident.bin").exists())
-    oracle_ui_block = camry_launcher.split("  oracle-ui-bringup)\n", 1)[1].split("  oracle-bringup)", 1)[0]
+    oracle_ui_block = camry_launcher.split("  oracle-ui-bringup)\n", 1)[1].split("  oracle-ui-resume)", 1)[0]
     check("Camry UI bringup holds one lease and delegates the startup-caught flow to the packaged backend",
           oracle_ui_block.index('quiesce_panda_owner') < oracle_ui_block.index('ORACLE_UI_BRINGUP_TOOL') and
           '--payload "$ORACLE_PAYLOAD"' in oracle_ui_block and '--meta "$ORACLE_META"' in oracle_ui_block and
           'output directory is not empty' in oracle_ui_block)
+    oracle_resume_block = camry_launcher.split("  oracle-ui-resume)\n", 1)[1].split("  oracle-bringup)", 1)[0]
+    check("Camry native-catch resume takes the Panda lease without running the multi-process doctor",
+          'doctor >/dev/null' not in oracle_resume_block and
+          oracle_resume_block.index('quiesce_panda_owner') < oracle_resume_block.index('ORACLE_UI_BRINGUP_TOOL') and
+          '--native-catch "$native_catch"' in oracle_resume_block and
+          'require_camry_oracle_files' in oracle_resume_block)
     oracle_bringup_block = camry_launcher.split("  oracle-bringup)\n", 1)[1].split("  recover-peers)", 1)[0]
     check("Camry oracle bringup installs, recovers Brake then FRC, and gates on a native known-answer",
           oracle_bringup_block.index('quiesce_panda_owner') <
