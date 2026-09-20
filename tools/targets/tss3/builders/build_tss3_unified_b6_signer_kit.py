@@ -113,7 +113,7 @@ Camry F33 recovery note: the field result is timing-sensitive. Exact application
 Manual equivalent on Camry: preflight -> install in NRTD -> direct NRTD->READY without OFF -> qualify EPS -> wait -> restart-brake -> wait -> restart-frc -> wait -> recovery-state -> status.
 C7 is the only recurring steering-control tag. Camry/Crown field kits use functional C6 only as the post-startup helper loader; Corolla embeds its helper in the authenticated payload. Camry field runtime is post-authenticated route44 application override and does not invoke command 5 during lateral control. This runtime does not patch CodeFlash.
 A full EPS power cycle removes the RAM resident and requires bringup again.
-For exact Camry, `oracle-ui-bringup` replaces the manual NRTD ceremony: arm while fully OFF, press brake+POWER normally, catch the first completed 50 03, send one 10 02, install directly from exact bootloader F181, then advance the Brake/FRC settle checkpoints from the UI.
+For exact Camry, `oracle-ui-bringup` replaces the manual NRTD ceremony: arm while fully OFF, press brake+POWER normally, catch the first completed 50 03, send one 10 02, install directly from exact bootloader F181, then verify READY/Park, peer DRCC health, and one native oracle known-answer. Brake/FRC resets remain explicit recovery tools only when peer state is actually unhealthy.
 """
     (out / "TESTING.txt").write_text(testing, encoding="utf-8")
     oracle = None

@@ -275,11 +275,12 @@ check("startup catcher uses the field-proven response-synchronized minimum ladde
       'POSITIVE_EXTENDED_FRAME = bytes.fromhex("065003003201f400")' in startup_src and
       startup_src.index('data == POSITIVE_EXTENDED_FRAME') < startup_src.index('panda.can_send(TX_ADDR, PROGRAMMING_FRAME, BUS)') and
       'SecurityAccess' in startup_src and 'persistent_flash_writes' in startup_src)
-check("UI backend preserves operator-paced Brake then FRC recovery after direct-boot install",
+check("UI backend verifies healthy peers and oracle KAT without mandatory peer resets",
       ui_src.index('race_to_bootloader()') < ui_src.index('install(payload, meta, direct_boot=True)') <
-      ui_src.index('ready_guard = wait_ready_parked') < ui_src.index('restart_brake_known_good(output_dir') <
-      ui_src.index('restart_one_domain("frc"') < ui_src.index('state = control_domain_state') < ui_src.index('kat = known_answer(meta)') and
-      ui_src.count('wait_for_continue(') >= 4)
+      ui_src.index('ready_guard = wait_ready_parked') < ui_src.index('state = control_domain_state') <
+      ui_src.index('kat = known_answer(meta)') and
+      'restart_brake_known_good' not in ui_src and 'restart_one_domain' not in ui_src and
+      'peer_resets_performed": False' in ui_src)
 
 launcher = LAUNCHER.read_text(encoding="utf-8")
 recovery = launcher.split("  recover-peers)\n", 1)[1].split("  status)", 1)[0]
