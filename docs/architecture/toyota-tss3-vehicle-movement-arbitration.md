@@ -722,25 +722,28 @@ ordinary-P5 MAC28 domain accessible from this EPS. This strongly supports a shar
 across the relevant Toyota arbitration domain, while not by itself identifying which upstream
 component enforces it.
 
-The resulting topology hypothesis is that protection may be checked **before** the PDU reaches
-the F33 application, potentially at the VMC/Brake/EBU forwarding boundary, after which the
-original authenticated 32-byte PDU is forwarded intact and the EPS consumes only its ordinary
-application fields. This would explain why the EPS receives FV4/MAC28 bytes without having a
-local `0x025` or `0x090` SecOC profile. It remains a hypothesis: the captures prove preserved
-SecOC material and the `0x090` command-5 result proves a real MAC domain, but neither identifies
-the enforcing ECU nor proves that `0x025` is rejected upstream on a bad MAC. Transparent
-forwarding without enforcement remains possible until a valid-MAC/invalid-MAC discriminator or
-the relevant upstream firmware closes the gate.
+The intact trailer is best treated as a **producer/domain property of the 32-byte PDU, not
+evidence that every receiver verifies it locally**. Toyota can emit one authenticated PDU
+shape for the safety domain, forward that shape unchanged through intermediate nodes, and let
+individual consumers either verify SecOC locally, rely on an upstream trust boundary, or ignore
+the trailer in their application route. That explains why exact F33 can consume `0x025/0x090`
+outside its local SecOC verifier while the complete `FV4||MAC28` envelope remains present.
 
-Exact F33 still does **not** run its local SecOC verifier on route40. The decisive follow-up is
-therefore one frame with a **valid fresh P5 MAC28 but deliberately invalid local B7**. The
-probe copies a native application, flips only application byte B6 (not consumed by the exact
-F33 `0x090` unpacker), leaves B7 stale, pre-signs message3 for a future reset, waits for native
-message1 of that exact reset, and transmits once. If `FEBE53C0` increments, the authenticated
-frame passed the upstream Brake/VMC/EBU boundary and reached F33's local checksum checker,
-proving that stale-MAC frames were being rejected before EPS delivery. If the sticky counter
-remains unchanged despite a TX return and valid freshness/MAC, a source/port/routing rule
-remains independently necessary.
+The September-19 valid-authentication discriminator then closes the simpler "upstream MAC gate"
+model negatively. Exact-F33 command 5 generated a selector-4 MAC28 for DataID `0x0090`; the
+host paired it with the live reset epoch, message 2 freshness, **and the exact F33-local B7
+checksum**, then transmitted it about 2.476 ms after native message 1 and before Toyota's
+native message 2. Panda returned the exact TX, native route40 remained live, but F33 raw COM
+`FEBE4BAF` never latched the host trailer or frame. Therefore bad MAC28, stale freshness, and
+bad local B7 are all disproved as sufficient causes of the direct-Panda FD loss. A pure
+"authenticate the PDU, then forward it" boundary cannot explain the result.
+
+The remaining gate has to depend on something outside those authenticated payload semantics:
+**ingress/source-domain/path membership, direction/routing state, CAN-FD traffic-class policy,
+or another upstream semantic predicate** on the deliberately unique host field. The first
+three are the leading class because the failure is format-selective: classic traffic on the
+same private endpoint reaches F33 while Panda-created FD does not. The valid-MAC negative is
+therefore evidence for a network-admission seam, not for missing cryptographic correctness.
 
 Current GTS topology is more specific than a generic "EBU-domain boundary." In
 `CDbCanBusComponentTable`, `EBU` is literally the **junction/attachment field on the
