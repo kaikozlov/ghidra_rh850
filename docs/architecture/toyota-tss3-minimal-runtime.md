@@ -324,6 +324,19 @@ EPS-communication-open clear; the succeeding native-`0x08A` known-answer supplie
 functional FRC-side proof. No DTC clear, peer reset, EPS reset, or EPS power cycle is
 part of a healthy `oracle-ui-bringup` run.
 
+The first automatic-start integration keeps the proven backend unchanged and
+adds an openpilot-side `Tss3OracleAutoArm` watcher. When enabled on exact F33 it
+runs while offroad, consumes the existing `pandaStates` stream, and triggers only
+on a newly observed ignition false->true edge. It then acquires the same
+cooperative direct-Panda lease and runs `oracle-ui-bringup` without operator
+input. Starting/restarting the watcher while ignition is already true does not
+trigger installation; it waits for the next complete OFF->ON cycle. Each auto
+run records Panda message time, watcher receipt, backend launch, first completed
+`50 03`, and `10 02` dispatch in `auto-trigger.json`. This 10-Hz watcher is the
+minimum-intrusion implementation; if field timing shows insufficient margin,
+only the latency-sensitive startup catcher should move into native `pandad`,
+while RAM upload/attestation/KAT remain in the existing backend.
+
 Non-Camry targets skip this lifecycle step. `replace-current` is the first mutation test: it requires READY plus stationary
 `0x0AA`, derives the current measured angle from `0x025`, converts that angle to
 the common B6 target domain, sends one fresh C7 generation, observes a signed
