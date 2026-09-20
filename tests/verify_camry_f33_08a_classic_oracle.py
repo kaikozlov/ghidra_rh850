@@ -15,13 +15,20 @@ from exploit.ephemeral_runtime import build_camry_f33_08a_classic_oracle as buil
 from exploit.ephemeral_runtime import camry_f33_08a_classic_oracle as host
 
 OUT = ROOT / "build/out/ephemeral-runtime/camry-f33-08a-classic-oracle"
+FAST_OUT = ROOT / "build/out/ephemeral-runtime/camry-f33-08a-classic-oracle-idle-fast"
 AUDIT = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_08a_classic_oracle_build.json"
 AUDITED_STAGE = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_08a_classic_oracle.bin"
 LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_08a_classic_oracle_launcher.sh"
 
 subprocess.run([sys.executable, str(build.BUILDER)], cwd=ROOT, check=True, stdout=subprocess.DEVNULL)
+subprocess.run(
+    [sys.executable, str(build.BUILDER), "--idle-fast-path"],
+    cwd=ROOT, check=True, stdout=subprocess.DEVNULL,
+)
 meta = json.loads((OUT / "camry_f33_08a_classic_oracle.json").read_text())
+fast_meta = json.loads((FAST_OUT / "camry_f33_08a_classic_oracle.json").read_text())
 resident = (OUT / meta["resident"]["path"]).read_bytes()
+fast_resident = (FAST_OUT / fast_meta["resident"]["path"]).read_bytes()
 helper = (OUT / meta["helper"]["path"]).read_bytes()
 stage = (OUT / meta["staging"]["path"]).read_bytes()
 payload = (OUT / meta["authenticated_payload"]["path"]).read_bytes()
@@ -39,6 +46,23 @@ def check(name: str, cond: object) -> None:
 
 check("audited build is byte/metadata exact",
       json.loads(AUDIT.read_text()) == meta and AUDITED_STAGE.read_bytes() == stage)
+check("road-qualified default remains byte-exact while idle-fast is separate",
+      meta["variant"] == "road-qualified-baseline" and
+      meta["idle_fast_path"]["enabled"] is False and
+      fast_meta["variant"] == "idle-fast-path-candidate" and
+      fast_meta["idle_fast_path"] == {
+          "behavior": "while the foreground flag is clear, scan only when the private cursor trails the producer and more than 3 ms remains; recheck the flag immediately before helper entry; retain the post-drain fallback",
+          "count_hz": 80_000_000,
+          "counter": "TAUJ0CNT3",
+          "counter_address": "0xFFE5001C",
+          "direction": "down",
+          "enabled": True,
+          "foreground_flag": "FFFFB111 bit4",
+          "minimum_remaining_counts": 240_000,
+          "minimum_remaining_us": 3_000,
+      } and
+      len(fast_resident) == 476 and fast_meta["resident"]["headroom"] == 48 and
+      fast_resident != resident and fast_meta["helper"]["sha256"] == meta["helper"]["sha256"])
 check("resident/helper fit proven RAM geometry",
       len(resident) == 424 and meta["resident"]["headroom"] == 100 and
       len(helper) == 848 and meta["helper"]["headroom"] == 176 and
@@ -50,6 +74,17 @@ check("artifact hashes self-consistent",
       sha(payload) == meta["authenticated_payload"]["sha256"])
 
 fw = meta["firmware_contract"]
+check("idle-fast timer gate is bound to exact firmware geometry",
+      fw["foreground_timer"] == {
+          "timer": "TAUJ0 channel 3",
+          "counter": "TAUJ0CNT3",
+          "counter_address": "0xFFE5001C",
+          "count_hz": 80_000_000,
+          "steady_counts": 400_000,
+          "steady_period_us": 5_000,
+          "direction": "down",
+          "flag": "FFFFB111 bit4",
+      })
 check("dead XCP hardware endpoint is dedicated raw-classic request carrier",
       fw["request"] == {
           "can_id": "0x1FDC0002",
@@ -83,6 +118,11 @@ check("host request is five ordered classic fragments", req == [
 resp = host.parse_response(bytes.fromhex("c90700f8d64e2a5e"), expected_seq=0x07)
 check("host response decoder matches resident layout",
       resp.seq == 0x07 and resp.status == 0 and resp.cmac4 == bytes.fromhex("d64e2a5e"))
+summary = host.latency_summary([4.0, 1.0, 3.0, 2.0])
+check("parked benchmark reports deterministic distribution statistics",
+      {name: round(value, 3) for name, value in summary.items()} == {
+          "mean_ms": 2.5, "median_ms": 2.5, "p95_ms": 3.85, "p99_ms": 3.97, "max_ms": 4.0,
+      })
 
 # Application RMBA cannot read the FEF0.... GlobalRAM helper span. Installer
 # attestation must therefore read only the LocalRAM resident/state and defer
@@ -169,8 +209,14 @@ check("no diagnostic transport or RSCFD mutation remains",
 resident_src = build.RESIDENT_SOURCE.read_text()
 helper_src = build.HELPER_SOURCE.read_text()
 check("resident private tap runs after stock receive drain",
-      resident_src.index("jarl32 target_rx_3, lp") < resident_src.index("jarl32 helper_entry, lp") and
+      resident_src.index("jarl32 target_rx_3, lp") < resident_src.rindex("jarl32 helper_entry, lp") and
       "ld.hu -0x6f08[gp]" in resident_src and "st.h r7, 0x4a7c[gp]" in resident_src)
+check("idle-fast gate is timer-bounded and preserves post-drain fallback",
+      ".ifdef ORACLE_IDLE_FAST_PATH" in resident_src and
+      "mov 0xffe5001c, r8" in resident_src and "ld.w 0[r8], r8" in resident_src and
+      "mov 240000, r9" in resident_src and "bnh .L_tick_wait" in resident_src and
+      resident_src.count("tst1 4, -0x4eef[r0]") >= 2 and
+      resident_src.index("jarl32 helper_entry, lp") < resident_src.index("jarl32 target_rx_3, lp"))
 check("helper matches only exact classic rule46 ring record",
       "mov 0x00002008" in helper_src and "mov 0x9fdc0002" in helper_src and
       "movea 0xc9, r0, r8" in helper_src and "movea 0xa8, r0, r8" in helper_src and
