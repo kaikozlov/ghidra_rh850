@@ -118,7 +118,7 @@ check("stock functional rule supplies the canonical raw-ring request carrier",
           "hardware_classic_word": "0x00000777",
           "label": "0x35",
           "rule": 53,
-          "record_header": "0x00002008",
+          "record_header": "0x00000408",
           "canif_row": "0x00021FA8",
       })
 check("software RX ring exposes independent producer geometry",
@@ -149,7 +149,8 @@ check("all exact targets select that same wire protocol from profile data",
           "corolla-8965H1202000", "corolla-8965F1208000",
       } and all(
           profile["carrier"] == "functional-c8" and profile["request_id"] == 0x777 and
-          profile["response_id"] == 0x7A9 and profile["fragment_count"] == 6
+          profile["response_id"] == 0x7A9 and profile["fragment_count"] == 6 and
+          profile["helper_macros"]["ORACLE_REQUEST_HEADER_WORD"] == 0x00000408
           for profile in build.ORACLE_PROFILES.values()
       ))
 check("Corolla lifecycle variant compiles from the same canonical sources",
@@ -266,7 +267,7 @@ check("idle-fast gate is timer-bounded and preserves post-drain fallback",
       resident_src.count("tst1 4, -0x4eef[r0]") >= 2 and
       resident_src.index("jarl32 helper_entry, lp") < resident_src.index("jarl32 target_rx_3, lp"))
 check("helper implements only the canonical C8 raw-ring codec",
-      "mov 0x00002008" in helper_src and "ORACLE_REQUEST_ID_WORD" in helper_src and
+      "mov ORACLE_REQUEST_HEADER_WORD" in helper_src and "ORACLE_REQUEST_ID_WORD" in helper_src and
       "movea 0xc8, r0, r8" in helper_src and "Fragment 5" in helper_src and
       "ORACLE_FUNCTIONAL_C8" not in helper_src and "0x9FDC0002" not in helper_src)
 check("helper has no truncated cmp-immediate literals",
