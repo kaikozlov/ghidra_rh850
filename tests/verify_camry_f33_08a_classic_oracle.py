@@ -319,14 +319,15 @@ class _FakeOracleSession:
 
 with (mock.patch.object(host, "verify_nrtd_ready", side_effect=AssertionError("NRTD guard must be skipped from exact boot")),
       mock.patch.object(host, "execute_ram_payload", return_value={"direct_bootloader": True}) as execute,
-      mock.patch.object(host, "wait_for_f181", return_value={"ok": True}),
+      mock.patch.object(host, "wait_for_f181", return_value={"ok": True}) as wait_for_application,
       mock.patch.object(host, "ClassicOracleSession", _FakeOracleSession),
       mock.patch.object(host.time, "sleep", return_value=None)):
     direct = host.install(OUT / meta["authenticated_payload"]["path"], OUT / "camry_f33_08a_classic_oracle.json", direct_boot=True)
 check("classic oracle can continue directly from exact caught bootloader without NRTD recheck",
       direct["entry_condition"] == "exact_bootloader_f181" and direct["nrtd_guard"] is None and
       direct["verdict"] == "runtime_08a_classic_fresh_signer_live_helper_pending_self_test" and
-      execute.call_args.kwargs["allow_direct_boot"] is True)
+      execute.call_args.kwargs["allow_direct_boot"] is True and
+      wait_for_application.call_args.kwargs["timeout"] == host.APPLICATION_REAPPEAR_TIMEOUT_SECONDS == 3.0)
 
 startup_src = (ROOT / "exploit/ephemeral_runtime/camry_f33_startup_programming.py").read_text(encoding="utf-8")
 ui_src = (ROOT / "exploit/ephemeral_runtime/camry_f33_oracle_ui_bringup.py").read_text(encoding="utf-8")
