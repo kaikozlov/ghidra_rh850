@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify the exact-F33 raw classic-CAN 0x08A signing mailbox contract."""
+"""Verify the canonical exact-target classic-CAN 0x08A signing mailbox."""
 from __future__ import annotations
 
 import hashlib
@@ -29,6 +29,13 @@ subprocess.run(
     [sys.executable, str(build.BUILDER), "--idle-fast-path"],
     cwd=ROOT, check=True, stdout=subprocess.DEVNULL,
 )
+with tempfile.TemporaryDirectory(prefix="verify-corolla-08a-oracle-") as td:
+    corolla_proc = subprocess.run(
+        [sys.executable, str(build.BUILDER), "--target", "corolla-8965H1202000",
+         "--output-dir", td],
+        cwd=ROOT, check=True, capture_output=True, text=True,
+    )
+    corolla_meta = json.loads(corolla_proc.stdout)
 meta = json.loads((OUT / "camry_f33_08a_classic_oracle.json").read_text())
 fast_meta = json.loads((FAST_OUT / "camry_f33_08a_classic_oracle.json").read_text())
 resident = (OUT / meta["resident"]["path"]).read_bytes()
@@ -48,10 +55,13 @@ def check(name: str, cond: object) -> None:
     print(f"PASS {name}")
 
 
-check("audited build is byte/metadata exact",
-      json.loads(AUDIT.read_text()) == meta and AUDITED_STAGE.read_bytes() == stage)
-check("road-qualified default remains byte-exact while idle-fast is separate",
-      meta["variant"] == "road-qualified-baseline" and
+check("canonical build retains the archived Camry road artifact only as history",
+      meta["schema"] == "tss3-08a-classic-oracle-build-v2" and
+      meta["target"]["name"] == "camry-8965F3307000" and
+      json.loads(AUDIT.read_text())["variant"] == "road-qualified-baseline" and
+      len(AUDITED_STAGE.read_bytes()) <= build.STAGING_LIMIT)
+check("canonical 0x777 candidate and idle-fast candidate remain separate",
+      meta["variant"] == "canonical-functional-c8-candidate" and
       meta["idle_fast_path"]["enabled"] is False and
       fast_meta["variant"] == "idle-fast-path-candidate" and
       fast_meta["idle_fast_path"] == {
@@ -65,11 +75,13 @@ check("road-qualified default remains byte-exact while idle-fast is separate",
           "minimum_remaining_counts": 240_000,
           "minimum_remaining_us": 3_000,
       } and
-      len(fast_resident) == 476 and fast_meta["resident"]["headroom"] == 48 and
+      len(fast_resident) <= fast_meta["resident"]["limit"] and
       fast_resident != resident and fast_meta["helper"]["sha256"] == meta["helper"]["sha256"])
 check("resident/helper fit proven RAM geometry",
-      len(resident) == 424 and meta["resident"]["headroom"] == 100 and
-      len(helper) == 848 and meta["helper"]["headroom"] == 176 and
+      len(resident) <= meta["resident"]["limit"] and
+      len(helper) <= meta["helper"]["limit"] and
+      meta["resident"]["headroom"] == meta["resident"]["limit"] - len(resident) and
+      meta["helper"]["headroom"] == meta["helper"]["limit"] - len(helper) and
       meta["resident"]["relocations"] == 0 and meta["helper"]["relocations"] == 0)
 check("artifact hashes self-consistent",
       sha(resident) == meta["resident"]["sha256"] and
@@ -89,14 +101,14 @@ check("idle-fast timer gate is bound to exact firmware geometry",
           "direction": "down",
           "flag": "FFFFB111 bit4",
       })
-check("dead XCP hardware endpoint is dedicated raw-classic request carrier",
+check("stock functional rule supplies the canonical raw-ring request carrier",
       fw["request"] == {
-          "can_id": "0x1FDC0002",
-          "hardware_classic_word": "0x9FDC0002",
-          "label": "0x37",
-          "rfifo": 1,
-          "rfifo_payload_bytes": 32,
-          "rule": 46,
+          "can_id": "0x00000777",
+          "hardware_classic_word": "0x00000777",
+          "label": "0x35",
+          "rule": 53,
+          "record_header": "0x00002008",
+          "canif_row": "0x00021FA8",
       })
 check("software RX ring exposes independent producer geometry",
       fw["rx_ring"]["base"] == "0xFEBE4038" and
@@ -104,21 +116,44 @@ check("software RX ring exposes independent producer geometry",
       fw["rx_ring"]["capacity_words"] == 0x228 and
       fw["rx_ring"]["classic8_record_words"] == 5 and
       fw["rx_ring"]["classic8_record_bytes"] == 20)
-check("paired response uses stock controller1 resource8",
-      fw["response"]["can_id"] == "0x1FE00002" and
-      fw["response"]["lower_handle"] == 55 and
-      fw["response"]["controller"] == 1 and fw["response"]["resource"] == 8 and
+check("paired response uses the stock primary diagnostic resource",
+      fw["response"]["can_id"] == "0x000007A9" and
+      fw["response"]["lower_handle"] == 53 and
+      fw["response"]["controller"] == 1 and fw["response"]["resource"] == 6 and
       fw["response"]["software_confirmation_handle"] == "0x00F0")
 
 application = bytes(range(28))
 req = host.build_request(application, 0x92, 0x12345, 0x07)
-check("host request is five ordered classic fragments", req == [
-    bytes.fromhex("0700010203040506"),
-    bytes.fromhex("270708090a0b0c0d"),
-    bytes.fromhex("470e0f1011121314"),
-    bytes.fromhex("6715161718191a1b"),
-    bytes.fromhex("879245c9a8f85aa5"),
-])
+check("host request is the one six-frame C8 codec used by every target",
+      len(req) == 6 and all(len(frame) == 8 and frame[0] == 0xC8 and frame[7] == 0 for frame in req) and
+      [frame[1] for frame in req] == [0x07, 0x27, 0x47, 0x67, 0x87, 0xA7] and
+      b"".join(frame[2:7] for frame in req) == application + bytes((0x92, 0x45)))
+check("all exact targets select that same wire protocol from profile data",
+      set(build.ORACLE_PROFILES) == {
+          "camry-8965F3307000", "crown-8965F3012000",
+          "corolla-8965H1202000", "corolla-8965F1208000",
+      } and all(
+          profile["carrier"] == "functional-c8" and profile["request_id"] == 0x777 and
+          profile["response_id"] == 0x7A9 and profile["fragment_count"] == 6
+          for profile in build.ORACLE_PROFILES.values()
+      ))
+check("Corolla lifecycle variant compiles from the same canonical sources",
+      corolla_meta["target"]["name"] == "corolla-8965H1202000" and
+      corolla_meta["request"]["carrier"] == "functional-c8" and
+      corolla_meta["request"]["can_id"] == "0x00000777" and
+      corolla_meta["response"]["can_id"] == "0x000007A9" and
+      corolla_meta["resident"]["size"] <= corolla_meta["resident"]["limit"] and
+      corolla_meta["helper"]["size"] <= corolla_meta["helper"]["limit"])
+try:
+    host.meta_transport({
+        "request": {"can_id": "0x1FDC0002", "bus": 0, "carrier": "raw-extended"},
+        "response": {"can_id": "0x1FE00002", "bus": 0},
+    })
+except host.ClassicOracleError:
+    pass
+else:
+    raise AssertionError("host accepted the retired second carrier")
+print("PASS host rejects the retired extended-XCP carrier")
 resp = host.parse_response(bytes.fromhex("c90700f8d64e2a5e"), expected_seq=0x07)
 check("host response decoder matches resident layout",
       resp.seq == 0x07 and resp.status == 0 and resp.cmac4 == bytes.fromhex("d64e2a5e"))
@@ -208,7 +243,10 @@ check("known-answer captures live native reset-boundary truth",
       vector.b26 == 11 and vector.native_mac28 == f"{mac1:07x}")
 
 check("no diagnostic transport or RSCFD mutation remains",
+      meta["request"]["diagnostic_acceptance_route_used"] is True and
       meta["request"]["diagnostic_stack_used"] is False and
+      meta["request"]["isotp_reassembly_used"] is False and
+      meta["request"]["dcm_buffer_used"] is False and
       meta["request"]["stock_xcp_protocol_used"] is False and
       meta["mutation_boundary"] == {
           "persistent_flash_write": False,
@@ -227,29 +265,29 @@ resident_src = build.RESIDENT_SOURCE.read_text()
 helper_src = build.HELPER_SOURCE.read_text()
 check("resident private tap runs after stock receive drain",
       resident_src.index("jarl32 target_rx_3, lp") < resident_src.rindex("jarl32 helper_entry, lp") and
-      "ld.hu -0x6f08[gp]" in resident_src and "st.h r7, 0x4a7c[gp]" in resident_src)
+      "ORACLE_RX_PRODUCER_GP_OFF" in resident_src and "st.h r7, 0x4a7c[gp]" in resident_src)
 check("idle-fast gate is timer-bounded and preserves post-drain fallback",
-      ".ifdef ORACLE_IDLE_FAST_PATH" in resident_src and
+      "#ifdef ORACLE_IDLE_FAST_PATH" in resident_src and
       "mov 0xffe5001c, r8" in resident_src and "ld.w 0[r8], r8" in resident_src and
       "mov 240000, r9" in resident_src and "bnh .L_tick_wait" in resident_src and
       resident_src.count("tst1 4, -0x4eef[r0]") >= 2 and
       resident_src.index("jarl32 helper_entry, lp") < resident_src.index("jarl32 target_rx_3, lp"))
-check("helper matches only exact classic rule46 ring record",
-      "mov 0x00002008" in helper_src and "mov 0x9fdc0002" in helper_src and
-      "movea 0xc9, r0, r8" in helper_src and "movea 0xa8, r0, r8" in helper_src and
-      "movea 0x5a, r0, r8" in helper_src and "movea 0xa5, r0, r8" in helper_src)
+check("helper implements only the canonical C8 raw-ring codec",
+      "mov 0x00002008" in helper_src and "ORACLE_REQUEST_ID_WORD" in helper_src and
+      "movea 0xc8, r0, r8" in helper_src and "Fragment 5" in helper_src and
+      "ORACLE_FUNCTIONAL_C8" not in helper_src and "0x9FDC0002" not in helper_src)
 check("helper has no truncated cmp-immediate literals",
       all(token not in helper_src for token in ("cmp 0xc9", "cmp 0xa8", "cmp 0x5a", "cmp 0xa5", "cmp 16")))
 check("helper uses local freshness and fixed selector4",
-      "ld.w -0x623c[gp]" in helper_src and "ld.w -0x6240[gp]" in helper_src and
+      "ORACLE_AUTH_RESET_GP_OFF" in helper_src and "ORACLE_AUTH_TRIP_GP_OFF" in helper_src and
       "jarl32 freshness_encode, lp" in helper_src and "jarl32 command5_sync, lp" in helper_src)
 check("helper advances an independent producer cursor across stock drains and signing",
-      "ld.hu -0x6f08[gp]" in helper_src and "ld.hu 0x4a7c[gp]" in helper_src and
-      "st.h r18, 0x4a7c[gp]" in helper_src and "st.h r19, 0x4a7e[gp]" in helper_src and
+      "ORACLE_RX_PRODUCER_GP_OFF" in helper_src and "ld.hu 32[r22]" in helper_src and
+      "st.h r18, 32[r22]" in helper_src and "st.h r19, 34[r22]" in helper_src and
       "br .L_reload_scan" in helper_src and "ld.hu -0x6f06[gp]" not in helper_src and
       "ld.hu -0x6f04[gp]" not in helper_src)
 check("response bypasses XCP protocol completion",
-      "movea 0x00f0" in helper_src and "movea 55, r0, r6" in helper_src and
+      "movea 0x00f0" in helper_src and "ORACLE_RESPONSE_LOWER_HANDLE" in helper_src and
       "jarl32 lower_can_write, lp" in helper_src)
 
 class _FakeOracleSession:
@@ -271,12 +309,17 @@ check("classic oracle can continue directly from exact caught bootloader without
 
 startup_src = (ROOT / "exploit/ephemeral_runtime/camry_f33_startup_programming.py").read_text(encoding="utf-8")
 ui_src = (ROOT / "exploit/ephemeral_runtime/camry_f33_oracle_ui_bringup.py").read_text(encoding="utf-8")
+ram_exec_src = (ROOT / "exploit/common/ram_exec.py").read_text(encoding="utf-8")
 check("startup catcher uses the field-proven response-synchronized minimum ladder",
       'EXTENDED_FRAME = bytes.fromhex("0210030000000000")' in startup_src and
       'PROGRAMMING_FRAME = bytes.fromhex("0210020000000000")' in startup_src and
       'POSITIVE_EXTENDED_FRAME = bytes.fromhex("065003003201f400")' in startup_src and
       startup_src.index('data == POSITIVE_EXTENDED_FRAME') < startup_src.index('panda.can_send(TX_ADDR, PROGRAMMING_FRAME, BUS)') and
       'SecurityAccess' in startup_src and 'persistent_flash_writes' in startup_src)
+direct_guard = ram_exec_src.index("if not allow_direct_boot:")
+direct_identity = ram_exec_src.index("initial_f181_hex, initial_f181_ascii = _read_f181(app, uds_mod)")
+check("caught bootloader identity is read without a redundant DEFAULT-session request",
+      direct_guard < ram_exec_src.index("app.diagnostic_session_control(uds_mod.SESSION_TYPE.DEFAULT)", direct_guard) < direct_identity)
 check("UI backend verifies healthy peers and oracle KAT without mandatory peer resets",
       ui_src.index('race_to_bootloader()') < ui_src.index('install(payload, meta, direct_boot=True)') <
       ui_src.index('ready_guard = wait_ready_parked') < ui_src.index('state = control_domain_state') <
@@ -318,4 +361,4 @@ check("standalone classic-oracle kit includes guarded Brake then FRC peer recove
       recovery.index("state --output") and
       "output directory is not empty" in recovery)
 
-print("PASS camry F33 raw classic-CAN 0x08A oracle")
+print("PASS canonical exact-target classic-CAN 0x08A oracle")

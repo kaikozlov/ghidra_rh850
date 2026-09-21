@@ -417,8 +417,9 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
           (kit / "tss3-unified-signer").is_file() and (kit / "bundle/unified.json").is_file() and
           (kit / "runtime/tsk/lib/programming.py").is_file() and
           (kit / "runtime/exploit/ephemeral_runtime/camry_f33_post_install_recovery.py").is_file() and
-          not (kit / "bundle/oracle").exists() and
-          kit_meta["camry_classic_08a_oracle"] is None)
+          (kit / "bundle/oracle/classic.json").is_file() and
+          kit_meta["classic_08a_oracle"]["transport"].startswith("functional-c8 0x00000777 -> 0x000007A9") and
+          "camry_classic_08a_oracle" not in kit_meta)
     launcher = (kit / "tss3-unified-signer").read_text(encoding="utf-8")
     check("unified kit prefers vendored runtime and exposes common test ladder plus exact-F33 DRCC diagnostic clear",
           'PYTHONPATH="$KIT_ROOT/runtime:$OPENPILOT_ROOT"' in launcher and
@@ -464,10 +465,11 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
     camry_launcher = (camry_kit / "tss3-unified-signer").read_text(encoding="utf-8")
     camry_oracle_meta = json.loads((camry_kit / "bundle/oracle/classic.json").read_text(encoding="utf-8"))
     camry_oracle_payload = (camry_kit / "bundle/oracle/classic_payload.bin").read_bytes()
-    check("Camry unified kit carries only the classic-oracle deployment pair plus its runtime",
-          camry_kit_meta["camry_classic_08a_oracle"]["metadata"] == "bundle/oracle/classic.json" and
-          camry_kit_meta["camry_classic_08a_oracle"]["payload"] == "bundle/oracle/classic_payload.bin" and
-          camry_oracle_meta["schema"] == "camry-f33-08a-classic-oracle-build-v1" and
+    check("Camry unified kit uses the same canonical oracle deployment key and runtime",
+          camry_kit_meta["classic_08a_oracle"]["metadata"] == "bundle/oracle/classic.json" and
+          camry_kit_meta["classic_08a_oracle"]["payload"] == "bundle/oracle/classic_payload.bin" and
+          camry_oracle_meta["schema"] == "tss3-08a-classic-oracle-build-v2" and
+          "camry_classic_08a_oracle" not in camry_kit_meta and
           len(camry_oracle_payload) == 0x1000 and
           hashlib.sha256(camry_oracle_payload).hexdigest() == camry_oracle_meta["authenticated_payload"]["sha256"] and
           (camry_kit / "runtime/exploit/ephemeral_runtime/camry_f33_08a_classic_oracle.py").is_file() and

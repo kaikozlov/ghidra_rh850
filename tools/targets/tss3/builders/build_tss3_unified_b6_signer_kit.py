@@ -29,8 +29,10 @@ RUNTIME_FILES = (
     "exploit/ephemeral_runtime/camry_f33_runtime_replay_discriminator.py",
     "exploit/ephemeral_runtime/f33_panda_lease.sh",
 )
-CAMRY_ORACLE_RUNTIME_FILES = (
+ORACLE_RUNTIME_FILES = (
     "exploit/ephemeral_runtime/camry_f33_08a_classic_oracle.py",
+)
+CAMRY_ORACLE_RUNTIME_FILES = (
     "exploit/ephemeral_runtime/camry_f33_startup_programming.py",
     "exploit/ephemeral_runtime/camry_f33_oracle_ui_bringup.py",
 )
@@ -66,19 +68,19 @@ def build(target: str, out: Path) -> dict:
         for p in built.iterdir():
             if p.is_file(): copy(p, out / "bundle" / p.name)
         copy(out / "bundle" / meta_path.name, out / "bundle/unified.json")
-        if target == "camry-8965F3307000":
-            oracle_proc = subprocess.run(
-                [sys.executable, str(ORACLE_BUILDER), "--output-dir", str(oracle_built)],
-                cwd=ROOT, check=True, capture_output=True, text=True,
-            )
-            oracle_meta = json.loads(oracle_proc.stdout)
-            oracle_meta_path = oracle_built / "camry_f33_08a_classic_oracle.json"
-            oracle_payload_path = oracle_built / "camry_f33_08a_classic_oracle_payload.bin"
-            if json.loads(oracle_meta_path.read_text(encoding="utf-8")) != oracle_meta:
-                raise RuntimeError("classic-oracle printed metadata differs from its artifact")
-            copy(oracle_meta_path, out / "bundle/oracle/classic.json")
-            copy(oracle_payload_path, out / "bundle/oracle/classic_payload.bin")
+        oracle_proc = subprocess.run(
+            [sys.executable, str(ORACLE_BUILDER), "--target", target, "--output-dir", str(oracle_built)],
+            cwd=ROOT, check=True, capture_output=True, text=True,
+        )
+        oracle_meta = json.loads(oracle_proc.stdout)
+        oracle_meta_path = oracle_built / "camry_f33_08a_classic_oracle.json"
+        oracle_payload_path = oracle_built / "camry_f33_08a_classic_oracle_payload.bin"
+        if json.loads(oracle_meta_path.read_text(encoding="utf-8")) != oracle_meta:
+            raise RuntimeError("classic-oracle printed metadata differs from its artifact")
+        copy(oracle_meta_path, out / "bundle/oracle/classic.json")
+        copy(oracle_payload_path, out / "bundle/oracle/classic_payload.bin")
     for rel in RUNTIME_FILES: copy(ROOT / rel, out / "runtime" / rel)
+    for rel in ORACLE_RUNTIME_FILES: copy(ROOT / rel, out / "runtime" / rel)
     if target == "camry-8965F3307000":
         for rel in CAMRY_ORACLE_RUNTIME_FILES: copy(ROOT / rel, out / "runtime" / rel)
     copy(LAUNCHER, out / "tss3-unified-signer"); (out / "tss3-unified-signer").chmod(0o755)
@@ -108,6 +110,9 @@ Preferred tester flow:
 Next, READY/Park/stationary: ./tss3-unified-signer [--topology ...] replace-current /tmp/tss3-replace-current.json
    This derives the live 0x025 steering angle, verifies fresh healthy stationary/Park state, sends one no-offset C7 generation, then sequence zero to release.
 
+Exact-target 0x08A oracle check: install in NRTD/Park with `./tss3-unified-signer oracle-install`, transition directly to READY/Park without powering EPS off, then run `./tss3-unified-signer oracle-known-answer`.
+All targets use the same six-frame standard-0x777 C8 protocol and standard-0x7A9 response. The exact-target payload contains only the firmware-specific addresses, lifecycle, bus, and transmit handle.
+
 Camry F33 recovery note: the field result is timing-sensitive. Exact application F181 returning proves the ECU application is back, not that every peer-facing state machine has finished initializing. The maintained guided flow therefore lets each stage finish while retaining one cooperative Panda lease; Panda ownership is not treated as a recovery primitive. `recover-drcc` remains legacy DTC-evidence tooling and is not part of this recovery.
 
 Manual equivalent on Camry: preflight -> install in NRTD -> direct NRTD->READY without OFF -> qualify EPS -> wait -> restart-brake -> wait -> restart-frc -> wait -> recovery-state -> status.
@@ -116,19 +121,17 @@ A full EPS power cycle removes the RAM resident and requires bringup again.
 For exact Camry, `oracle-ui-bringup` replaces the manual NRTD ceremony: arm while fully OFF, press brake+POWER normally, catch the first completed 50 03, send one 10 02, install directly from exact bootloader F181, then verify READY/Park, peer DRCC health, and one native oracle known-answer. Brake/FRC resets remain explicit recovery tools only when peer state is actually unhealthy.
 """
     (out / "TESTING.txt").write_text(testing, encoding="utf-8")
-    oracle = None
-    if target == "camry-8965F3307000":
-        oracle = {
-            "transport": "extended classic 0x1FDC0002 -> 0x1FE00002 on post-repin Panda bus0",
-            "metadata": "bundle/oracle/classic.json",
-            "payload": "bundle/oracle/classic_payload.bin",
-            "peer_recovery": "Brake/EPB -> FRC while retaining one Panda lease",
-        }
+    oracle = {
+        "transport": f"{oracle_meta['request']['carrier']} {oracle_meta['request']['can_id']} -> {oracle_meta['response']['can_id']} on Panda bus{oracle_meta['request']['bus']}",
+        "metadata": "bundle/oracle/classic.json",
+        "payload": "bundle/oracle/classic_payload.bin",
+        "peer_recovery": "Brake/EPB -> FRC while retaining one Panda lease" if target == "camry-8965F3307000" else None,
+    }
     manifest = {
         "schema": "tss3-unified-b6-signer-kit-v1", "created_at": datetime.now(UTC).isoformat(timespec="seconds"),
         "source_commit": commit, "target": meta["target"], "control": meta["control"],
         "install_strategy": meta["install_strategy"], "runtime_backend": meta.get("runtime_backend"), "review_status": meta["review_status"],
-        "camry_classic_08a_oracle": oracle,
+        "classic_08a_oracle": oracle,
         "files": {str(p.relative_to(out)): {"size": p.stat().st_size, "sha256": sha256(p)} for p in sorted(out.rglob("*")) if p.is_file()},
     }
     (out / "manifest.json").write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
