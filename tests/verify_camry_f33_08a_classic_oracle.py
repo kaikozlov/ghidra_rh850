@@ -323,14 +323,20 @@ check("caught bootloader identity is read without a redundant DEFAULT-session re
       direct_guard < ram_exec_src.index("app.diagnostic_session_control(uds_mod.SESSION_TYPE.DEFAULT)", direct_guard) < direct_identity)
 check("UI backend verifies healthy peers and oracle KAT without mandatory peer resets",
       ui_src.index('race_to_bootloader()') < ui_src.index('install(payload, meta, direct_boot=True, panda=panda)') <
-      ui_src.index('ready_guard = wait_ready_parked') < ui_src.index('state = control_domain_state') <
-      ui_src.index('kat = known_answer(meta)') and
+      ui_src.index('ready_guard = wait_ready_parked(timeout=ready_timeout, panda=panda)') <
+      ui_src.index('state = control_domain_state(output_dir / "control-domain-state.json", panda=panda)') <
+      ui_src.index('kat = known_answer(meta, panda=panda)') and
       'restart_brake_known_good' not in ui_src and 'restart_one_domain' not in ui_src and
       'peer_resets_performed": False' in ui_src)
-check("auto worker passively preconnects Panda and reuses it for caught-boot install",
+check("auto worker preloads protocols, passively preconnects Panda, and reuses it for the complete bringup",
       'Panda(cli=False, disable_checks=False, configure=False)' in ui_src and
+      ui_src.index('_import_uds()') < ui_src.index('server.listen(1)') and
+      ui_src.index('_import_isotp_send()') < ui_src.index('server.listen(1)') and
       ui_src.index('server.listen(1)') < ui_src.index('panda.set_power_save(0)', ui_src.index('server.listen(1)')) <
-      ui_src.index('native_catch=native_catch, panda=panda', ui_src.index('server.listen(1)')))
+      ui_src.index('native_catch=native_catch, panda=panda', ui_src.index('server.listen(1)')) and
+      'wait_ready_parked(timeout=ready_timeout, panda=panda)' in ui_src and
+      'control_domain_state(output_dir / "control-domain-state.json", panda=panda)' in ui_src and
+      'known_answer(meta, panda=panda)' in ui_src)
 
 native_marker = {
     "schema": "tss3-oracle-native-catch-v1",
