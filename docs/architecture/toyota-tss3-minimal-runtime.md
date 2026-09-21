@@ -30,6 +30,16 @@ and ends immediately before the object-15 RAM mirror. Trip/reset/message state
 is packed into retired telemetry bytes; expanding the state or moving scratch
 forward violates these two independently enforced boundaries.
 
+The Panda firmware image is part of this runtime contract. Any nested-opendbc
+safety change that alters the Toyota TX whitelist or hooks requires rebuilding
+and deploying `panda_h7.bin.signed`; updating only the openpilot/opendbc source
+checkout is insufficient because `pandad` compares the running Panda against
+the generated firmware artifact, not against safety-source Git state. The
+September-21 route `0000003a--7d62f5b41f` demonstrated the failure mode:
+the ownership arm succeeded, stale Panda safety rejected 126/126 new
+`0x777/C8` fragments, no signer response or host `0x08A` was produced, and
+Toyota cruise dropped about 1.05 seconds later.
+
 The remainder of this note retains earlier C7/B6 architecture and field
 evidence where useful; it is not the current exact-Camry runtime contract.
 

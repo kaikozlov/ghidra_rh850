@@ -1836,6 +1836,37 @@ silence; it is therefore classified as a diagnostic-tool-induced continuity brea
 steady-state proxy churn. Future parked qualification should avoid direct Panda lease/status
 operations after the final recovery gate and use cereal/messaging observation only.
 
+**September-21 route `0000003a--7d62f5b41f`: deployment skew, not an ECU fault.**
+This route was recorded at `kai-openpilot@747ea0ae4` / nested
+`opendbc@2d2d5479`, after the host/resident contract moved freshness entirely into the
+EPS and replaced the former extended raw-classic oracle carrier with six classic
+`0x777/8` C8 fragments on Panda bus 0. Toyota cruise became active at route-relative
+204.558 s; openpilot enabled at 204.562 s and longitudinal became active at 204.613 s.
+The ownership arm itself was accepted, but all **126/126** C8 fragments submitted during
+the resulting 21 signer transactions were returned by Panda as rejected bus-0 TX
+(`src=0xC0`). There were **zero** `0x7A9/C9` signer responses and therefore zero
+authenticated host `0x08A` publications. Native FRC `0x08A` was correctly blocked while
+host ownership was armed, leaving the downstream request stream empty until Toyota cruise
+fell inactive at 205.612 s, about **1.054 s** after activation; native forwarding resumed
+immediately after release.
+
+The rejection is a host deployment artifact, not evidence against the EPS resident,
+command-5 path, FRC, or Brake/VMM. The running Panda identified itself as
+`DEV-c85577b0-DEBUG`, and its firmware signature exactly matched the stale
+`panda/board/obj/panda_h7.bin.signed` already present on the comma. That image predated
+the `2d2d5479` Toyota safety change which whitelists the new classic `0x777` bus-0
+oracle carrier, so `pandad` saw no signature mismatch and had no reason to reflash even
+though the checked-out safety source had changed. Rebuilding Panda against the current
+nested opendbc produces a different firmware image/signature. The deployment invariant is
+therefore explicit: **any opendbc safety-source change must be accompanied by a Panda
+firmware rebuild and deployment; source/submodule HEAD equality alone is insufficient.**
+
+The route also exposed a replay-analysis blind spot. The EPS-owned-freshness replay had
+treated “recorded signer requests but no recorded signer response” as permission to invent
+a 20-ms response latency, so this failed drive incorrectly printed PASS. The replay now
+fails on recorded current-carrier Panda rejects or on current-carrier requests with zero
+EPS responses; synthetic latency remains available only when explicitly requested.
+
 Working session notes for the GTS+ vehicle-type → install-set → family-`.ddb` → GetSupport funnel (not a claim ledger): [../history/2026-08/CAMRY_GTS_LATERAL_FUNNEL_2026-08-29.md](../history/2026-08/CAMRY_GTS_LATERAL_FUNNEL_2026-08-29.md).
 
 ## 1. Exact F33 generated-COM Tx carriers
