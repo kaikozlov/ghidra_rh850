@@ -103,6 +103,28 @@ class TestRecovery(unittest.TestCase):
         self.assertFalse(recovery.peer_health_observed(state(allowed=False, main=False, fail_control=True)))
         self.assertFalse(recovery.peer_health_observed(state(allowed=False, main=False, comm_open=True)))
 
+    def test_startup_control_domain_report_has_no_drcc_permission_verdict(self):
+        state = {
+            "frc": {
+                "0x1B09": {"available": False},
+                "0x1903": {"available": True, "control_mode": 1},
+                "0x1905": {"available": True, "cruise_control_allowed": False},
+                "0x1906": {"available": True, "acc_not_available_icon": False},
+            },
+            "brake": {
+                "0x102D": {"available": True, "fail_status": False, "fail_control": False},
+                "0x102F": {"available": True, "eps_communication_open": False},
+            },
+        }
+        panda = FakePanda()
+        with (patch.dict(sys.modules, {"panda": types.SimpleNamespace(Panda=FakePanda)}),
+              patch.object(recovery, "read_exact_f181", side_effect=({"ecu": "EPS"}, {"ecu": "FRC"}, {"ecu": "Brake"})),
+              patch.object(recovery, "read_fault_state", return_value=state)):
+            result = recovery.control_domain_state(None, panda=panda)
+        self.assertTrue(result["peer_health_observed"])
+        self.assertEqual(result["verdict"], "control_domains_healthy")
+        self.assertNotIn("drcc_permission_observed", result)
+
     def test_missing_fields_never_mean_no_fault(self):
         for did, required in ((0x1B09, 6), (0x1903, 1), (0x1905, 2), (0x1906, 6)):
             for size in range(required):
