@@ -316,9 +316,7 @@ with tempfile.TemporaryDirectory() as td:
         else:
             os.environ["DIRECT_PANDA_LEASE_ID"] = original_lease_id
 check("host guard accepts only an exact acknowledged cooperative pandad lease",
-      cooperative_lease_allowed and wrong_lease_rejected and seen_process_checks == [
-          ("pgrep", "-f", r"selfdrive\.pandad\.pandad"), ("pidof", "pandad"), ("pidof", "boardd"),
-      ])
+      cooperative_lease_allowed and wrong_lease_rejected and seen_process_checks == [])
 check("deployer exposes explicit RAM-load hook", "--ram-load-addr" in deploy_source)
 check(
     "deployer requires provenance for non-default RAM geometry",

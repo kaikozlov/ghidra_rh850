@@ -17,6 +17,7 @@ sys.path.insert(0, str(ROOT))
 from exploit.ephemeral_runtime import build_camry_f33_08a_classic_oracle as build
 from exploit.ephemeral_runtime import camry_f33_08a_classic_oracle as host
 from exploit.ephemeral_runtime import camry_f33_oracle_ui_bringup as ui_bringup
+from exploit.common import ram_exec
 
 OUT = ROOT / "build/out/ephemeral-runtime/camry-f33-08a-classic-oracle"
 FAST_OUT = ROOT / "build/out/ephemeral-runtime/camry-f33-08a-classic-oracle-idle-fast"
@@ -54,6 +55,27 @@ def check(name: str, cond: object) -> None:
     if not cond:
         raise AssertionError(name)
     print(f"PASS {name}")
+
+
+class _TransientF181Client:
+    def __init__(self, payload: bytes | None):
+        self.payload = payload
+
+    def read_data_by_identifier(self, _did):
+        if self.payload is None:
+            raise TimeoutError("boot endpoint is still transitioning")
+        return self.payload
+
+
+boot_f181 = bytes.fromhex("02" + "21" * 32)
+transient_clients = iter((_TransientF181Client(None), _TransientF181Client(boot_f181)))
+with mock.patch.object(ram_exec, "_make_uds_client", side_effect=lambda *args, **kwargs: next(transient_clients)):
+    identity_client, identity_hex, _, identity_attempts = ram_exec._wait_for_f181_response(
+        object(), SimpleNamespace(DATA_IDENTIFIER_TYPE=SimpleNamespace(APPLICATION_SOFTWARE_IDENTIFICATION=0xF181)),
+        ram_exec.explicit_route(bus=0, elm327_param=1, uds_variant="old", cpu_index=0), timeout=0.5,
+    )
+check("caught boot identity retries with a fresh UDS transport after a transient miss",
+      identity_client.payload == boot_f181 and identity_hex == boot_f181.hex() and identity_attempts == 2)
 
 
 check("canonical build retains the archived Camry road artifact only as history",
@@ -315,10 +337,11 @@ check("startup catcher uses the field-proven response-synchronized minimum ladde
       'POSITIVE_EXTENDED_FRAME = bytes.fromhex("065003003201f400")' in startup_src and
       startup_src.index('data == POSITIVE_EXTENDED_FRAME') < startup_src.index('panda.can_send(TX_ADDR, PROGRAMMING_FRAME, BUS)') and
       'SecurityAccess' in startup_src and 'persistent_flash_writes' in startup_src)
-direct_guard = ram_exec_src.index("if not allow_direct_boot:")
+direct_guard = ram_exec_src.index("if allow_direct_boot:")
 direct_identity = ram_exec_src.index("initial_f181_hex, initial_f181_ascii = _read_f181(app, uds_mod)")
-check("caught bootloader identity is read without a redundant DEFAULT-session request",
-      direct_guard < ram_exec_src.index("app.diagnostic_session_control(uds_mod.SESSION_TYPE.DEFAULT)", direct_guard) < direct_identity)
+check("caught bootloader identity retries without a redundant DEFAULT-session request",
+      direct_guard < ram_exec_src.index("_wait_for_f181_response(", direct_guard) <
+      ram_exec_src.index("app.diagnostic_session_control(uds_mod.SESSION_TYPE.DEFAULT)", direct_guard) < direct_identity)
 check("UI backend verifies healthy peers and fresh signing without mandatory peer resets",
       ui_src.index('race_to_bootloader()') < ui_src.index('install(payload, meta, direct_boot=True, panda=panda)') <
       ui_src.index('ready_guard = wait_ready_parked(timeout=ready_timeout, panda=panda)') <
@@ -339,6 +362,7 @@ check("auto worker preloads protocols, passively preconnects Panda, and reuses i
 native_marker = {
     "schema": "tss3-oracle-native-catch-v1",
     "target": "TOYOTA_CAMRY_TSS3",
+    "pandad_wrapper_pid": 1234,
     "ignition_monotonic_ns": 100,
     "first_extended_tx_monotonic_ns": 110,
     "positive_extended_monotonic_ns": 300,
@@ -363,7 +387,8 @@ unified_launcher = UNIFIED_LAUNCHER.read_text(encoding="utf-8")
 warm_resume = unified_launcher.split('  oracle-ui-resume-warm)\n', 1)[1].split('    ;;', 1)[0]
 check("launcher transfers the cooperative lease to the warm oracle worker",
       'oracle-ui-worker)' in unified_launcher and 'oracle-ui-resume-warm)' in unified_launcher and
-      'quiesce_panda_owner' in warm_resume and 'DIRECT_PANDA_LEASE_ID' in warm_resume)
+      'quiesce_panda_owner "$pandad_pid" caught-handoff' in warm_resume and
+      'DIRECT_PANDA_LEASE_ID' in warm_resume)
 recovery = launcher.split("  recover-peers)\n", 1)[1].split("  status)", 1)[0]
 check("standalone classic-oracle kit includes guarded Brake then FRC peer recovery",
       "camry_f33_post_install_recovery.py" in launcher and
