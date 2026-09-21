@@ -84,6 +84,16 @@ check("resident/helper fit proven RAM geometry",
       meta["resident"]["headroom"] == meta["resident"]["limit"] - len(resident) and
       meta["helper"]["headroom"] == meta["helper"]["limit"] - len(helper) and
       meta["resident"]["relocations"] == 0 and meta["helper"]["relocations"] == 0)
+check("host-visible state and private scratch preserve exact safe boundaries",
+      host.STATE_SIZE == build.STATE_SIZE == 0x24 and
+      build.STATE_BASE + build.STATE_SIZE == build.CLASSIC_SCRATCH_BASE == 0xFEBF0280 and
+      build.STATE_BASE + build.STATE_SIZE <= build.APPLICATION_RMBA_PROTECTED_START and
+      build.CLASSIC_SCRATCH_BASE + build.CLASSIC_SCRATCH_SIZE == build.SECOC_OBJECT15_BASE and
+      meta["state"]["application_sid23_readable"] is True and
+      meta["scratch"] == {
+          "base": "0xFEBF0280", "size": 0x68, "end_exclusive": "0xFEBF02E8",
+          "object15_overlap": False,
+      })
 check("artifact hashes self-consistent",
       sha(resident) == meta["resident"]["sha256"] and
       sha(helper) == meta["helper"]["sha256"] and
@@ -122,6 +132,10 @@ check("paired response uses the stock primary diagnostic resource",
       fw["response"]["lower_handle"] == 53 and
       fw["response"]["controller"] == 1 and fw["response"]["resource"] == 6 and
       fw["response"]["software_confirmation_handle"] == "0x00F0")
+check("state read boundary is pinned to the exact application SID23 exclusion",
+      fw["application_rmba_exclusion"] == {
+          "start": "0xFEBF0288", "end_inclusive": "0xFEBF13CB",
+      } and meta["state"]["base"] == "0xFEBF025C" and meta["state"]["size"] == 0x24)
 
 application = bytes(range(28))
 req = host.build_request(application, 0x07)
@@ -143,6 +157,9 @@ check("Corolla lifecycle variant compiles from the same canonical sources",
       corolla_meta["request"]["carrier"] == "functional-c8" and
       corolla_meta["request"]["can_id"] == "0x00000777" and
       corolla_meta["response"]["can_id"] == "0x000007A9" and
+      corolla_meta["state"]["size"] == 0x24 and
+      corolla_meta["state"]["application_sid23_readable"] is True and
+      corolla_meta["scratch"]["base"] == "0xFEF07F98" and
       corolla_meta["resident"]["size"] <= corolla_meta["resident"]["limit"] and
       corolla_meta["helper"]["size"] <= corolla_meta["helper"]["limit"])
 try:
@@ -184,6 +201,12 @@ state = bytearray(host.STATE_SIZE)
 state[0:4] = host.STATE_MAGIC.to_bytes(4, "little")
 state[4] = host.STATE_VERSION
 state[5] = 1
+state[24:28] = (0x34567).to_bytes(4, "little")
+state[28:30] = (0x1234).to_bytes(2, "little")
+state[30] = 0x56
+state[31] = 1
+state[32:34] = (0x01A3).to_bytes(2, "little")
+state[34] = 0x0B
 orig_read_exact = host._read_exact
 reads: list[int] = []
 def fake_read_exact(_client, _uds_mod, address: int, size: int, *, label: str, attempts: int = 4) -> bytes:
@@ -205,7 +228,12 @@ finally:
 check("live attestation never RMBA-reads GlobalRAM helper",
       reads == [host.RESIDENT_BASE, host.STATE_BASE] and
       att["resident_sha256"] == meta["resident"]["sha256"] and
-      att["helper_attestation"] == "deferred_to_self_test_execution")
+      att["helper_attestation"] == "deferred_to_self_test_execution" and
+      att["state"]["freshness_reset"] == 0x34567 and
+      att["state"]["freshness_trip"] == 0x1234 and
+      att["state"]["freshness_message"] == 0x56 and
+      att["state"]["freshness_initialized"] is True and
+      att["state"]["tap_cursor"] == 0x01A3 and att["state"]["last_fv4"] == 0x0B)
 
 check("no diagnostic transport or RSCFD mutation remains",
       meta["request"]["diagnostic_acceptance_route_used"] is True and
@@ -248,9 +276,14 @@ check("helper uses local freshness and fixed selector4",
       "jarl32 freshness_encode, lp" in helper_src and "jarl32 command5_sync, lp" in helper_src)
 check("helper advances an independent producer cursor across stock drains and signing",
       "ORACLE_RX_PRODUCER_GP_OFF" in helper_src and "ld.hu 32[r22]" in helper_src and
-      "st.h r18, 32[r22]" in helper_src and "st.h r19, 34[r22]" in helper_src and
+      "st.h r18, 32[r22]" in helper_src and "st.h r19, 34[r22]" not in helper_src and
       "br .L_reload_scan" in helper_src and "ld.hu -0x6f06[gp]" not in helper_src and
       "ld.hu -0x6f04[gp]" not in helper_src)
+check("helper packs private freshness without moving scratch into protected RAM",
+      "movea 36, r22, r23" in helper_src and "movea 48, r22, r23" not in helper_src and
+      "st.w r13, 24[r22]" in helper_src and "st.h r12, 28[r22]" in helper_src and
+      "st.b r14, 30[r22]" in helper_src and "st.b r6, 31[r22]" in helper_src and
+      "st.b r6, 34[r22]" in helper_src)
 check("response bypasses XCP protocol completion",
       "movea 0x00f0" in helper_src and "ORACLE_RESPONSE_LOWER_HANDLE" in helper_src and
       "jarl32 lower_can_write, lp" in helper_src)

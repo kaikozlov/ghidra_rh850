@@ -23,6 +23,13 @@ FRC `0x08A` only while host ownership is active, and fails open after 100 ms. It
 does not queue native generations or compare B26/FV4. Native FRC `0x08A` remains
 an engagement/presence input and Brake `0x081` continues normally.
 
+On exact F33, the resident's complete 36-byte state remains at
+`FEBF025C..FEBF027F`, below the application SID23 exclusion beginning at
+`FEBF0288`. Command-5 scratch retains its proven `FEBF0280..FEBF02E7` envelope
+and ends immediately before the object-15 RAM mirror. Trip/reset/message state
+is packed into retired telemetry bytes; expanding the state or moving scratch
+forward violates these two independently enforced boundaries.
+
 The remainder of this note retains earlier C7/B6 architecture and field
 evidence where useful; it is not the current exact-Camry runtime contract.
 
