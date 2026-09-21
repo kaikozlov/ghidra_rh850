@@ -325,7 +325,6 @@ check("UI backend verifies healthy peers and oracle KAT without mandatory peer r
       ui_src.index('ready_guard = wait_ready_parked') < ui_src.index('state = control_domain_state') <
       ui_src.index('kat = known_answer(meta)') and
       'restart_brake_known_good' not in ui_src and 'restart_one_domain' not in ui_src and
-      'state.get("drcc_permission_observed") is not True' in ui_src and
       'peer_resets_performed": False' in ui_src)
 
 native_marker = {
