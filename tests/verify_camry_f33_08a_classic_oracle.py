@@ -350,11 +350,11 @@ check("UI backend verifies healthy peers and fresh signing without mandatory pee
       ui_src.index('signer_test = self_test(meta, panda=panda)') and
       'restart_brake_known_good' not in ui_src and 'restart_one_domain' not in ui_src and
       'peer_resets_performed": False' in ui_src)
-check("auto worker preloads protocols, passively preconnects Panda, and reuses it for the complete bringup",
-      'Panda(cli=False, disable_checks=False, configure=False)' in ui_src and
+check("auto worker preloads protocols, then uses one fresh post-handoff Panda for the complete bringup",
+      'panda = Panda(cli=False)' in ui_src and
       ui_src.index('_import_uds()') < ui_src.index('server.listen(1)') and
       ui_src.index('_import_isotp_send()') < ui_src.index('server.listen(1)') and
-      ui_src.index('server.listen(1)') < ui_src.index('panda.set_power_save(0)', ui_src.index('server.listen(1)')) <
+      ui_src.index('server.listen(1)') < ui_src.index('panda = Panda(cli=False)', ui_src.index('server.listen(1)')) <
       ui_src.index('native_catch=native_catch, panda=panda', ui_src.index('server.listen(1)')) and
       'wait_ready_parked(timeout=ready_timeout, panda=panda)' in ui_src and
       'control_domain_state(output_dir / "control-domain-state.json", panda=panda)' in ui_src and
