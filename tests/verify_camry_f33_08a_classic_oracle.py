@@ -23,6 +23,7 @@ FAST_OUT = ROOT / "build/out/ephemeral-runtime/camry-f33-08a-classic-oracle-idle
 AUDIT = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_08a_classic_oracle_build.json"
 AUDITED_STAGE = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_08a_classic_oracle.bin"
 LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_08a_classic_oracle_launcher.sh"
+UNIFIED_LAUNCHER = ROOT / "exploit/ephemeral_runtime/tss3_unified_b6_signer_launcher.sh"
 
 subprocess.run([sys.executable, str(build.BUILDER)], cwd=ROOT, check=True, stdout=subprocess.DEVNULL)
 subprocess.run(
@@ -321,11 +322,15 @@ direct_identity = ram_exec_src.index("initial_f181_hex, initial_f181_ascii = _re
 check("caught bootloader identity is read without a redundant DEFAULT-session request",
       direct_guard < ram_exec_src.index("app.diagnostic_session_control(uds_mod.SESSION_TYPE.DEFAULT)", direct_guard) < direct_identity)
 check("UI backend verifies healthy peers and oracle KAT without mandatory peer resets",
-      ui_src.index('race_to_bootloader()') < ui_src.index('install(payload, meta, direct_boot=True)') <
+      ui_src.index('race_to_bootloader()') < ui_src.index('install(payload, meta, direct_boot=True, panda=panda)') <
       ui_src.index('ready_guard = wait_ready_parked') < ui_src.index('state = control_domain_state') <
       ui_src.index('kat = known_answer(meta)') and
       'restart_brake_known_good' not in ui_src and 'restart_one_domain' not in ui_src and
       'peer_resets_performed": False' in ui_src)
+check("auto worker passively preconnects Panda and reuses it for caught-boot install",
+      'Panda(cli=False, disable_checks=False, configure=False)' in ui_src and
+      ui_src.index('server.listen(1)') < ui_src.index('panda.set_power_save(0)', ui_src.index('server.listen(1)')) <
+      ui_src.index('native_catch=native_catch, panda=panda', ui_src.index('server.listen(1)')))
 
 native_marker = {
     "schema": "tss3-oracle-native-catch-v1",
@@ -350,6 +355,11 @@ with tempfile.TemporaryDirectory() as td:
         raise AssertionError("UI resume accepted a non-F33 native startup catch")
 
 launcher = LAUNCHER.read_text(encoding="utf-8")
+unified_launcher = UNIFIED_LAUNCHER.read_text(encoding="utf-8")
+warm_resume = unified_launcher.split('  oracle-ui-resume-warm)\n', 1)[1].split('    ;;', 1)[0]
+check("launcher transfers the cooperative lease to the warm oracle worker",
+      'oracle-ui-worker)' in unified_launcher and 'oracle-ui-resume-warm)' in unified_launcher and
+      'quiesce_panda_owner' in warm_resume and 'DIRECT_PANDA_LEASE_ID' in warm_resume)
 recovery = launcher.split("  recover-peers)\n", 1)[1].split("  status)", 1)[0]
 check("standalone classic-oracle kit includes guarded Brake then FRC peer recovery",
       "camry_f33_post_install_recovery.py" in launcher and
