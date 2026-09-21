@@ -5,6 +5,27 @@ from the scaffolding and instrumentation that happened to be present in the
 same checkout. The successful-drive evidence is in
 [the bounty evidence report](../variants/toyota-tss3-openpilot-bounty-evidence.md).
 
+## Exact-Camry request-plane supersession (2026-09-21)
+
+The exact F33 no longer uses the C7/native-B6 modification architecture
+described in the historical sections below. Openpilot now owns the complete
+28-byte `0x08A` application and its 40-Hz publication cadence for both lateral
+and longitudinal control. It sends only that application to the EPS resident in
+six classic `0x777/C8` raw-ring fragments. No trip, reset, message counter,
+native B26, or native FV4 is sent by the host.
+
+The EPS resident reads Toyota's authenticated trip/reset epoch, advances a
+private volatile `0x08A` message counter, calls the stock freshness encoder and
+ICU-S command 5, and returns the finished `FV4||MAC28` trailer. Openpilot appends
+that trailer without reconstructing or interpreting freshness. Panda checks the
+complete application shape and normal angle/acceleration limits, blocks native
+FRC `0x08A` only while host ownership is active, and fails open after 100 ms. It
+does not queue native generations or compare B26/FV4. Native FRC `0x08A` remains
+an engagement/presence input and Brake `0x081` continues normally.
+
+The remainder of this note retains earlier C7/B6 architecture and field
+evidence where useful; it is not the current exact-Camry runtime contract.
+
 The first target is deliberately narrower than a complete Toyota TSS3 port:
 reproduce the demonstrated lateral path on the exact F33 with the smallest
 upstream-shaped runtime. Features can be added only after that baseline is
@@ -286,10 +307,10 @@ uv run --locked python tools/targets/tss3/builders/build_tss3_unified_b6_signer_
 ./tss3-unified-signer oracle-bringup /tmp/tss3-oracle-bringup
 ```
 
-`oracle-bringup` installs and attests the volatile classic oracle, prompts for
+`oracle-bringup` installs and attests the volatile classic signer, prompts for
 the direct transition to READY, performs the maintained Brake/EPB then FRC peer
 recovery while retaining the Panda lease, requires healthy DRCC state, and ends
-with a live native-`0x08A` MAC known-answer. `recover-peers` exposes that recovery
+with an independently fresh signed-`0x08A` self-test. `recover-peers` exposes that recovery
 step separately. The standalone `f33-08a-classic-oracle` launcher exposes the
 same command.
 
@@ -310,7 +331,7 @@ armed while the vehicle is fully OFF, repeatedly offers application EXTENDED, wa
 for the first completed `50 03`, sends one `10 02`, and installs the volatile oracle
 directly from the caught exact bootloader. After the application returns it requires
 READY/Park/stationary, then checks **peer health without resetting either peer** and
-runs one native-`0x08A` oracle known-answer. The 2026-09-20 live runs proved that this
+runs one fresh-signing self-test. The 2026-09-20 live runs proved that this
 startup-caught path can preserve healthy Brake/FRC state across installation.
 
 FRC `0x1905` **Cruise Control Permission Flag** and `0x1906` **Main Switch
@@ -320,8 +341,8 @@ verified healthy startup run they were initially false (`1905=8000`,
 drive with **no ECU reset**. Therefore startup success does not require those bits to
 already be asserted. They remain telemetry. The startup peer-health gate instead uses
 exact peer identities plus Brake `0x102D` fail-status/fail-control clear and `0x102F`
-EPS-communication-open clear; the succeeding native-`0x08A` known-answer supplies the
-functional FRC-side proof. No DTC clear, peer reset, EPS reset, or EPS power cycle is
+EPS-communication-open clear; the succeeding signer self-test supplies the
+functional EPS-side proof. No DTC clear, peer reset, EPS reset, or EPS power cycle is
 part of a healthy `oracle-ui-bringup` run.
 
 The first automatic-start integration keeps the proven backend unchanged and

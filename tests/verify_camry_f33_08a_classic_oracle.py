@@ -57,7 +57,7 @@ def check(name: str, cond: object) -> None:
 
 
 check("canonical build retains the archived Camry road artifact only as history",
-      meta["schema"] == "tss3-08a-classic-oracle-build-v2" and
+      meta["schema"] == "tss3-08a-classic-oracle-build-v3" and
       meta["target"]["name"] == "camry-8965F3307000" and
       json.loads(AUDIT.read_text())["variant"] == "road-qualified-baseline" and
       len(AUDITED_STAGE.read_bytes()) <= build.STAGING_LIMIT)
@@ -124,11 +124,11 @@ check("paired response uses the stock primary diagnostic resource",
       fw["response"]["software_confirmation_handle"] == "0x00F0")
 
 application = bytes(range(28))
-req = host.build_request(application, 0x92, 0x12345, 0x07)
+req = host.build_request(application, 0x07)
 check("host request is the one six-frame C8 codec used by every target",
       len(req) == 6 and all(len(frame) == 8 and frame[0] == 0xC8 and frame[7] == 0 for frame in req) and
       [frame[1] for frame in req] == [0x07, 0x27, 0x47, 0x67, 0x87, 0xA7] and
-      b"".join(frame[2:7] for frame in req) == application + bytes((0x92, 0x45)))
+      b"".join(frame[2:7] for frame in req) == application + bytes(2))
 check("all exact targets select that same wire protocol from profile data",
       set(build.ORACLE_PROFILES) == {
           "camry-8965F3307000", "crown-8965F3012000",
@@ -157,7 +157,7 @@ else:
 print("PASS host rejects the retired extended-XCP carrier")
 resp = host.parse_response(bytes.fromhex("c90700f8d64e2a5e"), expected_seq=0x07)
 check("host response decoder matches resident layout",
-      resp.seq == 0x07 and resp.status == 0 and resp.cmac4 == bytes.fromhex("d64e2a5e"))
+      resp.seq == 0x07 and resp.status == 0 and resp.trailer == bytes.fromhex("d64e2a5e"))
 summary = host.latency_summary([4.0, 1.0, 3.0, 2.0])
 check("parked benchmark reports deterministic distribution statistics",
       {name: round(value, 3) for name, value in summary.items()} == {
@@ -179,7 +179,7 @@ check("benchmark can refresh extended diagnostic after a long timing run",
 
 # Application RMBA cannot read the FEF0.... GlobalRAM helper span. Installer
 # attestation must therefore read only the LocalRAM resident/state and defer
-# helper execution proof to the live native-MAC known-answer.
+# helper execution proof to the live fresh-signing self-test.
 state = bytearray(host.STATE_SIZE)
 state[0:4] = host.STATE_MAGIC.to_bytes(4, "little")
 state[4] = host.STATE_VERSION
@@ -205,43 +205,7 @@ finally:
 check("live attestation never RMBA-reads GlobalRAM helper",
       reads == [host.RESIDENT_BASE, host.STATE_BASE] and
       att["resident_sha256"] == meta["resident"]["sha256"] and
-      att["helper_attestation"] == "deferred_to_known_answer_execution")
-
-# Native truth is captured at a real reset boundary where message8 is known to
-# restart at one; this avoids pretending a historical freshness tuple is valid today.
-def sync_frame(trip: int, reset: int) -> bytes:
-    data = bytearray(8)
-    data[0:2] = trip.to_bytes(2, "big")
-    data[2] = (reset >> 12) & 0xFF
-    data[3] = (reset >> 4) & 0xFF
-    data[4] = (reset & 0xF) << 4
-    return bytes(data)
-
-def native_frame(b26: int, reset: int, message: int, mac28: int) -> bytes:
-    app = bytearray(range(28))
-    app[26] = (app[26] & 0xC0) | (b26 & 0x3F)
-    fv4 = ((message & 0x3) << 2) | (reset & 0x3)
-    return bytes(app) + ((fv4 << 28) | mac28).to_bytes(4, "big")
-
-class FakePanda:
-    def __init__(self, rows): self.rows = rows
-    def can_recv(self):
-        rows, self.rows = self.rows, []
-        return rows
-
-trip = 0x026C
-reset0, reset1 = 0x12344, 0x12345
-mac1 = 0x1234567
-fake = FakePanda([
-    (host.SYNC_ID, sync_frame(trip, reset0), host.SYNC_BUS),
-    (host.NATIVE_08A_ID, native_frame(10, reset0, 0, 0x7654321), host.NATIVE_08A_BUS),
-    (host.SYNC_ID, sync_frame(trip, reset1), host.SYNC_BUS),
-    (host.NATIVE_08A_ID, native_frame(11, reset1, 1, mac1), host.NATIVE_08A_BUS),
-])
-vector = host.capture_native_vector(fake, timeout=0.1)
-check("known-answer captures live native reset-boundary truth",
-      vector.message_counter == 1 and vector.reset_counter == reset1 and
-      vector.b26 == 11 and vector.native_mac28 == f"{mac1:07x}")
+      att["helper_attestation"] == "deferred_to_self_test_execution")
 
 check("no diagnostic transport or RSCFD mutation remains",
       meta["request"]["diagnostic_acceptance_route_used"] is True and
@@ -305,7 +269,7 @@ with (mock.patch.object(host, "verify_nrtd_ready", side_effect=AssertionError("N
     direct = host.install(OUT / meta["authenticated_payload"]["path"], OUT / "camry_f33_08a_classic_oracle.json", direct_boot=True)
 check("classic oracle can continue directly from exact caught bootloader without NRTD recheck",
       direct["entry_condition"] == "exact_bootloader_f181" and direct["nrtd_guard"] is None and
-      direct["verdict"] == "runtime_08a_classic_oracle_resident_live_helper_pending_known_answer" and
+      direct["verdict"] == "runtime_08a_classic_fresh_signer_live_helper_pending_self_test" and
       execute.call_args.kwargs["allow_direct_boot"] is True)
 
 startup_src = (ROOT / "exploit/ephemeral_runtime/camry_f33_startup_programming.py").read_text(encoding="utf-8")
@@ -321,11 +285,11 @@ direct_guard = ram_exec_src.index("if not allow_direct_boot:")
 direct_identity = ram_exec_src.index("initial_f181_hex, initial_f181_ascii = _read_f181(app, uds_mod)")
 check("caught bootloader identity is read without a redundant DEFAULT-session request",
       direct_guard < ram_exec_src.index("app.diagnostic_session_control(uds_mod.SESSION_TYPE.DEFAULT)", direct_guard) < direct_identity)
-check("UI backend verifies healthy peers and oracle KAT without mandatory peer resets",
+check("UI backend verifies healthy peers and fresh signing without mandatory peer resets",
       ui_src.index('race_to_bootloader()') < ui_src.index('install(payload, meta, direct_boot=True, panda=panda)') <
       ui_src.index('ready_guard = wait_ready_parked(timeout=ready_timeout, panda=panda)') <
       ui_src.index('state = control_domain_state(output_dir / "control-domain-state.json", panda=panda)') <
-      ui_src.index('kat = known_answer(meta, panda=panda)') and
+      ui_src.index('signer_test = self_test(meta, panda=panda)') and
       'restart_brake_known_good' not in ui_src and 'restart_one_domain' not in ui_src and
       'peer_resets_performed": False' in ui_src)
 check("auto worker preloads protocols, passively preconnects Panda, and reuses it for the complete bringup",
@@ -336,7 +300,7 @@ check("auto worker preloads protocols, passively preconnects Panda, and reuses i
       ui_src.index('native_catch=native_catch, panda=panda', ui_src.index('server.listen(1)')) and
       'wait_ready_parked(timeout=ready_timeout, panda=panda)' in ui_src and
       'control_domain_state(output_dir / "control-domain-state.json", panda=panda)' in ui_src and
-      'known_answer(meta, panda=panda)' in ui_src)
+      'self_test(meta, panda=panda)' in ui_src)
 
 native_marker = {
     "schema": "tss3-oracle-native-catch-v1",

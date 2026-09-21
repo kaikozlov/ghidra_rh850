@@ -667,8 +667,8 @@ def build(out: Path, openpilot: Path) -> dict:
                 "field_sequence": [
                     "./f33-08a-classic-oracle install in NRTD/Park/stationary",
                     "direct NRTD->READY without OFF",
-                    "./f33-08a-classic-oracle known-answer in READY/Park/stationary",
-                    "only after known-answer passes: ./f33-08a-classic-oracle benchmark 20",
+                    "./f33-08a-classic-oracle self-test in READY/Park/stationary",
+                    "only after self-test passes: ./f33-08a-classic-oracle benchmark 20",
                 ],
                 "persistent_flash_write": False,
                 "live_qualified": False,

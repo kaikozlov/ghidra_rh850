@@ -428,7 +428,7 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
                                            "bringup-stale-030-bridge", "restart-brake", "restart-frc", "recovery-state",
                                            "restart-control-domains", "recover-drcc", "replace-current", "replace-once")) and
           all(cmd in launcher for cmd in ("oracle-bringup", "oracle-ui-bringup", "oracle-ui-resume", "oracle-install", "recover-peers",
-                                           "oracle-status", "oracle-known-answer", "oracle-benchmark")) and
+                                           "oracle-status", "oracle-self-test", "oracle-benchmark")) and
           "--topology stock|camry-post-repin" in launcher and
           "--nrtd-confirmed" in launcher and "NRTD/READY=0" in launcher and
           "FRC DRCC permission did not survive bridged bootstrap; STOP before READY qualification" in launcher)
@@ -468,7 +468,7 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
     check("Camry unified kit uses the same canonical oracle deployment key and runtime",
           camry_kit_meta["classic_08a_oracle"]["metadata"] == "bundle/oracle/classic.json" and
           camry_kit_meta["classic_08a_oracle"]["payload"] == "bundle/oracle/classic_payload.bin" and
-          camry_oracle_meta["schema"] == "tss3-08a-classic-oracle-build-v2" and
+          camry_oracle_meta["schema"] == "tss3-08a-classic-oracle-build-v3" and
           "camry_classic_08a_oracle" not in camry_kit_meta and
           len(camry_oracle_payload) == 0x1000 and
           hashlib.sha256(camry_oracle_payload).hexdigest() == camry_oracle_meta["authenticated_payload"]["sha256"] and
@@ -488,13 +488,13 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
           '--native-catch "$native_catch"' in oracle_resume_block and
           'require_camry_oracle_files' in oracle_resume_block)
     oracle_bringup_block = camry_launcher.split("  oracle-bringup)\n", 1)[1].split("  recover-peers)", 1)[0]
-    check("Camry oracle bringup installs, recovers Brake then FRC, and gates on a native known-answer",
+    check("Camry oracle bringup installs, recovers Brake then FRC, and gates on a fresh-signing self-test",
           oracle_bringup_block.index('quiesce_panda_owner') <
           oracle_bringup_block.index('install --payload "$ORACLE_PAYLOAD"') <
           oracle_bringup_block.index('run_peer_recovery "$out_dir"') <
-          oracle_bringup_block.index('known-answer --meta "$ORACLE_META"') and
-          "runtime_08a_classic_oracle_resident_live_helper_pending_known_answer" in oracle_bringup_block and
-          "r.get('matched') is not True" in oracle_bringup_block)
+          oracle_bringup_block.index('self-test --meta "$ORACLE_META"') and
+          "runtime_08a_classic_fresh_signer_live_helper_pending_self_test" in oracle_bringup_block and
+          "r.get('passed') is not True" in oracle_bringup_block)
     bringup_block = camry_launcher.split("  bringup)\n", 1)[1].split("  bringup-stale-030-bridge)", 1)[0]
     check("Camry guided bringup is operator-paced EPS -> Brake -> FRC under one Panda lease",
           bringup_block.index('quiesce_panda_owner') <
