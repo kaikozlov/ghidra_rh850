@@ -1,0 +1,516 @@
+{
+  "annotation": "The driver reported visible/audible PCS alerting in this window; that attribution is external to the logged openpilot fields.",
+  "corpus_census": {
+    "asserted_files": [
+      "00000043--29caa20fbc/00000043--29caa20fbc--12/rlog.zst"
+    ],
+    "native_5ae_byte2_bit2_asserted": 4,
+    "native_5ae_frames": 12981,
+    "rlog_count": 44,
+    "special_08a_request_b_counts": {
+      "id_33_allocation_3": 12,
+      "id_34_allocation_3": 9
+    }
+  },
+  "event": {
+    "acceleration_range_mps2": [
+      -4.0,
+      -3.8
+    ],
+    "after": {
+      "byte3": 8,
+      "byte4": 128,
+      "lateral_id": 0,
+      "log_mono_time_ns": 3183879464054,
+      "raw": "0000000880002d47f1285ef1287fff007fff00174000300000001f00117281d9",
+      "request_a": {
+        "accel_mps2": -3.8,
+        "allocation": 1,
+        "id": 11
+      },
+      "request_b": {
+        "accel_mps2": -3.8,
+        "allocation": 3,
+        "id": 17
+      },
+      "request_sequence": 31,
+      "set_speed_kph": 94
+    },
+    "before": {
+      "byte3": 8,
+      "byte4": 128,
+      "lateral_id": 0,
+      "log_mono_time_ns": 3183340552706,
+      "raw": "0000000880002d47f0605ef0607fff007fff000c4000100000000a00fc472d50",
+      "request_a": {
+        "accel_mps2": -4.0,
+        "allocation": 1,
+        "id": 11
+      },
+      "request_b": {
+        "accel_mps2": -4.0,
+        "allocation": 3,
+        "id": 17
+      },
+      "request_sequence": 10,
+      "set_speed_kph": 94
+    },
+    "duration_s": 0.486045,
+    "end_route_offset_s": 752.922597,
+    "first": {
+      "byte3": 12,
+      "byte4": 192,
+      "lateral_id": 0,
+      "log_mono_time_ns": 3183360778366,
+      "raw": "0000000cc0002d8bf0605ef0607fff007fff000b4000100000000b003a194b8d",
+      "request_a": {
+        "accel_mps2": -4.0,
+        "allocation": 1,
+        "id": 11
+      },
+      "request_b": {
+        "accel_mps2": -4.0,
+        "allocation": 3,
+        "id": 34
+      },
+      "request_sequence": 11,
+      "set_speed_kph": 94
+    },
+    "first_driver_brake": {
+      "after_event_start_ms": 16.733,
+      "brake_pressed": true,
+      "cruise_enabled": true,
+      "cruise_standstill": false,
+      "gas_pressed": false,
+      "log_mono_time_ns": 3183377510891,
+      "v_ego_mps": 7.663666248321533
+    },
+    "first_selfdrive_disabled": {
+      "active": false,
+      "after_event_start_ms": 19.717,
+      "alert_type": "pedalPressed/userDisable",
+      "enabled": false,
+      "log_mono_time_ns": 3183380495714
+    },
+    "frc_5ae": {
+      "asserted_frames": [
+        {
+          "byte0": 4,
+          "byte2": 4,
+          "log_mono_time_ns": 3183360778366,
+          "raw": "04000435110808000000000020038000026d0a40001000000000000000000000"
+        },
+        {
+          "byte0": 4,
+          "byte2": 4,
+          "log_mono_time_ns": 3183524123059,
+          "raw": "040004358f080000000000000003000c022b8a40000f80000000000000000000"
+        },
+        {
+          "byte0": 4,
+          "byte2": 4,
+          "log_mono_time_ns": 3183684391111,
+          "raw": "040004360e080000000000000003000c0a0e0a40000f80000000000000000000"
+        },
+        {
+          "byte0": 36,
+          "byte2": 4,
+          "log_mono_time_ns": 3183846822926,
+          "raw": "240004368d080000000000001003000c11ff8a40000f80000000000000000000"
+        }
+      ],
+      "first_assertion_offset_from_request_start_ms": 0.0,
+      "next_clear": {
+        "byte0": 36,
+        "byte2": 0,
+        "log_mono_time_ns": 3184007649913,
+        "raw": "240000370b080800000000001003800c19df8a40001000000000000000000000"
+      }
+    },
+    "last": {
+      "byte3": 8,
+      "byte4": 192,
+      "lateral_id": 0,
+      "log_mono_time_ns": 3183846822926,
+      "raw": "00000008c0002d87f1285ef1287fff007fff00154000300000001e00d1994198",
+      "request_a": {
+        "accel_mps2": -3.8,
+        "allocation": 1,
+        "id": 11
+      },
+      "request_b": {
+        "accel_mps2": -3.8,
+        "allocation": 3,
+        "id": 33
+      },
+      "request_sequence": 30,
+      "set_speed_kph": 94
+    },
+    "phase_transition": {
+      "byte3": 8,
+      "byte4": 192,
+      "lateral_id": 0,
+      "log_mono_time_ns": 3183576656788,
+      "raw": "00000008c0002d87f0605ef0607fff007fff000d400030000000130006f38fbe",
+      "request_a": {
+        "accel_mps2": -4.0,
+        "allocation": 1,
+        "id": 11
+      },
+      "request_b": {
+        "accel_mps2": -4.0,
+        "allocation": 3,
+        "id": 33
+      },
+      "request_sequence": 19,
+      "set_speed_kph": 94
+    },
+    "request_b_phase_counts": {
+      "id_33_allocation_3": 12,
+      "id_34_allocation_3": 9
+    },
+    "request_frame_count": 21,
+    "route": "00000043--29caa20fbc",
+    "segment": 12,
+    "start_route_offset_s": 752.436552,
+    "state_at_start": {
+      "car_control": {
+        "enabled": true,
+        "log_mono_time_ns": 3183358345864,
+        "long_active": true,
+        "requested_accel_mps2": -1.5
+      },
+      "car_state": {
+        "brake_pressed": false,
+        "cruise_enabled": true,
+        "cruise_standstill": false,
+        "gas_pressed": false,
+        "log_mono_time_ns": 3183354435872,
+        "v_ego_mps": 7.691429138183594
+      },
+      "selfdrive_state": {
+        "active": true,
+        "alert_type": "",
+        "enabled": true,
+        "log_mono_time_ns": 3183356886654
+      }
+    }
+  },
+  "interpretation": {
+    "boundary": "The user report plus temporal join identifies this as the PCS-alert witness, but does not assign a global semantic name to requester IDs 33/34 or prove which braking substage each ID represents.",
+    "bounded_result": "The native FRC request plane enters a two-phase ID34->ID33 state while request A remains ID11. Both acceleration slots are -4.000 m/s^2 at entry. FRC-side 0x5AE byte2 bit2 asserts on the exact entry timestamp and is unique in the retained 44-rlog corpus.",
+    "relay_consequence": "Blocking native FRC 0x08A prevents this native request from reaching VMC. A replacement path must preserve stock emergency requests through normal upstream safety/controller ownership."
+  },
+  "schema": "camry-20260921-pcs-alert-v1",
+  "sources": [
+    {
+      "native_5ae_byte2_bit2_asserted": 0,
+      "native_5ae_frames": 307,
+      "path": "0000003a--7d62f5b41f/rlog-0.zst",
+      "sha256": "cd8e8f47d177af27ab4a5d75fe9ea648287b56afd339abf3e8efaef247b6a5af",
+      "size": 8720096
+    },
+    {
+      "native_5ae_byte2_bit2_asserted": 0,
+      "native_5ae_frames": 300,
+      "path": "0000003a--7d62f5b41f/rlog-1.zst",
+      "sha256": "6c7d53147c3c8919cd0ad86fe3c1bcc4fbd327b261b642c2918b6707b641cdeb",
+      "size": 9401847
+    },
+    {
+      "native_5ae_byte2_bit2_asserted": 0,
+      "native_5ae_frames": 300,
+      "path": "0000003a--7d62f5b41f/rlog-10.zst",
+      "sha256": "9ff89f19991cc15babaa9d3eeb4977c61dc5fe99581730fbcc72551576ec86ea",
+      "size": 9268797
+    },
+    {
+      "native_5ae_byte2_bit2_asserted": 0,
+      "native_5ae_frames": 300,
+      "path": "0000003a--7d62f5b41f/rlog-11.zst",
+      "sha256": "477c584d1ef5b6505bf9904b5eade48211bdace42eb7e70b3553c0617b4d8679",
+      "size": 9283027
+    },
+    {
+      "native_5ae_byte2_bit2_asserted": 0,
+      "native_5ae_frames": 301,
+      "path": "0000003a--7d62f5b41f/rlog-2.zst",
+      "sha256": "f0031d2fdec2ff2ccb7d89f2ee95d92d8473141b27af71f82182850dc90be6b1",
+      "size": 9494412
+    },
+    {
+      "native_5ae_byte2_bit2_asserted": 0,
+      "native_5ae_frames": 325,
+      "path": "0000003a--7d62f5b41f/rlog-3.zst",
+      "sha256": "58a0503d44e19d15e41143af138b2216832224b8d0e2b8649d8b326d40d799f8",
+      "size": 10784223
+    },
+    {
+      "native_5ae_byte2_bit2_asserted": 0,
+      "native_5ae_frames": 314,
+      "path": "0000003a--7d62f5b41f/rlog-4.zst",
+      "sha256": "3c61c54c4b17ea0b541e500e5980246b7233c838bb44fc6ac171638605d414e8",
+      "size": 10688846
+    },
+    {
+      "native_5ae_byte2_bit2_asserted": 0,
+      "native_5ae_frames": 317,
+      "path": "0000003a--7d62f5b41f/rlog-5.zst",
+      "sha256": "a96d4ff18477732a4732c803c55a0cf7a85c6f8ea7ce391d842964c95dfa35b0",
+      "size": 10772314
+    },
+    {
+      "native_5ae_byte2_bit2_asserted": 0,
+      "native_5ae_frames": 313,
+      "path": "0000003a--7d62f5b41f/rlog-6.zst",
+      "sha256": "7d70561ca2b41e9a280630628dedeb50e084b0eae842ffd69ff6015cbb340b0a",
+      "size": 10561623
+    },
+    {
+      "native_5ae_byte2_bit2_asserted": 0,
+      "native_5ae_frames": 300,
+      "path": "0000003a--7d62f5b41f/rlog-7.zst",
+      "sha256": "499a959a400916672b07c421c64cd28b408f118c0bbe0be9c9e62b3ad172fc2a",
+      "size": 9280176
+    },
+    {
+      "native_5ae_byte2_bit2_asserted": 0,
+      "native_5ae_frames": 300,
+      "path": "0000003a--7d62f5b41f/rlog-8.zst",
+      "sha256": "fcfee944e69d5b3f38d5052af7a8570b34e25de47bab06f90db5127e2afbef38",
+      "size": 9259207
+    },
+    {
+      "native_5ae_byte2_bit2_asserted": 0,
+      "native_5ae_frames": 300,
+      "path": "0000003a--7d62f5b41f/rlog-9.zst",
+      "sha256": "c241cc25ee9f013953444f441ccb407c27d4ed7ea8037143d401a92fae14aa71",
+      "size": 9275321
+    },
+    {
+      "native_5ae_byte2_bit2_asserted": 0,
+      "native_5ae_frames": 318,
+      "path": "00000041--a8c2152e46/00000041--a8c2152e46--0/rlog.zst",
+      "sha256": "d756e56c6ae9023ba7d1d8923fd9543598859817f8d95580c4bf7e9c3953491d",
+      "size": 10303104
+    },
+    {
+      "native_5ae_byte2_bit2_asserted": 0,
+      "native_5ae_frames": 321,
+      "path": "00000041--a8c2152e46/00000041--a8c2152e46--1/rlog.zst",
+      "sha256": "dab0492d513f14f631625143626d2cddd7cd04bcbaa2409fd56b8df2492aa8ac",
+      "size": 10907168
+    },
+    {
+      "native_5ae_byte2_bit2_asserted": 0,
+      "native_5ae_frames": 308,
+      "path": "00000041--a8c2152e46/00000041--a8c2152e46--2/rlog.zst",
+      "sha256": "fc1bc2709112bf8c897341f3a7ceb6a184e25566856ddf52e2e9b08e9d7b3295",
+      "size": 10849261
+    },
+    {
+      "native_5ae_byte2_bit2_asserted": 0,
+      "native_5ae_frames": 303,
+      "path": "00000041--a8c2152e46/00000041--a8c2152e46--3/rlog.zst",
+      "sha256": "a11e57c016a3861292e09f3bdc0fee8edd39845d6240db10bc86fe3238826aea",
+      "size": 10836320
+    },
+    {
+      "native_5ae_byte2_bit2_asserted": 0,
+      "native_5ae_frames": 314,
+      "path": "00000041--a8c2152e46/00000041--a8c2152e46--4/rlog.zst",
+      "sha256": "e25f4165229754ebe0dcbc583571335ce6337b88782dddc25ce23d988a4a6058",
+      "size": 10713903
+    },
+    {
+      "native_5ae_byte2_bit2_asserted": 0,
+      "native_5ae_frames": 60,
+      "path": "00000041--a8c2152e46/00000041--a8c2152e46--5/rlog.zst",
+      "sha256": "16cf1c750102a7b432998f08478bdfe718d92aeac4bd5ee461db9e9044b6d98a",
+      "size": 2050487
+    },
+    {
+      "native_5ae_byte2_bit2_asserted": 0,
+      "native_5ae_frames": 12,
+      "path": "00000042--169d4d611d/00000042--169d4d611d--0/rlog.zst",
+      "sha256": "30c73949c8a6abcde6b5c678ae61cf0d8a3a8d67e2dfadfcd9ef9843933d6cb0",
+      "size": 125642
+    },
+    {
+      "native_5ae_byte2_bit2_asserted": 0,
+      "native_5ae_frames": 316,
+      "path": "00000043--29caa20fbc/00000043--29caa20fbc--0/rlog.zst",
+      "sha256": "cdb766eb77c3983149a395b23718090ce2e6fc4514b522f0fa34ab42f26354db",
+      "size": 10256935
+    },
+    {
+      "native_5ae_byte2_bit2_asserted": 0,
+      "native_5ae_frames": 306,
+      "path": "00000043--29caa20fbc/00000043--29caa20fbc--1/rlog.zst",
+      "sha256": "1605a2c6fda8c5109dc9439f264f1be455e7e0699174c2595c33fe49253d5ba2",
+      "size": 10571123
+    },
+    {
+      "native_5ae_byte2_bit2_asserted": 0,
+      "native_5ae_frames": 312,
+      "path": "00000043--29caa20fbc/00000043--29caa20fbc--10/rlog.zst",
+      "sha256": "7d880eb5f339fad14186426786817e6a49662569e9182680e7aba6ef2bf364fc",
+      "size": 10292994
+    },
+    {
+      "native_5ae_byte2_bit2_asserted": 0,
+      "native_5ae_frames": 306,
+      "path": "00000043--29caa20fbc/00000043--29caa20fbc--11/rlog.zst",
+      "sha256": "9a2bd13e33cc6105e166929ea42a54088382fbe93ecd75d7c4ece43b709b3ead",
+      "size": 10501057
+    },
+    {
+      "native_5ae_byte2_bit2_asserted": 4,
+      "native_5ae_frames": 310,
+      "path": "00000043--29caa20fbc/00000043--29caa20fbc--12/rlog.zst",
+      "sha256": "72afb760192315585274374cfd2d7ca39383178d618956400b07c370127de044",
+      "size": 10318903
+    },
+    {
+      "native_5ae_byte2_bit2_asserted": 0,
+      "native_5ae_frames": 309,
+      "path": "00000043--29caa20fbc/00000043--29caa20fbc--13/rlog.zst",
+      "sha256": "df0481b1c0d1ba7c1ff9ba7bedabffb4eb42561018414d7731035b340863bafc",
+      "size": 10545290
+    },
+    {
+      "native_5ae_byte2_bit2_asserted": 0,
+      "native_5ae_frames": 310,
+      "path": "00000043--29caa20fbc/00000043--29caa20fbc--14/rlog.zst",
+      "sha256": "e37e4c8906019a5b7cba177939945bd332a187866724c2a7a71ef2269c381330",
+      "size": 10713317
+    },
+    {
+      "native_5ae_byte2_bit2_asserted": 0,
+      "native_5ae_frames": 314,
+      "path": "00000043--29caa20fbc/00000043--29caa20fbc--15/rlog.zst",
+      "sha256": "21e77dd700bf30085d9b12466c38593d4d2c9cb5df883eb7cdeef2a470ad1cba",
+      "size": 10757517
+    },
+    {
+      "native_5ae_byte2_bit2_asserted": 0,
+      "native_5ae_frames": 260,
+      "path": "00000043--29caa20fbc/00000043--29caa20fbc--16/rlog.zst",
+      "sha256": "3badca8fcea6d8e3b33daeba3b71642100bc5f1de3548536abe8f24a4b7c1e96",
+      "size": 8390432
+    },
+    {
+      "native_5ae_byte2_bit2_asserted": 0,
+      "native_5ae_frames": 311,
+      "path": "00000043--29caa20fbc/00000043--29caa20fbc--2/rlog.zst",
+      "sha256": "a28f2fe32068c08dd54776677bebd562f57a367b2b46c68f5c708a2b93faea78",
+      "size": 10534698
+    },
+    {
+      "native_5ae_byte2_bit2_asserted": 0,
+      "native_5ae_frames": 316,
+      "path": "00000043--29caa20fbc/00000043--29caa20fbc--3/rlog.zst",
+      "sha256": "586f103d26c98c8b7a116f73da4a610f2f80107aa99f06043195c5c7ccc1ba3c",
+      "size": 10929361
+    },
+    {
+      "native_5ae_byte2_bit2_asserted": 0,
+      "native_5ae_frames": 302,
+      "path": "00000043--29caa20fbc/00000043--29caa20fbc--4/rlog.zst",
+      "sha256": "0b1eec5d7482401dcdb4f071dced98a405eb9b361581813feabeabb5cb52b2e5",
+      "size": 10089795
+    },
+    {
+      "native_5ae_byte2_bit2_asserted": 0,
+      "native_5ae_frames": 312,
+      "path": "00000043--29caa20fbc/00000043--29caa20fbc--5/rlog.zst",
+      "sha256": "dcbffe1ec8cf56757e1fef05ffd301a624d390147b5e02107d745b655e962e7d",
+      "size": 10741517
+    },
+    {
+      "native_5ae_byte2_bit2_asserted": 0,
+      "native_5ae_frames": 308,
+      "path": "00000043--29caa20fbc/00000043--29caa20fbc--6/rlog.zst",
+      "sha256": "7bef796de97c8f6eb0c4869f9b65f608ce9e3f803c891160d1f5432e9df312ad",
+      "size": 10198599
+    },
+    {
+      "native_5ae_byte2_bit2_asserted": 0,
+      "native_5ae_frames": 300,
+      "path": "00000043--29caa20fbc/00000043--29caa20fbc--7/rlog.zst",
+      "sha256": "540a652007c32d1900912351cae9aa2eac2f700311dfd7d2fcee20b03bf68152",
+      "size": 9611937
+    },
+    {
+      "native_5ae_byte2_bit2_asserted": 0,
+      "native_5ae_frames": 307,
+      "path": "00000043--29caa20fbc/00000043--29caa20fbc--8/rlog.zst",
+      "sha256": "fe5547b954e1f15fcdada56cb19708c7d6443da0b0654f114685c70433a99c8a",
+      "size": 10320806
+    },
+    {
+      "native_5ae_byte2_bit2_asserted": 0,
+      "native_5ae_frames": 308,
+      "path": "00000043--29caa20fbc/00000043--29caa20fbc--9/rlog.zst",
+      "sha256": "ee17080ace3bc81a8e622702b276f2d8bcd2d24dc11f97fdafff3c55e82edf74",
+      "size": 10238743
+    },
+    {
+      "native_5ae_byte2_bit2_asserted": 0,
+      "native_5ae_frames": 316,
+      "path": "00000051--894db634a8/00000051--894db634a8--0/rlog.zst",
+      "sha256": "31863d365d6164ffa0efe2ba8be976ad3a4ca908c27ad386ed02795b0fce8ff7",
+      "size": 10046257
+    },
+    {
+      "native_5ae_byte2_bit2_asserted": 0,
+      "native_5ae_frames": 315,
+      "path": "00000051--894db634a8/00000051--894db634a8--1/rlog.zst",
+      "sha256": "1e5f9095932ace0e99db234abeef2d5078b5c07f21d88be69f1142ad16ef2077",
+      "size": 10709498
+    },
+    {
+      "native_5ae_byte2_bit2_asserted": 0,
+      "native_5ae_frames": 306,
+      "path": "00000051--894db634a8/00000051--894db634a8--2/rlog.zst",
+      "sha256": "4e087632951d7e86b1d70b53947885f8c9b9ad28de03783d9437d969bafd8737",
+      "size": 10547025
+    },
+    {
+      "native_5ae_byte2_bit2_asserted": 0,
+      "native_5ae_frames": 319,
+      "path": "00000051--894db634a8/00000051--894db634a8--3/rlog.zst",
+      "sha256": "7e856d1a010ea7911e521d1b05c5c560518f88bb6fc754e8d02acbbe5a8aa660",
+      "size": 10634925
+    },
+    {
+      "native_5ae_byte2_bit2_asserted": 0,
+      "native_5ae_frames": 320,
+      "path": "00000051--894db634a8/00000051--894db634a8--4/rlog.zst",
+      "sha256": "9bc19b068a4861b3f74c762eb1205ed358b04c7de2a0afbc36fea5db2b7fe8cc",
+      "size": 10583273
+    },
+    {
+      "native_5ae_byte2_bit2_asserted": 0,
+      "native_5ae_frames": 313,
+      "path": "00000051--894db634a8/00000051--894db634a8--5/rlog.zst",
+      "sha256": "a101a7485ea6d1e984e52fb1548c54b5371c1f82e1cfa0b31fa3f7c2315ce1e6",
+      "size": 10789396
+    },
+    {
+      "native_5ae_byte2_bit2_asserted": 0,
+      "native_5ae_frames": 308,
+      "path": "00000051--894db634a8/00000051--894db634a8--6/rlog.zst",
+      "sha256": "30a5253ccd8774b8c34e30217f1853a15d025ff2785ba982e03f1f52e4f33a6b",
+      "size": 9815522
+    },
+    {
+      "native_5ae_byte2_bit2_asserted": 0,
+      "native_5ae_frames": 264,
+      "path": "00000051--894db634a8/00000051--894db634a8--7/rlog.zst",
+      "sha256": "828a5f2385a102fb9d4b74b91897dfd41e201b3ef869af3dc830d071a6f43509",
+      "size": 8177294
+    }
+  ],
+  "title": "Retained Camry user-reported PCS-alert request-plane timeline"
+}

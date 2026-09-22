@@ -76,6 +76,12 @@ class Record:
     data: dict[str, Any]
 
 
+@dataclass
+class ResourceValue:
+    key: str
+    value: str
+
+
 def _int_constant(ins: Any) -> int | None:
     op = str(ins.opcode)
     table = {
@@ -399,6 +405,9 @@ def _interpret_collection(
     record_type: str,
     record_fields: tuple[str, ...],
     resource_prefix: str,
+    target_static_field: str | None = None,
+    capture_resource_keys: bool = False,
+    default_record_values: dict[str, Any] | None = None,
 ) -> tuple[int, list[tuple[Any, dict[str, Any]]]]:
     method = _find_method(pe, define_type, ".cctor")
     body = CilMethodBody(MethodBodyReader(pe, method))
@@ -454,7 +463,7 @@ def _interpret_collection(
                 value = english.get(key)
                 if not isinstance(value, str):
                     raise ValueError(f"missing English string resource {key}")
-                stack.append(value)
+                stack.append(ResourceValue(key, value) if capture_resource_keys else value)
                 continue
             if name == "Add":
                 if len(stack) >= 2 and isinstance(stack[-2], Collection) and stack[-2].kind == "list":
@@ -478,24 +487,49 @@ def _interpret_collection(
             if name != ".ctor":
                 raise ValueError(f"{define_type}: unsupported newobj {owner}::{name}")
             if owner.startswith("<dnfile.mdtable.TypeSpecRow") or owner == "?":
+                next_op = str(body.instructions[index + 1].opcode) if index + 1 < len(body.instructions) else ""
+                is_outer = typespec_ctor_count == 0 or next_op.startswith("stloc")
                 typespec_ctor_count += 1
-                stack.append(Collection("outer" if typespec_ctor_count == 1 else "list", []))
+                if is_outer:
+                    records = []
+                stack.append(Collection("outer" if is_outer else "list", []))
                 continue
             if owner == "System.Decimal" and isinstance(called, dnfile.mdtable.MemberRefRow):
                 stack.append(_decimal_from_ctor(stack, called))
                 continue
             if owner == record_type:
-                argc = len(record_fields)
+                signature = bytes(called.Signature.value)
+                argc = signature[1] if len(signature) > 1 else -1
+                if argc == 0:
+                    if default_record_values is None:
+                        raise ValueError(
+                            f"{define_type}: default {record_type} ctor has no declared values at instruction {index}"
+                        )
+                    stack.append(Record(dict(default_record_values)))
+                    continue
+                if argc != len(record_fields):
+                    raise ValueError(
+                        f"{define_type}: unexpected {record_type} ctor arity {argc} at instruction {index}"
+                    )
                 if len(stack) < argc:
-                    raise ValueError(f"{define_type}: short stack for {record_type} ctor")
+                    raise ValueError(
+                        f"{define_type}: short stack for {record_type} ctor at instruction {index}: {stack[-5:]!r}"
+                    )
                 values = stack[-argc:]
                 del stack[-argc:]
-                stack.append(Record(dict(zip(record_fields, values))))
+                record = dict(zip(record_fields, values))
+                for field_name, value in tuple(record.items()):
+                    if isinstance(value, ResourceValue):
+                        record[field_name] = value.value
+                        record[f"{field_name}ResourceKey"] = value.key
+                stack.append(Record(record))
                 continue
             raise ValueError(f"{define_type}: unsupported constructor {owner}::{name} at instruction {index}")
         if op == "stsfld":
             stack.pop()
-            if records:
+            field = resolve_token(pe, ins.operand)
+            _owner, field_name = _field_owner_and_name(field)
+            if records and (target_static_field is None or field_name == target_static_field):
                 break
             continue
         if op in ("nop", "conv.i4", "conv.u4", "conv.i8", "conv.u8"):

@@ -3371,6 +3371,80 @@ Evidence:
 `tools/techstream/extract_pcs_data_viewer_adu_semantics.py`, and
 `tests/verify_gtsplus_pcs_data_viewer_adu_semantics.py`.
 
+### 4.15 The retained PCS-alert drive proves a native emergency request transition
+
+The user-reported PCS alert is localized to route `00000043--29caa20fbc`,
+segment 12, route offset **752.436552--752.922597 s**. The native FRC-side
+`0x08A` request-B slot makes one contiguous 21-frame transition:
+
+| Phase | Frames | Request A | Request B | requested acceleration |
+|---|---:|---|---|---:|
+| immediately before | 1 witness | ID11 / allocation 1 | ID17 / allocation 3 | -4.000 m/s² |
+| alert entry | 9 | ID11 / allocation 1 | **ID34 / allocation 3** | -4.000 m/s² |
+| alert continuation | 12 | ID11 / allocation 1 | **ID33 / allocation 3** | -4.000 to -3.800 m/s² |
+| immediately after | 1 witness | ID11 / allocation 1 | ID17 / allocation 3 | -3.800 m/s² |
+
+Two other application bits track the phase: byte 4 bit 6 is set throughout the
+ID34/33 interval, while byte 3 bit 2 is set only during ID34. More importantly,
+FRC-side `0x5AE` byte 2 bit 2 asserts on the **exact first ID34 timestamp**.
+Across the retained September 21 corpus—44 rlogs and **12,981 native `0x5AE`
+frames**—that bit is asserted only four times, all in this one event. The
+`0x08A` ID33 and ID34 states likewise occur only here, 12 and 9 frames
+respectively.
+
+The event is not caused by openpilot asking for the same braking. Immediately
+before native entry, `carControl.longActive` is true but requests only
+**-1.5 m/s²**; vehicle speed is 7.691 m/s and neither pedal is pressed. The
+native request is already -4.000 m/s². The logged driver brake follows entry by
+**16.733 ms**, and openpilot disables on `pedalPressed/userDisable` at
+**19.717 ms**. This ordering rejects “driver braking created the entire
+transition” and makes the user-reported PCS attribution a tightly joined
+dynamic witness.
+
+This still does not turn ID33 or ID34 into global PCS enums. It proves that the
+pair participates in this alert event, in this request-B slot, with these
+coincident FRC flags. The precise Toyota substage—ALM, prefill, PBA, PB, or a
+later arbitration state—remains unassigned without an ADU/FFD capture of the
+same event.
+
+#### Upstream policy consequence
+
+The comparison baseline is opendbc `origin/master` commit
+`4ad6045b2cd19c0c9adc0c2cd79bf96c8bda6e5d` (2026-09-21). Its idiom is
+consistent:
+
+- expose proven stock warning/braking state through `CarState.stockFcw` and
+  `CarState.stockAeb`; generic `CarEvents` turns those into UI/events, not an
+  actuation override;
+- when stock AEB has a distinct carrier, preserve it by normal Panda forwarding
+  while blocking/replacing only the ACC carrier—Hyundai `CAMERA_SCC` states
+  this explicitly, and Ford/GM likewise observe AEB on carriers separate from
+  their replaced ACC/UI traffic;
+- when disabling or replacing the relevant ECU/carrier loses AEB, say so
+  explicitly. Honda Bosch warns that longitudinal disables AEB, and Subaru
+  sets its PCB-off indication because AEB is not preserved.
+
+There is no upstream generic policy that observes `stockAeb` and merges a stock
+brake demand into an openpilot command. Consequently, TSS3's combined `0x08A`
+carrier cannot be made idiomatic by adding an ID detector and a private relay
+policy. If the relay blocks native FRC `0x08A`, the VMC cannot receive the
+emergency request above on that carrier; detecting its result ID elsewhere does
+not restore the request.
+Before longitudinal support can be considered complete, one of two things must
+be established in the normal upstream architecture: a separate downstream PCS
+actuation carrier that remains forwardable, or an upstream-reviewed combined-
+carrier ownership contract expressed through the Toyota `CarState` /
+`CarController` and Panda safety boundaries. Absent that, the honest upstream
+precedent is to mark stock AEB unavailable—not to hide a merge policy in the
+signer, relay, or an auxiliary daemon.
+
+Evidence:
+`data/generated/camry_20260921_pcs_alert.json`,
+`tools/targets/camry/analysis/analyze_camry_20260921_pcs_alert.py`,
+`tests/verify_camry_20260921_pcs_alert.py`,
+`data/generated/gtsplus_2026/pcs_data_viewer_ddr_semantics.json`, and
+`tests/verify_gtsplus_pcs_data_viewer_ddr_semantics.py`.
+
 ## 5. Demonstrated B6 steering authority and remaining qualification
 
 **2026-09-10 supersession:** the exact development path has established steering
