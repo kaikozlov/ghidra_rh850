@@ -212,6 +212,52 @@ The same `CommunicationControl` experiment against these responding endpoints di
 
 Therefore the still-running `0x00F` synchronization source and any distinct physical Bus-4 proxy for the FRC-dependent group were not identified among the CommunicationControl-capable responding ECUs tested here. Central Gateway / a non-addressed proxy remains a leading physical-publication candidate, but that is not yet proven by this experiment.
 
+### `0x00F` ownership follow-up: chassis-side direction and SRS prior art
+
+A later direct re-read of relay-open route `0000002d--4a4806c524` fixes the
+observable direction of the synchronization frame. `0x00F` has **3,243 native
+bus0 RX** frames, only **121 native bus2 RX** frames (120 confined to the first
+route segment and one shutdown-boundary frame), and **3,122 bus2 returned
+forwarding-TX echoes**. This is the same chassis-side direction as
+Brake/EPS traffic and the opposite direction from the FRC-owned `0x08A` family.
+Combined with the CommunicationControl result above, the FRC is therefore not
+the physical `0x00F` publisher at the accessible relay boundary.
+
+Current GTS+ resolves the tested `0x7B3` endpoint as category 445
+`StrAngleSnsr_P5`, so the unchanged `0x00F` under that endpoint's normal-Tx
+suppression also excludes the steering-angle-sensor ECU as the synchronization
+publisher in the tested state.
+
+The yc Toyota Venza SRS CodeFlash supplies useful cross-variant firmware prior
+art. Its production SecOC configuration uses logical key selector 4 in both
+directions. The four generated receive profiles are `0x00F`, `0x090`, `0x0D7`
+and `0x024`; the two generated transmit profiles are only SecOC DataIDs `0x326`
+and `0x024`. Thus that real Toyota airbag implementation explicitly treats
+`0x00F` as a synchronization **receive** profile, not a transmit profile. This
+does not prove the exact Camry SRS calibration is identical, but it materially
+weakens Airbag as the `0x00F` source hypothesis.
+
+Central Gateway remains the strongest unisolated physical-publication candidate.
+Current `CentralGW_P5` does contain behavior `XF01B ECU Security Key Not
+Registered`, so it belongs to Toyota's ECU-Security-Key vocabulary and should
+not be assumed incapable of holding/accessing network-authentication material.
+That DDB fact alone does not prove local key storage or SecOC generation: the
+same behavior exists on Meter, Airbag, SAS, Brake and EPS families. Toyota's
+recovered network-key utility instead exposes a special security master at
+`0x763` and a per-participant SHE M1--M5 update model; the exact identity of
+`0x763` remains unresolved. The normal Camry Central-Gateway diagnostic route is
+a separate phase-34 `0x750/0x758` path with address extension `0x5F`.
+
+The Combination Meter remains a logical-origin possibility because its current
+DDB also carries `XF01B ECU Security Key Not Registered` vocabulary and the
+screen wakes visibly during brake-only vehicle wake, but GTS+ places it on
+Toyota Bus 3. Since `0x00F` is native on the intercepted
+Bus-4/chassis side, a meter-originated synchronization frame would still require
+the Central Gateway (or another internal gateway function) to bridge it onto
+Bus 4. The retained pre-start brake-wake capture later shows `0x00F` already
+running before the brake press, so meter screen wake does not itself start the
+freshness epoch.
+
 ## 9. Live TSS3 Operation FFD access works
 
 This is a major live tooling result.
