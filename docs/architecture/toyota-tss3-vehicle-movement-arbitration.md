@@ -911,15 +911,17 @@ reports whichever source was actually employed.
 
 Consequences for the Camry work:
 
-- `0x08A`'s duplicated B8:B9/B11:B12 values are not conceptually “two copies of one
-  acceleration command”; they occupy the two **bound-package slots**.  Equality in our
-  retained DRCC captures means the bounds collapse to the same value in those states, or
-  that a remaining wire-field/order assumption needs refinement.
+- `0x08A` B8:B9/B11:B12 are not conceptually “two copies of one acceleration
+  command”; they occupy two **bound-package slots**.  The original selected DRCC corpus
+  happened to have equal values, but a Sep-22 archive-wide census finds six independent
+  ordinary `ID11/ID17` divergence episodes (12 frames) with B8:B9 > B11:B12 in every
+  case.  That strongly resolves the ordinary-DRCC ordering as B8:B9=upper and
+  B11:B12=lower. A separate `ID13/ID20` intervention family has different unequal
+  geometry and remains semantically unresolved.
 - A result ID of 63 while application bounds are present is expected when driver demand
   is the employed value inside the allowed range.
-- We should recover the upper/lower ordering and policy fields before attempting native
-  longitudinal output; simply writing one scalar acceleration is not the complete OEM
-  contract.
+- Remaining policy/permission fields still need recovery before native longitudinal is
+  complete; simply writing one scalar acceleration is not the complete OEM contract.
 
 GTS supplies an independent request-generation boundary in the Brake domain:
 
@@ -993,7 +995,7 @@ FRC / TSS3 applications
 - which internal node owns each SecOC freshness/signing operation and the clean external
   replacement/suppression boundary;
 - B6 secondary-field OEM names;
-- longitudinal A/B upper-versus-lower ordering and remaining policy bits.
+- longitudinal remaining policy bits and the distinct `ID13/ID20` intervention tuple semantics; ordinary `ID11/ID17` A/B ordering is now strongly resolved as upper/lower.
 
 The patent is an architecture source, not proof that every block is placed in exactly the
 same ECU on F33.  Those exact-Camry conclusions continue to require firmware/dynamic

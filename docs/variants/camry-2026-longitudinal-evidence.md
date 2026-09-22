@@ -479,13 +479,28 @@ The FRC-hosted PCS Operation-FFD recorder independently contains record `5280`
 (upper limit)", again signed16 at 0.001 m/s², as well as longitudinal IDs,
 braking/driving-force allocation, and arbitration-result records.
 
-This is **not yet a byte-name proof**. Because B8:B9 == B11:B12 in every retained
-complete-drive frame, the evidence cannot assign one word to upper and the other
-to lower, prove that either is literally DID `0x10A1/0x10A2`, or assign A/B to Toyota's
-upper versus lower record. The correct bounded statement is that the acceleration
-words and packed B6/B7 ID/allocation bytes match Toyota's TSS request contract in
-direction, width, scale, bit geometry, and pre-motion behavior; only the A/B
-upper/lower ordering remains open.
+The original two-drive result did **not** resolve upper-versus-lower ordering because
+B8:B9 == B11:B12 in all 44,617 frames in that selected corpus. A 2026-09-22
+archive-wide raw-log census supersedes that limitation. Scanning every recoverable
+`rlog.zst` / `*.rlog.zst` under `~/dev/inspect/logs` with `LogReader`, and retaining
+native-RX `0x08A/32` observations (`src < 128`), yields **1,505,266 observations from
+605 rlogs**. Only 48 have unequal B8:B9/B11:B12 values, but 12 of those are the
+ordinary Camry DRCC tuple `(ID11,allocation1)/(ID17,allocation3)`, spread across six
+independent route segments as two-frame episodes. Their `(B8:B9, B11:B12)` values in
+m/s² are `(+0.682,-0.769)`, `(+0.687,-0.437)`, `(+0.217,-0.442)`,
+`(+0.432,-0.659)`, `(+0.215,-0.452)`, and `(-0.621,-0.701)`: **A > B in 12/12
+ordinary-DRCC unequal frames**. The first five episodes occur immediately before the
+request drops to idle `0/4`; the sixth occurs on an idle->active transition. This is
+strong dynamic evidence that, for the ordinary `11/17` DRCC package, **B8:B9 is the
+upper acceleration bound and B11:B12 is the lower acceleration bound**, with B6/ID11
+paired to the upper slot and B7/ID17 paired to the lower slot.
+
+The other 36 unequal observations are one distinct route-45 intervention family with
+request IDs `13/20`, B5=`0x04`, B8:B9 sweeping `-0.175..-0.500 m/s²`, and B11:B12
+held at zero. That tuple is structurally different from ordinary DRCC and must not be
+used to invert the `11/17` ordering; its exact application semantics remain unnamed.
+This still stops short of a synchronized literal DID-to-byte proof for `0x10A1..0x10A4`,
+but the ordinary-DRCC A/B upper/lower ordering is no longer open.
 
 The alternatives now rank as follows:
 
