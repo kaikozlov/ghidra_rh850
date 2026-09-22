@@ -362,22 +362,37 @@ EPS-communication-open clear; the succeeding signer self-test supplies the
 functional EPS-side proof. No DTC clear, peer reset, EPS reset, or EPS power cycle is
 part of a healthy `oracle-ui-bringup` run.
 
-The first automatic-start integration keeps the proven backend unchanged and
-adds an openpilot-side `Tss3OracleAutoArm` watcher. When enabled on exact F33 it
-runs while offroad, consumes the existing `pandaStates` stream, and triggers only
-on a newly observed ignition false->true edge. It then acquires the same
-cooperative direct-Panda lease and runs `oracle-ui-bringup` without operator
-input. Starting/restarting the watcher while ignition is already true does not
-trigger installation; it waits for the next complete OFF->ON cycle. Each auto
-run records Panda message time, watcher receipt, backend launch, first completed
-`50 03`, and `10 02` dispatch in `auto-trigger.json`. The backend exclusively owns
-its per-run output directory: the watcher chooses a fresh non-existent path but
-never creates it before launch; daemon stdout is a sibling `*.auto-daemon.log`
-sidecar, and a pre-existing run name is resolved with a numeric suffix. This avoids
-self-failing the backend's intentional empty-output-directory guard. This 10-Hz watcher is the
-minimum-intrusion implementation; if field timing shows insufficient margin,
-only the latency-sensitive startup catcher should move into native `pandad`,
-while RAM upload/attestation/KAT remain in the existing backend.
+The automatic-start integration keeps the proven backend unchanged and uses a
+native `pandad` startup catcher plus the openpilot-side `Tss3OracleAutoArm`
+watcher. The original catcher waited for a Panda ignition false->true edge before
+transmitting. The 2026-09-22 deep-sleep/proximity experiment closes a better
+pre-start trigger on exact F33: from a verified zero-CAN state, ordinary approach
+with the normal key produced bus0/bus2 `0x45A` as the first mirrored wake frame,
+with the rest of the wake-active OFF set and `0x00F` following immediately.
+
+The maintained catcher therefore preloads ELM327 while OFF and remains in normal
+Panda power-save. Logical bus0 is already the always-awake main bus, so observing
+native bus0 `0x45A` starts a **low-rate prewarm** without waking the other Panda
+CAN transceivers: `10 03` is offered at 10 Hz on bus0 while the vehicle is already
+wake-active. A later native ignition edge promotes the same attempt to the
+existing 50-Hz startup catch, disables Panda power-save at the same point as
+before, and sends `10 02` only after an exact `50 03`. Ignition remains a full
+fallback if the proximity wake frame is ever missed.
+
+The prewarm does not run indefinitely. If native bus0 traffic goes quiet for
+three seconds it re-arms immediately. If wake-active traffic persists without an
+ignition edge, prewarm transmission stops after 60 seconds and waits for either
+ignition or a real return to sleep before another proximity-triggered prewarm can
+start. Thus true deep sleep retains the same Panda power-save behavior and zero
+CAN traffic; the only added traffic occurs after Toyota itself has already woken
+the visible network.
+
+After the native catcher reaches PROGRAMMING it publishes the same cooperative
+handoff marker and the existing warm uploader acquires the direct-Panda lease and
+runs `oracle-ui-bringup` without operator input. `auto-trigger.json` now retains
+both wake-relative and ignition-relative timing, including wake->first `10 03`,
+wake->ignition, `50 03`, and `10 02`. RAM upload/attestation/KAT and READY/peer
+health qualification remain unchanged in the existing backend.
 
 Non-Camry targets skip this lifecycle step. `replace-current` is the first mutation test: it requires READY plus stationary
 `0x0AA`, derives the current measured angle from `0x025`, converts that angle to

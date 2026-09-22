@@ -7320,3 +7320,32 @@ This treatment does not separately prove that RF key detection, rather than
 another no-touch effect of the operator's physical approach while carrying the
 key, is the specific physical trigger. That distinction is unnecessary for the
 current binary wake question.
+
+### 76.2 Auto-arm can now prewarm from the wake-active OFF transition
+
+The new proximity result is directly useful to the existing automatic startup
+catcher. Current `kai-openpilot` had already moved the latency-sensitive
+`10 03 -> exact 50 03 -> 10 02` portion into native `pandad`, but its first TX
+still waited for Panda ignition false->true. That wastes the tens of seconds
+between key-proximity wake and the driver's POWER press.
+
+The maintained implementation now uses the observed **bus0 `0x45A`** wake frame
+as an exact-F33 pre-start trigger. While OFF, the catcher remains in Panda
+power-save with ELM327 already loaded; logical bus0 is the main CAN path that
+Panda intentionally leaves awake. Native `0x45A` starts a 10-Hz `10 03` prewarm
+on that already-live bus without enabling the other CAN transceivers. The native
+ignition edge still exists as the fallback and, when observed, promotes the same
+attempt to the original 20-ms/50-Hz catch, disables power-save, and sends
+`10 02` only after an exact positive `50 03`.
+
+To avoid turning a casual walk-by into permanent bus activity, prewarm stops
+after 60 seconds if ignition never arrives. It also re-arms as soon as native
+bus0 has been quiet for three seconds. After the 60-second cap it waits for
+either ignition or an actual return to sleep rather than repeatedly retriggering
+on the still-awake `0x45A` heartbeat. Thus the all-day deep-sleep state remains
+unchanged: Panda stays in its ordinary power-save state and sends nothing until
+Toyota's own wake-active traffic is visible.
+
+The existing Python warm-uploader/backend is unchanged except for recording the
+new wake-relative timing fields. Exact RAM install, READY/Park/stationary guard,
+peer-health check, and signer self-test remain the same.
