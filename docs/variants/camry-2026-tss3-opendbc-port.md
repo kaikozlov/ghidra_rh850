@@ -3330,6 +3330,47 @@ not promoted into a new production-rate qualification framework here. If live 10
 shows signer saturation, measure that as a focused experiment rather than adding another
 runtime scheduler/tooling stack to this repository.
 
+### 4.14 Recovered PCS/ADU semantics constrain `0x08A` relay ownership
+
+The recovered GTS+ PCS Data Viewer now supplies the complete 7,851-row ADU
+recorder table. Its generic longitudinal interface is the same lower/upper
+limit abstraction already seen dynamically: `2A02` records lower requester ID,
+acceleration, distribution, shift/EPB/override/priority policy; `2A03` records
+upper requester ID, acceleration, and distribution. `1592` separately records
+the overall, brake, and powertrain arbitration-result IDs, while `161D` records
+the resulting acceleration. These are recorder payload geometries, not a claim
+that the same bytes appear directly in CAN `0x08A`.
+
+The table gives a concrete explanation for the observed upper-ID-17/lower-ID-23
+combination: Toyota explicitly records PDA(OAA) as an **upper-limit** request
+family (`1F03..1F07`) and PDA(DA) as a **lower-limit** request family
+(`5B07..5B11`). Two different IDs can therefore be cooperating halves of PDA.
+The viewer has no integer-to-client legend for 13, 17, or 23, so those values
+remain slot- and state-dependent; ID 17 is not assigned a global feature name.
+
+PCS evidence must be interpreted at the same boundary. The recorder separates
+warning/target judgment, enable/prohibit state, deceleration request, generic
+longitudinal arbitration, and final brake pressurization. A retained PCS alert
+alone does not prove the downstream request was delivered. If the relay blocks
+the FRC's native `0x08A`, VMC necessarily does not see the native PCS request
+carried by that frame. Any supported architecture must preserve stock emergency
+behavior through the normal openpilot/opendbc safety and CarController policy
+shape; it cannot treat the result ID or alert as a sufficient PCS detector and
+cannot add a separate vehicle-specific policy layer.
+
+The recovered stop/resume names sharpen, but do not yet close, that work.
+`1770_26` is `Automatic Start DDR Detection Signal`; DDR `5493/5494` are both
+named `ACC Resume Trigger Signal`; and trigger 33 is `ACC cancel after resume`.
+Those are observables and recorder events, not permission to synthesize resume.
+The next join is the DDR initializer plus the retained stop/resume and PCS-alert
+logs, with the existing rule unchanged: no resume command is emitted until the
+normal upstream state and safety contracts can express it.
+
+Evidence:
+`data/generated/gtsplus_2026/pcs_data_viewer_adu_semantics.json`,
+`tools/techstream/extract_pcs_data_viewer_adu_semantics.py`, and
+`tests/verify_gtsplus_pcs_data_viewer_adu_semantics.py`.
+
 ## 5. Demonstrated B6 steering authority and remaining qualification
 
 **2026-09-10 supersession:** the exact development path has established steering

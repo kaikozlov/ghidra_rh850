@@ -15,6 +15,7 @@ import contextlib
 import hashlib
 import io
 import json
+import re
 import sys
 from dataclasses import dataclass
 from decimal import Decimal
@@ -403,6 +404,7 @@ def _interpret_collection(
     body = CilMethodBody(MethodBodyReader(pe, method))
     owners = _method_owner_map(pe)
     stack: list[Any] = []
+    locals_: dict[int, Any] = {}
     typespec_ctor_count = 0
     records: list[tuple[Any, dict[str, Any]]] = []
 
@@ -423,6 +425,14 @@ def _interpret_collection(
             continue
         if op == "pop":
             stack.pop()
+            continue
+        local_match = re.fullmatch(r"(ldloc|stloc)\.(\d+)", op)
+        if local_match:
+            operation, local_index = local_match.group(1), int(local_match.group(2))
+            if operation == "stloc":
+                locals_[local_index] = stack.pop()
+            else:
+                stack.append(locals_[local_index])
             continue
         if op == "ldsfld":
             field = resolve_token(pe, ins.operand)
@@ -488,7 +498,7 @@ def _interpret_collection(
             if records:
                 break
             continue
-        if op in ("nop",):
+        if op in ("nop", "conv.i4", "conv.u4", "conv.i8", "conv.u8"):
             continue
         if op == "ret":
             break
