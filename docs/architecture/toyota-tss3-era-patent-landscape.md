@@ -772,18 +772,27 @@ Distribution Box, EBU, Main Body, or Entry&Start. Current GTS gives all of those
 useful observables, but an exact ownership map still requires live transitions,
 wiring/EWD evidence, or firmware.
 
-The next high-value capture should therefore distinguish these events instead of
-recording only "OFF" versus "READY":
+A 2026-09-22 binary proximity probe now closes the first boundary. Starting
+from verified zero-CAN deep sleep, the operator approached and stood next to the
+driver's door carrying the normal Toyota key without touching the car. The
+network stayed silent for 32.244 s after arming, then woke abruptly; `0x45A`
+was first and `0x00F` followed about 303.5 ms later. Within one second 28 native
+IDs / 56 mirrored bus0/bus2 streams were active. Therefore ordinary approach
+while carrying the normal key is sufficient to move the comma-visible network
+from deep sleep into wake-active OFF.
 
-deep sleep -> key approaches -> door unlock/open -> key in cabin -> brake down
+The remaining sequence can now start from that established state rather than
+treating proximity as an unknown:
+
+key-proximity wake -> door unlock/open -> key in cabin -> brake down
 -> brake up -> power-button press -> READY -> power OFF -> door close -> sleep
 
-For each boundary, record per-bus first/last frame time and newly appearing IDs,
-and concurrently sample the read-only GTS observables above when practical.
+For each later boundary, record per-bus first/last frame time and newly appearing
+IDs, and concurrently sample the read-only GTS observables above when practical.
 Particularly useful joins are PSC 0x1001/0x1003/0x1005,
 Central Gateway 0x1001, PDB 0x5011, and the SMART_P5 sleep/start fields.
-A true deep-sleep baseline must begin **before touching a door**, because Toyota
-documents the door event itself as sufficient to start brake-system activity.
+A true deep-sleep baseline must begin **before approaching with the normal key**,
+not merely before touching a door.
 
 ## 4. Security and reprogramming families
 

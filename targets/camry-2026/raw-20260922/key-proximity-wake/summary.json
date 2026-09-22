@@ -1,0 +1,89 @@
+{
+  "armed_wall_utc": "2026-09-22T20:45:16.657847+00:00",
+  "boundary": "Binary treatment result only; does not distinguish key RF detection from another no-touch effect of the operator physically approaching while carrying the key.",
+  "comparison_to_20260920_prebrake": {
+    "new_minus_old": [],
+    "old_minus_new": [
+      "0x129"
+    ],
+    "old_unique_native_id_count": 29
+  },
+  "conclusion": "Approaching and standing next to the car with the normal Toyota key, without touching the car or pressing a control, is sufficient to wake a comma-visible Toyota network from verified zero-CAN deep sleep.",
+  "controller_deltas": [
+    {
+      "controller": 0,
+      "total_error_cnt": 0,
+      "total_fwd_cnt": 0,
+      "total_rx_cnt": 2661,
+      "total_rx_lost_cnt": 0,
+      "total_tx_cnt": 0,
+      "total_tx_lost_cnt": 0
+    },
+    {
+      "controller": 1,
+      "total_error_cnt": 0,
+      "total_fwd_cnt": 0,
+      "total_rx_cnt": 0,
+      "total_rx_lost_cnt": 0,
+      "total_tx_cnt": 0,
+      "total_tx_lost_cnt": 0
+    },
+    {
+      "controller": 2,
+      "total_error_cnt": 0,
+      "total_fwd_cnt": 0,
+      "total_rx_cnt": 2661,
+      "total_rx_lost_cnt": 0,
+      "total_tx_cnt": 0,
+      "total_tx_lost_cnt": 0
+    }
+  ],
+  "end_wall_utc": "2026-09-22T20:46:18.901848+00:00",
+  "first_0x00f_ms_after_first_frame": {
+    "0": 303.514642,
+    "2": 303.506726
+  },
+  "first_frame": {
+    "address": 1114,
+    "bus": 2,
+    "data": "5a00a6020f0f0f0f",
+    "raw_bus": 2,
+    "returned": false,
+    "t_ns": 32243788898
+  },
+  "frame_count": 5320,
+  "schema": "camry-key-proximity-wake-summary-v1",
+  "sha256": "8592a57e36eec8722adca5f7996f4fe32f7bdfc9781193beb423e9c4e4405448",
+  "silent_after_arm_s": 32.243788898,
+  "unique_native_id_count": 28,
+  "unique_native_ids": [
+    "0x00F",
+    "0x14B",
+    "0x14C",
+    "0x1BF",
+    "0x2D1",
+    "0x2D8",
+    "0x2E5",
+    "0x2F9",
+    "0x329",
+    "0x340",
+    "0x345",
+    "0x3AE",
+    "0x3EE",
+    "0x3FC",
+    "0x439",
+    "0x45A",
+    "0x610",
+    "0x611",
+    "0x614",
+    "0x615",
+    "0x620",
+    "0x622",
+    "0x623",
+    "0x624",
+    "0x629",
+    "0x62A",
+    "0x638",
+    "0x63B"
+  ]
+}

@@ -7288,3 +7288,35 @@ logger armed before any approach/door interaction.
 Evidence grade: **dynamic-probe / observed** for comma-visible network silence
 and the deep-sleep-vs-wake-active distinction. Internal hidden buses and ECU
 power rails remain outside the capture boundary.
+
+### 76.1 Normal-key proximity alone is sufficient to enter wake-active OFF
+
+A follow-up probe started from the same verified zero-CAN deep-sleep state and
+required a fresh five-second zero-frame baseline before arming. The operator
+then approached and stood next to the driver's door carrying the normal Toyota
+key, without touching the vehicle or pressing any control.
+
+The network remained silent for **32.243788898 s after arming**, then the first
+native frame appeared on bus2 as `0x45A/8 5a00a6020f0f0f0f`; the mirrored bus0
+copy followed 0.062 ms later. Within 100 ms the mirrored wake set already
+included `0x45A/0x1BF/0x620/0x629`. Native `0x00F` began approximately
+**303.51 ms after the first wake frame** on both sides. Within one second, 28
+native IDs / 56 mirrored `(bus,address)` streams were active.
+
+The retained 30-second post-wake tail contains **5,320 frames**. Controller 0
+and controller 2 each gained 2,661 RX frames while TX, forwarding, errors and
+losses stayed zero; controller 1 remained at zero RX. Ignition line/CAN remained
+false and Panda safety remained NOOUTPUT throughout.
+
+The 28-ID proximity wake set is a strict subset of the September-20 pre-brake
+wake-active OFF set: all 28 IDs recur there, with only `0x129` present in the
+older pre-brake state but absent from this 30-second proximity tail. Thus normal
+approach while carrying the key is sufficient for the binary question: it wakes
+the comma-visible Toyota network and substantially reproduces the same
+wake-active OFF state that had already existed before the September-20 brake
+instruction.
+
+This treatment does not separately prove that RF key detection, rather than
+another no-touch effect of the operator's physical approach while carrying the
+key, is the specific physical trigger. That distinction is unnecessary for the
+current binary wake question.

@@ -1,0 +1,69 @@
+2026-09-22 exact-Camry normal-key proximity wake probe
+
+Target
+- 2026 Toyota Camry Hybrid
+- Toyota-B relay-correct topology
+- Vehicle started from the same deep-sleep state established by the immediately
+  preceding quiet-baseline experiment.
+
+Question
+Does approaching and standing next to the vehicle with the normal Toyota key,
+without touching the vehicle or pressing any control, wake a comma-visible
+Toyota network?
+
+Procedure
+- Cooperative direct-Panda lease.
+- Panda opened with configure=False.
+- Board heartbeat watchdog disabled only during the direct lease.
+- NOOUTPUT safety and closed intercept relay.
+- Panda power-save disabled so all three CAN receive paths were live.
+- Five-second zero-frame baseline required before arming.
+- Operator was told to walk to the car carrying the normal key, stand next to
+  the driver's door, and not touch the car or press anything.
+- Probe automatically retained 30 s after the first received vehicle frame.
+- No CAN data frame and no diagnostic request was transmitted by the host.
+
+Result
+- Armed UTC: 2026-09-22T20:45:16.657847Z.
+- The network remained silent for 32.243788898 s after arming.
+- First frame:
+    bus2 0x45A/8 5a00a6020f0f0f0f
+- Mirrored bus0 0x45A followed 0.062 ms later.
+- Within 100 ms, the visible wake set already included mirrored:
+    0x45A, 0x1BF, 0x620, 0x629.
+- Native 0x00F began 303.507 ms after the first wake frame on bus2 and
+  303.515 ms after the first wake frame on bus0.
+- Within 1 s, 28 native IDs / 56 mirrored (bus,address) streams were active.
+- The retained 30-s post-wake tail contains 5,320 frames total.
+- Controller deltas during the capture:
+    controller0 RX +2661, TX +0, forward +0, errors +0
+    controller1 RX +0,    TX +0, forward +0, errors +0
+    controller2 RX +2661, TX +0, forward +0, errors +0
+- ignitionLine=false and ignitionCan=false at arm and at end.
+- Safety remained NOOUTPUT.
+- Panda ownership returned normally after capture.
+
+Wake-set comparison to 2026-09-20 pre-brake state
+- New normal-key proximity wake: 28 native unique IDs.
+- Sep-20 pre-brake wake-active OFF state: 29 native unique IDs.
+- Every ID seen in the new proximity wake existed in the Sep-20 pre-brake set.
+- The only Sep-20 pre-brake ID not observed in this 30-s proximity tail was 0x129.
+- Therefore the proximity-triggered state substantially reproduces the same
+  wake-active OFF network that had already existed before the Sep-20 brake
+  instruction.
+
+Interpretation
+OBSERVED: approaching and standing next to the car with the normal key, without
+touching the car or pressing a control, is sufficient to wake a comma-visible
+Toyota network from the verified zero-CAN deep-sleep state.
+
+This is sufficient for the intended binary discriminator. It does not separately
+distinguish RF key detection from any other no-touch effect of the operator's
+physical approach; the treatment as executed was ordinary human approach while
+carrying the normal Toyota key.
+
+Files
+- key-proximity-probe.json.gz
+  SHA-256 8592a57e36eec8722adca5f7996f4fe32f7bdfc9781193beb423e9c4e4405448
+- camry_key_proximity_probe.py
+  Exact probe source used for the successful run.
