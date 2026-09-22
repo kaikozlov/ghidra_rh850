@@ -415,12 +415,12 @@ def requester_id_namespace(drive_reports: dict[str, dict], hold: dict) -> dict:
       "corolla_span": {"path": str(COROLLA_SPAN.relative_to(REPO)), "sha256": sha256(COROLLA_SPAN)},
     },
     "model": {
-      "id_is_not_priority": "Requester/result IDs identify an application/request source; the numeric value is not an ordinal priority.",
+      "id_is_not_priority": "Request IDs identify FRC-submitted application sources and result IDs identify the source actually employed downstream; the numeric value is not an ordinal priority.",
       "application_id_semantics": ("Toyota's vehicle-movement architecture defines both longitudinal request IDs and the lateral request ID as identifiers of applications. "
                                    "This supports a coordinated/shared application-ID namespace model, while the static diagnostic corpus still does not expose a complete longitudinal value table."),
       "axis_boundary": ("Numeric reuse across axes is now treated as potentially intentional application identity, not an automatic coincidence. "
                         "Axis-local diagnostic labels may still describe different roles/phases of the same application, so equal numbers do not by themselves prove identical display labels."),
-      "upper_lower_boundary": ("Candidate A/B are the two selected longitudinal bound-package ID/allocation slots; their upper-vs-lower ordering remains unresolved. "
+      "upper_lower_boundary": ("Candidate A/B are the two selected longitudinal bound-package ID/allocation slots. Archive-wide unequal ordinary-DRCC frames strongly resolve A as upper and B as lower. "
                                "The bounds are independently arbitrated and can therefore carry different application IDs."),
     },
     "camry_observed": {
@@ -439,7 +439,8 @@ def requester_id_namespace(drive_reports: dict[str, dict], hold: dict) -> dict:
       "boundary": corolla_long["boundary"],
     },
     "authoritative_sparse_names": {
-      "p5_frc_isa_vertical_id": {"patterns": isa_patterns, "meaning": "P5 FRC ordinary Data Monitor; exact longitudinal/vertical requester labels."},
+      "p5_frc_isa_vertical_id": {"patterns": isa_patterns, "meaning": ("P5 FRC ordinary Data Monitor display surface. Its pattern table includes 63=Driver Operation, but that does not establish FRC request origination. "
+                                                                                  "On the Camry wire, 63 is absent from both FRC-origin 0x08A request slots and appears on the Brake/VMC-owned 0x081 employed-result field.")},
       "cross_generation_examples": sparse_cross_generation,
       "lateral_target_id_dictionary": lateral_ids,
     },
@@ -495,16 +496,16 @@ def requester_id_namespace(drive_reports: dict[str, dict], hold: dict) -> dict:
         "lateral": lateral_ids.get("45"), "grade": "OEM cross-generation shared-application candidate",
       },
       "63": {
-        "longitudinal": ("P5 FRC ISA vertical ID explicitly names 63 = Driver Operation; Camry and retained Corolla 0x081 result use 63 when "
-                         "the employed longitudinal source is outside the FRC/TSS application slots."),
-        "lateral": lateral_ids.get("63"), "grade": "OEM named on both axes / observed result",
+        "longitudinal": ("Driver Operation is OEM-named on a P5 FRC diagnostic display surface, but dynamic Camry/Corolla evidence places longitudinal ID63 on the downstream Brake/VMC result side only: "
+                         "it is absent from both FRC-origin 0x08A request slots and appears in 0x081 when driver demand is the employed source."),
+        "lateral": lateral_ids.get("63"), "grade": "OEM-named driver/result identity; not an observed FRC longitudinal requester",
       },
     },
     "cross_axis_assessment": {
       "supports_shared_application_namespace": [
         "Toyota's architecture explicitly defines both longitudinal and lateral request IDs as application identifiers.",
         "0 is the no-request/manual anchor on both recovered interfaces.",
-        "63 is OEM-labeled Driver Operation on both the P5 longitudinal/vertical and lateral Target ID surfaces.",
+        "63 is OEM-labeled Driver Operation on a P5 FRC diagnostic display surface and on the lateral Target ID dictionary, but longitudinal dynamic evidence places 63 on the downstream Brake/VMC result side rather than the FRC 0x08A request side.",
         "Camry longitudinal ID11 is the ordinary DRCC application source while lateral ID11 is OEM LTA/LCA, making 11 a strong shared TSS continuous-driving application-ID candidate.",
         "P6 longitudinal IDs 41/45 are MaaS autonomous-driving Request 1/2 while the lateral table labels 41/45 AD(Lv.4)/DES(Lv.4); these may be axis-specific views of shared automated-driving application identities rather than contradictory namespaces.",
       ],
@@ -617,9 +618,9 @@ def build() -> dict:
       "result_plane": ("0x081 is the unified Brake-owned employed-result/reference/supervision envelope: its lateral selected ID/reference are recovered, "
                        "B6[5:0] is the strongest 5284 longitudinal employed-source-ID candidate, and B20:B21 is the strongest 57DB result-acceleration candidate. "
                        "Toyota's architecture distinguishes the lateral arbitration winner from the longitudinal source actually employed after driver/application comparison."),
-      "not_fully_mapped": ("The entire 5280/5281 recorder model is NOT yet byte-named. B6/B7 are now strongly recovered structurally as the two packed "
-                           "request-ID/allocation bytes (bits7:2 ID, bits1:0 allocation), including active/hold/override transitions; "
-                           "upper-vs-lower A/B assignment is unresolved, and shift/EPB, override-prohibition and priority remain unmapped."),
+      "not_fully_mapped": ("The entire 5280/5281 recorder model is NOT yet byte-named. B6/B7 are strongly recovered structurally as the two packed "
+                           "request-ID/allocation bytes (bits7:2 ID, bits1:0 allocation), including active/hold/override transitions; archive-wide unequal ordinary-DRCC frames strongly resolve A as upper and B as lower, "
+                           "while shift/EPB, override-prohibition and priority remain unmapped."),
       "0x0CA": "Supersede the old upper/lower/result-triplet interpretation; 0x0CA remains other protected longitudinal/chassis state.",
       "integration": ("For Camry, do not revive 0x160 Alpha Long. The OEM-native integration target is the TSS application/request side feeding Toyota's Vehicle Movement Manager, not direct powertrain/brake actuator synthesis. "
                       "0x08A is the strongest observed request-side carrier, while the downstream Vehicle Motion Control target interface and source-suppression/security path remain to be recovered."),

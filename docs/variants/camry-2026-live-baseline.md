@@ -3486,11 +3486,12 @@ override/priority fields and `57D3` acceleration validity remain unresolved.
 The result plane independently validates the packed-ID interpretation: selected
 `0x081 B6[5:0]` ID11 equals request candidate A (`0x08A B6[7:2]`) in
 **1,525/1,529** and **3,276/3,281** ID11 samples across the two drives, while
-every selected ID63 result is absent from both request-ID candidates. Candidate B
-is ID17 during active cruise. P5 FRC diagnostics independently name
-`63=Driver Operation`, so the current model is selected lower/upper application
-packages followed by controller/driver selection feedback—not a mysterious third
-FRC request hidden from `0x08A`. Upper-versus-lower A/B ordering remains unresolved.
+every selected ID63 result is absent from both FRC request-ID candidates. Candidate B
+is ID17 during active cruise. P5 FRC diagnostics include the display label
+`63=Driver Operation`, but `0x081` is Brake/VMC-owned: longitudinal 63 is downstream
+employed-source feedback to the FRC when driver demand wins, not a hidden FRC request.
+The archive-wide unequal-bound census now strongly resolves ordinary DRCC A as upper
+and B as lower.
 
 The delayed-hold corpus independently decomposes the old composite raw-B7 states:
 ordinary `0x2D/0x47` is A `(ID11,method1)` / B `(ID17,method3)`, delayed hold
@@ -3501,12 +3502,14 @@ frames and nowhere else in complete routes `3b/3c`. A moving `B7=0x65` =
 ID25/method1 has B4[5] clear. Camry runtime uses this exact structural hold bit;
 its OEM recorder name remains unassigned.
 
-The requester-ID namespace is now separately bounded. Camry observes request IDs
-A `{0,11}`, request IDs B `{4,17,25,36}`, and result IDs `{11,63}`; ID25 is the
-delayed-ACC-hold requester and ID36 is a 33-frame startup-only state. The retained
-2025 Corolla independently uses idle A/B `0/4`, active A/B `17/23`, while result
-ID stays 63. Toyota statically names only sparse longitudinal/vertical anchors in
-the available corpus: P5 `0=No Request,63=Driver Operation`; P6 speed-limiter
+The request/result ID roles are now separately bounded. Camry observes FRC request IDs
+A `{0,11}`, request IDs B `{4,17,25,36}`, and Brake/VMC result IDs `{11,63}`;
+ID25 is the delayed-ACC-hold requester and ID36 is a 33-frame startup-only state.
+The retained 2025 Corolla independently uses FRC idle A/B `0/4`, active A/B `17/23`,
+while the downstream result stays 63. Toyota statically names only sparse
+longitudinal/vertical anchors in the available corpus: the P5 FRC diagnostic display
+includes `0=No Request,63=Driver Operation`, but only 0 is observed as an FRC request
+anchor here; 63 is dynamically result-side. P6 speed-limiter
 `9=ISA`; P6 MaaS longitudinal `41/45=Request 1/2`. The full generation-20 lateral
 ID dictionary uses `11=LTA/LCA`, making Camry longitudinal ID11 during DRCC a
 strong **shared TSS application-ID hypothesis**, but not an OEM longitudinal name.

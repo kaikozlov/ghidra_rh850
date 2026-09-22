@@ -23,14 +23,15 @@ as an application identifier. This is generic Toyota architecture, not by
 itself a byte-level proof for F33, but it matches the recovered `0x08A/0x081`
 behavior unusually closely.
 
-That distinction explains an otherwise confusing observation: result ID63 does
-not need to exist in either `0x08A` longitudinal slot. On the Camry, `0x08A`
-request candidate A is ID11 during ordinary DRCC and candidate B is ID17, while
-`0x081` can report ID63. Toyota independently names `63 = Driver Operation` on
-the P5 FRC longitudinal/"Vertical ID" diagnostic surface. The strongest current
-model is therefore **FRC-submitted application request package(s) in `0x08A`,
-downstream arbitration/employed-source feedback in `0x081`**, not a final VMM
-winner already encoded in the request packet.
+That distinction explains the ID63 observation cleanly. On the Camry, FRC-origin
+`0x08A` request slots carry IDs such as 0/4 and 11/17; **ID63 is not observed in
+either request slot**. Brake/VMC-owned `0x081` can instead report ID63 after the
+VMC compares the FRC-submitted bounds with driver demand. Toyota labels 63
+`Driver Operation` on a P5 FRC diagnostic display surface, but that display does
+not make 63 an FRC-origin request: dynamically it is result-side feedback from
+the downstream VMC. The strongest current model is therefore **FRC-submitted
+application request package(s) in `0x08A`, downstream arbitration/employed-source
+feedback in `0x081`**.
 
 The retained source document is local-only under
 `REFERENCE/patents/toyota_vehicle_movement_arbitration_patent/US20200070849A1.pdf`
@@ -612,13 +613,13 @@ synchronized diagnostic/FFD value directly names that wire field.
 The packed-ID interpretation has an independent arbitration check. In the same
 pairs, selected `0x081` result ID11 equals `0x08A B6[7:2]` in **1,525/1,529**
 Drive-A and **3,276/3,281** Drive-B ID11 samples; it never equals the B7 candidate.
-Every selected ID63 sample (**15,544 / 16,718**) has ID63 absent from both request
-A/B fields. Toyota's P5 FRC longitudinal/Vertical-ID vocabulary independently
-names `63 = Driver Operation`, and Toyota's movement-control patent explicitly
-allows the result longitudinal ID to carry a driver discriminator when the
-driver request is employed. This does not name A as upper or lower, but it
-strongly supports B6/B7 as packed selected application-ID/allocation bytes rather
-than generic ACC-state bytes.
+Every selected ID63 sample (**15,544 / 16,718**) has ID63 absent from both FRC
+request A/B fields. Toyota's P5 FRC diagnostic display vocabulary includes
+`63 = Driver Operation`, and Toyota's movement-control patent explicitly allows
+the **result** longitudinal ID to carry a driver discriminator when driver demand
+is employed. Thus 63 is evidence for Brake/VMC result feedback to the FRC, not an
+FRC requester. This also strongly supports B6/B7 as packed FRC-submitted
+application-ID/allocation bytes rather than generic ACC-state bytes.
 
 The retained delayed-stop corpus gives a second dynamic check and supersedes the
 old raw-byte `ACC_STATE` description. Ordinary active cruise is
@@ -634,11 +635,15 @@ a standstill flag. Camry runtime therefore uses the source-real B4[5] structural
 hold state; the ID25/allocation2-or-3 tuple is its independent request-state
 corroboration. The exact OEM recorder name for B4[5] remains unknown.
 
-### Longitudinal requester-ID namespace: current enumeration
+### Longitudinal request IDs versus result-source IDs
 
-The numeric IDs are **application/request-source identities, not priorities and
-not ECU addresses**. The current Toyota corpus does not contain one complete
-longitudinal 0..63 enum analogous to EMPS `Target Lateral ID`. A six-region sweep
+Do not flatten the FRC request IDs and Brake/VMC result IDs into one wire namespace.
+`0x08A` carries **FRC-origin application request IDs** for the upper/lower bound
+packages. `0x081` carries the downstream **employed-source result ID**; that result
+can identify the driver even though no FRC request used that number. The numeric
+values are identities, not priorities or ECU addresses. The current Toyota corpus
+does not contain one complete longitudinal 0..63 request enum analogous to EMPS
+`Target Lateral ID`. A six-region sweep
 of current GTS+ and Techstream V18 (NA/EU/JP; 3,207 DDB files total) found the
 same sparse named anchors but no hidden complete `5280/5281/5284`, `0x1284`, or
 P6 longitudinal-arbitration value dictionary. The tracked request-plane producer
@@ -660,7 +665,11 @@ The working namespace is:
 | **36** | 33-frame (~0.79 s) Camry startup-only request-B state; zero request acceleration; result stays 63 | no lateral label | startup/initialization requester; OEM name unknown |
 | **41** | P6 MaaS lower-limit longitudinal ID = `Request 1 of MaaS Autonomous Driving System` | AD (Lv.4) | plausible shared automated-driving application identity |
 | **45** | P6 MaaS lower-limit longitudinal ID = `Request 2 of MaaS Autonomous Driving System` | DES (Lv.4) | plausible shared automated-driving application identity |
-| **63** | P5 FRC ISA Vertical ID explicitly names `Driver Operation`; Camry and retained Corolla `0x081` result use 63 | Driver Operation | common driver-operation anchor |
+
+**Result-side-only observation:** longitudinal ID63 is OEM-labeled `Driver Operation`
+on a P5 FRC diagnostic display surface and is observed in Brake/VMC-owned `0x081`.
+It is absent from both FRC-origin `0x08A` request slots in the retained Camry and
+Corolla evidence, so it must not be listed as an observed FRC longitudinal requester.
 
 Toyota's architecture materially strengthens the ID11 observation: it defines both
 the longitudinal request ID and the lateral request ID as the **identifier of an

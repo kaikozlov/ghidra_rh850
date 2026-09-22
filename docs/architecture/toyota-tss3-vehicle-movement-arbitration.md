@@ -286,8 +286,10 @@ an unsupported claim that every generation/axis has one identical display-label 
 In particular:
 
 - `0` is a common no-request/manual anchor;
-- `63` is independently named **Driver Operation** on both recovered longitudinal and
-  lateral surfaces;
+- `63` is independently named **Driver Operation** on a P5 FRC diagnostic display
+  surface and in the lateral dictionary, but Camry longitudinal dynamics place 63 on the
+  downstream Brake/VMC **result** side: it is absent from both FRC-origin `0x08A`
+  request slots and appears when driver demand is the employed longitudinal source;
 - Camry longitudinal ID11 during ordinary DRCC and lateral ID11 `LTA/LCA` are a strong
   candidate for a shared TSS continuous-driving application identity;
 - P6 longitudinal 41/45 “MaaS autonomous-driving request 1/2” need not contradict
@@ -318,8 +320,11 @@ The two result IDs have deliberately different semantics:
   the powertrain controller after it compares the arbitrated application request with
   driver demand**.  If the driver wins, a driver-discriminator value is returned.
 
-This is a direct explanation for Camry `0x081` result ID63 even when neither `0x08A`
-longitudinal bound slot contains 63: Toyota independently names ID63 `Driver Operation`.
+This is a direct explanation for Camry `0x081` result ID63 while neither FRC-origin
+`0x08A` longitudinal bound slot contains 63. Toyota labels 63 `Driver Operation` on a
+P5 FRC diagnostic display surface, but the wire direction matters: the Brake/VMC owns
+`0x081`, so longitudinal 63 is downstream employed-source feedback to the FRC, not an
+FRC-origin requester.
 
 ### Result/state telemetry
 

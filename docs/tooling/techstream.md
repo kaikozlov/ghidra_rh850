@@ -3339,13 +3339,14 @@ surface:
 - `0x5631`: LTA Lateral ID + LTA Control Request Pinion Angle;
 - `0x57DB/0x57DE`: arbitration-result acceleration / pinion angle.
 
-The longitudinal requester-ID vocabulary is **sparse, not absent**. A September-16
-requester-ID sweep across current GTS+ and Techstream V18 NA/EU/JP (3,207 DDBs)
+The longitudinal ID vocabulary is **sparse, not absent**, but request-side and
+result-side labels must not be conflated. A September-16 ID sweep across current GTS+
+and Techstream V18 NA/EU/JP (3,207 DDBs)
 finds no complete longitudinal 0..63 pattern table on `5280/5281/5284`, FRC
 `0x1284`, Brake `0x10A3/0x10A4`, or the successor longitudinal arbitration IDs.
 The available OEM labels are distributed across feature-specific requester fields:
 
-- P5 FRC `0x1B03` ISA Requesting Vertical ID: `0=No Request`, **`63=Driver Operation`**;
+- P5 FRC `0x1B03` ISA Requesting Vertical ID diagnostic display: `0=No Request`, **`63=Driver Operation`**. This pattern table is a diagnostic vocabulary source, not proof that the FRC originates 63; Camry wire evidence places longitudinal 63 only on the downstream Brake/VMC `0x081` result side;
 - P6 ADCU `0x1982` Speed Limiter Requesting Vertical ID: `0=No Request`, **`9=ISA`**;
 - P6 ADCU MaaS lower-limit longitudinal requester: `0=No Request`, **`41=Request 1`**,
   **`45=Request 2`** of MaaS Autonomous Driving System;

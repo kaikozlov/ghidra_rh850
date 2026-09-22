@@ -142,8 +142,9 @@ working = namespace["working_table"]
 check("longitudinal IDs are modeled as application identities rather than priorities",
       "not an ordinal priority" in namespace["model"]["id_is_not_priority"]
       and "identifiers of applications" in namespace["model"]["application_id_semantics"])
-check("P5 longitudinal/vertical namespace names driver operation ID63",
-      namespace["authoritative_sparse_names"]["p5_frc_isa_vertical_id"]["patterns"] == {"0": "No Request", "63": "Driver Operation"})
+check("P5 FRC diagnostic display names Driver Operation ID63 without implying FRC request origination",
+      namespace["authoritative_sparse_names"]["p5_frc_isa_vertical_id"]["patterns"] == {"0": "No Request", "63": "Driver Operation"}
+      and "does not establish FRC request origination" in namespace["authoritative_sparse_names"]["p5_frc_isa_vertical_id"]["meaning"])
 check("cross-generation sparse long anchors include ISA9 and MaaS41/45",
       namespace["authoritative_sparse_names"]["cross_generation_examples"]["Speed Limiter Requesting Vertical ID (Upper Limit)"]["patterns"] == {"0": "No Request", "9": "ISA"}
       and namespace["authoritative_sparse_names"]["cross_generation_examples"]["MaaS Longitudinal Request ID of Lower Limit From IFU"]["patterns"] == {"0": "No Request of MaaS Autonomous Driving System", "41": "Request 1 of MaaS Autonomous Driving System", "45": "Request 2 of MaaS Autonomous Driving System"})
@@ -158,7 +159,7 @@ check("ID25 remains an unresolved shared-application clue rather than an axis-na
 check("Camry startup ID36 is bounded and not active authority",
       namespace["camry_observed"]["id36_startup_frames"] == 33
       and "not observed as active cruise authority" in namespace["camry_observed"]["id36_boundary"])
-check("retained Corolla independently exercises active requester IDs 17 and 23 with result63",
+check("retained Corolla independently exercises active requester IDs 17 and 23 with downstream result63",
       namespace["corolla_cross_platform"]["request_candidate_A_counts"] == {"0": 2363, "17": 37}
       and namespace["corolla_cross_platform"]["request_candidate_B_counts"] == {"4": 2363, "23": 37}
       and namespace["corolla_cross_platform"]["result_id_counts"] == {"63": 2000})
