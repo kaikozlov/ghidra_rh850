@@ -55,6 +55,33 @@
       "request_sequence": 10,
       "set_speed_kph": 94
     },
+    "brake_vmm_result": {
+      "first": {
+        "lateral_result_id": 11,
+        "log_mono_time_ns": 3183375241976,
+        "longitudinal_result_id": 11,
+        "raw": "00000018faad0b5300000004000b0000fffffe55fe550c69fe551ff9f74010dd",
+        "request_loss_supervision": false,
+        "result_accel_mps2": -0.427
+      },
+      "frame_count": 17,
+      "last": {
+        "lateral_result_id": 0,
+        "log_mono_time_ns": 3183846822926,
+        "longitudinal_result_id": 11,
+        "raw": "00000018f31d0bbc00000004000000000017fe6ffe6f0c6bfe6f1f4fd10a00a3",
+        "request_loss_supervision": false,
+        "result_accel_mps2": -0.401
+      },
+      "longitudinal_result_ids": [
+        11
+      ],
+      "request_loss_supervision_asserted_frames": 0,
+      "result_accel_range_mps2": [
+        -0.427,
+        -0.401
+      ]
+    },
     "duration_s": 0.486045,
     "end_route_offset_s": 752.922597,
     "first": {
@@ -119,7 +146,9 @@
           "raw": "240004368d080000000000001003000c11ff8a40000f80000000000000000000"
         }
       ],
+      "asserted_frames_forwarded_to_bus0": 4,
       "first_assertion_offset_from_request_start_ms": 0.0,
+      "first_forward_offset_from_request_start_ms": 0.0,
       "next_clear": {
         "byte0": 36,
         "byte2": 0,
@@ -165,6 +194,135 @@
       "request_sequence": 19,
       "set_speed_kph": 94
     },
+    "relay_timeline": {
+      "first_host_send_after_start": {
+        "byte3": 8,
+        "byte4": 128,
+        "lateral_id": 11,
+        "log_mono_time_ns": 3183376463383,
+        "offset_from_request_start_ms": 15.685,
+        "raw": "0000000880002d47fa245efa247fff007fff0002c00b100064002a003be6827e",
+        "request_a": {
+          "accel_mps2": -1.5,
+          "allocation": 1,
+          "id": 11
+        },
+        "request_b": {
+          "accel_mps2": -1.5,
+          "allocation": 3,
+          "id": 17
+        },
+        "request_sequence": 42,
+        "set_speed_kph": 94
+      },
+      "first_native_forwarded": {
+        "byte3": 12,
+        "byte4": 192,
+        "lateral_id": 0,
+        "log_mono_time_ns": 3183394286123,
+        "offset_from_request_start_ms": 33.508,
+        "raw": "0000000cc0002d8bf0605ef0607fff007fff000b4000300000000c00bbd6a89b",
+        "request_a": {
+          "accel_mps2": -4.0,
+          "allocation": 1,
+          "id": 11
+        },
+        "request_b": {
+          "accel_mps2": -4.0,
+          "allocation": 3,
+          "id": 34
+        },
+        "request_sequence": 12,
+        "set_speed_kph": 94
+      },
+      "last_accepted_host_replacement_before_start": {
+        "byte3": 8,
+        "byte4": 128,
+        "lateral_id": 11,
+        "log_mono_time_ns": 3183352837554,
+        "offset_from_request_start_ms": -7.941,
+        "raw": "0000000880002d47fa245efa247fff007fffffffc00b100064002900fe6c035c",
+        "request_a": {
+          "accel_mps2": -1.5,
+          "allocation": 1,
+          "id": 11
+        },
+        "request_b": {
+          "accel_mps2": -1.5,
+          "allocation": 3,
+          "id": 17
+        },
+        "request_sequence": 41,
+        "set_speed_kph": 94
+      },
+      "native_special_frames_forwarded": 19,
+      "native_special_frames_not_forwarded": 2,
+      "not_forwarded": [
+        {
+          "byte3": 12,
+          "byte4": 192,
+          "lateral_id": 0,
+          "log_mono_time_ns": 3183360778366,
+          "raw": "0000000cc0002d8bf0605ef0607fff007fff000b4000100000000b003a194b8d",
+          "request_a": {
+            "accel_mps2": -4.0,
+            "allocation": 1,
+            "id": 11
+          },
+          "request_b": {
+            "accel_mps2": -4.0,
+            "allocation": 3,
+            "id": 34
+          },
+          "request_sequence": 11,
+          "set_speed_kph": 94
+        },
+        {
+          "byte3": 12,
+          "byte4": 192,
+          "lateral_id": 0,
+          "log_mono_time_ns": 3183375241976,
+          "raw": "0000000cc0002d8bf0605ef0607fff007fff000b4000100000000b00726d435a",
+          "request_a": {
+            "accel_mps2": -4.0,
+            "allocation": 1,
+            "id": 11
+          },
+          "request_b": {
+            "accel_mps2": -4.0,
+            "allocation": 3,
+            "id": 34
+          },
+          "request_sequence": 11,
+          "set_speed_kph": 94
+        }
+      ],
+      "panda_source_meanings": {
+        "128": "accepted bus-0 transmit confirmation",
+        "192": "rejected bus-0 transmit confirmation",
+        "2": "native FRC-side receive"
+      },
+      "rejected_host_replacement": {
+        "byte3": 8,
+        "byte4": 128,
+        "lateral_id": 11,
+        "log_mono_time_ns": 3183382952902,
+        "offset_from_request_start_ms": 22.175,
+        "raw": "0000000880002d47fa245efa247fff007fff0002c00b100064002a003be6827e",
+        "request_a": {
+          "accel_mps2": -1.5,
+          "allocation": 1,
+          "id": 11
+        },
+        "request_b": {
+          "accel_mps2": -1.5,
+          "allocation": 3,
+          "id": 17
+        },
+        "request_sequence": 42,
+        "set_speed_kph": 94
+      }
+    },
     "request_b_phase_counts": {
       "id_33_allocation_3": 12,
       "id_34_allocation_3": 9
@@ -199,9 +357,9 @@
   "interpretation": {
     "boundary": "The user report plus temporal join identifies this as the PCS-alert witness, but does not assign a global semantic name to requester IDs 33/34 or prove which braking substage each ID represents.",
     "bounded_result": "The native FRC request plane enters a two-phase ID34->ID33 state while request A remains ID11. Both acceleration slots are -4.000 m/s^2 at entry. FRC-side 0x5AE byte2 bit2 asserts on the exact entry timestamp and is unique in the retained 44-rlog corpus.",
-    "relay_consequence": "Blocking native FRC 0x08A prevents this native request from reaching VMC. A replacement path must preserve stock emergency requests through normal upstream safety/controller ownership."
+    "relay_consequence": "The active replacement path blocks the first two native ID34 frames. After openpilot disables, the next host replacement is rejected and stock forwarding resumes 33.508 ms after native entry. The separate 0x5AE alert bit is forwarded from the first transition, explaining why an alert can remain visible while the shared 0x08A request is blocked. The Brake/VMM result never asserts request-loss supervision, but it also remains result ID11 rather than selecting ID33/34. A replacement path must preserve stock emergency requests through normal upstream safety/controller ownership."
   },
-  "schema": "camry-20260921-pcs-alert-v1",
+  "schema": "camry-20260921-pcs-alert-v2",
   "sources": [
     {
       "native_5ae_byte2_bit2_asserted": 0,

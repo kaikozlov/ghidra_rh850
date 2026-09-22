@@ -17,7 +17,7 @@ def check(label: str, condition: bool) -> None:
 
 def main() -> int:
     data = json.loads(ART.read_text())
-    check("schema", data["schema"] == "camry-20260921-pcs-alert-v1")
+    check("schema", data["schema"] == "camry-20260921-pcs-alert-v2")
     census = data["corpus_census"]
     check("retained rlog census", census["rlog_count"] == 44)
     check("0x5AE census", census["native_5ae_frames"] == 12981 and census["native_5ae_byte2_bit2_asserted"] == 4)
@@ -44,6 +44,18 @@ def main() -> int:
     f5ae = event["frc_5ae"]
     check("0x5AE corroborates on exact entry", len(f5ae["asserted_frames"]) == 4 and f5ae["first_assertion_offset_from_request_start_ms"] == 0.0)
     check("0x5AE asserted bit is byte2 bit2", all(row["byte2"] & 0x04 for row in f5ae["asserted_frames"]))
+    check("separate 0x5AE alert carrier is forwarded immediately", f5ae["asserted_frames_forwarded_to_bus0"] == 4 and f5ae["first_forward_offset_from_request_start_ms"] == 0.0)
+
+    relay = event["relay_timeline"]
+    check("active replacement was last accepted before entry", relay["last_accepted_host_replacement_before_start"]["offset_from_request_start_ms"] == -7.941)
+    check("first two native PCS frames were blocked", relay["native_special_frames_not_forwarded"] == 2 and all(row["request_b"]["id"] == 34 for row in relay["not_forwarded"]))
+    check("stock forwarding resumes after disable", relay["native_special_frames_forwarded"] == 19 and relay["first_native_forwarded"]["offset_from_request_start_ms"] == 33.508)
+    check("last host replacement was rejected", relay["first_host_send_after_start"]["offset_from_request_start_ms"] == 15.685 and relay["rejected_host_replacement"]["offset_from_request_start_ms"] == 22.175)
+
+    result = event["brake_vmm_result"]
+    check("Brake/VMM result never selects PCS IDs", result["frame_count"] == 17 and result["longitudinal_result_ids"] == [11])
+    check("replacement/forward transition avoids request-loss flag", result["request_loss_supervision_asserted_frames"] == 0)
+    check("result acceleration remains far from native -4 bound", result["result_accel_range_mps2"] == [-0.427, -0.401])
     check("PCS attribution remains bounded", "does not assign a global semantic name" in data["interpretation"]["boundary"])
 
     print("Camry 2026-09-21 PCS-alert timeline verification passed")

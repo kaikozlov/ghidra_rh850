@@ -3401,6 +3401,34 @@ native request is already -4.000 m/s². The logged driver brake follows entry by
 transition” and makes the user-reported PCS attribution a tightly joined
 dynamic witness.
 
+The relay trace also resolves what the receiving side actually saw. Panda source
+2 contains the native FRC request; source 128 is an accepted bus-0 transmit
+confirmation, and source 192 is a rejected bus-0 transmit confirmation. The last
+accepted openpilot replacement precedes native entry by 7.941 ms and still
+carries request B ID17 with -1.5 m/s². The **first two native ID34 frames have no
+bus-0 transmit confirmation**. A final host replacement is submitted at +15.685
+ms but rejected at +22.175 ms, after the pedal disable. Native forwarding resumes
+at +33.508 ms and forwards the remaining 19 ID34/33 frames. Thus this drive
+dynamically proves the user's topology point: while replacement ownership is
+active, the VMC side does not receive the native PCS request merely because the
+FRC produced it. This particular event becomes fail-open quickly enough to pass
+most of the request after disengagement; that is not preservation while active.
+
+The visible alert has a separate path. All four asserted `0x5AE` alert-bit frames
+have accepted bus-0 transmit confirmations, beginning exactly at native request
+entry, even while the first two `0x08A` ID34 frames are blocked. An audible/visual
+PCS alert therefore does **not** prove that the shared `0x08A` braking request
+reached the VMC.
+
+Brake/VMM-owned `0x081` supplies the complementary result-side bound. Across 17
+result frames during the ID34/33 interval, longitudinal result ID remains **11**,
+request-loss supervision never asserts, and the result-acceleration candidate
+moves only -0.427 to -0.401 m/s². It never reports ID33 or ID34. That is compatible
+with seamless replacement-to-forwarding cadence, but it does not show the PCS
+request winning arbitration or automatic braking being executed. In particular,
+**result ID alone is not a PCS detector**: the alert carrier, submitted request,
+and employed result are three different observations.
+
 This still does not turn ID33 or ID34 into global PCS enums. It proves that the
 pair participates in this alert event, in this request-B slot, with these
 coincident FRC flags. The precise Toyota substage—ALM, prefill, PBA, PB, or a

@@ -71,6 +71,17 @@ def request_row(t: int, data: bytes) -> dict[str, Any]:
     }
 
 
+def result_row(t: int, data: bytes) -> dict[str, Any]:
+    return {
+        "log_mono_time_ns": t,
+        "raw": data.hex(),
+        "longitudinal_result_id": data[6] & 0x3F,
+        "request_loss_supervision": bool(data[11] & 0x10),
+        "lateral_result_id": data[13] & 0x3F,
+        "result_accel_mps2": signed16(data[20:22]),
+    }
+
+
 def preceding(rows: list[dict[str, Any]], t: int) -> dict[str, Any] | None:
     eligible = [row for row in rows if row["log_mono_time_ns"] <= t]
     return eligible[-1] if eligible else None
@@ -120,7 +131,12 @@ def build(logs: Path = DEFAULT_LOGS, openpilot_root: Path = DEFAULT_OPENPILOT) -
         })
 
     request_frames: list[dict[str, Any]] = []
+    accepted_bus0_request_tx: list[dict[str, Any]] = []
+    rejected_bus0_request_tx: list[dict[str, Any]] = []
+    host_request_sends: list[dict[str, Any]] = []
+    result_frames: list[dict[str, Any]] = []
     f5ae: list[dict[str, Any]] = []
+    accepted_bus0_5ae_tx: list[dict[str, Any]] = []
     car_states: list[dict[str, Any]] = []
     car_controls: list[dict[str, Any]] = []
     selfdrive_states: list[dict[str, Any]] = []
@@ -129,13 +145,29 @@ def build(logs: Path = DEFAULT_LOGS, openpilot_root: Path = DEFAULT_OPENPILOT) -
         which = event.which()
         if which == "can":
             for frame in event.can:
-                if frame.src != 2 or len(frame.dat) != 32:
+                if len(frame.dat) != 32:
                     continue
                 data = bytes(frame.dat)
                 if frame.address == 0x08A:
-                    request_frames.append(request_row(t, data))
+                    row = request_row(t, data)
+                    if frame.src == 2:
+                        request_frames.append(row)
+                    elif frame.src == 128:
+                        accepted_bus0_request_tx.append(row)
+                    elif frame.src == 192:
+                        rejected_bus0_request_tx.append(row)
+                elif frame.src == 0 and frame.address == 0x081:
+                    result_frames.append(result_row(t, data))
                 elif frame.address == 0x5AE:
-                    f5ae.append({"log_mono_time_ns": t, "raw": data.hex(), "byte0": data[0], "byte2": data[2]})
+                    row = {"log_mono_time_ns": t, "raw": data.hex(), "byte0": data[0], "byte2": data[2]}
+                    if frame.src == 2:
+                        f5ae.append(row)
+                    elif frame.src == 128:
+                        accepted_bus0_5ae_tx.append(row)
+        elif which == "sendcan":
+            for frame in event.sendcan:
+                if frame.src == 0 and frame.address == 0x08A and len(frame.dat) == 32:
+                    host_request_sends.append(request_row(t, bytes(frame.dat)))
         elif which == "carState":
             state = event.carState
             car_states.append({
@@ -174,10 +206,20 @@ def build(logs: Path = DEFAULT_LOGS, openpilot_root: Path = DEFAULT_OPENPILOT) -
     first_brake = next(row for row in car_states if row["log_mono_time_ns"] >= start_ns and row["brake_pressed"])
     first_disabled = next(row for row in selfdrive_states if row["log_mono_time_ns"] >= start_ns and not row["enabled"])
     asserted_in_segment = [row for row in f5ae if row["byte2"] & 0x04]
+    asserted_5ae_raws = {row["raw"] for row in asserted_in_segment}
+    forwarded_asserted_5ae = [row for row in accepted_bus0_5ae_tx if row["raw"] in asserted_5ae_raws]
     next_5ae_clear = next(row for row in f5ae if row["log_mono_time_ns"] > asserted_in_segment[-1]["log_mono_time_ns"] and not row["byte2"] & 0x04)
+    special_raws = {row["raw"] for row in special}
+    forwarded_special = [row for row in accepted_bus0_request_tx if row["raw"] in special_raws]
+    forwarded_raws = {row["raw"] for row in forwarded_special}
+    unforwarded_special = [row for row in special if row["raw"] not in forwarded_raws]
+    last_host_accepted = preceding([row for row in accepted_bus0_request_tx if row["raw"] not in special_raws], start_ns)
+    first_host_send_after_start = next(row for row in host_request_sends if row["log_mono_time_ns"] >= start_ns)
+    first_host_rejected = next(row for row in rejected_bus0_request_tx if row["log_mono_time_ns"] >= start_ns)
+    event_results = [row for row in result_frames if start_ns <= row["log_mono_time_ns"] <= end_ns]
 
     return {
-        "schema": "camry-20260921-pcs-alert-v1",
+        "schema": "camry-20260921-pcs-alert-v2",
         "title": "Retained Camry user-reported PCS-alert request-plane timeline",
         "annotation": "The driver reported visible/audible PCS alerting in this window; that attribution is external to the logged openpilot fields.",
         "sources": sources,
@@ -212,7 +254,46 @@ def build(logs: Path = DEFAULT_LOGS, openpilot_root: Path = DEFAULT_OPENPILOT) -
             "frc_5ae": {
                 "asserted_frames": asserted_in_segment,
                 "first_assertion_offset_from_request_start_ms": round((asserted_in_segment[0]["log_mono_time_ns"] - start_ns) / 1e6, 3),
+                "asserted_frames_forwarded_to_bus0": len(forwarded_asserted_5ae),
+                "first_forward_offset_from_request_start_ms": round((forwarded_asserted_5ae[0]["log_mono_time_ns"] - start_ns) / 1e6, 3),
                 "next_clear": next_5ae_clear,
+            },
+            "relay_timeline": {
+                "panda_source_meanings": {
+                    "2": "native FRC-side receive",
+                    "128": "accepted bus-0 transmit confirmation",
+                    "192": "rejected bus-0 transmit confirmation",
+                },
+                "last_accepted_host_replacement_before_start": {
+                    **last_host_accepted,
+                    "offset_from_request_start_ms": round((last_host_accepted["log_mono_time_ns"] - start_ns) / 1e6, 3),
+                },
+                "first_host_send_after_start": {
+                    **first_host_send_after_start,
+                    "offset_from_request_start_ms": round((first_host_send_after_start["log_mono_time_ns"] - start_ns) / 1e6, 3),
+                },
+                "rejected_host_replacement": {
+                    **first_host_rejected,
+                    "offset_from_request_start_ms": round((first_host_rejected["log_mono_time_ns"] - start_ns) / 1e6, 3),
+                },
+                "first_native_forwarded": {
+                    **forwarded_special[0],
+                    "offset_from_request_start_ms": round((forwarded_special[0]["log_mono_time_ns"] - start_ns) / 1e6, 3),
+                },
+                "native_special_frames_forwarded": len(forwarded_special),
+                "native_special_frames_not_forwarded": len(unforwarded_special),
+                "not_forwarded": unforwarded_special,
+            },
+            "brake_vmm_result": {
+                "frame_count": len(event_results),
+                "longitudinal_result_ids": sorted({row["longitudinal_result_id"] for row in event_results}),
+                "request_loss_supervision_asserted_frames": sum(row["request_loss_supervision"] for row in event_results),
+                "result_accel_range_mps2": [
+                    min(row["result_accel_mps2"] for row in event_results),
+                    max(row["result_accel_mps2"] for row in event_results),
+                ],
+                "first": event_results[0],
+                "last": event_results[-1],
             },
         },
         "interpretation": {
@@ -222,7 +303,11 @@ def build(logs: Path = DEFAULT_LOGS, openpilot_root: Path = DEFAULT_OPENPILOT) -
                 "entry timestamp and is unique in the retained 44-rlog corpus."
             ),
             "relay_consequence": (
-                "Blocking native FRC 0x08A prevents this native request from reaching VMC. A replacement path must "
+                "The active replacement path blocks the first two native ID34 frames. After openpilot disables, the "
+                "next host replacement is rejected and stock forwarding resumes 33.508 ms after native entry. The "
+                "separate 0x5AE alert bit is forwarded from the first transition, explaining why an alert can remain "
+                "visible while the shared 0x08A request is blocked. The Brake/VMM result never asserts request-loss "
+                "supervision, but it also remains result ID11 rather than selecting ID33/34. A replacement path must "
                 "preserve stock emergency requests through normal upstream safety/controller ownership."
             ),
             "boundary": (
