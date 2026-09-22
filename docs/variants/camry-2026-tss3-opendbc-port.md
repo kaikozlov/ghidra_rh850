@@ -3325,10 +3325,11 @@ freshness and the `FV4 || MAC28` trailer, and Panda's vehicle-model angle check 
 100-Hz cadence. There is no present reason to exceed 100 Hz because the normal openpilot
 vehicle-control state itself updates at 100 Hz.
 
-The existing parked raw-classic signer benchmark remains a 25-ms transport measurement; it is
-not promoted into a new production-rate qualification framework here. If live 100-Hz control
-shows signer saturation, measure that as a focused experiment rather than adding another
-runtime scheduler/tooling stack to this repository.
+The sequential parked raw-classic benchmark remains useful for latency comparison. The kit now
+also exposes the focused `oracle-benchmark-100hz` gate: it publishes every 10 ms without waiting
+inline, drains replies on a dedicated thread, and records resident request/success/response
+deltas. This directly measures the production transport shape without transmitting `0x08A` or
+adding another runtime scheduler.
 
 #### 4.13.1 September-22 route55: fixed-step safety policy mishandles sparse signed publications
 
@@ -3398,6 +3399,20 @@ commit or a successful lower-layer `0x7A9` write. The resident already exposes t
 post-drive discriminator. Compare host complete-request count with resident `request_count`,
 then compare `request_count`, `success_count`, `response_count`, and visible `0x7A9/C9` replies.
 That measurement should precede a carrier, scheduler, or response-retry change.
+
+#### 4.13.2 Post-route transport candidate: idle polling plus four request frames
+
+The next source candidate makes the TAUJ0CNT3-bounded idle poll the default exact-F33 resident
+and retains `--foreground-only` as the comparison build. It also replaces the six-frame C8
+request with four standard `0x777` frames. Each frame carries seven consecutive application
+bytes; invalid ISO-TP PCI nibbles 8--B encode fragment order, while the low nibbles carry the
+8-bit transaction sequence as low/high/low/high. The repeated nibbles reject mixed fragments,
+fragment 0 still restarts assembly, and no application byte is inferred or omitted.
+
+This reduces each signer request from six ring records to four and expands the outstanding
+sequence space from 31 to 255. It does not bypass or parallelize the serialized stock command-5
+wrapper. Static/cross-target build verification passes, but latency and loss-rate improvement
+remain unmeasured until a parked `oracle-benchmark-100hz` run and a later route test.
 
 ### 4.14 Recovered PCS/ADU semantics constrain `0x08A` relay ownership
 

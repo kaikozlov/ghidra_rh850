@@ -7,6 +7,7 @@ import json
 import subprocess
 import sys
 import tempfile
+import threading
 from pathlib import Path
 from types import SimpleNamespace
 from unittest import mock
@@ -20,7 +21,7 @@ from exploit.ephemeral_runtime import camry_f33_oracle_ui_bringup as ui_bringup
 from exploit.common import ram_exec
 
 OUT = ROOT / "build/out/ephemeral-runtime/camry-f33-08a-classic-oracle"
-FAST_OUT = ROOT / "build/out/ephemeral-runtime/camry-f33-08a-classic-oracle-idle-fast"
+FOREGROUND_OUT = ROOT / "build/out/ephemeral-runtime/camry-f33-08a-classic-oracle-foreground-only"
 AUDIT = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_08a_classic_oracle_build.json"
 AUDITED_STAGE = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_08a_classic_oracle.bin"
 LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_08a_classic_oracle_launcher.sh"
@@ -28,7 +29,7 @@ UNIFIED_LAUNCHER = ROOT / "exploit/ephemeral_runtime/tss3_unified_b6_signer_laun
 
 subprocess.run([sys.executable, str(build.BUILDER)], cwd=ROOT, check=True, stdout=subprocess.DEVNULL)
 subprocess.run(
-    [sys.executable, str(build.BUILDER), "--idle-fast-path"],
+    [sys.executable, str(build.BUILDER), "--foreground-only"],
     cwd=ROOT, check=True, stdout=subprocess.DEVNULL,
 )
 with tempfile.TemporaryDirectory(prefix="verify-corolla-08a-oracle-") as td:
@@ -39,9 +40,9 @@ with tempfile.TemporaryDirectory(prefix="verify-corolla-08a-oracle-") as td:
     )
     corolla_meta = json.loads(corolla_proc.stdout)
 meta = json.loads((OUT / "camry_f33_08a_classic_oracle.json").read_text())
-fast_meta = json.loads((FAST_OUT / "camry_f33_08a_classic_oracle.json").read_text())
+foreground_meta = json.loads((FOREGROUND_OUT / "camry_f33_08a_classic_oracle.json").read_text())
 resident = (OUT / meta["resident"]["path"]).read_bytes()
-fast_resident = (FAST_OUT / fast_meta["resident"]["path"]).read_bytes()
+foreground_resident = (FOREGROUND_OUT / foreground_meta["resident"]["path"]).read_bytes()
 helper = (OUT / meta["helper"]["path"]).read_bytes()
 stage = (OUT / meta["staging"]["path"]).read_bytes()
 payload = (OUT / meta["authenticated_payload"]["path"]).read_bytes()
@@ -79,15 +80,13 @@ check("caught boot identity retries with a fresh UDS transport after a transient
 
 
 check("canonical build retains the archived Camry road artifact only as history",
-      meta["schema"] == "tss3-08a-classic-oracle-build-v3" and
+      meta["schema"] == "tss3-08a-classic-oracle-build-v4" and
       meta["target"]["name"] == "camry-8965F3307000" and
       json.loads(AUDIT.read_text())["variant"] == "road-qualified-baseline" and
       len(AUDITED_STAGE.read_bytes()) <= build.STAGING_LIMIT)
-check("canonical 0x777 candidate and idle-fast candidate remain separate",
-      meta["variant"] == "canonical-functional-c8-candidate" and
-      meta["idle_fast_path"]["enabled"] is False and
-      fast_meta["variant"] == "idle-fast-path-candidate" and
-      fast_meta["idle_fast_path"] == {
+check("idle-fast Camry default and foreground-only reference remain separate",
+      meta["variant"] == "idle-fast-functional-nibble4-default" and
+      meta["idle_fast_path"] == {
           "behavior": "while the foreground flag is clear, scan only when the private cursor trails the producer and more than 3 ms remains; recheck the flag immediately before helper entry; retain the post-drain fallback",
           "count_hz": 80_000_000,
           "counter": "TAUJ0CNT3",
@@ -98,8 +97,10 @@ check("canonical 0x777 candidate and idle-fast candidate remain separate",
           "minimum_remaining_counts": 240_000,
           "minimum_remaining_us": 3_000,
       } and
-      len(fast_resident) <= fast_meta["resident"]["limit"] and
-      fast_resident != resident and fast_meta["helper"]["sha256"] == meta["helper"]["sha256"])
+      foreground_meta["variant"] == "foreground-only-functional-nibble4-reference" and
+      foreground_meta["idle_fast_path"]["enabled"] is False and
+      len(foreground_resident) <= foreground_meta["resident"]["limit"] and
+      foreground_resident != resident and foreground_meta["helper"]["sha256"] == meta["helper"]["sha256"])
 check("resident/helper fit proven RAM geometry",
       len(resident) <= meta["resident"]["limit"] and
       len(helper) <= meta["helper"]["limit"] and
@@ -160,24 +161,24 @@ check("state read boundary is pinned to the exact application SID23 exclusion",
       } and meta["state"]["base"] == "0xFEBF025C" and meta["state"]["size"] == 0x24)
 
 application = bytes(range(28))
-req = host.build_request(application, 0x07)
-check("host request is the one six-frame C8 codec used by every target",
-      len(req) == 6 and all(len(frame) == 8 and frame[0] == 0xC8 and frame[7] == 0 for frame in req) and
-      [frame[1] for frame in req] == [0x07, 0x27, 0x47, 0x67, 0x87, 0xA7] and
-      b"".join(frame[2:7] for frame in req) == application + bytes(2))
+req = host.build_request(application, 0xA7)
+check("host request is the four-frame full-payload nibble codec used by every target",
+      len(req) == 4 and all(len(frame) == 8 for frame in req) and
+      [frame[0] for frame in req] == [0x87, 0x9A, 0xA7, 0xBA] and
+      b"".join(frame[1:] for frame in req) == application)
 check("all exact targets select that same wire protocol from profile data",
       set(build.ORACLE_PROFILES) == {
           "camry-8965F3307000", "crown-8965F3012000",
           "corolla-8965H1202000", "corolla-8965F1208000",
       } and all(
-          profile["carrier"] == "functional-c8" and profile["request_id"] == 0x777 and
-          profile["response_id"] == 0x7A9 and profile["fragment_count"] == 6 and
+          profile["carrier"] == "functional-nibble4" and profile["request_id"] == 0x777 and
+          profile["response_id"] == 0x7A9 and profile["fragment_count"] == 4 and
           profile["helper_macros"]["ORACLE_REQUEST_HEADER_WORD"] == 0x00000408
           for profile in build.ORACLE_PROFILES.values()
       ))
 check("Corolla lifecycle variant compiles from the same canonical sources",
       corolla_meta["target"]["name"] == "corolla-8965H1202000" and
-      corolla_meta["request"]["carrier"] == "functional-c8" and
+      corolla_meta["request"]["carrier"] == "functional-nibble4" and
       corolla_meta["request"]["can_id"] == "0x00000777" and
       corolla_meta["response"]["can_id"] == "0x000007A9" and
       corolla_meta["state"]["size"] == 0x24 and
@@ -203,6 +204,72 @@ check("parked benchmark reports deterministic distribution statistics",
       {name: round(value, 3) for name, value in summary.items()} == {
           "mean_ms": 2.5, "median_ms": 2.5, "p95_ms": 3.85, "p99_ms": 3.97, "max_ms": 4.0,
       })
+
+
+class _FakePipelinedPanda:
+    def __init__(self):
+        self._lock = threading.Lock()
+        self._rx: list[tuple[int, bytes, int]] = []
+        self.request_count = 0
+
+    def can_send_many(self, rows):
+        first = int(rows[0][1][0])
+        second = int(rows[1][1][0])
+        seq = ((second & 0x0F) << 4) | (first & 0x0F)
+        with self._lock:
+            self.request_count += 1
+            trailer = bytes((0x10 | (self.request_count & 0x0F), seq, 0xA5, 0x5A))
+            self._rx.append((host.RESPONSE_ID, bytes((host.RESPONSE_MAGIC, seq, 0, seq ^ 0xFF)) + trailer, host.BUS))
+
+    def can_recv(self):
+        with self._lock:
+            rows, self._rx = self._rx, []
+        return rows
+
+
+class _FakePipelinedSession:
+    last = None
+
+    def __init__(self, *_args, **_kwargs):
+        self.panda = _FakePipelinedPanda()
+        self.transport = {
+            "request_id": host.REQUEST_ID, "request_bus": host.BUS,
+            "response_id": host.RESPONSE_ID, "response_bus": host.BUS,
+            "carrier": host.REQUEST_CARRIER,
+        }
+        self.attestation = {"state": {"initialized": True}}
+        self.refreshed = False
+        _FakePipelinedSession.last = self
+
+    def read_state(self):
+        count = self.panda.request_count
+        return {
+            "assembly_seq": 0,
+            "request_count": count,
+            "success_count": count,
+            "response_count": count,
+        }
+
+    def refresh_extended_session(self):
+        self.refreshed = True
+
+    def close(self):
+        pass
+
+
+with mock.patch.object(host, "ClassicOracleSession", _FakePipelinedSession):
+    pipelined = host.benchmark_pipelined(
+        OUT / "camry_f33_08a_classic_oracle.json", count=3, period_ms=10.0, drain_timeout_s=0.1,
+    )
+check("100-Hz benchmark pipelines requests without waiting for each reply",
+      pipelined["schema"] == "camry-f33-08a-classic-oracle-pipelined-benchmark-v1" and
+      pipelined["count_sent"] == pipelined["success_count"] == pipelined["responses_received"] == 3 and
+      pipelined["target_rate_hz"] == 100.0 and pipelined["complete_target_rate_run"] is True and
+      pipelined["resident_counter_deltas"] == {"request_count": 3, "success_count": 3, "response_count": 3} and
+      pipelined["boundaries"]["sender_waits_for_response"] is False and
+      pipelined["boundaries"]["transmitted_08a"] is False and
+      _FakePipelinedSession.last is not None and _FakePipelinedSession.last.refreshed)
+
 
 class FakeDiagnosticClient:
     def __init__(self): self.sessions = []
@@ -288,9 +355,10 @@ check("idle-fast gate is timer-bounded and preserves post-drain fallback",
       "mov 240000, r9" in resident_src and "bnh .L_tick_wait" in resident_src and
       resident_src.count("tst1 4, -0x4eef[r0]") >= 2 and
       resident_src.index("jarl32 helper_entry, lp") < resident_src.index("jarl32 target_rx_3, lp"))
-check("helper implements only the canonical C8 raw-ring codec",
+check("helper implements only the four-frame nibble raw-ring codec",
       "mov ORACLE_REQUEST_HEADER_WORD" in helper_src and "ORACLE_REQUEST_ID_WORD" in helper_src and
-      "movea 0xc8, r0, r8" in helper_src and "Fragment 5" in helper_src and
+      "invalid ISO-TP type 8..B" in helper_src and "complete response sequence" in helper_src and
+      "movea 7, r0, r9" in helper_src and "movea 0xc8, r0, r8" not in helper_src and
       "ORACLE_FUNCTIONAL_C8" not in helper_src and "0x9FDC0002" not in helper_src)
 check("helper has no truncated cmp-immediate literals",
       all(token not in helper_src for token in ("cmp 0xc9", "cmp 0xa8", "cmp 0x5a", "cmp 0xa5", "cmp 16")))
@@ -399,5 +467,10 @@ check("standalone classic-oracle kit includes guarded Brake then FRC peer recove
       recovery.index("restart-domain --domain frc") <
       recovery.index("state --output") and
       "output directory is not empty" in recovery)
+check("both oracle launchers expose the parked 100-Hz pipelined throughput gate",
+      "./f33-08a-classic-oracle benchmark-100hz [COUNT] [OUTPUT_JSON]" in launcher and
+      'benchmark-pipelined --meta "$META" --count "$count" --period-ms 10' in launcher and
+      "oracle-benchmark-100hz [COUNT] [OUT]" in unified_launcher and
+      'benchmark-pipelined --meta "$ORACLE_META" --count "$count" --period-ms 10' in unified_launcher)
 
 print("PASS canonical exact-target classic-CAN 0x08A oracle")

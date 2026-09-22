@@ -418,7 +418,7 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
           (kit / "runtime/tsk/lib/programming.py").is_file() and
           (kit / "runtime/exploit/ephemeral_runtime/camry_f33_post_install_recovery.py").is_file() and
           (kit / "bundle/oracle/classic.json").is_file() and
-          kit_meta["classic_08a_oracle"]["transport"].startswith("functional-c8 0x00000777 -> 0x000007A9") and
+          kit_meta["classic_08a_oracle"]["transport"].startswith("functional-nibble4 0x00000777 -> 0x000007A9") and
           "camry_classic_08a_oracle" not in kit_meta)
     launcher = (kit / "tss3-unified-signer").read_text(encoding="utf-8")
     check("unified kit prefers vendored runtime and exposes common test ladder plus exact-F33 DRCC diagnostic clear",
@@ -428,7 +428,7 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
                                            "bringup-stale-030-bridge", "restart-brake", "restart-frc", "recovery-state",
                                            "restart-control-domains", "recover-drcc", "replace-current", "replace-once")) and
           all(cmd in launcher for cmd in ("oracle-bringup", "oracle-ui-bringup", "oracle-ui-resume", "oracle-install", "recover-peers",
-                                           "oracle-status", "oracle-self-test", "oracle-benchmark")) and
+                                           "oracle-status", "oracle-self-test", "oracle-benchmark", "oracle-benchmark-100hz")) and
           "--topology stock|camry-post-repin" in launcher and
           "--nrtd-confirmed" in launcher and "NRTD/READY=0" in launcher and
           "FRC DRCC permission did not survive bridged bootstrap; STOP before READY qualification" in launcher)
@@ -468,7 +468,8 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
     check("Camry unified kit uses the same canonical oracle deployment key and runtime",
           camry_kit_meta["classic_08a_oracle"]["metadata"] == "bundle/oracle/classic.json" and
           camry_kit_meta["classic_08a_oracle"]["payload"] == "bundle/oracle/classic_payload.bin" and
-          camry_oracle_meta["schema"] == "tss3-08a-classic-oracle-build-v3" and
+          camry_oracle_meta["schema"] == "tss3-08a-classic-oracle-build-v4" and
+          camry_oracle_meta["idle_fast_path"]["enabled"] is True and
           "camry_classic_08a_oracle" not in camry_kit_meta and
           len(camry_oracle_payload) == 0x1000 and
           hashlib.sha256(camry_oracle_payload).hexdigest() == camry_oracle_meta["authenticated_payload"]["sha256"] and

@@ -110,8 +110,9 @@ Preferred tester flow:
 Next, READY/Park/stationary: ./tss3-unified-signer [--topology ...] replace-current /tmp/tss3-replace-current.json
    This derives the live 0x025 steering angle, verifies fresh healthy stationary/Park state, sends one no-offset C7 generation, then sequence zero to release.
 
-Exact-target 0x08A oracle check: install in NRTD/Park with `./tss3-unified-signer oracle-install`, transition directly to READY/Park without powering EPS off, then run `./tss3-unified-signer oracle-known-answer`.
-All targets use the same six-frame standard-0x777 C8 protocol and standard-0x7A9 response. The exact-target payload contains only the firmware-specific addresses, lifecycle, bus, and transmit handle.
+Exact-target 0x08A oracle check: install in NRTD/Park with `./tss3-unified-signer oracle-install`, transition directly to READY/Park without powering EPS off, then run `./tss3-unified-signer oracle-self-test`.
+All targets use the same four-frame standard-0x777 nibble-header protocol and standard-0x7A9 response. The exact-target payload contains only the firmware-specific addresses, lifecycle, bus, and transmit handle.
+Parked 100 Hz throughput gate: `./tss3-unified-signer oracle-benchmark-100hz 200 /tmp/tss3-oracle-100hz.json`. It publishes every 10 ms without waiting inline, drains replies on a dedicated receiver, and records resident request/success/response deltas.
 
 Camry F33 recovery note: the field result is timing-sensitive. Exact application F181 returning proves the ECU application is back, not that every peer-facing state machine has finished initializing. The maintained guided flow therefore lets each stage finish while retaining one cooperative Panda lease; Panda ownership is not treated as a recovery primitive. `recover-drcc` remains legacy DTC-evidence tooling and is not part of this recovery.
 
