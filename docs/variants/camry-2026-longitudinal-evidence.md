@@ -42,14 +42,15 @@ Transport, request semantics, physical publication/security ownership, and
 actuator authority remain separate questions. Later source-direction evidence
 places protected `0x08A` publication inside the FRC assembly, while the recovered
 Toyota architecture places request arbitration downstream in the Brake/VMM
-layer. The exact Brake code implementing that arbitration, the security/physical
-handoff, and the upper-vs-lower A/B ordering remain unresolved.
+layer. The exact Brake code implementing that arbitration and the security/physical
+handoff remain unresolved; the archive-wide unequal-bound census now strongly resolves
+ordinary Camry A/B ordering as upper/lower.
 
 **Request/result wire closure:** FRC normal-Tx suppression establishes `0x08A`
 as the upstream TSS request/instruction plane; Brake owns `0x081` and continues
 publishing it with request-loss supervision if the FRC request disappears. The
-byte-level audit maps `0x08A B8:B9/B11:B12` to the indistinguishable signed16
-x0.001 upper/lower acceleration-request pair, and maps `0x081 B6[5:0]` /
+byte-level audit maps `0x08A B8:B9` to the ordinary-DRCC upper bound and
+`B11:B12` to the lower bound at signed16 x0.001, and maps `0x081 B6[5:0]` /
 B20:B21 as the strongest `5284` employed-source-ID / `57DB` result-acceleration
 pair. `0x0CA` remains protected longitudinal/chassis state but is no longer the
 primary result interpretation. See
@@ -593,13 +594,13 @@ synchronized diagnostic/FFD value directly names that wire field.
 
 | Toyota recorder quantity | Wire disposition | Evidence status |
 |---|---|---|
-| `5280` lower longitudinal request ID | one of `0x08A B6[7:2]` / `B7[7:2]` | strong structural candidate; A/B upper-vs-lower assignment unresolved |
-| `5280` lower acceleration | one of `0x08A B8:B9` / `B11:B12`, s16 x0.001 m/s² | mapped as indistinguishable pair |
-| `5280` force distribution | paired `B6[1:0]` / `B7[1:0]` with its ID byte | strong structural candidate; 0..3 exactly matches Toyota allocation enum; A/B ordering unresolved |
+| `5280` lower longitudinal request ID | `0x08A B7[7:2]` | strongly resolved for ordinary Camry DRCC by unequal-bound census |
+| `5280` lower acceleration | `0x08A B11:B12`, s16 x0.001 m/s² | strongly resolved for ordinary Camry DRCC |
+| `5280` force distribution | `B7[1:0]` | strong structural join; 0..3 exactly matches Toyota allocation enum |
 | `5280` shift / EPB / override / priority | unresolved | complete-drive byte census does not justify an OEM-name assignment |
-| `5281` upper longitudinal request ID | the other of `0x08A B6[7:2]` / `B7[7:2]` | strong structural candidate; A/B upper-vs-lower assignment unresolved |
-| `5281` upper acceleration | the other of `0x08A B8:B9` / `B11:B12`, s16 x0.001 m/s² | mapped as indistinguishable pair |
-| `5281` upper force distribution | the other of `B6[1:0]` / `B7[1:0]` | strong structural candidate; no synchronized upper/lower oracle |
+| `5281` upper longitudinal request ID | `0x08A B6[7:2]` | strongly resolved for ordinary Camry DRCC by unequal-bound census |
+| `5281` upper acceleration | `0x08A B8:B9`, s16 x0.001 m/s² | strongly resolved for ordinary Camry DRCC |
+| `5281` upper force distribution | `B6[1:0]` | strong structural join; synchronized DID oracle still absent |
 | `5282` lateral request ID | `0x08A B21[5:0]` | recovered |
 | `5282` requested pinion angle | `0x08A B18:B19` | recovered; controller scale is 0.00100012 rad/count versus recorder 0.001 |
 | `5282` steering assist gain | `0x08A B24` x0.01 | strong structural join |
@@ -655,7 +656,7 @@ The working namespace is:
 | ID | Longitudinal evidence | Lateral comparison | Current disposition |
 |---:|---|---|---|
 | **0** | P5 FRC ISA Vertical ID names `No Request`; Camry request A uses 0 while idle | `No Request (Manual Operation)` | common no-request anchor |
-| **4** | Camry request B idle/default | LDA | longitudinal OEM name unknown; lateral label must not be copied |
+| **4** | Camry/Corolla default lower-bound request slot in manual `0/4`; Camry scalar is positive creep-like at very low speed, declines through zero into coast/decel with speed, and falls on 9/9 matched low-speed brake presses | LDA | **strong closed-accelerator/manual baseline lower-bound attribution**; exact longitudinal OEM application name unknown, and lateral `LDA` label must not be copied |
 | **9** | P6 Speed Limiter Requesting Vertical ID explicitly names `ISA` | no generation-20 lateral label | named cross-generation longitudinal/vertical anchor; not observed on Camry `0x08A` |
 | **11** | Camry request A during ordinary DRCC; `0x081` result ID11 when that application request is employed | LTA/LCA | **strong shared-TSS-application-ID hypothesis**, not yet an OEM longitudinal enum name |
 | **17** | Camry active request B; retained 2025 Corolla active request A | no lateral label | repeatable cross-platform active longitudinal requester; OEM name unknown |
@@ -670,6 +671,45 @@ The working namespace is:
 on a P5 FRC diagnostic display surface and is observed in Brake/VMC-owned `0x081`.
 It is absent from both FRC-origin `0x08A` request slots in the retained Camry and
 Corolla evidence, so it must not be listed as an observed FRC longitudinal requester.
+
+The idle `0/4` state is now dynamically much better constrained. In both complete
+Camry drives, after excluding request/result transition neighborhoods, **every stable
+FRC `0/4` request pairs with Brake/VMC longitudinal result ID63**: 18,608/18,608
+Drive-A and 19,441/19,441 Drive-B. The same is true while moving above 1 m/s
+(7,713/7,713 and 10,563/10,563). This is exactly the expected architecture:
+FRC contributes upper/lower application bounds while VMC reports `63=Driver Operation`
+when the driver's longitudinal request is the value actually employed.
+
+ID4's lower-bound magnitude is also not an inert idle constant. Restricting the two
+complete drives to FRC `0/4`, accelerator=0, D, and matched brake-pedal **press** edges
+below 1 m/s, all **9/9** events reduce B11:B12, the ID4 lower-bound acceleration:
+Drive-A 4/4 (median change -0.0295 m/s²) and Drive-B 5/5 (median -0.036 m/s²), with
+combined changes spanning -0.071..-0.0265 m/s². With the brake released, the same
+low-speed D/no-accelerator lower bound is positive and falls with speed (for example,
+Drive-B medians +0.468 m/s² below 0.15 m/s, +0.277 at 0.15..0.5 m/s, +0.202 at
+0.5..1.0 m/s). This is behaviorally consistent with a minimum-drive/creep-related
+lower-bound application whose request is cut when the driver brakes. It remains a
+**hypothesis about ID4's application identity**, because no Toyota longitudinal enum
+currently names value 4.
+
+Toyota's patent record makes the broader attribution substantially stronger than
+`ID4 = creep`. `US20200070849A1` defines the lower longitudinal package as the
+**minimum acceleration requested by an application**, separately reports the powertrain's
+**full-closed estimated ground acceleration**, and has the powertrain compare driver
+demand against the selected application bounds. Toyota's closely contemporary
+`US20200094835A1 / US11285952B2` then describes the physical powertrain **lower limit
+of availability** as the fully-closed/throttle-off baseline: it can be negative from
+engine braking at speed, but below roughly 8--10 km/h creep torque becomes dominant and
+drives that lower limit positive. Older Toyota `JP5195257B2` independently describes
+accelerator-off creep torque and creep-cut control under brake demand.
+
+That is almost exactly the shape seen on ID4. The best current semantic attribution is
+therefore **closed-accelerator/manual baseline lower-bound application**: its low-speed
+positive portion is creep, while its higher-speed negative portion is the coast/regen/
+engine-braking side of the same no-pedal baseline envelope. The patents do **not**
+identify numeric value 4, and the current 3,207-DDB sweep contains no longitudinal
+request/result enum assigning a name to value 4, so this remains a strong behavioral
+attribution rather than an OEM enum recovery.
 
 Toyota's architecture materially strengthens the ID11 observation: it defines both
 the longitudinal request ID and the lateral request ID as the **identifier of an

@@ -47,6 +47,27 @@ def s16be(data: bytes, offset: int) -> int:
   return int.from_bytes(data[offset:offset + 2], "big", signed=True)
 
 
+def be_raw(data: bytes, start_bit: int, size: int, signed: bool = False) -> int:
+  """Decode one Motorola DBC signal using opendbc bit numbering."""
+  be_bits = [j + i * 8 for i in range(len(data)) for j in range(7, -1, -1)]
+  idx = be_bits.index(start_bit)
+  bits = be_bits[idx:idx + size]
+  if len(bits) != size:
+    raise ValueError(f"signal {start_bit}|{size} exceeds payload")
+  value = 0
+  for bit in bits:
+    byte_i, bit_i = divmod(bit, 8)
+    value = (value << 1) | ((data[byte_i] >> bit_i) & 1)
+  if signed and value & (1 << (size - 1)):
+    value -= 1 << size
+  return value
+
+
+def decode_wheel_speed_mps(data: bytes) -> float:
+  values_kph = [be_raw(data, start, 15) * 0.01 - 67.67 for start in (6, 22, 38, 54)]
+  return statistics.fmean(values_kph) / 3.6
+
+
 def pearson(xs: list[float], ys: list[float]) -> float | None:
   if len(xs) < 2:
     return None
@@ -82,7 +103,7 @@ def quantile(values: list[float], q: float) -> float:
 
 
 def load(path: Path) -> dict[int, list[tuple[int, bytes]]]:
-  streams = {0x08A: [], 0x081: [], 0x0CA: []}
+  streams = {0x08A: [], 0x081: [], 0x0CA: [], 0x0AA: [], 0x101: [], 0x116: [], 0x127: []}
   with gzip.open(path, "rt") as f:
     for line in f:
       _seg, nanos, bus, address, payload = json.loads(line)
@@ -93,6 +114,8 @@ def load(path: Path) -> dict[int, list[tuple[int, bytes]]]:
         streams[0x081].append((int(nanos), data))
       elif address == 0x0CA and bus == 0 and len(data) == 32:
         streams[0x0CA].append((int(nanos), data))
+      elif address in (0x0AA, 0x101, 0x116, 0x127) and bus == 2 and len(data) == 8:
+        streams[address].append((int(nanos), data))
   return streams
 
 
@@ -119,6 +142,137 @@ def nearest_pairs(a: list[tuple[int, bytes]], b: list[tuple[int, bytes]]) -> lis
     if abs(age) <= MAX_PAIR_NS:
       pairs.append((ad, b[j][1], age))
   return pairs
+
+
+def preceding_value(rows: list[tuple[int, bytes]], t: int, decoder, max_age_ns: int = 100_000_000):
+  ts = [x[0] for x in rows]
+  i = bisect.bisect_right(ts, t) - 1
+  if i < 0 or t - ts[i] > max_age_ns:
+    return None
+  return decoder(rows[i][1])
+
+
+def idle_0_4_context(streams: dict[int, list[tuple[int, bytes]]]) -> dict:
+  request = streams[0x08A]
+  result = streams[0x081]
+  result_ts = [t for t, _ in result]
+  state_ts = {addr: [t for t, _ in streams[addr]] for addr in (0x0AA, 0x101, 0x116, 0x127)}
+
+  def state_value(addr: int, t: int, decoder, max_age_ns: int = 100_000_000):
+    rows = streams[addr]
+    ts = state_ts[addr]
+    i = bisect.bisect_right(ts, t) - 1
+    if i < 0 or t - ts[i] > max_age_ns:
+      return None
+    return decoder(rows[i][1])
+
+  def request_pair(data: bytes) -> tuple[int, int]:
+    return data[6] >> 2, data[7] >> 2
+
+  stable_result_ids = Counter()
+  stable_moving_result_ids = Counter()
+  stable_pairs = 0
+  stable_moving_pairs = 0
+  stable_transition_mismatches = []
+
+  contextual = []
+  for i, (t, data) in enumerate(request):
+    if request_pair(data) != (0, 4):
+      continue
+    lo, hi = max(0, i - 4), min(len(request), i + 5)
+    stable = hi - lo >= 5 and all(request_pair(d) == (0, 4) for _, d in request[lo:hi])
+    if not stable:
+      continue
+
+    j = bisect.bisect_left(result_ts, t)
+    choices = [k for k in (j - 1, j) if 0 <= k < len(result)]
+    if choices:
+      k = min(choices, key=lambda x: abs(result_ts[x] - t))
+      if abs(result_ts[k] - t) <= MAX_PAIR_NS:
+        rid = result[k][1][6] & 0x3F
+        stable_result_ids[rid] += 1
+        stable_pairs += 1
+        speed = state_value(0x0AA, t, decode_wheel_speed_mps)
+        if speed is not None and speed > 1.0:
+          stable_moving_result_ids[rid] += 1
+          stable_moving_pairs += 1
+        if rid != 63 and len(stable_transition_mismatches) < 16:
+          stable_transition_mismatches.append({"request_time_ns": t, "result_id": rid})
+
+    brake = state_value(0x101, t, lambda d: bool(be_raw(d, 3, 1)))
+    gas = state_value(0x116, t, lambda d: be_raw(d, 15, 8) * 0.005)
+    speed = state_value(0x0AA, t, decode_wheel_speed_mps)
+    gear = state_value(0x127, t, lambda d: be_raw(d, 47, 4))
+    if None not in (brake, gas, speed, gear):
+      contextual.append({
+        "t": t, "brake": bool(brake), "gas": float(gas), "speed": float(speed), "gear": int(gear),
+        "lower": s16be(data, 11) * 0.001,
+      })
+
+  # Match brake-on edges against the same 0/4 request state before and after the edge.
+  # Raw gear 3 is D on the retained Camry road captures. Limit the primary test to
+  # <1 m/s, where Toyota's creep-related behavior should be most discriminating.
+  brake_edges = []
+  last_brake = None
+  for t, data in streams[0x101]:
+    brake = bool(be_raw(data, 3, 1))
+    if last_brake is False and brake is True:
+      gas = state_value(0x116, t, lambda d: be_raw(d, 15, 8) * 0.005)
+      speed = state_value(0x0AA, t, decode_wheel_speed_mps)
+      gear = state_value(0x127, t, lambda d: be_raw(d, 47, 4))
+      if gas == 0.0 and gear == 3 and speed is not None and speed < 1.0:
+        pre = [r["lower"] for r in contextual if t - 400_000_000 <= r["t"] <= t - 100_000_000 and r["gas"] == 0.0 and r["gear"] == 3]
+        post = [r["lower"] for r in contextual if t + 100_000_000 <= r["t"] <= t + 400_000_000 and r["gas"] == 0.0 and r["gear"] == 3]
+        if len(pre) >= 3 and len(post) >= 3:
+          pre_median = statistics.median(pre)
+          post_median = statistics.median(post)
+          brake_edges.append({
+            "time_ns": t,
+            "speed_mps": round(float(speed), 6),
+            "pre_lower_median_mps2": round(pre_median, 6),
+            "post_lower_median_mps2": round(post_median, 6),
+            "delta_mps2": round(post_median - pre_median, 6),
+          })
+    last_brake = brake
+
+  # Speed-stratified descriptive check for the no-accelerator, D, 0/4 state.
+  bins = [(0.0, 0.15), (0.15, 0.5), (0.5, 1.0), (1.0, 2.0), (2.0, 5.0), (5.0, 10.0), (10.0, 20.0)]
+  speed_bins = []
+  for low, high in bins:
+    row = {"speed_mps": [low, high]}
+    for brake in (False, True):
+      values = [r["lower"] for r in contextual if r["gas"] == 0.0 and r["gear"] == 3 and r["brake"] == brake and low <= r["speed"] < high]
+      if values:
+        row["brake_on" if brake else "brake_off"] = {
+          "frames": len(values),
+          "median_mps2": round(statistics.median(values), 6),
+          "p10_mps2": round(quantile(values, 0.1), 6),
+          "p90_mps2": round(quantile(values, 0.9), 6),
+        }
+    speed_bins.append(row)
+
+  deltas = [row["delta_mps2"] for row in brake_edges]
+  return {
+    "request_state": "FRC-origin 0x08A upper ID0 / lower ID4",
+    "result_state": {
+      "stable_pair_count": stable_pairs,
+      "result_id_counts": {str(k): v for k, v in sorted(stable_result_ids.items())},
+      "moving_over_1_mps_pair_count": stable_moving_pairs,
+      "moving_over_1_mps_result_id_counts": {str(k): v for k, v in sorted(stable_moving_result_ids.items())},
+      "interpretation": "Stable FRC 0/4 request state returns Brake/VMC employed-source ID63; any non-63 values should be treated as transition-lag candidates, not FRC-origin ID63 requests.",
+      "non63_examples": stable_transition_mismatches,
+    },
+    "lower_id4_brake_context": {
+      "matched_brake_press_edges_under_1_mps": len(brake_edges),
+      "negative_delta_edges": sum(row["delta_mps2"] < 0 for row in brake_edges),
+      "positive_delta_edges": sum(row["delta_mps2"] > 0 for row in brake_edges),
+      "median_delta_mps2": round(statistics.median(deltas), 6) if deltas else None,
+      "mean_delta_mps2": round(statistics.fmean(deltas), 6) if deltas else None,
+      "edges": brake_edges,
+      "speed_bins_gas_off_drive": speed_bins,
+      "boundary": "Observed 0/4 lower-slot behavior; ID4 OEM application name remains unknown. Brake correlation is strongest below 1 m/s and does not by itself prove a creep application identity.",
+    },
+  }
 
 
 def hist(rows: list[bytes], offset: int) -> dict[str, int]:
@@ -148,7 +302,7 @@ def request_summary(rows: list[tuple[int, bytes]]) -> dict:
       },
       "gts_geometry": ("Brake 0x10A3/0x10A4 define each TSS request ID as bits 7:2 (six bits), leaving exactly two low bits. "
                        "FRC allocation-method vocabulary is 0..3. The wire split is therefore a strong structural candidate; "
-                       "upper-vs-lower A/B assignment still lacks a synchronized DID/FFD join."),
+                       "archive-wide unequal ordinary-DRCC frames strongly resolve A/B as upper/lower even though a synchronized DID/FFD join is still absent."),
       "allocation_enum": {"0": "Engine Only", "1": "Engine and Brake 1", "2": "Engine and Brake 2", "3": "Brake Only"},
     },
     "longitudinal_acceleration_words": {
@@ -156,7 +310,7 @@ def request_summary(rows: list[tuple[int, bytes]]) -> dict:
       "B11_B12": {"signed16_raw_range": [min(b), max(b)], "scale_mps2_per_count": 0.001},
       "equal_frames": sum(x == y for x, y in zip(a, b)),
       "equal_fraction": round(sum(x == y for x, y in zip(a, b)) / len(a), 9),
-      "upper_lower_assignment": "unresolved: both words are equal in every retained complete-drive frame",
+      "upper_lower_assignment": "these two selected complete drives are equal-only; archive-wide unequal ordinary-DRCC frames independently resolve B8:B9 as upper and B11:B12 as lower",
     },
     "lateral_request": {
       "target_lateral_id_low6_values": sorted({d[21] & 0x3F for d in data}),
@@ -178,9 +332,8 @@ def request_summary(rows: list[tuple[int, bytes]]) -> dict:
       "B23": hist(data, 23),
       "B24": hist(data, 24),
       "B25": hist(data, 25),
-      "boundary": ("B6/B7 are now structurally split into two six-bit request IDs plus two-bit allocation methods. The complete-drive census "
-                   "does not establish upper-vs-lower ordering or assign the remaining shift, EPB, override-prohibition or priority fields. "
-                   "B20/B22 mirror cruise state. Do not OEM-name unresolved bytes from resemblance."),
+      "boundary": ("B6/B7 are structurally split into two six-bit request IDs plus two-bit allocation methods. The selected complete drives alone are equal-bound, but the archive-wide unequal ordinary-DRCC census strongly resolves B6/B8:B9 as upper and B7/B11:B12 as lower. "
+                   "Shift, EPB, override-prohibition and priority fields remain unassigned. B20/B22 mirror cruise state. Do not OEM-name unresolved bytes from resemblance."),
     },
   }
 
@@ -393,6 +546,12 @@ def requester_id_namespace(drive_reports: dict[str, dict], hold: dict) -> dict:
 
   id25_hold_frames = hold["hold_episode_frames"]
   id36_frames = observed_b[36]
+  id4_stable = sum(d["idle_0_4_context"]["result_state"]["stable_pair_count"] for d in drive_reports.values())
+  id4_stable_63 = sum(d["idle_0_4_context"]["result_state"]["result_id_counts"].get("63", 0) for d in drive_reports.values())
+  id4_moving = sum(d["idle_0_4_context"]["result_state"]["moving_over_1_mps_pair_count"] for d in drive_reports.values())
+  id4_moving_63 = sum(d["idle_0_4_context"]["result_state"]["moving_over_1_mps_result_id_counts"].get("63", 0) for d in drive_reports.values())
+  id4_brake_edges = [edge for d in drive_reports.values() for edge in d["idle_0_4_context"]["lower_id4_brake_context"]["edges"]]
+  id4_brake_deltas = [edge["delta_mps2"] for edge in id4_brake_edges]
 
   pcs = json.loads(GTS.read_text())
   feature_id_fields = []
@@ -431,6 +590,18 @@ def requester_id_namespace(drive_reports: dict[str, dict], hold: dict) -> dict:
       "id36_startup_frames": id36_frames,
       "id36_boundary": ("ID36 appears only in drive A request candidate B for 33 frames (~0.79 s at startup), with candidate A ID0, "
                         "zero request acceleration, and result ID63; it is not observed as active cruise authority."),
+      "id4_semantic_assessment": {
+        "wire_role": "FRC-origin lower-bound requester in the stable manual/driver 0/4 state",
+        "stable_0_4_pairs": id4_stable,
+        "stable_0_4_result_63_pairs": id4_stable_63,
+        "moving_over_1_mps_pairs": id4_moving,
+        "moving_over_1_mps_result_63_pairs": id4_moving_63,
+        "matched_brake_press_edges_under_1_mps": len(id4_brake_edges),
+        "brake_press_edges_reducing_lower_bound": sum(delta < 0 for delta in id4_brake_deltas),
+        "median_brake_press_delta_mps2": round(statistics.median(id4_brake_deltas), 6) if id4_brake_deltas else None,
+        "current_semantics": ("Strong behavioral attribution: ID4 is the default closed-accelerator/manual baseline lower-bound application. Its lower-bound scalar is positive near zero speed in D, declines through zero into coast/regen/deceleration with speed, and is reduced by every matched low-speed brake press. "
+                              "This is the same physical behavior Toyota describes for the fully-closed powertrain acceleration / creep-to-engine-braking baseline, but no recovered Toyota enum names numeric ID4, so 'creep' is a low-speed behavior of the envelope rather than an OEM ID label."),
+      },
     },
     "corolla_cross_platform": {
       "request_candidate_A_counts": corolla_long["candidate_A_id_counts"],
@@ -451,8 +622,8 @@ def requester_id_namespace(drive_reports: dict[str, dict], hold: dict) -> dict:
         "lateral": lateral_ids.get("0"), "grade": "named anchor / observed",
       },
       "4": {
-        "longitudinal": "Observed Camry candidate B idle; no OEM longitudinal feature name recovered.",
-        "lateral": lateral_ids.get("4"), "grade": "observed longitudinal; lateral comparison only",
+        "longitudinal": ("Observed as the Camry/Corolla default lower-bound requester in the manual 0/4 state. On the Camry its scalar behaves like the closed-accelerator baseline acceleration envelope: positive creep-like floor near zero speed, falling with speed into coast/regen/deceleration, and reduced on every matched low-speed brake press. No OEM numeric longitudinal label for 4 is recovered."),
+        "lateral": lateral_ids.get("4"), "grade": "strong behavioral closed-accelerator/baseline lower-bound attribution; exact OEM application name unknown",
       },
       "9": {
         "longitudinal": "P6 Speed Limiter Requesting Vertical ID explicitly names 9 = ISA; not observed in Camry 0x08A corpus.",
@@ -552,18 +723,18 @@ def vehicle_motion_control_did_surface() -> dict:
 def layout_disposition() -> dict:
   return {
     "5280_lower_longitudinal_request": {
-      "request_id": {"status": "strong structural candidate; lower-vs-upper assignment unresolved", "wire_candidates": ["0x08A B6[7:2]", "0x08A B7[7:2]"]},
-      "acceleration": {"status": "mapped as one of an indistinguishable pair", "wire_candidates": ["0x08A B8:B9", "0x08A B11:B12"], "scale_mps2_per_count": 0.001},
-      "force_distribution": {"status": "strong structural candidate; lower-vs-upper assignment unresolved", "wire_candidates": ["0x08A B6[1:0]", "0x08A B7[1:0]"], "enum": {"0": "Engine Only", "1": "Engine and Brake 1", "2": "Engine and Brake 2", "3": "Brake Only"}},
+      "request_id": {"status": "strongly resolved for ordinary Camry DRCC", "wire": "0x08A B7[7:2]"},
+      "acceleration": {"status": "strongly resolved for ordinary Camry DRCC", "wire": "0x08A B11:B12", "scale_mps2_per_count": 0.001},
+      "force_distribution": {"status": "strong structural join", "wire": "0x08A B7[1:0]", "enum": {"0": "Engine Only", "1": "Engine and Brake 1", "2": "Engine and Brake 2", "3": "Brake Only"}},
       "shift_range": {"status": "unresolved", "wire": None},
       "epb_request": {"status": "unresolved", "wire": None},
       "accelerator_override_prohibition": {"status": "unresolved", "wire": None},
       "low_priority": {"status": "unresolved", "wire": None},
     },
     "5281_upper_longitudinal_request": {
-      "request_id": {"status": "strong structural candidate; lower-vs-upper assignment unresolved", "wire_candidates": ["0x08A B6[7:2]", "0x08A B7[7:2]"]},
-      "acceleration": {"status": "mapped as one of an indistinguishable pair", "wire_candidates": ["0x08A B8:B9", "0x08A B11:B12"], "scale_mps2_per_count": 0.001},
-      "force_distribution": {"status": "strong structural candidate; lower-vs-upper assignment unresolved", "wire_candidates": ["0x08A B6[1:0]", "0x08A B7[1:0]"], "enum": {"0": "Engine Only", "1": "Engine and Brake 1", "2": "Engine and Brake 2", "3": "Brake Only"}},
+      "request_id": {"status": "strongly resolved for ordinary Camry DRCC", "wire": "0x08A B6[7:2]"},
+      "acceleration": {"status": "strongly resolved for ordinary Camry DRCC", "wire": "0x08A B8:B9", "scale_mps2_per_count": 0.001},
+      "force_distribution": {"status": "strong structural join", "wire": "0x08A B6[1:0]", "enum": {"0": "Engine Only", "1": "Engine and Brake 1", "2": "Engine and Brake 2", "3": "Brake Only"}},
     },
     "5282_lateral_request": {
       "lateral_id": {"status": "recovered", "wire": "0x08A B21[5:0]"},
@@ -587,6 +758,7 @@ def build() -> dict:
       "source": {"path": str(path.relative_to(REPO)), "sha256": sha256(path)},
       "request_0x08A": request_summary(streams[0x08A]),
       "result_0x081": result_summary(streams[0x08A], streams[0x081]),
+      "idle_0_4_context": idle_0_4_context(streams),
       "0x0CA_supersession_check": old_0ca_boundary(streams[0x081], streams[0x0CA]),
     }
   hold = hold_semantics()

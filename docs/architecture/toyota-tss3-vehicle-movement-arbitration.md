@@ -129,17 +129,39 @@ The FRC-hosted TSS3 Operation-FFD dictionary mirrors this request vocabulary:
 
 | Patent request concept | Toyota GTS/FFD | Current Camry wire join |
 |---|---|---|
-| lower longitudinal application ID | `5280 TSS required longitudinal ID (lower limit)` | one of `0x08A B6[7:2]` / `B7[7:2]`; order unresolved |
-| lower acceleration | `5280 ... acceleration (lower limit)`, s16 x0.001 | one of `B8:B9` / `B11:B12` |
+| lower longitudinal application ID | `5280 TSS required longitudinal ID (lower limit)` | strongly resolved as `0x08A B7[7:2]` for ordinary Camry DRCC; idle/manual uses ID4, active DRCC ID17 |
+| lower acceleration | `5280 ... acceleration (lower limit)`, s16 x0.001 | strongly resolved as `B11:B12` for ordinary Camry DRCC |
 | lower distribution/policy | `5280` distribution, shift, EPB, override, priority | only ID/allocation core mapped so far |
-| upper longitudinal application ID | `5281 TSS request longitudinal ID (upper limit)` | other of B6/B7 upper-six fields |
-| upper acceleration | `5281 ... acceleration (upper limit)`, s16 x0.001 | other of B8:B9/B11:B12 |
+| upper longitudinal application ID | `5281 TSS request longitudinal ID (upper limit)` | strongly resolved as `0x08A B6[7:2]` for ordinary Camry DRCC; idle/manual uses ID0, active DRCC ID11 |
+| upper acceleration | `5281 ... acceleration (upper limit)`, s16 x0.001 | strongly resolved as `B8:B9` for ordinary Camry DRCC |
 | request lateral ID | `5282 TSS request - lateral ID` | `0x08A B21[5:0]` |
 | requested pinion angle | `5282 TSS request - pinion angle`, s16 x0.001 | `0x08A B18:B19` (~0.00100012 rad/count) |
 | lateral responsiveness/gains | `5282 Steering assist gain` / `Damping control gain` | `0x08A B24/B25` |
 
 This is why `0x08A` should be described as the **TSS request-side package**, not the
 final EPS command.  Exact F33 does not receive `0x08A`.
+
+The idle Camry pair `upper ID0 / lower ID4` is especially informative. Across both
+complete retained drives, every stable `0/4` request pairs with Brake/VMC result
+`63=Driver Operation` (18,608/18,608 and 19,441/19,441), including every stable
+pair above 1 m/s. ID63 therefore describes downstream driver employment; it is not an
+FRC request hiding behind the `0/4` state. Meanwhile the ID4 lower-bound magnitude is
+dynamic. At nine matched brake-press edges below 1 m/s in D with zero accelerator,
+B11:B12 falls on 9/9 edges (combined median about -0.035 m/s²). With the brake
+released it is positive near zero speed and declines through zero into a negative
+coast/deceleration baseline as speed rises.
+
+The best current semantic attribution is therefore **ID4 = the FRC's default
+closed-accelerator/manual baseline lower-bound application**, not simply "creep".
+`US20200070849A1` independently returns a *full-closed estimated ground acceleration*
+from the powertrain to the request-arbitration/application layer. Toyota's
+`US20200094835A1 / US11285952B2` describes the corresponding physical powertrain lower
+limit as a fully-closed baseline that is braking/negative at speed but rises due to
+creep torque below roughly 8--10 km/h; older `JP5195257B2` describes accelerator-off
+creep and brake-demand creep cut. That patent behavior matches the observed ID4 curve
+and brake response extremely closely. No recovered Toyota enum assigns numeric 4 this
+name, so the application **role/quantity is strongly bounded while its exact OEM name
+remains unknown**.
 
 The exact Camry implementation is now clearer than the patent's conceptual
 per-application drawing.  **LTA, LDA, LCA, PDA/SDG, PCS and the other TSS functions are

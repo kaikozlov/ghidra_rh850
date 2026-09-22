@@ -38,6 +38,187 @@
         "conclusion": "0x0CA remains protected longitudinal/chassis state, but none of its old B3:B4/B5:B6/B7:B8 candidates reproduces the cleaner Brake-owned 0x081 B20:B21 arbitration-result candidate. Supersede the old 0x0CA upper/lower/result triplet interpretation.",
         "pair_count": 17107
       },
+      "idle_0_4_context": {
+        "lower_id4_brake_context": {
+          "boundary": "Observed 0/4 lower-slot behavior; ID4 OEM application name remains unknown. Brake correlation is strongest below 1 m/s and does not by itself prove a creep application identity.",
+          "edges": [
+            {
+              "delta_mps2": -0.031,
+              "post_lower_median_mps2": 0.117,
+              "pre_lower_median_mps2": 0.148,
+              "speed_mps": 0.569444,
+              "time_ns": 503852892107
+            },
+            {
+              "delta_mps2": -0.028,
+              "post_lower_median_mps2": 0.097,
+              "pre_lower_median_mps2": 0.125,
+              "speed_mps": 0.733333,
+              "time_ns": 510052296724
+            },
+            {
+              "delta_mps2": -0.0265,
+              "post_lower_median_mps2": 0.295,
+              "pre_lower_median_mps2": 0.3215,
+              "speed_mps": 0.0,
+              "time_ns": 520513678375
+            },
+            {
+              "delta_mps2": -0.0495,
+              "post_lower_median_mps2": 0.282,
+              "pre_lower_median_mps2": 0.3315,
+              "speed_mps": 0.0,
+              "time_ns": 521658927178
+            }
+          ],
+          "matched_brake_press_edges_under_1_mps": 4,
+          "mean_delta_mps2": -0.03375,
+          "median_delta_mps2": -0.0295,
+          "negative_delta_edges": 4,
+          "positive_delta_edges": 0,
+          "speed_bins_gas_off_drive": [
+            {
+              "brake_off": {
+                "frames": 73,
+                "median_mps2": 0.33,
+                "p10_mps2": 0.316,
+                "p90_mps2": 0.69
+              },
+              "brake_on": {
+                "frames": 172,
+                "median_mps2": 0.337,
+                "p10_mps2": 0.288,
+                "p90_mps2": 0.342
+              },
+              "speed_mps": [
+                0.0,
+                0.15
+              ]
+            },
+            {
+              "brake_off": {
+                "frames": 49,
+                "median_mps2": 0.222,
+                "p10_mps2": 0.176,
+                "p90_mps2": 0.637
+              },
+              "brake_on": {
+                "frames": 295,
+                "median_mps2": 0.218,
+                "p10_mps2": 0.15,
+                "p90_mps2": 0.249
+              },
+              "speed_mps": [
+                0.15,
+                0.5
+              ]
+            },
+            {
+              "brake_off": {
+                "frames": 61,
+                "median_mps2": 0.138,
+                "p10_mps2": 0.118,
+                "p90_mps2": 0.158
+              },
+              "brake_on": {
+                "frames": 173,
+                "median_mps2": 0.108,
+                "p10_mps2": 0.012,
+                "p90_mps2": 0.129
+              },
+              "speed_mps": [
+                0.5,
+                1.0
+              ]
+            },
+            {
+              "brake_off": {
+                "frames": 206,
+                "median_mps2": -0.088,
+                "p10_mps2": -0.352,
+                "p90_mps2": -0.041
+              },
+              "brake_on": {
+                "frames": 60,
+                "median_mps2": -0.1205,
+                "p10_mps2": -0.173,
+                "p90_mps2": -0.062
+              },
+              "speed_mps": [
+                1.0,
+                2.0
+              ]
+            },
+            {
+              "brake_off": {
+                "frames": 297,
+                "median_mps2": -0.088,
+                "p10_mps2": -0.334,
+                "p90_mps2": 0.12
+              },
+              "brake_on": {
+                "frames": 162,
+                "median_mps2": -0.284,
+                "p10_mps2": -0.353,
+                "p90_mps2": 0.177
+              },
+              "speed_mps": [
+                2.0,
+                5.0
+              ]
+            },
+            {
+              "brake_off": {
+                "frames": 440,
+                "median_mps2": -0.5135,
+                "p10_mps2": -0.835,
+                "p90_mps2": -0.156
+              },
+              "brake_on": {
+                "frames": 418,
+                "median_mps2": -0.395,
+                "p10_mps2": -0.538,
+                "p90_mps2": -0.164
+              },
+              "speed_mps": [
+                5.0,
+                10.0
+              ]
+            },
+            {
+              "brake_off": {
+                "frames": 553,
+                "median_mps2": -0.261,
+                "p10_mps2": -0.58,
+                "p90_mps2": -0.152
+              },
+              "brake_on": {
+                "frames": 82,
+                "median_mps2": -0.261,
+                "p10_mps2": -0.268,
+                "p90_mps2": -0.25
+              },
+              "speed_mps": [
+                10.0,
+                20.0
+              ]
+            }
+          ]
+        },
+        "request_state": "FRC-origin 0x08A upper ID0 / lower ID4",
+        "result_state": {
+          "interpretation": "Stable FRC 0/4 request state returns Brake/VMC employed-source ID63; any non-63 values should be treated as transition-lag candidates, not FRC-origin ID63 requests.",
+          "moving_over_1_mps_pair_count": 7713,
+          "moving_over_1_mps_result_id_counts": {
+            "63": 7713
+          },
+          "non63_examples": [],
+          "result_id_counts": {
+            "63": 18608
+          },
+          "stable_pair_count": 18608
+        }
+      },
       "request_0x08A": {
         "frame_count": 20618,
         "lateral_request": {
@@ -81,7 +262,7 @@
           },
           "equal_fraction": 1.0,
           "equal_frames": 20618,
-          "upper_lower_assignment": "unresolved: both words are equal in every retained complete-drive frame"
+          "upper_lower_assignment": "these two selected complete drives are equal-only; archive-wide unequal ordinary-DRCC frames independently resolve B8:B9 as upper and B11:B12 as lower"
         },
         "longitudinal_id_allocation_packing": {
           "allocation_enum": {
@@ -113,7 +294,7 @@
             },
             "wire": "B7[7:2] request ID + B7[1:0] allocation method"
           },
-          "gts_geometry": "Brake 0x10A3/0x10A4 define each TSS request ID as bits 7:2 (six bits), leaving exactly two low bits. FRC allocation-method vocabulary is 0..3. The wire split is therefore a strong structural candidate; upper-vs-lower A/B assignment still lacks a synchronized DID/FFD join."
+          "gts_geometry": "Brake 0x10A3/0x10A4 define each TSS request ID as bits 7:2 (six bits), leaving exactly two low bits. FRC allocation-method vocabulary is 0..3. The wire split is therefore a strong structural candidate; archive-wide unequal ordinary-DRCC frames strongly resolve A/B as upper/lower even though a synchronized DID/FFD join is still absent."
         },
         "longitudinal_metadata_census": {
           "B20": {
@@ -150,7 +331,7 @@
             "0x47": 1834,
             "0x92": 33
           },
-          "boundary": "B6/B7 are now structurally split into two six-bit request IDs plus two-bit allocation methods. The complete-drive census does not establish upper-vs-lower ordering or assign the remaining shift, EPB, override-prohibition or priority fields. B20/B22 mirror cruise state. Do not OEM-name unresolved bytes from resemblance."
+          "boundary": "B6/B7 are structurally split into two six-bit request IDs plus two-bit allocation methods. The selected complete drives alone are equal-bound, but the archive-wide unequal ordinary-DRCC census strongly resolves B6/B8:B9 as upper and B7/B11:B12 as lower. Shift, EPB, override-prohibition and priority fields remain unassigned. B20/B22 mirror cruise state. Do not OEM-name unresolved bytes from resemblance."
         }
       },
       "result_0x081": {
@@ -271,6 +452,194 @@
         "conclusion": "0x0CA remains protected longitudinal/chassis state, but none of its old B3:B4/B5:B6/B7:B8 candidates reproduces the cleaner Brake-owned 0x081 B20:B21 arbitration-result candidate. Supersede the old 0x0CA upper/lower/result triplet interpretation.",
         "pair_count": 19999
       },
+      "idle_0_4_context": {
+        "lower_id4_brake_context": {
+          "boundary": "Observed 0/4 lower-slot behavior; ID4 OEM application name remains unknown. Brake correlation is strongest below 1 m/s and does not by itself prove a creep application identity.",
+          "edges": [
+            {
+              "delta_mps2": -0.027,
+              "post_lower_median_mps2": 0.143,
+              "pre_lower_median_mps2": 0.17,
+              "speed_mps": 0.657639,
+              "time_ns": 1480338552955
+            },
+            {
+              "delta_mps2": -0.035,
+              "post_lower_median_mps2": 0.2115,
+              "pre_lower_median_mps2": 0.2465,
+              "speed_mps": 0.452083,
+              "time_ns": 1490602059335
+            },
+            {
+              "delta_mps2": -0.071,
+              "post_lower_median_mps2": 0.217,
+              "pre_lower_median_mps2": 0.288,
+              "speed_mps": 0.470833,
+              "time_ns": 1602486191002
+            },
+            {
+              "delta_mps2": -0.0435,
+              "post_lower_median_mps2": 0.1665,
+              "pre_lower_median_mps2": 0.21,
+              "speed_mps": 0.624306,
+              "time_ns": 1603991484420
+            },
+            {
+              "delta_mps2": -0.036,
+              "post_lower_median_mps2": 0.2535,
+              "pre_lower_median_mps2": 0.2895,
+              "speed_mps": 0.374306,
+              "time_ns": 1614346571497
+            }
+          ],
+          "matched_brake_press_edges_under_1_mps": 5,
+          "mean_delta_mps2": -0.0425,
+          "median_delta_mps2": -0.036,
+          "negative_delta_edges": 5,
+          "positive_delta_edges": 0,
+          "speed_bins_gas_off_drive": [
+            {
+              "brake_off": {
+                "frames": 70,
+                "median_mps2": 0.468,
+                "p10_mps2": 0.356,
+                "p90_mps2": 0.763
+              },
+              "brake_on": {
+                "frames": 220,
+                "median_mps2": 0.367,
+                "p10_mps2": 0.258,
+                "p90_mps2": 0.483
+              },
+              "speed_mps": [
+                0.0,
+                0.15
+              ]
+            },
+            {
+              "brake_off": {
+                "frames": 67,
+                "median_mps2": 0.277,
+                "p10_mps2": 0.24,
+                "p90_mps2": 0.301
+              },
+              "brake_on": {
+                "frames": 854,
+                "median_mps2": 0.24,
+                "p10_mps2": 0.213,
+                "p90_mps2": 0.287
+              },
+              "speed_mps": [
+                0.15,
+                0.5
+              ]
+            },
+            {
+              "brake_off": {
+                "frames": 68,
+                "median_mps2": 0.202,
+                "p10_mps2": 0.167,
+                "p90_mps2": 0.21
+              },
+              "brake_on": {
+                "frames": 241,
+                "median_mps2": 0.17,
+                "p10_mps2": 0.03,
+                "p90_mps2": 0.213
+              },
+              "speed_mps": [
+                0.5,
+                1.0
+              ]
+            },
+            {
+              "brake_off": {
+                "frames": 156,
+                "median_mps2": 0.0745,
+                "p10_mps2": -0.367,
+                "p90_mps2": 0.187
+              },
+              "brake_on": {
+                "frames": 120,
+                "median_mps2": -0.19,
+                "p10_mps2": -0.382,
+                "p90_mps2": -0.015
+              },
+              "speed_mps": [
+                1.0,
+                2.0
+              ]
+            },
+            {
+              "brake_off": {
+                "frames": 589,
+                "median_mps2": -0.208,
+                "p10_mps2": -0.608,
+                "p90_mps2": 0.01
+              },
+              "brake_on": {
+                "frames": 363,
+                "median_mps2": -0.068,
+                "p10_mps2": -0.359,
+                "p90_mps2": 0.081
+              },
+              "speed_mps": [
+                2.0,
+                5.0
+              ]
+            },
+            {
+              "brake_off": {
+                "frames": 384,
+                "median_mps2": -0.36,
+                "p10_mps2": -0.951,
+                "p90_mps2": -0.104
+              },
+              "brake_on": {
+                "frames": 584,
+                "median_mps2": -0.4325,
+                "p10_mps2": -0.802,
+                "p90_mps2": -0.092
+              },
+              "speed_mps": [
+                5.0,
+                10.0
+              ]
+            },
+            {
+              "brake_off": {
+                "frames": 751,
+                "median_mps2": -0.446,
+                "p10_mps2": -0.568,
+                "p90_mps2": 0.093
+              },
+              "brake_on": {
+                "frames": 528,
+                "median_mps2": -0.174,
+                "p10_mps2": -0.533,
+                "p90_mps2": 0.082
+              },
+              "speed_mps": [
+                10.0,
+                20.0
+              ]
+            }
+          ]
+        },
+        "request_state": "FRC-origin 0x08A upper ID0 / lower ID4",
+        "result_state": {
+          "interpretation": "Stable FRC 0/4 request state returns Brake/VMC employed-source ID63; any non-63 values should be treated as transition-lag candidates, not FRC-origin ID63 requests.",
+          "moving_over_1_mps_pair_count": 10563,
+          "moving_over_1_mps_result_id_counts": {
+            "63": 10563
+          },
+          "non63_examples": [],
+          "result_id_counts": {
+            "63": 19441
+          },
+          "stable_pair_count": 19441
+        }
+      },
       "request_0x08A": {
         "frame_count": 23999,
         "lateral_request": {
@@ -313,7 +682,7 @@
           },
           "equal_fraction": 1.0,
           "equal_frames": 23999,
-          "upper_lower_assignment": "unresolved: both words are equal in every retained complete-drive frame"
+          "upper_lower_assignment": "these two selected complete drives are equal-only; archive-wide unequal ordinary-DRCC frames independently resolve B8:B9 as upper and B11:B12 as lower"
         },
         "longitudinal_id_allocation_packing": {
           "allocation_enum": {
@@ -344,7 +713,7 @@
             },
             "wire": "B7[7:2] request ID + B7[1:0] allocation method"
           },
-          "gts_geometry": "Brake 0x10A3/0x10A4 define each TSS request ID as bits 7:2 (six bits), leaving exactly two low bits. FRC allocation-method vocabulary is 0..3. The wire split is therefore a strong structural candidate; upper-vs-lower A/B assignment still lacks a synchronized DID/FFD join."
+          "gts_geometry": "Brake 0x10A3/0x10A4 define each TSS request ID as bits 7:2 (six bits), leaving exactly two low bits. FRC allocation-method vocabulary is 0..3. The wire split is therefore a strong structural candidate; archive-wide unequal ordinary-DRCC frames strongly resolve A/B as upper/lower even though a synchronized DID/FFD join is still absent."
         },
         "longitudinal_metadata_census": {
           "B20": {
@@ -380,7 +749,7 @@
             "0x46": 604,
             "0x47": 3922
           },
-          "boundary": "B6/B7 are now structurally split into two six-bit request IDs plus two-bit allocation methods. The complete-drive census does not establish upper-vs-lower ordering or assign the remaining shift, EPB, override-prohibition or priority fields. B20/B22 mirror cruise state. Do not OEM-name unresolved bytes from resemblance."
+          "boundary": "B6/B7 are structurally split into two six-bit request IDs plus two-bit allocation methods. The selected complete drives alone are equal-bound, but the archive-wide unequal ordinary-DRCC census strongly resolves B6/B8:B9 as upper and B7/B11:B12 as lower. Shift, EPB, override-prohibition and priority fields remain unassigned. B20/B22 mirror cruise state. Do not OEM-name unresolved bytes from resemblance."
         }
       },
       "result_0x081": {
@@ -933,11 +1302,8 @@
     "5280_lower_longitudinal_request": {
       "acceleration": {
         "scale_mps2_per_count": 0.001,
-        "status": "mapped as one of an indistinguishable pair",
-        "wire_candidates": [
-          "0x08A B8:B9",
-          "0x08A B11:B12"
-        ]
+        "status": "strongly resolved for ordinary Camry DRCC",
+        "wire": "0x08A B11:B12"
       },
       "accelerator_override_prohibition": {
         "status": "unresolved",
@@ -954,22 +1320,16 @@
           "2": "Engine and Brake 2",
           "3": "Brake Only"
         },
-        "status": "strong structural candidate; lower-vs-upper assignment unresolved",
-        "wire_candidates": [
-          "0x08A B6[1:0]",
-          "0x08A B7[1:0]"
-        ]
+        "status": "strong structural join",
+        "wire": "0x08A B7[1:0]"
       },
       "low_priority": {
         "status": "unresolved",
         "wire": null
       },
       "request_id": {
-        "status": "strong structural candidate; lower-vs-upper assignment unresolved",
-        "wire_candidates": [
-          "0x08A B6[7:2]",
-          "0x08A B7[7:2]"
-        ]
+        "status": "strongly resolved for ordinary Camry DRCC",
+        "wire": "0x08A B7[7:2]"
       },
       "shift_range": {
         "status": "unresolved",
@@ -979,11 +1339,8 @@
     "5281_upper_longitudinal_request": {
       "acceleration": {
         "scale_mps2_per_count": 0.001,
-        "status": "mapped as one of an indistinguishable pair",
-        "wire_candidates": [
-          "0x08A B8:B9",
-          "0x08A B11:B12"
-        ]
+        "status": "strongly resolved for ordinary Camry DRCC",
+        "wire": "0x08A B8:B9"
       },
       "force_distribution": {
         "enum": {
@@ -992,18 +1349,12 @@
           "2": "Engine and Brake 2",
           "3": "Brake Only"
         },
-        "status": "strong structural candidate; lower-vs-upper assignment unresolved",
-        "wire_candidates": [
-          "0x08A B6[1:0]",
-          "0x08A B7[1:0]"
-        ]
+        "status": "strong structural join",
+        "wire": "0x08A B6[1:0]"
       },
       "request_id": {
-        "status": "strong structural candidate; lower-vs-upper assignment unresolved",
-        "wire_candidates": [
-          "0x08A B6[7:2]",
-          "0x08A B7[7:2]"
-        ]
+        "status": "strongly resolved for ordinary Camry DRCC",
+        "wire": "0x08A B6[7:2]"
       }
     },
     "5282_lateral_request": {
@@ -1116,6 +1467,17 @@
       "id25_delayed_hold_frames": 198,
       "id36_boundary": "ID36 appears only in drive A request candidate B for 33 frames (~0.79 s at startup), with candidate A ID0, zero request acceleration, and result ID63; it is not observed as active cruise authority.",
       "id36_startup_frames": 33,
+      "id4_semantic_assessment": {
+        "brake_press_edges_reducing_lower_bound": 9,
+        "current_semantics": "Strong behavioral attribution: ID4 is the default closed-accelerator/manual baseline lower-bound application. Its lower-bound scalar is positive near zero speed in D, declines through zero into coast/regen/deceleration with speed, and is reduced by every matched low-speed brake press. This is the same physical behavior Toyota describes for the fully-closed powertrain acceleration / creep-to-engine-braking baseline, but no recovered Toyota enum names numeric ID4, so 'creep' is a low-speed behavior of the envelope rather than an OEM ID label.",
+        "matched_brake_press_edges_under_1_mps": 9,
+        "median_brake_press_delta_mps2": -0.035,
+        "moving_over_1_mps_pairs": 18276,
+        "moving_over_1_mps_result_63_pairs": 18276,
+        "stable_0_4_pairs": 38049,
+        "stable_0_4_result_63_pairs": 38049,
+        "wire_role": "FRC-origin lower-bound requester in the stable manual/driver 0/4 state"
+      },
       "request_candidate_A_counts": {
         "0": 38257,
         "11": 6360
@@ -1261,9 +1623,9 @@
         "longitudinal": "Observed Camry startup-only candidate B; no active authority and no OEM label recovered."
       },
       "4": {
-        "grade": "observed longitudinal; lateral comparison only",
+        "grade": "strong behavioral closed-accelerator/baseline lower-bound attribution; exact OEM application name unknown",
         "lateral": "LDA",
-        "longitudinal": "Observed Camry candidate B idle; no OEM longitudinal feature name recovered."
+        "longitudinal": "Observed as the Camry/Corolla default lower-bound requester in the manual 0/4 state. On the Camry its scalar behaves like the closed-accelerator baseline acceleration envelope: positive creep-like floor near zero speed, falling with speed into coast/regen/deceleration, and reduced on every matched low-speed brake press. No OEM numeric longitudinal label for 4 is recovered."
       },
       "41": {
         "grade": "OEM cross-generation shared-application candidate",

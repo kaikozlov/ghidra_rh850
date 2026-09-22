@@ -44,12 +44,14 @@ expected = {
     "request_frames": 20618, "raw_range": [-1146, 995], "pair_n": 17073,
     "result_ids": {"11": 1529, "63": 15544}, "r": 0.941674118,
     "id63_delta": 0.0, "id11_delta": -0.181, "lat_match": 0.999941428,
+    "idle04_stable": 18608, "idle04_moving": 7713, "low_speed_brake_edges": 4, "low_speed_brake_median_delta": -0.0295,
   },
   "drive_b": {
     "sha": "641eee57eaffc579002708185178ea08c189155527354712dd43a1f0e309bb3a",
     "request_frames": 23999, "raw_range": [-1102, 1070], "pair_n": 19999,
     "result_ids": {"11": 3281, "63": 16718}, "r": 0.836883952,
     "id63_delta": 0.0, "id11_delta": -0.435, "lat_match": 0.99979999,
+    "idle04_stable": 19441, "idle04_moving": 10563, "low_speed_brake_edges": 5, "low_speed_brake_median_delta": -0.036,
   },
 }
 
@@ -89,17 +91,31 @@ for label, e in expected.items():
         and abs(result_acc["conditional_by_result_id"]["11"]["result_minus_request"]["median_mps2"]) > .15)
   check(f"{label}: lateral selected ID remains the 0x081 positive control",
         approx(result["lateral_result"]["latest_request_id_match_fraction"], e["lat_match"]))
+  idle = d["idle_0_4_context"]
+  idle_result = idle["result_state"]
+  brake_ctx = idle["lower_id4_brake_context"]
+  check(f"{label}: stable FRC 0/4 returns Brake/VMC Driver Operation ID63",
+        idle_result["stable_pair_count"] == e["idle04_stable"]
+        and idle_result["result_id_counts"] == {"63": e["idle04_stable"]}
+        and idle_result["moving_over_1_mps_pair_count"] == e["idle04_moving"]
+        and idle_result["moving_over_1_mps_result_id_counts"] == {"63": e["idle04_moving"]})
+  check(f"{label}: low-speed brake press reduces the ID4 lower-bound value in every matched event",
+        brake_ctx["matched_brake_press_edges_under_1_mps"] == e["low_speed_brake_edges"]
+        and brake_ctx["negative_delta_edges"] == e["low_speed_brake_edges"]
+        and brake_ctx["positive_delta_edges"] == 0
+        and approx(brake_ctx["median_delta_mps2"], e["low_speed_brake_median_delta"])
+        and all(row["delta_mps2"] < 0 for row in brake_ctx["edges"]))
   old = d["0x0CA_supersession_check"]["0x081_result_accel_vs_0x0CA_words"]
   check(f"{label}: old 0x0CA result triplet does not reproduce the cleaner 0x081 result",
         all(abs(row["pearson_r"]) < .6 for row in old.values()))
 
 print("== GTS recorder and mapping boundaries ==")
 layout = art["layout"]
-check("5280/5281 packed ID/allocation bytes and acceleration pair are mapped without inventing upper/lower order",
-      layout["5280_lower_longitudinal_request"]["acceleration"]["status"].startswith("mapped")
-      and layout["5281_upper_longitudinal_request"]["acceleration"]["status"].startswith("mapped")
-      and layout["5280_lower_longitudinal_request"]["request_id"]["status"].startswith("strong structural")
-      and layout["5281_upper_longitudinal_request"]["force_distribution"]["status"].startswith("strong structural"))
+check("5280/5281 upper/lower ordering is strongly resolved for ordinary Camry DRCC",
+      layout["5280_lower_longitudinal_request"]["request_id"]["wire"] == "0x08A B7[7:2]"
+      and layout["5280_lower_longitudinal_request"]["acceleration"]["wire"] == "0x08A B11:B12"
+      and layout["5281_upper_longitudinal_request"]["request_id"]["wire"] == "0x08A B6[7:2]"
+      and layout["5281_upper_longitudinal_request"]["acceleration"]["wire"] == "0x08A B8:B9")
 check("5282 lateral tuple is recovered in 0x08A",
       layout["5282_lateral_request"]["lateral_id"]["wire"] == "0x08A B21[5:0]"
       and layout["5282_lateral_request"]["pinion_angle"]["wire"].startswith("0x08A B18:B19"))
@@ -159,6 +175,19 @@ check("ID25 remains an unresolved shared-application clue rather than an axis-na
 check("Camry startup ID36 is bounded and not active authority",
       namespace["camry_observed"]["id36_startup_frames"] == 33
       and "not observed as active cruise authority" in namespace["camry_observed"]["id36_boundary"])
+id4 = namespace["camry_observed"]["id4_semantic_assessment"]
+check("ID4 is bounded as the default closed-accelerator/manual lower-bound application",
+      id4["stable_0_4_pairs"] == 38049
+      and id4["stable_0_4_result_63_pairs"] == 38049
+      and id4["moving_over_1_mps_pairs"] == 18276
+      and id4["moving_over_1_mps_result_63_pairs"] == 18276
+      and id4["matched_brake_press_edges_under_1_mps"] == 9
+      and id4["brake_press_edges_reducing_lower_bound"] == 9
+      and approx(id4["median_brake_press_delta_mps2"], -0.035)
+      and "closed-accelerator/manual baseline lower-bound application" in id4["current_semantics"])
+check("working ID4 label keeps behavioral attribution separate from OEM enum naming",
+      "closed-accelerator" in working["4"]["grade"]
+      and "No OEM numeric longitudinal label for 4 is recovered" in working["4"]["longitudinal"])
 check("retained Corolla independently exercises active requester IDs 17 and 23 with downstream result63",
       namespace["corolla_cross_platform"]["request_candidate_A_counts"] == {"0": 2363, "17": 37}
       and namespace["corolla_cross_platform"]["request_candidate_B_counts"] == {"4": 2363, "23": 37}
