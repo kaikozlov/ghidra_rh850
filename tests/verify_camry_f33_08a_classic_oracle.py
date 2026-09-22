@@ -7,6 +7,7 @@ import json
 import subprocess
 import sys
 import tempfile
+import threading
 from pathlib import Path
 from types import SimpleNamespace
 from unittest import mock
@@ -204,6 +205,69 @@ check("parked benchmark reports deterministic distribution statistics",
           "mean_ms": 2.5, "median_ms": 2.5, "p95_ms": 3.85, "p99_ms": 3.97, "max_ms": 4.0,
       })
 
+
+class _FakePipelinedPanda:
+    def __init__(self):
+        self._lock = threading.Lock()
+        self._rx: list[tuple[int, bytes, int]] = []
+        self.request_count = 0
+
+    def can_send_many(self, rows):
+        seq = int(rows[0][1][1]) & host.SEQUENCE_MAX
+        with self._lock:
+            self.request_count += 1
+            trailer = bytes((0x10 | (self.request_count & 0x0F), seq, 0xA5, 0x5A))
+            self._rx.append((host.RESPONSE_ID, bytes((host.RESPONSE_MAGIC, seq, 0, seq ^ 0xFF)) + trailer, host.BUS))
+
+    def can_recv(self):
+        with self._lock:
+            rows, self._rx = self._rx, []
+        return rows
+
+
+class _FakePipelinedSession:
+    last = None
+
+    def __init__(self, *_args, **_kwargs):
+        self.panda = _FakePipelinedPanda()
+        self.transport = {
+            "request_id": host.REQUEST_ID, "request_bus": host.BUS,
+            "response_id": host.RESPONSE_ID, "response_bus": host.BUS,
+            "carrier": "functional-c8",
+        }
+        self.attestation = {"state": {"initialized": True}}
+        self.refreshed = False
+        _FakePipelinedSession.last = self
+
+    def read_state(self):
+        count = self.panda.request_count
+        return {
+            "assembly_seq": 0,
+            "request_count": count,
+            "success_count": count,
+            "response_count": count,
+        }
+
+    def refresh_extended_session(self):
+        self.refreshed = True
+
+    def close(self):
+        pass
+
+
+with mock.patch.object(host, "ClassicOracleSession", _FakePipelinedSession):
+    pipelined = host.benchmark_pipelined(
+        OUT / "camry_f33_08a_classic_oracle.json", count=3, period_ms=10.0, drain_timeout_s=0.1,
+    )
+check("100-Hz benchmark pipelines requests without waiting for each reply",
+      pipelined["schema"] == "camry-f33-08a-classic-oracle-pipelined-benchmark-v1" and
+      pipelined["count_sent"] == pipelined["success_count"] == pipelined["responses_received"] == 3 and
+      pipelined["target_rate_hz"] == 100.0 and pipelined["complete_target_rate_run"] is True and
+      pipelined["resident_counter_deltas"] == {"request_count": 3, "success_count": 3, "response_count": 3} and
+      pipelined["boundaries"]["sender_waits_for_response"] is False and
+      pipelined["boundaries"]["transmitted_08a"] is False and
+      _FakePipelinedSession.last is not None and _FakePipelinedSession.last.refreshed)
+
 class FakeDiagnosticClient:
     def __init__(self): self.sessions = []
     def diagnostic_session_control(self, session): self.sessions.append(session)
@@ -399,5 +463,8 @@ check("standalone classic-oracle kit includes guarded Brake then FRC peer recove
       recovery.index("restart-domain --domain frc") <
       recovery.index("state --output") and
       "output directory is not empty" in recovery)
+check("standalone classic-oracle kit exposes the parked 100-Hz pipelined throughput gate",
+      "./f33-08a-classic-oracle benchmark-100hz [COUNT] [OUTPUT_JSON]" in launcher and
+      'benchmark-pipelined --meta "$META" --count "$count" --period-ms 10' in launcher)
 
 print("PASS canonical exact-target classic-CAN 0x08A oracle")
