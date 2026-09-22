@@ -3310,70 +3310,25 @@ Evidence: `tools/targets/camry/analysis/analyze_camry_2026_parser_liveness.py`,
 `tests/verify_camry_2026_parser_liveness.py`, and fork
 `opendbc/car/toyota/tests/test_tss3_camry.py`.
 
-### 4.13 Host `0x08A` runs at the normal 100-Hz control cadence; native `0x08A` does not set the host clock
+### 4.13 Host request cadence is 100 Hz, independent of native `0x08A`
 
-**2026-09-21 cadence correction:** retained Toyota `0x08A` is not a ~119-Hz source.
-The two producer-bounds drives measured **38.122 / 39.997 Hz**, and the later long-route
-parser-liveness audit measured native bus-2 `0x08A` at at least **43.741-Hz median** while
-retaining a conservative 40-Hz parser setting. The rlog gap mix is publication-batch timing,
-not a physical transmitter-period fingerprint. Those measurements describe Toyota source
-liveness; they do not impose an openpilot actuator-command period.
+2026-09-21 re-check corrects the earlier ~119-Hz recollection. The retained producer-bounds
+drives measure native `0x08A` at **38.122 / 39.997 Hz** mean, while the later long routes
+measure **43.741--43.947 Hz** from median same-segment spacing. Those are Toyota source/liveness
+rates, not a host-control limit.
 
-That distinction matches established Toyota openpilot practice. The pre-TSS3 torque path
-runs `CarController` at 10 ms and emits `STEERING_LKA` every controller tick even though the
-upstream source comment records a Toyota trace at about 42 Hz; the explicit reason is that
-100-Hz host publication permits the intended steering rate behavior. The exact-F33 request
-plane now follows the same ownership shape instead of sampling openpilot output only when a
-native `0x08A` happens to arrive:
+The fork therefore follows the ordinary openpilot **100-Hz CarController** cadence for the
+host-owned request plane rather than waiting for native `0x08A` publications. This matches the
+older Toyota steering precedent where openpilot sends `STEERING_LKA` every control tick even
+though the source comment records stock traffic around 42 Hz. EPS remains responsible for
+freshness and the `FV4 || MAC28` trailer, and Panda's vehicle-model angle check uses the same
+100-Hz cadence. There is no present reason to exceed 100 Hz because the normal openpilot
+vehicle-control state itself updates at 100 Hz.
 
-- `CarController` keeps the normal **100 Hz** (`DT_CTRL=0.01`) clock and F33 uses
-  `STEER_STEP=1`; the 39-raw/tick fault bound is therefore normalized to 10-ms commands.
-- each control tick can enqueue one complete comma-owned `0x08A` application for the EPS
-  signer, while the EPS remains the sole owner of freshness and `FV4 || MAC28`;
-- at most one authenticated host `0x08A` is published per control tick, and no second host
-  frame is sent before Panda confirms the initial ownership-transfer frame;
-- signing work is bounded to eight pending generations so normal ~10--20-ms signer latency
-  can be hidden without creating an unbounded historical actuator queue;
-- a later valid signer response supersedes an earlier **unanswered** generation rather than
-  waiting 50 ms and retrying stale control. Already-completed responses remain ordered. This
-  removes the prior single-missed-response steering gap mechanism while retaining a 90-ms
-  no-publication liveness bound;
-- Panda's F33 vehicle-model angle check is normalized to **100 Hz** as well. Native source
-  `0x08A` remains a CANParser/FRC-liveness input, not the host publication scheduler.
-
-The authentication throughput boundary remains dynamic. Exact-F33 firmware already runs its
-native protected EPS `0x030` at **10 ms / 100 Hz** through the same 36-byte SecOC Tx MAC shape,
-ICU-S command 5, and selector 4, so the crypto primitive itself is not a 40-Hz mechanism.
-That does **not** by itself prove that the serialized ICU-S driver has enough additional
-headroom for another sustained 100-Hz `0x08A` signing stream alongside production SecOC work.
-The current raw-classic live benchmark is sequential at 25 ms: its 100-request run completed
-100/100 with mean **11.29 ms**, median **10.62 ms**, p95 **15.88 ms**, p99 **25.49 ms**, and
-maximum **36.27 ms** request-to-response latency. Those numbers make single-flight 10-ms
-operation inappropriate, but they do not rule out a pipeline because request/response latency
-also includes Panda transport and resident scheduling while the helper can drain multiple
-queued raw-ring requests serially.
-
-`camry_f33_08a_classic_oracle.py` therefore now has a dedicated parked/stationary
-`benchmark-pipelined` mode, exposed by the kit as `benchmark-100hz`. It submits one six-frame
-C8 application batch every **10 ms** while an independent receiver drains `0x7A9` responses,
-tracks sequence reuse safely, reports outstanding depth/response throughput/resident counter
-deltas, and transmits **no `0x08A` and no B6**. Its runtime-shaped pass condition requires all
-requested signatures to succeed, no more than eight requests outstanding, every successful
-request inside the 90-ms publication deadline, and no 10-ms scheduling slip. A complete
-100-Hz run is the remaining dynamic throughput gate before treating the new cadence as
-road-qualified. There is no current reason
-to exceed 100 Hz in the driving path: openpilot's normal vehicle-control state itself updates
-at 100 Hz, so a faster publication scheduler would duplicate actuator state and depart from
-the upstream ownership shape without evidence of benefit.
-
-Evidence: `docs/variants/camry-2026-live-baseline.md` §41,
-`data/generated/camry_2026_parser_liveness.json`,
-`docs/variants/camry-f33-eps-tx.md`,
-`data/generated/camry_8965F3307000_030_secoc_tx.json`,
-`exploit/ephemeral_runtime/camry_f33_08a_classic_oracle.py`,
-`tests/verify_camry_f33_08a_classic_oracle.py`, and fork
-`opendbc/car/toyota/{carcontroller.py,tss3.py,values.py}` plus
-`opendbc/safety/modes/toyota.h`.
+The existing parked raw-classic signer benchmark remains a 25-ms transport measurement; it is
+not promoted into a new production-rate qualification framework here. If live 100-Hz control
+shows signer saturation, measure that as a focused experiment rather than adding another
+runtime scheduler/tooling stack to this repository.
 
 ## 5. Demonstrated B6 steering authority and remaining qualification
 
