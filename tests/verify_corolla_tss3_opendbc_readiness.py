@@ -110,14 +110,17 @@ check("0x18A has competing radar/object and lateral hypotheses", all(x in fd["0x
 
 print("\n== Panda/harness and implementation boundaries ==")
 bus = ART["bus_and_suppression_boundary"]
-check("current Panda assumption is bus0", "logical bus 0" in bus["current_toyota_safety_assumption"])
-check("route reusable state is observed on bus1", "logical bus 1" in bus["public_route_observation"])
+topo = bus["canonical_deployment_topology"]
+check("canonical TSS3 topology is repinned 0/2 with aux bus1", topo["chassis_state_bus"] == 0 and topo["source_frc_bus"] == 2 and topo["aux_radar_bus"] == 1 and "CAN0/CAN2" in topo["description"])
+check("runtime topology has no stock-harness fallback", all(x in bus["runtime_topology_policy"] for x in ("provenance only", "does not auto-detect", "parallel logical-bus-1", "repinned 0/2")))
+check("current Panda assumption is canonical bus0", "canonical repinned chassis bus 0" in bus["current_toyota_safety_assumption"])
+check("raw route provenance remains bus1", all(x in bus["public_route_observation"] for x in ("Historical raw evidence", "logical bus 1", "does not define runtime placement")))
 check("Toyota-B relay topology is explicit", all(x in bus["toyota_b_harness_fact"] for x in ("CAN0/CAN2", "intercept-relay", "CAN1", "unsplit")))
 span_bus = bus["span_moving_observation"]
 check("Span rlog stayed direct normal-harness observation", span_bus["panda_state_samples"] == 599 and span_bus["all_samples_elm327_param1"] is True and span_bus["all_samples_harness_status_flipped"] is True)
 check("Panda flipped is not physical repin", all(x in bus["toyota_b_harness_fact"] for x in ("CAN0/CAN2", "CAN1", "harnessStatus=flipped", "not a physical")))
-check("direct observation is distinct from interception", all(x in bus["diagnostic_vs_interception"] for x in ("ELM327 param=1", "logical bus 1", "normal harness CAN1", "physical CAN0/CAN1 repin", "relay pair")))
-check("missing physical repin limits suppression, not passive visibility", all(x in bus["consequence"] for x in ("missing physical repin", "suppression topology", "does not by itself", "B6", "bounded observation")))
+check("historical bus1 observation is distinct from maintained interception", all(x in bus["diagnostic_vs_interception"] for x in ("ELM327 param=1", "logical bus 1", "physical CAN0/CAN1 repin", "CAN0/CAN2 relay pair")))
+check("unrepinned Span route is evidence, not supported topology", all(x in bus["consequence"] for x in ("unrepinned bus-1 rlog", "not a supported topology", "canonical repinned 0/2", "bounded historical observation")))
 impl = ART["implementation_readiness"]
 implemented = impl["implemented_from_retained_evidence"]
 check("base state plumbing is implemented from retained evidence", any(all(tok in x for tok in ("0x025/32", "0x030", "0x127", "0x3BF")) for x in implemented))

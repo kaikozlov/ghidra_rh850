@@ -498,12 +498,19 @@ def main() -> int:
         "role_readiness": readiness,
         "tss3_fd_network": tss3_fd,
         "bus_and_suppression_boundary": {
-            "current_toyota_safety_assumption": "Current Toyota Panda safety consumes its checked vehicle-state inputs on logical bus 0.",
-            "public_route_observation": "The directly reusable 0x00F/0x025/0x0AA/0x101/0x116/0x176 state evidence in the public TSS3 route is on logical bus 1. That bus also exposes exact-H/F search-vocabulary 0x0D7 and 0x030, but not B6 or H/F's 0x351/0x394/0x4A3/0x4C8 Tx set.",
+            "canonical_deployment_topology": {
+                "chassis_state_bus": 0,
+                "source_frc_bus": 2,
+                "aux_radar_bus": 1,
+                "description": "All maintained TSS3 integration uses the Toyota-B physical repin: the target chassis network is on Panda's CAN0/CAN2 relay pair, with CAN1 retained as the unsplit auxiliary/radar path.",
+            },
+            "runtime_topology_policy": "Historical stock-harness bus observations are provenance only. Runtime integration does not auto-detect, fall back to, or maintain a parallel logical-bus-1 state topology; future Corolla integration must use the same repinned 0/2 layout.",
+            "current_toyota_safety_assumption": "Current Toyota Panda safety consumes TSS3 checked vehicle-state inputs on the canonical repinned chassis bus 0.",
+            "public_route_observation": "Historical raw evidence remains unchanged: the directly reusable 0x00F/0x025/0x0AA/0x101/0x116/0x176 state evidence in the public TSS3 route was observed on logical bus 1 before a physical Toyota-B repin. That provenance does not define runtime placement.",
             "span_moving_observation": span_rlog["harness_observation_boundary"],
             "toyota_b_harness_fact": "Official Toyota-B hardware uses CAN0/CAN2 as the intercept-relay pair and CAN1 as a separate unsplit network. Panda harnessStatus=flipped is cable orientation, not a physical Toyota-B CAN0/CAN1 repin.",
-            "diagnostic_vs_interception": "ELM327 param=1 + logical bus 1 attaches FDCAN2 to the normal harness CAN1 wires and is sufficient for direct/passive observation. A physical CAN0/CAN1 repin is still required to move that network onto the CAN0/CAN2 relay pair for normal comma interception, stock-source suppression, and side-of-relay producer attribution.",
-            "consequence": "Span's missing physical repin explains why its rlog cannot establish production suppression topology; it does not by itself erase stock-CAN1 traffic from logical bus 1. B6's segment-level absence therefore remains a bounded observation, while its producer side and suppression point remain open until a relay-correct LTA transition capture is obtained.",
+            "diagnostic_vs_interception": "ELM327 param=1 + logical bus 1 attaches FDCAN2 to the normal harness CAN1 wires and is sufficient for historical direct/passive observation. The maintained integration instead requires the physical CAN0/CAN1 repin so the target network lands on the CAN0/CAN2 relay pair for normal comma interception and source-side attribution.",
+            "consequence": "Span's unrepinned bus-1 rlog remains valid wire-format evidence but is not a supported topology. Its B6 absence remains a bounded historical observation; deployment and any future Corolla control work use the canonical repinned 0/2 layout while producer/suppression evidence is closed separately.",
         },
         "forced_old_profile": public["forced_old_profile_result"],
         "implementation_readiness": {

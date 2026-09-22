@@ -454,16 +454,20 @@ the community lateral-control heatmap lead. Those are competing hypotheses. Do n
 assign producer, fields, integrity, or command ownership until firmware or synchronized
 traffic joins one of them to a real source/consumer.
 
-Finally, Panda topology is part of the port. Current Toyota safety consumes its
-checked state inputs on logical bus 0, while the directly useful state above is
-observed on logical bus 1. Official Toyota-B hardware makes CAN0/CAN2 the
-intercept-relay pair and CAN1 an unsplit network. `ELM327 param=1 + logical bus 1`
-is sufficient for direct diagnostics and passive observation of that stock CAN1
-network; it is **not** relay-topology-equivalent to the physical CAN0/CAN1 repin.
-Therefore "parse bus 1" is not itself a production architecture. Exact H/F
-receiver arbitration now closes **why exclusive B6 authority is required** even
-before that capture: there is one source-agnostic B6 SecOC profile/freshness state,
-one coalescing pending queue slot, and one PDU42 COM shadow; signal261 is not a
+Finally, Panda topology is fixed for maintained TSS3 integration. The canonical
+Toyota-B physical repin places chassis/state on logical bus 0 and the FRC/source
+side on logical bus 2 across the CAN0/CAN2 intercept-relay pair; logical bus 1
+remains the unsplit auxiliary/radar path. Raw Corolla captures that observed the
+target network on stock-harness logical bus 1 remain valid wire-format provenance,
+but they do not select a runtime topology. There is no maintained bus-1 fallback,
+per-vehicle bus remap, or topology auto-detector. In particular, `0x51E` Ready
+Status belongs to the canonical chassis/state parser on bus 0; a relay-side mirror
+may also be visible on bus 2, while historical bus-1 observation stays evidence
+only.
+
+Exact H/F receiver arbitration also closes **why exclusive B6 authority is
+required**: there is one source-agnostic B6 SecOC profile/freshness state, one
+coalescing pending queue slot, and one PDU42 COM shadow; signal261 is not a
 duplicate filter and Target Lateral ID has no cross-frame priority ranking. A
 pending second frame can replace the first before verification, in-flight arrivals
 are ignored, the first successful commit consumes a given freshness value, and a
@@ -472,42 +476,27 @@ closes a bounded generated failure-forwarding mode: a hard freshness failure or
 retry-exhausted CMAC failure can still reach COM without freshness commit while
 `FEBE5408 < 204` or a separate global D2 override is active. Thus parallel
 stock+openpilot B6 is timing-dependent rather than safely arbitrated even if one
-hoped verification failure would separate the streams. We still need
-a relay-correct capture to establish the **physical producer side and actual
-suppression/isolation point**, plus safe forwarding/transmit topology. Freshness
-racing must not be used as a coexistence mechanism.
+hoped verification failure would separate the streams. A relay-correct Corolla
+capture remains useful to establish the **physical producer side and actual
+suppression/isolation point**, but not to choose parser placement or support a
+second topology. Freshness racing must not be used as a coexistence mechanism.
 
-**Read-only implementation checkpoint (2026-08-25):** the scaffold above is now
-implemented in the maintained forks rather than remaining a paper design. The initial
-non-actuating TSS3 scaffold landed in opendbc commit
+**Historical read-only checkpoint (2026-08-25; superseded topology):** the initial
+non-actuating Corolla scaffold landed in opendbc commit
 `6b124c546381350b8c7285980ffed3f14aef8f53` and kai-openpilot commit
-`263b339480eabf8be242b486bd76f1df835241b2`: `TOYOTA_COROLLA_TSS3`, the dedicated
-`toyota_tss3_pt_generated` DBC, independent `TSS3` generation flag, TSS3-specific
-`CarState`, bounded steering status naming, and B6 inspection surface. Follow-up opendbc
-commit `fa1847d7ee66a221f2960ec5cf7a840e737ca521` adds incoming `0x51E B0[7]` as
-`TSS3_READY_STATUS.READY_STATUS` for observation only; kai-openpilot commit
-`ddc6e532ecb8640d5771234b0017d84839e28ae2` advances the submodule to that revision.
-The implementation is deliberately **non-actuating**:
-`CarParams.dashcamOnly=True`, Panda uses `SafetyModel.noOutput`, radar and longitudinal
-control are disabled, and the TSS3 `CarController` returns zero CAN messages even when an
-enabled lateral/longitudinal request is supplied. B6's DBC definition is therefore a
-receiver/packing-analysis surface, not an enabled sender.
+`263b339480eabf8be242b486bd76f1df835241b2`, with follow-up `0x51E B0[7]` Ready
+Status observation in opendbc `fa1847d7ee66a221f2960ec5cf7a840e737ca521`.
+That checkpoint experimented with choosing bus placement from the unrepinned Span
+capture. It is retained here only as history, not as current architecture.
 
-The read-only parser keeps the specimen/topology boundary explicit. Its provisional
-147-message CAN fingerprint is copied from Span's July-29 moving rlog and is **not** an
-F181 identity record; no guessed `FW_VERSIONS` row was added. Startup `0x025/32` +
-`0x0AA/8` on logical bus 1 selects the observed unmodified Toyota-B CAN1 topology; absent
-that exclusive bus-1 evidence, the parser defaults to bus 0 for the intended relay-correct
-placement. That choice affects observation only and does not claim producer-side ownership
-or stock-source suppression. `CarState` promotes the proved steering/wheel/brake/gas fields
-and now reconstructs live physical **Steering Wheel Torque** from `0x030` as
-`signed(B8)*0.1 + signed4(B17[3:0])*0.01 N.m`; the target-native torque-invalid gate
-suppresses invalid samples. It still promotes only the dynamically exercised `0x127` raw
-value `3=D`, and deliberately leaves cruise, EPS actuator torque/current, driver-override
-policy, Ready-to-fault/engagement policy and temporary/permanent steering-fault classes
-neutral. `0x51E B0[7]` is parsed as Ready Status but does not yet alter CarState policy. The decoded
-B6[2] `STEERING_FAULT_INHIBIT_STATUS` is explicitly a selected steering fault/inhibit
-aggregate, not an exhaustive EPS-fault state.
+**Current implementation rule:** the maintained fork has removed Corolla platform
+registration and its separate control/safety branches. The shared TSS3 DBC and
+retained Corolla wire-format tests remain, but they are replayed on the same
+canonical repinned topology as the active Camry port: chassis/state bus 0,
+FRC/source bus 2, auxiliary/radar bus 1. Historical raw bus-1 capture provenance is
+preserved in evidence artifacts and never drives runtime parser selection. `0x51E
+B0[7]` therefore remains a shared Ready Status wire field without creating a
+Corolla-specific bus exception.
 
 As an independent integration check, the complete tracked Span rlog was replayed through the
 new parser: after the first 100 startup samples, **5,900/5,900** samples remained

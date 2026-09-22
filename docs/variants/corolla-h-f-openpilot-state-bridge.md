@@ -247,6 +247,12 @@ still required before using the bit as an openpilot engagement/fault classifier.
 The join is an **incoming CAN Ready Status field**; it does not imply that
 `0x030/0x351/0x394/0x4A3` republishes the same boolean on an EPS Tx PDU.
 
+For maintained integration, bus placement is no longer specimen-dependent. The
+canonical Toyota-B physical repin is the only supported TSS3 topology: chassis/state
+(including `0x51E`) on Panda bus 0, FRC/source traffic on bus 2, and the unsplit
+auxiliary/radar path on bus 1. The historical Corolla routes below observed the target
+network on stock-harness logical bus 1; that remains raw-capture provenance only and
+must not become a runtime parser fallback or a separate Corolla topology.
 
 ### 6.5 The cooperative system gate is a graded power-supply receive-validity/freeze state
 
@@ -1025,13 +1031,15 @@ are byte-identical in 1,271 and 1,513 pairs respectively, with median absolute r
 difference zero in both. Loggerd publication timestamps remain batch timestamps and do
 not establish physical latency or wire order.
 
-Both Corolla captures use the normal **unsplit** Toyota harness observation, so
-`0x08A` and `0x081` appear together on logical bus 1 and cannot be direction-separated
-there. The repinned 2026 Camry is what later exposes their opposite sides of the relay:
-`0x08A` upstream-to-chassis and `0x081` chassis-to-upstream. Therefore the strongest
-cross-generation interpretation is a persistent Toyota TSS3 **control request/result
-plane**, already present by the 2023 Corolla, rather than a Camry-specific CAN
-convention.
+Both retained Corolla captures use the historical normal **unsplit** Toyota harness
+observation, so `0x08A` and `0x081` appear together on logical bus 1 and cannot be
+direction-separated there. The repinned 2026 Camry later exposes their opposite sides
+of the relay: `0x08A` upstream-to-chassis and `0x081` chassis-to-upstream. That repinned
+direction is now the integration contract for Corolla as well; the bus-1 observations
+remain evidence of the wire format, not a second deployment mode. The strongest
+cross-generation interpretation is therefore a persistent Toyota TSS3 **control
+request/result plane**, already present by the 2023 Corolla, rather than a Camry-specific
+CAN convention.
 
 The retained Corolla segments never leave Target Lateral ID 0, so they do **not** prove
 stock LTA/LDA/PDA actuation, arbitration winner state, or the final EPS authority
