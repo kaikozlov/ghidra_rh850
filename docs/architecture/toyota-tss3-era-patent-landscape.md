@@ -595,6 +595,17 @@ Discloses a tree network with:
 - wake/startup messages that move lower ECUs from power-off -> standby ->
   startup.
 
+The startup sequence is a particularly strong match to the question here. The
+intermediate ECU itself can remain in standby while its lower-ECU group is
+physically unpowered. An upper-ECU message wakes the intermediate ECU; the
+intermediate ECU closes a relay to power the lower group; the lower ECUs first
+enter standby; and a relayed network-management message then moves them into
+their operational startup state. The patent explicitly notes that the requested
+operation need not be limited to conventional ACC/IG states and can instead be
+defined around particular vehicle functions. Its related-art section also
+describes the conventional Toyota split of constant +B plus switched ACC/IG
+rails under a power-supply-management ECU.
+
 Source:
 https://patents.google.com/patent/US20220055556A1/en
 
@@ -615,6 +626,150 @@ Gateway/junction questions, especially when one logical participant is not
 visible on the same physical bus as another. They do not identify the exact
 Camry EBU attachment or prove that the patent upper/intermediate/lower placement
 matches the F33 harness.
+
+### WO2025084013A1 — selective target-device startup by power or communication
+
+Priority 2023-10-20, Toyota; published 2025-04-24.
+
+This later family is unusually explicit about the distinction between a vehicle
+being globally "off" and individual devices being selectively started. A
+management device receives a startup request from another ECU and chooses, **per
+target device**, between two mechanisms:
+
+1. **power-control startup** — assert a power-control line so the target begins
+   receiving power; or
+2. **communication startup** — request startup over the in-vehicle network for
+   a target already capable of receiving the request.
+
+The disclosed selection logic can use the request source, current vehicle state,
+network topology, and a per-function startup-time requirement. The concrete door
+example is especially relevant to pre-IG behavior: a door ECU reports that a
+door opened while the vehicle is after IG-OFF, the manager interprets the
+source+state as a vehicle event, and it starts only the device group needed for
+that event.
+
+This patent is **successor architecture vocabulary**, not proof that F33
+implements this exact manager/database or its target mapping. Its 2023 priority
+post-dates the core TSS3/F33 design period. It is nevertheless strong Toyota
+evidence that "OFF" is intentionally decomposed into event-driven selective
+device startup, and that Toyota distinguishes physical power-control wake from
+network/communication wake.
+
+Source:
+https://patents.google.com/patent/WO2025084013A1/en
+
+### 3.1 Pre-power-switch wake: public Toyota behavior + current GTS vocabulary
+
+The patent model now joins cleanly to both public Toyota documentation and the
+current recovered GTS+ catalog.
+
+The **2025 Camry Hybrid owner's manual** documents a pre-button state directly:
+
+- opening either front door illuminates the power switch;
+- with the power switch still OFF, depressing the brake while carrying the
+  electronic key makes the power-switch illumination blink; and
+- depressing the brake produces a start-related message in the
+  multi-information display before the driver presses the power switch.
+
+That is sufficient to say that the current Camry platform performs key/brake/UI
+work before the explicit power-button event. It does **not** by itself identify
+which ECU wakes which peer or which rail changes state.
+
+Source:
+https://assets.sia.toyota.com/publications/en/om-s/OM06266U/pdf/OM06266U.pdf
+(page 179)
+
+Toyota/Lexus service literature independently makes the brake-domain behavior
+physical rather than merely cosmetic. Lexus bulletin **L-SB-0032-23** warns
+that, while the auxiliary battery is connected, the brake control system
+activates with the power switch OFF when either the brake pedal is depressed or
+**any door courtesy switch** is turned on. The same warning appears across
+older Toyota hybrid repair procedures, so this is a long-lived Toyota behavior,
+not a one-off UI convention.
+
+Source:
+https://static.nhtsa.gov/odi/tsbs/2023/MC-10245447-9999.pdf
+(page 9; superseding Lexus brake bulletin)
+
+The current recovered P5 GTS+ databases expose the state split more explicitly:
+
+- PSC_P5.ddb (**Power Source Control**)
+  - DID 0x1001: Push Start Switch 1/2/3, Shift P Signal,
+    Stop Light Switch, and Starter Drive Request Signal;
+  - DID 0x1003: inside/outside IGP and IGR relay-circuit monitors,
+    IGP Hold Circuit Monitor, ACC Relay Monitor, and IGB Relay Monitor;
+  - DID 0x1005: Power Supply Condition with distinct values
+    OFF, ACC ON, IGR ON, IGP ON, and Starter ON;
+  - DID 0x2001: Accessory Mode (ACC) Transition.
+- CentralGW_P5.ddb (**Central Gateway**) DID 0x1001 independently exposes
+  IG2 SW/IGR SW, IG1 SW/IGP SW, ACC SW, and +B Voltage.
+- PowIntegr_4_P5.ddb (**Power Distribution Box**) DID 0x5011 exposes
+  Power Supply Management Request Signal.
+- SMART_P5.ddb (**Entry&Start**) exposes
+  Start SW Light Power Supply (0x2803), Steering Lock Sleep Condition,
+  Steering Lock Start Condition, ID-BOX Sleep Condition, and
+  ID-BOX Start Condition.
+- HV_P5.ddb (**Hybrid Control**) exposes an independently named wake plane:
+  - DID 0x1456: WAKE Signal Status for the Gear Shift Control Module,
+    module B, and sub-CPU variants;
+  - DID 0x1417: a sub-battery backup request whose value 1 is
+    Backup Stop Request / Wake Up/Sleep Permission;
+  - DID 0x1460: Gear Shift Control Module Backup Signal Status value 1
+    = Wake Up Request, and a companion request value 1
+    = Wake Up/Sleep Permission.
+
+The important architectural point is that Toyota's own diagnostic model does
+**not** collapse wake into ACC/IG. The current catalog has distinct wake/sleep
+state, start-function state, physical/relay power state, and button/brake input
+state.
+
+There is also a useful service-manual continuity check on the input side. Modern
+Toyota smart-key diagnostics expose a certification ECU with constant +B in
+ignition-off and a direct stop-light/brake input, while older Toyota push-button
+start manuals explicitly route the stop-light switch and power switch into the
+power-source controller. Those older wiring examples should be used only as
+topology vocabulary; the current PSC_P5/SMART_P5 records above are the better
+search oracle for F33.
+
+Public reference example:
+https://lemon.dogeware.me/Toyota/2023/Sienna%20XSE%2C%202.5L%20Eng%20VIN%20R/Repair%20and%20Diagnosis%20%28Single%20Page%29/Body%20%26%20Frame/Door%20Locks/Smart%20Key%20System%20%28For%20Start%20Function%29%20-%20Diagnostics%20-%20Introduction/SMART%20KEY%20SYSTEM%20%28for%20Start%20Function%29/Terminals%20Of%20Ecu%20%5B11%2F2020%20-%2009%2F2022%5D/Terminals%20Of%20Ecu%20%5B11%2F2020%20-%2009%2F2022%5D/
+
+### 3.2 What this means for the exact F33 wake investigation
+
+The best current model is a **layered power-state machine**, not a binary
+OFF/ON model:
+
+1. **quiescent / always-powered observers** remain capable of detecting at
+   least selected entry/start/network events;
+2. a **pre-IG event wake** can start selected ECU functions or whole power
+   groups in response to door, key, brake, timer, remote, or other events;
+3. **ACC / IGR / IGP** are broader named power-source states with their own
+   relay/request monitoring; and
+4. **READY** adds the hybrid/drivetrain start state.
+
+This fits the retained F33 dynamic evidence: the pre-start brake-wake capture
+already has native 0x00F traffic before the brake is pressed. Therefore the
+brake/meter event is **not** the origin of the 0x00F freshness epoch and at
+least part of the relevant network is already alive before the pedal event.
+
+Do not yet assign the patent's abstract "management device", "upper ECU", or
+"intermediate ECU" to F33 Central Gateway, Power Source Control, Power
+Distribution Box, EBU, Main Body, or Entry&Start. Current GTS gives all of those
+useful observables, but an exact ownership map still requires live transitions,
+wiring/EWD evidence, or firmware.
+
+The next high-value capture should therefore distinguish these events instead of
+recording only "OFF" versus "READY":
+
+deep sleep -> key approaches -> door unlock/open -> key in cabin -> brake down
+-> brake up -> power-button press -> READY -> power OFF -> door close -> sleep
+
+For each boundary, record per-bus first/last frame time and newly appearing IDs,
+and concurrently sample the read-only GTS observables above when practical.
+Particularly useful joins are PSC 0x1001/0x1003/0x1005,
+Central Gateway 0x1001, PDB 0x5011, and the SMART_P5 sleep/start fields.
+A true deep-sleep baseline must begin **before touching a door**, because Toyota
+documents the door event itself as sufficient to start brake-system activity.
 
 ## 4. Security and reprogramming families
 

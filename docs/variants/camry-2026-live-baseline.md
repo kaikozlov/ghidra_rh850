@@ -7184,3 +7184,45 @@ request-plane backend from replay/unit-qualified to live-road demonstrated on
 the maintainer F33 Camry. It does not turn one drive into a deterministic proof
 of every operating condition, nor does it transfer automatically to another
 calibration.
+
+## 75. 2026-09-22 pre-power-switch wake architecture research
+
+A dedicated Toyota architecture pass changes the working model of "vehicle
+off." Public Toyota documentation, Toyota patent families, and the recovered
+current GTS+ P5 vocabulary all distinguish selective ECU wake from the broader
+ACC/IG/READY power states. The detailed source/evidence review is in
+[the TSS3-era patent landscape](../architecture/toyota-tss3-era-patent-landscape.md#31-pre-power-switch-wake-public-toyota-behavior--current-gts-vocabulary).
+
+For exact F33 work, the important retained observation is unchanged but now has
+a clearer interpretation: the pre-start brake-wake capture already contains
+native 0x00F before the brake press. Therefore brake depression is not the event
+that begins the observed reset/freshness traffic. At least one relevant network
+domain is already active before that user input.
+
+The current GTS+ catalog provides read-only observables that should make the
+next capture substantially more informative than another CAN-only "off vs
+READY" comparison:
+
+- Power Source Control: DID 0x1001 separates Push Start Switch 1/2/3 from
+  Stop Light Switch and Shift P; 0x1003 reports IGP/IGR/ACC relay state; 0x1005
+  reports OFF/ACC/IGR/IGP/Starter power-supply condition.
+- Central Gateway: DID 0x1001 reports ACC, IGP/IG1, IGR/IG2, and +B state.
+- Power Distribution Box: DID 0x5011 reports Power Supply Management Request.
+- Entry&Start: current SMART_P5 data includes Start SW Light Power Supply plus
+  steering-lock and ID-BOX sleep/start conditions.
+- Hybrid Control: current HV_P5 data includes explicit WAKE Signal Status and
+  Wake Up/Sleep Permission fields for the gear-shift-control path.
+
+The next controlled wake trace should timestamp separate transitions for deep
+sleep, key approach/unlock, door opening, key in cabin, brake down/up, power
+button, READY, power-off, door close, and final sleep. Per-bus first/last-frame
+and appearing/disappearing-ID deltas should be joined to the GTS observables
+above. The logger must already be running before the door is touched: Toyota
+documents door opening itself as sufficient to activate the brake system while
+the power switch is OFF.
+
+This section is **architecture-research + recovered diagnostic-vocabulary**
+evidence. It does not yet identify which exact F33 ECU is the top-level wake
+manager or map the patent's abstract management/intermediate roles onto Central
+Gateway, Power Source Control, Power Distribution Box, EBU, Main Body, or
+Entry&Start.
