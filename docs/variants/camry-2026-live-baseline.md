@@ -7226,3 +7226,62 @@ evidence. It does not yet identify which exact F33 ECU is the top-level wake
 manager or map the patent's abstract management/intermediate roles onto Central
 Gateway, Power Source Control, Power Distribution Box, EBU, Main Body, or
 Entry&Start.
+
+## 76. 2026-09-22 true deep-sleep CAN baseline
+
+The untouched-car baseline now closes an ambiguity in the September-20
+pre-start experiment. The maintainer reported that the vehicle had not been
+entered or physically interacted with during the day. Comma remained powered
+and SSH-reachable.
+
+Two consecutive passive observations were retained under
+`targets/camry-2026/raw-20260922/quiet-baseline/`.
+
+The first 60.014-s control subscribed only to the existing pandad `can` and
+`pandaStates` publications. It observed zero CAN frames and zero hardware
+RX/TX/forward/error/loss counter movement, with ignition line/can false,
+NOOUTPUT safety, and Panda power-save enabled. This alone is not vehicle-bus
+proof because Panda power-save intentionally disables most receive paths.
+
+The authoritative pass then took the established cooperative direct-Panda
+lease, opened Panda with `configure=False`, preserved NOOUTPUT safety and the
+closed intercept relay, and disabled **only Panda power-save** so every CAN
+receive path was available. It submitted no CAN data frame and no diagnostic
+request; USB heartbeat keepalives only kept the receive-only board state alive.
+During the exact 60.002043-s frame-observation interval:
+
+- **zero CAN frames** were received;
+- controller 0 RX/TX/forward/error/loss/bus-off/core-reset deltas were all zero;
+- controller 1 deltas were all zero;
+- controller 2 deltas were all zero;
+- ignition line and CAN stayed false;
+- safety remained NOOUTPUT;
+- power-save was restored before ownership returned to pandad.
+
+This is direct dynamic evidence that the comma-visible Toyota networks can reach
+a genuinely silent parked/deep-sleep state.
+
+The contrast to the retained September-20 brake-wake probe is strong. Before
+that probe printed `ARMED` and instructed the operator to touch the brake, its
+first 3170.505 ms already contained **648 native frames** after excluding host
+`0x7A1`, spanning **58 native `(bus,address)` streams / 29 unique native IDs**
+mirrored across buses 0/2. Native `0x00F` appeared **27 times on bus0 and 27
+times on bus2** before the brake instruction.
+
+Therefore the old statement "`0x00F` runs while the car is off" needs a sharper
+state qualifier: `0x00F` was running while the **power switch remained OFF but
+the vehicle was already wake-active**. It is not continuously emitted through
+true deep sleep. The brake press was not the beginning of that visible epoch;
+some earlier key/entry/door/setup event had already woken the accessible
+network.
+
+The exact earlier trigger remains open. The new architecture/service evidence
+makes key proximity/unlock, door opening/courtesy-switch activity, and
+Entry&Start sequencing concrete candidates, but today's baseline does not choose
+among them. The next useful experiment is therefore the already-defined
+event-by-event trace beginning from this same zero-traffic state, with the
+logger armed before any approach/door interaction.
+
+Evidence grade: **dynamic-probe / observed** for comma-visible network silence
+and the deep-sleep-vs-wake-active distinction. Internal hidden buses and ECU
+power rails remain outside the capture boundary.

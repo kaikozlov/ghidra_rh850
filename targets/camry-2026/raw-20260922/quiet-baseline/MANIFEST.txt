@@ -1,0 +1,120 @@
+2026-09-22 exact-Camry deep-sleep / quiet CAN baseline
+
+Target
+- 2026 Toyota Camry Hybrid
+- Exact EPS application F181: 8965F3307000 / 8A3113303100
+- Toyota-B harness remains in the established relay-correct topology.
+
+Operator context
+- Maintainer reported that the vehicle had not been entered or physically
+  interacted with at all during the day before this capture.
+- That statement is operator context, not independently machine-timestamped.
+- The Comma remained powered and reachable over SSH.
+
+Question
+Does the comma-visible Toyota network actually continue emitting CAN traffic in
+true parked/deep-sleep state, or was the 2026-09-20 "pre-brake" traffic already
+produced by an earlier vehicle wake event such as key/entry/door activity?
+
+Capture 1: existing pandad / Panda power-save control
+- 2026-09-22T15:16:10.598893Z -> 15:17:10.612972Z
+  (10:16:10 -> 10:17:10 America/Chicago, CDT)
+- Read-only subscription to the existing pandad `can` and `pandaStates`
+  publications. No Panda ownership/configuration and no CAN transmission.
+- 60.014093571 s, 584 pandaStates samples, zero CAN frames.
+- Throughout: ignitionLine=false, ignitionCan=false, safetyModel=noOutput,
+  powerSaveEnabled=true.
+- All three controller RX/TX/forward/error/loss counters changed by zero.
+- This is only a board-level control. Panda power-save disables most CAN receive
+  paths, so zero traffic here alone cannot prove the vehicle buses are silent.
+
+Capture 2: authoritative direct-Panda receiver-enabled baseline
+- 2026-09-22T15:20:40.000827Z -> 15:21:40.002870Z
+  (10:20:40 -> 10:21:40 America/Chicago, CDT)
+- Cooperative direct-Panda lease; no manager reset/recovery/flash path.
+- Panda opened with `configure=False`, so connecting did not reset CAN
+  communications or rewrite CAN speeds/modes.
+- Successful run entered with safety NOOUTPUT(19), ignitionLine=false,
+  ignitionCan=false, powerSaveEnabled=true. It therefore did not need to change
+  safety mode.
+- Panda power-save alone was disabled, enabling all CAN receive
+  transceivers/IRQs. Existing NOOUTPUT safety remained ACK-capable with the
+  intercept relay closed.
+- Host sent only Panda USB heartbeat keepalives. There were zero CAN data-frame
+  submissions and no UDS/diagnostic requests.
+- Frame-observation wall interval: 60.002043 s. The raw artifact's historical
+  `duration_s=60.068289639` includes the post-loop state/readback+restore tail;
+  `start_wall_utc` -> `end_wall_utc` is the exact frame-observation interval.
+- Result: ZERO received CAN frames.
+- Controller 0 deltas: RX 0, TX 0, forward 0, error 0, RX/TX loss 0, bus-off 0,
+  CAN-core-reset 0.
+- Controller 1 deltas: RX 0, TX 0, forward 0, error 0, RX/TX loss 0, bus-off 0,
+  CAN-core-reset 0.
+- Controller 2 deltas: RX 0, TX 0, forward 0, error 0, RX/TX loss 0, bus-off 0,
+  CAN-core-reset 0.
+- Power-save was restored before Panda ownership was returned. The cooperative
+  lease and ready files were absent afterward, native pandad reacquired Panda,
+  and ordinary offroad state returned to NOOUTPUT + power-save.
+
+Preparatory aborted lease
+- One direct-Panda attempt immediately before the successful authoritative run
+  observed safety SILENT(0) after the native-child handoff and aborted by design
+  before disabling Panda power-save or submitting any CAN frame. Panda ownership
+  was then returned cleanly and pandad restored NOOUTPUT + power-save before the
+  successful run. This affected only the observation hardware; no vehicle CAN
+  data frame or diagnostic request was sent.
+
+Comparison: retained 2026-09-20 pre-start brake-wake experiment
+- Source: targets/camry-2026/raw-20260920/prestart-brake-wake/
+  f33-prestart-wake-probe.json
+- The prior experiment already had substantial native traffic BEFORE the host
+  printed ARMED and instructed the operator to press the brake.
+- In the first 3170.505 ms, excluding the host's 0x7A1 diagnostic request rows:
+    - 648 native frames
+    - 58 native (bus,address) streams
+    - 29 unique native addresses mirrored across buses 0/2
+    - 0x00F appeared 27 times on bus0 and 27 times on bus2
+- Therefore the September-20 "pre-brake" state was not deep sleep. Some earlier
+  wake event had already started that visible network epoch before brake input.
+
+Interpretation
+OBSERVED: the comma-visible vehicle network can reach a genuinely silent
+parked/deep-sleep state. With Panda's receive hardware deliberately awake, no
+accessible Toyota CAN frame appeared for 60.002 s and the underlying hardware
+RX counters did not advance at all.
+
+The prior 0x00F result should therefore be described as "SecOC synchronization
+traffic while the power switch remained OFF but the vehicle was already in a
+wake-active OFF state," not "0x00F runs continuously while the car is asleep."
+The brake press itself did not begin that prior epoch.
+
+The leading unresolved discriminator is which earlier event caused the wake:
+key proximity/unlock, door opening/courtesy switch, key entering the cabin, or
+another entry/start event. Toyota public/service material makes those event
+classes plausible, but this capture does not identify the exact trigger.
+
+Boundary
+- This proves silence only on the comma-visible Toyota networks / Panda receive
+  paths. It does not prove that every internal ECU rail or hidden internal bus is
+  electrically off.
+- Enabling Panda receive transceivers is itself observer intervention, although
+  the successful run emitted no CAN data frame and observed no vehicle traffic
+  or counter movement after enabling them.
+- The operator's all-day untouched context is not machine-timestamped.
+
+Files
+- direct-panda-60s.json.gz
+  SHA-256 763f0fa7fca9734e51e4fc439d11716fc42cbed4ccb07231ff22180964f56ab7
+  Authoritative receiver-enabled capture.
+- pandad-power-save-60s.json.gz
+  SHA-256 13f2f4ab8d19ac581e8715e9997168976f39e60db0dbc591fba6058ea7a1dffc
+  Non-authoritative power-save control.
+- camry_quiet_baseline_capture.py
+  SHA-256 e718e47137bd12f3b8775b0edeb8442685ac016c01c7744fd97905375da9641c
+  Exact direct-Panda capture source used for this retained run.
+- pandad_power_save_capture.py
+  SHA-256 b552f5a36751063956147c975a81e04b4916c5153e391fc406907a3a792b908a
+  Exact preliminary pandad-subscription source used for Capture 1.
+- summary.json
+  Deterministic compact reduction joining both new captures to the retained
+  2026-09-20 pre-brake traffic geometry.

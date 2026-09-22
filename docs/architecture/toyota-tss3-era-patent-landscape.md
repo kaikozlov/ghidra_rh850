@@ -751,10 +751,18 @@ OFF/ON model:
    relay/request monitoring; and
 4. **READY** adds the hybrid/drivetrain start state.
 
-This fits the retained F33 dynamic evidence: the pre-start brake-wake capture
-already has native 0x00F traffic before the brake is pressed. Therefore the
-brake/meter event is **not** the origin of the 0x00F freshness epoch and at
-least part of the relevant network is already alive before the pedal event.
+This fits the retained F33 dynamic evidence, now with a true deep-sleep control.
+On 2026-09-22 the vehicle had not been entered during the day; with Panda's
+power-save disabled solely to expose all receive paths, a 60.002-s direct-Panda
+NOOUTPUT capture observed **zero CAN frames and zero RX-counter movement on all
+three controllers**. By contrast, the September-20 pre-start brake-wake capture
+already had 648 native frames / 58 `(bus,address)` streams in its first
+3170.505 ms before the brake instruction, including 27 native `0x00F` frames on
+each of buses 0 and 2. Therefore `0x00F` is not a continuously running
+true-deep-sleep stream: the older capture was already in a wake-active OFF
+state. The brake/meter event is **not** the origin of that visible freshness
+epoch; some earlier entry/key/door/setup event had already awakened the relevant
+network domain.
 
 Do not yet assign the patent's abstract "management device", "upper ECU", or
 "intermediate ECU" to F33 Central Gateway, Power Source Control, Power

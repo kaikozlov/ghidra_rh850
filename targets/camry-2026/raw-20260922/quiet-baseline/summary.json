@@ -1,0 +1,147 @@
+{
+  "authoritative_direct_capture": {
+    "active_counter_deltas": [
+      {
+        "bus_off_cnt": 0,
+        "can_core_reset_count": 0,
+        "controller": 0,
+        "total_error_cnt": 0,
+        "total_fwd_cnt": 0,
+        "total_rx_cnt": 0,
+        "total_rx_lost_cnt": 0,
+        "total_tx_checksum_error_cnt": 0,
+        "total_tx_cnt": 0,
+        "total_tx_lost_cnt": 0
+      },
+      {
+        "bus_off_cnt": 0,
+        "can_core_reset_count": 0,
+        "controller": 1,
+        "total_error_cnt": 0,
+        "total_fwd_cnt": 0,
+        "total_rx_cnt": 0,
+        "total_rx_lost_cnt": 0,
+        "total_tx_checksum_error_cnt": 0,
+        "total_tx_cnt": 0,
+        "total_tx_lost_cnt": 0
+      },
+      {
+        "bus_off_cnt": 0,
+        "can_core_reset_count": 0,
+        "controller": 2,
+        "total_error_cnt": 0,
+        "total_fwd_cnt": 0,
+        "total_rx_cnt": 0,
+        "total_rx_lost_cnt": 0,
+        "total_tx_checksum_error_cnt": 0,
+        "total_tx_cnt": 0,
+        "total_tx_lost_cnt": 0
+      }
+    ],
+    "active_end_health": {
+      "current": 102,
+      "heartbeat_lost": false,
+      "ignition_can": false,
+      "ignition_line": false,
+      "power_save_enabled": false,
+      "safety_mode": 19,
+      "safety_rx_invalid": 0,
+      "safety_tx_blocked": 0,
+      "voltage": 12309
+    },
+    "compressed_size": 1255,
+    "end_wall_utc": "2026-09-22T15:21:40.002870+00:00",
+    "file": "direct-panda-60s.json.gz",
+    "frame_count": 0,
+    "method": "cooperative direct-Panda lease; Panda(configure=False); SILENT/NOOUTPUT entry asserted; NOOUTPUT selected only if handoff heartbeat had fallen to SILENT, preserving closed relay and ACK capability; Panda power-save temporarily disabled to enable receive transceivers; can_recv only; USB heartbeat only; zero CAN data-frame submissions; no diagnostics",
+    "observation_wall_duration_s": 60.002043,
+    "power_save_restored": true,
+    "receiver_enabled_health": {
+      "current": 108,
+      "heartbeat_lost": false,
+      "ignition_can": false,
+      "ignition_line": false,
+      "power_save_enabled": false,
+      "safety_mode": 19,
+      "safety_rx_invalid": 0,
+      "safety_tx_blocked": 0,
+      "voltage": 12276
+    },
+    "recorded_total_runtime_s": 60.068289639,
+    "sha256": "763f0fa7fca9734e51e4fc439d11716fc42cbed4ccb07231ff22180964f56ab7",
+    "start_wall_utc": "2026-09-22T15:20:40.000827+00:00",
+    "traffic_census": [],
+    "uncompressed_sha256": "cb5148c1953cb68b7caec4cd56f88bfd1996f4d8e69952fa41b4e93e043bc493",
+    "uncompressed_size": 10625
+  },
+  "comparison_to_20260920_prestart_brake_wake": {
+    "0x00f_counts_by_bus": {
+      "0": 27,
+      "2": 27
+    },
+    "interpretation": "The prior experiment was already in a wake-active state before the brake instruction. Today deep sleep has zero accessible CAN traffic, so 0x00F is not continuously emitted through true quiescence; an earlier entry/key/door/setup event had already started the prior visible network epoch.",
+    "native_addresses_before_arm": [
+      "0x00F",
+      "0x129",
+      "0x14B",
+      "0x14C",
+      "0x1BF",
+      "0x2D1",
+      "0x2D8",
+      "0x2E5",
+      "0x2F9",
+      "0x329",
+      "0x340",
+      "0x345",
+      "0x3AE",
+      "0x3EE",
+      "0x3FC",
+      "0x439",
+      "0x45A",
+      "0x610",
+      "0x611",
+      "0x614",
+      "0x615",
+      "0x620",
+      "0x622",
+      "0x623",
+      "0x624",
+      "0x629",
+      "0x62A",
+      "0x638",
+      "0x63B"
+    ],
+    "native_bus_address_streams_before_arm": 58,
+    "native_frames_before_arm_excluding_host_0x7A1": 648,
+    "native_unique_addresses_before_arm": 29,
+    "pre_brake_arm_duration_ms": 3170.504997,
+    "source": "targets/camry-2026/raw-20260920/prestart-brake-wake/f33-prestart-wake-probe.json"
+  },
+  "conclusion": {
+    "boundary": "This does not prove unobserved internal vehicle segments or every ECU power rail is electrically off, and it does not identify which pre-brake event woke the September 20 network.",
+    "implication": "The comma-visible vehicle network can reach a genuinely silent deep-sleep state. The 2026-09-20 pre-brake 0x00F traffic was not an always-running deep-sleep SecOC synchronization stream.",
+    "observed": "With all three Panda CAN receive paths enabled and NOOUTPUT ACK-capable safety, the accessible Toyota networks produced zero frames for 60.002043 s; hardware RX/TX/forward/error/loss/bus-off/reset counters were unchanged on all three controllers."
+  },
+  "operator_context": {
+    "evidence_grade": "operator report; not independently machine-timestamped",
+    "report": "Vehicle had not been entered or physically interacted with during the day before this capture."
+  },
+  "pandad_power_save_control": {
+    "compressed_size": 17937,
+    "duration_s": 60.01409357100056,
+    "end_wall_utc": "2026-09-22T15:17:10.612972+00:00",
+    "file": "pandad-power-save-60s.json.gz",
+    "frame_count": 0,
+    "interpretation": "Board-level control only: zero traffic while Panda power-save remained enabled. Not sufficient by itself to prove the vehicle buses were quiet because power-save disables most Panda CAN receive paths.",
+    "panda_state_samples": 584,
+    "sha256": "13f2f4ab8d19ac581e8715e9997168976f39e60db0dbc591fba6058ea7a1dffc",
+    "start_wall_utc": "2026-09-22T15:16:10.598893+00:00",
+    "uncompressed_sha256": "7c7566f556ba3d325c5d9dd6c659bed01cce2ebc5b4818e5e02a9223fe445b76",
+    "uncompressed_size": 1425971
+  },
+  "schema": "camry-quiet-baseline-summary-v1",
+  "target": {
+    "eps_application_f181": "8965F3307000 / 8A3113303100",
+    "vehicle": "2026 Toyota Camry Hybrid"
+  }
+}
