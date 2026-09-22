@@ -3330,7 +3330,7 @@ not promoted into a new production-rate qualification framework here. If live 10
 shows signer saturation, measure that as a focused experiment rather than adding another
 runtime scheduler/tooling stack to this repository.
 
-#### 4.13.1 September-22 route55: missing signer generations trip the 100-Hz Panda angle step
+#### 4.13.1 September-22 route55: fixed-step safety policy mishandles sparse signed publications
 
 Route `00000055--0d20bbf0c0` ran clean `kai-openpilot@179df2fd4` with nested
 `opendbc@566ab6b77`. It produced six request-plane hard failures at route-relative
@@ -3349,7 +3349,7 @@ for `pcm_cruise_check`, not `LATERAL_REQUEST_ID`. The host emitted 11,183 `0x08A
 while the latest native lateral ID was 0, so stock FRC choice of No Request is ordinary input
 state and does not mean comma lacks steering authority.
 
-The actual failure is a skipped-generation interaction between the asynchronous EPS signer
+The initiating event is a skipped-generation interaction between the asynchronous EPS signer
 and fixed-step Panda angle safety. Example at ~44 s: Panda accepted host request sequence 7
 at target raw -549. Application sequence 8 was submitted to the EPS under private oracle
 sequence 15 and all six `0x777/C8` fragments received Panda TX returns, but no `0x7A9/C9`
@@ -3358,9 +3358,11 @@ host's non-stalling transport superseded the missing generation and attempted se
 raw -520. At the ~8.95 m/s vehicle speed, the current 100-Hz vehicle-model safety check allows
 only **26 raw counts** for that accepted-frame step; the observed 29-count jump is rejected.
 A direct replay against the compiled safety hook confirms -549 -> -523 (26 counts) passes,
-while -549 -> -522 (27) and the logged -549 -> -520 (29) fail. The same pattern begins the
-other hard-failure bursts: the first rejected frame follows at least one missing application
-generation and exceeds the one-frame Panda angle envelope.
+while -549 -> -522 (27) and the logged -549 -> -520 (29) fail. That proves the current
+implementation's decision, not that the decision is the right policy. Sequence 9 arrived
+roughly 20 ms after the last accepted publication, so its 29-count change is below the same
+per-second jerk envelope when evaluated over elapsed time rather than pretending it followed
+the prior frame by 10 ms. The same pattern begins the other hard-failure bursts.
 
 Across the route, 14,895 complete signer requests were observed. 14,279 had a matching
 status-0 private response within 90 ms; 616 had no such response. Successful request-to-reply
@@ -3372,14 +3374,30 @@ slightly heavier bus-0 receive-ring load (median 201 ring words in the preceding
 throughput/ring pressure in the synchronous command-5 resident, but they do not by themselves
 prove the precise EPS-side record-loss mechanism.
 
-Consequence: **100 Hz itself is not a Toyota/FRC lane-state error, but the current 100-Hz
-host pipeline is not robust to a lost signer generation.** Panda is correctly rejecting a
-command step that exceeds its configured per-publication limit. Do not weaken steering safety
-or reinterpret native ID0 as an authority fault. The next software change should preserve the
-100-Hz control intent while making signer loss/order handling compatible with the Panda angle
-step (or remove the resident loss at source); a later signed application must not simply skip
-an unavailable intermediate steering generation and then be presented to Panda as one 10-ms
-step.
+The larger consequence comes from ownership policy after that first rejection. A structurally
+valid but actuation-rejected host frame refreshes Panda's replacement-publication timestamp,
+so source `0x08A` remains blocked even though no replacement reached the downstream bus. The
+host sees only rejected echoes, eventually promotes 90 ms without an accepted publication to
+`oracle_dead`, releases control, and reports the cruise/steering faults. In the first burst,
+the initial rejection at 44.552439 s precedes the first forwarded stock `0x08A` at 44.664946 s
+by about **112.5 ms**. This is the hazardous combination: control is abandoned while rejected
+traffic can continue renewing the lock that suppresses stock control.
+
+Consequence: **100 Hz itself is not a Toyota/FRC lane-state error, and one absent signer
+generation is not an authority failure.** Panda must enforce the same angle-rate envelope over
+the actual elapsed interval between checked publications; it must not assume that an
+asynchronous signing pipeline produces every 10-ms generation. A rejected application may
+leave ownership in place for the bounded watchdog interval, but it must not renew that lease;
+only an accepted replacement publication proves continuing replacement service. Native ID0
+remains unrelated to this decision.
+
+The 616 requests without visible replies remain a separate transport-quality question rather
+than the safety-policy failure. The route alone does not distinguish incomplete resident
+assembly from response-transmit loss: Panda TX returns prove submission, not an EPS ring
+commit or a successful lower-layer `0x7A9` write. The resident already exposes the needed
+post-drive discriminator. Compare host complete-request count with resident `request_count`,
+then compare `request_count`, `success_count`, `response_count`, and visible `0x7A9/C9` replies.
+That measurement should precede a carrier, scheduler, or response-retry change.
 
 ### 4.14 Recovered PCS/ADU semantics constrain `0x08A` relay ownership
 
