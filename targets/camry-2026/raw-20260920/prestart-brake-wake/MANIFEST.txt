@@ -44,6 +44,27 @@ Machine result
 - Host F181 requests appear as returned-TX 0x7A1 rows on bus 2; they never receive
   a matching 0x7A9 response.
 
+Follow-up brake-pedal observability audit
+- Current `toyota_tss3_pt` identifies the ordinary Brake Module as `0x101` and
+  carries `BRAKE_PRESSED` there. This capture contains zero native `0x101`
+  frames, so the normal openpilot brake-pedal signal is unavailable in the
+  OFF/brake-only state.
+- A payload-level comparison used conservative bus0 windows clear of the
+  operator transitions: 0.67..2.87 s before ARMED, 4.67..11.67 s while the
+  brake was held, and 15.67..20.67 s after the ~10 s hold had ended. No native
+  payload produced a press/hold/release state transition attributable to the
+  brake pedal.
+- The streams present in all three windows were byte-stable except `0x00F`,
+  `0x3FC`, and `0x63B`. `0x00F` is the SecOC synchronization message whose
+  counter/authenticator fields keep evolving; `0x3FC` already varied before
+  ARMED and continued varying throughout; `0x63B` likewise progressed rather
+  than toggling with the pedal. None is a usable brake-state discriminator in
+  this capture.
+- Therefore these retained logs do not machine-observe the pre-READY brake
+  pedal press itself. The operator procedure establishes that the press
+  occurred, but CAN timing cannot be anchored to a brake-state edge from this
+  dataset.
+
 Interpretation
 Observed/disproved for this topology and state: brake-only wake while POWER
 remains OFF does not make the exact F33 application diagnostic endpoint reachable
