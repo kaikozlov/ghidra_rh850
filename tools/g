@@ -38,7 +38,6 @@ PROGRAM_NAME=$(TARGET_FIELD program_name)
 SNAPSHOT_DIR="$ROOT/$(TARGET_FIELD snapshot_dir)"
 DEFAULT_PROJECT_DIR="$ROOT/$(TARGET_FIELD work_dir)"
 PROJECT_DIR="${GHIDRA_PROJECT:-$DEFAULT_PROJECT_DIR}"
-DAEMON_RE="AnalyzeHeadless.*${PROJECT_NAME}"
 
 # --- Canonicalize PROJECT_DIR -------------------------------------------------
 
@@ -49,6 +48,7 @@ import sys
 print(Path(sys.argv[1]).expanduser().resolve(strict=False))
 PY
 )
+DAEMON_RE="AnalyzeHeadless.*${ABS_PROJECT_DIR}.*${PROJECT_NAME}"
 SNAPSHOT_DIR=$(python3 - "$SNAPSHOT_DIR" <<'PY'
 from pathlib import Path
 import sys

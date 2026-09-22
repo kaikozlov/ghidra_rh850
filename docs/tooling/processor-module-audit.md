@@ -335,14 +335,14 @@ Instruction inventory for this firmware is committed as
 inventory under `build/out/` with `InventoryUsedInstructions.java` and compares it
 byte-for-byte with the committed baseline instead of mutating tracked evidence.
 
-### Ghidra 12.1.3 migration
+### Ghidra 12.1.4 migration
 
-The repository is pinned to Ghidra **12.1.3**. Two independent clean 12.1.3
-rebuilds produce byte-identical normalized inventories. Relative to the prior
-12.1.2 baseline, only the inventory metadata version changes; the compiled
-`v850e3.sla` hash, all semantic project records, and all 6,376 persisted
-decompiler function records are unchanged. See
-[the migration journal](../history/2026-08/GHIDRA_12_1_3_MIGRATION_2026-08-22.md)
+The repository is pinned to Ghidra **12.1.4**. Two independent clean 12.1.4
+rebuilds of every registered target produce byte-identical normalized
+inventories. Relative to the 12.1.3 baselines, only the inventory metadata
+version changes; the compiled `v850e3.sla` hash, all semantic project records,
+and all persisted decompiler function records are unchanged. See
+[the migration journal](../history/2026-09/GHIDRA_12_1_4_MIGRATION_2026-09-21.md)
 for the reproducibility and FindCrypt compatibility evidence.
 
 ## Exact project parity

@@ -36,7 +36,6 @@ PROJECT_DIR="${PROJECT_DIR:-$ROOT/$(field work_dir)}"
 SNAPSHOT_DIR="$ROOT/$(field snapshot_dir)"
 PROJECT_NAME=$(field project_name)
 PROGRAM_NAME=$(field program_name)
-DAEMON_RE="AnalyzeHeadless.*${PROJECT_NAME}"
 
 PROJECT_DIR=$(python3 - "$PROJECT_DIR" <<'PY'
 from pathlib import Path
@@ -44,6 +43,7 @@ import sys
 print(Path(sys.argv[1]).expanduser().resolve(strict=False))
 PY
 )
+DAEMON_RE="AnalyzeHeadless.*${PROJECT_DIR}.*${PROJECT_NAME}"
 
 echo "=== finalize-project: lifecycle orchestration ==="
 echo

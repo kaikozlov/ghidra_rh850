@@ -9,13 +9,13 @@ source "$ROOT/tools/lib/build_paths.sh"
 GHIDRA_HOME="$("$ROOT/tools/project/resolve_ghidra_home.sh")"
 VENDOR="$ROOT/ghidra/ghidra-findcrypt"
 USER_HOME="${GHIDRA_ISOLATED_HOME:-$BUILD_CACHE/ghidra-home}"
-SETTINGS_DIR="$USER_HOME/Library/ghidra/ghidra_12.1.3_PUBLIC"
+SETTINGS_DIR="$USER_HOME/Library/ghidra/ghidra_12.1.4_PUBLIC"
 EXT_DIR="$SETTINGS_DIR/Extensions/GhidraFindcrypt"
-ZIP_FILE="$VENDOR/ghidra_12.1.3_PUBLIC_20260822_GhidraFindcrypt.zip"
+ZIP_FILE="$VENDOR/ghidra_12.1.4_PUBLIC_20260921_GhidraFindcrypt.zip"
 
 GHIDRA_VERSION=$(awk -F= '$1 == "application.version" { print $2 }' "$GHIDRA_HOME/Ghidra/application.properties")
-[[ "$GHIDRA_VERSION" == "12.1.3" ]] || {
-  echo "Ghidra 12.1.3 is required (found ${GHIDRA_VERSION:-unknown})" >&2
+[[ "$GHIDRA_VERSION" == "12.1.4" ]] || {
+  echo "Ghidra 12.1.4 is required (found ${GHIDRA_VERSION:-unknown})" >&2
   exit 1
 }
 

@@ -34,16 +34,16 @@ _source_processor_env() {
 
 _cached_env_is_current() {
   _source_processor_env || return 1
-  [[ "${GHIDRA_VERSION:-}" == "12.1.3" ]] || return 1
+  [[ "${GHIDRA_VERSION:-}" == "12.1.4" ]] || return 1
   [[ "${GHIDRA_CLI_VERSION:-}" == "0.2.1" ]] || return 1
   [[ -d "${GHIDRA_HOME:-}" ]] || return 1
   [[ -f "$GHIDRA_HOME/Ghidra/application.properties" ]] || return 1
-  [[ "$(awk -F= '$1 == "application.version" { print $2 }' "$GHIDRA_HOME/Ghidra/application.properties")" == "12.1.3" ]] || return 1
+  [[ "$(awk -F= '$1 == "application.version" { print $2 }' "$GHIDRA_HOME/Ghidra/application.properties")" == "12.1.4" ]] || return 1
   [[ -f "${V850_EXT_DIR:-}/data/languages/v850e3.sla" ]] || return 1
   [[ -f "${PROCESSOR_MANIFEST:-}" ]] || return 1
   if ((_GHIDRA_ENV_CANONICAL)); then
     [[ "${GHIDRA_ISOLATED_HOME:-}" == "$_GHIDRA_ENV_CACHE/ghidra-home" ]] || return 1
-    [[ "${V850_EXT_DIR:-}" == "$_GHIDRA_ENV_CACHE/ghidra-home/Library/ghidra/ghidra_12.1.3_PUBLIC/Extensions/Renesas_v850" ]] || return 1
+    [[ "${V850_EXT_DIR:-}" == "$_GHIDRA_ENV_CACHE/ghidra-home/Library/ghidra/ghidra_12.1.4_PUBLIC/Extensions/Renesas_v850" ]] || return 1
     [[ "${V850_BUILD_DIR:-}" == "$_GHIDRA_ENV_CACHE/processor-extension-src/Renesas_v850" ]] || return 1
     [[ "${PROCESSOR_MANIFEST:-}" == "$_GHIDRA_ENV_OUT/processor_manifest.json" ]] || return 1
   fi

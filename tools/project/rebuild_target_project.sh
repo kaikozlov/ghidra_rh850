@@ -56,7 +56,8 @@ EOF
 # shellcheck disable=SC1091
 source "$ROOT/tools/lib/ghidra_env.sh" full
 "$ROOT/tools/project/install_findcrypt_extension.sh" >/dev/null
-if pgrep -f "AnalyzeHeadless.*${PROJECT_NAME}" >/dev/null 2>&1; then echo "target AnalyzeHeadless already running" >&2; exit 1; fi
+DAEMON_RE="AnalyzeHeadless.*${PROJECT_DIR}.*${PROJECT_NAME}"
+if pgrep -f "$DAEMON_RE" >/dev/null 2>&1; then echo "target AnalyzeHeadless already running for $PROJECT_DIR/$PROJECT_NAME" >&2; exit 1; fi
 runh(){ local stage=$1; shift; "$ROOT/tools/project/run_headless" --project-dir "$PROJECT_DIR" --project "$PROJECT_NAME" --label "$TARGET-$stage" --log "$BUILD_LOGS/targets/$TARGET/$stage.log" --quiet -- "$@"; }
 echo "[$TARGET 1/4] import registered CodeFlash/DataFlash and target-native device profile"
 runh import -import "$CODEFLASH" -processor "$PROCESSOR" -noanalysis \

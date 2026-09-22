@@ -7,21 +7,21 @@
     "fork_of": "https://github.com/TorgoTorgo/ghidra-findcrypt",
     "baseline_commit": "fcaa49e545b131e2cc631168c6c168c1aec862a6",
     "baseline_branch": "main",
-    "notes": "Full GhidraFindcrypt v3.1.9 source is pinned to upstream commit `fcaa49e545b131e2cc631168c6c168c1aec862a6`. The vendored extension zip is a local rebuild of that exact source against Ghidra 12.1.3 because upstream v3.1.9 predates the 12.1.3 release. The rebuilt JAR and data/database.json are byte-identical to the official 12.1.2 v3.1.9 package; only extension version packaging changes."
+    "notes": "Full GhidraFindcrypt v3.1.9 source is pinned to upstream commit `fcaa49e545b131e2cc631168c6c168c1aec862a6`. The vendored extension zip is a local rebuild of that exact source against Ghidra 12.1.4 because upstream v3.1.9 predates the 12.1.4 release. The rebuilt JAR and data/database.json are byte-identical to the official 12.1.2 v3.1.9 package; only extension version packaging changes."
   },
   "vendored_files": [
     "data/database.json",
-    "ghidra_12.1.3_PUBLIC_20260822_GhidraFindcrypt.zip"
+    "ghidra_12.1.4_PUBLIC_20260921_GhidraFindcrypt.zip"
   ],
   "ghidra": {
-    "required_version": "12.1.3"
+    "required_version": "12.1.4"
   },
   "license": "GPL-3.0",
   "local_rebuild": {
     "source_tag": "v3.1.9",
     "source_commit": "fcaa49e545b131e2cc631168c6c168c1aec862a6",
     "build_command": "GHIDRA_INSTALL_DIR=/opt/homebrew/opt/ghidra/libexec ./gradlew buildExtension",
-    "artifact_sha256": "5645d355d8baf53612a4e25eaba48367c4cb642180fa1fa696b1e726e08756be",
+    "artifact_sha256": "c10023384658968dee94ccc24fd5f9e1ee75088ddd2b7264d71e53ad4e236391",
     "jar_sha256": "dc2e395b6dac463ed9191465ce43d5c6cea5002851515b06f0167c5464ee3aa3",
     "database_sha256": "8f7bdbc5f9bbe48a4ed93792adab67fca6f103384165ed1917d883870ee6f471"
   }

@@ -30,6 +30,7 @@ Month index with current-state links: [2026-08/README.md](2026-08/README.md).
 
 ## 2026-09
 
+- [2026-09/GHIDRA_12_1_4_MIGRATION_2026-09-21.md](2026-09/GHIDRA_12_1_4_MIGRATION_2026-09-21.md)
 - [2026-09/2026-09-01-camry-live-communication-characterization-notebook.md](2026-09/2026-09-01-camry-live-communication-characterization-notebook.md)
 - [2026-09/2026-09-01-camry-route37-steering-speed-gate.md](2026-09/2026-09-01-camry-route37-steering-speed-gate.md)
 - [2026-09/2026-09-02-camry-f33-b6-review-handoff.md](2026-09/2026-09-02-camry-f33-b6-review-handoff.md)

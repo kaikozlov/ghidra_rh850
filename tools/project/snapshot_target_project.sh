@@ -26,7 +26,8 @@ PY
 }
 PROJECT_DIR=$(canon_work "$PROJECT_DIR"); [[ -d "$PROJECT_DIR/$PN.rep" ]] || { echo "missing target project $PROJECT_DIR/$PN.rep" >&2; exit 1; }
 if [[ -n "$PARITY_DIR" ]]; then PARITY_DIR=$(canon_work "$PARITY_DIR"); [[ -d "$PARITY_DIR/$PN.rep" ]] || { echo "missing parity target project" >&2; exit 1; }; fi
-if pgrep -f "AnalyzeHeadless.*${PN}" >/dev/null 2>&1; then echo "target daemon still active" >&2; exit 1; fi
+DAEMON_RE="AnalyzeHeadless.*${PROJECT_DIR}.*${PN}"
+if pgrep -f "$DAEMON_RE" >/dev/null 2>&1; then echo "target daemon still active for $PROJECT_DIR/$PN" >&2; exit 1; fi
 # shellcheck disable=SC1091
 source "$ROOT/tools/lib/ghidra_env.sh" full
 for d in "$PROJECT_DIR" ${PARITY_DIR:+"$PARITY_DIR"}; do

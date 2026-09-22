@@ -2,12 +2,12 @@
 
 Vendored [antoniovazquezblanco/GhidraFindcrypt](https://github.com/antoniovazquezblanco/GhidraFindcrypt)
 v3.1.9 (commit `fcaa49e545b131e2cc631168c6c168c1aec862a6`). Upstream v3.1.9
-predates Ghidra 12.1.3, so the extension zip is rebuilt locally from that
-exact tagged source against Ghidra 12.1.3.
+predates Ghidra 12.1.4, so the extension zip is rebuilt locally from that
+exact tagged source against Ghidra 12.1.4.
 
 ## What's vendored
 
-- `ghidra_12.1.3_PUBLIC_20260822_GhidraFindcrypt.zip` — local rebuild of the
+- `ghidra_12.1.4_PUBLIC_20260921_GhidraFindcrypt.zip` — local rebuild of the
   pinned upstream v3.1.9 source. Its `GhidraFindcrypt.jar` is byte-identical to
   the official upstream 12.1.2 v3.1.9 build; only Ghidra extension-version
   packaging differs. Installed by `tools/project/install_findcrypt_extension.sh` into
@@ -40,10 +40,10 @@ git -C /tmp/GhidraFindcrypt checkout v3.1.9
 GHIDRA_INSTALL_DIR=/opt/homebrew/opt/ghidra/libexec \
   /tmp/GhidraFindcrypt/gradlew -p /tmp/GhidraFindcrypt buildExtension
 
-cp /tmp/GhidraFindcrypt/dist/ghidra_12.1.3_PUBLIC_*_GhidraFindcrypt.zip \
+cp /tmp/GhidraFindcrypt/dist/ghidra_12.1.4_PUBLIC_*_GhidraFindcrypt.zip \
   ghidra/ghidra-findcrypt/
 ```
 
 After rebuilding, update `PROVENANCE.json` with the source commit, artifact
 hash, JAR hash, and database hash. `tests/verify_findcrypt_database.py` pins all
-of those identities and verifies the packaged extension declares Ghidra 12.1.3.
+of those identities and verifies the packaged extension declares Ghidra 12.1.4.

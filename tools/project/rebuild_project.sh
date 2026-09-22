@@ -93,7 +93,7 @@ if [[ ! -x "$BUILD_CACHE/ghidra-cli/ghidra" ]]; then
 fi
 
 # --- Shared environment setup -------------------------------------------------
-# This resolves GHIDRA_HOME (honoring --ghidra-home), validates version 12.1.3,
+# This resolves GHIDRA_HOME (honoring --ghidra-home), validates version 12.1.4,
 # installs the isolated processor extension, sources the env file, and validates
 # the processor fingerprint.
 # shellcheck disable=SC1091
@@ -104,9 +104,10 @@ source "$ROOT/tools/lib/ghidra_env.sh" full
 # Same isolated-user-home pattern as the v850 processor module.
 "$ROOT/tools/project/install_findcrypt_extension.sh"
 
-if pgrep -f 'AnalyzeHeadless.*rh850_p1me_mapped' >/dev/null 2>&1; then
-  echo "an RH850 AnalyzeHeadless process is already running; stop it before rebuilding" >&2
-  pgrep -af 'AnalyzeHeadless.*rh850_p1me_mapped' >&2 || true
+DAEMON_RE="AnalyzeHeadless.*${PROJECT_DIR}.*${PROJECT_NAME}"
+if pgrep -f "$DAEMON_RE" >/dev/null 2>&1; then
+  echo "an AnalyzeHeadless process for $PROJECT_DIR/$PROJECT_NAME is already running; stop it before rebuilding" >&2
+  pgrep -af "$DAEMON_RE" >&2 || true
   exit 1
 fi
 

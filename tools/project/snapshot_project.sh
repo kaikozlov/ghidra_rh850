@@ -85,7 +85,13 @@ command -v rsync >/dev/null 2>&1 || { echo "rsync is required" >&2; exit 1; }
 # shellcheck disable=SC1091
 source "$ROOT/tools/lib/ghidra_env.sh" full
 
-DAEMON_RE='AnalyzeHeadless.*rh850_p1me_mapped'
+PROJECT_DIR=$(python3 - "$PROJECT_DIR" <<'PY'
+from pathlib import Path
+import sys
+print(Path(sys.argv[1]).expanduser().resolve(strict=False))
+PY
+)
+DAEMON_RE="AnalyzeHeadless.*${PROJECT_DIR}.*${PROJECT_NAME}"
 if pgrep -f "$DAEMON_RE" >/dev/null 2>&1; then
   echo "an RH850 daemon is still running; stop it before snapshotting" >&2
   pgrep -af "$DAEMON_RE" >&2 || true
@@ -93,7 +99,6 @@ if pgrep -f "$DAEMON_RE" >/dev/null 2>&1; then
 fi
 
 # Resolve absolute paths for Ghidra (rejects dot-prefixed components).
-PROJECT_DIR=$(cd "$PROJECT_DIR" && pwd)
 SNAPSHOT_DIR=$(cd "$SNAPSHOT_DIR" && pwd)
 # shellcheck disable=SC1091
 source "$ROOT/tools/lib/project_marker.sh"
