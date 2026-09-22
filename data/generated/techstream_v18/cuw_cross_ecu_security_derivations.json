@@ -672,6 +672,972 @@
       }
     ]
   },
+  "frc_reprostd_extended_kdf_audit": {
+    "audit_gaps_closed": [
+      "16-byte reverse, bswap16, bswap32 and 32-bit-word-order variants of family secrets and contexts",
+      "bounded two-stage AES-ECB-ENC/AES-ECB-DEC/AES-CMAC derivations",
+      "per-image CID and 256-byte target-signature contexts",
+      "IV-independent A32 shape scoring of the identical 1392-byte R4-domain routine"
+    ],
+    "best_sparse_min_identity": 0.0107421875,
+    "boundary": "Every unique key hypothesis is screened over 64 image blocks; only the top 32 sparse results are rescored over the complete 64-KiB sample. No fully rescored result reaches the 1% threshold. This rejects only these explicit AES-CBC KDF grammars. A protected camera root, non-AES transform, different mode, unrelated routine key, or a KDF outside these bounded contexts remains possible. A32 shape is a ranking heuristic, not a decryption oracle.",
+    "candidates_at_or_above_threshold": [],
+    "full_rescore_top_n": 32,
+    "hypothesis": "Under the AES-CBC hypothesis, adjacent plaintext images should regain substantial byte identity when a candidate formula derives the correct shared or per-image key. Blocks >=2 are IV-independent.",
+    "interesting_identity_threshold": 0.01,
+    "known_toyota_constructions_covered": [
+      "P1M-E DFI-low-nibble-1 AES-CBC payload decoding, tested here as the CBC differential hypothesis",
+      "EPS Kimage=AES-128-ECB-ENC(payload_root, package_field), generalized across the FRC fields available in place of EPS SeedKey",
+      "EPS package Nonce as a direct key/KDF context; CBC IV remains irrelevant to the compared blocks"
+    ],
+    "per_image_candidate_value_tuple_count": 49725,
+    "per_image_context_count": 75,
+    "per_image_contexts": [
+      "bswap16(md5(new||source))",
+      "bswap16(md5(signature))",
+      "bswap16(md5(source||new))",
+      "bswap16(new_cid_left)",
+      "bswap16(new_cid_right)",
+      "bswap16(sha256_hi(new||source))",
+      "bswap16(sha256_hi(signature))",
+      "bswap16(sha256_hi(source||new))",
+      "bswap16(sha256_lo(new||source))",
+      "bswap16(sha256_lo(signature))",
+      "bswap16(sha256_lo(source||new))",
+      "bswap16(signature_first)",
+      "bswap16(signature_last)",
+      "bswap16(source_cid_left)",
+      "bswap16(source_cid_right)",
+      "bswap32(md5(new||source))",
+      "bswap32(md5(signature))",
+      "bswap32(md5(source||new))",
+      "bswap32(new_cid_left)",
+      "bswap32(new_cid_right)",
+      "bswap32(sha256_hi(new||source))",
+      "bswap32(sha256_hi(signature))",
+      "bswap32(sha256_hi(source||new))",
+      "bswap32(sha256_lo(new||source))",
+      "bswap32(sha256_lo(signature))",
+      "bswap32(sha256_lo(source||new))",
+      "bswap32(signature_first)",
+      "bswap32(signature_last)",
+      "bswap32(source_cid_left)",
+      "bswap32(source_cid_right)",
+      "md5(new||source)",
+      "md5(signature)",
+      "md5(source||new)",
+      "new_cid_left",
+      "new_cid_right",
+      "reverse(md5(new||source))",
+      "reverse(md5(signature))",
+      "reverse(md5(source||new))",
+      "reverse(new_cid_left)",
+      "reverse(new_cid_right)",
+      "reverse(sha256_hi(new||source))",
+      "reverse(sha256_hi(signature))",
+      "reverse(sha256_hi(source||new))",
+      "reverse(sha256_lo(new||source))",
+      "reverse(sha256_lo(signature))",
+      "reverse(sha256_lo(source||new))",
+      "reverse(signature_first)",
+      "reverse(signature_last)",
+      "reverse(source_cid_left)",
+      "reverse(source_cid_right)",
+      "sha256_hi(new||source)",
+      "sha256_hi(signature)",
+      "sha256_hi(source||new)",
+      "sha256_lo(new||source)",
+      "sha256_lo(signature)",
+      "sha256_lo(source||new)",
+      "signature_first",
+      "signature_last",
+      "source_cid_left",
+      "source_cid_right",
+      "wordrev32(md5(new||source))",
+      "wordrev32(md5(signature))",
+      "wordrev32(md5(source||new))",
+      "wordrev32(new_cid_left)",
+      "wordrev32(new_cid_right)",
+      "wordrev32(sha256_hi(new||source))",
+      "wordrev32(sha256_hi(signature))",
+      "wordrev32(sha256_hi(source||new))",
+      "wordrev32(sha256_lo(new||source))",
+      "wordrev32(sha256_lo(signature))",
+      "wordrev32(sha256_lo(source||new))",
+      "wordrev32(signature_first)",
+      "wordrev32(signature_last)",
+      "wordrev32(source_cid_left)",
+      "wordrev32(source_cid_right)"
+    ],
+    "routine_a32_baselines": {
+      "bottlenose_r4_first_1376_bytes": {
+        "always_condition_fraction": 0.5465116279069767,
+        "branch_fraction": 0.06686046511627906,
+        "literal_load_count": 18,
+        "never_condition_fraction": 0.19186046511627908,
+        "push_pop_count": 6,
+        "return_count": 2,
+        "shape_score": 0.6569767441860465,
+        "word_count": 344
+      },
+      "bottlenose_r4_prefix_sha256": "25bc5690caa00bcab4701ce48281886a45e75b7fbfcd43411ec474a243f2f8ee",
+      "bottlenose_r4_source_payload_sha256": "6cfe5eb572bce81b9f6641f6b90fcf47bcdfdea8439467e032c8b6aa48325af3",
+      "bottlenose_scope": "TMPV7708 sibling A32 compiler-output baseline only; it is not Toyota code and is not used as plaintext.",
+      "encrypted_routine_as_little_endian_words": {
+        "always_condition_fraction": 0.05813953488372093,
+        "branch_fraction": 0.13662790697674418,
+        "literal_load_count": 0,
+        "never_condition_fraction": 0.05232558139534884,
+        "push_pop_count": 0,
+        "return_count": 0,
+        "shape_score": 0.005813953488372093,
+        "word_count": 344
+      }
+    },
+    "routine_a32_top_candidates": [
+      {
+        "always_condition_fraction": 0.10174418604651163,
+        "branch_fraction": 0.125,
+        "candidate": "CMAC(AES-ENC(eps_payload_root,reverse(cipher_block1)),length_be)",
+        "key_hex": "e413dc66120df137400bb0ab6efcd477",
+        "literal_load_count": 3,
+        "never_condition_fraction": 0.040697674418604654,
+        "push_pop_count": 0,
+        "return_count": 0,
+        "shape_score": 0.09593023255813954,
+        "word_count": 344
+      },
+      {
+        "always_condition_fraction": 0.11337209302325581,
+        "branch_fraction": 0.09593023255813954,
+        "candidate": "CMAC(AES-DEC(wordrev32(service_auth),reverse(nonce)),length_be)",
+        "key_hex": "93bc4dfae4832f554c716117280237ae",
+        "literal_load_count": 2,
+        "never_condition_fraction": 0.046511627906976744,
+        "push_pop_count": 0,
+        "return_count": 0,
+        "shape_score": 0.09011627906976744,
+        "word_count": 344
+      },
+      {
+        "always_condition_fraction": 0.12790697674418605,
+        "branch_fraction": 0.13662790697674418,
+        "candidate": "AES-ENC(AES-DEC(reverse(working_key),reverse(start_be)),nonce)",
+        "key_hex": "340bc6e0ccb7674a63b6555f27bc2d80",
+        "literal_load_count": 0,
+        "never_condition_fraction": 0.0436046511627907,
+        "push_pop_count": 0,
+        "return_count": 0,
+        "shape_score": 0.08430232558139535,
+        "word_count": 344
+      },
+      {
+        "always_condition_fraction": 0.09302325581395349,
+        "branch_fraction": 0.10465116279069768,
+        "candidate": "AES-DEC(AES-ENC(nonce,bswap32(length_be)),working_key)",
+        "key_hex": "0cb3f9cb8f0c25b3f15de90c02df9225",
+        "literal_load_count": 1,
+        "never_condition_fraction": 0.02616279069767442,
+        "push_pop_count": 0,
+        "return_count": 0,
+        "shape_score": 0.07848837209302326,
+        "word_count": 344
+      },
+      {
+        "always_condition_fraction": 0.10174418604651163,
+        "branch_fraction": 0.10465116279069768,
+        "candidate": "AES-DEC(AES-ENC(reverse(eps_boot_sa_root),reverse(cipher_block0)),working_key)",
+        "key_hex": "5f17fe0208d7a1e3297fb9a19332faf8",
+        "literal_load_count": 1,
+        "never_condition_fraction": 0.03488372093023256,
+        "push_pop_count": 0,
+        "return_count": 0,
+        "shape_score": 0.07848837209302326,
+        "word_count": 344
+      },
+      {
+        "always_condition_fraction": 0.09593023255813954,
+        "branch_fraction": 0.11627906976744186,
+        "candidate": "AES-DEC(CMAC(eps_payload_root,cipher_block1),start_be)",
+        "key_hex": "a2504851520d85979835de1419e17ab8",
+        "literal_load_count": 1,
+        "never_condition_fraction": 0.029069767441860465,
+        "push_pop_count": 0,
+        "return_count": 0,
+        "shape_score": 0.07848837209302326,
+        "word_count": 344
+      },
+      {
+        "always_condition_fraction": 0.09593023255813954,
+        "branch_fraction": 0.11918604651162791,
+        "candidate": "AES-ENC(AES-ENC(bswap32(predicted_ecu_auth),reverse(cipher_block0)),nonce)",
+        "key_hex": "4e7b457a980d446b3f15a34807e4fa97",
+        "literal_load_count": 2,
+        "never_condition_fraction": 0.040697674418604654,
+        "push_pop_count": 0,
+        "return_count": 0,
+        "shape_score": 0.07848837209302326,
+        "word_count": 344
+      },
+      {
+        "always_condition_fraction": 0.09883720930232558,
+        "branch_fraction": 0.12209302325581395,
+        "candidate": "CMAC(AES-ENC(eps_payload_root,reverse(length_be)),cipher_block0)",
+        "key_hex": "efbe5f7f67cc51f41cdefed0897b5975",
+        "literal_load_count": 2,
+        "never_condition_fraction": 0.0436046511627907,
+        "push_pop_count": 0,
+        "return_count": 0,
+        "shape_score": 0.07848837209302326,
+        "word_count": 344
+      },
+      {
+        "always_condition_fraction": 0.08430232558139535,
+        "branch_fraction": 0.09883720930232558,
+        "candidate": "CMAC(AES-ENC(reverse(working_key),working_key),length_be)",
+        "key_hex": "5004cf61c10f398e4f640cb2fd045257",
+        "literal_load_count": 1,
+        "never_condition_fraction": 0.01744186046511628,
+        "push_pop_count": 0,
+        "return_count": 0,
+        "shape_score": 0.07848837209302326,
+        "word_count": 344
+      },
+      {
+        "always_condition_fraction": 0.11627906976744186,
+        "branch_fraction": 0.09011627906976744,
+        "candidate": "CMAC(CMAC(wordrev32(predicted_ecu_auth),bswap32(length_be)),service_auth)",
+        "key_hex": "175377ce30d3d6c99b0a9065b8d11ee4",
+        "literal_load_count": 0,
+        "never_condition_fraction": 0.0377906976744186,
+        "push_pop_count": 0,
+        "return_count": 0,
+        "shape_score": 0.07848837209302326,
+        "word_count": 344
+      },
+      {
+        "always_condition_fraction": 0.09302325581395349,
+        "branch_fraction": 0.11918604651162791,
+        "candidate": "AES-DEC(AES-DEC(eps_application_sa_root,nonce),cipher_block1)",
+        "key_hex": "c54203db3399d3965e409773a6cefa55",
+        "literal_load_count": 1,
+        "never_condition_fraction": 0.029069767441860465,
+        "push_pop_count": 0,
+        "return_count": 0,
+        "shape_score": 0.0755813953488372,
+        "word_count": 344
+      },
+      {
+        "always_condition_fraction": 0.11046511627906977,
+        "branch_fraction": 0.10465116279069768,
+        "candidate": "AES-ENC(CMAC(bswap32(predicted_ecu_auth),bswap32(start_be)),cipher_block1)",
+        "key_hex": "dc7ac05a09d55fe8c775a6cf44d90dd4",
+        "literal_load_count": 1,
+        "never_condition_fraction": 0.046511627906976744,
+        "push_pop_count": 0,
+        "return_count": 0,
+        "shape_score": 0.0755813953488372,
+        "word_count": 344
+      },
+      {
+        "always_condition_fraction": 0.10174418604651163,
+        "branch_fraction": 0.12209302325581395,
+        "candidate": "AES-ENC(CMAC(reverse(nonce),zero),length_be)",
+        "key_hex": "c78c38fd2508391e4132222c0b6fc3cf",
+        "literal_load_count": 0,
+        "never_condition_fraction": 0.02616279069767442,
+        "push_pop_count": 0,
+        "return_count": 0,
+        "shape_score": 0.0755813953488372,
+        "word_count": 344
+      },
+      {
+        "always_condition_fraction": 0.12209302325581395,
+        "branch_fraction": 0.10755813953488372,
+        "candidate": "AES-DEC(AES-DEC(reverse(nonce),ff),start_be)",
+        "key_hex": "56f8b7550821cfdee28f470d8cadc783",
+        "literal_load_count": 0,
+        "never_condition_fraction": 0.04941860465116279,
+        "push_pop_count": 0,
+        "return_count": 0,
+        "shape_score": 0.07267441860465117,
+        "word_count": 344
+      },
+      {
+        "always_condition_fraction": 0.11046511627906977,
+        "branch_fraction": 0.10174418604651163,
+        "candidate": "AES-ENC(AES-DEC(techstream_wrap_key,reverse(service_auth)),diag_ascii)",
+        "key_hex": "101ff27ad4a0169a767210176997ba2b",
+        "literal_load_count": 2,
+        "never_condition_fraction": 0.061046511627906974,
+        "push_pop_count": 0,
+        "return_count": 0,
+        "shape_score": 0.07267441860465117,
+        "word_count": 344
+      },
+      {
+        "always_condition_fraction": 0.10465116279069768,
+        "branch_fraction": 0.11627906976744186,
+        "candidate": "AES-ENC(AES-ENC(wordrev32(working_key),reverse(cipher_block1)),start_be)",
+        "key_hex": "435cacdc46c8ed989971339e93c6bfbf",
+        "literal_load_count": 0,
+        "never_condition_fraction": 0.03197674418604651,
+        "push_pop_count": 0,
+        "return_count": 0,
+        "shape_score": 0.07267441860465117,
+        "word_count": 344
+      }
+    ],
+    "sample_bytes_per_image": 65536,
+    "shared_candidate_value_count": 67157,
+    "shared_secret_variant_count": 32,
+    "shared_stage1_value_count": 2688,
+    "sparse_block_count": 64,
+    "stable_context_variant_count": 28,
+    "top_full_results": [
+      {
+        "candidate": "AES-DEC(AES-DEC(nonce,nonce),md5(signature)[package])",
+        "full_min_identity": 0.004335613092330239,
+        "full_pair_identities": {
+          "frc_f160_61_to_150": 0.004335613092330239,
+          "frc_f420_62_to_149": 0.004350879335613092
+        },
+        "keys_by_package": {
+          "T-0061-23.cuw": "16d848198f0f672bcf41093849793cce",
+          "T-0062-23.cuw": "aab90d162698259bfa9d06b2eab506f9",
+          "T-0149-24.cuw": "2de35c94198d56ddfe260fd94b89d8e0",
+          "T-0150-24.cuw": "96d9da8a718d8741a480fd7bcd38493e"
+        },
+        "scope": "per-image",
+        "sparse_min_identity": 0.0107421875,
+        "sparse_pair_identities": {
+          "frc_f160_61_to_150": 0.0107421875,
+          "frc_f420_62_to_149": 0.0107421875
+        }
+      },
+      {
+        "candidate": "AES-ENC(AES-ENC(working_key,reverse(working_key)),length_be)",
+        "full_min_identity": 0.004213483146067416,
+        "full_pair_identities": {
+          "frc_f160_61_to_150": 0.004427210552027357,
+          "frc_f420_62_to_149": 0.004213483146067416
+        },
+        "keys_by_package": {
+          "T-0061-23.cuw": "7a8f5f1dda2b4da23272bf7580d2d7f1",
+          "T-0062-23.cuw": "7a8f5f1dda2b4da23272bf7580d2d7f1",
+          "T-0149-24.cuw": "7a8f5f1dda2b4da23272bf7580d2d7f1",
+          "T-0150-24.cuw": "7a8f5f1dda2b4da23272bf7580d2d7f1"
+        },
+        "scope": "shared",
+        "sparse_min_identity": 0.0087890625,
+        "sparse_pair_identities": {
+          "frc_f160_61_to_150": 0.0087890625,
+          "frc_f420_62_to_149": 0.009765625
+        }
+      },
+      {
+        "candidate": "AES-DEC(reverse(predicted_ecu_auth),wordrev32(sha256_lo(new||source))[package])",
+        "full_min_identity": 0.00418295065950171,
+        "full_pair_identities": {
+          "frc_f160_61_to_150": 0.00418295065950171,
+          "frc_f420_62_to_149": 0.004488275525158769
+        },
+        "keys_by_package": {
+          "T-0061-23.cuw": "e9e99a6b235244bb97c05f9c02e8e4c2",
+          "T-0062-23.cuw": "1a84d0792ecd4ecfeb325f0df9a3abd2",
+          "T-0149-24.cuw": "50a229a9caf0719720b8d1644de009f0",
+          "T-0150-24.cuw": "6d291ebe975b3e9a9cb8e3d8f8ef956c"
+        },
+        "scope": "per-image",
+        "sparse_min_identity": 0.0087890625,
+        "sparse_pair_identities": {
+          "frc_f160_61_to_150": 0.0087890625,
+          "frc_f420_62_to_149": 0.0087890625
+        }
+      },
+      {
+        "candidate": "AES-ENC(CMAC(techstream_wrap_key,service_auth),sha256_hi(signature)[package])",
+        "full_min_identity": 0.004152418172936004,
+        "full_pair_identities": {
+          "frc_f160_61_to_150": 0.004152418172936004,
+          "frc_f420_62_to_149": 0.0042745481191988274
+        },
+        "keys_by_package": {
+          "T-0061-23.cuw": "1fe4ede7d7fb2de0b71bb96564a231f6",
+          "T-0062-23.cuw": "c9a4483f24a4f1a90a78bcff0aa22938",
+          "T-0149-24.cuw": "e7a1c84799f6a756b522d4b25887dff8",
+          "T-0150-24.cuw": "ec001819db429f0e0757767b64f4ff81"
+        },
+        "scope": "per-image",
+        "sparse_min_identity": 0.009765625,
+        "sparse_pair_identities": {
+          "frc_f160_61_to_150": 0.009765625,
+          "frc_f420_62_to_149": 0.009765625
+        }
+      },
+      {
+        "candidate": "CMAC(CMAC(bswap32(predicted_ecu_auth),reverse(diag_ascii)),cipher_block0)",
+        "full_min_identity": 0.004152418172936004,
+        "full_pair_identities": {
+          "frc_f160_61_to_150": 0.004152418172936004,
+          "frc_f420_62_to_149": 0.0042745481191988274
+        },
+        "keys_by_package": {
+          "T-0061-23.cuw": "6b7c50faf59b7a34a5aa8ec9e50911bb",
+          "T-0062-23.cuw": "6b7c50faf59b7a34a5aa8ec9e50911bb",
+          "T-0149-24.cuw": "6b7c50faf59b7a34a5aa8ec9e50911bb",
+          "T-0150-24.cuw": "6b7c50faf59b7a34a5aa8ec9e50911bb"
+        },
+        "scope": "shared",
+        "sparse_min_identity": 0.009765625,
+        "sparse_pair_identities": {
+          "frc_f160_61_to_150": 0.0107421875,
+          "frc_f420_62_to_149": 0.009765625
+        }
+      },
+      {
+        "candidate": "AES-ENC(AES-DEC(eps_application_sa_root,length_be),start_be)",
+        "full_min_identity": 0.004106619443087445,
+        "full_pair_identities": {
+          "frc_f160_61_to_150": 0.004106619443087445,
+          "frc_f420_62_to_149": 0.0042440156326331215
+        },
+        "keys_by_package": {
+          "T-0061-23.cuw": "ea140206451974294df2ca05851917d5",
+          "T-0062-23.cuw": "ea140206451974294df2ca05851917d5",
+          "T-0149-24.cuw": "ea140206451974294df2ca05851917d5",
+          "T-0150-24.cuw": "ea140206451974294df2ca05851917d5"
+        },
+        "scope": "shared",
+        "sparse_min_identity": 0.0087890625,
+        "sparse_pair_identities": {
+          "frc_f160_61_to_150": 0.0087890625,
+          "frc_f420_62_to_149": 0.0107421875
+        }
+      },
+      {
+        "candidate": "AES-DEC(AES-ENC(bswap32(eps_application_sa_root),reverse(start_be)),cipher_block1)",
+        "full_min_identity": 0.004076086956521739,
+        "full_pair_identities": {
+          "frc_f160_61_to_150": 0.004076086956521739,
+          "frc_f420_62_to_149": 0.004167684416218857
+        },
+        "keys_by_package": {
+          "T-0061-23.cuw": "207151eb54f09e5b9f3e417951c03d38",
+          "T-0062-23.cuw": "207151eb54f09e5b9f3e417951c03d38",
+          "T-0149-24.cuw": "207151eb54f09e5b9f3e417951c03d38",
+          "T-0150-24.cuw": "207151eb54f09e5b9f3e417951c03d38"
+        },
+        "scope": "shared",
+        "sparse_min_identity": 0.0087890625,
+        "sparse_pair_identities": {
+          "frc_f160_61_to_150": 0.0087890625,
+          "frc_f420_62_to_149": 0.0107421875
+        }
+      },
+      {
+        "candidate": "AES-ENC(AES-ENC(working_key,length_be),reverse(md5(new||source))[package])",
+        "full_min_identity": 0.004076086956521739,
+        "full_pair_identities": {
+          "frc_f160_61_to_150": 0.004335613092330239,
+          "frc_f420_62_to_149": 0.004076086956521739
+        },
+        "keys_by_package": {
+          "T-0061-23.cuw": "5be4b4053feeab774071ec740c15f5bb",
+          "T-0062-23.cuw": "c3685089f29c400c8f20423e116e5376",
+          "T-0149-24.cuw": "ebb7ba0be2e473f7e4bb202717932623",
+          "T-0150-24.cuw": "cac61f4f7d0c1233101e0da963bd4cb2"
+        },
+        "scope": "per-image",
+        "sparse_min_identity": 0.0087890625,
+        "sparse_pair_identities": {
+          "frc_f160_61_to_150": 0.009765625,
+          "frc_f420_62_to_149": 0.0087890625
+        }
+      },
+      {
+        "candidate": "CMAC(AES-DEC(wordrev32(techstream_wrap_key),reverse(diag_ascii)),cipher_block0)",
+        "full_min_identity": 0.004045554469956033,
+        "full_pair_identities": {
+          "frc_f160_61_to_150": 0.004045554469956033,
+          "frc_f420_62_to_149": 0.0042745481191988274
+        },
+        "keys_by_package": {
+          "T-0061-23.cuw": "e33b01aaa0c5f8fa0761552acf4b8ef4",
+          "T-0062-23.cuw": "e33b01aaa0c5f8fa0761552acf4b8ef4",
+          "T-0149-24.cuw": "e33b01aaa0c5f8fa0761552acf4b8ef4",
+          "T-0150-24.cuw": "e33b01aaa0c5f8fa0761552acf4b8ef4"
+        },
+        "scope": "shared",
+        "sparse_min_identity": 0.009765625,
+        "sparse_pair_identities": {
+          "frc_f160_61_to_150": 0.009765625,
+          "frc_f420_62_to_149": 0.0107421875
+        }
+      },
+      {
+        "candidate": "AES-ENC(AES-ENC(wordrev32(working_key),service_auth),diag_ascii)",
+        "full_min_identity": 0.00403028822667318,
+        "full_pair_identities": {
+          "frc_f160_61_to_150": 0.004396678065461651,
+          "frc_f420_62_to_149": 0.00403028822667318
+        },
+        "keys_by_package": {
+          "T-0061-23.cuw": "a27779f61ed82739f0dec30213fa35d8",
+          "T-0062-23.cuw": "a27779f61ed82739f0dec30213fa35d8",
+          "T-0149-24.cuw": "a27779f61ed82739f0dec30213fa35d8",
+          "T-0150-24.cuw": "a27779f61ed82739f0dec30213fa35d8"
+        },
+        "scope": "shared",
+        "sparse_min_identity": 0.0087890625,
+        "sparse_pair_identities": {
+          "frc_f160_61_to_150": 0.0087890625,
+          "frc_f420_62_to_149": 0.009765625
+        }
+      },
+      {
+        "candidate": "AES-DEC(AES-DEC(eps_payload_root,reverse(service_auth)),length_be)",
+        "full_min_identity": 0.004015021983390327,
+        "full_pair_identities": {
+          "frc_f160_61_to_150": 0.004167684416218857,
+          "frc_f420_62_to_149": 0.004015021983390327
+        },
+        "keys_by_package": {
+          "T-0061-23.cuw": "3634ed6bf7837a7d00a854a3f6a69ab4",
+          "T-0062-23.cuw": "3634ed6bf7837a7d00a854a3f6a69ab4",
+          "T-0149-24.cuw": "3634ed6bf7837a7d00a854a3f6a69ab4",
+          "T-0150-24.cuw": "3634ed6bf7837a7d00a854a3f6a69ab4"
+        },
+        "scope": "shared",
+        "sparse_min_identity": 0.0087890625,
+        "sparse_pair_identities": {
+          "frc_f160_61_to_150": 0.0087890625,
+          "frc_f420_62_to_149": 0.0087890625
+        }
+      },
+      {
+        "candidate": "AES-DEC(CMAC(eps_boot_sa_root,bswap32(start_be)),nonce)",
+        "full_min_identity": 0.004015021983390327,
+        "full_pair_identities": {
+          "frc_f160_61_to_150": 0.004015021983390327,
+          "frc_f420_62_to_149": 0.004106619443087445
+        },
+        "keys_by_package": {
+          "T-0061-23.cuw": "c092beb946bd87e826acdec3cc9bceee",
+          "T-0062-23.cuw": "c092beb946bd87e826acdec3cc9bceee",
+          "T-0149-24.cuw": "c092beb946bd87e826acdec3cc9bceee",
+          "T-0150-24.cuw": "c092beb946bd87e826acdec3cc9bceee"
+        },
+        "scope": "shared",
+        "sparse_min_identity": 0.0087890625,
+        "sparse_pair_identities": {
+          "frc_f160_61_to_150": 0.0087890625,
+          "frc_f420_62_to_149": 0.0087890625
+        }
+      },
+      {
+        "candidate": "AES-ENC(AES-ENC(eps_payload_root,length_be),bswap32(signature_last)[package])",
+        "full_min_identity": 0.004015021983390327,
+        "full_pair_identities": {
+          "frc_f160_61_to_150": 0.004015021983390327,
+          "frc_f420_62_to_149": 0.004091353199804592
+        },
+        "keys_by_package": {
+          "T-0061-23.cuw": "10c57e8d5cde77b0679ff29419ffe20d",
+          "T-0062-23.cuw": "fd220cf6a44c0920954fae7185633c2a",
+          "T-0149-24.cuw": "cb454a25af3495903ee22fe04a680581",
+          "T-0150-24.cuw": "935f045ce1b3f364fa5f5175bf328a35"
+        },
+        "scope": "per-image",
+        "sparse_min_identity": 0.0087890625,
+        "sparse_pair_identities": {
+          "frc_f160_61_to_150": 0.0087890625,
+          "frc_f420_62_to_149": 0.0087890625
+        }
+      },
+      {
+        "candidate": "AES-DEC(AES-DEC(eps_payload_root,diag_ascii),bswap32(signature_last)[package])",
+        "full_min_identity": 0.003953957010258915,
+        "full_pair_identities": {
+          "frc_f160_61_to_150": 0.003953957010258915,
+          "frc_f420_62_to_149": 0.0046104054714215924
+        },
+        "keys_by_package": {
+          "T-0061-23.cuw": "d3881696baefc6c21247fcb1bc6dab3f",
+          "T-0062-23.cuw": "dc6f232b4527872dc9d75bfb627eb850",
+          "T-0149-24.cuw": "1dbe596fec2c343378948ae434e1d515",
+          "T-0150-24.cuw": "4400aa7a90abbcf452a5cfa1da647cdf"
+        },
+        "scope": "per-image",
+        "sparse_min_identity": 0.0087890625,
+        "sparse_pair_identities": {
+          "frc_f160_61_to_150": 0.009765625,
+          "frc_f420_62_to_149": 0.0087890625
+        }
+      },
+      {
+        "candidate": "AES-ENC(AES-ENC(reverse(eps_payload_root),service_auth),start_be)",
+        "full_min_identity": 0.003953957010258915,
+        "full_pair_identities": {
+          "frc_f160_61_to_150": 0.003953957010258915,
+          "frc_f420_62_to_149": 0.004137151929653151
+        },
+        "keys_by_package": {
+          "T-0061-23.cuw": "d99012905aaba8edd6e32e49b616b9a5",
+          "T-0062-23.cuw": "d99012905aaba8edd6e32e49b616b9a5",
+          "T-0149-24.cuw": "d99012905aaba8edd6e32e49b616b9a5",
+          "T-0150-24.cuw": "d99012905aaba8edd6e32e49b616b9a5"
+        },
+        "scope": "shared",
+        "sparse_min_identity": 0.0087890625,
+        "sparse_pair_identities": {
+          "frc_f160_61_to_150": 0.009765625,
+          "frc_f420_62_to_149": 0.0087890625
+        }
+      },
+      {
+        "candidate": "AES-DEC(bswap32(techstream_wrap_key),new_cid_left[package])",
+        "full_min_identity": 0.003938690766976062,
+        "full_pair_identities": {
+          "frc_f160_61_to_150": 0.0042745481191988274,
+          "frc_f420_62_to_149": 0.003938690766976062
+        },
+        "keys_by_package": {
+          "T-0061-23.cuw": "e88ae9cf40a8ccd959b28a5593d7cdba",
+          "T-0062-23.cuw": "85cdd2ab4e726bc1ccf4a70dadb51b8e",
+          "T-0149-24.cuw": "51701c02fce6fb5b9c078db6caabd796",
+          "T-0150-24.cuw": "3eddd0ef656377f1111f9ef783c24bbd"
+        },
+        "scope": "per-image",
+        "sparse_min_identity": 0.0087890625,
+        "sparse_pair_identities": {
+          "frc_f160_61_to_150": 0.0107421875,
+          "frc_f420_62_to_149": 0.0087890625
+        }
+      },
+      {
+        "candidate": "AES-ENC(CMAC(bswap32(working_key),bswap32(cipher_block0)),cipher_block0)",
+        "full_min_identity": 0.0039234245236932095,
+        "full_pair_identities": {
+          "frc_f160_61_to_150": 0.0039234245236932095,
+          "frc_f420_62_to_149": 0.004060820713238886
+        },
+        "keys_by_package": {
+          "T-0061-23.cuw": "cfeb7a9cd36b30d266b511d094b8ef41",
+          "T-0062-23.cuw": "cfeb7a9cd36b30d266b511d094b8ef41",
+          "T-0149-24.cuw": "cfeb7a9cd36b30d266b511d094b8ef41",
+          "T-0150-24.cuw": "cfeb7a9cd36b30d266b511d094b8ef41"
+        },
+        "scope": "shared",
+        "sparse_min_identity": 0.0087890625,
+        "sparse_pair_identities": {
+          "frc_f160_61_to_150": 0.0087890625,
+          "frc_f420_62_to_149": 0.0087890625
+        }
+      },
+      {
+        "candidate": "AES-DEC(CMAC(eps_boot_sa_root,nonce),sha256_lo(source||new)[package])",
+        "full_min_identity": 0.0039081582804103565,
+        "full_pair_identities": {
+          "frc_f160_61_to_150": 0.0039081582804103565,
+          "frc_f420_62_to_149": 0.0042745481191988274
+        },
+        "keys_by_package": {
+          "T-0061-23.cuw": "7253192e118e4ab13459277e28e76d1e",
+          "T-0062-23.cuw": "f0584ba7d8e053d9d08f1218089e0def",
+          "T-0149-24.cuw": "d7f0bb3eee83414f85581f8f110515c4",
+          "T-0150-24.cuw": "c16f1be9f193dd1cfd2828e15dc61479"
+        },
+        "scope": "per-image",
+        "sparse_min_identity": 0.009765625,
+        "sparse_pair_identities": {
+          "frc_f160_61_to_150": 0.009765625,
+          "frc_f420_62_to_149": 0.009765625
+        }
+      },
+      {
+        "candidate": "AES-ENC(AES-ENC(nonce,cipher_block1),bswap16(sha256_hi(source||new))[package])",
+        "full_min_identity": 0.0038928920371275036,
+        "full_pair_identities": {
+          "frc_f160_61_to_150": 0.004045554469956033,
+          "frc_f420_62_to_149": 0.0038928920371275036
+        },
+        "keys_by_package": {
+          "T-0061-23.cuw": "34ce5510df96f7d348feaefb5ff03117",
+          "T-0062-23.cuw": "18c9827f7df3a234d54a142090b9a357",
+          "T-0149-24.cuw": "7d2a28ef623472e5c6cd8ecae2baf611",
+          "T-0150-24.cuw": "c74e28bf2b15c813d4cc81d2a2366c83"
+        },
+        "scope": "per-image",
+        "sparse_min_identity": 0.0087890625,
+        "sparse_pair_identities": {
+          "frc_f160_61_to_150": 0.0087890625,
+          "frc_f420_62_to_149": 0.0107421875
+        }
+      },
+      {
+        "candidate": "AES-ENC(AES-ENC(reverse(eps_application_sa_root),nonce),diag_ascii)",
+        "full_min_identity": 0.0038928920371275036,
+        "full_pair_identities": {
+          "frc_f160_61_to_150": 0.0038928920371275036,
+          "frc_f420_62_to_149": 0.004625671714704445
+        },
+        "keys_by_package": {
+          "T-0061-23.cuw": "b5cef408a4a2cd3dcae0b21544d6dc43",
+          "T-0062-23.cuw": "b5cef408a4a2cd3dcae0b21544d6dc43",
+          "T-0149-24.cuw": "b5cef408a4a2cd3dcae0b21544d6dc43",
+          "T-0150-24.cuw": "b5cef408a4a2cd3dcae0b21544d6dc43"
+        },
+        "scope": "shared",
+        "sparse_min_identity": 0.0087890625,
+        "sparse_pair_identities": {
+          "frc_f160_61_to_150": 0.009765625,
+          "frc_f420_62_to_149": 0.0087890625
+        }
+      },
+      {
+        "candidate": "AES-DEC(AES-DEC(wordrev32(working_key),reverse(cipher_block0)),diag_ascii)",
+        "full_min_identity": 0.0038776257938446506,
+        "full_pair_identities": {
+          "frc_f160_61_to_150": 0.0038776257938446506,
+          "frc_f420_62_to_149": 0.004473009281875916
+        },
+        "keys_by_package": {
+          "T-0061-23.cuw": "e43b8fb866dc277d5ee7e426c5e77c04",
+          "T-0062-23.cuw": "e43b8fb866dc277d5ee7e426c5e77c04",
+          "T-0149-24.cuw": "e43b8fb866dc277d5ee7e426c5e77c04",
+          "T-0150-24.cuw": "e43b8fb866dc277d5ee7e426c5e77c04"
+        },
+        "scope": "shared",
+        "sparse_min_identity": 0.0087890625,
+        "sparse_pair_identities": {
+          "frc_f160_61_to_150": 0.0087890625,
+          "frc_f420_62_to_149": 0.0087890625
+        }
+      },
+      {
+        "candidate": "AES-DEC(AES-ENC(bswap32(service_auth),zero),working_key)",
+        "full_min_identity": 0.003801294577430386,
+        "full_pair_identities": {
+          "frc_f160_61_to_150": 0.003999755740107474,
+          "frc_f420_62_to_149": 0.003801294577430386
+        },
+        "keys_by_package": {
+          "T-0061-23.cuw": "071ffb27a4a0e93ddbf226eff9a2be96",
+          "T-0062-23.cuw": "071ffb27a4a0e93ddbf226eff9a2be96",
+          "T-0149-24.cuw": "071ffb27a4a0e93ddbf226eff9a2be96",
+          "T-0150-24.cuw": "071ffb27a4a0e93ddbf226eff9a2be96"
+        },
+        "scope": "shared",
+        "sparse_min_identity": 0.009765625,
+        "sparse_pair_identities": {
+          "frc_f160_61_to_150": 0.009765625,
+          "frc_f420_62_to_149": 0.009765625
+        }
+      },
+      {
+        "candidate": "AES-ENC(CMAC(service_auth,service_auth),new_cid_left[package])",
+        "full_min_identity": 0.003801294577430386,
+        "full_pair_identities": {
+          "frc_f160_61_to_150": 0.003801294577430386,
+          "frc_f420_62_to_149": 0.004121885686370298
+        },
+        "keys_by_package": {
+          "T-0061-23.cuw": "d69756b4a459627474b6769856011303",
+          "T-0062-23.cuw": "89a4bd175e965b3eaea7cd73b5284dfe",
+          "T-0149-24.cuw": "852f00f5999342300e012b1a4e9ac8c5",
+          "T-0150-24.cuw": "28c12175b012c8259a17e787ec25d54f"
+        },
+        "scope": "per-image",
+        "sparse_min_identity": 0.009765625,
+        "sparse_pair_identities": {
+          "frc_f160_61_to_150": 0.009765625,
+          "frc_f420_62_to_149": 0.0107421875
+        }
+      },
+      {
+        "candidate": "AES-DEC(AES-DEC(nonce,reverse(diag_ascii)),diag_ascii)",
+        "full_min_identity": 0.003786028334147533,
+        "full_pair_identities": {
+          "frc_f160_61_to_150": 0.003786028334147533,
+          "frc_f420_62_to_149": 0.00403028822667318
+        },
+        "keys_by_package": {
+          "T-0061-23.cuw": "467d667b777a6c55317b1db48ccf1c9e",
+          "T-0062-23.cuw": "467d667b777a6c55317b1db48ccf1c9e",
+          "T-0149-24.cuw": "467d667b777a6c55317b1db48ccf1c9e",
+          "T-0150-24.cuw": "467d667b777a6c55317b1db48ccf1c9e"
+        },
+        "scope": "shared",
+        "sparse_min_identity": 0.0087890625,
+        "sparse_pair_identities": {
+          "frc_f160_61_to_150": 0.0087890625,
+          "frc_f420_62_to_149": 0.0087890625
+        }
+      },
+      {
+        "candidate": "AES-ENC(AES-ENC(working_key,service_auth),bswap16(md5(source||new))[package])",
+        "full_min_identity": 0.00377076209086468,
+        "full_pair_identities": {
+          "frc_f160_61_to_150": 0.00377076209086468,
+          "frc_f420_62_to_149": 0.004076086956521739
+        },
+        "keys_by_package": {
+          "T-0061-23.cuw": "c6b03ef63002ef26013e0190b8188adb",
+          "T-0062-23.cuw": "09e622777e255e920c08ad6904e4d431",
+          "T-0149-24.cuw": "aebeedffd42e5f3c1b10e4545185a726",
+          "T-0150-24.cuw": "53ff8155fea0be8d59e45578e5307294"
+        },
+        "scope": "per-image",
+        "sparse_min_identity": 0.009765625,
+        "sparse_pair_identities": {
+          "frc_f160_61_to_150": 0.0107421875,
+          "frc_f420_62_to_149": 0.009765625
+        }
+      },
+      {
+        "candidate": "AES-ENC(CMAC(bswap32(service_auth),reverse(length_be)),working_key)",
+        "full_min_identity": 0.00377076209086468,
+        "full_pair_identities": {
+          "frc_f160_61_to_150": 0.003969223253541768,
+          "frc_f420_62_to_149": 0.00377076209086468
+        },
+        "keys_by_package": {
+          "T-0061-23.cuw": "80af29ec6350ab6c230d2612b9a644b6",
+          "T-0062-23.cuw": "80af29ec6350ab6c230d2612b9a644b6",
+          "T-0149-24.cuw": "80af29ec6350ab6c230d2612b9a644b6",
+          "T-0150-24.cuw": "80af29ec6350ab6c230d2612b9a644b6"
+        },
+        "scope": "shared",
+        "sparse_min_identity": 0.009765625,
+        "sparse_pair_identities": {
+          "frc_f160_61_to_150": 0.009765625,
+          "frc_f420_62_to_149": 0.009765625
+        }
+      },
+      {
+        "candidate": "AES-ENC(CMAC(eps_boot_sa_root,service_auth),signature_last[package])",
+        "full_min_identity": 0.00377076209086468,
+        "full_pair_identities": {
+          "frc_f160_61_to_150": 0.0038470933072789447,
+          "frc_f420_62_to_149": 0.00377076209086468
+        },
+        "keys_by_package": {
+          "T-0061-23.cuw": "f348482e68ecc8b265f9d482a99309ab",
+          "T-0062-23.cuw": "632224aa9a1623ab6159f371f54d851a",
+          "T-0149-24.cuw": "289335c56ac377a732311bf0fbf7e637",
+          "T-0150-24.cuw": "139cdfa5a0605c545cd9185f5a183138"
+        },
+        "scope": "per-image",
+        "sparse_min_identity": 0.009765625,
+        "sparse_pair_identities": {
+          "frc_f160_61_to_150": 0.0107421875,
+          "frc_f420_62_to_149": 0.009765625
+        }
+      },
+      {
+        "candidate": "CMAC(AES-ENC(working_key,bswap32(working_key)),working_key)",
+        "full_min_identity": 0.003724963361016121,
+        "full_pair_identities": {
+          "frc_f160_61_to_150": 0.004198216902784563,
+          "frc_f420_62_to_149": 0.003724963361016121
+        },
+        "keys_by_package": {
+          "T-0061-23.cuw": "f3ac31eb7cc0c44ad59ddd1b435d61b8",
+          "T-0062-23.cuw": "f3ac31eb7cc0c44ad59ddd1b435d61b8",
+          "T-0149-24.cuw": "f3ac31eb7cc0c44ad59ddd1b435d61b8",
+          "T-0150-24.cuw": "f3ac31eb7cc0c44ad59ddd1b435d61b8"
+        },
+        "scope": "shared",
+        "sparse_min_identity": 0.009765625,
+        "sparse_pair_identities": {
+          "frc_f160_61_to_150": 0.009765625,
+          "frc_f420_62_to_149": 0.009765625
+        }
+      },
+      {
+        "candidate": "AES-DEC(CMAC(reverse(eps_boot_sa_root),bswap32(diag_ascii)),diag_ascii)",
+        "full_min_identity": 0.003694430874450415,
+        "full_pair_identities": {
+          "frc_f160_61_to_150": 0.003953957010258915,
+          "frc_f420_62_to_149": 0.003694430874450415
+        },
+        "keys_by_package": {
+          "T-0061-23.cuw": "1e033047308165f1e8944262ac49d35c",
+          "T-0062-23.cuw": "1e033047308165f1e8944262ac49d35c",
+          "T-0149-24.cuw": "1e033047308165f1e8944262ac49d35c",
+          "T-0150-24.cuw": "1e033047308165f1e8944262ac49d35c"
+        },
+        "scope": "shared",
+        "sparse_min_identity": 0.0087890625,
+        "sparse_pair_identities": {
+          "frc_f160_61_to_150": 0.0087890625,
+          "frc_f420_62_to_149": 0.0087890625
+        }
+      },
+      {
+        "candidate": "AES-DEC(AES-ENC(working_key,reverse(cipher_block1)),service_auth)",
+        "full_min_identity": 0.0036486321446018563,
+        "full_pair_identities": {
+          "frc_f160_61_to_150": 0.004060820713238886,
+          "frc_f420_62_to_149": 0.0036486321446018563
+        },
+        "keys_by_package": {
+          "T-0061-23.cuw": "f6bbde13d971c1285aee44ea92fb79a8",
+          "T-0062-23.cuw": "f6bbde13d971c1285aee44ea92fb79a8",
+          "T-0149-24.cuw": "f6bbde13d971c1285aee44ea92fb79a8",
+          "T-0150-24.cuw": "f6bbde13d971c1285aee44ea92fb79a8"
+        },
+        "scope": "shared",
+        "sparse_min_identity": 0.0087890625,
+        "sparse_pair_identities": {
+          "frc_f160_61_to_150": 0.0087890625,
+          "frc_f420_62_to_149": 0.0087890625
+        }
+      },
+      {
+        "candidate": "AES-DEC(CMAC(bswap32(nonce),reverse(service_auth)),working_key)",
+        "full_min_identity": 0.0035875671714704445,
+        "full_pair_identities": {
+          "frc_f160_61_to_150": 0.0036486321446018563,
+          "frc_f420_62_to_149": 0.0035875671714704445
+        },
+        "keys_by_package": {
+          "T-0061-23.cuw": "7f2182788d8f7aca71f55613ad508756",
+          "T-0062-23.cuw": "7f2182788d8f7aca71f55613ad508756",
+          "T-0149-24.cuw": "7f2182788d8f7aca71f55613ad508756",
+          "T-0150-24.cuw": "7f2182788d8f7aca71f55613ad508756"
+        },
+        "scope": "shared",
+        "sparse_min_identity": 0.0087890625,
+        "sparse_pair_identities": {
+          "frc_f160_61_to_150": 0.009765625,
+          "frc_f420_62_to_149": 0.0087890625
+        }
+      },
+      {
+        "candidate": "AES-ENC(CMAC(wordrev32(working_key),bswap32(nonce)),cipher_block0)",
+        "full_min_identity": 0.003450170981924768,
+        "full_pair_identities": {
+          "frc_f160_61_to_150": 0.0039081582804103565,
+          "frc_f420_62_to_149": 0.003450170981924768
+        },
+        "keys_by_package": {
+          "T-0061-23.cuw": "1613a3290736d953ee5b273791c3ddcd",
+          "T-0062-23.cuw": "1613a3290736d953ee5b273791c3ddcd",
+          "T-0149-24.cuw": "1613a3290736d953ee5b273791c3ddcd",
+          "T-0150-24.cuw": "1613a3290736d953ee5b273791c3ddcd"
+        },
+        "scope": "shared",
+        "sparse_min_identity": 0.009765625,
+        "sparse_pair_identities": {
+          "frc_f160_61_to_150": 0.009765625,
+          "frc_f420_62_to_149": 0.009765625
+        }
+      }
+    ],
+    "total_candidate_key_hypothesis_count": 116882
+  },
   "high_value_non_eps_predictions": {
     "0724": "192b8e45370251dff3b77f6bb069bf27",
     "0792": "5f1ca3df28378c808de34318288b056b",

@@ -14,6 +14,7 @@
             "cmac_empty": false,
             "crc_empty": true,
             "digital_signature_encoding": "",
+            "digital_signature_hex": "",
             "digital_signature_length": 0,
             "digital_signature_sha256": "",
             "digital_signature_wire_ascii_length": 0,
@@ -25,6 +26,7 @@
             "cmac_empty": false,
             "crc_empty": true,
             "digital_signature_encoding": "",
+            "digital_signature_hex": "",
             "digital_signature_length": 0,
             "digital_signature_sha256": "",
             "digital_signature_wire_ascii_length": 0,
@@ -97,6 +99,7 @@
             "cmac_empty": false,
             "crc_empty": true,
             "digital_signature_encoding": "",
+            "digital_signature_hex": "",
             "digital_signature_length": 0,
             "digital_signature_sha256": "",
             "digital_signature_wire_ascii_length": 0,
@@ -108,6 +111,7 @@
             "cmac_empty": false,
             "crc_empty": true,
             "digital_signature_encoding": "",
+            "digital_signature_hex": "",
             "digital_signature_length": 0,
             "digital_signature_sha256": "",
             "digital_signature_wire_ascii_length": 0,
@@ -180,6 +184,7 @@
             "cmac_empty": false,
             "crc_empty": false,
             "digital_signature_encoding": "",
+            "digital_signature_hex": "",
             "digital_signature_length": 0,
             "digital_signature_sha256": "",
             "digital_signature_wire_ascii_length": 0,
@@ -191,6 +196,7 @@
             "cmac_empty": false,
             "crc_empty": false,
             "digital_signature_encoding": "",
+            "digital_signature_hex": "",
             "digital_signature_length": 0,
             "digital_signature_sha256": "",
             "digital_signature_wire_ascii_length": 0,
@@ -290,6 +296,7 @@
             "cmac_empty": false,
             "crc_empty": false,
             "digital_signature_encoding": "",
+            "digital_signature_hex": "",
             "digital_signature_length": 0,
             "digital_signature_sha256": "",
             "digital_signature_wire_ascii_length": 0,
@@ -301,6 +308,7 @@
             "cmac_empty": false,
             "crc_empty": false,
             "digital_signature_encoding": "",
+            "digital_signature_hex": "",
             "digital_signature_length": 0,
             "digital_signature_sha256": "",
             "digital_signature_wire_ascii_length": 0,
@@ -373,6 +381,7 @@
             "cmac_empty": false,
             "crc_empty": false,
             "digital_signature_encoding": "",
+            "digital_signature_hex": "",
             "digital_signature_length": 0,
             "digital_signature_sha256": "",
             "digital_signature_wire_ascii_length": 0,
@@ -384,6 +393,7 @@
             "cmac_empty": false,
             "crc_empty": false,
             "digital_signature_encoding": "",
+            "digital_signature_hex": "",
             "digital_signature_length": 0,
             "digital_signature_sha256": "",
             "digital_signature_wire_ascii_length": 0,
@@ -563,46 +573,218 @@
       ]
     }
   },
+  "datx_structural_analysis": {
+    "bounded_interpretation": "All six .datx members share exactly one 16-byte prefix and no suffix. No 16-byte window collision survives at any alignment after that prefix, and the tested CID/address/length markers are not exposed as clear fields. Together with exact 16-byte length alignment and near-maximal entropy, this supports an encrypted outer representation of Toyota delta-method-2 input. The shared block could be a fixed IV/envelope value or the first ciphertext block of a common plaintext header; ciphertext alone cannot distinguish those cases.",
+    "cleartext_marker_searches": [
+      {
+        "filename": "T-0058-23.cuw",
+        "hits": {}
+      },
+      {
+        "filename": "T-0060-23.cuw",
+        "hits": {}
+      },
+      {
+        "filename": "T-0061-23.cuw",
+        "hits": {}
+      },
+      {
+        "filename": "T-0062-23.cuw",
+        "hits": {}
+      },
+      {
+        "filename": "T-0149-24.cuw",
+        "hits": {}
+      },
+      {
+        "filename": "T-0150-24.cuw",
+        "hits": {}
+      }
+    ],
+    "common_prefix_hex": "0a4aba7f300a8745e2acb15b5b59a046",
+    "common_prefix_length": 16,
+    "common_suffix_length": 0,
+    "cross_package_shared_16_byte_windows_by_alignment_after_common_prefix": {
+      "0": 0,
+      "1": 0,
+      "10": 0,
+      "11": 0,
+      "12": 0,
+      "13": 0,
+      "14": 0,
+      "15": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 0,
+      "6": 0,
+      "7": 0,
+      "8": 0,
+      "9": 0
+    },
+    "package_count": 6,
+    "shared_first_block_relations": {
+      "appears_in_routine_ciphertext": false,
+      "equals_whole_image_block0": false,
+      "equals_whole_image_block1": false
+    }
+  },
+  "delta_chain_families": [
+    {
+      "boundary": "The chain is descriptor-complete, but the first 6200 whole image is absent. Only the second edge has complete old/new encrypted images in the local corpus.",
+      "calibration_sequence": [
+        "8646F4206200",
+        "8646F4206400",
+        "8646F4206700"
+      ],
+      "edges": [
+        {
+          "both_endpoint_images_in_corpus": false,
+          "delta_serialized_length": 750992,
+          "delta_to_target_span_fraction": 0.00878775,
+          "encrypted_image_comparison": null,
+          "new_calibration": "8646F4206400",
+          "package": "T-0062-23.cuw",
+          "source_calibration": "8646F4206200",
+          "source_package_in_corpus": "",
+          "target_signature_sha256": "8a00a42dbbbe1a48b9eefb04c2845397c6724d7e54d6e333a94bf0aac464e262"
+        },
+        {
+          "both_endpoint_images_in_corpus": true,
+          "delta_serialized_length": 1503040,
+          "delta_to_target_span_fraction": 0.01758786,
+          "encrypted_image_comparison": {
+            "delta_serialized_length": 1503040,
+            "delta_to_target_span_fraction": 0.01758786,
+            "exact_32b_prefix_shared": true,
+            "expected_chance_fraction": 0.003906,
+            "identical_byte_count": 333710,
+            "identical_fraction": 0.003905,
+            "length": 85458944,
+            "longest_run_beyond_prefix32": 3,
+            "new_package": "T-0149-24.cuw",
+            "old_package": "T-0062-23.cuw",
+            "prefix32_is_exactly_shared": true,
+            "shared_16b_block_count": 2,
+            "shared_16b_blocks_beyond_prefix": 0
+          },
+          "new_calibration": "8646F4206700",
+          "package": "T-0149-24.cuw",
+          "source_calibration": "8646F4206400",
+          "source_package_in_corpus": "T-0062-23.cuw",
+          "target_signature_sha256": "82a1744fbf95f9ffd876f9c4a3d73b8001f31f86ecef866a77516e8d45e55f18"
+        }
+      ],
+      "family": "8646F420"
+    },
+    {
+      "boundary": "The chain is descriptor-complete, but the first 6200 whole image is absent. Only the second edge has complete old/new encrypted images in the local corpus.",
+      "calibration_sequence": [
+        "8646F1606200",
+        "8646F1606300",
+        "8646F1611200"
+      ],
+      "edges": [
+        {
+          "both_endpoint_images_in_corpus": false,
+          "delta_serialized_length": 10368,
+          "delta_to_target_span_fraction": 0.00012132,
+          "encrypted_image_comparison": null,
+          "new_calibration": "8646F1606300",
+          "package": "T-0061-23.cuw",
+          "source_calibration": "8646F1606200",
+          "source_package_in_corpus": "",
+          "target_signature_sha256": "c83ff9ca8dd6f02111f55c5fbdedee6626dbcb2d01f9fb3209a24a34db4a3c48"
+        },
+        {
+          "both_endpoint_images_in_corpus": true,
+          "delta_serialized_length": 1254976,
+          "delta_to_target_span_fraction": 0.01468513,
+          "encrypted_image_comparison": {
+            "delta_serialized_length": 1254976,
+            "delta_to_target_span_fraction": 0.01468513,
+            "exact_32b_prefix_shared": true,
+            "expected_chance_fraction": 0.003906,
+            "identical_byte_count": 333671,
+            "identical_fraction": 0.003904,
+            "length": 85458944,
+            "longest_run_beyond_prefix32": 3,
+            "new_package": "T-0150-24.cuw",
+            "old_package": "T-0061-23.cuw",
+            "prefix32_is_exactly_shared": true,
+            "shared_16b_block_count": 2,
+            "shared_16b_blocks_beyond_prefix": 0
+          },
+          "new_calibration": "8646F1611200",
+          "package": "T-0150-24.cuw",
+          "source_calibration": "8646F1606300",
+          "source_package_in_corpus": "T-0061-23.cuw",
+          "target_signature_sha256": "d4ecb84f637954f3f5695f83e81e34fc96372937adbb71229a496328acbafd6e"
+        }
+      ],
+      "family": "8646F160_to_8646F161"
+    }
+  ],
   "delta_chains": [
     {
+      "delta_serialized_length": 9184,
+      "delta_to_target_span_fraction": 0.00010747,
       "new_calibration": "8646F1204500",
       "package": "T-0058-23.cuw",
       "source_calibration": "8646F1204300",
-      "source_package_in_corpus": ""
+      "source_package_in_corpus": "",
+      "target_signature_sha256": "9b6686f0da6df76b947bd05e1b3d7ebb2e588a74b171ff63ba995adb629fe38e"
     },
     {
+      "delta_serialized_length": 8272,
+      "delta_to_target_span_fraction": 9.68e-05,
       "new_calibration": "8646F1204500",
       "package": "T-0060-23.cuw",
       "source_calibration": "8646F1204400",
-      "source_package_in_corpus": ""
+      "source_package_in_corpus": "",
+      "target_signature_sha256": "9b6686f0da6df76b947bd05e1b3d7ebb2e588a74b171ff63ba995adb629fe38e"
     },
     {
+      "delta_serialized_length": 10368,
+      "delta_to_target_span_fraction": 0.00012132,
       "new_calibration": "8646F1606300",
       "package": "T-0061-23.cuw",
       "source_calibration": "8646F1606200",
-      "source_package_in_corpus": ""
+      "source_package_in_corpus": "",
+      "target_signature_sha256": "c83ff9ca8dd6f02111f55c5fbdedee6626dbcb2d01f9fb3209a24a34db4a3c48"
     },
     {
+      "delta_serialized_length": 750992,
+      "delta_to_target_span_fraction": 0.00878775,
       "new_calibration": "8646F4206400",
       "package": "T-0062-23.cuw",
       "source_calibration": "8646F4206200",
-      "source_package_in_corpus": ""
+      "source_package_in_corpus": "",
+      "target_signature_sha256": "8a00a42dbbbe1a48b9eefb04c2845397c6724d7e54d6e333a94bf0aac464e262"
     },
     {
+      "delta_serialized_length": 1503040,
+      "delta_to_target_span_fraction": 0.01758786,
       "new_calibration": "8646F4206700",
       "package": "T-0149-24.cuw",
       "source_calibration": "8646F4206400",
-      "source_package_in_corpus": "T-0062-23.cuw"
+      "source_package_in_corpus": "T-0062-23.cuw",
+      "target_signature_sha256": "82a1744fbf95f9ffd876f9c4a3d73b8001f31f86ecef866a77516e8d45e55f18"
     },
     {
+      "delta_serialized_length": 1254976,
+      "delta_to_target_span_fraction": 0.01468513,
       "new_calibration": "8646F1611200",
       "package": "T-0150-24.cuw",
       "source_calibration": "8646F1606300",
-      "source_package_in_corpus": "T-0061-23.cuw"
+      "source_package_in_corpus": "T-0061-23.cuw",
+      "target_signature_sha256": "d4ecb84f637954f3f5695f83e81e34fc96372937adbb71229a496328acbafd6e"
     }
   ],
   "direct_update_comparisons": [
     {
+      "delta_serialized_length": 1503040,
+      "delta_to_target_span_fraction": 0.01758786,
       "exact_32b_prefix_shared": true,
       "expected_chance_fraction": 0.003906,
       "identical_byte_count": 333710,
@@ -616,6 +798,8 @@
       "shared_16b_blocks_beyond_prefix": 0
     },
     {
+      "delta_serialized_length": 1254976,
+      "delta_to_target_span_fraction": 0.01468513,
       "exact_32b_prefix_shared": true,
       "expected_chance_fraction": 0.003906,
       "identical_byte_count": 333671,
@@ -637,7 +821,9 @@
       "delta_datx": {
         "block_count": 574,
         "entropy_bits_per_byte": 7.978,
+        "first_64_bytes_hex": "0a4aba7f300a8745e2acb15b5b59a046f76c662f8836c998ba0e957981778e98331f8f86d69e0fdabcbe0e914459ef9bc8c4ff80a623d9ba978afb3449dc114c",
         "first_block_hex": "0a4aba7f300a8745e2acb15b5b59a046",
+        "last_64_bytes_hex": "e1ca4b2706009e676b1e7a24bbd818fb62a48fdc381b1afd1c307a4a41e77a22d5fb1853c80abf1bc990ea492db7c8fce2c0eb1ec74a58c25813f5427e89b413",
         "length": 9184,
         "length_mod_16": 0,
         "repeated_block_count": 0,
@@ -656,6 +842,7 @@
             "cmac_empty": true,
             "crc_empty": true,
             "digital_signature_encoding": "ascii-hex",
+            "digital_signature_hex": "b9a37b12c875c1b2e8539ad04ecbb1d651d038a296672102ffd176dc3ab7c4eeccfa7a50f2b97a1919fec88f23ce541b618d12e20c57048507b125e7ee5a30c8437284d46f1c792f159a240c308180aaddac35e7d7b35d2da1206ef8edfa3ad93d432c5f2cf7d0417f0b46918d9219f80c152c46fc2b95e66dcb3b7cfdd3fa7a02093c3e540c4aba87c82bfc92effa49e0dcd933a33fb8e4fce25edd9543bb29c2703e27e5d71c04ee2e8c30197b984a0a4214ad933ec660c66112db45a6348d448fb131b5723d1ed79ab7ca3fef832a97990b3ac54622e54ef87b86e34dcc59a4ad8a8e1309a42d9dcf6ca05e4c05c281689159bdd3f4c6b7d3513dfbf86fa4",
             "digital_signature_length": 256,
             "digital_signature_sha256": "743a089220e6a9309c8c708766bc64a961ce114b513119db7fd95bbf3e5dad63",
             "digital_signature_wire_ascii_length": 512,
@@ -667,6 +854,7 @@
             "cmac_empty": true,
             "crc_empty": true,
             "digital_signature_encoding": "ascii-hex",
+            "digital_signature_hex": "1f615de7210e6efeeeae54141ab6bd52ea6a6644d8aa212d1ec1a2484a28a370960f1703590cb0154739f2c7145ed7cc44b8f5386e1153e2e6a9dc2040b09142d3c4ff1679dd29a12e8e9885762d446eed37e6346faa4ad93c44b381bd656d5338c128ae381bdacb5356ca3ea3c38e864c7b8a67eb7e02adec1fcb8b4d2fe450c234f7d94bec977150d7bb2b7d8c7da76d07744304d44fa354ff0a82a7e48a951cc4337f69409001baeabe9581f517e1156327fe1e6a2154f69fd530b520bd1ef016875d613b6708c61f55b79ec6b3ca461ce0fc309a751e663ca8d3313831a8134ad16694ab2079b98e6f9515caa0a19c026e9dd8b206951ca3c77dab31eb8b",
             "digital_signature_length": 256,
             "digital_signature_sha256": "9b6686f0da6df76b947bd05e1b3d7ebb2e588a74b171ff63ba995adb629fe38e",
             "digital_signature_wire_ascii_length": 512,
@@ -678,6 +866,7 @@
             "cmac_empty": true,
             "crc_empty": true,
             "digital_signature_encoding": "ascii-hex",
+            "digital_signature_hex": "b9a37b12c875c1b2e8539ad04ecbb1d651d038a296672102ffd176dc3ab7c4eeccfa7a50f2b97a1919fec88f23ce541b618d12e20c57048507b125e7ee5a30c8437284d46f1c792f159a240c308180aaddac35e7d7b35d2da1206ef8edfa3ad93d432c5f2cf7d0417f0b46918d9219f80c152c46fc2b95e66dcb3b7cfdd3fa7a02093c3e540c4aba87c82bfc92effa49e0dcd933a33fb8e4fce25edd9543bb29c2703e27e5d71c04ee2e8c30197b984a0a4214ad933ec660c66112db45a6348d448fb131b5723d1ed79ab7ca3fef832a97990b3ac54622e54ef87b86e34dcc59a4ad8a8e1309a42d9dcf6ca05e4c05c281689159bdd3f4c6b7d3513dfbf86fa4",
             "digital_signature_length": 256,
             "digital_signature_sha256": "743a089220e6a9309c8c708766bc64a961ce114b513119db7fd95bbf3e5dad63",
             "digital_signature_wire_ascii_length": 512,
@@ -689,6 +878,7 @@
             "cmac_empty": true,
             "crc_empty": true,
             "digital_signature_encoding": "ascii-hex",
+            "digital_signature_hex": "1f615de7210e6efeeeae54141ab6bd52ea6a6644d8aa212d1ec1a2484a28a370960f1703590cb0154739f2c7145ed7cc44b8f5386e1153e2e6a9dc2040b09142d3c4ff1679dd29a12e8e9885762d446eed37e6346faa4ad93c44b381bd656d5338c128ae381bdacb5356ca3ea3c38e864c7b8a67eb7e02adec1fcb8b4d2fe450c234f7d94bec977150d7bb2b7d8c7da76d07744304d44fa354ff0a82a7e48a951cc4337f69409001baeabe9581f517e1156327fe1e6a2154f69fd530b520bd1ef016875d613b6708c61f55b79ec6b3ca461ce0fc309a751e663ca8d3313831a8134ad16694ab2079b98e6f9515caa0a19c026e9dd8b206951ca3c77dab31eb8b",
             "digital_signature_length": 256,
             "digital_signature_sha256": "9b6686f0da6df76b947bd05e1b3d7ebb2e588a74b171ff63ba995adb629fe38e",
             "digital_signature_wire_ascii_length": 512,
@@ -832,7 +1022,9 @@
       "delta_datx": {
         "block_count": 517,
         "entropy_bits_per_byte": 7.977,
+        "first_64_bytes_hex": "0a4aba7f300a8745e2acb15b5b59a046f7bdf8c1a73c00aa6013ec477a1c27b1bd6f76ac9745c1ddfb62cf8da65d9911dbcd070282ae6cea60e0517232885cf9",
         "first_block_hex": "0a4aba7f300a8745e2acb15b5b59a046",
+        "last_64_bytes_hex": "3e9f819a019852b067ca8c23975ebf50ec478e642918f3afb2d6d64237825662a411a0359e0614e1267910cb9f74c88db2f60f142158f4f0ea8439245d7c2466",
         "length": 8272,
         "length_mod_16": 0,
         "repeated_block_count": 0,
@@ -851,6 +1043,7 @@
             "cmac_empty": true,
             "crc_empty": true,
             "digital_signature_encoding": "ascii-hex",
+            "digital_signature_hex": "b9a37b12c875c1b2e8539ad04ecbb1d651d038a296672102ffd176dc3ab7c4eeccfa7a50f2b97a1919fec88f23ce541b618d12e20c57048507b125e7ee5a30c8437284d46f1c792f159a240c308180aaddac35e7d7b35d2da1206ef8edfa3ad93d432c5f2cf7d0417f0b46918d9219f80c152c46fc2b95e66dcb3b7cfdd3fa7a02093c3e540c4aba87c82bfc92effa49e0dcd933a33fb8e4fce25edd9543bb29c2703e27e5d71c04ee2e8c30197b984a0a4214ad933ec660c66112db45a6348d448fb131b5723d1ed79ab7ca3fef832a97990b3ac54622e54ef87b86e34dcc59a4ad8a8e1309a42d9dcf6ca05e4c05c281689159bdd3f4c6b7d3513dfbf86fa4",
             "digital_signature_length": 256,
             "digital_signature_sha256": "743a089220e6a9309c8c708766bc64a961ce114b513119db7fd95bbf3e5dad63",
             "digital_signature_wire_ascii_length": 512,
@@ -862,6 +1055,7 @@
             "cmac_empty": true,
             "crc_empty": true,
             "digital_signature_encoding": "ascii-hex",
+            "digital_signature_hex": "1f615de7210e6efeeeae54141ab6bd52ea6a6644d8aa212d1ec1a2484a28a370960f1703590cb0154739f2c7145ed7cc44b8f5386e1153e2e6a9dc2040b09142d3c4ff1679dd29a12e8e9885762d446eed37e6346faa4ad93c44b381bd656d5338c128ae381bdacb5356ca3ea3c38e864c7b8a67eb7e02adec1fcb8b4d2fe450c234f7d94bec977150d7bb2b7d8c7da76d07744304d44fa354ff0a82a7e48a951cc4337f69409001baeabe9581f517e1156327fe1e6a2154f69fd530b520bd1ef016875d613b6708c61f55b79ec6b3ca461ce0fc309a751e663ca8d3313831a8134ad16694ab2079b98e6f9515caa0a19c026e9dd8b206951ca3c77dab31eb8b",
             "digital_signature_length": 256,
             "digital_signature_sha256": "9b6686f0da6df76b947bd05e1b3d7ebb2e588a74b171ff63ba995adb629fe38e",
             "digital_signature_wire_ascii_length": 512,
@@ -873,6 +1067,7 @@
             "cmac_empty": true,
             "crc_empty": true,
             "digital_signature_encoding": "ascii-hex",
+            "digital_signature_hex": "b9a37b12c875c1b2e8539ad04ecbb1d651d038a296672102ffd176dc3ab7c4eeccfa7a50f2b97a1919fec88f23ce541b618d12e20c57048507b125e7ee5a30c8437284d46f1c792f159a240c308180aaddac35e7d7b35d2da1206ef8edfa3ad93d432c5f2cf7d0417f0b46918d9219f80c152c46fc2b95e66dcb3b7cfdd3fa7a02093c3e540c4aba87c82bfc92effa49e0dcd933a33fb8e4fce25edd9543bb29c2703e27e5d71c04ee2e8c30197b984a0a4214ad933ec660c66112db45a6348d448fb131b5723d1ed79ab7ca3fef832a97990b3ac54622e54ef87b86e34dcc59a4ad8a8e1309a42d9dcf6ca05e4c05c281689159bdd3f4c6b7d3513dfbf86fa4",
             "digital_signature_length": 256,
             "digital_signature_sha256": "743a089220e6a9309c8c708766bc64a961ce114b513119db7fd95bbf3e5dad63",
             "digital_signature_wire_ascii_length": 512,
@@ -884,6 +1079,7 @@
             "cmac_empty": true,
             "crc_empty": true,
             "digital_signature_encoding": "ascii-hex",
+            "digital_signature_hex": "1f615de7210e6efeeeae54141ab6bd52ea6a6644d8aa212d1ec1a2484a28a370960f1703590cb0154739f2c7145ed7cc44b8f5386e1153e2e6a9dc2040b09142d3c4ff1679dd29a12e8e9885762d446eed37e6346faa4ad93c44b381bd656d5338c128ae381bdacb5356ca3ea3c38e864c7b8a67eb7e02adec1fcb8b4d2fe450c234f7d94bec977150d7bb2b7d8c7da76d07744304d44fa354ff0a82a7e48a951cc4337f69409001baeabe9581f517e1156327fe1e6a2154f69fd530b520bd1ef016875d613b6708c61f55b79ec6b3ca461ce0fc309a751e663ca8d3313831a8134ad16694ab2079b98e6f9515caa0a19c026e9dd8b206951ca3c77dab31eb8b",
             "digital_signature_length": 256,
             "digital_signature_sha256": "9b6686f0da6df76b947bd05e1b3d7ebb2e588a74b171ff63ba995adb629fe38e",
             "digital_signature_wire_ascii_length": 512,
@@ -1016,7 +1212,9 @@
       "delta_datx": {
         "block_count": 648,
         "entropy_bits_per_byte": 7.979,
+        "first_64_bytes_hex": "0a4aba7f300a8745e2acb15b5b59a0468fcfe7693041c93beda99cfa922e5c190211d17b6c4da27f1bd6b6d38c6a1924ed813e5a8bd047c3f96ee7226a829137",
         "first_block_hex": "0a4aba7f300a8745e2acb15b5b59a046",
+        "last_64_bytes_hex": "7cd1702df25403fe710f8690e9d5dacf1de4139edfc841317050f1b968bb852528b9c5139a8ecd64e51973f60fa9cffeaec6d4df983aadc377e11d81b48f8b37",
         "length": 10368,
         "length_mod_16": 0,
         "repeated_block_count": 0,
@@ -1035,6 +1233,7 @@
             "cmac_empty": true,
             "crc_empty": true,
             "digital_signature_encoding": "ascii-hex",
+            "digital_signature_hex": "b9a37b12c875c1b2e8539ad04ecbb1d651d038a296672102ffd176dc3ab7c4eeccfa7a50f2b97a1919fec88f23ce541b618d12e20c57048507b125e7ee5a30c8437284d46f1c792f159a240c308180aaddac35e7d7b35d2da1206ef8edfa3ad93d432c5f2cf7d0417f0b46918d9219f80c152c46fc2b95e66dcb3b7cfdd3fa7a02093c3e540c4aba87c82bfc92effa49e0dcd933a33fb8e4fce25edd9543bb29c2703e27e5d71c04ee2e8c30197b984a0a4214ad933ec660c66112db45a6348d448fb131b5723d1ed79ab7ca3fef832a97990b3ac54622e54ef87b86e34dcc59a4ad8a8e1309a42d9dcf6ca05e4c05c281689159bdd3f4c6b7d3513dfbf86fa4",
             "digital_signature_length": 256,
             "digital_signature_sha256": "743a089220e6a9309c8c708766bc64a961ce114b513119db7fd95bbf3e5dad63",
             "digital_signature_wire_ascii_length": 512,
@@ -1046,6 +1245,7 @@
             "cmac_empty": true,
             "crc_empty": true,
             "digital_signature_encoding": "ascii-hex",
+            "digital_signature_hex": "0f3bd29a55a04e3c276720ba1f8d112a212f800a5417ffdbd601e9d9759909e069d8f1ea740e529630b3827bcdafc9338428f8ac0139192bb47fe732daf316ca72dc106ad38ce6fc860bd499ef530e8b3677284293ce286181af4ac07b7685852a7cc1a0ec5d43090a8b0177105daca1605abcf37fde31add1a46439ea031f75247f74ea17e31120f9582dcd14056ceb1f77c596e05a5e701e85c7100619da8e96c1d55dc37d9d527d1982fd17b4f13c01b673efcd52d28d3748f628f7646605d636629ba38a2e80a947f77ff5d3056213bbb9c896bf49d17e7e66a3d38ebb47556f0be39ed2a193acec3a221a8badc537f96ca3cd7b9ba789b3595b7e297ebb",
             "digital_signature_length": 256,
             "digital_signature_sha256": "c83ff9ca8dd6f02111f55c5fbdedee6626dbcb2d01f9fb3209a24a34db4a3c48",
             "digital_signature_wire_ascii_length": 512,
@@ -1057,6 +1257,7 @@
             "cmac_empty": true,
             "crc_empty": true,
             "digital_signature_encoding": "ascii-hex",
+            "digital_signature_hex": "b9a37b12c875c1b2e8539ad04ecbb1d651d038a296672102ffd176dc3ab7c4eeccfa7a50f2b97a1919fec88f23ce541b618d12e20c57048507b125e7ee5a30c8437284d46f1c792f159a240c308180aaddac35e7d7b35d2da1206ef8edfa3ad93d432c5f2cf7d0417f0b46918d9219f80c152c46fc2b95e66dcb3b7cfdd3fa7a02093c3e540c4aba87c82bfc92effa49e0dcd933a33fb8e4fce25edd9543bb29c2703e27e5d71c04ee2e8c30197b984a0a4214ad933ec660c66112db45a6348d448fb131b5723d1ed79ab7ca3fef832a97990b3ac54622e54ef87b86e34dcc59a4ad8a8e1309a42d9dcf6ca05e4c05c281689159bdd3f4c6b7d3513dfbf86fa4",
             "digital_signature_length": 256,
             "digital_signature_sha256": "743a089220e6a9309c8c708766bc64a961ce114b513119db7fd95bbf3e5dad63",
             "digital_signature_wire_ascii_length": 512,
@@ -1068,6 +1269,7 @@
             "cmac_empty": true,
             "crc_empty": true,
             "digital_signature_encoding": "ascii-hex",
+            "digital_signature_hex": "0f3bd29a55a04e3c276720ba1f8d112a212f800a5417ffdbd601e9d9759909e069d8f1ea740e529630b3827bcdafc9338428f8ac0139192bb47fe732daf316ca72dc106ad38ce6fc860bd499ef530e8b3677284293ce286181af4ac07b7685852a7cc1a0ec5d43090a8b0177105daca1605abcf37fde31add1a46439ea031f75247f74ea17e31120f9582dcd14056ceb1f77c596e05a5e701e85c7100619da8e96c1d55dc37d9d527d1982fd17b4f13c01b673efcd52d28d3748f628f7646605d636629ba38a2e80a947f77ff5d3056213bbb9c896bf49d17e7e66a3d38ebb47556f0be39ed2a193acec3a221a8badc537f96ca3cd7b9ba789b3595b7e297ebb",
             "digital_signature_length": 256,
             "digital_signature_sha256": "c83ff9ca8dd6f02111f55c5fbdedee6626dbcb2d01f9fb3209a24a34db4a3c48",
             "digital_signature_wire_ascii_length": 512,
@@ -1200,7 +1402,9 @@
       "delta_datx": {
         "block_count": 46937,
         "entropy_bits_per_byte": 8.0,
+        "first_64_bytes_hex": "0a4aba7f300a8745e2acb15b5b59a046bbb9b91b3681f74c5955b611577cef3ee45743454aea981d7d9ab3902d92f7b4ceab39a8e859e4d4718e7542273644e4",
         "first_block_hex": "0a4aba7f300a8745e2acb15b5b59a046",
+        "last_64_bytes_hex": "852867668feb711ccea4938110d403d6615fffccc5e8bb044f8b9d3522a046a1362b0f2bcf05707eb767fb393224b505f3437c4fe4814a13ab17568d1eee3369",
         "length": 750992,
         "length_mod_16": 0,
         "repeated_block_count": 0,
@@ -1219,6 +1423,7 @@
             "cmac_empty": true,
             "crc_empty": true,
             "digital_signature_encoding": "ascii-hex",
+            "digital_signature_hex": "b9a37b12c875c1b2e8539ad04ecbb1d651d038a296672102ffd176dc3ab7c4eeccfa7a50f2b97a1919fec88f23ce541b618d12e20c57048507b125e7ee5a30c8437284d46f1c792f159a240c308180aaddac35e7d7b35d2da1206ef8edfa3ad93d432c5f2cf7d0417f0b46918d9219f80c152c46fc2b95e66dcb3b7cfdd3fa7a02093c3e540c4aba87c82bfc92effa49e0dcd933a33fb8e4fce25edd9543bb29c2703e27e5d71c04ee2e8c30197b984a0a4214ad933ec660c66112db45a6348d448fb131b5723d1ed79ab7ca3fef832a97990b3ac54622e54ef87b86e34dcc59a4ad8a8e1309a42d9dcf6ca05e4c05c281689159bdd3f4c6b7d3513dfbf86fa4",
             "digital_signature_length": 256,
             "digital_signature_sha256": "743a089220e6a9309c8c708766bc64a961ce114b513119db7fd95bbf3e5dad63",
             "digital_signature_wire_ascii_length": 512,
@@ -1230,6 +1435,7 @@
             "cmac_empty": true,
             "crc_empty": true,
             "digital_signature_encoding": "ascii-hex",
+            "digital_signature_hex": "2540f35537ecad60529cfcd6643e9e8541c9604757b6a0b42927abe37ef4ffbffe3912bac78f5da8a13a8c19f2d11de2400b40ee17ccff7ec9a1c7ea0ec9c5752f5a57c8bbc5366249866292615e949f6d6da1fb67e2f01c4867667f7240e073c7221b356d1e32d5b7be75325d175375f67abb2140a1ade4474330e44cc2a10bbf267752165631b44302fd4528a420fad77674f12faa44cc1e95febea23eeb968b1c1a00c3de29906071cd0ff2e322f8119ce1c4b061e095542f67f68882b418223da35387ee81990b57d4285e342cd7276676bae03b2c3f45b5ee7e448c89689e2c699f2141f420a1a75ecf14416aa75e090767a842dbd2eae476cbc3b917ea",
             "digital_signature_length": 256,
             "digital_signature_sha256": "8a00a42dbbbe1a48b9eefb04c2845397c6724d7e54d6e333a94bf0aac464e262",
             "digital_signature_wire_ascii_length": 512,
@@ -1241,6 +1447,7 @@
             "cmac_empty": true,
             "crc_empty": true,
             "digital_signature_encoding": "ascii-hex",
+            "digital_signature_hex": "b9a37b12c875c1b2e8539ad04ecbb1d651d038a296672102ffd176dc3ab7c4eeccfa7a50f2b97a1919fec88f23ce541b618d12e20c57048507b125e7ee5a30c8437284d46f1c792f159a240c308180aaddac35e7d7b35d2da1206ef8edfa3ad93d432c5f2cf7d0417f0b46918d9219f80c152c46fc2b95e66dcb3b7cfdd3fa7a02093c3e540c4aba87c82bfc92effa49e0dcd933a33fb8e4fce25edd9543bb29c2703e27e5d71c04ee2e8c30197b984a0a4214ad933ec660c66112db45a6348d448fb131b5723d1ed79ab7ca3fef832a97990b3ac54622e54ef87b86e34dcc59a4ad8a8e1309a42d9dcf6ca05e4c05c281689159bdd3f4c6b7d3513dfbf86fa4",
             "digital_signature_length": 256,
             "digital_signature_sha256": "743a089220e6a9309c8c708766bc64a961ce114b513119db7fd95bbf3e5dad63",
             "digital_signature_wire_ascii_length": 512,
@@ -1252,6 +1459,7 @@
             "cmac_empty": true,
             "crc_empty": true,
             "digital_signature_encoding": "ascii-hex",
+            "digital_signature_hex": "2540f35537ecad60529cfcd6643e9e8541c9604757b6a0b42927abe37ef4ffbffe3912bac78f5da8a13a8c19f2d11de2400b40ee17ccff7ec9a1c7ea0ec9c5752f5a57c8bbc5366249866292615e949f6d6da1fb67e2f01c4867667f7240e073c7221b356d1e32d5b7be75325d175375f67abb2140a1ade4474330e44cc2a10bbf267752165631b44302fd4528a420fad77674f12faa44cc1e95febea23eeb968b1c1a00c3de29906071cd0ff2e322f8119ce1c4b061e095542f67f68882b418223da35387ee81990b57d4285e342cd7276676bae03b2c3f45b5ee7e448c89689e2c699f2141f420a1a75ecf14416aa75e090767a842dbd2eae476cbc3b917ea",
             "digital_signature_length": 256,
             "digital_signature_sha256": "8a00a42dbbbe1a48b9eefb04c2845397c6724d7e54d6e333a94bf0aac464e262",
             "digital_signature_wire_ascii_length": 512,
@@ -1384,7 +1592,9 @@
       "delta_datx": {
         "block_count": 93940,
         "entropy_bits_per_byte": 8.0,
+        "first_64_bytes_hex": "0a4aba7f300a8745e2acb15b5b59a0465e9197b6a7fef547028947dfc76618d835550972f82208d50063bbe0fffb7c394fc41b9b7c9a5a3bfc3a12ed5bb2cdaf",
         "first_block_hex": "0a4aba7f300a8745e2acb15b5b59a046",
+        "last_64_bytes_hex": "bedfc73b85579207f2065cc3ff788bf7351f753756c0a5312c724effcac233b0553d5c38b94b54be6bafc42f7091ccc5c7ff324d6ad59fe5092e31870224ec92",
         "length": 1503040,
         "length_mod_16": 0,
         "repeated_block_count": 0,
@@ -1403,6 +1613,7 @@
             "cmac_empty": true,
             "crc_empty": true,
             "digital_signature_encoding": "ascii-hex",
+            "digital_signature_hex": "b9a37b12c875c1b2e8539ad04ecbb1d651d038a296672102ffd176dc3ab7c4eeccfa7a50f2b97a1919fec88f23ce541b618d12e20c57048507b125e7ee5a30c8437284d46f1c792f159a240c308180aaddac35e7d7b35d2da1206ef8edfa3ad93d432c5f2cf7d0417f0b46918d9219f80c152c46fc2b95e66dcb3b7cfdd3fa7a02093c3e540c4aba87c82bfc92effa49e0dcd933a33fb8e4fce25edd9543bb29c2703e27e5d71c04ee2e8c30197b984a0a4214ad933ec660c66112db45a6348d448fb131b5723d1ed79ab7ca3fef832a97990b3ac54622e54ef87b86e34dcc59a4ad8a8e1309a42d9dcf6ca05e4c05c281689159bdd3f4c6b7d3513dfbf86fa4",
             "digital_signature_length": 256,
             "digital_signature_sha256": "743a089220e6a9309c8c708766bc64a961ce114b513119db7fd95bbf3e5dad63",
             "digital_signature_wire_ascii_length": 512,
@@ -1414,6 +1625,7 @@
             "cmac_empty": true,
             "crc_empty": true,
             "digital_signature_encoding": "ascii-hex",
+            "digital_signature_hex": "c3629cd122e4be5397ed1c0e424f3c485994c20c9c51c405b266363b3c8a65842ffdab976e6637a89891735cd8376bcaf5d37042e13fde9274c9f2a753ba5a92598264d17c9c1840b4e02e17a86bf75b0f9d148c889d89a8de5aa1bf59560d72fd54d1f9c1fad10b15241f7791d192bc21efb5a3fe50bdc5a0aa9bb94a5af05639c7d15480d1cf9540aa4fdce046dd5117bf5ac84c9022c31c22b1f09402157fdd24f53672f02374224e154198e873af6c306b868c8fbc527deab77492f21b98faae69e1e45f597e50a85de6d919b244798261f47a3ae6950bb77c889cede0b7bbea2397010a0a40f94ba4b0c811b89c92d4c4c2f6d4480501161557bf8875c5",
             "digital_signature_length": 256,
             "digital_signature_sha256": "82a1744fbf95f9ffd876f9c4a3d73b8001f31f86ecef866a77516e8d45e55f18",
             "digital_signature_wire_ascii_length": 512,
@@ -1425,6 +1637,7 @@
             "cmac_empty": true,
             "crc_empty": true,
             "digital_signature_encoding": "ascii-hex",
+            "digital_signature_hex": "b9a37b12c875c1b2e8539ad04ecbb1d651d038a296672102ffd176dc3ab7c4eeccfa7a50f2b97a1919fec88f23ce541b618d12e20c57048507b125e7ee5a30c8437284d46f1c792f159a240c308180aaddac35e7d7b35d2da1206ef8edfa3ad93d432c5f2cf7d0417f0b46918d9219f80c152c46fc2b95e66dcb3b7cfdd3fa7a02093c3e540c4aba87c82bfc92effa49e0dcd933a33fb8e4fce25edd9543bb29c2703e27e5d71c04ee2e8c30197b984a0a4214ad933ec660c66112db45a6348d448fb131b5723d1ed79ab7ca3fef832a97990b3ac54622e54ef87b86e34dcc59a4ad8a8e1309a42d9dcf6ca05e4c05c281689159bdd3f4c6b7d3513dfbf86fa4",
             "digital_signature_length": 256,
             "digital_signature_sha256": "743a089220e6a9309c8c708766bc64a961ce114b513119db7fd95bbf3e5dad63",
             "digital_signature_wire_ascii_length": 512,
@@ -1436,6 +1649,7 @@
             "cmac_empty": true,
             "crc_empty": true,
             "digital_signature_encoding": "ascii-hex",
+            "digital_signature_hex": "c3629cd122e4be5397ed1c0e424f3c485994c20c9c51c405b266363b3c8a65842ffdab976e6637a89891735cd8376bcaf5d37042e13fde9274c9f2a753ba5a92598264d17c9c1840b4e02e17a86bf75b0f9d148c889d89a8de5aa1bf59560d72fd54d1f9c1fad10b15241f7791d192bc21efb5a3fe50bdc5a0aa9bb94a5af05639c7d15480d1cf9540aa4fdce046dd5117bf5ac84c9022c31c22b1f09402157fdd24f53672f02374224e154198e873af6c306b868c8fbc527deab77492f21b98faae69e1e45f597e50a85de6d919b244798261f47a3ae6950bb77c889cede0b7bbea2397010a0a40f94ba4b0c811b89c92d4c4c2f6d4480501161557bf8875c5",
             "digital_signature_length": 256,
             "digital_signature_sha256": "82a1744fbf95f9ffd876f9c4a3d73b8001f31f86ecef866a77516e8d45e55f18",
             "digital_signature_wire_ascii_length": 512,
@@ -1568,7 +1782,9 @@
       "delta_datx": {
         "block_count": 78436,
         "entropy_bits_per_byte": 8.0,
+        "first_64_bytes_hex": "0a4aba7f300a8745e2acb15b5b59a0460eb30e6d913d385a752c4dd3ab9b7428ba36925a41757294db27ac1c239fb878f8637b153ad823235b98ba81a345c76f",
         "first_block_hex": "0a4aba7f300a8745e2acb15b5b59a046",
+        "last_64_bytes_hex": "a40f928e247fde60ee16be911cef52e89e1eb88aa0d97b6d0c2c37b056fd9a728429bad1a17e6e61d259d82a1eed4357695787dc47459c9dffb925d159ef2a1e",
         "length": 1254976,
         "length_mod_16": 0,
         "repeated_block_count": 0,
@@ -1587,6 +1803,7 @@
             "cmac_empty": true,
             "crc_empty": true,
             "digital_signature_encoding": "ascii-hex",
+            "digital_signature_hex": "b9a37b12c875c1b2e8539ad04ecbb1d651d038a296672102ffd176dc3ab7c4eeccfa7a50f2b97a1919fec88f23ce541b618d12e20c57048507b125e7ee5a30c8437284d46f1c792f159a240c308180aaddac35e7d7b35d2da1206ef8edfa3ad93d432c5f2cf7d0417f0b46918d9219f80c152c46fc2b95e66dcb3b7cfdd3fa7a02093c3e540c4aba87c82bfc92effa49e0dcd933a33fb8e4fce25edd9543bb29c2703e27e5d71c04ee2e8c30197b984a0a4214ad933ec660c66112db45a6348d448fb131b5723d1ed79ab7ca3fef832a97990b3ac54622e54ef87b86e34dcc59a4ad8a8e1309a42d9dcf6ca05e4c05c281689159bdd3f4c6b7d3513dfbf86fa4",
             "digital_signature_length": 256,
             "digital_signature_sha256": "743a089220e6a9309c8c708766bc64a961ce114b513119db7fd95bbf3e5dad63",
             "digital_signature_wire_ascii_length": 512,
@@ -1598,6 +1815,7 @@
             "cmac_empty": true,
             "crc_empty": true,
             "digital_signature_encoding": "ascii-hex",
+            "digital_signature_hex": "88d223b02d230add21adeefdbd6ab63dfffec908c60f0a20965fc1bb5484cf7be120461e5ed72877a87c7c12c79e224ed3df859de5d1cb8520c43bd2cf2842bc27c1da2bc9caceb27e185b3a3b0aa385587f342a2c3540527e3f46806ea7bd4daaa7eb6083bf6e2b13be968b95b3f5d2dd6a0cb26437130a8528d738a976fb3dc12da5fd2341a75b8dd3ba387c4906ed541dc24da234b5988fc96cd1bc124c4d40d38908e32cccf275024d45bfa7b6e23f2c89e027423c601f3fd72d31cf2e018eeef59c41809178c673141cf5c22f28a499fcc4211af4d176795e301d86d26f62e1123ad3c9ae8c6c4426ceb6fcc32620045bfda5a5d037964e14da78403448",
             "digital_signature_length": 256,
             "digital_signature_sha256": "d4ecb84f637954f3f5695f83e81e34fc96372937adbb71229a496328acbafd6e",
             "digital_signature_wire_ascii_length": 512,
@@ -1609,6 +1827,7 @@
             "cmac_empty": true,
             "crc_empty": true,
             "digital_signature_encoding": "ascii-hex",
+            "digital_signature_hex": "b9a37b12c875c1b2e8539ad04ecbb1d651d038a296672102ffd176dc3ab7c4eeccfa7a50f2b97a1919fec88f23ce541b618d12e20c57048507b125e7ee5a30c8437284d46f1c792f159a240c308180aaddac35e7d7b35d2da1206ef8edfa3ad93d432c5f2cf7d0417f0b46918d9219f80c152c46fc2b95e66dcb3b7cfdd3fa7a02093c3e540c4aba87c82bfc92effa49e0dcd933a33fb8e4fce25edd9543bb29c2703e27e5d71c04ee2e8c30197b984a0a4214ad933ec660c66112db45a6348d448fb131b5723d1ed79ab7ca3fef832a97990b3ac54622e54ef87b86e34dcc59a4ad8a8e1309a42d9dcf6ca05e4c05c281689159bdd3f4c6b7d3513dfbf86fa4",
             "digital_signature_length": 256,
             "digital_signature_sha256": "743a089220e6a9309c8c708766bc64a961ce114b513119db7fd95bbf3e5dad63",
             "digital_signature_wire_ascii_length": 512,
@@ -1620,6 +1839,7 @@
             "cmac_empty": true,
             "crc_empty": true,
             "digital_signature_encoding": "ascii-hex",
+            "digital_signature_hex": "88d223b02d230add21adeefdbd6ab63dfffec908c60f0a20965fc1bb5484cf7be120461e5ed72877a87c7c12c79e224ed3df859de5d1cb8520c43bd2cf2842bc27c1da2bc9caceb27e185b3a3b0aa385587f342a2c3540527e3f46806ea7bd4daaa7eb6083bf6e2b13be968b95b3f5d2dd6a0cb26437130a8528d738a976fb3dc12da5fd2341a75b8dd3ba387c4906ed541dc24da234b5988fc96cd1bc124c4d40d38908e32cccf275024d45bfa7b6e23f2c89e027423c601f3fd72d31cf2e018eeef59c41809178c673141cf5c22f28a499fcc4211af4d176795e301d86d26f62e1123ad3c9ae8c6c4426ceb6fcc32620045bfda5a5d037964e14da78403448",
             "digital_signature_length": 256,
             "digital_signature_sha256": "d4ecb84f637954f3f5695f83e81e34fc96372937adbb71229a496328acbafd6e",
             "digital_signature_wire_ascii_length": 512,
@@ -2162,6 +2382,12 @@
     "member_read_path": "format-0x67 members are raw length+CRC32 payloads; the CUW.dll read path is a chunked fread(dst,1,0xFFF) loop (reader 0x1002BEB0, push site 0x1002BF83) with a whole-file CRC32 gate (0x1002A3B0, called from loader 0x10031A20 at 0x10031C0C; mismatch -> Error FileCRC); CDeltaReproArchiveCtrlr (RTTI 0x1008A9A0, vtable 0x1007C918, single deleting-dtor virtual 0x10066DC0, global instance 0x1008CA0C) holds only 0xAC-stride path/name/count entries with no payload pointer or byte fields - orchestration-only; CAES encrypt/decrypt callers are only 0x1001B9B2/0x1005AC52/0x1005AD02 (INI parameter decode, SecurityUp helpers), never the member path; TCUWCalibrationFile.dll and TCUWCanReproStdFlashWriter.dll have no crypto or compression imports.",
     "routine_member": "byte-identical encrypted blob in all six packages; it decodes from S-record framing to the same 1392 stored bytes every whole image carries at 0x008F6C00. Exact plaintext/ECU-side interpretation remain unknown.",
     "selected_route_key_material": "The selected ReproStd prepare path enters 10 02, sends bare 27 01, extracts exactly 16 seed bytes from 67 01, calls CalcSeedKey with GetServiceAuthKey + that seed, then sends 27 02 plus a 16-byte key and expects 67 02. It imports GetServiceAuthKey but not GetNonce/GetSeedKey/GetECUAuthKey/GetSecurityProperty2; ReproStd flash imports only GetReproMethodType from these security/format getters. The recovered prepare/flash send grammar has no explicit Nonce/SeedKey transfer, so the selected route supplies no host-side nonce/seed material to the FRC payload decoder. This does not prove the package-generation Nonce is cryptographically irrelevant.",
+    "transform_order": {
+      "boundary": "Bounded ordering inference, not a recovered decoder. DFI nomenclature and ciphertext structure do not by themselves prove the ECU's internal buffering or whether either transform is streamed/interleaved.",
+      "bounded_ecu_inverse_hypothesis": "serialized .datx -> encryption-method-1 decode -> delta-method-2 application against the installed source image",
+      "bounded_generation_hypothesis": "old plaintext image + new plaintext image -> Toyota delta method 2 -> encryption method 1 -> serialized .datx",
+      "support": "DFI 0x21 declares both layers, the host passes an opaque high-entropy .datx, all candidate clear delta headers/addresses are absent, and only the ECU has the installed source image needed to apply the patch."
+    },
     "xx_members": "Motorola S-record framing carrying an encrypted target representation. ReproStd downloads whole/routine data with UDS RequestDownload DFI 0x01; by the UDS dataFormatIdentifier definition that is compression method 0 plus manufacturer-specific encryption method 1. The exact FRC cipher/key/IV remain unknown."
   }
 }

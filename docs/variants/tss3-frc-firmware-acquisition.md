@@ -168,6 +168,36 @@ bytes**, and the ReproStd RoutineControl request declares an `0x0100`-byte
 integrity object. The signature algorithm, signed object, and ECU public-key
 storage remain unknown.
 
+The corpus extractor can materialize the exact objects without duplicating the
+roughly 81.5-MiB image shared by `T-0058` and `T-0060`:
+
+```bash
+uv run python tools/techstream/inspect_cuw_frc_corpus.py \
+  --output data/generated/techstream_v18/cuw_frc_corpus.json \
+  --workspace build/out/frc-cuw-payloads
+```
+
+The ignored, content-addressed workspace contains each decoded-but-still-
+encrypted whole-image region, the 1,392-byte routine, raw `.datx`, and both
+256-byte signatures, with exact target ranges, SHA-256 identities,
+`ServiceAuthKey`, and `Nonce` in one package manifest. The original CUWs remain
+the evidence authority.
+
+The two relevant descriptor chains are:
+
+```text
+8646F4206200 --T-0062 / 750,992 B--> 8646F4206400
+             --T-0149 / 1,503,040 B--> 8646F4206700
+
+8646F1606200 --T-0061 / 10,368 B--> 8646F1606300
+             --T-0150 / 1,254,976 B--> 8646F1611200
+```
+
+The last CID is exactly `8646F1611200` (the family prefix changes from F160 to
+F161). Both chains are descriptor-complete, but neither `6200` whole image is
+present. Complete old/new encrypted images exist only for the second edge of
+each chain.
+
 ## 4. Cipher shape: useful constraint, not a solved key
 
 The five distinct stored FRC whole images share **exactly the first two 16-byte
@@ -196,14 +226,55 @@ for the strongest sparse candidates. No candidate recovers even 1% common
 plaintext across both chains; the best minimum result is ~0.434%, essentially
 random 1/256 behavior.
 
+A separate expanded audit closes the most important holes in that first pass.
+It screens **116,882 unique bounded key hypotheses**: byte-reversed, 16/32-bit-
+byte-swapped and 32-bit-word-reversed secret/context variants; two-stage
+AES-ECB-encrypt, AES-ECB-decrypt, and AES-CMAC compositions; and per-image keys
+derived from source/new CIDs and the exact 256-byte target signature. No key
+hypothesis among the top 32 sparse results reaches 1% recovered identity when
+rescored over the complete 64-KiB sample on both update edges. The best full
+minimum remains ~0.434%, so the added grammar also behaves at chance level.
+This includes the known EPS `Kimage=AES(payload_root, package_field)` shape (substituting the FRC
+fields actually present) and the P1M-E DFI-method-1 AES-CBC precedent.
+
+The identical routine supplies an independent ranking check. Interpreting its
+stored bytes directly as little-endian A32 gives a code-shape score of 0.0058.
+The TMPV7708 Bottlenose R4 payload scores 0.657 over the same 1,376-byte window,
+with recognizable prologues, literal loads, and returns. The strongest of
+67,157 shared-key routine decryptions reaches only 0.096 and has no prologue or
+return pattern. This is a useful negative discriminator, not proof of AES-CBC
+or of the routine's plaintext ISA. Bottlenose is used only as a sibling R4
+instruction-shape baseline.
+
+The `.datx` census is likewise structural rather than an entropy-only claim.
+All six members share exactly the first 16 bytes
+`0a4aba7f300a8745e2acb15b5b59a046`, share no suffix, and have no common
+16-byte window at any of the 16 possible alignments after that prefix. Searches
+for source/new CID, target/routine address, target span, and serialized `.datx`
+length in plausible byte orders find no clear fields. The first block is also
+neither whole-image header block and does not occur in the stored routine.
+Together with DFI `0x21`, this supports delta construction followed by an outer
+encryption-method-1 representation; it does not distinguish a fixed IV or
+envelope value from the first ciphertext block of a common delta header, nor
+does it prove the internal decrypt/apply order.
+
+A focused Techstream/GTS+ implementation search adds no hidden decryptor. The
+calibration library exposes `GetRequiredSpecReproVer` and named constants only
+for versions 02/03; the ReproStd writer treats the other branch as the 256-byte
+`DigitalSignature` path. The phase-6 writer names whole, compression, and delta
+methods, while the selected FRC writer's member path has no crypto or
+decompression imports. Thus the useful host-side clues remain the DFI values,
+the RequiredSpec04 integrity request shape, and the raw pass-through boundary;
+the encryption-method-1 implementation is ECU-side in the recovered route.
+
 That is a substantially stronger negative than trying `ServiceAuthKey`, its
 unwrapped working key, descriptor Nonce, or the known EPS roots one at a time.
 It still is not exhaustive cryptanalysis: a protected camera root, another
 cipher/mode, or a more complex KDF can trivially sit outside the tested grammar.
 The useful conclusion is narrower and operational: **the FRC image key is not
-an obvious one-step derivation from the package-visible values and Toyota roots
-we already possess.** More combinatorial guessing is lower-value than acquiring
-the ECU-side decoder/boot code or a raw plaintext/runtime image.
+an obvious one- or bounded two-stage derivation from the package-visible values
+and Toyota roots we already possess.** Further key guessing should be driven by
+a concrete Toyota DFI-1 construction or ECU-side implementation evidence.
 
 ## 5. Physical-firmware acquisition boundary
 

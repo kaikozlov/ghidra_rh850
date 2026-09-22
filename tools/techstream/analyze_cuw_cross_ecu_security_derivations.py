@@ -26,6 +26,7 @@ root.
 from __future__ import annotations
 
 import argparse
+import base64
 import hashlib
 import json
 import re
@@ -74,6 +75,9 @@ FRC_KDF_SPARSE_BLOCKS = 128
 FRC_KDF_FULL_SCORE_TOP_N = 16
 FRC_KDF_INTERESTING_IDENTITY = 0.01
 EPS_PAYLOAD_GRAMMAR_PACKAGES = ("T-0015-20.cuw", "T-0035-22.cuw", "T-0036-22.cuw")
+BOTTLENOSE_R4_PREFIX_B64 = REPO / "tests/fixtures/payloads/bottlenose_cr4_a32_prefix.b64"
+BOTTLENOSE_R4_PAYLOAD_SHA256 = "6cfe5eb572bce81b9f6641f6b90fcf47bcdfdea8439467e032c8b6aa48325af3"
+BOTTLENOSE_R4_PREFIX_SHA256 = "25bc5690caa00bcab4701ce48281886a45e75b7fbfcd43411ec474a243f2f8ee"
 
 
 def sha256(data: bytes) -> str:
@@ -377,6 +381,136 @@ def _cbc_pair_identity(left: bytes, right: bytes, key: bytes, indexes: list[int]
     return sum(a == b for a, b in zip(left_plain, right_plain)) / len(left_plain)
 
 
+def _cbc_pair_identity_keys(
+    left: bytes,
+    right: bytes,
+    left_key: bytes,
+    right_key: bytes,
+    indexes: list[int],
+) -> float:
+    left_plain = _cbc_plaintext_blocks(left, left_key, indexes)
+    right_plain = _cbc_plaintext_blocks(right, right_key, indexes)
+    return sum(a == b for a, b in zip(left_plain, right_plain)) / len(left_plain)
+
+
+def _byte_order_variants(label: str, value: bytes) -> dict[str, bytes]:
+    if len(value) != 16:
+        raise ValueError(f"{label}: byte-order input must be 16 bytes")
+    words = [value[index:index + 4] for index in range(0, 16, 4)]
+    pairs = [value[index:index + 2] for index in range(0, 16, 2)]
+    return {
+        label: value,
+        f"reverse({label})": value[::-1],
+        f"bswap16({label})": b"".join(pair[::-1] for pair in pairs),
+        f"bswap32({label})": b"".join(word[::-1] for word in words),
+        f"wordrev32({label})": b"".join(reversed(words)),
+    }
+
+
+def _apply_kdf(operation: str, key: bytes, message: bytes) -> bytes:
+    if operation == "AES-ENC":
+        return AES.new(key, AES.MODE_ECB).encrypt(message)
+    if operation == "AES-DEC":
+        return AES.new(key, AES.MODE_ECB).decrypt(message)
+    if operation == "CMAC":
+        return cmac(key, message)
+    raise ValueError(operation)
+
+
+def _package_kdf_context(attach: dict[str, dict[str, str]], ciphertext: bytes) -> dict[str, bytes]:
+    lb_name, lb = first_logical_block(attach)
+    area = attach["ReproData" + lb_name.removeprefix("LogicalBlock")]
+    node = attach["Node01"]
+    new_cid = lb.get("NewCID", "")
+    source_cid = lb.get("01_TargetCalibration", "")
+    # DigitalSignature deobfuscates to 512 ASCII-hex bytes. Decode it here
+    # without using the 16-byte field helper.
+    raw_signature = bytes.fromhex(area.get("DigitalSignature", ""))
+    deobfuscated = bytes((byte - index) & 0xFF for index, byte in enumerate(raw_signature))
+    signature = bytes.fromhex(deobfuscated.decode("ascii")) if deobfuscated else b""
+
+    raw: dict[str, bytes] = {
+        "new_cid_left": _pad_ascii_16(new_cid),
+        "new_cid_right": (bytes(16) + new_cid.encode("ascii"))[-16:],
+        "source_cid_left": _pad_ascii_16(source_cid),
+        "source_cid_right": (bytes(16) + source_cid.encode("ascii"))[-16:],
+        "diag_ascii": _pad_ascii_16(node.get("DiagID", "")),
+        "target_start_be": int(area["StartAddress"], 16).to_bytes(16, "big"),
+        "target_start_le": int(area["StartAddress"], 16).to_bytes(16, "little"),
+        "target_length_be": int(area["Length"], 16).to_bytes(16, "big"),
+        "target_length_le": int(area["Length"], 16).to_bytes(16, "little"),
+        "cipher_block0": ciphertext[:16],
+        "cipher_block1": ciphertext[16:32],
+        "signature_first": signature[:16],
+        "signature_last": signature[-16:],
+    }
+    concatenations = {
+        "new||source": new_cid.encode("ascii") + source_cid.encode("ascii"),
+        "source||new": source_cid.encode("ascii") + new_cid.encode("ascii"),
+        "signature": signature,
+        "new||signature": new_cid.encode("ascii") + signature,
+        "source||signature": source_cid.encode("ascii") + signature,
+    }
+    for name, value in concatenations.items():
+        raw.update(_digest_atoms(name, value))
+    variants: dict[str, bytes] = {}
+    for name, value in raw.items():
+        variants.update(_byte_order_variants(name, value))
+    return _dedupe_named_blocks(variants)
+
+
+def _read_format67_member(path: Path, first_member_end: int, wanted_suffix: str) -> bytes:
+    with path.open("rb") as stream:
+        stream.seek(first_member_end)
+        count_raw = stream.read(1)
+        if not count_raw:
+            raise ValueError(f"{path.name}: missing format-0x67 member count")
+        for _ in range(count_raw[0]):
+            name_length_raw = stream.read(2)
+            if len(name_length_raw) != 2:
+                raise ValueError(f"{path.name}: truncated member name length")
+            name_length = struct.unpack(">H", name_length_raw)[0]
+            name = stream.read(name_length).decode("ascii")
+            header = stream.read(8)
+            if len(header) != 8:
+                raise ValueError(f"{path.name}: truncated member header")
+            payload_length, _crc = struct.unpack(">II", header)
+            if name.endswith(wanted_suffix):
+                payload = stream.read(payload_length)
+                if len(payload) != payload_length:
+                    raise ValueError(f"{path.name}: truncated {name}")
+                return payload
+            stream.seek(payload_length, 1)
+    raise ValueError(f"{path.name}: no member ending in {wanted_suffix}")
+
+
+def _a32_shape(data: bytes, byteorder: str = "little") -> dict[str, float | int]:
+    usable = len(data) // 4 * 4
+    words = [int.from_bytes(data[index:index + 4], byteorder) for index in range(0, usable, 4)]
+    if not words:
+        raise ValueError("empty A32 shape input")
+    always = sum((word >> 28) == 0xE for word in words)
+    never = sum((word >> 28) == 0xF for word in words)
+    branch = sum(((word >> 25) & 0x7) == 0x5 and (word >> 28) != 0xF for word in words)
+    push_pop = sum((word & 0xFFFF0000) in (0xE92D0000, 0xE8BD0000) for word in words)
+    literal_load = sum((word & 0x0F7F0000) == 0x051F0000 for word in words)
+    returns = sum(word in (0xE12FFF1E, 0xE1A0F00E) for word in words)
+    # A32 compiler output on this platform is dominated by AL condition codes;
+    # random/high-entropy data has each condition nibble near 1/16. Keep the
+    # score simple and publish its components rather than treating it as proof.
+    score = (always - never + 4 * (push_pop + literal_load + returns)) / len(words)
+    return {
+        "word_count": len(words),
+        "always_condition_fraction": always / len(words),
+        "never_condition_fraction": never / len(words),
+        "branch_fraction": branch / len(words),
+        "push_pop_count": push_pop,
+        "literal_load_count": literal_load,
+        "return_count": returns,
+        "shape_score": score,
+    }
+
+
 def _load_frc_pair_samples(
     packages: dict[str, dict],
 ) -> tuple[list[dict], dict[str, dict[str, str]]]:
@@ -499,6 +633,240 @@ def frc_cbc_kdf_search(packages: dict[str, dict]) -> dict:
             "No threshold hit rejects only this explicit one-step metadata/known-root KDF grammar under the "
             "AES-CBC hypothesis. It is not an exhaustive KDF search, does not prove AES-CBC, and does not "
             "exclude an ECU-protected root, a different cipher/mode, or a more complex derivation."
+        ),
+    }
+
+
+def frc_extended_kdf_audit(packages: dict[str, dict]) -> dict:
+    """Test bounded two-stage, endian-variant, and per-image KDF grammars."""
+    pairs, first_attach = _load_frc_pair_samples(packages)
+    samples: dict[str, bytes] = {}
+    for pair in pairs:
+        samples[pair["left"]] = pair["left_sample"]
+        samples[pair["right"]] = pair["right_sample"]
+
+    attaches: dict[str, dict[str, dict[str, str]]] = {}
+    for filename in samples:
+        attaches[filename], _format_type, _first_end = read_attach(CUW_CORPUS_ROOT / filename)
+
+    family_row = packages[FRC_CBC_KDF_PAIR_SPECS[0][1]]
+    base_secrets = {
+        "service_auth": bytes.fromhex(family_row["service_auth_key"]),
+        "working_key": bytes.fromhex(family_row["working_key"]),
+        "nonce": bytes.fromhex(family_row["nonce"]),
+        "techstream_wrap_key": SECURITY_UP_WRAP_KEY,
+        "eps_payload_root": EPS_PAYLOAD_BUILD_ROOT,
+        "eps_boot_sa_root": EPS_BOOT_SA_ROOT,
+        "eps_application_sa_root": EPS_APPLICATION_SA_ROOT,
+        "predicted_ecu_auth": bytes.fromhex(family_row["eps_boot_root_hypothesis_ecu_auth_key"]),
+    }
+    secrets: dict[str, bytes] = {}
+    for name, value in base_secrets.items():
+        variants = _byte_order_variants(name, value)
+        # Full reverse and 32-bit byte/word ordering cover the realistic
+        # endian adapters without multiplying equivalent 16-bit-only forms.
+        for variant_name in (name, f"reverse({name})", f"bswap32({name})", f"wordrev32({name})"):
+            secrets[variant_name] = variants[variant_name]
+    secrets = _dedupe_named_blocks(secrets)
+
+    stable_atoms = _frc_family_kdf_atoms(first_attach, packages, pairs[0]["left_sample"])
+    stable_base_names = (
+        "zero", "ff", "service_auth", "working_key", "nonce", "diag_ascii",
+        "start_be", "start_le", "length_be", "length_le", "cipher_block0", "cipher_block1",
+    )
+    stable_contexts: dict[str, bytes] = {}
+    for name in stable_base_names:
+        value = stable_atoms[name]
+        variants = _byte_order_variants(name, value)
+        for variant_name in (name, f"reverse({name})", f"bswap32({name})"):
+            stable_contexts[variant_name] = variants[variant_name]
+    stable_contexts = _dedupe_named_blocks(stable_contexts)
+
+    shared_candidates: dict[bytes, str] = {}
+
+    def add_shared(name: str, value: bytes) -> None:
+        shared_candidates.setdefault(value, name)
+
+    for name, value in secrets.items():
+        add_shared(name, value)
+    stage1: dict[bytes, str] = {}
+    for secret_name, secret in secrets.items():
+        for context_name, context in stable_contexts.items():
+            for operation in ("AES-ENC", "AES-DEC", "CMAC"):
+                value = _apply_kdf(operation, secret, context)
+                name = f"{operation}({secret_name},{context_name})"
+                stage1.setdefault(value, name)
+                add_shared(name, value)
+
+    stage2_context_names = (
+        "working_key", "nonce", "diag_ascii", "start_be", "length_be",
+        "cipher_block0", "cipher_block1", "service_auth",
+    )
+    for first_value, first_name in stage1.items():
+        for context_name in stage2_context_names:
+            context = stable_atoms[context_name]
+            for operation in ("AES-ENC", "AES-DEC", "CMAC"):
+                add_shared(
+                    f"{operation}({first_name},{context_name})",
+                    _apply_kdf(operation, first_value, context),
+                )
+
+    package_contexts = {
+        filename: _package_kdf_context(attaches[filename], samples[filename])
+        for filename in samples
+    }
+    per_image_context_names = sorted(set.intersection(*(
+        set(contexts) for contexts in package_contexts.values()
+    )))
+    per_image_context_names = [
+        name for name in per_image_context_names
+        if any(token in name for token in (
+            "new_cid", "source_cid", "new||source", "source||new",
+            "signature_first", "signature_last", "md5(signature)",
+            "sha256_lo(signature)", "sha256_hi(signature)",
+        ))
+    ]
+    # Per-image KDFs use a deliberately smaller first-stage set. This captures
+    # the known EPS pattern Kimage=AES(root, package field) and one extra layer
+    # without turning the audit into an unconstrained combinatorial search.
+    per_image_bases: dict[bytes, str] = dict((value, name) for name, value in secrets.items())
+    for secret_name, secret in base_secrets.items():
+        for context_name in stage2_context_names:
+            context = stable_atoms[context_name]
+            for operation in ("AES-ENC", "AES-DEC", "CMAC"):
+                value = _apply_kdf(operation, secret, context)
+                per_image_bases.setdefault(value, f"{operation}({secret_name},{context_name})")
+
+    filenames = sorted(samples)
+    per_image_candidates: dict[tuple[bytes, ...], tuple[str, dict[str, bytes]]] = {}
+    for base_value, base_name in per_image_bases.items():
+        for context_name in per_image_context_names:
+            for operation in ("AES-ENC", "AES-DEC", "CMAC"):
+                keys = {
+                    filename: _apply_kdf(
+                        operation, base_value, package_contexts[filename][context_name])
+                    for filename in filenames
+                }
+                key_tuple = tuple(keys[filename] for filename in filenames)
+                per_image_candidates.setdefault(
+                    key_tuple,
+                    (f"{operation}({base_name},{context_name}[package])", keys),
+                )
+
+    sparse_indexes = _sparse_block_indexes(IMAGE_SAMPLE_BYTES // 16, 64)
+    scored: list[tuple[float, str, dict[str, bytes], dict[str, float], str]] = []
+    for key, name in shared_candidates.items():
+        identities = {
+            pair["name"]: _cbc_pair_identity(
+                pair["left_sample"], pair["right_sample"], key, sparse_indexes)
+            for pair in pairs
+        }
+        scored.append((min(identities.values()), name, {filename: key for filename in filenames}, identities, "shared"))
+    for name, keys in per_image_candidates.values():
+        identities = {
+            pair["name"]: _cbc_pair_identity_keys(
+                pair["left_sample"], pair["right_sample"],
+                keys[pair["left"]], keys[pair["right"]], sparse_indexes)
+            for pair in pairs
+        }
+        scored.append((min(identities.values()), name, keys, identities, "per-image"))
+    scored.sort(key=lambda row: (-row[0], row[1]))
+
+    full_indexes = list(range(2, IMAGE_SAMPLE_BYTES // 16))
+    full_rows = []
+    for sparse_min, name, keys, sparse_identities, scope in scored[:32]:
+        identities = {
+            pair["name"]: _cbc_pair_identity_keys(
+                pair["left_sample"], pair["right_sample"],
+                keys[pair["left"]], keys[pair["right"]], full_indexes)
+            for pair in pairs
+        }
+        full_rows.append({
+            "candidate": name,
+            "scope": scope,
+            "sparse_min_identity": sparse_min,
+            "sparse_pair_identities": sparse_identities,
+            "full_min_identity": min(identities.values()),
+            "full_pair_identities": identities,
+            "keys_by_package": {filename: keys[filename].hex() for filename in filenames},
+        })
+    full_rows.sort(key=lambda row: (-row["full_min_identity"], row["candidate"]))
+
+    # The downloaded routine is identical in every package. CBC blocks after
+    # block zero can be decoded and scored without knowing the IV.
+    routine_path = CUW_CORPUS_ROOT / FRC_CBC_KDF_PAIR_SPECS[0][1]
+    _attach, _format, first_end = read_attach(routine_path)
+    routine_member = _read_format67_member(routine_path, first_end, "-routine.xx")
+    streams = parse_srec_streams(routine_member)
+    routine_regions = srec_regions(streams[0])
+    routine_ciphertext = max(routine_regions, key=lambda row: len(row[1]))[1]
+    routine_indexes = list(range(1, len(routine_ciphertext) // 16))
+    routine_shape_rows = []
+    for key, name in shared_candidates.items():
+        plaintext = _cbc_plaintext_blocks(routine_ciphertext, key, routine_indexes)
+        shape = _a32_shape(plaintext, "little")
+        routine_shape_rows.append({
+            "candidate": name,
+            "key_hex": key.hex(),
+            **shape,
+        })
+    routine_shape_rows.sort(key=lambda row: (-float(row["shape_score"]), row["candidate"]))
+
+    bottlenose = base64.b64decode(BOTTLENOSE_R4_PREFIX_B64.read_text().strip(), validate=True)
+    if sha256(bottlenose) != BOTTLENOSE_R4_PREFIX_SHA256:
+        raise ValueError("tracked Bottlenose R4 A32 prefix identity mismatch")
+    routine_baselines = {
+        "encrypted_routine_as_little_endian_words": _a32_shape(routine_ciphertext[16:], "little"),
+        "bottlenose_r4_first_1376_bytes": _a32_shape(bottlenose, "little"),
+        "bottlenose_r4_source_payload_sha256": BOTTLENOSE_R4_PAYLOAD_SHA256,
+        "bottlenose_r4_prefix_sha256": BOTTLENOSE_R4_PREFIX_SHA256,
+        "bottlenose_scope": (
+            "TMPV7708 sibling A32 compiler-output baseline only; it is not Toyota code and is not used as plaintext."
+        ),
+    }
+
+    interesting = [
+        row for row in full_rows if row["full_min_identity"] >= FRC_KDF_INTERESTING_IDENTITY
+    ]
+    return {
+        "hypothesis": (
+            "Under the AES-CBC hypothesis, adjacent plaintext images should regain substantial byte identity "
+            "when a candidate formula derives the correct shared or per-image key. Blocks >=2 are IV-independent."
+        ),
+        "audit_gaps_closed": [
+            "16-byte reverse, bswap16, bswap32 and 32-bit-word-order variants of family secrets and contexts",
+            "bounded two-stage AES-ECB-ENC/AES-ECB-DEC/AES-CMAC derivations",
+            "per-image CID and 256-byte target-signature contexts",
+            "IV-independent A32 shape scoring of the identical 1392-byte R4-domain routine",
+        ],
+        "known_toyota_constructions_covered": [
+            "P1M-E DFI-low-nibble-1 AES-CBC payload decoding, tested here as the CBC differential hypothesis",
+            "EPS Kimage=AES-128-ECB-ENC(payload_root, package_field), generalized across the FRC fields available in place of EPS SeedKey",
+            "EPS package Nonce as a direct key/KDF context; CBC IV remains irrelevant to the compared blocks",
+        ],
+        "sample_bytes_per_image": IMAGE_SAMPLE_BYTES,
+        "sparse_block_count": len(sparse_indexes),
+        "full_rescore_top_n": len(full_rows),
+        "best_sparse_min_identity": scored[0][0],
+        "shared_secret_variant_count": len(secrets),
+        "stable_context_variant_count": len(stable_contexts),
+        "shared_stage1_value_count": len(stage1),
+        "shared_candidate_value_count": len(shared_candidates),
+        "per_image_context_count": len(per_image_context_names),
+        "per_image_contexts": per_image_context_names,
+        "per_image_candidate_value_tuple_count": len(per_image_candidates),
+        "total_candidate_key_hypothesis_count": len(scored),
+        "top_full_results": full_rows,
+        "candidates_at_or_above_threshold": interesting,
+        "interesting_identity_threshold": FRC_KDF_INTERESTING_IDENTITY,
+        "routine_a32_baselines": routine_baselines,
+        "routine_a32_top_candidates": routine_shape_rows[:16],
+        "boundary": (
+            "Every unique key hypothesis is screened over 64 image blocks; only the top 32 sparse results are "
+            "rescored over the complete 64-KiB sample. No fully rescored result reaches the 1% threshold. This "
+            "rejects only these explicit AES-CBC KDF grammars. A protected camera root, non-AES transform, "
+            "different mode, unrelated routine key, or a KDF outside these bounded contexts remains possible. "
+            "A32 shape is a ranking heuristic, not a decryption oracle."
         ),
     }
 
@@ -740,6 +1108,7 @@ def build() -> dict:
     payload_trials = [eps_payload_root_trial(CUW_CORPUS_ROOT / filename) for filename in EPS_PAYLOAD_GRAMMAR_PACKAGES]
     pair_trials = [image_pair_trial(name, left, right, packages) for name, left, right in IMAGE_PAIR_SPECS]
     frc_kdf_search = frc_cbc_kdf_search(packages)
+    frc_extended_audit = frc_extended_kdf_audit(packages)
     for trial in pair_trials:
         # Random byte identity is 1/256 ~= 0.003906.  Keep a generous ceiling:
         # these are merely dead-end guards, not a statistical cryptanalysis claim.
@@ -789,6 +1158,7 @@ def build() -> dict:
         },
         "reprostd_image_key_trials": pair_trials,
         "frc_reprostd_cbc_kdf_search": frc_kdf_search,
+        "frc_reprostd_extended_kdf_audit": frc_extended_audit,
         "conclusion": {
             "verified": "Techstream/CUW exposes stable effective SecurityAccess working keys for several non-EPS ReproStd families. The T-0035 EPS control specimen exactly validates the frontend/backend wrapping algebra under the recovered EPS boot root. Separately, the recovered EPS payload-build root CMAC-validates every encrypted body/erase region in both T-0035-22 and T-0036-22, while the older T-0015-20 RAV4 EPS package rejects that same root on every region.",
             "hypothesis": "If that backend root and wrapper algebra are shared cross-ECU, the predicted ECUAuthKey-shaped values are concrete firmware-search fingerprints for FRC/HV/MG.",

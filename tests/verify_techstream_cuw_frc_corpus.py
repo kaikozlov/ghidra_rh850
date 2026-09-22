@@ -316,6 +316,53 @@ for i in range(len(items)):
 check("excluding the shared leading block, cross-package datx block collisions are zero", interior_shared == 0,
       f"{interior_shared}")
 
+common_prefix = 0
+for values_at_offset in zip(*(data for _, data in sorted(datx.items()))):
+    if len(set(values_at_offset)) != 1:
+        break
+    common_prefix += 1
+common_suffix = 0
+for values_at_offset in zip(*(data[::-1] for _, data in sorted(datx.items()))):
+    if len(set(values_at_offset)) != 1:
+        break
+    common_suffix += 1
+check("datx common envelope is exactly a 16-byte prefix and no suffix",
+      common_prefix == 16 and common_suffix == 0)
+
+alignment_collisions = {}
+for alignment in range(16):
+    block_sets = []
+    for _, data in sorted(datx.items()):
+        start = alignment
+        while start < common_prefix:
+            start += 16
+        block_sets.append({data[o:o + 16] for o in range(start, len(data) - 15, 16)})
+    alignment_collisions[alignment] = sum(
+        len(left & right)
+        for index, left in enumerate(block_sets)
+        for right in block_sets[index + 1:]
+    )
+check("datx has no shared 16-byte window at any alignment after its prefix",
+      all(count == 0 for count in alignment_collisions.values()), str(alignment_collisions))
+
+clear_marker_hits = []
+for name, data in sorted(datx.items()):
+    desc = frc_descriptors[name]
+    delta_area = desc["DeltaReproData101"]
+    markers = (
+        desc["LogicalBlock101"]["01_TargetCalibration"].encode("ascii"),
+        desc["LogicalBlock101"]["NewCID"].encode("ascii"),
+        int(delta_area["StartAddress"], 16).to_bytes(4, "big"),
+        int(delta_area["StartAddress"], 16).to_bytes(4, "little"),
+        int(delta_area["Length"], 16).to_bytes(4, "big"),
+        int(delta_area["Length"], 16).to_bytes(4, "little"),
+        len(data).to_bytes(4, "big"),
+        len(data).to_bytes(4, "little"),
+    )
+    clear_marker_hits.extend((name, marker.hex(), data.find(marker)) for marker in markers if marker in data)
+check("datx exposes no tested CID/address/length marker in clear", clear_marker_hits == [],
+      str(clear_marker_hits))
+
 print("\n== direct-update whole-image comparisons (corpus-internal chains) ==")
 by_newcid = {frc_descriptors[n]["LogicalBlock101"]["NewCID"]: n for n in FRC_PACKAGES}
 chains = []
@@ -512,6 +559,14 @@ if ev:
           and inv["datx_shared_single_leading_block"]
           and inv["datx_shared_leading_block_hex"] == DATX_LEADING_BLOCK
           and inv["datx_interior_cross_package_shared_blocks"] == 0)
+    structure = ev["datx_structural_analysis"]
+    check("artifact: all-alignment datx structure and marker negative pinned",
+          structure["common_prefix_length"] == 16
+          and structure["common_suffix_length"] == 0
+          and structure["common_prefix_hex"] == DATX_LEADING_BLOCK
+          and set(structure["cross_package_shared_16_byte_windows_by_alignment_after_common_prefix"].values()) == {0}
+          and all(not row["hits"] for row in structure["cleartext_marker_searches"])
+          and not any(structure["shared_first_block_relations"].values()))
     probe = next(x["entropy_probe"] for x in ev["packages"] if "entropy_probe" in x)
     check("artifact: T-0058 entropy probe pinned",
           probe["global_entropy_bits"] == 7.9999977
@@ -532,6 +587,11 @@ if ev:
           and tb["data_format_identifier"]["whole_or_routine"] == "0x01"
           and tb["data_format_identifier"]["delta"] == "0x21"
           and "low nibble=encryptingMethod" in tb["data_format_identifier"]["uds_semantics"])
+    order = tb["transform_order"]
+    check("artifact: delta-then-encrypt ordering remains bounded",
+          "delta method 2 -> encryption method 1" in order["bounded_generation_hypothesis"]
+          and "encryption-method-1 decode -> delta-method-2 application" in order["bounded_ecu_inverse_hypothesis"]
+          and "Bounded ordering inference, not a recovered decoder" in order["boundary"])
     check("artifact: selected ReproStd route has no explicit Nonce/SeedKey provisioning",
           "GetServiceAuthKey" in tb["selected_route_key_material"]
           and "no host-side nonce/seed material" in tb["selected_route_key_material"])
@@ -544,6 +604,29 @@ if ev:
           and "no crypto or compression imports" in ev["transform_boundary"]["member_read_path"])
     cmp_rows = {(c["old_package"], c["new_package"]): c for c in ev["direct_update_comparisons"]}
     check("artifact: direct comparisons recorded", set(cmp_rows) == set(chains))
+    families = {row["family"]: row for row in ev["delta_chain_families"]}
+    check("artifact: both three-version delta chains retain the missing-6200-image boundary",
+          families["8646F420"]["calibration_sequence"]
+          == ["8646F4206200", "8646F4206400", "8646F4206700"]
+          and families["8646F160_to_8646F161"]["calibration_sequence"]
+          == ["8646F1606200", "8646F1606300", "8646F1611200"]
+          and all(not family["edges"][0]["both_endpoint_images_in_corpus"]
+                  and family["edges"][1]["both_endpoint_images_in_corpus"]
+                  for family in families.values()))
+    package_rows = {row["filename"]: row for row in ev["packages"]}
+    signature_objects_match = True
+    for name, desc in frc_descriptors.items():
+        artifact_areas = package_rows[name]["descriptor"]["areas"]
+        for section in ("ReproData101", "EraseAndReproRoutine101",
+                        "DeltaReproData101", "DeltaEraseAndReproRoutine101"):
+            signature = bytes.fromhex(decode_index_obfuscated_hex(
+                desc[section]["DigitalSignature"]).decode("ascii"))
+            signature_objects_match = (
+                signature_objects_match
+                and artifact_areas[section]["digital_signature_hex"] == signature.hex()
+                and artifact_areas[section]["digital_signature_sha256"] == sha256(signature)
+            )
+    check("artifact: exact 256-byte signature objects retained", signature_objects_match)
     nd = ev["reprostd_nonce_differential"]
     check("artifact: ReproStd nonce/routine-integrity differential pinned",
           nd["same_diag_id"] and nd["same_service_auth_key"] and nd["different_nonce"]

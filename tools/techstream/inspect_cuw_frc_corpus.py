@@ -174,6 +174,114 @@ def summarize_member_datx(payload: bytes) -> dict[str, Any]:
         "repeated_block_count": sum(1 for c in counts.values() if c > 1),
         "unique_block_count": len(counts),
         "first_block_hex": payload[:16].hex(),
+        "first_64_bytes_hex": payload[:64].hex(),
+        "last_64_bytes_hex": payload[-64:].hex(),
+    }
+
+
+def common_prefix_length(values: list[bytes]) -> int:
+    if not values:
+        return 0
+    limit = min(map(len, values))
+    for index in range(limit):
+        if len({value[index] for value in values}) != 1:
+            return index
+    return limit
+
+
+def common_suffix_length(values: list[bytes]) -> int:
+    if not values:
+        return 0
+    limit = min(map(len, values))
+    for count in range(1, limit + 1):
+        if len({value[-count] for value in values}) != 1:
+            return count - 1
+    return limit
+
+
+def datx_structural_analysis(
+    datx_by_pkg: dict[str, bytes],
+    package_rows: list[dict[str, Any]],
+    routine: bytes,
+    image_prefix: bytes,
+) -> dict[str, Any]:
+    """Characterize the encrypted delta envelope without inventing a decoder.
+
+    The offset census catches a shared structure that is not aligned to the
+    apparent 16-byte boundary. Marker searches test the few clear address/CID
+    encodings that would be expected in an unencrypted delta grammar.
+    """
+    values = list(datx_by_pkg.values())
+    prefix = common_prefix_length(values)
+    suffix = common_suffix_length(values)
+    rows_by_name = {row["filename"]: row for row in package_rows}
+
+    offset_collisions: dict[str, int] = {}
+    for offset in range(16):
+        block_sets: dict[str, set[bytes]] = {}
+        for name, payload in datx_by_pkg.items():
+            start = offset
+            while start < prefix:
+                start += 16
+            block_sets[name] = {
+                payload[index:index + 16]
+                for index in range(start, len(payload) - 15, 16)
+            }
+        names = sorted(block_sets)
+        collisions = 0
+        for left_index, left in enumerate(names):
+            for right in names[left_index + 1:]:
+                collisions += len(block_sets[left] & block_sets[right])
+        offset_collisions[str(offset)] = collisions
+
+    marker_rows = []
+    for name, payload in sorted(datx_by_pkg.items()):
+        desc = rows_by_name[name]["descriptor"]
+        markers = {
+            "source_cid_ascii": desc["source_target_calibration_1"].encode("ascii"),
+            "new_cid_ascii": desc["new_cid"].encode("ascii"),
+            "target_start_be32": int(desc["areas"]["DeltaReproData101"]["start_address"], 16).to_bytes(4, "big"),
+            "target_start_le32": int(desc["areas"]["DeltaReproData101"]["start_address"], 16).to_bytes(4, "little"),
+            "target_length_be32": int(desc["areas"]["DeltaReproData101"]["length"], 16).to_bytes(4, "big"),
+            "target_length_le32": int(desc["areas"]["DeltaReproData101"]["length"], 16).to_bytes(4, "little"),
+            "routine_start_be32": ROUTINE_RANGE[0].to_bytes(4, "big"),
+            "routine_start_le32": ROUTINE_RANGE[0].to_bytes(4, "little"),
+            "datx_length_be32": len(payload).to_bytes(4, "big"),
+            "datx_length_le32": len(payload).to_bytes(4, "little"),
+        }
+        hits = {
+            marker: [index for index in range(len(payload)) if payload.startswith(value, index)][:8]
+            for marker, value in markers.items()
+        }
+        marker_rows.append({
+            "filename": name,
+            "hits": {marker: positions for marker, positions in hits.items() if positions},
+        })
+
+    first_block = values[0][:16]
+    relation = {
+        "equals_whole_image_block0": first_block == image_prefix[:16],
+        "equals_whole_image_block1": first_block == image_prefix[16:32],
+        "appears_in_routine_ciphertext": first_block in {
+            routine[index:index + 16] for index in range(0, len(routine) - 15, 16)
+        },
+    }
+    return {
+        "package_count": len(values),
+        "common_prefix_length": prefix,
+        "common_prefix_hex": values[0][:prefix].hex(),
+        "common_suffix_length": suffix,
+        "cross_package_shared_16_byte_windows_by_alignment_after_common_prefix": offset_collisions,
+        "cleartext_marker_searches": marker_rows,
+        "shared_first_block_relations": relation,
+        "bounded_interpretation": (
+            "All six .datx members share exactly one 16-byte prefix and no suffix. No 16-byte window "
+            "collision survives at any alignment after that prefix, and the tested CID/address/length "
+            "markers are not exposed as clear fields. Together with exact 16-byte length alignment and "
+            "near-maximal entropy, this supports an encrypted outer representation of Toyota delta-method-2 "
+            "input. The shared block could be a fixed IV/envelope value or the first ciphertext block of a "
+            "common plaintext header; ciphertext alone cannot distinguish those cases."
+        ),
     }
 
 
@@ -214,6 +322,7 @@ def descriptor_summary(attach: dict[str, dict[str, str]]) -> dict[str, Any]:
         out["digital_signature_wire_ascii_length"] = len(decoded_ascii)
         out["digital_signature_wire_ascii_sha256"] = sha256(decoded_ascii) if decoded_ascii else ""
         out["digital_signature_length"] = len(signature)
+        out["digital_signature_hex"] = signature.hex()
         out["digital_signature_sha256"] = sha256(signature) if signature else ""
         return out
 
@@ -364,15 +473,105 @@ def inspect_package(path: Path, deep: bool = True) -> tuple[dict[str, Any], dict
     return out, by_name
 
 
+def write_workspace(
+    root: Path,
+    result: dict[str, Any],
+    image_members: dict[str, bytes],
+    datx_members: dict[str, bytes],
+    routine_members: dict[str, bytes],
+) -> None:
+    """Materialize a compact, content-addressed FRC payload workspace.
+
+    The source CUWs remain the evidence authority. Large decoded S-record
+    regions are stored once by SHA-256 and package manifests point to them.
+    """
+    objects = root / "objects"
+    packages_dir = root / "packages"
+    objects.mkdir(parents=True, exist_ok=True)
+    packages_dir.mkdir(parents=True, exist_ok=True)
+
+    def store(kind: str, data: bytes, suffix: str = ".bin") -> dict[str, Any]:
+        digest = sha256(data)
+        target = objects / f"{kind}-{digest}{suffix}"
+        if not target.exists():
+            target.write_bytes(data)
+        return {
+            "path": str(target.relative_to(root)),
+            "length": len(data),
+            "sha256": digest,
+        }
+
+    workspace_rows = []
+    rows_by_name = {row["filename"]: row for row in result["packages"]}
+    for filename in sorted(rows_by_name):
+        row = rows_by_name[filename]
+        whole_scan = scan_srec(image_members[filename])
+        flash = largest_range(whole_scan)
+        image = whole_scan["range_bytes"][(flash["start"], flash["end"])]
+        routine_scan = scan_srec(routine_members[filename])
+        routine = routine_scan["range_bytes"][ROUTINE_RANGE]
+        areas = row["descriptor"]["areas"]
+        image_signature = bytes.fromhex(areas["ReproData101"]["digital_signature_hex"])
+        routine_signature = bytes.fromhex(areas["EraseAndReproRoutine101"]["digital_signature_hex"])
+        image_start = int(areas["ReproData101"]["start_address"], 16)
+        routine_start = int(areas["EraseAndReproRoutine101"]["start_address"], 16)
+        delta_target_start = int(areas["DeltaReproData101"]["start_address"], 16)
+        delta_target_length = int(areas["DeltaReproData101"]["length"], 16)
+        image_object = store("image", image)
+        image_object.update({
+            "target_start": f"0x{image_start:08X}",
+            "target_end_exclusive": f"0x{image_start + len(image):08X}",
+        })
+        routine_object = store("routine", routine)
+        routine_object.update({
+            "target_start": f"0x{routine_start:08X}",
+            "target_end_exclusive": f"0x{routine_start + len(routine):08X}",
+        })
+        delta_object = store("delta", datx_members[filename], ".datx")
+        delta_object.update({
+            "decoded_target_start": f"0x{delta_target_start:08X}",
+            "decoded_target_length": delta_target_length,
+        })
+        manifest = {
+            "source_package": filename,
+            "source_package_sha256": row["sha256"],
+            "source_calibration": row["descriptor"]["source_target_calibration_1"],
+            "new_calibration": row["descriptor"]["new_cid"],
+            "service_auth_key": row["descriptor"]["service_auth_key_decoded"],
+            "nonce": row["descriptor"]["nonce_decoded"],
+            "encrypted_image": image_object,
+            "encrypted_routine": routine_object,
+            "encrypted_delta": delta_object,
+            "target_signature": store("target-signature", image_signature),
+            "routine_signature": store("routine-signature", routine_signature),
+        }
+        package_path = packages_dir / f"{Path(filename).stem}.json"
+        package_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")
+        workspace_rows.append({
+            "source_package": filename,
+            "manifest": str(package_path.relative_to(root)),
+        })
+
+    workspace_manifest = {
+        "schema": "toyota-frc-cuw-payload-workspace-v1",
+        "authority": "Derived workspace only; source_package and hashes bind every object to the external CUW corpus.",
+        "packages": workspace_rows,
+    }
+    (root / "manifest.json").write_text(json.dumps(workspace_manifest, indent=2, sort_keys=True) + "\n")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--corpus", type=Path, default=DEFAULT_CORPUS)
     ap.add_argument("--output", type=Path, required=True)
+    ap.add_argument("--workspace", type=Path,
+                    help="optionally materialize content-addressed encrypted payload objects")
     args = ap.parse_args()
 
     packages: list[dict[str, Any]] = []
     images_by_pkg: dict[str, bytes] = {}
     datx_by_pkg: dict[str, bytes] = {}
+    routine_by_pkg: dict[str, bytes] = {}
     contrast: list[dict[str, Any]] = []
 
     for name, (size, digest) in FRC_PACKAGES.items():
@@ -386,6 +585,8 @@ def main() -> int:
                 images_by_pkg[name] = payload
             elif member.endswith(".datx"):
                 datx_by_pkg[name] = payload
+            elif member.endswith("-routine.xx"):
+                routine_by_pkg[name] = payload
 
     for name, (size, digest) in CONTRAST_PACKAGES.items():
         path = args.corpus / name
@@ -451,6 +652,13 @@ def main() -> int:
             "source_calibration": src,
             "new_calibration": new,
             "source_package_in_corpus": tgt["filename"] if tgt else "",
+            "delta_serialized_length": p["delta_datx"]["length"],
+            "delta_to_target_span_fraction": round(
+                p["delta_datx"]["length"]
+                / int(p["descriptor"]["areas"]["DeltaReproData101"]["length"], 16),
+                8,
+            ),
+            "target_signature_sha256": p["descriptor"]["areas"]["DeltaReproData101"]["digital_signature_sha256"],
         })
 
     direct_comparisons = []
@@ -490,6 +698,45 @@ def main() -> int:
             "longest_run_beyond_prefix32": longest,
             "exact_32b_prefix_shared": a[:32] == b[:32],
             "prefix32_is_exactly_shared": prefix_shared,
+            "delta_serialized_length": len(datx_by_pkg[new_pkg]),
+            "delta_to_target_span_fraction": round(len(datx_by_pkg[new_pkg]) / len(a), 8),
+        })
+
+    comparison_by_edge = {
+        (row["old_package"], row["new_package"]): row
+        for row in direct_comparisons
+    }
+    chain_by_edge = {
+        (row["source_calibration"], row["new_calibration"]): row
+        for row in chains
+    }
+    chain_family_specs = (
+        ("8646F420", ("8646F4206200", "8646F4206400", "8646F4206700")),
+        # The final CID really changes from F160 to F161; retain the exact
+        # descriptor value rather than abbreviating it as a same-prefix 11200.
+        ("8646F160_to_8646F161", ("8646F1606200", "8646F1606300", "8646F1611200")),
+    )
+    delta_chain_families = []
+    for family, nodes in chain_family_specs:
+        edges = []
+        for source, target in zip(nodes, nodes[1:]):
+            chain = chain_by_edge[(source, target)]
+            package = chain["package"]
+            source_package = chain["source_package_in_corpus"]
+            comparison = comparison_by_edge.get((source_package, package))
+            edges.append({
+                **chain,
+                "both_endpoint_images_in_corpus": comparison is not None,
+                "encrypted_image_comparison": comparison,
+            })
+        delta_chain_families.append({
+            "family": family,
+            "calibration_sequence": list(nodes),
+            "edges": edges,
+            "boundary": (
+                "The chain is descriptor-complete, but the first 6200 whole image is absent. "
+                "Only the second edge has complete old/new encrypted images in the local corpus."
+            ),
         })
 
     # ReproStd whole-image contrast with a useful crypto differential.  The two
@@ -571,6 +818,12 @@ def main() -> int:
         for j in range(i + 1, len(datx_list)):
             cross_datx_shared_blocks += sum(1 for d in block_digests(datx_list[j][1])[1:] if d in set_a)
 
+    routine_scan = scan_srec(next(iter(routine_by_pkg.values())))
+    common_routine = routine_scan["range_bytes"][ROUTINE_RANGE]
+    common_image_prefix = bytes.fromhex(next(iter(set(prefixes.values())), ""))
+    datx_structure = datx_structural_analysis(
+        datx_by_pkg, packages, common_routine, common_image_prefix)
+
     result = {
         "schema_version": 3,
         "reference_inventory": {
@@ -633,7 +886,9 @@ def main() -> int:
             "datx_interior_cross_package_shared_blocks": cross_datx_shared_blocks,
         },
         "delta_chains": chains,
+        "delta_chain_families": delta_chain_families,
         "direct_update_comparisons": direct_comparisons,
+        "datx_structural_analysis": datx_structure,
         "reprostd_nonce_differential": reprostd_nonce_differential,
         "transform_boundary": {
             "xx_members": "Motorola S-record framing carrying an encrypted target representation. ReproStd downloads whole/routine data with UDS RequestDownload DFI 0x01; by the UDS dataFormatIdentifier definition that is compression method 0 plus manufacturer-specific encryption method 1. The exact FRC cipher/key/IV remain unknown.",
@@ -648,6 +903,12 @@ def main() -> int:
                 "bounded_conclusion": "all ReproStd payload families here use manufacturer-specific encryptingMethod 1; compression method 1 is Toyota CompressionRepro and compression method 2 is Toyota DeltaRepro",
             },
             "host_transform": "host parses S-record framing for .xx members and passes the decoded encrypted payload bytes; .datx remains an opaque raw member buffer. No host-side payload decryption/decompression is recovered in the selected ReproStd path.",
+            "transform_order": {
+                "bounded_generation_hypothesis": "old plaintext image + new plaintext image -> Toyota delta method 2 -> encryption method 1 -> serialized .datx",
+                "bounded_ecu_inverse_hypothesis": "serialized .datx -> encryption-method-1 decode -> delta-method-2 application against the installed source image",
+                "support": "DFI 0x21 declares both layers, the host passes an opaque high-entropy .datx, all candidate clear delta headers/addresses are absent, and only the ECU has the installed source image needed to apply the patch.",
+                "boundary": "Bounded ordering inference, not a recovered decoder. DFI nomenclature and ciphertext structure do not by themselves prove the ECU's internal buffering or whether either transform is streamed/interleaved.",
+            },
             "selected_route_key_material": "The selected ReproStd prepare path enters 10 02, sends bare 27 01, extracts exactly 16 seed bytes from 67 01, calls CalcSeedKey with GetServiceAuthKey + that seed, then sends 27 02 plus a 16-byte key and expects 67 02. It imports GetServiceAuthKey but not GetNonce/GetSeedKey/GetECUAuthKey/GetSecurityProperty2; ReproStd flash imports only GetReproMethodType from these security/format getters. The recovered prepare/flash send grammar has no explicit Nonce/SeedKey transfer, so the selected route supplies no host-side nonce/seed material to the FRC payload decoder. This does not prove the package-generation Nonce is cryptographically irrelevant.",
             "member_read_path": "format-0x67 members are raw length+CRC32 payloads; the CUW.dll read path is a chunked fread(dst,1,0xFFF) loop (reader 0x1002BEB0, push site 0x1002BF83) with a whole-file CRC32 gate (0x1002A3B0, called from loader 0x10031A20 at 0x10031C0C; mismatch -> Error FileCRC); CDeltaReproArchiveCtrlr (RTTI 0x1008A9A0, vtable 0x1007C918, single deleting-dtor virtual 0x10066DC0, global instance 0x1008CA0C) holds only 0xAC-stride path/name/count entries with no payload pointer or byte fields - orchestration-only; CAES encrypt/decrypt callers are only 0x1001B9B2/0x1005AC52/0x1005AD02 (INI parameter decode, SecurityUp helpers), never the member path; TCUWCalibrationFile.dll and TCUWCanReproStdFlashWriter.dll have no crypto or compression imports.",
             "entropy_support": "encrypted flash body is high-entropy throughout (T-0058: global 7.9999977 bits/byte, minimum complete 4-KiB window 7.93098; routine range 7.8798 over 1392 B). The two corpus-internal updates carry only 1,503,040 B and 1,254,976 B of delta input (1.76% and 1.47% of the 85,458,944-B target span) while their stored whole-image bytes decorrelate to chance immediately after a shared 32-byte prefix. Localized plaintext edits therefore do not remain localized in the stored representation.",
@@ -656,6 +917,8 @@ def main() -> int:
         },
     }
     args.output.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    if args.workspace is not None:
+        write_workspace(args.workspace, result, images_by_pkg, datx_by_pkg, routine_by_pkg)
     print(json.dumps({k: v for k, v in result.items() if k in ("corpus", "cross_package_invariants")},
                      indent=2, sort_keys=True))
     return 0

@@ -71,4 +71,29 @@ assert frc_kdf["best_full_min_identity"] < 0.005
 assert all(row["full_min_identity"] < 0.005 for row in frc_kdf["top_full_results"])
 assert "not an exhaustive KDF search" in frc_kdf["boundary"]
 
+extended = actual["frc_reprostd_extended_kdf_audit"]
+assert extended["shared_secret_variant_count"] == 32
+assert extended["stable_context_variant_count"] == 28
+assert extended["shared_stage1_value_count"] == 2688
+assert extended["shared_candidate_value_count"] == 67157
+assert extended["per_image_context_count"] == 75
+assert extended["per_image_candidate_value_tuple_count"] == 49725
+assert extended["total_candidate_key_hypothesis_count"] == 116882
+assert extended["sample_bytes_per_image"] == 0x10000
+assert extended["sparse_block_count"] == 64
+assert extended["full_rescore_top_n"] == 32
+assert extended["best_sparse_min_identity"] < 0.011
+assert extended["candidates_at_or_above_threshold"] == []
+assert all(row["full_min_identity"] < 0.005 for row in extended["top_full_results"])
+assert any("Kimage=AES-128-ECB-ENC" in row for row in extended["known_toyota_constructions_covered"])
+assert "only the top 32 sparse results" in extended["boundary"]
+
+a32 = extended["routine_a32_baselines"]
+assert a32["bottlenose_r4_first_1376_bytes"]["shape_score"] > 0.6
+assert a32["encrypted_routine_as_little_endian_words"]["shape_score"] < 0.02
+assert max(row["shape_score"] for row in extended["routine_a32_top_candidates"]) < 0.1
+assert all(row["push_pop_count"] == 0 and row["return_count"] == 0
+           for row in extended["routine_a32_top_candidates"])
+assert "sibling A32 compiler-output baseline only" in a32["bottlenose_scope"]
+
 print("CUW cross-ECU SecurityAccess derivations: PASS")
