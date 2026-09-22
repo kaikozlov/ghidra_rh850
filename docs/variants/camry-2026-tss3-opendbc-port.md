@@ -3330,6 +3330,57 @@ not promoted into a new production-rate qualification framework here. If live 10
 shows signer saturation, measure that as a focused experiment rather than adding another
 runtime scheduler/tooling stack to this repository.
 
+#### 4.13.1 September-22 route55: missing signer generations trip the 100-Hz Panda angle step
+
+Route `00000055--0d20bbf0c0` ran clean `kai-openpilot@179df2fd4` with nested
+`opendbc@566ab6b77`. It produced six request-plane hard failures at route-relative
+**44.545, 50.413, 85.939, 157.394, 170.653, and 187.956 s**. Each failure was logged as
+`Toyota F33 request plane failure: oracle_dead`; `CarInterface` then projected the request-
+plane authority failure into both `accFaulted` and `steerFaultTemporary`, producing the
+immediate cruise-fault disengagement. This was not an EPS-reported steering inhibit:
+`TSS3_EPS_TELEMETRY.EPS_FAULT_INHIBIT` remained zero for all 28,396 decoded telemetry
+frames in the route.
+
+The native FRC lateral owner is also not the gate. Source bus-2 `0x08A` contained **9,820
+ID0** and **1,538 ID11** frames, while the operating latch used by Panda remained independent
+of that lateral ID. During the rejection windows native ID0 coexisted with
+`controlsAllowed=true`; the current Panda hook consumes only the source `CRUISE_OPERATING_LATCH`
+for `pcm_cruise_check`, not `LATERAL_REQUEST_ID`. The host emitted 11,183 `0x08A` requests
+while the latest native lateral ID was 0, so stock FRC choice of No Request is ordinary input
+state and does not mean comma lacks steering authority.
+
+The actual failure is a skipped-generation interaction between the asynchronous EPS signer
+and fixed-step Panda angle safety. Example at ~44 s: Panda accepted host request sequence 7
+at target raw -549. Application sequence 8 was submitted to the EPS under private oracle
+sequence 15 and all six `0x777/C8` fragments received Panda TX returns, but no `0x7A9/C9`
+private response appeared. Oracle sequence 16/application sequence 9 did respond, so the
+host's non-stalling transport superseded the missing generation and attempted sequence 9 at
+raw -520. At the ~8.95 m/s vehicle speed, the current 100-Hz vehicle-model safety check allows
+only **26 raw counts** for that accepted-frame step; the observed 29-count jump is rejected.
+A direct replay against the compiled safety hook confirms -549 -> -523 (26 counts) passes,
+while -549 -> -522 (27) and the logged -549 -> -520 (29) fail. The same pattern begins the
+other hard-failure bursts: the first rejected frame follows at least one missing application
+generation and exceeds the one-frame Panda angle envelope.
+
+Across the route, 14,895 complete signer requests were observed. 14,279 had a matching
+status-0 private response within 90 ms; 616 had no such response. Successful request-to-reply
+latency was p50 17.0 ms, p90 22.7 ms, p99 31.6 ms, max 34.1 ms. The host request cadence was
+~97.2/s in active one-second bins while replies averaged ~93.2/s. Missing requests occur under
+slightly heavier bus-0 receive-ring load (median 201 ring words in the preceding 20 ms versus
+184 for successful requests). The installed resident/helper exactly match source commit
+`31c4b876`; this is not deployment skew. These data are consistent with moving-vehicle
+throughput/ring pressure in the synchronous command-5 resident, but they do not by themselves
+prove the precise EPS-side record-loss mechanism.
+
+Consequence: **100 Hz itself is not a Toyota/FRC lane-state error, but the current 100-Hz
+host pipeline is not robust to a lost signer generation.** Panda is correctly rejecting a
+command step that exceeds its configured per-publication limit. Do not weaken steering safety
+or reinterpret native ID0 as an authority fault. The next software change should preserve the
+100-Hz control intent while making signer loss/order handling compatible with the Panda angle
+step (or remove the resident loss at source); a later signed application must not simply skip
+an unavailable intermediate steering generation and then be presented to Panda as one 10-ms
+step.
+
 ### 4.14 Recovered PCS/ADU semantics constrain `0x08A` relay ownership
 
 The recovered GTS+ PCS Data Viewer now supplies the complete 7,851-row ADU
