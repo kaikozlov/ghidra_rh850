@@ -648,11 +648,15 @@ door opened while the vehicle is after IG-OFF, the manager interprets the
 source+state as a vehicle event, and it starts only the device group needed for
 that event.
 
-This patent is **successor architecture vocabulary**, not proof that F33
-implements this exact manager/database or its target mapping. Its 2023 priority
-post-dates the core TSS3/F33 design period. It is nevertheless strong Toyota
-evidence that "OFF" is intentionally decomposed into event-driven selective
-device startup, and that Toyota distinguishes physical power-control wake from
+This patent is **contemporary Toyota architecture evidence**, not proof that
+F33 implements this exact manager/database or its target mapping. Its 2023
+priority is fully compatible with a 2026-model Camry and could reflect design
+work that reached this vehicle generation. The evidentiary limitation is
+implementation proof, not chronology: until the exact F33 wiring, firmware, or
+live state transitions join to it, use the patent as a strong architectural
+oracle rather than as an exact block assignment. It is strong Toyota evidence
+that "OFF" is intentionally decomposed into event-driven selective device
+startup, and that Toyota distinguishes physical power-control wake from
 network/communication wake.
 
 Source:
@@ -777,8 +781,11 @@ documents the door event itself as sufficient to start brake-system activity.
 
 Priority 2024-03-22, Toyota.
 
-This is later than TSS3 launch and must be treated as **downstream Toyota
-security vocabulary**, not evidence that F33 uses its new dynamic-key scheme.
+This is later than the initial TSS3 launch, but its 2024 priority is still
+temporally compatible with a 2026-model F33 Camry. It must therefore be treated
+as **contemporary Toyota security vocabulary**, not dismissed as too new; the
+remaining limitation is that a patent does not prove this exact calibration
+uses its new dynamic-key scheme.
 
 Its description explicitly calls the related architecture **AUTOSAR SecOC**:
 sender and receiver ECUs share a secret key, the sender appends a MAC to the
@@ -789,9 +796,9 @@ counter rejection, and truncating the MAC and counter when payload space is
 limited.
 
 The invention's new contribution is dynamic per-ignition key derivation from
-pre-provisioned material. **Do not project that part backward** into the Camry:
-exact firmware/dynamic evidence remains authoritative for its key/profile
-behavior.
+pre-provisioned material. Do not assign that mechanism to the Camry merely from
+the patent: exact firmware/dynamic evidence remains authoritative for its
+key/profile behavior. Chronology does not exclude it on a 2026 vehicle.
 
 The patent is intentionally broad about how the derived key becomes usable by
 the ECU. Do **not** infer a programmable-HSM KDF or a new HSM firmware path from
