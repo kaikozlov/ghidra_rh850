@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import subprocess
 import sys
 import tempfile
@@ -420,7 +421,16 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
           (kit / "bundle/oracle/classic.json").is_file() and
           kit_meta["classic_08a_oracle"]["transport"].startswith("functional-nibble4 0x00000777 -> 0x000007A9") and
           "camry_classic_08a_oracle" not in kit_meta)
-    launcher = (kit / "tss3-unified-signer").read_text(encoding="utf-8")
+    launcher_path = kit / "tss3-unified-signer"
+    launcher = launcher_path.read_text(encoding="utf-8")
+    wrong_kit = subprocess.run(
+        [str(launcher_path), "--topology", "camry-post-repin", "doctor"],
+        env={**os.environ, "TSS3_PYTHON": sys.executable, "TSS3_OPENPILOT_ROOT": str(ROOT)},
+        capture_output=True, text=True,
+    )
+    check("Camry-only launcher path rejects a mismatched exact-target kit with an actionable identity error",
+          wrong_kit.returncode == 2 and
+          "wrong kit: crown-8965F3012000; need camry-8965F3307000" in wrong_kit.stderr)
     check("unified kit prefers vendored runtime and exposes common test ladder plus exact-F33 DRCC diagnostic clear",
           'PYTHONPATH="$KIT_ROOT/runtime:$OPENPILOT_ROOT"' in launcher and
           "camry_f33_post_install_recovery.py" in launcher and "require_camry_recovery" in launcher and

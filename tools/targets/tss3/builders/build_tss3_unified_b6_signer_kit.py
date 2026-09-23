@@ -100,6 +100,9 @@ def build(target: str, out: Path) -> dict:
 Target: {target}
 Source commit: {commit}
 
+This kit is exact-target-bound. Do not reuse a contributor- or vehicle-named copy on a different EPS target.
+The on-device Camry oracle UI requires target camry-8965F3307000 and rejects every other bundle identity before bringup.
+
 Preferred tester flow:
 1. ./tss3-unified-signer doctor
 {flow}
