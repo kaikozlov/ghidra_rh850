@@ -3414,6 +3414,59 @@ sequence space from 31 to 255. It does not bypass or parallelize the serialized 
 wrapper. Static/cross-target build verification passes, but latency and loss-rate improvement
 remain unmeasured until a parked `oracle-benchmark-100hz` run and a later route test.
 
+#### 4.13.3 Prior-art audit: a virtual FD32 datagram does not remove the Classic-CAN tunnel
+
+A September-23 review of existing CAN fragmentation transports does not identify an off-the-shelf
+protocol that improves the current four-frame wire shape. The useful prior art is in reassembly and
+resynchronization rather than in a drop-in `CAN-FD-over-Classic-CAN` layer:
+
+- [Cyphal/DroneCAN](https://dronecan.github.io/Specification/4.1_CAN_bus_transport_layer/)
+  reserves one tail byte in every CAN frame for start/end, toggle, and transfer-ID state. Current
+  [libcanard](https://github.com/OpenCyphal/libcanard/blob/master/libcanard/canard.h) deliberately
+  exposes the same transport over Classic-CAN MTU 8 and CAN-FD MTU 64. A multi-frame 28-byte
+  payload also carries its transfer CRC, so Classic CAN needs five physical frames rather than four.
+- NMEA 2000 Fast Packet uses a 3-bit sequence plus 5-bit frame index in B0, with six payload bytes
+  in the first frame and seven thereafter. A 28-byte payload therefore also needs five frames.
+- J1939 BAM/TP uses a connection-management announcement followed by TP.DT frames containing one
+  sequence byte plus seven data bytes. Four TP.DT frames can carry 28 data bytes, but the required
+  BAM announcement makes the standard transaction at least five frames.
+- ISO-TP likewise needs one First Frame carrying six data bytes plus four seven-byte Consecutive
+  Frames for 28 bytes, before considering Flow Control. This target already demonstrated why that
+  extra state is undesirable: the EPS advertised a 40-ms STmin even though a deliberately burst
+  transfer could be accepted faster.
+
+The current raw-classic mailbox is therefore already a target-specialized virtual-datagram tunnel.
+Four Classic-CAN data frames are the information-theoretic minimum for 28 application bytes, and
+its present one-byte-per-frame transport envelope uses the remaining four physical bytes for
+fragment identity and the full 8-bit oracle sequence. A host-side `FD32` object could make that
+abstraction cleaner, but it would not make the F33 RSCFD/CanIf path observe one real CAN-FD frame:
+the resident would still have to reconstruct the logical packet from accepted Classic-CAN records.
+
+One lower-layer primitive is worth retaining as a separate experiment. ISO 11898 Classical CAN
+transmits **eight data bytes for every raw DLC 8..15**. Linux exposes the otherwise-lost 9..15
+codes as [`len8_dlc`](https://github.com/linux-can/can-utils/blob/master/include/linux/can.h), and
+the Bosch M_CAN controller likewise specifies DLC 9..15 + FDF=0 as an eight-byte Classical frame.
+Exact F33 preserves enough of that distinction for a resident: in `FUN_00083e0c`, the non-FD path
+passes the raw hardware DLC nibble onward; `FUN_00080a4a` caps the copied Classic payload at eight
+bytes but stores that raw received value in the software-ring record header. In principle DLC 8..15
+therefore supplies three out-of-band transport bits per eight-byte Classic frame, e.g. fragment
+index plus a one-bit toggle, without consuming a data byte.
+
+That raw-DLC carrier is **not** free in the current openpilot path. Cereal `CanData` has only
+address/data/source, and `selfdrive/pandad/panda.cc` currently sets FDF solely from payload size:
+`header.fd = can_data.size() > 8`. Sending a 12/16/20/24-byte object to obtain raw DLC 9/10/11/12
+would consequently create a real CAN-FD frame in production `sendcan`. Panda's direct Python API
+can request `fd=False`, but production use would need an explicit raw-Classic-DLC representation
+through pandad plus corresponding Toyota safety allowances. The signer also permits up to eight
+outstanding generations, so a DLC-only fragment index/toggle cannot replace the existing full
+8-bit request sequence used to bind asynchronous replies.
+
+**Decision:** retain the four-frame `0x777/8` codec as the production candidate. If a future target
+requires the full 32-byte logical request rather than the current 28-byte application, first prove
+raw-DLC 8..15 end-to-end in a parked, non-actuating experiment; only then consider adding a generic
+raw-Classic-DLC field to the Panda/openpilot transport. Do not replace the current codec with a
+five-frame standard transport merely to make the fragmentation layer more generic.
+
 ### 4.14 Recovered PCS/ADU semantics constrain `0x08A` relay ownership
 
 The recovered GTS+ PCS Data Viewer now supplies the complete 7,851-row ADU
