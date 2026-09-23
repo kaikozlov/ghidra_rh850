@@ -69,6 +69,36 @@ rather than overwriting repeated counter values: 30,532 / 35,994 complete
 four-record bank bursts. Its kinematic agreement is corroboration, not a
 substitute for the independent unit anchors above.
 
+### TSS3 0x123/16 is a new Profile-5 radar-status PDU
+
+The old Toyota radar parser's STATUS_MSG is also CAN ID 0x123, but its
+7-byte TSS2 layout does **not** transfer. In that DBC RADAR_STATUS occupies
+B2 bits3..4; on TSS3 B2 is the rolling Profile-5 counter, so interpreting the
+new frame with the old status definition produces a counter-derived fake state.
+
+The retained August Camry drives establish the TSS3 envelope independently:
+all **5,130 / 5,999** 0x123/16 frames pass Profile-5 CRC with Data ID
+0x0123, B2 spans all 256 counter values, and the application payload is
+01 0c 08 00 a0 00 00 00 00 00 00 00 00. A full local archive scan on
+2026-09-23 covers **538,298** incoming 0x123/16 frames across **916** rlogs
+and finds only two application payloads: the baseline above on 538,079 frames
+and 01 0c 08 00 a0 10 00 00 00 00 00 00 00 on 219 frames across five
+segments.
+
+Current GTS+ Fr_RadSen_P5.ddb gives a direct semantic join for B7:B8.
+Front Radar Sensor DID 0x100F is a Data Monitor bitfield whose MSB0 bits
+8..13 are, in order, **Dirt Detection for Radar Cruise**, **Dirt Detection for
+PCS**, **Partially Dirt Detection**, **Foreign Matter Detection**, **Dirt
+Detection**, and **Blockage Detection**. Mapping those six bits onto the
+observed two-byte B7:B8 word places them exactly at B8[7:2]. The only dynamic
+CAN bit seen in the archive is B8[4], which therefore lands exactly on GTS+
+bit11 **Foreign Matter Detection**. This closes the generation-correct
+0x123 status definition used by opendbc; it is not the legacy
+RADAR_STATUS/RADAR_PRE_FAULT layout. GTS+ separately names temporary optical-
+axis unavailability in DID 0x1012 and function restriction in DID 0x2093;
+their CAN carriers remain unassigned and should not be invented from the
+constant bytes of 0x123.
+
 ## Completed diagnostic recovery review
 
 FRC_P5 monitor 199 defines control modes 1/2/4 as distance control and mode 3
