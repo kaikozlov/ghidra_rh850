@@ -954,7 +954,7 @@ def section_command5_runtime_carrier() -> int:
     PROXY_BIN=ROOT/'exploit/ephemeral_runtime/audited/camry_f33_command5_proxy.bin'
     CANARY_BIN=ROOT/'exploit/ephemeral_runtime/audited/camry_f33_runtime_canary.bin'
     PROXY_SOURCE=ROOT/'exploit/ephemeral_runtime/corolla_hf_command5_proxy.c'
-    CANARY_SOURCE=ROOT/'exploit/ephemeral_runtime/corolla_hf_canary.c'
+    CANARY_SOURCE=ROOT/'exploit/ephemeral_runtime/camry_f33_runtime_canary.c'
     RAMREQ=ROOT/'data/variant_ram_exec_requirements.json'
     p=f=0
     def sha(b:bytes)->str:return hashlib.sha256(b).hexdigest()
@@ -997,13 +997,13 @@ def section_command5_runtime_carrier() -> int:
     check('raw driver record exact',struct.unpack_from('<8I',img,0x27DA4)==(0xFFFF0000,0x89C4C,0,0,0,0x88DBC,0x88EC0,0x27DA0))
     print('\n== audited executable candidates ==')
     can=a['runtime_candidates']['inert_canary']; prox=a['runtime_candidates']['fixed_36_command5_proxy']
-    check('canary exact audited build',can['size']==CANARY_BIN.stat().st_size==334 and can['headroom']==442 and can['sha256']==sha(CANARY_BIN.read_bytes())=='facd4f590581f7422dab0fc4fcea21f6d73e4c361b1f4d54960d7001e89bdbb0' and can['entry_offset']==can['relocations']==0 and can['command5_calls'] is False and can['production_poststartup_usable'] is False)
-    check('proxy exact audited build',prox['size']==PROXY_BIN.stat().st_size==464 and prox['headroom']==312 and prox['sha256']==sha(PROXY_BIN.read_bytes())=='0ea9b9d460c3678ad4341817ae606d720bb2a13f4d14ec7dc1e0c8f569db94d3' and prox['entry_offset']==prox['relocations']==0 and prox['input_length']==36 and prox['key_selector']==4 and prox['production_poststartup_usable'] is False)
+    check('canary exact audited build',can['size']==CANARY_BIN.stat().st_size==302 and can['headroom']==474 and can['sha256']==sha(CANARY_BIN.read_bytes())=='81c7a45487a5ae8647b3526567b884011dba0adad606fd345e34ec97137949be' and can['entry_offset']==can['relocations']==0 and can['command5_calls'] is False and can['production_poststartup_usable'] is False)
+    check('proxy exact audited build',prox['size']==PROXY_BIN.stat().st_size==428 and prox['headroom']==348 and prox['sha256']==sha(PROXY_BIN.read_bytes())=='513dc3cc5edf992b401c6b88ab054b78073df2e634ca52c61a72bed90dff1c09' and prox['entry_offset']==prox['relocations']==0 and prox['input_length']==36 and prox['key_selector']==4 and prox['production_poststartup_usable'] is False)
     for label,audit,source,binary in [('proxy',pa,PROXY_SOURCE,PROXY_BIN),('canary',ca,CANARY_SOURCE,CANARY_BIN)]:
      check(f'{label} audit source bound',audit['source']['sha256']==sha(source.read_bytes()))
-     check(f'{label} compiler equivalence',audit['toolchain']['reproduced_byte_exact'] is True and audit['toolchain']['reference_sha256']=='273202dc591810b2f587ab8fac044599b57b4e07a24ff61d36b7131b97c00660')
+     check(f'{label} pinned toolchain',audit['toolchain']['schema']=='rh850-toolchain-v1' and audit['toolchain']['backend']=='tools/rh850' and audit['toolchain']['image_id']=='sha256:9fde551b36222ce74be9a366421401a3dc3d397c03dc924c34b452937cca5937')
      check(f'{label} audit binary bound',audit['shellcode']['sha256']==sha(binary.read_bytes()) and audit['compile_contract']['entry_offset']==0 and audit['compile_contract']['relocations']==0)
-    check('proxy source is fixed-36 and busy-retry', '36u' in PROXY_SOURCE.read_text() and 'else if (rc != 2)' in PROXY_SOURCE.read_text())
+    check('proxy source is fixed-36 with busy retry', '36u' in PROXY_SOURCE.read_text() and 'else if (rc != 2)' in PROXY_SOURCE.read_text())
     check('canary source has no command5 dispatch', 'TARGET_COMMAND5_DISPATCH' not in CANARY_SOURCE.read_text() and 'TARGET_CANARY_HEARTBEAT' in CANARY_SOURCE.read_text())
     print('\n== dynamic boundary ==')
     z=a['boundary']; variants={str(x.get('id','')).lower() for x in json.loads(RAMREQ.read_text())['variants']}

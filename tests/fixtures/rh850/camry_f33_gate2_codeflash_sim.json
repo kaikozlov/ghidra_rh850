@@ -1,0 +1,58 @@
+{
+  "accepted_image_sha256": [
+    "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
+    "fe144240c72de1981a87152da76e2df40f9ae01118ef02e562d8c2954b4277ea",
+    "6a371a2a17641ee5408777f06d303e34699d65dbde01e94cf89ffece7578d59c",
+    "67f4aaa803f9f3df3e5b2bf31d2c8950ebbb3870fa3f5d439f585caae3a8313c"
+  ],
+  "assembly": "tests/fixtures/rh850/camry_f33_gate2_codeflash_sim.S",
+  "codeflash_size": 1048576,
+  "entry_symbol": "codeflash_sim_start",
+  "gdb_results": [
+    "printf \"GATE2_RESULT=0x%x FRESHNESS_ARG=%u ROOT_BOOL=%u\\n\", *(unsigned int *)0xFEF01000, *(unsigned int *)0xFEF01004, *(unsigned int *)0xFEF01008"
+  ],
+  "gdb_setup": [
+    "set {unsigned char}0xFEBE5526 = 0xC3",
+    "set {unsigned char}0xFEBE5564 = 0x01"
+  ],
+  "harness_address": "0xFEF00000",
+  "memory_regions": [
+    "0xFEBE0000,0x20000",
+    "0xFEF00000,0x20000"
+  ],
+  "name": "camry-f33-gate2",
+  "overlays": [
+    {
+      "address": "0x0008F202",
+      "expected": "840f039d",
+      "section": ".sim.overlay.f202"
+    },
+    {
+      "address": "0x0008F8D2",
+      "expected": "800761008700e6f65000c5f1fe0f791a",
+      "section": ".sim.overlay.f8d2"
+    },
+    {
+      "address": "0x0008F4D0",
+      "expected": "8007",
+      "section": ".sim.overlay.f4d0"
+    },
+    {
+      "address": "0x0008F546",
+      "expected": "8807e11006e0",
+      "section": ".sim.overlay.f546"
+    },
+    {
+      "address": "0x0008F60E",
+      "expected": "80076100c600",
+      "section": ".sim.overlay.f60e"
+    },
+    {
+      "address": "0x0008F70E",
+      "expected": "8007",
+      "section": ".sim.overlay.f70e"
+    }
+  ],
+  "schema": "rh850-codeflash-sim-v1",
+  "stop_symbol": "codeflash_sim_stop"
+}

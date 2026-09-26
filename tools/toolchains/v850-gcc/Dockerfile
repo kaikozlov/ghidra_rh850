@@ -19,10 +19,13 @@ RUN /src/binutils/configure --target="${TARGET_ARCH}" --prefix="${TOOLCHAIN_PATH
  && make -j"$(nproc)" all && make install
 WORKDIR /src
 COPY patches/binutils-v850-sim-imm32.patch /tmp/binutils-v850-sim-imm32.patch
+COPY patches/binutils-v850-sim-codeflash-map.patch /tmp/binutils-v850-sim-codeflash-map.patch
 RUN git clone --depth=1 --branch=gdb-18.1-release https://sourceware.org/git/binutils-gdb.git gdb \
  && test "$(git -C gdb rev-parse HEAD)" = "${GDB_COMMIT}" \
  && git -C gdb apply --check /tmp/binutils-v850-sim-imm32.patch \
- && git -C gdb apply /tmp/binutils-v850-sim-imm32.patch
+ && git -C gdb apply /tmp/binutils-v850-sim-imm32.patch \
+ && git -C gdb apply --check /tmp/binutils-v850-sim-codeflash-map.patch \
+ && git -C gdb apply /tmp/binutils-v850-sim-codeflash-map.patch
 WORKDIR /build/gdb
 RUN /src/gdb/configure --target="${TARGET_ARCH}" --prefix="${TOOLCHAIN_PATH}" --disable-nls --disable-werror \
       --disable-binutils --disable-gas --disable-gprof --disable-gprofng --disable-ld --disable-gold --disable-gdbserver \
@@ -50,5 +53,5 @@ WORKDIR /src
 CMD ["/bin/bash"]
 
 LABEL org.opencontainers.image.title="ghidra_rh850 GNU V850/RH850 toolchain"
-LABEL org.opencontainers.image.description="GNU C compiler, binutils and GDB with the repository-local V850/RH850 imm32 simulator fix"
+LABEL org.opencontainers.image.description="GNU C compiler, binutils and GDB with repository-local V850/RH850 simulator fixes"
 LABEL org.opencontainers.image.source="https://github.com/kaikozlov/ghidra_rh850"

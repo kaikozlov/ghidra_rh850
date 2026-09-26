@@ -698,11 +698,13 @@ pocket at `FEBF0000..FEBF01CF`: the first recovered normalized direct/simple-GP
 reference is exactly `FEBF01D0`, MPU region 5 covers the pocket with supervisor
 R/W/X (`0xB8`) in both recovered application contexts, and all listed
 startup/MPU/command-5 prerequisites transfer byte-for-byte to F. A fixed B6-only
-command-5 runtime links to **462 bytes** with entry zero / zero relocations, leaving
-**2 bytes** headroom. A separate **332-byte** inert scheduler canary uses
-`FEBFFB80` as an observation heartbeat and never calls command 5. The corresponding
-60-byte signer mailbox `FEBFFB80..FEBFFBBB` is above H's startup shadow-copy end
-and has zero recovered normalized direct references under the same bounded census.
+command-5 runtime links to **424 bytes** with entry zero / zero relocations, leaving
+**40 bytes** headroom. A separate **298-byte** inert scheduler canary uses
+`FEBFFB80` as an observation heartbeat and never calls command 5. Both inline
+target calls, and the corrected canary executes one foreground tick against both
+tracked H/F CodeFlash images. The corresponding 60-byte signer mailbox
+`FEBFFB80..FEBFFBBB` is above H's startup shadow-copy end and has zero recovered
+normalized direct references under the same bounded census.
 Computed aliases, DMA/hardware ownership, and runtime lifetime remain outside that
 static proof, so `data/variant_ram_exec_requirements.json` intentionally still has
 no verified H/F entry. The August-18 range-dump acquisition had already established
@@ -720,7 +722,7 @@ Do not expose the signer if the canary fails or its observation cell is unstable
 Second, on a fresh isolated run, use
 `exploit/ephemeral_runtime/corolla_hf_direct_command5.py`: it accepts live mode only
 after a retained successful direct-canary result plus explicit reset-to-stock
-confirmation, then installs the audited 462-byte fixed-36-byte proxy and tests
+confirmation, then installs the audited 424-byte fixed-36-byte proxy and tests
 selector-4 command-5 permission against a known input without vehicle actuation.
 The proxy self-initializes its request byte after stock startup/before `ei` and
 mirrors the stock completion status into mailbox byte `+1`, eliminating the prior
@@ -733,11 +735,11 @@ Ready now:
 
 - audited H/F inert canary:
   `exploit/ephemeral_runtime/audited/corolla_hf_runtime_canary.bin`
-  (332 bytes, SHA-256 `a32baf46...97424f4`);
+  (298 bytes, SHA-256 `ec4a3116...3fca2df`);
 - audited H/F fixed-B6 signer:
   `exploit/ephemeral_runtime/audited/corolla_hf_command5_proxy.bin`
-  (462 bytes, SHA-256 `3bb96eef...609f8d3`);
-- deterministic target-native builder with compiler-equivalence protection:
+  (424 bytes, SHA-256 `62e4880e...dde183`);
+- deterministic target-native builder bound to the pinned `tools/rh850` image:
   `exploit/ephemeral_runtime/build_corolla_hf_command5_carrier.py`;
 - static geometry/build contract:
   `data/generated/corolla_hf_command5_runtime_carrier.json`;
@@ -746,12 +748,14 @@ Ready now:
   VAR-049 independently replays it with exact F181 and terminal payload-state joins;
 - the first inert live test is now operationalized by
   `exploit/ephemeral_runtime/corolla_hf_direct_canary.py` / VAR-050. It builds the
-  exact audited 4-KiB canary envelope (SHA-256 `313d1bb7...b0b29d84`), reproduces
+  exact audited 4-KiB canary envelope (SHA-256 `b6d4b261...bd884367`), reproduces
   the telescope-observed old-stack bootstrap without post-auth substitution, and
   refuses to expose command 5;
-- the second-stage slot-4 probe is now operationalized but remains hardware-gated:
+- offline modeled execution is closed on both tracked H/F images by
+  `tests/verify_corolla_hf_runtime_canary_codeflash_sim.py`;
+- the second-stage slot-4 probe is operationalized but remains hardware-gated:
   `exploit/ephemeral_runtime/corolla_hf_direct_command5.py` packages the hardened
-  proxy into exact envelope SHA-256 `a9497970...e9d5a58`, requires the successful
+  proxy into exact envelope SHA-256 `a81b367f...140bfc5`, requires the successful
   canary-result token plus reset-to-stock confirmation, commits mailbox state last,
   and requires mirrored status 0 / 16-byte non-sentinel output; it does not send B6;
 - low-risk fixed-16 stock permission experiment under `exploit/command5/` remains
@@ -958,7 +962,7 @@ Capture protected `0x0B6` during stock steering to validate **stock** sender wal
 cadence, secondary-field dynamics where needed, and normal target/rate bounds—not to
 rediscover the receiver envelope, replacement freshness state machine, or verification
 logic. In parallel, recover signing ownership and the slot-4 key value or live-validate
-the audited TMS-054 H/F carrier path: 332-byte inert canary first, then the 462-byte
+the audited TMS-054 H/F carrier path: 298-byte inert canary first, then the 424-byte
 fixed-B6 command-5 proxy for selector-4 permission and latency. The Sienna resident
 RAM geometry still does not transfer, and the H/F static pocket is not yet a verified
 `variant_ram_exec_requirements` entry; receiver freshness extraction/window/retry/commit,

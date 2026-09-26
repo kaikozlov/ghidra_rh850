@@ -649,7 +649,7 @@ def main() -> int:
     check(
         "pinned eps-telescope envelope algorithm reproduces the direct H/F canary package identity",
         len(telescope_canary_envelope) == 0x1000
-        and hashlib.sha256(telescope_canary_envelope).hexdigest() == "313d1bb70fe6147c179e4b5a35e4556e536f062a80d53d85af3d4292b0b29d84"
+        and hashlib.sha256(telescope_canary_envelope).hexdigest() == "b6d4b261ef6fb614ef0c9f8cd72bc7e7fb7608a793f9094ec76fe226bd884367"
         and binascii.crc32(telescope_canary_plain[:0xFF0]) & 0xFFFFFFFF == 0xFFFFFFFF,
     )
     check(

@@ -255,12 +255,12 @@
       "canary": {
         "binary": "exploit/ephemeral_runtime/audited/corolla_hf_runtime_canary.bin",
         "entry_offset": 0,
-        "headroom": 132,
+        "headroom": 166,
         "heartbeat_address": "0xFEBFFB80",
         "purpose": "validate boot-to-application handoff, scheduler ownership, executable retention, and observation-cell lifetime before any command-5 request",
         "relocations": 0,
-        "sha256": "a32baf46dd8e0599021b5c174763887513b3ba903d40ebe284f19d31c97424f4",
-        "size": 332
+        "sha256": "ec4a31160b877c9067361fe3296f151c5a5ca38835ee8f8f22aa9a6fe3fca2df",
+        "size": 298
       },
       "direct_canary": {
         "boundary": "The earlier range dump already proved boot-RAM execution; telescope independently replays the exact zero-DID package path, not application retention. A successful inert canary is the required dynamic evidence before promoting H/F RAM-exec geometry or exposing command 5.",
@@ -282,15 +282,15 @@
           "cmac_valid": true,
           "crc_descriptor_address": "0xFEBF0000",
           "crc_descriptor_length": 4080,
-          "crc_fixup": "0x35D8FE60",
+          "crc_fixup": "0xA42BCD48",
           "crc_residue": "0xFFFFFFFF",
           "payload_build_secret_source": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin@0xBFD8",
           "payload_build_secret_value_recorded": false,
-          "payload_sha256": "313d1bb70fe6147c179e4b5a35e4556e536f062a80d53d85af3d4292b0b29d84",
+          "payload_sha256": "b6d4b261ef6fb614ef0c9f8cd72bc7e7fb7608a793f9094ec76fe226bd884367",
           "payload_size": 4096,
           "shellcode_path": "exploit/ephemeral_runtime/audited/corolla_hf_runtime_canary.bin",
-          "shellcode_sha256": "a32baf46dd8e0599021b5c174763887513b3ba903d40ebe284f19d31c97424f4",
-          "shellcode_size": 332
+          "shellcode_sha256": "ec4a31160b877c9067361fe3296f151c5a5ca38835ee8f8f22aa9a6fe3fca2df",
+          "shellcode_size": 298
         },
         "success_gate": {
           "application_f181_must_reappear": "023839363546313230383030300000000038413331313132303230303000000000",
@@ -321,15 +321,15 @@
           "cmac_valid": true,
           "crc_descriptor_address": "0xFEBF0000",
           "crc_descriptor_length": 4080,
-          "crc_fixup": "0xB711D947",
+          "crc_fixup": "0xF44BB1A0",
           "crc_residue": "0xFFFFFFFF",
           "payload_build_secret_source": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin@0xBFD8",
           "payload_build_secret_value_recorded": false,
-          "payload_sha256": "a94979704010758dd09acc0e137977c8eed5003822eababa39eb8a7e5e9d5a58",
+          "payload_sha256": "a81b367febb819f4016a0880c707b82fb7f46f1bad5ec59119e43aec0140bfc5",
           "payload_size": 4096,
           "shellcode_path": "exploit/ephemeral_runtime/audited/corolla_hf_command5_proxy.bin",
-          "shellcode_sha256": "3bb96eefae06005c99a0ac52b7f0c64cc5d52e2b0b1fcbb73e0b4ec69609f8d3",
-          "shellcode_size": 462
+          "shellcode_sha256": "62e4880eaa1bb7dd79fb1f47f4ce44033d1201550a20812a6a103ace00dde183",
+          "shellcode_size": 424
         },
         "probe": {
           "boundary": "This proves the local application-context command-5/slot-4 generation path only. It does not establish a shared cross-vehicle key, B6 sender timing, or vehicle actuation.",
@@ -375,12 +375,12 @@
         "done_flag": "0xFEBF1280",
         "driver_record": 0,
         "entry_offset": 0,
-        "headroom": 2,
+        "headroom": 40,
         "input_length": 36,
         "key_selector": 4,
         "relocations": 0,
-        "sha256": "3bb96eefae06005c99a0ac52b7f0c64cc5d52e2b0b1fcbb73e0b4ec69609f8d3",
-        "size": 462,
+        "sha256": "62e4880eaa1bb7dd79fb1f47f4ce44033d1201550a20812a6a103ace00dde183",
+        "size": 424,
         "status_flag": "0xFEBF1281"
       },
       "static_candidate": {

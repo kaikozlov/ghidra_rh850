@@ -655,8 +655,9 @@ The receiver-side command carrier is now identified, so the decisive experiment 
   B6 authenticated input, but the Sienna single-stage resident proxy geometry does
   **not** transfer: H startup clears `FEBF05CC..FEBF09CB` and
   `FEBF0B4C..FEBF0F4B`. TMS-054 now supplies a separately audited **static** H/F
-  carrier candidate (332-byte inert canary / 462-byte fixed-B6 signer); what remains
-  is live canary retention/health followed by selector-4 permission and latency; and
+  carrier candidate (298-byte inert canary / 424-byte fixed-B6 signer); offline
+  execution now passes on both H/F CodeFlash images, while live canary
+  retention/health, selector-4 permission, and latency remain hardware gates; and
 - acquire/analyze true-TSS3 `FRC_P5` plus category-435 `ABS_P5`/Brake firmware,
   or synchronized FRC/Brake/EPS captures, to explain the still-open byte-level target
   transformation and SecOC sender/key/freshness ownership.
@@ -929,9 +930,11 @@ known XCP shadow window, and has zero recovered normalized direct references und
 the same bounded census.
 
 A dedicated fixed-B6 runtime now proves the machine-code fit rather than merely
-estimating it. The audited command-5 proxy is **462 bytes**, entry offset zero,
-zero ELF relocations, SHA-256 `3bb96eef...609f8d3`, and therefore leaves only
-**2 bytes** of headroom in `FEBF0000..FEBF01CF`. It keeps the stock application
+estimating it. The audited command-5 proxy is **424 bytes**, entry offset zero,
+zero ELF relocations, SHA-256 `62e4880e...dde183`, and therefore leaves
+**40 bytes** of headroom in `FEBF0000..FEBF01CF`. Target calls are inlined so
+loading at `FEBF0000` cannot branch to a VMA-zero local helper. It keeps the
+stock application
 scheduler, uses H/F dispatcher `0x82750`, clean record 0, slot selector 4,
 completion cells `FEBF1280/FEBF1281`, and a fixed 36-byte B6 authenticated input.
 Shared-driver busy result 2 leaves the request pending for a later foreground
@@ -943,24 +946,25 @@ proxy reads them as one halfword after done=1 and mirrors status into mailbox by
 `FEBFFB81`; immediate non-busy dispatcher errors are mirrored there too. This keeps
 all host-visible request/result state inside the XCP-readable 60-byte mailbox.
 
-The required first live payload is deliberately smaller and inert: a **332-byte**
+The required first live payload is deliberately smaller and inert: a **298-byte**
 canary, also entry-zero and relocation-free, reproduces the same boot ->
 application-context -> startup -> foreground transition but never calls command 5.
-Its sole extra behavior is heartbeat progression at `FEBFFB80`. A hardware run
-must establish that heartbeat progression, normal application health, and reset-
-to-stock behavior before the 462-byte signer is exposed. Only after that should a
-known-input selector-4 experiment establish live generation permission, followed
-by independent MAC agreement and command-5 latency/jitter under normal command-7
-verification load.
+Its sole extra behavior is heartbeat progression at `FEBFFB80`. The CodeFlash
+simulator executes that transition and one foreground tick against both tracked H
+and F images. A hardware run must still establish RAM upload, executable retention,
+normal application health, and reset-to-stock behavior before the 424-byte signer
+is exposed. Only after that should a known-input selector-4 experiment establish
+live generation permission, followed by independent MAC agreement and command-5
+latency/jitter under normal command-7 verification load.
 
 Albino's same-car `eps-telescope` replay now makes that first experiment directly
 operational instead of leaving the bootstrap implicit. The exact specimen reports
 application F181 `8965F1208000 / 8A3111202000`, boot F181 `02 || 32*0x21`, and
 successful boot SecurityAccess plus `0x10F0` authentication of a zero-0201/0202
 4-KiB `FEBF0000` envelope. `exploit/ephemeral_runtime/corolla_hf_direct_canary.py`
-therefore packages the audited 332-byte canary directly under the target's
+therefore packages the audited 298-byte canary directly under the target's
 payload-build secret into deterministic ciphertext SHA-256
-`313d1bb70fe6147c179e4b5a35e4556e536f062a80d53d85af3d4292b0b29d84`,
+`b6d4b261ef6fb614ef0c9f8cd72bc7e7fb7608a793f9094ec76fe226bd884367`,
 replays the exact single old-stack ladder and zero `0203/0201/0202` writes, uses
 `01 46 01 00 FEBF0000 1000` + `10F0/45 00` + raw `FF00`, and performs **no**
 post-`10F0` RAM substitution. Live mode is double-gated (`--execute` plus
@@ -970,8 +974,10 @@ F181 reappears, and does not expose the command-5 proxy. Reset-to-stock still ha
 to be observed separately after a successful canary run. The subsequent guarded
 `corolla_hf_direct_command5.py` path requires that successful canary result plus an
 explicit reset confirmation before live mode, packages the audited proxy directly
-(SHA-256 `a9497970...e9d5a58`), commits mailbox state last, and requires mirrored
-status zero with a 16-byte non-sentinel result; it does not emit B6 or write flash.
+(SHA-256 `a81b367f...140bfc5`), commits mailbox state last, and requires
+mirrored status zero with a 16-byte non-sentinel result; it does not emit B6 or
+write flash.
+
 The same-car bootstrap provenance is retained in
 `data/generated/corolla_2023_albino_telescope_analysis.json` and the specimen
 report [corolla-2023-us-public-route.md](corolla-2023-us-public-route.md) §7.39.

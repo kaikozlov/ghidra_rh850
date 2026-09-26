@@ -50,7 +50,14 @@ def validate_build(audit: dict, binary: Path, source: Path, kind: str, expected_
     cc = audit["compile_contract"]
     need(cc["candidate_base"] == "0xFEBF0000" and cc["candidate_end_exclusive"] == "0xFEBF01D0" and cc["candidate_limit"] == 464, f"{kind} carrier compile geometry drift")
     need(cc["entry_offset"] == 0 and cc["relocations"] == 0 and cc["architecture"] == "v850e3v5", f"{kind} relocation/entry drift")
-    need(audit["toolchain"]["reproduced_byte_exact"] is True and audit["toolchain"]["reference_sha256"] == "273202dc591810b2f587ab8fac044599b57b4e07a24ff61d36b7131b97c00660", f"{kind} toolchain equivalence drift")
+    toolchain = audit["toolchain"]
+    need(
+        toolchain["schema"] == "rh850-toolchain-v1"
+        and toolchain["backend"] == "tools/rh850"
+        and toolchain["image"] == "ghidra-rh850-v850-gcc:16.2.0-binutils2.46.1-gdb18.1-simfix2"
+        and toolchain["image_id"] == "sha256:9fde551b36222ce74be9a366421401a3dc3d397c03dc924c34b452937cca5937",
+        f"{kind} pinned toolchain identity drift",
+    )
 
 
 def build() -> dict:
@@ -81,8 +88,8 @@ def build() -> dict:
     need(mailbox["normalized_direct_reference_count_inside"] == 0, "mailbox direct-reference boundary drift")
     need(static["h_f_prerequisites_transfer_byte_exact"] and ev["h_f_exact_transfer"]["all_ranges_byte_equal"], "H/F prerequisite transfer drift")
 
-    validate_build(proxy, PROXY_BIN, PROXY_SOURCE, "command5-proxy", 462, 2, "3bb96eefae06005c99a0ac52b7f0c64cc5d52e2b0b1fcbb73e0b4ec69609f8d3")
-    validate_build(canary, CANARY_BIN, CANARY_SOURCE, "runtime-canary", 332, 132, "a32baf46dd8e0599021b5c174763887513b3ba903d40ebe284f19d31c97424f4")
+    validate_build(proxy, PROXY_BIN, PROXY_SOURCE, "command5-proxy", 424, 40, "62e4880eaa1bb7dd79fb1f47f4ce44033d1201550a20812a6a103ace00dde183")
+    validate_build(canary, CANARY_BIN, CANARY_SOURCE, "runtime-canary", 298, 166, "ec4a31160b877c9067361fe3296f151c5a5ca38835ee8f8f22aa9a6fe3fca2df")
 
     variants = {row["id"] for row in req["variants"]}
     need("corolla-8965h1202000" not in variants and "corolla-8965f1208000" not in variants, "static carrier candidate must not be promoted as verified RAM geometry")
@@ -132,9 +139,9 @@ def build() -> dict:
         "runtime_candidates": {
             "inert_canary": {
                 "binary": str(CANARY_BIN.relative_to(REPO)),
-                "size": 332,
-                "headroom": 132,
-                "sha256": "a32baf46dd8e0599021b5c174763887513b3ba903d40ebe284f19d31c97424f4",
+                "size": 298,
+                "headroom": 166,
+                "sha256": "ec4a31160b877c9067361fe3296f151c5a5ca38835ee8f8f22aa9a6fe3fca2df",
                 "entry_offset": 0,
                 "relocations": 0,
                 "heartbeat_address": "0xFEBFFB80",
@@ -142,9 +149,9 @@ def build() -> dict:
             },
             "fixed_b6_command5_proxy": {
                 "binary": str(PROXY_BIN.relative_to(REPO)),
-                "size": 462,
-                "headroom": 2,
-                "sha256": "3bb96eefae06005c99a0ac52b7f0c64cc5d52e2b0b1fcbb73e0b4ec69609f8d3",
+                "size": 424,
+                "headroom": 40,
+                "sha256": "62e4880eaa1bb7dd79fb1f47f4ce44033d1201550a20812a6a103ace00dde183",
                 "entry_offset": 0,
                 "relocations": 0,
                 "input_length": 36,
@@ -167,9 +174,10 @@ def build() -> dict:
             "h_f_listed_prerequisites_byte_identical": True,
         },
         "toolchain_reproducibility": {
-            "canonical_sienna_proxy_sha256": "273202dc591810b2f587ab8fac044599b57b4e07a24ff61d36b7131b97c00660",
-            "noncanonical_image_acceptance_rule": "accepted only after byte-exact reproduction of the canonical audited Sienna 546-byte proxy",
-            "selected_build_reproduced_canonical_reference": True,
+            "backend": "tools/rh850",
+            "image": proxy["toolchain"]["image"],
+            "image_id": proxy["toolchain"]["image_id"],
+            "proxy_and_canary_use_same_pinned_image": proxy["toolchain"] == canary["toolchain"],
         },
         "validation_sequence": [
             {

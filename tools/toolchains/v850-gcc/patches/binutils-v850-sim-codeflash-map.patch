@@ -1,0 +1,29 @@
+From: ghidra_rh850 project
+Subject: [PATCH] sim: v850: stop aliasing the 1 MiB low address space
+
+The V850 simulator maps 0x00000000..0x000fffff through a 32 KiB backing
+store.  Loading a 1 MiB RH850/P1M-E CodeFlash image therefore makes every
+0x8000-byte block overwrite the previous block.  Instruction reads at their
+real CodeFlash addresses see bytes from the final alias rather than the loaded
+firmware.
+
+This repository supports the RH850 v850e3v5 target, whose CodeFlash image uses
+the complete 1 MiB low address range.  Give that range a full-size backing
+store so each CodeFlash address remains distinct.  A 1 MiB modulo over a 1 MiB
+region preserves the existing region command while removing the aliases.
+---
+ sim/v850/v850-sim.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/sim/v850/v850-sim.h b/sim/v850/v850-sim.h
+index e96f965664d..00000000000 100644
+--- a/sim/v850/v850-sim.h
++++ b/sim/v850/v850-sim.h
+@@ -46,6 +46,6 @@ extern SIM_DESC simulator;
+ 
+ 
+-#define V850_ROM_SIZE 0x8000
++#define V850_ROM_SIZE 0x100000
+ #define V850_LOW_END 0x200000
+ #define V850_HIGH_START 0xffe000
+ 

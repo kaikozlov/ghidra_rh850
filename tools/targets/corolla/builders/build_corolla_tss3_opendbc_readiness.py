@@ -200,13 +200,13 @@ def main() -> int:
         raise ValueError("static carrier artifact must not claim live closure")
     if direct_canary["schema"] != "corolla-hf-direct-canary-v1" or direct_canary["mode"] != "plan":
         raise ValueError("H/F direct-canary plan schema drift")
-    if direct_canary["package"]["payload_sha256"] != "313d1bb70fe6147c179e4b5a35e4556e536f062a80d53d85af3d4292b0b29d84":
+    if direct_canary["package"]["payload_sha256"] != "b6d4b261ef6fb614ef0c9f8cd72bc7e7fb7608a793f9094ec76fe226bd884367":
         raise ValueError("H/F direct-canary package drift")
     if direct_canary["success_gate"]["command5_proxy_authorized_by_this_plan"] is not False:
         raise ValueError("H/F direct-canary must not authorize command5")
     if direct_command5["schema"] != "corolla-hf-direct-command5-v1" or direct_command5["mode"] != "plan":
         raise ValueError("H/F direct-command5 plan schema drift")
-    if direct_command5["package"]["payload_sha256"] != "a94979704010758dd09acc0e137977c8eed5003822eababa39eb8a7e5e9d5a58":
+    if direct_command5["package"]["payload_sha256"] != "a81b367febb819f4016a0880c707b82fb7f46f1bad5ec59119e43aec0140bfc5":
         raise ValueError("H/F direct-command5 package drift")
     if not direct_command5["live_guards"]["successful_canary_result_required"] or not direct_command5["live_guards"]["reset_to_stock_confirmation_required"]:
         raise ValueError("H/F direct-command5 must remain gated behind canary/reset proof")

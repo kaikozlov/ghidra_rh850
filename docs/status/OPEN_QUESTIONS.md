@@ -361,16 +361,17 @@ ledger context is useful.
   `FEBFFB80..FEBFFBBB` 60-byte mailbox/observation window has zero recovered
   normalized direct references and begins above the startup shadow-copy end.
 
-  Two target-native executables are now audited: a **332-byte** inert canary and
-  a **462-byte** fixed-36-byte command-5 proxy, both entry-zero and relocation-
-  free. The proxy leaves **2 bytes** of carrier headroom, uses H/F dispatcher
+  Two target-native executables are now audited: a **298-byte** inert canary and
+  a **424-byte** fixed-36-byte command-5 proxy, both entry-zero and relocation-
+  free. The proxy leaves **40 bytes** of carrier headroom, uses H/F dispatcher
   `0x82750`, record 0, selector 4, and completion cells `FEBF1280/FEBF1281`, and
-  retries shared-driver busy without aborting command 7. The current audited proxy
-  also self-initializes `request_state=0` after stock final init/before `ei`, samples
-  the adjacent done/status cells as one halfword, and mirrors terminal status into
-  host-readable mailbox byte `FEBFFB81`; the host therefore no longer depends on
-  preserving a preinitialized mailbox across the programming transition. The canary
-  never invokes command 5 and exposes heartbeat at `FEBFFB80`.
+  retries shared-driver busy without aborting command 7. Both inline target calls,
+  preventing VMA-zero helper branches after loading at `FEBF0000`. The CodeFlash
+  simulator executes the corrected canary through one foreground tick on both H/F
+  images. The proxy self-initializes `request_state=0` after stock final init/before
+  `ei`, samples the adjacent done/status cells as one halfword, and mirrors terminal
+  status into host-readable mailbox byte `FEBFFB81`. The canary never invokes
+  command 5 and exposes heartbeat at `FEBFFB80`.
 
   Albino's August-18 range-dump acquisition already demonstrated that the H/F
   authenticated boot-RAM architecture works on this physical specimen. VAR-049

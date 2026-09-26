@@ -24,7 +24,7 @@ from tools.targets.camry.support.camry_f33_corpus import IMAGE, IMAGE_SHA256
 CODEFLASH_ART = REPO / "data/generated/camry_8965F3307000_codeflash.json"
 RUNTIME_BUILDER = REPO / "exploit/ephemeral_runtime/build_camry_f33_command5_carrier.py"
 PROXY_SOURCE = REPO / "exploit/ephemeral_runtime/corolla_hf_command5_proxy.c"
-CANARY_SOURCE = REPO / "exploit/ephemeral_runtime/corolla_hf_canary.c"
+CANARY_SOURCE = REPO / "exploit/ephemeral_runtime/camry_f33_runtime_canary.c"
 PROXY_AUDIT = REPO / "exploit/ephemeral_runtime/audited_camry_f33_command5_proxy_build.json"
 CANARY_AUDIT = REPO / "exploit/ephemeral_runtime/audited_camry_f33_runtime_canary_build.json"
 PROXY_BIN = REPO / "exploit/ephemeral_runtime/audited/camry_f33_command5_proxy.bin"
@@ -40,10 +40,10 @@ PAYLOAD_BUILD_ROOT = bytes.fromhex("ba052435f8843f985fd1329d2b6117b0")
 BOOT_SA_ROOT = bytes.fromhex("f05f36b7d78c03e24ab4faef2a57d044")
 APP_SA_ROOT = bytes.fromhex("893e08418c741ffa2a9c044bffa55813")
 
-CANARY_SIZE = 334
-CANARY_SHA256 = "facd4f590581f7422dab0fc4fcea21f6d73e4c361b1f4d54960d7001e89bdbb0"
-PROXY_SIZE = 464
-PROXY_SHA256 = "0ea9b9d460c3678ad4341817ae606d720bb2a13f4d14ec7dc1e0c8f569db94d3"
+CANARY_SIZE = 302
+CANARY_SHA256 = "81c7a45487a5ae8647b3526567b884011dba0adad606fd345e34ec97137949be"
+PROXY_SIZE = 428
+PROXY_SHA256 = "513dc3cc5edf992b401c6b88ab054b78073df2e634ca52c61a72bed90dff1c09"
 
 # Exact raw-byte ranges recovered/decompiled from the F33 image.  These hashes
 # intentionally bind the semantic map to firmware bytes without making build/tmp
@@ -101,6 +101,13 @@ def validate_audit(audit: dict, binary: Path, source: Path, *, kind: str, size: 
     cc = audit["compile_contract"]
     need(cc["architecture"] == "v850e3v5" and cc["entry_offset"] == 0 and cc["relocations"] == 0, f"{kind} entry/relocation drift")
     need(cc["candidate_base"] == "0xFEBF0000" and cc["candidate_end_exclusive"] == "0xFEBF0308" and cc["candidate_limit"] == 776, f"{kind} carrier geometry drift")
+    toolchain = audit["toolchain"]
+    need(
+        toolchain["schema"] == "rh850-toolchain-v1"
+        and toolchain["backend"] == "tools/rh850"
+        and toolchain["image_id"] == "sha256:9fde551b36222ce74be9a366421401a3dc3d397c03dc924c34b452937cca5937",
+        f"{kind} pinned toolchain identity drift",
+    )
 
 
 def range_sources(image: bytes) -> dict[str, dict]:

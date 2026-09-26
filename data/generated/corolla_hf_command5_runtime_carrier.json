@@ -55,23 +55,23 @@
       "done_flag": "0xFEBF1280",
       "driver_record": 0,
       "entry_offset": 0,
-      "headroom": 2,
+      "headroom": 40,
       "input_length": 36,
       "key_selector": 4,
       "relocations": 0,
-      "sha256": "3bb96eefae06005c99a0ac52b7f0c64cc5d52e2b0b1fcbb73e0b4ec69609f8d3",
-      "size": 462,
+      "sha256": "62e4880eaa1bb7dd79fb1f47f4ce44033d1201550a20812a6a103ace00dde183",
+      "size": 424,
       "status_flag": "0xFEBF1281"
     },
     "inert_canary": {
       "binary": "exploit/ephemeral_runtime/audited/corolla_hf_runtime_canary.bin",
       "entry_offset": 0,
-      "headroom": 132,
+      "headroom": 166,
       "heartbeat_address": "0xFEBFFB80",
       "purpose": "validate boot-to-application handoff, scheduler ownership, executable retention, and observation-cell lifetime before any command-5 request",
       "relocations": 0,
-      "sha256": "a32baf46dd8e0599021b5c174763887513b3ba903d40ebe284f19d31c97424f4",
-      "size": 332
+      "sha256": "ec4a31160b877c9067361fe3296f151c5a5ca38835ee8f8f22aa9a6fe3fca2df",
+      "size": 298
     }
   },
   "scheduler_transfer": {
@@ -88,7 +88,7 @@
   "sources": {
     "canary_audit": {
       "path": "exploit/ephemeral_runtime/audited_corolla_hf_canary_build.json",
-      "sha256": "a34f756d7148eb69fedf8a70f8460b73b5dcafccf17ca26fac1549ed8dc4c5c3"
+      "sha256": "b9dd554e2c9d77c3337d0e8a6aca3e76c65ccc33c2938f03e1e52cbb00e65075"
     },
     "command5_portability": {
       "path": "data/generated/corolla_hf_command5_portability.json",
@@ -96,7 +96,7 @@
     },
     "proxy_audit": {
       "path": "exploit/ephemeral_runtime/audited_corolla_hf_command5_proxy_build.json",
-      "sha256": "f5c303ef5ff757fa9d2f4f5b0743a3294333e853ccce5e1a77260a1786e786af"
+      "sha256": "3fb1b4842bc612017d0790491fdc9559a943160be595db6308ee79bcccc87887"
     },
     "ram_exec_requirements": {
       "path": "data/variant_ram_exec_requirements.json",
@@ -104,17 +104,18 @@
     },
     "runtime_builder": {
       "path": "exploit/ephemeral_runtime/build_corolla_hf_command5_carrier.py",
-      "sha256": "cc553df848ac6b28a480220a809636d1c986cbbf651d11bfcb803669a1872f24"
+      "sha256": "59a1ecc3915e9d641e231de9c0de138a188359bf0ba3432d271120fddeb6b4bb"
     },
     "static_evidence": {
       "path": "data/generated/corolla_hf_command5_runtime_carrier_evidence.json",
-      "sha256": "e9a0726f3c5c31ad5fcfa85c972f1bd35a38064ae0809cfeac048f3bdcf57627"
+      "sha256": "10e341010d8a7e01745e7212af2373843689d31b3953d94afbd754b96899733b"
     }
   },
   "toolchain_reproducibility": {
-    "canonical_sienna_proxy_sha256": "273202dc591810b2f587ab8fac044599b57b4e07a24ff61d36b7131b97c00660",
-    "noncanonical_image_acceptance_rule": "accepted only after byte-exact reproduction of the canonical audited Sienna 546-byte proxy",
-    "selected_build_reproduced_canonical_reference": true
+    "backend": "tools/rh850",
+    "image": "ghidra-rh850-v850-gcc:16.2.0-binutils2.46.1-gdb18.1-simfix2",
+    "image_id": "sha256:9fde551b36222ce74be9a366421401a3dc3d397c03dc924c34b452937cca5937",
+    "proxy_and_canary_use_same_pinned_image": true
   },
   "validation_sequence": [
     {

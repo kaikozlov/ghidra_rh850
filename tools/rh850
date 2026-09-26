@@ -11,9 +11,10 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-IMAGE = "ghidra-rh850-v850-gcc:16.2.0-binutils2.46.1-gdb18.1-simfix1"
+IMAGE = "ghidra-rh850-v850-gcc:16.2.0-binutils2.46.1-gdb18.1-simfix2"
 DOCKERFILE = ROOT / "tools" / "toolchains" / "v850-gcc" / "Dockerfile"
 SELFTEST_RESULT = "RH850_SELFTEST_RESULT=0x12cb5687"
+SELFTEST_CODEFLASH_RESULT = "RH850_CODEFLASH_RESULT=0xc0deface"
 
 SELFTEST_SCRIPT = r"""
 set -eu
@@ -26,9 +27,19 @@ unsigned int selftest_compute(unsigned int x) {
 }
 EOF
 cat >"$work/selftest.S" <<'EOF'
+    .section .codeflash.start
+    .global codeflash_start
+codeflash_start:
+    /* A full 1 MiB low section must retain this block at its real CodeFlash
+       address instead of aliasing each 0x8000-byte block. */
+    mov 0xc0deface, r10
+    mov 0xfebf1004, r11
+    st.w r10, 0[r11]
+    jr32 high_start
+
     .section .text.start
-    .global _start
-_start:
+    .global high_start
+high_start:
     /* Exercise positive and negative format-VI disp32 control flow.  The far
        section forces a non-zero upper displacement word in both directions. */
     jarl32 far_call, lp
@@ -71,6 +82,12 @@ far_jump:
 EOF
 cat >"$work/selftest.ld" <<'EOF'
 SECTIONS {
+  .codeflash 0x00000000 : {
+    FILL(0x00)
+    . = 0x0008F800;
+    *(.codeflash.start)
+    . = 0x00100000;
+  }
   . = 0xFEBF0000;
   .text.start : { *(.text.start) }
   . = 0xFEBF1000;
@@ -79,7 +96,7 @@ SECTIONS {
   .text.far : { *(.text.far) }
   .text : { *(.text) *(.text.*) }
 }
-ENTRY(_start)
+ENTRY(codeflash_start)
 EOF
 v850-elf-gcc \
   -mv850e3v5 -mno-app-regs -ffreestanding -fno-builtin -Os -nostdlib \
@@ -93,7 +110,7 @@ v850-elf-gdb -q -batch \
   -ex "break rh850_sim_stop" \
   -ex "break rh850_sim_fail_stop" \
   -ex run \
-  -ex 'printf "RH850_SELFTEST_RESULT=0x%x\n", *(unsigned int *)0xFEBF1000'
+  -ex 'printf "RH850_SELFTEST_RESULT=0x%x\nRH850_CODEFLASH_RESULT=0x%x\n", *(unsigned int *)0xFEBF1000, *(unsigned int *)0xFEBF1004'
 """
 
 
@@ -285,11 +302,76 @@ def cmd_selftest(_args: argparse.Namespace) -> int:
         sys.stderr.write(proc.stderr)
     if proc.returncode != 0:
         return proc.returncode
-    if SELFTEST_RESULT not in proc.stdout:
-        raise Rh850ToolError(
-            f"simulator completed without expected result {SELFTEST_RESULT!r}"
-        )
+    for expected in (SELFTEST_RESULT, SELFTEST_CODEFLASH_RESULT):
+        if expected not in proc.stdout:
+            raise Rh850ToolError(
+                f"simulator completed without expected result {expected!r}"
+            )
     print("selftest: PASS")
+    return 0
+
+
+def cmd_codeflash_sim(args: argparse.Namespace) -> int:
+    from rh850_codeflash import CodeFlashSimError, run_raw_image, run_scenario
+
+    image = args.image if args.image.is_absolute() else ROOT / args.image
+    output_dir = args.output_dir
+    if output_dir is not None and not output_dir.is_absolute():
+        output_dir = ROOT / output_dir
+
+    loads: dict[int, Path] = {}
+    for value in args.load:
+        raw_address, separator, raw_path = value.partition("=")
+        if not separator or not raw_address or not raw_path:
+            raise Rh850ToolError("--load must use ADDRESS=PATH")
+        try:
+            address = int(raw_address, 0)
+        except ValueError as exc:
+            raise Rh850ToolError(f"invalid --load address {raw_address!r}") from exc
+        if not 0 <= address <= 0xFFFFFFFF:
+            raise Rh850ToolError(f"--load address {raw_address!r} is outside 32-bit space")
+        if address in loads:
+            raise Rh850ToolError(f"duplicate --load address 0x{address:08X}")
+        loads[address] = Path(raw_path)
+
+    try:
+        if args.spec is None:
+            result = run_raw_image(
+                root=ROOT,
+                image_path=image,
+                image_base=args.image_base or 0,
+                entry=args.entry,
+                memory_regions=args.memory_region,
+                gdb_commands=args.gdb_command,
+                ram_loads=list(loads.items()),
+                output_dir=output_dir,
+                expected_output=args.expected_output,
+            )
+        else:
+            if args.image_base is not None or args.entry is not None:
+                raise Rh850ToolError("--base and --entry cannot override a spec")
+            spec = args.spec if args.spec.is_absolute() else ROOT / args.spec
+            result = run_scenario(
+                root=ROOT,
+                image_path=image,
+                scenario_path=spec,
+                output_dir=output_dir,
+                expected_output=args.expected_output,
+                load_paths=loads,
+                extra_memory_regions=args.memory_region,
+                gdb_commands=args.gdb_command,
+            )
+    except CodeFlashSimError as exc:
+        raise Rh850ToolError(str(exc)) from exc
+    sys.stdout.write(result.output)
+    print(
+        f"codeflash-sim: PASS input={result.input_sha256} "
+        f"modeled={result.modeled_sha256}"
+    )
+    print(
+        "proof-boundary: hardware UNVERIFIED "
+        "(upload, RAM retention/MPU, interrupts/peripherals, timing, vehicle behavior)"
+    )
     return 0
 
 
@@ -317,9 +399,66 @@ def build_parser() -> argparse.ArgumentParser:
 
     p = sub.add_parser(
         "selftest",
-        help="compile and execute a small v850e3v5 program at 0xFEBF0000",
+        help="execute low-CodeFlash and high-RAM v850e3v5 regression programs",
     )
     p.set_defaults(func=cmd_selftest)
+
+    p = sub.add_parser(
+        "codeflash-sim",
+        help="execute a modeled raw CodeFlash image at its real RH850 addresses",
+    )
+    p.add_argument("image", type=Path)
+    p.add_argument(
+        "--spec",
+        type=Path,
+        help="optional strict execution contract for a known image",
+    )
+    p.add_argument(
+        "--output-dir",
+        type=Path,
+        help="retain the modeled image, ELF, overlay audit, and simulator output",
+    )
+    p.add_argument(
+        "--expect",
+        dest="expected_output",
+        action="append",
+        default=[],
+        help="require a string in simulator output; repeat as needed",
+    )
+    p.add_argument(
+        "--load",
+        action="append",
+        default=[],
+        metavar="ADDRESS=PATH",
+        help="load a raw RAM artifact at an exact address; repeat as needed",
+    )
+    p.add_argument(
+        "--base",
+        dest="image_base",
+        type=lambda value: int(value, 0),
+        help="CodeFlash base without --spec (default: 0)",
+    )
+    p.add_argument(
+        "--entry",
+        type=lambda value: int(value, 0),
+        help="entry address without --spec (default: CodeFlash base)",
+    )
+    p.add_argument(
+        "--memory-region",
+        action="append",
+        default=[],
+        metavar="BASE,SIZE",
+        help="additional simulator memory mapping; repeat as needed",
+    )
+    p.add_argument(
+        "--command",
+        "-ex",
+        dest="gdb_command",
+        action="append",
+        default=[],
+        help="GDB command after load; repeat as needed",
+    )
+    p.set_defaults(func=cmd_codeflash_sim)
 
     p = sub.add_parser(
         "exec",

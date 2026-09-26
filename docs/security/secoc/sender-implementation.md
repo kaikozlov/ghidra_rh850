@@ -376,11 +376,12 @@ and exact H MPU region 5 gives it supervisor R/W/X (`MPAT=0xB8`) in both
 recovered application contexts. The first recovered normalized reference is
 exactly `FEBF01D0`. Relevant startup/MPU/command-5 bytes transfer exactly to F.
 
-The H/F executable pair is deliberately split. The inert canary is **332 bytes**
+The H/F executable pair is deliberately split. The inert canary is **298 bytes**
 and only advances heartbeat `FEBFFB80`; the fixed-B6 command-5 proxy is
-**462 bytes**, leaves **2 bytes** headroom, fixes input length to 36 bytes, and
+**424 bytes**, leaves **40 bytes** headroom, fixes input length to 36 bytes, and
 uses H/F dispatcher `0x82750`, record 0, selector 4, and completion cells
-`FEBF1280/FEBF1281`. Both are entry-zero and relocation-free. The 60-byte H/F
+`FEBF1280/FEBF1281`. Both are entry-zero, relocation-free, and inline target
+calls so their control flow is independent of the RAM load address. The 60-byte H/F
 mailbox `FEBFFB80..FEBFFBBB` is above the startup shadow-copy end and has zero
 recovered normalized direct references under the same bounded census. The hardened
 proxy now writes `request_state=0` itself after the stock startup/final-init sequence
@@ -392,15 +393,16 @@ XCP-readable mailbox byte `FEBFFB81`. Immediate non-busy dispatcher errors are
 mirrored to the same byte. Thus neither mailbox preinitialization nor direct host
 access to the internal completion cells remains a prerequisite.
 
-This is still **not verified RAM geometry**. The negative census does not exclude
-computed aliases, DMA/hardware writers, or live lifetime conflicts, so H/F remain
-absent from `data/variant_ram_exec_requirements.json` and the Sienna
-`live_installer.py` is not generalized by this finding. Hardware validation must
-run the 332-byte canary first and prove heartbeat progression/application health.
-Only after a separately confirmed reset-to-stock may the plan-first
-`exploit/ephemeral_runtime/corolla_hf_direct_command5.py` expose the 462-byte proxy:
-its live mode requires the retained successful canary result, packages the proxy as
-the exact zero-DID 4-KiB envelope SHA-256 `a9497970…e9d5a58`, writes output/status
+This is still **not verified RAM geometry**. The CodeFlash simulator executes the
+corrected canary through one foreground tick on both tracked H/F images, but the
+negative census and instruction model do not exclude computed aliases, DMA/hardware
+writers, live lifetime conflicts, or peripheral/timing behavior. H/F therefore
+remain absent from `data/variant_ram_exec_requirements.json`; hardware validation
+must run the 298-byte canary and prove upload, heartbeat progression, application
+health, and reset-to-stock. Only then may the plan-first
+`exploit/ephemeral_runtime/corolla_hf_direct_command5.py` expose the 424-byte proxy.
+Its live mode requires the retained successful canary result and packages the proxy
+as zero-DID 4-KiB envelope SHA-256 `a81b367f…140bfc5`, writes output/status
 sentinels, commits state `1` last, and accepts only mirrored status zero with a
 16-byte non-sentinel output. It sends no B6 and writes no flash. Live slot-4
 permission, independent CMAC agreement, and signing latency/jitter remain separate

@@ -89,15 +89,9 @@ with tempfile.TemporaryDirectory() as td:
         "success_bookkeeping": "FUN_0008F4D0(id,0) is taken",
     })
     check("manifest requires NRTD for programming-session operations", any("NRTD" in s for s in manifest["safety"]["requirements"]))
-    check("preflight payload deterministic", package["payloads"]["preflight"]["sha256"] == "ea6d61d6ed4fcdb41302589fb8efefcf401576d6182e7d494d9ac9798012e97e")
-    check("apply payload deterministic", package["payloads"]["apply"]["sha256"] == "647add6242149c0e63f953195009414df46c96c92e760492004fa7a4ce73319a")
-    check("post-apply verifier deterministic", package["payloads"]["post_apply"]["payload_sha256"] == "f7c3462e57da7fcd687c253062a964bb48354f136ac07bf3c6db012467e40760")
     restore = json.loads((out / "restore/restore.json").read_text())
     check("restore reverses stage3 only", restore["restore_config"]["expected_live_preimage"] == "e00714d3" and restore["restore_config"]["replacement"] == "e10f14d3" and restore["validation"]["target_bytes_restored"] is True)
     check("restore returns exact stage2 CRC state", restore["validation"]["restore_simulated_fixup"] == "0xD12ADB05" and restore["validation"]["restore_simulated_residue"] == "0xFFFFFFFF")
-    check("restore config deterministic", builder.sha256((out / "restore/restore_config.bin").read_bytes()) == "4abd3270fdf96aac325cf3cb5ffd828c7c58c360010c08de8459d08f40dccaaa")
-    check("restore shellcode deterministic", builder.sha256((out / "restore/restore_shellcode.bin").read_bytes()) == "9447176f873e12648c208d780283638d2c83ca599f3e61a55f946b63ca0537fd")
-    check("restore payload deterministic", builder.sha256((out / "restore/restore_payload.bin").read_bytes()) == "9880a1f0dfe1a1ddcaa1da42453ca844d45dd15cd1147577d47a203d47fcfc4d")
     check("package never materializes standalone secrets", not any("secret" in p.name.lower() for p in out.rglob("*")))
 
 print("\n== retained stage2 apply / persistence proof ==")

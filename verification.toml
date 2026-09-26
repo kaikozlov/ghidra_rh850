@@ -1034,11 +1034,23 @@ tests = ["tests/verify_gtsplus_aux_body_recovery.py"]
 requires_external = ["gtsplus"]
 modes = ["local"]
 
+[suite.rh850_generic_codeflash_sim]
+tests = ["tests/verify_rh850_generic_codeflash_sim.py"]
+
 [suite.camry_f33_gate2_semantic_patch]
 tests = ["tests/verify_camry_f33_gate2_semantic_patch.py"]
 
 [suite.camry_f33_gate2_root_result_patch]
 tests = ["tests/verify_camry_f33_gate2_root_result_patch.py"]
+
+[suite.camry_f33_gate2_codeflash_sim]
+tests = ["tests/verify_camry_f33_gate2_codeflash_sim.py"]
+
+[suite.camry_f33_runtime_canary_codeflash_sim]
+tests = ["tests/verify_camry_f33_runtime_canary_codeflash_sim.py"]
+
+[suite.corolla_hf_runtime_canary_codeflash_sim]
+tests = ["tests/verify_corolla_hf_runtime_canary_codeflash_sim.py"]
 
 [suite.camry_f33_freshness_result_patch]
 tests = ["tests/verify_camry_f33_freshness_result_patch.py"]

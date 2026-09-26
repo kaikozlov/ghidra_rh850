@@ -75,8 +75,8 @@ def _section_corolla_hf_command5_runtime_carrier():
     print('\n== audited executable candidates ==')
     canary = a['runtime_candidates']['inert_canary']
     proxy = a['runtime_candidates']['fixed_b6_command5_proxy']
-    check('canary exact audited bytes', canary['size'] == CANARY_BIN.stat().st_size == 332 and canary['headroom'] == 132 and (canary['sha256'] == sha(CANARY_BIN.read_bytes()) == 'a32baf46dd8e0599021b5c174763887513b3ba903d40ebe284f19d31c97424f4'))
-    check('proxy exact audited bytes', proxy['size'] == PROXY_BIN.stat().st_size == 462 and proxy['headroom'] == 2 and (proxy['sha256'] == sha(PROXY_BIN.read_bytes()) == '3bb96eefae06005c99a0ac52b7f0c64cc5d52e2b0b1fcbb73e0b4ec69609f8d3'))
+    check('canary exact audited bytes', canary['size'] == CANARY_BIN.stat().st_size == 298 and canary['headroom'] == 166 and (canary['sha256'] == sha(CANARY_BIN.read_bytes()) == 'ec4a31160b877c9067361fe3296f151c5a5ca38835ee8f8f22aa9a6fe3fca2df'))
+    check('proxy exact audited bytes', proxy['size'] == PROXY_BIN.stat().st_size == 424 and proxy['headroom'] == 40 and (proxy['sha256'] == sha(PROXY_BIN.read_bytes()) == '62e4880eaa1bb7dd79fb1f47f4ce44033d1201550a20812a6a103ace00dde183'))
     check('both executables entry0/no relocations', canary['entry_offset'] == proxy['entry_offset'] == 0 and canary['relocations'] == proxy['relocations'] == 0)
     check('proxy exact B6 command5 contract', proxy['input_length'] == 36 and proxy['driver_record'] == 0 and (proxy['key_selector'] == 4) and (proxy['dispatcher'] == '0x00082750') and (proxy['done_flag'] == '0xFEBF1280') and (proxy['status_flag'] == '0xFEBF1281'))
     check('proxy shared-driver busy retry semantics', 'busy result 2' in proxy['busy_behavior'] and 'retries' in proxy['busy_behavior'] and ('no command-7 abort' in proxy['busy_behavior']))
@@ -90,9 +90,9 @@ def _section_corolla_hf_command5_runtime_carrier():
     print('\n== audit/toolchain trust ==')
     for label, audit, source in (('proxy', proxy_audit, PROXY_SOURCE), ('canary', canary_audit, CANARY_SOURCE)):
         check(f'{label} audit source hash', audit['source']['sha256'] == sha(source.read_bytes()))
-        check(f'{label} compiler equivalence', audit['toolchain']['reproduced_byte_exact'] is True and audit['toolchain']['reference_sha256'] == '273202dc591810b2f587ab8fac044599b57b4e07a24ff61d36b7131b97c00660')
+        check(f'{label} pinned toolchain', audit['toolchain']['schema'] == 'rh850-toolchain-v1' and audit['toolchain']['backend'] == 'tools/rh850' and audit['toolchain']['image_id'] == 'sha256:9fde551b36222ce74be9a366421401a3dc3d397c03dc924c34b452937cca5937')
         check(f'{label} static-only review grade', audit['review_status'] == 'static-carrier-candidate-not-live-validated')
-    check('artifact records compiler-equivalence rule', a['toolchain_reproducibility']['selected_build_reproduced_canonical_reference'] and 'byte-exact' in a['toolchain_reproducibility']['noncanonical_image_acceptance_rule'])
+    check('artifact binds one pinned compiler image', a['toolchain_reproducibility']['proxy_and_canary_use_same_pinned_image'] and a['toolchain_reproducibility']['backend'] == 'tools/rh850')
     print('\n== dynamic boundary ==')
     b = a['boundary']
     check('static carrier candidate is closed', b['static_target_native_carrier_candidate_closed'] is True)
@@ -361,7 +361,7 @@ def _section_corolla_hf_direct_canary():
     canary_audit = json.loads((ROOT / 'exploit/ephemeral_runtime/audited_corolla_hf_canary_build.json').read_text())
     canary_source_bytes = canary_source.read_bytes()
     check('heartbeat semantics are source/audit bound', canary_audit['source']['path'] == 'exploit/ephemeral_runtime/corolla_hf_canary.c' and canary_audit['source']['sha256'] == hashlib.sha256(canary_source_bytes).hexdigest() and (canary_audit['runtime_contract']['canary_heartbeat'] == f'0x{HEARTBEAT_ADDR:08X}') and (b'0x45504843u' in canary_source_bytes))
-    check('audited canary identity', meta['shellcode_size'] == 332 and meta['shellcode_sha256'] == CANARY_SHA256)
+    check('audited canary identity', meta['shellcode_size'] == 298 and meta['shellcode_sha256'] == CANARY_SHA256)
     check('direct package identity', len(payload) == 4096 and meta['payload_sha256'] == DIRECT_PAYLOAD_SHA256)
     check('package callback and descriptor are FEBF0000', meta['callback_address'] == '0xFEBF0000' and meta['crc_descriptor_address'] == '0xFEBF0000')
     check('package authenticates and has terminal CRC residue', meta['cmac_valid'] is True and meta['crc_residue'] == '0xFFFFFFFF')
@@ -895,8 +895,8 @@ def _section_corolla_hf_direct_command5():
     spec.loader.exec_module(mod)
     plan = mod.build_plan()
     check('schema exact', plan['schema'] == 'corolla-hf-direct-command5-v1')
-    check('audited proxy identity exact', PROXY.stat().st_size == 462 and plan['package']['shellcode_sha256'] == '3bb96eefae06005c99a0ac52b7f0c64cc5d52e2b0b1fcbb73e0b4ec69609f8d3')
-    check('direct proxy package identity exact', plan['package']['payload_sha256'] == 'a94979704010758dd09acc0e137977c8eed5003822eababa39eb8a7e5e9d5a58' and plan['package']['payload_size'] == 4096)
+    check('audited proxy identity exact', PROXY.stat().st_size == 424 and plan['package']['shellcode_sha256'] == '62e4880eaa1bb7dd79fb1f47f4ce44033d1201550a20812a6a103ace00dde183')
+    check('direct proxy package identity exact', plan['package']['payload_sha256'] == 'a81b367febb819f4016a0880c707b82fb7f46f1bad5ec59119e43aec0140bfc5' and plan['package']['payload_size'] == 4096)
     check('package validates CRC and CMAC', plan['package']['crc_residue'] == '0xFFFFFFFF' and plan['package']['cmac_valid'] is True)
     check('field-proven zero-DID old-stack path retained', plan['field_proven_bootstrap']['did_0203'] == '0000000000' and plan['field_proven_bootstrap']['did_0201'] == '00' * 16 and (plan['field_proven_bootstrap']['did_0202'] == '00' * 16) and (plan['field_proven_bootstrap']['post_10f0_ram_substitution_required'] is False))
     probe = plan['probe']
@@ -910,7 +910,7 @@ def _section_corolla_hf_direct_command5():
     check('proxy samples adjacent completion bytes as halfword', 'volatile unsigned short *completion' in SOURCE.read_text() and '*completion = 0xff00u;' in SOURCE.read_text())
     with tempfile.TemporaryDirectory() as td:
         good = Path(td) / 'good.json'
-        good.write_text(json.dumps({'schema': 'corolla-hf-direct-canary-v1', 'mode': 'live', 'created_at': 'test', 'live': {'attestation': {'attested': True, 'heartbeat_advanced': True, 'application_f181_hex': mod.ALBINO_APP_F181.hex(), 'heartbeat_first_hex': '43485045', 'heartbeat_second_hex': '44485045'}, 'panda_safety_tx_blocked_delta': 0, 'package': {'payload_sha256': '313d1bb70fe6147c179e4b5a35e4556e536f062a80d53d85af3d4292b0b29d84'}, 'reset_to_stock_checked': False}}))
+        good.write_text(json.dumps({'schema': 'corolla-hf-direct-canary-v1', 'mode': 'live', 'created_at': 'test', 'live': {'attestation': {'attested': True, 'heartbeat_advanced': True, 'application_f181_hex': mod.ALBINO_APP_F181.hex(), 'heartbeat_first_hex': '43485045', 'heartbeat_second_hex': '44485045'}, 'panda_safety_tx_blocked_delta': 0, 'package': {'payload_sha256': 'b6d4b261ef6fb614ef0c9f8cd72bc7e7fb7608a793f9094ec76fe226bd884367'}, 'reset_to_stock_checked': False}}))
         gate = mod.validate_canary_result(good)
         check('successful exact canary result is accepted', gate['application_f181_hex'] == mod.ALBINO_APP_F181.hex() and gate['panda_safety_tx_blocked_delta'] == 0)
         bad = Path(td) / 'bad.json'
