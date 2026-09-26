@@ -154,6 +154,39 @@ post-receive hook.
 | Corolla `8965F1208000` | `FEBE563D` | `corolla-hf` | exact-F181 resident + helper embedded in authenticated LocalRAM payload |
 | Crown `8965F3012000` | `FEBE527D` | `crown-f30` | exact-F181 high-tail resident + post-startup functional C6 helper load |
 
+#### Shared P1M-E RAM-execution invariant
+
+This runtime does not depend on a Camry-only processor feature. Camry F33 and
+Crown F30 use the 1-MiB `R7F701381`; Corolla H/F use the 1-MiB `R7F701383`.
+Both are RH850/P1M-E DPS variants with the same 160-MHz core, 16 MPU channels,
+128 KiB PE1 Local RAM (`FEBE0000..FEBFFFFF`), and 64 KiB Global RAM. The P1M-E
+execution map permits instruction fetch from PE1 Local RAM and Global RAM.
+`STAC_LM0` controls local-RAM zero initialization for the relevant system and
+application reset classes.
+
+That closes RAM execution as a shared platform capability. What remains
+target-specific is deterministic firmware data: which reset path the exact
+bootloader uses, which startup writes survive, the application call graph, RX
+ring, freshness fields, transmit handle, and callable signer entry points. The
+builder pins those facts to each exact CodeFlash hash; it does not use a
+vehicle-name capability gate.
+
+The classic-`0x08A` resident profiles currently compile to these exact
+application interfaces:
+
+| exact target | Panda bus | RX ring / producer | callback table / slot | resident state | response lower handle | signer scratch |
+|---|---:|---|---|---|---:|---|
+| Camry `8965F3307000` | 0 | `FEBE4038` / `FEBE48F8` | `000219DC` / 44 | `FEBF025C` | 53 | `FEBF0280` |
+| Crown `8965F3012000` | 1 | `FEBE3E98` / `FEBE475A` | `00021A00` / 42 | `FEBF025C` | 51 | `FEBF0280` |
+| Corolla `8965H1202000` | 1 | `FEBE3F4C` / `FEBE480C` | `00021988` / 41 | `FEBFF9F0` | 50 | `FEF07F98` |
+| Corolla `8965F1208000` | 1 | `FEBE3F4C` / `FEBE480C` | `00021988` / 41 | `FEBFF9F0` | 50 | `FEF07F98` |
+
+All four use four classic standard-`0x777` fragments, standard-`0x7A9`
+responses, the same 36-byte command-5 authentication domain, and exact
+target-specific CodeFlash calls. Corolla H/F intentionally produce identical
+resident/helper binaries because their pinned runtime profile is identical;
+their F181 and CodeFlash identities remain distinct deployment guards.
+
 The recurring steering-control contract is unified C7, but the field installation
 path is deliberately target-shaped. Camry/Crown use functional C6 only as a
 post-startup helper transport: the authenticated boot callback installs the
@@ -310,19 +343,34 @@ uv run --locked python tools/targets/tss3/builders/build_tss3_unified_b6_signer_
 ./tss3-unified-signer replace-current /tmp/tss3-replace-current.json
 ```
 
-The exact-Camry build also packages the audited classic-CAN `0x08A` oracle as
-the deployment pair `bundle/oracle/classic.json` plus
-`bundle/oracle/classic_payload.bin`; it does not copy the older Camry car kit's
-unrelated experiments. For the current relay-correct request-plane setup, use
-the guided path instead of the direct-B6 signer path:
+Every exact-target kit packages its target-bound classic-CAN `0x08A` oracle as
+`bundle/oracle/classic.json` plus `bundle/oracle/classic_payload.bin`. Build one
+kit with an exact target, or build the complete release set in target-named
+subdirectories:
 
 ```bash
 uv run --locked python tools/targets/tss3/builders/build_tss3_unified_b6_signer_kit.py \
-  --target camry-8965F3307000 --out EMPTY_KIT_DIRECTORY
+  --target crown-8965F3012000 --out EMPTY_KIT_DIRECTORY
 
-# full EPS OFF first; then NRTD / READY=0 / Park / stationary
-./tss3-unified-signer oracle-bringup /tmp/tss3-oracle-bringup
+uv run --locked python tools/targets/tss3/builders/build_tss3_unified_b6_signer_kit.py \
+  --target all --out EMPTY_KIT_SET_DIRECTORY
 ```
+
+The generic Corolla H/F and Crown qualification path is:
+
+```bash
+# full EPS OFF first; then NRTD / READY=0 / Park / stationary
+./tss3-unified-signer doctor
+./tss3-unified-signer oracle-install /tmp/tss3-oracle-install.json
+# transition directly to READY/Park without another EPS power cycle
+./tss3-unified-signer oracle-status /tmp/tss3-oracle-status.json
+./tss3-unified-signer oracle-self-test /tmp/tss3-oracle-self-test.json
+./tss3-unified-signer oracle-benchmark-100hz 200 /tmp/tss3-oracle-100hz.json
+```
+
+For exact Camry, `oracle-bringup` remains the guided peer-recovery path and
+`oracle-ui-bringup` remains the fully-OFF startup catcher. Those Camry-only
+commands reject Corolla/Crown bundle identities.
 
 `oracle-bringup` installs and attests the volatile classic signer, prompts for
 the direct transition to READY, performs the maintained Brake/EPB then FRC peer
@@ -330,6 +378,24 @@ recovery while retaining the Panda lease, requires healthy DRCC state, and ends
 with an independently fresh signed-`0x08A` self-test. `recover-peers` exposes that recovery
 step separately. The standalone `f33-08a-classic-oracle` launcher exposes the
 same command.
+
+The hardware qualification is intentionally short and target-neutral:
+
+1. Bind the bundle to the application F181 and CodeFlash hash reported in
+   `bundle/oracle/classic.json`; never substitute a related calibration.
+2. With the vehicle stationary in Park and READY low, install and attest only
+   the volatile payload.
+3. Transition directly to READY without powering the EPS off. Require
+   `oracle-status` to report the initialized exact-target state.
+4. Require `oracle-self-test` to return one independently fresh native-MAC
+   `0x08A`, then require the 200-request 100-Hz benchmark to show matching
+   request, success, response, and received counts with no signer errors.
+5. Send sequence zero/release before leaving qualification. A full EPS power
+   cycle removes the resident; repeat installation after every such cycle.
+
+This proves RAM survival, exact target calls, command-5 signing, and the
+classic-CAN request/response rate on that ECU. It does not transfer Camry road
+qualification to Corolla/Crown, prove steering authority, or authorize driving.
 
 The historical direct-B6 signer remains available for either host wiring with
 `--topology stock` (Panda bus 1) or exact-Camry

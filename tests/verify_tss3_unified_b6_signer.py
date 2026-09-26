@@ -391,14 +391,24 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
           result["qualified"] is True and result["verdict"] == "stock_functional_mailbox_live" and
           result["mailbox"]["tail_match"] is True and panda.sent == [(0x777, host.PROBE_FRAME, 1)])
 
-    # One packaged Crown kit exercises the field handoff without multiplying the
-    # already-covered four-target compilation cost.
-    kit = root / "crown-kit"
-    kit_proc = subprocess.run(
-        [sys.executable, str(KIT_BUILDER), "--target", "crown-8965F3012000", "--out", str(kit)],
+    # The all-target build is the release surface: every exact target gets its own
+    # signer and classic-0x08A deployment pair.
+    kit_set = root / "exact-target-kits"
+    kit_set_proc = subprocess.run(
+        [sys.executable, str(KIT_BUILDER), "--target", "all", "--out", str(kit_set)],
         cwd=ROOT, check=True, capture_output=True, text=True,
     )
-    kit_meta = json.loads(kit_proc.stdout)
+    kit_set_meta = json.loads(kit_set_proc.stdout)
+    check("all-target kit build emits four exact-target classic-oracle deployment pairs",
+          kit_set_meta["schema"] == "tss3-unified-b6-signer-kit-set-v1" and
+          set(kit_set_meta["kits"]) == set(TARGETS) and all(
+              kit_set_meta["kits"][target]["classic_08a_oracle_target"] == target and
+              json.loads((kit_set / target / "bundle/oracle/classic.json").read_text(encoding="utf-8"))["target"]["name"] == target and
+              (kit_set / target / "bundle/oracle/classic_payload.bin").stat().st_size == 0x1000
+              for target in TARGETS
+          ))
+    kit = kit_set / "crown-8965F3012000"
+    kit_meta = json.loads((kit / "manifest.json").read_text(encoding="utf-8"))
     packaged_meta = json.loads((kit / "bundle/unified.json").read_text(encoding="utf-8"))
     check("unified field kit packages one exact target and common launcher",
           kit_meta["schema"] == "tss3-unified-b6-signer-kit-v1" and
@@ -464,12 +474,8 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
           loader_session.panda.sent[0] == (0x777, host.loader_frame(0, field_bundle.helper_image[:4]), 1) and
           loader_session.panda.sent[-1] == (0x777, host.loader_frame(host.ARM_INDEX), 1))
 
-    camry_kit = root / "camry-postauth-kit"
-    camry_kit_proc = subprocess.run(
-        [sys.executable, str(KIT_BUILDER), "--target", "camry-8965F3307000", "--out", str(camry_kit)],
-        cwd=ROOT, check=True, capture_output=True, text=True,
-    )
-    camry_kit_meta = json.loads(camry_kit_proc.stdout)
+    camry_kit = kit_set / "camry-8965F3307000"
+    camry_kit_meta = json.loads((camry_kit / "manifest.json").read_text(encoding="utf-8"))
     camry_field_meta = json.loads((camry_kit / "bundle/unified.json").read_text(encoding="utf-8"))
     camry_field_bundle = host.load_bundle(camry_kit / "bundle/unified.json")
     camry_launcher = (camry_kit / "tss3-unified-signer").read_text(encoding="utf-8")

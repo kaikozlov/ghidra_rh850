@@ -20,27 +20,35 @@ from exploit.ephemeral_runtime import camry_f33_08a_classic_oracle as host
 from exploit.ephemeral_runtime import camry_f33_oracle_ui_bringup as ui_bringup
 from exploit.common import ram_exec
 
-OUT = ROOT / "build/out/ephemeral-runtime/camry-f33-08a-classic-oracle"
-FOREGROUND_OUT = ROOT / "build/out/ephemeral-runtime/camry-f33-08a-classic-oracle-foreground-only"
+CAMRY_TARGET = "camry-8965F3307000"
+CAMRY_STEM = build.output_stem(CAMRY_TARGET)
+OUT = build.default_output_dir(CAMRY_TARGET, idle_fast_path=True)
+FOREGROUND_OUT = build.default_output_dir(CAMRY_TARGET, idle_fast_path=False)
 AUDIT = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_08a_classic_oracle_build.json"
 AUDITED_STAGE = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_08a_classic_oracle.bin"
 LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_08a_classic_oracle_launcher.sh"
 UNIFIED_LAUNCHER = ROOT / "exploit/ephemeral_runtime/tss3_unified_b6_signer_launcher.sh"
 
-subprocess.run([sys.executable, str(build.BUILDER)], cwd=ROOT, check=True, stdout=subprocess.DEVNULL)
 subprocess.run(
-    [sys.executable, str(build.BUILDER), "--foreground-only"],
+    [sys.executable, str(build.BUILDER), "--target", CAMRY_TARGET],
     cwd=ROOT, check=True, stdout=subprocess.DEVNULL,
 )
-with tempfile.TemporaryDirectory(prefix="verify-corolla-08a-oracle-") as td:
-    corolla_proc = subprocess.run(
-        [sys.executable, str(build.BUILDER), "--target", "corolla-8965H1202000",
-         "--output-dir", td],
-        cwd=ROOT, check=True, capture_output=True, text=True,
-    )
-    corolla_meta = json.loads(corolla_proc.stdout)
-meta = json.loads((OUT / "camry_f33_08a_classic_oracle.json").read_text())
-foreground_meta = json.loads((FOREGROUND_OUT / "camry_f33_08a_classic_oracle.json").read_text())
+subprocess.run(
+    [sys.executable, str(build.BUILDER), "--target", CAMRY_TARGET, "--foreground-only"],
+    cwd=ROOT, check=True, stdout=subprocess.DEVNULL,
+)
+target_meta = {}
+with tempfile.TemporaryDirectory(prefix="verify-tss3-08a-oracle-") as td:
+    for target in sorted(set(build.ORACLE_PROFILES) - {CAMRY_TARGET}):
+        target_out = Path(td) / target
+        proc = subprocess.run(
+            [sys.executable, str(build.BUILDER), "--target", target, "--output-dir", str(target_out)],
+            cwd=ROOT, check=True, capture_output=True, text=True,
+        )
+        target_meta[target] = json.loads(proc.stdout)
+meta_path = OUT / f"{CAMRY_STEM}.json"
+meta = json.loads(meta_path.read_text())
+foreground_meta = json.loads((FOREGROUND_OUT / f"{CAMRY_STEM}.json").read_text())
 resident = (OUT / meta["resident"]["path"]).read_bytes()
 foreground_resident = (FOREGROUND_OUT / foreground_meta["resident"]["path"]).read_bytes()
 helper = (OUT / meta["helper"]["path"]).read_bytes()
@@ -215,16 +223,25 @@ check("all exact targets select that same wire protocol from profile data",
           profile["helper_macros"]["ORACLE_REQUEST_HEADER_WORD"] == 0x00000408
           for profile in build.ORACLE_PROFILES.values()
       ))
-check("Corolla lifecycle variant compiles from the same canonical sources",
-      corolla_meta["target"]["name"] == "corolla-8965H1202000" and
-      corolla_meta["request"]["carrier"] == "functional-nibble4" and
-      corolla_meta["request"]["can_id"] == "0x00000777" and
-      corolla_meta["response"]["can_id"] == "0x000007A9" and
-      corolla_meta["state"]["size"] == 0x24 and
-      corolla_meta["state"]["application_sid23_readable"] is True and
-      corolla_meta["scratch"]["base"] == "0xFEF07F98" and
-      corolla_meta["resident"]["size"] <= corolla_meta["resident"]["limit"] and
-      corolla_meta["helper"]["size"] <= corolla_meta["helper"]["limit"])
+check("Corolla H/F and Crown lifecycle variants compile from the same canonical sources",
+      set(target_meta) == {
+          "crown-8965F3012000", "corolla-8965H1202000", "corolla-8965F1208000",
+      } and all(target_meta[target]["target"]["name"] == target for target in target_meta) and
+      all(target_meta[target]["request"]["carrier"] == "functional-nibble4" for target in target_meta) and
+      all(target_meta[target]["request"]["can_id"] == "0x00000777" for target in target_meta) and
+      all(target_meta[target]["request"]["bus"] == 1 for target in target_meta) and
+      all(target_meta[target]["response"]["can_id"] == "0x000007A9" for target in target_meta) and
+      all(target_meta[target]["state"]["size"] == 0x24 for target in target_meta) and
+      all(target_meta[target]["resident"]["size"] <= target_meta[target]["resident"]["limit"] for target in target_meta) and
+      all(target_meta[target]["helper"]["size"] <= target_meta[target]["helper"]["limit"] for target in target_meta) and
+      target_meta["corolla-8965H1202000"]["resident"]["sha256"] ==
+          target_meta["corolla-8965F1208000"]["resident"]["sha256"] and
+      target_meta["corolla-8965H1202000"]["helper"]["sha256"] ==
+          target_meta["corolla-8965F1208000"]["helper"]["sha256"] and
+      target_meta["corolla-8965H1202000"]["scratch"]["base"] == "0xFEF07F98" and
+      target_meta["corolla-8965F1208000"]["scratch"]["base"] == "0xFEF07F98" and
+      target_meta["crown-8965F3012000"]["scratch"]["base"] == "0xFEBF0280" and
+      target_meta["crown-8965F3012000"]["runtime_profile"]["response_lower_handle"] == 51)
 try:
     host.meta_transport({
         "request": {"can_id": "0x1FDC0002", "bus": 0, "carrier": "raw-extended"},
@@ -298,10 +315,10 @@ class _FakePipelinedSession:
 
 with mock.patch.object(host, "ClassicOracleSession", _FakePipelinedSession):
     pipelined = host.benchmark_pipelined(
-        OUT / "camry_f33_08a_classic_oracle.json", count=3, period_ms=10.0, drain_timeout_s=0.1,
+        meta_path, count=3, period_ms=10.0, drain_timeout_s=0.1,
     )
 check("100-Hz benchmark pipelines requests without waiting for each reply",
-      pipelined["schema"] == "camry-f33-08a-classic-oracle-pipelined-benchmark-v1" and
+      pipelined["schema"] == "tss3-08a-classic-oracle-pipelined-benchmark-v1" and
       pipelined["count_sent"] == pipelined["success_count"] == pipelined["responses_received"] == 3 and
       pipelined["target_rate_hz"] == 100.0 and pipelined["complete_target_rate_run"] is True and
       pipelined["resident_counter_deltas"] == {"request_count": 3, "success_count": 3, "response_count": 3} and
@@ -434,7 +451,7 @@ with (mock.patch.object(host, "verify_nrtd_ready", side_effect=AssertionError("N
       mock.patch.object(host, "wait_for_f181", return_value={"ok": True}) as wait_for_application,
       mock.patch.object(host, "ClassicOracleSession", _FakeOracleSession),
       mock.patch.object(host.time, "sleep", return_value=None)):
-    direct = host.install(OUT / meta["authenticated_payload"]["path"], OUT / "camry_f33_08a_classic_oracle.json", direct_boot=True)
+    direct = host.install(OUT / meta["authenticated_payload"]["path"], meta_path, direct_boot=True)
 check("classic oracle can continue directly from exact caught bootloader without NRTD recheck",
       direct["entry_condition"] == "exact_bootloader_f181" and direct["nrtd_guard"] is None and
       direct["verdict"] == "runtime_08a_classic_fresh_signer_live_helper_pending_self_test" and

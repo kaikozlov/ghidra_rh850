@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Package one exact-target unified functional-0x777 TSS3 signer test kit."""
+"""Package one or all exact-target functional-0x777 TSS3 signer test kits."""
 from __future__ import annotations
 
 import argparse
@@ -73,8 +73,9 @@ def build(target: str, out: Path) -> dict:
             cwd=ROOT, check=True, capture_output=True, text=True,
         )
         oracle_meta = json.loads(oracle_proc.stdout)
-        oracle_meta_path = oracle_built / "camry_f33_08a_classic_oracle.json"
-        oracle_payload_path = oracle_built / "camry_f33_08a_classic_oracle_payload.bin"
+        oracle_stem = f"{target.replace('-', '_')}_08a_classic_oracle"
+        oracle_meta_path = oracle_built / f"{oracle_stem}.json"
+        oracle_payload_path = oracle_built / f"{oracle_stem}_payload.bin"
         if json.loads(oracle_meta_path.read_text(encoding="utf-8")) != oracle_meta:
             raise RuntimeError("classic-oracle printed metadata differs from its artifact")
         copy(oracle_meta_path, out / "bundle/oracle/classic.json")
@@ -126,6 +127,7 @@ For exact Camry, `oracle-ui-bringup` replaces the manual NRTD ceremony: arm whil
 """
     (out / "TESTING.txt").write_text(testing, encoding="utf-8")
     oracle = {
+        "target": oracle_meta["target"]["name"],
         "transport": f"{oracle_meta['request']['carrier']} {oracle_meta['request']['can_id']} -> {oracle_meta['response']['can_id']} on Panda bus{oracle_meta['request']['bus']}",
         "metadata": "bundle/oracle/classic.json",
         "payload": "bundle/oracle/classic_payload.bin",
@@ -142,11 +144,41 @@ For exact Camry, `oracle-ui-bringup` replaces the manual NRTD ceremony: arm whil
     return manifest
 
 
+def build_set(out: Path) -> dict:
+    if out.exists() and any(p.is_file() for p in out.rglob("*")):
+        raise RuntimeError(f"refusing nonempty output directory: {out}")
+    kits = {}
+    for target in TARGETS:
+        target_out = out / target
+        manifest = build(target, target_out)
+        kits[target] = {
+            "path": target,
+            "manifest": f"{target}/manifest.json",
+            "manifest_sha256": sha256(target_out / "manifest.json"),
+            "classic_08a_oracle_target": manifest["classic_08a_oracle"]["target"],
+        }
+    result = {
+        "schema": "tss3-unified-b6-signer-kit-set-v1",
+        "created_at": datetime.now(UTC).isoformat(timespec="seconds"),
+        "source_commit": source_commit(),
+        "kits": kits,
+    }
+    (out / "manifest.json").write_text(
+        json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return result
+
+
 def main() -> int:
-    ap=argparse.ArgumentParser(description=__doc__); ap.add_argument("--target", choices=TARGETS, required=True); ap.add_argument("--out", type=Path, required=True); args=ap.parse_args()
-    try: result=build(args.target,args.out)
-    except (OSError,RuntimeError,subprocess.CalledProcessError,json.JSONDecodeError) as exc:
-        print(f"refusing: {exc}", file=sys.stderr); return 2
-    print(json.dumps(result, indent=2, sort_keys=True)); return 0
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--target", choices=(*TARGETS, "all"), required=True)
+    ap.add_argument("--out", type=Path, required=True)
+    args = ap.parse_args()
+    try:
+        result = build_set(args.out) if args.target == "all" else build(args.target, args.out)
+    except (OSError, RuntimeError, subprocess.CalledProcessError, json.JSONDecodeError) as exc:
+        print(f"refusing: {exc}", file=sys.stderr)
+        return 2
+    print(json.dumps(result, indent=2, sort_keys=True))
+    return 0
 
 if __name__ == "__main__": raise SystemExit(main())
