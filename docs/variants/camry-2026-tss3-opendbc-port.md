@@ -3808,3 +3808,48 @@ This historical capture establishes neither a current-code bottleneck nor a
 transport optimization. No change to the four-frame transport is made here.
 The reporting fixes likewise do not establish that the remaining bring-up
 failure modes are resolved.
+
+
+### Independent follow-up: unreadable metadata and active-period timing
+
+`kai-openpilot` commit `1f882e7a7` follows the reporting commit above. An offline
+regression reproduced an uncaught `UnicodeDecodeError` when the local
+`bundle/unified.json` contained invalid UTF-8. The compatibility check now
+returns its existing `oracle kit metadata invalid` result instead of crashing
+the caller. This is local file decoding, not ECU memory corruption, and does
+not change target compatibility or permit a previously rejected kit.
+
+Additional regression cases cover truncated/invalid-UTF-8 summary files and
+preserving a JSON-formatted diagnostic when the backend fails. Summary decoding
+was already guarded by `8067921de`; that test extends coverage rather than
+claiming a second newly fixed source defect. The combined reporting and
+kit-compatibility suites now pass **20 tests**. All backend launches, worker
+socket checks and timing-report writes in these tests are mocked. Ruff and
+`git diff --check` pass. The pre-existing `opendbc_repo` submodule-pointer
+change in the openpilot worktree was not staged or altered.
+
+An independent full-rlog sample of segment 5 of the same historical route
+conditions host timing on the last observed `carControl.latActive OR
+carControl.longActive` value and resets interval histories at active/inactive
+transitions. It reads event metadata and batch lengths only, without decoding
+CAN payloads or running any vehicle-facing tool:
+
+| Host event | Selected records | Median interval | 99th percentile | Maximum interval |
+| --- | ---: | ---: | ---: | ---: |
+| `carControl` | 4,388 | 10.415 ms | 15.655 ms | 18.601 ms |
+| `sendcan` | 4,389 | 10.447 ms | 14.940 ms | 18.557 ms |
+| `can` | 4,383 | 10.431 ms | 14.553 ms | 16.554 ms |
+
+The selected `sendcan` population includes 76 empty batches. Batch publication
+cadence is therefore not command throughput; these figures also do not measure
+request/response pairing, loss, ECU latency, wire serialization or queue age.
+The initially inspected segment 0 contains mostly empty `sendcan` batches, so
+its long startup gaps were not promoted to transport-stall findings.
+
+The source-revision difference is substantive: the route records opendbc commit
+`9051a0b90bacd351a2cc1631ede34f8b6b337a67`, whereas the current checked-out
+opendbc commit is `8cab114eee02f946f18a83180542601a9ce62375`.
+`opendbc/car/toyota/tss3.py` and `carcontroller.py` differ between them. These
+historical timings must not be advertised as a benchmark of the current
+transport or used to justify changing its scheduling, timeouts or safety limits.
+No transport speedup, vehicle deployment or live validation is claimed.
