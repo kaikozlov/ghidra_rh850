@@ -751,8 +751,8 @@ Ready now:
   exact audited 4-KiB canary envelope (SHA-256 `b6d4b261...bd884367`), reproduces
   the telescope-observed old-stack bootstrap without post-auth substitution, and
   refuses to expose command 5;
-- offline modeled execution is closed on both tracked H/F images by
-  `tests/verify_corolla_hf_runtime_canary_codeflash_sim.py`;
+- offline modeled execution is closed on both tracked H/F images by the
+  `codeflash_sim` gate (`tests/verify_codeflash_sim.py`);
 - the second-stage slot-4 probe is operationalized but remains hardware-gated:
   `exploit/ephemeral_runtime/corolla_hf_direct_command5.py` packages the hardened
   proxy into exact envelope SHA-256 `a81b367f...140bfc5`, requires the successful

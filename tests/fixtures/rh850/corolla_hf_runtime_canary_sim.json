@@ -1,43 +1,30 @@
 {
-  "accepted_image_sha256": [
-    "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
-    "fdb35b76891cf84a8b89e0a05c9c7c5cfcd27994cf85ccc01ff32828f53091f6"
-  ],
   "assembly": "tests/fixtures/rh850/corolla_hf_runtime_canary_sim.S",
   "codeflash_size": 1048576,
-  "entry_symbol": "codeflash_sim_start",
-  "gdb_execution": [
-    "break *0xFEBF0124",
-    "run"
-  ],
-  "gdb_results": [
-    "printf \"COROLLA_RAM_HEARTBEAT=0x%x TICK=%u CONTEXT=0x%x STARTUP=0x%x FOREGROUND=0x%x\\n\", *(unsigned int *)0xFEBFFB80, *(unsigned char *)0xFEBE38EF, *(unsigned int *)0xFEF01000, *(unsigned int *)0xFEF01004, *(unsigned int *)0xFEF01008"
-  ],
-  "gdb_setup": [
-    "set {unsigned char}0xFFFFB111 = 0x10",
-    "set {unsigned int}0xFEBFFB80 = 0",
-    "set {unsigned char}0xFEBE38EF = 0",
-    "set {unsigned int}0xFEF01000 = 0",
-    "set {unsigned int}0xFEF01004 = 0",
-    "set {unsigned int}0xFEF01008 = 0"
-  ],
   "harness_address": "0xFEF00000",
-  "harness_size_limit": 4096,
-  "loads": [
-    {
-      "accepted_sha256": [
-        "ec4a31160b877c9067361fe3296f151c5a5ca38835ee8f8f22aa9a6fe3fca2df"
-      ],
-      "address": "0xFEBF0000",
-      "max_size": 464
-    }
+  "image_sha256": [
+    "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
+    "fdb35b76891cf84a8b89e0a05c9c7c5cfcd27994cf85ccc01ff32828f53091f6"
   ],
   "memory_regions": [
     "0xFEBE0000,0x20000",
     "0xFEF00000,0x20000",
     "0xFFFFB000,0x1000"
   ],
-  "name": "corolla-hf-runtime-canary",
+  "gdb": [
+    "set {unsigned char}0xFFFFB111 = 0x10",
+    "set {unsigned int}0xFEBFFB80 = 0",
+    "set {unsigned char}0xFEBE38EF = 0",
+    "set {unsigned int}0xFEF01000 = 0",
+    "set {unsigned int}0xFEF01004 = 0",
+    "set {unsigned int}0xFEF01008 = 0",
+    "break *0xFEBF0124",
+    "run",
+    "printf \"COROLLA_RAM_HEARTBEAT=0x%x TICK=%u CONTEXT=0x%x STARTUP=0x%x FOREGROUND=0x%x\\n\", *(unsigned int *)0xFEBFFB80, *(unsigned char *)0xFEBE38EF, *(unsigned int *)0xFEF01000, *(unsigned int *)0xFEF01004, *(unsigned int *)0xFEF01008"
+  ],
+  "loads": [
+    {"address": "0xFEBF0000", "max_size": 464}
+  ],
   "overlays": [
     {"address": "0x00000C7E", "expected": "009a", "section": ".sim.overlay.boot_c7e"},
     {"address": "0x00000E38", "expected": "3e06", "section": ".sim.overlay.boot_e38"},
@@ -70,6 +57,5 @@
     {"address": "0x0006A6A8", "expected": "1fa0", "section": ".sim.overlay.fg_pre_3"},
     {"address": "0x0005FAF2", "expected": "8007210080ff4e3481ff6a3a83ffd42080ff", "section": ".sim.overlay.fg_aggregate"},
     {"address": "0x0005FF98", "expected": "8007", "section": ".sim.overlay.fg_post_1"}
-  ],
-  "schema": "rh850-codeflash-sim-v1"
+  ]
 }

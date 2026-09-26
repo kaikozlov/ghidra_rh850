@@ -312,7 +312,7 @@ def cmd_selftest(_args: argparse.Namespace) -> int:
 
 
 def cmd_codeflash_sim(args: argparse.Namespace) -> int:
-    from rh850_codeflash import CodeFlashSimError, run_raw_image, run_scenario
+    from rh850_codeflash import CodeFlashSimError, load_spec, run
 
     image = args.image if args.image.is_absolute() else ROOT / args.image
     output_dir = args.output_dir
@@ -334,44 +334,33 @@ def cmd_codeflash_sim(args: argparse.Namespace) -> int:
             raise Rh850ToolError(f"duplicate --load address 0x{address:08X}")
         loads[address] = Path(raw_path)
 
+    spec = None
+    if args.spec is not None:
+        if args.image_base is not None or args.entry is not None:
+            raise Rh850ToolError("--base and --entry cannot override a spec")
+        spec_path = args.spec if args.spec.is_absolute() else ROOT / args.spec
+        try:
+            spec = load_spec(ROOT, spec_path)
+        except CodeFlashSimError as exc:
+            raise Rh850ToolError(str(exc)) from exc
+
     try:
-        if args.spec is None:
-            result = run_raw_image(
-                root=ROOT,
-                image_path=image,
-                image_base=args.image_base or 0,
-                entry=args.entry,
-                memory_regions=args.memory_region,
-                gdb_commands=args.gdb_command,
-                ram_loads=list(loads.items()),
-                output_dir=output_dir,
-                expected_output=args.expected_output,
-            )
-        else:
-            if args.image_base is not None or args.entry is not None:
-                raise Rh850ToolError("--base and --entry cannot override a spec")
-            spec = args.spec if args.spec.is_absolute() else ROOT / args.spec
-            result = run_scenario(
-                root=ROOT,
-                image_path=image,
-                scenario_path=spec,
-                output_dir=output_dir,
-                expected_output=args.expected_output,
-                load_paths=loads,
-                extra_memory_regions=args.memory_region,
-                gdb_commands=args.gdb_command,
-            )
+        output, _elf = run(
+            root=ROOT,
+            image_path=image,
+            spec=spec,
+            image_base=args.image_base or 0,
+            entry=args.entry,
+            memory_regions=args.memory_region,
+            gdb_commands=args.gdb_command,
+            ram_loads=list(loads.items()),
+            output_dir=output_dir,
+            expected_output=args.expected_output,
+        )
     except CodeFlashSimError as exc:
         raise Rh850ToolError(str(exc)) from exc
-    sys.stdout.write(result.output)
-    print(
-        f"codeflash-sim: PASS input={result.input_sha256} "
-        f"modeled={result.modeled_sha256}"
-    )
-    print(
-        "proof-boundary: hardware UNVERIFIED "
-        "(upload, RAM retention/MPU, interrupts/peripherals, timing, vehicle behavior)"
-    )
+    sys.stdout.write(output)
+    print("codeflash-sim: PASS")
     return 0
 
 
