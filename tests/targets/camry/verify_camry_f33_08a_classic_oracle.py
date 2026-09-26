@@ -17,6 +17,7 @@ ROOT = REPO_ROOT
 from exploit.ephemeral_runtime import build_camry_f33_08a_classic_oracle as build
 from exploit.ephemeral_runtime import camry_f33_08a_classic_oracle as host
 from exploit.ephemeral_runtime import camry_f33_oracle_ui_bringup as ui_bringup
+from exploit.ephemeral_runtime import camry_f33_startup_programming as startup_programming
 from exploit.common import ram_exec
 
 CAMRY_TARGET = "camry-8965F3307000"
@@ -74,6 +75,54 @@ with mock.patch.object(ram_exec, "_make_uds_client", side_effect=lambda *args, *
     )
 check("caught boot identity retries with a fresh UDS transport after a transient miss",
       identity_client.payload == boot_f181 and identity_hex == boot_f181.hex() and identity_attempts == 2)
+
+app_f181 = bytes.fromhex("023839363546333330373030300000000038413331313333303331303000000000")
+transition_clients = iter((_TransientF181Client(app_f181), _TransientF181Client(boot_f181)))
+with mock.patch.object(ram_exec, "_make_uds_client", side_effect=lambda *args, **kwargs: next(transition_clients)):
+    transition_client, transition_hex, _, transition_attempts = ram_exec._wait_for_f181_response(
+        object(), SimpleNamespace(DATA_IDENTIFIER_TYPE=SimpleNamespace(APPLICATION_SOFTWARE_IDENTIFICATION=0xF181)),
+        ram_exec.explicit_route(bus=0, elm327_param=1, uds_variant="old", cpu_index=0), timeout=0.5,
+        expected_f181_hex=boot_f181.hex(),
+    )
+check("caught PROGRAMMING ignores transitional application F181 until exact boot identity",
+      transition_client.payload == boot_f181 and transition_hex == boot_f181.hex() and transition_attempts == 2)
+
+class _FakeExecPanda:
+    def set_safety_mode(self, *_args):
+        pass
+    def can_recv(self):
+        return []
+
+fake_exec_panda = _FakeExecPanda()
+fake_boot_client = object()
+route = ram_exec.explicit_route(bus=0, elm327_param=1, uds_variant="old", cpu_index=0)
+with (mock.patch.dict(sys.modules, {"panda": SimpleNamespace(Panda=lambda *_a, **_k: fake_exec_panda)}),
+      mock.patch.object(ram_exec, "ensure_boardd_stopped"),
+      mock.patch.object(ram_exec, "_import_uds", return_value=SimpleNamespace()),
+      mock.patch.object(ram_exec, "_wait_for_f181_response",
+                        return_value=(fake_boot_client, boot_f181.hex(), None, 3)) as wait_exact_boot,
+      mock.patch.object(ram_exec, "_enter_programming_bootloader",
+                        side_effect=AssertionError("caught startup path must not request PROGRAMMING twice")),
+      mock.patch.object(ram_exec, "_prepare_direct_bootloader",
+                        return_value=(fake_boot_client, boot_f181.hex(), None,
+                                      {"direct_bootloader": True}, {"status": "test"})) as prepare_direct,
+      mock.patch.object(ram_exec, "_security_access", return_value=b"\x00" * 16),
+      mock.patch.object(ram_exec, "_upload_and_trigger")):
+    caught_exec = ram_exec.execute_ram_payload(
+        b"\x00" * 0x1000,
+        route=route,
+        security_secret=b"\x00" * 16,
+        timeout=0.0,
+        expected_f181_hex=app_f181.hex(),
+        expected_boot_f181_hex=boot_f181.hex(),
+        geometry=ram_exec.explicit_ram_exec_geometry(load_addr=0xFEBF0000, evidence="test:caught-programming"),
+        allow_direct_boot=True,
+        programming_already_requested=True,
+        panda=fake_exec_panda,
+    )
+check("caught PROGRAMMING execution path never re-enters the application handoff",
+      caught_exec["direct_bootloader"] is True and caught_exec["programming_already_requested"] is True and
+      wait_exact_boot.call_args.kwargs["expected_f181_hex"] == boot_f181.hex() and prepare_direct.call_count == 1)
 
 
 check("idle-fast Camry default and foreground-only reference remain separate",
@@ -378,8 +427,78 @@ check("classic oracle can continue directly from exact caught bootloader without
       direct["entry_condition"] == "exact_bootloader_f181" and direct["nrtd_guard"] is None and
       direct["verdict"] == "runtime_08a_classic_fresh_signer_live_helper_pending_self_test" and
       execute.call_args.kwargs["allow_direct_boot"] is True and
+      execute.call_args.kwargs["programming_already_requested"] is True and
       wait_for_application.call_args.kwargs["timeout"] == host.APPLICATION_REAPPEAR_TIMEOUT_SECONDS == 3.0)
 
+class _FakeStartupRacePanda:
+    def __init__(self):
+        self.recv_calls = 0
+        self.sent = []
+    def set_power_save(self, _enabled):
+        pass
+    def set_safety_mode(self, *_args):
+        pass
+    def can_recv(self):
+        self.recv_calls += 1
+        if self.recv_calls == 2:
+            return [(startup_programming.RX_ADDR, startup_programming.POSITIVE_EXTENDED_FRAME, startup_programming.BUS)]
+        return []
+    def can_send(self, address, data, bus):
+        self.sent.append((address, bytes(data), bus))
+    def close(self):
+        pass
+
+fake_race_panda = _FakeStartupRacePanda()
+cancel_checks = iter((False, True))
+with (mock.patch.object(startup_programming, "ensure_boardd_stopped"),
+      mock.patch.dict(sys.modules, {"panda": SimpleNamespace(Panda=lambda *_a, **_k: fake_race_panda)})):
+    try:
+        startup_programming.race_to_bootloader(
+            timeout=0.2, cancel_requested=lambda: next(cancel_checks),
+        )
+    except startup_programming.StartupProgrammingError as exc:
+        cancel_error = str(exc)
+    else:
+        raise AssertionError("cooperative cancel crossed the PROGRAMMING boundary")
+check("manual cancellation is honored after 50 03 but before the one-way 10 02 send",
+      cancel_error == "startup race cancelled before PROGRAMMING" and
+      any(data == startup_programming.EXTENDED_FRAME for _, data, _ in fake_race_panda.sent) and
+      all(data != startup_programming.PROGRAMMING_FRAME for _, data, _ in fake_race_panda.sent))
+
+startup_src = (ROOT / "exploit/ephemeral_runtime/camry_f33_startup_programming.py").read_text(encoding="utf-8")
+ui_src = (ROOT / "exploit/ephemeral_runtime/camry_f33_oracle_ui_bringup.py").read_text(encoding="utf-8")
+ram_exec_src = (ROOT / "exploit/common/ram_exec.py").read_text(encoding="utf-8")
+check("startup catcher uses the field-proven response-synchronized minimum ladder",
+      'EXTENDED_FRAME = bytes.fromhex("0210030000000000")' in startup_src and
+      'PROGRAMMING_FRAME = bytes.fromhex("0210020000000000")' in startup_src and
+      'POSITIVE_EXTENDED_FRAME = bytes.fromhex("065003003201f400")' in startup_src and
+      startup_src.index('data == POSITIVE_EXTENDED_FRAME') < startup_src.index('panda.can_send(TX_ADDR, PROGRAMMING_FRAME, BUS)') and
+      'cancel_requested()' in startup_src and
+      startup_src.index('cancel_requested()', startup_src.index('if positive_extended_ns is None')) <
+      startup_src.index('panda.can_send(TX_ADDR, PROGRAMMING_FRAME, BUS)') and
+      'SecurityAccess' in startup_src and 'persistent_flash_writes' in startup_src)
+direct_guard = ram_exec_src.index("if programming_already_requested:")
+direct_identity = ram_exec_src.index("initial_f181_hex, initial_f181_ascii = _read_f181(app, uds_mod)")
+check("caught bootloader waits for exact boot identity without a redundant application handoff",
+      direct_guard < ram_exec_src.index("expected_f181_hex=expected_boot_f181_hex", direct_guard) <
+      ram_exec_src.index("app.diagnostic_session_control(uds_mod.SESSION_TYPE.DEFAULT)", direct_guard) < direct_identity and
+      'caught PROGRAMMING transition did not reach the exact boot endpoint' in ram_exec_src)
+check("UI backend verifies healthy peers and fresh signing without mandatory peer resets",
+      ui_src.index('race_to_bootloader(cancel_requested=cancel_path.exists)') < ui_src.index('install(payload, meta, direct_boot=True, panda=panda)') <
+      ui_src.index('ready_guard = wait_ready_parked(timeout=ready_timeout, panda=panda)') <
+      ui_src.index('state = control_domain_state(output_dir / "control-domain-state.json", panda=panda)') <
+      ui_src.index('signer_test = self_test(meta, panda=panda)') and
+      'restart_brake_known_good' not in ui_src and 'restart_one_domain' not in ui_src and
+      'peer_resets_performed": False' in ui_src)
+check("auto worker preloads protocols, then uses one fresh post-handoff Panda for the complete bringup",
+      'panda = Panda(cli=False)' in ui_src and
+      ui_src.index('_import_uds()') < ui_src.index('server.listen(1)') and
+      ui_src.index('_import_isotp_send()') < ui_src.index('server.listen(1)') and
+      ui_src.index('server.listen(1)') < ui_src.index('panda = Panda(cli=False)', ui_src.index('server.listen(1)')) <
+      ui_src.index('native_catch=native_catch, panda=panda', ui_src.index('server.listen(1)')) and
+      'wait_ready_parked(timeout=ready_timeout, panda=panda)' in ui_src and
+      'control_domain_state(output_dir / "control-domain-state.json", panda=panda)' in ui_src and
+      'self_test(meta, panda=panda)' in ui_src)
 native_marker = {
     "schema": "tss3-oracle-native-catch-v1",
     "target": "TOYOTA_CAMRY_TSS3",
