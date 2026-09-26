@@ -161,6 +161,16 @@ for name, (size, sha) in EXPECTED_SOURCES_NA.items():
         == (size, sha),
     )
 
+# Exact EMPS_P5 exposes no direct/routine Active Test or Simple Utility table.
+# This pins the absence of those three parameterized OEM control/utility table classes.
+emps_ready_surface = p.parse_ecu_db(ROOT / "NA/DB/EMPS_P5.ddb")
+check(
+    "EMPS_P5 has no type-68/type-71/type-77 READY engineering table",
+    all(table_type not in emps_ready_surface.sections for table_type in (68, 71, 77))
+    and 90 in emps_ready_surface.sections
+    and 91 in emps_ready_surface.sections,
+)
+
 EXPECTED_DLLS = {
     "KgpDataCtrl.dll": (
         721008,

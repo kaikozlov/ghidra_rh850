@@ -1087,20 +1087,49 @@ ledger context is useful.
   fixed selectors plus a 51-populated-entry event-ID/type catalogue; neither
   interprets request bytes as an executable address.
 
-  Therefore more broad static searching of known stock services has diminishing
-  value. The remaining bounded classes are synthesized/computed aliases not present
-  in recovered references, a memory-safety bug outside the recovered CFG/dataflow,
-  a separate undiscovered DMA/hardware mutation mechanism, or undiscovered code.
-  The next live work should remain non-executing. First use the new read-only
-  `xcp_runtime_state_probe.py` on the proven normal-harness bus1/controller-1 route
-  to snapshot the exact admission chain (`FEBE3DF2/3DE5`, `FEBE4914..493A`,
-  `FEBE4EE6`, `FEBE4FAE`); only then repeat CONNECT. If it responds, close placement
-  with bounded high-tail DOWNLOAD+SHORT_UPLOAD readback. For the **execution** blocker, collect a targeted
-  runtime RAM/control-flow discriminator (for example before/after lower-RAM state
-  plus registration/control-flow trace around benign stock diagnostic/task activity)
-  to identify a concrete mutable continuation/callback/task object or unrecovered
-  trigger. Do not guess an arbitrary PC write. Canonical:
-  [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §13.
+  The Sep-25 READY-mode re-audit closes several previously implicit escape hatches.
+  The exact DCM table has no SID `0x2F` and no `0x3D`; `34/36/37` remain null-callback,
+  session-2 entries whose real loader lives behind the PROGRAMMING handoff. The three
+  remaining WDBI controls do not enable a debug path: `2012 -> FEBEB18F=0x5A` only feeds
+  lifecycle/availability state, `2013 -> FEBEB418` is a 16-bit numeric parameter, and
+  `2014 -> FEBEB3D2` is a one-byte application mode flag. Command 5's indirect calls
+  select only two fixed CodeFlash records and install fixed CodeFlash callbacks. The
+  boot `10F0 -> FF00` trampoline is not callable from the application service table:
+  neither RID is among its 19 routines, and callback cell `FEBF0FD0` has only boot
+  flash-engine consumers. Application SecurityAccess does not reveal a second service
+  graph; its exact callback-local BA `F7/BAENA` use remains lifecycle/authorization
+  state, not a PC pivot. Exact
+  controller-1 rules 43/44/45 are ordinary `0x7A1` physical UDS, `0x777` functional
+  UDS, and `0x7A0` secondary diagnostics; interrupt-time reception only completes
+  transport/enqueues DCM state, while SID dispatch occurs later in DCM main. `0x7F7` is
+  not an exact-F33 acceptance rule (the old special-demux attribution was Sienna-only).
+  Xrefs to
+  `SET_MTA/DOWNLOAD/MODIFY_BITS/SHORT_UPLOAD` show no alternate caller around the
+  immutable `0x30D68=0x5A` XCP gate. Current GTS+ `EMPS_P5` contains no type-68
+  Active Test, type-71 Routine Active Test, or type-77 Simple Utility table. OEM EPS
+  service workflows such as Initial Setting/Assist Map still reduce to already-audited
+  fixed application routines (for example `0x1109` DataFlash/NvM calibration-state
+  work), not a parameterized code-loader. Exact Corolla-H remains the useful
+  differential: its
+  sibling application leaves the same unauthenticated XCP RAM-write architecture live,
+  proving this is an F33 configuration/build exclusion rather than a platform limit.
+
+  The known oversized-DLC stale-stack source over-read also remains bounded away from
+  control: recovered consumers truncate/reject before an escaping write, and the
+  pre-fault STORE audit finds no ranged write into saved-PC/context RAM. Therefore no
+  stock **uninterrupted READY** arbitrary-code route is recovered on exact F33. The
+  startup lockout race is useful but does not change that conclusion: it still executes
+  `10 02` and enters the bootloader before RAM load/execute. The practical bootstrap
+  remains PROGRAMMING-race -> high-tail resident -> application return.
+
+  More CONNECT/WDBI/RoutineControl/command-5/AB-BA probing is no longer a useful next
+  discriminator. The residual classes are deliberately narrower: a concrete
+  memory-corruption bug with useful write+PC influence, a synthesized/computed alias or
+  mutable continuation object absent from recovered references, an undiscovered
+  DMA/hardware mutation mechanism, or undiscovered code. Any future READY-only work
+  should begin by producing one of those concrete primitives rather than guessing a PC
+  cell. Canonical:
+  [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §13.7.
 
 
 - **OQ-054 — Recover the exact FRC feature-selector/secured-egress implementation and the downstream Brake request-to-target handoff.** Toyota US20200070849A1 separates application request, result feedback, post-request target generation, and priority Vehicle Movement Control. Exact-Camry evidence now fixes the first placement more tightly than the generic patent diagram: **LTA/LDA/LCA/PDA/PCS are simultaneously enableable FRC-resident applications, and the FRC application state machine selects the current owner before generic `5282` / protected `0x08A` egress.** The repin experiment closes the external direction: protected `0x08A` is native on the **FRC/camera-side endpoint** of the intercepted Toyota Bus-4 pair and moves toward Brake; `0x081` is native on the **Brake/chassis-side endpoint** and returns toward FRC. FRC normal-Tx suppression removes `0x08A`; Brake normal-Tx suppression removes `0x081`, and Brake keeps publishing `0x081` with request-loss supervision when FRC request traffic disappears. Thus the supported whole loop is **FRC internal feature-owner selection -> signed/protected `0x08A` request -> downstream Brake/VMM request arbitration -> `0x081` arbitration-result/status back to FRC + post-arbitration request generation -> B6 final target toward EPS**. The FRC's selection only chooses which internal feature populates the request; it does not replace the downstream VMM arbiter. Exact F33 maps B6 loss to Brake System Control Module and internally receives native B6/profile2, but never receives `0x08A` or `0x081`.

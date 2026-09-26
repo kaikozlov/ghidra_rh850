@@ -1126,6 +1126,7 @@ def section_application_ram_loader() -> int:
 
     print("\n== ordinary application UDS negatives ==")
     u = a["application_uds"]
+    check("SID 0x2F InputOutputControlByIdentifier is absent", "0x2F" not in u["configured_sids"])
     check("SID 0x3D WriteMemoryByAddress is absent", u["write_memory_by_address_0x3d_configured"] is False and "0x3D" not in u["configured_sids"])
     check("SID 0x23 is read-only application RMBA surface", u["read_memory_by_address"] == {"sid":"0x23","callback":"0x000965C0","sessions":[3]})
     check("SID 0x2E is DID-bounded rather than arbitrary memory writer", u["write_data_by_identifier"]["callback"] == "0x00095978" and u["write_data_by_identifier"]["arbitrary_memory_writer"] is False)

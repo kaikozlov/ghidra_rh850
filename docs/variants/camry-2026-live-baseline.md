@@ -758,9 +758,10 @@ It therefore cannot directly sign the 7-byte `0x00F` authenticated input or the
 ### 13.4 Ordinary application UDS does not supply an alternative loader
 
 The exact application service table at `0x25C54` configures
-`10/11/14/19/22/23/27/28/2E/31/34/36/37/3E/85/AB/BA`. There is no SID `0x3D`
-WriteMemoryByAddress. SID `0x23` is the bounded RMBA reader; SID `0x2E` is the
-configured DID-write engine rather than arbitrary memory access. SIDs `0x34/0x36/0x37`
+`10/11/14/19/22/23/27/28/2E/31/34/36/37/3E/85/AB/BA`. There is no SID `0x2F`
+InputOutputControlByIdentifier and no SID `0x3D` WriteMemoryByAddress. SID `0x23`
+is the bounded RMBA reader; SID `0x2E` is the configured DID-write engine rather
+than arbitrary memory access. SIDs `0x34/0x36/0x37`
 have null direct application callbacks and are admitted only in session 2; the real
 download state belongs to the already-known disruptive PROGRAMMING path. SID `0x11`
 ECUReset is weaker still in this exact calibration: its service object has a null
@@ -926,6 +927,106 @@ Minimum useful next work:
 
 The Sep-6 XCP work is complete as a negative: the missing response is no longer an
 unresolved bus/session/admission problem.
+
+### 13.7 Sep-25 READY-mode execution re-audit
+
+A dedicated re-audit asked the stronger question directly: **with exact F33 already
+running its normal application in vehicle READY, is there any recovered stock path that
+places arbitrary tester bytes in executable RAM and transfers the CPU to them without
+`10 02` / the bootloader handoff?** The bounded answer remains **no**, and several
+previously implicit branches are now closed explicitly.
+
+First, the startup lockout race is not a READY-mode execution primitive. The retained
+race evidence proves that `10 03 -> 10 02` can win the startup lockout (the measured
+positive-response-to-programming-request gap was 26.615 us) and thereby avoid the
+ordinary NRTD gate. It still performs the PROGRAMMING transition and enters the
+bootloader before download/execute. The current RAM-resident bring-up therefore remains
+a programming-transition bootstrap followed by return to the application, not execution
+from an uninterrupted READY application.
+
+The closest stock READY primitive is still XCP, and the differential evidence now makes
+that especially clear. Exact F33 contains `SET_MTA 0x82C62`, `DOWNLOAD 0x81FFE`,
+`MODIFY_BITS 0x820C4`, and `SHORT_UPLOAD 0x82B1A`, with validator `0x98F2C` admitting
+`FEBF7C00..FEBFFBFF`. But all four callbacks are referenced only by the fixed XCP opcode
+table; the opcode table is consumed only by `0x821D6`, and `0x821D6` always executes
+`0x830C0 -> 0x98E80` first. Fixed CodeFlash `0x30D68=0x5A` disables that dispatch.
+There is no recovered UDS/proprietary caller that jumps directly into a memory callback
+and bypasses the gate. In contrast, exact Corolla-H sibling firmware retains the same
+shadow-RAM architecture with stock-reachable unauthenticated `SET_MTA/DOWNLOAD/
+MODIFY_BITS` into `FEBF7C00..FEBFFBFF`. Thus READY-time RAM placement is a real Toyota
+production architecture, but it is configured out on F33 rather than being impossible on
+the platform.
+
+The remaining normal-application mutators do not provide a hidden enable latch or PC
+object:
+
+- WDBI `0x2012` writes only `FEBEB18F=0x5A`; its consumers are lifecycle/availability
+  state and snapshot/export paths.
+- WDBI `0x2013` writes a 16-bit numeric parameter at `FEBEB418`; its consumers perform
+  numeric application-state calculations and snapshot/export.
+- WDBI `0x2014` maps payload `{0,1}` to a one-byte mode state at `FEBEB3D2`; its four
+  recovered consumers are steering/application state and snapshot/export paths.
+- none of these cells reaches `0x98E80`, the XCP tables, a callback table, saved PC,
+  vector base, DMA endpoint, or instruction-fetch configuration.
+
+RID `0x100F` was also re-traced through the indirect calls rather than classified by
+name. `0x8B872 -> 0x6A0AE` starts the fixed command-5 state machine. Dispatcher
+`0x89440` selects from exactly two fixed CodeFlash records (`0x893F2` bounds the selector
+to two); the active path uses fixed 16-byte buffers `FEBE5186/FEBE51B6`. Lower engine
+`0x8A720` installs only fixed CodeFlash callbacks at `FEBF131C/FEBF1320/FEBF1324` before
+issuing ICU-S command 5. The indirect calls are real, but tester input does not become
+the call target.
+
+The existing boot execution trampoline cannot simply be reused from READY either. The
+application's 19-RID `0x31` table contains neither boot RID `0x10F0` nor `0xFF00`.
+The RAM callback cell `FEBF0FD0` is consumed only by boot flash-engine sites
+`0x435E/0x437C/0x440E`; those consumers are not reached by an application diagnostic
+service. Application SecurityAccess does not add a second service table after unlock:
+its useful callback-local exception is BA `F7/BAENA`, whose exact effects remain bounded
+to authorization/lifecycle persistent state. Therefore knowing the application SA root
+does not turn the boot callback into a READY execution entry.
+
+The exact F33 diagnostic receive tail adds no separate executor outside DCM. RSCFD
+controller-1 rules 43/44/45 are exactly `0x7A1` physical UDS, `0x777` functional UDS,
+and `0x7A0` secondary diagnostics; rule 46 is the extended XCP endpoint above. The
+recovery-path audit independently proves that interrupt-time reception can complete
+ISO-TP and enqueue DCM protocol state, but SID inspection/dispatch occurs only later in
+DCM main. The receive/transport workers never call DCM service callbacks or the boot
+handoff directly. Thus these three READY-visible CAN routes reduce to the already-audited
+17-service DCM table rather than forming an interrupt-time call primitive. `0x7F7` is
+not one of exact F33's 47 controller-1 acceptance rules; the older `0x7F7` special-demux
+model belongs to the reference/Sienna application and must not be transferred to F33.
+
+The current Toyota GTS+ `EMPS_P5` database supplies no separate parameterized control
+surface beyond the firmware rows already audited. Its installed table inventory has
+neither type 68 `CDbActTestP5Table`, type 71 `CDbRoutineActTestP5Table`, nor type 77
+`CDbSimpleUtilityTable`; the category registry has zero Active Tests. Types 90/91 are
+Record-of-Behavior data/signal-check metadata, not a utility dispatcher. This does **not**
+mean Toyota has no EPS service utilities: for example the documented Power Steering ECU
+Initial Setting / Assist Map workflow reaches fixed application RoutineControl behavior
+such as RID `0x1109`. That path is already in the exact 19-RID census, takes no arbitrary
+address/code payload, and performs scheduled DataFlash/NvM calibration-state work. It is
+therefore a fixed application routine, not an omitted READY code-loader. The same exact
+service table has no SID `0x2F` and no SID `0x3D`.
+
+Finally, the known READY-facing transport memory-safety anomaly does not currently
+supply the missing composition. Exact F33 can over-read stale ISR-stack bytes when a
+logical CAN-FD DLC exceeds physical FIFO storage, but the recovered consumers truncate
+or reject before a write escapes their configured destinations. The exact pre-fault
+STORE audit finds no ranged write into saved-PC/context RAM. This remains a real
+information-leak/stale-input primitive, not a recovered overwrite or control-transfer
+primitive.
+
+**Disposition:** no stock uninterrupted-READY arbitrary-code path is recovered on exact
+F33. A new path would now have to come from one of the deliberately residual classes:
+(1) an unrecovered memory-corruption bug that supplies both a useful write and PC
+influence, (2) a synthesized/computed alias or mutable continuation object absent from
+recovered references, (3) an undiscovered DMA/hardware mutation mechanism, or (4)
+undiscovered code. Repeating XCP CONNECT, WDBI, RoutineControl, command 5, AB/BA, or
+Techstream utility searches does not address a remaining ambiguity. Until one of those
+residual classes produces a concrete primitive, the practical non-persistent bootstrap
+remains the startup PROGRAMMING race plus high-tail resident followed by application
+return.
 
 ## 14. Exact F33 persistent Gate-2 development patch
 
