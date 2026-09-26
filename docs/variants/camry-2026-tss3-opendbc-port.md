@@ -3746,3 +3746,65 @@ F33 path. What remains is the longitudinal semantic/safety qualification: exact 
 request mapping, Brake/VMC selection and feedback, PCS/AEB priority, driver override,
 standstill/hold behavior, and the `0x081` result plane. Only after those are closed should
 normal openpilot longitudinal output be connected to the two TSS3 acceleration requests.
+
+## 8. Host bring-up result reporting audit (2026-09-26)
+
+The host-side reporting changes are committed in `kai-openpilot` as `8067921de`
+(`tss3: fix host bring-up result reporting`), on `tss3-camry-port`. This change does
+not modify the ECU bootstrap, payloads, signing implementation, wire protocol,
+transport timing, steering limits, or process start/stop policy. It was tested
+offline; nothing was deployed to the comma or exercised against the vehicle.
+
+The current backend `exploit/ephemeral_runtime/camry_f33_oracle_ui_bringup.py`
+emits summary schema `camry-f33-oracle-ui-bringup-v1` and verdict
+`startup_caught_fresh_signer_peer_state_healthy_self_test_pass`. The automatic
+host consumer still expected the older known-answer verdict, so a successful
+current-backend run could be classified as failed. Its failure path could then
+reuse the last success detail, yielding an error state whose text said the
+checks had passed. That mismatch is corrected, with explicit summary-schema and
+object-shape validation instead of calling `.get()` on arbitrary JSON values.
+
+Manual and automatic output readers now share the small, host-only
+`openpilot/selfdrive/car/toyota_tss3_oracle_status.py` reporting contract. It
+checks status field types and terminal-flag consistency. A completion message
+cannot override a nonzero process exit; the manual UI displays finalization
+until the backend exits. An earlier backend error is preserved even if a later
+message reports success. Malformed status fields cannot reach the UI's integer
+progress conversion or become truthy string-valued success flags. Missing,
+unreadable or mismatched summaries produce diagnostic errors, not successful
+status text. Subprocess text decoding replaces invalid UTF-8 instead of
+terminating the output reader.
+
+Worker re-arming is operationally unchanged, but successful re-arming after a
+run no longer immediately overwrites its complete/error result with `armed`.
+Initial readiness is still reported. These status values are reporting state,
+not a new permission or vehicle-control system.
+
+Verification: the new mocked reporting suite has 14 tests, including UI
+completion/exit ordering, contradictory terminal messages, malformed JSON
+objects and fields, current/unknown summary contracts, and result preservation
+on re-arm. It passes together with the three existing kit-compatibility tests
+(**17 tests total**); Ruff and `git diff --check` also pass. The tests replace
+process/socket/compatibility boundaries and do not launch the ECU backend.
+
+### Passive transport observation, not a transport speedup
+
+Eight local rlog segments of route `00000067--abf9d48e19` were inspected under
+`~/dev/inspect/logs/00000067--abf9d48e19/`. Recorded start is
+2026-09-23 20:56:18 America/Chicago; `initData` identifies openpilot commit
+`e62f85cde183d33f17a5c667b078100bfb53dc4d`, which differs from the current
+checkout. Using `LogReader`, the inter-event differences of sorted
+`logMonoTime` for nonempty `can` events give per-segment median batch spacings
+of 10.35–10.44 ms and 99th percentiles of 14.53–14.57 ms. Typical batches contain
+dozens of frames. The sampled frame record has address/data/source/deprecated
+fields, not an independent per-frame timestamp.
+
+These are **host publication-batch timings**, not ECU execution, wire transit,
+or individual request/response latencies. The qlog is unsuitable for this
+measurement (only three CAN events in the inspected first segment), so the
+numbers above use full rlogs. Nonempty-sendcan gaps were not classified as
+transport stalls because this pass did not condition them on active demand.
+This historical capture establishes neither a current-code bottleneck nor a
+transport optimization. No change to the four-frame transport is made here.
+The reporting fixes likewise do not establish that the remaining bring-up
+failure modes are resolved.
