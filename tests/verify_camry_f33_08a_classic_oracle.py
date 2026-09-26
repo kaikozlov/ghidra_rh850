@@ -134,7 +134,7 @@ def run_core_simulator() -> str:
         elf = Path(td) / "core.elf"
         rel_elf = elf.relative_to(ROOT)
         subprocess.run([
-            str(ROOT / "tools/rh850"), "exec", "v850-elf-gcc",
+            str(ROOT / "tools/rh850"), "--image", "v850-gcc-scratch", "exec", "v850-elf-gcc",
             "-mv850e3v5", "-mno-app-regs", "-ffreestanding", "-fno-builtin", "-Os", "-nostdlib",
             "-Wa,-mv850e3v5,-mextension",
             "-Wl,-T,tests/fixtures/rh850/camry_f33_08a_oracle_core_sim.ld",
@@ -144,7 +144,7 @@ def run_core_simulator() -> str:
             "-o", str(rel_elf),
         ], cwd=ROOT, check=True, capture_output=True, text=True)
         proc = subprocess.run([
-            str(ROOT / "tools/rh850"), "sim", str(rel_elf),
+            str(ROOT / "tools/rh850"), "--image", "v850-gcc-scratch", "sim", str(rel_elf),
             "--memory-region", "0xFEBF0000,0x10000",
             "-ex", "break rh850_sim_stop",
             "-ex", "run",

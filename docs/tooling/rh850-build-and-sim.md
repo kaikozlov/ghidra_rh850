@@ -51,8 +51,10 @@ finding.
 ## Rebuilding the GNU setup
 
 The historical local image `v850-gcc-scratch` came from the public
-Bk2ol/I-CAN-hack recipe. A repository-owned rebuild recipe now lives at
-`tools/toolchains/v850-gcc/Dockerfile`. It pins:
+Bk2ol/I-CAN-hack recipe. Keep that tag intact because older audited artifacts
+record its image identity. `tools/rh850 build-image` instead builds the
+repository-owned `ghidra-rh850-v850-gcc:13.2.0-binutils2.41` image by default.
+The rebuild recipe lives at `tools/toolchains/v850-gcc/Dockerfile` and pins:
 
 - Ubuntu 22.04 by OCI digest;
 - binutils/GDB `binutils-2_41-release` commit

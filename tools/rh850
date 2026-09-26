@@ -12,7 +12,10 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_IMAGE = os.environ.get("RH850_TOOLCHAIN_IMAGE", "v850-gcc-scratch")
+DEFAULT_IMAGE = os.environ.get(
+    "RH850_TOOLCHAIN_IMAGE", "ghidra-rh850-v850-gcc:13.2.0-binutils2.41"
+)
+LEGACY_IMAGE = "v850-gcc-scratch"
 DOCKERFILE = ROOT / "tools" / "toolchains" / "v850-gcc" / "Dockerfile"
 SELFTEST_RESULT = "RH850_SELFTEST_RESULT=0x12cb5687"
 
@@ -23,31 +26,41 @@ trap 'rm -rf "$work"' EXIT
 cat >"$work/selftest.c" <<'EOF'
 volatile unsigned int result __attribute__((section(".result")));
 
-void exploit(void) {
+void exploit_body(void) {
   unsigned int x = 0x12340000u;
   x += 0x5678u;
   x ^= 0x00ff00ffu;
   result = x;
-  __asm__ volatile(".global rh850_sim_stop\nrh850_sim_stop:\nnop");
-  for (;;) __asm__ volatile("nop");
 }
+EOF
+cat >"$work/selftest.S" <<'EOF'
+    .section .text.start
+    .global _start
+_start:
+    /* GNU sim/v850 executes ordinary near JARL correctly. Keep this probe
+       deliberately distinct from the known-broken RH850 jarl32 extension. */
+    jarl _exploit_body, lp
+    .global rh850_sim_stop
+rh850_sim_stop:
+    br rh850_sim_stop
 EOF
 cat >"$work/selftest.ld" <<'EOF'
 SECTIONS {
   . = 0xFEBF0000;
-  .text : { *(.text*) }
+  .text : { *(.text.start) *(.text*) }
   . = 0xFEBF1000;
   .result : { *(.result) }
 }
-ENTRY(_exploit)
+ENTRY(_start)
 EOF
 v850-elf-gcc \
   -mv850e3v5 -mno-app-regs -ffreestanding -fno-builtin -Os -nostdlib \
+  -Wa,-mv850e3v5,-mextension \
   -Wl,-T,"$work/selftest.ld" -Wl,--build-id=none \
-  "$work/selftest.c" -o "$work/selftest.elf"
+  "$work/selftest.S" "$work/selftest.c" -o "$work/selftest.elf"
 v850-elf-gdb -q -batch \
   -ex "file $work/selftest.elf" \
-  -ex "target sim --memory-region 0xFEBF0000,0x2000" \
+  -ex "target sim --architecture v850e3v5 --memory-region 0xFEBF0000,0x2000" \
   -ex load \
   -ex "break rh850_sim_stop" \
   -ex run \
@@ -89,9 +102,15 @@ def _image_exists(image: str) -> bool:
 
 def _require_image(image: str) -> None:
     if not _image_exists(image):
+        legacy = (
+            f" The historical {LEGACY_IMAGE!r} image may still be selected explicitly with "
+            f"`tools/rh850 --image {LEGACY_IMAGE} ...`."
+            if image == DEFAULT_IMAGE and _image_exists(LEGACY_IMAGE)
+            else ""
+        )
         raise Rh850ToolError(
             f"Docker image {image!r} is missing; build it with "
-            f"`tools/rh850 --image {shlex.quote(image)} build-image`"
+            f"`tools/rh850 --image {shlex.quote(image)} build-image`." + legacy
         )
 
 
