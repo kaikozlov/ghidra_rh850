@@ -13,7 +13,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_IMAGE = os.environ.get(
-    "RH850_TOOLCHAIN_IMAGE", "ghidra-rh850-v850-gcc:13.2.0-binutils2.41"
+    "RH850_TOOLCHAIN_IMAGE", "ghidra-rh850-v850-gcc:13.2.0-binutils2.41-simfix1"
 )
 LEGACY_IMAGE = "v850-gcc-scratch"
 DOCKERFILE = ROOT / "tools" / "toolchains" / "v850-gcc" / "Dockerfile"
@@ -23,33 +23,56 @@ SELFTEST_SCRIPT = r"""
 set -eu
 work="$(mktemp -d)"
 trap 'rm -rf "$work"' EXIT
-cat >"$work/selftest.c" <<'EOF'
-volatile unsigned int result __attribute__((section(".result")));
-
-void exploit_body(void) {
-  unsigned int x = 0x12340000u;
-  x += 0x5678u;
-  x ^= 0x00ff00ffu;
-  result = x;
-}
-EOF
 cat >"$work/selftest.S" <<'EOF'
     .section .text.start
     .global _start
 _start:
-    /* GNU sim/v850 executes ordinary near JARL correctly. Keep this probe
-       deliberately distinct from the known-broken RH850 jarl32 extension. */
-    jarl _exploit_body, lp
+    /* Exercise positive and negative format-VI disp32 control flow.  The far
+       section forces a non-zero upper displacement word in both directions. */
+    jarl32 far_call, lp
+    mov 0x13579bdf, r11
+    cmp r11, r10
+    bne selftest_fail
+    jr32 far_jump
+
+selftest_fail:
+    mov 0xbad00001, r10
+    mov 0xfebf1000, r11
+    st.w r10, 0[r11]
+    .global rh850_sim_fail_stop
+rh850_sim_fail_stop:
+    br rh850_sim_fail_stop
+
+low_call:
+    mov 0x13579bdf, r10
+    jmp [lp]
+
+low_jump:
+    mov 0x12cb5687, r10
+    mov 0xfebf1000, r11
+    st.w r10, 0[r11]
     .global rh850_sim_stop
 rh850_sim_stop:
     br rh850_sim_stop
+
+    .section .text.far
+far_call:
+    mov lp, r20
+    jarl32 low_call, lp
+    mov r20, lp
+    jmp [lp]
+
+far_jump:
+    jr32 low_jump
 EOF
 cat >"$work/selftest.ld" <<'EOF'
 SECTIONS {
   . = 0xFEBF0000;
-  .text : { *(.text.start) *(.text*) }
+  .text.start : { *(.text.start) }
   . = 0xFEBF1000;
   .result : { *(.result) }
+  . = 0xFEC10000;
+  .text.far : { *(.text.far) }
 }
 ENTRY(_start)
 EOF
@@ -57,12 +80,13 @@ v850-elf-gcc \
   -mv850e3v5 -mno-app-regs -ffreestanding -fno-builtin -Os -nostdlib \
   -Wa,-mv850e3v5,-mextension \
   -Wl,-T,"$work/selftest.ld" -Wl,--build-id=none \
-  "$work/selftest.S" "$work/selftest.c" -o "$work/selftest.elf"
+  "$work/selftest.S" -o "$work/selftest.elf"
 v850-elf-gdb -q -batch \
   -ex "file $work/selftest.elf" \
-  -ex "target sim --architecture v850e3v5 --memory-region 0xFEBF0000,0x2000" \
+  -ex "target sim --architecture v850e3v5 --memory-region 0xFEBF0000,0x30000" \
   -ex load \
   -ex "break rh850_sim_stop" \
+  -ex "break rh850_sim_fail_stop" \
   -ex run \
   -ex 'printf "RH850_SELFTEST_RESULT=0x%x\n", *(unsigned int *)0xFEBF1000'
 """
@@ -204,7 +228,7 @@ def cmd_sim(args: argparse.Namespace) -> int:
     if not elf.is_file():
         raise Rh850ToolError(f"ELF does not exist: {elf}")
 
-    target = "target sim"
+    target = "target sim --architecture v850e3v5"
     for region in args.memory_region:
         target += f" --memory-region {region}"
 

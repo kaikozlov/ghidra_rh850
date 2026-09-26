@@ -18,9 +18,12 @@ RUN apt-get update \
  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /src
+COPY patches/binutils-v850-sim-imm32.patch /tmp/binutils-v850-sim-imm32.patch
 RUN git clone --depth=1 --branch=binutils-2_41-release \
       https://sourceware.org/git/binutils-gdb.git \
- && test "$(git -C binutils-gdb rev-parse HEAD)" = "${BINUTILS_GDB_COMMIT}"
+ && test "$(git -C binutils-gdb rev-parse HEAD)" = "${BINUTILS_GDB_COMMIT}" \
+ && git -C binutils-gdb apply --check /tmp/binutils-v850-sim-imm32.patch \
+ && git -C binutils-gdb apply /tmp/binutils-v850-sim-imm32.patch
 
 WORKDIR /build/binutils
 RUN /src/binutils-gdb/configure \
@@ -64,7 +67,7 @@ RUN apt-get update \
 COPY --from=build /opt/gcc-v850-elf-master /opt/gcc-v850-elf-master
 
 LABEL org.opencontainers.image.title="ghidra_rh850 GNU V850/RH850 toolchain"
-LABEL org.opencontainers.image.description="GCC 13.2.0 + binutils/GDB 2.41 lineage with the compiled-in V850/RH850 simulator"
+LABEL org.opencontainers.image.description="GCC 13.2.0 + binutils/GDB 2.41 lineage with the compiled-in V850/RH850 simulator and local imm32 simulator fix"
 LABEL org.opencontainers.image.source="https://github.com/kaikozlov/ghidra_rh850"
 
 WORKDIR /src

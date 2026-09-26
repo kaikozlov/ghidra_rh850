@@ -5,9 +5,7 @@
 _start:
     movhi 0xFEBF, r0, sp
     movea 0x7ff0, sp, sp
-    /* GNU sim/v850 does not execute the RH850 jarl32 extension correctly;
-       keep simulator-only harness calls in the ordinary near JARL form. */
-    jarl _oracle_core_sim_main, lp
+    jarl32 _oracle_core_sim_main, lp
     .global rh850_sim_stop
 rh850_sim_stop:
     br rh850_sim_stop

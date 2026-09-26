@@ -1,0 +1,30 @@
+From: ghidra_rh850 project
+Subject: [PATCH] sim: v850: fix 32-bit immediate word order
+
+The V850 igen cache for imm32 has two independent defects: it uses the
+relational '<' operator instead of a shift, and it treats the first encoded
+halfword as the high half.  RH850 format-VI disp32 instructions encode the
+low halfword first, followed by the high halfword.
+
+This cache feeds jarl32, jmp32, and jr32.  With the old expression a
+jarl32 with a small positive displacement decodes as zero and loops on
+itself in sim/v850.
+
+Keep this as a local patch until the equivalent fix lands upstream.
+---
+ sim/v850/v850.igen | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/sim/v850/v850.igen b/sim/v850/v850.igen
+index bd8de8e279..0000000000 100644
+--- a/sim/v850/v850.igen
++++ b/sim/v850/v850.igen
+@@ -63,7 +63,7 @@
+ :cache:::unsigned:imm5:iiii:(32 - (iiii << 1))
+ :cache:::unsigned:simm16:iiiiiiiiiiiiiiii:EXTEND16 (iiiiiiiiiiiiiiii)
+ :cache:::unsigned:uimm16:iiiiiiiiiiiiiiii:iiiiiiiiiiiiiiii
+-:cache:::unsigned:imm32:iiiiiiiiiiiiiiii,IIIIIIIIIIIIIIII:(iiiiiiiiiiiiiiii < 16 + IIIIIIIIIIIIIIII)
++:cache:::unsigned:imm32:iiiiiiiiiiiiiiii,IIIIIIIIIIIIIIII:((IIIIIIIIIIIIIIII << 16) + iiiiiiiiiiiiiiii)
+ :cache:::unsigned:uimm32:iiiiiiiiiiiiiiii,dddddddddddddddd:((iiiiiiiiiiiiiiii << 16) + dddddddddddddddd)
+ 
+ :cache:::unsigned:vector:iiiii:iiiii

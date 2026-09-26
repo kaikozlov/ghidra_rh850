@@ -3423,9 +3423,11 @@ verification suite also compiles a target-native `v850e3v5` harness and executes
 under GNU `sim/v850`: 30 assertions cover complete/mixed fragment sequences, epoch change,
 message-counter increment/wrap, FV4 construction, and success/error/busy response packing.
 The simulator harness deliberately stops before stock freshness/command-5/CAN calls and MMIO.
-The pinned GNU simulator executes ordinary near `jarl` but misexecutes RH850 `jarl32`, so far
-stock-call behavior remains a hardware/independent-simulator boundary rather than being mocked as
-if GNU sim had proved it.
+The repository-owned GNU simulator now carries a local fix for upstream `sim/v850`'s broken
+format-VI `imm32` reconstruction; `tools/rh850 selftest` exercises both forward and backward
+far `jarl32`/`jr32`, and the oracle harness itself uses `jarl32`. This removes the artificial
+far-call decoder boundary. Stock functions and P1M-E MMIO still require explicit models/mapped
+code or hardware before simulator execution can say anything about their behavior.
 
 #### 4.13.3 Prior-art audit: a virtual FD32 datagram does not remove the Classic-CAN tunnel
 

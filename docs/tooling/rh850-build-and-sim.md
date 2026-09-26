@@ -39,28 +39,34 @@ for the specific registers being exercised. Do not treat instruction-simulator
 success as evidence for RSCFD, ICU-S, FCU, interrupt-controller, or timing
 behavior.
 
-The pinned GNU `sim/v850` also has an instruction-coverage boundary that matters
-for our real payloads: the ordinary near `jarl` form executes correctly, while
-the RH850 `jarl32` extension used for far stock-function calls is misexecuted by
-this simulator build. A direct probe loops on the `jarl32` instruction instead
-of reaching its linked target. Simulator harnesses must therefore keep their own
-calls in near-`jarl` range and test production logic that does not itself cross a
-`jarl32` boundary. This is a simulator limitation, not an ECU/compiler ABI
-finding.
+Upstream GNU `sim/v850` has a long-standing format-VI 32-bit-immediate decoder
+bug that affects `jarl32`, `jr32`, and `jmp32`. The `imm32` cache in
+`sim/v850/v850.igen` used a relational `<` where a shift was intended and also
+assembled the two encoded halfwords in the wrong order. The same expression is
+still present on current upstream master, so merely upgrading binutils/GDB does
+not fix it.
+
+The repository-owned toolchain applies
+`tools/toolchains/v850-gcc/patches/binutils-v850-sim-imm32.patch` while building
+GNU binutils/GDB. `tools/rh850 selftest` exercises positive and negative far
+`jarl32` and `jr32` displacements with nonzero upper words before accepting the
+simulator. This fixes CPU control-flow simulation only; it is not evidence for
+P1M-E peripherals or for unmodeled stock/MMIO behavior.
 
 ## Rebuilding the GNU setup
 
 The historical local image `v850-gcc-scratch` came from the public
 Bk2ol/I-CAN-hack recipe. Keep that tag intact because older audited artifacts
 record its image identity. `tools/rh850 build-image` instead builds the
-repository-owned `ghidra-rh850-v850-gcc:13.2.0-binutils2.41` image by default.
+repository-owned `ghidra-rh850-v850-gcc:13.2.0-binutils2.41-simfix1` image by default.
 The rebuild recipe lives at `tools/toolchains/v850-gcc/Dockerfile` and pins:
 
 - Ubuntu 22.04 by OCI digest;
 - binutils/GDB `binutils-2_41-release` commit
   `675b9d612cc59446e84e2c6d89b45500cb603a8d`;
 - GCC `releases/gcc-13.2.0` commit
-  `c891d8dc23e1a46ad9f3e757d09e57b500d40044`.
+  `c891d8dc23e1a46ad9f3e757d09e57b500d40044`;
+- the repository-local V850 `imm32` simulator correction above.
 
 Build or inspect it with:
 
