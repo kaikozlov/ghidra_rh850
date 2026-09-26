@@ -2,17 +2,17 @@
 
 <!-- See Relax specification: Ghidra/Framework/SoftwareModeling/data/languages/processor_spec.rxg
 
-  Volatility for the RH850/P1M-E (R7F701381) analysis target.
-  The inherited upstream range 0x0..0x20 is CodeFlash in this project and must
-  NOT be marked volatile. Peripheral SFRs live in the high 24-bit window used
-  by the P1M-E (see hardware manual R01UH0585 and docs/architecture/firmware-architecture.md).
+  Volatility for the RH850/P1M-E R7F701381/R7F701383 analysis targets.
+  The inherited upstream range 0x0..0x20 is CodeFlash in these projects and
+  must not be marked volatile. The broad range below covers the verified high
+  SFR subset; lower FACI windows are marked volatile by the device profile.
 -->
 
 <processor_spec>
   <programcounter register="PC"/>
   <data_space space="ram"/>
   <volatile outputop="write" inputop="read">
-    <!-- P1M-E peripheral I/O / SFR window (covers EIC, RSCAN/RSCFD, TAUJ, ICU-S, flash sequencer). -->
+    <!-- Verified high P1M-E peripheral SFR subset; DataFlash at 0xFF200000 stays nonvolatile. -->
     <range space="ram" first="0xFF600000" last="0xFFFFFFFF"/>
   </volatile>
 </processor_spec>

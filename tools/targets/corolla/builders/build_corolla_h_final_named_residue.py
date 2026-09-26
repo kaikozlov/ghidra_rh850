@@ -153,7 +153,7 @@ def main():
 
     # Timer reload fixed hardware ownership and H-only extra channel.
     tr=hd[0x5F812]['decompiled_c']
-    require(all(x in tr for x in ['Ramffe20000','Ramffe21000','Ramffe21008','Ramffe50000']),'H timer reload fixed peripheral set drift')
+    require(all(x in tr for x in ['Ramffe20000','Ramffe21000','Ramffe21008','TAUJ0CDR0']),'H timer reload fixed peripheral set drift')
 
     # CH0 sample successor: mapped CH0 body -> regenerated intermediate -> snapshot publisher.
     require(calls(sf,0x64F18)[3]==0x656F0 and calls(hf,0x5F258)[3]==0x5FA96,'CH0 body fourth-child owner drift')

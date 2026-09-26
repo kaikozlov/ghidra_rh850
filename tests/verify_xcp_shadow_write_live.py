@@ -5,7 +5,7 @@ import argparse, subprocess, tempfile
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 PROGRAM='RH850_P1M-E_CodeFlash.bin'
-EXPECTED='ASSERT xcp-shadow-write-boundary: block=LocalRAM bytes=32768 read=true write=true execute=false refs=3 writes=3 reads=0 params=0 calls=0 other=0 functions=0 materializers=4 near_window=FEBF7BB0..FEBF7BEF_bounded_below daq_refs=4 daq_direction=ram_to_dto daq_mode_mask=0x33 unexpected=0'
+EXPECTED='ASSERT xcp-shadow-write-boundary: block=LocalRAM bytes=32768 read=true write=true execute=true refs=3 writes=3 reads=0 params=0 calls=0 other=0 functions=0 materializers=4 near_window=FEBF7BB0..FEBF7BEF_bounded_below daq_refs=4 daq_direction=ram_to_dto daq_mode_mask=0x33 unexpected=0'
 def main()->int:
     p=argparse.ArgumentParser(); p.add_argument('--project-dir',type=Path,default=ROOT/'build/work/project'); a=p.parse_args()
     project=a.project_dir.resolve()

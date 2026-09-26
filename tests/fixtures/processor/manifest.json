@@ -1,7 +1,7 @@
 {
   "processor": "v850e3:LE:32:default",
   "binary": "rh850_semantic_fixture.bin",
-  "size": 88,
+  "size": 104,
   "cases": [
     {
       "name": "sld.b",
@@ -246,6 +246,38 @@
       "must_pcode_ops": [
         "INT_SRIGHT"
       ]
+    },
+    {
+      "name": "ldsr-mcfg0",
+      "addr": 88,
+      "size": 4,
+      "bytes": "e6072008",
+      "mnemonic_prefix": "ldsr",
+      "operand_register": "MCFG0"
+    },
+    {
+      "name": "ldsr-pmr",
+      "addr": 92,
+      "size": 4,
+      "bytes": "e65f2010",
+      "mnemonic_prefix": "ldsr",
+      "operand_register": "PMR"
+    },
+    {
+      "name": "ldsr-mcc",
+      "addr": 96,
+      "size": 4,
+      "bytes": "e0572028",
+      "mnemonic_prefix": "ldsr",
+      "operand_register": "MCC"
+    },
+    {
+      "name": "stsr-cdbcr",
+      "addr": 100,
+      "size": 4,
+      "bytes": "f8574068",
+      "mnemonic_prefix": "stsr",
+      "operand_register": "CDBCR"
     }
   ]
 }

@@ -381,6 +381,8 @@ def build(out: Path, openpilot: Path) -> dict:
         [
             sys.executable,
             str(EPS08A_CLASSIC_ORACLE_BUILDER),
+            "--output-stem",
+            "camry_f33_08a_classic_oracle",
             "--output-dir",
             str(ram_dir),
         ],
@@ -420,14 +422,14 @@ def build(out: Path, openpilot: Path) -> dict:
     for name, helper in (("command9", icus_ramkey_helper9), ("command10", icus_ramkey_helper10)):
         if hashlib.sha256(helper).hexdigest() != icus_ramkey_meta["helpers"][name]["sha256"]:
             raise RuntimeError(f"ICU-S RAM_KEY {name} audited helper identity drift")
-    reused_resident = icus_ramkey_meta["reused_live_qualified_payload"]["resident"]
+    reused_resident = icus_ramkey_meta["reused_publication_correct_payload"]["resident"]
     # Continuous and one-shot signer bundles intentionally reuse the exact same
     # r6-correct staging/resident while carrying different post-startup helpers.
     # Artifact filenames differ, so bind the executable identity, not the path.
     for key in ("base", "size", "sha256"):
         if reused_resident[key] != inline_meta["resident"][key]:
             raise RuntimeError(f"ICU-S RAM_KEY probe no longer reuses the r6-correct resident ({key})")
-    if icus_ramkey_meta["reused_live_qualified_payload"]["authenticated_payload_sha256"] != hashlib.sha256(inline_signer_payload).hexdigest():
+    if icus_ramkey_meta["reused_publication_correct_payload"]["authenticated_payload_sha256"] != hashlib.sha256(inline_signer_payload).hexdigest():
         raise RuntimeError("ICU-S RAM_KEY authenticated payload identity drift")
     ingress_meta = json.loads(INGRESS_META.read_text(encoding="utf-8"))
     ingress_padded_helper = INGRESS_HELPER.read_bytes()
@@ -625,8 +627,8 @@ def build(out: Path, openpilot: Path) -> dict:
             "icus_ramkey_opcode_probe": {
                 "launcher": "f33-icus-ramkey",
                 "payload": "ram_payloads/camry_f33_icus_ramkey_probe_payload.bin",
-                "payload_sha256": icus_ramkey_meta["reused_live_qualified_payload"]["authenticated_payload_sha256"],
-                "resident": icus_ramkey_meta["reused_live_qualified_payload"]["resident"],
+                "payload_sha256": icus_ramkey_meta["reused_publication_correct_payload"]["authenticated_payload_sha256"],
+                "resident": icus_ramkey_meta["reused_publication_correct_payload"]["resident"],
                 "helpers": icus_ramkey_meta["helpers"],
                 "known_answer": icus_ramkey_meta["known_answer"],
                 "telemetry": icus_ramkey_meta["telemetry"],
@@ -919,8 +921,16 @@ def build(out: Path, openpilot: Path) -> dict:
                     "./f33-ingress selfcheck; require midaggregate_observer_selfcheck_pass",
                     "./f33-ingress marker --bus 0; interpret exact signature match or bounded D7-positive no-marker verdict",
                 ],
-                "live_qualified": True,
-                "live_result": "2026-09-10 selfcheck deltas observation/D7/B6=409/102/205; marker sent/returned 121/121, observer deltas=434/109/217, ID63 delta=0; verdict id63_not_seen_at_midaggregate_boundary",
+                "live_qualified": False,
+                "specification_conformant": True,
+                "historical_live_qualification": {
+                    "date": "2026-09-10",
+                    "payload_sha256": "01ce993425e910a6ea37473580adb6e641bdff56a3568492d4c9e0388e02fc6c",
+                    "resident_sha256": "31b1b2c31007f130d6b4679a0c99f5903a58f748daf11978f9c52f504aea3a3a",
+                    "helper_padded_sha256": "a964e816010a0ee6485877ac31006d77d6dbf3591ac5a22e8044ca7783cbb28c",
+                    "result": "selfcheck deltas observation/D7/B6=409/102/205; marker sent/returned 121/121, observer deltas=434/109/217, ID63 delta=0; verdict id63_not_seen_at_midaggregate_boundary",
+                    "boundary": "The observed artifact predated the P1M-E required final-word read, SYNCP, and SYNCI publication sequence. The rebuilt artifact includes that sequence and requires exact hardware requalification.",
+                },
                 "persistent_flash_write": False,
             },
             "runtime_monitor": {
@@ -1039,7 +1049,7 @@ def build(out: Path, openpilot: Path) -> dict:
                 "command5_probe is retained as the earlier bounded diagnostic oracle",
                 "valid_090_route40_experiment is the current routing discriminator for a host-origin 0x090 after both exact P5/MAC28 and local B7 conditions are satisfied",
                 "eps_origin_08a_routing_probe is the non-actuating topology discriminator: after passive native-0x08A MAC reproduction, replay one unchanged stock ID0 frame from the EPS lower CAN-FD path and observe whether that exact FV4+MAC frame reaches Panda",
-                "b6_ingress_observer is the live-qualified two-stage topology discriminator; its 2026-09-10 D7-positive marker run closed bounded negative for direct Panda ID63 at post-CanIf/pre-SecOC",
+                "b6_ingress_observer preserves the live-qualified 2026-09-10 D7-positive marker result as historical exact-artifact evidence; the current P1M-E publication-correct rebuild requires exact hardware requalification",
                 "the original b6_midaggregate_observer full-runtime install failed before initialization and is retained only as a superseded artifact",
                 "runtime_monitor_preaggregate and runtime_monitor_intertick are retained only as timing-insufficient/superseded predecessors and should not be rerun",
                 "runtime_monitor remains the general post-aggregate A-G gate monitor for later downstream localization after ingress identity is settled",

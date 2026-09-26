@@ -260,7 +260,21 @@ public class AssertProjectInvariants extends GhidraScript {
         }
 
         // Device-profile RAM/SFR windows are mandatory in the final project.
-        requireBlock("LocalRAM", 0xFEBE0000L, 0x20000L, true, true, false, false);
+        requireBlock("LocalRAM", 0xFEBE0000L, 0x20000L, true, true, true, false);
+        requireBlock("LocalRAM_self", 0xFEDE0000L, 0x20000L, true, true, true, false);
+        MemoryBlock selfLocal = currentProgram.getMemory().getBlock("LocalRAM_self");
+        if (selfLocal != null && !selfLocal.isMapped()) {
+            fail("LocalRAM_self must byte-map the PE1 LocalRAM physical backing");
+        }
+        requireBlock("GlobalRAM_A", 0xFEEF8000L, 0x8000L, true, true, true, false);
+        requireBlock("GlobalRAM_B", 0xFEF00000L, 0x8000L, true, true, true, false);
+        requireBlock("SFR_CODEFLASH_ECC", 0xFFC62000L, 0x500L, true, true, false, true);
+        requireBlock("SFR_FACI", 0xFFA10000L, 0x200L, true, true, false, true);
+        requireBlock("SFR_FACI_COMMAND", 0xFFA20000L, 0x4L, true, true, false, true);
+        requireBlock("SFR_ECM_MASTER", 0xFFD60000L, 0x100L, true, true, false, true);
+        requireBlock("SFR_ECM_CHECKER", 0xFFD61000L, 0x100L, true, true, false, true);
+        requireBlock("SFR_ECM_COMMON", 0xFFD62000L, 0x100L, true, true, false, true);
+        requireBlock("SFR_TAUJ", 0xFFE50000L, 0x3000L, true, true, false, true);
         requireBlock("SFR_EIC", 0xFFFFB000L, 0x1000L, true, true, false, true);
         requireBlock("SFR_RSCFD", 0xFFD20000L, 0x10000L, true, true, false, true);
         requireBlock("SFR_ICUS", 0xFFC5D000L, 0x1000L, true, true, false, true);
@@ -281,6 +295,17 @@ public class AssertProjectInvariants extends GhidraScript {
         requireLabel(0xFFD24200L, "CFDTMID16");
         requireLabel(0xFFC5D000L, "ICUSCMD");
         requireLabel(0xFFC5D00CL, "ICUSSTS");
+        requireLabel(0xFFC62008L, "UCFDERSTCLR");
+        requireLabel(0xFFC62030L, "UCFDERSTR");
+        requireLabel(0xFFF88818L, "CLKD3DIV");
+        requireLabel(0xFFF890C0L, "CKSC3C");
+        requireLabel(0xFFD62004L, "ECMMICFG0");
+        requireLabel(0xFFD62040L, "ECMPCMD1");
+        requireLabel(0xFFD6207CL, "ECMPEM");
+        requireLabel(0xFFA10080L, "FSTATR");
+        requireLabel(0xFFA20000L, "FACI_COMMAND_AREA");
+        requireLabel(0xFFE5000CL, "TAUJ0CDR3");
+        requireLabel(0xFFE50090L, "TAUJ0TPS");
 
         // Structured overlays from ApplyP1MSfrTypes.
         requireDataType(0xFFFFB110L, "EIC_Register", 2);

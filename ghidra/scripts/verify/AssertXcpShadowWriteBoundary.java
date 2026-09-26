@@ -17,9 +17,9 @@ public class AssertXcpShadowWriteBoundary extends GhidraScript {
         MemoryBlock block = currentProgram.getMemory().getBlock(start);
         if (block == null || !block.contains(end))
             throw new IllegalStateException("XCP write window is not wholly inside one memory block");
-        if (!block.isRead() || !block.isWrite() || block.isExecute())
+        if (!block.isRead() || !block.isWrite() || !block.isExecute())
             throw new IllegalStateException(String.format(
-                "unexpected XCP window permissions block=%s read=%s write=%s execute=%s",
+                "XCP LocalRAM block must be hardware-executable: block=%s read=%s write=%s execute=%s",
                 block.getName(), block.isRead(), block.isWrite(), block.isExecute()));
 
         Set<String> actual = new TreeSet<>();
@@ -113,7 +113,7 @@ public class AssertXcpShadowWriteBoundary extends GhidraScript {
         assertInstruction(0x82078L, "ori 0xf800,r6,r6");
 
         println(String.format(
-            "ASSERT xcp-shadow-write-boundary: block=%s bytes=%d read=true write=true execute=false refs=3 writes=3 reads=0 params=0 calls=0 other=0 functions=0 materializers=4 near_window=FEBF7BB0..FEBF7BEF_bounded_below daq_refs=4 daq_direction=ram_to_dto daq_mode_mask=0x33 unexpected=0",
+            "ASSERT xcp-shadow-write-boundary: block=%s bytes=%d read=true write=true execute=true refs=3 writes=3 reads=0 params=0 calls=0 other=0 functions=0 materializers=4 near_window=FEBF7BB0..FEBF7BEF_bounded_below daq_refs=4 daq_direction=ram_to_dto daq_mode_mask=0x33 unexpected=0",
             block.getName(), END - START + 1));
     }
 

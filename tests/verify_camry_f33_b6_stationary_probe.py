@@ -1120,7 +1120,7 @@ with tempfile.TemporaryDirectory() as td:
     check("kit retains native-B6 verify/replace signer only as historical development tooling",
           inline["launcher"] == "f33-secoc" and
           inline["resident_base"] == "0xFEBFF9F0" and inline["resident_size"] == 524 and
-          inline["resident_sha256"] == "31b1b2c31007f130d6b4679a0c99f5903a58f748daf11978f9c52f504aea3a3a" and
+          inline["resident_sha256"] == "f599fd600c7a2b59e72d18058729f0d121331df7078a72e6400571934447e2c4" and
           inline["helper_base"] == "0xFEBF0000" and inline["helper_padded_size"] == 600 and
           inline["helper_word_count"] == 150 and
           inline["helper_padded_sha256"] == "c28489ffa9278cab45f24cede1d9eefda0a70c45a1cfb254dd7c00e52e62c288" and
@@ -1182,18 +1182,20 @@ with tempfile.TemporaryDirectory() as td:
           mid["secoc_bypass"] is False and mid["route44_publish"] is False and mid["live_qualified"] is False and
           mid["superseded_by"] == "b6_ingress_observer" and "failed before observer initialization" in mid["live_result"])
     live_ingress = manifest["ram_experiments"]["b6_ingress_observer"]
-    check("kit packages the live-qualified two-stage ingress observer",
+    check("kit preserves the observed ingress result without transferring qualification to the publication-correct rebuild",
           live_ingress["launcher"] == "f33-ingress" and
-          live_ingress["payload_sha256"] == "01ce993425e910a6ea37473580adb6e641bdff56a3568492d4c9e0388e02fc6c" and
-          live_ingress["resident_sha256"] == "31b1b2c31007f130d6b4679a0c99f5903a58f748daf11978f9c52f504aea3a3a" and
+          live_ingress["payload_sha256"] == "8483fb5933d1354e9fe98fb5cfd59c6a7f0808151705295be20188eeb2a1c8b5" and
+          live_ingress["resident_sha256"] == "f599fd600c7a2b59e72d18058729f0d121331df7078a72e6400571934447e2c4" and
           live_ingress["helper_size"] == 120 and live_ingress["helper_padded_size"] == 600 and
           live_ingress["helper_padded_sha256"] == "a964e816010a0ee6485877ac31006d77d6dbf3591ac5a22e8044ca7783cbb28c" and
           live_ingress["telemetry"]["base"] == "0xFEBF0268" and
           "0x79EDE" in live_ingress["observation_boundary"] and
           live_ingress["mutation_boundary"]["receive_state_write"] is False and
-          live_ingress["live_qualified"] is True and
-          "id63_not_seen_at_midaggregate_boundary" in live_ingress["live_result"] and
-          any(row.startswith("b6_ingress_observer is the live-qualified") for row in manifest["ram_experiments"]["order"]))
+          live_ingress["live_qualified"] is False and live_ingress["specification_conformant"] is True and
+          live_ingress["historical_live_qualification"]["payload_sha256"] == "01ce993425e910a6ea37473580adb6e641bdff56a3568492d4c9e0388e02fc6c" and
+          live_ingress["historical_live_qualification"]["resident_sha256"] == "31b1b2c31007f130d6b4679a0c99f5903a58f748daf11978f9c52f504aea3a3a" and
+          "id63_not_seen_at_midaggregate_boundary" in live_ingress["historical_live_qualification"]["result"] and
+          any(row.startswith("b6_ingress_observer preserves the live-qualified") for row in manifest["ram_experiments"]["order"]))
     mon = manifest["ram_experiments"]["runtime_monitor"]
     check("kit retains generic external-control monitor for downstream A-G localization",
           mon["payload_sha256"] == monitor.EXPECTED_PAYLOAD_SHA256 and
@@ -1407,7 +1409,7 @@ with tempfile.TemporaryDirectory() as td:
     ingress_doctor = subprocess.run([str(ingress_launcher), "doctor"], cwd=out, env=env, capture_output=True, text=True, check=False)
     check("built two-stage ingress launcher doctor validates exact bundle without Panda access",
           ingress_doctor.returncode == 0 and "f33-ingress doctor: PASS" in ingress_doctor.stdout and
-          "01ce993425e910a6ea37473580adb6e641bdff56a3568492d4c9e0388e02fc6c" in ingress_doctor.stdout and
+          "8483fb5933d1354e9fe98fb5cfd59c6a7f0808151705295be20188eeb2a1c8b5" in ingress_doctor.stdout and
           "a964e816010a0ee6485877ac31006d77d6dbf3591ac5a22e8044ca7783cbb28c" in ingress_doctor.stdout,
           ingress_doctor.stderr[-300:])
     sign_launcher = out / "f33-sign"

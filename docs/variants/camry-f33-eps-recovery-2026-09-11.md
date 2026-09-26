@@ -343,9 +343,9 @@ The software RX ring does not turn the over-read into an overwrite.  Controller 
 has `DAT_21966 = 0x228` **words** of capacity; its fixed backing store is
 `FEBE4038..FEBE48D7`, and a logical 64-byte record consumes 19 words.  The ring
 uses 16-bit word indices and its mutation is wrapped by
-`7A2DA -> 98B8A -> 6A45E`, which saves IMSR and installs mask `0xFF00`, with
-`7A2E8 -> 6A4C4` restoring the prior mask.  The outer RSCFD ISR may enable nested
-interrupts, but these queue updates are explicitly serialized.
+`7A2DA -> 98B8A -> 6A45E`, which saves G3M `PMR` and installs mask `0xFF00`,
+with `7A2E8 -> 6A4C4` restoring the prior mask. The outer RSCFD ISR may enable
+nested interrupts, but these queue updates are explicitly serialized.
 
 Two additional write/pivot-looking cases also close under exact configuration:
 

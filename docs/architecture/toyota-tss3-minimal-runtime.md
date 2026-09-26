@@ -159,17 +159,38 @@ post-receive hook.
 This runtime does not depend on a Camry-only processor feature. Camry F33 and
 Crown F30 use the 1-MiB `R7F701381`; Corolla H/F use the 1-MiB `R7F701383`.
 Both are RH850/P1M-E DPS variants with the same 160-MHz core, 16 MPU channels,
-128 KiB PE1 Local RAM (`FEBE0000..FEBFFFFF`), and 64 KiB Global RAM. The P1M-E
-execution map permits instruction fetch from PE1 Local RAM and Global RAM.
-`STAC_LM0` controls local-RAM zero initialization for the relevant system and
-application reset classes.
+128 KiB PE1 Local RAM, and 64 KiB Global RAM.
 
-That closes RAM execution as a shared platform capability. What remains
-target-specific is deterministic firmware data: which reset path the exact
-bootloader uses, which startup writes survive, the application call graph, RX
-ring, freshness fields, transmit handle, and callable signer entry points. The
-builder pins those facts to each exact CodeFlash hash; it does not use a
-vehicle-name capability gate.
+The manual's architectural instruction-fetch map names the self Local-RAM view
+`FEDE0000..FEDFFFFF` and Global RAM. Exact firmware control flow and retained
+live payloads independently prove instruction fetch through Toyota's PE1 view
+`FEBE0000..FEBFFFFF`; the Ghidra profile therefore maps the self view as a byte
+alias of the PE1 backing and marks both views executable. Execution permission
+still depends on the active MPU region: the recovered payload regions use
+`MPAT=0xB8` for supervisor read/write/execute or `0xA8` for supervisor
+read/execute.
+
+Publishing newly written RAM code requires the G3M ordering from the CPU
+manual: complete the stores, perform a dummy read from the written region,
+execute `SYNCP`, execute `SYNCI`, then branch to it. The processor can
+speculatively fetch up to 48 bytes beyond the code body, so that trailing range
+must also be initialized and access-permitted. Every maintained RAM-code
+builder now validates the assembled dummy-read/`SYNCP`/`SYNCI` sequence; images
+whose destination lacks existing safe tail bytes carry a 48-byte zero guard.
+Global-RAM data writes are hardware-coherent/write-through on P1M-E, but that
+does not replace instruction-cache publication.
+
+RAM clearing is reset-class-specific. `STAC_LM0` controls local-RAM
+initialization for the reset classes listed by the device manual; it is not a
+blanket promise that every reset clears every local-RAM view. Target builders
+must continue to prove the exact boot/reset path and startup write survival
+from firmware.
+
+What remains target-specific is deterministic firmware data: the active reset
+path, startup writes, application call graph, RX ring, freshness fields,
+transmit handle, MPU table, and callable signer entry points. The builder pins
+those facts to each exact CodeFlash hash; it does not use a vehicle-name
+capability gate.
 
 The classic-`0x08A` resident profiles currently compile to these exact
 application interfaces:
@@ -216,11 +237,12 @@ The selected resident is copied to the common retained high tail
 zero aligned CodeFlash pointer literals and zero recovered application data
 references into that transit span. Their byte-identical MPU table places the
 span in region 12 (`FEC00000..FFFFFFFC`) with MPAT `0xB8` in both recovered
-application contexts, so the high resident can read it after startup. Cold-reset
-initialization clears all GlobalRAM before the authenticated payload runs, so it
-precedes rather than clobbers this staging write. The transit buffer is used only
-until the selected resident installs its helper into the target-native low-RAM
-pocket.
+application contexts, so the high resident can read it after startup. For the
+exact supported boot path, firmware startup clears GlobalRAM before the
+authenticated payload writes this transit buffer. That ordering is an
+exact-image firmware fact, not a universal consequence of all P1M-E reset
+classes. The transit buffer is used only until the selected resident installs
+its helper into the target-native low-RAM pocket.
 
 Corolla can install its 458-byte helper into `FEBF0000..FEBF01C9` before
 application startup because exact H/F startup-survival analysis excludes that

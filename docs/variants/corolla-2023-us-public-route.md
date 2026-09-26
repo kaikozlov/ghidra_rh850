@@ -2510,17 +2510,19 @@ cooperative controller. `1C02` remains a general multi-contributor torque observ
 it is not a wire echo of signal255. B6 signals262/263 also remain live percentage-like
 modifiers of internal contributor families through `CC442/CBFCE`.
 
-The B6 **receiver-loss path is also closed in scheduler ticks**. Status slot `0x18`
+The B6 **receiver-loss path is closed in scheduler ticks and nominal time**. Status slot `0x18`
 flows through `44744(0x18) -> FEBE7DA0 -> FEBEF132 -> FEBEADB9`; `CC7F8` requires
 `ADB9==0` before it can assert `FEBEC26D`. PDU42's raw descriptor at `0x22770` is
 `060000002000000c`: successful reception reloads its deadline to `6+1 = 7` foreground
 ticks and clears activity[PDU42], while `7683C -> 87AA0` marks it `0x5A` when that
 countdown expires. Because the lower deadline and higher status paths run in the
 same TAUJ0-CH3 foreground tick, the first expiry makes B6 status nonzero and drops
-cooperative selection immediately. The slower slot-18 row `2a00000bb8010200` has a
-configured threshold of `440` ticks for an extended status state; it is not the first
-steering cutout. The CH3 wall-clock period remains statically unsupported, so the
-receiver timeout is **7 ticks, not a claimed number of milliseconds**.
+cooperative selection immediately. `5F660` programs CH3's first interval as
+`(400000+8000)/80 MHz = 5.1 ms`; `5F812` reloads the steady
+`400000/80 MHz = 5.0 ms` interval. The primary seven-tick receiver cutoff is
+therefore nominally **35 ms** after startup. The slower slot-18 row
+`2a00000bb8010200` has a configured threshold of `440` ticks (nominally
+2.2 seconds) for an extended status state; it is not the first steering cutout.
 
 B6 signal261 (B7[5:0]) is a 6-bit rolling sequence counter: `CB246` computes the
 modulo-64 delta, normalizes delta `0/1` to an effective gap of `1`, and caps larger

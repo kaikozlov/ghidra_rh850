@@ -423,6 +423,20 @@ public class AssertProcessorFixtureSemantics extends GhidraScript {
             if (c.mnemonicPrefix != null && (mnem == null || !mnem.startsWith(c.mnemonicPrefix))) {
                 fail(c.name + ": mnemonic=" + mnem + " expected prefix " + c.mnemonicPrefix);
             }
+            if (c.operandRegister != null) {
+                boolean found = false;
+                for (int op = 0; op < ins.getNumOperands(); op++) {
+                    String rep = ins.getDefaultOperandRepresentation(op);
+                    if (c.operandRegister.equals(rep)) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    fail(c.name + ": operands do not contain exact register "
+                            + c.operandRegister + ": " + ins);
+                }
+            }
             Set<String> ops = pcodeOpNames(ins);
             for (String need : c.mustPcodeOps) {
                 if (!ops.contains(need)) {
@@ -481,6 +495,7 @@ public class AssertProcessorFixtureSemantics extends GhidraScript {
         String name;
         long addr;
         String mnemonicPrefix;
+        String operandRegister;
         List<String> mustPcodeOps = new ArrayList<>();
         List<String> forbidPcodeOps = new ArrayList<>();
         Integer loadSize;
@@ -504,6 +519,7 @@ public class AssertProcessorFixtureSemantics extends GhidraScript {
                 c.name = extractString(obj, "name");
                 c.addr = extractLong(obj, "addr");
                 c.mnemonicPrefix = extractString(obj, "mnemonic_prefix");
+                c.operandRegister = extractString(obj, "operand_register");
                 c.mustPcodeOps = extractStringArray(obj, "must_pcode_ops");
                 c.forbidPcodeOps = extractStringArray(obj, "forbid_pcode_ops");
                 if (obj.contains("\"load_size\"")) c.loadSize = (int) extractLong(obj, "load_size");

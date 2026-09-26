@@ -64,7 +64,7 @@ success nor failure path can return to its caller.
 The gate function runs two retry-bounded phases, each with a ceiling of three
 attempts (loop counter compared against `2`):
 
-### Phase 1 — CRC descriptor verification
+### Phase 1 — CRC and CodeFlash safety-status verification
 
 ```c
 // 0x119E — decompiled
@@ -73,20 +73,21 @@ while (true) {
     iVar2 = memory_crc_verify_descriptors(1);   // region 1
     iVar3 = memory_crc_verify_descriptors(0);   // region 0
     bVar1 = (iVar2 != 0) || (iVar3 != 0);
-    iVar2 = FUN_0000115a();                     // flash status helper
-    if (!bVar1 && iVar2 == 0) break;            // both CRCs pass + flash idle
+    iVar2 = FUN_0000115a();                     // CodeFlash DED/parity status helper
+    if (!bVar1 && iVar2 == 0) break;            // both CRCs pass + no DED/AP latch
     uVar4++;
     if (2 < uVar4) return 1;                    // give up → failure
 }
 ```
 
 `memory_crc_verify_descriptors` checks the per-region CRC embedded in flash
-against a live computation. `FUN_0000115a` (`0x115A`) is a flash-sequencer
-status helper: it polls the flash status register at `0xFFD62034` (the P1M-E
-FCU command/examine register window), returns non-zero if a flash error bit
-(OR of bit 0 and bit 2 of the status snapshot at `0xFFC62030`) is set, and
-writes the `0xA5` flash examine-code sequence before re-reading. A non-zero
-return forces the loop to retry.
+against a live computation. `FUN_0000115a` (`0x115A`) is a CodeFlash
+ECC/address-parity status helper, not a FACI sequencer-status poll. It snapshots
+`UCFDERSTR @ 0xFFC62030`, clears that DED/address-parity latch through
+`UCFDERSTCLR @ 0xFFC62008`, and uses the ECM protected-write sequence at
+`ECMPCMD1 @ 0xFFD62040` to clear the corresponding source through
+`ECMESSTC0 @ 0xFFD62034`. It returns non-zero when the original snapshot has
+`DEDF` bit 0 or `APEF` bit 2 set, forcing the loop to retry.
 
 ### Phase 2 — validity-marker comparison
 

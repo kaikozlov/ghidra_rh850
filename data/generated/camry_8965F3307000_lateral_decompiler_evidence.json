@@ -1278,17 +1278,10 @@
           "ref_type": "READ",
           "to_addr": "0xfebe66a8",
           "to_space": "ram"
-        },
-        {
-          "from_addr": "0x0004db8e",
-          "operand_index": 0,
-          "ref_type": "PARAM",
-          "to_addr": "0x000061a8",
-          "to_space": "ram"
         }
       ],
-      "decompiled_c": "\nundefined4 did_1035_steering_wheel_torque(undefined4 param_1)\n\n{\n  int iVar1;\n  int local_c [2];\n  \n  if (DAT_febe6af0 == -0x5aa5a55b) {\n    local_c[0] = (DAT_febe66a8 * 1000) / 0x100;\n    FUN_0007012a(local_c[0],&LAB_000061a8,0xffff9e58,local_c);\n    iVar1 = (int)(short)local_c[0];\n  }\n  else {\n    iVar1 = -0x8000;\n  }\n  FUN_0006a5ac(iVar1,param_1);\n  return 0;\n}\n\n",
-      "decompiled_c_sha256": "2741182f20a89b481f17ca99dc4b01d59a52980ea73680e228f47c63090d3444",
+      "decompiled_c": "\nundefined4 did_1035_steering_wheel_torque(undefined4 param_1)\n\n{\n  int iVar1;\n  int local_c [2];\n  \n  if (DAT_febe6af0 == -0x5aa5a55b) {\n    local_c[0] = (DAT_febe66a8 * 1000) / 0x100;\n    FUN_0007012a(local_c[0],25000,0xffff9e58,local_c);\n    iVar1 = (int)(short)local_c[0];\n  }\n  else {\n    iVar1 = -0x8000;\n  }\n  FUN_0006a5ac(iVar1,param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "0bf5f2183338e42e43a8eab60c3b063882a548e0ae4751bf106b7f0305c4c070",
       "entry": "0x0004DB70"
     },
     {
@@ -6395,8 +6388,8 @@
           "to_space": "ram"
         }
       ],
-      "decompiled_c": "\nvoid FUN_00066062(void)\n\n{\n  byte bVar1;\n  undefined8 uVar2;\n  int iVar3;\n  char *pcVar4;\n  \n  uVar2 = 0xfebeb800;\n  do {\n    do {\n      bVar1 = DAT_ffffb110._1_1_;\n    } while ((bVar1 & 0x10) == 0);\n    bVar1 = DAT_ffffb110._1_1_;\n    DAT_ffffb110._1_1_ = bVar1 & 0xef;\n    iVar3 = 0;\n    if (DAT_00031910 == 'Z') {\n      FUN_00064f12();\n      iVar3 = 0x5a;\n    }\n    FUN_00065442();\n    FUN_00071378();\n    FUN_00066ff2();\n    FUN_00071398();\n    FUN_000667e6();\n    FUN_00071378();\n    FUN_00066cf6();\n    FUN_00071398();\n    if (iVar3 == 0x5a) {\n      FUN_00065116();\n    }\n    pcVar4 = (char *)((int)uVar2 + -0x7e25);\n    *pcVar4 = *pcVar4 + '\\x01';\n  } while( true );\n}\n\n",
-      "decompiled_c_sha256": "cd44d3f72399c607435cb5a8840bc2152c8f0b15c868da34a7133a6db2bd5200",
+      "decompiled_c": "\nvoid FUN_00066062(void)\n\n{\n  byte bVar1;\n  undefined8 uVar2;\n  int iVar3;\n  char *pcVar4;\n  \n  uVar2 = 0xfebeb800;\n  do {\n    do {\n      bVar1 = EIC136._1_1_;\n    } while ((bVar1 & 0x10) == 0);\n    bVar1 = EIC136._1_1_;\n    EIC136._1_1_ = bVar1 & 0xef;\n    iVar3 = 0;\n    if (DAT_00031910 == 'Z') {\n      FUN_00064f12();\n      iVar3 = 0x5a;\n    }\n    FUN_00065442();\n    FUN_00071378();\n    FUN_00066ff2();\n    FUN_00071398();\n    FUN_000667e6();\n    FUN_00071378();\n    FUN_00066cf6();\n    FUN_00071398();\n    if (iVar3 == 0x5a) {\n      FUN_00065116();\n    }\n    pcVar4 = (char *)((int)uVar2 + -0x7e25);\n    *pcVar4 = *pcVar4 + '\\x01';\n  } while( true );\n}\n\n",
+      "decompiled_c_sha256": "9ca4f5cb901dd7770f0c7ef8cc6bb994a25472605da5b1240d72691eaeb7abd1",
       "entry": "0x00066062"
     },
     {
@@ -6642,8 +6635,8 @@
           "to_space": "ram"
         }
       ],
-      "decompiled_c": "\nvoid FUN_0006639c(void)\n\n{\n  byte bVar1;\n  \n  Ramffe50090 = 0;\n  DAT_ffe50094 = 0;\n  Ramffe50080 = 0;\n  Ramffe50084 = 0;\n  Ramffe50088 = 0;\n  Ramffe5008c = 0;\n  DAT_ffe50020 = 0;\n  DAT_ffe50024 = 0;\n  DAT_ffe50028 = 0;\n  DAT_ffe5002c = 0;\n  Ramffe50000 = PTR_FUN_00030df0 + DAT_00030df4 + -1;\n  Ramffe50004 = PTR_LAB_00030dfc + (int)PTR_LAB_00030df8 + -1;\n  Ramffe50008 = PTR_LAB_00030e04 + (int)PTR_DAT_00030e00 + -1;\n  Ramffe5000c = PTR_LAB_0000270e_2_00030e0c + DAT_00030e08 + -1;\n  bVar1 = DAT_ffe50060;\n  DAT_ffe50060 = bVar1 & 0xf0;\n  bVar1 = DAT_ffe5005c;\n  DAT_ffe5005c = bVar1 & 0xf0;\n  bVar1 = DAT_ffe500a0;\n  DAT_ffe500a0 = bVar1 & 0xf0;\n  bVar1 = DAT_ffe500a4;\n  DAT_ffe500a4 = bVar1 & 0xf0;\n  return;\n}\n\n",
-      "decompiled_c_sha256": "2081ed9d0c5652dcbb80c471d075b344d5b38f74e057f416d297b8599a8e6aeb",
+      "decompiled_c": "\nvoid FUN_0006639c(void)\n\n{\n  byte bVar1;\n  \n  TAUJ0TPS = 0;\n  TAUJ0BRS._0_1_ = 0;\n  TAUJ0CMOR0 = 0;\n  TAUJ0CMOR2 = 0;\n  DAT_ffe50088 = 0;\n  DAT_ffe5008c = 0;\n  DAT_ffe50020 = 0;\n  DAT_ffe50024 = 0;\n  DAT_ffe50028 = 0;\n  DAT_ffe5002c = 0;\n  TAUJ0CDR0 = (uint)(PTR_FUN_00030df0 + DAT_00030df4 + -1);\n  TAUJ0CDR1 = (uint)(PTR_LAB_00030dfc + (int)PTR_LAB_00030df8 + -1);\n  TAUJ0CDR2 = (uint)(PTR_LAB_00030e04 + (int)PTR_DAT_00030e00 + -1);\n  TAUJ0CDR3 = (uint)(PTR_LAB_0000270e_2_00030e0c + DAT_00030e08 + -1);\n  bVar1 = DAT_ffe50060;\n  DAT_ffe50060 = bVar1 & 0xf0;\n  bVar1 = DAT_ffe5005c;\n  DAT_ffe5005c = bVar1 & 0xf0;\n  bVar1 = DAT_ffe500a0;\n  DAT_ffe500a0 = bVar1 & 0xf0;\n  bVar1 = DAT_ffe500a4;\n  DAT_ffe500a4 = bVar1 & 0xf0;\n  return;\n}\n\n",
+      "decompiled_c_sha256": "7e1d0f3a5e4c0ad12afbe1ce2be5a9dac94878b594b929a8b1bf61934a169e8e",
       "entry": "0x0006639C"
     },
     {
@@ -6987,8 +6980,8 @@
           "to_space": "ram"
         }
       ],
-      "decompiled_c": "\nvoid FUN_00066512(void)\n\n{\n  ushort uVar1;\n  byte bVar2;\n  undefined4 uVar3;\n  \n  uVar3 = FUN_000701c4(0xffc0);\n  Ramffe20000 = DAT_00030e14 + -1;\n  Ramffe20004 = DAT_00030e18 + -1;\n  Ramffe2000c = DAT_00030e1c + -1;\n  Ramffe20014 = DAT_00030e20 + -1;\n  Ramffe20020 = DAT_00030e10 + -1;\n  Ramffe20038 = DAT_00030e10 + -1;\n  uVar1 = Ramffe2005c;\n  Ramffe2005c = uVar1 & 0xbed4;\n  uVar1 = Ramffe20058;\n  Ramffe20058 = uVar1 & 0xbed4;\n  Ramffe21000 = DAT_00030e14 + -1;\n  Ramffe21004 = DAT_00030e18 + -1;\n  Ramffe2100c = DAT_00030e1c + -1;\n  Ramffe21014 = DAT_00030e20 + -1;\n  uVar1 = Ramffe2105c;\n  Ramffe2105c = uVar1 & 0xffd0;\n  uVar1 = Ramffe21058;\n  Ramffe21058 = uVar1 & 0xffd0;\n  Ramffe50000 = PTR_FUN_00030df0 + -1;\n  Ramffe50004 = PTR_LAB_00030df8 + -1;\n  Ramffe50008 = PTR_DAT_00030e00 + -1;\n  Ramffe5000c = DAT_00030e08 + -1;\n  bVar2 = DAT_ffe50060;\n  DAT_ffe50060 = bVar2 & 0xf0;\n  bVar2 = DAT_ffe5005c;\n  DAT_ffe5005c = bVar2 & 0xf0;\n  FUN_000701ea(uVar3);\n  return;\n}\n\n",
-      "decompiled_c_sha256": "68a2a4272b68faad074e9dbb367747130df45263626453171c85bd9f4556ffca",
+      "decompiled_c": "\nvoid FUN_00066512(void)\n\n{\n  ushort uVar1;\n  byte bVar2;\n  undefined4 uVar3;\n  \n  uVar3 = FUN_000701c4(0xffc0);\n  Ramffe20000 = DAT_00030e14 + -1;\n  Ramffe20004 = DAT_00030e18 + -1;\n  Ramffe2000c = DAT_00030e1c + -1;\n  Ramffe20014 = DAT_00030e20 + -1;\n  Ramffe20020 = DAT_00030e10 + -1;\n  Ramffe20038 = DAT_00030e10 + -1;\n  uVar1 = Ramffe2005c;\n  Ramffe2005c = uVar1 & 0xbed4;\n  uVar1 = Ramffe20058;\n  Ramffe20058 = uVar1 & 0xbed4;\n  Ramffe21000 = DAT_00030e14 + -1;\n  Ramffe21004 = DAT_00030e18 + -1;\n  Ramffe2100c = DAT_00030e1c + -1;\n  Ramffe21014 = DAT_00030e20 + -1;\n  uVar1 = Ramffe2105c;\n  Ramffe2105c = uVar1 & 0xffd0;\n  uVar1 = Ramffe21058;\n  Ramffe21058 = uVar1 & 0xffd0;\n  TAUJ0CDR0 = (uint)(PTR_FUN_00030df0 + -1);\n  TAUJ0CDR1 = (uint)(PTR_LAB_00030df8 + -1);\n  TAUJ0CDR2 = (uint)(PTR_DAT_00030e00 + -1);\n  TAUJ0CDR3 = DAT_00030e08 - 1;\n  bVar2 = DAT_ffe50060;\n  DAT_ffe50060 = bVar2 & 0xf0;\n  bVar2 = DAT_ffe5005c;\n  DAT_ffe5005c = bVar2 & 0xf0;\n  FUN_000701ea(uVar3);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "55bbb8746aa9deb6b609dcd0f6c1a5fd585b2807742d583f32397f824673ae3e",
       "entry": "0x00066512"
     },
     {
@@ -12643,8 +12636,8 @@
   "software_id": "8965F3307000",
   "source_corpus": {
     "boundary": "First-class exact-F33 canonical Ghidra corpus; every promoted function/reference row is independently exact-body-range-hash-bound to the image.",
-    "function_count": 6065,
+    "function_count": 6073,
     "path": "data/generated/camry-8965F3307000/decompilations.jsonl",
-    "sha256": "760d19ce641e3e73b89bfc65185ffa08f16e563cc7a83a07f0594a42889c001d"
+    "sha256": "db011a14c7fc05aabba4aa193ad495c1e8e94dbc196ac683d9e907100be59320"
   }
 }

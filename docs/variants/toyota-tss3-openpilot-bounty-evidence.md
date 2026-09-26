@@ -195,17 +195,18 @@ Its source-level difference is one sequence-equality instruction: the continuous
 helper replaces `be .L_return` with `nop`. Because the branch encodes to four bytes
 and the NOP to two, the continuous helper is 588 rather than 590 bytes.
 
-The road-proven volatile lifecycle explicitly selected the retained continuous
-payload, helper, and matching metadata through `F33_INLINE_PAYLOAD_PATH`,
-`F33_INLINE_HELPER_PATH`, and `F33_INLINE_META_PATH`. As of the September 15 car-kit
-v16 cleanup, those exact continuous artifacts are now the **launcher defaults**;
-the distinct one-shot helper is retained only as development prior art. The
-lifecycle is full EPS OFF, NRTD/Park/stationary `./f33-secoc install`, direct
-NRTD-to-READY without OFF, then `./f33-secoc load-arm`. The last step requires
-byte-exact helper readback and equality between one untouched Toyota B6 trailer
-and the locally generated command-5 trailer. Panda ownership is then returned to
-exactly one normal openpilot manager/pandad tree. Full EPS OFF removes the
-resident and requires repeating the install/arm sequence.
+The identities above are the exact road-observed artifacts. The P1M-E manual
+requires a dummy read from the written code region followed by `SYNCP` and
+`SYNCI` before branching to RAM code. The historical resident did not perform
+that complete publication sequence after installing its helper. The current
+specification-conformant rebuild does and therefore has resident SHA-256
+`f599fd600c7a2b59e72d18058729f0d121331df7078a72e6400571934447e2c4`
+and authenticated-payload SHA-256
+`8483fb5933d1354e9fe98fb5cfd59c6a7f0808151705295be20188eeb2a1c8b5`.
+It preserves the continuous helper bytes but is **not** assigned the old exact
+artifact's hardware qualification; repeat exact-F33 qualification before live
+use. The car kit retains the historical route/result separately from the
+current build identity.
 
 The retained [session summary](../../targets/camry-2026/raw-20260910/working-steering/summary.json),
 [verbatim runtime artifacts, hashes, and replay procedure](../../targets/camry-2026/raw-20260910/working-steering/runtime/README.md),

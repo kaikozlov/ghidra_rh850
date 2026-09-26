@@ -137,9 +137,10 @@ and a tester-controlled 32-bit address. The address must lie in
 UPLOAD path. `SET_DAQ_LIST_MODE` rejects any mode byte with mask bits `0x33`
 set, requires a valid event ID, a nonzero prescaler, and zero priority. Four
 event slots are configured as IDs `0/1/2/3`; the periodic event worker reloads
-each after two eligible communication-manager invocations. The absolute
-foreground-tick duration remains unsupported, so no wall-clock DAQ rate is
-claimed.
+each after two eligible communication-manager invocations. That manager runs
+once per recovered 5-ms foreground cycle, so the nominal event base is 10 ms.
+The configured nonzero DAQ prescaler multiplies that base; transport scheduling
+and protocol-state gating can still delay an individual DTO.
 
 The runtime data direction is pinned at the instruction level. `WRITE_DAQ`
 stores the accepted tester address into the pointer table at `FEBE4CF0`. The
@@ -204,10 +205,10 @@ enables protection in supervisor mode with `MPM=3` (MPE+SVP), and the
 application MPU loader selects context 0 initially (`0x3180F=0`), context 1 for
 foreground/flash-end entry (`0x31810=1`), and context 0 for CAN1 Tx/Rx ISR
 wrappers (`0x31811=0`). MPAT bit semantics are those in the Renesas P1M-E
-manual (`REFERENCE/r01uh0585ej0120_manual.pdf`, Table 3.49). The
-Ghidra LocalRAM memory block's `execute=false` is **analysis metadata about
-the imported program database, not a hardware security bound** (see
-CORRECTIONS). Second, an exhaustive live-project
+manual (`REFERENCE/r01uh0585ej0120_manual.pdf`, Table 3.49). The common P1M-E
+device profile now correctly marks the PE1 and self Local-RAM views executable;
+the former `execute=false` Ghidra block flag was stale analysis metadata, not a
+hardware security bound (CORR-060). Second, an exhaustive live-project
 census over all defined function instructions finds exactly three direct
 references into `0xFEBF7C00..0xFEBFFBFF`, all `WRITE` references to the base
 `FEBF7C00` (`0x142E`, `0x62652`, `0x976E4`). It finds zero function-owned direct

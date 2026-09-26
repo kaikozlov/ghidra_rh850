@@ -321,21 +321,36 @@ proof**. `--data-ref` is the preferred persisted-xref entry point for RAM state;
 it avoids treating decompiler alias spelling as an address census. Decompiled C
 and the exported reference graph are generated evidence, not the source of truth.
 
-Expected memory map after the P1M-E device profile is applied:
+Expected memory map after the common P1M-E device profile is applied:
 
 ```text
-CodeFlash   00000000..000fffff  rx
-DataFlash   ff200000..ff207fff  rw
-LocalRAM    febe0000..febfffff  rw
-SFR_EIC     ffffb000..ffffbfff  rw volatile
-SFR_RSCFD   ffd20000..ffd2ffff  rw volatile
-SFR_ICUS    ffc5d000..ffc5dfff  rw volatile
+CodeFlash          00000000..000fffff  rx       imported user area
+Extended user      01000000..01007fff  rx       architectural; unmapped when absent from dump
+LocalRAM           febe0000..febfffff  rwx      PE1 view used by firmware
+LocalRAM_self      fede0000..fedfffff  rwx      byte alias of LocalRAM
+GlobalRAM_A        feef8000..feefffff  rwx
+GlobalRAM_B        fef00000..fef07fff  rwx
+DataFlash          ff200000..ff207fff  rw
+SFR_FACI_ID        ffa08000..ffa0801f  rw volatile
+SFR_FACI           ffa10000..ffa101ff  rw volatile
+SFR_FACI_COMMAND   ffa20000..ffa20003  rw volatile
+SFR_FACI_CONFIG    ffc59000..ffc590ff  rw volatile
+SFR_ICUS           ffc5d000..ffc5dfff  rw volatile
+SFR_CODEFLASH_ECC  ffc62000..ffc624ff  rw volatile
+SFR_RSCFD          ffd20000..ffd2ffff  rw volatile
+SFR_ECM_*          ffd60000..ffd630ff  rw volatile, four mapped windows
+SFR_TAUJ           ffe50000..ffe52fff  rw volatile
+SFR_EIC            ffffb000..ffffbfff  rw volatile
 ```
 
-The full peripheral window `0xFF600000..0xFFFFFFFF` stays volatile in
-`v850.pspec`. Only the verified windows above are mapped as blocks — mapping
-the entire 10 MiB SFR range makes CodeFlash immediates look like valid
-pointers and collapses disassembly.
+The self Local-RAM range is a mapped alias, not a second physical allocation.
+Executable flags describe architectural fetch capability; recovered MPU
+permissions remain the authority for a particular runtime context. The full
+high peripheral range `0xFF600000..0xFFFFFFFF` remains volatile in
+`v850.pspec`, while FACI and other lower verified peripheral blocks are marked
+volatile explicitly. Only evidence-backed windows are mapped: mapping every
+possible SFR address makes CodeFlash immediates look like pointers and
+collapses disassembly.
 
 ## Verification
 
@@ -437,6 +452,11 @@ reproduce the committed statistics.
    from `data/p1m_sfr_labels.csv`), `ApplyP1MSfrTypes.java` (EIC/RSCFD/ICU-S
    overlays), `ApplyRamTypes.java` (LocalRAM payload/SecOC/DID/checkpoint
    overlays from `data/checkpoint_payload_map.csv`).
+
+Registered exact-target rebuilds apply this common device profile and
+`ApplyP1MSfrTypes` before their target-specific identity/context/label script.
+Exact-target scripts do not maintain a second hardware map.
+
 2. Run `SeedEntries.java`, then the base auto-analysis.
 3. Run `SeedUdsServiceTable.java`, re-run analysis.
 4. Seed remaining missed functions (`SeedCanTransportFunctions`,

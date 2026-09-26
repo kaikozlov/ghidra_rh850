@@ -10,7 +10,7 @@ SRAW=SIENNA_CODEFLASH
 HRAW=H_RAW_DUMP
 SFP=ROOT/'build/work/corpora/sienna_function_structural_fingerprints.jsonl'
 HFP=ROOT/'build/work/corpora/h_clean_function_structural_fingerprints.jsonl'
-HDC=ROOT/'build/work/corpora/h_small_adapters_forced.jsonl'
+HDC=ROOT/'data/generated/corolla-8965H1202000/decompilations.jsonl'
 OUT=ROOT/'data/generated/corolla_8965H1202000_final_named_residue_evidence.json'
 S_ENTRIES={
  0x5778C,0x57980,0x57A7E,0x58404,0x5DB6E,0x64F18,0x656F0,0x6578E,

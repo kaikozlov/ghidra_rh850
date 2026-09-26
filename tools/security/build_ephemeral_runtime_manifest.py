@@ -50,7 +50,7 @@ def load_codeflash(path: Path) -> tuple[bytes, dict]:
         source["normalization"] = "trim-all-ff-upper-1mib-from-2mib-range-dump"
         return raw[:CODEFLASH_SIZE], source
     raise ManifestError(
-        f"CodeFlash input must be 1 MiB, or a 2 MiB range dump whose upper 1 MiB is all 0xFF; got {len(raw):#x} bytes"
+        f"user CodeFlash input must be 1 MiB, or a 2 MiB range dump whose upper 1 MiB is all 0xFF; got {len(raw):#x} bytes"
     )
 
 

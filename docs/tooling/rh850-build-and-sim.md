@@ -88,14 +88,17 @@ inline target calls.
 
 ### Proof boundary
 
-A passing simulation proves the executed CPU instructions, exact CodeFlash
-preimages, call targets, RAM placement, and modeled state transitions —
-nothing else. It cannot observe the bootloader transport, DataFlash state,
-live RAM retention, MPU state at the handoff, interrupts, peripherals,
-watchdogs, command-5 hardware permission, or timing. MMIO-heavy payloads need
-explicit register models; do not treat simulator success as evidence for
-RSCFD, ICU-S, FCU, or timing behavior. An isolated bench or in-vehicle canary
-remains required per target.
+A passing simulation proves the executed CPU instructions, exact low user-area
+CodeFlash preimages, call targets, RAM placement, and modeled state transitions
+— nothing else. GNU `sim/v850` does **not** model P1M-E LocalRAM aliases,
+instruction-cache state or the RAM publication effect of dummy-read /
+`SYNCP` / `SYNCI`, MPU/IPG access checks, ECC, reset-class RAM initialization,
+interrupts, peripherals, watchdogs, command-5 hardware permission, or timing.
+It also does not prove `MCTL.MA=0` misalignment exceptions unless a specific
+CPU model implements and exercises them. MMIO-heavy payloads need explicit
+register models; do not treat simulator success as evidence for RSCFD, ICU-S,
+FACI, ECM, or timing behavior. An isolated bench or in-vehicle canary remains
+required per target.
 
 ### Simulator fixes
 

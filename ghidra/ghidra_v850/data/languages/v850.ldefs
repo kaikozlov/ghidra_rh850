@@ -15,12 +15,12 @@
   <language processor="v850"
             endian="little"
             size="32"
-            variant="V850E3 (RH850)"
-            version="0.2"
+            variant="RH850G3M (P1M-E)"
+            version="0.3"
             slafile="v850e3.sla"
             processorspec="v850.pspec"
             id="v850e3:LE:32:default">
-    <description>Renesas v850 Module (RH850/P1M-E tuned)</description>
+    <description>Renesas RH850G3M for RH850/P1M-E</description>
     <compiler name="default" spec="v850.cspec" id="default"/>
   </language> 
 </language_definitions>

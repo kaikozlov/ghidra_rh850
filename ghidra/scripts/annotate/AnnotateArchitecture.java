@@ -47,8 +47,8 @@ public class AnnotateArchitecture extends GhidraScript {
         renameFunction(0x119eL, "boot_validity_check",
             "Boot validity gate called by boot_application_handoff. Runs up to 3 retry attempts for memory_crc_verify_descriptors of both CodeFlash regions, then up to 3 retry attempts for the marker equality check at 0x6C5A against markers 0x17E00 and 0xFFE00. Returns 0 on success, 1 on failure (never enters the application).");
 
-        renameFunction(0x115aL, "boot_flash_status_check",
-            "Boot flash sequencer status check. Writes the flash sequencer command window (0xFFD62034 area) with a clear/read-back sequence, checks error bits 0 and 2 of the status register, and returns 1 on error. Called inside the validity retry loop.");
+        renameFunction(0x115aL, "boot_codeflash_ecc_status_check",
+            "Boot CodeFlash ECC/address-parity status check. Reads UCFDERSTR, clears it through UCFDERSTCLR, uses the ECMPCMD1/ECMESSTC0 protected sequence to clear ECM source 19, and returns 1 when DEDF or APEF was set.");
 
         renameFunction(0x6c5aL, "boot_validity_marker_check",
             "Returns true if the 32-bit value at the parameter address is NOT equal to the validity marker 0x5AA5A55A. Called with 0xFFE00 and 0x17E00 (CodeFlash region markers). A true return means the marker is invalid/erased.");
@@ -59,11 +59,11 @@ public class AnnotateArchitecture extends GhidraScript {
         renameFunction(0xe54L, "boot_key_mirror_init",
             "Boot key mirror initialization. Reads three DataFlash triple-copy values at 0xFFC0A000-A008, checks their XOR55/XORAA complements, and if valid copies the primary values into GP-relative mirrors at FEBFFC00-C14, then computes the XOR55 and XORAA complement copies.");
 
-        renameFunction(0xf80L, "boot_flash_sequencer_init",
-            "Boot flash sequencer initialization. Configures the flash sequencer protection registers (0xFFD62000-28 area) with the enable key 0xA5 and configures blank/erase state for DataFlash banks at 0xFFD60000 and 0xFFD61000.");
+        renameFunction(0xf80L, "boot_ecm_init",
+            "Boot Error Control Module initialization. Uses ECMPCMD1 plus ECMMPCMD0/ECMCPCMD0 protection commands and programs the common, master, and checker ECM configuration/status registers at 0xFFD60000..0xFFD6207C.");
 
-        renameFunction(0x10c6L, "boot_clock_init",
-            "Boot clock generation initialization. Writes the clock control register at 0xFFF890C0 with value 4, polls the status register at 0xFFF890C8 for completion, then sets the main oscillator control at 0xFFF88818 to 0x50 (50 MHz main PLL configuration).");
+        renameFunction(0x10c6L, "boot_extclk1_init",
+            "Boot EXTCLK1O initialization. Selects CLK_LSB through CKSC3C/CKSC3S, uses the required dummy-read and SYNCP ordering, then sets CLKD3DIV to 0x50 for a divide-by-80 output.");
 
         renameFunction(0x1206L, "boot_failure_trap",
             "Boot failure trap called when validity checks fail. Zeros the diagnostic state at 0xFFFEE980-988 and returns; the caller then falls through to the boot failure main loop.");
@@ -139,8 +139,8 @@ public class AnnotateArchitecture extends GhidraScript {
         eol(0x64fd6L, "Clear EIC136.EIRF after accepting the polled foreground tick.");
         eol(0x13b4L, "jarl boot setup call 1: boot_peripheral_init (0xC9A)");
         eol(0x13b8L, "jarl boot setup call 2: boot_key_mirror_init (0xE54)");
-        eol(0x13bcL, "jarl boot setup call 3: boot_flash_sequencer_init (0xF80)");
-        eol(0x13c0L, "jarl boot setup call 4: boot_clock_init (0x10C6)");
+        eol(0x13bcL, "jarl boot setup call 3: boot_ecm_init (0xF80)");
+        eol(0x13c0L, "jarl boot setup call 4: boot_extclk1_init (0x10C6)");
         eol(0x13c4L, "jarl boot validity check: boot_validity_check (0x119E)");
         eol(0x6c60L, "Validity marker 0x5AA5A55A literal inside boot_validity_marker_check");
     }

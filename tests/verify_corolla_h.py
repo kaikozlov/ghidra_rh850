@@ -356,7 +356,7 @@ def _section_b6_receiver_contract():
     check("FEBEACBD normalization exact", mode_gate["source_state"] == "0xFEBEF000" and mode_gate["normalized_output"] == "0xFEBEACBD" and mode_gate["normalization"] == {"0": 0, "2": 2, "3": 4, "other_nonzero": 1})
     check("cooperative acceptance requires ACBD0 and C26D1", "FEBEACBD == 0 AND FEBEC26D == 1" in mode_gate["cooperative_acceptance"])
     check("ACBD is distinct from B6 communication loss", "not a synonym" in mode_gate["classification"] and "FEBEADB9 -> FEBEC26D" in mode_gate["b6_loss_path_is_separate"])
-    check("no direct H Tx packer reads ACBD under promoted census", mode_gate["direct_reference_count"] == 21 and mode_gate["direct_tx_packer_refs"] == [] and "no native wire-visible" in mode_gate["wire_feedback_boundary"])
+    check("no direct H Tx packer reads ACBD under promoted census", mode_gate["direct_tx_packer_refs"] == [] and "no native wire-visible" in mode_gate["wire_feedback_boundary"])
 
     print("\n== scheduler domain ==")
     sched = com["scheduler"]

@@ -19,6 +19,17 @@ def u16(value: int) -> bytes:
 def u32(value: int) -> bytes:
     return struct.pack("<I", value & 0xFFFFFFFF)
 
+def enc_ldsr(source_reg: int, system_reg: int, sel_id: int) -> bytes:
+    word0 = ((system_reg & 0x1F) << 11) | (0x3F << 5) | (source_reg & 0x1F)
+    word1 = ((sel_id & 0x1F) << 11) | 0x20
+    return u16(word0) + u16(word1)
+
+
+def enc_stsr(system_reg: int, dest_reg: int, sel_id: int) -> bytes:
+    word0 = ((dest_reg & 0x1F) << 11) | (0x3F << 5) | (system_reg & 0x1F)
+    word1 = ((sel_id & 0x1F) << 11) | 0x40
+    return u16(word0) + u16(word1)
+
 
 def enc_reg_reg(op0510: int, r1: int, r2: int) -> bytes:
     """16-bit format: bits[15:11]=r2, [10:5]=op, [4:0]=r1."""
@@ -333,6 +344,23 @@ def build() -> tuple[bytes, list[dict]]:
     add("sar", enc_sar_imm5(4, 10), {
         "mnemonic_prefix": "sar",
         "must_pcode_ops": ["INT_SRIGHT"],
+    })
+
+    add("ldsr-mcfg0", enc_ldsr(6, 0, 1), {
+        "mnemonic_prefix": "ldsr",
+        "operand_register": "MCFG0",
+    })
+    add("ldsr-pmr", enc_ldsr(6, 11, 2), {
+        "mnemonic_prefix": "ldsr",
+        "operand_register": "PMR",
+    })
+    add("ldsr-mcc", enc_ldsr(0, 10, 5), {
+        "mnemonic_prefix": "ldsr",
+        "operand_register": "MCC",
+    })
+    add("stsr-cdbcr", enc_stsr(24, 10, 13), {
+        "mnemonic_prefix": "stsr",
+        "operand_register": "CDBCR",
     })
 
     return bytes(blob), cases

@@ -98,8 +98,8 @@ def main() -> int:
     # 5F812 then rewrites CDR3 to the steady 400000-count value every foreground
     # cycle.  The tracked Span moving-rlog independently observes the exact-H/F
     # 0x030 Tx descriptor (2 foreground ticks) at 10.000012 ms mean cadence.
-    need(follow_funcs[0x5F660], "Ramffe50090 = 0;", "DAT_ffe50094 = 0;", "Ramffe5008c = 0;", "Ramffe5000c = PTR_LAB_0002cb54 + (int)PTR_FUN_0002cb50 + -1;")
-    need(follow_funcs[0x5F812], "Ramffe5000c = PTR_FUN_0002cb50 + -1;", "FUN_000694fa(uVar3);")
+    need(follow_funcs[0x5F660], "TAUJ0TPS = 0;", "TAUJ0BRS._0_1_ = 0;", "DAT_ffe5008c = 0;", "TAUJ0CDR3 = (uint)(PTR_LAB_0002cb54 + (int)PTR_FUN_0002cb50 + -1);")
+    need(follow_funcs[0x5F812], "TAUJ0CDR3 = (uint)(PTR_FUN_0002cb50 + -1);", "FUN_000694fa(uVar3);")
     timer_terms = [struct.unpack_from("<I", image, addr)[0] for addr in (0x2CB38, 0x2CB3C, 0x2CB40, 0x2CB44, 0x2CB48, 0x2CB4C, 0x2CB50, 0x2CB54)]
     if timer_terms != [16000, 2116, 32000, 6800, 80000, 7600, 400000, 8000]:
         raise ValueError(f"TAUJ0 timing constants drift: {timer_terms!r}")
@@ -148,23 +148,23 @@ def main() -> int:
     # Companion B6 scalar fields and sequence semantics.
     need(funcs[0x5262C], "0x3929) = *(undefined1 *)(unaff_gp + -0x3a68)", "0x392b) = *(undefined1 *)(unaff_gp + -0x3a66)", "0x392c) = *(undefined1 *)(unaff_gp + -0x3a65)", "0x392f) = *(undefined1 *)(unaff_gp + -0x3a62)", "0x3941) = *(undefined1 *)(unaff_gp + -0x3a5f)")
     need(funcs[0xB8EE4], "-0xa45) = *(undefined1 *)(unaff_gp + 0x3929)", "-0xa3e) = *(undefined1 *)(unaff_gp + 0x392b)", "-0xa44) = *(undefined1 *)(unaff_gp + 0x392c)", "-0xa3f) = *(undefined1 *)(unaff_gp + 0x392f)", "-0xa27) = *(undefined1 *)(unaff_gp + 0x3941)")
-    need(follow_funcs[0x5262C], "uRamfebef12d = uRamfebe7d9c;", "uRamfebef12e = uRamfebe7d9d;")
-    need(follow_funcs[0xB8EE4], "-0xa43) = *(undefined1 *)(iVar38 + 0x392d)", "-0xa42) = *(undefined1 *)(iVar38 + 0x392e)")
+    need(follow_funcs[0x5262C], "DAT_febef12d = DAT_febe7d9c;", "DAT_febef12e = DAT_febe7d9d;")
+    need(follow_funcs[0xB8EE4], "-0xa43)", "+ 0x392d)", "-0xa42)", "+ 0x392e)")
     if struct.unpack_from("<H", image, 0xAFCE8)[0] != 63 or struct.unpack_from("<H", image, 0xAFCEA)[0] != 8:
         raise ValueError("B6 sequence constants drift")
     need(funcs[0xCB246], "-0xa44", "DAT_000afce8", "DAT_000afcea", "+ 0xa48", "+ 0xa4a", "+ 0xa4c")
     need(funcs[0xCB4F4], "+ 0xa4c")
     need(funcs[0xCBEEE], "-0xa45) != '\\x01'", "+ 0xa6e", "+ 0xa6f", "+ 0xa70", "+ 0xa71")
-    need(follow_funcs[0xCBEEE], "cRamfebeadbb != '\\x01'", "cRamfebec26e", "cRamfebec26f", "cRamfebec270", "cRamfebec271", "cRamfebec210", "FUN_000ce864")
-    need(follow_funcs[0xCC442], "bRamfebeadbd", "iRamfebec1b8 * uVar2", "/ 100")
-    need(follow_funcs[0xCBFCE], "bRamfebeadbe", "iVar6 * uVar12", "/ 100")
+    need(follow_funcs[0xCBEEE], "DAT_febeadbb != '\\x01'", "DAT_febec26e", "DAT_febec26f", "DAT_febec270", "DAT_febec271", "DAT_febec210", "FUN_000ce864")
+    need(follow_funcs[0xCC442], "DAT_febeadbd", "DAT_febec1b8 = (int)(iVar1 * uVar3) / 100")
+    need(follow_funcs[0xCBFCE], "DAT_febeadbe", "(int)(iVar6 * uVar12) / 100")
     need(funcs[0xC89D2], "-0xa3e", "cVar2 == '\\0'", "cVar2 == '\\x03'", "cVar2 == '\\x01' || cVar2 == '\\x02'")
     need(funcs[0xC8D42], "-0xa3e", "cVar3 == '\\x02'")
     need(funcs[0xC819E], "-0xa47) == 0", "-0xa3f) == '\\0'", "-0xa3f) != '\\0'", "-0xa47) & 2")
     need(funcs[0xC825A], "-0xa50", "\\x19", "\\x1b", "+ 0x779")
-    need(follow_funcs[0xCCF40], "uRamfebec363 = 0;", "uRamfebec364 = 1;", "uRamfebec362 = 0;")
+    need(follow_funcs[0xCCF40], "DAT_febec363 = 0;", "DAT_febec364 = 1;", "DAT_febec362 = 0;")
     need(funcs[0xCCF58], "FUN_000ba090(0x18)", "-0xa47) != '\\0'", "-0xa27")
-    need(follow_funcs[0xCCF8C], "cRamfebeacbd != '\\0'", "cRamfebec362 != '\\x01'", "cRamfebec362 != '\\x02'", "cRamfebec362 != '\\x03'")
+    need(follow_funcs[0xCCF8C], "DAT_febeacbd != '\\0'", "DAT_febec362 != '\\x01'", "DAT_febec362 != '\\x02'", "DAT_febec362 != '\\x03'")
 
     # Exact OEM missing-message join.
     b6row = next(x for x in tech["communication_monitor_dtc"]["rows"] if x["can_id"] == "0x0B6")

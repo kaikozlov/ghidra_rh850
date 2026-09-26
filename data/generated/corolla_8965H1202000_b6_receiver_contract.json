@@ -5,7 +5,7 @@
       "b6_loss_path_is_separate": "B6 loss propagates through FEBEADB9 -> FEBEC26D",
       "classification": "graded internal steering/system mode-or-inhibit code; not a synonym for B6 communication loss",
       "cooperative_acceptance": "CBE6E requires FEBEACBD == 0 AND FEBEC26D == 1 before asserting an active cooperative profile",
-      "direct_reference_count": 21,
+      "direct_reference_count": 20,
       "direct_tx_packer_refs": [],
       "normalization": {
         "0": 0,
@@ -238,7 +238,7 @@
     "span_moving_rlog_evidence": {
       "frame_count_0x030": 6000,
       "path": "data/generated/corolla_2025_span_discord_rlog_opendbc_evidence.json",
-      "sha256": "65af33b876067984cdc2d2ab8c900cfeaefae57de67bdf6ab0da634b3c57ee08"
+      "sha256": "ef0244d18a1cc6a467c91db1e523ee941bbb24f36d518e8253873bdfc73bf5c7"
     },
     "techstream_correlations": {
       "path": "data/generated/corolla_8965H1202000_techstream_correlations.json",
@@ -247,7 +247,7 @@
     "tms053_followup_decompiler_evidence": {
       "function_count": 29,
       "path": "data/generated/corolla_8965H1202000_tms053_followup_decompiler_evidence.json",
-      "sha256": "4afbd5568b61016161b147d23239011f579a2511d3497e628b69c2bdde60b200"
+      "sha256": "a866a31fb71e24a8eb14b4ef5f06f742ad7c03eb3f0485bacb8c3dea1ebd6cd9"
     }
   },
   "static_conclusion": {

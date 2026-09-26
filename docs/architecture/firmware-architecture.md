@@ -80,33 +80,35 @@ The handoff invokes four setup functions before the validity check:
 |---|---|---|
 | `0x13B4` | `boot_peripheral_init` `0xC9A` | Initializes RSCFD CAN controller register windows (`0xFFC20000`/`0xFFC24000`/`0xFFC34000`) and CAN channel descriptors from the table at `0x87A0` |
 | `0x13B8` | `boot_key_mirror_init` `0xE54` | Reads three DataFlash triple-copy values at `0xFFC0A000-A008`, checks XOR55/XORAA complements, and copies valid primaries into GP-relative mirrors at `0xFEBFFC00-C14` |
-| `0x13BC` | `boot_flash_sequencer_init` `0xF80` | Configures flash sequencer protection registers (`0xFFD62000-28`) with enable key `0xA5`; sets blank/erase state for DataFlash banks at `0xFFD60000`/`0xFFD61000` |
-| `0x13C0` | `boot_clock_init` `0x10C6` | Writes `0xFFF890C0=4`, polls `0xFFF890C8` for completion, then sets `0xFFF88818=0x50` (main PLL configuration) |
+| `0x13BC` | `boot_ecm_init` `0xF80` | Configures the P1M-E Error Control Module master/checker/common windows (`0xFFD60000`, `0xFFD61000`, `0xFFD62000`): error routing, reset/interrupt configuration, masks, status clears, delay timer, and pseudo-error mask, using the ECM `0xA5` protected-write sequence |
+| `0x13C0` | `boot_extclk1_init` `0x10C6` | Selects `CLK_LSB` through `CKSC3C=4`, waits for `CKSC3S`, and writes `CLKD3DIV=0x50`; 40-MHz `CLK_LSB / 80` produces 500-kHz `EXTCLK1O` |
 
-The peripheral, key-mirror, flash-sequencer, and clock roles are bounded to
-the register windows they touch; the exact clock tree and CAN bit timing are
-not fully decoded and are not claimed here.
+These roles are bounded by direct register accesses and the P1M-E register
+definitions. `0xF80` is not FACI/flash-sequencer setup, and `0x10C6` does not
+reconfigure the PLL.
 
 #### Validity check (`0x119E`)
 
 `boot_validity_check` at `0x119E` runs two retry-bounded phases, each with a
 ceiling of three attempts (loop counter compared against `2`):
 
-1. **Phase 1 — CRC descriptor verification.** Calls
+1. **Phase 1 — CRC and CodeFlash safety-status verification.** Calls
    `memory_crc_verify_descriptors` for both CodeFlash regions (region 1 then
-   region 0), then `boot_flash_status_check` at `0x115A`. It breaks only when
-   both CRCs pass and the flash status is idle; otherwise it retries up to
-   three times and returns `1` (failure) on exhaustion.
+   region 0), then `boot_codeflash_ecc_status_check` at `0x115A`. It breaks
+   only when both CRCs pass and no CodeFlash double-bit ECC or address-parity
+   error was latched; otherwise it retries up to three times and returns `1`
+   on exhaustion.
 2. **Phase 2 — validity-marker comparison.** Calls
    `boot_validity_marker_check` at `0x6C5A` with `0xFFE00` (region 1) and
    `0x17E00` (region 0). It breaks only when both markers are present,
    otherwise retries up to three times and returns `1`.
 
-The function returns `0` only when both phases pass. The flash status helper
-at `0x115A` polls the flash sequencer command window at `0xFFD62034`, checks
-error bits 0 and 2 of the status snapshot, issues the `0xA5` examine-code
-sequence, and returns non-zero on error — a non-zero return forces the CRC
-phase to retry.
+The function returns `0` only when both phases pass. The helper at `0x115A`
+snapshots `UCFDERSTR @ 0xFFC62030`, clears the CodeFlash DED/address-parity
+latch through `UCFDERSTCLR @ 0xFFC62008`, and clears the corresponding ECM
+source through protected `ECMESSTC0 @ 0xFFD62034`. It returns non-zero when
+the snapshot has `DEDF` bit 0 or `APEF` bit 2 set. None of these addresses is
+the FACI command/status window (`0xFFA10000` / `0xFFA20000`).
 
 #### Region table and markers
 
@@ -193,7 +195,16 @@ The loop at `0x64FCC` polls bit 12 of the 16-bit interrupt-control register at `
 
 The loop waits for `EIRF136`, clears it in software, and executes one foreground cycle. Channel 136 remains mapped to the default pointer-table handler because the firmware consumes this timer event by polling rather than by an ISR.
 
-This establishes the tick **source**. The exact foreground-tick period remains `unsupported`: the TAUJ0 prescaler and reload (TDR) registers are not referenced via 32-bit absolute addresses in CodeFlash (the setup likely uses register-indirect or 16-bit-displacement addressing the decompiler does not resolve), and the RH850/P1M-E datasheet (`REFERENCE/r01ds0505ed0100-rh850p1m-e.pdf`) is a 72-page brief that documents TAUJ0 pin assignments and AC timing but not the register-level layout. The **PLL CPU clock is proven at 160 MHz** (16 MHz main oscillator × 10; REFERENCE PDF Sec 1.3 Table 1.1, Sec 3.4, Sec 3.6), but converting that to a TAUJ0 CH3 tick still requires the prescaler+TDR. All timing in `data/scheduler_periods.csv` is therefore expressed in foreground ticks, with microsecond periods marked `unsupported`. This is documented in `tests/verify_scheduler_timing.py`.
+The exact periods are recovered. `application_tauj0_init` at `0x65306` writes
+`TAUJ0TPS=0`, selects `CK0=PCLK` for all four interval channels, and loads the
+four `TAUJ0CDR` values from the table at `0x30F7C`. The P1M-E TAUJ clock
+definition and 80-MHz P-Bus therefore give CH0 `16000` ticks = **200 us**,
+CH1 `32000` = **400 us**, CH2 `80000` = **1 ms**, and CH3 `400000` =
+**5 ms**. The initial loads add one-time phase offsets of 800, 9200, 9600,
+and 10000 ticks respectively; `application_timer_peripheral_reload` at
+`0x6547C` restores the steady channel reloads. The CPU PLL output is 160 MHz,
+but it is not the TAUJ scheduler clock. `data/scheduler_periods.csv` records
+the exact derivations and distinguishes periods from clock-frequency rows.
 
 ### 3.2 Foreground cycle
 
@@ -241,16 +252,21 @@ The increment at the end of the loop updates a cycle counter at application `GP 
 
 ### 3.3 Interrupt-driven periodic groups
 
-TAUJ0 channels 0, 1, and 2 are handled through the application pointer table:
+TAUJ0 channels 0, 1, and 2 are handled through the application pointer table;
+channel 3 supplies the foreground trigger:
 
-| EIINT | ISR | Body | Observation |
-|---:|---:|---:|---|
-| 133 | `0x70320` | `0x64F18` | Generated context wrapper, periodic body, event counter increment |
-| 134 | `0x703CA` | `0x64F54` | Generated context wrapper, periodic body, event counter increment |
-| 135 | `0x70476` | `0x64F90` | Generated context wrapper, periodic body, event counter increment |
-| 136 | default entry | polled at `0x64FCC` | Foreground-cycle trigger; `EIRF136` is cleared by the loop |
+| EIINT | ISR/body | Steady reload | Period | Initial added ticks |
+|---:|---|---:|---:|---:|
+| 133 | `0x70320` -> `0x64F18` | 16,000 ticks | 200 µs | 800 |
+| 134 | `0x703CA` -> `0x64F54` | 32,000 ticks | 400 µs | 9,200 |
+| 135 | `0x70476` -> `0x64F90` | 80,000 ticks | 1 ms | 9,600 |
+| 136 | default entry; polled at `0x64FCC` | 400,000 ticks | 5 ms | 10,000 |
 
-This gives four timer-driven execution lanes, but it does not by itself prove their periods or AUTOSAR runnable names.
+`application_tauj0_init @ 0x65306` sets `TAUJ0TPS=0` and channel mode
+`CKS=0, CCS=0`, selecting CK0 from the 80-MHz P-Bus. The periods therefore
+follow directly from the reload tables at `0x30F7C..0x30F93`; they are not
+inferred from AUTOSAR naming. Channel 3's first interval is 410,000 ticks
+(5.125 ms), after which its 5-ms foreground cadence is steady.
 
 ## 4. Interrupt architecture
 

@@ -1,12 +1,22 @@
 {"record":"meta","schema_version":1,"ghidra_version":"12.1.4","program_name":"RH850_P1M-E_CodeFlash.bin","executable_sha256":"21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde","executable_format":"Raw Binary","language_id":"v850e3:LE:32:default","compiler_spec_id":"default"}
 {"record":"memory_block","name":"CodeFlash","start":{"space":"ram","offset":"00000000"},"end":{"space":"ram","offset":"000fffff"},"size":1048576,"block_type":"Default","initialized":true,"overlay":false,"loaded":true,"read":true,"write":false,"execute":true,"volatile":false,"artificial":false,"source_infos":[{"destination_min":{"space":"ram","offset":"00000000"},"destination_max":{"space":"ram","offset":"000fffff"},"length":1048576,"mapped_range":null,"byte_mapping":null,"file_bytes":{"filename":"RH850_P1M-E_CodeFlash.bin","file_offset":0,"size":1048576,"source_offset":0}}]}
-{"record":"memory_block","name":"LocalRAM","start":{"space":"ram","offset":"febe0000"},"end":{"space":"ram","offset":"febfffff"},"size":131072,"block_type":"Default","initialized":false,"overlay":false,"loaded":true,"read":true,"write":true,"execute":false,"volatile":false,"artificial":false,"source_infos":[{"destination_min":{"space":"ram","offset":"febe0000"},"destination_max":{"space":"ram","offset":"febfffff"},"length":131072,"mapped_range":null,"byte_mapping":null,"file_bytes":null}]}
-{"record":"memory_block","name":"GlobalRAM_A","start":{"space":"ram","offset":"feef8000"},"end":{"space":"ram","offset":"feefffff"},"size":32768,"block_type":"Default","initialized":false,"overlay":false,"loaded":true,"read":true,"write":true,"execute":false,"volatile":false,"artificial":false,"source_infos":[{"destination_min":{"space":"ram","offset":"feef8000"},"destination_max":{"space":"ram","offset":"feefffff"},"length":32768,"mapped_range":null,"byte_mapping":null,"file_bytes":null}]}
-{"record":"memory_block","name":"GlobalRAM_B","start":{"space":"ram","offset":"fef00000"},"end":{"space":"ram","offset":"fef07fff"},"size":32768,"block_type":"Default","initialized":false,"overlay":false,"loaded":true,"read":true,"write":true,"execute":false,"volatile":false,"artificial":false,"source_infos":[{"destination_min":{"space":"ram","offset":"fef00000"},"destination_max":{"space":"ram","offset":"fef07fff"},"length":32768,"mapped_range":null,"byte_mapping":null,"file_bytes":null}]}
+{"record":"memory_block","name":"LocalRAM","start":{"space":"ram","offset":"febe0000"},"end":{"space":"ram","offset":"febfffff"},"size":131072,"block_type":"Default","initialized":false,"overlay":false,"loaded":true,"read":true,"write":true,"execute":true,"volatile":false,"artificial":false,"source_infos":[{"destination_min":{"space":"ram","offset":"febe0000"},"destination_max":{"space":"ram","offset":"febfffff"},"length":131072,"mapped_range":null,"byte_mapping":null,"file_bytes":null}]}
+{"record":"memory_block","name":"LocalRAM_self","start":{"space":"ram","offset":"fede0000"},"end":{"space":"ram","offset":"fedfffff"},"size":131072,"block_type":"Byte Mapped","initialized":false,"overlay":false,"loaded":true,"read":true,"write":true,"execute":true,"volatile":false,"artificial":false,"source_infos":[{"destination_min":{"space":"ram","offset":"fede0000"},"destination_max":{"space":"ram","offset":"fedfffff"},"length":131072,"mapped_range":{"min":{"space":"ram","offset":"febe0000"},"max":{"space":"ram","offset":"febfffff"}},"byte_mapping":{"mapped_byte_count":1,"mapped_source_byte_count":1},"file_bytes":null}]}
+{"record":"memory_block","name":"GlobalRAM_A","start":{"space":"ram","offset":"feef8000"},"end":{"space":"ram","offset":"feefffff"},"size":32768,"block_type":"Default","initialized":false,"overlay":false,"loaded":true,"read":true,"write":true,"execute":true,"volatile":false,"artificial":false,"source_infos":[{"destination_min":{"space":"ram","offset":"feef8000"},"destination_max":{"space":"ram","offset":"feefffff"},"length":32768,"mapped_range":null,"byte_mapping":null,"file_bytes":null}]}
+{"record":"memory_block","name":"GlobalRAM_B","start":{"space":"ram","offset":"fef00000"},"end":{"space":"ram","offset":"fef07fff"},"size":32768,"block_type":"Default","initialized":false,"overlay":false,"loaded":true,"read":true,"write":true,"execute":true,"volatile":false,"artificial":false,"source_infos":[{"destination_min":{"space":"ram","offset":"fef00000"},"destination_max":{"space":"ram","offset":"fef07fff"},"length":32768,"mapped_range":null,"byte_mapping":null,"file_bytes":null}]}
 {"record":"memory_block","name":"DataFlash","start":{"space":"ram","offset":"ff200000"},"end":{"space":"ram","offset":"ff207fff"},"size":32768,"block_type":"Default","initialized":true,"overlay":false,"loaded":true,"read":true,"write":true,"execute":false,"volatile":false,"artificial":false,"source_infos":[{"destination_min":{"space":"ram","offset":"ff200000"},"destination_max":{"space":"ram","offset":"ff207fff"},"length":32768,"mapped_range":null,"byte_mapping":null,"file_bytes":null}]}
+{"record":"memory_block","name":"SFR_FACI_ID","start":{"space":"ram","offset":"ffa08000"},"end":{"space":"ram","offset":"ffa0801f"},"size":32,"block_type":"Default","initialized":false,"overlay":false,"loaded":true,"read":true,"write":true,"execute":false,"volatile":true,"artificial":false,"source_infos":[{"destination_min":{"space":"ram","offset":"ffa08000"},"destination_max":{"space":"ram","offset":"ffa0801f"},"length":32,"mapped_range":null,"byte_mapping":null,"file_bytes":null}]}
+{"record":"memory_block","name":"SFR_FACI","start":{"space":"ram","offset":"ffa10000"},"end":{"space":"ram","offset":"ffa101ff"},"size":512,"block_type":"Default","initialized":false,"overlay":false,"loaded":true,"read":true,"write":true,"execute":false,"volatile":true,"artificial":false,"source_infos":[{"destination_min":{"space":"ram","offset":"ffa10000"},"destination_max":{"space":"ram","offset":"ffa101ff"},"length":512,"mapped_range":null,"byte_mapping":null,"file_bytes":null}]}
+{"record":"memory_block","name":"SFR_FACI_COMMAND","start":{"space":"ram","offset":"ffa20000"},"end":{"space":"ram","offset":"ffa20003"},"size":4,"block_type":"Default","initialized":false,"overlay":false,"loaded":true,"read":true,"write":true,"execute":false,"volatile":true,"artificial":false,"source_infos":[{"destination_min":{"space":"ram","offset":"ffa20000"},"destination_max":{"space":"ram","offset":"ffa20003"},"length":4,"mapped_range":null,"byte_mapping":null,"file_bytes":null}]}
+{"record":"memory_block","name":"SFR_FACI_CONFIG","start":{"space":"ram","offset":"ffc59000"},"end":{"space":"ram","offset":"ffc590ff"},"size":256,"block_type":"Default","initialized":false,"overlay":false,"loaded":true,"read":true,"write":true,"execute":false,"volatile":true,"artificial":false,"source_infos":[{"destination_min":{"space":"ram","offset":"ffc59000"},"destination_max":{"space":"ram","offset":"ffc590ff"},"length":256,"mapped_range":null,"byte_mapping":null,"file_bytes":null}]}
 {"record":"memory_block","name":"SFR_ICUS","start":{"space":"ram","offset":"ffc5d000"},"end":{"space":"ram","offset":"ffc5dfff"},"size":4096,"block_type":"Default","initialized":false,"overlay":false,"loaded":true,"read":true,"write":true,"execute":false,"volatile":true,"artificial":false,"source_infos":[{"destination_min":{"space":"ram","offset":"ffc5d000"},"destination_max":{"space":"ram","offset":"ffc5dfff"},"length":4096,"mapped_range":null,"byte_mapping":null,"file_bytes":null}]}
+{"record":"memory_block","name":"SFR_CODEFLASH_ECC","start":{"space":"ram","offset":"ffc62000"},"end":{"space":"ram","offset":"ffc624ff"},"size":1280,"block_type":"Default","initialized":false,"overlay":false,"loaded":true,"read":true,"write":true,"execute":false,"volatile":true,"artificial":false,"source_infos":[{"destination_min":{"space":"ram","offset":"ffc62000"},"destination_max":{"space":"ram","offset":"ffc624ff"},"length":1280,"mapped_range":null,"byte_mapping":null,"file_bytes":null}]}
 {"record":"memory_block","name":"SFR_RSCFD","start":{"space":"ram","offset":"ffd20000"},"end":{"space":"ram","offset":"ffd2ffff"},"size":65536,"block_type":"Default","initialized":false,"overlay":false,"loaded":true,"read":true,"write":true,"execute":false,"volatile":true,"artificial":false,"source_infos":[{"destination_min":{"space":"ram","offset":"ffd20000"},"destination_max":{"space":"ram","offset":"ffd2ffff"},"length":65536,"mapped_range":null,"byte_mapping":null,"file_bytes":null}]}
-{"record":"memory_block","name":"SFR_FCU","start":{"space":"ram","offset":"ffd62000"},"end":{"space":"ram","offset":"ffd620ff"},"size":256,"block_type":"Default","initialized":false,"overlay":false,"loaded":true,"read":true,"write":true,"execute":false,"volatile":true,"artificial":false,"source_infos":[{"destination_min":{"space":"ram","offset":"ffd62000"},"destination_max":{"space":"ram","offset":"ffd620ff"},"length":256,"mapped_range":null,"byte_mapping":null,"file_bytes":null}]}
+{"record":"memory_block","name":"SFR_ECM_MASTER","start":{"space":"ram","offset":"ffd60000"},"end":{"space":"ram","offset":"ffd600ff"},"size":256,"block_type":"Default","initialized":false,"overlay":false,"loaded":true,"read":true,"write":true,"execute":false,"volatile":true,"artificial":false,"source_infos":[{"destination_min":{"space":"ram","offset":"ffd60000"},"destination_max":{"space":"ram","offset":"ffd600ff"},"length":256,"mapped_range":null,"byte_mapping":null,"file_bytes":null}]}
+{"record":"memory_block","name":"SFR_ECM_CHECKER","start":{"space":"ram","offset":"ffd61000"},"end":{"space":"ram","offset":"ffd610ff"},"size":256,"block_type":"Default","initialized":false,"overlay":false,"loaded":true,"read":true,"write":true,"execute":false,"volatile":true,"artificial":false,"source_infos":[{"destination_min":{"space":"ram","offset":"ffd61000"},"destination_max":{"space":"ram","offset":"ffd610ff"},"length":256,"mapped_range":null,"byte_mapping":null,"file_bytes":null}]}
+{"record":"memory_block","name":"SFR_ECM_COMMON","start":{"space":"ram","offset":"ffd62000"},"end":{"space":"ram","offset":"ffd620ff"},"size":256,"block_type":"Default","initialized":false,"overlay":false,"loaded":true,"read":true,"write":true,"execute":false,"volatile":true,"artificial":false,"source_infos":[{"destination_min":{"space":"ram","offset":"ffd62000"},"destination_max":{"space":"ram","offset":"ffd620ff"},"length":256,"mapped_range":null,"byte_mapping":null,"file_bytes":null}]}
+{"record":"memory_block","name":"SFR_ECM_PULSE","start":{"space":"ram","offset":"ffd63000"},"end":{"space":"ram","offset":"ffd630ff"},"size":256,"block_type":"Default","initialized":false,"overlay":false,"loaded":true,"read":true,"write":true,"execute":false,"volatile":true,"artificial":false,"source_infos":[{"destination_min":{"space":"ram","offset":"ffd63000"},"destination_max":{"space":"ram","offset":"ffd630ff"},"length":256,"mapped_range":null,"byte_mapping":null,"file_bytes":null}]}
+{"record":"memory_block","name":"SFR_TAUJ","start":{"space":"ram","offset":"ffe50000"},"end":{"space":"ram","offset":"ffe52fff"},"size":12288,"block_type":"Default","initialized":false,"overlay":false,"loaded":true,"read":true,"write":true,"execute":false,"volatile":true,"artificial":false,"source_infos":[{"destination_min":{"space":"ram","offset":"ffe50000"},"destination_max":{"space":"ram","offset":"ffe52fff"},"length":12288,"mapped_range":null,"byte_mapping":null,"file_bytes":null}]}
 {"record":"memory_block","name":"SFR_TSG3","start":{"space":"ram","offset":"ffe70000"},"end":{"space":"ram","offset":"ffe71fff"},"size":8192,"block_type":"Default","initialized":false,"overlay":false,"loaded":true,"read":true,"write":true,"execute":false,"volatile":true,"artificial":false,"source_infos":[{"destination_min":{"space":"ram","offset":"ffe70000"},"destination_max":{"space":"ram","offset":"ffe71fff"},"length":8192,"mapped_range":null,"byte_mapping":null,"file_bytes":null}]}
 {"record":"memory_block","name":"SFR_CLKGEN","start":{"space":"ram","offset":"fff88000"},"end":{"space":"ram","offset":"fff89fff"},"size":8192,"block_type":"Default","initialized":false,"overlay":false,"loaded":true,"read":true,"write":true,"execute":false,"volatile":true,"artificial":false,"source_infos":[{"destination_min":{"space":"ram","offset":"fff88000"},"destination_max":{"space":"ram","offset":"fff89fff"},"length":8192,"mapped_range":null,"byte_mapping":null,"file_bytes":null}]}
 {"record":"memory_block","name":"SFR_ADCG0","start":{"space":"ram","offset":"fff91000"},"end":{"space":"ram","offset":"fff91fff"},"size":4096,"block_type":"Default","initialized":false,"overlay":false,"loaded":true,"read":true,"write":true,"execute":false,"volatile":true,"artificial":false,"source_infos":[{"destination_min":{"space":"ram","offset":"fff91000"},"destination_max":{"space":"ram","offset":"fff91fff"},"length":4096,"mapped_range":null,"byte_mapping":null,"file_bytes":null}]}
@@ -30,10 +40,10 @@
 {"record":"function","entry":{"space":"ram","offset":"00000c52"},"body_ranges":[{"min":{"space":"ram","offset":"00000c52"},"max":{"space":"ram","offset":"00000c99"}}],"body_address_count":72,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":null,"name_source":"DEFAULT","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
 {"record":"function","entry":{"space":"ram","offset":"00000c9a"},"body_ranges":[{"min":{"space":"ram","offset":"00000c9a"},"max":{"space":"ram","offset":"00000e53"}}],"body_address_count":442,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":"boot_peripheral_init","name_source":"USER_DEFINED","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
 {"record":"function","entry":{"space":"ram","offset":"00000e54"},"body_ranges":[{"min":{"space":"ram","offset":"00000e54"},"max":{"space":"ram","offset":"00000f7f"}}],"body_address_count":300,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":"boot_key_mirror_init","name_source":"USER_DEFINED","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
-{"record":"function","entry":{"space":"ram","offset":"00000f80"},"body_ranges":[{"min":{"space":"ram","offset":"00000f80"},"max":{"space":"ram","offset":"000010c3"}}],"body_address_count":324,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":"boot_flash_sequencer_init","name_source":"USER_DEFINED","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
+{"record":"function","entry":{"space":"ram","offset":"00000f80"},"body_ranges":[{"min":{"space":"ram","offset":"00000f80"},"max":{"space":"ram","offset":"000010c3"}}],"body_address_count":324,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":"boot_ecm_init","name_source":"USER_DEFINED","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
 {"record":"function","entry":{"space":"ram","offset":"000010c4"},"body_ranges":[{"min":{"space":"ram","offset":"000010c4"},"max":{"space":"ram","offset":"000010c5"}}],"body_address_count":2,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":null,"name_source":"DEFAULT","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
-{"record":"function","entry":{"space":"ram","offset":"000010c6"},"body_ranges":[{"min":{"space":"ram","offset":"000010c6"},"max":{"space":"ram","offset":"00001159"}}],"body_address_count":148,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":"boot_clock_init","name_source":"USER_DEFINED","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
-{"record":"function","entry":{"space":"ram","offset":"0000115a"},"body_ranges":[{"min":{"space":"ram","offset":"0000115a"},"max":{"space":"ram","offset":"0000119d"}}],"body_address_count":68,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":"boot_flash_status_check","name_source":"USER_DEFINED","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
+{"record":"function","entry":{"space":"ram","offset":"000010c6"},"body_ranges":[{"min":{"space":"ram","offset":"000010c6"},"max":{"space":"ram","offset":"00001159"}}],"body_address_count":148,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":"boot_extclk1_init","name_source":"USER_DEFINED","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
+{"record":"function","entry":{"space":"ram","offset":"0000115a"},"body_ranges":[{"min":{"space":"ram","offset":"0000115a"},"max":{"space":"ram","offset":"0000119d"}}],"body_address_count":68,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":"boot_codeflash_ecc_status_check","name_source":"USER_DEFINED","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
 {"record":"function","entry":{"space":"ram","offset":"0000119e"},"body_ranges":[{"min":{"space":"ram","offset":"0000119e"},"max":{"space":"ram","offset":"00001205"}}],"body_address_count":104,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":"boot_validity_check","name_source":"USER_DEFINED","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
 {"record":"function","entry":{"space":"ram","offset":"00001206"},"body_ranges":[{"min":{"space":"ram","offset":"00001206"},"max":{"space":"ram","offset":"00001219"}}],"body_address_count":20,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":"boot_failure_trap","name_source":"USER_DEFINED","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
 {"record":"function","entry":{"space":"ram","offset":"0000121a"},"body_ranges":[{"min":{"space":"ram","offset":"0000121a"},"max":{"space":"ram","offset":"00001227"}}],"body_address_count":14,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":null,"name_source":"DEFAULT","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
@@ -6395,9 +6405,9 @@
 {"record":"user_symbol","address":{"space":"ram","offset":"00000780"},"symbol_type":"Function","qualified_name":"bootloader_service_periodic","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"00000c9a"},"symbol_type":"Function","qualified_name":"boot_peripheral_init","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"00000e54"},"symbol_type":"Function","qualified_name":"boot_key_mirror_init","primary":true}
-{"record":"user_symbol","address":{"space":"ram","offset":"00000f80"},"symbol_type":"Function","qualified_name":"boot_flash_sequencer_init","primary":true}
-{"record":"user_symbol","address":{"space":"ram","offset":"000010c6"},"symbol_type":"Function","qualified_name":"boot_clock_init","primary":true}
-{"record":"user_symbol","address":{"space":"ram","offset":"0000115a"},"symbol_type":"Function","qualified_name":"boot_flash_status_check","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"00000f80"},"symbol_type":"Function","qualified_name":"boot_ecm_init","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"000010c6"},"symbol_type":"Function","qualified_name":"boot_extclk1_init","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"0000115a"},"symbol_type":"Function","qualified_name":"boot_codeflash_ecc_status_check","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"0000119e"},"symbol_type":"Function","qualified_name":"boot_validity_check","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"00001206"},"symbol_type":"Function","qualified_name":"boot_failure_trap","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"0000137a"},"symbol_type":"Function","qualified_name":"boot_failure_periodic","primary":true}
@@ -8201,11 +8211,57 @@
 {"record":"user_symbol","address":{"space":"ram","offset":"ff207780"},"symbol_type":"Label","qualified_name":"secoc_nvm_obj1_raw_record","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ff2077c0"},"symbol_type":"Label","qualified_name":"secoc_nvm_obj0_raw_record","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ff207800"},"symbol_type":"Label","qualified_name":"dataflash_icus_reserved_tail_2k","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa08000"},"symbol_type":"Label","qualified_name":"SELFID0","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa08004"},"symbol_type":"Label","qualified_name":"SELFID1","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa08008"},"symbol_type":"Label","qualified_name":"SELFID2","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa0800c"},"symbol_type":"Label","qualified_name":"SELFID3","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa08010"},"symbol_type":"Label","qualified_name":"SELFIDST","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa10000"},"symbol_type":"Label","qualified_name":"FPMON","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa10010"},"symbol_type":"Label","qualified_name":"FASTAT","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa10014"},"symbol_type":"Label","qualified_name":"FAEINT","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa10020"},"symbol_type":"Label","qualified_name":"FAREASELC","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa10030"},"symbol_type":"Label","qualified_name":"FSADDR","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa10034"},"symbol_type":"Label","qualified_name":"FEADDR","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa10080"},"symbol_type":"Label","qualified_name":"FSTATR","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa10084"},"symbol_type":"Label","qualified_name":"FENTRYR","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa10088"},"symbol_type":"Label","qualified_name":"FPROTR","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa1008c"},"symbol_type":"Label","qualified_name":"FSUINITR","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa10090"},"symbol_type":"Label","qualified_name":"FLKSTAT","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa10098"},"symbol_type":"Label","qualified_name":"FRTSTAT","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa1009c"},"symbol_type":"Label","qualified_name":"FRTEINT","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa100a0"},"symbol_type":"Label","qualified_name":"FCMDR","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa100c0"},"symbol_type":"Label","qualified_name":"FPESTAT","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa100d0"},"symbol_type":"Label","qualified_name":"FBCCNT","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa100d4"},"symbol_type":"Label","qualified_name":"FBCSTAT","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa100d8"},"symbol_type":"Label","qualified_name":"FPSADDR","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa100e0"},"symbol_type":"Label","qualified_name":"FCPSR","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa100e4"},"symbol_type":"Label","qualified_name":"FPCKAR","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa10100"},"symbol_type":"Label","qualified_name":"FECCEMON","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa10104"},"symbol_type":"Label","qualified_name":"FECCTMD","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa10108"},"symbol_type":"Label","qualified_name":"FDMYECC","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa20000"},"symbol_type":"Label","qualified_name":"FACI_COMMAND_AREA","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffc59008"},"symbol_type":"Label","qualified_name":"BFASELR","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffc5d000"},"symbol_type":"Label","qualified_name":"ICUSCMD","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffc5d004"},"symbol_type":"Label","qualified_name":"ICUSDAT","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffc5d00c"},"symbol_type":"Label","qualified_name":"ICUSSTS","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffc5d014"},"symbol_type":"Label","qualified_name":"ICUSSTS2","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffc5d024"},"symbol_type":"Label","qualified_name":"ICUSCTL","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffc62000"},"symbol_type":"Label","qualified_name":"UCFERRINT","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffc62004"},"symbol_type":"Label","qualified_name":"UCFSERSTCLR","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffc62008"},"symbol_type":"Label","qualified_name":"UCFDERSTCLR","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffc6200c"},"symbol_type":"Label","qualified_name":"UCFOVFSTR","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffc62020"},"symbol_type":"Label","qualified_name":"UCFSERSTR","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffc62030"},"symbol_type":"Label","qualified_name":"UCFDERSTR","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffc62040"},"symbol_type":"Label","qualified_name":"UCF1SEDADR","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffc62044"},"symbol_type":"Label","qualified_name":"UCF2SEDADR","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffc62048"},"symbol_type":"Label","qualified_name":"UCF3SEDADR","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffc6204c"},"symbol_type":"Label","qualified_name":"UCF4SEDADR","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffc620c0"},"symbol_type":"Label","qualified_name":"UCFDEDADR","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffc62100"},"symbol_type":"Label","qualified_name":"CFAPCTL","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffc62200"},"symbol_type":"Label","qualified_name":"CFECCCTL_VCI2CFBA","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffc622f0"},"symbol_type":"Label","qualified_name":"CFSTSTCTL_VCI2CFBA","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffc62400"},"symbol_type":"Label","qualified_name":"CFECCCTL_PE1","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffc624f0"},"symbol_type":"Label","qualified_name":"CFSTSTCTL_PE1","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffd20178"},"symbol_type":"Label","qualified_name":"CFSTS","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffd20184"},"symbol_type":"Label","qualified_name":"CFSTS_CH1","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffd201d8"},"symbol_type":"Label","qualified_name":"CFPCTR","primary":true}
@@ -8218,32 +8274,75 @@
 {"record":"user_symbol","address":{"space":"ram","offset":"ffd23580"},"symbol_type":"Label","qualified_name":"CFID_CH1","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffd24000"},"symbol_type":"Label","qualified_name":"CFDTMID","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffd24200"},"symbol_type":"Label","qualified_name":"CFDTMID16","primary":true}
-{"record":"user_symbol","address":{"space":"ram","offset":"ffd62004"},"symbol_type":"Label","qualified_name":"FCU_CMD_WINDOW_0","primary":true}
-{"record":"user_symbol","address":{"space":"ram","offset":"ffd62008"},"symbol_type":"Label","qualified_name":"FCU_CMD_WINDOW_1","primary":true}
-{"record":"user_symbol","address":{"space":"ram","offset":"ffd6200c"},"symbol_type":"Label","qualified_name":"FCU_CMD_WINDOW_2","primary":true}
-{"record":"user_symbol","address":{"space":"ram","offset":"ffd62010"},"symbol_type":"Label","qualified_name":"FCU_CMD_WINDOW_3","primary":true}
-{"record":"user_symbol","address":{"space":"ram","offset":"ffd62014"},"symbol_type":"Label","qualified_name":"FCU_CMD_WINDOW_4","primary":true}
-{"record":"user_symbol","address":{"space":"ram","offset":"ffd62018"},"symbol_type":"Label","qualified_name":"FCU_CMD_WINDOW_5","primary":true}
-{"record":"user_symbol","address":{"space":"ram","offset":"ffd6201c"},"symbol_type":"Label","qualified_name":"FCU_CMD_WINDOW_6","primary":true}
-{"record":"user_symbol","address":{"space":"ram","offset":"ffd62020"},"symbol_type":"Label","qualified_name":"FCU_CMD_WINDOW_7","primary":true}
-{"record":"user_symbol","address":{"space":"ram","offset":"ffd62024"},"symbol_type":"Label","qualified_name":"FCU_CMD_WINDOW_8","primary":true}
-{"record":"user_symbol","address":{"space":"ram","offset":"ffd62028"},"symbol_type":"Label","qualified_name":"FCU_PROT_CTRL","primary":true}
-{"record":"user_symbol","address":{"space":"ram","offset":"ffd6202c"},"symbol_type":"Label","qualified_name":"FCU_PROT_CTRL_1","primary":true}
-{"record":"user_symbol","address":{"space":"ram","offset":"ffd62030"},"symbol_type":"Label","qualified_name":"FCU_PROT_CTRL_2","primary":true}
-{"record":"user_symbol","address":{"space":"ram","offset":"ffd62034"},"symbol_type":"Label","qualified_name":"FCU_CMD_SEQUENCE","primary":true}
-{"record":"user_symbol","address":{"space":"ram","offset":"ffd62038"},"symbol_type":"Label","qualified_name":"FCU_CMD_SEQUENCE_1","primary":true}
-{"record":"user_symbol","address":{"space":"ram","offset":"ffd6203c"},"symbol_type":"Label","qualified_name":"FCU_CMD_SEQUENCE_2","primary":true}
-{"record":"user_symbol","address":{"space":"ram","offset":"ffd62040"},"symbol_type":"Label","qualified_name":"FKEY","primary":true}
-{"record":"user_symbol","address":{"space":"ram","offset":"ffd62044"},"symbol_type":"Label","qualified_name":"FSTS","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd60000"},"symbol_type":"Label","qualified_name":"ECMMESET","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd60004"},"symbol_type":"Label","qualified_name":"ECMMECLR","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd60008"},"symbol_type":"Label","qualified_name":"ECMMESSTR0","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd6000c"},"symbol_type":"Label","qualified_name":"ECMMESSTR1","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd60010"},"symbol_type":"Label","qualified_name":"ECMMESSTR2","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd60014"},"symbol_type":"Label","qualified_name":"ECMMPCMD0","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd61000"},"symbol_type":"Label","qualified_name":"ECMCESET","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd61004"},"symbol_type":"Label","qualified_name":"ECMCECLR","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd61008"},"symbol_type":"Label","qualified_name":"ECMCESSTR0","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd6100c"},"symbol_type":"Label","qualified_name":"ECMCESSTR1","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd61010"},"symbol_type":"Label","qualified_name":"ECMCESSTR2","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd61014"},"symbol_type":"Label","qualified_name":"ECMCPCMD0","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd62000"},"symbol_type":"Label","qualified_name":"ECMEPCFG","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd62004"},"symbol_type":"Label","qualified_name":"ECMMICFG0","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd62008"},"symbol_type":"Label","qualified_name":"ECMMICFG1","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd6200c"},"symbol_type":"Label","qualified_name":"ECMMICFG2","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd62010"},"symbol_type":"Label","qualified_name":"ECMNMICFG0","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd62014"},"symbol_type":"Label","qualified_name":"ECMNMICFG1","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd62018"},"symbol_type":"Label","qualified_name":"ECMNMICFG2","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd6201c"},"symbol_type":"Label","qualified_name":"ECMIRCFG0","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd62020"},"symbol_type":"Label","qualified_name":"ECMIRCFG1","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd62024"},"symbol_type":"Label","qualified_name":"ECMIRCFG2","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd62028"},"symbol_type":"Label","qualified_name":"ECMEMK0","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd6202c"},"symbol_type":"Label","qualified_name":"ECMEMK1","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd62030"},"symbol_type":"Label","qualified_name":"ECMEMK2","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd62034"},"symbol_type":"Label","qualified_name":"ECMESSTC0","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd62038"},"symbol_type":"Label","qualified_name":"ECMESSTC1","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd6203c"},"symbol_type":"Label","qualified_name":"ECMESSTC2","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd62040"},"symbol_type":"Label","qualified_name":"ECMPCMD1","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd62044"},"symbol_type":"Label","qualified_name":"ECMPS","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd62048"},"symbol_type":"Label","qualified_name":"ECMPE0","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd6204c"},"symbol_type":"Label","qualified_name":"ECMPE1","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd62050"},"symbol_type":"Label","qualified_name":"ECMPE2","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd62054"},"symbol_type":"Label","qualified_name":"ECMDTMCTL","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd62058"},"symbol_type":"Label","qualified_name":"ECMDTMR","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd6205c"},"symbol_type":"Label","qualified_name":"ECMDTMCMP","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd62060"},"symbol_type":"Label","qualified_name":"ECMDTMCFG0","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd62064"},"symbol_type":"Label","qualified_name":"ECMDTMCFG1","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd62068"},"symbol_type":"Label","qualified_name":"ECMDTMCFG2","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd6206c"},"symbol_type":"Label","qualified_name":"ECMDTMCFG3","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd62070"},"symbol_type":"Label","qualified_name":"ECMDTMCFG4","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd62074"},"symbol_type":"Label","qualified_name":"ECMDTMCFG5","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd62078"},"symbol_type":"Label","qualified_name":"ECMEOCCFG","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd6207c"},"symbol_type":"Label","qualified_name":"ECMPEM","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd63000"},"symbol_type":"Label","qualified_name":"ECMEPCTL","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffe50000"},"symbol_type":"Label","qualified_name":"TAUJ0CDR0","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffe50004"},"symbol_type":"Label","qualified_name":"TAUJ0CDR1","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffe50008"},"symbol_type":"Label","qualified_name":"TAUJ0CDR2","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffe5000c"},"symbol_type":"Label","qualified_name":"TAUJ0CDR3","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffe50010"},"symbol_type":"Label","qualified_name":"TAUJ0CNT0","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffe50014"},"symbol_type":"Label","qualified_name":"TAUJ0CNT1","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffe50018"},"symbol_type":"Label","qualified_name":"TAUJ0CNT2","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffe5001c"},"symbol_type":"Label","qualified_name":"TAUJ0CNT3","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffe50080"},"symbol_type":"Label","qualified_name":"TAUJ0CMOR0","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffe50082"},"symbol_type":"Label","qualified_name":"TAUJ0CMOR1","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffe50084"},"symbol_type":"Label","qualified_name":"TAUJ0CMOR2","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffe50086"},"symbol_type":"Label","qualified_name":"TAUJ0CMOR3","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffe50090"},"symbol_type":"Label","qualified_name":"TAUJ0TPS","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffe50094"},"symbol_type":"Label","qualified_name":"TAUJ0BRS","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffe70180"},"symbol_type":"Label","qualified_name":"TSG30CMPWE","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffe70184"},"symbol_type":"Label","qualified_name":"TSG30CMPVE","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffe70188"},"symbol_type":"Label","qualified_name":"TSG30CMPUE","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffe71180"},"symbol_type":"Label","qualified_name":"TSG31CMPWE","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffe71184"},"symbol_type":"Label","qualified_name":"TSG31CMPVE","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffe71188"},"symbol_type":"Label","qualified_name":"TSG31CMPUE","primary":true}
-{"record":"user_symbol","address":{"space":"ram","offset":"fff88818"},"symbol_type":"Label","qualified_name":"PLLCFG","primary":true}
-{"record":"user_symbol","address":{"space":"ram","offset":"fff890c0"},"symbol_type":"Label","qualified_name":"PLLCTL","primary":true}
-{"record":"user_symbol","address":{"space":"ram","offset":"fff890c8"},"symbol_type":"Label","qualified_name":"PLLSTS","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"fff88818"},"symbol_type":"Label","qualified_name":"CLKD3DIV","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"fff8881c"},"symbol_type":"Label","qualified_name":"CLKD3STAT","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"fff890c0"},"symbol_type":"Label","qualified_name":"CKSC3C","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"fff890c8"},"symbol_type":"Label","qualified_name":"CKSC3S","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"fff91200"},"symbol_type":"Label","qualified_name":"ADCG0DIR00","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"fff92200"},"symbol_type":"Label","qualified_name":"ADCG1DIR00","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffff8100"},"symbol_type":"Label","qualified_name":"DM00CM","primary":true}
@@ -8264,9 +8363,9 @@
 {"record":"listing_comment","address":{"space":"ram","offset":"00000780"},"comment_type":"PLATE","text":"Periodic entry that drives active bootloader diagnostic state machines."}
 {"record":"listing_comment","address":{"space":"ram","offset":"00000c9a"},"comment_type":"PLATE","text":"Early boot peripheral initialization: initializes RSCFD CAN controller register windows (0xFFC20000/0xFFC24000/0xFFC34000 areas) and CAN channel descriptors from the table at 0x87A0."}
 {"record":"listing_comment","address":{"space":"ram","offset":"00000e54"},"comment_type":"PLATE","text":"Boot key mirror initialization. Reads three DataFlash triple-copy values at 0xFFC0A000-A008, checks their XOR55/XORAA complements, and if valid copies the primary values into GP-relative mirrors at FEBFFC00-C14, then computes the XOR55 and XORAA complement copies."}
-{"record":"listing_comment","address":{"space":"ram","offset":"00000f80"},"comment_type":"PLATE","text":"Boot flash sequencer initialization. Configures the flash sequencer protection registers (0xFFD62000-28 area) with the enable key 0xA5 and configures blank/erase state for DataFlash banks at 0xFFD60000 and 0xFFD61000."}
-{"record":"listing_comment","address":{"space":"ram","offset":"000010c6"},"comment_type":"PLATE","text":"Boot clock generation initialization. Writes the clock control register at 0xFFF890C0 with value 4, polls the status register at 0xFFF890C8 for completion, then sets the main oscillator control at 0xFFF88818 to 0x50 (50 MHz main PLL configuration)."}
-{"record":"listing_comment","address":{"space":"ram","offset":"0000115a"},"comment_type":"PLATE","text":"Boot flash sequencer status check. Writes the flash sequencer command window (0xFFD62034 area) with a clear/read-back sequence, checks error bits 0 and 2 of the status register, and returns 1 on error. Called inside the validity retry loop."}
+{"record":"listing_comment","address":{"space":"ram","offset":"00000f80"},"comment_type":"PLATE","text":"Boot Error Control Module initialization. Uses ECMPCMD1 plus ECMMPCMD0/ECMCPCMD0 protection commands and programs the common, master, and checker ECM configuration/status registers at 0xFFD60000..0xFFD6207C."}
+{"record":"listing_comment","address":{"space":"ram","offset":"000010c6"},"comment_type":"PLATE","text":"Boot EXTCLK1O initialization. Selects CLK_LSB through CKSC3C/CKSC3S, uses the required dummy-read and SYNCP ordering, then sets CLKD3DIV to 0x50 for a divide-by-80 output."}
+{"record":"listing_comment","address":{"space":"ram","offset":"0000115a"},"comment_type":"PLATE","text":"Boot CodeFlash ECC/address-parity status check. Reads UCFDERSTR, clears it through UCFDERSTCLR, uses the ECMPCMD1/ECMESSTC0 protected sequence to clear ECM source 19, and returns 1 when DEDF or APEF was set."}
 {"record":"listing_comment","address":{"space":"ram","offset":"0000119e"},"comment_type":"PLATE","text":"Boot validity gate called by boot_application_handoff. Runs up to 3 retry attempts for memory_crc_verify_descriptors of both CodeFlash regions, then up to 3 retry attempts for the marker equality check at 0x6C5A against markers 0x17E00 and 0xFFE00. Returns 0 on success, 1 on failure (never enters the application)."}
 {"record":"listing_comment","address":{"space":"ram","offset":"00001206"},"comment_type":"PLATE","text":"Boot failure trap called when validity checks fail. Zeros the diagnostic state at 0xFFFEE980-988 and returns; the caller then falls through to the boot failure main loop."}
 {"record":"listing_comment","address":{"space":"ram","offset":"0000137a"},"comment_type":"PLATE","text":"Boot failure main-loop body. Sets state 0xFEBF2904=2, calls bootloader periodic, flash_operation_task, bootloader_main_operation_release, and memory_crc_verify_task."}
@@ -8274,8 +8373,8 @@
 {"record":"listing_comment","address":{"space":"ram","offset":"000013b0"},"comment_type":"PLATE","text":"Runs final boot checks. On success, loads the entry pointer at 0xFFDB8 and calls application entry 0x20880; otherwise stays in the boot failure path."}
 {"record":"listing_comment","address":{"space":"ram","offset":"000013b4"},"comment_type":"EOL","text":"jarl boot setup call 1: boot_peripheral_init (0xC9A)"}
 {"record":"listing_comment","address":{"space":"ram","offset":"000013b8"},"comment_type":"EOL","text":"jarl boot setup call 2: boot_key_mirror_init (0xE54)"}
-{"record":"listing_comment","address":{"space":"ram","offset":"000013bc"},"comment_type":"EOL","text":"jarl boot setup call 3: boot_flash_sequencer_init (0xF80)"}
-{"record":"listing_comment","address":{"space":"ram","offset":"000013c0"},"comment_type":"EOL","text":"jarl boot setup call 4: boot_clock_init (0x10C6)"}
+{"record":"listing_comment","address":{"space":"ram","offset":"000013bc"},"comment_type":"EOL","text":"jarl boot setup call 3: boot_ecm_init (0xF80)"}
+{"record":"listing_comment","address":{"space":"ram","offset":"000013c0"},"comment_type":"EOL","text":"jarl boot setup call 4: boot_extclk1_init (0x10C6)"}
 {"record":"listing_comment","address":{"space":"ram","offset":"000013c4"},"comment_type":"EOL","text":"jarl boot validity check: boot_validity_check (0x119E)"}
 {"record":"listing_comment","address":{"space":"ram","offset":"000013f2"},"comment_type":"EOL","text":"Load application entry pointer from CodeFlash 0xFFDB8."}
 {"record":"listing_comment","address":{"space":"ram","offset":"000013fe"},"comment_type":"EOL","text":"Indirect boot-to-application call; resolved target is 0x20880."}
@@ -9101,11 +9200,57 @@
 {"record":"listing_comment","address":{"space":"ram","offset":"ff207780"},"comment_type":"PLATE","text":"Object 1 raw persistent copy (job 3, page 478)."}
 {"record":"listing_comment","address":{"space":"ram","offset":"ff2077c0"},"comment_type":"PLATE","text":"Object 0 raw persistent copy (job 2, page 479); highest normal NvM page."}
 {"record":"listing_comment","address":{"space":"ram","offset":"ff207800"},"comment_type":"PLATE","text":"Pages 480..511 are outside both NvM owner classes, protected by 0x4EAD8, and align with the documented final 2 KiB ICU-S reservation. CPU-visible 00/FF words do not reveal secure contents or locate the SecOC slot-4 key."}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa08000"},"comment_type":"PLATE","text":"Self-programming ID input word 0 [w, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa08004"},"comment_type":"PLATE","text":"Self-programming ID input word 1 [w, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa08008"},"comment_type":"PLATE","text":"Self-programming ID input word 2 [w, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa0800c"},"comment_type":"PLATE","text":"Self-programming ID input word 3 [w, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa08010"},"comment_type":"PLATE","text":"Self-programming ID authentication status [r, u8]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa10000"},"comment_type":"PLATE","text":"Flash pin monitor [r, u8]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa10010"},"comment_type":"PLATE","text":"Flash access status [rw, u8]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa10014"},"comment_type":"PLATE","text":"Flash access-error interrupt enable [rw, u8]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa10020"},"comment_type":"PLATE","text":"CodeFlash memory-area selector [rw, u16]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa10030"},"comment_type":"PLATE","text":"FACI command start address [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa10034"},"comment_type":"PLATE","text":"FACI command end address [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa10080"},"comment_type":"PLATE","text":"Flash sequencer status [r, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa10084"},"comment_type":"PLATE","text":"Flash program-or-erase mode entry [rw, u16]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa10088"},"comment_type":"PLATE","text":"CodeFlash protection control [rw, u16]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa1008c"},"comment_type":"PLATE","text":"Flash sequencer setup initialization [rw, u16]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa10090"},"comment_type":"PLATE","text":"Flash lock-bit status [r, u8]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa10098"},"comment_type":"PLATE","text":"FACI reset-transfer status [r, u8]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa1009c"},"comment_type":"PLATE","text":"FACI reset-transfer error interrupt enable [rw, u8]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa100a0"},"comment_type":"PLATE","text":"Last FACI command [r, u16]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa100c0"},"comment_type":"PLATE","text":"Flash program-or-erase status [r, u16]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa100d0"},"comment_type":"PLATE","text":"DataFlash blank-check control [rw, u8]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa100d4"},"comment_type":"PLATE","text":"DataFlash blank-check status [r, u8]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa100d8"},"comment_type":"PLATE","text":"First programmed DataFlash address [r, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa100e0"},"comment_type":"PLATE","text":"Flash sequencer process switch [rw, u16]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa100e4"},"comment_type":"PLATE","text":"Flash sequencer processing-clock notification [rw, u16]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa10100"},"comment_type":"PLATE","text":"Flash ECC encoder monitor [r, u16]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa10104"},"comment_type":"PLATE","text":"Flash ECC test-mode control [rw, u16]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa10108"},"comment_type":"PLATE","text":"Flash dummy ECC value [rw, u16]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa20000"},"comment_type":"PLATE","text":"FACI command-issuing area [w, u8]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffc59008"},"comment_type":"PLATE","text":"Boot-flash area selector [rw, u16]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffc5d000"},"comment_type":"PLATE","text":"ICU-S command register; recovered MAC generate writes (selector<<16)|5 and CMAC verify writes (selector<<16)|7 [rw, u32]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffc5d004"},"comment_type":"PLATE","text":"ICU-S data/parameter word written beside ICUSCMD (firmware role) [rw, u32]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffc5d00c"},"comment_type":"PLATE","text":"ICU-S status; driver polls bit 0 as busy/ready [rw, u32]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffc5d014"},"comment_type":"PLATE","text":"ICU-S companion status; driver polls low bits with ICUSSTS [rw, u32]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffc5d024"},"comment_type":"PLATE","text":"ICU-S control word written during driver reset/abort path [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffc62000"},"comment_type":"PLATE","text":"CodeFlash error-information control [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffc62004"},"comment_type":"PLATE","text":"CodeFlash ECC single-error status clear [w, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffc62008"},"comment_type":"PLATE","text":"CodeFlash ECC double-error and address-parity status clear [w, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffc6200c"},"comment_type":"PLATE","text":"CodeFlash single-error count overflow status [r, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffc62020"},"comment_type":"PLATE","text":"CodeFlash ECC single-error status [r, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffc62030"},"comment_type":"PLATE","text":"CodeFlash ECC double-error and address-parity status [r, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffc62040"},"comment_type":"PLATE","text":"CodeFlash first single-error address [r, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffc62044"},"comment_type":"PLATE","text":"CodeFlash second single-error address [r, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffc62048"},"comment_type":"PLATE","text":"CodeFlash third single-error address [r, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffc6204c"},"comment_type":"PLATE","text":"CodeFlash fourth single-error address [r, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffc620c0"},"comment_type":"PLATE","text":"CodeFlash double-error or address-parity error address [r, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffc62100"},"comment_type":"PLATE","text":"CodeFlash address-parity control [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffc62200"},"comment_type":"PLATE","text":"CodeFlash ECC control for system-interconnect access [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffc622f0"},"comment_type":"PLATE","text":"CodeFlash ECC sub-test control for system-interconnect access [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffc62400"},"comment_type":"PLATE","text":"CodeFlash ECC control for PE1 access [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffc624f0"},"comment_type":"PLATE","text":"CodeFlash ECC sub-test control for PE1 access [rw, u32]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffd20178"},"comment_type":"PLATE","text":"RSCFD common-FIFO status base (ch0/fifo0; +0x0C*ch +4*fifo) [rw, u32]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffd20184"},"comment_type":"PLATE","text":"RSCFD common-FIFO status for application CAN1 (ch1/fifo0) [rw, u32]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffd201d8"},"comment_type":"PLATE","text":"RSCFD common-FIFO pointer control base (write 0xFF advances) [rw, u32]"}
@@ -9118,32 +9263,75 @@
 {"record":"listing_comment","address":{"space":"ram","offset":"ffd23580"},"comment_type":"PLATE","text":"RSCFD common-FIFO message RAM for application CAN1 [rw, u32]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffd24000"},"comment_type":"PLATE","text":"RSCFD Tx message-buffer RAM base (0x20-byte entries) [rw, u32]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffd24200"},"comment_type":"PLATE","text":"Diagnostic Tx message RAM for buffer n=16 (CAN 0x7A9 path) [rw, u32]"}
-{"record":"listing_comment","address":{"space":"ram","offset":"ffd62004"},"comment_type":"PLATE","text":"FCU command window slot 0 (boot flash init path) [rw, u32]"}
-{"record":"listing_comment","address":{"space":"ram","offset":"ffd62008"},"comment_type":"PLATE","text":"FCU command window slot 1 (boot flash init path) [rw, u32]"}
-{"record":"listing_comment","address":{"space":"ram","offset":"ffd6200c"},"comment_type":"PLATE","text":"FCU command window slot 2 (boot flash init path) [rw, u32]"}
-{"record":"listing_comment","address":{"space":"ram","offset":"ffd62010"},"comment_type":"PLATE","text":"FCU command window slot 3 (boot flash init path) [rw, u32]"}
-{"record":"listing_comment","address":{"space":"ram","offset":"ffd62014"},"comment_type":"PLATE","text":"FCU command window slot 4 (boot flash init path) [rw, u32]"}
-{"record":"listing_comment","address":{"space":"ram","offset":"ffd62018"},"comment_type":"PLATE","text":"FCU command window slot 5 (boot flash init path) [rw, u32]"}
-{"record":"listing_comment","address":{"space":"ram","offset":"ffd6201c"},"comment_type":"PLATE","text":"FCU command window slot 6 (boot flash init path) [rw, u32]"}
-{"record":"listing_comment","address":{"space":"ram","offset":"ffd62020"},"comment_type":"PLATE","text":"FCU command window slot 7 (boot flash init path) [rw, u32]"}
-{"record":"listing_comment","address":{"space":"ram","offset":"ffd62024"},"comment_type":"PLATE","text":"FCU command window slot 8 (boot flash init path) [rw, u32]"}
-{"record":"listing_comment","address":{"space":"ram","offset":"ffd62028"},"comment_type":"PLATE","text":"FCU protection control (write sequence: clear/set/clear with FKEY) [rw, u32]"}
-{"record":"listing_comment","address":{"space":"ram","offset":"ffd6202c"},"comment_type":"PLATE","text":"FCU protection control slot 1 (blank check enable/disable) [rw, u32]"}
-{"record":"listing_comment","address":{"space":"ram","offset":"ffd62030"},"comment_type":"PLATE","text":"FCU protection control slot 2 (write-protect toggle) [rw, u32]"}
-{"record":"listing_comment","address":{"space":"ram","offset":"ffd62034"},"comment_type":"PLATE","text":"FCU command sequence register; 3-word write with FKEY=0xA5 [rw, u32]"}
-{"record":"listing_comment","address":{"space":"ram","offset":"ffd62038"},"comment_type":"PLATE","text":"FCU command sequence slot 1 (alternate sequence) [rw, u32]"}
-{"record":"listing_comment","address":{"space":"ram","offset":"ffd6203c"},"comment_type":"PLATE","text":"FCU command sequence slot 2 (alternate sequence) [rw, u32]"}
-{"record":"listing_comment","address":{"space":"ram","offset":"ffd62040"},"comment_type":"PLATE","text":"FCU enable key register; write 0xA5 before FCU command sequences [w, u32]"}
-{"record":"listing_comment","address":{"space":"ram","offset":"ffd62044"},"comment_type":"PLATE","text":"FCU status readback; polled after each command sequence [r, u8]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd60000"},"comment_type":"PLATE","text":"ECM master error-source set trigger [w, u8]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd60004"},"comment_type":"PLATE","text":"ECM master error-source clear trigger [w, u8]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd60008"},"comment_type":"PLATE","text":"ECM master error-source status 0 [r, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd6000c"},"comment_type":"PLATE","text":"ECM master error-source status 1 [r, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd60010"},"comment_type":"PLATE","text":"ECM master error-source status 2 [r, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd60014"},"comment_type":"PLATE","text":"ECM master protection command; write 0xA5 before protected writes [w, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd61000"},"comment_type":"PLATE","text":"ECM checker error-source set trigger [w, u8]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd61004"},"comment_type":"PLATE","text":"ECM checker error-source clear trigger [w, u8]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd61008"},"comment_type":"PLATE","text":"ECM checker error-source status 0 [r, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd6100c"},"comment_type":"PLATE","text":"ECM checker error-source status 1 [r, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd61010"},"comment_type":"PLATE","text":"ECM checker error-source status 2 [r, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd61014"},"comment_type":"PLATE","text":"ECM checker protection command; write 0xA5 before protected writes [w, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd62000"},"comment_type":"PLATE","text":"ECM error-pulse configuration [rw, u8]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd62004"},"comment_type":"PLATE","text":"ECM maskable-interrupt configuration 0 [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd62008"},"comment_type":"PLATE","text":"ECM maskable-interrupt configuration 1 [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd6200c"},"comment_type":"PLATE","text":"ECM maskable-interrupt configuration 2 [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd62010"},"comment_type":"PLATE","text":"ECM non-maskable-interrupt configuration 0 [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd62014"},"comment_type":"PLATE","text":"ECM non-maskable-interrupt configuration 1 [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd62018"},"comment_type":"PLATE","text":"ECM non-maskable-interrupt configuration 2 [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd6201c"},"comment_type":"PLATE","text":"ECM internal-reset configuration 0 [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd62020"},"comment_type":"PLATE","text":"ECM internal-reset configuration 1 [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd62024"},"comment_type":"PLATE","text":"ECM internal-reset configuration 2 [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd62028"},"comment_type":"PLATE","text":"ECM error mask 0 [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd6202c"},"comment_type":"PLATE","text":"ECM error mask 1 [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd62030"},"comment_type":"PLATE","text":"ECM error mask 2 [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd62034"},"comment_type":"PLATE","text":"ECM error-source status-clear trigger 0 [w, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd62038"},"comment_type":"PLATE","text":"ECM error-source status-clear trigger 1 [w, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd6203c"},"comment_type":"PLATE","text":"ECM error-source status-clear trigger 2 [w, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd62040"},"comment_type":"PLATE","text":"ECM common protection command; write 0xA5 before protected writes [w, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd62044"},"comment_type":"PLATE","text":"ECM common protection status [r, u8]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd62048"},"comment_type":"PLATE","text":"ECM pseudo-error trigger 0 [w, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd6204c"},"comment_type":"PLATE","text":"ECM pseudo-error trigger 1 [w, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd62050"},"comment_type":"PLATE","text":"ECM pseudo-error trigger 2 [w, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd62054"},"comment_type":"PLATE","text":"ECM delay-timer control [rw, u8]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd62058"},"comment_type":"PLATE","text":"ECM delay-timer count [r, u16]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd6205c"},"comment_type":"PLATE","text":"ECM delay-timer compare [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd62060"},"comment_type":"PLATE","text":"ECM delay-timer configuration 0 [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd62064"},"comment_type":"PLATE","text":"ECM delay-timer configuration 1 [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd62068"},"comment_type":"PLATE","text":"ECM delay-timer configuration 2 [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd6206c"},"comment_type":"PLATE","text":"ECM delay-timer configuration 3 [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd62070"},"comment_type":"PLATE","text":"ECM delay-timer configuration 4 [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd62074"},"comment_type":"PLATE","text":"ECM delay-timer configuration 5 [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd62078"},"comment_type":"PLATE","text":"ECM error-output clear-invalidation configuration [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd6207c"},"comment_type":"PLATE","text":"ECM pseudo-error mask [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd63000"},"comment_type":"PLATE","text":"ECM error-pulse control [rw, u8]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffe50000"},"comment_type":"PLATE","text":"TAUJ0 channel 0 data reload [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffe50004"},"comment_type":"PLATE","text":"TAUJ0 channel 1 data reload [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffe50008"},"comment_type":"PLATE","text":"TAUJ0 channel 2 data reload [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffe5000c"},"comment_type":"PLATE","text":"TAUJ0 channel 3 data reload [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffe50010"},"comment_type":"PLATE","text":"TAUJ0 channel 0 counter [r, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffe50014"},"comment_type":"PLATE","text":"TAUJ0 channel 1 counter [r, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffe50018"},"comment_type":"PLATE","text":"TAUJ0 channel 2 counter [r, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffe5001c"},"comment_type":"PLATE","text":"TAUJ0 channel 3 counter [r, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffe50080"},"comment_type":"PLATE","text":"TAUJ0 channel 0 mode [rw, u16]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffe50082"},"comment_type":"PLATE","text":"TAUJ0 channel 1 mode [rw, u16]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffe50084"},"comment_type":"PLATE","text":"TAUJ0 channel 2 mode [rw, u16]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffe50086"},"comment_type":"PLATE","text":"TAUJ0 channel 3 mode [rw, u16]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffe50090"},"comment_type":"PLATE","text":"TAUJ0 prescaler [rw, u16]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffe50094"},"comment_type":"PLATE","text":"TAUJ0 base-clock reload selector [rw, u16]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffe70180"},"comment_type":"PLATE","text":"TSG30 bit-extended HT-PWM W-phase compare register [rw, u32]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffe70184"},"comment_type":"PLATE","text":"TSG30 bit-extended HT-PWM V-phase compare register [rw, u32]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffe70188"},"comment_type":"PLATE","text":"TSG30 bit-extended HT-PWM U-phase compare register [rw, u32]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffe71180"},"comment_type":"PLATE","text":"TSG31 bit-extended HT-PWM W-phase compare register [rw, u32]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffe71184"},"comment_type":"PLATE","text":"TSG31 bit-extended HT-PWM V-phase compare register [rw, u32]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffe71188"},"comment_type":"PLATE","text":"TSG31 bit-extended HT-PWM U-phase compare register [rw, u32]"}
-{"record":"listing_comment","address":{"space":"ram","offset":"fff88818"},"comment_type":"PLATE","text":"PLL configuration register; boot writes 0x50 (main PLL enable) [rw, u32]"}
-{"record":"listing_comment","address":{"space":"ram","offset":"fff890c0"},"comment_type":"PLATE","text":"PLL control register; write 4 to trigger reconfiguration [rw, u32]"}
-{"record":"listing_comment","address":{"space":"ram","offset":"fff890c8"},"comment_type":"PLATE","text":"PLL status register; polled until == 4 (lock complete) [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"fff88818"},"comment_type":"PLATE","text":"EXTCLK1O divider; boot writes 0x50 for divide by 80 [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"fff8881c"},"comment_type":"PLATE","text":"EXTCLK1O divider status; boot polls synchronization and active state [r, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"fff890c0"},"comment_type":"PLATE","text":"EXTCLK1O source selector; source 4 is CLK_LSB [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"fff890c8"},"comment_type":"PLATE","text":"EXTCLK1O selected-source status; boot polls until source 4 is active [r, u32]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"fff91200"},"comment_type":"PLATE","text":"ADCG0 data supplementary information register 00; DMA source for sample ring [r, u32]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"fff92200"},"comment_type":"PLATE","text":"ADCG1 data supplementary information register 00; DMA source for sample ring [r, u32]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffff8100"},"comment_type":"PLATE","text":"DMAC0 channel 0 channel master setting register [rw, u32]"}
@@ -9164,9 +9352,9 @@
 {"record":"function_comment","entry":{"space":"ram","offset":"00000780"},"comment_type":"regular","text":"Periodic entry that drives active bootloader diagnostic state machines."}
 {"record":"function_comment","entry":{"space":"ram","offset":"00000c9a"},"comment_type":"regular","text":"Early boot peripheral initialization: initializes RSCFD CAN controller register windows (0xFFC20000/0xFFC24000/0xFFC34000 areas) and CAN channel descriptors from the table at 0x87A0."}
 {"record":"function_comment","entry":{"space":"ram","offset":"00000e54"},"comment_type":"regular","text":"Boot key mirror initialization. Reads three DataFlash triple-copy values at 0xFFC0A000-A008, checks their XOR55/XORAA complements, and if valid copies the primary values into GP-relative mirrors at FEBFFC00-C14, then computes the XOR55 and XORAA complement copies."}
-{"record":"function_comment","entry":{"space":"ram","offset":"00000f80"},"comment_type":"regular","text":"Boot flash sequencer initialization. Configures the flash sequencer protection registers (0xFFD62000-28 area) with the enable key 0xA5 and configures blank/erase state for DataFlash banks at 0xFFD60000 and 0xFFD61000."}
-{"record":"function_comment","entry":{"space":"ram","offset":"000010c6"},"comment_type":"regular","text":"Boot clock generation initialization. Writes the clock control register at 0xFFF890C0 with value 4, polls the status register at 0xFFF890C8 for completion, then sets the main oscillator control at 0xFFF88818 to 0x50 (50 MHz main PLL configuration)."}
-{"record":"function_comment","entry":{"space":"ram","offset":"0000115a"},"comment_type":"regular","text":"Boot flash sequencer status check. Writes the flash sequencer command window (0xFFD62034 area) with a clear/read-back sequence, checks error bits 0 and 2 of the status register, and returns 1 on error. Called inside the validity retry loop."}
+{"record":"function_comment","entry":{"space":"ram","offset":"00000f80"},"comment_type":"regular","text":"Boot Error Control Module initialization. Uses ECMPCMD1 plus ECMMPCMD0/ECMCPCMD0 protection commands and programs the common, master, and checker ECM configuration/status registers at 0xFFD60000..0xFFD6207C."}
+{"record":"function_comment","entry":{"space":"ram","offset":"000010c6"},"comment_type":"regular","text":"Boot EXTCLK1O initialization. Selects CLK_LSB through CKSC3C/CKSC3S, uses the required dummy-read and SYNCP ordering, then sets CLKD3DIV to 0x50 for a divide-by-80 output."}
+{"record":"function_comment","entry":{"space":"ram","offset":"0000115a"},"comment_type":"regular","text":"Boot CodeFlash ECC/address-parity status check. Reads UCFDERSTR, clears it through UCFDERSTCLR, uses the ECMPCMD1/ECMESSTC0 protected sequence to clear ECM source 19, and returns 1 when DEDF or APEF was set."}
 {"record":"function_comment","entry":{"space":"ram","offset":"0000119e"},"comment_type":"regular","text":"Boot validity gate called by boot_application_handoff. Runs up to 3 retry attempts for memory_crc_verify_descriptors of both CodeFlash regions, then up to 3 retry attempts for the marker equality check at 0x6C5A against markers 0x17E00 and 0xFFE00. Returns 0 on success, 1 on failure (never enters the application)."}
 {"record":"function_comment","entry":{"space":"ram","offset":"00001206"},"comment_type":"regular","text":"Boot failure trap called when validity checks fail. Zeros the diagnostic state at 0xFFFEE980-988 and returns; the caller then falls through to the boot failure main loop."}
 {"record":"function_comment","entry":{"space":"ram","offset":"0000137a"},"comment_type":"regular","text":"Boot failure main-loop body. Sets state 0xFEBF2904=2, calls bootloader periodic, flash_operation_task, bootloader_main_operation_release, and memory_crc_verify_task."}
@@ -10172,4 +10360,4 @@
 {"record":"bookmark","address":{"space":"ram","offset":"000d5ffc"},"type":"Analysis","category":"Address Table","comment":"Address table[16] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d603c"},"type":"Analysis","category":"Address Table","comment":"Address table[16] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d607c"},"type":"Analysis","category":"Address Table","comment":"Address table[16] created"}
-{"record":"totals","functions":6376,"instructions":183240,"symbols":7953,"memory_blocks":14,"body_ranges":6408,"body_addresses":502024,"user_function_names":1113,"user_symbols":1869,"listing_comments":900,"function_comments":502,"bookmarks":512,"name_sources":{"DEFAULT":5263,"USER_DEFINED":1113},"calling_conventions":{"__interrupt":24,"__stdcall":6352},"signature_sources":{"DEFAULT":6376}}
+{"record":"totals","functions":6376,"instructions":183240,"symbols":8042,"memory_blocks":24,"body_ranges":6408,"body_addresses":502024,"user_function_names":1113,"user_symbols":1958,"listing_comments":989,"function_comments":502,"bookmarks":512,"name_sources":{"DEFAULT":5263,"USER_DEFINED":1113},"calling_conventions":{"__interrupt":24,"__stdcall":6352},"signature_sources":{"DEFAULT":6376}}

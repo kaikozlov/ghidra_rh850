@@ -193,7 +193,7 @@ def main() -> int:
         and 0xFEBEF400 <= 0xFEBF0000 <= 0xFEBF0307 <= 0xFEBF33FC,
     )
     print(
-        "NOTE: this proves a reset-cleared, direct-handoff-retainable, application-RWX storage pocket.\n"
+        "NOTE: this proves a stock-reset/startup-cleared, direct-handoff-retainable, application-RWX storage pocket.\n"
         "      It does not prove a post-init stock control-transfer consumer into that pocket."
     )
 

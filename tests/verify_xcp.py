@@ -61,7 +61,7 @@ def _section_xcp_window_mpu_permissions():
         check('neither context grants user-mode access', not any(((ctx0[k], ctx1[k]) != (False, False) for k in ('UX', 'UW', 'UR'))))
         print('== corrected impact statement boundary ==')
         check('supervisor-executable window: this test asserts permission bits only, no consumer claim', ctx0['SX'] and ctx1['SX'])
-        print("NOTE: Ghidra LocalRAM block execute=false is analysis metadata, not a hardware bound.\n      Direct consumer/callback/function census into the window remains zero, so COM-005\n      impact stays 'attacker-writable supervisor-executable RAM, no recovered\n      control-transfer consumer' — not an RCE claim.")
+        print("NOTE: The corrected P1M-E device profile marks LocalRAM executable, matching the\n      hardware fetch map and recovered MPU permissions. Direct consumer/callback/function\n      census into the window remains zero, so COM-005 impact stays\n      'attacker-writable supervisor-executable RAM, no recovered control-transfer\n      consumer' — not an RCE claim.")
         print(f'\n{passed} passed, {failed} failed')
         return 1 if failed else 0
     main()
@@ -586,7 +586,7 @@ def _section_xcp_shadow_write_plan():
     plan = build_download_plan(SHADOW_START + 4, bytes(range(14)))
     check('plan binds COM-005', plan['finding_id'] == 'COM-005')
     check('planner has no live execution path', plan['live_execution_implemented'] is False)
-    check('plan records impact bounds: Ghidra execute=false is analysis metadata; hardware MPU grants supervisor execute; no direct consumer', plan['window']['executable'] is False and plan['window']['executable_basis'] == 'ghidra_localram_block_metadata' and (plan['window']['hardware_mpu_supervisor_executable'] is True) and (plan['window']['direct_runtime_consumer_recovered'] is False))
+    check('plan records executable profile/MPU permissions and no direct consumer', plan['window']['executable'] is True and plan['window']['executable_basis'] == 'p1m_device_profile_and_firmware_mpu' and (plan['window']['hardware_mpu_supervisor_executable'] is True) and (plan['window']['direct_runtime_consumer_recovered'] is False))
     check('plan emits CONNECT + SET_MTA + three DOWNLOAD frames', [row['operation'] for row in plan['requests']] == ['connect', 'set_mta', 'download', 'download', 'download'])
     check('all planned frames are exactly eight bytes', all((len(bytes.fromhex(row['request'])) == 8 for row in plan['requests'])))
     print('\n== deterministic local simulation ==')

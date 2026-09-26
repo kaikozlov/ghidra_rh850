@@ -10,7 +10,7 @@ Primary analyzed calibration:
 
 - **Toyota/Denso EPS:** `8965B4512000`
 - **MCU:** Renesas RH850/P1M-E `R7F701381`
-- **CodeFlash:** 1 MiB at `0x00000000..0x000FFFFF`
+- **User CodeFlash:** 1 MiB at `0x00000000..0x000FFFFF`; the architectural 32-KiB extended user area at `0x01000000..0x01007FFF` is absent from the retained dump
 - **DataFlash:** 32 KiB at `0xFF200000..0xFF207FFF`
 - **Application:** base `0x20000`, entry `0x20880`
 

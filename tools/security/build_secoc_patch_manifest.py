@@ -34,18 +34,19 @@ REPO = Path(__file__).resolve().parents[2]
 EXPECTED_CRC_RESIDUE = 0xFFFFFFFF
 P1M_E_FCU_BLOCK_SIZE = 0x8000
 VALIDITY_MARKER = 0x5AA5A55A
-# RH850/P1M-E CodeFlash geometry. The semantic resolver and patch manifest
-# are defined for a bare 1 MiB CodeFlash image imported at base 0. Public dump
-# tools sometimes ship a DataFlash+CodeFlash concatenation whose 0x8000-byte
-# DataFlash prefix shifts every CodeFlash VA by -0x8000; accepting it here would
-# silently mis-resolve every target address.
+# RH850/P1M-E user CodeFlash geometry. The semantic resolver and patch manifest
+# are defined for the retained bare 1 MiB user-area image imported at base 0.
+# The product's separate 32 KiB extended user area is not present in this input.
+# Public dump tools sometimes ship a DataFlash+CodeFlash concatenation whose
+# 0x8000-byte DataFlash prefix shifts every user-area CodeFlash VA by -0x8000;
+# accepting it here would silently mis-resolve every target address.
 P1M_E_CODEFLASH_SIZE = 0x100000
 P1M_E_DATAFLASH_PREFIX_SIZE = 0x8000
 CONCATENATED_DUMP_SIZE = P1M_E_CODEFLASH_SIZE + P1M_E_DATAFLASH_PREFIX_SIZE
 
 
 def validate_codeflash_geometry(size: int) -> None:
-    """Fail closed unless the image has the bare 1 MiB CodeFlash geometry."""
+    """Fail closed unless the image has the bare 1 MiB user-area geometry."""
     if size < 0:
         raise ValueError("image size must not be negative")
     if size == P1M_E_CODEFLASH_SIZE:
@@ -58,7 +59,7 @@ def validate_codeflash_geometry(size: int) -> None:
         )
     raise ValueError(
         f"unexpected CodeFlash image geometry: {size} (0x{size:X}) bytes; expected exactly "
-        f"0x{P1M_E_CODEFLASH_SIZE:X} (1 MiB) RH850/P1M-E CodeFlash — reject truncated or oversized images"
+        f"0x{P1M_E_CODEFLASH_SIZE:X} (1 MiB) P1M-E user CodeFlash — reject truncated or oversized images"
     )
 
 

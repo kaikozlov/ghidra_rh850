@@ -22,17 +22,53 @@ def check(name: str, condition: object, detail: str = "") -> None:
 prod = FACTS["products"]["R7F701383"]
 camry_prod = FACTS["products"]["R7F701381"]
 addr = FACTS["address_space"]
+ram_execution = FACTS["ram_execution"]
+alignment = FACTS["alignment"]
+reset_init = FACTS["reset_ram_initialization"]
+mpat = FACTS["mpat"]
 timer = FACTS["timer"]
 
 print("== exact 1-MiB DPS product facts ==")
-check("R7F701381/R7F701383 are tracked as DPS 1-MiB CodeFlash", all(p["regulator"] == "DPS" and p["codeflash_bytes"] == 0x100000 for p in (camry_prod, prod)))
+check("R7F701381/R7F701383 have 1-MiB user-area CodeFlash", all(p["regulator"] == "DPS" and p["codeflash_bytes"] == 0x100000 for p in (camry_prod, prod)))
 check("R7F701381/R7F701383 DataFlash is 32 KiB", all(p["dataflash_bytes"] == 0x8000 for p in (camry_prod, prod)))
 check("R7F701381/R7F701383 local/global RAM totals are 128/64 KiB", all(p["local_ram_bytes"] == 0x20000 and p["global_ram_bytes"] == 0x10000 for p in (camry_prod, prod)))
+check("both products have a 32-KiB extended user CodeFlash area",
+      all(p["extended_user_codeflash_bytes"] == 0x8000 for p in (camry_prod, prod)))
 check("1-MiB DataFlash geometry is FF200000..FF207FFF", addr["dataflash_1mb"] == {"start": 0xFF200000, "end_exclusive": 0xFF208000})
 check("2-MiB DataFlash geometry is FF200000..FF20FFFF", addr["dataflash_2mb"] == {"start": 0xFF200000, "end_exclusive": 0xFF210000})
 check("PE1 local-RAM view is 128 KiB", addr["local_ram_pe1"] == {"start": 0xFEBE0000, "end_exclusive": 0xFEC00000})
 check("self local-RAM view is 128 KiB", addr["local_ram_self"] == {"start": 0xFEDE0000, "end_exclusive": 0xFEE00000})
 check("two local-RAM views do not imply 256 KiB physical local RAM", prod["local_ram_bytes"] == (addr["local_ram_pe1"]["end_exclusive"] - addr["local_ram_pe1"]["start"]))
+check("user CodeFlash geometry is 00000000..000FFFFF",
+      addr["codeflash_user_1mb"] == {"start": 0, "end_exclusive": 0x100000})
+check("extended user CodeFlash geometry is 01000000..01007FFF",
+      addr["codeflash_extended_user"] == {"start": 0x01000000, "end_exclusive": 0x01008000})
+check("Global RAM geometry is 64 KiB",
+      addr["global_ram"] == {"start": 0xFEEF8000, "end_exclusive": 0xFEF08000})
+check("RAM publication sequence follows the hardware manual",
+      ram_execution["publication_sequence"]
+      == ["store", "dummy_read_same_memory", "SYNCP", "SYNCI", "branch"])
+check("RAM speculative-fetch guard is 48 initialized bytes",
+      ram_execution["prefetch_initialized_bytes"] == 48)
+check("architectural and firmware-proven LocalRAM fetch views stay distinct",
+      ram_execution["architectural_fetch_views"] == ["local_ram_self", "global_ram"]
+      and ram_execution["firmware_proven_fetch_views"] == ["local_ram_pe1"])
+check("GlobalRAM data coherency is hardware-maintained write-through",
+      "write-through" in ram_execution["global_ram_data_coherency"]
+      and "PE and DMA" in ram_execution["global_ram_data_coherency"])
+check("MCTL reset behavior rejects misaligned data access",
+      alignment["mctl_ma_reset"] == 0
+      and alignment["default_behavior"] == "misaligned data access exception"
+      and "non-atomic" in alignment["mctl_ma_1_behavior"])
+check("RAM reset initialization remains reset-class and STAC dependent",
+      "unless" in reset_init["baseline_behavior"]
+      and "STAC_LM0" in reset_init["local_ram_disable_control"]
+      and "STAC_GRAM" in reset_init["global_ram_disable_control"]
+      and "not assumed" in reset_init["firmware_boundary"])
+check("MPAT 0xB8/0xA8 supervisor permissions use the G3M bit layout",
+      mpat["bit_layout"] == {"E": 7, "G": 6, "SX": 5, "SW": 4, "SR": 3, "UX": 2, "UW": 1, "UR": 0}
+      and "read/write/execute" in mpat["0xB8"]
+      and "read/execute" in mpat["0xA8"])
 
 print("\n== retained H silicon identity ==")
 blob = H_CODEFLASH.read_bytes()
@@ -51,7 +87,7 @@ check("P-Bus 80 MHz / 4 gives 20 MHz CK0", timer["p_bus_hz"] == 80_000_000 and t
 check("200,000,000 TAUJ1 ticks is 10 seconds", timer["security_delay_ticks"] * 1000 // timer["ck0_hz"] == timer["security_delay_ms"] == 10_000)
 
 print("\n== source identity when retained references are present ==")
-for key in ("datasheet", "hardware_manual"):
+for key in ("datasheet", "hardware_manual", "flash_hardware_manual", "cpu_software_manual"):
     source = FACTS["sources"][key]
     path = ROOT / source["path"]
     if path.is_file():

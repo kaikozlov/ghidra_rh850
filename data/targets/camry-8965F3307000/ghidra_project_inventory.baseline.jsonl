@@ -1,12 +1,22 @@
 {"record":"meta","schema_version":1,"ghidra_version":"12.1.4","program_name":"CodeFlash.bin","executable_sha256":"42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7","executable_format":"Raw Binary","language_id":"v850e3:LE:32:default","compiler_spec_id":"default"}
 {"record":"memory_block","name":"CodeFlash","start":{"space":"ram","offset":"00000000"},"end":{"space":"ram","offset":"000fffff"},"size":1048576,"block_type":"Default","initialized":true,"overlay":false,"loaded":true,"read":true,"write":false,"execute":true,"volatile":false,"artificial":false,"source_infos":[{"destination_min":{"space":"ram","offset":"00000000"},"destination_max":{"space":"ram","offset":"000fffff"},"length":1048576,"mapped_range":null,"byte_mapping":null,"file_bytes":{"filename":"CodeFlash.bin","file_offset":0,"size":1048576,"source_offset":0}}]}
-{"record":"memory_block","name":"LocalRAM","start":{"space":"ram","offset":"febe0000"},"end":{"space":"ram","offset":"febfffff"},"size":131072,"block_type":"Default","initialized":false,"overlay":false,"loaded":true,"read":true,"write":true,"execute":false,"volatile":false,"artificial":false,"source_infos":[{"destination_min":{"space":"ram","offset":"febe0000"},"destination_max":{"space":"ram","offset":"febfffff"},"length":131072,"mapped_range":null,"byte_mapping":null,"file_bytes":null}]}
-{"record":"memory_block","name":"GlobalRAM_A","start":{"space":"ram","offset":"feef8000"},"end":{"space":"ram","offset":"feefffff"},"size":32768,"block_type":"Default","initialized":false,"overlay":false,"loaded":true,"read":true,"write":true,"execute":false,"volatile":false,"artificial":false,"source_infos":[{"destination_min":{"space":"ram","offset":"feef8000"},"destination_max":{"space":"ram","offset":"feefffff"},"length":32768,"mapped_range":null,"byte_mapping":null,"file_bytes":null}]}
-{"record":"memory_block","name":"GlobalRAM_B","start":{"space":"ram","offset":"fef00000"},"end":{"space":"ram","offset":"fef07fff"},"size":32768,"block_type":"Default","initialized":false,"overlay":false,"loaded":true,"read":true,"write":true,"execute":false,"volatile":false,"artificial":false,"source_infos":[{"destination_min":{"space":"ram","offset":"fef00000"},"destination_max":{"space":"ram","offset":"fef07fff"},"length":32768,"mapped_range":null,"byte_mapping":null,"file_bytes":null}]}
+{"record":"memory_block","name":"LocalRAM","start":{"space":"ram","offset":"febe0000"},"end":{"space":"ram","offset":"febfffff"},"size":131072,"block_type":"Default","initialized":false,"overlay":false,"loaded":true,"read":true,"write":true,"execute":true,"volatile":false,"artificial":false,"source_infos":[{"destination_min":{"space":"ram","offset":"febe0000"},"destination_max":{"space":"ram","offset":"febfffff"},"length":131072,"mapped_range":null,"byte_mapping":null,"file_bytes":null}]}
+{"record":"memory_block","name":"LocalRAM_self","start":{"space":"ram","offset":"fede0000"},"end":{"space":"ram","offset":"fedfffff"},"size":131072,"block_type":"Byte Mapped","initialized":false,"overlay":false,"loaded":true,"read":true,"write":true,"execute":true,"volatile":false,"artificial":false,"source_infos":[{"destination_min":{"space":"ram","offset":"fede0000"},"destination_max":{"space":"ram","offset":"fedfffff"},"length":131072,"mapped_range":{"min":{"space":"ram","offset":"febe0000"},"max":{"space":"ram","offset":"febfffff"}},"byte_mapping":{"mapped_byte_count":1,"mapped_source_byte_count":1},"file_bytes":null}]}
+{"record":"memory_block","name":"GlobalRAM_A","start":{"space":"ram","offset":"feef8000"},"end":{"space":"ram","offset":"feefffff"},"size":32768,"block_type":"Default","initialized":false,"overlay":false,"loaded":true,"read":true,"write":true,"execute":true,"volatile":false,"artificial":false,"source_infos":[{"destination_min":{"space":"ram","offset":"feef8000"},"destination_max":{"space":"ram","offset":"feefffff"},"length":32768,"mapped_range":null,"byte_mapping":null,"file_bytes":null}]}
+{"record":"memory_block","name":"GlobalRAM_B","start":{"space":"ram","offset":"fef00000"},"end":{"space":"ram","offset":"fef07fff"},"size":32768,"block_type":"Default","initialized":false,"overlay":false,"loaded":true,"read":true,"write":true,"execute":true,"volatile":false,"artificial":false,"source_infos":[{"destination_min":{"space":"ram","offset":"fef00000"},"destination_max":{"space":"ram","offset":"fef07fff"},"length":32768,"mapped_range":null,"byte_mapping":null,"file_bytes":null}]}
 {"record":"memory_block","name":"DataFlash","start":{"space":"ram","offset":"ff200000"},"end":{"space":"ram","offset":"ff207fff"},"size":32768,"block_type":"Default","initialized":true,"overlay":false,"loaded":true,"read":true,"write":true,"execute":false,"volatile":false,"artificial":false,"source_infos":[{"destination_min":{"space":"ram","offset":"ff200000"},"destination_max":{"space":"ram","offset":"ff207fff"},"length":32768,"mapped_range":null,"byte_mapping":null,"file_bytes":null}]}
+{"record":"memory_block","name":"SFR_FACI_ID","start":{"space":"ram","offset":"ffa08000"},"end":{"space":"ram","offset":"ffa0801f"},"size":32,"block_type":"Default","initialized":false,"overlay":false,"loaded":true,"read":true,"write":true,"execute":false,"volatile":true,"artificial":false,"source_infos":[{"destination_min":{"space":"ram","offset":"ffa08000"},"destination_max":{"space":"ram","offset":"ffa0801f"},"length":32,"mapped_range":null,"byte_mapping":null,"file_bytes":null}]}
+{"record":"memory_block","name":"SFR_FACI","start":{"space":"ram","offset":"ffa10000"},"end":{"space":"ram","offset":"ffa101ff"},"size":512,"block_type":"Default","initialized":false,"overlay":false,"loaded":true,"read":true,"write":true,"execute":false,"volatile":true,"artificial":false,"source_infos":[{"destination_min":{"space":"ram","offset":"ffa10000"},"destination_max":{"space":"ram","offset":"ffa101ff"},"length":512,"mapped_range":null,"byte_mapping":null,"file_bytes":null}]}
+{"record":"memory_block","name":"SFR_FACI_COMMAND","start":{"space":"ram","offset":"ffa20000"},"end":{"space":"ram","offset":"ffa20003"},"size":4,"block_type":"Default","initialized":false,"overlay":false,"loaded":true,"read":true,"write":true,"execute":false,"volatile":true,"artificial":false,"source_infos":[{"destination_min":{"space":"ram","offset":"ffa20000"},"destination_max":{"space":"ram","offset":"ffa20003"},"length":4,"mapped_range":null,"byte_mapping":null,"file_bytes":null}]}
+{"record":"memory_block","name":"SFR_FACI_CONFIG","start":{"space":"ram","offset":"ffc59000"},"end":{"space":"ram","offset":"ffc590ff"},"size":256,"block_type":"Default","initialized":false,"overlay":false,"loaded":true,"read":true,"write":true,"execute":false,"volatile":true,"artificial":false,"source_infos":[{"destination_min":{"space":"ram","offset":"ffc59000"},"destination_max":{"space":"ram","offset":"ffc590ff"},"length":256,"mapped_range":null,"byte_mapping":null,"file_bytes":null}]}
 {"record":"memory_block","name":"SFR_ICUS","start":{"space":"ram","offset":"ffc5d000"},"end":{"space":"ram","offset":"ffc5dfff"},"size":4096,"block_type":"Default","initialized":false,"overlay":false,"loaded":true,"read":true,"write":true,"execute":false,"volatile":true,"artificial":false,"source_infos":[{"destination_min":{"space":"ram","offset":"ffc5d000"},"destination_max":{"space":"ram","offset":"ffc5dfff"},"length":4096,"mapped_range":null,"byte_mapping":null,"file_bytes":null}]}
+{"record":"memory_block","name":"SFR_CODEFLASH_ECC","start":{"space":"ram","offset":"ffc62000"},"end":{"space":"ram","offset":"ffc624ff"},"size":1280,"block_type":"Default","initialized":false,"overlay":false,"loaded":true,"read":true,"write":true,"execute":false,"volatile":true,"artificial":false,"source_infos":[{"destination_min":{"space":"ram","offset":"ffc62000"},"destination_max":{"space":"ram","offset":"ffc624ff"},"length":1280,"mapped_range":null,"byte_mapping":null,"file_bytes":null}]}
 {"record":"memory_block","name":"SFR_RSCFD","start":{"space":"ram","offset":"ffd20000"},"end":{"space":"ram","offset":"ffd2ffff"},"size":65536,"block_type":"Default","initialized":false,"overlay":false,"loaded":true,"read":true,"write":true,"execute":false,"volatile":true,"artificial":false,"source_infos":[{"destination_min":{"space":"ram","offset":"ffd20000"},"destination_max":{"space":"ram","offset":"ffd2ffff"},"length":65536,"mapped_range":null,"byte_mapping":null,"file_bytes":null}]}
-{"record":"memory_block","name":"SFR_FCU","start":{"space":"ram","offset":"ffd62000"},"end":{"space":"ram","offset":"ffd620ff"},"size":256,"block_type":"Default","initialized":false,"overlay":false,"loaded":true,"read":true,"write":true,"execute":false,"volatile":true,"artificial":false,"source_infos":[{"destination_min":{"space":"ram","offset":"ffd62000"},"destination_max":{"space":"ram","offset":"ffd620ff"},"length":256,"mapped_range":null,"byte_mapping":null,"file_bytes":null}]}
+{"record":"memory_block","name":"SFR_ECM_MASTER","start":{"space":"ram","offset":"ffd60000"},"end":{"space":"ram","offset":"ffd600ff"},"size":256,"block_type":"Default","initialized":false,"overlay":false,"loaded":true,"read":true,"write":true,"execute":false,"volatile":true,"artificial":false,"source_infos":[{"destination_min":{"space":"ram","offset":"ffd60000"},"destination_max":{"space":"ram","offset":"ffd600ff"},"length":256,"mapped_range":null,"byte_mapping":null,"file_bytes":null}]}
+{"record":"memory_block","name":"SFR_ECM_CHECKER","start":{"space":"ram","offset":"ffd61000"},"end":{"space":"ram","offset":"ffd610ff"},"size":256,"block_type":"Default","initialized":false,"overlay":false,"loaded":true,"read":true,"write":true,"execute":false,"volatile":true,"artificial":false,"source_infos":[{"destination_min":{"space":"ram","offset":"ffd61000"},"destination_max":{"space":"ram","offset":"ffd610ff"},"length":256,"mapped_range":null,"byte_mapping":null,"file_bytes":null}]}
+{"record":"memory_block","name":"SFR_ECM_COMMON","start":{"space":"ram","offset":"ffd62000"},"end":{"space":"ram","offset":"ffd620ff"},"size":256,"block_type":"Default","initialized":false,"overlay":false,"loaded":true,"read":true,"write":true,"execute":false,"volatile":true,"artificial":false,"source_infos":[{"destination_min":{"space":"ram","offset":"ffd62000"},"destination_max":{"space":"ram","offset":"ffd620ff"},"length":256,"mapped_range":null,"byte_mapping":null,"file_bytes":null}]}
+{"record":"memory_block","name":"SFR_ECM_PULSE","start":{"space":"ram","offset":"ffd63000"},"end":{"space":"ram","offset":"ffd630ff"},"size":256,"block_type":"Default","initialized":false,"overlay":false,"loaded":true,"read":true,"write":true,"execute":false,"volatile":true,"artificial":false,"source_infos":[{"destination_min":{"space":"ram","offset":"ffd63000"},"destination_max":{"space":"ram","offset":"ffd630ff"},"length":256,"mapped_range":null,"byte_mapping":null,"file_bytes":null}]}
+{"record":"memory_block","name":"SFR_TAUJ","start":{"space":"ram","offset":"ffe50000"},"end":{"space":"ram","offset":"ffe52fff"},"size":12288,"block_type":"Default","initialized":false,"overlay":false,"loaded":true,"read":true,"write":true,"execute":false,"volatile":true,"artificial":false,"source_infos":[{"destination_min":{"space":"ram","offset":"ffe50000"},"destination_max":{"space":"ram","offset":"ffe52fff"},"length":12288,"mapped_range":null,"byte_mapping":null,"file_bytes":null}]}
 {"record":"memory_block","name":"SFR_TSG3","start":{"space":"ram","offset":"ffe70000"},"end":{"space":"ram","offset":"ffe71fff"},"size":8192,"block_type":"Default","initialized":false,"overlay":false,"loaded":true,"read":true,"write":true,"execute":false,"volatile":true,"artificial":false,"source_infos":[{"destination_min":{"space":"ram","offset":"ffe70000"},"destination_max":{"space":"ram","offset":"ffe71fff"},"length":8192,"mapped_range":null,"byte_mapping":null,"file_bytes":null}]}
 {"record":"memory_block","name":"SFR_CLKGEN","start":{"space":"ram","offset":"fff88000"},"end":{"space":"ram","offset":"fff89fff"},"size":8192,"block_type":"Default","initialized":false,"overlay":false,"loaded":true,"read":true,"write":true,"execute":false,"volatile":true,"artificial":false,"source_infos":[{"destination_min":{"space":"ram","offset":"fff88000"},"destination_max":{"space":"ram","offset":"fff89fff"},"length":8192,"mapped_range":null,"byte_mapping":null,"file_bytes":null}]}
 {"record":"memory_block","name":"SFR_ADCG0","start":{"space":"ram","offset":"fff91000"},"end":{"space":"ram","offset":"fff91fff"},"size":4096,"block_type":"Default","initialized":false,"overlay":false,"loaded":true,"read":true,"write":true,"execute":false,"volatile":true,"artificial":false,"source_infos":[{"destination_min":{"space":"ram","offset":"fff91000"},"destination_max":{"space":"ram","offset":"fff91fff"},"length":4096,"mapped_range":null,"byte_mapping":null,"file_bytes":null}]}
@@ -183,6 +193,7 @@
 {"record":"function","entry":{"space":"ram","offset":"000046ee"},"body_ranges":[{"min":{"space":"ram","offset":"000046ee"},"max":{"space":"ram","offset":"00004743"}}],"body_address_count":86,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":null,"name_source":"DEFAULT","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
 {"record":"function","entry":{"space":"ram","offset":"00004744"},"body_ranges":[{"min":{"space":"ram","offset":"00004744"},"max":{"space":"ram","offset":"0000475b"}}],"body_address_count":24,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":null,"name_source":"DEFAULT","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
 {"record":"function","entry":{"space":"ram","offset":"0000475c"},"body_ranges":[{"min":{"space":"ram","offset":"0000475c"},"max":{"space":"ram","offset":"00004773"}}],"body_address_count":24,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":null,"name_source":"DEFAULT","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
+{"record":"function","entry":{"space":"ram","offset":"00004776"},"body_ranges":[{"min":{"space":"ram","offset":"00004776"},"max":{"space":"ram","offset":"0000478d"}}],"body_address_count":24,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":null,"name_source":"DEFAULT","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
 {"record":"function","entry":{"space":"ram","offset":"0000478e"},"body_ranges":[{"min":{"space":"ram","offset":"0000478e"},"max":{"space":"ram","offset":"00004793"}}],"body_address_count":6,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":null,"name_source":"DEFAULT","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
 {"record":"function","entry":{"space":"ram","offset":"00004794"},"body_ranges":[{"min":{"space":"ram","offset":"00004794"},"max":{"space":"ram","offset":"00004799"}}],"body_address_count":6,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":null,"name_source":"DEFAULT","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
 {"record":"function","entry":{"space":"ram","offset":"0000479a"},"body_ranges":[{"min":{"space":"ram","offset":"0000479a"},"max":{"space":"ram","offset":"000047ab"}}],"body_address_count":18,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":null,"name_source":"DEFAULT","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
@@ -247,8 +258,12 @@
 {"record":"function","entry":{"space":"ram","offset":"00005f68"},"body_ranges":[{"min":{"space":"ram","offset":"00005f68"},"max":{"space":"ram","offset":"00005f7b"}}],"body_address_count":20,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":null,"name_source":"DEFAULT","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
 {"record":"function","entry":{"space":"ram","offset":"00005f7c"},"body_ranges":[{"min":{"space":"ram","offset":"00005f7c"},"max":{"space":"ram","offset":"00005fb7"}}],"body_address_count":60,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":null,"name_source":"DEFAULT","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
 {"record":"function","entry":{"space":"ram","offset":"00006082"},"body_ranges":[{"min":{"space":"ram","offset":"00006082"},"max":{"space":"ram","offset":"00006083"}}],"body_address_count":2,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":null,"name_source":"DEFAULT","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
+{"record":"function","entry":{"space":"ram","offset":"00006084"},"body_ranges":[{"min":{"space":"ram","offset":"00006084"},"max":{"space":"ram","offset":"00006097"}}],"body_address_count":20,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":null,"name_source":"DEFAULT","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
+{"record":"function","entry":{"space":"ram","offset":"00006098"},"body_ranges":[{"min":{"space":"ram","offset":"00006098"},"max":{"space":"ram","offset":"000060c1"}}],"body_address_count":42,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":null,"name_source":"DEFAULT","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
+{"record":"function","entry":{"space":"ram","offset":"000060c2"},"body_ranges":[{"min":{"space":"ram","offset":"000060c2"},"max":{"space":"ram","offset":"00006133"}}],"body_address_count":114,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":null,"name_source":"DEFAULT","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
 {"record":"function","entry":{"space":"ram","offset":"00006134"},"body_ranges":[{"min":{"space":"ram","offset":"00006134"},"max":{"space":"ram","offset":"00006135"}}],"body_address_count":2,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":null,"name_source":"DEFAULT","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
 {"record":"function","entry":{"space":"ram","offset":"00006136"},"body_ranges":[{"min":{"space":"ram","offset":"00006136"},"max":{"space":"ram","offset":"00006149"}}],"body_address_count":20,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":null,"name_source":"DEFAULT","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
+{"record":"function","entry":{"space":"ram","offset":"0000614a"},"body_ranges":[{"min":{"space":"ram","offset":"0000614a"},"max":{"space":"ram","offset":"00006203"}}],"body_address_count":186,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":null,"name_source":"DEFAULT","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
 {"record":"function","entry":{"space":"ram","offset":"00006204"},"body_ranges":[{"min":{"space":"ram","offset":"00006204"},"max":{"space":"ram","offset":"00006243"}}],"body_address_count":64,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":null,"name_source":"DEFAULT","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
 {"record":"function","entry":{"space":"ram","offset":"00006244"},"body_ranges":[{"min":{"space":"ram","offset":"00006244"},"max":{"space":"ram","offset":"000062db"}}],"body_address_count":152,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":null,"name_source":"DEFAULT","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
 {"record":"function","entry":{"space":"ram","offset":"000062dc"},"body_ranges":[{"min":{"space":"ram","offset":"000062dc"},"max":{"space":"ram","offset":"000062ff"}}],"body_address_count":36,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":null,"name_source":"DEFAULT","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
@@ -267,6 +282,7 @@
 {"record":"function","entry":{"space":"ram","offset":"000066fa"},"body_ranges":[{"min":{"space":"ram","offset":"000066fa"},"max":{"space":"ram","offset":"00006749"}}],"body_address_count":80,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":null,"name_source":"DEFAULT","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
 {"record":"function","entry":{"space":"ram","offset":"0000674a"},"body_ranges":[{"min":{"space":"ram","offset":"0000674a"},"max":{"space":"ram","offset":"000067af"}}],"body_address_count":102,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":null,"name_source":"DEFAULT","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
 {"record":"function","entry":{"space":"ram","offset":"000067b0"},"body_ranges":[{"min":{"space":"ram","offset":"000067b0"},"max":{"space":"ram","offset":"000067cf"}}],"body_address_count":32,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":null,"name_source":"DEFAULT","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
+{"record":"function","entry":{"space":"ram","offset":"000067da"},"body_ranges":[{"min":{"space":"ram","offset":"000067da"},"max":{"space":"ram","offset":"000067f5"}}],"body_address_count":28,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":null,"name_source":"DEFAULT","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
 {"record":"function","entry":{"space":"ram","offset":"000067f6"},"body_ranges":[{"min":{"space":"ram","offset":"000067f6"},"max":{"space":"ram","offset":"0000681d"}}],"body_address_count":40,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":null,"name_source":"DEFAULT","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
 {"record":"function","entry":{"space":"ram","offset":"000068fa"},"body_ranges":[{"min":{"space":"ram","offset":"000068fa"},"max":{"space":"ram","offset":"000068fb"}}],"body_address_count":2,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":null,"name_source":"DEFAULT","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
 {"record":"function","entry":{"space":"ram","offset":"0000699a"},"body_ranges":[{"min":{"space":"ram","offset":"0000699a"},"max":{"space":"ram","offset":"0000699b"}}],"body_address_count":2,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":null,"name_source":"DEFAULT","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
@@ -6078,6 +6094,8 @@
 {"record":"function","entry":{"space":"ram","offset":"000ff218"},"body_ranges":[{"min":{"space":"ram","offset":"000ff218"},"max":{"space":"ram","offset":"000ff21f"}}],"body_address_count":8,"is_thunk":true,"thunk_target":{"space":"ram","offset":"000354d6"},"is_inline":false,"is_external":false,"user_name":null,"name_source":"DEFAULT","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
 {"record":"function","entry":{"space":"ram","offset":"000ff240"},"body_ranges":[{"min":{"space":"ram","offset":"000ff240"},"max":{"space":"ram","offset":"000ff247"}}],"body_address_count":8,"is_thunk":true,"thunk_target":{"space":"ram","offset":"00056b78"},"is_inline":false,"is_external":false,"user_name":null,"name_source":"DEFAULT","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
 {"record":"function","entry":{"space":"ram","offset":"000ff254"},"body_ranges":[{"min":{"space":"ram","offset":"000ff254"},"max":{"space":"ram","offset":"000ff25f"}}],"body_address_count":12,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":null,"name_source":"DEFAULT","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
+{"record":"function","entry":{"space":"ram","offset":"febf11f0"},"body_ranges":[{"min":{"space":"ram","offset":"febf11f0"},"max":{"space":"ram","offset":"febf11f0"}}],"body_address_count":1,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":null,"name_source":"DEFAULT","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
+{"record":"function","entry":{"space":"ram","offset":"febf12b8"},"body_ranges":[{"min":{"space":"ram","offset":"febf12b8"},"max":{"space":"ram","offset":"febf12b8"}}],"body_address_count":1,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":null,"name_source":"DEFAULT","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
 {"record":"user_symbol","address":{"space":"ram","offset":"00020880"},"symbol_type":"Function","qualified_name":"f33_application_entry","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"0004d874"},"symbol_type":"Function","qualified_name":"f33_rdbi_0102_callback","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"0004d8ee"},"symbol_type":"Function","qualified_name":"f33_rdbi_0103_callback","primary":true}
@@ -6277,14 +6295,309 @@
 {"record":"user_symbol","address":{"space":"ram","offset":"000636d4"},"symbol_type":"Function","qualified_name":"f33_startup_copy_helper","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"000637ee"},"symbol_type":"Function","qualified_name":"f33_startup_coordinator","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"000715b4"},"symbol_type":"Function","qualified_name":"f33_application_context_init","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"feef81e0"},"symbol_type":"Label","qualified_name":"ADCG0_DMA_SAMPLE_RING","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"feef8a20"},"symbol_type":"Label","qualified_name":"ADCG1_DMA_SAMPLE_RING","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa08000"},"symbol_type":"Label","qualified_name":"SELFID0","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa08004"},"symbol_type":"Label","qualified_name":"SELFID1","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa08008"},"symbol_type":"Label","qualified_name":"SELFID2","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa0800c"},"symbol_type":"Label","qualified_name":"SELFID3","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa08010"},"symbol_type":"Label","qualified_name":"SELFIDST","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa10000"},"symbol_type":"Label","qualified_name":"FPMON","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa10010"},"symbol_type":"Label","qualified_name":"FASTAT","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa10014"},"symbol_type":"Label","qualified_name":"FAEINT","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa10020"},"symbol_type":"Label","qualified_name":"FAREASELC","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa10030"},"symbol_type":"Label","qualified_name":"FSADDR","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa10034"},"symbol_type":"Label","qualified_name":"FEADDR","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa10080"},"symbol_type":"Label","qualified_name":"FSTATR","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa10084"},"symbol_type":"Label","qualified_name":"FENTRYR","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa10088"},"symbol_type":"Label","qualified_name":"FPROTR","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa1008c"},"symbol_type":"Label","qualified_name":"FSUINITR","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa10090"},"symbol_type":"Label","qualified_name":"FLKSTAT","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa10098"},"symbol_type":"Label","qualified_name":"FRTSTAT","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa1009c"},"symbol_type":"Label","qualified_name":"FRTEINT","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa100a0"},"symbol_type":"Label","qualified_name":"FCMDR","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa100c0"},"symbol_type":"Label","qualified_name":"FPESTAT","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa100d0"},"symbol_type":"Label","qualified_name":"FBCCNT","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa100d4"},"symbol_type":"Label","qualified_name":"FBCSTAT","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa100d8"},"symbol_type":"Label","qualified_name":"FPSADDR","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa100e0"},"symbol_type":"Label","qualified_name":"FCPSR","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa100e4"},"symbol_type":"Label","qualified_name":"FPCKAR","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa10100"},"symbol_type":"Label","qualified_name":"FECCEMON","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa10104"},"symbol_type":"Label","qualified_name":"FECCTMD","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa10108"},"symbol_type":"Label","qualified_name":"FDMYECC","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffa20000"},"symbol_type":"Label","qualified_name":"FACI_COMMAND_AREA","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffc59008"},"symbol_type":"Label","qualified_name":"BFASELR","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffc5d000"},"symbol_type":"Label","qualified_name":"ICUSCMD","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffc5d004"},"symbol_type":"Label","qualified_name":"ICUSDAT","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffc5d00c"},"symbol_type":"Label","qualified_name":"ICUSSTS","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffc5d014"},"symbol_type":"Label","qualified_name":"ICUSSTS2","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffc5d024"},"symbol_type":"Label","qualified_name":"ICUSCTL","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffc62000"},"symbol_type":"Label","qualified_name":"UCFERRINT","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffc62004"},"symbol_type":"Label","qualified_name":"UCFSERSTCLR","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffc62008"},"symbol_type":"Label","qualified_name":"UCFDERSTCLR","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffc6200c"},"symbol_type":"Label","qualified_name":"UCFOVFSTR","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffc62020"},"symbol_type":"Label","qualified_name":"UCFSERSTR","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffc62030"},"symbol_type":"Label","qualified_name":"UCFDERSTR","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffc62040"},"symbol_type":"Label","qualified_name":"UCF1SEDADR","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffc62044"},"symbol_type":"Label","qualified_name":"UCF2SEDADR","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffc62048"},"symbol_type":"Label","qualified_name":"UCF3SEDADR","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffc6204c"},"symbol_type":"Label","qualified_name":"UCF4SEDADR","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffc620c0"},"symbol_type":"Label","qualified_name":"UCFDEDADR","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffc62100"},"symbol_type":"Label","qualified_name":"CFAPCTL","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffc62200"},"symbol_type":"Label","qualified_name":"CFECCCTL_VCI2CFBA","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffc622f0"},"symbol_type":"Label","qualified_name":"CFSTSTCTL_VCI2CFBA","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffc62400"},"symbol_type":"Label","qualified_name":"CFECCCTL_PE1","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffc624f0"},"symbol_type":"Label","qualified_name":"CFSTSTCTL_PE1","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd20178"},"symbol_type":"Label","qualified_name":"CFSTS","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd20184"},"symbol_type":"Label","qualified_name":"CFSTS_CH1","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd201d8"},"symbol_type":"Label","qualified_name":"CFPCTR","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd201e4"},"symbol_type":"Label","qualified_name":"CFPCTR_CH1","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd20250"},"symbol_type":"Label","qualified_name":"CFDTMC","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd20260"},"symbol_type":"Label","qualified_name":"CFDTMC16","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd202d0"},"symbol_type":"Label","qualified_name":"CFDTMSTS","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd202e0"},"symbol_type":"Label","qualified_name":"CFDTMSTS_CH1","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd23400"},"symbol_type":"Label","qualified_name":"CFID","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd23580"},"symbol_type":"Label","qualified_name":"CFID_CH1","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd24000"},"symbol_type":"Label","qualified_name":"CFDTMID","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd24200"},"symbol_type":"Label","qualified_name":"CFDTMID16","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd60000"},"symbol_type":"Label","qualified_name":"ECMMESET","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd60004"},"symbol_type":"Label","qualified_name":"ECMMECLR","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd60008"},"symbol_type":"Label","qualified_name":"ECMMESSTR0","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd6000c"},"symbol_type":"Label","qualified_name":"ECMMESSTR1","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd60010"},"symbol_type":"Label","qualified_name":"ECMMESSTR2","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd60014"},"symbol_type":"Label","qualified_name":"ECMMPCMD0","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd61000"},"symbol_type":"Label","qualified_name":"ECMCESET","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd61004"},"symbol_type":"Label","qualified_name":"ECMCECLR","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd61008"},"symbol_type":"Label","qualified_name":"ECMCESSTR0","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd6100c"},"symbol_type":"Label","qualified_name":"ECMCESSTR1","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd61010"},"symbol_type":"Label","qualified_name":"ECMCESSTR2","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd61014"},"symbol_type":"Label","qualified_name":"ECMCPCMD0","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd62000"},"symbol_type":"Label","qualified_name":"ECMEPCFG","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd62004"},"symbol_type":"Label","qualified_name":"ECMMICFG0","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd62008"},"symbol_type":"Label","qualified_name":"ECMMICFG1","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd6200c"},"symbol_type":"Label","qualified_name":"ECMMICFG2","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd62010"},"symbol_type":"Label","qualified_name":"ECMNMICFG0","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd62014"},"symbol_type":"Label","qualified_name":"ECMNMICFG1","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd62018"},"symbol_type":"Label","qualified_name":"ECMNMICFG2","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd6201c"},"symbol_type":"Label","qualified_name":"ECMIRCFG0","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd62020"},"symbol_type":"Label","qualified_name":"ECMIRCFG1","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd62024"},"symbol_type":"Label","qualified_name":"ECMIRCFG2","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd62028"},"symbol_type":"Label","qualified_name":"ECMEMK0","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd6202c"},"symbol_type":"Label","qualified_name":"ECMEMK1","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd62030"},"symbol_type":"Label","qualified_name":"ECMEMK2","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd62034"},"symbol_type":"Label","qualified_name":"ECMESSTC0","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd62038"},"symbol_type":"Label","qualified_name":"ECMESSTC1","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd6203c"},"symbol_type":"Label","qualified_name":"ECMESSTC2","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd62040"},"symbol_type":"Label","qualified_name":"ECMPCMD1","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd62044"},"symbol_type":"Label","qualified_name":"ECMPS","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd62048"},"symbol_type":"Label","qualified_name":"ECMPE0","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd6204c"},"symbol_type":"Label","qualified_name":"ECMPE1","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd62050"},"symbol_type":"Label","qualified_name":"ECMPE2","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd62054"},"symbol_type":"Label","qualified_name":"ECMDTMCTL","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd62058"},"symbol_type":"Label","qualified_name":"ECMDTMR","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd6205c"},"symbol_type":"Label","qualified_name":"ECMDTMCMP","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd62060"},"symbol_type":"Label","qualified_name":"ECMDTMCFG0","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd62064"},"symbol_type":"Label","qualified_name":"ECMDTMCFG1","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd62068"},"symbol_type":"Label","qualified_name":"ECMDTMCFG2","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd6206c"},"symbol_type":"Label","qualified_name":"ECMDTMCFG3","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd62070"},"symbol_type":"Label","qualified_name":"ECMDTMCFG4","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd62074"},"symbol_type":"Label","qualified_name":"ECMDTMCFG5","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd62078"},"symbol_type":"Label","qualified_name":"ECMEOCCFG","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd6207c"},"symbol_type":"Label","qualified_name":"ECMPEM","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd63000"},"symbol_type":"Label","qualified_name":"ECMEPCTL","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffe50000"},"symbol_type":"Label","qualified_name":"TAUJ0CDR0","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffe50004"},"symbol_type":"Label","qualified_name":"TAUJ0CDR1","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffe50008"},"symbol_type":"Label","qualified_name":"TAUJ0CDR2","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffe5000c"},"symbol_type":"Label","qualified_name":"TAUJ0CDR3","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffe50010"},"symbol_type":"Label","qualified_name":"TAUJ0CNT0","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffe50014"},"symbol_type":"Label","qualified_name":"TAUJ0CNT1","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffe50018"},"symbol_type":"Label","qualified_name":"TAUJ0CNT2","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffe5001c"},"symbol_type":"Label","qualified_name":"TAUJ0CNT3","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffe50080"},"symbol_type":"Label","qualified_name":"TAUJ0CMOR0","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffe50082"},"symbol_type":"Label","qualified_name":"TAUJ0CMOR1","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffe50084"},"symbol_type":"Label","qualified_name":"TAUJ0CMOR2","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffe50086"},"symbol_type":"Label","qualified_name":"TAUJ0CMOR3","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffe50090"},"symbol_type":"Label","qualified_name":"TAUJ0TPS","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffe50094"},"symbol_type":"Label","qualified_name":"TAUJ0BRS","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffe70180"},"symbol_type":"Label","qualified_name":"TSG30CMPWE","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffe70184"},"symbol_type":"Label","qualified_name":"TSG30CMPVE","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffe70188"},"symbol_type":"Label","qualified_name":"TSG30CMPUE","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffe71180"},"symbol_type":"Label","qualified_name":"TSG31CMPWE","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffe71184"},"symbol_type":"Label","qualified_name":"TSG31CMPVE","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffe71188"},"symbol_type":"Label","qualified_name":"TSG31CMPUE","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"fff88818"},"symbol_type":"Label","qualified_name":"CLKD3DIV","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"fff8881c"},"symbol_type":"Label","qualified_name":"CLKD3STAT","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"fff890c0"},"symbol_type":"Label","qualified_name":"CKSC3C","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"fff890c8"},"symbol_type":"Label","qualified_name":"CKSC3S","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"fff91200"},"symbol_type":"Label","qualified_name":"ADCG0DIR00","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"fff92200"},"symbol_type":"Label","qualified_name":"ADCG1DIR00","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffff8100"},"symbol_type":"Label","qualified_name":"DM00CM","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffff8120"},"symbol_type":"Label","qualified_name":"DM10CM","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffffb010"},"symbol_type":"Label","qualified_name":"EIC8","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffffb10a"},"symbol_type":"Label","qualified_name":"EIC133","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffffb10c"},"symbol_type":"Label","qualified_name":"EIC134","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffffb10e"},"symbol_type":"Label","qualified_name":"EIC135","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffffb110"},"symbol_type":"Label","qualified_name":"EIC136","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffffb176"},"symbol_type":"Label","qualified_name":"EIC187","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffffb178"},"symbol_type":"Label","qualified_name":"EIC188","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffffb248"},"symbol_type":"Label","qualified_name":"EIC292","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffffb24a"},"symbol_type":"Label","qualified_name":"EIC293","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffffb2f6"},"symbol_type":"Label","qualified_name":"EIC379","primary":true}
 {"record":"listing_comment","address":{"space":"ram","offset":"00008ff1"},"comment_type":"EOL","text":"Crypt constant AES_Encryption_SBox - 256 bytes"}
 {"record":"listing_comment","address":{"space":"ram","offset":"000090f1"},"comment_type":"EOL","text":"Crypt constant AES_Decryption_SBox_Inverse - 256 bytes"}
 {"record":"listing_comment","address":{"space":"ram","offset":"00020880"},"comment_type":"PLATE","text":"Exact F33 application entry wrapper -> startup coordinator 0x637EE"}
 {"record":"listing_comment","address":{"space":"ram","offset":"00025500"},"comment_type":"EOL","text":"Crypt constant AES_Decryption_SBox_Inverse - 256 bytes"}
 {"record":"listing_comment","address":{"space":"ram","offset":"000715b4"},"comment_type":"PLATE","text":"Exact F33 context loader: INTBP=20200 EBASE=20000 GP=FEBEB800 TP=23DFC SP=FEBE2000"}
+{"record":"listing_comment","address":{"space":"ram","offset":"feef81e0"},"comment_type":"PLATE","text":"432-entry x32-bit Global RAM ring fed from ADCG0DIR00 by DMAC"}
+{"record":"listing_comment","address":{"space":"ram","offset":"feef8a20"},"comment_type":"PLATE","text":"432-entry x32-bit Global RAM ring fed from ADCG1DIR00 by DMAC"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa08000"},"comment_type":"PLATE","text":"Self-programming ID input word 0 [w, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa08004"},"comment_type":"PLATE","text":"Self-programming ID input word 1 [w, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa08008"},"comment_type":"PLATE","text":"Self-programming ID input word 2 [w, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa0800c"},"comment_type":"PLATE","text":"Self-programming ID input word 3 [w, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa08010"},"comment_type":"PLATE","text":"Self-programming ID authentication status [r, u8]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa10000"},"comment_type":"PLATE","text":"Flash pin monitor [r, u8]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa10010"},"comment_type":"PLATE","text":"Flash access status [rw, u8]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa10014"},"comment_type":"PLATE","text":"Flash access-error interrupt enable [rw, u8]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa10020"},"comment_type":"PLATE","text":"CodeFlash memory-area selector [rw, u16]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa10030"},"comment_type":"PLATE","text":"FACI command start address [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa10034"},"comment_type":"PLATE","text":"FACI command end address [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa10080"},"comment_type":"PLATE","text":"Flash sequencer status [r, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa10084"},"comment_type":"PLATE","text":"Flash program-or-erase mode entry [rw, u16]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa10088"},"comment_type":"PLATE","text":"CodeFlash protection control [rw, u16]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa1008c"},"comment_type":"PLATE","text":"Flash sequencer setup initialization [rw, u16]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa10090"},"comment_type":"PLATE","text":"Flash lock-bit status [r, u8]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa10098"},"comment_type":"PLATE","text":"FACI reset-transfer status [r, u8]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa1009c"},"comment_type":"PLATE","text":"FACI reset-transfer error interrupt enable [rw, u8]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa100a0"},"comment_type":"PLATE","text":"Last FACI command [r, u16]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa100c0"},"comment_type":"PLATE","text":"Flash program-or-erase status [r, u16]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa100d0"},"comment_type":"PLATE","text":"DataFlash blank-check control [rw, u8]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa100d4"},"comment_type":"PLATE","text":"DataFlash blank-check status [r, u8]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa100d8"},"comment_type":"PLATE","text":"First programmed DataFlash address [r, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa100e0"},"comment_type":"PLATE","text":"Flash sequencer process switch [rw, u16]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa100e4"},"comment_type":"PLATE","text":"Flash sequencer processing-clock notification [rw, u16]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa10100"},"comment_type":"PLATE","text":"Flash ECC encoder monitor [r, u16]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa10104"},"comment_type":"PLATE","text":"Flash ECC test-mode control [rw, u16]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa10108"},"comment_type":"PLATE","text":"Flash dummy ECC value [rw, u16]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffa20000"},"comment_type":"PLATE","text":"FACI command-issuing area [w, u8]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffc59008"},"comment_type":"PLATE","text":"Boot-flash area selector [rw, u16]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffc5d000"},"comment_type":"PLATE","text":"ICU-S command register; recovered MAC generate writes (selector<<16)|5 and CMAC verify writes (selector<<16)|7 [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffc5d004"},"comment_type":"PLATE","text":"ICU-S data/parameter word written beside ICUSCMD (firmware role) [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffc5d00c"},"comment_type":"PLATE","text":"ICU-S status; driver polls bit 0 as busy/ready [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffc5d014"},"comment_type":"PLATE","text":"ICU-S companion status; driver polls low bits with ICUSSTS [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffc5d024"},"comment_type":"PLATE","text":"ICU-S control word written during driver reset/abort path [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffc62000"},"comment_type":"PLATE","text":"CodeFlash error-information control [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffc62004"},"comment_type":"PLATE","text":"CodeFlash ECC single-error status clear [w, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffc62008"},"comment_type":"PLATE","text":"CodeFlash ECC double-error and address-parity status clear [w, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffc6200c"},"comment_type":"PLATE","text":"CodeFlash single-error count overflow status [r, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffc62020"},"comment_type":"PLATE","text":"CodeFlash ECC single-error status [r, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffc62030"},"comment_type":"PLATE","text":"CodeFlash ECC double-error and address-parity status [r, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffc62040"},"comment_type":"PLATE","text":"CodeFlash first single-error address [r, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffc62044"},"comment_type":"PLATE","text":"CodeFlash second single-error address [r, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffc62048"},"comment_type":"PLATE","text":"CodeFlash third single-error address [r, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffc6204c"},"comment_type":"PLATE","text":"CodeFlash fourth single-error address [r, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffc620c0"},"comment_type":"PLATE","text":"CodeFlash double-error or address-parity error address [r, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffc62100"},"comment_type":"PLATE","text":"CodeFlash address-parity control [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffc62200"},"comment_type":"PLATE","text":"CodeFlash ECC control for system-interconnect access [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffc622f0"},"comment_type":"PLATE","text":"CodeFlash ECC sub-test control for system-interconnect access [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffc62400"},"comment_type":"PLATE","text":"CodeFlash ECC control for PE1 access [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffc624f0"},"comment_type":"PLATE","text":"CodeFlash ECC sub-test control for PE1 access [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd20178"},"comment_type":"PLATE","text":"RSCFD common-FIFO status base (ch0/fifo0; +0x0C*ch +4*fifo) [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd20184"},"comment_type":"PLATE","text":"RSCFD common-FIFO status for application CAN1 (ch1/fifo0) [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd201d8"},"comment_type":"PLATE","text":"RSCFD common-FIFO pointer control base (write 0xFF advances) [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd201e4"},"comment_type":"PLATE","text":"RSCFD common-FIFO pointer control for application CAN1 [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd20250"},"comment_type":"PLATE","text":"RSCFD Tx message-buffer control base (CFDTMCn.TMTR at +n) [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd20260"},"comment_type":"PLATE","text":"Diagnostic Tx buffer control (HTH 0x13 -> n=16; TMTR bit 0) [rw, u8]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd202d0"},"comment_type":"PLATE","text":"RSCFD Tx message-buffer status base (CFDTMSTSn at +n) [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd202e0"},"comment_type":"PLATE","text":"RSCFD Tx status base for application CAN1 record [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd23400"},"comment_type":"PLATE","text":"RSCFD common-FIFO message RAM base (CFID/CFPTR/CFDF window) [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd23580"},"comment_type":"PLATE","text":"RSCFD common-FIFO message RAM for application CAN1 [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd24000"},"comment_type":"PLATE","text":"RSCFD Tx message-buffer RAM base (0x20-byte entries) [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd24200"},"comment_type":"PLATE","text":"Diagnostic Tx message RAM for buffer n=16 (CAN 0x7A9 path) [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd60000"},"comment_type":"PLATE","text":"ECM master error-source set trigger [w, u8]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd60004"},"comment_type":"PLATE","text":"ECM master error-source clear trigger [w, u8]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd60008"},"comment_type":"PLATE","text":"ECM master error-source status 0 [r, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd6000c"},"comment_type":"PLATE","text":"ECM master error-source status 1 [r, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd60010"},"comment_type":"PLATE","text":"ECM master error-source status 2 [r, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd60014"},"comment_type":"PLATE","text":"ECM master protection command; write 0xA5 before protected writes [w, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd61000"},"comment_type":"PLATE","text":"ECM checker error-source set trigger [w, u8]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd61004"},"comment_type":"PLATE","text":"ECM checker error-source clear trigger [w, u8]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd61008"},"comment_type":"PLATE","text":"ECM checker error-source status 0 [r, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd6100c"},"comment_type":"PLATE","text":"ECM checker error-source status 1 [r, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd61010"},"comment_type":"PLATE","text":"ECM checker error-source status 2 [r, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd61014"},"comment_type":"PLATE","text":"ECM checker protection command; write 0xA5 before protected writes [w, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd62000"},"comment_type":"PLATE","text":"ECM error-pulse configuration [rw, u8]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd62004"},"comment_type":"PLATE","text":"ECM maskable-interrupt configuration 0 [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd62008"},"comment_type":"PLATE","text":"ECM maskable-interrupt configuration 1 [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd6200c"},"comment_type":"PLATE","text":"ECM maskable-interrupt configuration 2 [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd62010"},"comment_type":"PLATE","text":"ECM non-maskable-interrupt configuration 0 [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd62014"},"comment_type":"PLATE","text":"ECM non-maskable-interrupt configuration 1 [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd62018"},"comment_type":"PLATE","text":"ECM non-maskable-interrupt configuration 2 [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd6201c"},"comment_type":"PLATE","text":"ECM internal-reset configuration 0 [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd62020"},"comment_type":"PLATE","text":"ECM internal-reset configuration 1 [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd62024"},"comment_type":"PLATE","text":"ECM internal-reset configuration 2 [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd62028"},"comment_type":"PLATE","text":"ECM error mask 0 [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd6202c"},"comment_type":"PLATE","text":"ECM error mask 1 [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd62030"},"comment_type":"PLATE","text":"ECM error mask 2 [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd62034"},"comment_type":"PLATE","text":"ECM error-source status-clear trigger 0 [w, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd62038"},"comment_type":"PLATE","text":"ECM error-source status-clear trigger 1 [w, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd6203c"},"comment_type":"PLATE","text":"ECM error-source status-clear trigger 2 [w, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd62040"},"comment_type":"PLATE","text":"ECM common protection command; write 0xA5 before protected writes [w, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd62044"},"comment_type":"PLATE","text":"ECM common protection status [r, u8]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd62048"},"comment_type":"PLATE","text":"ECM pseudo-error trigger 0 [w, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd6204c"},"comment_type":"PLATE","text":"ECM pseudo-error trigger 1 [w, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd62050"},"comment_type":"PLATE","text":"ECM pseudo-error trigger 2 [w, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd62054"},"comment_type":"PLATE","text":"ECM delay-timer control [rw, u8]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd62058"},"comment_type":"PLATE","text":"ECM delay-timer count [r, u16]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd6205c"},"comment_type":"PLATE","text":"ECM delay-timer compare [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd62060"},"comment_type":"PLATE","text":"ECM delay-timer configuration 0 [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd62064"},"comment_type":"PLATE","text":"ECM delay-timer configuration 1 [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd62068"},"comment_type":"PLATE","text":"ECM delay-timer configuration 2 [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd6206c"},"comment_type":"PLATE","text":"ECM delay-timer configuration 3 [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd62070"},"comment_type":"PLATE","text":"ECM delay-timer configuration 4 [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd62074"},"comment_type":"PLATE","text":"ECM delay-timer configuration 5 [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd62078"},"comment_type":"PLATE","text":"ECM error-output clear-invalidation configuration [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd6207c"},"comment_type":"PLATE","text":"ECM pseudo-error mask [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd63000"},"comment_type":"PLATE","text":"ECM error-pulse control [rw, u8]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffe50000"},"comment_type":"PLATE","text":"TAUJ0 channel 0 data reload [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffe50004"},"comment_type":"PLATE","text":"TAUJ0 channel 1 data reload [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffe50008"},"comment_type":"PLATE","text":"TAUJ0 channel 2 data reload [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffe5000c"},"comment_type":"PLATE","text":"TAUJ0 channel 3 data reload [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffe50010"},"comment_type":"PLATE","text":"TAUJ0 channel 0 counter [r, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffe50014"},"comment_type":"PLATE","text":"TAUJ0 channel 1 counter [r, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffe50018"},"comment_type":"PLATE","text":"TAUJ0 channel 2 counter [r, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffe5001c"},"comment_type":"PLATE","text":"TAUJ0 channel 3 counter [r, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffe50080"},"comment_type":"PLATE","text":"TAUJ0 channel 0 mode [rw, u16]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffe50082"},"comment_type":"PLATE","text":"TAUJ0 channel 1 mode [rw, u16]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffe50084"},"comment_type":"PLATE","text":"TAUJ0 channel 2 mode [rw, u16]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffe50086"},"comment_type":"PLATE","text":"TAUJ0 channel 3 mode [rw, u16]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffe50090"},"comment_type":"PLATE","text":"TAUJ0 prescaler [rw, u16]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffe50094"},"comment_type":"PLATE","text":"TAUJ0 base-clock reload selector [rw, u16]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffe70180"},"comment_type":"PLATE","text":"TSG30 bit-extended HT-PWM W-phase compare register [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffe70184"},"comment_type":"PLATE","text":"TSG30 bit-extended HT-PWM V-phase compare register [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffe70188"},"comment_type":"PLATE","text":"TSG30 bit-extended HT-PWM U-phase compare register [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffe71180"},"comment_type":"PLATE","text":"TSG31 bit-extended HT-PWM W-phase compare register [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffe71184"},"comment_type":"PLATE","text":"TSG31 bit-extended HT-PWM V-phase compare register [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffe71188"},"comment_type":"PLATE","text":"TSG31 bit-extended HT-PWM U-phase compare register [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"fff88818"},"comment_type":"PLATE","text":"EXTCLK1O divider; boot writes 0x50 for divide by 80 [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"fff8881c"},"comment_type":"PLATE","text":"EXTCLK1O divider status; boot polls synchronization and active state [r, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"fff890c0"},"comment_type":"PLATE","text":"EXTCLK1O source selector; source 4 is CLK_LSB [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"fff890c8"},"comment_type":"PLATE","text":"EXTCLK1O selected-source status; boot polls until source 4 is active [r, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"fff91200"},"comment_type":"PLATE","text":"ADCG0 data supplementary information register 00; DMA source for sample ring [r, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"fff92200"},"comment_type":"PLATE","text":"ADCG1 data supplementary information register 00; DMA source for sample ring [r, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffff8100"},"comment_type":"PLATE","text":"DMAC0 channel 0 channel master setting register [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffff8120"},"comment_type":"PLATE","text":"DMAC1 channel 0 channel master setting register [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffffb010"},"comment_type":"PLATE","text":"ECM maskable-error interrupt control (EIINT 8) [rw, u16]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffffb10a"},"comment_type":"PLATE","text":"TAUJ0 CH0 interrupt control (EIINT 133) [rw, u16]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffffb10c"},"comment_type":"PLATE","text":"TAUJ0 CH1 interrupt control (EIINT 134) [rw, u16]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffffb10e"},"comment_type":"PLATE","text":"TAUJ0 CH2 interrupt control (EIINT 135) [rw, u16]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffffb110"},"comment_type":"PLATE","text":"TAUJ0 CH3 interrupt control (foreground tick; EIRF bit 12 polled) [rw, u16]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffffb176"},"comment_type":"PLATE","text":"RSCAN CAN1 receive interrupt control (EIINT 187) [rw, u16]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffffb178"},"comment_type":"PLATE","text":"RSCAN CAN1 transmit interrupt control (EIINT 188) [rw, u16]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffffb248"},"comment_type":"PLATE","text":"ICU-S crypto-driver interrupt channel 292 [rw, u16]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffffb24a"},"comment_type":"PLATE","text":"ICU-S crypto-driver interrupt channel 293 [rw, u16]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffffb2f6"},"comment_type":"PLATE","text":"Flash sequencer-end interrupt control (EIINT 379) [rw, u16]"}
 {"record":"function_comment","entry":{"space":"ram","offset":"00020880"},"comment_type":"regular","text":"Exact F33 application entry wrapper -> startup coordinator 0x637EE"}
 {"record":"function_comment","entry":{"space":"ram","offset":"000715b4"},"comment_type":"regular","text":"Exact F33 context loader: INTBP=20200 EBASE=20000 GP=FEBEB800 TP=23DFC SP=FEBE2000"}
-{"record":"bookmark","address":{"space":"ram","offset":"00000768"},"type":"Analysis","category":"Found Code","comment":"Found code from operand reference"}
 {"record":"bookmark","address":{"space":"ram","offset":"0000083c"},"type":"Error","category":"Bad Instruction","comment":"Failed to disassemble at 0000083c due to conflicting data at 0000083d (flow from 0000083a)"}
 {"record":"bookmark","address":{"space":"ram","offset":"0000090a"},"type":"Analysis","category":"Found Code","comment":"Found code from operand reference"}
 {"record":"bookmark","address":{"space":"ram","offset":"00000bb8"},"type":"Analysis","category":"Found Code","comment":"Found code from operand reference"}
@@ -6312,7 +6625,6 @@
 {"record":"bookmark","address":{"space":"ram","offset":"00005dc0"},"type":"Analysis","category":"Found Code","comment":"Found code from operand reference"}
 {"record":"bookmark","address":{"space":"ram","offset":"00005ffe"},"type":"Error","category":"Bad Instruction","comment":"Failed to disassemble at 00005ffe due to conflicting instruction at 00006000 (flow from 00005ffa)"}
 {"record":"bookmark","address":{"space":"ram","offset":"00006000"},"type":"Analysis","category":"Found Code","comment":"Found code from operand reference"}
-{"record":"bookmark","address":{"space":"ram","offset":"000061a8"},"type":"Analysis","category":"Found Code","comment":"Found code from operand reference"}
 {"record":"bookmark","address":{"space":"ram","offset":"00006d92"},"type":"Analysis","category":"Found Code","comment":"Found code from operand reference"}
 {"record":"bookmark","address":{"space":"ram","offset":"00007100"},"type":"Analysis","category":"Found Code","comment":"Found code from operand reference"}
 {"record":"bookmark","address":{"space":"ram","offset":"00008380"},"type":"Analysis","category":"Found Code","comment":"Found code from operand reference"}
@@ -6321,17 +6633,11 @@
 {"record":"bookmark","address":{"space":"ram","offset":"00008750"},"type":"Analysis","category":"Address Table","comment":"Address table[4] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"0000876c"},"type":"Analysis","category":"Address Table","comment":"Address table[6] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"00008770"},"type":"Analysis","category":"Address Table","comment":"Address table[5] created"}
+{"record":"bookmark","address":{"space":"ram","offset":"00008792"},"type":"Analysis","category":"Found Code","comment":"Found code from operand reference"}
 {"record":"bookmark","address":{"space":"ram","offset":"00008858"},"type":"Analysis","category":"Address Table","comment":"Address table[3] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000088f4"},"type":"Analysis","category":"Address Table","comment":"Address table[3] created"}
-{"record":"bookmark","address":{"space":"ram","offset":"00008904"},"type":"Analysis","category":"Address Table","comment":"Address table[4] created"}
-{"record":"bookmark","address":{"space":"ram","offset":"00008908"},"type":"Analysis","category":"Address Table","comment":"Address table[3] created"}
-{"record":"bookmark","address":{"space":"ram","offset":"00008938"},"type":"Analysis","category":"Address Table","comment":"Address table[3] created"}
-{"record":"bookmark","address":{"space":"ram","offset":"00008968"},"type":"Analysis","category":"Address Table","comment":"Address table[4] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"00008a0c"},"type":"Analysis","category":"Address Table","comment":"Address table[3] created"}
-{"record":"bookmark","address":{"space":"ram","offset":"00008a24"},"type":"Analysis","category":"Address Table","comment":"Address table[3] created"}
-{"record":"bookmark","address":{"space":"ram","offset":"00008d9c"},"type":"Analysis","category":"Address Table","comment":"Address table[3] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"00008dd8"},"type":"Analysis","category":"Address Table","comment":"Address table[6] created"}
-{"record":"bookmark","address":{"space":"ram","offset":"00008e04"},"type":"Analysis","category":"Address Table","comment":"Address table[4] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"00008e18"},"type":"Analysis","category":"Address Table","comment":"Address table[6] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"00010032"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
 {"record":"bookmark","address":{"space":"ram","offset":"00010034"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
@@ -6455,6 +6761,7 @@
 {"record":"bookmark","address":{"space":"ram","offset":"00011b3c"},"type":"Analysis","category":"Address Table","comment":"Address table[3] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000123f4"},"type":"Analysis","category":"Address Table","comment":"Address table[4] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"00012530"},"type":"Analysis","category":"Address Table","comment":"Address table[3] created"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012530"},"type":"Error","category":"Bad Instruction","comment":"Failed to disassemble at 00012530 due to conflicting data at 00012530 (flow from 0001252e)"}
 {"record":"bookmark","address":{"space":"ram","offset":"0001276c"},"type":"Analysis","category":"Address Table","comment":"Address table[3] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"00012790"},"type":"Analysis","category":"Address Table","comment":"Address table[3] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000127b4"},"type":"Analysis","category":"Address Table","comment":"Address table[3] created"}
@@ -6464,6 +6771,8 @@
 {"record":"bookmark","address":{"space":"ram","offset":"0001284c"},"type":"Analysis","category":"Address Table","comment":"Address table[4] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"0001287c"},"type":"Analysis","category":"Address Table","comment":"Address table[4] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"00012a14"},"type":"Analysis","category":"Address Table","comment":"Address table[5] created"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012f32"},"type":"Error","category":"Bad Instruction","comment":"Could not follow disassembly flow into non-existing memory at fff6309c (flow from 00012f32)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012f36"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012f32)"}
 {"record":"bookmark","address":{"space":"ram","offset":"00013062"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
 {"record":"bookmark","address":{"space":"ram","offset":"000130f8"},"type":"Analysis","category":"Address Table","comment":"Address table[4] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"00013128"},"type":"Analysis","category":"Address Table","comment":"Address table[4] created"}
@@ -6532,134 +6841,6 @@
 {"record":"bookmark","address":{"space":"ram","offset":"00016420"},"type":"Analysis","category":"Address Table","comment":"Address table[4] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000165fc"},"type":"Analysis","category":"Address Table","comment":"Address table[4] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"00016640"},"type":"Analysis","category":"Address Table","comment":"Address table[4] created"}
-{"record":"bookmark","address":{"space":"ram","offset":"00018000"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"00018002"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"00018004"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"00018006"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"00018008"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"0001800a"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"0001800c"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"0001800e"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"00018010"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"00018012"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"00018014"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"00018016"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"00018018"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"0001801a"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"0001801c"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"0001801e"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"00018020"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"00018022"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"00018024"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"00018026"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"00018028"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"0001802a"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"0001802c"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"0001802e"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"00018030"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"00018032"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"00018034"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"00018036"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"00018038"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"0001803a"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"0001803c"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"0001803e"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"00018040"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"00018042"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"00018044"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"00018046"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"00018048"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"0001804a"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"0001804c"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"0001804e"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"00018050"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"00018052"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"00018054"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"00018056"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"00018058"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"0001805a"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"0001805c"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"0001805e"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"00018060"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"00018062"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"00018064"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"00018066"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"00018068"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"0001806a"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"0001806c"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"0001806e"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"00018070"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"00018072"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"00018074"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"00018076"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"00018078"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"0001807a"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"0001807c"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"0001807e"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"00018080"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"00018082"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"00018084"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"00018086"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"00018088"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"0001808a"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"0001808c"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"0001808e"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"00018090"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"00018092"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"00018094"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"00018096"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"00018098"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"0001809a"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"0001809c"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"0001809e"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"000180a0"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"000180a2"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"000180a4"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"000180a6"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"000180a8"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"000180aa"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"000180ac"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"000180ae"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"000180b0"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"000180b2"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"000180b4"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"000180b6"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"000180b8"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"000180ba"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"000180bc"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"000180be"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"000180c0"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"000180c2"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"000180c4"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"000180c6"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"000180c8"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"000180ca"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"000180cc"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"000180ce"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"000180d0"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"000180d2"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"000180d4"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"000180d6"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"000180d8"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"000180da"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"000180dc"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"000180de"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"000180e0"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"000180e2"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"000180e4"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"000180e6"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"000180e8"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"000180ea"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"000180ec"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"000180ee"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"000180f0"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"000180f2"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"000180f4"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"000180f6"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"000180f8"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"000180fa"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"000180fc"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
-{"record":"bookmark","address":{"space":"ram","offset":"000180fe"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
 {"record":"bookmark","address":{"space":"ram","offset":"000195d0"},"type":"Analysis","category":"Address Table","comment":"Address table[3] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000195f4"},"type":"Analysis","category":"Address Table","comment":"Address table[3] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"00019618"},"type":"Analysis","category":"Address Table","comment":"Address table[3] created"}
@@ -6773,8 +6954,7 @@
 {"record":"bookmark","address":{"space":"ram","offset":"0001e9cc"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
 {"record":"bookmark","address":{"space":"ram","offset":"0001e9ce"},"type":"Warning","category":"Unimplemented Pcode","comment":"Instruction pcode is unimplemented: rie"}
 {"record":"bookmark","address":{"space":"ram","offset":"00020200"},"type":"Analysis","category":"Address Table","comment":"Address table[177] created"}
-{"record":"bookmark","address":{"space":"ram","offset":"000204c4"},"type":"Analysis","category":"Address Table","comment":"Address table[89] created"}
-{"record":"bookmark","address":{"space":"ram","offset":"0002062c"},"type":"Analysis","category":"Address Table","comment":"Address table[115] created"}
+{"record":"bookmark","address":{"space":"ram","offset":"000204c4"},"type":"Analysis","category":"Address Table","comment":"Address table[205] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000210f8"},"type":"Analysis","category":"Address Table","comment":"Address table[3] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000212dc"},"type":"Analysis","category":"Address Table","comment":"Address table[4] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"00021350"},"type":"Analysis","category":"Address Table","comment":"Address table[3] created"}
@@ -7004,6 +7184,8 @@
 {"record":"bookmark","address":{"space":"ram","offset":"0002a520"},"type":"Analysis","category":"Address Table","comment":"Address table[5] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"0002a540"},"type":"Analysis","category":"Address Table","comment":"Address table[3] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"0002a558"},"type":"Analysis","category":"Address Table","comment":"Address table[3] created"}
+{"record":"bookmark","address":{"space":"ram","offset":"0002a630"},"type":"Analysis","category":"Address Table","comment":"Address table[3] created"}
+{"record":"bookmark","address":{"space":"ram","offset":"0002a648"},"type":"Analysis","category":"Address Table","comment":"Address table[3] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"0002a6d8"},"type":"Analysis","category":"Address Table","comment":"Address table[3] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"0002a6f0"},"type":"Analysis","category":"Address Table","comment":"Address table[3] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"0002a74c"},"type":"Analysis","category":"Address Table","comment":"Address table[4] created"}
@@ -7137,41 +7319,35 @@
 {"record":"bookmark","address":{"space":"ram","offset":"000d3f38"},"type":"Analysis","category":"Address Table","comment":"Address table[4] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d3f54"},"type":"Analysis","category":"Address Table","comment":"Address table[8] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d3f88"},"type":"Analysis","category":"Address Table","comment":"Address table[4] created"}
-{"record":"bookmark","address":{"space":"ram","offset":"000d3f9c"},"type":"Analysis","category":"Address Table","comment":"Address table[4] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d3fb4"},"type":"Analysis","category":"Address Table","comment":"Address table[10] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d3fe0"},"type":"Analysis","category":"Address Table","comment":"Address table[6] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d4004"},"type":"Analysis","category":"Address Table","comment":"Address table[27] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d4074"},"type":"Analysis","category":"Address Table","comment":"Address table[5] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d40b0"},"type":"Analysis","category":"Address Table","comment":"Address table[8] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d40e4"},"type":"Analysis","category":"Address Table","comment":"Address table[4] created"}
-{"record":"bookmark","address":{"space":"ram","offset":"000d40f8"},"type":"Analysis","category":"Address Table","comment":"Address table[4] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d4110"},"type":"Analysis","category":"Address Table","comment":"Address table[17] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d4160"},"type":"Analysis","category":"Address Table","comment":"Address table[27] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d41d0"},"type":"Analysis","category":"Address Table","comment":"Address table[4] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d420c"},"type":"Analysis","category":"Address Table","comment":"Address table[8] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d4240"},"type":"Analysis","category":"Address Table","comment":"Address table[4] created"}
-{"record":"bookmark","address":{"space":"ram","offset":"000d4254"},"type":"Analysis","category":"Address Table","comment":"Address table[4] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d426c"},"type":"Analysis","category":"Address Table","comment":"Address table[17] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d42bc"},"type":"Analysis","category":"Address Table","comment":"Address table[12] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d42f0"},"type":"Analysis","category":"Address Table","comment":"Address table[14] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d432c"},"type":"Analysis","category":"Address Table","comment":"Address table[4] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d4368"},"type":"Analysis","category":"Address Table","comment":"Address table[8] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d439c"},"type":"Analysis","category":"Address Table","comment":"Address table[4] created"}
-{"record":"bookmark","address":{"space":"ram","offset":"000d43b0"},"type":"Analysis","category":"Address Table","comment":"Address table[4] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d43c4"},"type":"Analysis","category":"Address Table","comment":"Address table[26] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d440c"},"type":"Analysis","category":"Address Table","comment":"Address table[8] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d4434"},"type":"Analysis","category":"Address Table","comment":"Address table[25] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d44ac"},"type":"Analysis","category":"Address Table","comment":"Address table[5] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d44c4"},"type":"Analysis","category":"Address Table","comment":"Address table[8] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d44f8"},"type":"Analysis","category":"Address Table","comment":"Address table[4] created"}
-{"record":"bookmark","address":{"space":"ram","offset":"000d450c"},"type":"Analysis","category":"Address Table","comment":"Address table[4] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d4524"},"type":"Analysis","category":"Address Table","comment":"Address table[10] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d4550"},"type":"Analysis","category":"Address Table","comment":"Address table[6] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d4574"},"type":"Analysis","category":"Address Table","comment":"Address table[27] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d45e4"},"type":"Analysis","category":"Address Table","comment":"Address table[5] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d4620"},"type":"Analysis","category":"Address Table","comment":"Address table[8] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d4654"},"type":"Analysis","category":"Address Table","comment":"Address table[4] created"}
-{"record":"bookmark","address":{"space":"ram","offset":"000d4668"},"type":"Analysis","category":"Address Table","comment":"Address table[4] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d4680"},"type":"Analysis","category":"Address Table","comment":"Address table[10] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d46ac"},"type":"Analysis","category":"Address Table","comment":"Address table[6] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d46d0"},"type":"Analysis","category":"Address Table","comment":"Address table[27] created"}
@@ -7179,8 +7355,6 @@
 {"record":"bookmark","address":{"space":"ram","offset":"000d477c"},"type":"Analysis","category":"Address Table","comment":"Address table[9] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d47a4"},"type":"Analysis","category":"Address Table","comment":"Address table[33] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d47ac"},"type":"Analysis","category":"Address Table","comment":"Address table[5] created"}
-{"record":"bookmark","address":{"space":"ram","offset":"000d47c8"},"type":"Analysis","category":"Address Table","comment":"Address table[4] created"}
-{"record":"bookmark","address":{"space":"ram","offset":"000d47dc"},"type":"Analysis","category":"Address Table","comment":"Address table[4] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d47f0"},"type":"Analysis","category":"Address Table","comment":"Address table[14] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d4830"},"type":"Analysis","category":"Address Table","comment":"Address table[41] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d488c"},"type":"Analysis","category":"Address Table","comment":"Address table[10] created"}
@@ -7190,8 +7364,8 @@
 {"record":"bookmark","address":{"space":"ram","offset":"000d490c"},"type":"Analysis","category":"Address Table","comment":"Address table[4] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d4920"},"type":"Analysis","category":"Address Table","comment":"Address table[20] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d4938"},"type":"Analysis","category":"Address Table","comment":"Address table[14] created"}
-{"record":"bookmark","address":{"space":"ram","offset":"000d4974"},"type":"Analysis","category":"Address Table","comment":"Address table[31] created"}
-{"record":"bookmark","address":{"space":"ram","offset":"000d4984"},"type":"Analysis","category":"Address Table","comment":"Address table[27] created"}
+{"record":"bookmark","address":{"space":"ram","offset":"000d4974"},"type":"Analysis","category":"Address Table","comment":"Address table[29] created"}
+{"record":"bookmark","address":{"space":"ram","offset":"000d4984"},"type":"Analysis","category":"Address Table","comment":"Address table[25] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d49fc"},"type":"Analysis","category":"Address Table","comment":"Address table[5] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d4a18"},"type":"Analysis","category":"Address Table","comment":"Address table[3] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d4a34"},"type":"Analysis","category":"Address Table","comment":"Address table[8] created"}
@@ -7217,12 +7391,11 @@
 {"record":"bookmark","address":{"space":"ram","offset":"000d4e48"},"type":"Analysis","category":"Address Table","comment":"Address table[8] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d4e7c"},"type":"Analysis","category":"Address Table","comment":"Address table[4] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d4e90"},"type":"Analysis","category":"Address Table","comment":"Address table[4] created"}
-{"record":"bookmark","address":{"space":"ram","offset":"000d4ea4"},"type":"Analysis","category":"Address Table","comment":"Address table[16] created"}
+{"record":"bookmark","address":{"space":"ram","offset":"000d4eb0"},"type":"Analysis","category":"Address Table","comment":"Address table[13] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d4eec"},"type":"Analysis","category":"Address Table","comment":"Address table[36] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d4f8c"},"type":"Analysis","category":"Address Table","comment":"Address table[5] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d4fa4"},"type":"Analysis","category":"Address Table","comment":"Address table[8] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d4fd8"},"type":"Analysis","category":"Address Table","comment":"Address table[4] created"}
-{"record":"bookmark","address":{"space":"ram","offset":"000d4fec"},"type":"Analysis","category":"Address Table","comment":"Address table[4] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d5000"},"type":"Analysis","category":"Address Table","comment":"Address table[5] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d5018"},"type":"Analysis","category":"Address Table","comment":"Address table[9] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d5054"},"type":"Analysis","category":"Address Table","comment":"Address table[23] created"}
@@ -7230,7 +7403,6 @@
 {"record":"bookmark","address":{"space":"ram","offset":"000d50d0"},"type":"Analysis","category":"Address Table","comment":"Address table[3] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d5100"},"type":"Analysis","category":"Address Table","comment":"Address table[8] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d5134"},"type":"Analysis","category":"Address Table","comment":"Address table[4] created"}
-{"record":"bookmark","address":{"space":"ram","offset":"000d5148"},"type":"Analysis","category":"Address Table","comment":"Address table[4] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d515c"},"type":"Analysis","category":"Address Table","comment":"Address table[5] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d5174"},"type":"Analysis","category":"Address Table","comment":"Address table[9] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d51b0"},"type":"Analysis","category":"Address Table","comment":"Address table[23] created"}
@@ -7238,4 +7410,4 @@
 {"record":"bookmark","address":{"space":"ram","offset":"000d522c"},"type":"Analysis","category":"Address Table","comment":"Address table[3] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d525c"},"type":"Analysis","category":"Address Table","comment":"Address table[4] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"ff205c88"},"type":"Analysis","category":"Address Table","comment":"Address table[4] created"}
-{"record":"totals","functions":6065,"instructions":187532,"symbols":6860,"memory_blocks":14,"body_ranges":6088,"body_addresses":491145,"user_function_names":199,"user_symbols":199,"listing_comments":5,"function_comments":2,"bookmarks":954,"name_sources":{"DEFAULT":5866,"USER_DEFINED":199},"calling_conventions":{"__stdcall":6065},"signature_sources":{"DEFAULT":6065}}
+{"record":"totals","functions":6073,"instructions":187618,"symbols":7016,"memory_blocks":24,"body_ranges":6096,"body_addresses":491561,"user_function_names":199,"user_symbols":347,"listing_comments":153,"function_comments":2,"bookmarks":812,"name_sources":{"DEFAULT":5874,"USER_DEFINED":199},"calling_conventions":{"__stdcall":6073},"signature_sources":{"DEFAULT":6073}}

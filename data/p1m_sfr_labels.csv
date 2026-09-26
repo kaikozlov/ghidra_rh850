@@ -33,30 +33,121 @@ address,name,size,access,comment
 0xFFC5D00C,ICUSSTS,4,rw,ICU-S status; driver polls bit 0 as busy/ready
 0xFFC5D014,ICUSSTS2,4,rw,ICU-S companion status; driver polls low bits with ICUSSTS
 0xFFC5D024,ICUSCTL,4,rw,ICU-S control word written during driver reset/abort path
-# PLL / clock generation SFRs (docs/architecture/firmware-architecture.md boot setup).
-# Written by boot_clock_init (0x10C6) and application PLL reconfig (0x607DE).
-0xFFF88818,PLLCFG,4,rw,PLL configuration register; boot writes 0x50 (main PLL enable)
-0xFFF890C0,PLLCTL,4,rw,PLL control register; write 4 to trigger reconfiguration
-0xFFF890C8,PLLSTS,4,rw,PLL status register; polled until == 4 (lock complete)
-# Flash sequencer (FCU) command/protection window.
-# The 0xA5 enable-key sequence at FKEY is used throughout boot and flashing.
-0xFFD62004,FCU_CMD_WINDOW_0,4,rw,FCU command window slot 0 (boot flash init path)
-0xFFD62008,FCU_CMD_WINDOW_1,4,rw,FCU command window slot 1 (boot flash init path)
-0xFFD6200C,FCU_CMD_WINDOW_2,4,rw,FCU command window slot 2 (boot flash init path)
-0xFFD62010,FCU_CMD_WINDOW_3,4,rw,FCU command window slot 3 (boot flash init path)
-0xFFD62014,FCU_CMD_WINDOW_4,4,rw,FCU command window slot 4 (boot flash init path)
-0xFFD62018,FCU_CMD_WINDOW_5,4,rw,FCU command window slot 5 (boot flash init path)
-0xFFD6201C,FCU_CMD_WINDOW_6,4,rw,FCU command window slot 6 (boot flash init path)
-0xFFD62020,FCU_CMD_WINDOW_7,4,rw,FCU command window slot 7 (boot flash init path)
-0xFFD62024,FCU_CMD_WINDOW_8,4,rw,FCU command window slot 8 (boot flash init path)
-0xFFD62028,FCU_PROT_CTRL,4,rw,FCU protection control (write sequence: clear/set/clear with FKEY)
-0xFFD6202C,FCU_PROT_CTRL_1,4,rw,FCU protection control slot 1 (blank check enable/disable)
-0xFFD62030,FCU_PROT_CTRL_2,4,rw,FCU protection control slot 2 (write-protect toggle)
-0xFFD62034,FCU_CMD_SEQUENCE,4,rw,FCU command sequence register; 3-word write with FKEY=0xA5
-0xFFD62038,FCU_CMD_SEQUENCE_1,4,rw,FCU command sequence slot 1 (alternate sequence)
-0xFFD6203C,FCU_CMD_SEQUENCE_2,4,rw,FCU command sequence slot 2 (alternate sequence)
-0xFFD62040,FKEY,4,w,FCU enable key register; write 0xA5 before FCU command sequences
-0xFFD62044,FSTS,1,r,FCU status readback; polled after each command sequence
+# CodeFlash ECC/address-parity safety registers from R01UH0585EJ0120 section 31.2.2.
+0xFFC62000,UCFERRINT,4,rw,CodeFlash error-information control
+0xFFC62004,UCFSERSTCLR,4,w,CodeFlash ECC single-error status clear
+0xFFC62008,UCFDERSTCLR,4,w,CodeFlash ECC double-error and address-parity status clear
+0xFFC6200C,UCFOVFSTR,4,r,CodeFlash single-error count overflow status
+0xFFC62020,UCFSERSTR,4,r,CodeFlash ECC single-error status
+0xFFC62030,UCFDERSTR,4,r,CodeFlash ECC double-error and address-parity status
+0xFFC62040,UCF1SEDADR,4,r,CodeFlash first single-error address
+0xFFC62044,UCF2SEDADR,4,r,CodeFlash second single-error address
+0xFFC62048,UCF3SEDADR,4,r,CodeFlash third single-error address
+0xFFC6204C,UCF4SEDADR,4,r,CodeFlash fourth single-error address
+0xFFC620C0,UCFDEDADR,4,r,CodeFlash double-error or address-parity error address
+0xFFC62100,CFAPCTL,4,rw,CodeFlash address-parity control
+0xFFC62200,CFECCCTL_VCI2CFBA,4,rw,CodeFlash ECC control for system-interconnect access
+0xFFC622F0,CFSTSTCTL_VCI2CFBA,4,rw,CodeFlash ECC sub-test control for system-interconnect access
+0xFFC62400,CFECCCTL_PE1,4,rw,CodeFlash ECC control for PE1 access
+0xFFC624F0,CFSTSTCTL_PE1,4,rw,CodeFlash ECC sub-test control for PE1 access
+# EXTCLK1O clock-generation SFRs used by boot_extclk1_init (0x10C6).
+0xFFF88818,CLKD3DIV,4,rw,EXTCLK1O divider; boot writes 0x50 for divide by 80
+0xFFF8881C,CLKD3STAT,4,r,EXTCLK1O divider status; boot polls synchronization and active state
+0xFFF890C0,CKSC3C,4,rw,EXTCLK1O source selector; source 4 is CLK_LSB
+0xFFF890C8,CKSC3S,4,r,EXTCLK1O selected-source status; boot polls until source 4 is active
+# Error Control Module master and checker register windows.
+0xFFD60000,ECMMESET,1,w,ECM master error-source set trigger
+0xFFD60004,ECMMECLR,1,w,ECM master error-source clear trigger
+0xFFD60008,ECMMESSTR0,4,r,ECM master error-source status 0
+0xFFD6000C,ECMMESSTR1,4,r,ECM master error-source status 1
+0xFFD60010,ECMMESSTR2,4,r,ECM master error-source status 2
+0xFFD60014,ECMMPCMD0,4,w,ECM master protection command; write 0xA5 before protected writes
+0xFFD61000,ECMCESET,1,w,ECM checker error-source set trigger
+0xFFD61004,ECMCECLR,1,w,ECM checker error-source clear trigger
+0xFFD61008,ECMCESSTR0,4,r,ECM checker error-source status 0
+0xFFD6100C,ECMCESSTR1,4,r,ECM checker error-source status 1
+0xFFD61010,ECMCESSTR2,4,r,ECM checker error-source status 2
+0xFFD61014,ECMCPCMD0,4,w,ECM checker protection command; write 0xA5 before protected writes
+# Error Control Module common register window. This is not the flash sequencer.
+0xFFD62000,ECMEPCFG,1,rw,ECM error-pulse configuration
+0xFFD62004,ECMMICFG0,4,rw,ECM maskable-interrupt configuration 0
+0xFFD62008,ECMMICFG1,4,rw,ECM maskable-interrupt configuration 1
+0xFFD6200C,ECMMICFG2,4,rw,ECM maskable-interrupt configuration 2
+0xFFD62010,ECMNMICFG0,4,rw,ECM non-maskable-interrupt configuration 0
+0xFFD62014,ECMNMICFG1,4,rw,ECM non-maskable-interrupt configuration 1
+0xFFD62018,ECMNMICFG2,4,rw,ECM non-maskable-interrupt configuration 2
+0xFFD6201C,ECMIRCFG0,4,rw,ECM internal-reset configuration 0
+0xFFD62020,ECMIRCFG1,4,rw,ECM internal-reset configuration 1
+0xFFD62024,ECMIRCFG2,4,rw,ECM internal-reset configuration 2
+0xFFD62028,ECMEMK0,4,rw,ECM error mask 0
+0xFFD6202C,ECMEMK1,4,rw,ECM error mask 1
+0xFFD62030,ECMEMK2,4,rw,ECM error mask 2
+0xFFD62034,ECMESSTC0,4,w,ECM error-source status-clear trigger 0
+0xFFD62038,ECMESSTC1,4,w,ECM error-source status-clear trigger 1
+0xFFD6203C,ECMESSTC2,4,w,ECM error-source status-clear trigger 2
+0xFFD62040,ECMPCMD1,4,w,ECM common protection command; write 0xA5 before protected writes
+0xFFD62044,ECMPS,1,r,ECM common protection status
+0xFFD62048,ECMPE0,4,w,ECM pseudo-error trigger 0
+0xFFD6204C,ECMPE1,4,w,ECM pseudo-error trigger 1
+0xFFD62050,ECMPE2,4,w,ECM pseudo-error trigger 2
+0xFFD62054,ECMDTMCTL,1,rw,ECM delay-timer control
+0xFFD62058,ECMDTMR,2,r,ECM delay-timer count
+0xFFD6205C,ECMDTMCMP,4,rw,ECM delay-timer compare
+0xFFD62060,ECMDTMCFG0,4,rw,ECM delay-timer configuration 0
+0xFFD62064,ECMDTMCFG1,4,rw,ECM delay-timer configuration 1
+0xFFD62068,ECMDTMCFG2,4,rw,ECM delay-timer configuration 2
+0xFFD6206C,ECMDTMCFG3,4,rw,ECM delay-timer configuration 3
+0xFFD62070,ECMDTMCFG4,4,rw,ECM delay-timer configuration 4
+0xFFD62074,ECMDTMCFG5,4,rw,ECM delay-timer configuration 5
+0xFFD62078,ECMEOCCFG,4,rw,ECM error-output clear-invalidation configuration
+0xFFD6207C,ECMPEM,4,rw,ECM pseudo-error mask
+0xFFD63000,ECMEPCTL,1,rw,ECM error-pulse control
+# Flash interface (FACI) register and command windows from R01UH0615EJ0120.
+0xFFA08000,SELFID0,4,w,Self-programming ID input word 0
+0xFFA08004,SELFID1,4,w,Self-programming ID input word 1
+0xFFA08008,SELFID2,4,w,Self-programming ID input word 2
+0xFFA0800C,SELFID3,4,w,Self-programming ID input word 3
+0xFFA08010,SELFIDST,1,r,Self-programming ID authentication status
+0xFFA10000,FPMON,1,r,Flash pin monitor
+0xFFA10010,FASTAT,1,rw,Flash access status
+0xFFA10014,FAEINT,1,rw,Flash access-error interrupt enable
+0xFFA10020,FAREASELC,2,rw,CodeFlash memory-area selector
+0xFFA10030,FSADDR,4,rw,FACI command start address
+0xFFA10034,FEADDR,4,rw,FACI command end address
+0xFFA10080,FSTATR,4,r,Flash sequencer status
+0xFFA10084,FENTRYR,2,rw,Flash program-or-erase mode entry
+0xFFA10088,FPROTR,2,rw,CodeFlash protection control
+0xFFA1008C,FSUINITR,2,rw,Flash sequencer setup initialization
+0xFFA10090,FLKSTAT,1,r,Flash lock-bit status
+0xFFA10098,FRTSTAT,1,r,FACI reset-transfer status
+0xFFA1009C,FRTEINT,1,rw,FACI reset-transfer error interrupt enable
+0xFFA100A0,FCMDR,2,r,Last FACI command
+0xFFA100C0,FPESTAT,2,r,Flash program-or-erase status
+0xFFA100D0,FBCCNT,1,rw,DataFlash blank-check control
+0xFFA100D4,FBCSTAT,1,r,DataFlash blank-check status
+0xFFA100D8,FPSADDR,4,r,First programmed DataFlash address
+0xFFA100E0,FCPSR,2,rw,Flash sequencer process switch
+0xFFA100E4,FPCKAR,2,rw,Flash sequencer processing-clock notification
+0xFFA10100,FECCEMON,2,r,Flash ECC encoder monitor
+0xFFA10104,FECCTMD,2,rw,Flash ECC test-mode control
+0xFFA10108,FDMYECC,2,rw,Flash dummy ECC value
+0xFFA20000,FACI_COMMAND_AREA,1,w,FACI command-issuing area
+0xFFC59008,BFASELR,2,rw,Boot-flash area selector
+# TAUJ0 register landmarks used to derive the four application scheduler periods.
+0xFFE50000,TAUJ0CDR0,4,rw,TAUJ0 channel 0 data reload
+0xFFE50004,TAUJ0CDR1,4,rw,TAUJ0 channel 1 data reload
+0xFFE50008,TAUJ0CDR2,4,rw,TAUJ0 channel 2 data reload
+0xFFE5000C,TAUJ0CDR3,4,rw,TAUJ0 channel 3 data reload
+0xFFE50010,TAUJ0CNT0,4,r,TAUJ0 channel 0 counter
+0xFFE50014,TAUJ0CNT1,4,r,TAUJ0 channel 1 counter
+0xFFE50018,TAUJ0CNT2,4,r,TAUJ0 channel 2 counter
+0xFFE5001C,TAUJ0CNT3,4,r,TAUJ0 channel 3 counter
+0xFFE50080,TAUJ0CMOR0,2,rw,TAUJ0 channel 0 mode
+0xFFE50082,TAUJ0CMOR1,2,rw,TAUJ0 channel 1 mode
+0xFFE50084,TAUJ0CMOR2,2,rw,TAUJ0 channel 2 mode
+0xFFE50086,TAUJ0CMOR3,2,rw,TAUJ0 channel 3 mode
+0xFFE50090,TAUJ0TPS,2,rw,TAUJ0 prescaler
+0xFFE50094,TAUJ0BRS,2,rw,TAUJ0 base-clock reload selector
 # ADCG result-source registers and DMAC channel-master settings used by the
 # TAUJ0 CH0 phase-sample acquisition path. P1M-E manual register table maps
 # ADCG0DIR00/ADCG1DIR00 at FFF91200/FFF92200 and DM00CM/DM10CM at

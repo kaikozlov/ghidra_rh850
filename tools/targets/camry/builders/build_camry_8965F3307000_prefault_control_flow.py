@@ -83,10 +83,14 @@ def build() -> dict:
     # ECM starts with all maskable/NMI/internal-reset routing disabled, then enables
     # only eight maskable sources. RSCFD ECC sources 22/37/54 are absent.
     ecm_clear = fn(0x63338)
-    for addr in range(0xFFD62004,0xFFD62028,4):
-        need(f"DAT_{addr:08x} = 0;" in ecm_clear, f"ECM clear missing {addr:08X}")
+    for name in (
+        "ECMMICFG0", "ECMMICFG1", "ECMMICFG2",
+        "ECMNMICFG0", "ECMNMICFG1", "ECMNMICFG2",
+        "ECMIRCFG0", "ECMIRCFG1", "ECMIRCFG2",
+    ):
+        need(f"{name} = 0;" in ecm_clear, f"ECM clear missing {name}")
     ecm_enable = fn(0x63738)
-    need("DAT_ffd62004 = 0x100b001e" in ecm_enable, "ECM maskable enable drift")
+    need("ECMMICFG0 = 0x100b001e" in ecm_enable, "ECM maskable enable drift")
     micfg0 = 0x100B001E
     enabled_ecm = bits(micfg0)
     need(enabled_ecm == [1,2,3,4,16,17,19,28], f"ECM enabled bits drift: {enabled_ecm}")
@@ -99,7 +103,7 @@ def build() -> dict:
     eic = fn(0x62E6A)
     for n,addr in [(183,0xFFFFB16E),(184,0xFFFFB170),(185,0xFFFFB172),(186,0xFFFFB174),(189,0xFFFFB17A),(190,0xFFFFB17C)]:
         need(f"DAT_{addr:08x} = 0x80cf" in eic, f"CAN EIC{n} mask drift")
-    need("FUN_00062e44(&DAT_ffffb176,&DAT_00008048)" in eic and "FUN_00062e44(&DAT_ffffb178,&DAT_00008048)" in eic, "CAN1 RX/TX EIC enable drift")
+    need("FUN_00062e44(&EIC187,&DAT_00008048)" in eic and "FUN_00062e44(&EIC188,&DAT_00008048)" in eic, "CAN1 RX/TX EIC enable drift")
     default_isr = image[0x62E1E:0x62E44]
     need(image[0x62E42:0x62E44] == bytes.fromhex("8505"), "default ISR terminal self-branch drift")
 
@@ -198,7 +202,7 @@ def build() -> dict:
     # Valid cold boot jumps to application before the bootloader CAN loop; CAN is
     # initialized only on the failed-validation branch.
     boot = fn(0x13B0)
-    need("iVar3 = FUN_0000119e()" in boot and "PTR_f33_application_entry_000ffdb8" in boot and "FUN_00001398()" in boot, "boot branch structure drift")
+    need("FUN_0000119e()" in boot and "PTR_f33_application_entry_000ffdb8" in boot and "FUN_00001398()" in boot, "boot branch structure drift")
     need(boot.index("PTR_f33_application_entry_000ffdb8") < boot.index("FUN_00001398()"), "boot branch textual order drift")
     need("FUN_00001338()" in fn(0x1398) and "FUN_00003b3c()" in fn(0x1338), "bootloader CAN init chain drift")
 

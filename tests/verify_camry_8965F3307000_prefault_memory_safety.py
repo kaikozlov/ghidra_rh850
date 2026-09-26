@@ -110,7 +110,7 @@ check(
     and art["software_queue"]["capacity_words"] == 0x228
     and art["software_queue"]["fd_record_words_for_len64"] == 19,
 )
-check("software queue is serialized", "IMSR 0xFF00" in art["software_queue"]["critical_section"])
+check("software queue is serialized", "PMR 0xFF00" in art["software_queue"]["critical_section"])
 
 cs = art["computed_store_audit"]
 check(

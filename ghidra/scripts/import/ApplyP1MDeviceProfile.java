@@ -48,6 +48,34 @@ public class ApplyP1MDeviceProfile extends GhidraScript {
         return block;
     }
 
+    private MemoryBlock ensureByteMappedBlock(String name, long start, long mappedStart,
+                                               long size, boolean read, boolean write,
+                                               boolean exec) throws Exception {
+        Memory mem = currentProgram.getMemory();
+        Address addr = toAddr(start);
+        MemoryBlock existing = mem.getBlock(addr);
+        if (existing != null) {
+            if (!name.equals(existing.getName()) || !existing.getStart().equals(addr)
+                    || existing.getSize() != size || !existing.isMapped()) {
+                throw new IllegalStateException("conflicting mapped block at " + addr);
+            }
+            existing.setRead(read);
+            existing.setWrite(write);
+            existing.setExecute(exec);
+            existing.setVolatile(false);
+            return existing;
+        }
+        MemoryBlock block = mem.createByteMappedBlock(
+                name, addr, toAddr(mappedStart), size, false);
+        block.setRead(read);
+        block.setWrite(write);
+        block.setExecute(exec);
+        block.setVolatile(false);
+        println(String.format("Created %s %s..%s -> 0x%x r=%s w=%s x=%s",
+                name, block.getStart(), block.getEnd(), mappedStart, read, write, exec));
+        return block;
+    }
+
     private void label(long addr, String name, String comment) throws Exception {
         Address a = toAddr(addr);
         var symbols = currentProgram.getSymbolTable();
@@ -121,8 +149,7 @@ public class ApplyP1MDeviceProfile extends GhidraScript {
                 Address start = toAddr(addr);
                 Address end = start.add(size - 1L);
                 MemoryBlock block = currentProgram.getMemory().getBlock(start);
-                if (addr < 0xFF600000L || block == null || !block.isVolatile()
-                        || !block.contains(end)) {
+                if (block == null || !block.isVolatile() || !block.contains(end)) {
                     throw new IllegalStateException(String.format(
                             "SFR %s 0x%x..0x%x is outside a mapped volatile window",
                             name, addr, addr + size - 1L));
@@ -142,19 +169,22 @@ public class ApplyP1MDeviceProfile extends GhidraScript {
 
     @Override
     public void run() throws Exception {
-        // R7F701381 memory map (P1M-E hardware manual):
-        //   CodeFlash    0x00000000-0x000FFFFF  (already imported)
-        //   DataFlash    0xFF200000-0xFF207FFF  (already imported)
-        //   Local RAM    0xFEBE0000-0xFEBFFFFF
-        //   Global RAM A 0xFEEF8000-0xFEEFFFFF
-        //   Global RAM B 0xFEF00000-0xFEF07FFF
-        // Peripheral SFRs are volatile in v850.pspec for the full 0xFF600000..
-        // 0xFFFFFFFF window, but only verified peripheral *windows* are mapped
-        // as memory blocks. Mapping the entire 10 MiB SFR range makes random
-        // CodeFlash immediates look like valid pointers and collapses disassembly.
-        ensureUninitBlock("LocalRAM", 0xFEBE0000L, 0x20000L, true, true, false, false);
-        ensureUninitBlock("GlobalRAM_A", 0xFEEF8000L, 0x8000L, true, true, false, false);
-        ensureUninitBlock("GlobalRAM_B", 0xFEF00000L, 0x8000L, true, true, false, false);
+        // R7F701381/R7F701383 memory map (P1M-E hardware manual):
+        //   user CodeFlash     0x00000000-0x000FFFFF  (already imported)
+        //   extended user area 0x01000000-0x01007FFF  (not present in dumps)
+        //   DataFlash          0xFF200000-0xFF207FFF  (already imported)
+        //   PE1 Local RAM      0xFEBE0000-0xFEBFFFFF
+        //   self Local RAM     0xFEDE0000-0xFEDFFFFF  (same physical RAM)
+        //   Global RAM A       0xFEEF8000-0xFEEFFFFF
+        //   Global RAM B       0xFEF00000-0xFEF07FFF
+        // Section 4.2.1 documents instruction fetch from the self Local-RAM
+        // view and Global RAM. Exact firmware and retained live payloads also
+        // prove fetch through the PE1 view used by Toyota's callback path.
+        ensureUninitBlock("LocalRAM", 0xFEBE0000L, 0x20000L, true, true, true, false);
+        ensureByteMappedBlock("LocalRAM_self", 0xFEDE0000L, 0xFEBE0000L,
+                0x20000L, true, true, true);
+        ensureUninitBlock("GlobalRAM_A", 0xFEEF8000L, 0x8000L, true, true, true, false);
+        ensureUninitBlock("GlobalRAM_B", 0xFEF00000L, 0x8000L, true, true, true, false);
         // The CH0 sample path uses two 432-entry DMA rings in Global RAM A.
         // Firmware DMA descriptors source ADCG0DIR00/ADCG1DIR00 and target these
         // addresses; names are structural and do not claim physical ADC pins.
@@ -168,14 +198,23 @@ public class ApplyP1MDeviceProfile extends GhidraScript {
         ensureUninitBlock("SFR_RSCFD", 0xFFD20000L, 0x10000L, true, true, false, true);
         // ICU-S crypto-driver command/status window (see architecture evidence).
         ensureUninitBlock("SFR_ICUS", 0xFFC5D000L, 0x1000L, true, true, false, true);
-        // PLL / clock generation SFRs written by boot_clock_init (0x10C6) and
-        // application PLL reconfig (0x607DE): 0xFFF88818 config, 0xFFF890C0
-        // control, 0xFFF890C8 status.
+        // CodeFlash ECC/address-parity safety registers. The boot validity
+        // helper reads UCFDERSTR and clears it through UCFDERSTCLR.
+        ensureUninitBlock("SFR_CODEFLASH_ECC", 0xFFC62000L, 0x500L,
+                true, true, false, true);
+        // Clock-generation window. The boot path configures EXTCLK1O through
+        // CLKD3DIV/CLKD3STAT and CKSC3C/CKSC3S; it does not reconfigure the PLL.
         ensureUninitBlock("SFR_CLKGEN", 0xFFF88000L, 0x2000L, true, true, false, true);
-        // Flash sequencer SFRs written throughout boot/flashing: 0xFFD62000-0x44
-        // FCU command/protection window (enable key 0xA5), 0xFFD60000/0xFFD61000
-        // DataFlash bank control.
-        ensureUninitBlock("SFR_FCU", 0xFFD62000L, 0x100L, true, true, false, true);
+        // Flash interface (FACI), command-issuing area, self-ID, and base selector.
+        ensureUninitBlock("SFR_FACI_ID", 0xFFA08000L, 0x20L, true, true, false, true);
+        ensureUninitBlock("SFR_FACI", 0xFFA10000L, 0x200L, true, true, false, true);
+        ensureUninitBlock("SFR_FACI_COMMAND", 0xFFA20000L, 0x4L, true, true, false, true);
+        ensureUninitBlock("SFR_FACI_CONFIG", 0xFFC59000L, 0x100L, true, true, false, true);
+        // Error Control Module master, checker, common, and error-pulse windows.
+        ensureUninitBlock("SFR_ECM_MASTER", 0xFFD60000L, 0x100L, true, true, false, true);
+        ensureUninitBlock("SFR_ECM_CHECKER", 0xFFD61000L, 0x100L, true, true, false, true);
+        ensureUninitBlock("SFR_ECM_COMMON", 0xFFD62000L, 0x100L, true, true, false, true);
+        ensureUninitBlock("SFR_ECM_PULSE", 0xFFD63000L, 0x100L, true, true, false, true);
         // ADCG0/1 windows supplying the DMA-backed phase-sample rings.
         ensureUninitBlock("SFR_ADCG0", 0xFFF91000L, 0x1000L, true, true, false, true);
         ensureUninitBlock("SFR_ADCG1", 0xFFF92000L, 0x1000L, true, true, false, true);
@@ -184,6 +223,8 @@ public class ApplyP1MDeviceProfile extends GhidraScript {
         // TSG30/31 motor-control timer windows. The CH0 commit worker at 0x60DDC
         // writes extended HT-PWM W/V/U compare registers at offsets 0x180/184/188.
         ensureUninitBlock("SFR_TSG3", 0xFFE70000L, 0x2000L, true, true, false, true);
+        // TAUJ0/1/2 are consecutive 0x1000-byte modules on the 80-MHz P-Bus.
+        ensureUninitBlock("SFR_TAUJ", 0xFFE50000L, 0x3000L, true, true, false, true);
 
         // Boot code occupies low CodeFlash; application starts at 0x20000.
         // GP/TP are constant within each region after startup.

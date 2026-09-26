@@ -462,7 +462,7 @@
     "capacity_bytes": 2208,
     "capacity_words": 552,
     "classification": "bounded 16-bit word-index ring; no wrap/next-record overwrite recovered",
-    "critical_section": "0x7A2DA -> 0x98B8A -> 0x6A45E installs IMSR 0xFF00; 0x7A2E8 -> 0x6A4C4 restores",
+    "critical_section": "0x7A2DA -> 0x98B8A -> 0x6A45E installs PMR 0xFF00; 0x7A2E8 -> 0x6A4C4 restores",
     "end_inclusive": "0xFEBE48D7",
     "fd_record_words_for_len64": 19
   },

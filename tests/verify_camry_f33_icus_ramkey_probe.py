@@ -48,10 +48,10 @@ helper10 = helper10_path.read_bytes()
 source9 = build.CMD9_SOURCE.read_text()
 source10 = build.CMD10_SOURCE.read_text()
 
-check("audited metadata is exact-target and reuses the live-qualified resident",
+check("audited metadata is exact-target and reuses the publication-correct resident",
       meta["schema"] == host.BUILD_SCHEMA and meta["target"] == {
           "software_id": "8965F3307000", "codeflash_sha256": build.IMAGE_SHA256,
-      } and meta["reused_live_qualified_payload"]["resident"] == host.EXPECTED_RESIDENT)
+      } and meta["reused_publication_correct_payload"]["resident"] == host.EXPECTED_RESIDENT)
 check("both helpers are exact 150-word audited loader images",
       len(helper9) == len(helper10) == 600 and
       hashlib.sha256(helper9).hexdigest() == meta["helpers"]["command9"]["sha256"] and

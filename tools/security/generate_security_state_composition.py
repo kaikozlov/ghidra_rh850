@@ -201,7 +201,7 @@ QUERY_RESULTS = [
         "query": "privilege carryover across reset",
         "result": "Exactly one verified reset-persistent authorization exists: BA persistent auth "
                   "(SEC-APP-007). Application SA level 2, XCP connection, sessions, and bootloader SA "
-                  "are all reset-cleared or independently re-gated.",
+                  "are all stock-reset/startup-cleared or independently re-gated.",
         "grade": "verified (composition of verified findings)",
     },
     {

@@ -94,9 +94,9 @@ def build() -> dict:
     # Timer: 0x6639C clears TAUJ0 TPS/BRS/CMOR and loads the first TDR values;
     # 0x66512 reloads channel 3 with the steady value. The product record binds
     # R7F701381 and the official 80-MHz P-Bus/TAUJ domain.
-    require_tokens(functions, 0x66062, "DAT_ffffb110._1_1_", "(bVar1 & 0x10) == 0", "DAT_ffffb110._1_1_ = bVar1 & 0xef;")
-    require_tokens(functions, 0x6639C, "Ramffe50090 = 0;", "Ramffe50080 = 0;", "Ramffe5000c = PTR_LAB_0000270e_2_00030e0c + DAT_00030e08 + -1;")
-    require_tokens(functions, 0x66512, "Ramffe5000c = DAT_00030e08 + -1;", "FUN_000701ea(uVar3);")
+    require_tokens(functions, 0x66062, "EIC136._1_1_", "(bVar1 & 0x10) == 0", "EIC136._1_1_ = bVar1 & 0xef;")
+    require_tokens(functions, 0x6639C, "TAUJ0TPS = 0;", "TAUJ0BRS._0_1_ = 0;", "TAUJ0CDR3 = (uint)(PTR_LAB_0000270e_2_00030e0c + DAT_00030e08 + -1);")
+    require_tokens(functions, 0x66512, "TAUJ0CDR3 = DAT_00030e08 - 1;", "FUN_000701ea(uVar3);")
     timer_terms = [u32(image, 0x30DF0 + i * 4) for i in range(8)]
     need(timer_terms == [16000, 800, 32000, 9200, 80000, 9600, 400000, 10000], "F33 TAUJ0 timer terms drift")
     p_bus_hz = product["timer"]["p_bus_hz"]
@@ -140,7 +140,7 @@ def build() -> dict:
 
     # Driver torque diagnostic source and acquisition saturation.
     require_tokens(functions, 0x484D2, "DAT_00030e52")
-    require_tokens(functions, 0x4DB70, "DAT_febe6af0 == -0x5aa5a55b", "DAT_febe66a8", "* 1000) / 0x100", "&LAB_000061a8")
+    require_tokens(functions, 0x4DB70, "DAT_febe6af0 == -0x5aa5a55b", "DAT_febe66a8", "* 1000) / 0x100")
     need(u16(image, 0x2938C) == 0x1035 and u32(image, 0x29390) == 0x4DB70, "DID1035 row drift")
     need(u16(image, 0x30E52) == 2109, "normalized F33 torque acquisition saturation drift")
     need(tech_name(tech, "0x1035") == "Steering Wheel Torque", "DID1035 Techstream name drift")

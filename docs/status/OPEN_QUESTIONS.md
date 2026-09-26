@@ -36,11 +36,11 @@ ledger context is useful.
   store-through-pointer path is recovered. The known d/q references
   `FEBE6D28/6D2A` and TSG3 compare state `FEBE38A2/38A4/38A6` are DAQ-readable,
   so a reachable channel would provide a non-invasive observer for the dynamic
-  actuation discriminator. The separate shadow write window remains RW and
-  direct-consumer-negative. Its Ghidra `execute=false` attribute is analysis
-  metadata; the hardware MPU grants supervisor execute on that region
-  (CORR-060), so the open question is a runtime-computed control-transfer
-  consumer, not executability. What is still unobserved is whether a vehicle
+  actuation discriminator. The separate shadow write window remains RWX and
+  direct-consumer-negative. The corrected Ghidra device profile and hardware
+  MPU both grant supervisor execute on that region (CORR-060), so the open
+  question is a runtime-computed control-transfer consumer, not executability.
+  What is still unobserved is whether a vehicle
   gateway or diagnostic connector forwards CAN `0x7F7/0x7F8`.
   `exploit/followups/xcp_read_probe.py` remains read-only for isolated-bench
   reachability confirmation. `exploit/followups/xcp_daq_probe.py` now adds the

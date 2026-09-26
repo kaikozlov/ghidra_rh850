@@ -1,6 +1,6 @@
 //@author kaikozlov
 //@category Verification
-// Assert every ldsr/stsr operand is a named system register (no blank/"_").
+// Assert every G3M ldsr/stsr operand names an exact R01US0123EJ0140 system register.
 import ghidra.app.script.GhidraScript;
 import ghidra.program.model.listing.*;
 import java.util.ArrayList;
@@ -11,22 +11,22 @@ public class AssertSystemRegisterNames extends GhidraScript {
     private static final Set<String> EXPECTED = Set.of(
         "PSW", "EIPC", "EIPSW", "FEPC", "FEPSW", "CTPC", "CTPSW",
         "EIIC", "FEIC", "EIWR", "FEWR", "CTBP", "BSEL",
-        "EBASE", "INTBP", "MCTL", "SCCFG", "SCBP", "SPID", "FPIPR",
-        "MEA", "MEI", "ASID", "IMSR", "INTCFG",
-        "ICTAGL", "ICTAGH", "ICDATL", "ICDATH", "ICCTRL", "ICERR",
-        "MPM", "MPRC", "MCA", "MCS", "MCR",
+        "EBASE", "INTBP", "MCTL", "SCCFG", "SCBP", "MCFG0", "PID", "FPIPR",
+        "HTCFG0", "MEA", "MEI", "ASID", "ISPR", "PMR", "ICSR", "INTCFG",
+        "ICTAGL", "ICTAGH", "ICDATL", "ICDATH", "ICCTRL", "ICCFG", "ICERR",
+        "MPM", "MPRC", "MPBRGN", "MPTRGN", "MCA", "MCS", "MCC", "MCR",
         "MPAT0", "MPAT1", "MPAT2", "MPAT3", "MPAT4", "MPAT5", "MPAT6", "MPAT7",
         "MPAT8", "MPAT9", "MPAT10", "MPAT11", "MPAT12", "MPAT13", "MPAT14", "MPAT15",
         "MPLA0", "MPLA1", "MPLA2", "MPLA3", "MPLA4", "MPLA5", "MPLA6", "MPLA7",
         "MPLA8", "MPLA9", "MPLA10", "MPLA11", "MPLA12", "MPLA13", "MPLA14", "MPLA15",
         "MPUA0", "MPUA1", "MPUA2", "MPUA3", "MPUA4", "MPUA5", "MPUA6", "MPUA7",
         "MPUA8", "MPUA9", "MPUA10", "MPUA11", "MPUA12", "MPUA13", "MPUA14", "MPUA15",
-        "RDBCR", "FPSR", "FPEC", "FPEPC"
+        "CDBCR", "FPSR", "FPEC", "FPEPC"
     );
 
     @Override
     public void run() throws Exception {
-        String[] pats = {"ldsr", "stsr", "ldtc", "sttc", "ldvc", "stvc"};
+        String[] pats = {"ldsr", "stsr"};
         int total = 0;
         int bad = 0;
         InstructionIterator it = currentProgram.getListing().getInstructions(true);

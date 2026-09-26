@@ -59,9 +59,11 @@ source "$ROOT/tools/lib/ghidra_env.sh" full
 DAEMON_RE="AnalyzeHeadless.*${PROJECT_DIR}.*${PROJECT_NAME}"
 if pgrep -f "$DAEMON_RE" >/dev/null 2>&1; then echo "target AnalyzeHeadless already running for $PROJECT_DIR/$PROJECT_NAME" >&2; exit 1; fi
 runh(){ local stage=$1; shift; "$ROOT/tools/project/run_headless" --project-dir "$PROJECT_DIR" --project "$PROJECT_NAME" --label "$TARGET-$stage" --log "$BUILD_LOGS/targets/$TARGET/$stage.log" --quiet -- "$@"; }
-echo "[$TARGET 1/4] import registered CodeFlash/DataFlash and target-native device profile"
+echo "[$TARGET 1/4] import registered images, common P1M-E map, and target context"
 runh import -import "$CODEFLASH" -processor "$PROCESSOR" -noanalysis \
   -postScript AddDataFlash.java "$DATAFLASH" \
+  -postScript ApplyP1MDeviceProfile.java "$ROOT/data/p1m_sfr_labels.csv" \
+  -postScript ApplyP1MSfrTypes.java \
   -postScript "$DEVICE_PROFILE_SCRIPT" \
   -commit "Import registered target images and target-native context"
 echo "[$TARGET 2/4] seed registered application roots and run base analysis"

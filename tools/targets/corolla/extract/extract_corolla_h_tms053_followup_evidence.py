@@ -11,6 +11,7 @@ from tools.targets.corolla.support.corolla_h_constants import CODEFLASH as H_COD
 REPO = Path(__file__).resolve().parents[4]
 IMAGE = H_CODEFLASH
 OUT = REPO / "data/generated/corolla_8965H1202000_tms053_followup_decompiler_evidence.json"
+CORPUS = REPO / "data/generated/corolla-8965H1202000/decompilations.jsonl"
 ENTRIES = [
     # TAUJ0 foreground timing / H LocalRAM initialization
     0x5262C, 0x5F660, 0x5F812, 0x6149A, 0xB8EE4,
@@ -31,7 +32,7 @@ def sha(data: bytes) -> str:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--image", type=Path, default=IMAGE)
-    ap.add_argument("--corpus", type=Path, required=True)
+    ap.add_argument("--corpus", type=Path, default=CORPUS)
     ap.add_argument("--out", type=Path, default=OUT)
     args = ap.parse_args()
     image = args.image.read_bytes()

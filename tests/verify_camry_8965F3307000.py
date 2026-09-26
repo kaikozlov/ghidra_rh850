@@ -448,12 +448,12 @@ def section_lateral_static() -> int:
     check("R7F701381 exact 1MiB product pinned", product["products"]["R7F701381"]["codeflash_bytes"] == 0x100000 and product["products"]["R7F701381"]["regulator"] == "DPS")
     check("TAUJ official 80MHz P-Bus source pinned", product["timer"]["p_bus_hz"] == 80_000_000 and any("TAUJ" in x and "80 MHz" in x for x in product["sources"]["datasheet"]["references"]))
     check("target timer entries exact", t["loop"] == "0x00066062" and t["timer_init"] == "0x0006639C" and t["timer_reload"] == "0x00066512")
-    check("target timer config no prescale", t["tps"] == t["brs"] == t["cmor_ch3"] == 0 and "Ramffe50090 = 0;" in funcs[0x6639C]["decompiled_c"] and "Ramffe50080 = 0;" in funcs[0x6639C]["decompiled_c"])
+    check("target timer config no prescale", t["tps"] == t["brs"] == t["cmor_ch3"] == 0 and "TAUJ0TPS = 0;" in funcs[0x6639C]["decompiled_c"] and "TAUJ0BRS._0_1_ = 0;" in funcs[0x6639C]["decompiled_c"])
     terms = [int.from_bytes(img[0x30DF0 + 4*i:0x30DF4 + 4*i], "little") for i in range(8)]
     check("target timer raw terms exact", terms == [16000, 800, 32000, 9200, 80000, 9600, 400000, 10000])
     check("first interval 410000 / 5.125ms", t["initial_counts"] == 410000 and t["initial_period_ms"] == 5.125)
     check("steady interval 400000 / 5ms", t["steady_counts"] == 400000 and t["steady_period_ms"] == 5.0)
-    check("foreground polls/clears channel3 flag", t["tick_flag"] == "FFFFB111 bit4" and "(bVar1 & 0x10) == 0" in funcs[0x66062]["decompiled_c"] and "DAT_ffffb110._1_1_ = bVar1 & 0xef;" in funcs[0x66062]["decompiled_c"])
+    check("foreground polls/clears channel3 flag", t["tick_flag"] == "FFFFB111 bit4" and "(bVar1 & 0x10) == 0" in funcs[0x66062]["decompiled_c"] and "EIC136._1_1_ = bVar1 & 0xef;" in funcs[0x66062]["decompiled_c"])
     check("B6 deadline seven ticks / 35ms", t["b6_successful_receive_reload_ticks"] == codeflash["b6_com"]["deadline_descriptor"]["successful_receive_reload_ticks"] == 7 and t["b6_nominal_steady_timeout_ms"] == 35.0)
 
     print("\n== mode2 command envelope / sequence ==")
@@ -493,7 +493,7 @@ def section_lateral_static() -> int:
     print("\n== driver torque / Q-current boundaries ==")
     d = art["driver_torque"]
     check("DID1035 exact Toyota identity/source", d["did"] == "0x1035" and d["techstream_name"] == "Steering Wheel Torque" and d["callback"] == "0x0004DB70" and d["raw_source"] == "gp-0x5158")
-    check("DID1035 physical formula and display clamp", d["physical_formula"] == "N.m = raw / 256" and d["diagnostic_display_clamp_nm"] == 25.0 and "* 1000) / 0x100" in funcs[0x4DB70]["decompiled_c"] and "&LAB_000061a8" in funcs[0x4DB70]["decompiled_c"])
+    check("DID1035 physical formula and display clamp", d["physical_formula"] == "N.m = raw / 256" and d["diagnostic_display_clamp_nm"] == 25.0 and "* 1000) / 0x100" in funcs[0x4DB70]["decompiled_c"])
     check("DID1035 validity magic exact", d["validity_magic"] == "0xA5AA5AA5" and "-0x5aa5a55b" in funcs[0x4DB70]["decompiled_c"])
     check("correct normalized torque acquisition clamp is 2109", d["sensor_acquisition_saturation_raw"] == int.from_bytes(img[0x30E52:0x30E54], "little") == 2109 and d["sensor_acquisition_saturation_calibration"] == "normalized CodeFlash 0x00030E52")
     check("2109 raw is about 8.238Nm representation limit", abs(d["sensor_acquisition_saturation_nm"] - 8.23828125) < 1e-12 and d["override_threshold_recovered"] is False and "not a driver-override threshold" in d["boundary"])

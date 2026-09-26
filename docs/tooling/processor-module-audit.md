@@ -48,40 +48,47 @@ make work-project
 make verify-processor
 ```
 
-## System-register coverage (ldsr / stsr)
+## System-register coverage (`ldsr` / `stsr`)
 
-Script: `ghidra/scripts/investigate/FindSystemRegisterOps.java`
-(asserting companion: `ghidra/scripts/verify/AssertSystemRegisterNames.java`).
+Primary ISA source: *RH850G3M User's Manual: Software*,
+R01US0123EJ0140, chapter 3. Script:
+`ghidra/scripts/investigate/FindSystemRegisterOps.java`; asserting companion:
+`ghidra/scripts/verify/AssertSystemRegisterNames.java`.
 
-Every system-register transfer in the firmware decodes with a correct register
-name; there is nothing to add to the `selID` tables in `v850e3.sinc`. Across the
-whole CodeFlash the firmware uses **324** such instructions (**242 `ldsr`** +
-**82 `stsr`**) and **zero** `ldtc`/`sttc`/`ldvc`/`stvc` (the thread-/virtual-
-context transfers are absent, consistent with the P1M-E having no hypervisor or
-virtualization extension). No operand decodes to a blank or raw token.
+The former `v850e3.sinc` table mixed G3M with later G4 register names and
+instructions. It mislabeled three register IDs exercised by this firmware:
+`PID` as `SPID`, `PMR` as `IMSR`, and `CDBCR` as `RDBCR`. In particular,
+selection ID 2, register 11 is **PMR** on G3M; the previous claim that `IMSR`
+was correct for P1M-E was false. Persisted decompiler output made with that
+table must be regenerated rather than treated as evidence.
 
-The distinct registers referenced, all named correctly:
+The implemented G3M selection-ID table is now:
 
 - **selID 0** (common, `v850_common.sinc`): `PSW`, `EIPC`, `EIPSW`, `FEPC`,
-  `FEPSW`, `CTPC`, `CTPSW`, `EIIC`, `FEIC`, `EIWR`, `FEWR`, `CTBP`, `BSEL`.
-- **selID 1**: `EBASE`, `INTBP`, `MCTL`, `SCCFG`, `SCBP`, `SPID`, `FPIPR`.
-- **selID 2**: `MEA`, `MEI`, `ASID`, `IMSR`, `INTCFG`.
-- **selID 4** (cache): `ICTAGL`, `ICTAGH`, `ICDATL`, `ICDATH`, `ICCTRL`, `ICERR`.
-- **selID 5/6/7** (MPU): `MPM`, `MPRC`, `MCA`, `MCS`, `MCR`, `MPAT0–15`,
-  `MPLA0–15`, `MPUA0–15`.
-- **selID 13**: `RDBCR`.
-- FPU: `FPSR`, `FPEC`, `FPEPC`.
+  `FEPSW`, `CTPC`, `CTPSW`, `EIIC`, `FEIC`, `EIWR`, `FEWR`, `CTBP`, `BSEL`,
+  plus the FPU registers.
+- **selID 1**: `MCFG0`, `RBASE`, `EBASE`, `INTBP`, `MCTL`, `PID`, `FPIPR`,
+  `SCCFG`, `SCBP`.
+- **selID 2**: `HTCFG0`, `MEA`, `ASID`, `MEI`, `ISPR`, `PMR`, `ICSR`,
+  `INTCFG`.
+- **selID 4**: instruction-cache registers `ICTAGL/H`, `ICDATL/H`, `ICCTRL`,
+  `ICCFG`, `ICERR`.
+- **selID 5**: `MPM`, `MPRC`, `MPBRGN`, `MPTRGN`, `MCA`, `MCS`, `MCC`,
+  `MCR`.
+- **selID 6/7**: `MPLA0–15`, `MPUA0–15`, `MPAT0–15`.
+- **selID 13**: `CDBCR`.
 
-Two points worth recording:
+Reserved register-number slots remain unnamed. G4 guest, virtualization,
+thread-context, TLB, and hypervisor instructions were removed from the G3M
+language rather than left as plausible decodes. The synthetic processor
+fixture includes `MCFG0`, `PMR`, `MCC`, and `CDBCR` transfers and asserts the
+decoded operand register, so a future name/selection regression fails before
+project analysis.
 
-- `IMSR` (the subject of upstream issue #40, "decoded where it should be PMR")
-  is **correct** for the P1M-E. The firmware uses it for the standard
-  interrupt-mask critical section (`stsr IMSR,rN` / `ldsr rN,IMSR` around
-  protected regions). Issue #40 concerns a newer multicore ICU, not this core.
-- `EIC136`/`EIC292`/`EIC293` are **memory-mapped** peripheral registers at
-  `0xFFFFB110` / `0xFFFFB248` / `0xFFFFB24A`, accessed via `ld.w`/`st.w`, not
-  `ldsr`/`stsr`. They are therefore out of scope for the `selID` tables and are
-  named through the device profile / project labels, not the processor module.
+`EIC136`/`EIC292`/`EIC293` remain memory-mapped peripheral registers at
+`0xFFFFB110` / `0xFFFFB248` / `0xFFFFB24A`, accessed via `ld.w`/`st.w`, not
+`ldsr`/`stsr`. They belong to the device profile and are not system-register
+table entries.
 
 ## Instruction-decode coverage
 
@@ -337,18 +344,21 @@ byte-for-byte with the committed baseline instead of mutating tracked evidence.
 
 ### Ghidra 12.1.4 migration
 
-The repository is pinned to Ghidra **12.1.4**. Two independent clean 12.1.4
-rebuilds of every registered target produce byte-identical normalized
-inventories. Relative to the 12.1.3 baselines, only the inventory metadata
-version changes; the compiled `v850e3.sla` hash, all semantic project records,
-and all persisted decompiler function records are unchanged. See
+The repository is pinned to Ghidra **12.1.4**. The 12.1.3→12.1.4 migration
+itself changed only inventory-version metadata; the compiled language and
+semantic project rows were unchanged at that milestone. This later P1M-E
+hardware-spec correction intentionally changes the processor language and
+persisted semantics. The current source fingerprint is
+`3d4137d656b4ca310f32b286fdb51fbdd3cf2d104b983768d2b032099868bf05`;
+two independent clean rebuilds of every registered target now agree under that
+fingerprint, and all five snapshots/corpora were regenerated. See
 [the migration journal](../history/2026-09/GHIDRA_12_1_4_MIGRATION_2026-09-21.md)
-for the reproducibility and FindCrypt compatibility evidence.
+for the earlier version-migration evidence.
 
 ## Exact project parity
 
 The current normalized project inventory has **6,376 functions, 183,240
-instructions, and 7,953 symbols**. Aggregate floors remain useful as a fast collapse
+instructions, and 8,042 symbols**. Aggregate floors remain useful as a fast collapse
 detector, but they cannot detect equal-count substitutions. The deterministic
 `ExportProjectInventory.java` exporter therefore records path-free Ghidra and
 program identity, every memory mapping, function entry/body/signature/parameter

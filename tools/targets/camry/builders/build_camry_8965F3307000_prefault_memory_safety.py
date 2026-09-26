@@ -328,7 +328,7 @@ def build() -> dict:
             "state_flag_range": "0xFEBE4909..0xFEBE490D",
             "classification": "route-manager computed destinations are configuration-indexed 0..4",
         },
-        "software_queue":{"base":f"0x{queue_base:08X}","end_inclusive":f"0x{queue_end:08X}","capacity_words":queue_capacity_words,"capacity_bytes":queue_capacity_words*4,"fd_record_words_for_len64":19,"critical_section":"0x7A2DA -> 0x98B8A -> 0x6A45E installs IMSR 0xFF00; 0x7A2E8 -> 0x6A4C4 restores","classification":"bounded 16-bit word-index ring; no wrap/next-record overwrite recovered"},
+        "software_queue":{"base":f"0x{queue_base:08X}","end_inclusive":f"0x{queue_end:08X}","capacity_words":queue_capacity_words,"capacity_bytes":queue_capacity_words*4,"fd_record_words_for_len64":19,"critical_section":"0x7A2DA -> 0x98B8A -> 0x6A45E installs PMR 0xFF00; 0x7A2E8 -> 0x6A4C4 restores","classification":"bounded 16-bit word-index ring; no wrap/next-record overwrite recovered"},
         "dcm_copy":{"buffers":[{"channel":x["channel"],"route":x["route"],"capacity":f"0x{x['capacity']:X}","start":f"0x{x['start']:08X}","end_exclusive":f"0x{x['end_exclusive']:08X}"} for x in dcm],"classification":"0x92152 requires chunk_len <= remaining before 0x93DE8 advances fixed configured destination pointer"},
         "computed_store_audit": {
             "call_cone": cone["summary"],

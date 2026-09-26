@@ -17,7 +17,8 @@ stock boot
 ```
 
 The important result is now stronger than "RAM execution exists." Bootloader
-RAM execution, a reset-cleared application-RWX retention pocket, and a complete
+RAM execution, an application-RWX retention pocket that the stock reset/startup
+path reinitializes, and a complete
 **callback-free foreground scheduler shell** are recovered. The payload does not
 need stock application code to rediscover a RAM function pointer after startup:
 it performs the stock transition/initialization sequence itself, then remains
@@ -34,11 +35,13 @@ Evidence labels below follow `AGENTS.md`: **verified**, **recovered**,
 
 1. **Verified:** normal reset startup clears `FEBE7000..FEBE7FFC`, then the
    effective clear loop at `0x143C` clears `FEBE8000..FEBFFFFC`. Therefore the
-   authenticated payload window at `FEBF0000..FEBF0FFF` is reset-cleared.
+   authenticated payload window at `FEBF0000..FEBF0FFF` is cleared by this
+   recovered firmware path. This is not a claim that P1M-E hardware initializes
+   it for every reset class.
 2. **Verified:** `boot_application_handoff @ 0x13B0` does not itself perform
    those broad clears. The normal wrapper clears RAM first and then calls
    `0x13B0`. A boot-context payload that directly invokes `0x13B0` can therefore
-   skip that reset-clear stage.
+   skip that startup-clear stage.
 3. **Verified / generated-artifact bounded:** the application corpus has no
    recovered direct reference into `FEBF0000..FEBF0307`; its first recovered
    direct reference inside the authenticated-download page is `FEBF0308`.
@@ -110,7 +113,7 @@ pinned public encrypted 4 KiB payload fixture
             application_com_rx_indication(PDU, saved secured frame)
        -> run stock COM unpack/system-mode/control path
        -> continue remaining stock foreground tasks
-  -> hardware/watchdog/power reset clears RAM and returns to stock
+  -> stock reset/startup reinitialization removes the RAM runtime and returns to stock
 ```
 
 The former `???` is resolved without finding a persistent callback: **the RAM
@@ -792,7 +795,7 @@ that bench proof exists.
 | preseed `FEBF1194` ICU-S callback | disproved across startup | crypto/ICU-S startup zeros it |
 | preseed `FEBE5600` parser callback | disproved across startup | startup reset chain reaches `FUN_8F688` zeroing it |
 | place trampoline in XCP window before app init | disproved as retention plan | app startup copies CodeFlash into `FEBF7C00..` |
-| ordinary hardware reset after installing upper-RAM trampoline | disproved as retention plan | reset clears upper LocalRAM |
+| ordinary reset/startup after installing upper-RAM trampoline | disproved as retention plan | the recovered stock reset/startup path clears upper LocalRAM; hardware reset initialization itself is reset-source- and `STAC_LM0`-dependent |
 | pure CAN proxy / EPS impersonation | disproved as SecOC solution | real EPS still verifies inbound protected steering frames |
 | OEM driver has arbitrary SRAM write/call | bounded / unknown | matching OEM payload absent from local artifacts |
 | retained `FEBF0000..0307` pocket has no computed/DMA owner | bounded | direct-ref negative only; needs dynamic canary proof |
@@ -1011,7 +1014,10 @@ not this steering bridge.
 
 The installer triggers the existing `FF00` callback path. The RAM code performs
 the stock application transition directly while preserving the retained runtime
-region. A normal hardware reset would clear this RAM and remove the bridge.
+region. The recovered normal reset/startup path reinitializes this RAM and
+removes the bridge; the P1M-E hardware does not promise blanket LocalRAM
+clearing for every reset source because initialization is controlled by
+`STAC_LM0`.
 
 The resident scheduler then reproduces the normal application foreground work
 while wrapping the SecOC/COM receive boundary. It does **not** replace Toyota's
@@ -1117,11 +1123,14 @@ For this image, the stock delivery API is
 receive-authentication decision and then returns to Toyota's normal application
 pipeline.
 
-### 19.14 Reset and power loss return the EPS to stock
+### 19.14 The normal reset/startup lifecycle returns the EPS to stock
 
-A hardware reset, watchdog reset, or power cycle clears the retained LocalRAM
-runtime and returns the EPS to its normal boot/application path. The next drive
-must reinstall and re-attest the bridge before marked commands are allowed.
+The recovered stock reset/startup path reinitializes the retained LocalRAM
+runtime and returns the EPS to its normal boot/application path. Power loss also
+removes volatile RAM state. Do not generalize that firmware-specific lifecycle
+into a hardware claim that every reset source clears every LocalRAM view:
+P1M-E reset initialization is reset-class- and `STAC_LM0`-dependent. The next
+drive must reinstall and re-attest the bridge before marked commands are allowed.
 
 That produces the intended fail-silent lifecycle:
 
