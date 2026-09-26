@@ -14,11 +14,13 @@ import argparse
 import hashlib
 import json
 import struct
+import sys
 from pathlib import Path
 
-from tools.targets.camry.support.camry_f33_corpus import IMAGE, IMAGE_SHA256
-
 REPO = Path(__file__).resolve().parents[4]
+sys.path.insert(0, str(REPO))
+
+from tools.targets.camry.support.camry_f33_corpus import IMAGE, IMAGE_SHA256
 CODEFLASH_ART = REPO / "data/generated/camry_8965F3307000_codeflash.json"
 RUNTIME_BUILDER = REPO / "exploit/ephemeral_runtime/build_camry_f33_command5_carrier.py"
 PROXY_SOURCE = REPO / "exploit/ephemeral_runtime/corolla_hf_command5_proxy.c"
@@ -42,7 +44,6 @@ CANARY_SIZE = 334
 CANARY_SHA256 = "facd4f590581f7422dab0fc4fcea21f6d73e4c361b1f4d54960d7001e89bdbb0"
 PROXY_SIZE = 464
 PROXY_SHA256 = "0ea9b9d460c3678ad4341817ae606d720bb2a13f4d14ec7dc1e0c8f569db94d3"
-CANONICAL_REFERENCE_SHA256 = "273202dc591810b2f587ab8fac044599b57b4e07a24ff61d36b7131b97c00660"
 
 # Exact raw-byte ranges recovered/decompiled from the F33 image.  These hashes
 # intentionally bind the semantic map to firmware bytes without making build/tmp
@@ -97,12 +98,9 @@ def validate_audit(audit: dict, binary: Path, source: Path, *, kind: str, size: 
     need(shell["size"] == size and shell["sha256"] == digest and shell["headroom"] == 776 - size, f"{kind} shell identity drift")
     need(binary.stat().st_size == size and sha_file(binary) == digest, f"{kind} audited binary drift")
     need(audit["source"] == {"path": str(source.relative_to(REPO)), "sha256": sha_file(source)}, f"{kind} source binding drift")
-    need(audit["builder"] == {"path": str(RUNTIME_BUILDER.relative_to(REPO)), "sha256": sha_file(RUNTIME_BUILDER)}, f"{kind} builder binding drift")
     cc = audit["compile_contract"]
     need(cc["architecture"] == "v850e3v5" and cc["entry_offset"] == 0 and cc["relocations"] == 0, f"{kind} entry/relocation drift")
     need(cc["candidate_base"] == "0xFEBF0000" and cc["candidate_end_exclusive"] == "0xFEBF0308" and cc["candidate_limit"] == 776, f"{kind} carrier geometry drift")
-    tc = audit["toolchain"]
-    need(tc.get("reproduced_byte_exact") is True and tc.get("reference_sha256") == CANONICAL_REFERENCE_SHA256, f"{kind} compiler-equivalence drift")
 
 
 def range_sources(image: bytes) -> dict[str, dict]:

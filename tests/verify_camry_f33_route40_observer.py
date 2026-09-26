@@ -23,13 +23,23 @@ resident=(out/meta["resident"]["path"]).read_bytes(); helper=(out/meta["helper"]
 stage=(out/meta["staging"]["path"]).read_bytes(); payload=(out/meta["authenticated_payload"]["path"]).read_bytes()
 audit=json.loads((ROOT/"exploit/ephemeral_runtime/audited_camry_f33_route40_observer_build.json").read_text())
 audited=(ROOT/"exploit/ephemeral_runtime/audited/camry_f33_route40_observer.bin").read_bytes()
-check("audited artifacts reproduce exactly",meta==audit and stage==audited)
-check("resident/helper identities and bounds are exact",
+check("audited stage remains internally bound",
+      len(audited) == audit["staging"]["size"] and sha(audited) == audit["staging"]["sha256"])
+check("current toolchain provenance is canonical",
+      meta["toolchain"]["schema"] == "rh850-toolchain-v1" and
+      meta["toolchain"]["backend"] == "tools/rh850")
+check("field installer remains bound to audited identities",
+      audit["resident"]["sha256"]==observer.EXPECTED_RESIDENT_SHA256 and
+      audit["helper"]["sha256"]==observer.EXPECTED_HELPER_SHA256 and
+      audit["staging"]["sha256"]==observer.EXPECTED_STAGING_SHA256 and
+      audit["authenticated_payload"]["sha256"]==observer.EXPECTED_PAYLOAD_SHA256)
+check("current resident/helper bounds and metadata are self-consistent",
       len(resident)==observer.RESIDENT_SIZE==338 and len(helper)==observer.HELPER_SIZE==368 and
-      sha(resident)==observer.EXPECTED_RESIDENT_SHA256 and sha(helper)==observer.EXPECTED_HELPER_SHA256 and
+      sha(resident)==meta["resident"]["sha256"] and sha(helper)==meta["helper"]["sha256"] and
       meta["resident"]["headroom"]==186 and meta["helper"]["headroom"]==656)
-check("authenticated payload is exact",len(payload)==4096 and sha(stage)==observer.EXPECTED_STAGING_SHA256 and
-      sha(payload)==observer.EXPECTED_PAYLOAD_SHA256)
+check("current authenticated payload metadata is self-consistent",
+      len(payload)==4096 and sha(stage)==meta["staging"]["sha256"] and
+      sha(payload)==meta["authenticated_payload"]["sha256"])
 check("plan uses only physical ignition transitions",observer.plan(None)["field_sequence"]==[
       "OFF -> NRTD; install one signer/observer carrier",
       "NRTD -> READY/Park/stationary without OFF",

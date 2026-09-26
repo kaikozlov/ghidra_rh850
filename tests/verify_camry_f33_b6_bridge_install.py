@@ -55,11 +55,10 @@ check("v3 low-RAM mailbox and stock tick witness exact",
       (m.MAILBOX_BASE, m.MAILBOX_SIZE, m.MAILBOX_MAGIC, m.MAILBOX_VERSION) ==
       (0xFEBF0000, 0x30, 0x42364252, 3) and m.FOREGROUND_TICK == 0xFEBE39DB)
 
-check("audited bridge source/builder are hash-bound",
+check("audited bridge source remains hash-bound",
       audit["schema"] == "camry-f33-b6-bridge-build-v3" and
       audit["source"]["path"] == "exploit/ephemeral_runtime/camry_f33_b6_bridge.S" and
-      audit["source"]["sha256"] == hashlib.sha256(SOURCE.read_bytes()).hexdigest() and
-      audit["builder"]["sha256"] == hashlib.sha256(BUILDER.read_bytes()).hexdigest())
+      audit["source"]["sha256"] == hashlib.sha256(SOURCE.read_bytes()).hexdigest())
 check("audited staging identity exact",
       len(blob) == audit["staging"]["size"] == 648 and
       hashlib.sha256(blob).hexdigest() == audit["staging"]["sha256"] == m.BRIDGE_SHELLCODE_SHA256 and

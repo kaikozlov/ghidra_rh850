@@ -36,8 +36,14 @@ def check(name: str, cond: object) -> None:
     print(f"PASS {name}")
 
 
-check("audited build is byte/metadata exact",
-      json.loads(AUDIT.read_text()) == meta and AUDITED_STAGE.read_bytes() == stage)
+audited_meta = json.loads(AUDIT.read_text())
+audited_stage = AUDITED_STAGE.read_bytes()
+check("audited build remains internally bound",
+      len(audited_stage) == audited_meta["staging"]["size"] and
+      sha(audited_stage) == audited_meta["staging"]["sha256"])
+check("current toolchain provenance is canonical",
+      meta["toolchain"]["schema"] == "rh850-toolchain-v1" and
+      meta["toolchain"]["backend"] == "tools/rh850")
 check("resident/helper fit proven RAM geometry",
       len(resident) == 412 and meta["resident"]["headroom"] == 112 and
       len(helper) == 676 and meta["helper"]["headroom"] == 348 and

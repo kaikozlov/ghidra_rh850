@@ -1,10 +1,9 @@
 # RH850 build and execution testing
 
-The repository's target-native payloads use the GNU `v850-elf` toolchain
-validated against the known-working public Toyota payload lineage. The useful
-detail for local testing is that the same binutils/GDB build already contains
-GNU's V850/RH850 instruction simulator: `v850-elf-gdb` exposes `target sim` and
-advertises `v850e3v5`, the architecture selected by our payload builders.
+`tools/rh850` supports one pinned GNU `v850-elf` toolchain: GCC 16.2.0,
+binutils 2.46.1, and GDB 18.1 with the repository-local simulator fix.
+Builds and instruction simulation use the same image and `v850e3v5`
+architecture. There is no GCC 13 compatibility path or compiler-profile selection.
 
 Use the repository wrapper rather than assembling ad-hoc Docker commands:
 
@@ -13,11 +12,12 @@ tools/rh850 doctor
 tools/rh850 selftest
 ```
 
-`selftest` compiles a freestanding `-mv850e3v5 -mno-app-regs` program, links it
-at the real payload VMA `0xFEBF0000`, maps that RAM range in the simulator,
-executes it, and checks a deterministic result in simulated RAM. This exercises
-the compiler, linker, ELF loader, RH850 instruction decoder, and basic
-register/memory execution together.
+`selftest` compiles a freestanding C function and assembly harness with
+`-mv850e3v5 -mno-app-regs`, links them starting at `0xFEBF0000`, maps RAM in
+the simulator, executes far branches and the C function, and checks a
+deterministic result in simulated RAM. The C function computes from a volatile
+local rather than a folded constant. This exercises C compilation, linking,
+ELF loading, far control flow, and basic register/stack/memory execution together.
 
 For a retained ELF, add the address ranges the program can touch and then give
 ordinary GDB commands:
@@ -55,29 +55,36 @@ P1M-E peripherals or for unmodeled stock/MMIO behavior.
 
 ## Rebuilding the GNU setup
 
-The historical local image `v850-gcc-scratch` came from the public
-Bk2ol/I-CAN-hack recipe. Keep that tag intact because older audited artifacts
-record its image identity. `tools/rh850 build-image` instead builds the
-repository-owned `ghidra-rh850-v850-gcc:13.2.0-binutils2.41-simfix1` image by default.
-The rebuild recipe lives at `tools/toolchains/v850-gcc/Dockerfile` and pins:
+`tools/toolchains/v850-gcc/Dockerfile` owns the Ubuntu digest and GCC,
+binutils, and GDB source revisions. Each cloned release is checked against its
+pinned commit. `tools/rh850` owns the single image tag used by every command.
 
-- Ubuntu 22.04 by OCI digest;
-- binutils/GDB `binutils-2_41-release` commit
-  `675b9d612cc59446e84e2c6d89b45500cb603a8d`;
-- GCC `releases/gcc-13.2.0` commit
-  `c891d8dc23e1a46ad9f3e757d09e57b500d40044`;
-- the repository-local V850 `imm32` simulator correction above.
-
-Build or inspect it with:
+Build and verify it with:
 
 ```bash
 tools/rh850 build-image
 tools/rh850 doctor
+tools/rh850 selftest
 ```
+
+`tools/rh850 image` prints the canonical tag without requiring Docker.
+Generic callers should use the wrapper rather than copying version strings
+into argument defaults. `--toolchain`, `--image`, and `build-compat-image` are
+not supported; `RH850_TOOLCHAIN_IMAGE` no longer changes image selection.
+
+Historical compiler outputs and audit records remain immutable evidence, not
+a reason to retain a second supported compiler. Current ECU payload builders
+all enter the pinned toolchain through `tools/rh850`; builder CLIs do not accept
+an image or compiler override. A compiler upgrade can change bytes without
+changing behavior, so field-qualified historical binaries remain separate from
+newly built artifacts until the new artifacts receive their own qualification.
 
 `tools/rh850 exec ...` is the escape hatch for invoking any `v850-elf-*`
 program with the repository mounted at `/src`; for example,
-`tools/rh850 exec v850-elf-objdump -d build/out/example.elf`.
+`tools/rh850 exec v850-elf-objdump -d build/out/example.elf`. Builders use
+`tools/rh850 exec --work-dir PATH ...` when they need a scratch directory
+mounted at `/out`; `tools/rh850_toolchain.py` provides that command construction
+and canonical provenance to Python callers.
 
 ## Official Renesas options
 
@@ -95,12 +102,8 @@ Renesas also ships two useful but separate products:
 The current **CC-RH V2.08.00** compiler has a Linux x86-64 distribution in
 addition to Windows; Renesas publishes it through the
 [compiler installation guide](https://www.renesas.com/en/software-tool/compiler-installation-guide).
-It is useful as a reference/secondary compiler, but it is not a drop-in
-replacement for the repository's payload compiler: exact Toyota
-firmware already disproves CC-RH's normal `ep` preservation rule, while the
-current GCC lineage has a byte-identical reproduction of a published working
-Toyota payload. Keep GCC as the deployment compiler unless a particular test
-needs CC-RH comparison.
+CC-RH is an external reference tool, not an alternative compiler selected by
+`tools/rh850` or part of the supported GNU build path.
 
 The official CS+ simulator remains valuable as an independent implementation,
 especially for ISA edge cases and CC-RH differential tests. Renesas documents

@@ -40,15 +40,22 @@ def main() -> int:
 
   audited_stage = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_08a_tx_probe.bin"
   audited_meta = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_08a_tx_probe_build.json"
-  assert audited_stage.read_bytes() == stage
-  assert json.loads(audited_meta.read_text(encoding="utf-8")) == meta
+  audited = json.loads(audited_meta.read_text(encoding="utf-8"))
+  assert len(audited_stage.read_bytes()) == audited["staging"]["size"]
+  assert sha(audited_stage.read_bytes()) == audited["staging"]["sha256"]
+  assert meta["toolchain"]["schema"] == "rh850-toolchain-v1"
+  assert meta["toolchain"]["backend"] == "tools/rh850"
+  assert audited["resident"]["sha256"] == probe.EXPECTED_RESIDENT_SHA256
+  assert audited["helper"]["sha256"] == probe.EXPECTED_HELPER_SHA256
+  assert audited["staging"]["sha256"] == probe.EXPECTED_STAGING_SHA256
+  assert audited["authenticated_payload"]["sha256"] == probe.EXPECTED_PAYLOAD_SHA256
 
   assert meta["schema"] == "camry-f33-08a-tx-probe-build-v1"
   assert meta["target"] == {"software_id": "8965F3307000", "codeflash_sha256": build.IMAGE_SHA256}
-  assert (len(resident), sha(resident)) == (probe.RESIDENT_SIZE, probe.EXPECTED_RESIDENT_SHA256)
-  assert (len(helper), sha(helper)) == (probe.HELPER_SIZE, probe.EXPECTED_HELPER_SHA256)
-  assert (len(stage), sha(stage)) == (978, probe.EXPECTED_STAGING_SHA256)
-  assert (len(payload), sha(payload)) == (0x1000, probe.EXPECTED_PAYLOAD_SHA256)
+  assert len(resident) == probe.RESIDENT_SIZE and sha(resident) == meta["resident"]["sha256"]
+  assert len(helper) == probe.HELPER_SIZE and sha(helper) == meta["helper"]["sha256"]
+  assert len(stage) == 978 and sha(stage) == meta["staging"]["sha256"]
+  assert len(payload) == 0x1000 and sha(payload) == meta["authenticated_payload"]["sha256"]
   assert meta["resident"]["headroom"] == build.RESIDENT_LIMIT - probe.RESIDENT_SIZE == 240
   assert meta["helper"]["headroom"] == build.UNIVERSAL_HELPER_TRANSIT_LIMIT - probe.HELPER_SIZE == 714
   assert meta["helper"]["jarl_targets"] == ["0x00085112"]

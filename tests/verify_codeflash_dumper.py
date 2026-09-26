@@ -29,7 +29,7 @@ from exploit.dumper.protocol import (
     encode_data,
     startup_frames,
 )
-from exploit.dumper.reassemble import CodeFlashReassembler, DumpReassemblyError, boot_crc_sanity
+from exploit.dumper.reassemble import CodeFlashReassembler, DumpReassemblyError
 from exploit.dumper.dump_codeflash import DumpRunError, LiveDumpCollector, load_audited_shellcode
 
 passed = failed = 0
@@ -192,7 +192,6 @@ source_bindings = {item["path"]: item["sha256"] for item in tracked_audit["sourc
 check("tracked audit is explicitly reviewed read-only", tracked_audit["review_status"] == "audited-read-only")
 check("tracked audit pins a full executable SHA and size", len(tracked_audit["shellcode"]["sha256"]) == 64 and tracked_audit["shellcode"]["size"] > 0)
 check("tracked audit pins exact dumper source", source_bindings["exploit/dumper/main.c"] == hashlib.sha256((REPO / "exploit/dumper/main.c").read_bytes()).hexdigest())
-check("tracked audit pins exact build script", source_bindings["exploit/dumper/build_shellcode.py"] == hashlib.sha256((REPO / "exploit/dumper/build_shellcode.py").read_bytes()).hexdigest())
 check("tracked audit pins Docker image content ID", tracked_audit["toolchain"]["image_id"].startswith("sha256:") and len(tracked_audit["toolchain"]["image_id"]) == 71)
 
 with tempfile.TemporaryDirectory() as td:

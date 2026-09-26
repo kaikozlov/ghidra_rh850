@@ -19,9 +19,10 @@ the firmware *is*, see [OVERVIEW.md](OVERVIEW.md).
   `14c1b5be32b8ec741ee626c8bca9885c58f7a473`; see
   `ghidra/ghidra_v850/README.md` and `PROVENANCE.json`).
 - Docker for target-native RH850 payload compilation/execution testing. The
-  repository-owned GNU toolchain recipe and compiled-in V850/RH850 GDB simulator
-  are exposed through `tools/rh850`; on a clean machine run `tools/rh850 build-image`
-  once, then `tools/rh850 doctor` and `tools/rh850 selftest`. See
+  single pinned GNU toolchain and compiled-in V850/RH850 GDB simulator are
+  exposed through `tools/rh850`. On a clean machine run `tools/rh850 build-image`,
+  then `tools/rh850 doctor` and `tools/rh850 selftest`. There is no compiler-profile
+  selection or image override. See
   [RH850 build and execution testing](tooling/rh850-build-and-sim.md).
 
 There is no separate install step. `tools/project/install_v850_extension.sh` (invoked

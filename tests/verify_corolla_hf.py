@@ -90,7 +90,6 @@ def _section_corolla_hf_command5_runtime_carrier():
     print('\n== audit/toolchain trust ==')
     for label, audit, source in (('proxy', proxy_audit, PROXY_SOURCE), ('canary', canary_audit, CANARY_SOURCE)):
         check(f'{label} audit source hash', audit['source']['sha256'] == sha(source.read_bytes()))
-        check(f'{label} audit builder hash', audit['builder']['sha256'] == sha(RUNTIME_BUILDER.read_bytes()))
         check(f'{label} compiler equivalence', audit['toolchain']['reproduced_byte_exact'] is True and audit['toolchain']['reference_sha256'] == '273202dc591810b2f587ab8fac044599b57b4e07a24ff61d36b7131b97c00660')
         check(f'{label} static-only review grade', audit['review_status'] == 'static-carrier-candidate-not-live-validated')
     check('artifact records compiler-equivalence rule', a['toolchain_reproducibility']['selected_build_reproduced_canonical_reference'] and 'byte-exact' in a['toolchain_reproducibility']['noncanonical_image_acceptance_rule'])

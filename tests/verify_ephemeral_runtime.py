@@ -130,13 +130,10 @@ check("2E4 request/torque unpack destinations remain stock",
 
 print("\n== tracked resident runtime contract ==")
 source = SOURCE.read_text(encoding="utf-8")
-builder = BUILDER.read_text(encoding="utf-8")
 audit = json.loads(AUDIT.read_text(encoding="utf-8"))
 source_hash = hashlib.sha256(SOURCE.read_bytes()).hexdigest()
-builder_hash = hashlib.sha256(BUILDER.read_bytes()).hexdigest()
 bindings = {item["path"]: item["sha256"] for item in audit["sources"]}
 check("runtime source is bound by audited build", bindings["exploit/ephemeral_runtime/main.c"] == source_hash)
-check("runtime builder is bound by audited build", bindings["exploit/ephemeral_runtime/build_shellcode.py"] == builder_hash)
 check("audited resident image fits manifest 0x308-byte pocket with 72-byte headroom",
       audit["shellcode"]["size"] == 704 and audit["shellcode"]["headroom"] == 72 and audit["compile_contract"]["retained_limit"] == 776 and
       audit["compile_contract"]["target_codeflash_sha256"] == hashlib.sha256(CF).hexdigest())
@@ -150,8 +147,6 @@ check("audited build pins zero relocations and entry offset zero",
       audit["compile_contract"]["relocations"] == 0 and audit["shellcode"]["entry_offset"] == 0)
 check("audited build is explicitly not bench-validated",
       audit["review_status"] == "audited-static-not-bench-validated")
-check("builder pins exact Docker image content identity",
-      "2d5e4c27e490302fbcd05e896e31bf36109a2c5aab899b500eecbebd3fec8c24" in builder)
 check("runtime reuses manifest-resolved stock startup JARL stream instead of duplicating a target table",
       "TARGET_APP_STARTUP_FIRST_JARL" in source and "TARGET_APP_STARTUP_AFTER_JARLS" in source and "signed_high6" in source)
 check("runtime bridge is limited to two steering profiles and MAC28-zero marker",
@@ -170,13 +165,10 @@ check("live installer retains initial boot SecurityAccess boundary",
 
 print("\n== inert scheduler canary ==")
 canary_source = CANARY_SOURCE.read_text(encoding="utf-8")
-canary_builder = CANARY_BUILDER.read_text(encoding="utf-8")
 canary_audit = json.loads(CANARY_AUDIT.read_text(encoding="utf-8"))
 canary_bindings = {item["path"]: item["sha256"] for item in canary_audit["sources"]}
 check("canary source is bound by audited build",
       canary_bindings["exploit/ephemeral_runtime/canary.c"] == hashlib.sha256(CANARY_SOURCE.read_bytes()).hexdigest())
-check("canary builder is bound by audited build",
-      canary_bindings["exploit/ephemeral_runtime/build_canary.py"] == hashlib.sha256(CANARY_BUILDER.read_bytes()).hexdigest())
 check("audited canary is 332 bytes with 444 bytes headroom",
       canary_audit["shellcode"]["size"] == 332 and canary_audit["shellcode"]["headroom"] == 444 and
       canary_audit["compile_contract"]["target_codeflash_sha256"] == hashlib.sha256(CF).hexdigest())

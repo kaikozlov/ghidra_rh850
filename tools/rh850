@@ -4,18 +4,14 @@
 from __future__ import annotations
 
 import argparse
-import os
-import shlex
+import json
 import shutil
 import subprocess
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_IMAGE = os.environ.get(
-    "RH850_TOOLCHAIN_IMAGE", "ghidra-rh850-v850-gcc:13.2.0-binutils2.41-simfix1"
-)
-LEGACY_IMAGE = "v850-gcc-scratch"
+IMAGE = "ghidra-rh850-v850-gcc:16.2.0-binutils2.46.1-gdb18.1-simfix1"
 DOCKERFILE = ROOT / "tools" / "toolchains" / "v850-gcc" / "Dockerfile"
 SELFTEST_RESULT = "RH850_SELFTEST_RESULT=0x12cb5687"
 
@@ -23,6 +19,12 @@ SELFTEST_SCRIPT = r"""
 set -eu
 work="$(mktemp -d)"
 trap 'rm -rf "$work"' EXIT
+cat >"$work/selftest.c" <<'EOF'
+unsigned int selftest_compute(unsigned int x) {
+  volatile unsigned int value = x;
+  return (value + 0x5678u) ^ 0x00ff00ffu;
+}
+EOF
 cat >"$work/selftest.S" <<'EOF'
     .section .text.start
     .global _start
@@ -48,7 +50,9 @@ low_call:
     jmp [lp]
 
 low_jump:
-    mov 0x12cb5687, r10
+    mov 0xfebf8000, sp
+    mov 0x12340000, r6
+    jarl32 _selftest_compute, lp
     mov 0xfebf1000, r11
     st.w r10, 0[r11]
     .global rh850_sim_stop
@@ -73,6 +77,7 @@ SECTIONS {
   .result : { *(.result) }
   . = 0xFEC10000;
   .text.far : { *(.text.far) }
+  .text : { *(.text) *(.text.*) }
 }
 ENTRY(_start)
 EOF
@@ -80,7 +85,7 @@ v850-elf-gcc \
   -mv850e3v5 -mno-app-regs -ffreestanding -fno-builtin -Os -nostdlib \
   -Wa,-mv850e3v5,-mextension \
   -Wl,-T,"$work/selftest.ld" -Wl,--build-id=none \
-  "$work/selftest.S" -o "$work/selftest.elf"
+  "$work/selftest.S" "$work/selftest.c" -o "$work/selftest.elf"
 v850-elf-gdb -q -batch \
   -ex "file $work/selftest.elf" \
   -ex "target sim --architecture v850e3v5 --memory-region 0xFEBF0000,0x30000" \
@@ -120,27 +125,26 @@ def _run(
     )
 
 
-def _image_exists(image: str) -> bool:
-    return _run([_docker(), "image", "inspect", image], capture=True).returncode == 0
-
-
-def _require_image(image: str) -> None:
-    if not _image_exists(image):
-        legacy = (
-            f" The historical {LEGACY_IMAGE!r} image may still be selected explicitly with "
-            f"`tools/rh850 --image {LEGACY_IMAGE} ...`."
-            if image == DEFAULT_IMAGE and _image_exists(LEGACY_IMAGE)
-            else ""
-        )
+def _image_id() -> str:
+    proc = _run(
+        [_docker(), "image", "inspect", IMAGE, "--format", "{{.Id}}"],
+        capture=True,
+    )
+    if proc.returncode != 0:
         raise Rh850ToolError(
-            f"Docker image {image!r} is missing; build it with "
-            f"`tools/rh850 --image {shlex.quote(image)} build-image`." + legacy
+            f"Docker image {IMAGE!r} is missing; "
+            "build it with `tools/rh850 build-image`."
         )
+    return proc.stdout.strip()
 
 
-def _container_base(image: str, *, writable: bool) -> list[str]:
+def _require_image() -> None:
+    _image_id()
+
+
+def _container_base(*, writable: bool, work_dir: Path | None = None) -> list[str]:
     mount_mode = "rw" if writable else "ro"
-    return [
+    command = [
         _docker(),
         "run",
         "--rm",
@@ -148,11 +152,17 @@ def _container_base(image: str, *, writable: bool) -> list[str]:
         f"{ROOT}:/src:{mount_mode}",
         "-w",
         "/src",
-        image,
     ]
+    if work_dir is not None:
+        resolved = work_dir.resolve()
+        if not resolved.is_dir():
+            raise Rh850ToolError(f"work directory does not exist: {resolved}")
+        command += ["-v", f"{resolved}:/out:rw"]
+    command.append(IMAGE)
+    return command
 
 
-def cmd_build_image(args: argparse.Namespace) -> int:
+def cmd_build_image(_args: argparse.Namespace) -> int:
     if not DOCKERFILE.is_file():
         raise Rh850ToolError(f"missing toolchain recipe: {DOCKERFILE}")
     command = [
@@ -161,21 +171,31 @@ def cmd_build_image(args: argparse.Namespace) -> int:
         "--file",
         str(DOCKERFILE),
         "--tag",
-        args.image,
+        IMAGE,
         str(DOCKERFILE.parent),
     ]
     return _run(command).returncode
 
 
-def cmd_doctor(args: argparse.Namespace) -> int:
-    _require_image(args.image)
-    image_id = _run(
-        [_docker(), "image", "inspect", args.image, "--format", "{{.Id}}"],
-        capture=True,
-        check=True,
-    ).stdout.strip()
+def cmd_image(_args: argparse.Namespace) -> int:
+    print(IMAGE)
+    return 0
+
+
+def cmd_info(_args: argparse.Namespace) -> int:
+    image_id = _image_id()
+    print(json.dumps({
+        "schema": "rh850-toolchain-v1",
+        "backend": "tools/rh850",
+        "image": IMAGE,
+        "image_id": image_id,
+    }, sort_keys=True))
+    return 0
+
+def cmd_doctor(_args: argparse.Namespace) -> int:
+    image_id = _image_id()
     probe = _run(
-        _container_base(args.image, writable=False)
+        _container_base(writable=False)
         + [
             "sh",
             "-lc",
@@ -189,7 +209,7 @@ v850-elf-gdb -q -batch -ex 'target sim --architecture-info'
         ],
         capture=True,
     )
-    sys.stdout.write(f"image: {args.image}\nimage_id: {image_id}\n")
+    sys.stdout.write(f"image: {IMAGE}\nimage_id: {image_id}\n")
     sys.stdout.write(probe.stdout)
     if probe.stderr:
         sys.stderr.write(probe.stderr)
@@ -202,13 +222,17 @@ v850-elf-gdb -q -batch -ex 'target sim --architecture-info'
 
 
 def cmd_exec(args: argparse.Namespace) -> int:
-    _require_image(args.image)
+    _require_image()
     command = list(args.command)
     if command[:1] == ["--"]:
         command = command[1:]
     if not command:
         raise Rh850ToolError("exec requires a command")
-    return _run(_container_base(args.image, writable=True) + command).returncode
+    base = _container_base(
+        writable=args.work_dir is None,
+        work_dir=args.work_dir,
+    )
+    return _run(base + command).returncode
 
 
 def _container_path(path: Path) -> str:
@@ -216,12 +240,13 @@ def _container_path(path: Path) -> str:
     try:
         relative = resolved.relative_to(ROOT)
     except ValueError as exc:
-        raise Rh850ToolError(f"sim ELF must be inside the repository: {resolved}") from exc
+        message = f"sim ELF must be inside the repository: {resolved}"
+        raise Rh850ToolError(message) from exc
     return "/src/" + relative.as_posix()
 
 
 def cmd_sim(args: argparse.Namespace) -> int:
-    _require_image(args.image)
+    _require_image()
     elf = args.elf
     if not elf.is_absolute():
         elf = ROOT / elf
@@ -245,13 +270,13 @@ def cmd_sim(args: argparse.Namespace) -> int:
     ]
     for command in args.gdb_command:
         gdb_args += ["-ex", command]
-    return _run(_container_base(args.image, writable=False) + gdb_args).returncode
+    return _run(_container_base(writable=False) + gdb_args).returncode
 
 
-def cmd_selftest(args: argparse.Namespace) -> int:
-    _require_image(args.image)
+def cmd_selftest(_args: argparse.Namespace) -> int:
+    _require_image()
     proc = _run(
-        [_docker(), "run", "--rm", "-i", args.image, "sh", "-s"],
+        [_docker(), "run", "--rm", "-i", IMAGE, "sh", "-s"],
         input_text=SELFTEST_SCRIPT,
         capture=True,
     )
@@ -270,15 +295,19 @@ def cmd_selftest(args: argparse.Namespace) -> int:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
-        "--image",
-        default=DEFAULT_IMAGE,
-        help=f"Docker image (default: {DEFAULT_IMAGE})",
-    )
     sub = parser.add_subparsers(dest="command_name", required=True)
 
-    p = sub.add_parser("build-image", help="build the pinned GNU RH850 toolchain image")
+    p = sub.add_parser("build-image", help="build the pinned toolchain")
     p.set_defaults(func=cmd_build_image)
+
+    p = sub.add_parser(
+        "image",
+        help="print the pinned image tag without requiring Docker",
+    )
+    p.set_defaults(func=cmd_image)
+    p = sub.add_parser("info", help="print canonical toolchain metadata as JSON")
+    p.set_defaults(func=cmd_info)
+
 
     p = sub.add_parser(
         "doctor",
@@ -294,7 +323,15 @@ def build_parser() -> argparse.ArgumentParser:
 
     p = sub.add_parser(
         "exec",
-        help="run a v850-elf tool inside the image with the repo mounted read-write",
+        help="run a v850-elf tool inside the pinned image",
+    )
+    p.add_argument(
+        "--work-dir",
+        type=Path,
+        help=(
+            "mount a builder scratch directory at /out "
+            "and mount the repository read-only"
+        ),
     )
     p.add_argument("command", nargs=argparse.REMAINDER)
     p.set_defaults(func=cmd_exec)

@@ -6,7 +6,6 @@ import argparse
 import copy
 import hashlib
 import json
-import shutil
 import subprocess
 import sys
 import tempfile
@@ -26,6 +25,7 @@ from exploit.patcher.build_payload import (  # noqa: E402
 )
 from tools.security.build_secoc_patch_manifest import crc32  # noqa: E402
 from tools.targets.camry.builders import build_camry_f33_crypto_result_patch as stage5  # noqa: E402
+from tools.rh850_toolchain import command as rh850_command  # noqa: E402
 
 SIGNER_BUILDER = ROOT / "exploit/ephemeral_runtime/build_camry_f33_b6_persistent_signer.py"
 FIXED_BLOB_SOURCE = ROOT / "exploit/patcher/fixed_blob.c"
@@ -86,7 +86,7 @@ def _blob_assembly(expected: list[bytes], replacement: list[bytes]) -> str:
     return "\n".join(rows) + "\n"
 
 
-def compile_fixed_blob_shellcode(*, docker_image: str, expected: list[bytes], replacement: list[bytes],
+def compile_fixed_blob_shellcode(*, expected: list[bytes], replacement: list[bytes],
                                  source_fixup: int, write: bool, work: Path,
                                  stem: str) -> tuple[bytes, dict[str, Any]]:
     blob_source = work / f"{stem}-blob.S"
@@ -114,10 +114,7 @@ def compile_fixed_blob_shellcode(*, docker_image: str, expected: list[bytes], re
         *definitions, "/src/exploit/patcher/fixed_blob.c", f"/out/{blob_source.name}",
         "-o", f"/out/{elf.name}",
     ]
-    base = [
-        "docker", "run", "--rm", "-v", f"{ROOT}:/src:ro", "-v", f"{work}:/out",
-        "-w", "/src", docker_image,
-    ]
+    base = rh850_command(work)
     compiled = subprocess.run(base + compile_cmd, check=False, capture_output=True, text=True)
     if compiled.returncode != 0:
         raise ValueError(f"fixed-blob shellcode compile failed: {compiled.stderr.strip()}")
@@ -206,16 +203,13 @@ def make_stage7_manifest(stage6: bytes, stage6_fixup: int, hook: bytes,
     return manifest
 
 
-def build(out: Path, *, docker_image: str = "v850-gcc-scratch") -> dict[str, Any]:
-    if shutil.which("docker") is None:
-        raise ValueError("Docker is required")
+def build(out: Path) -> dict[str, Any]:
     out.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="camry-f33-persistent-patch-") as td:
         work = Path(td)
         signer_out = work / "signer"
         subprocess.run([
-            sys.executable, str(SIGNER_BUILDER), "--docker-image", docker_image,
-            "--output-dir", str(signer_out),
+            sys.executable, str(SIGNER_BUILDER), "--output-dir", str(signer_out),
         ], cwd=ROOT, check=True, capture_output=True, text=True)
         signer_segments = [
             (signer_out / f"camry_f33_b6_persistent_signer_{name}.bin").read_bytes()
@@ -271,7 +265,7 @@ def build(out: Path, *, docker_image: str = "v850-gcc-scratch") -> dict[str, Any
             ("stage6-restore", signer_segments, erased_segments, True, stage6_fixup),
         ):
             shellcode, shell_meta = compile_fixed_blob_shellcode(
-                docker_image=docker_image, expected=expected, replacement=replacement,
+                expected=expected, replacement=replacement,
                 source_fixup=source_fixup, write=write, work=work, stem=name,
             )
             payload = package_shellcode(shellcode, secret=TOYOTA_P1ME_PAYLOAD_BUILD_SECRET)
@@ -342,9 +336,8 @@ def build(out: Path, *, docker_image: str = "v850-gcc-scratch") -> dict[str, Any
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--out", type=Path, default=DEFAULT_OUT)
-    ap.add_argument("--docker-image", default="v850-gcc-scratch")
     args = ap.parse_args()
-    print(json.dumps(build(args.out, docker_image=args.docker_image), indent=2, sort_keys=True))
+    print(json.dumps(build(args.out), indent=2, sort_keys=True))
     return 0
 
 

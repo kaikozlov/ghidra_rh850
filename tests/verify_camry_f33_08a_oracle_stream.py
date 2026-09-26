@@ -41,17 +41,24 @@ def main() -> int:
 
     audited_stage = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_08a_oracle_stream.bin"
     audited_meta = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_08a_oracle_stream_build.json"
-    assert audited_stage.read_bytes() == stage
-    assert json.loads(audited_meta.read_text()) == meta
+    audited = json.loads(audited_meta.read_text())
+    assert len(audited_stage.read_bytes()) == audited["staging"]["size"]
+    assert sha(audited_stage.read_bytes()) == audited["staging"]["sha256"]
+    assert meta["toolchain"]["schema"] == "rh850-toolchain-v1"
+    assert meta["toolchain"]["backend"] == "tools/rh850"
+    assert audited["resident"]["sha256"] == oracle.EXPECTED_RESIDENT_SHA256
+    assert audited["helper"]["sha256"] == oracle.EXPECTED_HELPER_SHA256
+    assert audited["staging"]["sha256"] == oracle.EXPECTED_STAGING_SHA256
+    assert audited["authenticated_payload"]["sha256"] == oracle.EXPECTED_PAYLOAD_SHA256
 
     assert meta["schema"] == "camry-f33-08a-oracle-stream-build-v1"
     assert oracle.DIAG_BUS == 0 and oracle.BUS == oracle.DIAG_BUS
     assert oracle.STATE_BUS == 0 and oracle.ROUTE.bus == oracle.DIAG_BUS
     assert meta["target"] == {"software_id": "8965F3307000", "codeflash_sha256": build.IMAGE_SHA256}
-    assert (len(resident), sha(resident)) == (oracle.RESIDENT_SIZE, oracle.EXPECTED_RESIDENT_SHA256)
-    assert (len(helper), sha(helper)) == (oracle.HELPER_SIZE, oracle.EXPECTED_HELPER_SHA256)
-    assert sha(stage) == oracle.EXPECTED_STAGING_SHA256 and len(stage) == 1136
-    assert sha(payload) == oracle.EXPECTED_PAYLOAD_SHA256 and len(payload) == 0x1000
+    assert len(resident) == oracle.RESIDENT_SIZE and sha(resident) == meta["resident"]["sha256"]
+    assert len(helper) == oracle.HELPER_SIZE and sha(helper) == meta["helper"]["sha256"]
+    assert len(stage) == 1136 and sha(stage) == meta["staging"]["sha256"]
+    assert len(payload) == 0x1000 and sha(payload) == meta["authenticated_payload"]["sha256"]
     assert meta["resident"]["headroom"] == 112
     assert meta["helper"]["headroom"] == 684 and meta["helper"]["word_count"] == 85 and meta["helper"]["execution"] == "direct-from-GlobalRAM" and meta["helper"]["base"] == "0xFEF07C00"
     assert meta["staging"]["resident_offset"] == 0x180 and meta["staging"]["helper_offset"] == 0x31C

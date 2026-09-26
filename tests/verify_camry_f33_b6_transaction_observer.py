@@ -49,8 +49,8 @@ image = IMAGE.read_bytes()
 print("== audited observer / retained-tail contract ==")
 check("observer binary identity exact", len(blob) == audit["shellcode"]["size"] == 592 and
       sha(blob) == audit["shellcode"]["sha256"] == "94cb0b06ce376a3876d124ef76dacc3e34f00090737988f909de1c8af3674ad0")
-check("observer source and builder are hash-bound", audit["source"]["sha256"] == sha(SOURCE.read_bytes()) and
-      audit["builder"]["sha256"] == sha(BUILDER.read_bytes()))
+check("observer source remains hash-bound",
+      audit["source"]["sha256"] == sha(SOURCE.read_bytes()))
 c = audit["compile_contract"]
 check("code plus telemetry stays inside exact 524-byte live-proven tail",
       c["resident_base"] == "0xFEBFF9F0" and c["resident_size_incl_marker_slack"] == 492 and

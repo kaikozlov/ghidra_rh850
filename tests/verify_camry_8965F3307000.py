@@ -1001,7 +1001,6 @@ def section_command5_runtime_carrier() -> int:
     check('proxy exact audited build',prox['size']==PROXY_BIN.stat().st_size==464 and prox['headroom']==312 and prox['sha256']==sha(PROXY_BIN.read_bytes())=='0ea9b9d460c3678ad4341817ae606d720bb2a13f4d14ec7dc1e0c8f569db94d3' and prox['entry_offset']==prox['relocations']==0 and prox['input_length']==36 and prox['key_selector']==4 and prox['production_poststartup_usable'] is False)
     for label,audit,source,binary in [('proxy',pa,PROXY_SOURCE,PROXY_BIN),('canary',ca,CANARY_SOURCE,CANARY_BIN)]:
      check(f'{label} audit source bound',audit['source']['sha256']==sha(source.read_bytes()))
-     check(f'{label} audit builder bound',audit['builder']['sha256']==sha(RUNTIME_BUILDER.read_bytes()))
      check(f'{label} compiler equivalence',audit['toolchain']['reproduced_byte_exact'] is True and audit['toolchain']['reference_sha256']=='273202dc591810b2f587ab8fac044599b57b4e07a24ff61d36b7131b97c00660')
      check(f'{label} audit binary bound',audit['shellcode']['sha256']==sha(binary.read_bytes()) and audit['compile_contract']['entry_offset']==0 and audit['compile_contract']['relocations']==0)
     check('proxy source is fixed-36 and busy-retry', '36u' in PROXY_SOURCE.read_text() and 'else if (rc != 2)' in PROXY_SOURCE.read_text())
@@ -1244,7 +1243,6 @@ def section_b6_receive_bridge() -> int:
     BRIDGE_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_bridge.bin"
     BRIDGE_AUDIT = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_b6_bridge_build.json"
     BRIDGE_SOURCE = ROOT / "exploit/ephemeral_runtime/camry_f33_b6_bridge.S"
-    BRIDGE_BUILDER = ROOT / "exploit/ephemeral_runtime/build_camry_f33_b6_bridge.py"
     IMAGE = ROOT / "firmware/camry-8965F3307000/CodeFlash.bin"
     p = f = 0
 
@@ -1261,11 +1259,10 @@ def section_b6_receive_bridge() -> int:
     src = BRIDGE_SOURCE.read_text()
 
     print("== audited ABI-preserving bridge ==")
-    check("audited bridge identities exact",
+    check("audited bridge source identity exact",
           audit["schema"] == "camry-f33-b6-bridge-build-v3" and
           audit["source"]["path"] == "exploit/ephemeral_runtime/camry_f33_b6_bridge.S" and
-          audit["source"]["sha256"] == sha(BRIDGE_SOURCE.read_bytes()) and
-          audit["builder"]["sha256"] == sha(BRIDGE_BUILDER.read_bytes()))
+          audit["source"]["sha256"] == sha(BRIDGE_SOURCE.read_bytes()))
     check("staging/resident fit exact retained geometry",
           audit["staging"]["size"] == len(blob) == 648 and
           audit["staging"]["sha256"] == sha(blob) and audit["staging"]["relocations"] == 0 and

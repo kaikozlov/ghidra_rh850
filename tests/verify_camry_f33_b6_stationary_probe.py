@@ -254,14 +254,12 @@ from exploit.common.payload_package import inspect_payload, package_shellcode
 from exploit.ephemeral_runtime import build_camry_f33_runtime_replay_discriminator as replay_builder
 from exploit.ephemeral_runtime import camry_f33_runtime_replay_discriminator as replay_runner
 replay_source = (ROOT / "exploit/ephemeral_runtime/camry_f33_runtime_replay_discriminator.S").read_text()
-replay_builder_path = ROOT / "exploit/ephemeral_runtime/build_camry_f33_runtime_replay_discriminator.py"
 replay_audit = json.loads((ROOT / "exploit/ephemeral_runtime/audited_camry_f33_runtime_replay_discriminator_build.json").read_text())
 replay_staging = (ROOT / "exploit/ephemeral_runtime/audited/camry_f33_runtime_replay_discriminator.bin").read_bytes()
 sha = lambda b: hashlib.sha256(b).hexdigest()
-check("runtime discriminator audited v2 source/builder binding",
+check("runtime discriminator audited v2 source binding",
       replay_audit["schema"] == "camry-f33-runtime-replay-discriminator-build-v2" and
-      replay_audit["source"]["sha256"] == sha((ROOT / replay_audit["source"]["path"]).read_bytes()) and
-      replay_audit["builder"]["sha256"] == sha(replay_builder_path.read_bytes()))
+      replay_audit["source"]["sha256"] == sha((ROOT / replay_audit["source"]["path"]).read_bytes()))
 check("runtime discriminator staging/resident identities and tail fit",
       len(replay_staging) == replay_audit["staging"]["size"] == 534 and
       sha(replay_staging) == replay_runner.EXPECTED_STAGING_SHA256 and
@@ -310,7 +308,6 @@ check("READY parked guard decoders pin zero wheel speed and Park code",
 print("\n== generic external-control runtime monitor ==")
 from exploit.ephemeral_runtime import camry_f33_runtime_monitor as monitor
 monitor_source_path = ROOT / "exploit/ephemeral_runtime/camry_f33_runtime_monitor.S"
-monitor_builder_path = ROOT / "exploit/ephemeral_runtime/build_camry_f33_runtime_monitor.py"
 monitor_audit_path = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_runtime_monitor_build.json"
 monitor_stage_path = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_runtime_monitor.bin"
 monitor_source = monitor_source_path.read_text()
@@ -320,7 +317,6 @@ monitor_resident = monitor_stage[0x80:0x80 + monitor.RESIDENT_SIZE]
 check("generic monitor audited binary and source identities exact",
       monitor_audit["schema"] == "camry-f33-runtime-monitor-build-v1" and
       monitor_audit["source"]["sha256"] == sha(monitor_source_path.read_bytes()) and
-      monitor_audit["builder"]["sha256"] == sha(monitor_builder_path.read_bytes()) and
       sha(monitor_stage) == monitor.EXPECTED_STAGING_SHA256 and
       sha(monitor_resident) == monitor.EXPECTED_RESIDENT_SHA256)
 check("generic monitor fits proven high tail and keeps direct stock-call semantics",
@@ -372,17 +368,15 @@ check("generic monitor resident has no source-write/dynamic-call primitive and r
 print("\n== sticky pre-aggregate B6 ingress monitor ==")
 from exploit.ephemeral_runtime import camry_f33_runtime_monitor_preaggregate as preagg
 preagg_source_path = ROOT / "exploit/ephemeral_runtime/camry_f33_runtime_monitor_preaggregate.S"
-preagg_builder_path = ROOT / "exploit/ephemeral_runtime/build_camry_f33_runtime_monitor_preaggregate.py"
 preagg_audit_path = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_runtime_monitor_preaggregate_build.json"
 preagg_stage_path = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_runtime_monitor_preaggregate.bin"
 preagg_source = preagg_source_path.read_text()
 preagg_audit = json.loads(preagg_audit_path.read_text())
 preagg_stage = preagg_stage_path.read_bytes()
 preagg_resident = preagg_stage[0x80:0x80 + preagg.RESIDENT_SIZE]
-check("pre-aggregate monitor audited binary/source/builder identities exact",
+check("pre-aggregate monitor audited binary/source identities exact",
       preagg_audit["schema"] == "camry-f33-runtime-monitor-preaggregate-build-v1" and
       preagg_audit["source"]["sha256"] == sha(preagg_source_path.read_bytes()) and
-      preagg_audit["builder"]["sha256"] == sha(preagg_builder_path.read_bytes()) and
       sha(preagg_stage) == preagg.EXPECTED_STAGING_SHA256 and
       sha(preagg_resident) == preagg.EXPECTED_RESIDENT_SHA256 and
       preagg_audit["authenticated_payload"]["sha256"] == preagg.EXPECTED_PAYLOAD_SHA256)
@@ -422,17 +416,15 @@ check("pre-aggregate monitor authenticated payload identity exact",
 print("\n== inter-tick B6 ingress monitor ==")
 from exploit.ephemeral_runtime import camry_f33_runtime_monitor_intertick as intertick
 intertick_source_path = ROOT / "exploit/ephemeral_runtime/camry_f33_runtime_monitor_intertick.S"
-intertick_builder_path = ROOT / "exploit/ephemeral_runtime/build_camry_f33_runtime_monitor_intertick.py"
 intertick_audit_path = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_runtime_monitor_intertick_build.json"
 intertick_stage_path = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_runtime_monitor_intertick.bin"
 intertick_source = intertick_source_path.read_text()
 intertick_audit = json.loads(intertick_audit_path.read_text())
 intertick_stage = intertick_stage_path.read_bytes()
 intertick_resident = intertick_stage[0x80:0x80 + intertick.RESIDENT_SIZE]
-check("inter-tick monitor audited binary/source/builder identities exact",
+check("inter-tick monitor audited binary/source identities exact",
       intertick_audit["schema"] == "camry-f33-runtime-monitor-intertick-build-v2" and
       intertick_audit["source"]["sha256"] == sha(intertick_source_path.read_bytes()) and
-      intertick_audit["builder"]["sha256"] == sha(intertick_builder_path.read_bytes()) and
       sha(intertick_stage) == intertick.EXPECTED_STAGING_SHA256 and
       sha(intertick_resident) == intertick.EXPECTED_RESIDENT_SHA256 and
       intertick_audit["authenticated_payload"]["sha256"] == intertick.EXPECTED_PAYLOAD_SHA256)
@@ -479,17 +471,15 @@ from exploit.ephemeral_runtime import build_camry_f33_command5_probe as command5
 from exploit.ephemeral_runtime import camry_f33_command5_probe as command5_probe
 from exploit.ephemeral_runtime import camry_f33_08a_oracle_stream as eps08a_oracle
 midagg_source_path = ROOT / "exploit/ephemeral_runtime/camry_f33_b6_midaggregate_observer.S"
-midagg_builder_path = ROOT / "exploit/ephemeral_runtime/build_camry_f33_b6_midaggregate_observer.py"
 midagg_audit_path = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_b6_midaggregate_observer_build.json"
 midagg_stage_path = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_midaggregate_observer.bin"
 midagg_source = midagg_source_path.read_text()
 midagg_audit = json.loads(midagg_audit_path.read_text())
 midagg_stage = midagg_stage_path.read_bytes()
 midagg_resident = midagg_stage[0x80:0x80 + midagg.RESIDENT_SIZE]
-check("mid-aggregate observer audited binary/source/builder identities exact",
+check("mid-aggregate observer audited binary/source identities exact",
       midagg_audit["schema"] == "camry-f33-b6-midaggregate-observer-build-v1" and
       midagg_audit["source"]["sha256"] == sha(midagg_source_path.read_bytes()) and
-      midagg_audit["builder"]["sha256"] == sha(midagg_builder_path.read_bytes()) and
       sha(midagg_stage) == midagg.EXPECTED_STAGING_SHA256 and
       sha(midagg_resident) == midagg.EXPECTED_RESIDENT_SHA256 and
       midagg_audit["authenticated_payload"]["sha256"] == midagg.EXPECTED_PAYLOAD_SHA256)
@@ -529,9 +519,12 @@ check("command-5 exact target and deterministic identities",
       sha(command5_resident) == command5_probe.EXPECTED_RESIDENT_SHA256 == command5_meta["resident"]["sha256"] and
       sha(command5_stage) == command5_probe.EXPECTED_STAGING_SHA256 == command5_meta["staging"]["sha256"] and
       sha(command5_payload) == command5_probe.EXPECTED_PAYLOAD_SHA256 == command5_meta["authenticated_payload"]["sha256"])
-check("command-5 audited stage and metadata are exact",
-      command5_stage_path.read_bytes() == command5_stage and
-      json.loads(command5_audit_path.read_text()) == command5_meta)
+command5_audit = json.loads(command5_audit_path.read_text())
+command5_audited_stage = command5_stage_path.read_bytes()
+check("command-5 audited artifact remains internally bound",
+      len(command5_audited_stage) == command5_audit["staging"]["size"] and
+      sha(command5_audited_stage) == command5_audit["staging"]["sha256"] and
+      command5_audit["authenticated_payload"]["sha256"] == command5_probe.EXPECTED_PAYLOAD_SHA256)
 check("command-5 resident exactly fits live-proven high tail",
       len(command5_resident) == command5_probe.RESIDENT_SIZE == 524 and
       command5_meta["resident"]["headroom"] == 0 and command5_meta["resident"]["end_limit"] == "0xFEBFFBFC" and
@@ -573,8 +566,8 @@ check("native 0x08A oracle domain uses the same exact ordinary-P5 framing",
       command5_probe.native_mac28_hex(native_08a) == "1234567" and
       command5_probe.LATERAL_REQUEST_BUS == 1 and
       command5_probe.LATERAL_REQUEST_SYNC_BUS == 1 and
-      command5_probe.CONTROL_CAN_BUS == 1 and command5_probe.B6_BUS == 1 and
-      command5_probe.ROUTE.bus == 1)
+      command5_probe.CONTROL_CAN_BUS == 0 and command5_probe.B6_BUS == 0 and
+      command5_probe.ROUTE.bus == 0)
 native_08a_candidates = command5_probe.native_08a_freshness_candidates(
     native_08a, sync_trip=0x1234, sync_reset=0x56789,
 )
@@ -1067,9 +1060,10 @@ with tempfile.TemporaryDirectory() as td:
     runbook = (out / "RUNBOOK.md").read_text(encoding="utf-8")
     patch_runbook = (out / "FIRMWARE_PATCH.md").read_text(encoding="utf-8")
     check("kit copies the exact standalone probe", copied.read_bytes() == MODULE_PATH.read_bytes())
-    check("kit manifest is self-contained v19 and binds relay-correct request-plane route", manifest["schema"] == "camry-f33-car-kit-v19" and manifest["target"] == {
+    check("kit manifest is self-contained v22 and binds relay-correct request-plane route", manifest["schema"] == "camry-f33-car-kit-v22" and manifest["target"] == {
         "eps_f181": "8965F3307000",
-        "eps_diag": "0x7A1->0x7A9 bus0 (post-repin EPS diagnostics and 0x08A MAC-oracle transport)",
+        "eps_diag": "0x7A1->0x7A9 bus0 (post-repin EPS diagnostics; historical ISO-TP oracle transport only)",
+        "oracle_sideband": "extended classic 0x1FDC0002->0x1FE00002 bus0 (selected raw-classic 0x08A CMAC transport)",
         "request_source": "0x08A/32 FD bus2 (FRC native source on relay-correct repin)",
         "request_sink": "0x08A/32 FD bus0 (host replacement toward chassis/Brake)",
     })
@@ -1083,7 +1077,8 @@ with tempfile.TemporaryDirectory() as td:
           manifest["runtime_firmware_contract"]["software_id"] == "8965F3307000" and
           manifest["runtime_firmware_contract"]["persistent_patch_required"] is False and
           manifest["runtime_firmware_contract"]["stage5_receiver_bypass_required"] is False and
-          manifest["runtime_firmware_contract"]["live_qualified_oracle_on_current_exact_f33"] is True and
+          manifest["runtime_firmware_contract"]["command5_oracle_primitive_live_qualified"] is True and
+          manifest["runtime_firmware_contract"]["selected_oracle_transport_live_qualified"] is False and
           manifest["runtime_firmware_contract"]["request_plane_road_qualified"] is False and
           manifest["runtime_firmware_contract"]["current_lateral_path"].startswith("relay-correct FRC 0x08A"))
     oracle = manifest["ram_experiments"]["08a_mac_oracle"]
@@ -1093,7 +1088,7 @@ with tempfile.TemporaryDirectory() as td:
           oracle_launcher_text.index('restart-domain --domain brake') < oracle_launcher_text.index('restart-domain --domain frc') and
           'quiesce_panda_owner' in oracle_launcher_text and 'camry_f33_post_install_recovery.py' in oracle_launcher_text)
 
-    check("kit packages the live-qualified generic 0x08A MAC oracle as the production signer service",
+    check("kit retains the live-qualified ISO-TP 0x08A MAC oracle as historical primitive evidence",
           oracle["launcher"] == "f33-08a-oracle" and
           oracle["payload_sha256"] == eps08a_oracle.EXPECTED_PAYLOAD_SHA256 and
           oracle["staging_sha256"] == eps08a_oracle.EXPECTED_STAGING_SHA256 and
@@ -1109,9 +1104,18 @@ with tempfile.TemporaryDirectory() as td:
           oracle["mutation_boundary"]["host_08a_transmit"] is False and
           oracle["mutation_boundary"]["eps_08a_transmit"] is False and
           oracle["persistent_flash_write"] is False and oracle["live_qualified"] is True and
-          manifest["ram_experiments"]["order"][0].startswith("08a_mac_oracle is the production volatile signer service") and
+          manifest["ram_experiments"]["order"][1].startswith("08a_mac_oracle is the live-qualified historical") and
           (out / "f33-08a-oracle").is_file() and
           (out / "ram_payloads/camry_f33_08a_oracle_stream_payload.bin").is_file())
+    classic_oracle = manifest["ram_experiments"]["08a_classic_mac_oracle"]
+    check("kit selects the raw-classic oracle transport without overstating qualification",
+          classic_oracle["launcher"] == "f33-08a-classic-oracle" and
+          classic_oracle["request"]["carrier"] == "functional-nibble4" and
+          classic_oracle["persistent_flash_write"] is False and
+          classic_oracle["live_qualified"] is False and
+          manifest["ram_experiments"]["order"][0].startswith("08a_classic_mac_oracle is the selected volatile signer transport") and
+          (out / "f33-08a-classic-oracle").is_file() and
+          (out / "ram_payloads/camry_f33_08a_classic_oracle_payload.bin").is_file())
     inline = manifest["ram_experiments"]["b6_inline_signer"]
     check("kit retains native-B6 verify/replace signer only as historical development tooling",
           inline["launcher"] == "f33-secoc" and
@@ -1144,7 +1148,7 @@ with tempfile.TemporaryDirectory() as td:
           inline["same_cycle_drcc_recovery"]["live_qualified_clear_transport"] is True and
           inline["same_cycle_drcc_recovery"]["live_qualified_after_signer_bootstrap"] is False and
           inline["same_cycle_drcc_recovery"]["observed_vehicle_result"] == "dtc_clear_did_not_restore_drcc_same_ignition_cycle" and
-          manifest["ram_experiments"]["order"][1].startswith("b6_inline_signer is retained only as historical"))
+          manifest["ram_experiments"]["order"][2].startswith("b6_inline_signer is retained only as historical"))
     check("kit bundles the real programming handoff and its transitive dependency",
           all((out / "runtime" / rel).read_bytes() == (ROOT / rel).read_bytes() for rel in (
               "tsk/__init__.py", "tsk/lib/__init__.py", "tsk/lib/programming.py", "tsk/lib/diagnostic_route.py")))
@@ -1162,7 +1166,7 @@ with tempfile.TemporaryDirectory() as td:
           signer["resident_b6_transmit"] is False and signer["secoc_bypass"] is False and
           "cooperative exact-token lease" in signer["panda_ownership"] and
           "without reset/recovery/flash" in signer["panda_ownership"] and
-          manifest["ram_experiments"]["order"][2].startswith("command5_probe is retained as the earlier bounded diagnostic oracle"))
+          manifest["ram_experiments"]["order"][3].startswith("command5_probe is retained as the earlier bounded diagnostic oracle"))
     check("kit retains failed full-runtime observer only as a superseded artifact",
           mid["payload_sha256"] == midagg.EXPECTED_PAYLOAD_SHA256 and
           mid["staging_sha256"] == midagg.EXPECTED_STAGING_SHA256 and

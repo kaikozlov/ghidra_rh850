@@ -18,8 +18,8 @@ from exploit.common.ram_exec import (
     TOYOTA_P1ME_BOOT_SECURITY_ACCESS_SECRET,
     TOYOTA_P1ME_PAYLOAD_BUILD_SECRET,
 )
-from exploit.ephemeral_runtime import camry_f33_08a_oracle_stream as eps08a_oracle
-from exploit.ephemeral_runtime import camry_f33_08a_classic_oracle as eps08a_classic_oracle
+
+
 from exploit.ephemeral_runtime import camry_f33_08a_tx_probe as eps08a_probe
 from exploit.ephemeral_runtime import camry_f33_b6_bridge_install as bridge_install
 from exploit.ephemeral_runtime import (
@@ -79,8 +79,7 @@ EPS08A_TX_PROBE_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_08a_tx
 EPS08A_TX_PROBE_META = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_08a_tx_probe_build.json"
 EPS08A_ORACLE_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_08a_oracle_stream.bin"
 EPS08A_ORACLE_META = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_08a_oracle_stream_build.json"
-EPS08A_CLASSIC_ORACLE_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_08a_classic_oracle.bin"
-EPS08A_CLASSIC_ORACLE_META = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_08a_classic_oracle_build.json"
+EPS08A_CLASSIC_ORACLE_BUILDER = ROOT / "exploit/ephemeral_runtime/build_camry_f33_08a_classic_oracle.py"
 # Supervised continuous substitution preserves the road helper's steady-state
 # behavior, but stops after seven foreground ticks without a changed host
 # generation. Its new identity has instruction-level, not vehicle, validation.
@@ -378,12 +377,32 @@ def build(out: Path, openpilot: Path) -> dict:
     eps08a_oracle_payload = package_shellcode(eps08a_oracle_stage, secret=TOYOTA_P1ME_PAYLOAD_BUILD_SECRET)
     if hashlib.sha256(eps08a_oracle_payload).hexdigest() != eps08a_oracle_meta["authenticated_payload"]["sha256"]:
         raise RuntimeError("0x08A oracle authenticated payload identity drift")
-    eps08a_classic_oracle_meta = json.loads(EPS08A_CLASSIC_ORACLE_META.read_text(encoding="utf-8"))
-    eps08a_classic_oracle_stage = EPS08A_CLASSIC_ORACLE_BIN.read_bytes()
-    if hashlib.sha256(eps08a_classic_oracle_stage).hexdigest() != eps08a_classic_oracle_meta["staging"]["sha256"]:
-        raise RuntimeError("0x08A raw-classic oracle audited staging identity drift")
-    eps08a_classic_oracle_payload = package_shellcode(eps08a_classic_oracle_stage, secret=TOYOTA_P1ME_PAYLOAD_BUILD_SECRET)
-    if hashlib.sha256(eps08a_classic_oracle_payload).hexdigest() != eps08a_classic_oracle_meta["authenticated_payload"]["sha256"]:
+    classic_run = subprocess.run(
+        [
+            sys.executable,
+            str(EPS08A_CLASSIC_ORACLE_BUILDER),
+            "--output-dir",
+            str(ram_dir),
+        ],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if classic_run.returncode != 0:
+        raise RuntimeError(f"0x08A raw-classic oracle build failed: {classic_run.stderr[-1200:]}")
+    eps08a_classic_oracle_meta = json.loads(
+        (ram_dir / "camry_f33_08a_classic_oracle.json").read_text(encoding="utf-8")
+    )
+    eps08a_classic_oracle_payload = (
+        ram_dir / eps08a_classic_oracle_meta["authenticated_payload"]["path"]
+    ).read_bytes()
+    if eps08a_classic_oracle_meta["toolchain"].get("backend") != "tools/rh850":
+        raise RuntimeError("0x08A raw-classic oracle did not use the canonical RH850 toolchain")
+    if (
+        hashlib.sha256(eps08a_classic_oracle_payload).hexdigest()
+        != eps08a_classic_oracle_meta["authenticated_payload"]["sha256"]
+    ):
         raise RuntimeError("0x08A raw-classic oracle authenticated payload identity drift")
     inline_meta = json.loads(INLINE_SIGNER_META.read_text(encoding="utf-8"))
     inline_staging = INLINE_SIGNER_BIN.read_bytes()
@@ -459,8 +478,6 @@ def build(out: Path, openpilot: Path) -> dict:
     (ram_dir / "camry_f33_08a_tx_probe.json").write_text(json.dumps(eps08a_tx_meta, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     (ram_dir / "camry_f33_08a_oracle_stream_payload.bin").write_bytes(eps08a_oracle_payload)
     (ram_dir / "camry_f33_08a_oracle_stream.json").write_text(json.dumps(eps08a_oracle_meta, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    (ram_dir / "camry_f33_08a_classic_oracle_payload.bin").write_bytes(eps08a_classic_oracle_payload)
-    (ram_dir / "camry_f33_08a_classic_oracle.json").write_text(json.dumps(eps08a_classic_oracle_meta, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     (ram_dir / "camry_f33_b6_inline_signer_payload.bin").write_bytes(inline_signer_payload)
     (ram_dir / "camry_f33_b6_inline_signer_helper_padded.bin").write_bytes(inline_helper)
     (ram_dir / "camry_f33_b6_inline_signer.json").write_text(json.dumps(inline_meta, indent=2, sort_keys=True) + "\n", encoding="utf-8")
