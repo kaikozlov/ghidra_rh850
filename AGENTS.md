@@ -76,6 +76,7 @@ Remember task commands, not implementation files:
 | Verification | `tools/test <suite-or-prefix>` (explicit only; no selector runs nothing) |
 | Discover / preview suites | `tools/test list [query]`, `tools/test plan <suite-or-prefix>` |
 | Ghidra / pseudocode | `tools/g`, `tools/pseudo` |
+| RH850 target compilation / instruction simulation | `tools/rh850` |
 | GTS+ / Toyota vocabulary / CUW routes | `tools/gts` |
 | Toyota platform capabilities (SecOC, E2E, DataFlash, EPS probe, target workflows) | `tools/toyota capabilities` |
 | Repository knowledge (findings, corrections, open questions) | `tools/know QUERY` |

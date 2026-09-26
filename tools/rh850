@@ -1,0 +1,293 @@
+#!/usr/bin/env python3
+"""Build and execute RH850/V850E3 code with the pinned GNU toolchain."""
+
+from __future__ import annotations
+
+import argparse
+import os
+import shlex
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+DEFAULT_IMAGE = os.environ.get("RH850_TOOLCHAIN_IMAGE", "v850-gcc-scratch")
+DOCKERFILE = ROOT / "tools" / "toolchains" / "v850-gcc" / "Dockerfile"
+SELFTEST_RESULT = "RH850_SELFTEST_RESULT=0x12cb5687"
+
+SELFTEST_SCRIPT = r"""
+set -eu
+work="$(mktemp -d)"
+trap 'rm -rf "$work"' EXIT
+cat >"$work/selftest.c" <<'EOF'
+volatile unsigned int result __attribute__((section(".result")));
+
+void exploit(void) {
+  unsigned int x = 0x12340000u;
+  x += 0x5678u;
+  x ^= 0x00ff00ffu;
+  result = x;
+  __asm__ volatile(".global rh850_sim_stop\nrh850_sim_stop:\nnop");
+  for (;;) __asm__ volatile("nop");
+}
+EOF
+cat >"$work/selftest.ld" <<'EOF'
+SECTIONS {
+  . = 0xFEBF0000;
+  .text : { *(.text*) }
+  . = 0xFEBF1000;
+  .result : { *(.result) }
+}
+ENTRY(_exploit)
+EOF
+v850-elf-gcc \
+  -mv850e3v5 -mno-app-regs -ffreestanding -fno-builtin -Os -nostdlib \
+  -Wl,-T,"$work/selftest.ld" -Wl,--build-id=none \
+  "$work/selftest.c" -o "$work/selftest.elf"
+v850-elf-gdb -q -batch \
+  -ex "file $work/selftest.elf" \
+  -ex "target sim --memory-region 0xFEBF0000,0x2000" \
+  -ex load \
+  -ex "break rh850_sim_stop" \
+  -ex run \
+  -ex 'printf "RH850_SELFTEST_RESULT=0x%x\n", *(unsigned int *)0xFEBF1000'
+"""
+
+
+class Rh850ToolError(RuntimeError):
+    pass
+
+
+def _docker() -> str:
+    path = shutil.which("docker")
+    if path is None:
+        raise Rh850ToolError("docker is required")
+    return path
+
+
+def _run(
+    args: list[str],
+    *,
+    input_text: str | None = None,
+    capture: bool = False,
+    check: bool = False,
+) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        args,
+        cwd=ROOT,
+        input=input_text,
+        text=True,
+        capture_output=capture,
+        check=check,
+    )
+
+
+def _image_exists(image: str) -> bool:
+    return _run([_docker(), "image", "inspect", image], capture=True).returncode == 0
+
+
+def _require_image(image: str) -> None:
+    if not _image_exists(image):
+        raise Rh850ToolError(
+            f"Docker image {image!r} is missing; build it with "
+            f"`tools/rh850 --image {shlex.quote(image)} build-image`"
+        )
+
+
+def _container_base(image: str, *, writable: bool) -> list[str]:
+    mount_mode = "rw" if writable else "ro"
+    return [
+        _docker(),
+        "run",
+        "--rm",
+        "-v",
+        f"{ROOT}:/src:{mount_mode}",
+        "-w",
+        "/src",
+        image,
+    ]
+
+
+def cmd_build_image(args: argparse.Namespace) -> int:
+    if not DOCKERFILE.is_file():
+        raise Rh850ToolError(f"missing toolchain recipe: {DOCKERFILE}")
+    command = [
+        _docker(),
+        "build",
+        "--file",
+        str(DOCKERFILE),
+        "--tag",
+        args.image,
+        str(DOCKERFILE.parent),
+    ]
+    return _run(command).returncode
+
+
+def cmd_doctor(args: argparse.Namespace) -> int:
+    _require_image(args.image)
+    image_id = _run(
+        [_docker(), "image", "inspect", args.image, "--format", "{{.Id}}"],
+        capture=True,
+        check=True,
+    ).stdout.strip()
+    probe = _run(
+        _container_base(args.image, writable=False)
+        + [
+            "sh",
+            "-lc",
+            """
+set -eu
+v850-elf-gcc --version | head -n 1
+v850-elf-ld --version | head -n 1
+v850-elf-gdb --version | head -n 1
+v850-elf-gdb -q -batch -ex 'target sim --architecture-info'
+""",
+        ],
+        capture=True,
+    )
+    sys.stdout.write(f"image: {args.image}\nimage_id: {image_id}\n")
+    sys.stdout.write(probe.stdout)
+    if probe.stderr:
+        sys.stderr.write(probe.stderr)
+    if probe.returncode != 0:
+        return probe.returncode
+    if "v850e3v5" not in probe.stdout:
+        raise Rh850ToolError("GDB simulator does not advertise v850e3v5 support")
+    print("doctor: PASS")
+    return 0
+
+
+def cmd_exec(args: argparse.Namespace) -> int:
+    _require_image(args.image)
+    command = list(args.command)
+    if command[:1] == ["--"]:
+        command = command[1:]
+    if not command:
+        raise Rh850ToolError("exec requires a command")
+    return _run(_container_base(args.image, writable=True) + command).returncode
+
+
+def _container_path(path: Path) -> str:
+    resolved = path.resolve()
+    try:
+        relative = resolved.relative_to(ROOT)
+    except ValueError as exc:
+        raise Rh850ToolError(f"sim ELF must be inside the repository: {resolved}") from exc
+    return "/src/" + relative.as_posix()
+
+
+def cmd_sim(args: argparse.Namespace) -> int:
+    _require_image(args.image)
+    elf = args.elf
+    if not elf.is_absolute():
+        elf = ROOT / elf
+    if not elf.is_file():
+        raise Rh850ToolError(f"ELF does not exist: {elf}")
+
+    target = "target sim"
+    for region in args.memory_region:
+        target += f" --memory-region {region}"
+
+    gdb_args = [
+        "v850-elf-gdb",
+        "-q",
+        "-batch",
+        "-ex",
+        f"file {_container_path(elf)}",
+        "-ex",
+        target,
+        "-ex",
+        "load",
+    ]
+    for command in args.gdb_command:
+        gdb_args += ["-ex", command]
+    return _run(_container_base(args.image, writable=False) + gdb_args).returncode
+
+
+def cmd_selftest(args: argparse.Namespace) -> int:
+    _require_image(args.image)
+    proc = _run(
+        [_docker(), "run", "--rm", "-i", args.image, "sh", "-s"],
+        input_text=SELFTEST_SCRIPT,
+        capture=True,
+    )
+    sys.stdout.write(proc.stdout)
+    if proc.stderr:
+        sys.stderr.write(proc.stderr)
+    if proc.returncode != 0:
+        return proc.returncode
+    if SELFTEST_RESULT not in proc.stdout:
+        raise Rh850ToolError(
+            f"simulator completed without expected result {SELFTEST_RESULT!r}"
+        )
+    print("selftest: PASS")
+    return 0
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--image",
+        default=DEFAULT_IMAGE,
+        help=f"Docker image (default: {DEFAULT_IMAGE})",
+    )
+    sub = parser.add_subparsers(dest="command_name", required=True)
+
+    p = sub.add_parser("build-image", help="build the pinned GNU RH850 toolchain image")
+    p.set_defaults(func=cmd_build_image)
+
+    p = sub.add_parser(
+        "doctor",
+        help="show compiler/GDB identities and simulator architecture support",
+    )
+    p.set_defaults(func=cmd_doctor)
+
+    p = sub.add_parser(
+        "selftest",
+        help="compile and execute a small v850e3v5 program at 0xFEBF0000",
+    )
+    p.set_defaults(func=cmd_selftest)
+
+    p = sub.add_parser(
+        "exec",
+        help="run a v850-elf tool inside the image with the repo mounted read-write",
+    )
+    p.add_argument("command", nargs=argparse.REMAINDER)
+    p.set_defaults(func=cmd_exec)
+
+    p = sub.add_parser(
+        "sim",
+        help="load a repository ELF in the GNU V850/RH850 instruction simulator",
+    )
+    p.add_argument("elf", type=Path)
+    p.add_argument(
+        "--memory-region",
+        action="append",
+        default=[],
+        metavar="BASE,SIZE",
+        help="simulator RAM/flash mapping; repeat as needed",
+    )
+    p.add_argument(
+        "--command",
+        "-ex",
+        dest="gdb_command",
+        action="append",
+        default=[],
+        help="GDB command to execute after load; repeat as needed",
+    )
+    p.set_defaults(func=cmd_sim)
+    return parser
+
+
+def main() -> int:
+    parser = build_parser()
+    args = parser.parse_args()
+    try:
+        return int(args.func(args))
+    except (Rh850ToolError, OSError, subprocess.CalledProcessError) as exc:
+        parser.error(str(exc))
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

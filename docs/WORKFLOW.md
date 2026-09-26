@@ -18,6 +18,10 @@ the firmware *is*, see [OVERVIEW.md](OVERVIEW.md).
   `ghidra/ghidra_v850/` (fork of `esaulenka/ghidra_v850` at commit
   `14c1b5be32b8ec741ee626c8bca9885c58f7a473`; see
   `ghidra/ghidra_v850/README.md` and `PROVENANCE.json`).
+- Docker for target-native RH850 payload compilation/execution testing. The
+  repository-owned GNU toolchain recipe and compiled-in V850/RH850 GDB simulator
+  are exposed through `tools/rh850`; run `tools/rh850 doctor` and
+  `tools/rh850 selftest`. See [RH850 build and execution testing](tooling/rh850-build-and-sim.md).
 
 There is no separate install step. `tools/project/install_v850_extension.sh` (invoked
 by `make verify-sleigh` and every project rebuild) compiles the vendored
