@@ -3414,6 +3414,19 @@ sequence space from 31 to 255. It does not bypass or parallelize the serialized 
 wrapper. Static/cross-target build verification passes, but latency and loss-rate improvement
 remain unmeasured until a parked `oracle-benchmark-100hz` run and a later route test.
 
+The target code is now split at a testable boundary without changing the live helper bytes.
+`camry_f33_08a_classic_oracle_core.inc` owns the CPU/memory-only fragment assembly, private
+freshness update, and response packing. The live helper expands those macros in place; rebuilding
+the default Camry helper after the split still produces the exact pre-refactor 860-byte image,
+SHA-256 `faabdbab491e0d75c640003a96335c7f56ca39a9b4fe0f8f97ef01eef0c26d10`. The focused
+verification suite also compiles a target-native `v850e3v5` harness and executes the same macros
+under GNU `sim/v850`: 30 assertions cover complete/mixed fragment sequences, epoch change,
+message-counter increment/wrap, FV4 construction, and success/error/busy response packing.
+The simulator harness deliberately stops before stock freshness/command-5/CAN calls and MMIO.
+The pinned GNU simulator executes ordinary near `jarl` but misexecutes RH850 `jarl32`, so far
+stock-call behavior remains a hardware/independent-simulator boundary rather than being mocked as
+if GNU sim had proved it.
+
 #### 4.13.3 Prior-art audit: a virtual FD32 datagram does not remove the Classic-CAN tunnel
 
 A September-23 review of existing CAN fragmentation transports does not identify an off-the-shelf

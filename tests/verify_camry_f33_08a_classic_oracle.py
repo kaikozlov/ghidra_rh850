@@ -122,6 +122,45 @@ check("artifact hashes self-consistent",
       sha(helper) == meta["helper"]["sha256"] and
       sha(stage) == meta["staging"]["sha256"] and
       sha(payload) == meta["authenticated_payload"]["sha256"])
+check("pure oracle core is a first-class build source",
+      meta["sources"]["core"]["path"] ==
+      "exploit/ephemeral_runtime/camry_f33_08a_classic_oracle_core.inc")
+
+
+def run_core_simulator() -> str:
+    tmp_root = ROOT / "build/tmp"
+    tmp_root.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix="oracle-core-sim-", dir=tmp_root) as td:
+        elf = Path(td) / "core.elf"
+        rel_elf = elf.relative_to(ROOT)
+        subprocess.run([
+            str(ROOT / "tools/rh850"), "exec", "v850-elf-gcc",
+            "-mv850e3v5", "-mno-app-regs", "-ffreestanding", "-fno-builtin", "-Os", "-nostdlib",
+            "-Wa,-mv850e3v5,-mextension",
+            "-Wl,-T,tests/fixtures/rh850/camry_f33_08a_oracle_core_sim.ld",
+            "-Wl,--build-id=none",
+            "tests/fixtures/rh850/camry_f33_08a_oracle_core_sim.S",
+            "tests/fixtures/rh850/camry_f33_08a_oracle_core_sim.c",
+            "-o", str(rel_elf),
+        ], cwd=ROOT, check=True, capture_output=True, text=True)
+        proc = subprocess.run([
+            str(ROOT / "tools/rh850"), "sim", str(rel_elf),
+            "--memory-region", "0xFEBF0000,0x10000",
+            "-ex", "break rh850_sim_stop",
+            "-ex", "run",
+            "-ex", (
+                'printf "ORACLE_SIM_RESULT=0x%x FAILURE=%u PASSES=%u\\n", '
+                '*(unsigned int *)&oracle_sim_result, '
+                '*(unsigned int *)&oracle_sim_failure, '
+                '*(unsigned int *)&oracle_sim_passes'
+            ),
+        ], cwd=ROOT, check=True, capture_output=True, text=True)
+        return proc.stdout + proc.stderr
+
+
+simulator_output = run_core_simulator()
+check("production pure-core macros execute under GNU RH850 sim",
+      "ORACLE_SIM_RESULT=0x8a0c0de FAILURE=0 PASSES=30" in simulator_output)
 
 fw = meta["firmware_contract"]
 check("idle-fast timer gate is bound to exact firmware geometry",
@@ -346,6 +385,7 @@ check("no diagnostic transport or RSCFD mutation remains",
 
 resident_src = build.RESIDENT_SOURCE.read_text()
 helper_src = build.HELPER_SOURCE.read_text()
+core_src = build.CORE_SOURCE.read_text()
 check("resident private tap runs after stock receive drain",
       resident_src.index("jarl32 target_rx_3, lp") < resident_src.rindex("jarl32 helper_entry, lp") and
       "ORACLE_RX_PRODUCER_GP_OFF" in resident_src and "st.h r7, 0x4a7c[gp]" in resident_src)
@@ -355,13 +395,17 @@ check("idle-fast gate is timer-bounded and preserves post-drain fallback",
       "mov 240000, r9" in resident_src and "bnh .L_tick_wait" in resident_src and
       resident_src.count("tst1 4, -0x4eef[r0]") >= 2 and
       resident_src.index("jarl32 helper_entry, lp") < resident_src.index("jarl32 target_rx_3, lp"))
-check("helper implements only the four-frame nibble raw-ring codec",
-      "mov ORACLE_REQUEST_HEADER_WORD" in helper_src and "ORACLE_REQUEST_ID_WORD" in helper_src and
-      "invalid ISO-TP type 8..B" in helper_src and "complete response sequence" in helper_src and
-      "movea 7, r0, r9" in helper_src and "movea 0xc8, r0, r8" not in helper_src and
+check("helper delegates pure codec/freshness/response logic to one shared core",
+      '#include "camry_f33_08a_classic_oracle_core.inc"' in helper_src and
+      "ORACLE_CORE_ASSEMBLE_FRAGMENT .L_next, .L_reset_assembly" in helper_src and
+      "ORACLE_CORE_ADVANCE_FRESHNESS" in helper_src and "ORACLE_CORE_PACK_RESPONSE" in helper_src)
+check("pure core implements only CPU/memory codec state",
+      "invalid ISO-TP type 8..B" in core_src and "complete 8-byte oracle response" in core_src and
+      "movea 7, r0, r9" in core_src and "movea 0xc9, r0, r6" in core_src and
+      all(token not in core_src for token in ("jarl", "[gp]", "lower_can_write", "command5_sync")) and
       "ORACLE_FUNCTIONAL_C8" not in helper_src and "0x9FDC0002" not in helper_src)
-check("helper has no truncated cmp-immediate literals",
-      all(token not in helper_src for token in ("cmp 0xc9", "cmp 0xa8", "cmp 0x5a", "cmp 0xa5", "cmp 16")))
+check("helper/core have no truncated cmp-immediate literals",
+      all(token not in helper_src + core_src for token in ("cmp 0xc9", "cmp 0xa8", "cmp 0x5a", "cmp 0xa5", "cmp 16")))
 check("helper uses local freshness and fixed selector4",
       "ORACLE_AUTH_RESET_GP_OFF" in helper_src and "ORACLE_AUTH_TRIP_GP_OFF" in helper_src and
       "jarl32 freshness_encode, lp" in helper_src and "jarl32 command5_sync, lp" in helper_src)
@@ -372,9 +416,9 @@ check("helper advances an independent producer cursor across stock drains and si
       "ld.hu -0x6f04[gp]" not in helper_src)
 check("helper packs private freshness without moving scratch into protected RAM",
       "movea 36, r22, r23" in helper_src and "movea 48, r22, r23" not in helper_src and
-      "st.w r13, 24[r22]" in helper_src and "st.h r12, 28[r22]" in helper_src and
-      "st.b r14, 30[r22]" in helper_src and "st.b r6, 31[r22]" in helper_src and
-      "st.b r6, 34[r22]" in helper_src)
+      "st.w r13, 24[r22]" in core_src and "st.h r12, 28[r22]" in core_src and
+      "st.b r14, 30[r22]" in core_src and "st.b r6, 31[r22]" in core_src and
+      "st.b r6, 34[r22]" in core_src)
 check("response bypasses XCP protocol completion",
       "movea 0x00f0" in helper_src and "ORACLE_RESPONSE_LOWER_HANDLE" in helper_src and
       "jarl32 lower_can_write, lp" in helper_src)

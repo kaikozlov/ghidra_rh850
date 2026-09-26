@@ -39,6 +39,15 @@ for the specific registers being exercised. Do not treat instruction-simulator
 success as evidence for RSCFD, ICU-S, FCU, interrupt-controller, or timing
 behavior.
 
+The pinned GNU `sim/v850` also has an instruction-coverage boundary that matters
+for our real payloads: the ordinary near `jarl` form executes correctly, while
+the RH850 `jarl32` extension used for far stock-function calls is misexecuted by
+this simulator build. A direct probe loops on the `jarl32` instruction instead
+of reaching its linked target. Simulator harnesses must therefore keep their own
+calls in near-`jarl` range and test production logic that does not itself cross a
+`jarl32` boundary. This is a simulator limitation, not an ECU/compiler ABI
+finding.
+
 ## Rebuilding the GNU setup
 
 The historical local image `v850-gcc-scratch` came from the public
