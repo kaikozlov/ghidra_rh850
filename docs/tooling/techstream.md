@@ -938,6 +938,50 @@ positive oracle cannot yet be applied to FRC/HV/MG/Brake. Their missing KDF /
 image-transform layer remains the blocker; the first root to test once that
 layer is recovered remains the proven F340 EPS payload-build root.
 
+The retained decrypted `T-0035-22` CPU11 application supplies an independent
+third F340 check. `firmware/tundra-8965F3401200/Application.bin` is loaded at
+`0x18000`; application-file offset `0x8840` therefore maps to CodeFlash
+`0x20840`, where it contains the exact tracked EPS application SecurityAccess
+root `893e08418c741ffa2a9c044bffa55813`. The software ID
+`8965F3401200` follows at file offset `0x8860`. Consequently this one Tundra
+update family independently checks all three P1M-E EPS roots without requiring
+a complete ECU dump: the CUW credential relation checks boot `$27`, package
+CBC/CMAC checks the payload root, and the decrypted application carries the
+application `$27` root.
+
+#### Direct root-reuse tests for a foreign ECU or update package
+
+The practical cross-OEM test is candidate verification, not root recovery from
+a transcript. The three recovered EPS roots can be tested independently:
+
+1. **Firmware dump:** scan raw CodeFlash/application bytes for the three exact
+   roots and common little-endian storage variants. A hit should then be joined
+   to the local AES caller rather than treated as sufficient by itself.
+2. **Toyota-shaped boot/application `$27`:** after independently establishing
+   that the target uses a 16-byte data record, 16-byte seed, and 16-byte key,
+   compute
+   `Kwork = AES-DEC(candidate_root, data_record)` and
+   `key = AES-ENC(Kwork, seed)`. An accepted key proves that candidate root for
+   that target. A rejection is only meaningful after the session, level,
+   request shape, and retry/lockout state are known.
+3. **Different `$27` algorithm, known candidate root:** reuse can still be
+   tested. For the public GM Global-B construction, one real accepted
+   31-byte-seed/12-byte-key transcript is sufficient to test each Toyota root
+   as the CMAC root; the public worked example itself uses an illustrative test
+   key and therefore does not answer the reuse question.
+4. **Encrypted OEM update package:** where the package exposes a recoverable
+   `SeedKey`/nonce/ciphertext/integrity grammar, derive the image key with the
+   candidate payload root and require the package's own cryptographic integrity
+   check to validate. This is the strongest no-ECU test and is how `ba0524…`
+   reuse was proved for the two independent F340 packages above.
+
+`tools/security/reprogramming_secret_probe.py` implements the firmware scan,
+Toyota two-stage `$27` candidate calculation/transcript comparison, the
+published GM Global-B CMAC candidate calculation, and the payload-key KDF. It
+is deliberately offline: it does not send UDS or write an ECU. A normal AES-128
+challenge/response transcript does not make an unknown 128-bit root practically
+recoverable; it only makes a **known candidate root** cheap to confirm or reject.
+
 Two obvious alternatives were also checked and rejected narrowly. None of the
 recovered family working keys equals a simple AES encrypt/decrypt or CMAC of the
 public 16-bit diagnostic ID under the three known EPS roots. And selected FRC
