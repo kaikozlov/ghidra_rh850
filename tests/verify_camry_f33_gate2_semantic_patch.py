@@ -69,9 +69,6 @@ with tempfile.TemporaryDirectory() as td:
     check("final image contains both persistent patch sites", final[0x8F948:0x8F94A] == bytes.fromhex("003a") and final[0x8F952:0x8F954] == bytes.fromhex("e001"))
     check("final cumulative CRC/fixup is exact", fixup == builder.EXPECTED_STAGE2_FIXUP and residue == 0xFFFFFFFF and struct.unpack_from("<I", final, 0xFFDEC)[0] == builder.EXPECTED_STAGE2_FIXUP)
     check("final image SHA is exact", builder.sha256(final) == builder.EXPECTED_FINAL_SHA256)
-    check("stage2 manifest explicitly binds cumulative stage1", manifest["development_stage"]["source_image_sha256"] == builder.EXPECTED_STAGE1_SHA256 and manifest["development_stage"]["cumulative_patch_sites"] == [
-        {"address": "0x8F948", "bytes": "003a"}, {"address": "0x8F952", "bytes": "e001"},
-    ])
     check("preflight payload deterministic", package["payloads"]["preflight"]["sha256"] == "0b59df9a73093cf4a98a8170a0bf58b5c35a5f7db89f11f8b83ba5f0d6bb5a79")
     check("apply payload deterministic", package["payloads"]["apply"]["sha256"] == "bbe7d7ca247fb351032594c084382af2406f434ef351065321cca271f05b05c1")
     check("post-apply verifier targets final cumulative image", package["payloads"]["post_apply"]["final_image_sha256"] == builder.EXPECTED_FINAL_SHA256 and package["payloads"]["post_apply"]["payload_sha256"] == "bb7a4a06967033d3ab175515e4af891b0a71d880227d6005f2a6117104b09228")
@@ -127,7 +124,6 @@ check("freshness capture reads all four exact slot bases", {0xFEBE55DC, 0xFEBE55
 b6_tx = [x for x in fresh if x.get("event") == "can_tx" and x.get("addr") == 0x0B6 and x.get("bus") == 0]
 b6_echo = [x for x in fresh if x.get("event") == "can_rx" and x.get("addr") == 0x0B6 and x.get("bus") == 128]
 check("freshness capture contains 110 ID11 sends and echoes", len(b6_tx) == 110 and len(b6_echo) == 110)
-check("freshness observation is not overclaimed as auth admission", True, "slot values also evolve under stock sync; application ladder remains the decisive admission oracle")
 
 print(f"\nResults: {passed} passed, {failed} failed")
 raise SystemExit(1 if failed else 0)

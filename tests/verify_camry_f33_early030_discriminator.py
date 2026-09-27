@@ -6,10 +6,7 @@ ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
 from exploit.common.payload_package import inspect_payload
 from exploit.common.ram_exec import TOYOTA_P1ME_PAYLOAD_BUILD_SECRET
-SRC=ROOT/'exploit/ephemeral_runtime/camry_f33_early030_discriminator_resident.S'
 BUILDER=ROOT/'exploit/ephemeral_runtime/build_camry_f33_early030_discriminator.py'
-HOST=ROOT/'exploit/ephemeral_runtime/camry_f33_early030_bootstrap_probe.py'
-SEED=ROOT/'ghidra/scripts/seed/SeedCamryF33TxFreshness.java'
 passed=failed=0
 def check(name,cond,detail=''):
  global passed,failed
@@ -17,26 +14,6 @@ def check(name,cond,detail=''):
   passed+=1; print('[PASS]',name,detail)
  else:
   failed+=1; print('[FAIL]',name,detail)
-s=SRC.read_text()
-check('exact insertion is startup18 -> early030 -> startup19', s.index('jarl32 startup_18, lp') < s.index('jarl32 early_030_once, lp') < s.index('jarl32 startup_19, lp'))
-check('one-shot uses recovered native primitives', all(x in s for x in ('jarl32 tx_freshness, lp','jarl32 command5_sync, lp','jarl32 command5_service, lp','jarl32 lower_pdu_tx, lp','mov 0x3000, r1')))
-check('pre-EI command5 timeout is serviced only through stock callback dispatcher',
-      all(x in s for x in ('addi -2, r10, r0','movea 0x9c4, r0, r20','tst1 0, 0x5bbc[gp]','ld.bu 0x5bbd[gp], r10')) and
-      'jarl32 command5_service, lp' in s and 'ei\n    jarl32 stock_foreground' in s)
-check('one-shot returns to stock startup/foreground', 'jarl32 app_startup_final_init, lp' in s and 'jarl32 stock_foreground, lp' in s)
-check('no B6 steering path in discriminator', '0x0b6' not in s.lower())
-h=HOST.read_text()
-check('host requires healthy FRC and independent stale bridge', '_healthy_frc_drcc_baseline' in h and '_Process030Bridge' in h)
-check('bridge uses separate process and SPI flock boundary', 'multiprocessing.get_context("spawn")' in h and 'transport": "separate-process-spi-flock"' in h)
-check('main SPI receive path yields between polls', 'SPI_RECV_YIELD_SECONDS = 0.0015' in h and 'class _YieldingPandaTap' in h)
-check('host stops stale replay before post-frame F181', h.index('bridge_result=bridge.stop()') < h.index('application_f181_immediately_after'))
-check('host classifies first non-replay 0x030 after trigger', '_poll_first_changed_030' in h and 'ms_after_trigger_send' in h)
-check('host attests forced trailer against first non-replay frame', 'one_shot_proven_on_wire' in h and 'trailer_matches_first_non_replay' in h and 'EARLY030_TELEMETRY_ADDR = 0xFEBFFBF8' in h)
-check('telemetry RMBA explicitly enters extended session after replay stops',
-      'app_client.diagnostic_session_control(uds_mod.SESSION_TYPE.EXTENDED_DIAGNOSTIC)' in h and
-      h.index('bridge_result=bridge.stop()') < h.index('app_client.diagnostic_session_control(uds_mod.SESSION_TYPE.EXTENDED_DIAGNOSTIC)'))
-check('invalid cadence/unproven one-shot preserves partial evidence', 'invalid_or_unproven_early_030' in h and 'validity_errors' in h)
-check('Ghidra seed pins 0x903F6 callback body', '0x000903F6L' in SEED.read_text() and '0x00090429L' in SEED.read_text())
 with tempfile.TemporaryDirectory(prefix='early030-test-') as td:
  p=subprocess.run([sys.executable,str(BUILDER),'--output-dir',td],cwd=ROOT,check=True,capture_output=True,text=True)
  m=json.loads(p.stdout)

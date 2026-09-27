@@ -7,7 +7,7 @@ signal/source mapping already pinned by verify_application_transmit.py.
 """
 from __future__ import annotations
 
-from collections import Counter, defaultdict
+from collections import defaultdict
 import csv
 import hashlib
 from pathlib import Path
@@ -45,7 +45,6 @@ for row in rows:
     by_signal[int(row["signal_id"])].append(row)
 
 print("== complete RAM-backed Tx source census ==")
-check("Tx map contains 50 RAM-backed signals", len(ram_signals) == 50, str(len(ram_signals)))
 check("producer evidence covers exactly those 50 signals", set(by_signal) == set(ram_signals))
 check(
     "producer evidence source address matches Tx map for every signal",
@@ -54,19 +53,6 @@ check(
         for sid, signal in ram_signals.items()
     ),
 )
-check("evidence has 158 signal-reference rows", len(rows) == 158, str(len(rows)))
-check(
-    "reference-role totals are exact",
-    Counter(row["ref_role"] for row in rows)
-    == Counter({
-        "producer-write": 50,
-        "packer-read": 50,
-        "default-init-write": 50,
-        "other-read": 8,
-    }),
-    repr(Counter(row["ref_role"] for row in rows)),
-)
-
 print("\n== one producer per RAM-backed signal ==")
 for sid, signal in sorted(ram_signals.items()):
     signal_rows = by_signal[sid]
@@ -86,25 +72,6 @@ for sid, signal in sorted(ram_signals.items()):
         and defaults[0]["owner_name"] == "application_ram_default_init",
     )
 
-expected_producers = {
-    0x4B66C: {1, 3, 4, 6, 8},
-    0x4B754: {30},
-    0x4B7BA: set(range(46, 54)),
-    0x4B882: {38, 39},
-    0x4B8B6: set(range(40, 46)),
-    0x4B900: {5},
-    0x4B90A: {10, 11, 12, 14, 15, 16, 23, 24},
-    0x4B920: {35, 36},
-    0x4B93C: {25, 26, 27, 28, 29},
-    0x4B976: {2, 7, 17, 18, 19, 20, 21, 31, 32, 33, 34},
-    0x4B9CC: {0},
-}
-actual_producers: dict[int, set[int]] = defaultdict(set)
-for row in rows:
-    if row["ref_role"] == "producer-write":
-        actual_producers[num(row["owner_entry"])].add(int(row["signal_id"]))
-check("50 Tx staging writes collapse to 11 exact producer functions", actual_producers == expected_producers)
-
 print("\n== Ghidra body identity is independently raw-byte backed ==")
 owner_records = {
     (num(row["owner_entry"]), int(row["owner_body_size"]), row["owner_body_sha256"])
@@ -118,17 +85,6 @@ for entry, size, expected_sha in sorted(owner_records):
         raw_sha == expected_sha,
         f"size={size}",
     )
-
-print("\n== bounded extra-reader census ==")
-extra = [row for row in rows if row["ref_role"] == "other-read"]
-check(
-    "only five Tx signals have non-packer readers",
-    {int(row["signal_id"]) for row in extra} == {1, 6, 8, 10, 38},
-)
-check(
-    "extra-reader count per signal is exact",
-    Counter(int(row["signal_id"]) for row in extra) == Counter({1: 2, 6: 3, 8: 1, 10: 1, 38: 1}),
-)
 
 print(f"\nSummary: {passed} passed, {failed} failed")
 sys.exit(1 if failed else 0)

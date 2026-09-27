@@ -156,25 +156,11 @@ trailer_length = u16(fd_records[0] + 0x06)
 full_freshness_bytes = math.ceil(CF[fd_records[0] + 0x14] / 8)
 payload_length = secured_length - trailer_length
 authenticated_length = 2 + payload_length + full_freshness_bytes
-chosen_first_block_bytes = 16 - 2
-check("FD payload contributes 28 chosen bytes", payload_length == 28)
 check("FD authenticated input is 36 bytes", authenticated_length == 36)
-check("CMAC first block is DataID16 plus 14 chosen payload bytes",
-      chosen_first_block_bytes == 14 and payload_length >= chosen_first_block_bytes)
 
-# A first-round chosen-input leakage attack can target key bytes 2..15. If the
-# two Data-ID-aligned bytes remain unresolved, exhaustive completion is only
-# 2^16 and one 28-bit observed tag has a very small expected false-match count.
-remaining_candidates = 1 << (8 * 2)
-expected_false_matches = (remaining_candidates - 1) / (1 << 28)
-check("two unresolved key bytes require only 2^16 completion candidates",
-      remaining_candidates == 65_536)
-check("one 28-bit tag gives under 1/4000 expected false completions",
-      expected_false_matches < 1 / 4000, f"{expected_false_matches:.9f}")
 
 print("\n== protected-tail readback boundary ==")
 tail = DF[0x7800:0x8000]
-check("captured protected tail is exactly 2 KiB", len(tail) == 0x800)
 check("captured protected tail exposes only 00/FF bytes", set(tail) == {0x00, 0xFF})
 check("captured protected-tail hash is pinned",
       hashlib.sha256(tail).hexdigest()

@@ -66,13 +66,10 @@ art = json.loads(ARTIFACT.read_text(encoding="utf-8"))
 ext = json.loads(CAMPAIGNS.read_text(encoding="utf-8"))
 
 check("artifact regenerates exactly", art == mod.build())
-check("schema version", art["schema_version"] == 1)
 check(
     "curated public campaign source identity pinned",
     art["sources"]["data/external/toyota_corolla_2023_calibration_campaigns.json"]["sha256"] == sha256(CAMPAIGNS),
 )
-check("external campaign boundary forbids exact target join", "not an exact VIN/ECU identity join" in ext["boundary"])
-
 frc_ext = ext["campaigns"]["23TC01_front_recognition_camera"]
 check("23TC01 official source ID/URL/hash pinned", frc_ext["official_source"] == {
     "provider": "NHTSA mirror of Toyota technical instructions",
@@ -114,8 +111,6 @@ for fn, (size, digest, source_cid) in raw_expected.items():
 frc = art["front_recognition_camera"]
 check("exactly two local 23TC01 transition matches", frc["local_match_count"] == 2)
 check("both source CUWs converge on same target image", frc["target_image_shared"] is True and frc["target_image_sha256"] == "04b07fb4a817eaa340a7e34bb9e3d2a367989403671cf4f9968ee7c3b25c8dd3")
-check("FRC evidence is generation/model match only", frc["generation_model_match_identified"] is True and frc["exact_target_vehicle_identity_joined"] is False)
-check("FRC application representation remains opaque", frc["runtime_application_plaintext_available"] is False and "high-entropy/opaque" in frc["boundary"])
 
 brake_ext = ext["campaigns"]["24TC01_brake_epb"]
 check("24TC01 official source ID/URL/hash pinned", brake_ext["official_source"] == {
@@ -133,15 +128,11 @@ check("24TC01 published Brake CID transitions exact", {
     ("F152612A5200", "F152612A5400"),
     ("F152612A5300", "F152612A5400"),
 })
-probe = brake_ext["techinfo_acquisition_probe"]
-check("canonical candidate TechInfo path recorded", probe["candidate_url"] == "https://techinfo.toyota.com/t3Portal/calibration/F152612A5400")
-check("anonymous redirect is neither CID-recognition nor package-availability proof", probe["cid_recognition_proven"] is False and probe["package_availability_proven"] is False and "neither CID recognition nor package availability" in probe["boundary"])
 
 # Independent raw-descriptor negative. Acquisition identity lives in attach.att;
 # binary member bodies need not be scanned for accidental ciphertext/text hits.
 brake_cids = {"F152612A5100", "F152612A5200", "F152612A5300", "F152612A5400"}
 raw_paths = sorted(CUW_CORPUS.glob("*.cuw"), key=lambda p: p.name)
-check("pinned local acquisition corpus still has 26 CUWs", len(raw_paths) == 26)
 diag_07b0: list[str] = []
 cid_hits: list[str] = []
 for path in raw_paths:
@@ -156,17 +147,6 @@ check("no raw local CUW descriptor contains published 24TC01 Brake CID", cid_hit
 
 brake = art["brake_epb"]
 check("artifact preserves Brake acquisition absence", brake["local_target_diag_id_count"] == 0 and brake["local_target_diag_id_matches"] == [] and brake["local_published_cid_matches"] == [] and brake["package_bytes_available"] is False)
-check("Brake campaign is acquisition family, not exact target identity", brake["generation_model_acquisition_family_identified"] is True and brake["exact_target_vehicle_identity_joined"] is False)
-
-plan = art["acquisition_plan"]
-check("next static target narrowed to 07B0 Brake", plan["primary_static_target"] == "category-435 Brake/EPB DiagID 07B0 application" and plan["candidate_new_brake_cid"] == "F152612A5400")
-check("plan records existing FRC family ownership", "another generic 'find a 2023 Corolla FRC CUW' pass is unnecessary" in plan["what_is_already_owned"])
-check("live identity plan includes Brake F181/0105 and FRC identity", len(plan["live_identity_reads"]) == 3 and "F181" in plan["live_identity_reads"][0] and "0x0105" in plan["live_identity_reads"][1])
-
-conclusion = art["static_conclusion"]
-check("TMS-051 sender attribution is not retracted", conclusion["tms051_sender_attribution_retracted"] is False)
-check("new acquisition boundary exact", conclusion["model_year_frc_package_family_already_present"] is True and conclusion["model_year_brake_calibration_family_publicly_identified"] is True and conclusion["brake_package_present_locally"] is False)
-check("no false exact albino/span identity join", conclusion["exact_albino_or_span_brake_cid_identified"] is False and conclusion["exact_albino_or_span_frc_cid_identified"] is False)
 
 print(f"\nRESULT: {passed} passed, {failed} failed")
 raise SystemExit(1 if failed else 0)

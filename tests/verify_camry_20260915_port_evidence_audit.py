@@ -12,8 +12,6 @@ BUILDER = ROOT / 'tools/targets/camry/analysis/analyze_camry_20260915_port_audit
 OP = ROOT.parent / 'kai-openpilot'
 LOGS = ROOT.parent.parent / 'logs/camry-2026'
 report = json.loads(ART.read_text())
-assert report['schema'] == 'camry-port-evidence-audit-v1'
-assert report['vehicle_access'] is False
 assert sum(len(rows) for rows in report['route_groups'].values()) == 7
 for group in ('working_repin', 'working_repin_corroboration'):
     for row in report['route_groups'][group]:

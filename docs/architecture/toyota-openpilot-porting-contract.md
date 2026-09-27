@@ -54,7 +54,6 @@ message protection is a separately proved target property.
 The curated variant data now records these as separate `adas_generation` and
 `security_architecture` columns in
 [`../../data/toyota_eps_variant_matrix.csv`](../../data/toyota_eps_variant_matrix.csv).
-This distinction is enforced by `tests/verify_toyota_eps_variant_matrix.py`.
 
 ## 1. What comma's Toyota implementation is actually modeling
 

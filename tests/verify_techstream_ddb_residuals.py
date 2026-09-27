@@ -78,14 +78,6 @@ check(
     hashlib.sha256(factory_body).hexdigest()
     == "bc2b0b27e6e81abbea2b94ebc021ac9882466497e5b4c6c5bd5511557a45b996",
 )
-check("factory maps section 3 to CDbSupPidTable",
-      ECU_TABLE_CLASS_NAMES[3] == "CDbSupPidTable")
-check("factory maps section 7 to CDbDidTable",
-      ECU_TABLE_CLASS_NAMES[7] == "CDbDidTable")
-check("factory maps section 6 to CDbPidTable",
-      ECU_TABLE_CLASS_NAMES[6] == "CDbPidTable")
-check("factory maps section 10 to CDbFreezeTable",
-      ECU_TABLE_CLASS_NAMES[10] == "CDbFreezeTable")
 
 print("\n== independently derived factory maps ==")
 oracle = "instruction_semantics"

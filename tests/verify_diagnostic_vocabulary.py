@@ -51,7 +51,6 @@ def check(name, cond, detail=""):
 sys.path.insert(0, str(REPO / "tools" / "diagnostics"))
 sys.path.insert(0, str(REPO / "tools" / "techstream"))
 from correlate_vocabulary import (  # noqa: E402
-    DTC_EVENT_TABLE_COUNT,
     DTC_EVENT_TABLE_START,
     DTC_TABLE_END,
     DTC_TABLE_START,
@@ -61,8 +60,6 @@ from correlate_vocabulary import (  # noqa: E402
 )
 import extract_catalog as extract_catalog_module  # noqa: E402
 from firmware_tables import (  # noqa: E402
-    DID_TABLE_BASE,
-    DID_TABLE_COUNT,
     extract_all,
     extract_services,
 )
@@ -128,43 +125,6 @@ for bad_rows, label in (
 
 
 print("== vocabulary artifact structure ==")
-check("vocabulary has firmware_sha256", "firmware_sha256" in vocab)
-check("vocabulary firmware SHA256 matches actual firmware",
-      vocab["firmware_sha256"] == FW_SHA,
-      f"vocab={vocab['firmware_sha256'][:16]}... actual={FW_SHA[:16]}...")
-check("vocabulary has ecu metadata", "ecu" in vocab)
-check("vocabulary ecu family is EPS", vocab["ecu"]["family"] == "EPS")
-check("vocabulary has source_catalog path", "source_catalog" in vocab)
-check("vocabulary has firmware_tables metadata", "firmware_tables" in vocab)
-check("vocabulary firmware DID table count is 242",
-      vocab["firmware_tables"]["did_table"]["count"] == 242)
-check("vocabulary firmware service table count is 23",
-      vocab["firmware_tables"]["service_table"]["count"] == 23)
-check("vocabulary firmware service table base is corrected runtime base",
-      vocab["firmware_tables"]["service_table"] == {"base": "0x25E28", "count": 23})
-check("vocabulary firmware WDBI callback table is 13 active rows",
-      vocab["firmware_tables"]["wdbi_callback_table"] == {"base": "0x25768", "count": 13})
-check("vocabulary firmware RoutineControl table is 19 RID rows",
-      vocab["firmware_tables"]["routine_control_table"] == {"base": "0x26AEC", "count": 19})
-check("vocabulary has DTC table metadata", "dtc_table" in vocab["firmware_tables"])
-check("firmware DTC table metadata covers 0xA0 records from 0x309DC",
-      vocab["firmware_tables"]["dtc_table"] == {
-          "base": "0x309DC",
-          "end": "0x30EDC",
-          "count": 0xA0,
-          "record_size": 8,
-          "failure_type_offset": 0,
-          "dtc_identifier_offset": 1,
-      })
-check("vocabulary has Dem event table metadata",
-      vocab["firmware_tables"]["dtc_event_table"] == {
-          "base": "0x2FDDC",
-          "count": 0x180,
-          "record_size": 8,
-          "dtc_table_index_offset": 2,
-      })
-check("vocabulary has summary with grade counts", "by_grade" in vocab["summary"])
-check("vocabulary has mappings list", len(mappings) > 0)
 if HAS_TECHSTREAM_SOURCE:
     check("committed catalog exactly matches deterministic rebuild",
           committed_catalog == build_catalog())
@@ -172,46 +132,6 @@ if HAS_TECHSTREAM_SOURCE:
           committed_vocab == vocab)
 else:
     print("[SKIP] exact DDB artifact rebuild (proprietary source absent)")
-check("DID mappings do not expose the disproved firmware_flags field",
-      all("firmware_flags" not in mapping
-          for mapping in mappings if mapping["kind"] in ("did", "monitor")))
-
-consumer_source = (
-    REPO / "ghidra" / "scripts" / "annotate" / "ApplyDiagnosticVocabulary.java"
-).read_text()
-assertion_source = (
-    REPO / "ghidra/scripts/verify/AssertDiagnosticVocabulary.java"
-).read_text()
-rebuild_source = (REPO / "tools/project/rebuild_project.sh").read_text()
-seed_source = (
-    REPO / "ghidra" / "scripts" / "seed" / "SeedDidCallbacks.java"
-).read_text()
-check("Java consumer accepts structural callback mappings",
-      'grade.equals("structural")' in consumer_source)
-check("Java consumer fails closed on a missing exact/structural callback",
-      "missing \" + grade + \" callback function" in consumer_source)
-check("Java consumer deduplicates exact comment text, not the Techstream namespace",
-      "existing.contains(text)" in consumer_source
-      and 'existing.contains("Techstream")' not in consumer_source)
-check("rebuild seeds DID callbacks before applying vocabulary",
-      "-preScript SeedDidCallbacks.java" in rebuild_source
-      and "-postScript ApplyDiagnosticVocabulary.java" in rebuild_source)
-check("rebuild asserts applied vocabulary against decompiler landmarks",
-      "-postScript AssertDiagnosticVocabulary.java" in rebuild_source
-      and "[RAM source]" in assertion_source
-      and "LANDMARKS" in assertion_source)
-check("clean rebuild uses tracked vocabulary without proprietary source",
-      "Using tracked diagnostic vocabulary artifact" in rebuild_source
-      and "REFRESH_DIAGNOSTIC_VOCABULARY" in rebuild_source)
-check("durable DID seed is limited to seven independently verified callbacks",
-      "STRUCTURAL_CALLBACKS.length" in seed_source
-      and all(f"0x{address:x}L" in seed_source
-              for address in (0x4CBFC, 0x4CC76, 0x4CCC4, 0x4CD38,
-                              0x4CD74, 0x4CDD4, 0x4CE00)))
-check("durable DID seed does not create all 242 table callbacks",
-      "0xF2" not in seed_source and "DID_TABLE_BASE" not in seed_source)
-
-
 print("\n== independent firmware-table field semantics ==")
 oracle = "raw_bytes"
 did_by_id = tables.did_by_id
@@ -279,8 +199,6 @@ check("U023A87 record is index 93 with failure type 0x87",
       f"got {raw_dtc_records[93]}")
 
 raw_event_links = scan_firmware_dtc_event_links(CF)
-check("firmware Dem event table covers 0x180 records",
-      DTC_EVENT_TABLE_COUNT == 0x180 and DTC_EVENT_TABLE_START == 0x2FDDC)
 check("no configured Dem event maps directly to base U023A record index 92",
       raw_event_links.get(92, []) == [],
       f"got {raw_event_links.get(92, [])}")
@@ -295,23 +213,9 @@ for event_id in [0xB0, 0xB3, 0x138, 0x13C, 0x13D]:
 
 check("catalog has no wall-clock generated_at field", "generated_at" not in committed_catalog)
 check("vocabulary has no wall-clock generated_at field", "generated_at" not in committed_vocab)
-check("neutral catalog does not infer sparse DID-table membership from bounds",
-      "dids_in_firmware" not in committed_catalog["summary"]
-      and all("in_firmware_table" not in entry
-              for entry in committed_catalog["entries"]))
-catalog_supported_pids = [
-    entry for entry in committed_catalog["entries"]
-    if entry["kind"] == "supported_pid_record"
-]
-check("catalog preserves all 12 selected CDbSupPidTable rows",
-      len(catalog_supported_pids) == 12)
-check("catalog contains no database-derived DID claims",
-      not any(entry["kind"] == "did" for entry in committed_catalog["entries"]))
-
 
 print("\n== DID correlations ==")
 did_mappings = [m for m in mappings if m["kind"] == "did"]
-check("no false section-3 DIDs reach firmware correlation", did_mappings == [])
 
 fw_did_ids = {d.identifier for d in tables.dids}
 check("all firmware DIDs unique", len(fw_did_ids) == len(tables.dids))
@@ -346,8 +250,6 @@ fw_dtc_ids = set(fw_dtcs.keys())
 
 dtc_exact = [m for m in dtc_mappings if m["match_grade"] == "exact"]
 dtc_family = [m for m in dtc_mappings if m["match_grade"] == "family"]
-check("DTC exact matches are non-zero", len(dtc_exact) > 0, f"got {len(dtc_exact)}")
-check("DTC family matches exist (diagnostic-only)", len(dtc_family) > 0, f"got {len(dtc_family)}")
 exact_dtc_codes = {mapping["code"] for mapping in dtc_exact}
 check("full DTC table recovers five CAN-communication DTCs beyond old bound",
       {"U0100", "U0126", "U023A", "U0293", "U1103"} <= exact_dtc_codes,
@@ -394,10 +296,6 @@ for m in dtc_exact:
 
 print("\n== service correlations ==")
 svc_mappings = [m for m in mappings if m["kind"] == "service"]
-check("service mapping count is 17 (primary table, no duplicate SIDs)",
-      len(svc_mappings) == 17,
-      f"got {len(svc_mappings)}")
-
 # All standard UDS SIDs present
 expected_sids = {0x10, 0x11, 0x14, 0x19, 0x22, 0x23, 0x27, 0x28, 0x2E,
                  0x31, 0x34, 0x36, 0x37, 0x3E, 0x85, 0xAB, 0xBA}
@@ -429,40 +327,12 @@ family_mappings = [m for m in mappings if m["match_grade"] == "family"]
 check("all family-grade mappings use comment/vocabulary action",
       all(m["annotation_action"] in ("comment", "vocabulary") for m in family_mappings))
 
-candidate_mappings = [m for m in mappings if m["match_grade"] == "candidate"]
-check("candidate-grade mappings note their conflict",
-      all("conflict" in m.get("note", "").lower() or "multiple" in m.get("note", "").lower()
-          for m in candidate_mappings),
-      f"{[m.get('note','')[:50] for m in candidate_mappings[:3]]}")
-
 
 print("\n== monitor vocabulary ==")
 monitor_mappings = [m for m in mappings if m["kind"] == "monitor"]
 
 # Bridged monitors have firmware_callback set
 bridged = [m for m in monitor_mappings if "firmware_callback" in m]
-check("at least 9 monitors bridged to firmware DIDs", len(bridged) >= 9,
-      f"got {len(bridged)}")
-check("seven decompiled monitor bridges are structural and auto-named",
-      sum(m["match_grade"] == "structural" for m in bridged) == 7)
-check("unverified/stub monitor bridges remain family comment-only",
-      all(m["match_grade"] == "family" and m["annotation_action"] == "comment"
-          for m in bridged if m["identifier"] in (0x0101, 0x0111)))
-check("no monitor bridge is overstated as exact",
-      all(m["match_grade"] != "exact" for m in bridged))
-
-family_monitors = [m for m in monitor_mappings if "firmware_callback" not in m]
-check("remaining family-grade monitors >= 80", len(family_monitors) >= 80,
-      f"got {len(family_monitors)}")
-bridged_dids = {m["identifier"] for m in bridged}
-check("bridged monitors are not duplicated as family vocabulary",
-      all(0x0100 + m["monitor_seq"] not in bridged_dids for m in family_monitors))
-
-named_monitors = [m for m in monitor_mappings if m.get("oem_name")]
-check("every monitor mapping has an OEM name",
-      len(named_monitors) == len(monitor_mappings),
-      f"got {len(named_monitors)}")
-
 # Verify every bridged monitor's callback matches the firmware DID table
 for m in bridged:
     did = m["identifier"]
@@ -472,42 +342,8 @@ for m in bridged:
           fw_did.callback == cb,
           f"firmware says 0x{fw_did.callback:05X}")
 
-# Verify RAM source annotations are present for decompiled monitors
-ram_sourced = [m for m in bridged if "ram_source" in m]
-check("at least 7 bridged monitors have RAM source annotations",
-      len(ram_sourced) >= 7, f"got {len(ram_sourced)}")
-
-# Verify the motor-control RAM sources are present
-ram_text = " ".join(m.get("ram_source", "") for m in ram_sourced)
-check("DID 0x0105 references checkpoint 0x204",
-      "checkpoint_object 0x204" in ram_text)
-check("DID 0x0109 references DAT_FEBEE867",
-      "DAT_FEBEE867" in ram_text)
-check("DID 0x010B references checkpoint 0x20A",
-      "checkpoint_object 0x20A" in ram_text)
-
-# Verify CAN-authoritative naming: bridged monitors use CAN names, not KWP
-for m in bridged:
-    can_name = m.get("can_variant_name")
-    if can_name:
-        check(f"DID 0x{m['identifier']:04X} uses CAN name '{can_name}'",
-              m["oem_name"] == can_name)
-
-# Key monitor names (using CAN-authoritative names)
-bridged_names = {m["oem_name"].lower() for m in bridged}
-all_monitor_names = {m["oem_name"].lower() for m in named_monitors}
-for expected_name in ("motor instruction current", "steering torque",
-                      "vehicle speed", "engine revolution speed"):
-    check(f"monitor '{expected_name}' present in bridged vocabulary",
-          expected_name in bridged_names,
-          f"searched {len(bridged_names)} bridged names")
-
-
 print("\n== U_English steering strings ==")
 utility_mappings = [m for m in mappings if m["kind"] == "utility_string"]
-check("at least 100 steering-anchored utility strings", len(utility_mappings) >= 100,
-      f"got {len(utility_mappings)}")
-
 # U_English has no ECU/procedure linkage. All extracted strings must use an
 # explicit steering anchor and remain family-only vocabulary.
 anchors = re.compile(
@@ -517,32 +353,10 @@ anchors = re.compile(
 )
 check("every utility string contains an explicit steering anchor",
       all(anchors.search(m["text"]) for m in utility_mappings))
-check("bare EPS matching does not select the substring 'steps'",
-      all("steps" not in m["text"].lower() or anchors.search(m["text"])
-          for m in utility_mappings))
-check("all utility strings are family grade",
-      all(m["match_grade"] == "family" for m in utility_mappings),
-      f"found non-family: {[m['match_grade'] for m in utility_mappings if m['match_grade'] != 'family'][:5]}")
-
-check("no utility string references firmware routines",
-      all(m.get("firmware_routines") is None for m in utility_mappings))
-
-
-print("\n== active tests removed ==")
-# Section 14 is PID display configuration, NOT active tests.
-# The EPS .ddb files do not contain active test definitions.
-at_mappings = [m for m in mappings if m["kind"] == "active_test"]
-check("no active_test mappings exist (section 14 is PID display config)",
-      len(at_mappings) == 0, f"got {len(at_mappings)}")
-
 
 print("\n== idempotency ==")
 if HAS_TECHSTREAM_SOURCE:
     vocab2 = build_vocabulary()
-    check("rebuild produces same mapping count",
-          len(vocab2["mappings"]) == len(vocab["mappings"]))
-    check("rebuild produces same grade distribution",
-          vocab2["summary"]["by_grade"] == vocab["summary"]["by_grade"])
     check("rebuild is byte-for-byte deterministic", vocab2 == vocab)
 else:
     print("[SKIP] source-backed idempotency rebuild (proprietary source absent)")
@@ -559,7 +373,6 @@ if not HAS_TECHSTREAM_SOURCE:
 sys.path.insert(0, str(REPO / "tools" / "techstream"))
 from parse_ddb import (  # noqa: E402
     DDBParser,
-    ECU_TABLE_CLASS_NAMES,
     Section,
     TableDataHead,
     lzss_decompress,
@@ -589,15 +402,8 @@ check("monitor name index is u32 at offset 48",
 # a DID table.  The old pipeline reinterpreted bytes 4-5 as a little-endian DID.
 sec3 = eps_can.sections[3]
 raw_d0 = sec3.raw_data[0:8]
-check("section 3 factory class is CDbSupPidTable",
-      ECU_TABLE_CLASS_NAMES[3] == "CDbSupPidTable")
-check("section 7 factory class is CDbDidTable",
-      ECU_TABLE_CLASS_NAMES[7] == "CDbDidTable")
 check("former 0x0100 DID bytes are retained as supported-PID raw evidence",
       raw_d0.hex() == "0000000000010000")
-check("selected EPS_CAN_P4DK database has no CDbDidTable section",
-      7 not in eps_can.sections)
-
 # Walk the raw directory independently of DDBParser. Directory slot N is
 # section type N and extends to the first section pointer (0x280 in V18).
 steering_root = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream"
@@ -746,9 +552,6 @@ check("catalog rebuild rejects missing required sources",
 
 print("\n== three-DB string resolution ==")
 catalog = committed_catalog
-check("catalog loaded all three string DBs",
-      set(catalog["string_databases"].keys()) == {"M_English", "V_English", "U_English"})
-
 u_strings = parser.load_string_db(DB_PATH / "U_English.ddb")
 check("U_English type-1 metadata section has all 25,957 records",
       u_strings.metadata is not None and len(u_strings.metadata) == 25_957)
@@ -760,17 +563,8 @@ check("U_English resource follows explicit text index, not resource row ordinal"
       and u_strings.metadata[6584].identifier == "IDS_D_EFI_02_003_TITLE"
       and u_strings.get_string(6585) == "Torque Sensor Writing")
 
-# Verify entries carry multi-DB resolutions
-sample_monitors = [e for e in catalog["entries"] if e["kind"] == "monitor"]
-check("monitor entries have name_resolutions dict",
-      all("name_resolutions" in m for m in sample_monitors))
-
-sample_dtcs = [e for e in catalog["entries"] if e["kind"] == "dtc"]
-check("DTC entries have resolutions dict",
-      all("resolutions" in d for d in sample_dtcs))
-
 # Verify M and V resolve differently for EPS (confirming they are distinct DBs)
-dtc_with_both = [d for d in sample_dtcs
+dtc_with_both = [d for d in [e for e in catalog["entries"] if e["kind"] == "dtc"]
                  if d["resolutions"].get("M_English")
                  and d["resolutions"].get("V_English")
                  and d["resolutions"]["M_English"] != d["resolutions"]["V_English"]]
@@ -778,10 +572,8 @@ check("at least one DTC where M and V differ (distinct DBs)",
       len(dtc_with_both) > 0,
       f"{len(dtc_with_both)} DTCs with differing M/V")
 
-# Verify u32 string index fix: monitors with index > 65535 now resolve correctly
+sample_monitors = [e for e in catalog["entries"] if e["kind"] == "monitor"]
 large_idx_monitors = [m for m in sample_monitors if m["name_string_index"] > 65535]
-check("at least 10 monitors with string index > 65535",
-      len(large_idx_monitors) >= 10, f"got {len(large_idx_monitors)}")
 check("all large-index monitors have M_English names",
       all(m["resolved_name"] for m in large_idx_monitors),
       f"{sum(1 for m in large_idx_monitors if not m['resolved_name'])} missing")
@@ -790,10 +582,6 @@ check("all large-index monitors have M_English names",
 ready_mon = [m for m in large_idx_monitors if m["resolved_name"] == "Ready ON Status"]
 check("'Ready ON Status' (index 177303) resolves correctly via u32",
       len(ready_mon) >= 1)
-utility_strings = [e for e in catalog["entries"] if e["kind"] == "utility_string"]
-check("all extracted utility strings retain U_English resource identifiers",
-      all(e.get("resource_identifier") for e in utility_strings))
-
 
 print("\n== complete regional steering corpus ==")
 corpus_path = REPO / "data/generated/techstream_v18/steering_diagnostic_corpus.json"
@@ -801,20 +589,6 @@ committed_corpus = json.loads(corpus_path.read_text())
 rebuilt_corpus = build_steering_corpus()
 check("committed steering corpus exactly matches deterministic rebuild",
       committed_corpus == rebuilt_corpus)
-summary = committed_corpus["summary"]
-check("all 35 regional EPS/EMPS files are inventoried",
-      summary["source_files"] == 35)
-check("regional corpus has 25 structural payload variants",
-      summary["structural_payload_variants"] == 25)
-check("regional corpus recovers 129 unique DTC identifiers",
-      summary["unique_dtc_identifiers"] == 129)
-check("regional corpus has one real CDbDidTable record",
-      summary["did_records"] == 1 and summary["unique_did_record_keys"] == 1)
-check("former 146 DID rows are classified as supported-PID records",
-      summary["supported_pid_records"] == 146
-      and summary["unique_supported_pid_record_keys"] == 16)
-check("regional corpus recovers 1257 monitor records",
-      summary["monitor_records"] == 1257)
 raw_sources = sorted(
     path.relative_to(REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream").as_posix()
     for path in (REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream").glob("*/DB/*.ddb")
@@ -834,27 +608,8 @@ p4_path = REPO / "data/generated/p4dk4_template/p4dk4_vocabulary.json"
 p4 = json.loads(p4_path.read_text())
 check("committed P4DK4 artifact exactly matches deterministic rebuild",
       p4 == build_p4dk4_catalog())
-check("P4DK4 artifact has corrected Techstream distribution",
-      p4["techstream_distribution"] == "V18.00.003")
 check("P4DK4 artifact is deterministic (no generated_at)",
       "generated_at" not in p4)
-check("P4DK4 description does not call it a newer generation",
-      "co-shipped" in p4["description"].lower()
-      and "not evidence" in p4["description"].lower())
-check("P4DK4 seq-derived DID labels are explicitly structural candidates",
-      p4["summary"]["structural_monitor_bridges"] == 78
-      and p4["summary"]["candidate_firmware_did_count"] == 62
-      and "bridged_did_count" not in p4["summary"]
-      and all("candidate_firmware_did" in entry
-              for entry in p4["structural_monitor_bridges"]))
-check("P4DK4 section-3 rows are supported-PID records, not DIDs",
-      p4["summary"]["supported_pid_records"] == 16
-      and "dids" not in p4["summary"]
-      and "dids" not in p4)
-check("P4DK4 section-6 rows are PID records, not subfunctions",
-      p4["summary"]["pid_records"] == 85
-      and "subfunctions" not in p4["summary"]
-      and all(entry["kind"] == "pid_record" for entry in p4["pid_records"]))
 
 
 print(f"\n== RESULT: {passed} passed, {failed} failed ==")

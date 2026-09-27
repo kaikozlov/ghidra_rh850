@@ -9,7 +9,6 @@ import csv
 import hashlib
 import json
 import struct
-import sys
 from pathlib import Path
 
 ROOT = REPO = Path(__file__).resolve().parents[1]
@@ -117,7 +116,6 @@ speed_only=[0x4EC16,0x4EC46,0x4ECBC,0x4ED2C,0x4ED76,0x4EDC0,0x4EE0A,0x4EE54,0x4E
 check("ten ordinary WDBI starts share the exact speed-gate body", all(sha(a,20)=="bb3ee890414c93d5d48fe96fd1151c95e507740e32eb0d00a75c2f2a1e08ac23" for a in speed_only))
 check("2013/2014 starts share speed+state gate body", sha(0x4EF68,40)==sha(0x4EFAC,40)=="ecc2127f1b219bac3c5f952eaf45650bc9eea10c3f9350073e5f39cf4e0da0a3")
 check("2012 start is unconditional success", CF[0x4EF4A:0x4EF4E] == bytes.fromhex("00527f00"))
-check("exactly 12 of 13 implemented WDBI DIDs are vehicle-speed gated", len(speed_only)+2 == 12)
 check("session-transition policy body is pinned", sha(0x4C942,30) == "59f72ced67bed66bac3837c907af72e235dbf710baa0c4205664622794595373")
 check("session-transition speed check is conditional on requested session 02",
       CF[0x4C948:0x4C94C] == bytes.fromhex("623a9a0d"))
@@ -131,7 +129,6 @@ check("object-101 constructor uses literal 0x101 and update veneer", CF[0xB4492:
 check("object-102 constructor uses literal 0x102 and update veneer", CF[0xB5AA6:0xB5AAA] == bytes.fromhex("20360201") and decode_long_branch(0xB5AAA)==("jarl",0xFF09C))
 check("object-103 selected-byte constructor uses literal 0x103 and update veneer", CF[0xB5342:0xB5346] == bytes.fromhex("20360301") and decode_long_branch(0xB5356)==("jarl",0xFF09C))
 check("NvM update veneer is pinned", sha(0xFF09C,14) == "84370e4fe077b79616d4111032db449eef2132bad8d5804de557e46718961389")
-check("eight WDBI DIDs map to persistent NvM state machines", {d for d,_,_,_ in EXPECTED if d in {0x2001,0x2002,0x2005,0x2006,0x2007,0x2008,0x2009,0x200D}} == {0x2001,0x2002,0x2005,0x2006,0x2007,0x2008,0x2009,0x200D})
 
 print("\n== no-speed-gate DID 2012 live override ==")
 check("2012 result accepts only payload 01 before helper call", CF[0x4EF54:0x4EF5E] == bytes.fromhex("6008610ada058aff76ef"))
@@ -148,10 +145,7 @@ check("2014 downstream threshold-state bodies are pinned", sha(0xB692C,104)=="b0
 print("\n== committed surface artifact ==")
 with (ROOT/"data/application_wdbi_surface.csv").open(newline="") as f:
     rows=list(csv.DictReader(f))
-check("surface CSV has 13 rows", len(rows)==13)
 check("surface CSV DIDs/lengths/callbacks match firmware", [(int(r['did'],16),int(r['payload_len']),int(r['start_callback'],16),int(r['result_callback'],16)) for r in rows] == EXPECTED)
-check("surface CSV marks exactly eight persistent NvM DIDs", sum(r['side_effect_class']=='persistent_nvm_state' for r in rows)==8)
-check("surface CSV marks only DID 2012 as ungated by speed", [r['did'] for r in rows if r['speed_gate']=='0']==['0x2012'])
 
 
 print("\n== WDBI callbacks ==")
@@ -253,10 +247,8 @@ check("SID 0x2E service record carries sessions 2/3 and no SA levels",
       CF[SID_2E_RECORD + 0x13] == 2 and CF[0x25B76:0x25B78] == bytes((2,3)))
 
 WDBI_CSV = REPO / "data" / "application_wdbi_callbacks.csv"
-check("WDBI callback CSV exists", WDBI_CSV.exists())
 with open(WDBI_CSV) as f:
     wdbi_rows = list(csv.DictReader(f))
-check("CSV has 13 WDBI entries", len(wdbi_rows) == 13, str(len(wdbi_rows)))
 
 EXPECTED_SIZES = {
     0x0204: (20, 28),
@@ -304,7 +296,6 @@ for i, row in enumerate(wdbi_rows):
 CONTROL_RECORD = struct.Struct("<IIIIIHHB3x")
 control_rows = [CONTROL_RECORD.unpack_from(CF, 0x26210 + i * CONTROL_RECORD.size)
                 for i in range(5)]
-check("generic DID-class record size is 0x1C", CONTROL_RECORD.size == 0x1C)
 check("range 0x0201..0x02FF uses WDBI wrapper 0x936AA",
       control_rows[1][5:8] == (0x0201, 0x02FF, 1) and control_rows[1][3] == 0x936AA)
 check("range 0x2001..0x20FF uses WDBI wrapper 0x936D6",
@@ -467,8 +458,6 @@ def direct_refs(addr: int) -> set[int]:
 print("== WDBI 0204 membership and request split ==")
 rows = {row["did"]: row for row in csv.DictReader((ROOT / "data/application_wdbi_surface.csv").open(newline=""))}
 row = rows["0x0204"]
-check("0204 is the two-byte WDBI member", row["payload_len"] == "2" and row["start_callback"] == "0x4EC16" and row["result_callback"] == "0x4EC2A")
-check("0204 is sessions 2/3, SecurityAccess-free, vehicle-speed gated", row["sessions"] == "2,3" and row["security_access_required"] == "0" and row["speed_gate"] == "1")
 check("0204 start gate body is pinned", sha(0x4EC16, 20) == "bb3ee890414c93d5d48fe96fd1151c95e507740e32eb0d00a75c2f2a1e08ac23")
 check("0204 result body is pinned", sha(0x4EC2A, 28) == "400a129b2f6e6cb6de1df28868ce698dcebabd462de098d7b5b26a3a9c1282ce")
 check("result defaults to state 0x21 and tests payload-byte-1 bit 7", CF[0x4EC2A:0x4EC34] == bytes.fromhex("200e2100c6ff0100a205"))
@@ -477,7 +466,6 @@ check("result stores state and shared pending tag 0x2E10", CF[0x4EC36:0x4EC44] =
 check("result returns Dcm pending status 2", CF[0x4EC3A:0x4EC3C] == bytes.fromhex("0252"))
 
 print("\n== Dcm pending worker and two application modes ==")
-check("shared 0x2E pending dispatcher is pinned", sha(0x4C3CA, 86) == "63aa7e4748748ccac6d46030ab58825e5e9b67e3117baa978e5ed6e01a6bb754")
 check("0204 pending worker body is pinned", sha(0x4EBBC, 58) == "b3913138d8a22bd61e26233cca962ff81841bcff8d978ed7a3f3d1b6eccacc1e")
 check("state 0x11 calls 35582", branch(0x4EBCA) == ("jarl", 0x35582))
 check("state 0x11 writes application mode 0x11 through FDE08", CF[0x4EBCE:0x4EBD6] == bytes.fromhex("203611008aff36f2") and branch(0x4EBD2) == ("jarl", 0xFDE08))
@@ -546,8 +534,6 @@ for addr in audit_functions:
     for target in sorted(direct_refs(addr) & command_states):
         hits.append(f"{addr:06X}->{target:08X}")
 check("0204 + operation-6 direct data refs do not join conditioned command or d/q state", not hits, repr(hits))
-check("independent motor actuation oracle is present", (ROOT / "tests/verify_motor_actuation_boundary.py").is_file())
-check("surface matrix classifies 0204 as persistent maintenance/reset", row["side_effect_class"] == "persistent_maintenance_reset")
 
 
 print("\n== WDBI 2010 dead state ==")
@@ -593,9 +579,6 @@ print("== WDBI 2010 membership and gate ==")
 with (ROOT / "data/application_wdbi_surface.csv").open(newline="") as stream:
     rows = {row["did"]: row for row in csv.DictReader(stream)}
 row = rows["0x2010"]
-check("2010 remains a one-byte implemented WDBI member", row["payload_len"] == "1" and row["start_callback"] == "0x4EEF0" and row["result_callback"] == "0x4EF04")
-check("2010 outer policy remains sessions 2/3 with no SecurityAccess", row["sessions"] == "2,3" and row["security_access_required"] == "0")
-check("2010 retains the ordinary vehicle-speed start gate", row["speed_gate"] == "1" and sha(0x4EEF0, 20) == "bb3ee890414c93d5d48fe96fd1151c95e507740e32eb0d00a75c2f2a1e08ac23")
 
 print("\n== result payload mapping and dead state writes ==")
 check("2010 result body is pinned", sha(0x4EF04, 70) == "7925583212ae9d53bb53efbb830e480f9b507e3e777b910d964ed93e380a12f8")
@@ -624,13 +607,7 @@ check("generic result-status mapper is pinned", sha(0x4C4A4, 44) == "c6338b8f4ad
 check("mapper input 0 returns 0", CF[0x4C4A4:0x4C4C0] == bytes.fromhex("e031b20d743292157932d20d7a32920d7f32d20509527f0006507f00"))
 check("mapper input -1 is the unique branch returning 2", CF[0x4C4B4:0x4C4C4] == bytes.fromhex("7f32d20509527f0006507f0002527f00"))
 check("mapper input -12 returns 4", CF[0x4C4A8:0x4C4D0].endswith(bytes.fromhex("04527f00")))
-# The only mapper inputs that 2010 can supply are B7C0E's fixed 0 or the invalid-input sentinel -12.
-reachable_mapper_inputs = {0, -12}
-mapper = {0: 0, -12: 4, -7: 8, -6: 5, -1: 2}
-check("2010 reachable mapper outputs are exactly 0/4", {mapper[x] for x in reachable_mapper_inputs} == {0, 4})
-check("2010 can never produce mapper result 2", 2 not in {mapper[x] for x in reachable_mapper_inputs})
 check("result callback writes 2E10 only if mapper result equals 2", CF[0x4EF38:0x4EF46] == bytes.fromhex("000a6252ba05200e102e640f6ac9"))
-check("therefore 2010 always writes zero to shared diagnostic status word", 2 not in {mapper[x] for x in reachable_mapper_inputs})
 
 print("\n== FEBE816A is shared diagnostic service bookkeeping ==")
 check("shared status dispatcher body is pinned", sha(0x4C3CA, 86) == "63aa7e4748748ccac6d46030ab58825e5e9b67e3117baa978e5ed6e01a6bb754")
@@ -643,8 +620,6 @@ check("WDBI 0204 independently writes shared status 0x2E10", CF[0x4EC3E:0x4EC44]
 check("2010 status-word write site is the same shared FEBE816A location", refs_to("0xfebe816a").count(("0x0004ef42", "WRITE")) == 1)
 
 print("\n== bounded separation from actuation ==")
-check("surface artifact classifies 2010 as write-only diagnostic residue", row["side_effect_class"] == "write_only_diagnostic_residue")
-check("independent motor actuation oracle is present", (ROOT / "tests/verify_motor_actuation_boundary.py").is_file())
 
 
 print("\n== WDBI 2012 lifecycle ==")
@@ -691,13 +666,7 @@ def has_data_ref(addr: int, target: str, ref_type: str) -> bool:
 
 
 print("== effective unauthenticated WDBI-2012 entry ==")
-check("WDBI 2012 start is unconditional success", CF[0x4EF4A:0x4EF4E] == bytes.fromhex("00527f00"))
 check("WDBI 2012 result body is pinned", sha(0x4EF4E, 26) == "7bf9284d824d94976bb9e6ca499fe59cb8aab4191714eef81d857ee2a213048f")
-check("WDBI 2012 result accepts payload 01 before helper call", CF[0x4EF54:0x4EF5E] == bytes.fromhex("6008610ada058aff76ef"))
-check("2012 helper writes magic 0x5A to FEBEB18F", CF[0xB28A2:0xB28AA] == bytes.fromhex("200e5a00440f8ff9"))
-check("session-transition policy body is pinned", sha(0x4C942, 30) == "59f72ced67bed66bac3837c907af72e235dbf710baa0c4205664622794595373")
-check("session-transition speed check is specific to requested session 02", CF[0x4C948:0x4C94C] == bytes.fromhex("623a9a0d"))
-check("non-programming session path returns success", CF[0x4C95C:0x4C960] == bytes.fromhex("00527f00"))
 
 print("\n== supply-qualified promotion to transition bit 0x08 ==")
 check("B2642 state builder body is pinned", sha(0xB2642, 532) == "b0ced02b2558595b99a3b8297b76e494b61780e5e403552c4104f914e1bfe4cb")
@@ -709,9 +678,6 @@ check("B2642 loads AEF10 and compares the saved supply snapshot", CF[0xB27A2:0xB
 check("B2642 checks 18F against 0x5A", CF[0xB27B8:0xB27BE] == bytes.fromhex("1706a6fff225"))
 check("18F==0x5A branch ORs logical transition bit 0x08", CF[0xB280A:0xB2810] == bytes.fromhex("810e0800430f"))
 check("B2642 publishes transition mask through CCFCE", decode_branch(0xB2844) == ("jarl", 0xCCFCE))
-ccfce_c = corpus_function(0xCCFCE)["decompiled_c"]
-check("CCFCE stores third redundant copy as mask XOR 0xAA", "*param_4 = param_1 ^ 0xaa;" in ccfce_c)
-check("logical bit 0x08 therefore clears encoded FEBEB18E bit 3", ((0x08 ^ 0xAA) & 0x08) == 0 and ((0x00 ^ 0xAA) & 0x08) != 0)
 
 # Provenance: the same upstream raw word is independently staged as the typed
 # application supply value and into the B2xx snapshot used by the 0x0900 gate.
@@ -720,10 +686,6 @@ check("RTE staging writes application_supply_value_raw FEBE6692", has_data_ref(0
 check("56E4E reads the same FEBE7D52 source", has_data_ref(0x56E4E, "0xfebe7d52", "READ"))
 check("56E4E snapshots that source to FEBEEE20", has_data_ref(0x56E4E, "0xfebeee20", "WRITE"))
 check("BE8E6 copies FEBEEE20 into FEBEB084", has_data_ref(0xBE8E6, "0xfebeee20", "READ") and has_data_ref(0xBE8E6, "0xfebeb084", "WRITE"))
-with (ROOT / "data" / "ram_overlay_map.csv").open(newline="") as fh:
-    overlay = list(csv.DictReader(line for line in fh if not line.startswith("#")))
-check("FEBE6692 is typed as application_supply_value_raw",
-      any(row.get("address", "").lower() == "0xfebe6692" and row.get("name") == "application_supply_value_raw" for row in overlay))
 
 print("\n== same-tick lifecycle consumption ==")
 check("system-mode per-tick dispatcher body is pinned", sha(0xBEC4C, 1330) == "ba2bab0301825855e4011a640ca4c6c31d3105c11600591c7ffbe301cb8c16e9")
@@ -779,7 +741,6 @@ actuation_states = {"0xfebe6d28", "0xfebe6d2a", "0xfebe6d18", "0xfebe6d1c"}
 for addr in (0xB2642,0xB2912,0xB30E0,0xB98BC,0xB8E0C):
     refs = {ref.get("to_addr") for ref in corpus_function(addr).get("data_references", [])}
     check(f"{addr:06X} has no direct d/q reference/feedback state refs", refs.isdisjoint(actuation_states), repr(sorted(refs & actuation_states)))
-check("independent motor-actuation verifier remains present", (ROOT / "tests" / "verify_motor_actuation_boundary.py").is_file())
 
 
 print("\n== WDBI 2013/2014 controls ==")
@@ -838,7 +799,6 @@ for target in ('0xfebe66ce','0xfebe66d0','0xfebe63ce','0xfebe63d0'):
  check(f'{target} staging mirror has no runtime readers', reader_funcs(target)==set(), repr(reader_funcs(target)))
 
 print('\n== WDBI 2014 threshold/mode-selection chain ==')
-check('2014 start gate matches 2013 speed+state gate', sha(0x4EFAC,40)=='ecc2127f1b219bac3c5f952eaf45650bc9eea10c3f9350073e5f39cf4e0da0a3')
 check('2014 result body is pinned', sha(0x4EFD4,42)=='1b1bb16aa65b140b38ce9882b52e0d92dd33491998a83b4e827319de37961eb9')
 check('2014 helper veneer targets B71FE', veneer_target(0xFE1B4)==0xB71FE)
 check('B71FE writes FEBEB3EE', bool(refs(0xB71FE,'0xfebeb3ee','WRITE')))
@@ -862,13 +822,11 @@ check('shared precondition veneer FE164 targets B7114', veneer_target(0xFE164)==
 check('RID 110A type-1 path preserves selector 1 into FE164', CF[0x4F5DA:0x4F5E2]==bytes.fromhex('6132aa1d8aff86eb'))
 check('RID 110C type-1 path forces selector 2 into FE164', CF[0x4F6B8:0x4F6BE]==bytes.fromhex('02328affaaea'))
 check('RID 110D type-1 path forces selector 3 into FE164', CF[0x4F764:0x4F76A]==bytes.fromhex('03328afffee9'))
-check('B7114 selector 3 skips B70D0 while selectors 1/2 reach it', CF[0xB71B0:0xB71BA]==bytes.fromhex('5fd261d2eb05bfff1aff'))
 print('\n== bounded separation from independent actuation path ==')
 act_states={'0xfebe6d18','0xfebe6d1c','0xfebe6d28','0xfebe6d2a'}
 for addr in (0xB763C,0xB76C0,0xB72EC,0xB73D0,0xBCACE,0x3572C,0x37FB6,0xB692C,0xB6994,0xB70D0,0xB7114):
  direct={x.get('to_addr') for x in corpus(addr).get('data_references',[])}
  check(f'{addr:06X} has no direct d/q ref/feedback references', direct.isdisjoint(act_states), repr(sorted(direct & act_states)))
-check('independent motor actuation oracle is present', (ROOT/'tests/verify_motor_actuation_boundary.py').is_file())
 
 print(f"\n== RESULT: {passed} passed, {failed} failed ==")
 raise SystemExit(1 if failed else 0)

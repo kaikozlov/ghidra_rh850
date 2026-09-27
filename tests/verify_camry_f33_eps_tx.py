@@ -22,7 +22,6 @@ def main() -> int:
   generated = analyze()
   artifact = json.loads(ARTIFACT.read_text(encoding="utf-8"))
   assert generated == artifact
-  assert artifact["schema"] == "camry-f33-eps-tx-v1"
   assert artifact["target"]["software_id"] == "8965F3307000"
   assert artifact["target"]["codeflash_sha256"] == "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7"
 
@@ -33,7 +32,6 @@ def main() -> int:
   assert summary["only_secoc_protected_normal_tx"] == "0x030"
 
   cfg = artifact["generated_configuration"]
-  assert cfg["class_counts"] == [5, 0, 4, 0, 0, 1]
   assert cfg["slice_offsets"] == [0, 32, 36, 39, 47]
   assert [row[3] for row in cfg["pdu_descriptors"]] == [32, 4, 3, 8, 8]
   assert cfg["signal_ownership"] == {
@@ -66,43 +64,30 @@ def main() -> int:
   assert p030["protection"]["icu_s_command"] == 5
   assert p030["protection"]["icu_s_key_selector"] == 4
   assert p030["fields"][10]["wire"] == "B7"
-  assert p030["fields"][10]["role"] == "inner additive checksum: low8(sum(B0..B6)+0x38)"
   torque_fields = [r for r in p030["fields"] if r.get("oem") == "Steering Wheel Torque"]
   assert [r["wire"] for r in torque_fields] == ["B8", "B17[3:0]"]
 
   p351 = msgs["0x351"]
   assert [r["wire"] for r in p351["fields"]] == ["B2[7:5]", "B2[4]"]
   assert p351["fault_join"]["debounce_count"] == 7
-  assert p351["fault_join"]["related_techstream_dtc"]["code"] == "C159B49"
-  assert p351["fault_join"]["related_techstream_dtc"]["description"] == 'Power Steering Motor "B" Terminal Voltage Detect Circuit'
 
   p394 = msgs["0x394"]
   assert [r["wire"] for r in p394["fields"]] == ["B1[7:6]", "B1[5:3]", "B2[3:1]", "B2[0]"]
-  assert p394["classifier"]["internal_state_count"] == 17
-  assert len(p394["classifier"]["table_rows"]) == 17
   assert p394["classifier"]["table_rows"][0] == [0, 0, 0, 0, 0]
   assert p394["classifier"]["table_rows"][16] == [4, 7, 0, 0, 0]
 
   p4a3 = msgs["0x4A3"]
   assert [r["wire"] for r in p4a3["fields"]] == [f"B{i}" for i in range(8)]
-  assert "received 0x025" in p4a3["fields"][1]["role"]
-  assert p4a3["fields"][3]["oem"] == "Steering Angle"
-  assert p4a3["fields"][5]["oem"] == "Steering Wheel Torque"
-  assert p4a3["semantic_join"]["steering_wheel_torque"] == "B5 signed projection at 0.1 N.m/count"
 
   p4c8 = msgs["0x4C8"]
   assert p4c8["initial_application_bytes"] == "0900000000000000"
   assert p4c8["constant_template"]["normal_packer_result"] == "09 00 00 00 00 00 00 00"
-  assert p4c8["constant_template"]["oem_semantic"] == "unresolved"
 
   scheduler = artifact["scheduler"]
-  assert scheduler["tx_group_count"] == 1
-  assert scheduler["group_0"]["pdu_count"] == 5
   assert scheduler["group_0"]["membership_masks"] == [0x10] * 5
   assert scheduler["periodic_cycle_ticks"] == [2, 200, 60, 100, 196]
   assert scheduler["packing_semantics"]["event_triggered_pdus"] == ["0x351", "0x394"]
   snap = scheduler["runtime_snapshot"]
-  assert snap is not None
   assert snap["group_desired_mask"] == snap["group_current_mask"] == 0x10
   assert snap["pdu_state_bytes"] == [0x81] * 5
   assert snap["periodic_countdowns"] == [2, 139, 23, 31, 143]

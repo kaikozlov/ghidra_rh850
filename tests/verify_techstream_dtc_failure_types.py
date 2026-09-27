@@ -121,9 +121,6 @@ check("SetRecString consumes +0x30/+0x38/+0x34",
           for pattern in ("8b 51 30", "8b 51 38", "8b 51 34")))
 check("FindDbItem1 consumes packed key +0x2C",
       bytes.fromhex("8b 42 2c") in find_key)
-check("no pinned DTC-P5 accessor attributes +0x40 semantics",
-      True,
-      "reported as tail_word, not enabled")
 
 print("\n== corpus-wide failure byte semantics ==")
 oracle = "raw_bytes"

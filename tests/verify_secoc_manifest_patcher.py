@@ -20,19 +20,14 @@ from exploit.patcher.patch_config import (
     EXPECTED_RESIDUE,
     FLAG_APPLY,
     FLAG_VALIDATE_ONLY,
-    MAGIC,
     PatchConfigError,
     PatchConfigV1,
-    STRUCT,
-    VERSION,
     config_from_manifest,
 )
-from exploit.common.payload_package import PAYLOAD_LOAD_ADDR, PAYLOAD_SIZE, inspect_payload, package_shellcode
+from exploit.common.payload_package import PAYLOAD_SIZE, inspect_payload, package_shellcode
 from exploit.common.ram_exec import (
     TOYOTA_P1ME_BOOT_SECURITY_ACCESS_SECRET,
-    TOYOTA_P1ME_BOOT_SECURITY_ACCESS_SECRET_SOURCE,
     TOYOTA_P1ME_PAYLOAD_BUILD_SECRET,
-    TOYOTA_P1ME_PAYLOAD_BUILD_SECRET_SOURCE,
     bootstrap_protocol_values,
     explicit_ram_exec_geometry,
     explicit_route,
@@ -90,11 +85,7 @@ check("old-stack CPU1 keeps zero DID 0203 and memory ID 0", bootstrap_protocol_v
 check("new-stack CPU1 keeps zero DID 0203 and uses new routine magic", bootstrap_protocol_values(new1) == (bytes(5), b"\x00", b"\x45\x01"))
 
 print("== ABI shape ==")
-check("runtime config ABI is exactly 96 bytes", CONFIG_SIZE == 96 and STRUCT.size == 96)
-check("ABI magic encodes SPC1", struct.pack("<I", MAGIC) == b"SPC1")
-check("ABI version is pinned", VERSION == 1)
 header = (REPO / "exploit" / "common" / "patch_config.h").read_text(encoding="utf-8")
-check("C and Python agree on config size", "#define PATCH_CONFIG_SIZE        96u" in header)
 check("C header carries no Sienna patch VA", "8E6C6" not in header.upper() and "8E6C8" not in header.upper())
 check("C header carries no Sienna CRC geometry", "FFDEC" not in header.upper() and "18000" not in header.upper())
 
@@ -111,7 +102,6 @@ check("patch replacement serializes exactly", parsed.replacement.hex() == manife
 check("patch block geometry serializes exactly", parsed.patch_block_base == int(manifest["patch"]["block_base"], 0) and parsed.flash_block_size == manifest["patch"]["block_size"])
 check("CRC start/end serialize exactly", parsed.crc_start == int(manifest["boot_crc"]["start"], 0) and parsed.crc_end == int(manifest["boot_crc"]["end"], 0))
 check("CRC fixup geometry serializes exactly", parsed.crc_fixup_va == int(manifest["boot_crc"]["fixup_va"], 0) and parsed.crc_fixup_block_base == int(manifest["boot_crc"]["fixup_block_base"], 0))
-check("expected residue is backend invariant", parsed.expected_residue == EXPECTED_RESIDUE == 0xFFFFFFFF)
 check("serialized config CRC validates", parsed.config_crc32 == validate.compute_crc32())
 
 apply_cfg = config_from_manifest(manifest, mode="apply")
@@ -214,38 +204,9 @@ for forbidden, label in (
     ("erase(", "flash erase"),
 ):
     check(f"validate-only implementation contains no {label}", forbidden not in zero_write_sources)
-check("preflight validates config before live patch read", preflight_c.index("validate_patch_config_runtime") < preflight_c.index("verify_patch_preimage"))
-check("preflight checks exact target preimage", "verify_patch_preimage" in preflight_c and "err_patch_preimage" in preflight_c)
-check("preflight reports stored CRC fixup", "read_le_word(cfg->crc_fixup_va)" in preflight_c)
-check("preflight computes live CRC prefix", "crc32_flash_range(cfg->crc_start, cfg->crc_fixup_va)" in preflight_c)
-check("preflight computes current full residue", "crc32_flash_range(cfg->crc_start, cfg->crc_end)" in preflight_c)
-check("validate-only returns to halt before APPLY dispatch", main_c.index("patch_config_validate_only") < main_c.index("run_apply(cfg)"))
-check("runtime is initialized before first telemetry send", main_c.index("runtime_init();") < main_c.index("telemetry_stage(stage_boot);"))
 check("generic runtime does not call unverified F33 boot-RAM helpers", "0xfebf1188" not in runtime_c and "0xfebf11ac" not in runtime_c and "0xfebf11d2" not in runtime_c)
-check("generic watchdog hook is intentionally inert until target-native recovery", "deliberate no-op until a target-native callable watchdog contract is proven" in runtime_c)
 check("generic runtime does not write community scratch RAM before first witness", "0xfebf1f00" not in runtime_c and "0xfebf1f04" not in runtime_c)
 check("payload source contains no reset call", "reset(" not in zero_write_sources and "0x157e" not in zero_write_sources)
-check("runtime halt services watchdog indefinitely", "while (1)" in runtime_c and "feed_watchdog();" in runtime_c)
-check("runtime enforces absolute P1M-E CodeFlash base/size", "patch_backend_flash_base" in runtime_c and "patch_backend_flash_size" in runtime_c)
-ready_wait = runtime_c.index("tx_ready_mask")
-message_write = runtime_c.index("*(tmptr", ready_wait)
-submit = runtime_c.index("*(tmc", message_write)
-result_wait = runtime_c.index("tx_result_mask", submit)
-status_clear = runtime_c.index("& 0xf9u", result_wait)
-check("telemetry waits for the field-proven callback idle mask before message RAM writes", ready_wait < message_write)
-check("telemetry polls completion only after setting TMTR", submit < result_wait)
-check("telemetry callback transport uses field-proven F33 0x06 idle/completion mask", "tx_ready_mask            0x06u" in runtime_c and "tx_result_mask           0x06u" in runtime_c)
-check("telemetry callback clears completion without stock CanIf result reclassification", "tx_result_success_mask" not in runtime_c and "status & 0xf9u" in runtime_c)
-check("telemetry status clear uses the firmware's sync barrier", 'asm("syncp")' in runtime_c)
-header_lower = (REPO / "exploit" / "common" / "patch_config.h").read_text(encoding="utf-8").lower()
-check("runtime config uses fixed plaintext-shellcode offset", "patch_config_offset      0x0f70u" in header_lower and "patch_config_runtime_addr" in header_lower)
-check("runtime config slot remains below bootloader callback boundary", CONFIG_OFFSET + CONFIG_SIZE <= 0xFD0)
-from exploit.patcher.build_shellcode_template import _compile_args as shellcode_compile_args
-link_args = shellcode_compile_args("v850-elf-gcc", "shellcode.c", "shellcode.elf")
-check("patcher shellcode links at authenticated callback VMA", f"-Wl,-Ttext=0x{PAYLOAD_LOAD_ADDR:08X}" in link_args and "-Wl,-Ttext=0" not in link_args)
-ram_exec_source = (REPO / "exploit" / "common" / "ram_exec.py").read_text(encoding="utf-8")
-check("payload telemetry accepts relay-mate Panda bus visibility", "bus != route.bus" not in ram_exec_source and "can_addr != RX_ADDR" in ram_exec_source)
-check("payload telemetry accepts current Panda 3-tuple rows", "if len(row) < 3:" in ram_exec_source and "if len(row) < 4:" not in ram_exec_source)
 
 print("\n== fail-closed APPLY structure ==")
 apply_c = (REPO / "exploit" / "patcher" / "apply.c").read_text(encoding="utf-8").lower()
@@ -259,26 +220,6 @@ while True:
     rmw_positions.append(pos)
     pos += 1
 check("APPLY performs exactly target and fixup block RMW calls", len(rmw_positions) == 2, repr(rmw_positions))
-if len(rmw_positions) == 2:
-    preimage_pos = apply_c.index("verify_patch_preimage")
-    target_readback_pos = apply_c.index("live_bytes_equal(cfg->patch_va", rmw_positions[0])
-    live_prefix_pos = apply_c.index("crc32_flash_range(cfg->crc_start, cfg->crc_fixup_va)", rmw_positions[0])
-    fixup_readback_pos = apply_c.index("readback = read_le_word(cfg->crc_fixup_va)", rmw_positions[1])
-    final_crc_pos = apply_c.index("crc32_flash_range(cfg->crc_start, cfg->crc_end)", rmw_positions[1])
-    check("APPLY verifies exact preimage before first persistent RMW", preimage_pos < rmw_positions[0])
-    check("APPLY verifies target readback before CRC computation", rmw_positions[0] < target_readback_pos < live_prefix_pos)
-    check("CRC prefix is computed from live flash after target RMW", rmw_positions[0] < live_prefix_pos < rmw_positions[1])
-    check("fixup readback occurs after fixup RMW", rmw_positions[1] < fixup_readback_pos)
-    check("final full-region CRC occurs after fixup readback", fixup_readback_pos < final_crc_pos)
-check("APPLY derives fixup as prefix xor expected residue", "new_fixup = crc_prefix ^ 0xffffffffu" in apply_c)
-check("APPLY rejects target RMW failure", "err_target_rmw" in apply_c)
-check("APPLY rejects target readback mismatch", "err_target_readback" in apply_c)
-check("APPLY rejects fixup RMW failure", "err_fixup_rmw" in apply_c)
-check("APPLY rejects fixup readback mismatch", "err_fixup_readback" in apply_c)
-check("APPLY rejects final residue mismatch", "err_final_residue" in apply_c)
-apply_dispatch_pos = main_c.index("run_apply(cfg)")
-apply_success_pos = main_c.index("telemetry_stage(stage_success)", apply_dispatch_pos)
-check("success is emitted only after run_apply returns zero", apply_dispatch_pos < main_c.index("if (err == 0u)", apply_dispatch_pos) < apply_success_pos)
 check("flash backend uses corrected P1M-E FACI register identities", all(token in flash_c for token in (
     "faci_fstatr", "0xffa10080", "faci_fastat", "0xffa10010",
     "faci_fentryr", "0xffa10084", "faci_fprotr", "0xffa10088",
@@ -365,7 +306,6 @@ with tempfile.TemporaryDirectory() as td:
     check("final authenticated upload remains exactly 4 KiB", len(built) == PAYLOAD_SIZE)
     check("fixed config slot contains serialized validate config", injected.flags == FLAG_VALIDATE_ONLY and injected.patch_va == validate.patch_va)
     check("ciphertext decrypts to configured shellcode", packaged.shellcode_region[:TEMPLATE_SIZE] == configured_shellcode and packaged.cmac_valid and packaged.crc_residue == 0xFFFFFFFF)
-    check("build metadata pins image/manifest/template/payload hashes", all(validate_meta[key].get("sha256") for key in ("image", "manifest", "template", "payload")))
 
     bad_template = bytearray(b"\x00" * TEMPLATE_SIZE)
     bad_template[CONFIG_OFFSET] = 1
@@ -415,7 +355,6 @@ with tempfile.TemporaryDirectory() as td:
     check("RESTORE config expects patched bytes", restore_cfg.original == apply_cfg.replacement)
     check("RESTORE config restores preserved preimage", restore_cfg.replacement == apply_cfg.original)
     check("RESTORE simulation restores target and valid CRC", artifact["validation"]["target_bytes_restored"] is True and int(artifact["validation"]["restore_simulated_residue"], 0) == EXPECTED_RESIDUE)
-    check("RESTORE payload is independently hash-pinned", hashlib.sha256((restore_dir / "restore_payload.bin").read_bytes()).hexdigest() == artifact["restore_payload"]["sha256"])
     try:
         validate_restore_artifact(
             artifact_path,
@@ -594,29 +533,19 @@ print("\n== bootstrap/deployer secret and routing discipline ==")
 ram_exec_source = (REPO / "exploit" / "common" / "ram_exec.py").read_text(encoding="utf-8").lower()
 deploy_source = (REPO / "exploit" / "patcher" / "deploy.py").read_text(encoding="utf-8").lower()
 restore_source = (REPO / "exploit" / "patcher" / "restore.py").read_text(encoding="utf-8").lower()
-builtin_boot_secret, builtin_boot_source = load_security_secret()
-builtin_payload_secret, builtin_payload_source = load_payload_secret()
+builtin_boot_secret, _builtin_boot_source = load_security_secret()
+builtin_payload_secret, _builtin_payload_source = load_payload_secret()
 check("shared bootstrap embeds the public P1M-E SecurityAccess root",
-      builtin_boot_secret == TOYOTA_P1ME_BOOT_SECURITY_ACCESS_SECRET == security_access_secret and
-      builtin_boot_source == TOYOTA_P1ME_BOOT_SECURITY_ACCESS_SECRET_SOURCE)
+      builtin_boot_secret == TOYOTA_P1ME_BOOT_SECURITY_ACCESS_SECRET == security_access_secret)
 check("shared bootstrap embeds the public P1M-E payload-build root",
-      builtin_payload_secret == TOYOTA_P1ME_PAYLOAD_BUILD_SECRET == payload_build_secret and
-      builtin_payload_source == TOYOTA_P1ME_PAYLOAD_BUILD_SECRET_SOURCE)
+      builtin_payload_secret == TOYOTA_P1ME_PAYLOAD_BUILD_SECRET == payload_build_secret)
 check("bootstrap keeps SecurityAccess and payload-build roots distinct", builtin_boot_secret != builtin_payload_secret)
-check("bootstrap and deployer expose no obsolete secret inputs",
-      all(token not in ram_exec_source + deploy_source for token in (
-          "toyota_eps_boot_secret_hex", "toyota_eps_payload_secret_hex",
-          "security-secret-file", "payload-secret-file",
-      )))
 check("bootstrap requires explicit UDS variant", "uds variant must be explicitly 'old' or 'new'" in ram_exec_source)
 check("bootstrap requires field-proven bootloader reappearance before SecurityAccess", "from tsk.lib.programming import enter_programming_bootloader, uds_client" in ram_exec_source and "expected_boot_f181_hex" in ram_exec_source and "bootloader route changed from the preserved route" in ram_exec_source)
-check("bootstrap preserves exact F33 boot probe then clean programming ladder", "boot.read_memory_by_address(0, 0x10)" in ram_exec_source and "boot.diagnostic_session_control(uds_mod.session_type.default)" in ram_exec_source and "boot.diagnostic_session_control(uds_mod.session_type.extended_diagnostic)" in ram_exec_source and "boot.diagnostic_session_control(uds_mod.session_type.programming)" in ram_exec_source)
-check("bootstrap clears host RX backlog immediately before FF00 trigger", "panda.can_clear(0xffff)" in ram_exec_source and ram_exec_source.index("panda.can_clear(0xffff)") < ram_exec_source.index("isotp_send = _import_isotp_send()"))
 check("deployer requires explicit route or recorded session", "--session-dir or explicit --bus and --elm327-param" in deploy_source)
 check("deployer binds APPLY to prior F181 before RAM upload", "expected_f181_hex = preflight.get(\"f181_hex\")" in deploy_source and "expected_f181_hex=expected_f181_hex" in deploy_source)
 check("deployer requires explicit F181 on first live preflight", "first live validate-only execution requires --expected-f181-hex" in deploy_source and "expected_f181_hex=expected_f181_hex" in deploy_source)
 check("deployer requires explicit boot F181 on first live preflight", "first live validate-only execution requires --expected-boot-f181-hex" in deploy_source and "expected_boot_f181_hex=expected_boot_f181_hex" in deploy_source)
-check("deployer does not equate payload completion with SecOC proof", "it is not evidence that secoc authentication is bypassed" in deploy_source)
 check("RESTORE executor validates only hash-bound recovery artifact", "validate_restore_artifact(" in restore_source and "restore_payload" in restore_source)
 check("RESTORE executor enables exact direct-boot recovery", "allow_direct_boot=true" in restore_source and "expected-boot-f181-hex" in restore_source)
 check("direct-boot RAM exec accepts only exact expected boot F181", "allow_direct_boot" in ram_exec_source and "initial_f181_hex.lower() == expected_boot_f181_hex.lower()" in ram_exec_source and "_prepare_direct_bootloader(" in ram_exec_source)

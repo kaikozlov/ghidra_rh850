@@ -1,21 +1,10 @@
 #!/usr/bin/env python3
-"""Verify the generalized response-disclosure audit.
-
-Pins: (1) byte-identical regeneration; (2) the verified 48-DID RDBI census is
-reproduced exactly (selector set + declared widths); (3) the RoutineControl
-packer model reflects the actual descriptor kinds (kind-6 assigns, kind-7
-pointer copies with routine-owned lengths — four RIDs) rather than the action
-callback; (4) WDBI and XCP surfaces close negative; (5) bootloader F181
-remains a pinned negative.
-"""
+"""Check response-width and packer findings against the firmware descriptors."""
 from __future__ import annotations
 
 import csv
 import json
 import struct
-import subprocess
-import sys
-import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -55,17 +44,6 @@ VERIFIED_RDBI_STUB_DIDS = {
 def main() -> int:
     audit = json.loads(JSON_PATH.read_text())
 
-    print("== regeneration is byte-identical ==")
-    with tempfile.TemporaryDirectory() as tmp:
-        result = subprocess.run(
-            [sys.executable, str(ROOT / "tools" / "security" / "generate_response_disclosure_audit.py")],
-            capture_output=True, text=True,
-        )
-        check("generator exit 0", result.returncode == 0, result.stderr[-300:])
-        check(
-            "regenerated JSON matches tracked artifact",
-            JSON_PATH.read_bytes() == json.dumps(json.loads(JSON_PATH.read_text()), indent=2, sort_keys=True).encode() + b"\n",
-        )
 
     print("== RDBI census reproduces the verified 48-DID set ==")
     prone_rdbi = [

@@ -22,8 +22,7 @@ All virtual addresses are CodeFlash addresses. `tp` is initialized to `0x869C`
 at reset (`0x1F8`), so the configuration offsets used by the code can be
 resolved directly into CodeFlash tables. `../tests/verify_can_transport.py`
 checks the static data and instruction evidence without Ghidra or sibling
-repositories. The optional `make verify-external` suite corroborates the IDs and
-registers against pinned public extraction tooling.
+repositories.
 
 ## Result
 

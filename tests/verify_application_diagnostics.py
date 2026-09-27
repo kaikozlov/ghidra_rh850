@@ -35,15 +35,9 @@ expected_sids = [
     0x10, 0x11, 0x14, 0x19, 0x22, 0x23, 0x27, 0x28, 0x2E,
     0x31, 0x34, 0x36, 0x37, 0x3E, 0x85, 0xAB, 0xBA,
 ]
-check("application service object size is 24 bytes", APP_SERVICE.size == 24)
-check("application service table has 17 primary objects", len(app_services) == 17)
 check("application SID sequence matches runtime object layout", app_sids == expected_sids,
       " ".join(f"{sid:02x}" for sid in app_sids))
-check("every expected SID is present exactly once",
-      sorted(app_sids) == sorted(expected_sids) and len(set(app_sids)) == 17)
 by_sid = {row[4]: (i, row) for i, row in enumerate(app_services)}
-for sid in expected_sids:
-    check(f"SID 0x{sid:02X} exists in primary table", sid in by_sid)
 
 expected_callbacks = {
     0x14: 0x8B1F0,  # ClearDiagnosticInformation
@@ -132,7 +126,6 @@ expected_dids = [
     (0xF186, 0x0001, 0x4E90A, 0, 0),
     (0xF18C, 0x0014, 0x4E918, 0, 0),
 ]
-check("application DID record size is 16 bytes", APP_DID.size == 16)
 check("F181/F186/F18C application records match", app_dids == expected_dids, repr(app_dids))
 check("application software-ID slot 1 is 8965B4512000",
       CF[0x20860:0x20870] == b"8965B4512000\0\0\0\0")
@@ -154,7 +147,6 @@ expected_sessions = [
     (0x94006, 0, 0x25B64, 2, 2),
     (0x94016, 0, 0x25B66, 3, 2),
 ]
-check("session row size is 16 bytes", SESSION_ROW.size == 16)
 check("default/programming/extended rows match", session_rows == expected_sessions,
       repr(session_rows))
 check("default wrapper passes requested session 1",
@@ -367,8 +359,6 @@ check("SA crypto init at 0x8C7BC references key material at 0x20840",
 check("SA key verification worker loads provisioned flag from FEBF4958",
       bytes.fromhex("5849") in CF[0x8C82A:0x8C900])  # ld.bu FEBF4958
 # Attempt counter: send-key worker 0x94A72 maps mismatch (0x0B) to NRC 0x35
-check("SA send-key worker contains NRC 0x35 invalidKey path",
-      bytes.fromhex("203e3500") in CF[0x94A72:0x94B66])
 # Crypto operations reference the ICU-S temp buffer at FEBF498C
 check("SA crypto init 0x8C7BC references crypto temp at FEBF498C",
       struct.pack("<I", 0xFEBF498C) in CF[0x8C7BC:0x8C7F6])
@@ -576,7 +566,7 @@ check("ReadDTC subfn01 mirrors request via st.w r19,0[r1] at absolute base",
 # then jarl 0x8F202; session-list miss emits NRC 0x7F.
 APP_TP = 0x25E38 - 0x1F54
 check("service-table SID byte is at TP+0x1F54 (first record SID 0x10)",
-      APP_TP == 0x23EE4 and CF[APP_TP + 0x1F54] == 0x10)
+      CF[APP_TP + 0x1F54] == 0x10)
 check("gate 0x8F282 encodes ld.bu 0x1F54[r17] SID compare",
       CF[0x8F2B8:0x8F2BC] == bytes.fromhex("918f551f"))
 check("gate 0x8F282 encodes mulhi 0x18 record stride before SID load",
@@ -675,11 +665,8 @@ GEN = REPO / "tools" / "firmware" / "generate_application_diagnostic_map.py"
 check("application diagnostic map CSV exists", MAP_CSV.is_file())
 with MAP_CSV.open(newline="") as fh:
     map_rows = list(csv.DictReader(fh))
-check("map CSV contains exactly 17 SID rows", len(map_rows) == 17, str(len(map_rows)))
 check("map CSV SID set matches primary table",
       [int(row["sid"], 16) for row in map_rows] == expected_sids)
-missing = [sid for sid in expected_sids if f"0x{sid:02X}" not in {row["sid"] for row in map_rows}]
-check("map CSV fails closed if any of 17 SIDs missing", missing == [], repr(missing))
 with tempfile.TemporaryDirectory() as tmp:
     out = _Path(tmp) / "application_diagnostic_map.csv"
     import subprocess

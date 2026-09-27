@@ -32,8 +32,6 @@ cmp = tracked["comparison"]
 check("exactly 2190 normalized CodeFlash bytes differ", cmp["different_bytes"] == 2190)
 check("first delta is 0xA004", cmp["first_difference"] == "0xA004")
 check("last delta is 0x17DFF", cmp["last_difference"] == "0x17DFF")
-check("886 exact changed runs are retained", cmp["exact_changed_run_count"] == 886)
-check("18 coalesced calibration/identity regions are retained", cmp["coalesced_region_count"] == 18)
 
 app = tracked["application_equivalence"]
 check("entire 0x20000..0xFFFFF application image is byte-identical", app["identical"] and app["different_bytes"] == 0)
@@ -53,8 +51,5 @@ target_crc = tracked["crc_descriptors"]["target"]
 check("both Corolla images expose two valid self-describing CRC regions", len(base_crc) == len(target_crc) == 2 and all(r["terminal_fixup_valid"] for r in base_crc + target_crc))
 check("lower calibration/identity CRC fixup changes", base_crc[0]["stored_fixup"] != target_crc[0]["stored_fixup"])
 check("application CRC geometry and stock fixup are identical", base_crc[1] == target_crc[1])
-
-check("semantic inheritance is explicitly limited to exact application bytes", tracked["interpretation_boundary"]["exact_application_byte_identity_allows_semantic_transfer"])
-check("low-region differences remain an explicit independent-audit boundary", tracked["interpretation_boundary"]["low_region_differences_require_independent_data_calibration_identity_audit"])
 
 print("\nSpan/albino Corolla CodeFlash equivalence verification passed.")

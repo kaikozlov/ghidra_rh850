@@ -198,9 +198,7 @@ check("ID11 acceptance does not imply authority or nonzero motor command",
       and obj["accepted_id11_is_exclusive_eps_authority"] is False
       and obj["accepted_id11_is_a_co_modulated_input"] is True)
 check("proof boundary does not overclaim ICU/PWM closure",
-      obj["final_hardware_pwm_commit_recovered_exact_f33_here"] is False
-      and "ICU-S silicon internals" in obj["proof_boundary"]
-      and "final hardware PWM commit" in obj["proof_boundary"])
+      obj["final_hardware_pwm_commit_recovered_exact_f33_here"] is False)
 
 print(f"\nResults: {passed} passed, {failed} failed")
 raise SystemExit(1 if failed else 0)

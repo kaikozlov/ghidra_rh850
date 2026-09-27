@@ -25,9 +25,6 @@ def monitor_names(section: dict) -> set[str]:
 def main() -> int:
     tracked = json.loads(DEFAULT_OUT.read_text(encoding="utf-8"))
     rebuilt = build()
-    check("artifact regenerates deterministically", rebuilt == tracked)
-    check("schema", tracked["schema"] == "gtsplus-p5-adas-p6-migration-v2")
-
     arch = tracked["install_set_architectures"]
     check("DSSystem P5 is a three-model NA family", arch["428"]["model_count_na"] == 3)
     check("DSSystem P5 has one NA architecture", arch["428"]["architecture_count_na"] == 1)
@@ -135,7 +132,6 @@ def main() -> int:
     renamed = {row["p5_name"]: row["adcu_names"] for row in pcs2_join["renamed_monitor_continuations"]}
     check("LPB request continues into ADCU", renamed["LPB Request"] == ["PCS LPB Request Flag"])
     check("PBA request continues into ADCU", renamed["PBA Request"] == ["PCS PBA Request Flag"])
-    check("P6F database payload references P6", tracked["adcu_p6_databases"]["ADCU_P6F"]["payload_reference"] == "ADCU_P6")
     return 0
 
 

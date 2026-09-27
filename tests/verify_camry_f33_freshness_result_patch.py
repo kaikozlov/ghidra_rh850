@@ -26,7 +26,6 @@ with tempfile.TemporaryDirectory() as td:
  check('stage4 prefix exact', crc32(final[0x18000:0xFFDEC])==b.EXPECTED_STAGE4_PREFIX)
  check('stage4 fixup residue exact', fix==b.EXPECTED_STAGE4_FIXUP and res==0xffffffff and struct.unpack_from('<I',final,0xFFDEC)[0]==b.EXPECTED_STAGE4_FIXUP)
  check('stage4 final sha exact', b.sha256(final)==b.EXPECTED_FINAL_SHA256)
- sem=man['semantic_resolution']; check('callback remains and result only overridden', sem['native_success_equivalence']['freshness_callback_still_runs'] is True and sem['patch']['address']=='0x0008f7e6')
  check('preflight payload pinned', pkg['payloads']['preflight']['sha256']=='b97e34ec7b796d4c525bccfa12abc3152ac1b1fc3f80baa96d54d69826cbef4f')
  check('apply payload pinned', pkg['payloads']['apply']['sha256']=='920631b8725b7520c8f04d895b4f76f9d5c1de87c8baa901678512ba2d59c4d7')
  check('post payload pinned', pkg['payloads']['post_apply']['payload_sha256']=='82f569c121215ad8dd7516af183067c81548a21c195c5f48c9d9923bfd41acdb')

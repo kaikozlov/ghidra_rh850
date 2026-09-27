@@ -36,7 +36,7 @@ endif
 	generate-dataflash generate-application-diagnostics generate-diagnostic-vocabulary generate-techstream-corpus \
 	generate-application-receive-evidence generate-application-receive generate-application-transmit \
 	generate-processor-fixture generate-function-discovery generate-semantic-coverage generate-project-inventory \
-	generate-semantic-sweep generate-decompiler-corpus pseudocode \
+	generate-decompiler-corpus pseudocode \
 	verify-project-parity update-project-baseline \
 	rebuild-project work-project snapshot-project finalize-project build-init build-status clean-build
 
@@ -143,9 +143,6 @@ generate-function-discovery:
 
 generate-semantic-coverage:
 	GHIDRA_ANALYSIS_TARGET="$(LEGACY_SIENNA_TARGET)" PROJECT_DIR="$(LEGACY_SIENNA_PROJECT_DIR)" tools/project/export_ghidra_project.sh semantic-coverage
-
-generate-semantic-sweep:
-	$(PYTHON) tools/project/generate_semantic_sweep.py --project-dir "$(LEGACY_SIENNA_PROJECT_DIR)"
 
 generate-decompiler-corpus:
 ifeq ($(TARGET),$(LEGACY_SIENNA_TARGET))

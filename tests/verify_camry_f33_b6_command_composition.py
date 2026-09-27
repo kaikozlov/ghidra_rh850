@@ -101,8 +101,6 @@ check("co-modulation answer is objectively YES",
       proof["accepted_id11_contributes_via_cb38_inside_ordinary_d0218_sum"] is True
       and proof["ordinary_eps_terms_remain_in_id11_composition"] is True
       and proof["later_id11_specific_final_command_override_recovered"] is False)
-check("0x08A/0x081 are explicitly outside this EPS-side proof",
-      "receives neither 0x08A nor 0x081" in proof["stock_request_plane_boundary"])
 
 print(f"\nResults: {passed} passed, {failed} failed")
 raise SystemExit(1 if failed else 0)

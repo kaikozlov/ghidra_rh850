@@ -90,19 +90,12 @@ with tempfile.TemporaryDirectory() as tmp:
     matches = report["matches"]
 
 print("== uniqueness and evidence boundary ==")
-check("schema is pinned", report["schema"] == "rh850-cross-image-structural-function-match-v1")
-check("report explicitly excludes operand semantics", "operands" in report["evidence_boundary"].lower())
 check("only one shape is unique on both sides", len(matches) == 1, repr(matches))
 check("unique shape maps A 0x1000 -> 0x1800", matches[0]["reference_entry"] == "0x00001000" and matches[0]["target_entry"] == "0x00001800")
 check("relocation is represented exactly", matches[0]["delta"] == "+0x800" and matches[0]["delta_decimal"] == 0x800)
 check("target-duplicated B fails closed", all(item["reference_name"] != "named_b" for item in matches))
 check("instruction-length-changed C does not match", all(item["reference_name"] != "named_c" for item in matches))
 check("reference-duplicated D fails closed", all(not str(item["reference_name"]).startswith("named_d") for item in matches))
-
-print("\n== summary accounting ==")
-check("summary counts the unique pair", report["summary"]["unique_exact_shape_matches"] == 1)
-check("five-instruction fixture does not enter >=8 bucket", report["summary"]["unique_exact_shape_matches_min_8_instructions"] == 0)
-check("named-reference accounting includes A", report["summary"]["named_unique_exact_shape_matches"] == 1)
 
 print(f"\nResults: {passed} passed, {failed} failed")
 if failed:

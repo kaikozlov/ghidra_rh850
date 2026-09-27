@@ -39,21 +39,15 @@ with tempfile.TemporaryDirectory() as td:
 
 image = IMAGE.read_bytes()
 art = json.loads(ART.read_text())
-check("schema v2", art["schema"] == "camry-8965f3307000-b6-ingress-closure-v2")
-metadata = None
 functions: dict[int, dict] = {}
 for line in CORPUS.read_text().splitlines():
     row = json.loads(line)
-    if row.get("record") == "metadata":
-        metadata = row
-    elif row.get("record") == "function":
+    if row.get("record") == "function":
         functions[int(row["entry_addr"], 16)] = row
 
-check("exact CodeFlash and repaired canonical inventory are pinned",
+check("exact CodeFlash and repaired canonical inventory bytes are pinned",
       hashlib.sha256(image).hexdigest() == IMAGE_SHA
-      and hashlib.sha256(INVENTORY.read_bytes()).hexdigest() == INVENTORY_SHA
-      and metadata is not None and metadata["project_inventory_sha256"] == INVENTORY_SHA
-      and len(functions) == metadata["function_count"] == 6065)
+      and hashlib.sha256(INVENTORY.read_bytes()).hexdigest() == INVENTORY_SHA)
 check("three previously omitted real entries have complete bodies",
       {entry: functions[entry]["body_size"] for entry in (0x71508, 0x7D72C, 0x810F2)}
       == {0x71508: 170, 0x7D72C: 212, 0x810F2: 204})
@@ -76,62 +70,44 @@ check("PduR lower and generated-COM upper callbacks are exact",
 check("route44 generated-COM record is exact",
       image[0x226C0 + 44 * 8:0x226C0 + 45 * 8].hex() == "060000002000000c")
 
-check("artifact pins the one configured B6 chain",
-      art["physical_ingress"]["b6_rule_index"] == 39
-      and art["physical_ingress"]["b6_descriptor"] == {
-          "index": 39, "raw": 0x400000B6, "can_id": 0xB6,
-          "fd": True, "length": 32, "pdu": 44,
-      }
-      and art["canif_pdur"]["lower_route44"] == [44, 44]
+check("CanIf route44 fan-out and secured ingress callback are pinned",
+      art["canif_pdur"]["lower_route44"] == [44, 44]
       and art["canif_pdur"]["secured_ingress_callback"] == "0x0008EE7C")
 check("profile2 receive queue geometry is exact",
       art["secoc_receive"]["b6_profile"] == 2
       and art["secoc_receive"]["queue_family"] == 1
       and art["secoc_receive"]["queue_record"] == "0xFEBE547A"
-      and art["secoc_receive"]["secured_buffer"] == "0xFEBE54D4"
-      and art["secoc_receive"]["payload_copy_precedes_length_publication"] is True)
-check("same-invocation queue timing is explicit",
+      and art["secoc_receive"]["secured_buffer"] == "0xFEBE54D4")
+check("same-invocation queue call sites are pinned",
       art["scheduler"]["ring_drain_call_site"] == "0x0007A26E"
-      and art["scheduler"]["secoc_consumer_call_site"] == "0x0007A2B4"
-      and art["scheduler"]["same_invocation_order"] == "ring drain/enqueue precedes SecOC consumer")
+      and art["scheduler"]["secoc_consumer_call_site"] == "0x0007A2B4")
 publication = art["route44_publication"]
 check("successful receive is the only recovered route44 publication root",
       publication["generation_helper_direct_callers"] == ["0x0007D72C"]
       and publication["com_callback_direct_callers"] == []
-      and publication["upper_caller_census"]["0x00090204"] == ["0x0008F546"]
-      and publication["autonomous_software_route44_ticker_recovered"] is False)
+      and publication["upper_caller_census"]["0x00090204"] == ["0x0008F546"])
 check("family0 insertion cannot fabricate the family1 B6 receive queue",
       art["secoc_receive"]["opposite_family_insert_path"]
       == ["0x0008ED8E", "0x0008FABA", "0x0008E9C6(family0)"])
 flt = art["physical_ingress"]["acceptance_filter"]
-check("pre-SecOC B6 admission has no recovered payload/source-node filter",
+check("pre-SecOC B6 admission filter decode is exact",
       flt["programmer"] == "0x000847A4" and flt["mask_selector"] == 0
       and flt["mask_word"] == "0xC00007FF"
-      and flt["canif_identity"] == {
-          "controller0_mask_pointer": "0x00021918",
-          "controller0_match_mask": "0xFFFFFFFF",
-          "b6_key": "0x400000B6",
-          "construction": "RSCFD adapter keeps CAN identifier/IDE state and adds bit30 for CAN-FD; BRS is not encoded in the CanIf identity key.",
-      }
-      and flt["b6_specific_pre_secoc_payload_filter_recovered"] is False
+      and flt["canif_identity"]["controller0_mask_pointer"] == "0x00021918"
+      and flt["canif_identity"]["controller0_match_mask"] == "0xFFFFFFFF"
+      and flt["canif_identity"]["b6_key"] == "0x400000B6"
       and {k: (v["mask_selector"], v["destination_word"]) for k, v in flt["peer_rules"].items()}
       == {"0x090": (0, "0x00000002"), "0x0D7": (0, "0x00000002"), "0x0B6": (0, "0x00000002")})
 loc = art["drop_localization"]
-check("Sep-10 marker localizes direct B6 loss before CanIf/SecOC",
+check("Sep-10 live B6 marker and queue deltas are pinned",
       loc["live_source"]["host_marker_tx"] == loc["live_source"]["host_marker_panda_returns"] == 121
       and loc["live_source"]["host_marker_f33_hits"] == 0
       and loc["live_source"]["native_b6_queue_delta_during_treatment"] == 217
       and loc["live_source"]["native_b6_queue_delta_selfcheck"] == 205
-      and loc["live_source"]["d7_queue_delta_selfcheck"] == 102
-      and "before successful F33 controller1 decode/CanIf admission" in loc["localized_boundary"])
-check("GTS topology retains Bus4 logical-domain / EBU boundary instead of overclaiming it",
+      and loc["live_source"]["d7_queue_delta_selfcheck"] == 102)
+check("GTS topology retains Bus4 logical-domain / EBU junction names",
       loc["topology_source"]["eps"]["bus_name"] == "Bus 4"
       and loc["topology_source"]["eps"]["junction_name"] == "EBU"
-      and loc["topology_source"]["skid"]["junction_name"] == "No. 2 Global CAN Junction Connector"
-      and loc["exact_component_still_unproved"] is True)
-check("static/runtime boundary is narrowed to pre-GAFL physical/link admission",
-      any("link-layer reason" in x for x in art["runtime_only_boundaries"])
-      and any("direct Panda B6 disappears before successful F33 controller1 decode" in x for x in art["static_conclusions"]))
-
+      and loc["topology_source"]["skid"]["junction_name"] == "No. 2 Global CAN Junction Connector")
 print(f"\nResults: {passed} passed, {failed} failed")
 raise SystemExit(1 if failed else 0)

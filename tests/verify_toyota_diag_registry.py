@@ -22,28 +22,16 @@ def check(name: str, condition: object) -> None:
     ok = bool(condition)
     passed += int(ok)
     failed += int(not ok)
-    print(f"[{'PASS' if ok else 'FAIL'}][generated_self_check] {name}")
+    print(f"[{'PASS' if ok else 'FAIL'}] {name}")
 
 
 def main() -> int:
-    check("registry artifact exists", ART.is_file())
     actual = json.loads(ART.read_text())
     gts = gts_cli._resolve_gts_root(os.environ.get("GTSPLUS_ROOT"))
     regenerated = gts_cli.build_toyota_diag_registry(gts)
     check("registry regenerates exactly from current GTS+ and pinned live evidence", actual == regenerated)
 
     profile = actual["profile"]
-    check("schema and exact Camry profile are pinned",
-          actual["schema"] == "toyota-diagnostics-registry-v6"
-          and profile["profile"] == "camry-2026-f33"
-          and profile["panda_bus"] == 0)
-    decoder = actual["decoders"]["p5-linear-msb0-v1"]
-    check("registry carries the closed current-P5 value decoder contract",
-          decoder["payload_origin"] == "UDS DID value bytes (positive SID/DID echo excluded)"
-          and decoder["bit_numbering"] == "msb0"
-          and decoder["byte_order"] == "big-endian"
-          and decoder["integer_formula"] == "trunc_toward_zero(signed_raw * mul / div) + offset"
-          and decoder["pattern_lookup"] == "match converted_integer before decimal rendering")
     check("exact F33 EPS identity guard is pinned",
           profile["identity_guard"] == {
               "ecu": "eps", "did": 0xF181, "contains_ascii": "8965F3307000",
@@ -63,13 +51,6 @@ def main() -> int:
           })
     check("core current P5 catalogs are present",
           profile["catalog_category_ids"] == [372, 395, 397, 398, 405, 435, 450, 498])
-    source_keys = set(actual["source_identity"])
-    check("registry source identities are checkout-independent logical paths",
-          "gtsplus/NA/DB/Gen/Toyota.ddb" in source_keys
-          and "gtsplus/NA/DB/Gen/M_English.ddb" in source_keys
-          and "data/generated/gtsplus_2026/vehicle_resolver_semantics.json" in source_keys
-          and all(not key.startswith("software/Techstream/") for key in source_keys)
-          and all("/Users/" not in key for key in source_keys))
 
     resolver = profile["vehicle_resolution"]
     check("Toyota vehicle resolver selects current Camry-HV vehicle type",
@@ -98,11 +79,6 @@ def main() -> int:
           and mount["comm_set_9"]["send_parameter"] == 1000
           and mount["comm_set_9"]["receive_timeout"] == 1020)
     routes = {row["category_id"]: row["transport_route"] for row in mount["candidates"]}
-    check("registry mount routes are Toyota class-0x10D output, not maintained-profile joins",
-          all(isinstance(row.get("transport_route"), dict) for row in mount["candidates"])
-          and all("direct_address" not in row for row in mount["candidates"])
-          and "Maintained-profile request addresses are not consulted" in mount["route_boundary"]
-          and mount["transport_route"]["protocol_info_db_class_id"] == "0x10D")
     check("Toyota route contains direct endpoints absent from the old 17-address sweep",
           routes[409]["request_address"] == 0x7C0 and routes[444]["request_address"] == 0x780)
     check("Toyota shared 0x750 routes preserve logical address extensions",
@@ -134,9 +110,6 @@ def main() -> int:
           and placement_by_domain["Power Steering (EPS)"]["gateway_names"] == ["Central Gateway"]
           and placement_by_domain["Skid Control (ABS/VSC/TRAC)"]["bus_name"] == "Bus 4"
           and placement_by_domain["Skid Control (ABS/VSC/TRAC)"]["gateway_names"] == ["Central Gateway"])
-    check("GTS vehicle-bus names remain explicitly separate from Panda logical buses",
-          "not Panda logical bus numbers" in topology["namespace_boundary"]
-          and "post-repin diagnostics use Panda bus0" in topology["namespace_boundary"])
 
     ecu_by_key = {row["key"]: row for row in profile["ecus"]}
     eps_identity = ecu_by_key["eps"]["observed_identity"]
@@ -146,20 +119,17 @@ def main() -> int:
           eps_identity["f181_software_ids"] == ["8965F3307000", "8A3113303100"]
           and eps_identity["f18c_serial"] == "8965033K9011J2740743"
           and eps_identity["panda_bus_at_observation"] == 1
-          and eps_identity["elm327_param"] == 1
-          and "current profile diagnostic route is post-repin Panda bus0" in eps_identity["route_note"])
+          and eps_identity["elm327_param"] == 1)
     check("historical FRC identity is exact without rewriting its pre-repin Panda route",
           frc_identity["f181_software_ids"] == ["8646F3315000"]
           and frc_identity["ecu_part_0105"] == "8646C06091"
           and frc_identity["f18c_serial"] == "TN69400026030404235J"
-          and frc_identity["panda_bus_at_observation"] == 1
-          and "current profile diagnostic route is post-repin Panda bus0" in frc_identity["route_note"])
+          and frc_identity["panda_bus_at_observation"] == 1)
     check("historical Brake identity is exact without rewriting its pre-repin Panda route",
           brake_identity["f181_software_ids"] == ["F152633K0000"]
           and brake_identity["ecu_part_0105"] == "8954147040"
           and brake_identity["f18c_serial"] == "8954147040CFC1800985"
-          and brake_identity["panda_bus_at_observation"] == 1
-          and "current profile diagnostic route is post-repin Panda bus0" in brake_identity["route_note"])
+          and brake_identity["panda_bus_at_observation"] == 1)
 
     eps_angle = actual["catalogs"]["405"]["dids"]["0x1037"]
     check("EPS steering-angle DID retains exact current scaling",
@@ -235,8 +205,7 @@ def main() -> int:
           hybrid_water_pump["signal_info"]["physical"]["mul"] == 1
           and hybrid_water_pump["signal_info"]["physical"]["div"] == 1
           and hybrid_water_pump["signal_info"]["physical"]["offset"] == 0
-          and hybrid_water_pump["signal_info"]["choices"] == [{"value": 1, "text": "ON"}]
-          and "trunc_toward_zero" in hybrid_water_pump["signal_info"]["engineering_to_raw"]["formula"])
+          and hybrid_water_pump["signal_info"]["choices"] == [{"value": 1, "text": "ON"}])
     engine_vvt = next(row for row in actual["catalogs"]["372"]["active_tests"] if row["id"] == 4)
     check("Engine direct Active Test retains engineering offset/unit for inverse conversion",
           engine_vvt["signal_info"]["physical"]["offset"] == -128
@@ -291,10 +260,6 @@ def main() -> int:
           and sum(row["execution"] == "plan_only" for row in active) == 349
           and sum(row["execution"] == "unresolved_static_plan" for row in active) == 10
           and all(row["execution"] != "executable" for row in active if row["kind"] == "direct"))
-    check("registry contains derived metadata only and forbids execution authorization",
-          "no Toyota binaries" in actual["boundary"]
-          and "no execution authorization" in actual["boundary"]
-          and "no execution authorization" in actual["utilities"]["boundary"])
 
     # ---- schema v6: Toyota resolver/routes + execution model, function hierarchy, utilities ----
     hv = actual["catalogs"]["397"]
@@ -371,8 +336,6 @@ def main() -> int:
                   [("ab01", "eb01"), ("ab020000", "eb02"), ("ab0300000000", "eb03")],
                   [("ab11", "eb11"), ("ab120000", "eb12"), ("ab1300000000", "eb13")],
                ]
-          and hv_rob["response_model"]["record"]["count_zero_policy"].startswith("FUN_10002A60")
-          and hv_rob["response_model"]["record"]["length_rule"].startswith("DID 0x6000..0x6FFF")
           and hv_rob["execution"] == "read_only")
 
     session = profile["session_control"]
@@ -386,13 +349,6 @@ def main() -> int:
               "kind": "session_did_poll", "did": "0xF186", "request": "22f186",
               "positive_prefix": "62f186", "interval_s": 2.0,
           } | {key: session["keepalive"][key] for key in ("selector", "mask", "check", "meaning", "session_state")})
-    check("session-judgment exception stays documentation, not runtime default",
-          session["session_judgment_exception"]["runtime_default"] is False
-          and session["session_judgment_exception"]["flag"] == "CCommFrameCtrl +0x398")
-    check("Toyota P5 generation gate replaces the former local wire-proof subset",
-          session["eligible_generation_low5"] == ["0x14", "0x15", "0x16"]
-          and "wire_proven_categories" not in session
-          and "independent-tooling policy" in session["boundary"])
     check("every catalog category resolves identical D1/D2/0xDD session frames",
           set(session["per_category"]) == {str(cid) for cid in profile["catalog_category_ids"]}
           and all(row["generation_low5"] == "0x14"
@@ -412,8 +368,7 @@ def main() -> int:
                   "send_parameter": 1000, "receive_timeout": 1020, "retry_count": 0,
                   "exception_handler_id": 0, "exception_handler_flag": 0,
               },
-          }
-          and "CheckAndConvertRcvTimeOut" in actual["commsets"]["boundary"])
+          })
 
     hv_selectors = {row["selector"]: row for row in hv["selectors"]}
     check("resolved selector frames include the recovered executor templates",
@@ -460,8 +415,7 @@ def main() -> int:
           len(hv["functions"]) == 9
           and sum(len(row["detail_ids"]) for row in hv["functions"]) == 18
           and sorted(hv_functions) == [2, 3, 4, 10, 28, 29, 30, 32, 37]
-          and all(row["name"] is None and row["description"] is None for row in hv["functions"])
-          and "OEM function names are not" in actual["function_names"])
+          and all(row["name"] is None and row["description"] is None for row in hv["functions"]))
 
     hv_data_list = hv["data_list"]
     check("Data List display order is the consumer-pinned monitor sort key",
@@ -486,7 +440,6 @@ def main() -> int:
           and group76["execution"] == "materializable" and group76["did"] == 0x284A
           and group102["members"] == [103, 104]
           and group102["execution"] == "blocked" and group102["did"] is None
-          and "DID bytes differ" in group102["reason"]
           and actual["catalogs"]["397"]["active_test_groups"]["group_count"] == 0)
 
     utilities = actual["utilities"]

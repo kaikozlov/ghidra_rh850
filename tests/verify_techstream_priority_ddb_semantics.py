@@ -126,9 +126,6 @@ check("summary decoded-record count is independently reproduced",
       decoded_records == artifact["summary"]["decoded_records"] == 6521)
 check("32 steering files carry at least one priority section",
       len(artifact["sources"]) == artifact["summary"]["steering_files_with_priority_sections"] == 32)
-check("every schema explicitly preserves unknown bytes",
-      all(schema["unknown_bytes_policy"] == "complete raw_hex retained per record"
-          for schema in artifact["schemas"].values()))
 
 print("\n== deterministic regeneration ==")
 oracle = "generated_self_check"

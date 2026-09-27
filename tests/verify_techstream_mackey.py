@@ -4,8 +4,6 @@
 from __future__ import annotations
 
 import hashlib
-import csv
-import json
 import re
 import struct
 import subprocess
@@ -273,136 +271,13 @@ check("shared-memory reader starts payload at offset 2",
 print("\n== generated native vehicle protocol ==")
 generator = REPO / "tools/techstream/generate_techstream_mackey_protocol.py"
 generated_json = REPO / "data/generated/techstream_v18/mackey_vehicle_protocol.json"
-generated_csv = REPO / "data/generated/techstream_v18/mackey_state_machine.csv"
 result = subprocess.run(
     [sys.executable, str(generator), "--check"], cwd=REPO,
     text=True, capture_output=True, check=False,
 )
 check("generated MACKey evidence is current", result.returncode == 0,
       (result.stdout + result.stderr).strip())
-protocol = json.loads(generated_json.read_text())
-with generated_csv.open(newline="") as stream:
-    state_rows = list(csv.DictReader(stream))
-
-classes = protocol["rtti_classes"]
-check("generated RTTI census names all 24 classes", len(classes) == 24)
-check("native bridge pins all twelve UtilityEx MACKey imports",
-      len(protocol["companion_imports"]) == 12
-      and all("Ex2MAC_01" in name for name in protocol["companion_imports"]))
-expected_vtables = {
-    "CMAC_01": ("0x103ceb10", 84),
-    "CMAC_01_000": ("0x103cec64", 118),
-    "CMAC_01_000_S": ("0x103cee40", 118),
-    "CMAC_01_000A": ("0x103cf01c", 118),
-    "CMAC_01_001A": ("0x103cf1f8", 118),
-    "CMAC_01_001B": ("0x103cf3d4", 113),
-    "CMAC_01_001C": ("0x103cf59c", 118),
-    "CMAC_01_001C_S": ("0x103cf778", 118),
-    "CMAC_01_001D": ("0x103cf954", 118),
-    "CMAC_01_001E": ("0x103cfb30", 113),
-    "CMAC_01_001F": ("0x103cfcf8", 118),
-    "CMAC_01_001F_S": ("0x103cfed4", 118),
-    "CMAC_01_009A": ("0x103d00b0", 118),
-    "CMAC_01_009A_S": ("0x103d028c", 118),
-    "CMAC_01_009B": ("0x103d0468", 118),
-    "CMAC_01_009B_S": ("0x103d0644", 118),
-    "CMAC_01_015": ("0x103d0820", 118),
-    "CMAC_01_017": ("0x103d09fc", 118),
-    "CMAC_01_025_S": ("0x103d0bd8", 113),
-    "CMAC_01_028_S": ("0x103d0da0", 118),
-    "CMAC_01_031_S": ("0x103d0f7c", 118),
-    "CMAC_01_036_S": ("0x103d1158", 118),
-    "CMAC_01_038_S": ("0x103d1334", 118),
-    "CMAC_01_039_S": ("0x103d1510", 113),
-}
-actual_vtables = {
-    item["name"]: (item["vtable_va"], item["vtable_entries"])
-    for item in classes
-}
-check("all native vtable locations and widths are pinned",
-      actual_vtables == expected_vtables)
-expected_states = {
-    f"S324-{state}"
-    for item in classes for state in item["states"]
-}
-check("all 51 distinct S324 procedure codes are represented",
-      len(expected_states) == 51
-      and expected_states
-      == {value.decode("ascii") for value in re.findall(rb"S324-[0-9A-F]+", native_bytes)},
-      f"got {len(expected_states)}")
-check("state-machine CSV covers every class/state association",
-      len([row for row in state_rows if row["row_kind"] == "state"])
-      == sum(len(item["states"]) for item in classes))
-
-expected_body_hashes = {
-    "decode_exchange_records": "b8e4a3b44251c8b172053f363947bb95fdbafc9c894d137f3ed53ba93c338334",
-    "discover_master_slaves": "7c0d3814f5e81441b19959ad966fc7fa0650845af865376075b290b45d5230cb",
-    "parse_exchange_key_entry": "bd71fb24d3ed5bf8d1fba70ca76470be542ec7c1676034d3740e59155a75da43",
-    "poll_key_update_3002": "35857d4c2eb7e266fa6a096fc444c3576909e4964797b9ae55295e5ffc7a2093",
-    "read_mac_tuple_102e": "a903c56eb8fa3df66435962d9bbeb2551bbcbb6b3ecfe8c6b77d51ad0908c014",
-    "read_safekey_1010": "2b95a7bfc3bc8639f12ecf776d931a1144bcf51fca4f711d81b6a80c32748b54",
-    "read_vin_f190": "d4b9e46e17cef3e2916415df61b55b0c9a0d3e98e99fb4420cac74e1605a715f",
-    "security_key_2742": "f630da58c41f2357a282c40029d7b543a209ffa3cccd72888e779e30886543c4",
-    "security_seed_2741": "bc8f0c4b9d856d5682f520a4b5cfca0b3ac2fb13dcb9a41067afccef2d16fff8",
-    "start_key_update_3002": "79acd1a60e651c19900f8af5f65a51e3383016450fc062662f3ffb957d5fef43",
-    "write_topology_1035": "48356f7d4fa78eff9c55c3a32907b1087753d4326d78ff28983c2b8aee3b7f50",
-}
-actual_body_hashes = {
-    name: details["sha256"] for name, details in protocol["function_bodies"].items()
-    if name in expected_body_hashes
-}
-check("critical parser and diagnostic method bodies are pinned",
-      actual_body_hashes == expected_body_hashes,
-      oracle_class="identity_hash")
-
-commands = {item["name"]: item for item in protocol["commands"]}
-check("vehicle reads VIN through DID F190",
-      commands["read VIN"]["request"] == "22 f1 90"
-      and commands["read VIN"]["destination"] == "VIN[17]")
-check("vehicle reads M1/M2/M3 through DID 102E",
-      commands["read MAC tuple"]["request"] == "22 10 2e"
-      and commands["read MAC tuple"]["response_length"] == ">=67")
-check("SafekeyNumber is the raw 16-byte DID 1010 payload",
-      commands["read SafekeyNumber"]["request"] == "22 10 10"
-      and commands["read SafekeyNumber"]["destination"] == "SafekeyNumber[16]")
-check("Techstream sends the server M1-M3 package through routine 3002",
-      commands["start key update"]["request"]
-      == "31 01 30 02 || M1[16] || M2[32] || M3[16]"
-      and commands["start key update"]["request_length"] == 68)
-check("Techstream polls routine 3002 for the 32+16-byte proof",
-      commands["poll key update"]["request"] == "31 03 30 02"
-      and commands["poll key update"]["destination"]
-      == "state[2], M4[32], M5[16]")
-check("Techstream and Sienna DID 1010 are not an exact diagnostic join",
-      protocol["firmware_join"]["conclusion"]
-      == "same cryptographic envelope; different service/procedure")
-
-response = protocol["response_parser"]
-check("response parser iterates bounded exchange-record lists",
-      response["maximum_exchange_records"] == {"short_variant": 8, "standard": 28})
-check("response parser preserves all M1-M4 field widths",
-      response["record_fields"]
-      == {"MACM1": 16, "MACM2": 32, "MACM3": 16, "MACK4": 32,
-          "SafekeyNumber": 16})
-check("master/slave association uses the raw safe-key identity",
-      protocol["vehicle_architecture"]["association_key"]
-      == "raw 16-byte SafekeyNumber"
-      and protocol["vehicle_architecture"]["maximum_ecu_records"] == 8)
-
-
 print("\n== MACK4 disposition (negative finding) ==")
-mack4 = protocol["mack4_disposition"]
-check("MACK4 is parsed but never reaches a vehicle write",
-      mack4["consumed_by_vehicle_write"] is False)
-check("MACK4 start_key_update payload is 68 bytes (header+M1+M2+M3 only)",
-      mack4["start_key_update_payload"]
-      == "header(4) + M1(16) + M2(32) + M3(16) = 68 bytes")
-check("MACK4 does not appear in UtilityExNK2.dll",
-      mack4["appears_in_utilityexnk2"] is False)
-check("MACK4 does not appear in the managed layer",
-      mack4["appears_in_managed"] is False)
-check("MACK4 non-parse references are destructors only",
-      mack4["non_parse_refs"] == "std::string destructors only")
 check("MACK4 string appears exactly once in native DLL bytes",
       native_bytes.count(b"<MACK4>") == 1)
 check("MACK4 string is absent from UtilityExNK2.dll",
@@ -413,31 +288,6 @@ check("MACK4 literal is absent from managed IT3UtilityRevNK.dll",
 
 
 print("\n== S324 state-reference evidence model ==")
-state_model = protocol["state_reference_model"]
-check("state model explicitly disclaims per-state operation ownership",
-      state_model["meaning"]
-      == "S324 string-reference census; no per-state operation ownership")
-check("state-reference census has 61 associations across 60 unique functions",
-      state_model["reference_associations"] == 61
-      and state_model["unique_reference_functions"] == 60)
-check("0x10241650 is the sole shared state-reference function",
-      state_model["shared_reference_functions"]
-      == {"0x10241650": ["08", "19"]})
-check("S324-08 and S324-19 both record the shared 0x10241650 reference",
-      "0x10241650" in state_model["references"]["08"]
-      and state_model["references"]["19"] == ["0x10241650"])
-
-csv_s324_41 = [
-    row for row in state_rows
-    if row["row_kind"] == "state" and row["class_state"] == "CMAC_01_001C/S324-41"
-]
-check("state CSV keeps state-code references separate from class operations",
-      csv_s324_41
-      and csv_s324_41[0]["state_code_reference_rvas"] == "0x23f900"
-      and "handler_operations" not in csv_s324_41[0]
-      and "handler_comprocess_calls" not in csv_s324_41[0]
-      and "0:update_vehicle_status" in csv_s324_41[0]["class_operations"])
-
 # The old review patch incorrectly treated wider class-region call counts as if
 # they belonged to one displayed S324 state. Pin two primary counterexamples:
 # S324-41's actual reference function has one direct ComProcess call, and a

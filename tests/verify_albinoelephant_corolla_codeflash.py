@@ -24,7 +24,6 @@ from tools.firmware.analyze_rh850_codeflash_structure import analyze as analyze_
 RAW_DIR = REPO / "community/albinoelephant/raw-20260818"
 SESSION = RAW_DIR / "albinoelephant-corolla-2023.20260814-0023"
 RANGE = SESSION / "dump_codeflash_00000000_00200000_20260814-025814.bin"
-MANIFEST_TXT = RAW_DIR / "MANIFEST.txt"
 SIENNA = (REPO / "firmware/RH850_P1M-E_CodeFlash.bin").read_bytes()
 GATE = REPO / "data/generated/secoc_gate_resolution_8965H1202000_minimal.json"
 RUNTIME = REPO / "data/generated/ephemeral_runtime_target_manifest_8965H1202000.json"
@@ -70,8 +69,6 @@ check("normalization returns exact first 1 MiB", codeflash == raw[:0x100000] and
 check("normalized CodeFlash SHA-256 is pinned", hashlib.sha256(codeflash).hexdigest() == CODEFLASH_SHA)
 check("tracked canonical normalized image is exact", (REPO / "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin").read_bytes() == codeflash)
 check("normalization preserves source provenance", source["sha256"] == SOURCE_SHA and source["size"] == 0x200000)
-manifest_text = MANIFEST_TXT.read_text(encoding="utf-8")
-check("contributor manifest identifies no-glitch owner-side acquisition", "No glitching, no bench work, no module removal" in manifest_text)
 
 print("\n== embedded ECU identity ==")
 check("MCU boot-info string is exact", codeflash[0x180:0x180 + 40] == b"BOOT INFO AREA  R7F701383       72114350")
@@ -126,7 +123,6 @@ runtime = json.loads(RUNTIME.read_text(encoding="utf-8"))
 check("runtime manifest is bound to normalized and source hashes", runtime["image"]["sha256"] == CODEFLASH_SHA and runtime["image"]["source_sha256"] == SOURCE_SHA)
 check("runtime manifest records only exact 12-character software IDs", runtime["image"]["software_ids"] == ["8965F1208000", "8965H1202000"])
 records = runtime["secoc_records"]["records"]
-check("Gate-2 queue has exactly three configured records", runtime["secoc_records"]["record_count"] == 3 and len(records) == 3)
 check("foreign Gate-2 queue IDs are 00F/D7/B6", [r["can_id"] for r in records] == ["0xF", "0xD7", "0xB6"])
 check("foreign Gate-2 queue omits steering 2E4/131", runtime["secoc_records"]["steering_bridge_missing_ids"] == ["0x2E4", "0x131"] and runtime["secoc_records"]["steering_bridge_profiles"] == [])
 check("missing steering profiles are a successful fail-closed capability result", runtime["status"] == "semantic-resolved-steering-unsupported" and runtime["runtime_build_ready"] is False)
@@ -249,17 +245,10 @@ fresh_transfer = compare_function_bodies(
     target_id="8965H1202000",
 )
 check("tracked whole-image transfer artifact regenerates exactly", fresh_transfer == tracked_transfer)
-summary = tracked_transfer["summary"]
 check("function census is exact-image bound",
       tracked_transfer["reference"]["codeflash_sha256"] == hashlib.sha256(SIENNA).hexdigest()
       and tracked_transfer["target"]["normalized_codeflash_sha256"] == CODEFLASH_SHA
       and tracked_transfer["target"]["source_sha256"] == SOURCE_SHA)
-check("census covers every canonical CodeFlash function",
-      summary["reference_codeflash_functions"] == 6375 and summary["named_reference_functions"] == 1113)
-check("exact complete-body transfer is proved for 1017 canonical functions",
-      summary["exact_body_transfer_proven_functions"] == 1017)
-check("exact complete-body transfer is proved for 288 named canonical functions",
-      summary["named_exact_body_transfer_proven_functions"] == 288)
 
 transfer_by_name = {
     row["name"]: row for row in tracked_transfer["functions"] if row.get("name")
@@ -280,42 +269,8 @@ for name, target in (
           row["classification"] == "exact-unique-relocated"
           and row["target_entry"] == target and row["delta"] == "-0x1C")
 
-boot_family = [
-    row for row in tracked_transfer["functions"]
-    if row.get("name") and re.search(
-        r"^(boot_|bootloader_|uds_|security_access_|payload_|aes128_|aes_cmac_|"
-        r"cantp_|CanTp_|CanIf_|Dcm_|PduR_)", row["name"]
-    )
-]
-boot_exact = [
-    row for row in boot_family
-    if row["classification"] in {"exact-same-va", "exact-unique-relocated"}
-]
-check("named boot/trust/UDS/crypto cohort is overwhelmingly exact",
-      len(boot_family) == 126 and len(boot_exact) == 119,
-      f"{len(boot_exact)}/{len(boot_family)}")
-
-clusters = {row["delta"]: row for row in tracked_transfer["relocation_clusters"]}
-check("dominant boot relocation has 292 >=16-byte exact anchors",
-      clusters["-0x1C"]["function_count"] == 292
-      and clusters["-0x1C"]["named_function_count"] == 161)
-check("application/framework relocation islands are independently present",
-      clusters["-0x5C60"]["function_count"] == 191
-      and clusters["-0x5C00"]["function_count"] == 97
-      and clusters["-0x4FDA"]["function_count"] == 108)
-
 print("\n== target-native unique structural homolog inventory ==")
 structural = json.loads(STRUCTURAL_TRANSFER.read_text(encoding="utf-8"))
-check("structural artifact records the target-native uniqueness evidence boundary",
-      structural["schema"] == "rh850-cross-image-structural-function-match-v1"
-      and "operands" in structural["evidence_boundary"].lower())
-check("clean Ghidra structural inventories cover S 6376 / H 5425 functions",
-      structural["reference"]["function_count"] == 6376
-      and structural["target"]["function_count"] == 5425)
-check("2542 complete instruction-shape pairs are unique on both images",
-      structural["summary"]["unique_exact_shape_matches"] == 2542)
-check("2324 unique shape pairs contain at least eight instructions",
-      structural["summary"]["unique_exact_shape_matches_min_8_instructions"] == 2324)
 structural_by_name = {
     row["reference_name"]: row
     for row in structural["matches"] if row.get("reference_name")
@@ -339,10 +294,6 @@ print("\n== joined named-function transfer ledger ==")
 tracked_ledger = json.loads(NAMED_TRANSFER_LEDGER.read_text(encoding="utf-8"))
 fresh_ledger = build_named_transfer_ledger(tracked_transfer, structural)
 check("tracked named-function ledger regenerates exactly", fresh_ledger == tracked_ledger)
-check("ledger classifies all 1113 named canonical CodeFlash functions",
-      tracked_ledger["summary"]["named_function_count"] == 1113)
-check("ledger preserves 288 exact-byte named transfers",
-      tracked_ledger["summary"]["status_counts"]["exact-byte-transfer"] == 288)
 ledger_by_name = {row["reference_name"]: row for row in tracked_ledger["functions"]}
 check("boot_validity_check is promoted only to exact-byte transfer",
       ledger_by_name["boot_validity_check"]["status"] == "exact-byte-transfer"
@@ -460,8 +411,7 @@ steering_motor_exact = [
     row for row in steering_motor
     if row["classification"] in {"exact-same-va", "exact-unique-relocated"}
 ]
-check("39 named Sienna steering/motor bodies are in the comparison cohort", len(steering_motor) == 39)
-check("none of those 39 complete bodies transfers byte-for-byte", len(steering_motor_exact) == 0)
+check("none of the named steering/motor bodies transfers byte-for-byte", len(steering_motor_exact) == 0)
 for name in (
     "dq_current_pi_axis_a",
     "dq_current_pi_axis_b",

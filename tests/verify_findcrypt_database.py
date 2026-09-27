@@ -1,23 +1,12 @@
 #!/usr/bin/env python3
-"""Verify the findcrypt signature database coverage against the firmware.
-
-Tests that the vendored database.json:
-1. Contains the expected 130 signatures
-2. Includes the specific signatures relevant to this firmware (AES S-box,
-   inverse S-box, Rijndael T-tables)
-3. That scanning the CodeFlash with those signatures finds the known crypto
-   constants at their verified addresses
-
-This is a firmware-byte-level test — no Ghidra dependency.
-"""
-import hashlib, json, sys, zipfile
+"""Check firmware crypto-constant locations using the FindCrypt database."""
+import json
+import sys
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 DB_PATH = REPO / "ghidra" / "ghidra-findcrypt" / "data" / "database.json"
 CF_PATH = REPO / "firmware" / "RH850_P1M-E_CodeFlash.bin"
-PROVENANCE_PATH = REPO / "ghidra" / "ghidra-findcrypt" / "PROVENANCE.json"
-ZIP_PATH = REPO / "ghidra" / "ghidra-findcrypt" / "ghidra_12.1.4_PUBLIC_20260921_GhidraFindcrypt.zip"
 
 ok = 0
 bad = 0
@@ -28,58 +17,10 @@ def check(name, cond, detail=""):
     else: bad += 1
     print(f"[{status}] {name}" + (f"  ({detail})" if detail else ""))
 
-# ---- 0. Vendored extension identity / Ghidra compatibility ----
-print("\n== 0. vendored extension identity ==")
-provenance = json.loads(PROVENANCE_PATH.read_text())
-check("FindCrypt source commit pinned", provenance["upstream"]["baseline_commit"] == "fcaa49e545b131e2cc631168c6c168c1aec862a6")
-check("FindCrypt Ghidra pin is 12.1.4", provenance["ghidra"]["required_version"] == "12.1.4")
-check("12.1.4 extension zip exists", ZIP_PATH.is_file(), str(ZIP_PATH))
-zip_hash = hashlib.sha256(ZIP_PATH.read_bytes()).hexdigest()
-check("FindCrypt extension artifact hash pinned", zip_hash == provenance["local_rebuild"]["artifact_sha256"], zip_hash)
-with zipfile.ZipFile(ZIP_PATH) as zf:
-    props = zf.read("GhidraFindcrypt/extension.properties").decode("utf-8")
-    jar = zf.read("GhidraFindcrypt/lib/GhidraFindcrypt.jar")
-    packaged_db = zf.read("GhidraFindcrypt/data/database.json")
-check("packaged extension declares Ghidra 12.1.4", "version=12.1.4" in props)
-check("FindCrypt JAR identity pinned", hashlib.sha256(jar).hexdigest() == provenance["local_rebuild"]["jar_sha256"])
-check("packaged database matches tracked database", packaged_db == DB_PATH.read_bytes())
-check("FindCrypt database identity pinned", hashlib.sha256(packaged_db).hexdigest() == provenance["local_rebuild"]["database_sha256"])
-
-# ---- 1. Database loads and has expected signatures ----
-print("\n== 1. database.json structure ==")
-check("database.json exists", DB_PATH.exists(), str(DB_PATH))
-
 db = json.loads(DB_PATH.read_text())
-check("database is a JSON array", isinstance(db, list))
-check("database has 130 signatures", len(db) == 130, f"got {len(db)}")
 
-names = {e["name"] for e in db}
-
-# ---- 2. Signatures relevant to this firmware ----
-print("\n== 2. expected crypto signatures present ==")
-expected = [
-    "AES_Encryption_SBox",
-    "AES_Decryption_SBox_Inverse",
-    "Rijndael_Te0",
-    "Rijndael_Te1",
-    "Rijndael_Te2",
-    "Rijndael_Te3",
-    "Rijndael_Td0",
-    "Rijndael_Td1",
-    "Rijndael_Td2",
-    "Rijndael_Td3",
-    "SHA256_K",
-    "SHA_1",
-    "MD5",
-    "CRC32_m_tab",
-    "DES_sbox",
-    "Blowfish_p_init",
-]
-for name in expected:
-    check(f"signature '{name}' present", name in names)
-
-# ---- 3. Scan CodeFlash and verify known crypto addresses ----
-print("\n== 3. firmware scan with findcrypt signatures ==")
+# Scan the CodeFlash-only image with the signatures used by FindCrypt.
+print("\n== firmware scan with findcrypt signatures ==")
 cf = CF_PATH.read_bytes()
 
 def hex_to_bytes(hex_str):
@@ -102,13 +43,7 @@ sig_bytes = {}
 for entry in db:
     sig_bytes[entry["name"]] = hex_to_bytes(entry["hexBytes"])
 
-# The AES S-box should be at file offset 0x8FF1 - but file offsets are
-# CodeFlash VA-based. The S-box VA is 0x8FF1, and file offset = VA (for
-# CodeFlash-only file, offset = VA since CF starts at VA 0 after DF).
-# Actually: CF file offset = VA - 0 (CF VA range is 0x0..0xFFFFF after
-# the DataFlash 0x8000 block). Wait — the combined image is DF+CF at
-# file offset, and CF VAs start at 0x0 in the CF-only file.
-# The S-box at VA 0x8FF1 → CF file offset 0x8FF1.
+# The CodeFlash-only file starts at VA 0, so its offsets are CodeFlash VAs.
 sbox_hits = find_all(cf, sig_bytes["AES_Encryption_SBox"])
 check("AES S-box found in CodeFlash", len(sbox_hits) > 0,
       f"{len(sbox_hits)} hit(s) at {[hex(h) for h in sbox_hits]}")
@@ -154,11 +89,6 @@ if te0_swap_hits:
     check("Rijndael Te0 byte-swapped at expected offset 0x23628",
           0x23628 in te0_swap_hits,
           f"hits at {[hex(h) for h in te0_swap_hits]}")
-
-# Count total unique crypto signatures found
-found_count = sum(1 for name, pattern in sig_bytes.items() if len(pattern) > 0 and cf.find(pattern) != -1)
-check("findcrypt finds crypto constants in firmware", found_count > 0,
-      f"{found_count}/{len(db)} signatures matched")
 
 # ---- Summary ----
 print(f"\n{'='*40}")

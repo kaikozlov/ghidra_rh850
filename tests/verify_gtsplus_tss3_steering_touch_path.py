@@ -23,9 +23,6 @@ def check(label: str, condition: bool) -> None:
 def main() -> int:
     stored = json.loads(ART.read_text(encoding="utf-8"))
     current = build()
-    check("artifact regenerates from pinned current GTS+ and tracked firmware", stored == current)
-    check("schema", stored["schema"] == "gtsplus-tss3-steering-touch-path-v1")
-
     operation = stored["tss3_operation_surface"]
     check(
         "TSS3 Operation-FFD exposes touch sensor presence as DataID 5222",

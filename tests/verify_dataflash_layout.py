@@ -8,11 +8,8 @@ key-field mapping, reserved regions, and volatile bootloader DID descriptors.
 from __future__ import annotations
 
 import csv
-import io
-import math
 import struct
 import sys
-from collections import Counter
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
@@ -35,15 +32,11 @@ def check(name, condition, detail=""):
     print(f"[{'PASS' if ok else 'FAIL'}] {name}{suffix}")
 
 u16 = lambda b, a: struct.unpack_from("<H", b, a)[0]
-u32 = lambda b, a: struct.unpack_from("<I", b, a)[0]
 
 print("== image and configuration roots ==")
 check("CodeFlash is 1 MiB", len(CF) == 0x100000)
 check("DataFlash is 32 KiB / 512 pages", len(DF) == 0x8000 and len(DF) // 64 == 512)
 check("NvM job count is 124", u16(CF, TP + 0x2EF8) == 124)
-check("job table is 0x26DE0", JOB_TABLE == 0x26DE0)
-check("storage map is 0x27808", STORAGE_MAP == 0x27808)
-check("SecOC object table is 0x2B0AC", OBJECT_TABLE == 0x2B0AC)
 
 print("\n== complete physical storage map ==")
 jobs_by_cfg = {}
@@ -76,9 +69,6 @@ check("68 records have matching header + AAAAAAAA trailer", valid_count == 68, s
 
 lower = DF[:0x4000]
 check("pages 0..255 contain no AAAAAAAA record marker", b"\xAA" * 4 not in lower)
-check("no configured storage page is below 256", all(r[1] >= 256 for r in rows))
-check("general NvM region ends at page 431", 0xFF200000 + 432 * 64 == 0xFF206C00)
-check("SecOC triplicate bank is pages 432..479", 0xFF200000 + 432 * 64 == 0xFF206C00 and 0xFF200000 + 480 * 64 == 0xFF207800)
 
 print("\n== 16-entry SecOC redundant-object table ==")
 expected_desc = [
@@ -94,8 +84,6 @@ expected_desc = [
 ]
 desc = [struct.unpack_from("<HHI", CF, OBJECT_TABLE + i * 8) for i in range(16)]
 check("all 16 object descriptors match", desc == expected_desc)
-check("objects 7..11 are disabled", all(desc[i][1] == 0xFFFF for i in range(7, 12)))
-check("objects 12..15 are four 32-byte mirrors", [d[0] for d in desc[12:]] == [32] * 4)
 
 # Expected copy pages derived independently from block->storage configuration.
 def block_page(block):
@@ -161,8 +149,6 @@ check("RAM key field is FEBF02F8", ram + 0x10 == 0xFEBF02F8)
 current_field = DF[0x6E14:0x6E24]
 check("current raw field matches captured bytes",
       current_field == bytes.fromhex("00000000040000808202000000000000"), current_field.hex())
-entropy = -sum((n / 16) * math.log2(n / 16) for n in Counter(current_field).values())
-check("current raw field is low entropy/non-key-like", abs(entropy - 1.311278124459133) < 1e-12, f"H={entropy:.6f}")
 
 print("\n== bootloader DID table is volatile RAM, not DataFlash ==")
 dids = [

@@ -13,8 +13,10 @@ independent of neighboring checkouts.
 
 Repository URLs, exact commits, upstream paths, and source-file hashes are in
 [`../../external-references.lock.json`](../../external-references.lock.json).
-`make verify-external` confirms that pinned external checkouts still match these
-fixtures and re-runs the source-level corroboration checks.
+The payloads' decryption, CRC residue, CMAC, and callback-slot semantics are
+verified against the committed CodeFlash image by the core deterministic
+suites (`verify_payload_gate.py`, `verify_candidate_f05_payload.py`,
+`verify_icus_software_paths.py`), which never require external checkouts.
 
 `techstream/` contains small **synthetic** cross-version `ptshim32` log samples.
 They are not vehicle captures and contain no real ECU data; they exercise the

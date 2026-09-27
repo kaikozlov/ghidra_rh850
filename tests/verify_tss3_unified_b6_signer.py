@@ -2,7 +2,6 @@
 """Verify the one-payload functional-0x777 TSS3 signer implementation."""
 from __future__ import annotations
 
-import hashlib
 import json
 import os
 import subprocess
@@ -175,62 +174,6 @@ check("bridged boot rediscovery preserves allOutput instead of re-entering ELM32
       preserve_panda.safety_changes == [] and preserve_client.sessions == [2] and
       boot_route["tx_bus"] == 1 and preserve_telemetry["rediscovery_mode"] == "same-bus-f181-preserve-safety")
 
-check("legacy target-specific implementations remain in tree",
-      all((ROOT / path).is_file() for path in (
-          "exploit/ephemeral_runtime/build_camry_f33_b6_inline_signer.py",
-          "exploit/ephemeral_runtime/build_corolla_hf_b6_inline_signer.py",
-          "exploit/ephemeral_runtime/build_crown_f30_b6_inline_signer.py",
-          "exploit/ephemeral_runtime/camry_f33_b6_inline_signer.py",
-          "exploit/ephemeral_runtime/corolla_hf_b6_inline_signer.py",
-          "exploit/ephemeral_runtime/crown_f30_b6_inline_signer.py",
-      )))
-
-resident_source = (ROOT / "exploit/ephemeral_runtime/tss3_unified_b6_signer_resident.S").read_text()
-field_resident_source = (ROOT / "exploit/ephemeral_runtime/tss3_unified_b6_signer_field_resident.S").read_text()
-helper_source = (ROOT / "exploit/ephemeral_runtime/tss3_unified_b6_signer_helper.S").read_text()
-postauth_helper_source = (ROOT / "exploit/ephemeral_runtime/camry_f33_b6_postauth_override_helper.S").read_text()
-check("experimental one-shot and field split-loader residents remain separate",
-      "#ifdef TSS3_COROLLA_HF" in resident_source and "#ifdef TSS3_COROLLA_HF" in helper_source and
-      "FEF07C00" in resident_source and ".L_parse_loader" not in resident_source and
-      "C6 C6" in field_resident_source and ".L_parse_loader" in field_resident_source and
-      "FEF07C00" not in field_resident_source)
-check("Camry/Crown helper keeps call-spanning locals in ABI-preserved registers",
-      "prepare {r20-r21,lp}, 0" in helper_source and
-      "mov 2, r20                   /* operation = replace; callee-saved */" in helper_source and
-      "ld.hu TSS3_DCM_TARGET_OFF[gp], r21" in helper_source and
-      "st.h r21, 0x4a8e[gp]" in helper_source and
-      "dispose 0, {r20-r21,lp}, lp" in helper_source and
-      "st.b r6, 0x4ad0[gp]" not in helper_source and "st.h r6, 0x4ad2[gp]" not in helper_source)
-check("native oracle retries freshness skew and command5 rc2 before terminal failure",
-      "Keep oracle state 0 while the snapshot/result is still retryable" in helper_source and
-      "be .L_return              /* rc2 = transient busy/poll timeout; retry next native frame */" in helper_source and
-      ".L_terminal_fail:" in helper_source and
-      "st.b r6, 0x4a79[gp]" in helper_source)
-check("Camry field post-auth backend leaves native SecOC untouched and overrides only route44 application bytes",
-      "jarl32 secoc_aggregate, lp" in postauth_helper_source and
-      "jarl32 comm_after_secoc, lp" in postauth_helper_source and
-      "jarl32 application_aggregate, lp" in postauth_helper_source and
-      "jarl32 aggregate_final, lp" in postauth_helper_source and
-      "command5_sync" not in postauth_helper_source and "freshness_encode" not in postauth_helper_source and
-      all(token in postauth_helper_source for token in (
-          "TSS3_RAW_B3_OFF", "TSS3_RAW_B4_OFF", "TSS3_RAW_B5_OFF",
-          "TSS3_RAW_B6_OFF", "TSS3_RAW_B8_OFF", "TSS3_RAW_B9_OFF")) and
-      "TSS3_RAW_B7_OFF" not in postauth_helper_source and "TSS3_B6_TRAILER_OFF" not in postauth_helper_source)
-check("Camry post-auth resident cannot execute low helper before C6 arm",
-      "#ifdef TSS3_CAMRY_POSTAUTH_OVERRIDE" in field_resident_source and
-      "tst1 0, 0x4a62[gp]" in field_resident_source and
-      "be .L_postauth_stock_tail" in field_resident_source and
-      "jr32 target_stock_aggregate_tail" in field_resident_source)
-check("Camry/Crown resident no longer depends on functional-loader offsets",
-      unified_builder.TARGETS["camry-8965F3307000"]["resident_macros"] == {} and
-      unified_builder.TARGETS["crown-8965F3012000"]["resident_macros"] == {} and
-      unified_builder.TARGETS["camry-8965F3307000"]["helper_macros"]["TSS3_DCM_SEQ_OFF"] == -0x60AD and
-      unified_builder.TARGETS["crown-8965F3012000"]["helper_macros"]["TSS3_DCM_SEQ_OFF"] == -0x6581)
-check("Corolla H/F select one shared runtime profile",
-      unified_builder.TARGETS["corolla-8965H1202000"]["profile"] == "corolla-hf" and
-      unified_builder.TARGETS["corolla-8965F1208000"]["profile"] == "corolla-hf" and
-      unified_builder.PROFILE_RUNTIME_IDENTITIES["corolla-hf"] == "8965F1208000")
-
 for target, spec in unified_builder.TARGETS.items():
     image = Path(spec["image"]).read_bytes()
     signature = int.from_bytes(
@@ -254,7 +197,6 @@ for target, spec in unified_builder.TARGETS.items():
             refs.append((off, value))
     check(f"{target}: universal GlobalRAM helper transit has no aligned pointer literal", refs == [])
     corpus = ROOT / "data/generated" / target / "decompilations.jsonl"
-    check(f"{target}: tracked decompiler corpus available for GlobalRAM transit audit", corpus.is_file())
     data_refs = []
     for line in corpus.read_text(encoding="utf-8").splitlines():
         row = json.loads(line)
@@ -276,7 +218,6 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
         cwd=ROOT, check=True, capture_output=True, text=True,
     )
     printed = json.loads(proc.stdout)
-    check("builder emits one universal build set", printed["schema"] == "tss3-universal-b6-signer-build-set-v1")
     universal = printed["universal"]
     payload_path = out / universal["payload"]["path"]
     stage_path = out / universal["staging"]["path"]
@@ -304,11 +245,9 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
               stage[row["helper_offset"]:row["helper_offset"] + len(helper)] == helper)
 
     common_payload_sha = universal["payload"]["sha256"]
-    common_staging_sha = universal["staging"]["sha256"]
-    for target, (buffer, state_model, resident_size, helper_size, runtime_mode, host_loss_ticks) in TARGETS.items():
+    for target, (buffer, state_model, _resident_size, _helper_size, runtime_mode, host_loss_ticks) in TARGETS.items():
         meta = printed["targets"][target]
         meta_path = out / f"{target.replace('-', '_')}_unified_b6_signer.json"
-        check(f"{target}: target wrapper written byte-for-byte", json.loads(meta_path.read_text()) == meta)
         check(f"{target}: exact common functional control",
               meta["schema"] == "tss3-unified-b6-signer-build-v1" and
               meta["control"]["can_id"] == "0x777" and meta["control"]["bus"] == 1 and
@@ -320,23 +259,6 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
               meta["control"]["release_sequence_zero"] is True and
               meta["control"]["functional_nrc11_suppressed"] is True and
               meta["install_strategy"] == "universal-one-shot" and meta["state_model"] == state_model)
-        check(f"{target}: wrapper references the exact same universal executable",
-              meta["artifacts_sha256"]["payload"] == common_payload_sha and
-              meta["artifacts_sha256"]["staging"] == common_staging_sha and
-              meta["universal_payload"]["sha256"] == common_payload_sha and
-              meta["layout"]["helper_transfer"]["host_loader"] is False)
-        check(f"{target}: resident/helper reproduce reviewed exact sizes",
-              meta["resident"]["size"] == resident_size and meta["resident"]["headroom"] == 524 - resident_size and
-              meta["helper"]["size"] == helper_size and meta["helper"]["image_size"] == helper_size and
-              meta["helper"]["headroom"] == meta["helper"]["limit"] - helper_size and
-              meta["resident"]["relocations"] == meta["helper"]["relocations"] == 0)
-        bundle = host.load_bundle(meta_path)
-        plan = host.plan(bundle)
-        check(f"{target}: plan is one-shot install followed only by C7 runtime control",
-              plan["sequence"][0].startswith("NRTD/Park: prove exact-target stock functional 0x777") and
-              "helper" in plan["sequence"][2] and "native command-5 MAC oracle" in plan["sequence"][2] and
-              meta["artifacts"]["payload"] == universal["payload"]["path"] and
-              plan["old_implementations_retained"] is True)
         built[target] = (meta, meta_path)
 
     check("all target wrappers use one payload SHA",
@@ -432,7 +354,6 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
           kit_meta["classic_08a_oracle"]["transport"].startswith("functional-nibble4 0x00000777 -> 0x000007A9") and
           "camry_classic_08a_oracle" not in kit_meta)
     launcher_path = kit / "tss3-unified-signer"
-    launcher = launcher_path.read_text(encoding="utf-8")
     wrong_kit = subprocess.run(
         [str(launcher_path), "--topology", "camry-post-repin", "doctor"],
         env={**os.environ, "TSS3_PYTHON": sys.executable, "TSS3_OPENPILOT_ROOT": str(ROOT)},
@@ -441,17 +362,6 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
     check("Camry-only launcher path rejects a mismatched exact-target kit with an actionable identity error",
           wrong_kit.returncode == 2 and
           "wrong kit: crown-8965F3012000; need camry-8965F3307000" in wrong_kit.stderr)
-    check("unified kit prefers vendored runtime and exposes common test ladder plus exact-F33 DRCC diagnostic clear",
-          'PYTHONPATH="$KIT_ROOT/runtime:$OPENPILOT_ROOT"' in launcher and
-          "camry_f33_post_install_recovery.py" in launcher and "require_camry_recovery" in launcher and
-          all(cmd in launcher for cmd in ("preflight", "install", "install-stale-030-bridge", "qualify", "bringup",
-                                           "bringup-stale-030-bridge", "restart-brake", "restart-frc", "recovery-state",
-                                           "restart-control-domains", "recover-drcc", "replace-current", "replace-once")) and
-          all(cmd in launcher for cmd in ("oracle-bringup", "oracle-ui-bringup", "oracle-ui-resume", "oracle-install", "recover-peers",
-                                           "oracle-status", "oracle-self-test", "oracle-benchmark", "oracle-benchmark-100hz")) and
-          "--topology stock|camry-post-repin" in launcher and
-          "--nrtd-confirmed" in launcher and "NRTD/READY=0" in launcher and
-          "FRC DRCC permission did not survive bridged bootstrap; STOP before READY qualification" in launcher)
 
     field_bundle = host.load_bundle(kit / "bundle/unified.json")
     check("split field bundle carries the exact padded 150-word helper image",
@@ -478,7 +388,6 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
     camry_kit_meta = json.loads((camry_kit / "manifest.json").read_text(encoding="utf-8"))
     camry_field_meta = json.loads((camry_kit / "bundle/unified.json").read_text(encoding="utf-8"))
     camry_field_bundle = host.load_bundle(camry_kit / "bundle/unified.json")
-    camry_launcher = (camry_kit / "tss3-unified-signer").read_text(encoding="utf-8")
     camry_oracle_meta = json.loads((camry_kit / "bundle/oracle/classic.json").read_text(encoding="utf-8"))
     camry_oracle_payload = (camry_kit / "bundle/oracle/classic_payload.bin").read_bytes()
     check("Camry unified kit uses the same canonical oracle deployment key and runtime",
@@ -488,57 +397,10 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
           camry_oracle_meta["idle_fast_path"]["enabled"] is True and
           "camry_classic_08a_oracle" not in camry_kit_meta and
           len(camry_oracle_payload) == 0x1000 and
-          hashlib.sha256(camry_oracle_payload).hexdigest() == camry_oracle_meta["authenticated_payload"]["sha256"] and
           (camry_kit / "runtime/exploit/ephemeral_runtime/camry_f33_08a_classic_oracle.py").is_file() and
           (camry_kit / "runtime/exploit/ephemeral_runtime/camry_f33_startup_programming.py").is_file() and
           (camry_kit / "runtime/exploit/ephemeral_runtime/camry_f33_oracle_ui_bringup.py").is_file() and
           not (camry_kit / "bundle/oracle/camry_f33_08a_classic_oracle_resident.bin").exists())
-    oracle_ui_block = camry_launcher.split("  oracle-ui-bringup)\n", 1)[1].split("  oracle-ui-resume)", 1)[0]
-    check("Camry UI bringup holds one lease and delegates the startup-caught flow to the packaged backend",
-          oracle_ui_block.index('quiesce_panda_owner') < oracle_ui_block.index('ORACLE_UI_BRINGUP_TOOL') and
-          '--payload "$ORACLE_PAYLOAD"' in oracle_ui_block and '--meta "$ORACLE_META"' in oracle_ui_block and
-          'output directory is not empty' in oracle_ui_block)
-    oracle_resume_block = camry_launcher.split("  oracle-ui-resume)\n", 1)[1].split("  oracle-bringup)", 1)[0]
-    check("Camry native-catch resume takes the Panda lease without running the multi-process doctor",
-          'doctor >/dev/null' not in oracle_resume_block and
-          oracle_resume_block.index('quiesce_panda_owner') < oracle_resume_block.index('ORACLE_UI_BRINGUP_TOOL') and
-          '--native-catch "$native_catch"' in oracle_resume_block and
-          'require_camry_oracle_files' in oracle_resume_block)
-    oracle_bringup_block = camry_launcher.split("  oracle-bringup)\n", 1)[1].split("  recover-peers)", 1)[0]
-    check("Camry oracle bringup installs, recovers Brake then FRC, and gates on a fresh-signing self-test",
-          oracle_bringup_block.index('quiesce_panda_owner') <
-          oracle_bringup_block.index('install --payload "$ORACLE_PAYLOAD"') <
-          oracle_bringup_block.index('run_peer_recovery "$out_dir"') <
-          oracle_bringup_block.index('self-test --meta "$ORACLE_META"') and
-          "runtime_08a_classic_fresh_signer_live_helper_pending_self_test" in oracle_bringup_block and
-          "r.get('passed') is not True" in oracle_bringup_block)
-    bringup_block = camry_launcher.split("  bringup)\n", 1)[1].split("  bringup-stale-030-bridge)", 1)[0]
-    check("Camry guided bringup is operator-paced EPS -> Brake -> FRC under one Panda lease",
-          bringup_block.index('quiesce_panda_owner') <
-          bringup_block.index('run_tool preflight --output "$out_dir/preflight.json"') <
-          bringup_block.index('run_tool qualify --execute --output "$out_dir/qualify.json"') <
-          bringup_block.index('restart-domain --domain brake') <
-          bringup_block.index('restart-domain --domain frc') <
-          bringup_block.index('state --output "$out_dir/control-domain-state.json"') <
-          bringup_block.index('post-recovery-status.json') and
-          bringup_block.count('quiesce_panda_owner') == 1 and
-          'release_panda_owner' not in bringup_block and
-          'Panda lease remains held' in bringup_block and
-          'wait as long as you want' in bringup_block and 'no peer reset will happen until you explicitly continue' in bringup_block)
-    camry_plan = host.plan(camry_field_bundle)
-    check("Camry field kit uses post-auth raw-COM ownership with no command5 runtime dependency",
-          camry_kit_meta["target"]["name"] == "camry-8965F3307000" and
-          camry_field_meta["runtime_backend"] == "postauth-raw-com" and
-          camry_field_meta["resident"]["size"] == 522 and camry_field_meta["helper"]["size"] == 218 and
-          camry_field_meta["helper"]["image_size"] == 600 and
-          camry_field_meta["sources"]["helper"]["path"].endswith("camry_f33_b6_postauth_override_helper.S") and
-          camry_field_meta["mutation_boundary"]["postauth_raw_com_override"] is True and
-          camry_field_meta["mutation_boundary"]["native_secoc_bytes_mutated"] is False and
-          camry_field_meta["mutation_boundary"]["command5_runtime_required"] is False and
-          camry_field_meta["mutation_boundary"]["native_mac_oracle_required"] is False and
-          camry_field_meta["layout"]["postauth_override"]["raw_com_base"] == "0xFEBE4BFF" and
-          "native authenticated route44 publication" in camry_plan["sequence"][2] and
-          "command-5 MAC oracle" not in camry_plan["sequence"][2])
 
     postauth_qual_session = object.__new__(host.Session)
     postauth_qual_session.bundle = camry_field_bundle

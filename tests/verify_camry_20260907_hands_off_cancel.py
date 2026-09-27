@@ -20,9 +20,7 @@ def check(label: str, condition: bool, detail: str = '') -> None:
 
 
 obj = json.loads(ART.read_text())
-check('schema', obj['schema'] == 'camry-20260907-hands-off-cancel-v1')
 check('route identity', obj['source']['route'] == '00000045--805b7ca6ab' and obj['source']['segments'] == 15)
-check('route openpilot commit pinned', obj['source']['openpilot_commit'] == 'f8bd956a4b23eb4992c6abbe899e72b27cd91d80')
 check('nine operating-latch falls retained', obj['latch_fall_count'] == 9)
 check('cancel classification census', obj['classification_counts'] == {
     'openpilot_button_cancel': 4,

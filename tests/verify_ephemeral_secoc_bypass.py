@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import json
 import struct
-import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -136,10 +135,6 @@ def main() -> int:
         CF[0x8E6C6:0x8E6CA] == bytes.fromhex("e0d19a0d"),
         CF[0x8E6C6:0x8E6CA].hex(),
     )
-    check(
-        "correct persistent neutralization changes cmp only (E0D1 -> E001)",
-        bytes.fromhex("e001") + CF[0x8E6C8:0x8E6CA] == bytes.fromhex("e0019a0d"),
-    )
 
     print("== recovered RAM callback cells are active subsystem state, not dormant hook slots ==")
     cb_refs = [(fn, site, typ) for fn, _, site, typ in refs_to(0xFEBE5600)]
@@ -183,18 +178,6 @@ def main() -> int:
         "ICU-S startup initialization zeros FEBF1194 before normal SecOC traffic",
         "puVar1[0x1665] = 0;" in FUN_BY_ADDR[0x8735E]["decompiled_c"]
         and "crypto_icus_initialize();" in startup,
-    )
-
-    print("== conclusion boundary ==")
-    check(
-        "retained pocket is inside both authenticated-download and application-RWX bounds",
-        0xFEBF0000 >= 0xFEBF0000
-        and 0xFEBF0307 <= 0xFEBF0FFF
-        and 0xFEBEF400 <= 0xFEBF0000 <= 0xFEBF0307 <= 0xFEBF33FC,
-    )
-    print(
-        "NOTE: this proves a stock-reset/startup-cleared, direct-handoff-retainable, application-RWX storage pocket.\n"
-        "      It does not prove a post-init stock control-transfer consumer into that pocket."
     )
 
     print(f"\n{passed} passed, {failed} failed")

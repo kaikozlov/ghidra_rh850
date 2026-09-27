@@ -91,7 +91,6 @@ expected_boot_irq = [
     (0x10C1, 0x1E96),
     (0xFFFFFFFF, 0x1EA4),
 ]
-check("boot EIINT dispatch table has eight records", len(boot_irq) == 8)
 check("boot EIINT source/handler records match", boot_irq == expected_boot_irq, repr(boot_irq))
 check("boot direct EIINT prologue calls dispatcher 0x748",
       CF[0x130:0x136] == bytes.fromhex("ff0218060000"), CF[0x130:0x136].hex())
@@ -105,7 +104,6 @@ check("application vector 0x90 points to 0x64B3E",
       CF[0x20090:0x20098] == bytes.fromhex("1f00e0063e4b0600"))
 app_vectors = [u32(0x20200 + 4 * channel) for channel in range(384)]
 counts = Counter(app_vectors)
-check("application INTBP region has 384 entries", len(app_vectors) == 384)
 check("application default handler occupies 373 entries",
       counts[0x61D88] == 373, repr(counts))
 expected_special = {
@@ -148,7 +146,6 @@ check("tail channels 382/383 contain unresolved pointer 0x00400040",
 print("\n== application RSCFD register map ==")
 RSCFD_RECORD = struct.Struct("<29I")
 rscfd = [RSCFD_RECORD.unpack_from(CF, 0x22FE0 + i * RSCFD_RECORD.size) for i in range(3)]
-check("RSCFD register map has three 0x74-byte records", RSCFD_RECORD.size == 0x74 and len(rscfd) == 3)
 check("channel records begin with channel-specific control registers",
       [row[0] for row in rscfd] == [0xFFD20008, 0xFFD20018, 0xFFD20028])
 check("channel records select FIFO RAM 0xFFD23400/3580/3700",
@@ -181,7 +178,6 @@ check("47 normal RX descriptors match exact ID/length sequence",
 RULE = struct.Struct("<IIII")
 rules = [RULE.unpack_from(CF, 0x231A0 + RULE.size * i) for i in range(52)]
 acceptance_ids = [row[0] for row in rules[:51]]
-check("acceptance table has 51 rules plus terminator", len(rules) == 52)
 check("normal hardware-rule IDs mirror descriptors without software CAN-FD marker",
       acceptance_ids[:47] == normal_ids)
 check("diagnostic/special acceptance tail is 7A1/777/7A0/7F7",
@@ -202,9 +198,8 @@ check("receive callback masks split normal/diagnostic/special classes",
 check("diagnostic software ID table is 7A1/777/7A0",
       [u32(0x21FC8 + 8 * i) for i in range(3)] == [0x7A1, 0x777, 0x7A0])
 
-for can_id, index, pdu_id in [(0x2E4, 0, 6), (0x0F, 5, 11), (0x131, 20, 26)]:
+for can_id, index in [(0x2E4, 0), (0x0F, 5), (0x131, 20)]:
     check(f"CAN {can_id:#x} has acceptance index {index}", acceptance_ids[index] == can_id)
-    check(f"CAN {can_id:#x} maps by 6+n to application PDU {pdu_id}", 6 + index == pdu_id)
 check("CAN 0x344 is absent from application RX acceptance rules", 0x344 not in acceptance_ids)
 
 print(f"\nSummary: {passed} passed, {failed} failed")

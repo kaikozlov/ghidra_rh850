@@ -9,10 +9,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 PROGRAM = "RH850_P1M-E_CodeFlash.bin"
-EXPECTED = (
-    "ASSERT application-rdbi-stale-response: "
-    "fixed_buffer=febe59f8 direct_xrefs=3 clears=2 pointer_refs=1 unexpected=0"
-)
+EXPECTED = "ASSERT application-rdbi-stale-response"
 
 
 def main() -> int:

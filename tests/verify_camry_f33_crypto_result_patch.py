@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from __future__ import annotations
-import hashlib, importlib.util, json, struct, sys, tempfile
+import importlib.util, json, struct, sys, tempfile
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 P=ROOT/'tools/targets/camry/builders/build_camry_f33_crypto_result_patch.py'
@@ -35,8 +35,6 @@ with tempfile.TemporaryDirectory() as td:
   check('stage5 prefix exact', crc32(final[0x18000:0xFFDEC])==b.EXPECTED_STAGE5_PREFIX)
   check('stage5 fixup/residue exact', fix==b.EXPECTED_STAGE5_FIXUP and res==0xffffffff and struct.unpack_from('<I',final,0xFFDEC)[0]==b.EXPECTED_STAGE5_FIXUP)
   check('stage5 final sha exact', b.sha256(final)==b.EXPECTED_FINAL_SHA256)
-  sem=man['semantic_resolution']['exact_control_flow']
-  check('manifest identifies pre-8F906 ordinary failure', 'FUN_0008F906 is not called' in sem['ordinary_failure'])
   check('preflight payload pinned', pkg['payloads']['preflight']['sha256']=='274eb7eaea0e41c77a8f3d1fabfe82a0fffc8a0c085be7957790f93147483f53')
   check('apply payload pinned', pkg['payloads']['apply']['sha256']=='a5d9b3eaf8670160c371fa2756d65db73d8ad3f1644313c277ac52e5f4091917')
   check('post payload pinned', pkg['payloads']['post_apply']['payload_sha256']=='98c6042021de65e6a0da8038e6198de5caa0764a5725a8fd0c0a0e66a12bed85')

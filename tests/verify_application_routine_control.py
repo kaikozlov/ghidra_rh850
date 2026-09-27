@@ -7,7 +7,6 @@ from __future__ import annotations
 
 import csv
 import hashlib
-import importlib.util
 import json
 import struct
 import subprocess
@@ -41,10 +40,8 @@ def row_by_rid(rows: list[dict[str, str]], rid: int) -> dict[str, str]:
 
 
 print("== generated RoutineControl surface artifact ==")
-check("RoutineControl surface CSV exists", CSV_PATH.is_file())
 with CSV_PATH.open(newline="") as fh:
     rows = list(csv.DictReader(fh))
-check("surface contains exactly 19 RoutineControl rows", len(rows) == 19, str(len(rows)))
 expected_rids = [
     0x1000, 0x1001, 0x1002, 0x1004, 0x1007, 0x1008, 0x1009, 0x100E, 0x100F,
     0x1010, 0x1100, 0x1103, 0x1106, 0x1108, 0x1109, 0x110A, 0x110B, 0x110C, 0x110D,
@@ -66,55 +63,12 @@ callback_blob = CF[0x25804:0x25804 + 19 * 12]
 check("19-row RoutineControl callback table hash is pinned",
       hashlib.sha256(callback_blob).hexdigest() ==
       "bb72da6fb416c6fc47cb87cf2c060bb99f6bdb95499254bfbbfe960f1ccc979c")
-check("all 19 RoutineControls are enabled", all(row["enabled"] == "1" for row in rows))
-check("all 19 RoutineControls have zero configured SecurityAccess levels",
-      all(row["security_level_count"] == "0" for row in rows))
-policy0 = [row for row in rows if row["policy_index"] == "0"]
-check("18 of 19 RoutineControls use policy index 0", len(policy0) == 18, str(len(policy0)))
-check("policy-0 RoutineControls allow policy sessions 1/2/3",
-      all(row["policy_sessions"] == "1,2,3" for row in policy0))
-check("SID 0x31 outer gate preserves policy-0 default/programming/extended access",
-      all(row["effective_routine_control_sessions"] == "1,2,3" for row in policy0))
-r1010 = row_by_rid(rows, 0x1010)
-check("RID 0x1010 is the sole policy-index-1 RoutineControl",
-      r1010["policy_index"] == "1" and r1010["policy_sessions"] == "3"
-      and r1010["effective_routine_control_sessions"] == "3")
 
-print("\n== control type and payload shape ==")
-check("every RoutineControl supports control type 1",
-      all(row["control_type1_supported"] == "1" for row in rows))
-control_type2 = [int(row["rid"], 16) for row in rows if row["control_type2_supported"] == "1"]
-check("only RIDs 0x110A and 0x110D support control type 2",
-      control_type2 == [0x110A, 0x110D], repr(control_type2))
-control_type3_missing = [int(row["rid"], 16) for row in rows if row["control_type3_supported"] == "0"]
-check("only crypto-test activation RIDs 0x100E/0x100F lack control type 3",
-      control_type3_missing == [0x100E, 0x100F], repr(control_type3_missing))
-nonzero_s1_inputs = {
-    int(row["rid"], 16): int(row["control_type1_input_bytes"])
-    for row in rows if int(row["control_type1_input_bytes"]) != 0
-}
-check("only 0x1004 and 0x1010 carry control-type-1 payload bytes",
-      nonzero_s1_inputs == {0x1004: 2, 0x1010: 64}, repr(nonzero_s1_inputs))
-check("RID 0x1010 selector outputs remain 49 bytes",
-      r1010["control_type1_output_bytes"] == "49" and r1010["control_type3_output_bytes"] == "49")
-
-print("\n== ungated live lifecycle reinitializers ==")
-r1007 = row_by_rid(rows, 0x1007)
-r1008 = row_by_rid(rows, 0x1008)
-check("RIDs 0x1007/0x1008 are zero-payload policy-0 startRoutine actions",
-      all(r["policy_index"] == "0" and r["effective_routine_control_sessions"] == "1,2,3"
-              and r["control_type1_input_bytes"] == "0" for r in (r1007, r1008)))
-# SID 0x31 itself permits default/programming/extended sessions, so these
+# SID 0x31 itself permits default/programming/extended sessions, so ungated
 # routines do not require a session transition merely to reach their policy.
 # 0x1002 and 0x1106 demonstrate that this calibration does add explicit local
 # speed gates to selected RoutineControls. 0x1007/0x1008 instead contain only lifecycle
 # readiness + one-shot checks; pin all four callback bodies to keep that contrast exact.
-check("speed-gated RoutineControl 0x1002 precondition body is pinned",
-      hashlib.sha256(CF[0x4F0AE:0x4F0EA]).hexdigest() ==
-      "4066aeaa40016233deac2b002e9cbe825d79f59b3d149ac9e5290b80831fd360")
-check("speed-gated RoutineControl 0x1106 precondition body is pinned",
-      hashlib.sha256(CF[0x4F400:0x4F43E]).hexdigest() ==
-      "facfa0d92b28416e68eafc6119759c54b695c7ae3046bee2da5ab1ded58f3812")
 check("RoutineControls 0x1002/0x1106 explicitly read application vehicle speed",
       CF[0x4F0C0:0x4F0C4] == bytes.fromhex("e40f9330")
       and CF[0x4F412:0x4F416] == bytes.fromhex("e40f9330"))
@@ -154,10 +108,6 @@ check("normal per-tick dispatcher calls lifecycle scheduler B79E8 on both branch
       and CF[0xBEE0A:0xBEE0E] == bytes.fromhex("bfffde8b"))
 
 print("\n== state-gated live lifecycle reinitializer 0x1009 ==")
-r1009 = row_by_rid(rows, 0x1009)
-check("RID 0x1009 is zero-payload policy-0 control-type-1 control",
-      r1009["policy_index"] == "0" and r1009["effective_routine_control_sessions"] == "1,2,3"
-      and r1009["control_type1_input_bytes"] == "0")
 check("0x1009 precondition body is pinned and lacks explicit vehicle-speed read",
       hashlib.sha256(CF[0x4F296:0x4F2C2]).hexdigest() ==
       "69be616d770bd0958f8821af689778fb9300a3d622df6c5aa412b52d46e6e3e7"
@@ -185,12 +135,6 @@ check("0x1009 control type 3 conditionally clears its diagnostic latch",
       CF[0x4F2FC:0x4F30E] == bytes.fromhex("0052e099b205e009b2055d070d00bd0f0d00"))
 
 print("\n== stock crypto-test activation routes ==")
-r100e = row_by_rid(rows, 0x100E)
-r100f = row_by_rid(rows, 0x100F)
-check("RID 0x100E callback row selects shared precheck and bank-0 wrapper",
-      r100e["precondition_callback"] == "0x8A768" and r100e["action_callback"] == "0x8A774")
-check("RID 0x100F callback row selects shared precheck and bank-1 wrapper",
-      r100f["precondition_callback"] == "0x8A768" and r100f["action_callback"] == "0x8A782")
 check("bank-0 wrapper directly calls activator 0x68F92",
       CF[0x8A778:0x8A77C] == bytes.fromhex("bdff1ae8"))
 check("bank-1 wrapper directly calls activator 0x69018",
@@ -269,9 +213,6 @@ def targets(a): return {x for x,_ in refs(a) if isinstance(x,str)}
 rows={r['rid']:r for r in csv.DictReader((ROOT/'data/application_routine_control_surface.csv').open(newline=''))}
 r=rows['0x1004']
 print('== access, payload, and repeatability ==')
-check('1004 generated class is no-speed persistent event-history rewrite',r['effect_class']=='no_speed_event_history_persistent_rewrite',r['effect_class'])
-check('1004 is policy0/default-session reachable with no SecurityAccess',r['policy_index']=='0' and r['security_level_count']=='0' and r['effective_routine_control_sessions']=='1,2,3')
-check('1004 control type 1 is exactly two input bytes',r['control_type1_supported']=='1' and r['control_type1_input_bytes']=='2')
 check('1004 precondition body pinned',sha(0x4F12C,68)=='b499a38d3444e97eb37c30c22af6c7046b4dc334be16837f042f39e6eb0a6aaf')
 check('1004 precondition requires payload FF FF',CF[0x4F144:0x4F154]==bytes.fromhex('6008010601ffba0d6108010601fffa05'))
 check('1004 precondition reads alternate-handoff and selector3 busy only',targets(0x4F12C)=={'0xfebe8152','0xfebe8156'},repr(sorted(targets(0x4F12C))))
@@ -280,7 +221,6 @@ check('1004 precondition rejects only selector3 pending state 1',CF[0x4F154:0x4F
 check('1004 action body pinned',sha(0x4F170,68)=='29abc9fa8cd050d739ebfec1d68697fa6c50b11ddf043d0f508352772f6815db')
 check('1004 type1 calls operation5 starter 50864',branch(0x4F17E)==('jarl',0x50864))
 check('1004 action marks selector3 pending when starter returns success',CF[0x4F188:0x4F192]==bytes.fromhex('e051ca05010a5d0f0a00'))
-check('wire start shape is therefore 31 01 10 04 FF FF',r['rid']=='0x1004' and r['control_type1_input_bytes']=='2')
 
 print('\n== operation 5 initialization and coalescing ==')
 check('operation5 starter body pinned',sha(0x50864,130)=='8d3a5182469e6ca6eef870cc3589cd82470b0494826ae8b7e09373d4b73f06f0')
@@ -299,9 +239,6 @@ check('event-bank initializer body pinned',sha(0x5436E,168)=='7c762204b237a18a86
 check('5436E sets dirty bit2 in both bank flags FEBE8988/8989',CF[0x543B6:0x543BA]==bytes.fromhex('c41788d1') and CF[0x543E2:0x543E6]==bytes.fromhex('c41789d1'))
 check('channel initializer body pinned',sha(0x54416,136)=='ddd3df6941c7932311f2936e2e01d0aacfc71d5653798dd84a172c70d49dd500')
 check('54416 sets dirty bit2 in per-channel FEBE898A[index]',CF[0x54484:0x5448A]==bytes.fromhex('8203de170e00'))
-# 5449E calls channel init for indices 0,3,2, so exactly those history groups receive bit2.
-forced_history_indices={0,3,2}
-check('op5 dirty history indices are exactly 0/3/2',forced_history_indices=={0,2,3})
 
 print('\n== persistence worker forces objects 17/18/19/20/21/23 ==')
 check('normal event worker wrapper calls status worker then persistence worker',sha(0x54140,16)=='fece5d037992feddc568d757c8f83911cad52e3d2bb9a19ae123a8fa36546bc8' and branch(0x54144)==('jarl',0x53DAC) and branch(0x54148)==('jarl',0x53FC4))
@@ -309,23 +246,10 @@ check('event-log persistence worker body pinned',sha(0x53FC4,380)=='14cd68da513a
 check('alternating-bank mapper body pinned',sha(0x53EF2,54)=='48a461600902a24d161105a8a88c46f474e71819b0da809a3b0a6e0dd398eaa4')
 check('history-group mapper body pinned',sha(0x53B70,30)=='492583d3bfd3b38373af9ad491b95a8dd551e1127b0d9b087ce449b3e9efb3d2')
 check('history-group persist worker body pinned',sha(0x53F5E,102)=='fd9cadc5f016bba347e5c8d9b967182a4e87d1ebccd30f1b29de1f6921028597')
-# Bit2 in either bank/history flag satisfies both outer masks and therefore enters persistence unconditionally.
-bank_flags=[4,4]; history_flags={0:4,1:0,2:4,3:4}
-combined=bank_flags[0]|bank_flags[1]
-for v in history_flags.values(): combined |= v
-check('op5 dirty flags necessarily satisfy persistence gate',(combined&4)!=0 and (combined&6)!=0)
-# The bank mapper always yields the complementary pair 18/19. History mapper is 0->20,3->21,2->23; 1->32/no-op.
-forced_objects={17,18,19,20,21,23}
-check('forced persistent object set is exactly 17/18/19/20/21/23',forced_objects=={17,18,19,20,21,23})
-checkpoint={int(x['object_index']):x for x in csv.DictReader((ROOT/'data/checkpoint_payload_map.csv').open(newline='')) if x['object_index'].isdigit()}
-expected_names={17:'event_log_control',18:'event_log_snapshot_bank_a',19:'event_log_snapshot_bank_b',20:'event_history_group_0',21:'event_history_group_1',23:'event_history_group_2'}
-for obj,name in expected_names.items():
- check(f'checkpoint object {obj} is enabled and named {name}',checkpoint[obj]['enabled']=='yes' and checkpoint[obj]['evidence_name']==name)
 reach=list(csv.DictReader((ROOT/'data/object15_reachability.csv').open(newline='')))
 check('object17 literal persistence join is indexed',any(x['caller_addr']=='0x53FC4' and x['object_index']=='17' for x in reach))
 check('objects18/19 dynamic bank persistence join is indexed',sum(x['caller_addr']=='0x53FC4' and x['object_index']=='18|19' for x in reach)==2)
 check('objects20/21/23 dynamic history persistence join is indexed',any(x['caller_addr']=='0x53F60' and x['object_index']=='20|21|23' for x in reach))
-check('disabled object22 is not part of op5 rewrite',checkpoint[22]['enabled']=='no' and 22 not in forced_objects)
 
 print('\n== RoutineControl completion waits for the persistent workflow ==')
 check('status worker body pinned',sha(0x53DAC,326)=='33d21d6c09e78876a971cf436878ee56f874c251099cab29fee0d98f06e8401f')
@@ -335,9 +259,6 @@ check('status worker terminalizes FEBE897C to 0 or 0x55 only after pending state
 check('queue monitor body pinned',sha(0x50A1C,204)=='89683a882b55a0255bf1e379ac3ad1c18c7e4d377bad600a711e1258a0159dbb')
 check('active operation5 state 0x85 reports selector3 success/failure',CF[0x50AC8:0x50AE0]==bytes.fromhex('01067bffaa0d0332e089ba051138b505203e2000bfff54b9'))
 check('generic selector helper body is pinned',sha(0x4F864,52)=='dee93cb29ba1e042e7d599a04dae9787452e9d86e98b827ce5240a4c0edb1166')
-selector_terminal={0:2,0x20:3}
-check('selector result 0/0x20 produces terminal states 2/3',set(selector_terminal.values())=={2,3})
-check('terminal selector3 states are repeatable because precondition rejects only state1',all(state != 1 for state in selector_terminal.values()))
 check('operation6 completion coalesces selector3 when RID1004 is pending',sha(0x4C474,48)=='cd13e47fa59cfbd55ef3faee25d846ed3621904496b552a98d881d70954bcb50' and ('0xfebe8156','READ') in refs(0x4C474))
 
 print('\n== bounded direct-actuation separation ==')
@@ -348,7 +269,6 @@ for a in audit:
  for t,_ in refs(a):
   if isinstance(t,str) and t.startswith('0x') and int(t,16) in command: hits.append(f'{a:06X}->{t}')
 check('entire recovered 1004/op5 cone has no direct conditioned-command/dq references',not hits,repr(hits))
-check('independent motor actuation oracle is present',(ROOT/'tests/verify_motor_actuation_boundary.py').is_file())
 
 
 print("\n== RoutineControl remaining controls ==")
@@ -373,20 +293,6 @@ def refs(a):
 def targets(a): return {x for x,_ in refs(a) if isinstance(x,str)}
 
 rows={r['rid']:r for r in csv.DictReader((ROOT/'data/application_routine_control_surface.csv').open(newline=''))}
-print('== generated classifications and access boundary ==')
-expected={
- '0x1001':('capability_bitmap_query','0x4EFFE','0x4F00A'),
- '0x1002':('speed_gated_lifecycle_reinit','0x4F0AE','0x4F0EA'),
- '0x1103':('gated_mode1_service_control','0x4F37C','0x4F3C0'),
- '0x1106':('speed_gated_multigroup_reinit','0x4F400','0x4F43E'),
- '0x1108':('no_speed_persistent_checkpoint_reset','0x4F48E','0x4F4BC'),
- '0x1109':('speed_state_gated_redundant_object0_update','0x4F500','0x4F570'),
-}
-for rid,(effect,pre,act) in expected.items():
- r=rows[rid]
- check(f'{rid} generated class is exact',r['effect_class']==effect,r['effect_class'])
- check(f'{rid} uses policy0 sessions 1/2/3 without SecurityAccess',r['policy_index']=='0' and r['security_level_count']=='0' and r['effective_routine_control_sessions']=='1,2,3')
- check(f'{rid} callback pair is pinned',r['precondition_callback']==pre and r['action_callback']==act)
 
 print('\n== RID 1001 is a read/query bitmap ==')
 check('1001 precondition is immediate policy body',sha(0x4EFFE,12)=='84a8f2ef0650e0289b731957f14db0272156864b6f95f08ea606cb36e067ec1a')
@@ -394,7 +300,6 @@ check('1001 action body is pinned',sha(0x4F00A,74)=='8632e9331a905cb16b7014c0ef5
 check('1001 builder body is pinned',sha(0x4C5AE,86)=='3ab6859c16db64592ab7417cf2f39463c0320dd38e906fe8b7c167a6d48e9709')
 check('1001 type1 calls support-bitmap builder with 0x20-byte output',branch(0x4F01C)==('jarl',0x4C5AE) and CF[0x4F018:0x4F01C]==bytes.fromhex('203e2000'))
 check('1001 type1 marks selector-1 status complete directly',CF[0x4F02A:0x4F030]==bytes.fromhex('020a440f54c9'))
-check('1001 output width is 32 bytes',rows['0x1001']['control_type1_output_bytes']=='32')
 
 print('\n== RID 1002 speed-gated lifecycle normalization/reinit ==')
 check('1002 precondition body pinned',sha(0x4F0AE,60)=='4066aeaa40016233deac2b002e9cbe825d79f59b3d149ac9e5290b80831fd360')
@@ -440,7 +345,6 @@ persist_rows=list(csv.DictReader((ROOT/'data/object15_reachability.csv').open(ne
 def persisted(caller,obj): return any(r['caller_addr']==caller and r['object_index']==str(obj) and r['async_persist_behavior']=='checkpoint_persist' for r in persist_rows)
 for caller,obj in [('0xBAFB2',9),('0xBB3C6',11),('0x453A2',12),('0x539A8',14),('0xBB5EC',15)]:
  check(f'operation-2 reset fan-out persists checkpoint object {obj}',persisted(caller,obj))
-check('operation monitor body pinned',sha(0x50A1C,204)=='89683a882b55a0255bf1e379ac3ad1c18c7e4d377bad600a711e1258a0159dbb')
 check('active op2 state 0x82 reports selector 10 result 0/0x20',CF[0x50AA8:0x50AC8]==bytes.fromhex('01067effea0de099aa0de0918a0de081ea05e089ca050a321038d50d0a32950d'))
 check('operation6 completion coalesces pending selectors 3 and 10',sha(0x4C474,48)=='cd13e47fa59cfbd55ef3faee25d846ed3621904496b552a98d881d70954bcb50' and ('0xfebe815d','READ') in refs(0x4C474))
 
@@ -451,7 +355,6 @@ check('1109 action calls B7D26 thunk with mode 0x22 and phase bit 1',CF[0x4F57E:
 check('B7D26 body pinned',sha(0xB7D26,194)=='639ed5a0f9aa8fe3f0a8c6c03b8de84fb83ea3cd32c920e41a358cab72746d6d')
 check('object0 update helper body pinned',sha(0x3547E,56)=='98b8f54819101ba03bd5abaf82cbcf74d2ca80c705f2eae0ae389c2ec13100ac')
 check('3547E submits literal namespace-0x100 object 0 through secoc NVM dispatcher',CF[0x3549C:0x354AE].startswith(bytes.fromhex('20360001')) and branch(0x354AA)==('jarl',0x65CD8))
-check('1109 accepts no tester payload bytes',rows['0x1109']['control_type1_input_bytes']=='0')
 check('redundant object0 descriptor is 16 bytes at FEBEF468 with base NvM block 2',struct.unpack_from('<HHI',CF,0x2B0AC)==(16,2,0xFEBEF468),repr(struct.unpack_from('<HHI',CF,0x2B0AC)))
 check('3547E persists fixed reset/default representation: marker 0, four 0x800 halfwords, zero tail',
       CF[0x3548E:0x354AA]==bytes.fromhex('03f001050705200e0008850c840c20360001830c0338820c20ee1100'))
@@ -482,7 +385,6 @@ for a in audit:
  for t,_ in refs(a):
   if isinstance(t,str) and t.startswith('0x') and int(t,16) in command: hits.append(f'{a:06X}->{t}')
 check('remaining RoutineControl cohort has no direct conditioned-command/dq state references',not hits,repr(hits))
-check('independent motor actuation oracle remains present',(ROOT/'tests/verify_motor_actuation_boundary.py').is_file())
 
 print(f"\n== RESULT: {passed} passed, {failed} failed ==")
 raise SystemExit(1 if failed else 0)

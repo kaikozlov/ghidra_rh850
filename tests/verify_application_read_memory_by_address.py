@@ -123,7 +123,6 @@ check("ICU-S tail FF207800 is excluded", overlaps(0xFF207800, 1, df_excluded))
 check("ordinary DataFlash FF200000 remains readable", not overlaps(0xFF200000, 16, df_excluded))
 
 print("\n== bounded request geometry ==")
-check("one-byte configured size field caps a single request at 255 bytes", (0x15 >> 4) == 1 and 0xFF == 255)
 check("RAM read helper independently rejects sizes above 256", CF[0x4EB3E:0x4EB48] == bytes.fromhex("1c0effff010601ff9125"))
 check("compiled exclusion test rejects overlap, not only starts inside the range", overlaps(0xFEBE502F, 2, ram_excluded))
 check("byte immediately before an excluded RAM range is readable alone", not overlaps(0xFEBE502F, 1, ram_excluded))

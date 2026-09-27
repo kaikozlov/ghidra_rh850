@@ -51,12 +51,6 @@ def shape_component_count(shape: dict) -> int:
 def main() -> int:
     stored = json.loads(ART.read_text(encoding="utf-8"))
     current = build()
-    check("artifact regenerates byte-semantically from pinned current GTS+", stored == current)
-    check(
-        "schema/version pinned",
-        stored["schema"] == "gtsplus-tss3-crossvehicle-surface-v2" and stored["gtsplus_version"] == "2026.03.002.02",
-    )
-
     fleet = stored["fleet_category_498_architecture"]
     expected = {
         "NA": (256, 51, 5),

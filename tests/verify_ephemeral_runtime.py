@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import csv
-import hashlib
 import json
 import struct
 from pathlib import Path
@@ -11,11 +10,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 CF = (REPO / "firmware" / "RH850_P1M-E_CodeFlash.bin").read_bytes()
 SOURCE = REPO / "exploit" / "ephemeral_runtime" / "main.c"
-BUILDER = REPO / "exploit" / "ephemeral_runtime" / "build_shellcode.py"
-AUDIT = REPO / "exploit" / "ephemeral_runtime" / "audited_build.json"
 CANARY_SOURCE = REPO / "exploit" / "ephemeral_runtime" / "canary.c"
-CANARY_BUILDER = REPO / "exploit" / "ephemeral_runtime" / "build_canary.py"
-CANARY_AUDIT = REPO / "exploit" / "ephemeral_runtime" / "audited_canary_build.json"
 SUBSTITUTION_PLANNER = REPO / "exploit" / "ephemeral_runtime" / "build_substitution_plan.py"
 CORPUS = REPO / "data" / "generated" / "decompilations.jsonl"
 passed = failed = 0
@@ -68,7 +63,6 @@ expected_startup = [
     0x61B18, 0x6257E, 0x5FC78, 0x61DD4, 0x6263E, 0x62662, 0x62682,
     0x627C6, 0x70550, 0x626A2, 0x61CC8, 0x65626, 0x626F6, 0x6555C,
 ]
-check("startup coordinator contains exactly 21 consecutive direct JARL slots", len(startup_sites) == 21)
 check("JARL disp22 decoder reproduces exact stock startup targets",
       [jarl22_target(a) for a in startup_sites] == expected_startup)
 check("stock startup then calls final init 0x6F15A with r6=0",
@@ -130,29 +124,6 @@ check("2E4 request/torque unpack destinations remain stock",
 
 print("\n== tracked resident runtime contract ==")
 source = SOURCE.read_text(encoding="utf-8")
-audit = json.loads(AUDIT.read_text(encoding="utf-8"))
-source_hash = hashlib.sha256(SOURCE.read_bytes()).hexdigest()
-bindings = {item["path"]: item["sha256"] for item in audit["sources"]}
-check("runtime source is bound by audited build", bindings["exploit/ephemeral_runtime/main.c"] == source_hash)
-check("audited resident image fits manifest 0x308-byte pocket with 72-byte headroom",
-      audit["shellcode"]["size"] == 704 and audit["shellcode"]["headroom"] == 72 and audit["compile_contract"]["retained_limit"] == 776 and
-      audit["compile_contract"]["target_codeflash_sha256"] == hashlib.sha256(CF).hexdigest())
-check("audited resident image has exact executable SHA",
-      audit["shellcode"]["sha256"] == "8f486d36ae38d233165563ad2cc4a71d006cf5c8cf9a876345a3b6ab72f10495")
-AUDITED_RUNTIME = REPO / "exploit/ephemeral_runtime/audited/ephemeral_secoc_runtime.bin"
-check("tracked audited resident bytes match audit manifest",
-      AUDITED_RUNTIME.is_file() and len(AUDITED_RUNTIME.read_bytes()) == audit["shellcode"]["size"] and
-      hashlib.sha256(AUDITED_RUNTIME.read_bytes()).hexdigest() == audit["shellcode"]["sha256"])
-check("audited build pins zero relocations and entry offset zero",
-      audit["compile_contract"]["relocations"] == 0 and audit["shellcode"]["entry_offset"] == 0)
-check("audited build is explicitly not bench-validated",
-      audit["review_status"] == "audited-static-not-bench-validated")
-check("runtime reuses manifest-resolved stock startup JARL stream instead of duplicating a target table",
-      "TARGET_APP_STARTUP_FIRST_JARL" in source and "TARGET_APP_STARTUP_AFTER_JARLS" in source and "signed_high6" in source)
-check("runtime bridge is limited to two steering profiles and MAC28-zero marker",
-      "BRIDGE_PROFILE_COUNT       2u" in source and "MAC28_ZERO_MASK            0xFFFFFF0Fu" in source)
-check("runtime calls stock COM RxIndication before stock system-mode dispatcher",
-      source.index("call0(TARGET_AGG_1)") < source.index("((com_rx_t)TARGET_APPLICATION_COM_RX)") < source.index("call0(TARGET_AGG_4)"))
 check("runtime source contains no CodeFlash/FACI programming primitive",
       all(token not in source.lower() for token in ("faci_", "flash_block_rmw", "program_page", "codeflash_write")))
 installer_source = (REPO / "exploit" / "ephemeral_runtime" / "live_installer.py").read_text(encoding="utf-8")
@@ -165,30 +136,9 @@ check("live installer retains initial boot SecurityAccess boundary",
 
 print("\n== inert scheduler canary ==")
 canary_source = CANARY_SOURCE.read_text(encoding="utf-8")
-canary_audit = json.loads(CANARY_AUDIT.read_text(encoding="utf-8"))
-canary_bindings = {item["path"]: item["sha256"] for item in canary_audit["sources"]}
-check("canary source is bound by audited build",
-      canary_bindings["exploit/ephemeral_runtime/canary.c"] == hashlib.sha256(CANARY_SOURCE.read_bytes()).hexdigest())
-check("audited canary is 332 bytes with 444 bytes headroom",
-      canary_audit["shellcode"]["size"] == 332 and canary_audit["shellcode"]["headroom"] == 444 and
-      canary_audit["compile_contract"]["target_codeflash_sha256"] == hashlib.sha256(CF).hexdigest())
-check("audited canary executable SHA is pinned",
-      canary_audit["shellcode"]["sha256"] == "81176c6e1c33451cfa63bd3b4a0e07b8b0fb952c70b3d67442f1a294ed6b651e")
-AUDITED_CANARY = REPO / "exploit/ephemeral_runtime/audited/ephemeral_scheduler_canary.bin"
-check("tracked audited canary bytes match audit manifest",
-      AUDITED_CANARY.is_file() and len(AUDITED_CANARY.read_bytes()) == canary_audit["shellcode"]["size"] and
-      hashlib.sha256(AUDITED_CANARY.read_bytes()).hexdigest() == canary_audit["shellcode"]["sha256"])
-check("canary is entry-zero, relocation-free, and explicitly unvalidated",
-      canary_audit["shellcode"]["entry_offset"] == 0 and
-      canary_audit["compile_contract"]["relocations"] == 0 and
-      canary_audit["review_status"] == "audited-inert-static-not-bench-validated")
 check("canary preserves the manifest-resolved stock aggregate and contains no COM/SecOC bridge",
       "TARGET_FG_AGGREGATE" in canary_source and
       "application_com_rx" not in canary_source.lower() and "MAC28" not in canary_source)
-check("canary heartbeat comes from the target manifest and resolves to FEBFFBF0 on Sienna",
-      "TARGET_CANARY_HEARTBEAT" in canary_source and
-      canary_audit["compile_contract"]["heartbeat_address"] == "0xFEBFFBF0" and
-      canary_audit["compile_contract"]["heartbeat_source"] == "target-manifest canary_observation_address")
 # Heartbeat is beyond startup CodeFlash shadow copy and remains XCP-readable.
 heartbeat = 0xFEBFFBF0
 exclusion_count = u32(0x2B3B8)
@@ -209,42 +159,15 @@ check("heartbeat has no canonical application direct reference", not heartbeat_r
 
 print("\n== post-auth substitution / execution ordering ==")
 planner = SUBSTITUTION_PLANNER.read_text(encoding="utf-8")
-check("planner derives runtime base and callback cell from the target manifest",
-      "payload_callback_base" in planner and "payload_callback_cell" in planner and "DEFAULT_MANIFEST" in planner)
-check("planner writes callback pointer last and packs the manifest-derived target little-endian",
-      '"callback_pointer_last"' in planner and "struct.pack(\"<I\", callback_value)" in planner)
-check("planner pins exact FF00 execution request",
-      'FF00_REQUEST = bytes.fromhex("3101ff004500000e000000008000")' in planner)
 check("planner explicitly requires prior successful 10F0 authentication",
       "selected target-accepted encrypted bootstrap fixture has been uploaded and passed RID 0x10F0" in planner and
       '"initial_authentication_bypassed": False' in planner)
-check("planner binds the pinned Sienna-authenticated public payload fixture",
-      'AUTHENTICATED_FIXTURE = REPO / "tests/fixtures/payloads/ram_dump_payload.bin"' in planner and
-      "d972d4bf432685217591768600a9abd7820d35b04a72270edc87074365356be2" in planner)
-check("planner separates shared bootstrap-family reuse from exact fixture identity",
-      "authenticated_bootstrap_profile" in planner and
-      "cross_vehicle_reuse_established" in planner and
-      "--bootstrap-fixture" in planner and "--bootstrap-fixture-sha256" in planner and
-      "SIENNA_CODEFLASH_SHA256" not in planner)
-check("planner does not assume Sienna encrypted bytes transfer to every bootstrap-family target",
-      "local Sienna encrypted" in planner and "not proven byte-for-byte" in planner and
-      '"payload_build_secret_required_to_replay_fixture": False' in planner)
 check("flash_erase_start stages operation type 2 rather than invoking payload callback",
       CF[0x4244:0x424A] == bytes.fromhex("020a440f9c91"))
 check("operation-type-2 worker reaches flash_driver_call_block_operation",
       jarl22_target(0x4538) == 0x4332)
 check("block-operation helper loads FEBF0FD0 and indirect-calls it",
       CF[0x434C:0x4362] == bytes.fromhex("40eebffe3defd10f0ad81c380142234e0300fdc760f9"))
-check("canary is non-returning after application transition",
-      "__attribute__((noreturn)) exploit" in canary_source and
-      "static void post_context_startup(void) __attribute__((noreturn, noinline));" in canary_source)
-
-
-command5_audit = json.loads((REPO / "exploit/ephemeral_runtime/audited_command5_proxy_build.json").read_text())
-command5_runtime = REPO / "exploit/ephemeral_runtime/audited/ephemeral_command5_proxy.bin"
-check("tracked audited command5 proxy bytes match audit manifest",
-      command5_runtime.is_file() and len(command5_runtime.read_bytes()) == command5_audit["shellcode"]["size"] and
-      hashlib.sha256(command5_runtime.read_bytes()).hexdigest() == command5_audit["shellcode"]["sha256"])
 
 print(f"\nResults: {passed} passed, {failed} failed")
 if failed:

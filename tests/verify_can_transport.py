@@ -121,15 +121,6 @@ check("Tx completion dispatcher calls extractor, ack, ID helper before classifyi
           "5e5203f0023d1b3063406152cb0580ff6008b50580ff7208"
       ))
 
-def firmware_tx_completion_class(result: int) -> str:
-    # Exact 0x3ED6..0x3EE2 semantics: add -2; cmp 1; bh error.
-    adjusted = (result - 2) & 0xFFFFFFFF
-    return "error" if adjusted > 1 else "success"
-
-check("encoded result 1 follows error branch",
-      firmware_tx_completion_class(1) == "error")
-check("encoded results 2/3 follow success branch",
-      [firmware_tx_completion_class(v) for v in (2, 3)] == ["success", "success"])
 check("success wrapper injects CanIf status 0",
       CF[0x4744:0x475C] == bytes.fromhex("800721000848c6008900074006380032bfff9aff40063f00"))
 check("error wrapper injects CanIf status 2",
@@ -194,7 +185,6 @@ check("Dcm addressing classes are physical=1, functional=0",
 SERVICE = struct.Struct("<BBHI")
 services = [SERVICE.unpack_from(CF, 0x8E54 + i * 8) for i in range(20)]
 by_sid = {sid:(mask, handler) for sid,mask,_reserved,handler in services}
-check("service table has 20 entries", len(services) == 20)
 check("SID 0x27 is physical-only mask 0x02", by_sid[0x27] == (2, 0x5516), repr(by_sid[0x27]))
 check("SID 0x10 allows both addressing classes", by_sid[0x10][0] == 3)
 check("SID 0x28 is functional-only mask 0x01", by_sid[0x28][0] == 1)

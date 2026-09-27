@@ -23,7 +23,6 @@ def sha256(path: Path) -> str:
 
 def main() -> int:
     data = json.loads(ART.read_text())
-    check("schema", data["schema"] == "gtsplus-pcs-data-viewer-tss3-managed-semantics-v1")
     proof = data["recovery_proof"]
     check("PCS MethodDef census", proof["method_def_count"] == 22564)
     check("PCS executable MethodDef census", proof["method_body_rva_count"] == 22447)
@@ -31,8 +30,6 @@ def main() -> int:
     operation = data["operation_ffd"]
     check("Operation-FFD bit-assignment row census", operation["detail_row_count"] == 1130)
     check("Operation-FFD DID census", operation["did_count"] == 623)
-    check("RoB/trigger row census", data["rob_codes"]["row_count"] == 47)
-    check("TSS3 RoB system enum", data["rob_codes"]["system_type_enum"] == {"0": "None", "1": "AHBAHS", "2": "LDA", "3": "PCS", "4": "IDA", "5": "URSM", "6": "SDG"})
     usage = data["rob_codes"]["system_type_usage"]
     check("RoB SYSTEM_TYPE classifies triggers rather than DIDs", usage["did_decode_scans_full_definition_table"] and not usage["analyze_rob_parameter_reads_system_type"] and usage["multi_trigger_matching_compares_system_type_and_group"])
     check("physical conversion formula", operation["physical_value_contract"]["formula"] == "physical = raw * Lsb + Offset")

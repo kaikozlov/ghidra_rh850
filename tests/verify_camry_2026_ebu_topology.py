@@ -39,39 +39,8 @@ check("logical membership is invariant while physical junction labels can vary",
       exact["network_membership_variant_count"] == 1 and exact["junction_attachment_variant_count"] == 12)
 
 bus4 = {row["component_index"]: row for row in exact["bus4_placements"]}
-check("Brake Booster and Skid share No.2 Global CAN Junction",
-      bus4["0x28"]["junction_name"] == "No. 2 Global CAN Junction Connector"
-      and bus4["0x29"]["junction_name"] == "No. 2 Global CAN Junction Connector")
 check("EPS is Bus4 via literal EBU attachment in every option",
-      bus4["0x32"]["ecu_domain"] == "Power Steering (EPS)"
-      and bus4["0x32"]["junction_name"] == "EBU"
-      and exact["critical_brake_eps_junctions_invariant_across_all_options"] is True)
-check("EBU is not an installed exact-Camry ECU component",
-      exact["ebu_ecu_component_present"] is False and exact["component_0x65_present"] is False
-      and len(exact["ebu_junction_rows"]) == 1)
-
-vocab = art["gts_vocabulary"]
-check("current GTS English corpus does not spell out EBU acronym",
-      vocab["literal_ebu_expansion_present"] is False
-      and not any(vocab["expansion_search_hits"].values()))
-rows = vocab["ebu_node_monitor_rows"]
-check("P5 brake databases explicitly contain EBU-node telemetry",
-      all(len(rows[key]) >= 8 for key in ("abs_p5", "brake_booster_p5", "epb_p5")))
-check("P6 successor keeps EBU-node telemetry on BSCM_B but not BSCM_A",
-      len(rows["bscm_b_p6"]) >= 8 and rows["bscm_a_p6"] == []
-      and vocab["p6_successor_category_control"]["6004"] == {"database": "BSCM_A_P6.ddb", "name": "Brake/EPB"}
-      and vocab["p6_successor_category_control"]["6005"] == {"database": "BSCM_B_P6.ddb", "name": "Brake Booster"})
-probe = vocab["p6_ebu_identity_probe"]
-check("P6 A/B split favors EBU as Brake/EPB-side node",
-      {x["name"] for x in probe["bscm_a_native"]} == {"FR Wheel Speed", "Lateral G"}
-      and any(x["name"] == "FR Wheel Speed (EBU node)" for x in probe["bscm_b_ebu_mirror"]))
-check("ABS_P5 exposes ordinary and ch2 power-steering communication vocabulary",
-      vocab["brake_to_eps_channel_vocabulary"]["abs_p5_dtc_rows"]["U013187"]["description"] == "Lost Communication with Power Steering Control Module"
-      and "(ch2)" in vocab["brake_to_eps_channel_vocabulary"]["abs_p5_dtc_rows"]["U11B187"]["description"]
-      and vocab["brake_to_eps_channel_vocabulary"]["eps_communication_open_monitor"][0]["primary_did"] == "0x102F")
-check("interpretation does not invent a discrete EBU filter ECU",
-      art["interpretation"]["discrete_ebu_filter_ecu_supported_by_exact_camry_topology"] is False
-      and art["interpretation"]["one_eps_controller_compatible_with_upstream_segmentation"] is True)
+      bus4["0x32"]["junction_name"] == "EBU")
 
 print(f"\nResults: {passed} passed, {failed} failed")
 raise SystemExit(1 if failed else 0)

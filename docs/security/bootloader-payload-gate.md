@@ -21,8 +21,7 @@ and the `0xFF00` execution trigger. Addresses are CodeFlash virtual addresses.
 `../tests/verify_payload_gate.py` independently checks the static tables,
 callback instructions, and the two unique encrypted payload fixtures represented
 by four pinned public upstream copies. Fixture provenance and upstream hashes are
-in `../external-references.lock.json`; `make verify-external` compares them to
-optional external checkouts.
+in `../external-references.lock.json`.
 
 ## Executive result
 

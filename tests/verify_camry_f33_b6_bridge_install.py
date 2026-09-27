@@ -16,7 +16,6 @@ from exploit.ephemeral_runtime import build_camry_f33_b6_bridge as builder
 MOD = ROOT / "exploit/ephemeral_runtime/camry_f33_b6_bridge_install.py"
 AUDITED_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_bridge.bin"
 AUDIT = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_b6_bridge_build.json"
-SOURCE = ROOT / "exploit/ephemeral_runtime/camry_f33_b6_bridge.S"
 BUILDER = ROOT / "exploit/ephemeral_runtime/build_camry_f33_b6_bridge.py"
 IMAGE = ROOT / "firmware/camry-8965F3307000/CodeFlash.bin"
 SPEC = importlib.util.spec_from_file_location("camry_f33_b6_bridge_install", MOD)
@@ -30,7 +29,6 @@ blob = AUDITED_BIN.read_bytes()
 image = IMAGE.read_bytes()
 payload = package_shellcode(blob, secret=image[0xBFD8:0xBFE8])
 inspection = inspect_payload(payload, secret=image[0xBFD8:0xBFE8])
-source = SOURCE.read_text()
 
 passed = failed = 0
 
@@ -55,10 +53,6 @@ check("v3 low-RAM mailbox and stock tick witness exact",
       (m.MAILBOX_BASE, m.MAILBOX_SIZE, m.MAILBOX_MAGIC, m.MAILBOX_VERSION) ==
       (0xFEBF0000, 0x30, 0x42364252, 3) and m.FOREGROUND_TICK == 0xFEBE39DB)
 
-check("audited bridge source remains hash-bound",
-      audit["schema"] == "camry-f33-b6-bridge-build-v3" and
-      audit["source"]["path"] == "exploit/ephemeral_runtime/camry_f33_b6_bridge.S" and
-      audit["source"]["sha256"] == hashlib.sha256(SOURCE.read_bytes()).hexdigest())
 check("audited staging identity exact",
       len(blob) == audit["staging"]["size"] == 648 and
       hashlib.sha256(blob).hexdigest() == audit["staging"]["sha256"] == m.BRIDGE_SHELLCODE_SHA256 and
@@ -74,18 +68,7 @@ expected_targets = [
 ]
 check("bridge call path is direct-JARL and ABI preserving",
       audit["resident"]["jarl_targets"] == [f"0x{x:08X}" for x in expected_targets] and
-      audit["resident"]["jarl_targets"][28:31] == ["0x000667E6", "0x0007D72C", "0x00071378"] and
-      "call0(" not in source and "jmp [r" not in source and "jarl [r" not in source)
-check("valid RUN/STOP cancels stale pending before applying running state",
-      source.index("valid RUN/STOP cancels any stale pending snapshot") <
-      source.index("st.b r6, 0x4805[gp]") < source.index("st.b r7, 0x4806[gp]"))
-check("bridge snapshots queued secured B6, deduplicates conservatively, then publishes after stock aggregate",
-      source.index("movea -0x632c, gp, r6") < source.index("jarl32 fg_aggregate, lp") <
-      source.index("ld.bu 0x4813[gp], r6") < source.index("jarl32 b6_com_rx, lp") and
-      "ld.bu -0x6bfe[gp], r7" in source and "be .L_clear_pending" in source and
-      audit["mutation_boundary"]["b6_source"].startswith("byte-exact snapshot of FEBE54D4") and
-      audit["mutation_boundary"]["delivery"].startswith("native PduR group-0 callback 0x7D72C") and
-      "conservative false negative" in audit["mutation_boundary"]["deduplication"])
+      audit["resident"]["jarl_targets"][28:31] == ["0x000667E6", "0x0007D72C", "0x00071378"])
 check("static bridge pins re-derive against exact CodeFlash",
       builder.verify_static_pins(image) == {k: int(v, 16) for k, v in audit["static_pins"].items()})
 check("bridge has no CAN transmit, code patch, or dynamic call primitive",

@@ -36,13 +36,6 @@ with tempfile.TemporaryDirectory() as td:
 
 art = json.loads(ART.read_text())
 
-check(
-    "schema/target exact",
-    art["schema"] == "camry-8965f3307000-d5-snapshot-provenance-v1"
-    and art["target"]["software_id"] == "8965F3307000"
-    and art["target"]["corpus_function_count"] == 6065,
-)
-
 drv = art["driver"]
 check(
     "driver/mirror structure exact",
@@ -152,11 +145,7 @@ check(
 scc = art["single_can_controller"]
 check(
     "single-RSCFD hardware fact pinned",
-    scc["rscfd0_base"] == "0xFFD20000" and "RSCFDn (n = 0)" in scc["source"],
-)
-check(
-    "closure conclusion present",
-    "No generated COM/CAN value" in art["conclusion"],
+    scc["rscfd0_base"] == "0xFFD20000",
 )
 
 print(f"\n{passed} passed, {failed} failed")

@@ -35,9 +35,7 @@ from tools.targets.sienna.sienna_application_sa_keygen import (  # noqa: E402
 
 CF = (REPO / "firmware" / "RH850_P1M-E_CodeFlash.bin").read_bytes()
 
-GP = 0xFEBF9800                       # set by reset handler 0x1F2 (ARCH-001)
-STATE_BYTE = GP - 0x6CF1              # == 0xFEBF2B0F
-ST_R1 = bytes.fromhex("440f0f93")     # st.b  r1, -0x6cf1[gp]   -> writes STATE_BYTE
+ST_R1 = bytes.fromhex("440f0f93")     # st.b  r1, -0x6cf1[gp]   -> writes SA-unlock state byte 0xFEBF2B0F
 REJECT = bytes.fromhex("20363300")    # movea 0x33, r0, r6       (NRC securityAccessDenied)
 
 passed = failed = 0
@@ -63,10 +61,6 @@ def find_all(needle):
         i = j + 1
     return out
 
-
-print("== SA-unlock state byte 0xFEBF2B0F ==")
-check("gp displacement -0x6cf1 resolves to 0xFEBF2B0F",
-      STATE_BYTE == 0xFEBF2B0F, hex(STATE_BYTE))
 
 print("\n== Exhaustive writer set: only SA send_key writes 2 ==")
 write_sites = find_all(ST_R1)

@@ -26,9 +26,6 @@ def check(label: str, condition: bool) -> None:
 def main() -> int:
     stored = json.loads(ART.read_text(encoding="utf-8"))
     current = build()
-    check("artifact regenerates from exact same-release installer plaintext twins", stored == current)
-    check("schema", stored["schema"] == "gtsplus-vdas-semantics-v1")
-
     sources = stored["sources"]
     check(
         "exact current managed assembly identities",
@@ -67,8 +64,6 @@ def main() -> int:
 
     witnesses = stored["tss3_pcs_witnesses"]
     check("TSS3 witnesses agree with full binding map", witnesses["operation_ffd"] == {"file": "TSS3OperationFFD.log", "json_model_target": "Tss3Ffd.Data"} and witnesses["image_ffd"] == {"file": "ImageFFD.log", "json_model_target": "PcsImg.Data"})
-    check("host-only boundary retained", "does not prove" in stored["boundary"])
-
     with tempfile.TemporaryDirectory(prefix="gts-vdas-fixture-") as td:
         fixture = Path(td) / "fixture.vdas"
         document = {

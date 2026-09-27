@@ -17,7 +17,6 @@ def check(label: str, condition: bool) -> None:
 
 def main() -> int:
     data = json.loads(ART.read_text())
-    check("schema", data["schema"] == "camry-20260921-pcs-alert-v2")
     census = data["corpus_census"]
     check("retained rlog census", census["rlog_count"] == 44)
     check("0x5AE census", census["native_5ae_frames"] == 12981 and census["native_5ae_byte2_bit2_asserted"] == 4)
@@ -56,7 +55,6 @@ def main() -> int:
     check("Brake/VMM result never selects PCS IDs", result["frame_count"] == 17 and result["longitudinal_result_ids"] == [11])
     check("replacement/forward transition avoids request-loss flag", result["request_loss_supervision_asserted_frames"] == 0)
     check("result acceleration remains far from native -4 bound", result["result_accel_range_mps2"] == [-0.427, -0.401])
-    check("PCS attribution remains bounded", "does not assign a global semantic name" in data["interpretation"]["boundary"])
 
     print("Camry 2026-09-21 PCS-alert timeline verification passed")
     return 0

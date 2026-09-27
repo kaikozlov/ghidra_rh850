@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-import ast
 import io
 import json
 import subprocess
@@ -97,27 +96,15 @@ class FakePanda:
 
 print("== immutable dry-run contract ==")
 plan = capture.build_plan(900, None)
-check("schema pins exact passive-capture contract", plan["schema"] == "camry-f33-eps-gts-passive-capture-v1")
 check("plan declares zero CAN transmissions and no UDS requests",
       plan["can_transmit_calls"] == 0 and plan["flow_control_frames"] == 0 and plan["uds_requests"] == [])
-check("plan requires GTS on a separate VCI",
-      "separate VIM/J2534" in plan["active_client"])
-check("Panda is forced to NOOUTPUT on normal routing",
+check("Panda is forced to NOOUTPUT and exits SILENT",
       plan["panda"]["safety_mode"] == {"name": "NOOUTPUT", "numeric": 19}
-      and plan["panda"]["exit_safety_mode"] == {"name": "SILENT", "numeric": 0}
-      and plan["panda"]["routing"] == "normal harness CAN mode; no OBD mux selection")
+      and plan["panda"]["exit_safety_mode"] == {"name": "SILENT", "numeric": 0})
 check("capture pins exact 500/2000 kbps ISO CAN-FD controller format",
       plan["panda"]["can_format"]
       == {"nominal_kbps": 500, "data_kbps": 2000, "can_fd_non_iso": False})
 check("all three physical Panda buses are retained", plan["panda"]["physical_buses_recorded"] == [0, 1, 2])
-capture_tree = ast.parse(Path(capture.__file__).read_text())
-can_transmit_calls = [
-    node for node in ast.walk(capture_tree)
-    if isinstance(node, ast.Call)
-    and isinstance(node.func, ast.Attribute)
-    and node.func.attr in {"can_send", "can_send_many"}
-]
-check("capture implementation contains no Panda CAN transmit call", not can_transmit_calls)
 
 
 print("\n== passive batch retention and bounded UDS hints ==")

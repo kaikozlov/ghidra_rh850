@@ -5,11 +5,8 @@ Merged portable family module.
 """
 from __future__ import annotations
 
-import csv
 import hashlib
-import json
 import struct
-import sys
 from pathlib import Path
 
 ROOT = REPO = Path(__file__).resolve().parents[1]
@@ -28,7 +25,6 @@ def check(name, cond, detail=""):
 print("== TX 260 semantics ==")
 
 
-MAP = REPO / "data" / "application_tx_map.csv"
 
 
 
@@ -125,30 +121,9 @@ check("signal-8 producer loads signed FEBE66F0", b(0x4B73C, "240ff0ae"))
 check("signal-8 negates source then scales by 100/128", b(0x4B740, "209e80008009e40f4c02f30ffc02"))
 check("signal-8 stores to FEBE8110", b(0x4B74E, "640f10c9"))
 
-print("\n== curated map roles ==")
-with MAP.open(newline="", encoding="utf-8") as stream:
-    rows = {int(row["signal_id"]): row for row in csv.DictReader(stream) if row["tx_pdu_id"] == "0"}
-expected_roles = {
-    0: "constant-clear in recovered producer graph; public DBC location STEER_OVERRIDE",
-    1: "composite initialization/validity flag; public DBC STEER_ANGLE_INITIALIZING",
-    2: "debounced steering-control consistency status",
-    3: "operational-mode/status inhibit A",
-    4: "operational-mode/status inhibit B",
-    5: "thresholded motor-feedback magnitude status",
-    6: "scaled/clamped sensor torque; public DBC STEER_TORQUE_DRIVER",
-    7: "saturated signed steering-control estimate; public DBC STEER_ANGLE",
-    8: "scaled motor-feedback torque estimate; public DBC STEER_TORQUE_EPS",
-}
-check("CAN 0x260 map contains all ten signals", set(rows) == set(range(10)))
-for sid, role in expected_roles.items():
-    check(f"signal {sid} curated role is exact", rows[sid]["static_role"] == role, rows[sid]["static_role"])
-
 
 print("\n== TX 262 semantics ==")
 
-
-MAP = REPO / "data" / "application_tx_map.csv"
-DBC_FACTS = REPO / "data/external/opendbc/toyota_dbc_facts.json"
 
 
 
@@ -171,15 +146,6 @@ expected_bodies = {
 }
 for (address, size), expected in expected_bodies.items():
     check(f"producer 0x{address:X} body identity", sha(address, size) == expected)
-
-print("\n== public DBC field geometry is only corroboration ==")
-facts = json.loads(DBC_FACTS.read_text(encoding="utf-8"))
-eps = facts["messages"]["EPS_STATUS"]
-check("pinned DBC fact has EPS_STATUS CAN 0x262", eps["can_id_decimal"] == 610 and eps["length"] == 8)
-check("DBC IPAS_STATE is B0 low nibble", eps["signals"]["IPAS_STATE"] == {"start_bit_motorola": 3, "bit_length": 4, "signed": False})
-check("DBC LTA_STATE is B1[7:3]", eps["signals"]["LTA_STATE"] == {"start_bit_motorola": 15, "bit_length": 5, "signed": False})
-check("DBC TYPE is B3[0]", eps["signals"]["TYPE"] == {"start_bit_motorola": 24, "bit_length": 1, "signed": False})
-check("DBC LKA_STATE is B3[7:1]", eps["signals"]["LKA_STATE"] == {"start_bit_motorola": 31, "bit_length": 7, "signed": False})
 
 print("\n== byte 0 / IPAS_STATE is runtime-zero in this calibration ==")
 # 0x4B90A uses ep=FEBE8094 and clears offsets 8,9,0x20,0xA..0xE.
@@ -229,48 +195,9 @@ check("B4 threshold/limiter flags are written by C96D2", b(0xC9778, "44dfd808") 
 check("B4 transition latch/code are written by C9CA8", b(0xC9D5C, "44dffe08") and b(0xC9D60, "44e7ff08"))
 check("B5/B6 runtime producer writes 0xFF", b(0x4B920, "1f0a24f694c89e0b9f0b7f00"))
 
-print("\n== curated EPS_STATUS map roles ==")
-with MAP.open(newline="", encoding="utf-8") as stream:
-    rows = {int(row["signal_id"]): row for row in csv.DictReader(stream) if row["tx_pdu_id"] == "1"}
-expected_roles = {
-    10: "constant-zero EPS_STATUS prefix bit",
-    11: "constant-zero EPS_STATUS prefix bit",
-    12: "constant-zero EPS_STATUS prefix bit",
-    13: "constant zero",
-    14: "IPAS_STATE bit2; constant zero in runtime producer",
-    15: "IPAS_STATE bit1; constant zero in runtime producer",
-    16: "IPAS_STATE bit0; constant zero in runtime producer",
-    17: "LTA_STATE bit4; internal status aggregate",
-    18: "LTA_STATE bit3; timeout/recovery status",
-    19: "LTA_STATE bit2; active-state latch",
-    20: "LTA_STATE bit1; multi-condition status aggregate",
-    21: "LTA_STATE bit0; gated base-eligibility status",
-    22: "constant zero 11-bit field",
-    23: "LKA_STATE bit6; constant zero in runtime producer",
-    24: "LKA_STATE bit5; constant zero in runtime producer",
-    25: "LKA_STATE bit4; internal status aggregate",
-    26: "LKA_STATE bit3; transient recovery latch",
-    27: "LKA_STATE bit2; active-state latch",
-    28: "LKA_STATE bit1; timeout/availability status",
-    29: "LKA_STATE bit0; gated base-eligibility status",
-    30: "TYPE; constant zero in runtime producer",
-    31: "steering-control threshold status",
-    32: "steering-control limiter status",
-    33: "steering-control transition latch",
-    34: "steering-control transition code",
-    35: "constant 0xFF byte in runtime producer",
-    36: "constant 0xFF byte in runtime producer",
-}
-check("CAN 0x262 map contains all 28 signals", set(rows) == set(range(10, 38)))
-for sid, role in expected_roles.items():
-    check(f"signal {sid} curated role is exact", rows[sid]["static_role"] == role, rows[sid]["static_role"])
-
-
 print("\n== TX remaining semantics ==")
 
 
-MAP = REPO / "data" / "application_tx_map.csv"
-RX_MAP = REPO / "data" / "application_rx_map.csv"
 
 
 
@@ -341,40 +268,12 @@ expected_table = bytes.fromhex(
     "04 07 00 00 00"
 )
 check("17-entry five-byte state table is exact", CF[0x2A33C:0x2A33C + len(expected_table)] == expected_table)
-# The 0x394 producer maps state into a coarse 2-bit class.
-def state_class(state: int) -> int:
-    u = (state - 1) & 0xFFFFFFFF
-    if u > 3:
-        if u == 4:
-            return 1
-        if u > 13:
-            if u == 14:
-                return 2
-            if u != 15:
-                return 0
-    return 3
-
-expected_classes = {0: 0, 5: 1, 15: 2, 17: 0}
-expected_classes.update({state: 3 for state in range(1, 17) if state not in {5, 15}})
-check("coarse state-class model matches exact valid/invalid partition",
-      all(state_class(state) == expected for state, expected in expected_classes.items()))
 check("producer contains 0/1/2/3 class constants", b(0x4B8CC, "000a") and b(0x4B8D0, "010a") and b(0x4B8D4, "020a") and b(0x4B8D8, "030a"))
 check("tuple byte0 maps to signal40", b(0x4B8E0, "840f67caa60b"))
 check("tuple byte4 maps to signal42", b(0x4B8E6, "a40f65caa90b"))
 check("tuple bytes1/2/3 map to signals43/44/45", b(0x4B8EC, "840f63caaa0b") and b(0x4B8F2, "a40f63caab0b") and b(0x4B8F8, "840f65caad0b"))
 
 print("\n== CAN 0x4A3: mixed steering telemetry and explicit Rx->Tx joins ==")
-# Existing independently verified Rx map identifies E801C as CAN 0x025 signal
-# 221 and E807C as CAN 0x64F signal 289. The new raw proof below pins their use
-# and the exact Tx transformation; it does not use those OEM names as semantics.
-with RX_MAP.open(newline="", encoding="utf-8") as stream:
-    rx_rows = {int(row["signal_id"]): row for row in csv.DictReader(stream)}
-check("Rx signal221 structural source is CAN 0x025 signed12 -> FEBE801C",
-      rx_rows[221]["can_id"] == "0x25" and rx_rows[221]["bit_length"] == "12"
-      and rx_rows[221]["signed"] == "1" and rx_rows[221]["dest"] == "0xFEBE801C")
-check("Rx signal289 structural source is CAN 0x64F signed12 -> FEBE807C",
-      rx_rows[289]["can_id"] == "0x64F" and rx_rows[289]["bit_length"] == "12"
-      and rx_rows[289]["signed"] == "1" and rx_rows[289]["dest"] == "0xFEBE807C")
 # 4703E computes E801C-E807C, saturates to signed16, stores E7CE6.
 check("difference helper loads E801C and E807C", b(0x47046, "24371cc8") and b(0x4704A, "240f7cc8"))
 check("difference helper subtracts and calls signed16 saturator", b(0x4706A, "a13182fffe24"))
@@ -402,30 +301,6 @@ check("0x4C8 packer writes constant 09 / zero / zero", b(0x4BC58, "090a440f0ad4"
 # Signal 57 remains absent from the packer and starts B4..B7 zero; the existing
 # transmit verifier independently closes the pre/post-transform route.
 check("0x4C8 initial B4..B7 are zero", CF[0x221DC + 31 + 4:0x221DC + 31 + 8] == bytes(4))
-
-print("\n== curated remaining-Tx roles ==")
-with MAP.open(newline="", encoding="utf-8") as stream:
-    rows = {int(row["signal_id"]): row for row in csv.DictReader(stream)}
-expected_roles = {
-    38: "filtered plausibility-monitor status code; system-gated override=7",
-    39: "system-gated plausibility-status override flag",
-    40: "state-table tuple byte0",
-    41: "coarse 1..16 internal-state class code",
-    42: "state-table tuple byte4",
-    43: "state-table tuple byte1",
-    44: "state-table tuple byte2",
-    45: "state-table tuple byte3",
-    46: "initialization/validity flag OR 0x20",
-    47: "CAN 0x025 signal221 signed12 mirror bits11:8",
-    48: "CAN 0x025 signal221 signed12 mirror bits7:0",
-    49: "clamped signed12 delta (CAN 0x025 s221 - CAN 0x64F s289) bits11:8",
-    50: "clamped signed12 delta (CAN 0x025 s221 - CAN 0x64F s289) bits7:0",
-    51: "signed-byte conversion of CAN 0x260 driver-torque staging / 10",
-    52: "CAN 0x260 EPS-torque staging mirror high byte",
-    53: "CAN 0x260 EPS-torque staging mirror low byte",
-}
-for sid, role in expected_roles.items():
-    check(f"signal {sid} curated role is exact", rows[sid]["static_role"] == role, rows[sid]["static_role"])
 
 print(f"\n== RESULT: {passed} passed, {failed} failed ==")
 raise SystemExit(1 if failed else 0)

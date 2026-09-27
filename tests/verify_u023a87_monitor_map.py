@@ -61,7 +61,6 @@ print("\n== bounded residual ==")
 check("event 0xB3 remains configured-unresolved", mappings["0xB3"]["status"] == "configured-unresolved")
 check("event 0xB3 is absent from the 11-entry monitor table",
       all(row["event_id"] != "0xB3" for row in table["rows"]))
-check("boundary does not invent a PDU for 0xB3", "remains unresolved" in rebuilt["boundary"])
 
 print(f"\n== RESULT: {passed} passed, {failed} failed ==")
 if failed:

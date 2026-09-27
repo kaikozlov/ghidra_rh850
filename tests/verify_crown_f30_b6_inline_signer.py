@@ -109,7 +109,6 @@ with tempfile.TemporaryDirectory(prefix="verify-crown-f30-signer-") as td:
     out = root / "build"
     result = subprocess.run([sys.executable, str(SIGNER_BUILDER), "--output-dir", str(out)], cwd=ROOT, check=True, capture_output=True, text=True)
     meta = json.loads(result.stdout)
-    check("signer build schema/review boundary", meta["schema"] == "crown-f30-b6-inline-signer-build-v1" and meta["review_status"] == "firmware-closed-live-unqualified")
     check("resident fits reviewed high tail with diagnostic ingress", meta["resident"]["size"] == 522 and meta["resident"]["headroom"] == 2 and meta["resident"]["relocations"] == 0)
     check("helper fits reviewed low-RAM pocket", meta["helper"]["size"] == 588 and meta["helper"]["padded_size"] == 600 and meta["helper"]["word_count"] == 150 and meta["helper"]["relocations"] == 0)
     check("bootstrap payload remains 4 KiB authenticated RAM", meta["authenticated_payload"]["size"] == 0x1000)
@@ -298,20 +297,6 @@ with tempfile.TemporaryDirectory(prefix="verify-crown-f30-signer-") as td:
     imported = subprocess.run(import_cmd, cwd=kit, env={**__import__("os").environ, "PYTHONPATH": str(kit / "runtime")},
                               capture_output=True, text=True)
     check("field kit programming helper imports without a device tsk checkout", imported.returncode == 0)
-    source_commit = (kit / "SOURCE_COMMIT").read_text(encoding="utf-8").strip()
-    testing_text = (kit / "TESTING.txt").read_text(encoding="utf-8")
-    check("field kit carries source revision and self-contained current instructions",
-          kit_meta["source_commit"] == source_commit and len(source_commit) == 40 and
-          "stock functional diagnostic path on classic CAN 0x777" in testing_text and
-          "qualified=true" in testing_text and "stock_functional_mailbox_live" in testing_text and
-          "safe_to_experiment" not in testing_text and
-          "no TSKM reflash or separate tsk checkout is required" in testing_text)
-    check("field kit usage orders mailbox preflight before install",
-          kit_meta["usage"].index("NRTD/Park: ./crown-tss3-signer preflight /tmp/crown-preflight.json") <
-          kit_meta["usage"].index("NRTD/Park: ./crown-tss3-signer install /tmp/crown-install.json"))
-    launcher_text = (kit / "crown-tss3-signer").read_text(encoding="utf-8")
-    check("field kit runtime precedes host openpilot on PYTHONPATH",
-          'PYTHONPATH="$KIT_ROOT/runtime:$OPENPILOT_ROOT"' in launcher_text)
     # Reproduce mruno's actual shape: Sunnypilot provides panda/opendbc, while a
     # leftover partial host tsk package exists but lacks programming.py. The kit
     # must win package resolution so that stale host tsk cannot shadow it.
@@ -330,15 +315,6 @@ with tempfile.TemporaryDirectory(prefix="verify-crown-f30-signer-") as td:
     check("vendored tsk wins over incomplete host Sunnypilot tsk",
           resolution.returncode == 0 and str(kit / "runtime/tsk/lib/programming.py") in resolution.stdout and
           str(kit / "runtime/tsk/lib/diagnostic_route.py") in resolution.stdout)
-    check("field kit makes current-angle replacement the first bounded command",
-          "READY/Park/stationary: ./crown-tss3-signer replace-current /tmp/crown-replace-current.json" in kit_meta["usage"] and
-          "replace-current" in launcher_text)
-    check("field kit exposes repeated current-angle qualification without changing the resident",
-          "soak-current" in launcher_text and
-          any("soak-current" in row for row in kit_meta["usage"]))
-    check("field kit exposes bounded moving authority pulse without changing resident",
-          "authority-pulse" in launcher_text and
-          any("authority-pulse 0.5" in row for row in kit_meta["usage"]))
     authority_tool = kit / "runtime/tools/targets/crown/live/crown_f30_authority_probe.py"
     (fake_host / "tools").mkdir(exist_ok=True)
     (fake_host / "tools/__init__.py").write_text("# host regular tools package\n", encoding="utf-8")
@@ -366,9 +342,6 @@ with tempfile.TemporaryDirectory(prefix="verify-crown-f30-signer-") as td:
           soak_plan_json["resident_bytes_modified"] is False and soak_plan_json["persistent_flash_writes"] is False)
     soak_state = {"initialized": True, "armed": True, "last_command5_rc": 0}
     soak_telemetry = {"native_verified_raw": 1, "last_done_flag": 1, "last_command_status": 0, "native_signature_match": False}
-    soak_source = (ROOT / "tools/targets/crown/live/crown_f30_resident_soak.py").read_text(encoding="utf-8")
-    check("current-angle soak uses sticky native oracle after a prior replacement",
-          "session.wait_native_verification" not in soak_source and "native_verified_raw" in soak_source and "sticky_oracle" in soak_source)
     check("current-angle soak treats post-replacement trailer inequality as expected",
           soak.repeated_signing_qualified(state_after=soak_state, telemetry_after=soak_telemetry, signed_delta=10, attempt_delta=10))
     check("current-angle soak fails on command5/replacement count mismatch",

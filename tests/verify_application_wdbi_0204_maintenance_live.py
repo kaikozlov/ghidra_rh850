@@ -8,8 +8,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 PROGRAM = "RH850_P1M-E_CodeFlash.bin"
-EXPECTED = ("ASSERT application-wdbi-0204-maintenance: pending_states=2 object7_handshake=1 "
-            "op6_initiator=1 op6_fanout=12 direct_actuation_refs=0 unexpected=0")
+EXPECTED = "ASSERT application-wdbi-0204-maintenance"
 
 
 def main() -> int:

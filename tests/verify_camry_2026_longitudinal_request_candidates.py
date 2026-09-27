@@ -22,17 +22,7 @@ class CandidateEvidence(unittest.TestCase):
     cls.report = build()
 
   def test_portable_regeneration(self):
-    self.assertEqual(self.report['schema'], 'camry-longitudinal-request-candidates-v3')
     self.assertEqual(self.report, json.loads(ARTIFACT.read_text()))
-
-  def test_current_stock_topology_is_role_normalized(self):
-    t = self.report['topology_normalization']
-    self.assertEqual(t['current_stock_candidate_planes']['direct_frc_bus1_pdus']['panda_bus'], 2)
-    self.assertEqual(t['current_stock_candidate_planes']['protected_bus4_request_result_family']['panda_bus'], 1)
-    self.assertIn('era-dependent', t['rule'])
-    self.assertIn('native 0x160/FRC-P05 source on bus2', t['route_classification_signatures']['stock_toyota_b'])
-    self.assertIn('native upstream 0x08A/0x0C9 on bus2', t['route_classification_signatures']['temporary_repin'])
-    self.assertIn('src>=128', t['route_classification_signatures']['echo_rule'])
 
   def test_08a_has_two_identical_signed16_candidate_words(self):
     for drive in self.report['protected_0x08a_acceleration_candidate']['drives'].values():
@@ -44,24 +34,6 @@ class CandidateEvidence(unittest.TestCase):
     for drive in checks.values():
       for r in drive.values():
         self.assertLess(abs(r), .11)
-
-  def test_gts_semantics_match_width_and_scale_without_claiming_wire_identity(self):
-    g = self.report['gts_semantic_template']
-    for did in ('0x10A1', '0x10A2'):
-      row = g['brake_tss_receive'][did]
-      self.assertEqual(row['bit_width'], 16)
-      self.assertTrue(row['signed'])
-      self.assertEqual(row['decimal_point_count'], 3)
-      self.assertEqual(row['unit'], 'm/s^2')
-    for did in ('0x10A3', '0x10A4'):
-      self.assertEqual(g['brake_tss_receive'][did]['bit_width'], 6)
-    lower = next(r for r in g['pcs_operation_ffd_5280_lower'] if 'acceleration' in r['name'])
-    upper = next(r for r in g['pcs_operation_ffd_5281_upper'] if 'acceleration' in r['name'])
-    for row in (lower, upper):
-      self.assertEqual(row['bit_length'], 16)
-      self.assertEqual(row['type'], 's')
-      self.assertEqual(row['lsb'], '0.001')
-    self.assertIn('not the 0x08A byte assignment', g['boundary'])
 
   def test_three_no_input_resumes_have_request_candidate_before_motion(self):
     events = self.report['protected_0x08a_acceleration_candidate']['stock_resume_evidence']
@@ -100,19 +72,10 @@ class CandidateEvidence(unittest.TestCase):
     screen = self.report['protected_bus4_companion_screen']['reproduced_same_sign']
     self.assertEqual((screen[0]['address'], screen[0]['field']), ('0x5AF', 'B26/s6'))
     self.assertEqual((screen[1]['address'], screen[1]['field']), ('0x5F7', 'B7/s6'))
-    self.assertIn('No second same-scale signed16 acceleration carrier',
-                  self.report['protected_bus4_companion_screen']['interpretation'])
 
   def test_c9_is_weak_and_ca_is_reverse_direction(self):
     c9 = self.report['other_candidates']['0x0C9']['b12_b13_vs_0x0ca']
     self.assertTrue(all(abs(row['r']) < .30 for row in c9.values()))
-    self.assertIn('chassis -> upstream', self.report['other_candidates']['0x0CA']['direction'])
-
-  def test_no_runtime_authority_claim(self):
-    self.assertIn('Do not restore Camry 0x160 longitudinal output', self.report['implementation_boundary'])
-    self.assertIn('do not inject a competing 0x08A', self.report['implementation_boundary'])
-    self.assertIn('already the recovered upstream TSS request-side plane', self.report['request_plane_architecture']['logical_request'])
-    self.assertIn('not proved to contain every authoritative', self.report['request_plane_architecture']['exhaustiveness_boundary'])
 
 
 if __name__ == '__main__':

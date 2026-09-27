@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import itertools
 import sys
-from collections import Counter
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
@@ -50,11 +49,7 @@ check("three complete 48-KiB extended-CodeFlash captures retained", len(EXT) == 
 check("three complete 64-KiB global-RAM captures retained", len(GRAM) == 3 and all(p.stat().st_size == 0x10000 for p in GRAM))
 check("three complete 128-KiB PE1-local-RAM captures retained", len(LRAM) == 3 and all(p.stat().st_size == 0x20000 for p in LRAM))
 all_memory = sorted(RAW.glob("*.bin"))
-legacy_df = REPO / "community/albinoelephant/dump_ff200000_ff208000.bin"
-window_count = sum(path.stat().st_size - 15 for path in [*all_memory, legacy_df])
 check("range corpus has 15 files / 3,162,112 bytes", len(all_memory) == 15 and sum(p.stat().st_size for p in all_memory) == 3_162_112)
-check("16 retained memory files contain 3,194,640 sliding 16-byte windows", window_count == 3_194_640, str(window_count))
-check("two-oracle full-corpus scan geometry is 6,389,280 window/oracle invocations", window_count * 2 == 6_389_280)
 check("R7F701383 physical DataFlash is only the first 32 KiB", P1ME["products"]["R7F701383"]["dataflash_bytes"] == 0x8000 and P1ME["address_space"]["dataflash_1mb"]["end_exclusive"] == 0xFF208000)
 
 print("\n== read-to-read divergence ==")

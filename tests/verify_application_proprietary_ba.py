@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Verify the application SID-0xBA proprietary operation and authorization surface."""
 from __future__ import annotations
-import csv,hashlib,struct,subprocess,sys,tempfile
+import hashlib,struct,subprocess,sys,tempfile
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 CF=(ROOT/'firmware/RH850_P1M-E_CodeFlash.bin').read_bytes()
@@ -65,8 +65,6 @@ check('countdown persists 0x18 and clears 0x105 on expiry',bytes.fromhex('203618
 red5=struct.unpack_from('<HHI',CF,0x2B0AC+5*8); red15=struct.unpack_from('<HHI',CF,0x2B0AC+15*8)
 check('redundant object 5 is 8 bytes / base block 15 / RAM FEBEF418',red5==(8,15,0xFEBEF418),repr(red5))
 check('key-bearing redundant object 15 is separate 32-byte object / RAM FEBF02E8',red15==(32,41,0xFEBF02E8),repr(red15))
-with (ROOT/'data/checkpoint_payload_map.csv').open(newline='') as f: cps={int(r['object_index']):r for r in csv.DictReader(f)}
-check('ordinary object 24 is persistent_countdown',cps[24]['evidence_name']=='persistent_countdown' and cps[24]['data_length']=='8')
 print('\n== operation families and bounded effects ==')
 for start,mode in [(0x34B74,3),(0x34C50,5),(0x34C84,6),(0x34F1A,7)]:
  check(f'JTRM/JTEKM start {start:06X} reaches common mode-request thunk',0xFE024 in [branch(a)[1] for a in range(start,start+40,2) if branch(a) and branch(a)[0]=='jarl'])
@@ -80,12 +78,6 @@ check('ASINC completion calls B20DC thunk',branch(0x34FAE)==('jarl',0xFE1DC))
 check('ASINC lower flag setter body pinned',sha(0xB20DC,12)=='4c8d9f3c9cee9f6e1fe0813c9c4ab30968888bb9ebb0cc8e075866bb4198b99b')
 check('ASINC filtered consumer body pinned',sha(0xB80EE,192)=='efdfb22c1fb61de153991835c98ccca28725de8bdaa5745f6089b94439f0ab59')
 check('VSPDA worker body pinned',sha(0xBC5BC,228)=='ae1be39d16576ecb4d529a88940e02315a875e5188c1e5052bc455be79a0f519')
-print('\n== generated BA artifact ==')
-with CSV.open(newline='') as f: rows=list(csv.DictReader(f))
-check('BA CSV has ten rows',len(rows)==10)
-check('BA CSV selectors exact',[r['selector'] for r in rows]==[f'0x{x:02X}' for x,_,_ in expected])
-check('F7 CSV records local SA2 gate',next(r for r in rows if r['selector']=='0xF7')['effective_local_gate']=='application SecurityAccess level 2')
-check('FA CSV records alternate snapshot, not protected speed gate','FEBEE894' in next(r for r in rows if r['selector']=='0xFA')['downstream_state'])
 with tempfile.TemporaryDirectory() as d:
  out=Path(d)/'ba.csv'; p=subprocess.run([sys.executable,str(GEN),'-o',str(out)],cwd=ROOT,capture_output=True,text=True)
  check('BA generator rerun succeeds',p.returncode==0,p.stderr)

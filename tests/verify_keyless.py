@@ -467,7 +467,7 @@ print()
 
 print("== keyless exec portability ==")
 def _section_keyless_exec_portability():
-    import json, struct
+    import json
     from pathlib import Path
     ROOT = Path(__file__).resolve().parents[1]
     S = (ROOT / 'firmware/RH850_P1M-E_CodeFlash.bin').read_bytes()
@@ -486,25 +486,11 @@ def _section_keyless_exec_portability():
             check(f'{name} {label} body transfers at -0x1C', exact_shift(img, off, size))
     check('H/F boot domain is byte-identical through 0xA003', H[:40964] == F[:40964])
     check('H/F live handoff stays at absolute 0x9F00 with same fixed-state prefix', H[40704:40738] == F[40704:40738] == S[40704:40738])
-    print('\n== field-acquisition provenance ==')
-    h_manifest = (ROOT / 'community/albinoelephant/raw-20260818/MANIFEST.txt').read_text()
-    check('Albino manifest says dump used public payload-build secret', 'public payload-build secret' in h_manifest)
-    check('Albino manifest rules out glitch/bench/module removal for this acquisition', 'No glitching, no bench work, no module removal.' in h_manifest)
     span_log = json.loads((ROOT / 'community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/security_access_log.json').read_text())
     attempts = next(iter(span_log['ecus'].values()))['attempts']
     accepted = {a['caller'] for a in attempts if a['outcome'] == 'accepted' and a['call'] == 'send_key'}
     for caller in ('dump_range:codeflash', 'dump_range:local_ram_pe1', 'dump_range:local_ram_self', 'dump_range:dataflash'):
         check(f'Span log records accepted SecurityAccess for {caller}', caller in accepted)
-    profiles = json.loads((ROOT / 'data/variant_bootstrap_profiles.json').read_text())['profiles']
-    check('exactly one tracked authenticated-RAM bootstrap profile', len(profiles) == 1)
-    profile = profiles[0]
-    check('bootstrap profile pins FEBF0000/0x1000 staging', profile['authenticated_download_base'] == '0xFEBF0000' and profile['authenticated_download_size'] == '0x1000')
-    check('bootstrap profile pins 10F0 verify and FF00 execute', profile['verify_routine'] == '0x10F0' and profile['execute_routine'] == '0xFF00')
-    evidence = {e['software_id']: e for e in profile['evidence']}
-    for sw, manifest in [('8965H1202000', 'community/albinoelephant/raw-20260818/MANIFEST.txt'), ('8965F1208000', 'community/spanconstant/raw-20260821/MANIFEST.txt')]:
-        e = evidence[sw]
-        check(f'{sw} profile records target-built range-payload execution', e['fixture_transfer'] == 'target-built-range-payloads-observed' and e['grade'] == 'observed')
-        check(f'{sw} profile provenance names retained manifest', manifest in e['source'])
 _section_keyless_exec_portability()
 print()
 

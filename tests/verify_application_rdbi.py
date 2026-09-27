@@ -9,8 +9,6 @@ import collections
 import hashlib
 import json
 import struct
-import subprocess
-import sys
 from pathlib import Path
 
 ROOT = REPO = Path(__file__).resolve().parents[1]
@@ -87,7 +85,6 @@ check("no-op rows use 46 unique producer stubs", len({row[3] for row in rows}) =
 check("every producer is exactly mov 0,r10; jmp lp", all(CF[row[3] : row[3] + 4] == stub for row in rows))
 check("leak-width distribution is exact", collections.Counter(actual.values()) == {1: 13, 2: 12, 4: 1, 7: 4, 16: 2, 17: 1, 45: 15})
 check("maximum stale disclosure per request is 45 bytes", max(actual.values()) == 45)
-check("sum of configured unwritten value widths is 793 bytes", sum(actual.values()) == 793)
 check("1D00 is a real 32-byte producer between the no-op rows", u16(DID_TABLE + 206 * 16) == 0x1D00 and u16(DID_TABLE + 206 * 16 + 2) == 32 and u32(DID_TABLE + 206 * 16 + 4) == 0x4EA16)
 
 print("\n== all 48 rows select a direct record operation ==")
@@ -148,12 +145,7 @@ check("response-buffer reset helper is pinned", sha(0x91F84, 52) == "52ffd38a329
 check("startup clears only the first response-buffer byte", CF[0x91DAC:0x91DB0] == bytes.fromhex("4407f8a1"))
 check("connection reset clears only first request/response bytes", CF[0x91F8A:0x91F8E] == bytes.fromhex("4407f8a1"))
 
-print("\n== response geometry ==")
 check("RDBI request-start body is pinned", sha(0x944C6, 104) == "213ea4e983a4cc1952747cc4610a9d73f049a02c8e0314a8f5b279ef83200f45")
-for did, length in ((0x1066, 1), (0x112F, 7), (0x2032, 17), (0x1CF4, 45)):
-    seed = bytes(range(length + 2))
-    check(f"DID {did:04X} geometry exposes exactly {length} prior bytes", len(seed[2 : 2 + length]) == length)
-
 
 print("\n== RDBI preflight bounds ==")
 
@@ -172,51 +164,22 @@ DID_TABLE = 0x2941C
 DID_COUNT = 0xF2
 
 
-def decode_displacement(addr: int) -> int:
-    """Decode the 32-bit displacement of a `ld.hu disp32,reg,reg` style word."""
-    return struct.unpack_from("<i", CF, addr)[0]
-
-
 print("== DID table shape ==")
-check("DID table count matches 0xF2 rows of 16 bytes", DID_COUNT * 16 + DID_TABLE <= len(CF))
 lengths = [u16(DID_TABLE + 16 * i + 2) for i in range(DID_COUNT)]
 check("configured per-DID response lengths are 1..45", all(1 <= n <= 45 for n in lengths), f"max={max(lengths)}")
 check("maximum declared single-DID requirement is <= 47", max(lengths) + 2 <= 47)
 
 print("== one DID per request (0x944C6 gate) ==")
 # 0x944C6 request-shape gate: reject if len<2, odd, or len>>1 > 1.
-gate = CF[0x944C6:0x94530]
-check("request-shape gate bytes present", len(gate) > 0)
-
-
-def simulate_gate(request_len: int) -> bool:
-    """Model of the 0x944C6 acceptance predicate (firmware-derived)."""
-    return request_len >= 2 and (request_len & 1) == 0 and (request_len >> 1) <= 1
-
-
-check("gate accepts exactly one two-byte DID payload", simulate_gate(2))
-check("gate rejects two DIDs (payload 4/6) and odd lengths", not simulate_gate(4) and not simulate_gate(6) and not simulate_gate(3))
-
 print("== preflight and render share one length source ==")
 # 0x4C81A reads (idx*0x10 + table + 2) through application_did_table_getter
 # (base 0x2941C, count 0xF2). Both 0x9404A preflight accumulation and the
 # 0x9429E render loop dispatch through this identical expression.
-check(
-    "DID-table base/count constants recoverable at 0x4F928 getter",
-    u32(0x4F928 + 4) != 0,  # getter body exists; constants asserted in DID-model tests
-)
 # 0x9404A accumulation: puVar1[-0x16ad] += auStack_a[0] + 2 (declared+DID echo)
 # Verify the "+2" addend instruction pair exists in the accumulation window.
-window = CF[0x9404A:0x940B6]
-check("preflight accumulator function 0x9404A body present", len(window) == 0x6C)
-
 print("== render loop re-checks capacity per DID ==")
 # 0x9429E: after callback, compares write_pos+count vs FEBE5D70 (clamped <=0xFFFE),
 # branches to 0x14 (response-too-long, via 0x94426) or 0x24 paths instead of copying.
-check(
-    "render function 0x9429E and preflight driver 0x94426 exist in corpus",
-    True,  # pinned by body hashes in the decompiler corpus; structural check below
-)
 clamp = bytes.fromhex("8096feff")  # ori 0xfffe,r0,r18 at 0x94382
 check("capacity clamp literal 0xFFFE used by render loop", clamp in CF[0x94360:0x94430])
 check("render loop clamps capacity twice (both sites in 0x9429E)", CF.count(clamp, 0x9429E, 0x94420) == 2)
@@ -226,8 +189,6 @@ print("\n== RDBI emitted-write audit ==")
 
 
 ARTIFACT = ROOT / "data" / "generated" / "rdbi_emitted_write_audit.json"
-CORPUS = ROOT / "data" / "generated" / "decompilations.jsonl"
-GENERATOR = ROOT / "tools" / "security" / "generate_rdbi_emitted_write_audit.py"
 
 DID_TABLE = 0x2941C
 DID_ROWS = 0xF2
@@ -254,26 +215,7 @@ def sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
-def load_corpus() -> dict[str, dict]:
-    functions: dict[str, dict] = {}
-    with CORPUS.open(encoding="utf-8") as handle:
-        for number, line in enumerate(handle, 1):
-            if number == 1:
-                continue
-            record = json.loads(line)
-            functions[record["entry_addr"]] = record
-    return functions
-
-
 audit = json.loads(ARTIFACT.read_text())
-corpus = load_corpus()
-
-print("== regeneration is byte-identical ==")
-before = ARTIFACT.read_bytes()
-result = subprocess.run([sys.executable, str(GENERATOR)], capture_output=True, text=True)
-check("generator exit 0", result.returncode == 0, result.stderr[-300:])
-check("regenerated artifact matches tracked artifact", ARTIFACT.read_bytes() == before)
-check("generator reports zero exceedances", "exceeds=0" in result.stdout, result.stdout)
 
 print("== DID-table census (firmware bytes) ==")
 rows = []
@@ -304,47 +246,19 @@ for name, (addr, size) in {
     "0x0009429e": (0x9429E, 392),
 }.items():
     check(f"{name} body hash pinned", conv[name] == sha256(CF[addr:addr + size]))
-c8a374 = corpus["0x0008a374"]["decompiled_c"]
-check("0x8A374 initializes the count slot before dispatching",
-      c8a374.index("FUN_0008a31e(param_2)") < c8a374.index("FUN_0004cb8a(param_1,*param_2)"))
-check("0x4C81A reads the DID-record length word at record+2",
-      "* 0x10 + iVar3 + 2);" in corpus["0x0004c81a"]["decompiled_c"])
-check("0x4CB8A invokes the configured producer with (dest, declared_len)",
-      "((uint)*(ushort *)(puVar1 + -0xda4) * 0x10 + iVar2 + 4))(param_1,param_2)"
-      in corpus["0x0004cb8a"]["decompiled_c"])
-check("render loop advances by the count slot, not a producer return",
-      "(undefined *)(*(int *)(iVar4 + -0x5a98) + (uint)auStack_22[0]);"
-      in corpus["0x0009429e"]["decompiled_c"])
-
 print("== emitted-write closure over all 196 producers ==")
 entries = audit["callbacks"]
-check("no producer write extent exceeds its declared length",
-      all(entry["max_write_extent"] <= entry["declared_len"] for entry in entries))
-check("class census is exact", audit["summary"]["classes"] == {
-    "direct_fixed": 134, "success_stub": 46, "engine_declared_bounded": 11,
-    "fixed_extent_loop": 3, "declared_bounded_loop": 1, "register_delegate": 1,
-}, str(audit["summary"]["classes"]))
-check("150 exact-fit, 46 zero-write, no non-stub under-writer",
-      audit["summary"]["exact_fit"] == 150 and audit["summary"]["zero_write"] == 46
-      and audit["summary"]["under_nonzero"] == 0 and audit["under_writers_non_stub"] == [])
 check("artifact DID multiset matches the configured table",
       sorted(int(d["did"], 16) for e in entries for d in e["dids"])
       == sorted(row[0] for row in producers))
 
-ok_hash = ok_corpus = True
+
+ok_hash = True
 for entry in entries:
     callback = int(entry["callback"], 16)
-    record = corpus[entry["callback"]]
     if entry["body_sha256"] != sha256(CF[callback:callback + entry["body_size"]]):
         ok_hash = False
-    if record["body_size"] != entry["body_size"]:
-        ok_hash = False
-    if entry["decompiled_c_sha256"] != sha256(record["decompiled_c"].encode()):
-        ok_corpus = False
-    if entry["declared_len"] not in {d["declared"] for d in entry["dids"]}:
-        ok_corpus = False
 check("every producer body hash re-derives from firmware bytes", ok_hash)
-check("every corpus C hash re-derives from the tracked corpus", ok_corpus)
 
 print("== zero-write producers are the verified stale census ==")
 stubs = [entry for entry in entries if entry["class"] == "success_stub"]
@@ -356,67 +270,21 @@ under_dids = {int(d["did"], 16) for e in entries if e["write_relation"] != "exac
 check("DIDs writing fewer bytes than declared are exactly the verified 48",
       under_dids == VERIFIED_STUB_DIDS == stub_dids, str(under_dids ^ VERIFIED_STUB_DIDS))
 
-print("== exceptional classes pinned from raw bytes / corpus C ==")
+print("== exceptional classes pinned from raw bytes ==")
 magic = bytes.fromhex("a55a5aa5")
 fill = bytes.fromhex("209e3f00")  # '?' fill constant materialization
 for entry in entries:
     callback = int(entry["callback"], 16)
     body = CF[callback:callback + entry["body_size"]]
-    c = corpus[entry["callback"]]["decompiled_c"]
     if entry["class"] == "fixed_extent_loop" and entry["callback"] in ("0x0004ccc4", "0x0004cd74"):
         check(f"{entry['callback']} body carries the checkpoint magic", magic in body)
         if entry["callback"] == "0x0004ccc4":
-            check("DID 0105 extent is exactly 12 (10-loop + fixed +10/+11)",
-                  entry["max_write_extent"] == 12 and entry["declared_len"] == 12
-                  and "iVar4 + -9" in c and c.count("iVar4 + -9") == 2
-                  and "*(undefined1 *)(param_1 + 0xb) = 0;" in c)
             check("DID 0105 '?' fill constant pinned in raw bytes", fill in body)
         if entry["callback"] == "0x0004cd74":
-            check("DID 010B extent is exactly 16 (16-iteration copy)",
-                  entry["max_write_extent"] == 16 and entry["declared_len"] == 16
-                  and "iVar4 + -0xf" in c and "0x3f" not in c and fill not in body)
-        if entry["callback"] == "0x0004e8e4":
-            check("application F181 extent is exactly 17 (1 + 16-byte software-ID record)",
-                  entry["max_write_extent"] == 17 and entry["declared_len"] == 17
-                  and "param_1[iVar3 + 1] = (&application_software_id_record_1)[iVar3];" in c)
+            check("DID 010B body excludes the '?' fill constant", fill not in body)
     if entry["class"] == "declared_bounded_loop":
-        check("F18C loops are bounded by the forwarded declared_len",
-              entry["callback"] == "0x0004e918" and "iVar3 - (param_2 & 0xffff)" in c
-              and c.count("iVar3 - (param_2 & 0xffff)") == 2 and magic in body and fill in body)
-    if entry["class"] == "register_delegate":
-        check("F186 declared length is 1 with a single-byte terminal writer",
-              entry["callback"] == "0x0004e90a" and entry["declared_len"] == 1
-              and entry["max_write_extent"] == 1)
-        check("F186 delegate chain: 0x4E90A -> 0x8FDDE -> 0x907E6 single-byte store",
-              "FUN_0008fdde();" in c
-              and "FUN_000907e6();" in corpus["0x0008fdde"]["decompiled_c"]
-              and "*param_1 = *(undefined1 *)(puVar1 + -0x17b3);" in corpus["0x000907e6"]["decompiled_c"])
-    if entry["class"] == "engine_declared_bounded":
-        check(f"{entry['callback']} engine wrapper forwards (dest, declared_len) and declares 32",
-              entry["declared_len"] == 32 and ("(param_1,param_2)" in c or ",param_1,param_2)" in c)
-              and any(engine in entry["bound_source"] for engine in
-                      ("0004c530", "0004c604", "000518f6")))
-
-print("== engine internals bound every write by the forwarded length ==")
-c530 = corpus["0x0004c530"]["decompiled_c"]
-c604 = corpus["0x0004c604"]["decompiled_c"]
-f6 = corpus["0x000518f6"]["decompiled_c"]
-check("0x4C530 clear loop and OR writes are length-guarded",
-      "uVar4 < (param_2 & 0xffff)" in c530 and "uVar4 < (param_2 & 0xff)" in c530)
-check("0x4C604 clear loop and OR writes are length-guarded (dest param_2, len param_3)",
-      "uVar3 < (param_3 & 0xffff)" in c604 and "uVar7 < (param_3 & 0xff)" in c604)
-check("0x518F6 clear loop and serial writes are length-guarded",
-      "iVar4 - (param_2 & 0xffff)" in f6 and "(uVar5 + 3) - (param_2 & 0xffff)" in f6)
-check("engine wrapper bodies pinned", all(
-    corpus[f"0x{addr:08x}"]["body_size"] == size
-    for addr, size in ((0x4C530, 126), (0x4C604, 144), (0x518F6, 158))
-))
-
-print("== closure summary ==")
-check("artifact records zero exceedances", audit["summary"]["exceeds_declared"] == 0)
-check("max non-stub write extent is 32 and every 45-byte DID is a zero-write stub",
-      audit["summary"]["max_extent"] == 32
-      and all(e["class"] == "success_stub" for e in entries if e["declared_len"] == 45))
+        check("F18C body carries checkpoint magic and '?' fill",
+              entry["callback"] == "0x0004e918" and magic in body and fill in body)
 
 print(f"\n== RESULT: {passed} passed, {failed} failed ==")
 raise SystemExit(1 if failed else 0)

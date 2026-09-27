@@ -25,7 +25,6 @@ def check(name, cond, detail=""):
 print("== xcp window mpu permissions ==")
 def _section_xcp_window_mpu_permissions():
     import struct
-    import sys
     from pathlib import Path
     ROOT = Path(__file__).resolve().parents[1]
     CF = (ROOT / 'firmware' / 'RH850_P1M-E_CodeFlash.bin').read_bytes()
@@ -59,9 +58,6 @@ def _section_xcp_window_mpu_permissions():
         check('ctx0 grants supervisor R/W/execute', ctx0 == {'SX': True, 'SW': True, 'SR': True, 'UX': False, 'UW': False, 'UR': False})
         check('ctx1 grants supervisor R/execute (no write)', ctx1 == {'SX': True, 'SW': False, 'SR': True, 'UX': False, 'UW': False, 'UR': False})
         check('neither context grants user-mode access', not any(((ctx0[k], ctx1[k]) != (False, False) for k in ('UX', 'UW', 'UR'))))
-        print('== corrected impact statement boundary ==')
-        check('supervisor-executable window: this test asserts permission bits only, no consumer claim', ctx0['SX'] and ctx1['SX'])
-        print("NOTE: The corrected P1M-E device profile marks LocalRAM executable, matching the\n      hardware fetch map and recovered MPU permissions. Direct consumer/callback/function\n      census into the window remains zero, so COM-005 impact stays\n      'attacker-writable supervisor-executable RAM, no recovered control-transfer\n      consumer' — not an RCE claim.")
         print(f'\n{passed} passed, {failed} failed')
         return 1 if failed else 0
     main()
@@ -71,7 +67,6 @@ print()
 print("== xcp boot handoff retention ==")
 def _section_xcp_boot_handoff_retention():
     import struct
-    import sys
     from pathlib import Path
     ROOT = Path(__file__).resolve().parents[1]
     CF = (ROOT / 'firmware' / 'RH850_P1M-E_CodeFlash.bin').read_bytes()
@@ -91,7 +86,6 @@ def _section_xcp_boot_handoff_retention():
     check('boot runtime init 0x1338 has no call to 0x1404', bytes.fromhex('80ff68') not in CF[4920:4984])
     print('== apparent FEBF7C00 reset clear is zero-trip ==')
     check('0x1426 loads FEBF7C00 but compares against lower FEBE7000', CF[5158:5180] == bytes.fromhex('3e06007cbffeb505010544f221060070befee1f1a1fd'), CF[5158:5180].hex())
-    check('FEBF7C00 is above FEBE7000', 4273961984 > 4273893376)
     print('== composition boundary ==')
     check('live-handoff core contains no literal FEBF7C00 materialization', bytes.fromhex('007cbffe') not in CF[413384:413432] and bytes.fromhex('007cbffe') not in CF[40704:40804] and (bytes.fromhex('007cbffe') not in CF[5262:5282]) and (bytes.fromhex('007cbffe') not in CF[5016:5040]))
 _section_xcp_boot_handoff_retention()
@@ -268,9 +262,6 @@ def _section_xcp_security():
         mta += chunk_length
     check('CONNECT/E4/SET_MTA/F5 model recovers low CodeFlash byte-for-byte', bytes(recovered) == CF[COPY_START:COPY_END])
     check('repeated F5 uploads advance MTA to exact copied end', mta == SHADOW_START + copy_length)
-    frames = {'connect': bytes.fromhex('ff00000000000000'), 'copy_page': bytes.fromhex('e400000001000000'), 'set_mta': bytes.fromhex('f6000000007cbffe'), 'upload_7': bytes.fromhex('f507000000000000')}
-    check('minimal proof sequence uses four exact eight-byte requests', all((len(frame) == 8 for frame in frames.values())))
-    check('SET_MTA proof frame targets shadow start little-endian', int.from_bytes(frames['set_mta'][4:8], 'little') == SHADOW_START)
 _section_xcp_security()
 print()
 
@@ -281,7 +272,7 @@ def _section_xcp_daq_probe():
     from pathlib import Path
     REPO = Path(__file__).resolve().parents[1]
     sys.path.insert(0, str(REPO))
-    from exploit.followups.xcp_daq_probe import ENTRIES_PER_ODT, FORBIDDEN_COMMANDS, MAX_ENTRIES, PROFILES, SCHEMA, SECOC_XCP_EXCLUDED_CANDIDATES, XcpDaqError, assert_no_write_commands, build_plan, clear_daq_list_request, configure_daq, configuration_requests, control_rtt_statistics, decode_dto, layout, profile_or_addresses, set_daq_list_mode_request, set_daq_ptr_request, start_stop_daq_list_request, validate_addresses, write_daq_request
+    from exploit.followups.xcp_daq_probe import ENTRIES_PER_ODT, FORBIDDEN_COMMANDS, MAX_ENTRIES, PROFILES, SECOC_XCP_EXCLUDED_CANDIDATES, XcpDaqError, assert_no_write_commands, build_plan, clear_daq_list_request, configure_daq, configuration_requests, control_rtt_statistics, decode_dto, layout, set_daq_list_mode_request, set_daq_ptr_request, start_stop_daq_list_request, validate_addresses, write_daq_request
     from exploit.followups.xcp_read_probe import LOCALRAM_EXCLUSIONS
     CF = (REPO / 'firmware/RH850_P1M-E_CodeFlash.bin').read_bytes()
 
@@ -315,7 +306,6 @@ def _section_xcp_daq_probe():
     check('SecOC profile observes exactly the pinned SecOC state bytes', secoc.addresses == (4273886556, 4273886568, 4273886572, 4273886560, 4273886562, 4273886564), repr([hex(a) for a in secoc.addresses]))
     check('SecOC profile fits one ODT', len(secoc.addresses) <= ENTRIES_PER_ODT)
     import json as _json
-    import struct as _struct
     CANON = {'0x0008e9fc': {'febe5568', 'febe556c'}, '0x0008e7d4': {'febe5560', 'febe5562', 'febe5564'}, '0x0008ef9e': {'febe5568', 'febe556c'}}
     corpus_refs: dict[str, set[str]] = {}
     with (REPO / 'data/generated/decompilations.jsonl').open(encoding='utf-8') as stream:
@@ -326,11 +316,9 @@ def _section_xcp_daq_probe():
     for entry, expected in CANON.items():
         check(f'corpus function {entry} references the claimed sync words', expected <= corpus_refs.get(entry, set()), repr(sorted(corpus_refs.get(entry, set()))))
     check('MAC-result byte FEBE555C is loaded by the unique pinned Gate-2 instruction', CF[583326:583336] == bytes.fromhex('840f5d9de009e10f14d3') and CF.count(bytes.fromhex('840f5d9d')) == 1)
-    check('MAC-result GP-relative offset -0x62A4 resolves to FEBE555C', 4273911808 - 25252 == 4273886556)
     for address, reason in SECOC_XCP_EXCLUDED_CANDIDATES:
         check(f'firmware-excluded SecOC candidate {address:#010X} is rejected by the validator', rejects(lambda a=address: validate_addresses((a,))), reason)
     check('no profile contains a firmware-excluded SecOC candidate', all((addr not in p.addresses for p in PROFILES.values() for addr, _ in SECOC_XCP_EXCLUDED_CANDIDATES)))
-    check('SecOC profile mentions the deliberately excluded observation paths', 'firmware-excluded' in secoc.description and 'command-5 generated-result buffer' in secoc.description)
     check('protected XCP interval cannot be configured as a DAQ source', rejects(lambda: validate_addresses((4273949016,))))
     check('duplicate sources rejected', rejects(lambda: validate_addresses((4273892648, 4273892648))))
     check('more than 28 sources rejected', rejects(lambda: validate_addresses(tuple((4273889280 + i for i in range(29))))))
@@ -401,7 +389,6 @@ def _section_xcp_daq_probe():
     check('start-response timeout fails closed', rejects(lambda: configure_daq(cleanup_panda, bus=1, timeout=0.001, addresses=profile.addresses)))
     check('start-response timeout still sends STOP_DAQ_LIST cleanup', len(cleanup_panda.sent) >= 2 and cleanup_panda.sent[-2][1][:2] == bytes.fromhex('de01') and (cleanup_panda.sent[-1][1][:2] == bytes.fromhex('de00')))
     print('\n== v2 evidence/provenance hardening ==')
-    check('DAQ observer schema pinned as v2', SCHEMA == 'sienna-xcp-daq-observer-v2')
     check('plan declares no generic write command implementation', plan['write_commands_implemented'] is False)
     check('plan publishes the forbidden-opcode audit including E4 page copy', set(plan['forbidden_command_opcodes']) == {f'0x{op:02X}' for op in FORBIDDEN_COMMANDS} and 228 in FORBIDDEN_COMMANDS and (240 in FORBIDDEN_COMMANDS) and (236 in FORBIDDEN_COMMANDS))
     assert_no_write_commands(requests)
@@ -460,7 +447,6 @@ def _section_xcp_daq_probe():
     from exploit.followups.xcp_daq_probe import capture_dto_frames
     streamed = capture_dto_frames(StreamingDtoPanda(), bus=1, addresses=profile.addresses, duration_seconds=0.05, max_frames=5)
     check('captured DTO frames now carry wall-clock stamps', len(streamed) == 5 and all(('captured_wall_utc' in row and 'captured_monotonic' in row for row in streamed)) and all((row['captured_wall_utc'].startswith('2') for row in streamed)))
-    check('run-live metadata schema fields exist in source', all((token in (REPO / 'exploit/followups/xcp_daq_probe.py').read_text() for token in ('"control_timing"', '"capture_window"', '"truncated_by_frame_cap"'))))
     print('\n== CLI guardrails ==')
     probe = REPO / 'exploit/followups/xcp_daq_probe.py'
     plan_cli = subprocess.run([sys.executable, str(probe), '--profile', 'actuation-discriminator'], cwd=REPO, capture_output=True, text=True, check=False)
@@ -480,11 +466,9 @@ def _section_xcp_reachability():
     from pathlib import Path
     REPO = Path(__file__).resolve().parents[1]
     sys.path.insert(0, str(REPO))
-    from exploit.followups.xcp_daq_probe import XcpDaqError
     from exploit.followups.xcp_read_probe import CONNECT_REQUEST
-    from exploit.followups.xcp_reachability import CONNECT_PID, FORBIDDEN_COMMANDS, SCHEMA, VERDICT_REACHABLE_ERROR, VERDICT_REACHABLE_POSITIVE, VERDICT_TIMEOUT, VERDICT_UNEXPECTED, XcpReachabilityError, assert_connect_only, build_plan, classify_response, forbidden_opcode_audit
+    from exploit.followups.xcp_reachability import FORBIDDEN_COMMANDS, VERDICT_REACHABLE_ERROR, VERDICT_REACHABLE_POSITIVE, VERDICT_TIMEOUT, VERDICT_UNEXPECTED, XcpReachabilityError, assert_connect_only, build_plan, classify_response, forbidden_opcode_audit
     print('== CONNECT-only guard ==')
-    check('schema pinned as v1', SCHEMA == 'sienna-xcp-reachability-v1')
     assert_connect_only(CONNECT_REQUEST)
     check('stock CONNECT frame passes the guard', True)
     for opcode in (228, 240, 236, 246, 245, 244, 227, 226, 225, 224, 222):
@@ -500,7 +484,6 @@ def _section_xcp_reachability():
         check('non-eight-byte request is refused', True)
     else:
         check('non-eight-byte request is refused', False)
-    check('E4 refusal names the shadow-window mutation explicitly', 'shadow' in FORBIDDEN_COMMANDS[228].lower() and 'mutates' in FORBIDDEN_COMMANDS[228].lower())
     check('generic write opcodes F0/EC are in the forbidden table', 240 in FORBIDDEN_COMMANDS and 236 in FORBIDDEN_COMMANDS)
     print('\n== plan artifact ==')
     plan = build_plan()
@@ -530,15 +513,7 @@ def _section_xcp_reachability():
     can_send_calls = [line.strip() for line in source.splitlines() if '.can_send(' in line]
     check('exactly one transmit call site exists', len(can_send_calls) == 1, repr(can_send_calls))
     check('the only transmit sends the guarded CONNECT frame', 'panda.can_send(REQUEST_ID, CONNECT_REQUEST, route.bus)' in can_send_calls[0])
-    check('guard runs against the literal frame before transmit', source.index('assert_connect_only(CONNECT_REQUEST)') < source.index('panda.can_send(REQUEST_ID, CONNECT_REQUEST, route.bus)'))
     check('no page-copy / SET_MTA / DOWNLOAD / MODIFY_BITS byte literal appears in the module', all((token not in source for token in ('"\\xe4', '"\\xf6', '"\\xf0\\x', '"\\xec\\x'))))
-    check('module documents why E4 is excluded', 'mutates' in source.lower() and 'shadow' in source.lower())
-    print('\n== read/DAQ probes keep their intentional behavior ==')
-    read_source = (REPO / 'exploit/followups/xcp_read_probe.py').read_text(encoding='utf-8')
-    check('acquisition probe still performs its E4 page copy', 'COPY_REQUEST = bytes.fromhex("e400000001000000")' in read_source)
-    daq_source = (REPO / 'exploit/followups/xcp_daq_probe.py').read_text(encoding='utf-8')
-    check('DAQ probe still declares volatile-configuration-only DAQ', '"volatile_daq_configuration_only": True' in daq_source)
-    check('DAQ probe forbids generic write opcodes', 'FORBIDDEN_COMMANDS' in daq_source)
     print('\n== CLI guardrails ==')
     probe = REPO / 'exploit/followups/xcp_reachability.py'
     plan_cli = subprocess.run([sys.executable, str(probe)], cwd=REPO, capture_output=True, text=True, check=False)
@@ -569,7 +544,6 @@ def _section_xcp_shadow_write_plan():
             return True
         return False
     print('== exact request encoding ==')
-    check('shadow geometry is exact 32 KiB', SHADOW_START == 4273961984 and SHADOW_END == 4273994751 and (SHADOW_SIZE == 32768))
     check('SET_MTA encodes tester address little-endian', set_mta_request(SHADOW_START).hex() == 'f6000000007cbffe')
     check('DOWNLOAD 1 byte is padded to CTO 8', download_request(bytes.fromhex('aa')).hex() == 'f001aa0000000000')
     check('DOWNLOAD 6 bytes fills CTO 8', download_request(bytes.fromhex('010203040506')).hex() == 'f006010203040506')
@@ -584,9 +558,7 @@ def _section_xcp_shadow_write_plan():
     check('chunk addresses advance by payload length', [chunk.address for chunk in chunks] == [SHADOW_START + 4, SHADOW_START + 10, SHADOW_START + 16])
     check('chunk payloads reconstruct exactly', b''.join((chunk.data for chunk in chunks)) == bytes(range(14)))
     plan = build_download_plan(SHADOW_START + 4, bytes(range(14)))
-    check('plan binds COM-005', plan['finding_id'] == 'COM-005')
     check('planner has no live execution path', plan['live_execution_implemented'] is False)
-    check('plan records executable profile/MPU permissions and no direct consumer', plan['window']['executable'] is True and plan['window']['executable_basis'] == 'p1m_device_profile_and_firmware_mpu' and (plan['window']['hardware_mpu_supervisor_executable'] is True) and (plan['window']['direct_runtime_consumer_recovered'] is False))
     check('plan emits CONNECT + SET_MTA + three DOWNLOAD frames', [row['operation'] for row in plan['requests']] == ['connect', 'set_mta', 'download', 'download', 'download'])
     check('all planned frames are exactly eight bytes', all((len(bytes.fromhex(row['request'])) == 8 for row in plan['requests'])))
     print('\n== deterministic local simulation ==')

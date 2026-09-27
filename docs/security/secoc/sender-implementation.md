@@ -13,8 +13,7 @@
 > **Canonical artifacts:** `tools/toyota_support/toyota_secoc_signer.py`,
 > `external-references.lock.json`
 >
-> **Verification:** `tests/verify_toyota_secoc_signer.py`; optional pinned-source
-> check `tests/verify_external_corroboration.py`
+> **Verification:** `tests/verify_toyota_secoc_signer.py`
 >
 > **Related:** [application receive chain](application-chain.md)
 

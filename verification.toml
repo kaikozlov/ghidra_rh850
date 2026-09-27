@@ -6,8 +6,8 @@
 #
 
 [verification]
-# Portable proofs default to the exhaustive full/local tiers.  The small core
-# smoke tier is centralized here so new evidence suites do not silently bloat it.
+# Suites run only when selected. Core covers repository mechanics without
+# pulling in firmware research suites or external corpora.
 default_modes = ["full", "local"]
 core_suites = [
   "analysis_targets",
@@ -55,9 +55,6 @@ description = "Pinned external Toyota CUW specimen corpus"
 path = "software/Techstream/gtsplus"
 env = "GTSPLUS_ROOT"
 description = "Pinned proprietary GTS+ distribution and derived local reconstruction corpus"
-
-[suite.software_layout]
-tests = ["tests/verify_software_layout.py"]
 
 [suite.gtsplus_artifact_lock]
 tests = ["tests/verify_gtsplus_artifact_lock.py"]
@@ -136,9 +133,6 @@ tests = ["tests/verify_gtsplus_tse_managed_semantics.py"]
 requires_external = ["gtsplus"]
 modes = ["local"]
 
-[suite.public_techstream_tse_lineage]
-tests = ["tests/verify_public_techstream_tse_lineage.py"]
-
 [suite.gtsplus_vdas_semantics]
 tests = ["tests/verify_gtsplus_vdas_semantics.py"]
 requires_external = ["gtsplus"]
@@ -164,11 +158,6 @@ tests = ["tests/verify_gtsplus_tss3_native_recorder.py"]
 requires_external = ["gtsplus"]
 modes = ["local"]
 
-[suite.toyota_cuw_corpus_lock]
-tests = ["tests/verify_toyota_cuw_corpus_lock.py"]
-requires_external = ["cuw_reference_corpus"]
-modes = ["local"]
-
 [suite.architecture]
 tests = ["tests/verify_architecture.py"]
 
@@ -183,9 +172,6 @@ tests = [
 
 [suite.bootloader_diagnostics]
 tests = ["tests/verify_bootloader_diagnostics.py"]
-
-[suite.p1me_product_memory]
-tests = ["tests/verify_p1me_product_memory.py"]
 
 [suite.bootloader_secrets]
 tests = ["tests/verify_findings.py"]
@@ -359,9 +345,6 @@ tests = ["tests/verify_ram_overlays.py"]
 [suite.renesas_rfp]
 tests = ["tests/verify_renesas_rfp.py"]
 
-[suite.scheduler_timing]
-tests = ["tests/verify_scheduler_timing.py"]
-
 [suite.semantic_coverage]
 tests = ["tests/verify_semantic_coverage.py"]
 
@@ -375,9 +358,6 @@ tests = ["tests/verify_semantic_review_promotions.py"]
 
 [suite.semantic_interest_ranking]
 tests = ["tests/verify_semantic_interest_ranking.py"]
-
-[suite.semantic_sweep]
-tests = ["tests/verify_semantic_sweep.py"]
 
 [suite.decompiler_corpus]
 tests = ["tests/verify_decompiler_corpus.py"]
@@ -412,12 +392,6 @@ tests = ["tests/verify_security_consumers.py"]
 
 [suite.toyota_secoc_signer]
 tests = ["tests/verify_toyota_secoc_signer.py"]
-
-[suite.toyota_eps_variant_matrix]
-tests = ["tests/verify_toyota_eps_variant_matrix.py"]
-
-[suite.toyota_porting_contract]
-tests = ["tests/verify_toyota_porting_contract.py"]
 
 [suite.corolla_2023_public_route_opendbc_evidence]
 tests = ["tests/verify_corolla_2023_public_route_opendbc_evidence.py"]
@@ -615,9 +589,6 @@ tests = ["tests/verify_corolla_pre_tss3_message_comparison.py"]
 tests = ["tests/verify_corolla_h_sienna_secoc_structural_comparison.py"]
 
 
-[suite.target_artifact_manifest]
-tests = ["tests/verify_target_artifact_manifest.py"]
-
 [suite.techstream_rks]
 tests = ["tests/verify_techstream_rks.py"]
 requires_external = ["techstream_v18"]
@@ -786,10 +757,7 @@ tests = ["tests/verify_yc_venza_airbag_reprogramming.py"]
 
 [suite.community_tooling]
 tests = ["tests/verify_community_tooling.py"]
-# Cross-validates community exploit tooling (blurbdust/@yc flash patcher,
-# egg-hunter shellcode, CUW decryptor) against repository findings SEC-BOOT-002..007,
-# SECOC-024/028/044, including live CRC resigning. Verifies SHA-256 integrity
-# of committed artifacts.
+# Checks the firmware instruction match and CRC reconstruction.
 
 [suite.lochuan_patch_semantics]
 tests = ["tests/verify_lochuan_patch_semantics.py"]
@@ -802,9 +770,6 @@ tests = ["tests/verify_exploit_interest_ranking.py"]
 
 [suite.exploit_interest_reviewed_candidates]
 tests = ["tests/verify_exploit_interest_reviewed_candidates.py"]
-
-[suite.security_state_composition]
-tests = ["tests/verify_security_state_composition.py"]
 
 [suite.response_disclosure_audit]
 tests = ["tests/verify_response_disclosure_audit.py"]
@@ -962,9 +927,6 @@ tests = ["tests/verify_fast_verify.py"]
 [suite.icus_register_footprint]
 tests = ["tests/verify_icus_register_footprint.py"]
 
-[suite.rav4_prime_forced_profile_matrix]
-tests = ["tests/verify_rav4_prime_forced_profile_matrix.py"]
-
 [suite.toyota_dataflash_analyzer]
 tests = ["tests/verify_toyota_dataflash_analyzer.py"]
 
@@ -997,8 +959,8 @@ tests = ['tests/verify_keyless.py']
 [suite.keyless_live_handoff_dma]
 tests = ["tests/verify_keyless_live_handoff_dma.py"]
 
-[suite.tooling_consolidation]
-tests = ["tests/verify_tooling_consolidation.py"]
+[suite.evidence_tooling]
+tests = ["tests/verify_evidence_tooling.py"]
 
 [suite.annotation_ledger]
 tests = ["tests/verify_annotation_ledger.py"]

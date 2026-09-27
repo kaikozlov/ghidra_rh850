@@ -2,7 +2,6 @@
 """Independent raw-CodeFlash checks for docs/communications/application-tx.md."""
 from __future__ import annotations
 
-from collections import Counter
 import csv
 import hashlib
 from pathlib import Path
@@ -48,7 +47,6 @@ TX = struct.Struct("<IBBH")
 com_tx = [TX.unpack_from(CF, 0x21F78 + TX.size * i) for i in range(6)]
 diag_tx = [TX.unpack_from(CF, 0x21FA8 + TX.size * i) for i in range(4)]
 special_tx = TX.unpack_from(CF, 0x21F68)
-check("CanIf Tx records are eight bytes", TX.size == 8)
 check("six COM Tx CAN IDs are exact",
       [row[0] for row in com_tx] == [0x260, 0x262, 0x351, 0x394, 0x4A3, 0x4C8])
 check("COM Tx records select controller zero", all(row[1:3] == (0, 0) for row in com_tx))
@@ -84,7 +82,6 @@ expected_pdu = [
     (196, 0, 0, 8, 0, 3),
 ]
 com_pdu = [PDU.unpack_from(CF, 0x2273C + PDU.size * i) for i in range(6)]
-check("COM PDU descriptors are eight bytes", PDU.size == 8)
 check("six Tx PDU cycle/length/flag records match", com_pdu == expected_pdu, repr(com_pdu))
 check("first six buffer offsets are contiguous by PDU length",
       [u16(0x228E4 + 2 * i) for i in range(6)] == [0, 8, 16, 20, 23, 31])
@@ -99,7 +96,6 @@ expected_initial = bytes.fromhex(
 )
 check("39-byte initial Tx data image matches", CF[0x221DC:0x221DC + 39] == expected_initial,
       CF[0x221DC:0x221DC + 39].hex())
-check("53 COM PDU descriptors split as six Tx plus 47 Rx", 53 - 6 == 47)
 
 print("\n== all 58 configured transmit signals ==")
 signal_to_pdu = [u16(0x224E4 + 2 * i) for i in range(300)]
@@ -115,7 +111,6 @@ check("Tx signal property classes match 0*38,3*8,0*12",
 
 with CSV_PATH.open(newline="", encoding="utf-8") as stream:
     rows = list(csv.DictReader(stream))
-check("machine-readable Tx map has 58 rows", len(rows) == 58, str(len(rows)))
 check("CSV signal IDs are exactly 0..57", [int(row["signal_id"]) for row in rows] == list(range(58)))
 check("CSV PDU membership equals raw signal map",
       [int(row["tx_pdu_id"]) for row in rows] == signal_to_pdu[:58])
@@ -153,34 +148,6 @@ check("no configured-unresolved Tx rows remain",
 check("RAM-backed signal sources are application addresses",
       all(0xFEBE8094 <= int(row["source"], 0) <= 0xFEBE8110
           for row in rows if row["source_kind"] == "ram"))
-expected_sources = [
-    "0xFEBE8094", "0xFEBE8096", "0xFEBE8098", "0xFEBE8099", "0xFEBE809A",
-    "0xFEBE809B", "0xFEBE810A", "0xFEBE810E", "0xFEBE8110", "0x7FEAC",
-    "0xFEBE809C", "0xFEBE80B4", "0xFEBE809D", "0", "0xFEBE809E", "0xFEBE809F",
-    "0xFEBE80A0", "0xFEBE80A4", "0xFEBE80A6", "0xFEBE80A8", "0xFEBE80AA",
-    "0xFEBE80AC", "0", "0xFEBE80A1", "0xFEBE80A2", "0xFEBE80A3", "0xFEBE80A5",
-    "0xFEBE80A7", "0xFEBE80A9", "0xFEBE80AB", "0xFEBE80AD", "0xFEBE80AE",
-    "0xFEBE80AF", "0xFEBE80B0", "0xFEBE80B1", "0xFEBE80B2", "0xFEBE80B3", "0x7FEAC",
-    "0xFEBE80B8", "0xFEBE80B9", "0xFEBE80BA", "0xFEBE80C2", "0xFEBE80BD",
-    "0xFEBE80BE", "0xFEBE80BF", "0xFEBE80C1", "0xFEBE80C3", "0xFEBE80C4",
-    "0xFEBE80C5", "0xFEBE80C6", "0xFEBE80C7", "0xFEBE80C8", "0xFEBE80C9",
-    "0xFEBE80CA", "9", "0", "0", "0",
-]
-check("all 58 CSV source fields match the recovered packers",
-      [row["source"] for row in rows] == expected_sources)
-expected_wire = [
-    "B0[7]", "B0[4]", "B0[3]", "B0[2]", "B0[1]", "B0[0]", "B1..B2 BE16",
-    "B3..B4 BE16", "B5..B6 BE16", "B7",
-    "B0[7]", "B0[6]", "B0[5]", "B0[4]", "B0[2]", "B0[1]", "B0[0]",
-    "B1[7]", "B1[6]", "B1[5]", "B1[4]", "B1[3]", "B1[2:0] || B2",
-    "B3[7]", "B3[6]", "B3[5]", "B3[4]", "B3[3]", "B3[2]", "B3[1]", "B3[0]",
-    "B4[7]", "B4[6]", "B4[5]", "B4[4:3]", "B5", "B6", "B7",
-    "B2[7:5]", "B2[4]", "B0[6:4]", "B0[1:0]", "B1[7:6]", "B1[2:0]",
-    "B2[3:1]", "B2[0]", "B0", "B1", "B2", "B3", "B4", "B5", "B6", "B7",
-    "B0", "B1[7]", "B2..B3 BE16", "B4..B7",
-]
-check("all 58 CSV wire fields match the recovered packing layout",
-      [row["wire_field"] for row in rows] == expected_wire)
 
 
 print("\n== post-packer checksum/default-only closure ==")

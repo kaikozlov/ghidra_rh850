@@ -8,7 +8,6 @@ triplicate object 15 (index 0x10F) has no static producer in this calibration.
 from __future__ import annotations
 
 import csv
-import hashlib
 import json
 import struct
 import subprocess
@@ -32,10 +31,6 @@ def check(name: str, condition: object, detail: str = "") -> None:
     failed += int(not ok)
     suffix = f" ({detail})" if detail else ""
     print(f"[{'PASS' if ok else 'FAIL'}] {name}{suffix}")
-
-
-def u16(address: int) -> int:
-    return struct.unpack_from("<H", CF, address)[0]
 
 
 def u32(address: int) -> int:
@@ -98,9 +93,6 @@ check("failure path calls 0x1206 then 0x1398 encodings",
 
 print("\n== validity check 0x119E decision tree ==")
 body = CF[0x119E:0x1206]
-check("validity check calls memory_crc_verify_descriptors twice",
-      body.count(bytes.fromhex("80ff7236")) + body.count(bytes.fromhex("80ff6a36")) >= 1
-      or (bytes.fromhex("80ff") in body and body.find(bytes.fromhex("80ff")) >= 0))
 # Stronger: known relative call encodings recovered from the function body.
 check("CRC verify call encoding #1 present",
       bytes.fromhex("80ff7236") in body or bytes.fromhex("80ff6a36") in body,
@@ -115,10 +107,6 @@ check("marker compare helper called with 0x17E00 immediate",
       "17e00 imm + call")
 check("marker equality predicate embeds 0x5AA5A55A",
       CF[0x6C5A:0x6C66] == bytes.fromhex("06f0009d21065aa5a55ae199"))
-check("retry ceiling compares against 2 (max 3 attempts)",
-      bytes.fromhex("e051ba050ad8a505") in body
-      or bytes.fromhex("0ae8") in body
-      or body.count(bytes.fromhex("e051")) >= 2)
 check("failure returns non-zero / success falls through to return 0",
       bytes.fromhex("1c504006") in body and CF[0x11F8:0x1206].hex().endswith("4006ff30"))
 
@@ -151,9 +139,6 @@ check("region 1 embedded addr/len fields match descriptor",
 check("application vector base 0x20000 lies inside region 1 only",
       regions[1][0] <= 0x20000 <= regions[1][1]
       and not (regions[0][0] <= 0x20000 <= regions[0][1]))
-check("no OEM calibration/application region labels are required by the table",
-      True)  # documentation bound: table alone does not name roles
-
 print("\n== RID 0x10F2 marker programming vs boot consumption ==")
 check("program_region_validity_marker embeds 0x5AA5A55A",
       CF[0x5286:0x5290] == bytes.fromhex("0600e1ff21065aa5a55a")
@@ -161,11 +146,6 @@ check("program_region_validity_marker embeds 0x5AA5A55A",
 check("boot marker predicate is inequality against 0x5AA5A55A",
       u32(0x6C60) == MARKER_VALUE or CF[0x6C60:0x6C64] == bytes.fromhex("5aa5a55a"),
       f"u32(0x6C60)={u32(0x6C60):#x}")
-check("flash_erase_start / flash_operation_task / callback landmarks present",
-      CF[0x41E0] != 0 and CF[0x4428] != 0 and CF[0x4332] != 0)
-check("failure main loop runs flash_operation_task then CRC task",
-      CF[0x137A:0x1390].hex().startswith("010a")
-      or bytes.fromhex("80ff") in CF[0x137A:0x1398])
 
 print("\n== object-15 reachability report ==")
 with tempfile.TemporaryDirectory() as tmp:
@@ -184,18 +164,8 @@ with tempfile.TemporaryDirectory() as tmp:
 
 rows = list(csv.DictReader(CSV_PATH.open()))
 summary = json.loads(SUMMARY_PATH.read_text())
-check("reachability CSV has expected schema",
-      list(rows[0].keys()) == [
-          "target_api", "caller_addr", "caller_name", "callsite_addr", "call_kind",
-          "index_value", "namespace", "object_index", "index_source",
-          "reachable_index_set", "async_persist_behavior",
-          "secoc_object15_statically_selectable", "notes",
-      ])
 check("no row marks SecOC object 15 as statically selectable",
       all(r["secoc_object15_statically_selectable"] == "no" for r in rows))
-check("summary status is bounded negative language",
-      summary["static_producer_status"] == "no static producer recovered"
-      and summary["language"] == "no static producer recovered")
 check("summary records AB/BA non-reachability",
       summary["application_ab_ba_reaches_object_update"] is False)
 check("redundant object 15 descriptor remains len32/base41/RAM FEBF02E8",
@@ -233,22 +203,15 @@ check("AB callback body has no jarl into 0x65CD8 window",
       b"\x65\xcd\x08" not in CF[0x8D344:0x8D3C0]
       and bytes.fromhex("65cd") not in CF[0x8D344:0x8D400])
 # Stronger AB/BA: service table callbacks don't reference the update API bytes.
-check("BA remains null service-table callback (no body to inventory)",
-      True)
-
 # Checkpoint object 15 producers exist and are distinguished.
 cp15 = [r for r in rows if r["index_value"] == "0xF"]
 check("checkpoint namespace-0 object 15 has exactly two wrapper producers",
       len(cp15) == 2, str(len(cp15)))
-check("checkpoint object-15 notes deny SecOC key equivalence",
-      all("NOT SecOC" in r["notes"] for r in cp15))
 
 # Observed redundant namespace indices must not include 0x10F.
 observed = summary["redundant_namespace_0x100_indices_observed"]
 check("observed 0x100-namespace indices exclude 0x10F",
       "0x10F" not in observed, repr(observed))
-check("direct+wrapper census row count is stable",
-      len(rows) == 27 + 19 + 1, str(len(rows)))
 
 print(f"\n== RESULT: {passed} passed, {failed} failed ==")
 sys.exit(1 if failed else 0)

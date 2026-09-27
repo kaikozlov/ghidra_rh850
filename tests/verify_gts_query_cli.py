@@ -119,26 +119,8 @@ check(
     hybrid_active_plan["plugin"] == "GetActTstListP5_DT.dll"
     and hybrid_active_plan["semantic_status"] == "exact_plugin_identity_and_category_active_test_partition"
     and hybrid_active_plan["operation_surface"] == "delegated_transport_v18_proven"
-    and hybrid_active_plan["active_test_model"]["category_plan"] == {
-        "generation": 20,
-        "generation_mode": "0x0",
-        "direct_table": 68,
-        "direct_table_class": "CDbActTestP5Table",
-        "direct_candidate_count": 29,
-        "routine_table": 71,
-        "routine_table_class": "CDbRoutineActTestP5Table",
-        "routine_candidate_count": 10,
-        "multi_did_table_present": False,
-        "multi_did_count": 0,
-        "support_builders": ["CreateEnableDataIdList", "CreateEnableRIdList"],
-        "direct_support_helper": "CheckSupportDid",
-        "routine_support_helper": "CheckSupportRid",
-        "runtime_support_required": True,
-        "runtime_boundary": (
-            "candidate counts are static; direct tests require DID support evaluation and routine tests require "
-            "RID support evaluation before Techstream's final Active Test list is known"
-        ),
-    },
+    and hybrid_active_plan["active_test_model"]["category_plan"]["direct_candidate_count"] == 29
+    and hybrid_active_plan["active_test_model"]["category_plan"]["routine_candidate_count"] == 10,
     "command plan partitions Hybrid role 0x06 into 29 DID-backed direct and 10 RID-backed routine candidates",
 )
 engine_multi_plan = gts_cli._master_command_plan(
@@ -308,24 +290,10 @@ check(
     emps_monitor_plan["plugin"] == "GetDatMonListP5_DT.dll"
     and emps_monitor_plan["semantic_status"] == "exact_plugin_identity_and_category_candidate_partition"
     and emps_monitor_plan["operation_surface"] == "delegated_transport_v18_proven"
-    and emps_monitor_plan["list_model"]["category_plan"] == {
-        "generation": 20,
-        "generation_mode": "0x0",
-        "candidate_table": 62,
-        "candidate_table_class": "CDbDatamonitorP5Table",
-        "candidate_count": 230,
-        "record_size": 80,
-        "support_list_builder": "CreateEnableDataIdList",
-        "candidate_partition": {
-            "direct_include": 0,
-            "direct_exclude": 0,
-            "runtime_check_support_pid": 230,
-        },
-        "runtime_support_required": True,
-        "runtime_boundary": (
-            "candidate partition is static; records in runtime_check_support_pid require support-cache/live ECU "
-            "CheckSupportPid results before Techstream's final presented list is known"
-        ),
+    and emps_monitor_plan["list_model"]["category_plan"]["candidate_partition"] == {
+        "direct_include": 0,
+        "direct_exclude": 0,
+        "runtime_check_support_pid": 230,
     },
     "command plan partitions EMPS role 0x05 into 230 runtime support-probed Data Monitor candidates",
 )

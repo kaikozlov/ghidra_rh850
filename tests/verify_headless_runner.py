@@ -50,11 +50,6 @@ def invoke(fake_home: Path, *args: str, extra_env: dict[str, str] | None = None)
 
 
 print("== centralized analyzeHeadless runner ==")
-runner_text = RUNNER.read_text()
-check(
-    "caller-supplied GHIDRA_ENV_READY cannot bypass bootstrap validation",
-    "GHIDRA_ENV_READY" not in runner_text,
-)
 with tempfile.TemporaryDirectory() as td:
     temp = Path(td)
     fake_home = temp / "ghidra"

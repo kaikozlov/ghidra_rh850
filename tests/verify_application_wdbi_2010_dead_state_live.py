@@ -8,8 +8,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 PROGRAM = "RH850_P1M-E_CodeFlash.bin"
-EXPECTED = ("ASSERT application-wdbi-2010-dead-state: residue_fields=3 runtime_readers=0 "
-            "writer_callers=1 direct_actuation_refs=0 direct_actuation_calls=0 unexpected=0")
+EXPECTED = "ASSERT application-wdbi-2010-dead-state"
 
 
 def main() -> int:

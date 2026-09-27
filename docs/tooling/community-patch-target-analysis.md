@@ -29,10 +29,7 @@ jmp [lp]
 ```
 
 This blurbdust/yc egg-based patch is also distinct from the separately published
-Lochuan/3b1b `8965B4512000-FW-PATCH` repository. That repository is pinned as
-`lochuan_b4512000_fw_patch` in
-[`external-references.lock.json`](../../external-references.lock.json) at
-`e7c1f17d1090470b18f7f3315abd99b64e5e4619` and fixes a different target,
+Lochuan/3b1b `8965B4512000-FW-PATCH` repository. Its historical patch changed
 `0x664E6: 0x31→0x10`. Firmware analysis now closes that byte as an ordinary
 checkpoint/NvM failure-status fail-open, not a second SecOC Gate-2 encoding. The
 full yc-versus-Lochuan comparison, including why the older Lochuan analysis

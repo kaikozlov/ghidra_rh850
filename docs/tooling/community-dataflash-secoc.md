@@ -26,8 +26,8 @@ the vehicle has no SecOC traffic.
 
 ## 1. Pinned hardcoded assumptions
 
-The following are pinned in `external-references.lock.json` and asserted by the
-optional external-source verifier:
+The following assumptions were read from the source revisions recorded in
+`external-references.lock.json`:
 
 | File | Static assumption |
 |---|---|

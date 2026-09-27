@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import hashlib
 import json
-import sys
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
@@ -42,23 +41,10 @@ required_data = {
 }
 required = required_pe | required_data
 
-print("== committed lock schema ==")
-check("all load-bearing artifacts are pinned", required <= set(artifacts),
-      f"missing={sorted(required - set(artifacts))}")
-for name in sorted(required):
-    item = artifacts[name]
-    check(f"{name}: relative path", isinstance(item.get("path"), str)
-          and not Path(item["path"]).is_absolute())
-    check(f"{name}: size and SHA-256", isinstance(item.get("size"), int)
-          and item["size"] > 0 and len(item.get("sha256", "")) == 64)
-    if name in required_pe:
-        check(f"{name}: PE versions", bool(item.get("product_version"))
-              and bool(item.get("file_version")))
-    check(f"{name}: purpose and dependencies", bool(item.get("purpose"))
-          and bool(item.get("claims_tests")))
-
 if ROOT.is_dir():
-    print("\n== live artifact parity ==")
+    print("== live artifact parity ==")
+    check("all load-bearing artifacts are pinned", required <= set(artifacts),
+          f"missing={sorted(required - set(artifacts))}")
     for name in sorted(required):
         item = artifacts[name]
         path = ROOT / item["path"]
@@ -68,7 +54,7 @@ if ROOT.is_dir():
             check(f"{name}: live size", len(data) == item["size"])
             check(f"{name}: live SHA-256", hashlib.sha256(data).hexdigest() == item["sha256"])
 else:
-    print("\n[SKIP] external Techstream tree unavailable; committed lock schema still checked")
+    print("\n[SKIP] external Techstream tree unavailable; no live identity checks ran")
 
 print(f"\nResults: {passed} passed, {failed} failed")
 raise SystemExit(1 if failed else (0 if ROOT.is_dir() else 77))

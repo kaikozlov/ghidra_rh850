@@ -657,16 +657,12 @@ ledger context is useful.
 
 ## Tooling
 
-- **OQ-032 — Semantic coverage.** The current graph has 6,376 structurally discovered
-  functions. A reproducible ranked sweep decompiled 100 entries, including all
-  mandatory callback/dispatcher families, but 87 selected entries remain
-  `reviewed_unknown`; across the whole ledger 6,257 functions remain
-  unreviewed and only 32 carry a semantic grade. This is an open semantic
-  denominator, not evidence of hidden subsystems. New work should remain
-  lead-driven and record an explicit disposition without upgrading successful
-  decompilation into semantic confidence. The selection artifact and current
-  boundary are in
-  [historical corrected-graph re-audit](../history/2026-08/CORRECTED_GRAPH_REAUDIT_2026-08-11.md).
+- **OQ-032 — Semantic coverage.** Most discovered functions still lack a
+  supported semantic conclusion. `data/semantic_review_status.csv` records
+  actual reviews; `data/semantic_coverage_summary.json` summarizes coverage.
+  Follow concrete leads using `tools/pseudo` and the interest ranking, rather
+  than treating a successful decompilation or a completed selection list as
+  semantic understanding.
 - **OQ-033 — RFP/P1M-E serial-protocol transfer.** The generic RV40F **host-side static
   work is closed** (RFP-001..008): all 52 ordinary command IDs are censused,
   both connection/setup variants are recovered, the 8-byte `GetDeviceType`

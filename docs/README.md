@@ -1,11 +1,8 @@
 # Documentation map
 
-This directory is organized by **document role**, not by chronology. If a page
-looks like a current-state source but is actually a dated investigation journal,
-that is a documentation bug.
-
-The firmware and deterministic tests remain authoritative. Documentation exists
-to make the evidence legible.
+Use the subsystem reports for conclusions, the status pages for navigation,
+and `WORKFLOW.md` for commands. Firmware and captured observations are the
+underlying evidence; tests check particular behaviors or binary facts.
 
 ## Read these first
 
@@ -62,33 +59,7 @@ useful for chronology, methodology, and why a correction happened, but **they
 are not the place to determine current project state**. Current conclusions
 must be taken from the live status ledgers and canonical subsystem reports.
 
-## Evidence vocabulary
-
-Confidence grades are defined centrally in
-[status/FINDINGS.md](status/FINDINGS.md#evidence-model):
-
-- **verified** — directly asserted by a deterministic repository test;
-- **observed** — directly observed dynamically/externally but not reproduced by
-  a repository test;
-- **recovered** — control/data flow substantially reconstructed;
-- **bounded** — interpretation constrained but incomplete;
-- **hypothesis** — plausible and explicitly unverified;
-- **disproved** — retained to prevent the old claim from returning.
-
-Evidence source and confidence are separate dimensions. A third-party field
-observation can be genuinely observed while still not being a firmware-static
-fact for `8965B4512000`.
-
-## Canonical ownership rule
-
-To keep this tree from becoming confusing again:
-
-- subsystem reports own the detailed argument;
-- `FINDINGS.md` owns the compact claim/evidence index;
-- `OPEN_QUESTIONS.md` owns unresolved detail;
-- `PRIORITIES.md` owns only the short execution queue;
-- `OVERVIEW.md` summarizes and links;
-- dated investigation narratives go to `history/`.
-
-Do not copy multi-paragraph findings between documents. Link to the canonical
-home instead.
+Confidence grades are defined in
+[status/FINDINGS.md](status/FINDINGS.md#evidence-model).
+Keep detailed conclusions in the relevant subsystem report and link to them
+from status pages rather than copying the argument.

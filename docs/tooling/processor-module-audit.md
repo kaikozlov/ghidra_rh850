@@ -407,12 +407,11 @@ DATA reference into CodeFlash that is not a function entry (scalars included),
 not a table-only classifier. The ledger deliberately does **not** claim that
 every function is behaviorally understood.
 
-The current ledger contains **6,376** functions: 6,257 `unreviewed`, 87
-`reviewed_unknown`, 3 `structurally_bounded`, and 29
-`semantically_identified`. 32 rows carry a semantic evidence grade (3
-bounded, 11 recovered, 18 verified). The reproducible selected sweep and
-corrected-graph negative re-audit are recorded in
-[historical corrected-graph re-audit](../history/2026-08/CORRECTED_GRAPH_REAUDIT_2026-08-11.md).
+Current review counts are generated in `data/semantic_coverage_summary.json`.
+The curated conclusions live in `data/semantic_review_status.csv`; automatic
+decompilation-only entries are not counted as reviews. The earlier selected
+sweep and corrected-graph re-audit remain in the
+[historical report](../history/2026-08/CORRECTED_GRAPH_REAUDIT_2026-08-11.md).
 
 This in-function inventory is not an executable denominator. The separate
 outside-function exporter currently records 1,665 conservative candidate runs

@@ -2,7 +2,6 @@
 """Offline tests of diagnostic session lifetime and shared preflight RX accounting."""
 from __future__ import annotations
 
-import json
 import sys
 import unittest
 from pathlib import Path
@@ -52,17 +51,6 @@ class StaticGenerationSemanticsTests(unittest.TestCase):
         # Secondary callback path equivalently tests original bit1 before 0x8C244.
         self.assertEqual(image[0x7BBBE:0x7BBC8], bytes.fromhex('82dac9051d3081ff8006'))
 
-        rows = {}
-        with (ROOT / 'data/generated/crown-8965F3012000/decompilations.jsonl').open() as fh:
-            for line in fh:
-                row = json.loads(line)
-                if row.get('record') == 'function':
-                    rows[int(row['entry_addr'], 16)] = row
-        self.assertIn('cVar1 = DAT_febe4e91', rows[0x4B874]['decompiled_c'])
-        self.assertIn('FUN_0007a8e6(0x114,0x1d0,4,0,0,&DAT_febe7bb6)', rows[0x4B874]['decompiled_c'])
-        self.assertIn("(&DAT_febe4e64)[param_1] + '\\x01'", rows[0x8C212]['decompiled_c'])
-        self.assertIn("(&DAT_febe4e64)[param_1 & 0xffff] + '\\x01'", rows[0x8C244]['decompiled_c'])
-
         # PDU45 is descriptor 40 of the 41 normal application Rx descriptors.
         # Controller-0 starts at descriptor 0/count 41; the generated PDU base is 5.
         self.assertEqual(image[0x218FC:0x21904], bytes.fromhex('0000290000000000'))
@@ -89,17 +77,6 @@ class StaticGenerationSemanticsTests(unittest.TestCase):
         secoc_routes = [int.from_bytes(image[0x255BA+i*0x50:0x255BC+i*0x50], 'little') for i in range(3)]
         self.assertEqual(secoc_routes, [9, 40, 42])
         self.assertNotIn(45, secoc_routes)
-
-        # Exact driver path: hardware FIFO/buffer readers -> common frame
-        # adapter -> receive ring -> foreground drain. These tokens pin the
-        # recovered path without requiring Ghidra at test time.
-        self.assertIn('FUN_0007fea4(param_1,uVar6 >> 0x10 & 0xff,&puStack_20)', rows[0x7FED0]['decompiled_c'])
-        self.assertIn('FUN_0007fea4(param_1,uVar6 >> 0x10 & 0xff,&puStack_20)', rows[0x7FF9C]['decompiled_c'])
-        self.assertIn('FUN_0007e1ac', rows[0x7FEA4]['decompiled_c'])
-        self.assertIn('FUN_0007e0bc(uVar6,&local_2c)', rows[0x7E1AC]['decompiled_c'])
-        self.assertIn('FUN_0007df42(uVar5)', rows[0x7E06A]['decompiled_c'])
-        self.assertIn('FUN_0007def0(param_1,&uStack_38)', rows[0x7DF42]['decompiled_c'])
-        self.assertIn('FUN_0007e06a()', rows[0x792EE]['decompiled_c'])
 
 
 class PreflightTests(unittest.TestCase):

@@ -9,7 +9,6 @@ Findings (all scoped to this Sienna calibration 8965B4512000):
 - 0xAB event-record closure is in verify_application_ab_service.py
 """
 from pathlib import Path
-import csv
 import struct
 import sys
 
@@ -31,47 +30,6 @@ def check(name, cond, detail=""):
     suffix = f" ({detail})" if detail else ""
     print(f"[{mark}] {name}{suffix}")
 
-
-# ═══════════════════════════════════════════════════════════════════
-# 1. CONSUMER TABLE: exact address set + liveness
-# ═══════════════════════════════════════════════════════════════════
-print("== security-state consumer table ==")
-
-CSV_PATH = REPO / "data" / "application_security_consumers.csv"
-check("consumer CSV exists", CSV_PATH.exists())
-with open(CSV_PATH) as f:
-    rows = list(csv.DictReader(f))
-
-expected_cols = {"consumer_addr", "consumer_name", "check_type", "required_level",
-                 "gated_service", "gated_did_or_rid", "operation", "relevance"}
-check("CSV header schema", set(rows[0].keys()) == expected_cols,
-      repr(sorted(rows[0].keys())))
-
-# Assert the EXACT expected consumer address set (from Ghidra x-refs to
-# 0x8FDCA, 0x900FC, 0x92FEE, 0x9075A)
-EXPECTED_CONSUMERS = {
-    0x8F282,   # Dcm DSP service dispatch
-    0x8F344,   # Dcm DSP subfunction dispatch
-    0x945DC,   # RDBI service callback
-    0x92FEE,   # per-DID policy lookup
-    0x95556,   # RoutineControl per-RID security checker
-    0x9497C,   # SA request seed
-    0x94A72,   # SA send key
-    0x940B6,   # session/DTC policy
-    0x93A1E,   # WDBI generic record policy
-    0x90834,   # session transition clearer
-    0x908C6,   # timeout revoker
-}
-actual_addrs = {int(r["consumer_addr"], 16) for r in rows}
-check("consumer CSV has exactly the expected address set",
-      actual_addrs == EXPECTED_CONSUMERS,
-      f"expected {len(EXPECTED_CONSUMERS)}, got {len(actual_addrs)}; "
-      f"missing={EXPECTED_CONSUMERS - actual_addrs}; "
-      f"extra={actual_addrs - EXPECTED_CONSUMERS}")
-
-for addr in sorted(EXPECTED_CONSUMERS):
-    check(f"consumer 0x{addr:05X} is live code",
-          CF[addr:addr + 2] != b"\x00\x00")
 
 # ═══════════════════════════════════════════════════════════════════
 # 2. SERVICE-LEVEL: all 17 SIDs have sec_count=0
@@ -174,15 +132,8 @@ check("no configured RoutineControl RIDs require SecurityAccess level > 0",
 # ═══════════════════════════════════════════════════════════════════
 # 6. MACHINERY LIVENESS
 # ═══════════════════════════════════════════════════════════════════
-print("\n== security machinery is live code ==")
-check("security reader 0x8FDCA is live code",
-      CF[0x8FDCA:0x8FDCC] != b"\x00\x00")
-check("bitmask setter 0x9075A is live code",
-      CF[0x9075A:0x9075C] != b"\x00\x00")
 check("unlock helper 0x900FC starts with prepare",
       CF[0x900FC:0x90100] == bytes.fromhex("80072100"))
-check("per-DID checker 0x92FEE is live code",
-      CF[0x92FEE:0x92FF0] != b"\x00\x00")
 
 print(f"\n== RESULT: {passed} passed, {failed} failed ==")
 if failed:

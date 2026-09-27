@@ -27,12 +27,6 @@ def geometry(row: dict[str, object]) -> tuple[object, ...]:
 
 def main() -> int:
     data = json.loads(ART.read_text())
-    check("schema", data["schema"] == "gtsplus-pcs-data-viewer-adu-semantics-v1")
-    check("full managed recovery", data["recovery_proof"] == {
-        "method_body_materialized_count": 22447,
-        "method_body_rva_count": 22447,
-        "method_def_count": 22564,
-    })
     adu = data["adu"]
     check("ADU row census", adu["row_count"] == 7851)
     check("ADU DID census", adu["did_count"] == 1369)

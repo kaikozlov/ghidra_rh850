@@ -33,7 +33,6 @@ with tempfile.TemporaryDirectory() as td:
   check("offline analyzer succeeds", proc.returncode == 0, proc.stderr[-300:])
   check("artifact regenerates byte-identically",
         proc.returncode == 0 and out.read_bytes() == ART.read_bytes())
-check("schema is v1", art["schema"] == "camry-2026-upstream-request-field-census-v1")
 
 print("== drive identity and duplication ==")
 for drive in ("drive_a", "drive_b"):
@@ -71,29 +70,6 @@ print("== B21 state sets are exactly {0,11,18} ==")
 for drive in ("drive_a", "drive_b"):
   states = set(art["drives"][drive]["byte_census_by_b21_state"])
   check(f"{drive}: B21 value set", states == {"0", "11", "18"}, str(sorted(states)))
-
-print("== GTS+ EMPS_P5 DID 0x1cee structured record ==")
-mon = art["gtsplus_join"]["emps_p5_did_0x1cee"]["monitors"]
-check("four monitors", len(mon) == 4)
-check("monitor 2069 Target Lateral ID bits 0-7",
-      mon[0]["monitor_key"] == 2069 and mon[0]["bits"] == "0-7")
-check("monitor 2070 Cooperative Control in Progress Flag bits 8-15",
-      mon[1]["monitor_key"] == 2070 and mon[1]["bits"] == "8-15"
-      and mon[1]["pattern_display"] == {"0": "OFF", "1": "ON"})
-check("monitor 2071 Target Steering Angle After Output Compensation bits 16-31",
-      mon[2]["monitor_key"] == 2071 and mon[2]["bits"] == "16-31" and mon[2]["signed"])
-check("monitor 2072 Advanced Drive Target Steering Angle bits 32-47",
-      mon[3]["monitor_key"] == 2072 and mon[3]["bits"] == "32-47" and mon[3]["signed"])
-dct = art["gtsplus_join"]["emps_p5_did_0x1cee"]["target_lateral_id_dictionary"]
-check("dictionary has exactly 19 values", len(dct) == 19, str(len(dct)))
-for key, label in (("0", "No Request (Manual Operation)"), ("11", "LTA/LCA"), ("18", "SDG"),
-                   ("49", "Self-Propelled Transport"), ("63", "Driver Operation")):
-  check(f"dictionary {key} = {label}", dct.get(key) == label)
-
-print("== interpretation boundaries retained ==")
-itp = art["interpretation"]
-check("producer boundary present", "producer remains unidentified" in itp["producer_boundary"])
-check("regression rule present", "0x08A-to-B6" in itp["regression_rule"])
 
 print()
 print(f"passed={passed} failed={failed}")

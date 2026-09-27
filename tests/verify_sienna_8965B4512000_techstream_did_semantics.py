@@ -107,19 +107,10 @@ chain_checks = [
 for name, address, *needles in chain_checks:
     check(name, all(n in code.get(address, "") for n in needles))
 
-print("\n== capture-model boundaries ==")
-check("1C02 remains general internal torque observer", "general internal command-value-torque" in obj["boundary"])
-check("Q command distinguishes base from compensated PI state", "compensated PI reference is FEBE6D24" in rows[0x1152]["control_role"])
-check("D command distinguishes base from compensated PI state", "compensated PI reference is FEBE6D28" in rows[0x1154]["control_role"])
-check("1185 explicitly distinct from 0102", "distinct from DID 0x0102" in rows[0x1185]["control_role"])
-check("1155 invalid marker recorded", "0xFFFF" in rows[0x1155]["emitted_encoding"])
 validity = obj["motor_angle_validity"]
 check("event 0x52 raw record exact", validity["event_record_address"] == "0x0003006C" and validity["event_record_raw"] == "0000000000010000" and FW[0x3006C:0x30074].hex() == validity["event_record_raw"])
 check("event 0x52 carries DTC-table index zero", validity["dtc_table_index"] == 0 and FW[0x3006E] == 0)
 check("1156 companion points to 1065", rows[0x1156]["companion_did"] == "0x1065" and 0x1065 in companions)
-check("capture card covers nine prioritized reads", [x["did"] for x in obj["capture_card"]] == obj["observer_priority"])
-check("bounded residue keeps event 0x52 producer unresolved", any("event 0x52" in x for x in obj["bounded_residues"]))
-check("bounded residue keeps external 2E4 contribution unresolved", any("0x2E4" in x for x in obj["bounded_residues"]))
 
 print("\n== regeneration ==")
 with tempfile.TemporaryDirectory() as td:

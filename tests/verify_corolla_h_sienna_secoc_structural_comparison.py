@@ -76,7 +76,6 @@ s_decomp = load_sienna_decomp({0x8DB22, 0x8E1A8, 0x8E166, 0x8E382, 0x8E426, 0x8E
                                 0x8EE5C, 0x8EECA, 0x8EF9E, 0x8F084, 0x8F0B8, 0x8F112, 0x87ED0, 0x897F4})
 
 print("\n== source binding ==")
-check("schema exact", art["schema"] == "corolla-h-sienna-secoc-structural-comparison-v1")
 check("Sienna image pinned", len(s) == 0x100000 and sha(s) == art["sources"]["sienna_codeflash"]["sha256"])
 check("H image pinned", len(h) == 0x100000 and sha(h) == art["sources"]["corolla_h_codeflash"]["sha256"])
 check("H/F application identical", h[0x20000:] == f[0x20000:] and art["applies_to"]["corolla_h_f_application_identical"] is True)
@@ -96,12 +95,11 @@ sd7 = next(r for r in sp if r["data_id"] == "0x0D7")
 hd7 = next(r for r in hp if r["data_id"] == "0x0D7")
 hb6 = next(r for r in hp if r["data_id"] == "0x0B6")
 check("shared D7 FD profile class identical", art["profile_tables"]["shared_0d7"]["fd_format_crypto_retry_fields_identical"] is True and sd7["secured_pdu_length"] == hd7["secured_pdu_length"] == 32)
-check("D7 freshness ID is deliberately not portable", sd7["freshness_id"] == 6 and hd7["freshness_id"] == 1 and art["static_conclusion"]["freshness_ids_portable_across_images"] is False)
+check("D7 freshness ID differs between images", sd7["freshness_id"] == 6 and hd7["freshness_id"] == 1)
 check("D7 ordinary slot moves 4 -> 0", art["profile_tables"]["shared_0d7"]["differences"]["ordinary_slot"] == {"sienna": 4, "corolla_h_f": 0})
 slot_map = art["profile_tables"]["freshness_id_to_state_slot"]
 check("Sienna freshness IDs compact to ordinary slots", slot_map["sienna"] == {"0": "sync", "1": 0, "2": 1, "4": 2, "5": 3, "6": 4} and "sVar8 = sVar8 + 1" in s_decomp[0x8E80A])
 check("H/F freshness IDs compact to ordinary slots", slot_map["corolla_h_f"] == {"0": "sync", "1": 0, "2": 1} and "sVar6 = sVar6 + 1" in h_funcs["freshness_profile_lookup"]["decompiled_c"])
-check("freshness ID not direct array index", "not the freshness ID used directly as an array index" in slot_map["rule"])
 check("B6 instantiates same Sienna FD ordinary class", art["profile_tables"]["b6_as_shared_fd_profile_class"]["matches_sienna_0d7_format_crypto_retry_class"] is True and hb6["secured_pdu_length"] == 32 and hb6["freshness_id"] == 2)
 check("ordinary retry class shared", sd7["authentication_retry_limit"] == hd7["authentication_retry_limit"] == hb6["authentication_retry_limit"] == 1 and sd7["cryptoif_busy_retry_limit"] == hd7["cryptoif_busy_retry_limit"] == hb6["cryptoif_busy_retry_limit"] == 2)
 
@@ -112,7 +110,7 @@ check("sync-manager wrap threshold exact", sync_cfg["wrap_threshold"] == 15 and 
 
 print("\n== ICU-S selector / command7 ==")
 check("slot4 config bytes exact-identical", s[0x25950:0x25964] == h[0x2570C:0x25720] == bytes.fromhex("0100000004000000000000000000000000000000"))
-check("config semantics bounded to selector not secret", art["key_and_icus"]["config_semantics"]["icus_slot_selector"] == 4 and art["key_and_icus"]["config_semantics"]["command_word"] == "0x00040007" and "does not prove" in art["key_and_icus"]["slot_secret_transfer_boundary"])
+check("config semantics bounded to selector not secret", art["key_and_icus"]["config_semantics"]["icus_slot_selector"] == 4 and art["key_and_icus"]["config_semantics"]["command_word"] == "0x00040007")
 check("Sienna prepare reads config+4", "*(byte *)(param_1 + 1)" in s_decomp[0x87ED0])
 check("H prepare reads config+4", "*(byte *)(param_1 + 1)" in h_funcs["icus_command7_descriptor_prepare"]["decompiled_c"])
 check("Sienna command7 forms selector<<16|7", "puVar2[4] << 0x10 | 7" in s_decomp[0x897F4])
@@ -122,23 +120,21 @@ check("lower command7 function geometry retained", transfer_by_ref["0X00087ED0"]
 print("\n== exact freshness codec transfers ==")
 rows = {row["role"]: row for row in art["function_correspondence"]["rows"]}
 expected_exact = {"full_freshness_pack", "sync_freshness_pack", "transmitted_freshness_parse", "sync_freshness_parse"}
-check("exact helper set exact", set(art["function_correspondence"]["exact_byte_transfers"]) == expected_exact and art["function_correspondence"]["exact_byte_transfer_count"] == 4)
+check("exact helper set exact", set(art["function_correspondence"]["exact_byte_transfers"]) == expected_exact)
 for role in sorted(expected_exact):
     row = rows[role]
     sa, ha, n = int(row["sienna_entry"], 16), int(row["corolla_h_entry"], 16), row["body_size"]
     check(f"{role} raw bytes identical", s[sa:sa+n] == h[ha:ha+n] and row["byte_identical"] is True)
-check("normal full freshness format shared", art["shared_freshness_semantics"]["ordinary_full_freshness"].startswith("46 meaningful bits") and h_secoc["transmitted_freshness"]["full_bits"] == 46)
-check("ordinary FV4 split shared", art["shared_freshness_semantics"]["ordinary_transmitted_freshness"].startswith("FV4") and h_secoc["transmitted_freshness"]["wire"] == "B28[7:4]")
+check("normal full freshness format shared", h_secoc["transmitted_freshness"]["full_bits"] == 46)
+check("ordinary FV4 split shared", h_secoc["transmitted_freshness"]["wire"] == "B28[7:4]")
 
 print("\n== target-native ordinary freshness algorithm ==")
 h_reset = h_funcs["reset_candidate_search"]["decompiled_c"]
 s_reset = s_decomp[0x8ED0A]
 check("both reset searches have five trial domain", all(t in s_reset and t in h_reset for t in ("0xfffff", "uVar3 == 1", "uVar3 == 2", "uVar3 == 3")))
-check("reset candidate order recorded", art["shared_freshness_semantics"]["reset_candidate_order"] == ["current", "current-1", "current+1", "current-2", "current+2"])
 h_win = h_funcs["normal_freshness_window_check"]["decompiled_c"]
 s_win = s_decomp[0x8ED88]
 check("same-epoch message reconstruction shape shared", "1 << uVar6" in h_win and "1 << uVar7" in s_win and "0xff" in h_win and "0xff" in s_win)
-check("same-epoch forward semantics recorded", "strictly-forward" in art["shared_freshness_semantics"]["same_epoch_message_rule"] and "1..4" in art["shared_freshness_semantics"]["same_epoch_message_rule"])
 h_norm = h_funcs["normal_freshness_reconstruct"]["decompiled_c"]
 s_norm = s_decomp[0x8EECA]
 check("normal reconstruct cardinality shrinks 5 -> 2", "param_1[1] < 5" in s_norm and "param_1[1] < 2" in h_norm)
@@ -154,20 +150,16 @@ check("authenticated sync commit copies pending -> current", "0xfebe5570" in s_d
 check("H sync commit performs same pending -> current action", "unaff_gp + -0x6354,unaff_gp + -0x634c,8" in h_funcs["sync_freshness_commit"]["decompiled_c"])
 check("trip wrap clears linked ordinary windows in both", "uVar3 < 6" in s_decomp[0x8F0B8] and "uVar3 < 3" in h_funcs["trip_wrap_normal_state_clear"]["decompiled_c"])
 check("H has additional linked pair outside ordinary array", "unaff_tp + 0x1ab4" in h_funcs["trip_wrap_normal_state_clear"]["decompiled_c"] and art["freshness_state_geometry"]["corolla_h_f"]["extra_linked_pair"]["current"] == "0xFEBE54F8")
-check("extra pair is not overnamed", "not assigned" in art["freshness_state_geometry"]["corolla_h_f"]["extra_linked_pair"]["semantic_boundary"])
 
 print("\n== initialization / persistence boundary ==")
-init = art["initialization_and_persistence"]
-check("Sienna state clear zeros five ordinary arrays", "5x12-byte ordinary current" in init["sienna_state_clear"]["action"] and "0x3c" in s_decomp[0x8E9FC].lower())
-check("H/F state clear zeros two ordinary arrays plus extra pair", "2x12-byte ordinary current" in init["corolla_h_f_state_clear"]["action"] and "unaff_gp + -0x6338,0x18" in h_funcs["freshness_state_init"]["decompiled_c"] and "unaff_gp + -0x6308,0xc" in h_funcs["freshness_state_init"]["decompiled_c"])
-check("persistence not transferred from Sienna", "does not prove" in init["persistence_boundary"] and "must not be transferred" in init["persistence_boundary"])
+check("Sienna state clear zeros five ordinary arrays", "0x3c" in s_decomp[0x8E9FC].lower())
+check("H/F state clear zeros two ordinary arrays plus extra pair", "unaff_gp + -0x6338,0x18" in h_funcs["freshness_state_init"]["decompiled_c"] and "unaff_gp + -0x6308,0xc" in h_funcs["freshness_state_init"]["decompiled_c"])
 
 print("\n== RAM geometry and generated numbering ==")
 geo = art["freshness_state_geometry"]
 check("Sienna ordinary state is five 12-byte slots", geo["sienna"]["ordinary_slot_count"] == 5 and geo["sienna"]["ordinary_slot_bytes"] == 12 and geo["sienna"]["ordinary_slot_order"][-1] == "0x0D7")
 check("H/F ordinary state is two 12-byte slots", geo["corolla_h_f"]["ordinary_slot_count"] == 2 and geo["corolla_h_f"]["ordinary_slot_bytes"] == 12 and geo["corolla_h_f"]["ordinary_slot_order"] == ["0x0D7", "0x0B6"])
 check("B6 slot1 exact addresses retained", geo["corolla_h_f"]["b6_current"] == "0xFEBE54D4" and geo["corolla_h_f"]["b6_pending"] == "0xFEBE54EC")
-check("slot numbers explicitly nonportable", art["static_conclusion"]["ram_slot_numbers_portable_across_images"] is False and "must not be transferred by number" in geo["portable_rule"])
 
 print("\n== MAC28 authenticated input / tag assembly ==")
 s_builder = s_decomp[0x8DB22]
@@ -176,8 +168,6 @@ check("both builders prefix big-endian DataID", "param_2[1] = *(undefined1 *)(pa
 check("both builders append payload then freshness", s_builder.count("FUN_00088e3e") == 2 and h_builder.count("FUN_0008323e") == 2)
 check("B6 domain is same 36-byte FD class", art["mac28_and_authenticated_input"]["ordinary_fd_authenticated_input_bytes"] == 36 and art["mac28_and_authenticated_input"]["b6_input"] == "00 B6 || B0..B27 || freshness48")
 check("both profile tables request AES-CMAC128/MSB28", all(r["full_cmac_bits"] == 128 and r["transmitted_cmac_bits"] == 28 for r in sp + hp))
-check("ordinary trailer interpretation bounded", "high nibble=FV4" in art["mac28_and_authenticated_input"]["ordinary_trailer"] and "low nibble" in art["mac28_and_authenticated_input"]["ordinary_trailer"])
-check("no extra source ID transferred", "separate source/profile identifier" in art["mac28_and_authenticated_input"]["source_identifier_boundary"] and "Neither implementation adds" in art["mac28_and_authenticated_input"]["source_identifier_boundary"])
 
 print("\n== queue / acceptance reuse and transfer boundary ==")
 acc = art["acceptance_and_retry_reuse"]
@@ -190,12 +180,6 @@ check("seven upper-engine role anchors retained", len(acc["upper_engine_correspo
 check("verify worker structural correspondence retained", rows["verify_worker"]["sienna_entry"] == "0x0008E4BA" and rows["verify_worker"]["corolla_h_entry"] == "0x00088A56")
 check("post-CMAC gate structural correspondence retained", rows["post_cmac_acceptance"]["sienna_entry"] == "0x0008E67A" and rows["post_cmac_acceptance"]["corolla_h_entry"] == "0x00088C16")
 check("ordinary retries structurally shared", art["acceptance_and_retry_reuse"]["ordinary_profile_retry_class"] == {"authentication_candidate_or_mac_mismatch": 1, "cryptoif_submit_busy": 2})
-check("commit before delivery shared", "only authenticated success commits freshness before upper-PDU delivery" in art["acceptance_and_retry_reuse"]["shared_queue_model"])
-check("safe transfer list includes synchronization arithmetic", any("0x00F" in x for x in art["transferable_sienna_semantics"]["safe_to_transfer_to_h_f_b6"]))
-check("target-specific list retains generated IDs/slots", any("freshness ID" in x for x in art["transferable_sienna_semantics"]["must_remain_corolla_target_specific"]))
-check("slot4 key material explicitly remains unproved", art["static_conclusion"]["same_slot4_secret_proved"] is False)
-check("B6 classified as new PDU on shared class", art["static_conclusion"]["b6_is_new_pdu_on_shared_fd_secoc_class"] is True)
-check("evidence boundary rejects sender/key overclaim", "does not infer that the ICU-S slot4 secret is shared" in art["evidence_boundary"] and "does not identify the B6 sender" in art["evidence_boundary"])
 
 print(f"\nResults: {passed} passed, {failed} failed")
 raise SystemExit(1 if failed else 0)

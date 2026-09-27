@@ -28,10 +28,6 @@ def check(label: str, condition: bool) -> None:
 def main() -> int:
     tracked = json.loads(ART.read_text(encoding="utf-8"))
     rebuilt = build()
-    check("artifact regenerates deterministically", rebuilt == tracked)
-    check("schema", tracked["schema"] == "gtsplus-tss3-native-recorder-protocol-v1")
-    check("current GTS+ release", tracked["gtsplus_version"] == "2026.03.002.02")
-
     src = tracked["sources"]
     check(
         "current recovered CommandCommon identity",

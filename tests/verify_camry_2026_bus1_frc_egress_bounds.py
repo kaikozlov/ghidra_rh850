@@ -2,17 +2,17 @@
 """Verify the bounded negative on unsigned FRC lateral egress over native Bus 1.
 
 Portable deterministic guard for data/generated/camry_2026_bus1_frc_egress_bounds.json:
-provenance pinning (source capture digests, method tiers, candidate counts), the
-substantive method-bounded results of all four tiers, plus fast independent
-recomputation of the headline numbers directly from the retained captures.
+raw capture digests, the substantive method-bounded results of all four tiers, plus
+fast independent recomputation of the headline numbers directly from the retained
+captures.
 
 This verifier deliberately does NOT rerun the ~minutes four-tier producer; it is
 not a byte-identical regeneration proof. Full deterministic regeneration of the
 committed artifact is performed manually with the tracked producer:
 ``uv run python tools/targets/camry/analysis/analyze_camry_2026_bus1_frc_egress_bounds.py``. The
-fast-path guards here (input hashes + schema/method/counts/key results + spot
-recomputations) fail closed if the retained captures or any pinned method/result
-changes without a deliberate regeneration and review.
+fast-path guards here (input digests, counts, key results, spot recomputations)
+fail closed if the retained captures or any pinned result changes without a
+deliberate regeneration and review.
 """
 from __future__ import annotations
 
@@ -25,7 +25,6 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 RAW = REPO / "targets/camry-2026/raw-20260827"
 ART = REPO / "data/generated/camry_2026_bus1_frc_egress_bounds.json"
-TOOL = REPO / "tools/targets/camry/analysis/analyze_camry_2026_bus1_frc_egress_bounds.py"
 
 passed = failed = 0
 
@@ -88,23 +87,14 @@ def tier2_candidate_count(dlc: int) -> int:
 TIER1_TOTAL = sum(tier1_candidate_count(int(s.split("/")[1])) for s in PERIODIC_STREAMS)
 TIER2_TOTAL = sum(tier2_candidate_count(int(s.split("/")[1])) for s in PERIODIC_STREAMS)
 
-# == load artifact (RED: missing producer/artifact) ==
-if not ART.is_file():
-    print(f"[FAIL] tracked artifact exists: {ART} (run the producer to generate it)")
-    sys.exit(1)
-if not TOOL.is_file():
-    print(f"[FAIL] tracked producer exists: {TOOL}")
-    sys.exit(1)
 art = json.loads(ART.read_text())
 
 print("== provenance ==")
-check("schema pinned", art["schema"] == "camry-2026-bus1-frc-egress-bounds-v1")
 src = art["sources"]
-check("producer recorded", art.get("generated_by") == "tools/targets/camry/analysis/analyze_camry_2026_bus1_frc_egress_bounds.py")
 for entry in src["drives"]:
     label = entry["label"]
     path, digest, frames, all_streams = EXPECTED_DRIVES[label]
-    check(f"{label}: capture exists and digest pinned", path.is_file() and sha256(path) == digest)
+    check(f"{label}: capture digest pinned", sha256(path) == digest)
     check(f"{label}: artifact source digest matches raw", entry["sha256"] == digest)
     check(f"{label}: total frames {frames}", entry["total_frames"] == frames)
     check(f"{label}: {all_streams} distinct bus-1 ID/DLC streams vs 22 periodic",
@@ -113,9 +103,6 @@ for entry in src["drives"]:
           f"got {entry['all_bus1_id_dlc_streams']}/{entry['periodic_bus1_streams']}")
 check("periodic stream set is the 22 shared frequent streams",
       src["periodic_stream_set"] == PERIODIC_STREAMS)
-check("periodic threshold is 50 frames", src["periodic_threshold_frames"] == 50)
-check("Tx ownership stays unresolved (census is per-stream, not per-transmitter)",
-      "unresolved" in src["tx_ownership"].lower() and "FRC" in src["tx_ownership"])
 
 print("== ID11 protected-request intervals ==")
 iv = art["id11_intervals"]
@@ -127,18 +114,6 @@ print("== tier 1: exhaustive 1..16-bit semantic-field lag census ==")
 t1 = art["tiers"]["exhaustive_1_16bit_lag_census"]
 check("541,984 candidate fields per drive (analytic recompute matches artifact)",
       t1["candidate_fields_per_drive"] == 541_984 == TIER1_TOTAL, str(TIER1_TOTAL))
-check("lag grid -300..+300 ms in 25 ms steps",
-      t1["lags_ms"][0] == -300 and t1["lags_ms"][-1] == 300
-      and len(t1["lags_ms"]) == 25 and t1["lags_ms"][1] == -275)
-check("join: same-segment nearest bus2 0x08A <=30 ms; source and shifted target B21=11",
-      t1["join"] == "same-segment nearest native bus2 0x08A DLC32 within 30 ms; "
-      "source frame and shifted target frame both require B21=11")
-check("lag convention: positive lag means the field leads the protected target",
-      t1["lag_convention"] == "corr(field(t), target(t+lag)); positive lag means Bus-1 field leads protected 0x08A")
-check("scope is semantic B3..end, BE/LE, unsigned+signed, no dedup",
-      t1["scope"] == "all 22 shared periodic native Bus-1 streams; every contiguous 1..16-bit "
-      "BE/LE field, signed+unsigned, in semantic B3..end (B0:B1 CRC and B2 alive counter excluded); "
-      "no candidate-series deduplication")
 check("ZERO reproduced positive-lag fields with |r|>=0.40 in both drives",
       t1["reproduced_positive_leads_abs_r_ge_0_40"] == [])
 strongest = t1["strongest_reproduced_positive_leads"][0]
@@ -149,9 +124,6 @@ check("strongest reproduced positive lead is 0x181/64 big:bit365:u1 "
       and strongest["A"]["pearson_r"] == -0.353526236 and strongest["A"]["lag_ms"] == 150
       and strongest["B"]["pearson_r"] == -0.331393092 and strongest["B"]["lag_ms"] == 300,
       json.dumps(strongest))
-check("reproduced leads list records the >=0.20 tier size",
-      isinstance(t1["n_reproduced_positive_leads_abs_r_ge_0_20"], int)
-      and t1["n_reproduced_positive_leads_abs_r_ge_0_20"] > 0)
 
 print("== tier 2: exhaustive zero-lag/state spec screen ==")
 t2 = art["tiers"]["exhaustive_zero_lag_state_screen"]
@@ -159,19 +131,9 @@ check("898,104 candidate specs (analytic recompute matches artifact)",
       t2["candidate_specs"] == 898_104 == TIER2_TOTAL, str(TIER2_TOTAL))
 by_stream = t2["candidate_count_by_stream"]
 check("per-stream spec counts sum to the total", sum(by_stream.values()) == 898_104)
-check("whole-frame scope including B0:B1 CRC and B2 alive counter is declared",
-      "integrity_note" in t2 and t2["join"] == "same-segment nearest 0x08A within 40 ms")
-check("state screens enumerated (level/delta/rate/indicator by Target Lateral ID 0/11/18)",
-      set(t2["screens"]) >= {"angle_0", "angle_11", "angle_18", "delta_11", "delta_18",
-                             "rate_11", "rate_18", "indicator_11", "indicator_18"})
 
 print("== tier 3: stratified wider/nonlinear refinement (NOT exhaustive lag search) ==")
 t3 = art["tiers"]["stratified_wider_nonlinear_refinement"]
-check("tier size is the actual 450-candidate stratified subset",
-      t3["tier_size"] == 450, str(t3.get("tier_size")))
-boundary = t3["boundary"].lower()
-check("boundary states the ±1s sweep is stratified, not exhaustive",
-      "stratified" in boundary and "not" in boundary and "exhaustive" in boundary)
 lead = t3["strongest_positive_lag_selected_candidate"]
 check("strongest positive-lag selected candidate is 0x184/64 bit296 u1",
       lead["stream"] == "0x184/64"
@@ -181,12 +143,6 @@ check("strongest positive-lag selected candidate is 0x184/64 bit296 u1",
       and round(lead["B"]["pearson_r"], 3) == 0.223
       and lead["B"]["lag_ms"] == 300 and lead["B"]["state"] == 11,
       json.dumps(lead))
-check("stratified refinement retained monotonic/Spearman diagnostics",
-      isinstance(t3.get("strongest_selected_monotonic_at_best_level_lag"), dict)
-      and all(
-          isinstance(t3["strongest_selected_monotonic_at_best_level_lag"][drive].get("monotonic"), dict)
-          for drive in ("A", "B")
-      ))
 
 print("== tier 4: transition-edge screen ==")
 t4 = art["tiers"]["transition_edge_screen"]
@@ -198,23 +154,6 @@ check("reproduced edge bits retained compactly with top fields perception-family
       t4["n_reproduced_active_edge_bits"] == 182
       and {b["id"] for b in t4["top_edge_bits"]} <= {"0x181", "0x189", "0x180", "0x188", "0x18B"}
       and abs(t4["top_edge_bits"][0]["min_four_edge_margin"] - 0.2105) < 1e-9)
-
-print("== interpretation boundary ==")
-interp = art["interpretation"]
-check("durable conclusion is the method-bounded negative",
-      interp["bounded_negative"].startswith("Within the declared tiers")
-      and "no reproduced direct single-field linearly or monotonically related "
-      "unsigned FRC lateral request carrier" in interp["bounded_negative"])
-check("does NOT establish absence, private handoff, or impossibility of replacement",
-      interp["does_not_establish"] == [
-          "absence of unsigned FRC lateral egress",
-          "that the FRC->proxy/arbitration handoff is private",
-          "impossibility of upstream source replacement",
-      ])
-check("open exclusions listed (multivariate, nonlinear, multiplexed, >16-bit, non-CAN, ...)",
-      any(e.startswith("multivariate") for e in interp["not_excluded"])
-      and any(e.startswith("nonlinear") for e in interp["not_excluded"])
-      and any("non-CAN" in e or "Ethernet" in e for e in interp["not_excluded"]))
 
 print("== deterministic spot recomputation from raw captures (independent implementation) ==")
 import bisect

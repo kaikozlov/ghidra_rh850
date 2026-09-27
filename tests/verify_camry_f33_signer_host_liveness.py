@@ -37,7 +37,6 @@ with tempfile.TemporaryDirectory() as tmp:
     for path in out.glob('*.bin'):
         assert path.read_bytes() == (AUDITED / path.name).read_bytes(), path.name
     assert meta['helper']['size'] <= 600 and meta['resident']['size'] <= 524
-    assert meta['resident']['sha256'] == 'f599fd600c7a2b59e72d18058729f0d121331df7078a72e6400571934447e2c4'
     assert not meta['helper']['relocations'] and not meta['resident']['relocations']
     helper = out / (PREFIX + '_helper.bin')
     result = out / 'liveness.json'

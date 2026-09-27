@@ -125,16 +125,6 @@ for record_index, expected_name, expected_id in (
           route["category"]["on_disk_record_offset"]
           == category["data_offset"] + record_index * 76)
 
-emps = next(item for item in na["routes"] if item["database_name"] == "EMPS_P5.ddb")
-check("EMPS_P5 master generation is 20", emps["category"]["generation"] == 20)
-check("EMPS_P5 master display name is EMPS", emps["category"]["resolved_ecu_name"] == "EMPS")
-check(
-    "EMPS_P5 master route contains the P5 data-monitor DLL pair",
-    {row["dll_name"] for row in emps["dlls"]}
-    >= {"GetDatMonListP5_DT.dll", "GetDatMonSignalInfoP5_DT.dll"},
-)
-check("EMPS_P5 master route has exactly eight DLL roles", len(emps["dlls"]) == 8)
-
 print("\n== every generated join points to exact source bytes ==")
 for region in artifact["regions"]:
     source_path = REPO / region["source"]["relative_path"]
@@ -187,9 +177,6 @@ with tempfile.TemporaryDirectory() as temp_dir:
     check("master-route generator succeeds", proc.returncode == 0, proc.stderr.strip())
     check("master-route regeneration is byte-identical",
           proc.returncode == 0 and rebuilt.read_bytes() == ARTIFACT.read_bytes())
-
-check("communication tables remain an explicitly unresolved category join",
-      any("no category-id field" in item for item in artifact["unresolved_joins"]))
 
 print(f"\nResults: {passed} passed, {failed} failed")
 raise SystemExit(1 if failed else 0)

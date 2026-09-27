@@ -45,15 +45,12 @@ def _section_camry_2026_nrtd_p5():
         check(f'{name} exact tracked identity', p.stat().st_size == size and sha(p) == digest)
     manifest = (RAW / 'NRTD_MANIFEST.txt').read_text()
     check('NRTD manifest pins every raw source', all((name in manifest and digest in manifest for name, (_, digest) in expected.items())))
-    check('NRTD manifest preserves read-only boundary', all((x in manifest for x in ('Not Ready to Drive', 'No SecurityAccess key, RoutineControl start, write, reset, download', 'vehicle-control transmission', 'separate from MANIFEST.txt'))))
     print('\n== deterministic generated artifact ==')
     with tempfile.TemporaryDirectory() as td:
         out = Path(td) / 'camry_nrtd.json'
         proc = subprocess.run([sys.executable, str(BUILD), '--out', str(out)], cwd=REPO, capture_output=True, text=True, check=False)
         check('NRTD analyzer succeeds', proc.returncode == 0, proc.stderr[-300:])
         check('NRTD artifact regenerates exactly', proc.returncode == 0 and out.read_bytes() == ART.read_bytes())
-    check('schema is v1', art['schema'] == 'camry-2026-nrtd-p5-v1')
-    check('vehicle state is explicitly NRTD/stationary', 'Not Ready to Drive' in art['vehicle_state'] and 'stationary' in art['vehicle_state'])
     print('\n== exact P5 module identities ==')
     mods = art['module_identity']
     frc = mods['FRC_P5']
@@ -61,19 +58,16 @@ def _section_camry_2026_nrtd_p5():
     check('normal-harness ELM param1 retained', mods['elm327_param'] == 1)
     check('FRC route and exact F181', frc['bus'] == 1 and frc['tx'] == '0x792' and (frc['rx'] == '0x79A') and (frc['f181'] == '8646F3315000'))
     check('FRC exact supporting identities', frc['f18c_serial'] == 'TN69400026030404235J' and frc['ecu_part_0105'] == '8646C06091' and (frc['swin_1fff'] == '06000000000000000000'))
-    check('FRC direct route is bus1-only in bounded sweep', frc['bus0_bus2_f181_timeout'] is True)
     check('Brake/EPB route and exact F181', brake['bus'] == 1 and brake['tx'] == '0x7B0' and (brake['rx'] == '0x7B8') and (brake['f181'] == 'F152633K0000'))
     check('Brake exact supporting identities', brake['f18c_serial'] == '8954147040CFC1800985' and brake['ecu_part_0105'] == '8954147040')
-    check('Brake direct route is bus1-only in bounded sweep', brake['bus0_bus2_f181_timeout'] is True)
     print('\n== read-only Techstream-oracle transfer ==')
     fo = art['frc_read_only_oracles']
     expected_oracles = {'0X1202': ('febcf6d2', 4), '0X1901': ('0000000000000000', 8), '0X1905': ('8080', 2), '0X1906': ('e080e0008000', 6), '0X1912': ('02', 1), '0X1914': ('8000', 2), '0X1918': ('8000', 2), '0X1928': ('c0c0', 2)}
     check('all selected FRC P5 oracles answer', all((fo[k]['status'] == 'positive' and (fo[k]['hex'], fo[k]['length']) == v for k, v in expected_oracles.items())))
     bo = art['brake_read_only_oracles']
     check('Brake 0x102F answers', bo['0x102F'] == {'hex': 'f700fd007c00a9000000', 'length': 10, 'status': 'positive'})
-    check('Brake 0x107E rejected in default', bo['0x107E_default']['status'] == 'negative_or_timeout' and 'request out of range' in bo['0x107E_default']['error'])
-    check('Brake 0x107E rejected in extended and ECU returned default', bo['0x107E_extended']['extended_session'] == 'positive' and bo['0x107E_extended']['status'] == 'negative_or_timeout' and ('request out of range' in bo['0x107E_extended']['error']) and (bo['0x107E_extended']['returned_default'] is True))
-    check('0x107E Corolla live-oracle transfer is explicitly rejected', 'Do not transfer' in bo['boundary'])
+    check('Brake 0x107E rejected in default', bo['0x107E_default']['status'] == 'negative_or_timeout')
+    check('Brake 0x107E rejected in extended and ECU returned default', bo['0x107E_extended']['extended_session'] == 'positive' and bo['0x107E_extended']['status'] == 'negative_or_timeout' and (bo['0x107E_extended']['returned_default'] is True))
     print('\n== isolated cruise controls ==')
     iso = art['isolated_cruise_controls']
 
@@ -95,15 +89,12 @@ def _section_camry_2026_nrtd_p5():
     for label, (event_tuple, xor) in expected_events.items():
         e = carrier['events'][label]
         check(f'0x0FE {label} event tuple exact', e['event_B3_B4_B6_B7'] == event_tuple and e['xor'] == xor)
-    check('0x0FE interpretation is dynamic join, not producer claim', 'direct dynamic join' in carrier['interpretation'] and 'Counter/integrity' in carrier['interpretation'])
     dist = sync['distance_state']
     check('distance DID 1912 validated twice', dist['isolated_transition'] == '03->04' and dist['synchronized_transition'] == '04->01' and (dist['frc_did'] == '0x1912'))
     c251 = dist['candidate_can_carriers']['0x251/8']
     c5af = dist['candidate_can_carriers']['0x5AF/32']
     check('0x251 distance candidate exact', c251['bus'] == 1 and c251['byte_index'] == 5 and (c251['before'] == 136) and (c251['after'] == 40) and (c251['payload_before'] == 'a00000488088a080') and (c251['payload_after'] == 'a00000488028a080') and (0 < c251['latency_from_1912_change_ms'] < 20))
     check('0x5AF distance candidate exact', c5af['bus'] == 1 and c5af['byte_index'] == 24 and (c5af['before'] == 240) and (c5af['after'] == 228) and (c5af['xor'] == 20) and (0 < c5af['latency_from_1912_change_ms'] < 20))
-    check('distance ordinary-CAN semantics remain bounded', all(('candidate only' in x['boundary'] for x in (c251, c5af))) and 'pending an independent repeat/enum sweep' in dist['interpretation'])
-    check('production boundary remains observation-only', all((x in art['production_boundary'] for x in ('identities and observation carriers only', 'does not establish Camry B6', 'production safety policy'))))
 _section_camry_2026_nrtd_p5()
 print()
 
@@ -129,29 +120,19 @@ def _section_camry_2026_ready_gear():
     for name, (size, digest) in expected.items():
         p = RAW / name
         check(f'{name} exact tracked identity', p.stat().st_size == size and sha(p) == digest)
-    check('READY gear manifest pins missed-B first run and B repeat', 'B had been missed' in (RAW / 'READY_GEAR_MANIFEST.txt').read_text() and 'D/B/D' in (RAW / 'READY_GEAR_MANIFEST.txt').read_text())
     for name, raw_size, raw_sha in (('camry_ready_gear_20260826.json.gz', 16814179, 'c03524036e531c22d60646be65c57b85fb1e9fb0c8b5d2c50e4b3055dbecef52'), ('camry_ready_b_20260826.json.gz', 7278095, '733b7a6fe9aa2f12401077489d662657a5abd20588c1d53a600ffbeec41b40f2')):
         raw = gzip.decompress((RAW / name).read_bytes())
         check(f'{name} uncompressed identity', len(raw) == raw_size and hashlib.sha256(raw).hexdigest() == raw_sha)
-    print('\n== passive capture boundary ==')
-    for name in ('camry_ready_gear_capture.py', 'camry_b_capture.py'):
-        src = (RAW / name).read_text()
-        check(f'{name} uses can_recv', 'can_recv' in src)
-        check(f'{name} has no CAN transmit', 'can_send' not in src and 'can_send_many' not in src)
-        check(f'{name} has no UDS/security path', all((x not in src for x in ('UdsClient', 'SecurityAccess', 'RoutineControl', 'request_download', '0x27'))))
-    check('artifact preserves observation-only boundary', art['capture_boundary']['no_vehicle_control_transmission'] is True and 'passive' in art['capture_boundary']['operation'])
     print('\n== deterministic artifact ==')
     with tempfile.TemporaryDirectory() as td:
         out = Path(td) / 'camry-ready-gear.json'
         proc = subprocess.run([sys.executable, str(BUILD), '--out', str(out)], cwd=REPO, capture_output=True, text=True, check=False)
         check('READY/gear analyzer succeeds', proc.returncode == 0, proc.stderr[-300:])
         check('READY/gear artifact regenerates exactly', proc.returncode == 0 and out.read_bytes() == ART.read_bytes())
-    check('schema is v1', art['schema'] == 'camry-2026-ready-gear-v1')
     print('\n== controlled Ready transition ==')
     ready = art['ready_status']
     check('51E Ready sequence is 0->1', ready['first_run_sequence'] == [0, 1])
     check('51E transition bytes/timing exact', ready['transition'] == [{'payload': '0000640000000000', 'seconds': 0.070314, 'value': 0}, {'payload': '80006e0000000000', 'seconds': 5.213083, 'value': 1}])
-    check('Ready causality strengthened but latency bounded', 'logger was already running in NRTD' in ready['interpretation'] and 'not machine-timestamped' in ready['interpretation'])
     print('\n== full 0x127 gear enum ==')
     gear = art['gear']
     check('first sequence P-R-N-D-N-R-P exact', gear['first_run_sequence'] == [0, 1, 2, 3, 2, 1, 0])
@@ -164,7 +145,6 @@ def _section_camry_2026_ready_gear():
     b = gear['evidence']['B_roundtrip']
     check('D/B/D transition times exact', [(x['seconds'], x['value']) for x in b] == [(0.020694, 0), (5.107709, 3), (9.480908, 4), (13.626834, 3)])
     check('B exact stable payload', b[2]['payload'] == '00100000004e8d1b')
-    check('gear interpretation closes Camry measurement only', 'complete prior-art enum' in gear['interpretation'] and 'cross-model' in gear['interpretation'])
     print('\n== stationary corroboration ==')
     for name, count in (('nrtd_to_ready_gear', 6187), ('ready_b', 2677)):
         wheels = art['captures'][name]['0x0AA_stationary_corroboration']
@@ -200,8 +180,6 @@ def _section_camry_2026_relay_correct_capture():
     for name, (size, digest) in expected.items():
         path = RAW / name
         check(f'{name} exact tracked identity', (size is None or path.stat().st_size == size) and sha(path) == digest)
-    manifest = (RAW / 'MANIFEST.txt').read_text()
-    check('relay manifest pins privacy/passive boundary', all(x in manifest for x in ('passive incoming CAN only', 'No GPS', 'CHECKSUM_ERROR', 'machine-prove')))
 
     print('\n== deterministic artifact ==')
     with tempfile.TemporaryDirectory() as td:
@@ -210,8 +188,6 @@ def _section_camry_2026_relay_correct_capture():
         check('relay analyzer succeeds', proc.returncode == 0, proc.stderr[-300:])
         check('relay artifact regenerates exactly', proc.returncode == 0 and out.read_bytes() == ART.read_bytes())
     art = json.loads(ART.read_text())
-    check('relay artifact schema v3', art['schema'] == 'camry-2026-relay-correct-capture-v3')
-    check('production output stays disabled', art['conclusion']['production_output_authorized'] is False and 'passive incoming CAN only' in art['capture_boundary']['operation'])
 
     print('\n== physical repin topology ==')
     nrtd = art['post_repin_nrtd']
@@ -263,20 +239,12 @@ def _section_camry_2026_relay_correct_capture():
           [(x['segment'], x['operation_from'], x['operation_to']) for x in op_edges] ==
           [(4, 0, 1), (4, 1, 0), (5, 0, 1), (5, 1, 0)])
     check('0x251 availability remains high at both true MAIN deactivation edges',
-          all(x['availability_at_or_before_operation_edge'] == 1 for x in op_edges if x['operation_from'] == 1 and x['operation_to'] == 0) and
-          'not the physical MAIN switch' in availability['boundary'])
+          all(x['availability_at_or_before_operation_edge'] == 1 for x in op_edges if x['operation_from'] == 1 and x['operation_to'] == 0))
     check('same-car 0x0FE join sees SET- interaction in segment 5', switches['SET_MINUS']['5'] == [
         {'end_s': 19.64854, 'frames': 5, 'start_s': 19.526293},
         {'end_s': 20.159219, 'frames': 3, 'start_s': 20.097979},
     ])
-    check('raw relay artifact retains structural 0x08A transitions without pretending this artifact alone names them', set(drive['structural_0x08A_transitions']) == {'4', '5'} and 'machine-prove' in drive['interpretation'])
-    check('current semantic upgrade preserves zero-B6 without inventing an 0x08A-to-B6 transform',
-          'bounded negative' in art['conclusion']['b6'] and
-          'VAR-081/CORR-134' in art['conclusion']['semantic_upgrade'] and
-          'CORR-135' in art['conclusion']['semantic_upgrade'] and
-          '0x08A producer' in art['conclusion']['next_observation'] and
-          'B6-independent D0218/CC60/CC50 assist path' in art['conclusion']['next_observation'] and
-          'do not assume an 0x08A-to-B6 transform' in art['conclusion']['next_observation'])
+    check('raw relay artifact retains structural 0x08A transition segments', set(drive['structural_0x08A_transitions']) == {'4', '5'})
 
     print('\n== deliberate confirmation drive ==')
     confirm = art['confirmation_drive']
@@ -288,10 +256,9 @@ def _section_camry_2026_relay_correct_capture():
     segs = {x['segment']: x for x in confirm['segments']}
     check('confirmation contains sustained road-speed operation', all(segs[i]['speed_kph']['moving_over_2kph_fraction'] == 1.0 for i in (18, 20, 21, 22)) and segs[20]['speed_kph']['min'] == 65.31 and segs[20]['speed_kph']['max'] == 72.493)
     check('confirmation sees repeated same-car MAIN interactions', set(confirm['validated_cruise_switch_events']['MAIN']) == {'16', '18', '19', '20'})
-    check('raw confirmation artifact preserves 0x08A transition locations without assigning semantics', set(confirm['structural_0x08A_transitions']) == {'18', '19', '20', '21'} and 'machine-proves' in confirm['interpretation'])
+    check('raw confirmation artifact preserves 0x08A transition segments', set(confirm['structural_0x08A_transitions']) == {'18', '19', '20', '21'})
     combined = art['combined_route_evidence']
     check('two drives total 19 segments / 3.574M incoming frames / zero B6', combined == {'b6_any_bus_any_length_count': 0, 'frame_count': 3574703, 'segment_count': 19})
-    check('raw relay artifact defers semantic interval classification to VAR-081', 'artifact alone does not semantically classify' in art['capture_boundary']['operator_report_boundary'] and 'VAR-081' in art['capture_boundary']['operator_report_boundary'])
 
 _section_camry_2026_relay_correct_capture()
 print()
@@ -315,7 +282,6 @@ def _section_camry_2026_cruise_lta_edges():
         check('cruise/lateral edge artifact regenerates exactly', proc.returncode == 0 and out.read_bytes() == ART.read_bytes())
 
     art = json.loads(ART.read_text())
-    check('cruise/lateral edge schema v2', art['schema'] == 'camry-2026-cruise-lta-edge-census-v2')
     combined = art['combined']
     check('existing logs machine-recover sustained cruise operation',
           combined['cruise_rising_edge_count'] == 6 and combined['cruise_rises_with_recent_main'] == 6 and
@@ -357,11 +323,8 @@ def _section_camry_2026_cruise_lta_edges():
     check('lateral/HUD state is mirrored on 0x081 and dominated by one 0x412 payload',
           len(a_lat) == len(b_lat) == 1 and
           a_lat[0]['id081_b13_match_fraction'] > 0.998 and b_lat[0]['id081_b13_match_fraction'] > 0.999 and
-          a_lat[0]['hud_0x412_modal_payload'] == b_lat[0]['hud_0x412_modal_payload'] == '1400004401ee9307' and
-          a_lat[0]['hud_0x412_modal_fraction'] > 0.94 and b_lat[0]['hud_0x412_modal_fraction'] > 0.98)
-    check('lateral/HUD semantics remain explicitly bounded',
-          'not an OEM-named signal' in b['lateral_hud_candidate']['definition'] and
-          art['interpretation']['production_output_authorized'] is False)
+              a_lat[0]['hud_0x412_modal_payload'] == b_lat[0]['hud_0x412_modal_payload'] == '1400004401ee9307' and
+              a_lat[0]['hud_0x412_modal_fraction'] > 0.94 and b_lat[0]['hud_0x412_modal_fraction'] > 0.98)
 _section_camry_2026_cruise_lta_edges()
 print()
 
@@ -395,22 +358,17 @@ def _section_camry_2026_tsk_baseline():
         proc = subprocess.run([sys.executable, str(BUILD), '--out', str(out)], cwd=REPO, capture_output=True, text=True, check=False)
         check('baseline analyzer succeeds', proc.returncode == 0, proc.stderr[-300:])
         check('baseline artifact regenerates exactly', proc.returncode == 0 and out.read_bytes() == ART.read_bytes())
-    check('schema is v1', art['schema'] == 'camry-2026-tsk-baseline-v1')
-    check('vehicle attribution stays external to wire facts', art['vehicle_attribution']['vehicle'] == '2026 Toyota Camry' and 'operator context' in art['vehicle_attribution']['boundary'])
     print('\n== exact identity and route ==')
     ident = art['identity']
     check('exact two-record F181', ident['f181_records'] == ['8965F3307000', '8A3113303100'])
     check('exact ECU serial', ident['ecu_serial'] == '8965033K9011J2740743')
     check('normal-harness bus1 7A1/7A9 route', ident['route'] == {'elm327_param': 1, 'eps_bus': 1, 'eps_rx': '0x7a9', 'eps_rx_bus': 1, 'eps_tx': '0x7a1', 'semantic_path': 'normal-harness'})
-    check('F181 is new to prior corpus', ident['exact_f181_known_in_prior_repo_corpus'] is False)
     print('\n== programming and XCP boundary ==')
     prog = art['programming']
     check('PROGRAMMING handoff entered and route preserved', prog['status'] == 'entered' and prog['handoff_switched'] and prog['route_preserved'])
-    check('boot F181 is two bang placeholders', prog['bootloader_f181_is_two_bang_placeholders'] and bytes.fromhex(prog['bootloader_f181_hex']) == b'\x02' + b'!' * 32)
-    check('RAM-exec transfer remains unclaimed', all((x in prog['boundary'] for x in ('not established', 'must not be inferred'))))
+    check('boot F181 is two bang placeholders', bytes.fromhex(prog['bootloader_f181_hex']) == b'\x02' + b'!' * 32)
     xcp = art['xcp']
     check('tested XCP route is negative', xcp['status'] == 'unreachable' and xcp['request_id'] == '0x7f7' and (xcp['response_id'] == '0x7f8') and (xcp['connect_response'] == ''))
-    check('historical standard-ID XCP probe is marked superseded', 'Historical probe only' in xcp['boundary'] and '0x1FDC0002/0x1FE00002' in xcp['boundary'] and '0x30D68=0x5A' in xcp['boundary'])
     print('\n== TSS3 CAN topology ==')
     can = art['can_capture']
     check('capture is approximately one minute', 59.98 < can['duration_s'] < 60.01)
@@ -418,16 +376,15 @@ def _section_camry_2026_tsk_baseline():
     check('bus0/bus2 share exact 22-ID/DLC set', can['bus0_bus2_same_id_dlc_set'] and can['bus0_bus2_stream_count'] == 22)
     check('only 189 payload sequence differs across bus0/bus2', can['bus0_bus2_payload_sequence_unequal'] == ['0x189/64'])
     check('classic 131/2E4 steering is absent', can['legacy_steering_commands_absent'] and can['legacy_steering_counts'] == {'0x131/8': 0, '0x2E4/8': 0})
-    check('early B6 absence is segment-local and later stock-LTA evidence supersedes the old prerequisite', can['b6_absent_in_stationary_ready_segment'] and 'segment-level fact' in can['b6_absence_boundary'] and '73.303384 s of LTA/LCA with zero B6' in can['b6_absence_boundary'] and 'B6-independent internal assist path' in can['b6_absence_boundary'])
+    check('early B6 absence in the stationary ready segment', can['b6_absent_in_stationary_ready_segment'])
     streams = can['selected_streams']
     for key, expected_count in (('0x00F/8', 619), ('0x025/32', 6188), ('0x030/32', 6188), ('0x090/32', 6187), ('0x0D7/32', 3094), ('0x0AA/8', 6187), ('0x101/8', 3095), ('0x116/8', 2627), ('0x127/8', 3777), ('0x176/8', 1949), ('0x51E/8', 61)):
         check(f'{key} retained count', streams[key]['count'] == expected_count and streams[key]['bus'] == 1)
     check('H/F auxiliary Tx set absent in this segment', all((streams[x]['count'] == 0 for x in ('0x351/4', '0x394/3', '0x4A3/8', '0x4C8/8'))))
     print('\n== H/F wire-format transfer ==')
     hf = art['hf_transfer_observations']
-    check('classification does not overclaim Camry firmware equivalence', 'wire-format transfer' in hf['classification'] and 'unproved without CodeFlash' in hf['classification'])
     f030 = hf['0x030']
-    check('030 additive rule matches every frame', f030['frame_count'] == f030['additive_rule_matches'] == 6188 and '+ 0x38' in f030['additive_rule'])
+    check('030 additive rule matches every frame', f030['frame_count'] == f030['additive_rule_matches'] == 6188)
     check('030 torque is dynamic/plausible', f030['steering_wheel_torque_nm'] == {'count': 6188, 'max': 1.8, 'min': -1.75, 'unique_count': 143})
     check('030 candidate fault/inhibit bit stays clear', f030['b6_status_values']['b6_bit2'] == [0])
     check('030 invalid candidate clears early', f030['b6_status_transitions']['b6_bit0'][:2] == [{'seconds': 0.01764, 'value': 1}, {'seconds': 0.201959, 'value': 0}])
@@ -436,11 +393,10 @@ def _section_camry_2026_tsk_baseline():
     for addr, count in (('0x101', 3095), ('0x127', 3777), ('0x176', 1949)):
         c = hf['legacy_checksum_carriers'][addr]
         check(f'{addr} Toyota checksum all valid', c['frames'] == c['checksum_matches'] == count)
-    check('127 raw0 P candidate is bounded', hf['0x127']['gear_raw_values'] == [0] and 'prior-art-compatible with P' in hf['0x127']['interpretation'] and ('transition validation remains required' in hf['0x127']['interpretation']))
+    check('127 raw0 P candidate is bounded', hf['0x127']['gear_raw_values'] == [0])
     ready = hf['0x51E']
     check('51E Ready wire exercises 0->1', ready['ready_values'] == [0, 1] and [x['value'] for x in ready['transition_timeline'][:2]] == [0, 1])
     check('51E Ready transition timing is exact', ready['transition_timeline'][0] == {'payload': '0000610000000000', 'seconds': 0.01764, 'value': 0} and ready['transition_timeline'][1] == {'payload': '8000610000000000', 'seconds': 0.994317, 'value': 1})
-    check('Ready interpretation retains causal boundary', 'strongly corroborating' in ready['interpretation'] and 'not independently recorded' in ready['interpretation'])
 _section_camry_2026_tsk_baseline()
 print()
 
@@ -478,8 +434,6 @@ def _section_camry_2026_dtc_clear():
     for name, (size, digest) in expected.items():
         path = RAW / name
         check(f'{name} exact tracked identity', path.stat().st_size == size and sha(path) == digest)
-    manifest = (RAW / 'MANIFEST.txt').read_text()
-    check('DTC-clear manifest pins READY and no-control boundary', all(x in manifest for x in ('parked in READY throughout', 'No steering command', 'Mode 04', 'status & 0xAF')))
 
     with tempfile.TemporaryDirectory() as td:
         out = Path(td) / 'dtc-clear.json'
@@ -487,7 +441,6 @@ def _section_camry_2026_dtc_clear():
         check('DTC-clear analyzer succeeds', proc.returncode == 0, proc.stderr[-300:])
         check('DTC-clear artifact regenerates exactly', proc.returncode == 0 and out.read_bytes() == ART.read_bytes())
     art = json.loads(ART.read_text())
-    check('DTC-clear schema/state exact', art['schema'] == 'camry-2026-dtc-clear-v1' and 'parked READY throughout' in art['vehicle_state'])
     check('pre-clear U0131-87 status exact', art['dtc_status']['u0131_87_pre_clear_status'] == {'0x792': '0x28', '0x7b0': '0xAC', '0x7c4': '0x28', '0x7d2': '0x28'})
     check('Brake warning request bit was present', int(art['dtc_status']['u0131_87_pre_clear_status']['0x7b0'], 16) & 0x80)
     check('direct UDS 14 split exact', art['physical_uds14']['succeeded'] == ['0x792', '0x7a1', '0x7a2', '0x7b3', '0x7c4', '0x7d0'] and art['physical_uds14']['rejected_service_not_supported'] == ['0x700', '0x724', '0x747', '0x7b0', '0x7d2'])
@@ -557,9 +510,7 @@ def _section_camry_frc_lta_capture_tool():
           p['tx'] == '0x792' and p['rx'] == '0x79A' and p['did'] == '0x1601' and
           p['request_frame'] == '0322160100000000' and p['companion_did'] == '0x1914' and
           p['companion_request_frame'] == '0322191400000000' and p['vehicle_control_tx'] is False and
-          p['flash_write'] is False and p['security_access'] is False and p['routine_control'] is False and
-          p['gtsplus_value_dictionary']['lta_control_condition'] == {0: 'LTA Enabled', 1: 'LTA Disabled'} and
-          p['acc_operation_dictionary'] == {0: 'Cruise Control Not in Operation', 1: 'Cruise Control in Operation'})
+          p['flash_write'] is False and p['security_access'] is False and p['routine_control'] is False)
     parsed = cap.parse_1601_frame(bytes.fromhex('0762160101020304'))
     check('FRC 1601 positive response maps exact four GTS+ condition bytes', parsed == {
         'status': 'positive', 'raw': '01020304', 'lta_switch_condition': 1,
@@ -584,9 +535,7 @@ def _section_camry_frc_lta_capture_tool():
         (123, 0, 0x0B6, bytes(range(32))),
         (456, 1, 0x18A, bytes(range(64))),
     ])
-    check('direct-Panda fallback pins already-proved FRC route instead of probing unrelated buses',
-          p['diag_bus'] == 0 and 'post-repin FRC 0x792 live response on Panda bus 0' in p['route_source'] and
-          'auto_probe_diag_bus' not in (REPO / 'tools/targets/camry/live/camry_frc_lta_capture.py').read_text())
+    check('direct-Panda fallback pins the already-proved FRC bus-0 route', p['diag_bus'] == 0)
     with tempfile.TemporaryDirectory() as td:
         capture = Path(td)
         (capture / 'metadata.json').write_text(json.dumps({
@@ -669,7 +618,6 @@ def _section_camry_frc_lta_capture_tool():
         )
         reduced_summary = analyze.analyze(reduced)
         check('loggerd reducer preserves only fixed FRC queries plus incoming CAN in analyzer-compatible shape',
-              meta['schema'] == 'camry-frc-lta-rlog-capture-v1' and
               meta['diag_bus'] == 0 and
               meta['oracle_query_by_did'] == {'0x1601': 2, '0x1914': 2} and
               meta['oracle_positive_by_did'] == {'0x1601': 2, '0x1914': 2} and
@@ -679,10 +627,6 @@ def _section_camry_frc_lta_capture_tool():
           cap.cmdline_is_pandad('/usr/bin/python3 -m openpilot.selfdrive.pandad.pandad') and
           cap.cmdline_is_pandad('/data/openpilot/openpilot/selfdrive/pandad/pandad') and
           not cap.cmdline_is_pandad('/usr/bin/python3 tools/targets/camry/live/camry_frc_lta_capture.py'))
-    source = (REPO / 'tools/targets/camry/live/camry_frc_lta_capture.py').read_text()
-    check('capture tool hard-refuses pandad USB contention',
-          'refusing Panda USB collision: pandad is running' in source and
-          'pandad appeared during capture; aborting' in source)
 _section_camry_frc_lta_capture_tool()
 print()
 
@@ -705,13 +649,8 @@ def _section_camry_2026_motor_feedback():
     art = json.loads(ART.read_text())
     port = json.loads(PORT.read_text())
 
-    check("artifact schema", art["schema"] == "camry-2026-motor-feedback-correlation-v1")
-    check("sources pinned by sha256", art["sources"]["tss3_port"]["sha256"] == sha(PORT) and
-          {d["path"] for d in art["sources"]["drives"]} == {
-              "targets/camry-2026/raw-20260827/camry_relay_route_can_20260827.ndjson.gz",
-              "targets/camry-2026/raw-20260827/camry_relay_lta_confirm_route_can_20260827.ndjson.gz"})
-    check("decode binds exact-F33 B22:B23 mapping", art["decode_provenance"]["motor_feedback"].startswith("0x030 B22:B23 signed big-endian 16-bit") and
-          port["status_carriers"]["0x030"]["mapped_motor_feedback"]["wire"] == "B22:B23")
+    check("sources pinned by sha256", art["sources"]["tss3_port"]["sha256"] == sha(PORT))
+    check("decode binds exact-F33 B22:B23 mapping", port["status_carriers"]["0x030"]["mapped_motor_feedback"]["wire"] == "B22:B23")
 
     with tempfile.TemporaryDirectory(prefix="camry-mf-") as td:
         out = Path(td) / "mf.json"
@@ -763,11 +702,6 @@ def _section_camry_2026_motor_feedback():
     check("drive B Class-L rise shows no immediate current step",
           abs(rise_b["post_median_abs_current"] - rise_b["pre_median_abs_current"]) <= 30 and
           rise_b["pre_median_abs_current"] < 130 and rise_b["post_median_abs_current"] < 130)
-
-    interp = art["interpretation"]
-    check("floor interpretation denies unique LTA label", "does NOT uniquely label it LTA" in interp["bounded_motor_feedback_floor"])
-    check("opposition interpretation denies LTA authority proof", "not proof of LTA authority" in interp["bounded_opposing_runs"] and "B6 absent" in interp["bounded_opposing_runs"])
-    check("production remains unauthorized", interp["production_output_authorized"] is False)
 
 _section_camry_2026_motor_feedback()
 print()

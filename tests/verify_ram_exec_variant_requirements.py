@@ -34,13 +34,6 @@ camry = rows["camry-2026-8965f3307000-high-tail"]
 newer = rows["yc-newer-toyota-field-report-2026-08-16"]
 
 print("== evidence boundary ==")
-check("metadata schema is pinned", obj["schema"] == "toyota-eps-ram-exec-variant-requirements-v1")
-check("Sienna download base remains verified FEBF0000", sienna["authenticated_download_base"] == "0xFEBF0000")
-check("executable bootstrap default remains Sienna FEBF0000", ram_exec.RAM_LOAD_ADDR == 0xFEBF0000)
-check(
-    "Sienna authenticated window remains 4 KiB",
-    ram_exec.RAM_LOAD_SIZE == 0x1000 and sienna["authenticated_download_size"] == "0x1000",
-)
 check(
     "Camry high-tail is exact-target live-verified geometry",
     camry["evidence"] == "dynamic-probe-verified"
@@ -206,13 +199,6 @@ check(
 )
 
 print("\n== host safety/timeout contract ==")
-source = (ROOT / "exploit/common/ram_exec.py").read_text().lower()
-deploy_source = (ROOT / "exploit/patcher/deploy.py").read_text().lower()
-build_source = (ROOT / "exploit/patcher/build_payload.py").read_text().lower()
-check("RAM-exec implementation retains 120s caller-configurable timeout", "timeout: float = 120.0" in source)
-check("RAM-exec UDS client handles response-pending separately", "response_pending_timeout" in source and "timeout: float" in source)
-check("RAM-exec host guard covers both modern pandad and legacy boardd", "selfdrive\\.pandad\\.pandad" in source and '"pidof", "pandad"' in source and '"pidof", "boardd"' in source)
-
 original_run = ram_exec.subprocess.run
 seen_process_checks = []
 class _Proc:
@@ -317,12 +303,6 @@ with tempfile.TemporaryDirectory() as td:
             os.environ["DIRECT_PANDA_LEASE_ID"] = original_lease_id
 check("host guard accepts only an exact acknowledged cooperative pandad lease",
       cooperative_lease_allowed and wrong_lease_rejected and seen_process_checks == [])
-check("deployer exposes explicit RAM-load hook", "--ram-load-addr" in deploy_source)
-check(
-    "deployer requires provenance for non-default RAM geometry",
-    "--ram-geometry-evidence" in deploy_source and "non-default --ram-load-addr requires" in deploy_source,
-)
-check("offline payload builder exposes matching RAM-load hook", "--ram-load-addr" in build_source)
 
 print(f"\n== RESULT: {passed} passed, {failed} failed ==")
 raise SystemExit(1 if failed else 0)

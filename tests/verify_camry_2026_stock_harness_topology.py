@@ -12,8 +12,6 @@ OP = ROOT.parent / 'kai-openpilot'
 PYTHON = OP / '.venv/bin/python'
 LOGS = ROOT.parent.parent / 'logs/camry-2026/2026-09-11'
 report = json.loads(ARTIFACT.read_text())
-assert report['schema'] == 'camry-stock-harness-topology-v2'
-assert report['physical_network_roles']['panda_bus1'].startswith('stock Toyota-B unsplit Toyota Bus-4')
 assert report['candidate_direction']['direct_frc_bus1_pdus']['panda_bus'] == 2
 assert report['candidate_direction']['protected_bus4_request_result_family']['panda_bus'] == 1
 for source in report['sources']:

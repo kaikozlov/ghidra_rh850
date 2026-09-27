@@ -2678,7 +2678,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   generation from target-native bytes/captures.
 - **Canonical:** [../variants/toyota-eps-variant-comparison.md](../variants/toyota-eps-variant-comparison.md);
   [../architecture/toyota-openpilot-porting-contract.md](../architecture/toyota-openpilot-porting-contract.md);
-  `tests/verify_toyota_eps_variant_matrix.py`; COM-013.
+  COM-013.
 
 
 ### CORR-109 — eleven H `0x030` fields were not default-only; GP-relative writers carry live torque and status
@@ -3234,7 +3234,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **New evidence:** three public 2017 Techstream forum attachments contain four genuine `.TSE` sessions. Privacy-minimized structural extraction pins four distinct TSE SHA-256 identities, common GTS `11.30.137` / TSE header `0x102A`, the same current-template header field sequence, a 14-entry `12-byte ASCII key + DWORD absolute position` FAT, and **56/56** FAT targets beginning `FF FF FF FF <selector> FF FF FF`, exactly the current recovered position-scan shape. Raw third-party sessions and their vehicle-identifying filenames are deliberately not committed.
 - **Version boundary:** current recovered `TSEConverter` first invokes native `GFCConvertOldTSEToLatestTSE`, writes `_NEW.TSE`, and only then applies `BinaryRead` with the configured current template. The legacy bytes therefore prove stable format lineage and the old-file conversion boundary; they do not prove direct `180_Template.csv` compatibility.
 - **Correct remaining blocker:** only a **true-TSS3** raw TSE carrying PCS Operation/Image FFD remains source-data blocked. Generic real-TSE header/FAT/position-record validation is now closed by TMS-086.
-- **Canonical:** TMS-086; `data/external/public_techstream_tse_lineage.json`; `data/generated/gtsplus_2026/tse_managed_semantics.json`; `tests/verify_public_techstream_tse_lineage.py`; [../tooling/gtsplus-tse-gtse-saved-session.md](../tooling/gtsplus-tse-gtse-saved-session.md) §3.1.
+- **Canonical:** TMS-086; `data/external/public_techstream_tse_lineage.json`; `data/generated/gtsplus_2026/tse_managed_semantics.json`; [../tooling/gtsplus-tse-gtse-saved-session.md](../tooling/gtsplus-tse-gtse-saved-session.md) §3.1.
 
 ### CORR-134 — `0x08A` is a lateral-request carrier, not state/display-only evidence
 

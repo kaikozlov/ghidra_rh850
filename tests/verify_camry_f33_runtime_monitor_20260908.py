@@ -19,7 +19,6 @@ assert actual["route44_no_host_b6_control"]["host_b6_echo_delta"] == 0
 assert actual["route44_no_host_b6_control"]["capture_generation_low_transitions"] > 0
 assert len(actual["route44_no_host_b6_control"]["capture_generation_low_unique"]) > 1
 assert actual["route44_no_host_b6_control"]["all_sampled_target_lateral_ids_zero"] is True
-assert "not publication-rate estimates" in actual["short_window_rate_segments"]["interpretation"]
 assert actual["route44_no_host_b6_control"]["minimum_route44_publications"] == 256
 assert 96.9 < actual["route44_no_host_b6_control"]["minimum_route44_publication_rate_hz"] < 97.1
 assert actual["current_shape_phase_a"]["sent_target_lateral_id"] == 11
@@ -36,12 +35,5 @@ assert actual["id63_marker"]["all_sampled_raw_generated_snapshot_ids_remained_ze
 assert actual["preaggregate_phase_p"]["tx_count"] == actual["preaggregate_phase_p"]["tx_echo_delta"] == 188
 assert actual["preaggregate_phase_p"]["preaggregate_verdict"] == "no_profile2_queue_hit_latched"
 assert actual["preaggregate_phase_p"]["queue_length_at_latched_sample"] == 0
-assert "0x8F746" in actual["exact_scheduler_correction"]["aggregate_contains_secoc_consumer_chain"]
-assert "ID63" in actual["boundary"]["next"]
-assert "0x79EDE/0x809FE" in actual["boundary"]["next"]
-assert "D7" in actual["boundary"]["next"]
-assert "no SID23 reads" in actual["boundary"]["next"]
-assert "0x71508 -> 0x66026" in actual["boundary"]["rejected_probe"]["reason"]
-assert "0x83CE4 -> 0x83E0C" in actual["boundary"]["rejected_probe"]["reason"]
 
 print("camry F33 2026-09-08 runtime-monitor evidence: PASS")

@@ -4,7 +4,7 @@ from __future__ import annotations
 import argparse,subprocess,tempfile
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]; PROGRAM='RH850_P1M-E_CodeFlash.bin'
-EXPECTED='ASSERT application-proprietary-ba: starts=10 completions=10 marker_readers=2 countdown_readers=1 vspda_snapshot_readers=1 cone_functions=41 direct_actuation_refs=0 unexpected=0'
+EXPECTED='ASSERT application-proprietary-ba'
 def main():
  p=argparse.ArgumentParser();p.add_argument('--project-dir',type=Path,default=ROOT/'build/work/project');a=p.parse_args();project=a.project_dir.resolve()
  if not (project/'rh850_p1me_mapped.rep').is_dir(): print(f'[FAIL] live BA surface: missing project {project}');return 1

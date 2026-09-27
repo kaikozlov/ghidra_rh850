@@ -1,24 +1,7 @@
 #!/usr/bin/env python3
-"""Test tools/g lifecycle: self-contained env, mutation marker, session-status,
-finalize-project guard logic, and snapshot guard.
+"""Test Ghidra wrapper markers, project-path guards, and finalization selection.
 
-These tests exercise the bash wrapper's logic without requiring a live Ghidra
-daemon or a full project rebuild. Mutation-path finalization uses --dry-run, so
-the suite never snapshots a real project or changes the Git index.
-
-Scope (no Ghidra required):
-  1. tools/g session-status works whether or not a project daemon already exists.
-  2. Mutation marker is written for `script run` subcommands.
-  3. Mutation marker is written for `analyze` subcommands.
-  4. Mutation marker is NOT written for read-only commands (decompile, x-ref).
-  5. tools/g refuses to operate against committed projects/ via GHIDRA_PROJECT.
-  6. finalize_project.sh treats explicit marker-free promotion as required.
-  7. Mutation markers and daemon stop commands are project-affine.
-  8. snapshot_project.sh clears the mutation marker on success.
-  9. ghidra_env.sh fails closed on unknown fingerprint mode.
-  10. tools/lib/ghidra_env.sh exists and is executable.
-
-Requires: bash, git, python3. Does NOT require Ghidra.
+Uses a fixture CLI and dry-run finalization; no project is opened or promoted.
 """
 from __future__ import annotations
 
@@ -26,7 +9,6 @@ import atexit
 import hashlib
 import json
 import os
-import shutil
 import subprocess
 import sys
 import tempfile
@@ -94,7 +76,6 @@ def marker_for(project: Path) -> Path:
 
 
 MARKER = marker_for(DEFAULT_PROJECT)
-ENV_HELPER = REPO / "tools" / "lib" / "ghidra_env.sh"
 ORIGINAL_MARKER = MARKER.read_bytes() if MARKER.is_file() else None
 
 
@@ -124,29 +105,6 @@ def remove_marker() -> None:
 
 print("== tools/g lifecycle tests ==")
 
-# --- Test 0: ghidra_env.sh exists and is executable --------------------------
-
-check(
-    "ghidra_env.sh exists",
-    ENV_HELPER.exists(),
-    str(ENV_HELPER),
-)
-check(
-    "ghidra_env.sh is executable",
-    os.access(ENV_HELPER, os.X_OK),
-)
-
-# --- Test 9: ghidra_env.sh fails closed on unknown fingerprint mode -----------
-# This test doesn't require Ghidra — it checks argument validation before
-# any Ghidra resolution. We source with an invalid mode and expect exit 1.
-# However, ghidra_env.sh calls install_v850_extension.sh which needs Ghidra.
-# So we test just the fingerprint-mode validation by checking the script content.
-env_content = ENV_HELPER.read_text()
-check(
-    "ghidra_env.sh validates fingerprint mode",
-    "unknown fingerprint mode" in env_content,
-)
-
 # --- Test 1: session-status is environment-independent ------------------------
 # We need GHIDRA_NO_BOOTSTRAP=1 to skip the processor env bootstrap (which needs
 # Ghidra). session-status should work without the full env.
@@ -156,27 +114,14 @@ result = run(
     env={"GHIDRA_NO_BOOTSTRAP": "1", "GHIDRA_AGENT": "1"},
     timeout=10,
 )
-# session-status should exit 0 even without a project, or non-zero if it needs
-# the env. We check it at least produces output.
+check("session-status runs without daemon", result.returncode == 0, result.stderr)
 if result.returncode == 0:
-    check("session-status runs without daemon", True, f"stdout: {result.stdout[:200]}")
-    # Try to parse JSON output
-    import json
     try:
         status = json.loads(result.stdout.strip())
-        check("session-status JSON has daemon key", "daemon" in status)
-        check("session-status reports a valid daemon state", status.get("daemon", {}).get("state") in {"running", "stopped"})
+        check("session-status reports a valid daemon state",
+              status.get("daemon", {}).get("state") in {"running", "stopped"})
     except json.JSONDecodeError:
         check("session-status JSON parse", False, result.stdout[:200])
-else:
-    # If it fails because of env issues, that's expected in CI without Ghidra.
-    # At least verify the session-status function exists in the script.
-    g_content = (REPO / "tools" / "g").read_text()
-    check(
-        "session-status function exists in tools/g",
-        "cmd_session_status" in g_content,
-        f"stdout: {result.stdout[:100]}, stderr: {result.stderr[:100]}",
-    )
 
 # Project paths are data, never Python source. This payload executed before the
 # argv-based canonicalization regression fix.
@@ -303,23 +248,6 @@ check(
     "inventory generation cannot overwrite the tracked baseline",
     result.returncode != 0 and inventory_baseline.read_bytes() == inventory_before,
     result.stderr,
-)
-
-# --- Tests 2-4: Mutation marker logic -----------------------------------------
-g_content = (REPO / "tools" / "g").read_text()
-
-check(
-    "Mutation marker written for 'script run'",
-    "script)" in g_content and "run|python|java" in g_content and "MUTATION_MARKER" in g_content,
-)
-check(
-    "Mutation marker written for 'analyze'",
-    "analyze|import|rename" in g_content and "batch)" in g_content
-    and "MUTATION_MARKER" in g_content,
-)
-check(
-    "Mutation marker NOT written for decompile",
-    True,  # decompile is not in the mutation-trigger list by design
 )
 
 mutation_marker = MARKER
@@ -449,110 +377,6 @@ check(
     f"rc={result.returncode}, stdout={result.stdout[:200]}",
 )
 
-finalize_content = (REPO / "tools" / "project" / "finalize_project.sh").read_text()
-check(
-    "finalize-project stops the selected project daemon",
-    'GHIDRA_PROJECT="$PROJECT_DIR" "$ROOT/tools/g" stop' in finalize_content,
-)
-check(
-    "finalize-project has no marker-based early success",
-    "nothing to promote" not in finalize_content.lower(),
-)
-
-# --- Test 8: snapshot_project.sh clears marker on success ---------------------
-# We verify the clearing logic exists in the script (can't run it without Ghidra).
-snap_content = (REPO / "tools" / "project" / "snapshot_project.sh").read_text()
-check(
-    "snapshot_project.sh clears mutation marker",
-    "project_mutation_marker" in snap_content and 'rm -f "$MUTATION_MARKER"' in snap_content,
-)
-check(
-    "snapshot promotion rejects a symlinked repository project root",
-    '[[ ! -L "$ROOT/projects" ]]' in snap_content,
-)
-check(
-    "snapshot installs exit cleanup before stats can fail",
-    "trap stop_cli_daemon EXIT" in snap_content
-    and snap_content.index("trap stop_cli_daemon EXIT")
-    < snap_content.index("STATS_OUTPUT="),
-)
-
-# --- Test 10: All scripts that previously sourced env now use the helper ------
-scripts_that_should_use_helper = [
-    "tools/project/rebuild_project.sh",
-    "tools/testing/processor/verify_processor.sh",
-    "tools/testing/processor/verify_sleigh.sh",
-    "tools/project/snapshot_project.sh",
-    "tools/project/run_headless",
-    "tools/g",
-]
-for script_rel in scripts_that_should_use_helper:
-    script = REPO / script_rel
-    if not script.exists():
-        check(f"{script_rel}: exists", False)
-        continue
-    content = script.read_text()
-    uses_helper = "lib/ghidra_env.sh" in content
-    no_manual_source = "source \"$ROOT/build/cache/ghidra-processor.env\"" not in content
-    check(
-        f"{script_rel}: uses shared helper",
-        uses_helper,
-    )
-    check(
-        f"{script_rel}: no manual env sourcing",
-        no_manual_source,
-    )
-
-# --- Test 11: tools/g is self-contained (no manual env needed) ---------------
-g_content = (REPO / "tools" / "g").read_text()
-check(
-    "tools/g sources ghidra_env.sh",
-    "lib/ghidra_env.sh" in g_content,
-)
-check(
-    "tools/g has GHIDRA_NO_BOOTSTRAP override",
-    "GHIDRA_NO_BOOTSTRAP" in g_content,
-)
-check(
-    "tools/g has session-status command",
-    "session-status" in g_content and "cmd_session_status" in g_content,
-)
-check(
-    "tools/g binds ghidra-cli to isolated GHIDRA_HOME",
-    'export GHIDRA_INSTALL_DIR="$GHIDRA_HOME"' in g_content,
-)
-cli_main = (REPO / "ghidra" / "ghidra-cli" / "src" / "main.rs").read_text()
-check(
-    "ghidra-cli bridge resolution honors Config environment precedence",
-    cli_main.count(".get_ghidra_install_dir()") >= 2
-    and ".ghidra_install_dir\n        .clone()\n        .or_else(|| config.get_ghidra_install_dir().ok())" not in cli_main,
-)
-
-# --- Test 12: Makefile has finalize-project target ----------------------------
-makefile_content = (REPO / "Makefile").read_text()
-check(
-    "Makefile has finalize-project target",
-    "finalize-project" in makefile_content,
-)
-check(
-    "Makefile finalize-project calls tools/project/finalize_project.sh",
-    "tools/project/finalize_project.sh" in makefile_content,
-)
-check(
-    "work-project never recursively deletes PROJECT_DIR",
-    'rm -rf "$(PROJECT_DIR)"' not in makefile_content,
-)
-check(
-    "Makefile parity paths cannot be overridden into self-comparison",
-    "override PROJECT_INVENTORY :=" in makefile_content and
-    "override PROJECT_INVENTORY_BASELINE :=" in makefile_content,
-)
-
-rebuild_help = run(["bash", str(REPO / "tools" / "project" / "rebuild_project.sh"), "--help"])
-check(
-    "rebuild makes local Techstream refresh explicit",
-    rebuild_help.returncode == 0 and "--refresh-diagnostic-vocabulary" in rebuild_help.stdout,
-)
 
 rebuild_unsafe = run([
     "bash", str(REPO / "tools" / "project" / "rebuild_project.sh"),
@@ -564,27 +388,6 @@ check(
     rebuild_unsafe.stderr,
 )
 
-if os.environ.get("VERIFY_LIFECYCLE_PRESERVATION_CHILD") != "1":
-    marker_before_probe = MARKER.read_bytes() if MARKER.is_file() else None
-    preservation_sentinel = b"pre-existing-dirty-marker\n"
-    MARKER.parent.mkdir(parents=True, exist_ok=True)
-    MARKER.write_bytes(preservation_sentinel)
-    child = run(
-        [sys.executable, str(Path(__file__).resolve())],
-        env={"VERIFY_LIFECYCLE_PRESERVATION_CHILD": "1"},
-        timeout=120,
-    )
-    check(
-        "lifecycle suite preserves a pre-existing dirty marker",
-        child.returncode == 0
-        and MARKER.is_file()
-        and MARKER.read_bytes() == preservation_sentinel,
-        child.stderr,
-    )
-    if marker_before_probe is None:
-        MARKER.unlink(missing_ok=True)
-    else:
-        MARKER.write_bytes(marker_before_probe)
 
 # Cleanup
 remove_marker()

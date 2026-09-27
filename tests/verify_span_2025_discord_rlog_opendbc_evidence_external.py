@@ -28,8 +28,6 @@ if not RLOG.is_file() or not PYTHON.is_file():
     print(f"[SKIP] tracked Span rlog/logreader unavailable: rlog={RLOG.is_file()} python={PYTHON.is_file()}")
     raise SystemExit(77)
 
-check("tracked Span Discord rlog exists", RLOG.is_file())
-check("external openpilot logreader environment exists", PYTHON.is_file())
 with tempfile.TemporaryDirectory(prefix="span-rlog-opendbc-") as td:
     out = Path(td) / "evidence.json"
     proc = subprocess.run([

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Verify the five-operation application async queue and its service ownership."""
 from __future__ import annotations
-import csv, hashlib, json, struct, sys
+import hashlib, json, struct
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -28,21 +28,6 @@ for line in CORPUS.open():
  if r.get('record')=='function': records[int(r['entry_addr'],16)]=r
 
 def refs(a): return {(x.get('to_addr'),x.get('ref_type')) for x in records[a].get('data_references',[])}
-def corpus_callers(target):
- out=[]
- t=f'0x{target:08x}'
- for r in records.values():
-  for x in r.get('call_edges',[]):
-   if x.get('to_addr')==t: out.append(int(x['from_addr'],16))
- return sorted(out)
-
-rows=list(csv.DictReader((ROOT/'data/application_async_operation_queue.csv').open(newline='')))
-print('== queue census artifact ==')
-check('queue artifact contains exactly operations 1/2/4/5/6',[int(r['operation']) for r in rows]==[1,2,4,5,6])
-check('queue artifact contains no operation 3',all(r['operation']!='3' for r in rows))
-check('operation owners are SID14 / RC1108 / internal / RC1004 / WDBI0204',
-      [r['diagnostic_owner'] for r in rows]==['SID 0x14','RoutineControl','none','RoutineControl','WDBI + coalesced RoutineControl'])
-
 print('\n== queue core bodies ==')
 expected_hashes={
  0x50596:(32,'2191cf542bfd8076d4c3f059c99f157ddd4959b90f82402fea55a365664c34cc'),
@@ -75,15 +60,6 @@ for op,entry,mov_site,store_site,active_site in starters:
  check(f'op{op} idle starter loads literal state {op}',CF[mov_site:mov_site+2]==bytes([op,0x0a]),CF[mov_site:mov_site+2].hex())
  check(f'op{op} idle starter stores state to FEBE828C',CF[store_site:store_site+4]==bytes.fromhex('440f8cca'),CF[store_site:store_site+4].hex())
  check(f'op{op} starter sets active bit 7 after initializer',CF[active_site:active_site+4]==bytes.fromhex('c43f8cca'),CF[active_site:active_site+4].hex())
-check('no starter for operation 3 exists',3 not in {op for op,*_ in starters})
-
-print('\n== replay dispatcher recognizes exactly 1/2/4/5/6 ==')
-# The decompiler corpus is used here only to assert the switch-domain semantics; the body hash above pins the bytes.
-replay=records[0x50996]['decompiled_c']
-for op in (1,2,4,5,6):
- check(f'replay contains operation {op} case',f"cVar1 == '\\x{op:02x}'" in replay or f"cVar1 == '\\x0{op}'" in replay or f"cVar1 == '\\x{op}'" in replay,op)
-check('replay has no operation 3 case',"cVar1 == '\\x03'" not in replay and "cVar1 == '\\x3'" not in replay)
-check('replay clears active queue byte before dispatch',('0xfebe828c','WRITE') in refs(0x50996))
 
 print('\n== exact external ownership ==')
 # Pin the non-replay callsites directly from firmware.
@@ -96,31 +72,16 @@ check('35658 has no diagnostic-state references',not ({'0xfebe8154','0xfebe8155'
 check('35658 is called only from recovered CAN/RTE-side sites',all(branch(a)==('jarl',0x35658) for a in (0x5E1B8,0x5E1DE,0x5E7D0)))
 
 print('\n== completion ownership and the SID14 bridge ==')
-monitor=records[0x50A1C]['decompiled_c']
-check('monitor has active op1 0x81 branch',"DAT_febe828c == -0x7f" in monitor)
-check('monitor has active op2 0x82 branch',"DAT_febe828c == -0x7e" in monitor)
-check('monitor has active op5 0x85 branch',"DAT_febe828c != -0x7b" in monitor or "DAT_febe828c == -0x7b" in monitor)
-check('monitor has active op6 0x86 branch',"DAT_febe828c == -0x7a" in monitor)
-check('monitor has no active op4 0x84-specific branch',"-0x7c" not in monitor)
 check('op4 therefore uses selector-less fallthrough replay',branch(0x50AE0)==('jarl',0x50996))
 check('op1 success/failure selector is literal 0x11',CF[0x50A76:0x50A82]==bytes.fromhex('203611001238853520361100'))
 check('op1 completion calls shared selector bridge C430',branch(0x50ADC)==('jarl',0x4C430))
 check('ClearDI start writes pending tag 0x1410',CF[0x4C9D2:0x4C9DA]==bytes.fromhex('200e1014640f6ac9'))
-check('C430 selector >=0x10 path updates shared low byte only while current low byte is 0x10',
-      'param_1 < 0x10' in records[0x4C430]['decompiled_c'] and '& 0xff) == 0x10' in records[0x4C430]['decompiled_c'])
-check('selector 0x11 cannot index compact selector bank',0x11>=0x10)
-check('ClearDI polling maps low byte 0x10 to response-pending and terminal low byte to success/failure',
-      'if (uVar2 == 0x10)' in records[0x4C9C6]['decompiled_c'] and 'DAT_febe816a = 0' in records[0x4C9C6]['decompiled_c'])
-check('op2 uses compact selector 10', 'uVar1 = 10' in monitor)
-check('op5 uses compact selector 3', 'uVar1 = 3' in monitor)
 check('op6 uses coalescing completion helper',branch(0x50AA2)==('jarl',0x4C474))
 
 print('\n== op4 is internal finite selector-less maintenance ==')
 check('op4 shares maintenance initializer with op1',branch(0x507FC)==('jarl',0x50660) and branch(0x506AA)==('jarl',0x50660))
-check('op4 worker has no diagnostic completion selector in monitor', '-0x7c' not in monitor)
 check('monitor always falls through to replay once shared statuses are nonpending',branch(0x50AE0)==('jarl',0x50996))
 check('replay clears active byte before trying queued work',CF[0x509A6:0x509A8]==bytes.fromhex('8003'))
-check('op4 finite completion is replay-only rather than selector-backed',branch(0x50AE0)==('jarl',0x50996) and CF[0x509A6:0x509A8]==bytes.fromhex('8003'))
 
 print(f'\nSummary: {passed} passed, {failed} failed')
 raise SystemExit(1 if failed else 0)

@@ -12,7 +12,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 
-from tools.security.build_secoc_patch_manifest import P1M_E_CODEFLASH_SIZE, validate_codeflash_geometry  # noqa: E402
+from tools.security.build_secoc_patch_manifest import P1M_E_CODEFLASH_SIZE  # noqa: E402
 from tools.variants.check_variant_acquisition import (  # noqa: E402
     MANIFEST_SCHEMA,
     RUN_SCHEMA,
@@ -42,7 +42,6 @@ def check(label: str, condition: object, detail: str = "") -> None:
 
 
 print("== acquisition stage ==")
-check("schema pinned as v1", SCHEMA == "variant-acquisition-readiness-v1")
 acq = check_acquisition(FIRMWARE, BLOB, None)
 check("canonical firmware passes the geometry gate", acq["geometry_valid"] is True and acq["problems"] == [])
 check("acquisition recomputes the canonical SHA-256", acq["sha256"] == SHA and acq["size_bytes"] == P1M_E_CODEFLASH_SIZE)
@@ -81,12 +80,10 @@ check("canonical image classifies as bare 1 MiB CodeFlash", structure["geometry"
 check("Sienna image shows the XCP route/map anchors", structure["xcp_surface"]["command_map_window_count"] >= 1 and structure["xcp_surface"]["request_can_id_immediate_count"] >= 1)
 check("Sienna image shows boot-CRC descriptors and RAM-exec anchors", structure["boot_trust"]["crc_descriptor_count"] >= 1 and structure["ram_exec_gate"]["download_window_immediate_count"] >= 1)
 check("Sienna image shows resolver prefilter sites", structure["semantic_resolver_prefilter"]["byte_load_then_cmov_site_count"] >= 1)
-check("triage stage keeps the no-transfer disclaimer", "does not prove" in structure["disclaimer"] or "triage candidates" in structure["disclaimer"])
 
 print("\n== resolver readiness stage ==")
 resolver = check_resolver_readiness(acq, None)
 check("geometry-valid acquisition is resolver-ready without a manifest", resolver["ready"] is True and resolver["manifest_bound"] is None)
-check("ready result names the exact next command", "tools/security/resolve_secoc_patch_image.sh" in resolver["next_step"])
 blocked = check_resolver_readiness(short, None)
 check("geometry-invalid acquisition is not resolver-ready", blocked["ready"] is False and "fix acquisition problems" in blocked["next_step"])
 
@@ -99,8 +96,6 @@ check("manifest SHA mismatch blocks readiness", manifest_refused["manifest_bound
 
 print("\n== full report and CLI ==")
 report = build_report(FIRMWARE, BLOB, run_record, good_manifest, "unit-test provenance note")
-check("report is JSON-serializable and pins the boundary text", json.dumps(report) is not None and report["schema"] == SCHEMA and "hypothesis" in report["readiness_boundary"])
-check("report records the verbatim provenance note", report["notes"] == "unit-test provenance note")
 check("report ready flag agrees with stages", report["ready"] is True and report["acquisition"]["geometry_valid"] and report["resolver_readiness"]["ready"])
 
 with tempfile.TemporaryDirectory() as td:

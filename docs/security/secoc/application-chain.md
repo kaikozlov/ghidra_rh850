@@ -1872,9 +1872,7 @@ the SecOC effect.
 | CRC fixup on reconstructed `4512000` | `0x41C90FF2` | historical target had a different candidate CRC |
 | Stability expectation | narrow semantic bypass | inconsistent state / delayed-failure risk |
 
-The historical distinction is pinned by `tests/verify_lochuan_patch_semantics.py`;
-current-upstream convergence and FACI source semantics are checked separately by
-`make verify-external`.
+The historical distinction is checked by `tests/verify_lochuan_patch_semantics.py`.
 
 ## References
 

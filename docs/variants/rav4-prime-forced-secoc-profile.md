@@ -87,9 +87,7 @@ or dependencies independently of the EPS SecOC acceptance predicate.
 
 ### 2.1 Exhaustive relevant-message matrix
 
-The machine-readable source of truth is
-`data/rav4_prime_forced_profile_matrix.csv`, verified by
-`tests/verify_rav4_prime_forced_profile_matrix.py` plus pinned-source assertions.
+`data/rav4_prime_forced_profile_matrix.csv` records the pinned-source analysis.
 It covers the complete relevant control/SecOC set rather than only the four
 blocked camera messages:
 

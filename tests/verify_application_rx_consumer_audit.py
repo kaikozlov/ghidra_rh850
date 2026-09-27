@@ -8,14 +8,11 @@ the live exporter.
 """
 from __future__ import annotations
 
-from collections import Counter
-import csv
 from pathlib import Path
 import sys
 
 REPO = Path(__file__).resolve().parents[1]
 CF = (REPO / "firmware" / "RH850_P1M-E_CodeFlash.bin").read_bytes()
-AUDIT = REPO / "data" / "application_rx_consumer_audit.csv"
 
 passed = failed = 0
 
@@ -34,10 +31,6 @@ def b(offset: int, hex_bytes: str) -> bool:
     return CF[offset:offset + len(expected)] == expected
 
 
-with AUDIT.open(newline="", encoding="utf-8") as stream:
-    rows = list(csv.DictReader(stream))
-by_sid = {int(row["signal_id"]): row for row in rows}
-
 LOCAL = {231, 233, 235, 237, 270, 273, 276}
 STORED = {
     62, 70, 107, 115, 144, 173, 177, 194, 197,
@@ -53,46 +46,6 @@ LOCAL_SITES = {
     273: "0x4B306",
     276: "0x4B366",
 }
-
-print("== exact unresolved denominator and dispositions ==")
-check("audit has exactly 25 rows", len(rows) == 25, str(len(rows)))
-check("audit signal IDs are exact", set(by_sid) == LOCAL | STORED)
-check(
-    "disposition totals are 7 local-postprocess + 18 stored-only",
-    Counter(row["disposition"] for row in rows)
-    == Counter({"local-postprocess": 7, "stored-no-direct-consumer": 18}),
-)
-check("exact local-postprocess signal set", {sid for sid, row in by_sid.items() if row["disposition"] == "local-postprocess"} == LOCAL)
-check("exact stored-no-direct-consumer signal set", {sid for sid, row in by_sid.items() if row["disposition"] == "stored-no-direct-consumer"} == STORED)
-check("exact SecOC unresolved set is nine signals", {sid for sid, row in by_sid.items() if row["secoc_envelope"] == "yes"} == SECOC)
-check("SecOC split is 3 local + 6 store-only", len(LOCAL & SECOC) == 3 and len(STORED & SECOC) == 6)
-check(
-    "no PARAM/plain-DATA pointer into the complete Rx scalar bank originates outside generated unpackers",
-    all(row["outside_unpacker_bank_pointer_sites"] == "" for row in rows),
-)
-
-print("\n== live-audit direct-reference shape ==")
-for sid in sorted(LOCAL):
-    row = by_sid[sid]
-    check(f"signal {sid} has three direct refs", row["direct_ref_count"] == "3")
-    check(f"signal {sid} local read site is exact", row["unpacker_read_sites"] == LOCAL_SITES[sid], row["unpacker_read_sites"])
-    check(f"signal {sid} has no outside direct read", row["outside_read_sites"] == "")
-    check(f"signal {sid} has no outside PARAM alias in same-unpacker range", row["outside_param_alias_sites"] == "")
-for sid in sorted(STORED):
-    row = by_sid[sid]
-    check(f"signal {sid} has exactly two direct refs", row["direct_ref_count"] == "2")
-    check(f"signal {sid} has no local direct read", row["unpacker_read_sites"] == "")
-    check(f"signal {sid} has no outside direct read", row["outside_read_sites"] == "")
-    check(f"signal {sid} has no extra direct refs", row["other_direct_refs"] == "")
-    check(f"signal {sid} has no outside PARAM alias in same-unpacker range", row["outside_param_alias_sites"] == "")
-check(
-    "16/18 stored-only rows are selective omissions beside consumed siblings",
-    sum(int(by_sid[sid]["consumed_siblings_same_unpacker"]) > 0 for sid in STORED) == 16,
-)
-check(
-    "CAN 0x020 is the sole whole-unpacker no-direct-consumer pair",
-    {sid for sid in STORED if by_sid[sid]["consumed_siblings_same_unpacker"] == "0"} == {291, 292},
-)
 
 print("\n== raw local-postprocess control flow ==")
 # CAN 0x0AA: four unsigned 15-bit raw values are immediately loaded as

@@ -28,26 +28,15 @@ rebuilds. Committed-project promotion is a separate final lifecycle gate.
 
 ## Semantic and verification coverage
 
-| Dimension | Current value | Evidence boundary and source |
-|---|---:|---|
-| Functions reviewed | 119 / 6,376 | `data/semantic_coverage_summary.json`; review does not imply understanding |
-| Functions semantically identified | 29 | Curated `semantically_identified` state; 3 more are `structurally_bounded` |
-| Functions with a semantic evidence grade | 32 | 3 bounded, 11 recovered, 18 verified; 6,344 carry no semantic grade |
-| Functions still unreviewed | 6,257 | Structural denominator from the semantic coverage ledger |
-| Reproducible selected sweep | 100 functions | Scalar top 40 plus structural strata and mandatory graph families; two decompilation artifacts are byte-identical |
-| Selected sweep without semantic conclusion | 87 | `reviewed_unknown`, no evidence grade; successful decompilation is a generated self-check only |
-| Per-function claim execution status | 114 `passed`, 5 `unavailable`, 0 `failed` | `data/semantic_review_status.csv`; `unavailable` marks manual CFG reviews with no automated execution gate |
-| Strongest independent oracle per reviewed function | 28 CFG/data-flow, 3 instruction semantics, 1 raw-byte oracle, 87 none | The 87 have only a generated self-check, which is recorded separately and confers no semantic grade |
-| Findings with exact `verified` grade | 92 | Exact-grade rows in `FINDINGS.md`; qualified/mixed/partial-grade rows are not included in this scalar |
-| Findings dynamically/externally observed | 24 | Exact `observed...`-grade rows in `FINDINGS.md`: SECOC-030, VAR-001, STORE-007, VAR-108/109/110, TMS-086, VAR-116, VAR-124/125/126/128/129/133/135/137/138/139/140/141/143/144/145/151; observations are not promoted beyond their stated evidence boundary |
+`data/semantic_review_status.csv` records actual function-level conclusions;
+`data/semantic_coverage_summary.json` summarizes their coverage. Most discovered
+functions remain semantically unreviewed. Successful decompilation alone is not
+a review, and the former automatic sweep rows have been removed.
 
-For material findings, `FINDINGS.md` identifies the claim-specific gate in its
-`Checked by` column; `verification.toml` supplies that gate's oracle class, and
-`make verify-agent` reports current `pass`/`fail`/`skip` execution status.
-Execution status and confidence are deliberately separate: a passing identity,
-documentation, or generated-self-check suite cannot independently justify a
-semantic `verified` grade. External suites report `skip` when their pinned
-artifact is absent and `required-external` converts that absence to failure.
+Use `tools/pseudo` for the canonical decompilations and
+`data/generated/semantic_interest_ranking.csv` to navigate candidate functions.
+Use `tools/test <suite>` to run the relevant executable or firmware check.
+Neither ranking nor a passing unrelated suite establishes a function's meaning.
 
 ## Techstream and DDB coverage
 

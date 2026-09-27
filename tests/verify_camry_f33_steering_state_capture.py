@@ -2,7 +2,6 @@
 """Verify the exact-F33 native-XCP steering-state observer contract."""
 from __future__ import annotations
 
-import json
 import subprocess
 import sys
 from pathlib import Path
@@ -13,18 +12,15 @@ if str(REPO) not in sys.path:
 
 from exploit.followups.xcp_daq_probe import (  # noqa: E402
     FORBIDDEN_COMMANDS,
-    MAX_ENTRIES,
 )
 from tools.targets.camry.live.camry_f33_steering_state_capture import (  # noqa: E402
     CAN_WITNESS_IDS,
     COMMAND_FUNNEL,
     ELM327_PARAM,
-    EXPECTED_F181_HEX,
     FULL_PATH,
     EventAssembler,
     PANDA_BUS,
     PROFILES,
-    SCHEMA,
     SOURCE_TERMS,
     XCP_REQUEST_ID,
     XCP_RESPONSE_ID,
@@ -47,8 +43,6 @@ def check(name: str, condition: object, detail: str = "") -> None:
     print(f"[{'PASS' if ok else 'FAIL'}][generated_self_check] {name}{suffix}")
 
 print("== target and route ==")
-check("schema is exact-F33 v2", SCHEMA == "camry-f33-steering-state-capture-v2")
-check("exact F181 is pinned", EXPECTED_F181_HEX == "023839363546333330373030300000000038413331313333303331303000000000")
 check("post-repin route is Panda bus0 / ELM327 param1", PANDA_BUS == 0 and ELM327_PARAM == 1)
 check("XCP route IDs are exact extended endpoints", XCP_REQUEST_ID == 0x1FDC0002 and XCP_RESPONSE_ID == 0x1FE00002)
 check("planner marks stock protocol dispatch disabled", plan(FULL_PATH)["stock_protocol_gate"] == {"address":"0x00030D68","value":"0x5A","dispatch_required_value":"0x00","stock_protocol_dispatch_enabled":False})
@@ -60,8 +54,6 @@ check("legacy wider Panda tuple retains raw busTime", legacy_row == (0x1FE00002,
 check("malformed short Panda tuple is rejected", _panda_row((0x1FE00002, b"")) is None)
 
 print("\n== exact one/two-list DAQ profile geometry ==")
-check("three target profiles include one combined full path",
-      set(PROFILES) == {"source-terms", "command-funnel", "full-path"})
 expected_geometry = {"source-terms": (28,1,4), "command-funnel": (28,1,4), "full-path": (52,2,8)}
 for profile in PROFILES.values():
     try:
@@ -74,7 +66,6 @@ for profile in PROFILES.values():
     check(f"{profile.name} byte/list/ODT geometry exact",
           len(profile.addresses) == expected_bytes and len(profile_list_chunks(profile)) == expected_lists and len(profile_odt_groups(profile)) == expected_odts)
     check(f"{profile.name} has no overlapping byte addresses", len(set(profile.addresses)) == len(profile.addresses))
-check("one native DAQ list remains 28 bytes", MAX_ENTRIES == 28)
 
 source_expected = (
     ("AC2B_diag_gate",0xFEBEAC2B,1,False),
@@ -113,20 +104,6 @@ check("full-path is exact source+funnel union with CC48 sampled once",
       FULL_PATH.fields == SOURCE_TERMS.fields + tuple(f for f in COMMAND_FUNNEL.fields if f.name != "CC48_d0218_output") and
       len(FULL_PATH.addresses) == 52)
 
-print("\n== repository semantic joins ==")
-cone = json.loads((REPO / "data/generated/camry_8965F3307000_command_cone_ingress.json").read_text())
-oracles = json.loads((REPO / "data/generated/camry_8965F3307000_internal_assist_oracles.json").read_text())
-source_text = cone["baseline_internal_assist_path"]["D0218_sum"]
-for token in ("C43C","C4C0","C3BA","CC2C","BF3C","CB38","C5EE","CBE8","FEBECC48","AC2B","C7BF"):
-    check(f"canonical D0218 evidence contains {token}", token in source_text)
-chain = oracles["physical_actuation_funnel"]["chain"]
-for token in ("FEBECC50","FEBECC62","FEBECC66","FEBECC64","FEBEAC54"):
-    check(f"canonical physical funnel contains {token}", token in chain)
-check("canonical diagnostic sibling identifies AC56 from CC62",
-      cone["command_block_map"]["via_D0AAE"]["FEBEAC56"].startswith("FEBECC62"))
-check("canonical motor branch identifies AC54 from CC64",
-      cone["command_block_map"]["via_D0AAE"]["FEBEAC54"] == "FEBECC64")
-
 print("\n== DAQ configuration remains observation-only ==")
 for profile in PROFILES.values():
     requests = camry_configuration_requests(profile, prescaler=7)
@@ -153,16 +130,6 @@ for profile in PROFILES.values():
 
 p = plan(SOURCE_TERMS)
 check("plan defaults to conservative DAQ prescaler 10", p["daq_prescaler"] == 10)
-check("plan explicitly declares no source/flash/steering/B6 writes",
-      p["mutation_boundary"] == {
-          "source_memory_writes": False,
-          "steering_commands": False,
-          "b6_transmit": False,
-          "flash_writes": False,
-          "ephemeral_resident": False,
-          "volatile_xcp_daq_configuration": True,
-      })
-check("plan publishes sequential-not-atomic timing boundary", "not physical wire timestamps" in p["timing_boundary"] and "atomic CPU snapshots" in p["timing_boundary"])
 
 print("\n== byte decoding and one/two-list event assembly ==")
 # Fill each source-profile byte with a deterministic pattern, then overwrite

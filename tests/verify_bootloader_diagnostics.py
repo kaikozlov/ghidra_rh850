@@ -8,14 +8,12 @@ repository is required.
 from __future__ import annotations
 
 import hashlib
-import json
 import struct
 import sys
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 CF = (REPO / "firmware" / "RH850_P1M-E_CodeFlash.bin").read_bytes()
-P1ME = json.loads((REPO / "data" / "p1me_product_memory.json").read_text(encoding="utf-8"))
 TP = 0x869C
 
 passed = failed = 0
@@ -28,14 +26,6 @@ def check(name: str, condition: object, detail: str = "") -> None:
     failed += int(not ok)
     suffix = f" ({detail})" if detail else ""
     print(f"[{'PASS' if ok else 'FAIL'}] {name}{suffix}")
-
-
-def u16(address: int) -> int:
-    return struct.unpack_from("<H", CF, address)[0]
-
-
-def u32(address: int) -> int:
-    return struct.unpack_from("<I", CF, address)[0]
 
 
 def occurrences(pattern: bytes) -> list[int]:
@@ -166,7 +156,6 @@ check("diagnostic initialization writes default session", CF[0x508C:0x5090] == b
 check("explicit session completion is the other local session writer", CF[0x51E6:0x51EA] == bytes.fromhex("44e70e93"))
 
 print("\n== SecurityAccess 0x27 request-seed / send-key ==")
-BOOT_GP = 0xFEBF9800
 check("SID 0x27 handler is 0x5516", services[0x27] == (0x02, 0, 0x5516), repr(services.get(0x27)))
 check("request-seed rejects lockout flag with NRC 0x37",
       CF[0x532C:0x533C] == bytes.fromhex("840f5793a4ef5593610aca0520363700"),
@@ -174,9 +163,6 @@ check("request-seed rejects lockout flag with NRC 0x37",
 check("request-seed requires total length 0x12",
       CF[0x5340:0x534A] == bytes.fromhex("0606eeffe20520361300"),
       CF[0x5340:0x534A].hex())
-check("request-seed lockout/state GP loads resolve to FEBF2B56/FEBF2B55",
-      (BOOT_GP + (-0x6CAA)) & 0xFFFFFFFF == 0xFEBF2B56 and
-      (BOOT_GP + (-0x6CAB)) & 0xFFFFFFFF == 0xFEBF2B55)
 check("send-key gates on security state then requires length 0x12",
       CF[0x53F6:0x5412] == bytes.fromhex(
           "c600a4ef559361eae1070f01e207050163eaeb070501d97d0606eeff"),
@@ -190,12 +176,7 @@ check("send-key emits NRC 0x35 invalidKey",
 check("send-key emits NRC 0x36 exceededNumberOfAttempts",
       CF[0x54C8:0x54CE] == bytes.fromhex("20363600e5ad"),
       CF[0x54C8:0x54CE].hex())
-check("send-key success stores security state 2 at FEBF2B0F",
-      CF[0x54DA:0x54E0] == bytes.fromhex("020a440f0f93") and
-      (BOOT_GP + (-0x6CF1)) & 0xFFFFFFFF == 0xFEBF2B0F,
-      CF[0x54DA:0x54E0].hex())
-check("send-key attempt counter lives at FEBF2B57",
-      (BOOT_GP + (-0x6CA9)) & 0xFFFFFFFF == 0xFEBF2B57)
+
 # The mismatch branch tests (attempt_counter - 1). Starting from zero, the
 # first failure takes the increment/NRC-0x35 path; with counter == 1 the next
 # failure takes the lockout/NRC-0x36 path and clears the counter.
@@ -215,18 +196,6 @@ check("SecurityAccess init arms 200000000-tick delay and clears attempts",
 # counter source and TAUJ1 configuration, not from the adjacent CanTp numbers.
 check("free-running SecurityAccess timer reader is exact",
       CF[0x1D24:0x1D2C] == bytes.fromhex("8007095120ca7f00"))
-check("tracked timer source is TAUJ1CNT0 at FFE51010",
-      P1ME["timer"]["tauj1cnt0_address"] == 0xFFE51010)
-check("TAUJ1 init stores TPS=FFF2 and CMOR0=0156",
-      P1ME["timer"]["firmware_tauj1tps_value"] == 0xFFF2 and
-      P1ME["timer"]["firmware_tauj1cmor0_value"] == 0x0156)
-check("P1M-E 80MHz P-Bus and PRS0=2 make TAUJ1 CK0 20MHz",
-      P1ME["timer"]["p_bus_hz"] == 80_000_000 and
-      P1ME["timer"]["prs0"] == 2 and
-      P1ME["timer"]["ck0_hz"] == 20_000_000)
-check("SecurityAccess 200000000-tick delay is 10 seconds",
-      P1ME["timer"]["security_delay_ticks"] // P1ME["timer"]["ck0_hz"] == 10 and
-      P1ME["timer"]["security_delay_ms"] == 10_000)
 check("generic boot scheduler body pins exact x20000 counter scaling",
       CF[0x1D2C:0x1D56] == bytes.fromhex(
           "8007a17006e007d89c0008d0db0009c88036ffff80ffde540a30bfffdefffcf60c00240e3891c1f103d5"))

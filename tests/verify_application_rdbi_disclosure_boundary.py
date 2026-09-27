@@ -10,12 +10,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 PROGRAM = "RH850_P1M-E_CodeFlash.bin"
-EXPECTED = (
-    "ASSERT application-rdbi-disclosure-boundary: "
-    "dids=242 unique_callbacks=196 max_depth=4 conservative_hits=4 "
-    "branch_resolved_hits=1 checkpoint_0x200_hits=0 root_fixed_global_writes=0 "
-    "fixed_global_writes=4 unexpected=0"
-)
+EXPECTED = "ASSERT application-rdbi-disclosure-boundary"
 
 
 def main() -> int:

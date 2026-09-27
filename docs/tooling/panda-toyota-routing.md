@@ -13,8 +13,7 @@
 > external-source, contributor raw CodeFlash, and local tooling.
 >
 > **Verification:** `tests/verify_toyota_eps_bus_probe.py`,
-> `tests/verify_toyota_b_programming_topology.py`, plus optional
-> `tests/verify_external_corroboration.py`.
+> `tests/verify_toyota_b_programming_topology.py`.
 
 ## 1. Question and result
 

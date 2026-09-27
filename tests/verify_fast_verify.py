@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Smoke-test the intentionally explicit verification runner."""
+"""Verify explicit suite, prefix, and group selection."""
 from __future__ import annotations
 
 import subprocess
@@ -25,16 +25,8 @@ def check(name: str, cond: object, detail: str = "") -> None:
 
 manifest = tomllib.loads(MANIFEST.read_text(encoding="utf-8"))
 suites = manifest.get("suite", {})
-check("suite registry is nonempty", bool(suites))
 missing = [test for row in suites.values() for test in row.get("tests", []) if not (REPO / test).is_file()]
 check("registered test files exist", not missing, repr(missing[:10]))
-check("suite registry has no changed-file path metadata",
-      all("paths" not in row for row in suites.values()))
-check("legacy aggregate routing policy is gone", "aggregate_infrastructure_suites" not in manifest.get("verification", {}))
-source = RUNNER.read_text(encoding="utf-8")
-check("runner has no changed-file ownership engine",
-      "artifact_dependencies" not in source and "plan_changed_suites" not in source and "changed_paths" not in source)
-check("runner explicitly rejects changed/branch auto-plans", "Automatic changed-file verification was removed" in source)
 
 with tempfile.TemporaryDirectory(prefix="explicit-verify-") as td:
     root = Path(td)

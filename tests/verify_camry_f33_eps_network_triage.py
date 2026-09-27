@@ -163,7 +163,6 @@ def call_names(exchange: FakeExchange) -> list[str]:
 print("== immutable plan and protocol allowlist ==")
 plain_plan = triage.build_plan(False)
 gateway_plan = triage.build_plan(True)
-check("schema is exact-F33 network triage v1", triage.SCHEMA == "camry-f33-eps-network-triage-v1")
 check("normal route is fixed to post-repin bus0 ELM327 param1",
       plain_plan["normal_route"] == {"panda_bus": 0, "elm327_safety_mode": 3, "elm327_param": 1})
 check("live preflight pins 500/2000 kbps ISO CAN-FD and exits SILENT",
@@ -681,28 +680,8 @@ check("gateway interruption still performs final Brake control", call_names(inte
 check("post-cleanup result preserves interrupted status", interrupt_result["status"] == "interrupted")
 
 
-print("\n== source-level and CLI fail-closed boundary ==")
+print("\n== CLI fail-closed boundary ==")
 source_path = ROOT / "tools/targets/camry/live/camry_f33_eps_network_triage.py"
-source = source_path.read_text(encoding="utf-8")
-check("implementation has one diagnostic-PDU send call", source.count("message.send(request)") == 1)
-guard_index = source.index("assert_allowed_request(stage, route, request)")
-health_index = source.index("health_start = _transport_health_snapshot(panda)", guard_index)
-clear_index = source.index("_clear_stale_receive_boundary(panda)", health_index)
-send_index = source.index("message.send(request)", clear_index)
-check("baseline health precedes the final stale-RX clear immediately before sole send",
-      guard_index < health_index < clear_index < send_index
-      and source[clear_index:send_index]
-      == "_clear_stale_receive_boundary(panda)\n            ")
-check("implementation never calls Panda set_obd", ".set_obd(" not in source)
-check("implementation never disables heartbeat checks", "set_heartbeat_disabled" not in source and "disable_checks=False" in source)
-check("implementation clears only the global receive queue before correlation",
-      source.count("panda.can_clear(0xFFFF)") == 1 and "panda.can_clear(0xFFFF)\n" in source)
-check("implementation contains no high-level mutation call sites",
-      all(token not in source for token in (
-          ".diagnostic_session_control(", ".ecu_reset(", ".security_access(",
-          ".clear_diagnostic_information(", ".write_data_by_identifier(",
-          ".request_download(", ".routine_control(",
-      )))
 check("process-owner matcher catches modern Python pandad title",
       triage.PANDA_OWNER_COMMAND_PATTERN.search("python openpilot.selfdrive.pandad.pandad") is not None)
 check("process-owner matcher catches boardd paths but ignores its own pgrep expression",

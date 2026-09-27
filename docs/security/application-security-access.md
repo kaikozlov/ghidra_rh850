@@ -408,14 +408,13 @@ the first UDS request or include explicit padding bytes.
 
 ## 8.1 Cross-security-state composition audit (SEC-APP-008)
 
-An explicit composition model
-(`tools/security/generate_security_state_composition.py`, verified by
-`tests/verify_security_state_composition.py`) composes the firmware-proven
-state machines — UDS sessions (both contexts), application SA level 2, the BA
-persistent authorization (SEC-APP-007), the programming handoff phase,
-CommunicationControl, the XCP `0x7F7` connection, and the bootloader SA byte —
-and queries privilege carryover and stale authorization across transitions.
-Result:
+The static analysis covers UDS sessions (both contexts), application SA level 2,
+BA persistent authorization (SEC-APP-007), programming handoff,
+CommunicationControl, the XCP connection, and bootloader SA. The former
+"composition model" serialized handwritten conclusions; it did not execute
+state transitions or independently verify their composition.
+
+The underlying findings support these conclusions:
 
 - **No privilege composition stronger than the existing SEC-APP-007 BA
   reset-persistent downgrade exists.** Application SA and XCP are disjoint

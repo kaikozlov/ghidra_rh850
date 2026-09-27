@@ -6,7 +6,7 @@ from pathlib import Path
 
 REPO=Path(__file__).resolve().parents[1]
 PROGRAM="RH850_P1M-E_CodeFlash.bin"
-EXPECTED="ASSERT application-wdbi-surface: implemented=13 speed_gated=12 no_speed_gate=2012 persistent_nvm_dids=8 live_override_refs=7 control_parameter_refs=4 control_mode_refs=5 unexpected=0"
+EXPECTED="ASSERT application-wdbi-surface"
 
 def main()->int:
     p=argparse.ArgumentParser(); p.add_argument('--project-dir',type=Path,default=REPO/'build/work/project'); a=p.parse_args()

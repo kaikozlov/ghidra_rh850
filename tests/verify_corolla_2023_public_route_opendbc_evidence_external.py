@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import json
 import subprocess
-import sys
 import tempfile
 from pathlib import Path
 
@@ -25,9 +24,6 @@ def check(name: str, condition: object, detail: str = "") -> None:
 if not RLOG.is_file() or not PYTHON.is_file():
     print(f"[SKIP] external route/logreader unavailable: rlog={RLOG.is_file()} python={PYTHON.is_file()}")
     raise SystemExit(77)
-
-check("external raw rlog exists", RLOG.is_file())
-check("external openpilot logreader environment exists", PYTHON.is_file())
 
 with tempfile.TemporaryDirectory(prefix="corolla-route-opendbc-") as td:
     out = Path(td) / "evidence.json"

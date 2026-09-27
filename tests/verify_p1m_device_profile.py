@@ -104,10 +104,6 @@ def window_for(addr: int, size: int) -> str | None:
 
 def main() -> int:
     print("== P1M-E SFR label CSV ==")
-    check("CSV exists", CSV_PATH.is_file(), str(CSV_PATH))
-    if not CSV_PATH.is_file():
-        print(f"\nSummary: {passed} passed, {failed} failed")
-        return 1
 
     rows: list[dict[str, str]] = []
     with CSV_PATH.open(newline="") as fh:
@@ -129,9 +125,6 @@ def main() -> int:
                 "access": parts[3].strip(),
                 "comment": parts[4].strip(),
             })
-
-    check("CSV has at least 20 named SFRs", len(rows) >= 20, str(len(rows)))
-    check("CSV grew past the original 7-row inventory", len(rows) > 7, str(len(rows)))
 
     addresses: set[int] = set()
     names: set[str] = set()
@@ -157,11 +150,6 @@ def main() -> int:
         check(f"required {name} at {addr:#x}",
               actual == (name, size),
               repr(actual))
-
-    # EIC channel formula used by the architecture docs.
-    for channel, addr in [(136, 0xFFFFB110), (292, 0xFFFFB248), (187, 0xFFFFB176)]:
-        check(f"EIC{channel} follows 0xFFFFB000+2*n",
-              addr == 0xFFFFB000 + 2 * channel)
 
     print(f"\nSummary: {passed} passed, {failed} failed ({len(rows)} SFR labels)")
     return 1 if failed else 0

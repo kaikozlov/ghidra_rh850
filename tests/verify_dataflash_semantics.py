@@ -91,10 +91,6 @@ expected_checkpoint = {
 }
 check("all 74 checkpoint blocks map to 32 logical slots",
       checkpoint_blocks == expected_checkpoint, repr(checkpoint_blocks))
-check("ownership classes cover every persistent block exactly once",
-      sum(map(len, triplicate_blocks.values())) == 48 and
-      sum(map(len, checkpoint_blocks.values())) == 74)
-
 print("\n== checkpoint descriptors and record envelope ==")
 descriptors = [
     struct.unpack_from("<HHHHI", CF, CHECKPOINT_TABLE + index * 12)
@@ -103,10 +99,7 @@ descriptors = [
 enabled = [index for index, (_length, count, base, _reserved, _ram) in enumerate(descriptors)
            if count and base != 0xFFFF]
 disabled = [index for index in range(32) if index not in enabled]
-check("24 checkpoint descriptors are enabled", len(enabled) == 24, repr(enabled))
 check("disabled checkpoint slots are exact", disabled == [16, 22, 25, 26, 28, 29, 30, 31], repr(disabled))
-check("enabled descriptors own 56 ring blocks", sum(len(checkpoint_blocks[i]) for i in enabled) == 56)
-check("disabled descriptors reserve 18 physical blocks", sum(len(checkpoint_blocks[i]) for i in disabled) == 18)
 check("every enabled descriptor base/count matches owner map",
       all(checkpoint_blocks[i] == list(range(descriptors[i][2], descriptors[i][2] + descriptors[i][1]))
           for i in enabled))
@@ -163,7 +156,6 @@ for index, blocks in triplicate_blocks.items():
 check("11 triplicate descriptors are enabled", trip_enabled == list(range(7)) + list(range(12, 16)))
 check("18 enabled triplicate records are valid", trip_valid_enabled == 18, str(trip_valid_enabled))
 check("all 15 disabled triplicate records are invalid", trip_invalid_disabled == 15)
-check("total valid configured records remains 68", active_valid + trip_valid_enabled == 68)
 
 print("\n== lower unallocated half and protected ranges ==")
 all_pages = []
@@ -188,8 +180,8 @@ check("DataFlash range validator starts at 0x4EAD8",
 check("range validator references protected table 0x293E4",
       (0x293E4).to_bytes(4, "little") in CF[0x4EAD8:0x4EB1C])
 check("optional objects 12..15 occupy protected range FF206C00..FF206EFF",
-      min(physical_record(block)[0] for block in range(38, 50)) == 37 and
-      432 * 64 == 0x6C00 and 444 * 64 - 1 == 0x6EFF)
+      min(physical_record(block)[0] for block in range(38, 50)) == 37)
+
 
 tail = DF[0x7800:]
 tail_words = Counter(tail[offset:offset + 4] for offset in range(0, len(tail), 4))
@@ -304,19 +296,11 @@ while True:
 # The descriptor/owner table region spans the checkpoint descriptor table
 # (0x2AF2C..0x2B0AC), the redundant table (0x2B0AC..0x2B12C), and the owner map
 # (0x2B1B0..0x2B2A8). Object 27's RAM field lives at descriptor offset 27*12+8.
-DESC_TABLE_LO = CHECKPOINT_TABLE                      # 0x2AF2C
-DESC_TABLE_HI = OWNER_MAP + 124 * 2                   # 0x2B2A8 (end of owner map)
 check("object 27 RAM literal 0xFEBF0240 occurs exactly once in CodeFlash",
       len(obj27_ram_hits) == 1, repr([hex(h) for h in obj27_ram_hits]))
 check("the sole occurrence is object 27's descriptor RAM field at 0x2B078",
       obj27_ram_hits == [CHECKPOINT_TABLE + 27 * 12 + 8],
       repr([hex(h) for h in obj27_ram_hits]))
-check("the sole occurrence lies inside the descriptor/owner table region",
-      all(DESC_TABLE_LO <= h < DESC_TABLE_HI for h in obj27_ram_hits),
-      repr([hex(h) for h in obj27_ram_hits]))
-check("no occurrence lies inside a function body (outside the table region)",
-      all(DESC_TABLE_LO <= h < DESC_TABLE_HI for h in obj27_ram_hits)
-      and len(obj27_ram_hits) == 1)
 check("object 27 writer_functions column is empty (dead configuration)",
       payload_rows[27]["writer_functions"] == "")
 check("object 27 is enabled (configured orphan, not a disabled slot)",

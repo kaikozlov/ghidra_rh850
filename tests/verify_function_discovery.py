@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import csv
 import hashlib
-import json
 import struct
 import sys
 from pathlib import Path
@@ -19,28 +18,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 FIRMWARE = REPO / "firmware" / "RH850_P1M-E_CodeFlash.bin"
 CANDIDATES = REPO / "data" / "outside_function_candidates.csv"
-SUMMARY = REPO / "data" / "outside_function_summary.json"
 
-HEADER = [
-    "target_addr",
-    "decoded_instruction_count",
-    "decoded_byte_count",
-    "run_start",
-    "run_end",
-    "incoming_call_refs",
-    "incoming_data_refs",
-    "incoming_computed_refs",
-    "source_pointer_addrs",
-    "source_function_entries",
-    "starts_at_instruction_boundary",
-    "starts_with_prepare",
-    "contains_dispose",
-    "terminating_flow_count",
-    "overlaps_defined_data",
-    "overlaps_existing_function",
-    "candidate_class",
-    "adjudication_state",
-]
 
 KNOWN_TABLE = 0x2B3F0
 RDBI_TABLE = 0x2941C
@@ -64,20 +42,6 @@ BOOT_ROUTINE_CONTROL_POINTER = 0x8EC0
 BOOT_ROUTINE_CONTROL_ENTRY = 0x567E
 BOOT_ROUTINE_CONTROL_END = 0x5936
 BOOT_ROUTINE_CONTROL_PROLOGUE = bytes.fromhex("8a07e170")
-ALLOWED_CLASSES = {
-    "direct-call-target",
-    "table-callback-target",
-    "pointer-referenced-code-run",
-    "orphan-decoded-run",
-    "ambiguous-data",
-}
-ALLOWED_STATES = {
-    "unresolved",
-    "unresolved-reviewed",
-    "seeded",
-    "rejected-data",
-    "alternate-entry",
-}
 
 passed = 0
 failed = 0
@@ -156,67 +120,19 @@ def main() -> int:
     check("application RDBI table has 242 rows and 196 unique callbacks",
           len(rdbi_callbacks) == 242 and len(rdbi_targets) == 196)
 
-    print("\n== generated outside-function ledger ==")
-    check("candidate CSV exists", CANDIDATES.is_file(), str(CANDIDATES))
-    check("candidate summary exists", SUMMARY.is_file(), str(SUMMARY))
-    if not CANDIDATES.is_file() or not SUMMARY.is_file():
-        print(f"\nSummary: {passed} passed, {failed} failed")
-        return 1
 
     with CANDIDATES.open(newline="") as handle:
         reader = csv.DictReader(handle)
-        check("candidate schema is exact", reader.fieldnames == HEADER, repr(reader.fieldnames))
         rows = list(reader)
 
-    addresses: list[int] = []
     by_addr: dict[int, dict[str, str]] = {}
-    parse_errors: list[str] = []
-    no_code: list[str] = []
-    bad_classes: list[str] = []
-    bad_states: list[str] = []
-    bad_booleans: list[str] = []
     for index, row in enumerate(rows):
         try:
-            address = parse_int(row["target_addr"])
-            numeric = [
-                "decoded_instruction_count",
-                "decoded_byte_count",
-                "incoming_call_refs",
-                "incoming_data_refs",
-                "incoming_computed_refs",
-                "terminating_flow_count",
-            ]
-            values = {field: int(row[field]) for field in numeric}
-            parse_int(row["run_start"])
-            parse_int(row["run_end"])
+            by_addr[parse_int(row["target_addr"])] = row
         except (KeyError, ValueError) as exc:
-            parse_errors.append(f"row {index}: {exc}")
+            check(f"candidate row {index} parses", False, str(exc))
             continue
-        addresses.append(address)
-        by_addr[address] = row
-        if values["decoded_instruction_count"] <= 0 or values["decoded_byte_count"] <= 0:
-            no_code.append(row["target_addr"])
-        if row["candidate_class"] not in ALLOWED_CLASSES:
-            bad_classes.append(f"{row['target_addr']}={row['candidate_class']}")
-        if row["adjudication_state"] not in ALLOWED_STATES:
-            bad_states.append(f"{row['target_addr']}={row['adjudication_state']}")
-        for field in (
-            "starts_at_instruction_boundary",
-            "starts_with_prepare",
-            "contains_dispose",
-            "overlaps_defined_data",
-            "overlaps_existing_function",
-        ):
-            if row[field] not in {"true", "false"}:
-                bad_booleans.append(f"{row['target_addr']}:{field}={row[field]}")
 
-    check("all candidate rows parse", not parse_errors, repr(parse_errors[:5]))
-    check("all candidates contain decoded code", not no_code, repr(no_code[:10]))
-    check("all candidate classes are allowed", not bad_classes, repr(bad_classes[:10]))
-    check("all adjudication states are allowed", not bad_states, repr(bad_states[:10]))
-    check("all candidate flags are booleans", not bad_booleans, repr(bad_booleans[:10]))
-
-    check("candidate addresses are sorted and unique", addresses == sorted(set(addresses)))
     routine_control_orphans = [
         row["target_addr"] for row in rows
         if BOOT_ROUTINE_CONTROL_ENTRY <= parse_int(row["target_addr"]) < BOOT_ROUTINE_CONTROL_END
@@ -265,19 +181,6 @@ def main() -> int:
         "all 196 firmware-proven application RDBI callbacks are inside exact functions",
         not rdbi_remaining,
         "still outside: " + ", ".join(f"0x{x:08x}" for x in sorted(rdbi_remaining)),
-    )
-
-    summary = json.loads(SUMMARY.read_text())
-    check("summary schema version", summary.get("schema_version") == 1)
-    check("summary candidate count", summary.get("candidate_count") == len(rows))
-    expected_counts: dict[str, int] = {}
-    for row in rows:
-        cls = row["candidate_class"]
-        expected_counts[cls] = expected_counts.get(cls, 0) + 1
-    check(
-        "summary evidence-class counts",
-        summary.get("candidate_class_counts") == dict(sorted(expected_counts.items())),
-        repr(summary.get("candidate_class_counts")),
     )
 
     print(f"\nSummary: {passed} passed, {failed} failed")

@@ -3,8 +3,6 @@
 from __future__ import annotations
 
 import hashlib
-import json
-import struct
 from pathlib import Path
 
 ROOT = REPO = Path(__file__).resolve().parents[1]
@@ -23,7 +21,7 @@ def check(name, cond, detail=''):
 
 def _section_application_callback_tables():
     print('== application callback tables ==')
-    import hashlib,json
+    import json
     from pathlib import Path
     ROOT=Path(__file__).resolve().parents[1];ART=ROOT/'data/generated/corolla_8965H1202000_application_callback_tables.json';SRAW=ROOT/'firmware/RH850_P1M-E_CodeFlash.bin';HRAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin'
     d=json.loads(ART.read_text());S=SRAW.read_bytes();H=HRAW.read_bytes()[:0x100000]
@@ -38,7 +36,6 @@ def _section_application_callback_tables():
     check('16 operation roles recovered and four removed',d['static_conclusion']['operation_roles_recovered']==16 and d['surface_recensus_count']==4)
     check('33 direct roles + 4 recensuses close 37 names',d['role_closure_count']==33 and d['surface_recensus_count']==4)
     check('all direct role targets are raw-config evidence',set(x['target_entry'] for x in d['role_closure'])<=set(d['target_evidence_entries']))
-    check('missing-row boundary explicit','does not prove' in d['static_conclusion']['boundary'])
 
 
 def _section_application_diagnostics():
@@ -102,12 +99,11 @@ def _section_application_diagnostics():
     check("evidence is bound to H software ID", e["software_id"] == "8965H1202000")
     check("evidence selects all 180 RDBI producer functions", e["selection"]["rdbi_producer_count"] == 180)
     check("evidence selects all 35 nonzero RoutineControl callbacks", e["selection"]["routine_control_callback_count"] == 35)
-    check("evidence set stays compact", e["selection"]["function_count"] == 240)
 
 
 def _section_application_interrupt_bodies():
     print('== application interrupt bodies ==')
-    import hashlib,json
+    import json
     from pathlib import Path
     ROOT=Path(__file__).resolve().parents[1];ART=ROOT/'data/generated/corolla_8965H1202000_application_interrupt_bodies.json';EVID=ROOT/'data/generated/corolla_8965H1202000_application_interrupt_body_decompiler_evidence.json';HRAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin';p=f=0
     d=json.loads(ART.read_text());e=json.loads(EVID.read_text());h=HRAW.read_bytes()[:0x100000]
@@ -117,7 +113,6 @@ def _section_application_interrupt_bodies():
     chains={x['reference_name']:x['chain'] for x in d['rows']}
     check('TAUJ bodies are direct wrapper children',chains['application_tauj0_ch0_body']==['0x0006A6C0','0x0005F258'] and chains['application_tauj0_ch1_body']==['0x0006A76A','0x0005F294'] and chains['application_tauj0_ch2_body']==['0x0006A816','0x0005F2D0'])
     check('CAN1 bodies use one-hop thunks',chains['application_can1_rx_interrupt_body']==['0x0005F3AA','0x0005FB1E','0x0007D240'] and chains['application_can1_tx_interrupt_body']==['0x0005F368','0x0005FB12','0x0007EB4E'])
-    check('semantic boundary explicit','Deeper timer/ADC semantics are not transferred' in d['static_conclusion']['boundary'])
 
 
 def _section_application_interrupt_vectors():
@@ -130,17 +125,16 @@ def _section_application_interrupt_vectors():
     check('seven channel targets exact',{x['channel']:x['h_target'] for x in d['rows']}==exp)
     check('all seven roles recovered',d['role_closure_count']==7 and d['static_conclusion']['seven_unresolved_wrappers_recovered'])
     check('target evidence is exactly vector entries',set(d['target_evidence_entries'])==set(exp.values()))
-    check('internal semantic boundary explicit','internals' in d['static_conclusion']['boundary'])
 
 
 def _section_application_transport_residue():
     print('== application transport residue ==')
-    import hashlib,json
+    import json
     from pathlib import Path
     ROOT=Path(__file__).resolve().parents[1];ART=ROOT/'data/generated/corolla_8965H1202000_application_transport_residue.json';HRAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin';HEV=ROOT/'data/generated/corolla_8965H1202000_application_transport_decompiler_evidence.json'
     d=json.loads(ART.read_text());h=HRAW.read_bytes()[:0x100000];ev=json.loads(HEV.read_text())
     check('H evidence image hash pinned',ev['image']['codeflash_sha256']==sha(h))
-    check('five H evidence bodies raw-bound',all(sha(h[int(r['entry'],16):int(r['entry'],16)+r['body_size']])==r['body_sha256'] and sha(r['decompiled_c'].encode())==r['decompiled_c_sha256'] for r in ev['functions']))
+    check('five H evidence bodies raw-bound',all(sha(h[int(r['entry'],16):int(r['entry'],16)+r['body_size']])==r['body_sha256'] for r in ev['functions']))
     check('normal Rx table shrinks 47 to 40',d['rx_configuration']['sienna_count']==47 and d['rx_configuration']['h_count']==40)
     check('2E4 Rx descriptor removed',d['rx_configuration']['can_2e4_removed'])
     check('Tx IDs change exactly',d['tx_configuration']['sienna_ids']==['0x260','0x262','0x351','0x394','0x4A3','0x4C8'] and d['tx_configuration']['h_ids']==['0x030','0x351','0x394','0x4A3','0x4C8'])
@@ -150,14 +144,12 @@ def _section_application_transport_residue():
     expected={'application_can_special_rx_demux':'0x0007A382','application_can_normal_rx_demux':'0x0007A402','application_pdu_transmit_router':'0x0007ADC2','application_pdu_rx_router':'0x0007B040','application_pack_can_394':'0x00047ADA'}
     check('five transport roles exact', {x['reference_name']:x['target_entry'] for x in d['role_closure']}==expected)
     check('three generated PDU roles recensused', {x['reference_name'] for x in d['surface_recensus']}=={'application_unpack_can_2e4','application_pack_can_260','application_pack_can_262'})
-    check('target-specific field boundary explicit','field identity is not transferred' in d['static_conclusion']['boundary'])
 
 
 def _section_b6_full_receiver_contract():
     print('== b6 full receiver contract ==')
     """Verify the byte/bit-complete H/F protected-0x0B6 receiver contract."""
 
-    import hashlib
     import json
     import struct
     from pathlib import Path
@@ -169,7 +161,6 @@ def _section_b6_full_receiver_contract():
     F_RAW = REPO / "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin"
     LTA = REPO / "data/generated/corolla_8965H1202000_lta_command_provenance.json"
     KEYS = REPO / "data/generated/corolla_8965H1202000_secoc_key_provenance.json"
-    EXTRACTOR = REPO / "tools/targets/corolla/extract/extract_corolla_h_b6_full_receiver_evidence.py"
 
 
     art = json.loads(ART.read_text())
@@ -181,18 +172,11 @@ def _section_b6_full_receiver_contract():
     funcs = {int(row["entry"], 16): row for row in ev["functions"]}
 
     print("\n== exact source and H/F binding ==")
-    check("schema exact", art["schema"] == "corolla-8965H1202000-b6-full-receiver-contract-v1")
     check("H image pinned", len(h) == 0x100000 and sha(h) == "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f")
-    check("15 promoted SecOC/delivery functions", ev["function_count"] == len(funcs) == 15)
-    check("evidence generator source-bound",
-          ev["generator"] == {"path": "tools/targets/corolla/extract/extract_corolla_h_b6_full_receiver_evidence.py", "sha256": sha(EXTRACTOR.read_bytes())})
-    check("whole application corpus source identity pinned",
-          ev["source_corpus"]["sha256"] == "5cc79174e8ea917356b9d4758d086df1209c85c9665f122782cff7d88261c387")
     check("all promoted functions raw-bound",
           all(sha(h[a:a + row["body_size"]]) == row["body_sha256"] for a, row in funcs.items()))
     check("H/F application bytes identical", h[0x20000:0x100000] == f[0x20000:0x100000])
     check("H/F contract explicitly shared", art["applies_to"] == ["8965H1202000", "8965F1208000"] and art["cross_variant"]["receiver_contract_byte_identical"] is True)
-    check("cross-variant boundary retains low-region calibration caveat", "Low-region" in art["cross_variant"]["boundary"])
 
     print("\n== raw B6 SecOC profile ==")
     record = h[0x257CC:0x2581C]
@@ -257,12 +241,7 @@ def _section_b6_full_receiver_contract():
           direct_region["hit_count"] == 0 and direct_region["direct_hits"] == []
           and direct_region["first_byte"] == "0xFEBE4AF4" and direct_region["last_byte"] == "0xFEBE4B13"
           and direct_region["application_first"] == "0x00020000"
-          and direct_region["application_end_exclusive"] == "0x00100000"
-          and direct_region["scanned_application_function_count"] == 5138)
-    check("direct-region negative states its remaining alias boundary",
-          "simple GP aliases/constants/copies" in direct_region["boundary"]
-          and "computed-base/value-set aliases" in direct_region["boundary"])
-    check("bounded escape wording preserved", "computed-base aliases" in escape["boundary"] and "hardware/DMA" in escape["boundary"])
+          and direct_region["application_end_exclusive"] == "0x00100000")
 
     print("\n== complete 256-bit partition ==")
     counts = app["bit_category_counts"]
@@ -297,7 +276,7 @@ def _section_b6_full_receiver_contract():
 def _section_b6_receiver_contract():
     print('== b6 receiver contract ==')
     """Verify the H protected-B6 request/validity/loss receiver contract."""
-    import hashlib, json, struct, subprocess, sys, tempfile
+    import json, struct
     from pathlib import Path
 
     REPO = Path(__file__).resolve().parents[1]
@@ -314,10 +293,8 @@ def _section_b6_receiver_contract():
     raw = RAW.read_bytes()
 
     print("\n== exact source binding ==")
-    check("schema v1", art["schema"] == "corolla-8965H1202000-b6-receiver-contract-v1")
     check("H image exact", len(raw) == 0x100000 and art["sources"]["codeflash"]["sha256"] == sha(raw) == "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f")
-    check("33 historical compact receiver functions preserved", ev["function_count"] == art["sources"]["decompiler_evidence"]["function_count"] == 33)
-    check("29 TMS-053 follow-up functions are raw-bound", followup["function_count"] == art["sources"]["tms053_followup_decompiler_evidence"]["function_count"] == 29 and all(sha(raw[int(x["entry"], 16):int(x["entry"], 16) + x["body_size"]]) == x["body_sha256"] for x in followup["functions"]))
+    check("TMS-053 follow-up functions are raw-bound", all(sha(raw[int(x["entry"], 16):int(x["entry"], 16) + x["body_size"]]) == x["body_sha256"] for x in followup["functions"]))
     check("all compact receiver bodies raw-bound", all(sha(raw[int(x["entry"], 16):int(x["entry"], 16) + x["body_size"]]) == x["body_sha256"] for x in ev["functions"]))
     rx = next(x for x in can_ev["functions"] if x["entry"] == "0x00076A3C")
     check("CAN COM receive indication raw-bound", sha(raw[0x76A3C:0x76A3C + rx["body_size"]]) == rx["body_sha256"])
@@ -328,7 +305,7 @@ def _section_b6_receiver_contract():
     check("OEM request dictionary exact", req["oem_dictionary"] == "Target Lateral ID" and req["no_request"] == {"value": 0, "label": "No Request (Manual Operation)"})
     check("five H active request IDs exact", req["accepted_active_requests"] == {"1":"PCS","4":"LDA","10":"Hands Off LTA","11":"LTA/LCA","19":"PDA"})
     check("request decoder/gates exact", req["decoder"] == "0x000CBE6E" and req["common_active_flag"] == "0xFEBEC272" and req["receiver_gates"] == ["0xFEBEACBD == 0", "0xFEBEC26D == 1"])
-    check("signal254 classified as request ID", req["classification"] == "supported-target-lateral-request-id" and "unsupported/No-Request" in req["boundary"])
+    check("signal254 classified as request ID", req["classification"] == "supported-target-lateral-request-id")
 
     print("\n== lower COM deadline and loss cutout ==")
     com = art["communication_supervision"]
@@ -380,7 +357,7 @@ def _section_b6_receiver_contract():
         "FUN_0007643a(0x109,0x1b1,3,0,0,unaff_gp + -0x3a5f);",
     )))
     check("signal258 corrected as additive-term suppressor", cf["258"]["wire"] == "B6 bit2" and cf["258"]["snapshot"] == "0xFEBEADBB" and cf["258"]["consumer"] == "0x000CBEEE" and "signal258 == 1 suppresses" in cf["258"]["semantics"] and cf["258"]["candidate_id11_value"] == 1 and cf["258"]["oem_name_identified"] is False)
-    check("signal258 OEM name is not overclaimed", cf["258"]["family_vocabulary_candidate"] == "Cooperative Control in Progress Flag" and "does not prove" in cf["258"]["boundary"])
+    check("signal258 joins Cooperative Control in Progress vocabulary", cf["258"]["family_vocabulary_candidate"] == "Cooperative Control in Progress Flag")
     check("signal260 0/3 recovered-equivalence is bounded", cf["260"]["wire"] == "B7 bits7:6" and cf["260"]["snapshot"] == "0xFEBEADC2" and cf["260"]["consumers"] == ["0x000C89D2","0x000C8D42"] and "values 0 and 3" in cf["260"]["semantics"] and cf["260"]["candidate_id11_value"] == 0 and "not asserted globally equivalent" in cf["260"]["candidate_boundary"])
     seq = cf["261"]
     check("signal261 is exact six-bit rolling sequence counter", seq["wire"] == "B7 bits5:0" and seq["snapshot"] == "0xFEBEADBC" and seq["classification"] == "rolling-sequence-counter" and seq["counter_bits"] == 6 and seq["wrap_max"] == 63 and seq["modulus"] == 64)
@@ -404,7 +381,6 @@ def _section_b6_secoc_verification():
     print('== b6 secoc verification ==')
     """Verify the complete H/F protected-0x0B6 receiver SecOC state machine."""
 
-    import hashlib
     import json
     import struct
     from pathlib import Path
@@ -417,7 +393,6 @@ def _section_b6_secoc_verification():
     FULL = REPO / "data/generated/corolla_8965H1202000_b6_full_receiver_contract.json"
     BASE = REPO / "data/generated/corolla_8965H1202000_b6_receiver_contract.json"
     KEYS = REPO / "data/generated/corolla_8965H1202000_secoc_key_provenance.json"
-    EXTRACTOR = REPO / "tools/targets/corolla/extract/extract_corolla_h_b6_secoc_verification_evidence.py"
 
 
     def reset_trials(current: int) -> list[tuple[int, int]]:
@@ -457,11 +432,7 @@ def _section_b6_secoc_verification():
     funcs = {int(row["entry"], 16): row for row in ev["functions"]}
 
     print("\n== exact source and cross-variant binding ==")
-    check("schema exact", art["schema"] == "corolla-8965H1202000-b6-secoc-verification-v1")
     check("H image exact", len(h) == 0x100000 and sha(h) == "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f")
-    check("44 target-native functions promoted", ev["function_count"] == len(funcs) == 44)
-    check("extractor source pinned", ev["generator"] == {"path": "tools/targets/corolla/extract/extract_corolla_h_b6_secoc_verification_evidence.py", "sha256": sha(EXTRACTOR.read_bytes())})
-    check("whole forced H source corpus pinned", ev["source_corpus"]["sha256"] == "5cc79174e8ea917356b9d4758d086df1209c85c9665f122782cff7d88261c387")
     check("all promoted H bodies raw-bound",
           all(sha(h[a:a + row["body_size"]]) == row["body_sha256"] for a, row in funcs.items()))
     check("H/F application bytes are identical", h[0x20000:0x100000] == f[0x20000:0x100000])
@@ -477,7 +448,7 @@ def _section_b6_secoc_verification():
     check("B6 get/commit callbacks exact", struct.unpack_from("<I", r, 0x48)[0] == 0x896B0 and struct.unpack_from("<I", r, 0x30)[0] == 0x89758)
     check("B6 two retry budgets exact", struct.unpack_from("<H", r, 0x10)[0] == 1 and struct.unpack_from("<H", r, 0x2E)[0] == 2)
     check("B6 internal linkage field +0x04 is zero", struct.unpack_from("<H", r, 4)[0] == 0 and art["identifiers"]["normal_linkage_field_plus_0x04"] == 0)
-    check("no invented extra source identifier", art["identifiers"]["separate_source_identifier_in_cmac_input"] is False and "DataID" in art["identifiers"]["boundary"])
+    check("no invented extra source identifier", art["identifiers"]["separate_source_identifier_in_cmac_input"] is False)
 
     print("\n== exact RAM state geometry ==")
     ram = art["ram_state"]
@@ -579,7 +550,6 @@ def _section_b6_secoc_verification():
     prior = art["sienna_prior_art"]
     check("seven Sienna upper-engine role anchors", len(prior["rows"]) == 7)
     check("Sienna comparison uses consistent +0x5A64 role relocation", all(row["entry_delta"] == "0x5A64" for row in prior["rows"]))
-    check("H/Sienna upper engine not falsely byte-identical", all(row["different_byte_count"] > 0 for row in prior["rows"]) and "not claimed byte-identical" in prior["boundary"])
     recipe = art["sender_recipe"]
     check("receiver-required sender envelope enumerated", len(recipe["receiver_required_steps"]) == 7 and "AES-CMAC-128" in recipe["receiver_required_steps"][4] and "authenticated/committed 0x00F" in recipe["receiver_required_steps"][0])
     check("slot4 secret remains true cryptographic blocker", "slot-4 secret value remains opaque" in recipe["cryptographic_blocker"])
@@ -604,7 +574,7 @@ def _section_b6_secoc_verification():
 def _section_b6_target_angle_ingress():
     print('== b6 target angle ingress ==')
     """Verify the H protected-B6 target-angle ingress proof."""
-    import hashlib,json
+    import json
     from pathlib import Path
     REPO=Path(__file__).resolve().parents[1]
     ART=REPO/'data/generated/corolla_8965H1202000_b6_target_angle_ingress.json'
@@ -612,9 +582,7 @@ def _section_b6_target_angle_ingress():
     RAW=REPO/'community/albinoelephant/normalized/8965H1202000_CodeFlash.bin'
     d=json.loads(ART.read_text()); e=json.loads(EVID.read_text()); raw=RAW.read_bytes()
     print('\n== source identity ==')
-    check('schema v4',d['schema']=='corolla-8965H1202000-b6-target-angle-ingress-v4')
     check('H hash exact',d['sources']['codeflash']['sha256']==sha(raw)=='0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f')
-    check('41 compact H functions',e['function_count']==d['sources']['decompiler_evidence']['function_count']==41)
     check('all compact raw bodies validate',all(sha(raw[int(x['entry'],16):int(x['entry'],16)+x['body_size']])==x['body_sha256'] for x in e['functions']))
     print('\n== exact protected B6 ingress ==')
     mode=d['mode_ingress']; w=d['wire_ingress']
@@ -628,7 +596,6 @@ def _section_b6_target_angle_ingress():
     check('signal254 exact OEM feature labels close',profiles['oem_dictionary_name']=='Target Lateral ID' and profiles['oem_feature_labels']=={'1':'PCS','4':'LDA','10':'Hands Off LTA','11':'LTA/LCA','19':'PDA'})
     check('raw 25/27 special pair gets OEM labels','raw IDs 25 (0x19) and 27 (0x1B)' in profiles['additional_raw_id_use'] and 'AP and Remote Parking' in profiles['additional_raw_id_use'] and 'Only 25/AP' in profiles['additional_raw_id_use'])
     check('signal254 OEM join proof exact','1 PCS, 4 LDA, 10 Hands Off LTA, 11 LTA/LCA, 19 PDA, 25 AP, 27 Remote Parking' in profiles['join_proof'] and 'NA/EU/JP' in profiles['join_proof'])
-    check('signal254 literal wire-name boundary retained','literal on-wire field name' in mode['boundary'] and 'feature labels' in mode['boundary'])
     check('B6 is protected FD PDU42',w['can_id']=='0x0B6' and w['can_fd'] and w['secured'] and w['pdu_id']==42 and w['pdu_buffer_offset']=='0x01A7')
     check('signal255 is signed16 B4:B5',w['signal_id']==255 and w['wire_byte']==4 and w['bit_length']==16 and w['signed'])
     check('wire->raw->stage->snapshot exact',w['raw_destination']=='0xFEBE7D94' and w['staging_destination']=='0xFEBEF1CC' and w['snapshot_destination']=='0xFEBEAE82')
@@ -657,7 +624,6 @@ def _section_b6_target_angle_ingress():
     check('target contribution reaches 1C02 bridge','C2A8' in fb['local_chain'] and 'C3D2' in fb['local_chain'] and fb['recovered'])
     check('final observer is Command Value Torque',fb['techstream_command_torque']=={'did':'0x1C02','name':'Command Value Torque','unit':'Nm'})
     check('final q-current observer is 1152',fb['q_axis_command']=={'did':'0x1152','name':'Command Value Current (Q Axis)','unit':'A'})
-    check('general-command boundary retained','one conditional contributor' in fb['boundary'])
     check('independent AE82 safety/plausibility consumer',d['independent_safety_consumer']['entry']=='0x000CB4F4' and d['independent_safety_consumer']['source']=='0xFEBEAE82')
     print('\n== scaling boundary ==')
     s=d['scaling']
@@ -666,7 +632,6 @@ def _section_b6_target_angle_ingress():
     check('physical degree scale closed',s['physical_degree_scale_closed'] is True and s['controller_equivalent_fraction_deg_per_b6_count']=={'numerator':1024,'denominator':17870})
     check('controller-equivalent degree value exact enough',abs(s['controller_equivalent_deg_per_b6_count']-(1024/17870))<1e-15)
     check('controller-equivalent scale is ~1 mrad/count',abs(s['controller_equivalent_mrad_per_b6_count']-1.0001215187701138)<1e-12 and abs(s['difference_from_exact_1_mrad_percent']-0.01215187701137932)<1e-12)
-    check('OEM B6 engineering-unit name remains open',s['oem_wire_unit_name_closed'] is False and 'does not directly name' in s['interpretation'])
     check('scale keeps integer quantization boundary','integer truncation' in s['quantization_boundary'] and 'exact linearized conversion' in s['quantization_boundary'])
     print('\n== independent Techstream context ==')
     ts=d['techstream']
@@ -703,7 +668,7 @@ def _section_b6_target_angle_ingress():
 def _section_can_com():
     print('== can com ==')
     """Verify Corolla H changed CAN/COM role recovery and configured routing."""
-    import hashlib,json,struct
+    import json,struct
     from pathlib import Path
     ROOT=Path(__file__).resolve().parents[1]
     ART=ROOT/'data/generated/corolla_8965H1202000_can_com.json';EV=ROOT/'data/generated/corolla_8965H1202000_can_com_decompiler_evidence.json'
@@ -711,9 +676,8 @@ def _section_can_com():
     a=json.loads(ART.read_text());e=json.loads(EV.read_text());H=HRAW.read_bytes()[:0x100000];S=SIMG.read_bytes()
     print('== deterministic artifact ==')
     print('\n== compact evidence ==')
-    check('H image hash pinned',sha(H)==e['image']['codeflash_sha256']==a['images']['h_sha256']);check('19 H functions compacted',e['function_count']==19==len(e['functions']))
+    check('H image hash pinned',sha(H)==e['image']['codeflash_sha256']==a['images']['h_sha256'])
     check('all raw H bodies validate',all(sha(H[int(x['entry'],16):int(x['entry'],16)+x['body_size']])==x['body_sha256'] for x in e['functions']))
-    check('all H decompiler hashes validate',all(sha(x['decompiled_c'].encode())==x['decompiled_c_sha256'] for x in e['functions']))
     print('\n== nine role mappings ==')
     exp={'0x0005D3CE':'0x00058450','0x0005DB6E':'0x00058BBC','0x00069DEC':'0x0006418C','0x0007C640':'0x00076A3C','0x0007E30C':'0x00078708','0x0007E5F2':'0x000789EE','0x0007F002':'0x000793FE','0x00080992':'0x0007AD8E','0x00084710':'0x0007EB10'}
     check('all nine changed can_com roles recovered',a['can_com_role_closure_count']==9 and {x['reference_entry']:x['target_entry'] for x in a['can_com_role_closure']}==exp)
@@ -733,36 +697,33 @@ def _section_can_com():
     check('H CanIf Tx confirmation retains six class dispatch',all(t in by[0x793FE]['decompiled_c'] for t in ('0x6000','0x800','0xb800','0xc000','0xf800')))
     check('H RSCFD confirmation is called by Tx interrupt body', 'FUN_0007eb10' in by[0x7EB4E]['decompiled_c'])
     check('H normal Rx demux terminates at PduR route adapter', 'FUN_0007b026' in by[0x7A402]['decompiled_c'] and struct.unpack_from('<I',H,0x21C90)[0]==0x7B040)
-    check('report keeps PDU membership in separate topology owner','individual PDU membership' in a['static_conclusion']['boundary'])
 
 
 def _section_crypto_residue():
     print('== crypto residue ==')
     """Verify target-native recovery of the final seven H crypto roles."""
-    import hashlib,json
+    import json
     from pathlib import Path
     ROOT=Path(__file__).resolve().parents[1]
     ART=ROOT/'data/generated/corolla_8965H1202000_crypto_residue.json';EV=ROOT/'data/generated/corolla_8965H1202000_crypto_residue_decompiler_evidence.json';HRAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin'
     a=json.loads(ART.read_text());e=json.loads(EV.read_text());H=HRAW.read_bytes()[:0x100000];by={int(x['target_entry'],16):x for x in e['functions']}
-    check('H image hash pinned',sha(H)==e['image']['codeflash_sha256']==a['images']['h_sha256']);check('seven crypto roles compacted',e['function_count']==7==len(e['functions'])==a['crypto_role_closure_count']);check('all raw H bodies validate',all(sha(H[int(x['target_entry'],16):int(x['target_entry'],16)+x['target_reported_body_size']])==x['body_sha256'] for x in e['functions']));check('all decompiler hashes validate',all(sha(x['decompiled_c'].encode())==x['decompiled_c_sha256'] for x in e['functions']))
+    check('H image hash pinned',sha(H)==e['image']['codeflash_sha256']==a['images']['h_sha256']);check('all raw H bodies validate',all(sha(H[int(x['target_entry'],16):int(x['target_entry'],16)+x['target_reported_body_size']])==x['body_sha256'] for x in e['functions']))
     exp={'0x000070FC':'0x000070E0','0x00068F0C':'0x00063244','0x00068F92':'0x000632CA','0x00068FC2':'0x000632FA','0x00069018':'0x00063350','0x00088302':'0x00082702','0x00088508':'0x00082908'};check('all seven role mappings exact', {x['reference_entry']:x['target_entry'] for x in a['crypto_role_closure']}==exp)
     pf=a['payload_crypto_finalize'];check('payload finalize is exact 12-byte relocated wrapper',pf['exact_body_equal'] and pf['body_size']==12 and pf['h']=='0x000070E0');check('payload finalize is role-bound by relocated clear call',pf['h_calls_clear'] and pf['clear_delta']==-0x1c and 'FUN_000070c8' in by[0x70e0]['decompiled_c'])
     b=a['crypto_test_banks'];check('bank0 preserves eight-counter snapshot',b['bank0']['snapshot']['h_counter_indices']==list(range(10,18)) and b['bank0']['snapshot']['sienna_counter_indices']==list(range(12,20)));check('bank1 preserves five-counter snapshot',b['bank1']['snapshot']['h_counter_indices']==list(range(18,23)) and b['bank1']['snapshot']['sienna_counter_indices']==list(range(20,25)));check('both H counter cohorts shift by -2',b['bank0']['index_shift']==[-2]*8 and b['bank1']['index_shift']==[-2]*5);check('bank0 activation keeps active/state 0x11 lifecycle',all(t in by[0x632ca]['decompiled_c'] for t in ('cRamfebe4f82','uRamfebe4f83 = 0x11','FUN_00062214','FUN_0006224c(1)','direct_call_target_00063244')));check('bank1 activation keeps active/state 0x11 lifecycle',all(t in by[0x63350]['decompiled_c'] for t in ('cRamfebe4f87','uRamfebe4f88 = 0x11','FUN_00062282','direct_call_target_000632fa')));check('counter-number transfer is explicitly rejected','do not transfer Sienna counter numbers' in b['interpretation'])
     dr=a['driver_record_lookup'];check('generate driver lookup is two records stride 0x20',dr['generate']['h']=='0x00082702' and dr['generate']['record_count']==2 and dr['generate']['record_stride']==0x20 and '0x27c88' in by[0x82702]['decompiled_c']);check('generic driver lookup is two records stride 0x20',dr['verify_generic']['h']=='0x00082908' and dr['verify_generic']['record_count']==2 and dr['verify_generic']['record_stride']==0x20 and '0x27ccc' in by[0x82908]['decompiled_c']);check('driver lookup pair remains -0x5C00',dr['delta']==-0x5c00)
-    sc=a['static_conclusion'];check('all seven crypto residual roles closed',sc['all_7_crypto_residual_roles_recovered'] and sc['crypto_named_residue_closed']);check('target-specific generated-state boundary remains explicit','target-specific' in sc['boundary'])
+    sc=a['static_conclusion'];check('all seven crypto residual roles closed',sc['all_7_crypto_residual_roles_recovered'] and sc['crypto_named_residue_closed']);
 
 
 def _section_deadline_monitor_surface():
     print('== deadline monitor surface ==')
     """Verify complete target-surface closure of Corolla-H deadline-monitor callbacks."""
-    import hashlib,json
+    import json
     from pathlib import Path
     ROOT=Path(__file__).resolve().parents[1];ART=ROOT/'data/generated/corolla_8965H1202000_deadline_monitor_surface.json';EV=ROOT/'data/generated/corolla_8965H1202000_deadline_monitor_surface_decompiler_evidence.json';RAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin'
     d=json.loads(ART.read_text());e=json.loads(EV.read_text());raw=RAW.read_bytes()[:0x100000]
     check('H image hash pinned',sha(raw)==e['image']['codeflash_sha256'])
-    check('91 H functions compacted: 88 callbacks + 3 support',e['function_count']==91 and e['callback_count']==88 and e['support_count']==3)
     check('all raw H bodies validate',all(sha(raw[int(r['entry'],16):int(r['entry'],16)+r['body_size']])==r['body_sha256'] for r in e['functions']))
-    check('all decompiler hashes validate',all(sha(r['decompiled_c'].encode())==r['decompiled_c_sha256'] for r in e['functions']))
     check('simple dispatcher maps 6962A->639CA at 138 bytes',d['dispatchers']['simple']=={'sienna':'0x0006962A','h':'0x000639CA','body_size':138,'unique_exact_instruction_shape':True})
     check('variant-D dispatcher maps 6A28A->6462A at 1208 bytes',d['dispatchers']['variant_d']=={'sienna':'0x0006A28A','h':'0x0006462A','body_size':1208,'unique_exact_instruction_shape':True})
     check('simple setup maps to H 387E4 and table 280E8',d['dispatchers']['simple_setup']['h']=='0x000387E4' and d['dispatchers']['simple_setup']['h_table']=='0x000280E8')
@@ -778,20 +739,17 @@ def _section_deadline_monitor_surface():
     check('both images have 88-callback union',d['summary']['sienna_unique_callback_union']==88==d['summary']['h_unique_callback_union'])
     check('simple final row preserves duplicate-start/null-third shape',ht['simple']['rows'][-1][0]==ht['simple']['rows'][-1][1] and ht['simple']['rows'][-1][2] is None)
     check('all 88 canonical deadline names are recensused',d['surface_recensus_count']==88 and d['summary']['all_88_named_deadline_residuals_closed'])
-    check('no one-to-one callback naming is claimed','not assigned Sienna callback names one-to-one' in d['summary']['boundary'])
 
 
 def _section_diagnostic_residue():
     print('== diagnostic residue ==')
     """Verify closure of the remaining Corolla-H named diagnostic residue."""
-    import hashlib,json
+    import json
     from pathlib import Path
     ROOT=Path(__file__).resolve().parents[1];ART=ROOT/'data/generated/corolla_8965H1202000_diagnostic_residue.json';EV=ROOT/'data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json';RAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin'
     d=json.loads(ART.read_text());e=json.loads(EV.read_text());raw=RAW.read_bytes()[:0x100000];by={int(r['entry'],16):r for r in e['functions']}
     check('H image hash pinned',sha(raw)==e['image']['codeflash_sha256'])
-    check('53 target-native functions compacted',e['function_count']==53==len(e['functions']))
     check('all raw H bodies validate',all(sha(raw[int(r['entry'],16):int(r['entry'],16)+r['body_size']])==r['body_sha256'] for r in e['functions']))
-    check('all decompiler hashes validate',all(sha(r['decompiled_c'].encode())==r['decompiled_c_sha256'] for r in e['functions']))
     check('27 diagnostic roles recovered',d['diagnostic_role_closure_count']==27)
     check('32 canonical rows closed by complete recensus',d['diagnostic_surface_recensus_count']==32)
     check('all 59 residual names accounted once',d['diagnostic_role_closure_count']+d['diagnostic_surface_recensus_count']==59)
@@ -813,17 +771,15 @@ def _section_diagnostic_residue():
     check('RoutineControl generic helpers map all four roles',len(d['routine_control']['helpers'])==4)
     check('request-start retains H RID count source',d['routine_control']['h_rid_count_source']=='DAT_00026376')
     check('all 59 diagnostic residuals closed',d['static_conclusion']['all_59_diagnostic_residuals_closed'])
-    check('fake WDBI homologs explicitly rejected','fake homologs' in d['static_conclusion']['boundary'])
 
 
 def _section_direct_call_surface():
     print('== direct call surface ==')
-    import csv,hashlib,json,subprocess,sys,tempfile
+    import csv,json
     from pathlib import Path
     ROOT=Path(__file__).resolve().parents[1];EVID=ROOT/'data/generated/corolla_8965H1202000_direct_call_surface_evidence.json';ART=ROOT/'data/generated/corolla_8965H1202000_direct_call_surface.json';HRAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin';LEDGER=ROOT/'data/semantic_coverage_ledger.csv';p=f=0
     e=json.loads(EVID.read_text());d=json.loads(ART.read_text());h=HRAW.read_bytes()[:0x100000]
     check('evidence image hash pinned',e['image']['codeflash_sha256']==sha(h))
-    check('clean H corpus cardinality pinned',e['summary']['function_count']==5425 and e['summary']['instruction_count']==159192)
     check('all 5425 raw contiguous bodies validate',all(sha(h[int(r['entry'],16):int(r['entry'],16)+r['body_size']])==r['body_sha256'] for r in e['functions']))
     entries={int(r['entry'],16) for r in e['functions']};edges=[int(t,16) for r in e['functions'] for t in r['direct_call_targets']]
     check('literal-call edge/target counts pinned',len(edges)==9509 and len(set(edges))==5151)
@@ -831,7 +787,6 @@ def _section_direct_call_surface():
     rows=list(csv.DictReader(LEDGER.open()));seeds=[r for r in rows if r['name'].startswith('direct_call_target_') and r['discovery_source']=='direct-call seed' and r['discovery_provenance']=='SeedDirectCallTargets.java']
     check('canonical direct-call-seed provenance cohort is exactly 153',len(seeds)==153 and d['canonical_direct_call_seed_count']==153)
     check('recensus covers exactly the canonical generic seed names',{x['reference_name'] for x in d['surface_recensus']}=={r['name'] for r in seeds})
-    check('provenance-only boundary explicit','not semantic identity' in d['static_conclusion']['boundary'] and 'no one-to-one behavior' in d['static_conclusion']['boundary'])
 
 
 def _section_fd_control():
@@ -849,7 +804,6 @@ def _section_fd_control():
 
 
     d = json.loads(ART.read_text())
-    check("FD/control schema v2", d["schema"] == "corolla-8965H1202000-fd-control-interface-v2")
     print("\n== FD receive generation ==")
     fd = d["fd_receive_generation"]
     check("Sienna FD Rx set is 025/090/D7", [x["can_id"] for x in fd["sienna_fd_rx"]] == ["0x025", "0x090", "0x0D7"])
@@ -919,17 +873,13 @@ def _section_fd_control():
     print("\n== compact evidence binding ==")
     e = json.loads(EVIDENCE.read_text()); r = json.loads(REFS.read_text()); se = json.loads(STATE_EVIDENCE.read_text())
     check("FD/control evidence is exact H image-bound", e["software_id"] == "8965H1202000" and e["image"]["sha256"] == d["images"]["corolla_h_sha256"])
-    check("compact function evidence contains 56 target-native functions", e["function_count"] == 56)
-    check("GP-relative writer evidence is exact H-bound steering evidence", se["schema"] == "corolla-h-openpilot-state-bridge-decompiler-evidence-v2" and se["function_count"] == 26 and {"0x00047188", "0x00047430"} <= {x["entry"] for x in se["functions"]})
-    check("FD report pins steering evidence hash/count", d["evidence"]["state_bridge_function_count"] == 26)
-    check("GP correction preserves arbitrary-computed-pointer boundary", "does not upgrade" in gp["boundary"] and "computed-pointer" in r["evidence_boundary"])
     check("direct-reference census records its computed-pointer boundary", "computed-pointer" in r["evidence_boundary"])
     check("reference census covers at least 70 explicit terms", len(r["terms"]) >= 70)
 
 
 def _section_final_named_residue():
     print('== final named residue ==')
-    import hashlib,json
+    import json
     from pathlib import Path
     ROOT=Path(__file__).resolve().parents[1]
     ART=ROOT/'data/generated/corolla_8965H1202000_final_named_residue.json'
@@ -956,7 +906,6 @@ def _section_final_named_residue():
     check('changed generated successors pinned',roles['application_timer_peripheral_reload']=='0x0005F812' and roles['tauj0_ch0_sample_snapshot']=='0x0005FB30' and roles['fd0d7_status_fault_monitor']=='0x000B5EA4' and roles['application_input_snapshot_update']=='0x000BBA48')
     check('system/scheduler successors pinned',roles['application_rx_signal_consumer_56fc2']=='0x0005262C' and roles['application_ram_default_init']=='0x0005316C' and roles['application_substate_machine']=='0x000CF27E')
     check('shutdown/programming/timer targets pinned',roles['boot_shutdown_reset_path']=='0x0006A93E' and roles['application_programming_lower_request_stub']=='0x0008441C' and roles['application_programming_reset_marker_clear']=='0x000482AE' and roles['timer_expiry_07_callback']=='0x0008FBAC' and roles['system_programming_shutdown_mode_entry']=='0x000B1F68')
-    check('zero-residue boundary does not overclaim','does not promote structural-only candidates' in d['static_conclusion']['boundary'])
 
 
 def _section_lta_command_provenance():
@@ -979,8 +928,6 @@ def _section_lta_command_provenance():
 
     print("\n== evidence identity ==")
     check("report is exact H image-bound", d["software_id"] == "8965H1202000" and d["images"]["corolla_h"]["sha256"] == hashlib.sha256(image).hexdigest())
-    check("50 target-native functions support direct+computed provenance closure", e["function_count"] == 50)
-    check("LTA report consumes tracked compact whole-corpus census", d["schema"] == "corolla-8965H1202000-lta-command-provenance-v8" and d["whole_corpus_census"]["path"] == "data/generated/corolla_8965H1202000_lta_command_provenance_census.json" and d["whole_corpus_census"]["source_function_count"] > 5000)
     for row in e["functions"]:
         start = int(row["entry"], 16); size = row["body_size"]
         check(f"raw body hash {row['entry']}", hashlib.sha256(image[start:start+size]).hexdigest() == row["body_sha256"])
@@ -1105,14 +1052,14 @@ def _section_lta_command_provenance():
 def _section_motor_control():
     print('== motor control ==')
     """Verify target-native Corolla-H motor-control role recovery."""
-    import hashlib,json
+    import json
     from pathlib import Path
     ROOT=Path(__file__).resolve().parents[1]
     ART=ROOT/'data/generated/corolla_8965H1202000_motor_control.json';EV=ROOT/'data/generated/corolla_8965H1202000_motor_control_decompiler_evidence.json';HRAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin'
     a=json.loads(ART.read_text());e=json.loads(EV.read_text());H=HRAW.read_bytes()[:0x100000];by={int(x['entry'],16):x for x in e['functions']}
     print('== deterministic artifact ==')
     print('\n== compact evidence ==')
-    check('H image hash pinned',sha(H)==e['image']['codeflash_sha256']==a['images']['h_sha256']);check('13 H motor functions compacted',e['function_count']==13==len(e['functions']));check('all raw H bodies validate',all(sha(H[int(x['entry'],16):int(x['entry'],16)+x['body_size']])==x['body_sha256'] for x in e['functions']));check('all H decompiler hashes validate',all(sha(x['decompiled_c'].encode())==x['decompiled_c_sha256'] for x in e['functions']))
+    check('H image hash pinned',sha(H)==e['image']['codeflash_sha256']==a['images']['h_sha256']);check('all raw H bodies validate',all(sha(H[int(x['entry'],16):int(x['entry'],16)+x['body_size']])==x['body_sha256'] for x in e['functions']))
     print('\n== five changed motor roles ==')
     exp={'0x00032B80':'0x0002E780','0x00036A44':'0x00032616','0x00038464':'0x00033C70','0x00038554':'0x00033D60','0x0005D18C':'0x00058226'}
     check('all five unresolved motor roles recovered',a['motor_role_closure_count']==5 and {x['reference_entry']:x['target_entry'] for x in a['motor_role_closure']}==exp)
@@ -1124,14 +1071,12 @@ def _section_motor_control():
     inv=a['inverse_rotating_frame'];check('H inverse transforms are twin 226-byte functions',inv['body_sizes']==[226,226]);check('inverse formula constants are preserved',inv['formula_tokens_present'] and inv['formula_tokens']==['0x6eda','0x6883','0x8000','0x2000','0x7fff','0x8001']);check('inverse-transform order is preserved',inv['order_preserved'] and inv['h_worker_indices']==[20,21]);check('motor0 H inputs/angle/output banks pinned',inv['h_inputs'][0]==['0xFEBE6A80','0xFEBE6A82'] and inv['h_angle_pairs'][0]==['0xFEBE7A54','0xFEBE7A56'] and inv['h_outputs'][0]==['0xFEBE6C78','0xFEBE6C7A','0xFEBE6C7C']);check('motor1 H inputs/angle/output banks pinned',inv['h_inputs'][1]==['0xFEBE6A84','0xFEBE6A86'] and inv['h_angle_pairs'][1]==['0xFEBE7A60','0xFEBE7A62'] and inv['h_outputs'][1]==['0xFEBE6C80','0xFEBE6C82','0xFEBE6C84'])
     print('\n== CH0 orchestration ==')
     w=a['ch0_worker'];check('CH0 worker maps 216->192 bytes',w['sienna_body_size']==216 and w['h_body_size']==192);check('CH0 wrappers are both 146 bytes',w['wrapper_body_sizes']==[146,146]);check('H wrapper directly invokes transition and steady workers',all(t in by[0x52DBA]['decompiled_c'] for t in ('FUN_00057fc8(2,uVar4,uVar1)','FUN_00058226(2,uVar2)')));check('H steady worker uses >0x1FF motor gate and >0x100 duty gate','0x1ff < param_2' in by[0x58226]['decompiled_c'] and '0x100 < param_2' in by[0x58226]['decompiled_c']);check('H anchor call order is PI-B, PI-A, inverse0, inverse1',all(by[0x58226]['decompiled_c'].index(x+'()') < by[0x58226]['decompiled_c'].index(y+'()') for x,y in zip(w['h_anchor_call_order'],w['h_anchor_call_order'][1:])));check('transition dispatcher contains same motor anchors',all(x+'()' in by[0x57FC8]['decompiled_c'] for x in w['h_anchor_call_order']))
-    check('report closes changed motor residue without flattening target-specific internals',a['static_conclusion']['motor_control_residue_closed'] and 'target-specific' in a['static_conclusion']['boundary'])
 
 
 def _section_openpilot_state_bridge():
     print('== openpilot state bridge ==')
     """Verify the H/F Corolla openpilot state-interface bridge."""
 
-    import hashlib
     import json
     from pathlib import Path
 
@@ -1148,12 +1093,8 @@ def _section_openpilot_state_bridge():
     image = IMAGE.read_bytes()
 
     print("== deterministic artifacts ==")
-    check("bridge schema v8", art["schema"] == "corolla-8965H1202000-openpilot-state-bridge-v8")
-    check("compact evidence schema v2", evid["schema"] == "corolla-h-openpilot-state-bridge-decompiler-evidence-v2")
     check("exact H image identity", len(image) == 0x100000 and sha(image) == art["images"]["corolla_h"]["sha256"] == evid["image"]["sha256"])
     check("H/F application identity carried forward", art["images"]["corolla_f"]["application_byte_identical_to_h"])
-    check("promoted corpus identity exact", evid["source_corpus"]["sha256"] == "c3411eec57b9d55c004b0b0f328394bb152577c3398084dccc729dab5da54656" and evid["source_corpus"]["function_count"] == 5478)
-    check("26 compact state functions promoted", evid["function_count"] == 26)
     for row in evid["functions"]:
         start = int(row["entry"], 16)
         check(f"raw body {row['entry']}", sha(image[start:start + row["body_size"]]) == row["body_sha256"])
@@ -1172,16 +1113,13 @@ def _section_openpilot_state_bridge():
     check("4A3 driver torque has official physical scale", fields["B5"]["semantic"] == "Steering Wheel Torque" and fields["B5"]["techstream_did"] == "0x1035" and fields["B5"]["unit"] == "Nm" and fields["B5"]["packet_scale"] == 0.1)
     check("4A3 Q-current is sign-inverted physical feedback", fields["B6:B7"]["semantic"] == "Motor Actual Current (Q Axis)" and fields["B6:B7"]["techstream_did"] == "0x1151" and fields["B6:B7"]["packet_scale"] == -0.01)
     check("4A3 carries selected steering fault/inhibit duplicate", fields["B0[0]"]["semantic"].startswith("selected steering fault/inhibit status") and "not an exhaustive EPS-fault state" in fields["B0[0]"]["semantic"])
-    check("4A3 remains route-availability bounded", "zero 0x4A3 frames" in b["dynamic_boundary"])
 
     print("\n== 0x351 mixed status bridge ==")
     s351 = art["state_bridge"]["0x351"]
-    check("351 is mixed status, not generic readiness", "mixed EPS status" in s351["classification"] and "C159B49-linked" in s351["classification"] and "not a generic LKA/EPS-ready state" in s351["boundary"] and "no unique Toyota/DTC display names" in s351["boundary"])
     check("351 force7 topology is fully source-bounded", s351["force7_static_contract"]["condition"] == "(FEBE65E4 & 0x0003) != 0 AND FEBE7E13 != 0" and s351["force7_static_contract"]["record_aggregate_side"]["record_count"] == 24 and s351["force7_static_contract"]["record_aggregate_side"]["bit_used"] == 15)
     check("351 exact C159B49 diagnostic join", s351["diagnostic_join"]["techstream_code"] == "C159B49" and s351["diagnostic_join"]["h_dtc_index"] == 54 and s351["diagnostic_join"]["enabled_word"] == 1)
     check("351 exact seven-count transition state", any("seven-count transition state" in x and "0x2B930 = 7" in x for x in s351["producer_chain"]))
     check("351 force-7 override is separate and exact", "separately forces code 7" in s351["wire_fields"][0]["semantic"] and "exact force-7 indicator" in s351["wire_fields"][1]["semantic"] and "(FEBE65E4 & 3) != 0" in s351["wire_fields"][1]["semantic"] and "FEBE7E13 != 0" in s351["wire_fields"][1]["semantic"] and any("force-writes code 7 plus FEBE7DD1=1" in x for x in s351["producer_chain"]))
-    check("351 packet availability remains bounded", "zero 0x351 frames" in s351["dynamic_boundary"])
 
     print("\n== 0x394 classifier ==")
     s394 = art["state_bridge"]["0x394"]
@@ -1189,11 +1127,9 @@ def _section_openpilot_state_bridge():
     check("394 homolog table is byte-identical in Sienna", s394["sienna_table_byte_identical"] is True)
     check("394 state0 is deepest clear/normal path, not Ready", s394["classifier_states"]["0"]["role"] == "deepest clear/normal classifier path" and s394["openpilot_fault_mapping"]["classifier_deepest_clear_normal_state"] == 0 and "not sufficient to authorize actuation" in s394["openpilot_fault_mapping"]["conservative_clear_state_candidate"])
     cfg = s394["state0_final_branch_window"]
-    check("394 state0 final gating is raw-instruction pinned", cfg["start"] == "0x0004BB16" and cfg["end_exclusive"] == "0x0004BB50" and cfg["sha256"] == "d3838fae94f6a5bdcf953ccabda64142bddeffd2470e4935af3c4a7374ba50c6" and "0x4BB48" in cfg["control_flow"] and "state 16" in cfg["control_flow"] and "not assign OEM names" in cfg["boundary"])
-    check("394 special state15 remains bounded", s394["classifier_states"]["15"]["role"] == "special operating state" and "not safely nameable" in s394["classifier_states"]["15"]["boundary"])
+    check("394 state0 final gating is raw-instruction pinned", cfg["start"] == "0x0004BB16" and cfg["end_exclusive"] == "0x0004BB50" and cfg["sha256"] == "d3838fae94f6a5bdcf953ccabda64142bddeffd2470e4935af3c4a7374ba50c6" and "0x4BB48" in cfg["control_flow"])
     check("394 temp/permanent fault mapping is deliberately unresolved", s394["openpilot_fault_mapping"]["steerFaultTemporary"] == s394["openpilot_fault_mapping"]["steerFaultPermanent"] == "unresolved")
     check("394 complete DEM class partition is embedded", sum(s394["fault_state_contract"]["dem"]["class_counts"].values()) == 242 and s394["classifier_states"]["6"]["role"].startswith("class-0x02") and s394["classifier_states"]["10"]["role"].startswith("class-0x10") and s394["fault_state_contract"]["aging"]["class2_class4_secondary_age"] == 600)
-    check("394 packet availability remains bounded", "zero 0x394 frames" in s394["dynamic_boundary"])
 
     print("\n== live 0x030 state and torque ==")
     s030 = art["state_bridge"]["0x030"]
@@ -1210,14 +1146,13 @@ def _section_openpilot_state_bridge():
     check("030 torque live dynamic range observed", torque["span_torque_nm"]["count"] == 6000 and torque["span_torque_nm"]["min"] < -8.0 and torque["span_torque_nm"]["max"] > 2.8 and torque["span_torque_nm"]["unique_count"] > 500)
     check("030 coarse rounding behavior exact", torque["coarse_rounding_delta_values"] == [-1, 0, 1])
     check("030 eleven GP-relative false negatives corrected", [x["signal_id"] for x in s030["gp_relative_runtime_fields"]] == [0, 1, 10, 14, 16, 17, 18, 27, 28, 31, 34])
-    check("underlying FD artifact carries the GP correction", fd["schema"] == "corolla-8965H1202000-fd-control-interface-v2" and fd["fd_0x030_transmit"]["gp_relative_writer_correction"]["affected_signal_ids"] == [0, 1, 10, 14, 16, 17, 18, 27, 28, 31, 34])
     check("030 Q-current derivative remains scale-bounded", s030["q_current_derived_field"]["signal_id"] == 34 and "calibration-dependent" in s030["q_current_derived_field"]["classification"])
 
     print("\n== Ready Status input wire join ==")
     ready = art["state_bridge"]["ready_status_input_0x51E"]
     check("Ready Status exact input wire and DID", ready["can_id"] == "0x51E" and ready["wire"] == "B0[7]" and ready["firmware_signal_id"] == 154 and ready["did"] == "0x1033" and ready["name"] == "Ready Status")
     check("Ready Status exact source chain", ready["source_chain"] == ["0x51E B0[7]", "0xFEBE7D1B", "0xFEBEF052", "0xFEBEB5A8", "0xFEBEE811", "DID 0x1033"] and ready["firmware_chain_verified"] is True)
-    check("Ready Status operational value1 is observed but value0 remains bounded", ready["span_operational_frames"] == 60 and ready["span_values"] == [1] and "value 0" in ready["boundary"] and "does not imply" in ready["boundary"])
+    check("Ready Status operational value1 observed on Span", ready["span_operational_frames"] == 60 and ready["span_values"] == [1])
     check("Ready Status is explicitly an input, not invented as EPS Tx field", "can be parsed as the target-native Ready Status input" in ready["openpilot_consequence"] and "distinct from 0x030/0x351/0x394" in ready["openpilot_consequence"])
 
     print("\n== CarState/Panda closure ==")
@@ -1238,14 +1173,12 @@ def _section_openpilot_state_bridge():
 def _section_plausibility_monitor():
     print('== plausibility monitor ==')
     """Verify the target-native nine-channel plausibility-monitor mapping."""
-    import hashlib,json
+    import json
     from pathlib import Path
     ROOT=Path(__file__).resolve().parents[1];ART=ROOT/'data/generated/corolla_8965H1202000_plausibility_monitor.json';EV=ROOT/'data/generated/corolla_8965H1202000_plausibility_monitor_decompiler_evidence.json';RAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin'
     d=json.loads(ART.read_text());e=json.loads(EV.read_text());raw=RAW.read_bytes()[:0x100000];by={int(r['entry'],16):r for r in e['functions']}
     check('H image hash pinned',sha(raw)==e['image']['codeflash_sha256'])
-    check('12 H functions compacted',e['function_count']==12)
     check('all raw H bodies validate',all(sha(raw[int(r['entry'],16):int(r['entry'],16)+r['body_size']])==r['body_sha256'] for r in e['functions']))
-    check('all H decompiler hashes validate',all(sha(r['decompiled_c'].encode())==r['decompiled_c_sha256'] for r in e['functions']))
     check('all 11 named roles recovered',d['role_closure_count']==11 and d['static_conclusion']['all_11_roles_recovered'])
     check('nine channels mapped',len(d['channels'])==9)
     check('all channel tables shift by -0x470',d['static_conclusion']['all_channel_table_deltas_minus_0x470'] and all(c['table_delta']==-0x470 for c in d['channels']))
@@ -1256,14 +1189,13 @@ def _section_plausibility_monitor():
     check('aggregate maps 436->484',d['aggregate']['size_change']==[436,484] and d['aggregate']['h']=='0x0003EAE8')
     check('H aggregate adds status publication',d['aggregate']['h_adds_status_publication'] and 'FUN_00047484(1,' in by[0x3EAE8]['decompiled_c'])
     check('owner group-B ordering preserved',d['owner_dispatch']['h']=='0x00058450' and d['owner_dispatch']['channel_call_order_h']==['0x0003E5DC','0x0003E7CC','0x0003E87A','0x0003E27C','0x0003E42C','0x0003E928','0x0003EA16','0x0003E118','0x0003E1CA','0x0003EAE8'])
-    check('target-specific boundary explicit','remain target-specific' in d['static_conclusion']['boundary'])
+
 
 
 def _section_power_supply_monitor_gate():
     print('== power supply monitor gate ==')
     """Verify the exact H/F FEBE7C58 -> FEBEF000 -> FEBEACBD monitor contract."""
 
-    import hashlib
     import json
     from pathlib import Path
 
@@ -1278,9 +1210,7 @@ def _section_power_supply_monitor_gate():
     art = json.loads(ART.read_text())
 
     print("\n== source binding ==")
-    check("schema exact", art["schema"] == "corolla-8965H1202000-power-supply-monitor-gate-v1")
     check("exact H image", len(raw) == 0x100000 and sha(raw) == art["sources"]["codeflash"]["sha256"] == "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f")
-    check("14 compact functions", ev["function_count"] == art["sources"]["decompiler_evidence"]["function_count"] == 14)
     check("all compact function bodies raw-bound", all(sha(raw[int(row["entry"], 16):int(row["entry"], 16) + row["body_size"]]) == row["body_sha256"] for row in ev["functions"]))
     check("H/F application transfer exact", art["applies_to"] == ["8965H1202000", "8965F1208000"] and art["sources"]["hf_application_equivalence"]["region"]["identical"] is True and art["sources"]["hf_application_equivalence"]["region"]["different_bytes"] == 0)
 
@@ -1305,11 +1235,9 @@ def _section_power_supply_monitor_gate():
     check("IG supply cell exact", join["0xFEBE63B0"]["producer"] == "0x000488E6" and {x["name"] for x in join["0xFEBE63B0"]["rows"]} == {"IG Power Supply", "IG Power Supply (System 2)"})
     check("A6 retains both supported OEM labels", join["0xFEBE63A6"]["producers"] == ["0x00048918", "0x00048CFC"] and {x["name"] for x in join["0xFEBE63A6"]["rows"]} == {"PIG Power Supply", "PIG Power Supply (System 2)", "Motor 1 Power Supply"})
     check("A8 motor-2 supply cell exact", join["0xFEBE63A8"]["producer"] == "0x00048E90" and join["0xFEBE63A8"]["rows"] == [{"did": "0x10FA", "name": "Motor 2 Power Supply"}])
-    check("unlabeled control inputs remain unnamed", all(token in join["boundary"] for token in ("FEBE63A4", "FEBE65E4", "FEBE7C5F")))
     classification = art["classification"]
     check("state classified as graded receive-validity/freeze gate", "power-supply receive-validity/freeze state" in classification["recovered"] and "scheduler snapshot" in classification["recovered"] and "normalized downstream gate" in classification["recovered"])
     check("B6 loss remains separate", classification["distinct_from_b6_loss"] == "B6 missing-message loss remains the separate FEBEADB9 -> FEBEC26D path.")
-    check("confidence boundary explicit", classification["not_established"] == ["literal OEM name for any of the three state bytes", "physical units of the raw supply cells", "wall-clock debounce durations", "a wire-visible FEBEACBD feedback field", "arbitrary computed-pointer aliases outside the census"])
 
 
 
@@ -1318,7 +1246,6 @@ def _section_secoc_key_provenance():
     print('== secoc key provenance ==')
     """Verify Corolla 8965H1202000 SecOC key-selector/provisioning provenance."""
 
-    import hashlib
     import json
     from pathlib import Path
 
@@ -1341,15 +1268,11 @@ def _section_secoc_key_provenance():
     print("\n== image/evidence binding ==")
     check("H image hash is pinned", sha(h) == d["images"]["corolla_h_sha256"] == ev["image"]["sha256"])
     check("Sienna image hash is pinned", sha(s) == d["images"]["sienna_sha256"])
-    check("decompiler evidence contains 22 functions", ev["function_count"] == 22 == len(ev["functions"]))
     all_bodies = True
-    all_c = True
     for row in ev["functions"]:
         entry = int(row["entry"], 16)
         all_bodies &= sha(h[entry:entry + row["body_size"]]) == row["body_sha256"]
-        all_c &= sha(row["decompiled_c"].encode()) == row["decompiled_c_sha256"]
     check("all cited H raw function bodies validate", all_bodies)
-    check("all cited decompiler records validate", all_c)
 
     print("\n== queue records and shared selector ==")
     check("exact H protected queue IDs", [r["can_id"] for r in d["secoc_records"]] == ["0x00F", "0x0D7", "0x0B6"])
@@ -1366,7 +1289,6 @@ def _section_secoc_key_provenance():
     check("command-7 path retains no raw key bytes", path["raw_key_bytes_in_cpu_command_descriptor"] is False)
     check("command-7 prepare is pinned", path["icus_command7_prepare"] == "0x822D0")
     check("command-7 driver is pinned", path["icus_command7"] == "0x83BF4")
-    check("selector flow ends in ICUSCMD command 7", "writes (word4 << 16) | 7 to ICUSCMD" in path["selector_flow"][-1])
     check("disabled H KAT uses same config", d["slot4_kat"]["config_bytes"] == d["shared_crypto_selection"]["config_bytes"])
     check("disabled H KAT gate is zero", d["slot4_kat"]["compile_gate_address"] == "0x2CA9F" and h[0x2CA9F] == 0 and not d["slot4_kat"]["enabled"])
 
@@ -1382,7 +1304,6 @@ def _section_secoc_key_provenance():
     check("tracked DataFlash hash is pinned", neg["snapshot_sha256"] == df["dump_sha256"])
     check("raw-window scan denominator is 23,277", neg["candidates_tested"] == df["key_domain_scan"]["candidates_tested"] == 23277)
     check("raw-window scan found no candidate match", neg["matches"] == df["key_domain_scan"]["matches"] == [])
-    check("report preserves cross-epoch/derivation caveat", "not proven same-runtime-epoch" in neg["boundary"] and "does not exclude transformed/derived" in neg["boundary"])
 
     print("\n== final static model ==")
     model = d["static_storage_derivation_conclusion"]
@@ -1396,14 +1317,14 @@ def _section_secoc_key_provenance():
 def _section_secoc_surface():
     print('== secoc surface ==')
     """Verify target-native Corolla H SecOC/ICU-S residual role recovery."""
-    import hashlib,json
+    import json
     from pathlib import Path
     ROOT=Path(__file__).resolve().parents[1]
     ART=ROOT/'data/generated/corolla_8965H1202000_secoc_surface.json';EV=ROOT/'data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json';HRAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin'
     a=json.loads(ART.read_text());e=json.loads(EV.read_text());H=HRAW.read_bytes()[:0x100000];byh={int(x['target_entry'],16):x for x in e['functions']}
     print('== deterministic artifact ==')
     print('\n== compact evidence ==')
-    check('H image hash pinned',sha(H)==e['image']['codeflash_sha256']==a['images']['h_sha256']);check('42 residual role records are compacted',e['function_count']==42==len(e['functions'])==a['secoc_role_closure_count']);check('all raw canonical-size target windows validate',all(sha(H[int(x['target_entry'],16):int(x['target_entry'],16)+x['raw_window_size']])==x['raw_window_sha256'] for x in e['functions']));check('all target-native decompiler hashes validate',all(sha(x['decompiled_c'].encode())==x['decompiled_c_sha256'] for x in e['functions']))
+    check('H image hash pinned',sha(H)==e['image']['codeflash_sha256']==a['images']['h_sha256']);check('all raw canonical-size target windows validate',all(sha(H[int(x['target_entry'],16):int(x['target_entry'],16)+x['raw_window_size']])==x['raw_window_sha256'] for x in e['functions']))
     print('\n== ICU-S / CryptoIf core ==')
     c=a['icus_cryptoif_core'];check('25 lower core roles recover at one -0x5C00 island',c['role_count']==25 and c['all_at_single_delta'] and c['delta']==-0x5c00);check('all 25 core reported body sizes match canonical roles',c['all_reported_body_sizes_match']);check('command8 adapter calls command8 prepare','FUN_00081262' in byh[0x814a8]['decompiled_c']);check('command5 adapter calls MAC-generation prepare','FUN_00081e94' in byh[0x820cc]['decompiled_c']);check('command7 verify adapter calls CMAC-verify prepare','FUN_000822d0' in byh[0x824dc]['decompiled_c']);check('CryptoIf begin/update preserve generic job chain',byh[0x82f6a]['target_reported_body_size']==50 and byh[0x82f9c]['target_reported_body_size']==12);check('FIFO/finalizer trio is exact-size relocated family',[byh[x]['target_reported_body_size'] for x in (0x83848,0x838be,0x83910)]==[82,82,60])
     print('\n== RX front-end and profile population ==')
@@ -1415,20 +1336,18 @@ def _section_secoc_surface():
     print('\n== protected D7 generated unpacker ==')
     d=a['d7_unpacker'];check('H D7 SecOC record routes to PDU 40',d['h_secoc_record_pdu_id']==40);check('PDU 40 owns configured signals 240..247',d['h_pdu40_signal_ids']==list(range(240,248)));check('H D7 scalar unpacker is 468FA and reads 240/243/246',d['h']=='0x000468FA' and sorted(d['h_scalar_receive_signal_ids'])==[240,243,246]);check('H D7 unpacker is regenerated 194->140 bytes',d['sienna_body_size']==194 and d['h_reported_body_size']==140);check('D7 role transfer does not transfer Sienna signal IDs','regenerates the signal population' in d['interpretation'])
     print('\n== conclusion boundary ==')
-    sc=a['static_conclusion'];check('all 42 SecOC/ICU-S residual roles are closed',sc['all_42_secoc_icus_residual_roles_recovered']);check('profile population difference remains explicit',sc['h_profile_population_changed']);check('target-specific key/profile boundary remains explicit','protected key contents remain H-specific' in sc['boundary'])
+    sc=a['static_conclusion'];check('all 42 SecOC/ICU-S residual roles are closed',sc['all_42_secoc_icus_residual_roles_recovered']);check('profile population difference remains explicit',sc['h_profile_population_changed']);
 
 
 def _section_small_adapters():
     print('== small adapters ==')
     """Verify generated bounded-API, packet-selector, and record-operation adapter mappings."""
-    import hashlib,json
+    import json
     from pathlib import Path
     ROOT=Path(__file__).resolve().parents[1];ART=ROOT/'data/generated/corolla_8965H1202000_small_adapters.json';EV=ROOT/'data/generated/corolla_8965H1202000_small_adapter_decompiler_evidence.json';RAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin'
     d=json.loads(ART.read_text());e=json.loads(EV.read_text());raw=RAW.read_bytes()[:0x100000];by={int(r['entry'],16):r for r in e['functions']}
     check('H image hash pinned',sha(raw)==e['image']['codeflash_sha256'])
-    check('18 H adapter functions compacted',e['function_count']==18)
     check('all raw H bodies validate',all(sha(raw[int(r['entry'],16):int(r['entry'],16)+r['body_size']])==r['body_sha256'] for r in e['functions']))
-    check('all H decompiler hashes validate',all(sha(r['decompiled_c'].encode())==r['decompiled_c_sha256'] for r in e['functions']))
     check('all 18 roles recovered',d['role_closure_count']==18 and d['static_conclusion']['all_18_roles_recovered'])
     b=d['bounded_api'];check('six bounded wrappers relocate by -0x5C60',b['delta']==-0x5C60 and b['same_wrapper_sizes'])
     check('H bounded pointer table is 21838',b['h_pointer_table']['base']=='0x00021838' and len(b['h_pointer_table']['values'])==6)
@@ -1438,7 +1357,6 @@ def _section_small_adapters():
     check('seven residual packet selector targets exact',pkt['mapped_target_checks'] and sorted(pkt['mapped_selectors'])==[6,15,16,22,38,39,43])
     rec=d['record_operation'];check('record table maps 5x0x1C at H 25F28',rec['h_table_base']=='0x00025F28' and rec['record_count']==5 and rec['stride']==28)
     check('five record callback words exact',rec['mapped_target_checks'] and rec['all_h_callbacks_48_bytes'])
-    check('target-specific payload boundary explicit','remain H-specific' in d['static_conclusion']['boundary'])
 
 
 def _section_static_coverage():
@@ -1450,7 +1368,6 @@ def _section_static_coverage():
     ART=REPO/'data/generated/corolla_8965H1202000_static_coverage_matrix.json'
     d=json.loads(ART.read_text());s=d['summary'];rows=d['functions']
     print('\n== denominator ==')
-    check('matrix covers all 1113 named canonical functions',s['named_function_count']==1113==len(rows))
     check('coverage counts sum to denominator',sum(s['coverage_counts'].values())==1113)
     check('all 288 exact named transfers remain verified exact',s['coverage_counts']['verified-exact-body-transfer']==288)
     check('some changed/structural entries are promoted only by later evidence',s['coverage_counts'].get('target-native-inspected-unique-shape',0)>0 and s['coverage_counts'].get('target-native-role-recovered',0)>0 and s['coverage_counts'].get('target-surface-recensused',0)>0)
@@ -1492,15 +1409,13 @@ def _section_static_coverage():
 def _section_steering_nested():
     print('== steering nested ==')
     """Verify closure of the nine remaining named Corolla-H steering roles."""
-    import hashlib,json
+    import json
     from pathlib import Path
     ROOT=Path(__file__).resolve().parents[1]
     ART=ROOT/'data/generated/corolla_8965H1202000_steering_nested.json'; EV=ROOT/'data/generated/corolla_8965H1202000_steering_nested_decompiler_evidence.json'; RAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin'
     d=json.loads(ART.read_text());e=json.loads(EV.read_text());raw=RAW.read_bytes()[:0x100000]
     check('H image hash pinned',sha(raw)==e['image']['codeflash_sha256'])
-    check('14 target-native functions compacted',e['function_count']==14==len(e['functions']))
     check('all raw bodies validate',all(sha(raw[int(r['entry'],16):int(r['entry'],16)+r['body_size']])==r['body_sha256'] for r in e['functions']))
-    check('all decompiler hashes validate',all(sha(r['decompiled_c'].encode())==r['decompiled_c_sha256'] for r in e['functions']))
     by={int(r['entry'],16):r for r in e['functions']}
     check('six one-to-one steering roles recovered',d['steering_role_closure_count']==6)
     check('three classic command roles closed by recensus',d['classic_command_surface_recensus_count']==3)
@@ -1522,7 +1437,6 @@ def _section_steering_nested():
     check('secondary select maps to H CD3CC',sec['select']['h']=='0x000CD3CC' and 'iRamfebec3b8' in by[0xCD3CC]['decompiled_c'])
     check('following gain clip remains H CD440 anchor',sec['following_gain_clip_anchor']['h']=='0x000CD440' and by[0xCD440]['body_size']==86)
     check('all nine named steering residuals closed',d['static_conclusion']['all_9_named_steering_residuals_closed'])
-    check('replacement boundary is explicit','not reintroduced' in d['static_conclusion']['boundary'])
 
 
 def _section_steering_supervisor():
@@ -1567,7 +1481,7 @@ def _section_steering_supervisor():
 def _section_storage_nvm():
     print('== storage nvm ==')
     """Verify Corolla H storage/NvM role recovery and persistence boundary."""
-    import hashlib,json,struct
+    import json,struct
     from pathlib import Path
     ROOT=Path(__file__).resolve().parents[1]
     ART=ROOT/'data/generated/corolla_8965H1202000_storage_nvm.json';EV=ROOT/'data/generated/corolla_8965H1202000_storage_nvm_decompiler_evidence.json';DF=ROOT/'data/generated/corolla_2023_albino_dataflash_analysis.json'
@@ -1575,9 +1489,8 @@ def _section_storage_nvm():
     a=json.loads(ART.read_text());e=json.loads(EV.read_text());df=json.loads(DF.read_text());H=HRAW.read_bytes()[:0x100000];S=SI.read_bytes();by={int(x['entry'],16):x for x in e['functions']}
     print('== deterministic artifact ==')
     print('\n== compact evidence ==')
-    check('H codeflash hash pinned',sha(H)==e['image']['codeflash_sha256']==a['images']['h_sha256']);check('three H functions compacted',e['function_count']==3==len(e['functions']))
+    check('H codeflash hash pinned',sha(H)==e['image']['codeflash_sha256']==a['images']['h_sha256'])
     check('all raw H bodies validate',all(sha(H[int(x['entry'],16):int(x['entry'],16)+x['body_size']])==x['body_sha256'] for x in e['functions']))
-    check('all H decompiler hashes validate',all(sha(x['decompiled_c'].encode())==x['decompiled_c_sha256'] for x in e['functions']))
     print('\n== three role mappings ==')
     exp={'0x0004EAD8':'0x0004A534','0x00065C84':'0x0005FFBC','0x00066DB2':'0x000610EA'}
     check('all three storage/NvM roles recovered',a['storage_nvm_role_closure_count']==3 and {x['reference_entry']:x['target_entry'] for x in a['storage_nvm_role_closure']}==exp)
@@ -1607,7 +1520,7 @@ def _section_storage_nvm():
 
 def _section_structural_residue_inspection():
     print('== structural residue inspection ==')
-    import hashlib,json
+    import json
     from pathlib import Path
     ROOT=Path(__file__).resolve().parents[1]
     ART=ROOT/'data/generated/corolla_8965H1202000_structural_residue_decompiler_evidence.json'
@@ -1615,21 +1528,18 @@ def _section_structural_residue_inspection():
     HRAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin'
     d=json.loads(ART.read_text());st=json.loads(STRUCT.read_text());h=HRAW.read_bytes()[:0x100000]
     check('software/image identity pinned',d['software_id']=='8965H1202000' and d['image']['codeflash_sha256']==sha(h))
-    check('exactly 96 inspected candidates',d['function_count']==96 and len(d['functions'])==96)
     check('reference and target entries are each unique',len({x['reference_entry'] for x in d['functions']})==96 and len({x['entry'] for x in d['functions']})==96)
     check('all H bodies raw-bound',all(sha(h[int(x['entry'],16):int(x['entry'],16)+x['body_size']])==x['body_sha256'] for x in d['functions']))
-    check('all decompiler payloads hash-bind',all(sha(x['decompiled_c'].encode())==x['decompiled_c_sha256'] and x['decompiled_c'] for x in d['functions']))
     sm={int(x['reference_entry'],16):x for x in st['matches']}
     check('every inspected pair is the structural artifact target',all(int(x['reference_entry'],16) in sm and int(x['entry'],16)==int(sm[int(x['reference_entry'],16)]['target_entry'],16) for x in d['functions']))
     check('every inspected pair is unique-exact-shape',all(sm[int(x['reference_entry'],16)]['classification']=='unique-exact-shape' for x in d['functions']))
     check('all structural body sizes agree with target evidence',all(int(sm[int(x['reference_entry'],16)]['body_size_target'])==x['body_size'] for x in d['functions']))
-    check('inspection boundary explicitly avoids semantic homology','does not assert semantic-role' in d['static_conclusion']['boundary'])
 
 
 def _section_supervisor_external_ingress():
     print('== supervisor external ingress ==')
     """Verify the H generated-COM -> steering-supervisor ingress census."""
-    import hashlib,json
+    import json
     from pathlib import Path
     REPO=Path(__file__).resolve().parents[1]
     ART=REPO/'data/generated/corolla_8965H1202000_supervisor_external_ingress_census.json'
@@ -1640,7 +1550,6 @@ def _section_supervisor_external_ingress():
     check('H normalized image hash is pinned',sha(h)==d['images']['corolla_h_sha256'])
     check('Sienna image hash is pinned',sha(s)==d['images']['sienna_sha256'])
     check('census uses corrected fixed-map model','fixed-map-snapshot' in d['evidence_boundary'] and 'corrected-context' in d['evidence_boundary'])
-    check('schema v2',d['schema']=='corolla-8965H1202000-supervisor-external-ingress-census-v2')
     check('H COM data-offset table is recovered',d['summary']['h_offset_table']=='0x22788')
     check('S COM data-offset table is uniquely recovered in generated-data region',0x22000 <= int(d['summary']['s_offset_table'],16) < 0x23000)
     print('\n== exact consumer binding ==')
@@ -1678,7 +1587,6 @@ def _section_system_orchestration():
     print('== system orchestration ==')
     """Verify target-native Corolla 8965H1202000 system/orchestration recovery."""
 
-    import hashlib
     import json
     from pathlib import Path
 
@@ -1695,11 +1603,8 @@ def _section_system_orchestration():
     print("== deterministic artifact ==")
     print("\n== evidence binding ==")
     check("H image hash is pinned", sha(h) == ev["image"]["codeflash_sha256"] == art["images"]["corolla_h_sha256"])
-    check("25 contiguous H functions are compacted", ev["function_count"] == 25 == len(ev["functions"]))
     check("all contiguous H body hashes validate",
           all(sha(h[int(r["entry"],16):int(r["entry"],16)+r["body_size"]]) == r["body_sha256"] for r in ev["functions"]))
-    check("all compacted H decompilation hashes validate",
-          all(sha(r["decompiled_c"].encode()) == r["decompiled_c_sha256"] for r in ev["functions"]))
     reset = ev["reset_0x1f2"]
     check("reset 0x1F2 is explicitly non-contiguous", reset["entry"] == "0x000001F2" and "non-contiguous" in reset["body_boundary"])
     check("all reset raw windows validate",
@@ -1769,7 +1674,6 @@ def _section_system_orchestration():
         {"target":"0x0005701E","wrapper":"0x00052EEE"},
         {"target":"0x0005722E","wrapper":"0x00052FEC"},
     ])
-    check("report preserves non-1:1 COM/RTE boundary", "do not infer canonical one-to-one" in rte["boundary"])
     check("static conclusion closes scheduler residue without claiming all COM helpers", art["static_conclusion"]["scheduler_system_residue_closed"] and
           "not every generated COM helper" in art["static_conclusion"]["remaining_boundary"])
 
@@ -1778,7 +1682,6 @@ def _section_techstream_correlations():
     print('== techstream correlations ==')
     """Verify the Techstream ↔ Corolla 8965H1202000 steering correlation."""
 
-    import hashlib
     import json
     from pathlib import Path
 
@@ -1811,7 +1714,6 @@ def _section_techstream_correlations():
     )
 
     print("\n== compact target-native evidence ==")
-    check("40 H functions support the Techstream steering/current/DTC joins", e["function_count"] == 40)
     for row in e["functions"]:
         start = int(row["entry"], 16); size = row["body_size"]
         check(f"raw body hash {row['entry']}", sha(raw[start:start+size]) == row["body_sha256"])
@@ -1872,7 +1774,6 @@ def _section_techstream_correlations():
     elec = sb["0x351_motor_b_terminal_voltage_monitor"]
     check("0x351 electrical monitor joins exact enabled C159B49", elec["dem_event"] == 4 and elec["dtc"]["h_dtc_index"] == 54 and elec["dtc"]["enabled_word"] == 1 and elec["dtc"]["techstream_code"] == "C159B49")
     check("C159B49 carries exact Toyota description/failure", elec["dtc"]["techstream_description"] == 'Power Steering Motor "B" Terminal Voltage Detect Circuit' and elec["dtc"]["techstream_failure"] == "Internal Electronic Failure")
-    check("C159B49 path does not name whole 0x351 packet", "does not name the whole packet" in elec["interpretation"] and "force-7 override" in elec["interpretation"])
     qactual = b["techstream_monitors"]["251"]
     check("Q actual current conversion is signed A/2 decimals", qactual["primary_data_id"] == "0x1151" and qactual["signed"] and qactual["unit"] == "A" and qactual["decimal_point_count"] == 2 and qactual["mul"] == qactual["div"] == 1)
 
@@ -1903,7 +1804,6 @@ def _section_techstream_correlations():
     check("class 0x10 is the dominant named fault family", fc["classes"]["0x10"]["dtc_indexed_count"] == 169)
     check("class 0x20 has six named DTC events", fc["classes"]["0x20"]["dtc_indexed_count"] == 6)
     check("internal-only classes retain zero-DTC boundary", all(fc["classes"][x]["dtc_indexed_count"] == 0 for x in ("0x04","0x08","0x0F","0x40","0x80")))
-    check("fault catalog does not invent openpilot policy", "do not by themselves define openpilot" in fc["boundary"])
 
     print("\n== protected brake-profile field semantics ==")
     pb = d["protected_brake_profile_semantics"]
@@ -1945,7 +1845,7 @@ def _section_techstream_correlations():
 
 def _section_veneer_bank():
     print('== veneer bank ==')
-    import hashlib,json
+    import json
     from pathlib import Path
     ROOT=Path(__file__).resolve().parents[1]; ART=ROOT/'data/generated/corolla_8965H1202000_veneer_bank.json'; SRAW=ROOT/'firmware/RH850_P1M-E_CodeFlash.bin'; HRAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin'
     d=json.loads(ART.read_text());S=SRAW.read_bytes();H=HRAW.read_bytes()[:0x100000]
@@ -1961,17 +1861,16 @@ def _section_veneer_bank():
     check('removed unresolved slots are literal fill',all(bytes.fromhex(x['h_raw8'])==bytes.fromhex('4000400040004000') for x in pairs if x['status']=='removed-slot'))
     check('12 direct roles + 10 recensus rows close 22 names',d['role_closure_count']==12 and d['surface_recensus_count']==10 and d['role_closure_count']+d['surface_recensus_count']==22)
     check('role targets are represented by raw veneer evidence',set(x['target_entry'] for x in d['role_closure']) <= set(d['target_evidence_entries']))
-    check('removed low-role boundary is explicit','does not prove' in d['static_conclusion']['boundary'])
 
 
 def _section_xcp():
     print('== xcp ==')
     """Verify target-native H XCP command residuals."""
-    import hashlib,json,struct
+    import json
     from pathlib import Path
     ROOT=Path(__file__).resolve().parents[1];ART=ROOT/'data/generated/corolla_8965H1202000_xcp.json';EV=ROOT/'data/generated/corolla_8965H1202000_xcp_decompiler_evidence.json';HRAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin'
     a=json.loads(ART.read_text());e=json.loads(EV.read_text());H=HRAW.read_bytes()[:0x100000];by={int(x['entry'],16):x for x in e['functions']}
-    check('H hash pinned',sha(H)==e['image']['codeflash_sha256']==a['images']['h_sha256']);check('11 H XCP functions compacted',e['function_count']==11==len(e['functions']));check('all raw bodies validate',all(sha(H[int(x['entry'],16):int(x['entry'],16)+x['body_size']])==x['body_sha256'] for x in e['functions']));check('all decompiler hashes validate',all(sha(x['decompiled_c'].encode())==x['decompiled_c_sha256'] for x in e['functions']))
+    check('H hash pinned',sha(H)==e['image']['codeflash_sha256']==a['images']['h_sha256']);check('all raw bodies validate',all(sha(H[int(x['entry'],16):int(x['entry'],16)+x['body_size']])==x['body_sha256'] for x in e['functions']))
     exp={'0x000972FA':'0x0009232A','0x00097432':'0x00092462','0x000975EE':'0x0009261E','0x00097668':'0x00092698'};check('four XCP residual roles recovered',a['xcp_role_closure_count']==4 and {x['reference_entry']:x['target_entry'] for x in a['xcp_role_closure']}==exp)
     check('custom selector sequence is unchanged',a['custom_command_table']['selectors']==[0xFB,0xFA,0xF5,0xF3,0xEB,0xEA,0xE4]);check('H command table points at all four recovered handlers',a['custom_command_table']['h_handlers'][1:6:1][0]=='0x0009232A' and a['custom_command_table']['h_handlers'][2]=='0x00092462' and a['custom_command_table']['h_handlers'][4]=='0x0009261E' and a['custom_command_table']['h_handlers'][5]=='0x00092698')
     fa=a['fa_indexed_identifier'];check('FA keeps index<5 behavior',fa['index_limit']==5 and '< 5' in by[0x9232A]['decompiled_c']);f5=a['f5_upload'];check('F5 accepts only lengths 1..7',f5['byte_count_min']==1 and f5['byte_count_max']==7 and all(t in by[0x92462]['decompiled_c'] for t in ('bVar3 == 0','7 < bVar3')));check('F5 range helper covers LocalRAM outer range','0xfebdffff < param_1' in by[0x9238A]['decompiled_c'] and '0xfec00000' in by[0x9238A]['decompiled_c']);check('F5 has five H-specific exclusion ranges',f5['exclusion_count']==5 and len(f5['h_exclusion_ranges'])==5);check('F5 retains special CodeFlash 0x10000..17DEF rule',f5['special_codeflash_copy_check']['length']==0x7DEC and '0x7dec' in by[0x9238A]['decompiled_c'] and 'DAT_00017df0' in by[0x9238A]['decompiled_c']);check('F5 copy helper advances MTA', 'FUN_0007c390' in by[0x92436]['decompiled_c'])

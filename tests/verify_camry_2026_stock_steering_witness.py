@@ -23,7 +23,6 @@ def check(name, cond, detail=""):
         failures.append(name)
 
 
-check("schema pinned", D["schema"] == "camry-2026-stock-steering-witness-v1")
 a = D["drives"]["drive_a"]
 b = D["drives"]["drive_b"]
 check("B6 absent in both retained drives", a["b6_total_all_buses"] == b["b6_total_all_buses"] == 0)

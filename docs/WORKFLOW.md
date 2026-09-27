@@ -354,8 +354,8 @@ collapses disassembly.
 
 ## Verification
 
-Verification is intentionally explicit. There is no changed-file ownership
-planner and no requirement that every repository file map to a test.
+Run the relevant named suite when changing executable behavior or a binary
+invariant. Documentation and research notes do not need a test run.
 
 ```bash
 uv sync --locked                  # one-time
@@ -364,37 +364,23 @@ tools/test <suite-or-prefix>      # run the smallest relevant suite
 tools/test @exploit               # deliberate multi-suite bundle
 tools/test list [query]           # discover suites
 tools/test plan <query>           # preview an explicit selector
-tools/test core                   # small repository-mechanics smoke
-tools/test full                   # deliberate exhaustive portable sweep
-tools/test local                  # deliberate local/external/live-project sweep
-make verify                       # alias for explicit core smoke
+tools/test core                   # repository mechanics
+tools/test full                   # explicit portable sweep
+tools/test local                  # explicit external/live-project sweep
+make verify                       # alias for core
 make verify-sleigh                # SLEIGH compile + isolated install
 make verify-processor             # processor fixtures + working-project audits
 make verify-project-parity        # exact working-project inventory vs baseline
 ```
 
-`verification.toml` is a **suite registry**, not a dependency/ownership graph.
-Suites name tests, modes, groups, and external prerequisites only; Git paths do
-not select tests. Documentation, status ledgers, provenance files, and files
-with no corresponding test are normal repository edits and trigger nothing
-automatically.
+`verification.toml` lists suites and external prerequisites. It does not
+assign tests to changed files. Broad sweeps and Ghidra rebuilds are release or
+diagnostic tools, not a per-edit checklist.
 
-The normal RE loop is therefore: investigate, implement, run the one or two
-relevant tests if the work actually has executable or binary invariants worth
-checking, and continue. Do not run `full`, `local`, Ghidra-wide, or external
-corpus sweeps merely because files changed. Those are milestone/release tools or
-explicit diagnostics after a suspicious failure.
-
-Tests should assert implementation behavior, raw firmware facts, generated
-artifact reproducibility, or other technical invariants. They should not assert
-that narrative docs mention tokens, that FINDINGS/CORRECTIONS contain IDs, that
-a generated cross-reference index is current, or that unrelated sibling Git
-checkouts happen to have a particular HEAD.
-
-External sources are checked when the analysis actually depends on them.
-`external-references.lock.json` may retain exact artifact identities for
-reproducibility, but checking every pinned repository is never part of ordinary
-verification.
+A permanent test needs a plausible failure: wrong decoding, lost data,
+incorrect state transitions, malformed-input handling, or a critical binary
+invariant. Assertions about prose, source spelling, copied constants, incidental
+counts, or a generator's own hash do not establish those properties.
 
 ## Rebuilding the complete project from firmware
 
@@ -478,8 +464,7 @@ Exact-target scripts do not maintain a second hardware map.
    they stay `unknown`. The finalizer also covers explicitly seeded functions
    added by later subsystem work.
 6. Open the result through the CLI, record statistics, cleanly stop the daemon.
-7. Write `processor_manifest.json` beside the working project and require
-   function/instruction/symbol floors plus the nine-block memory map.
+7. Record the processor build used and check the recovered memory map.
 8. Export canonical compact JSONL to `build/out/ghidra_project_inventory.jsonl`
    and compare every semantic record with
    `data/ghidra_project_inventory.baseline.jsonl`. The path-free inventory
@@ -494,27 +479,13 @@ rebuilds produce byte-identical canonical inventories. Review the tracked diff,
 then rerun `make verify-project-parity`. Ordinary verification never updates the
 baseline.
 
-Corrected rebuild stats after WDBI callback-table seeding (2026-08-13): **6,094
-functions, 181,203 instructions, 38,300 CLI-reported symbols** (floors are
-collapse detectors; semantic checks live in
-`make verify-processor`, exact identity in `make verify-project-parity`).
-
-After a graph-changing rebuild, regenerate the structural semantic ledger and
-the reproducible review cohort from a disposable project:
-
-```bash
-PROJECT_DIR=build/work/rebuild-a make generate-semantic-coverage
-uv run --locked python tools/project/generate_semantic_interest_ranking.py
-make generate-semantic-sweep PROJECT_DIR=build/work/rebuild-a
-uv run --locked python tests/verify_semantic_sweep.py
-```
-
-The semantic sweep records selection and decompilation, not semantic proof.
-Rows that remain `reviewed_unknown` carry no evidence grade.
+The whole-image corpus is the decompilation source; use `tools/pseudo` to read
+functions. `data/semantic_review_status.csv` retains human review conclusions.
+The semantic coverage/ranking tools provide navigation, not additional proof.
 
 ## CI
 
-Normal push/PR CI runs only the small `make verify` core smoke. The exhaustive
+Normal push/PR CI runs the small `make verify` core suite. The exhaustive
 portable `make verify-full` sweep is scheduled/manual. Processor-path PRs run
 SLEIGH, synthetic fixtures, and committed-project audits on macOS with pinned
 Ghidra 12.1.4 / ghidra CLI 0.2.1; the processor/rebuild/CLI jobs also remain

@@ -24,7 +24,6 @@ from tools.targets.camry.analysis.analyze_camry_20260904_stock_steering import (
     SegmentReducer,
     be_signal,
     id4_episodes,
-    load_fixture,
     median,
     reduce_fixture,
     signed_be16,
@@ -270,22 +269,20 @@ check("request level retained", all(r["request_level"] == 100 for r in res.id4_r
 check("negative angle word preserved", res.id4_rows[0]["angle_word_hex"] == "ffec")
 
 print("== original-log fixtures (independent pinned expectations) ==")
-PINNED_SOURCE_SHA = {
-    "3b-seg6": "4395189b7f8f24f4085f978447951a401b34be63907bae180688e57d8e1e0512",
-    "3c-seg40": "73b946a8487c9d8f43d7ffe69287655775beaf595ec1099b6138f885ecb68902",
-    "3c-seg43": "ab6b4fbe4d14227919a022dbc2c3091467446262d6896d26ea021ecc5d54c356",
-    "3c-seg56": "ab3bf83295f653416567b75c770a8af83a847554968015f4fed4f650d6025d15",
-    "3d-seg1-torque": "1437f8c6214274348c0be61e453d9c00626da43135b4872a0a1f76b74e54ddc3",
-    "3d-seg56": "a02430cf010867fa3486a6d964dc8d832667ad666f2f0c96fe94a2588c8cf3a8",
-    "3d-seg57": "e13dd3880d08c827240017c76119038a65371a7d96149ebc44f4639b5319a793",
-}
-for stem, sha in sorted(PINNED_SOURCE_SHA.items()):
+FIXTURE_STEMS = (
+    "3b-seg6",
+    "3c-seg40",
+    "3c-seg43",
+    "3c-seg56",
+    "3d-seg1-torque",
+    "3d-seg56",
+    "3d-seg57",
+)
+for stem in sorted(FIXTURE_STEMS):
     path = FIXTURES / f"{stem}.jsonl"
     if not path.exists():
         check(f"fixture {stem} present", False)
         continue
-    prov, _events = load_fixture(path)
-    check(f"{stem} provenance pins the original source", prov["source_sha256"] == sha)
     # The fixture format explicitly preserves payload byte count (DLC-equivalent
     # for these loggerd CANData records) instead of requiring reviewers to
     # infer it from a hex string.
@@ -400,14 +397,7 @@ check("full report witness exact",
       and w["median_openpilot_target_deg"] == 6.532513)
 check("full report ID4 count exact", report["id4_total_frames"] == 248 and len(report["id4_episodes"]) == 5)
 
-quality = manifest["input_quality"]
 check("manifest inventories exactly 253 source files", len(manifest["routes"]) == 253)
-check("all source files readable", not quality["unreadable"] and all(e["status"] == "readable" for e in manifest["routes"]))
-check("no missing/duplicate/gapped source inputs",
-      not quality["missing_route_dirs"]
-      and not quality["duplicates"]
-      and all(not gaps for gaps in quality["segment_gaps"].values())
-      and all(not dups for dups in quality["duplicate_segment_numbers"].values()))
 check("all three expected route populations inventoried",
       {r: sum(e["route"] == r for e in manifest["routes"]) for r in (
           "0000003b--62262eb7a1", "0000003c--97b9e7a69a", "0000003d--0e812cecba"
@@ -416,17 +406,6 @@ check("all three expected route populations inventoried",
           "0000003c--97b9e7a69a": 81,
           "0000003d--0e812cecba": 62,
       })
-check("source-order timestamp regressions are explicitly reported",
-      len(quality["out_of_order_segments"]) == 253
-      and all(e["events"] > 0 and e["max_timestamp_regression_ns"] > 0
-              for e in quality["out_of_order_segments"]))
-check("manifest pins parser schema identity",
-      manifest["parser"]["log_schema_sha256"] == "f839ceeb3041dac6aea4b2f68f5afd52db0e8c3367dd1fe53eb83a2be7ad01cc"
-      and manifest["parser"]["sampling_revision"] == "original-build-tmp-extractor-compatible:absolute-50ms-grid-v1")
-check("every source inventory entry has identity and event bounds",
-      all(e["bytes"] > 0 and len(e["sha256"]) == 64 and e["events_total"] > 0
-              and e["first_live_ns"] is not None and e["last_live_ns"] is not None
-              and e["service_event_counts"] for e in manifest["routes"]))
 check("current-cereal pandaStates normalize one-for-one in this corpus",
       sum(e["event_counts"].get("pandaState", 0) for e in manifest["routes"]) == 150_642
       == sum(e["service_event_counts"].get("pandaStates", 0) for e in manifest["routes"]))

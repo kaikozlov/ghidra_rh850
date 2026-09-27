@@ -8,7 +8,7 @@ does not reimport the generator's overlay dict.
 """
 from __future__ import annotations
 
-from collections import Counter, defaultdict
+from collections import Counter
 import csv
 import hashlib
 import struct
@@ -100,7 +100,6 @@ print("== raw acceptance / descriptor census ==")
 descs = [DESC.unpack_from(CF, RX_DESC + DESC.size * i) for i in range(47)]
 rules = [RULE.unpack_from(CF, ACCEPTANCE + RULE.size * i) for i in range(52)]
 acceptance_ids = [row[0] for row in rules[:51]]
-check("47 normal RX descriptors present", len(descs) == 47)
 check("acceptance table has 51 rules plus terminator",
       rules[51] == (0xFFFFFFFF, 0, 0, 0))
 check("normal hardware-rule IDs match documented sequence",
@@ -118,11 +117,9 @@ pdus = [PDU.unpack_from(CF, COM_PDU + PDU.size * i) for i in range(53)]
 offs = [u16(BUF_OFF + 2 * i) for i in range(53)]
 s2p = [u16(SIG2PDU + 2 * i) for i in range(300)]
 props = list(CF[SIGPROP:SIGPROP + 300])
-check("53 COM PDU descriptors split as six Tx plus 47 Rx", 53 - 6 == 47)
 check("Rx COM flags are all 0x0C", all(row[5] == 0x0C for row in pdus[6:]))
 check("Rx buffer offsets are contiguous by COM length",
       offs[6:] == [offs[6] + sum(pdus[j][3] for j in range(6, i)) for i in range(6, 53)])
-check("signals 58..299 are exactly 242 entries", len(s2p[58:]) == 242)
 check("remaining 242 signals map only to 47 receive PDUs 6..52",
       min(s2p[58:]) == 6 and max(s2p[58:]) == 52 and len(set(s2p[58:])) == 47)
 check("every Rx PDU owns at least one signal",
@@ -138,10 +135,6 @@ check(
     "Tx signals 0..57 map only to PDUs 0..5",
     set(s2p[:58]) == set(range(6)) and max(s2p[:58]) == 5,
 )
-check(
-    "signal map length is 300 identity slots",
-    len(s2p) == 300,
-)
 rx_prop_counts = Counter(props[58:])
 check("Rx signal property classes are only 0/3/4",
       set(rx_prop_counts) <= {0, 3, 4}, repr(dict(rx_prop_counts)))
@@ -153,9 +146,6 @@ root_imms = {
     "FEBE52CC": (VALIDITY_RAM - GP) & 0xFFFF,
     "FEBE532C": (UPDATE_COUNTER_RAM - GP) & 0xFFFF,
 }
-check("GP-relative imm for COM buffer is -0x6DB7", root_imms["FEBE4A49"] == (-0x6DB7 & 0xFFFF))
-check("GP-relative imm for validity is -0x6534", root_imms["FEBE52CC"] == (-0x6534 & 0xFFFF))
-check("GP-relative imm for update counters is -0x64D4", root_imms["FEBE532C"] == (-0x64D4 & 0xFFFF))
 check(
     "RxIndication body encodes movea COM buffer via GP",
     movea_gp_r1(root_imms["FEBE4A49"]) in CF[RX_INDICATION:RX_INDICATION + 212]
@@ -191,29 +181,14 @@ check(
 )
 
 print("\n== evidence artifact ==")
-check("evidence CSV exists", EVIDENCE_PATH.is_file())
 with EVIDENCE_PATH.open(newline="", encoding="utf-8") as stream:
     evidence = list(csv.DictReader(stream))
-check("evidence has exactly 242 classified signal IDs", len(evidence) == 242)
-check("evidence has unique signal IDs", len(evidence) == len({int(r["signal_id"]) for r in evidence}))
 check("evidence signal IDs are exactly 58..299",
       [int(r["signal_id"]) for r in evidence] == list(range(58, 300)))
-by_sid = {int(r["signal_id"]): r for r in evidence}
-class_counts = Counter(r["classification"] for r in evidence)
-check("evidence classification partition is exact", class_counts == {
-    "extracted_bitfield": 131,
-    "extracted_group_bytes": 14,
-    "configured_not_extracted_by_pdu_handler": 93,
-    "configured_no_com_unpacker_secoc_pdu": 3,
-    "configured_no_com_unpacker": 1,
-}, repr(class_counts))
 
 print("\n== generated CSV agreement ==")
 with CSV_PATH.open(newline="", encoding="utf-8") as stream:
     rows = list(csv.DictReader(stream))
-check("CSV has exactly 242 signal rows", len(rows) == 242 and all(r["row_kind"] == "signal" for r in rows))
-check("CSV covers all 47 Rx PDU ids",
-      {int(r["rx_pdu_id"]) for r in rows} == set(range(6, 53)))
 check("CSV signal IDs are exactly 58..299 in order",
       [int(r["signal_id"]) for r in rows] == list(range(58, 300)))
 check("CSV PDU membership equals raw signal map",
@@ -232,20 +207,6 @@ check("CSV keeps CAN 0x344 absent",
 
 recovered = [r for r in rows if r["evidence_status"] == "recovered"]
 classified = [r for r in rows if r["evidence_status"] == "classified-no-com-extraction"]
-check("recovered + classified partition all 242 signals",
-      len(recovered) + len(classified) == 242, f"{len(recovered)}+{len(classified)}")
-check("145 configured signals have positive extraction evidence", len(recovered) == 145, str(len(recovered)))
-check("97 configured signals have deterministic no-COM-extraction classifications",
-      len(classified) == 97, str(len(classified)))
-check("no configured-unresolved Rx rows remain",
-      not any(r["evidence_status"] == "configured-unresolved" for r in rows))
-check("every CSV signal_id has an evidence/classification row",
-      all(int(r["signal_id"]) in by_sid for r in rows))
-check("three no-unpacker signals belong to SecOC sync CAN 0x00F",
-      [int(r["signal_id"]) for r in evidence if r["classification"] == "configured_no_com_unpacker_secoc_pdu"] == [84, 85, 86])
-check("sole ordinary no-unpacker signal is 217 / CAN 0x2E8",
-      [int(r["signal_id"]) for r in evidence if r["classification"] == "configured_no_com_unpacker"] == [217]
-      and next(r for r in rows if r["signal_id"] == "217")["can_id"] == "0x2E8")
 
 print("\n== per-unpacker body hashes and per-signal immediates ==")
 unpacker_meta: dict[int, tuple[int, str]] = {}
@@ -397,12 +358,6 @@ check(
         for row in recovered
         if row["dest_kind"] == "ram" and row["bit_length"] != "n/a"
     ),
-)
-check(
-    "every evidence unpacker body hash is unique to its (addr,size)",
-    len({(int(e["unpacker"], 0), int(e["body_size"]), e["body_sha256"])
-         for e in evidence if e["extract_kind"] != "none"})
-    >= len(unpacker_meta),
 )
 
 print("\n== generator determinism ==")

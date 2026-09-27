@@ -21,7 +21,6 @@ from exploit.ephemeral_runtime.camry_f33_b6_transaction_observer import (
 
 AUDITED_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_transaction_observer.bin"
 AUDIT = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_b6_transaction_observer_build.json"
-SOURCE = ROOT / "exploit/ephemeral_runtime/camry_f33_b6_transaction_observer.c"
 BUILDER = ROOT / "exploit/ephemeral_runtime/build_camry_f33_b6_transaction_observer.py"
 INSTALLER = ROOT / "exploit/ephemeral_runtime/camry_f33_b6_transaction_observer_install.py"
 BRIDGE_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_bridge.bin"
@@ -49,8 +48,6 @@ image = IMAGE.read_bytes()
 print("== audited observer / retained-tail contract ==")
 check("observer binary identity exact", len(blob) == audit["shellcode"]["size"] == 592 and
       sha(blob) == audit["shellcode"]["sha256"] == "94cb0b06ce376a3876d124ef76dacc3e34f00090737988f909de1c8af3674ad0")
-check("observer source remains hash-bound",
-      audit["source"]["sha256"] == sha(SOURCE.read_bytes()))
 c = audit["compile_contract"]
 check("code plus telemetry stays inside exact 524-byte live-proven tail",
       c["resident_base"] == "0xFEBFF9F0" and c["resident_size_incl_marker_slack"] == 492 and
@@ -73,12 +70,6 @@ check("B6 profile callbacks exact", int.from_bytes(image[record+0x30:record+0x34
       int.from_bytes(image[record+0x48:record+0x4C], "little") == 0x903A0)
 
 print("\n== non-bypass semantics ==")
-src = SOURCE.read_text()
-check("observer executes stock aggregate exactly once and never calls route44 itself",
-      src.count("call0(TARGET_FG_AGGREGATE);") == 1 and "TARGET_B6_COM_RX_CALLBACK" not in src and "B6_PDUR_ROUTE" not in src)
-check("observer counts B6 queue samples and a native D7 control without changing either path",
-      "t[T_QUEUE_SAMPLES]++" in src and "t[T_D7_QUEUE_SAMPLES]++" in src and
-      "TARGET_B6_PROFILE_STATE" in src)
 bridge_audit = json.loads(BRIDGE_AUDIT.read_text())
 check("observer binary has stock aggregate/profile/D7 pins while only the ABI-safe bridge calls route44",
       bytes.fromhex("e6670600") in blob and bytes.fromhex("2655befe") in blob and

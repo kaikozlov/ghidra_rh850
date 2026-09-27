@@ -398,8 +398,7 @@ calibration.
 - **`flash_patcher.py`** — host tool. Structurally identical to the
   inherited I-CAN-hack/Bk2ol bootstrap: same `SEED_KEY_SECRET`, same `0x203→0x201→0x202`
   DID order, same `0xFEBF0000` download window, same `0x10F0`/`0xFF00` routine
-  triggers, all-zero data_record protocol. The structural cross-validation is
-  pinned in `verify_community_tooling.py`. Its version
+  triggers, all-zero data_record protocol. Its version
   table covers `8965B4209000`, `8965B4233100`, `8965B4509100`, and new parts
   `8965F3401200` (dual-CPU), `8965F4207000`, `8965F4201000`.
 - **Flash RMW + CRC resigning** — `main.c` uses FCU registers (`FACI` at

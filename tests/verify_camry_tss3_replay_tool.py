@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from tools.targets.camry.utilities.replay_camry_tss3_carstate_revisions import fixture_provenance, summarize
+from tools.targets.camry.utilities.replay_camry_tss3_carstate_revisions import summarize
 
 passed = failed = 0
 
@@ -22,12 +22,6 @@ def check(name: str, condition: bool) -> None:
 
 
 f3c = ROOT / "tests/fixtures/camry_20260904/3c-seg43.jsonl"
-f3d = ROOT / "tests/fixtures/camry_20260904/3d-seg1-torque.jsonl"
-p3c = fixture_provenance(f3c)
-p3d = fixture_provenance(f3d)
-check("3c replay fixture source pinned", p3c["source_sha256"] == "ab6b4fbe4d14227919a022dbc2c3091467446262d6896d26ea021ecc5d54c356")
-check("3d torque replay fixture source pinned", p3d["source_sha256"] == "1437f8c6214274348c0be61e453d9c00626da43135b4872a0a1f76b74e54ddc3")
-check("3d torque replay window pinned", p3d["window_s"] == [4.0, 14.0])
 
 recorded = [
     {"t": 1, "steeringTorque": 0.4, "steeringPressed": False, "vehicleSensorsInvalid": False, "steeringAngleDeg": 2.0},

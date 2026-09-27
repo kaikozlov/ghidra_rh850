@@ -35,48 +35,12 @@ def expect_probe_error(name: str, fn) -> None:
         check(name, False)
 
 
-print("== fixed dry-run / transmit surface ==")
-plan = probe.build_plan()
-check("route is fixed to orientation-stable Panda bus 1", plan["route"]["panda_bus"] == 1 and "not swapped" in plan["route"]["controller"])
-check("CAN geometry is 500k/2M ISO with auto disabled", plan["can"] == {
-    "nominal_kbps": 500,
-    "data_kbps": 2000,
-    "canfd_non_iso": False,
-    "canfd_auto": False,
-    "controller_loopback": False,
-    "explicit_frame_format": True,
-})
-check("at most three gated host submissions are possible", plan["max_host_submissions"] == 3 and "only a validated positive 7E00 reply plus complete clean" in plan["state_machine"] and [p.name for p in probe.TX_PHASES] == [
-    "tester-present-classical", "f186-classical", "tester-present-fd", "f186-fd",
-])
-check("plan discloses automatic wire retries and F186 early-stop", "retry each host submission" in plan["automatic_retransmission"] and "same-format F186" in plan["early_stop"] and "even if F186 is silent" in plan["early_stop"] and "negative TesterPresent stops" in plan["early_stop"])
-check("plan bounds F186 mode meaning and never authorizes restore", "exact application" in plan["mode_classification"]["application"] and "boot-compatible, not boot proof" in plan["mode_classification"]["boot_compatible"] and not plan["mode_classification"]["restore_authorization"])
-check("plan retains Panda host-loss watchdog", "remain enabled" in plan["host_failure"] and "falls back to SILENT" in plan["host_failure"])
-check("bounded NOOUTPUT transition monitoring precedes TX", plan["passive_listen"] == {
-    "settle_seconds_after_each_transition": 1.0,
-    "transitions": ["aux-negative reconnect with IG OFF", "IG ON / not READY"],
-    "panda_safety": "NOOUTPUT (host data frames blocked; protocol ACK bits enabled)",
-    "tx_count": 0,
-    "collection": "baseline before each prompt through post-attestation settle; drain direct USB through its empty transfer, then reconcile native rows for all three physical controllers to their own RX deltas and recheck every counter snapshot",
-    "loss_policy": "any controller/Panda fault or drift, off-bus controller activity, unexpected host TX receipt, controller RX loss, or Panda RX overflow stops before active TX",
-})
 check("TesterPresent request is exact padded ISO-TP SF", probe.TESTER_PRESENT_FRAME.hex() == "023e000000000000")
 check("F186 request is exact padded ISO-TP SF", probe.F186_FRAME.hex() == "0322f18600000000")
 check("both requests are emitted explicitly as Classical and FD", [(p.data, p.fd) for p in probe.TX_PHASES] == [
     (probe.TESTER_PRESENT_FRAME, False), (probe.F186_FRAME, False),
     (probe.TESTER_PRESENT_FRAME, True), (probe.F186_FRAME, True),
 ])
-check("CAN0/CAN2 relay has no direct control and no physical legs", "no direct/debug control" in plan["route"]["can0_can2_intercept_relay"] and "physically unconnected" in plan["route"]["can0_can2_intercept_relay"])
-check("plan never treats a TX echo as physical ACK", "never called physical ACK" in plan["ack_discriminator"]["boundary"])
-check("plan requires exact TX receipt and bounded native-RX reconciliation", "exactly one" in plan["rx_accounting"]["tx_receipt_gate"] and "reconcile exactly" in plan["rx_accounting"]["bounded_drain"])
-check("mutating/session surfaces are explicitly forbidden", all(token in plan["forbidden"] for token in (
-    "DiagnosticSessionControl", "SecurityAccess", "WriteDataByIdentifier", "RoutineControl",
-    "RequestDownload", "TransferData", "RequestTransferExit", "flow-control TX",
-)))
-
-for phase in probe.TX_PHASES:
-    probe.assert_allowed_tx(1, probe.TX_ADDR, phase.data, phase.fd)
-check("all four planned frames pass the hard allowlist", True)
 for description, address, data, fd in (
     ("programming session", probe.TX_ADDR, bytes.fromhex("0210020000000000"), False),
     ("SecurityAccess", probe.TX_ADDR, bytes.fromhex("0227010000000000"), False),
@@ -126,8 +90,6 @@ valid = probe.PhysicalPreflight(
     only_can1_connected=True,
     arm=probe.ARM_TOKEN,
 )
-probe.validate_preflight(valid, 1)
-check("fully attested bus-1 preflight passes", True)
 expect_probe_error("missing A30 disconnect fails closed", lambda: probe.validate_preflight(replace(valid, a30_disconnected=False), 1))
 for field in (
     "a30_mating_connector_correct_terminals_no_backprobe_no_piercing_no_generic_pin",

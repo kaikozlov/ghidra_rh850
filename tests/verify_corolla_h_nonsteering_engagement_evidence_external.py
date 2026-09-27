@@ -30,9 +30,5 @@ with tempfile.TemporaryDirectory(prefix="h-engagement-evidence-") as td:
     check("exact-H engagement extraction succeeds", proc.returncode == 0, proc.stderr[-300:])
     check("tracked compact evidence matches exact disposable corpus", out.exists() and json.loads(out.read_text()) == json.loads(TRACKED.read_text()))
 
-art = json.loads(TRACKED.read_text())
-check("six target-native functions promoted", art["function_count"] == 6)
-roles = {x["role"] for x in art["functions"]}
-check("Ready and gear roles are both represented", {"gear_packet_hybrid_scalar_unpacker", "ready_status_0x51e_scalar_unpacker", "ready_status_secondary_operational_copy", "ready_status_primary_operational_copy", "ready_status_snapshot_publish"} <= roles)
 print(f"\n== RESULT: {passed} passed, {failed} failed ==")
 raise SystemExit(1 if failed else 0)

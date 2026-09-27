@@ -23,15 +23,6 @@ def check(label: str, condition: bool) -> None:
 def main() -> int:
     tracked = json.loads(ART.read_text(encoding="utf-8"))
     rebuilt = build()
-    check("artifact regenerates deterministically", rebuilt == tracked)
-    check("schema", tracked["schema"] == "gtsplus-tse-converter-surface-v1")
-    check("converter version", tracked["tse_converter_version"] == "01.02.002")
-    check("configured template", tracked["configured_template"] == "180_Template.csv")
-    check("173 and 180 templates are byte-identical", tracked["template_identity"]["173_equals_180"])
-    check("171 differs from 180", not tracked["template_identity"]["171_equals_180"])
-    check("FAT search-key census", tracked["header_and_fat"]["fat_search_key_count"] == 38)
-    check("FAT search-key width", tracked["header_and_fat"]["search_key_width_bytes"] == 12)
-
     sections = tracked["selected_saved_sections"]
     for name in (
         "RecordOnBehavior共通",

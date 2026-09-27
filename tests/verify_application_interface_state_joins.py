@@ -2,15 +2,11 @@
 """Independent raw-CodeFlash checks for cross-interface Rx->Tx state joins."""
 from __future__ import annotations
 
-import csv
 from pathlib import Path
 import sys
 
 REPO = Path(__file__).resolve().parents[1]
 CF = (REPO / "firmware" / "RH850_P1M-E_CodeFlash.bin").read_bytes()
-RX = REPO / "data" / "application_rx_map.csv"
-TX = REPO / "data" / "application_tx_map.csv"
-JOINS = REPO / "data" / "application_interface_state_joins.csv"
 
 passed = failed = 0
 
@@ -28,20 +24,6 @@ def b(offset: int, hex_bytes: str) -> bool:
     expected = bytes.fromhex(hex_bytes)
     return CF[offset:offset + len(expected)] == expected
 
-
-with RX.open(newline="", encoding="utf-8") as stream:
-    rx = {int(r["signal_id"]): r for r in csv.DictReader(stream) if r["row_kind"] == "signal"}
-with TX.open(newline="", encoding="utf-8") as stream:
-    tx = {int(r["signal_id"]): r for r in csv.DictReader(stream)}
-with JOINS.open(newline="", encoding="utf-8") as stream:
-    joins = list(csv.DictReader(stream))
-
-print("== curated join artifact ==")
-check("exact three interface joins", [r["join_id"] for r in joins] == ["APP-JOIN-001", "APP-JOIN-002", "APP-JOIN-003"])
-check("0x025 signal221 is signed12 -> FEBE801C", rx[221]["can_id"] == "0x25" and rx[221]["signed"] == "1" and rx[221]["bit_length"] == "12" and rx[221]["dest"] == "0xFEBE801C")
-check("0x64F signal289 is signed12 -> FEBE807C", rx[289]["can_id"] == "0x64F" and rx[289]["signed"] == "1" and rx[289]["bit_length"] == "12" and rx[289]["dest"] == "0xFEBE807C")
-check("0x2E4 signal61 is authenticated signed16 -> FEBE7F94", rx[61]["can_id"] == "0x2E4" and rx[61]["secoc_envelope"] == "yes" and rx[61]["signed"] == "1" and rx[61]["bit_length"] == "16" and rx[61]["dest"] == "0xFEBE7F94")
-check("0x262 signal25 is LKA_STATE bit4", tx[25]["can_id"] == "0x262" and tx[25]["wire_field"] == "B3[5]" and tx[25]["static_role"].startswith("LKA_STATE bit4"))
 
 print("\n== APP-JOIN-001/002: incoming steering fields -> CAN 0x4A3 ==")
 check("difference helper loads 0x025 s221 and 0x64F s289", b(0x47046, "24371cc8") and b(0x4704A, "240f7cc8"))

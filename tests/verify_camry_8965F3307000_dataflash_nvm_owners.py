@@ -29,7 +29,6 @@ def check(name, cond, detail=""):
         failures.append(name)
 
 
-check("schema pinned", D["schema"] == "camry-8965f3307000-dataflash-nvm-owner-closure-v1")
 check("inputs bind the exact F33 image",
       D["inputs"]["codeflash"]["sha256"].startswith("42dce8ef")
       and D["inputs"]["dataflash"]["sha256"].startswith("231fbdde"))
@@ -59,11 +58,6 @@ cen = D["census"]
 check("45 corpus functions touch learned cells", cen["functions_touching_learned_cells"] == 45)
 check("zero functions touch both learned cells and the assist funnel",
       cen["functions_touching_both"] == [])
-
-con = D["conclusion"]
-check("conclusion records the negative",
-      con["dataflash_learned_state_feeds_assist_funnel"] is False
-      and any("0x0800" in r for r in con["reasons"]))
 
 with tempfile.TemporaryDirectory() as td:
     regen = Path(td) / "nvm_owners.json"

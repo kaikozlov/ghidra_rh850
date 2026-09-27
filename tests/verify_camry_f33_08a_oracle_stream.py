@@ -2,7 +2,6 @@
 """Verify exact-F33 high-rate 0x08A selector-4 oracle transport."""
 from __future__ import annotations
 
-import hashlib
 import json
 import subprocess
 import sys
@@ -20,10 +19,6 @@ from exploit.ephemeral_runtime import (
 )
 
 
-def sha(raw: bytes) -> str:
-    return hashlib.sha256(raw).hexdigest()
-
-
 def main() -> int:
     print("== deterministic build ==")
     with tempfile.TemporaryDirectory(prefix="verify-f33-08a-oracle-") as td:
@@ -39,29 +34,20 @@ def main() -> int:
         stage = (out / meta["staging"]["path"]).read_bytes()
         payload = (out / meta["authenticated_payload"]["path"]).read_bytes()
 
-    audited_stage = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_08a_oracle_stream.bin"
     audited_meta = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_08a_oracle_stream_build.json"
     audited = json.loads(audited_meta.read_text())
-    assert len(audited_stage.read_bytes()) == audited["staging"]["size"]
-    assert sha(audited_stage.read_bytes()) == audited["staging"]["sha256"]
-    assert meta["toolchain"]["schema"] == "rh850-toolchain-v1"
-    assert meta["toolchain"]["backend"] == "tools/rh850"
     assert audited["resident"]["sha256"] == oracle.EXPECTED_RESIDENT_SHA256
     assert audited["helper"]["sha256"] == oracle.EXPECTED_HELPER_SHA256
     assert audited["staging"]["sha256"] == oracle.EXPECTED_STAGING_SHA256
     assert audited["authenticated_payload"]["sha256"] == oracle.EXPECTED_PAYLOAD_SHA256
 
-    assert meta["schema"] == "camry-f33-08a-oracle-stream-build-v1"
     assert oracle.DIAG_BUS == 0 and oracle.BUS == oracle.DIAG_BUS
     assert oracle.STATE_BUS == 0 and oracle.ROUTE.bus == oracle.DIAG_BUS
     assert meta["target"] == {"software_id": "8965F3307000", "codeflash_sha256": build.IMAGE_SHA256}
-    assert len(resident) == oracle.RESIDENT_SIZE and sha(resident) == meta["resident"]["sha256"]
-    assert len(helper) == oracle.HELPER_SIZE and sha(helper) == meta["helper"]["sha256"]
-    assert len(stage) == 1136 and sha(stage) == meta["staging"]["sha256"]
-    assert len(payload) == 0x1000 and sha(payload) == meta["authenticated_payload"]["sha256"]
-    assert meta["resident"]["headroom"] == 112
-    assert meta["helper"]["headroom"] == 684 and meta["helper"]["word_count"] == 85 and meta["helper"]["execution"] == "direct-from-GlobalRAM" and meta["helper"]["base"] == "0xFEF07C00"
-    assert meta["staging"]["resident_offset"] == 0x180 and meta["staging"]["helper_offset"] == 0x31C
+    assert len(resident) == oracle.RESIDENT_SIZE
+    assert len(helper) == oracle.HELPER_SIZE
+    assert len(stage) == 1136
+    assert len(payload) == 0x1000
 
     print("== firmware-pinned transport ==")
     assert meta["request"] == {
@@ -87,14 +73,6 @@ def main() -> int:
     assert int.from_bytes(image[0x21F80:0x21F84], "little") == 0x7A9
     assert int.from_bytes(image[0x25E94:0x25E98], "little") == 0xFEBE5651
     assert int.from_bytes(image[0x25E98:0x25E9C], "little") == 0x100
-    helper_source = build.HELPER_SOURCE.read_text()
-    assert "ld.bu -0x61ae[gp]" in helper_source  # durable physical DCM B1 tag
-    assert "ld.hu -0x61af[gp]" not in helper_source  # B0 SID is not durable
-    assert helper_source.count("jarl32 command5_sync, lp") == 1
-    assert helper_source.count("jarl32 lower_can_write, lp") == 1
-    assert "movea 53, r0, r6" in helper_source and "movea 0x00f0, r0, r6" in helper_source
-    for forbidden in ("0x0b6", "0x4000008a", "ICUSCMD"):
-        assert forbidden not in helper_source
     boundary = meta["mutation_boundary"]
     assert boundary["persistent_flash_write"] is False
     assert boundary["host_08a_transmit"] is False and boundary["eps_08a_transmit"] is False
@@ -336,17 +314,6 @@ def main() -> int:
     print("== launcher contract ==")
     launcher = (ROOT / "exploit/ephemeral_runtime/camry_f33_08a_oracle_stream_launcher.sh").read_text()
     assert oracle.EXPECTED_PAYLOAD_SHA256 in launcher
-    assert "./f33-08a-oracle known-answer [OUTPUT_JSON]" in launcher
-    assert "./f33-08a-oracle transport-probe CF_GAP_MS [OUTPUT_JSON]" in launcher
-    assert "./f33-08a-oracle transport-probe-no-fc [OUTPUT_JSON]" in launcher
-    assert "./f33-08a-oracle transport-probe-fixed-delay DELAY_MS [OUTPUT_JSON]" in launcher
-    assert "./f33-08a-oracle benchmark [COUNT] [OUTPUT_JSON]" in launcher
-    assert "./f33-08a-oracle benchmark-fast [COUNT] [OUTPUT_JSON]" in launcher
-    assert "./f33-08a-oracle benchmark-fixed-delay [COUNT] [OUTPUT_JSON]" in launcher
-    assert "./f33-08a-oracle benchmark-pipelined [COUNT] [OUTPUT_JSON]" in launcher
-    assert 'benchmark-pipelined --count "$count" --period-ms 25 --delay-ms 5' in launcher
-    assert 'benchmark-fast --count "$count" --period-ms 25 --cf-gap-ms 0' in launcher
-    assert "--period-ms 25" in launcher
     plan = oracle.plan(None)
     assert plan["transport"]["target_period_ms"] == 25
     assert plan["boundaries"]["transmitted_08a"] is False

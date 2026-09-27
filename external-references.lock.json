@@ -7,30 +7,6 @@
       "size": 1081344
     },
     {
-      "path": "RESEARCH_REPORT_EN.md",
-      "repository": "rh850_p1me_original",
-      "sha256": "9e9fb350a93610f938353a03d9b4d6fe87d3a974bf237f89c12b4e5c83b2e18d",
-      "size": 42627
-    },
-    {
-      "path": "README.md",
-      "repository": "lochuan_b4512000_fw_patch",
-      "sha256": "ccccd0c396e34fbd4495d5d36b3a511e50d2471c3f3e0b7f0dbe66f431c0e1cf",
-      "size": 68239
-    },
-    {
-      "path": "eps_patch/manifest.py",
-      "repository": "lochuan_b4512000_fw_patch",
-      "sha256": "099ce5d24cf2b28f6b3fdbfcb89cdc53401375a8d07b250e9615bee974435efe",
-      "size": 7754
-    },
-    {
-      "path": "payload/faci_dual.h",
-      "repository": "lochuan_b4512000_fw_patch",
-      "sha256": "67554bbb1181f9798c509f3358f8d8f9bd0ed94870f34f419b69b130fab33c1d",
-      "size": 5352
-    },
-    {
       "fixture": "tests/fixtures/payloads/ram_dump_payload.bin",
       "path": "payload.bin",
       "repository": "icanhack_secoc",
@@ -59,41 +35,6 @@
       "size": 4096
     },
     {
-      "path": "extract_keys.py",
-      "repository": "icanhack_secoc",
-      "sha256": "a4927044cdc944e496ff7b56d8241f1353278e651a0e51eb3961f55c2f89d96b"
-    },
-    {
-      "path": "shellcode/main.c",
-      "repository": "icanhack_secoc",
-      "sha256": "bfa673dda68292505ee6be6e34f8ddf5b3f3c7595529400543ad66d64869eea7",
-      "size": 1354
-    },
-    {
-      "path": "shellcode/Dockerfile",
-      "repository": "icanhack_secoc",
-      "sha256": "f26d4544ea92290856159c473018c5c24cbb35c05cb79989e4205e3b3db214e9",
-      "size": 1211
-    },
-    {
-      "path": "shellcode/build.sh",
-      "repository": "icanhack_secoc",
-      "sha256": "d4102622de9b5e17b6aa8b3d4837ffe88575b0c79c4eef6c3cc04e30d2351dcb",
-      "size": 134
-    },
-    {
-      "path": "extract_keys.py",
-      "repository": "icanhack_secoc_tundra",
-      "sha256": "c5a538b99489b1b39d434ff516cf16ad87327a0117894bb1bea8cbb22ca8535b",
-      "size": 7323
-    },
-    {
-      "path": "shellcode/main.c",
-      "repository": "icanhack_secoc_tundra",
-      "sha256": "c273e3d9d83da14ee51db9c78205d752df6ec95fdf853e459ae7d9069dceccd1",
-      "size": 1393
-    },
-    {
       "path": "flash_patcher.py",
       "repository": "blurbdust_secoc",
       "sha256": "d6ccab187b0cd0ea50c99d75e3911c90e540cb9ed21ccced24704e4e40010f9f",
@@ -104,135 +45,6 @@
       "repository": "blurbdust_secoc",
       "sha256": "5fa6ef897e928e3f9cacc13a5eac59a5708791a0ae1a32f17a6cf2a7781f505a",
       "size": 10228
-    },
-    {
-      "path": "tsk/COROLLA_INVESTIGATION.md",
-      "repository": "calvinpark_openpilot",
-      "sha256": "b05fa2fd29ead90426cb5d31d7d077984c66a2657f2124db10f812a9476dce2e",
-      "size": 85587
-    },
-    {
-      "path": "opendbc_repo/opendbc/car/uds.py",
-      "repository": "calvinpark_openpilot",
-      "sha256": "688f9af41c7dbf48bace98d683a67ac9d69cd74af270c58a034a00da391e65de"
-    },
-    {
-      "path": "panda/board/main.c",
-      "repository": "calvinpark_openpilot",
-      "sha256": "6afdb8a8ef1b78717ac4f3b724d59f11adf8d9fc778164638387c7740903bd6d",
-      "size": 11530
-    },
-    {
-      "path": "panda/board/boards/tres.h",
-      "repository": "calvinpark_openpilot",
-      "sha256": "64f2cbe98c8262635053ddf8049337958f1e79d9977dace1fd2148aa4f2ea70d",
-      "size": 5102
-    },
-    {
-      "path": "panda/board/drivers/can_common.h",
-      "repository": "calvinpark_openpilot",
-      "sha256": "d67254ba8bce391ce3ebb6c7e80a409eb4421600772c7a2c25539984ca4ba700",
-      "size": 6117
-    },
-    {
-      "path": "panda/examples/query_fw_versions.py",
-      "repository": "calvinpark_openpilot",
-      "sha256": "dce58977ffda566dd1041c2d0d33d3cd04e958e0865525a7db95250cca0f5669",
-      "size": 4794
-    },
-    {
-      "path": "panda/python/__init__.py",
-      "repository": "calvinpark_openpilot",
-      "sha256": "e80ee3e6271bfafb6b63bf5aeb1f1e5ca4dde8f0d822812e8637ade5cea06c4b",
-      "size": 26572
-    },
-    {
-      "path": "openpilot/selfdrive/pandad/panda.h",
-      "repository": "calvinpark_openpilot",
-      "sha256": "325fbcc720a9af7988ec8098a32568f85ed923f55508e829c6a5fe3d3ca210af",
-      "size": 2853
-    },
-    {
-      "path": "openpilot/selfdrive/pandad/panda.cc",
-      "repository": "calvinpark_openpilot",
-      "sha256": "b5a198a30ff5a193e5c71e2c0bc2b2649a5d6737ae13bee4ec7bbba471eec9b9",
-      "size": 8185
-    },
-    {
-      "path": "opendbc_repo/opendbc/safety/modes/elm327.h",
-      "repository": "calvinpark_openpilot",
-      "sha256": "aeb7c7a763d422cad072d1982585dab190a97593cc729cb528ac3e669241925e",
-      "size": 1158
-    },
-    {
-      "path": "opendbc_repo/opendbc/safety/modes/toyota.h",
-      "repository": "calvinpark_openpilot",
-      "sha256": "5f248ef75fc269b087282e6434a63c2918a2e4ae350741796f40365576d6ac34",
-      "size": 17034
-    },
-    {
-      "path": "opendbc_repo/opendbc/safety/safety.h",
-      "repository": "calvinpark_openpilot",
-      "sha256": "d36c69ec9b0f5634726aa327cd8be69d48e69ad0fa851d49c24c3888bbdce8c0",
-      "size": 19112
-    },
-    {
-      "path": "steps/step_dump_dataflash.py",
-      "repository": "toyota_dataflash_secoc_setup",
-      "sha256": "ddf902816d4f5dcb978857f2d17c9fb23baa83dbfad2da3eb4d4a17bb4d102d8"
-    },
-    {
-      "path": "steps/step_eps_probe.py",
-      "repository": "toyota_dataflash_secoc_setup",
-      "sha256": "3f534c4bea4a09255ef7ae425ea3b0d1a7f1834f5b8db81b46cb2a39bce0f4e5",
-      "size": 3828
-    },
-    {
-      "path": "steps/step_extract_verify_key.py",
-      "repository": "toyota_dataflash_secoc_setup",
-      "sha256": "76973ee7ead61e87d9ad04e56d763ce975690bbbb797d5d1bc268cded3d7701f",
-      "size": 11998
-    },
-    {
-      "path": "steps/step_collect_can.py",
-      "repository": "toyota_dataflash_secoc_setup",
-      "sha256": "ebe713d83dc5148490cc36148aa3d2526e42eb63f820a176c2c70e99ddd893ea",
-      "size": 5286
-    },
-    {
-      "path": "payload_source/shellcode/main_ff1ff000_ff209000.c",
-      "repository": "toyota_dataflash_secoc_setup",
-      "sha256": "2564a97342dd269f2113b53ed58ca1d74bc5ded7e2219b75003212c37b848431"
-    },
-    {
-      "path": "opendbc/dbc/generator/toyota/_toyota_2017.dbc",
-      "repository": "opendbc",
-      "sha256": "818872b1c1034983f61a51460a9b175b4bfe01f3d34f537c3d21f420991a8a48"
-    },
-    {
-      "path": "opendbc/dbc/generator/toyota/toyota_secoc_pt.dbc",
-      "repository": "opendbc",
-      "sha256": "2d680b1b73102d1c88bd735da7683f9379c98f39e1ad608618b94bf037c76119"
-    },
-    {
-      "path": "opendbc/car/secoc.py",
-      "repository": "opendbc",
-      "sha256": "62ce41680ab05db11807d73370806372ad0623015e2f23b41d7167d00280b13c"
-    },
-    {
-      "path": "opendbc/car/toyota/carcontroller.py",
-      "repository": "opendbc",
-      "sha256": "57cc1cb138b7d257128b33b17e45e4bbda119610f8827c676b5c56125785dc95"
-    },
-    {
-      "path": "opendbc/car/toyota/toyotacan.py",
-      "repository": "opendbc",
-      "sha256": "aac2d2fe4785f337c9b412a2a358082c57907091522bf092d336735a08dc89b2"
-    },
-    {
-      "path": "opendbc/car/toyota/values.py",
-      "repository": "opendbc",
-      "sha256": "acef77680fdfb8ea58396f66d834556b7f8049ecdb91c4050950bf7c6ef3a7af"
     },
     {
       "path": "docs/tss3-secoc-key-recovery-20260608-zh.md",
@@ -289,30 +101,6 @@
       "size": 195395
     },
     {
-      "path": "CLAUDE.md",
-      "repository": "calvinpark_openpilot_dump",
-      "sha256": "7e5a2504d928170add432dbf1ec68772b5f4e47d40714883b5acf4374bf38e8a",
-      "size": 130954
-    },
-    {
-      "path": "tsk/lib/dump_range.py",
-      "repository": "calvinpark_openpilot_dump",
-      "sha256": "21fce761351861d811be82a8628cd6c0a3d04a87d2ed95f5beeba814c63ab26b",
-      "size": 21088
-    },
-    {
-      "path": "tsk/lib/preflight.py",
-      "repository": "calvinpark_openpilot_dump",
-      "sha256": "714bac321cbf9cf0aa2247782bdf28d427f3283fa8447692cb981c66dcb16ee7",
-      "size": 33127
-    },
-    {
-      "path": "tsk/lib/preflight_store.py",
-      "repository": "calvinpark_openpilot_dump",
-      "sha256": "59e200a92549afc3c09ce2a2e698d8de0788bef2ec053ad8467cf8bdd1d217b6",
-      "size": 13114
-    },
-    {
       "path": "tsk/lib/payload_codeflash_00000000_00200000.bin",
       "repository": "calvinpark_openpilot_dump",
       "sha256": "860f8a3418d23ccfd0861a97efdb9e1d23a8854c3a629b8d7b6821eb93d0b588",
@@ -347,24 +135,6 @@
       "repository": "calvinpark_openpilot_dump",
       "sha256": "fba7950a62939f75d7b06e08fc1fe4ceea5fd2109b8fe4677494a3777543a35d",
       "size": 4096
-    },
-    {
-      "path": "harness/v3/Toyota_B_Harness.pdf",
-      "repository": "commaai_hardware",
-      "sha256": "39126557ad6ae4400dd0ac44080437e860cb3a6923a42b0ab523a78f456a8fb6",
-      "size": 32357
-    },
-    {
-      "path": "harness/v3/Harness_Box.pdf",
-      "repository": "commaai_hardware",
-      "sha256": "36dc9e55ff193a98c74ea7db9f0d63f0f7ea75f6cd2d5eb3ccd763a686585562",
-      "size": 22319
-    },
-    {
-      "path": "harness/OBD-C.sch.pdf",
-      "repository": "commaai_hardware",
-      "sha256": "3450700e3711643c097374a1d71d20e4d6004ac9946534e052e23c0417401008",
-      "size": 41427
     }
   ],
   "community_artifacts": [
@@ -1136,19 +906,9 @@
       "directory": "calvinpark-openpilot-dump",
       "url": "https://github.com/calvinpark/openpilot.git"
     },
-    "commaai_hardware": {
-      "commit": "530b7da136b6a6d4b0d37b95bdb3472c59f672f4",
-      "directory": "comma-hardware",
-      "url": "https://github.com/commaai/hardware.git"
-    },
     "icanhack_secoc": {
       "commit": "4ce19cc31ff560b697bcd59cc3db55711f50b7b3",
       "directory": "secoc",
-      "url": "https://github.com/I-CAN-hack/secoc.git"
-    },
-    "icanhack_secoc_tundra": {
-      "commit": "b80d9104a14bdf59d236a6a0de2a4a5c929a9d76",
-      "directory": "secoc-tundra",
       "url": "https://github.com/I-CAN-hack/secoc.git"
     },
     "lochuan_b4512000_fw_patch": {
@@ -1165,11 +925,6 @@
       "commit": "c9b31d21bc396e8958891e271936bdbdf1a6ca93",
       "directory": "opendbc",
       "url": "https://github.com/commaai/opendbc.git"
-    },
-    "optskug_docs": {
-      "commit": "2c7184122d3f1644dfc9f32e98daaa45df653098",
-      "directory": "optskug-docs",
-      "url": "https://github.com/optskug/docs.git"
     },
     "rh850_p1me_original": {
       "commit": "b8c6bcf6b84763a9c5288fc8fa6766ebfe66ce4a",
