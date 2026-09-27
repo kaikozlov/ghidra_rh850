@@ -398,6 +398,107 @@ documents ICU-S as a fixed SHE state machine, so a substantial common Renesas
 low-level/security-driver layer is expected. MCAL/ICU-S provenance does not
 imply that an OEM UDS SecurityAccess root or algorithm is Renesas-selected.
 
+### Local Renesas P1M-E MCAL package audit
+
+A locally retained Renesas package now lets us separate those layers with source
+rather than inference. The ignored external artifact is:
+
+```text
+AUTOSAR_RH850_P1M-E_MCAL_Ver4.07.00_QM_MP.zip
+sha256 5f05f1f76ead31a1d2300d17c79b26b0f7d9e794af8446defd8c8afa00bdc054
+```
+
+Its two installer payloads identify **AUTOSAR Renesas R4.0.3 P1M-E MCAL,
+version 4.07.00** and expand to full source/generator/device-support trees.
+Across source-like C/header/assembly files the package contains about 150k lines
+covering exactly the expected low-level modules:
+
+```text
+adc can dio fls gpt icu mcu port pwm spi wdg
+```
+
+Here `icu` is AUTOSAR **Input Capture Unit**, not the RH850 Intelligent
+Cryptographic Unit / ICU-S. A bounded whole-package source/configuration search
+finds no Dcm, `SecurityAccess`, `requestSeed`, `sendKey`, SecOC, CSM,
+CryptoIf, SHE `CMD_LOAD_KEY`, ICU-S driver/API, `ICUSCMD`, or any of the
+three Toyota/Denso EPS roots. The generic GHS `R7F701381` device header also
+defines the ordinary SFR regions surrounding `0xFFC5D000` while omitting that
+ICU-S register window itself. This package therefore does **not** contain the
+Toyota boot `$27` implementation or a candidate source for
+`f05f36b7...`.
+
+The same package does, however, supply strong positive provenance for a lower
+layer of the Toyota firmware. Renesas `Can_MainServ.c` contains the canonical
+CAN-FD conversion arrays:
+
+```text
+Can_GaaDLCFromPayloadTable[65]
+Can_GaaPayloadFromDLCTable[16]
+Can_GaaPayloadFromPLSTable[8]
+```
+
+All five tracked P1M-E EPS images contain the 65-byte and 16-byte arrays exactly
+once, while the eight-byte PLS array is the identical suffix of the 16-byte
+array and can therefore be linker-folded:
+
+| target | payload length -> DLC | DLC -> payload |
+|---|---:|---:|
+| Sienna `8965B4512000` | `0x23582` | `0x22F10` |
+| Camry `8965F3307000` | `0x2345A` | `0x22E28` |
+| Crown `8965F3012000` | `0x22FBE` | `0x229BC` |
+| Corolla F `8965F1208000` | `0x2334A` | `0x22D46` |
+| Corolla H `8965H1202000` | `0x2334A` | `0x22D46` |
+
+The surrounding recovered receive code is more discriminating than the arrays
+alone. The Toyota functions use a 64-byte local receive buffer, extract DLC from
+the high nibble, use the same DLC/PLS conversion tables, copy CAN-FD data as
+32-bit words, advance the common FIFO with `CFPCTR = 0xFF`, represent the FD
+flag as `0x40000000`, preserve the extended-ID flag as `0x80000000`, and
+forward the same four-argument `HRH, CanId, DLC, data` indication shape. Those
+details line up with Renesas `Can_RxIndicationTxRxFIFO` /
+`Can_RxIndicationCommonPart` and its macros
+`CAN_RSCAN_XXDLC_GET(x) = x >> 28`,
+`CAN_RSCAN_CFPC_NEXT = 0xFF`,
+`CAN_FD_FRAME_FORMAT = 0x40000000`, and
+`CAN_EXTENDED_FORMAT = 0x80000000`. The four-argument indication is also the
+non-AUTOSAR-4.2.2 branch in this **R4.0.3** source family.
+
+That is strong evidence that a substantial part of the stripped Toyota EPS CAN
+stack descends from the Renesas CAN-MCAL implementation family, rather than
+merely being independently written against the same RSCFD peripheral. It does
+**not** prove that these ECUs were compiled from release 4.07.00 specifically:
+the Toyota images also carry an adjacent 4-byte-rounding length table not
+declared in this exact source file, and we have not reproduced an OEM
+configuration/compiler build byte-for-byte.
+
+Renesas separately advertises an **ICU-S Driver** as RH850 security software,
+outside the ordinary MCAL package
+(<https://www.renesas.com/en/key-technologies/security/automotive-security>).
+That makes the layering materially sharper:
+
+```text
+Toyota/Denso application + diagnostics + boot/reprogramming policy
+        |
+        +-- UDS $27 SecurityAccess + CPU-software AES + root @ CodeFlash 0xBFE8
+        |
+        +-- AUTOSAR SecOC / CSM / CryptoIf integration
+        |
+        +-- Renesas ICU-S driver candidate        [separate security product]
+        |
+        +-- Renesas P1M-E MCAL                    [CAN/FLS/MCU/etc.; CAN lineage observed]
+        |
+        +-- RH850/P1M-E + ICU-S hardware
+```
+
+The package therefore supports the broad hypothesis that large pieces of these
+ECUs are vendor-supplied software, but it moves the repeated `$27` secret
+question **above MCAL**. The next Renesas artifact worth acquiring is the
+P1M-E-generation ICU-S Driver/source or integration package; it can be compared
+directly with the exact command-5/7/8 driver recovered from the EPS. Even that
+would not by itself explain `f05f36b7...`, because the boot SecurityAccess
+implementation performs software AES using a CPU-readable CodeFlash root rather
+than an ICU-S key slot.
+
 The best discriminator is therefore a non-Toyota `R7F701381/383` P1M-E
 CodeFlash image. If it carries the same `0xBFE8` root **and** the same relocated
 boot-SA machine, the supplier/reference-package hypothesis becomes much
