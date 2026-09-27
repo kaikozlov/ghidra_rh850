@@ -321,12 +321,24 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
         cwd=ROOT, check=True, capture_output=True, text=True,
     )
     kit_set_meta = json.loads(kit_set_proc.stdout)
-    check("all-target kit build emits four exact-target classic-oracle deployment pairs",
+    packaged_oracles = {
+        target: json.loads(
+            (kit_set / target / "bundle/oracle/classic.json").read_text(encoding="utf-8")
+        )
+        for target in TARGETS
+    }
+    check("all-target kit defaults to four exact-target four-frame oracle deployment pairs",
           kit_set_meta["schema"] == "tss3-unified-b6-signer-kit-set-v1" and
           set(kit_set_meta["kits"]) == set(TARGETS) and all(
               kit_set_meta["kits"][target]["classic_08a_oracle_target"] == target and
-              json.loads((kit_set / target / "bundle/oracle/classic.json").read_text(encoding="utf-8"))["target"]["name"] == target and
-              (kit_set / target / "bundle/oracle/classic_payload.bin").stat().st_size == 0x1000
+              packaged_oracles[target]["target"]["name"] == target and
+              packaged_oracles[target]["request"]["codec"] == "four-frame" and
+              packaged_oracles[target]["request"]["frame_count"] == 4 and
+              (kit_set / target / "bundle/oracle/classic_payload.bin").stat().st_size == 0x1000 and
+              not (
+                  kit_set / target /
+                  "runtime/exploit/ephemeral_runtime/camry_f33_08a_classic_oracle_compact.py"
+              ).exists()
               for target in TARGETS
           ))
     kit = kit_set / "crown-8965F3012000"
@@ -351,8 +363,30 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
           (kit / "runtime/tsk/lib/programming.py").is_file() and
           (kit / "runtime/exploit/ephemeral_runtime/camry_f33_post_install_recovery.py").is_file() and
           (kit / "bundle/oracle/classic.json").is_file() and
-          kit_meta["classic_08a_oracle"]["transport"].startswith("functional-compact1 0x00000777 -> 0x000007A9") and
+          kit_meta["classic_08a_oracle"]["codec"] == "four-frame" and
+          kit_meta["classic_08a_oracle"]["transport"].startswith("functional-nibble4 0x00000777 -> 0x000007A9") and
           "camry_classic_08a_oracle" not in kit_meta)
+    compact_kit = root / "crown-compact-kit"
+    compact_kit_proc = subprocess.run(
+        [
+            sys.executable, str(KIT_BUILDER), "--target", "crown-8965F3012000",
+            "--oracle-codec", "compact", "--out", str(compact_kit),
+        ],
+        cwd=ROOT, check=True, capture_output=True, text=True,
+    )
+    compact_kit_meta = json.loads(compact_kit_proc.stdout)
+    compact_oracle_meta = json.loads(
+        (compact_kit / "bundle/oracle/classic.json").read_text(encoding="utf-8")
+    )
+    check("compact package assets require and honor explicit builder selection",
+          compact_kit_meta["classic_08a_oracle"]["codec"] == "compact" and
+          compact_oracle_meta["request"]["experimental"] is True and
+          compact_oracle_meta["request"]["frame_count"] == 1 and
+          (
+              compact_kit /
+              "runtime/exploit/ephemeral_runtime/camry_f33_08a_classic_oracle_compact.py"
+          ).is_file())
+
     launcher_path = kit / "tss3-unified-signer"
     wrong_kit = subprocess.run(
         [str(launcher_path), "--topology", "camry-post-repin", "doctor"],
@@ -393,11 +427,12 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
     check("Camry unified kit uses the same canonical oracle deployment key and runtime",
           camry_kit_meta["classic_08a_oracle"]["metadata"] == "bundle/oracle/classic.json" and
           camry_kit_meta["classic_08a_oracle"]["payload"] == "bundle/oracle/classic_payload.bin" and
-          camry_oracle_meta["schema"] == "tss3-08a-classic-oracle-build-v5" and
+          camry_oracle_meta["schema"] == "tss3-08a-classic-oracle-build-v6" and
           camry_oracle_meta["idle_fast_path"]["enabled"] is True and
           "camry_classic_08a_oracle" not in camry_kit_meta and
           len(camry_oracle_payload) == 0x1000 and
           (camry_kit / "runtime/exploit/ephemeral_runtime/camry_f33_08a_classic_oracle.py").is_file() and
+          not (camry_kit / "runtime/exploit/ephemeral_runtime/camry_f33_08a_classic_oracle_compact.py").exists() and
           (camry_kit / "runtime/exploit/ephemeral_runtime/camry_f33_startup_programming.py").is_file() and
           (camry_kit / "runtime/exploit/ephemeral_runtime/camry_f33_oracle_ui_bringup.py").is_file() and
           not (camry_kit / "bundle/oracle/camry_f33_08a_classic_oracle_resident.bin").exists())

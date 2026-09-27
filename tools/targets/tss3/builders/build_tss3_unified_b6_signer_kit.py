@@ -33,6 +33,9 @@ RUNTIME_FILES = (
 ORACLE_RUNTIME_FILES = (
     "exploit/ephemeral_runtime/camry_f33_08a_classic_oracle.py",
 )
+COMPACT_ORACLE_RUNTIME_FILE = "exploit/ephemeral_runtime/camry_f33_08a_classic_oracle_compact.py"
+DEFAULT_ORACLE_CODEC = "four-frame"
+ORACLE_CODECS = (DEFAULT_ORACLE_CODEC, "compact")
 CAMRY_ORACLE_RUNTIME_FILES = (
     "exploit/ephemeral_runtime/camry_f33_startup_programming.py",
     "exploit/ephemeral_runtime/camry_f33_oracle_ui_bringup.py",
@@ -51,7 +54,7 @@ def source_commit() -> str:
     return subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT, check=True, capture_output=True, text=True).stdout.strip()
 
 
-def build(target: str, out: Path) -> dict:
+def build(target: str, out: Path, oracle_codec: str = DEFAULT_ORACLE_CODEC) -> dict:
     if out.exists() and any(p.is_file() for p in out.rglob("*")):
         raise RuntimeError(f"refusing nonempty output directory: {out}")
     with tempfile.TemporaryDirectory(prefix="tss3-unified-kit-") as td:
@@ -70,11 +73,16 @@ def build(target: str, out: Path) -> dict:
             if p.is_file(): copy(p, out / "bundle" / p.name)
         copy(out / "bundle" / meta_path.name, out / "bundle/unified.json")
         oracle_proc = subprocess.run(
-            [sys.executable, str(ORACLE_BUILDER), "--target", target, "--output-dir", str(oracle_built)],
+            [
+                sys.executable, str(ORACLE_BUILDER), "--target", target,
+                "--codec", oracle_codec, "--output-dir", str(oracle_built),
+            ],
             cwd=ROOT, check=True, capture_output=True, text=True,
         )
         oracle_meta = json.loads(oracle_proc.stdout)
         oracle_stem = f"{target.replace('-', '_')}_08a_classic_oracle"
+        if oracle_codec != DEFAULT_ORACLE_CODEC:
+            oracle_stem += "_compact"
         oracle_meta_path = oracle_built / f"{oracle_stem}.json"
         oracle_payload_path = oracle_built / f"{oracle_stem}_payload.bin"
         if json.loads(oracle_meta_path.read_text(encoding="utf-8")) != oracle_meta:
@@ -83,6 +91,8 @@ def build(target: str, out: Path) -> dict:
         copy(oracle_payload_path, out / "bundle/oracle/classic_payload.bin")
     for rel in RUNTIME_FILES: copy(ROOT / rel, out / "runtime" / rel)
     for rel in ORACLE_RUNTIME_FILES: copy(ROOT / rel, out / "runtime" / rel)
+    if oracle_codec == "compact":
+        copy(ROOT / COMPACT_ORACLE_RUNTIME_FILE, out / "runtime" / COMPACT_ORACLE_RUNTIME_FILE)
     if target == "camry-8965F3307000":
         for rel in CAMRY_ORACLE_RUNTIME_FILES: copy(ROOT / rel, out / "runtime" / rel)
     copy(LAUNCHER, out / "tss3-unified-signer"); (out / "tss3-unified-signer").chmod(0o755)
@@ -98,6 +108,17 @@ def build(target: str, out: Path) -> dict:
     else:
         flow = """2. Put the vehicle in NRTD/READY=0 and Park.
 3. ./tss3-unified-signer bringup /tmp/tss3-bringup"""
+    if oracle_codec == DEFAULT_ORACLE_CODEC:
+        oracle_transport_text = (
+            "All targets use the proven four-message standard-0x777 protocol and standard-0x7A9 response. "
+            "The exact-target payload contains only the firmware-specific addresses, lifecycle, bus, scratch "
+            "location, and transmit handle."
+        )
+    else:
+        oracle_transport_text = (
+            "This package was explicitly built with the experimental single-message compact protocol. "
+            "The compact codec module and compact-only helper are included only in this opt-in package."
+        )
     testing = f"""Unified TSS3 functional-0x777 signer test kit
 Target: {target}
 Source commit: {commit}
@@ -116,7 +137,7 @@ Next, READY/Park/stationary: ./tss3-unified-signer [--topology ...] replace-curr
    This derives the live 0x025 steering angle, verifies fresh healthy stationary/Park state, sends one no-offset C7 generation, then sequence zero to release.
 
 Exact-target 0x08A oracle check: install in NRTD/Park with `./tss3-unified-signer oracle-install`, transition directly to READY/Park without powering EPS off, then run `./tss3-unified-signer oracle-self-test`.
-All targets use the same single-frame standard-0x777 compact protocol and standard-0x7A9 response. The exact-target payload contains only the firmware-specific addresses, lifecycle, bus, scratch location, and transmit handle.
+{oracle_transport_text}
 Parked 100 Hz throughput gate: `./tss3-unified-signer oracle-benchmark-100hz 200 /tmp/tss3-oracle-100hz.json`. It publishes every 10 ms without waiting inline, drains replies on a dedicated receiver, and records resident request/success/response deltas.
 
 Camry F33 recovery note: the field result is timing-sensitive. Exact application F181 returning proves the ECU application is back, not that every peer-facing state machine has finished initializing. The maintained guided flow therefore lets each stage finish while retaining one cooperative Panda lease; Panda ownership is not treated as a recovery primitive. `recover-drcc` remains legacy DTC-evidence tooling and is not part of this recovery.
@@ -129,6 +150,7 @@ For exact Camry, `oracle-ui-bringup` replaces the manual NRTD ceremony: arm whil
     (out / "TESTING.txt").write_text(testing, encoding="utf-8")
     oracle = {
         "target": oracle_meta["target"]["name"],
+        "codec": oracle_meta["request"]["codec"],
         "transport": f"{oracle_meta['request']['carrier']} {oracle_meta['request']['can_id']} -> {oracle_meta['response']['can_id']} on Panda bus{oracle_meta['request']['bus']}",
         "metadata": "bundle/oracle/classic.json",
         "payload": "bundle/oracle/classic_payload.bin",
@@ -145,18 +167,19 @@ For exact Camry, `oracle-ui-bringup` replaces the manual NRTD ceremony: arm whil
     return manifest
 
 
-def build_set(out: Path) -> dict:
+def build_set(out: Path, oracle_codec: str = DEFAULT_ORACLE_CODEC) -> dict:
     if out.exists() and any(p.is_file() for p in out.rglob("*")):
         raise RuntimeError(f"refusing nonempty output directory: {out}")
     kits = {}
     for target in TARGETS:
         target_out = out / target
-        manifest = build(target, target_out)
+        manifest = build(target, target_out, oracle_codec)
         kits[target] = {
             "path": target,
             "manifest": f"{target}/manifest.json",
             "manifest_sha256": sha256(target_out / "manifest.json"),
             "classic_08a_oracle_target": manifest["classic_08a_oracle"]["target"],
+            "classic_08a_oracle_codec": manifest["classic_08a_oracle"]["codec"],
         }
     result = {
         "schema": "tss3-unified-b6-signer-kit-set-v1",
@@ -173,9 +196,16 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--target", choices=(*TARGETS, "all"), required=True)
     ap.add_argument("--out", type=Path, required=True)
+    ap.add_argument(
+        "--oracle-codec", choices=ORACLE_CODECS, default=DEFAULT_ORACLE_CODEC,
+        help="four-frame is packaged by default; compact is experimental and explicit",
+    )
     args = ap.parse_args()
     try:
-        result = build_set(args.out) if args.target == "all" else build(args.target, args.out)
+        result = (
+            build_set(args.out, args.oracle_codec) if args.target == "all"
+            else build(args.target, args.out, args.oracle_codec)
+        )
     except (OSError, RuntimeError, subprocess.CalledProcessError, json.JSONDecodeError) as exc:
         print(f"refusing: {exc}", file=sys.stderr)
         return 2

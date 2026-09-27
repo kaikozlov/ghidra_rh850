@@ -3382,34 +3382,49 @@ post-drive discriminator. Compare host complete-request count with resident `req
 then compare `request_count`, `success_count`, `response_count`, and visible `0x7A9/C9` replies.
 That measurement should precede a carrier, scheduler, or response-retry change.
 
-#### 4.13.2 September-23 four-frame candidate (superseded)
+#### 4.13.2 Four-frame carrier restored as the universal default
 
 The September-23 candidate made the TAUJ0CNT3-bounded idle poll the default
 exact-F33 resident and retained `--foreground-only` as the comparison build. It
-also replaced the six-frame C8 request with four standard `0x777` frames. Each
-frame carried seven consecutive application bytes; invalid ISO-TP PCI nibbles
-8--B encoded fragment order, while the low nibbles carried the 8-bit
+also replaced the six-frame C8 request with four standard `0x777` messages.
+Each message carries seven consecutive application bytes. Header high nibbles
+8--B encode fragment order, while low nibbles carry the complete 8-bit
 transaction sequence as low/high/low/high.
 
-That candidate reduced each signer request from six ring records to four and
-expanded the outstanding sequence space from 31 to 255, but it did not bypass
-or parallelize the serialized stock command-5 wrapper. The four-frame assembler
-was removed by the September-27 single-frame cutover below.
+The September-27 compact cutover temporarily removed that assembler. The
+current correction restores the four-message codec for Camry, Crown, and
+Corolla H/F after the compact steering experiment was reported broken with
+stock TSS3 steering. The default transports all 28 application bytes verbatim;
+fragment 0 restarts assembly, and ordered continuations must repeat both
+sequence nibbles. It reduces the original six ring records to four and provides
+255 nonzero transaction IDs, but it does not bypass or parallelize the
+serialized stock command-5 wrapper.
+
+Compact reconstruction remains available only for a deliberate experiment.
+The normal builder emits no compact template or assembly path, and normal
+Camry/unified kits omit the compact Python module. `--codec compact` or the kit
+builder's `--oracle-codec compact` produces a separately identified,
+compact-only artifact; there is no default fallback or automatic selection.
+The reported steering result determines the repository default, but no
+identity-bound capture is promoted here as vehicle qualification for the
+compact experiment.
 
 The target code remains split at a testable boundary.
-`camry_f33_08a_classic_oracle_core.inc` owns CPU/memory-only canonical
-reconstruction, private freshness update, and response packing. The focused
-verification suite compiles a target-native `v850e3v5` harness and executes
-those production macros under GNU `sim/v850`, including exact inactive and
-LTA/LCA reconstruction, rejection without mutation, ABI global-pointer
+`camry_f33_08a_classic_oracle_core.inc` owns CPU/memory-only four-message
+assembly, optional compact reconstruction, private freshness update, and
+response packing. The focused verification suite compiles a target-native
+`v850e3v5` harness and executes both codec macros under GNU `sim/v850`,
+including verbatim four-fragment assembly, sequence/order rejection, compact
+inactive and LTA/LCA reconstruction, ABI global-pointer/record-size
 preservation, epoch change, message-counter increment/wrap, FV4 construction,
 and success/error/busy response packing. The harness deliberately stops before
 stock freshness/command-5/CAN calls and MMIO.
-The repository-owned GNU simulator now carries a local fix for upstream `sim/v850`'s broken
-format-VI `imm32` reconstruction; `tools/rh850 selftest` exercises both forward and backward
-far `jarl32`/`jr32`, and the oracle harness itself uses `jarl32`. This removes the artificial
-far-call decoder boundary. Stock functions and P1M-E MMIO still require explicit models/mapped
-code or hardware before simulator execution can say anything about their behavior.
+The repository-owned GNU simulator carries a local fix for upstream
+`sim/v850`'s broken format-VI `imm32` reconstruction; `tools/rh850 selftest`
+exercises both forward and backward far `jarl32`/`jr32`, and the oracle harness
+itself uses `jarl32`. This removes the artificial far-call decoder boundary.
+Stock functions and P1M-E MMIO still require explicit models/mapped code or
+hardware before simulator execution can say anything about their behavior.
 
 #### 4.13.3 Prior-art audit: a virtual FD32 datagram does not remove the Classic-CAN tunnel
 
@@ -3460,27 +3475,27 @@ through pandad plus corresponding Toyota safety allowances. The signer also perm
 outstanding generations, so a DLC-only fragment index/toggle cannot replace the existing full
 8-bit request sequence used to bind asynchronous replies.
 
-**Decision (2026-09-27 cutover):** the one-frame `0x777/8` codec is the sole
-request transport for Camry, Crown, and Corolla H/F. Exact byte `C0` plus seven
-payload bytes carry the acceleration bound package (mirrored into both PDU
-slots), set speed, pinion angle, six-bit lateral ID, and complete 8-bit request
-sequence whose low six bits are the application request sequence. The host
-proves byte-for-byte that the complete application equals the helper's
-canonical reconstruction before transmission; a nonrepresentable shape is an
-explicit host error, not a four-frame fallback.
+**Superseded decision (2026-09-27):** the one-message `0x777/8` codec became the
+sole request transport. Exact byte `C0` plus seven payload bytes carried the
+acceleration-bound package, set speed, pinion angle, six-bit lateral ID, and
+complete 8-bit request sequence. The host rejected any application that did not
+equal the helper's canonical reconstruction. That decision and its claim that
+the fragment assembler was obsolete no longer describe the maintained build.
 
-The obsolete fragment assembler and compile-time target split are removed. All
-four targets build the same source implementation against a universal
-920-byte code limit set by Corolla's `FEF07F98` scratch boundary. Camry/Crown
-link at 808 bytes and Corolla H/F at 812 bytes, all with zero relocations; the
-four-byte target delta is only separate-scratch address materialization. The
-cutover also corrected the compact macro's use of RH850 `r4` (`gp`) as a
-temporary and its reuse of the outer scanner's `r10` record-size register. The
-simulator wrapper now requires both registers to survive commit and rejection.
+**Current decision:** the four-message codec is again universal and default.
+It is the information-theoretic minimum already described above for transporting
+all 28 application bytes verbatim on Classical CAN while retaining one envelope
+byte per message. All four targets build it against Corolla's 920-byte
+`FEF07F98` scratch boundary with zero relocations. Camry/Crown link the default
+helper at 800 bytes and Corolla H/F at 804 bytes; explicit compact builds are
+808 and 812 bytes respectively. The helper's compile-time codec selection is
+exclusive: a default binary has only fragment assembly, and an explicitly
+selected compact binary has only canonical reconstruction.
 
-If a future requirement genuinely needs a noncanonical 28-byte application,
-first establish that requirement and then prove an appropriate carrier; do not
-retain an unused fragmented protocol in the live helper.
+The compact work remains useful as a bounded experiment and retains its RH850
+ABI corrections: neither `r4` (`gp`) nor the outer scanner's `r10` record-size
+register may be clobbered. It is not shipped in normal packages and is not a
+fallback for a dropped or nonrepresentable four-message request.
 
 ### 4.14 Recovered PCS/ADU semantics constrain `0x08A` relay ownership
 

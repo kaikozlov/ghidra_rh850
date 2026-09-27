@@ -16,6 +16,7 @@ ROOT = REPO_ROOT
 
 from exploit.ephemeral_runtime import build_camry_f33_08a_classic_oracle as build
 from exploit.ephemeral_runtime import camry_f33_08a_classic_oracle as host
+from exploit.ephemeral_runtime import camry_f33_08a_classic_oracle_compact as compact_host
 from exploit.ephemeral_runtime import camry_f33_oracle_ui_bringup as ui_bringup
 from exploit.ephemeral_runtime import camry_f33_startup_programming as startup_programming
 from exploit.common import ram_exec
@@ -34,14 +35,25 @@ subprocess.run(
     cwd=ROOT, check=True, stdout=subprocess.DEVNULL,
 )
 target_meta = {}
+compact_target_meta = {}
 with tempfile.TemporaryDirectory(prefix="verify-tss3-08a-oracle-") as td:
-    for target in sorted(set(build.ORACLE_PROFILES) - {CAMRY_TARGET}):
-        target_out = Path(td) / target
-        proc = subprocess.run(
-            [sys.executable, str(build.BUILDER), "--target", target, "--output-dir", str(target_out)],
+    for target in sorted(build.ORACLE_PROFILES):
+        if target != CAMRY_TARGET:
+            target_out = Path(td) / f"{target}-four"
+            proc = subprocess.run(
+                [sys.executable, str(build.BUILDER), "--target", target, "--output-dir", str(target_out)],
+                cwd=ROOT, check=True, capture_output=True, text=True,
+            )
+            target_meta[target] = json.loads(proc.stdout)
+        compact_out = Path(td) / f"{target}-compact"
+        compact_proc = subprocess.run(
+            [
+                sys.executable, str(build.BUILDER), "--target", target, "--codec", "compact",
+                "--output-dir", str(compact_out),
+            ],
             cwd=ROOT, check=True, capture_output=True, text=True,
         )
-        target_meta[target] = json.loads(proc.stdout)
+        compact_target_meta[target] = json.loads(compact_proc.stdout)
 meta_path = OUT / f"{CAMRY_STEM}.json"
 meta = json.loads(meta_path.read_text())
 foreground_meta = json.loads((FOREGROUND_OUT / f"{CAMRY_STEM}.json").read_text())
@@ -136,7 +148,7 @@ check("resident/helper fit proven RAM geometry",
       meta["resident"]["relocations"] == 0 and meta["helper"]["relocations"] == 0)
 check("host-visible state and private scratch preserve exact safe boundaries",
       host.STATE_SIZE == build.STATE_SIZE == 0x24 and
-      host.STATE_VERSION == build.STATE_VERSION == meta["state"]["version"] == 2 and
+      host.STATE_VERSION == build.STATE_VERSION == meta["state"]["version"] == 3 and
       build.STATE_BASE + build.STATE_SIZE == build.CLASSIC_SCRATCH_BASE == 0xFEBF0280 and
       build.STATE_BASE + build.STATE_SIZE <= build.APPLICATION_RMBA_PROTECTED_START and
       build.CLASSIC_SCRATCH_BASE + build.CLASSIC_SCRATCH_SIZE == build.SECOC_OBJECT15_BASE and
@@ -180,7 +192,7 @@ def run_core_simulator() -> str:
 
 simulator_output = run_core_simulator()
 check("production pure-core macros execute under GNU RH850 sim",
-      "ORACLE_SIM_RESULT=0x8a0c0de FAILURE=0 PASSES=24" in simulator_output)
+      "ORACLE_SIM_RESULT=0x8a0c0de FAILURE=0 PASSES=36" in simulator_output)
 
 fw = meta["firmware_contract"]
 check("idle-fast timer gate is bound to exact firmware geometry",
@@ -219,48 +231,73 @@ check("state read boundary is pinned to the exact application SID23 exclusion",
           "start": "0xFEBF0288", "end_inclusive": "0xFEBF13CB",
       } and meta["state"]["base"] == "0xFEBF025C" and meta["state"]["size"] == 0x24)
 
+application = bytes(range(28))
+four_frames = host.build_request(application, 0xA7)
+check("host default codec transports all application bytes in four exact frames",
+      four_frames == (
+          bytes.fromhex("8700010203040506"),
+          bytes.fromhex("9a0708090a0b0c0d"),
+          bytes.fromhex("a70e0f1011121314"),
+          bytes.fromhex("ba15161718191a1b"),
+      ) and
+      b"".join(frame[1:] for frame in four_frames) == application and
+      host.build_request_frames(application, 0xA7) == four_frames)
+
 compact_app = bytearray(host.SAFE_APPLICATION)
 compact_app[18], compact_app[19], compact_app[26] = 0x34, 0x12, 0x21
-compact_frame = host.build_compact_frame(bytes(compact_app), 0xA1)
-check("host codec proves one-frame losslessness against its own reconstruction",
+compact_frame = compact_host.build_compact_frame(bytes(compact_app), 0xA1)
+check("optional compact module retains its bounded reconstruction contract",
       compact_frame == bytes.fromhex("c0000000341200a1") and
-      host.compact_reconstruction(compact_frame)[2:] == bytes(compact_app) and
-      host.build_compact_frame(host.SAFE_APPLICATION, 0x40) ==
+      compact_host.compact_reconstruction(compact_frame)[2:] == bytes(compact_app) and
+      compact_host.build_compact_frame(host.SAFE_APPLICATION, 0x40) ==
           bytes.fromhex("c000000000000040"))
 for rejected_application, rejected_seq in (
-    (bytes(range(28)), 0xA7),  # template mismatch
-    (host.SAFE_APPLICATION, 0x41),  # seq low6 != application[26]
+    (bytes(range(28)), 0xA7),
+    (host.SAFE_APPLICATION, 0x41),
     (bytes(bytearray(compact_app[:24]) + bytearray([100]) + bytes(compact_app[25:])), 0xA1),
 ):
     try:
-        host.build_compact_frame(rejected_application, rejected_seq)
+        compact_host.build_compact_frame(rejected_application, rejected_seq)
     except ValueError:
         pass
     else:
-        raise AssertionError("host accepted an application the one-frame helper cannot reconstruct")
-print("PASS host rejects every nonrepresentable application before transmission")
+        raise AssertionError("optional compact codec accepted a nonrepresentable application")
+print("PASS optional compact codec rejects every nonrepresentable application")
 
-check("all exact targets use one compact wire protocol",
-      set(build.ORACLE_PROFILES) == {
-          "camry-8965F3307000", "crown-8965F3012000",
-          "corolla-8965H1202000", "corolla-8965F1208000",
-      } and all(
-          profile["carrier"] == "functional-compact1" and profile["request_id"] == 0x777 and
-          profile["response_id"] == 0x7A9 and profile["frame_count"] == 1 and
+expected_targets = {
+    "camry-8965F3307000", "crown-8965F3012000",
+    "corolla-8965H1202000", "corolla-8965F1208000",
+}
+check("all exact targets share codec-neutral firmware profiles",
+      set(build.ORACLE_PROFILES) == expected_targets and
+      all(
+          profile["request_id"] == 0x777 and profile["response_id"] == 0x7A9 and
           profile["helper_macros"]["ORACLE_REQUEST_HEADER_WORD"] == 0x00000408 and
-          "ORACLE_COMPACT_PROFILE" not in profile["helper_macros"]
+          "ORACLE_COMPACT_CODEC" not in profile["helper_macros"] and
+          "carrier" not in profile and "frame_count" not in profile
           for profile in build.ORACLE_PROFILES.values()
       ))
-check("single-frame contract reaches every target's metadata",
-      meta["request"]["frame_count"] == 1 and meta["request"]["header"] == "0xC0" and
-      meta["request"]["sequence_coupling"] == "seq8 low 6 bits == application[26]" and
-      all(target_meta[target]["request"]["frame_count"] == 1 for target in target_meta) and
-      all(target_meta[target]["request"]["header"] == "0xC0" for target in target_meta))
-check("Corolla H/F and Crown lifecycle variants compile from the same canonical sources",
-      set(target_meta) == {
-          "crown-8965F3012000", "corolla-8965H1202000", "corolla-8965F1208000",
-      } and all(target_meta[target]["target"]["name"] == target for target in target_meta) and
-      all(target_meta[target]["request"]["carrier"] == "functional-compact1" for target in target_meta) and
+
+four_target_meta = {CAMRY_TARGET: meta, **target_meta}
+check("four-frame is the universal default metadata contract",
+      set(four_target_meta) == expected_targets and
+      all(item["schema"] == "tss3-08a-classic-oracle-build-v6" for item in four_target_meta.values()) and
+      all(item["request"]["codec"] == "four-frame" for item in four_target_meta.values()) and
+      all(item["request"]["carrier"] == "functional-nibble4" for item in four_target_meta.values()) and
+      all(item["request"]["frame_count"] == 4 for item in four_target_meta.values()) and
+      all(item["request"]["experimental"] is False for item in four_target_meta.values()) and
+      "functional-compact1" not in json.dumps(meta))
+check("compact helper builds only through explicit selection on every exact target",
+      set(compact_target_meta) == expected_targets and
+      all(item["request"]["codec"] == "compact" for item in compact_target_meta.values()) and
+      all(item["request"]["carrier"] == "functional-compact1" for item in compact_target_meta.values()) and
+      all(item["request"]["frame_count"] == 1 for item in compact_target_meta.values()) and
+      all(item["request"]["experimental"] is True for item in compact_target_meta.values()) and
+      all(item["helper"]["size"] <= item["helper"]["limit"] == 0x398
+          for item in compact_target_meta.values()))
+check("Corolla H/F and Crown lifecycle variants compile from the canonical four-frame sources",
+      set(target_meta) == expected_targets - {CAMRY_TARGET} and
+      all(target_meta[target]["target"]["name"] == target for target in target_meta) and
       all(target_meta[target]["request"]["can_id"] == "0x00000777" for target in target_meta) and
       all(target_meta[target]["request"]["bus"] == 1 for target in target_meta) and
       all(target_meta[target]["response"]["can_id"] == "0x000007A9" for target in target_meta) and
@@ -303,9 +340,16 @@ class _FakePipelinedPanda:
         self.request_count = 0
         self.sent_frame_counts: list[int] = []
     def can_send_many(self, rows):
-        if len(rows) != 1:
-            raise AssertionError("compact-only oracle must submit exactly one frame")
-        seq = int(rows[0][1][7])
+        if len(rows) != host.FRAGMENT_COUNT:
+            raise AssertionError("default oracle must submit exactly four frames")
+        frame_data = [bytes(row[1]) for row in rows]
+        if [frame[0] >> 4 for frame in frame_data] != [8, 9, 10, 11]:
+            raise AssertionError("default oracle fragment order drift")
+        seq = (frame_data[0][0] & 0x0F) | ((frame_data[1][0] & 0x0F) << 4)
+        if b"".join(frame[1:] for frame in frame_data) != bytes(
+            bytearray(host.SAFE_APPLICATION[:26]) + bytes((seq & 0x3F,)) + host.SAFE_APPLICATION[27:]
+        ):
+            raise AssertionError("default oracle application transport drift")
         with self._lock:
             self.request_count += 1
             trailer = bytes((0x10 | (self.request_count & 0x0F), seq, 0xA5, 0x5A))
@@ -326,7 +370,7 @@ class _FakePipelinedSession:
         self.transport = {
             "request_id": host.REQUEST_ID, "request_bus": host.BUS,
             "response_id": host.RESPONSE_ID, "response_bus": host.BUS,
-            "carrier": host.REQUEST_CARRIER,
+            "codec": host.FOUR_FRAME_CODEC, "carrier": host.REQUEST_CARRIER,
         }
         self.attestation = {"state": {"initialized": True}}
         self.refreshed = False
@@ -361,10 +405,13 @@ check("100-Hz benchmark pipelines requests without waiting for each reply",
       pipelined["boundaries"]["transmitted_08a"] is False and
       _FakePipelinedSession.last is not None and _FakePipelinedSession.last.refreshed)
 
-check("pipelined benchmark emits one compact frame per request on every target",
-      _FakePipelinedSession.last.panda.sent_frame_counts == [1, 1, 1] and
-      all(len(sent["frames_hex"]) == 1 and sent["frames_hex"][0][:2] == "c0"
-          for sent in pipelined["rows"]))
+check("pipelined benchmark emits four ordered default frames per request",
+      _FakePipelinedSession.last.panda.sent_frame_counts == [4, 4, 4] and
+      all(
+          len(sent["frames_hex"]) == 4 and
+          [int(frame[:2], 16) >> 4 for frame in sent["frames_hex"]] == [8, 9, 10, 11]
+          for sent in pipelined["rows"]
+      ))
 
 
 class FakeDiagnosticClient:

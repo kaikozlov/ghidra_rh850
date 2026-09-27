@@ -219,24 +219,31 @@ application interfaces:
 | Corolla `8965H1202000` | 1 | `FEBE3F4C` / `FEBE480C` | `00021988` / 41 | `FEBFF9F0` | 50 | `FEF07F98` |
 | Corolla `8965F1208000` | 1 | `FEBE3F4C` / `FEBE480C` | `00021988` / 41 | `FEBFF9F0` | 50 | `FEF07F98` |
 
-All four use the same single-frame classic standard-`0x777` request codec,
-standard-`0x7A9` responses, the same 36-byte command-5 authentication domain,
-and exact target-specific CodeFlash calls. PCI type `C` plus seven payload
-bytes carry every dynamic field of the canonical CONTROL_REQUEST shape. The
-host transmits only after proving the complete 28-byte application equals the
-helper's reconstruction; a nonrepresentable application is rejected before
-CAN submission. There is no fragment assembler or verbatim fallback.
+All four default to the same four-message classic standard-`0x777` request
+codec, standard-`0x7A9` responses, the same 36-byte command-5 authentication
+domain, and exact target-specific CodeFlash calls. Headers `8s`, `9S`, `As`,
+and `BS` encode ordered fragments 0..3 while repeating the low/high nibbles of
+the complete 8-bit transaction sequence. Each message contributes seven
+consecutive bytes, so the helper reconstructs the complete 28-byte application
+verbatim rather than inferring a canonical shape.
 
 One source implementation is built for all four targets and is held to the
 same 920-byte (`0x398`) code limit. That limit is the start of Corolla's
 GlobalRAM scratch region, so Camry/Crown cannot silently consume their extra
-transit-window headroom. Current linked sizes are 808 bytes for Camry/Crown and
-812 bytes for Corolla H/F, all with zero relocations; Corolla's four-byte delta
-is only the second instruction needed to materialize its separate scratch
-address, not a transport or behavior branch. Corolla H/F intentionally produce
-identical resident/helper binaries because their pinned runtime profile is
-identical; their F181 and CodeFlash identities remain distinct deployment
-guards.
+transit-window headroom. Current default helpers link at 800 bytes for
+Camry/Crown and 804 bytes for Corolla H/F, all with zero relocations and with no
+compact template or compact assembly path. Explicit compact builds remain
+808/812 bytes respectively. Corolla H/F intentionally produce identical
+resident/helper binaries because their pinned runtime profile is identical;
+their F181 and CodeFlash identities remain distinct deployment guards.
+
+The one-message canonical-reconstruction codec is retained only as an explicit
+experiment. Its stock-TSS3 steering experiment was reported broken, so it is
+not a default or a fallback. `--codec compact` builds a compact-only helper;
+`--oracle-codec compact` additionally places its optional Python codec module in
+an experimental kit. Default kits omit that module. The reported result selects
+the safe default but is not promoted here to identity-bound vehicle
+qualification without its capture.
 
 The recurring steering-control contract is unified C7, but the field installation
 path is deliberately target-shaped. Camry/Crown use functional C6 only as a

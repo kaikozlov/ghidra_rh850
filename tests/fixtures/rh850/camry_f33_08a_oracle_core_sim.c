@@ -2,6 +2,7 @@ typedef unsigned char u8;
 typedef unsigned short u16;
 typedef unsigned int u32;
 
+extern u32 oracle_sim_fragment(const u8 *record, u8 *state, u8 *scratch);
 extern u32 oracle_sim_freshness(u8 *state, u8 *scratch, u32 trip, u32 reset);
 extern u32 oracle_sim_response(u8 *state, u8 *scratch, u32 seq, const u8 *result);
 extern u32 oracle_sim_compact(const u8 *record, u8 *state, u8 *scratch);
@@ -32,6 +33,13 @@ static void store32(u8 *p, u32 v) {
   p[0] = (u8)v; p[1] = (u8)(v >> 8); p[2] = (u8)(v >> 16); p[3] = (u8)(v >> 24);
 }
 
+
+static void make_fragment(u8 tag, u8 base) {
+  u32 i;
+  clear_bytes(record, sizeof(record));
+  record[12] = tag;
+  for (i = 0; i < 7; ++i) record[13 + i] = (u8)(base + i);
+}
 
 static u8 expected_domain[30];
 
@@ -73,6 +81,10 @@ static int bytes_equal(const u8 *a, const u8 *b, u32 n) {
 #define CHECK(code, expr) do {   if (!(expr)) { oracle_sim_failure = (code); return; }   oracle_sim_passes++; } while (0)
 
 void oracle_core_sim_main(void) {
+  static const u8 app_expected[28] = {
+    0,1,2,3,4,5,6,7,8,9,10,11,12,13,
+    14,15,16,17,18,19,20,21,22,23,24,25,26,27
+  };
   static const u8 response_success[8] = {0xc9,0x07,0x00,0xf8,0xbd,0x64,0xe2,0xa5};
   static const u8 response_error[8] = {0xc9,0x42,0x01,0xbd,0,0,0,0};
   static const u8 response_busy[8] = {0xc9,0x55,0x02,0xaa,0,0,0,0};
@@ -82,6 +94,39 @@ void oracle_core_sim_main(void) {
   oracle_sim_result = 0;
   clear_bytes(state, sizeof(state));
   clear_bytes(scratch, sizeof(scratch));
+  /* Proven four-frame codec: ordered fragments preserve all 28 bytes. */
+  make_fragment(0x87, 0);
+  CHECK(101, oracle_sim_fragment(record, state, scratch) == 0);
+  CHECK(102, state[6] == 0x07 && state[7] == 1);
+  CHECK(103, scratch[16] == 0x00 && scratch[17] == 0x8a &&
+             bytes_equal(&scratch[18], &app_expected[0], 7));
+
+  make_fragment(0x9a, 7);
+  CHECK(104, oracle_sim_fragment(record, state, scratch) == 0);
+  CHECK(105, state[6] == 0xa7 && state[7] == 2 &&
+             bytes_equal(&scratch[25], &app_expected[7], 7));
+
+  make_fragment(0xa7, 14);
+  CHECK(106, oracle_sim_fragment(record, state, scratch) == 0);
+  CHECK(107, state[7] == 3 && bytes_equal(&scratch[32], &app_expected[14], 7));
+
+  make_fragment(0xba, 21);
+  CHECK(108, oracle_sim_fragment(record, state, scratch) == 1);
+  CHECK(109, state[6] == 0xa7 &&
+             bytes_equal(&scratch[18], app_expected, sizeof(app_expected)));
+
+  /* A mismatched continuation resets assembly without committing. */
+  clear_bytes(state, sizeof(state));
+  make_fragment(0x83, 0);
+  CHECK(110, oracle_sim_fragment(record, state, scratch) == 0);
+  make_fragment(0x94, 7);
+  CHECK(111, oracle_sim_fragment(record, state, scratch) == 0);
+  make_fragment(0xa2, 14);
+  CHECK(112, oracle_sim_fragment(record, state, scratch) == 2 && state[7] == 0);
+
+  clear_bytes(state, sizeof(state));
+  clear_bytes(scratch, sizeof(scratch));
+
 
   /* Canonical inactive shape reconstructs exactly and preserves gp/r10. */
   make_compact(0x12, 0x34, 0x56, 0x9a, 0x78, 0x00, 0xa7);

@@ -132,6 +132,9 @@ RUNTIME_FILES = [
     "tools/security/build_secoc_patch_manifest.py",
     "tools/targets/camry/live/camry_f33_steering_state_capture.py",
 ]
+COMPACT_ORACLE_RUNTIME_FILE = "exploit/ephemeral_runtime/camry_f33_08a_classic_oracle_compact.py"
+DEFAULT_ORACLE_CODEC = "four-frame"
+ORACLE_CODECS = (DEFAULT_ORACLE_CODEC, "compact")
 
 
 def git_state(repo: Path) -> dict:
@@ -146,10 +149,13 @@ def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def copy_runtime(out: Path) -> dict[str, dict[str, str]]:
+def copy_runtime(out: Path, oracle_codec: str = DEFAULT_ORACLE_CODEC) -> dict[str, dict[str, str]]:
     runtime = out / "runtime"
     result: dict[str, dict[str, str]] = {}
-    for rel in RUNTIME_FILES:
+    files = [*RUNTIME_FILES]
+    if oracle_codec == "compact":
+        files.append(COMPACT_ORACLE_RUNTIME_FILE)
+    for rel in files:
         src = ROOT / rel
         dst = runtime / rel
         dst.parent.mkdir(parents=True, exist_ok=True)
@@ -332,7 +338,7 @@ application behavior.
 """
 
 
-def build(out: Path, openpilot: Path) -> dict:
+def build(out: Path, openpilot: Path, oracle_codec: str = DEFAULT_ORACLE_CODEC) -> dict:
     out.mkdir(parents=True, exist_ok=True)
     dst = out / PROBE.name
     shutil.copy2(PROBE, dst)
@@ -341,7 +347,7 @@ def build(out: Path, openpilot: Path) -> dict:
     patch_package = stage3.build(patch_dir, build_payloads=True)
     persistent_dir = out / "persistent_patch"
     persistent_package = persistent_patch.build(persistent_dir)
-    runtime_files = copy_runtime(out)
+    runtime_files = copy_runtime(out, oracle_codec)
     (out / "FIRMWARE_PATCH.md").write_text(patch_runbook(), encoding="utf-8")
 
     ram_dir = out / "ram_payloads"
@@ -382,6 +388,8 @@ def build(out: Path, openpilot: Path) -> dict:
         [
             sys.executable,
             str(EPS08A_CLASSIC_ORACLE_BUILDER),
+            "--codec",
+            oracle_codec,
             "--output-stem",
             "camry_f33_08a_classic_oracle",
             "--output-dir",
@@ -555,13 +563,18 @@ def build(out: Path, openpilot: Path) -> dict:
         files[str(path.relative_to(out))] = {"sha256": sha256(path)}
     for path in sorted(p for p in persistent_dir.rglob("*") if p.is_file()):
         files[str(path.relative_to(out))] = {"sha256": sha256(path)}
+    oracle_transport = (
+        "proven four-message standard classic 0x777 request / standard 0x7A9 response"
+        if oracle_codec == DEFAULT_ORACLE_CODEC else
+        "explicit experimental single-message compact 0x777 request / standard 0x7A9 response"
+    )
     manifest = {
-        "schema": "camry-f33-car-kit-v22",
+        "schema": "camry-f33-car-kit-v23",
         "created_at": datetime.now(UTC).isoformat(timespec="seconds"),
         "target": {
             "eps_f181": "8965F3307000",
             "eps_diag": "0x7A1->0x7A9 bus0 (post-repin EPS diagnostics; historical ISO-TP oracle transport only)",
-            "oracle_sideband": "standard classic 0x777->0x7A9 bus0 (selected single-frame 0x08A CMAC transport)",
+            "oracle_sideband": oracle_transport,
             "request_source": "0x08A/32 FD bus2 (FRC native source on relay-correct repin)",
             "request_sink": "0x08A/32 FD bus0 (host replacement toward chassis/Brake)",
         },
@@ -578,9 +591,9 @@ def build(out: Path, openpilot: Path) -> dict:
             "persistent_patch_required": False,
             "stage5_receiver_bypass_required": False,
             "current_lateral_path": "relay-correct FRC 0x08A source replacement; EPS resident is CMAC service only",
-            "reason": "stock ICU-S command 5 selector 4 is live-qualified for exact 0x008A CMAC generation; the selected single-frame raw-ring carrier changes only host-to-resident transport and does not bypass the EPS receiver or transmit the request",
+            "reason": "stock ICU-S command 5 selector 4 is live-qualified for exact 0x008A CMAC generation; the selected raw-ring carrier changes only host-to-resident transport and does not bypass the EPS receiver or transmit the request",
             "command5_oracle_primitive_live_qualified": True,
-            "selected_oracle_transport": "single-frame standard 0x777 request / standard 0x7A9 response",
+            "selected_oracle_transport": oracle_transport,
             "selected_oracle_transport_live_qualified": False,
             "request_plane_road_qualified": False,
             "historical_direct_b6_path": "retained as development evidence only; do not arm f33-secoc or f33-persist alongside the 0x08A request-plane path",
@@ -1095,8 +1108,12 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", type=Path, default=ROOT / "build/out/camry-f33-car-kit")
     parser.add_argument("--openpilot", type=Path, default=DEFAULT_OPENPILOT)
+    parser.add_argument(
+        "--oracle-codec", choices=ORACLE_CODECS, default=DEFAULT_ORACLE_CODEC,
+        help="four-frame is packaged by default; compact is experimental and explicit",
+    )
     args = parser.parse_args()
-    manifest = build(args.out, args.openpilot)
+    manifest = build(args.out, args.openpilot, args.oracle_codec)
     print(json.dumps(manifest, indent=2, sort_keys=True))
     return 0
 

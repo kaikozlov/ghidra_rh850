@@ -1028,14 +1028,17 @@ with tempfile.TemporaryDirectory() as td:
           (out / "f33-08a-oracle").is_file() and
           (out / "ram_payloads/camry_f33_08a_oracle_stream_payload.bin").is_file())
     classic_oracle = manifest["ram_experiments"]["08a_classic_mac_oracle"]
-    check("kit selects the raw-classic oracle transport without overstating qualification",
+    check("kit defaults to the proven four-frame raw-classic oracle without overstating qualification",
           classic_oracle["launcher"] == "f33-08a-classic-oracle" and
-          classic_oracle["request"]["carrier"] == "functional-compact1" and
+          classic_oracle["request"]["codec"] == "four-frame" and
+          classic_oracle["request"]["carrier"] == "functional-nibble4" and
+          classic_oracle["request"]["frame_count"] == 4 and
           classic_oracle["persistent_flash_write"] is False and
           classic_oracle["live_qualified"] is False and
           manifest["ram_experiments"]["order"][0].startswith("08a_classic_mac_oracle is the selected volatile signer transport") and
           (out / "f33-08a-classic-oracle").is_file() and
-          (out / "ram_payloads/camry_f33_08a_classic_oracle_payload.bin").is_file())
+          (out / "ram_payloads/camry_f33_08a_classic_oracle_payload.bin").is_file() and
+          not (out / "runtime/exploit/ephemeral_runtime/camry_f33_08a_classic_oracle_compact.py").exists())
     inline = manifest["ram_experiments"]["b6_inline_signer"]
     check("kit retains native-B6 verify/replace signer only as historical development tooling",
           inline["launcher"] == "f33-secoc" and
