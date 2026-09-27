@@ -10,36 +10,34 @@ _start:
 rh850_sim_stop:
     br rh850_sim_stop
 
-    .global _oracle_sim_fragment
-_oracle_sim_fragment:
-    prepare {r20-r23,lp}, 0
-    mov r7, r22
-    mov r8, r23
-    mov r6, r7
-    ORACLE_CORE_ASSEMBLE_FRAGMENT .L_sim_fragment_partial, .L_sim_fragment_reset
-    movea 1, r0, r10
-    br .L_sim_fragment_done
-.L_sim_fragment_partial:
-    mov 0, r10
-    br .L_sim_fragment_done
-.L_sim_fragment_reset:
-    st.b r0, 7[r22]
-    movea 2, r0, r10
-.L_sim_fragment_done:
-    dispose 0, {r20-r23,lp}, lp
 
     .global _oracle_sim_compact
 _oracle_sim_compact:
     prepare {r20-r23,lp}, 0
+    mov gp, r13
+    movea 5, r0, r10
     mov r7, r22
     mov r8, r23
     mov r6, r7
-    ORACLE_CORE_ASSEMBLE_COMPACT .L_sim_compact_commit, .L_sim_compact_skip
+    ORACLE_CORE_ASSEMBLE_COMPACT .L_sim_compact_skip
 .L_sim_compact_commit:
+    cmp r13, gp
+    bne .L_sim_compact_abi_bad
+    cmp 5, r10
+    bne .L_sim_compact_abi_bad
+    st.b r20, 6[r22]
     movea 1, r0, r10
     br .L_sim_compact_done
 .L_sim_compact_skip:
+    cmp r13, gp
+    bne .L_sim_compact_abi_bad
+    cmp 5, r10
+    bne .L_sim_compact_abi_bad
     mov 0, r10
+    br .L_sim_compact_done
+.L_sim_compact_abi_bad:
+    mov r13, gp
+    movea 3, r0, r10
 .L_sim_compact_done:
     dispose 0, {r20-r23,lp}, lp
 
@@ -68,4 +66,4 @@ _oracle_sim_response:
     mov r21, r10
     dispose 0, {r20-r23,lp}, lp
 
-    ORACLE_CORE_EMIT_SUPPORT
+    ORACLE_CORE_EMIT_TEMPLATE

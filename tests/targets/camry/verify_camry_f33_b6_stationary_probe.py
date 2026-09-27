@@ -1030,7 +1030,7 @@ with tempfile.TemporaryDirectory() as td:
     classic_oracle = manifest["ram_experiments"]["08a_classic_mac_oracle"]
     check("kit selects the raw-classic oracle transport without overstating qualification",
           classic_oracle["launcher"] == "f33-08a-classic-oracle" and
-          classic_oracle["request"]["carrier"] == "functional-nibble4" and
+          classic_oracle["request"]["carrier"] == "functional-compact1" and
           classic_oracle["persistent_flash_write"] is False and
           classic_oracle["live_qualified"] is False and
           manifest["ram_experiments"]["order"][0].startswith("08a_classic_mac_oracle is the selected volatile signer transport") and

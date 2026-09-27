@@ -1571,6 +1571,11 @@ ISO-TP carrier described above is now superseded by the exact-F33 raw-CAN-FD car
 no moving test should precede its parked live qualification.
 
 ### September-19 raw CAN-FD oracle carrier: DCM/CanTp removed entirely
+**Historical checkpoint:** both the raw-FD design and its five-frame
+raw-classic replacement below are superseded by the one-frame cutover in
+[§4.13.3](#4133-prior-art-audit-a-virtual-fd32-datagram-does-not-remove-the-classic-can-tunnel).
+They remain here only as evidence for the receive-path and replay chronology.
+
 
 A firmware-first receive-path audit closes a simpler transport than either speculative or
 well-formed ISO-TP. The key correction is architectural: **DCM/CanTp does not own the EPS CAN
@@ -1686,17 +1691,20 @@ frame cannot be classic to one receiver and FD to another; a one-frame host carr
 requires an intermediate Toyota component to regenerate/translate the frame onto the EPS-local
 FD link.
 
-The replacement carrier is now implemented as a **stateless five-frame raw-classic mailbox**
-on that already-proven endpoint. One source generation is encoded as five extended classic
-`0x1FDC0002/8` frames. Fragments 0--3 carry the complete 28-byte application image, seven
-bytes per frame; fragment 4 carries `message8`, source `reset_low8`, and a fixed transaction
-trailer. The five-bit transaction sequence is carried in each fragment header together with
-the fragment index. All five frames are submitted in one Panda batch. The resident consumes
-them from the **pre-staging software RX ring**, not the single eight-byte XCP staging cell,
-so batching cannot overwrite intermediate fragments. A new fragment 0 unconditionally
-restarts assembly; missing or malformed fragments never invoke command 5 and require no retry
-or recovery state. Only a complete ordered request calls selector-4 once and returns one
-classic `0x1FE00002/8` response.
+At this September-19 checkpoint, the replacement carrier was implemented as a
+**stateless five-frame raw-classic mailbox** on that already-proven endpoint.
+One source generation was encoded as five extended classic `0x1FDC0002/8`
+frames. Fragments 0--3 carried the complete 28-byte application image, seven
+bytes per frame; fragment 4 carried `message8`, source `reset_low8`, and a fixed
+transaction trailer. The five-bit transaction sequence was carried in each
+fragment header together with the fragment index. All five frames were
+submitted in one Panda batch. The resident consumed them from the
+**pre-staging software RX ring**, not the single eight-byte XCP staging cell, so
+batching could not overwrite intermediate fragments. A new fragment 0
+unconditionally restarted assembly; missing or malformed fragments never
+invoked command 5 and required no retry or recovery state. Only a complete
+ordered request called selector-4 once and returned one classic
+`0x1FE00002/8` response.
 
 This is intentionally not a resident mirror/delta protocol. Route149 shows most native
 application generations change only a few bytes, so a delta encoding could often fit in one
@@ -1704,15 +1712,17 @@ classic frame, but it would make host/resident mirror synchronization another au
 machine. The fixed five-frame request is per-generation self-contained. Prior Panda batching
 measurements already put five classic CF submissions at roughly 0.6--0.8 ms host-side; the
 removed latency was the receiver-controlled ISO-TP FF->FC wait, not the five-frame wire burst.
-The new carrier therefore removes DCM/CanTp, FF/FC/CF semantics, and every transport retry
-while preserving exact application/freshness input to command 5. `tools/test
-camry_f33_08a_classic_oracle` rebuilds and byte-compares the 424-byte resident, 848-byte
-helper, staging image and authenticated payload and verifies the exact classic rule46/ring/
-response-handle contract. Recovering the Brake/EBU classic-to-local-FD regeneration path
-remains the deeper OEM-shaped alternative, not a prerequisite for this carrier.
+That carrier removed DCM/CanTp, FF/FC/CF semantics, and every transport retry
+while preserving exact application/freshness input to command 5. Its
+then-current focused verifier rebuilt and compared the 424-byte resident,
+848-byte helper, staging image, and authenticated payload and verified the
+exact classic rule46/ring/response-handle contract. Recovering the Brake/EBU
+classic-to-local-FD regeneration path remained the deeper OEM-shaped
+alternative, not a prerequisite for that carrier.
 
-The corresponding host/Panda implementation is offline-qualified end to end. The focused
-proxy suite now passes **17/17** and the complete Camry TSS3 module passes **48 tests + 8
+The corresponding host/Panda implementation was offline-qualified end to end.
+The focused proxy suite passed **17/17** and the complete Camry TSS3 module
+passed **48 tests + 8
 subtests**. Full route149 replay completes the original **5 arms / 5 releases**, with 7,387
 owned source generations represented by exactly **36,935 accepted classic oracle fragments**,
 7,384 active ID11 outputs, zero native leaks and valid Panda safety throughout. Mixed route135
@@ -3372,29 +3382,29 @@ post-drive discriminator. Compare host complete-request count with resident `req
 then compare `request_count`, `success_count`, `response_count`, and visible `0x7A9/C9` replies.
 That measurement should precede a carrier, scheduler, or response-retry change.
 
-#### 4.13.2 Post-route transport candidate: idle polling plus four request frames
+#### 4.13.2 September-23 four-frame candidate (superseded)
 
-The next source candidate makes the TAUJ0CNT3-bounded idle poll the default exact-F33 resident
-and retains `--foreground-only` as the comparison build. It also replaces the six-frame C8
-request with four standard `0x777` frames. Each frame carries seven consecutive application
-bytes; invalid ISO-TP PCI nibbles 8--B encode fragment order, while the low nibbles carry the
-8-bit transaction sequence as low/high/low/high. The repeated nibbles reject mixed fragments,
-fragment 0 still restarts assembly, and no application byte is inferred or omitted.
+The September-23 candidate made the TAUJ0CNT3-bounded idle poll the default
+exact-F33 resident and retained `--foreground-only` as the comparison build. It
+also replaced the six-frame C8 request with four standard `0x777` frames. Each
+frame carried seven consecutive application bytes; invalid ISO-TP PCI nibbles
+8--B encoded fragment order, while the low nibbles carried the 8-bit
+transaction sequence as low/high/low/high.
 
-This reduces each signer request from six ring records to four and expands the outstanding
-sequence space from 31 to 255. It does not bypass or parallelize the serialized stock command-5
-wrapper. Static/cross-target build verification passes, but latency and loss-rate improvement
-remain unmeasured until a parked `oracle-benchmark-100hz` run and a later route test.
+That candidate reduced each signer request from six ring records to four and
+expanded the outstanding sequence space from 31 to 255, but it did not bypass
+or parallelize the serialized stock command-5 wrapper. The four-frame assembler
+was removed by the September-27 single-frame cutover below.
 
-The target code is now split at a testable boundary without changing the live helper bytes.
-`camry_f33_08a_classic_oracle_core.inc` owns the CPU/memory-only fragment assembly, private
-freshness update, and response packing. The live helper expands those macros in place; rebuilding
-the default Camry helper after the split still produces the exact pre-refactor 860-byte image,
-SHA-256 `faabdbab491e0d75c640003a96335c7f56ca39a9b4fe0f8f97ef01eef0c26d10`. The focused
-verification suite also compiles a target-native `v850e3v5` harness and executes the same macros
-under GNU `sim/v850`: 30 assertions cover complete/mixed fragment sequences, epoch change,
-message-counter increment/wrap, FV4 construction, and success/error/busy response packing.
-The simulator harness deliberately stops before stock freshness/command-5/CAN calls and MMIO.
+The target code remains split at a testable boundary.
+`camry_f33_08a_classic_oracle_core.inc` owns CPU/memory-only canonical
+reconstruction, private freshness update, and response packing. The focused
+verification suite compiles a target-native `v850e3v5` harness and executes
+those production macros under GNU `sim/v850`, including exact inactive and
+LTA/LCA reconstruction, rejection without mutation, ABI global-pointer
+preservation, epoch change, message-counter increment/wrap, FV4 construction,
+and success/error/busy response packing. The harness deliberately stops before
+stock freshness/command-5/CAN calls and MMIO.
 The repository-owned GNU simulator now carries a local fix for upstream `sim/v850`'s broken
 format-VI `imm32` reconstruction; `tools/rh850 selftest` exercises both forward and backward
 far `jarl32`/`jr32`, and the oracle harness itself uses `jarl32`. This removes the artificial
@@ -3403,9 +3413,10 @@ code or hardware before simulator execution can say anything about their behavio
 
 #### 4.13.3 Prior-art audit: a virtual FD32 datagram does not remove the Classic-CAN tunnel
 
-A September-23 review of existing CAN fragmentation transports does not identify an off-the-shelf
-protocol that improves the current four-frame wire shape. The useful prior art is in reassembly and
-resynchronization rather than in a drop-in `CAN-FD-over-Classic-CAN` layer:
+A September-23 review of existing CAN fragmentation transports did not identify
+an off-the-shelf protocol that improved the then-current four-frame wire shape.
+The useful prior art was in reassembly and resynchronization rather than in a
+drop-in `CAN-FD-over-Classic-CAN` layer:
 
 - [Cyphal/DroneCAN](https://dronecan.github.io/Specification/4.1_CAN_bus_transport_layer/)
   reserves one tail byte in every CAN frame for start/end, toggle, and transfer-ID state. Current
@@ -3422,12 +3433,13 @@ resynchronization rather than in a drop-in `CAN-FD-over-Classic-CAN` layer:
   extra state is undesirable: the EPS advertised a 40-ms STmin even though a deliberately burst
   transfer could be accepted faster.
 
-The current raw-classic mailbox is therefore already a target-specialized virtual-datagram tunnel.
-Four Classic-CAN data frames are the information-theoretic minimum for 28 application bytes, and
-its present one-byte-per-frame transport envelope uses the remaining four physical bytes for
-fragment identity and the full 8-bit oracle sequence. A host-side `FD32` object could make that
-abstraction cleaner, but it would not make the F33 RSCFD/CanIf path observe one real CAN-FD frame:
-the resident would still have to reconstruct the logical packet from accepted Classic-CAN records.
+The then-current raw-classic mailbox was therefore already a
+target-specialized virtual-datagram tunnel. Four Classic-CAN data frames were
+the information-theoretic minimum for transporting all 28 application bytes
+verbatim, and its one-byte-per-frame envelope used the remaining four physical
+bytes for fragment identity and the full 8-bit oracle sequence. The compact
+cutover below instead transmits only the dynamic fields of a proved canonical
+application reconstruction.
 
 One lower-layer primitive is worth retaining as a separate experiment. ISO 11898 Classical CAN
 transmits **eight data bytes for every raw DLC 8..15**. Linux exposes the otherwise-lost 9..15
@@ -3448,20 +3460,27 @@ through pandad plus corresponding Toyota safety allowances. The signer also perm
 outstanding generations, so a DLC-only fragment index/toggle cannot replace the existing full
 8-bit request sequence used to bind asynchronous replies.
 
-**Decision (superseded 2026-09-27):** the four-frame `0x777/8` codec is no longer the only
-production candidate. Camry/Crown helpers now also accept a **lossless compact one-frame
-profile** on the same `0x777` acceptance rule: PCI type `C` plus seven payload bytes carry the
-acceleration bound package (mirrored into both PDU slots), set speed, pinion angle, the
-six-bit lateral ID, and the complete 8-bit request sequence whose low six bits are the
-application request sequence. The host emits it only after proving byte-for-byte that the
-application it wants signed equals the helper's canonical reconstruction, so the async-reply
-binding argument above still holds and every non-canonical shape (including the full 32-byte
-logical request) still uses the verbatim four-frame fallback. Corolla keeps four-frame only:
-its helper transit window also hosts the scratch region, leaving no code headroom. If a future
-target requires the full 32-byte logical request, first prove raw-DLC 8..15 end-to-end in a
-parked, non-actuating experiment; only then consider adding a generic raw-Classic-DLC field
-to the Panda/openpilot transport. Do not replace the codec with a five-frame standard
-transport merely to make the fragmentation layer more generic.
+**Decision (2026-09-27 cutover):** the one-frame `0x777/8` codec is the sole
+request transport for Camry, Crown, and Corolla H/F. Exact byte `C0` plus seven
+payload bytes carry the acceleration bound package (mirrored into both PDU
+slots), set speed, pinion angle, six-bit lateral ID, and complete 8-bit request
+sequence whose low six bits are the application request sequence. The host
+proves byte-for-byte that the complete application equals the helper's
+canonical reconstruction before transmission; a nonrepresentable shape is an
+explicit host error, not a four-frame fallback.
+
+The obsolete fragment assembler and compile-time target split are removed. All
+four targets build the same source implementation against a universal
+920-byte code limit set by Corolla's `FEF07F98` scratch boundary. Camry/Crown
+link at 808 bytes and Corolla H/F at 812 bytes, all with zero relocations; the
+four-byte target delta is only separate-scratch address materialization. The
+cutover also corrected the compact macro's use of RH850 `r4` (`gp`) as a
+temporary and its reuse of the outer scanner's `r10` record-size register. The
+simulator wrapper now requires both registers to survive commit and rejection.
+
+If a future requirement genuinely needs a noncanonical 28-byte application,
+first establish that requirement and then prove an appropriate carrier; do not
+retain an unused fragmented protocol in the live helper.
 
 ### 4.14 Recovered PCS/ADU semantics constrain `0x08A` relay ownership
 

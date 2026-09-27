@@ -351,7 +351,7 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
           (kit / "runtime/tsk/lib/programming.py").is_file() and
           (kit / "runtime/exploit/ephemeral_runtime/camry_f33_post_install_recovery.py").is_file() and
           (kit / "bundle/oracle/classic.json").is_file() and
-          kit_meta["classic_08a_oracle"]["transport"].startswith("functional-nibble4 0x00000777 -> 0x000007A9") and
+          kit_meta["classic_08a_oracle"]["transport"].startswith("functional-compact1 0x00000777 -> 0x000007A9") and
           "camry_classic_08a_oracle" not in kit_meta)
     launcher_path = kit / "tss3-unified-signer"
     wrong_kit = subprocess.run(
@@ -393,7 +393,7 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
     check("Camry unified kit uses the same canonical oracle deployment key and runtime",
           camry_kit_meta["classic_08a_oracle"]["metadata"] == "bundle/oracle/classic.json" and
           camry_kit_meta["classic_08a_oracle"]["payload"] == "bundle/oracle/classic_payload.bin" and
-          camry_oracle_meta["schema"] == "tss3-08a-classic-oracle-build-v4" and
+          camry_oracle_meta["schema"] == "tss3-08a-classic-oracle-build-v5" and
           camry_oracle_meta["idle_fast_path"]["enabled"] is True and
           "camry_classic_08a_oracle" not in camry_kit_meta and
           len(camry_oracle_payload) == 0x1000 and
