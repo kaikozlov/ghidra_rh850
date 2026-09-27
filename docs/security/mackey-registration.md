@@ -344,24 +344,79 @@ protocol. That is consistent with Renesas offering SHE-capable ICU security
 blocks across RH850 product lines and with the exact P1M-E ICU-S command-8
 implementation recovered in this repository.
 
-The similarity must not be projected onto the message profile itself. GM's
-published example authenticates a construction containing an OEM data ID,
-32-bit CAN ID, 64-bit freshness and payload. The Toyota EPS recovered here
-authenticates `DataID_be16 || authentic_payload || full_freshness`, with a
-Toyota-specific six-byte reconstructed freshness value and bit-packed FV4/MAC28
-trailer. The UDS SecurityAccess derivation is likewise not shared: the GM report
-shows a CMAC-based ECUID+nonce construction, whereas exact Sienna application
-and bootloader `$27` use the separately recovered Denso two-stage AES-ECB
-construction. The common boundary is therefore **SHE/HSM key management and
-CMAC/freshness architecture**, not byte-for-byte OEM protocol identity.
+The similarity must not be projected blindly onto the protected-message
+profile. GM's published example reports authentication over
+`data_id_u8 || can_id_be32 || freshness_be64 || payload`. That construction is
+**not the canonical AUTOSAR SecOC DataToAuthenticator layout**: AUTOSAR defines
+the standard input as the full 16-bit SecOC Data ID, secured Authentic I-PDU
+data, and complete Freshness Value. The GM vector may still be an exact
+empirical description of Global B -- the reported live key and captured frame
+are sufficient to test it -- but if so it is an OEM/supplier-specific secured-CAN
+profile or preprocessing layer around standard AES-CMAC, not evidence that GM
+invented a cryptographic primitive. The Toyota EPS recovered here follows the
+canonical-looking `DataID_be16 || authentic_payload || full_freshness` shape,
+with a Toyota-specific six-byte reconstructed freshness value and bit-packed
+FV4/MAC28 trailer.
+
+The diagnostic-security comparison needs the same separation. UDS
+`27 01`/ `27 02` is only the standard level-1 requestSeed/sendKey pairing and
+is not by itself evidence of shared implementation. The implementations behind
+that carrier are presently different:
+
+- the GM report gives a 31-byte `ECUID[16] || nonce[15]` seed, a 12-byte
+  response, and a two-stage AES-CMAC derivation; its worked
+  `2b7e1516...` root is explicitly an AES test key, not the recovered GM
+  vehicle root;
+- the tracked Toyota/Denso P1M-E EPS boot path uses a 16-byte seed/key and
+  `AES-ENC(AES-DEC(root, tester_data_record), ecu_seed)`.
+
+The Toyota reuse is nevertheless unusually deep. Across the five tracked P1M-E
+EPS images -- Sienna `8965B4512000`, Camry `8965F3307000`, Crown
+`8965F3012000`, Corolla F `8965F1208000`, and Corolla H
+`8965H1202000` -- the three CodeFlash roots at `0xBFD8`, `0xBFE8`, and
+`0x20840` are byte-identical. More importantly, the complete 774-byte boot
+SecurityAccess request/send-key/retry/lockout/init state machine is byte-identical
+between Sienna, Camry, and Crown at `0x5328..0x562D`, and byte-identical in
+both Corolla images after the fixed `-0x1C` relocation. The two-stage boot-SA
+AES routines transfer identically under the same mapping. This is stronger
+evidence for a common **Denso/P1M-E EPS software component** than merely finding
+one repeated secret.
+
+It still does **not** prove that `f05f36b7...` is a Renesas silicon-family
+secret. In every tracked P1M-E EPS, the boot SecurityAccess root is ordinary
+CPU-readable CodeFlash at `0xBFE8`; the main CPU directly loads it into a
+software AES context. It is not an ICU-S protected key slot, fuse, OTP value, or
+mask-ROM constant. Renesas therefore does not force that value at the hardware
+boundary. It could still have originated in supplier/reference software that a
+Tier-1 failed to customize, but that is a software-provenance hypothesis.
+
+Public exact-value searches currently provide no cross-OEM support for a
+Renesas-global secret: the three P1M-E root constants resolve to Toyota/Denso
+P1M-E research and derivative tooling, not to a retained non-Toyota P1M-E
+firmware. Conversely, Renesas publicly supplies the P1M-E AUTOSAR MCAL and
+documents ICU-S as a fixed SHE state machine, so a substantial common Renesas
+low-level/security-driver layer is expected. MCAL/ICU-S provenance does not
+imply that an OEM UDS SecurityAccess root or algorithm is Renesas-selected.
+
+The best discriminator is therefore a non-Toyota `R7F701381/383` P1M-E
+CodeFlash image. If it carries the same `0xBFE8` root **and** the same relocated
+boot-SA machine, the supplier/reference-package hypothesis becomes much
+stronger; if an unrelated Tier-1 image carries the same bytes, Renesas-origin
+reference software becomes a serious explanation. Extension from P1M-E to
+RH850/F1x is currently weaker still: the published GM `$27` algorithm's
+31-byte seed, 12-byte response, and CMAC KDF differ materially from the Toyota
+P1M-E implementation, arguing against one universal Renesas UDS SecurityAccess
+implementation across those families.
 
 The GM author's final claim that SecOC keys can be dumped "from any module"
 without an exploit is an interesting lead, but the public post deliberately
-withholds the extraction mechanism. It does not establish a Toyota extraction
-route. In particular, standard SHE `CMD_LOAD_KEY` is specifically designed so
-the main CPU can relay `M1/M2/M3` without ever seeing the plaintext replacement
-key; any transferable weakness would need independent evidence at the
-Renesas/HSM lifecycle, debug, provisioning, or implementation boundary.
+withholds the extraction mechanism. The phrase "think fast" is compatible with
+a timing/fault-injection or transient-lifecycle attack, especially given the
+history of RH850 fault-injection work, but the post does not establish that
+mechanism. In particular, standard SHE `CMD_LOAD_KEY` is specifically designed
+so the main CPU can relay `M1/M2/M3` without ever seeing the plaintext
+replacement key; any transferable weakness would need independent evidence at
+the Renesas/HSM lifecycle, debug, provisioning, or implementation boundary.
 
 ## Front Recognition Camera applicability
 
