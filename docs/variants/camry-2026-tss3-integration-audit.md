@@ -1,24 +1,26 @@
 # 2026 Camry TSS3 integration replay audit and upstream comparison (WP2)
 
-> **September-16 evidence-audit supersession:** historical steering/replay
-> evidence remains valid, but present-tense integration claims are governed by
-> [the current capability matrix](camry-2026-capability-matrix.md),
-> [the evidence review](camry-2026-port-evidence-review.md), and
-> [the TSS3 arbitration note](../architecture/toyota-tss3-vehicle-movement-arbitration.md).
-> In particular, the former `0x160` Alpha Long path is withdrawn; `0x08A` is the
-> shared request plane and TSS3 longitudinal remains Toyota-owned.
+**Historical replay audit:** the comparison and test results below belong to
+the pinned September-7 audit candidates, with later dated supersession notes.
+“Current” inside that comparison means the candidate examined at that time,
+not today's fork, upstream HEAD, or deployed vehicle.
 
-**Scope:** work package 2 of the Camry openpilot completion plan
-(REFERENCE/CAMRY_OPENPILOT_COMPLETION_PLAN.md): field-level vehicle-interface
-contract, recorded-versus-proposed replay audit, and the explicit list of
-unvalidated physical semantics. Everything here is offline software evidence;
-no new vehicle claim is made.
+For maintained qualification boundaries, use
+[the capability matrix](camry-2026-capability-matrix.md); for interpretation
+changes, use [the evidence review](camry-2026-port-evidence-review.md).
+The [porting contract](../architecture/toyota-openpilot-porting-contract.md)
+owns integration design. In particular, later longitudinal corrections must
+not be replaced by this audit's older sender/HUD/cancel assumptions.
+
+The original scope was work package 2: field-level interface comparison,
+recorded-versus-proposed replay, and unvalidated physical semantics. These are
+offline software results, not a new vehicle demonstration.
 
 | Role | Repository | Revision |
 |---|---|---|
-| Proposed (current fork) | kai-openpilot / opendbc `kai` / panda `kai` | `63e525b2f9500cc10bd9e7c9116010842f633f87` / opendbc `ca52a67fccb63317068b35d1b18c0af028122e0b` / panda `5236f3708bfd833942c0e0f79a7fc6d8255fbe60` |
-| Upstream openpilot (design reference) | commaai/openpilot | `a4f7c50d2a52a5865a40da2ebc5004c82929a0ef` |
-| Upstream opendbc (design reference) | commaai/opendbc | `3e92d112129507debe45364891954db70238997a` |
+| Proposed audit candidate | kai-openpilot / opendbc `kai` / panda `kai` | `63e525b2f9500cc10bd9e7c9116010842f633f87` / opendbc `ca52a67fccb63317068b35d1b18c0af028122e0b` / panda `5236f3708bfd833942c0e0f79a7fc6d8255fbe60` |
+| Upstream openpilot comparison snapshot | commaai/openpilot | `a4f7c50d2a52a5865a40da2ebc5004c82929a0ef` |
+| Upstream opendbc comparison snapshot | commaai/opendbc | `3e92d112129507debe45364891954db70238997a` |
 | Recorded (produced the 2026-09-04 routes) | kai-openpilot / opendbc `kai` | parent `d1914bbe7`… / opendbc `c7a62eaf` |
 
 **2026-09-10 supersession note.** The revision table and sender-complete diagnosis below are
@@ -41,29 +43,21 @@ the September 10 C7/RAM-resident path edits an already-native B6 inside the EPS 
 steered the car. The old direct-B6/source-transform investigation is retained below as
 historical localization evidence, not as the current blocker.
 
-**2026-09-16 current-state update.** The production-shaped candidate is the stock-Toyota-B
-port summarized in [the capability matrix](camry-2026-capability-matrix.md) and
-[`toyota-tss3-minimal-runtime.md`](../architecture/toyota-tss3-minimal-runtime.md): C7 on
-unsplit Panda bus 1, exact-EPS fingerprinting, normal `CarState`/`CarController` ownership,
-and Toyota stock longitudinal. The intended lateral runtime uses the byte-exact continuous RAM
-helper from the successful steering handoff and generates a **native-valid** B6 FV4+CMAC28
-trailer; the historical stage-5 receiver bypass and persistent signer are not runtime
-requirements. The September-16 request-plane audit also withdraws the former Alpha Long
-`0x160` replacement: openpilot emits neither `0x160` nor `0x08A`, Panda permits neither as a
-TSS3 host longitudinal command, and stock `0x160` is not suppressed. Any section below that
-promotes `0x160` as the current actuator path, calls the current sender zero-MAC, places current
-C7 on bus 0, or calls lateral receiver-unqualified is a dated checkpoint. Native longitudinal
-now blocks on recovering clean `0x08A` source ownership/pre-signing handoff and then validating
-Brake/VMC/PCS/AEB coexistence.
+**September-16 supersession note (itself a dated checkpoint).** This audit's
+earlier direct-B6 and longitudinal/HUD/cancel descriptions do not define the
+maintained port. The later runtime and qualification conclusions belong in
+[the capability matrix](camry-2026-capability-matrix.md), not in another
+present-tense summary here. The comparison table below remains evidence about
+the revisions named above.
 
-All three fork trees were clean at the final audit point. Upstream has **no** Toyota TSS3
-platform, no `0x025/0x030/0x08A/0x0B6` Toyota CAN-FD messages, and no
+All three fork trees were clean at the recorded audit point. The pinned
+upstream comparison had **no** Toyota TSS3
 angle-command `0x0B6` safety path, so the comparison baseline is upstream's
 ordinary Toyota port *shape* (torque platforms), not a line-for-line
-equivalent. The current upstream `openpilot/selfdrive` and `openpilot/cereal`
-trees have no changes at all relative to the earlier `0ec3a082...` audit pin,
-so the controlsd/DesireHelper conclusions below are unchanged after repinning
-to `a4f7c50d...`. Reviewable diffs (regenerated 2026-09-05):
+equivalent. The compared upstream `openpilot/selfdrive` and `openpilot/cereal`
+trees had no changes relative to the earlier `0ec3a082...` audit pin,
+so the audit retained its controlsd/DesireHelper conclusions after repinning
+to `a4f7c50d...`. Reviewable diffs (generated 2026-09-05):
 `build/out/camry-replay-audit-20260905/upstream-opendbc-toyota.diff`
 (1,954 lines at the final pin: values/fingerprints/interface/carstate/carcontroller/tss3.py,
 toyota_tss3_pt DBC, Toyota safety gates, tests) and

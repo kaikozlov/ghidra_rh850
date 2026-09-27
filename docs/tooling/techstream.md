@@ -3265,7 +3265,7 @@ Gateway **Bus 1**, while Skid Control (ABS/VSC/TRAC) and Power Steering (EPS) ar
 on **Bus 4**. This is Toyota network-topology evidence rather than inference from CAN
 arbitration IDs. Vehicle-specific physical interpretation, including the Toyota-B repin
 join and B6 consequence, is owned by
-[the Camry baseline §19](../variants/camry-2026-live-baseline.md#19-current-gts-can-topology-closes-the-b6-bus-question).
+[the Camry baseline §19](../variants/camry-2026-live-baseline.md#19-current-gts-closes-logical-bus-4-membership-corr-197-separates-physical-transparency).
 
 `Bus 1`/`Bus 4` are Central-Gateway logical network identities. They must not be equated
 numerically with Panda bus 1/4 or connector cavity numbers without a separate physical

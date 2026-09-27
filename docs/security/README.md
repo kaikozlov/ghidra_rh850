@@ -4,6 +4,12 @@ Three independent security domains. They share a broad AES construction shape
 but use different secrets, handlers, sessions, and state — do not conflate
 them.
 
+Unless a report says otherwise, the firmware domain reports below are grounded
+in the legacy Sienna EPS `8965B4512000`; `keyless-exec-surface-assessment.md`
+is the deliberate cross-image exception, and `mackey-registration.md` is pinned
+Techstream software evidence rather than firmware analysis. Other registered
+calibrations are compared under [../variants/README.md](../variants/README.md).
+
 | Domain | Purpose | Start here |
 |---|---|---|
 | Bootloader SecurityAccess + payload gate | Unlock programming services; authenticated download | [bootloader-payload-gate.md](bootloader-payload-gate.md) |

@@ -9,14 +9,13 @@
 #
 # You never need to `source build/cache/ghidra-processor.env` before running this.
 #
-# Usage:
-#   tools/g decompile 0x8db22
-#   tools/g x-ref to 0x8db22
-#   tools/g inspect 0xc853a --decompile --callers --callees --xrefs --disasm 40
-#   tools/g inspect 0xc853a 0x8db22
-#   tools/g x-ref trace-to 0xfebef02a --disasm 20
+# Usage (address examples refer to the default Camry F33 target):
+#   tools/g decompile 0x4e848
+#   tools/g x-ref to 0x4e848
+#   tools/g inspect 0x4e848 --decompile --callers --callees --xrefs --disasm 40
+#   tools/g inspect 0x4e848 0x8549e
+#   tools/gtarget sienna-8965B4512000 decompile 0x8db22
 #   printf 'stats\nquery functions --count\n' | tools/g batch --read-only -
-#   tools/g script run ghidra/scripts/investigate/Foo.java -- arg1
 #   tools/g session-status
 #   tools/g stop
 #

@@ -1,49 +1,73 @@
-# Variants
+# Variant and target reports
 
-Camry `8965F3307000` is the primary/default analysis target. Sienna
-`8965B4512000` remains the legacy deep-reference calibration for P1M-E/SecOC
-internals. No target inherits another target's findings automatically: each
-transfer remains a hypothesis until checked against that target's own evidence.
-The tracked 2023-Corolla corpus historically labelled `8965H1202000` is now
-the first exact foreign image used for such checks; its later direct application
-F181 is `8965F1208000/8A3111202000`, while `8965H1202000` belongs to the
-auxiliary DID-2032 identity. Span's distinct physical `8965F1208000` specimen has
-a persisted corpus with secondary F181 `8A3111213000`; `8965B4514000` and the
-wider TSS 3.0 family keep their own narrower evidence boundaries.
+Use this index to select evidence for a **specific specimen or calibration**,
+not to infer vehicle support from a similar name. Registry roles describe
+analysis ownership, not openpilot qualification.
 
-| Variant | Firmware | Status | Report |
-|---|---|---|---|
-| Sienna (China) | `8965B4512000` | Legacy deep-reference calibration | [sienna-8965B4512000.md](sienna-8965B4512000.md) · [legacy overview](sienna-8965B4512000-overview.md) |
-| Sienna (Vance partner) | `8965B4514000` | External field report pinned; firmware/raw outputs unavailable | [sienna-8965B4514000.md](sienna-8965B4514000.md) |
-| Corolla | `8965F1208000` / `8A3111213000`; auxiliary DID2032 `8965H1213000` | First-class R7F701383 firmware/DataFlash/project snapshot and 5,811-function canonical corpus; persisted 2026-08-21 full memory acquisition; H/F application equivalence and active `0xA000` unit calibration closed | [corolla-8965F1208000.md](corolla-8965F1208000.md) |
-| Corolla (reported 2023 US / albinoelephant) | direct app F181 `8965F1208000` / `8A3111202000`; auxiliary DID2032 `8965H1202000` | First-class R7F701383 firmware/DataFlash/project snapshot and 5,811-function canonical corpus; complete memory corpus + same-car eps-telescope probe retained; direct F181/MCU/live Gate-2/boot-RAM-exec joins verified; the 2026-09-10 external field report records openpilot `0x160` modification/transmission with reported lead-following behavior, but the September-16 shared-request-plane audit supersedes using that result as proof that `0x160` is authoritative longitudinal command ingress; the contributor architecture/change reference remains retained as historical topology/E2E evidence | [corolla-2023-us-public-route.md](corolla-2023-us-public-route.md) · [Toyota TSS3 bounty evidence](toyota-tss3-openpilot-bounty-evidence.md) |
-| Camry (**primary/default maintainer target**) | EPS F181 `8965F3307000` / `8A3113303100`; exact 1-MiB CodeFlash SHA-256 `42dce8ef…d9b0e7`; canonical 6,062-function Ghidra corpus; FRC `8646F3315000`; Brake/EPB `F152633K0000` | First-class firmware/DataFlash/project snapshot; target-native B6/SecOC receiver, timing, limits, Ready/gear/cruise state and authenticated boot RAM path closed; September 10 route demonstrates C7/RAM-resident openpilot lateral control with Toyota LTA off | [camry-2026-live-baseline.md](camry-2026-live-baseline.md) · [Toyota TSS3 bounty evidence](toyota-tss3-openpilot-bounty-evidence.md) |
-| Camry F33 TSS3 fault/status contract | `8965F3307000` | Exact target-native `0x394` classifier/DEM/DTC/aging closure; openpilot temp/permanent mapping remains live-policy bounded | [camry-2026-tss3-fault-status.md](camry-2026-tss3-fault-status.md) |
-| TSS3 Front Recognition Camera acquisition | Camry FRC `8646F3315000`; local Corolla FRC CUW family `8646F1...` | FRC-hosted request/arbitration-result recorder vocabulary recovered; ReproStd image encryption boundary closed; exact Camry application plaintext/boot decoder still pending | [tss3-frc-firmware-acquisition.md](tss3-frc-firmware-acquisition.md) |
-| Camry openpilot integration | software revisions pinned in-doc | 2026-09-10 road demonstration closes exact development lateral control with Toyota LTA off; ordinary port contract, replay audit, longitudinal evidence, capability boundaries, and bounty review summary retained | [Toyota TSS3 bounty evidence](toyota-tss3-openpilot-bounty-evidence.md) · [camry-2026-tss3-integration-audit.md](camry-2026-tss3-integration-audit.md) · [camry-2026-longitudinal-evidence.md](camry-2026-longitudinal-evidence.md) · [camry-2026-capability-matrix.md](camry-2026-capability-matrix.md) |
-| RAV4 Prime (2024 field experiments) | exact F181 pending | Earlier failure statically bounded; 2026-08-16 corrected compare-neutralization externally reported with ~1.5 days working lateral; strict MAC28-only proof still pending | [rav4-prime-forced-secoc-profile.md](rav4-prime-forced-secoc-profile.md) |
-| Toyota EPS security/control variants | various | Evidence-graded matrix with independent ADAS-generation and SecOC/TSK axes | [toyota-eps-variant-comparison.md](toyota-eps-variant-comparison.md) |
-| Venza airbag sensor (yc community specimen) | raw identities `8917048E30` / `8917F48692`; exact MCU pending | RH850 CodeFlash + 32-KiB extended-user RPRG image; `10 02` retained handoff and RAM relocation recovered; no F33 code-identity transfer | [yc-venza-airbag-reprogramming-2026-09-14.md](yc-venza-airbag-reprogramming-2026-09-14.md) |
-| Newer TSK target | exact part pending | Artifact/capture contract only; all transfer claims remain hypothesis | [newer-tsk-target-evidence.md](newer-tsk-target-evidence.md) |
+## Registered analysis targets
 
-For the control-interface migration specifically, see
-[corolla-pre-tss3-openpilot-message-comparison.md](corolla-pre-tss3-openpilot-message-comparison.md).
-It compares the exact message roles used by current pre-TSS3 Corolla openpilot
-support against both tracked H/F applications and separates EPS-local migrations
-from camera/ACC/UI roles that an EPS dump cannot resolve.
+`tools/gtarget list` and
+[data/analysis_targets.json](../../data/analysis_targets.json) are authoritative
+for target IDs, images, snapshots, corpora, and working paths.
 
-The deeper H/F state recovery is in
-[corolla-h-f-openpilot-state-bridge.md](corolla-h-f-openpilot-state-bridge.md).
-It recovers target-native `0x4A3`, `0x351`, and `0x394` state roles, reframes
-`0x030`, and records the complete generated-COM command-ingress boundary.
+| Target | Role / specimen | Report |
+|---|---|---|
+| `camry-8965F3307000` | Primary/default; maintainer's 2026 Camry Hybrid | [Capability matrix](camry-2026-capability-matrix.md) · [field evidence](camry-2026-live-baseline.md) |
+| `crown-8965F3012000` | First-class; mruno's reported 2024 Crown Limited | [Crown report](crown-8965F3012000.md) |
+| `corolla-8965F1208000` | First-class; Span's reported 2025 Corolla | [Corolla F report](corolla-8965F1208000.md) |
+| `corolla-8965H1202000` | First-class; albinoelephant's reported 2023 US Corolla; historical auxiliary-identity label | [Corpus and public-route report](corolla-2023-us-public-route.md) |
+| `sienna-8965B4512000` | Legacy deep-reference calibration | [Sienna report](sienna-8965B4512000.md) · [reference overview](sienna-8965B4512000-overview.md) |
+
+**Corolla identity trap:** both retained specimens report primary application
+F181 `8965F1208000`. Their secondary records differ: `8A3111202000` for
+albinoelephant and `8A3111213000` for Span. The former registry ID retains the
+historical `8965H1202000` auxiliary identity. Do not merge these specimens or
+rename their source evidence based on the shared primary string.
+
+## Camry: conclusions versus investigation history
+
+| Question | Report |
+|---|---|
+| What has been demonstrated, and what remains unqualified? | [Capability matrix](camry-2026-capability-matrix.md) |
+| What evidence changed an earlier conclusion? | [Port evidence review](camry-2026-port-evidence-review.md) |
+| Where are the dated field observations? | [Live baseline](camry-2026-live-baseline.md) · [bounty evidence](toyota-tss3-openpilot-bounty-evidence.md) |
+| Where are target-specific integration details and earlier designs? | [Port report](camry-2026-tss3-opendbc-port.md), read by checkpoint |
+| What does the longitudinal evidence establish? | [Longitudinal report](camry-2026-longitudinal-evidence.md) |
+| What does the exact EPS publish? | [EPS transmit report](camry-f33-eps-tx.md) |
+| How are fault observations bounded? | [Fault/status report](camry-2026-tss3-fault-status.md) |
+| What is the normal software ownership contract? | [Native openpilot contract](../architecture/toyota-openpilot-porting-contract.md) |
+
+The [integration replay audit](camry-2026-tss3-integration-audit.md) and
+[bench-validation specification](camry-2026-bench-validation-spec.md) retain
+earlier work-package checkpoints. They are not current installation guides or
+evidence that every listed experiment was performed. Recovery/incident reports
+likewise apply to their recorded rack, firmware, and date.
+
+## Corolla comparison and qualification
+
+- [Pre-TSS3 interface comparison](corolla-pre-tss3-openpilot-message-comparison.md)
+  separates EPS-local behavior from camera, cruise, and UI roles.
+- [H/F state bridge](corolla-h-f-openpilot-state-bridge.md) owns the
+  calibration-specific state analysis.
+- [September-16 offline audit](corolla-tss3-offline-audit-2026-09-16.md) and
+  [tester-handoff audit](corolla-tss3-tester-handoff-audit-2026-09-16.md) are
+  revision-bound reviews, not current upstream or road-qualification claims.
+
+## Other evidence — not registered full analysis targets
+
+| Evidence | Scope / report |
+|---|---|
+| Sienna `8965B4514000` | [External field report](sienna-8965B4514000.md) |
+| Tundra `8965F3401200` | [Partial application-image provenance](../../firmware/tundra-8965F3401200/README.md), not a complete registered CodeFlash target |
+| TSS3 Front Recognition Camera | [Acquisition and evidence boundaries](tss3-frc-firmware-acquisition.md) |
+| RAV4 Prime | [Historical field experiments](rav4-prime-forced-secoc-profile.md), with their own identity limits |
+| Venza airbag sensor | [September-14 specimen report](yc-venza-airbag-reprogramming-2026-09-14.md); not an EPS comparison by default |
+| Newer TSK target | [Evidence contract](newer-tsk-target-evidence.md); no automatic transfer |
+| Cross-vehicle comparison | [Evidence-graded comparison](toyota-eps-variant-comparison.md) and `data/toyota_eps_variant_matrix.csv` |
 
 ## The transfer rule
 
-Matching application DID/service tables in a related EPS are strong
-software-family evidence. They do **not** prove the related MCU, byte-identical
-bootloader contents, retained secrets/payload routines, or that a PROGRAMMING
-timeout must be external to the EPS. Every transferred claim starts at grade
-**hypothesis** until checked against the variant's own bytes.
-
-The machine-readable comparison data lives in
-`data/toyota_eps_variant_matrix.csv`.
+Matching services, names, or application-family structure do not prove identical
+hardware, boot code, calibration, or vehicle behavior. A transfer starts as a
+**hypothesis** until checked against the target's own evidence. Dated raw logs
+and public routes retain their original software and vehicle-attribution limits.

@@ -1,12 +1,13 @@
-# Firmware / project overview
+# Sienna `8965B4512000` reference overview
 
-This is the human-scale current-state summary for the Sienna EPS analysis. It
-is intentionally shorter than the canonical subsystem reports and status
-ledgers. Follow the links when you need evidence, exact addresses, or caveats.
+Legacy Sienna research summary, not the current multi-target project overview.
+The technical sections and earlier investigation priorities below retain their
+Sienna scope. Start at [the project overview](../OVERVIEW.md) for repository
+orientation and [the variant index](README.md) for other targets.
 
 ## Target and evidence boundary
 
-Primary analyzed calibration:
+Calibration covered here (legacy reference, not the default target):
 
 - **Toyota/Denso EPS:** `8965B4512000`
 - **MCU:** Renesas RH850/P1M-E `R7F701381`
@@ -14,15 +15,16 @@ Primary analyzed calibration:
 - **DataFlash:** 32 KiB at `0xFF200000..0xFF207FFF`
 - **Application:** base `0x20000`, entry `0x20880`
 
-The committed CodeFlash and DataFlash files in `firmware/` are the source
-inputs. The current corrected project contains **6,376 structurally discovered
-functions / 183,240 decoded instructions**. There are 6,376 structurally discovered functions, of which 6,257 remain unreviewed and 32 currently carry a semantic evidence grade. Structural recovery is therefore much broader than
-semantic understanding; exact coverage denominators are in
-[status/ANALYSIS_STATUS.md](status/ANALYSIS_STATUS.md).
+The committed Sienna CodeFlash and DataFlash files are the source inputs.
+The recorded inventory contains **6,376 structurally discovered functions /
+183,240 decoded instructions**; its semantic-review counts are historical,
+not a current whole-project progress measure. See the
+[Sienna coverage snapshot](../status/ANALYSIS_STATUS.md) and use
+`tools/gtarget show sienna-8965B4512000` for registered input/corpus paths.
 
 Unless explicitly stated otherwise, firmware-static findings apply only to
 `8965B4512000`. Related Corolla/Sienna/F3/F4/RAV4 observations are tracked under
-[variants/](variants/README.md) and do not automatically transfer.
+[variant reports](README.md) and do not automatically transfer.
 
 ## What the firmware does
 
@@ -38,8 +40,8 @@ format are recovered, and the authenticated 4 KiB RAM-exec bootstrap is fully
 modeled locally.
 
 Canonical reports:
-[architecture/boot-validity-and-flash-lifecycle.md](architecture/boot-validity-and-flash-lifecycle.md) ·
-[security/bootloader-payload-gate.md](security/bootloader-payload-gate.md).
+[architecture/boot-validity-and-flash-lifecycle.md](../architecture/boot-validity-and-flash-lifecycle.md) ·
+[security/bootloader-payload-gate.md](../security/bootloader-payload-gate.md).
 
 ### Diagnostics
 
@@ -65,9 +67,9 @@ Important application results include:
   TOCTOU escape classes, without reducing its disclosure impact.
 
 Canonical reports:
-[diagnostics/application.md](diagnostics/application.md) ·
-[security/application-security-access.md](security/application-security-access.md) ·
-[security/memory-safety-audit.md](security/memory-safety-audit.md).
+[diagnostics/application.md](../diagnostics/application.md) ·
+[security/application-security-access.md](../security/application-security-access.md) ·
+[security/memory-safety-audit.md](../security/memory-safety-audit.md).
 
 ## SecOC / ICU-S state
 
@@ -106,7 +108,7 @@ The live slot-4 key is still not known from this image. The embedded apparent
 the live ICU-S slot contents.
 
 Start here:
-[security/secoc/README.md](security/secoc/README.md).
+[security/secoc/README.md](../security/secoc/README.md).
 
 ## XCP / calibration surface
 
@@ -125,7 +127,7 @@ unobserved. A CONNECT-only reachability probe and read-only DAQ tooling are read
 under `exploit/followups/`.
 
 Canonical report:
-[communications/xcp-command-dispatch.md](communications/xcp-command-dispatch.md).
+[communications/xcp-command-dispatch.md](../communications/xcp-command-dispatch.md).
 
 ## Steering / motor-control boundary
 
@@ -143,7 +145,7 @@ still not a physical-independence proof. A live actuation discriminator remains
 the right next step if the XCP observer route is reachable.
 
 Canonical report:
-[architecture/control-partition.md](architecture/control-partition.md).
+[architecture/control-partition.md](../architecture/control-partition.md).
 
 ## Exploit engineering status
 
@@ -157,12 +159,14 @@ The repo now separates a firmware finding from a runnable experiment. The
 - RMBA/RDBI/CommunicationControl/SecOC freshness follow-ups;
 - XCP CONNECT/read/DAQ observation.
 
-See [../exploit/README.md](../exploit/README.md).
+See [the experimental research index](../../exploit/README.md).
 
-## What is actually blocking progress
+## Earlier Sienna investigation priorities
 
-Most high-value unknowns are no longer “decompile another random function.” The
-current blockers are:
+This list records the Sienna research checkpoint, not the current repository
+queue. In particular, later Crown, Camry, and Corolla acquisitions supersede
+the generic “another CodeFlash” acquisition gap below; applicability to a
+specific Sienna finding remains a separate question.
 
 1. **Live slot-4 command-5 permission and timing.** If generation is allowed,
    an application-resident signing proxy becomes practical without extracting
@@ -176,9 +180,9 @@ current blockers are:
 5. **Live command→actuation discriminator.** Static work has reached diminishing
    returns; dynamic observation is now more informative.
 
-The short actionable queue, including what *not* to spend time on, is
-[status/PRIORITIES.md](status/PRIORITIES.md). The exhaustive unresolved ledger is
-[status/OPEN_QUESTIONS.md](status/OPEN_QUESTIONS.md).
+Use [PRIORITIES.md](../status/PRIORITIES.md) for the current execution queue
+and [OPEN_QUESTIONS.md](../status/OPEN_QUESTIONS.md) for recorded unresolved
+boundaries. Neither this earlier list nor the ledger is a live coverage dashboard.
 
 ## External / variant evidence
 
@@ -191,14 +195,14 @@ promoted to Sienna firmware truth. The strongest external work includes:
 - community RAM-exec, DataFlash, patching, and SecOC-oracle workflows;
 - Corolla/RAV4/Sienna-related field observations.
 
-See [tooling/README.md](tooling/README.md), [variants/README.md](variants/README.md),
-and [../community/README.md](../community/README.md).
+See [tooling/README.md](../tooling/README.md), [the variant index](README.md),
+and [community/README.md](../../community/README.md).
 
 ## How to navigate from here
 
-- Need a **claim ID / confidence** → [status/FINDINGS.md](status/FINDINGS.md)
-- Need a **current task** → [status/PRIORITIES.md](status/PRIORITIES.md)
-- Need an **unresolved detail** → [status/OPEN_QUESTIONS.md](status/OPEN_QUESTIONS.md)
-- Need a **past investigation journal** → [history/](history/README.md)
+- Need a **claim ID / confidence** → [FINDINGS.md](../status/FINDINGS.md)
+- Need a **current task** → [PRIORITIES.md](../status/PRIORITIES.md)
+- Need an **unresolved detail** → [OPEN_QUESTIONS.md](../status/OPEN_QUESTIONS.md)
+- Need a **past investigation journal** → [history/](../history/README.md)
 - Need **exact machine evidence** → `data/`, `tests/`, firmware bytes
-- Need **Ghidra mechanics** → [WORKFLOW.md](WORKFLOW.md)
+- Need **Ghidra mechanics** → [WORKFLOW.md](../WORKFLOW.md)

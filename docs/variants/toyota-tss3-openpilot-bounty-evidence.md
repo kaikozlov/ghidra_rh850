@@ -22,13 +22,12 @@ separates the control result from the development mechanism used to obtain it:
 
 - the maintainer's 2026 Camry demonstrates openpilot lateral control while
   Toyota LTA is off;
-- the maintainer's Camry work had already discovered the unprotected `0x160`
-  request plane and produced a verified offline generator; albinoelephant's
-  later 2023 Corolla TSS3 field run independently validates it under live
-  openpilot longitudinal control on the stock Toyota-B network;
-- SecOC is not a TSS3-generation requirement. The Camry's RAM-resident B6 signer
-  is an exact-EPS development adapter, not architecture that should be imposed
-  on every TSS3 platform.
+- the independent Corolla longitudinal field experiment is retained with its
+  attribution and chronology, but its original `0x160` command-role
+  interpretation is superseded by [the longitudinal review](camry-2026-longitudinal-evidence.md);
+- development mechanisms and their successful observations remain
+  target/configuration-specific. They are not a universal TSS3 interface or
+  evidence of a production-ready port.
 
 ## 1. Camry lateral: direct route evidence
 
@@ -150,6 +149,10 @@ copy, so its historical full-route totals remain pinned rather than recomputed; 
 does not affect the segment-3 corroboration.
 
 ## 2. Exact Camry development mechanism
+
+This section records the **September-10 configuration** and subsequent rebuild
+notes, not the later capability matrix's runtime checkpoint. Its source hashes
+and mechanism are preserved to explain that particular road witness.
 
 The successful Camry drive did not transmit a host-built B6. Its ordinary
 openpilot control path was:

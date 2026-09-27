@@ -1,77 +1,81 @@
 # Project overview
 
-This repository reverse-engineers Toyota/Denso RH850/P1M-E firmware and the
-surrounding Toyota TSS3 control/security stack for openpilot integration.
-Firmware bytes and deterministic verification remain the source of truth; Ghidra
-projects, generated artifacts, captures, Toyota diagnostic software, community
-evidence, and documentation are progressively more contextual views of that
-evidence.
+This is the scope and evidence model for the Toyota/Denso RH850 analysis
+repository. Use the [documentation map](README.md) for navigation,
+[WORKFLOW.md](WORKFLOW.md) for commands, and
+[variant reports](variants/README.md) for technical conclusions. This page does
+not duplicate the changing integration checkpoint.
 
-## Primary target
+## What is maintained here
 
-The primary analysis target is the maintainer's **2026 Toyota Camry Hybrid EPS
-`8965F3307000`**. `data/analysis_targets.json` is authoritative, and plain
-`tools/g`, `tools/pseudo`, and `make work-project` resolve to this target unless an
-explicit target is supplied.
+- Exact firmware inputs and target-specific Ghidra snapshots and decompiler
+  corpora.
+- Reproducible analysis of firmware, Toyota GTS+/Techstream software, and
+  retained vehicle captures.
+- Curated evidence tables, generated reports, and narrowly selected
+  verification.
+- Openpilot integration research, including dated experiments and their
+  limitations. The openpilot/opendbc implementation lives in separate
+  repositories; a revision quoted here is the revision used for that result,
+  not a claim about today's upstream or deployed software.
 
-Current Camry work spans the complete TSS3 control path rather than only the EPS:
+The primary/default registered target is **2026 Camry Hybrid EPS
+`8965F3307000`**. Crown and both Corolla specimens have independent registered
+inputs. Sienna `8965B4512000` remains the legacy reference for much of the
+low-level research. Its addresses, signal meanings, and conclusions do not
+become Camry facts because it was analyzed first.
 
-- native lateral control is demonstrated through the volatile EPS-resident
-  **post-auth** route44 raw-COM path: stock B6 completes SecOC verification
-  unchanged, then the application control fields are overridden before the
-  cooperative controller consumes them; the current Camry backend does not
-  re-sign B6 or invoke command 5 at runtime;
-- `0x08A` is the FRC-side TSS application request plane and `0x081` the
-  Brake/VMM result/status plane;
-- protected `0x0B6` is the downstream steering-controller instruction received by
-  the EPS;
-- the exact F33 EPS has a real production SecOC transmit stack for protected
-  `0x030`, including sender freshness, ICU-S command 5 / selector 4, trailer
-  construction, PduR/CanIf routing, and CAN-FD transmission;
-- current RE is closing driver-attention behavior, Brake/EBU routing, longitudinal
-  request ownership, and the smallest native openpilot integration boundary.
+The authoritative registry is
+[data/analysis_targets.json](../data/analysis_targets.json). It distinguishes
+registered full analysis targets from partial images and external observations.
+The [variant index](variants/README.md) routes each specimen to its own report
+and explains the historical Corolla naming.
 
-Start with:
+## Where the current questions belong
 
-- [variants/camry-2026-tss3-opendbc-port.md](variants/camry-2026-tss3-opendbc-port.md)
-- [variants/camry-2026-live-baseline.md](variants/camry-2026-live-baseline.md)
-- [variants/camry-f33-eps-tx.md](variants/camry-f33-eps-tx.md)
-- [architecture/toyota-tss3-vehicle-movement-arbitration.md](architecture/toyota-tss3-vehicle-movement-arbitration.md)
-- [status/PRIORITIES.md](status/PRIORITIES.md)
-
-## Other registered targets
-
-| Target | Role |
+| Question | Owner |
 |---|---|
-| `camry-8965F3307000` | **primary** — exact maintained vehicle and current integration target |
-| `crown-8965F3012000` | first-class TSS3 comparison / live field target |
-| `corolla-8965F1208000` | first-class newer Corolla target |
-| `corolla-8965H1202000` | first-class Corolla comparison target |
-| `sienna-8965B4512000` | **legacy reference** — deep P1M-E/SecOC/diagnostic substrate |
+| What does the retained Camry evidence demonstrate, and what is still unqualified? | [Capability matrix](variants/camry-2026-capability-matrix.md) |
+| How were those conclusions reached or corrected? | [Port evidence review](variants/camry-2026-port-evidence-review.md) and [field baseline](variants/camry-2026-live-baseline.md), read by checkpoint |
+| What is the integration design contract? | [Native openpilot ownership](architecture/toyota-openpilot-porting-contract.md) |
+| What is the target-specific longitudinal evidence? | [Longitudinal report](variants/camry-2026-longitudinal-evidence.md) |
+| What is the next investigation? | [Priorities](status/PRIORITIES.md) |
+| What was established for Sienna? | [Sienna reference overview](variants/sienna-8965B4512000-overview.md) and scoped subsystem reports |
 
-The Sienna remains valuable because much of the low-level boot, diagnostic,
-ICU-S, storage, and SecOC machinery was first recovered there. It is no longer
-the default project or the authority for target-specific Camry behavior. Its
-former overview is retained at
-[variants/sienna-8965B4512000-overview.md](variants/sienna-8965B4512000-overview.md).
+The capability matrix distinguishes demonstrations, software validation, and
+remaining qualification. Neither an older successful experiment nor an older
+failure should be read as the status of every later configuration.
 
-## Analysis workflow
+## Evidence boundaries
 
-All committed Ghidra snapshots live under `projects/<target>/` using deliberately
-non-openable `.gpr.snapshot` / `.rep.snapshot` names. Never open those trees with
-Ghidra. Interactive and headless analysis uses registered paths under
-`build/work/`.
+For firmware facts, the order is firmware bytes and deterministic verification,
+generated artifacts, curated evidence tables, annotated projects, then
+narrative documentation. A decompilation helps explain a path; disassembly,
+bytes, and dataflow are the proof. A capture establishes an observation only
+for its recorded vehicle, software, harness, and operating state.
 
-Useful entry points:
+For openpilot design, start from current upstream openpilot/opendbc/Panda.
+Firmware establishes genuinely target-specific constraints, not a second
+engagement or permission architecture.
 
-```bash
-tools/g inspect 0x4e848 --decompile --callers --callees --xrefs --disasm 40
-tools/pseudo 0x4e848
-tools/gtarget list
-tools/gtarget sienna-8965B4512000 decompile 0x8db22
-make work-project
-```
+Keep evidence source separate from confidence. The
+[evidence model](status/FINDINGS.md#evidence-model) defines **verified**,
+**observed**, **recovered**, **bounded**, **hypothesis**, and **disproved**.
+Discovery counts, offline test results, field observations, and production
+qualification are not interchangeable.
 
-See [WORKFLOW.md](WORKFLOW.md) for lifecycle rules and
-[architecture/toyota-openpilot-porting-contract.md](architecture/toyota-openpilot-porting-contract.md)
-for the integration design contract.
+Status ledgers are lookup aids and may lag the owning reports.
+[ANALYSIS_STATUS.md](status/ANALYSIS_STATUS.md) is a historical Sienna coverage
+snapshot, not a current multi-target dashboard. Dated sections inside a
+subsystem or variant report are historical checkpoints even when they are not
+stored under `history/`.
+
+## Working state is not evidence
+
+Committed projects use non-openable snapshot names under `projects/<target>/`.
+Interactive analysis uses registered `build/work/` paths. Generated material
+under `build/` and local references under `REFERENCE/` are not portable inputs;
+promote required evidence deliberately and preserve its scope.
+
+See [WORKFLOW.md](WORKFLOW.md) for safe project materialization, durable edits,
+rebuilds, explicit verification, and snapshot promotion.

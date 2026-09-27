@@ -1,10 +1,23 @@
 # 2026 Camry openpilot capability matrix and qualification handoff
 
-**Current checkpoint: September 18, 2026, after same-ignition FRC→Brake→FRC recovery and stock-adaptive-cruise road qualification of the post-authenticated B6 ownership design.**
-This incorporates the retained-evidence review, the correction that removes `0x160`
-from the native-long actuator contract on both Camry and Corolla, and the move from
-target-specific extended C7 ingress to the common functional-`0x777` C7 contract. Detailed
-reasoning and reproducible sources are in
+This page separates **retained vehicle qualification evidence** from later
+**implementation checkpoints**. They are not one continuously qualified build.
+
+| Status question | Evidence owner / boundary |
+|---|---|
+| What was demonstrated on the road? | The September-18 route and C7/B6-era configuration summarized below; [field witnesses](toyota-tss3-openpilot-bounty-evidence.md) retain their exact identities |
+| What architecture superseded that configuration? | The [September-21 request-plane checkpoint](../architecture/toyota-tss3-minimal-runtime.md#exact-camry-request-plane-supersession-2026-09-21); an implementation change is not a transfer of road qualification |
+| What later host/software work is recorded? | The [September-26 reporting audit](camry-2026-tss3-opendbc-port.md#8-host-bring-up-result-reporting-audit-2026-09-26), explicitly offline and not deployed by that review |
+| What does the longitudinal evidence establish? | [Longitudinal evidence](camry-2026-longitudinal-evidence.md), including corrections to the older `0x160` interpretation |
+| What is installed on a vehicle now? | Not established by this document; use that installation's retained software/harness/runtime identities |
+
+## September-18 qualification checkpoint
+
+The matrix below retains the C7/B6-era integration state and subsequent offline
+evidence annotations. Its descriptions of the active runtime, transport, stock
+longitudinal setting, and source-ownership blocker are **not the current
+request-plane implementation contract**. Do not reuse this checkpoint as an
+installation procedure. Detailed reasoning and reproducible sources are in
 [the port evidence review](camry-2026-port-evidence-review.md) and the
 [TSS3 vehicle-movement arbitration note](../architecture/toyota-tss3-vehicle-movement-arbitration.md).
 
@@ -15,7 +28,7 @@ records openpilot `2768fa575fe16e79e1b9817b2c33d76183a05dd0` on branch `tss3`
 with opendbc `8a970bd9e4f8fe50b8db2efebef95915480fd6c9`; ordinary openpilot engagement,
 CarState/CarController ownership, and Toyota Panda safety remain the architecture.
 
-## Current capability matrix
+## Recorded capability matrix
 
 | Capability | Implemented / demonstrated | Actual remaining boundary |
 |---|---|---|
@@ -56,15 +69,15 @@ join consumes repeated counter occurrences rather than overwriting them:
 
 ## Validation checkpoint
 
-The combined Toyota state/controller tests, CAN tests, Toyota safety tests,
-generic car interfaces, docs, platform configurations and vehicle-model tests
-pass **617 tests with 3,186 subtests**; 262 existing tests are skipped by that
-selection. Toyota Python lint passes. The dedicated Camry firmware/package,
-compiled-helper liveness, independent radar anchors, full object reconstruction,
-recovery transport, and original-log topology checks also pass. The exact
-commands and final evidence identities are recorded in the review document.
+The retained validation checkpoint reports **617 tests with 3,186 subtests**,
+with 262 tests skipped by that selection, for the named Toyota/interface/safety
+suites in the separate integration checkout. These are historical results,
+not the current test count of this analysis repository. The corresponding
+Python lint and analysis/package checks are recorded with their commands,
+revisions, and evidence identities in [the review](camry-2026-port-evidence-review.md).
+They do not establish vehicle-level qualification by themselves.
 
-## What still constitutes completion
+## Qualification boundaries at this checkpoint
 
 **Lateral authority plus stock adaptive cruise is now demonstrated on the final
 stock-Toyota-B installation.** Route `0000010c--506d7277c7` closes same-ignition
@@ -93,6 +106,6 @@ qualification is not claimed. Current hardware and cooperative-control inhibits 
 These lossy current-state projections cannot identify every fault or manufacture
 a restart-required `steerFaultPermanent` classification.
 
-The port is still classified **Custom**, not plug-and-play or production-ready.
-These boundaries preserve the real steering result without conflating a working
-experiment, correct software construction, and a completed vehicle port.
+This checkpoint was classified **Custom**, not plug-and-play or production-ready.
+Later runtime, topology, or host-software changes need their own evidence;
+neither a working older experiment nor a passing offline suite qualifies them.

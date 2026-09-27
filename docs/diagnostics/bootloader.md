@@ -21,7 +21,7 @@ the top-level README. Its scope is the bootloader UDS table at CodeFlash
 `../diagnostics/application.md`.
 
 All addresses are CodeFlash virtual addresses. The independent checks in
-`../tests/firmware/verify_bootloader_diagnostics.py` validate the service/routine tables,
+`tests/firmware/verify_bootloader_diagnostics.py` validate the service/routine tables,
 policy bytes, state-machine instructions, response builders, and memory-transfer
 mode directly from the committed CodeFlash image.
 

@@ -1,9 +1,16 @@
 # Toyota TSS3 minimal openpilot runtime
 
-This note separates the code that made the exact-F33 Camry lateral drive work
-from the scaffolding and instrumentation that happened to be present in the
-same checkout. The successful-drive evidence is in
-[the bounty evidence report](../variants/toyota-tss3-openpilot-bounty-evidence.md).
+This report records successive runtime architecture checkpoints. The
+September-21 request-plane design supersedes the earlier C7/B6 design below;
+later host/reporting reviews are recorded in
+[the port report](../variants/camry-2026-tss3-opendbc-port.md#8-host-bring-up-result-reporting-audit-2026-09-26).
+Transport sizes, source pins, and deployment notes belong to their checkpoint,
+not an evergreen wire specification.
+
+The [capability matrix](../variants/camry-2026-capability-matrix.md) separates
+retained qualification evidence from later implementation changes. In
+particular, the [September-18 road witness](../variants/toyota-tss3-openpilot-bounty-evidence.md)
+does not by itself qualify the superseding request-plane configuration.
 
 ## Exact-Camry request-plane supersession (2026-09-21)
 
@@ -43,20 +50,21 @@ Toyota cruise dropped about 1.05 seconds later.
 The remainder of this note retains earlier C7/B6 architecture and field
 evidence where useful; it is not the current exact-Camry runtime contract.
 
-The first target is deliberately narrower than a complete Toyota TSS3 port:
-reproduce the demonstrated lateral path on the exact F33 with the smallest
-upstream-shaped runtime. Features can be added only after that baseline is
-understood and preserved.
+At the earlier C7/B6 checkpoint, the initial integration goal was narrower
+than a complete TSS3 port: reproduce the demonstrated lateral result on exact
+F33 with an upstream-shaped runtime. The paragraphs below preserve that
+checkpoint, not a restriction on the later request-plane implementation.
 
-Longitudinal is a separate build-up layer and remains stock-owned. The
-September-16 request-plane audit supersedes the former `0x160` actuator
+At that checkpoint, longitudinal was a separate layer and remained stock-owned.
+The September-16 request-plane audit supersedes the former `0x160` actuator
 interpretation: `0x08A` is the shared TSS3 application-request carrier for both
 lateral and longitudinal requests, while `0x160` is retained only as FRC-origin
 state/evidence.
 
-## Runtime boundary
+## Runtime boundary (superseded C7/B6 bring-up state)
 
-The active path is:
+The boundary below is the pre-2026-09-21 C7/B6 bring-up path, retained as
+historical architecture; the supersession above replaces it:
 
 1. upstream `controlsd` owns engagement and `CC.latActive`;
 2. opendbc `CarState` decodes ordinary vehicle and stock-cruise state;
@@ -78,16 +86,25 @@ material, not the intended deployment architecture.
 
 ## Minimum by repository
 
+The table records the superseded C7/B6 bring-up baseline. After the
+2026-09-21 supersession the host emits the complete `0x08A` application
+instead of the C7 sideband; the Panda relay/transport and vehicle-state
+decoding rows are retained here unchanged from that baseline.
+
 | repository | required for the demonstrated lateral path | not required by that path |
 |---|---|---|
 | openpilot | After CarParams identifies the F33 safety profile, disable Panda `canfd_auto` on unsplit Toyota-B bus 1. No controls/model changes. | direct-Panda lease; `CanData.fd` schema/logging; SecOC-key Params; controller arming Params; changes to `card.py` or `controlsd` |
 | opendbc | F33 platform identity and DBC; TSS3 state decoding; F33 CarParams; direct C7 angle encoder; native 20 Hz TSS3 RadarInterface from recovered `0x180..0x185` geometry/motion fields; Toyota F33 safety RX state, angle checks, TX whitelist, and normal relay blocking | host construction or signing of B6; host freshness/MAC state; diagnostic/oracle arming; controller-side permission vetoes; unmapped object-class/reliability metadata |
 | Panda | Preserve the received FDF and BRS attributes when software-forwarding across the relay; sanitize the queue-private forwarding markers on host input and validate the original host checksum | relay-close/debug exceptions; F33-specific safety state outside opendbc; global 70% data sample point; global EFBI; logging the per-frame FDF bit to cereal |
 
-## Current longitudinal layer
+## Longitudinal layer (pre-supersession baseline)
 
-Native longitudinal is deliberately **not advertised** on the current TSS3
-platforms. The recovered request/result split places the TSS application
+This section records the longitudinal boundary as it stood before the
+2026-09-21 request-plane supersession above; native-longitudinal authority
+remains open in [../status/OPEN_QUESTIONS.md](../status/OPEN_QUESTIONS.md)
+(OQ-052). At this baseline, native longitudinal was deliberately **not
+advertised** on the TSS3 platforms. The recovered request/result split places
+the TSS application
 request in `0x08A`: B6/B7 carry the two request-ID/allocation tuples and
 B8:B9/B11:B12 carry the two signed16 ×0.001 m/s² acceleration requests. The
 same PDU also carries the lateral request tuple. Brake-owned `0x081` is the
@@ -106,13 +123,13 @@ the `0x08A` request family is visible on the unsplit chassis network, so the
 normal CAN0/CAN2 relay cannot simply make openpilot the sole emitter. A future
 native-long implementation needs a qualified suppression/sole-emitter boundary
 or an equivalent pre-signing/request-generation handoff, followed by normal
-Brake/PCS/AEB coexistence validation. Until then stock Toyota longitudinal is
-the only runtime path.
+Brake/PCS/AEB coexistence validation. At this baseline, stock Toyota
+longitudinal was the only runtime path.
 
-### Why the remaining openpilot transport exception is lateral-only
+### Why the openpilot transport exception was lateral-only at this baseline
 
-The current TSS3 host-control PDU is the 8-byte Classical functional frame
-`0x777` on stock Toyota-B Panda bus 1:
+The TSS3 host-control PDU at this baseline was the 8-byte Classical functional
+frame `0x777` on stock Toyota-B Panda bus 1:
 
 ```text
 07 C7 C7 seq target_hi target_lo 00 00
@@ -123,15 +140,15 @@ places the seven-byte N-SDU `C7 C7 seq target_hi target_lo 00 00` in the EPS
 functional DCM buffer. Panda permits only this exact bounded C7 envelope; it
 does **not** expose arbitrary functional diagnostics while driving. The former
 HUD `0x412`, brake-cancel `0x101`, longitudinal `0x160`, and historical
-extended-family-5 `0x1FDC0002` steering transmissions are not part of the
-current openpilot runtime surface.
+extended-family-5 `0x1FDC0002` steering transmissions were not part of the
+openpilot runtime surface at this baseline.
 
 The same physical network carries native CAN-FD traffic including `0x08A`.
 Route 45 showed that sticky bus-global `canfd_auto` can promote a short
-Classical host frame to FD, so functional C7 still needs the target-scoped
-Classical transport treatment on bus 1. No equivalent host transport exception
-is currently needed for longitudinal because openpilot emits neither `0x08A`
-nor `0x160`.
+Classical host frame to FD, so functional C7 still needed the target-scoped
+Classical transport treatment on bus 1. At this baseline no equivalent host
+transport exception was needed for longitudinal because openpilot emitted
+neither `0x08A` nor `0x160`.
 
 Adding `CanData.fd` remains useful for exact logging and arbitrary short FD
 host TX, but the demonstrated controller sends no short FD PDU. It is a
@@ -527,11 +544,12 @@ Functional `0x777` is the shared host carrier; actuator field semantics,
 scaling, limits, signer RAM locations, freshness cells, and the EPS payload
 remain target-local facts and must not transfer merely from that shared carrier.
 
-## Current Camry audit checkpoint
+## Camry audit checkpoints (historical snapshots)
 
-The September-15 retained-evidence audit supersedes the preceding “essentially
-complete” assessment. The maintained C7 architecture is unchanged, but its
-implementation and evidence boundaries are corrected:
+The September-15 retained-evidence audit superseded the preceding “essentially
+complete” assessment. At that checkpoint the maintained architecture was still
+C7; the 2026-09-21 supersession above replaced it. The audit corrected the
+implementation and evidence boundaries as follows:
 
 - Stock Toyota-B radar objects originate on bus0, FRC `0x160` on bus2, and
   `0x025/0x101/0x412` on unsplit bus1. HUD/brake duplicates on the ADAS relay

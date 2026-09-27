@@ -1,6 +1,8 @@
 # 2026 Camry longitudinal evidence packet and status (WP4)
 
-**Current disposition — September 16 request/result closure:** `0x160` is an
+**Evidence scope:** the September-16 command-role correction, followed by
+later dated request/result and archive-wide analyses. This is a wire-evidence
+report, not a statement of the currently deployed sender. `0x160` is an
 FRC-origin longitudinal/ego-state publication, not the demonstrated Camry
 actuator ingress. The central request surface is `0x08A`: it carries the
 FRC-submitted upper/lower longitudinal request packages plus the recovered lateral

@@ -3,6 +3,11 @@
 Two independent UDS stacks live in this image. Do not project one onto the
 other.
 
+Unless a report header says otherwise, these reports describe the **legacy
+Sienna EPS `8965B4512000`** image — including the DIDs, RIDs, and session
+policies quoted below. Other registered calibrations have their own diagnostic
+surfaces (see [../variants/README.md](../variants/README.md)).
+
 | Stack | Physical ID | Functional ID | Report |
 |---|---|---|---|
 | Bootloader | `0x7A1` | `0x777` | [bootloader.md](bootloader.md) |
@@ -10,7 +15,7 @@ other.
 
 | Report | Scope |
 |---|---|
-| [bootloader.md](bootloader.md) | Bootloader SIDs `10/11/28/3E/85`, routines `10F1–10F3` |
+| [bootloader.md](bootloader.md) | Bootloader service dispatch, diagnostic sessions, and configured routine surface |
 | [bootloader-dids.md](bootloader-dids.md) | Bootloader DID model: the four-descriptor table, `F181` placeholder, strict `0203→0201→0202` write sequence |
 | [application.md](application.md) | Application 17-service-object map, 242-row readable-DID model, 19-RID RoutineControl surface, `0xAB` event service, programming handoff gate |
 | [application-routine-control-surface.md](application-routine-control-surface.md) | Complete 19-entry RoutineControl RID policy/control-type/callback surface, recovered service-mode controls, and bounded motor-actuation separation |

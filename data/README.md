@@ -18,13 +18,18 @@ then curated tables, then the Ghidra snapshot and narrative docs.
 ## Finding the producer of a file
 
 Use `tools/artifact list [query]` and `tools/artifact show ARTIFACT` for tracked
-generated artifacts. The catalog derives producers/consumers from repository
-source; generated files do not need a verification owner.
+generated artifacts. The catalog covers tracked files under `data/generated/`
+and derives producers/consumers from repository source; those files do not need
+a verification owner.
 
-Examples of generated top-level compatibility paths include
-`application_rx_map.csv`, `application_diagnostic_map.csv`, and
-`semantic_coverage_ledger.csv`; moving them merely to make the directory look
-purer would create large path churn without changing their evidence role.
+Some top-level CSVs are generated through `make` targets rather than the
+artifact catalog: `make generate-dataflash` rewrites `dataflash_nvm_records.csv`
+and `checkpoint_payload_map.csv`, `make generate-application-receive` rewrites
+`application_rx_map.csv`, `make generate-application-diagnostics` rewrites
+`application_diagnostic_map.csv`, and `make generate-semantic-coverage`
+rewrites `semantic_coverage_ledger.csv`. Other top-level tables are curated:
+do not overwrite them as though every CSV were a generator output. Their
+placement alone does not determine their evidence role.
 
 `data/generated/` is the preferred destination for new derived artifacts unless
 an existing subsystem convention requires a stable top-level data path.

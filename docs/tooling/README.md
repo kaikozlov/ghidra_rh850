@@ -5,18 +5,23 @@ The analysis toolchain: processor module, scripts, verification.
 | Report | Scope |
 |---|---|
 | [processor-module-audit.md](processor-module-audit.md) | Audit of the vendored `ghidra_v850` processor module: SLEIGH semantics, semantic coverage ledger, calling-convention model |
+| [rh850-build-and-sim.md](rh850-build-and-sim.md) | Pinned single-image RH850 GNU toolchain behind `tools/rh850`: image build/doctor/selftest, CodeFlash-realistic execution testing, and simulator usage (no compiler-profile selection) |
 | [renesas-rfp-rv40f.md](renesas-rfp-rv40f.md) | External-source recovery of the Renesas Flash Programmer RV40F serial protocol and its bounded ICU-S configuration interface |
 | [techstream.md](techstream.md) | External-source recovery of Toyota Techstream V18.00.003 (installer 18.00.008): J2534 diagnostic architecture, SecurityAccess implementations, CUW reflash flow, and the ptshim32 CAN traffic logger |
 | [techstream-capture-procedure.md](techstream-capture-procedure.md) | Isolated-bench capture, hashing, normalization, redaction, and evidence labeling for official J2534 traces |
 | [techstream-ddb-pipeline.md](techstream-ddb-pipeline.md) | `.ddb` binary format reverse-engineering: LZSS decompression, section parsing, OEM string resolution, and the generated diagnostic catalog pipeline |
 | [gts-query-cli.md](gts-query-cli.md) | `tools/gts`: unified read-only discovery across current GTS+ DDB semantics, CUW descriptors/writer routes, and DLL/EXE metadata/strings |
+| [gtsplus-body-recovery.md](gtsplus-body-recovery.md) | Offline recovery of the current CP-protected GTS+ executable bodies into clean analysis PEs |
+| [cuwplus-body-recovery.md](cuwplus-body-recovery.md) | Offline reconstruction of the CP-protected CUWPlus/GTS+ auxiliary corpus (stub + sidecar pairs) in a constrained emulator |
 | [gtsplus-tss3-fleet-map.md](gtsplus-tss3-fleet-map.md) | Current-GTS+ cross-vehicle TSS3 architecture/topology census: per-region category-498 install-set architectures, v18 ECU_Setting diagnostic addresses, and CAN Bus Check gateway topology (Toyota bus identity, explicitly not panda buses) |
 | [pcs-data-viewer-tss3-dictionary.md](pcs-data-viewer-tss3-dictionary.md) | PCS Data Viewer TSS3 Operation/Image FFD dictionary: 1,131 recorder fields, trigger names, control/arbitration semantics, and the AB/EB recorder-model join |
+| [gtsplus-vdas-pcs-data.md](gtsplus-vdas-pcs-data.md) | GTS+ PCS Vehicle Data Analysis `.vdas` persistence: TSS3 FFD model fields and the recovered managed-body container contract |
 | [gtsplus-tse-gtse-saved-session.md](gtsplus-tse-gtse-saved-session.md) | GTS+ TSE/GTSE saved-session grammar: FAT/sections, ring-buffer signal metadata, PCS Operation/Image FFD persistence, and converter skip boundary |
 | [gtsplus-p5-adas-p6-migration.md](gtsplus-p5-adas-p6-migration.md) | Cross-generation ADAS semantic map from distributed P5 PCS/radar/lane databases into generation-22 ADCU_P6, including recorder and diagnostic-role continuity |
 | [community-dataflash-secoc.md](community-dataflash-secoc.md) | Static audit of the pinned community DataFlash/SecOC extractor, its Sienna-specific bus/ID assumptions, and the repository-local generic Toyota classic-SecOC oracle |
 | [community-patch-target-analysis.md](community-patch-target-analysis.md) | Fail-closed raw/Ghidra workflow for classifying the blurbdust/yc persistent patch target on future F3/F4 firmware |
 | [secoc-semantic-patch-resolver.md](secoc-semantic-patch-resolver.md) | Calibration-independent host-side resolver for the SecOC authenticated-delivery branch plus dynamic boot-CRC geometry and patch-manifest generation |
+| [ephemeral-runtime-semantic-resolver.md](ephemeral-runtime-semantic-resolver.md) | Fresh-image fail-closed resolver and SHA-bound target manifest for the RAM scheduler/SecOC-COM bridge, avoiding inherited Sienna offsets |
 | [exploit-predicate-semantics.md](exploit-predicate-semantics.md) | Cross-workstream firmware audit of exploit-critical result/status polarity, branch direction, and opposite-direction regression coverage |
 | [panda-toyota-routing.md](panda-toyota-routing.md) | Static Panda ELM327/harness routing model and non-destructive Toyota EPS bus-discovery helper |
 | [exploit-interest-ranking.md](exploit-interest-ranking.md) | Whole-image exploit-interest ranking pipeline: ingress/pre-SA distance, attacker-controlled-selection proxies, sink families, anchored cohorts |
@@ -40,8 +45,8 @@ The small command surface to remember is:
 
 | Task | Entry point |
 |---|---|
-| Edit-loop tests | `tools/test` |
-| Discover / preview | `tools/test list [word]`, `tools/test plan` |
+| Edit-loop tests | `tools/test <suite-or-prefix>` — run the smallest relevant suite |
+| Discover / preview | `tools/test list [query]`, `tools/test plan <selector>` (selector required) |
 | Ghidra / pseudocode | `tools/g`, `tools/pseudo` |
 | GTS+ / Toyota vocabulary / CUW routes | `tools/gts` |
 | Toyota platform capabilities / target workflows | `tools/toyota capabilities`, `tools/toyota target list camry` |
@@ -169,5 +174,3 @@ The RH850 language `v850e3:LE:32:default` is the **vendored in-tree fork** at
 `14c1b5be32b8ec741ee626c8bca9885c58f7a473`; see
 `ghidra/ghidra_v850/PROVENANCE.json`). Install path and fingerprint checks are
 in [../WORKFLOW.md](../WORKFLOW.md).
-
-- [Ephemeral runtime semantic resolver](ephemeral-runtime-semantic-resolver.md) — fresh-image fail-closed resolver and SHA-bound target manifest for the RAM scheduler/SecOC-COM bridge.

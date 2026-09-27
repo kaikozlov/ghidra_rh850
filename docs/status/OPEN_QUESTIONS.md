@@ -1,7 +1,9 @@
 # Open questions
 
-Exhaustive unresolved-question ledger. **This is not the execution queue**; for
-what to work on next, start with [PRIORITIES.md](PRIORITIES.md).
+Reference ledger of unresolved questions. Entries are added and updated when
+someone maintains them; there is no completeness or freshness guarantee, and a
+canonical report may be ahead of this file. **This is not the execution
+queue**; for what to work on next, start with [PRIORITIES.md](PRIORITIES.md).
 
 Existing OQ IDs are retained for historical references. New work does not need an
 OQ entry before it can proceed, and resolving a question does not require a
@@ -206,9 +208,13 @@ ledger context is useful.
 ## SecOC
 
 - **OQ-006 — Cross-calibration ephemeral runtime transfer.** The Sienna fresh-import
-  resolver is now deterministic and the RH850 runtime sources are target-driven.
-  What remains is external evidence: run `tools/security/resolve_ephemeral_runtime_image.sh`
-  unchanged on the first foreign CodeFlash. A `semantic-resolved-geometry-unresolved`
+  resolver is now deterministic and the RH850 runtime sources are target-driven,
+  and it has already run unchanged on foreign images: tracked `8965H1202000`
+  and Span `8965F1208000` both resolve (the former deliberately
+  `semantic-resolved-steering-unsupported`). What remains is external evidence
+  on an **applicable** foreign CodeFlash — one carrying the `0x2E4/0x131`
+  steering bridge: run `tools/security/resolve_ephemeral_runtime_image.sh`
+  unchanged on it. A `semantic-resolved-geometry-unresolved`
   result is useful and must remain non-buildable until that image's authenticated
   download/callback/retention MPU geometry is proven. A build-ready foreign
   manifest then still needs its own inert-canary observation cell. Authenticated

@@ -10,7 +10,9 @@ the firmware *is*, see [OVERVIEW.md](OVERVIEW.md).
 - Rust `ghidra` CLI **0.2.1** (`ghidra doctor` must pass). The CLI source is
   **vendored in-tree** at `ghidra/ghidra-cli/` (fork of
   `akiselev/ghidra-cli`). Run `make ghidra-cli` to build it into
-  `build/cache/ghidra-cli/`; the repo's tool scripts automatically prefer the
+  `build/cache/ghidra-cli/` (needs a Rust/cargo toolchain; when the vendored
+  binary is missing or stale, the tool wrappers rebuild it automatically when
+  cargo is available); the repo's tool scripts automatically prefer the
   vendored build over any `ghidra` on `PATH`. See
   `ghidra/ghidra-cli/README.md` and `PROVENANCE.json`. Use
   `make test-ghidra-cli` for the complete portable CLI compile/unit gate.
@@ -18,7 +20,9 @@ the firmware *is*, see [OVERVIEW.md](OVERVIEW.md).
   `ghidra/ghidra_v850/` (fork of `esaulenka/ghidra_v850` at commit
   `14c1b5be32b8ec741ee626c8bca9885c58f7a473`; see
   `ghidra/ghidra_v850/README.md` and `PROVENANCE.json`).
-- Docker for target-native RH850 payload compilation/execution testing. The
+- Docker for target-native RH850 payload compilation/execution testing — only
+  the `tools/rh850` build/simulation workflows need it; read-only Ghidra
+  analysis does not. The
   single pinned GNU toolchain and compiled-in V850/RH850 GDB simulator are
   exposed through `tools/rh850`. On a clean machine run `tools/rh850 build-image`,
   then `tools/rh850 doctor` and `tools/rh850 selftest`. There is no compiler-profile
@@ -103,7 +107,7 @@ under ignored `software/` corpus roots:
 software/Techstream/v18/       # Techstream V18 distribution
 software/Techstream/gtsplus/   # current GTS+ distribution and local PE reconstructions
 software/Techstream/cuw/       # Toyota CUW specimen corpus
-software/Renesas/              # Renesas Flash Programmer distribution
+software/Renesas/              # Renesas Flash Programmer distribution and CC-RH compiler docs
 ```
 
 Tracked source identities/provenance live under `software/locks/`. Our analysis
@@ -168,8 +172,11 @@ priority and paths; the current default/primary target is the 2026 Camry F33.
   require `PARITY_PROJECT_DIR` from an independent rebuild; later promotions
   compare directly to the tracked target baseline.
 - `make finalize-project` — orchestrated end-of-session promotion: stops the
-  selected target daemon, verifies the working project, invokes the snapshot path,
-  and prints the staged project diff summary.
+  selected target daemon, then promotes. The legacy Sienna orchestration
+  verifies the working project, invokes the snapshot path, and prints the
+  staged project diff summary; staged targets invoke the snapshot path directly
+  (registry baseline parity, or first-promotion two-build parity, followed by
+  canonical corpus regeneration, snapshot pack/validate, and git staging).
 
 Mutation markers are project-affine records under
 `build/work/ghidra-session-dirty/`; each records the canonical working-project path.
@@ -203,8 +210,9 @@ tools/gtarget camry-8965F3307000 x-ref to 0xfebe66a8
 For the common multi-command read paths, prefer the compound CLI operations:
 
 ```bash
-# Single-target output is unchanged; two or more targets return an ordered aggregate.
-tools/g inspect 0x8549e 0x8f850 --decompile --callees --disasm 40
+# Both addresses are Camry F33 functions in the default working project; two or
+# more targets return an ordered aggregate.
+tools/g inspect 0x8549e 0x4e848 --decompile --callees --disasm 40
 
 # Exact refs-to census, unique containing functions, and owner decompilations.
 tools/g x-ref trace-to 0xfebe5504 --disasm 20
@@ -226,33 +234,40 @@ operations, and executable scripts before its first command. Without
 
 If you re-run `analyze` or any `script run` and want to keep the result in the
 working copy, run `tools/g stop` afterward. To promote a finished working copy
-into the committed snapshot, run `make finalize-project` (which orchestrates
-daemon stop, verification, snapshot, and diff).
+into the committed snapshot, run `make finalize-project` for the selected target
+(daemon stop, target-specific verification, and snapshot promotion).
 
-### Persistent mechanical annotations
+### Persistent mechanical annotations (legacy Sienna ledger)
 
-Do not transcribe every rename or comment into another one-off Java class. Simple
-function renames, data labels, and listing comments live in the tracked
-`data/annotations/annotation_ledger.jsonl` ledger and are edited through
-`tools/annotations`:
+Simple function renames, data labels, and listing comments for the legacy Sienna
+image live in the tracked `data/annotations/annotation_ledger.jsonl` ledger and
+are edited through `tools/annotations`; `apply` replays the ledger into the
+registered Sienna working project (`build/work/project`), then cleanly stops and
+persists:
 
 ```bash
-tools/annotations add function 0x8db22 uds_security_access_handler --comment '...'
+tools/annotations add function 0x32d2 boot_memory_range_check_access --comment '...'
 tools/annotations add label 0xfebef02a security_state
-tools/annotations add comment 0x8db36 '...' --comment-type eol
-tools/annotations apply              # replay into build/work/project, then cleanly stop/persist
+tools/annotations add comment 0x8db22 '...' --comment-type eol
+tools/annotations apply              # replay into the registered Sienna work project, then cleanly stop/persist
 ```
 
-The canonical rebuild validates and applies the complete ledger at the end of
-stage 4. The applier preflights the complete ledger before mutation and fails on missing
-functions, symbol collisions, unmapped addresses, or malformed operations. Function discovery, signatures, types, overlays, and semantic
-recovery remain purpose-built seed/annotation scripts. See
+The legacy Sienna rebuild validates and applies the complete ledger during its
+annotate stage. The applier preflights the complete ledger before mutation and fails on missing
+functions, symbol collisions, unmapped addresses, or malformed operations. Registered
+first-class targets replay their own purpose-built seed/annotation scripts instead;
+function discovery, signatures, types, overlays, and semantic recovery are never
+ledger operations. See
 [tooling/annotation-ledger.md](tooling/annotation-ledger.md).
 
 ## Persistent whole-image pseudocode
 
-The canonical project has a tracked decompiler corpus at
-`data/generated/decompilations.jsonl`. It contains one record for every recovered
+Every registered target has a tracked decompiler corpus at its registry
+`decompiler_corpus` path. `tools/pseudo` reads the selected target's corpus and
+defaults to the registry primary — the Camry F33 corpus at
+`data/generated/camry-8965F3307000/decompilations.jsonl`; the legacy Sienna
+corpus remains at `data/generated/decompilations.jsonl`. A corpus contains one
+record for every recovered
 function, including entry address, name, signature, calling convention, body
 size, decompiler status, SHA-256 of the rendered C, the complete decompiled C,
 and the canonical non-flow instruction/data references exported by Ghidra. The
@@ -267,20 +282,22 @@ lookup accepts either a function entry or any address inside an exact body range
 from the provenance-matched project inventory:
 
 ```bash
-tools/pseudo 0x6fec                     # function entry -> pseudocode
-tools/pseudo 0x6fee                     # interior address -> containing function pseudocode
-tools/pseudo security_access --list    # search function names
-tools/pseudo secoc --all               # emit all matching pseudocode
-tools/pseudo --data-ref 0xfebef02a    # canonical function-owned RAM refs despite text aliases
+# Default target: Camry F33
+tools/pseudo 0x4e848                     # function entry (did_1c05_1c0c_asic_state_information) -> pseudocode
+tools/pseudo 0x4e850                     # interior address -> containing function pseudocode
+tools/pseudo steering_angle --list       # search function names
+tools/pseudo rdbi_0103 --all             # emit all matching pseudocode
+tools/pseudo --data-ref 0xfebef02a       # canonical function-owned RAM refs despite text aliases
 tools/pseudo --data-ref 0xfebe8001 --list
+tools/pseudo --target sienna-8965B4512000 0x6fec   # explicit legacy-Sienna corpus lookup
 # IMPORTANT: --data-ref is a function-owned corpus query, not an exhaustive live-xref census.
 # References at addresses outside Ghidra's current Function.body can be absent even when the
-# decompiler follows that code (boot send-key 0x54DC is a known example). For exhaustive
-# security-state writer closure, confirm with `tools/g x-ref to <address>` in a disposable/live
-# project and raw disassembly.
-make pseudocode                        # rebuild ignored build/out/pseudocode/*.c view
+# decompiler follows that code (the legacy-Sienna boot send-key 0x54DC is a known example).
+# For exhaustive security-state writer closure, confirm with `tools/g x-ref to <address>` in a
+# disposable/live project and raw disassembly.
+make pseudocode                          # rebuild the ignored build/out/pseudocode/*.c view for the selected target
 rg 'ICUSCMD' build/out/pseudocode
-rg 'nvm_object_15' build/out/pseudocode
+rg 'f33_rdbi' build/out/pseudocode
 ```
 
 ## Task-oriented tooling discovery
@@ -293,7 +310,7 @@ belong there rather than in a new top-level file:
 | Operation | Entry point |
 |---|---|
 | Corolla target workflow discovery | `tools/toyota target list corolla` |
-| Read-only exports from `build/work/project` (signals/consumers/producers/coverage/inventory) | `tools/project/export_ghidra_project.sh list` |
+| Read-only exports from the selected working project (signals/consumers/producers/coverage/inventory) | `tools/project/export_ghidra_project.sh list` |
 | Cross-variant image-bound evidence | `tools/toyota variant list` |
 | Interactive GTS+ OEM vocabulary / DID / DTC / CUW route / PE lookup | `tools/gts` |
 | Repository knowledge across findings/corrections/OQs/artifacts/suites/docs | `tools/know QUERY` |
@@ -313,8 +330,11 @@ JSONL without opening Ghidra. The JSONL is generated in one read-only headless
 Ghidra pass rather than thousands of individual CLI calls.
 
 Refresh the corpus only from a fresh rebuilt/disposable project whose exported
-inventory is byte-for-byte equal to
-`data/ghidra_project_inventory.baseline.jsonl`. A project merely materialized
+inventory is byte-for-byte equal to that target's tracked inventory baseline
+(the registry `inventory_baseline`: e.g.
+`data/targets/camry-8965F3307000/ghidra_project_inventory.baseline.jsonl` for
+the default Camry, `data/ghidra_project_inventory.baseline.jsonl` for the legacy
+Sienna). A project merely materialized
 from the committed snapshot may carry Ghidra version-control state that
 `analyzeHeadless -process` reports as hijacked, so use a fresh rebuild output:
 
@@ -398,39 +418,49 @@ counts, or a generator's own hash do not establish those properties.
 
 ## Rebuilding the complete project from firmware
 
-The committed split images are the only firmware inputs. SHA-256:
+The committed split images are the only firmware inputs. Every rebuild driver
+checks the selected target's registered identity — `codeflash_sha256`,
+`dataflash_sha256`, sizes, and bases from `data/analysis_targets.json` — and
+aborts on drift before touching a project. The hashes below are the legacy
+Sienna reference pair (registry target `sienna-8965B4512000`); every first-class
+target carries its own committed identities in the same registry:
 
 ```text
-DataFlash  81d87b678784bb2a07b1fdcb3d43dd40767d4f5ca1b56867b6575cd652a9ecb8
-CodeFlash  21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde
-Combined   0bba74d0e443f9dd3da33e3a28c3511ec31e35e8303acef7e0117fbdc91d5a86
+Sienna DataFlash  81d87b678784bb2a07b1fdcb3d43dd40767d4f5ca1b56867b6575cd652a9ecb8
+Sienna CodeFlash  21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde
+Sienna Combined   0bba74d0e443f9dd3da33e3a28c3511ec31e35e8303acef7e0117fbdc91d5a86
 ```
 
-The CodeFlash input is preserved exactly as published. SECOC-044 recovers a
+The Sienna CodeFlash input is preserved exactly as published. SECOC-044
+(Sienna-scoped) recovers a
 unique one-bit inconsistency at VA `0xBB1C4` (`0xA2→0x82`) whose analysis-only
 reconstruction restores the existing region-1 boot CRC and repairs the local
 RH850 store semantics; reconstructed CodeFlash SHA-256 is
 `b6f510662c324261dac6fc1504ec77c217d2055dc099096375a91f3fcf7e9916`.
-Do **not** silently patch the committed firmware input or rebuild the canonical
-project from the reconstructed derivative; use the reconstruction only for
+Do **not** silently patch any committed firmware input or rebuild a canonical
+project from a reconstructed derivative; use reconstructions only for
 explicit CRC/semantic experiments.
 
 ```bash
 make rebuild-project                                  # registry-default Camry work path
 make rebuild-project PROJECT_DIR="$PWD/build/work/parity-project"  # disposable alternate
+make rebuild-project TARGET=sienna-8965B4512000       # legacy Sienna, specialized script
 ```
 
 Rebuild destinations are deliberately constrained to dedicated directories
 below `build/work/`; this keeps `--force` incapable of deleting committed or
-unrelated trees. For the legacy Sienna rebuild specifically,
+unrelated trees. The legacy Sienna keeps its mature specialized rebuild script;
+direct invocation
 `tools/project/rebuild_project.sh --project-dir "$PWD/build/work/project" --force`
-remains available. Never point any rebuild at committed `projects/`; promote only
-with `make snapshot-project`.
+is the `make rebuild-project TARGET=sienna-8965B4512000` path plus forced
+replacement of an existing project. Never point any rebuild at committed
+`projects/`; promote only with `make snapshot-project`.
 
-Rebuilds consume the tracked diagnostic-vocabulary artifact by default; an
-ignored local Techstream tree is never an implicit input. To deliberately
-refresh that artifact first, pass `--refresh-diagnostic-vocabulary` and review
-its tracked diff before promotion.
+The legacy Sienna rebuild consumes the tracked diagnostic-vocabulary artifact
+by default; an ignored local Techstream tree is never an implicit input. To
+deliberately refresh that artifact first, pass `--refresh-diagnostic-vocabulary`
+and review its tracked diff before promotion. Registered first-class target
+rebuilds do not consume the vocabulary artifact.
 
 All repository one-shot Ghidra jobs go through `tools/project/run_headless`. It owns
 the isolated environment, canonical project-path guard, canonical script path,
@@ -440,10 +470,10 @@ deliberately excludes `ghidra/scripts/investigate`: including that directory was
 measured to change the recovered graph by 194 functions. Deterministic exporters
 used by tooling live under `ghidra/scripts/verify` instead.
 
-### The four-stage analysis (do not collapse)
+### The staged rebuild analyses (do not collapse)
 
-The script uses four staged durable analysis commits plus a separate
-`-noanalysis` calling-convention finalizer. Staging matters: injecting every
+The legacy Sienna rebuild script uses four staged durable analysis commits plus
+a separate `-noanalysis` calling-convention finalizer. Staging matters: injecting every
 seed before the first analysis pass produces a different graph and does not
 reproduce the committed statistics.
 
@@ -453,24 +483,35 @@ reproduce the committed statistics.
    overlays), `ApplyRamTypes.java` (LocalRAM payload/SecOC/DID/checkpoint
    overlays from `data/checkpoint_payload_map.csv`).
 
-Registered exact-target rebuilds apply this common device profile and
-`ApplyP1MSfrTypes` before their target-specific identity/context/label script.
-Exact-target scripts do not maintain a second hardware map.
+Registered first-class rebuilds run the same common import — `AddDataFlash`,
+the P1M-E device profile, and `ApplyP1MSfrTypes` — plus the target's registered
+context script (`device_profile_script`, e.g. `ApplyCamryF33DeviceProfile.java`),
+then stage their registered seed scripts (`entry_seed_script`,
+`diagnostic_seed_script`, `recovered_seed_script`, plus the target's
+`function_seeds` CSV) as their own durable analysis commits, and end with the
+same `-noanalysis` `ApplyCallingConventions` finalizer. Exact-target scripts do
+not maintain a second hardware map.
 
 2. Run `SeedEntries.java`, then the base auto-analysis.
 3. Run `SeedUdsServiceTable.java`, re-run analysis.
 4. Seed remaining missed functions (`SeedCanTransportFunctions`,
    `SeedPayloadVerificationFunctions`, `SeedSecocNvmFunctions`,
    `SeedSecocApplicationFunctions`, `SeedDataFlashSemanticsFunctions`,
-   `SeedApplicationDiagnosticFunctions`, `SeedBootloaderDiagnosticFunctions`,
-   `SeedArchitectureFunctions`, `SeedApplicationTransmitFunctions`), re-run
+   `SeedApplicationDiagnosticFunctions`, `SeedDidCallbacks`,
+   `SeedBootloaderDiagnosticFunctions`, `SeedArchitectureFunctions`,
+   `SeedApplicationTransmitFunctions`, `SeedApplicationReceiveFunctions`,
+   `SeedRecoveredCallbackTables`, `SeedDispatchProvenFunctionTables`,
+   `SeedBoundedPointerWrappers`, `SeedDirectCallTargets`), re-run
    analysis, apply every annotation script (`AnnotateBootloaderSecrets`,
    `AnnotatePayloadGate`, `AnnotateSecocNvmCorrection`,
    `AnnotateSecocApplication`, `AnnotateDataFlashLayout`, `AnnotateDidModel`,
    `AnnotateCanTransport`, `AnnotateApplicationDiagnostics`,
+   `ApplyDiagnosticVocabulary`/`AssertDiagnosticVocabulary` when a tracked
+   vocabulary artifact exists, `AnnotateControlPartition`,
    `AnnotateBootloaderDiagnostics`, `RecoverVectorHandlers`,
    `RecoverSwitchTables`, `AnnotateArchitecture`,
-   `AnnotateApplicationTransmit`, `ApplyCallingConventions`), then replay the
+   `AnnotateApplicationTransmit`, `AnnotateApplicationReceive`,
+   `AnnotateLargeFunctions`, `ApplyCallingConventions`), then replay the
    tracked mechanical annotation ledger with `ApplyAnnotationLedger`.
 5. `-noanalysis` convention finalizer: re-run `ApplyCallingConventions.java`.
    After the annotate-stage reopen, Ghidra surfaces two additional non-ISR
@@ -479,9 +520,12 @@ Exact-target scripts do not maintain a second hardware map.
    added by later subsystem work.
 6. Open the result through the CLI, record statistics, cleanly stop the daemon.
 7. Record the processor build used and check the recovered memory map.
-8. Export canonical compact JSONL to `build/out/ghidra_project_inventory.jsonl`
-   and compare every semantic record with
-   `data/ghidra_project_inventory.baseline.jsonl`. The path-free inventory
+8. Export canonical compact JSONL and compare every semantic record with that
+   target's tracked baseline — for the legacy Sienna rebuild,
+   `build/out/ghidra_project_inventory.jsonl` against
+   `data/ghidra_project_inventory.baseline.jsonl`; for a first-class target,
+   `build/out/targets/<target>/project_inventory.jsonl` against the registry
+   `inventory_baseline`. The path-free inventory
    covers tool/program identity, memory mappings, complete function bodies and
    signatures/storage, user symbols, comments, bookmarks, and aggregate maps;
    it catches equal-count substitutions and annotation drift that floors miss.

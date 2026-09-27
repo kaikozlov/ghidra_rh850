@@ -30,7 +30,7 @@ update, and provisioned-unit experiment are in
 `../../security/secoc/application-chain.md`.
 
 `tools/test secoc` verifies the original NvM correction. The broader 16-object
-map and key-location correction are checked by `../tests/firmware/verify_dataflash_layout.py`.
+map and key-location correction are checked by `tests/firmware/verify_dataflash_layout.py`.
 
 ## Executive conclusion
 

@@ -12,7 +12,7 @@ software/
 │   ├── v18/                 # ignored Toyota Techstream V18 distribution
 │   ├── gtsplus/             # ignored Toyota GTS+ distribution/reconstructed local PEs
 │   └── cuw/                 # ignored Toyota calibration-update package corpus
-├── Renesas/                 # ignored Renesas Flash Programmer distribution
+├── Renesas/                 # ignored Renesas Flash Programmer distribution and CC-RH compiler docs
 └── locks/                   # tracked hashes/provenance for analyzed source artifacts
 ```
 

@@ -28,7 +28,7 @@ the bootloader handlers at `0x4948`, `0x5FB8`, and `0x614A` do not yet control t
 request.
 
 All addresses below are CodeFlash virtual addresses. The independent checks in
-`../tests/diagnostics/verify_application_diagnostics.py` validate the static tables and key
+`tests/diagnostics/verify_application_diagnostics.py` validate the static tables and key
 instruction sequences directly from the committed image.
 
 ## Executive result

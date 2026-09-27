@@ -1,65 +1,75 @@
 # Documentation map
 
-Use the subsystem reports for conclusions, the status pages for navigation,
-and `WORKFLOW.md` for commands. Firmware and captured observations are the
-underlying evidence; tests check particular behaviors or binary facts.
+Start with the task below. The repository contains operating guides, evolving
+target reports, and historical evidence; **a file's directory does not certify
+that every paragraph is current**.
 
-## Read these first
+## Find the right entry point
 
-1. **[OVERVIEW.md](OVERVIEW.md)** — the current technical picture.
-2. **[status/PRIORITIES.md](status/PRIORITIES.md)** — the short execution queue.
-3. **[status/README.md](status/README.md)** — how to use the live status ledgers.
-4. **[WORKFLOW.md](WORKFLOW.md)** — how to operate the Ghidra/tooling stack.
-
-If you are looking up prior research by ID or keyword, use `tools/know QUERY` or
-read [status/FINDINGS.md](status/FINDINGS.md) directly. The status ledgers are
-navigation/history aids; they are not required to mirror every report or test.
-
-## Document classes
-
-### Current orientation
-
-| Document | Purpose |
+| Task | Read |
 |---|---|
-| [OVERVIEW.md](OVERVIEW.md) | Human-scale summary of architecture, attack surface, exploit status, and current blockers |
-| [WORKFLOW.md](WORKFLOW.md) | Project lifecycle, Ghidra durability rules, verification, and rebuild procedure |
+| Understand repository scope and evidence | [OVERVIEW.md](OVERVIEW.md) |
+| Install tools, select a target, use Ghidra, or verify a change | [WORKFLOW.md](WORKFLOW.md) |
+| Find a command or artifact producer | [Tooling](tooling/README.md) |
+| Find a calibration or vehicle report | [Variants](variants/README.md) |
+| Review Camry capability and qualification boundaries | [Capability matrix](variants/camry-2026-capability-matrix.md) |
+| Understand normal openpilot ownership | [Porting contract](architecture/toyota-openpilot-porting-contract.md) |
+| Choose the next investigation | [Priorities](status/PRIORITIES.md) |
+| Find an earlier claim, question, or correction | [Status reference](status/README.md), or `tools/know QUERY` |
 
-### Live project status
+## Reading reports without mixing checkpoints
 
-Everything under [status/](status/README.md) is current unless explicitly
-marked otherwise:
+1. Check the **target, software revision, capture date, and evidence source**.
+   Sienna reference findings do not silently transfer to the default Camry.
+2. Use the report's conclusion and stated supersessions. Long Camry/Corolla
+   reports preserve dated investigations; “current” inside an old checkpoint
+   refers to that checkpoint, not today's installation.
+3. Follow the actual evidence. Generated artifacts are regenerated, not
+   hand-edited; `build/` and `REFERENCE/` material is local context, not portable
+   authority.
+4. Keep successful software checks, observed vehicle behavior, and outstanding
+   qualification separate. Historical integration audits are not deployment
+   instructions or a claim about current upstream support.
 
-| Document | Use it for |
-|---|---|
-| [status/PRIORITIES.md](status/PRIORITIES.md) | What to do next, in priority order |
-| [status/FINDINGS.md](status/FINDINGS.md) | Canonical claim IDs, scope, confidence, and verification |
-| [status/OPEN_QUESTIONS.md](status/OPEN_QUESTIONS.md) | Exhaustive unresolved-question ledger |
-| [status/ANALYSIS_STATUS.md](status/ANALYSIS_STATUS.md) | Coverage/denominator snapshot |
-| [status/CORRECTIONS.md](status/CORRECTIONS.md) | Superseded or disproved prior claims |
-
-### Canonical subsystem reports
-
-A material conclusion should have exactly one canonical report in these trees:
+## Subsystem reports
 
 | Section | Scope |
 |---|---|
-| [architecture/](architecture/README.md) | Boot/execution architecture, control partition, system modes |
-| [communications/](communications/README.md) | CAN/ISO-TP, application Rx/Tx, XCP |
-| [diagnostics/](diagnostics/README.md) | Bootloader/application UDS and configured service surfaces |
-| [security/](security/README.md) | SecurityAccess, payload gate, memory safety, SecOC, provisioning |
+| [architecture/](architecture/README.md) | Boot/execution, control partition, system modes, integration contracts |
+| [communications/](communications/README.md) | CAN/ISO-TP and target-specific application Rx/Tx |
+| [diagnostics/](diagnostics/README.md) | Separate bootloader/application diagnostic surfaces |
+| [security/](security/README.md) | Security analysis and its target-specific evidence boundaries |
 | [storage/](storage/README.md) | DataFlash/NvM layout and semantics |
-| [variants/](variants/README.md) | Cross-calibration/vehicle evidence and transfer boundaries |
-| [tooling/](tooling/README.md) | Analysis, Techstream/RFP, cross-calibration, and acquisition tooling |
-| [reference/](reference/README.md) | Address/artifact lookup tables |
+| [variants/](variants/README.md) | Calibration-specific conclusions and cross-target transfer limits |
+| [tooling/](tooling/README.md) | Operating interfaces and software-analysis reports |
+| [reference/](reference/README.md) | Address and artifact lookup tables |
 
-### Historical research journals
+These sections include legacy Sienna reference material as well as newer
+multi-target reports. Their indexes identify that distinction.
 
-[history/](history/README.md) contains dated investigation reports. They are
-useful for chronology, methodology, and why a correction happened, but **they
-are not the place to determine current project state**. Current conclusions
-must be taken from the live status ledgers and canonical subsystem reports.
+## Status and history
 
-Confidence grades are defined in
-[status/FINDINGS.md](status/FINDINGS.md#evidence-model).
-Keep detailed conclusions in the relevant subsystem report and link to them
-from status pages rather than copying the argument.
+| Document | Meaning |
+|---|---|
+| [PRIORITIES.md](status/PRIORITIES.md) | Short execution queue, not a completion diary |
+| [FINDINGS.md](status/FINDINGS.md) | Claim IDs, evidence grades, and links; not a complete or always-current status mirror |
+| [OPEN_QUESTIONS.md](status/OPEN_QUESTIONS.md) | Reference questions and recorded closure boundaries; owning reports may be newer |
+| [CORRECTIONS.md](status/CORRECTIONS.md) | Prior interpretations retained so mistakes are not repeated |
+| [ANALYSIS_STATUS.md](status/ANALYSIS_STATUS.md) | Historical Sienna coverage snapshot, not whole-project progress |
+| [history/](history/README.md) | Dated investigation journals and migrations |
+
+Historical sections also remain inside variant and subsystem reports where
+their provenance is useful. Retain observations and source identities; correct
+their interpretation in the owning report rather than rewriting a capture.
+
+## Maintaining this documentation
+
+Keep each conclusion in its existing target/subsystem report and link to it
+from indexes. Update operating instructions when commands or ownership change.
+Do not duplicate runtime state across README, overview, priorities, and several
+reports, or turn every research update into a required ledger transaction.
+
+For firmware questions, inspect the exact target bytes/decompilation first.
+For integration design, consult current upstream and the porting contract.
+Documentation-only changes do not require tests; exercise changed command
+examples and check navigation where applicable.

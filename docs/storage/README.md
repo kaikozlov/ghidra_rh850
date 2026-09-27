@@ -1,6 +1,8 @@
 # Storage
 
-Persistent storage: the 32 KiB DataFlash and the NvM object model.
+Persistent storage: the 32 KiB DataFlash and the NvM object model of the legacy
+Sienna EPS `8965B4512000`. Other calibrations have their own DataFlash/NvM
+layouts; do not transfer page or record numbers across images.
 
 | Report | Scope |
 |---|---|

@@ -1,8 +1,15 @@
 # 2026 Camry port: adversarial evidence review
 
-This September 15 review audits the preceding integration checkpoint, rather
-than accepting the earlier “essentially complete” summary as evidence. All
-work is offline; no vehicle commands or persistent firmware writes are run.
+This review began on September 15 and retains later dated corrections and
+validation checkpoints. It audits evidence rather than accepting an
+“essentially complete” summary. Software state and test counts belong to the
+revision named in each section; earlier completion/blocker statements may be
+superseded farther down the chronology.
+
+Use [the capability matrix](camry-2026-capability-matrix.md) for consolidated
+status. Offline reviews below are distinct from the separately attributed
+vehicle observations they discuss; reading this report does not reproduce
+either class of evidence.
 
 ## Confirmed corrections
 

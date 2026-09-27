@@ -270,9 +270,9 @@ belong to the active nine-record `0xA000` unit-calibration/identity family,
 still-opaque post-CRC field. The active motor/sensor calibration differences are
 not promoted to model-year tuning because the specimens are different physical
 ECUs. DataFlash/extended-CodeFlash/RAM invariants are separately pinned by
-`tests/verify_spanconstant_corolla_memory.py`.
+`tests/targets/corolla/verify_spanconstant_corolla_memory.py`.
 
-`tests/verify_spanconstant_corolla_codeflash.py` still proves the H-family
+`tests/targets/corolla/verify_spanconstant_corolla_codeflash.py` still proves the H-family
 unauthenticated XCP high-LocalRAM write architecture and live application→boot
 retention path, while deliberately stopping short of a no-auth PC-pivot claim.
 See

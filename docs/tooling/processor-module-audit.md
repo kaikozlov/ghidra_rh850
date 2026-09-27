@@ -35,10 +35,10 @@ semantic correctness.** The checks below are layered:
 Automated gate:
 
 ```bash
-make verify            # firmware-only, no Ghidra
+make verify            # core repository mechanics, no Ghidra or firmware research suites
 make verify-sleigh     # compile + isolated install
 make verify-processor  # fixtures (+ working-project audits if present)
-make verify-ghidra     # all of the above
+make verify-ghidra     # full portable sweep + SLEIGH + fixtures + live semantic coverage + project parity
 ```
 
 Working-project audits require a materialized copy:
@@ -382,7 +382,8 @@ Whole-image structural function inventory (not full semantic understanding):
   `tools/project/export_ghidra_project.sh semantic-coverage`
 - Artifacts: `data/semantic_coverage_ledger.csv` and
   `data/semantic_coverage_summary.json`
-- Gate: `tests/tooling/verify_semantic_coverage.py` (registered in `make verify`)
+- Gate: `tests/tooling/verify_semantic_coverage.py` (runs in the
+  `tools/test full` / `local` sweeps, not core)
 
 Each CSV row is one discovered function, sorted by entry address, with Ghidra
 discovery and name provenance, calling convention, caller/callee counts,

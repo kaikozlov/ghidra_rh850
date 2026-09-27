@@ -2,6 +2,14 @@
 
 ## Scope and evidence
 
+This is a chronological evidence report, not a current installation guide.
+It starts with the August-26 baseline and accumulates later acquisitions,
+corrections, and field checkpoints. Bus assignments, software revisions, and
+“not yet” statements apply to their section's capture/configuration.
+For consolidated capability and qualification boundaries, start with
+[the capability matrix](camry-2026-capability-matrix.md); for recorded
+interpretation changes, use [the evidence review](camry-2026-port-evidence-review.md).
+
 On 2026-08-26 the maintainer's 2026 Toyota Camry produced an identity-bound TSK
 baseline covering EPS diagnostics, a stationary READY CAN segment, a bounded
 PROGRAMMING handoff, and an XCP CONNECT-only probe. Raw/privacy-minimized source

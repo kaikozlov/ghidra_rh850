@@ -128,7 +128,7 @@ vehicle=12704 name=Camry HV can_bus_car_id=0x00A7D910 options=18 placement_varia
 
 The displayed Toyota `Bus N` name is a Central-Gateway network identity, **not** a Panda
 bus number or connector pin. Physical harness mapping still requires vehicle evidence.
-For the exact 2026 Camry join, see the [Camry baseline §19](../variants/camry-2026-live-baseline.md#19-current-gts-can-topology-closes-the-b6-bus-question).
+For the exact 2026 Camry join, see the [Camry baseline §19](../variants/camry-2026-live-baseline.md#19-current-gts-closes-logical-bus-4-membership-corr-197-separates-physical-transparency).
 
 ### Master DB execution model
 

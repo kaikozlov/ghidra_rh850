@@ -4,9 +4,13 @@ Dated investigation journals and handoff-style reports live here. They preserve
 chronology and methodology, including analyses that were later corrected.
 
 **Do not use this tree to determine current project state.** Start with
-[../OVERVIEW.md](../OVERVIEW.md) and [../status/](../status/README.md). Current
-claims live in subsystem reports plus `status/FINDINGS.md`; superseded claims
-are tracked in `status/CORRECTIONS.md`.
+[../OVERVIEW.md](../OVERVIEW.md). Current per-target conclusions live in the
+canonical target reports under [../variants/](../variants/README.md) and the
+canonical subsystem reports. [../status/](../status/README.md) is a navigation
+index — current queue, claim IDs, unresolved questions, and one Sienna coverage
+snapshot — and is maintained opportunistically, not continuously; it is not
+current truth by itself. Superseded claims are tracked in
+`status/CORRECTIONS.md`.
 
 ## 2026-08
 
@@ -27,11 +31,12 @@ Month index with current-state links: [2026-08/README.md](2026-08/README.md).
 - [2026-08/T0011_21_04C21_CUW_ANALYSIS_2026-08-23.md](2026-08/T0011_21_04C21_CUW_ANALYSIS_2026-08-23.md)
 - [2026-08/VERIFICATION_ARCHITECTURE_2026-08-23.md](2026-08/VERIFICATION_ARCHITECTURE_2026-08-23.md)
 - [2026-08/CAMRY_GTS_LATERAL_FUNNEL_2026-08-29.md](2026-08/CAMRY_GTS_LATERAL_FUNNEL_2026-08-29.md)
+- [2026-08/CAMRY_08A_SIGNER_CONTINUITY_2026-08-30.md](2026-08/CAMRY_08A_SIGNER_CONTINUITY_2026-08-30.md)
 
 ## 2026-09
 
-- [2026-09/GHIDRA_12_1_4_MIGRATION_2026-09-21.md](2026-09/GHIDRA_12_1_4_MIGRATION_2026-09-21.md)
 - [2026-09/2026-09-01-camry-live-communication-characterization-notebook.md](2026-09/2026-09-01-camry-live-communication-characterization-notebook.md)
 - [2026-09/2026-09-01-camry-route37-steering-speed-gate.md](2026-09/2026-09-01-camry-route37-steering-speed-gate.md)
 - [2026-09/2026-09-02-camry-f33-b6-review-handoff.md](2026-09/2026-09-02-camry-f33-b6-review-handoff.md)
 - [2026-09/2026-09-04-camry-route-log-import.md](2026-09/2026-09-04-camry-route-log-import.md)
+- [2026-09/GHIDRA_12_1_4_MIGRATION_2026-09-21.md](2026-09/GHIDRA_12_1_4_MIGRATION_2026-09-21.md)

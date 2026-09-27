@@ -1,8 +1,13 @@
 # Address reference
 
-Consolidated address lookup across all subsystems. Every entry links to its
-canonical report; this page is an index, not an explanation. All addresses are
-CodeFlash VAs unless marked RAM or DataFlash.
+Consolidated address lookup across all subsystems of the **legacy Sienna EPS
+`8965B4512000`** image. Every entry links to its canonical report; this page is
+an index, not an explanation. All addresses are Sienna CodeFlash VAs unless
+marked RAM or DataFlash. The same virtual address names different code in other
+registered targets (`data/analysis_targets.json`, `tools/gtarget show TARGET`);
+Camry/Crown/Corolla lookups stay in their target-scoped reports under
+[../variants/](../variants/README.md), and the exact-Camry participant lookup is
+[camry-2026-tss3-control-security-participants.md](camry-2026-tss3-control-security-participants.md).
 
 ## Boot / architecture
 

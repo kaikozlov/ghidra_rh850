@@ -1,10 +1,15 @@
 # 2026 Camry steering bench-validation specification and interface inventory (WP3)
 
-**Scope:** work package 3 of the Camry openpilot completion plan. This is a
-specification and evidence-inventory document, not a validation result. No
-bench work has been performed; availability of a legitimate control interface
-remains the external dependency that gates execution. Nothing here authorizes
-steering transmission.
+**Historical WP3 specification:** this document records the direct-host-B6
+bench plan and its September-4-era evidence boundary. It is a specification,
+not a validation result. Later development steering observations do not show
+that this bench plan was executed, and this plan's older “unobserved” statements
+do not negate those later observations.
+
+Use [the capability matrix](camry-2026-capability-matrix.md) for consolidated
+qualification status. The interface inventory and blocked exit below belong
+to this earlier plan, not the current installation or complete project state.
+Nothing here authorizes steering transmission.
 
 ## Boundary definitions and required evidence
 
@@ -22,7 +27,7 @@ automatically.
 | Physical response | Independently measured steering-column/wheel angle attributable to that interface | Similar stock/openpilot targets, or `0x030 B22:B23` motor feedback alone |
 | Release and override | Measured behavior under ID0/inactive and driver-input conditions across power transitions | A positive response in one active interval |
 
-Current status against these boundaries, from retained evidence only:
+Status recorded for this plan's original evidence checkpoint:
 physical reception is bounded by Panda TX returns plus same-bus native traffic
 (VAR-126 transport exoneration); receiver acceptance, application
 consumption, physical response, and release/override are all **unobserved** —

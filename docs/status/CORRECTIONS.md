@@ -194,7 +194,7 @@ the mistakes are not re-made.
 - **Canonical:** [../diagnostics/application.md](../diagnostics/application.md)
   §"Proprietary `AB` event-record service";
   `tests/diagnostics/verify_application_ab_service.py`,
-  `tests/verify_application_routine_id_callbacks.py`.
+  `tests/diagnostics/verify_application_wdbi.py`.
 
 ### CORR-015 — Crypto-test cyclics misidentified as motor control
 

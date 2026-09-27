@@ -2,9 +2,10 @@
 
 Simple persistent Ghidra edits no longer need a one-off Java script. The tracked
 `data/annotations/annotation_ledger.jsonl` ledger owns mechanical function
-renames, data labels, and listing comments. `ghidra/scripts/annotate/ApplyAnnotationLedger.java`
+renames, data labels, and listing comments for the legacy Sienna image.
+`ghidra/scripts/annotate/ApplyAnnotationLedger.java`
 applies the complete ledger as the final annotation operation in stage 4 of the
-canonical rebuild.
+legacy Sienna rebuild (`tools/project/rebuild_project.sh`).
 
 This is deliberately narrow. Function creation/recovery, signatures, types,
 overlays, table discovery, control-flow recovery, and any edit whose correctness
@@ -15,29 +16,30 @@ scripts.
 ## Daily use
 
 ```bash
-# Record a durable edit only.
-tools/annotations add function 0x8db22 uds_security_access_handler \
-  --comment 'SecurityAccess dispatcher.'
+# Record a durable edit only (legacy-Sienna addresses).
+tools/annotations add function 0x32d2 boot_memory_range_check_access \
+  --comment 'Validate address/length and operation bit against boot_memory_access_table.'
 tools/annotations add label 0xfebef02a security_state
-tools/annotations add comment 0x8db36 'Result gate.' --comment-type eol
+tools/annotations add comment 0x8db22 'Result gate.' --comment-type eol
 
 # Validate/review the tracked recipe.
 tools/annotations validate
 tools/annotations list
 
-# Replay the complete ledger into build/work/project and durably save it.
+# Replay the complete ledger into the registered Sienna working project
+# (build/work/project) and durably save it.
 tools/annotations apply
 
 # Or record + replay in one command.
-tools/annotations add function 0x8db22 uds_security_access_handler --apply
+tools/annotations add function 0x32d2 boot_memory_range_check_access --apply
 ```
 
 `--apply` and `apply` always go through `tools/g`, then cleanly stop the bridge so
 the working-copy edit is durable. The committed `projects/sienna-8965B4512000/` snapshot remains
 non-openable and protected by the normal lifecycle guard. A
 working-project replay is for the edit loop; the canonical proof remains a fresh
-`make rebuild-project` followed by project-parity verification and normal
-snapshot promotion.
+`make rebuild-project TARGET=sienna-8965B4512000` followed by project-parity
+verification and normal snapshot promotion.
 
 ## Ledger contract
 

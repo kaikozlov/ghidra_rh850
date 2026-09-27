@@ -289,23 +289,25 @@ one from the Toyota topology component index `0x28`. Use the `0x763` roster to
 identify any additional security slave endpoint first.
 
 With ignition/READY awake, the first characterization pass should remain
-read-only and use the Comma Toyota diagnostic CLI:
+read-only and use the `toyota` diagnostic CLI from the on-device
+`kai-openpilot` checkout (the `uds`/`did` subcommands are not part of this
+repository's `tools/toyota`):
 
 ```text
 # Toyota MACKey-registration master / exact roster
-tools/toyota uds raw 0x763 0x22 1033
-tools/toyota uds raw 0x763 0x22 1010
-tools/toyota uds raw 0x763 0x22 102E
-tools/toyota uds raw 0x763 0x22 1100
+toyota uds raw 0x763 0x22 1033
+toyota uds raw 0x763 0x22 1010
+toyota uds raw 0x763 0x22 102E
+toyota uds raw 0x763 0x22 1100
 ... through 1105, then 1107 and 1108
 
 # exact live Brake/EPB endpoint
-tools/toyota did read brake 0x10AF
-tools/toyota uds raw brake 0x22 1010
+toyota did read brake 0x10AF
+toyota uds raw brake 0x22 1010
 
 # FRC security-registration observer
-tools/toyota did read frc 0x10AF
-tools/toyota uds raw frc 0x22 1010
+toyota did read frc 0x10AF
+toyota uds raw frc 0x22 1010
 ```
 
 `kai-openpilot@25f6909ea` extends `uds raw` so an unregistered numeric 11-bit

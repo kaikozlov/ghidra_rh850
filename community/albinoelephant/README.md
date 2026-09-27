@@ -158,7 +158,7 @@ the previously retained static corpus to a later live bootloader session:
 
 The deterministic correlation is generated in
 `data/generated/corolla_2023_albino_telescope_analysis.json` and verified by
-`tests/verify_albinoelephant_telescope_probe.py`.
+`tests/targets/corolla/verify_albinoelephant_telescope_probe.py`.
 
 
 ## Complete 2026-08-18 memory corpus

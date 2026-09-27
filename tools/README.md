@@ -33,7 +33,8 @@ Implementation is grouped by the capability it serves:
 - `firmware/` — generic firmware-derived artifact producers.
 - `security/` — generic SecOC/payload/memory-safety analysis mechanics.
 - `variants/` — cross-calibration comparison/extraction.
-- `catalog/` — implementation of `tools/artifact`.
+- `toolchains/` — implementation of `tools/rh850` and the pinned GNU toolchain build inputs (`v850-gcc/` Dockerfile and patches).
+- `catalog/` — implementation of `tools/artifact` and `tools/know`.
 - `testing/` — implementation of `tools/test`; verification machinery is deliberately not presented as general tooling.
 - `diagnostics/`, `lib/` — shared diagnostic and shell-library internals.
 

@@ -8,7 +8,10 @@ These trees are deliberately stored under non-openable `.gpr.snapshot` /
 `.rep.snapshot` names. Never point Ghidra, `analyzeHeadless`, or `tools/g` at the
 committed `projects/` namespace. Materialize a disposable working copy with
 `make work-project [TARGET=<target>]`; target identity, priority, snapshot paths,
-and working paths are defined by `data/analysis_targets.json`.
+and working paths are defined by `data/analysis_targets.json`. Snapshots are
+immutable committed evidence: the only promotion path is `make snapshot-project`,
+which writes the non-openable names and requires inventory parity (an
+independent two-build comparison for a target's first promotion).
 
 The registry default is the 2026 Camry F33 target. Use `tools/gtarget list` to see
 all registered targets and `tools/gtarget <target> ...` for an explicit one.

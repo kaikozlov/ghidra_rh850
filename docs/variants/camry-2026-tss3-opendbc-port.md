@@ -1,66 +1,38 @@
 # 2026 Camry TSS3 openpilot/opendbc port
 
-> **September-16 evidence-audit supersession:** historical steering and `0x160`
-> field experiments remain retained, but the current runtime contract is the one
-> in [the capability matrix](camry-2026-capability-matrix.md),
-> [the evidence review](camry-2026-port-evidence-review.md), and
-> [the TSS3 arbitration note](../architecture/toyota-tss3-vehicle-movement-arbitration.md).
-> In particular, `0x160` is no longer a native-long actuator candidate: `0x08A`
-> is the shared TSS3 application-request plane, and both current TSS3 platforms
-> keep Toyota stock longitudinal until clean `0x08A` source ownership exists.
+This report combines exact-F33 analysis with dated implementation and field
+checkpoints. **Start with the [capability matrix](camry-2026-capability-matrix.md)
+for consolidated qualification status.** Earlier sender designs, software pins,
+and “current” statements below belong to their recorded checkpoint; they are
+not a second current runtime contract.
+
+Use [the evidence review](camry-2026-port-evidence-review.md) for corrections,
+[the longitudinal report](camry-2026-longitudinal-evidence.md) for command-role
+evidence, and [the native-shape contract](../architecture/toyota-openpilot-porting-contract.md)
+for integration ownership.
 
 **Target:** maintainer 2026 Toyota Camry Hybrid, EPS application F181
 `8965F3307000 / 8A3113303100`.
 
-**Current control result:** the September 10 development configuration produced
-observed openpilot lateral control primarily on route `0000008d--a9f348691a`, with
-later same-build route `00000093--4066e7ae51` as a shorter corroboration, while the
-native `0x08A` and `0x081` request/result planes remained Target Lateral ID 0
-(Toyota LTA off). The direct route evidence, exact software/RAM identities, and
-the independent TSS3 Corolla longitudinal proof of concept are summarized in
-[toyota-tss3-openpilot-bounty-evidence.md](toyota-tss3-openpilot-bounty-evidence.md).
-Earlier passive/direct-B6 checkpoints below remain useful history, but they do
-not supersede that working result.
+## Reading the integration chronology
 
-**2026-09-16 runtime checkpoint:** the current production-shaped candidate no
-longer host-transmits B6 or depends on a dummy/zero MAC. `CarController` sends
-the unified Classical functional C7 frame `07 C7 C7 seq target_hi target_lo 00
-00` on **stock Toyota-B Panda bus 1 / CAN `0x777`**; Panda permits only that
-bounded envelope. The volatile continuous resident edits an already-native B6
-inside the EPS and obtains a native-valid FV4+CMAC28 through the EPS ICU-S
-command-5 path. Changed nonzero generations renew a seven-foreground-tick host
-lease; expiry or sequence zero returns ownership to untouched native B6. The
-current installer is a single cross-variant 4-KiB authenticated payload that
-self-selects the exact F33/Crown/Corolla profile; F33 stages its helper through
-`FEF07C00` and installs it at count 224, so no C6 loading phase remains.
-Longitudinal remains entirely Toyota-owned:
-openpilot advertises no TSS3 Alpha Long, does not synthesize or suppress `0x160`,
-and does not transmit `0x08A`. HUD/cancel transmission claims from the older
-integration are likewise bounded by the current capability matrix. The intended
-lateral runtime requires **no persistent EPS CodeFlash patch**; the stage-5
-receiver bypass and persistent signer below are historical development artifacts.
-Current qualification status and exact next vehicle tests are maintained in
-[camry-2026-capability-matrix.md](camry-2026-capability-matrix.md) and
-[the minimal runtime contract](../architecture/toyota-tss3-minimal-runtime.md).
+The September-10 material records the initial development steering witnesses.
+Later September-16, -17, and -18 sections describe different software/runtime
+checkpoints and further observations. Neither an earlier direct-B6 failure nor
+an earlier working configuration is the qualification status of a later design.
+Exact source and route identities remain with the corresponding evidence.
 
-**Evidence boundary:** this report closes the exact-F33 generated-COM transmit
-geometry, the software integration, and the development B6 sender/safety envelope.
-The September 10 route establishes steering for the exact C7/RAM configuration;
-it does not qualify direct host-B6 transmission or make the Camry adapter a
-universal TSS3 interface. CORR-129/VAR-081 identify **73.303384 s of retained `0x08A` ID11 LTA/LCA request state with zero B6**; this is not a direct winner/grant oracle. CORR-134 recovers B21 as Target Lateral ID and B18:B19 as the signed request-angle quantity; CORR-135 rejects a presumed `0x08A -> B6` transform. Exact F33 neither accepts `0x08A` nor transmits it, while its B6-inactive internal path reaches physical steering; that makes zero B6 architecturally possible but does not prove the retained request was granted. VAR-091/CORR-136 place authenticated `0x08A` on the intercepted chassis network while observed Toyota-Bus-1 camera/radar PDUs use E2E. The later repin/source experiment resolves the source ambiguity those older rows could not: with the relay open, protected `0x08A` is native on the **FRC/camera-side endpoint** and forwarded byte-for-byte toward Brake, while `0x081` is native on the Brake/chassis side and returns toward FRC. FRC CommunicationControl removes `0x08A`; therefore the secured publisher/signing boundary is inside the FRC assembly, even though the exact internal key/HSM owner remains open. VAR-094 proves consecutive `5282` is absent from native Bus-1 CAN; CORR-138 retracts the former standing-echo interpretation of `0x160[22]`. VAR-101 proves the authenticated publication continues at zero request, not that the CMAC engine is downstream.
+The earlier `0x160` longitudinal interpretation and the former signer/runtime
+descriptions are retained below to explain the investigation, not as present-day
+installation instructions. The capability matrix owns what is demonstrated,
+implemented, withdrawn, or still unqualified; this report owns the detailed
+target-specific reasoning.
 
-The integration and stock-architecture questions are deliberately separate.
-OQ-054 now tracks the **internal FRC feature-owner + `0x08A` signer/key/freshness path** and the downstream Brake/VMM verification/request-arbitration/result/request-generation -> B6 path. That attribution is **not** a prerequisite for the demonstrated C7 ->
-native-B6 ingress. Exact-F33 Gate-2 compare neutralization and the historical
-zero-MAC/wrong-key host-B6 senders remain useful failure-localization evidence,
-but they are not the current sender. VAR-155/156 and the September 10 road handoff
-supersede that architecture: local selector-4 command-5 signing reproduces the
-native trailer and continuously re-signs the resident's B3..B9 replacement before
-the untouched SecOC consumer. The current `kai-openpilot`/opendbc path therefore
-carries only C7 through ordinary Toyota safety; B6 construction/freshness/MAC
-ownership stays inside the EPS. Upstream comma opendbc still has no Camry TSS3
-platform, so the comparison target remains upstream architecture rather than a
-preexisting wire implementation.
+Stock Toyota architecture and integration qualification are separate questions.
+[OQ-054](../status/OPEN_QUESTIONS.md) records architecture questions;
+[the field-evidence review](toyota-tss3-openpilot-bounty-evidence.md) records
+the scope of the retained demonstrations. A reported development result is not
+upstream platform support or evidence that a different target shares its interface.
 
 **September-17 `0x08A` sender-experiment checkpoint:** the exact F33 car kit now packages two deliberately separate, non-actuating discriminators. `f33-sign verify-native-08a` asks the already-live-qualified selector-4 command-5 path to reproduce stock `0x08A` MAC28 without transmitting `0x08A`. After a full EPS power-off, `f33-08a-route` installs a different volatile resident/helper and replays one unchanged stock Target-Lateral-ID0 `0x08A` through exact HTH0 lower object 47 / writer `0x85112`; the helper uses special software handle `0x00F0` and `FEBE502A` departure as a physical-completion witness. Both host and resident reject a nonzero Target Lateral ID and one successful EPS transmit closes the probe for that boot. The routing result distinguishes an EPS-local Tx path that reaches Panda from a selectively forwarded EBU/local segment. It does not yet create a new sender freshness stream or authorize longitudinal output. Runbook: [the F33 `0x08A` sender experiments](../../exploit/ephemeral_runtime/camry_f33_08a_sender_experiments.md).
 

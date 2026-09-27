@@ -2,6 +2,12 @@
 
 CAN and ISO-TP transport, and the application receive/transmit maps.
 
+All four reports analyze the legacy Sienna EPS `8965B4512000`; their counts and
+acceptance rules are facts about that calibration only. Camry/Crown/Corolla
+transport behavior is target-scoped evidence under
+[../variants/README.md](../variants/README.md) and must not be read into these
+tables.
+
 | Report | Scope |
 |---|---|
 | [diagnostic-transport.md](diagnostic-transport.md) | Bootloader CAN/ISO-TP diagnostic transport path |

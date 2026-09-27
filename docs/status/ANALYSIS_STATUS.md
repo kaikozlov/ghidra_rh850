@@ -1,20 +1,21 @@
-# Analysis status matrix
+# Analysis status matrix — Sienna snapshot (2026-08-15)
 
-Current multidimensional status for the Sienna `8965B4512000` analysis. This
-page is a denominator/index, not a claim ledger or priority order: use
-[FINDINGS.md](FINDINGS.md) for claim scope/confidence,
-[OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) for the exhaustive unresolved ledger,
-[PRIORITIES.md](PRIORITIES.md) for the current execution queue, and subsystem
-reports for interpretation.
+Historical coverage notes for the Sienna `8965B4512000` analysis, originating
+with the **2026-08-15 inventory snapshot** and including later corpus/variant
+addenda. The tables are not one synchronized present-day census, a priority
+order, or a live multi-target dashboard. Use [FINDINGS.md](FINDINGS.md) for
+recorded claim scope/confidence, [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) for
+question references, [PRIORITIES.md](PRIORITIES.md) for the current queue, and
+the [variant reports](../variants/README.md) for calibration-specific state.
 
-Snapshot date: **2026-08-15**. Corrected normalized project-inventory SHA-256:
+Corrected normalized project-inventory SHA-256:
 `19d5a7fc1c0465b6ab62936e5f12fc95f130197ee3e095f77215c982b11f02c8`.
 The inventory was produced byte-identically by two separately invoked four-stage
 rebuilds. Committed-project promotion is a separate final lifecycle gate.
 
 ## Firmware and graph coverage
 
-| Dimension | Current value | Evidence boundary and source |
+| Dimension | Snapshot value | Evidence boundary and source |
 |---|---:|---|
 | Firmware bytes mapped | CodeFlash 1,048,576 B; DataFlash 32,768 B | Exact published/committed binaries; SHA-256 `21140bbd…fde` and `81d87b67…ecb8`; SECOC-044 identifies a unique one-bit CodeFlash region-1 inconsistency at `0xBB1C4 A2→82` whose reconstruction restores the stock boot CRC and local instruction semantics. The committed artifact remains unchanged for provenance; project inventory records 14 memory blocks including mapped overlays |
 | Decoded CodeFlash instructions | 183,240 | Ghidra listing total in `data/ghidra_project_inventory.baseline.jsonl`; this is decode coverage, not semantic coverage |
@@ -33,14 +34,14 @@ rebuilds. Committed-project promotion is a separate final lifecycle gate.
 functions remain semantically unreviewed. Successful decompilation alone is not
 a review, and the former automatic sweep rows have been removed.
 
-Use `tools/pseudo` for the canonical decompilations and
+Use `tools/pseudo --target sienna-8965B4512000` for this target's decompilations and
 `data/generated/semantic_interest_ranking.csv` to navigate candidate functions.
 Use `tools/test <suite>` to run the relevant executable or firmware check.
 Neither ranking nor a passing unrelated suite establishes a function's meaning.
 
 ## Techstream and DDB coverage
 
-| Dimension | Current value | Evidence boundary and source |
+| Dimension | Snapshot value | Evidence boundary and source |
 |---|---:|---|
 | Techstream artifacts pinned/analyzed | 45 | `software/locks/techstream-v18.json`, distribution V18.00.003; proprietary files remain ignored and are never committed |
 | GTS+ source/reconstruction anchors pinned | 17 CUWPlus artifacts + source archive | `software/locks/gtsplus.json`; vendor archive/containers and reconstructed PE intermediates remain ignored, while derived evidence is tracked |
@@ -55,7 +56,7 @@ Neither ranking nor a passing unrelated suite establishes a function's meaning.
 | Live official Techstream↔`8965B4512000` flows captured | 0 | Matching vehicle/calibration session unavailable; static host/firmware intersections are bounded, not a transcript |
 | Exact cross-variant/target-generation transfers verified | 2 tracked foreign CodeFlash regressions (`8965H1202000`, Span 2026-08-21) | the Albino corpus (historically labelled `8965H1202000`, direct app F181 `8965F1208000/8A3111202000`) independently transfers the Gate-2 semantic/CRC resolver, crypto roots, boot-SA shape, runtime control discovery, CAN1 continuity, and asynchronous PROGRAMMING architecture while correctly failing the Sienna steering-profile capability check; its 2026-08-26 telescope run independently replays the already field-observed boot SA/authenticated-RAM path while directly closing F181, PRDNAME, exact payload terminal state and Gate-2 relocation. Span's persisted third specimen independently verifies the no-auth XCP high-LocalRAM write geometry plus live application→boot retention path and corrected direct `(bus1,param1)` PROGRAMMING acquisition. `4514000` and newer F3/F4 targets remain artifact/evidence bounded |
 
-## Interpretation
+## Interpretation (at the 2026-08-15 snapshot)
 
 The largest remaining gap is semantic, not disassembly: 6,376 function entries
 are known, but 6,257 have no curated review and only 32 have a semantic grade.
