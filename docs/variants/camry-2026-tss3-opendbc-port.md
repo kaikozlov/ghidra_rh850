@@ -3448,11 +3448,20 @@ through pandad plus corresponding Toyota safety allowances. The signer also perm
 outstanding generations, so a DLC-only fragment index/toggle cannot replace the existing full
 8-bit request sequence used to bind asynchronous replies.
 
-**Decision:** retain the four-frame `0x777/8` codec as the production candidate. If a future target
-requires the full 32-byte logical request rather than the current 28-byte application, first prove
-raw-DLC 8..15 end-to-end in a parked, non-actuating experiment; only then consider adding a generic
-raw-Classic-DLC field to the Panda/openpilot transport. Do not replace the current codec with a
-five-frame standard transport merely to make the fragmentation layer more generic.
+**Decision (superseded 2026-09-27):** the four-frame `0x777/8` codec is no longer the only
+production candidate. Camry/Crown helpers now also accept a **lossless compact one-frame
+profile** on the same `0x777` acceptance rule: PCI type `C` plus seven payload bytes carry the
+acceleration bound package (mirrored into both PDU slots), set speed, pinion angle, the
+six-bit lateral ID, and the complete 8-bit request sequence whose low six bits are the
+application request sequence. The host emits it only after proving byte-for-byte that the
+application it wants signed equals the helper's canonical reconstruction, so the async-reply
+binding argument above still holds and every non-canonical shape (including the full 32-byte
+logical request) still uses the verbatim four-frame fallback. Corolla keeps four-frame only:
+its helper transit window also hosts the scratch region, leaving no code headroom. If a future
+target requires the full 32-byte logical request, first prove raw-DLC 8..15 end-to-end in a
+parked, non-actuating experiment; only then consider adding a generic raw-Classic-DLC field
+to the Panda/openpilot transport. Do not replace the codec with a five-frame standard
+transport merely to make the fragmentation layer more generic.
 
 ### 4.14 Recovered PCS/ADU semantics constrain `0x08A` relay ownership
 

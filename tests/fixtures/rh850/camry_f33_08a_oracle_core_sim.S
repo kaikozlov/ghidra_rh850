@@ -28,6 +28,21 @@ _oracle_sim_fragment:
 .L_sim_fragment_done:
     dispose 0, {r20-r23,lp}, lp
 
+    .global _oracle_sim_compact
+_oracle_sim_compact:
+    prepare {r20-r23,lp}, 0
+    mov r7, r22
+    mov r8, r23
+    mov r6, r7
+    ORACLE_CORE_ASSEMBLE_COMPACT .L_sim_compact_commit, .L_sim_compact_skip
+.L_sim_compact_commit:
+    movea 1, r0, r10
+    br .L_sim_compact_done
+.L_sim_compact_skip:
+    mov 0, r10
+.L_sim_compact_done:
+    dispose 0, {r20-r23,lp}, lp
+
     .global _oracle_sim_freshness
 _oracle_sim_freshness:
     prepare {r20-r23,lp}, 0
@@ -52,3 +67,5 @@ _oracle_sim_response:
     ORACLE_CORE_PACK_RESPONSE
     mov r21, r10
     dispose 0, {r20-r23,lp}, lp
+
+    ORACLE_CORE_EMIT_SUPPORT

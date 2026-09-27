@@ -5,15 +5,16 @@ typedef unsigned int u32;
 extern u32 oracle_sim_fragment(const u8 *record, u8 *state, u8 *scratch);
 extern u32 oracle_sim_freshness(u8 *state, u8 *scratch, u32 trip, u32 reset);
 extern u32 oracle_sim_response(u8 *state, u8 *scratch, u32 seq, const u8 *result);
+extern u32 oracle_sim_compact(const u8 *record, u8 *state, u8 *scratch);
 
 volatile u32 oracle_sim_failure;
 volatile u32 oracle_sim_passes;
 volatile u32 oracle_sim_result;
 
-static u8 state[0x24];
-static u8 scratch[0x68];
-static u8 record[20];
-static u8 result_args[8];
+static u8 state[0x24] __attribute__((aligned(4)));
+static u8 scratch[0x68] __attribute__((aligned(4)));
+static u8 record[20] __attribute__((aligned(4)));
+static u8 result_args[8] __attribute__((aligned(4)));
 
 static void clear_bytes(u8 *p, u32 n) {
   u32 i;
@@ -37,6 +38,35 @@ static void make_fragment(u8 tag, u8 base) {
   clear_bytes(record, sizeof(record));
   record[12] = tag;
   for (i = 0; i < 7; ++i) record[13 + i] = (u8)(base + i);
+}
+
+static u8 expected_domain[30];
+
+static void make_compact(u8 b1, u8 b2, u8 b3, u8 b4, u8 b5, u8 b6, u8 b7) {
+  clear_bytes(record, sizeof(record));
+  record[12] = 0xc0;
+  record[13] = b1; record[14] = b2; record[15] = b3;
+  record[16] = b4; record[17] = b5; record[18] = b6; record[19] = b7;
+}
+
+static void build_compact_domain(u8 b1, u8 b2, u8 b3, u8 b4, u8 b5, u8 lat, u8 seq) {
+  static const u8 tmpl[30] = {
+    0x00,0x8a,
+    0x00,0x00,0x00,0x08,0x80,0x00,0x2d,0x47,
+    0x00,0x00,0x00,0x00,0x00,
+    0x7f,0xff,0x00,0x7f,0xff,
+    0x00,0x00,0xc0,0x00,
+    0x10,0x00,0x32,0x00,
+    0x00,0x00
+  };
+  u32 i;
+  for (i = 0; i < 30; ++i) expected_domain[i] = tmpl[i];
+  expected_domain[10] = b1; expected_domain[11] = b2; expected_domain[12] = b3;
+  expected_domain[13] = b1; expected_domain[14] = b2;
+  expected_domain[20] = b4; expected_domain[21] = b5;
+  expected_domain[23] = lat;
+  expected_domain[26] = (lat == 11) ? 100 : 50;
+  expected_domain[28] = seq & 0x3f;
 }
 
 static int bytes_equal(const u8 *a, const u8 *b, u32 n) {
@@ -91,6 +121,49 @@ void oracle_core_sim_main(void) {
   CHECK(11, oracle_sim_fragment(record, state, scratch) == 0);
   make_fragment(0xa2, 14);
   CHECK(12, oracle_sim_fragment(record, state, scratch) == 2 && state[7] == 0);
+
+  /* Compact one-frame profile: canonical inactive shape reconstructs exactly. */
+  clear_bytes(state, sizeof(state));
+  clear_bytes(scratch, sizeof(scratch));
+  make_compact(0x12, 0x34, 0x56, 0x9a, 0x78, 0x00, 0xa7);
+  build_compact_domain(0x12, 0x34, 0x56, 0x9a, 0x78, 0x00, 0xa7);
+  CHECK(31, oracle_sim_compact(record, state, scratch) == 1);
+  CHECK(32, state[6] == 0xa7 && state[7] == 0 &&
+           bytes_equal(&scratch[16], expected_domain, 30));
+
+  /* Active LTA/LCA shape: lateral ID 11 rewrites assist gain to 100. */
+  clear_bytes(scratch, sizeof(scratch));
+  make_compact(0x00, 0x11, 0x22, 0xbb, 0xcc, 0x0b, 0x3f);
+  build_compact_domain(0x00, 0x11, 0x22, 0xbb, 0xcc, 0x0b, 0x3f);
+  CHECK(33, oracle_sim_compact(record, state, scratch) == 1);
+  CHECK(34, expected_domain[26] == 100 && expected_domain[23] == 11 &&
+           bytes_equal(&scratch[16], expected_domain, 30) && state[6] == 0x3f);
+
+  /* Sequence zero is never a valid transaction; nothing is written. */
+  clear_bytes(state, sizeof(state));
+  clear_bytes(scratch, sizeof(scratch));
+  scratch[16] = 0x5a; scratch[45] = 0xa5;
+  make_compact(0, 0, 0, 0, 0, 0x0b, 0x00);
+  CHECK(35, oracle_sim_compact(record, state, scratch) == 0 &&
+           scratch[16] == 0x5a && scratch[45] == 0xa5 && state[6] == 0);
+
+  /* Lateral IDs outside {0, 11} are not derivable: ignored, state preserved. */
+  make_compact(0, 0, 0, 0, 0, 0x05, 0x42);
+  CHECK(36, oracle_sim_compact(record, state, scratch) == 0 && state[6] == 0);
+
+  /* A compact commit leaves an in-flight four-frame assembly intact; the
+     live helper's shared commit tail owns clearing the assembly state. */
+  clear_bytes(state, sizeof(state));
+  clear_bytes(scratch, sizeof(scratch));
+  make_fragment(0x87, 0);
+  CHECK(37, oracle_sim_fragment(record, state, scratch) == 0 && state[7] == 1);
+  make_fragment(0x9a, 7);
+  CHECK(38, oracle_sim_fragment(record, state, scratch) == 0 && state[7] == 2);
+  make_compact(0x12, 0x34, 0x56, 0x9a, 0x78, 0x00, 0xc1);
+  CHECK(39, oracle_sim_compact(record, state, scratch) == 1 && state[7] == 2);
+  state[7] = 0;
+  make_fragment(0x87, 0);
+  CHECK(40, oracle_sim_fragment(record, state, scratch) == 0 && state[7] == 1);
 
   clear_bytes(state, sizeof(state));
   clear_bytes(scratch, sizeof(scratch));
