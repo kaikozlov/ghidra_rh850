@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Offline regression checks for exact-car recovery transport and evidence."""
+"""Offline regression checks for target-bound TSS3 peer recovery."""
 from __future__ import annotations
 import json
 import sys
@@ -11,7 +11,15 @@ from unittest.mock import patch
 
 from tools import REPO_ROOT
 ROOT = REPO_ROOT
-from exploit.ephemeral_runtime import camry_f33_post_install_recovery as recovery
+from exploit.ephemeral_runtime import tss3_post_install_recovery as recovery
+
+TARGET = recovery.RecoveryTarget(
+    name="camry-8965F3307000",
+    eps_f181=bytes.fromhex(
+        "023839363546333330373030300000000038413331313333303331303000000000"
+    ),
+    eps_bus=0,
+)
 
 
 class FakePanda:
@@ -52,10 +60,25 @@ class FakePanda:
 
 
 class TestRecovery(unittest.TestCase):
-    def test_current_repin_routes_all_control_domain_diagnostics_on_bus0(self):
-        self.assertEqual((recovery.EPS_TX, recovery.EPS_BUS), (0x7A1, 0))
+    def test_target_profile_owns_eps_bus_while_peer_routes_remain_common(self):
+        self.assertEqual((recovery.EPS_TX, TARGET.eps_bus), (0x7A1, 0))
         self.assertEqual((recovery.FRC_TX, recovery.FRC_BUS), (0x792, 0))
         self.assertEqual((recovery.BRAKE_TX, recovery.BRAKE_BUS), (0x7B0, 0))
+
+    def test_recovery_target_uses_request_signer_metadata_for_non_camry_bus(self):
+        with tempfile.TemporaryDirectory() as td:
+            meta = Path(td) / "request-signer.json"
+            meta.write_text(json.dumps({
+                "target": {
+                    "name": "crown-8965F3012000",
+                    "application_f181_hex": "02" + "31" * 32,
+                },
+                "request": {"bus": 1},
+            }))
+            target = recovery.recovery_target(meta)
+        self.assertEqual(target.name, "crown-8965F3012000")
+        self.assertEqual(target.eps_f181, bytes.fromhex("02" + "31" * 32))
+        self.assertEqual(target.eps_bus, 1)
 
     def test_gts_permission_requires_distance_control_mode(self):
         for mode in range(6):
@@ -120,7 +143,7 @@ class TestRecovery(unittest.TestCase):
         with (patch.dict(sys.modules, {"panda": types.SimpleNamespace(Panda=FakePanda)}),
               patch.object(recovery, "read_exact_f181", side_effect=({"ecu": "EPS"}, {"ecu": "FRC"}, {"ecu": "Brake"})),
               patch.object(recovery, "read_fault_state", return_value=state)):
-            result = recovery.control_domain_state(None, panda=panda)
+            result = recovery.control_domain_state(None, TARGET, panda=panda)
         self.assertTrue(result["peer_health_observed"])
         self.assertEqual(result["verdict"], "control_domains_healthy")
         self.assertNotIn("drcc_permission_observed", result)
@@ -186,7 +209,7 @@ class TestRecovery(unittest.TestCase):
             calls.append((address, bus, pdu.hex()))
             if pdu == bytes.fromhex("22f181"):
                 if address == recovery.EPS_TX:
-                    return bytes.fromhex("62f181") + recovery.EXPECTED_EPS_F181
+                    return bytes.fromhex("62f181") + TARGET.eps_f181
                 if address == recovery.FRC_TX:
                     return bytes.fromhex("62f181") + recovery.EXPECTED_FRC_F181
                 if address == recovery.BRAKE_TX:
@@ -229,7 +252,7 @@ class TestRecovery(unittest.TestCase):
             with (patch.dict(sys.modules, {"panda": types.SimpleNamespace(Panda=Factory)}),
                   patch.object(recovery, "isotp_request", side_effect=respond),
                   patch.object(recovery.time, "sleep", return_value=None) as sleep_mock):
-                result = recovery.restart_control_domains(output)
+                result = recovery.restart_control_domains(output, TARGET)
             saved = json.loads(output.read_text())
 
         self.assertEqual(phase["value"], 3)
@@ -311,7 +334,7 @@ class TestRecovery(unittest.TestCase):
                   }),
                   patch.object(recovery.time, "monotonic", side_effect=monotonic),
                   patch.object(recovery.time, "sleep", return_value=None) as sleep_mock):
-                result = recovery.restart_one_domain("brake", output)
+                result = recovery.restart_one_domain("brake", output, TARGET)
             saved = json.loads(output.read_text())
 
         self.assertEqual(panda.safety, [(recovery.DIAG_SAFETY, recovery.DIAG_SAFETY_PARAM)])
@@ -352,7 +375,7 @@ class TestRecovery(unittest.TestCase):
             def __new__(cls, serial): return panda
         def respond(_panda, address, bus, pdu, **kwargs):
             if pdu == bytes.fromhex("22f181"):
-                return bytes.fromhex("62f181") + recovery.EXPECTED_EPS_F181
+                return bytes.fromhex("62f181") + TARGET.eps_f181
             if pdu == bytes.fromhex("1902ff"):
                 return bytes.fromhex("5902bdc13187ac")
             if pdu == bytes.fromhex("221b09"):
@@ -378,7 +401,7 @@ class TestRecovery(unittest.TestCase):
         with tempfile.TemporaryDirectory() as td:
             output = Path(td) / "capture.json"
             with patch.dict(sys.modules, {"panda": types.SimpleNamespace(Panda=Factory)}), patch.object(recovery, "isotp_request", side_effect=respond):
-                with self.assertRaises(TimeoutError): recovery.execute(output)
+                with self.assertRaises(TimeoutError): recovery.execute(output, TARGET)
             saved = json.loads(output.read_text())
             self.assertEqual(saved["verdict"], "recovery_failed")
             self.assertEqual(len(saved["pre_clear"]), 11)

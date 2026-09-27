@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the self-contained exact-F33 in-car lateral/receiver bring-up kit."""
+"""Package the historical exact-F33 lateral/receiver experiment archive."""
 from __future__ import annotations
 
 from tools.targets.camry.support import camry_f33_corpus as f33
@@ -19,6 +19,7 @@ from exploit.common.ram_exec import (
     TOYOTA_P1ME_BOOT_SECURITY_ACCESS_SECRET,
     TOYOTA_P1ME_PAYLOAD_BUILD_SECRET,
 )
+from exploit.ram_runtime.target_profiles import target_spec
 
 
 from exploit.ephemeral_runtime import camry_f33_08a_tx_probe as eps08a_probe
@@ -61,7 +62,6 @@ COMMAND5_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_command5_launche
 ROUTE40_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_route40_observer_launcher.sh"
 EPS08A_TX_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_08a_tx_probe_launcher.sh"
 EPS08A_ORACLE_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_08a_oracle_stream_launcher.sh"
-EPS08A_CLASSIC_ORACLE_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_08a_classic_oracle_launcher.sh"
 INLINE_SIGNER_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_b6_inline_signer_launcher.sh"
 ICUS_RAMKEY_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_icus_ramkey_probe_launcher.sh"
 PERSISTENT_SIGNER_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_persistent_signer_launcher.sh"
@@ -80,7 +80,6 @@ EPS08A_TX_PROBE_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_08a_tx
 EPS08A_TX_PROBE_META = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_08a_tx_probe_build.json"
 EPS08A_ORACLE_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_08a_oracle_stream.bin"
 EPS08A_ORACLE_META = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_08a_oracle_stream_build.json"
-EPS08A_CLASSIC_ORACLE_BUILDER = ROOT / "exploit/ephemeral_runtime/build_camry_f33_08a_classic_oracle.py"
 # Supervised continuous substitution preserves the road helper's steady-state
 # behavior, but stops after seven foreground ticks without a changed host
 # generation. Its new identity has instruction-level, not vehicle, validation.
@@ -113,12 +112,11 @@ RUNTIME_FILES = [
     "exploit/ephemeral_runtime/camry_f33_route40_observer.py",
     "exploit/ephemeral_runtime/camry_f33_08a_tx_probe.py",
     "exploit/ephemeral_runtime/camry_f33_08a_oracle_stream.py",
-    "exploit/ephemeral_runtime/camry_f33_08a_classic_oracle.py",
     "exploit/ephemeral_runtime/camry_f33_b6_inline_signer.py",
-    "exploit/ephemeral_runtime/camry_f33_post_install_recovery.py",
+    "exploit/ephemeral_runtime/tss3_post_install_recovery.py",
     "exploit/ephemeral_runtime/camry_f33_icus_ramkey_probe.py",
     "exploit/ephemeral_runtime/camry_f33_persistent_signer.py",
-    "exploit/ephemeral_runtime/f33_panda_lease.sh",
+    "exploit/ephemeral_runtime/tss3_panda_lease.sh",
     "exploit/followups/xcp_read_probe.py",
     "exploit/followups/xcp_daq_probe.py",
     "exploit/followups/xcp_runtime_state_probe.py",
@@ -132,9 +130,6 @@ RUNTIME_FILES = [
     "tools/security/build_secoc_patch_manifest.py",
     "tools/targets/camry/live/camry_f33_steering_state_capture.py",
 ]
-COMPACT_ORACLE_RUNTIME_FILE = "exploit/ephemeral_runtime/camry_f33_08a_classic_oracle_compact.py"
-DEFAULT_ORACLE_CODEC = "four-frame"
-ORACLE_CODECS = (DEFAULT_ORACLE_CODEC, "compact")
 
 
 def git_state(repo: Path) -> dict:
@@ -149,12 +144,10 @@ def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def copy_runtime(out: Path, oracle_codec: str = DEFAULT_ORACLE_CODEC) -> dict[str, dict[str, str]]:
+def copy_runtime(out: Path) -> dict[str, dict[str, str]]:
     runtime = out / "runtime"
     result: dict[str, dict[str, str]] = {}
     files = [*RUNTIME_FILES]
-    if oracle_codec == "compact":
-        files.append(COMPACT_ORACLE_RUNTIME_FILE)
     for rel in files:
         src = ROOT / rel
         dst = runtime / rel
@@ -338,7 +331,7 @@ application behavior.
 """
 
 
-def build(out: Path, openpilot: Path, oracle_codec: str = DEFAULT_ORACLE_CODEC) -> dict:
+def build(out: Path, openpilot: Path) -> dict:
     out.mkdir(parents=True, exist_ok=True)
     dst = out / PROBE.name
     shutil.copy2(PROBE, dst)
@@ -347,7 +340,7 @@ def build(out: Path, openpilot: Path, oracle_codec: str = DEFAULT_ORACLE_CODEC) 
     patch_package = stage3.build(patch_dir, build_payloads=True)
     persistent_dir = out / "persistent_patch"
     persistent_package = persistent_patch.build(persistent_dir)
-    runtime_files = copy_runtime(out, oracle_codec)
+    runtime_files = copy_runtime(out)
     (out / "FIRMWARE_PATCH.md").write_text(patch_runbook(), encoding="utf-8")
 
     ram_dir = out / "ram_payloads"
@@ -384,37 +377,6 @@ def build(out: Path, openpilot: Path, oracle_codec: str = DEFAULT_ORACLE_CODEC) 
     eps08a_oracle_payload = package_shellcode(eps08a_oracle_stage, secret=TOYOTA_P1ME_PAYLOAD_BUILD_SECRET)
     if hashlib.sha256(eps08a_oracle_payload).hexdigest() != eps08a_oracle_meta["authenticated_payload"]["sha256"]:
         raise RuntimeError("0x08A oracle authenticated payload identity drift")
-    classic_run = subprocess.run(
-        [
-            sys.executable,
-            str(EPS08A_CLASSIC_ORACLE_BUILDER),
-            "--codec",
-            oracle_codec,
-            "--output-stem",
-            "camry_f33_08a_classic_oracle",
-            "--output-dir",
-            str(ram_dir),
-        ],
-        cwd=ROOT,
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    if classic_run.returncode != 0:
-        raise RuntimeError(f"0x08A raw-classic oracle build failed: {classic_run.stderr[-1200:]}")
-    eps08a_classic_oracle_meta = json.loads(
-        (ram_dir / "camry_f33_08a_classic_oracle.json").read_text(encoding="utf-8")
-    )
-    eps08a_classic_oracle_payload = (
-        ram_dir / eps08a_classic_oracle_meta["authenticated_payload"]["path"]
-    ).read_bytes()
-    if eps08a_classic_oracle_meta["toolchain"].get("backend") != "tools/rh850":
-        raise RuntimeError("0x08A raw-classic oracle did not use the canonical RH850 toolchain")
-    if (
-        hashlib.sha256(eps08a_classic_oracle_payload).hexdigest()
-        != eps08a_classic_oracle_meta["authenticated_payload"]["sha256"]
-    ):
-        raise RuntimeError("0x08A raw-classic oracle authenticated payload identity drift")
     inline_meta = json.loads(INLINE_SIGNER_META.read_text(encoding="utf-8"))
     inline_staging = INLINE_SIGNER_BIN.read_bytes()
     inline_helper = INLINE_SIGNER_HELPER.read_bytes()
@@ -492,6 +454,17 @@ def build(out: Path, openpilot: Path, oracle_codec: str = DEFAULT_ORACLE_CODEC) 
     (ram_dir / "camry_f33_b6_inline_signer_payload.bin").write_bytes(inline_signer_payload)
     (ram_dir / "camry_f33_b6_inline_signer_helper_padded.bin").write_bytes(inline_helper)
     (ram_dir / "camry_f33_b6_inline_signer.json").write_text(json.dumps(inline_meta, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    recovery = target_spec("camry-8965F3307000")
+    (ram_dir / "tss3_recovery_target.json").write_text(
+        json.dumps({
+            "target": {
+                "name": recovery["name"],
+                "application_f181_hex": recovery["application_f181_hex"],
+            },
+            "request": {"bus": recovery["request"]["request_bus"]},
+        }, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
     (ram_dir / "camry_f33_icus_ramkey_probe_payload.bin").write_bytes(inline_signer_payload)
     (ram_dir / "camry_f33_icus_ramkey_cmd9_helper_padded.bin").write_bytes(icus_ramkey_helper9)
     (ram_dir / "camry_f33_icus_ramkey_cmd10_helper_padded.bin").write_bytes(icus_ramkey_helper10)
@@ -525,9 +498,6 @@ def build(out: Path, openpilot: Path, oracle_codec: str = DEFAULT_ORACLE_CODEC) 
     eps08a_oracle_launcher = out / "f33-08a-oracle"
     shutil.copy2(EPS08A_ORACLE_LAUNCHER, eps08a_oracle_launcher)
     eps08a_oracle_launcher.chmod(0o755)
-    eps08a_classic_oracle_launcher = out / "f33-08a-classic-oracle"
-    shutil.copy2(EPS08A_CLASSIC_ORACLE_LAUNCHER, eps08a_classic_oracle_launcher)
-    eps08a_classic_oracle_launcher.chmod(0o755)
     inline_signer_launcher = out / "f33-secoc"
     shutil.copy2(INLINE_SIGNER_LAUNCHER, inline_signer_launcher)
     inline_signer_launcher.chmod(0o755)
@@ -551,7 +521,6 @@ def build(out: Path, openpilot: Path, oracle_codec: str = DEFAULT_ORACLE_CODEC) 
         "f33-route40": {"sha256": sha256(route40_launcher)},
         "f33-08a-route": {"sha256": sha256(eps08a_tx_launcher)},
         "f33-08a-oracle": {"sha256": sha256(eps08a_oracle_launcher)},
-        "f33-08a-classic-oracle": {"sha256": sha256(eps08a_classic_oracle_launcher)},
         "f33-secoc": {"sha256": sha256(inline_signer_launcher)},
         "f33-icus-ramkey": {"sha256": sha256(icus_ramkey_launcher)},
         "f33-persist": {"sha256": sha256(persistent_signer_launcher)},
@@ -563,18 +532,13 @@ def build(out: Path, openpilot: Path, oracle_codec: str = DEFAULT_ORACLE_CODEC) 
         files[str(path.relative_to(out))] = {"sha256": sha256(path)}
     for path in sorted(p for p in persistent_dir.rglob("*") if p.is_file()):
         files[str(path.relative_to(out))] = {"sha256": sha256(path)}
-    oracle_transport = (
-        "proven four-message standard classic 0x777 request / standard 0x7A9 response"
-        if oracle_codec == DEFAULT_ORACLE_CODEC else
-        "explicit experimental single-message compact 0x777 request / standard 0x7A9 response"
-    )
     manifest = {
         "schema": "camry-f33-car-kit-v23",
         "created_at": datetime.now(UTC).isoformat(timespec="seconds"),
         "target": {
             "eps_f181": "8965F3307000",
             "eps_diag": "0x7A1->0x7A9 bus0 (post-repin EPS diagnostics; historical ISO-TP oracle transport only)",
-            "oracle_sideband": oracle_transport,
+            "current_ram_runtime": "not packaged; use tools/toyota ram kit",
             "request_source": "0x08A/32 FD bus2 (FRC native source on relay-correct repin)",
             "request_sink": "0x08A/32 FD bus0 (host replacement toward chassis/Brake)",
         },
@@ -593,8 +557,7 @@ def build(out: Path, openpilot: Path, oracle_codec: str = DEFAULT_ORACLE_CODEC) 
             "current_lateral_path": "relay-correct FRC 0x08A source replacement; EPS resident is CMAC service only",
             "reason": "stock ICU-S command 5 selector 4 is live-qualified for exact 0x008A CMAC generation; the selected raw-ring carrier changes only host-to-resident transport and does not bypass the EPS receiver or transmit the request",
             "command5_oracle_primitive_live_qualified": True,
-            "selected_oracle_transport": oracle_transport,
-            "selected_oracle_transport_live_qualified": False,
+            "current_ram_runtime": "not packaged; use tools/toyota ram kit",
             "request_plane_road_qualified": False,
             "historical_direct_b6_path": "retained as development evidence only; do not arm f33-secoc or f33-persist alongside the 0x08A request-plane path",
         },
@@ -686,26 +649,6 @@ def build(out: Path, openpilot: Path, oracle_codec: str = DEFAULT_ORACLE_CODEC) 
                 "live_qualified": True,
                 "live_result": "2026-09-18 production-shaped 100-request 25-ms pipeline: 100/100 responses, resident counters +100/+100/+100, p95 24.094 ms, max 28.946 ms",
             },
-            "08a_classic_mac_oracle": {
-                "launcher": "f33-08a-classic-oracle",
-                "payload": "ram_payloads/camry_f33_08a_classic_oracle_payload.bin",
-                "payload_sha256": eps08a_classic_oracle_meta["authenticated_payload"]["sha256"],
-                "staging_sha256": eps08a_classic_oracle_meta["staging"]["sha256"],
-                "resident": eps08a_classic_oracle_meta["resident"],
-                "helper": eps08a_classic_oracle_meta["helper"],
-                "request": eps08a_classic_oracle_meta["request"],
-                "response": eps08a_classic_oracle_meta["response"],
-                "command5": eps08a_classic_oracle_meta["command5"],
-                "mutation_boundary": eps08a_classic_oracle_meta["mutation_boundary"],
-                "field_sequence": [
-                    "./f33-08a-classic-oracle install in NRTD/Park/stationary",
-                    "direct NRTD->READY without OFF",
-                    "./f33-08a-classic-oracle self-test in READY/Park/stationary",
-                    "only after self-test passes: ./f33-08a-classic-oracle benchmark 20",
-                ],
-                "persistent_flash_write": False,
-                "live_qualified": False,
-            },
             "b6_inline_signer": {
                 "launcher": "f33-secoc",
                 "payload": "ram_payloads/camry_f33_b6_inline_signer_payload.bin",
@@ -751,7 +694,7 @@ def build(out: Path, openpilot: Path, oracle_codec: str = DEFAULT_ORACLE_CODEC) 
                 "same_cycle_drcc_recovery": {
                     "command": "./f33-secoc recover-drcc",
                     "role": "diagnostic_only",
-                    "tool": "runtime/exploit/ephemeral_runtime/camry_f33_post_install_recovery.py",
+                    "tool": "runtime/exploit/ephemeral_runtime/tss3_post_install_recovery.py",
                     "physical_clear": "14FFFFFF on the six exact-car responders that accepted it",
                     "functional_clear": "0x7DF Mode 04 on Panda bus 0; require 0x7E8/7EA/7EB/7ED/7EE positive 44",
                     "acceptance": "all 11 known physical responders have no status&0xAF fault records and FRC DID1905 permits cruise without DID1906 ACC-not-available",
@@ -1057,7 +1000,6 @@ def build(out: Path, openpilot: Path, oracle_codec: str = DEFAULT_ORACLE_CODEC) 
                 "requires_before_arm": "first prove the exact injected ID63 frame reaches profile2 with b6_midaggregate_observer; bridge is a later controlled transformation experiment",
             },
             "order": [
-                "08a_classic_mac_oracle is the selected volatile signer transport: install in NRTD, transition directly to READY without OFF, prove native-MAC equality and 25-ms cadence, then openpilot signs exact observed native 0x08A generations through the raw-classic mailbox while Panda owns relay replacement",
                 "08a_mac_oracle is the live-qualified historical ISO-TP command-5 transport and remains useful as primitive evidence, not the selected driving carrier",
                 "b6_inline_signer is retained only as historical direct-B6 development evidence and must not be armed alongside the request-plane path",
                 "command5_probe is retained as the earlier bounded diagnostic oracle",
@@ -1108,12 +1050,8 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", type=Path, default=ROOT / "build/out/camry-f33-car-kit")
     parser.add_argument("--openpilot", type=Path, default=DEFAULT_OPENPILOT)
-    parser.add_argument(
-        "--oracle-codec", choices=ORACLE_CODECS, default=DEFAULT_ORACLE_CODEC,
-        help="four-frame is packaged by default; compact is experimental and explicit",
-    )
     args = parser.parse_args()
-    manifest = build(args.out, args.openpilot, args.oracle_codec)
+    manifest = build(args.out, args.openpilot)
     print(json.dumps(manifest, indent=2, sort_keys=True))
     return 0
 

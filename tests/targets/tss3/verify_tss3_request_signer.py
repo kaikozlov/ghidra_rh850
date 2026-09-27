@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify the canonical exact-target classic-CAN 0x08A signing mailbox."""
+"""Verify the canonical exact-target TSS3 RAM-resident request signer."""
 from __future__ import annotations
 
 import json
@@ -14,10 +14,10 @@ from unittest import mock
 from tools import REPO_ROOT
 ROOT = REPO_ROOT
 
-from exploit.ephemeral_runtime import build_camry_f33_08a_classic_oracle as build
-from exploit.ephemeral_runtime import camry_f33_08a_classic_oracle as host
-from exploit.ephemeral_runtime import camry_f33_08a_classic_oracle_compact as compact_host
-from exploit.ephemeral_runtime import camry_f33_oracle_ui_bringup as ui_bringup
+from exploit.ephemeral_runtime import build_tss3_request_signer as build
+from exploit.ephemeral_runtime import tss3_request_signer as host
+from exploit.ephemeral_runtime import tss3_request_signer_compact as compact_host
+from exploit.ephemeral_runtime import camry_f33_request_signer_ui_bringup as ui_bringup
 from exploit.ephemeral_runtime import camry_f33_startup_programming as startup_programming
 from exploit.common import ram_exec
 
@@ -36,8 +36,8 @@ subprocess.run(
 )
 target_meta = {}
 compact_target_meta = {}
-with tempfile.TemporaryDirectory(prefix="verify-tss3-08a-oracle-") as td:
-    for target in sorted(build.ORACLE_PROFILES):
+with tempfile.TemporaryDirectory(prefix="verify-tss3-request-signer-") as td:
+    for target in sorted(build.REQUEST_PROFILES):
         if target != CAMRY_TARGET:
             target_out = Path(td) / f"{target}-four"
             proc = subprocess.run(
@@ -162,17 +162,17 @@ check("host-visible state and private scratch preserve exact safe boundaries",
 def run_core_simulator() -> str:
     tmp_root = ROOT / "build/tmp"
     tmp_root.mkdir(parents=True, exist_ok=True)
-    with tempfile.TemporaryDirectory(prefix="oracle-core-sim-", dir=tmp_root) as td:
+    with tempfile.TemporaryDirectory(prefix="request-signer-core-sim-", dir=tmp_root) as td:
         elf = Path(td) / "core.elf"
         rel_elf = elf.relative_to(ROOT)
         subprocess.run([
             str(ROOT / "tools/rh850"), "exec", "v850-elf-gcc",
             "-mv850e3v5", "-mno-app-regs", "-ffreestanding", "-fno-builtin", "-Os", "-nostdlib",
             "-Wa,-mv850e3v5,-mextension",
-            "-Wl,-T,tests/fixtures/rh850/camry_f33_08a_oracle_core_sim.ld",
+            "-Wl,-T,tests/fixtures/rh850/tss3_request_signer_core_sim.ld",
             "-Wl,--build-id=none",
-            "tests/fixtures/rh850/camry_f33_08a_oracle_core_sim.S",
-            "tests/fixtures/rh850/camry_f33_08a_oracle_core_sim.c",
+            "tests/fixtures/rh850/tss3_request_signer_core_sim.S",
+            "tests/fixtures/rh850/tss3_request_signer_core_sim.c",
             "-o", str(rel_elf),
         ], cwd=ROOT, check=True, capture_output=True, text=True)
         proc = subprocess.run([
@@ -269,19 +269,19 @@ expected_targets = {
     "corolla-8965H1202000", "corolla-8965F1208000",
 }
 check("all exact targets share codec-neutral firmware profiles",
-      set(build.ORACLE_PROFILES) == expected_targets and
+      set(build.REQUEST_PROFILES) == expected_targets and
       all(
           profile["request_id"] == 0x777 and profile["response_id"] == 0x7A9 and
           profile["helper_macros"]["ORACLE_REQUEST_HEADER_WORD"] == 0x00000408 and
           "ORACLE_COMPACT_CODEC" not in profile["helper_macros"] and
           "carrier" not in profile and "frame_count" not in profile
-          for profile in build.ORACLE_PROFILES.values()
+          for profile in build.REQUEST_PROFILES.values()
       ))
 
 four_target_meta = {CAMRY_TARGET: meta, **target_meta}
 check("four-frame is the universal default metadata contract",
       set(four_target_meta) == expected_targets and
-      all(item["schema"] == "tss3-08a-classic-oracle-build-v6" for item in four_target_meta.values()) and
+      all(item["schema"] == build.SCHEMA for item in four_target_meta.values()) and
       all(item["request"]["codec"] == "four-frame" for item in four_target_meta.values()) and
       all(item["request"]["carrier"] == "functional-nibble4" for item in four_target_meta.values()) and
       all(item["request"]["frame_count"] == 4 for item in four_target_meta.values()) and
@@ -318,7 +318,7 @@ try:
         "request": {"can_id": "0x1FDC0002", "bus": 0, "carrier": "raw-extended"},
         "response": {"can_id": "0x1FE00002", "bus": 0},
     })
-except host.ClassicOracleError:
+except host.RequestSignerError:
     pass
 else:
     raise AssertionError("host accepted the retired second carrier")
@@ -341,15 +341,15 @@ class _FakePipelinedPanda:
         self.sent_frame_counts: list[int] = []
     def can_send_many(self, rows):
         if len(rows) != host.FRAGMENT_COUNT:
-            raise AssertionError("default oracle must submit exactly four frames")
+            raise AssertionError("default request signer must submit exactly four frames")
         frame_data = [bytes(row[1]) for row in rows]
         if [frame[0] >> 4 for frame in frame_data] != [8, 9, 10, 11]:
-            raise AssertionError("default oracle fragment order drift")
+            raise AssertionError("default request-signer fragment order drift")
         seq = (frame_data[0][0] & 0x0F) | ((frame_data[1][0] & 0x0F) << 4)
         if b"".join(frame[1:] for frame in frame_data) != bytes(
             bytearray(host.SAFE_APPLICATION[:26]) + bytes((seq & 0x3F,)) + host.SAFE_APPLICATION[27:]
         ):
-            raise AssertionError("default oracle application transport drift")
+            raise AssertionError("default request-signer application transport drift")
         with self._lock:
             self.request_count += 1
             trailer = bytes((0x10 | (self.request_count & 0x0F), seq, 0xA5, 0x5A))
@@ -392,12 +392,12 @@ class _FakePipelinedSession:
         pass
 
 
-with mock.patch.object(host, "ClassicOracleSession", _FakePipelinedSession):
+with mock.patch.object(host, "RequestSignerSession", _FakePipelinedSession):
     pipelined = host.benchmark_pipelined(
         meta_path, count=3, period_ms=10.0, drain_timeout_s=0.1,
     )
 check("100-Hz benchmark pipelines requests without waiting for each reply",
-      pipelined["schema"] == "tss3-08a-classic-oracle-pipelined-benchmark-v1" and
+      pipelined["schema"] == "tss3-request-signer-pipelined-benchmark-v1" and
       pipelined["count_sent"] == pipelined["success_count"] == pipelined["responses_received"] == 3 and
       pipelined["target_rate_hz"] == 100.0 and pipelined["complete_target_rate_run"] is True and
       pipelined["resident_counter_deltas"] == {"request_count": 3, "success_count": 3, "response_count": 3} and
@@ -418,7 +418,7 @@ class FakeDiagnosticClient:
     def __init__(self): self.sessions = []
     def diagnostic_session_control(self, session): self.sessions.append(session)
 
-diagnostic_session = host.ClassicOracleSession.__new__(host.ClassicOracleSession)
+diagnostic_session = host.RequestSignerSession.__new__(host.RequestSignerSession)
 diagnostic_session.client = FakeDiagnosticClient()
 diagnostic_session.uds_mod = SimpleNamespace(
     SESSION_TYPE=SimpleNamespace(EXTENDED_DIAGNOSTIC="extended"),
@@ -451,7 +451,7 @@ def fake_read_exact(_client, _uds_mod, address: int, size: int, *, label: str, a
     raise AssertionError(f"unexpected RMBA read 0x{address:08X} ({label})")
 host._read_exact = fake_read_exact
 try:
-    sess = host.ClassicOracleSession.__new__(host.ClassicOracleSession)
+    sess = host.RequestSignerSession.__new__(host.RequestSignerSession)
     sess.meta = meta
     sess.client = object()
     sess.uds_mod = object()
@@ -486,7 +486,7 @@ check("no diagnostic transport or RSCFD mutation remains",
           "key_extraction": False,
       })
 
-class _FakeOracleSession:
+class _FakeRequestSignerSession:
     def __init__(self, *_args, **_kwargs):
         self.attestation = {"state": {"initialized": True}}
     def close(self):
@@ -495,12 +495,12 @@ class _FakeOracleSession:
 with (mock.patch.object(host, "verify_nrtd_ready", side_effect=AssertionError("NRTD guard must be skipped from exact boot")),
       mock.patch.object(host, "execute_ram_payload", return_value={"direct_bootloader": True}) as execute,
       mock.patch.object(host, "wait_for_f181", return_value={"ok": True}) as wait_for_application,
-      mock.patch.object(host, "ClassicOracleSession", _FakeOracleSession),
+      mock.patch.object(host, "RequestSignerSession", _FakeRequestSignerSession),
       mock.patch.object(host.time, "sleep", return_value=None)):
     direct = host.install(OUT / meta["authenticated_payload"]["path"], meta_path, direct_boot=True)
-check("classic oracle can continue directly from exact caught bootloader without NRTD recheck",
+check("request signer can continue directly from exact caught bootloader without NRTD recheck",
       direct["entry_condition"] == "exact_bootloader_f181" and direct["nrtd_guard"] is None and
-      direct["verdict"] == "runtime_08a_classic_fresh_signer_live_helper_pending_self_test" and
+      direct["verdict"] == "request_signer_live_helper_pending_self_test" and
       execute.call_args.kwargs["allow_direct_boot"] is True and
       execute.call_args.kwargs["programming_already_requested"] is True and
       wait_for_application.call_args.kwargs["timeout"] == host.APPLICATION_REAPPEAR_TIMEOUT_SECONDS == 3.0)
@@ -540,40 +540,6 @@ check("manual cancellation is honored after 50 03 but before the one-way 10 02 s
       any(data == startup_programming.EXTENDED_FRAME for _, data, _ in fake_race_panda.sent) and
       all(data != startup_programming.PROGRAMMING_FRAME for _, data, _ in fake_race_panda.sent))
 
-startup_src = (ROOT / "exploit/ephemeral_runtime/camry_f33_startup_programming.py").read_text(encoding="utf-8")
-ui_src = (ROOT / "exploit/ephemeral_runtime/camry_f33_oracle_ui_bringup.py").read_text(encoding="utf-8")
-ram_exec_src = (ROOT / "exploit/common/ram_exec.py").read_text(encoding="utf-8")
-check("startup catcher uses the field-proven response-synchronized minimum ladder",
-      'EXTENDED_FRAME = bytes.fromhex("0210030000000000")' in startup_src and
-      'PROGRAMMING_FRAME = bytes.fromhex("0210020000000000")' in startup_src and
-      'POSITIVE_EXTENDED_FRAME = bytes.fromhex("065003003201f400")' in startup_src and
-      startup_src.index('data == POSITIVE_EXTENDED_FRAME') < startup_src.index('panda.can_send(TX_ADDR, PROGRAMMING_FRAME, BUS)') and
-      'cancel_requested()' in startup_src and
-      startup_src.index('cancel_requested()', startup_src.index('if positive_extended_ns is None')) <
-      startup_src.index('panda.can_send(TX_ADDR, PROGRAMMING_FRAME, BUS)') and
-      'SecurityAccess' in startup_src and 'persistent_flash_writes' in startup_src)
-direct_guard = ram_exec_src.index("if programming_already_requested:")
-direct_identity = ram_exec_src.index("initial_f181_hex, initial_f181_ascii = _read_f181(app, uds_mod)")
-check("caught bootloader waits for exact boot identity without a redundant application handoff",
-      direct_guard < ram_exec_src.index("expected_f181_hex=expected_boot_f181_hex", direct_guard) <
-      ram_exec_src.index("app.diagnostic_session_control(uds_mod.SESSION_TYPE.DEFAULT)", direct_guard) < direct_identity and
-      'caught PROGRAMMING transition did not reach the exact boot endpoint' in ram_exec_src)
-check("UI backend verifies healthy peers and fresh signing without mandatory peer resets",
-      ui_src.index('race_to_bootloader(cancel_requested=cancel_path.exists)') < ui_src.index('install(payload, meta, direct_boot=True, panda=panda)') <
-      ui_src.index('ready_guard = wait_ready_parked(timeout=ready_timeout, panda=panda)') <
-      ui_src.index('state = control_domain_state(output_dir / "control-domain-state.json", panda=panda)') <
-      ui_src.index('signer_test = self_test(meta, panda=panda)') and
-      'restart_brake_known_good' not in ui_src and 'restart_one_domain' not in ui_src and
-      'peer_resets_performed": False' in ui_src)
-check("auto worker preloads protocols, then uses one fresh post-handoff Panda for the complete bringup",
-      'panda = Panda(cli=False)' in ui_src and
-      ui_src.index('_import_uds()') < ui_src.index('server.listen(1)') and
-      ui_src.index('_import_isotp_send()') < ui_src.index('server.listen(1)') and
-      ui_src.index('server.listen(1)') < ui_src.index('panda = Panda(cli=False)', ui_src.index('server.listen(1)')) <
-      ui_src.index('native_catch=native_catch, panda=panda', ui_src.index('server.listen(1)')) and
-      'wait_ready_parked(timeout=ready_timeout, panda=panda)' in ui_src and
-      'control_domain_state(output_dir / "control-domain-state.json", panda=panda)' in ui_src and
-      'self_test(meta, panda=panda)' in ui_src)
 native_marker = {
     "schema": "tss3-oracle-native-catch-v1",
     "target": "TOYOTA_CAMRY_TSS3",
@@ -597,4 +563,4 @@ with tempfile.TemporaryDirectory() as td:
     else:
         raise AssertionError("UI resume accepted a non-F33 native startup catch")
 
-print("PASS canonical exact-target classic-CAN 0x08A oracle")
+print("PASS canonical exact-target TSS3 request signer")

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build a minimal in-car RAM-signer kit for one exact Corolla H/F target."""
+"""Package a historical direct-B6 Corolla H/F RAM-signer experiment."""
 from __future__ import annotations
 
 from tools import REPO_ROOT
@@ -19,7 +19,7 @@ LAUNCHER = ROOT / "exploit/ephemeral_runtime/corolla_hf_b6_inline_signer_launche
 RUNTIME_FILES = (
     "exploit/common/ram_exec.py",
     "exploit/ephemeral_runtime/corolla_hf_b6_inline_signer.py",
-    "exploit/ephemeral_runtime/f33_panda_lease.sh",
+    "exploit/ephemeral_runtime/tss3_panda_lease.sh",
 )
 
 

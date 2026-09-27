@@ -10,6 +10,7 @@ that every paragraph is current**.
 |---|---|
 | Understand repository scope and evidence | [OVERVIEW.md](OVERVIEW.md) |
 | Install tools, select a target, use Ghidra, or verify a change | [WORKFLOW.md](WORKFLOW.md) |
+| Build or package a registered RAM-resident TSS3 runtime | [RAM-resident TSS3 workflow](WORKFLOW.md#ram-resident-tss3-build-and-kit-workflow) |
 | Find a command or artifact producer | [Tooling](tooling/README.md) |
 | Find a calibration or vehicle report | [Variants](variants/README.md) |
 | Review Camry capability and qualification boundaries | [Capability matrix](variants/camry-2026-capability-matrix.md) |

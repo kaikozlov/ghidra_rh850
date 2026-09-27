@@ -196,11 +196,12 @@ remains selected. Source hashes and the complete derived reduction are retained 
 `/Users/kai/dev/inspect/logs/camry-2026/2026-09-18/0000010c--506d7277c7/`.
 
 Thus GTS+ plus the programming-session probes now provide a concrete **same-ignition
-recovery sequence that preserves the EPS RAM resident**, and route `10c` road-qualifies
-that recovery with stock adaptive cruise. `camry_f33_post_install_recovery.py` now snapshots the FRC and Brake live state DIDs
-before and after the known DTC clear, treating newly added DDB-derived DIDs as
-best-effort until exact-car support is observed. The higher-value paired capture is a
-before/after `health-check`: if DTC bits clear and Brake EPS communication has returned
+recovery sequence that preserves the EPS RAM resident**, and route `10c`
+road-qualifies that recovery with stock adaptive cruise.
+`tss3_post_install_recovery.py` snapshots the FRC and Brake live-state DIDs
+before and after the known DTC clear; additional DDB-derived DIDs remain
+best-effort until exact-car support is observed. The higher-value paired
+capture is a before/after `health-check`: if DTC bits clear and Brake EPS communication has returned
 normal while Hybrid RoB records show cruise permission `NG`, automatic cancel,
 `Suspend`, or `Abnormal Stop`, the persistent denial is in the cruise-control state
 machine rather than DTC memory. If Brake `Fail Control` or EPS communication-open stays
@@ -3219,8 +3220,8 @@ intentional observation path, not a fallback after another XCP attempt. It adds 
 persistent flash patch; installation/heartbeat semantics remain the already-audited
 RAM-only path.
 
-Verification: `tests/targets/camry/verify_camry_f33_steering_state_capture.py`; the in-car packaging
-path is `tools/targets/camry/builders/build_camry_f33_car_kit.py`.
+Verification: `tests/targets/camry/verify_camry_f33_steering_state_capture.py`;
+historical in-car packaging is `tools/targets/camry/research/package_camry_f33_research_kit.py`.
 
 ### 4.11 Stock ACC delayed hold is request-ID/allocation state (VAR-140 supersession)
 
@@ -3402,18 +3403,18 @@ serialized stock command-5 wrapper.
 
 Compact reconstruction remains available only for a deliberate experiment.
 The normal builder emits no compact template or assembly path, and normal
-Camry/unified kits omit the compact Python module. `--codec compact` or the kit
-builder's `--oracle-codec compact` produces a separately identified,
-compact-only artifact; there is no default fallback or automatic selection.
+request-signer kits omit the compact Python module. `--codec compact` on
+`tools/toyota ram build` or `tools/toyota ram kit` produces a separately
+identified compact-only artifact; there is no default fallback.
 The reported steering result determines the repository default, but no
 identity-bound capture is promoted here as vehicle qualification for the
 compact experiment.
 
 The target code remains split at a testable boundary.
-`camry_f33_08a_classic_oracle_core.inc` owns CPU/memory-only four-message
-assembly, optional compact reconstruction, private freshness update, and
-response packing. The focused verification suite compiles a target-native
-`v850e3v5` harness and executes both codec macros under GNU `sim/v850`,
+`tss3_request_signer_core.inc` owns CPU/memory-only four-message assembly,
+optional compact reconstruction, private freshness update, and response
+packing. The focused verification suite compiles a target-native `v850e3v5`
+harness and executes both codec macros under GNU `sim/v850`,
 including verbatim four-fragment assembly, sequence/order rejection, compact
 inactive and LTA/LCA reconstruction, ABI global-pointer/record-size
 preservation, epoch change, message-counter increment/wrap, FV4 construction,
@@ -3421,8 +3422,8 @@ and success/error/busy response packing. The harness deliberately stops before
 stock freshness/command-5/CAN calls and MMIO.
 The repository-owned GNU simulator carries a local fix for upstream
 `sim/v850`'s broken format-VI `imm32` reconstruction; `tools/rh850 selftest`
-exercises both forward and backward far `jarl32`/`jr32`, and the oracle harness
-itself uses `jarl32`. This removes the artificial far-call decoder boundary.
+exercises both forward and backward far `jarl32`/`jr32`; the request-signer
+harness itself uses `jarl32`. This removes the artificial far-call decoder boundary.
 Stock functions and P1M-E MMIO still require explicit models/mapped code or
 hardware before simulator execution can say anything about their behavior.
 

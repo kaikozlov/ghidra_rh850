@@ -7,7 +7,7 @@ from tools import REPO_ROOT
 ROOT = REPO_ROOT; 
 from exploit.ephemeral_runtime import build_camry_f33_route40_observer as build  # noqa: E402
 from exploit.ephemeral_runtime import camry_f33_route40_observer as observer  # noqa: E402
-from tools.targets.camry.builders import build_camry_f33_car_kit as car_kit  # noqa: E402
+from tools.targets.camry.research import package_camry_f33_research_kit as car_kit  # noqa: E402
 
 passed = failed = 0
 def check(name, value, detail=""):

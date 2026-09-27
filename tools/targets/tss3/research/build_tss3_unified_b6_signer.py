@@ -1,16 +1,9 @@
 #!/usr/bin/env python3
-"""Build the new cross-variant TSS3 functional-UDS B6 signer shape.
+"""Build the historical direct-B6/C7 TSS3 signer experiment.
 
-This builds one authenticated 4-KiB RAM payload for every supported P1M-E
-TSS3 EPS. The payload identifies the application family from CodeFlash, selects
-the exact resident/helper profile internally, and installs it without a second
-host-side loader. Recurring control is one stock functional-CAN contract on
-Toyota-B bus 1:
-
-  runtime control: 07 C7 C7 seq target_hi target_lo 00 00
-
-Target-specific application replay, B6/freshness state, and command-5 call
-addresses remain exact-profile facts embedded inside the one payload.
+This research-only runtime embeds exact firmware profiles and controls a
+resident through the stock functional diagnostic route. It is not the
+maintained RAM-runtime product path; use ``tools/toyota ram`` for that.
 """
 from __future__ import annotations
 
@@ -22,8 +15,9 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
+from tools import REPO_ROOT
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = REPO_ROOT
 sys.path.insert(0, str(REPO))
 
 from exploit.common.payload_package import package_shellcode

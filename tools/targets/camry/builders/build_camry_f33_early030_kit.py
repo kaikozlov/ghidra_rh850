@@ -12,7 +12,7 @@ RUNTIME=(
  'exploit/ephemeral_runtime/tss3_unified_b6_signer.py',
  'exploit/ephemeral_runtime/camry_f33_runtime_monitor.py',
  'exploit/ephemeral_runtime/camry_f33_runtime_replay_discriminator.py',
- 'exploit/ephemeral_runtime/f33_panda_lease.sh',
+ 'exploit/ephemeral_runtime/tss3_panda_lease.sh',
  'tsk/__init__.py','tsk/lib/__init__.py','tsk/lib/programming.py','tsk/lib/diagnostic_route.py',
 )
 def cp(src,dst): dst.parent.mkdir(parents=True,exist_ok=True); shutil.copy2(src,dst)

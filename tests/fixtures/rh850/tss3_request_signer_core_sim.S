@@ -1,4 +1,4 @@
-#include "../../../exploit/ephemeral_runtime/camry_f33_08a_classic_oracle_core.inc"
+#include "../../../exploit/ephemeral_runtime/tss3_request_signer_core.inc"
 
     .section .text
     .global _start

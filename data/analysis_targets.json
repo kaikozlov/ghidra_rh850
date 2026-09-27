@@ -29,7 +29,13 @@
       "device_profile_script": "ApplyCamryF33DeviceProfile.java",
       "entry_seed_script": "SeedCamryF33Entries.java",
       "diagnostic_seed_script": "SeedCamryF33Diagnostics.java",
-      "recovered_seed_script": "SeedCamryF33RecoveredFunctions.java"
+      "recovered_seed_script": "SeedCamryF33RecoveredFunctions.java",
+      "ram_runtime": {
+        "profile": "camry-f33",
+        "payloads": ["tss3-request-signer"],
+        "idle_fast_path": true,
+        "application_f181_hex": "023839363546333330373030300000000038413331313333303331303000000000"
+      }
     },
     "crown-8965F3012000": {
       "status": "first_class",
@@ -59,7 +65,13 @@
       "device_profile_script": "ApplyCrownF30DeviceProfile.java",
       "entry_seed_script": "SeedCrownF30Entries.java",
       "diagnostic_seed_script": "SeedCrownF30Diagnostics.java",
-      "recovered_seed_script": "SeedCrownF30RecoveredFunctions.java"
+      "recovered_seed_script": "SeedCrownF30RecoveredFunctions.java",
+      "ram_runtime": {
+        "profile": "crown-f30",
+        "payloads": ["tss3-request-signer"],
+        "idle_fast_path": false,
+        "application_f181_hex": "023839363546333031323030300000000038413331313330303830303000000000"
+      }
     },
     "corolla-8965F1208000": {
       "status": "first_class",
@@ -89,7 +101,13 @@
       "device_profile_script": "ApplyCorollaHFDeviceProfile.java",
       "entry_seed_script": "SeedCorollaHFEntries.java",
       "diagnostic_seed_script": "SeedCorollaHFDiagnostics.java",
-      "recovered_seed_script": "SeedCorollaHFRecoveredFunctions.java"
+      "recovered_seed_script": "SeedCorollaHFRecoveredFunctions.java",
+      "ram_runtime": {
+        "profile": "corolla-hf",
+        "payloads": ["tss3-request-signer"],
+        "idle_fast_path": false,
+        "application_f181_hex": "023839363546313230383030300000000038413331313132313330303000000000"
+      }
     },
     "corolla-8965H1202000": {
       "status": "first_class",
@@ -120,7 +138,13 @@
       "device_profile_script": "ApplyCorollaHFDeviceProfile.java",
       "entry_seed_script": "SeedCorollaHFEntries.java",
       "diagnostic_seed_script": "SeedCorollaHFDiagnostics.java",
-      "recovered_seed_script": "SeedCorollaHFRecoveredFunctions.java"
+      "recovered_seed_script": "SeedCorollaHFRecoveredFunctions.java",
+      "ram_runtime": {
+        "profile": "corolla-hf",
+        "payloads": ["tss3-request-signer"],
+        "idle_fast_path": false,
+        "application_f181_hex": "023839363546313230383030300000000038413331313132303230303000000000"
+      }
     },
     "sienna-8965B4512000": {
       "status": "legacy_reference",

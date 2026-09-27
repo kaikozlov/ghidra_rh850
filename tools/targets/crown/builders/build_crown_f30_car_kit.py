@@ -30,7 +30,7 @@ RUNTIME_FILES = (
     "exploit/ephemeral_runtime/crown_f30_b6_inline_signer.py",
     "exploit/ephemeral_runtime/camry_f33_runtime_monitor.py",
     "exploit/ephemeral_runtime/camry_f33_runtime_replay_discriminator.py",
-    "exploit/ephemeral_runtime/f33_panda_lease.sh",
+    "exploit/ephemeral_runtime/tss3_panda_lease.sh",
     "tools/targets/crown/live/crown_f30_diag_mailbox_probe.py",
     "tools/targets/crown/live/crown_f30_resident_soak.py",
     "tools/targets/crown/live/crown_f30_authority_probe.py",

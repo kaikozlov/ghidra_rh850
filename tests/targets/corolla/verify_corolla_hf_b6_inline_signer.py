@@ -12,7 +12,7 @@ from tools import REPO_ROOT
 REPO = REPO_ROOT
 BUILDER = REPO / "exploit/ephemeral_runtime/build_corolla_hf_b6_inline_signer.py"
 from exploit.ephemeral_runtime import corolla_hf_b6_inline_signer as installer
-from tools.targets.corolla.builders import build_corolla_hf_car_kit as car_kit
+from tools.targets.corolla.research import package_corolla_hf_b6_research_kit as car_kit
 
 
 def check(label: str, condition: bool) -> None:
@@ -156,7 +156,7 @@ with tempfile.TemporaryDirectory(prefix="verify-corolla-hf-inline-signer-") as t
         "ram_payloads/corolla_hf_b6_inline_signer_payload.bin",
         "runtime/exploit/common/ram_exec.py",
         "runtime/exploit/ephemeral_runtime/corolla_hf_b6_inline_signer.py",
-        "runtime/exploit/ephemeral_runtime/f33_panda_lease.sh",
+        "runtime/exploit/ephemeral_runtime/tss3_panda_lease.sh",
     })
 
 print("Corolla H/F inline signer build verification passed.")

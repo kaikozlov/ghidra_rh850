@@ -12,43 +12,56 @@ retained qualification evidence from later implementation changes. In
 particular, the [September-18 road witness](../variants/toyota-tss3-openpilot-bounty-evidence.md)
 does not by itself qualify the superseding request-plane configuration.
 
-## Exact-Camry request-plane supersession (2026-09-21)
+## Current exact-target request-signer contract
 
-The exact F33 no longer uses the C7/native-B6 modification architecture
-described in the historical sections below. Openpilot now owns the complete
-28-byte `0x08A` application and its 40-Hz publication cadence for both lateral
-and longitudinal control. It sends only that application to the EPS resident in
-six classic `0x777/C8` raw-ring fragments. No trip, reset, message counter,
-native B26, or native FV4 is sent by the host.
+The maintained RAM runtime is the request signer exposed by
+`tools/toyota ram`. Openpilot owns the complete 28-byte `0x08A` application and
+its publication cadence. It sends that application to the EPS resident in four
+ordered classic-CAN `0x777` frames:
+
+```text
+8s || application[0:7]
+9S || application[7:14]
+As || application[14:21]
+BS || application[21:28]
+```
+
+`s` and `S` are the low and high nibbles of one 8-bit transaction sequence.
+Fragment zero restarts assembly; missing, repeated, reordered, or
+mixed-sequence continuations are rejected. The host sends no trip, reset,
+message counter, native B26, or native FV4.
 
 The EPS resident reads Toyota's authenticated trip/reset epoch, advances a
-private volatile `0x08A` message counter, calls the stock freshness encoder and
-ICU-S command 5, and returns the finished `FV4||MAC28` trailer. Openpilot appends
-that trailer without reconstructing or interpreting freshness. Panda checks the
-complete application shape and normal angle/acceleration limits, blocks native
-FRC `0x08A` only while host ownership is active, and fails open after 100 ms. It
-does not queue native generations or compare B26/FV4. Native FRC `0x08A` remains
-an engagement/presence input and Brake `0x081` continues normally.
+private volatile `0x08A` message counter, calls the target's stock freshness
+encoder and ICU-S command 5, and returns one standard classic-CAN `0x7A9`
+response containing status plus `FV4||MAC28`. Openpilot appends that trailer
+without reconstructing or interpreting freshness.
 
-On exact F33, the resident's complete 36-byte state remains at
+The transport and host interface are shared by Camry, Crown, and Corolla H/F.
+Each build remains exact-target-bound: firmware call addresses, RAM layout,
+CAN bus, transmit handle, CodeFlash hash, and application F181 come from the
+registered target profile. There is no cross-calibration binary.
+
+Panda checks the complete application shape and ordinary angle/acceleration
+limits, blocks native FRC `0x08A` only while host ownership is active, and
+fails open after 100 ms. It does not queue native generations or compare
+B26/FV4. Native FRC `0x08A` remains an engagement/presence input and Brake
+`0x081` continues normally.
+
+On F3 targets, the resident's 36-byte state remains at
 `FEBF025C..FEBF027F`, below the application SID23 exclusion beginning at
-`FEBF0288`. Command-5 scratch retains its proven `FEBF0280..FEBF02E7` envelope
-and ends immediately before the object-15 RAM mirror. Trip/reset/message state
-is packed into retired telemetry bytes; expanding the state or moving scratch
-forward violates these two independently enforced boundaries.
+`FEBF0288`; command-5 scratch occupies `FEBF0280..FEBF02E7`. Corolla H/F uses
+its registered resident and scratch locations. A full EPS power cycle removes
+the runtime.
 
 The Panda firmware image is part of this runtime contract. Any nested-opendbc
 safety change that alters the Toyota TX whitelist or hooks requires rebuilding
-and deploying `panda_h7.bin.signed`; updating only the openpilot/opendbc source
-checkout is insufficient because `pandad` compares the running Panda against
-the generated firmware artifact, not against safety-source Git state. The
-September-21 route `0000003a--7d62f5b41f` demonstrated the failure mode:
-the ownership arm succeeded, stale Panda safety rejected 126/126 new
-`0x777/C8` fragments, no signer response or host `0x08A` was produced, and
-Toyota cruise dropped about 1.05 seconds later.
+and deploying `panda_h7.bin.signed`; updating only openpilot/opendbc source is
+insufficient.
 
 The remainder of this note retains earlier C7/B6 architecture and field
-evidence where useful; it is not the current exact-Camry runtime contract.
+evidence where useful. It is historical, not the maintained RAM-runtime
+contract.
 
 At the earlier C7/B6 checkpoint, the initial integration goal was narrower
 than a complete TSS3 port: reproduce the demonstrated lateral result on exact
@@ -156,20 +169,18 @@ transport enhancement, not a dependency of this lateral baseline.
 
 ### Cross-variant resident control ingress
 
-Exact Camry F33, Corolla H, Corolla F, and Crown F30 all expose the same normal
-runtime control ingress: classic functional request `0x777`, DCM request type 1.
-Their configured functional service set is identically `10,14,28,31,3E,85`;
-private C7 is therefore staged into the target's channel-1 DCM buffer, assigned
-NRC `0x11`, and suppressed on the functional response path. CanTp/PduR still
-performs the complete seven-byte N-SDU copy before the resident's exact
-post-receive hook.
+Exact Camry F33, Corolla H, Corolla F, and Crown F30 expose the same physical
+request contract: four classic standard-`0x777` records accepted by the stock
+functional CAN rule. The resident reads those records from the target's
+software RX ring after stock drain through a private cursor. Header nibbles
+`8..B` are intentionally invalid ISO-TP PCI types; the current request signer
+does not use CanTp reassembly, PduR copying, DCM buffers, service lookup, or
+diagnostic response state.
 
-| exact target | functional DCM buffer | unified runtime profile | field installation |
-|---|---:|---|---|
-| Camry `8965F3307000` | `FEBE5751` | `camry-f33` | exact-F181 high-tail resident + post-startup functional C6 helper load |
-| Corolla `8965H1202000` | `FEBE563D` | `corolla-hf` | exact-F181 resident + helper embedded in authenticated LocalRAM payload |
-| Corolla `8965F1208000` | `FEBE563D` | `corolla-hf` | exact-F181 resident + helper embedded in authenticated LocalRAM payload |
-| Crown `8965F3012000` | `FEBE527D` | `crown-f30` | exact-F181 high-tail resident + post-startup functional C6 helper load |
+The common contract stops at that raw-record boundary. Each registered target
+still supplies its request/response bus, RX ring and producer, callback
+geometry, resident/scratch placement, lower transmit handle, firmware calls,
+application F181, and CodeFlash hash.
 
 #### Shared P1M-E RAM-execution invariant
 
@@ -239,14 +250,16 @@ their F181 and CodeFlash identities remain distinct deployment guards.
 
 The one-message canonical-reconstruction codec is retained only as an explicit
 experiment. Its stock-TSS3 steering experiment was reported broken, so it is
-not a default or a fallback. `--codec compact` builds a compact-only helper;
-`--oracle-codec compact` additionally places its optional Python codec module in
-an experimental kit. Default kits omit that module. The reported result selects
+not a default or a fallback. `--codec compact` on `tools/toyota ram build` or
+`tools/toyota ram kit` emits a compact-only helper and includes its optional
+Python codec module. Default kits omit that module. The reported result selects
 the safe default but is not promoted here to identity-bound vehicle
 qualification without its capture.
 
-The recurring steering-control contract is unified C7, but the field installation
-path is deliberately target-shaped. Camry/Crown use functional C6 only as a
+#### Historical C7/B6 installation checkpoint
+
+At the superseded C7/B6 checkpoint, recurring steering control was unified C7
+but field installation remained target-shaped. Camry/Crown used functional C6 only as a
 post-startup helper transport: the authenticated boot callback installs the
 high-tail resident, the resident reaches the qualified count-224 boundary, and
 the host then transfers the padded helper as `07 C6 C6 index word_le32` before
@@ -385,96 +398,64 @@ the continuity failure it was designed to remove.
 > evidence-bounded, and physical steering/coexistence behavior is untested. See
 > [the audit](../variants/corolla-tss3-tester-handoff-audit-2026-09-16.md).
 
-For a tester using the maintained `kai-openpilot` TSS3 branch, the portable kit
-packages that ladder behind a guided launcher. Build the exact target on the
-analysis checkout, copy the output directory to comma hardware, and run:
+For current builds and tester packages, use only the registry-backed public
+surface:
 
 ```bash
-uv run --locked python tools/targets/tss3/builders/build_tss3_unified_b6_signer_kit.py \
-  --target corolla-8965F1208000 --out EMPTY_KIT_DIRECTORY
-
-# on comma, with Kai's TSS3 openpilot checkout at /data/openpilot
-./tss3-unified-signer doctor
-# vehicle already in NRTD / READY=0 / Park:
-./tss3-unified-signer bringup /tmp/tss3-bringup
-# after the command prompts: transition directly to READY/Park without OFF,
-# remain stationary, then press Enter
-./tss3-unified-signer replace-current /tmp/tss3-replace-current.json
+tools/toyota ram list
+tools/toyota ram build corolla-8965F1208000 --out build/out/corolla-f-request-signer
+tools/toyota ram kit crown-8965F3012000 --out EMPTY_KIT_DIRECTORY
+tools/toyota ram kit all --out EMPTY_KIT_SET_DIRECTORY
 ```
 
-Every exact-target kit packages its target-bound classic-CAN `0x08A` oracle as
-`bundle/oracle/classic.json` plus `bundle/oracle/classic_payload.bin`. Build one
-kit with an exact target, or build the complete release set in target-named
-subdirectories:
+Every kit contains one target-bound request signer, its metadata, the common
+runtime host, peer recovery, and one launcher:
 
 ```bash
-uv run --locked python tools/targets/tss3/builders/build_tss3_unified_b6_signer_kit.py \
-  --target crown-8965F3012000 --out EMPTY_KIT_DIRECTORY
-
-uv run --locked python tools/targets/tss3/builders/build_tss3_unified_b6_signer_kit.py \
-  --target all --out EMPTY_KIT_SET_DIRECTORY
+./tss3-request-signer doctor
+# NRTD / READY=0 / Park / stationary
+./tss3-request-signer install /tmp/tss3-request-signer-install.json
+# transition directly to READY/Park without powering EPS off
+./tss3-request-signer status /tmp/tss3-request-signer-status.json
+./tss3-request-signer self-test /tmp/tss3-request-signer-self-test.json
+./tss3-request-signer benchmark-100hz 200 /tmp/tss3-request-signer-100hz.json
 ```
 
-The generic Corolla H/F and Crown qualification path is:
+If the programming transition leaves peer state unhealthy, `recover-peers`
+uses the same Brake/EPB then FRC recovery on every supported TSS3 kit. The
+launcher derives the EPS F181 and diagnostic bus from that kit's request-signer
+metadata; recovery is not a Camry-only package path.
 
-```bash
-# full EPS OFF first; then NRTD / READY=0 / Park / stationary
-./tss3-unified-signer doctor
-./tss3-unified-signer oracle-install /tmp/tss3-oracle-install.json
-# transition directly to READY/Park without another EPS power cycle
-./tss3-unified-signer oracle-status /tmp/tss3-oracle-status.json
-./tss3-unified-signer oracle-self-test /tmp/tss3-oracle-self-test.json
-./tss3-unified-signer oracle-benchmark-100hz 200 /tmp/tss3-oracle-100hz.json
-```
+The hardware qualification remains intentionally short:
 
-For exact Camry, `oracle-bringup` remains the guided peer-recovery path and
-`oracle-ui-bringup` remains the fully-OFF startup catcher. Those Camry-only
-commands reject Corolla/Crown bundle identities.
-
-`oracle-bringup` installs and attests the volatile classic signer, prompts for
-the direct transition to READY, performs the maintained Brake/EPB then FRC peer
-recovery while retaining the Panda lease, requires healthy DRCC state, and ends
-with an independently fresh signed-`0x08A` self-test. `recover-peers` exposes that recovery
-step separately. The standalone `f33-08a-classic-oracle` launcher exposes the
-same command.
-
-The hardware qualification is intentionally short and target-neutral:
-
-1. Bind the bundle to the application F181 and CodeFlash hash reported in
-   `bundle/oracle/classic.json`; never substitute a related calibration.
+1. Bind the bundle to its application F181 and CodeFlash hash; never substitute
+   a related calibration.
 2. With the vehicle stationary in Park and READY low, install and attest only
    the volatile payload.
-3. Transition directly to READY without powering the EPS off. Require
-   `oracle-status` to report the initialized exact-target state.
-4. Require `oracle-self-test` to return one independently fresh native-MAC
-   `0x08A`, then require the 200-request 100-Hz benchmark to show matching
-   request, success, response, and received counts with no signer errors.
-5. Send sequence zero/release before leaving qualification. A full EPS power
-   cycle removes the resident; repeat installation after every such cycle.
+3. Transition directly to READY without powering the EPS off. Require `status`
+   to report initialized exact-target state.
+4. Require `self-test` to return one independently fresh native-MAC `0x08A`,
+   then require the 200-request 100-Hz benchmark to show matching request,
+   success, response, and received counts with no signer errors.
+5. A full EPS power cycle removes the resident; repeat installation afterward.
 
 This proves RAM survival, exact target calls, command-5 signing, and the
-classic-CAN request/response rate on that ECU. It does not transfer Camry road
-qualification to Corolla/Crown, prove steering authority, or authorize driving.
+classic-CAN request/response rate on that ECU. It does not transfer road
+qualification between targets, prove steering authority, or authorize driving.
 
-The historical direct-B6 signer remains available for either host wiring with
-`--topology stock` (Panda bus 1) or exact-Camry
-`--topology camry-post-repin` (Panda bus 0). Oracle and direct-B6 signer are
-alternative volatile runtime architectures; do not install or operate both.
+The former direct-B6/C7 builders and target-specific kit packagers are
+research-only. They are not alternate current installation paths and are not
+packaged by `tools/toyota ram kit`.
 
-The historical `bringup` path still retains its individual fail-closed gates:
-stock functional-mailbox preflight, exact-F181 NRTD install, READY qualification,
-and (on exact Camry) operator-paced Brake/FRC recovery when that older programming
-path actually leaves peer state unhealthy. The field-proven Brake/FRC restart
-commands remain available as explicit recovery tools, not as the normal startup
-contract.
+### Historical exact-Camry startup-catcher experiment
 
-The maintained exact-Camry classic-`0x08A` path is now `oracle-ui-bringup`. It is
-armed while the vehicle is fully OFF, repeatedly offers application EXTENDED, waits
-for the first completed `50 03`, sends one `10 02`, and installs the volatile oracle
-directly from the caught exact bootloader. After the application returns it requires
-READY/Park/stationary, then checks **peer health without resetting either peer** and
-runs one fresh-signing self-test. The 2026-09-20 live runs proved that this
-startup-caught path can preserve healthy Brake/FRC state across installation.
+A 2026-09-20 exact-Camry experiment armed the request signer while the vehicle
+was fully OFF, repeatedly offered application EXTENDED, waited for the first
+completed `50 03`, sent one `10 02`, and installed from the caught bootloader.
+After application return it required READY/Park/stationary, checked peer health
+without resetting either peer, and ran one fresh-signing self-test. Those runs
+showed that this startup-caught path could preserve healthy Brake/FRC state; the
+catcher is not packaged by the current cross-target RAM kit.
 
 FRC `0x1905` **Cruise Control Permission Flag** and `0x1906` **Main Switch
 Recognition Flag** are operational cruise state, not persistent health latches. In a
@@ -487,15 +468,15 @@ EPS-communication-open clear; the succeeding signer self-test supplies the
 functional EPS-side proof. No DTC clear, peer reset, EPS reset, or EPS power cycle is
 part of a healthy `oracle-ui-bringup` run.
 
-The automatic-start integration keeps the proven backend unchanged and uses a
-native `pandad` startup catcher plus the openpilot-side `Tss3OracleAutoArm`
-watcher. The original catcher waited for a Panda ignition false->true edge before
+The experiment used a native `pandad` startup catcher plus the openpilot-side
+`Tss3OracleAutoArm` watcher.
+The original catcher waited for a Panda ignition false->true edge before
 transmitting. The 2026-09-22 deep-sleep/proximity experiment closes a better
 pre-start trigger on exact F33: from a verified zero-CAN state, ordinary approach
 with the normal key produced bus0/bus2 `0x45A` as the first mirrored wake frame,
 with the rest of the wake-active OFF set and `0x00F` following immediately.
 
-The maintained catcher therefore preloads ELM327 while OFF and remains in normal
+The experimental catcher preloaded ELM327 while OFF and remained in normal
 Panda power-save. Logical bus0 is already the always-awake main bus, so observing
 native bus0 `0x45A` starts a **low-rate prewarm** without waking the other Panda
 CAN transceivers: `10 03` is offered at 10 Hz on bus0 while the vehicle is already
@@ -512,23 +493,17 @@ start. Thus true deep sleep retains the same Panda power-save behavior and zero
 CAN traffic; the only added traffic occurs after Toyota itself has already woken
 the visible network.
 
-After the native catcher reaches PROGRAMMING it publishes the same cooperative
-handoff marker and the existing warm uploader acquires the direct-Panda lease and
-runs `oracle-ui-bringup` without operator input. `auto-trigger.json` now retains
-both wake-relative and ignition-relative timing, including wake->first `10 03`,
-wake->ignition, `50 03`, and `10 02`. RAM upload/attestation/KAT and READY/peer
-health qualification remain unchanged in the existing backend.
+After the native catcher reached PROGRAMMING it published a cooperative handoff
+marker and the warm uploader acquired the direct-Panda lease. Its evidence
+recorded wake-relative and ignition-relative timing, including wake to first
+`10 03`, wake to ignition, `50 03`, and `10 02`. This remains exact-Camry
+historical evidence, not another maintained kit workflow.
 
-Non-Camry targets skip this lifecycle step. `replace-current` is the first mutation test: it requires READY plus stationary
-`0x0AA`, derives the current measured angle from `0x025`, converts that angle to
-the common B6 target domain, sends one fresh C7 generation, observes a signed
-replacement, then sends sequence zero to release. On Corolla the guard also
-requires a fresh decoded Park state from `0x127` or the retained `0x3BF` fallback
-carrier; wheel-fault flags and stale motion/angle samples are rejected. A full
-EPS power cycle removes the resident and requires
-`bringup` again. The launcher cooperatively hands Panda ownership back to the managed `pandad` when
-the command exits. A guided `bringup` deliberately keeps the same lease across its
-operator-paced stages; lease ownership is not part of Toyota recovery semantics.
+The former direct-C7 mutation test required READY/stationary state, derived a
+target from measured angle, sent one C7 generation, observed a signed
+replacement, then sent sequence zero to release. Those C7/B6 lifecycle and
+topology details belong to the superseded runtime and do not apply to
+`tss3-request-signer`.
 
 ### Why Panda still needs a generic fix
 
@@ -555,14 +530,14 @@ dependency.
 actuation and does not imply one authentication scheme.
 
 `ToyotaSafetyFlags.TSS3_SIGNER` selects the bounded resident-signer actuator
-contract; `F33` remains its source-compatible alias. The host transport is the
-common functional `0x777` C7 envelope, while target identity still determines
-exact EPS scaling, RX requirements, resident placement, and signer image.
+contract. The maintained host transport is the four-frame functional `0x777`
+request described above. Target identity determines exact EPS scaling, RX
+requirements, resident/scratch placement, diagnostic bus, transmit handle,
+firmware calls, and payload identity.
 
 The reusable architecture is the normal openpilot division of ownership.
-Functional `0x777` is the shared host carrier; actuator field semantics,
-scaling, limits, signer RAM locations, freshness cells, and the EPS payload
-remain target-local facts and must not transfer merely from that shared carrier.
+Shared transport does not make target-local actuator semantics, scaling,
+limits, freshness cells, or firmware addresses transferable.
 
 ## Camry audit checkpoints (historical snapshots)
 
@@ -603,12 +578,11 @@ transition. The first successful recovery session's chronology was FRC reset,
 then Brake/EPB reset, then FRC reset again; that chronology proves the relevant
 state is volatile and dependency-sensitive, but it did not isolate the minimum
 reset set because the initial FRC probe was part of the same session. A later
-operator-paced field run reached the same final healthy FRC state after Brake and
-then FRC were restarted with long quiet intervals. The maintained launcher therefore
-stops trying to infer a fixed automatic cadence: it exposes/operator-prompts the
-Brake and FRC stages separately, preserves the exact field-proven Brake reset-and-return
-procedure, keeps one cooperative Panda lease throughout, and lets the operator decide
-when the network has settled before continuing. The subsequent route
+operator-paced field run reached the same final healthy FRC state after Brake
+and then FRC were restarted with long quiet intervals. The current
+`recover-peers` command exposes those Brake and FRC stages on every supported
+TSS3 kit, preserves the field-proven Brake reset-and-return procedure, and
+keeps one cooperative Panda lease throughout. The subsequent route
 `0000010c--506d7277c7` demonstrates 919.572 s / 19.772 km of stock adaptive cruise
 overlapping openpilot lateral with factory lateral request/result IDs at 0 and
 openpilot `longActive` false. The historical `recover-drcc` command remains for

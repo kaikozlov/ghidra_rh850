@@ -102,7 +102,7 @@ def cmd_capabilities(_args: argparse.Namespace) -> int:
         "eps-probe": "non-destructive Toyota EPS diagnostic-bus discovery",
         "eps-isolated-probe": "mode/liveness probe of an isolated EPS-side CAN segment",
         "e2e-p05": ["crc", "check", "protect", "recover-data-id"],
-        "variant": "cross-calibration image/corpus evidence extraction",
+        "ram": ["list", "build", "kit"],
         "targets": {name: len(target_capabilities(name)) for name in TARGETS},
     }
     print(json.dumps(payload, indent=2, sort_keys=True))
@@ -140,6 +140,36 @@ def cmd_eps_isolated_probe(args: argparse.Namespace) -> int:
 
 def cmd_variant(args: argparse.Namespace) -> int:
     return _run_path(TOOLS / "variants/extract_variant_evidence.py", args.args)
+
+
+def cmd_ram_list(args: argparse.Namespace) -> int:
+    from exploit.ram_runtime.target_profiles import supported_targets, target_spec
+
+    query = (args.query or "").casefold()
+    for target in supported_targets():
+        spec = target_spec(target)
+        summary = (
+            f"{spec['vehicle']} profile={spec['profile']} "
+            f"payloads={','.join(spec['payloads'])}"
+        )
+        if query and query not in target.casefold() and query not in summary.casefold():
+            continue
+        print(f"{target}\t{summary}")
+    return 0
+
+
+def cmd_ram_build(args: argparse.Namespace) -> int:
+    command = ["--target", args.target, "--codec", args.codec]
+    if args.out is not None:
+        command.extend(("--output-dir", str(args.out)))
+    return _run_path(ROOT / "exploit/ephemeral_runtime/build_tss3_request_signer.py", command)
+
+
+def cmd_ram_kit(args: argparse.Namespace) -> int:
+    return _run_path(
+        TOOLS / "targets/tss3/builders/build_tss3_ram_kit.py",
+        ["--target", args.target, "--out", str(args.out), "--codec", args.codec],
+    )
 
 
 def cmd_target_list(args: argparse.Namespace) -> int:
@@ -239,6 +269,22 @@ def build_parser() -> argparse.ArgumentParser:
     q.add_argument("--data-id", type=_parse_int)
     q.add_argument("--offset", type=int, default=0)
     q.set_defaults(func=cmd_e2e)
+
+    q = sub.add_parser("ram", help="discover/build exact-target RAM-resident payloads")
+    qs = q.add_subparsers(dest="ram_command", required=True)
+    l = qs.add_parser("list", help="list registered RAM-runtime targets and payloads")
+    l.add_argument("query", nargs="?")
+    l.set_defaults(func=cmd_ram_list)
+    b = qs.add_parser("build", help="build the canonical request signer")
+    b.add_argument("target")
+    b.add_argument("--out", type=Path)
+    b.add_argument("--codec", choices=("four-frame", "compact"), default="four-frame")
+    b.set_defaults(func=cmd_ram_build)
+    k = qs.add_parser("kit", help="package one exact target or all registered targets")
+    k.add_argument("target")
+    k.add_argument("--out", type=Path, required=True)
+    k.add_argument("--codec", choices=("four-frame", "compact"), default="four-frame")
+    k.set_defaults(func=cmd_ram_kit)
 
     q = sub.add_parser("target", help="discover/run target-specific workflows")
     qs = q.add_subparsers(dest="target_command", required=True)

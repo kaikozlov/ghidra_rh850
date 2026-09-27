@@ -325,6 +325,49 @@ behavioral domains and selected through stable `tools/test` suite names.
 Implementation locations and capability boundaries are documented in
 [tooling/README.md](tooling/README.md#task-oriented-entry-points).
 
+### RAM-resident TSS3 build and kit workflow
+
+`data/analysis_targets.json` registers which exact firmware targets support a
+maintained RAM payload. Discover that matrix instead of selecting a
+vehicle-named builder:
+
+```bash
+tools/toyota ram list
+tools/toyota ram list corolla
+```
+
+The maintained payload is `tss3-request-signer`. It uses one four-frame
+classic-CAN request contract on every supported target, but emits a distinct
+target-bound binary and metadata file for each registered CodeFlash identity.
+
+```bash
+# Build one target. Without --out, output is under build/out/ram-runtime/TARGET/.
+tools/toyota ram build camry-8965F3307000
+tools/toyota ram build crown-8965F3012000 --out build/out/crown-request-signer
+
+# Package one target, or a target-named set containing every supported target.
+tools/toyota ram kit corolla-8965H1202000 --out EMPTY_KIT_DIRECTORY
+tools/toyota ram kit all --out EMPTY_KIT_SET_DIRECTORY
+```
+
+Output directories must be empty. Each kit contains one payload, one metadata
+contract, the common host runtime, target-bound peer recovery, and
+`./tss3-request-signer`; it does not contain the historical direct-B6 runtime.
+On comma hardware, run `./tss3-request-signer doctor` before any live command.
+`recover-peers` is available in every supported TSS3 kit and derives the EPS
+identity and diagnostic bus from that kit's metadata.
+
+The optional `--codec compact` build is experimental and explicit. Omission
+always selects the four-frame carrier that transports all 28 application
+bytes. Verify source or contract changes with:
+
+```bash
+tools/test tss3_request_signer tss3_post_install_recovery
+```
+
+Historical C7/B6 builders and the old Camry/Corolla packagers live only under
+target `research/` namespaces. They are not alternate current build surfaces.
+
 The `.c` tree is intentionally ignored; it can be reproduced from the tracked
 JSONL without opening Ghidra. The JSONL is generated in one read-only headless
 Ghidra pass rather than thousands of individual CLI calls.

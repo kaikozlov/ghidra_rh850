@@ -683,7 +683,7 @@ check("command-5 launcher uses cooperative Panda lease without stopping manager/
       'kill -STOP "$PANDAD_WRAPPER_PID"' not in command5_launcher_text and
       'kill -CONT "$PANDAD_WRAPPER_PID"' not in command5_launcher_text and
       "start_power_watchdog_keeper" not in command5_launcher_text and
-      "f33_panda_lease.sh" in command5_launcher_text and
+      "tss3_panda_lease.sh" in command5_launcher_text and
       "source \"$PANDA_LEASE_LIB\"" in command5_launcher_text and
       'timeout --signal=TERM --kill-after=2 "${seconds}s"' in command5_launcher_text)
 
@@ -819,7 +819,7 @@ check("command-5 plan is non-actuating and ephemeral", command5_probe.plan(None)
 print("\n== inline B6 signer host-visible state ==")
 from exploit.ephemeral_runtime import camry_f33_b6_inline_signer as inline_signer
 from exploit.ephemeral_runtime import camry_f33_b6_ingress_helper as ingress_helper
-from exploit.ephemeral_runtime import camry_f33_post_install_recovery as post_recovery
+from exploit.ephemeral_runtime import tss3_post_install_recovery as post_recovery
 check("inline signer state remains wholly SID23-readable below the protected boundary",
       inline_signer.STATE_BASE == 0xFEBF025C and inline_signer.STATE_SIZE == 12 and
       inline_signer.STATE_BASE + inline_signer.STATE_SIZE == inline_signer.TELEMETRY_BASE and
@@ -979,7 +979,7 @@ check("inline signer holds every sequential word across multiple foreground tick
       len(fake_session.panda.frames) == 2 * 2 * inline_signer.WORD_REPEAT_COUNT)
 
 print("\n== car-kit packaging ==")
-import tools.targets.camry.builders.build_camry_f33_car_kit as builder
+import tools.targets.camry.research.package_camry_f33_research_kit as builder
 with tempfile.TemporaryDirectory() as td:
     out = Path(td) / "kit"
     manifest = builder.build(out, Path("/Users/kai/dev/inspect/repos/kai-openpilot"))
@@ -1006,7 +1006,7 @@ with tempfile.TemporaryDirectory() as td:
     check("oracle launcher exposes post-repin Brake then FRC recovery under one Panda lease",
           "reset-brake" in oracle_launcher_text and "reset-frc" in oracle_launcher_text and "recover-peers" in oracle_launcher_text and
           oracle_launcher_text.index('restart-domain --domain brake') < oracle_launcher_text.index('restart-domain --domain frc') and
-          'quiesce_panda_owner' in oracle_launcher_text and 'camry_f33_post_install_recovery.py' in oracle_launcher_text)
+          'quiesce_panda_owner' in oracle_launcher_text and 'tss3_post_install_recovery.py' in oracle_launcher_text)
 
     check("kit retains the live-qualified ISO-TP 0x08A MAC oracle as historical primitive evidence",
           oracle["launcher"] == "f33-08a-oracle" and
@@ -1024,21 +1024,9 @@ with tempfile.TemporaryDirectory() as td:
           oracle["mutation_boundary"]["host_08a_transmit"] is False and
           oracle["mutation_boundary"]["eps_08a_transmit"] is False and
           oracle["persistent_flash_write"] is False and oracle["live_qualified"] is True and
-          manifest["ram_experiments"]["order"][1].startswith("08a_mac_oracle is the live-qualified historical") and
+          manifest["ram_experiments"]["order"][0].startswith("08a_mac_oracle is the live-qualified historical") and
           (out / "f33-08a-oracle").is_file() and
           (out / "ram_payloads/camry_f33_08a_oracle_stream_payload.bin").is_file())
-    classic_oracle = manifest["ram_experiments"]["08a_classic_mac_oracle"]
-    check("kit defaults to the proven four-frame raw-classic oracle without overstating qualification",
-          classic_oracle["launcher"] == "f33-08a-classic-oracle" and
-          classic_oracle["request"]["codec"] == "four-frame" and
-          classic_oracle["request"]["carrier"] == "functional-nibble4" and
-          classic_oracle["request"]["frame_count"] == 4 and
-          classic_oracle["persistent_flash_write"] is False and
-          classic_oracle["live_qualified"] is False and
-          manifest["ram_experiments"]["order"][0].startswith("08a_classic_mac_oracle is the selected volatile signer transport") and
-          (out / "f33-08a-classic-oracle").is_file() and
-          (out / "ram_payloads/camry_f33_08a_classic_oracle_payload.bin").is_file() and
-          not (out / "runtime/exploit/ephemeral_runtime/camry_f33_08a_classic_oracle_compact.py").exists())
     inline = manifest["ram_experiments"]["b6_inline_signer"]
     check("kit retains native-B6 verify/replace signer only as historical development tooling",
           inline["launcher"] == "f33-secoc" and
@@ -1071,7 +1059,7 @@ with tempfile.TemporaryDirectory() as td:
           inline["same_cycle_drcc_recovery"]["live_qualified_clear_transport"] is True and
           inline["same_cycle_drcc_recovery"]["live_qualified_after_signer_bootstrap"] is False and
           inline["same_cycle_drcc_recovery"]["observed_vehicle_result"] == "dtc_clear_did_not_restore_drcc_same_ignition_cycle" and
-          manifest["ram_experiments"]["order"][2].startswith("b6_inline_signer is retained only as historical"))
+          manifest["ram_experiments"]["order"][1].startswith("b6_inline_signer is retained only as historical"))
     check("kit bundles the real programming handoff and its transitive dependency",
           all((out / "runtime" / rel).read_bytes() == (ROOT / rel).read_bytes() for rel in (
               "tsk/__init__.py", "tsk/lib/__init__.py", "tsk/lib/programming.py", "tsk/lib/diagnostic_route.py")))
@@ -1211,8 +1199,8 @@ with tempfile.TemporaryDirectory() as td:
         "runtime/exploit/ephemeral_runtime/camry_f33_b6_midaggregate_observer.py",
         "runtime/exploit/ephemeral_runtime/camry_f33_b6_ingress_helper.py",
         "runtime/exploit/ephemeral_runtime/camry_f33_b6_inline_signer.py",
-        "runtime/exploit/ephemeral_runtime/camry_f33_post_install_recovery.py",
-        "runtime/exploit/ephemeral_runtime/f33_panda_lease.sh",
+        "runtime/exploit/ephemeral_runtime/tss3_post_install_recovery.py",
+        "runtime/exploit/ephemeral_runtime/tss3_panda_lease.sh",
         "runtime/exploit/ephemeral_runtime/camry_f33_runtime_replay_discriminator.py",
         "runtime/exploit/followups/xcp_read_probe.py", "runtime/exploit/followups/xcp_daq_probe.py",
         "runtime/tools/targets/camry/live/camry_f33_steering_state_capture.py",
@@ -1232,11 +1220,11 @@ with tempfile.TemporaryDirectory() as td:
           "0x30D68=0x5A" in xcp_observer["live_status"] and
           "stock-native execution disabled" in xcp_observer["live_status"])
     runtime_source = (out / "runtime/exploit/common/ram_exec.py").read_text(encoding="utf-8")
-    lease_source = (out / "runtime/exploit/ephemeral_runtime/f33_panda_lease.sh").read_text(encoding="utf-8")
+    lease_source = (out / "runtime/exploit/ephemeral_runtime/tss3_panda_lease.sh").read_text(encoding="utf-8")
     check("kit packages exact-token cooperative pandad lease helper",
           "kill -WINCH" in lease_source and "openpilot-pandad-direct-ready" in lease_source and
           "DIRECT_PANDA_LEASE_ID" in lease_source and 'kill -STOP "$PANDAD_WRAPPER_PID"' not in lease_source and
-          (out / "runtime/exploit/ephemeral_runtime/f33_panda_lease.sh").stat().st_mode & 0o111)
+          (out / "runtime/exploit/ephemeral_runtime/tss3_panda_lease.sh").stat().st_mode & 0o111)
     check("kit embeds fixed P1M-E roots without standalone secret files",
           "ba052435f8843f985fd1329d2b6117b0" in runtime_source and
           "f05f36b7d78c03e24ab4faef2a57d044" in runtime_source and
@@ -1255,10 +1243,10 @@ with tempfile.TemporaryDirectory() as td:
           'kill -STOP "$PANDAD_WRAPPER_PID"' not in secoc_launcher_text and
           'kill -CONT "$PANDAD_WRAPPER_PID"' not in secoc_launcher_text and
           "start_power_watchdog_keeper" not in secoc_launcher_text and
-          "f33_panda_lease.sh" in secoc_launcher_text and
+          "tss3_panda_lease.sh" in secoc_launcher_text and
           "source \"$PANDA_LEASE_LIB\"" in secoc_launcher_text and
           "load-arm" in secoc_launcher_text and "recover-drcc" in secoc_launcher_text and
-          "camry_f33_post_install_recovery.py" in secoc_launcher_text and
+          "tss3_post_install_recovery.py" in secoc_launcher_text and
           "quiet-source" in secoc_launcher_text and "replace-once" in secoc_launcher_text and
           "verify_openpilot_ready_parked" in secoc_launcher_text and
           secoc_launcher_text.index("verify_openpilot_ready_parked") < secoc_launcher_text.rindex("quiesce_panda_owner") and

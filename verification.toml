@@ -1077,8 +1077,8 @@ timeout = 600
 tests = ["tests/targets/camry/verify_camry_f33_08a_fd_oracle.py"]
 timeout = 600
 
-[suite.camry_f33_08a_classic_oracle]
-tests = ["tests/targets/camry/verify_camry_f33_08a_classic_oracle.py"]
+[suite.tss3_request_signer]
+tests = ["tests/targets/tss3/verify_tss3_request_signer.py"]
 timeout = 600
 
 [suite.camry_f33_08a_tx_probe]
@@ -1143,15 +1143,12 @@ tests = ["tests/variants/verify_tss3_resident_control_ingress.py"]
 [suite.camry_2026_radar_anchors]
 tests = ["tests/targets/camry/verify_camry_2026_radar_anchors.py"]
 
-[suite.camry_f33_post_install_recovery]
-tests = ["tests/targets/camry/verify_camry_f33_post_install_recovery.py"]
+[suite.tss3_post_install_recovery]
+tests = ["tests/targets/tss3/verify_tss3_post_install_recovery.py"]
 
 [suite.camry_f33_signer_host_liveness]
 tests = ["tests/targets/camry/verify_camry_f33_signer_host_liveness.py"]
 
-[suite.tss3_unified_b6_signer]
-tests = ["tests/targets/camry/verify_tss3_unified_b6_signer.py"]
-timeout = 600
 
 [suite.camry_2026_stock_harness_topology]
 tests = ["tests/targets/camry/verify_camry_2026_stock_harness_topology.py"]

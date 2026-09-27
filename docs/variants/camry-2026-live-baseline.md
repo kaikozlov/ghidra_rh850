@@ -4236,8 +4236,8 @@ sequence, or `0x08A` arbitration policy. `0x08A` remains a read-only/forwarded s
 request-plane object and is not an openpilot Tx object. The current Panda forwarding fix is
 unchanged at `panda@4130c4a9`.
 
-`tools/targets/camry/builders/build_camry_f33_car_kit.py` materializes the standalone probe, exact runbook, hashes,
-and repository revisions under `build/out/camry-f33-car-kit/` for the in-car session.
+The historical `tools/targets/camry/research/package_camry_f33_research_kit.py`
+materializes the standalone probe, exact runbook, hashes, and repository revisions for this in-car session.
 
 ### 57.4 2026-09-01: final-compare-only Gate-2 patch does not deliver the injected ID11 payload
 
