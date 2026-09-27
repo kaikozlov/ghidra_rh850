@@ -314,7 +314,7 @@ def cmd_selftest(_args: argparse.Namespace) -> int:
 
 
 def cmd_codeflash_sim(args: argparse.Namespace) -> int:
-    from rh850_codeflash import CodeFlashSimError, load_spec, run
+    from tools.rh850_codeflash import CodeFlashSimError, load_spec, run
 
     image = args.image if args.image.is_absolute() else ROOT / args.image
     output_dir = args.output_dir
