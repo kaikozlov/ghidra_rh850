@@ -1,211 +1,203 @@
 # Agent instructions
 
-Operating contract for changing this repository. What the firmware *is*:
-`docs/OVERVIEW.md`. How to run the tooling: `docs/WORKFLOW.md`.
+Stable operating contract for this repository. Project scope and evidence model:
+[docs/OVERVIEW.md](docs/OVERVIEW.md). Commands and lifecycle:
+[docs/WORKFLOW.md](docs/WORKFLOW.md). Report navigation:
+[docs/README.md](docs/README.md).
 
 ## Source-of-truth hierarchy
 
-1. **Firmware bytes and deterministic verification** (`firmware/`, `tests/`)
-2. **Generated artifacts** (`data/` generated CSVs — regenerate, never hand-edit)
-3. **Curated evidence tables** (`data/` hand-maintained CSVs — edit intentionally, validate with tests)
-4. **Annotated Ghidra projects** (`projects/<target>/` committed snapshots)
-5. **Narrative documentation** (`docs/`), then historical notes (`docs/status/CORRECTIONS.md`)
+1. **Primary evidence and deterministic verification** — exact firmware bytes
+   for firmware behavior; identity-bound captures for observed vehicle behavior;
+   tests establish only the behavior or binary invariant they exercise.
+2. **Generated artifacts** — regenerate from their inputs; never hand-edit.
+3. **Curated evidence tables** — edit intentionally; validate relevant executable
+   or binary invariants, not incidental prose or metadata.
+4. **Annotated Ghidra projects** — committed snapshots for the selected target.
+5. **Narrative documentation and historical ledgers** — interpretations, not proof.
 
-The firmware is the single source of truth; the docs are falsifiable
-approximations. For firmware/vehicle-behavior questions, go to the Ghidra CLI
-against the binary first (`tools/g`, `tools/pseudo`) — never read our own
-docs/tests as primary sources. Naming a function without decompiling it is
-slop; verify firmware claims from gate code, not spec knowledge.
+For firmware questions, inspect the exact target through `tools/gtarget` /
+`tools/pseudo` before making a claim. Decompile a function before naming its role;
+verify important gates from disassembly/bytes and dataflow, not spec knowledge
+or our own tests/docs. Static firmware analysis alone does not prove physical
+vehicle behavior. Captured observations retain their software, harness, clock,
+and operating-state boundaries.
 
-For **openpilot/comma integration-design questions** the priority reverses:
-current upstream openpilot/opendbc/Panda is the design reference. Firmware
-evidence defines only what is genuinely target-specific (wire format, buses,
-scaling, limits, capabilities, actual incompatibilities) — it is not an
-invitation to add policy. -- The goal is native openpilot/comma integrattion.
+For openpilot/comma integration design, **current upstream openpilot/opendbc/Panda**
+is the reference. Firmware defines genuinely target-specific constraints, not
+an invitation to add policy. A pinned historical comparison is not current upstream.
+
+Keep confidence separate from evidence source. Use **verified**, **observed**,
+**recovered**, **bounded**, **hypothesis**, and **disproved** as defined in
+[FINDINGS.md](docs/status/FINDINGS.md#evidence-model).
+Code implemented, offline checks passed, software deployed, and vehicle behavior
+observed are different claims; never use one as a substitute for another.
 
 ## Non-negotiable hazards
 
-- **Never open committed `projects/` with a Ghidra daemon** — any open compacts
-  the DB and dirties the tree. Work only in the selected target's registered `build/work/` path (`make work-project`).
-- **Stop the relevant daemon before copying, staging, or snapshotting its
-  working project** — only clean teardown persists in-memory edits durably.
-  Ordinary source/documentation commits are safe while daemons run because
-  working projects and their transient `.lock`/`tmp*` files live under ignored
-  `build/`. Confirm the daemon for every project being promoted is stopped;
-  use the global `pgrep -f 'AnalyzeHeadless.*rh850'` check only when promoting
-  multiple/default projects whose ownership is ambiguous.
-- **Never point a rebuild at `projects/`.** Promote only with
-  `make snapshot-project` (end of session: `make finalize-project`).
-- **SIENNA CodeFlash VA = file offset − `0x8000`** (DataFlash prefix).
-- **`build/` is workspace state, never evidence authority.** Portable
-  verification must pass without it; promote any input verification depends on
-  to a tracked location first.
-- **Do not collapse the four-stage rebuild** — seed timing changes Ghidra's
-  recovered graph (docs/WORKFLOW.md §"The four-stage analysis").
+- **Never open committed `projects/` with Ghidra.** Opening compacts the database.
+  Work only in the selected target's registered `build/work/` path.
+- **Stop the relevant daemon before copying or promoting its working project.**
+  Only clean teardown persists in-memory edits durably. Ordinary source/docs
+  commits are safe while daemons run: working databases and locks are ignored.
+  Confirm each promoted project's daemon has stopped; use the global
+  `pgrep -f 'AnalyzeHeadless.*rh850'` check only when ownership is ambiguous.
+- **Never rebuild into `projects/`.** Use the documented `make work-project`,
+  `make rebuild-project`, and `make snapshot-project` / `make finalize-project`
+  lifecycle for the selected target.
+- **Do not collapse the four-stage rebuild.** Seed timing changes Ghidra's
+  recovered graph; follow [the workflow](docs/WORKFLOW.md).
+- **Sienna's `−0x8000` offset applies only to its DataFlash-prefixed combined
+  image.** The split CodeFlash file starts at CodeFlash VA zero. Other targets
+  use their own registered bases and image layouts.
+- **`build/` and `REFERENCE/` are workspace/context, never evidence authority.**
+  Portable checks must not require pre-existing ignored inputs. Promote required
+  evidence deliberately; keep external-corpus checks explicitly gated.
+- Preserve committed firmware and raw captures. Correct an interpretation or
+  create an explicitly identified derivative; never silently repair source bytes.
 
-## Testing
+## Target selection and tools
 
-Verification is **explicit and narrow**. `tools/test` with no selector runs
-nothing. Run the smallest suite that exercises code or evidence you actually
-changed, e.g. `tools/test camry_f33_b6_stationary_probe`. Documentation-only,
-status-ledger, provenance-metadata, and research-note edits require **no tests**.
+`data/analysis_targets.json` owns the default target, image identities, paths,
+rebuild inputs, inventories, and decompiler corpora. Discover before selecting
+an address; never assume the default is Sienna or transfer an address by family
+name. Name the target explicitly in address-based documentation examples.
 
-Do not create tests whose purpose is to prove that Markdown, FINDINGS,
-CORRECTIONS, generated indexes, or provenance locks contain particular prose or
-IDs. Tests should protect executable behavior, critical binary invariants,
-artifact regeneration, or a genuinely fragile recovered machine-level fact.
+| Task | Public command |
+|---|---|
+| Discover target identity and paths | `tools/gtarget list`, `tools/gtarget show TARGET` |
+| Ghidra against the default target | `tools/g decompile ADDR`, `tools/g inspect ADDR --decompile --callers --disasm 40`, `tools/g session-status`, `tools/g stop` |
+| Ghidra against an explicit target | `tools/gtarget TARGET ...` |
+| Read a tracked corpus | `tools/pseudo --target TARGET QUERY`, `tools/pseudo --target TARGET --stats` |
+| Discover / preview verification | `tools/test list [query]`, `tools/test plan SELECTOR` |
+| Run selected verification | `tools/test SELECTOR` |
+| RH850 compilation / instruction simulation | `tools/rh850` |
+| GTS+ / Toyota vocabulary / CUW evidence | `tools/gts` |
+| Toyota capability / workflow discovery | `tools/toyota capabilities`, `tools/toyota target list FAMILY`, `tools/toyota variant list` |
+| Findings, questions, and report lookup | `tools/know QUERY` |
+| Generated artifact / producer discovery | `tools/artifact list`, `tools/artifact show ARTIFACT`, `tools/artifact regen ARTIFACT` |
 
-`tools/test full`, `local`, processor/SLEIGH gates, and external-corpus sweeps are
-manual milestone/release tools. They are not an edit loop and must not be run
-after unrelated RE/documentation work.
+`TARGET`, `QUERY`, `SELECTOR`, `FAMILY`, and `ARTIFACT` above are arguments, not
+literal example values. Prefer these task commands over implementation filenames.
+`tools/know` is navigation, not an evidence oracle.
+
+Run `uv sync --locked` for the editable Python installation. Use normal package
+imports and `tools.REPO_ROOT` for repository-owned files; do not add `sys.path`,
+`PYTHONPATH`, or fixed-file dynamic-import bootstraps to packaged tooling/tests.
+Keep caller-relative paths distinct from repository-owned inputs; a one-off
+analysis script loading an explicitly passed external checkout (e.g. an
+openpilot root) through `sys.path` is caller input, not repository-owned
+importing. The documented
+repository-root dispatch behavior of `tools/toyota` and `tools/artifact regen`
+is intentional.
+
+`tools/g` bootstraps the isolated Ghidra environment and working project itself.
+Never manually source `build/cache/ghidra-processor.env`. `GHIDRA_AGENT=1` selects
+compact JSON. Use the target's session status and clean `stop` before promotion.
+All one-shot Ghidra execution goes through `tools/project/run_headless`.
+
+The registered decompiler corpus is derived evidence: pseudocode for understanding,
+xrefs/dataflow for tracing, disassembly/bytes for proof. Prefer `--data-ref` to
+grepping decompiler spelling, but it is not an exhaustive live-xref census.
+After graph, naming, type, calling-convention, or processor-semantic changes,
+regenerate the selected target's corpus from a fresh rebuild matching its
+canonical inventory. Commands and prerequisites belong in `docs/WORKFLOW.md`.
 
 ## Snapshot policy
 
-Direct CLI mutations are exploratory. Anything persistent — renames, function
-creation, signatures, types, comments, overlays — must be represented in
-tracked rebuild inputs before snapshotting: `tools/annotations` /
-`data/annotations/annotation_ledger.jsonl` for mechanical renames, data
-labels, and listing comments; seed/annotation scripts for semantic recovery.
+Direct CLI mutations are exploratory. Persistent renames, functions, signatures,
+types, comments, and overlays must be represented in tracked rebuild inputs
+before snapshotting.
 
-## Tools
+- The existing `tools/annotations` / `data/annotations/annotation_ledger.jsonl`
+  mechanism is **legacy-Sienna-only**: mechanical renames, labels, and listing
+  comments. It is not a generic multi-target annotation service.
+- Other registered targets use their target-specific seed/annotation scripts.
+  Semantic recovery belongs in those scripts, not a mechanical ledger.
 
-Remember task commands, not implementation files:
+See [annotation ownership](docs/tooling/annotation-ledger.md) and the
+[project lifecycle](docs/WORKFLOW.md) before recording or promoting edits.
 
-| Task | Command |
-|---|---|
-| Verification | `tools/test <suite-or-prefix>` (explicit only; no selector runs nothing) |
-| Discover / preview suites | `tools/test list [query]`, `tools/test plan <suite-or-prefix>` |
-| Ghidra / pseudocode | `tools/g`, `tools/pseudo` |
-| RH850 target compilation / instruction simulation | `tools/rh850` |
-| GTS+ / Toyota vocabulary / CUW routes | `tools/gts` |
-| Toyota platform capabilities (SecOC, E2E, DataFlash, EPS probe, target workflows) | `tools/toyota capabilities` |
-| Repository knowledge (findings, corrections, open questions) | `tools/know QUERY` |
-| Generated artifacts / producers | `tools/artifact list/show/regen` |
-| Registered analysis targets | `tools/gtarget list`, `tools/gtarget show TARGET` |
-| Target / cross-variant workflow discovery | `tools/toyota target list camry`, `tools/toyota target list corolla`, `tools/toyota variant list` |
+## Testing
 
-`tools/gtarget TARGET ...` runs Ghidra commands against a configured target. Registered rebuild inputs, stage
-scripts, image identities, and corpus paths live in
-`data/analysis_targets.json`; generic target tooling must not bake in
-vehicle-specific paths.
+Verification is **explicit and narrow**. Bare `tools/test` runs nothing.
+Discover and preview the smallest selector that exercises the changed code or
+evidence. `verification.toml` owns suite selection and prerequisites; do not
+create another registry or Make wrapper layer.
 
-Daily commands: `uv sync --locked` (one-time), an explicit `tools/test <suite>`
-when needed, and optionally `tools/test core` / `make verify-core`. The broader
-gate surface (`@exploit`, `verify-full`, `verify-local`, `verify-sleigh`,
-`verify-processor`, …) is
-enumerated in `docs/WORKFLOW.md` §Verification — don't recreate it as Make
-wrappers or new registries; `verification.toml` and the discovery commands
-above are the source of truth.
+- Permanent tests protect plausible consumer-visible failures, parsing boundaries,
+  state transitions, artifact regeneration, or fragile machine-level invariants.
+- Do not test Markdown wording, ledger IDs, source spelling, copied constants,
+  incidental counts, import wiring, or mock echoes. Remove obsolete checks rather
+  than repinning them to a refactor.
+- Exercise changed behavior, not merely compilation or a mocked success path.
+  Use a bounded offline/throwaway smoke when a permanent regression adds no value.
+  Do not turn verification into an unrequested live vehicle experiment.
+- Documentation-only, ledger, provenance-metadata, and research-note edits need
+  **no test suites**. Check changed links and benign command examples instead.
+- `full`, `local`, processor/SLEIGH gates, and external-corpus sweeps are deliberate
+  milestone/debugging tools, not the edit loop.
 
-### tools/g (interactive Ghidra)
+Report only checks actually run and their evidence limits. A passing suite is
+not whole-project correctness, a hardware result, or production qualification.
 
-`tools/g` is fully self-contained — it bootstraps the isolated processor
-environment and materializes the working project itself. **Never** `source
-build/cache/ghidra-processor.env` manually.
+## Implementation discipline
 
-```bash
-tools/g decompile 0x8549e
-tools/g inspect 0x8549e --decompile --callers --callees --xrefs --disasm 40
-tools/g x-ref trace-to 0xfebe5504 --disasm 20
-printf 'stats\nquery functions --count\n' | tools/g batch --read-only -
-tools/g session-status   # daemon state, mutation marker, snapshot diff
-tools/g stop             # persist working-copy edits (does NOT promote)
-```
-
-It refuses the committed `projects/` namespace. `GHIDRA_AGENT=1`
-gives compact JSON output. To promote a finished working copy into the
-committed snapshot, use `make finalize-project`.
-
-### tools/pseudo (persistent decompiler corpus)
-
-Use the tracked whole-image corpus for broad reading, search, and
-cross-function reasoning before dropping to individual CLI calls:
-
-```bash
-tools/pseudo 0x6fec
-tools/pseudo security_access --list
-tools/pseudo --data-ref 0xfebef02a   # canonical RAM xrefs, alias-independent
-make pseudocode                      # materialize build/out/pseudocode/*.c
-```
-
-`data/generated/decompilations.jsonl` is derived evidence, not firmware
-truth: pseudocode for understanding, xrefs/dataflow for tracing,
-disassembly/bytes for proof. Prefer `--data-ref` over grepping decompiler
-spelling. After any graph, naming, type, calling-convention, or processor
-semantic change, regenerate with `make generate-decompiler-corpus` against a
-fresh rebuilt project that exactly matches the canonical inventory.
-
-All one-shot Ghidra execution goes through `tools/project/run_headless`.
-
-## Evidence language
-
-Grades (full definitions and ledger in `docs/status/FINDINGS.md`):
-**verified** (asserted by a deterministic test), **observed** (directly
-observed, not test-reproduced), **recovered** (flow substantially
-reconstructed), **bounded** (interpretation constrained, exact semantics
-unknown), **hypothesis** (plausible, unverified), **disproved** (retained to
-prevent regression). Keep the evidence **source** (`firmware-static` /
-`dynamic-probe` / `generated-artifact` / `external-source`) distinct from
-confidence.
+- Find the existing owner before adding a file, helper, command, or abstraction.
+  Reuse capability/target namespaces; preserve the short public command surface.
+- Consolidate repeated mechanics where they are genuinely shared. Keep calibration
+  addresses, scaling, timing, and interpretation local. Do not replace duplication
+  with a giant utility module, plugin system, or speculative framework.
+- Use the existing target registry, verification configuration, and derived artifact
+  catalog. Do not create parallel manifests or manually maintained copies of facts
+  already available from code or evidence.
+- Make the requested change, not adjacent retries, guards, telemetry, policy, or
+  future-proofing. A new abstraction needs a concrete responsibility or real reuse.
+- On a cutover, migrate callers and remove obsolete code, aliases, forwarding
+  modules, comments, and instructions. Do not retain compatibility scaffolding
+  without an actual supported consumer.
+- Trace consumers before deleting dated experiments or outputs. Age is not
+  redundancy; distinct evidence must not disappear in a cosmetic cleanup.
 
 ## Openpilot integration: native-shape rule
 
-Canonical contract: [docs/architecture/toyota-openpilot-porting-contract.md](docs/architecture/toyota-openpilot-porting-contract.md).
-Operating summary:
+Follow [the porting contract](docs/architecture/toyota-openpilot-porting-contract.md).
+Before adding a target-specific branch, find how current upstream implements
+the same feature; use that mechanism when it works.
 
-- Start from current upstream comma/openpilot and make the **smallest
-  target-specific change** required to support the car. The burden of proof is
-  on a deviation from upstream, never on re-proving upstream behavior from
-  firmware.
-- Keep normal ownership boundaries: `controlsd` owns engagement and
-  `CC.latActive`; `CarInterface`/`CarParams` describe the vehicle;
-  `CarState` decodes; `CarController` encodes; Panda applies the ordinary
-  safety model and TX whitelist. No second permission system, no
-  controller-side steering vetoes, no Panda enforcement of receiver behavior,
-  no request/status bit promoted to an authority signal without proof.
-- No speculative safety policy: unknown target semantics stay unmapped or use
-  the normal upstream mechanism — never a guard, timer, threshold, interlock,
-  special Param, debug mode, or alternate state machine "just to be safe."
-- The F33 bring-up experiments (private lateral-arming Params, fake SecOC-key
-  availability, diagnostic/oracle arming, `ALLOW_DEBUG` shadow-safety modes,
-  dynamic harness modes, controller-side permission vetoes, Panda `0x00F`/B6
-  sequence/`0x08A` gates, template-wide required-zero checks, global Toyota
-  changes for this one target) were scaffolding, not architecture. Keep them
-  out of the normal driving path unless an actual upstream-equivalent
-  requirement is later proven.
+- Make the smallest demonstrated target-specific change. The burden of proof is
+  on a deviation from upstream, not on re-proving upstream behavior from firmware.
+- `controlsd` owns engagement and `CC.latActive`; `CarInterface`/`CarParams`
+  describe the vehicle; `CarState` decodes; `CarController` encodes; Panda applies
+  the ordinary safety model and TX whitelist.
+- No second permission system, controller-side steering veto, or Panda replica
+  of receiver behavior. Do not promote a request/status bit to authority without proof.
+- Unknown semantics stay unmapped or use the normal upstream mechanism. Do not
+  invent a guard, timer, threshold, interlock, Param, or alternate state machine
+  “just to be safe.”
+- Experimental arming, fake capability flags, and debug-only safety paths are
+  not architecture. Do not promote bring-up scaffolding into the normal driving path.
 
-Before adding any Camry/TSS3-specific runtime branch, search current upstream
-for how the same feature is normally implemented; if the normal mechanism
-works, use it.
+## Documentation and scope discipline
 
-## Documentation
-
-Write down conclusions where they are useful to future work, usually in the
-existing subsystem/variant report. **Do not stop active RE to manufacture a
-FINDINGS row, CORRECTIONS row, verification owner, cross-reference footer, or
-provenance record.** The status ledgers are historical/navigation aids, not a
-transaction log and not a completeness requirement. Batch ledger cleanup at
-meaningful milestones if it provides value.
-
-Record exact hashes/commits only when an external artifact is directly required
-to reproduce a technical result. Do not pin incidental files just so they can be
-verified later. Routine fixes belong in code and the commit message.
-
-## Scope discipline
-
-- Findings are specific to their individual calibration until proven
-  otherwise; record transfers as **hypothesis** in `docs/variants/`.
-- Do not project application-mode or related-variant probe expectations onto
-  the bootloader DID table (or vice versa).
-- Do not invent OEM field names unavailable in the firmware; use bounded
-  structural names.
-- Don't prematurely declare a path "not security-relevant" — thorough
-  reference analysis serves all future RH850 vehicles.
-
-## Navigation
-
-- Operating manual: [docs/WORKFLOW.md](docs/WORKFLOW.md)
-- Documentation map: [docs/README.md](docs/README.md)
-- Current priorities: [docs/status/PRIORITIES.md](docs/status/PRIORITIES.md)
-- Ledgers: [docs/status/FINDINGS.md](docs/status/FINDINGS.md) · [docs/status/CORRECTIONS.md](docs/status/CORRECTIONS.md) · [docs/status/OPEN_QUESTIONS.md](docs/status/OPEN_QUESTIONS.md)
-- Historical journals: [docs/history/README.md](docs/history/README.md)
+- Keep one owner for each conclusion: the existing target/subsystem report.
+  README is onboarding/navigation; OVERVIEW is scope/evidence; WORKFLOW owns
+  commands; PRIORITIES is a short queue. Do not copy runtime status into all four.
+- Identify the target and relevant revision/capture checkpoint when recording an
+  implementation or result. “Current” inside an old audit is not today's software.
+  An architecture change does not inherit the previous configuration's road result.
+- When a conclusion or interface is superseded, replace competing present-tense
+  summaries and repair incoming links. Retain useful historical observations with
+  explicit scope; do not append another contradictory “current-state” paragraph.
+- Do not create a new report, checklist, handoff, provenance manifest, or progress
+  journal when an existing owner suffices. Keep source hashes/commits when required
+  to reproduce a result, not as incidental decoration.
+- FINDINGS, CORRECTIONS, and OPEN_QUESTIONS are historical/navigation aids, not a
+  transaction log or a guaranteed-current mirror. Do not interrupt active RE to
+  manufacture ledger rows, verification owners, cross-reference footers, or prose tests.
+- Findings remain calibration-specific; transfers start as **hypothesis**.
+  Keep bootloader/application modes separate and use bounded structural names
+  rather than inventing OEM field names. Do not declare a path “not security-relevant”
+  without the reference analysis needed to support that boundary.
+- Keep this file a stable contract. Revise or remove stale rules instead of
+  accumulating session-specific exceptions, completion notes, or runtime inventories.
