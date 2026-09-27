@@ -752,7 +752,7 @@ Ready now:
   the telescope-observed old-stack bootstrap without post-auth substitution, and
   refuses to expose command 5;
 - offline modeled execution is closed on both tracked H/F images by the
-  `codeflash_sim` gate (`tests/verify_codeflash_sim.py`);
+  `codeflash_sim` gate (`tests/firmware/verify_codeflash_sim.py`);
 - the second-stage slot-4 probe is operationalized but remains hardware-gated:
   `exploit/ephemeral_runtime/corolla_hf_direct_command5.py` packages the hardened
   proxy into exact envelope SHA-256 `a81b367f...140bfc5`, requires the successful

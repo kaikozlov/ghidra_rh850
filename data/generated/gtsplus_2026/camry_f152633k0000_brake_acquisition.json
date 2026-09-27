@@ -45,8 +45,8 @@
       "parameter_file": "P5-Unified.ini",
       "prepare_writer": "TCUWCanUnifiedPrepareWriter.dll"
     },
-    "host_dataflow_verification": "TMS-049 / tests/verify_techstream_tis_calibration_acquisition.py",
-    "result_selection_verification": "TMS-050 / tests/verify_techstream_tis_calibration_selection.py",
+    "host_dataflow_verification": "TMS-049 / tests/techstream/verify_techstream_tis_calibration_acquisition.py",
+    "result_selection_verification": "TMS-050 / tests/techstream/verify_techstream_tis_calibration_selection.py",
     "route_kind": "Toyota/TIS ECU-supply-change search",
     "search_inputs": {
       "baseSwNoLst_from_counted_did_f181": [
@@ -368,10 +368,10 @@
       "sha256": "3a344b6cb2de19edb163e040974955f2d27467dc0a864974b6a5af90659d308f"
     },
     "data/generated/techstream_v18/cuw_frc_corpus.json": {
-      "sha256": "8e83dc0c3a48eb6ab95637447f74b6b87698f23ae0d325db5935d9bdfd40475d"
+      "sha256": "eeca82ddf15bab993fd1942acf318f2c5308c73bd7d9f8c0c6983081d32cbd60"
     },
     "data/generated/techstream_v18/tss3_b6_sender_attribution.json": {
-      "sha256": "a9911d1bccc649f8008ae1f076ca65711c848747afbc5d29aef6e9321c128296"
+      "sha256": "c38891ce3a96d5e20fc4fc7599076a8defd65bee76683ec974c33013cf887110"
     },
     "software/locks/gtsplus.json": {
       "sha256": "f6f5a072d3ef890787b9e09f7b54fed6dc00d3e367a66f632a05a435bbe2e5ed"

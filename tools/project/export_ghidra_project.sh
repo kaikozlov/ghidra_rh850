@@ -177,7 +177,7 @@ grep -Fq "$SUCCESS_MARKER" "$LOG" || {
 
 case "$PROFILE" in
   application-tx-producers)
-    uv run --locked python "$ROOT/tools/firmware/generate_application_tx_producer_evidence.py" \
+    uv run --locked python -m tools.firmware.generate_application_tx_producer_evidence \
       --refs "$RAW_REFS" \
       --output "$PRIMARY_OUT"
     ;;

@@ -12,7 +12,6 @@ import argparse
 import hashlib
 import json
 import struct
-import sys
 import tempfile
 from pathlib import Path
 from typing import Any
@@ -20,16 +19,14 @@ from typing import Any
 import pefile
 from Crypto.Cipher import AES
 from Crypto.Hash import CMAC
+from tools.techstream.recover_cp_bodies import recover
+from tools import REPO_ROOT
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from recover_cp_bodies import recover
-
-REPO = Path(__file__).resolve().parents[2]
-DEFAULT_OUT = REPO / "data/generated/gtsplus_2026/reprogramming_root_pair_analysis.json"
-TARGETS = REPO / "data/analysis_targets.json"
-EPS_CODEFLASH = REPO / "firmware/RH850_P1M-E_CodeFlash.bin"
-SRS_CODEFLASH = REPO / "community/yc/venza/cflash.bin"
+DEFAULT_OUT = REPO_ROOT / "data/generated/gtsplus_2026/reprogramming_root_pair_analysis.json"
+TARGETS = REPO_ROOT / "data/analysis_targets.json"
+EPS_CODEFLASH = REPO_ROOT / "firmware/RH850_P1M-E_CodeFlash.bin"
+SRS_CODEFLASH = REPO_ROOT / "community/yc/venza/cflash.bin"
 
 EPS_PAYLOAD_OFFSET = 0xBFD8
 EPS_SA_OFFSET = 0xBFE8
@@ -252,7 +249,7 @@ def tracked_eps_reuse(pair: bytes) -> list[dict[str, Any]]:
     registry = json.loads(TARGETS.read_text(encoding="utf-8"))["targets"]
     out: list[dict[str, Any]] = []
     for name, target in registry.items():
-        path = REPO / target["codeflash"]
+        path = REPO_ROOT / target["codeflash"]
         raw = path.read_bytes()
         offset = raw.find(pair)
         out.append(
@@ -286,7 +283,7 @@ def build() -> dict[str, Any]:
         formula for formula, value in fingerprints["eps"].items() if fingerprints["srs"][formula] == value
     ]
 
-    with tempfile.TemporaryDirectory(prefix="gtsplus-reprogramming-roots-", dir=REPO / "build/tmp") as td:
+    with tempfile.TemporaryDirectory(prefix="gtsplus-reprogramming-roots-", dir=REPO_ROOT / "build/tmp") as td:
         recovered = Path(td) / "recovered"
         manifest = recover(output=recovered, only=list(RECOVERED_NAMES))
         paths = {name: recovered / name for name in RECOVERED_NAMES}
@@ -338,14 +335,14 @@ def build() -> dict[str, Any]:
         "schema": "ghidra-rh850-reprogramming-root-pairs-v1",
         "firmware_roots": {
             "eps": {
-                "source": str(EPS_CODEFLASH.relative_to(REPO)),
+                "source": str(EPS_CODEFLASH.relative_to(REPO_ROOT)),
                 "source_sha256": sha256_file(EPS_CODEFLASH),
                 "payload_build": {"offset": f"0x{EPS_PAYLOAD_OFFSET:X}", "value": eps_payload.hex()},
                 "boot_security_access": {"offset": f"0x{EPS_SA_OFFSET:X}", "value": eps_sa.hex()},
                 "adjacent_payload_then_sa": EPS_PAYLOAD_OFFSET + BLOCK == EPS_SA_OFFSET,
             },
             "srs": {
-                "source": str(SRS_CODEFLASH.relative_to(REPO)),
+                "source": str(SRS_CODEFLASH.relative_to(REPO_ROOT)),
                 "source_sha256": sha256_file(SRS_CODEFLASH),
                 "payload_build": {"offset": f"0x{SRS_PAYLOAD_OFFSET:X}", "value": srs_payload.hex()},
                 "boot_security_access": {"offset": f"0x{SRS_SA_OFFSET:X}", "value": srs_sa.hex()},

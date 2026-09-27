@@ -16,21 +16,18 @@ import json
 from pathlib import Path
 import re
 import struct
-import sys
-
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-from parse_ddb import DDBParser  # noqa: E402
-from ddb_strings import load_string_db
-from techstream_paths import V18_TECHSTREAM_ROOT  # noqa: E402
+from tools.techstream.parse_ddb import DDBParser
+from tools.techstream.ddb_strings import load_string_db
+from tools.techstream.techstream_paths import V18_TECHSTREAM_ROOT
+from tools import REPO_ROOT
 
 
-REPO = Path(__file__).resolve().parents[2]
 DEFAULT_ROOT = V18_TECHSTREAM_ROOT
-DEFAULT_OUTPUT = REPO / "data/generated/techstream_v18/application_interface_correlations.json"
+DEFAULT_OUTPUT = REPO_ROOT / "data/generated/techstream_v18/application_interface_correlations.json"
 SIGNAL_INFO_DLL = DEFAULT_ROOT / "bin/GetDatMonSignalInfoP5_DT.dll"
 KGP_DLL = DEFAULT_ROOT / "bin/KgpDataCtrl.dll"
-DBC = REPO / "REFERENCE/opendbc/opendbc/dbc/generator/toyota/toyota_secoc_pt.dbc"
-RX_MAP = REPO / "data/application_rx_map.csv"
+DBC = REPO_ROOT / "REFERENCE/opendbc/opendbc/dbc/generator/toyota/toyota_secoc_pt.dbc"
+RX_MAP = REPO_ROOT / "data/application_rx_map.csv"
 TARGET_MONITORS = (60, 402, 403)
 REGIONS = ("NA", "EU", "JP")
 
@@ -219,7 +216,7 @@ def firmware_command_side() -> dict:
             ),
         },
         "public_dbc": {
-            "relative_path": DBC.relative_to(REPO).as_posix(),
+            "relative_path": DBC.relative_to(REPO_ROOT).as_posix(),
             "sha256": sha256(DBC),
             "message_can_id": "0x2E4",
             "message_name": "STEERING_LKA",
@@ -288,11 +285,11 @@ def build(root: Path) -> dict:
         "source": "Techstream V18.00.003 + pinned Toyota opendbc",
         "artifacts": {
             "kgp_data_ctrl": {
-                "relative_path": KGP_DLL.relative_to(REPO).as_posix(),
+                "relative_path": KGP_DLL.relative_to(REPO_ROOT).as_posix(),
                 "sha256": sha256(KGP_DLL),
             },
             "p5_signal_info": {
-                "relative_path": SIGNAL_INFO_DLL.relative_to(REPO).as_posix(),
+                "relative_path": SIGNAL_INFO_DLL.relative_to(REPO_ROOT).as_posix(),
                 "sha256": sha256(SIGNAL_INFO_DLL),
             },
         },

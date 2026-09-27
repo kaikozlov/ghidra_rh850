@@ -9,12 +9,17 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
-from recover_cp_bodies import recover as recover_cp_bodies
-from recover_cp_bodies import recover_auxiliary
-from recover_gtsplus_bodies import recover as recover_gtsplus_bodies
-from techstream_paths import REPO, resolve_gts_root
+from tools.techstream.recover_cp_bodies import recover as recover_cp_bodies
 
-DEFAULT_OUTPUT = REPO / "build/out/gts-all-unprotected"
+from tools.techstream.recover_cp_bodies import recover_auxiliary
+
+from tools.techstream.recover_gtsplus_bodies import recover as recover_gtsplus_bodies
+
+from tools import REPO_ROOT
+from tools.techstream.techstream_paths import resolve_gts_root
+
+
+DEFAULT_OUTPUT = REPO_ROOT / "build/out/gts-all-unprotected"
 ProgressCallback = Callable[[str, int, int, Path], None]
 
 

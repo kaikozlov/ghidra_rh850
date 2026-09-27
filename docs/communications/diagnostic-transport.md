@@ -10,7 +10,7 @@
 >
 > **Canonical artifacts:** —
 >
-> **Verification:** `tests/verify_findings.py`
+> **Verification:** `tests/firmware/verify_findings.py`
 >
 > **Related:** [bootloader diagnostics](../diagnostics/bootloader.md), [payload-gate](../security/bootloader-payload-gate.md)
 
@@ -20,7 +20,7 @@ CanTp, PduR, and Dcm/UDS, and back to RSCFD transmission.
 
 All virtual addresses are CodeFlash addresses. `tp` is initialized to `0x869C`
 at reset (`0x1F8`), so the configuration offsets used by the code can be
-resolved directly into CodeFlash tables. `../tests/verify_can_transport.py`
+resolved directly into CodeFlash tables. `../tests/firmware/verify_can_transport.py`
 checks the static data and instruction evidence without Ghidra or sibling
 repositories.
 

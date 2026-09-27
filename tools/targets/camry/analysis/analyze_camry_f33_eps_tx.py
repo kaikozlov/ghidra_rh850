@@ -9,6 +9,8 @@ status fields remain structural rather than inheriting stale public-DBC names.
 """
 from __future__ import annotations
 
+from tools.targets.camry.support import camry_f33_corpus as f33
+from tools import REPO_ROOT
 import argparse
 import hashlib
 import json
@@ -18,16 +20,16 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
-ROOT = Path(__file__).resolve().parents[4]
-IMAGE = ROOT / "firmware/camry-8965F3307000/CodeFlash.bin"
-CORPUS = ROOT / "data/generated/camry-8965F3307000/decompilations.jsonl"
+ROOT = REPO_ROOT
+IMAGE = f33.IMAGE
+CORPUS = f33.CORPUS
 SECOC030 = ROOT / "data/generated/camry_8965F3307000_030_secoc_tx.json"
 FAULT_STATUS = ROOT / "data/generated/camry_8965F3307000_fault_status.json"
-LIVENESS = ROOT / "targets/camry-2026/raw-20260912/eps-recovery/saved-log-liveness.json"
+LIVENESS = f33.CAPTURE / "raw-20260912/eps-recovery/saved-log-liveness.json"
 LATERAL_TRACE = ROOT / "data/generated/camry_2026_lateral_flow_trace.json"
-LOCAL_RAM = ROOT / "targets/camry-2026/raw-20260826/secoc-recovery/ram/local_ram_pe1.bin"
+LOCAL_RAM = f33.CAPTURE / "raw-20260826/secoc-recovery/ram/local_ram_pe1.bin"
 OUT = ROOT / "data/generated/camry_8965F3307000_eps_tx.json"
-EXPECTED_SHA256 = "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7"
+EXPECTED_SHA256 = f33.IMAGE_SHA256
 
 TX_CLASS_PTRS = 0x21994
 TX_CLASS_COUNTS = 0x21A48

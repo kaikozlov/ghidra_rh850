@@ -27,7 +27,7 @@ the mistakes are not re-made.
   raw/XOR55/XORAA objects; `0x758A0/0x785D2` are NvM/DataFlash service
   machinery. Not a key lifecycle at all.
 - **Canonical:** [../security/secoc/key-storage-and-lifecycle.md](../security/secoc/key-storage-and-lifecycle.md);
-  `tests/verify_secoc.py`.
+  `tools/test secoc`.
 
 ### CORR-003 — Application GP work-buffer root
 
@@ -92,7 +92,7 @@ the mistakes are not re-made.
   be incompatible with a personalized nonvolatile slot; compiling it out is
   consistent with either personalized or unprovisioned hardware state.
 - **Canonical:** [../security/secoc/application-chain.md](../security/secoc/application-chain.md)
-  §"Compiled-out slot-4 known-answer check"; `tests/verify_secoc.py`.
+  §"Compiled-out slot-4 known-answer check"; `tools/test secoc`.
 
 ### CORR-010 — No SHE key-update path exists in the application
 
@@ -114,7 +114,7 @@ the mistakes are not re-made.
   slot 4.
 - **Canonical:**
   [../security/secoc/key-storage-and-lifecycle.md](../security/secoc/key-storage-and-lifecycle.md)
-  §"Injection and refresh"; `tests/verify_icus_key_update.py`.
+  §"Injection and refresh"; `tests/firmware/verify_icus_key_update.py`.
 
 ### CORR-011 — DID `0x1010` is one asynchronous WDBI exchange
 
@@ -131,7 +131,7 @@ the mistakes are not re-made.
 - **Canonical:**
   [../security/secoc/key-storage-and-lifecycle.md](../security/secoc/key-storage-and-lifecycle.md)
   §"Exact diagnostic transport contract";
-  `tests/verify_icus_key_update.py`, `tests/verify_icus_trace_decoder.py`.
+  `tests/firmware/verify_icus_key_update.py`, `tests/firmware/verify_icus_trace_decoder.py`.
 
 ### CORR-012 — Short classic-CAN SecOC frame bypass
 
@@ -144,7 +144,7 @@ the mistakes are not re-made.
   accept physical DLC 48/64, and are then clamped to 32; the suffix is ignored
   rather than delivered as stale authenticated payload.
 - **Canonical:** [../security/secoc/application-chain.md](../security/secoc/application-chain.md)
-  §"DLC canonicalization"; `tests/verify_secoc.py`.
+  §"DLC canonicalization"; `tools/test secoc`.
 
 ### CORR-013 — `0x6922C` as command-13 key-export completion
 
@@ -164,7 +164,7 @@ the mistakes are not re-made.
 - **Canonical:**
   [../security/secoc/key-recovery-assessment.md](../security/secoc/key-recovery-assessment.md)
   §"Complete application command-writer census";
-  `tests/verify_icus_key_recovery_surface.py`.
+  `tests/firmware/verify_icus_key_recovery_surface.py`.
 
 ### CORR-014 — SID `0xAB` as RID-based calibration/flash control
 
@@ -193,7 +193,7 @@ the mistakes are not re-made.
   state objects, not object 15 or a key/crypto operation.
 - **Canonical:** [../diagnostics/application.md](../diagnostics/application.md)
   §"Proprietary `AB` event-record service";
-  `tests/verify_application_ab_service.py`,
+  `tests/diagnostics/verify_application_ab_service.py`,
   `tests/verify_application_routine_id_callbacks.py`.
 
 ### CORR-015 — Crypto-test cyclics misidentified as motor control
@@ -211,7 +211,7 @@ the mistakes are not re-made.
   harness and establishes the first firmware-backed protected `0x2E4`
   torque-command handoff without claiming a downstream current/PWM mapping.
 - **Canonical:** [../architecture/control-partition.md](../architecture/control-partition.md);
-  `tests/verify_control_partition.py`.
+  `tests/firmware/verify_control_partition.py`.
 
 ### CORR-016 — `0x47C3C` as calibration-transition-only conditioning
 
@@ -229,7 +229,7 @@ the mistakes are not re-made.
   command state into the d/q current references.
 - **Canonical:** [../architecture/control-partition.md](../architecture/control-partition.md)
   §"Independent phase-current control to physical PWM boundary";
-  `tests/verify_motor_actuation_boundary.py`,
+  `tests/firmware/verify_motor_actuation_boundary.py`,
   `ghidra/scripts/verify/AssertMotorActuationBoundary.java`.
 
 ### CORR-017 — SHE "verify-only" slot-4 generation restriction
@@ -256,7 +256,7 @@ the mistakes are not re-made.
   non-standard Renesas restriction, not standard SHE policy.
 - **Canonical:**
   [../security/secoc/key-recovery-assessment.md](../security/secoc/key-recovery-assessment.md)
-  §1.3; `tests/verify_secoc.py`;
+  §1.3; `tools/test secoc`;
   `build/reference-text/AUTOSAR_TR_SecureHardwareExtensions.txt` §4.4.1.5/§4.4.2.4.
 
 ### CORR-018 — Techstream online portal as an "immobilizer/MAC" path
@@ -276,7 +276,7 @@ the mistakes are not re-made.
   provisioning, overstating its relationship to the firmware SecOC findings.
 - **Canonical:**
   [../tooling/techstream.md](../tooling/techstream.md) §5.3; TMS-009;
-  `tests/verify_techstream_rks.py`.
+  `tests/techstream/verify_techstream_rks.py`.
 
 ### CORR-019 — RKS offline mode and VIN usage imprecisely characterized
 
@@ -388,7 +388,7 @@ the mistakes are not re-made.
 - **Later refinement:** CORR-031 corrects section 3 from DIDs to
   `CDbSupPidTable`; the regional corpus has one actual type-7 DID row.
 - **Canonical:** [../tooling/techstream.md](../tooling/techstream.md) §6.2;
-  TMS-013; `tests/verify_diagnostic_vocabulary.py`.
+  TMS-013; `tests/techstream/verify_diagnostic_vocabulary.py`.
 
 ### CORR-024 — MACKey `$36` interpreted as a diagnostic identifier
 
@@ -407,7 +407,7 @@ the mistakes are not re-made.
   SecOC remains open until the native `CMAC_01_*` write path is recovered.
 - **Canonical:**
   [../security/mackey-registration.md](../security/mackey-registration.md);
-  TMS-011; `tests/verify_techstream_mackey.py`.
+  TMS-011; `tests/techstream/verify_techstream_mackey.py`.
 
 ### CORR-025 — Application DID and service record fields misnamed
 
@@ -423,7 +423,7 @@ the mistakes are not re-made.
   `firmware_flags` field, and alternate-image analysis cannot silently mix in
   Sienna session policy.
 - **Canonical:** [../diagnostics/application.md](../diagnostics/application.md);
-  DIAG-APP-007; `tests/verify_diagnostic_vocabulary.py`.
+  DIAG-APP-007; `tests/techstream/verify_diagnostic_vocabulary.py`.
 
 ### CORR-026 — Firmware DTC-table correlation range truncated
 
@@ -439,7 +439,7 @@ the mistakes are not re-made.
   finds 12 exact Techstream DTC rows, including `U0100`, `U0126`, `U023A`,
   `U0293`, and `U1103`.
 - **Canonical:** [../diagnostics/application.md](../diagnostics/application.md);
-  DIAG-APP-008; `tests/verify_diagnostic_vocabulary.py`.
+  DIAG-APP-008; `tests/techstream/verify_diagnostic_vocabulary.py`.
 
 ### CORR-027 — Format-6 magic treated the English language tag as fixed
 
@@ -451,7 +451,7 @@ the mistakes are not re-made.
   strings plus 25,957 aligned metadata records. The deterministic suite now
   parses all 13 and asserts the complete observed language-tag set.
 - **Canonical:** [../tooling/techstream.md](../tooling/techstream.md) §6.2;
-  TMS-013; `tests/verify_diagnostic_vocabulary.py`.
+  TMS-013; `tests/techstream/verify_diagnostic_vocabulary.py`.
 
 ### CORR-028 — Phase-sample rings misclassified as peripheral/SFR windows
 
@@ -468,7 +468,7 @@ the mistakes are not re-made.
   address-space model. The exact external ADC pins represented by DIR00 remain
   outside the static evidence.
 - **Canonical:** [../architecture/control-partition.md](../architecture/control-partition.md)
-  §9.1; `tests/verify_motor_actuation_boundary.py`;
+  §9.1; `tests/firmware/verify_motor_actuation_boundary.py`;
   `ghidra/scripts/verify/AssertMotorActuationBoundary.java`.
 
 ### CORR-029 — Three "isolated safety interlocks" are registered monitor callbacks
@@ -490,7 +490,7 @@ the mistakes are not re-made.
   monitor states can never participate indirectly in safety policy.
 - **Canonical:** [../architecture/control-partition.md](../architecture/control-partition.md)
   §9.5; `data/motor_safety_monitors.csv`;
-  `tests/verify_motor_safety_monitors.py`.
+  `tests/firmware/verify_motor_safety_monitors.py`.
 
 ### CORR-030 — Remaining motor calibration handlers were called transition-only
 
@@ -507,7 +507,7 @@ the mistakes are not re-made.
   authenticated-command→d/q join are not invented.
 - **Canonical:** [../architecture/control-partition.md](../architecture/control-partition.md)
   §9.6; `data/motor_calibration_handlers.csv`;
-  `tests/verify_motor_calibration_handlers.py`.
+  `tests/firmware/verify_motor_calibration_handlers.py`.
 
 ### CORR-031 — Techstream supported-PID rows were mislabeled as DIDs
 
@@ -531,8 +531,8 @@ the mistakes are not re-made.
   Compressed EU payloads remain explicitly undecoded. Exact `8965B4512000` is
   absent.
 - **Canonical:** [../tooling/techstream-ddb-pipeline.md](../tooling/techstream-ddb-pipeline.md);
-  TMS-013; `tests/verify_diagnostic_vocabulary.py`;
-  `tests/verify_techstream_ddb_residuals.py`.
+  TMS-013; `tests/techstream/verify_diagnostic_vocabulary.py`;
+  `tests/techstream/verify_techstream_ddb_residuals.py`.
 
 ### CORR-032 — ELM Toyota-B routing was described as active 0↔2 software forwarding
 
@@ -555,13 +555,13 @@ the mistakes are not re-made.
   equivalent of physically moving the vehicle network onto the CAN0/CAN2
   intercept-relay pair; see CORR-072.
 - **Canonical:** [../tooling/panda-toyota-routing.md](../tooling/panda-toyota-routing.md);
-  SECOC-033; `tests/verify_toyota_eps_bus_probe.py`; optional
-  `tests/verify_external_corroboration.py`.
+  SECOC-033; `tests/toyota/verify_toyota_eps_bus_probe.py`; optional
+  `tests/tooling/verify_external_corroboration.py`.
 
 ### CORR-033 — Memory-safety “verified” grades were backed by vacuous checks
 
 - **Wrong:** MEM-SAFE-001–005 were labeled `verified` while
-  `tests/verify_memory_safety.py` mostly checked that bytes existed at named
+  `tests/tooling/verify_memory_safety.py` mostly checked that bytes existed at named
   addresses; two advertised semantic checks were literal `True`. The suite
   still passed after zeroing its load-bearing function bodies. MEM-SAFE-005
   also presented an enumerated negative as an unqualified verified absence.
@@ -572,8 +572,8 @@ the mistakes are not re-made.
   their statically asserted propositions. MEM-SAFE-005 is `bounded` to the
   named CAN/ISO-TP/SecOC/application-copy/range-check graph.
 - **Canonical:** [../security/memory-safety-audit.md](../security/memory-safety-audit.md);
-  `data/memory_safety_proof_matrix.csv`; `tests/verify_memory_safety.py`;
-  `tests/verify_memory_safety_mutations.py`;
+  `data/memory_safety_proof_matrix.csv`; `tests/tooling/verify_memory_safety.py`;
+  `tests/tooling/verify_memory_safety_mutations.py`;
   `ghidra/scripts/verify/AssertMemorySafetyPaths.java`.
 
 ### CORR-034 — IT3ACNK was wrongly called keyless and host-key maps were incomplete
@@ -592,7 +592,7 @@ the mistakes are not re-made.
   constant-propagation or complete-absence claim.
 - **Canonical:** [../tooling/techstream.md](../tooling/techstream.md) §§4.5, 7.1;
   `data/generated/techstream_v18/crypto_inventory.json`;
-  `tests/verify_techstream_crypto_inventory.py`.
+  `tests/techstream/verify_techstream_crypto_inventory.py`.
 
 ### CORR-035 — Sienna CUW writer selection was inferred from class names
 
@@ -610,7 +610,7 @@ the mistakes are not re-made.
   tables prove protocol compatibility and exclude VFOREST, not factory choice.
 - **Canonical:** [../tooling/techstream.md](../tooling/techstream.md) §§5.1–5.2;
   `data/generated/techstream_v18/cuw_writer_inventory.json`;
-  `tests/verify_techstream_cuw_writer_routes.py`.
+  `tests/techstream/verify_techstream_cuw_writer_routes.py`.
 
 ### CORR-036 — DDB structural hashes and the P5 tail word were overnamed
 
@@ -627,8 +627,8 @@ the mistakes are not re-made.
   records. The `0x87 = Missing Message` mapping is unchanged.
 - **Canonical:** [../tooling/techstream-ddb-pipeline.md](../tooling/techstream-ddb-pipeline.md);
   `data/generated/techstream_v18/priority_steering_ddb_semantics.json`;
-  `tests/verify_techstream_priority_ddb_semantics.py`;
-  `tests/verify_techstream_dtc_failure_types.py`.
+  `tests/techstream/verify_techstream_priority_ddb_semantics.py`;
+  `tests/techstream/verify_techstream_dtc_failure_types.py`.
 
 ### CORR-037 — In-function decode coverage was presented as an executable census
 
@@ -649,8 +649,8 @@ the mistakes are not re-made.
   [historical corrected-graph re-audit](../history/2026-08/CORRECTED_GRAPH_REAUDIT_2026-08-11.md);
   `data/outside_function_candidates.csv`;
   `data/semantic_coverage_summary.json`;
-  `tests/verify_function_discovery.py`;
-  `tests/verify_semantic_coverage.py`.
+  `tests/tooling/verify_function_discovery.py`;
+  `tests/tooling/verify_semantic_coverage.py`.
 
 ### CORR-038 — Bootloader SID 0x31 was a one-byte function shell and the FF00 gate was attributed to its worker
 
@@ -674,8 +674,8 @@ the mistakes are not re-made.
   [../tooling/processor-module-audit.md](../tooling/processor-module-audit.md);
   `ghidra/scripts/seed/SeedUdsServiceTable.java`;
   `ghidra/scripts/verify/AssertMemorySafetyPaths.java`;
-  `tests/verify_bootloader_diagnostics.py`;
-  `tests/verify_function_discovery.py`.
+  `tests/firmware/verify_bootloader_diagnostics.py`;
+  `tests/tooling/verify_function_discovery.py`.
 
 ### CORR-039 — Techstream was said to have no torque-command information
 
@@ -697,7 +697,7 @@ the mistakes are not re-made.
 - **Canonical:** [../tooling/techstream.md](../tooling/techstream.md) §6.2.1;
   [../architecture/control-partition.md](../architecture/control-partition.md) §8;
   `data/generated/techstream_v18/application_interface_correlations.json`;
-  `tests/verify_application_interface_correlations.py`.
+  `tests/diagnostics/verify_application_interface_correlations.py`.
 
 ### CORR-040 — Stage-6 steering-command tracing stopped before the real common cone and omitted the protected LTA mode
 
@@ -721,7 +721,7 @@ the mistakes are not re-made.
   **conclusion** (no recovered static command-to-d/q transfer) survives, but its
   evidence boundary is replaced by this larger dual-mode/common-cone audit.
 - **Canonical:** [../architecture/control-partition.md](../architecture/control-partition.md) §9.3;
-  `data/motor_actuation_path.csv`; `tests/verify_motor_actuation_boundary.py`;
+  `data/motor_actuation_path.csv`; `tests/firmware/verify_motor_actuation_boundary.py`;
   `ghidra/scripts/verify/AssertMotorActuationBoundary.java`.
 
 ### CORR-041 — `0x0D7` signal 280 inherited signal 284's GP destination in generated Rx evidence
@@ -744,7 +744,7 @@ the mistakes are not re-made.
   in protected invalidity/fault handling.
 - **Canonical:** [../communications/application-rx.md](../communications/application-rx.md) §5.4;
   `ghidra/scripts/verify/ExportApplicationRxSignalEvidence.java`;
-  `tests/verify_application_receive.py`; `AssertApplicationReceiveMap.java`;
+  `tests/diagnostics/verify_application_receive.py`; `AssertApplicationReceiveMap.java`;
   `data/secoc_rx_control_surface.csv`.
 
 ### CORR-042 — Published region-1 CRC mismatch was mistaken for a CRC-algorithm incompatibility
@@ -780,8 +780,8 @@ the mistakes are not re-made.
   after target-block RMW and writes its complement.
 - **Canonical:** [../security/secoc/key-recovery-assessment.md](../security/secoc/key-recovery-assessment.md) §1.7;
   [../security/secoc/application-chain.md](../security/secoc/application-chain.md) §9.6;
-  `tests/verify_codeflash_crc_reconstruction.py`; `tests/verify_community_tooling.py`;
-  `tests/verify_secoc.py`.
+  `tests/firmware/verify_codeflash_crc_reconstruction.py`; `tests/tooling/verify_community_tooling.py`;
+  `tools/test secoc`.
 
 ### CORR-043 — Runtime patch config was injected into the final 4 KiB upload artifact
 
@@ -811,7 +811,7 @@ the mistakes are not re-made.
   only in the plaintext template.
 - **Canonical:** [../security/bootloader-payload-gate.md](../security/bootloader-payload-gate.md) §§2–8;
   `exploit/common/payload_package.py`; `exploit/patcher/build_payload.py`;
-  `tests/verify_secoc_manifest_patcher.py`.
+  `tests/runtime/verify_secoc_manifest_patcher.py`.
 
 ### CORR-044 — Dormant command-5 inputs/output required a new application runner
 
@@ -842,7 +842,7 @@ the mistakes are not re-made.
 - **Canonical:** [../communications/application-rx.md](../communications/application-rx.md) §5.5;
   [../security/secoc/software-path-assessment.md](../security/secoc/software-path-assessment.md) §7.5;
   `exploit/command5/build_experiment.py`; `exploit/command5/stimulus.py`;
-  `tests/verify_secoc_command5_experiment.py`.
+  `tests/runtime/verify_secoc_command5_experiment.py`.
 
 ### CORR-045 — Toyota static-blocking source was misclassified as unavailable
 
@@ -867,7 +867,7 @@ the mistakes are not re-made.
   skips); the one-off source/scope regression passes 4/4.
 - **Canonical:** `exploit/behavioral_proof/README.md`;
   `exploit/behavioral_proof/openpilot_ablation_audit.json`;
-  `tests/verify_secoc_mac28_behavioral_proof.py`.
+  `tests/runtime/verify_secoc_mac28_behavioral_proof.py`.
 
 ### CORR-046 — Command-5 live stimulus used diagnostic-only Panda safety
 
@@ -1016,8 +1016,8 @@ the mistakes are not re-made.
 - **Canonical:** [../security/secoc/software-path-assessment.md](../security/secoc/software-path-assessment.md);
   [../security/secoc/application-chain.md](../security/secoc/application-chain.md);
   `ghidra/scripts/seed/SeedDispatchProvenFunctionTables.java`;
-  `tests/verify_icus_stage7_static.py`;
-  `tests/verify_secoc_command5_experiment.py`.
+  `tests/firmware/verify_icus_stage7_static.py`;
+  `tests/runtime/verify_secoc_command5_experiment.py`.
 
 ### CORR-053 — Application service objects were parsed eight bytes late
 
@@ -1054,10 +1054,10 @@ the mistakes are not re-made.
 - **Canonical:** [../diagnostics/application.md](../diagnostics/application.md);
   [../diagnostics/application-routine-control-surface.md](../diagnostics/application-routine-control-surface.md);
   [../security/application-security-access.md](../security/application-security-access.md);
-  `tests/verify_application_diagnostics.py`;
-  `tests/verify_application_routine_control.py`;
-  `tests/verify_icus_key_update.py`;
-  `tests/verify_secoc_command5_experiment.py`.
+  `tests/diagnostics/verify_application_diagnostics.py`;
+  `tests/diagnostics/verify_application_routine_control.py`;
+  `tests/firmware/verify_icus_key_update.py`;
+  `tests/runtime/verify_secoc_command5_experiment.py`.
 
 ### CORR-054 — Application SID `0x23` is a real bounded memory-read service
 
@@ -1078,7 +1078,7 @@ the mistakes are not re-made.
   `FEBF2D08..2D17` is not excluded, but useful live residue there is not statically
   proven to survive the required reset/session sequence.
 - **Canonical:** [../security/secoc/software-path-assessment.md](../security/secoc/software-path-assessment.md);
-  `tests/verify_application_read_memory_by_address.py`;
+  `tests/diagnostics/verify_application_read_memory_by_address.py`;
   `exploit/followups/application_rmba_probe.py`.
 
 ### CORR-055 — RDBI stale-response disclosure affects 48 DIDs, not only the 15 45-byte rows
@@ -1103,7 +1103,7 @@ the mistakes are not re-made.
   oracle for DID `1CF4` is unchanged.
 - **Canonical:** [../diagnostics/application.md](../diagnostics/application.md);
   [../security/application-security-access.md](../security/application-security-access.md);
-  `tests/verify_application_rdbi.py`;
+  `tests/diagnostics/verify_application_rdbi.py`;
   `exploit/followups/application_rdbi_stale_probe.py`.
 
 
@@ -1133,8 +1133,8 @@ the mistakes are not re-made.
   DIAG-APP-016 records the corrected WDBI security surface.
 - **Canonical:** [../diagnostics/application.md](../diagnostics/application.md);
   [../security/application-security-access.md](../security/application-security-access.md);
-  `data/application_wdbi_surface.csv`; `tests/verify_application_wdbi.py`;
-  `tests/verify_application_wdbi.py`.
+  `data/application_wdbi_surface.csv`; `tests/diagnostics/verify_application_wdbi.py`;
+  `tests/diagnostics/verify_application_wdbi.py`.
 
 ### CORR-057 — WDBI DID `0x2010` writes diagnostic residue, not live runtime command state
 
@@ -1159,8 +1159,8 @@ the mistakes are not re-made.
 - **Canonical:** [../diagnostics/application.md](../diagnostics/application.md);
   [../security/application-security-access.md](../security/application-security-access.md);
   `data/application_wdbi_surface.csv`;
-  `tests/verify_application_wdbi.py`;
-  `tests/verify_application_wdbi_2010_dead_state_live.py`.
+  `tests/diagnostics/verify_application_wdbi.py`;
+  `tests/diagnostics/verify_application_wdbi_2010_dead_state_live.py`.
 
 
 ### CORR-058 — `sec_count=0` does not eliminate callback-local SecurityAccess checks; SID `0xBA` F7 requires level 2
@@ -1186,8 +1186,8 @@ the mistakes are not re-made.
 - **Canonical:** [../diagnostics/application-proprietary-ba.md](../diagnostics/application-proprietary-ba.md);
   [../security/application-security-access.md](../security/application-security-access.md);
   `data/application_proprietary_ba_surface.csv`;
-  `tests/verify_application_proprietary_ba.py`;
-  `tests/verify_application_proprietary_ba_live.py`.
+  `tests/diagnostics/verify_application_proprietary_ba.py`;
+  `tests/diagnostics/verify_application_proprietary_ba_live.py`.
 
 
 ### CORR-059 — XCP generic writes are direct arbitrary 32 KiB LocalRAM writes, not merely a shadow-window configuration
@@ -1211,7 +1211,7 @@ the mistakes are not re-made.
 - **Dynamic boundary:** external forwarding of CAN `0x7F7/0x7F8` remains
   unobserved; the default live probe stays read-only.
 - **Canonical:** [../communications/xcp-command-dispatch.md](../communications/xcp-command-dispatch.md);
-  `tests/verify_xcp.py`; `tests/verify_xcp_shadow_write_live.py`;
+  `tools/test xcp`; `tests/runtime/verify_xcp_shadow_write_live.py`;
   `AssertXcpShadowWriteBoundary.java`.
 
 ### CORR-060 — The XCP write window is supervisor-executable by hardware MPU configuration; "non-executable" was Ghidra analysis metadata
@@ -1243,13 +1243,13 @@ the mistakes are not re-made.
   statement is: the window is attacker-writable
   **supervisor-executable** RAM with **no recovered control-transfer
   consumer** — write capability verified, execution path not recovered.
-- **Deterministic check:** `tests/verify_xcp.py` pins
+- **Deterministic check:** `tools/test xcp` pins
   hardware MPU permissions; `AssertXcpShadowWriteBoundary.java` additionally
   pins direct-reference topology, all four recovered write-window base
   materializers, and the bounded-below `FEBF7BB0..FEBF7BEF` adjacent loop.
 - **Canonical:** [../communications/xcp-command-dispatch.md](../communications/xcp-command-dispatch.md);
   [FINDINGS.md](FINDINGS.md) COM-005;
-  `tests/verify_xcp.py`.
+  `tools/test xcp`.
 
 ### CORR-061 — Command-5 bank output bytes remain private, but the terminal negative state is stock-DTC observable
 
@@ -1282,8 +1282,8 @@ the mistakes are not re-made.
   never issues ClearDiagnosticInformation.
 - **Canonical:** [FINDINGS.md](FINDINGS.md) SECOC-046;
   [../security/secoc/application-chain.md](../security/secoc/application-chain.md);
-  `tests/verify_command5_dtc_side_channel.py`;
-  `tests/verify_secoc_command5_experiment.py`.
+  `tests/runtime/verify_command5_dtc_side_channel.py`;
+  `tests/runtime/verify_secoc_command5_experiment.py`.
 
 ### CORR-062 — RID 0x1010 status 0x02 does not prove the diagnostic's own envelope executed
 
@@ -1313,7 +1313,7 @@ the mistakes are not re-made.
   region).
 - **Canonical:** [FINDINGS.md](FINDINGS.md) SECOC-047/SECOC-048;
   [../security/secoc/application-chain.md](../security/secoc/application-chain.md) §5.10;
-  `tests/verify_crypto_test_bank0_composition.py`.
+  `tests/firmware/verify_crypto_test_bank0_composition.py`.
 
 ### CORR-063 — RMBA lower-reader size rejection was imprecisely stated
 
@@ -1327,7 +1327,7 @@ the mistakes are not re-made.
   boundary needed by the RMBA memory-safety audit.
 - **Canonical:** [../diagnostics/application.md](../diagnostics/application.md);
   [FINDINGS.md](FINDINGS.md) MEM-SAFE-007;
-  `tests/verify_application_rmba_memory_safety.py`.
+  `tests/diagnostics/verify_application_rmba_memory_safety.py`.
 
 ### CORR-064 — Gate-2 result polarity and bypass branch direction were inverted
 
@@ -1365,7 +1365,7 @@ the mistakes are not re-made.
   masquerading as CMP neutralization.
 - **Canonical:** [FINDINGS.md](FINDINGS.md) SECOC-029/043/045/049;
   [../security/secoc/application-chain.md](../security/secoc/application-chain.md) §9;
-  `tests/verify_secoc.py`; `tests/verify_secoc_semantic_patch_resolver.py`.
+  `tools/test secoc`; `tests/runtime/verify_secoc_semantic_patch_resolver.py`.
 
 ### CORR-065 — RSCFD Tx completion result polarity was still reversed
 
@@ -1406,9 +1406,9 @@ the mistakes are not re-made.
 - **Canonical:** [FINDINGS.md](FINDINGS.md) SEC-EXP-001/003;
   [../communications/diagnostic-transport.md](../communications/diagnostic-transport.md);
   [../tooling/exploit-predicate-semantics.md](../tooling/exploit-predicate-semantics.md);
-  `tests/verify_can_transport.py`;
-  `tests/verify_exploit_predicate_semantics.py`;
-  `tests/verify_secoc_command5_experiment.py`.
+  `tests/firmware/verify_can_transport.py`;
+  `tests/runtime/verify_exploit_predicate_semantics.py`;
+  `tests/runtime/verify_secoc_command5_experiment.py`.
 
 ### CORR-066 — Lochuan `0x664E6: 0x31→0x10` is checkpoint fail-open, not SecOC MAC acceptance
 
@@ -1544,7 +1544,7 @@ the mistakes are not re-made.
   into SecOC Gate 2.
 - **Canonical:** [FINDINGS.md](FINDINGS.md) SECOC-050;
   [../security/secoc/application-chain.md](../security/secoc/application-chain.md) §9.7;
-  `tests/verify_lochuan_patch_semantics.py`;
+  `tests/tooling/verify_lochuan_patch_semantics.py`;
   `external-references.lock.json`.
 
 ### CORR-067 — `0x1426` is a zero-trip clear-shaped loop, not an XCP-window startup clear
@@ -1563,7 +1563,7 @@ the mistakes are not re-made.
   exact reset/lifetime model used by the ephemeral SecOC investigation.
 - **Canonical:** [../communications/xcp-command-dispatch.md](../communications/xcp-command-dispatch.md);
   [../security/ephemeral-secoc-bypass.md](../security/ephemeral-secoc-bypass.md);
-  `tests/verify_ephemeral_secoc_bypass.py`.
+  `tests/runtime/verify_ephemeral_secoc_bypass.py`.
 
 ### CORR-068 — a post-init stock callback is not required for ephemeral residency
 
@@ -1593,7 +1593,7 @@ the mistakes are not re-made.
   unobserved on hardware.
 - **Canonical:** [../security/ephemeral-secoc-bypass.md](../security/ephemeral-secoc-bypass.md);
   [FINDINGS.md](FINDINGS.md) ARCH-014 / SECOC-061;
-  `tests/verify_ephemeral_runtime.py`;
+  `tests/runtime/verify_ephemeral_runtime.py`;
   `exploit/ephemeral_runtime/audited_build.json`.
 
 ### CORR-069 — a matching CUW/payload is not a Sienna bootstrap dependency
@@ -1603,7 +1603,7 @@ the mistakes are not re-made.
   legitimate authenticated `0x10F0` could unlock MEM-SAFE-001.
 - **Right:** the repository already contains two pinned public 4 KiB encrypted
   payload fixtures that are accepted by this exact Sienna bootloader gate.
-  `tests/verify_payload_gate.py` decrypts them with the recovered construction
+  `tests/runtime/verify_payload_gate.py` decrypts them with the recovered construction
   using tester-controlled `DID 0x0201 = 00*16` and `0x0202 = 00*16`, then proves
   callback `FEBF0FD0→FEBF0000`, the embedded CRC descriptor, CRC32 residue,
   CMAC, and exact AES-CBC round trip. The shared RAM-exec host already writes
@@ -1621,7 +1621,7 @@ the mistakes are not re-made.
   to local cryptographic verification of the exact Sienna fixture bytes.
 - **Canonical:** [../security/ephemeral-secoc-bypass.md](../security/ephemeral-secoc-bypass.md) §8;
   [FINDINGS.md](FINDINGS.md) SECOC-062;
-  `tests/verify_payload_gate.py`;
+  `tests/runtime/verify_payload_gate.py`;
   `exploit/ephemeral_runtime/build_substitution_plan.py`.
 
 ### CORR-070 — the albinoelephant 2023-Corolla firmware is no longer calibration-unknown
@@ -1650,7 +1650,7 @@ closure but supersedes its identity interpretation and missing-F181 boundary: di
 same-car telescope F181 is `8965F1208000 / 8A3111202000`, while
 `8965H1202000` is DID `0x2032`'s separate one-record identity.
 
-Checked by `tests/verify_albinoelephant_corolla_codeflash.py`; canonical report:
+Checked by `tests/targets/corolla/verify_albinoelephant_corolla_codeflash.py`; canonical report:
 [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-public-route.md).
 
 ### CORR-071 — the first runtime target resolver overfit Sienna's queue layout and CAN-ID order
@@ -1681,8 +1681,8 @@ Checked by `tests/verify_albinoelephant_corolla_codeflash.py`; canonical report:
 
 The generalized implementation still reproduces Sienna's exact queue geometry
 and audited runtime builds. The tracked H image is the permanent foreign
-regression. Checked by `tests/verify_ephemeral_runtime_resolver.py` and
-`tests/verify_albinoelephant_corolla_codeflash.py`; canonical tooling report:
+regression. Checked by `tests/runtime/verify_ephemeral_runtime_resolver.py` and
+`tests/targets/corolla/verify_albinoelephant_corolla_codeflash.py`; canonical tooling report:
 [`../tooling/ephemeral-runtime-semantic-resolver.md`](../tooling/ephemeral-runtime-semantic-resolver.md).
 
 ### CORR-072 — `ELM param 1 + bus 1` is a direct diagnostic route, not a full Toyota-B repin equivalent
@@ -1716,9 +1716,9 @@ regression. Checked by `tests/verify_ephemeral_runtime_resolver.py` and
   response timing, ACK/bus-off, and wake/topology remain candidates; none is
   promoted without gateway firmware or a dual-segment transition capture.
 
-Checked by `tests/verify_toyota_b_programming_topology.py`,
-`tests/verify_toyota_eps_bus_probe.py`, and optional
-`tests/verify_external_corroboration.py`. Canonical report:
+Checked by `tests/toyota/verify_toyota_b_programming_topology.py`,
+`tests/toyota/verify_toyota_eps_bus_probe.py`, and optional
+`tests/tooling/verify_external_corroboration.py`. Canonical report:
 [`../tooling/panda-toyota-routing.md`](../tooling/panda-toyota-routing.md).
 
 ### CORR-073 — absence of plain `0x7F7/0x7F8` literals does not mean H lost the XCP-shaped CAN route
@@ -1740,8 +1740,8 @@ Checked by `tests/verify_toyota_b_programming_topology.py`,
   exclusion ranges identical; those were recovered separately and differ from
   Sienna.
 
-Checked by `tests/verify_rh850_codeflash_structure_scanner.py` and
-`tests/verify_albinoelephant_corolla_codeflash.py`. Canonical report:
+Checked by `tests/firmware/verify_rh850_codeflash_structure_scanner.py` and
+`tests/targets/corolla/verify_albinoelephant_corolla_codeflash.py`. Canonical report:
 [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-public-route.md) §7.7.
 
 ### CORR-074 — foreign Ghidra projects must recover target GP/TP; canonical Sienna context is not portable
@@ -1792,7 +1792,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   evidence. This does not imply the entire EPS motor/assist system is inactive.
 - **Canonical:**
   [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md)
-  §7.11; `tests/verify_corolla_h.py`.
+  §7.11; `tools/test corolla_h`.
 
 ### CORR-106 — H `0xCEDAE` is 534 bytes, not 533
 
@@ -1806,7 +1806,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   invariant.
 - **Canonical:**
   [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md)
-  §7.12; `tests/verify_corolla_h.py`.
+  §7.12; `tools/test corolla_h`.
 
 ### CORR-075 — H `00F/D7/B6` do not select three independent SecOC keys
 
@@ -1823,7 +1823,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   negatives retain their capture-epoch caveat.
 - **Canonical:**
   [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md)
-  §7.13; `tests/verify_corolla_h.py`.
+  §7.13; `tools/test corolla_h`.
 
 
 ### CORR-076 — Techstream monitor 402 is an internal commanded-torque observable, not intrinsically the external `0x2E4` field
@@ -1850,7 +1850,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   torque field.
 - **Canonical:**
   [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md)
-  §7.34; `tests/verify_corolla_h.py`.
+  §7.34; `tools/test corolla_h`.
 
 ### CORR-077 — H's internal Command Value Torque reaches the closed-loop Q-current controller
 
@@ -1873,7 +1873,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   LTA-specific.
 - **Canonical:**
   [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md)
-  §7.34; `tests/verify_corolla_h.py`.
+  §7.34; `tools/test corolla_h`.
 
 ### CORR-079 — CUW routine IDs were displayed in x86 immediate order; standard is not a Sienna-compatible route
 
@@ -1897,7 +1897,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   EachArea) as byte-compatible. A matching calibration artifact is still
   required to prove which row Toyota selected and to recover its actual
   credentials/ranges.
-- **Canonical:** `tests/verify_techstream_cuw_writer_protocol_grammar.py`;
+- **Canonical:** `tests/techstream/verify_techstream_cuw_writer_protocol_grammar.py`;
   `data/generated/techstream_v18/cuw_writer_protocol_grammar.json`;
   [../tooling/techstream.md](../tooling/techstream.md) §5.
 
@@ -1919,8 +1919,8 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   selection remain specimen-bound. Membership-only enforcement for the other
   table values is still not promoted to per-value meaning.
 - **Canonical:** TMS-034/TMS-037;
-  `tests/verify_techstream_cuw_calibration_schema.py`;
-  `tests/verify_techstream_cuw_legacy.py`;
+  `tests/techstream/verify_techstream_cuw_calibration_schema.py`;
+  `tests/techstream/verify_techstream_cuw_legacy.py`;
   [../tooling/techstream.md](../tooling/techstream.md) §5.2.1.
 
 ### CORR-084 — the RKS SeedValue producer was called an unresolved upstream edge; it is fully static `Cuw.exe` code
@@ -1934,7 +1934,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   token returns to the ECU as `27 22 || token[256]`.
 - **Preserved boundary:** only the live gateway seed value and the server
   signing key remain external.
-- **Canonical:** TMS-033; `tests/verify_techstream_rks_client_state.py`;
+- **Canonical:** TMS-033; `tests/techstream/verify_techstream_rks_client_state.py`;
   [../tooling/techstream.md](../tooling/techstream.md) §5.3.
 
 ### CORR-083 — `SecurityProperty2` was not an ASCII character selector; it is hex-decoded key material
@@ -1948,7 +1948,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   (`shr dl,3 / and dl,1` in the pinned EachArea step). The public example
   yields `0x98 → 1`.
 - **Rule:** never reinterpret the decoded byte as its ASCII character value.
-- **Canonical:** TMS-032; `tests/verify_techstream_cuw_writer_protocol_grammar.py`;
+- **Canonical:** TMS-032; `tests/techstream/verify_techstream_cuw_writer_protocol_grammar.py`;
   [../tooling/techstream.md](../tooling/techstream.md) §5.2.3.
 
 ### CORR-082 — the Unified RequestDownload field order was transposed
@@ -1964,7 +1964,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Also corrected:** the "size" operand is the area Length field's raw bytes
   transmitted verbatim, not a parsed integer, and the field is named
   `areaLength`/`length` rather than the ambiguous `areaSize`.
-- **Canonical:** TMS-032; `tests/verify_techstream_cuw_writer_protocol_grammar.py`;
+- **Canonical:** TMS-032; `tests/techstream/verify_techstream_cuw_writer_protocol_grammar.py`;
   [../tooling/techstream.md](../tooling/techstream.md) §5.2/§5.2.3.
 
 ### CORR-081 — the first CUW route census stopped one pass too early; all 196 rows are statically classifiable
@@ -1988,7 +1988,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   + 2 byte-compatible Unified rows**, with zero unresolved/bounded route rows.
   A matching package is still required to choose between the two compatible
   rows and recover calibration values.
-- **Canonical:** `tests/verify_techstream_cuw_writer_protocol_grammar.py`;
+- **Canonical:** `tests/techstream/verify_techstream_cuw_writer_protocol_grammar.py`;
   `data/generated/techstream_v18/cuw_writer_protocol_grammar.json`;
   [../tooling/techstream.md](../tooling/techstream.md) §5.2.2.
 
@@ -1998,7 +1998,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Reference-level correction:** the controller contains the timing-key strings but has no executable absolute reference to `WaitTimeAfterSeedData` or `WaitTimeAfterSeedKey`; the P4/P5 prepare writer references those keys at `0x100019F0` and `0x10001F2F`. The controller's executable references instead cover the retry/IG-off subset such as `PrepareRetryFlag`, `IGOffRetriableFlag`, and `ReceiveTimeoutBeforePrepareRetry`.
 - **Bus-speed correction:** `TCUWCanCommonPrepareWriter::GetBusTypeFromCPUImage @ 0x10001630` reads `CANCommunicationSpeedAddress` as a byte location in the downloaded CPU image and maps that byte to a bus/speed mode. It is not a hardware register address.
 - **Correct model:** the encoded factory/system parameter tables are shared configuration consumed by different CUW components; ownership must be assigned at actual code references, not string presence.
-- **Canonical:** `tests/verify_techstream_cuw_timing_recovery.py`; `data/generated/techstream_v18/cuw_timing_recovery.json`; [../tooling/techstream.md](../tooling/techstream.md) §5.4.
+- **Canonical:** `tests/techstream/verify_techstream_cuw_timing_recovery.py`; `data/generated/techstream_v18/cuw_timing_recovery.json`; [../tooling/techstream.md](../tooling/techstream.md) §5.4.
 
 ### CORR-078 — the retained H Sienna-homolog LTA branch is direct-write inactive; B6 nonscalar rows are not a recovered hidden command
 
@@ -2052,7 +2052,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   ingress** despite retaining downstream steering framework.
 - **Canonical:**
   [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md)
-  §7.35; `tests/verify_corolla_h.py`.
+  §7.35; `tools/test corolla_h`.
 
 ### CORR-086 — the persistent patcher's FACI pacing/status model inherited obsolete community code
 
@@ -2085,7 +2085,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   exit remain current.
 - **Canonical:** `exploit/patcher/flash_backend.c`;
   [../security/secoc/application-chain.md](../security/secoc/application-chain.md)
-  §9.7; `tests/verify_secoc_manifest_patcher.py`.
+  §9.7; `tests/runtime/verify_secoc_manifest_patcher.py`.
 
 ### CORR-087 — the blurbdust Discord bundle was misclassified as source-less independent tooling
 
@@ -2126,8 +2126,8 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Canonical:** [../../community/README.md](../../community/README.md)
   `blurbdust_secoc_flash_patcher` provenance section;
   [../security/secoc/key-recovery-assessment.md](../security/secoc/key-recovery-assessment.md)
-  §1.7; `tests/verify_community_tooling.py`; optional
-  `tests/verify_external_corroboration.py`.
+  §1.7; `tests/tooling/verify_community_tooling.py`; optional
+  `tests/tooling/verify_external_corroboration.py`.
 
 ### CORR-088 — normal PROGRAMMING replay clears the initializer delay; it does not disprove the 10-second bad-key backoff
 
@@ -2163,7 +2163,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   the normal retained handoff remain distinct from this ordinary path.
 - **Canonical:** [../diagnostics/bootloader.md](../diagnostics/bootloader.md) §2.1;
   [../security/ephemeral-secoc-bypass.md](../security/ephemeral-secoc-bypass.md)
-  §19.5; `tests/verify_bootloader_diagnostics.py`;
+  §19.5; `tests/firmware/verify_bootloader_diagnostics.py`;
   `data/p1me_product_memory.json`.
 
 ### CORR-089 — degraded boot and normal PROGRAMMING share the runtime, not the entry session
@@ -2183,7 +2183,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   unauthenticated programming path; only the entry-state equivalence is
   withdrawn.
 - **Canonical:** [../architecture/boot-validity-and-flash-lifecycle.md](../architecture/boot-validity-and-flash-lifecycle.md)
-  §4.1; `tests/verify_bootloader_diagnostics.py`.
+  §4.1; `tests/firmware/verify_bootloader_diagnostics.py`.
 
 ### CORR-090 — SecOC limits are per-queued-PDU / CryptoIf retry budgets, not persistent wrong-MAC caps
 
@@ -2209,7 +2209,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   guesses are not throttled across frames because admission resets the retry
   counters.
 - **Canonical:** [../security/secoc/application-chain.md](../security/secoc/application-chain.md)
-  §5.7; `tests/verify_findings.py`; `tests/verify_secoc.py`.
+  §5.7; `tests/firmware/verify_findings.py`; `tools/test secoc`.
 
 ### CORR-091 — NeoNK AES-256 result stands; the prior PKCS#7-gate description did not
 
@@ -2225,7 +2225,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   many trailing bytes. It does not compare every padding byte, so it is not a
   strict PKCS#7 validator.
 - **Canonical:** [../tooling/techstream.md](../tooling/techstream.md) §4.5;
-  `tests/verify_techstream_crypto_inventory.py`.
+  `tests/techstream/verify_techstream_crypto_inventory.py`.
 
 ### CORR-092 — generic RFP all-FF ID examples do not prove P1M-E blank-ID state
 
@@ -2276,7 +2276,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   must be measured rather than inferred from the base SHE FID alone.
 - **Canonical:**
   [../security/secoc/command5-oracle-assessment.md](../security/secoc/command5-oracle-assessment.md);
-  `tests/verify_secoc_command5_oracle_assessment.py`; SECOC-069.
+  `tests/runtime/verify_secoc_command5_oracle_assessment.py`; SECOC-069.
 
 ### CORR-094 — the programming handoff preserves XCP-window bytes, but its 36-byte state-copy source is fixed
 
@@ -2296,7 +2296,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   complete RCE. A separate boot control-transfer primitive is still required.
 - **Canonical:**
   [../architecture/boot-validity-and-flash-lifecycle.md](../architecture/boot-validity-and-flash-lifecycle.md) §4.1;
-  `tests/verify_xcp.py`; SEC-BOOT-012.
+  `tools/test xcp`; SEC-BOOT-012.
 
 ### CORR-095 — Span direct PROGRAMMING was no longer unmeasured after the corrected 2026-08-21 preflight
 
@@ -2313,7 +2313,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   `a5744b4c4627d3e5c20d590bb882d25b9b40c0679cbc3e9660140c7f2ef5262b`;
   the corrected preflight, route record, SecurityAccess log, and normalized
   memory corpus are independently pinned by
-  `tests/verify_spanconstant_corolla_codeflash.py`.
+  `tests/targets/corolla/verify_spanconstant_corolla_codeflash.py`.
 - **Canonical:** [../variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md);
   VAR-039.
 
@@ -2330,7 +2330,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Impact:** the live F181 and raw firmware are internally consistent; no
   `F12080`/`H12130` identity contradiction remains.
 - **Canonical:** [../variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md) §3;
-  VAR-042; `tests/verify_spanconstant_corolla_equivalence.py`.
+  VAR-042; `tests/targets/corolla/verify_spanconstant_corolla_equivalence.py`.
 
 ### CORR-097 — vehicle-bus `2E4/131/344` observations are not Span EPS SecOC/Rx configuration
 
@@ -2347,7 +2347,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   acceptance. The Sienna `2E4/131` steering bridge must not be transplanted to
   Span by ID.
 - **Canonical:** [../variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md) §7;
-  VAR-043; `tests/verify_spanconstant_corolla_cross_variant.py`.
+  VAR-043; `tests/variants/verify_spanconstant_corolla_cross_variant.py`.
 
 ### CORR-098 — the first Span low-delta pass missed indirect A000 calibration consumers
 
@@ -2368,7 +2368,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   opaque post-CRC field.
 - **Canonical:**
   [../variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md) §4.2;
-  VAR-045; `tests/verify_spanconstant_low_calibration_delta.py`.
+  VAR-045; `tests/targets/corolla/verify_spanconstant_low_calibration_delta.py`.
 
 ### CORR-099 — `0x17DF0..0x17DFF` is the region-0 AES-CMAC tag, not an opaque field
 
@@ -2397,7 +2397,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   programmed on this generation is not asserted.
 - **Canonical:**
   [../variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md) §4.2.3;
-  VAR-045/VAR-046; `tests/verify_spanconstant_low_calibration_delta.py`.
+  VAR-045/VAR-046; `tests/targets/corolla/verify_spanconstant_low_calibration_delta.py`.
 
 ### CORR-100 — the low-delta semantic boundary is closed: consumers, bank role, record-8 reader, and CMAC KDF recovered
 
@@ -2453,7 +2453,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Canonical:**
   [../variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md)
   §4.2.2–§4.2.3; VAR-048;
-  `tests/verify_spanconstant_low_calibration_delta.py`;
+  `tests/targets/corolla/verify_spanconstant_low_calibration_delta.py`;
   `data/generated/corolla_8965F1208000_low_calibration_delta.json`.
 
 ### CORR-101 — mechanism-specific keyless closures do not exhaust software-visible static work
@@ -2482,7 +2482,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   statement about reviewed rows only, not global static coverage.
 - **Canonical:**
   [../security/keyless-exec-surface-assessment.md](../security/keyless-exec-surface-assessment.md)
-  §§20.1–20.3; `tests/verify_keyless.py`; `tests/verify_exploit_interest_reviewed_candidates.py`.
+  §§20.1–20.3; `tools/test keyless`; `tests/runtime/verify_exploit_interest_reviewed_candidates.py`.
 
 ### CORR-102 — the legacy CUW software password was not one generic value with an unknown wire consumer
 
@@ -2511,7 +2511,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   materialized image bytes into the J2534 transmit path without host-side
   crypto/recode. What `A1DFE103` and the encoded-looking representation mean to
   the ECU remains bounded; an ECU-side decoding algorithm is not inferred.
-- **Canonical:** TMS-037; `tests/verify_techstream_cuw_legacy.py`;
+- **Canonical:** TMS-037; `tests/techstream/verify_techstream_cuw_legacy.py`;
   `data/generated/techstream_v18/cuw_t0087_17_specimen.json`;
   [../tooling/techstream.md](../tooling/techstream.md) §4.5.0/§5.2.1;
   [../history/2026-08/T0087_17_CUW_ANALYSIS_2026-08-22.md](../history/2026-08/T0087_17_CUW_ANALYSIS_2026-08-22.md).
@@ -2538,7 +2538,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   suffix, or instruction set. `VFOREST` must therefore remain the recovered
   Toyota/Techstream family name unless stronger target-native evidence exists.
 - **Canonical:** TMS-038;
-  `tests/verify_techstream_cuw_vforest.py`;
+  `tests/techstream/verify_techstream_cuw_vforest.py`;
   `data/generated/techstream_v18/cuw_t0011_21_04c21_specimen.json`;
   [../tooling/techstream.md](../tooling/techstream.md) §4.5.2;
   [../history/2026-08/T0011_21_04C21_CUW_ANALYSIS_2026-08-23.md](../history/2026-08/T0011_21_04C21_CUW_ANALYSIS_2026-08-23.md).
@@ -2564,7 +2564,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   `VehicleForEUOT` descriptor sections; RKS selection is instead the runtime
   `JudgeReproGWNodeForP4AndP5` probe result.
 - **Canonical:** TMS-042;
-  `tests/verify_techstream_cuw_frc_corpus.py`;
+  `tests/techstream/verify_techstream_cuw_frc_corpus.py`;
   `data/generated/techstream_v18/cuw_frc_corpus.json`;
   [../tooling/techstream.md](../tooling/techstream.md) §5.2.4.
 
@@ -2644,9 +2644,9 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   `data/generated/corolla_8965H1202000_b6_target_angle_ingress.json` v4;
   `data/generated/corolla_8965H1202000_b6_receiver_contract.json` v1;
   `data/generated/corolla_8965H1202000_lta_command_provenance.json` v8;
-  `tests/verify_corolla_h.py`;
-  `tests/verify_corolla_h.py`;
-  `tests/verify_corolla_h.py`;
+  `tools/test corolla_h`;
+  `tools/test corolla_h`;
+  `tools/test corolla_h`;
   [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md)
   §§7.11, 7.14, 7.35.
 
@@ -2722,9 +2722,9 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   `data/generated/corolla_8965H1202000_fd_control_interface.json` v2;
   `data/generated/corolla_8965H1202000_openpilot_state_bridge.json` v7;
   `data/generated/corolla_2025_span_discord_rlog_opendbc_evidence.json`;
-  `tests/verify_corolla_h.py`;
-  `tests/verify_corolla_h.py`;
-  `tests/verify_span_2025_discord_rlog_opendbc_evidence_external.py`;
+  `tools/test corolla_h`;
+  `tools/test corolla_h`;
+  `tests/targets/corolla/verify_span_2025_discord_rlog_opendbc_evidence_external.py`;
   [../variants/corolla-h-f-openpilot-state-bridge.md](../variants/corolla-h-f-openpilot-state-bridge.md) §6.
 
 
@@ -2756,7 +2756,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Canonical:**
   `data/generated/corolla_hf_steering_limits.json`;
   `data/generated/corolla_8965H1202000_steering_limits_reference_census.json`;
-  `tests/verify_corolla_hf.py`;
+  `tools/test corolla_hf`;
   [../variants/corolla-h-f-openpilot-state-bridge.md](../variants/corolla-h-f-openpilot-state-bridge.md).
 
 
@@ -2788,8 +2788,8 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Canonical:**
   `data/generated/corolla_8965H1202000_b6_secoc_verification.json`;
   `data/generated/corolla_hf_b6_competing_sender_arbitration.json`;
-  `tests/verify_corolla_h.py`;
-  `tests/verify_corolla_hf.py`;
+  `tools/test corolla_h`;
+  `tools/test corolla_hf`;
   [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md) §7.36;
   [../variants/corolla-h-f-openpilot-state-bridge.md](../variants/corolla-h-f-openpilot-state-bridge.md).
 
@@ -2816,7 +2816,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Canonical:**
   `data/generated/corolla_hf_nonsteering_engagement_state.json`;
   `data/generated/corolla_8965H1202000_openpilot_state_bridge.json`;
-  `tests/verify_corolla_hf.py`;
+  `tools/test corolla_hf`;
   [../variants/corolla-h-f-openpilot-state-bridge.md](../variants/corolla-h-f-openpilot-state-bridge.md) §6.4.
 
 
@@ -2842,7 +2842,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Canonical:**
   `data/generated/corolla_8965H1202000_b6_receiver_contract.json`;
   `data/generated/corolla_2025_span_discord_rlog_opendbc_evidence.json`;
-  `tests/verify_corolla_h.py`;
+  `tools/test corolla_h`;
   [../variants/corolla-h-f-openpilot-state-bridge.md](../variants/corolla-h-f-openpilot-state-bridge.md).
 
 
@@ -2864,7 +2864,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   vocabulary only; no literal OEM field-name join for signal258 is claimed.
 - **Canonical:**
   `data/generated/corolla_8965H1202000_b6_receiver_contract.json`;
-  `tests/verify_corolla_h.py`;
+  `tools/test corolla_h`;
   [../variants/corolla-h-f-openpilot-state-bridge.md](../variants/corolla-h-f-openpilot-state-bridge.md).
 
 
@@ -2888,7 +2888,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   a hardware test.
 - **Canonical:**
   `data/generated/corolla_hf_command5_portability.json`;
-  `tests/verify_corolla_hf.py`;
+  `tools/test corolla_hf`;
   [../variants/corolla-h-f-openpilot-state-bridge.md](../variants/corolla-h-f-openpilot-state-bridge.md).
 
 
@@ -2910,7 +2910,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   openpilot driver-override policy must still be chosen and dynamically validated.
 - **Canonical:**
   `data/generated/corolla_hf_steering_limits.json`;
-  `tests/verify_corolla_hf.py`;
+  `tools/test corolla_hf`;
   [../variants/corolla-h-f-openpilot-state-bridge.md](../variants/corolla-h-f-openpilot-state-bridge.md).
 
 
@@ -2932,7 +2932,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   require `62 || requested_DID` before decoding. No named outer DiagnosticSessionControl
   or SecurityAccess prerequisite is inferred from this path.
 - **Canonical:** `data/generated/techstream_v18/tss3_cruise_live_transport.json`;
-  `tests/verify_tss3_cruise_live_transport_external.py`;
+  `tests/targets/camry/verify_tss3_cruise_live_transport_external.py`;
   [../tooling/techstream.md](../tooling/techstream.md) §6.3.
 
 ### CORR-118 — `8965H1202000` is not Albino's application-F181 primary
@@ -2961,7 +2961,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   route itself.
 - **Canonical:**
   `data/generated/corolla_2023_albino_telescope_analysis.json`;
-  `tests/verify_albinoelephant_telescope_probe.py`;
+  `tests/targets/corolla/verify_albinoelephant_telescope_probe.py`;
   [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md) §7.39.
 
 ### CORR-119 — F33 `FEBF0000` is not a retained stock-application carrier
@@ -2992,7 +2992,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   primitive is withdrawn. The 22-record / 88-endpoint fixed-DMAC negative remains.
 - **Canonical:**
   `data/generated/camry_8965F3307000_application_ram_loader_assessment.json`;
-  `tests/verify_camry_8965F3307000.py`;
+  `camry_8965f3307000_*` suites in `verification.toml`;
   [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §§12.6–13.
 
 ### CORR-120 — VAR-056's four-user F33 torque-source census was incomplete; `0x4C000` is the fifth recovered direct user
@@ -3017,7 +3017,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Canonical:**
   [../variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md);
   `data/generated/camry_8965F3307000_tss3_opendbc_port.json`;
-  `tests/verify_camry_8965F3307000.py`.
+  `camry_8965f3307000_*` suites in `verification.toml`.
 
 ### CORR-121 — Toyota's retained F340 flash driver uses DBFULL bit 10, not SUSRDY bit 11, for per-halfword pacing
 
@@ -3027,7 +3027,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Exact F33 cross-check:** Camry `8965F3307000` native program routine `0x78E2A` writes each halfword and immediately checks `FSTATR & 0x400`; its target-native helpers `0x78C30/0x78CE6` independently provide Status Clear `0x50` and Forced Stop `0xB3`. This makes the DBFULL correction exact-target firmware-static as well as manufacturer-CUW-backed.
 - **Implementation consequence:** `exploit/patcher/flash_backend.c` now writes each halfword first and performs a bounded `FSTATR_DBFULL_MASK=0x00000400` wait afterward. The `0x800` pacing interpretation is rejected by regression tests. The backend retains `0x50` cleanup because exact F33/Sienna stock code supports it; no byte-identical T-0035 implementation claim is made. The rebuilt generic template remains within the fixed `0xFD0` code boundary (`0xF6E` raw text).
 - **Scope:** T-0035 validates Toyota F3/P1M-E manufacturer flash-control behavior; it is not an exact Camry F33 CUW and does not replace the exact stock F33 dump/restore artifact.
-- **Canonical:** `data/generated/techstream_v18/t0035_faci_backend_evidence.json`; `data/generated/camry_8965F3307000_flash_backend_evidence.json`; `tests/verify_camry_8965F3307000.py`; local `tests/verify_t0035_faci_backend_external.py`; [../security/secoc/application-chain.md](../security/secoc/application-chain.md) §9.7.
+- **Canonical:** `data/generated/techstream_v18/t0035_faci_backend_evidence.json`; `data/generated/camry_8965F3307000_flash_backend_evidence.json`; `camry_8965f3307000_*` suites in `verification.toml`; local `tests/firmware/verify_t0035_faci_backend_external.py`; [../security/secoc/application-chain.md](../security/secoc/application-chain.md) §9.7.
 
 ### CORR-122 — the F33 4→5 fixed-GP census was still incomplete; the first-class 6,065-function graph finds 9 torque and 6 Q-current direct references
 
@@ -3035,7 +3035,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Root cause:** the first-class F33 project now seeds the exact application `GP=FEBEB800` recovered from `0x715B4`. Ghidra therefore resolves many former `unaff_gp±offset` expressions to absolute LocalRAM symbols, and the canonical 6,065-function corpus exports its data-reference graph. Text search is neither complete nor stable under that improvement.
 - **Exact correction:** `GP-0x5158 = FEBE66A8` has **9** direct Ghidra-reference owners: readers `0x35A06, 0x4C000, 0x4C490, 0x4DB70, 0x52CA0, 0x54244, 0x564CE` and writers `0x59448, 0x5D5E0`. DID1151 Q-current `GP-0x50F2 = FEBE670E` has **6**: readers `0x4E394, 0x52CA0, 0x54244, 0x564CE` and writers `0x59448, 0x5D12C`. The distinct `0x4A3` source `GP-0x50E8 = FEBE6718` has four direct refs: readers `0x4C000/0x4C490`, writers `0x59448/0x5D12C`.
 - **Safety consequence:** the prior bounded control-cone conclusion survives the stronger census: neither `FEBE66A8` nor `FEBE670E` has a direct Ghidra data reference in the cooperative `C8xxx–D1xxx` target-to-motor cone. Computed aliases without a recovered data reference, DMA/hardware mutation, and unrecovered code remain outside the negative proof.
-- **Canonical:** `data/generated/camry-8965F3307000/decompilations.jsonl`; `data/generated/camry_8965F3307000_lateral_decompiler_evidence.json`; `data/generated/camry_8965F3307000_lateral_static.json`; `tests/verify_camry_8965F3307000.py`; [../variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) §2.
+- **Canonical:** `data/generated/camry-8965F3307000/decompilations.jsonl`; `data/generated/camry_8965F3307000_lateral_decompiler_evidence.json`; `data/generated/camry_8965F3307000_lateral_static.json`; `camry_8965f3307000_*` suites in `verification.toml`; [../variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) §2.
 
 ### CORR-123 — the F33 application-pivot census was stale; the first-class graph has 496 indirect transfers / 487 application transfers and more lower-RAM call cells
 
@@ -3077,7 +3077,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   not another pass over the stale 312-site corpus.
 - **Canonical:**
   `data/generated/camry_8965F3307000_application_ram_loader_assessment.json`;
-  `tests/verify_camry_8965F3307000.py`;
+  `camry_8965f3307000_*` suites in `verification.toml`;
   [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §13.5.
 
 ### CORR-124 — F33 `0x7F7/0x7F8` was already on the correct normal-harness bus1 route; the unresolved timeout is transport admission/response state
@@ -3116,8 +3116,8 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Canonical:**
   `data/generated/camry_8965F3307000_application_ram_loader_assessment.json`;
   `exploit/followups/xcp_runtime_state_probe.py`;
-  `tests/verify_camry_8965F3307000.py`;
-  `tests/verify_exploit_followups.py`;
+  `camry_8965f3307000_*` suites in `verification.toml`;
+  `tests/runtime/verify_exploit_followups.py`;
   [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §§6,13.1,13.6.
 
 ### CORR-125 — current GTS+ moved the `CDbDllTable` role key; `DelDiagCodeP4` is role `0x19`, not role 0
@@ -3126,7 +3126,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Root cause:** `parse_ddb.py::extract_master_dlls()` reused the V18 type-19 field layout for current GTS+. Both generations retain 88-byte `CDbDllTable` records and category at u16 `+0x50`, which hid the schema change. V18 `CDbDllTable::FindDbItem1` reads the role as **u8 `+0x56`** and every pinned V18 NA type-19 row has u16 `+0x54 == 0`. Current GTS+ `FindDbItem1` instead reads **u16 `+0x54`**; byte `+0x56` is a separate field/flag and is zero on most rows, causing the old parser to report role 0.
 - **Exact correction:** pinned V18 `KgpDataCtrl.dll` consumes `mov al,[edx+0x56]` in `CDbDllTable::FindDbItem1`; pinned current GTS+ consumes `movzx eax,word [edx+0x54]`. `FindDbItem2` consumes category u16 `+0x50` in both. Under the corrected version-aware parser, current GTS+ categories 372 Engine, 395 Motor Generator, 397 Hybrid Control, 398 HV Battery, and 435 Brake/EPB all bind `DelDiagCodeP4.dll` at logical DLL role **`0x19` (25)**, matching V18.
 - **Consequence:** the exact Camry DTC-clear procedure and live evidence are unchanged: functional `0x7DF` Mode 04 remains the proven legislated-controller clear route, and physical SID14 remains the proven direct route where supported. The correction matters to the reusable Techstream execution model and any future database-driven Comma runtime, because plugin selection must use the correct generation-specific type-19 key layout.
-- **Canonical:** `tools/techstream/parse_ddb.py`; `tools/techstream/extract_diagnostic_execution_model.py`; `data/generated/techstream_v18/diagnostic_execution_model.json`; `tests/verify_techstream_diagnostic_execution_model.py`; `tests/verify_camry_2026.py`; [../tooling/techstream.md](../tooling/techstream.md) §6.2.0/§6.4; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §17.
+- **Canonical:** `tools/techstream/parse_ddb.py`; `tools/techstream/extract_diagnostic_execution_model.py`; `data/generated/techstream_v18/diagnostic_execution_model.json`; `tests/techstream/verify_techstream_diagnostic_execution_model.py`; `tools/test camry_2026`; [../tooling/techstream.md](../tooling/techstream.md) §6.2.0/§6.4; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §17.
 
 ### CORR-126 — exact-F33 signal188 is `0x025` B4[7:4], not B2[7:4]
 
@@ -3141,7 +3141,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   correct.
 - **Canonical:** `tools/targets/camry/analysis/analyze_camry_8965F3307000_codeflash.py`;
   `data/generated/camry_8965F3307000_codeflash.json`;
-  `tests/verify_camry_8965F3307000.py`;
+  `camry_8965f3307000_*` suites in `verification.toml`;
   [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §9.
 
 ### CORR-127 — VAR-065's `19/116 nonempty, 97 empty` count described a narrow preselected raw→stage→snapshot model, not the full F33 COM-to-command denominator
@@ -3150,7 +3150,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Root cause:** exact F33 `0x58074` stages far more of the generated-COM raw bank than the old fixed triple enumerated, and several qualification/observer functions consume those stage cells before the C/D-family command logic. Two table-driven extraction families (`0x693FE/0x697F4`) were also absent from the literal-call census.
 - **Exact correction:** the canonical 6,065-function corpus now yields 116 literal scalar raw cells plus 14 table-driven extracts (signals 90..103 over `0x013..0x01F`). Of the 116 scalar raws, **98 are staged** by `0x58074` over **105 exact raw→stage edges**; the remaining **18 are consumer-free**. The exact COM-derived stage-space has **52 reader functions, 15 inside the recovered cluster, with no direct stage reader above `0xBF0EC`**. Six exact snapshot copiers (`0xBC96A/0xBCA08/0xBCAA6/0xBCBD8/0xBCD62/0xBCD66`) fill **306 unique snapshot destinations**.
 - **Preserved and strengthened conclusion:** statement-level command composition still has only B6-derived COM **value/mode** inputs: B6 sig262 reaches `FEBEC81A <- FEBEAE90` and B6 sig261 is required by `0xCB73A` to raise the B6 assist-active state. The remaining non-B6 COM paths reaching the cluster (`0x090`, `0x0D7`, `0x675`, `0x13B`) are observer, gate/selector, plausibility, or telemetry paths. CORR-128 separately corrects the provenance of `FEBECC60`: `FEBE71F2 -> FEBEEF8E -> FEBEAC52` supplies only its saturation limit, while the B6-independent magnitude comes from an internal `D0218 -> D0284 -> D02DA -> FEBECC4E` baseline-assist chain. Therefore the corrected headline is narrower: B6 is the only recovered generated-COM external **value/mode input to the `FEBECC50/FEBECC62` shared command funnel**. CORR-130 subsequently closes that funnel's physical current-control consequence while showing why the `AC56/EE40A/1C02` diagnostic mirror must not be mistaken for the motor-driving `AC54/EE40C` sibling.
-- **Canonical:** `data/generated/camry_8965F3307000_command_cone_ingress.json`; `tools/targets/camry/builders/build_camry_8965F3307000_command_cone_ingress.py`; `tests/verify_camry_8965F3307000_command_cone_ingress.py`; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §29.
+- **Canonical:** `data/generated/camry_8965F3307000_command_cone_ingress.json`; `tools/targets/camry/builders/build_camry_8965F3307000_command_cone_ingress.py`; `tests/targets/camry/verify_camry_8965F3307000_command_cone_ingress.py`; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §29.
 
 ### CORR-128 — `FEBE71F2/FEBEAC52` limits `FEBECC60`; it does not supply the B6-independent command magnitude
 
@@ -3158,7 +3158,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Exact correction:** `FUN_000D0382` reads dynamic `FEBECC4E` and `FEBEAC52`, then computes `FEBECC60 = clamp(FEBECC4E, +/-FEBEAC52)`. `FEBEAC52 <- FEBEEF8E <- FEBE71F2` is therefore only the limit. `FEBE71F2` itself has runtime writer `0x3BDC6`, which selects the minimum active entry from exact ROM table `0x317E0` (`0x2B4D`, `0x3A75`, or `0x569A`, default `0x569A`) from an internal protected status mask. The dynamic magnitude instead flows `D0218 -> FEBECC48 -> D0284/FEBECC4C -> D02DA/FEBECC4E -> D0382/FEBECC60`. `D0284`'s multiplier is also internal: `FEBEAC64 <- FEBEB140`; `B3866/B389C/B38D2` derive `FEBEB140` from exact ROM u16 `0xAEF4C=0x5571` as `0x7636`, while reset/default `BF97A` writes `0x7637`. There is therefore no hidden generated-COM/CAN magnitude entering through that scale factor.
 - **Recovered B6-independent branch:** with internal diagnostic gate `FEBEAC2B!=0x5A` and B6 assist-active flag `FEBEC7BF!=1`, `D0218` sums `FEBEC43C + FEBEC4C0 + FEBEC3BA + FEBECC2C + FEBEBF3C + clamp(FEBECB38 + FEBEC5EE,+/-B132C/2) + FEBECBE8`. Exact runtime writers are `C7E36`, `C8678`, `C74AC`, `D0162`, `C2B64`, `CF2B2`, `C9A84`, and `CFCD4`; `CB73A` can set `FEBEC7BF=1` only with B6 sig261. This is an EPS-internal baseline-assist magnitude path, not another generated-COM target.
 - **Consequence:** the VAR-077/CORR-127 ingress conclusion is preserved and sharpened: B6 remains the only recovered generated-COM value/mode input to `FEBECC50/FEBECC62`, while F33 can generate a nonzero value internally with B6 absent. CORR-130 now proves that the same `CC62` value is a real pre-slew stage of the current-control funnel through the intra-function `D042C -> CC66` edge and sibling `CC64/AC54/EE40C` branch. What remains unresolved is upstream lane-authority provenance: none of the recovered B6-inactive terms is independently identified as the stock LTA lane target.
-- **Canonical:** `data/generated/camry_8965F3307000_command_cone_ingress.json`; `tools/targets/camry/builders/build_camry_8965F3307000_command_cone_ingress.py`; `tests/verify_camry_8965F3307000_command_cone_ingress.py`; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §30.
+- **Canonical:** `data/generated/camry_8965F3307000_command_cone_ingress.json`; `tools/targets/camry/builders/build_camry_8965F3307000_command_cone_ingress.py`; `tests/targets/camry/verify_camry_8965F3307000_command_cone_ingress.py`; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §30.
 
 ### CORR-129 — VAR-067's `0x08A B21=11` generic lateral/HUD-candidate label was too weak; the retained numeric and dynamic joins strongly identify LTA/LCA active
 
@@ -3166,7 +3166,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Exact correction:** fresh deterministic enumeration proves B21's set is exactly `{0,11,18}` in both retained drives. B21=`11` occurs only with cruise B3=`8` and B24=`100`; B21=`18` occurs only with cruise off/B24=`50` and has B23=`0x20` in every observed row; B21=`0` occupies the remaining tuple classes. Current generation-20 `EMPS_P5` independently defines Target Lateral ID `0=No Request (Manual Operation), 11=LTA/LCA, 18=SDG`. `0x081 B13` matches B21 in 20,442/20,479 A pairs and 23,991/23,999 B pairs. `0x412 B0` plus `0x371 B9/B20low2` reconstruct `10/10/0`, `12/20/1`, `14/30/3`; the active carrier follows B21=`11` by 0.100..0.200 s and clears with the segment21 CANCEL. Drive-B cruise precedes B21=`11` by 11.693298 s, so cruise and lateral active state are distinct.
 - **Correct confidence boundary:** this is a **strong cross-domain numeric+dynamic identification of `0x08A B21=11` as LTA/LCA active**, not target-native byte-exact OEM producer-wire proof. The current `0x08A` producer mapping is unavailable; exact F33's complete 43-entry normal-Rx list excludes `0x08A`, `0x371`, and `0x412`; historical `LTA_RELATED`/`LKAS_HUD` labels are corroboration only and no old layout transfers. No physical LTA-button carrier is recovered, and the operator's green-LTA/steering report remains separate human corroboration rather than machine evidence.
 - **Preserved conclusions:** VAR-067's cruise/set-speed recovery remains valid. The two complete LTA/LCA-active intervals remain 73.303384 s / 237,097 incoming frames / zero B6 on every bus and DLC. None of the state carriers is shown to be EPS ingress or a steering-command wire, and the result authorizes no output.
-- **Canonical:** `data/generated/camry_2026_lta_state_reconciliation.json`; `tools/targets/camry/analysis/analyze_camry_2026_lta_state_reconciliation.py`; `tests/verify_camry_2026_lta_state_reconciliation.py`; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §20.
+- **Canonical:** `data/generated/camry_2026_lta_state_reconciliation.json`; `tools/targets/camry/analysis/analyze_camry_2026_lta_state_reconciliation.py`; `tests/targets/camry/verify_camry_2026_lta_state_reconciliation.py`; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §20.
 
 
 ### CORR-130 — a direct-reader-only audit falsely separated `FEBECC62` from physical current control; the exact intra-function and sibling-mirror chain closes the convergence
@@ -3177,7 +3177,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Diagnostic-mirror distinction:** `D0AAE` simultaneously copies **pre-slew `CC62 -> AC56`** and **motor-driving post-slew/override `CC64 -> AC54`**. `BF33E` mirrors these as `EE40A` and `EE40C`. The `AC56/EE40A` side is the Toyota-named `1C02` diagnostic branch (`EE40A -> 5D5E0 -> 6772 -> 4E7D6`) and also `EE40A -> 35C4C/6AF6 -> 387CE/6E22/6E24`, whose readers are snapshot/report consumers. The **`AC54/EE40C` sibling is the branch actually consumed into `6AF4` and the current-control path**. `37F16` later mirrors downstream `6DD6/6DC8 -> 6D84/6D86` for the command-current diagnostic family.
 - **Preserved ingress boundary:** B6 remains an exact external target-angle/mode contributor to the shared `CC50/CC62` funnel, and the B6-inactive `D0218` contribution remains real. The eight B6-inactive terms are structurally bounded to measured torque, torque+speed maps, internal aggregation/ROM state, `|torque|` curves, angle return/dither, a retained-drive-zero moving-mode term, and phase-window angle excitation. None is independently recovered as an external lane-target magnitude.
 - **Consequence:** the downstream actuation question is substantially closed. At this correction stage we still described zero-B6 factory LTA as an upstream contradiction; CORR-135 supersedes that framing. The exact B6-inactive `D0218 -> CC48 -> CC60 -> CC50 -> CC62/CC66 -> CC64` path itself can reach physical current control, so factory steering with zero B6 is architecturally consistent. `0x08A` producer/security ownership and the exact state that selects/modulates this internal path remain separate open questions; no `0x08A -> B6` stock-LTA transform is implied.
-- **Canonical:** `data/generated/camry_8965F3307000_internal_assist_oracles.json`; `tools/targets/camry/builders/build_camry_8965F3307000_internal_assist_oracles.py`; `tests/verify_camry_8965F3307000_internal_assist_oracles.py`; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §§34–35.
+- **Canonical:** `data/generated/camry_8965F3307000_internal_assist_oracles.json`; `tools/targets/camry/builders/build_camry_8965F3307000_internal_assist_oracles.py`; `tests/targets/camry/verify_camry_8965F3307000_internal_assist_oracles.py`; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §§34–35.
 
 
 ### CORR-131 — the development sender's stock-B6-template gate is not the Camry integration contract
@@ -3225,7 +3225,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   are now positively materialized and independently oracle-checked.
 - **Canonical:** `tools/techstream/cp_body_decode.py`;
   `tools/techstream/recover_cp_bodies.py`;
-  `tests/verify_gtsplus_managed_exe_recovery.py`;
+  `tests/techstream/verify_gtsplus_managed_exe_recovery.py`;
   [../tooling/cuwplus-body-recovery.md](../tooling/cuwplus-body-recovery.md).
 
 ### CORR-133 — “no real TSE specimen” was too broad; public legacy Toyota TSEs validate the common framing lineage
@@ -3255,7 +3255,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   remains unauthorized.
 - **Canonical:** VAR-081;
   `data/generated/camry_2026_lta_state_reconciliation.json`;
-  `tests/verify_camry_2026_lta_state_reconciliation.py`;
+  `tests/targets/camry/verify_camry_2026_lta_state_reconciliation.py`;
   [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §20.
 
 ### CORR-135 — zero-B6 factory LTA does not imply an `0x08A -> B6` transform; exact F33 has a B6-independent actuation path
@@ -3273,7 +3273,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Timestamp correction:** the retained NDJSON preserves rlog `Event.logMonoTime`, which timestamps a complete CAN publication batch rather than each wire frame. Median bus-0 batch size is 14 frames in both drives; 20,607/20,615 drive-A and 23,999/23,999 drive-B `0x08A` frames share their timestamp with at least one other frame. The apparent 20/30 ms classes cannot establish arbitration delay, TX-queue identity, scheduler identity, oscillator identity, or physical transmitter. The `0x0D7`-queue exclusion is disproved.
 - **Authentication correction at that evidence stage:** zero Bus-1 `0x00F` plus near-constant last-4 on all periodic Bus-1 streams, by itself, proved only that those observed PDUs did not end in ordinary-P5 `FV4||MAC28`; it could not identify the Bus-4 CMAC owner from trailer absence alone. **CORR-149 supersedes the broader FRC-signer possibility** using the subsequently composed TSK/ICU-S hardware boundary plus VAR-107's recovered native-Bus-1 E2E framing: FRC-side TSK signing/pre-authentication is no longer a live branch, while physical transmission and the downstream proxy-signer identity remain open.
 - **Preserved facts:** `0x08A` is present on captured Bus 4 and absent on Bus 1; exact F33 is not its generated-COM transmitter or receiver; Bus-4 `0x08A` has the ordinary-P5 trailer structure; the FRC-hosted recorder carries the matching `5282/5631` request object; consecutive `5282` is absent from sniffed Bus-1 CAN.
-- **Canonical:** VAR-091/094 plus CORR-149 for the superseding FRC/TSK boundary; `data/generated/camry_2026_08a_producer_bounds.json` schema v4; `tests/verify_camry_2026_08a_producer_bounds.py`; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §§41–43.
+- **Canonical:** VAR-091/094 plus CORR-149 for the superseding FRC/TSK boundary; `data/generated/camry_2026_08a_producer_bounds.json` schema v4; `tests/targets/camry/verify_camry_2026_08a_producer_bounds.py`; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §§41–43.
 
 ### CORR-137 — retained `0x08A` ID11 is request state, not a proved LTA winner/grant
 
@@ -3281,14 +3281,14 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Exact distinction:** PCS Operation FFD separately names request `5282/5631`, winner `5285/57DE`, active-steering grant `5265`, and EPS pinion `560D`. Retained CAN has the `5282`-shaped `0x08A` request plus mirrors, zero B6, and no `AB11/12/13` recorder transaction. The motor-feedback correlation is not a grant oracle.
 - **Preserved F33 fact:** the B6-inactive `D0218 -> ... -> motor` path is real and proves zero B6 is compatible with continued physical steering. It does not prove that path received autonomous lane-centering authority in the retained intervals.
 - **Correct next check:** synchronized FRC Operation FFD `5282/5285/57DE/5265` plus CAN. Until then the retained intervals are graded request-state verified, winner/grant bounded.
-- **Canonical:** VAR-095; `data/generated/camry_2026_lta_state_reconciliation.json`; `tests/verify_camry_2026_lta_state_reconciliation.py`; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §§38,43.
+- **Canonical:** VAR-095; `data/generated/camry_2026_lta_state_reconciliation.json`; `tests/targets/camry/verify_camry_2026_lta_state_reconciliation.py`; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §§38,43.
 
 ### CORR-138 — `0x160[22]` is not a standing delayed SAS echo; the echo statistic was Class-L-window-restricted
 
 - **Superseded inference:** the VAR-074 lead/lag screen, live-baseline §21's "particularly clear steering-angle echo" (r=+0.9963/−75 ms drive A, +0.8698/−100 ms drive B), §42/§43's "delayed `0x025` steering-angle echo (SAS → FRC)" wording, PRIORITIES "0x160[22] remains a delayed steering-angle echo", and VAR-094's parenthetical generalized a window-restricted correlation into a standing echo property of the frame.
 - **Window correction:** the artifact `camry_2026_bus1_field_leadlag.json` computed those r values inside the Class-L window only (`frames_in_window` 1,285/2,927). Over the full drives the same `0x160[22]s16be` decode vs `0x025` coarse ct (nearest ±20 ms, zero lag) collapses to **r=+0.086104 (A) / −0.091204 (B)** with slope ≈0.0007/−0.0009 ct/ct. Inside ID11 every byte-21/22 decode reproduces high correlation (0.985033/0.554946 zero-lag) because lane-centering oscillates every candidate together; the 9-bit `B21[3:0]:B22` decode's full-drive slope ≈1.01/0.91 at r=0.506847/0.458923 is a range coincidence plus sign-variable local coupling, and that field's standing identity is bounded (no OEM name).
 - **Preserved facts:** `0x160` remains a ~40 Hz camera/radar-domain stream, and the declared VAR-082/VAR-094 searches remain valid within their literal/windowed methods. They do **not** establish that Bus 1 carries only feedback/plant-shaped data or that command/request information is absent: transformed, multi-field, nonlinear, multiplexed, or otherwise non-literal unsigned FRC egress was outside those bounds (CORR-153 / VAR-113).
-- **Canonical:** `data/generated/camry_2026_lateral_flow_trace.json` `x160_echo_correction`; `tests/verify_camry_2026_lateral_flow_trace.py`; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §46.
+- **Canonical:** `data/generated/camry_2026_lateral_flow_trace.json` `x160_echo_correction`; `tests/targets/camry/verify_camry_2026_lateral_flow_trace.py`; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §46.
 
 ### CORR-139 — carrier absences do not reopen a private-EPS-stub routing theory
 
@@ -3298,7 +3298,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Routing correction:** keep the present physical repin. The candidate openpilot external cooperative-control route is `0x0B6` DLC 32 on Panda bus 0 across the `CAN0/CAN2` relay pair. Do not send `0x08A` to EPS and do not hunt a second EBU-private CAN pair from these absences. Later VAR-147/149/150 sharpen the receiver boundary: cumulative stage 5 removes the recovered authentication-result distinction, but neither that patch nor a successful Panda TX proves F33 queue/route44/application admission. The next discriminator is the stationary internal first-divergence capture, not another repin or a MAC-value A/B.
 - **Downstream mirror sync (2026-09-08):** `kai-openpilot@60d57a89a` briefly used the GTS `EBU` junction label to make an EBU-mediated private EPS branch the leading explanation for missing native B6. That conflicts with VAR-066's independent GTS+/single-F33-controller/UDS/repin join. `kai-openpilot@7aece7f63` removes that inference: `EBU` remains a topology label, and no second EPS application bus or repin change is justified by B6 absence.
 - **Additional language corrections:** `0x081` equality is stratified rather than universal; the B26 break causes are unclassified under batched ordering; the damping negative is limited to a separate `{0,50,100}`-alphabet field on `0x08A`; request/plant correlations do not prove a causal command path.
-- **Canonical:** VAR-066/098/099/100; `data/generated/camry_2026_lateral_flow_trace.json`; `tests/verify_camry_2026_lateral_flow_trace.py`; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §§19,46; [../variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md).
+- **Canonical:** VAR-066/098/099/100; `data/generated/camry_2026_lateral_flow_trace.json`; `tests/targets/camry/verify_camry_2026_lateral_flow_trace.py`; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §§19,46; [../variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md).
 
 ### CORR-140 — the exact-F33 development B6 sender is present again; “runtime removed” is historical, not current
 
@@ -3306,7 +3306,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Current source:** `opendbc@c98872c6` and parent `5fee63cfc` reintroduced an exact-F181, non-release zero-MAC28 B6 development path without reviving the disproved stock-template admission premise. `opendbc@8da4bb9b` adds `0x08A B3[3]` cruise/`controls_allowed` safety and slew-limited output reporting; parent `6dd58cf5e` repairs `card.py` controller availability/imports and registers `ToyotaTss3DevLateral`.
 - **Preserved boundary:** default/release behavior remains `dashcamOnly` / `SafetyModel.noOutput`; ordinary Toyota safety rejects B6. The current path requires exact bridge-attestation params and is not live proof: `card.py` neither deploys a RAM resident nor verifies a heartbeat, the 28-byte base remains an explicit-zero non-stock candidate, and no receiver deployment or vehicle actuation is claimed.
 - **Correct next gate:** install and positively verify persistent Gate-2 patch or RAM bridge, then stationary ID0/ID11-zero/small-angle testing for application semantics, sign/scale, override, motor response, timeout/release, source coexistence/suppression, and fault recovery. OQ-054 FRC/signer attribution remains separate and does not block this direct B6 development test.
-- **Canonical:** VAR-102; `data/generated/camry_8965F3307000_tss3_opendbc_port.json`; `tests/verify_camry_8965F3307000.py`; [../variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) §§3.4–5.
+- **Canonical:** VAR-102; `data/generated/camry_8965F3307000_tss3_opendbc_port.json`; `camry_8965f3307000_*` suites in `verification.toml`; [../variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) §§3.4–5.
 
 ### CORR-141 — CPU index does not select old-stack DID `0x0203`; the generic RAM-exec helper mixed old/new Toyota boot grammars
 
@@ -3314,7 +3314,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Exact F33 evidence:** all retained successful 2026-08-26 Camry `8965F3307000` CodeFlash/RAM acquisitions identify the old stack by accepting `0x0203 = 00 00 00 00 00`, then `RequestDownload = 01 46 01 00 FEBF0000 1000`, RID `10F0` option `45 00 ...`, and old-stack FF00 `45 00 ...`. The `01 00 00 00 00` DID value is the newer-stack CPU0 offset selector, not the old-stack CPU0 value.
 - **2026-08-30 live observation:** a validate-only Gate-2 preflight matched exact application F181 and passed boot SecurityAccess/`10F0`; the shared runner then *reported* zero payload telemetry and blocked APPLY. CORR-145 later proves that collector discarded every current Panda 3-tuple, so the zero count cannot be attributed to the wrong DID value. The DID grammar bug remains independently proven by the retained successful old-stack transcript. No flash write occurred.
 - **Permanent rule:** DID `0x0203` and RequestDownload memory ID are separate protocol fields. Old stack uses five zero bytes for DID `0x0203` on CPU0/CPU1; new-stack CPU0 uses `01 00 00 00 00` while new-stack CPU1 remains zero. RequestDownload memory ID is independently `1` for CPU0 and `0` for CPU1. Use the shared bootstrap-protocol helper; do not derive DID `0x0203` from CPU index alone.
-- **Canonical:** SECOC-075; `exploit/common/README.md`; `exploit/common/ram_exec.py`; `tests/verify_secoc_manifest_patcher.py`; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §14.
+- **Canonical:** SECOC-075; `exploit/common/README.md`; `exploit/common/ram_exec.py`; `tests/runtime/verify_secoc_manifest_patcher.py`; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §14.
 
 
 ### CORR-142 — zero payload telemetry did not prove the DID0203 fix failed or that the patcher runtime was the sole remaining defect
@@ -3324,7 +3324,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Independent payload correction:** the generic patcher was linked at VMA 0 even though GCC materialized absolute addresses for several intra-payload calls. Disassembly therefore contained low targets such as `0x154/0x196` rather than `FEBF0154/FEBF0196`. The builder now links at the authenticated callback/load VMA `FEBF0000` while retaining entry offset 0. This was a real execution defect. A corrected-VMA retry still *reported* zero telemetry, but CORR-145 later invalidates that count as execution evidence because the collector dropped current Panda 3-tuples.
 - **Independent host delta:** the successful exact-F33 2026-08-26 acquisition performs `panda.can_clear(0xFFFF)` plus a 10-ms settle immediately before the one-shot multi-frame FF00 trigger. The shared runner omitted this. Current `opendbc.car.isotp.isotp_send()` takes the first matching response-ID frame as flow-control without first validating its PCI byte, so stale `0x7A9` backlog can corrupt the FF00 transaction. The shared runner now mirrors the proven F33 clear+settle sequence. CORR-145 means the earlier zero-count retries cannot establish whether this delta was causal.
 - **Permanent rule:** do not infer callback/payload failure from zero post-trigger telemetry until the host trigger choreography matches a target-native successful acquisition. Treat DID grammar, payload link VMA, and host ISO-TP/RX-ring discipline as separate gates.
-- **Canonical:** SECOC-075/076; `exploit/common/ram_exec.py`; `exploit/patcher/build_shellcode_template.py`; `tests/verify_secoc_manifest_patcher.py`; `tests/verify_ram_exec_variant_requirements.py`; `targets/camry-2026/raw-20260830/secoc-patch-preflight-f33-handoff-vmafix/`; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §14.
+- **Canonical:** SECOC-075/076; `exploit/common/ram_exec.py`; `exploit/patcher/build_shellcode_template.py`; `tests/runtime/verify_secoc_manifest_patcher.py`; `tests/runtime/verify_ram_exec_variant_requirements.py`; `targets/camry-2026/raw-20260830/secoc-patch-preflight-f33-handoff-vmafix/`; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §14.
 
 ### CORR-143 — nonzero F33 boot-RAM bytes do not establish a watchdog API; callback Tx must follow the field-proven payload context
 
@@ -3332,7 +3332,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Exact F33 correction:** retained LocalRAM bytes decode `FEBF1188` and `FEBF11AC/FEBF11D2` as privileged status-register helpers; no target-native watchdog callable contract has been recovered for those addresses. The exact Calvin 4-KiB payload that successfully streamed all 2 MiB of F33 CodeFlash for ~194.9 s calls none of them. Its callback sender waits only for `CFDTMSTS16 & 0x06 == 0`, submits the frame, waits for any nonzero `0x06` completion, clears with `& 0xF9`, and continues.
 - **2026-08-30 live observation:** retries before and after removing the unverified helper calls / adopting the callback `0x06` handshake all *reported* zero telemetry and blocked APPLY. CORR-145 later proves those shared-run counts were blind because every current Panda 3-tuple was discarded before inspection; they do not establish payload failure. The unverified helper contract and later-discovered `FEBF1F00/FEBF1F04` scratch writes remain independently invalid assumptions and are removed.
 - **Permanent rule:** do not infer a callable RAM helper from a nonzero instruction word, and do not reuse community scratch RAM on an exact target without proving that region is free. For exact F33 RAM callbacks, use only target-native recovered call contracts or the retained field-proven callback behavior. Stock-driver Tx predicates and callback-context Tx behavior are separate evidence classes. The standalone dumper now follows the same rule, links at `FEBF0000`, and pins its corrected read-only executable identity.
-- **Canonical:** SECOC-077; `exploit/common/runtime.c`; `exploit/dumper/main.c`; `exploit/dumper/build_shellcode.py`; `tests/verify_secoc_manifest_patcher.py`; `tests/verify_codeflash_dumper.py`; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §14.
+- **Canonical:** SECOC-077; `exploit/common/runtime.c`; `exploit/dumper/main.c`; `exploit/dumper/build_shellcode.py`; `tests/runtime/verify_secoc_manifest_patcher.py`; `tests/firmware/verify_codeflash_dumper.py`; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §14.
 
 ### CORR-144 — the shared F33 RAM-exec handoff duplicated a retained proven helper; its causal blame for zero telemetry is withdrawn
 
@@ -3340,7 +3340,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Causal correction:** the one-word Calvin derivative was initially reported as failing through the duplicate shared handoff and succeeding through the retained host script, and that contrast was used to blame the handoff. CORR-145 shows the shared collector discarded every current Panda 3-tuple, so its “zero frames” side of that comparison was not an execution observation. The handoff reuse is still the correct implementation shape, but its causal attribution is disproved.
 - **Preserved positive control:** the retained host path on the current post-repin Panda bus 0 returned address 0 / CodeFlash word `0x06E0001F` in 6 ms. This independently proves the repin, bus0 callback transport, CAN-FD state, and current opendbc/Panda versions are viable.
 - **Permanent rule:** reuse a retained successful stateful helper when available, but do not call an A/B control causal unless both observation paths are themselves validated.
-- **Canonical:** SECOC-078/079; `exploit/common/ram_exec.py`; `tests/verify_secoc_manifest_patcher.py`; `targets/camry-2026/raw-20260830/secoc-ram-exec-exact-host-control/`; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §14.
+- **Canonical:** SECOC-078/079; `exploit/common/ram_exec.py`; `tests/runtime/verify_secoc_manifest_patcher.py`; `targets/camry-2026/raw-20260830/secoc-ram-exec-exact-host-control/`; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §14.
 
 ### CORR-145 — shared F33 zero-telemetry runs discarded current Panda 3-tuples before inspecting them
 
@@ -3350,7 +3350,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Collector-fixed confirmation:** the next exact-F33 validate-only run on post-repin Panda bus 0 recovered 35 telemetry events, reached `SUCCESS` and `DONE`, produced no config/observation mismatches, and set `apply_ready=true`. This dynamically confirms the tuple filter—not the ECU/payload—as the reason the prior shared runs reported zero frames. No flash write occurred.
 - **Permanent rule:** a zero telemetry count is meaningful only after the collector is validated against the concrete Panda row ABI. Accept current 3-tuples and wider historical tuples by reading address from field 0 and data/bus from the last two fields. Do not use the earlier shared-run zero counts as causal evidence about payload execution.
 - **Preserved boundaries:** the old-stack DID0203 bug, VMA=0 bug, unverified boot-RAM helper assumption, unproven scratch writes, and duplicate handoff were real implementation defects found independently and remain fixed. Their causal role in the earlier live failures is unproved because those runs had a blind collector. No persistent flash write occurred.
-- **Canonical:** SECOC-079; `exploit/common/ram_exec.py`; `tests/verify_secoc_manifest_patcher.py`; `tests/verify_camry_8965F3307000.py`; `targets/camry-2026/raw-20260830/secoc-ram-exec-exact-host-control/`; `targets/camry-2026/raw-20260830/secoc-patch-preflight-f33-field-proven-handoff-collector-bug/`; `targets/camry-2026/raw-20260830/secoc-patch-preflight-f33-collector-fixed/`; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §14.
+- **Canonical:** SECOC-079; `exploit/common/ram_exec.py`; `tests/runtime/verify_secoc_manifest_patcher.py`; `camry_8965f3307000_*` suites in `verification.toml`; `targets/camry-2026/raw-20260830/secoc-ram-exec-exact-host-control/`; `targets/camry-2026/raw-20260830/secoc-patch-preflight-f33-field-proven-handoff-collector-bug/`; `targets/camry-2026/raw-20260830/secoc-patch-preflight-f33-collector-fixed/`; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §14.
 
 ### CORR-146 — relay-closed TSS3 was only a workaround; forwarding was frame-format-sensitive, and `0x08A` state belongs on native bus 2
 
@@ -3368,7 +3368,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Request-plane correction:** the temporary Panda rule that rejected active B6 whenever `0x08A` Target Lateral ID was nonzero was also non-native policy. VAR-104 proves `0x08A` is not an F33 EPS ingress/grant carrier and identifies no blockable stock-LTA frame. A request-plane value cannot be promoted into an openpilot authority grant; VAR-148/CORR-179 subsequently close the exact EPS-side composition as ID11 co-modulation rather than an exclusive replacement path. The final port therefore removes this bespoke interlock; normal `controls_allowed` and `CC.latActive` own engagement/lateral authority.
 - **Implementation:** final native revisions are `kai-openpilot@7ae38f6d4` / `opendbc@ae284aaf` / `panda@4130c4a9`; focused Toyota/TSS3 interface/controller tests cover full-range capability and `CC.latActive` ownership with no Target-Lateral-ID permission gate.
 - **VAR-104 boundary (2026-08-30):** statement-level exact-F33 decode found no EPS-accepted stock-LTA carrier to suppress: F33's accepted surface excludes `0x08A`/`0x081`, and its internal authority path is not CAN-fed. VAR-148/CORR-179 subsequently close receiver composition as co-modulation while leaving upstream Toyota request/reference provenance separate; none of that justifies blocking `0x08A`, refusing B6 from the request state, or adding a controller-side arbitration hack ([../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §48).
-- **Canonical:** VAR-103/VAR-104/VAR-105 and CORR-148; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §§48–49; `kai-openpilot@7ae38f6d4` / `opendbc@ae284aaf` / `panda@4130c4a9`; `tests/verify_camry_8965F3307000_command_cone_ingress.py`.
+- **Canonical:** VAR-103/VAR-104/VAR-105 and CORR-148; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §§48–49; `kai-openpilot@7ae38f6d4` / `opendbc@ae284aaf` / `panda@4130c4a9`; `tests/targets/camry/verify_camry_8965F3307000_command_cone_ingress.py`.
 
 ### CORR-148 — final F33 port removes bring-up policy from the driving path; route 2A failure belongs to the superseded sender/safety shape
 
@@ -3386,7 +3386,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **What remains open:** the proxy's exact identity and handoff remain unresolved. Current topology bounds the candidate set to Skid Control / ABS, Brake Booster, or Central Gateway. Physical Bus-4 transmitter, request handoff/encoding, final arbitration executor, SecOC profile/freshness owner, and exact ICU-S key selection still require source/downstream producer or private-link evidence. VAR-113/CORR-153 explicitly keep transformed/multi-field native-Bus-1 egress open; a private link is one candidate, not a proved requirement.
 - **Permanent rule:** do not carry “FRC secretly signs/pre-authenticates TSK traffic” as an equal architecture branch. Treat FRC as the upstream request producer and search for the downstream OEM proxy signer/arbitrator. This does not imply `0x08A` is an EPS command or restore the disproved `0x08A -> B6` transform.
 - **Later supersession:** CORR-194 reopens the FRC key-participant branch, and the later relay-open/FRC-CommunicationControl source result in CORR-198 disproves this correction's downstream-physical-publisher conclusion. Preserve CORR-149 only as the historical reason the project stopped inferring a signer from native Bus-1 framing; do **not** use its “downstream proxy signer” rule as current architecture.
-- **Canonical:** VAR-091/101/107; `data/generated/camry_2026_08a_producer_bounds.json` schema v4; `data/generated/camry_2026_08a_signer_continuity.json`; `tests/verify_camry_2026_08a_producer_bounds.py`; `tests/verify_camry_2026_08a_signer_continuity.py`; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §§41,47,51.
+- **Canonical:** VAR-091/101/107; `data/generated/camry_2026_08a_producer_bounds.json` schema v4; `data/generated/camry_2026_08a_signer_continuity.json`; `tests/targets/camry/verify_camry_2026_08a_producer_bounds.py`; `tests/targets/camry/verify_camry_2026_08a_signer_continuity.py`; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §§41,47,51.
 
 ### CORR-150 — native Bus-1 integrity is exact AUTOSAR E2E Profile 5; the checksum polynomial is no longer open
 
@@ -3394,7 +3394,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Exact recovery:** byte-swapping transmitted B0:B1 into the CRC register value makes adjacent bit syndromes follow the non-reflected CRC-16/CCITT recurrence with polynomial `0x1021`. B2 and B12 bit-0 syndromes are separated by exactly 80 CRC shifts, proving normal increasing-byte payload order. The remaining two implicit CRC input bytes are the 16-bit CAN identifier low byte then high byte: every same-suffix `0x18x` cross-ID checksum delta matches that Data-ID contribution exactly. With start value `0xFFFF`, no xorout, CRC bytes at offset 0 in little-endian order and B2 as the 8-bit counter, the resulting AUTOSAR E2E Profile-5 generator validates **438,380/438,380** retained periodic Bus-1 frames across all 22 IDs in both drives.
 - **Implementation/documentation correction:** `tools/targets/camry/live/camry_frc_request_poc.py` now verifies/recomputes the full Profile-5 CRC through `tools/toyota_support/toyota_e2e_p05.py`; it no longer depends on B2/B12-specific learned XOR tables. The old delta values remain regression witnesses derived from the exact generator. Profile 5 also closes the E2E counter width as **B2 only**; older VAR-093 wording that called B2-B3 a shared counter is superseded. B3 may co-vary at the application layer (and mirrors B2 on `0x020`) but is not part of the Profile-5 counter field.
 - **Preserved boundary:** this closes wire integrity generation, not receiver policy or request semantics. `MaxDeltaCounter`, timeout/restart behavior, `0x160` physical producer/direction, B12 OEM meaning, and modified-frame acceptance remain open.
-- **Canonical:** VAR-107; `tools/targets/camry/analysis/analyze_camry_2026_bus1_e2e.py`; `tools/toyota_support/toyota_e2e_p05.py`; `data/generated/camry_2026_bus1_e2e.json`; `tests/verify_camry_2026_bus1_e2e.py`; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §51.
+- **Canonical:** VAR-107; `tools/targets/camry/analysis/analyze_camry_2026_bus1_e2e.py`; `tools/toyota_support/toyota_e2e_p05.py`; `data/generated/camry_2026_bus1_e2e.json`; `tests/targets/camry/verify_camry_2026_bus1_e2e.py`; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §51.
 
 
 ### CORR-151 — F33's B6-independent assist path is not the recovered stock autonomous-authority path
@@ -3405,7 +3405,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Preserved fact:** the B6-independent `D0218 -> CC60 -> CC50 -> CC62/CC66 -> CC64` path is real physical assist/current control and explains why motor actuation can exist with no B6. It does **not** identify the stock lane-target authority source.
 - **Correct remaining boundary:** the stock request/reference is observed on protected chassis publications (`0x08A` upstream->chassis and `0x081` chassis->upstream), while exact F33 receives neither. The unresolved authority hop is therefore outside the recovered F33 external-command surface: identify the downstream Brake/Booster/gateway proxy/arbitrator and the chassis/reference-to-steering-assembly handoff. Do not repeat generic F33 COM/peripheral scans or describe an unknown F33-local selector as the standing hypothesis.
 - **Downstream mirror sync (2026-09-08):** `kai-openpilot@60d57a89a` correctly imported VAR-111's B6-only recovered external-target result but over-promoted it to an "EPS-side stock command interface" and wrote an `0x08A -> 0x081 -> Brake/EBU -> B6` network chain. Neither follows from F33 CodeFlash. `kai-openpilot@7aece7f63` corrects the TSK mirror to **external target ingress only**, keeps factory winner/grant and B6 producer/delivery as separate open questions, and removes the asserted transform.
-- **Canonical:** VAR-110/111; `tests/verify_camry_8965F3307000_command_cone_ingress.py`; `tests/verify_camry_8965F3307000_hidden_ingress_residuals.py`; `tests/verify_camry_2026_stock_steering_witness.py`; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §§52–53.
+- **Canonical:** VAR-110/111; `tests/targets/camry/verify_camry_8965F3307000_command_cone_ingress.py`; `tests/targets/camry/verify_camry_8965F3307000_hidden_ingress_residuals.py`; `tests/targets/camry/verify_camry_2026_stock_steering_witness.py`; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §§52–53.
 
 ### CORR-152 — historical `0x08A` forwarding suppression is superseded by CORR-179
 
@@ -3424,7 +3424,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Permanent rule:** say “no reproduced direct single-field carrier within the declared method bounds,” not “no unsigned FRC egress.” Describe the FRC→proxy/arbitration hop as **unresolved request handoff/encoding**, not a private link, until source-side diagnostics, physical attribution, producer firmware, or private-link evidence identifies it.
 - **Later supersession:** the relay-open/FRC-CommunicationControl experiment now closes ECU-level `0x08A` egress to the FRC assembly, so the old “FRC->proxy handoff encoding” topology question is no longer current. The methodological negative remains useful only for the separate native-Bus-1 interface and for avoiding false absence claims.
 - **Correct next discriminator:** synchronize FRC Operation FFD `5282/5631` (request), `5285/57DE` (arbitration result), `5265` (active-steering grant), and `560D` (EPS pinion) with complete all-bus CAN. That experiment now separates FRC feature-owner/request state from downstream Brake/VMM arbitration/result and plant state rather than deciding whether `0x08A` leaves the FRC at all.
-- **Canonical:** VAR-113; `tools/targets/camry/analysis/analyze_camry_2026_bus1_frc_egress_bounds.py`; `data/generated/camry_2026_bus1_frc_egress_bounds.json`; `tests/verify_camry_2026_bus1_frc_egress_bounds.py`; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §56; OQ-054.
+- **Canonical:** VAR-113; `tools/targets/camry/analysis/analyze_camry_2026_bus1_frc_egress_bounds.py`; `data/generated/camry_2026_bus1_frc_egress_bounds.json`; `tests/targets/camry/verify_camry_2026_bus1_frc_egress_bounds.py`; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §56; OQ-054.
 
 ### CORR-154 — Gate-2 persistence and a transmitted cleaned B6 do not yet prove patched-F33 lateral output
 
@@ -3434,7 +3434,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Exact acceptance discriminator:** PDU44 monitor slot `0x1A -> 4BD46 status -> FEBE80C9 -> FEBEF13E -> FEBEADB9`; application sig261/sig262 -> `FEBEADB0/FEBEAE90`; `CEFA4` gates `FEBECAFF`; `CEFFC` requires `ACBD==0 && CAFF==1` and maps ID11 to `CB00=2`. Those cells must be observed in a stationary bounded probe before classifying B6 acceptance or moving downstream to motor response.
 - **Sender correction:** do not explain route 2D with the generic `self.secoc_key = b"00" * 16` initializer. The pinned cleaned F33 sender (`opendbc@ae284aaf`) uses `build_b6_zero_marker_frame` and intentionally relies on the Gate-2 development patch; the generic 32-byte ASCII initializer belongs to other/older SecOC paths.
 - **Current status:** B6 remains a real exact-F33 external cooperative-steering interface and a viable development path. What is reopened is only its **live patched-EPS acceptance/actuation proof**. Patch installation, Panda TX echoes, or bus cadence alone are insufficient. No production steering output is authorized.
-- **Canonical:** VAR-114; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §57; `tests/verify_camry_8965F3307000.py --section b6_acceptance_ladder`.
+- **Canonical:** VAR-114; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §57; `tests/targets/camry/verify_camry_8965F3307000_b6_acceptance_ladder.py`.
 
 ### CORR-155 — the final-compare-only F33 Gate-2 patch does not deliver the tested zero-MAC28 ID11 payload
 
@@ -3443,7 +3443,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Patch-semantics correction:** stage 1 only forces the final predicate after callback `8F94C`. The exact call site already uses `8F944 003A (mov 0,r7)` on one success path, but `8F948 1A38 (mov r26,r7)` otherwise passes the real command-7 result into the callback. The next bounded discriminator is therefore stage 2 `8F948 1A38->003A` while preserving stage 1. This tests the pre-final callback semantics; it is not yet a proven fix.
 - **Cumulative CRC correction:** stage 2 must be resigned from the **already stage-1-patched image**, not stock. The deterministic source is SHA `272843a2…9f65` / fixup `D9AF33AF`; with both patch sites the required prefix/fixup/residue are `2ED524FA / D12ADB05 / FFFFFFFF`, final SHA `6a371a2a…d59c`. RESTORE reverses stage 2 only and returns to stage 1.
 - **Freshness evidence boundary:** the same session read B6/D7 committed/pending slot addresses while ID11 was transmitted, but those values also advance under stock synchronization. Do not use their motion alone as proof that an injected frame passed freshness/authentication. The application ladder is the acceptance oracle.
-- **Canonical:** VAR-115; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §57.4; `tests/verify_camry_f33_gate2_semantic_patch.py`; `targets/camry-2026/raw-20260901/f33-b6-admission/`.
+- **Canonical:** VAR-115; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §57.4; `tests/targets/camry/verify_camry_f33_gate2_semantic_patch.py`; `targets/camry-2026/raw-20260901/f33-b6-admission/`.
 
 ### CORR-156 — stage 2 does not make the exact-F33 SecOC result semantically successful
 
@@ -3454,7 +3454,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Next bounded discriminator:** stage 3 changes only the newly targeted root instruction `0x8F930 E10F14D3 -> E00714D3`, a same-width RH850 `cmovne 0,r0,r26`, while retaining the already installed stage-1/2 bytes for one-variable experimental continuity. The deterministic cumulative image is prefix/fixup/residue `13ADA3CC / EC525C33 / FFFFFFFF`, SHA `67f4aaa8…313c`. This reproduces the native-success boolean throughout `FUN_8F906`; it remains a candidate until the live application ladder proves admission.
 - **Measurement correction:** the next probe also samples direct generated-COM PDU44 outputs `FEBE80BC` (Target Lateral ID) and `FEBE80B8` (target angle) before the later `FEBEADB0/FEBEAE90` snapshot. This distinguishes “PduR/COM never delivered” from “COM delivered but later snapshot did not publish.”
 - **Field lifecycle:** in this session exact F33 rejected programming-session entry in READY with NRC `0x22`, while NRTD succeeded. Persistent preflight/APPLY/restore/post-reboot verification are therefore run in NRTD; B6 admission remains READY/Park/stationary.
-- **Canonical:** VAR-116; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §57.5; `tests/verify_camry_f33_gate2_root_result_patch.py`; `targets/camry-2026/raw-20260901/f33-gate2-stage2/`.
+- **Canonical:** VAR-116; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §57.5; `tests/targets/camry/verify_camry_f33_gate2_root_result_patch.py`; `targets/camry-2026/raw-20260901/f33-gate2-stage2/`.
 
 ### CORR-157 — stage-5 non-delivery is not a license to keep patching SecOC result bits
 
@@ -3471,7 +3471,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Publication-counter correction:** `FEBE5364` cannot independently fill that gap. CORR-161's raw timeline re-read supersedes the initial approximately-100-Hz/background interpretation: publication generation is unchanged across the retained pre-sender interval (including 46 native `0x090` frames) and moves during B6 phases. The earlier six-count “baseline” delta compared publication with a different consumed-generation cell. Counter movement remains non-unique because the retained probes never sampled raw COM; CORR-162 separately disproves the apparent scalar ID0 delivery.
 - **Cross-target correction:** direct Corolla H/F versus Camry CodeFlash comparison finds the same B6 receive contract, not a Camry-only hidden security field: byte-identical CanIf descriptors, identical RSCFD acceptance metadata outside destination index, profile-2 equality outside relocated callbacks/routes, byte-identical queue dispatch, and the same enqueue/verify/Gate-2 control shape.
 - **Correct discriminator:** sample receiver queue bytes with the non-bypassing observer, raw COM `B3/B4:B5`, `FEBE7F68`, then `80BC/80B8` and the application snapshot in one current-angle-only run. Record Panda CAN health around the phase; a TX return is generated before physical acknowledgement. Do not add another persistent result-bit patch.
-- **Canonical:** VAR-118; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §57.7; `tests/verify_camry_f33_b6_stationary_probe.py`.
+- **Canonical:** VAR-118; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §57.7; `tests/targets/camry/verify_camry_f33_b6_stationary_probe.py`.
 
 ### CORR-159 — target-only observer/COM matches are not phase-bound ingress proof
 
@@ -3480,7 +3480,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Probe correction:** retain exact sent `(ID, angle, companion, sequence, FV4, MAC28)` signatures; sample observer telemetry before, during, and after each phase; reject a matching baseline; read raw COM B3..B31 in one SID23 response; and require an exact current-phase signature for positive queue/raw-COM classification. Negative or baseline-colliding observer results remain inconclusive because the resident still lacks a capture counter.
 - **Transport correction:** REC/TEC are endpoint gauges and are no longer differenced as event counts. Cumulative Panda counters are differenced modulo 32 bits and remain supporting evidence only; neither clean endpoints nor TX returns prove physical ACK. A negative queue result needs an independent bus receiver or genuine TX-completion witness before transport and EPS ingress can be separated.
 - **Safety correction:** the optional offset phase now requires `--require-bridge`; observer-only and uninstrumented runs cannot request it.
-- **Canonical:** VAR-119; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §57.8; `tests/verify_camry_f33_b6_stationary_probe.py`.
+- **Canonical:** VAR-119; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §57.8; `tests/targets/camry/verify_camry_f33_b6_stationary_probe.py`.
 
 ### CORR-160 — the no-counter queue observer has been superseded, not its retained live result
 
@@ -3499,8 +3499,8 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Canonical:** VAR-120;
   [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md)
   §57.9; `exploit/ephemeral_runtime/camry_f33_b6_observer_runbook.md`;
-  `tests/verify_camry_f33_b6_transaction_observer.py`;
-  `tests/verify_camry_f33_b6_stationary_probe.py`. No new live result.
+  `tests/targets/camry/verify_camry_f33_b6_transaction_observer.py`;
+  `tests/targets/camry/verify_camry_f33_b6_stationary_probe.py`. No new live result.
 
 ### CORR-161 — native `0x090` is not proven to feed route-44 publication
 
@@ -3542,7 +3542,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   discriminator.
 - **Canonical:** VAR-121;
   [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md)
-  §57.10; `tests/verify_camry_8965F3307000.py`.
+  §57.10; `camry_8965f3307000_*` suites in `verification.toml`.
 
 ### CORR-162 — the retained ID0/ID11 delivery split was a stale scalar-baseline alias
 
@@ -3571,7 +3571,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Canonical:** VAR-122/123;
   [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md)
   §§57.11–57.12; `exploit/behavioral_proof/camry_f33_b6_stationary_probe.py`;
-  `tests/verify_camry_f33_b6_stationary_probe.py`.
+  `tests/targets/camry/verify_camry_f33_b6_stationary_probe.py`.
 
 ### CORR-163 — the September stock-steering grid phase is recoverable exactly
 
@@ -3595,7 +3595,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Canonical:** VAR-129;
   [../variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md)
   §4.6; `tools/targets/camry/analysis/analyze_camry_20260904_stock_steering.py`;
-  `tests/verify_camry_20260904_stock_steering.py`.
+  `tests/targets/camry/verify_camry_20260904_stock_steering.py`.
 
 ### CORR-164 — the provisional Corolla TSS3 census is evidence, not an FPv1 identity
 
@@ -3661,7 +3661,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Canonical:**
   `targets/camry-2026/raw-20260906/xcp-extended-ingress-probe.json`;
   `data/generated/camry_8965F3307000_application_ram_loader_assessment.json`;
-  `tests/verify_camry_8965F3307000.py`;
+  `camry_8965f3307000_*` suites in `verification.toml`;
   `exploit/followups/xcp_runtime_state_probe.py`;
   [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §§6,13.1.
 
@@ -3681,7 +3681,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Static correction:** both failed residents route stock calls through `call0(unsigned int address) { ((fn0_t)address)(); }`. RH850 passes the first C argument in `r6`, so every target is entered with `r6=target_address`. Exact Toyota startup at `0x637EE` uses direct `jarl` calls instead; several startup target entries consume `r6` and/or adjacent live register state. The failed residents therefore did not preserve stock ABI/register flow.
 - **Preserved live evidence:** both Sep-6 payloads really did fail to restore F181 until power-cycle, and the Aug-26 high-tail marker + stock-`0x20880` return still proves the 524-byte high tail itself can execute and survive startup. What is withdrawn is the interpretation that those failures meaningfully test an ABI-correct scheduler replay or isolate telemetry writes.
 - **Replacement:** direct RH850 `JARL disp32` remains the corrected call primitive, but the preferred field artifact is now the generic external-control monitor rather than the address-specific v2 discriminator. It is 520/524 bytes with zero relocations, adds no application-memory writes through foreground count 223, then owns only `FEBF0000..FEBF0057`. It accepts `00 F3 seq opcode arg32-le` on the already-live-proven extended `0x1FDC0002 -> FEBE4C34` staging path, with eight aligned LocalRAM watch slots plus RUN/STOP/SNAPSHOT; SID23 provides generation-bracketed current readback. Exact `0x715B4` pins `GP=FEBEB800`. Only `runtime_monitor_live` is a positive NRTD result; after that the same monitor is controlled after direct NRTD->READY without OFF. The old C observer/bridge payloads remain blocked by the superseded trampoline; CORR-184 later rebuilds the bridge itself as an assembly-only direct-JARL v3 artifact while leaving the legacy C observer blocked.
-- **Canonical:** [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §58; `tests/verify_camry_f33_b6_stationary_probe.py`; `exploit/ephemeral_runtime/audited_camry_f33_runtime_monitor_build.json`; `exploit/ephemeral_runtime/camry_f33_runtime_monitor_runbook.md`.
+- **Canonical:** [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §58; `tests/targets/camry/verify_camry_f33_b6_stationary_probe.py`; `exploit/ephemeral_runtime/audited_camry_f33_runtime_monitor_build.json`; `exploit/ephemeral_runtime/camry_f33_runtime_monitor_runbook.md`.
 
 ### CORR-168 — Camry cruise availability is independent of the `0x08A` operating latch
 
@@ -3695,7 +3695,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Superseded implementation/audit claim:** fork opendbc `e37bab6c` restored `steeringPressed` using a provisional 1.2 N.m absolute physical-torque threshold selected from one September-4 drive's no-blinker/pre-lane-change distributions, with torque sign and final magnitude explicitly left for dynamic validation.
 - **Dynamic correction:** September-6 same-car routes provide two independent oracles. All 45 observed transitions into openpilot `laneChangeStarting` have the direction expected by DesireHelper (left = positive torque, right = negative torque), closing sign. Native exact-F33 `0x030` torque joined to Toyota's native `0x371 B20[4]` driver-steering detector places the median detector-set transition at 0.67 N.m on both routes; a stateless threshold fit peaks near 0.49–0.51 N.m by balanced accuracy. The fork therefore selects a conservative **0.6 N.m** openpilot threshold, which preserves ~94–95% specificity while retaining ~75–77% sensitivity to Toyota's slower hysteretic state.
 - **Boundary:** 0.6 N.m is an openpilot driver-intervention policy chosen from same-car evidence, not a claim that Toyota itself implements one static 0.6 N.m comparator. Toyota's observed detector has hysteresis-like set/release behavior.
-- **Canonical:** VAR-139; [../variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) §4.4; `tools/targets/camry/analysis/analyze_camry_20260906_hands_off_warning.py`; `tests/verify_camry_20260906_hands_off_warning.py`; opendbc `test_tss3_camry.py`.
+- **Canonical:** VAR-139; [../variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) §4.4; `tools/targets/camry/analysis/analyze_camry_20260906_hands_off_warning.py`; `tests/targets/camry/verify_camry_20260906_hands_off_warning.py`; opendbc `test_tss3_camry.py`.
 
 ### CORR-170 — the provisional Corolla census belongs in FPv1 as an ambiguity guard, not as a uniquely identifying platform
 
@@ -3709,21 +3709,21 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Superseded overclaim:** VAR-109 and follow-on integration prose called retained `0x610.UI_SPEED` the Camry's physical cluster-speed carrier and quoted counts from an earlier partial copy of route `0000002c--c784367b7e`.
 - **Current complete-route evidence:** the present archive contains 26 segments / 3,247 native bus0 `0x610` frames and 1,546 native bus2 `0x251` frames. Every `0x610` frame joins a same-segment native `0x0AA` wheel-speed sample within 100 ms. For the 703 moving samples above 2 km/h, `UI_SPEED - four-wheel mean` has median +0.0875 km/h, median absolute error 0.25 km/h, p95 absolute error 0.6525 km/h, and max absolute error 1.575 km/h. This strongly supports `0x610` as the retained wheel-correlated UI-speed carrier used for `vEgoCluster`, but does not observe the physical meter display. The inherited `_toyota_2017.dbc` warning that `UI_SPEED` may not match dash therefore remains relevant.
 - **Diagnostic oracle:** current Toyota FRC Operation-FFD exposes `5235 Vehicle speed meter` and `5236 Vehicle speed meter status` with `SupportDID=0`. They are semantic oracles for a future synchronized capture, not a static `0x610` bit/name transfer.
-- **Canonical:** VAR-109; `tools/targets/camry/analysis/analyze_camry_2026_cluster_ui_speed.py`; `data/generated/camry_2026_cluster_ui_speed.json`; `tests/verify_camry_2026_cluster_ui_speed.py`; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §49.4.
+- **Canonical:** VAR-109; `tools/targets/camry/analysis/analyze_camry_2026_cluster_ui_speed.py`; `data/generated/camry_2026_cluster_ui_speed.json`; `tests/targets/camry/verify_camry_2026_cluster_ui_speed.py`; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §49.4.
 
 ### CORR-172 — TSS3 HUD state 3 exists and B3 side orientation is not yet proved
 
 - **Superseded overclaims:** the first VAR-138 reducer said B3 nibble value 3 was unobserved and the fork test asserted that the B3 high nibble is left and low nibble is right. The first noncanonical-mode fix also guarded only lane/mode rewriting while still changing B1/B2 warning bits, so it did not actually preserve an unknown frame byte-for-byte.
 - **Dynamic correction:** route `3b` contains four native `(high,low)=(2,3)` B3 frames. The September modelV2 join strongly supports symmetric state meanings `1=recognized/inactive`, `2=weak-or-missing`, and `4=recognized/active`, but its asymmetric rows do not conclusively identify left versus right on every route. Current Toyota Operation-FFD independently exposes DataID `5514` fields `Left Lane Display`, `Right Lane Display`, and `Steering Symbol Display`; a synchronized `5514` + `0x412` capture is the clean side-orientation oracle.
 - **Implementation correction:** noncanonical B0=`0x10` frames now pass through byte-for-byte before any lane/warning mutation. Symmetric visibility is rendered directly. For asymmetric requests the controller preserves the live stock frame's existing high/low orientation and only translates recognized state `1↔4`; state 3 is not synthesized. This avoids guessing a side assignment while retaining target-native display state.
-- **Canonical:** VAR-138; `tools/targets/camry/analysis/analyze_camry_20260906_hands_off_warning.py`; `tests/verify_camry_20260906_hands_off_warning.py`; fork `opendbc/car/toyota/tests/test_tss3_camry.py`; [../variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) §4.7.
+- **Canonical:** VAR-138; `tools/targets/camry/analysis/analyze_camry_20260906_hands_off_warning.py`; `tests/targets/camry/verify_camry_20260906_hands_off_warning.py`; fork `opendbc/car/toyota/tests/test_tss3_camry.py`; [../variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) §4.7.
 
 ### CORR-173 — retained ACC-hold clears prove accelerator input, not RES-button resume
 
 - **Superseded wording:** the first VAR-140 reducer/documentation said the `0x66/0x67` delayed stop-hold state "clears on accelerator/resume" even though the reducer did not join a RES-button event.
 - **Dynamic correction:** all three retained route-3b/3c hold episodes clear with `carState.gasPressed=true` while speed remains below 0.1 m/s before motion. No RES-button clear join is established. The mapping to `cruiseState.standstill` remains valid because it depends on the delayed zero-speed state itself, not on how the driver exits it.
 - **Diagnostic corroboration:** current FRC Operation-FFD names `525E Stop holding status` (`SupportDID=0`), supporting the concept without transferring a public-CAN field identity.
-- **Canonical:** VAR-140; `tools/targets/camry/analysis/analyze_camry_20260906_hands_off_warning.py`; `tests/verify_camry_20260906_hands_off_warning.py`; [../variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) §4.11.
+- **Canonical:** VAR-140; `tools/targets/camry/analysis/analyze_camry_20260906_hands_off_warning.py`; `tests/targets/camry/verify_camry_20260906_hands_off_warning.py`; [../variants/camry-2026-tss3-opendbc-port.md](../variants/camry-2026-tss3-opendbc-port.md) §4.11.
 
 ### CORR-174 — schema-v6 generation admission was a local compatibility policy, not Toyota's universal resolver
 
@@ -3731,7 +3731,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Toyota resolver correction:** current GTS+ keeps these axes independent. VIN10 dispatch is `low5 3 -> Phase3`, `4 -> Phase4`, `20/21 -> Phase5`, `22 -> Phase6`; its `5..19` rejection is specific to VIN10 because the same Toyota master separately binds legacy `SelectCarType.dll` / `SelectCarTypeVin.dll` roles. P3/P4 continue through the `Spe/Toyota.ddb` probe program and type-41 vehicle decision, while P5/P6 use the type-59 VIN stage differently. After vehicle selection, type-5/type-44 installation, class-`0x10D` transport routing, mounted-connectivity checks, support-plugin dispatch, live PID/DID/RID support and category-local D1/D2/DD lifecycle are separate Toyota layers.
 - **Runtime correction:** `toyota-diagnostics-bundle-v2` preserves all 2,136 Toyota category identities per region regardless of decoded-catalog availability and records Toyota's literal support-plugin selection (`p3/p4/p5/p6`). The Comma runtime no longer has `uses_current_p5_path()`, `SessionLifecycle.eligible_generation_low5`, `validate_lifecycle_for_ecu()`, an `unsupported_generation` mount state, or any supported-generation/category session permission check. A category with an unrecovered live probe/session/catalog path remains known and routed where Toyota metadata says so and is reported as `probe_unavailable` / executor-unavailable rather than unsupported. The old Camry v6 JSON may retain historical generation metadata for compatibility, but universal database profiles never use it as authority.
 - **Preserved boundaries:** this correction does not weaken actual request-construction or vehicle-control safety. Unknown/malformed request geometry remains non-executable; mutation still requires explicit user acknowledgement; Panda controls-allowed, bus, checksum, angle/torque/rate and related safety checks remain safety invariants rather than Toyota-capability policy.
-- **Canonical:** TMS-089; [../tooling/techstream.md](../tooling/techstream.md) §6.2.5; [../tooling/gts-query-cli.md](../tooling/gts-query-cli.md) Derived Comma diagnostic registry; `tools/techstream/gts_cli.py`; `tests/verify_toyota_diag_bundle.py`; `data/generated/gtsplus_2026/toyota_diag_bundle_current.zip`.
+- **Canonical:** TMS-089; [../tooling/techstream.md](../tooling/techstream.md) §6.2.5; [../tooling/gts-query-cli.md](../tooling/gts-query-cli.md) Derived Comma diagnostic registry; `tools/techstream/gts/`; `tests/techstream/verify_toyota_diag_bundle.py`; `data/generated/gtsplus_2026/toyota_diag_bundle_current.zip`.
 
 ### CORR-175 — P6 support roots, raw route bytes, and Panda bus were incomplete implementation boundaries, not Toyota policy
 
@@ -3739,7 +3739,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Support correction:** recovered current `CommandCommon.dll` shows that even `GetSupportP5_DT.dll` contains multiple family-local modes, so the bundle now exports `support_mode` independently of plugin family. Ordinary Toyota P5 retains advertised `xx00` root IDs and deliberately skips group queries `F300`/`FD00`. `GetSupportMultiP6_DT.dll` is now complete for the current standard P6 path: DID `22 A1 00 -> A1nn -> nn00..nnFF` (`A1FD/A1FE` retained but unexpanded) and RID `31 01 D1 00 -> D1nn -> nn00..nnFF` (`D1F0/D1FE` retained but unexpanded).
 - **Transport correction:** `CCommFrameCtrl::ChangeCommIF` selects `CCommCtrlISO15765_29BitCan` for phase `0x18`/`0x38`. Its class-`0x10D +0x08` field is a normal-fixed target byte, materialized as request `0x18DA<target>F1` and response `0x18DAF1<target>`; category 6000 target `00` is therefore `0x18DA00F1 -> 0x18DAF100`, not CAN ID zero. Other controller families stay separately typed so local transport implementation coverage cannot become a Toyota category-support verdict.
 - **Panda boundary:** Toyota's DB does not select a Comma/Panda logical bus. The universal bundle no longer carries one. The maintainer Camry CLI may bind its installation-local post-repin default bus 0, but library profiles remain unbound until the caller supplies a bus. Raw UDS now accepts 11-bit and 29-bit CAN IDs and optional explicit RX addressing rather than imposing an 11-bit policy.
-- **Canonical:** TMS-089; [../tooling/techstream.md](../tooling/techstream.md) §6.2.5; [../tooling/gts-query-cli.md](../tooling/gts-query-cli.md) Derived Comma diagnostic registry; `tools/techstream/gts_cli.py`; `tests/verify_toyota_diag_bundle.py`; `data/generated/gtsplus_2026/toyota_diag_bundle_current.zip`.
+- **Canonical:** TMS-089; [../tooling/techstream.md](../tooling/techstream.md) §6.2.5; [../tooling/gts-query-cli.md](../tooling/gts-query-cli.md) Derived Comma diagnostic registry; `tools/techstream/gts/`; `tests/techstream/verify_toyota_diag_bundle.py`; `data/generated/gtsplus_2026/toyota_diag_bundle_current.zip`.
 
 ### CORR-176 — the Sep-1 F33 B6 restore accidentally revived a bridge-only zero-MAC sender
 
@@ -3756,7 +3756,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Exact receiver correction:** exact `8965F3307000` `0x90A48` has two relevant paths. In the same trip/reset epoch it reconstructs the next strictly-forward full message8 congruent with transmitted low2, giving the ordinary +1..+4 window. For a newer authenticated trip/reset candidate it loads the received message-low field from the parsed FV4 structure and stores it directly as pending message8. There is no test against a fixed initial value. `0x909CA` independently reconstructs reset candidates in order `current,-1,+1,-2,+2`, and `0x90736` proves the transmitted split is message-low2 plus reset-low2. Therefore first low2 `0`, `1`, `2`, and `3` are all receiver-valid on a newer epoch.
 - **Complete-corpus check:** the 13-route / 530-rlog / 5,328,786,933-byte Camry reduction finds 1,696,097 historical B6 sends whose FV4 all maps through the exact reconstruction model and 1,554,213 successful Panda TX echoes with the same property. Routes 45/48 deliberately start every observed B6 epoch at 0 and remain freshness-admissible. Native D7 still strongly prefers 1; that is retained as sender behavior, not transferred as B6 policy.
 - **Current implementation consequence:** opendbc `f207c273` resets the full B6-local message counter to 0 on `RESET_CNT` change and increments it per send. This is correct because F33 seeds the same full value 0 from low2=0 and then reconstructs the same +1 progression; it also matches current upstream Toyota SecOC counter ownership. No `0 -> 1` code change is warranted. CORR-178 further removes zero-vs-dummy MAC28 as an acceptance discriminator under the installed stage-5 image.
-- **Canonical:** VAR-146; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §63; `data/generated/camry_b6_freshness_contract.json`; `tests/verify_camry_b6_freshness_contract.py`.
+- **Canonical:** VAR-146; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §63; `data/generated/camry_b6_freshness_contract.json`; `tests/targets/camry/verify_camry_b6_freshness_contract.py`.
 
 ### CORR-178 — under cumulative F33 stage 5, zero MAC28 and wrong-key dummy MAC28 are acceptance-equivalent
 
@@ -3766,7 +3766,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **After SecOC:** native-success delivery is `8F546 -> 90204 -> 81CA6 -> route44`. Exact route44 ROM record is `06 00 00 00 20 00 00 0C`: 32-byte length, optional pre-copy hook disabled, the enabled `7D800` guard returns `1` unconditionally, and new-data generation is enabled. The COM window begins at offset `0x1B7`; `4BD46` unpacks only `0x1BA..0x1C1` (B3..B10). The secured trailer is `0x1D3..0x1D6` (B28..B31), has zero direct application references, and is not rechecked after SecOC.
 - **Objective consequence:** with the real slot-4 key unknown, an all-zero MAC28 and a dummy-key CMAC28 are both wrong tags (apart from the same accidental 28-bit-match probability). Under cumulative stage 5, **they have the same recovered software acceptance behavior**. The dummy-CMAC sender may remain because it preserves Toyota's normal SecOC envelope grammar, but it provides no stronger reason to expect steering or application admission than route 48's zero-MAC sender. If behavior changes after installing `f207c273`, attribute it to another changed variable unless a controlled result disproves this exact-path equivalence. The remaining problem is outside the MAC-value distinction: physical reception/queue publication/application state or downstream cooperative-control behavior.
 - **Downstream implementation sync (2026-09-08):** actual nested opendbc `f207c273b645` calls `build_b6_secoc_frame(TSS3_B6_DUMMY_SECOC_KEY, ...)` with `TSS3_B6_DUMMY_SECOC_KEY = bytes(16)`, so it emits a normal AES-CMAC/FV4 envelope, **not** the historical zero-MAC marker. `kai-openpilot@60d57a89a` still described that current sender as zero-MAC; follow-up `7aece7f63` corrects the TSK status/docs while preserving the historical zero-MAC RAM-bridge description. No runtime sender change was needed.
-- **Canonical:** VAR-147; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §64; `tools/targets/camry/analysis/analyze_camry_f33_b6_mac_equivalence.py`; `data/generated/camry_f33_b6_mac_equivalence.json`; `tests/verify_camry_f33_b6_mac_equivalence.py`.
+- **Canonical:** VAR-147; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §64; `tools/targets/camry/analysis/analyze_camry_f33_b6_mac_equivalence.py`; `data/generated/camry_f33_b6_mac_equivalence.json`; `tests/targets/camry/verify_camry_f33_b6_mac_equivalence.py`.
 
 ### CORR-179 — `0x081` and forwarded `0x08A` do not arbitrate comma B6; exact F33 proves ID11 co-modulation
 
@@ -3775,7 +3775,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Exact EPS-side answer:** VAR-148 exhausts every `CB00`/`ADB0` selector reader and every direct writer of the final steering-command funnel. Accepted ID11 maps `ADB0=0x0B -> CEFFC -> CB00=2`; its target-angle controller reaches `CB38`; `D0218` adds that term inside the ordinary EPS sum; and the same `CC48 -> CC64 -> AC54 -> EE40C` current-command funnel remains active. No later ID11-selected replacement writer exists. The only special transient capable of changing the ordinary sum is `CB73A` and requires `ADB0==0x31`, not ID11. Thus ID11 B6 is **co-modulation, not exclusive authority**.
 - **Road-evidence correction:** VAR-144's request/path/model statistics remain valid, including the edge-hugging witness and B6 packer fidelity. Its `0x081`-versus-B6 comparison is retained only as proof that `0x081` is on the Toyota reference plane, not as evidence about EPS-side B6 mixing. VAR-145 still proves a long interval where the *upstream Toyota autonomous request/reference plane* is ID0 while B6 is transmitted ID11 and steering does not follow B6; it does **not** prove that every ordinary EPS-side assist/current term has been eliminated. The observed B6 non-response remains real, but the source-off label must not be promoted into an F33-exclusive-authority experiment.
 - **Integration-policy correction:** this also supersedes CORR-152's later claim that Panda must block forwarded `0x08A` to obtain B6 authority. Current fork opendbc had already removed that bespoke forwarding policy in `bf9f7528`; `f207c273` forwards `0x08A` and `0x081` normally while keeping `0x08A` out of the TX whitelist. No `0x08A` forwarding state, Target-Lateral ID, or relay-malfunction observation becomes a second lateral-permission system. The next live discriminator is B6 physical reception/queue/raw-COM/application publication into the already-recovered controller, not another `0x08A` suppression experiment.
-- **Canonical:** VAR-148; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §65; `tools/targets/camry/analysis/analyze_camry_f33_b6_command_composition.py`; `data/generated/camry_f33_b6_command_composition.json`; `tests/verify_camry_f33_b6_command_composition.py`.
+- **Canonical:** VAR-148; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §65; `tools/targets/camry/analysis/analyze_camry_f33_b6_command_composition.py`; `data/generated/camry_f33_b6_command_composition.json`; `tests/targets/camry/verify_camry_f33_b6_command_composition.py`.
 
 ### CORR-180 — "B6 acceptance" is not one gate; cumulative stage 5 leaves the ordinary EPS command gates intact
 
@@ -3784,7 +3784,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Sender correction:** exact application-field fate recovery removes the remaining generic "secondary-field template" excuse for the current active candidate. Opendbc `f207c273b645` sends the recovered normal-ID11 companions in the required direction: sig265=0, sig268 +1 modulo64, sig269/270=100, with currently unconsumed companions zero. It also sends sig263=0, but CORR-182 shows that bit belongs only to the separate `ADB0==0x31` transient and is not an ID11 admission prerequisite; its nominal 50-Hz cadence is inside the exact 35-ms receive-loss bound. VAR-146/147 already close freshness phase and zero-vs-dummy wrong-MAC as road discriminators. This does not claim the slot-4 key is known or the dummy MAC is stock-valid.
 - **Current execution correction:** no further persistent SecOC-result patch, MAC A/B, counter-phase A/B, `0x08A` suppression experiment, or packer-field guess is justified by the recovered software. The next test is one **adjacent-rung stationary internal capture** from F33 queue -> freshness/auth transaction -> raw COM -> generated COM -> application snapshot -> bank/readiness -> `CB38` -> `AC2B` branch -> shared command -> `AC5A` -> `AC29/AC2A` -> `CC98/CC94` -> motor-side selection -> current model. Route 48 cannot identify this first divergence because it contains no receiver-side/internal state witnesses.
 - **Boundary:** this correction closes recovered CodeFlash gates through exact-F33 motor-current-model convergence under the complete direct-reference/writer census. ICU-S silicon internals, computed aliases/DMA outside that model, the final exact-F33 hardware-PWM commit, and the *live value* of each gate in the failed road run remain explicit boundaries.
-- **Canonical:** VAR-149; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §66; `tools/targets/camry/analysis/analyze_camry_f33_b6_end_to_end.py`; `data/generated/camry_f33_b6_end_to_end.json`; `tests/verify_camry_f33_b6_end_to_end.py`.
+- **Canonical:** VAR-149; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §66; `tools/targets/camry/analysis/analyze_camry_f33_b6_end_to_end.py`; `data/generated/camry_f33_b6_end_to_end.json`; `tests/targets/camry/verify_camry_f33_b6_end_to_end.py`.
 
 ### CORR-181 — three exact-F33 +4 function seeds were false splits; the canonical target is 6,062 functions
 
@@ -3793,7 +3793,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Independent rebuild proof:** two independent four-stage rebuilds from empty state produce byte-identical normalized inventories. The corrected inventory SHA-256 is `423f5e584548f984bc5b447d9975ac378fdcba4a3a00b3a4c6d0c33660320f99`; the canonical decompiler corpus has **6,062 functions**, not 6,065. The corrected packed target snapshot and corpus are promoted through the registered target workflow.
 - **Mechanical denominator effects:** collapsing the three artificial bodies removes duplicated HighFunction accounting: recovered STORE operations change **13,493 -> 13,183** and statically known-range STOREs **5,011 -> 4,701**, while the actual E1/E2 candidate sets remain exactly **100 candidates / 46 functions** and **5 / 3**. Generated-COM stage readers change **52 -> 51**. The artificial `BCD62` + `BCD66` snapshot split collapses six reported copiers to **five**, while the actual **306 unique snapshot destinations remain unchanged**. `CB00`-aware functions change **50 -> 49**.
 - **Semantic consequence:** none of the B6 steering conclusions changes. The statements formerly attributed to the +4 child labels are contained in the real parent bodies: `BCD62` still snapshots B6 state to `ADB0/AE90`, `CCFB2` still performs target limiting, and `CEE7C` still consumes the target snapshot in readiness/inhibit supervision. ID11 still maps to bank2, the B6 controller still reaches `CB38`, and `D0218` still co-modulates it into the ordinary shared command/current funnel. VAR-148/149 are regenerated against the corrected 6,062-function corpus, and all 49 `CB00` users are now exhaustively partitioned without overlap or remainder.
-- **Canonical:** [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §66.5; `data/targets/camry-8965F3307000/function_seeds.csv`; `data/targets/camry-8965F3307000/ghidra_project_inventory.baseline.jsonl`; `data/generated/camry-8965F3307000/decompilations.jsonl`; `tests/verify_camry_f33_b6_command_composition.py`; `tests/verify_camry_f33_b6_end_to_end.py`.
+- **Canonical:** [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §66.5; `data/targets/camry-8965F3307000/function_seeds.csv`; `data/targets/camry-8965F3307000/ghidra_project_inventory.baseline.jsonl`; `data/generated/camry-8965F3307000/decompilations.jsonl`; `tests/targets/camry/verify_camry_f33_b6_command_composition.py`; `tests/targets/camry/verify_camry_f33_b6_end_to_end.py`.
 
 ### CORR-182 — `CB664`/signal263 qualifies the special `0x31` transient, not normal ID11 cooperative admission
 
@@ -3801,7 +3801,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Exact reference/call correction:** `ADDD` has exactly one runtime reader, `CB664`. `CB664` writes/maintains `FEBEC7B4`; the only runtime consumer of `C7B4` outside `CB664` itself is `CB73A`. The shared wrapper `CB81C` calls `CB664` immediately before `CB73A`. `CB73A` can raise its special `C7BF` state only when `C7B4==1` **and `ADB0=='1'` (`0x31`)**, and its hold path again requires the same `0x31` value. The normal Target Lateral ID dictionary in `CEFFC` is numeric `0x01/0x04/0x0A/0x0B/0x12/0x13`; LTA/LCA ID11 is `0x0B`, not ASCII `0x31`.
 - **Consequence:** signal263=0 and the `CB664` speed bound are qualifiers for the already-recovered self-terminating **special `0x31` transient**, not prerequisites for ordinary ID11 bank2 selection or `CB38` co-modulation. The current sender still transmits signal263=0, so no opendbc change is required; zero is simply harmless rather than evidence that one normal-ID11 gate has been satisfied. Normal ID11 localization should instead follow `CEFA4/CEFFC` (`CAFF`, `ACBD`, `ADB0`, `CB00`) and the `CE772/CE7A6` readiness family (`ACCC/ACCD/ADBF/CAFC/CAD9`) before `CB20/CB38`.
 - **Dynamic implication:** do not infer a high-speed B6 rejection from `CB664` or its `AE02` threshold. Any road-speed hypothesis must come from the bank2 controller/readiness calibrations themselves or a live internal witness, not this `0x31` machine.
-- **Canonical:** VAR-149; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §66; exact `CB664/CB73A/CB81C/CEFFC`; `tools/targets/camry/analysis/analyze_camry_f33_b6_end_to_end.py`; `tests/verify_camry_f33_b6_end_to_end.py`.
+- **Canonical:** VAR-149; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §66; exact `CB664/CB73A/CB81C/CEFFC`; `tools/targets/camry/analysis/analyze_camry_f33_b6_end_to_end.py`; `tests/targets/camry/verify_camry_f33_b6_end_to_end.py`.
 
 ### CORR-183 — one immediately-pre-aggregate queue sample cannot exclude asynchronous B6 enqueue
 
@@ -3809,7 +3809,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Exact scheduler correction:** exact `8965F3307000` foreground is `0x66062`, which waits on the 5-ms tick and then calls `65442 -> 71378 -> 66FF2 -> 71398 -> 667E6`. The `0x667E6` aggregate itself reaches the protected-Rx SecOC consumer through `7A254 -> 6A410 -> 8EFF8 -> 8EF84 -> 8F98C -> 8F746`. The configured receive callback can enqueue through `8EE7C -> 8F34A -> 8E9C6` asynchronously between foreground ticks. Therefore queue lifetime can begin after one foreground observation and end inside the next aggregate; a zero at the single point immediately before `0x667E6` is only a zero **at that instant**, not proof that enqueue never occurred.
 - **Instrumentation correction:** the replacement is a dedicated **518-byte** ABI-preserving inter-tick monitor. After the same 224-tick startup qualification, RUN polls exact profile-2 queue length `FEBE547A==32` inside the foreground tick-wait before testing the tick bit, then additionally requires secured B3 `FEBE54D7 & 0x3F == 63` before latching queue record, B0..B11, and B28..B31. Phase Q sends that non-command ID63 marker with additive contribution suppressed. Exact `8E9C6` copies payload bytes before publishing length, so a positive marker latch post-dates the completed secured-buffer copy. Native/background parked ID0 cannot steal the sticky sample. The subsequent stock `0x667E6` remains unchanged; the resident has no source-memory/MMIO write, SecOC bypass, steering/B6 transmitter, dynamic call, or flash mutation.
 - **Live-result boundary:** Phase P remains useful evidence that the pre-aggregate sample point was zero while 188/188 host frames were echoed; it does not move the first divergence earlier than queue ingress. The exact TX->queue marker identity boundary remains open until the inter-tick Phase-Q result.
-- **Canonical:** VAR-151; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §68; `tools/targets/camry/analysis/analyze_camry_f33_runtime_monitor_20260908.py`; `exploit/ephemeral_runtime/camry_f33_runtime_monitor_intertick.S`; `tests/verify_camry_f33_b6_stationary_probe.py`.
+- **Canonical:** VAR-151; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §68; `tools/targets/camry/analysis/analyze_camry_f33_runtime_monitor_20260908.py`; `exploit/ephemeral_runtime/camry_f33_runtime_monitor_intertick.S`; `tests/targets/camry/verify_camry_f33_b6_stationary_probe.py`.
 
 ### CORR-184 — route44 stationary publication is background activity; use an ID63 profile-2 marker, not a foreground RSCFD race
 
@@ -3818,7 +3818,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Marker correction:** native/background ID0 can also steal an unfiltered sticky profile-2 sample. The inter-tick resident is therefore rebuilt to **518/524 bytes** and requires both `FEBE547A==32` and secured `FEBE54D7 & 0x3F == 63` before latching. Host Phase Q sends Target Lateral ID63 with additive contribution suppressed. ID63 is outside the recovered F33 normal command-mode dictionary, so this is an ingress marker rather than an actuation request. A positive `exact_phase_b6_queued_intertick` result proves byte identity after physical/CanIf/PduR admission and before SecOC consumption; a no-marker result is bounded to the captured interval and does not prove physical impossibility.
 - **Rejected RSCFD draft:** controller-1 active receive registers `FFD200DC/FFD23080/FFD2308C...` are correctly recovered, but the proposed foreground polling timing was not. Exact F33 drains that path under interrupt context `0x71508 -> 0x66026 -> 0x667B6 -> 0x7A232 -> 0x79EBA -> 0x83CE4 -> 0x83E0C`, using an ISR stack and `eiret`; it is not drained by foreground loop `0x66062`. A foreground waiter is therefore not proven to execute before the interrupt consumes/acknowledges the hardware head. The RSCFD draft is intentionally not shipped. If Phase Q sees no marker despite complete host echoes, the next instrument must hook or observe the interrupt/CanIf/queue-admission path with ordering that is actually proven.
 - **Bridge correction:** the old C bridge's `call0(address)` ABI defect no longer applies to the current bridge. The v3 assembly bridge is 520 bytes in the retained tail, has zero relocations, uses linker-resolved direct `JARL32`, snapshots exact queued B6 before the stock aggregate, and can republish it through native route44 callback `0x7D72C`. Before reinjection it compares saved B3 with post-aggregate raw-route44 B3: exact native success necessarily matches and is skipped, while an unrelated same-B3 collision can only create a conservative false negative rather than a duplicate publication. Its `FEBF0000` mailbox (magic `0x42364252`, version 3) replaces the obsolete high-tail heartbeat/zero-MAC telemetry cells; installer/probe liveness uses the stock foreground tick. Arming remains explicit and parked/stationary-only. The bridge is static-ready but not live-qualified and is deferred until marker ingress is independently proven.
-- **Canonical:** VAR-151; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §68; `data/generated/camry_f33_runtime_monitor_20260908.json`; `exploit/ephemeral_runtime/camry_f33_runtime_monitor_intertick.S`; `exploit/ephemeral_runtime/camry_f33_b6_bridge.S`; `tests/verify_camry_f33_runtime_monitor_20260908.py`; `tests/verify_camry_f33_b6_bridge_install.py`.
+- **Canonical:** VAR-151; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §68; `data/generated/camry_f33_runtime_monitor_20260908.json`; `exploit/ephemeral_runtime/camry_f33_runtime_monitor_intertick.S`; `exploit/ephemeral_runtime/camry_f33_b6_bridge.S`; `tests/targets/camry/verify_camry_f33_runtime_monitor_20260908.py`; `tests/targets/camry/verify_camry_f33_b6_bridge_install.py`.
 
 ### CORR-185 — the Sep-8 short-window route44 “rates” were modulo residues, and inter-tick Q cannot observe a same-foreground queue lifetime
 
@@ -3827,7 +3827,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Observation-load correction:** the requested 30-ms poll produced only ~8.34 host reads/s, while resident `sample_generation` advanced only ~21.34/s under that diagnostic-read condition despite the exact 5-ms/200-Hz foreground timer. Repeated SID23 reads also returned stale resident generations. The capture cannot be modeled as independent passive 30-ms samples; this fact alone does not identify which execution context was slowed/coalesced.
 - **Scheduler correction:** exact `7A254` places normal receive-ring promotion and SecOC consumption in the same foreground invocation. `79EDE` is the unique direct caller of `809FE`; `809FE -> 808D6 -> 80884` reaches controller-0 normal CanIf callback `810F2`, while later in the same `7A254` call `6A410 -> 8EFF8 -> ... -> 8F746` consumes protected profiles. Thus a B6 queue lifetime can be born after `79EDE` begins and end at `6A410` without ever existing either immediately before the outer `0x667E6` call or between foreground ticks. Phase P and the already-run Phase-Q-v1 no-hit therefore do not constitute queue-admission negatives. The marker-filtered inter-tick Q-v2 is superseded before live use.
 - **Replacement experiment:** VAR-152 observes at the deterministic return from `79EDE`, before the untouched stock `0x7A272` tail reaches `6A410`, and uses D7 as a same-scheduler positive control. The final resident is **498/524 bytes** with 26 bytes headroom and zero relocations. After the 224-tick qualification it publishes mailbox magic/version without clearing the counter/signature region; host decisions use modulo-u32 before/after deltas, so NRTD attestation is not coupled to `7A254`'s FE01 receive-state gate. The treatment window contains no SID23 polling and uses a non-5-ms-phase-locked ID63 marker. The audited staging/resident/payload identities and deterministic build/classification tests now pass offline; the next vehicle work is therefore limited to one READY D7 selfcheck and, only if that passes, one ID63 marker block.
-- **Canonical:** VAR-151/VAR-152; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §68; `tools/targets/camry/analysis/analyze_camry_f33_runtime_monitor_statistics.py`; `data/generated/camry_f33_runtime_monitor_statistics.json`; `tests/verify_camry_f33_runtime_monitor_statistics.py`; `tests/verify_camry_f33_b6_midaggregate_observer.py`.
+- **Canonical:** VAR-151/VAR-152; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §68; `tools/targets/camry/analysis/analyze_camry_f33_runtime_monitor_statistics.py`; `data/generated/camry_f33_runtime_monitor_statistics.json`; `tests/targets/camry/verify_camry_f33_runtime_monitor_statistics.py`; `tests/targets/camry/verify_camry_f33_b6_midaggregate_observer.py`.
 
 ### CORR-186 — the sampled ID0 B6 was not a demonstrated rewrite, and the current graph is 6,065 real functions
 
@@ -3835,33 +3835,33 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Exact software correction:** newly promoted normal CanIf callback `810F2` and generated-COM callback `7D72C` close the configured raw-byte path: controller-1 rule39/descriptor39 -> PDU44 -> SecOC family1/profile2 -> successful upper PduR delivery -> `7D72C`. The callback copies the received 32-byte payload into route44 raw COM and invokes `8E772(44)`; it does not construct, re-sign, sanitize, zero, or replace B6. `8E772` has no other direct caller, and the upper publication chain is rooted only in SecOC receive delivery. Therefore no EPS remint/rewrite or autonomous route44 ticker is recovered. The observed ID0 image is an independent delivered PDU (or an unrecovered mechanism), not evidence of host-payload modification.
 - **Source boundary:** static EPS software proves reception and unchanged publication, not the external physical transmitter. Toyota diagnostic ownership constrains the immediate missing-message peer to the Brake System Control Module/category-435 domain; exact Brake/Skid/CGW producer identity, bus segment, signing ownership, and stock-source suppression remain open. An inactive periodic ID0/status interpretation is plausible but not promoted above hypothesis without producer evidence.
 - **Graph correction after CORR-181:** raw bytes also establish three genuine omitted entries: interrupt wrapper `71508` (170 bytes), COM callback `7D72C` (212), and CanIf callback `810F2` (204). The current canonical graph consequently contains **6,065 real functions** with normalized inventory SHA-256 `ccbf09df3807942b67f21789c1068b2be2bc2eb12d71bc2bf349f06b8386496d`. This numerical return to 6,065 is coincidental and does not reverse CORR-181: false +4 child entries `BCD66/CCFB6/CEE80` remain absent. HighFunction STORE count becomes 13,185; the 4,701 known-range STOREs and actual E1/E2 candidate sets remain unchanged.
-- **Canonical:** VAR-153; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §69; `tools/targets/camry/analysis/analyze_camry_8965F3307000_b6_ingress_closure.py`; `data/generated/camry_8965F3307000_b6_ingress_closure.json`; `tests/verify_camry_8965F3307000_b6_ingress_closure.py`.
+- **Canonical:** VAR-153; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §69; `tools/targets/camry/analysis/analyze_camry_8965F3307000_b6_ingress_closure.py`; `data/generated/camry_8965F3307000_b6_ingress_closure.json`; `tests/targets/camry/verify_camry_8965F3307000_b6_ingress_closure.py`.
 
 ### CORR-187 — the processor ABI is firmware-observed and GHS-compatible; it is not the standard CC-RH ABI
 
 - **Superseded wording:** `v850.cspec` said the modeled calling convention was a G3-family ABI shared by CC-RH and GCC, and `InspectSwitchSites.java` called the recovered compact tables “GHS switches.” Neither statement had a compiler-identification proof behind it. The first was materially wrong about `r30/ep`; the second attached a vendor name to a generic recovered switch shape.
 - **Exact firmware correction:** Sienna and F33 both have reachable leaf `0x1478`, called at `0x1498`/`0x1522`, whose 22-byte body begins `mov r6,ep` and returns without preserving ep. This single ordinary call is enough to prove that the analyzed firmware ABI treats `ep` as volatile. The shared cspec keeps `r20..r29` callee-save but now explicitly models `ep` as firmware-observed volatile state.
 - **Compiler-reference correction:** the supplied CC-RH V2.08.00 manual explicitly makes `r30/ep` fixed or callee-save and guarantees it across calls when `-Xep` is omitted, so standard CC-RH is not ABI-compatible with the observed Toyota call boundary. CC-RH still emits Toyota-like `switch` instructions and compact halfword tables in reference fixtures; that similarity cannot identify the vendor. GCC's RH850 backend exposes a GHS-compatible `-mghs` mode matching the current model, but no compiler marker or runtime-library body proves Toyota used a particular Green Hills release. Vendor/version remains bounded.
-- **Canonical:** ARCH-017; [../tooling/processor-module-audit.md](../tooling/processor-module-audit.md) “Compiler / ABI fingerprint”; `tests/verify_rh850_compiler_abi.py`.
+- **Canonical:** ARCH-017; [../tooling/processor-module-audit.md](../tooling/processor-module-audit.md) “Compiler / ABI fingerprint”; `tests/firmware/verify_rh850_compiler_abi.py`.
 
 ### CORR-188 — VAR-142 used the bootloader RS-CANFD GCFG as if it were the live application configuration
 
 - **Superseded provenance:** VAR-142 correctly recovered the F33 500-kbit/s nominal / 2-Mbit/s data timing and 80%/70% sample points, but attributed `0x3B3C -> 0x3908/0x396C/0x3978/0x3A8E` to the application startup coordinator. That chain is actually bootloader-only: `0x1398 -> 0x1338 -> 0x3B3C`, and its `0x396C` writer sets `RSCFD0CFDGCFG=0xFFFF0000`.
 - **Exact application correction:** normal F33 startup reaches the separate table-driven driver through `0x666BC -> 0x7A132 -> 0x79DFA -> 0x83F3E -> 0x84652 -> 0x84570`. `0x84570` writes `FFD204FC=1` and loads `FFD20084` from CodeFlash `0x22E80=0xFFFF0020`; channel-1 configuration row `0x233EC` supplies `NCFG=0x0F3E7800`, `DCFG=0x055C0000`, and `FDCFG=0x280D0200`. This occurs before `0x7A132` writes its final `FEBE3DF2=0xFE01`, so it is the active configuration for the pre-fault receive paths.
 - **Semantic consequence:** the original bit-rate/sample-point result survives because the application channel-1 NCFG/DCFG are identical in the relevant timing fields and application FDCFG still has `REFE=1/FDOE=0`. The GCFG provenance correction is nevertheless material for memory safety: `0xFFFF0020` decodes to `CMPOC=1/DRE=0/DCE=0`, whereas the boot value does not. VAR-155 therefore uses the application configuration when analyzing oversized CAN-FD reception.
-- **Canonical:** VAR-142/VAR-155; `tests/verify_camry_8965F3307000_canfd_timing.py`; `data/generated/camry_8965F3307000_prefault_memory_safety.json`; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §59; [../variants/camry-f33-eps-recovery-2026-09-11.md](../variants/camry-f33-eps-recovery-2026-09-11.md) §7.
+- **Canonical:** VAR-142/VAR-155; `tests/targets/camry/verify_camry_8965F3307000_canfd_timing.py`; `data/generated/camry_8965F3307000_prefault_memory_safety.json`; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §59; [../variants/camry-f33-eps-recovery-2026-09-11.md](../variants/camry-f33-eps-recovery-2026-09-11.md) §7.
 
 ### CORR-189 — the VAR-155 DCM route-label extractor used a byte stride where `93F0E` uses a ushort stride
 
 - **Superseded generated detail:** the first VAR-155 artifact read `0x25EF2 + i*6` bytes and labeled the three fixed DCM buffers with external route IDs `2/1/3`.
 - **Exact correction:** `93F0E` indexes `(&DAT_25EF2)[i*6]` as 16-bit elements, so the byte stride is 12 and the route IDs are **2/3/4**. The internal channel domain remains exactly `0/1/2`, and the three 0x100-byte buffers remain `FEBE5651`, `FEBE5751`, and `FEBE5851`; no memory-safety or recovery conclusion changes.
-- **Canonical:** VAR-155/VAR-156; `data/generated/camry_8965F3307000_prefault_memory_safety.json`; `data/generated/camry_8965F3307000_prefault_control_flow.json`; `tests/verify_camry_8965F3307000_prefault_memory_safety.py`.
+- **Canonical:** VAR-155/VAR-156; `data/generated/camry_8965F3307000_prefault_memory_safety.json`; `data/generated/camry_8965F3307000_prefault_control_flow.json`; `tests/targets/camry/verify_camry_8965F3307000_prefault_memory_safety.py`.
 
 ### CORR-190 — VAR-156 initially conflated stock bytes at `0x7A272` with the recorded incident write
 
 - **Superseded detail:** the first VAR-156 control-flow artifact described stock CodeFlash bytes `80 FF EE 1C` (the replaced `JARL 0x7BF60,LP`) plus the next halfword as though they were the malformed incident instruction.
 - **Exact incident correction:** the retained recovery structure distinguishes the stock image from the recorded write. The incident changed the four bytes at `0x7A272` to `FF 02 92 5B`; with untouched successor halfword `24 36`, RH850 decoding is the six-byte **`JARL 0x362BFE04,LP`** already established in recovery §4. No post-incident whole-flash readback exists, so all fault semantics must use this reconstructed instruction rather than stock `CodeFlash.bin` bytes.
-- **Canonical:** `data/generated/camry_f33_recovery_structure.json`; VAR-156; [../variants/camry-f33-eps-recovery-2026-09-11.md](../variants/camry-f33-eps-recovery-2026-09-11.md) §§4,8; `tests/verify_camry_8965F3307000_prefault_control_flow.py`.
+- **Canonical:** `data/generated/camry_f33_recovery_structure.json`; VAR-156; [../variants/camry-f33-eps-recovery-2026-09-11.md](../variants/camry-f33-eps-recovery-2026-09-11.md) §§4,8; `tests/targets/camry/verify_camry_8965F3307000_prefault_control_flow.py`.
 
 ### CORR-191 — `0x62E1E`'s `EI` does not restore CAN EIINT service when the incident enters through fetch-SYSERR
 
@@ -3869,7 +3869,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Exact raw-image correction:** the incident bytes remain `FF 02 92 5B 24 36 = JARL 0x362BFE04,LP`, not stock `0x7A272`. A whole-image raw `LDSR` census finds PSW writes only at `0x204` and `0x9F28`. Hidden reset core-init loads `0x00018020` then writes PSW at `0x204`, setting `EBV=1`; `0x9F28` belongs only to application-to-boot handoff `65F5E -> 9F00`. RBASE has no writer. Application startup sets `EBASE=0x20000` at `0x715C8`; the low EBASE helper containing `0x8508/0x8514` has only low-boot direct callers and no fixed pointer literal. Matching Renesas architecture therefore selects SYSERR vector `0x20010`, whose exact F33 stub jumps to `0x62E1E`.
 - **Exception-semantics correction:** P1M-E maps instruction fetch from other than CodeFlash to FEIC `0x13`; `0x362BFE04` is in PE1's access-prohibited range. G3M classifies instruction-fetch error input as resumable FE-level SYSERR. SYSERR acknowledgement sets `PSW.ID=1`, `NP=1`, `EP=1` and retains EBV. The `EI` at `0x62E36` clears ID only; it does not clear NP. Since ordinary EIINT acknowledgement requires `ID=0` and `NP=0`, CAN RX/TX and periodic maskable interrupts cannot preempt the resulting `0x62E42` loop. The handler itself has no FERET/EIRET.
 - **Evidence boundary:** no live post-incident `FEIC/FEPC/FEPSW` capture exists. `FEIC=0x13` and the resulting SYSERR path are therefore architecture-predicted from the exact bad target plus matching Renesas manuals, not claimed as dynamically observed. The prior broader statement that “hardware activity or an interrupt can survive the foreground failure” is withdrawn for ordinary maskable EIINTs under this predicted fault model.
-- **Canonical:** VAR-157; `data/generated/camry_8965F3307000_incident_fault_model.json`; `tests/verify_camry_8965F3307000_incident_fault_model.py`; [../variants/camry-f33-eps-recovery-2026-09-11.md](../variants/camry-f33-eps-recovery-2026-09-11.md) §4.
+- **Canonical:** VAR-157; `data/generated/camry_8965F3307000_incident_fault_model.json`; `tests/targets/camry/verify_camry_8965F3307000_incident_fault_model.py`; [../variants/camry-f33-eps-recovery-2026-09-11.md](../variants/camry-f33-eps-recovery-2026-09-11.md) §4.
 
 ### CORR-192 — the F33 `0x51E` selector is drive mode, not shift position; Sport selects a distinct assist map
 
@@ -3878,7 +3878,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Calibration consequence:** healthy base `0x10100` has four `8 x 0x44` `C28FC/C2B64` driver-torque selector banks. Selectors 0/2/3 are byte-identical; selector 1 differs by 215 bytes. Thus Eco value6 and the ordinary zero-companion Normal path share the same **primary steering-weight surface**, while Sport selects the only distinct bank for that surface. `C58B8` interpolates its eight torque curves at SP1 breakpoints `0, 7.68, 19.2, 38.4, 76.8, 128, 192, 256 km/h`. Representative direct `C2B64 -> FEBEBF3C` reductions in Sport are 60.2% at 40 km/h/1 N·m, 46.4% at 60 km/h/2 N·m, 41.3% at 80 km/h/1 N·m, and 68.2% at 120 km/h/1 N·m. These are one base-assist term, not total motor/rack-assist percentages; the selected curve slope also propagates through `C2C32 -> FEBEBF40 -> C8678/FEBEC4C0`.
 - **Full selector census:** exact F33 has 31 direct `FEBEC156` readers. Of 26 direct selector-strided healthy calibration regions, selector1/Sport differs from selector0 in exactly five: `C28FC/C2B64` (215 bytes), `C6E7E` (40), `C7AB0` map B (6), `C91F2` map A (2), and `C9258` map B (4). All enumerated pointer-indexed selector families alias. The four smaller differences are live shaping paths: they converge through `C39C`, `C41E`, or `C5A8` into `D0162 -> D0218`. Selector2 differs from selector0 only in the three tiny `C7AB0/C91F2/C9258` regions, so the correction is deliberately narrower than "all Normal and Eco calibration is identical."
 - **Retained-drive boundary:** the tracked road captures used for VAR-079 have `0x51E` sig160=0 throughout, so they exercised only the Normal-compatible calibration and still correctly exclude drive-mode selection as their Class-L/LTA transition discriminator. The prior conclusion that the selector itself was functionally inert is withdrawn.
-- **Canonical:** [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §31; `data/generated/camry_8965F3307000_internal_assist_oracles.json`; `tools/targets/camry/builders/build_camry_8965F3307000_internal_assist_oracles.py`; `tests/verify_camry_8965F3307000_internal_assist_oracles.py`.
+- **Canonical:** [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §31; `data/generated/camry_8965F3307000_internal_assist_oracles.json`; `tools/targets/camry/builders/build_camry_8965F3307000_internal_assist_oracles.py`; `tests/targets/camry/verify_camry_8965F3307000_internal_assist_oracles.py`.
 
 ### CORR-193 — the September-15 Camry completion pass conflated plausible decodes and software construction with a qualified port
 
@@ -3888,7 +3888,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Runtime lifetime:** the historical continuous helper retains its last nonzero host command indefinitely while native B6 continues. A new 598-byte supervised helper fits the unchanged 600-byte transfer and releases native B6 after seven nominal 5-ms foreground ticks without a changed host generation. It passes 86 compiled-instruction assertions (34 liveness, 52 golden-differential/error cases); the historical helper fails the same expiry test. Differential crypto/encoder boundaries are stubbed, so this is not a silicon or road qualification. The resident/staging/authenticated payload remain byte-identical. The v17 kit's current helper is explicitly not live-qualified, and `replace-once` rejects held-command helpers.
 - **Stock-ACC claim:** the selected September-10 working steering intervals carry conventional 0x88/0x90 cruise, not adaptive 0xA0/0xC0. Physical lateral authority remains demonstrated, but that evidence does not close the final lateral-plus-adaptive-cruise combination. The later exact-car outcome closes the diagnostic-clear idea negatively: clearing the communication-warning/DTC state did not re-enable DRCC in that ignition cycle; only a full vehicle restart restored DRCC, which also removed the RAM signer. The FRC distance-control/permission/ACC-not-available DIDs remain useful state oracles, not a demonstrated recovery mechanism. Pre-clear evidence is saved before mutation and retained on failure.
 - **Software enforcement:** planner/controller/Panda acceleration bounds now agree; exact native handback is distinguished from bounded host modification; Profile-5 RX/TX validation, preservation of B12's unmodified high bit, actual C7 absolute-angle enforcement, and sequence continuity across disengagement are regression-tested. These fixes do not prove physical longitudinal authority, delayed-stop release, PCS/AEB coexistence, or complete EPS fault classification.
-- **Canonical:** `docs/variants/camry-2026-port-evidence-review.md`; `data/generated/camry_2026_radar_anchors.json`; `data/generated/camry_2026_stock_harness_topology.json`; `data/generated/camry_20260915_port_evidence_audit.json`; object report v5; `tests/verify_camry_f33_signer_host_liveness.py`; `tests/verify_camry_f33_post_install_recovery.py`; maintained opendbc `093125ab` / openpilot`3f9f3c061`. No new vehicle operation or persistent firmware write was performed.
+- **Canonical:** `docs/variants/camry-2026-port-evidence-review.md`; `data/generated/camry_2026_radar_anchors.json`; `data/generated/camry_2026_stock_harness_topology.json`; `data/generated/camry_20260915_port_evidence_audit.json`; object report v5; `tests/targets/camry/verify_camry_f33_signer_host_liveness.py`; `tests/targets/camry/verify_camry_f33_post_install_recovery.py`; maintained opendbc `093125ab` / openpilot`3f9f3c061`. No new vehicle operation or persistent firmware write was performed.
 
 ### CORR-194 — FRC ECU-Security-Key provisioning and runtime SecOC signing are separate claims
 
@@ -3916,7 +3916,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Dynamic join:** the Sep-10 observer sat after `79EDE/809FE` ring drain and before `6A410` SecOC. The positive-control block observed D7 `+102` and native B6 `+205`. The treatment returned all **121/121** Panda B6 sends with zero rejects/errors while native B6 still advanced `+217`, yet exact ID63 marker count remained **0**. Therefore the host B6 disappears **before successful F33 controller1 decode/CanIf admission**. EPS SecOC, PduR, generated COM, application profile selection and Target-Lateral-ID semantics are not the selective drop point.
 - **Physical boundary:** a pre-GAFL physical/link decode failure remains the narrow receiver-side residue. Otherwise the loss must be in an external routing boundary between the Panda-visible logical-Bus-4 trunk and the EPS-local B6 delivery path. Current GTS is consistent with, but does not prove, that model: Skid Control is Bus 4 through `No. 2 Global CAN Junction Connector`, whereas EPS is Bus 4 with junction label `EBU`. Do not expand `EBU` or name it as the filter without exact producer/physical evidence.
 - **Next proof target:** acquire/decode category-435 Brake `F152633K0000` (`0x7B0`, assy `8954147040`) and recover its B6 Tx/bridge/filter/routing logic, or physically instrument both sides of the EPS-local hop. The logical Vehicle Movement Manager ownership is already closed by VAR-161/CORR-195; this is now a physical-routing problem.
-- **Canonical:** `data/generated/camry_8965F3307000_b6_ingress_closure.json`; `tests/verify_camry_8965F3307000_b6_ingress_closure.py`; [../architecture/toyota-tss3-vehicle-movement-arbitration.md](../architecture/toyota-tss3-vehicle-movement-arbitration.md) §8; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §70.5; OQ-054.
+- **Canonical:** `data/generated/camry_8965F3307000_b6_ingress_closure.json`; `tests/targets/camry/verify_camry_8965F3307000_b6_ingress_closure.py`; [../architecture/toyota-tss3-vehicle-movement-arbitration.md](../architecture/toyota-tss3-vehicle-movement-arbitration.md) §8; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §70.5; OQ-054.
 
 ### CORR-197 — `EBU` is an EPS attachment into the brake domain, not a proved discrete filter ECU
 
@@ -3927,7 +3927,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Security/replacement consequence:** contemporary Toyota repair procedures require `Update ECU Security Key` when the skid-control ECU / brake-actuator assembly is replaced, and Toyota's current ECU-Security-Key bulletin applies to Camry HV. This supports keeping final target generation/signing/routing inside the serviceable Brake/Skid domain rather than inventing a separate replaceable EBU filter ECU. It does not exclude an **internal** EBU sub-node within the brake assembly sharing that service/security boundary.
 - **Leading physical model:** the Panda-visible network is the shared/logical Bus-4 side. Category-435 Skid Control / Brake actuator is the leading VMM/request-generation and selective-routing owner; it can construct/authenticate or selectively forward B6 onto an EBU-labelled EPS-local leg. F33 then receives that leg on its one and only application CAN controller. This requires neither a second EPS network controller nor a discrete EBU ECU.
 - **Remaining proof:** exact `F152633K0000` category-435 firmware or physical wiring/trace evidence must identify the actual CAN controller/channel, B6 Tx descriptor, bridge/filter policy, and CMAC/freshness owner. The GTS/DDB evidence narrows that target but does not replace it.
-- **Canonical:** `data/generated/camry_2026_ebu_topology.json`; `tests/verify_camry_2026_ebu_topology.py`; [Toyota TSS3 vehicle-movement arbitration architecture](../architecture/toyota-tss3-vehicle-movement-arbitration.md) §8; [Camry live baseline](../variants/camry-2026-live-baseline.md) §§19,70.5; OQ-054; CORR-196.
+- **Canonical:** `data/generated/camry_2026_ebu_topology.json`; `tests/targets/camry/verify_camry_2026_ebu_topology.py`; [Toyota TSS3 vehicle-movement arbitration architecture](../architecture/toyota-tss3-vehicle-movement-arbitration.md) §8; [Camry live baseline](../variants/camry-2026-live-baseline.md) §§19,70.5; OQ-054; CORR-196.
 
 ### CORR-198 — current GTS+ UtilityPlusFront selects RID `0x3002`; the earlier `UtilityGene` raw-body boundary was an installed-CP artifact
 
@@ -3936,7 +3936,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Recovered selected wire flow:** the master is opened at `0x763`; key-management session is `10 4F`; SecurityAccess is `27 41 -> seed[16]`, `27 42 || key[16]`; discovery walks the master `0x1100` topology family, checks participant `22 1000` bit0, and reads admitted identities with `22 1010 -> 16 bytes`. After backend ExchangeKey data is installed in the endpoint records, each selected slave is reconnected, receives `10 4F`, then **`31 01 30 02 || M1[16] || M2[32] || M3[16]`** and **`31 03 30 02`** polling for the M4/M5 proof. Therefore RID `0x3002` is the implementation selected by the current `UtilityPlusFrontNK -> UtilityGene` network key-update path. Current `UtilityExNK2` RID `0x1010` remains real alternate/multi-generation support, not the selected path here.
 - **FRC-specific boundary:** this does not manufacture a live camera transcript. Ordinary current `FRC_P5` uses DID `0x1010` for Field FOE Origin X/Y / Roll Angle Gap and exposes no ordinary Data-Monitor DID `0x1000`; therefore the MACKey participant `22 1000/1010` namespace must not be identified with the ordinary FRC DDB namespace. A special `10 4F` context/security endpoint, master-mediated addressing, or another admission mechanism remains to be proved from a live Update-ECU-Security-Key trace or decoded FRC firmware.
 - **Hardware join:** same-generation Denso/TSS3 uses Toshiba TMPV7706XBG, and DTS Insight's public TMPV770 startup guide explicitly identifies Core0 **`HSM_CM3`** with its own secure-debug gate. The remaining camera implementation problem is therefore the FRC UDS/application-core -> on-die HSM service ABI, SHE slot/AuthID mapping, and runtime SecOC use—not the existence of a secure engine.
-- **Canonical:** [../security/mackey-registration.md](../security/mackey-registration.md); [../tooling/techstream.md](../tooling/techstream.md) §7; `tests/verify_gtsplus_mackey_rid1010.py`; CORR-194 for the provisioning-vs-runtime-signing distinction.
+- **Canonical:** [../security/mackey-registration.md](../security/mackey-registration.md); [../tooling/techstream.md](../tooling/techstream.md) §7; `tests/techstream/verify_gtsplus_mackey_rid1010.py`; CORR-194 for the provisioning-vs-runtime-signing distinction.
 
 
 ### CORR-198 — repin direction closes `0x08A` physical publication inside the FRC assembly
@@ -3956,7 +3956,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Runtime correction:** current opendbc `4f90c758` removes TSS3 `0x160` live-template parsing, construction, stock suppression, Panda RX-liveness dependence, TX whitelist entries, acceleration checks, and forwarding override. Both Camry and Corolla set `alphaLongitudinalAvailable=False`, `openpilotLongitudinalControl=False`, and Toyota `STOCK_LONGITUDINAL`. BO352 remains in the DBC as neutral `TSS3_FRC_STATE_160`; `0x08A` remains decoded but is not host-transmitted. kai-openpilot `73c0e2992` pins this revision.
 - **Remaining native-long blocker:** stock Toyota-B does not yet expose a qualified openpilot ownership boundary for the shared `0x08A` source. Recover source suppression/sole-emitter control or an equivalent pre-signing/request-generation handoff first; only then qualify Brake/VMC result selection, PCS/AEB priority, standstill/hold behavior, and `0x081` result semantics.
 - **Identity unaffected:** Corolla TSS3 identification remains exact on the two direct EPS F181 pairs `8965F1208000/8A3111202000` and `8965F1208000/8A3111213000`; the curated ten NA GTS Corolla/Corolla-HV vehicle-type IDs continue to resolve fail-closed to the same platform. No fingerprint broadening was introduced by this correction.
-- **Canonical:** VAR-163; [../variants/corolla-h-f-openpilot-state-bridge.md](../variants/corolla-h-f-openpilot-state-bridge.md) §9.2; [../architecture/toyota-tss3-minimal-runtime.md](../architecture/toyota-tss3-minimal-runtime.md); `data/generated/corolla_2025_span_discord_rlog_opendbc_evidence.json`; `data/generated/corolla_tss3_opendbc_readiness.json`; `tests/verify_span_2025_discord_rlog_opendbc_evidence.py`; `tests/verify_corolla_tss3_opendbc_readiness.py`.
+- **Canonical:** VAR-163; [../variants/corolla-h-f-openpilot-state-bridge.md](../variants/corolla-h-f-openpilot-state-bridge.md) §9.2; [../architecture/toyota-tss3-minimal-runtime.md](../architecture/toyota-tss3-minimal-runtime.md); `data/generated/corolla_2025_span_discord_rlog_opendbc_evidence.json`; `data/generated/corolla_tss3_opendbc_readiness.json`; `tests/targets/corolla/verify_span_2025_discord_rlog_opendbc_evidence.py`; `tests/targets/corolla/verify_corolla_tss3_opendbc_readiness.py`.
 
 
 ### CORR-200 — Corolla single-use C7 generations were not a valid continuous-control contract
@@ -3967,7 +3967,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Executable regression:** `VerifyCorollaUnifiedSignerHostLiveness.java` executes the compiled exact-H helper and checks continuous admission under a 100-Hz changing host generation against the 200-Hz nominal foreground schedule, seventh-tick expiry, immediate zero release, 255→1 sequence wrap, no stale-generation rearm, and the empty-queue case where B6 returns only after the 35-ms lease has expired. The test is emulator-only and does not claim vehicle qualification.
 - **Openpilot/Panda consequence:** the host wire from `opendbc@82bbbf57` remains correct and unchanged: `0x777 / 07 C7 C7 seq target_hi target_lo 00 00`, with C6 reserved only for Camry/Crown split-helper loading. The correction is entirely in the Corolla resident/helper lifetime semantics.
 - **Remaining boundary:** live H/F command-5/MAC timing, native-B6 replacement, and physical steering response are still vehicle tests. This correction closes the software lifetime bug; it does not promote the Corolla signer to live-qualified.
-- **Canonical:** [../architecture/toyota-tss3-minimal-runtime.md](../architecture/toyota-tss3-minimal-runtime.md); [../variants/corolla-h-f-openpilot-state-bridge.md](../variants/corolla-h-f-openpilot-state-bridge.md); `tests/verify_tss3_unified_b6_signer.py`; `ghidra/scripts/verify/VerifyCorollaUnifiedSignerHostLiveness.java`.
+- **Canonical:** [../architecture/toyota-tss3-minimal-runtime.md](../architecture/toyota-tss3-minimal-runtime.md); [../variants/corolla-h-f-openpilot-state-bridge.md](../variants/corolla-h-f-openpilot-state-bridge.md); `tests/targets/camry/verify_tss3_unified_b6_signer.py`; `ghidra/scripts/verify/VerifyCorollaUnifiedSignerHostLiveness.java`.
 
 ### CORR-201 — FRC feature-owner selection does not replace the downstream Vehicle Movement Manager arbiter
 
@@ -3985,4 +3985,4 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Exact dynamic proof:** immediate post-install state on 2026-09-20 was `0x1903=01` (DRCC all speed), `0x1905=8000` (Cruise Control Permission false), and `0x1906=e000e0008000` (Main Switch Recognition false, ACC-not-available false), while Brake `0x102D` had `fail_status=false/fail_control=false` and `0x102F` had `eps_communication_open=false`. No Brake or FRC reset was performed. The vehicle then completed a normal drive. A post-drive read, still with no peer reset, showed `0x1905=8080` and `0x1906=e080e0008000`; the legacy DRCC-permission verdict flipped to healthy solely because those operational bits changed.
 - **GTS semantic correction:** Toyota names `0x1905` **Cruise Control Permission Flag** and `0x1906` bit8 **Main Switch Recognition Flag**. Both describe current cruise state. `0x1906` bit40 is separately the **ACC Not Available Icon Lighting Request Flag**. None is a persistent proof that the peer ECU failed to recover from EPS programming.
 - **Maintained contract:** `drcc_permission_observed()` remains a live cruise-state diagnostic only for explicit recovery/debugging. The startup control-domain report does not derive or publish a DRCC-permission verdict. Startup `peer_health_observed()` instead requires exact peer identities plus Brake `0x102D` fail-status/fail-control clear and `0x102F` EPS-communication-open clear. The normal startup flow then requires a fresh resident-signing self-test. Healthy startup no longer resets Brake/FRC or waits for `0x1905`/MAIN to assert.
-- **Canonical:** `targets/camry-2026/raw-20260920/startup-ui-transient-drcc-permission/`; `tests/verify_camry_f33_post_install_recovery.py`; `exploit/ephemeral_runtime/camry_f33_post_install_recovery.py`; `exploit/ephemeral_runtime/camry_f33_oracle_ui_bringup.py`; [Toyota TSS3 minimal runtime](../architecture/toyota-tss3-minimal-runtime.md).
+- **Canonical:** `targets/camry-2026/raw-20260920/startup-ui-transient-drcc-permission/`; `tests/targets/camry/verify_camry_f33_post_install_recovery.py`; `exploit/ephemeral_runtime/camry_f33_post_install_recovery.py`; `exploit/ephemeral_runtime/camry_f33_oracle_ui_bringup.py`; [Toyota TSS3 minimal runtime](../architecture/toyota-tss3-minimal-runtime.md).

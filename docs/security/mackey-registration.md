@@ -11,7 +11,7 @@ native companion `UtilityExNK2.dll`. The last file has SHA-256
 The end-to-end vehicle/server/vehicle data flow is **recovered** from managed
 IL, native PE bytes, imports/exports, RTTI, parser bodies, and diagnostic helper
 bodies. It is verified deterministically by
-`tests/verify_techstream_mackey.py`; generated evidence lives in
+`tests/techstream/verify_techstream_mackey.py`; generated evidence lives in
 `data/generated/techstream_v18/mackey_vehicle_protocol.json` and
 `mackey_state_machine.csv`. Applicability to the Sienna `8965B4512000` EPS is
 **bounded** at the Toyota transport-selection layer: both sides carry the same

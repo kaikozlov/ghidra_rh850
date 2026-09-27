@@ -10,7 +10,7 @@
 >
 > **Canonical artifacts:** —
 >
-> **Verification:** `tests/verify_did_model.py`
+> **Verification:** `tests/firmware/verify_did_model.py`
 >
 > **Related:** [bootloader](bootloader.md), [payload-gate](../security/bootloader-payload-gate.md)
 
@@ -207,6 +207,6 @@ variant. It does mean those meanings must not be projected onto handlers
 | `F181` exact response is `02 || 32*0x21` | **Definitive** |
 | interpreting `0x02` as a two-record count | **Standard-based inference** |
 
-`../tests/verify_did_model.py` independently checks the table, loop bounds,
+`../tests/firmware/verify_did_model.py` independently checks the table, loop bounds,
 policies, state transitions, RAM consumers, and response bytes from the raw
 CodeFlash image.

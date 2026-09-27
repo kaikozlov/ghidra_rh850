@@ -16,23 +16,21 @@ import hashlib
 import io
 import json
 import re
-import sys
 from dataclasses import dataclass
 from decimal import Decimal
 from pathlib import Path
 from typing import Any
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import dnfile  # type: ignore
 from dncil.cil.body import CilMethodBody  # type: ignore
+from tools.techstream.extract_pcs_data_viewer_tss3_dictionary import load_culture
+from tools.techstream.inspect_dotnet_il import MethodBodyReader, resolve_token, type_name
+from tools.techstream.techstream_paths import resolve_gts_root
+from tools import REPO_ROOT
 
-from extract_pcs_data_viewer_tss3_dictionary import load_culture
-from inspect_dotnet_il import MethodBodyReader, resolve_token, type_name
-from techstream_paths import resolve_gts_root
 
-REPO = Path(__file__).resolve().parents[2]
-DEFAULT_OUT = REPO / "data/generated/gtsplus_2026/pcs_data_viewer_tss3_managed_semantics.json"
+DEFAULT_OUT = REPO_ROOT / "data/generated/gtsplus_2026/pcs_data_viewer_tss3_managed_semantics.json"
 DID_DEFINE = "PCSDataViewer.Extractor.OperationFFD.TSS3.Define.DIDDataDefine"
 DETAIL_INFO = "PCSDataViewer.Extractor.OperationFFD.TSS3.Define.DetailBitAssignInfo"
 ROB_DEFINE = "PCSDataViewer.Extractor.OperationFFD.TSS3.Define.RoBCodeDefine"
@@ -543,7 +541,6 @@ def _interpret_collection(
     return int(method.Rva), records
 
 
-
 def _enum_literal_map(pe: dnfile.dnPE, full_type: str) -> dict[int, str]:
     constants: dict[int, int] = {}
     for row in pe.net.mdtables.Constant.rows:
@@ -582,7 +579,6 @@ def _normalize(value: Any) -> Any:
     if isinstance(value, (list, tuple)):
         return [_normalize(item) for item in value]
     return value
-
 
 
 def _rob_system_type_usage(pe: dnfile.dnPE) -> dict[str, Any]:

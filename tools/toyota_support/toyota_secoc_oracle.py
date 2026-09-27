@@ -22,19 +22,18 @@ against synchronization and protected traffic. Raw keys are never printed.
 
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import csv
 import hashlib
 import json
 import math
-import sys
 from collections import Counter, defaultdict
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable
 
-REPO = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO))
+REPO = REPO_ROOT
 
 from tools.toyota_support.toyota_secoc_signer import (
     AES_128_KEY_BYTES,

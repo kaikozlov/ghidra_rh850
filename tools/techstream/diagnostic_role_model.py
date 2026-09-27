@@ -11,7 +11,8 @@ from pathlib import Path
 from typing import Any
 
 import pefile
-from pe_utils import imports as pe_imports
+from tools.techstream.pe_utils import imports as pe_imports
+
 
 # CommandCommon primitives that directly materialize or execute communication
 # frames in the plugin itself.

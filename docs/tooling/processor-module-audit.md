@@ -146,14 +146,14 @@ context. `ApplyP1MSfrTypes.java` then overlays structured types:
 
 The full `0xFF600000..0xFFFFFFFF` range stays volatile in `v850.pspec` without
 being mapped as one block (that caused false CodeFlash-as-SFR pointer creation).
-CSV coverage is checked by `tests/verify_p1m_device_profile.py`; project
+CSV coverage is checked by `tests/firmware/verify_p1m_device_profile.py`; project
 invariants require the windows, a landmark label subset, and the structured
 overlays above.
 
 `ApplyRamTypes.java` then overlays evidence-backed LocalRAM types at absolute
 addresses (GP/TP register context is already seeded above). Inventory and
 GP-displacement checks live in `data/ram_overlay_map.csv` /
-`tests/verify_ram_overlays.py`. Enabled checkpoint mirrors are sized from
+`tests/runtime/verify_ram_overlays.py`. Enabled checkpoint mirrors are sized from
 `data/checkpoint_payload_map.csv` without inventing OEM field names.
 
 | Type | Applied at | Notes |
@@ -205,7 +205,7 @@ ends as follows:
 ```
 
 There is no save or restore of the incoming `r30/ep`. A caller therefore cannot
-assume that `ep` survives an ordinary call. `tests/verify_rh850_compiler_abi.py`
+assume that `ep` survives an ordinary call. `tests/firmware/verify_rh850_compiler_abi.py`
 binds this witness to both exact firmware images and also pins the corresponding
 `v850.cspec` model. This is sufficient to establish **volatile `ep`** for the
 firmware ABI; a broader read-only census finds the same pattern throughout both
@@ -382,7 +382,7 @@ Whole-image structural function inventory (not full semantic understanding):
   `tools/project/export_ghidra_project.sh semantic-coverage`
 - Artifacts: `data/semantic_coverage_ledger.csv` and
   `data/semantic_coverage_summary.json`
-- Gate: `tests/verify_semantic_coverage.py` (registered in `make verify`)
+- Gate: `tests/tooling/verify_semantic_coverage.py` (registered in `make verify`)
 
 Each CSV row is one discovered function, sorted by entry address, with Ghidra
 discovery and name provenance, calling convention, caller/callee counts,

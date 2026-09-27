@@ -9,7 +9,9 @@ oracle required to distinguish a wheel-correlated UI carrier from the physical
 meter display.
 """
 from __future__ import annotations
+from tools.toyota_support.toyota_route_opendbc_common import be_raw
 
+from tools import REPO_ROOT
 import argparse
 import bisect
 import hashlib
@@ -17,7 +19,7 @@ import json
 import sys
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[4]
+REPO = REPO_ROOT
 DEFAULT_LOG_ROOT = Path('/Users/kai/dev/inspect/logs/camry-2026')
 DEFAULT_OPENPILOT_ROOT = Path('/Users/kai/dev/inspect/repos/kai-openpilot')
 DEFAULT_ROUTE = '0000002c--c784367b7e'
@@ -28,16 +30,6 @@ def load_logreader(openpilot_root: Path):
   sys.path.insert(0, str(openpilot_root))
   from openpilot.tools.lib.logreader import LogReader  # type: ignore[import-not-found]
   return LogReader
-
-
-def be_raw(dat: bytes, start_bit: int, size: int) -> int:
-  be_bits = [j + i * 8 for i in range(len(dat)) for j in range(7, -1, -1)]
-  idx = be_bits.index(start_bit)
-  value = 0
-  for bit in be_bits[idx:idx + size]:
-    byte_i, bit_i = divmod(bit, 8)
-    value = (value << 1) | ((dat[byte_i] >> bit_i) & 1)
-  return value
 
 
 def wheel_speed_kph(dat: bytes) -> float:

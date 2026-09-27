@@ -15,6 +15,8 @@ prevents exact/unique-shape matching. Everything else remains structural-only or
 """
 from __future__ import annotations
 
+from tools.targets.sienna.sienna_target import CORPUS as SIENNA_CORPUS
+from tools import REPO_ROOT
 import argparse
 import hashlib
 import json
@@ -24,7 +26,7 @@ from collections import Counter, defaultdict
 from pathlib import Path
 from tools.targets.sienna.sienna_target import CODEFLASH as SIENNA_CODEFLASH
 
-REPO = Path(__file__).resolve().parents[4]
+REPO = REPO_ROOT
 DID = struct.Struct("<HHIII")
 RID_CB = struct.Struct("<HHII")
 
@@ -46,7 +48,7 @@ def load_codeflash(path: Path) -> bytes:
 
 def canonical_supervisor_calls() -> set[int]:
     records = []
-    for line in (REPO / "data/generated/decompilations.jsonl").read_text().splitlines():
+    for line in (SIENNA_CORPUS).read_text().splitlines():
         r = json.loads(line)
         if "entry_addr" in r:
             records.append(r)

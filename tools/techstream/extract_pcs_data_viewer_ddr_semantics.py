@@ -11,9 +11,9 @@ from pathlib import Path
 from typing import Any
 
 import dnfile
+from tools.techstream.extract_pcs_data_viewer_tss3_dictionary import load_culture
+from tools.techstream.extract_pcs_data_viewer_tss3_managed_semantics import (
 
-from extract_pcs_data_viewer_tss3_dictionary import load_culture
-from extract_pcs_data_viewer_tss3_managed_semantics import (
     Collection,
     _call_names,
     _interpret_collection,
@@ -21,10 +21,11 @@ from extract_pcs_data_viewer_tss3_managed_semantics import (
     _normalize,
     sha256_file,
 )
-from techstream_paths import resolve_gts_root
+from tools.techstream.techstream_paths import resolve_gts_root
+from tools import REPO_ROOT
 
-REPO = Path(__file__).resolve().parents[2]
-DEFAULT_OUT = REPO / "data/generated/gtsplus_2026/pcs_data_viewer_ddr_semantics.json"
+
+DEFAULT_OUT = REPO_ROOT / "data/generated/gtsplus_2026/pcs_data_viewer_ddr_semantics.json"
 DDR_DEFINE = "PCSDataViewer.DDRDetailInfo"
 DDR_RECORD = "PCSDataViewer.DetailBitAssignInfo"
 DDR_DECODER = "PCSDataViewer.MemoryAreaCommon"

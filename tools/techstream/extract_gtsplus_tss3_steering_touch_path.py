@@ -17,24 +17,21 @@ import hashlib
 import json
 import re
 import struct
-import sys
 from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
 import pefile
+from tools.techstream.ddb_semantics import behavior_rows, dtc_rows, monitor_rows, records
+from tools.techstream.ddb_strings import load_string_db
+from tools.techstream.parse_ddb import DDBParser
+from tools.techstream.techstream_paths import gts_db_root, resolve_gts_root
+from tools import REPO_ROOT
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from ddb_semantics import behavior_rows, dtc_rows, monitor_rows, records
-from ddb_strings import load_string_db
-from parse_ddb import DDBParser
-from techstream_paths import gts_db_root, resolve_gts_root
-
-REPO = Path(__file__).resolve().parents[2]
-DEFAULT_OUT = REPO / "data/generated/gtsplus_2026/tss3_steering_touch_path.json"
-PCS_SEMANTICS = REPO / "data/generated/gtsplus_2026/pcs_data_viewer_tss3_managed_semantics.json"
-VENZA_SRS = REPO / "community/yc/venza/cflash.bin"
+DEFAULT_OUT = REPO_ROOT / "data/generated/gtsplus_2026/tss3_steering_touch_path.json"
+PCS_SEMANTICS = REPO_ROOT / "data/generated/gtsplus_2026/pcs_data_viewer_tss3_managed_semantics.json"
+VENZA_SRS = REPO_ROOT / "community/yc/venza/cflash.bin"
 REGIONS = ("NA", "EU", "JP")
 REPRESENTATIVE_VEHICLES = {
     "camry_hv": 12984,
@@ -602,7 +599,7 @@ def venza_srs_024_boundary() -> dict[str, Any]:
     target = next(row for row in rows if row["secoc_data_id"] == "0x024")
     return {
         "source": {
-            "path": str(VENZA_SRS.relative_to(REPO)),
+            "path": str(VENZA_SRS.relative_to(REPO_ROOT)),
             "sha256": sha256_bytes(cf),
         },
         "profiles": rows,

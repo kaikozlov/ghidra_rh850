@@ -6,11 +6,13 @@ segments verify the resulting bit positions without fitting them again. GTS+
 provides object/fusion vocabulary, not a CAN field map or a quality threshold.
 """
 from __future__ import annotations
+from tools.toyota_support.passive_capture import sha256_file as sha
 
+from tools.targets.camry.support import camry_f33_corpus as f33
+from tools import REPO_ROOT
 import argparse
 import binascii
 import gzip
-import hashlib
 import io
 import json
 import sys
@@ -18,22 +20,14 @@ from collections import Counter
 from pathlib import Path
 from typing import Iterable, Iterator
 
-ROOT = Path(__file__).resolve().parents[4]
+ROOT = REPO_ROOT
 FIXTURE = ROOT / 'tests/fixtures/camry_2026_radar_lifecycle_holdout.jsonl.gz'
 OUTPUT = ROOT / 'data/generated/camry_2026_radar_lifecycle.json'
 DRIVES = {
-    'august_a': ROOT / 'targets/camry-2026/raw-20260827/camry_relay_route_can_20260827.ndjson.gz',
-    'august_b': ROOT / 'targets/camry-2026/raw-20260827/camry_relay_lta_confirm_route_can_20260827.ndjson.gz',
+    'august_a': f33.CAPTURE / 'raw-20260827/camry_relay_route_can_20260827.ndjson.gz',
+    'august_b': f33.CAPTURE / 'raw-20260827/camry_relay_lta_confirm_route_can_20260827.ndjson.gz',
 }
 EMPTY = bytes.fromhex('fff8000000ffff')
-
-
-def sha(path: Path) -> str:
-    h = hashlib.sha256()
-    with path.open('rb') as f:
-        for chunk in iter(lambda: f.read(1 << 20), b''):
-            h.update(chunk)
-    return h.hexdigest()
 
 
 def banks(frames: Iterable[tuple[int, int, int, bytes]], counts: Counter) -> Iterator[list]:

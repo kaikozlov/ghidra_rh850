@@ -6,17 +6,14 @@ import argparse
 import hashlib
 import json
 import subprocess
-import sys
 from pathlib import Path
 from typing import Any
+from tools.techstream.techstream_paths import gts_db_root, resolve_gts_root
+from tools import REPO_ROOT
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from techstream_paths import gts_db_root, resolve_gts_root
-
-REPO = Path(__file__).resolve().parents[2]
-LIVE = REPO / "data/generated/camry_2026_nrtd_p5.json"
-DEFAULT_OUT = REPO / "data/generated/gtsplus_2026/camry_brake_observer_vocabulary.json"
+LIVE = REPO_ROOT / "data/generated/camry_2026_nrtd_p5.json"
+DEFAULT_OUT = REPO_ROOT / "data/generated/gtsplus_2026/camry_brake_observer_vocabulary.json"
 
 
 def sha256_file(path: Path) -> str:
@@ -29,8 +26,8 @@ def sha256_file(path: Path) -> str:
 
 def gts_json(*args: str) -> Any:
     proc = subprocess.run(
-        [str(REPO / "tools/gts"), *args, "--json"],
-        cwd=REPO,
+        [str(REPO_ROOT / "tools/gts"), *args, "--json"],
+        cwd=REPO_ROOT,
         capture_output=True,
         text=True,
         check=False,
@@ -131,7 +128,7 @@ def build() -> dict[str, Any]:
                 "size": abs_ddb.stat().st_size,
                 "sha256": sha256_file(abs_ddb),
             },
-            str(LIVE.relative_to(REPO)): {"sha256": sha256_file(LIVE)},
+            str(LIVE.relative_to(REPO_ROOT)): {"sha256": sha256_file(LIVE)},
         },
         "category_435": {
             **category,

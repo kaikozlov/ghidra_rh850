@@ -19,12 +19,13 @@ from __future__ import annotations
 import argparse, hashlib, json, struct
 from pathlib import Path
 
-from techstream_paths import V18_CUW_ROOT
-import pefile
 
-REPO=Path(__file__).resolve().parents[2]
+import pefile
+from tools.techstream.techstream_paths import V18_CUW_ROOT
+from tools import REPO_ROOT
+
 CUW=V18_CUW_ROOT
-OUT=REPO/'data/generated/techstream_v18/rks_client_state.json'
+OUT=REPO_ROOT/'data/generated/techstream_v18/rks_client_state.json'
 
 HANDLERS={
 'Button_StartRequestReproKey_NextClick':0x49C62C,

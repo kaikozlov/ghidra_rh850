@@ -7,6 +7,7 @@ are retained; REFERENCE and build remain outside Git.
 """
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import gzip
 import hashlib
@@ -15,7 +16,7 @@ import json
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[4]
+ROOT = REPO_ROOT
 DEFAULT_FIXTURE = ROOT / 'tests/fixtures/camry_2026_longitudinal_role.jsonl.gz'
 TRIAL_IDS = {0x08A, 0x0AA, 0x0CA, 0x13C, 0x160, 0x251}
 DIRECTION_IDS = {0x08A, 0x0CA, 0x0C9, 0x160}

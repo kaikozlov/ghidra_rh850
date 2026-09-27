@@ -13,24 +13,19 @@ import argparse
 import hashlib
 import json
 import re
-import sys
 from pathlib import Path
+from tools.targets.sienna.sienna_target import CODEFLASH as SIENNA_CODEFLASH
+from tools import REPO_ROOT
 
-try:
-    from .techstream_paths import CUW_CORPUS_ROOT
-except ImportError:  # direct script execution
-    from techstream_paths import CUW_CORPUS_ROOT
+from tools.techstream.techstream_paths import CUW_CORPUS_ROOT
 
 from Crypto.Cipher import AES
 from Crypto.Hash import CMAC
 
-REPO = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO / "tools"))
-from tools.targets.sienna.sienna_target import CODEFLASH as SIENNA_CODEFLASH  # noqa: E402
 
 DEFAULT_CUW = CUW_CORPUS_ROOT / "T-0035-22.cuw"
 DEFAULT_REFERENCE = SIENNA_CODEFLASH
-DEFAULT_OUT = REPO / "data/generated/techstream_v18/t0035_faci_backend_evidence.json"
+DEFAULT_OUT = REPO_ROOT / "data/generated/techstream_v18/t0035_faci_backend_evidence.json"
 PAYLOAD_BUILD_ROOT_OFFSET = 0xBFD8
 EXPECTED_CUW_SHA256 = "9882b1b6dd6acda2d142a2825eda396b0a425e41c13f822b9a18e022d4c43e81"
 EXPECTED_CUW_SIZE = 5725237
@@ -218,7 +213,7 @@ def build(cuw_path: Path, reference_path: Path) -> dict[str, object]:
             "required_spec_repro_ver": ini["Node01"]["RequiredSpecReproVer"],
         },
         "crypto_provenance": {
-            "reference_image": str(reference_path.resolve().relative_to(REPO.resolve())),
+            "reference_image": str(reference_path.resolve().relative_to(REPO_ROOT.resolve())),
             "payload_build_root_offset": f"0x{PAYLOAD_BUILD_ROOT_OFFSET:X}",
             "payload_build_root_sha256": sha256(build_root),
             "secret_values_recorded": False,

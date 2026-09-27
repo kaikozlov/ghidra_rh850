@@ -18,6 +18,7 @@ the upper boundary.
 """
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import json
 import re
@@ -26,7 +27,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-ROOT = Path(__file__).resolve().parents[4]
+ROOT = REPO_ROOT
 DEFAULT_OPENPILOT = Path('/Users/kai/dev/inspect/repos/kai-openpilot')
 DEFAULT_LOG_ROOT = Path('/Users/kai/dev/inspect/logs/camry-2026')
 DEFAULT_CAP_ROOT = Path('/Users/kai/dev/inspect/captures')

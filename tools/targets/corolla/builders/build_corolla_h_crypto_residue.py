@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """Build deterministic Corolla-H comparison for the final seven crypto roles."""
 from __future__ import annotations
+from tools.targets.sienna.sienna_target import CORPUS as SIENNA_CORPUS
+from tools import REPO_ROOT
 import argparse,hashlib,json,struct
 from pathlib import Path
 from tools.targets.sienna.sienna_target import CODEFLASH as SIENNA_CODEFLASH
 from tools.targets.corolla.support.corolla_h_constants import RAW_DUMP as H_RAW_DUMP
-ROOT=Path(__file__).resolve().parents[4]
-EV=ROOT/'data/generated/corolla_8965H1202000_crypto_residue_decompiler_evidence.json';SC=ROOT/'data/generated/decompilations.jsonl';HRAW=H_RAW_DUMP;SI=SIENNA_CODEFLASH;OUT=ROOT/'data/generated/corolla_8965H1202000_crypto_residue.json'
+ROOT=REPO_ROOT
+EV=ROOT/'data/generated/corolla_8965H1202000_crypto_residue_decompiler_evidence.json';SC = SIENNA_CORPUS;HRAW=H_RAW_DUMP;SI=SIENNA_CODEFLASH;OUT=ROOT/'data/generated/corolla_8965H1202000_crypto_residue.json'
 ROLES=[
  (0x70fc,'payload_crypto_finalize',0x70e0,'exact-ambiguous-body-role-recovered'),
  (0x68f0c,'crypto_test_bank0_update_counter_snapshot',0x63244,'target-native-role-recovered'),

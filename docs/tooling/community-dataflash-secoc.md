@@ -8,8 +8,8 @@
 >
 > **Evidence source:** external-source plus generated-artifact
 >
-> **Verification:** `tests/verify_toyota_secoc_oracle.py`; optional pinned-source
-> verification `tests/verify_external_corroboration.py`
+> **Verification:** `tests/toyota/verify_toyota_secoc_oracle.py`; optional pinned-source
+> verification `tests/tooling/verify_external_corroboration.py`
 >
 > **Canonical surface:** `tools/toyota secoc oracle` (implementation: `tools/toyota_support/toyota_secoc_oracle.py`)
 
@@ -164,7 +164,7 @@ it records the observed EPS address/F181 against the selected target car so an
 analyst can review the appropriate openpilot fingerprint entry without silently
 injecting Sienna defaults into another vehicle.
 
-`tests/verify_toyota_secoc_session.py` proves that the manager contains no
+`tests/toyota/verify_toyota_secoc_session.py` proves that the manager contains no
 programming-session, SecurityAccess, DID-write, RequestDownload, RoutineControl,
 CAN-send, or Panda-safety mutation path. Device-side mutating dump behavior
 remains in the separately pinned community tooling; the repository-local
@@ -303,7 +303,7 @@ The useful distinction is between **single-byte content** and **repeated
 structure**. Every one of the five DataFlash reads still independently decodes
 objects 0/2/5 with three valid copies and object 15 with zero valid copies. That
 structural conclusion therefore survives; an isolated candidate or null byte in
-one read does not. `tests/verify_albinoelephant_corolla_repeatability.py` pins
+one read does not. `tests/targets/corolla/verify_albinoelephant_corolla_repeatability.py` pins
 these exact dispositions and divergence ranges.
 
 One host-tool limitation also remains explicit at the pinned tip:

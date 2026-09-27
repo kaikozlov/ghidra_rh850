@@ -6,12 +6,12 @@ Ghidra workspace export and must be supplied explicitly; the tracked compact
 result is what repository verification consumes.
 """
 from __future__ import annotations
-import argparse, hashlib, json, struct, sys
+from tools import REPO_ROOT
+import argparse, hashlib, json
 from pathlib import Path
 from tools.targets.corolla.support.corolla_h_constants import CODEFLASH as H_CODEFLASH
 
-REPO = Path(__file__).resolve().parents[4]
-sys.path.insert(0, str(REPO))
+REPO = REPO_ROOT
 IMAGE = H_CODEFLASH
 DEFAULT_OUT = REPO / "data/generated/corolla_8965H1202000_lta_command_provenance_census.json"
 

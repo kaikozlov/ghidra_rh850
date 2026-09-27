@@ -6,7 +6,10 @@ from an OEM recorder-name join: fields without a synchronized diagnostic/FFD
 witness remain bounded or unresolved rather than being named by resemblance.
 """
 from __future__ import annotations
+from tools.toyota_support.toyota_route_opendbc_common import be_raw
 
+from tools.targets.camry.support import camry_f33_corpus as f33
+from tools import REPO_ROOT
 import argparse
 import bisect
 import gzip
@@ -14,12 +17,11 @@ import hashlib
 import json
 import math
 import statistics
-import sys
 from collections import Counter
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[4]
-RAW = REPO / "targets/camry-2026/raw-20260827"
+REPO = REPO_ROOT
+RAW = f33.CAPTURE / "raw-20260827"
 DEFAULT_OUT = REPO / "data/generated/camry_2026_longitudinal_request_plane.json"
 GTS = REPO / "data/generated/gtsplus_2026/pcs_data_viewer_tss3_managed_semantics.json"
 HOLD = REPO / "data/generated/camry_20260906_hands_off_warning_audit.json"
@@ -45,22 +47,6 @@ def sha256(path: Path) -> str:
 
 def s16be(data: bytes, offset: int) -> int:
   return int.from_bytes(data[offset:offset + 2], "big", signed=True)
-
-
-def be_raw(data: bytes, start_bit: int, size: int, signed: bool = False) -> int:
-  """Decode one Motorola DBC signal using opendbc bit numbering."""
-  be_bits = [j + i * 8 for i in range(len(data)) for j in range(7, -1, -1)]
-  idx = be_bits.index(start_bit)
-  bits = be_bits[idx:idx + size]
-  if len(bits) != size:
-    raise ValueError(f"signal {start_bit}|{size} exceeds payload")
-  value = 0
-  for bit in bits:
-    byte_i, bit_i = divmod(bit, 8)
-    value = (value << 1) | ((data[byte_i] >> bit_i) & 1)
-  if signed and value & (1 << (size - 1)):
-    value -= 1 << size
-  return value
 
 
 def decode_wheel_speed_mps(data: bytes) -> float:
@@ -507,12 +493,9 @@ def requester_id_namespace(drive_reports: dict[str, dict], hold: dict) -> dict:
   isa_rows = ownership["longitudinal_request_surface"]["frc_output_vocabulary"]["dids"]["0x1B03"]
   isa_patterns = isa_rows[0]["patterns"]
 
-  techstream_tools = REPO / "tools/techstream"
-  if str(techstream_tools) not in sys.path:
-    sys.path.insert(0, str(techstream_tools))
-  from ddb_semantics import monitor_rows  # type: ignore[import-not-found]
-  from ddb_strings import load_string_db  # type: ignore[import-not-found]
-  from parse_ddb import DDBParser  # type: ignore[import-not-found]
+  from tools.techstream.ddb_semantics import monitor_rows
+  from tools.techstream.ddb_strings import load_string_db
+  from tools.techstream.parse_ddb import DDBParser
 
   parser = DDBParser()
   strings = load_string_db(parser, DDB_ROOT / "M_English.ddb")
@@ -692,12 +675,9 @@ def requester_id_namespace(drive_reports: dict[str, dict], hold: dict) -> dict:
 
 def vehicle_motion_control_did_surface() -> dict:
   """Extract the Brake diagnostic request -> Vehicle Motion Control target split."""
-  techstream_tools = REPO / "tools/techstream"
-  if str(techstream_tools) not in sys.path:
-    sys.path.insert(0, str(techstream_tools))
-  from ddb_semantics import monitor_rows  # type: ignore[import-not-found]
-  from ddb_strings import load_string_db  # type: ignore[import-not-found]
-  from parse_ddb import DDBParser  # type: ignore[import-not-found]
+  from tools.techstream.ddb_semantics import monitor_rows
+  from tools.techstream.ddb_strings import load_string_db
+  from tools.techstream.parse_ddb import DDBParser
 
   parser = DDBParser()
   strings = load_string_db(parser, DDB_ROOT / "M_English.ddb")

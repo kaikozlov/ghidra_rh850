@@ -11,6 +11,7 @@ rlog by SHA-256 and emits a compact deterministic evidence artifact.
 """
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import hashlib
 import json
@@ -26,7 +27,7 @@ import numpy as np
 ANGLE_SCALE = 1024 / 17870
 DEFAULT_ROUTE = Path("/Users/kai/dev/inspect/logs/camry-2026/2026-09-07/00000048--709f22277b")
 DEFAULT_OPENPILOT = Path("/Users/kai/dev/inspect/repos/kai-openpilot")
-DEFAULT_OUT = Path(__file__).resolve().parents[4] / "data/generated/camry_20260907_lta_off_b6_authority.json"
+DEFAULT_OUT = REPO_ROOT / "data/generated/camry_20260907_lta_off_b6_authority.json"
 
 
 def load_logreader(openpilot_root: Path):

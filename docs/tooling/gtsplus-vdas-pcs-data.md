@@ -11,7 +11,7 @@ standard ZIP archive named `.vdas`. This means VDAS preserves exactly the PCS ev
 that the current TSE->GTSE converter is configured to skip.
 
 Canonical machine-readable evidence is
-`data/generated/gtsplus_2026/vdas_semantics.json`; `tests/verify_gtsplus_vdas_semantics.py`
+`data/generated/gtsplus_2026/vdas_semantics.json`; `tests/techstream/verify_gtsplus_vdas_semantics.py`
 regenerates it from the exact same-release installer plaintext twins.
 
 ## 1. Exact current components

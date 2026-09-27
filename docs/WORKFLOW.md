@@ -25,7 +25,7 @@ the firmware *is*, see [OVERVIEW.md](OVERVIEW.md).
   selection or image override. See
   [RH850 build and execution testing](tooling/rh850-build-and-sim.md).
 
-There is no separate install step. `tools/project/install_v850_extension.sh` (invoked
+There is no separate processor install step. `tools/project/install_v850_extension.sh` (invoked
 by `make verify-sleigh` and every project rebuild) compiles the vendored
 `.slaspec` sources from a disposable copy under `build/cache/processor-extension-src/`
 and installs into an isolated Ghidra user-home under `build/cache/ghidra-home/` via
@@ -38,6 +38,22 @@ lp link register, `__interrupt` prototype). Exact Sienna/F33 code disproves the
 standard CC-RH ep-preservation rule; the model is GHS-compatible without
 claiming a specific Toyota compiler vendor/version. Processor audits:
 [tooling/processor-module-audit.md](tooling/processor-module-audit.md).
+
+## Python tooling
+
+Run `uv sync --locked` to install the checkout in editable mode with its locked
+dependencies. Public commands under `tools/` select this environment themselves.
+For implementation-level use, run modules from the repository:
+
+```bash
+uv run --locked python -m tools.project.analysis_target --list
+```
+
+Python modules import through `tools.<subsystem>` and use `tools.REPO_ROOT` for
+repository-owned files. Command-line input/output paths remain relative to the
+caller's working directory unless the command explicitly documents otherwise.
+`tools/artifact regen` and `tools/toyota` capability dispatch retain their existing
+repository-root working directory; pass absolute paths for inputs outside the checkout.
 
 ## Build workspace contract
 
@@ -287,11 +303,9 @@ Corolla-H runner reports its profile inputs and tracked outputs; the
 argument-driven variant runner reports mode purpose/input/selection semantics;
 the exporter lists its profile names. `tools/gts` instead exposes task-shaped
 subcommands (`search`, `did`, `dtc`, `cuw`, `route`, `pe`) because it is a
-read-only query surface, not a proof generator. The portable exact-F33 verifier
-is one family module (`tests/verify_camry_8965F3307000.py`) with manifest-owned
-`--section` dispatch; dependency routing is section-aware so changed-path tests
-remain narrow. Defaults and scope boundaries — including which extractors stay
-separate and why — are documented in
+read-only query surface, not a proof generator. Target tests are split into
+behavioral domains and selected through stable `tools/test` suite names.
+Implementation locations and capability boundaries are documented in
 [tooling/README.md](tooling/README.md#task-oriented-entry-points).
 
 The `.c` tree is intentionally ignored; it can be reproduced from the tracked
@@ -307,7 +321,7 @@ from the committed snapshot may carry Ghidra version-control state that
 ```bash
 make rebuild-project PROJECT_DIR="$PWD/build/work/corpus-rebuild"
 make generate-decompiler-corpus PROJECT_DIR="$PWD/build/work/corpus-rebuild"
-uv run --locked python tests/verify_decompiler_corpus.py
+tools/test decompiler_corpus
 ```
 
 The generator stops the selected project's daemon, exports and compares its

@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Build raw configured application command/async-operation callback closure for 8965H1202000."""
 from __future__ import annotations
+from tools import REPO_ROOT
 import argparse,hashlib,json,struct
 from pathlib import Path
 from tools.targets.sienna.sienna_target import CODEFLASH as SIENNA_CODEFLASH
 from tools.targets.corolla.support.corolla_h_constants import RAW_DUMP as H_RAW_DUMP
-ROOT=Path(__file__).resolve().parents[4]
+ROOT=REPO_ROOT
 SRAW=SIENNA_CODEFLASH
 HRAW=H_RAW_DUMP
 STRUCT=ROOT/'data/generated/corolla_8965H1202000_structural_function_transfer.json'

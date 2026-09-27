@@ -142,8 +142,6 @@ def run_one(
         return {"suite": suite_name, "test": test, "status": "fail", "detail": "test file not found", "duration": 0.0}
 
     env = dict(os.environ)
-    current_pythonpath = env.get("PYTHONPATH", "")
-    env["PYTHONPATH"] = str(root) + (os.pathsep + current_pythonpath if current_pythonpath else "")
     env["RH850_VERIFY_EXTERNAL"] = "1" if allow_external else "0"
     timeout = entry.get("timeout", 300)
     try:

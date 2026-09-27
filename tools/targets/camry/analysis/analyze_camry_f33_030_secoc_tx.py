@@ -14,6 +14,8 @@ and protects 0x030; it does not transfer this Tx profile to another Toyota ECU.
 """
 from __future__ import annotations
 
+from tools.targets.camry.support import camry_f33_corpus as f33
+from tools import REPO_ROOT
 import argparse
 import gzip
 import hashlib
@@ -24,13 +26,13 @@ from itertools import pairwise
 from pathlib import Path
 from typing import Any
 
-ROOT = Path(__file__).resolve().parents[4]
-IMAGE = ROOT / "firmware/camry-8965F3307000/CodeFlash.bin"
-CORPUS = ROOT / "data/generated/camry-8965F3307000/decompilations.jsonl"
-LOCAL_RAM = ROOT / "targets/camry-2026/raw-20260826/secoc-recovery/ram/local_ram_pe1.bin"
-CAN_ORACLE = ROOT / "targets/camry-2026/raw-20260826/secoc-recovery/can_oracle.ndjson.gz"
+ROOT = REPO_ROOT
+IMAGE = f33.IMAGE
+CORPUS = f33.CORPUS
+LOCAL_RAM = f33.CAPTURE / "raw-20260826/secoc-recovery/ram/local_ram_pe1.bin"
+CAN_ORACLE = f33.CAPTURE / "raw-20260826/secoc-recovery/can_oracle.ndjson.gz"
 OUT = ROOT / "data/generated/camry_8965F3307000_030_secoc_tx.json"
-EXPECTED_IMAGE_SHA256 = "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7"
+EXPECTED_IMAGE_SHA256 = f33.IMAGE_SHA256
 
 FUNCTIONS = {
   0x04C97A: "generated-COM PDU0/0x030 application packer",

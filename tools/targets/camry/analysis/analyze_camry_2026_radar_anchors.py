@@ -6,6 +6,7 @@ that fixture from the specified original rlogs; it never accesses a vehicle.
 Diagnostic FFD encodings are NOT treated as CAN wire layouts.
 """
 from __future__ import annotations
+from tools import REPO_ROOT
 import argparse
 import binascii
 import gzip
@@ -16,7 +17,7 @@ import sys
 from pathlib import Path
 import numpy as np
 
-ROOT = Path(__file__).resolve().parents[4]
+ROOT = REPO_ROOT
 FIXTURE = ROOT / "tests/fixtures/camry_2026_radar_anchors.jsonl.gz"
 OUTPUT = ROOT / "data/generated/camry_2026_radar_anchors.json"
 LOG_ROOT = Path("/Users/kai/dev/inspect/logs/camry-2026")

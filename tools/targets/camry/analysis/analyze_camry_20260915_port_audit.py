@@ -6,6 +6,8 @@ Toyota-B and a non-publishing EPS. Keep these source populations separate.
 """
 from __future__ import annotations
 
+from tools.targets.camry.support import camry_f33_corpus as f33
+from tools import REPO_ROOT
 import argparse
 import binascii
 from collections import Counter
@@ -16,7 +18,7 @@ from pathlib import Path
 import statistics
 import sys
 
-ROOT = Path(__file__).resolve().parents[4]
+ROOT = REPO_ROOT
 DEFAULT_LOGS = ROOT.parents[1] / "logs/camry-2026"
 DEFAULT_OPENPILOT = ROOT.parent / "kai-openpilot"
 IDS = {0x025, 0x030, 0x08A, 0x0AA, 0x0FE, 0x101, 0x116, 0x127, 0x160,
@@ -136,7 +138,7 @@ def main() -> int:
         "scope": "seven source-pinned rlog segments plus both complete August-27 CAN captures; not a full-fleet qualification",
         "route_groups": {name: [reduce_log(args.logs_root / route / f"rlog-{segment}.zst", args.logs_root, LogReader)
                                 for segment in segments] for name, route, segments in ROUTES},
-        "native_longitudinal_handoff": [stock_longitudinal_bounds(ROOT / "targets/camry-2026/raw-20260827" / filename)
+        "native_longitudinal_handoff": [stock_longitudinal_bounds(f33.CAPTURE / "raw-20260827" / filename)
                                        for filename in ("camry_relay_route_can_20260827.ndjson.gz", "camry_relay_lta_confirm_route_can_20260827.ndjson.gz")],
         "boundaries": [
             "Stock-harness samples have an absent EPS and cannot qualify healthy-stock-harness steering.",

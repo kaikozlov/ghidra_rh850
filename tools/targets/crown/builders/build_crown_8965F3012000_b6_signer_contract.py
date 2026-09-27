@@ -2,6 +2,9 @@
 """Build the exact-Crown static contract needed by the volatile native-B6 signer."""
 from __future__ import annotations
 
+from tools.targets.camry.support import camry_f33_corpus as f33
+from tools.targets.crown.support import crown_f30_targets as crown
+from tools import REPO_ROOT
 import argparse
 import hashlib
 import json
@@ -9,15 +12,15 @@ import math
 import struct
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[4]
-CROWN = REPO / "firmware/crown-8965F3012000/CodeFlash.bin"
-CAMRY = REPO / "firmware/camry-8965F3307000/CodeFlash.bin"
-CROWN_CORPUS = REPO / "data/generated/crown-8965F3012000/decompilations.jsonl"
-CAMRY_CORPUS = REPO / "data/generated/camry-8965F3307000/decompilations.jsonl"
+REPO = REPO_ROOT
+CROWN = crown.CODEFLASH
+CAMRY = f33.IMAGE
+CROWN_CORPUS = crown.CORPUS
+CAMRY_CORPUS = f33.CORPUS
 OUT = REPO / "data/generated/crown_8965F3012000_b6_signer_contract.json"
 
 CROWN_SHA = "5b89fdbc69edc2f66ef8a557f88b08c758e3146bd4e90067320d7966812b1273"
-CAMRY_SHA = "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7"
+CAMRY_SHA = f33.IMAGE_SHA256
 GP = 0xFEBEB800
 TP = 0x00023C98
 

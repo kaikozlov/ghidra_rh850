@@ -11,11 +11,11 @@ import subprocess
 from html.parser import HTMLParser
 from pathlib import Path
 from typing import Any
+from tools import REPO_ROOT
 
-REPO = Path(__file__).resolve().parents[2]
-PCS_DIR = REPO / "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/PCS Data Viewer"
-DICT_ART = REPO / "data/generated/gtsplus_2026/pcs_data_viewer_tss3_dictionary.json"
-DEFAULT_OUT = REPO / "data/generated/gtsplus_2026/pcs_data_viewer_parameter_help.json"
+PCS_DIR = REPO_ROOT / "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/PCS Data Viewer"
+DICT_ART = REPO_ROOT / "data/generated/gtsplus_2026/pcs_data_viewer_tss3_dictionary.json"
+DEFAULT_OUT = REPO_ROOT / "data/generated/gtsplus_2026/pcs_data_viewer_parameter_help.json"
 
 
 class TableParser(HTMLParser):
@@ -119,9 +119,9 @@ def build(seven_zip: str | None = None) -> dict[str, Any]:
         "schema": "gtsplus-pcs-data-viewer-parameter-help-v1",
         "title": "PCS Data Viewer FFD parameter help and TSS3 dictionary joins",
         "sources": {
-            "english_chm": {"path": str(en.relative_to(REPO)), "size": en.stat().st_size, "sha256": sha256(en)},
-            "japanese_chm": {"path": str(ja.relative_to(REPO)), "size": ja.stat().st_size, "sha256": sha256(ja)},
-            "tss3_dictionary_artifact": {"path": str(DICT_ART.relative_to(REPO)), "sha256": sha256(DICT_ART)},
+            "english_chm": {"path": str(en.relative_to(REPO_ROOT)), "size": en.stat().st_size, "sha256": sha256(en)},
+            "japanese_chm": {"path": str(ja.relative_to(REPO_ROOT)), "size": ja.stat().st_size, "sha256": sha256(ja)},
+            "tss3_dictionary_artifact": {"path": str(DICT_ART.relative_to(REPO_ROOT)), "sha256": sha256(DICT_ART)},
         },
         "english_ffd_parameters": en_rows,
         "japanese_help_ffd_parameters": ja_rows,

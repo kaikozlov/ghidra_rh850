@@ -2,6 +2,8 @@
 """Build deterministic 2026 Camry READY/gear evidence from retained passive captures."""
 from __future__ import annotations
 
+from tools.targets.camry.support import camry_f33_corpus as f33
+from tools import REPO_ROOT
 import argparse
 import gzip
 import json
@@ -9,8 +11,8 @@ from pathlib import Path
 
 from tools.toyota_support.toyota_route_opendbc_common import be_signal, sha256, toyota_checksum
 
-REPO = Path(__file__).resolve().parents[4]
-RAW = REPO / "targets/camry-2026/raw-20260826"
+REPO = REPO_ROOT
+RAW = f33.CAPTURE / "raw-20260826"
 DEFAULT_OUT = REPO / "data/generated/camry_2026_ready_gear.json"
 SOURCE_NAMES = (
   "READY_GEAR_MANIFEST.txt",
@@ -29,18 +31,6 @@ def load_gzip_json(name: str) -> dict:
 def signed(value: int, bits: int) -> int:
   sign = 1 << (bits - 1)
   return value - (1 << bits) if value & sign else value
-
-
-def be_signal(data: bytes, start_bit: int, size: int, *, is_signed: bool = False) -> int:
-  be_bits = [j + i * 8 for i in range(len(data)) for j in range(7, -1, -1)]
-  idx = be_bits.index(start_bit)
-  positions = be_bits[idx:idx + size]
-  if len(positions) != size:
-    raise ValueError(f"signal {start_bit}|{size} exceeds payload")
-  value = 0
-  for pos in positions:
-    value = (value << 1) | ((data[pos // 8] >> (pos % 8)) & 1)
-  return signed(value, size) if is_signed else value
 
 
 def toyota_checksum(address: int, data: bytes) -> int:

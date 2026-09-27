@@ -3026,7 +3026,7 @@ openpilot; the normal openpilot profile remains ID11/LTA-LCA.
 
 Deterministic evidence: `tools/targets/camry/analysis/analyze_camry_2026_pda_sdg.py`,
 `data/generated/camry_2026_pda_sdg_attribution.json`, and
-`tests/verify_camry_2026_pda_sdg.py`, joined to the exact-F33 target and current TSS3
+`tests/targets/camry/verify_camry_2026_pda_sdg.py`, joined to the exact-F33 target and current TSS3
 managed recorder artifacts.
 
 
@@ -3151,7 +3151,7 @@ request generation, plus the final steering-assembly authority handoff between t
 Deterministic reduction and verification:
 `tools/targets/camry/analysis/analyze_camry_2026_lateral_family_census.py`,
 `data/generated/camry_2026_lateral_family_census.json`, and
-`tests/verify_camry_2026_lateral_family_census.py`.
+`tests/targets/camry/verify_camry_2026_lateral_family_census.py`.
 
 ### 4.10 Internal steering-state profile: stock F33 XCP DAQ is disabled
 
@@ -3237,7 +3237,7 @@ intentional observation path, not a fallback after another XCP attempt. It adds 
 persistent flash patch; installation/heartbeat semantics remain the already-audited
 RAM-only path.
 
-Verification: `tests/verify_camry_f33_steering_state_capture.py`; the in-car packaging
+Verification: `tests/targets/camry/verify_camry_f33_steering_state_capture.py`; the in-car packaging
 path is `tools/targets/camry/builders/build_camry_f33_car_kit.py`.
 
 ### 4.11 Stock ACC delayed hold is request-ID/allocation state (VAR-140 supersession)
@@ -3277,7 +3277,7 @@ allocation2/3 contract. No resume command is synthesized.
 
 Evidence: `data/generated/camry_20260906_hands_off_warning_audit.json`,
 `data/generated/camry_2026_longitudinal_request_plane.json`,
-`tests/verify_camry_2026_longitudinal_request_plane.py`, and fork
+`tests/targets/camry/verify_camry_2026_longitudinal_request_plane.py`, and fork
 `opendbc/car/toyota/tests/test_tss3_{camry,corolla}.py`.
 
 ### 4.12 Source-real parser liveness across the long routes (VAR-141)
@@ -3307,7 +3307,7 @@ software timeout test from the dynamic evidence that supplies its rates.
 
 Evidence: `tools/targets/camry/analysis/analyze_camry_2026_parser_liveness.py`,
 `data/generated/camry_2026_parser_liveness.json`,
-`tests/verify_camry_2026_parser_liveness.py`, and fork
+`tests/targets/camry/verify_camry_2026_parser_liveness.py`, and fork
 `opendbc/car/toyota/tests/test_tss3_camry.py`.
 
 ### 4.13 Host request cadence is 100 Hz, independent of native `0x08A`
@@ -3521,7 +3521,7 @@ normal upstream state and safety contracts can express it.
 Evidence:
 `data/generated/gtsplus_2026/pcs_data_viewer_adu_semantics.json`,
 `tools/techstream/extract_pcs_data_viewer_adu_semantics.py`, and
-`tests/verify_gtsplus_pcs_data_viewer_adu_semantics.py`.
+`tests/techstream/verify_gtsplus_pcs_data_viewer_adu_semantics.py`.
 
 ### 4.15 The retained PCS-alert drive proves a native emergency request transition
 
@@ -3621,9 +3621,9 @@ signer, relay, or an auxiliary daemon.
 Evidence:
 `data/generated/camry_20260921_pcs_alert.json`,
 `tools/targets/camry/analysis/analyze_camry_20260921_pcs_alert.py`,
-`tests/verify_camry_20260921_pcs_alert.py`,
+`tests/targets/camry/verify_camry_20260921_pcs_alert.py`,
 `data/generated/gtsplus_2026/pcs_data_viewer_ddr_semantics.json`, and
-`tests/verify_gtsplus_pcs_data_viewer_ddr_semantics.py`.
+`tests/techstream/verify_gtsplus_pcs_data_viewer_ddr_semantics.py`.
 
 ## 5. Demonstrated B6 steering authority and remaining qualification
 
@@ -3694,12 +3694,12 @@ block the independent B6 development probe above.
   `data/generated/camry_20260904_stock_steering_manifest.json`
   (from `tools/targets/camry/analysis/analyze_camry_20260904_stock_steering.py`; external
   `/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/` inputs)
-- `tests/verify_camry_20260904_stock_steering.py`
-- `tests/verify_camry_8965F3307000.py`
-- `tests/verify_camry_2026_lta_state_reconciliation.py`
-- `tests/verify_camry_2026_08a_producer_bounds.py`
+- `tests/targets/camry/verify_camry_20260904_stock_steering.py`
+- `tools/test camry_8965f3307000_tss3_opendbc_port`
+- `tests/targets/camry/verify_camry_2026_lta_state_reconciliation.py`
+- `tests/targets/camry/verify_camry_2026_08a_producer_bounds.py`
 - `tools/targets/camry/utilities/decode_camry_tss3_operation_ffd.py`
-- `tests/verify_camry_tss3_operation_ffd_decoder.py`
+- `tests/targets/camry/verify_camry_tss3_operation_ffd_decoder.py`
 
 ## 7. Native longitudinal integration consequence of the Bus-1 E2E candidate
 

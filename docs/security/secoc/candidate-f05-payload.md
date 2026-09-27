@@ -158,7 +158,7 @@ plausible, but it remains **bounded**, not a provenance fact.
 - Fixture: `tests/fixtures/payloads/candidate_f05_dataflash_payload.bin`
 - Generator: `tools/security/generate_candidate_f05_semantics.py`
 - Machine-readable record: `data/generated/candidate_f05_payload.json`
-- Deterministic verifier: `tests/verify_candidate_f05_payload.py`
+- Deterministic verifier: `tests/runtime/verify_candidate_f05_payload.py`
 - Ghidra raw-payload seeder: `ghidra/scripts/investigate/SeedRawPayload.java`
 
 ## Historical provenance boundary

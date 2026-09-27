@@ -13,6 +13,8 @@ TSS generation and SecOC/TSK are modeled as orthogonal axes throughout.
 """
 from __future__ import annotations
 
+from tools.targets.corolla.support.corolla_h_constants import H_CAPTURE
+from tools import REPO_ROOT
 import argparse
 import collections
 import hashlib
@@ -22,7 +24,7 @@ import zipfile
 from pathlib import Path
 from typing import Any
 
-REPO = Path(__file__).resolve().parents[4]
+REPO = REPO_ROOT
 DEFAULT_OUT = REPO / "data/generated/corolla_tss3_opendbc_readiness.json"
 PUBLIC = REPO / "data/generated/corolla_2023_public_route_opendbc_evidence.json"
 PRIOR = REPO / "data/external/opendbc/toyota_porting_contract.json"
@@ -44,7 +46,7 @@ POWER_GATE = REPO / "data/generated/corolla_8965H1202000_power_supply_monitor_ga
 AUTH_WIRE = REPO / "data/generated/corolla_hf_cooperative_authority_wire_visibility.json"
 FAULT_STATE = REPO / "data/generated/corolla_hf_fault_state_contract.json"
 REMAINING_STATUS = REPO / "data/generated/corolla_hf_remaining_status_contract.json"
-ALBINO_ARCH = REPO / "community/albinoelephant/albinoelephant_discord_PORT_ARCHITECTURE.md"
+ALBINO_ARCH = H_CAPTURE / "albinoelephant_discord_PORT_ARCHITECTURE.md"
 GTS_REGISTRY = REPO / "data/generated/gtsplus_2026/toyota_diag_registry_camry_2026.json"
 
 

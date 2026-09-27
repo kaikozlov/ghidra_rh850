@@ -20,18 +20,16 @@ Run in an openpilot Python environment that provides ``LogReader``.
 """
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import hashlib
 import json
-import sys
 from collections import Counter
 from collections.abc import Iterable
 from pathlib import Path
 from typing import Any
 
-REPO = Path(__file__).resolve().parents[4]
-if str(REPO) not in sys.path:
-    sys.path.insert(0, str(REPO))
+REPO = REPO_ROOT
 
 from tools.targets.camry.live.camry_frc_lta_capture import (
     ACC_OPERATION_DID,

@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   verify-core:
-    name: Core repository smoke (make verify)
+    name: Core repository checks (make verify)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -67,18 +67,18 @@ jobs:
               - 'tools/project/rebuild_project.sh'
               - 'ghidra/scripts/verify/**'
               - 'tests/fixtures/processor/**'
-              - 'tests/verify_lifecycle.py'
-              - 'tests/verify_project_layout.py'
-              - 'tests/verify_headless_runner.py'
-              - 'tests/verify_ghidra_env.py'
-              - 'tests/verify_project_inventory.py'
+              - 'tests/tooling/verify_lifecycle.py'
+              - 'tests/tooling/verify_project_layout.py'
+              - 'tests/tooling/verify_headless_runner.py'
+              - 'tests/tooling/verify_ghidra_env.py'
+              - 'tests/tooling/verify_project_inventory.py'
               - 'data/processor_unimpl_allowlist.txt'
               - 'data/processor_manifest.baseline.json'
               - 'data/decompiler_signatures.baseline.csv'
               - 'data/instruction_inventory.csv'
               - 'data/switch_table_inventory.csv'
               - 'data/ghidra_project_inventory.baseline.jsonl'
-              - 'project/**'
+              - 'projects/**'
             cli:
               - 'ghidra/ghidra-cli/**'
               - 'tools/project/build_ghidra_cli.sh'
@@ -97,11 +97,11 @@ jobs:
               - 'tools/project/project_layout.py'
               - 'tools/project/project_inventory.py'
               - 'tools/project/export_ghidra_project.sh'
-              - 'tests/verify_lifecycle.py'
-              - 'tests/verify_project_layout.py'
-              - 'tests/verify_headless_runner.py'
-              - 'tests/verify_ghidra_env.py'
-              - 'tests/verify_project_inventory.py'
+              - 'tests/tooling/verify_lifecycle.py'
+              - 'tests/tooling/verify_project_layout.py'
+              - 'tests/tooling/verify_headless_runner.py'
+              - 'tests/tooling/verify_ghidra_env.py'
+              - 'tests/tooling/verify_project_inventory.py'
               - 'tools/testing/processor/verify_ghidra_stats.py'
               - 'tools/project/install_v850_extension.sh'
               - 'tools/project/fingerprint_processor.py'
@@ -110,7 +110,7 @@ jobs:
               - 'data/decompiler_signatures.baseline.csv'
               - 'data/ghidra_project_inventory.baseline.jsonl'
               - 'data/generated/21140bbd65e530a9/diagnostic_vocabulary.json'
-              - 'project/**'
+              - 'projects/**'
 
   verify-processor:
     name: SLEIGH + processor/project audits
@@ -205,7 +205,10 @@ jobs:
       - run: make verify-processor
       - run: make verify-project-parity
       - name: Compare rebuilt processor manifest with snapshot
-        run: cmp build/work/project/processor_manifest.json project/processor_manifest.json
+        run: |
+          work_dir="$(uv run --locked python -m tools.project.analysis_target --field work_dir)"
+          snapshot_dir="$(uv run --locked python -m tools.project.analysis_target --field snapshot_dir)"
+          cmp "$work_dir/processor_manifest.json" "$snapshot_dir/processor_manifest.json"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -213,9 +216,10 @@ jobs:
           path: |
             build/logs/sleigh/
             build/out/processor_manifest.json
-            build/work/project/processor_manifest.json
+            build/work/**/processor_manifest.json
             build/logs/verify-processor-*.log
             build/out/decompiler-signatures.txt
             build/out/ghidra_project_inventory.jsonl
+            build/out/targets/*/project_inventory.jsonl
             data/instruction_inventory.csv
           if-no-files-found: ignore

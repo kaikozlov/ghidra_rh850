@@ -140,7 +140,7 @@ priority artifact covers 32 steering files, 76 section instances, and 6,521
 records. Each named field carries its consumer RVA and method-prefix hash, and
 each record retains complete `raw_hex`; unknown bytes remain unknown. See
 `data/generated/techstream_v18/priority_steering_ddb_semantics.json` and
-`tests/verify_techstream_priority_ddb_semantics.py`.
+`tests/techstream/verify_techstream_priority_ddb_semantics.py`.
 
 A narrower P5 signal-info pass additionally follows fields consumed by
 `GetDatMonSignalInfoP5_DT.dll`, without promoting them into the broad priority
@@ -153,7 +153,7 @@ string index at `+0x00`. Pattern-display records are 24 bytes, keyed at
 `+0x0C`; `FindDbItem2` compares the represented value at `+0x04`, and
 `SetRecString` resolves the display string index at `+0x00`. Every one of those
 offsets is pinned by x86 operand bytes in
-`tests/verify_application_interface_correlations.py`.
+`tests/diagnostics/verify_application_interface_correlations.py`.
 
 ### DTC record format (section type 5, 28 bytes)
 
@@ -344,7 +344,7 @@ script does not understand `.ddb`; it consumes a deterministic generated artifac
 | `tools/diagnostics/firmware_tables.py` | Extract DID/service/WDBI-callback/RoutineControl structures from raw CodeFlash |
 | `tools/diagnostics/correlate_vocabulary.py` | Match Techstream catalog with firmware tables, emit graded vocabulary |
 | `ghidra/scripts/annotate/ApplyDiagnosticVocabulary.java` | Apply OEM names/comments to Ghidra project |
-| `tests/verify_diagnostic_vocabulary.py` | Deterministic verification of every correlation |
+| `tests/techstream/verify_diagnostic_vocabulary.py` | Deterministic verification of every correlation |
 
 ### Match grades
 
@@ -460,7 +460,7 @@ Stage 4, after analysis:
   run ApplyDiagnosticVocabulary.java      (OEM vocabulary layer)
 
 Verification:
-  tests/verify_diagnostic_vocabulary.py (190+ checks against raw artifacts)
+  tests/techstream/verify_diagnostic_vocabulary.py (190+ checks against raw artifacts)
 ```
 
 The Java script (`ApplyDiagnosticVocabulary.java`) includes a self-contained

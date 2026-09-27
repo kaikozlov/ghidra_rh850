@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """Promote exact 8965F3307000 target-native decompiler evidence."""
 from __future__ import annotations
+from tools import REPO_ROOT
 import argparse, json
 from pathlib import Path
-from tools.targets.camry.support.camry_f33_corpus import CORPUS, IMAGE, IMAGE_SHA256, body_bytes, display_path
-from tools.project.decompiler_evidence import bind_entries, bind_function, load_function_corpus, require_function, sha256_bytes
+from tools.targets.camry.support.camry_f33_corpus import CORPUS, IMAGE, display_path
+from tools.project.decompiler_evidence import bind_entries, load_function_corpus, sha256_bytes
 
-REPO = Path(__file__).resolve().parents[4]
+REPO = REPO_ROOT
 OUT = REPO / "data/generated/camry_8965F3307000_decompiler_evidence.json"
 ENTRIES = [
     # Target-native COM/diagnostic steering-angle ingress.

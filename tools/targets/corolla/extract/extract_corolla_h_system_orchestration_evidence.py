@@ -8,12 +8,13 @@ contiguous body hash.
 """
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import hashlib
 import json
 from pathlib import Path
 from tools.targets.corolla.support.corolla_h_constants import RAW_DUMP as H_RAW_DUMP
 
-ROOT = Path(__file__).resolve().parents[4]
+ROOT = REPO_ROOT
 H_RAW = H_RAW_DUMP
 APP_CORPUS = ROOT / "build/work/corpora/h_8965H1202000_rdbihelper2_decompilations.jsonl"
 BOOT_CORPUS = ROOT / "build/work/corpora/h_8965H1202000_boot1f2_decompilations.jsonl"

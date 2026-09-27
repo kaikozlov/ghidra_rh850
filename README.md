@@ -123,7 +123,8 @@ targets use their own manifests and layout rules.
 
 ## Working with the repository
 
-One-time environment setup and narrow verification:
+Install the repository's Python packages and locked dependencies, then select
+the relevant verification:
 
 ```bash
 uv sync --locked
@@ -131,6 +132,10 @@ tools/test <suite-or-prefix>   # run only what exercises the changed code/eviden
 tools/test list [query]        # discover suites
 tools/test plan <query>        # preview a suite/prefix/group
 ```
+
+`uv sync` installs the checkout in editable mode. Repository code uses normal
+package imports; no `PYTHONPATH` setup is needed. The short commands in `tools/`
+remain the public interface.
 
 Documentation-only edits do not require tests. `full`, `local`, processor,
 SLEIGH, and external-corpus sweeps are deliberate milestone/debugging tools, not
@@ -166,7 +171,7 @@ Read [AGENTS.md](AGENTS.md) before changing the repository and
 | `firmware/` | Exact committed firmware inputs — highest evidence authority |
 | `projects/` | Committed packed Ghidra snapshots for registered targets |
 | `targets/` | Vehicle-bound captures, manifests, runtime evidence, and target-local provenance |
-| `tests/` | Deterministic binary/tooling verification |
+| `tests/` | Verification grouped by subsystem and target; suite names live in `verification.toml` |
 | `data/` | Curated and generated machine-readable evidence |
 | `ghidra/` | RH850 processor/CLI plus analysis and verification scripts |
 | `tools/` | Target-aware RE, Toyota/GTS+, acquisition, generation, and analysis tooling |
@@ -177,6 +182,11 @@ Read [AGENTS.md](AGENTS.md) before changing the repository and
 | `software/` | Tracked provenance/locks for external Toyota/Renesas software corpora |
 | `REFERENCE/` | Ignored local context/reference material; never project truth |
 | `build/` | Ignored mutable workspace, generated output, logs, and scratch state |
+
+Target ownership is defined by `data/analysis_targets.json`, not guessed from
+directory names. It joins each calibration's firmware, captures, working project,
+snapshot, inventory, and decompiler corpus. Analysis implementations live under
+`tools/targets/<family>/`; historical capture locations remain recorded inputs.
 
 Large licensed/local corpora such as Techstream, GTS+, Toyota CUW packages, and
 Renesas tooling stay under ignored software/reference storage. Tracked locks,

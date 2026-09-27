@@ -8,6 +8,8 @@ from becoming a write/control-flow recovery primitive.
 """
 from __future__ import annotations
 
+from tools.targets.camry.support import camry_f33_corpus as f33
+from tools import REPO_ROOT
 import argparse
 import hashlib
 import json
@@ -16,11 +18,11 @@ from pathlib import Path
 
 from tools.targets.camry.support.camry_f33_corpus import IMAGE, IMAGE_SHA256
 
-ROOT = Path(__file__).resolve().parents[4]
+ROOT = REPO_ROOT
 OUT = ROOT / "data/generated/camry_8965F3307000_prefault_memory_safety.json"
 CONE = ROOT / "data/generated/camry_8965F3307000_prefault_store_audit.json"
 STORE_CENSUS = ROOT / "data/generated/camry_8965F3307000_computed_store_target_census.json"
-DECOMP = ROOT / "data/generated/camry-8965F3307000/decompilations.jsonl"
+DECOMP = f33.CORPUS
 
 CRITICAL_CELLS = [
     0xFEBE3DF0, 0xFEBE3DF1, 0xFEBE3DF2, 0xFEBE3DF3, 0xFEBE3DF4, 0xFEBE3DF5,

@@ -22,20 +22,17 @@ import hashlib
 import json
 import re
 import struct
-import sys
 from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any
+from tools.techstream.ddb_semantics import behavior_rows, dtc_rows, monitor_rows, records
+from tools.techstream.ddb_strings import load_string_db
+from tools.techstream.parse_ddb import ECU_TABLE_CLASS_NAMES, DDBParser, _fixed_utf16le
+from tools.techstream.techstream_paths import gts_db_root, resolve_gts_root
+from tools import REPO_ROOT
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from ddb_semantics import behavior_rows, dtc_rows, monitor_rows, records
-from ddb_strings import load_string_db
-from parse_ddb import ECU_TABLE_CLASS_NAMES, DDBParser, _fixed_utf16le
-from techstream_paths import gts_db_root, resolve_gts_root
-
-REPO = Path(__file__).resolve().parents[2]
-DEFAULT_OUT = REPO / "data/generated/gtsplus_2026/p5_adas_p6_migration.json"
+DEFAULT_OUT = REPO_ROOT / "data/generated/gtsplus_2026/p5_adas_p6_migration.json"
 REGIONS = ("NA", "EU", "JP")
 
 P5_TARGETS = (

@@ -7,23 +7,22 @@ This analysis uses only already-validated same-car 0x0FE button bits, exact Camr
 not receive 0x08A and no target-native CAN-field name is asserted here.
 """
 from __future__ import annotations
+from tools.toyota_support.toyota_route_opendbc_common import decode_wheel_speed_kph
 
+from tools.targets.camry.support import camry_f33_corpus as f33
+from tools import REPO_ROOT
 import argparse
 import gzip
 import hashlib
 import json
-import sys
 from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Callable
 
-REPO = Path(__file__).resolve().parents[4]
-if str(REPO) not in sys.path:
-  sys.path.insert(0, str(REPO))
+REPO = REPO_ROOT
 
-from tools.targets.camry.analysis.analyze_camry_2026_relay_capture import decode_wheel_speed
 
-RAW = REPO / "targets/camry-2026/raw-20260827"
+RAW = f33.CAPTURE / "raw-20260827"
 SOURCES = (
   ("drive_a", RAW / "camry_relay_route_can_20260827.ndjson.gz"),
   ("drive_b", RAW / "camry_relay_lta_confirm_route_can_20260827.ndjson.gz"),
@@ -130,7 +129,7 @@ def analyze_one(label: str, path: Path) -> dict:
     elif bus == 0 and addr == 0x412 and len(dat) == 8:
       hud412.append((t, dat, seg))
     elif bus == 0 and addr == 0x0AA and len(dat) == 8:
-      speeds.append((t, decode_wheel_speed(dat), seg))
+      speeds.append((t, decode_wheel_speed_kph(dat), seg))
     if addr == 0x0B6:
       b6.append((t, seg, bus, len(dat)))
     if bus == 0 and addr == 0x0D5 and len(dat) >= 5:

@@ -106,7 +106,8 @@ def verify_live_inventory(project_dir: Path, environment: dict[str, str], temp_d
     run_checked([str(REPO / "tools/project/export_ghidra_project.sh"), "project-inventory", str(live_inventory)], env=inventory_env)
     run_checked([
         sys.executable,
-        str(REPO / "tools/project/project_inventory.py"),
+        "-m",
+        "tools.project.project_inventory",
         "compare",
         str(INVENTORY),
         str(live_inventory),

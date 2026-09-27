@@ -12,8 +12,8 @@
 > **Primary evidence:** firmware bytes and disposable working-project Ghidra
 > analysis in `build/work/project/`; existing reports are navigation aids, not proof
 >
-> **Verification:** `tests/verify_icus_software_paths.py`,
-> `tests/verify_payload_gate.py`, `tests/verify_secoc.py`
+> **Verification:** `tests/firmware/verify_icus_software_paths.py`,
+> `tests/runtime/verify_payload_gate.py`, `tools/test secoc`
 
 ## Methodological boundary
 
@@ -243,12 +243,12 @@ The read-only host implementation is
 `exploit/followups/application_rmba_probe.py`. It models the exact exclusion
 rules, defaults to planning/simulation, requires explicit isolated-bench consent
 for live reads, and can acquire the 29,952-byte readable DataFlash subset in 119
-requests. `tests/verify_application_read_memory_by_address.py` pins the firmware
-configuration and `tests/verify_exploit_followups.py` pins the host protocol.
+requests. `tests/diagnostics/verify_application_read_memory_by_address.py` pins the firmware
+configuration and `tests/runtime/verify_exploit_followups.py` pins the host protocol.
 
 ### 2026-08-15 — RMBA memory-safety closure (purpose-built audit)
 
-`tests/verify_application_rmba_memory_safety.py` audits the entire
+`tests/diagnostics/verify_application_rmba_memory_safety.py` audits the entire
 tester-controlled address/length chain for memory-safety defects and pins the
 boundary matrix. The result is a **verified bounded negative**: no integer
 overflow/wrap, signedness/truncation defect, range-boundary inconsistency,
@@ -475,7 +475,7 @@ was observed before accepting a hardware-reported clean completion. A hardware
 fault or undocumented sequencing violation that reports success without the
 specified output-ready events is therefore outside this software-static proof.
 
-Deterministic coverage is in `tests/verify_icus_stage7_static.py` and
+Deterministic coverage is in `tests/firmware/verify_icus_stage7_static.py` and
 `AssertIcusStage7Static.java`.
 
 ## 2026-08-13 — bank-1 diagnostic activation correction

@@ -2,13 +2,13 @@
 """Materialize canonical physical CodeFlash/DataFlash inputs for Corolla targets."""
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import hashlib
 from dataclasses import dataclass
-from pathlib import Path
 
 
-REPO = Path(__file__).resolve().parents[4]
+REPO = REPO_ROOT
 
 
 @dataclass(frozen=True)

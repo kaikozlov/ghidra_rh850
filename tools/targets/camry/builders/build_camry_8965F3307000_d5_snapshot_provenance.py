@@ -17,7 +17,7 @@ that feeds it.  This builder deterministically re-derives, from the canonical
 * the single-RSCFD hardware fact that removes the second-CAN-controller class.
 
 Everything asserted here is re-derived from tracked inputs; the emitted JSON is
-checked byte-exact by tests/verify_camry_8965F3307000_d5_snapshot_provenance.py.
+checked byte-exact by tests/targets/camry/verify_camry_8965F3307000_d5_snapshot_provenance.py.
 """
 from __future__ import annotations
 

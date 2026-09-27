@@ -7,20 +7,18 @@ import contextlib
 import hashlib
 import io
 import json
-import sys
 from pathlib import Path
 from typing import Any
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import dnfile  # type: ignore
 from dncil.cil.body import CilMethodBody  # type: ignore
+from tools.techstream.inspect_dotnet_il import MethodBodyReader, format_operand, resolve_token, type_name
+from tools.techstream.techstream_paths import resolve_gts_root
+from tools import REPO_ROOT
 
-from inspect_dotnet_il import MethodBodyReader, format_operand, resolve_token, type_name
-from techstream_paths import resolve_gts_root
 
-REPO = Path(__file__).resolve().parents[2]
-DEFAULT_OUT = REPO / "data/generated/gtsplus_2026/tse_managed_semantics.json"
+DEFAULT_OUT = REPO_ROOT / "data/generated/gtsplus_2026/tse_managed_semantics.json"
 COMPONENTS = (
     "GTSPlusTSEConverter/Converter.dll",
     "GTSPlusTSEConverter/RingBufferParser.dll",

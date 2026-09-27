@@ -2,6 +2,7 @@
 """Extract compact exact-H evidence for the remaining 0x030/0x351 status paths."""
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import json
 from pathlib import Path
@@ -9,7 +10,7 @@ from tools.targets.corolla.support.corolla_h_constants import CODEFLASH as H_COD
 
 from tools.project.decompiler_evidence import bind_entries, load_function_corpus, sha256_bytes
 
-REPO = Path(__file__).resolve().parents[4]
+REPO = REPO_ROOT
 IMAGE = H_CODEFLASH
 OUT = REPO / "data/generated/corolla_8965H1202000_remaining_status_decompiler_evidence.json"
 ENTRIES = (

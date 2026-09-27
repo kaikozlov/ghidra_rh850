@@ -6,6 +6,7 @@ This tool is offline only; it does not contact the vehicle.
 """
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import json
 import struct
@@ -14,7 +15,7 @@ from decimal import Decimal
 from pathlib import Path
 from typing import Any
 
-REPO = Path(__file__).resolve().parents[4]
+REPO = REPO_ROOT
 SEMANTICS_PATH = REPO / "data/generated/gtsplus_2026/pcs_data_viewer_tss3_managed_semantics.json"
 EXPECTED_SCHEMA = "gtsplus-pcs-data-viewer-tss3-managed-semantics-v1"
 

@@ -10,7 +10,7 @@
 >
 > **Canonical artifacts:** pinned payload fixtures
 >
-> **Verification:** `tests/verify_payload_gate.py`
+> **Verification:** `tests/runtime/verify_payload_gate.py`
 >
 > **Related:** [bootloader diagnostics](../diagnostics/bootloader.md), [bootloader-dids](../diagnostics/bootloader-dids.md)
 
@@ -18,7 +18,7 @@ This note traces the complete firmware-side path used by the public RH850/P1M-E
 payload toolchain: UDS download, AES-CBC decryption, CRC + CMAC authentication,
 and the `0xFF00` execution trigger. Addresses are CodeFlash virtual addresses.
 
-`../tests/verify_payload_gate.py` independently checks the static tables,
+`../tests/runtime/verify_payload_gate.py` independently checks the static tables,
 callback instructions, and the two unique encrypted payload fixtures represented
 by four pinned public upstream copies. Fixture provenance and upstream hashes are
 in `../external-references.lock.json`.
@@ -140,7 +140,7 @@ redundant.
 The same byte gates two sibling services identically — `WriteDataByIdentifier`
 (read `0x49c6`) and `ECUReset` (read `0x610c`), both `cmp 2 / be / NRC 0x33`.
 Writer/reader provenance is re-runnable via `ghidra x-ref to 0xFEBF2B0F`, and the
-byte behaviour at every site is asserted in `tests/verify_security_gate.py`
+byte behaviour at every site is asserted in `tests/tooling/verify_security_gate.py`
 (SEC-BOOT-007).
 
 There is one ordering nuance important for keyless-execution analysis. On one

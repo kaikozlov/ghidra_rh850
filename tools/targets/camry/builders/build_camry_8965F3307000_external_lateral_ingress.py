@@ -8,6 +8,7 @@ network the EPS does not directly accept.
 """
 from __future__ import annotations
 
+from tools.targets.camry.support import camry_f33_corpus as f33
 import argparse
 import collections
 import gzip
@@ -29,8 +30,8 @@ GTS = REPO / "data/generated/gtsplus_2026/camry_8965F3307000_emps_semantics.json
 B6 = REPO / "data/generated/camry_8965F3307000_codeflash.json"
 FAULT = REPO / "data/generated/camry_8965F3307000_fault_status.json"
 DRIVES = [
-    REPO / "targets/camry-2026/raw-20260827/camry_relay_route_can_20260827.ndjson.gz",
-    REPO / "targets/camry-2026/raw-20260827/camry_relay_lta_confirm_route_can_20260827.ndjson.gz",
+    f33.CAPTURE / "raw-20260827/camry_relay_route_can_20260827.ndjson.gz",
+    f33.CAPTURE / "raw-20260827/camry_relay_lta_confirm_route_can_20260827.ndjson.gz",
 ]
 GP = 0xFEBEB800
 RX_TABLE = 0x21FE8

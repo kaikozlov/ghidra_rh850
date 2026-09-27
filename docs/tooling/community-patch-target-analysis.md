@@ -6,8 +6,8 @@
 > **Status:** tooling complete; target semantics artifact-blocked until an
 > F3/F4 image is acquired
 >
-> **Verification:** `tests/verify_community_patch_target_analyzer.py` and
-> `tests/verify_community_tooling.py`
+> **Verification:** `tests/tooling/verify_community_patch_target_analyzer.py` and
+> `tests/tooling/verify_community_tooling.py`
 
 The community persistent patcher searches CodeFlash for one exact 8-byte marker:
 

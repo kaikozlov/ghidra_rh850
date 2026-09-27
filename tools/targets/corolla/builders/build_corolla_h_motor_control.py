@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """Build deterministic target-native Corolla-H motor-control comparison."""
 from __future__ import annotations
+from tools.targets.sienna.sienna_target import CORPUS as SIENNA_CORPUS
+from tools import REPO_ROOT
 import argparse,hashlib,json,re
 from pathlib import Path
 from tools.targets.sienna.sienna_target import CODEFLASH as SIENNA_CODEFLASH
 from tools.targets.corolla.support.corolla_h_constants import RAW_DUMP as H_RAW_DUMP
-ROOT=Path(__file__).resolve().parents[4]
-EV=ROOT/'data/generated/corolla_8965H1202000_motor_control_decompiler_evidence.json';SC=ROOT/'data/generated/decompilations.jsonl';HRAW=H_RAW_DUMP;SI=SIENNA_CODEFLASH;OUT=ROOT/'data/generated/corolla_8965H1202000_motor_control.json'
+ROOT=REPO_ROOT
+EV=ROOT/'data/generated/corolla_8965H1202000_motor_control_decompiler_evidence.json';SC = SIENNA_CORPUS;HRAW=H_RAW_DUMP;SI=SIENNA_CODEFLASH;OUT=ROOT/'data/generated/corolla_8965H1202000_motor_control.json'
 MAP=[
 (0x32B80,'motor_coord_transform_calib_handler',0x2E780),
 (0x36A44,'dq_current_pi_axis_b',0x32616),

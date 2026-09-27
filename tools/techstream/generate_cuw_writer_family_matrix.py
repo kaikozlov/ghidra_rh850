@@ -14,22 +14,21 @@ import collections
 import hashlib
 import json
 import re
-import sys
 from pathlib import Path
 
-from techstream_paths import V18_DIAGNOSTICS_ROOT
+
 from typing import Any
 
 import pefile
-from pe_utils import exports as pe_exports, imports as pe_imports
+from tools.techstream.techstream_paths import V18_DIAGNOSTICS_ROOT
+from tools.techstream.pe_utils import exports as pe_exports, imports as pe_imports
+from tools.techstream.generate_cuw_writer_inventory import COMMANDS, factory_routes
+from tools.techstream.generate_cuw_writer_protocol_grammar import route_verdict
+from tools import REPO_ROOT
 
-REPO = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO))
-from tools.techstream.generate_cuw_writer_inventory import COMMANDS, factory_routes  # noqa: E402
-from tools.techstream.generate_cuw_writer_protocol_grammar import route_verdict  # noqa: E402
 
 DEFAULT_ROOT = V18_DIAGNOSTICS_ROOT
-DEFAULT_OUT = REPO / "data/generated/techstream_v18/cuw_writer_family_matrix.json"
+DEFAULT_OUT = REPO_ROOT / "data/generated/techstream_v18/cuw_writer_family_matrix.json"
 CUW_SUBDIR = Path("Calibration Update Wizard")
 
 COMMON_DLLS = {

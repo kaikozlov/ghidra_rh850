@@ -9,6 +9,8 @@ vehicle output.
 """
 from __future__ import annotations
 
+from tools.targets.camry.support import camry_f33_corpus as f33
+from tools import REPO_ROOT
 import argparse
 import gzip
 import hashlib
@@ -16,8 +18,8 @@ import json
 from collections import Counter, defaultdict
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[4]
-RAW = REPO / "targets/camry-2026/raw-20260827"
+REPO = REPO_ROOT
+RAW = f33.CAPTURE / "raw-20260827"
 CENSUS = REPO / "data/generated/camry_2026_cruise_lta_edge_census.json"
 STATIC = REPO / "data/generated/camry_8965F3307000_command_cone_ingress.json"
 OUT = REPO / "data/generated/camry_2026_baseline_selector_live.json"

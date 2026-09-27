@@ -8,16 +8,16 @@ is explicitly non-diagnostic unless the old role was EPS-local.
 """
 from __future__ import annotations
 
+from tools.targets.corolla.support.corolla_h_constants import F_RAW_DUMP
+from tools import REPO_ROOT
 import argparse
 import hashlib
 import json
 import struct
-import sys
 from pathlib import Path
 from tools.targets.corolla.support.corolla_h_constants import CODEFLASH as H_CODEFLASH
 
-REPO = Path(__file__).resolve().parents[4]
-sys.path.insert(0, str(REPO))
+REPO = REPO_ROOT
 
 from tools.security.build_ephemeral_runtime_manifest import load_codeflash
 from tools.variants.compare_variant_application_rx import (
@@ -29,7 +29,7 @@ TX = struct.Struct("<IBBH")
 PDU = struct.Struct("<HBBHBB")
 
 DEFAULT_H = H_CODEFLASH
-DEFAULT_F = REPO / "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin"
+DEFAULT_F = F_RAW_DUMP
 DEFAULT_CONTRACT = REPO / "data/external/opendbc/toyota_corolla_pre_tss3_contract.json"
 DEFAULT_FD = REPO / "data/generated/corolla_8965H1202000_fd_control_interface.json"
 DEFAULT_LTA = REPO / "data/generated/corolla_8965H1202000_lta_command_provenance.json"

@@ -13,7 +13,7 @@
 > **Canonical artifacts:** `tools/toyota_support/toyota_secoc_signer.py`,
 > `external-references.lock.json`
 >
-> **Verification:** `tests/verify_toyota_secoc_signer.py`
+> **Verification:** `tests/toyota/verify_toyota_secoc_signer.py`
 >
 > **Related:** [application receive chain](application-chain.md)
 
@@ -249,7 +249,7 @@ DataFlash verifier, it does not assume steering IDs or Panda buses 0/2. It:
 - scans every sliding 16-byte DataFlash window with a sync-CMAC prefilter; and
 - reports only candidate offset/address hashes and match counts, not raw keys.
 
-`tests/verify_toyota_secoc_oracle.py` includes a synthetic bus-1 capture with
+`tests/toyota/verify_toyota_secoc_oracle.py` includes a synthetic bus-1 capture with
 `0x116` and `0x24D` specifically to prevent regression to the Sienna-only
 `0x131/0x2E4/0x344` assumption.
 

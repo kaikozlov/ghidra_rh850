@@ -9,6 +9,8 @@ The exact FRC-internal CMAC engine/key remains unresolved.
 """
 from __future__ import annotations
 
+from tools.targets.camry.support import camry_f33_corpus as f33
+from tools import REPO_ROOT
 import argparse
 import gzip
 import hashlib
@@ -18,8 +20,8 @@ import subprocess
 from collections import defaultdict
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[4]
-RAW = REPO / "targets/camry-2026/raw-20260827"
+REPO = REPO_ROOT
+RAW = f33.CAPTURE / "raw-20260827"
 DRIVES = {
     "drive_a": RAW / "camry_relay_route_can_20260827.ndjson.gz",
     "drive_b": RAW / "camry_relay_lta_confirm_route_can_20260827.ndjson.gz",

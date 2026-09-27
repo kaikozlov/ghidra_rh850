@@ -9,6 +9,8 @@ programming-counter difference, exits 1 and remains visible in the JSON report.
 
 from __future__ import annotations
 
+from tools.targets.camry.support import camry_f33_corpus as f33
+from tools import REPO_ROOT
 import argparse
 import hashlib
 import json
@@ -19,9 +21,9 @@ from itertools import pairwise
 from pathlib import Path
 from typing import Any
 
-ROOT = Path(__file__).resolve().parents[4]
-STOCK = ROOT / "firmware/camry-8965F3307000/CodeFlash.bin"
-STOCK_SHA256 = "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7"
+ROOT = REPO_ROOT
+STOCK = f33.IMAGE
+STOCK_SHA256 = f33.IMAGE_SHA256
 IMAGE_SIZE = 0x100000
 
 

@@ -2,6 +2,7 @@
 """Build the exact H/F cooperative-authority wire-visibility boundary."""
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import hashlib
 import json
@@ -10,7 +11,7 @@ from pathlib import Path
 from tools.targets.corolla.support.corolla_h_constants import CODEFLASH as H_CODEFLASH
 
 
-REPO = Path(__file__).resolve().parents[4]
+REPO = REPO_ROOT
 IMAGE = H_CODEFLASH
 EVIDENCE = REPO / "data/generated/corolla_8965H1202000_cooperative_authority_wire_decompiler_evidence.json"
 FD = REPO / "data/generated/corolla_8965H1202000_fd_control_interface.json"

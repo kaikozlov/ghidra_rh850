@@ -8,19 +8,18 @@ accesses.
 """
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import hashlib
 import json
 import re
 import struct
-import sys
 from collections import deque
 from pathlib import Path
 from tools.targets.sienna.sienna_target import CODEFLASH as SIENNA_CODEFLASH
 from tools.targets.corolla.support.corolla_h_constants import RAW_DUMP as H_RAW_DUMP
 
-REPO = Path(__file__).resolve().parents[4]
-sys.path.insert(0, str(REPO))
+REPO = REPO_ROOT
 GP = 0xFEBEB800
 TX = struct.Struct("<IBBH")
 PDU = struct.Struct("<HBBHBB")

@@ -15,15 +15,16 @@ import struct
 import zlib
 from pathlib import Path
 
-from techstream_paths import CUW_CORPUS_ROOT
+
 from typing import Any
+from tools.techstream.techstream_paths import CUW_CORPUS_ROOT
+from tools.techstream.cuw_attach import parse_attach_bytes
+from tools import REPO_ROOT
 
-from cuw_attach import parse_attach_bytes
 
-REPO = Path(__file__).resolve().parents[2]
-CAMPAIGNS = REPO / "data/external/toyota_corolla_2023_calibration_campaigns.json"
-FRC_CORPUS = REPO / "data/generated/techstream_v18/cuw_frc_corpus.json"
-DEFAULT_OUT = REPO / "data/generated/techstream_v18/corolla_2023_calibration_acquisition.json"
+CAMPAIGNS = REPO_ROOT / "data/external/toyota_corolla_2023_calibration_campaigns.json"
+FRC_CORPUS = REPO_ROOT / "data/generated/techstream_v18/cuw_frc_corpus.json"
+DEFAULT_OUT = REPO_ROOT / "data/generated/techstream_v18/corolla_2023_calibration_acquisition.json"
 
 
 def sha256_file(path: Path) -> str:
@@ -142,8 +143,8 @@ def build() -> dict[str, Any]:
         "schema_version": 1,
         "title": "2023 Corolla FRC/Brake calibration acquisition correlation",
         "sources": {
-            str(CAMPAIGNS.relative_to(REPO)): {"sha256": sha256_file(CAMPAIGNS)},
-            str(FRC_CORPUS.relative_to(REPO)): {"sha256": sha256_file(FRC_CORPUS)},
+            str(CAMPAIGNS.relative_to(REPO_ROOT)): {"sha256": sha256_file(CAMPAIGNS)},
+            str(FRC_CORPUS.relative_to(REPO_ROOT)): {"sha256": sha256_file(FRC_CORPUS)},
         },
         "front_recognition_camera": {
             "campaign": frc_campaign,

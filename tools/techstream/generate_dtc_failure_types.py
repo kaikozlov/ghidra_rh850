@@ -11,19 +11,16 @@ from __future__ import annotations
 
 import argparse
 import json
-import sys
 from collections import Counter, defaultdict
 from pathlib import Path
+from tools.techstream.parse_ddb import DDBParser
+from tools.techstream.ddb_strings import load_string_db
+from tools.techstream.techstream_paths import V18_DB_ROOT
+from tools import REPO_ROOT
 
-REPO = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO / "tools" / "techstream"))
-
-from parse_ddb import DDBParser  # noqa: E402
-from ddb_strings import load_string_db
-from techstream_paths import V18_DB_ROOT  # noqa: E402
 
 DEFAULT_DB_ROOT = V18_DB_ROOT
-DEFAULT_OUTPUT = REPO / "data/generated/techstream_v18/dtc_failure_types.json"
+DEFAULT_OUTPUT = REPO_ROOT / "data/generated/techstream_v18/dtc_failure_types.json"
 
 
 def build(db_root: Path) -> dict:

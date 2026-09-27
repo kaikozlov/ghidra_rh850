@@ -20,10 +20,12 @@ from typing import Any
 
 import pefile
 
-from techstream_paths import REPO, resolve_gts_root
+from tools import REPO_ROOT
+from tools.techstream.techstream_paths import resolve_gts_root
 
-DEFAULT_OUTPUT = REPO / "build/out/cuwplus-unprotected"
-DEFAULT_AUX_OUTPUT = REPO / "build/out/gts-aux-unprotected"
+
+DEFAULT_OUTPUT = REPO_ROOT / "build/out/cuwplus-unprotected"
+DEFAULT_AUX_OUTPUT = REPO_ROOT / "build/out/gts-aux-unprotected"
 DECODER = Path(__file__).with_name("cp_body_decode.py")
 ProgressCallback = Callable[[int, int, Path], None]
 # The protected CP loader header uses 0x1000/0x1000, but restored coree CLR images
@@ -629,7 +631,7 @@ def recover(
     write_root = staging_output
     temp: tempfile.TemporaryDirectory[str] | None = None
     try:
-        build_tmp = REPO / "build/tmp"
+        build_tmp = REPO_ROOT / "build/tmp"
         build_tmp.mkdir(parents=True, exist_ok=True)
         if keep_workspace:
             workspace = build_tmp / workspace_name

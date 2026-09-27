@@ -2,6 +2,8 @@
 """Extract exact-H/F static evidence for the Corolla command-5 runtime carrier candidate."""
 from __future__ import annotations
 
+from tools.targets.corolla.support.corolla_h_constants import F_RAW_DUMP
+from tools import REPO_ROOT
 import argparse
 import hashlib
 import json
@@ -10,11 +12,11 @@ from pathlib import Path
 from tools.targets.corolla.support.corolla_h_constants import CODEFLASH as H_CODEFLASH
 from typing import Any
 
-REPO = Path(__file__).resolve().parents[4]
+REPO = REPO_ROOT
 DEFAULT_CORPUS = REPO / "build/work/corpora/h_8965H1202000_decompilations.corrected-context.raw.jsonl"
 DEFAULT_OUTPUT = REPO / "data/generated/corolla_hf_command5_runtime_carrier_evidence.json"
 H_CODE = H_CODEFLASH
-F_SOURCE = REPO / "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin"
+F_SOURCE = F_RAW_DUMP
 
 H_SHA256 = "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f"
 F_SOURCE_SHA256 = "b8fa3d951f59fb75c190ce1b2c73164adb952f871650cfcd3b7656f08a9c448d"

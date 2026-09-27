@@ -6,6 +6,8 @@ attempts. This tool is passive; it creates no CAN sender or executable command.
 """
 from __future__ import annotations
 
+from tools.targets.camry.support import camry_f33_corpus as f33
+from tools import REPO_ROOT
 import argparse
 import binascii
 import gzip
@@ -16,10 +18,10 @@ from pathlib import Path
 
 import numpy as np
 
-ROOT = Path(__file__).resolve().parents[4]
+ROOT = REPO_ROOT
 BUSES = ROOT / 'tests/fixtures/camry_2026_cancel_all_buses.jsonl.gz'
 HOSTS = ROOT / 'tests/fixtures/camry_2026_cancel_host_attempts.jsonl.gz'
-STATIONARY = ROOT / 'targets/camry-2026/raw-20260826/camry_nrtd_cruise_can_sync_20260826.json.gz'
+STATIONARY = f33.CAPTURE / 'raw-20260826/camry_nrtd_cruise_can_sync_20260826.json.gz'
 OUTPUT = ROOT / 'data/generated/camry_2026_cancel_ownership.json'
 
 

@@ -36,7 +36,7 @@ Architecture::
 
 Usage::
 
-    uv run python tools/diagnostics/correlate_vocabulary.py
+    uv run python -m tools.diagnostics.correlate_vocabulary
 """
 
 from __future__ import annotations
@@ -46,15 +46,9 @@ import struct
 import hashlib
 from pathlib import Path
 
-# These imports work because the script runs from the repo root and
-# tools/techstream is on sys.path via the extract_catalog import chain.
-import sys
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "techstream"))
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+from tools import REPO_ROOT
+from tools.diagnostics.firmware_tables import extract_all, FirmwareTables
 
-from firmware_tables import extract_all, FirmwareTables, DidEntry  # noqa: E402
-
-REPO_ROOT = Path(__file__).resolve().parents[2]
 CODEFLASH_PATH = REPO_ROOT / "firmware" / "RH850_P1M-E_CodeFlash.bin"
 
 # Firmware DTC table used by FUN_0005159e/FUN_000517b4. The callbacks walk 0xA0
@@ -331,7 +325,7 @@ def correlate_monitors(
     itself would trigger a candidate grade.
     """
     import struct
-    from parse_ddb import DDBParser
+    from tools.techstream.parse_ddb import DDBParser
 
     DB = REPO_ROOT / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream/NA/DB"
     parser = DDBParser()

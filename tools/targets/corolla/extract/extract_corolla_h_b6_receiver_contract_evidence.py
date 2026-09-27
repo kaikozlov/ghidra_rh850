@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """Promote exact H decompiler evidence for the protected-B6 receiver contract."""
 from __future__ import annotations
+from tools import REPO_ROOT
 import argparse, json
 from pathlib import Path
 from tools.targets.corolla.support.corolla_h_constants import CODEFLASH as H_CODEFLASH
 
 from tools.project.decompiler_evidence import bind_entries, load_function_corpus, sha256_bytes
 
-REPO = Path(__file__).resolve().parents[4]
+REPO = REPO_ROOT
 IMAGE = H_CODEFLASH
 OUT = REPO / "data/generated/corolla_8965H1202000_b6_receiver_contract_decompiler_evidence.json"
 ENTRIES = [

@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Build deterministic Sienna->Corolla-H deadline-monitor callback-surface closure."""
 from __future__ import annotations
+from tools import REPO_ROOT
 import argparse,hashlib,json,struct
 from pathlib import Path
 from tools.targets.sienna.sienna_target import CODEFLASH as SIENNA_CODEFLASH
 from tools.targets.corolla.support.corolla_h_constants import H_DEADLINE_TABLES, RAW_DUMP, SIENNA_DEADLINE_TABLES
-ROOT=Path(__file__).resolve().parents[4]
+ROOT=REPO_ROOT
 HRAW=RAW_DUMP; SRAW=SIENNA_CODEFLASH; EV=ROOT/'data/generated/corolla_8965H1202000_deadline_monitor_surface_decompiler_evidence.json'; COVER=ROOT/'data/generated/corolla_8965H1202000_static_coverage_matrix.json'; OUT=ROOT/'data/generated/corolla_8965H1202000_deadline_monitor_surface.json'
 S_TABLES=SIENNA_DEADLINE_TABLES
 H_TABLES=H_DEADLINE_TABLES

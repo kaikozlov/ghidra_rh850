@@ -23,6 +23,7 @@ against the target's own bytes (see docs/variants/README.md).
 
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import hashlib
 import json
@@ -31,8 +32,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-REPO = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO))
+REPO = REPO_ROOT
 
 from tools.firmware.analyze_rh850_codeflash_structure import analyze as scan_structure  # noqa: E402
 from tools.security.build_secoc_patch_manifest import (  # noqa: E402

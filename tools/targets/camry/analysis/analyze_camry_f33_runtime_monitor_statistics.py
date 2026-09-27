@@ -8,14 +8,16 @@ control.
 """
 from __future__ import annotations
 
+from tools.targets.camry.support import camry_f33_corpus as f33
+from tools import REPO_ROOT
 import argparse
 import json
 import re
 from pathlib import Path
 from statistics import median
 
-ROOT = Path(__file__).resolve().parents[4]
-RAW = ROOT / "targets/camry-2026/raw-20260908/runtime-monitor-session/files"
+ROOT = REPO_ROOT
+RAW = f33.CAPTURE / "raw-20260908/runtime-monitor-session/files"
 DEFAULT_OUT = ROOT / "data/generated/camry_f33_runtime_monitor_statistics.json"
 RATE_RE = re.compile(
     r"bus (?P<bus>None|\d+) dt (?P<dt>[0-9.]+) sent (?P<sent>\d+) echo (?P<echo>\d+) "

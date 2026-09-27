@@ -22,8 +22,8 @@
 > specific searches remain valid work; CORR-101 records the correction after a
 > fresh re-audit found additional unaudited application transport and formatter
 > surfaces. Deterministic regressions are
-> `tests/verify_keyless.py` and
-> `tests/verify_keyless_live_handoff_dma.py`; the fuller Sienna no-auth control-
+> `tools/test keyless` and
+> `tests/runtime/verify_keyless_live_handoff_dma.py`; the fuller Sienna no-auth control-
 > flow audit remains in
 > [bootloader-noauth-pc-pivot-assessment.md](bootloader-noauth-pc-pivot-assessment.md).
 
@@ -205,7 +205,7 @@ an unknown application-SA key as a dumping/glitching requirement. This result
 does **not** recover the boot-SA root at `0xBFE8`, does not set boot SA state
 `FEBF2B0F`, and does not make boot `0x34`/execution RoutineControl keyless.
 
-Deterministic proof is in `tests/verify_keyless.py`
+Deterministic proof is in `tools/test keyless`
 (`KEYLESS-006`). The Sienna subsystem-level interpretation is also recorded in
 [application-security-access.md](application-security-access.md).
 
@@ -325,7 +325,7 @@ in the same PSW/TP values plus direct call `0x148E -> 0x1472`.
 
 None of the 18 introduces a request parser, tester-derived pointer, new DMA
 endpoint, retained vector base, credential reader, or alternate boot entry.
-`tests/verify_keyless.py` pins the raw-byte closure
+`tools/test keyless` pins the raw-byte closure
 (`KEYLESS-011`).
 
 ## 14. Recovering application SA mainly unlocks BA F7, not boot execution
@@ -352,7 +352,7 @@ into a recoverable protocol step, with BA F7 as the important newly practical
 capability. It still does not write boot SA state, expose `0xBFD8/0xBFE8`, or
 create application arbitrary-code execution. `KEYLESS-012` pins the Dcm and F7
 facts; the complete Sienna BA semantics remain in
-`tests/verify_application_proprietary_ba.py`.
+`tests/diagnostics/verify_application_proprietary_ba.py`.
 
 ## 15. Live handoff retains peripheral state, but DMAC endpoints are fixed
 
@@ -374,7 +374,7 @@ Boot startup does touch the DMAC global control through `0x121A`, so retained
 channel state is not assumed quiescent. The security conclusion instead rests
 on endpoint provenance: without an application arbitrary-SFR/descriptor write,
 a tester cannot arm a retained DMA transfer whose source is a boot credential
-or whose destination is a control-flow cell. `tests/verify_keyless_live_handoff_dma.py`
+or whose destination is a control-flow cell. `tests/runtime/verify_keyless_live_handoff_dma.py`
 pins the live-call ordering, fixed descriptor provenance, endpoint census, and
 absence of an application WriteMemoryByAddress service (`KEYLESS-013`). This is
 a software-visible conclusion; undocumented peripheral behavior remains outside
@@ -399,7 +399,7 @@ area, and the remainder are auto-analysis gaps/data or target-specific callback
 fragments. None of their target-definition chains reads the XCP window. The
 real CALLT concern is independently closed by §10: CTBP is fixed to zero.
 Configured H XCP/async callback tables are separately raw-byte pinned by
-`tests/verify_corolla_h.py`.
+`tools/test corolla_h`.
 
 The result is therefore a **bounded target-native negative**, not a claim that
 Ghidra has perfect function ownership for every H byte: no recovered H computed
@@ -443,7 +443,7 @@ view `FEBE0000..FEBFFFFF` and self view `FEDE0000..FEDFFFFF` are same-offset
 aliases separated by `0x200000`; XCP address `FEBF7C00` therefore aliases
 `FEDF7C00`, not a lower `FEBE...` stack or `FEBF7704`. Span's paired PE1/self
 RAM captures are consistent with this same-offset mapping. These facts are
-pinned by `tests/verify_keyless.py` (`KEYLESS-015`).
+pinned by `tools/test keyless` (`KEYLESS-015`).
 
 ## 18. Complete configured XCP composition does not escape the write window
 
@@ -467,7 +467,7 @@ Page selection is not fed into a destination calculation. Arithmetic edge
 cases were also checked: multi-byte XCP writes reject interval overflow, and
 the word-aligned `MODIFY_BITS` case cannot wrap `0xFFFFFFFC + 3` through zero.
 
-`tests/verify_keyless.py` pins this closure (`KEYLESS-016`).
+`tools/test keyless` pins this closure (`KEYLESS-016`).
 It materially narrows the remaining application-RCE search: a useful future
 primitive must come from a different writer/corruption path, not from reversing
 DAQ direction or composing the currently configured XCP commands.
@@ -495,7 +495,7 @@ alternate ROM monitor, serial/bootstrap entry, or attacker-selected reset PC.
 This is intentionally a **bounded** static conclusion (`KEYLESS-017`): boot-pin
 straps, undocumented on-chip ROM behavior, and fault-injection-only entry modes
 are outside the CodeFlash model. The software facts are pinned by
-`tests/verify_keyless.py`.
+`tools/test keyless`.
 
 ## 20. Authenticated RAM execution is functional architecture across all three dumps
 
@@ -514,7 +514,7 @@ range-payload execution as observed. Span's retained `security_access_log.json`
 records accepted `send_key` operations for CodeFlash, LocalRAM, and DataFlash
 range dumps, while the same bootstrap profile records the observed target-built
 `FEBF0000/0x1000 -> 10F0 -> FF00` range-payload architecture.
-`tests/verify_keyless.py` pins both the raw body transfer and
+`tools/test keyless` pins both the raw body transfer and
 this retained field provenance (`KEYLESS-018`).
 
 The portability conclusion is deliberately precise: **the authenticated RAM-
@@ -548,7 +548,7 @@ Thus ordinary segmented application diagnostics do not provide a pre-SID
 buffer overflow on this image. The important methodological result is that this
 was a **new static avenue**, not something implied by KEYLESS-015/016. It is
 pinned as `KEYLESS-019` by
-`tests/verify_keyless.py`.
+`tools/test keyless`.
 
 ## 20.2 The event snapshot formatter is structurally unchecked but configuration-safe on S/H/F
 
@@ -581,7 +581,7 @@ dependent rather than structural**. A future or alternate calibration that
 changes event-mask membership, descriptor count/length, or staging capacity can
 invalidate the arithmetic without changing the unchecked formatter itself.
 This is `KEYLESS-020`, pinned by
-`tests/verify_keyless.py` and the compact H-native
+`tools/test keyless` and the compact H-native
 artifact
 `data/generated/corolla_8965H1202000_keyless_event_formatter_decompiler_evidence.json`.
 
@@ -624,7 +624,7 @@ the same exact 18-byte SecurityAccess exchange required by firmware:
 `UseNewSoftwarePassword`/RecoveryInfo state is therefore host persistence, not
 evidence that these target-compatible rows resume a fresh locked ECU without
 SecurityAccess. `TMS-036` and
-`tests/verify_techstream_cuw_timing_recovery.py` pin this V18-specific closure.
+`tests/techstream/verify_techstream_cuw_timing_recovery.py` pin this V18-specific closure.
 
 ## 22. Payload fixtures and key rotation
 

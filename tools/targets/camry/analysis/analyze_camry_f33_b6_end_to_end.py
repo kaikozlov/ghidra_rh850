@@ -8,6 +8,8 @@ single capture can identify the first stage at which an injected B6 disappears.
 """
 from __future__ import annotations
 
+from tools.targets.camry.support import camry_f33_corpus as f33
+from tools import REPO_ROOT
 import argparse
 import hashlib
 import json
@@ -15,11 +17,11 @@ import struct
 from pathlib import Path
 from typing import Any
 
-ROOT = Path(__file__).resolve().parents[4]
-IMAGE = ROOT / "firmware/camry-8965F3307000/CodeFlash.bin"
-CORPUS = ROOT / "data/generated/camry-8965F3307000/decompilations.jsonl"
+ROOT = REPO_ROOT
+IMAGE = f33.IMAGE
+CORPUS = f33.CORPUS
 DEFAULT_OUT = ROOT / "data/generated/camry_f33_b6_end_to_end.json"
-EXPECTED_SHA256 = "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7"
+EXPECTED_SHA256 = f33.IMAGE_SHA256
 
 # Stock functions that establish every software stage after CanIf/PduR mapping.
 FUNCTIONS = {

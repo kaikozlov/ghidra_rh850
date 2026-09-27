@@ -16,21 +16,19 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-import sys
 from pathlib import Path
 from typing import Any
+from tools.targets.corolla.support.corolla_h_constants import CODEFLASH as H_CODE
+from tools import REPO_ROOT
 
-REPO = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO / "tools"))
-from tools.targets.corolla.support.corolla_h_constants import CODEFLASH as H_CODE  # noqa: E402
 
-DEFAULT_OUT = REPO / "data/generated/techstream_v18/tss3_b6_sender_attribution.json"
-P5 = REPO / "data/generated/techstream_v18/p5_lateral_control_semantics.json"
-CUW = REPO / "data/generated/techstream_v18/cuw_frc_corpus.json"
-H_CORR = REPO / "data/generated/corolla_8965H1202000_techstream_correlations.json"
-H_KEY = REPO / "data/generated/corolla_8965H1202000_secoc_key_provenance.json"
-H_B6 = REPO / "data/generated/corolla_8965H1202000_b6_secoc_verification.json"
-H_PROV = REPO / "data/generated/corolla_8965H1202000_lta_command_provenance.json"
+DEFAULT_OUT = REPO_ROOT / "data/generated/techstream_v18/tss3_b6_sender_attribution.json"
+P5 = REPO_ROOT / "data/generated/techstream_v18/p5_lateral_control_semantics.json"
+CUW = REPO_ROOT / "data/generated/techstream_v18/cuw_frc_corpus.json"
+H_CORR = REPO_ROOT / "data/generated/corolla_8965H1202000_techstream_correlations.json"
+H_KEY = REPO_ROOT / "data/generated/corolla_8965H1202000_secoc_key_provenance.json"
+H_B6 = REPO_ROOT / "data/generated/corolla_8965H1202000_b6_secoc_verification.json"
+H_PROV = REPO_ROOT / "data/generated/corolla_8965H1202000_lta_command_provenance.json"
 
 
 def sha256_file(path: Path) -> str:
@@ -145,7 +143,7 @@ def build() -> dict[str, Any]:
         "schema_version": 1,
         "title": "Toyota TSS3 Corolla protected-B6 sender attribution from current Techstream/CUW corpus",
         "sources": {
-            str(path.relative_to(REPO)): {"sha256": sha256_file(path)}
+            str(path.relative_to(REPO_ROOT)): {"sha256": sha256_file(path)}
             for path in (P5, CUW, H_CORR, H_KEY, H_B6, H_PROV, H_CODE)
         },
         "corpus_boundary": {

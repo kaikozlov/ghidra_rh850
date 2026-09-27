@@ -7,6 +7,7 @@ are intentionally not interpreted as CAN-field positions or write commands.
 """
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import binascii
 import gzip
@@ -17,7 +18,7 @@ from pathlib import Path
 
 import numpy as np
 
-ROOT = Path(__file__).resolve().parents[4]
+ROOT = REPO_ROOT
 FIXTURE = ROOT / 'tests/fixtures/camry_2026_cancel_windows.jsonl.gz'
 OUTPUT = ROOT / 'data/generated/camry_2026_cancel_evidence.json'
 

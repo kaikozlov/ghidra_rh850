@@ -11,9 +11,9 @@
 > **Evidence profile:** mixed — verified firmware structure, bounded hardware
 > interpretation, and untested physical-attack hypotheses are kept separate
 >
-> **Verification:** `tests/verify_icus_key_recovery_surface.py`,
-> `tests/verify_icus_software_paths.py`, `tests/verify_secoc.py`,
-> `tests/verify_secoc.py`
+> **Verification:** `tests/firmware/verify_icus_key_recovery_surface.py`,
+> `tests/firmware/verify_icus_software_paths.py`, `tools/test secoc`,
+> `tools/test secoc`
 >
 > **Related:** [software-path assessment](software-path-assessment.md),
 > [application chain](application-chain.md),

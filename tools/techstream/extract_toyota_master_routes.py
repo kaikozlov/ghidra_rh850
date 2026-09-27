@@ -8,15 +8,14 @@ import hashlib
 import json
 import struct
 from pathlib import Path
+from tools.techstream.parse_ddb import DDBParser
+from tools.techstream.ddb_strings import load_string_db
+from tools.techstream.techstream_paths import V18_TECHSTREAM_ROOT
+from tools import REPO_ROOT
 
-from parse_ddb import DDBParser
-from ddb_strings import load_string_db
-from techstream_paths import V18_TECHSTREAM_ROOT
 
-
-REPO = Path(__file__).resolve().parents[2]
 DEFAULT_ROOT = V18_TECHSTREAM_ROOT
-DEFAULT_OUTPUT = REPO / "data/generated/techstream_v18/toyota_master_routes.json"
+DEFAULT_OUTPUT = REPO_ROOT / "data/generated/techstream_v18/toyota_master_routes.json"
 TARGET_DATABASES = ("EPS_P4DK3.ddb", "EPS_CAN_P4DK.ddb", "EMPS_P5.ddb")
 
 
@@ -167,7 +166,7 @@ def region_routes(root: Path, region: str) -> dict:
     return {
         "region": region,
         "source": {
-            "relative_path": db_path.relative_to(REPO).as_posix(),
+            "relative_path": db_path.relative_to(REPO_ROOT).as_posix(),
             "size": len(db_bytes),
             "sha256": sha256(db_bytes),
         },

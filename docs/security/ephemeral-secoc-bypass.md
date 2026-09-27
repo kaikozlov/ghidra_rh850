@@ -427,7 +427,7 @@ runtime. Its usefulness is therefore:
 - a convenient command mailbox for a future resident shim;
 - not, by itself, code execution.
 
-See SEC-BOOT-012 and `tests/verify_xcp.py`.
+See SEC-BOOT-012 and `tools/test xcp`.
 
 ### 6.3 No independent application relocation loader recovered
 
@@ -501,7 +501,7 @@ committed public encrypted fixtures are already accepted by the exact recovered
 | `tests/fixtures/payloads/ram_dump_payload.bin` | `d972d4bf432685217591768600a9abd7820d35b04a72270edc87074365356be2` | `0x1000` |
 | `tests/fixtures/payloads/dataflash_dump_payload.bin` | `d48988366b5e6d2ddd7438caca5e6f6f02daba9b650263c323a2ffd770a06e34` | `0x1000` |
 
-`tests/verify_payload_gate.py` decrypts each with this image's recovered payload
+`tests/runtime/verify_payload_gate.py` decrypts each with this image's recovered payload
 construction and proves:
 
 - callback slot `+0xFD0 = FEBF0000`;
@@ -824,8 +824,8 @@ should validate it in increasing-risk order rather than resume broad xref work.
 
 ## 18. Reproducer
 
-`tests/verify_ephemeral_secoc_bypass.py` pins the RAM-lifetime/MPU/callback
-boundary. `tests/verify_ephemeral_runtime.py` independently pins the callback-free
+`tests/runtime/verify_ephemeral_secoc_bypass.py` pins the RAM-lifetime/MPU/callback
+boundary. `tests/runtime/verify_ephemeral_runtime.py` independently pins the callback-free
 runtime architecture:
 
 - stock boot transition and application CPU-context install;

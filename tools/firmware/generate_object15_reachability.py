@@ -29,7 +29,7 @@ REPO = Path(__file__).resolve().parents[2]
 CF_PATH = REPO / "firmware" / "RH850_P1M-E_CodeFlash.bin"
 
 # Exhaustive Ghidra xref census of UNCONDITIONAL_CALL to 0x65CD8, pinned and
-# re-checked against CodeFlash call encodings by tests/verify_boot_trust.py.
+# re-checked against CodeFlash call encodings by tests/firmware/verify_boot_trust.py.
 DIRECT_CALLS: list[dict] = [
     # callsite, caller_entry, caller_name, index_value or None, index_source,
     # reachable_set (ints), async_persist

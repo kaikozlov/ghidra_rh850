@@ -28,23 +28,21 @@ assist also creates current. The output is bounded review evidence only; product
 output stays disabled.
 """
 from __future__ import annotations
+from tools.toyota_support.passive_capture import iter_route_can as load, sha256_file as sha256
+from tools.toyota_support.toyota_route_opendbc_common import decode_wheel_speed_kph
 
+from tools.targets.camry.support import camry_f33_corpus as f33
+from tools import REPO_ROOT
 import argparse
-import gzip
-import hashlib
 import json
 import math
-import sys
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[4]
-if str(REPO) not in sys.path:
-    sys.path.insert(0, str(REPO))
+REPO = REPO_ROOT
 
-from tools.targets.camry.analysis.analyze_camry_2026_relay_capture import decode_wheel_speed
 from tools.toyota_support.toyota_route_opendbc_common import be_signal
 
-RAW = REPO / "targets/camry-2026/raw-20260827"
+RAW = f33.CAPTURE / "raw-20260827"
 CENSUS = REPO / "data/generated/camry_2026_cruise_lta_edge_census.json"
 PORT = REPO / "data/generated/camry_8965F3307000_tss3_opendbc_port.json"
 OUT = REPO / "data/generated/camry_2026_motor_feedback_correlation.json"
@@ -67,14 +65,6 @@ EDGE_WINDOW_NS = 3_000_000_000
 LAG1_MAX_DT_NS = 15_000_000
 
 
-def sha256(path: Path) -> str:
-    h = hashlib.sha256()
-    with open(path, "rb") as f:
-        for chunk in iter(lambda: f.read(1 << 20), b""):
-            h.update(chunk)
-    return h.hexdigest()
-
-
 def torque_nm(d: bytes) -> float:
     return round(be_signal(d, 71, 8, is_signed=True) * 0.1 + be_signal(d, 139, 4, is_signed=True) * 0.01, 3)
 
@@ -90,15 +80,6 @@ def rate_raw(d: bytes) -> int:
 def motor_current(d: bytes) -> int:
     """0x030 B22:B23 signed big-endian (firmware packer writes value<<16 BE)."""
     return int.from_bytes(d[22:24], "big", signed=True)
-
-
-def load(path: Path):
-    with gzip.open(path, "rt") as f:
-        for line in f:
-            if not line.strip():
-                continue
-            seg, t, bus, addr, data = json.loads(line)
-            yield int(seg), int(t), int(bus), int(addr), bytes.fromhex(data)
 
 
 def pearson(a: list[float], b: list[float]) -> float:
@@ -213,7 +194,7 @@ def analyze_drive(label: str, path: Path, census_intervals: list[dict], census_c
             elif addr == 0x025 and len(dat) == 32:
                 t25.append((t, dat))
             elif addr == 0x0AA and len(dat) == 8:
-                speeds.append((t, decode_wheel_speed(dat)))
+                speeds.append((t, decode_wheel_speed_kph(dat)))
             elif addr == 0x08A and len(dat) == 32:
                 a8.append((seg, t, dat))
         if addr == 0x0B6:

@@ -7,6 +7,7 @@ This extractor never connects to a vehicle and never generates CAN traffic.
 """
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import gzip
 import hashlib
@@ -15,7 +16,7 @@ import json
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[4]
+ROOT = REPO_ROOT
 SOURCES = (
     ('2026-09-04', '0000003b--62262eb7a1', 54, 1),
     ('2026-09-04', '0000003b--62262eb7a1', 90, 1),

@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """Build residual application CAN/PduR transport closure for Corolla H."""
 from __future__ import annotations
-import argparse,hashlib,json,re,struct,sys
+from tools import REPO_ROOT
+import argparse,hashlib,json,re,struct
 from pathlib import Path
 from tools.targets.sienna.sienna_target import CODEFLASH as SIENNA_CODEFLASH
 from tools.targets.corolla.support.corolla_h_constants import RAW_DUMP as H_RAW_DUMP
-ROOT=Path(__file__).resolve().parents[4];sys.path.insert(0,str(ROOT))
-from tools.variants.compare_variant_application_rx import find_normal_rx_descriptor_table
+ROOT=REPO_ROOT;from tools.variants.compare_variant_application_rx import find_normal_rx_descriptor_table
 SRAW=SIENNA_CODEFLASH;HRAW=H_RAW_DUMP;HEV=ROOT/'data/generated/corolla_8965H1202000_application_transport_decompiler_evidence.json';OUT=ROOT/'data/generated/corolla_8965H1202000_application_transport_residue.json'
 TX=struct.Struct('<IBBH')
 ROLES=[(0x7FF86,'application_can_special_rx_demux',0x7A382),(0x80006,'application_can_normal_rx_demux',0x7A402),(0x809C6,'application_pdu_transmit_router',0x7ADC2),(0x80C44,'application_pdu_rx_router',0x7B040),(0x4C158,'application_pack_can_394',0x47ADA)]

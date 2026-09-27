@@ -10,7 +10,7 @@
 >
 > **Canonical artifacts:** —
 >
-> **Verification:** `tests/verify_secoc.py`
+> **Verification:** `tools/test secoc`
 >
 > **Related:** [key-storage](key-storage-and-lifecycle.md), [dataflash](../../storage/dataflash.md)
 
@@ -46,7 +46,7 @@ exposes serialized command-5 plumbing and a foreground hook architecture for a
 minimum signing proxy (SECOC-041). Static analysis still does not establish
 live slot-4 command-5 permission or runtime performance.
 
-`../tests/verify_secoc.py` checks the configuration, routing,
+`tools/test secoc` checks the configuration, routing,
 disabled KAT gate, command-5/command-7 driver families, selector validation,
 dormant test inputs, key-slot selection, freshness/MAC profile, and object-15
 state directly from the committed images.
@@ -592,7 +592,7 @@ cannot exploit an error-code inversion in the recovered chain. Any bypass must
 instead compromise the key/use boundary, modify application code/state, exploit
 a separate parser/control-flow defect, or find an ICU-S policy failure.
 
-`tests/verify_secoc.py` pins the relevant worker bodies and
+`tools/test secoc` pins the relevant worker bodies and
 exact result-branch instructions.
 
 ## 5.6 Volatile freshness creates a reset-window replay boundary
@@ -751,7 +751,7 @@ and behavior when sync or legitimate protected traffic advances concurrently.
 
 ## 5.10 Bank-0 crypto test: RID 0x100E → CAN 0x13..0x1A → command 8 (SECOC-047/048)
 
-> **Verification:** `tests/verify_crypto_test_bank0_composition.py` (32
+> **Verification:** `tests/firmware/verify_crypto_test_bank0_composition.py` (32
 > assertions: raw CodeFlash pins, table decodes, and a deterministic composition
 > model reproducing the misattribution sequence)
 >
@@ -902,7 +902,7 @@ Impact classification:
   benign: the bank-0 collector runs while the diagnostic owns the driver, and
   each completion is routed correctly once only one machine is active.
 
-`tests/verify_crypto_test_bank0_composition.py` reproduces the full sequence
+`tests/firmware/verify_crypto_test_bank0_composition.py` reproduces the full sequence
 as a deterministic composition model and pins every gate/dispatch/scrub body
 named above.
 
@@ -1125,9 +1125,9 @@ exact-EPS branch selection and package target remain dynamic questions.
 
 ## 9. SecOC acceptance-gate recovery (SECOC-029)
 
-> **Verification:** `tests/verify_secoc.py`,
-> `tests/verify_secoc.py`, and
-> `tests/verify_secoc.py`.
+> **Verification:** `tools/test secoc`,
+> `tools/test secoc`, and
+> `tools/test secoc`.
 >
 > **Evidence grade:** verified firmware structure for result polarity, local gate
 > direction, PduR/COM delivery reachability, and exact Sienna patch encoding;
@@ -1681,7 +1681,7 @@ actual bench observations from later offline-only verification:
   final Flash-level PASS, or stationary openpilot/SecOC functional test.
 
 The target-sector identity pins do not add an independent semantic observation.
-`tests/verify_lochuan_patch_semantics.py` reproduces the published original
+`tests/tooling/verify_lochuan_patch_semantics.py` reproduces the published original
 sector SHA-256 `f0e76a887c2b85609cee4cd44620db068d414edfb44bbafe551ec440b2a0e9d0`
 directly from this repository's `0x60000..0x67FFF` CodeFlash bytes and reproduces
 candidate SHA-256 `c67d992a8413d020fb16464d58654ab3fbd84139809b6b544c6142d6dcfeeb7b`
@@ -1872,7 +1872,7 @@ the SecOC effect.
 | CRC fixup on reconstructed `4512000` | `0x41C90FF2` | historical target had a different candidate CRC |
 | Stability expectation | narrow semantic bypass | inconsistent state / delayed-failure risk |
 
-The historical distinction is checked by `tests/verify_lochuan_patch_semantics.py`.
+The historical distinction is checked by `tests/tooling/verify_lochuan_patch_semantics.py`.
 
 ## References
 

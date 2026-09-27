@@ -102,7 +102,7 @@ if [[ ! -s "$RESOLUTION" ]]; then
   exit 1
 fi
 
-uv run --locked python "$ROOT/tools/security/build_secoc_patch_manifest.py" \
+uv run --locked python -m tools.security.build_secoc_patch_manifest \
   "$RESOLUTION" "$IMAGE" -o "$OUT"
 
 cat "$OUT"

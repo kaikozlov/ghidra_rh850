@@ -7,6 +7,7 @@ on the wire.  It does not infer receiver acceptance from a Panda TX echo.
 """
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import hashlib
 import json
@@ -18,7 +19,7 @@ from typing import Any
 
 DEFAULT_LOG_ROOT = Path("/Users/kai/dev/inspect/logs/camry-2026")
 DEFAULT_OPENPILOT = Path("/Users/kai/dev/inspect/repos/kai-openpilot")
-DEFAULT_OUT = Path(__file__).resolve().parents[4] / "data/generated/camry_b6_freshness_contract.json"
+DEFAULT_OUT = REPO_ROOT / "data/generated/camry_b6_freshness_contract.json"
 
 
 def load_logreader(openpilot_root: Path):

@@ -19,13 +19,13 @@ from pathlib import Path
 from typing import Any
 
 import dnfile
+from tools.techstream.extract_pcs_data_viewer_tss3_dictionary import load_culture, sha256_file
+from tools.techstream.extract_pcs_data_viewer_tss3_managed_semantics import _interpret_collection, _normalize
+from tools.techstream.techstream_paths import resolve_gts_root
+from tools import REPO_ROOT
 
-from extract_pcs_data_viewer_tss3_dictionary import load_culture, sha256_file
-from extract_pcs_data_viewer_tss3_managed_semantics import _interpret_collection, _normalize
-from techstream_paths import resolve_gts_root
 
-REPO = Path(__file__).resolve().parents[2]
-DEFAULT_OUT = REPO / "data/generated/gtsplus_2026/pcs_data_viewer_adu_semantics.json"
+DEFAULT_OUT = REPO_ROOT / "data/generated/gtsplus_2026/pcs_data_viewer_adu_semantics.json"
 
 ADU_DEFINE = "PCSDataViewer.ADUDetailInfo"
 ADU_RECORD = "PCSDataViewer.P6DetailBitAssignInfo"

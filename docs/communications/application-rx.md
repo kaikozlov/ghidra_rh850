@@ -10,7 +10,7 @@
 >
 > **Canonical artifacts:** `data/application_rx_map.csv` (final map), `data/application_rx_signal_evidence.csv` (extraction evidence)
 >
-> **Verification:** `tests/verify_application_receive.py`
+> **Verification:** `tests/diagnostics/verify_application_receive.py`
 >
 > **Related:** [application-tx](application-tx.md), [firmware-architecture](../architecture/firmware-architecture.md)
 
@@ -23,7 +23,7 @@ machine-readable map is `data/application_rx_map.csv` (one row per signal with
 repeated parent-PDU columns). Recovered extraction parameters come from
 `data/application_rx_signal_evidence.csv` (Ghidra exporter
 `ExportApplicationRxSignalEvidence.java`). Independent raw checks are in
-`tests/verify_application_receive.py`; `AssertApplicationReceiveMap.java`
+`tests/diagnostics/verify_application_receive.py`; `AssertApplicationReceiveMap.java`
 audits destination WRITE / consumer READ ownership under `make verify-processor`.
 
 ## 1. Executive summary
@@ -521,7 +521,7 @@ The three tables contain 91 nonzero slots and **88 unique callback entry
 points**. The simple dispatcher consumes exactly `param_3[0..2]`; variant D
 consumes the full 13-pointer `param_3[0..12]` shape across its lifecycle states.
 The table byte hashes, setup bodies, literal table loads, and direct dispatcher
-calls are pinned by `tests/verify_deadline_monitor_dispatch_tables.py`.
+calls are pinned by `tests/firmware/verify_deadline_monitor_dispatch_tables.py`.
 Consequently these 88 targets are not speculative pointer scans: they are
 configured callback entries on live COM deadline-monitor paths and are seeded
 into the persistent graph. This is a graph-completeness result; it does not by

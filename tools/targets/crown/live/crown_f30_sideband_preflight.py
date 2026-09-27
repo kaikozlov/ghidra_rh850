@@ -10,6 +10,7 @@ consumed by the UDS client as well as the outer observation loop.
 """
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import json
 import sys
@@ -17,8 +18,7 @@ import time
 from pathlib import Path
 from typing import Any
 
-ROOT = Path(__file__).resolve().parents[4]
-sys.path.insert(0, str(ROOT))
+ROOT = REPO_ROOT
 
 from exploit.common.ram_exec import (  # noqa: E402
     _import_uds,

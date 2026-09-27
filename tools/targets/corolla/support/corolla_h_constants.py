@@ -1,16 +1,23 @@
 #!/usr/bin/env python3
 """Shared structural constants for exact Corolla-H evidence/build pairs.
 
-Only target identity/path and byte-table coordinates live here. Semantic proof
-logic remains in the individual extractors/builders.
+Target identity and byte-table coordinates live here; acquisition files resolve
+through the analysis-target registry (capture roots), not ad-hoc repo joins.
+Semantic proof logic remains in the individual extractors/builders.
 """
 from __future__ import annotations
-from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[4]
+from tools.project.analysis_target import path
+
+H_TARGET_NAME = "corolla-8965H1202000"
+F_TARGET_NAME = "corolla-8965F1208000"
+H_CAPTURE = path(H_TARGET_NAME, "capture_root")
+F_CAPTURE = path(F_TARGET_NAME, "capture_root")
+
 SOFTWARE_ID = "8965H1202000"
-CODEFLASH = REPO / "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin"
-RAW_DUMP = REPO / "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin"
+CODEFLASH = H_CAPTURE / "normalized/8965H1202000_CodeFlash.bin"
+RAW_DUMP = H_CAPTURE / "raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin"
+F_RAW_DUMP = F_CAPTURE / "dump_codeflash_00000000_00200000_20260821-152033.bin"
 
 # name, base, count, stride, pointer offsets
 SIENNA_DEADLINE_TABLES = (

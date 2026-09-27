@@ -8,7 +8,7 @@
 > **Reference output:**
 > `data/generated/dataflash_structural_analysis_4512000.json`
 >
-> **Verification:** `tests/verify_toyota_dataflash_analyzer.py`
+> **Verification:** `tests/toyota/verify_toyota_dataflash_analyzer.py`
 
 This analyzer is the offline end point for a future Corolla/Sienna/Yaris EPS
 DataFlash artifact. It deliberately separates **storage-structure evidence**

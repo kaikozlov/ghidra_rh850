@@ -27,6 +27,8 @@ Output: data/generated/camry_2026_lateral_flow_trace.json (byte-stable).
 """
 from __future__ import annotations
 
+from tools import REPO_ROOT
+from tools.targets.camry.support import camry_f33_corpus as f33
 import gzip
 import hashlib
 import json
@@ -35,16 +37,16 @@ import sys
 from collections import Counter
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[4]
+REPO = REPO_ROOT
 OUT = REPO / "data/generated/camry_2026_lateral_flow_trace.json"
 
 DRIVES = {
-    "drive_a": "targets/camry-2026/raw-20260827/camry_relay_route_can_20260827.ndjson.gz",
-    "drive_b": "targets/camry-2026/raw-20260827/camry_relay_lta_confirm_route_can_20260827.ndjson.gz",
+    "drive_a": "raw-20260827/camry_relay_route_can_20260827.ndjson.gz",
+    "drive_b": "raw-20260827/camry_relay_lta_confirm_route_can_20260827.ndjson.gz",
 }
 PARKED = {
-    "post_repin_nrtd": "targets/camry-2026/raw-20260827/camry_post_repin_nrtd_20260827.json.gz",
-    "post_repin_ready": "targets/camry-2026/raw-20260827/camry_post_repin_ready_20260827.json.gz",
+    "post_repin_nrtd": "raw-20260827/camry_post_repin_nrtd_20260827.json.gz",
+    "post_repin_ready": "raw-20260827/camry_post_repin_ready_20260827.json.gz",
 }
 
 ABSENT_IDS = [0x351, 0x394, 0x4A3, 0x4C8, 0x0B6, 0x131, 0x2E4]
@@ -533,7 +535,7 @@ def main() -> int:
     out_path = Path(sys.argv[1]) if len(sys.argv) > 1 else OUT
     drives = {}
     for name, rel in DRIVES.items():
-        path = REPO / rel
+        path = f33.CAPTURE / rel
         total, sha_u, counts, streams, b1_streams = parse_drive(path)
         rows_08a = streams[0x08A]
         id11 = id11_interval(rows_08a)
@@ -544,7 +546,7 @@ def main() -> int:
         controls = {f"0x{c:03X}": {"src0": counts.get((0, c), 0), "src2": counts.get((2, c), 0)}
                     for c in CONTROL_IDS}
         drives[name] = {
-            "source": rel,
+            "source": str((f33.CAPTURE / rel).relative_to(REPO)),
             "sha256_compressed": hashlib.sha256(path.read_bytes()).hexdigest(),
             "sha256_uncompressed_ndjson": sha_u,
             "incoming_frames": total,
@@ -566,10 +568,10 @@ def main() -> int:
 
     parked = {}
     for name, rel in PARKED.items():
-        data = json.loads(gzip.open(REPO / rel, "rb").read())
+        data = json.loads(gzip.open(f33.CAPTURE / rel, "rb").read())
         cnt = Counter(fr["addr"] for fr in data["frames"])
         parked[name] = {
-            "source": rel,
+            "source": str((f33.CAPTURE / rel).relative_to(REPO)),
             "frames": len(data["frames"]),
             "absent_carriers": {f"0x{aid:03X}": cnt.get(aid, 0) for aid in ABSENT_IDS},
             "controls": {f"0x{c:03X}": cnt.get(c, 0) for c in CONTROL_IDS},

@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 """Build deterministic closure for the nine remaining named steering roles."""
 from __future__ import annotations
+from tools.targets.sienna.sienna_target import CORPUS as SIENNA_CORPUS
+from tools import REPO_ROOT
 import argparse,hashlib,json,re
 from pathlib import Path
 from tools.targets.sienna.sienna_target import CODEFLASH as SIENNA_CODEFLASH
 from tools.targets.corolla.support.corolla_h_constants import RAW_DUMP as H_RAW_DUMP
-ROOT=Path(__file__).resolve().parents[4]
+ROOT=REPO_ROOT
 EV=ROOT/'data/generated/corolla_8965H1202000_steering_nested_decompiler_evidence.json'
-SDEC=ROOT/'data/generated/decompilations.jsonl'
+SDEC = SIENNA_CORPUS
 HRAW=H_RAW_DUMP
 SRAW=SIENNA_CODEFLASH
 OUT=ROOT/'data/generated/corolla_8965H1202000_steering_nested.json'

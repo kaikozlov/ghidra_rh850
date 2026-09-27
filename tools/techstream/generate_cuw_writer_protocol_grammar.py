@@ -10,19 +10,19 @@ from __future__ import annotations
 import argparse, collections, csv, hashlib, io, json, struct
 from pathlib import Path
 
-from techstream_paths import V18_DIAGNOSTICS_ROOT
+
 from typing import Any
 import pefile
-from pe_utils import imports as pe_imports
-import sys
 
-REPO=Path(__file__).resolve().parents[2]
-sys.path.insert(0,str(REPO))
+from tools.techstream.techstream_paths import V18_DIAGNOSTICS_ROOT
+from tools.techstream.pe_utils import imports as pe_imports
 from tools.techstream.cuw_parameter import decode_parameter_ini, factory_routes_from_ini_root
+from tools import REPO_ROOT
+
 
 ROOT=V18_DIAGNOSTICS_ROOT
 CUW=ROOT/'Calibration Update Wizard'
-OUT=REPO/'data/generated/techstream_v18/cuw_writer_protocol_grammar.json'
+OUT=REPO_ROOT/'data/generated/techstream_v18/cuw_writer_protocol_grammar.json'
 
 SUPPORT={'TCUWCanCommonPrepareWriter.dll','TCUWCanCommonFlashWriter.dll','TCUWUnifiedUtils.dll','TCUWHINOUtils.dll','TCUWSBRUtils.dll','TCUWPSAUtils.dll','TCUWCanDiagCommUtils.dll'}
 UDS={0x10,0x11,0x22,0x27,0x28,0x2e,0x31,0x34,0x36,0x37,0x3e,0x85}

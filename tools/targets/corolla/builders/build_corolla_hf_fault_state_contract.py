@@ -2,6 +2,7 @@
 """Build the exact H/F 0x394 DEM-class/fault-state contract."""
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import hashlib
 import json
@@ -9,7 +10,7 @@ import struct
 from pathlib import Path
 from tools.targets.corolla.support.corolla_h_constants import CODEFLASH as H_CODEFLASH
 
-REPO = Path(__file__).resolve().parents[4]
+REPO = REPO_ROOT
 IMAGE = H_CODEFLASH
 EVID = REPO / "data/generated/corolla_8965H1202000_openpilot_state_bridge_decompiler_evidence.json"
 TECH = REPO / "data/generated/corolla_8965H1202000_techstream_correlations.json"

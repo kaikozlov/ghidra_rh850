@@ -15,14 +15,12 @@ sender candidate.
 """
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import json
-import sys
 from dataclasses import dataclass
-from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[4]
-sys.path.insert(0, str(REPO))
+REPO = REPO_ROOT
 
 from tools.toyota_support.toyota_e2e_p05 import e2e_p05_check, e2e_p05_protect
 

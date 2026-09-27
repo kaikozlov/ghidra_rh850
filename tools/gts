@@ -1,4 +1,6 @@
 #!/bin/sh
+# tools/gts — official GTS+/Techstream discovery and Toyota vocabulary
+# (tools.techstream.gts.cli module).
 set -eu
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-exec uv run --project "$ROOT" --locked python "$ROOT/tools/techstream/gts_cli.py" "$@"
+exec uv run --project "$ROOT" --locked python -m tools.techstream.gts.cli "$@"

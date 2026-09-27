@@ -535,8 +535,8 @@ Primary local evidence:
 - direct `ghidra-cli` decompilation/xrefs for `0x8A782`, `0x69018`, `0x6875E`,
   `0x68B42`, `0x69042`, `0x69068`, `0x87A94`, `0x87B46`, `0x87CCC`, `0x8954C`,
   and `0x89630`
-- `tests/verify_secoc_command5_oracle_assessment.py`
-- `tests/verify_secoc_command5_experiment.py`
+- `tests/runtime/verify_secoc_command5_oracle_assessment.py`
+- `tests/runtime/verify_secoc_command5_experiment.py`
 
 External architecture references:
 

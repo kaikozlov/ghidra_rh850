@@ -1,0 +1,571 @@
+#!/usr/bin/env python3
+"""Verify the one-payload functional-0x777 TSS3 signer implementation."""
+from __future__ import annotations
+
+import json
+import os
+import subprocess
+import sys
+import tempfile
+import types
+from pathlib import Path
+from unittest import mock
+
+from tools import REPO_ROOT
+ROOT = REPO_ROOT
+
+from exploit.ephemeral_runtime import build_tss3_unified_b6_signer as unified_builder
+from exploit.ephemeral_runtime import tss3_unified_b6_signer as host
+from exploit.ephemeral_runtime import camry_f33_runtime_replay_discriminator as replay_guard
+
+BUILDER = ROOT / "exploit/ephemeral_runtime/build_tss3_unified_b6_signer.py"
+KIT_BUILDER = ROOT / "tools/targets/tss3/builders/build_tss3_unified_b6_signer_kit.py"
+TARGETS = {
+    "camry-8965F3307000": ("0xFEBE5751", "split-telemetry", 462, 596, "supervised-continuous", 7),
+    "corolla-8965H1202000": ("0xFEBE563D", "corolla-resident-prefix", 522, 458, "supervised-continuous", 7),
+    "corolla-8965F1208000": ("0xFEBE563D", "corolla-resident-prefix", 522, 458, "supervised-continuous", 7),
+    "crown-8965F3012000": ("0xFEBE527D", "split-telemetry", 462, 596, "supervised-continuous", 7),
+}
+
+
+def check(label: str, condition: object) -> None:
+    if not condition:
+        raise AssertionError(label)
+    print(f"[PASS] {label}")
+
+
+check("C7 is recurring control and C6 is split-target installation only",
+      host.loader_frame(3, bytes.fromhex("11223344")) == bytes.fromhex("07c6c60311223344") and
+      host.replacement_frame(7, 0x1234) == bytes.fromhex("07c7c70712340000") and
+      host.release_frame() == bytes.fromhex("07c7c70000000000"))
+
+post_repin = host.configure_topology(host.TOPOLOGY_CAMRY_POST_REPIN, target_name=host.CAMRY_F33_TARGET)
+check("exact Camry can select the relay-correct post-repin host route",
+      post_repin == {"name": "camry-post-repin", "control_bus": 0, "diagnostic_bus": 0} and
+      host.CONTROL_BUS == 0 and host.ROUTE.bus == 0)
+try:
+    host.configure_topology(host.TOPOLOGY_CAMRY_POST_REPIN, target_name="crown-8965F3012000")
+except host.UnifiedSignerError:
+    pass
+else:
+    raise AssertionError("non-Camry target accepted Camry post-repin topology")
+stock = host.configure_topology(host.TOPOLOGY_STOCK, target_name=host.CAMRY_F33_TARGET)
+check("ordinary topology remains the default bus1 route",
+      stock == {"name": "stock", "control_bus": 1, "diagnostic_bus": 1} and
+      host.CONTROL_BUS == 1 and host.ROUTE.bus == 1)
+
+class NrtdGuardPanda:
+    instance = None
+    def __init__(self):
+        type(self).instance = self
+        self.calls = 0
+        self.closed = False
+    def set_safety_mode(self, *_args): pass
+    def can_recv(self):
+        self.calls += 1
+        if self.calls == 1:
+            return [(replay_guard.READY_CAN_ID, bytes.fromhex("8000000000000000"), 1)]
+        if self.calls < 6:
+            return []
+        return [(replay_guard.READY_CAN_ID, bytes.fromhex("00007f0000000000"), 1)]
+    def close(self): self.closed = True
+
+class NrtdGuardClock:
+    def __init__(self): self.t = 0.0
+    def monotonic(self):
+        self.t += 0.01
+        return self.t
+
+nrtd_clock = NrtdGuardClock()
+with (mock.patch.dict(sys.modules, {"panda": types.SimpleNamespace(Panda=NrtdGuardPanda)}),
+      mock.patch.object(replay_guard, "ensure_boardd_stopped", return_value=None),
+      mock.patch.object(replay_guard.time, "monotonic", side_effect=nrtd_clock.monotonic),
+      mock.patch.object(replay_guard.time, "sleep", return_value=None)):
+    nrtd_guard = replay_guard.verify_nrtd_ready(
+        timeout=0.5, route=types.SimpleNamespace(elm327_param=1), ready_buses=frozenset({1}),
+    )
+check("NRTD guard drains stale READY backlog before evaluating fresh 0x51E",
+      nrtd_guard["ready_values"] == [0] and nrtd_guard["rx_backlog_drained"] is True and
+      NrtdGuardPanda.instance is not None and NrtdGuardPanda.instance.closed is True)
+post_replace_raw = bytearray(host.SPLIT_TELEMETRY_SIZE)
+post_replace_raw[8:12] = bytes.fromhex("d4a561f5")
+post_replace_raw[12:16] = bytes.fromhex("11223344")
+post_replace_raw[17] = 1
+post_replace = host.decode_split_telemetry(bytes(post_replace_raw))
+check("Camry/Crown telemetry distinguishes sticky oracle from latest trailer equality",
+      post_replace["oracle_latched"] is True and post_replace["native_verified"] is True and
+      post_replace["latest_trailer_equality"] is False and post_replace["native_signature_match"] is False)
+postauth_raw = bytearray(host.SPLIT_TELEMETRY_SIZE)
+postauth_raw[0:4] = (7).to_bytes(4, "little")
+postauth_raw[4:8] = (5).to_bytes(4, "little")
+postauth_raw[16] = 23
+postauth_raw[17] = 1
+postauth = host.decode_postauth_telemetry(bytes(postauth_raw))
+check("post-auth telemetry reports native publications and application overrides without inventing command5 work",
+      postauth["native_publication_count"] == 7 and postauth["override_count"] == 5 and
+      postauth["last_control_seq"] == 23 and postauth["native_publication_observed"] is True and
+      postauth["command5_attempts"] == 0 and postauth["native_signature_match"] is False)
+healthy_frc = {
+    "0x1903": host._decode_frc_bootstrap_did(0x1903, bytes.fromhex("01")),
+    "0x1905": host._decode_frc_bootstrap_did(0x1905, bytes.fromhex("8080")),
+    "0x1906": host._decode_frc_bootstrap_did(0x1906, bytes.fromhex("e080e0008000")),
+}
+faulted_frc = {
+    "0x1903": host._decode_frc_bootstrap_did(0x1903, bytes.fromhex("01")),
+    "0x1905": host._decode_frc_bootstrap_did(0x1905, bytes.fromhex("8000")),
+    "0x1906": host._decode_frc_bootstrap_did(0x1906, bytes.fromhex("e080e0008080")),
+}
+check("stale-030 bootstrap gate distinguishes healthy DRCC permission from observed denial",
+      host._healthy_frc_drcc_baseline(healthy_frc) is True and
+      host._healthy_frc_drcc_baseline(faulted_frc) is False)
+
+class CapturePanda:
+    def __init__(self):
+        self.frame = bytes.fromhex("000000ffc400201b00ffc0ff9e00003f22000000ff9e007000000000b96152f6")
+    def can_recv(self):
+        return [(0x030, self.frame, 1)]
+
+class CaptureClock:
+    def __init__(self): self.t = 0.0
+    def monotonic(self):
+        self.t += 0.01
+        return self.t
+    def monotonic_ns(self): return int(self.t * 1e9)
+
+capture_clock = CaptureClock()
+with (mock.patch.object(host.time, "monotonic", side_effect=capture_clock.monotonic),
+      mock.patch.object(host.time, "monotonic_ns", side_effect=capture_clock.monotonic_ns),
+      mock.patch.object(host.time, "sleep", return_value=None)):
+    captured_030 = host._capture_latest_native_030(CapturePanda(), duration=0.18)
+check("bootstrap bridge captures a fresh exact native bus1 0x030 before programming handoff",
+      captured_030["count"] >= host.BOOTSTRAP_030_MIN_CAPTURE_FRAMES and
+      captured_030["bus"] == 1 and captured_030["can_id"] == "0x030" and
+      captured_030["frame_hex"] == CapturePanda().frame.hex() and captured_030["age_ms"] <= 30.0)
+
+class PreservePanda:
+    def __init__(self): self.safety_changes = []
+    def set_safety_mode(self, *args): self.safety_changes.append(args)
+
+class PreserveClient:
+    def __init__(self): self.sessions = []
+    def diagnostic_session_control(self, session): self.sessions.append(session)
+
+class PreserveSessionType:
+    PROGRAMMING = 2
+
+class PreserveUds:
+    SESSION_TYPE = PreserveSessionType
+    class InvalidServiceIdError(Exception): pass
+    class MessageTimeoutError(Exception): pass
+    class NegativeResponseError(Exception): pass
+
+preserve_panda = PreservePanda()
+preserve_client = PreserveClient()
+preserve_reads = iter(((None, None), ("022121212121212121212121212121212121212121212121212121212121212121", None)))
+with (mock.patch.object(host, "_make_uds_client", return_value=preserve_client),
+      mock.patch.object(host, "_read_f181", side_effect=lambda *a, **k: next(preserve_reads)),
+      mock.patch.object(host, "panda_health_snapshot", return_value={"health": {}, "can_health": {}}),
+      mock.patch.object(host.time, "sleep", return_value=None)):
+    boot_route, preserve_telemetry = host._enter_programming_preserve_safety(
+        type("B", (), {"target": {"boot_f181_hex": "022121212121212121212121212121212121212121212121212121212121212121"}})(),
+        preserve_panda, PreserveUds(), reappearance_timeout=1.0,
+    )
+check("bridged boot rediscovery preserves allOutput instead of re-entering ELM327",
+      preserve_panda.safety_changes == [] and preserve_client.sessions == [2] and
+      boot_route["tx_bus"] == 1 and preserve_telemetry["rediscovery_mode"] == "same-bus-f181-preserve-safety")
+
+for target, spec in unified_builder.TARGETS.items():
+    image = Path(spec["image"]).read_bytes()
+    signature = int.from_bytes(
+        image[unified_builder.BOOT_FAMILY_PROBE_ADDR:unified_builder.BOOT_FAMILY_PROBE_ADDR + 4], "little"
+    )
+    check(
+        f"{target}: universal dispatcher has an exact low-CodeFlash boot-family discriminator",
+        signature == unified_builder.BOOT_FAMILY_SIGNATURES[spec["boot_family"]],
+    )
+
+# The temporary helper transit is deliberately the last 1 KiB of exact GlobalRAM.
+# Every supported image is SHA-bound separately by the builder; independently pin
+# the useful negative that no aligned CodeFlash pointer targets the transit span.
+for target, spec in unified_builder.TARGETS.items():
+    image = Path(spec["image"]).read_bytes()
+    refs = []
+    for off in range(0, len(image) - 3, 4):
+        value = int.from_bytes(image[off:off + 4], "little")
+        if unified_builder.UNIVERSAL_HELPER_TRANSIT_BASE <= value < (
+                unified_builder.UNIVERSAL_HELPER_TRANSIT_BASE + unified_builder.UNIVERSAL_HELPER_TRANSIT_LIMIT):
+            refs.append((off, value))
+    check(f"{target}: universal GlobalRAM helper transit has no aligned pointer literal", refs == [])
+    corpus = ROOT / "data/generated" / target / "decompilations.jsonl"
+    data_refs = []
+    for line in corpus.read_text(encoding="utf-8").splitlines():
+        row = json.loads(line)
+        if row.get("record") != "function":
+            continue
+        for ref in row.get("data_references", []):
+            address = int(ref["to_addr"], 16)
+            if unified_builder.UNIVERSAL_HELPER_TRANSIT_BASE <= address < (
+                    unified_builder.UNIVERSAL_HELPER_TRANSIT_BASE + unified_builder.UNIVERSAL_HELPER_TRANSIT_LIMIT):
+                data_refs.append((row["entry_addr"], ref["from_addr"], ref["to_addr"], ref["ref_type"]))
+    check(f"{target}: recovered application graph has no direct GlobalRAM transit reference", data_refs == [])
+
+built: dict[str, tuple[dict, Path]] = {}
+with tempfile.TemporaryDirectory(prefix="verify-tss3-unified-") as td:
+    root = Path(td)
+    out = root / "universal"
+    proc = subprocess.run(
+        [sys.executable, str(BUILDER), "--target", "all", "--output-dir", str(out)],
+        cwd=ROOT, check=True, capture_output=True, text=True,
+    )
+    printed = json.loads(proc.stdout)
+    universal = printed["universal"]
+    payload_path = out / universal["payload"]["path"]
+    stage_path = out / universal["staging"]["path"]
+    payload = payload_path.read_bytes(); stage = stage_path.read_bytes()
+    check("one authenticated payload contains all three runtime profiles",
+          len(payload) == 0x1000 and universal["payload"]["size"] == 0x1000 and
+          universal["staging"]["size"] == len(stage) < unified_builder.UNIVERSAL_STAGING_LIMIT and
+          set(universal["profiles"]) == {"camry-f33", "crown-f30", "corolla-hf"} and
+          universal["dispatcher"]["boot_family_probe_address"] == "0x00000C80" and
+          universal["dispatcher"]["boot_family_signatures"] == {"f3": "0x9D230D21", "corolla": "0x0030F6F3"} and
+          universal["dispatcher"]["identity_address"] == "0x00020860" and
+          universal["dispatcher"]["ordering"] == "low boot-family signature -> exact family boot init/validity -> application identity" and
+          universal["helper_transit"]["base"] == "0xFEF07C00")
+    transit_mpu = universal["helper_transit"]["mpu"]
+    check("universal GlobalRAM transit is MPU R/W/X in both recovered application contexts",
+          set(transit_mpu) == set(unified_builder.TARGETS) and
+          all(row["mpu_region"] == 12 and row["mpu_bounds"] == ["0xFEC00000", "0xFFFFFFFC"] and
+              row["ctx0_mpat"] == row["ctx1_mpat"] == "0x000000B8" and
+              row["aligned_codeflash_pointer_hits"] == [] for row in transit_mpu.values()))
+    for profile, row in universal["profiles"].items():
+        resident = (out / row["resident_path"]).read_bytes()
+        helper = (out / row["helper_path"]).read_bytes()
+        check(f"{profile}: profile bytes are embedded byte-exact in universal staging",
+              stage[row["resident_offset"]:row["resident_offset"] + len(resident)] == resident and
+              stage[row["helper_offset"]:row["helper_offset"] + len(helper)] == helper)
+
+    common_payload_sha = universal["payload"]["sha256"]
+    for target, (buffer, state_model, _resident_size, _helper_size, runtime_mode, host_loss_ticks) in TARGETS.items():
+        meta = printed["targets"][target]
+        meta_path = out / f"{target.replace('-', '_')}_unified_b6_signer.json"
+        check(f"{target}: exact common functional control",
+              meta["schema"] == "tss3-unified-b6-signer-build-v1" and
+              meta["control"]["can_id"] == "0x777" and meta["control"]["bus"] == 1 and
+              meta["control"]["extended"] is False and meta["control"]["dcm_buffer"] == buffer and
+              meta["control"]["loader_frame"] is None and
+              meta["control"]["runtime_frame"] == "07 C7 C7 seq target_hi target_lo 00 00" and
+              meta["control"]["runtime_mode"] == runtime_mode and
+              meta["control"]["host_loss_ticks"] == host_loss_ticks and
+              meta["control"]["release_sequence_zero"] is True and
+              meta["control"]["functional_nrc11_suppressed"] is True and
+              meta["install_strategy"] == "universal-one-shot" and meta["state_model"] == state_model)
+        built[target] = (meta, meta_path)
+
+    check("all target wrappers use one payload SHA",
+          {meta["artifacts_sha256"]["payload"] for meta, _ in built.values()} == {common_payload_sha})
+    check("Corolla H/F wrappers share the same resident and helper runtime bytes",
+          built["corolla-8965H1202000"][0]["resident"]["sha256"] == built["corolla-8965F1208000"][0]["resident"]["sha256"] and
+          built["corolla-8965H1202000"][0]["helper"]["sha256"] == built["corolla-8965F1208000"][0]["helper"]["sha256"])
+
+    # Execute the exact compiled Corolla H helper's C7 lease gates in the
+    # target Ghidra emulator. This protects continuous 100-Hz host ownership,
+    # seven-tick host-loss expiry, zero release, and empty-queue aging.
+    corolla_meta, corolla_meta_path = built["corolla-8965H1202000"]
+    corolla_helper = corolla_meta_path.parent / corolla_meta["artifacts"]["helper"]
+    liveness_result = root / "corolla-unified-liveness.json"
+    liveness_script = ROOT / "ghidra/scripts/verify/VerifyCorollaUnifiedSignerHostLiveness.java"
+    liveness = subprocess.run(
+        [str(ROOT / "tools/gtarget"), "corolla-8965H1202000", "script", "run", str(liveness_script), "--",
+         str(corolla_helper), str(liveness_result)],
+        cwd=ROOT, check=True, capture_output=True, text=True, timeout=90,
+    )
+    liveness_record = json.loads(liveness_result.read_text(encoding="utf-8"))
+    check("Corolla unified compiled helper has continuous supervised C7 liveness",
+          liveness_record["passed"] == 36 and liveness_record["vehicle_executed"] is False and
+          liveness_record["helper_sha256"] == corolla_meta["helper"]["sha256"] and
+          "normal 100 Hz host remains continuously admitted" in liveness_record["tests"] and
+          "host loss expires at seventh tick" in liveness_record["tests"] and
+          "returning native B6 after empty-queue expiry stays native" in liveness_record["tests"] and
+          liveness.returncode == 0)
+
+    # Behavioral fixture for the common mailbox proof. DCM teardown may clear
+    # service byte 0 while the six-byte tail remains the durable witness.
+    meta, meta_path = built["camry-8965F3307000"]
+    bundle = host.load_bundle(meta_path)
+
+    class FakePanda:
+        def __init__(self): self.sent = []
+        def can_recv(self): return []
+        def can_send(self, addr, dat, bus, **kwargs): self.sent.append((addr, bytes(dat), bus))
+
+    panda = FakePanda()
+    reads = iter((bytes(7), bytes.fromhex("00c7a512340000")))
+    clock = iter(i / 1000 for i in range(10000))
+    with (mock.patch.object(host, "verify_nrtd_ready", return_value={"ready_values": [0]}),
+          mock.patch.object(host, "_open_app", return_value=(panda, object(), object(), bundle.target["application_f181_hex"], "fixture", None)),
+          mock.patch.object(host, "_resident_already_present", return_value=False),
+          mock.patch.object(host, "_read_memory", side_effect=lambda *a, **k: next(reads)),
+          mock.patch.object(host.time, "monotonic", side_effect=lambda: next(clock)),
+          mock.patch.object(host.time, "monotonic_ns", return_value=123456789),
+          mock.patch.object(host.time, "sleep", return_value=None)):
+        result = host.preflight(bundle)
+    check("common functional mailbox fixture qualifies durable tail with no response",
+          result["qualified"] is True and result["verdict"] == "stock_functional_mailbox_live" and
+          result["mailbox"]["tail_match"] is True and panda.sent == [(0x777, host.PROBE_FRAME, 1)])
+
+    # The all-target build is the release surface: every exact target gets its own
+    # signer and classic-0x08A deployment pair.
+    kit_set = root / "exact-target-kits"
+    kit_set_proc = subprocess.run(
+        [sys.executable, str(KIT_BUILDER), "--target", "all", "--out", str(kit_set)],
+        cwd=ROOT, check=True, capture_output=True, text=True,
+    )
+    kit_set_meta = json.loads(kit_set_proc.stdout)
+    check("all-target kit build emits four exact-target classic-oracle deployment pairs",
+          kit_set_meta["schema"] == "tss3-unified-b6-signer-kit-set-v1" and
+          set(kit_set_meta["kits"]) == set(TARGETS) and all(
+              kit_set_meta["kits"][target]["classic_08a_oracle_target"] == target and
+              json.loads((kit_set / target / "bundle/oracle/classic.json").read_text(encoding="utf-8"))["target"]["name"] == target and
+              (kit_set / target / "bundle/oracle/classic_payload.bin").stat().st_size == 0x1000
+              for target in TARGETS
+          ))
+    kit = kit_set / "crown-8965F3012000"
+    kit_meta = json.loads((kit / "manifest.json").read_text(encoding="utf-8"))
+    packaged_meta = json.loads((kit / "bundle/unified.json").read_text(encoding="utf-8"))
+    check("unified field kit packages one exact target and common launcher",
+          kit_meta["schema"] == "tss3-unified-b6-signer-kit-v1" and
+          kit_meta["target"]["name"] == "crown-8965F3012000" and
+          kit_meta["install_strategy"] == "split-functional-loader" and
+          packaged_meta["install_strategy"] == "split-functional-loader" and
+          packaged_meta["control"]["loader_frame"] == "07 C6 C6 index word_le32" and
+          packaged_meta["control"]["runtime_frame"] == "07 C7 C7 seq target_hi target_lo 00 00" and
+          packaged_meta["layout"]["helper_transfer"]["strategy"] == "functional-c6-after-startup" and
+          packaged_meta["layout"]["helper_transfer"]["boot_context_globalram_write"] is False and
+          packaged_meta["helper"]["image_size"] == 600 and
+          packaged_meta["exact_target_payload"]["dispatcher"]["mode"] == "host-exact-f181-bound" and
+          packaged_meta["exact_target_payload"]["dispatcher"]["codeflash_data_reads_before_resident"] is False and
+          packaged_meta["exact_target_payload"]["dispatcher"]["boot_context_globalram_write"] is False and
+          packaged_meta["exact_target_payload"]["dispatcher"]["boot_calls"] ==
+              ["0x00000C9A", "0x00000E54", "0x00000F80", "0x000010C6", "0x0000119E"] and
+          (kit / "tss3-unified-signer").is_file() and (kit / "bundle/unified.json").is_file() and
+          (kit / "runtime/tsk/lib/programming.py").is_file() and
+          (kit / "runtime/exploit/ephemeral_runtime/camry_f33_post_install_recovery.py").is_file() and
+          (kit / "bundle/oracle/classic.json").is_file() and
+          kit_meta["classic_08a_oracle"]["transport"].startswith("functional-nibble4 0x00000777 -> 0x000007A9") and
+          "camry_classic_08a_oracle" not in kit_meta)
+    launcher_path = kit / "tss3-unified-signer"
+    wrong_kit = subprocess.run(
+        [str(launcher_path), "--topology", "camry-post-repin", "doctor"],
+        env={**os.environ, "TSS3_PYTHON": sys.executable, "TSS3_OPENPILOT_ROOT": str(ROOT)},
+        capture_output=True, text=True,
+    )
+    check("Camry-only launcher path rejects a mismatched exact-target kit with an actionable identity error",
+          wrong_kit.returncode == 2 and
+          "wrong kit: crown-8965F3012000; need camry-8965F3307000" in wrong_kit.stderr)
+
+    field_bundle = host.load_bundle(kit / "bundle/unified.json")
+    check("split field bundle carries the exact padded 150-word helper image",
+          field_bundle.strategy == "split-functional-loader" and
+          len(field_bundle.helper_image) == 600 and len(field_bundle.helper_image) // 4 == 150)
+    loader_session = object.__new__(host.Session)
+    loader_session.bundle = field_bundle
+    loader_session.client = object(); loader_session.uds_mod = object()
+    loader_session.panda = FakePanda()
+    init_state = {"initialized": True, "armed": False, "armed_raw": 0, "next_index": 0, "last_command5_rc": 0, "signed_count": 0}
+    loaded_state = {"initialized": True, "armed": False, "armed_raw": 0, "next_index": 150, "last_command5_rc": 0, "signed_count": 0}
+    armed_state = {"initialized": True, "armed": True, "armed_raw": 1, "next_index": 150, "last_command5_rc": 0, "signed_count": 0}
+    loader_session.split_state = mock.Mock(side_effect=(init_state, loaded_state, armed_state))
+    with (mock.patch.object(host, "_read_memory_retry", return_value=field_bundle.helper_image),
+          mock.patch.object(host.time, "sleep", return_value=None)):
+        loaded = loader_session.load_and_arm_split_helper()
+    check("split field loader sends 150 repeated C6 words then explicit arm and verifies readback",
+          loaded["helper_byte_exact"] is True and loaded["state"] == armed_state and
+          len(loader_session.panda.sent) == 150 * host.WORD_REPEAT_COUNT + 1 and
+          loader_session.panda.sent[0] == (0x777, host.loader_frame(0, field_bundle.helper_image[:4]), 1) and
+          loader_session.panda.sent[-1] == (0x777, host.loader_frame(host.ARM_INDEX), 1))
+
+    camry_kit = kit_set / "camry-8965F3307000"
+    camry_kit_meta = json.loads((camry_kit / "manifest.json").read_text(encoding="utf-8"))
+    camry_field_meta = json.loads((camry_kit / "bundle/unified.json").read_text(encoding="utf-8"))
+    camry_field_bundle = host.load_bundle(camry_kit / "bundle/unified.json")
+    camry_oracle_meta = json.loads((camry_kit / "bundle/oracle/classic.json").read_text(encoding="utf-8"))
+    camry_oracle_payload = (camry_kit / "bundle/oracle/classic_payload.bin").read_bytes()
+    check("Camry unified kit uses the same canonical oracle deployment key and runtime",
+          camry_kit_meta["classic_08a_oracle"]["metadata"] == "bundle/oracle/classic.json" and
+          camry_kit_meta["classic_08a_oracle"]["payload"] == "bundle/oracle/classic_payload.bin" and
+          camry_oracle_meta["schema"] == "tss3-08a-classic-oracle-build-v4" and
+          camry_oracle_meta["idle_fast_path"]["enabled"] is True and
+          "camry_classic_08a_oracle" not in camry_kit_meta and
+          len(camry_oracle_payload) == 0x1000 and
+          (camry_kit / "runtime/exploit/ephemeral_runtime/camry_f33_08a_classic_oracle.py").is_file() and
+          (camry_kit / "runtime/exploit/ephemeral_runtime/camry_f33_startup_programming.py").is_file() and
+          (camry_kit / "runtime/exploit/ephemeral_runtime/camry_f33_oracle_ui_bringup.py").is_file() and
+          not (camry_kit / "bundle/oracle/camry_f33_08a_classic_oracle_resident.bin").exists())
+
+    postauth_qual_session = object.__new__(host.Session)
+    postauth_qual_session.bundle = camry_field_bundle
+    postauth_qual_session.wait_self_install = mock.Mock(return_value={"state": {"initialized": True}})
+    postauth_qual_session.load_and_arm_split_helper = mock.Mock(return_value={"passes": [], "state": {"armed": True}, "helper_byte_exact": True})
+    postauth_qual_session.split_state = mock.Mock(return_value={
+        "initialized": True, "armed": True, "signed_count": 0, "last_command5_rc": 0,
+    })
+    postauth_qual_session.split_telemetry = mock.Mock(return_value={
+        "native_publication_count": 3, "override_count": 0, "last_control_seq": 0,
+        "native_publication_observed": True, "native_verified_raw": 1,
+    })
+    postauth_qualified = postauth_qual_session.qualify()
+    check("Camry post-auth qualification proves released native publication without invoking command5 oracle",
+          postauth_qualified["qualified"] is True and postauth_qualified["runtime_backend"] == "postauth-raw-com" and
+          postauth_qual_session.split_telemetry.call_count == 1)
+
+    postauth_emu_result = root / "camry-postauth-override-emulation.json"
+    postauth_emu_script = ROOT / "ghidra/scripts/verify/VerifyCamryPostauthOverrideHelper.java"
+    postauth_emu = subprocess.run(
+        [str(ROOT / "tools/gtarget"), "camry-8965F3307000", "script", "run", str(postauth_emu_script), "--",
+         str(camry_kit / "bundle" / camry_field_meta["artifacts"]["helper"]), str(postauth_emu_result)],
+        cwd=ROOT, check=True, capture_output=True, text=True, timeout=90,
+    )
+    postauth_emu_record = json.loads(postauth_emu_result.read_text(encoding="utf-8"))
+    check("compiled Camry post-auth helper enforces exclusive cached C7 ownership in the F33 emulator",
+          postauth_emu_record["passed"] == 18 and postauth_emu_record["vehicle_executed"] is False and
+          postauth_emu_record["helper_sha256"] == camry_field_meta["helper"]["sha256"] and
+          "unrelated DCM traffic cannot leak native target during live lease" in postauth_emu_record["tests"] and
+          "same C7 generation cannot change cached target" in postauth_emu_record["tests"] and
+          "seventh held tick expires to stock target" in postauth_emu_record["tests"] and postauth_emu.returncode == 0)
+
+    class GuardPanda:
+        def __init__(self, *, fault=False, gear=0, stale=False):
+            self.calls = 0
+            self.fault = fault
+            self.gear = gear
+            self.stale = stale
+        def can_recv(self):
+            import time
+            self.calls += 1
+            wheel = bytearray.fromhex("1a6f1a6f1a6f1a6f")
+            if self.fault:
+                for i in (0, 2, 4, 6): wheel[i] |= 0x80
+            angle = bytes(32)
+            gear127 = bytes((0, 0, 0, 0, 0, (self.gear & 0x0F) << 4, 0, 0))
+            if self.stale:
+                if self.calls == 1:
+                    return [(host.WHEEL_SPEED_CAN_ID, bytes(wheel), host.CONTROL_BUS),
+                            (host.STEERING_ANGLE_CAN_ID, angle, host.CONTROL_BUS),
+                            (0x127, gear127, host.CONTROL_BUS)]
+                if self.calls == 2:
+                    time.sleep(0.11)
+                    return [(host.READY_CAN_ID, bytes.fromhex("8000000000000000"), host.CONTROL_BUS)]
+                return []
+            if self.calls > 1:
+                return []
+            return [
+                (host.READY_CAN_ID, bytes.fromhex("8000000000000000"), host.CONTROL_BUS),
+                (host.WHEEL_SPEED_CAN_ID, bytes(wheel), host.CONTROL_BUS),
+                (host.STEERING_ANGLE_CAN_ID, angle, host.CONTROL_BUS),
+                (0x127, gear127, host.CONTROL_BUS),
+            ]
+
+    guard = host.verify_ready_stationary_current_angle(GuardPanda(), target_family="corolla-hf")
+    check("unified current-angle guard derives a zero no-offset target while READY, Park, and stationary",
+          guard["ready_values"] == [1] and guard["wheel_centered_raw"] == [0, 0, 0, 0] and
+          guard["wheel_faults"] == [False, False, False, False] and guard["gear"]["park"] is True and
+          guard["steering_angle_deg"] == 0.0 and guard["recommended_current_target_raw"] == 0)
+
+    for label, fixture in (("wheel fault", GuardPanda(fault=True)), ("not Park", GuardPanda(gear=3))):
+        try:
+            host.verify_ready_stationary_current_angle(fixture, target_family="corolla-hf", timeout=0.15)
+        except host.UnifiedSignerError:
+            pass
+        else:
+            raise AssertionError(f"current-angle guard accepted {label}")
+    check("unified current-angle guard rejects wheel faults and non-Park Corolla state", True)
+
+    try:
+        host.verify_ready_stationary_current_angle(GuardPanda(stale=True), target_family="corolla-hf", timeout=0.15)
+    except host.UnifiedSignerError:
+        pass
+    else:
+        raise AssertionError("current-angle guard accepted stale wheel/angle samples")
+    check("unified current-angle guard rejects stale motion/angle samples", True)
+
+    # Application diagnostics can be briefly unavailable while the replayed application
+    # settles. Normalize that into a bounded retry instead of leaking a raw UDS timeout.
+    meta, camry_meta_path = built["camry-8965F3307000"]
+    camry_bundle = host.load_bundle(camry_meta_path)
+    read_attempts = iter((TimeoutError("startup transient"), camry_bundle.resident))
+    def flaky_read(*_args, **_kwargs):
+        value = next(read_attempts)
+        if isinstance(value, Exception):
+            raise value
+        return value
+    class RetryClient:
+        def __init__(self): self.sessions = []
+        def diagnostic_session_control(self, session): self.sessions.append(session)
+    class RetryUds:
+        class SESSION_TYPE:
+            EXTENDED_DIAGNOSTIC = 3
+    retry_client = RetryClient()
+    with mock.patch.object(host, "_read_memory", side_effect=flaky_read):
+        retried = host._read_memory_retry(retry_client, RetryUds, 0xFEBFF9F0, len(camry_bundle.resident),
+                                          label="fixture resident", timeout=0.2)
+    check("resident readback retries startup DCM reset by re-entering extended session",
+          retried == camry_bundle.resident and retry_client.sessions == [3])
+
+    damaged = bytearray(camry_bundle.resident); damaged[7] ^= 1
+    try:
+        host._resident_attestation(camry_bundle, bytes(damaged))
+    except host.UnifiedSignerError as exc:
+        mismatch_text = str(exc)
+    else:
+        raise AssertionError("Camry resident attestation accepted a byte mismatch")
+    check("Camry resident mismatch reports hashes and first differing offset",
+          "observed_sha256=" in mismatch_text and "expected_sha256=" in mismatch_text and
+          "first_offset=0x7" in mismatch_text)
+
+    # Install is not complete merely because the application answers F181. For split
+    # targets it must cross count 224, arm, read the full helper back, and re-attest
+    # the high resident before bringup is allowed to prompt for READY.
+    session = object.__new__(host.Session)
+    session.bundle = camry_bundle
+    session.client = object(); session.uds_mod = object()
+    state0 = {"initialized": False, "armed": False}
+    state1 = {"initialized": True, "armed": True}
+    session.split_state = mock.Mock(side_effect=(state0, state1))
+    helper_base = int(camry_bundle.meta["helper"]["base"], 0)
+    resident_base = int(camry_bundle.meta["resident"]["base"], 0)
+    def installed_read(_client, _uds, address, size, **_kwargs):
+        if address == helper_base:
+            return camry_bundle.helper_image
+        if address == resident_base:
+            return camry_bundle.resident
+        raise AssertionError(f"unexpected self-install read 0x{address:X}/0x{size:X}")
+    with mock.patch.object(host, "_read_memory_retry", side_effect=installed_read):
+        self_install = session.wait_self_install(timeout=0.2)
+    check("split install gate requires armed state, byte-exact helper, and post-boundary resident",
+          self_install["state"] == state1 and self_install["helper"]["byte_exact"] is True and
+          self_install["resident_attestation"]["byte_exact"] is True and session.split_state.call_count == 2)
+
+    # Corolla startup intentionally reuses the one-shot resident prefix as state/scratch.
+    # Attestation must therefore pin the immutable foreground suffix plus live state magic,
+    # not compare the mutable prefix against the pristine build image.
+    _, corolla_meta_path = built["corolla-8965F1208000"]
+    corolla_bundle = host.load_bundle(corolla_meta_path)
+    observed = bytearray(corolla_bundle.resident)
+    immutable_offset = int(corolla_bundle.meta["layout"]["foreground_entry"], 0) - int(corolla_bundle.meta["resident"]["base"], 0)
+    observed[:immutable_offset] = bytes([0xA5]) * immutable_offset
+    observed[0:4] = host.COROLLA_STATE_MAGIC.to_bytes(4, "little")
+    attestation = host._resident_attestation(corolla_bundle, bytes(observed))
+    check("Corolla resident attestation accepts mutable startup prefix and pins immutable foreground",
+          attestation["mode"] == "mutable-prefix+immutable-foreground" and
+          attestation["mutable_prefix_size"] == immutable_offset and attestation["state"]["resident_present"] is True)
+    observed[immutable_offset] ^= 1
+    try:
+        host._resident_attestation(corolla_bundle, bytes(observed))
+    except host.UnifiedSignerError:
+        pass
+    else:
+        raise AssertionError("Corolla resident attestation accepted immutable-code mutation")
+    check("Corolla resident attestation rejects immutable foreground mutation", True)
+
+
+print("Unified TSS3 functional B6 signer verification passed.")

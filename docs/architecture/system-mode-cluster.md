@@ -10,7 +10,7 @@
 >
 > **Canonical artifacts:** —
 >
-> **Verification:** `tests/verify_application_diagnostics.py`
+> **Verification:** `tests/diagnostics/verify_application_diagnostics.py`
 >
 > **Related:** [firmware-architecture](firmware-architecture.md), [application diagnostics](../diagnostics/application.md)
 

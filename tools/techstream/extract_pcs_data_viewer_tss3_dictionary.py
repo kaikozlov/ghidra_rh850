@@ -27,19 +27,18 @@ import hashlib
 import json
 import re
 import struct
-import sys
 from collections import Counter
 from pathlib import Path
 from typing import Any
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import dnfile  # type: ignore
 import pefile  # type: ignore
-from techstream_paths import resolve_gts_root
+from tools.techstream.techstream_paths import resolve_gts_root
+from tools import REPO_ROOT
 
-REPO = Path(__file__).resolve().parents[2]
-DEFAULT_OUT = REPO / "data/generated/gtsplus_2026/pcs_data_viewer_tss3_dictionary.json"
+
+DEFAULT_OUT = REPO_ROOT / "data/generated/gtsplus_2026/pcs_data_viewer_tss3_dictionary.json"
 
 # Resource key families that make up the TSS3 recorder dictionary.
 TSS3_FAMILIES = (

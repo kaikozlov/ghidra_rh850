@@ -2,6 +2,7 @@
 """Build exact H/F contracts for remaining 0x030 B6[1] and 0x351 force-7 status paths."""
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import hashlib
 import json
@@ -9,7 +10,7 @@ import struct
 from pathlib import Path
 from tools.targets.corolla.support.corolla_h_constants import CODEFLASH as H_CODEFLASH
 
-REPO = Path(__file__).resolve().parents[4]
+REPO = REPO_ROOT
 IMAGE = H_CODEFLASH
 EVID = REPO / "data/generated/corolla_8965H1202000_remaining_status_decompiler_evidence.json"
 FD = REPO / "data/generated/corolla_8965H1202000_fd_control_interface.json"

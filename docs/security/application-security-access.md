@@ -10,7 +10,7 @@
 >
 > **Canonical artifacts:** —
 >
-> **Verification:** `tests/verify_application_diagnostics.py`
+> **Verification:** `tests/diagnostics/verify_application_diagnostics.py`
 >
 > **Related:** [payload-gate](bootloader-payload-gate.md), [application diagnostics](../diagnostics/application.md)
 
@@ -75,7 +75,7 @@ proprietary BA selector `F7/BAENA`: its local helper checks application-SA level
 root above is read, that check is a recoverable protocol step rather than a
 secret-dependent barrier. The downstream BA state machine still supplies no
 recovered boot-SA write, low-CodeFlash credential read, or attacker-selected PC
-(`KEYLESS-012`; `tests/verify_application_proprietary_ba.py`).
+(`KEYLESS-012`; `tests/diagnostics/verify_application_proprietary_ba.py`).
 
 ## 2. Algorithm
 

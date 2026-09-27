@@ -2,6 +2,7 @@
 """Build the exact-F33 0x394 DEM/classifier fault-status contract."""
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import collections
 import hashlib
@@ -12,7 +13,7 @@ from tools.targets.corolla.support.corolla_h_constants import CODEFLASH as H_COD
 
 from tools.targets.camry.support.camry_f33_corpus import IMAGE, IMAGE_SHA256
 
-REPO = Path(__file__).resolve().parents[4]
+REPO = REPO_ROOT
 EVID = REPO / "data/generated/camry_8965F3307000_fault_status_decompiler_evidence.json"
 TX = REPO / "data/generated/camry_8965F3307000_tss3_opendbc_port.json"
 H_TECH = REPO / "data/generated/corolla_8965H1202000_techstream_correlations.json"

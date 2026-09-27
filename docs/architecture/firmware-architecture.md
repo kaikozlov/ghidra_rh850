@@ -10,13 +10,13 @@
 >
 > **Canonical artifacts:** `data/semantic_coverage_ledger.csv`
 >
-> **Verification:** `tests/verify_architecture.py`
+> **Verification:** `tests/tooling/verify_architecture.py`
 >
 > **Related:** [boot-validity](boot-validity-and-flash-lifecycle.md), [control-partition](control-partition.md), [system-mode-cluster](system-mode-cluster.md)
 
 This document maps the broad control-flow architecture of the China-market Sienna EPS firmware `8965B4512000` for the RH850/P1M-E R7F701381. It covers the boot/application split, startup and handoff, foreground scheduling, interrupt routing, and the application-side CAN receive path.
 
-The addresses below are CodeFlash virtual addresses. The independent raw-image checks are in `tests/verify_architecture.py`.
+The addresses below are CodeFlash virtual addresses. The independent raw-image checks are in `tests/tooling/verify_architecture.py`.
 
 ## 1. Executive summary
 
@@ -67,7 +67,7 @@ The direct boot exception vectors occupy the low vector area. Most point to `0x1
 `boot_application_handoff` at `0x13B0` is the single gate between boot and
 application execution. The four `jarl` call sites at `0x13B4`, `0x13B8`,
 `0x13BC`, `0x13C0` encode a fixed setup order, and the validity-check `jarl`
-is at `0x13C4` (these encodings are pinned in `tests/verify_boot_trust.py`).
+is at `0x13C4` (these encodings are pinned in `tests/firmware/verify_boot_trust.py`).
 The full decision tree is documented in
 `../architecture/boot-validity-and-flash-lifecycle.md`; the summary below is the
 statically verifiable structure.
@@ -158,7 +158,7 @@ program a new image. The handoff function itself ends in an unconditional
 The validity markers are written by `program_region_validity_marker` at
 `0x5286`, reached via UDS RID `0x10F2`. The write path embeds the
 `0x5AA5A55A` immediate at `0x5286` (verified in
-`tests/verify_bootloader_diagnostics.py` and `tests/verify_boot_trust.py`).
+`tests/firmware/verify_bootloader_diagnostics.py` and `tests/firmware/verify_boot_trust.py`).
 After a successful re-flash, the next reset re-runs the validity gate, which
 succeeds if both CRCs verify and both markers are present.
 

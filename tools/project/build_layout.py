@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Inspect and safely clean the canonical ignored build workspace."""
 from __future__ import annotations
-import argparse, json, shutil, subprocess, sys
+import argparse, json, shutil, subprocess
 from pathlib import Path
-REPO = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO))
+
 from tools.project.build_paths import for_repo
+
+REPO = Path(__file__).resolve().parents[2]
 CATEGORIES = ("cache", "work", "out", "logs", "tmp")
 
 def size_bytes(path: Path) -> int:

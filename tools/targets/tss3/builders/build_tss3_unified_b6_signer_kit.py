@@ -2,6 +2,7 @@
 """Package one or all exact-target functional-0x777 TSS3 signer test kits."""
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import hashlib
 import json
@@ -12,7 +13,7 @@ import tempfile
 from datetime import UTC, datetime
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[4]
+ROOT = REPO_ROOT
 BUILDER = ROOT / "exploit/ephemeral_runtime/build_tss3_unified_b6_signer.py"
 ORACLE_BUILDER = ROOT / "exploit/ephemeral_runtime/build_camry_f33_08a_classic_oracle.py"
 LAUNCHER = ROOT / "exploit/ephemeral_runtime/tss3_unified_b6_signer_launcher.sh"

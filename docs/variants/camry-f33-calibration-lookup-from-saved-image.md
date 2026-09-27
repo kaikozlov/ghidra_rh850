@@ -89,8 +89,8 @@ The existing saved-image comparator now reports
 factory reference and never from candidate-supplied descriptors or text:
 
 ```sh
-uv run python tools/targets/camry/analysis/analyze_camry_f33_recovery_image.py SAVED_CODEFLASH.bin
-uv run python tests/verify_camry_f33_recovery_image.py
+uv run --locked python -m tools.targets.camry.analysis.analyze_camry_f33_recovery_image SAVED_CODEFLASH.bin
+tools/test camry_f33_recovery_image
 ```
 
 The fourteen portable tests pass. New cases pin the DID callback/object pointer,

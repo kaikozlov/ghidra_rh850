@@ -6,6 +6,7 @@ Host attempts are discovered from sendcan, never from forwarding/TX echoes.
 """
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import gzip
 import hashlib
@@ -17,9 +18,7 @@ from collections import Counter, deque
 from itertools import chain
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[4]
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
+ROOT = REPO_ROOT
 
 from tools.targets.camry.extract.extract_camry_2026_cancel_windows import (
     WINDOWS,

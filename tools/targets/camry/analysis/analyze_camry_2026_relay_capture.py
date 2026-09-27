@@ -1,45 +1,22 @@
 #!/usr/bin/env python3
 """Reduce the 2026-08-27 relay-correct Camry capture to portable CAN evidence."""
 from __future__ import annotations
+from tools.toyota_support.toyota_route_opendbc_common import be_raw, decode_wheel_speed_kph
+from tools.toyota_support.passive_capture import iter_route_can, load_gzip_json, sha256_file as sha256
 
+from tools.targets.camry.support import camry_f33_corpus as f33
+from tools import REPO_ROOT
 import argparse
-import gzip
-import hashlib
 import json
 from collections import Counter, defaultdict
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[4]
-RAW = REPO / "targets/camry-2026/raw-20260827"
-
-
-def sha256(path: Path) -> str:
-  return hashlib.sha256(path.read_bytes()).hexdigest()
-
-
-def be_raw(dat: bytes, start_bit: int, size: int, signed: bool = False) -> int:
-  """Decode one Motorola DBC signal using opendbc bit numbering."""
-  be_bits = [j + i * 8 for i in range(len(dat)) for j in range(7, -1, -1)]
-  idx = be_bits.index(start_bit)
-  bits = be_bits[idx:idx + size]
-  if len(bits) != size:
-    raise ValueError(f"signal {start_bit}|{size} exceeds payload")
-  value = 0
-  for bit in bits:
-    byte_i, bit_i = divmod(bit, 8)
-    value = (value << 1) | ((dat[byte_i] >> bit_i) & 1)
-  if signed and value & (1 << (size - 1)):
-    value -= 1 << size
-  return value
-
-
-def load_snapshot(path: Path) -> dict:
-  with gzip.open(path, "rt") as f:
-    return json.load(f)
+REPO = REPO_ROOT
+RAW = f33.CAPTURE / "raw-20260827"
 
 
 def summarize_snapshot(path: Path) -> dict:
-  src = load_snapshot(path)
+  src = load_gzip_json(path)
   frames = src["frames"]
   by_bus = Counter(int(x["bus"]) for x in frames)
   ids = defaultdict(set)
@@ -70,19 +47,6 @@ def summarize_snapshot(path: Path) -> dict:
     },
     "ready_values_bus0": sorted(set(ready)),
   }
-
-
-def load_route(path: Path):
-  with gzip.open(path, "rt") as f:
-    for line in f:
-      seg, t, bus, addr, data = json.loads(line)
-      yield int(seg), int(t), int(bus), int(addr), bytes.fromhex(data)
-
-
-def decode_wheel_speed(dat: bytes) -> float:
-  # Existing Camry/Corolla H/F 0x0AA geometry, independently exercised on this car.
-  vals = [be_raw(dat, s, 15) * 0.01 - 67.67 for s in (6, 22, 38, 54)]
-  return sum(vals) / 4
 
 
 def contiguous_intervals(rows: list[tuple[int, bool]]) -> list[dict]:
@@ -119,7 +83,7 @@ def summarize_route(path: Path, segment_ids: tuple[int, ...], structural_segment
   b6_any = []
   seen_segments = set()
 
-  for seg, t, bus, addr, dat in load_route(path):
+  for seg, t, bus, addr, dat in iter_route_can(path):
     if seg not in segment_set:
       raise ValueError(f"unexpected segment {seg} in {path.name}; expected {segment_ids}")
     seen_segments.add(seg)
@@ -131,7 +95,7 @@ def summarize_route(path: Path, segment_ids: tuple[int, ...], structural_segment
     if bus != 0:
       continue
     if addr == 0x0AA and len(dat) == 8:
-      speeds[seg].append(decode_wheel_speed(dat))
+      speeds[seg].append(decode_wheel_speed_kph(dat))
     elif addr == 0x127 and len(dat) == 8:
       gears[seg][be_raw(dat, 47, 4)] += 1
     elif addr == 0x51E and len(dat) == 8:

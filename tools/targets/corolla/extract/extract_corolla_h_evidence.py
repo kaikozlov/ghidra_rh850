@@ -10,17 +10,16 @@ target discovery or additional semantic joins remain separate tools.
 
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import hashlib
 import json
-import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-ROOT = Path(__file__).resolve().parents[4]
-sys.path.insert(0, str(ROOT / "tools"))
-from tools.targets.corolla.support.corolla_h_constants import RAW_DUMP, XCP_ROLE_MAP  # noqa: E402
+ROOT = REPO_ROOT
+from tools.targets.corolla.support.corolla_h_constants import RAW_DUMP, XCP_ROLE_MAP
 
 RAW = RAW_DUMP
 

@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Compact target-native evidence for Corolla-H diagnostic residue closure."""
 from __future__ import annotations
+from tools import REPO_ROOT
 import hashlib,json,struct
-from pathlib import Path
 from tools.targets.corolla.support.corolla_h_constants import RAW_DUMP as H_RAW_DUMP
-ROOT=Path(__file__).resolve().parents[4]
+ROOT=REPO_ROOT
 RAW=H_RAW_DUMP
 SRC=ROOT/'build/work/corpora/h_diag_wdbi_exact.jsonl'
 OUT=ROOT/'data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json'

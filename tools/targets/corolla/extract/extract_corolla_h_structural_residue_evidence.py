@@ -5,10 +5,10 @@ The cohort is stable across regeneration: include current structural-only rows, 
 rows whose only target-native inspection evidence is this artifact itself.
 """
 from __future__ import annotations
+from tools import REPO_ROOT
 import hashlib,json
-from pathlib import Path
 from tools.targets.corolla.support.corolla_h_constants import RAW_DUMP as H_RAW_DUMP
-ROOT=Path(__file__).resolve().parents[4]
+ROOT=REPO_ROOT
 RAW=H_RAW_DUMP
 MATRIX=ROOT/'data/generated/corolla_8965H1202000_static_coverage_matrix.json'
 STRUCT=ROOT/'data/generated/corolla_8965H1202000_structural_function_transfer.json'

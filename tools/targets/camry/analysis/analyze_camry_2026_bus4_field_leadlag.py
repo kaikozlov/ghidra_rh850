@@ -13,25 +13,23 @@ Adapted from tools/targets/camry/analysis/analyze_camry_2026_bus1_field_leadlag.
 Offline/generated evidence only; no vehicle I/O.
 """
 from __future__ import annotations
+from tools.toyota_support.toyota_route_opendbc_common import decode_wheel_speed_kph
 
+from tools.targets.camry.support import camry_f33_corpus as f33
+from tools import REPO_ROOT
 import argparse
 import gzip
 import json
-import sys
-from bisect import bisect_right
 from collections import Counter, defaultdict
 from functools import reduce
 from operator import mul
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[4]
-if str(REPO) not in sys.path:
-    sys.path.insert(0, str(REPO))
+REPO = REPO_ROOT
 
-from tools.targets.camry.analysis.analyze_camry_2026_relay_capture import decode_wheel_speed
 from tools.toyota_support.toyota_route_opendbc_common import be_signal
 
-RAW = REPO / "targets/camry-2026/raw-20260827"
+RAW = f33.CAPTURE / "raw-20260827"
 CENSUS = REPO / "data/generated/camry_2026_cruise_lta_edge_census.json"
 DRIVES = {
     "drive_a": RAW / "camry_relay_route_can_20260827.ndjson.gz",
@@ -186,7 +184,7 @@ def collect_drive(path: Path) -> dict:
             elif addr == 0x025 and len(dat) == 32:
                 t25.append((t, dat))
             elif addr == 0x0AA and len(dat) == 8:
-                speeds.append((t, decode_wheel_speed(dat)))
+                speeds.append((t, decode_wheel_speed_kph(dat)))
         elif bus == 2:
             bus2[(addr, len(dat))].append((t, dat))
     a8.sort(); t30.sort(); t25.sort(); speeds.sort()

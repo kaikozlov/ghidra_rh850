@@ -165,12 +165,12 @@ steering-current primitive.
 
 ## 6. Verification
 
-- `tests/verify_application_proprietary_ba.py` pins the raw service/table bytes,
+- `tests/diagnostics/verify_application_proprietary_ba.py` pins the raw service/table bytes,
   request contracts, F7 SA2 gate, persistent object identities, restore/countdown
   behavior, and lower semantic joins.
-- `tests/verify_application_proprietary_ba_live.py` plus
+- `tests/diagnostics/verify_application_proprietary_ba_live.py` plus
   `AssertApplicationProprietaryBaSurface.java` pin exact live table ownership,
   marker-reader topology, VSPDA/SP1 separation, and the 41-function direct
   actuation negative.
-- `tests/verify_motor_actuation_boundary.py` remains the independent global motor
+- `tests/firmware/verify_motor_actuation_boundary.py` remains the independent global motor
   boundary.

@@ -16,21 +16,22 @@ import json
 from collections import Counter
 from pathlib import Path
 
-from techstream_paths import V18_DIAGNOSTICS_ROOT
+
 from typing import Any
 
 import pefile
-from pe_utils import exports as pe_export_rows
+from tools.techstream.techstream_paths import V18_DIAGNOSTICS_ROOT
+from tools.techstream.pe_utils import exports as pe_export_rows
+from tools.techstream.cuw_parameter import decode_parameter_ini
+from tools import REPO_ROOT
 
-from cuw_parameter import decode_parameter_ini
 
-REPO = Path(__file__).resolve().parents[2]
 TECH = V18_DIAGNOSTICS_ROOT
 CUW = TECH / "Calibration Update Wizard"
 INI = CUW / "Ini"
-DDB_ART = REPO / "data/generated/techstream_v18/priority_steering_ddb_semantics.json"
-PROTOCOL_ART = REPO / "data/generated/techstream_v18/cuw_writer_protocol_grammar.json"
-OUT = REPO / "data/generated/techstream_v18/cuw_timing_recovery.json"
+DDB_ART = REPO_ROOT / "data/generated/techstream_v18/priority_steering_ddb_semantics.json"
+PROTOCOL_ART = REPO_ROOT / "data/generated/techstream_v18/cuw_writer_protocol_grammar.json"
+OUT = REPO_ROOT / "data/generated/techstream_v18/cuw_timing_recovery.json"
 
 FACTORY_KEYS = [
     "WaitTimeAfterSeedData",
@@ -258,7 +259,6 @@ def recovery_string_records() -> list[dict[str, Any]]:
         raw = pe.get_data(va - base, len(text) + 1)
         out.append({"va": va, "text": text, "raw_hex": raw.hex()})
     return out
-
 
 
 def pe_exports(path: Path) -> list[str]:

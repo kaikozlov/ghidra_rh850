@@ -10,6 +10,7 @@ This is an offline review tool. It does not transmit CAN or touch a vehicle.
 """
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import json
 import subprocess
@@ -17,7 +18,7 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
-REPO = Path(__file__).resolve().parents[4]
+REPO = REPO_ROOT
 DEFAULT_OPENPILOT = Path("/Users/kai/dev/inspect/repos/kai-openpilot")
 RECORDED_REVISION = "c7a62eaf"
 DEFAULT_FIXTURES = (

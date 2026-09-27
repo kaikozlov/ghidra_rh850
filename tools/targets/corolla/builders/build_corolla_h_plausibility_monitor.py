@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 """Build deterministic closure for the 11 named plausibility-monitor roles."""
 from __future__ import annotations
+from tools.targets.sienna.sienna_target import CORPUS as SIENNA_CORPUS
+from tools import REPO_ROOT
 import argparse,hashlib,json,re,struct
 from pathlib import Path
 from tools.targets.sienna.sienna_target import CODEFLASH as SIENNA_CODEFLASH
 from tools.targets.corolla.support.corolla_h_constants import RAW_DUMP as H_RAW_DUMP
-ROOT=Path(__file__).resolve().parents[4];EV=ROOT/'data/generated/corolla_8965H1202000_plausibility_monitor_decompiler_evidence.json';HRAW=H_RAW_DUMP;SRAW=SIENNA_CODEFLASH;SDEC=ROOT/'data/generated/decompilations.jsonl';OUT=ROOT/'data/generated/corolla_8965H1202000_plausibility_monitor.json'
+ROOT=REPO_ROOT;EV=ROOT/'data/generated/corolla_8965H1202000_plausibility_monitor_decompiler_evidence.json';HRAW=H_RAW_DUMP;SRAW=SIENNA_CODEFLASH;SDEC = SIENNA_CORPUS;OUT=ROOT/'data/generated/corolla_8965H1202000_plausibility_monitor.json'
 CHANNELS=[
  (0,0x43558,0x3E118,0x28984,0x28514,7),(1,0x4360A,0x3E1CA,0x289B8,0x28548,8),(2,0x436BC,0x3E27C,0x289EC,0x2857C,3),(3,0x4386C,0x3E42C,0x28A20,0x285B0,4),(4,0x43A1C,0x3E5DC,0x28A54,0x285E4,0),(5,0x43C0C,0x3E7CC,0x28A88,0x28618,1),(6,0x43CBA,0x3E87A,0x28ABC,0x2864C,2),(7,0x43D68,0x3E928,0x28AF0,0x28680,5),(8,0x43E56,0x3EA16,0x28B24,0x286B4,6)]
 ROLES=CHANNELS+[(9,0x43F28,0x3EAE8,None,None,None),(10,0x440DC,0x3ECCC,None,None,None)]

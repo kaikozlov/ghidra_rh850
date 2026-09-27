@@ -13,13 +13,12 @@ from __future__ import annotations
 import hashlib
 import json
 import struct
-from pathlib import Path
+from tools.techstream.parse_ddb import DDBParser, ECUDataBase, StringDataBase
+from tools.techstream.ddb_strings import load_string_db
+from tools.techstream.techstream_paths import V18_TECHSTREAM_ROOT
+from tools import REPO_ROOT
 
-from parse_ddb import DDBParser, ECUDataBase, StringDataBase
-from ddb_strings import load_string_db
-from techstream_paths import V18_TECHSTREAM_ROOT
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
 TECHSTREAM_ROOT = V18_TECHSTREAM_ROOT
 OUTPUT_PATH = (
     REPO_ROOT

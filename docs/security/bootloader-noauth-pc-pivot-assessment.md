@@ -232,4 +232,4 @@ consumer that turns COM-005 into a zero-auth boot PC pivot. A new hardware
 observation, undocumented peripheral behavior, or a newly discovered software
 path can supersede this assessment.
 
-Deterministic regression: `tests/verify_boot_noauth_pc_pivot_assessment.py`.
+Deterministic regression: `tests/runtime/verify_boot_noauth_pc_pivot_assessment.py`.

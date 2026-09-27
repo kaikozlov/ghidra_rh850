@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Build deterministic closure for 18 generated packet/record/API adapter roles."""
 from __future__ import annotations
+from tools import REPO_ROOT
 import argparse,hashlib,json,struct
 from pathlib import Path
 from tools.targets.sienna.sienna_target import CODEFLASH as SIENNA_CODEFLASH
 from tools.targets.corolla.support.corolla_h_constants import RAW_DUMP as H_RAW_DUMP
-ROOT=Path(__file__).resolve().parents[4];HRAW=H_RAW_DUMP;SRAW=SIENNA_CODEFLASH;EV=ROOT/'data/generated/corolla_8965H1202000_small_adapter_decompiler_evidence.json';OUT=ROOT/'data/generated/corolla_8965H1202000_small_adapters.json'
+ROOT=REPO_ROOT;HRAW=H_RAW_DUMP;SRAW=SIENNA_CODEFLASH;EV=ROOT/'data/generated/corolla_8965H1202000_small_adapter_decompiler_evidence.json';OUT=ROOT/'data/generated/corolla_8965H1202000_small_adapters.json'
 BOUNDED=[(0x7ADC8,'bounded_api_wrapper_00',0x75168),(0x7ADDC,'bounded_api_wrapper_01',0x7517C),(0x7ADEE,'bounded_api_wrapper_02',0x7518E),(0x7AE00,'bounded_api_wrapper_03',0x751A0),(0x7AE14,'bounded_api_wrapper_04',0x751B4),(0x7AE28,'bounded_api_wrapper_05',0x751C8)]
 PACKET=[(39,0x90676,'packet_low_selector_39_callback',0x8B69C),(43,0x9133C,'packet_low_selector_43_callback',0x8C362),(15,0x94A52,'packet_low_selector_15_callback',0x8FA78),(16,0x94B66,'packet_low_selector_16_callback',0x8FB8C),(38,0x953AA,'packet_low_selector_38_callback',0x903D0),(6,0x95DFC,'packet_low_selector_06_callback',0x90E22),(22,0x96B0C,'packet_low_selector_22_callback',0x91B32)]
 RECORD=[(0,0x935BA,'record_operation_00_callback',0x8E5E0),(1,0x935EA,'record_operation_01_callback',0x8E610),(2,0x9361A,'record_operation_02_callback',0x8E640),(3,0x9364A,'record_operation_03_callback',0x8E670),(4,0x9367A,'record_operation_04_callback',0x8E6A0)]

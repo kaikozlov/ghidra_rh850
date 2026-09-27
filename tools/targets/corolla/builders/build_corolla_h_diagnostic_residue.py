@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Build deterministic Corolla-H closure for the 59 remaining diagnostic roles."""
 from __future__ import annotations
+from tools import REPO_ROOT
 import argparse,hashlib,json,struct
 from pathlib import Path
 from tools.targets.sienna.sienna_target import CODEFLASH as SIENNA_CODEFLASH
 from tools.targets.corolla.support.corolla_h_constants import RAW_DUMP as H_RAW_DUMP
-ROOT=Path(__file__).resolve().parents[4]
+ROOT=REPO_ROOT
 EV=ROOT/'data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json'; HRAW=H_RAW_DUMP; SRAW=SIENNA_CODEFLASH; OUT=ROOT/'data/generated/corolla_8965H1202000_diagnostic_residue.json'
 ROLE_MAP=[
  (0x4C942,'application_session_transition_policy',0x4826A),(0x80114,'application_can_diagnostic_rx_demux',0x7A510),(0x8A27E,'application_session_transition_check_adapter',0x8467E),(0x8B144,'application_clear_diagnostic_information_request_start',0x85544),

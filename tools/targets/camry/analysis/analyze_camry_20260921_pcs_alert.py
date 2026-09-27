@@ -2,6 +2,7 @@
 """Reduce the retained 2026-09-21 user-reported Camry PCS-alert event."""
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import glob
 import hashlib
@@ -11,7 +12,7 @@ from collections import Counter
 from pathlib import Path
 from typing import Any
 
-ROOT = Path(__file__).resolve().parents[4]
+ROOT = REPO_ROOT
 DEFAULT_LOGS = ROOT.parents[1] / "logs"
 DEFAULT_OPENPILOT = ROOT.parent / "kai-openpilot"
 DEFAULT_OUT = ROOT / "data/generated/camry_20260921_pcs_alert.json"

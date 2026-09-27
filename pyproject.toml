@@ -12,5 +12,13 @@ dependencies = [
     "numpy==2.4.6",
 ]
 
-[tool.uv]
-package = false
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+# Checkout tooling: uv sync installs this project editable from the source
+# tree, so operational code is never relocated into site-packages and module
+# __file__ paths keep resolving inside the checkout.
+include = ["tools", "tools.*", "exploit", "exploit.*", "tsk", "tsk.*", "tests", "tests.*"]
+namespaces = true

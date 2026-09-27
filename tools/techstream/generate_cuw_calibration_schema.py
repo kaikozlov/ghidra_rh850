@@ -15,20 +15,19 @@ import hashlib
 import json
 import collections
 import struct
-import sys
 from pathlib import Path
 
-from techstream_paths import V18_CUW_ROOT
+
 from typing import Any
 
 import pefile
+from tools.techstream.techstream_paths import V18_CUW_ROOT
+from tools.techstream.cuw_parameter import factory_routes_from_ini_root
+from tools.techstream.generate_cuw_writer_protocol_grammar import route_verdict
+from tools import REPO_ROOT
 
-REPO = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO))
-from tools.techstream.cuw_parameter import factory_routes_from_ini_root  # noqa: E402
-from tools.techstream.generate_cuw_writer_protocol_grammar import route_verdict  # noqa: E402
 ROOT = V18_CUW_ROOT
-OUT = REPO / "data/generated/techstream_v18/cuw_calibration_schema.json"
+OUT = REPO_ROOT / "data/generated/techstream_v18/cuw_calibration_schema.json"
 
 FUNCTIONS = {
     "Cuw.exe": [

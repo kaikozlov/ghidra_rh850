@@ -330,7 +330,7 @@ Reproducible source reduction:
 `data/generated/camry_2026_radar_lifecycle.json`, and
 `tests/fixtures/camry_2026_radar_lifecycle_holdout.jsonl.gz`.
 The extractor verifies original rlog hashes and P05 integrity before writing
-its deterministic fixture. `tests/verify_camry_2026_radar_lifecycle.py` checks
+its deterministic fixture. `tests/targets/camry/verify_camry_2026_radar_lifecycle.py` checks
 both discovery captures and the independent holdout.
 
 ### Current fault versus a restart-required failure
@@ -361,7 +361,7 @@ fault projection. H/F and Crown are not assigned the F33 policy by analogy.
 Reproducible proof:
 `tools/targets/camry/analysis/analyze_camry_f33_live_fault_projection.py`,
 `data/generated/camry_f33_live_fault_projection.json`, and
-`tests/verify_camry_f33_live_fault_projection.py`.
+`tests/targets/camry/verify_camry_f33_live_fault_projection.py`.
 
 ### Validation
 
@@ -403,7 +403,7 @@ Python reconstruction of the RTE chain. **59 assertions pass**, adding to the
 85 live hardware-fault assertions. Source, generated evidence and runnable
 verifier are `analyze_camry_f33_cooperative_fault_projection.py`,
 `data/generated/camry_f33_cooperative_fault_projection.json`, and
-`tests/verify_camry_f33_cooperative_fault_projection.py`.
+`tests/targets/camry/verify_camry_f33_cooperative_fault_projection.py`.
 
 ### Cancellation: the remaining command contract is not recovered
 
@@ -462,7 +462,7 @@ No automatic-cancel sender is added in this checkpoint.
 Source/reducer: `tools/targets/camry/extract/extract_camry_2026_cancel_windows.py`,
 `tools/targets/camry/analysis/analyze_camry_2026_cancel_evidence.py`,
 `data/generated/camry_2026_cancel_evidence.json` (v2), and
-`tests/verify_camry_2026_cancel_evidence.py`. Synthetic positive controls independently
+`tests/targets/camry/verify_camry_2026_cancel_evidence.py`. Synthetic positive controls independently
 check that both endian search directions recover a one-frame pulse, including
 a 16-bit field crossing three bytes, and reject an otherwise identical
 non-reproducing event or a pulse supplied only by a CRC-corrupt frame.
@@ -476,7 +476,7 @@ passes **617 tests and 3,186 subtests**, with 262 existing skips in that selecti
 Toyota Python lint passes. No EPS image, signer/runtime loader or Panda safety
 policy was changed in this follow-up, and nothing was installed in a vehicle.
 
-`tests/verify_camry_2026_radar_lifecycle_external.py` now makes the actual-parser
+`tests/targets/camry/verify_camry_2026_radar_lifecycle_external.py` now makes the actual-parser
 replay reproducible through the maintained sibling opendbc environment. Besides
 the 17-source held-out reduction, it preserves original CAN publication
 boundaries on six raw-source segments. Two are stock-harness bus0 captures,
@@ -663,7 +663,7 @@ Reproduction uses
 `data/generated/camry_2026_cancel_request_causality.json`. The extractor has
 reproduced the fixture and report byte-for-byte from the original source files.
 The 12 regression tests in
-`tests/verify_camry_2026_cancel_request_causality.py` cover both the real windows
+`tests/targets/camry/verify_camry_2026_cancel_request_causality.py` cover both the real windows
 and independent synthetic counterexamples. Run
 `tools/test camry_2026_cancel_request_causality camry_2026_cancel_evidence`.
 
@@ -808,7 +808,7 @@ Reproduction:
 
 ```sh
 # Re-reduce the portable retained fixture and run classifier/source regressions.
-uv run python tools/targets/camry/analysis/analyze_camry_2026_native_cruise_release.py
+uv run --locked python -m tools.targets.camry.analysis.analyze_camry_2026_native_cruise_release
 tools/test camry_2026_native_cruise_release
 
 # Explicit full original-source scan, using the existing openpilot LogReader environment.

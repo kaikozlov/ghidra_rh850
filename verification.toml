@@ -57,225 +57,223 @@ env = "GTSPLUS_ROOT"
 description = "Pinned proprietary GTS+ distribution and derived local reconstruction corpus"
 
 [suite.gtsplus_artifact_lock]
-tests = ["tests/verify_gtsplus_artifact_lock.py"]
+tests = ["tests/techstream/verify_gtsplus_artifact_lock.py"]
 requires_external = ["gtsplus"]
 modes = ["local"]
 
 [suite.gtsplus_mackey_rid1010]
-tests = ["tests/verify_gtsplus_mackey_rid1010.py"]
+tests = ["tests/techstream/verify_gtsplus_mackey_rid1010.py"]
 requires_external = ["gtsplus"]
 modes = ["local"]
 # Pins the current-GTS MAC_01 RID-0x1010 M1-M5 path and its coexistence with
 # the newer RID-0x3002 transport.
 
 [suite.gtsplus_tss3_crossvehicle_surface]
-tests = ["tests/verify_gtsplus_tss3_crossvehicle_surface.py"]
+tests = ["tests/techstream/verify_gtsplus_tss3_crossvehicle_surface.py"]
 requires_external = ["gtsplus"]
 modes = ["local"]
 
 [suite.gtsplus_tss3_control_ownership]
-tests = ["tests/verify_gtsplus_tss3_control_ownership.py"]
+tests = ["tests/techstream/verify_gtsplus_tss3_control_ownership.py"]
 requires_external = ["gtsplus"]
 modes = ["local"]
 
 [suite.gtsplus_tss3_steering_touch_path]
-tests = ["tests/verify_gtsplus_tss3_steering_touch_path.py"]
+tests = ["tests/techstream/verify_gtsplus_tss3_steering_touch_path.py"]
 requires_external = ["gtsplus"]
 modes = ["local"]
 
 [suite.gtsplus_vehicle_resolver]
-tests = ["tests/verify_gtsplus_vehicle_resolver.py"]
+tests = ["tests/techstream/verify_gtsplus_vehicle_resolver.py"]
 requires_external = ["gtsplus"]
 modes = ["local"]
 
 [suite.gtsplus_ddb_factory_table_map]
-tests = ["tests/verify_gtsplus_ddb_factory_table_map.py"]
+tests = ["tests/techstream/verify_gtsplus_ddb_factory_table_map.py"]
 requires_external = ["gtsplus"]
 modes = ["local"]
 
 [suite.gtsplus_ddb_corpus_census]
-tests = ["tests/verify_gtsplus_ddb_corpus_census.py"]
+tests = ["tests/techstream/verify_gtsplus_ddb_corpus_census.py"]
 requires_external = ["gtsplus"]
 modes = ["local"]
 
 [suite.gtsplus_pcs_data_viewer_tss3_dictionary]
-tests = ["tests/verify_gtsplus_pcs_data_viewer_tss3_dictionary.py"]
+tests = ["tests/techstream/verify_gtsplus_pcs_data_viewer_tss3_dictionary.py"]
 requires_external = ["gtsplus"]
 modes = ["local"]
 
 [suite.gtsplus_pcs_data_viewer_tss3_managed_semantics]
-tests = ["tests/verify_gtsplus_pcs_data_viewer_tss3_managed_semantics.py"]
+tests = ["tests/techstream/verify_gtsplus_pcs_data_viewer_tss3_managed_semantics.py"]
 requires_external = ["gtsplus"]
 modes = ["local"]
 
 [suite.gtsplus_pcs_data_viewer_adu_semantics]
-tests = ["tests/verify_gtsplus_pcs_data_viewer_adu_semantics.py"]
+tests = ["tests/techstream/verify_gtsplus_pcs_data_viewer_adu_semantics.py"]
 requires_external = ["gtsplus"]
 modes = ["local"]
 
 [suite.gtsplus_pcs_data_viewer_ddr_semantics]
-tests = ["tests/verify_gtsplus_pcs_data_viewer_ddr_semantics.py"]
+tests = ["tests/techstream/verify_gtsplus_pcs_data_viewer_ddr_semantics.py"]
 requires_external = ["gtsplus"]
 modes = ["local"]
 
 [suite.gtsplus_pcs_data_viewer_parameter_help]
-tests = ["tests/verify_gtsplus_pcs_data_viewer_parameter_help.py"]
+tests = ["tests/techstream/verify_gtsplus_pcs_data_viewer_parameter_help.py"]
 requires_external = ["gtsplus"]
 modes = ["local"]
 
 [suite.gtsplus_tse_converter]
-tests = ["tests/verify_gtsplus_tse_converter.py"]
+tests = ["tests/techstream/verify_gtsplus_tse_converter.py"]
 requires_external = ["gtsplus"]
 modes = ["local"]
 
 [suite.gtsplus_tse_managed_semantics]
-tests = ["tests/verify_gtsplus_tse_managed_semantics.py"]
+tests = ["tests/techstream/verify_gtsplus_tse_managed_semantics.py"]
 requires_external = ["gtsplus"]
 modes = ["local"]
 
 [suite.gtsplus_vdas_semantics]
-tests = ["tests/verify_gtsplus_vdas_semantics.py"]
+tests = ["tests/techstream/verify_gtsplus_vdas_semantics.py"]
 requires_external = ["gtsplus"]
 modes = ["local"]
 
 [suite.gtsplus_p5_adas_p6_migration]
-tests = ["tests/verify_gtsplus_p5_adas_p6_migration.py"]
+tests = ["tests/techstream/verify_gtsplus_p5_adas_p6_migration.py"]
 requires_external = ["gtsplus"]
 modes = ["local"]
 
 [suite.gtsplus_body_recovery]
-tests = ["tests/verify_gtsplus_body_recovery.py"]
+tests = ["tests/techstream/verify_gtsplus_body_recovery.py"]
 requires_external = ["gtsplus"]
 modes = ["local"]
 
 [suite.gtsplus_managed_exe_recovery]
-tests = ["tests/verify_gtsplus_managed_exe_recovery.py"]
+tests = ["tests/techstream/verify_gtsplus_managed_exe_recovery.py"]
 requires_external = ["gtsplus"]
 modes = ["local"]
 
 [suite.gtsplus_tss3_native_recorder]
-tests = ["tests/verify_gtsplus_tss3_native_recorder.py"]
+tests = ["tests/techstream/verify_gtsplus_tss3_native_recorder.py"]
 requires_external = ["gtsplus"]
 modes = ["local"]
 
 [suite.architecture]
-tests = ["tests/verify_architecture.py"]
+tests = ["tests/tooling/verify_architecture.py"]
 
 [suite.rh850_compiler_abi]
-tests = ["tests/verify_rh850_compiler_abi.py"]
+tests = ["tests/firmware/verify_rh850_compiler_abi.py"]
 
 [suite.boot_trust]
 tests = [
-  "tests/verify_boot_trust.py",
-  "tests/verify_codeflash_crc_reconstruction.py",
+  "tests/firmware/verify_boot_trust.py",
+  "tests/firmware/verify_codeflash_crc_reconstruction.py",
 ]
 
 [suite.bootloader_diagnostics]
-tests = ["tests/verify_bootloader_diagnostics.py"]
+tests = ["tests/firmware/verify_bootloader_diagnostics.py"]
 
 [suite.bootloader_secrets]
-tests = ["tests/verify_findings.py"]
+tests = ["tests/firmware/verify_findings.py"]
 
 [suite.findcrypt_database]
-tests = ["tests/verify_findcrypt_database.py"]
+tests = ["tests/tooling/verify_findcrypt_database.py"]
 
 [suite.can_transport]
-tests = ["tests/verify_can_transport.py"]
+tests = ["tests/firmware/verify_can_transport.py"]
 
 [suite.deadline_monitor_dispatch_tables]
-tests = ["tests/verify_deadline_monitor_dispatch_tables.py"]
+tests = ["tests/firmware/verify_deadline_monitor_dispatch_tables.py"]
 
 [suite.control_partition]
-tests = ["tests/verify_control_partition.py"]
+tests = ["tests/firmware/verify_control_partition.py"]
 
 [suite.dataflash_layout]
-tests = ["tests/verify_dataflash_layout.py"]
+tests = ["tests/firmware/verify_dataflash_layout.py"]
 
 [suite.dataflash_semantics]
-tests = ["tests/verify_dataflash_semantics.py"]
+tests = ["tests/firmware/verify_dataflash_semantics.py"]
 
 [suite.did_model]
-tests = ["tests/verify_did_model.py"]
+tests = ["tests/firmware/verify_did_model.py"]
 
 [suite.application_ab_service]
-tests = ["tests/verify_application_ab_service.py"]
+tests = ["tests/diagnostics/verify_application_ab_service.py"]
 
 [suite.application_proprietary_ba]
-tests = ["tests/verify_application_proprietary_ba.py"]
+tests = ["tests/diagnostics/verify_application_proprietary_ba.py"]
 
 [suite.application_proprietary_ba_live]
-tests = ["tests/verify_application_proprietary_ba_live.py"]
+tests = ["tests/diagnostics/verify_application_proprietary_ba_live.py"]
 modes = ["local"]
 
 [suite.application_diagnostics]
-tests = ["tests/verify_application_diagnostics.py"]
+tests = ["tests/diagnostics/verify_application_diagnostics.py"]
 
 [suite.application_routine_control]
-tests = ["tests/verify_application_routine_control.py"]
+tests = ["tests/diagnostics/verify_application_routine_control.py"]
 
 [suite.application_routine_control_1004_event_history_live]
-tests = ["tests/verify_application_routine_control_1004_event_history_live.py"]
+tests = ["tests/diagnostics/verify_application_routine_control_1004_event_history_live.py"]
 modes = ["local"]
 
 [suite.application_routine_control_remaining_controls_live]
-tests = ["tests/verify_application_routine_control_remaining_controls_live.py"]
+tests = ["tests/diagnostics/verify_application_routine_control_remaining_controls_live.py"]
 modes = ["local"]
 
 [suite.application_async_operation_queue]
-tests = [
-  "tests/verify_application_async_operation_queue.py",
-]
+tests = ["tests/diagnostics/verify_application_async_operation_queue.py"]
 
 [suite.application_async_operation_queue_live]
-tests = ["tests/verify_application_async_operation_queue_live.py"]
+tests = ["tests/diagnostics/verify_application_async_operation_queue_live.py"]
 modes = ["local"]
 
 [suite.application_read_memory_by_address]
-tests = ["tests/verify_application_read_memory_by_address.py"]
+tests = ["tests/diagnostics/verify_application_read_memory_by_address.py"]
 
 [suite.application_rmba_memory_safety]
-tests = ["tests/verify_application_rmba_memory_safety.py"]
+tests = ["tests/diagnostics/verify_application_rmba_memory_safety.py"]
 
 [suite.diagnostic_vocabulary]
-tests = ["tests/verify_diagnostic_vocabulary.py"]
+tests = ["tests/techstream/verify_diagnostic_vocabulary.py"]
 
 [suite.application_receive]
 tests = [
-  "tests/verify_application_receive.py",
-  "tests/verify_application_rx_consumer_audit.py",
+  "tests/diagnostics/verify_application_receive.py",
+  "tests/diagnostics/verify_application_rx_consumer_audit.py",
 ]
 
 [suite.application_wdbi]
-tests = ["tests/verify_application_wdbi.py"]
+tests = ["tests/diagnostics/verify_application_wdbi.py"]
 
 [suite.application_wdbi_surface_live]
-tests = ["tests/verify_application_wdbi_surface_live.py"]
+tests = ["tests/diagnostics/verify_application_wdbi_surface_live.py"]
 modes = ["local"]
 
 [suite.application_wdbi_0204_maintenance_live]
-tests = ["tests/verify_application_wdbi_0204_maintenance_live.py"]
+tests = ["tests/diagnostics/verify_application_wdbi_0204_maintenance_live.py"]
 modes = ["local"]
 
 [suite.application_wdbi_2010_dead_state_live]
-tests = ["tests/verify_application_wdbi_2010_dead_state_live.py"]
+tests = ["tests/diagnostics/verify_application_wdbi_2010_dead_state_live.py"]
 modes = ["local"]
 
 [suite.application_wdbi_2012_lifecycle_live]
-tests = ["tests/verify_application_wdbi_2012_lifecycle_live.py"]
+tests = ["tests/diagnostics/verify_application_wdbi_2012_lifecycle_live.py"]
 modes = ["local"]
 
 [suite.application_wdbi_2013_2014_controls_live]
-tests = ["tests/verify_application_wdbi_2013_2014_controls_live.py"]
+tests = ["tests/diagnostics/verify_application_wdbi_2013_2014_controls_live.py"]
 modes = ["local"]
 
 [suite.application_security_access]
-tests = ["tests/verify_security_gate.py"]
+tests = ["tests/tooling/verify_security_gate.py"]
 
 [suite.application_interface]
-tests = ["tests/verify_application_interface_state_joins.py"]
+tests = ["tests/diagnostics/verify_application_interface_state_joins.py"]
 
 [suite.application_interface_correlation]
-tests = ["tests/verify_application_interface_correlations.py"]
+tests = ["tests/diagnostics/verify_application_interface_correlations.py"]
 requires_external = ["techstream_v18"]
 modes = ["local"]
 
@@ -283,314 +281,322 @@ modes = ["local"]
 
 [suite.application_transmit]
 tests = [
-  "tests/verify_application_transmit.py",
-  "tests/verify_application_tx_producer_evidence.py",
-  "tests/verify_application_tx.py",
+  "tests/diagnostics/verify_application_transmit.py",
+  "tests/diagnostics/verify_application_tx_producer_evidence.py",
+  "tests/diagnostics/verify_application_tx.py",
 ]
 
 [suite.icus_key_recovery_surface]
-tests = ["tests/verify_icus_key_recovery_surface.py"]
+tests = ["tests/firmware/verify_icus_key_recovery_surface.py"]
 
 [suite.icus_key_update]
-tests = ["tests/verify_icus_key_update.py"]
+tests = ["tests/firmware/verify_icus_key_update.py"]
 
 [suite.icus_software_paths]
-tests = ["tests/verify_icus_software_paths.py"]
+tests = ["tests/firmware/verify_icus_software_paths.py"]
 
 [suite.icus_stage7_static]
-tests = ["tests/verify_icus_stage7_static.py"]
+tests = ["tests/firmware/verify_icus_stage7_static.py"]
 
 [suite.icus_trace_decoder]
-tests = ["tests/verify_icus_trace_decoder.py"]
+tests = ["tests/firmware/verify_icus_trace_decoder.py"]
 
 [suite.motor_actuation_boundary]
-tests = ["tests/verify_motor_actuation_boundary.py"]
+tests = ["tests/firmware/verify_motor_actuation_boundary.py"]
 
 [suite.motor_safety_monitors]
-tests = ["tests/verify_motor_safety_monitors.py"]
+tests = ["tests/firmware/verify_motor_safety_monitors.py"]
 
 [suite.motor_calibration_handlers]
-tests = ["tests/verify_motor_calibration_handlers.py"]
+tests = ["tests/firmware/verify_motor_calibration_handlers.py"]
 
 [suite.p1m_device_profile]
-tests = ["tests/verify_p1m_device_profile.py"]
+tests = ["tests/firmware/verify_p1m_device_profile.py"]
 
 [suite.payload_gate]
-tests = ["tests/verify_payload_gate.py"]
+tests = ["tests/runtime/verify_payload_gate.py"]
 
 [suite.candidate_f05]
-tests = ["tests/verify_candidate_f05_payload.py"]
+tests = ["tests/runtime/verify_candidate_f05_payload.py"]
 
 [suite.memory_safety]
 tests = [
-  "tests/verify_memory_safety.py",
-  "tests/verify_memory_safety_mutations.py",
+  "tests/tooling/verify_memory_safety.py",
+  "tests/tooling/verify_memory_safety_mutations.py",
 ]
 
 [suite.ephemeral_secoc_bypass]
-tests = ["tests/verify_ephemeral_secoc_bypass.py"]
+tests = ["tests/runtime/verify_ephemeral_secoc_bypass.py"]
 
 [suite.ephemeral_runtime_live_installer]
-tests = ["tests/verify_ephemeral_runtime_live_installer.py"]
+tests = ["tests/runtime/verify_ephemeral_runtime_live_installer.py"]
 
 [suite.ephemeral_runtime]
-tests = ["tests/verify_ephemeral_runtime.py"]
+tests = ["tests/runtime/verify_ephemeral_runtime.py"]
 
 [suite.ephemeral_runtime_resolver]
-tests = ["tests/verify_ephemeral_runtime_resolver.py"]
+tests = ["tests/runtime/verify_ephemeral_runtime_resolver.py"]
 
 [suite.ram_overlays]
-tests = ["tests/verify_ram_overlays.py"]
+tests = ["tests/runtime/verify_ram_overlays.py"]
 
 [suite.renesas_rfp]
-tests = ["tests/verify_renesas_rfp.py"]
+tests = ["tests/firmware/verify_renesas_rfp.py"]
 
 [suite.semantic_coverage]
-tests = ["tests/verify_semantic_coverage.py"]
+tests = ["tests/tooling/verify_semantic_coverage.py"]
 
 [suite.semantic_coverage_live]
-tests = ["tests/verify_semantic_coverage_live.py"]
+tests = ["tests/tooling/verify_semantic_coverage_live.py"]
 modes = ["local"]
 args = ["--project-dir", "build/work/project"]
 
 [suite.semantic_review_promotions]
-tests = ["tests/verify_semantic_review_promotions.py"]
+tests = ["tests/tooling/verify_semantic_review_promotions.py"]
 
 [suite.semantic_interest_ranking]
-tests = ["tests/verify_semantic_interest_ranking.py"]
+tests = ["tests/tooling/verify_semantic_interest_ranking.py"]
 
 [suite.decompiler_corpus]
-tests = ["tests/verify_decompiler_corpus.py"]
+tests = ["tests/tooling/verify_decompiler_corpus.py"]
 
 [suite.function_discovery]
-tests = ["tests/verify_function_discovery.py"]
+tests = ["tests/tooling/verify_function_discovery.py"]
 
 [suite.application_rdbi_disclosure_boundary]
-tests = ["tests/verify_application_rdbi_disclosure_boundary.py"]
+tests = ["tests/diagnostics/verify_application_rdbi_disclosure_boundary.py"]
 modes = ["local"]
 
 [suite.application_rdbi]
-tests = ["tests/verify_application_rdbi.py"]
+tests = ["tests/diagnostics/verify_application_rdbi.py"]
 
 [suite.application_rdbi_stale_response_live]
-tests = ["tests/verify_application_rdbi_stale_response_live.py"]
+tests = ["tests/diagnostics/verify_application_rdbi_stale_response_live.py"]
 modes = ["local"]
 
 [suite.camry_f33_steering_state_capture]
-tests = ["tests/verify_camry_f33_steering_state_capture.py"]
+tests = ["tests/targets/camry/verify_camry_f33_steering_state_capture.py"]
 
 [suite.xcp]
-tests = ['tests/verify_xcp.py']
+tests = [
+  "tests/runtime/verify_xcp_window_security.py",
+  "tests/runtime/verify_xcp_daq_probe.py",
+  "tests/runtime/verify_xcp_reachability.py",
+]
 [suite.xcp_shadow_write_live]
-tests = ["tests/verify_xcp_shadow_write_live.py"]
+tests = ["tests/runtime/verify_xcp_shadow_write_live.py"]
 modes = ["local"]
 
 [suite.secoc]
-tests = ['tests/verify_secoc.py']
+tests = [
+  "tests/runtime/verify_secoc_receive_surface.py",
+  "tests/runtime/verify_secoc_persistence_security.py",
+  "tests/runtime/verify_secoc_bypass_gate.py",
+]
 [suite.security_consumers]
-tests = ["tests/verify_security_consumers.py"]
+tests = ["tests/tooling/verify_security_consumers.py"]
 
 [suite.toyota_secoc_signer]
-tests = ["tests/verify_toyota_secoc_signer.py"]
+tests = ["tests/toyota/verify_toyota_secoc_signer.py"]
 
 [suite.corolla_2023_public_route_opendbc_evidence]
-tests = ["tests/verify_corolla_2023_public_route_opendbc_evidence.py"]
+tests = ["tests/targets/corolla/verify_corolla_2023_public_route_opendbc_evidence.py"]
 
 [suite.analysis_targets]
-tests = ["tests/verify_analysis_targets.py"]
+tests = ["tests/tooling/verify_analysis_targets.py"]
 
 [suite.camry_8965f3307000_gtsplus_semantics]
-tests = ["tests/verify_camry_8965F3307000_gtsplus_semantics.py"]
+tests = ["tests/targets/camry/verify_camry_8965F3307000_gtsplus_semantics.py"]
 
 [suite.camry_8965f3307000_gtsplus_external]
-tests = ["tests/verify_camry_8965F3307000_gtsplus_external.py"]
+tests = ["tests/targets/camry/verify_camry_8965F3307000_gtsplus_external.py"]
 requires_external = ["techstream_v18", "gtsplus"]
 modes = ["local"]
 
 [suite.toyota_diag_registry]
-tests = ["tests/verify_toyota_diag_registry.py"]
+tests = ["tests/techstream/verify_toyota_diag_registry.py"]
 requires_external = ["gtsplus"]
 modes = ["local"]
 
 [suite.toyota_diag_bundle]
-tests = ["tests/verify_toyota_diag_bundle.py"]
+tests = ["tests/techstream/verify_toyota_diag_bundle.py"]
 requires_external = ["gtsplus"]
 modes = ["local"]
 
 [suite.gts_query_cli]
-tests = ["tests/verify_gts_query_cli.py"]
+tests = ["tests/techstream/verify_gts_query_cli.py"]
 requires_external = ["gtsplus", "cuw_reference_corpus"]
 modes = ["local"]
 
 [suite.camry_2026]
-tests = ['tests/verify_camry_2026.py']
+tests = [
+  "tests/targets/camry/verify_camry_2026_engagement.py",
+  "tests/targets/camry/verify_camry_2026_capture_replay.py",
+  "tests/targets/camry/verify_camry_2026_diagnostics.py",
+  "tests/targets/camry/verify_camry_2026_motor_feedback.py",
+]
 
 [suite.camry_2026_lta_state_reconciliation]
-tests = ["tests/verify_camry_2026_lta_state_reconciliation.py"]
+tests = ["tests/targets/camry/verify_camry_2026_lta_state_reconciliation.py"]
 
 
 [suite.camry_2026_upstream_request_census]
-tests = ["tests/verify_camry_2026_upstream_request_census.py"]
+tests = ["tests/targets/camry/verify_camry_2026_upstream_request_census.py"]
 
 [suite.camry_20260904_stock_steering]
-tests = ["tests/verify_camry_20260904_stock_steering.py"]
+tests = ["tests/targets/camry/verify_camry_20260904_stock_steering.py"]
 
 [suite.camry_tss3_replay_tool]
-tests = ["tests/verify_camry_tss3_replay_tool.py"]
+tests = ["tests/targets/camry/verify_camry_tss3_replay_tool.py"]
 
 [suite.camry_2026_08a_producer_bounds]
-tests = ["tests/verify_camry_2026_08a_producer_bounds.py"]
+tests = ["tests/targets/camry/verify_camry_2026_08a_producer_bounds.py"]
 
 [suite.camry_2026_bus1_camera_output]
-tests = ["tests/verify_camry_2026_bus1_camera_output.py"]
+tests = ["tests/targets/camry/verify_camry_2026_bus1_camera_output.py"]
 
 [suite.camry_2026_bus1_e2e]
-tests = ["tests/verify_camry_2026_bus1_e2e.py"]
+tests = ["tests/targets/camry/verify_camry_2026_bus1_e2e.py"]
 
 [suite.camry_frc_request_poc]
-tests = ["tests/verify_camry_frc_request_poc.py"]
+tests = ["tests/targets/camry/verify_camry_frc_request_poc.py"]
 
 [suite.camry_2026_bus1_field_leadlag]
-tests = ["tests/verify_camry_2026_bus1_field_leadlag.py"]
+tests = ["tests/targets/camry/verify_camry_2026_bus1_field_leadlag.py"]
 
 [suite.camry_2026_bus1_frc_egress_bounds]
-tests = ["tests/verify_camry_2026_bus1_frc_egress_bounds.py"]
+tests = ["tests/targets/camry/verify_camry_2026_bus1_frc_egress_bounds.py"]
 
 [suite.camry_2026_bus4_field_leadlag]
-tests = ["tests/verify_camry_2026_bus4_field_leadlag.py"]
+tests = ["tests/targets/camry/verify_camry_2026_bus4_field_leadlag.py"]
 
 [suite.camry_2026_longitudinal_request_plane]
-tests = ["tests/verify_camry_2026_longitudinal_request_plane.py"]
+tests = ["tests/targets/camry/verify_camry_2026_longitudinal_request_plane.py"]
 
 [suite.camry_2026_baseline_selector]
-tests = ["tests/verify_camry_2026_baseline_selector.py"]
+tests = ["tests/targets/camry/verify_camry_2026_baseline_selector.py"]
 [suite.camry_2026_lateral_flow_trace]
-tests = ["tests/verify_camry_2026_lateral_flow_trace.py"]
+tests = ["tests/targets/camry/verify_camry_2026_lateral_flow_trace.py"]
 
 [suite.camry_2026_08a_signer_continuity]
-tests = ["tests/verify_camry_2026_08a_signer_continuity.py"]
+tests = ["tests/targets/camry/verify_camry_2026_08a_signer_continuity.py"]
 [suite.camry_2026_tss3_request_capture]
-tests = ["tests/verify_camry_tss3_request_capture.py"]
+tests = ["tests/targets/camry/verify_camry_tss3_request_capture.py"]
 
 [suite.camry_frc_operation_ffd_capture]
-tests = ["tests/verify_camry_frc_operation_ffd_capture.py"]
+tests = ["tests/targets/camry/verify_camry_frc_operation_ffd_capture.py"]
 
 [suite.camry_2026_driver_steering_threshold_split]
-tests = ["tests/verify_camry_2026_driver_steering_threshold_split.py"]
+tests = ["tests/targets/camry/verify_camry_2026_driver_steering_threshold_split.py"]
 
 [suite.camry_frc_drcc_gate_probe]
-tests = ["tests/verify_camry_frc_drcc_gate_probe.py"]
+tests = ["tests/targets/camry/verify_camry_frc_drcc_gate_probe.py"]
 
 [suite.camry_tss3_operation_ffd_decoder]
-tests = ["tests/verify_camry_tss3_operation_ffd_decoder.py"]
+tests = ["tests/targets/camry/verify_camry_tss3_operation_ffd_decoder.py"]
 [suite.camry_8965f3307000_canfd_timing]
-tests = ["tests/verify_camry_8965F3307000_canfd_timing.py"]
+tests = ["tests/targets/camry/verify_camry_8965F3307000_canfd_timing.py"]
 
 [suite.camry_8965f3307000_codeflash]
-tests = ["tests/verify_camry_8965F3307000.py"]
-args = ["--section", "codeflash"]
+tests = ["tests/targets/camry/verify_camry_8965F3307000_codeflash.py"]
 
 [suite.crown_8965f3012000]
-tests = ["tests/verify_crown_8965F3012000.py"]
+tests = ["tests/targets/crown/verify_crown_8965F3012000.py"]
 
 [suite.camry_8965f3307000_flash_backend]
-tests = ["tests/verify_camry_8965F3307000.py"]
-args = ["--section", "flash_backend"]
+tests = ["tests/targets/camry/verify_camry_8965F3307000_flash_backend.py"]
 
 [suite.t0035_faci_backend_external]
-tests = ["tests/verify_t0035_faci_backend_external.py"]
+tests = ["tests/firmware/verify_t0035_faci_backend_external.py"]
 requires_external = ["cuw_reference_corpus"]
 modes = ["local"]
 
 [suite.camry_8965f3307000_secoc_patch]
-tests = ["tests/verify_camry_8965F3307000.py"]
-args = ["--section", "secoc_patch"]
+tests = ["tests/targets/camry/verify_camry_8965F3307000_secoc_patch.py"]
 
 [suite.camry_8965f3307000_b6_acceptance_ladder]
-tests = ["tests/verify_camry_8965F3307000.py"]
-args = ["--section", "b6_acceptance_ladder"]
+tests = ["tests/targets/camry/verify_camry_8965F3307000_b6_acceptance_ladder.py"]
 
 [suite.camry_8965f3307000_lateral_static]
-tests = ["tests/verify_camry_8965F3307000.py"]
-args = ["--section", "lateral_static"]
+tests = ["tests/targets/camry/verify_camry_8965F3307000_lateral_static.py"]
 
 [suite.camry_8965f3307000_tss3_opendbc_port]
-tests = ["tests/verify_camry_8965F3307000.py"]
-args = ["--section", "tss3_opendbc_port"]
+tests = ["tests/targets/camry/verify_camry_8965F3307000_tss3_opendbc_port.py"]
 
 [suite.camry_8965f3307000_fault_status]
-tests = ["tests/verify_camry_8965F3307000.py"]
-args = ["--section", "fault_status"]
+tests = ["tests/targets/camry/verify_camry_8965F3307000_fault_status.py"]
 
 [suite.camry_8965f3307000_secoc_recovery]
-tests = ["tests/verify_camry_8965F3307000.py"]
-args = ["--section", "secoc_recovery"]
+tests = ["tests/targets/camry/verify_camry_8965F3307000_secoc_recovery.py"]
 
 [suite.camry_8965f3307000_command5_runtime_carrier]
-tests = ["tests/verify_camry_8965F3307000.py"]
-args = ["--section", "command5_runtime_carrier"]
+tests = ["tests/targets/camry/verify_camry_8965F3307000_command5_runtime_carrier.py"]
 
 [suite.camry_8965f3307000_application_ram_loader]
-tests = ["tests/verify_camry_8965F3307000.py"]
-args = ["--section", "application_ram_loader"]
+tests = ["tests/targets/camry/verify_camry_8965F3307000_application_ram_loader.py"]
 
 [suite.span_2025_discord_rlog_opendbc_evidence]
-tests = ["tests/verify_span_2025_discord_rlog_opendbc_evidence.py"]
+tests = ["tests/targets/corolla/verify_span_2025_discord_rlog_opendbc_evidence.py"]
 
 [suite.corolla_tss3_opendbc_readiness]
-tests = ["tests/verify_corolla_tss3_opendbc_readiness.py"]
+tests = ["tests/targets/corolla/verify_corolla_tss3_opendbc_readiness.py"]
 
 [suite.corolla_hf]
-tests = ['tests/verify_corolla_hf.py']
+tests = [
+  "tests/targets/corolla/verify_corolla_hf_b6_secoc.py",
+  "tests/targets/corolla/verify_corolla_hf_command5.py",
+  "tests/targets/corolla/verify_corolla_hf_state_contracts.py",
+  "tests/targets/corolla/verify_corolla_hf_steering_authority.py",
+]
 
 [suite.corolla_hf_b6_inline_signer]
-tests = ["tests/verify_corolla_hf_b6_inline_signer.py"]
+tests = ["tests/targets/corolla/verify_corolla_hf_b6_inline_signer.py"]
 
 [suite.tss3_cruise_live_transport_external]
-tests = ["tests/verify_tss3_cruise_live_transport_external.py"]
+tests = ["tests/targets/camry/verify_tss3_cruise_live_transport_external.py"]
 modes = ["local"]
 
 [suite.corolla_2023_public_route_opendbc_evidence_external]
-tests = ["tests/verify_corolla_2023_public_route_opendbc_evidence_external.py"]
+tests = ["tests/targets/corolla/verify_corolla_2023_public_route_opendbc_evidence_external.py"]
 modes = ["local"]
 
 [suite.span_2025_discord_rlog_opendbc_evidence_external]
-tests = ["tests/verify_span_2025_discord_rlog_opendbc_evidence_external.py"]
+tests = ["tests/targets/corolla/verify_span_2025_discord_rlog_opendbc_evidence_external.py"]
 modes = ["local"]
 
 [suite.corolla_h_nonsteering_engagement_evidence_external]
-tests = ["tests/verify_corolla_h_nonsteering_engagement_evidence_external.py"]
+tests = ["tests/targets/corolla/verify_corolla_h_nonsteering_engagement_evidence_external.py"]
 modes = ["local"]
 
 [suite.tss3_cruise_engagement_semantics_external]
-tests = ["tests/verify_tss3_cruise_engagement_semantics_external.py"]
+tests = ["tests/targets/camry/verify_tss3_cruise_engagement_semantics_external.py"]
 modes = ["local"]
 
 [suite.corolla_hf_regen]
-tests = ["tests/verify_corolla_hf_regen.py"]
+tests = ["tests/targets/corolla/verify_corolla_hf_regen.py"]
 modes = ["full", "local"]
 
 [suite.corolla_hf_secoc_00f_freshness_bridge_external]
-tests = ["tests/verify_corolla_hf_secoc_00f_freshness_bridge_external.py"]
+tests = ["tests/targets/corolla/verify_corolla_hf_secoc_00f_freshness_bridge_external.py"]
 modes = ["local"]
 
 [suite.corolla_tss3_opendbc_readonly_external]
-tests = ["tests/verify_corolla_tss3_opendbc_readonly_external.py"]
+tests = ["tests/targets/corolla/verify_corolla_tss3_opendbc_readonly_external.py"]
 modes = ["local"]
 
 [suite.corolla_pre_tss3_message_comparison]
-tests = ["tests/verify_corolla_pre_tss3_message_comparison.py"]
+tests = ["tests/targets/corolla/verify_corolla_pre_tss3_message_comparison.py"]
 
 
 
 
 
 [suite.corolla_h_sienna_secoc_structural_comparison]
-tests = ["tests/verify_corolla_h_sienna_secoc_structural_comparison.py"]
+tests = ["tests/targets/corolla/verify_corolla_h_sienna_secoc_structural_comparison.py"]
 
 
 [suite.techstream_rks]
-tests = ["tests/verify_techstream_rks.py"]
+tests = ["tests/techstream/verify_techstream_rks.py"]
 requires_external = ["techstream_v18"]
 modes = ["local"]
 # External-tree suite: verifies TMS-009 (CUW RKS / two-layer reflash
@@ -599,151 +605,149 @@ modes = ["local"]
 # --allow-skips is requested. Run directly with: tools/test techstream_rks
 
 [suite.techstream_ptshim]
-tests = ["tests/verify_techstream_ptshim.py"]
+tests = ["tests/techstream/verify_techstream_ptshim.py"]
 # Synthetic fixtures always exercise the parser; binary body/path/timestamp
 # locks are additionally checked when the gitignored Techstream tree is present.
 
 [suite.techstream_ddb_header_families]
-tests = ["tests/verify_techstream_ddb_header_families.py"]
+tests = ["tests/techstream/verify_techstream_ddb_header_families.py"]
 
 [suite.techstream_ddb_residuals]
-tests = ["tests/verify_techstream_ddb_residuals.py"]
+tests = ["tests/techstream/verify_techstream_ddb_residuals.py"]
 requires_external = ["techstream_v18"]
 modes = ["local"]
 # Bounded current-state audit: Security_P4 high-value unknowns plus the separate
 # Toyota.ddb type-1 master-enumeration schema. SKIPs when the external tree is absent.
 
 [suite.techstream_master_routes]
-tests = ["tests/verify_techstream_master_routes.py"]
+tests = ["tests/techstream/verify_techstream_master_routes.py"]
 requires_external = ["techstream_v18"]
 modes = ["local"]
 
 [suite.techstream_diagnostic_execution_model]
-tests = ["tests/verify_techstream_diagnostic_execution_model.py"]
+tests = ["tests/techstream/verify_techstream_diagnostic_execution_model.py"]
 requires_external = ["techstream_v18", "gtsplus"]
 modes = ["local"]
 
 [suite.techstream_priority_ddb_semantics]
-tests = ["tests/verify_techstream_priority_ddb_semantics.py"]
+tests = ["tests/techstream/verify_techstream_priority_ddb_semantics.py"]
 requires_external = ["techstream_v18"]
 modes = ["local"]
 
 [suite.techstream_p5_lateral_control]
-tests = [
-  "tests/verify_techstream_p5_lateral_control.py",
-]
+tests = ["tests/techstream/verify_techstream_p5_lateral_control.py"]
 requires_external = ["techstream_v18"]
 modes = ["local"]
 
 [suite.tss3_b6_sender_attribution]
-tests = ["tests/verify_tss3_b6_sender_attribution.py"]
+tests = ["tests/targets/corolla/verify_tss3_b6_sender_attribution.py"]
 
 [suite.corolla_2023_calibration_acquisition]
-tests = ["tests/verify_corolla_2023_calibration_acquisition.py"]
+tests = ["tests/targets/corolla/verify_corolla_2023_calibration_acquisition.py"]
 requires_external = ["cuw_reference_corpus"]
 modes = ["local"]
 
 [suite.techstream_searchcal]
-tests = ["tests/verify_techstream_searchcal.py"]
+tests = ["tests/techstream/verify_techstream_searchcal.py"]
 requires_external = ["techstream_v18"]
 modes = ["local"]
 
 [suite.camry_f152633k0000_brake_acquisition]
-tests = ["tests/verify_camry_f152633k0000_brake_acquisition.py"]
+tests = ["tests/targets/camry/verify_camry_f152633k0000_brake_acquisition.py"]
 requires_external = ["cuw_reference_corpus", "gtsplus"]
 modes = ["local"]
 
 [suite.camry_brake_observer_vocabulary]
-tests = ["tests/verify_camry_brake_observer_vocabulary.py"]
+tests = ["tests/targets/camry/verify_camry_brake_observer_vocabulary.py"]
 requires_external = ["gtsplus"]
 modes = ["local"]
 
 [suite.techstream_tis_calibration_acquisition]
-tests = ["tests/verify_techstream_tis_calibration_acquisition.py"]
+tests = ["tests/techstream/verify_techstream_tis_calibration_acquisition.py"]
 requires_external = ["techstream_v18"]
 modes = ["local"]
 
 [suite.techstream_tis_calibration_selection]
-tests = ["tests/verify_techstream_tis_calibration_selection.py"]
+tests = ["tests/techstream/verify_techstream_tis_calibration_selection.py"]
 requires_external = ["techstream_v18"]
 modes = ["local"]
 
 [suite.techstream_dtc_failure_types]
-tests = ["tests/verify_techstream_dtc_failure_types.py"]
+tests = ["tests/techstream/verify_techstream_dtc_failure_types.py"]
 requires_external = ["techstream_v18"]
 modes = ["local"]
 
 [suite.techstream_mackey]
-tests = ["tests/verify_techstream_mackey.py"]
+tests = ["tests/techstream/verify_techstream_mackey.py"]
 requires_external = ["techstream_v18"]
 modes = ["local"]
 # External-tree suite: verifies TMS-011 against native exports/imports and the
 # managed IT3UtilityRevNK IL. Exits 77 when software/Techstream/v18/unpacked is absent.
 
 [suite.techstream_crypto_inventory]
-tests = ["tests/verify_techstream_crypto_inventory.py"]
+tests = ["tests/techstream/verify_techstream_crypto_inventory.py"]
 requires_external = ["techstream_v18"]
 modes = ["local"]
 
 [suite.techstream_srp]
-tests = ["tests/verify_techstream_srp.py"]
+tests = ["tests/techstream/verify_techstream_srp.py"]
 requires_external = ["techstream_v18"]
 modes = ["local"]
 
 [suite.techstream_artifact_lock]
-tests = ["tests/verify_techstream_artifact_lock.py"]
+tests = ["tests/techstream/verify_techstream_artifact_lock.py"]
 requires_external = ["techstream_v18"]
 modes = ["local"]
 
 [suite.techstream_cuw_writer_routes]
-tests = ["tests/verify_techstream_cuw_writer_routes.py"]
+tests = ["tests/techstream/verify_techstream_cuw_writer_routes.py"]
 requires_external = ["techstream_v18"]
 modes = ["local"]
 
 [suite.techstream_pre_gts_static_closure]
 tests = [
-  "tests/verify_sienna_8965B4512000_techstream_did_semantics.py",
-  "tests/verify_techstream_cuw_calibration_schema.py",
-  "tests/verify_techstream_cuw_timing_recovery.py",
-  "tests/verify_techstream_cuw_writer_family_matrix.py",
-  "tests/verify_techstream_cuw_writer_protocol_grammar.py",
-  "tests/verify_techstream_rks_client_state.py",
+  "tests/targets/sienna/verify_sienna_8965B4512000_techstream_did_semantics.py",
+  "tests/techstream/verify_techstream_cuw_calibration_schema.py",
+  "tests/techstream/verify_techstream_cuw_timing_recovery.py",
+  "tests/techstream/verify_techstream_cuw_writer_family_matrix.py",
+  "tests/techstream/verify_techstream_cuw_writer_protocol_grammar.py",
+  "tests/techstream/verify_techstream_rks_client_state.py",
 ]
 requires_external = ["techstream_v18"]
 modes = ["local"]
 
 [suite.techstream_cuw_legacy]
-tests = ["tests/verify_techstream_cuw_legacy.py"]
+tests = ["tests/techstream/verify_techstream_cuw_legacy.py"]
 requires_external = ["techstream_v18"]
 modes = ["local"]
 
 [suite.techstream_cuw_vforest]
-tests = ["tests/verify_techstream_cuw_vforest.py"]
+tests = ["tests/techstream/verify_techstream_cuw_vforest.py"]
 requires_external = ["techstream_v18"]
 modes = ["local"]
 
 [suite.techstream_cuw_vforest_corpus]
-tests = ["tests/verify_techstream_cuw_vforest_corpus.py"]
+tests = ["tests/techstream/verify_techstream_cuw_vforest_corpus.py"]
 requires_external = ["techstream_v18"]
 modes = ["local"]
 
 [suite.techstream_cuw_frc_corpus]
-tests = ["tests/verify_techstream_cuw_frc_corpus.py"]
+tests = ["tests/techstream/verify_techstream_cuw_frc_corpus.py"]
 requires_external = ["techstream_v18", "cuw_reference_corpus", "gtsplus"]
 modes = ["local"]
 
 [suite.techstream_cuw_security_up]
-tests = ["tests/verify_techstream_cuw_security_up.py"]
+tests = ["tests/techstream/verify_techstream_cuw_security_up.py"]
 requires_external = ["techstream_v18"]
 modes = ["local"]
 
 [suite.techstream_cuw_cross_ecu_security_derivations]
-tests = ["tests/verify_techstream_cuw_cross_ecu_security_derivations.py"]
+tests = ["tests/techstream/verify_techstream_cuw_cross_ecu_security_derivations.py"]
 requires_external = ["cuw_reference_corpus"]
 modes = ["local"]
 
 [suite.techstream_layerb]
-tests = ["tests/verify_techstream_layerb.py"]
+tests = ["tests/techstream/verify_techstream_layerb.py"]
 requires_external = ["techstream_v18"]
 modes = ["local"]
 # External-tree suite: verifies TMS-010 (VFOREST flash-writer SA transmission /
@@ -753,125 +757,123 @@ modes = ["local"]
 # tools/test techstream_layerb
 
 [suite.yc_venza_airbag_reprogramming]
-tests = ["tests/verify_yc_venza_airbag_reprogramming.py"]
+tests = ["tests/targets/venza/verify_yc_venza_airbag_reprogramming.py"]
 
 [suite.community_tooling]
-tests = ["tests/verify_community_tooling.py"]
+tests = ["tests/tooling/verify_community_tooling.py"]
 # Checks the firmware instruction match and CRC reconstruction.
 
 [suite.lochuan_patch_semantics]
-tests = ["tests/verify_lochuan_patch_semantics.py"]
+tests = ["tests/tooling/verify_lochuan_patch_semantics.py"]
 
 [suite.secoc_semantic_patch_resolver]
-tests = ["tests/verify_secoc_semantic_patch_resolver.py"]
+tests = ["tests/runtime/verify_secoc_semantic_patch_resolver.py"]
 
 [suite.exploit_interest_ranking]
-tests = ["tests/verify_exploit_interest_ranking.py"]
+tests = ["tests/runtime/verify_exploit_interest_ranking.py"]
 
 [suite.exploit_interest_reviewed_candidates]
-tests = ["tests/verify_exploit_interest_reviewed_candidates.py"]
+tests = ["tests/runtime/verify_exploit_interest_reviewed_candidates.py"]
 
 [suite.response_disclosure_audit]
-tests = ["tests/verify_response_disclosure_audit.py"]
+tests = ["tests/diagnostics/verify_response_disclosure_audit.py"]
 
 [suite.boot_noauth_pc_pivot_assessment]
-tests = ["tests/verify_boot_noauth_pc_pivot_assessment.py"]
+tests = ["tests/runtime/verify_boot_noauth_pc_pivot_assessment.py"]
 
 [suite.codeflash_structure_scanner]
-tests = ["tests/verify_rh850_codeflash_structure_scanner.py"]
+tests = ["tests/firmware/verify_rh850_codeflash_structure_scanner.py"]
 
 [suite.variant_function_structure_matcher]
-tests = ["tests/verify_variant_function_structure_matcher.py"]
+tests = ["tests/variants/verify_variant_function_structure_matcher.py"]
 
 [suite.exploit_surface]
-tests = ["tests/verify_exploit_surface.py"]
+tests = ["tests/runtime/verify_exploit_surface.py"]
 
 [suite.exploit_predicate_semantics]
-tests = ["tests/verify_exploit_predicate_semantics.py"]
+tests = ["tests/runtime/verify_exploit_predicate_semantics.py"]
 
 [suite.secoc_manifest_patcher]
 tests = [
-  "tests/verify_secoc_manifest_patcher.py",
-  "tests/verify_ram_exec_variant_requirements.py",
+  "tests/runtime/verify_secoc_manifest_patcher.py",
+  "tests/runtime/verify_ram_exec_variant_requirements.py",
 ]
 
 [suite.codeflash_dumper]
-tests = ["tests/verify_codeflash_dumper.py"]
+tests = ["tests/firmware/verify_codeflash_dumper.py"]
 
 [suite.crypto_test_bank0_composition]
-tests = ["tests/verify_crypto_test_bank0_composition.py"]
+tests = ["tests/firmware/verify_crypto_test_bank0_composition.py"]
 
 [suite.secoc_command5_experiment]
-tests = ["tests/verify_secoc_command5_experiment.py"]
+tests = ["tests/runtime/verify_secoc_command5_experiment.py"]
 
 [suite.secoc_command5_oracle_assessment]
-tests = ["tests/verify_secoc_command5_oracle_assessment.py"]
+tests = ["tests/runtime/verify_secoc_command5_oracle_assessment.py"]
 
 [suite.secoc_command5_ram_proxy]
-tests = ["tests/verify_secoc_command5_ram_proxy.py"]
+tests = ["tests/runtime/verify_secoc_command5_ram_proxy.py"]
 
 [suite.command5_dtc_side_channel]
-tests = ["tests/verify_command5_dtc_side_channel.py"]
+tests = ["tests/runtime/verify_command5_dtc_side_channel.py"]
 
 [suite.secoc_mac28_behavioral_proof]
-tests = ["tests/verify_secoc_mac28_behavioral_proof.py"]
+tests = ["tests/runtime/verify_secoc_mac28_behavioral_proof.py"]
 
 [suite.camry_f33_b6_stationary_probe]
 tests = [
-  "tests/verify_camry_f33_b6_stationary_probe.py",
-  "tests/verify_camry_f33_b6_midaggregate_observer.py",
+  "tests/targets/camry/verify_camry_f33_b6_stationary_probe.py",
+  "tests/targets/camry/verify_camry_f33_b6_midaggregate_observer.py",
 ]
 
 [suite.camry_f33_route40_observer]
-tests = ["tests/verify_camry_f33_route40_observer.py"]
+tests = ["tests/targets/camry/verify_camry_f33_route40_observer.py"]
 
 [suite.camry_f33_icus_ramkey_probe]
-tests = ["tests/verify_camry_f33_icus_ramkey_probe.py"]
+tests = ["tests/targets/camry/verify_camry_f33_icus_ramkey_probe.py"]
 
 [suite.exploit_followups]
-tests = [
-  "tests/verify_exploit_followups.py",
-]
+tests = ["tests/runtime/verify_exploit_followups.py"]
 
 [suite.variant_acquisition_readiness]
-tests = ["tests/verify_variant_acquisition_readiness.py"]
+tests = ["tests/variants/verify_variant_acquisition_readiness.py"]
 
 [suite.lifecycle]
 serial = true
 tests = [
-  "tests/verify_lifecycle.py",
-  "tests/verify_project_layout.py",
-  "tests/verify_headless_runner.py",
-  "tests/verify_ghidra_env.py",
-  "tests/verify_project_inventory.py",
+  "tests/tooling/verify_lifecycle.py",
+  "tests/tooling/verify_project_layout.py",
+  "tests/tooling/verify_headless_runner.py",
+  "tests/tooling/verify_ghidra_env.py",
+  "tests/tooling/verify_project_inventory.py",
 ]
 
 [suite.community_patch_target_analyzer]
-tests = ["tests/verify_community_patch_target_analyzer.py"]
+tests = ["tests/tooling/verify_community_patch_target_analyzer.py"]
 
 [suite.corolla_2023_public_route_summary]
-tests = ["tests/verify_corolla_2023_public_route_summary.py"]
+tests = ["tests/targets/corolla/verify_corolla_2023_public_route_summary.py"]
 
 [suite.albinoelephant_corolla_dataflash]
 modes = ["full", "local"]
-tests = ["tests/verify_albinoelephant_corolla_dataflash.py"]
+tests = ["tests/targets/corolla/verify_albinoelephant_corolla_dataflash.py"]
 
 [suite.albinoelephant_telescope_probe]
-tests = ["tests/verify_albinoelephant_telescope_probe.py"]
+tests = ["tests/targets/corolla/verify_albinoelephant_telescope_probe.py"]
 
 [suite.albinoelephant_corolla_repeatability]
-tests = ["tests/verify_albinoelephant_corolla_repeatability.py"]
+tests = ["tests/targets/corolla/verify_albinoelephant_corolla_repeatability.py"]
 
 [suite.albinoelephant_corolla_codeflash]
-tests = ["tests/verify_albinoelephant_corolla_codeflash.py"]
+tests = ["tests/targets/corolla/verify_albinoelephant_corolla_codeflash.py"]
 
 [suite.spanconstant_corolla_codeflash]
 tests = [
-  "tests/verify_spanconstant_corolla_codeflash.py",
-  "tests/verify_spanconstant_corolla_equivalence.py",
-  "tests/verify_spanconstant_corolla_cross_variant.py",
-  "tests/verify_spanconstant_corolla_memory.py",
-  "tests/verify_spanconstant_low_calibration_delta.py",
+  "tests/targets/corolla/verify_spanconstant_corolla_codeflash.py",
+  "tests/targets/corolla/verify_spanconstant_corolla_equivalence.py",
+  "tests/variants/verify_spanconstant_corolla_cross_variant.py",
+  "tests/targets/corolla/verify_spanconstant_corolla_memory.py",
+  "tests/targets/corolla/verify_spanconstant_low_calibration_delta.py",
 ]
 
 
@@ -901,281 +903,404 @@ tests = [
 
 
 [suite.external_corroboration]
-tests = ["tests/verify_external_corroboration.py"]
+tests = ["tests/tooling/verify_external_corroboration.py"]
 modes = ["local"]
 args = ["--repos-dir", "../"]
 
 [suite.build_layout]
-tests = ["tests/verify_build_layout.py"]
+tests = ["tests/tooling/verify_build_layout.py"]
 
 
 [suite.corolla_h]
-tests = ["tests/verify_corolla_h.py"]
+tests = [
+  "tests/targets/corolla/verify_corolla_h_application.py",
+  "tests/targets/corolla/verify_corolla_h_b6_receiver.py",
+  "tests/targets/corolla/verify_corolla_h_monitors.py",
+  "tests/targets/corolla/verify_corolla_h_residue.py",
+  "tests/targets/corolla/verify_corolla_h_secoc.py",
+  "tests/targets/corolla/verify_corolla_h_steering.py",
+  "tests/targets/corolla/verify_corolla_h_storage.py",
+  "tests/targets/corolla/verify_corolla_h_system.py",
+]
 
 [suite.corolla_h_regen]
-tests = ["tests/verify_corolla_h_regen.py"]
+tests = ["tests/targets/corolla/verify_corolla_h_regen.py"]
 modes = ["full", "local"]
 
 [suite.corolla_h_techstream_external]
-tests = ["tests/verify_corolla_h_techstream_external.py"]
+tests = ["tests/targets/corolla/verify_corolla_h_techstream_external.py"]
 modes = ["local"]
 requires_external = ["techstream_v18"]
 
 [suite.fast_verify]
-tests = ["tests/verify_fast_verify.py"]
+tests = ["tests/tooling/verify_fast_verify.py"]
 
 [suite.icus_register_footprint]
-tests = ["tests/verify_icus_register_footprint.py"]
+tests = ["tests/firmware/verify_icus_register_footprint.py"]
 
 [suite.toyota_dataflash_analyzer]
-tests = ["tests/verify_toyota_dataflash_analyzer.py"]
+tests = ["tests/toyota/verify_toyota_dataflash_analyzer.py"]
 
 [suite.toyota_b_programming_topology]
-tests = ["tests/verify_toyota_b_programming_topology.py"]
+tests = ["tests/toyota/verify_toyota_b_programming_topology.py"]
 
 [suite.toyota_eps_bus_probe]
-tests = ["tests/verify_toyota_eps_bus_probe.py"]
+tests = ["tests/toyota/verify_toyota_eps_bus_probe.py"]
 
 [suite.toyota_eps_isolated_can_probe]
-tests = ["tests/verify_toyota_eps_isolated_can_probe.py"]
+tests = ["tests/toyota/verify_toyota_eps_isolated_can_probe.py"]
 
 [suite.camry_f33_eps_network_triage]
-tests = ["tests/verify_camry_f33_eps_network_triage.py"]
+tests = ["tests/targets/camry/verify_camry_f33_eps_network_triage.py"]
 
 [suite.camry_f33_eps_gts_passive_capture]
-tests = ["tests/verify_camry_f33_eps_gts_passive_capture.py"]
+tests = ["tests/targets/camry/verify_camry_f33_eps_gts_passive_capture.py"]
 
 [suite.toyota_secoc_oracle]
-tests = ["tests/verify_toyota_secoc_oracle.py"]
+tests = ["tests/toyota/verify_toyota_secoc_oracle.py"]
 
 [suite.toyota_secoc_session]
-tests = ["tests/verify_toyota_secoc_session.py"]
+tests = ["tests/toyota/verify_toyota_secoc_session.py"]
 
 [suite.u023a87_monitor_map]
-tests = ["tests/verify_u023a87_monitor_map.py"]
+tests = ["tests/targets/sienna/verify_u023a87_monitor_map.py"]
 
 [suite.keyless]
-tests = ['tests/verify_keyless.py']
+tests = [
+  "tests/runtime/verify_keyless_application_surfaces.py",
+  "tests/runtime/verify_keyless_exec_surface.py",
+  "tests/runtime/verify_keyless_exec_portability.py",
+]
 [suite.keyless_live_handoff_dma]
-tests = ["tests/verify_keyless_live_handoff_dma.py"]
+tests = ["tests/runtime/verify_keyless_live_handoff_dma.py"]
 
 [suite.evidence_tooling]
-tests = ["tests/verify_evidence_tooling.py"]
+tests = ["tests/tooling/verify_evidence_tooling.py"]
 
 [suite.annotation_ledger]
-tests = ["tests/verify_annotation_ledger.py"]
+tests = ["tests/tooling/verify_annotation_ledger.py"]
 
 [suite.camry_8965f3307000_external_lateral_ingress]
-tests = ["tests/verify_camry_8965F3307000_external_lateral_ingress.py"]
+tests = ["tests/targets/camry/verify_camry_8965F3307000_external_lateral_ingress.py"]
 
 [suite.camry_8965f3307000_d5_snapshot_provenance]
-tests = ["tests/verify_camry_8965F3307000_d5_snapshot_provenance.py"]
+tests = ["tests/targets/camry/verify_camry_8965F3307000_d5_snapshot_provenance.py"]
 
 [suite.camry_8965f3307000_command_cone_ingress]
-tests = ["tests/verify_camry_8965F3307000_command_cone_ingress.py"]
+tests = ["tests/targets/camry/verify_camry_8965F3307000_command_cone_ingress.py"]
 
 [suite.camry_8965f3307000_internal_assist_oracles]
-tests = ["tests/verify_camry_8965F3307000_internal_assist_oracles.py"]
+tests = ["tests/targets/camry/verify_camry_8965F3307000_internal_assist_oracles.py"]
 
 [suite.camry_8965f3307000_hidden_ingress_residuals]
-tests = ["tests/verify_camry_8965F3307000_hidden_ingress_residuals.py"]
+tests = ["tests/targets/camry/verify_camry_8965F3307000_hidden_ingress_residuals.py"]
 
 [suite.camry_2026_stock_steering_witness]
-tests = ["tests/verify_camry_2026_stock_steering_witness.py"]
+tests = ["tests/targets/camry/verify_camry_2026_stock_steering_witness.py"]
 
 [suite.camry_8965f3307000_dataflash_nvm_owners]
-tests = ["tests/verify_camry_8965F3307000_dataflash_nvm_owners.py"]
+tests = ["tests/targets/camry/verify_camry_8965F3307000_dataflash_nvm_owners.py"]
 
 [suite.cuwplus_body_recovery]
-tests = ["tests/verify_cuwplus_body_recovery.py"]
+tests = ["tests/techstream/verify_cuwplus_body_recovery.py"]
 requires_external = ["gtsplus"]
 modes = ["local"]
 
 [suite.gtsplus_aux_body_recovery]
-tests = ["tests/verify_gtsplus_aux_body_recovery.py"]
+tests = ["tests/techstream/verify_gtsplus_aux_body_recovery.py"]
 requires_external = ["gtsplus"]
 modes = ["local"]
 
 [suite.codeflash_sim]
-tests = ["tests/verify_codeflash_sim.py"]
+tests = ["tests/firmware/verify_codeflash_sim.py"]
 
 [suite.camry_f33_freshness_result_patch]
-tests = ["tests/verify_camry_f33_freshness_result_patch.py"]
+tests = ["tests/targets/camry/verify_camry_f33_freshness_result_patch.py"]
 
 [suite.camry_f33_crypto_result_patch]
-tests = ["tests/verify_camry_f33_crypto_result_patch.py"]
+tests = ["tests/targets/camry/verify_camry_f33_crypto_result_patch.py"]
 
 [suite.camry_f33_persistent_signer]
-tests = ["tests/verify_camry_f33_persistent_signer.py"]
+tests = ["tests/targets/camry/verify_camry_f33_persistent_signer.py"]
 
 [suite.f33_recovery_structure]
-tests = ["tests/verify_f33_recovery_structure.py"]
+tests = ["tests/targets/camry/verify_f33_recovery_structure.py"]
 
 [suite.camry_eps_recovery_liveness]
-tests = ["tests/verify_camry_eps_recovery_liveness.py"]
+tests = ["tests/targets/camry/verify_camry_eps_recovery_liveness.py"]
 
 [suite.camry_f33_b6_transaction_observer]
-tests = ["tests/verify_camry_f33_b6_transaction_observer.py"]
+tests = ["tests/targets/camry/verify_camry_f33_b6_transaction_observer.py"]
 
 [suite.camry_f33_b6_bridge_install]
-tests = ["tests/verify_camry_f33_b6_bridge_install.py"]
+tests = ["tests/targets/camry/verify_camry_f33_b6_bridge_install.py"]
 
 [suite.camry_20260906_hands_off_warning]
-tests = ["tests/verify_camry_20260906_hands_off_warning.py"]
+tests = ["tests/targets/camry/verify_camry_20260906_hands_off_warning.py"]
 
 [suite.camry_2026_parser_liveness]
-tests = ["tests/verify_camry_2026_parser_liveness.py"]
+tests = ["tests/targets/camry/verify_camry_2026_parser_liveness.py"]
 
 [suite.camry_2026_cluster_ui_speed]
-tests = ["tests/verify_camry_2026_cluster_ui_speed.py"]
+tests = ["tests/targets/camry/verify_camry_2026_cluster_ui_speed.py"]
 
 [suite.camry_2026_pda_sdg]
-tests = ["tests/verify_camry_2026_pda_sdg.py"]
+tests = ["tests/targets/camry/verify_camry_2026_pda_sdg.py"]
 
 [suite.camry_2026_lateral_family_census]
-tests = ["tests/verify_camry_2026_lateral_family_census.py"]
+tests = ["tests/targets/camry/verify_camry_2026_lateral_family_census.py"]
 
 [suite.camry_20260907_canfd_transport]
-tests = ["tests/verify_camry_20260907_canfd_transport.py"]
+tests = ["tests/targets/camry/verify_camry_20260907_canfd_transport.py"]
 
 [suite.camry_20260907_steering_reconciliation]
-tests = ["tests/verify_camry_20260907_steering_reconciliation.py"]
+tests = ["tests/targets/camry/verify_camry_20260907_steering_reconciliation.py"]
 
 [suite.camry_20260907_lta_off_b6_authority]
-tests = ["tests/verify_camry_20260907_lta_off_b6_authority.py"]
+tests = ["tests/targets/camry/verify_camry_20260907_lta_off_b6_authority.py"]
 
 [suite.camry_b6_freshness_contract]
-tests = ["tests/verify_camry_b6_freshness_contract.py"]
+tests = ["tests/targets/camry/verify_camry_b6_freshness_contract.py"]
 
 [suite.camry_f33_030_secoc_tx]
-tests = ["tests/verify_camry_f33_030_secoc_tx.py"]
+tests = ["tests/targets/camry/verify_camry_f33_030_secoc_tx.py"]
 
 [suite.camry_f33_eps_tx]
-tests = ["tests/verify_camry_f33_eps_tx.py"]
+tests = ["tests/targets/camry/verify_camry_f33_eps_tx.py"]
 
 
 [suite.camry_f33_08a_oracle_stream]
-tests = ["tests/verify_camry_f33_08a_oracle_stream.py"]
+tests = ["tests/targets/camry/verify_camry_f33_08a_oracle_stream.py"]
 timeout = 600
 
 [suite.camry_f33_08a_fd_oracle]
-tests = ["tests/verify_camry_f33_08a_fd_oracle.py"]
+tests = ["tests/targets/camry/verify_camry_f33_08a_fd_oracle.py"]
 timeout = 600
 
 [suite.camry_f33_08a_classic_oracle]
-tests = ["tests/verify_camry_f33_08a_classic_oracle.py"]
+tests = ["tests/targets/camry/verify_camry_f33_08a_classic_oracle.py"]
 timeout = 600
 
 [suite.camry_f33_08a_tx_probe]
-tests = ["tests/verify_camry_f33_08a_tx_probe.py"]
+tests = ["tests/targets/camry/verify_camry_f33_08a_tx_probe.py"]
 timeout = 600
 
 [suite.camry_f33_b6_mac_equivalence]
-tests = ["tests/verify_camry_f33_b6_mac_equivalence.py"]
+tests = ["tests/targets/camry/verify_camry_f33_b6_mac_equivalence.py"]
 
 [suite.camry_f33_b6_command_composition]
-tests = ["tests/verify_camry_f33_b6_command_composition.py"]
+tests = ["tests/targets/camry/verify_camry_f33_b6_command_composition.py"]
 
 [suite.camry_f33_b6_end_to_end]
-tests = ["tests/verify_camry_f33_b6_end_to_end.py"]
+tests = ["tests/targets/camry/verify_camry_f33_b6_end_to_end.py"]
 
 [suite.camry_f33_b6_gate_log_reconciliation]
-tests = ["tests/verify_camry_f33_b6_gate_log_reconciliation.py"]
+tests = ["tests/targets/camry/verify_camry_f33_b6_gate_log_reconciliation.py"]
 
 [suite.camry_f33_runtime_monitor_20260908]
 tests = [
-  "tests/verify_camry_f33_runtime_monitor_20260908.py",
-  "tests/verify_camry_f33_runtime_monitor_statistics.py",
+  "tests/targets/camry/verify_camry_f33_runtime_monitor_20260908.py",
+  "tests/targets/camry/verify_camry_f33_runtime_monitor_statistics.py",
 ]
 
 [suite.camry_8965f3307000_function_boundaries]
-tests = ["tests/verify_camry_8965F3307000_function_boundaries.py"]
+tests = ["tests/targets/camry/verify_camry_8965F3307000_function_boundaries.py"]
 
 [suite.camry_8965f3307000_b6_ingress_closure]
-tests = ["tests/verify_camry_8965F3307000_b6_ingress_closure.py"]
+tests = ["tests/targets/camry/verify_camry_8965F3307000_b6_ingress_closure.py"]
 
 [suite.camry_2026_ebu_topology]
-tests = ["tests/verify_camry_2026_ebu_topology.py"]
+tests = ["tests/targets/camry/verify_camry_2026_ebu_topology.py"]
 requires_external = ["gtsplus"]
 
 [suite.camry_8965f3307000_prefault_memory_safety]
-tests = ["tests/verify_camry_8965F3307000_prefault_memory_safety.py"]
+tests = ["tests/targets/camry/verify_camry_8965F3307000_prefault_memory_safety.py"]
 
 [suite.camry_8965f3307000_prefault_control_flow]
-tests = ["tests/verify_camry_8965F3307000_prefault_control_flow.py"]
+tests = ["tests/targets/camry/verify_camry_8965F3307000_prefault_control_flow.py"]
 
 [suite.camry_8965f3307000_incident_fault_model]
-tests = ["tests/verify_camry_8965F3307000_incident_fault_model.py"]
+tests = ["tests/targets/camry/verify_camry_8965F3307000_incident_fault_model.py"]
 
 [suite.camry_f33_recovery_identity]
-tests = ["tests/verify_camry_f33_recovery_identity.py"]
+tests = ["tests/targets/camry/verify_camry_f33_recovery_identity.py"]
+
+[suite.camry_f33_recovery_image]
+tests = ["tests/targets/camry/verify_camry_f33_recovery_image.py"]
 
 [suite.crown_f30_b6_inline_signer]
-tests = ["tests/verify_crown_f30_b6_inline_signer.py"]
+tests = ["tests/targets/crown/verify_crown_f30_b6_inline_signer.py"]
 
 [suite.crown_diag_mailbox_probe]
-tests = ["tests/verify_crown_diag_mailbox_probe.py"]
+tests = ["tests/targets/crown/verify_crown_diag_mailbox_probe.py"]
 
 [suite.crown_sideband_preflight]
-tests = ["tests/verify_crown_sideband_preflight.py"]
+tests = ["tests/targets/crown/verify_crown_sideband_preflight.py"]
 
 [suite.tss3_resident_control_ingress]
-tests = ["tests/verify_tss3_resident_control_ingress.py"]
+tests = ["tests/variants/verify_tss3_resident_control_ingress.py"]
 
 [suite.camry_2026_radar_anchors]
-tests = ["tests/verify_camry_2026_radar_anchors.py"]
+tests = ["tests/targets/camry/verify_camry_2026_radar_anchors.py"]
 
 [suite.camry_f33_post_install_recovery]
-tests = ["tests/verify_camry_f33_post_install_recovery.py"]
+tests = ["tests/targets/camry/verify_camry_f33_post_install_recovery.py"]
 
 [suite.camry_f33_signer_host_liveness]
-tests = ["tests/verify_camry_f33_signer_host_liveness.py"]
+tests = ["tests/targets/camry/verify_camry_f33_signer_host_liveness.py"]
 
 [suite.tss3_unified_b6_signer]
-tests = ["tests/verify_tss3_unified_b6_signer.py"]
+tests = ["tests/targets/camry/verify_tss3_unified_b6_signer.py"]
 timeout = 600
 
 [suite.camry_2026_stock_harness_topology]
-tests = ["tests/verify_camry_2026_stock_harness_topology.py"]
+tests = ["tests/targets/camry/verify_camry_2026_stock_harness_topology.py"]
 
 [suite.camry_20260915_port_evidence_audit]
-tests = ["tests/verify_camry_20260915_port_evidence_audit.py"]
+tests = ["tests/targets/camry/verify_camry_20260915_port_evidence_audit.py"]
 
 [suite.camry_2026_radar_lifecycle]
-tests = ["tests/verify_camry_2026_radar_lifecycle.py"]
+tests = ["tests/targets/camry/verify_camry_2026_radar_lifecycle.py"]
 
 [suite.camry_f33_live_fault_projection]
-tests = ["tests/verify_camry_f33_live_fault_projection.py"]
+tests = ["tests/targets/camry/verify_camry_f33_live_fault_projection.py"]
 
 [suite.camry_2026_radar_lifecycle_external]
-tests = ["tests/verify_camry_2026_radar_lifecycle_external.py"]
+tests = ["tests/targets/camry/verify_camry_2026_radar_lifecycle_external.py"]
 
 [suite.camry_f33_cooperative_fault_projection]
-tests = ["tests/verify_camry_f33_cooperative_fault_projection.py"]
+tests = ["tests/targets/camry/verify_camry_f33_cooperative_fault_projection.py"]
 
 [suite.camry_2026_cancel_evidence]
-tests = ["tests/verify_camry_2026_cancel_evidence.py"]
+tests = ["tests/targets/camry/verify_camry_2026_cancel_evidence.py"]
 
 [suite.camry_2026_cancel_ownership]
-tests = ["tests/verify_camry_2026_cancel_ownership.py"]
+tests = ["tests/targets/camry/verify_camry_2026_cancel_ownership.py"]
 
 [suite.camry_2026_cancel_request_causality]
-tests = ["tests/verify_camry_2026_cancel_request_causality.py"]
+tests = ["tests/targets/camry/verify_camry_2026_cancel_request_causality.py"]
 
 [suite.camry_2026_native_cruise_release]
-tests = ["tests/verify_camry_2026_native_cruise_release.py"]
+tests = ["tests/targets/camry/verify_camry_2026_native_cruise_release.py"]
 
 [suite.camry_2026_longitudinal_role]
-tests = ["tests/verify_camry_2026_longitudinal_role.py"]
+tests = ["tests/targets/camry/verify_camry_2026_longitudinal_role.py"]
 
 [suite.camry_20260916_longitudinal_motion_audit]
-tests = ["tests/verify_camry_20260916_longitudinal_motion_audit.py"]
+tests = ["tests/targets/camry/verify_camry_20260916_longitudinal_motion_audit.py"]
 
 [suite.camry_20260921_pcs_alert]
-tests = ["tests/verify_camry_20260921_pcs_alert.py"]
+tests = ["tests/targets/camry/verify_camry_20260921_pcs_alert.py"]
 
 [suite.camry_2026_longitudinal_request_candidates]
-tests = ["tests/verify_camry_2026_longitudinal_request_candidates.py"]
+tests = ["tests/targets/camry/verify_camry_2026_longitudinal_request_candidates.py"]
 
 [suite.camry_20260907_hands_off_cancel]
-tests = ["tests/verify_camry_20260907_hands_off_cancel.py"]
+tests = ["tests/targets/camry/verify_camry_20260907_hands_off_cancel.py"]
+
+# Split-domain suites: exact coverage carved out of the bundled suites above.
+# Each names real split scripts; the parent suites still select the whole domain set.
+
+[suite.camry_8965f3307000_b6_receive_bridge]
+tests = ["tests/targets/camry/verify_camry_8965F3307000_b6_receive_bridge.py"]
+# F33 B6 receive-bridge surface; previously only reachable via the un-sectioned bundle run.
+
+[suite.camry_2026_engagement]
+tests = ["tests/targets/camry/verify_camry_2026_engagement.py"]
+# NRTD/P5 bring-up, READY/gear baseline, cruise/LTA edge census.
+
+[suite.camry_2026_capture_replay]
+tests = ["tests/targets/camry/verify_camry_2026_capture_replay.py"]
+# Relay-correct drive capture pins and FRC LTA synchronized capture tooling.
+
+[suite.camry_2026_diagnostics]
+tests = ["tests/targets/camry/verify_camry_2026_diagnostics.py"]
+# TSK baseline and Techstream DTC-clear selectors.
+
+[suite.camry_2026_motor_feedback]
+tests = ["tests/targets/camry/verify_camry_2026_motor_feedback.py"]
+# 0x030 B22:B23 motor-feedback two-drive correlation.
+
+[suite.corolla_h_application]
+tests = ["tests/targets/corolla/verify_corolla_h_application.py"]
+# Callback tables, diagnostics diff, interrupt bodies/vectors, transport residue.
+
+[suite.corolla_h_b6_receiver]
+tests = ["tests/targets/corolla/verify_corolla_h_b6_receiver.py"]
+# Protected-0x0B6 receiver contracts and target-angle ingress.
+
+[suite.corolla_h_secoc]
+tests = ["tests/targets/corolla/verify_corolla_h_secoc.py"]
+# B6 SecOC verification, key provenance, receive surface.
+
+[suite.corolla_h_steering]
+tests = ["tests/targets/corolla/verify_corolla_h_steering.py"]
+# FD control, steering supervisors, LTA provenance, motor control, ingress/bridge surfaces.
+
+[suite.corolla_h_monitors]
+tests = ["tests/targets/corolla/verify_corolla_h_monitors.py"]
+# Deadline-monitor surface, plausibility monitor, power-supply monitor gate.
+
+[suite.corolla_h_residue]
+tests = ["tests/targets/corolla/verify_corolla_h_residue.py"]
+# Crypto/diagnostic/named residue, static coverage, structural inspection, CAN comms, XCP.
+
+[suite.corolla_h_storage]
+tests = ["tests/targets/corolla/verify_corolla_h_storage.py"]
+# Storage/NVM, small adapters, veneer bank.
+
+[suite.corolla_h_system]
+tests = ["tests/targets/corolla/verify_corolla_h_system.py"]
+# System orchestration and Techstream correlations.
+
+[suite.corolla_hf_b6_secoc]
+tests = ["tests/targets/corolla/verify_corolla_hf_b6_secoc.py"]
+# Direct canary, competing-sender arbitration, 00F freshness bridge.
+
+[suite.corolla_hf_command5]
+tests = ["tests/targets/corolla/verify_corolla_hf_command5.py"]
+# Command5 runtime carrier, direct command5, portability.
+
+[suite.corolla_hf_state_contracts]
+tests = ["tests/targets/corolla/verify_corolla_hf_state_contracts.py"]
+# Engagement state, fault state, remaining status contracts.
+
+[suite.corolla_hf_steering_authority]
+tests = ["tests/targets/corolla/verify_corolla_hf_steering_authority.py"]
+# Steering limits, cooperative authority wire visibility, Panda lateral safety contract.
+
+[suite.secoc_receive_surface]
+tests = ["tests/runtime/verify_secoc_receive_surface.py"]
+# Base-image SecOC receive chain, Rx control, freshness, FD sensor correlations.
+
+[suite.secoc_persistence_security]
+tests = ["tests/runtime/verify_secoc_persistence_security.py"]
+# Base-image SecOC NVM key state and security properties.
+
+[suite.secoc_bypass_gate]
+tests = ["tests/runtime/verify_secoc_bypass_gate.py"]
+# SecOC bypass patch point and acceptance gate.
+
+[suite.keyless_application_surfaces]
+tests = ["tests/runtime/verify_keyless_application_surfaces.py"]
+# Keyless event formatter, boot residuals, diagnostic transport, PC surfaces.
+
+[suite.keyless_exec_surface]
+tests = ["tests/runtime/verify_keyless_exec_surface.py"]
+# Keyless execution surface and reset entry.
+
+[suite.keyless_exec_portability]
+tests = ["tests/runtime/verify_keyless_exec_portability.py"]
+# Keyless execution portability and XCP composition.
+
+[suite.xcp_window_security]
+tests = ["tests/runtime/verify_xcp_window_security.py"]
+# XCP window MPU permissions, boot handoff retention, security surface.
+
+[suite.xcp_daq_probe]
+tests = ["tests/runtime/verify_xcp_daq_probe.py"]
+# XCP DAQ probe.
+
+[suite.xcp_reachability]
+tests = ["tests/runtime/verify_xcp_reachability.py"]
+# XCP reachability and shadow-write plan.

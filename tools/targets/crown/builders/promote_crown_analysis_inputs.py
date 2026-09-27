@@ -2,14 +2,15 @@
 """Materialize canonical physical CodeFlash/DataFlash for the mruno Crown EPS target."""
 from __future__ import annotations
 
+from tools.targets.crown.support import crown_f30_targets as crown
+from tools import REPO_ROOT
 import argparse
 import hashlib
-from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[4]
-RAW_CODEFLASH = REPO / "community/mruno/partial_codeflash_00000000_00200000_20260913-220010_2075572of2097152.bin"
-RAW_DATAFLASH = REPO / "community/mruno/crown-eps-dataflash-dump-20260913.bin"
-OUT_DIR = REPO / "firmware/crown-8965F3012000"
+REPO = REPO_ROOT
+RAW_CODEFLASH = crown.CAPTURE / "partial_codeflash_00000000_00200000_20260913-220010_2075572of2097152.bin"
+RAW_DATAFLASH = crown.CAPTURE / "crown-eps-dataflash-dump-20260913.bin"
+OUT_DIR = crown.CODEFLASH.parent
 OUT_CODEFLASH = OUT_DIR / "CodeFlash.bin"
 OUT_DATAFLASH = OUT_DIR / "DataFlash.bin"
 

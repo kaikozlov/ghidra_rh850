@@ -80,11 +80,11 @@ service.
 
 ## Verification boundary
 
-- `tests/verify_application_async_operation_queue.py` pins queue function hashes,
+- `tests/diagnostics/verify_application_async_operation_queue.py` pins queue function hashes,
   literal operation numbers, absence of operation 3, replay cases, external
   ownership, the SID-`0x14` selector-`0x11` completion bridge, and selector-less
   operation-4 completion.
-- `tests/verify_application_async_operation_queue_live.py` runs
+- `tests/diagnostics/verify_application_async_operation_queue_live.py` runs
   `AssertApplicationAsyncOperationQueue.java` against the accepted project and
   pins exact starter/helper/queue-state xref topology.
 

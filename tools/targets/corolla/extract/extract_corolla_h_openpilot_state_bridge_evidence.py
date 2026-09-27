@@ -7,13 +7,14 @@ verification can use the firmware body hashes without depending on disposable wo
 """
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import hashlib
 import json
 from pathlib import Path
 from tools.targets.corolla.support.corolla_h_constants import CODEFLASH as H_CODEFLASH
 
-REPO = Path(__file__).resolve().parents[4]
+REPO = REPO_ROOT
 DEFAULT_IMAGE = H_CODEFLASH
 DEFAULT_OUT = REPO / "data/generated/corolla_8965H1202000_openpilot_state_bridge_decompiler_evidence.json"
 

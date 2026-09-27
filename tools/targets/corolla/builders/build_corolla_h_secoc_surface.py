@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Build deterministic target-native Corolla-H SecOC/ICU-S residual closure."""
 from __future__ import annotations
+from tools import REPO_ROOT
 import argparse,hashlib,json,re,struct
 from pathlib import Path
 from tools.targets.sienna.sienna_target import CODEFLASH as SIENNA_CODEFLASH
 from tools.targets.corolla.support.corolla_h_constants import RAW_DUMP as H_RAW_DUMP
-ROOT=Path(__file__).resolve().parents[4]
+ROOT=REPO_ROOT
 EV=ROOT/'data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json'
 HRAW=H_RAW_DUMP
 SIMG=SIENNA_CODEFLASH

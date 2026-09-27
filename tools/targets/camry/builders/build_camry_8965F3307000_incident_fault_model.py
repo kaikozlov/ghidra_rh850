@@ -10,6 +10,7 @@ not dynamically observed: no live FEPC/FEPSW/FEIC capture exists for the inciden
 """
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import hashlib
 import json
@@ -18,7 +19,7 @@ from pathlib import Path
 
 from tools.targets.camry.support.camry_f33_corpus import IMAGE, IMAGE_SHA256
 
-ROOT = Path(__file__).resolve().parents[4]
+ROOT = REPO_ROOT
 OUT = ROOT / "data/generated/camry_8965F3307000_incident_fault_model.json"
 RECOVERY = ROOT / "data/generated/camry_f33_recovery_structure.json"
 

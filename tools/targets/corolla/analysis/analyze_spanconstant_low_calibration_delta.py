@@ -9,6 +9,9 @@ recovered target-natively from the byte-identical H/Span application.
 """
 from __future__ import annotations
 
+from tools.targets.corolla.support.corolla_h_constants import H_CAPTURE
+from tools.targets.corolla.support.corolla_h_constants import F_RAW_DUMP, F_CAPTURE
+from tools import REPO_ROOT
 import argparse
 import hashlib
 import json
@@ -20,9 +23,9 @@ from tools.targets.corolla.support.corolla_h_constants import RAW_DUMP as H_RAW_
 from Crypto.Cipher import AES
 from Crypto.Hash import CMAC
 
-ROOT = Path(__file__).resolve().parents[4]
+ROOT = REPO_ROOT
 H_DEFAULT = H_RAW_DUMP
-SPAN_DEFAULT = ROOT / "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin"
+SPAN_DEFAULT = F_RAW_DUMP
 OUT_DEFAULT = ROOT / "data/generated/corolla_8965F1208000_low_calibration_delta.json"
 
 CODEFLASH_SIZE = 0x100000
@@ -324,11 +327,11 @@ def build_report(h_path: Path = H_DEFAULT, span_path: Path = SPAN_DEFAULT) -> di
     # is the live runtime copy (byte-identical to the same image's CodeFlash page).
     shadow_verifications = []
     for label, ram_path, img, base in (
-        ("albino-PE1-002502", ROOT / "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_local_ram_pe1_febe0000_fec00000_20260814-002502.bin", h, 0xFEBE0000),
-        ("albino-PE1-004452", ROOT / "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_local_ram_pe1_febe0000_fec00000_20260814-004452.bin", h, 0xFEBE0000),
-        ("albino-PE1-005055", ROOT / "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_local_ram_pe1_febe0000_fec00000_20260814-005055.bin", h, 0xFEBE0000),
-        ("span-PE1-151834", ROOT / "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_local_ram_pe1_febe0000_fec00000_20260821-151834.bin", s, 0xFEBE0000),
-        ("span-self-152418", ROOT / "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_local_ram_self_fede0000_fee00000_20260821-152418.bin", s, 0xFEDE0000),
+        ("albino-PE1-002502", H_CAPTURE / "raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_local_ram_pe1_febe0000_fec00000_20260814-002502.bin", h, 0xFEBE0000),
+        ("albino-PE1-004452", H_CAPTURE / "raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_local_ram_pe1_febe0000_fec00000_20260814-004452.bin", h, 0xFEBE0000),
+        ("albino-PE1-005055", H_CAPTURE / "raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_local_ram_pe1_febe0000_fec00000_20260814-005055.bin", h, 0xFEBE0000),
+        ("span-PE1-151834", F_CAPTURE / "dump_local_ram_pe1_febe0000_fec00000_20260821-151834.bin", s, 0xFEBE0000),
+        ("span-self-152418", F_CAPTURE / "dump_local_ram_self_fede0000_fee00000_20260821-152418.bin", s, 0xFEDE0000),
     ):
         ram = ram_path.read_bytes()
         shadow_va = SHADOW_RAM_START if base == 0xFEBE0000 else (base + 0x17C00)

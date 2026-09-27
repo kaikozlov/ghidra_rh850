@@ -7,6 +7,8 @@ Panda TX return never counts as evidence of actuator acceptance.
 """
 from __future__ import annotations
 
+from tools.targets.camry.support import camry_f33_corpus as f33
+from tools import REPO_ROOT
 import argparse
 import binascii
 import gzip
@@ -17,7 +19,7 @@ from pathlib import Path
 
 import numpy as np
 
-ROOT = Path(__file__).resolve().parents[4]
+ROOT = REPO_ROOT
 FIXTURE = ROOT / 'tests/fixtures/camry_2026_longitudinal_role.jsonl.gz'
 OUTPUT = ROOT / 'data/generated/camry_2026_longitudinal_role.json'
 NATIVE = {
@@ -102,7 +104,7 @@ def stats(x, y) -> dict:
 
 
 def load_native(label: str) -> tuple[dict, dict]:
-    path = ROOT / 'targets/camry-2026/raw-20260827' / NATIVE[label]
+    path = f33.CAPTURE / 'raw-20260827' / NATIVE[label]
     rows = defaultdict(list)
     with gzip.open(path, 'rt') as stream:
         for line in stream:

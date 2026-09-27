@@ -2,6 +2,7 @@
 """Promote exact-H decompiler evidence needed to exhaust the protected 0x0B6 receiver envelope."""
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import hashlib
 import json
@@ -9,7 +10,7 @@ import re
 from pathlib import Path
 from tools.targets.corolla.support.corolla_h_constants import CODEFLASH as H_CODEFLASH
 
-REPO = Path(__file__).resolve().parents[4]
+REPO = REPO_ROOT
 GENERATOR = Path(__file__).resolve()
 IMAGE = H_CODEFLASH
 OUT = REPO / "data/generated/corolla_8965H1202000_b6_full_receiver_decompiler_evidence.json"

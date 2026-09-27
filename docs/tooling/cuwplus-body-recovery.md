@@ -283,7 +283,7 @@ small normalized `.idata`; application semantics are the oracle here.
 The same corrected path recovers `PCS Data Viewer.exe` with **22,447/22,447**
 nonzero-RVA method bodies materialized (entry `0x66FB8E`) and
 `GTSPlusTSEConverter/TSEConverter.exe` with **27/27** (entry `0x6BAE`).
-`tests/verify_gtsplus_managed_exe_recovery.py` pins the five exact Toyota
+`tests/techstream/verify_gtsplus_managed_exe_recovery.py` pins the five exact Toyota
 oracles; the auxiliary recovery test pins PCS/TSEConverter.
 
 ## Independent native oracle
@@ -312,7 +312,7 @@ exactly. `CUW.dll` differs only in presentation for three `OLEAUT32` imports:
 CP resolves ordinals `#2/#9/#6`, while the older dump named those same exports;
 the IAT RVAs are identical.
 
-`tests/verify_cuwplus_body_recovery.py` keeps the verification fast by pinning
+`tests/techstream/verify_cuwplus_body_recovery.py` keeps the verification fast by pinning
 the full external census but actively re-running one representative of every
 rebuild path: ordinary native, seven-section native, pure managed DLL, mixed
 native/CLR, and managed EXE. It also compares a newly decoded native `.text`

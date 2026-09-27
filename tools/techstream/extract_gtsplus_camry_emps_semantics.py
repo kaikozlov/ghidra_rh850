@@ -6,27 +6,24 @@ import argparse
 import hashlib
 import json
 import struct
-import sys
 from collections import defaultdict
 from pathlib import Path
+from tools.techstream.parse_ddb import DDBParser, ECU_TABLE_CLASS_NAMES, MASTER_TABLE_CLASS_NAMES
+from tools.techstream.ddb_semantics import extract_behavior_records, extract_monitor_records, records
+from tools.techstream.ddb_strings import load_string_db
+from tools.techstream.techstream_paths import GTSPLUS_EXTERNAL_ROOT, V18_TECHSTREAM_ROOT, resolve_gts_root
+from tools.project.analysis_target import target, verified_file
+from tools import REPO_ROOT
 
-from parse_ddb import DDBParser, ECU_TABLE_CLASS_NAMES, MASTER_TABLE_CLASS_NAMES
-from ddb_semantics import extract_behavior_records, extract_monitor_records, records
-from ddb_strings import load_string_db
-from techstream_paths import GTSPLUS_EXTERNAL_ROOT, V18_TECHSTREAM_ROOT, resolve_gts_root
-
-REPO = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO / "tools"))
-from tools.project.analysis_target import target, verified_file  # noqa: E402
 
 DEFAULT_GTS = resolve_gts_root(GTSPLUS_EXTERNAL_ROOT)
 DEFAULT_V18 = V18_TECHSTREAM_ROOT
 _, F33_TARGET = target("camry-8965F3307000")
 IMAGE = verified_file("camry-8965F3307000", "codeflash")
-RAM = REPO / "targets/camry-2026/raw-20260826/secoc-recovery/ram/local_ram_pe1.bin"
-DECOMP = REPO / "data/generated/camry_8965F3307000_gtsplus_decompiler_evidence.json"
-F33_CORPUS = REPO / F33_TARGET["decompiler_corpus"]
-OUT = REPO / "data/generated/gtsplus_2026/camry_8965F3307000_emps_semantics.json"
+RAM = REPO_ROOT / "targets/camry-2026/raw-20260826/secoc-recovery/ram/local_ram_pe1.bin"
+DECOMP = REPO_ROOT / "data/generated/camry_8965F3307000_gtsplus_decompiler_evidence.json"
+F33_CORPUS = REPO_ROOT / F33_TARGET["decompiler_corpus"]
+OUT = REPO_ROOT / "data/generated/gtsplus_2026/camry_8965F3307000_emps_semantics.json"
 IMAGE_SHA = F33_TARGET["codeflash_sha256"]
 RDBI_OFFSET = 0x2928C
 RDBI_COUNT = 241
@@ -431,7 +428,7 @@ def main() -> int:
     sources = {}
     for name, path in source_paths.items():
         sources[name] = {
-            "path": str(path.relative_to(REPO)) if path.is_relative_to(REPO) else str(path),
+            "path": str(path.relative_to(REPO_ROOT)) if path.is_relative_to(REPO_ROOT) else str(path),
             "size": path.stat().st_size,
             "sha256": sha(path),
         }
@@ -441,7 +438,7 @@ def main() -> int:
         "sources": sources,
         "target": {
             "software_id": "8965F3307000",
-            "codeflash_path": str(IMAGE.relative_to(REPO)),
+            "codeflash_path": str(IMAGE.relative_to(REPO_ROOT)),
             "codeflash_sha256": IMAGE_SHA,
             "rdbi_table_offset": f"0x{RDBI_OFFSET:06X}",
             "rdbi_record_count": RDBI_COUNT,
@@ -567,13 +564,13 @@ def main() -> int:
             "gtsplus_rows": asic_rows,
             "interpretation": "GTS+ splits each exact 8-byte F33 RDBI into bits 0..31 'ASIC State Information' and bits 32..63 'ASIC State Information 2'.",
             "f33_callback_evidence": {
-                "path": str(DECOMP.relative_to(REPO)),
+                "path": str(DECOMP.relative_to(REPO_ROOT)),
                 "sha256": sha(DECOMP),
                 "resolved_sources": decomp["callback"]["resolved_sources"],
                 "gp": decomp["callback"]["gp_value_from_exact_f33_runtime_model"],
             },
             "ram_snapshot": {
-                "path": str(RAM.relative_to(REPO)),
+                "path": str(RAM.relative_to(REPO_ROOT)),
                 "base": "0xFEBE0000",
                 "address": "0xFEBE8298",
                 "raw_hex": snapshot.hex(),

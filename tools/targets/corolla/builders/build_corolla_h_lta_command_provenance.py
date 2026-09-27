@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Build the exact-image Corolla H autonomous-lateral command provenance report."""
 from __future__ import annotations
+from tools.targets.sienna.sienna_target import CORPUS as SIENNA_CORPUS
 
+from tools import REPO_ROOT
 import argparse
 import hashlib
 import json
@@ -12,11 +14,11 @@ from pathlib import Path
 from tools.targets.sienna.sienna_target import CODEFLASH as SIENNA_CODEFLASH
 from tools.targets.corolla.support.corolla_h_constants import CODEFLASH as H_CODEFLASH
 
-REPO = Path(__file__).resolve().parents[4]
+REPO = REPO_ROOT
 H_IMAGE = H_CODEFLASH
 S_IMAGE = SIENNA_CODEFLASH
 H_CENSUS = REPO / "data/generated/corolla_8965H1202000_lta_command_provenance_census.json"
-S_CORPUS = REPO / "data/generated/decompilations.jsonl"
+S_CORPUS = SIENNA_CORPUS
 EVIDENCE = REPO / "data/generated/corolla_8965H1202000_lta_command_provenance_decompiler_evidence.json"
 SUPERVISOR = REPO / "data/generated/corolla_8965H1202000_supervisor_external_ingress_census.json"
 TOYOTA_DBC_FACTS = REPO / "data/external/opendbc/toyota_dbc_facts.json"

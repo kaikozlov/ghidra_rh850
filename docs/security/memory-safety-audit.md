@@ -10,8 +10,8 @@
 >
 > **Canonical artifacts:** committed CodeFlash bytes, decompiled functions
 >
-> **Verification:** `tests/verify_memory_safety.py`,
-> `tests/verify_memory_safety_mutations.py`, and
+> **Verification:** `tests/tooling/verify_memory_safety.py`,
+> `tests/tooling/verify_memory_safety_mutations.py`, and
 > `ghidra/scripts/verify/AssertMemorySafetyPaths.java`
 >
 > **Related:** [bootloader payload gate](bootloader-payload-gate.md), [SecOC application chain](secoc/application-chain.md)

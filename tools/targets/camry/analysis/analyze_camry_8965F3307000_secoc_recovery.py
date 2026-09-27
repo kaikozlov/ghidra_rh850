@@ -12,21 +12,21 @@ No recovered/candidate raw key bytes are emitted.
 """
 from __future__ import annotations
 
+from tools.targets.camry.support import camry_f33_corpus as f33
+from tools import REPO_ROOT
 import argparse
 import gzip
 import hashlib
 import json
-import sys
 from collections import Counter
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[4]
-sys.path.insert(0, str(REPO))
+REPO = REPO_ROOT
 
 from exploit.common.payload_package import inspect_payload
 from tools.toyota_support.analyze_toyota_dataflash import analyze_triplicate_objects
 
-ROOT = REPO / "targets/camry-2026/raw-20260826/secoc-recovery"
+ROOT = f33.CAPTURE / "raw-20260826/secoc-recovery"
 DATAFLASH = ROOT / "dataflash/dump_ff200000_ff208000.bin"
 ORACLE_GZ = ROOT / "can_oracle.ndjson.gz"
 LOCAL_RAM = ROOT / "ram/local_ram_pe1.bin"

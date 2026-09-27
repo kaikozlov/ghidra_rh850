@@ -11,7 +11,6 @@ import argparse
 import json
 import struct
 from pathlib import Path
-from typing import Callable
 
 
 REPO = Path(__file__).resolve().parents[2]

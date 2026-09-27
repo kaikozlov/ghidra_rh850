@@ -7,22 +7,21 @@ the CAN Bus Check topology; it is not promoted into an installed ECU component.
 """
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import hashlib
 import json
 import struct
-import sys
 from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
-ROOT = Path(__file__).resolve().parents[4]
-sys.path.insert(0, str(ROOT / "tools/techstream"))
+ROOT = REPO_ROOT
 
-from ddb_semantics import extract_monitor_records, records
-from ddb_strings import load_string_db
-from parse_ddb import DDBParser
-from techstream_paths import GTSPLUS_EXTERNAL_ROOT, resolve_gts_root
+from tools.techstream.ddb_semantics import extract_monitor_records, records
+from tools.techstream.ddb_strings import load_string_db
+from tools.techstream.parse_ddb import DDBParser
+from tools.techstream.techstream_paths import GTSPLUS_EXTERNAL_ROOT, resolve_gts_root
 
 DEFAULT_OUT = ROOT / "data/generated/camry_2026_ebu_topology.json"
 CAMRY_VEHICLE_TYPES = (12704, 12862, 12984)

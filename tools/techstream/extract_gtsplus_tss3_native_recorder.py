@@ -13,19 +13,17 @@ import argparse
 import hashlib
 import json
 import struct
-import sys
 import tempfile
 from pathlib import Path
 from typing import Any
 
 import pefile  # type: ignore
+from tools.techstream.recover_gtsplus_bodies import recover
+from tools.techstream.techstream_paths import resolve_gts_root
+from tools import REPO_ROOT
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-from recover_gtsplus_bodies import recover
-from techstream_paths import resolve_gts_root
 
-REPO = Path(__file__).resolve().parents[2]
-DEFAULT_OUT = REPO / "data/generated/gtsplus_2026/tss3_native_recorder_protocol.json"
+DEFAULT_OUT = REPO_ROOT / "data/generated/gtsplus_2026/tss3_native_recorder_protocol.json"
 
 IMAGE_EXPORTS = {
     "calculate_key_level49": "?CalculateKeyDataSecLv49@CCmdImgOpeDdr@@AAEXPBEQAE@Z",

@@ -10,7 +10,7 @@
 >
 > **Canonical artifacts:** `data/application_tx_map.csv`, `data/application_tx_producer_evidence.csv`
 >
-> **Verification:** `tests/verify_application_transmit.py`, `tests/verify_application_tx_producer_evidence.py`
+> **Verification:** `tests/diagnostics/verify_application_transmit.py`, `tests/diagnostics/verify_application_tx_producer_evidence.py`
 >
 > **Related:** [application-rx](application-rx.md), [firmware-architecture](../architecture/firmware-architecture.md)
 
@@ -21,7 +21,7 @@ signals assigned to those I-PDUs.
 
 Addresses are CodeFlash virtual addresses unless they begin with `0xFEBE`. The
 machine-readable 58-row map is `data/application_tx_map.csv`; independent
-raw-image checks are in `tests/verify_application_transmit.py`.
+raw-image checks are in `tests/diagnostics/verify_application_transmit.py`.
 
 ## 1. Executive summary
 

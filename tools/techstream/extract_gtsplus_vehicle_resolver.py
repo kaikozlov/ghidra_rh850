@@ -19,23 +19,20 @@ import argparse
 import hashlib
 import json
 import struct
-import sys
 import tempfile
 from pathlib import Path
 from typing import Any
 
 import pefile
+from tools.techstream.ddb_semantics import records
+from tools.techstream.ddb_strings import load_string_db
+from tools.techstream.parse_ddb import DDBParser
+from tools.techstream.recover_gtsplus_bodies import recover
+from tools.techstream.techstream_paths import gts_db_root, resolve_gts_root
+from tools import REPO_ROOT
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from ddb_semantics import records
-from ddb_strings import load_string_db
-from parse_ddb import DDBParser
-from recover_gtsplus_bodies import recover
-from techstream_paths import gts_db_root, resolve_gts_root
-
-REPO = Path(__file__).resolve().parents[2]
-DEFAULT_OUT = REPO / "data/generated/gtsplus_2026/vehicle_resolver_semantics.json"
+DEFAULT_OUT = REPO_ROOT / "data/generated/gtsplus_2026/vehicle_resolver_semantics.json"
 REGIONS = ("NA", "EU", "JP")
 
 # Current KgpDataCtrl master-table class ids used by SelectCarTypeVin10.

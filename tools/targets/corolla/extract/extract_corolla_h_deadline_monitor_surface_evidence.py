@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Compact H-native evidence for the regenerated deadline-monitor callback surface."""
 from __future__ import annotations
+from tools import REPO_ROOT
 import hashlib,json,struct
-from pathlib import Path
 from tools.targets.corolla.support.corolla_h_constants import H_DEADLINE_TABLES, RAW_DUMP
-ROOT=Path(__file__).resolve().parents[4]
+ROOT=REPO_ROOT
 RAW=RAW_DUMP
 SRC=ROOT/'build/work/corpora/h_deadline_forced.jsonl'
 OUT=ROOT/'data/generated/corolla_8965H1202000_deadline_monitor_surface_decompiler_evidence.json'

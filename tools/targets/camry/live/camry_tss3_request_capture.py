@@ -34,6 +34,7 @@ retained and analyzed.
 """
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import json
 import sys
@@ -43,7 +44,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-REPO = Path(__file__).resolve().parents[4]
+REPO = REPO_ROOT
 for _path in (str(REPO), str(REPO / "tools" / "techstream")):
     if _path not in sys.path:
         sys.path.insert(0, _path)

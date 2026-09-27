@@ -23,19 +23,18 @@ copy/transform, cadence, arbitration executor, or signer ownership that
 OQ-052 still needs target-native evidence for.
 """
 from __future__ import annotations
+from tools.targets.camry.live.camry_frc_lta_capture import iter_canbin_records
+from tools.toyota_support.toyota_route_opendbc_common import decode_wheel_speed_kph
 
+from tools import REPO_ROOT
 import argparse
 import json
-import sys
 from collections import Counter
 from pathlib import Path
 from typing import Any
 
-REPO = Path(__file__).resolve().parents[4]
-if str(REPO) not in sys.path:
-    sys.path.insert(0, str(REPO))
+REPO = REPO_ROOT
 
-from tools.targets.camry.analysis.analyze_camry_frc_lta_capture import decode_wheel_speed_kph, iter_canbin_records
 from tools.targets.camry.live.camry_tss3_request_capture import load_registry, build_did_table
 
 SCHEMA = "camry-tss3-request-capture-v1"

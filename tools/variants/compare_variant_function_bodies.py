@@ -31,18 +31,17 @@ range-dumper shape whose upper 1 MiB is all 0xFF.
 
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import bisect
 import collections
 import hashlib
 import json
-import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterable
 
-REPO = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO))
+REPO = REPO_ROOT
 
 from tools.security.build_ephemeral_runtime_manifest import load_codeflash  # noqa: E402
 

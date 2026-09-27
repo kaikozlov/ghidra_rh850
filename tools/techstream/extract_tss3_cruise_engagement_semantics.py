@@ -6,15 +6,14 @@ import argparse
 import hashlib
 import json
 import struct
-import sys
 from pathlib import Path
+from tools.techstream.parse_ddb import DDBParser
+from tools.techstream.ddb_strings import load_string_db
+from tools.techstream.techstream_paths import V18_DB_ROOT
+from tools import REPO_ROOT
 
-REPO = Path(__file__).resolve().parents[2]
-OUT = REPO / "data/generated/techstream_v18/tss3_cruise_engagement_semantics.json"
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-from parse_ddb import DDBParser  # noqa: E402
-from ddb_strings import load_string_db  # noqa: E402
-from techstream_paths import V18_DB_ROOT  # noqa: E402
+OUT = REPO_ROOT / "data/generated/techstream_v18/tss3_cruise_engagement_semantics.json"
+
 
 ROOT = V18_DB_ROOT
 
@@ -133,7 +132,7 @@ def main() -> int:
     out = {
         "schema": "techstream-p5-tss3-cruise-engagement-semantics-v1",
         "sources": [{
-            "path": str(path.relative_to(REPO)),
+            "path": str(path.relative_to(REPO_ROOT)),
             "size": path.stat().st_size,
             "sha256": sha(path.read_bytes()),
         } for path in source_paths],

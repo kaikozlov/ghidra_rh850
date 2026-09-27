@@ -1546,7 +1546,7 @@ index 216404. Resolving it through the actual pattern and monitor tables of
 `ADCU_P6.ddb` and `ADCU_P6F.ddb` identifies it as value 4 of **Sudden Acceleration
 Suppression Operation Mode**, DID **2106**. The other values describe
 inoperative, high/low acceleration suppression, and monitor states. It is not
-an EPS firmware recovery procedure. The existing `gts_cli._monitor_rows`
+an EPS firmware recovery procedure. The existing `tools.techstream.gts.ddb._monitor_rows`
 resolver reproduces that ownership from the current source databases.
 
 A broader raw integer-reference scan was used only to locate candidate records;

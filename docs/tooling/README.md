@@ -86,13 +86,14 @@ tools/gtarget show corolla-8965F1208000
 
 Generic rebuild/snapshot tooling resolves target-specific seed tables and Ghidra stage scripts from `data/analysis_targets.json`; adding a target must not require editing the generic shell scripts.
 
-Family modules (`tests/verify_application_wdbi.py`, `tests/verify_corolla_h.py`,
-and so on) group related proofs. Exact F33 proofs use
-`tests/verify_camry_8965F3307000.py` with per-suite `--section` dispatch. Tests
-are selected explicitly; Git changes do not route into suites. Prefix discovery
-remains available with `tools/test list application` / `corolla` /
-`camry_8965f3307000` / `techstream`. Generated-artifact producer discovery is
-handled directly by `tools/artifact` and is independent of verification suites.
+Tests are grouped under `tests/tooling/`, `tests/techstream/`, `tests/toyota/`,
+`tests/diagnostics/`, `tests/firmware/`, `tests/targets/`, `tests/variants/`,
+and `tests/runtime/`. Larger target suites
+are split by behavioral domain; `verification.toml` retains their public suite
+names and maps them to the relevant scripts. Use `tools/test list application`,
+`corolla`, `camry_8965f3307000`, or `techstream` for discovery. Git changes do not
+select suites. Artifact producer discovery remains the separate `tools/artifact`
+command.
 
 The repeated Corolla-H corpus-compaction scripts are consolidated behind one
 profile-driven command:

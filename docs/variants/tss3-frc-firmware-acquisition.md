@@ -172,7 +172,7 @@ The corpus extractor can materialize the exact objects without duplicating the
 roughly 81.5-MiB image shared by `T-0058` and `T-0060`:
 
 ```bash
-uv run python tools/techstream/inspect_cuw_frc_corpus.py \
+uv run --locked python -m tools.techstream.inspect_cuw_frc_corpus \
   --output data/generated/techstream_v18/cuw_frc_corpus.json \
   --workspace build/out/frc-cuw-payloads
 ```

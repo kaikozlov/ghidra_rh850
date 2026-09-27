@@ -445,8 +445,8 @@ flow or replace normal programming-integrity checks with a simulated image hash.
 The new read-only saved-image comparator is:
 
 ```sh
-uv run python tools/targets/camry/analysis/analyze_camry_f33_recovery_image.py SAVED_CODEFLASH.bin
-uv run python tests/verify_camry_f33_recovery_image.py
+uv run --locked python -m tools.targets.camry.analysis.analyze_camry_f33_recovery_image SAVED_CODEFLASH.bin
+tools/test camry_f33_recovery_image
 ```
 
 It reads files only, trusts geometry solely from the exact hash-checked factory

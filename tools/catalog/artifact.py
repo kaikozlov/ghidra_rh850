@@ -1,0 +1,133 @@
+#!/usr/bin/env python3
+"""Discover, inspect, and regenerate tracked generated artifacts."""
+from __future__ import annotations
+
+import argparse
+import json
+import subprocess
+import sys
+from pathlib import Path
+
+from tools.catalog.artifact_catalog import REPO, consumers, producer_candidates, rows, tracked_artifacts
+
+
+def resolve_artifact(query: str) -> str:
+    artifacts = tracked_artifacts()
+    q = query.casefold()
+    exact = [p for p in artifacts if p.casefold() == q or Path(p).name.casefold() == q]
+    if len(exact) == 1:
+        return exact[0]
+    matches = [p for p in artifacts if q in p.casefold()]
+    if len(matches) == 1:
+        return matches[0]
+    if not matches:
+        raise SystemExit(f"no tracked generated artifact matches {query!r}")
+    raise SystemExit("ambiguous artifact; matches:\n" + "\n".join(f"  {p}" for p in matches[:80]))
+
+
+def print_rows(items: list[dict], as_json: bool) -> None:
+    if as_json:
+        print(json.dumps(items, indent=2, sort_keys=True))
+        return
+    for row in items:
+        producers = ",".join(row["producers"]) or "—"
+        print(f"{row['artifact']}\tproducer={producers}")
+
+
+def describe(path: str) -> dict:
+    return {
+        "artifact": path,
+        "size": (REPO / path).stat().st_size,
+        "producers": producer_candidates(path),
+        "consumers": consumers(path),
+    }
+
+
+def cmd_list(args: argparse.Namespace) -> int:
+    print_rows(rows(args.query), args.json)
+    return 0
+
+
+def cmd_show(args: argparse.Namespace) -> int:
+    row = describe(resolve_artifact(args.artifact))
+    if args.json:
+        print(json.dumps(row, indent=2, sort_keys=True))
+    else:
+        print(row["artifact"])
+        print(f"size\t{row['size']}")
+        print("producers\t" + (", ".join(row["producers"]) or "—"))
+        print("consumers")
+        for value in row["consumers"]:
+            print(f"  {value}")
+    return 0
+
+
+def choose_producer(path: str, override: str | None) -> str:
+    candidates = producer_candidates(path)
+    if override:
+        candidate = override if override.startswith("tools/") else f"tools/{override}"
+        if candidate not in candidates:
+            raise SystemExit(f"{candidate} does not name {path}; candidates: {candidates}")
+        return candidate
+    ranked = [
+        p for p in candidates
+        if Path(p).name.startswith(("build_", "generate_", "extract_", "analyze_", "inspect_", "compare_"))
+    ]
+    pool = ranked or candidates
+    if len(pool) != 1:
+        raise SystemExit(
+            "producer is ambiguous; pass --producer. candidates:\n" +
+            "\n".join(f"  {p}" for p in pool)
+        )
+    return pool[0]
+
+
+def producer_command(producer: str, passthrough: list[str]) -> list[str]:
+    """Launch a producer through the locked project environment.
+
+    Python producers run as modules so repository imports resolve through the
+    installed package; non-Python producers keep direct execution.
+    """
+    if producer.endswith(".py"):
+        module = producer[: -len(".py")].replace("/", ".")
+        return ["uv", "run", "--project", str(REPO), "--locked", "python", "-m", module, *passthrough]
+    return [str(REPO / producer), *passthrough]
+
+
+def cmd_regen(args: argparse.Namespace) -> int:
+    path = resolve_artifact(args.artifact)
+    producer = choose_producer(path, args.producer)
+    passthrough = list(args.generator_args)
+    if passthrough[:1] == ["--"]:
+        passthrough = passthrough[1:]
+    command = producer_command(producer, passthrough)
+    print("+ " + " ".join(command), file=sys.stderr)
+    return subprocess.run(command, cwd=REPO, check=False).returncode
+
+
+def build_parser() -> argparse.ArgumentParser:
+    ap = argparse.ArgumentParser(prog="artifact", description=__doc__)
+    sub = ap.add_subparsers(dest="command", required=True)
+    p = sub.add_parser("list", help="list tracked generated artifacts")
+    p.add_argument("query", nargs="?")
+    p.add_argument("--json", action="store_true")
+    p.set_defaults(func=cmd_list)
+    p = sub.add_parser("show", help="show producer and consumers")
+    p.add_argument("artifact")
+    p.add_argument("--json", action="store_true")
+    p.set_defaults(func=cmd_show)
+    p = sub.add_parser("regen", help="run the derived producer for one artifact")
+    p.add_argument("artifact")
+    p.add_argument("--producer", help="select a producer when multiple candidates exist")
+    p.add_argument("generator_args", nargs=argparse.REMAINDER, help="arguments passed to producer after --")
+    p.set_defaults(func=cmd_regen)
+    return ap
+
+
+def main() -> int:
+    args = build_parser().parse_args()
+    return int(args.func(args))
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

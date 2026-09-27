@@ -12,6 +12,8 @@ CodeFlash decompilation corpus. Raw road logs stay outside the git repository.
 """
 from __future__ import annotations
 
+from tools.targets.camry.support import camry_f33_corpus as f33
+from tools import REPO_ROOT
 import argparse
 import json
 import re
@@ -21,7 +23,7 @@ import tempfile
 from collections import Counter
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[4]
+REPO = REPO_ROOT
 DEFAULT_OPENPILOT = Path('/Users/kai/dev/inspect/repos/kai-openpilot')
 DEFAULT_LOG_ROOT = Path('/Users/kai/dev/inspect/logs/camry-2026')
 DEFAULT_CAP_ROOT = Path('/Users/kai/dev/inspect/captures')
@@ -320,7 +322,7 @@ def aggregate_segment_rows(rows: list[dict]) -> dict:
   }
 
 def exact_f33() -> dict:
-  corpus = REPO / 'data/generated/camry-8965F3307000/decompilations.jsonl'
+  corpus = f33.CORPUS
   rows = {}
   for line in corpus.open():
     row = json.loads(line)

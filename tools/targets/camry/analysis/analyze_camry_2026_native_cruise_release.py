@@ -6,6 +6,7 @@ cancel classification. No CAN transmitter, security operation, or vehicle I/O.
 """
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import gzip
 import io
@@ -14,9 +15,7 @@ import sys
 from collections import Counter, deque
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[4]
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
+ROOT = REPO_ROOT
 
 from tools.targets.camry.analysis.analyze_camry_2026_cancel_request_causality import (
     input_assertions,

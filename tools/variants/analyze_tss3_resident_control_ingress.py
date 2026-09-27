@@ -13,6 +13,7 @@ evidence already establishes it.
 """
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import hashlib
 import json
@@ -20,7 +21,7 @@ import re
 import struct
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = REPO_ROOT
 DEFAULT_OUT = REPO / "data/generated/tss3_resident_control_ingress_matrix.json"
 
 PRIMARY_SERVICE_SIDS = [

@@ -9,16 +9,15 @@ import json
 from pathlib import Path
 
 import pefile
+from tools.techstream.parse_ddb import DDBParser, ECU_TABLE_CLASS_NAMES
+from tools.techstream.ddb_strings import load_string_db
+from tools.techstream.techstream_paths import V18_TECHSTREAM_ROOT
+from tools import REPO_ROOT
 
-from parse_ddb import DDBParser, ECU_TABLE_CLASS_NAMES
-from ddb_strings import load_string_db
-from techstream_paths import V18_TECHSTREAM_ROOT
 
-
-REPO = Path(__file__).resolve().parents[2]
 DEFAULT_ROOT = V18_TECHSTREAM_ROOT
 DEFAULT_PE = DEFAULT_ROOT / "bin/KgpDataCtrl.dll"
-DEFAULT_OUTPUT = REPO / "data/generated/techstream_v18/priority_steering_ddb_semantics.json"
+DEFAULT_OUTPUT = REPO_ROOT / "data/generated/techstream_v18/priority_steering_ddb_semantics.json"
 PRIORITY_TYPES = (6, 11, 12, 61, 62, 63, 80, 87, 88, 90, 91)
 
 SCHEMAS = {
@@ -207,7 +206,7 @@ def build(root: Path, pe_path: Path) -> dict:
         "schema_version": 1,
         "source": "Techstream V18.00.003",
         "artifact": {
-            "relative_path": pe_path.relative_to(REPO).as_posix(),
+            "relative_path": pe_path.relative_to(REPO_ROOT).as_posix(),
             "size": len(pe_bytes),
             "sha256": sha256(pe_bytes),
         },

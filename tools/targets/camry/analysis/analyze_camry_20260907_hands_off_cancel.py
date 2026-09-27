@@ -17,6 +17,7 @@ Raw road logs remain outside git; the reduced JSON is tracked.
 """
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import bisect
 import json
@@ -28,7 +29,7 @@ from itertools import pairwise
 from pathlib import Path
 from typing import Any
 
-REPO = Path(__file__).resolve().parents[4]
+REPO = REPO_ROOT
 DEFAULT_OPENPILOT = Path('/Users/kai/dev/inspect/repos/kai-openpilot')
 DEFAULT_ROUTE = Path('/Users/kai/dev/inspect/logs/camry-2026/2026-09-07/00000045--805b7ca6ab')
 DEFAULT_OUT = REPO / 'data/generated/camry_20260907_hands_off_cancel.json'

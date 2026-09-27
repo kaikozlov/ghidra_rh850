@@ -108,7 +108,7 @@ protector key is required. The output tree is built in a sibling staging
 directory and replaces the previous result only after the 54/54 recovery and
 manifest checks succeed.
 
-`tests/verify_gtsplus_body_recovery.py` repeats the recovery against the pinned
+`tests/techstream/verify_gtsplus_body_recovery.py` repeats the recovery against the pinned
 external corpus and pins the 54/54 coverage plus the `CommandCommon.dll`
 witness identity.
 

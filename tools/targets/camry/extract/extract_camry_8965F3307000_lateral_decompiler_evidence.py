@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Promote exact-F33 decompiler evidence needed by the static lateral contract."""
 from __future__ import annotations
+from tools import REPO_ROOT
 import argparse, json
 from pathlib import Path
 from tools.targets.camry.support.camry_f33_corpus import CORPUS, IMAGE, IMAGE_SHA256, body_bytes, display_path
-from tools.project.decompiler_evidence import bind_entries, bind_function, load_function_corpus, require_function, sha256_bytes
-REPO=Path(__file__).resolve().parents[4]
+from tools.project.decompiler_evidence import bind_entries, load_function_corpus, sha256_bytes
+REPO=REPO_ROOT
 OUT=REPO/'data/generated/camry_8965F3307000_lateral_decompiler_evidence.json'
 ENTRIES=[
   0x34C56,0x35A06,0x46994,0x47AE0,0x484D2,0x48684,0x4B59E,0x4BD46,0x4DB70,0x4DBBC,0x4E394,0x54244,0x564CE,0x58074,

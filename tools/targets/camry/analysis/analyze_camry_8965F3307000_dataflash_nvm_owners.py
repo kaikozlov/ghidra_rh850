@@ -24,6 +24,8 @@ The tool prints no raw key material and only structural/calibration state.
 
 from __future__ import annotations
 
+from tools.targets.camry.support import camry_f33_corpus as f33
+from tools import REPO_ROOT
 import argparse
 import hashlib
 import json
@@ -32,12 +34,12 @@ import struct
 import sys
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[4]
+REPO = REPO_ROOT
 
-F33_CODEFLASH = REPO / "firmware/camry-8965F3307000/CodeFlash.bin"
-F33_DATAFLASH = REPO / "firmware/camry-8965F3307000/DataFlash.bin"
-F33_CORPUS = REPO / "data/generated/camry-8965F3307000/decompilations.jsonl"
-F33_RAM = REPO / "targets/camry-2026/raw-20260826/secoc-recovery/ram/local_ram_pe1.bin"
+F33_CODEFLASH = f33.IMAGE
+F33_DATAFLASH = f33.DATAFLASH
+F33_CORPUS = f33.CORPUS
+F33_RAM = f33.CAPTURE / "raw-20260826/secoc-recovery/ram/local_ram_pe1.bin"
 
 JOB_TABLE = 0x27636  # FUN_00074884 length-field base; stride-6 {u16 len, u16 pad, u16 page}
 JOB_STRIDE = 6

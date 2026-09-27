@@ -34,9 +34,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-
-from tools.security.build_secoc_patch_manifest import (  # noqa: E402
+from tools.security.build_secoc_patch_manifest import (
     CONCATENATED_DUMP_SIZE,
     P1M_E_CODEFLASH_SIZE,
     P1M_E_DATAFLASH_PREFIX_SIZE,

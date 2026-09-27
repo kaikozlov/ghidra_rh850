@@ -17,21 +17,20 @@ still does not substitute for the FRC Operation-FFD winner/grant objects 5285/57
 """
 from __future__ import annotations
 
+from tools.targets.camry.support import camry_f33_corpus as f33
+from tools import REPO_ROOT
 import argparse
 import bisect
 import gzip
 import hashlib
 import json
-import sys
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[4]
-if str(REPO) not in sys.path:
-    sys.path.insert(0, str(REPO))
+REPO = REPO_ROOT
 
 from tools.targets.camry.analysis.analyze_camry_2026_motor_feedback import angle_deg, motor_current, rate_raw, torque_nm
 
-RAW = REPO / "targets/camry-2026/raw-20260827"
+RAW = f33.CAPTURE / "raw-20260827"
 OUT = REPO / "data/generated/camry_2026_stock_steering_witness.json"
 DRIVES = {
     "drive_a": RAW / "camry_relay_route_can_20260827.ndjson.gz",

@@ -13,10 +13,10 @@
 >
 > **Canonical artifact:** `data/recovered_callback_tables.csv`
 >
-> **Verification:** `tests/verify_function_discovery.py`,
-> `tests/verify_xcp.py`, `tests/verify_xcp_shadow_write_live.py`,
-> `tests/verify_xcp.py`,
-> `tests/verify_exploit_followups.py`, `AssertXcpShadowWriteBoundary.java`,
+> **Verification:** `tests/tooling/verify_function_discovery.py`,
+> `tools/test xcp`, `tests/runtime/verify_xcp_shadow_write_live.py`,
+> `tools/test xcp`,
+> `tests/runtime/verify_exploit_followups.py`, `AssertXcpShadowWriteBoundary.java`,
 > `AssertRecoveredCallbackTables.java`, `AssertFunctionDiscoveryFloor.java`
 
 ## Result
@@ -237,7 +237,7 @@ to `FEBF7C00..FEBFFBFF` immediately before the programming transition remains
 resident in the boot programming runtime. This strengthens COM-005 from
 "post-init application storage" to **cross-application/boot retained executable
 storage**, but still does not supply the missing PC-redirection consumer. See
-SEC-BOOT-012 and `tests/verify_xcp.py`.
+SEC-BOOT-012 and `tools/test xcp`.
 
 The same composition is now independently verified in Span's persisted
 2026-08-21 Corolla CodeFlash (`SHA-256
@@ -246,7 +246,7 @@ generic opcode map, all 18 callbacks, `0x7F7/0x7F8` packed descriptors,
 LocalRAM/shadow bounds, five exclusion intervals, `0x5F208` handoff caller,
 complete `0x9F00` boot stub, `0x1472` state copier, and reset-only `0x13E8`
 initializer are byte-identical to tracked Corolla `8965H1202000`. GET_SEED and
-UNLOCK remain unconfigured. `tests/verify_spanconstant_corolla_codeflash.py`
+UNLOCK remain unconfigured. `tests/targets/corolla/verify_spanconstant_corolla_codeflash.py`
 pins the source ZIP and extracted bytes and verifies the full composition; see
 [the Span Corolla variant record](../variants/corolla-8965F1208000.md).
 

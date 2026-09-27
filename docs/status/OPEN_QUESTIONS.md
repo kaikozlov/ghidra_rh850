@@ -1045,7 +1045,7 @@ ledger context is useful.
   output monitor. Neither candidate's diagnostic surface witnesses the arbitration result,
   so static GTS+ cannot distinguish FRC-side from Brake-side arbitration execution. Both
   closures are pinned in `tss3_control_ownership_surface.json` schema v2 and verified by
-  `tests/verify_gtsplus_tss3_control_ownership.py`.
+  `tests/techstream/verify_gtsplus_tss3_control_ownership.py`.
   Canonical: [../tooling/techstream.md](../tooling/techstream.md) §6.2.4,
   `data/generated/gtsplus_2026/tss3_control_ownership_surface.json`, and
   [../architecture/toyota-openpilot-porting-contract.md](../architecture/toyota-openpilot-porting-contract.md) §4.1/§5D.

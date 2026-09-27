@@ -7,7 +7,7 @@
 > `8965B4512000` and independently transferred to tracked Corolla
 > `8965H1202000`; every additional calibration still resolves fail-closed
 >
-> **Verification:** `tests/verify_secoc_semantic_patch_resolver.py`
+> **Verification:** `tests/runtime/verify_secoc_semantic_patch_resolver.py`
 
 The durable target is not a raw Sienna byte string or software-ID table. It is
 the decision that consumes the command-7 verification result and selects the

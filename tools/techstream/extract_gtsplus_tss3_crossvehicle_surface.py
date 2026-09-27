@@ -14,21 +14,18 @@ import argparse
 import hashlib
 import json
 import struct
-import sys
 from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any
+from tools.techstream.ddb_semantics import records
+from tools.techstream.ddb_strings import load_string_db
+from tools.techstream.parse_ddb import ECU_TABLE_CLASS_NAMES, DDBParser
+from tools.techstream.pe_utils import binary_strings
+from tools.techstream.techstream_paths import gts_db_root, resolve_gts_root, v18_techstream_root
+from tools import REPO_ROOT
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from ddb_semantics import records
-from ddb_strings import load_string_db
-from parse_ddb import ECU_TABLE_CLASS_NAMES, DDBParser
-from pe_utils import binary_strings
-from techstream_paths import gts_db_root, resolve_gts_root, v18_techstream_root
-
-REPO = Path(__file__).resolve().parents[2]
-DEFAULT_OUT = REPO / "data/generated/gtsplus_2026/tss3_crossvehicle_surface.json"
+DEFAULT_OUT = REPO_ROOT / "data/generated/gtsplus_2026/tss3_crossvehicle_surface.json"
 REGIONS = ("NA", "EU", "JP")
 
 # Categories useful for distinguishing the current category-498 architecture.
@@ -388,7 +385,7 @@ def canbus_topology_region(
 ) -> dict[str, Any]:
     """Join the regional CAN Bus Check topology for category-498 vehicle types.
 
-    Mirrors the gts_cli canbus join: table 75 vehicle_type -> car_id, table 77
+    Mirrors the tools/techstream/gts/master.py canbus join: table 75 vehicle_type -> car_id, table 77
     car_id -> component group, table 78 group -> placements, names from 76/79,
     gateway identity from 55. Every group must resolve to exactly one placement
     shape; the generator asserts that invariant rather than assuming it.

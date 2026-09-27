@@ -8,12 +8,13 @@ remaining compact enough to review and verify without Ghidra.
 """
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import hashlib
 import json
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[4]
+ROOT = REPO_ROOT
 DEFAULT_IN = ROOT / "build/tmp/f33-prefault-param-store-census.raw.json"
 DEFAULT_OUT = ROOT / "data/generated/camry_8965F3307000_prefault_store_audit.json"
 ROOTS = [

@@ -505,7 +505,7 @@ all 60 observed `0x51E` samples decoded Ready=1, and physical driver torque span
 `-8.23..+2.85 N.m` with 482 distinct post-startup
 hundredth-N.m values. `steeringPressed` and both openpilot steering-fault flags remain false
 by design because their policy mapping is not yet proved.
-`tests/verify_corolla_tss3_opendbc_readonly_external.py` reproduces this against the sibling
+`tests/targets/corolla/verify_corolla_tss3_opendbc_readonly_external.py` reproduces this against the sibling
 maintained forks. What still cannot be made production-ready is the **deployment** side of the B6 sender contract (live proof of the audited H/F carrier canary, live slot4 MAC capability and acceptable command-5 latency or an equivalent signer, stock payload/cadence template, and relay-correct suppression topology), a deliberately chosen/validated Panda driver-override policy, Q-current response policy, Ready/fault transition mapping, radar parsing, or longitudinal control. Receiver freshness/message8 re-anchoring and the nominal 35-ms loss cutoff are already static closures, not remaining blockers. The readiness artifact continues to record those evidence blockers rather than implementation state.
 
 ## 5. The concrete TSS3 investigation roadmap

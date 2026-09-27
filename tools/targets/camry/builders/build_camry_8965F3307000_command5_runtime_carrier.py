@@ -10,15 +10,15 @@ a production post-startup loader.
 """
 from __future__ import annotations
 
+from tools.targets.camry.support import camry_f33_corpus as f33
+from tools import REPO_ROOT
 import argparse
 import hashlib
 import json
 import struct
-import sys
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[4]
-sys.path.insert(0, str(REPO))
+REPO = REPO_ROOT
 
 from tools.targets.camry.support.camry_f33_corpus import IMAGE, IMAGE_SHA256
 CODEFLASH_ART = REPO / "data/generated/camry_8965F3307000_codeflash.json"
@@ -30,8 +30,8 @@ CANARY_AUDIT = REPO / "exploit/ephemeral_runtime/audited_camry_f33_runtime_canar
 PROXY_BIN = REPO / "exploit/ephemeral_runtime/audited/camry_f33_command5_proxy.bin"
 CANARY_BIN = REPO / "exploit/ephemeral_runtime/audited/camry_f33_runtime_canary.bin"
 RAMREQ = REPO / "data/variant_ram_exec_requirements.json"
-HIGH_TAIL = REPO / "targets/camry-2026/raw-20260826/high-tail-20260826.json"
-LOW_RETENTION = REPO / "targets/camry-2026/raw-20260826/stock-retention-20260826.json"
+HIGH_TAIL = f33.CAPTURE / "raw-20260826/high-tail-20260826.json"
+LOW_RETENTION = f33.CAPTURE / "raw-20260826/stock-retention-20260826.json"
 OUT = REPO / "data/generated/camry_8965F3307000_command5_runtime_carrier.json"
 
 EXPECTED_APP_F181_HEX = "023839363546333330373030300000000038413331313333303331303000000000"

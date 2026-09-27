@@ -8,6 +8,7 @@ implemented locally so the result does not depend on that checkout's Toyota DBC.
 """
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 from bisect import bisect_right
 import collections
@@ -15,8 +16,9 @@ import json
 import re
 import sys
 from pathlib import Path
+from typing import Any
 
-REPO = Path(__file__).resolve().parents[4]
+REPO = REPO_ROOT
 LOCK = REPO / "external-references.lock.json"
 H_STATE = REPO / "data/generated/corolla_8965H1202000_openpilot_state_bridge.json"
 H_RUNTIME = REPO / "data/generated/ephemeral_runtime_target_manifest_8965H1202000.json"

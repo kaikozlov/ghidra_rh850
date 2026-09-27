@@ -10,7 +10,7 @@
 >
 > **Canonical artifacts:** `data/control_partition.csv`, `data/motor_actuation_path.csv`
 >
-> **Verification:** `tests/verify_architecture.py`, `tests/verify_control_partition.py`, `tests/verify_motor_actuation_boundary.py`, `ghidra/scripts/verify/AssertMotorActuationBoundary.java`
+> **Verification:** `tests/tooling/verify_architecture.py`, `tests/firmware/verify_control_partition.py`, `tests/firmware/verify_motor_actuation_boundary.py`, `ghidra/scripts/verify/AssertMotorActuationBoundary.java`
 >
 > **Related:** [firmware-architecture](firmware-architecture.md), [application-tx](../communications/application-tx.md)
 
@@ -24,7 +24,7 @@ Addresses are CodeFlash virtual addresses unless they begin with `0xFEBE` (local
 RAM) or `0xFFE2`/`0xFFE5`/`0xFFE7` (peripheral MMIO). The application GP base is
 `0xFEBEB800`. The machine-readable partition table is
 `data/control_partition.csv`; the self-contained verification is in
-`tests/verify_control_partition.py`.
+`tests/firmware/verify_control_partition.py`.
 
 The six callees are invoked unconditionally and in fixed order from `0x65750`,
 which is itself step 5 of the foreground cycle documented in
@@ -345,10 +345,10 @@ not proof that no table-driven, computed, or runtime-only handoff can exist.
 ### Evidence grade: recovered
 
 The producer/consumer addresses and arithmetic are deterministically checked by
-`tests/verify_control_partition.py`; the command-to-visible-status extension is
-checked independently by `tests/verify_application_interface_state_joins.py`
+`tests/firmware/verify_control_partition.py`; the command-to-visible-status extension is
+checked independently by `tests/diagnostics/verify_application_interface_state_joins.py`
 and `AssertApplicationInterfaceStateJoins.java`; the Techstream/DBC correlation
-is independently checked by `tests/verify_application_interface_correlations.py`;
+is independently checked by `tests/diagnostics/verify_application_interface_correlations.py`;
 the expanded stopping-boundary census is checked by
 `AssertMotorActuationBoundary.java`.
 

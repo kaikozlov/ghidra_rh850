@@ -39,7 +39,7 @@ write; it is not a new post-incident whole-flash readback.
 Regenerate the compact structural report without Ghidra, Docker, or ECU access:
 
 ```sh
-uv run python tools/targets/camry/analysis/analyze_f33_recovery_structure.py \
+uv run --locked python -m tools.targets.camry.analysis.analyze_f33_recovery_structure \
   --output data/generated/camry_f33_recovery_structure.json
 ```
 
@@ -233,7 +233,7 @@ Canonical evidence:
 - `data/generated/camry_8965F3307000_incident_fault_model.json`
 - `data/generated/camry_f33_recovery_structure.json`
 - `tools/targets/camry/builders/build_camry_8965F3307000_incident_fault_model.py`
-- `tests/verify_camry_8965F3307000_incident_fault_model.py`
+- `tests/targets/camry/verify_camry_8965F3307000_incident_fault_model.py`
 
 ## 5. Boot selection is more than CRC, but not a crash counter
 
@@ -405,7 +405,7 @@ Canonical evidence:
 - `data/generated/camry_8965F3307000_prefault_store_audit.json`
 - `data/generated/camry_8965F3307000_prefault_memory_safety.json`
 - `ghidra/scripts/investigate/AuditCallConeStores.java`
-- `tests/verify_camry_8965F3307000_prefault_memory_safety.py`
+- `tests/targets/camry/verify_camry_8965F3307000_prefault_memory_safety.py`
 
 ## 8. Expanded pre-fault control-flow/reset audit: synchronous CAN ingress is bounded
 
@@ -542,7 +542,7 @@ Canonical evidence:
 - `data/generated/camry_8965F3307000_prefault_control_flow_store_audit.json`
 - `data/generated/camry_8965F3307000_prefault_control_flow_ops.json`
 - `ghidra/scripts/investigate/AuditCallConeMemoryOps.java`
-- `tests/verify_camry_8965F3307000_prefault_control_flow.py`
+- `tests/targets/camry/verify_camry_8965F3307000_prefault_control_flow.py`
 
 ## 9. External safety outputs and flash-bank selection do not add a network boot path
 
@@ -590,7 +590,7 @@ traffic through this F33 image does not.
 
 Canonical structural evidence is included in
 `data/generated/camry_f33_recovery_structure.json` and verified by
-`tests/verify_f33_recovery_structure.py`.
+`tests/targets/camry/verify_f33_recovery_structure.py`.
 
 ## 10. P4_5 is a free-running EXTCLK1O supervisor clock, not a software watchdog kick
 
@@ -688,7 +688,7 @@ fault injection.  A real silicon ECC/redundancy fault can take this path.  What
 is closed is the proposed **vehicle-CAN protocol** route to it under the exact
 F33 ECM configuration.  Canonical bytes/source-mask evidence is preserved in
 `data/generated/camry_f33_recovery_structure.json` and verified by
-`tests/verify_f33_recovery_structure.py`.
+`tests/targets/camry/verify_f33_recovery_structure.py`.
 
 ## 12. Connector-accessible recovery checkpoint (2026-09-12)
 

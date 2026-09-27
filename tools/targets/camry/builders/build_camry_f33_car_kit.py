@@ -2,6 +2,8 @@
 """Build the self-contained exact-F33 in-car lateral/receiver bring-up kit."""
 from __future__ import annotations
 
+from tools.targets.camry.support import camry_f33_corpus as f33
+from tools import REPO_ROOT
 import argparse
 import hashlib
 import json
@@ -11,8 +13,7 @@ import sys
 from datetime import UTC, datetime
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[4]
-sys.path.insert(0, str(ROOT))
+ROOT = REPO_ROOT
 from exploit.common.payload_package import package_shellcode
 from exploit.common.ram_exec import (
     TOYOTA_P1ME_BOOT_SECURITY_ACCESS_SECRET,
@@ -64,7 +65,7 @@ EPS08A_CLASSIC_ORACLE_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_08a
 INLINE_SIGNER_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_b6_inline_signer_launcher.sh"
 ICUS_RAMKEY_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_icus_ramkey_probe_launcher.sh"
 PERSISTENT_SIGNER_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_persistent_signer_launcher.sh"
-F33_IMAGE = ROOT / "firmware/camry-8965F3307000/CodeFlash.bin"
+F33_IMAGE = f33.IMAGE
 OBSERVER_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_transaction_observer.bin"
 BRIDGE_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_bridge.bin"
 REPLAY_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_runtime_replay_discriminator.bin"

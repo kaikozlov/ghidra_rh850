@@ -14,22 +14,22 @@ import hashlib
 import json
 from pathlib import Path
 
-from techstream_paths import CUW_CORPUS_ROOT, V18_CUW_ROOT
+
 from typing import Any
+from tools.techstream.techstream_paths import CUW_CORPUS_ROOT, V18_CUW_ROOT
+from tools.techstream.cuw_attach import parse_attach_bytes
+from tools.techstream.parse_cuw_container import first_member_payload
+from tools.techstream.inspect_cuw_legacy import (
 
-from cuw_attach import parse_attach_bytes
-from parse_cuw_container import first_member_payload
-
-from inspect_cuw_legacy import (
     decode_legacy_target_data,
     decode_parameter_rows,
     exported_value_labels,
     legacy_check_id_payloads,
 )
-from inspect_cuw_vforest import decode_ascii_hex_payload, parse_zv_lzf_stream
-from parse_cuw_container import parse as parse_container
+from tools.techstream.inspect_cuw_vforest import decode_ascii_hex_payload, parse_zv_lzf_stream
+from tools.techstream.parse_cuw_container import parse as parse_container
 
-REPO = Path(__file__).resolve().parents[2]
+
 DEFAULT_CORPUS = CUW_CORPUS_ROOT
 DEFAULT_TECHSTREAM_ROOT = V18_CUW_ROOT
 FILL_WORD = bytes.fromhex("E203F133")

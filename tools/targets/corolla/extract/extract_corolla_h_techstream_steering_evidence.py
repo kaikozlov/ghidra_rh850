@@ -8,13 +8,14 @@ the authoritative identity and the pseudocode as recovered semantic evidence.
 """
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import hashlib
 import json
 from pathlib import Path
 from tools.targets.corolla.support.corolla_h_constants import CODEFLASH as H_CODEFLASH
 
-REPO = Path(__file__).resolve().parents[4]
+REPO = REPO_ROOT
 DEFAULT_CORPUS = REPO / "build/work/corpora/h_8965H1202000_rdbihelper2_decompilations.jsonl"
 DEFAULT_IMAGE = H_CODEFLASH
 DEFAULT_OUT = REPO / "data/generated/corolla_8965H1202000_techstream_steering_decompiler_evidence.json"

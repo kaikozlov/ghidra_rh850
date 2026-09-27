@@ -2,13 +2,14 @@
 """Promote the exact F33 callback used by the current GTS+ ASIC-state join."""
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import json
 from pathlib import Path
 from tools.targets.camry.support.camry_f33_corpus import CORPUS, IMAGE, IMAGE_SHA256, body_bytes, display_path
-from tools.project.decompiler_evidence import bind_entries, bind_function, load_function_corpus, require_function, sha256_bytes
+from tools.project.decompiler_evidence import bind_function, load_function_corpus, require_function, sha256_bytes
 
-REPO = Path(__file__).resolve().parents[4]
+REPO = REPO_ROOT
 OUT = REPO / "data/generated/camry_8965F3307000_gtsplus_decompiler_evidence.json"
 IMAGE_SHA = IMAGE_SHA256
 ENTRY = 0x4E848

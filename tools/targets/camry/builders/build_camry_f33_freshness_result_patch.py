@@ -11,17 +11,16 @@ the later ICU-S verify result to the native success path.
 """
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import copy
 import hashlib
 import json
 import struct
-import sys
 from pathlib import Path
 from typing import Any
 
-ROOT = Path(__file__).resolve().parents[4]
-sys.path.insert(0, str(ROOT))
+ROOT = REPO_ROOT
 
 from exploit.patcher.build_payload import (
     build_authenticated_payload,

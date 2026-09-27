@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Build canonical direct-call seed provenance closure from the clean H call graph."""
 from __future__ import annotations
+from tools import REPO_ROOT
 import argparse,csv,hashlib,json
 from pathlib import Path
-ROOT=Path(__file__).resolve().parents[4]
+ROOT=REPO_ROOT
 EVID=ROOT/'data/generated/corolla_8965H1202000_direct_call_surface_evidence.json'
 LEDGER=ROOT/'data/semantic_coverage_ledger.csv'
 OUT=ROOT/'data/generated/corolla_8965H1202000_direct_call_surface.json'

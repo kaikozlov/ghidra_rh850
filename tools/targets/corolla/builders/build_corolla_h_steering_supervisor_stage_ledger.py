@@ -8,12 +8,14 @@ unique complete instruction-shape match. H-only/Sienna-only rows mean unpaired
 in this ordered supervisor alignment, not globally absent from the other image.
 """
 from __future__ import annotations
+from tools.targets.sienna.sienna_target import CORPUS as SIENNA_CORPUS
+from tools import REPO_ROOT
 import argparse, difflib, hashlib, json, re
 from pathlib import Path
 from tools.targets.sienna.sienna_target import CODEFLASH as SIENNA_CODEFLASH
 from tools.targets.corolla.support.corolla_h_constants import CODEFLASH as H_CODEFLASH
 
-REPO=Path(__file__).resolve().parents[4]
+REPO=REPO_ROOT
 GAP=-0.22
 
 H_ROLE={
@@ -134,7 +136,7 @@ def main():
  Sf=validate_struct(loadj(a.sienna_struct),si);Hf=validate_struct(loadj(a.h_struct),hi)
  # canonical S root/name map
  decs=[]
- for line in (REPO/'data/generated/decompilations.jsonl').read_text().splitlines():
+ for line in (SIENNA_CORPUS).read_text().splitlines():
   r=json.loads(line)
   if 'entry_addr' in r:decs.append(r)
  nmap={r['name']:int(r['entry_addr'],16) for r in decs};sroot=next(r for r in decs if int(r['entry_addr'],16)==0xCB86E)

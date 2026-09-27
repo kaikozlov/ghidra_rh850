@@ -12,8 +12,8 @@
 > **Evidence source:** firmware-static, official hardware schematics, pinned
 > external-source, contributor raw CodeFlash, and local tooling.
 >
-> **Verification:** `tests/verify_toyota_eps_bus_probe.py`,
-> `tests/verify_toyota_b_programming_topology.py`.
+> **Verification:** `tests/toyota/verify_toyota_eps_bus_probe.py`,
+> `tests/toyota/verify_toyota_b_programming_topology.py`.
 
 ## 1. Question and result
 
@@ -234,7 +234,7 @@ Two invariants are important:
   orientation, while parameter 0 means the **OBD semantic path**.
 
 `tools/toyota_support/toyota_eps_bus_probe.py` now emits this truth table for the selected
-ELM parameter, and `tests/verify_toyota_eps_bus_probe.py` pins the model.
+ELM parameter, and `tests/toyota/verify_toyota_eps_bus_probe.py` pins the model.
 
 ## 7. Official Toyota-B / harness-box topology
 

@@ -26,7 +26,7 @@ import hashlib
 import json
 import re
 import struct
-from collections import Counter, defaultdict
+from collections import defaultdict
 from pathlib import Path
 
 from tools.targets.camry.support.camry_f33_corpus import CORPUS, IMAGE, IMAGE_SHA256, REPO

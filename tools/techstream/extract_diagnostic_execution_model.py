@@ -16,12 +16,13 @@ import struct
 from pathlib import Path
 
 import pefile
-from diagnostic_role_model import role_operation_catalog
-from parse_ddb import ECU_TABLE_CLASS_NAMES, MASTER_TABLE_CLASS_NAMES, DDBParser
-from techstream_paths import resolve_gts_root
+from tools.techstream.diagnostic_role_model import role_operation_catalog
+from tools.techstream.parse_ddb import ECU_TABLE_CLASS_NAMES, MASTER_TABLE_CLASS_NAMES, DDBParser
+from tools.techstream.techstream_paths import resolve_gts_root
+from tools import REPO_ROOT
 
-REPO = Path(__file__).resolve().parents[2]
-DEFAULT_OUT = REPO / "data/generated/techstream_v18/diagnostic_execution_model.json"
+
+DEFAULT_OUT = REPO_ROOT / "data/generated/techstream_v18/diagnostic_execution_model.json"
 
 CORE_V18 = (
     "CommandAPI.dll",
@@ -340,7 +341,6 @@ def core_binary_model(techstream_root: Path) -> dict:
             },
         }
     return result
-
 
 
 def dll_role_catalog(parser: DDBParser, master) -> dict:
@@ -1695,7 +1695,7 @@ def main() -> int:
     ap.add_argument(
         "--techstream-root",
         type=Path,
-        default=Path(os.environ.get("TECHSTREAM_UNPACKED_ROOT", REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream")),
+        default=Path(os.environ.get("TECHSTREAM_UNPACKED_ROOT", REPO_ROOT / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream")),
     )
     ap.add_argument("--gts-root", type=Path, default=Path(os.environ["GTSPLUS_ROOT"]) if "GTSPLUS_ROOT" in os.environ else None)
     ap.add_argument("--out", type=Path, default=DEFAULT_OUT)

@@ -7,7 +7,8 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 from typing import Any, Callable
 
-from parse_ddb import DDBParser
+from tools.techstream.parse_ddb import DDBParser
+
 
 
 def records(section: Any) -> Iterable[bytes]:

@@ -8,6 +8,8 @@ algorithms/secrets are already recovered from the target bootloader family.
 """
 from __future__ import annotations
 
+from tools.targets.corolla.support.corolla_h_constants import H_CAPTURE
+from tools import REPO_ROOT
 import argparse
 import hashlib
 import json
@@ -16,13 +18,12 @@ from tools.targets.corolla.support.corolla_h_constants import CODEFLASH as H_COD
 
 from Crypto.Cipher import AES
 
-REPO = Path(__file__).resolve().parents[4]
-PROBE = REPO / "community/albinoelephant/telescope/probe.json"
-PROBE_MD = REPO / "community/albinoelephant/telescope/probe.md"
+REPO = REPO_ROOT
+PROBE = H_CAPTURE / "telescope/probe.json"
+PROBE_MD = H_CAPTURE / "telescope/probe.md"
 CODEFLASH = H_CODEFLASH
 RAW_RAM_DIR = (
-    REPO
-    / "community/albinoelephant/raw-20260818"
+    H_CAPTURE / "raw-20260818"
     / "albinoelephant-corolla-2023.20260814-0023"
 )
 

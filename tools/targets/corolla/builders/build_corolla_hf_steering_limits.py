@@ -9,6 +9,8 @@ used to create the compact evidence is not opened here.
 """
 from __future__ import annotations
 
+from tools.targets.corolla.support.corolla_h_constants import F_RAW_DUMP
+from tools import REPO_ROOT
 import argparse
 import hashlib
 import json
@@ -17,9 +19,9 @@ from pathlib import Path
 from tools.targets.corolla.support.corolla_h_constants import CODEFLASH as H_CODEFLASH
 from typing import Any
 
-REPO = Path(__file__).resolve().parents[4]
+REPO = REPO_ROOT
 H_CODE = H_CODEFLASH
-F_CODE = REPO / "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin"
+F_CODE = F_RAW_DUMP
 DECOMP = REPO / "data/generated/corolla_8965H1202000_steering_limits_decompiler_evidence.json"
 CENSUS = REPO / "data/generated/corolla_8965H1202000_steering_limits_reference_census.json"
 PANDA_DECOMP = REPO / "data/generated/corolla_8965H1202000_panda_lateral_safety_decompiler_evidence.json"

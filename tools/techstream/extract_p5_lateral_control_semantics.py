@@ -24,17 +24,18 @@ from collections import Counter
 from pathlib import Path
 
 import pefile
-from pe_utils import imports as pe_imports
-from parse_ddb import DDBParser
-from ddb_semantics import records as semantic_records
-from ddb_strings import load_string_db
-from techstream_paths import V18_TECHSTREAM_ROOT
+from tools.techstream.pe_utils import imports as pe_imports
+from tools.techstream.parse_ddb import DDBParser
+from tools.techstream.ddb_semantics import records as semantic_records
+from tools.techstream.ddb_strings import load_string_db
+from tools.techstream.techstream_paths import V18_TECHSTREAM_ROOT
+from tools import REPO_ROOT
 
-REPO = Path(__file__).resolve().parents[2]
+
 TECHROOT = V18_TECHSTREAM_ROOT
-FACTORY = REPO / "data/generated/techstream_v18/ddb_factory_table_map.json"
-H_CORR = REPO / "data/generated/corolla_8965H1202000_techstream_correlations.json"
-DEFAULT_OUT = REPO / "data/generated/techstream_v18/p5_lateral_control_semantics.json"
+FACTORY = REPO_ROOT / "data/generated/techstream_v18/ddb_factory_table_map.json"
+H_CORR = REPO_ROOT / "data/generated/corolla_8965H1202000_techstream_correlations.json"
+DEFAULT_OUT = REPO_ROOT / "data/generated/techstream_v18/p5_lateral_control_semantics.json"
 
 REGIONS = ("NA", "EU", "JP")
 TARGET_DATABASES = (

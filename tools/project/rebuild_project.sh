@@ -201,8 +201,8 @@ if ((REFRESH_DIAGNOSTIC_VOCABULARY)); then
     exit 1
   }
   echo "  Generating Techstream diagnostic vocabulary..."
-  ( cd "$ROOT/tools/techstream" && python3 extract_catalog.py )
-  ( cd "$ROOT/tools/diagnostics" && python3 correlate_vocabulary.py )
+  uv run --project "$ROOT" --locked python -m tools.techstream.extract_catalog
+  uv run --project "$ROOT" --locked python -m tools.diagnostics.correlate_vocabulary
   VOCAB_PATH="$TRACKED_VOCAB"
 elif [ -f "$TRACKED_VOCAB" ]; then
   echo "  Using tracked diagnostic vocabulary artifact."

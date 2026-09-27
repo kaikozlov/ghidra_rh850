@@ -31,18 +31,16 @@ import binascii
 import hashlib
 import json
 import math
-import sys
 from collections import Counter
 from pathlib import Path
 
-from techstream_paths import CUW_CORPUS_ROOT
+
 from typing import Any
+from tools.techstream.techstream_paths import CUW_CORPUS_ROOT
+from tools.techstream.cuw_attach import parse_attach_bytes
+from tools.techstream.parse_cuw_container import parse as parse_container
+from tools import REPO_ROOT
 
-REPO = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-
-from cuw_attach import parse_attach_bytes
-from parse_cuw_container import parse as parse_container
 
 DEFAULT_CORPUS = CUW_CORPUS_ROOT
 
@@ -845,7 +843,7 @@ def main() -> int:
             },
         },
         "corpus": {
-            "directory": str(args.corpus.relative_to(REPO)) if args.corpus.is_relative_to(REPO) else str(args.corpus),
+            "directory": str(args.corpus.relative_to(REPO_ROOT)) if args.corpus.is_relative_to(REPO_ROOT) else str(args.corpus),
             "frc_package_count": len(packages),
             "frc_descriptor_signature": {
                 "contact_type": "P5-Unified",

@@ -7,6 +7,8 @@ the exact boundary that still requires runtime observation.
 """
 from __future__ import annotations
 
+from tools.targets.camry.support import camry_f33_corpus as f33
+from tools import REPO_ROOT
 import argparse
 import hashlib
 import itertools
@@ -16,14 +18,14 @@ import struct
 from pathlib import Path
 from typing import Any
 
-ROOT = Path(__file__).resolve().parents[4]
-IMAGE = ROOT / "firmware/camry-8965F3307000/CodeFlash.bin"
-CORPUS = ROOT / "data/generated/camry-8965F3307000/decompilations.jsonl"
+ROOT = REPO_ROOT
+IMAGE = f33.IMAGE
+CORPUS = f33.CORPUS
 DEFAULT_OUT = ROOT / "data/generated/camry_8965F3307000_b6_ingress_closure.json"
-LIVE_INGRESS = ROOT / "targets/camry-2026/raw-20260910/f33-ingress/session-summary.json"
+LIVE_INGRESS = f33.CAPTURE / "raw-20260910/f33-ingress/session-summary.json"
 TOPOLOGY = ROOT / "data/generated/gtsplus_2026/camry_8965F3307000_emps_semantics.json"
 EBU_TOPOLOGY = ROOT / "data/generated/camry_2026_ebu_topology.json"
-SHA = "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7"
+SHA = f33.IMAGE_SHA256
 COUNT = 6065
 
 # Entries whose exact graph placement matters to this proof.  Three of these were

@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Compact the clean H structural corpus into raw-bound direct-call closure evidence."""
 from __future__ import annotations
+from tools import REPO_ROOT
 import hashlib,json
-from pathlib import Path
 from tools.targets.corolla.support.corolla_h_constants import RAW_DUMP as H_RAW_DUMP
-ROOT=Path(__file__).resolve().parents[4]
+ROOT=REPO_ROOT
 RAW=H_RAW_DUMP
 SRC=ROOT/'build/work/corpora/h_clean_function_structural_fingerprints.jsonl'
 OUT=ROOT/'data/generated/corolla_8965H1202000_direct_call_surface_evidence.json'

@@ -6,6 +6,8 @@ No vehicle connection, transmitter, diagnostic write, or firmware access.
 """
 from __future__ import annotations
 
+from tools.targets.camry.support import camry_f33_corpus as f33
+from tools import REPO_ROOT
 import argparse
 import binascii
 import bisect
@@ -18,13 +20,13 @@ from pathlib import Path
 
 import numpy as np
 
-ROOT = Path(__file__).resolve().parents[4]
+ROOT = REPO_ROOT
 STEM = 'camry_20260916_longitudinal_motion_audit'
 FIXTURE = ROOT / f'tests/fixtures/{STEM}.jsonl.gz'
 OUTPUT = ROOT / f'data/generated/{STEM}.json'
 AUGUST = {
-    'drive_a': ROOT / 'targets/camry-2026/raw-20260827/camry_relay_route_can_20260827.ndjson.gz',
-    'drive_b': ROOT / 'targets/camry-2026/raw-20260827/camry_relay_lta_confirm_route_can_20260827.ndjson.gz',
+    'drive_a': f33.CAPTURE / 'raw-20260827/camry_relay_route_can_20260827.ndjson.gz',
+    'drive_b': f33.CAPTURE / 'raw-20260827/camry_relay_lta_confirm_route_can_20260827.ndjson.gz',
 }
 SOURCE_GROUPS = (
     ('combined_trial', '2026-09-11/000000d4--327b2c4bb8', (2, 3, 4, 5)),

@@ -15,16 +15,16 @@ import io
 import json
 from pathlib import Path
 
-from techstream_paths import V18_CUW_ROOT
+
 from typing import Any
 
 import pefile
+from tools.techstream.techstream_paths import V18_CUW_ROOT
+from tools.techstream.cuw_attach import parse_attach_bytes
+from tools.techstream.parse_cuw_container import first_member_payload, parse as parse_container
+from tools.techstream.cuw_parameter import decode_parameter_ini
 
-from cuw_attach import parse_attach_bytes
-from parse_cuw_container import first_member_payload, parse as parse_container
-from cuw_parameter import decode_parameter_ini
 
-REPO = Path(__file__).resolve().parents[2]
 DEFAULT_TECHSTREAM_ROOT = V18_CUW_ROOT
 
 

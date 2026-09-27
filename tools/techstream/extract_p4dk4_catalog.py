@@ -29,14 +29,14 @@ from __future__ import annotations
 import json
 import struct
 from pathlib import Path
+from tools.techstream.parse_ddb import DDBParser
+from tools.techstream.ddb_strings import load_string_db
+from tools.techstream.techstream_paths import V18_TECHSTREAM_ROOT
+from tools import REPO_ROOT
 
-from parse_ddb import DDBParser
-from ddb_strings import load_string_db
-from techstream_paths import V18_TECHSTREAM_ROOT
 
 # ── Constants ─────────────────────────────────────────────────────────────────
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
 TECHSTREAM_DB = V18_TECHSTREAM_ROOT
 
 # P4DK4 is JP-only. String DBs are region-independent (same OEM tables).

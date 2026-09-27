@@ -8,6 +8,7 @@ internal storage/derivation beyond those interfaces.
 """
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import hashlib
 import json
@@ -16,7 +17,7 @@ from pathlib import Path
 from tools.targets.sienna.sienna_target import CODEFLASH as SIENNA_CODEFLASH
 from tools.targets.corolla.support.corolla_h_constants import RAW_DUMP as H_RAW_DUMP
 
-REPO = Path(__file__).resolve().parents[4]
+REPO = REPO_ROOT
 H_CONFIG = bytes.fromhex("0100000004000000000000000000000000000000")
 H_RECORD_BASE = 0x2572C
 H_RECORD_COUNT = 3

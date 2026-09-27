@@ -17,11 +17,12 @@ import struct
 from pathlib import Path
 
 import pefile
-from techstream_paths import resolve_gts_root
+from tools.techstream.techstream_paths import resolve_gts_root
+from tools import REPO_ROOT
 
-REPO = Path(__file__).resolve().parents[2]
+
 DEFAULT_PE = resolve_gts_root() / "bin/KgpDataCtrl.dll"
-DEFAULT_OUTPUT = REPO / "data/generated/gtsplus_2026/ddb_factory_table_map.json"
+DEFAULT_OUTPUT = REPO_ROOT / "data/generated/gtsplus_2026/ddb_factory_table_map.json"
 
 FACTORIES = (
     {
@@ -140,7 +141,7 @@ def build(pe_path: Path) -> dict:
         "schema_version": 1,
         "source": "GTS+ 2026.03.002.02",
         "artifact": {
-            "relative_path": pe_path.relative_to(REPO).as_posix(),
+            "relative_path": pe_path.relative_to(REPO_ROOT).as_posix(),
             "size": len(pe_bytes),
             "sha256": sha256(pe_bytes),
         },

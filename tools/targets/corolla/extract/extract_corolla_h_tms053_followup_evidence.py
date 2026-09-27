@@ -2,13 +2,14 @@
 """Promote exact-H decompiler evidence for the TMS-053 B6/openpilot closure pass."""
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import hashlib
 import json
 from pathlib import Path
 from tools.targets.corolla.support.corolla_h_constants import CODEFLASH as H_CODEFLASH
 
-REPO = Path(__file__).resolve().parents[4]
+REPO = REPO_ROOT
 IMAGE = H_CODEFLASH
 OUT = REPO / "data/generated/corolla_8965H1202000_tms053_followup_decompiler_evidence.json"
 CORPUS = REPO / "data/generated/corolla-8965H1202000/decompilations.jsonl"

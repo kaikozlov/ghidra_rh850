@@ -127,7 +127,7 @@ bytes above are the evidence. Meaningful/non-fill CodeFlash ends around
 `0x2B0000..0x2FFFFF` is `0x00` fill in this capture.
 
 Portable byte assertions for the critical findings are in
-`tests/verify_yc_venza_airbag_reprogramming.py`.
+`tests/targets/venza/verify_yc_venza_airbag_reprogramming.py`.
 
 ## 1. `boot.bin` is the `0x01000000` extended-user image
 

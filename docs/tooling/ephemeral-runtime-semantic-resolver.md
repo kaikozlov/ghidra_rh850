@@ -277,7 +277,7 @@ application-time RAM retention/scheduler geometry.
 
 ## Fail-closed regression coverage
 
-`tests/verify_ephemeral_runtime_resolver.py` pins the fresh-import result and
+`tests/runtime/verify_ephemeral_runtime_resolver.py` pins the fresh-import result and
 mutates individual machine signatures. It requires rejection when the boot
 handoff, `Com_RxIndication`, queue helper, timeout helper, SecOC record table, or
 RAM-geometry identity no longer matches.

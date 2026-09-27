@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Pin stock-Toyota-B native message sides from retained September 11 logs."""
 from __future__ import annotations
+from tools import REPO_ROOT
 import argparse
 import hashlib
 import json
@@ -8,7 +9,7 @@ import sys
 from collections import Counter
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[4]
+ROOT = REPO_ROOT
 OUTPUT = ROOT / 'data/generated/camry_2026_stock_harness_topology.json'
 LOG_ROOT = Path('/Users/kai/dev/inspect/logs/camry-2026/2026-09-11')
 OPENPILOT = Path('/Users/kai/dev/inspect/repos/kai-openpilot')

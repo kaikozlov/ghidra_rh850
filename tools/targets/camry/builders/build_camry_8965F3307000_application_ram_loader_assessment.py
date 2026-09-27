@@ -7,6 +7,8 @@ or implement a vehicle-side execution pivot.
 """
 from __future__ import annotations
 
+from tools.targets.camry.support import camry_f33_corpus as f33
+from tools import REPO_ROOT
 import argparse
 import hashlib
 import json
@@ -15,16 +17,16 @@ from pathlib import Path
 
 from tools.targets.camry.support.camry_f33_corpus import IMAGE, IMAGE_SHA256
 
-ROOT = Path(__file__).resolve().parents[4]
+ROOT = REPO_ROOT
 IMAGE_SHA = IMAGE_SHA256
-RAW = ROOT / "targets/camry-2026/raw-20260826"
+RAW = f33.CAPTURE / "raw-20260826"
 HIGH = RAW / "high-tail-20260826.json"
 LOW = RAW / "stock-retention-20260826.json"
 STOCK_HANDOFF = RAW / "stock-handoff-20260826.json"
 POSTSTARTUP = RAW / "poststartup-canary-20260826.json"
 RETENTION_MANIFEST = RAW / "RAM_RETENTION_MANIFEST.txt"
 XCP_LIVE = RAW / "xcp_probe.json"
-XCP_EXT_LIVE = ROOT / "targets/camry-2026/raw-20260906/xcp-extended-ingress-probe.json"
+XCP_EXT_LIVE = f33.CAPTURE / "raw-20260906/xcp-extended-ingress-probe.json"
 OUT = ROOT / "data/generated/camry_8965F3307000_application_ram_loader_assessment.json"
 
 HIGH_BASE, HIGH_END = 0xFEBFF9F0, 0xFEBFFBFB

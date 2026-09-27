@@ -19,23 +19,20 @@ import argparse
 import json
 import re
 import struct
-import sys
 from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any
+from tools.techstream.ddb_semantics import monitor_rows, records
+from tools.techstream.extract_gtsplus_p5_adas_p6_migration import rob_data_ids
+from tools.techstream.ddb_strings import load_string_db
+from tools.techstream.parse_ddb import DDBParser
+from tools.techstream.techstream_paths import gts_db_root, resolve_gts_root
+from tools.techstream.decode_srp import decrypt_srp
+from tools.techstream.ddb_semantics import dtc_rows
+from tools import REPO_ROOT
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from ddb_semantics import monitor_rows, records
-from extract_gtsplus_p5_adas_p6_migration import rob_data_ids
-from ddb_strings import load_string_db
-from parse_ddb import DDBParser
-from techstream_paths import gts_db_root, resolve_gts_root
-from decode_srp import decrypt_srp
-from ddb_semantics import dtc_rows
-
-REPO = Path(__file__).resolve().parents[2]
-DEFAULT_OUT = REPO / "data/generated/gtsplus_2026/tss3_control_ownership_surface.json"
+DEFAULT_OUT = REPO_ROOT / "data/generated/gtsplus_2026/tss3_control_ownership_surface.json"
 REGIONS = ("NA", "EU", "JP")
 TSS3_RECORDER_BINDINGS = (
     (498, 233, "GetTSS3ImageFFDP5_DT.dll"),
@@ -53,11 +50,11 @@ BRAKE_DID_SERVING_CATEGORIES = {
 BRAKE_DOMAIN_CATEGORIES = tuple(sorted((*BRAKE_DID_SERVING_CATEGORIES, 6005)))
 
 RECORDER_LONGITUDINAL_DIDS = ("5280", "5281", "5284", "57D3", "57DB")
-PCS_SEMANTICS = REPO / "data/generated/gtsplus_2026/pcs_data_viewer_tss3_managed_semantics.json"
-CROSSVEHICLE = REPO / "data/generated/gtsplus_2026/tss3_crossvehicle_surface.json"
-B6_SENDER_ATTRIBUTION = REPO / "data/generated/techstream_v18/tss3_b6_sender_attribution.json"
-CAMRY_BRAKE_ACQUISITION = REPO / "data/generated/gtsplus_2026/camry_f152633k0000_brake_acquisition.json"
-CAMRY_BRAKE_OBSERVERS = REPO / "data/generated/gtsplus_2026/camry_brake_observer_vocabulary.json"
+PCS_SEMANTICS = REPO_ROOT / "data/generated/gtsplus_2026/pcs_data_viewer_tss3_managed_semantics.json"
+CROSSVEHICLE = REPO_ROOT / "data/generated/gtsplus_2026/tss3_crossvehicle_surface.json"
+B6_SENDER_ATTRIBUTION = REPO_ROOT / "data/generated/techstream_v18/tss3_b6_sender_attribution.json"
+CAMRY_BRAKE_ACQUISITION = REPO_ROOT / "data/generated/gtsplus_2026/camry_f152633k0000_brake_acquisition.json"
+CAMRY_BRAKE_OBSERVERS = REPO_ROOT / "data/generated/gtsplus_2026/camry_brake_observer_vocabulary.json"
 
 CROSS_ECU_DATABASES = (
     ("FRC_P5", 498),
@@ -525,9 +522,9 @@ def specimen_census(root: Path) -> dict[str, Any]:
         for path in diagnostics.rglob("*")
         if path.is_file() and path.suffix.casefold() in {".tse", ".gtse"}
     )
-    repository_roots = [REPO / name for name in ("REFERENCE", "community", "targets")]
+    repository_roots = [REPO_ROOT / name for name in ("REFERENCE", "community", "targets")]
     repo_specimens = sorted(
-        str(path.relative_to(REPO)).replace("\\", "/")
+        str(path.relative_to(REPO_ROOT)).replace("\\", "/")
         for base in repository_roots if base.exists()
         for path in base.rglob("*")
         if path.is_file() and path.suffix.casefold() in {".tse", ".gtse"}
@@ -544,7 +541,6 @@ def specimen_census(root: Path) -> dict[str, Any]:
             "the current converter skip policy omits PCS Operation/Image FFD sections."
         ),
     }
-
 
 
 def current_utility_srp_census(root: Path) -> dict[str, Any]:

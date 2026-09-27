@@ -6,16 +6,14 @@ tracked generated evidence. Ghidra workspace state under build/ is not an input.
 """
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import hashlib
 import json
-import math
 import struct
 from pathlib import Path
-import sys
 
-REPO = Path(__file__).resolve().parents[4]
-sys.path.insert(0, str(REPO))
+REPO = REPO_ROOT
 from tools.targets.camry.support.camry_f33_corpus import IMAGE, IMAGE_SHA256, body_bytes  # noqa: E402
 EVID = REPO / "data/generated/camry_8965F3307000_lateral_decompiler_evidence.json"
 CODEFLASH = REPO / "data/generated/camry_8965F3307000_codeflash.json"

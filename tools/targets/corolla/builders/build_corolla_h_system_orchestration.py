@@ -2,6 +2,8 @@
 """Build the target-native Corolla H system/orchestration comparison report."""
 from __future__ import annotations
 
+from tools.targets.sienna.sienna_target import CORPUS as SIENNA_CORPUS
+from tools import REPO_ROOT
 import argparse
 import difflib
 import hashlib
@@ -11,9 +13,8 @@ from pathlib import Path
 from tools.targets.sienna.sienna_target import CODEFLASH as SIENNA_CODEFLASH
 from tools.targets.corolla.support.corolla_h_constants import RAW_DUMP as H_RAW_DUMP
 
-ROOT = Path(__file__).resolve().parents[4]
+ROOT = REPO_ROOT
 EVIDENCE = ROOT / "data/generated/corolla_8965H1202000_system_orchestration_decompiler_evidence.json"
-SIENNA_CORPUS = ROOT / "data/generated/decompilations.jsonl"
 H_RAW = H_RAW_DUMP
 SIENNA_IMAGE = SIENNA_CODEFLASH
 DEFAULT_OUT = ROOT / "data/generated/corolla_8965H1202000_system_orchestration.json"

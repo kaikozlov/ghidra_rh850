@@ -8,18 +8,18 @@ acceptance-window semantics from sender traces.
 """
 from __future__ import annotations
 
+from tools.targets.camry.support import camry_f33_corpus as f33
+from tools import REPO_ROOT
 import argparse
 import gzip
 import hashlib
 import itertools
 import json
 import statistics
-import sys
 from collections import Counter, defaultdict
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[4]
-sys.path.insert(0, str(REPO))
+REPO = REPO_ROOT
 
 from tools.toyota_support.toyota_e2e_p05 import (
     CRC16_INIT,
@@ -28,7 +28,7 @@ from tools.toyota_support.toyota_e2e_p05 import (
     e2e_p05_recover_data_id,
 )
 
-RAW = REPO / "targets/camry-2026/raw-20260827"
+RAW = f33.CAPTURE / "raw-20260827"
 DRIVES = {
     "drive_a": RAW / "camry_relay_route_can_20260827.ndjson.gz",
     "drive_b": RAW / "camry_relay_lta_confirm_route_can_20260827.ndjson.gz",

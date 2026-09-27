@@ -10,7 +10,7 @@
 >
 > **Canonical artifacts:** `data/application_diagnostic_map.csv`
 >
-> **Verification:** `tests/verify_application_diagnostics.py`
+> **Verification:** `tests/diagnostics/verify_application_diagnostics.py`
 >
 > **Related:** [bootloader](bootloader.md), [bootloader-dids](bootloader-dids.md), [application SA](../security/application-security-access.md)
 
@@ -28,7 +28,7 @@ the bootloader handlers at `0x4948`, `0x5FB8`, and `0x614A` do not yet control t
 request.
 
 All addresses below are CodeFlash virtual addresses. The independent checks in
-`../tests/verify_application_diagnostics.py` validate the static tables and key
+`../tests/diagnostics/verify_application_diagnostics.py` validate the static tables and key
 instruction sequences directly from the committed image.
 
 ## Executive result
@@ -210,7 +210,7 @@ The raw table spans `0x309DC`–`0x30EDC`; 127 records are enabled and all pad
 bytes are zero. An earlier vocabulary scan used only `0x30A28`–`0x30C40` and
 therefore missed enabled CAN-communication DTCs through `0x30D74`, including
 `U0100`, `U0126`, `U023A`, `U0293`, and `U1103`. The complete bound is asserted
-against the raw records in `tests/verify_diagnostic_vocabulary.py`.
+against the raw records in `tests/techstream/verify_diagnostic_vocabulary.py`.
 
 This limited `0x7A0 -> 0x7A8` diagnostic endpoint is therefore real, but its intended external tester or manufacturing role and the OEM meaning of SID `0xAB` remain unresolved. The primary application table must not be confused with the bootloader table at `0x8E54`.
 For example, bootloader SIDs `14`, `19`, `23`, `AB`, and `BA` all point to
@@ -321,7 +321,7 @@ both configured classes have zero write-range entries. This is a verified
 negative for escaping the recovered RMBA **read allow-set** through these software
 classes; it does not weaken the disclosure finding itself and is not a whole-Dcm
 memory-safety claim. Deterministic boundary cases live in
-`tests/verify_application_rmba_memory_safety.py`.
+`tests/diagnostics/verify_application_rmba_memory_safety.py`.
 
 The RDBI table contains 196 unique nonzero callback targets. The actual dispatch
 at `FUN_4CB8A` indexes the 16-byte records, loads the callback field at record
@@ -377,16 +377,16 @@ length overrun in this calibration. This upgrades MEM-SAFE-006 to a verified
 negative for the configured RDBI length-mismatch class while retaining the known
 48 stale-response DIDs and making no general claim about other Dcm services.
 Generation and verification are in `tools/security/generate_rdbi_emitted_write_audit.py`
-and `tests/verify_application_rdbi.py`.
+and `tests/diagnostics/verify_application_rdbi.py`.
 
-Verified by `tests/verify_application_rdbi.py`.
+Verified by `tests/diagnostics/verify_application_rdbi.py`.
 
 #### Generalized response-disclosure audit (DIAG-APP-025)
 
 The stale-response criterion (declared-by-configuration length vs producer
 writes, above) is now applied to every response-producing surface:
 `tools/security/generate_response_disclosure_audit.py` +
-`tests/verify_response_disclosure_audit.py`. Result: exactly the 48 known
+`tests/diagnostics/verify_response_disclosure_audit.py`. Result: exactly the 48 known
 stale-RDBI DIDs and **no new under-written surface** — RoutineControl packer
 `0x95966` uses kind-6 byte assigns and kind-7 routine-owned pointer copies
 (never an OR-only byte without a prior assign); no WDBI result callback is a

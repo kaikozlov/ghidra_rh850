@@ -1,0 +1,52 @@
+#!/usr/bin/env python3
+"""Portable checks for the WP2 recorded-vs-proposed CarState replay tool."""
+from __future__ import annotations
+
+
+from tools import REPO_ROOT
+ROOT = REPO_ROOT
+from tools.targets.camry.utilities.replay_camry_tss3_carstate_revisions import summarize
+
+passed = failed = 0
+
+
+def check(name: str, condition: bool) -> None:
+    global passed, failed
+    passed += int(condition)
+    failed += int(not condition)
+    print(f"[{'PASS' if condition else 'FAIL'}] {name}")
+
+
+f3c = ROOT / "tests/fixtures/camry_20260904/3c-seg43.jsonl"
+
+recorded = [
+    {"t": 1, "steeringTorque": 0.4, "steeringPressed": False, "vehicleSensorsInvalid": False, "steeringAngleDeg": 2.0},
+    {"t": 2, "steeringTorque": 1.3, "steeringPressed": False, "vehicleSensorsInvalid": False, "steeringAngleDeg": 2.1},
+]
+proposed = [
+    {"t": 1, "steeringTorque": 0.4, "steeringPressed": False, "vehicleSensorsInvalid": False, "steeringAngleDeg": 2.0},
+    {"t": 2, "steeringTorque": 1.3, "steeringPressed": True, "vehicleSensorsInvalid": False, "steeringAngleDeg": 2.1},
+]
+summary, rows = summarize(recorded, proposed, f3c)
+check("replay keeps identical decode separate from driver semantic delta", summary["decode_equal_when_proposed_measurement_valid"] is True)
+check("replay counts pressed transition", summary["steeringPressed_true_recorded"] == 0 and summary["steeringPressed_true_proposed"] == 1)
+check("replay emits one diff row per timestamp", len(rows) == 2 and [r["t"] for r in rows] == [1, 2])
+
+try:
+    summarize(recorded, proposed[:1], f3c)
+except RuntimeError:
+    check("replay rejects length mismatch", True)
+else:
+    check("replay rejects length mismatch", False)
+
+bad_time = [dict(proposed[0]), dict(proposed[1])]
+bad_time[1]["t"] = 3
+try:
+    summarize(recorded, bad_time, f3c)
+except RuntimeError:
+    check("replay rejects timestamp mismatch", True)
+else:
+    check("replay rejects timestamp mismatch", False)
+
+print(f"\n{passed} passed, {failed} failed")
+raise SystemExit(1 if failed else 0)

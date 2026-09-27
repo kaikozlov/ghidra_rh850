@@ -11,21 +11,17 @@ import csv
 import hashlib
 import json
 import struct
-import sys
 from pathlib import Path
+from tools.techstream.parse_ddb import DDBParser
+from tools.techstream.ddb_strings import load_string_db
+from tools.techstream.techstream_paths import V18_TECHSTREAM_ROOT
+from tools.targets.sienna.sienna_target import CODEFLASH as FW
+from tools import REPO_ROOT
 
-HERE = Path(__file__).resolve()
-REPO = HERE.parents[2]
-sys.path.insert(0, str(HERE.parent))
-sys.path.insert(0, str(REPO / "tools"))
-from parse_ddb import DDBParser  # noqa: E402
-from ddb_strings import load_string_db
-from techstream_paths import V18_TECHSTREAM_ROOT  # noqa: E402
-from tools.targets.sienna.sienna_target import CODEFLASH as FW  # noqa: E402
 
 ROOT = V18_TECHSTREAM_ROOT
-OUT = REPO / "data/generated/techstream_v18/secoc_fd_sensor_correlations.json"
-RXMAP = REPO / "data/application_rx_map.csv"
+OUT = REPO_ROOT / "data/generated/techstream_v18/secoc_fd_sensor_correlations.json"
+RXMAP = REPO_ROOT / "data/application_rx_map.csv"
 REGIONS = ("NA", "EU", "JP")
 MONITORS = {
     303: "CAN Vehicle Speed (Speed Sensor RR)",

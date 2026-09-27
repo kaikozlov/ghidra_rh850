@@ -17,23 +17,22 @@ Read-only analysis against tracked raw captures:
 The output is review evidence only; production output stays disabled.
 """
 from __future__ import annotations
+from tools.toyota_support.toyota_route_opendbc_common import decode_wheel_speed_kph
 
+from tools.targets.camry.support import camry_f33_corpus as f33
+from tools import REPO_ROOT
 import argparse
 import gzip
 import hashlib
 import json
-import sys
 from collections import Counter, defaultdict
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[4]
-if str(REPO) not in sys.path:
-    sys.path.insert(0, str(REPO))
+REPO = REPO_ROOT
 
-from tools.targets.camry.analysis.analyze_camry_2026_relay_capture import decode_wheel_speed
 from tools.toyota_support.toyota_route_opendbc_common import be_signal
 
-RAW = REPO / "targets/camry-2026/raw-20260827"
+RAW = f33.CAPTURE / "raw-20260827"
 CENSUS = REPO / "data/generated/camry_2026_cruise_lta_edge_census.json"
 INGRESS = REPO / "data/generated/camry_8965F3307000_external_lateral_ingress.json"
 DRIVES = {
@@ -147,7 +146,7 @@ def analyze_drive(label: str, path: Path, accepted: set[int], census_intervals: 
             if addr == 0x08A and len(dat) == 32:
                 a8[seg].append((t, dat))
             elif addr == 0x0AA and len(dat) == 8:
-                speeds.append((seg, t, decode_wheel_speed(dat)))
+                speeds.append((seg, t, decode_wheel_speed_kph(dat)))
             elif addr == 0x030 and len(dat) == 32:
                 eps_tx30.append((seg, t, dat))
             if addr in accepted:

@@ -1,3 +1,4 @@
+from tools.targets.sienna.sienna_target import CORPUS as SIENNA_CORPUS
 #!/usr/bin/env python3
 """Promote H generated-COM provenance into the CEDAE supervisor cone.
 
@@ -7,11 +8,12 @@ the tracked compact JSON is what repository verification consumes. The extractor
 compares exact wire fields, follows raw->staging->fixed-map snapshot copies, and
 fails closed unless the only changed command-sized field is B6 signal255.
 """
+from tools import REPO_ROOT
 import argparse,json,re,struct,hashlib
 from pathlib import Path
 from tools.targets.sienna.sienna_target import CODEFLASH as SIENNA_CODEFLASH
 from tools.targets.corolla.support.corolla_h_constants import CODEFLASH as H_CODEFLASH
-REPO=Path(__file__).resolve().parents[4]
+REPO=REPO_ROOT
 GP=0xFEBEB800
 ap=argparse.ArgumentParser(description=__doc__)
 ap.add_argument('--h-corpus',type=Path,required=True,help='disposable corrected-context H decompiler corpus JSONL')
@@ -26,7 +28,7 @@ def load_corpus(path):
   r=json.loads(l)
   if 'entry_addr' in r:d[int(r['entry_addr'],16)]=r
  return d
-SCORPUS=REPO/'data/generated/decompilations.jsonl'
+SCORPUS = SIENNA_CORPUS
 HCORPUS=ARGS.h_corpus.resolve()
 S=load_corpus(SCORPUS); H=load_corpus(HCORPUS)
 

@@ -17,6 +17,7 @@ by VAR-084.
 """
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import hashlib
 import json
@@ -28,7 +29,7 @@ from tools.targets.camry.support.camry_f33_corpus import CORPUS, IMAGE, IMAGE_SH
 from tools.project.decompiler_evidence import body_bytes, load_function_corpus
 from tools.targets.camry.builders.build_camry_8965F3307000_application_ram_loader_assessment import DMAC_TABLES
 
-ROOT = Path(__file__).resolve().parents[4]
+ROOT = REPO_ROOT
 E1 = ROOT / "data/generated/camry_8965F3307000_computed_store_target_census.json"
 E2 = ROOT / "data/generated/camry_8965F3307000_dmac_destination_computed_store_census.json"
 SCRIPT = ROOT / "ghidra/scripts/investigate/AuditComputedStoreTargets.java"

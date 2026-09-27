@@ -4,14 +4,14 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
+from tools import REPO_ROOT
 
-REPO = Path(__file__).resolve().parents[2]
-V18_DIAGNOSTICS_ROOT = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics"
+V18_DIAGNOSTICS_ROOT = REPO_ROOT / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics"
 V18_TECHSTREAM_ROOT = V18_DIAGNOSTICS_ROOT / "Techstream"
 V18_DB_ROOT = V18_TECHSTREAM_ROOT / "NA/DB"
 V18_CUW_ROOT = V18_DIAGNOSTICS_ROOT / "Calibration Update Wizard"
-GTSPLUS_EXTERNAL_ROOT = REPO / "software/Techstream/gtsplus"
-CUW_CORPUS_ROOT = REPO / "software/Techstream/cuw"
+GTSPLUS_EXTERNAL_ROOT = REPO_ROOT / "software/Techstream/gtsplus"
+CUW_CORPUS_ROOT = REPO_ROOT / "software/Techstream/cuw"
 
 
 def v18_diagnostics_root() -> Path:
@@ -53,7 +53,7 @@ def resolve_cuwplus_root(gts_root: Path, value: str | Path | None = None) -> Pat
             return candidate.resolve()
     default_gts = resolve_gts_root(GTSPLUS_EXTERNAL_ROOT)
     if gts_root.resolve() == default_gts:
-        external = REPO / "software/Techstream/gtsplus/cuwplus/CUWPlus"
+        external = REPO_ROOT / "software/Techstream/gtsplus/cuwplus/CUWPlus"
         return external.resolve()
     # Never silently combine writer routes from a different GTS release.
     return (gts_root / "__missing_cuwplus__").resolve()

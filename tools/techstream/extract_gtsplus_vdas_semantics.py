@@ -12,8 +12,8 @@ import json
 import tempfile
 from pathlib import Path
 from typing import Any
+from tools.techstream.extract_gtsplus_tse_managed_semantics import (
 
-from extract_gtsplus_tse_managed_semantics import (
     _contains_ordered,
     _instructions,
     _lines,
@@ -22,10 +22,11 @@ from extract_gtsplus_tse_managed_semantics import (
     _strings,
     sha256_file,
 )
-from recover_gtsplus_bodies import recover
+from tools.techstream.recover_gtsplus_bodies import recover
+from tools import REPO_ROOT
 
-REPO = Path(__file__).resolve().parents[2]
-DEFAULT_OUT = REPO / "data/generated/gtsplus_2026/vdas_semantics.json"
+
+DEFAULT_OUT = REPO_ROOT / "data/generated/gtsplus_2026/vdas_semantics.json"
 DIAG = "GTSPlusDiagAdaptationManager.DiagAdaptationManager"
 ARCHIVER = "GTSPlusArchiver.ZipFile"
 

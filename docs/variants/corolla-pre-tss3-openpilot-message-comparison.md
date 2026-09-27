@@ -300,7 +300,7 @@ firmware does not identify their TSS3 wire messages.
 
 - `tools/targets/corolla/builders/build_corolla_pre_tss3_message_comparison.py` rebuilds the exact H/F
   application identity, normal-Rx table, Tx table, and role migration report.
-- `tests/verify_corolla_pre_tss3_message_comparison.py` enforces the upstream
+- `tests/targets/corolla/verify_corolla_pre_tss3_message_comparison.py` enforces the upstream
   Corolla baseline and target-native migration conclusions.
 - `data/generated/corolla_8965H1202000_fd_control_interface.json` provides the
   exact H FD `0x030` / `0x0B6` generated-interface evidence.

@@ -21,18 +21,16 @@ download payloads, start routines, patch firmware, or install keys.
 
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import json
 import os
-import shutil
-import sys
 from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Iterable
 
-REPO = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO))
+REPO = REPO_ROOT
 
 from tools.toyota_support.toyota_secoc_oracle import known_protected_ids
 

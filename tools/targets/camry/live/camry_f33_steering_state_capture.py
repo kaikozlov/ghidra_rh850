@@ -42,10 +42,10 @@ native live XCP session on the installed calibration.
 """
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import hashlib
 import json
-import sys
 import time
 from collections import Counter
 from dataclasses import dataclass
@@ -53,9 +53,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable
 
-REPO = Path(__file__).resolve().parents[4]
-if str(REPO) not in sys.path:
-    sys.path.insert(0, str(REPO))
+REPO = REPO_ROOT
 
 from exploit.common.ram_exec import (  # noqa: E402
     ELM327_SAFETY_MODE,

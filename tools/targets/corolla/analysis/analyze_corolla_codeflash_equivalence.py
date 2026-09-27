@@ -8,14 +8,13 @@ application boundary?
 """
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import hashlib
 import json
-import sys
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[4]
-sys.path.insert(0, str(REPO))
+REPO = REPO_ROOT
 
 from tools.security.build_secoc_patch_manifest import discover_crc_descriptors  # noqa: E402
 

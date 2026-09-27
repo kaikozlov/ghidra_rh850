@@ -8,6 +8,8 @@ exact H/F firmware-derived rules.
 """
 from __future__ import annotations
 
+from tools.targets.corolla.support.corolla_h_constants import F_CAPTURE
+from tools import REPO_ROOT
 import argparse
 import collections
 import itertools
@@ -27,14 +29,14 @@ from tools.toyota_support.toyota_route_opendbc_common import (
     toyota_checksum,
 )
 
-REPO = Path(__file__).resolve().parents[4]
+REPO = REPO_ROOT
 LOCK = REPO / "external-references.lock.json"
 RLOG_REL = "community/spanconstant/span_67fd5b833889fedf_00000010--17084916da--3--rlog.zst"
 DEFAULT_RLOG = REPO / RLOG_REL
 DEFAULT_OUT = REPO / "data/generated/corolla_2025_span_discord_rlog_opendbc_evidence.json"
 H_STATE = REPO / "data/generated/corolla_8965H1202000_openpilot_state_bridge.json"
 H_RUNTIME = REPO / "data/generated/ephemeral_runtime_target_manifest_8965H1202000.json"
-SPAN_PREFLIGHT = REPO / "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/preflight_8965012N50E12H030731_20260821-151149.json"
+SPAN_PREFLIGHT = F_CAPTURE / "preflight_8965012N50E12H030731_20260821-151149.json"
 
 ROLE_IDS = {
     0x00F: "SECOC_SYNCHRONIZATION",

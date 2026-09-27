@@ -7,6 +7,7 @@ No input detected in the retained window is NOT proof of command acceptance.
 """
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import gzip
 import hashlib
@@ -17,7 +18,7 @@ import sys
 from collections import Counter, defaultdict
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[4]
+ROOT = REPO_ROOT
 FIXTURE = ROOT / 'tests/fixtures/camry_2026_cancel_request_causality.jsonl.gz'
 OUTPUT = ROOT / 'data/generated/camry_2026_cancel_request_causality.json'
 RADIUS_NS = 1_000_000_000

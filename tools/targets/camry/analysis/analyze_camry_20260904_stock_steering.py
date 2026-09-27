@@ -53,7 +53,9 @@ Usage (analysis repo root, openpilot environment providing LogReader)::
     --openpilot-root /path/to/kai-openpilot
 """
 from __future__ import annotations
+from tools.toyota_support.toyota_route_opendbc_common import be_signal
 
+from tools import REPO_ROOT
 import argparse
 import csv
 import hashlib
@@ -68,9 +70,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-REPO = Path(__file__).resolve().parents[4]
-if str(REPO) not in sys.path:
-    sys.path.insert(0, str(REPO))
+REPO = REPO_ROOT
 
 DEFAULT_INPUT_ROOT = "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04"
 DEFAULT_OPENPILOT_ROOT = "/Users/kai/dev/inspect/repos/kai-openpilot"
@@ -159,22 +159,6 @@ LIVE_EVENT_TYPES = frozenset({"can", "sendcan", "carState", "carControl"})
 
 
 # --- Decode primitives ------------------------------------------------------
-
-
-def be_signal(data: bytes, start_bit: int, size: int) -> int:
-    """Motorola bit numbering, MSB-first within each byte.
-
-    Matches the pinned repo helper semantics and the exact-F33 packer
-    geometry (empirically r=0.9999 against the logged carState decodes).
-    """
-    be_bits = [j + i * 8 for i in range(len(data)) for j in range(7, -1, -1)]
-    idx = be_bits.index(start_bit)
-    value = 0
-    for b in be_bits[idx:idx + size]:
-        value = (value << 1) | ((data[b // 8] >> (b % 8)) & 1)
-    if value >= (1 << (size - 1)):
-        value -= 1 << size
-    return value
 
 
 def signed_be16(data: bytes, off: int) -> int:

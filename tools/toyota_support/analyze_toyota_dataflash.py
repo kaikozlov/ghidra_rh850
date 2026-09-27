@@ -17,20 +17,18 @@ virtual address, entropy, and SHA-256.
 
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import csv
 import hashlib
 import json
 import math
-import sys
 from collections import Counter, defaultdict
 from pathlib import Path
-from typing import Iterable
 
 from tools.targets.sienna.sienna_target import DATAFLASH as SIENNA_DATAFLASH
 
-REPO = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO))
+REPO = REPO_ROOT
 
 from tools.toyota_support.toyota_secoc_oracle import (  # noqa: E402
     ProtectedSample,

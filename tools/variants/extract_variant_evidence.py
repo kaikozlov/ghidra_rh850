@@ -11,6 +11,7 @@ target discovery or semantic joins stay in their own tools.
 """
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import hashlib
 import json
@@ -80,7 +81,7 @@ def write_payload(out: Path, payload: dict[str, Any]) -> None:
 
 
 def run_structural(args: argparse.Namespace) -> None:
-    root = Path(__file__).resolve().parents[2]
+    root = REPO_ROOT
     image = load_codeflash(args.image, description="image")
     want = set(args.address)
     rows: dict[int, dict[str, Any]] = {}
@@ -120,7 +121,7 @@ def run_structural(args: argparse.Namespace) -> None:
 
 
 def run_function(args: argparse.Namespace) -> None:
-    root = Path(__file__).resolve().parents[2]
+    root = REPO_ROOT
     image = load_codeflash(args.image)
     wanted = set(args.address)
     if not wanted:
@@ -280,7 +281,7 @@ def run_application_diagnostics(args: argparse.Namespace) -> None:
 
 
 def run_reference_census(args: argparse.Namespace) -> None:
-    root = Path(__file__).resolve().parents[2]
+    root = REPO_ROOT
     image = load_codeflash(args.image)
     terms: dict[str, str] = {}
     for item in args.term:

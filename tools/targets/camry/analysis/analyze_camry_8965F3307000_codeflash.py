@@ -1,21 +1,22 @@
 #!/usr/bin/env python3
 """Build exact-target static evidence for the maintainer 2026 Camry EPS."""
 from __future__ import annotations
-import argparse, hashlib, json, math, struct, sys
+from tools.targets.camry.support import camry_f33_corpus as f33
+from tools import REPO_ROOT
+import argparse, hashlib, json, math, struct
 from pathlib import Path
 from tools.targets.sienna.sienna_target import CODEFLASH as SIENNA_CODEFLASH
 from tools.targets.corolla.support.corolla_h_constants import CODEFLASH as H_CODEFLASH
 
-REPO = Path(__file__).resolve().parents[4]
-sys.path.insert(0, str(REPO))
+REPO = REPO_ROOT
 from tools.variants.compare_variant_application_rx import compare as compare_rx  # noqa: E402
 from tools.targets.camry.support.camry_f33_corpus import IMAGE as NORMALIZED, body_bytes  # noqa: E402
 
-RAW_DIR = REPO / 'targets/camry-2026/raw-20260826/codeflash'
+RAW_DIR = f33.CAPTURE / 'raw-20260826/codeflash'
 RAW = RAW_DIR / 'camry_8965F3307000_codeflash_20260826T213719Z.bin'
 RUN = RAW_DIR / 'camry_8965F3307000_codeflash_20260826T213719Z.run.json'
 COVERAGE = RAW_DIR / 'camry_8965F3307000_codeflash_20260826T213719Z.coverage.bin'
-PAYLOAD = REPO / 'targets/camry-2026/raw-20260826/calvin_payload_codeflash_00000000_00200000.bin'
+PAYLOAD = f33.CAPTURE / 'raw-20260826/calvin_payload_codeflash_00000000_00200000.bin'
 EVIDENCE = REPO / 'data/generated/camry_8965F3307000_decompiler_evidence.json'
 P5 = REPO / 'data/generated/techstream_v18/p5_lateral_control_semantics.json'
 H = H_CODEFLASH

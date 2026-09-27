@@ -38,6 +38,12 @@ def be_signal(dat: bytes, start_bit: int, size: int, *, is_signed: bool = False)
     return be_raw(dat, start_bit, size, signed=is_signed)
 
 
+def decode_wheel_speed_kph(dat: bytes) -> float:
+    """Existing Camry/Corolla H/F 0x0AA four-wheel speed geometry."""
+    vals = [be_raw(dat, s, 15) * 0.01 - 67.67 for s in (6, 22, 38, 54)]
+    return sum(vals) / 4
+
+
 def toyota_checksum(addr: int, dat: bytes) -> int:
     return (addr + (addr >> 8) + len(dat) + sum(dat[:-1])) & 0xFF
 

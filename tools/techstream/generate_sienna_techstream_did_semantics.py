@@ -11,14 +11,12 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-import sys
 from pathlib import Path
+from tools.targets.sienna.sienna_target import CODEFLASH as FW
+from tools import REPO_ROOT
 
-REPO = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO / "tools"))
-from tools.targets.sienna.sienna_target import CODEFLASH as FW  # noqa: E402
-H_JOIN = REPO / "data/generated/corolla_8965H1202000_techstream_correlations.json"
-OUT = REPO / "data/generated/sienna_8965B4512000_techstream_did_semantics.json"
+H_JOIN = REPO_ROOT / "data/generated/corolla_8965H1202000_techstream_correlations.json"
+OUT = REPO_ROOT / "data/generated/sienna_8965B4512000_techstream_did_semantics.json"
 
 DIDS = {
     0x1151: {

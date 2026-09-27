@@ -2,12 +2,13 @@
 """Build the H/F command-5 static runtime-carrier contract from promoted evidence."""
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import hashlib
 import json
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[4]
+REPO = REPO_ROOT
 EVIDENCE = REPO / "data/generated/corolla_hf_command5_runtime_carrier_evidence.json"
 PORTABILITY = REPO / "data/generated/corolla_hf_command5_portability.json"
 PROXY_AUDIT = REPO / "exploit/ephemeral_runtime/audited_corolla_hf_command5_proxy_build.json"

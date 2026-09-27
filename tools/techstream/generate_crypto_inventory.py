@@ -8,15 +8,17 @@ import json
 import struct
 from pathlib import Path
 
-from techstream_paths import V18_DIAGNOSTICS_ROOT
+
 from typing import Any
 
 import pefile
-from pe_utils import exports as pe_exports
+from tools.techstream.techstream_paths import V18_DIAGNOSTICS_ROOT
+from tools.techstream.pe_utils import exports as pe_exports
+from tools import REPO_ROOT
 
-REPO = Path(__file__).resolve().parents[2]
+
 DEFAULT_ROOT = V18_DIAGNOSTICS_ROOT
-DEFAULT_OUT = REPO / "data/generated/techstream_v18/crypto_inventory.json"
+DEFAULT_OUT = REPO_ROOT / "data/generated/techstream_v18/crypto_inventory.json"
 
 VALUES = {
     "FUKUMORIYOSIYAMA": bytes.fromhex("46554b554d4f5249594f534959414d41"),

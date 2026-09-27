@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
 """Build deterministic Corolla-H event-formatter role/bounds evidence for the keyless re-audit."""
 from __future__ import annotations
+from tools.targets.corolla.support.corolla_h_constants import F_RAW_DUMP
+from tools import REPO_ROOT
 import argparse,hashlib,json,struct
 from pathlib import Path
 from tools.targets.sienna.sienna_target import CODEFLASH as SIENNA_CODEFLASH
 from tools.targets.corolla.support.corolla_h_constants import RAW_DUMP as H_RAW_DUMP
-ROOT=Path(__file__).resolve().parents[4]
+ROOT=REPO_ROOT
 EV_DEFAULT=ROOT/'data/generated/corolla_8965H1202000_keyless_event_formatter_decompiler_evidence.json'
 S_DEFAULT=SIENNA_CODEFLASH
 H_DEFAULT=H_RAW_DUMP
-F_DEFAULT=ROOT/'community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin'
+F_DEFAULT=F_RAW_DUMP
 OUT_DEFAULT=ROOT/'data/generated/corolla_8965H1202000_keyless_event_formatter.json'
 ROLE_MAP=[
  (0x54910,'direct_call_target_00054910',0x50038,'unchecked-event-snapshot-formatter'),

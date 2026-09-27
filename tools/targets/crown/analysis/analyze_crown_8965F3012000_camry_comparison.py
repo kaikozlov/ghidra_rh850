@@ -2,6 +2,9 @@
 """Build an exact-byte Crown 8965F3012000 vs Camry 8965F3307000 comparison."""
 from __future__ import annotations
 
+from tools.targets.camry.support import camry_f33_corpus as f33
+from tools.targets.crown.support import crown_f30_targets as crown
+from tools import REPO_ROOT
 import argparse
 import collections
 import hashlib
@@ -9,13 +12,13 @@ import json
 import struct
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[4]
-CROWN_PATH = REPO / "firmware/crown-8965F3012000/CodeFlash.bin"
-CAMRY_PATH = REPO / "firmware/camry-8965F3307000/CodeFlash.bin"
+REPO = REPO_ROOT
+CROWN_PATH = crown.CODEFLASH
+CAMRY_PATH = f33.IMAGE
 DEFAULT_OUT = REPO / "data/generated/crown_8965F3012000_camry_comparison.json"
 
 CROWN_SHA = "5b89fdbc69edc2f66ef8a557f88b08c758e3146bd4e90067320d7966812b1273"
-CAMRY_SHA = "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7"
+CAMRY_SHA = f33.IMAGE_SHA256
 
 # Function bodies independently established in the first-class projects. These
 # checks intentionally compare raw CodeFlash bytes, not decompiler text.

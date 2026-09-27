@@ -2,21 +2,19 @@
 """Join Techstream P5 steering vocabulary to Corolla 8965H1202000 diagnostics."""
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import hashlib
 import json
 import os
 import re
 import struct
-import sys
 from pathlib import Path
 from tools.targets.sienna.sienna_target import CODEFLASH as SIENNA_CODEFLASH
 from tools.targets.corolla.support.corolla_h_constants import RAW_DUMP as H_RAW_DUMP
+from tools.techstream.parse_ddb import DDBParser
 
-sys.path.insert(0, str(Path(__file__).resolve().parent / "techstream"))
-from parse_ddb import DDBParser
-
-REPO = Path(__file__).resolve().parents[4]
+REPO = REPO_ROOT
 TECH = REPO / "data/generated/techstream_v18/priority_steering_ddb_semantics.json"
 APP = REPO / "data/generated/techstream_v18/application_interface_correlations.json"
 DIAG = REPO / "data/generated/corolla_8965H1202000_application_diagnostics_diff.json"

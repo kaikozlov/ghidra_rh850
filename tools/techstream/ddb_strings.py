@@ -6,12 +6,12 @@ import hashlib
 import os
 import struct
 from pathlib import Path
+from tools.techstream.parse_ddb import DDBParser, StringDataBase
+from tools import REPO_ROOT
 
-from parse_ddb import DDBParser, StringDataBase
 
-REPO = Path(__file__).resolve().parents[2]
 CACHE_MAGIC = b"GTSSTR1\0"
-CACHE_ROOT = REPO / "build/cache/gts/string-dbs"
+CACHE_ROOT = REPO_ROOT / "build/cache/gts/string-dbs"
 CACHE_GENERATIONS_TO_KEEP = 4
 
 

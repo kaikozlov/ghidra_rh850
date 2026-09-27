@@ -14,26 +14,22 @@ import hashlib
 import json
 import struct
 import subprocess
-import sys
 import zlib
 from collections import Counter
 from pathlib import Path
 from typing import Any
+from tools.techstream.techstream_paths import CUW_CORPUS_ROOT, resolve_gts_root
+from tools.techstream.cuw_attach import parse_attach_bytes
+from tools.techstream.cuw_identity_census import scan_cuw_corpus, scan_retained_gtsplus_state
+from tools import REPO_ROOT
 
-from techstream_paths import CUW_CORPUS_ROOT, resolve_gts_root
 
-REPO = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-
-from cuw_attach import parse_attach_bytes  # noqa: E402
-from cuw_identity_census import scan_cuw_corpus, scan_retained_gtsplus_state  # noqa: E402
-
-LIVE = REPO / "data/generated/camry_2026_nrtd_p5.json"
-CORPUS = REPO / "data/generated/techstream_v18/cuw_frc_corpus.json"
-SENDER = REPO / "data/generated/techstream_v18/tss3_b6_sender_attribution.json"
-CAMPAIGNS = REPO / "data/external/toyota_corolla_2023_calibration_campaigns.json"
-GTSPLUS_LOCK = REPO / "software/locks/gtsplus.json"
-DEFAULT_OUT = REPO / "data/generated/gtsplus_2026/camry_f152633k0000_brake_acquisition.json"
+LIVE = REPO_ROOT / "data/generated/camry_2026_nrtd_p5.json"
+CORPUS = REPO_ROOT / "data/generated/techstream_v18/cuw_frc_corpus.json"
+SENDER = REPO_ROOT / "data/generated/techstream_v18/tss3_b6_sender_attribution.json"
+CAMPAIGNS = REPO_ROOT / "data/external/toyota_corolla_2023_calibration_campaigns.json"
+GTSPLUS_LOCK = REPO_ROOT / "software/locks/gtsplus.json"
+DEFAULT_OUT = REPO_ROOT / "data/generated/gtsplus_2026/camry_f152633k0000_brake_acquisition.json"
 
 EXACT_F181 = "F152633K0000"
 EXACT_ECU_PART = "8954147040"
@@ -78,8 +74,8 @@ def all_values(desc: dict[str, dict[str, str]]) -> set[str]:
 
 def gts_json(*args: str) -> Any:
     proc = subprocess.run(
-        [str(REPO / "tools/gts"), *args, "--json"],
-        cwd=REPO,
+        [str(REPO_ROOT / "tools/gts"), *args, "--json"],
+        cwd=REPO_ROOT,
         capture_output=True,
         text=True,
         check=False,
@@ -236,7 +232,7 @@ def build() -> dict[str, Any]:
         "schema": "camry-f152633k0000-brake-acquisition-v2",
         "title": "Exact 2026 Camry Brake/EPB producer acquisition blocker and route",
         "sources": {
-            str(path.relative_to(REPO)): {"sha256": sha256_file(path)}
+            str(path.relative_to(REPO_ROOT)): {"sha256": sha256_file(path)}
             for path in (LIVE, CORPUS, SENDER, CAMPAIGNS, GTSPLUS_LOCK)
         },
         "exact_target": {
@@ -295,8 +291,8 @@ def build() -> dict[str, Any]:
                 "ecuAssyNo_from_did_0105": EXACT_ECU_PART,
                 "baseSwNoLst_from_counted_did_f181": [EXACT_F181],
             },
-            "host_dataflow_verification": "TMS-049 / tests/verify_techstream_tis_calibration_acquisition.py",
-            "result_selection_verification": "TMS-050 / tests/verify_techstream_tis_calibration_selection.py",
+            "host_dataflow_verification": "TMS-049 / tests/techstream/verify_techstream_tis_calibration_acquisition.py",
+            "result_selection_verification": "TMS-050 / tests/techstream/verify_techstream_tis_calibration_selection.py",
             "server_package_availability_proven": False,
             "calibration_url": None,
             "url_policy": (

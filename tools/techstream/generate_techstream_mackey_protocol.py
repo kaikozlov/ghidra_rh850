@@ -18,11 +18,11 @@ import struct
 from pathlib import Path
 
 import pefile
+from tools import REPO_ROOT
 
 
-REPO = Path(__file__).resolve().parents[2]
-BIN = REPO / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream/bin"
-OUT_DIR = REPO / "data/generated/techstream_v18"
+BIN = REPO_ROOT / "software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/Techstream/bin"
+OUT_DIR = REPO_ROOT / "data/generated/techstream_v18"
 
 CLASS_STATES = {
     "CMAC_01": ["02", "03A", "03B", "04", "05", "06", "10", "11A", "11B",
@@ -399,7 +399,7 @@ def main() -> None:
         OUT_DIR / "mackey_state_machine.csv": csv_text,
     }
     if args.check:
-        stale = [str(path.relative_to(REPO)) for path, text in outputs.items()
+        stale = [str(path.relative_to(REPO_ROOT)) for path, text in outputs.items()
                  if not path.exists() or path.read_text() != text]
         if stale:
             raise SystemExit("stale generated outputs: " + ", ".join(stale))
@@ -408,7 +408,7 @@ def main() -> None:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     for path, text in outputs.items():
         path.write_text(text)
-        print(path.relative_to(REPO))
+        print(path.relative_to(REPO_ROOT))
 
 
 if __name__ == "__main__":

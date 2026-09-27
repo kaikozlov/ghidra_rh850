@@ -14,15 +14,14 @@ only that the car is observably moving rather than stationary.
 """
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import json
-import sys
 import time
 from pathlib import Path
 from typing import Any
 
-ROOT = Path(__file__).resolve().parents[4]
-sys.path.insert(0, str(ROOT))
+ROOT = REPO_ROOT
 
 from exploit.ephemeral_runtime import crown_f30_b6_inline_signer as signer
 

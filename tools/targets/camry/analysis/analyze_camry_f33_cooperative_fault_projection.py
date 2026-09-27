@@ -2,13 +2,13 @@
 """Bind exact-F33 cooperative inhibits to transmitted status and ready-state gates."""
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import hashlib
 import json
-from pathlib import Path
 
 from tools.targets.camry.support.camry_f33_corpus import CORPUS, IMAGE, IMAGE_SHA256
 
-ROOT = Path(__file__).resolve().parents[4]
+ROOT = REPO_ROOT
 OUTPUT = ROOT / 'data/generated/camry_f33_cooperative_fault_projection.json'
 
 

@@ -2,6 +2,8 @@
 """Build the exact-H/F ICU-S command-5 portability and resident-carrier boundary."""
 from __future__ import annotations
 
+from tools.targets.corolla.support.corolla_h_constants import F_RAW_DUMP
+from tools import REPO_ROOT
 import argparse
 import hashlib
 import json
@@ -9,9 +11,9 @@ import struct
 from pathlib import Path
 from tools.targets.corolla.support.corolla_h_constants import CODEFLASH as H_CODEFLASH
 
-REPO = Path(__file__).resolve().parents[4]
+REPO = REPO_ROOT
 H = H_CODEFLASH
-F = REPO / "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin"
+F = F_RAW_DUMP
 FOLLOWUP = REPO / "data/generated/corolla_8965H1202000_tms053_followup_decompiler_evidence.json"
 EQUIV = REPO / "data/generated/corolla_8965F1208000_vs_8965H1202000_codeflash_equivalence.json"
 RAMREQ = REPO / "data/variant_ram_exec_requirements.json"

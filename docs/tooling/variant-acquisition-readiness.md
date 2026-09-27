@@ -15,7 +15,7 @@
 >
 > **Tool:** `tools/variants/check_variant_acquisition.py`
 >
-> **Verification:** `tests/verify_variant_acquisition_readiness.py`
+> **Verification:** `tests/variants/verify_variant_acquisition_readiness.py`
 > (`tools/test variant_acquisition_readiness`)
 
 ## Purpose
@@ -27,7 +27,7 @@ acquisition→triage→resolver handoff into one command and one machine-readabl
 artifact:
 
 ```sh
-uv run --locked python tools/variants/check_variant_acquisition.py CodeFlash.bin \
+uv run --locked python -m tools.variants.check_variant_acquisition CodeFlash.bin \
   --run-json CodeFlash.bin.run.json --notes "target X, bench Y" \
   -o build/out/target-evidence/acquisition-readiness.json
 ```

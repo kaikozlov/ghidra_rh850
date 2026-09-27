@@ -2,6 +2,8 @@
 """Build the bounded H/F Corolla non-steering engagement-state contract."""
 from __future__ import annotations
 
+from tools.targets.corolla.support.corolla_h_constants import H_CAPTURE
+from tools import REPO_ROOT
 import argparse
 import hashlib
 import json
@@ -11,7 +13,7 @@ import zipfile
 from pathlib import Path
 from tools.targets.corolla.support.corolla_h_constants import CODEFLASH as H_CODEFLASH
 
-REPO = Path(__file__).resolve().parents[4]
+REPO = REPO_ROOT
 IMAGE = H_CODEFLASH
 RX_DIFF = REPO / "data/generated/corolla_8965H1202000_application_rx_diff.json"
 ENG_EVID = REPO / "data/generated/corolla_8965H1202000_nonsteering_engagement_decompiler_evidence.json"
@@ -22,8 +24,8 @@ TECH_CRUISE_TRANSPORT = REPO / "data/generated/techstream_v18/tss3_cruise_live_t
 PUBLIC = REPO / "data/generated/corolla_2023_public_route_opendbc_evidence.json"
 SPAN = REPO / "data/generated/corolla_2025_span_discord_rlog_opendbc_evidence.json"
 EQ = REPO / "data/generated/corolla_8965F1208000_vs_8965H1202000_codeflash_equivalence.json"
-ALBINO_ARCH = REPO / "community/albinoelephant/albinoelephant_discord_PORT_ARCHITECTURE.md"
-ALBINO_PORT = REPO / "community/albinoelephant/Corolla_Fingerprint_v1.zip"
+ALBINO_ARCH = H_CAPTURE / "albinoelephant_discord_PORT_ARCHITECTURE.md"
+ALBINO_PORT = H_CAPTURE / "Corolla_Fingerprint_v1.zip"
 ALBINO_DBC_MEMBER = r"Corolla_Fingerprint\port\files\opendbc_repo\opendbc\dbc\toyota_corolla_tss3_pt.dbc"
 GTS_REGISTRY = REPO / "data/generated/gtsplus_2026/toyota_diag_registry_camry_2026.json"
 OUT = REPO / "data/generated/corolla_hf_nonsteering_engagement_state.json"

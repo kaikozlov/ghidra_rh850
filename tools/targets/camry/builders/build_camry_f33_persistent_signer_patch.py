@@ -2,6 +2,7 @@
 """Build two CRC-valid exact-F33 stages for the normal-boot C7/B6 signer."""
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import copy
 import hashlib
@@ -12,8 +13,7 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
-ROOT = Path(__file__).resolve().parents[4]
-sys.path.insert(0, str(ROOT))
+ROOT = REPO_ROOT
 
 from exploit.common.payload_package import package_shellcode  # noqa: E402
 from exploit.common.ram_exec import TOYOTA_P1ME_PAYLOAD_BUILD_SECRET  # noqa: E402

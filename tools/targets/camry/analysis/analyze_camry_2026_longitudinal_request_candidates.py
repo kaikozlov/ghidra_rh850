@@ -11,19 +11,20 @@ physical-network normalization. No transmitter, vehicle session, or firmware
 mutation is used here.
 """
 from __future__ import annotations
+from tools.toyota_support.passive_capture import sha256_file as sha
 
+from tools.targets.camry.support import camry_f33_corpus as f33
+from tools import REPO_ROOT
 import argparse
 import bisect
 import gzip
-import hashlib
 import json
-import sys
 from collections import defaultdict
 from pathlib import Path
 
 import numpy as np
 
-ROOT = Path(__file__).resolve().parents[4]
+ROOT = REPO_ROOT
 OUT = ROOT / 'data/generated/camry_2026_longitudinal_request_candidates.json'
 ROLE_FIXTURE = ROOT / 'tests/fixtures/camry_2026_longitudinal_role.jsonl.gz'
 ROLE_REPORT = ROOT / 'data/generated/camry_2026_longitudinal_role.json'
@@ -31,8 +32,8 @@ TOPOLOGY = ROOT / 'data/generated/camry_2026_stock_harness_topology.json'
 GTS = ROOT / 'data/generated/gtsplus_2026/tss3_control_ownership_surface.json'
 CENSUS = ROOT / 'data/generated/camry_2026_upstream_request_field_census.json'
 DRIVES = {
-    'drive_a': ROOT / 'targets/camry-2026/raw-20260827/camry_relay_route_can_20260827.ndjson.gz',
-    'drive_b': ROOT / 'targets/camry-2026/raw-20260827/camry_relay_lta_confirm_route_can_20260827.ndjson.gz',
+    'drive_a': f33.CAPTURE / 'raw-20260827/camry_relay_route_can_20260827.ndjson.gz',
+    'drive_b': f33.CAPTURE / 'raw-20260827/camry_relay_lta_confirm_route_can_20260827.ndjson.gz',
 }
 DIRECT_FRC_IDS = (0x020, 0x160, 0x230, 0x440)
 # Sep-1 FRC CommunicationControl suppression + relay-open direction recovery.
@@ -48,16 +49,10 @@ FRC_DEPENDENT_BUS4_IDS = (
 LAGS_MS = tuple(range(-300, 301, 25))
 MAX_JOIN_NS = 30_000_000
 
-sys.path.insert(0, str(ROOT))
 from tools.targets.camry.analysis.analyze_camry_2026_longitudinal_role import (
     latest,
     load_fixture,
 )
-
-
-def sha(path: Path) -> str:
-    with path.open('rb') as f:
-        return hashlib.file_digest(f, 'sha256').hexdigest()
 
 
 def s16be(data: bytes | np.ndarray, offset: int) -> int:

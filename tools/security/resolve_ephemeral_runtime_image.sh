@@ -125,5 +125,5 @@ ARGS=(
 if [[ -n "$VARIANT_ID" ]]; then
   ARGS+=(--variant-id "$VARIANT_ID")
 fi
-uv run --locked python "$ROOT/tools/security/build_ephemeral_runtime_manifest.py" "${ARGS[@]}"
+uv run --locked python -m tools.security.build_ephemeral_runtime_manifest "${ARGS[@]}"
 cat "$OUT"

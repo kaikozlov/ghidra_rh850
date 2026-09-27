@@ -13,22 +13,19 @@ import hashlib
 import json
 import re
 import struct
-import sys
 from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any
 
 import pefile
+from tools.techstream.ddb_semantics import monitor_rows
+from tools.techstream.ddb_strings import load_string_db
+from tools.techstream.parse_ddb import DDBParser, ECU_TABLE_CLASS_NAMES
+from tools.techstream.techstream_paths import resolve_gts_root
+from tools import REPO_ROOT
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from ddb_semantics import monitor_rows
-from ddb_strings import load_string_db
-from parse_ddb import DDBParser, ECU_TABLE_CLASS_NAMES
-from techstream_paths import resolve_gts_root
-
-REPO = Path(__file__).resolve().parents[2]
-DEFAULT_OUTPUT = REPO / "data/generated/gtsplus_2026/ddb_corpus_census.json"
+DEFAULT_OUTPUT = REPO_ROOT / "data/generated/gtsplus_2026/ddb_corpus_census.json"
 REGIONS = ("NA", "EU", "JP")
 FAMILIES = ("Gen", "Spe")
 ACTIVE_LAYOUTS = {
@@ -370,7 +367,7 @@ def build(root: Path | None = None) -> dict[str, Any]:
         "schema": "gtsplus-current-ddb-corpus-census-v1",
         "release": "2026.03.002.02",
         "source": {
-            "root": str(root.relative_to(REPO)).replace("\\", "/"),
+            "root": str(root.relative_to(REPO_ROOT)).replace("\\", "/"),
             "kgp_data_ctrl_sha256": sha256_file(kgp),
         },
         "corpus": {

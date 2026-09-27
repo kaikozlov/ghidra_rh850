@@ -2,14 +2,16 @@
 """Reduce the 2026-09-08 exact-F33 generic-monitor field session."""
 from __future__ import annotations
 
+from tools.targets.camry.support import camry_f33_corpus as f33
+from tools import REPO_ROOT
 import argparse
 import hashlib
 import json
 import re
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[4]
-RAW = ROOT / "targets/camry-2026/raw-20260908/runtime-monitor-session/files"
+ROOT = REPO_ROOT
+RAW = f33.CAPTURE / "raw-20260908/runtime-monitor-session/files"
 DEFAULT_OUT = ROOT / "data/generated/camry_f33_runtime_monitor_20260908.json"
 
 
@@ -113,7 +115,7 @@ def build() -> dict:
         "marker": RAW / "f33_marker.out",
         "idle_raw": RAW / "f33-idle-raw.json",
         "idle_raw_ndjson": RAW / "f33-idle-raw.ndjson",
-        "preaggregate_phase_p": ROOT / "targets/camry-2026/raw-20260908/preaggregate-phase-p/f33-preaggregate-P2-console.log",
+        "preaggregate_phase_p": f33.CAPTURE / "raw-20260908/preaggregate-phase-p/f33-preaggregate-P2-console.log",
     }
     for p in paths.values():
         if not p.is_file():

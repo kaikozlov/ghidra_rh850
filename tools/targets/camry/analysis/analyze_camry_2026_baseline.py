@@ -2,6 +2,8 @@
 """Build the compact 2026 Camry TSK/CAN baseline from tracked field evidence."""
 from __future__ import annotations
 
+from tools.targets.camry.support import camry_f33_corpus as f33
+from tools import REPO_ROOT
 import argparse
 import gzip
 import json
@@ -10,8 +12,8 @@ from pathlib import Path
 
 from tools.toyota_support.toyota_route_opendbc_common import be_signal, sha256, toyota_checksum
 
-REPO = Path(__file__).resolve().parents[4]
-RAW = REPO / "targets/camry-2026/raw-20260826"
+REPO = REPO_ROOT
+RAW = f33.CAPTURE / "raw-20260826"
 DEFAULT_OUT = REPO / "data/generated/camry_2026_tsk_baseline.json"
 BASELINE_SOURCE_NAMES = ("MANIFEST.txt", "can_oracle.ndjson.gz", "identity.json", "programming_probe.json", "xcp_probe.json")
 

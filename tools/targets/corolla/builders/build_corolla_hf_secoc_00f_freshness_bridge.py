@@ -11,6 +11,8 @@ tracked JSON remains reproducible without vendoring cereal/logreader into this r
 """
 from __future__ import annotations
 
+from tools.targets.corolla.support.corolla_h_constants import H_CAPTURE
+from tools import REPO_ROOT
 import argparse
 import bisect
 import collections
@@ -20,7 +22,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-REPO = Path(__file__).resolve().parents[4]
+REPO = REPO_ROOT
 H_VERIFY = REPO / "data/generated/corolla_8965H1202000_b6_secoc_verification.json"
 H_DECOMP = REPO / "data/generated/corolla_8965H1202000_b6_secoc_verification_decompiler_evidence.json"
 STRUCTURAL = REPO / "data/generated/corolla_h_sienna_secoc_structural_comparison.json"
@@ -29,7 +31,7 @@ SPAN_EVIDENCE = REPO / "data/generated/corolla_2025_span_discord_rlog_opendbc_ev
 EXTERNAL_LOCK = REPO / "external-references.lock.json"
 DEFAULT_PUBLIC = REPO / "REFERENCE/public_route_corolla_2023_segment0_rlog.zst"
 DEFAULT_SPAN = REPO / "community/spanconstant/span_67fd5b833889fedf_00000010--17084916da--3--rlog.zst"
-DEFAULT_ALBINO = REPO / "community/albinoelephant/can_oracle.ndjson"
+DEFAULT_ALBINO = H_CAPTURE / "can_oracle.ndjson"
 DEFAULT_OUTPUT = REPO / "data/generated/corolla_hf_secoc_00f_freshness_bridge.json"
 
 

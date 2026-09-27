@@ -92,7 +92,7 @@
     ],
     "frc_runtime_code_searchable": false,
     "why_brake_not_searchable": "No current software/Techstream/cuw package has Node01/DiagID=07B0. This is a local-corpus absence only.",
-    "why_frc_not_searchable": "Motorola S-record framing only; decoded flash data is high-entropy and its exact encoding is unknown (no plaintext claim)."
+    "why_frc_not_searchable": "Motorola S-record framing carrying an encrypted target representation. ReproStd downloads whole/routine data with UDS RequestDownload DFI 0x01; by the UDS dataFormatIdentifier definition that is compression method 0 plus manufacturer-specific encryption method 1. The exact FRC cipher/key/IV remain unknown."
   },
   "immediate_b6_sender_domain": {
     "boundary": "This identifies the immediate monitored source domain at the EPS endpoint. It does not distinguish originator from forwarder or prove which ECU executes CMAC/freshness generation.",
@@ -261,7 +261,7 @@
       "sha256": "5e4eac747a29080dcb5a700070655dccb7814434cc810f204080512416aa8e3a"
     },
     "data/generated/techstream_v18/cuw_frc_corpus.json": {
-      "sha256": "8e83dc0c3a48eb6ab95637447f74b6b87698f23ae0d325db5935d9bdfd40475d"
+      "sha256": "eeca82ddf15bab993fd1942acf318f2c5308c73bd7d9f8c0c6983081d32cbd60"
     },
     "data/generated/techstream_v18/p5_lateral_control_semantics.json": {
       "sha256": "d86dc9c016dd94cbbc3f4435d09eadc0796192bfd258c8ea264722a163e6b86b"

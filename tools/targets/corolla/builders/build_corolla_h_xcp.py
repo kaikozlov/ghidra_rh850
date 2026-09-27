@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 """Build deterministic Sienna↔Corolla-H XCP residual comparison."""
 from __future__ import annotations
+from tools.targets.sienna.sienna_target import CORPUS as SIENNA_CORPUS
+from tools import REPO_ROOT
 import argparse,hashlib,json,struct
 from pathlib import Path
 from tools.targets.sienna.sienna_target import CODEFLASH as SIENNA_CODEFLASH
 from tools.targets.corolla.support.corolla_h_constants import RAW_DUMP, XCP_ROLE_MAP
-ROOT=Path(__file__).resolve().parents[4];EV=ROOT/'data/generated/corolla_8965H1202000_xcp_decompiler_evidence.json';SC=ROOT/'data/generated/decompilations.jsonl';HRAW=RAW_DUMP;SI=SIENNA_CODEFLASH;OUT=ROOT/'data/generated/corolla_8965H1202000_xcp.json'
+ROOT=REPO_ROOT;EV=ROOT/'data/generated/corolla_8965H1202000_xcp_decompiler_evidence.json';SC = SIENNA_CORPUS;HRAW=RAW_DUMP;SI=SIENNA_CODEFLASH;OUT=ROOT/'data/generated/corolla_8965H1202000_xcp.json'
 MAP=XCP_ROLE_MAP
 def sha(b):return hashlib.sha256(b).hexdigest()
 def u32(b,a):return struct.unpack_from('<I',b,a)[0]

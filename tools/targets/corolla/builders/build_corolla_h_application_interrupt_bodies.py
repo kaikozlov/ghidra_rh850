@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Recover TAUJ0/CAN1 interrupt body roles from H wrapper call chains."""
 from __future__ import annotations
+from tools import REPO_ROOT
 import argparse,hashlib,json,struct
 from pathlib import Path
 from tools.targets.corolla.support.corolla_h_constants import RAW_DUMP as H_RAW_DUMP
-ROOT=Path(__file__).resolve().parents[4]
+ROOT=REPO_ROOT
 HRAW=H_RAW_DUMP
 HEV=ROOT/'data/generated/corolla_8965H1202000_application_interrupt_body_decompiler_evidence.json'
 OUT=ROOT/'data/generated/corolla_8965H1202000_application_interrupt_bodies.json'

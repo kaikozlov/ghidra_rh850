@@ -11,7 +11,7 @@
 > pinned v18 MDB VDS corpus (external-source-derived, deterministic to
 > regenerate).
 >
-> **Verification:** `tests/verify_gtsplus_tss3_crossvehicle_surface.py`
+> **Verification:** `tests/techstream/verify_gtsplus_tss3_crossvehicle_surface.py`
 > (suite `gtsplus_tss3_crossvehicle_surface`).
 >
 > **Artifacts:**

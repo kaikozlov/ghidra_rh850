@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 from __future__ import annotations
+from tools import REPO_ROOT
 import argparse, hashlib, json, shutil, subprocess, sys, tempfile
 from pathlib import Path
-ROOT=Path(__file__).resolve().parents[4]
-sys.path.insert(0,str(ROOT))
+ROOT=REPO_ROOT
 BUILDER=ROOT/'exploit/ephemeral_runtime/build_camry_f33_early030_discriminator.py'
 LAUNCHER=ROOT/'exploit/ephemeral_runtime/camry_f33_early030_launcher.sh'
 RUNTIME=(

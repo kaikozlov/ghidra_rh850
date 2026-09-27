@@ -20,5 +20,5 @@ mkdir -p "$(dirname "$OUT")"
 # requires to equal IMAGE's SHA-256. This makes cross-calibration/project mixups
 # fail closed.
 tools/g script run ghidra/scripts/investigate/ResolveSecocAcceptanceGate.java -- "$RESOLUTION" >/dev/null
-uv run --locked python tools/security/build_secoc_patch_manifest.py "$RESOLUTION" "$IMAGE" -o "$OUT"
+uv run --locked python -m tools.security.build_secoc_patch_manifest "$RESOLUTION" "$IMAGE" -o "$OUT"
 cat "$OUT"

@@ -24,18 +24,16 @@ artifact rather than copied into this live tool.
 """
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import json
-import sys
 import time
 from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any, BinaryIO
 
-REPO = Path(__file__).resolve().parents[4]
-if str(REPO) not in sys.path:
-    sys.path.insert(0, str(REPO))
+REPO = REPO_ROOT
 
 from tools.targets.camry.live.camry_frc_lta_capture import (
     ELM327_PARAM,

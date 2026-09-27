@@ -2,13 +2,14 @@
 """Extract compact exact-H evidence for the FEBE7C58 receive-validity monitor."""
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import hashlib
 import json
 from pathlib import Path
 from tools.targets.corolla.support.corolla_h_constants import CODEFLASH as H_CODEFLASH
 
-REPO = Path(__file__).resolve().parents[4]
+REPO = REPO_ROOT
 IMAGE = H_CODEFLASH
 OUT = REPO / "data/generated/corolla_8965H1202000_power_supply_monitor_decompiler_evidence.json"
 ENTRIES = (

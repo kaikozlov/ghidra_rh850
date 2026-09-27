@@ -49,7 +49,7 @@ independent raw-object-byte fixture with 17 SHA-256-pinned rlog segments:
 
 Object associations and stationary classification remain inferred, not OEM
 validity/identity labels. See `data/generated/camry_2026_radar_anchors.json` and
-`tests/verify_camry_2026_radar_anchors.py`. All source radar frames are checked
+`tests/targets/camry/verify_camry_2026_radar_anchors.py`. All source radar frames are checked
 against native Profile-5 integrity during extraction. The corrected full August
 join consumes repeated counter occurrences rather than overwriting them:
 30,532 / 35,994 complete four-record bank bursts.

@@ -2,6 +2,7 @@
 """Build a minimal in-car RAM-signer kit for one exact Corolla H/F target."""
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import hashlib
 import json
@@ -12,7 +13,7 @@ import tempfile
 from datetime import UTC, datetime
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[4]
+ROOT = REPO_ROOT
 BUILDER = ROOT / "exploit/ephemeral_runtime/build_corolla_hf_b6_inline_signer.py"
 LAUNCHER = ROOT / "exploit/ephemeral_runtime/corolla_hf_b6_inline_signer_launcher.sh"
 RUNTIME_FILES = (

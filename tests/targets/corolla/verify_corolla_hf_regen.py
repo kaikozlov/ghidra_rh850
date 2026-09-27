@@ -1,0 +1,58 @@
+#!/usr/bin/env python3
+"""Regenerate committed Corolla H/F builder artifacts (full/local only)."""
+from __future__ import annotations
+
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+
+from tools import REPO_ROOT
+ROOT = REPO = REPO_ROOT
+passed = failed = 0
+
+
+def check(name, cond, detail=""):
+    global passed, failed
+    ok = bool(cond)
+    passed += int(ok)
+    failed += int(not ok)
+    suffix = f" ({detail})" if detail else ""
+    print(f"[{'PASS' if ok else 'FAIL'}] {name}{suffix}")
+
+
+def builder_pairs() -> list[tuple[str, str]]:
+    pairs = []
+    for tool in sorted((ROOT / "tools/targets/corolla/build").glob("build_corolla_hf_*.py")):
+        suffix = tool.stem.removeprefix("build_corolla_hf_")
+        artifact = ROOT / "data/generated/corolla_hf_{suffix}.json"
+        if artifact.is_file():
+            pairs.append((tool.relative_to(ROOT).as_posix(), artifact.relative_to(ROOT).as_posix()))
+    return pairs
+
+
+BUILDERS = [(Path(artifact).stem, builder, artifact) for builder, artifact in builder_pairs()]
+
+
+for title, builder, artifact in BUILDERS:
+    print(f"== {title} regen ==")
+    tool = ROOT / builder
+    art = ROOT / artifact
+    with tempfile.TemporaryDirectory() as td:
+        out = Path(td) / "out.json"
+        proc = subprocess.run(
+            [sys.executable, str(tool), "--out", str(out)],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        check(f"{title} builder exits cleanly", proc.returncode == 0, (proc.stderr or proc.stdout)[-300:] if proc.returncode else "")
+        check(
+            f"{title} artifact regenerates exactly",
+            proc.returncode == 0 and out.exists() and out.read_bytes() == art.read_bytes(),
+        )
+    print()
+
+print(f"\n== RESULT: {passed} passed, {failed} failed ==")
+raise SystemExit(1 if failed else 0)

@@ -116,7 +116,7 @@ Keep the raw `j2534_MMDDYYYYhhmmss.log` private and immutable. Hash it before
 parsing, then normalize it with the locked environment:
 
 ```bash
-uv run --locked python tools/techstream/parse_ptshim_log.py \
+uv run --locked python -m tools.techstream.parse_ptshim_log \
   build/out/target-evidence/private/j2534_MMDDYYYYhhmmss.log \
   -o build/out/target-evidence/private/health_check.normalized.json
 ```

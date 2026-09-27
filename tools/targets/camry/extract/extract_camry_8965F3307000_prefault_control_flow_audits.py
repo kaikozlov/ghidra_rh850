@@ -8,12 +8,13 @@ stdout blobs into the repository.
 """
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import hashlib
 import json
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[4]
+ROOT = REPO_ROOT
 ROOTS = [
     "0x0007BBC2", "0x0007C43C", "0x00079EDE", "0x0007A232",
     "0x00066806", "0x00066812", "0x00079DA2", "0x00083156",

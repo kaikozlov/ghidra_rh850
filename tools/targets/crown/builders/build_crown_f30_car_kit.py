@@ -2,6 +2,7 @@
 """Build a self-contained exact-8965F3012000 volatile signer field kit."""
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import hashlib
 import json
@@ -12,7 +13,7 @@ import tempfile
 from datetime import UTC, datetime
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[4]
+ROOT = REPO_ROOT
 BUILDER = ROOT / "exploit/ephemeral_runtime/build_crown_f30_b6_inline_signer.py"
 LAUNCHER = ROOT / "exploit/ephemeral_runtime/crown_f30_b6_inline_signer_launcher.sh"
 PROGRAMMING_HELPER_SOURCE_COMMIT = "fdded7183e41bed42d0c74b1a204e8883e543a6f"

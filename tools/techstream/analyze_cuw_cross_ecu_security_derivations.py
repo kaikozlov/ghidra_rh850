@@ -36,15 +36,16 @@ from pathlib import Path
 
 from Crypto.Cipher import AES
 from Crypto.Hash import CMAC
-from cuw_attach import parse_attach_bytes
-from cuw_security_up import (
+from tools.techstream.cuw_attach import parse_attach_bytes
+from tools.techstream.cuw_security_up import (
     SECURITY_UP_WRAP_KEY,
     firmware_security_access_working_key,
     unwrap_service_auth_key,
 )
-from techstream_paths import CUW_CORPUS_ROOT, REPO
+from tools import REPO_ROOT
+from tools.techstream.techstream_paths import CUW_CORPUS_ROOT
 
-DEFAULT_OUT = REPO / "data/generated/techstream_v18/cuw_cross_ecu_security_derivations.json"
+DEFAULT_OUT = REPO_ROOT / "data/generated/techstream_v18/cuw_cross_ecu_security_derivations.json"
 
 # Recovered EPS-family roots.  Their cross-ECU reuse is the hypothesis under test.
 EPS_PAYLOAD_BUILD_ROOT = bytes.fromhex("ba052435f8843f985fd1329d2b6117b0")
@@ -75,7 +76,7 @@ FRC_KDF_SPARSE_BLOCKS = 128
 FRC_KDF_FULL_SCORE_TOP_N = 16
 FRC_KDF_INTERESTING_IDENTITY = 0.01
 EPS_PAYLOAD_GRAMMAR_PACKAGES = ("T-0015-20.cuw", "T-0035-22.cuw", "T-0036-22.cuw")
-BOTTLENOSE_R4_PREFIX_B64 = REPO / "tests/fixtures/payloads/bottlenose_cr4_a32_prefix.b64"
+BOTTLENOSE_R4_PREFIX_B64 = REPO_ROOT / "tests/fixtures/payloads/bottlenose_cr4_a32_prefix.b64"
 BOTTLENOSE_R4_PAYLOAD_SHA256 = "6cfe5eb572bce81b9f6641f6b90fcf47bcdfdea8439467e032c8b6aa48325af3"
 BOTTLENOSE_R4_PREFIX_SHA256 = "25bc5690caa00bcab4701ce48281886a45e75b7fbfcd43411ec474a243f2f8ee"
 

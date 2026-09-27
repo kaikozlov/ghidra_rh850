@@ -24,6 +24,8 @@ FRC-internal CMAC engine, key slot and freshness owner remain open.
 """
 from __future__ import annotations
 
+from tools.targets.camry.support import camry_f33_corpus as f33
+from tools import REPO_ROOT
 import bisect
 import gzip
 import hashlib
@@ -31,11 +33,11 @@ import json
 from collections import Counter
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[4]
-READY = REPO / "targets/camry-2026/raw-20260826/camry_ready_gear_20260826.json.gz"
+REPO = REPO_ROOT
+READY = f33.CAPTURE / "raw-20260826/camry_ready_gear_20260826.json.gz"
 DRIVES = {
-    "drive_a": REPO / "targets/camry-2026/raw-20260827/camry_relay_route_can_20260827.ndjson.gz",
-    "drive_b": REPO / "targets/camry-2026/raw-20260827/camry_relay_lta_confirm_route_can_20260827.ndjson.gz",
+    "drive_a": f33.CAPTURE / "raw-20260827/camry_relay_route_can_20260827.ndjson.gz",
+    "drive_b": f33.CAPTURE / "raw-20260827/camry_relay_lta_confirm_route_can_20260827.ndjson.gz",
 }
 DEFAULT_OUT = REPO / "data/generated/camry_2026_08a_signer_continuity.json"
 REQUEST_PLANE = REPO / "data/generated/camry_2026_longitudinal_request_plane.json"

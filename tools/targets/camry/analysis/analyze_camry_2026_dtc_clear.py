@@ -2,13 +2,15 @@
 """Summarize the 2026 Camry live DTC-clear probe into a deterministic artifact."""
 from __future__ import annotations
 
+from tools.targets.camry.support import camry_f33_corpus as f33
+from tools import REPO_ROOT
 import argparse
 import hashlib
 import json
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[4]
-RAW = REPO / "targets/camry-2026/raw-20260827/dtc-clear"
+REPO = REPO_ROOT
+RAW = f33.CAPTURE / "raw-20260827/dtc-clear"
 DEFAULT_OUT = REPO / "data/generated/camry_2026_dtc_clear.json"
 FAULT_MASK = 0xAF  # failed/current/pending/confirmed/failed-since-clear/warning
 

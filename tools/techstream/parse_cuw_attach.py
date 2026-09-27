@@ -4,7 +4,8 @@ from __future__ import annotations
 import argparse, json
 from pathlib import Path
 
-from cuw_attach import capture_shape
+from tools.techstream.cuw_attach import capture_shape
+
 
 
 def parse_attach(path: Path) -> dict:

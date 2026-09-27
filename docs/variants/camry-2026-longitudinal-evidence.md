@@ -256,7 +256,7 @@ never carry a usable command on this or another Toyota.
 Reproduce without `REFERENCE/`, `build/`, original September rlogs, or a car:
 
 ```bash
-uv run python tools/targets/camry/analysis/analyze_camry_20260916_longitudinal_motion_audit.py
+uv run --locked python -m tools.targets.camry.analysis.analyze_camry_20260916_longitudinal_motion_audit
 tools/test camry_20260916_longitudinal_motion_audit
 ```
 
@@ -770,7 +770,7 @@ and protected by `tools/test camry_2026_longitudinal_request_candidates`.
 Reproduce the portable reductions:
 
 ```bash
-uv run python tools/targets/camry/analysis/analyze_camry_2026_longitudinal_role.py
+uv run --locked python -m tools.targets.camry.analysis.analyze_camry_2026_longitudinal_role
 tools/test camry_2026_longitudinal_role camry_20260916_longitudinal_motion_audit
 ```
 

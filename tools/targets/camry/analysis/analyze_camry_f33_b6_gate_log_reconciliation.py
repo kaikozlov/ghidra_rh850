@@ -7,6 +7,8 @@ requires the RAM monitor.  Panda TX echoes are never treated as F33 reception.
 """
 from __future__ import annotations
 
+from tools.targets.camry.support import camry_f33_corpus as f33
+from tools import REPO_ROOT
 import argparse
 import hashlib
 import json
@@ -16,14 +18,14 @@ from collections import Counter
 from pathlib import Path
 from typing import Any
 
-ROOT = Path(__file__).resolve().parents[4]
+ROOT = REPO_ROOT
 DEFAULT_LOG_ROOT = Path('/Users/kai/dev/inspect/logs/camry-2026')
 DEFAULT_OPENPILOT = Path('/Users/kai/dev/inspect/repos/kai-openpilot')
 DEFAULT_OUT = ROOT / 'data/generated/camry_f33_b6_gate_log_reconciliation.json'
 FRESHNESS_ART = ROOT / 'data/generated/camry_b6_freshness_contract.json'
 EXTERNAL_INGRESS_ART = ROOT / 'data/generated/camry_8965F3307000_external_lateral_ingress.json'
 F33_PORT_ART = ROOT / 'data/generated/camry_8965F3307000_tss3_opendbc_port.json'
-F33_CORPUS = ROOT / 'data/generated/camry-8965F3307000/decompilations.jsonl'
+F33_CORPUS = f33.CORPUS
 
 
 def sha256(path: Path) -> str:

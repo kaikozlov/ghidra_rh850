@@ -8,15 +8,15 @@ import json
 import struct
 import subprocess
 from pathlib import Path
+from tools.techstream.techstream_paths import GTSPLUS_EXTERNAL_ROOT
+from tools import REPO_ROOT
 
-from techstream_paths import GTSPLUS_EXTERNAL_ROOT
 
-REPO = Path(__file__).resolve().parents[2]
 ARCHIVE = GTSPLUS_EXTERNAL_ROOT / "gtsplus.7z"
 MEMBER = "gtsplus/Toyota Diagnostics/GTSPlus/bin/DataListIF.dll"
-SEMANTICS = REPO / "data/generated/techstream_v18/tss3_cruise_engagement_semantics.json"
-P5 = REPO / "data/generated/techstream_v18/p5_lateral_control_semantics.json"
-OUT = REPO / "data/generated/techstream_v18/tss3_cruise_live_transport.json"
+SEMANTICS = REPO_ROOT / "data/generated/techstream_v18/tss3_cruise_engagement_semantics.json"
+P5 = REPO_ROOT / "data/generated/techstream_v18/p5_lateral_control_semantics.json"
+OUT = REPO_ROOT / "data/generated/techstream_v18/tss3_cruise_live_transport.json"
 SELECTED = (0x1901, 0x1905, 0x1906, 0x1912, 0x1914)
 
 
@@ -141,10 +141,10 @@ def main() -> int:
         "schema": "techstream-gtsplus-p5-cruise-live-dataid-transport-v1",
         "scope": {"category_id": 498, "database": "FRC_P5.ddb", "ecu_name": "Front Recognition Camera 2", "physical_request_address": "0x792"},
         "sources": {
-            "gtsplus_archive": {"path": str(args.archive.relative_to(REPO)) if args.archive.is_relative_to(REPO) else str(args.archive), "member": MEMBER},
+            "gtsplus_archive": {"path": str(args.archive.relative_to(REPO_ROOT)) if args.archive.is_relative_to(REPO_ROOT) else str(args.archive), "member": MEMBER},
             "data_list_if": {"size": len(dll), "sha256": sha(dll)},
-            "cruise_semantics": {"path": str(SEMANTICS.relative_to(REPO)), "sha256": sha(sem_bytes)},
-            "p5_lateral_control_semantics": {"path": str(P5.relative_to(REPO)), "sha256": sha(p5_bytes), "frc_vds_anchor": frc_setting[0]},
+            "cruise_semantics": {"path": str(SEMANTICS.relative_to(REPO_ROOT)), "sha256": sha(sem_bytes)},
+            "p5_lateral_control_semantics": {"path": str(P5.relative_to(REPO_ROOT)), "sha256": sha(p5_bytes), "frc_vds_anchor": frc_setting[0]},
         },
         "raw_function_evidence": function_evidence,
         "raw_instruction_anchors": raw_anchors,

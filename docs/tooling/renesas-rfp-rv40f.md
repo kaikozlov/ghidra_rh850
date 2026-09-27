@@ -12,7 +12,7 @@
 > `data/renesas_rfp_rv40f_commands.csv`,
 > `data/renesas_rfp_rv40f_capabilities.csv`
 >
-> **Verification:** `tests/verify_renesas_rfp.py` (`make verify-rfp`)
+> **Verification:** `tests/firmware/verify_renesas_rfp.py` (`make verify-rfp`)
 >
 > **Related:** [workflow](../WORKFLOW.md),
 > [SecOC key lifecycle](../security/secoc/key-storage-and-lifecycle.md)

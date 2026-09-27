@@ -13,6 +13,8 @@ that every eligible frame is a PDA-SA opportunity.
 """
 from __future__ import annotations
 
+from tools.targets.camry.support import camry_f33_corpus as f33
+from tools import REPO_ROOT
 import argparse
 import json
 import re
@@ -20,7 +22,7 @@ import sys
 from collections import Counter
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[4]
+REPO = REPO_ROOT
 DEFAULT_LOG_ROOT = Path("/Users/kai/dev/inspect/logs/camry-2026")
 DEFAULT_OPENPILOT_ROOT = Path("/Users/kai/dev/inspect/repos/kai-openpilot")
 DEFAULT_OUT = REPO / "data/generated/camry_2026_pda_sdg_attribution.json"
@@ -95,7 +97,7 @@ def scan_route(LogReader, route_dir: Path) -> dict:
 def exact_f33_join() -> dict:
   codeflash = json.loads((REPO / "data/generated/camry_8965F3307000_codeflash.json").read_text())
   selector = codeflash["b6_steering_command"]["selector_signal"]
-  corpus = REPO / "data/generated/camry-8965F3307000/decompilations.jsonl"
+  corpus = f33.CORPUS
   ceffc = None
   cb73a = None
   cb00_readers = []

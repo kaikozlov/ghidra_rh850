@@ -2,14 +2,14 @@
 """Regenerate the minimal shared H/F application seed manifest."""
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import csv
 import io
 import json
-from pathlib import Path
 
 
-REPO = Path(__file__).resolve().parents[4]
+REPO = REPO_ROOT
 OUTPUT = REPO / "data/targets/corolla-hf/function_seeds.csv"
 SOURCES = (
     "data/generated/corolla_8965H1202000_b6_full_receiver_decompiler_evidence.json",

@@ -6,6 +6,7 @@ The event selection is frozen; raw bytes, timestamps, and original hashes
 are acquired again from the corresponding rlog files on regeneration.
 """
 from __future__ import annotations
+from tools import REPO_ROOT
 import argparse
 import gzip
 import hashlib
@@ -14,7 +15,7 @@ import json
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[4]
+ROOT = REPO_ROOT
 OUTPUT = ROOT / 'tests/fixtures/camry_2026_cancel_windows.jsonl.gz'
 WINDOWS = [(944177318754, ('2026-09-04/0000003b--62262eb7a1/rlog-14.zst',)),
  (1765674076305, ('2026-09-04/0000003b--62262eb7a1/rlog-28.zst',)),

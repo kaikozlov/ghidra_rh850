@@ -24,12 +24,12 @@ import subprocess
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
+from tools.techstream.techstream_paths import GTSPLUS_EXTERNAL_ROOT, resolve_gts_root
+from tools import REPO_ROOT
 
-from techstream_paths import GTSPLUS_EXTERNAL_ROOT, resolve_gts_root
 
-REPO = Path(__file__).resolve().parents[2]
 DEFAULT_ARCHIVE = GTSPLUS_EXTERNAL_ROOT / "unpacked/gtsplus/gtsplus_msi.7z"
-DEFAULT_OUTPUT = REPO / "build/out/gtsplus-unprotected"
+DEFAULT_OUTPUT = REPO_ROOT / "build/out/gtsplus-unprotected"
 INSTALLERS = ("Setup_PF.exe", "Setup_InfoCenter.exe")
 CP_PREFIX = "GTSPlusCP\\"
 PLAIN_PREFIX = "GTSPlus\\"
@@ -252,7 +252,7 @@ def recover(
 
     workspace_owner: tempfile.TemporaryDirectory[str] | None = None
     if keep_workspace:
-        workspace = REPO / "build/tmp/gtsplus-body-recovery"
+        workspace = REPO_ROOT / "build/tmp/gtsplus-body-recovery"
         shutil.rmtree(workspace, ignore_errors=True)
         workspace.mkdir(parents=True)
     else:

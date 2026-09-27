@@ -2,13 +2,13 @@
 """Describe the exact F33 live fault projection, separate from latched history."""
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import hashlib
 import json
-from pathlib import Path
 
 from tools.targets.camry.support.camry_f33_corpus import CORPUS, IMAGE, IMAGE_SHA256
 
-ROOT = Path(__file__).resolve().parents[4]
+ROOT = REPO_ROOT
 OUTPUT = ROOT / 'data/generated/camry_f33_live_fault_projection.json'
 
 

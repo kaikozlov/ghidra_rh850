@@ -5,15 +5,14 @@ import argparse, hashlib, json, os, subprocess, sys, tempfile
 from pathlib import Path
 from typing import Any
 
-REPO=Path(__file__).resolve().parents[2]
+from tools import REPO_ROOT
+from tools.project import analysis_target
+
+REPO=REPO_ROOT
 BUILD=REPO/'build'; BUILD_WORK=BUILD/'work'; BUILD_LOGS=BUILD/'logs'; BUILD_TMP=BUILD/'tmp'
 EXPORTER=REPO/'ghidra/scripts/verify/ExportDecompilerCorpus.java'
 
 def sha(p:Path)->str:return hashlib.sha256(p.read_bytes()).hexdigest()
-def registry_target(name:str)->dict:
-    o=json.loads((REPO/'data/analysis_targets.json').read_text())
-    try:return o['targets'][name]
-    except KeyError:raise SystemExit(f'unknown analysis target: {name}')
 def run(cmd:list[str],env=None):
     r=subprocess.run(cmd,cwd=REPO,env=env,capture_output=True,text=True)
     if r.returncode: raise SystemExit(f"command failed ({r.returncode}): {' '.join(cmd)}\n{r.stdout}\n{r.stderr}")
@@ -53,7 +52,7 @@ def canonicalize(raw:Path,inv:dict[str,dict[str,Any]]):
     return sorted(out,key=lambda r:int(r['entry_addr'],16))
 def main()->int:
     ap=argparse.ArgumentParser(description=__doc__); ap.add_argument('--target',required=True); ap.add_argument('--project-dir',type=Path); ap.add_argument('--output',type=Path); ap.add_argument('--timeout-seconds',type=int,default=60); a=ap.parse_args()
-    t=registry_target(a.target); project=(a.project_dir or REPO/t['work_dir']).expanduser().resolve(); work=BUILD_WORK.resolve(); committed=(REPO/'projects').resolve()
+    _, t=analysis_target.target(a.target); project=(a.project_dir or REPO/t['work_dir']).expanduser().resolve(); work=BUILD_WORK.resolve(); committed=(REPO/'projects').resolve()
     if project==work or work not in project.parents:raise SystemExit(f'refusing project outside build/work descendant: {project}')
     if project==committed or committed in project.parents:raise SystemExit(f'refusing committed snapshot project: {project}')
     pname=t['project_name']; prog=t['program_name'];
@@ -66,7 +65,7 @@ def main()->int:
     with tempfile.TemporaryDirectory(prefix=f'{a.target}-corpus-',dir=BUILD_TMP) as td:
         td=Path(td); live=td/'live_inventory.jsonl'; raw=td/'raw.jsonl'
         run([str(REPO/'tools/project/export_ghidra_project.sh'),'project-inventory',str(live)],env)
-        run([sys.executable,str(REPO/'tools/project/project_inventory.py'),'compare',str(inv_path),str(live)])
+        run([sys.executable,'-m','tools.project.project_inventory','compare',str(inv_path),str(live)])
         log=BUILD_LOGS/f'generate-{a.target}-decompiler-corpus.log'
         run([str(REPO/'tools/project/run_headless'),'--project-dir',str(project),'--project',pname,'--label',f'{a.target}-decompiler-corpus','--log',str(log),'--quiet','--','-process',prog,'-noanalysis','-readOnly','-postScript',EXPORTER.name,str(raw),str(a.timeout_seconds)],env)
         records=canonicalize(raw,funcs)

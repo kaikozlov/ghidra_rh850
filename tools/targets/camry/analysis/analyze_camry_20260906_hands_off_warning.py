@@ -23,6 +23,7 @@ checkout providing LogReader.
 """
 from __future__ import annotations
 
+from tools import REPO_ROOT
 import argparse
 import bisect
 import json
@@ -30,7 +31,7 @@ import sys
 from collections import Counter
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[4]
+ROOT = REPO_ROOT
 DEFAULT_LOG_ROOT = Path("/Users/kai/dev/inspect/logs/camry-2026")
 DEFAULT_OPENPILOT_ROOT = Path("/Users/kai/dev/inspect/repos/kai-openpilot")
 DEFAULT_OUT = ROOT / "data/generated/camry_20260906_hands_off_warning_audit.json"
