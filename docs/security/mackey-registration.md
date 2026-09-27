@@ -316,6 +316,53 @@ shared numeric `0x1010` does not make that DID the RoutineControl payload. What
 has changed is that current Toyota tooling now proves a genuine RoutineControl
 RID-`0x1010` MACKey transport exists.
 
+## Cross-OEM corroboration: GM Global B / Renesas SHE
+
+Snipesy's 2026-09-22 public Global B SecOC write-up is useful **external
+cross-OEM corroboration**, not Toyota evidence:
+<https://surrealdev.com/rooting-the-cadillac-part-2-secoc/>. Its preceding
+hardware note identifies a Cadillac/GM Global B radio controller as an
+**RH850/F1x**:
+<https://surrealdev.com/rooting-the-cadillac-part-1-lay-of-the-land/>.
+
+The independently recovered GM provisioning model has the same architectural
+split established above for Toyota:
+
+| Layer | GM Global B public report | Toyota recovered here |
+|---|---|---|
+| protected-message primitive | AES-128 CMAC + freshness + truncated on-wire authenticator | AES-128 CMAC + reconstructed freshness + `FV4 || MAC28` |
+| protected key storage/use | HSM/SHE key slot | exact EPS: Renesas ICU-S protected key selector; other P5 ECUs may use different HSMs |
+| replacement-key object | standard SHE `M1[16] || M2[32] || M3[16]` construction with UID, ID, AuthID, counter and flags | standard SHE `CMD_LOAD_KEY` `M1/M2/M3 -> M4/M5`, proven both in Toyota tooling and exact EPS command 8 |
+| vehicle-side carrier | UDS RoutineControl, GM example RID `0x0200` with an additional slot byte | Toyota RID `0x3002` or `0x1010`, depending protocol family |
+| backend/orchestration | ECU/HSM identity plus OEM-held authorization material | VIN, per-ECU `SafekeyNumber`, topology and Toyota server exchange records |
+| diagnostic authorization | UDS `$27` before provisioning | current Toyota network updater also performs `$27 41/42`; exact Sienna application/boot SA algorithms are separate Denso constructions |
+
+This is stronger than the generic observation that both OEMs "use SecOC":
+the **64-byte SHE memory-update object is the same standardized cryptographic
+contract**, while each OEM wraps it in its own diagnostic/session/topology
+protocol. That is consistent with Renesas offering SHE-capable ICU security
+blocks across RH850 product lines and with the exact P1M-E ICU-S command-8
+implementation recovered in this repository.
+
+The similarity must not be projected onto the message profile itself. GM's
+published example authenticates a construction containing an OEM data ID,
+32-bit CAN ID, 64-bit freshness and payload. The Toyota EPS recovered here
+authenticates `DataID_be16 || authentic_payload || full_freshness`, with a
+Toyota-specific six-byte reconstructed freshness value and bit-packed FV4/MAC28
+trailer. The UDS SecurityAccess derivation is likewise not shared: the GM report
+shows a CMAC-based ECUID+nonce construction, whereas exact Sienna application
+and bootloader `$27` use the separately recovered Denso two-stage AES-ECB
+construction. The common boundary is therefore **SHE/HSM key management and
+CMAC/freshness architecture**, not byte-for-byte OEM protocol identity.
+
+The GM author's final claim that SecOC keys can be dumped "from any module"
+without an exploit is an interesting lead, but the public post deliberately
+withholds the extraction mechanism. It does not establish a Toyota extraction
+route. In particular, standard SHE `CMD_LOAD_KEY` is specifically designed so
+the main CPU can relay `M1/M2/M3` without ever seeing the plaintext replacement
+key; any transferable weakness would need independent evidence at the
+Renesas/HSM lifecycle, debug, provisioning, or implementation boundary.
+
 ## Front Recognition Camera applicability
 
 The current Toyota/GTS+ camera evidence now closes a distinction that was left
