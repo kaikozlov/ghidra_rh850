@@ -419,6 +419,8 @@ runtime host, peer recovery, and one launcher:
 ./tss3-request-signer status /tmp/tss3-request-signer-status.json
 ./tss3-request-signer self-test /tmp/tss3-request-signer-self-test.json
 ./tss3-request-signer benchmark-100hz 200 /tmp/tss3-request-signer-100hz.json
+# exact-F33 Camry startup-catcher integration only
+./tss3-request-signer ui-bringup /tmp/tss3-request-signer-ui-run
 ```
 
 If the programming transition leaves peer state unhealthy, `recover-peers`
@@ -447,15 +449,16 @@ The former direct-B6/C7 builders and target-specific kit packagers are
 research-only. They are not alternate current installation paths and are not
 packaged by `tools/toyota ram kit`.
 
-### Historical exact-Camry startup-catcher experiment
+### Exact-Camry startup-catcher integration
 
 A 2026-09-20 exact-Camry experiment armed the request signer while the vehicle
 was fully OFF, repeatedly offered application EXTENDED, waited for the first
 completed `50 03`, sent one `10 02`, and installed from the caught bootloader.
 After application return it required READY/Park/stationary, checked peer health
 without resetting either peer, and ran one fresh-signing self-test. Those runs
-showed that this startup-caught path could preserve healthy Brake/FRC state; the
-catcher is not packaged by the current cross-target RAM kit.
+showed that this startup-caught path could preserve healthy Brake/FRC state. The
+current exact-F33 Camry kit packages this backend as `ui-bringup`, `ui-resume`,
+`ui-worker`, and `ui-resume-warm`; other target kits do not carry it.
 
 FRC `0x1905` **Cruise Control Permission Flag** and `0x1906` **Main Switch
 Recognition Flag** are operational cruise state, not persistent health latches. In a
@@ -466,7 +469,7 @@ already be asserted. They remain telemetry. The startup peer-health gate instead
 exact peer identities plus Brake `0x102D` fail-status/fail-control clear and `0x102F`
 EPS-communication-open clear; the succeeding signer self-test supplies the
 functional EPS-side proof. No DTC clear, peer reset, EPS reset, or EPS power cycle is
-part of a healthy `oracle-ui-bringup` run.
+part of a healthy `ui-bringup` run.
 
 The experiment used a native `pandad` startup catcher plus the openpilot-side
 `Tss3OracleAutoArm` watcher.

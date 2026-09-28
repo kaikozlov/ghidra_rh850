@@ -33,6 +33,10 @@ RUNTIME_FILES = (
     "exploit/ephemeral_runtime/camry_f33_runtime_replay_discriminator.py",
     "exploit/ephemeral_runtime/tss3_panda_lease.sh",
 )
+CAMRY_UI_RUNTIME_FILES = (
+    "exploit/ephemeral_runtime/camry_f33_request_signer_ui_bringup.py",
+    "exploit/ephemeral_runtime/camry_f33_startup_programming.py",
+)
 COMPACT_RUNTIME_FILE = "exploit/ephemeral_runtime/tss3_request_signer_compact.py"
 
 
@@ -95,6 +99,9 @@ def build(target: str, out: Path, codec: str = DEFAULT_CODEC) -> dict:
 
     for rel in RUNTIME_FILES:
         copy(ROOT / rel, out / "runtime" / rel)
+    if target == "camry-8965F3307000":
+        for rel in CAMRY_UI_RUNTIME_FILES:
+            copy(ROOT / rel, out / "runtime" / rel)
     if codec == "compact":
         copy(ROOT / COMPACT_RUNTIME_FILE, out / "runtime" / COMPACT_RUNTIME_FILE)
 

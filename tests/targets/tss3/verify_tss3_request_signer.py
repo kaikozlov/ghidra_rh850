@@ -20,6 +20,7 @@ from exploit.ephemeral_runtime import tss3_request_signer_compact as compact_hos
 from exploit.ephemeral_runtime import camry_f33_request_signer_ui_bringup as ui_bringup
 from exploit.ephemeral_runtime import camry_f33_startup_programming as startup_programming
 from exploit.common import ram_exec
+from tools.targets.tss3.builders import build_tss3_ram_kit as ram_kit
 
 CAMRY_TARGET = "camry-8965F3307000"
 CAMRY_STEM = build.output_stem(CAMRY_TARGET)
@@ -77,6 +78,9 @@ class _TransientF181Client:
             raise TimeoutError("boot endpoint is still transitioning")
         return self.payload
 
+    def diagnostic_session_control(self, session):
+        self.session = session
+
 
 boot_f181 = bytes.fromhex("02" + "21" * 32)
 transient_clients = iter((_TransientF181Client(None), _TransientF181Client(boot_f181)))
@@ -98,6 +102,22 @@ with mock.patch.object(ram_exec, "_make_uds_client", side_effect=lambda *args, *
     )
 check("caught PROGRAMMING ignores transitional application F181 until exact boot identity",
       transition_client.payload == boot_f181 and transition_hex == boot_f181.hex() and transition_attempts == 2)
+
+session_clients = iter((_TransientF181Client(None), _TransientF181Client(app_f181)))
+session_uds = SimpleNamespace(
+    DATA_IDENTIFIER_TYPE=SimpleNamespace(APPLICATION_SOFTWARE_IDENTIFICATION=0xF181),
+    SESSION_TYPE=SimpleNamespace(EXTENDED_DIAGNOSTIC="extended"),
+)
+with (mock.patch.dict(sys.modules, {"panda": SimpleNamespace(Panda=object)}),
+      mock.patch.object(ram_exec, "_make_uds_client",
+                        side_effect=lambda *args, **kwargs: next(session_clients)),
+      mock.patch.object(host, "_import_uds", return_value=session_uds),
+      mock.patch.object(host, "_alloutput_mode"),
+      mock.patch.object(host.RequestSignerSession, "_attest", return_value={"state": {"initialized": True}})):
+    app_session = host.RequestSignerSession(meta, require_ready_parked=False, panda=object())
+check("application attestation retries a transient F181 miss with a fresh transport",
+      app_session.f181_hex == app_f181.hex() and app_session.f181_attempts == 2 and
+      app_session.client.payload == app_f181 and app_session.client.session == "extended")
 
 class _FakeExecPanda:
     def set_safety_mode(self, *_args):
@@ -503,7 +523,8 @@ check("request signer can continue directly from exact caught bootloader without
       direct["verdict"] == "request_signer_live_helper_pending_self_test" and
       execute.call_args.kwargs["allow_direct_boot"] is True and
       execute.call_args.kwargs["programming_already_requested"] is True and
-      wait_for_application.call_args.kwargs["timeout"] == host.APPLICATION_REAPPEAR_TIMEOUT_SECONDS == 3.0)
+      wait_for_application.call_args.kwargs["timeout"] == host.APPLICATION_REAPPEAR_TIMEOUT_SECONDS == 3.0 and
+      wait_for_application.call_args.kwargs["expected_f181_hex"] == meta["target"]["application_f181_hex"])
 
 class _FakeStartupRacePanda:
     def __init__(self):
@@ -562,5 +583,21 @@ with tempfile.TemporaryDirectory() as td:
         pass
     else:
         raise AssertionError("UI resume accepted a non-F33 native startup catch")
+
+with tempfile.TemporaryDirectory(prefix="verify-tss3-ram-kit-") as td:
+    kit_root = Path(td) / "camry-kit"
+    kit_manifest = ram_kit.build(CAMRY_TARGET, kit_root)
+    ui_runtime = "runtime/exploit/ephemeral_runtime/camry_f33_request_signer_ui_bringup.py"
+    startup_runtime = "runtime/exploit/ephemeral_runtime/camry_f33_startup_programming.py"
+    help_result = subprocess.run(
+        [str(kit_root / "tss3-request-signer"), "--help"],
+        cwd=kit_root, check=True, capture_output=True, text=True,
+    )
+    check("Camry kit carries the canonical startup bringup backend",
+          ui_runtime in kit_manifest["files"] and startup_runtime in kit_manifest["files"])
+    check("canonical launcher owns the comma startup commands",
+          all(command in help_result.stdout for command in (
+              "ui-bringup", "ui-resume", "ui-worker", "ui-resume-warm",
+          )))
 
 print("PASS canonical exact-target TSS3 request signer")

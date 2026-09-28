@@ -353,9 +353,13 @@ tools/toyota ram kit all --out EMPTY_KIT_SET_DIRECTORY
 Output directories must be empty. Each kit contains one payload, one metadata
 contract, the common host runtime, target-bound peer recovery, and
 `./tss3-request-signer`; it does not contain the historical direct-B6 runtime.
-On comma hardware, run `./tss3-request-signer doctor` before any live command.
+Deploy into a fresh directory rather than overlaying an older kit: stale
+launchers are not part of the manifest and must not remain callable. On comma
+hardware, run `./tss3-request-signer doctor` before any live command.
 `recover-peers` is available in every supported TSS3 kit and derives the EPS
-identity and diagnostic bus from that kit's metadata.
+identity and diagnostic bus from that kit's metadata. The exact-F33 Camry kit
+also carries the current `ui-bringup`, `ui-worker`, `ui-resume`, and
+`ui-resume-warm` startup-catcher commands used by its openpilot integration.
 
 The optional `--codec compact` build is experimental and explicit. Omission
 always selects the four-frame carrier that transports all 28 application
