@@ -139,11 +139,17 @@ class TestRecovery(unittest.TestCase):
                 "0x102F": {"available": True, "eps_communication_open": False},
             },
         }
+        def read_peer_identity(_panda, tx_addr, _bus, _expected, label, *, timeout):
+            self.assertNotEqual(tx_addr, recovery.EPS_TX)
+            return {"ecu": label, "timeout": timeout}
+
         panda = FakePanda()
         with (patch.dict(sys.modules, {"panda": types.SimpleNamespace(Panda=FakePanda)}),
-              patch.object(recovery, "read_exact_f181", side_effect=({"ecu": "EPS"}, {"ecu": "FRC"}, {"ecu": "Brake"})),
+              patch.object(recovery, "read_exact_f181", side_effect=read_peer_identity) as identities,
               patch.object(recovery, "read_fault_state", return_value=state)):
             result = recovery.control_domain_state(None, TARGET, panda=panda)
+        self.assertEqual(identities.call_count, 2)
+        self.assertEqual(result["eps_identity"]["verification"], "bound_by_install_pre_helper_f181")
         self.assertTrue(result["peer_health_observed"])
         self.assertEqual(result["verdict"], "control_domains_healthy")
         self.assertNotIn("drcc_permission_observed", result)

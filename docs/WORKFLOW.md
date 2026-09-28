@@ -361,6 +361,11 @@ identity and diagnostic bus from that kit's metadata. The exact-F33 Camry kit
 also carries the current `ui-bringup`, `ui-worker`, `ui-resume`, and
 `ui-resume-warm` startup-catcher commands used by its openpilot integration.
 
+`install` records the application F181 once before helper activation, then
+waits for a successful signer request/response. `status`, `self-test`, and the
+benchmarks use that request/response path directly; post-activation EPS F181 or
+SID23 availability is not required.
+
 The optional `--codec compact` build is experimental and explicit. Omission
 always selects the four-frame carrier that transports all 28 application
 bytes. Verify source or contract changes with:

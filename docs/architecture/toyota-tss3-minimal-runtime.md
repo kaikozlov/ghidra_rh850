@@ -432,14 +432,19 @@ The hardware qualification remains intentionally short:
 
 1. Bind the bundle to its application F181 and CodeFlash hash; never substitute
    a related calibration.
-2. With the vehicle stationary in Park and READY low, install and attest only
-   the volatile payload.
+2. With the vehicle stationary in Park and READY low, install only the volatile
+   payload. The one pre-helper F181 response proves the application handoff.
 3. Transition directly to READY without powering the EPS off. Require `status`
-   to report initialized exact-target state.
+   to receive a successful fresh signer response on `0x7A9`.
 4. Require `self-test` to return one independently fresh native-MAC `0x08A`,
-   then require the 200-request 100-Hz benchmark to show matching request,
-   success, response, and received counts with no signer errors.
+   then require the 200-request 100-Hz benchmark to receive one successful
+   signer response for every request with no timing or transport errors.
 5. A full EPS power cycle removes the resident; repeat installation afterward.
+
+Post-activation EPS F181 and SID23/RMBA are not signer-liveness gates. The
+resident can continue signing while the stock diagnostic endpoint is
+unavailable; installation, status, self-test, and throughput qualification
+therefore use the signer's actual `0x777` request / `0x7A9` response path.
 
 This proves RAM survival, exact target calls, command-5 signing, and the
 classic-CAN request/response rate on that ECU. It does not transfer road
@@ -466,10 +471,11 @@ verified healthy startup run they were initially false (`1905=8000`,
 `1906=e000e0008000`) and later became true (`8080` / `e080e0008000`) after a normal
 drive with **no ECU reset**. Therefore startup success does not require those bits to
 already be asserted. They remain telemetry. The startup peer-health gate instead uses
-exact peer identities plus Brake `0x102D` fail-status/fail-control clear and `0x102F`
-EPS-communication-open clear; the succeeding signer self-test supplies the
-functional EPS-side proof. No DTC clear, peer reset, EPS reset, or EPS power cycle is
-part of a healthy `ui-bringup` run.
+the pre-helper exact EPS F181, exact FRC/Brake identities, Brake `0x102D`
+fail-status/fail-control clear, and `0x102F` EPS-communication-open clear; the
+succeeding signer self-test supplies the functional post-activation EPS proof.
+No DTC clear, peer reset, EPS reset, or EPS power cycle is part of a healthy
+`ui-bringup` run.
 
 The experiment used a native `pandad` startup catcher plus the openpilot-side
 `Tss3OracleAutoArm` watcher.

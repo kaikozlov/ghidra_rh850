@@ -103,21 +103,6 @@ with mock.patch.object(ram_exec, "_make_uds_client", side_effect=lambda *args, *
 check("caught PROGRAMMING ignores transitional application F181 until exact boot identity",
       transition_client.payload == boot_f181 and transition_hex == boot_f181.hex() and transition_attempts == 2)
 
-session_clients = iter((_TransientF181Client(None), _TransientF181Client(app_f181)))
-session_uds = SimpleNamespace(
-    DATA_IDENTIFIER_TYPE=SimpleNamespace(APPLICATION_SOFTWARE_IDENTIFICATION=0xF181),
-    SESSION_TYPE=SimpleNamespace(EXTENDED_DIAGNOSTIC="extended"),
-)
-with (mock.patch.dict(sys.modules, {"panda": SimpleNamespace(Panda=object)}),
-      mock.patch.object(ram_exec, "_make_uds_client",
-                        side_effect=lambda *args, **kwargs: next(session_clients)),
-      mock.patch.object(host, "_import_uds", return_value=session_uds),
-      mock.patch.object(host, "_alloutput_mode"),
-      mock.patch.object(host.RequestSignerSession, "_attest", return_value={"state": {"initialized": True}})):
-    app_session = host.RequestSignerSession(meta, require_ready_parked=False, panda=object())
-check("application attestation retries a transient F181 miss with a fresh transport",
-      app_session.f181_hex == app_f181.hex() and app_session.f181_attempts == 2 and
-      app_session.client.payload == app_f181 and app_session.client.session == "extended")
 
 class _FakeExecPanda:
     def set_safety_mode(self, *_args):
@@ -392,21 +377,8 @@ class _FakePipelinedSession:
             "response_id": host.RESPONSE_ID, "response_bus": host.BUS,
             "codec": host.FOUR_FRAME_CODEC, "carrier": host.REQUEST_CARRIER,
         }
-        self.attestation = {"state": {"initialized": True}}
-        self.refreshed = False
+        self.vehicle_guard = {"ready": True}
         _FakePipelinedSession.last = self
-
-    def read_state(self):
-        count = self.panda.request_count
-        return {
-            "last_seq": count % host.SEQUENCE_MAX,
-            "request_count": count,
-            "success_count": count,
-            "response_count": count,
-        }
-
-    def refresh_extended_session(self):
-        self.refreshed = True
 
     def close(self):
         pass
@@ -416,17 +388,17 @@ with mock.patch.object(host, "RequestSignerSession", _FakePipelinedSession):
     pipelined = host.benchmark_pipelined(
         meta_path, count=3, period_ms=10.0, drain_timeout_s=0.1,
     )
+pipeline_session = _FakePipelinedSession.last
+assert pipeline_session is not None
 check("100-Hz benchmark pipelines requests without waiting for each reply",
       pipelined["schema"] == "tss3-request-signer-pipelined-benchmark-v1" and
       pipelined["count_sent"] == pipelined["success_count"] == pipelined["responses_received"] == 3 and
       pipelined["target_rate_hz"] == 100.0 and pipelined["complete_target_rate_run"] is True and
-      pipelined["resident_counter_deltas"] == {"request_count": 3, "success_count": 3, "response_count": 3} and
       pipelined["boundaries"]["sender_waits_for_response"] is False and
-      pipelined["boundaries"]["transmitted_08a"] is False and
-      _FakePipelinedSession.last is not None and _FakePipelinedSession.last.refreshed)
+      pipelined["boundaries"]["transmitted_08a"] is False)
 
 check("pipelined benchmark emits four ordered default frames per request",
-      _FakePipelinedSession.last.panda.sent_frame_counts == [4, 4, 4] and
+      pipeline_session.panda.sent_frame_counts == [4, 4, 4] and
       all(
           len(sent["frames_hex"]) == 4 and
           [int(frame[:2], 16) >> 4 for frame in sent["frames_hex"]] == [8, 9, 10, 11]
@@ -434,59 +406,6 @@ check("pipelined benchmark emits four ordered default frames per request",
       ))
 
 
-class FakeDiagnosticClient:
-    def __init__(self): self.sessions = []
-    def diagnostic_session_control(self, session): self.sessions.append(session)
-
-diagnostic_session = host.RequestSignerSession.__new__(host.RequestSignerSession)
-diagnostic_session.client = FakeDiagnosticClient()
-diagnostic_session.uds_mod = SimpleNamespace(
-    SESSION_TYPE=SimpleNamespace(EXTENDED_DIAGNOSTIC="extended"),
-)
-diagnostic_session.refresh_extended_session()
-check("benchmark can refresh extended diagnostic after a long timing run",
-      diagnostic_session.client.sessions == ["extended"])
-
-# Application RMBA cannot read the FEF0.... GlobalRAM helper span. Installer
-# attestation must therefore read only the LocalRAM resident/state and defer
-# helper execution proof to the live fresh-signing self-test.
-state = bytearray(host.STATE_SIZE)
-state[0:4] = host.STATE_MAGIC.to_bytes(4, "little")
-state[4] = host.STATE_VERSION
-state[5] = 1
-state[24:28] = (0x34567).to_bytes(4, "little")
-state[28:30] = (0x1234).to_bytes(2, "little")
-state[30] = 0x56
-state[31] = 1
-state[32:34] = (0x01A3).to_bytes(2, "little")
-state[34] = 0x0B
-orig_read_exact = host._read_exact
-reads: list[int] = []
-def fake_read_exact(_client, _uds_mod, address: int, size: int, *, label: str, attempts: int = 4) -> bytes:
-    reads.append(address)
-    if address == host.RESIDENT_BASE:
-        return resident
-    if address == host.STATE_BASE:
-        return bytes(state)
-    raise AssertionError(f"unexpected RMBA read 0x{address:08X} ({label})")
-host._read_exact = fake_read_exact
-try:
-    sess = host.RequestSignerSession.__new__(host.RequestSignerSession)
-    sess.meta = meta
-    sess.client = object()
-    sess.uds_mod = object()
-    att = sess._attest()
-finally:
-    host._read_exact = orig_read_exact
-check("live attestation never RMBA-reads GlobalRAM helper",
-      reads == [host.RESIDENT_BASE, host.STATE_BASE] and
-      att["resident_sha256"] == meta["resident"]["sha256"] and
-      att["helper_attestation"] == "deferred_to_self_test_execution" and
-      att["state"]["freshness_reset"] == 0x34567 and
-      att["state"]["freshness_trip"] == 0x1234 and
-      att["state"]["freshness_message"] == 0x56 and
-      att["state"]["freshness_initialized"] is True and
-      att["state"]["tap_cursor"] == 0x01A3 and att["state"]["last_fv4"] == 0x0B)
 
 check("no diagnostic transport or RSCFD mutation remains",
       meta["request"]["diagnostic_acceptance_route_used"] is True and
@@ -506,25 +425,31 @@ check("no diagnostic transport or RSCFD mutation remains",
           "key_extraction": False,
       })
 
-class _FakeRequestSignerSession:
-    def __init__(self, *_args, **_kwargs):
-        self.attestation = {"state": {"initialized": True}}
-    def close(self):
-        pass
-
+fake_probe_panda = _FakePipelinedPanda()
 with (mock.patch.object(host, "verify_nrtd_ready", side_effect=AssertionError("NRTD guard must be skipped from exact boot")),
       mock.patch.object(host, "execute_ram_payload", return_value={"direct_bootloader": True}) as execute,
       mock.patch.object(host, "wait_for_f181", return_value={"ok": True}) as wait_for_application,
-      mock.patch.object(host, "RequestSignerSession", _FakeRequestSignerSession),
-      mock.patch.object(host.time, "sleep", return_value=None)):
-    direct = host.install(OUT / meta["authenticated_payload"]["path"], meta_path, direct_boot=True)
-check("request signer can continue directly from exact caught bootloader without NRTD recheck",
+      mock.patch.object(host, "_alloutput_mode")):
+    direct = host.install(
+        OUT / meta["authenticated_payload"]["path"], meta_path,
+        direct_boot=True, panda=fake_probe_panda,
+    )
+check("post-activation install success is proved by the signer response, not a second F181 check",
       direct["entry_condition"] == "exact_bootloader_f181" and direct["nrtd_guard"] is None and
-      direct["verdict"] == "request_signer_live_helper_pending_self_test" and
+      direct["verdict"] == "request_signer_live_probe_pass" and
+      direct["signer_probe"]["passed"] is True and fake_probe_panda.request_count == 1 and
       execute.call_args.kwargs["allow_direct_boot"] is True and
       execute.call_args.kwargs["programming_already_requested"] is True and
-      wait_for_application.call_args.kwargs["timeout"] == host.APPLICATION_REAPPEAR_TIMEOUT_SECONDS == 3.0 and
+      wait_for_application.call_count == 1 and
       wait_for_application.call_args.kwargs["expected_f181_hex"] == meta["target"]["application_f181_hex"])
+
+fake_self_test_panda = _FakePipelinedPanda()
+with (mock.patch.object(host, "_alloutput_mode"),
+      mock.patch.object(host, "verify_ready_parked_on_panda", return_value={"ready": True})):
+    signer_self_test = host.self_test(meta_path, panda=fake_self_test_panda)
+check("fresh signer self-test needs no post-activation diagnostic transport",
+      signer_self_test["passed"] is True and signer_self_test["response"]["status"] == 0 and
+      fake_self_test_panda.request_count == 1)
 
 class _FakeStartupRacePanda:
     def __init__(self):
