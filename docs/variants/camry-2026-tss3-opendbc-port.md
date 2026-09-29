@@ -3591,11 +3591,19 @@ reached the VMC.
 Brake/VMM-owned `0x081` supplies the complementary result-side bound. Across 17
 result frames during the ID34/33 interval, longitudinal result ID remains **11**,
 request-loss supervision never asserts, and the result-acceleration candidate
-moves only -0.427 to -0.401 m/s². It never reports ID33 or ID34. That is compatible
-with seamless replacement-to-forwarding cadence, but it does not show the PCS
-request winning arbitration or automatic braking being executed. In particular,
-**result ID alone is not a PCS detector**: the alert carrier, submitted request,
-and employed result are three different observations.
+moves only -0.427 to -0.401 m/s². It never reports ID33 or ID34. **This is not
+negative evidence that an uninterrupted stock PCS/AEB event would have declined
+to brake.** The relay withheld the first two native ID34 requests from Brake/VMM;
+the driver brake arrives at +16.733 ms, openpilot disables at +19.717 ms, and
+native PCS forwarding does not resume until +33.508 ms. The receiving side
+therefore never observes the event's native onset before driver intervention.
+Once the remaining 19 ID34/33 frames are forwarded, the vehicle is already in a
+different driver/control state. This capture can prove that the FRC generated an
+emergency request and that the active replacement path initially suppressed it;
+it cannot answer the counterfactual downstream arbitration/automatic-braking
+response had the native request arrived uninterrupted. In particular, **result
+ID alone is not a PCS detector**: the alert carrier, submitted request, delivered
+request, and employed result are distinct observations.
 
 This still does not turn ID33 or ID34 into global PCS enums. It proves that the
 pair participates in this alert event, in this request-B slot, with these
@@ -3773,10 +3781,16 @@ longitudinal request and `0x160` remains non-actuating evidence/state traffic. T
 field hypothesis and its exact Profile-5 transform.
 
 Thus clean `0x08A` source ownership is no longer the native-long blocker on the repinned
-F33 path. What remains is the longitudinal semantic/safety qualification: exact upper/lower
-request mapping, Brake/VMC selection and feedback, PCS/AEB priority, driver override,
-standstill/hold behavior, and the `0x081` result plane. Only after those are closed should
-normal openpilot longitudinal output be connected to the two TSS3 acceleration requests.
+F33 path. The September-21 PCS-alert capture also makes the emergency-preservation boundary
+concrete: the then-active replacement path suppressed the first two native ID34 PCS requests,
+and native forwarding resumed only after driver braking and openpilot disengagement. The
+remaining longitudinal semantic/safety qualification is exact Brake/VMC selection and
+feedback, corrected PCS/AEB preservation while host longitudinal is active, driver override,
+standstill/hold behavior, and the `0x081` result/actuation plane. The same capture does **not**
+prove that stock AEB would or would not have actuated with uninterrupted delivery, because
+the native request onset was blocked and the driver intervened before forwarding resumed.
+Only after those boundaries are closed should normal openpilot longitudinal output be
+connected to the two TSS3 acceleration requests.
 
 ## 8. Host bring-up result reporting audit (2026-09-26)
 

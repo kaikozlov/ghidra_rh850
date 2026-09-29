@@ -1015,13 +1015,16 @@ override-prohibition, low-priority, shift-range, and braking/driving-force
 fields.
 
 The retained normal rlogs do not contain synchronized `0x1B03..0x1B07` /
-Brake `0x10A1..0x10A4` reads, nor a PCS/AEB intervention suitable for proving
-that PCS wins over a replaced cruise request. Those remain targeted-live
-questions. For implementation, the least-destructive candidate is therefore a
-1:1 relay replacement of each live FRC `0x160`: preserve the current stock
-application/context fields and B2 counter, modify only the request field(s) that
-are positively recovered, recompute E2E Profile 5, and leave Toyota's downstream
-arbitration/SecOC participants untouched.
+Brake `0x10A1..0x10A4` reads. A later September-21 retained route **does** contain
+a real user-reported PCS alert with a native FRC emergency-request transition;
+see [the current request-plane analysis](camry-2026-tss3-opendbc-port.md#415-the-retained-pcs-alert-drive-proves-a-native-emergency-request-transition).
+That capture does not prove PCS wins downstream arbitration. Instead, it proves
+the then-active replacement path suppresses the first two native ID34 emergency
+requests; driver braking begins before native `0x08A` forwarding resumes. It is
+therefore a negative PCS/AEB coexistence result for that replacement architecture,
+not a clean stock-AEB actuation experiment. The synchronized FRC/Brake DID and
+Operation-FFD join remains the targeted-live path for assigning the downstream
+request/result/actuation semantics.
 
 ## Branch implementation and validation boundary
 
@@ -1046,10 +1049,13 @@ from Toyota's source-real state and does not transmit `0x251`.
    `0x160`, protected `0x0CA`, and all ordinary state on one clock. This should
    bind the stop/hold permissions and request ID/acceleration to the wire without
    guessing from correlation.
-3. Explicitly validate PCS/AEB coexistence before calling the path complete.
-   The current logs show the OEM arbitration stack and ordinary stop/resume
-   behavior, but they do not contain a PCS event that proves emergency authority
-   survives request replacement.
+3. Re-validate PCS/AEB coexistence with a corrected replacement architecture before
+   calling the path complete. The September-21 PCS event already proves the old
+   replacement path **did not preserve emergency-request onset**: its first two
+   native ID34 frames were suppressed, and driver braking preceded native forwarding
+   resumption. A future validation must preserve the native emergency request while
+   host longitudinal remains active and separately capture the downstream Brake/VMM
+   result/actuation response without that relay confound.
 
 **Exit status:** the historical B12 offline generator remains verified evidence,
 and the test branch now implements the Corolla-validated B4:B5 request plus the
@@ -1057,5 +1063,8 @@ gap-free stock-Toyota-B replacement topology. For Camry, B4:B5 is strongly feedb
 combined B4:B5+B12 trial does not establish independent influence on the
 protected plane. The requested stopping response did not occur; its cause
 is not selected by this trial. The `0x251` mode-middleman and
-virtual engagement path are disproved and removed; delayed-hold release, the
-missing request/permission semantics, and PCS/AEB coexistence remain open.
+virtual engagement path are disproved and removed; delayed-hold release and the
+missing request/permission semantics remain open. PCS/AEB coexistence is no longer
+merely untested: the September-21 event disproves preservation at emergency-request
+onset for the then-active replacement path. Corrected preservation plus an
+unconfounded downstream AEB result/actuation capture remain open.
