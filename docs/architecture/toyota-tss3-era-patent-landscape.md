@@ -1,6 +1,6 @@
 # Toyota TSS3-era patent landscape (2019-2026)
 
-**Status:** external-source architecture/research index, researched 2026-09-18.
+**Status:** external-source architecture/research index, researched 2026-09-29.
 
 This note catalogs Toyota and Toyota-affiliated patent families published in the
 TSS3 development/deployment era that expose useful architecture vocabulary for
@@ -48,6 +48,11 @@ Accordingly:
 | **US11834037B2**, Control device, method... | 2020-03-18 | Toyota | Manager distributes converted motion requests and returns steering-actuator **middle-point / neutral-point** information to applications; updates are coordinated so clients do not disagree across handoffs. | Search oracle for steering center/middle-point synchronization, calibration, and discontinuity handling. |
 | **US20240101086A1 / US12344222B2**, Motion manager, control device of brake device... | 2022-09-27 | Toyota + ADVICS | Explicit later topology has ADAS applications, engine ECU, steering ECU and a **brake ECU containing the motion manager**. The manager converts normalized motion requests into actuator-type-specific instruction values using stored actuator type information. | Later-generation confirmation of the brake-hosted VMM/request-generation model and useful vocabulary for the transformation between application requests and actuator-specific targets. |
 | **US20240262354A1 / US12311936B2**, Vehicle motion manager... | 2023-02-07 | Toyota + ADVICS | Failure information plus application ID selects whether a request requires **degeneration**; the manager can replace a request with a time-varying value that approaches an end value, with degeneration state/status returned to the commanding ECU. | Later-generation clue for graceful failover/fade-out behavior. Search logs/GTS for degeneration-like ramps at application failure/disengagement, but do not project its exact longitudinal algorithm onto F33. |
+| **US20190092343A1 / US10829128B2**, Driving support device | 2017-09-25; pub. 2019 | Toyota | PCS is explicitly staged as **alert -> advanced pre-collision brake -> final pre-collision brake**, with separate TTC thresholds. The final brake stage latches braking through vehicle stop and briefly holds the stop. Brake commands carry target deceleration to the brake ECU. | High-value PCS state-machine lineage. It establishes that warning, cancellable earlier braking, and committed stop/hold can be distinct PCS phases rather than one AEB boolean. |
+| **US20220340106A1 / US11993237B2**, Drive assistance device | 2019-08-09; pub. 2022 | Toyota | Separates a warning TTC threshold from a later automatic-brake TTC threshold. The PCS brake command carries requested deceleration Gpcs to the brake ECU; after automatic stopping, a distinct brake-hold controller keeps the vehicle stopped. | Strong semantic support for the current GTS separation among ALM/warning, deceleration request, PB and PBH. |
+| **US20220258731A1**, Collision avoidance assist apparatus | 2021-02-17 | Toyota | Fuses front radar, front camera and front/lateral radar target information, then evaluates **warning** and **automatic-braking** conditions separately. The braking condition uses predicted trajectories/TTC, computes target deceleration, and sends it to the brake ECU; automatic steering may be layered on top. | Strong TSS3-era match for the FRC-side target-selection/collision-scene plane: current GTS exposes separate AEB-warning and AEB-intervention scene judgments plus rich target/trajectory state. |
+| **US20240109522A1 / US12434673B2**, Driving support apparatus... | 2022-09-29 | Toyota + Denso | Defines **PB** and **LPB (Light Pre-collision Brake)**. LPB uses lower maximum target deceleration and gentler jerk, and its collision gate jointly uses **TTC**, **TTS (Time To Steer)**, **TTB (Time To Brake)** and **TCC (Time to Conclusive Collision)**. | Exceptional vocabulary join to the exact TSS3 GTS dictionary, which exposes LPB enable/prohibit state, Avoidance TTB, left/right Driver TTS, and Time of margin until confirmed collision. |
+| **US20240116524A1 / US12441340B2**, Vehicle, method of controlling vehicle, and vehicle control interface box | 2022-10-04 | Toyota | Vehicle-platform API publishes distinct **PCS Alert**, **PCS Preparation (Prefill)**, **PCS Brake / PCS Brake Hold**, and **ADS/PCS arbitration** states. Prefill is explicitly preparation of the brake actuator to shorten latency from a later PCS deceleration request; arbitration chooses between ADS and PCS acceleration requests. | Direct Toyota-authored decomposition of the stages we need to distinguish in captures. Particularly important for proving that a visible alert or Prefill is not evidence that PCS braking won downstream arbitration or was physically executed. |
 
 Public sources:
 
@@ -63,6 +68,11 @@ Public sources:
 - https://patents.google.com/patent/US11834037B2/en
 - https://patents.google.com/patent/US20240101086A1/en
 - https://patents.google.com/patent/US20240262354A1/en
+- https://patents.google.com/patent/US20190092343A1/en
+- https://patents.google.com/patent/US20220340106A1/en
+- https://patents.google.com/patent/US20220258731A1/en
+- https://patents.google.com/patent/US20240109522A1/en
+- https://patents.google.com/patent/US20240116524A1/en
 
 ## 2. Exact joins to the current Camry/GTS work
 
@@ -578,6 +588,259 @@ unavailable.  Full comma authority would then require separately qualifying the
 already-recovered `0x08A` longitudinal request fields and Toyota's
 longitudinal arbitration/hold/release semantics.  Avoiding the FRC latch remains
 preferable if stock-longitudinal coexistence is the objective.
+
+### 2.6 PCS is a staged collision pipeline, not a single AEB boolean
+
+The PCS-specific patent pass on 2026-09-29 materially sharpens the current
+Camry interpretation. Toyota's own patents repeatedly separate **collision
+recognition**, **driver warning**, **brake preparation**, **driver brake
+assist**, **automatic braking**, **stop hold**, and **downstream request
+arbitration**. Those stages also appear independently in the current GTS+
+TSS3 dictionary.
+
+The strongest families are:
+
+1. **US20190092343A1 / US10829128B2** (Toyota, priority 2017-09-25).
+   This family explicitly orders three pre-collision controls: alert control,
+   advanced pre-collision brake control, then final pre-collision brake
+   control. They use successively shorter TTC thresholds T1th, T2th, and T3th.
+   The advanced brake stage commands target deceleration but can still be
+   cancelled as the scene changes. Once the final stage starts, the disclosed
+   controller continues braking to zero speed regardless of later obstacle/TTC
+   disappearance and then maintains the stop for a short interval. This is not
+   proof that current TSS3 uses the same three internal names, but it is strong
+   Toyota-authored precedent for **warning, earlier braking and committed final
+   braking being distinct states**.
+
+2. **WO2017014113A1 / US20180201238A1 / US10906515B2** (Toyota + ADVICS,
+   priority 2015-07-17). This predecessor family gives the most explicit
+   Toyota-authored actuator-side PCS sequence found in this pass:
+
+       warning
+         -> brake prefill
+         -> preliminary braking
+         -> collision-avoidance braking
+         -> brake hold after a successful stop
+
+   The PCS ECU computes TTC and advances the collision-avoidance control through
+   those stages. Prefill commands the brake ECU to operate the hydraulic pump
+   and take up pad/rotor clearance so later braking responds faster.
+   Preliminary braking is a separate low-deceleration stage; the full braking
+   stage commands the required collision-avoidance deceleration; brake hold
+   maintains the stopped state for a period afterward. The patent also keeps
+   driver brake demand additive during the preliminary-braking interval rather
+   than simply replacing it.
+
+   This predates TSS3, but it is unusually relevant because the current TSS3
+   dictionary independently exposes Prefill enable/prohibit and start/cancel
+   state plus PB/PBH vocabulary. It supplies mechanism-level lineage for those
+   names without proving that F33 retains the same thresholds or exact state
+   ordering.
+
+3. **US20160325720A1 / US10118598B2** (Toyota, priority 2014-01-20).
+   This predates TSS3 and therefore belongs here only as vocabulary lineage,
+   but the terminology match is too exact to ignore. It defines an ALM warning
+   region followed by PBA1, PBA2, and PBA3 TTC regions. Those PBA request modes
+   gate **braking-force assist**: when the driver brakes, the controller can
+   add pressurization above the driver's normal braking force, with requested
+   assist/pressurization levels increasing from 1 through 3 as the collision
+   becomes more urgent.
+
+   Current GTS help independently describes PBA as **Pre-collision brake
+   assist**. That makes the current GTS names ALM Request Flag, PBA Request
+   Status, PBA Assist Level, PBA1/PBA3 operation enable/prohibition, and the
+   PBA1/PBA2/PBA3 start/cancel flags look like inherited Toyota PCS vocabulary,
+   not generic translator guesses. It also gives an important semantic
+   distinction: **PBA is driver-brake assist, not necessarily autonomous PB**.
+   Do not project the old patent's exact TTC thresholds or level encoding onto
+   F33.
+
+4. **US20220340106A1 / US11993237B2** (Toyota, priority 2019-08-09).
+   This family gives a compact warning-to-stop sequence. A first TTC threshold
+   causes warning; a shorter operation threshold causes the automatic brake
+   unit to send a **PCS brake command** carrying requested deceleration Gpcs
+   to the brake ECU. The brake ECU controls the actuator so actual acceleration
+   follows that target. Once the automatic brake stops the car, a separate
+   brake-hold unit commands pressure to keep the car stopped.
+
+   This maps cleanly at the semantic level to the GTS split among ALM,
+   Deceleration Request Output Value, PB, and PBH. It is also consistent with
+   treating a negative PCS acceleration request as an application request that
+   still has to travel through a downstream brake-control/arbitration path
+   before physical pressure proves execution.
+
+5. **US20220258731A1** (Toyota, priority 2021-02-17).
+   This is particularly useful for the **front-camera/radar application side**
+   rather than the downstream motion manager. The disclosed controller
+   acquires front-radar, front-camera, and front/lateral-radar target
+   information, reduces/selects the candidate set, fuses targets, and then
+   evaluates warning and automatic-braking conditions independently. The
+   automatic-braking path predicts own-vehicle and target trajectories,
+   calculates TTC, computes a target deceleration needed to stop before the
+   target, and sends that target deceleration to the brake ECU.
+
+   That architecture is a close semantic fit for the current TSS3 FFD surface:
+
+   - Probability of collision point;
+   - Object collision score;
+   - Collision scene flag at AEB ALM;
+   - Collision scene flag at AEB request;
+   - control-target candidate/change/trace/crossing flags;
+   - image and millimeter-wave detection counters;
+   - collision-point and target-trajectory geometry.
+
+   The important conclusion is that **AEB warning-scene judgment and
+   AEB-intervention-scene judgment are intentionally separate decision
+   surfaces**. The exact Camry already exposes both names in GTS.
+
+6. **US20240109522A1 / US12434673B2** (Toyota + Denso, priority
+   2022-09-29). This is the strongest generation-proximate vocabulary join
+   found in this pass. Its autonomous-braking logic distinguishes ordinary
+   **PB (Pre-collision Brake)** from **LPB (Light Pre-collision Brake)**. LPB
+   has a lower maximum target-deceleration magnitude and more moderate jerk
+   than PB, and can start earlier for a class of crossing objects.
+
+   More importantly, its collision condition uses four named time margins:
+
+   - TTC — Time To Collision;
+   - TTS — Time To Steer, the remaining time in which steering can avoid
+     collision;
+   - TTB — Time To Brake, the remaining time in which braking can avoid
+     collision;
+   - TCC — Time to Conclusive Collision, a margin based on how soon the
+     moving object would itself need to accelerate/decelerate to avoid the
+     collision.
+
+   The exact TSS3 GTS dictionary independently exposes:
+
+       LPB operation enable flag
+       LPB operation prohibition flag
+       Avoidance TTB
+       Driver TTS (left)
+       Driver TTS (right)
+       Time of margin until confirmed collision
+
+   Time of margin until confirmed collision is not word-for-word identical to
+   the patent's English Time to Conclusive Collision, so retain the normal
+   translation caveat. Taken together with TTB/TTS and LPB, however, the join
+   is unusually specific.
+
+7. **US20240116524A1 / US12441340B2** (Toyota, priority 2022-10-04).
+   Although this family is written around Toyota's autonomous-driving vehicle
+   platform interface rather than the Camry FRC, it publishes perhaps the
+   cleanest Toyota PCS state decomposition:
+
+       PCS Alert Status
+       PCS Preparation Status      = Prefill
+       PCS Brake / PCS Brake Hold = PB / PBH
+       ADS / PCS arbitration status
+
+   Toyota explicitly describes Prefill Active as the condition in which PCS
+   prepares the brake actuator **to shorten latency from a later PCS
+   deceleration request**. It also exposes the downstream arbitration result:
+   the more-decelerative of the ADS and PCS acceleration requests wins, with
+   PCS arbitration status tied to PCS Brake or PCS Brake Hold.
+
+This yields a useful working architecture for F33 without claiming that every
+box is used in every scene:
+
+    front / lateral perception
+        |
+        v
+    target fusion / candidate selection / trajectory prediction
+        |
+        +--> TTC / TTS / TTB / collision-margin / scene qualification
+        |
+        +--> PCW / ALM -------------------------------> warning UI / buzzer
+        |
+        +--> Prefill ---------------------------------> brake preparation
+        |
+        +--> PBA1/2/3 --[driver braking]--------------> added brake assist
+        |
+        +--> LPB / PB / other autonomous-brake stage -+
+                                                        |
+                                                        v
+                                          PCS deceleration request
+                                                        |
+                                                        v
+                                          VMM / Brake arbitration
+                                                        |
+                                                        v
+                                          brake actuator / result
+                                                        |
+                                                        +--> PBH after stop
+
+The arrows are a **semantic working model**, not a claim that every named stage
+is serialized exactly this way on the 2026 Camry.
+
+#### Join to the retained 2026 Camry PCS event
+
+This patent/GTS join strengthens one part of the existing log interpretation
+without solving the still-unknown request IDs.
+
+During the retained route
+00000043--29caa20fbc, segment 12, the FRC-side 0x5AE warning indication
+asserted at the same instant that native 0x08A request-B moved from ID17 to
+ID34 with approximately -4.0 m/s^2 requested acceleration. The user brake
+arrived about 16.7 ms later; the native 0x08A request later changed from ID34
+to ID33. The relay blocked the first two special native 0x08A frames, while
+the separate 0x5AE warning path still crossed the relay.
+
+The patents now make the evidence boundary clearer:
+
+- 0x5AE can be treated as evidence for the **warning/ALM presentation path**,
+  not as evidence that brake pressure was commanded or applied;
+- the simultaneous negative-acceleration 0x08A request is evidence that a
+  **longitudinal PCS application request** was active, but it still does not
+  prove that Brake/VMM selected it or that the actuator executed it;
+- Prefill is itself a first-class PCS state and explicitly need not mean
+  braking, so a future capture must not collapse Prefill and PB merely because
+  both involve the brake system;
+- PBA is driver-brake-assist vocabulary. Since the user's brake starts during
+  the event, a transition involving PBA is now a plausible hypothesis for one
+  of the request-ID phases, but **ID34 and ID33 remain unassigned** until the
+  same event is joined to TSS3 Operation FFD/VDAS state;
+- the unchanged Brake/VMM longitudinal result ID11 in this interrupted event
+  remains meaningful negative evidence against claiming that the observed
+  ID33/34 request demonstrably won arbitration.
+
+The highest-value next capture is therefore no longer just "PCS warning on/off."
+At minimum synchronize these current GTS fields with 0x08A, 0x081, 0x5AE,
+brake-pedal state, and pressure/deceleration:
+
+    AEB Warning Collision Scene Determination
+    AEB Intervention Collision Scene Determination
+    ALM Request Flag
+    Prefill operation start/cancel + enable/prohibit
+    PBA Request Status / PBA Assist Level
+    PBA1 / PBA2 / PBA3 start/cancel
+    LPB start/cancel + enable/prohibit
+    FPB / PB request or start/cancel state
+    PBH Request Flag
+    Deceleration Request Output Value [m/s^2]
+    Avoidance TTB
+    Driver TTS left/right
+    Time of margin until confirmed collision
+
+That capture should let us answer three separate questions instead of one
+ambiguous "did PCS fire?" question:
+
+1. **warning-only:** collision/ALM judgment and meter/buzzer request, with no
+   automatic-brake request;
+2. **brake preparation / assist:** Prefill and/or PBA state without proof of an
+   autonomous PB request winning;
+3. **automatic braking:** PCS deceleration/PB request, downstream VMM selection,
+   and measured brake/acceleration response.
+
+Public sources for this PCS-specific pass:
+
+- https://patents.google.com/patent/US20190092343A1/en
+- https://patents.google.com/patent/US20180201238A1/en
+- https://patents.google.com/patent/US10118598B2/en
+- https://patents.google.com/patent/US20220340106A1/en
+- https://patents.google.com/patent/US20220258731A1/en
+- https://patents.google.com/patent/US20240109522A1/en
+- https://patents.google.com/patent/US20240116524A1/en
 
 ## 3. Network/gateway families
 
