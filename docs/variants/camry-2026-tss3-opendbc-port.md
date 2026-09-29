@@ -3548,13 +3548,42 @@ segment 12, route offset **752.436552--752.922597 s**. The native FRC-side
 | Phase | Frames | Request A | Request B | requested acceleration |
 |---|---:|---|---|---:|
 | immediately before | 1 witness | ID11 / allocation 1 | ID17 / allocation 3 | -4.000 m/s² |
-| alert entry | 9 | ID11 / allocation 1 | **ID34 / allocation 3** | -4.000 m/s² |
-| alert continuation | 12 | ID11 / allocation 1 | **ID33 / allocation 3** | -4.000 to -3.800 m/s² |
+| first special-request phase | 9 | ID11 / allocation 1 | **ID34 / allocation 3** | -4.000 m/s² |
+| second special-request phase | 12 | ID11 / allocation 1 | **ID33 / allocation 3** | -4.000 to -3.800 m/s² |
 | immediately after | 1 witness | ID11 / allocation 1 | ID17 / allocation 3 | -3.800 m/s² |
 
 Two other application bits track the phase: byte 4 bit 6 is set throughout the
-ID34/33 interval, while byte 3 bit 2 is set only during ID34. More importantly,
-FRC-side `0x5AE` byte 2 bit 2 asserts on the **exact first ID34 timestamp**.
+ID34/33 interval, while byte 3 bit 2 is set only during ID34. FRC-side
+`0x5AE` byte 2 bit 2 first asserts in the **same cereal CAN-event batch** as
+the first ID34 frame, but the raw batch is not unordered: `0x5AE` is CAN-array
+index 16 and `0x08A` ID34 is index 28. `pandad` copies the Panda receive
+buffer into cereal in order, so the captured FIFO order is **0x5AE warning
+first, ID34 request second**. This log format has no per-frame hardware
+timestamp, so it does not resolve the time separation within that batch.
+The differing carrier cadences also limit the underlying state-transition
+inference: the last observed clear `0x5AE` was 188.123 ms earlier, whereas the
+last ID17 `0x08A` was only 20.226 ms earlier. Thus the wire evidence proves
+the order of the **first observed frames**, not that the FRC's internal warning
+decision necessarily preceded its internal longitudinal-request transition.
+
+The observed onset/exit chronology, relative to the first asserted `0x5AE` /
+first ID34 receive batch, is:
+
+| Offset | Observation |
+|---:|---|
+| -188.123 ms | prior native `0x5AE` sample has warning bit clear |
+| -20.226 ms | prior native `0x08A`: request B ID17, -4.000 m/s² |
+| +0.000 ms | native `0x5AE` warning bit asserted, receive-array index 16 |
+| +0.000 ms | native `0x08A` request B first observed as ID34, -4.000 m/s², receive-array index 28 |
+| +0.000 ms | forwarded `0x5AE` TX return appears later in the same batch, index 36 |
+| +14.464 ms | second native ID34 `0x08A` |
+| +16.733 ms | first logged driver-brake press |
+| +33.508 ms | next native ID34 frame is the first special request observed forwarded to bus 0 |
+| +215.878 ms | native request B first changes ID34 -> ID33 |
+| +486.045 ms | last native ID33 frame; `0x5AE` warning remains asserted |
+| +518.686 ms | native `0x08A` returns to ID17 |
+| +646.872 ms | native `0x5AE` warning bit first observed clear again |
+
 Across the retained September 21 corpus—44 rlogs and **12,981 native `0x5AE`
 frames**—that bit is asserted only four times, all in this one event. The
 `0x08A` ID33 and ID34 states likewise occur only here, 12 and 9 frames

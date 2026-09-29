@@ -779,19 +779,26 @@ This patent/GTS join strengthens one part of the existing log interpretation
 without solving the still-unknown request IDs.
 
 During the retained route
-00000043--29caa20fbc, segment 12, the FRC-side 0x5AE warning indication
-asserted at the same instant that native 0x08A request-B moved from ID17 to
-ID34 with approximately -4.0 m/s^2 requested acceleration. The user brake
-arrived about 16.7 ms later; the native 0x08A request later changed from ID34
-to ID33. The relay blocked the first two special native 0x08A frames, while
-the separate 0x5AE warning path still crossed the relay.
+00000043--29caa20fbc, segment 12, the first asserted FRC-side 0x5AE warning
+frame and the first native 0x08A request-B transition from ID17 to ID34 share
+one cereal CAN-event timestamp. They are nevertheless ordered inside that
+receive batch: 0x5AE is CAN-array index 16 and the ID34 0x08A is index 28.
+Current pandad preserves Panda receive-buffer order when publishing that array,
+so the captured FIFO order is **warning frame first, ID34 request second**.
+The rlog carries no per-frame hardware timestamp, so the sub-batch delay is
+unknown. The ID34 request carries approximately -4.0 m/s^2 requested
+acceleration. The user brake arrives about 16.7 ms after the batch timestamp;
+the native 0x08A request later changes from ID34 to ID33. The relay blocked the
+first two special native 0x08A frames, while the separate 0x5AE warning path
+still crossed the relay.
 
 The patents now make the evidence boundary clearer:
 
 - 0x5AE can be treated as evidence for the **warning/ALM presentation path**,
   not as evidence that brake pressure was commanded or applied;
-- the simultaneous negative-acceleration 0x08A request is evidence that a
-  **longitudinal PCS application request** was active, but it still does not
+- the co-batched negative-acceleration 0x08A request, ordered after the first
+  warning frame in the captured FIFO, is evidence that a **longitudinal PCS
+  application request** was active, but it still does not
   prove that Brake/VMM selected it or that the actuator executed it;
 - Prefill is itself a first-class PCS state and explicitly need not mean
   braking, so a future capture must not collapse Prefill and PB merely because
