@@ -3584,7 +3584,19 @@ most of the request after disengagement; that is not preservation while active.
 
 The visible alert has a separate path. All four asserted `0x5AE` alert-bit frames
 have accepted bus-0 transmit confirmations, beginning exactly at native request
-entry, even while the first two `0x08A` ID34 frames are blocked. An audible/visual
+entry, even while the first two `0x08A` ID34 frames are blocked. Current GTS+
+provides the corresponding UI endpoint vocabulary: predecessor `PCS2_P5` exposes
+DID `0x100E` **PCS Warning Display Request** (Not Request / Display 1 / Display 2 /
+Display 3) and DID `0x1014` **PCS Warning Buzzer Request**, while `Meter_P5`
+exposes DID `0x2951` bit 9 as **PCS Warning**. The exact Camry-HV type-12984 CAN
+Bus Check topology places the FRC on Toyota Bus 1 and the **Combination Meter**
+on Toyota Bus 3, both behind the Central Gateway. Joined to the independently
+observed FRC-origin `0x5AE` direction and the recovered FRC absorption of older
+`PCS2_P5` roles, this strongly supports `0x5AE` as an FRC-origin PCS alert/UI
+carrier routed toward display consumers including the Combination Meter. It does
+**not** prove that `0x5AE` is meter-exclusive, nor does the GTS+ diagnostic DDB
+map `0x5AE` byte 2 bit 2 directly to Meter DID `0x2951`; normal-driving CAN
+arbitration-ID/bit routing remains a separate wire-level join. An audible/visual
 PCS alert therefore does **not** prove that the shared `0x08A` braking request
 reached the VMC.
 
