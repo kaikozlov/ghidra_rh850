@@ -930,14 +930,25 @@ ledger context is useful.
   fields fit the request-side bound-package geometry; `0x081` fits the result/status
   family. The former `0x160` and `0x0CA` command interpretations are superseded.
 
-  The remaining longitudinal work is therefore narrow: resolve `0x08A` A/B
-  upper-versus-lower order and remaining policy fields, identify the exact Camry
-  request->Vehicle-Motion-Control target handoff and protected physical publisher,
-  recover safe stock request-source suppression/replacement, and validate the result/
+  The remaining longitudinal work is therefore narrow: resolve remaining `0x08A`
+  policy fields, identify the exact Camry request->Vehicle-Motion-Control target
+  handoff, qualify safe source replacement/handoff, and validate the result/
   driver-override/standstill behavior. Do **not** synthesize a direct powertrain/brake
   command merely because the final actuator interface is unknown; the OEM-native
   integration point is the application/request side of Toyota's Vehicle Movement
   Manager. Canonical architecture: [../architecture/toyota-tss3-vehicle-movement-arbitration.md](../architecture/toyota-tss3-vehicle-movement-arbitration.md).
+
+  **September-29 PCS/AEB closure of the openpilot-facing carrier question:** the
+  retained user-reported PCS event proves that stock PCS braking itself rides native
+  FRC `0x08A`. Request B enters the unique ID34->ID33 Brake-Only, approximately
+  -4.0 m/s² episode while a separate FRC-origin `0x5AE` warning path asserts. The
+  then-active host replacement suppresses the first two native ID34 requests, so it
+  demonstrably does not preserve PCS onset; `0x081` remains ID11 and is therefore a
+  downstream result witness, not the source-side detector. For openpilot, the logical
+  correction is now defined: detect source-side PCS emergency intent, relinquish host
+  `0x08A` ownership, and pass the **original authenticated FRC request** untouched.
+  Exact ID33/34 Toyota substage names, first-frame handoff timing, and unconfounded
+  downstream Brake/VMM selection/physical actuation remain open.
 
   The historical evidence below remains provenance for how this was reached, but any
   section that promotes `0x160` or `0x0CA` as the current command candidate is superseded.

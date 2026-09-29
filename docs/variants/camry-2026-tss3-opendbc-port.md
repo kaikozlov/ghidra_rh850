@@ -3669,19 +3669,56 @@ consistent:
   explicitly. Honda Bosch warns that longitudinal disables AEB, and Subaru
   sets its PCB-off indication because AEB is not preserved.
 
-There is no upstream generic policy that observes `stockAeb` and merges a stock
-brake demand into an openpilot command. Consequently, TSS3's combined `0x08A`
-carrier cannot be made idiomatic by adding an ID detector and a private relay
-policy. If the relay blocks native FRC `0x08A`, the VMC cannot receive the
-emergency request above on that carrier; detecting its result ID elsewhere does
-not restore the request.
-Before longitudinal support can be considered complete, one of two things must
-be established in the normal upstream architecture: a separate downstream PCS
-actuation carrier that remains forwardable, or an upstream-reviewed combined-
-carrier ownership contract expressed through the Toyota `CarState` /
-`CarController` and Panda safety boundaries. Absent that, the honest upstream
-precedent is to mark stock AEB unavailable—not to hide a merge policy in the
-signer, relay, or an auxiliary daemon.
+The September-21 event plus the PCS-specific patent/GTS join now close the
+**openpilot-facing architecture** more tightly than that earlier either/or
+framing.
+
+First, stock PCS observation belongs on the FRC/source side, not on
+`CONTROL_RESULT`:
+
+- the FRC-origin `0x5AE` warning bit is the current **`stockFcw` candidate**:
+  it is rare in the retained corpus, asserts at the observed PCS warning event,
+  follows a separate forwarding path, and remains asserted after the special
+  longitudinal-request phase has ended. The exact normal-driving OEM bit name
+  is still a wire-level join, so this is a bounded implementation candidate,
+  not a DBC rename by fiat;
+- the native source-side `0x08A` ID34->ID33 request-B episode is the current
+  **`stockAeb` candidate**. Both phases use allocation 3 (Brake Only) and a
+  large negative request (-4.0 to -3.8 m/s²), and occur only in this retained
+  PCS event. Byte 4 bit 6 tracks the whole ID34/33 interval and byte 3 bit 2
+  additionally distinguishes ID34. Exact Toyota substage names remain unknown,
+  so implementation should express the proven emergency-request predicate
+  without claiming that ID34 or ID33 literally means Prefill/PBA/PB;
+- Brake-owned `0x081 CONTROL_RESULT` is **downstream selection/result
+  evidence**, not the stock-AEB detector. In this capture it remains ID11
+  precisely while the native PCS request onset is being suppressed.
+
+Second, the carrier question is no longer open: **PCS braking rides the same
+native FRC `0x08A CONTROL_REQUEST` that host longitudinal replaces.** The
+September-21 relay trace directly demonstrates that active replacement blocks
+the native emergency-request onset while the separate `0x5AE` warning path
+continues. Thus the then-active alpha-long shape did not preserve stock PCS
+braking.
+
+The idiomatic preservation target is therefore not to synthesize or merge a
+Toyota PCS command. When a native source-side PCS emergency request is detected,
+host `0x08A` ownership should be relinquished so the FRC's **original
+authenticated request**—including its OEM request identity, acceleration,
+allocation/policy fields, freshness and MAC—can reach Brake/VMM untouched.
+This is analogous in purpose to ports that preserve a stock AEB command while
+openpilot owns ordinary longitudinal control, but TSS3 requires an ownership
+handoff because ACC and PCS share one carrier.
+
+That closes the **logical integration strategy**, not its qualification. The
+current Panda forwarding hook is address-based, so an implementation must prove
+that ownership can be released early enough to preserve the first native
+emergency frame. The observed `0x5AE` warning frame precedes the first ID34
+frame in the Panda receive FIFO and may provide an early latch, but its lower
+cadence means that ordering must not be assumed universal from one event.
+Completion therefore requires a corrected handoff demonstrated while host
+longitudinal remains active, followed by an unconfounded capture showing the
+native PCS request reaching Brake/VMM and the downstream `0x081`/physical
+braking response.
 
 Evidence:
 `data/generated/camry_20260921_pcs_alert.json`,

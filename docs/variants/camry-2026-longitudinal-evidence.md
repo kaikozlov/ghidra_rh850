@@ -1022,9 +1022,17 @@ That capture does not prove PCS wins downstream arbitration. Instead, it proves
 the then-active replacement path suppresses the first two native ID34 emergency
 requests; driver braking begins before native `0x08A` forwarding resumes. It is
 therefore a negative PCS/AEB coexistence result for that replacement architecture,
-not a clean stock-AEB actuation experiment. The synchronized FRC/Brake DID and
-Operation-FFD join remains the targeted-live path for assigning the downstream
-request/result/actuation semantics.
+not a clean stock-AEB actuation experiment.
+
+The openpilot-facing carrier question is nevertheless closed: PCS braking is
+present on the same native FRC `0x08A CONTROL_REQUEST` that host longitudinal
+replaces, while `0x5AE` carries a separate warning/UI path. `0x081` remains
+the downstream Brake/VMM result witness. The corrected integration target is
+therefore to **relinquish host `0x08A` ownership and pass the original
+authenticated native PCS request untouched** when the source-side emergency
+request is detected, rather than to merge or synthesize PCS into the host
+request. What remains open is the timing/implementation of that handoff and an
+unconfounded downstream result/physical-actuation validation.
 
 ## Branch implementation and validation boundary
 
@@ -1049,13 +1057,15 @@ from Toyota's source-real state and does not transmit `0x251`.
    `0x160`, protected `0x0CA`, and all ordinary state on one clock. This should
    bind the stop/hold permissions and request ID/acceleration to the wire without
    guessing from correlation.
-3. Re-validate PCS/AEB coexistence with a corrected replacement architecture before
-   calling the path complete. The September-21 PCS event already proves the old
-   replacement path **did not preserve emergency-request onset**: its first two
-   native ID34 frames were suppressed, and driver braking preceded native forwarding
-   resumption. A future validation must preserve the native emergency request while
-   host longitudinal remains active and separately capture the downstream Brake/VMM
-   result/actuation response without that relay confound.
+3. Implement and validate the now-defined PCS/AEB ownership handoff. The
+   September-21 event proves the old replacement path **did not preserve
+   emergency-request onset** and also identifies the integration point: native
+   source-side `0x08A` carries the PCS braking request, `0x5AE` carries the
+   separate warning path, and `0x081` reports the downstream result. A future
+   validation must relinquish host `0x08A` ownership early enough that the
+   original authenticated emergency request passes untouched while host
+   longitudinal had been active, then separately capture Brake/VMM
+   selection/result and physical actuation without the relay confound.
 
 **Exit status:** the historical B12 offline generator remains verified evidence,
 and the test branch now implements the Corolla-validated B4:B5 request plus the
@@ -1066,5 +1076,7 @@ is not selected by this trial. The `0x251` mode-middleman and
 virtual engagement path are disproved and removed; delayed-hold release and the
 missing request/permission semantics remain open. PCS/AEB coexistence is no longer
 merely untested: the September-21 event disproves preservation at emergency-request
-onset for the then-active replacement path. Corrected preservation plus an
-unconfounded downstream AEB result/actuation capture remain open.
+onset for the then-active replacement path **and closes the logical correction**:
+release host ownership and pass the stock authenticated `0x08A` PCS request,
+rather than synthesize/merge it. Corrected handoff timing plus an unconfounded
+downstream AEB result/actuation capture remain open.
