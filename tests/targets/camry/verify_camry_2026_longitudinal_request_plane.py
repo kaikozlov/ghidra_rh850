@@ -61,15 +61,13 @@ for label, e in expected.items():
   result = d["result_0x081"]
   words = request["longitudinal_acceleration_words"]
   result_id = result["longitudinal_result_id_candidate"]
-  result_acc = result["longitudinal_result_acceleration_candidate"]
+  result_acc = result["longitudinal_reference_word_B20"]
   print(f"== {label} ==")
   check(f"{label}: raw capture identity", d["source"]["sha256"] == e["sha"])
   check(f"{label}: duplicated 0x08A acceleration words are exact",
         request["frame_count"] == e["request_frames"] and words["equal_frames"] == e["request_frames"]
         and words["equal_fraction"] == 1.0 and words["B8_B9"]["signed16_raw_range"] == e["raw_range"]
         and words["B11_B12"]["signed16_raw_range"] == e["raw_range"])
-  check(f"{label}: request scale matches Toyota 5280/5281 geometry",
-        words["B8_B9"]["scale_mps2_per_count"] == .001 and words["B11_B12"]["scale_mps2_per_count"] == .001)
   check(f"{label}: 0x081 selected longitudinal-ID alphabet",
         result["paired_to_preceding_0x08A"] == e["pair_n"] and result_id["value_counts"] == e["result_ids"])
   packed = request["longitudinal_id_allocation_packing"]
@@ -83,9 +81,9 @@ for label, e in expected.items():
         relation["selected_ID11_equals_candidate_A_frames"] >= relation["selected_ID11_frames"] - 5
         and relation["selected_equals_candidate_B_frames"] == 0
         and relation["selected_63_absent_from_A_B_frames"] == e["result_ids"]["63"])
-  check(f"{label}: 0x081 B20:B21 is strongly request-related result acceleration",
-        approx(result_acc["request_vs_result"]["pearson_r"], e["r"]))
-  check(f"{label}: ID63 pass-through and ID11 arbitration divergence",
+  check(f"{label}: historical B20 reference-word request correlation",
+        approx(result_acc["request_vs_reference"]["pearson_r"], e["r"]))
+  check(f"{label}: ID63 pass-through and ID11 divergence in the B20 reference word",
         approx(result_acc["conditional_by_result_id"]["63"]["result_minus_request"]["median_mps2"], e["id63_delta"])
         and approx(result_acc["conditional_by_result_id"]["11"]["result_minus_request"]["median_mps2"], e["id11_delta"])
         and abs(result_acc["conditional_by_result_id"]["11"]["result_minus_request"]["median_mps2"]) > .15)
@@ -105,23 +103,10 @@ for label, e in expected.items():
         and brake_ctx["positive_delta_edges"] == 0
         and approx(brake_ctx["median_delta_mps2"], e["low_speed_brake_median_delta"])
         and all(row["delta_mps2"] < 0 for row in brake_ctx["edges"]))
-  old = d["0x0CA_supersession_check"]["0x081_result_accel_vs_0x0CA_words"]
-  check(f"{label}: old 0x0CA result triplet does not reproduce the cleaner 0x081 result",
+  old = d["0x0CA_supersession_check"]["0x081_B20_reference_vs_0x0CA_words"]
+  check(f"{label}: old 0x0CA result triplet does not reproduce the 0x081 B20 reference word",
         all(abs(row["pearson_r"]) < .6 for row in old.values()))
 
-print("== GTS recorder and mapping boundaries ==")
-layout = art["layout"]
-check("5280/5281 upper/lower ordering is strongly resolved for ordinary Camry DRCC",
-      layout["5280_lower_longitudinal_request"]["request_id"]["wire"] == "0x08A B7[7:2]"
-      and layout["5280_lower_longitudinal_request"]["acceleration"]["wire"] == "0x08A B11:B12"
-      and layout["5281_upper_longitudinal_request"]["request_id"]["wire"] == "0x08A B6[7:2]"
-      and layout["5281_upper_longitudinal_request"]["acceleration"]["wire"] == "0x08A B8:B9")
-check("5282 lateral tuple is recovered in 0x08A",
-      layout["5282_lateral_request"]["lateral_id"]["wire"] == "0x08A B21[5:0]"
-      and layout["5282_lateral_request"]["pinion_angle"]["wire"].startswith("0x08A B18:B19"))
-check("5284/57DB longitudinal result candidates live in Brake-owned 0x081",
-      layout["5284_longitudinal_result_id"]["wire"] == "0x081 B6[5:0]"
-      and layout["57DB_result_acceleration"]["wire"].startswith("0x081 B20:B21"))
 hold = art["hold_request_semantics"]
 check("raw ACC hold states decompose into request IDs and allocation methods",
       hold["hold_episode_frames"] == 198

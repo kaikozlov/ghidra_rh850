@@ -1,0 +1,260 @@
+[
+  {
+    "B18": -0.303,
+    "B20": -0.314,
+    "B22": 3.113,
+    "B24": -0.314,
+    "B26_raw": 0,
+    "B26_signed13": 0,
+    "B4": -0.303,
+    "aEgo": -0.08367390930652618,
+    "ages_ms": {
+      "age_applied": 10.01864599993496,
+      "age_brake": 10.01864599993496,
+      "age_cs": 8.636457999955383,
+      "age_gas": 0.0,
+      "age_native": 10.01864599993496
+    },
+    "allocation": [
+      1.0,
+      3.0
+    ],
+    "b6_high_bits": 0,
+    "brake_on": false,
+    "confirmed_origin": 2,
+    "delivered_ids": [
+      11.0,
+      17.0
+    ],
+    "delivered_lower": -0.436,
+    "delivered_upper": -0.436,
+    "gas_fraction": 0.0,
+    "label": "stock braking ramp start",
+    "longActive": false,
+    "native_request_hex": "0000000880002d47fe4c5efe4c7fff007ffffffb400b100064002200609f8edf",
+    "native_upper": -0.436,
+    "requestLoss": false,
+    "resultID": 11,
+    "route": "0000003f--36e72f5fdc",
+    "segment": 21,
+    "speed_mps": 11.386805555555558,
+    "status_hex": "00000018fed10b7b00000004000b0000fffbfed1fec60c29fec60000ae19fba9",
+    "t_route": 1318.830603612,
+    "vehicle_side_request_hex": "0000000880002d47fe4c5efe4c7fff007ffffffb400b100064002200609f8edf"
+  },
+  {
+    "B18": -0.466,
+    "B20": -0.466,
+    "B22": 4.216,
+    "B24": -0.466,
+    "B26_raw": 0,
+    "B26_signed13": 0,
+    "B4": -1.423,
+    "aEgo": -1.4534156322479248,
+    "ages_ms": {
+      "age_applied": 0.0,
+      "age_brake": 12.733050999997886,
+      "age_cs": 11.221613999992996,
+      "age_gas": 12.733050999997886,
+      "age_native": 20.496901000001344
+    },
+    "allocation": [
+      1.0,
+      3.0
+    ],
+    "b6_high_bits": 0,
+    "brake_on": false,
+    "confirmed_origin": 1,
+    "delivered_ids": [
+      11.0,
+      17.0
+    ],
+    "delivered_lower": -2.123,
+    "delivered_upper": -2.123,
+    "gas_fraction": 0.0,
+    "label": "OP weak braking before pedal",
+    "longActive": true,
+    "native_request_hex": "0000000880002d47f06059f0607fff007fff004340001000640027006a4e1b48",
+    "native_upper": -4.0,
+    "requestLoss": false,
+    "resultID": 11,
+    "route": "00000086--575a5fd6a5",
+    "segment": 4,
+    "speed_mps": 4.844444444444445,
+    "status_hex": "00000018fa710b1700000004000b0000003ffe2efe2e1078fe2e0000a47702d5",
+    "t_route": 253.87649745,
+    "vehicle_side_request_hex": "0000000880002d47f7b559f7b57fff007fff003fc00b100064001e0064528171"
+  },
+  {
+    "B18": -0.442,
+    "B20": -0.442,
+    "B22": 4.249,
+    "B24": -0.442,
+    "B26_raw": 8097,
+    "B26_signed13": -95,
+    "B4": -2.249,
+    "aEgo": -1.4199981689453125,
+    "ages_ms": {
+      "age_applied": 0.0,
+      "age_brake": 0.0,
+      "age_cs": 8.829928000011478,
+      "age_gas": 0.0,
+      "age_native": 0.0
+    },
+    "allocation": [
+      1.0,
+      3.0
+    ],
+    "b6_high_bits": 0,
+    "brake_on": true,
+    "confirmed_origin": 2,
+    "delivered_ids": [
+      11.0,
+      17.0
+    ],
+    "delivered_lower": -4.0,
+    "delivered_upper": -4.0,
+    "gas_fraction": 0.0,
+    "label": "driver brake after disengagement",
+    "longActive": false,
+    "native_request_hex": "0000000880002d47f06059f0607fff007fff00424000300064002e0022f5391a",
+    "native_upper": -4.0,
+    "requestLoss": true,
+    "resultID": 11,
+    "route": "00000086--575a5fd6a5",
+    "segment": 4,
+    "speed_mps": 4.625000000000001,
+    "status_hex": "00000018f7370bda00000014000000000042fe46fe461099fe461fa1e53be480",
+    "t_route": 254.027889756,
+    "vehicle_side_request_hex": "0000000880002d47f06059f0607fff007fff00424000300064002e0022f5391a"
+  },
+  {
+    "B18": 1.649,
+    "B20": -0.082,
+    "B22": 5.76,
+    "B24": 1.649,
+    "B26_raw": 0,
+    "B26_signed13": 0,
+    "B4": 1.649,
+    "aEgo": 1.7585453987121582,
+    "ages_ms": {
+      "age_applied": 10.214596999958303,
+      "age_brake": 0.0,
+      "age_cs": 7.981189999952676,
+      "age_gas": 21.88964199996235,
+      "age_native": 10.214596999958303
+    },
+    "allocation": [
+      0.0,
+      2.0
+    ],
+    "b6_high_bits": 0,
+    "brake_on": false,
+    "confirmed_origin": 2,
+    "delivered_ids": [
+      0.0,
+      4.0
+    ],
+    "delivered_lower": -0.049,
+    "delivered_upper": -0.049,
+    "gas_fraction": 0.25,
+    "label": "driver accelerator",
+    "longActive": false,
+    "native_request_hex": "0000000080000012ffcf00ffcf7fff007fffffee00000000640014009d031e4c",
+    "native_upper": -0.049,
+    "requestLoss": false,
+    "resultID": 63,
+    "route": "00000086--575a5fd6a5",
+    "segment": 4,
+    "speed_mps": 2.066666666666667,
+    "status_hex": "0000001806713f570000000400000000fff40671ffae168006710000552b2e87",
+    "t_route": 259.791936445,
+    "vehicle_side_request_hex": "0000000080000012ffcf00ffcf7fff007fffffee00000000640014009d031e4c"
+  },
+  {
+    "B18": 0.636,
+    "B20": -0.461,
+    "B22": 2.96,
+    "B24": -0.461,
+    "B26_raw": 0,
+    "B26_signed13": 0,
+    "B4": 0.636,
+    "aEgo": 0.6942835450172424,
+    "ages_ms": {
+      "age_applied": 0.0,
+      "age_brake": 10.327512999992905,
+      "age_cs": 7.355678999999782,
+      "age_gas": 22.01979799997389,
+      "age_native": 10.327512999992905
+    },
+    "allocation": [
+      1.0,
+      3.0
+    ],
+    "b6_high_bits": 0,
+    "brake_on": false,
+    "confirmed_origin": 1,
+    "delivered_ids": [
+      11.0,
+      17.0
+    ],
+    "delivered_lower": 0.642,
+    "delivered_upper": 0.642,
+    "gas_fraction": 0.0,
+    "label": "normal OP acceleration",
+    "longActive": true,
+    "native_request_hex": "0000000880002d4700ab5900ab7fff007fff00234000100064001e001c0fba40",
+    "native_upper": 0.171,
+    "requestLoss": false,
+    "resultID": 11,
+    "route": "00000086--575a5fd6a5",
+    "segment": 4,
+    "speed_mps": 17.86875,
+    "status_hex": "00000018027c0b2a00000004000b00000026027cfe330b90fe330000106ce309",
+    "t_route": 272.839678435,
+    "vehicle_side_request_hex": "0000000880002d4702825902827fff007fff0026c00b100064000e00df68dbc3"
+  },
+  {
+    "B18": 0.666,
+    "B20": 0.666,
+    "B22": 0.849,
+    "B24": 0.666,
+    "B26_raw": 7887,
+    "B26_signed13": -305,
+    "B4": -2.458,
+    "aEgo": 0.0,
+    "ages_ms": {
+      "age_applied": 19.431836999999064,
+      "age_brake": 0.0,
+      "age_cs": 10.252213999999427,
+      "age_gas": 19.431836999999064,
+      "age_native": 19.431836999999064
+    },
+    "allocation": [
+      0.0,
+      2.0
+    ],
+    "b6_high_bits": 2,
+    "brake_on": true,
+    "confirmed_origin": 2,
+    "delivered_ids": [
+      0.0,
+      4.0
+    ],
+    "delivered_lower": 0.666,
+    "delivered_upper": 0.666,
+    "gas_fraction": 0.0,
+    "label": "stationary with brake held",
+    "longActive": false,
+    "native_request_hex": "0000000080000012029a00029a7fff007fff00190000000000000f0027e4bf91",
+    "native_upper": 0.666,
+    "requestLoss": false,
+    "resultID": 63,
+    "route": "00000087--7e7f16f8af",
+    "segment": 0,
+    "speed_mps": 0.0,
+    "status_hex": "00000018f666bfbc00000004000000000019029a029a0351029a1ecfebff6284",
+    "t_route": 9.972896911,
+    "vehicle_side_request_hex": "0000000080000012029a00029a7fff007fff00190000000000000f0027e4bf91"
+  }
+]

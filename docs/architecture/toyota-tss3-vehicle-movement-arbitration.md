@@ -377,11 +377,19 @@ publication toward the TSS applications**, not as a dumb echo:
 - `B13[5:0]` = recovered lateral result ID;
 - `B16:B17` = recovered result/reference pinion quantity;
 - `B6[5:0]` = strongest `5284` longitudinal employed-source-ID candidate;
-- `B20:B21` = strongest `57DB` result-acceleration candidate;
 - `B11[4]` = proven FRC-request-loss supervision state, not yet joined to `57D3`.
 
-The remaining acceleration-like `0x081` fields should be investigated against the full
-Figure-4/FFD state packet before assigning them ad-hoc names.
+The acceleration-like words are bounded by the
+[2026-09-30 VMC status corpus](../variants/camry-2026-longitudinal-evidence.md#2026-09-30-vmc-status-corpus)
+across 1,232,664 native status frames: `B4:B5` is the effective/result
+candidate (request-following, not a literal body sensor or unconditional echo),
+`B18:B19` is an empirical `max(B4, B24)` drive-side envelope, `B20:B21` is a
+**closed-accelerator reference** (the early `57DB` result-acceleration reading
+is retracted as an unconfirmed join), `B22:B23` is a `B22 >= B18`
+open-accelerator envelope, `B24:B25` is driver-accelerator demand, and `B26`
+is a signed brake-linked quantity with unresolved scale. None of these words
+is OEM-name-joined. The remaining `0x081` fields should still be investigated
+against the full Figure-4/FFD state packet before assigning them ad-hoc names.
 
 ### Fault-state feedback is synthesized by the manager
 

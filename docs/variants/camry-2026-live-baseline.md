@@ -3448,10 +3448,15 @@ for an unsigned pre-sign PDU.
 
 ### 50.2 Historical interpretation: `0x0CA` application words looked upper/lower/result-like
 
-> **September-16 supersession:** the dedicated request/result audit now finds the
-> cleaner arbitration result in Brake-owned `0x081`: B6[5:0] selected longitudinal
-> ID and B20:B21 signed16 x0.001 result acceleration. The `0x0CA` triplet below is
-> retained as historical evidence only and is no longer the current result mapping.
+> **September-16 supersession, corrected 2026-09-30:** the dedicated request/result
+> audit finds the cleaner arbitration result in Brake-owned `0x081`: `B6[5:0]`
+> selected longitudinal ID plus an effective/result acceleration candidate.
+> An early draft named `B20:B21` as that result acceleration; the
+> [2026-09-30 VMC status corpus](camry-2026-longitudinal-evidence.md#2026-09-30-vmc-status-corpus)
+> corrects it to a closed-accelerator reference and moves the effective/result
+> candidate to `B4:B5` (all OEM joins still unconfirmed). The `0x0CA` triplet
+> below is retained as historical evidence only and is no longer the current
+> result mapping.
 
 During the stock-cruise latch, signed big-endian words B3:B4, B5:B6, and B7:B8
 all occupy physically plausible acceleration ranges at **0.001 m/s²/count**.
@@ -3575,9 +3580,16 @@ B8:B9 and B11:B12 are equal in **44,617/44,617** frames and have the exact
 signed16 x0.001 geometry Toyota assigns to recorder `5280/5281` lower/upper
 acceleration requests. `0x081 B6[5:0]` has only selected values 11 and 63 and is
 the strongest `5284` result-ID candidate. `0x081 B20:B21` has the exact signed16
-x0.001 result geometry; its request correlation is r=0.941674/0.836884, and the
-selected-ID split is decisive: ID63 has median result-minus-request 0.000 m/s² in
-both drives, whereas ID11 differs by -0.181/-0.435 m/s². This is arbitration-like
+x0.001 geometry and its request correlation is r=0.941674/0.836884, with the
+selected-ID split decisive: ID63 has median result-minus-request 0.000 m/s² in
+both drives, whereas ID11 differs by -0.181/-0.435 m/s². The
+[2026-09-30 VMC status corpus](camry-2026-longitudinal-evidence.md#2026-09-30-vmc-status-corpus)
+supersedes the field-role reading (not these observations): `B20` is a
+closed-accelerator reference, the effective/result acceleration candidate is
+`B4:B5`, `B18:B19` is an empirical `max(B4, B24)` envelope, `B22:B23` a
+`B22>=B18` open-accelerator envelope, `B24:B25` driver demand, and `B26` a
+brake-linked signed quantity; the exact `57DB`/`57D3` joins remain unconfirmed.
+This is arbitration-like
 selection behavior. The old `0x0CA B3:B4/B5:B6/B7:B8` triplet does not reproduce
 this result and is demoted to other protected longitudinal/chassis state.
 

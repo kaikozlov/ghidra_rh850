@@ -52,11 +52,14 @@ ordinary Camry A/B ordering as upper/lower.
 as the upstream TSS request/instruction plane; Brake owns `0x081` and continues
 publishing it with request-loss supervision if the FRC request disappears. The
 byte-level audit maps `0x08A B8:B9` to the ordinary-DRCC upper bound and
-`B11:B12` to the lower bound at signed16 x0.001, and maps `0x081 B6[5:0]` /
-B20:B21 as the strongest `5284` employed-source-ID / `57DB` result-acceleration
-pair. `0x0CA` remains protected longitudinal/chassis state but is no longer the
-primary result interpretation. See
-`data/generated/camry_2026_longitudinal_request_plane.json`.
+`B11:B12` to the lower bound at signed16 x0.001, and maps `0x081 B6[5:0]` as
+the strongest `5284` employed-source-ID candidate. An early draft also read
+`B20:B21` as the `57DB` result-acceleration candidate; the
+[2026-09-30 VMC status corpus](#2026-09-30-vmc-status-corpus) corrects that:
+`B20` is a closed-accelerator reference and `B4:B5` is the effective/result
+candidate, with every OEM diagnostic join still unconfirmed. `0x0CA` remains
+protected longitudinal/chassis state but is no longer the primary result
+interpretation. See `data/generated/camry_2026_longitudinal_request_plane.json`.
 
 ## September 16: command versus feedback audit
 
@@ -610,7 +613,7 @@ synchronized diagnostic/FFD value directly names that wire field.
 | `5284` arbitration-result longitudinal ID | `0x081 B6[5:0]` | strong candidate; observed values 11 and 63 |
 | `5285` arbitration-result lateral ID | `0x081 B13[5:0]` | recovered |
 | `57D3` acceleration-valid flag | unresolved | `0x081 B11[4]` is proven request-loss supervision, but is not OEM-joined to `57D3` |
-| `57DB` arbitration-result acceleration | `0x081 B20:B21`, s16 x0.001 m/s² | strong candidate |
+| `57DB` arbitration-result acceleration | no confirmed wire join | the earlier `0x081 B20:B21` candidate was corrected on 2026-09-30: `B20` is a closed-accelerator reference and `B4:B5` is the effective/result candidate ([VMC status corpus](#2026-09-30-vmc-status-corpus)); no synchronized diagnostic sample names any `0x081` word |
 | `57DE` arbitration-result pinion angle | `0x081 B16:B17` | recovered |
 
 The packed-ID interpretation has an independent arbitration check. In the same
@@ -749,11 +752,15 @@ Across 17,073 / 19,999 request-result pairs in the complete A/B drives,
 `0x081 B20:B21` correlates with the request at r=0.941674 / 0.836884. The more
 discriminating result-ID split is stronger: for selected ID63 the median
 result-minus-request is **0.000 m/s²** in both drives (p10/p90 only a few
-milligravity-scale counts apart), while selected ID11 gives median deltas
+0.001 m/s² counts apart), while selected ID11 gives median deltas
 **-0.181 / -0.435 m/s²**. That is the behavior expected of an employed-source/result publication rather
 than a second request echo. In Toyota's documented architecture, the selected
 application upper/lower request may still be constrained or superseded by the
-driver request in the powertrain/brake execution layer.
+driver request in the powertrain/brake execution layer. The
+[2026-09-30 VMC status corpus](#2026-09-30-vmc-status-corpus) later narrowed
+which word carries that result-like behavior: these two-drive observations
+remain valid history, but `B20:B21` itself is a closed-accelerator reference
+and the effective/result candidate is `B4:B5`.
 
 This closes `0x08A` as the **unified observed continuous TSS3 request-side envelope**
 for the recovered lateral tuple plus longitudinal request magnitudes. It does
@@ -780,6 +787,180 @@ This review changes only passive evidence tooling and documentation. No ECU,
 Panda, authentication, vehicle-control, or firmware operation is performed.
 The local research bundle under `REFERENCE/camry_2026_0x160_role_audit/` and
 all re-extraction workspace files under `build/` remain ignored/untracked.
+
+## 2026-09-30 VMC status corpus
+
+An archive-wide reduction of Brake-owned `0x081` status traffic **retracts the
+present-tense reading of `B20:B21` as the `57DB` result-acceleration candidate**.
+Across 1,232,664 native status frames `B20` behaves as a closed-accelerator
+reference, and the request-following **effective/result acceleration candidate
+is `B4:B5`**. `B4/B18/B20/B22/B24` are signed16BE words read at
+**0.001 m/s²/count**; `B26:B27` is a separate signed low-13-bit quantity
+whose physical scale remains unresolved. Nothing below is in milli-g.
+OEM diagnostic names (`5280/5281`, `5284`, `57D3`, `57DB`) remain
+**unjoined hypotheses**: no synchronized diagnostic/Operation-FFD capture
+names these words, and this corpus does not change that.
+
+### Scope and source artifacts
+
+| Population | Routes | Segments | `0x081` status frames | Moving rows | Covered time |
+|---|---:|---:|---:|---:|---:|
+| Primary openpilot-longitudinal drives `86/87/88/8a` | 4 | 50 | 96,593 | 56,524 | 2,898.1 s |
+| Historical stock (`openpilotLongitudinalControl=false`) | 21 | 353 | 689,752 | 494,875 | 20,692.3 s |
+| Historical openpilot | 19 | 229 | 446,168 | 289,169 | 13,386.1 s |
+| All status (union of the above plus two tiny no-mode clips) | 46 | 634 | 1,232,664 | 840,645 | 36,981.0 s |
+
+Route `00000089--0dd1afd752` is primary-flagged but never reaches an openpilot
+longitudinal phase; it and `00000042--169d4d611d` are one-segment no-mode clips
+(74/77 status frames) counted only in the all-status totals. No vehicle
+operations are involved: every source is an existing recorded rlog under an
+external logs root.
+
+Raw logs remain external. The committed compact evidence lives in
+`data/generated/camry_20260930_vmc_status/`: `input_manifest.json` (per-route/
+segment paths relative to the external logs root, sizes, SHA-256, software
+metadata, and extraction/join cache identities), `summary.json`,
+`corpus_validation.json` (per-route/per-phase recomputation),
+`phase_comparison.csv` (route × git-phase aggregates),
+`stock_epochs.csv` (the 126 window table), `b18_exceptions.csv` (every
+non-exact `B18=max(B4,B24)` row with pedal context),
+`representative_samples.json`, and the two plots below. Per-route software
+provenance is committed alongside: available `initData` records identify
+openpilot `0.11.2`, branches `kai`/`tss3`/`tss3-camry-port`, and per-route
+git commits; available `TOYOTA_CAMRY_TSS3` CarParams retain
+`openpilotLongitudinalControl`. Extraction/join intermediates are git-ignored
+under `build/cache/camry_20260930_vmc_corpus/` and are regenerated on demand;
+`--corpus-dir` explicitly accepts an existing extraction directory.
+
+### Method, timing, and origin bounds
+
+The pipeline is extract → join → analyze → plot (commands in
+[WORKFLOW.md](../WORKFLOW.md#external-openpilot-rlog-reducers)). The join is
+**preceding-only** with request windows of 75 ms and
+carState/carControl/carOutput/wheel/pedal windows of 60 ms (plan/selfdriveState
+120 ms); every snapshot carries per-source ages. These are bounded-fresh
+samples, not atomic same-instant measurements or interpolation across gaps.
+Covered time sums adjacent status intervals, capping each contribution at
+100 ms. It includes parked time and bounds each recording-gap contribution.
+`t_route` is seconds from the minimum recorded monotonic
+timestamp; cached segment metadata timestamps may repeat and are not playback
+anchors. All times are logger/event timestamps and must not be read as
+physical wire timing or ECU execution/acceptance deadlines.
+
+Each delivered `0x08A` request is classified by exact 32-byte payload match
+against host sendcan versus native CAN traffic (plot legend `10=comma`,
+`20=native`). Vehicle-side Tx confirmations therefore establish **observed
+publication only** — not ECU execution, acceptance, or an acceptance deadline.
+`ID11` also appears on native stock traffic, so it is **not a comma-ownership
+marker**.
+
+### Six acceleration-like words: candidate roles, not OEM joins
+
+| Word | Candidate role | Dominant evidence and bounds |
+|---|---|---|
+| `B4:B5` | effective/selected **result** acceleration; normally request-following | in every one of 126 excited no-pedal moving stock windows the direct `B4−request` RMS beats the direct `B4−wheel CarState` RMS (medians 0.00921 vs 0.09756 m/s²); deviates persistently in the route-86 under-deceleration case; not literal body motion (−2.458 at held-brake standstill) and not an unconditional echo |
+| `B18:B19` | drive-side result/reference envelope; empirically `max(B4,B24)` | exact in 1,232,419/1,232,664 frames; `B22 ≥ B18` in all frames; an empirical dominant relation, not a proved ECU formula |
+| `B20:B21` | **closed-accelerator reference** | equals `B24` in 1,005,245/1,010,206 fresh closed-pedal frames (~99.5%); mirrors inactive native request words (IDs 0/4); not whole-vehicle achieved acceleration |
+| `B22:B23` | upper/open-accelerator envelope | `B22 ≥ B18` with zero violations in 1,232,664 frames; `B24` itself exceeds `B22` in 11 frames, so it is not a proved hard cap on driver demand; exact quantity and speed/gear/grade dependence unresolved |
+| `B24:B25` | driver-accelerator demand/reference | rises from `B20` toward `B22` with physical accelerator fraction; not a universal selected-result or motion measurement |
+| `B26` | brake-linked signed quantity (low 13 bits) | nonzero on 121,174/121,175 brake-on frames and negative whenever nonzero (135,686/135,686); physical scale unresolved |
+
+Separately, `B6[7]` — the high bit above the six-bit result ID — is
+**standstill-associated in this corpus**: it is set in 363,989 of 370,244
+known `CarState.standstill=true` samples and zero known non-standstill
+samples or raw-wheel moving rows above 0.5 m/s. Missing CarState samples
+are excluded from the CarState denominators.
+This bounds it as a standstill-associated state bit; it is **not** a proved
+availability or hold enum, and its exact semantic (hold request, stop-hold
+status, or another standstill state) remains open.
+
+### Empirical envelope and its exceptions
+
+Raw-count equality `B18 = max(B4, B24)` holds exactly in **1,232,419/1,232,664**
+all-status frames (primary drives 96,591/96,593 exact with both remaining
+frames within 5 counts; 1,232,427 within ±5 corpus-wide). The 245 remaining
+rows split **234 above / 11 below** and are each listed with raw packet and
+pedal/gas/brake transition context in `b18_exceptions.csv`. The 11 below
+cases are exactly the frames where `B24` exceeds `B22` (routes `3f` and
+`16a`, excesses of 5–139 counts). Including that ceiling gives
+`B18 = min(max(B4, B24), B22)` exactly in **1,232,430/1,232,664** frames,
+with **no below-envelope violations**. The remaining 234 above-envelope
+rows are concentrated around braking and stop/launch transitions.
+This is an empirical envelope relationship, not a recovered ECU formula;
+the additional dynamics behind those above-envelope rows remain unresolved.
+
+### Independent stock direct-difference comparison
+
+An earlier draft of this comparison reported fitted-gain RMSE figures with
+milli-g wording; that wording was **incorrect and is withdrawn**. The maintained
+result uses direct differences with **no fitted gain or offset**: in the 126
+existing excited no-pedal moving stock windows, comparing fresh vehicle-side
+TX/request against `B4` and `B4` against wheel-derived `CarState.aEgo`, all
+**126/126** windows have `RMS(B4−request) < RMS(B4−wheel CarState)`, with
+medians **0.00921 vs 0.09756 m/s²** (≈0.009 vs 0.098). `B4` tracks the
+delivered request far better than measured motion, which is the core support
+for the effective/result reading and against a literal body-sensor reading.
+
+The excitation selector uses an 11-sample centered median of wheel speed
+and differentiates only **unique logger-time knots**. Different status
+payloads sharing a batch timestamp remain in every status count; only the
+derivative's time axis is deduplicated. This avoids zero-time division without
+discarding status evidence or treating the selection filter as a latency oracle.
+
+### Representative status states
+
+Values are 0.001 m/s² counts converted to m/s²; ages are logger timestamps.
+
+| Case | Route / segment / t_route | Delivered request (origin) | `B4` | `B18` | `B20` | `B22` | `B24` | Reading |
+|---|---|---|---:|---:|---:|---:|---:|---|
+| stock braking ramp start | `3f` seg21 t=1318.83 | −0.436 (native) | −0.303 | −0.303 | −0.314 | 3.113 | −0.314 | early request/result transient; wheel aEgo −0.084, result ID11 |
+| **weak OP braking before pedal** | `86` seg4 t=253.876497 | −2.123 (comma) | −1.423 | −0.466 | −0.466 | 4.216 | −0.466 | no pedals, requestLoss 0, aEgo −1.453; `B4` under-follows while the envelope words hold the closed-pedal reference; see below |
+| driver brake after disengagement | `86` seg4 t=254.028 | −4.0 (native, post-intervention) | −2.249 | −0.442 | −0.442 | 4.249 | −0.442 | brake on, `B26`=8097 raw (−95 as signed13); native request-loss supervision set |
+| driver accelerator | `86` seg4 t=259.792 | −0.049 (native, inactive) | 1.649 | 1.649 | −0.082 | 5.760 | 1.649 | gas 0.25; `B24` leaves `B20` toward `B22`; result ID63 |
+| normal OP acceleration | `86` seg4 t=272.840 | 0.642 (comma) | 0.636 | 0.636 | −0.461 | 2.960 | −0.461 | native FRC upper was 0.171; `B4` follows the delivered request, result ID11 |
+| stationary with brake held | `87` seg0 t=9.973 | 0.666 (native, inactive) | −2.458 | 0.666 | 0.666 | 0.849 | 0.666 | aEgo 0; `B4` is not literal motion at standstill; result ID63 |
+
+For the weak-braking case the full native-shaped status packet is
+`00000018fa710b1700000004000b0000003ffe2efe2e1078fe2e0000a47702d5`
+(`B4:B5=0xfa71`=−1423, `B18:B19`/`B20:B21`/`B24:B25`=`0xfe2e`=−466,
+`B22:B23`=`0x1078`=4216, `B26:B27`=0). The native FRC was already
+publishing an upper request of −4.0 **before** driver intervention, while
+the vehicle-side publication remained the host's −2.123. Native forwarding
+resumed only after the brake press; subsequent deep deceleration is
+confounded by driver braking, not unconfounded proof of native execution.
+The cause of the delivered-request-to-`B4` gap remains unresolved.
+
+![Route-86 weak-braking incident and subsequent restart: request, status words, result ID, and pedals](../../data/generated/camry_20260930_vmc_status/incident_and_restart.png)
+
+![Four current drives: B18=max(B4,B24), inactive request words vs B20, B4 vs wheel aEgo, and (B24−B20)/(B22−B20) versus accelerator fraction](../../data/generated/camry_20260930_vmc_status/cross_state_relationships.png)
+
+### What this changes and what stays open
+
+- The September-16/expanded-review sentence treating `0x081 B20:B21` as the
+  `57DB` result-acceleration candidate is **corrected**: `B20` is the
+  closed-accelerator reference and the effective/result candidate is `B4`.
+  The two-drive numeric observations quoted earlier (request correlation and
+  the ID63/ID11 median deltas) remain valid observed history, but their
+  field-role reading is superseded; exact `57DB`/`57D3`/`5284` joins remain
+  unconfirmed.
+- `0x08A` B6/B7 request-ID/allocation geometry, the ID63/ID11 result-ID
+  observations, and `B11[4]` request-loss supervision are unchanged by this
+  corpus.
+- Unresolved: the OEM join for every acceleration-like status word; the cause
+  of the route-86 request-vs-`B4` difference; `B26`'s physical scale; the
+  additional dynamics behind the rare `B18` envelope departures; and the
+  speed/gear/grade dependence of `B22`. Vehicle-side Tx confirmations bound
+  publication, not ECU execution or acceptance deadlines.
+- No new gain or cap recommendation follows from this corpus, and none is
+  implied.
+
+Reproduce from an external logs root (see
+[WORKFLOW.md](../WORKFLOW.md#external-openpilot-rlog-reducers) for the full
+prerequisites):
+
+```bash
+uv run --no-sync --project ../kai-openpilot/opendbc_repo python -m tools.targets.camry.analysis.analyze_camry_20260930_vmc_status --corpus-dir /tmp/tss3_vmc_corpus --logs-root ~/dev/inspect/logs --output-dir data/generated/camry_20260930_vmc_status
+```
 
 ---
 

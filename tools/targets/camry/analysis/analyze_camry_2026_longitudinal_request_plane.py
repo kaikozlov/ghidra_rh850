@@ -378,15 +378,23 @@ def result_summary(request_rows: list[tuple[int, bytes]], result_rows: list[tupl
                            "consistent with Toyota's independently named Driver Operation ID63. This supports the packed request-ID interpretation."),
       },
     },
-    "longitudinal_result_acceleration_candidate": {
+    "longitudinal_reference_word_B20": {
       "wire": "B20:B21 signed16 big-endian",
       "scale_mps2_per_count": 0.001,
-      "candidate_for": "PCS 57DB Arbitration result Acceleration",
-      "grade": "strong candidate; exact synchronized DID/FFD value capture absent",
-      "request_vs_result": regression(req_acc, res_acc),
+      "observation": "request-tracking acceleration-scale word on the Brake-owned result frame; not an OEM-joined diagnostic value",
+      "request_vs_reference": regression(req_acc, res_acc),
       "conditional_by_result_id": conditional,
-      "arbitration_discriminator": ("Result ID 63 tracks the request nearly exactly while result ID 11 materially diverges in the retained drives; "
-                                    "this is result-selection behavior, not a simple request echo."),
+      "selection_discriminator": ("Result ID 63 tracks the request nearly exactly while result ID 11 materially diverges in the retained drives; "
+                                  "this is result-selection behavior, not a simple request echo."),
+      "retired_oem_join": {
+        "former_mapping": "PCS 57DB Arbitration result Acceleration (formerly graded a strong candidate here)",
+        "status": "withdrawn",
+        "basis": ("The 2026-09-30 native status corpus shows B20:B21 equals B24:B25 on 1005245/1010206 closed-pedal frames. "
+                  "B18:B19 has a drive-side envelope relationship, while B4:B5 is the effective/result candidate. "
+                  "This retires the selected-total-acceleration interpretation of B20; exact OEM diagnostic byte/name joins remain unresolved."),
+        "cross_state_artifact": "data/generated/camry_20260930_vmc_status/summary.json",
+        "docs_anchor": "docs/variants/camry-2026-longitudinal-evidence.md#2026-09-30-vmc-status-corpus",
+      },
     },
     "lateral_result": {
       "result_id_wire": "B13[5:0]",
@@ -415,9 +423,9 @@ def old_0ca_boundary(result_rows: list[tuple[int, bytes]], ca_rows: list[tuple[i
     words[f"B{offset}_B{offset + 1}"] = regression(result, candidate)
   return {
     "pair_count": len(pairs),
-    "0x081_result_accel_vs_0x0CA_words": words,
+    "0x081_B20_reference_vs_0x0CA_words": words,
     "conclusion": ("0x0CA remains protected longitudinal/chassis state, but none of its old B3:B4/B5:B6/B7:B8 candidates reproduces "
-                   "the cleaner Brake-owned 0x081 B20:B21 arbitration-result candidate. Supersede the old 0x0CA upper/lower/result triplet interpretation."),
+                   "the Brake-owned 0x081 B20:B21 reference word. Supersede the old 0x0CA upper/lower/result triplet interpretation."),
   }
 
 
@@ -725,7 +733,10 @@ def layout_disposition() -> dict:
     "5284_longitudinal_result_id": {"status": "strong candidate", "wire": "0x081 B6[5:0]"},
     "5285_lateral_result_id": {"status": "recovered", "wire": "0x081 B13[5:0]"},
     "57D3_acceleration_valid": {"status": "unresolved", "wire": None, "note": "0x081 B11[4] is request-loss supervision, not OEM-joined to this flag"},
-    "57DB_result_acceleration": {"status": "strong candidate", "wire": "0x081 B20:B21 signed16", "scale_mps2_per_count": 0.001},
+    "57DB_result_acceleration": {"status": "unmapped", "wire": None,
+                                 "note": ("the former 0x081 B20:B21 join is disproved by the 2026-09-30 cross-state corpus: B20:B21 is the "
+                                          "closed-accelerator reference word, B4:B5 the effective/result candidate and B18:B19 the drive "
+                                          "result/reference; no OEM diagnostic join is confirmed")},
     "57DE_result_pinion_angle": {"status": "recovered", "wire": "0x081 B16:B17 signed16", "scale_rad_per_count": round(ANGLE_RAD_PER_COUNT, 12)},
   }
 
@@ -744,7 +755,7 @@ def build() -> dict:
   hold = hold_semantics()
   namespace = requester_id_namespace(drive_reports, hold)
   return {
-    "schema": "camry-2026-longitudinal-request-plane-v4",
+    "schema": "camry-2026-longitudinal-request-plane-v5",
     "vehicle_access": False,
     "topology": {
       "capture_era": "temporary CAN0/CAN1 repin",
@@ -768,8 +779,11 @@ def build() -> dict:
       "request_plane": ("0x08A is the unified observed continuous TSS request-side envelope: the lateral 5282 tuple is recovered there and the duplicated "
                         "signed16 B8:B9/B11:B12 words occupy the 5280/5281 longitudinal lower/upper bound-package geometry. Exact placement before versus after internal TSS application selection remains unresolved."),
       "result_plane": ("0x081 is the unified Brake-owned employed-result/reference/supervision envelope: its lateral selected ID/reference are recovered, "
-                       "B6[5:0] is the strongest 5284 longitudinal employed-source-ID candidate, and B20:B21 is the strongest 57DB result-acceleration candidate. "
-                       "Toyota's architecture distinguishes the lateral arbitration winner from the longitudinal source actually employed after driver/application comparison."),
+                       "B6[5:0] is the strongest 5284 longitudinal employed-source-ID candidate, and B20:B21 is observed as the closed-accelerator "
+                       "reference word with its former 57DB result-acceleration join retired by the 2026-09-30 cross-state corpus. In that corpus "
+                       "B4:B5 is the effective/result acceleration candidate and B18:B19 the drive result/reference, with no confirmed OEM diagnostic "
+                       "join for either. Current status and evidence: docs/variants/camry-2026-longitudinal-evidence.md#2026-09-30-vmc-status-corpus "
+                       "and data/generated/camry_20260930_vmc_status/."),
       "not_fully_mapped": ("The entire 5280/5281 recorder model is NOT yet byte-named. B6/B7 are strongly recovered structurally as the two packed "
                            "request-ID/allocation bytes (bits7:2 ID, bits1:0 allocation), including active/hold/override transitions; archive-wide unequal ordinary-DRCC frames strongly resolve A as upper and B as lower, "
                            "while shift/EPB, override-prohibition and priority remain unmapped."),

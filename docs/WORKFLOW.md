@@ -59,6 +59,45 @@ caller's working directory unless the command explicitly documents otherwise.
 `tools/artifact regen` and `tools/toyota` capability dispatch retain their existing
 repository-root working directory; pass absolute paths for inputs outside the checkout.
 
+### External openpilot rlog reducers
+
+Some Camry evidence reducers read external comma rlog corpora and need
+openpilot's reader/runtime. These are offline commands only: they never
+perform vehicle operations. Run them from this repository root; the usual
+runtime is the adjacent openpilot/opendbc checkout, selected through uv's
+`--project` so `--no-sync` keeps its environment pinned:
+
+```bash
+# 2026-09-30 VMC status corpus pipeline (paths below are the documented example)
+UV="uv run --no-sync --project ../kai-openpilot/opendbc_repo"
+$UV python -m tools.targets.camry.analysis.extract_camry_20260930_vmc_corpus \
+  --logs-root ~/dev/inspect/logs --openpilot-root ../kai-openpilot/openpilot \
+  --output-dir build/cache/camry_20260930_vmc_corpus
+$UV python -m tools.targets.camry.analysis.join_camry_20260930_vmc_corpus \
+  --corpus-dir build/cache/camry_20260930_vmc_corpus
+$UV python -m tools.targets.camry.analysis.analyze_camry_20260930_vmc_status \
+  --corpus-dir build/cache/camry_20260930_vmc_corpus \
+  --output-dir data/generated/camry_20260930_vmc_status
+$UV python -m tools.targets.camry.analysis.plot_camry_20260930_vmc_status \
+  --corpus-dir build/cache/camry_20260930_vmc_corpus \
+  --output-dir data/generated/camry_20260930_vmc_status
+```
+
+- `--openpilot-root` points at a caller-supplied openpilot checkout containing
+  `tools/lib/logreader.py` (the extraction example needs it). It is caller
+  input; pass the default checkout explicitly rather than importing it as a
+  repository dependency.
+- Extraction/join intermediates are git-ignored caches under
+  `build/cache/…`; only compact summaries under `data/generated/…` are
+  committed. `--corpus-dir` explicitly accepts an existing extraction
+  directory (for example `/tmp/tss3_vmc_corpus`) to reuse or analyze one
+  extracted elsewhere.
+- `matplotlib` is required only by the plot module. Analysis and joining need
+  NumPy; only extraction needs the external openpilot reader/runtime.
+- Modules accept narrowing flags such as `--routes`, `--primary`, `--missing`,
+  and `--inventory` (see each module's `--help`) instead of any new wrapper
+  script.
+
 ## Build workspace contract
 
 `build/` is ignored **workspace state**, not a source of repository truth. A

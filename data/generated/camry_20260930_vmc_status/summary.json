@@ -1,0 +1,351 @@
+{
+  "b18_exceptions": {
+    "above": 234,
+    "below": 11
+  },
+  "b6_bit7": {
+    "known_cs_nonstandstill_bit7": 0,
+    "known_cs_standstill": 370244,
+    "known_cs_standstill_bit7": 363989,
+    "moving_over_0_5_bit7": 0
+  },
+  "candidate_roles": {
+    "B18": "drive-side result/reference",
+    "B20": "closed-accelerator reference",
+    "B22": "upper/open-accelerator envelope",
+    "B24": "driver-accelerator demand/reference",
+    "B26": "brake-linked signed13 quantity; scale unresolved",
+    "B4": "effective/total-result acceleration"
+  },
+  "decode_errors": 0,
+  "direct_stock_comparison": {
+    "B4_request_RMS_less_than_B4_wheel_CarState_RMS": 126,
+    "median_request_RMS_mps2": 0.00920730808326855,
+    "median_wheel_CarState_RMS_mps2": 0.09756425289185089,
+    "n_epochs": 126
+  },
+  "limits": [
+    "Candidate roles are not confirmed OEM byte/name joins.",
+    "ID11 also appears under native stock control and does not establish comma ownership.",
+    "Vehicle-side TX confirmations establish publication, not execution or acceptance latency.",
+    "Driver-brake onset confounds the subsequent native -4m/s2 request; it is not native-only braking proof.",
+    "B4 is neither unconditional request echo nor literal stationary body acceleration.",
+    "B18 envelope exceptions prohibit treating the dominant identity as universal.",
+    "Cause of route86 request-to-B4 discrepancy and B26 physical scale remain unresolved."
+  ],
+  "methods": {
+    "clamped_envelope": "B18=min(max(B4,B24),B22), raw counts; tests whether B22 explains below-max samples",
+    "coverage": "sum adjacent status intervals capped100ms; includes parked time, limits larger-gap contributions to100ms",
+    "max_relation": "B18=max(B4,B24), rawcounts; informative excludes B4=B24; empirical, not proved ECU equation",
+    "moving": ">0.5m/s from fresh raw wheels with CarState fallback",
+    "segment_times": "t_route from minimum recorded monotonic event; repeated init/carParams timestamps are not segment playback anchors",
+    "semantics": "candidate roles only; exact synchronized OEM diagnostic/FFD joins absent",
+    "stock_epochs": "native latch1,no pedals,moving,freshCS; >=2s; request range>=0.5 or centered-median wheel-gradient range>=0.4 using unique time knots; direct RMS on original2-decimal episode boundaries, no fitted gain/offset",
+    "timing": "preceding-only joins; CS/CC60ms,request75ms,exact-payload origin100ms; logger batch timestamps, not ECU deadlines",
+    "words": "B4/B18/B20/B22/B24 signed16BE x0.001 nominalm/s2; B26 low13 signed, physical scale unresolved"
+  },
+  "primary_op_braking_events": 2,
+  "report": "docs/variants/camry-2026-longitudinal-evidence.md#2026-09-30-vmc-status-corpus",
+  "schema": "camry-20260930-vmc-status-v1",
+  "scope": {
+    "all_status": {
+      "b22_ceiling": {
+        "n": 1232664,
+        "ok": 1232653
+      },
+      "b22_ge_b18": {
+        "n": 1232664,
+        "ok": 1232664
+      },
+      "b26_nonzero_s13_negative": {
+        "n": 135686,
+        "ok": 135686
+      },
+      "brake_on_b26_nonzero": {
+        "n": 121175,
+        "ok": 121174
+      },
+      "closed_b24_equals_b20": {
+        "n": 1010206,
+        "ok": 1005245
+      },
+      "closed_b24_within2_b20": {
+        "n": 1010206,
+        "ok": 1006948
+      },
+      "moving_rows": 840645,
+      "n_status": 1232664,
+      "observed_vmc_seconds": 36981.00682143,
+      "open_b24_ge_b20": {
+        "n": 222424,
+        "ok": 222346
+      },
+      "relation_clamped_envelope_exact": {
+        "n": 1232664,
+        "ok": 1232430
+      },
+      "relation_clamped_envelope_within5": {
+        "n": 1232664,
+        "ok": 1232437
+      },
+      "relation_max_exact": {
+        "n": 1232664,
+        "ok": 1232419
+      },
+      "relation_max_informative": {
+        "n": 603505,
+        "ok": 603260
+      },
+      "relation_max_moving": {
+        "n": 840645,
+        "ok": 840440
+      },
+      "relation_max_within5": {
+        "n": 1232664,
+        "ok": 1232427
+      },
+      "routes": 46,
+      "segments": 634
+    },
+    "historical_op": {
+      "b22_ceiling": {
+        "n": 446168,
+        "ok": 446168
+      },
+      "b22_ge_b18": {
+        "n": 446168,
+        "ok": 446168
+      },
+      "b26_nonzero_s13_negative": {
+        "n": 55838,
+        "ok": 55838
+      },
+      "brake_on_b26_nonzero": {
+        "n": 49826,
+        "ok": 49826
+      },
+      "closed_b24_equals_b20": {
+        "n": 370138,
+        "ok": 368271
+      },
+      "closed_b24_within2_b20": {
+        "n": 370138,
+        "ok": 368895
+      },
+      "moving_rows": 289169,
+      "n_status": 446168,
+      "observed_vmc_seconds": 13386.093338098999,
+      "open_b24_ge_b20": {
+        "n": 76023,
+        "ok": 75957
+      },
+      "relation_clamped_envelope_exact": {
+        "n": 446168,
+        "ok": 446021
+      },
+      "relation_clamped_envelope_within5": {
+        "n": 446168,
+        "ok": 446026
+      },
+      "relation_max_exact": {
+        "n": 446168,
+        "ok": 446021
+      },
+      "relation_max_informative": {
+        "n": 214811,
+        "ok": 214664
+      },
+      "relation_max_moving": {
+        "n": 289169,
+        "ok": 289061
+      },
+      "relation_max_within5": {
+        "n": 446168,
+        "ok": 446026
+      },
+      "routes": 19,
+      "segments": 229
+    },
+    "historical_stock": {
+      "b22_ceiling": {
+        "n": 689752,
+        "ok": 689741
+      },
+      "b22_ge_b18": {
+        "n": 689752,
+        "ok": 689752
+      },
+      "b26_nonzero_s13_negative": {
+        "n": 64550,
+        "ok": 64550
+      },
+      "brake_on_b26_nonzero": {
+        "n": 57080,
+        "ok": 57079
+      },
+      "closed_b24_equals_b20": {
+        "n": 564243,
+        "ok": 561544
+      },
+      "closed_b24_within2_b20": {
+        "n": 564243,
+        "ok": 562484
+      },
+      "moving_rows": 494875,
+      "n_status": 689752,
+      "observed_vmc_seconds": 20692.332890982,
+      "open_b24_ge_b20": {
+        "n": 125490,
+        "ok": 125480
+      },
+      "relation_clamped_envelope_exact": {
+        "n": 689752,
+        "ok": 689667
+      },
+      "relation_clamped_envelope_within5": {
+        "n": 689752,
+        "ok": 689667
+      },
+      "relation_max_exact": {
+        "n": 689752,
+        "ok": 689656
+      },
+      "relation_max_informative": {
+        "n": 351073,
+        "ok": 350977
+      },
+      "relation_max_moving": {
+        "n": 494875,
+        "ok": 494779
+      },
+      "relation_max_within5": {
+        "n": 689752,
+        "ok": 689657
+      },
+      "routes": 21,
+      "segments": 353
+    },
+    "primary_drives": {
+      "b22_ceiling": {
+        "n": 96593,
+        "ok": 96593
+      },
+      "b22_ge_b18": {
+        "n": 96593,
+        "ok": 96593
+      },
+      "b26_nonzero_s13_negative": {
+        "n": 15203,
+        "ok": 15203
+      },
+      "brake_on_b26_nonzero": {
+        "n": 14178,
+        "ok": 14178
+      },
+      "closed_b24_equals_b20": {
+        "n": 75680,
+        "ok": 75285
+      },
+      "closed_b24_within2_b20": {
+        "n": 75680,
+        "ok": 75424
+      },
+      "moving_rows": 56524,
+      "n_status": 96593,
+      "observed_vmc_seconds": 2898.078959144,
+      "open_b24_ge_b20": {
+        "n": 20911,
+        "ok": 20909
+      },
+      "relation_clamped_envelope_exact": {
+        "n": 96593,
+        "ok": 96591
+      },
+      "relation_clamped_envelope_within5": {
+        "n": 96593,
+        "ok": 96593
+      },
+      "relation_max_exact": {
+        "n": 96593,
+        "ok": 96591
+      },
+      "relation_max_informative": {
+        "n": 37526,
+        "ok": 37524
+      },
+      "relation_max_moving": {
+        "n": 56524,
+        "ok": 56523
+      },
+      "relation_max_within5": {
+        "n": 96593,
+        "ok": 96593
+      },
+      "routes": 4,
+      "segments": 50
+    }
+  },
+  "simple_driver_brake_correction_scale10": {
+    "new_10count_model_within5": 1230366,
+    "old_misses_improved_to_within5": 42,
+    "previously_exact": 1232419,
+    "previously_exact_broken_gt5": 2102,
+    "rows": 1232664
+  },
+  "stock_braking_events": 21,
+  "transport": {
+    "00000086--575a5fd6a5": {
+      "best_match_lag_s_q05_q25_q50_q75_q95": [
+        0.004034133399966322,
+        0.008328682249995722,
+        0.02056270600000687,
+        0.03791843000000128,
+        0.04857746640000471
+      ],
+      "host_frames": 13622,
+      "matched_preceding_cc_frames": 13622,
+      "method": "preceding CC window101ms, tolerance0.0005m/s2; logger batching permits1us; not ECU execution latency",
+      "unresolved_frames": 0
+    },
+    "00000087--7e7f16f8af": {
+      "best_match_lag_s_q05_q25_q50_q75_q95": [
+        0.0040067722999822305,
+        0.008725617999999713,
+        0.024113704000001235,
+        0.03765816699998936,
+        0.04896249790000695
+      ],
+      "host_frames": 16883,
+      "matched_preceding_cc_frames": 16883,
+      "method": "preceding CC window101ms, tolerance0.0005m/s2; logger batching permits1us; not ECU execution latency",
+      "unresolved_frames": 0
+    },
+    "00000088--462e38e23b": {
+      "best_match_lag_s_q05_q25_q50_q75_q95": [
+        0.004121444500000848,
+        0.008489448500000663,
+        0.02568521399999213,
+        0.03762786849998179,
+        0.04855026949999797
+      ],
+      "host_frames": 25771,
+      "matched_preceding_cc_frames": 25771,
+      "method": "preceding CC window101ms, tolerance0.0005m/s2; logger batching permits1us; not ECU execution latency",
+      "unresolved_frames": 0
+    },
+    "0000008a--0c0e51b672": {
+      "best_match_lag_s_q05_q25_q50_q75_q95": [
+        0.003577180000002045,
+        0.007236059499987846,
+        0.01624943600000961,
+        0.03624230249999982,
+        0.048268799099992064
+      ],
+      "host_frames": 15663,
+      "matched_preceding_cc_frames": 15663,
+      "method": "preceding CC window101ms, tolerance0.0005m/s2; logger batching permits1us; not ECU execution latency",
+      "unresolved_frames": 0
+    }
+  },
+  "vehicle_access": false
+}
