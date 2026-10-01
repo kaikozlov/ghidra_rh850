@@ -56,8 +56,10 @@ byte-level audit maps `0x08A B8:B9` to the ordinary-DRCC upper bound and
 the strongest `5284` employed-source-ID candidate. An early draft also read
 `B20:B21` as the `57DB` result-acceleration candidate; the
 [2026-09-30 VMC status corpus](#2026-09-30-vmc-status-corpus) corrects that:
-`B20` is a closed-accelerator reference and `B4:B5` is the effective/result
-candidate, with every OEM diagnostic join still unconfirmed. `0x0CA` remains
+`B20` is a closed-accelerator reference; `B4:B5` and `B18:B19` are candidate
+combined and drive-side quantities, respectively. Neither is OEM-joined to `57DB`.
+The [braking-ceiling comparison](#repeated-braking-ceiling-and-request-policy-candidate)
+narrows the weak-braking behavior. `0x0CA` remains
 protected longitudinal/chassis state but is no longer the primary result
 interpretation. See `data/generated/camry_2026_longitudinal_request_plane.json`.
 
@@ -613,7 +615,7 @@ synchronized diagnostic/FFD value directly names that wire field.
 | `5284` arbitration-result longitudinal ID | `0x081 B6[5:0]` | strong candidate; observed values 11 and 63 |
 | `5285` arbitration-result lateral ID | `0x081 B13[5:0]` | recovered |
 | `57D3` acceleration-valid flag | unresolved | `0x081 B11[4]` is proven request-loss supervision, but is not OEM-joined to `57D3` |
-| `57DB` arbitration-result acceleration | no confirmed wire join | the earlier `0x081 B20:B21` candidate was corrected on 2026-09-30: `B20` is a closed-accelerator reference and `B4:B5` is the effective/result candidate ([VMC status corpus](#2026-09-30-vmc-status-corpus)); no synchronized diagnostic sample names any `0x081` word |
+| `57DB` arbitration-result acceleration | no confirmed wire join | `B20:B21` is a closed-accelerator reference candidate; `B4:B5` and `B18:B19` are candidate combined and drive-side quantities. Their distinction matters under braking; neither has a synchronized diagnostic join to `57DB` ([status reconstruction](#message-structure-and-drivebrake-decomposition)) |
 | `57DE` arbitration-result pinion angle | `0x081 B16:B17` | recovered |
 
 The packed-ID interpretation has an independent arbitration check. In the same
@@ -760,7 +762,8 @@ driver request in the powertrain/brake execution layer. The
 [2026-09-30 VMC status corpus](#2026-09-30-vmc-status-corpus) later narrowed
 which word carries that result-like behavior: these two-drive observations
 remain valid history, but `B20:B21` itself is a closed-accelerator reference
-and the effective/result candidate is `B4:B5`.
+while `B4:B5` and `B18:B19` are candidate combined and drive-side quantities.
+Neither correspondence establishes the exact `57DB` wire location.
 
 This closes `0x08A` as the **unified observed continuous TSS3 request-side envelope**
 for the recovered lateral tuple plus longitudinal request magnitudes. It does
@@ -793,8 +796,10 @@ all re-extraction workspace files under `build/` remain ignored/untracked.
 An archive-wide reduction of Brake-owned `0x081` status traffic **retracts the
 present-tense reading of `B20:B21` as the `57DB` result-acceleration candidate**.
 Across 1,232,664 native status frames `B20` behaves as a closed-accelerator
-reference, and the request-following **effective/result acceleration candidate
-is `B4:B5`**. `B4/B18/B20/B22/B24` are signed16BE words read at
+reference. The subsequent decomposition strengthens **`B4:B5` as a combined
+longitudinal control/force-equivalent quantity and `B18:B19` as a drive-side
+result/reference**, both still inferred roles rather than OEM names.
+`B4/B18/B20/B22/B24` are signed16BE words read at nominal
 **0.001 m/s²/count**; `B26:B27` is a separate signed low-13-bit quantity
 whose physical scale remains unresolved. Nothing below is in milli-g.
 OEM diagnostic names (`5280/5281`, `5284`, `57D3`, `57DB`) remain
@@ -858,12 +863,12 @@ marker**.
 
 | Word | Candidate role | Dominant evidence and bounds |
 |---|---|---|
-| `B4:B5` | effective/selected **result** acceleration; normally request-following | in every one of 126 excited no-pedal moving stock windows the direct `B4−request` RMS beats the direct `B4−wheel CarState` RMS (medians 0.00921 vs 0.09756 m/s²); deviates persistently in the route-86 under-deceleration case; not literal body motion (−2.458 at held-brake standstill) and not an unconditional echo |
-| `B18:B19` | drive-side result/reference envelope; empirically `max(B4,B24)` | exact in 1,232,419/1,232,664 frames; `B22 ≥ B18` in all frames; an empirical dominant relation, not a proved ECU formula |
+| `B4:B5` | inferred combined longitudinal control/force-equivalent quantity; normally request-following | in every one of 126 excited no-pedal moving stock windows the direct `B4−request` RMS beats the direct `B4−wheel CarState` RMS (medians 0.00921 vs 0.09756 m/s²); `B4−B18` follows the separate driver-brake word during manual braking; not literal body motion (−2.458 at held-brake standstill), an unconditional echo, or an established `57DB` join |
+| `B18:B19` | inferred drive-side result/reference; empirically `max(B4,B24)` | exact in 1,232,419/1,232,664 frames; `B22 ≥ B18` in all frames; distinct from the combined quantity during braking, but not an established `57DB` join or recovered ECU formula |
 | `B20:B21` | **closed-accelerator reference** | equals `B24` in 1,005,245/1,010,206 fresh closed-pedal frames (~99.5%); mirrors inactive native request words (IDs 0/4); not whole-vehicle achieved acceleration |
 | `B22:B23` | upper/open-accelerator envelope | `B22 ≥ B18` with zero violations in 1,232,664 frames; `B24` itself exceeds `B22` in 11 frames, so it is not a proved hard cap on driver demand; exact quantity and speed/gear/grade dependence unresolved |
 | `B24:B25` | driver-accelerator demand/reference | rises from `B20` toward `B22` with physical accelerator fraction; not a universal selected-result or motion measurement |
-| `B26` | brake-linked signed quantity (low 13 bits) | nonzero on 121,174/121,175 brake-on frames and negative whenever nonzero (135,686/135,686); physical scale unresolved |
+| `B26:B27` low 13 bits | driver-brake-linked signed quantity | nonzero on 121,174/121,175 brake-on frames and negative whenever nonzero (135,686/135,686); remains zero in the route-86 automatic-braking example; physical scale unresolved |
 
 Separately, `B6[7]` — the high bit above the six-bit result ID — is
 **standstill-associated in this corpus**: it is set in 363,989 of 370,244
@@ -898,8 +903,10 @@ existing excited no-pedal moving stock windows, comparing fresh vehicle-side
 TX/request against `B4` and `B4` against wheel-derived `CarState.aEgo`, all
 **126/126** windows have `RMS(B4−request) < RMS(B4−wheel CarState)`, with
 medians **0.00921 vs 0.09756 m/s²** (≈0.009 vs 0.098). `B4` tracks the
-delivered request far better than measured motion, which is the core support
-for the effective/result reading and against a literal body-sensor reading.
+delivered request far better than measured motion in this population. This
+supports a control quantity rather than a literal body sensor; request-following
+alone does not choose the OEM result name or distinguish drive-only from combined
+braking/driving semantics.
 
 The excitation selector uses an 11-sample centered median of wheel speed
 and differentiates only **unique logger-time knots**. Different status
@@ -928,29 +935,155 @@ publishing an upper request of −4.0 **before** driver intervention, while
 the vehicle-side publication remained the host's −2.123. Native forwarding
 resumed only after the brake press; subsequent deep deceleration is
 confounded by driver braking, not unconfounded proof of native execution.
-The cause of the delivered-request-to-`B4` gap remains unresolved.
+The [repeated braking-ceiling comparison](#repeated-braking-ceiling-and-request-policy-candidate)
+below explains the numerical shape of this gap; its exact policy cause remains open.
 
 ![Route-86 weak-braking incident and subsequent restart: request, status words, result ID, and pedals](../../data/generated/camry_20260930_vmc_status/incident_and_restart.png)
 
 ![Four current drives: B18=max(B4,B24), inactive request words vs B20, B4 vs wheel aEgo, and (B24−B20)/(B22−B20) versus accelerator fraction](../../data/generated/camry_20260930_vmc_status/cross_state_relationships.png)
 
+### Message structure and drive/brake decomposition
+
+The same 46-route cache supplies an exact additional structural result:
+`0x081 B7 = (0x81 + 8 + sum(B0..B6)) & 255` in
+**1,232,664/1,232,664 frames**. This is an embedded classic Toyota checksum over
+the first seven bytes, inside the 32-byte publication. It is not a rolling
+counter or an independent acceleration word. `B0:B3` is always `00000018`
+in this population; that constant alone does not identify a length or flag.
+
+The current byte-level reconstruction is:
+
+| Message | Location | Supported interpretation |
+|---|---|---|
+| `0x08A` | `B3[3]`, `B4[5]` | cruise-operating latch; delayed-hold-associated request state |
+| `0x08A` | `B6[7:2]` / `B6[1:0]`, `B8:B9` | upper application ID / allocation / signed16BE acceleration |
+| `0x08A` | `B7[7:2]` / `B7[1:0]`, `B11:B12` | lower application ID / allocation / signed16BE acceleration |
+| `0x08A` | `B10` | requested/set speed, km/h |
+| `0x08A` | `B13:B14`, `B16:B17` | unidentified `0x7FFF` slots, constant in all 1,479,225 native request frames examined |
+| `0x08A` | `B18:B19`, `B21[5:0]`, `B24`, `B25` | lateral pinion request, application ID, assistance and damping gains |
+| `0x08A` | `B20`, `B22`, `B23` | partially understood control-state/policy fields; `B20[7]` needs the distinction below |
+| `0x08A` | `B26[5:0]` | request sequence |
+| `0x081` | `B4:B5`, `B6[5:0]`, `B6[7]`, `B7` | inferred combined quantity, result-source ID, standstill-associated state, verified checksum |
+| `0x081` | `B11[4]`, `B13`, `B16:B17` | request-loss supervision; lateral result ID/status; pinion result/reference |
+| `0x081` | `B18:B19`, `B20:B21`, `B22:B23`, `B24:B25`, `B26:B27` | inferred drive-side, closed/open capability, accelerator demand, and driver-brake quantities as bounded above |
+| both | `B28:B31` | security trailer, not application acceleration words |
+
+The request census selects each route's native source using the saved
+`*.joined.json` metadata, rather than counting host requests or forwarded copies.
+`0x08A B15/B27` are also zero throughout. No variation identifies the constant
+`0x7FFF` words as jerk quantities rather than other unused slots.
+
+Manual-braking observations independently distinguish the two result-like words.
+On primary-drive rows with result ID63, no accelerator, and signed13 brake word
+below −50, the median raw-count ratio `(B4−B18)/brake_word` is **10.268**.
+Applying that coefficient without refitting to **84,434 historical rows** gives
+a median absolute residual of **3.53 counts** (nominal 0.00353 m/s²).
+This is an empirical relationship, not a calibration or an OEM force unit:
+a fixed **10.24-count step with truncation** explains much of the apparent
+gain difference, and transitions produce larger residuals. At held-brake
+standstill on route `87`, t=9.972897, `B4=−2.458`, `B18=+0.666`,
+brake word=−305, and wheel acceleration is zero. During route-86 automatic
+braking, the brake word is zero despite `B4−B18=−0.957`.
+
+[US20200070849A1, Fig. 4 and sections 2-1 through 2-4](https://patents.google.com/patent/US20200070849A1/en)
+separates selected acceleration, sensor-derived body acceleration, fully
+closed/open powertrain capability, and accelerator/brake-pedal demand.
+The brake-pedal quantity explicitly excludes automatic braking.
+[US20200094835A1, steps S104–S107](https://patents.google.com/patent/US20200094835A1/en)
+separately describes powertrain availability and the additional braking needed
+below that availability. These definitions support the decomposition, but do
+not prove that a particular Camry word is a particular patent variable.
+In particular, the empirical `B18=min(max(B4,B24),B22)` relation is not literally
+the first patent's request-bound clamp: `B22` is a capability candidate, not
+the application-request upper bound.
+
+GTS recorder records `5252/5253/5261/5262` name brake-pedal demand, body
+acceleration/status, fully closed ground acceleration, and accelerator demand.
+They use float32, while `57DB` uses signed16 × 0.001. Re-encoding permits
+semantic correspondence; neither matching nor differing representation proves
+a wire join. The retained Operation-FFD examples do not contain the longitudinal
+result records needed to decide `57DB=B4` versus `57DB=B18`.
+
+### Repeated braking ceiling and request-policy candidate
+
+The weak-braking shape repeats as a roughly **−1.0 m/s² additional contribution**,
+not as a total-acceleration clamp at the closed-pedal baseline. In the route-86
+packet above, `−0.466 + (−0.957) = −1.423`, close to wheel-derived −1.453.
+The drive/brake interpretation remains an inference; the subtraction is observed.
+
+Selection uses the existing preceding-only joins and exact-payload host origin:
+fresh request and CarState; no driver pedals; result ID11; no request loss;
+speed >2 m/s; request IDs11/17 with allocation1/3; bounds equal within
+0.001 m/s²; upper request <−0.7; delivered `0x08A B20[7]=1`; and
+`request−0x081.B18 <−1.1 m/s²` continuously for at least 300 ms.
+Gaps over 100 ms break an episode; discard its first 300 ms.
+**No selection condition uses the B4 tracking error.**
+
+This yields **12 episodes / 8 routes / 708 status rows**. Every retained
+`B4−B18` lies between **−1.010 and −0.956 m/s²**:
+
+| Route suffix | Episode start, t_route (s) | Duration (s) | Rows after 300 ms | Median `B4−B18` (m/s²) |
+|---|---:|---:|---:|---:|
+| `03--78555c9090` | 505.788 | 0.512 | 7 | −1.000 |
+| `51--894db634a8` | 69.214 | 1.792 | 50 | −1.004 |
+| `51--894db634a8` | 338.208 | 2.009 | 57 | −1.003 |
+| `55--0d20bbf0c0` | 110.319 | 1.118 | 28 | −1.004 |
+| `64--6d1ea4acc9` | 178.423 | 2.426 | 72 | −0.981 |
+| `64--6d1ea4acc9` | 604.445 | 1.436 | 38 | −0.997 |
+| `64--6d1ea4acc9` | 639.328 | 1.265 | 33 | −0.990 |
+| `67--abf9d48e19` | 278.071 | 1.166 | 29 | −0.997 |
+| `67--abf9d48e19` | 411.124 | 2.490 | 73 | −1.002 |
+| `86--575a5fd6a5` | 245.092 | 8.815 | 285 | −0.976 |
+| `88--462e38e23b` | 454.885 | 0.819 | 18 | −0.974 |
+| `175--6c2758b35b` | 58.539 | 0.814 | 18 | −1.008 |
+
+All times and software identities resolve through the existing
+`input_manifest.json`; full route IDs are zero-padded to eight hexadecimal
+digits before `--`. This is a follow-on calculation over the saved raw/joined
+caches, not an output already emitted by the original summary generator.
+An empirical model for these states is
+`B4 ≈ max(request, B18−1.0 m/s²)`; median absolute error is **0.008 m/s²**,
+maximum **0.044 m/s²**.
+
+The stock strong-braking comparison on route `3f`, segment21, is an important
+counterexample to a universal cap. Its `B4−B18` reaches **−1.352 m/s²** while
+B4 follows the request. A directly redecoded packet at t=1313.999846 is
+`00000018f8c00b6400000004000b00000016fdddfddd1208fddd000094a9766d`:
+`B4=−1.856`, `B18=−0.547`, difference=−1.309, driver-brake word=0.
+Strong stock comparison coverage is one episode, not a matched causal experiment.
+
+**Request-policy lead:** the inspected opendbc encoder
+`create_tss3_control_request_values` hardcodes `CRUISE_STATE_MIRROR=3`,
+making `0x08A B20[7:6]=0b11` (`0xC0`). The stock strong-braking example uses
+`0b01` (`0x40`). GTS `FRC_P5 0x1B07` independently names **Brake Usage Limit
+Permission**, Stop Control Permission, and Brake Hold Control Prohibited;
+`0x1B06` separately names responsiveness values No FB / High / Medium / Low.
+Source: [recovered control-ownership vocabulary](../../data/generated/gtsplus_2026/tss3_control_ownership_surface.json).
+Thus `B20[7]` is a **brake-limitation-policy candidate**, not an established
+OEM join; responsiveness or another request policy remains an alternative.
+The observed `0x40/0xC0` distinction cannot be described adequately as just
+another copy of the cruise latch.
+
+This identifies a repeatable limiting regime and a concrete encoder-policy
+suspect. It does not prove which bit causes the limit, the exact receiver
+algorithm, or that changing this field alone is a safe fix. Publication echoes
+still do not prove execution. No controller, DBC, safety, gain, or cap was changed.
+
 ### What this changes and what stays open
 
-- The September-16/expanded-review sentence treating `0x081 B20:B21` as the
-  `57DB` result-acceleration candidate is **corrected**: `B20` is the
-  closed-accelerator reference and the effective/result candidate is `B4`.
-  The two-drive numeric observations quoted earlier (request correlation and
-  the ID63/ID11 median deltas) remain valid observed history, but their
-  field-role reading is superseded; exact `57DB`/`57D3`/`5284` joins remain
-  unconfirmed.
+- The earlier `0x081 B20:B21 → 57DB` interpretation is withdrawn. `B20` is a
+  closed-accelerator reference candidate; B4 and B18 have distinct combined
+  and drive-side candidate roles. Neither is conclusively joined to `57DB`.
+  The earlier request correlations and ID63/ID11 deltas remain observations,
+  not evidence assigning one universal "result acceleration" name.
 - `0x08A` B6/B7 request-ID/allocation geometry, the ID63/ID11 result-ID
   observations, and `B11[4]` request-loss supervision are unchanged by this
   corpus.
-- Unresolved: the OEM join for every acceleration-like status word; the cause
-  of the route-86 request-vs-`B4` difference; `B26`'s physical scale; the
-  additional dynamics behind the rare `B18` envelope departures; and the
-  speed/gear/grade dependence of `B22`. Vehicle-side Tx confirmations bound
-  publication, not ECU execution or acceptance deadlines.
+- The route-86 discrepancy now belongs to a repeated approximately 1 m/s²
+  additional-braking regime. Its exact request-policy cause, all acceleration
+  OEM joins, B26 physical scale, rare B18 envelope departures, and B22
+  speed/gear/grade dependence remain unresolved. Vehicle-side Tx confirmations
+  bound publication, not ECU execution or acceptance deadlines.
 - No new gain or cap recommendation follows from this corpus, and none is
   implied.
 

@@ -3453,8 +3453,9 @@ for an unsigned pre-sign PDU.
 > selected longitudinal ID plus an effective/result acceleration candidate.
 > An early draft named `B20:B21` as that result acceleration; the
 > [2026-09-30 VMC status corpus](camry-2026-longitudinal-evidence.md#2026-09-30-vmc-status-corpus)
-> corrects it to a closed-accelerator reference and moves the effective/result
-> candidate to `B4:B5` (all OEM joins still unconfirmed). The `0x0CA` triplet
+> corrects it to a closed-accelerator reference. B4 and B18 now have distinct
+> combined and drive-side candidate roles; neither is OEM-joined to `57DB`.
+> See the owner's message reconstruction and braking-ceiling comparison. The `0x0CA` triplet
 > below is retained as historical evidence only and is no longer the current
 > result mapping.
 
@@ -3585,10 +3586,10 @@ selected-ID split decisive: ID63 has median result-minus-request 0.000 m/s² in
 both drives, whereas ID11 differs by -0.181/-0.435 m/s². The
 [2026-09-30 VMC status corpus](camry-2026-longitudinal-evidence.md#2026-09-30-vmc-status-corpus)
 supersedes the field-role reading (not these observations): `B20` is a
-closed-accelerator reference, the effective/result acceleration candidate is
-`B4:B5`, `B18:B19` is an empirical `max(B4, B24)` envelope, `B22:B23` a
-`B22>=B18` open-accelerator envelope, `B24:B25` driver demand, and `B26` a
-brake-linked signed quantity; the exact `57DB`/`57D3` joins remain unconfirmed.
+closed-accelerator reference; B4 and B18 are inferred combined and drive-side
+quantities, respectively. The owner's message reconstruction includes the
+embedded B7 checksum and repeated additional-braking ceiling. Exact `57DB`/
+`57D3` joins remain unconfirmed.
 This is arbitration-like
 selection behavior. The old `0x0CA B3:B4/B5:B6/B7:B8` triplet does not reproduce
 this result and is demoted to other protected longitudinal/chassis state.

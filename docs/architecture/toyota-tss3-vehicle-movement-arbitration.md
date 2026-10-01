@@ -365,9 +365,10 @@ The same result dataset can carry:
 The current FRC-hosted Operation-FFD vocabulary contains striking counterparts:
 `5252` brake-pedal driver acceleration, `5253` estimated vehicle acceleration/status,
 `525D` cruise brake control in progress, `525E` stop holding status, `5261` estimated
-on-ground acceleration with accelerator fully closed, `526A` current shift range,
-`5284/5285` result IDs, `57D3` result-acceleration validity, `57DB` result acceleration,
-and `57DE` result pinion angle.
+on-ground acceleration with accelerator fully closed, `5262` accelerator-pedal
+demand, `526A` current shift range, `5284/5285` result IDs, `57D3`
+result-acceleration validity, `57DB` result acceleration, and `57DE` result
+pinion angle. These diagnostic quantities do not supply CAN byte locations.
 
 ### Camry wire join
 
@@ -381,15 +382,21 @@ publication toward the TSS applications**, not as a dumb echo:
 
 The acceleration-like words are bounded by the
 [2026-09-30 VMC status corpus](../variants/camry-2026-longitudinal-evidence.md#2026-09-30-vmc-status-corpus)
-across 1,232,664 native status frames: `B4:B5` is the effective/result
-candidate (request-following, not a literal body sensor or unconditional echo),
-`B18:B19` is an empirical `max(B4, B24)` drive-side envelope, `B20:B21` is a
-**closed-accelerator reference** (the early `57DB` result-acceleration reading
-is retracted as an unconfirmed join), `B22:B23` is a `B22 >= B18`
-open-accelerator envelope, `B24:B25` is driver-accelerator demand, and `B26`
-is a signed brake-linked quantity with unresolved scale. None of these words
-is OEM-name-joined. The remaining `0x081` fields should still be investigated
-against the full Figure-4/FFD state packet before assigning them ad-hoc names.
+across 1,232,664 native status frames. **Inferred roles:** `B4:B5` is a combined
+longitudinal control/force-equivalent quantity; `B18:B19` is a drive-side
+result/reference; `B20:B21` is a closed-accelerator reference; `B22:B23` is an
+open-accelerator capability reference; `B24:B25` is accelerator demand; and
+`B26:B27` low13 is a driver-brake-linked signed quantity with unresolved units.
+Neither B4 nor B18 is conclusively joined to `57DB`. The patent's selected
+acceleration and sensor-derived body acceleration are separate concepts;
+request-following alone does not identify either OEM field.
+
+The [message reconstruction and braking-ceiling comparison](../variants/camry-2026-longitudinal-evidence.md#message-structure-and-drivebrake-decomposition)
+also identifies an exact embedded eight-byte Toyota checksum at B7 and a
+repeated approximately 1 m/s² additional-braking regime. The request's
+`0x08A B20[7]` is a policy suspect, not an established brake-limit permission
+bit. The empirical B18 envelope is not a recovered ECU formula or a literal
+mapping of the patent's application-bound clamp.
 
 ### Fault-state feedback is synthesized by the manager
 
