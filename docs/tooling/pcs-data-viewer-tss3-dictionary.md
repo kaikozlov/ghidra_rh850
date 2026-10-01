@@ -264,6 +264,36 @@ prove that `5631` is the runtime LCA carrier, establish copy direction between
 `5631` and `5282`, or identify the ECU/network producer. Those require dynamic
 Operation-FFD data or producer firmware/dataflow.
 
+### PBA event discriminator
+
+The 2026-10-01 offline consumer inspection closes the meaning of
+`UniqueRoBCodeDID=610` on RoB `2098` (`PBA Request Flag`). It is a **field-table
+key**, not diagnostic ID `0x0262`:
+
+```text
+RoB 2098 → field-table key 610 → recorder 5792, byte 1 bits 1:0
+```
+
+`LogAnalyserDIDData::GetNumberForUniqueRoBCode` (RVA `0x236954`) passes the
+key to `DIDDataDefine::GetDetailBitAssignInfo` (RVA `0x23751C`), then uses
+the returned definition's `DataID`, size and bit geometry to extract the
+value. Row 610 in the
+[managed schema](../../data/generated/gtsplus_2026/pcs_data_viewer_tss3_managed_semantics.json)
+is `5792`, `PBA Request Status`, unsigned length 2 at byte 1, bit position 1.
+
+`RoBCodeDefine::GetNumbering` (RVA `0x2460BC`) looks up `DataID_value` in
+`NumberingListForRoBCode`. Its static initializer supplies `5792_01 → 1`,
+`5792_02 → 2`, and `5792_03 → 2`; unmatched keys return zero. Thus viewer
+event numbering merges raw states 2 and 3, while the recorded two-bit value
+remains distinct. This is not a vehicle-side PBA arbitration rule.
+The executable identity is recorded in the [ADS inspection](#62-ads-recorder-schema).
+
+The existing shared decoder was exercised with synthetic bytes `A0..A3`:
+it returned raw/physical PBA states `0..3`. Additional synthetic checks
+decoded `57DB: F8C0` as `-1.856` and `5261: BF000000` as `-0.500`.
+These checks exercise the decoder, not the viewer's event-numbering execution
+or live vehicle support.
+
 ### Shared Operation-FFD decoder
 
 `tools/techstream/tss3_operation_ffd.py` owns EB13 framing, schema loading and
@@ -347,6 +377,32 @@ longitudinal/vertical-ID fields but no integer-to-client legend** for values 13,
 the request slot, producer, and runtime state, so an observed number must not be
 promoted to a global feature enum.
 
+#### Separate OAA request-policy fields
+
+The 2026-10-01 EN/JA satellite inspection distinguishes additional policies
+within the existing
+[ADU schema](../../data/generated/gtsplus_2026/pcs_data_viewer_adu_semantics.json).
+Positions below are 1-based recorder bytes, not CAN offsets:
+
+| Resource suffix (`ADU_ID_…`) | OEM quantity | Geometry |
+|---|---|---|
+| `1F06_3` | OAA responsiveness request, upper limit | byte 3, unsigned 8-bit |
+| `1F07_3` | OAA brake-use-restriction permission, upper limit | byte 3, unsigned 8-bit |
+| `1F07_5` | OAA intermittent-drive permission, upper limit | byte 5, unsigned 8-bit |
+| `1F07_6` | OAA natural-coasting request, upper limit | byte 6, unsigned 8-bit |
+| `1F0E_1/2` | Acceleration-change upper limits for increasing drive / increasing braking | bytes 1/5, IEEE-754 singles |
+| `1F0F_1/2` | Acceleration-change upper limits for decreasing drive / decreasing braking | bytes 1/5, IEEE-754 singles |
+
+The Japanese resources explicitly distinguish `OAA間欠駆動制御許可フラグ（上限）`
+(`1F07_5`) from `OAA自然惰行要求フラグ（上限）` (`1F07_6`). Neither is the
+result-side closed-accelerator acceleration estimate named by TSS3 `5261`.
+The four change-limit fields use LSB 1, offset 0 and invalid pattern
+`0xFFFFFFFF`. These are separate named inputs in the ADU/OAA model; the
+schema supplies no mapping from them to Camry `0x08A B20`, nor permission
+to transfer the ISA responsiveness enum to them.
+
+#### PCS and resume observations
+
 PCS is likewise a staged pipeline rather than one detector. The table separates
 scene/target judgment (`1572`, `15AC..15AE`), requests and deceleration output
 (`153C`, `153E`, `15E5`, `15E6`, `15EE`, `1607`), enable/prohibit state
@@ -360,8 +416,11 @@ preserves that request.
 
 Stop/resume observables are present but do not constitute a recovered policy
 machine. `1770_26` is `Automatic Start DDR Detection Signal` at ADU byte 30;
-`1770_24` is signed ACC target acceleration at byte 28 and `1770_40` is signed
-ACC lower-limit acceleration excluding jerk at byte 45, both scaled by 0.2.
+`1770_24` is ACC target acceleration at byte 28 and `1770_40` is ACC
+lower-limit requested acceleration excluding jerk limiting at byte 45.
+Both are signed 8-bit values scaled by 0.2, with `0x7F` invalid. The
+2026-10-01 inspection reconfirmed these already-recorded distinctions;
+it did not establish which Camry CAN word, if any, carries either value.
 DDR resources `5493/5494` are named `ACC Resume Trigger Signal`, while trigger
 33 is `ACC cancel after resume` in ADU, DDR, and TSS3 image namespaces. The DDR
 initializer is now recovered too: it contains **284 legacy and 1,788 Phase-5
@@ -379,6 +438,67 @@ which bit is the automatic-start edge.
 All of these byte positions are **diagnostic-recorder payload layouts**. They
 must not be copied into a CAN DBC or treated as `0x08A` bit positions without an
 independent runtime or firmware join.
+
+### 6.2 ADS recorder schema
+
+On 2026-10-01, an offline probe interpreted the previously unprocessed
+`PCSDataViewer.ADSDetailInfo::.cctor` at RVA `0xCB20`, using the existing
+`_interpret_collection` helper. The actual record constructor is
+`PCSDataViewer.ADSDetailBitAssignInfo`, not `ADSDisplayDetailInfo`.
+Its ten fields are `DataID, DataSize, SupportDID, BytePosition, BitPosition,
+BitLength, InvalidValueList, Type, Lsb, Offset`; it has no `Point` member.
+
+The result is **1,419 rows**, including **four metadata rows** with
+`DataID="-"`, and **612 distinct payload DIDs**. The raw distinct-ID count
+is 613 only when the metadata placeholder is included. English/Japanese
+names resolve through `ADS_ID_<key>` satellite resources.
+
+This is the **Advanced Drive** recorder namespace, not the FRC TSS3 or ADU
+namespace. Selected exact definitions, all starting at byte 1:
+
+| ADS recorder ID | OEM label | Encoding |
+|---|---|---|
+| `50E6` | Driving Force Mediation Result | unsigned 8-bit, LSB 1 |
+| `5C68` | Advanced Drive Control Acceleration and Slowdown Request G [m/s²] | IEEE-754 single, LSB 1 |
+| `5C6E` | Prediction vehicle acceleration [m/s²] | signed 16-bit, LSB 0.05076 |
+| `5C83` | Brake mediation device operation number | unsigned 8-bit, LSB 1 |
+| `5D82` | Target acceleration (CTL) [N] | IEEE-754 single, LSB 1 |
+| `5D8F` | Accelerator operation (Driving force mediation result) | unsigned 8-bit, LSB 1 |
+
+These rows have offset 0, `SupportDID=0` and empty invalid-value lists.
+The contradictory acceleration/[N] wording for `5D82` is retained as
+shipped; the inspection does not resolve its physical meaning. None of
+these definitions establishes an ADS-to-Camry CAN correspondence.
+
+Source: PCS Data Viewer 12.00.005 from GTS+ 2026.03.002.02; reconstructed
+assembly SHA-256
+`fc0841df01e11e546977cecc14f391f018d0a402fa1dd88d14ea7e75a6543c4d`.
+The reconstruction materialized all 22,447 nonzero-RVA method bodies.
+This remains an exploratory extraction, not a registered ADS artifact or
+an added `tools/gts recorder` schema. Given that reconstructed assembly,
+the bounded extraction is reproducible with the existing helpers:
+
+```python
+import dnfile
+from tools import REPO_ROOT
+from tools.techstream.extract_pcs_data_viewer_adu_semantics import ADU_FIELDS
+from tools.techstream.extract_pcs_data_viewer_tss3_dictionary import load_culture
+from tools.techstream.extract_pcs_data_viewer_tss3_managed_semantics import _interpret_collection
+from tools.techstream.techstream_paths import resolve_gts_root
+
+assembly = REPO_ROOT / "build/out/gts-aux-unprotected/PCS Data Viewer/PCS Data Viewer.exe"
+pcs = resolve_gts_root().parent / "PCS Data Viewer"
+_, english = load_culture(pcs / "en-US/PCS Data Viewer.resources.dll")
+rva, rows = _interpret_collection(
+    dnfile.dnPE(str(assembly)), english,
+    define_type="PCSDataViewer.ADSDetailInfo",
+    record_type="PCSDataViewer.ADSDetailBitAssignInfo",
+    record_fields=ADU_FIELDS,  # same ordered ten-field constructor contract
+    resource_prefix="ADS_ID_",
+)
+payload_ids = {row["DataID"] for _, row in rows if row["DataID"] != "-"}
+print(hex(rva), len(rows), len(payload_ids))  # 0xcb20 1419 612
+```
 
 ## 7. Join to the current FRC_P5 proprietary protocol
 
@@ -581,6 +701,14 @@ Toyota system families: for TSS P/LSS+A it enumerates `00 No assist / 01 PBA1 /
 10 PBA2 / 11 PBA3`, while the TSS C interpretation collapses the states to
 request/no-request behavior. This is host documentation, not a claim that every
 TSS3 generation uses the same raw field or network encoding.
+
+The 2026-10-01 inspection also extracted `VCH.htm`, `Welcome.htm` and
+`Table of Contents.hhc` from both shipped CHMs. The 378-byte English VCH
+page says only: “If you'd like to know VCH parameters detail, please check
+VCH repair manual.” The 369-byte Japanese page says the same; its text
+requires CP932 rather than UTF-8 decoding. Welcome is introductory, and the
+contents link FFD/VCH in English and VCH in Japanese. These examined pages
+add no request-policy or result-field definitions beyond `FFD.htm`.
 
 ## 11. What remains bounded
 

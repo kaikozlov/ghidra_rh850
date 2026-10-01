@@ -1262,6 +1262,19 @@ and another flag packing. Neither encoding identifies `0x08A B20` or proves
 that its two observed high bits form an enum rather than dependent flags.
 The observed native values `{0,1,3}` do not decide that distinction.
 
+The **2026-10-01 offline GTS follow-up** is recorded in the
+[recorder guide](../tooling/pcs-data-viewer-tss3-dictionary.md#separate-oaa-request-policy-fields):
+it distinguishes OAA coasting/intermittent-drive permissions and four
+acceleration-change limits, and reconfirms separate ACC target and
+pre-jerk-limit request quantities. It also recovers the
+[ADS field table](../tooling/pcs-data-viewer-tss3-dictionary.md#62-ads-recorder-schema)
+and resolves the viewer's
+[PBA event discriminator](../tooling/pcs-data-viewer-tss3-dictionary.md#pba-event-discriminator).
+These are recorder definitions and consumer behavior, not new Camry wire
+assignments. The pass leaves the OEM meaning of `0x08A B20` and the
+`0x081 B4/B18/B20` quantity mappings open; it adds no vehicle-response
+evidence for the policy-one cutover.
+
 [US20200094835A1, steps S104–S107](https://patents.google.com/patent/US20200094835A1/en)
 describes powertrain availability and a remaining brake contribution below
 that availability. [US12258022B2, Fig. 2 and its description](https://www.freepatentsonline.com/12258022.html)
