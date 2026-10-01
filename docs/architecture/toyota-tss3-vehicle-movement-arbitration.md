@@ -393,10 +393,16 @@ request-following alone does not identify either OEM field.
 
 The [message reconstruction and braking-ceiling comparison](../variants/camry-2026-longitudinal-evidence.md#message-structure-and-drivebrake-decomposition)
 also identifies an exact embedded eight-byte Toyota checksum at B7 and a
-repeated approximately 1 m/s² additional-braking regime. The request's
-`0x08A B20[7]` is a policy suspect, not an established brake-limit permission
-bit. The empirical B18 envelope is not a recovered ECU formula or a literal
-mapping of the patent's application-bound clamp.
+repeated approximately 1 m/s² additional-braking regime. The subsequent
+[stock scene comparison](../variants/camry-2026-longitudinal-evidence.md#stock-following-versus-free-cruise-association)
+associates the request's `0x08A B20[7:6]` values with following-like versus
+free-cruise-like conditions. Fixing this companion field while independently
+increasing braking demand is the leading mismatch hypothesis, not a proved
+cause. GTS defines both brake-use restriction permission and responsiveness
+selection; neither has a verified CAN join to this field. The additional
+contribution is not independently identified as hydraulic braking. The empirical
+B18 envelope is not a recovered ECU formula or a literal mapping of the patent's
+application-bound clamp.
 
 ### Fault-state feedback is synthesized by the manager
 

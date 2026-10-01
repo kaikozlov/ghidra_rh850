@@ -59,9 +59,11 @@ the strongest `5284` employed-source-ID candidate. An early draft also read
 `B20` is a closed-accelerator reference; `B4:B5` and `B18:B19` are candidate
 combined and drive-side quantities, respectively. Neither is OEM-joined to `57DB`.
 The [braking-ceiling comparison](#repeated-braking-ceiling-and-request-policy-candidate)
-narrows the weak-braking behavior. `0x0CA` remains
-protected longitudinal/chassis state but is no longer the primary result
-interpretation. See `data/generated/camry_2026_longitudinal_request_plane.json`.
+narrows the weak-braking behavior; the subsequent
+[stock scene comparison](#stock-following-versus-free-cruise-association) makes a
+companion request-policy mismatch the leading hypothesis, not a proved cause.
+`0x0CA` remains protected longitudinal/chassis state but is no longer the primary
+result interpretation. See `data/generated/camry_2026_longitudinal_request_plane.json`.
 
 ## September 16: command versus feedback audit
 
@@ -1053,20 +1055,111 @@ B4 follows the request. A directly redecoded packet at t=1313.999846 is
 Strong stock comparison coverage is one episode, not a matched causal experiment.
 
 **Request-policy lead:** the inspected opendbc encoder
-`create_tss3_control_request_values` hardcodes `CRUISE_STATE_MIRROR=3`,
-making `0x08A B20[7:6]=0b11` (`0xC0`). The stock strong-braking example uses
-`0b01` (`0x40`). GTS `FRC_P5 0x1B07` independently names **Brake Usage Limit
-Permission**, Stop Control Permission, and Brake Hold Control Prohibited;
-`0x1B06` separately names responsiveness values No FB / High / Medium / Low.
-Source: [recovered control-ownership vocabulary](../../data/generated/gtsplus_2026/tss3_control_ownership_surface.json).
-Thus `B20[7]` is a **brake-limitation-policy candidate**, not an established
-OEM join; responsiveness or another request policy remains an alternative.
-The observed `0x40/0xC0` distinction cannot be described adequately as just
-another copy of the cruise latch.
+`opendbc/car/toyota/toyotacan.py::create_tss3_control_request_values` hardcodes
+`CRUISE_STATE_MIRROR=3` in its synthesized longitudinal request, making
+`0x08A B20[7:6]=0b11` (`0xC0`). The stock strong-braking example uses
+`0b01` (`0x40`). Stock-longitudinal pass-through instead retains the native
+longitudinal fields. The following comparison adds independent scene context
+to this difference; it does not isolate the field's causal effect.
 
-This identifies a repeatable limiting regime and a concrete encoder-policy
-suspect. It does not prove which bit causes the limit, the exact receiver
-algorithm, or that changing this field alone is a safe fix. Publication echoes
+### Stock following versus free-cruise association
+
+**Observed:** the native `0x08A B20[7:6]` values have a strong association with
+following-like versus free-cruise-like scenes. Eight stock-ACC segments were
+selected for coverage of both field values, not for lead presence:
+
+| Stock route | Segments |
+|---|---|
+| `0000003e--1a2f20417d` | 23, 42, 54 |
+| `0000003f--36e72f5fdc` | 25, 34, 48, 51, 61 |
+
+The original rlogs, software identities, and SHA-256 hashes are listed in the
+existing [input manifest](../../data/generated/camry_20260930_vmc_status/input_manifest.json).
+Extraction read **9,599 `radarState` messages**. For the retained fresh
+request/status samples above 2 m/s, each status row was paired with the
+preceding `radarState.leadOne` sample only when its age was below 100 ms.
+The resulting 15,741 status rows give:
+
+| `0x08A B20[7:6]` | Matched status rows | Lead-present rows | Lead-present fraction | Median lead time gap when present |
+|---|---:|---:|---:|---:|
+| `1` (`0x40`) | 7,641 | 7,521 | 98.43% | 2.629 s |
+| `3` (`0xC0`) | 8,100 | 1,656 | 20.44% | 3.479 s |
+
+Time gap is `leadOne.dRel / vehicle_speed`. The lead-present rows under
+`0xC0` generally have farther, lower-confidence leads. Both populations are
+near their set speeds: median set-speed-minus-vehicle-speed is +0.101 m/s
+under `0x40` and +0.056 m/s under `0xC0`.
+
+These are **openpilot's radar/model lead estimates, not Toyota's internal ACC
+target selection**. Status rows are temporally correlated; multiple rows can
+reuse one radar sample. This selected two-route comparison is not a fleet-wide
+prevalence estimate or a count of independent trials. It is an exploratory
+follow-on calculation using the retained request/status caches and additional
+raw-rlog lead extraction, not an output of the existing VMC summary generator.
+
+The native field changes while cruise remains active. Thus the observed
+`0x40/0xC0` distinction is not adequately described as another copy of the
+cruise latch. **Hypothesis:** `0x40` selects or accompanies a following-control
+policy and `0xC0` a free-cruise policy. These are behavioral descriptions, not
+recovered OEM enum names.
+
+### GTS request-policy definitions and patent interpretation
+
+Direct offline queries of the shipped `FRC_P5.ddb` records (`tools/gts did
+FRC_P5 0x1B06 --json` and the corresponding `0x1B07` query) confirm separate
+controls in the **ISA upper-request** diagnostic vocabulary:
+
+| DID | Field | Decoded values |
+|---|---|---|
+| `0x1B06` | Braking Force and Driving Force Allocation Method Specification | 0 Engine Only; 1 Engine and Brake 1; 2 Engine and Brake 2; 3 Brake Only |
+| `0x1B06` | Speed Change Priority Request | 0 no brake-coordination downshift request; 1 request exists |
+| `0x1B06` | Responsiveness Request | 0 No FB; 1 FB Control High Gain; 2 FB Control Medium Gain; 3 FB Control Low Gain |
+| `0x1B07` | Brake Hold Control Prohibited Flag | 0 Allowed; 1 Not Allowed |
+| `0x1B07` | Stop Control Permission Flag | 0 Not Allowed; 1 Allowed |
+| `0x1B07` | Brake Usage Limit Permission Flag | 0 Not Allowed; 1 Allowed |
+
+Source: [recovered control-ownership vocabulary](../../data/generated/gtsplus_2026/tss3_control_ownership_surface.json).
+The shipped PCS viewer's PDA(OAA) record `5A08_3` independently names
+`ブレーキ使用制限許可フラグ`, with English alias **Brake Use Restriction Flag**.
+The Japanese compound supports the reading **permission to restrict brake
+use**, not merely permission to brake. Record `5A07_3` separately names
+`応答性要求` / Response Priority Request.
+Source: [EN/JA recorder dictionary](../../data/generated/gtsplus_2026/pcs_data_viewer_tss3_dictionary.json).
+
+These are diagnostic/recorder definitions, not a CAN layout or proof that the
+ISA/PDA fields map identically onto the DRCC request. In particular, the
+[recorder decoder](../../data/generated/gtsplus_2026/pcs_data_viewer_tss3_managed_semantics.json)
+defines a **three-bit** response-priority field for `5A07` and three separate
+one-bit flags for `5A08`; the DDB monitor uses a byte-wide responsiveness row
+and another flag packing. Neither encoding identifies `0x08A B20` or proves
+that its two observed high bits form an enum rather than dependent flags.
+The observed native values `{0,1,3}` do not decide that distinction.
+
+[US20200094835A1, steps S104–S107](https://patents.google.com/patent/US20200094835A1/en)
+describes powertrain availability and a remaining brake contribution below
+that availability. [US12258022B2, Fig. 2 and its description](https://www.freepatentsonline.com/12258022.html)
+separately describes application acceleration requests, conversion to force
+or torque, actuator allocation, and actuator feedback. It also permits a
+regenerative motor-generator in the brake subsystem. These disclosures support
+the staged interpretation of request, drive-side contribution, and combined
+result; they do not identify the Camry bytes. The observed additional
+contribution is **not independently identified as hydraulic friction braking**.
+No retrieved patent specifies this Camry's approximately 1 m/s² limit.
+
+**[INFERENCE] Leading explanation: a companion request-policy mismatch.**
+Openpilot requests stronger deceleration while fixing a field to the value
+stock commonly associates with free cruising. In the documented weak-braking
+episodes, the additional contribution stays near −1.0 m/s² despite greater
+demand; the stock `0x40` comparison exceeds that magnitude. A restricted-braking
+regime fits this shape better than merely insufficient controller gain.
+Brake-restriction permission and responsiveness selection remain competing
+field interpretations; a responsiveness setting could also select a regime
+with a limiter.
+
+The missing proof is the exact OEM identity and causal effect of the companion
+field. There is no isolated-field comparison under matched demand or
+synchronized diagnostic-to-CAN join. This is not a verified constant-value fix,
+an exact receiver algorithm, or a new gain recommendation. Publication echoes
 still do not prove execution. No controller, DBC, safety, gain, or cap was changed.
 
 ### What this changes and what stays open
@@ -1080,10 +1173,12 @@ still do not prove execution. No controller, DBC, safety, gain, or cap was chang
   observations, and `B11[4]` request-loss supervision are unchanged by this
   corpus.
 - The route-86 discrepancy now belongs to a repeated approximately 1 m/s²
-  additional-braking regime. Its exact request-policy cause, all acceleration
-  OEM joins, B26 physical scale, rare B18 envelope departures, and B22
-  speed/gear/grade dependence remain unresolved. Vehicle-side Tx confirmations
-  bound publication, not ECU execution or acceptance deadlines.
+  additional-braking regime. The stock scene comparison strengthens the
+  companion request-policy hypothesis without proving the field's identity or
+  causal effect. All acceleration OEM joins, B26 physical scale, rare B18
+  envelope departures, and B22 speed/gear/grade dependence remain unresolved.
+  Vehicle-side Tx confirmations bound publication, not ECU execution or
+  acceptance deadlines.
 - No new gain or cap recommendation follows from this corpus, and none is
   implied.
 

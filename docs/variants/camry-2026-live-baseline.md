@@ -2942,8 +2942,9 @@ command. Producer identity stays open (OQ-054); F33's Rx set excludes `0x081`
 
 ### 46.3 `0x08A` is byte-complete (VAR-098)
 
-Constants B0/B1/B2/B5/B15/B25/B27=0x00, B13/B16=0x7F, B14/B17=0xFF; B6[0]/B7[0]/
-B20[7] mirror the B3[3] cruise latch; B22[4]/B4[7] assert in every ID11 frame;
+In this two-drive census, constants B0/B1/B2/B5/B15/B25/B27=0x00,
+B13/B16=0x7F, B14/B17=0xFF; B6[0]/B7[0]/B20[7] matched the B3[3] cruise
+latch; B22[4]/B4[7] asserted in every ID11 frame.
 B23[5] differs by drive (0.582/0.100 of ID11 frames). B26[5:0] is overwhelmingly
 `+1 mod 64` across chronological frames; drive A contains 175 non-`+1` breaks and
 drive B contains 0. Batched capture ordering does not classify those breaks as
@@ -2953,6 +2954,14 @@ trailer. B24 is the only byte with the recorder assist `{0,50,100}` alphabet; no
 other `0x08A` byte carries that same alphabet. The bounded conclusion is that no
 separate damping-gain field was identified on `0x08A`, not that no differently
 encoded or off-PDU carrier can exist.
+
+**Later interpretation correction:** the expanded native corpus shows
+`0x08A B20[7:6]` changing between `0x40` and `0xC0` while cruise remains active.
+The [stock scene comparison](camry-2026-longitudinal-evidence.md#stock-following-versus-free-cruise-association)
+associates those values with following-like and free-cruise-like conditions.
+The two-drive latch correlation above is historical, not a general field
+definition. Brake-use restriction permission and responsiveness selection are
+still competing interpretations, not established CAN names.
 
 ### 46.4 SDG is a steering request; the plant shows request-associated response (VAR-100)
 
