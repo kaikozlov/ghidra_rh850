@@ -25,7 +25,13 @@ def _format_row(row: dict[str, Any]) -> str:
             )
             if info.get("pattern_display"):
                 info_text += f" patterns={len(info['pattern_display'])}"
-        return f"did\t{row['source']}\t0x{did:04X}{alt_text}\t{row.get('name') or ''}{info_text}"
+        tables = "/".join(str(table) for table in row.get("tables", [row["table"]]))
+        refs = (
+            f"\ttable={tables} monitor={row['monitor_key']} "
+            f"bits={row['bit_start']}..{row['bit_end']} "
+            f"physical={row['physical_data_key']} pattern={row['pattern_display_key']}"
+        )
+        return f"did\t{row['source']}\t0x{did:04X}{alt_text}\t{row.get('name') or ''}{refs}{info_text}"
     if kind == "dtc":
         return f"dtc\t{row['source']}\t{row.get('code') or row.get('packed_dtc')}\t{row.get('description') or ''}\t{row.get('failure') or ''}"
     if kind == "behavior":
@@ -61,6 +67,36 @@ def _print_rows(rows: list[dict[str, Any]], *, as_json: bool, limit: int | None 
             print(_format_row(row))
         if limit is not None and len(rows) > limit:
             print(f"... {len(rows) - limit} more result(s); use --limit to raise the cap", file=sys.stderr)
+
+
+def did(rows, *, as_json, limit):
+    _print_rows(rows, as_json=as_json, limit=limit)
+    if not rows and not as_json:
+        print("No Data List / alternate snapshot DID matches in this ECU database.")
+        print("PCS recorder IDs are a separate namespace: tools/gts recorder --help")
+
+
+def recorder(payload, *, as_json, limit):
+    fields = payload["fields"]
+    shown = fields[:limit]
+    if as_json:
+        print(json.dumps({**payload, "fields": shown, "matched_fields": len(fields)}, indent=2, sort_keys=True))
+    else:
+        print(f"pcs-recorder\tschema={payload['schema']}\tsource={payload['source']}")
+        print("Record positions: byte is 1-based, bit 7 is MSB; these are not CAN-frame offsets.")
+        if not fields:
+            print("No recorder fields match in this schema.")
+        for row in shown:
+            point = f" point={row['Point']}" if "Point" in row else ""
+            print(
+                f"0x{row['DataID']}\t{row['DataName']}\t"
+                f"size={row['DataSize']} byte={row['BytePosition']} bit={row['BitPosition']} "
+                f"width={row['BitLength']} type={row['Type']} "
+                f"lsb={row['Lsb']} offset={row['Offset']}{point} "
+                f"support={row['SupportDID']} invalid={row['InvalidValueList']}"
+            )
+    if len(fields) > limit:
+        print(f"... {len(fields) - limit} more field(s); use --limit to raise the cap", file=sys.stderr)
 
 
 def _recovery_progress(label: str):

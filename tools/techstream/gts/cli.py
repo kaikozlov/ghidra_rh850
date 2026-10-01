@@ -4,6 +4,15 @@
 Most commands are read-only discovery helpers over already recovered repository
 mechanics. The recover-* commands are the explicit exception: they materialize
 validated analysis PEs and provenance manifests under their selected output root.
+
+Schema-first discovery:
+  tools/gts ecu FRC_P5                 DDB tables and record classes
+  tools/gts did FRC_P5 0x1B06 --json    Data List / alternate snapshot DIDs
+  tools/gts recorder 0x5A08 --json      PCS recorder field definitions
+  tools/gts recorder 0x1F06 --schema adu
+  tools/gts category FRC_P5            ECU/plugin routing
+
+Guide: docs/tooling/gts-query-cli.md#schema-first-workflow
 """
 
 from __future__ import annotations
@@ -48,6 +57,7 @@ from tools.techstream.gts.query import (
     did_rows,
     ecu_payload,
     pe_payload,
+    recorder_payload,
     search_rows,
     status_payload,
 )
@@ -105,7 +115,13 @@ def cmd_did(args: argparse.Namespace) -> int:
     gts = resolve_gts_root(args.gtsplus_root)
     db_root = gts_db_root(gts, args.region, args.family)
     rows = did_rows(db_root, args.ecu, args.query)
-    _print_rows(rows, as_json=args.json, limit=args.limit)
+    render.did(rows, as_json=args.json, limit=args.limit)
+    return 0
+
+
+def cmd_recorder(args: argparse.Namespace) -> int:
+    payload = recorder_payload(args.schema, args.query)
+    render.recorder(payload, as_json=args.json, limit=args.limit)
     return 0
 
 
@@ -496,12 +512,28 @@ def build_parser() -> argparse.ArgumentParser:
     _common(p)
     p.set_defaults(func=cmd_frame)
 
-    p = sub.add_parser("did", help="resolve GTS+ Data List DIDs for one ECU")
+    p = sub.add_parser(
+        "did", help="resolve ECU Data List / alternate snapshot DIDs (not PCS recorder IDs)",
+        description="Resolve DDB monitor rows and reference keys. Use --json for full scaling and enum labels. "
+                    "PCS recorder fields use the separate 'recorder' command.",
+    )
     p.add_argument("ecu")
-    p.add_argument("query", nargs="?", help="DID (hex) or OEM-name substring")
+    p.add_argument("query", nargs="?", help="primary/alternate DID (hex) or OEM-name substring")
     p.add_argument("--limit", type=int, default=100)
     _common(p)
     p.set_defaults(func=cmd_did)
+
+    p = sub.add_parser(
+        "recorder", help="inspect recovered PCS recorder field schemas (TSS3 or ADU)",
+        description="Read tracked PCS viewer field definitions; no external GTS installation is needed. "
+                    "Byte/bit positions belong to recorder records, not CAN frames. "
+                    "This does not query an ECU or transfer Data List enum meanings.",
+    )
+    p.add_argument("query", nargs="?", help="record ID (four hex digits or 0x-prefixed) or field-name substring")
+    p.add_argument("--schema", choices=("tss3", "adu"), default="tss3", help="recorder schema, kept separate (default: tss3)")
+    p.add_argument("--limit", type=int, default=100)
+    p.add_argument("--json", action="store_true", help="emit source identities and complete field definitions")
+    p.set_defaults(func=cmd_recorder)
 
     p = sub.add_parser("dtc", help="resolve GTS+ DTC descriptions/failure types for one ECU")
     p.add_argument("ecu")

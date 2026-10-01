@@ -103,6 +103,22 @@ After graph, naming, type, calling-convention, or processor-semantic changes,
 regenerate the selected target's corpus from a fresh rebuild matching its
 canonical inventory. Commands and prerequisites belong in `docs/WORKFLOW.md`.
 
+## GTS+ schema-first investigation
+
+Start with the [schema-first workflow](docs/tooling/gts-query-cli.md#schema-first-workflow)
+and `tools/gts --help`, before broad string/PE searches.
+
+- Use `ecu` / `category` / `command` for table and consumer routing, and `did`
+  for ECU Data List/alternate snapshot rows, reference keys, scaling and enums.
+- Use `recorder` for the recovered PCS TSS3/ADU field schemas. An empty `did`
+  lookup does not establish that a recorder field is unknown.
+- Follow existing schema producers and decoder consumers before proposing a
+  new parser or declaring a recovery gap. Inspect support bits, invalid values
+  and source identity along with the field name.
+- Keep diagnostic, recorder and CAN namespaces distinct. A matching name or
+  number is not a wire join. Check whether focus lists affect decoding,
+  acquisition, or both.
+
 ## Snapshot policy
 
 Direct CLI mutations are exploratory. Persistent renames, functions, signatures,

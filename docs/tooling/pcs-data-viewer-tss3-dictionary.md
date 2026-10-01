@@ -41,6 +41,13 @@ families include:
 These are OEM names for recorder-internal signals and triggers. They are a
 separate semantic surface from ordinary FRC_P5 Data Monitor / UDS SID-22 DIDs.
 
+Use `tools/gts recorder 0x5280 --json` to inspect these recovered field rows,
+or `tools/gts recorder 0x1F06 --schema adu --json` for ADU. The query reports
+the source artifact and field geometry without requiring the external software
+tree or re-extracting the viewer. Start with the
+[schema-first workflow](gts-query-cli.md#schema-first-workflow) to distinguish
+recorder IDs from ECU Data List/alternate snapshot DIDs.
+
 ## 2. The TSS3 control/arbitration model is explicit
 
 The most important contiguous dictionary block is `0x5280..0x5285`:

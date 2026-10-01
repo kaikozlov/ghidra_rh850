@@ -7,6 +7,7 @@ import shutil
 import subprocess
 import tempfile
 from pathlib import Path
+from unittest.mock import patch
 
 from tools import REPO_ROOT
 
@@ -47,6 +48,45 @@ with tempfile.TemporaryDirectory(prefix="gts-cli-cwd-") as td:
         and category_response["category"]["name"] == "Hybrid Control",
         "public category query emits one JSON document without text-renderer fallthrough",
     )
+
+with tempfile.TemporaryDirectory(prefix="gts-recorder-schema-") as td:
+    fixture = Path(td)
+    generated = fixture / "data/generated/gtsplus_2026"
+    generated.mkdir(parents=True)
+    tss3_fields = [
+        {"DataID": "5A08", "DataName": "Brake permission"},
+        {"DataID": "6A08", "DataName": "Reference to 5A08"},
+        {"DataID": "-", "DataName": "Viewer metadata"},
+    ]
+    adu_fields = [{"DataID": "5A08", "DataName": "Different ADU field"}]
+    (generated / "pcs_data_viewer_tss3_managed_semantics.json").write_text(json.dumps({
+        "schema": "gtsplus-pcs-data-viewer-tss3-managed-semantics-v1",
+        "sources": {}, "operation_ffd": {"detail_rows": tss3_fields},
+    }))
+    (generated / "pcs_data_viewer_adu_semantics.json").write_text(json.dumps({
+        "schema": "gtsplus-pcs-data-viewer-adu-semantics-v1",
+        "sources": {}, "adu": {"rows": adu_fields},
+    }))
+    with patch.object(query, "REPO_ROOT", fixture):
+        prefixed = query.recorder_payload("tss3", "0x5a08")["fields"]
+        bare = query.recorder_payload("tss3", "5A08")["fields"]
+        check(
+            [row["DataName"] for row in prefixed] == [row["DataName"] for row in bare] == ["Brake permission"],
+            "recorder IDs match exactly, not names containing the same hex token",
+        )
+        check(
+            [row["DataID"] for row in query.recorder_payload("tss3", "brAKE")["fields"]] == ["5A08"],
+            "recorder field-name matching is case-insensitive",
+        )
+        check(
+            [row["DataID"] for row in query.recorder_payload("tss3")["fields"]] == ["5A08", "6A08"],
+            "recorder discovery excludes non-record viewer metadata",
+        )
+        check(
+            query.recorder_payload("adu", "0x6A08")["fields"] == []
+            and [row["DataName"] for row in query.recorder_payload("adu", "0x5A08")["fields"]] == ["Different ADU field"],
+            "recorder schemas neither mix same-ID meanings nor fall back to another schema",
+        )
 
 with tempfile.TemporaryDirectory(prefix="gts-cache-prune-") as td:
     cache_root = Path(td)

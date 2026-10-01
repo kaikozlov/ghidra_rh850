@@ -351,15 +351,17 @@ belong there rather than in a new top-level file:
 | Corolla target workflow discovery | `tools/toyota target list corolla` |
 | Read-only exports from the selected working project (signals/consumers/producers/coverage/inventory) | `tools/project/export_ghidra_project.sh list` |
 | Cross-variant image-bound evidence | `tools/toyota variant list` |
-| Interactive GTS+ OEM vocabulary / DID / DTC / CUW route / PE lookup | `tools/gts` |
+| Interactive GTS+ diagnostic / recorder schemas, OEM vocabulary and implementation routes | `tools/gts` |
 | Repository knowledge across findings/corrections/OQs/artifacts/suites/docs | `tools/know QUERY` |
 
 The three evidence/export runners expose a `list` discovery command. The
 Corolla-H runner reports its profile inputs and tracked outputs; the
 argument-driven variant runner reports mode purpose/input/selection semantics;
 the exporter lists its profile names. `tools/gts` instead exposes task-shaped
-subcommands (`search`, `did`, `dtc`, `cuw`, `route`, `pe`) because it is a
-read-only query surface, not a proof generator. Target tests are split into
+subcommands such as `ecu`, `did`, `recorder`, `category` and `command`.
+Start with the [schema-first workflow](tooling/gts-query-cli.md#schema-first-workflow)
+to select the Data List or PCS recorder namespace before searching strings.
+It is a discovery surface, not a proof generator. Target tests are split into
 behavioral domains and selected through stable `tools/test` suite names.
 Implementation locations and capability boundaries are documented in
 [tooling/README.md](tooling/README.md#task-oriented-entry-points).

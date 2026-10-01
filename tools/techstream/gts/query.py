@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import re
 from collections.abc import Iterable
 from pathlib import Path
@@ -182,6 +183,38 @@ def did_rows(db_root: Path, ecu_query: str, query: str | None = None) -> list[di
         else:
             rows = [r for r in rows if _fold_match(query, r.get("name"), r.get("monitor_key"), r.get("physical_data_key"))]
     return rows
+
+
+def recorder_payload(schema: str, query: str | None = None) -> dict[str, Any]:
+    """Inspect recovered PCS field definitions, independently of ECU Data List DIDs."""
+    filenames = {
+        "tss3": "pcs_data_viewer_tss3_managed_semantics.json",
+        "adu": "pcs_data_viewer_adu_semantics.json",
+    }
+    source = Path("data/generated/gtsplus_2026") / filenames[schema]
+    artifact = json.loads((REPO_ROOT / source).read_text())
+    definitions = artifact["operation_ffd"]["detail_rows"] if schema == "tss3" else artifact["adu"]["rows"]
+    did = _normalize_did(query) if query else None
+    fields = []
+    for row in definitions:
+        record_id = _normalize_did(row["DataID"])
+        if record_id is None:
+            continue  # Viewer metadata entries are not recorder field definitions.
+        if query:
+            if did is not None:
+                if record_id != did:
+                    continue
+            elif not _fold_match(query, row["DataName"]):
+                continue
+        fields.append(row)
+    return {
+        "namespace": "pcs-recorder",
+        "schema": schema,
+        "artifact_schema": artifact["schema"],
+        "source": source.as_posix(),
+        "sources": artifact["sources"],
+        "fields": fields,
+    }
 
 
 def dtc_rows(db_root: Path, ecu_query: str, query: str | None = None) -> list[dict[str, Any]]:

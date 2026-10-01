@@ -1,15 +1,82 @@
 # GTS+ query CLI
 
 `tools/gts` is the read-only discovery surface for Toyota GTS+/Techstream evidence.
-It exists to make the OEM corpus usable as a Rosetta stone during firmware RE:
-start from an unknown DID/DTC/CUW/contact type or a Toyota phrase, resolve the
-OEM vocabulary and implementation route immediately, then return to target
-firmware bytes for proof.
+It exposes structured OEM records and their implementation routes. Start by
+selecting the diagnostic or recorder namespace below; use string/PE searches
+for remaining gaps, then return to target firmware bytes or captures for proof.
 
 The command deliberately does **not** replace the deterministic Techstream/GTS+
 extractors and verification suites. Those encode subsystem-specific evidence
 boundaries. `tools/gts` only centralizes the already-shared mechanics needed for
 interactive discovery.
+
+## Schema-first workflow
+
+GTS has two distinct field-definition paths. A hexadecimal identifier alone
+does not select one:
+
+| Starting point | First query | What it resolves |
+|---|---|---|
+| ECU / database | `tools/gts ecu FRC_P5` | Section types, record classes and sizes |
+| Data List or ordinary snapshot DID | `tools/gts did FRC_P5 0x1B06 --json` | Monitor row, primary/alternate DID, bit range, scaling and enum references |
+| PCS TSS3 recorder ID / field name | `tools/gts recorder 0x5A08 --json` | Recovered viewer field definitions and source identities |
+| PCS ADU recorder ID / field name | `tools/gts recorder 0x1F06 --schema adu --json` | The separate ADU field schema |
+| ECU implementation route | `tools/gts category FRC_P5` | Category and plugin-role bindings; follow a role with `command` |
+
+An empty `did` result means **no matching Data List/alternate snapshot row in
+that ECU database**, not “Toyota has no definition.” Check the recorder
+namespace when investigating a recorder ID. Neither command silently borrows
+records or enum meanings from the other namespace.
+
+### Follow references, not just names
+
+- **DDB path:** `Toyota.ddb` category/plugin routing → ECU monitor tables
+  `62/157` → physical-data table `13` → unit table `15`, plus pattern-display
+  table `14` and language strings. `did` displays table aliases, monitor key,
+  bit range, physical key and pattern key; `--json` includes the enum labels.
+  It matches both the primary Data List DID and the alternate snapshot DID.
+  See the [DDB pipeline](techstream-ddb-pipeline.md#ecu-databases) and the
+  canonical decoder, `tools/techstream/ddb_semantics.py`.
+- **Recorder path:** recovered PCS viewer static constructors → TSS3
+  `DetailBitAssignInfo` or ADU `P6DetailBitAssignInfo` → record ID and
+  byte/bit geometry, type, scale, support bits and invalid values.
+  `recorder` reads the complete tracked schemas, independently of live-tool
+  focus lists. See the [recorder model](pcs-data-viewer-tss3-dictionary.md#6-how-pcs-data-viewer-models-operation-ffd)
+  for the existing extractors and decoder consumers.
+
+For example, `1B06`'s responsiveness row supplies its own enum labels, while
+recorder `5A07` supplies a three-bit response-priority field. Similar names do
+not establish identical enum values. Recorder `5A08` also has a support bitmap:
+for its `SupportDID=1` fields, the preceding byte supplies the support bit.
+Keep “unsupported” separate from a numeric zero.
+
+Both paths describe **diagnostic/recorder payload positions, not CAN-frame
+positions**. A CAN assignment requires a producer/dataflow or synchronized
+capture join. A display focus filter also does not establish that raw records
+were omitted from acquisition; inspect the reader before making that claim.
+
+### Recorder lookup contract
+
+```bash
+tools/gts recorder 5A08
+tools/gts recorder 'response priority'
+tools/gts recorder 1F06 --schema adu --json
+```
+
+IDs match exactly, accepting four hex digits or a `0x` prefix. Other queries
+match field names case-insensitively. Omitting the query lists record fields;
+viewer metadata entries without a record ID are excluded. `--limit` caps
+displayed fields; JSON includes `matched_fields` before truncation.
+
+The command needs no external GTS installation. It reads the pinned
+`pcs_data_viewer_tss3_managed_semantics.json` or
+`pcs_data_viewer_adu_semantics.json` under `data/generated/gtsplus_2026/`,
+not whichever release `--gtsplus-root` selects for DDB queries. Output identifies
+the artifact and JSON includes its source hashes. All recovered field attributes
+are retained, including `Point` where present; byte positions are 1-based and
+bit position 7 is MSB. This is schema inspection, not a new decoder or a
+live-support claim. Legacy DDR schemas remain in the
+[recorder guide](pcs-data-viewer-tss3-dictionary.md), outside these two selections.
 
 ## Command surface
 
@@ -71,7 +138,8 @@ kept so side-by-side GTS+ releases stay warm without unbounded cache growth.
 The public command runs `tools.techstream.gts.cli`. Within
 `tools/techstream/gts/`, `cli.py` owns argument parsing and dispatch; `render.py`
 owns text/JSON presentation. Domain modules build the results: `ddb.py` and
-`master.py` resolve OEM data, `query.py` and `cuw.py` provide searches,
+`master.py` resolve OEM data, `query.py` provides DDB and recorder-schema queries,
+`cuw.py` provides CUW searches,
 `active_tests.py` and `commands.py` assemble recovered plans, and `registry.py`
 and `bundle.py` export diagnostic descriptions. Shared support selection and
 execution-model loading live in `support.py` and `execution_model.py`.
