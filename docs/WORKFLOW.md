@@ -382,6 +382,14 @@ binary implements the four-frame classic-CAN contract for every registered
 Camry, Crown, and Corolla H/F target. Target builds retain separate metadata
 for host bus/F181 binding, but their default payload SHA-256 is identical.
 
+The shared resident services a pending private-ring record immediately only
+while the foreground flag is clear and TAUJ0 channel 3 has more than 240,000
+counts (3 ms of the 5-ms interval) remaining; it rechecks the flag before
+helper entry. The complete stock foreground schedule and tick update remain
+unchanged, followed by the ordinary signer call as the fallback. The builder
+proves the common timer table, channel-3 reload stores, mode initializer, and
+foreground machine shape in every registered CodeFlash image.
+
 ```bash
 # Build one target. Without --out, output is under build/out/ram-runtime/TARGET/.
 tools/toyota ram build camry-8965F3307000

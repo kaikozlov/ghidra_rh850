@@ -3401,6 +3401,14 @@ sequence nibbles. It reduces the original six ring records to four and provides
 255 nonzero transaction IDs, but it does not bypass or parallelize the
 serialized stock command-5 wrapper.
 
+The current shared resident also applies that idle service algorithm to every
+registered Camry, Crown, and Corolla H/F image. The builder verifies each
+image's common 400,000-count TAUJ0 channel-3 interval and emits no
+target-specific fast-path branch. A pending private-ring record enters the
+helper only above the 240,000-count threshold with the foreground flag clear
+before and after the counter read; the post-foreground helper call remains the
+fallback.
+
 Compact reconstruction remains available only for a deliberate experiment.
 The normal builder emits no compact template or assembly path, and normal
 request-signer kits omit the compact Python module. `--codec compact` on

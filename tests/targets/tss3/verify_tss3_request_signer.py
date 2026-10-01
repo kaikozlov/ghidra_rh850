@@ -292,7 +292,7 @@ check("four-frame is the universal default metadata contract",
       all(item["request"]["carrier"] == "functional-nibble4" for item in four_target_meta.values()) and
       all(item["request"]["frame_count"] == 4 for item in four_target_meta.values()) and
       all(item["request"]["experimental"] is False for item in four_target_meta.values()) and
-      all(item["variant"] == "outer-foreground-functional-nibble4-default"
+      all(item["variant"] == "idle-fast-functional-nibble4-default"
           for item in four_target_meta.values()) and
       "functional-compact1" not in json.dumps(meta))
 check("one payload binary covers every registered TSS3 target",
@@ -301,6 +301,32 @@ check("one payload binary covers every registered TSS3 target",
       len({item["staging"]["sha256"] for item in four_target_meta.values()}) == 1 and
       len({item["authenticated_payload"]["sha256"] for item in four_target_meta.values()}) == 1 and
       all(len(item["universal_runtime"]["profiles"]) == 3 for item in four_target_meta.values()))
+check("all exact targets use the same timer-bounded idle service contract",
+      all(item["idle_fast_path"] == {
+          "enabled": True,
+          "timer": "TAUJ0 channel 3",
+          "counter": "TAUJ0CNT3",
+          "counter_address": "0xFFE5001C",
+          "count_hz": 80_000_000,
+          "steady_counts": 400_000,
+          "steady_period_us": 5_000,
+          "direction": "down",
+          "minimum_remaining_counts": 240_000,
+          "minimum_remaining_us": 3_000,
+          "foreground_flag": "FFFFB111 bit4",
+          "gate_order": [
+              "foreground flag clear",
+              "private cursor trails producer",
+              "counter above minimum remaining counts",
+              "foreground flag still clear",
+          ],
+          "fallback": "service again after the complete stock foreground schedule and tick update",
+      } for item in four_target_meta.values()) and
+      all(
+          item["firmware_contract"]["execution"]["idle_fast"]["steady_counts"] == 400_000 and
+          len(item["firmware_contract"]["execution"]["idle_fast"]["reload_stores"]) == 2
+          for item in four_target_meta.values()
+      ))
 check("firmware-derived execution bindings preserve each exact stock scheduler",
       {
           target: (

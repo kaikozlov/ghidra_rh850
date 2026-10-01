@@ -195,6 +195,48 @@ def check_request_signer(work: Path) -> None:
     )
     print(f"PASS universal request signer: {expected}")
 
+    idle_spec = json.loads(REQUEST_SIGNER_SPEC.read_text(encoding="utf-8"))
+    idle_spec["memory_regions"].append("0xFFE50000,0x1000")
+    tick_wait = metadata["resident"]["tick_wait"]
+    idle_spec["gdb"] = [
+        "set {unsigned char}0xFFFFB111 = 0x10",
+        "set {unsigned char}0x00031910 = 0x5A",
+        "set {unsigned char}0xFEBE39DB = 0",
+        "set {unsigned short}0xFEBE48F8 = 0",
+        "set {unsigned int}0xFEF01000 = 0",
+        "set {unsigned int}0xFEF01004 = 0",
+        "break *0xFEBF0146",
+        "run",
+        f"break *{tick_wait}",
+        "continue",
+        "set {unsigned char}0xFFFFB111 = 0",
+        "set {unsigned short}0xFEBE48F8 = 5",
+        "set {unsigned int}0xFFE5001C = 300000",
+        "break *0xFEF07C00",
+        "continue",
+        (
+            'printf "UNIVERSAL_IDLE_FAST STATE=0x%x VERSION=%u INIT=%u TICK=%u '
+            'FLAG=0x%x COUNTER=%u CONTEXT=0x%x STARTUP=0x%x\\n", '
+            "*(unsigned int *)0xFEBF025C, *(unsigned char *)0xFEBF0260, "
+            "*(unsigned char *)0xFEBF0261, *(unsigned char *)0xFEBE39DB, "
+            "*(unsigned char *)0xFFFFB111, *(unsigned int *)0xFFE5001C, "
+            "*(unsigned int *)0xFEF01000, *(unsigned int *)0xFEF01004"
+        ),
+    ]
+    idle_spec_path = work / "request-signer-idle-sim.json"
+    idle_spec_path.write_text(json.dumps(idle_spec), encoding="utf-8")
+    idle_expected = (
+        "UNIVERSAL_IDLE_FAST STATE=0x4c433841 VERSION=3 INIT=1 TICK=0 "
+        "FLAG=0x0 COUNTER=300000 CONTEXT=0x43545831 STARTUP=0x53544152"
+    )
+    simulate(
+        ROOT / "firmware/camry-8965F3307000/CodeFlash.bin",
+        idle_expected,
+        spec=idle_spec_path,
+        load=f"0xFEBF0000={simulator_staging}",
+    )
+    print(f"PASS universal request signer idle path: {idle_expected}")
+
 
 def main() -> int:
     tmp_root = ROOT / "build/tmp"

@@ -44,6 +44,14 @@ the application software ID at CodeFlash `0x20860`; unknown IDs stop before
 application handoff. Target metadata remains separate for F181, CodeFlash hash,
 Panda bus, and installation routing.
 
+The resident uses one fast-service algorithm on all four targets. While the
+stock foreground flag is clear, it calls the helper only when its private RX
+cursor trails the producer and TAUJ0 channel 3 has more than 240,000 counts
+(3 ms of the 5-ms interval) remaining, then rechecks the flag immediately
+before entry. If that window is unavailable, the unchanged complete stock
+foreground schedule and tick update run first and the helper executes at the
+outer end-of-tick fallback. There is no target-specific fast-path branch.
+
 Panda checks the complete application shape and ordinary angle/acceleration
 limits, blocks native FRC `0x08A` only while host ownership is active, and
 fails open after 100 ms. It does not queue native generations or compare
@@ -179,11 +187,12 @@ Header nibbles `8..B` are intentionally invalid ISO-TP PCI types, so no CanTp
 reassembly, PduR copying, DCM buffer, service lookup, or diagnostic response
 state is part of the recurring request path.
 
-The resident executes the target's stock foreground calls unchanged and invokes
-the helper only after the complete foreground body and stock tick-counter
-update. The older request signer inherited a target-specific mid-receive splice
-from the B6 replacement experiments; that splice and its copied aggregate/Rx
-call graphs are no longer part of the maintained runtime.
+The resident executes the target's stock foreground calls unchanged. It may
+service pending private-ring records in the shared timer-bounded idle window
+described above; the outer post-foreground call remains the fallback. The
+older request signer inherited a target-specific mid-receive splice from the
+B6 replacement experiments; that splice and its copied aggregate/Rx call
+graphs are no longer part of the maintained runtime.
 
 #### Shared P1M-E RAM-execution invariant
 
