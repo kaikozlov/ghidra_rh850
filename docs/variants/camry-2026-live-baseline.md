@@ -2490,7 +2490,7 @@ application byte of `0x08A/32` (44,613 deduped bus-0 frames; per-B21-state censu
 | B8:B9 and B11:B12 | **byte-identical duplicated signed16 in 100% of frames**; raw range −1146..995; four negative joins bound semantics (`\|r\|<=0.07` vs speed-derived acceleration, `0x025` angle, `0x030` driver torque, and B18:B19 target-angle rate) |
 | B10 | latched cruise set speed, 1 km/count (RES+ 66→67→68→70; FRC `0x1901` Memory Vehicle Speed concept corroboration) |
 | B13:B14, B16:B17 | constant `0x7FFF` sentinel slots in every frame |
-| B20[7:6], B22[4] | cruise-state mirrors of B3[3] (44,587/44,613 agreement; 26 transition frames) |
+| B20[7:6], B22[4] | matched B3[3] in 44,587/44,613 early frames; the inferred universal cruise-mirror role for B20 is [superseded by ordinary policy transitions](camry-2026-longitudinal-evidence.md#native-policy-transitions-and-cruise-speed-buttons) |
 | B21 | Target Lateral ID, value set exactly `{0,11,18}` in both drives |
 | B23[5] | set in every SDG row (1,898/1,898); toggles inside LTA/LCA (605/2,934 set) |
 | B24 | request level `0/50/100`: **100 in every LTA/LCA frame (2,934/2,934)**, **50 in every SDG frame (1,898/1,898)**, 0/50/100 in manual; percent unit bounded, not OEM-joined |

@@ -1054,13 +1054,14 @@ B4 follows the request. A directly redecoded packet at t=1313.999846 is
 `B4=−1.856`, `B18=−0.547`, difference=−1.309, driver-brake word=0.
 Strong stock comparison coverage is one episode, not a matched causal experiment.
 
-**Request-policy lead:** the inspected opendbc encoder
-`opendbc/car/toyota/toyotacan.py::create_tss3_control_request_values` hardcodes
-`CRUISE_STATE_MIRROR=3` in its synthesized longitudinal request, making
-`0x08A B20[7:6]=0b11` (`0xC0`). The stock strong-braking example uses
-`0b01` (`0x40`). Stock-longitudinal pass-through instead retains the native
-longitudinal fields. The following comparison adds independent scene context
-to this difference; it does not isolate the field's causal effect.
+**Request-policy lead in the recorded stack:** before opendbc commit
+`3ec57f92`, `opendbc/car/toyota/toyotacan.py::create_tss3_control_request_values`
+hardcoded `CRUISE_STATE_MIRROR=3` in its synthesized longitudinal request,
+making `0x08A B20[7:6]=0b11` (`0xC0`). The stock strong-braking example uses
+`0b01` (`0x40`). Stock-longitudinal pass-through retains the native longitudinal
+fields. The following comparisons do not isolate the field's causal effect.
+The [policy-one cutover](#policy-one-encoder-cutover) changes that constant,
+not the interpretation or evidentiary limits of the recorded drives.
 
 ### Stock following versus free-cruise association
 
@@ -1099,9 +1100,135 @@ raw-rlog lead extraction, not an output of the existing VMC summary generator.
 
 The native field changes while cruise remains active. Thus the observed
 `0x40/0xC0` distinction is not adequately described as another copy of the
-cruise latch. **Hypothesis:** `0x40` selects or accompanies a following-control
-policy and `0xC0` a free-cruise policy. These are behavioral descriptions, not
-recovered OEM enum names.
+cruise latch. Following/free-cruise are scene associations, not recovered OEM
+enum names or a complete explanation: the button-driven transitions below
+also occur without a lead-presence change.
+
+### Native policy transitions and cruise-speed buttons
+
+The follow-on census retains camera-origin requests separately from host
+requests and vehicle-side forwarded copies. It finds **1,217 continuous
+`1 ↔ 3` transitions** with ordinary upper/lower IDs `11/17` and allocations
+`1/3` unchanged: 610 `1 → 3`, 607 `3 → 1`. Continuity requires the same
+route/segment and adjacent logger timestamps no more than 100 ms apart;
+same-timestamp batches and gaps are not assigned transition order.
+
+- Both directions occur with positive and negative acceleration requests.
+- In **144 transitions**, neither acceleration bound changes.
+- **379 of 610 `1 → 3` transitions** change requested speed in the same
+  packet; none of the 607 reverse transitions does. Of those 379 speed
+  changes, 139 are on stock-ACC routes and 240 on openpilot-longitudinal
+  routes; the latter are still native camera requests, not host output.
+- Some scene-context transitions occur while openpilot continues detecting
+  the same lead. Its lead selection is not Toyota's internal ACC target.
+
+Original button packets establish driver-input association independently of
+scene inference. One stock-ACC example, route `0000003f--36e72f5fdc`,
+segment 15:
+
+| Route time (s) | Observation |
+|---|---|
+| 902.257 | RES pressed |
+| 902.298 | Native policy becomes `1`; requested speed remains 97 km/h; acceleration −0.068 m/s² |
+| 902.349 | RES released |
+| 902.399 | Native policy returns to `3`; requested speed becomes 98 km/h; acceleration −0.032 m/s² |
+
+The original SET packets on stock route `0000003e--1a2f20417d`, segment 15,
+show the corresponding decrement sequence: press at 932.356860 s, policy `1`
+at 932.428377 s while speed remains 119 km/h, release at 932.449123 s, then
+policy `3` and 117 km/h at 932.528814 s. Thus this is neither an
+acceleration-sign flag nor solely a lead-present indicator.
+
+For ordinary `11/17`, allocation `1/3` requests on stock-ACC recordings,
+observed upper-acceleration ranges are −1.888…+0.925 m/s² under policy `1`
+and −0.993…+0.942 m/s² under policy `3`. These are observed ranges, not
+limits. Native traffic during an openpilot-longitudinal drive also switches
+to policy `3` at −1.444 m/s², then relaxes toward zero; stronger braking does
+not invariably imply policy `1`.
+
+The corpus also contains `11/25` hold-associated pairs, `13/20` intervention
+pairs, and upper `11`/lower `0` requests with unequal acceleration bounds.
+Policy `0` is therefore not a universal no-request indicator. Do not pool
+those identities into ordinary-DRCC magnitude comparisons.
+
+Verification: eight representative before/after request packets were matched
+byte-for-byte to the original rlogs, including source bus and logger timestamp.
+Button observations above were extracted from the original segments. Source
+identities are in the existing
+[corpus manifest](../../data/generated/camry_20260930_vmc_status/input_manifest.json).
+
+### PCS escalation leaves the policy field unchanged
+
+In the documented September 21 event, route `00000043--29caa20fbc`, segment
+12, the native policy is already **`1` before ID34, stays `1` throughout
+ID34/ID33, and remains `1` afterward**. Its preceding transition was about
+79.5 s earlier under an ordinary request. The host's policy `3` was a
+pre-existing mismatch, not a change triggered by PCS.
+
+The ordinary native `11/17` request ramps from about +0.37 to −4.0 m/s²
+over 6.6 s and reaches −4.0 **20.226 ms before** the first ID34 packet.
+Upper ID `11`, allocations `1/3`, and equal upper/lower acceleration bounds
+persist across the event:
+
+| Offset from first ID34 (ms) | Lower ID | Both bounds (m/s²) | B3[2] | B4[6] | B20 |
+|---|---:|---:|---:|---:|---|
+| −20.226 | 17 | −4.000 | 0 | 0 | `0x40` |
+| 0 | 34 | −4.000 | 1 | 1 | `0x40` |
+| +215.878 | 33 | −4.000 | 0 | 1 | `0x40` |
+| +486.045 | 33 | −3.800 | 0 | 1 | `0x40` |
+| +518.686 | 17 | −3.800 | 0 | 0 | `0x40` |
+
+The table's final row is the first request after the special-ID interval,
+not the last ID33 packet. B22 changes `0x10 → 0x30` on the third ID34 frame,
+after driver braking begins; its meaning is unassigned. Lateral ID and both
+lateral gains remain zero; both `0x7FFF` slots remain unchanged. The first
+two ID34 packets have identical application bytes and sequence but different
+trailers. B3[2] occurs only on the nine ID34 frames in this retained corpus;
+B4[6] occurs on exactly the 21 ID34/ID33 frames. Those are observed
+phase correspondences, not recovered Toyota feature/substage names.
+
+The first two native special-ID packets have no vehicle-side Tx confirmation.
+Driver braking begins at +16.733 ms; forwarding resumes at +33.508 ms,
+after the pedal disable. The host was still publishing about −1.5 m/s² with
+policy `3` versus the native −4.0 with policy `1`. This records replacement
+of the stronger factory request through the beginning of the event; it does
+not isolate either policy's effect on braking. Logger timestamps establish
+these observations, not ECU execution timing.
+
+All **2,401 native request packets** in the event segment were independently
+matched to the retained raw cache. The
+[existing PCS artifact](../../data/generated/camry_20260921_pcs_alert.json)
+and [relay analysis](camry-2026-tss3-opendbc-port.md#414-recovered-pcsadu-semantics-constrain-0x08a-relay-ownership)
+provide the original source and publication boundary. Policy transitions
+and PCS escalation are separate observable changes.
+
+### Policy-one encoder cutover
+
+The constant originated in opendbc commit `089e6466` (September 21), which
+replaced native-field preservation with a host-built template containing
+B20=`0xC0`, based on 44,613 early native publications. Commit `b7e8ccad`
+subsequently named its high bits `CRUISE_STATE_MIRROR`, claiming steady
+cruise value `3`. The expanded corpus disproves that universal interpretation;
+it does not establish an OEM name for the field.
+
+At the owner's request, opendbc commit
+[`3ec57f92`](https://github.com/kaikozlov/opendbc/commit/3ec57f92)
+changes the synthesized openpilot-longitudinal value to **`1`** and Panda's
+matching B20 requirement from `0xC0` to `0x40`. Stock-longitudinal forwarding
+still preserves the factory value. The legacy DBC field name is retained;
+neither its name nor this cutover establishes the signal's semantics.
+
+Verification: 75 targeted Toyota safety/car/transport tests ran with four
+skipped. An offline encoder/packer/compiled-safety smoke accepted policy `1`
+at −3.5, −2.123, 0, +1, and +2 m/s², rejected host policy values `0/2/3`,
+and accepted native-preserving stock-long requests under policies `1` and
+`3`. No hardware signer or vehicle response was exercised. The cutover is
+an experimental candidate, **not a demonstrated fix for weak braking**.
+
+The existing raw steering-assist gain `100` is `LATERAL_ASSIST_GAIN=1.0`;
+it is not a longitudinal feedback-gain setting. The acceleration requests
+and B20 policy are separate controls. GTS's responsiveness vocabulary remains
+relevant, but has no verified B20 mapping.
 
 ### GTS request-policy definitions and patent interpretation
 
@@ -1147,10 +1274,10 @@ contribution is **not independently identified as hydraulic friction braking**.
 No retrieved patent specifies this Camry's approximately 1 m/s² limit.
 
 **[INFERENCE] Leading explanation: a companion request-policy mismatch.**
-Openpilot requests stronger deceleration while fixing a field to the value
-stock commonly associates with free cruising. In the documented weak-braking
-episodes, the additional contribution stays near −1.0 m/s² despite greater
-demand; the stock `0x40` comparison exceeds that magnitude. A restricted-braking
+The recorded host stack requested stronger deceleration while fixing a field
+to the value stock commonly associates with free cruising. In the documented
+weak-braking episodes, the additional contribution stays near −1.0 m/s² despite
+greater demand; the stock `0x40` comparison exceeds that magnitude. A restricted-braking
 regime fits this shape better than merely insufficient controller gain.
 Brake-restriction permission and responsiveness selection remain competing
 field interpretations; a responsiveness setting could also select a regime
@@ -1158,9 +1285,10 @@ with a limiter.
 
 The missing proof is the exact OEM identity and causal effect of the companion
 field. There is no isolated-field comparison under matched demand or
-synchronized diagnostic-to-CAN join. This is not a verified constant-value fix,
-an exact receiver algorithm, or a new gain recommendation. Publication echoes
-still do not prove execution. No controller, DBC, safety, gain, or cap was changed.
+synchronized diagnostic-to-CAN join. This is not a verified constant-value fix
+or an exact receiver algorithm. Publication echoes still do not prove execution.
+The later policy-one cutover above changes the encoder and safety contract;
+these recordings do not qualify its vehicle response.
 
 ### What this changes and what stays open
 
