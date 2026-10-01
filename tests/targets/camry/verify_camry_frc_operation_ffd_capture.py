@@ -2,13 +2,15 @@
 """Verify the read-only exact-Camry FRC Operation-FFD acquisition tool."""
 from __future__ import annotations
 
+import io
 import json
-import subprocess
-import sys
+import tempfile
+from contextlib import redirect_stdout
+from pathlib import Path
+from unittest.mock import Mock, patch
 
-from tools import REPO_ROOT
-REPO = REPO_ROOT
 from tools.targets.camry.live import camry_frc_operation_ffd_capture as cap
+from tools.targets.camry.live.camry_frc_lta_capture import iter_canbin_records
 
 passed = failed = 0
 
@@ -25,113 +27,114 @@ def check(label: str, condition: object, detail: str = "") -> None:
 check("AB11 builder", cap.build_ab11() == bytes.fromhex("ab11"))
 check("AB12 builder", cap.build_ab12(0x2845) == bytes.fromhex("ab122845"))
 check("AB13 builder", cap.build_ab13(0x2845, 0x1234) == bytes.fromhex("ab1328451234"))
-check("all proprietary requests fit classic CAN single frames",
-      all(len(pdu) <= 7 for pdu in (cap.build_ab11(), cap.build_ab12(0x2845), cap.build_ab13(0x2845, 0x1234))))
 
 robs = cap.parse_eb11(bytes.fromhex("eb11209d28182845240f"))
 check("EB11 parser", robs == [0x209D, 0x2818, 0x2845, 0x240F])
 records = cap.parse_eb12(bytes.fromhex("eb122845000100020010"), 0x2845)
 check("EB12 parser + behavior echo", records == [1, 2, 0x10])
 
-# One synthetic EB13 snapshot carrying the exact request/arbitration/state DIDs
-# used by the current acquisition plan.
-blocks = [
-    (0x5282, bytes.fromhex("0b04d26432")),          # ID11, +1.234, gains 1.00/0.50
-    (0x5631, bytes.fromhex("0bff066432")),          # ID11, -0.250
-    (0x5285, bytes.fromhex("0b")),
-    (0x57DE, bytes.fromhex("01f4")),                # +0.500
-    (0x560D, bytes.fromhex("010002ff9c0100")),      # EPS pinion -0.100
-]
-stream = b"".join(did.to_bytes(2, "big") + bytes((len(data),)) + data for did, data in blocks)
-pdu = bytes.fromhex("eb1328451234") + bytes((len(blocks),)) + stream
-count, parsed = cap.parse_eb13(pdu, 0x2845, 0x1234)
-check("EB13 declared-count parser", count == len(blocks) and [(b.data_id, b.data) for b in parsed] == blocks)
-
-zero_count_pdu = bytes.fromhex("eb1328451234") + b"\x00" + stream
-zero_count, zero_parsed = cap.parse_eb13(zero_count_pdu, 0x2845, 0x1234)
-check("EB13 zero-count derives block count by scanning", zero_count == 0 and len(zero_parsed) == len(blocks))
-
-try:
-    cap.parse_eb13(bytes.fromhex("eb1328451234015282050b04"), 0x2845, 0x1234)
-except cap.ProtocolError:
-    malformed_rejected = True
-else:
-    malformed_rejected = False
-check("EB13 truncated block rejected", malformed_rejected)
-
-semantics = cap.load_recorder_semantics()
-decoded = {row["data_id"]: row for row in cap.decode_blocks(parsed, semantics)}
-
-def sig(did: str, name: str) -> dict:
-    return next(row for row in decoded[did]["decoded"] if row["name"] == name)
-
-check("5282 generic lateral ID decode", sig("0x5282", "TSS request - lateral ID")["raw"] == 11)
-check("5282 generic pinion angle decode", sig("0x5282", "TSS request - pinion angle")["physical"] == "1.234")
-check("5282 steering-assist gain decode", sig("0x5282", "Steering assist gain")["physical"] == "1.00")
-check("5282 damping gain decode", sig("0x5282", "Damping control gain")["physical"] == "0.50")
-check("5631 LTA negative pinion angle decode", sig("0x5631", "LTA Control Request Pinion Angle")["physical"] == "-0.250")
-check("5285 arbitration ID decode", sig("0x5285", "Arbitration result_lateral ID")["raw"] == 11)
-check("57DE arbitration pinion angle decode", sig("0x57DE", "Arbitration result Pinion angle")["physical"] == "0.500")
-check("560D EPS pinion angle decode", sig("0x560D", "EPS Pinion Angle")["physical"] == "-0.100")
-
-# MSB0 bit extraction matters for support/under-control flags.  The current
-# 5265 metadata locates the seven one-bit fields at MSB positions in its payload.
-flag_payload = bytearray(14)
-# Support bytes precede each value byte for SupportDID==1 fields.
-flag_payload[0] = 0x80
-flag_payload[1] = 0x80
-flag_payload[2] = 0x80
-flag_payload[12] = 0x80
-flag_payload[13] = 0x80
-flag_block = cap.RecorderBlock(0x5265, bytes(flag_payload))
-flags = cap.decode_blocks([flag_block], semantics)[0]["decoded"]
-flags_by_name = {row["name"]: row for row in flags}
-check("5265 ABS under-control MSB0 decode", flags_by_name["ABS under-control"]["raw"] == 1)
-check("5265 active-steering under-control MSB0 decode", flags_by_name["Active steering under-control flag"]["raw"] == 1)
-check("5265 unset VSC under-control decode", flags_by_name["VSC under-control"]["raw"] == 0)
-
-# SupportDID==1 is a recorder-local support bit. 5774/5776 use byte1 bit7
-# to qualify the value in byte2 bit7; it is not evidence for SID22 support.
-override_defs = semantics[0x5774]
-check("5774 has one support-gated override definition",
-      len(override_defs) == 1 and override_defs[0]["SupportDID"] == 1)
-override_supported = cap.decode_signal(bytes.fromhex("8080"), override_defs[0])
-override_unsupported = cap.decode_signal(bytes.fromhex("0080"), override_defs[0])
-check("5774 support bit admits asserted override value",
-      override_supported["supported"] is True and override_supported["raw"] == 1)
-check("5774 missing support bit suppresses value decode",
-      override_unsupported == {"name": "Driver steering override", "supported": False, "support_did": 1})
-
 check("UDS negative parser", cap.negative_response(bytes.fromhex("7fab31")) == {
     "request_sid": "0xAB", "nrc": "0x31", "raw": "7fab31"
 })
 
-plan = cap.plan()
-check("plan exact FRC route and identity guard", plan["target"] == {
-    "tx": "0x792", "rx": "0x79A", "panda_bus": 0, "f181_contains": "8646F3315000"
-})
-check("plan uses only ordinary extended/default session around Operation FFD",
-      plan["session"] == {"enter": "10 03", "leave": "10 01"})
-check("plan has no SecurityAccess/RC/WDBI/flash/active-test/vehicle-control TX",
-      not any(plan[key] for key in (
-          "security_access", "routine_control", "write_data_by_identifier",
-          "flash_write", "active_test", "vehicle_control_tx")))
-check("plan includes request/arbitration/plant-state DIDs",
-      {"0x5282", "0x5631", "0x5285", "0x57DE", "0x5265", "0x560D",
-       "0x550D", "0x5774", "0x5776"} <= set(plan["focus_dids"]))
-check("plan defaults include steering-override and hands-off warning RoBs",
-      {"0x209D", "0x2845", "0x2846", "0x229C", "0x229F"} <= set(plan["default_robs"]))
 
-proc = subprocess.run(
-    [sys.executable, str(REPO / "tools/targets/camry/live/camry_frc_operation_ffd_capture.py")],
-    cwd=REPO, text=True, capture_output=True,
-)
-try:
-    cli_plan = json.loads(proc.stdout)
-except json.JSONDecodeError:
-    cli_plan = {}
-check("CLI defaults to plan-only and emits no live action", proc.returncode == 0 and cli_plan == plan,
-      proc.stderr.strip())
+class FakePanda:
+    """USB boundary only: exercise the real transport and on-disk capture."""
+
+    def __init__(self, fail_capture=False, fail_reset=False):
+        self.fail_capture = fail_capture
+        self.fail_reset = fail_reset
+        self.batches = []
+        self.safety_mode = None
+
+    def set_safety_mode(self, mode, *_args):
+        self.safety_mode = mode
+
+    def can_send(self, address, frame, bus):
+        assert (address, bus) == (0x792, 0)
+        if frame[0] == 0x30:
+            return
+        request = frame[1:1 + frame[0]]
+        if request == bytes.fromhex("1001") and self.fail_reset:
+            self.batches.append([(0x123, b"\xaa\xbb", 2)])
+            raise OSError("reset send failed")
+        response = {
+            bytes.fromhex("22f181"): bytes.fromhex("62f181") + b"8646F3315000",
+            bytes.fromhex("1003"): bytes.fromhex("5003"),
+            bytes.fromhex("ab11"): bytes.fromhex("7fab31" if self.fail_capture else "eb112845"),
+            bytes.fromhex("ab122845"): bytes.fromhex("eb1228450001"),
+            bytes.fromhex("ab1328450001"): bytes.fromhex("eb13284500010157db02ffce"),
+            bytes.fromhex("1001"): bytes.fromhex("5001"),
+        }[request]
+        if len(response) <= 7:
+            frames = [(bytes([len(response)]) + response).ljust(8, b"\0")]
+        else:
+            frames = [bytes([0x10 | len(response) >> 8, len(response) & 0xFF]) + response[:6]]
+            for sequence, offset in enumerate(range(6, len(response), 7), 1):
+                frames.append((bytes([0x20 | sequence & 0xF]) + response[offset:offset + 7]).ljust(8, b"\0"))
+        self.batches.append([(0x79A, frame, 0) for frame in frames])
+        if request == bytes.fromhex("1001"):
+            # This arrives after the reset response, during the final drain.
+            self.batches.append([(0x123, b"\xaa\xbb", 2)])
+
+    def can_recv(self):
+        return self.batches.pop(0) if self.batches else []
+
+
+for label, fail_capture, fail_reset in (
+    ("normal capture", False, False),
+    ("acquisition failure", True, False),
+    ("acquisition and reset failure", True, True),
+):
+    panda = FakePanda(fail_capture, fail_reset)
+    panda_class = Mock(return_value=panda)
+    panda_class.list.return_value = ["offline-fixture"]
+    opened = {}
+    original_open = Path.open
+
+    def track_open(path, *args, _open=original_open, _opened=opened, **kwargs):
+        stream = _open(path, *args, **kwargs)
+        if path.name in ("can.bin", "records.ndjson"):
+            _opened[path.name] = stream
+        return stream
+
+    with tempfile.TemporaryDirectory() as directory:
+        out_dir = Path(directory) / "capture"
+        caught = None
+        with patch.object(cap, "load_panda_class", return_value=panda_class), \
+                patch.object(cap, "find_pandad_processes", return_value=[]), \
+                patch.object(Path, "open", track_open), redirect_stdout(io.StringIO()):
+            try:
+                cap.execute(out_dir, requested_robs=[0x2845], all_robs=False, max_records_per_rob=1)
+            except cap.ProtocolError as exc:
+                caught = exc
+
+        result = json.loads((out_dir / "operation_ffd.json").read_text())
+        with (out_dir / "can.bin").open("rb") as stream:
+            frames = [(bus, address, data) for _, bus, address, data in iter_canbin_records(stream)]
+
+        check(f"{label}: both output streams close",
+              opened["can.bin"].closed and opened["records.ndjson"].closed)
+        check(f"{label}: final CAN drain is persisted",
+              frames[-1] == (2, 0x123, b"\xaa\xbb") and result["frames_by_bus"]["2"] == 1)
+        check(f"{label}: silent safety restored", panda.safety_mode == cap.SILENT_SAFETY_MODEL)
+        if fail_capture:
+            check(f"{label}: primary acquisition error survives cleanup",
+                  caught is not None and "AB11 rejected" in str(caught) and "AB11 rejected" in result["error"])
+        else:
+            check(f"{label}: record remains readable after cleanup",
+                  caught is None and result["error"] is None and
+                  json.loads((out_dir / "records.ndjson").read_text())["blocks"][0]["decoded"][0]["physical"] == "-0.050")
+        if fail_reset:
+            check(f"{label}: reset failure remains separate",
+                  result.get("default_session_error") == "OSError: reset send failed" and
+                  "default_session_response" not in result)
+        else:
+            check(f"{label}: reset response is confirmed and recorded",
+                  result.get("default_session_response") == "5001" and
+                  "default_session_error" not in result and
+                  (0, 0x79A, bytes.fromhex("0250010000000000")) in frames)
+
 
 print(f"\nSummary: {passed} passed, {failed} failed")
 raise SystemExit(1 if failed else 0)

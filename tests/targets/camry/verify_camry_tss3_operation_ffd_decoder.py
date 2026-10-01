@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify offline Camry TSS3 Operation-FFD EB13 parsing and OEM field decode."""
+"""Verify shared TSS3 Operation-FFD framing and recovered viewer value rules."""
 from __future__ import annotations
 
 import json
@@ -7,19 +7,12 @@ import struct
 import subprocess
 import sys
 import tempfile
-from importlib import import_module
 from pathlib import Path
 
 from tools import REPO_ROOT
-REPO = REPO_ROOT
+from tools.techstream import tss3_operation_ffd as decoder
 
-decoder = import_module("tools.targets.camry.utilities.decode_camry_tss3_operation_ffd")
-decode_eb13 = decoder.decode_eb13
-load_semantics = decoder.load_semantics
-parse_eb13 = decoder.parse_eb13
-
-TOOL = REPO / "tools/targets/camry/utilities/decode_camry_tss3_operation_ffd.py"
-
+TOOL = REPO_ROOT / "tools/targets/camry/utilities/decode_camry_tss3_operation_ffd.py"
 passed = failed = 0
 
 
@@ -35,75 +28,127 @@ def block(data_id: int, payload: bytes) -> bytes:
     return data_id.to_bytes(2, "big") + bytes((len(payload),)) + payload
 
 
-fixture = (
-    bytes.fromhex("EB1328450001")
-    + block(0x5282, bytes.fromhex("0BFF9C6400"))
-    + block(0x5285, bytes.fromhex("0B"))
-    + block(0x57DE, bytes.fromhex("FF9C"))
-    + block(0x5265, bytes(13) + b"\x80")
-    + block(0x560D, bytes.fromhex("00000000640000"))
-    + block(0x0501, bytes.fromhex("FFFF0000000100"))
-    + block(0x9999, bytes.fromhex("AABB"))
-    + block(0x5230, struct.pack(">f", 12.5))
-)
+def rejects(name, callback):
+    try:
+        callback()
+    except ValueError:
+        check(name, True)
+    else:
+        check(name, False, "accepted malformed input")
+
+
+# The seventh header byte is the count; it is not the first byte of a DID.
+blocks = [
+    (0x5282, bytes.fromhex("0BFF9C6400")),
+    (0x5285, bytes.fromhex("0B")),
+    (0x57DE, bytes.fromhex("FF9C")),
+    (0x5265, bytes.fromhex("808080") + bytes(9) + bytes.fromhex("8080")),
+    (0x560D, bytes.fromhex("00000000640000")),
+    (0x5631, bytes.fromhex("0BFF066432")),
+    (0x0501, bytes.fromhex("FFFF0000000100")),
+    (0x9999, bytes.fromhex("AABB")),
+    (0x5261, struct.pack(">f", -0.5)),
+    (0x5A08, bytes.fromhex("E0A0")),
+]
+stream = b"".join(block(did, payload) for did, payload in blocks)
+header = bytes.fromhex("EB1328450001")
+fixture = header + bytes((len(blocks),)) + stream
 
 print("== EB13 grammar ==")
-parsed = parse_eb13(fixture)
-check("service/behavior/record decode", (parsed["service"], parsed["behavior"], parsed["record"]) == ("EB13", "0x2845", "0x0001"))
-check("all block IDs and lengths decode", [(b["data_id"], b["length"]) for b in parsed["blocks"]] == [
-    ("5282", 5), ("5285", 1), ("57DE", 2), ("5265", 14), ("560D", 7), ("0501", 7), ("9999", 2),
-    ("5230", 4),
-])
-for name, malformed, text in (
-    ("wrong service rejected", bytes.fromhex("621328450001"), "expected EB13"),
-    ("short header rejected", bytes.fromhex("EB132845"), "need at least 6"),
-    ("truncated block rejected", bytes.fromhex("EB1328450001528205AA"), "declares 5 bytes"),
+parsed = decoder.parse_eb13(fixture, expected=(0x2845, 1))
+check("behavior/record echoes and declared count", (parsed.behavior_id, parsed.record_id, parsed.declared_count) == (0x2845, 1, len(blocks)))
+check("all blocks retain their boundaries and bytes", [(b.data_id, b.data) for b in parsed.blocks] == blocks)
+zero = decoder.parse_eb13(header + b"\x00" + stream)
+check("zero count scans the complete stream", zero.declared_count == 0 and zero.blocks == parsed.blocks)
+check("empty zero-count record", decoder.parse_eb13(header + b"\x00").blocks == [])
+repeated = decoder.parse_eb13(header + b"\x02" + block(0x9999, b"") + block(0x9999, b"a"))
+check("repeated IDs and zero-length blocks retain order", [(b.data_id, b.data) for b in repeated.blocks] == [(0x9999, b""), (0x9999, b"a")])
+for name, malformed in (
+    ("wrong service rejected", b"\x62\x13" + fixture[2:]),
+    ("missing count byte rejected", header),
+    ("short header rejected", header[:4]),
+    ("truncated block header rejected", header + bytes.fromhex("0152")),
+    ("truncated block payload rejected", header + bytes.fromhex("01528205AA")),
+    ("too few blocks rejected", header + b"\x02" + block(0x5285, b"\x0b")),
+    ("trailing blocks rejected", header + b"\x01" + stream),
+    ("zero-count trailing fragment rejected", header + b"\x00" + stream + b"\x52"),
 ):
-    try:
-        parse_eb13(malformed)
-    except ValueError as exc:
-        check(name, text in str(exc), str(exc))
-    else:
-        check(name, False, "accepted malformed PDU")
+    rejects(name, lambda pdu=malformed: decoder.parse_eb13(pdu))
+for expected in ((0x2846, 1), (0x2845, 2)):
+    rejects(f"echo mismatch {expected} rejected", lambda expected=expected: decoder.parse_eb13(fixture, expected=expected))
+rejects("filter cannot hide malformed blocks", lambda: decoder.decode_eb13(header + bytes.fromhex("01999902AA"), only={0x5282}))
 
 print("\n== managed-semantics decode ==")
-semantics = load_semantics()
-result = decode_eb13(fixture, semantics)
+semantics = decoder.load_semantics()
+result = decoder.decode_eb13(fixture, semantics)
 by_id = {row["data_id"]: row for row in result["blocks"]}
-fields_5282 = {row["name"]: row for row in by_id["5282"]["fields"]}
-check("5282 Target Lateral ID", fields_5282["TSS request - lateral ID"]["raw"] == 11 and fields_5282["TSS request - lateral ID"]["display"] == "11")
-check("5282 signed request pinion", fields_5282["TSS request - pinion angle"]["raw"] == 0xFF9C and fields_5282["TSS request - pinion angle"]["display"] == "-0.100")
-check("5282 assist/damping gains", fields_5282["Steering assist gain"]["display"] == "1.00" and fields_5282["Damping control gain"]["display"] == "0.00")
-check("5285 arbitration winner ID", by_id["5285"]["fields"][0]["display"] == "11")
-check("57DE arbitration winner pinion", by_id["57DE"]["fields"][0]["display"] == "-0.100")
-active = next(row for row in by_id["5265"]["fields"] if row["name"] == "Active steering under-control flag")
-check("5265 active-steering bit uses byte14 MSB", active["raw"] == 1 and active["display"] == "1")
-eps = next(row for row in by_id["560D"]["fields"] if row["name"] == "EPS Pinion Angle")
-check("560D EPS pinion signed scale", eps["raw"] == 100 and eps["display"] == "0.100")
-trip = next(row for row in by_id["0501"]["fields"] if row["name"] == "Trip count [trip]")
-check("invalid-value list is honored", trip["raw"] == 0xFFFF and trip["invalid"] is True)
-check("IEEE-754 recorder float decodes", by_id["5230"]["fields"][0]["display"] == "12.500")
-check("unknown DID is retained raw", by_id["9999"] == {
-    "data_id": "9999", "length": 2, "raw": "aabb", "known": False, "fields": [], "errors": [],
-})
-check("decode has no field errors", all(not row["errors"] for row in result["blocks"]))
 
-filtered = decode_eb13(fixture, semantics, {"0x5282", "57DE"})
-check("DID filter is exact", [row["data_id"] for row in filtered["blocks"]] == ["5282", "57DE"])
+
+def signal(did, name):
+    return next(row for row in by_id[did]["decoded"] if row["name"] == name)
+
+
+check("5282 lateral ID", signal("0x5282", "TSS request - lateral ID")["physical"] == "11")
+pinion = signal("0x5282", "TSS request - pinion angle")
+check("signed pinion preserves unsigned raw bits", pinion["raw"] == 0xFF9C and pinion["physical"] == "-0.100")
+check("assist/damping scales", signal("0x5282", "Steering assist gain")["physical"] == "1.00" and signal("0x5282", "Damping control gain")["physical"] == "0.00")
+check("arbitration lateral ID", by_id["0x5285"]["decoded"][0]["physical"] == "11")
+check("arbitration pinion", by_id["0x57DE"]["decoded"][0]["physical"] == "-0.100")
+check("LTA negative pinion", signal("0x5631", "LTA Control Request Pinion Angle")["physical"] == "-0.250")
+check("EPS positive pinion", signal("0x560D", "EPS Pinion Angle")["physical"] == "0.100")
+check("active-steering support/value MSBs", signal("0x5265", "Active steering under-control flag")["raw"] == 1)
+check("ABS support/value MSBs", signal("0x5265", "ABS under-control")["raw"] == 1)
+check("supported zero differs from unsupported", signal("0x5265", "VSC under-control")["raw"] == 0 and signal("0x5265", "VSC under-control")["supported"] is True)
+trip = signal("0x0501", "Trip count [trip]")
+check("invalid integer has no physical value", trip["raw"] == 0xFFFF and trip["invalid"] is True and trip["physical"] is None)
+check("closed-accelerator IEEE-754 value", by_id["0x5261"]["decoded"][0]["physical"] == "-0.500")
+check("5A08 support bitmap qualifies separate value bits", [r["raw"] for r in by_id["0x5A08"]["decoded"]] == [1, 0, 1])
+check("unknown DID retains raw bytes without invented fields", by_id["0x9999"]["data"] == "aabb" and by_id["0x9999"]["decoded"] == [])
+check("complete fixture has no field errors", all("decode_error" not in field for row in result["blocks"] for field in row["decoded"]))
+for payload in (bytes.fromhex("00A0"), b"\x00"):
+    unsupported = decoder.decode_blocks([decoder.RecorderBlock(0x5A08, payload)], semantics)[0]["decoded"]
+    check(f"absent support suppresses stale/missing values {payload.hex()}", all(r["supported"] is False and "raw" not in r and "physical" not in r for r in unsupported))
+short = decoder.decode_eb13(header + b"\x02" + block(0x5282, b"\x0b") + block(0x9999, b"\xaa"), semantics)
+check("short field reports error while preserving other data", short["blocks"][0]["decoded"][0]["raw"] == 11 and "decode_error" in short["blocks"][0]["decoded"][1] and short["blocks"][1]["data"] == "aa")
+
+# These exercise numeric boundaries, not schema-row spelling or copied metadata.
+row = dict(semantics[0x5282][1], BytePosition=1, BitPosition=7, BitLength=16, Lsb="0.001", Offset="0", Point=2)
+for raw, expected in ((1239, "1.23"), (-1231, "-1.24"), (-32768, "-32.77"), (32767, "32.76")):
+    value = decoder.decode_signal(raw.to_bytes(2, "big", signed=True), row)
+    check(f"signed scale and floor {raw}", value["physical"] == expected)
+check("Point zero floors instead of rounding", decoder.decode_signal(b"\x00\x0f", dict(row, Lsb="0.1", Point=0))["physical"] == "1")
+check("packed signed field across bytes", decoder.decode_signal(bytes.fromhex("2AAA"), dict(row, BitPosition=5, BitLength=12, Lsb="1", Point=0))["physical"] == "-1366")
+for kind, width, fmt in (("f", 32, ">f"), ("d", 64, ">d")):
+    floating = dict(row, Type=kind, BitLength=width, Lsb="1", Point=3)
+    for value, expected in ((12.5, "12.500"), (-0.5, "-0.500"), (-1.2341, "-1.235")):
+        check(f"{kind} IEEE conversion and floor {value}", decoder.decode_signal(struct.pack(fmt, value), floating)["physical"] == expected)
+    nan = decoder.decode_signal(struct.pack(fmt, float("nan")), floating)
+    check(f"{kind} NaN is invalid without a sentinel row", nan["invalid"] is True and nan["physical"] is None)
+    for value, expected in ((float("inf"), "Infinity"), (-float("inf"), "-Infinity")):
+        infinite = decoder.decode_signal(struct.pack(fmt, value), floating)
+        check(f"{kind} infinity stays JSON-safe", infinite["physical"] == expected and json.loads(json.dumps(infinite, allow_nan=False))["physical"] == expected)
+    zero_invalid = decoder.decode_signal(struct.pack(fmt, -0.0), dict(floating, InvalidValueList=["0x" + "00" * (width // 8)]))
+    check(f"{kind} invalid float compares numeric value", zero_invalid["invalid"] is True and zero_invalid["physical"] is None)
+
+for payload, expected in (("261001123456", ["26", "10", "01", "12", "34", "56"]), ("39130024606A", [None] * 6)):
+    dates = decoder.decode_blocks([decoder.RecorderBlock(0x0507, bytes.fromhex(payload))], semantics)[0]["decoded"]
+    check(f"BCD timestamp components and bounds {payload}", [r["physical"] for r in dates] == expected)
+
+filtered = decoder.decode_eb13(fixture, semantics, only={0x5282, 0x57DE})
+check("filter selects output without changing record count", [row["data_id"] for row in filtered["blocks"]] == ["0x5282", "0x57DE"] and filtered["parsed_block_count"] == len(blocks))
 
 print("\n== CLI ==")
 with tempfile.TemporaryDirectory() as td:
     out = Path(td) / "decoded.json"
     proc = subprocess.run(
-        [sys.executable, str(TOOL), "--hex", fixture.hex(), "--only", "5265", "--out", str(out)],
-        cwd=REPO,
-        capture_output=True,
-        text=True,
-        check=False,
+        [sys.executable, str(TOOL), "--hex", fixture.hex(), "--only", "5261", "--only", "0x5A08", "--out", str(out)],
+        cwd=td, capture_output=True, text=True, check=False,
     )
     cli = json.loads(out.read_text()) if out.exists() else {}
-    check("CLI succeeds", proc.returncode == 0, proc.stderr[-300:])
-    check("CLI writes filtered deterministic JSON", [row["data_id"] for row in cli.get("blocks", [])] == ["5265"])
+    check("CLI loads repository schema outside repo and decodes selected values", proc.returncode == 0 and
+          [r["data_id"] for r in cli.get("blocks", [])] == ["0x5261", "0x5A08"] and
+          cli["blocks"][0]["decoded"][0]["physical"] == "-0.500" and
+          [r["physical"] for r in cli["blocks"][1]["decoded"]] == ["1", "0", "1"], proc.stderr[-300:])
 
 print(f"\nResults: {passed} passed, {failed} failed")
 raise SystemExit(1 if failed else 0)

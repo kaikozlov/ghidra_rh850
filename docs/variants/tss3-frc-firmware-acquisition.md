@@ -101,9 +101,16 @@ session handling. This is separate from **Image FFD**, whose live
 strictly read-only acquisition of this interface. Before using the proprietary
 service it requires F181 to contain `8646F3315000`, enters `10 03`, then uses
 only `AB11/12/13` plus ISO-TP flow control. It captures all incoming Panda buses
-0..2 on the same monotonic clock and restores `10 01` and silent Panda safety on
-exit. It has no SecurityAccess, RoutineControl, WDBI, flash, Active-Test, or
-vehicle-control path.
+0..2 on the same monotonic clock, attempts to restore `10 01`, and resets
+silent Panda safety on exit. The CAN log stays open through session-reset
+response handling and the final CAN drain. It has no SecurityAccess,
+RoutineControl, WDBI, flash, Active-Test, or vehicle-control path.
+
+EB13 parsing and field conversion use the
+[shared Operation-FFD decoder](../tooling/pcs-data-viewer-tss3-dictionary.md#shared-operation-ffd-decoder).
+All returned blocks are retained and all known fields are decoded, including
+floating-point fields. `FOCUS_DIDS` only marks the summary; it does not limit
+acquisition or decoding.
 
 The default RoB set targets stored steering/driver events (`LCS Steer Override`,
 `Steering Angle Speed Threshold Exceeded`, `LTA Hands Free Cancel`, LCA

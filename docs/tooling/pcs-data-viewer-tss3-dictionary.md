@@ -208,9 +208,9 @@ and writes
 The current artifact contains **1,130 exact `DetailBitAssignInfo` rows across 623
 recorder DIDs** and **47 exact RoB/trigger definitions**. The recovered
 `MeasuredValue` methods prove the common engineering conversion
-**`physical = raw * Lsb + Offset`**, followed by fixed-point presentation using
-`Point` decimal places; `f`/`d` reinterpret IEEE-754 single/double payloads,
-while `u`/`s` use the integer path.
+**`physical = raw * Lsb + Offset`**, followed by **flooring** to `Point`
+decimal places and fixed-point presentation; `f`/`d` reinterpret IEEE-754
+single/double payloads, while `u`/`s` use the integer path.
 
 High-value lateral rows are no longer inferred from names alone:
 
@@ -263,6 +263,58 @@ ID dictionary using one shared profile value **11 = LTA/LCA**. It does **not**
 prove that `5631` is the runtime LCA carrier, establish copy direction between
 `5631` and `5282`, or identify the ECU/network producer. Those require dynamic
 Operation-FFD data or producer firmware/dataflow.
+
+### Shared Operation-FFD decoder
+
+`tools/techstream/tss3_operation_ffd.py` owns EB13 framing, schema loading and
+field conversion. Both `tools/targets/camry/live/camry_frc_operation_ffd_capture.py`
+and `tools/targets/camry/utilities/decode_camry_tss3_operation_ffd.py` call it;
+neither command maintains a separate parser or value decoder.
+
+- **Framing:** the seven-byte header includes the block count at byte 6.
+  Blocks start at byte 7 as `data_id:be16 || length:u8 || data`.
+  Count zero scans the entire stream. Nonzero counts must match exactly;
+  truncated headers/payloads and trailing bytes are rejected. Acquisition also
+  checks the echoed behavior and record IDs.
+- **Support:** `SupportDID=1` tests the same bit in the preceding byte before
+  reading the value. An unsupported field has `supported=false` and no `raw`
+  or `physical` value; it is not a zero.
+- **Values:** `raw` is the unsigned wire bit pattern, including signed and
+  IEEE fields. `physical` is a fixed-point string. Invalid sentinels and IEEE
+  NaNs set `invalid=true` and `physical=null`; infinities use JSON-safe strings.
+  Negative values are floored, not rounded or truncated toward zero.
+- **Time:** `0507` contains BCD components, not binary integers. The decoder
+  applies the recovered component bounds and returns the stored date/time,
+  without the viewer's PC-local timezone conversion. Download time does not
+  establish the original event time.
+- **Retention:** unknown IDs, repeated IDs and raw block bytes are preserved.
+  Field-level errors appear as `decode_error` without discarding other fields.
+  Acquisition decodes every known returned field; `FOCUS_DIDS` only annotates
+  its summary. Offline `--only` filters output blocks after full framing
+  validation.
+
+Both commands emit record schema `tss3-operation-ffd-decode-v1`, with
+`behavior_id`, `record_id`, `raw_response`, `declared_block_count`,
+`parsed_block_count` and `blocks`. Each block contains `data_id`, `length`,
+hexadecimal `data`, and `decoded` fields. This replaces the offline command's
+old `fields`/`display` output; there are no compatibility decoder aliases.
+
+Offline example (synthetic record; no vehicle access):
+
+```bash
+python -m tools.targets.camry.utilities.decode_camry_tss3_operation_ffd \
+  --hex eb132845000103526104bf0000005a080200a0999902aabb
+tools/test camry_tss3_operation_ffd_decoder
+tools/test camry_frc_operation_ffd_capture
+```
+
+The recovered viewer's `MeasuredValue.GetValue`, `CheckSupportDataID`,
+`ConvertPhysicalValueOf*`, `GetSeparatedDateTime` and `ValueConverter.Floor`
+provide the conversion rules. Regression coverage exercises framing/counts,
+echoes, support, signed/packed integers, floats/doubles, invalid values,
+timestamp bounds, raw retention and CLI filtering. Offline command and
+synthetic ISO-TP acquisition smoke checks agree on decoded blocks. These
+checks do not establish live field availability or a recorder-to-CAN join.
 
 ### 6.1 ADU longitudinal arbitration, PDA split, PCS, and resume observables
 

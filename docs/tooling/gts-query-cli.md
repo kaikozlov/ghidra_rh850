@@ -41,8 +41,9 @@ records or enum meanings from the other namespace.
   `DetailBitAssignInfo` or ADU `P6DetailBitAssignInfo` → record ID and
   byte/bit geometry, type, scale, support bits and invalid values.
   `recorder` reads the complete tracked schemas, independently of live-tool
-  focus lists. See the [recorder model](pcs-data-viewer-tss3-dictionary.md#6-how-pcs-data-viewer-models-operation-ffd)
-  for the existing extractors and decoder consumers.
+  focus lists. The [shared Operation-FFD decoder](pcs-data-viewer-tss3-dictionary.md#shared-operation-ffd-decoder),
+  `tools/techstream/tss3_operation_ffd.py`, owns TSS3 payload decoding for both
+  acquisition and offline commands; the schema query itself does not decode bytes.
 
 For example, `1B06`'s responsiveness row supplies its own enum labels, while
 recorder `5A07` supplies a three-bit response-priority field. Similar names do
