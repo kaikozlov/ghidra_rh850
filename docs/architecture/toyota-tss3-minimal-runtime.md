@@ -12,7 +12,7 @@ retained qualification evidence from later implementation changes. In
 particular, the [September-18 road witness](../variants/toyota-tss3-openpilot-bounty-evidence.md)
 does not by itself qualify the superseding request-plane configuration.
 
-## Current exact-target request-signer contract
+## Current shared request-signer contract
 
 The maintained RAM runtime is the request signer exposed by
 `tools/toyota ram`. Openpilot owns the complete 28-byte `0x08A` application and
@@ -37,10 +37,12 @@ encoder and ICU-S command 5, and returns one standard classic-CAN `0x7A9`
 response containing status plus `FV4||MAC28`. Openpilot appends that trailer
 without reconstructing or interpreting freshness.
 
-The transport and host interface are shared by Camry, Crown, and Corolla H/F.
-Each build remains exact-target-bound: firmware call addresses, RAM layout,
-CAN bus, transmit handle, CodeFlash hash, and application F181 come from the
-registered target profile. There is no cross-calibration binary.
+The transport, host interface, resident, helper, staging image, and
+authenticated payload are shared by every registered Camry, Crown, and Corolla
+H/F target. The staging shell selects one verified 108-byte runtime config from
+the application software ID at CodeFlash `0x20860`; unknown IDs stop before
+application handoff. Target metadata remains separate for F181, CodeFlash hash,
+Panda bus, and installation routing.
 
 Panda checks the complete application shape and ordinary angle/acceleration
 limits, blocks native FRC `0x08A` only while host ownership is active, and
@@ -171,16 +173,17 @@ transport enhancement, not a dependency of this lateral baseline.
 
 Exact Camry F33, Corolla H, Corolla F, and Crown F30 expose the same physical
 request contract: four classic standard-`0x777` records accepted by the stock
-functional CAN rule. The resident reads those records from the target's
-software RX ring after stock drain through a private cursor. Header nibbles
-`8..B` are intentionally invalid ISO-TP PCI types; the current request signer
-does not use CanTp reassembly, PduR copying, DCM buffers, service lookup, or
-diagnostic response state.
+functional CAN rule. The helper reads those records through a private cursor
+over the software RX ring; it does not depend on or modify the stock consumer.
+Header nibbles `8..B` are intentionally invalid ISO-TP PCI types, so no CanTp
+reassembly, PduR copying, DCM buffer, service lookup, or diagnostic response
+state is part of the recurring request path.
 
-The common contract stops at that raw-record boundary. Each registered target
-still supplies its request/response bus, RX ring and producer, callback
-geometry, resident/scratch placement, lower transmit handle, firmware calls,
-application F181, and CodeFlash hash.
+The resident executes the target's stock foreground calls unchanged and invokes
+the helper only after the complete foreground body and stock tick-counter
+update. The older request signer inherited a target-specific mid-receive splice
+from the B6 replacement experiments; that splice and its copied aggregate/Rx
+call graphs are no longer part of the maintained runtime.
 
 #### Shared P1M-E RAM-execution invariant
 
@@ -214,39 +217,36 @@ blanket promise that every reset clears every local-RAM view. Target builders
 must continue to prove the exact boot/reset path and startup write survival
 from firmware.
 
-What remains target-specific is deterministic firmware data: the active reset
-path, startup writes, application call graph, RX ring, freshness fields,
-transmit handle, MPU table, and callable signer entry points. The builder pins
-those facts to each exact CodeFlash hash; it does not use a vehicle-name
-capability gate.
+What remains target-specific is a small signer/I/O ABI: RX ring and producer,
+authenticated trip/reset cells, state/scratch placement, freshness encoder,
+command-5 wrapper/globals, lower CAN writer and transmit handle. Startup and
+foreground addresses are not curated profile data: the builder resolves the
+unique coordinator and common 92-byte foreground machine shape from each exact
+CodeFlash image, then emits its decoded startup span and ten stock calls into
+the selected runtime config. Exact CodeFlash hashes still bind that derivation.
 
-The classic-`0x08A` resident profiles currently compile to these exact
-application interfaces:
+The shared binary currently contains three runtime configs for four targets;
+Corolla H/F resolve to the same application software ID and ABI:
 
-| exact target | Panda bus | RX ring / producer | callback table / slot | resident state | response lower handle | signer scratch |
-|---|---:|---|---|---|---:|---|
-| Camry `8965F3307000` | 0 | `FEBE4038` / `FEBE48F8` | `000219DC` / 44 | `FEBF025C` | 53 | `FEBF0280` |
-| Crown `8965F3012000` | 1 | `FEBE3E98` / `FEBE475A` | `00021A00` / 42 | `FEBF025C` | 51 | `FEBF0280` |
-| Corolla `8965H1202000` | 1 | `FEBE3F4C` / `FEBE480C` | `00021988` / 41 | `FEBFF9F0` | 50 | `FEF07F98` |
-| Corolla `8965F1208000` | 1 | `FEBE3F4C` / `FEBE480C` | `00021988` / 41 | `FEBFF9F0` | 50 | `FEF07F98` |
+| exact target | Panda bus | RX ring / producer | resident state | response lower handle | signer scratch | command-5 globals |
+|---|---:|---|---|---:|---|---|
+| Camry `8965F3307000` | 0 | `FEBE4038` / `FEBE48F8` | `FEBF025C` | 53 | `FEBF0280` | `FEBF13A0` |
+| Crown `8965F3012000` | 1 | `FEBE3E98` / `FEBE475A` | `FEBF025C` | 51 | `FEBF0280` | `FEBF13A0` |
+| Corolla `8965H1202000` | 1 | `FEBE3F4C` / `FEBE480C` | `FEBFF9F0` | 50 | `FEF07F98` | `FEBF1264` |
+| Corolla `8965F1208000` | 1 | `FEBE3F4C` / `FEBE480C` | `FEBFF9F0` | 50 | `FEF07F98` | `FEBF1264` |
 
 All four default to the same four-message classic standard-`0x777` request
-codec, standard-`0x7A9` responses, the same 36-byte command-5 authentication
-domain, and exact target-specific CodeFlash calls. Headers `8s`, `9S`, `As`,
-and `BS` encode ordered fragments 0..3 while repeating the low/high nibbles of
-the complete 8-bit transaction sequence. Each message contributes seven
-consecutive bytes, so the helper reconstructs the complete 28-byte application
-verbatim rather than inferring a canonical shape.
+codec, standard-`0x7A9` response, and 36-byte command-5 authentication domain.
+Headers `8s`, `9S`, `As`, and `BS` encode ordered fragments 0..3 while
+repeating the low/high nibbles of the complete 8-bit transaction sequence. Each
+message contributes seven consecutive bytes, so the helper reconstructs all 28
+application bytes verbatim.
 
-One source implementation is built for all four targets and is held to the
-same 920-byte (`0x398`) code limit. That limit is the start of Corolla's
-GlobalRAM scratch region, so Camry/Crown cannot silently consume their extra
-transit-window headroom. Current default helpers link at 800 bytes for
-Camry/Crown and 804 bytes for Corolla H/F, all with zero relocations and with no
-compact template or compact assembly path. Explicit compact builds remain
-808/812 bytes respectively. Corolla H/F intentionally produce identical
-resident/helper binaries because their pinned runtime profile is identical;
-their F181 and CodeFlash identities remain distinct deployment guards.
+The common resident code is bounded below the runtime-config block in
+`FEBFF9F0..FEBFFBFB`. The helper remains bounded to 920 bytes (`0x398`) because
+Corolla scratch begins at `FEF07F98`; zero relocations and the common bound are
+checked from linked artifacts. The runtime config fixes an earlier portability
+defect in which the shared helper used F3 command-5 globals on Corolla.
 
 The one-message canonical-reconstruction codec is retained only as an explicit
 experiment. Its stock-TSS3 steering experiment was reported broken, so it is

@@ -33,7 +33,6 @@
       "ram_runtime": {
         "profile": "camry-f33",
         "payloads": ["tss3-request-signer"],
-        "idle_fast_path": true,
         "application_f181_hex": "023839363546333330373030300000000038413331313333303331303000000000"
       }
     },
@@ -69,7 +68,6 @@
       "ram_runtime": {
         "profile": "crown-f30",
         "payloads": ["tss3-request-signer"],
-        "idle_fast_path": false,
         "application_f181_hex": "023839363546333031323030300000000038413331313330303830303000000000"
       }
     },
@@ -105,7 +103,6 @@
       "ram_runtime": {
         "profile": "corolla-hf",
         "payloads": ["tss3-request-signer"],
-        "idle_fast_path": false,
         "application_f181_hex": "023839363546313230383030300000000038413331313132313330303000000000"
       }
     },
@@ -142,7 +139,6 @@
       "ram_runtime": {
         "profile": "corolla-hf",
         "payloads": ["tss3-request-signer"],
-        "idle_fast_path": false,
         "application_f181_hex": "023839363546313230383030300000000038413331313132303230303000000000"
       }
     },

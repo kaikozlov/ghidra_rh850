@@ -11,28 +11,23 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest import mock
 
-from tools import REPO_ROOT
-ROOT = REPO_ROOT
-
+from exploit.common import ram_exec
 from exploit.ephemeral_runtime import build_tss3_request_signer as build
-from exploit.ephemeral_runtime import tss3_request_signer as host
-from exploit.ephemeral_runtime import tss3_request_signer_compact as compact_host
 from exploit.ephemeral_runtime import camry_f33_request_signer_ui_bringup as ui_bringup
 from exploit.ephemeral_runtime import camry_f33_startup_programming as startup_programming
-from exploit.common import ram_exec
+from exploit.ephemeral_runtime import tss3_request_signer as host
+from exploit.ephemeral_runtime import tss3_request_signer_compact as compact_host
+from tools import REPO_ROOT
 from tools.targets.tss3.builders import build_tss3_ram_kit as ram_kit
+
+ROOT = REPO_ROOT
 
 CAMRY_TARGET = "camry-8965F3307000"
 CAMRY_STEM = build.output_stem(CAMRY_TARGET)
-OUT = build.default_output_dir(CAMRY_TARGET, idle_fast_path=True)
-FOREGROUND_OUT = build.default_output_dir(CAMRY_TARGET, idle_fast_path=False)
+OUT = build.default_output_dir(CAMRY_TARGET)
 
 subprocess.run(
     [sys.executable, str(build.BUILDER), "--target", CAMRY_TARGET],
-    cwd=ROOT, check=True, stdout=subprocess.DEVNULL,
-)
-subprocess.run(
-    [sys.executable, str(build.BUILDER), "--target", CAMRY_TARGET, "--foreground-only"],
     cwd=ROOT, check=True, stdout=subprocess.DEVNULL,
 )
 target_meta = {}
@@ -57,9 +52,7 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-request-signer-") as td:
         compact_target_meta[target] = json.loads(compact_proc.stdout)
 meta_path = OUT / f"{CAMRY_STEM}.json"
 meta = json.loads(meta_path.read_text())
-foreground_meta = json.loads((FOREGROUND_OUT / f"{CAMRY_STEM}.json").read_text())
 resident = (OUT / meta["resident"]["path"]).read_bytes()
-foreground_resident = (FOREGROUND_OUT / foreground_meta["resident"]["path"]).read_bytes()
 helper = (OUT / meta["helper"]["path"]).read_bytes()
 
 
@@ -142,11 +135,11 @@ check("caught PROGRAMMING execution path never re-enters the application handoff
       wait_exact_boot.call_args.kwargs["expected_f181_hex"] == boot_f181.hex() and prepare_direct.call_count == 1)
 
 
-check("idle-fast Camry default and foreground-only reference remain separate",
-      len(foreground_resident) <= foreground_meta["resident"]["limit"] and
-      foreground_resident != resident and foreground_meta["helper"]["sha256"] == meta["helper"]["sha256"])
-check("resident/helper fit proven RAM geometry",
-      len(resident) <= meta["resident"]["limit"] and
+check("resident/helper/config fit the common RAM geometry",
+      len(resident) <= meta["resident"]["limit"] == build.RESIDENT_CODE_LIMIT and
+      meta["resident"]["config_base"] == f"0x{build.CONFIG_BASE:08X}" and
+      meta["resident"]["config_size"] == build.CONFIG_SIZE and
+      meta["resident"]["pocket_limit"] == 0x20C and
       len(helper) <= meta["helper"]["limit"] and
       meta["resident"]["headroom"] == meta["resident"]["limit"] - len(resident) and
       meta["helper"]["headroom"] == meta["helper"]["limit"] - len(helper) and
@@ -199,8 +192,17 @@ simulator_output = run_core_simulator()
 check("production pure-core macros execute under GNU RH850 sim",
       "ORACLE_SIM_RESULT=0x8a0c0de FAILURE=0 PASSES=36" in simulator_output)
 
-fw = meta["firmware_contract"]
-check("idle-fast timer gate is bound to exact firmware geometry",
+fw = meta["firmware_contract"]["camry"]
+execution = meta["firmware_contract"]["execution"]
+check("firmware-derived scheduler matches exact Camry machine structure",
+      execution["coordinator"] == 0x637EE and
+      execution["startup_count"] == 21 and
+      execution["foreground"] == 0x66062 and
+      execution["foreground_size"] == 92 and
+      execution["foreground_shape_sha256"] == build.FOREGROUND_SHAPE_SHA256 and
+      execution["timing_flag"] == 0x31910 and
+      execution["tick_counter"] == 0xFEBE39DB)
+check("stock foreground timer remains bound to exact firmware geometry",
       fw["foreground_timer"] == {
           "timer": "TAUJ0 channel 3",
           "counter": "TAUJ0CNT3",
@@ -273,13 +275,12 @@ expected_targets = {
     "camry-8965F3307000", "crown-8965F3012000",
     "corolla-8965H1202000", "corolla-8965F1208000",
 }
-check("all exact targets share codec-neutral firmware profiles",
+check("all exact targets share the same physical request/response contract",
       set(build.REQUEST_PROFILES) == expected_targets and
       all(
-          profile["request_id"] == 0x777 and profile["response_id"] == 0x7A9 and
-          profile["helper_macros"]["ORACLE_REQUEST_HEADER_WORD"] == 0x00000408 and
-          "ORACLE_COMPACT_CODEC" not in profile["helper_macros"] and
-          "carrier" not in profile and "frame_count" not in profile
+          profile["request_id"] == 0x777 and
+          profile["response_id"] == 0x7A9 and
+          profile["ring_words"] == 0x228
           for profile in build.REQUEST_PROFILES.values()
       ))
 
@@ -291,29 +292,51 @@ check("four-frame is the universal default metadata contract",
       all(item["request"]["carrier"] == "functional-nibble4" for item in four_target_meta.values()) and
       all(item["request"]["frame_count"] == 4 for item in four_target_meta.values()) and
       all(item["request"]["experimental"] is False for item in four_target_meta.values()) and
+      all(item["variant"] == "outer-foreground-functional-nibble4-default"
+          for item in four_target_meta.values()) and
       "functional-compact1" not in json.dumps(meta))
+check("one payload binary covers every registered TSS3 target",
+      len({item["resident"]["sha256"] for item in four_target_meta.values()}) == 1 and
+      len({item["helper"]["sha256"] for item in four_target_meta.values()}) == 1 and
+      len({item["staging"]["sha256"] for item in four_target_meta.values()}) == 1 and
+      len({item["authenticated_payload"]["sha256"] for item in four_target_meta.values()}) == 1 and
+      all(len(item["universal_runtime"]["profiles"]) == 3 for item in four_target_meta.values()))
+check("firmware-derived execution bindings preserve each exact stock scheduler",
+      {
+          target: (
+              item["firmware_contract"]["execution"]["startup_count"],
+              item["firmware_contract"]["execution"]["foreground"],
+              item["firmware_contract"]["execution"]["timing_flag"],
+              item["firmware_contract"]["execution"]["tick_counter"],
+          )
+          for target, item in four_target_meta.items()
+      } == {
+          "camry-8965F3307000": (21, 0x66062, 0x31910, 0xFEBE39DB),
+          "crown-8965F3012000": (21, 0x65462, 0x315B8, 0xFEBE39DB),
+          "corolla-8965F1208000": (18, 0x5F30C, 0x2D4AC, 0xFEBE38EF),
+          "corolla-8965H1202000": (18, 0x5F30C, 0x2D4AC, 0xFEBE38EF),
+      })
+check("target-selected command5 globals match each stock wrapper",
+      four_target_meta["camry-8965F3307000"]["command5"]["globals"] == "0xFEBF13A0" and
+      four_target_meta["crown-8965F3012000"]["command5"]["globals"] == "0xFEBF13A0" and
+      four_target_meta["corolla-8965F1208000"]["command5"]["globals"] == "0xFEBF1264" and
+      four_target_meta["corolla-8965H1202000"]["command5"]["done"] == "0xFEBF1280")
 check("compact helper builds only through explicit selection on every exact target",
       set(compact_target_meta) == expected_targets and
       all(item["request"]["codec"] == "compact" for item in compact_target_meta.values()) and
       all(item["request"]["carrier"] == "functional-compact1" for item in compact_target_meta.values()) and
       all(item["request"]["frame_count"] == 1 for item in compact_target_meta.values()) and
       all(item["request"]["experimental"] is True for item in compact_target_meta.values()) and
+      len({item["authenticated_payload"]["sha256"] for item in compact_target_meta.values()}) == 1 and
       all(item["helper"]["size"] <= item["helper"]["limit"] == 0x398
           for item in compact_target_meta.values()))
-check("Corolla H/F and Crown lifecycle variants compile from the canonical four-frame sources",
+check("target metadata retains only target-local transport and RAM state",
       set(target_meta) == expected_targets - {CAMRY_TARGET} and
       all(target_meta[target]["target"]["name"] == target for target in target_meta) and
       all(target_meta[target]["request"]["can_id"] == "0x00000777" for target in target_meta) and
       all(target_meta[target]["request"]["bus"] == 1 for target in target_meta) and
       all(target_meta[target]["response"]["can_id"] == "0x000007A9" for target in target_meta) and
       all(target_meta[target]["state"]["size"] == 0x24 for target in target_meta) and
-      all(target_meta[target]["resident"]["size"] <= target_meta[target]["resident"]["limit"] for target in target_meta) and
-      all(target_meta[target]["helper"]["size"] <= target_meta[target]["helper"]["limit"] == 0x398 for target in target_meta) and
-      all(target_meta[target]["helper"]["transit_limit"] == 0x400 for target in target_meta) and
-      target_meta["corolla-8965H1202000"]["resident"]["sha256"] ==
-          target_meta["corolla-8965F1208000"]["resident"]["sha256"] and
-      target_meta["corolla-8965H1202000"]["helper"]["sha256"] ==
-          target_meta["corolla-8965F1208000"]["helper"]["sha256"] and
       target_meta["corolla-8965H1202000"]["scratch"]["base"] == "0xFEF07F98" and
       target_meta["corolla-8965F1208000"]["scratch"]["base"] == "0xFEF07F98" and
       target_meta["crown-8965F3012000"]["scratch"]["base"] == "0xFEBF0280" and

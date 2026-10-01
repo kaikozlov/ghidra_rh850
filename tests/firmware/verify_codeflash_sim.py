@@ -13,19 +13,22 @@ import sys
 import tempfile
 from pathlib import Path
 
-from tools import REPO_ROOT
-ROOT = REPO_ROOT
-
+from exploit.ephemeral_runtime import build_tss3_request_signer as signer_builder
 from exploit.patcher.build_payload import simulate_apply
 from exploit.patcher.patch_config import config_from_manifest
+from tools import REPO_ROOT
 from tools.security.build_secoc_patch_manifest import crc32
 from tools.targets.camry.builders import (
     build_camry_f33_gate2_root_result_patch as gate2_builder,
 )
 
+ROOT = REPO_ROOT
+
 GATE2_SPEC = ROOT / "tests/fixtures/rh850/camry_f33_gate2_codeflash_sim.json"
 F33_SPEC = ROOT / "tests/fixtures/rh850/camry_f33_runtime_canary_sim.json"
 COROLLA_SPEC = ROOT / "tests/fixtures/rh850/corolla_hf_runtime_canary_sim.json"
+REQUEST_SIGNER_SPEC = ROOT / "tests/fixtures/rh850/camry_f33_request_signer_sim.json"
+CACHE_PUBLICATION = bytes.fromhex("1f001c00")  # syncp; synci
 CRC_START = 0x18000
 CRC_FIXUP = 0xFFDEC
 CRC_END = 0xFFDF0
@@ -158,6 +161,40 @@ def check_built_resident(work: Path, *, builder: Path, binary_name: str, pocket:
         simulate(image, expected, spec=spec, load=f"0xFEBF0000={resident}")
     print(f"PASS {binary_name}: {expected} ({len(images)} image(s))")
 
+def check_request_signer(work: Path) -> None:
+    build_dir = work / "tss3-request-signer"
+    run([
+        sys.executable,
+        str(signer_builder.BUILDER),
+        "--target",
+        "camry-8965F3307000",
+        "--output-dir",
+        str(build_dir),
+    ])
+    stem = signer_builder.output_stem("camry-8965F3307000")
+    metadata = json.loads((build_dir / f"{stem}.json").read_text(encoding="utf-8"))
+    staging = build_dir / metadata["staging"]["path"]
+    staging_blob = staging.read_bytes()
+    if sha256(staging_blob) != metadata["staging"]["sha256"]:
+        raise AssertionError("request-signer staging metadata drift")
+    if staging_blob.count(CACHE_PUBLICATION) != 2:
+        raise AssertionError("request-signer publication sequence drift")
+    # GNU sim does not implement SYNCP/SYNCI. Preserve and check the production
+    # bytes above; only the simulator input substitutes four RH850 NOP bytes.
+    simulator_staging = work / "request-signer-simulator.bin"
+    simulator_staging.write_bytes(staging_blob.replace(CACHE_PUBLICATION, b"\0" * 4))
+    expected = (
+        "UNIVERSAL_SIGNER STATE=0x4c433841 VERSION=3 INIT=1 TICK=1 FLAG=0x0 "
+        "CONTEXT=0x43545831 STARTUP=0x53544152 APP=0x715b4 CMD5_GLOBALS=0xfebf13a0"
+    )
+    simulate(
+        ROOT / "firmware/camry-8965F3307000/CodeFlash.bin",
+        expected,
+        spec=REQUEST_SIGNER_SPEC,
+        load=f"0xFEBF0000={simulator_staging}",
+    )
+    print(f"PASS universal request signer: {expected}")
+
 
 def main() -> int:
     tmp_root = ROOT / "build/tmp"
@@ -194,6 +231,7 @@ def main() -> int:
                 "CONTEXT=0x43545848 STARTUP=0x53544152 FOREGROUND=0x46475248"
             ),
         )
+        check_request_signer(work)
     return 0
 
 

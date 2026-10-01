@@ -377,9 +377,10 @@ tools/toyota ram list
 tools/toyota ram list corolla
 ```
 
-The maintained payload is `tss3-request-signer`. It uses one four-frame
-classic-CAN request contract on every supported target, but emits a distinct
-target-bound binary and metadata file for each registered CodeFlash identity.
+The maintained payload is `tss3-request-signer`. One self-selecting payload
+binary implements the four-frame classic-CAN contract for every registered
+Camry, Crown, and Corolla H/F target. Target builds retain separate metadata
+for host bus/F181 binding, but their default payload SHA-256 is identical.
 
 ```bash
 # Build one target. Without --out, output is under build/out/ram-runtime/TARGET/.
@@ -391,16 +392,14 @@ tools/toyota ram kit corolla-8965H1202000 --out EMPTY_KIT_DIRECTORY
 tools/toyota ram kit all --out EMPTY_KIT_SET_DIRECTORY
 ```
 
-Output directories must be empty. Each kit contains one payload, one metadata
-contract, the common host runtime, target-bound peer recovery, and
+Output directories must be empty. Each kit contains the shared payload,
+target-bound metadata, the common host runtime, peer recovery, and
 `./tss3-request-signer`; it does not contain the historical direct-B6 runtime.
-Deploy into a fresh directory rather than overlaying an older kit: stale
-launchers are not part of the manifest and must not remain callable. On comma
-hardware, run `./tss3-request-signer doctor` before any live command.
-`recover-peers` is available in every supported TSS3 kit and derives the EPS
-identity and diagnostic bus from that kit's metadata. The exact-F33 Camry kit
-also carries the current `ui-bringup`, `ui-worker`, `ui-resume`, and
-`ui-resume-warm` startup-catcher commands used by its openpilot integration.
+The launcher performs its offline integrity/environment check automatically
+before every live command. `recover-peers` derives the EPS identity and
+diagnostic bus from target metadata. The exact-F33 Camry kit also carries
+`ui-bringup`, `ui-worker`, `ui-resume`, and `ui-resume-warm` for its current
+openpilot startup-catcher integration.
 
 `install` records the application F181 once before helper activation, then
 waits for a successful signer request/response. `status`, `self-test`, and the
