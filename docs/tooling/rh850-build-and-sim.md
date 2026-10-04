@@ -82,10 +82,11 @@ that exact CodeFlash:
 tools/toyota ram onboard path/to/CodeFlash.bin
 ```
 
-Its two scenarios reach the GlobalRAM helper through the complete
-post-foreground fallback and through the timer-bounded idle branch. Boot,
-context, startup-final, and hardware-heavy foreground callees are explicit
-generated overlays; their preimages remain bound to the supplied dump.
+Its two clean simulator processes share one linked ELF: one reaches the
+GlobalRAM helper through the complete post-foreground fallback, the other
+through the timer-bounded idle branch. Boot, context, startup-final, and
+hardware-heavy foreground callees are explicit generated overlays; their
+preimages remain bound to the supplied dump.
 
 One gate runs every modeled scenario — generic synthetic image, the F33
 Gate-2 stock/root-only/stage-2/stage-3 differential, the F33 and Corolla
@@ -160,8 +161,9 @@ newly built artifacts until the new artifacts receive their own qualification.
 program with the repository mounted at `/src`; for example,
 `tools/rh850 exec v850-elf-objdump -d build/out/example.elf`. Builders use
 `tools/rh850 exec --work-dir PATH ...` when they need a scratch directory
-mounted at `/out`; `tools/rh850_toolchain.py` provides that command construction
-and canonical provenance to Python callers.
+mounted at `/out`; dependent compile, conversion, and inspection commands are
+batched into one container invocation. `tools/rh850_toolchain.py` provides the
+canonical command construction and provenance to Python callers.
 
 ## Official Renesas options
 

@@ -12,11 +12,11 @@ import tempfile
 from datetime import UTC, datetime
 from pathlib import Path
 
+from exploit.ephemeral_runtime import build_tss3_request_signer as signer_builder
+from exploit.ram_runtime.target_profiles import registered_targets, supported_targets
 from tools import REPO_ROOT
-from exploit.ram_runtime.target_profiles import supported_targets
 
 ROOT = REPO_ROOT
-BUILDER = ROOT / "exploit/ephemeral_runtime/build_tss3_request_signer.py"
 LAUNCHER = ROOT / "exploit/ephemeral_runtime/tss3_request_signer_launcher.sh"
 TARGETS = supported_targets()
 DEFAULT_CODEC = "four-frame"
@@ -61,41 +61,78 @@ def _require_empty(out: Path) -> None:
         raise RuntimeError(f"refusing nonempty output directory: {out}")
 
 
-def build(target: str, out: Path, codec: str = DEFAULT_CODEC) -> dict:
-    if target not in TARGETS:
-        raise RuntimeError(f"unsupported RAM-runtime target: {target}")
-    if codec not in CODECS:
-        raise RuntimeError(f"unsupported request codec: {codec}")
-    _require_empty(out)
+def _build_once(target: str, built: Path, codec: str) -> tuple[dict, Path]:
+    proc = subprocess.run(
+        [
+            sys.executable,
+            str(signer_builder.BUILDER),
+            "--target",
+            target,
+            "--codec",
+            codec,
+            "--output-dir",
+            str(built),
+        ],
+        cwd=ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    metadata = json.loads(proc.stdout)
+    return metadata, built / metadata["authenticated_payload"]["path"]
 
-    with tempfile.TemporaryDirectory(prefix="tss3-ram-kit-") as td:
-        built = Path(td) / "request-signer"
-        proc = subprocess.run(
-            [
-                sys.executable, str(BUILDER), "--target", target,
-                "--codec", codec, "--output-dir", str(built),
-            ],
-            cwd=ROOT, check=True, capture_output=True, text=True,
-        )
-        metadata = json.loads(proc.stdout)
-        stem = f"{target.replace('-', '_')}_request_signer"
-        if codec != DEFAULT_CODEC:
-            stem += "_compact"
-        metadata_path = built / f"{stem}.json"
-        payload_path = built / f"{stem}_payload.bin"
-        if json.loads(metadata_path.read_text(encoding="utf-8")) != metadata:
-            raise RuntimeError("printed metadata differs from the built artifact")
-        if metadata.get("target", {}).get("name") != target:
-            raise RuntimeError("built metadata target differs from requested target")
-        if metadata.get("request", {}).get("codec") != codec:
-            raise RuntimeError("built metadata codec differs from requested codec")
 
-        out.mkdir(parents=True, exist_ok=True)
-        for path in built.iterdir():
-            if path.is_file():
-                copy(path, out / "bundle" / path.name)
-        copy(metadata_path, out / "bundle/request_signer.json")
-        copy(payload_path, out / "bundle/payload.bin")
+def _bind_target(metadata: dict, target: str, record: dict) -> dict:
+    bound = {
+        **metadata,
+        "request": dict(metadata["request"]),
+        "response": dict(metadata["response"]),
+    }
+    runtime = record["ram_runtime"]
+    bound["target"] = {
+        "name": target,
+        "vehicle": record["vehicle"],
+        "profile": runtime["profile"],
+        "software_id": record["software_id"],
+        "codeflash_sha256": record["codeflash_sha256"],
+        "application_f181_hex": runtime["application_f181_hex"],
+        "boot_f181_hex": signer_builder.BOOT_F181_HEX,
+        "registered": True,
+    }
+    bound["request"]["bus"] = runtime["request_bus"]
+    bound["response"]["bus"] = runtime["response_bus"]
+    return bound
+
+
+def _package(
+    target: str,
+    out: Path,
+    codec: str,
+    metadata: dict,
+    payload_path: Path,
+    commit: str,
+) -> dict:
+    metadata = {
+        "schema": metadata["schema"],
+        "target": metadata["target"],
+        "request": metadata["request"],
+        "response": metadata["response"],
+        "state": metadata["state"],
+        "resident": {"sha256": metadata["resident"]["sha256"]},
+        "helper": {"sha256": metadata["helper"]["sha256"]},
+        "authenticated_payload": {
+            **metadata["authenticated_payload"],
+            "path": "payload.bin",
+        },
+    }
+    out.mkdir(parents=True, exist_ok=True)
+    bundle = out / "bundle"
+    bundle.mkdir()
+    (bundle / "request_signer.json").write_text(
+        json.dumps(metadata, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    copy(payload_path, bundle / "payload.bin")
 
     for rel in RUNTIME_FILES:
         copy(ROOT / rel, out / "runtime" / rel)
@@ -107,7 +144,6 @@ def build(target: str, out: Path, codec: str = DEFAULT_CODEC) -> dict:
 
     copy(LAUNCHER, out / "tss3-request-signer")
     (out / "tss3-request-signer").chmod(0o755)
-    commit = source_commit()
     (out / "SOURCE_COMMIT").write_text(commit + "\n", encoding="utf-8")
     (out / "TESTING.txt").write_text(
         "\n".join((
@@ -154,33 +190,60 @@ def build(target: str, out: Path, codec: str = DEFAULT_CODEC) -> dict:
         },
     }
     (out / "manifest.json").write_text(
-        json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8",
+        json.dumps(manifest, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
     )
     return manifest
 
 
-def build_set(out: Path, codec: str = DEFAULT_CODEC) -> dict:
+def build(target: str, out: Path, codec: str = DEFAULT_CODEC) -> dict:
+    if target not in TARGETS:
+        raise RuntimeError(f"unsupported RAM-runtime target: {target}")
+    if codec not in CODECS:
+        raise RuntimeError(f"unsupported request codec: {codec}")
     _require_empty(out)
+    with tempfile.TemporaryDirectory(prefix="tss3-ram-kit-") as td:
+        metadata, payload_path = _build_once(target, Path(td), codec)
+        return _package(target, out, codec, metadata, payload_path, source_commit())
+
+
+def build_set(out: Path, codec: str = DEFAULT_CODEC) -> dict:
+    if codec not in CODECS:
+        raise RuntimeError(f"unsupported request codec: {codec}")
+    _require_empty(out)
+    records = registered_targets()
+    first = TARGETS[0]
+    commit = source_commit()
     kits = {}
-    for target in TARGETS:
-        target_out = out / target
-        manifest = build(target, target_out, codec)
-        kits[target] = {
-            "path": target,
-            "manifest": f"{target}/manifest.json",
-            "manifest_sha256": sha256(target_out / "manifest.json"),
-            "payload": manifest["payload"],
-            "codec": manifest["request"]["codec"],
-        }
+    with tempfile.TemporaryDirectory(prefix="tss3-ram-kit-") as td:
+        metadata, payload_path = _build_once(first, Path(td), codec)
+        for target in TARGETS:
+            target_out = out / target
+            manifest = _package(
+                target,
+                target_out,
+                codec,
+                _bind_target(metadata, target, records[target]),
+                payload_path,
+                commit,
+            )
+            kits[target] = {
+                "path": target,
+                "manifest": f"{target}/manifest.json",
+                "manifest_sha256": sha256(target_out / "manifest.json"),
+                "payload": manifest["payload"],
+                "codec": manifest["request"]["codec"],
+            }
     result = {
         "schema": "tss3-ram-kit-set-v1",
         "created_at": datetime.now(UTC).isoformat(timespec="seconds"),
-        "source_commit": source_commit(),
+        "source_commit": commit,
         "kits": kits,
     }
     out.mkdir(parents=True, exist_ok=True)
     (out / "manifest.json").write_text(
-        json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8",
+        json.dumps(result, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
     )
     return result
 

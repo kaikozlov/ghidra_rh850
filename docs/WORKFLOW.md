@@ -399,13 +399,13 @@ tools/toyota ram onboard path/to/CodeFlash.bin
 
 The command recovers the runtime selector identity, boot transition, scheduler,
 RX ring, signer ABI, private-memory layout, and MPU transit permission directly
-from that dump. It reports whether the current universal binary already has the
-exact selector/config row. When the contract resolves but the row is absent, it
-adds the row to a candidate build, builds the payload, and runs both the
-post-foreground fallback and timer-bounded idle path against that exact image.
-The retained result contains `report.json`, `resolved_profile.json`, build
-artifacts, simulator ELFs, and simulator output under a unique
-`build/out/ram-runtime/onboard/` directory.
+from that dump. It reports whether the registered universal profile table
+already contains the exact selector/config row; a missing row is inserted into
+that candidate build before compilation. The compiled simulator ELF is reused
+for separate clean-process fallback and timer-bounded idle executions against
+the supplied image. The retained result contains `report.json`, the resolved
+profile and build artifacts under `build/`, one simulator ELF, and per-scenario
+output under a unique `build/out/ram-runtime/onboard/` directory.
 
 Resolution is deliberately fail-closed. Missing or ambiguous machine evidence
 means “not proven compatible,” not proof that the firmware can never support
@@ -418,14 +418,15 @@ those remain registry/bench qualification inputs.
 tools/toyota ram build camry-8965F3307000
 tools/toyota ram build crown-8965F3012000 --out build/out/crown-request-signer
 
-# Package one target, or a target-named set containing every supported target.
+# Package one target, or compile once and bind target metadata for every kit.
 tools/toyota ram kit corolla-8965H1202000 --out EMPTY_KIT_DIRECTORY
 tools/toyota ram kit all --out EMPTY_KIT_SET_DIRECTORY
 ```
 
-Output directories must be empty. Each kit contains the shared payload,
-target-bound metadata, the common host runtime, peer recovery, and
-`./tss3-request-signer`; it does not contain the historical direct-B6 runtime.
+Explicit onboarding and kit output directories must be empty. Each kit contains
+only the shared authenticated payload, host-consumed target metadata, the
+common host runtime, peer recovery, and `./tss3-request-signer`; it does not
+duplicate compiler intermediates or contain the historical direct-B6 runtime.
 The launcher performs its offline integrity/environment check automatically
 before every live command. `recover-peers` derives the EPS identity and
 diagnostic bus from target metadata. The exact-F33 Camry kit also carries
@@ -439,10 +440,14 @@ SID23 availability is not required.
 
 The optional `--codec compact` build is experimental and explicit. Omission
 always selects the four-frame carrier that transports all 28 application
-bytes. Verify source or contract changes with:
+bytes. Run only the gate that owns the changed behavior:
 
 ```bash
-tools/test tss3_request_signer tss3_post_install_recovery
+# signer build, codecs, metadata consumer, and host protocol
+tools/test tss3_request_signer
+
+# generic CodeFlash linker/simulator or generated simulation model
+tools/test codeflash_sim
 ```
 
 Historical C7/B6 builders and the old Camry/Corolla packagers live only under

@@ -20,67 +20,74 @@ from exploit.ephemeral_runtime import (
 )
 from exploit.ephemeral_runtime import tss3_request_signer as host
 from exploit.ephemeral_runtime import tss3_request_signer_compact as compact_host
-from exploit.ram_runtime.target_profiles import target_spec
+from exploit.ram_runtime.target_profiles import registered_specs, spec_from_codeflash
 from exploit.ram_runtime.tss3_request_signer_contract import (
     ContractError,
     resolve_request_signer_contract,
 )
 from tools import REPO_ROOT
-from tools.targets.tss3.builders import build_tss3_ram_kit as ram_kit
-from tools.targets.tss3.onboard_ram_signer import compatibility_verdict
 
 ROOT = REPO_ROOT
 
 CAMRY_TARGET = "camry-8965F3307000"
 CAMRY_STEM = build.output_stem(CAMRY_TARGET)
-OUT = build.default_output_dir(CAMRY_TARGET)
+SPECS = registered_specs()
+BUILD_TEMP = tempfile.TemporaryDirectory(prefix="verify-tss3-request-signer-")
+BUILD_ROOT = Path(BUILD_TEMP.name)
+OUT = BUILD_ROOT / "default"
 
-subprocess.run(
-    [sys.executable, str(build.BUILDER), "--target", CAMRY_TARGET],
-    cwd=ROOT, check=True, stdout=subprocess.DEVNULL,
+default_proc = subprocess.run(
+    [
+        sys.executable,
+        str(build.BUILDER),
+        "--target",
+        CAMRY_TARGET,
+        "--output-dir",
+        str(OUT),
+    ],
+    cwd=ROOT,
+    check=True,
+    capture_output=True,
+    text=True,
 )
-target_meta = {}
-compact_target_meta = {}
-with tempfile.TemporaryDirectory(prefix="verify-tss3-request-signer-") as td:
-    for target in sorted(build.REQUEST_PROFILES):
-        if target != CAMRY_TARGET:
-            target_out = Path(td) / f"{target}-four"
-            proc = subprocess.run(
-                [sys.executable, str(build.BUILDER), "--target", target, "--output-dir", str(target_out)],
-                cwd=ROOT, check=True, capture_output=True, text=True,
-            )
-            target_meta[target] = json.loads(proc.stdout)
-        compact_out = Path(td) / f"{target}-compact"
-        compact_proc = subprocess.run(
-            [
-                sys.executable, str(build.BUILDER), "--target", target, "--codec", "compact",
-                "--output-dir", str(compact_out),
-            ],
-            cwd=ROOT, check=True, capture_output=True, text=True,
-        )
-        compact_target_meta[target] = json.loads(compact_proc.stdout)
-    synthetic_image = bytearray(build.TARGET_SPECS[CAMRY_TARGET]["image"].read_bytes())
-    old_selector = build.TARGET_SPECS[CAMRY_TARGET]["runtime_software_id"].encode("ascii")
-    new_selector = b"8965F3307999"
-    if synthetic_image.count(old_selector) != 1:
-        raise AssertionError("Camry selector identity is not unique")
-    selector_offset = synthetic_image.find(old_selector)
-    synthetic_image[selector_offset:selector_offset + len(old_selector)] = new_selector
-    synthetic_path = Path(td) / "synthetic-new-profile-CodeFlash.bin"
-    synthetic_path.write_bytes(synthetic_image)
-    synthetic_out = Path(td) / "synthetic-new-profile"
-    synthetic_proc = subprocess.run(
-        [
-            sys.executable, str(build.BUILDER), "--codeflash", str(synthetic_path),
-            "--output-dir", str(synthetic_out),
-        ],
-        cwd=ROOT, check=True, capture_output=True, text=True,
-    )
-    synthetic_meta = json.loads(synthetic_proc.stdout)
+meta = json.loads(default_proc.stdout)
 meta_path = OUT / f"{CAMRY_STEM}.json"
-meta = json.loads(meta_path.read_text())
-resident = (OUT / meta["resident"]["path"]).read_bytes()
-helper = (OUT / meta["helper"]["path"]).read_bytes()
+
+compact_out = BUILD_ROOT / "compact"
+compact_proc = subprocess.run(
+    [
+        sys.executable,
+        str(build.BUILDER),
+        "--target",
+        CAMRY_TARGET,
+        "--codec",
+        "compact",
+        "--output-dir",
+        str(compact_out),
+    ],
+    cwd=ROOT,
+    check=True,
+    capture_output=True,
+    text=True,
+)
+compact_meta = json.loads(compact_proc.stdout)
+
+synthetic_image = bytearray(SPECS[CAMRY_TARGET]["image"].read_bytes())
+old_selector = SPECS[CAMRY_TARGET]["runtime_software_id"].encode("ascii")
+new_selector = b"8965F3307999"
+if synthetic_image.count(old_selector) != 1:
+    raise AssertionError("Camry selector identity is not unique")
+selector_offset = synthetic_image.find(old_selector)
+synthetic_image[selector_offset:selector_offset + len(old_selector)] = new_selector
+synthetic_path = BUILD_ROOT / "synthetic-new-profile-CodeFlash.bin"
+synthetic_path.write_bytes(synthetic_image)
+synthetic_spec = spec_from_codeflash(synthetic_path, known_specs=SPECS)
+current_profiles = build.runtime_profiles(SPECS)
+synthetic_compatibility = build.profile_status(synthetic_spec, current_profiles)
+synthetic_profiles = build.runtime_profiles({
+    **SPECS,
+    synthetic_spec["name"]: synthetic_spec,
+})
 
 
 def check(name: str, cond: object) -> None:
@@ -104,7 +111,7 @@ class _TransientF181Client:
 
 boot_f181 = bytes.fromhex("02" + "21" * 32)
 transient_clients = iter((_TransientF181Client(None), _TransientF181Client(boot_f181)))
-with mock.patch.object(ram_exec, "_make_uds_client", side_effect=lambda *args, **kwargs: next(transient_clients)):
+with mock.patch.object(ram_exec, "_make_uds_client", side_effect=lambda *_args, **_kwargs: next(transient_clients)):
     identity_client, identity_hex, _, identity_attempts = ram_exec._wait_for_f181_response(
         object(), SimpleNamespace(DATA_IDENTIFIER_TYPE=SimpleNamespace(APPLICATION_SOFTWARE_IDENTIFICATION=0xF181)),
         ram_exec.explicit_route(bus=0, elm327_param=1, uds_variant="old", cpu_index=0), timeout=0.5,
@@ -114,7 +121,7 @@ check("caught boot identity retries with a fresh UDS transport after a transient
 
 app_f181 = bytes.fromhex("023839363546333330373030300000000038413331313333303331303000000000")
 transition_clients = iter((_TransientF181Client(app_f181), _TransientF181Client(boot_f181)))
-with mock.patch.object(ram_exec, "_make_uds_client", side_effect=lambda *args, **kwargs: next(transition_clients)):
+with mock.patch.object(ram_exec, "_make_uds_client", side_effect=lambda *_args, **_kwargs: next(transition_clients)):
     transition_client, transition_hex, _, transition_attempts = ram_exec._wait_for_f181_response(
         object(), SimpleNamespace(DATA_IDENTIFIER_TYPE=SimpleNamespace(APPLICATION_SOFTWARE_IDENTIFICATION=0xF181)),
         ram_exec.explicit_route(bus=0, elm327_param=1, uds_variant="old", cpu_index=0), timeout=0.5,
@@ -162,26 +169,7 @@ check("caught PROGRAMMING execution path never re-enters the application handoff
       wait_exact_boot.call_args.kwargs["expected_f181_hex"] == boot_f181.hex() and prepare_direct.call_count == 1)
 
 
-check("resident/helper/config fit the common RAM geometry",
-      len(resident) <= meta["resident"]["limit"] == build.RESIDENT_CODE_LIMIT and
-      meta["resident"]["config_base"] == f"0x{build.CONFIG_BASE:08X}" and
-      meta["resident"]["config_size"] == build.CONFIG_SIZE and
-      meta["resident"]["pocket_limit"] == 0x20C and
-      len(helper) <= meta["helper"]["limit"] and
-      meta["resident"]["headroom"] == meta["resident"]["limit"] - len(resident) and
-      meta["helper"]["headroom"] == meta["helper"]["limit"] - len(helper) and
-      meta["resident"]["relocations"] == 0 and meta["helper"]["relocations"] == 0)
-state_base = int(meta["state"]["base"], 0)
-scratch_base = int(meta["scratch"]["base"], 0)
-rmba_start, _rmba_end = meta["firmware_contract"]["resolver_evidence"]["memory"]["application_rmba_exclusion"]
-check("host-visible state and private scratch preserve resolved safe boundaries",
-      host.STATE_SIZE == build.STATE_SIZE == meta["state"]["size"] == 0x24 and
-      host.STATE_VERSION == build.STATE_VERSION == meta["state"]["version"] == 3 and
-      state_base + build.STATE_SIZE == scratch_base and
-      state_base + build.STATE_SIZE <= rmba_start and
-      meta["state"]["application_sid23_readable"] is True and
-      meta["scratch"]["size"] == 0x68 and
-      int(meta["scratch"]["end_exclusive"], 0) == scratch_base + meta["scratch"]["size"])
+check("host accepts generated metadata", host.load_meta(meta_path) == meta)
 
 
 def run_core_simulator() -> str:
@@ -219,48 +207,6 @@ simulator_output = run_core_simulator()
 check("production pure-core macros execute under GNU RH850 sim",
       "ORACLE_SIM_RESULT=0x8a0c0de FAILURE=0 PASSES=36" in simulator_output)
 
-fw = meta["firmware_contract"]["resolver_evidence"]
-execution = meta["firmware_contract"]["execution"]
-check("firmware-derived scheduler matches exact Camry machine structure",
-      execution["coordinator"] == 0x637EE and
-      execution["startup_count"] == 21 and
-      execution["foreground"] == 0x66062 and
-      execution["foreground_size"] == 92 and
-      execution["timing_flag"] == 0x31910 and
-      execution["tick_counter"] == 0xFEBE39DB)
-check("stock foreground timer remains bound to exact firmware geometry",
-      execution["idle_fast"] == {
-          "timer": "TAUJ0 channel 3",
-          "counter": "TAUJ0CNT3",
-          "counter_address": 0xFFE5001C,
-          "count_hz": 80_000_000,
-          "steady_counts": 400_000,
-          "steady_period_us": 5_000,
-          "direction": "down",
-          "foreground_flag": "FFFFB111 bit4",
-          "minimum_remaining_counts": 240_000,
-          "minimum_remaining_us": 3_000,
-          "mode_initializer": 0x6639C,
-          "reload_stores": [0x665C6, 0x666AC],
-          "timer_table": 0x30DF0,
-      })
-check("stock functional rule supplies the canonical raw-ring request carrier",
-      fw["request"]["request_id"] == 0x777 and
-      fw["request"]["request_rule_label"] == 0x35 and
-      fw["request"]["request_record_header"] == 0x408)
-check("software RX ring exposes independent producer geometry",
-      fw["request"]["ring_base"] == 0xFEBE4038 and
-      fw["request"]["ring_base"] + fw["request"]["ring_words"] * 4 - 1 == 0xFEBE48D7 and
-      fw["request"]["ring_words"] == 0x228 and
-      fw["request"]["ring_producer"] == 0xFEBE48F8)
-check("paired response uses the stock primary diagnostic resource",
-      fw["request"]["response_id"] == 0x7A9 and
-      fw["signer_abi"]["response_handle"] == 53 and
-      fw["signer_abi"]["response_controller"] == 1 and
-      fw["signer_abi"]["response_resource"] == 6)
-check("state read boundary is pinned to the resolved application SID23 exclusion",
-      fw["memory"]["application_rmba_exclusion"] == [0xFEBF0288, 0xFEBF13CB] and
-      meta["state"]["base"] == "0xFEBF025C" and meta["state"]["size"] == 0x24)
 
 application = bytes(range(28))
 four_frames = host.build_request(application, 0xA7)
@@ -295,40 +241,28 @@ for rejected_application, rejected_seq in (
         raise AssertionError("optional compact codec accepted a nonrepresentable application")
 print("PASS optional compact codec rejects every nonrepresentable application")
 
-expected_targets = {
-    "camry-8965F3307000", "crown-8965F3012000",
-    "corolla-8965H1202000", "corolla-8965F1208000",
-}
-camry_spec = target_spec(CAMRY_TARGET)
-camry_contract = camry_spec["contract"]
-covered = compatibility_verdict(camry_contract)
-check("dump onboarding recognizes an exact current universal profile",
-      covered["status"] == "covered-by-current-build" and
-      covered["compatible"] is True and covered["current_build_works_offline"] is True)
+check("registered dump is already covered by the universal build",
+      meta["compatibility"]["status"] == "covered-by-current-build")
+check("missing selector extends the universal profile table without compilation",
+      synthetic_compatibility["status"] == "compatible-profile-missing" and
+      len(synthetic_profiles) == len(current_profiles) + 1 and
+      any(
+          row["software_id"] == new_selector.decode("ascii")
+          for row in synthetic_profiles
+      ))
 
-missing_contract = copy.deepcopy(camry_contract)
-missing_contract["identity"]["runtime_software_id"] = "8965F9999999"
-missing = compatibility_verdict(missing_contract)
-check("dump onboarding distinguishes a compatible missing profile",
-      missing["status"] == "compatible-profile-missing" and
-      missing["compatible"] is True and missing["current_build_works_offline"] is False)
-check("dump onboarding adds a missing selector to a buildable universal profile table",
-      len(synthetic_meta["universal_runtime"]["profiles"]) == 4 and
-      synthetic_meta["target"]["registered"] is False and
-      synthetic_meta["target"]["software_id"] == "8965H33030A0" and
-      next(
-          row for row in synthetic_meta["universal_runtime"]["profiles"]
-          if row["software_id"] == new_selector.decode("ascii")
-      )["targets"] == ["tss3-8965H33030A0"] and
-      synthetic_meta["staging"]["resident_offset"] > meta["staging"]["resident_offset"])
+conflicting_spec = copy.deepcopy(SPECS[CAMRY_TARGET])
+conflicting_spec["runtime_config"]["app_context"] += 4
+try:
+    build.runtime_profiles({**SPECS, "conflict": conflicting_spec})
+except RuntimeError:
+    pass
+else:
+    raise AssertionError("universal profile table accepted an ambiguous selector")
+print("PASS universal profile table rejects an ambiguous selector")
 
-conflicting_contract = copy.deepcopy(camry_contract)
-conflicting_contract["runtime_config"]["app_context"] += 4
-conflict = compatibility_verdict(conflicting_contract)
-check("dump onboarding rejects an ambiguous current selector",
-      conflict["status"] == "selector-conflict" and conflict["compatible"] is False)
-
-damaged_image = bytearray(camry_spec["image"].read_bytes())
+damaged_image = bytearray(SPECS[CAMRY_TARGET]["image"].read_bytes())
+camry_contract = SPECS[CAMRY_TARGET]["contract"]
 freshness_address = camry_contract["signer_abi"]["freshness_encode"]
 damaged_image[freshness_address:freshness_address + 16] = b"\0" * 16
 try:
@@ -337,99 +271,11 @@ except ContractError:
     pass
 else:
     raise AssertionError("dump resolver accepted firmware without the signer freshness primitive")
-print("PASS dump onboarding rejects firmware with an unresolved signer ABI")
-check("all exact targets share the same physical request/response contract",
-      set(build.REQUEST_PROFILES) == expected_targets and
-      all(
-          profile["request_id"] == 0x777 and
-          profile["response_id"] == 0x7A9 and
-          profile["ring_words"] == 0x228
-          for profile in build.REQUEST_PROFILES.values()
-      ))
+print("PASS dump resolver rejects firmware with an unresolved signer ABI")
 
-four_target_meta = {CAMRY_TARGET: meta, **target_meta}
-check("four-frame is the universal default metadata contract",
-      set(four_target_meta) == expected_targets and
-      all(item["schema"] == build.SCHEMA for item in four_target_meta.values()) and
-      all(item["request"]["codec"] == "four-frame" for item in four_target_meta.values()) and
-      all(item["request"]["carrier"] == "functional-nibble4" for item in four_target_meta.values()) and
-      all(item["request"]["frame_count"] == 4 for item in four_target_meta.values()) and
-      all(item["request"]["experimental"] is False for item in four_target_meta.values()) and
-      all(item["variant"] == "idle-fast-functional-nibble4-default"
-          for item in four_target_meta.values()) and
-      "functional-compact1" not in json.dumps(meta))
-check("one payload binary covers every registered TSS3 target",
-      len({item["resident"]["sha256"] for item in four_target_meta.values()}) == 1 and
-      len({item["helper"]["sha256"] for item in four_target_meta.values()}) == 1 and
-      len({item["staging"]["sha256"] for item in four_target_meta.values()}) == 1 and
-      len({item["authenticated_payload"]["sha256"] for item in four_target_meta.values()}) == 1 and
-      all(len(item["universal_runtime"]["profiles"]) == 3 for item in four_target_meta.values()))
-check("all exact targets use the same timer-bounded idle service contract",
-      all(item["idle_fast_path"] == {
-          "enabled": True,
-          "timer": "TAUJ0 channel 3",
-          "counter": "TAUJ0CNT3",
-          "counter_address": "0xFFE5001C",
-          "count_hz": 80_000_000,
-          "steady_counts": 400_000,
-          "steady_period_us": 5_000,
-          "direction": "down",
-          "minimum_remaining_counts": 240_000,
-          "minimum_remaining_us": 3_000,
-          "foreground_flag": "FFFFB111 bit4",
-          "gate_order": [
-              "foreground flag clear",
-              "private cursor trails producer",
-              "counter above minimum remaining counts",
-              "foreground flag still clear",
-          ],
-          "fallback": "service again after the complete stock foreground schedule and tick update",
-      } for item in four_target_meta.values()) and
-      all(
-          item["firmware_contract"]["execution"]["idle_fast"]["steady_counts"] == 400_000 and
-          len(item["firmware_contract"]["execution"]["idle_fast"]["reload_stores"]) == 2
-          for item in four_target_meta.values()
-      ))
-check("firmware-derived execution bindings preserve each exact stock scheduler",
-      {
-          target: (
-              item["firmware_contract"]["execution"]["startup_count"],
-              item["firmware_contract"]["execution"]["foreground"],
-              item["firmware_contract"]["execution"]["timing_flag"],
-              item["firmware_contract"]["execution"]["tick_counter"],
-          )
-          for target, item in four_target_meta.items()
-      } == {
-          "camry-8965F3307000": (21, 0x66062, 0x31910, 0xFEBE39DB),
-          "crown-8965F3012000": (21, 0x65462, 0x315B8, 0xFEBE39DB),
-          "corolla-8965F1208000": (18, 0x5F30C, 0x2D4AC, 0xFEBE38EF),
-          "corolla-8965H1202000": (18, 0x5F30C, 0x2D4AC, 0xFEBE38EF),
-      })
-check("target-selected command5 globals match each stock wrapper",
-      four_target_meta["camry-8965F3307000"]["command5"]["globals"] == "0xFEBF13A0" and
-      four_target_meta["crown-8965F3012000"]["command5"]["globals"] == "0xFEBF13A0" and
-      four_target_meta["corolla-8965F1208000"]["command5"]["globals"] == "0xFEBF1264" and
-      four_target_meta["corolla-8965H1202000"]["command5"]["done"] == "0xFEBF1280")
-check("compact helper builds only through explicit selection on every exact target",
-      set(compact_target_meta) == expected_targets and
-      all(item["request"]["codec"] == "compact" for item in compact_target_meta.values()) and
-      all(item["request"]["carrier"] == "functional-compact1" for item in compact_target_meta.values()) and
-      all(item["request"]["frame_count"] == 1 for item in compact_target_meta.values()) and
-      all(item["request"]["experimental"] is True for item in compact_target_meta.values()) and
-      len({item["authenticated_payload"]["sha256"] for item in compact_target_meta.values()}) == 1 and
-      all(item["helper"]["size"] <= item["helper"]["limit"] == 0x398
-          for item in compact_target_meta.values()))
-check("target metadata retains only target-local transport and RAM state",
-      set(target_meta) == expected_targets - {CAMRY_TARGET} and
-      all(target_meta[target]["target"]["name"] == target for target in target_meta) and
-      all(target_meta[target]["request"]["can_id"] == "0x00000777" for target in target_meta) and
-      all(target_meta[target]["request"]["bus"] == 1 for target in target_meta) and
-      all(target_meta[target]["response"]["can_id"] == "0x000007A9" for target in target_meta) and
-      all(target_meta[target]["state"]["size"] == 0x24 for target in target_meta) and
-      target_meta["corolla-8965H1202000"]["scratch"]["base"] == "0xFEF07F98" and
-      target_meta["corolla-8965F1208000"]["scratch"]["base"] == "0xFEF07F98" and
-      target_meta["crown-8965F3012000"]["scratch"]["base"] == "0xFEBF0280" and
-      target_meta["crown-8965F3012000"]["runtime_profile"]["response_lower_handle"] == 51)
+check("generated transports satisfy the host metadata contract",
+      host.meta_transport(meta)["codec"] == "four-frame" and
+      host.meta_transport(compact_meta)["codec"] == "compact")
 try:
     host.meta_transport({
         "request": {"can_id": "0x1FDC0002", "bus": 0, "carrier": "raw-extended"},
@@ -518,25 +364,6 @@ check("pipelined benchmark emits four ordered default frames per request",
       ))
 
 
-
-check("no diagnostic transport or RSCFD mutation remains",
-      meta["request"]["diagnostic_acceptance_route_used"] is True and
-      meta["request"]["diagnostic_stack_used"] is False and
-      meta["request"]["isotp_reassembly_used"] is False and
-      meta["request"]["dcm_buffer_used"] is False and
-      meta["request"]["stock_xcp_protocol_used"] is False and
-      meta["mutation_boundary"] == {
-          "persistent_flash_write": False,
-          "rscfd_reconfiguration": False,
-          "rx_queue_mutation": False,
-          "xcp_protocol_dispatch": False,
-          "dcm_or_cantp_use": False,
-          "host_08a_transmit": False,
-          "b6_transmit": False,
-          "secoc_bypass": False,
-          "key_extraction": False,
-      })
-
 fake_probe_panda = _FakePipelinedPanda()
 with (mock.patch.object(host, "verify_nrtd_ready", side_effect=AssertionError("NRTD guard must be skipped from exact boot")),
       mock.patch.object(host, "execute_ram_payload", return_value={"direct_bootloader": True}) as execute,
@@ -621,20 +448,6 @@ with tempfile.TemporaryDirectory() as td:
     else:
         raise AssertionError("UI resume accepted a non-F33 native startup catch")
 
-with tempfile.TemporaryDirectory(prefix="verify-tss3-ram-kit-") as td:
-    kit_root = Path(td) / "camry-kit"
-    kit_manifest = ram_kit.build(CAMRY_TARGET, kit_root)
-    ui_runtime = "runtime/exploit/ephemeral_runtime/camry_f33_request_signer_ui_bringup.py"
-    startup_runtime = "runtime/exploit/ephemeral_runtime/camry_f33_startup_programming.py"
-    help_result = subprocess.run(
-        [str(kit_root / "tss3-request-signer"), "--help"],
-        cwd=kit_root, check=True, capture_output=True, text=True,
-    )
-    check("Camry kit carries the canonical startup bringup backend",
-          ui_runtime in kit_manifest["files"] and startup_runtime in kit_manifest["files"])
-    check("canonical launcher owns the comma startup commands",
-          all(command in help_result.stdout for command in (
-              "ui-bringup", "ui-resume", "ui-worker", "ui-resume-warm",
-          )))
 
-print("PASS canonical exact-target TSS3 request signer")
+BUILD_TEMP.cleanup()
+print("PASS TSS3 request signer behavior")

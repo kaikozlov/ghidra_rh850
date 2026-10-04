@@ -12,15 +12,16 @@ from pathlib import Path
 from typing import Any
 
 from exploit.ephemeral_runtime import build_tss3_request_signer as builder
-from exploit.ephemeral_runtime.build_tss3_request_signer import TARGET_SPECS
-from exploit.ram_runtime.tss3_request_signer_contract import (
-    HELPER_TRANSIT_BASE,
-    ContractError,
-    resolve_request_signer_contract,
-)
+from exploit.ram_runtime.tss3_request_signer_contract import HELPER_TRANSIT_BASE
 from tools import REPO_ROOT
-from tools.rh850_codeflash import Overlay, Spec
-from tools.rh850_codeflash import run as run_codeflash_sim
+from tools.rh850_codeflash import (
+    Overlay,
+    Spec,
+    run_elf,
+)
+from tools.rh850_codeflash import (
+    run as run_codeflash_sim,
+)
 from tools.security.build_ephemeral_runtime_manifest import is_jarl22, jarl22_target
 
 ROOT = REPO_ROOT
@@ -28,6 +29,12 @@ CACHE_PUBLICATION = bytes.fromhex("1f001c00")  # syncp; synci
 HARNESS_ADDRESS = 0xFEF00000
 CONTEXT_MARKER = 0xFEF01000
 STARTUP_MARKER = 0xFEF01004
+SIM_MEMORY_REGIONS = (
+    "0xFEBE0000,0x20000",
+    "0xFEF00000,0x20000",
+    "0xFFFFB000,0x1000",
+    "0xFFE50000,0x1000",
+)
 
 
 def _require_empty(path: Path) -> None:
@@ -36,52 +43,6 @@ def _require_empty(path: Path) -> None:
     path.mkdir(parents=True, exist_ok=True)
 
 
-def _current_profiles() -> list[dict[str, Any]]:
-    return builder.runtime_profiles(dict(TARGET_SPECS))
-
-
-def compatibility_verdict(candidate: dict[str, Any]) -> dict[str, Any]:
-    profiles = _current_profiles()
-    identity = candidate["identity"]
-    software_id = identity["runtime_software_id"]
-    row = {
-        "software_id": software_id,
-        "software_id_address": identity["runtime_software_id_address"],
-        "boot_calls": list(candidate["boot_calls"]),
-        "config": builder.runtime_config(candidate),
-    }
-    current = next((profile for profile in profiles if profile["software_id"] == software_id), None)
-    if current is None:
-        return {
-            "compatible": True,
-            "current_build_works_offline": False,
-            "status": "compatible-profile-missing",
-            "reason": "the firmware contract resolved uniquely, but the current universal payload has no selector row for this software ID",
-            "current_targets": [],
-        }
-    same = (
-        current["software_id_address"] == row["software_id_address"]
-        and current["boot_calls"] == row["boot_calls"]
-        and current["config"] == row["config"]
-    )
-    if same:
-        return {
-            "compatible": True,
-            "current_build_works_offline": True,
-            "status": "covered-by-current-build",
-            "reason": "the current universal payload already contains the exact resolved selector, boot calls, and runtime config",
-            "current_targets": current["targets"],
-        }
-    return {
-        "compatible": False,
-        "current_build_works_offline": False,
-        "status": "selector-conflict",
-        "reason": (
-            "the current payload already uses this software ID for a different boot/runtime contract; "
-            "adding a second row would make on-ECU selection ambiguous"
-        ),
-        "current_targets": current["targets"],
-    }
 
 
 def _return_section(name: str) -> str:
@@ -188,12 +149,7 @@ def _sim_spec(
         codeflash_size=0x100000,
         harness_address=HARNESS_ADDRESS,
         image_sha256=frozenset((digest,)),
-        memory_regions=(
-            "0xFEBE0000,0x20000",
-            "0xFEF00000,0x20000",
-            "0xFFFFB000,0x1000",
-            "0xFFE50000,0x1000",
-        ),
+        memory_regions=SIM_MEMORY_REGIONS,
         gdb=gdb,
         loads=((builder.STAGING_BASE, builder.STAGING_LIMIT),),
         overlays=overlays,
@@ -251,13 +207,13 @@ def simulate_candidate(
             f'*(unsigned int *)0x{STARTUP_MARKER:08X}'
         ),
     )
-    fallback_output, fallback_elf = run_codeflash_sim(
+    fallback_output, runtime_elf = run_codeflash_sim(
         root=ROOT,
         image_path=image_path,
         spec=_sim_spec(assembly=harness, digest=digest, overlays=overlays, gdb=fallback_gdb),
         ram_loads=load,
         expected_output=(fallback_expected,),
-        output_dir=output_dir / "fallback",
+        output_dir=output_dir / "runtime",
     )
 
     idle_expected = (
@@ -288,25 +244,27 @@ def simulate_candidate(
             f'*(unsigned int *)0x{CONTEXT_MARKER:08X}, *(unsigned int *)0x{STARTUP_MARKER:08X}'
         ),
     )
-    idle_output, idle_elf = run_codeflash_sim(
+    if runtime_elf is None:
+        raise RuntimeError("retained simulator ELF is missing")
+    idle_output = run_elf(
         root=ROOT,
-        image_path=image_path,
-        spec=_sim_spec(assembly=harness, digest=digest, overlays=overlays, gdb=idle_gdb),
-        ram_loads=load,
+        elf_path=runtime_elf,
+        memory_regions=SIM_MEMORY_REGIONS,
+        gdb_commands=idle_gdb,
         expected_output=(idle_expected,),
-        output_dir=output_dir / "idle",
+        output_path=output_dir / "idle-output.txt",
     )
+    elf_path = str(runtime_elf.relative_to(output_dir.parent))
     return {
         "passed": True,
         "harness": str(harness.relative_to(output_dir.parent)),
+        "elf": elf_path,
         "fallback": {
             "expected": fallback_expected,
-            "elf": str(fallback_elf.relative_to(output_dir.parent)) if fallback_elf else None,
             "output_sha256": hashlib.sha256(fallback_output.encode()).hexdigest(),
         },
         "idle_fast": {
             "expected": idle_expected,
-            "elf": str(idle_elf.relative_to(output_dir.parent)) if idle_elf else None,
             "output_sha256": hashlib.sha256(idle_output.encode()).hexdigest(),
         },
         "proof_boundary": (
@@ -326,53 +284,9 @@ def onboard(image_path: Path, output_dir: Path | None = None) -> tuple[dict[str,
     image_path = image_path.resolve()
     image = image_path.read_bytes()
     digest = hashlib.sha256(image).hexdigest()
-    try:
-        contract = resolve_request_signer_contract(image)
-    except (ContractError, ValueError, OSError) as exc:
-        out = output_dir.resolve() if output_dir is not None else _default_output("unresolved", digest)
-        if output_dir is not None:
-            _require_empty(out)
-        report = {
-            "schema": "tss3-request-signer-onboarding-v1",
-            "codeflash": {"path": str(image_path), "sha256": digest, "size": len(image)},
-            "compatible": False,
-            "current_build_works_offline": False,
-            "status": "not-proven-compatible",
-            "reason": str(exc),
-            "build": None,
-            "simulation": None,
-            "output_directory": str(out),
-        }
-        (out / "report.json").write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
-        return report, 1
-
-    identity = contract["identity"]
-    out = output_dir.resolve() if output_dir is not None else _default_output(identity["firmware_software_id"], digest)
+    out = output_dir.resolve() if output_dir is not None else _default_output("dump", digest)
     if output_dir is not None:
         _require_empty(out)
-    verdict = compatibility_verdict(contract)
-    report: dict[str, Any] = {
-        "schema": "tss3-request-signer-onboarding-v1",
-        "codeflash": {"path": str(image_path), "sha256": digest, "size": len(image)},
-        "identity": identity,
-        **verdict,
-        "resolved_profile": "resolved_profile.json",
-        "output_directory": str(out),
-        "build": None,
-        "simulation": None,
-        "deployment": {
-            "ready": False,
-            "reason": "offline compatibility cannot derive Panda logical bus or prove ICU-S/RSCFD behavior",
-            "next_check": (
-                "observe the EPS diagnostic/request buses, register the resolved hash/F181/buses, "
-                "package the target kit, then run one parked install/status/self-test/benchmark-100hz session"
-            ),
-        },
-    }
-    (out / "resolved_profile.json").write_text(json.dumps(contract, indent=2, sort_keys=True) + "\n")
-    if not verdict["compatible"]:
-        (out / "report.json").write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
-        return report, 1
 
     build_dir = out / "build"
     command = [
@@ -386,36 +300,57 @@ def onboard(image_path: Path, output_dir: Path | None = None) -> tuple[dict[str,
         "resolved_request_signer",
     ]
     proc = subprocess.run(command, cwd=ROOT, text=True, capture_output=True, check=False)
+    profile_path = build_dir / "resolved_request_signer_profile.json"
     if proc.returncode != 0:
-        report["status"] = "candidate-build-failed"
-        report["reason"] = "candidate payload build failed"
-        report["build"] = {
-            "passed": False,
-            "stdout": proc.stdout,
-            "stderr": proc.stderr,
+        status = (
+            "candidate-build-failed"
+            if profile_path.is_file()
+            else "not-proven-compatible"
+        )
+        report = {
+            "schema": "tss3-request-signer-onboarding-v1",
+            "codeflash": {"path": str(image_path), "sha256": digest, "size": len(image)},
+            "status": status,
+            "reason": proc.stderr.strip().splitlines()[-1] if proc.stderr.strip() else "candidate build failed",
+            "build": {"passed": False},
+            "simulation": None,
+            "output_directory": str(out),
         }
         (out / "report.json").write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
         return report, 1
+
     metadata = json.loads(proc.stdout)
     metadata_path = build_dir / "resolved_request_signer.json"
-    if json.loads(metadata_path.read_text(encoding="utf-8")) != metadata:
-        raise RuntimeError("printed build metadata differs from the retained artifact")
-    included = next(
-        (
-            row for row in metadata["universal_runtime"]["profiles"]
-            if row["software_id"] == identity["runtime_software_id"]
-        ),
-        None,
-    )
-    if included is None:
-        raise RuntimeError("candidate build omitted the resolved runtime profile")
-    report["build"] = {
-        "passed": True,
-        "profile_action": "already-present" if verdict["current_build_works_offline"] else "added-to-candidate-build",
-        "metadata": str(metadata_path.relative_to(out)),
-        "staging": metadata["staging"],
-        "authenticated_payload": metadata["authenticated_payload"],
-        "included_profile": included,
+    contract = json.loads(profile_path.read_text(encoding="utf-8"))
+    identity = contract["identity"]
+    verdict = metadata["compatibility"]
+    report: dict[str, Any] = {
+        "schema": "tss3-request-signer-onboarding-v1",
+        "codeflash": {"path": str(image_path), "sha256": digest, "size": len(image)},
+        "identity": identity,
+        **verdict,
+        "resolved_profile": str(profile_path.relative_to(out)),
+        "output_directory": str(out),
+        "build": {
+            "passed": True,
+            "profile_action": (
+                "already-present"
+                if verdict["status"] == "covered-by-current-build"
+                else "added-to-candidate-build"
+            ),
+            "metadata": str(metadata_path.relative_to(out)),
+            "staging": metadata["staging"],
+            "authenticated_payload": metadata["authenticated_payload"],
+        },
+        "simulation": None,
+        "deployment": {
+            "ready": False,
+            "reason": "offline compatibility cannot derive Panda logical bus or prove ICU-S/RSCFD behavior",
+            "next_check": (
+                "observe the EPS diagnostic/request buses, register the resolved hash/F181/buses, "
+                "package the target kit, then run one parked install/status/self-test/benchmark-100hz session"
+            ),
+        },
     }
     try:
         report["simulation"] = simulate_candidate(
@@ -431,7 +366,6 @@ def onboard(image_path: Path, output_dir: Path | None = None) -> tuple[dict[str,
         report["simulation"] = {"passed": False, "reason": str(exc)}
         (out / "report.json").write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
         return report, 1
-    report["offline_result"] = "works"
     (out / "report.json").write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
     return report, 0
 

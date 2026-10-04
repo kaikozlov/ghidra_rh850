@@ -143,14 +143,14 @@ def cmd_variant(args: argparse.Namespace) -> int:
 
 
 def cmd_ram_list(args: argparse.Namespace) -> int:
-    from exploit.ram_runtime.target_profiles import supported_targets, target_spec
+    from exploit.ram_runtime.target_profiles import registered_targets
 
     query = (args.query or "").casefold()
-    for target in supported_targets():
-        spec = target_spec(target)
+    for target, record in registered_targets().items():
+        runtime = record["ram_runtime"]
         summary = (
-            f"{spec['vehicle']} profile={spec['profile']} "
-            f"payloads={','.join(spec['payloads'])}"
+            f"{record['vehicle']} profile={runtime['profile']} "
+            f"payloads={','.join(runtime['payloads'])}"
         )
         if query and query not in target.casefold() and query not in summary.casefold():
             continue

@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import shlex
 import subprocess
 import tempfile
 from collections.abc import Sequence
@@ -113,19 +114,19 @@ def _run_tool(root: Path, args: Sequence[str]) -> subprocess.CompletedProcess[st
 
 def _compile_harness(root: Path, work: Path, spec: Spec) -> None:
     source = spec.assembly.relative_to(root).as_posix()
-    _run_tool(root, (
-        "exec", "--work-dir", str(work),
+    compile_args = [
         "v850-elf-gcc", "-mv850e3v5", "-mno-app-regs", "-ffreestanding",
         "-fno-builtin", "-Os", "-nostdlib", "-Wa,-mv850e3v5,-mextension",
         "-c", f"/src/{source}", "-o", "/out/harness.o",
-    ))
-    dump_args = ["exec", "--work-dir", str(work), "v850-elf-objcopy"]
+    ]
+    dump_args = ["v850-elf-objcopy"]
     for index, overlay in enumerate(spec.overlays):
         dump_args += [
             "--dump-section", f"{overlay.section}=/out/overlay-{index}.bin",
         ]
     dump_args.append("/out/harness.o")
-    _run_tool(root, dump_args)
+    script = f"{shlex.join(compile_args)} && {shlex.join(dump_args)}"
+    _run_tool(root, ("exec", "--work-dir", str(work), "sh", "-ec", script))
 
 
 def _apply_overlays(image: bytes, work: Path, spec: Spec) -> bytes:
@@ -180,23 +181,65 @@ def _link(
     lines += ["}", entry, ""]
     (work / "sim.ld").write_text("\n".join(lines), encoding="utf-8")
 
-    _run_tool(root, (
-        "exec", "--work-dir", str(work), "v850-elf-objcopy",
+    commands = [[
+        "v850-elf-objcopy",
         "-I", "binary", "-O", "elf32-v850-rh850", "-B", "v850:rh850",
         "--rename-section", ".data=.codeflash,alloc,load,readonly,code,contents",
         "/out/model.bin", "/out/model.o",
-    ))
+    ]]
     objects = ["/out/model.o"]
     for index in range(len(load_addresses)):
+        section = f".sim.load.{index}" if harness_address is not None else f".raw.load.{index}"
+        commands.append([
+            "v850-elf-objcopy",
+            "-I", "binary", "-O", "elf32-v850-rh850", "-B", "v850:rh850",
+            "--rename-section", f".data={section},alloc,load,code,contents",
+            f"/out/load-{index}.bin", f"/out/load-{index}.o",
+        ])
         objects.append(f"/out/load-{index}.o")
     if harness_address is not None:
         objects.insert(0, "/out/harness.o")
-    _run_tool(root, (
-        "exec", "--work-dir", str(work), "v850-elf-gcc", "-nostdlib",
+    commands.append([
+        "v850-elf-gcc", "-nostdlib",
         "-Wl,--no-warn-mismatch", "-Wl,-T,/out/sim.ld", "-Wl,--build-id=none",
         *objects, "-o", "/out/sim.elf",
-    ))
+    ])
+    _run_tool(
+        root,
+        (
+            "exec", "--work-dir", str(work), "sh", "-ec",
+            " && ".join(shlex.join(command) for command in commands),
+        ),
+    )
     return work / "sim.elf"
+
+
+def run_elf(
+    *,
+    root: Path,
+    elf_path: Path,
+    memory_regions: Sequence[str] = (),
+    gdb_commands: Sequence[str] = (),
+    expected_output: Sequence[str] = (),
+    output_path: Path | None = None,
+) -> str:
+    """Run one prepared simulator ELF with a fresh GDB command script."""
+    root = root.resolve()
+    elf_path = elf_path if elf_path.is_absolute() else root / elf_path
+    args: list[str] = ["sim", str(elf_path)]
+    for region in memory_regions:
+        args += ["--memory-region", region]
+    for command in gdb_commands:
+        args += ["-ex", command]
+    proc = _run_tool(root, args)
+    output = proc.stdout + proc.stderr
+    for expected in expected_output:
+        if expected not in output:
+            raise CodeFlashSimError(f"simulation output lacks {expected!r}\n{output}")
+    if output_path is not None:
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output_path.write_text(output, encoding="utf-8")
+    return output
 
 
 def run(
@@ -304,13 +347,6 @@ def run(
         )
         for index, (_, blob) in enumerate(load_blobs):
             (work / f"load-{index}.bin").write_bytes(blob)
-            section = f".sim.load.{index}" if spec is not None else f".raw.load.{index}"
-            _run_tool(root, (
-                "exec", "--work-dir", str(work), "v850-elf-objcopy",
-                "-I", "binary", "-O", "elf32-v850-rh850", "-B", "v850:rh850",
-                "--rename-section", f".data={section},alloc,load,code,contents",
-                f"/out/load-{index}.bin", f"/out/load-{index}.o",
-            ))
         elf = _link(
             root, work,
             image_base=image_base,
@@ -320,26 +356,21 @@ def run(
             entry_address=entry_address,
         )
 
-        args: list[str] = ["sim", str(elf)]
         regions = tuple(memory_regions) + (spec.memory_regions if spec else ())
-        for region in regions:
-            args += ["--memory-region", region]
-        script: tuple[str, ...]
         if gdb_commands:
             script = tuple(gdb_commands)
         elif spec is not None and spec.gdb:
             script = spec.gdb
         else:
             script = ("starti", "x/8i $pc", "info registers pc")
-        for command in script:
-            args += ["-ex", command]
-        proc = _run_tool(root, args)
-        output = proc.stdout + proc.stderr
-        for expected in expected_output:
-            if expected not in output:
-                raise CodeFlashSimError(f"simulation output lacks {expected!r}\n{output}")
-
-        (work / "output.txt").write_text(output, encoding="utf-8")
+        output = run_elf(
+            root=root,
+            elf_path=elf,
+            memory_regions=regions,
+            gdb_commands=script,
+            expected_output=expected_output,
+            output_path=work / "output.txt",
+        )
         return output, (None if temporary is not None else elf)
     finally:
         if temporary is not None:
