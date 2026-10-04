@@ -17,8 +17,6 @@ that boundary lives in docs/tooling/rh850-build-and-sim.md, not in this code.
 
 from __future__ import annotations
 
-from typing import Any
-
 import hashlib
 import json
 import subprocess
@@ -26,6 +24,7 @@ import tempfile
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
 
 DEFAULT_ENTRY_SYMBOL = "codeflash_sim_start"
 _HARNESS_REGION_SIZE = 0x1000
@@ -120,12 +119,13 @@ def _compile_harness(root: Path, work: Path, spec: Spec) -> None:
         "-fno-builtin", "-Os", "-nostdlib", "-Wa,-mv850e3v5,-mextension",
         "-c", f"/src/{source}", "-o", "/out/harness.o",
     ))
+    dump_args = ["exec", "--work-dir", str(work), "v850-elf-objcopy"]
     for index, overlay in enumerate(spec.overlays):
-        _run_tool(root, (
-            "exec", "--work-dir", str(work), "v850-elf-objcopy",
+        dump_args += [
             "--dump-section", f"{overlay.section}=/out/overlay-{index}.bin",
-            "/out/harness.o",
-        ))
+        ]
+    dump_args.append("/out/harness.o")
+    _run_tool(root, dump_args)
 
 
 def _apply_overlays(image: bytes, work: Path, spec: Spec) -> bytes:

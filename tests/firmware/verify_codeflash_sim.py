@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
-"""One gate for CodeFlash simulation: generic viability, F33 Gate-2
-differential, and the F33 / Corolla H/F RAM residents at their real load
-addresses."""
+"""One gate for generic CodeFlash execution, F33 Gate-2 differential,
+registered RAM canaries, and the dump-generated universal signer model."""
 
 from __future__ import annotations
 
@@ -16,19 +15,19 @@ from pathlib import Path
 from exploit.ephemeral_runtime import build_tss3_request_signer as signer_builder
 from exploit.patcher.build_payload import simulate_apply
 from exploit.patcher.patch_config import config_from_manifest
+from exploit.ram_runtime.target_profiles import supported_targets, target_spec
 from tools import REPO_ROOT
 from tools.security.build_secoc_patch_manifest import crc32
 from tools.targets.camry.builders import (
     build_camry_f33_gate2_root_result_patch as gate2_builder,
 )
+from tools.targets.tss3.onboard_ram_signer import simulate_candidate
 
 ROOT = REPO_ROOT
 
 GATE2_SPEC = ROOT / "tests/fixtures/rh850/camry_f33_gate2_codeflash_sim.json"
 F33_SPEC = ROOT / "tests/fixtures/rh850/camry_f33_runtime_canary_sim.json"
 COROLLA_SPEC = ROOT / "tests/fixtures/rh850/corolla_hf_runtime_canary_sim.json"
-REQUEST_SIGNER_SPEC = ROOT / "tests/fixtures/rh850/camry_f33_request_signer_sim.json"
-CACHE_PUBLICATION = bytes.fromhex("1f001c00")  # syncp; synci
 CRC_START = 0x18000
 CRC_FIXUP = 0xFFDEC
 CRC_END = 0xFFDF0
@@ -174,68 +173,24 @@ def check_request_signer(work: Path) -> None:
     stem = signer_builder.output_stem("camry-8965F3307000")
     metadata = json.loads((build_dir / f"{stem}.json").read_text(encoding="utf-8"))
     staging = build_dir / metadata["staging"]["path"]
-    staging_blob = staging.read_bytes()
-    if sha256(staging_blob) != metadata["staging"]["sha256"]:
+    if sha256(staging.read_bytes()) != metadata["staging"]["sha256"]:
         raise AssertionError("request-signer staging metadata drift")
-    if staging_blob.count(CACHE_PUBLICATION) != 2:
-        raise AssertionError("request-signer publication sequence drift")
-    # GNU sim does not implement SYNCP/SYNCI. Preserve and check the production
-    # bytes above; only the simulator input substitutes four RH850 NOP bytes.
-    simulator_staging = work / "request-signer-simulator.bin"
-    simulator_staging.write_bytes(staging_blob.replace(CACHE_PUBLICATION, b"\0" * 4))
-    expected = (
-        "UNIVERSAL_SIGNER STATE=0x4c433841 VERSION=3 INIT=1 TICK=1 FLAG=0x0 "
-        "CONTEXT=0x43545831 STARTUP=0x53544152 APP=0x715b4 CMD5_GLOBALS=0xfebf13a0"
-    )
-    simulate(
-        ROOT / "firmware/camry-8965F3307000/CodeFlash.bin",
-        expected,
-        spec=REQUEST_SIGNER_SPEC,
-        load=f"0xFEBF0000={simulator_staging}",
-    )
-    print(f"PASS universal request signer: {expected}")
 
-    idle_spec = json.loads(REQUEST_SIGNER_SPEC.read_text(encoding="utf-8"))
-    idle_spec["memory_regions"].append("0xFFE50000,0x1000")
-    tick_wait = metadata["resident"]["tick_wait"]
-    idle_spec["gdb"] = [
-        "set {unsigned char}0xFFFFB111 = 0x10",
-        "set {unsigned char}0x00031910 = 0x5A",
-        "set {unsigned char}0xFEBE39DB = 0",
-        "set {unsigned short}0xFEBE48F8 = 0",
-        "set {unsigned int}0xFEF01000 = 0",
-        "set {unsigned int}0xFEF01004 = 0",
-        "break *0xFEBF0146",
-        "run",
-        f"break *{tick_wait}",
-        "continue",
-        "set {unsigned char}0xFFFFB111 = 0",
-        "set {unsigned short}0xFEBE48F8 = 5",
-        "set {unsigned int}0xFFE5001C = 300000",
-        "break *0xFEF07C00",
-        "continue",
-        (
-            'printf "UNIVERSAL_IDLE_FAST STATE=0x%x VERSION=%u INIT=%u TICK=%u '
-            'FLAG=0x%x COUNTER=%u CONTEXT=0x%x STARTUP=0x%x\\n", '
-            "*(unsigned int *)0xFEBF025C, *(unsigned char *)0xFEBF0260, "
-            "*(unsigned char *)0xFEBF0261, *(unsigned char *)0xFEBE39DB, "
-            "*(unsigned char *)0xFFFFB111, *(unsigned int *)0xFFE5001C, "
-            "*(unsigned int *)0xFEF01000, *(unsigned int *)0xFEF01004"
-        ),
-    ]
-    idle_spec_path = work / "request-signer-idle-sim.json"
-    idle_spec_path.write_text(json.dumps(idle_spec), encoding="utf-8")
-    idle_expected = (
-        "UNIVERSAL_IDLE_FAST STATE=0x4c433841 VERSION=3 INIT=1 TICK=0 "
-        "FLAG=0x0 COUNTER=300000 CONTEXT=0x43545831 STARTUP=0x53544152"
-    )
-    simulate(
-        ROOT / "firmware/camry-8965F3307000/CodeFlash.bin",
-        idle_expected,
-        spec=idle_spec_path,
-        load=f"0xFEBF0000={simulator_staging}",
-    )
-    print(f"PASS universal request signer idle path: {idle_expected}")
+    for target in supported_targets():
+        spec = target_spec(target)
+        result = simulate_candidate(
+            image_path=spec["image"],
+            contract=spec["contract"],
+            metadata=metadata,
+            staging_path=staging,
+            output_dir=work / "request-signer-sim" / target,
+        )
+        if not result["passed"]:
+            raise AssertionError(f"{target} universal request-signer simulation failed")
+        print(
+            f"PASS universal request signer {target}: "
+            f"{result['fallback']['expected']} / {result['idle_fast']['expected']}"
+        )
 
 
 def main() -> int:

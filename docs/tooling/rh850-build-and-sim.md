@@ -73,9 +73,24 @@ boot/context installation and hardware-heavy callees; everything else (stock
 startup JARLs, RAM-clear, scheduler, foreground) runs unmodified at its
 original address.
 
+The TSS3 signer does not use a Camry-only checked-in spec. The dump onboarding
+workflow generates byte-pinned overlays and a GP/TP/SP harness from each
+resolved firmware contract, then executes the same universal payload against
+that exact CodeFlash:
+
+```bash
+tools/toyota ram onboard path/to/CodeFlash.bin
+```
+
+Its two scenarios reach the GlobalRAM helper through the complete
+post-foreground fallback and through the timer-bounded idle branch. Boot,
+context, startup-final, and hardware-heavy foreground callees are explicit
+generated overlays; their preimages remain bound to the supplied dump.
+
 One gate runs every modeled scenario — generic synthetic image, the F33
-Gate-2 stock/root-only/stage-2/stage-3 differential, and the F33 and Corolla
-H/F RAM residents through one foreground tick:
+Gate-2 stock/root-only/stage-2/stage-3 differential, the F33 and Corolla
+H/F RAM residents, and the universal signer fallback/idle paths on every
+registered Camry, Crown, and Corolla H/F CodeFlash:
 
 ```bash
 tools/test codeflash_sim

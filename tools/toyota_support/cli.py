@@ -102,7 +102,7 @@ def cmd_capabilities(_args: argparse.Namespace) -> int:
         "eps-probe": "non-destructive Toyota EPS diagnostic-bus discovery",
         "eps-isolated-probe": "mode/liveness probe of an isolated EPS-side CAN segment",
         "e2e-p05": ["crc", "check", "protect", "recover-data-id"],
-        "ram": ["list", "build", "kit"],
+        "ram": ["list", "build", "onboard", "kit"],
         "targets": {name: len(target_capabilities(name)) for name in TARGETS},
     }
     print(json.dumps(payload, indent=2, sort_keys=True))
@@ -163,6 +163,16 @@ def cmd_ram_build(args: argparse.Namespace) -> int:
     if args.out is not None:
         command.extend(("--output-dir", str(args.out)))
     return _run_path(ROOT / "exploit/ephemeral_runtime/build_tss3_request_signer.py", command)
+
+
+def cmd_ram_onboard(args: argparse.Namespace) -> int:
+    command = [str(args.codeflash)]
+    if args.out is not None:
+        command.extend(("--out", str(args.out)))
+    return _run_path(
+        TOOLS / "targets/tss3/onboard_ram_signer.py",
+        command,
+    )
 
 
 def cmd_ram_kit(args: argparse.Namespace) -> int:
@@ -280,6 +290,13 @@ def build_parser() -> argparse.ArgumentParser:
     b.add_argument("--out", type=Path)
     b.add_argument("--codec", choices=("four-frame", "compact"), default="four-frame")
     b.set_defaults(func=cmd_ram_build)
+    o = qs.add_parser(
+        "onboard",
+        help="resolve, build, and simulate the signer from one CodeFlash dump",
+    )
+    o.add_argument("codeflash", type=Path)
+    o.add_argument("--out", type=Path)
+    o.set_defaults(func=cmd_ram_onboard)
     k = qs.add_parser("kit", help="package one exact target or all registered targets")
     k.add_argument("target")
     k.add_argument("--out", type=Path, required=True)

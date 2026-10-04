@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""Verify the canonical exact-target TSS3 RAM-resident request signer."""
+"""Verify the dump-resolved universal TSS3 RAM-resident request signer."""
 from __future__ import annotations
 
+import copy
 import json
 import subprocess
 import sys
@@ -14,11 +15,19 @@ from unittest import mock
 from exploit.common import ram_exec
 from exploit.ephemeral_runtime import build_tss3_request_signer as build
 from exploit.ephemeral_runtime import camry_f33_request_signer_ui_bringup as ui_bringup
-from exploit.ephemeral_runtime import camry_f33_startup_programming as startup_programming
+from exploit.ephemeral_runtime import (
+    camry_f33_startup_programming as startup_programming,
+)
 from exploit.ephemeral_runtime import tss3_request_signer as host
 from exploit.ephemeral_runtime import tss3_request_signer_compact as compact_host
+from exploit.ram_runtime.target_profiles import target_spec
+from exploit.ram_runtime.tss3_request_signer_contract import (
+    ContractError,
+    resolve_request_signer_contract,
+)
 from tools import REPO_ROOT
 from tools.targets.tss3.builders import build_tss3_ram_kit as ram_kit
+from tools.targets.tss3.onboard_ram_signer import compatibility_verdict
 
 ROOT = REPO_ROOT
 
@@ -50,6 +59,24 @@ with tempfile.TemporaryDirectory(prefix="verify-tss3-request-signer-") as td:
             cwd=ROOT, check=True, capture_output=True, text=True,
         )
         compact_target_meta[target] = json.loads(compact_proc.stdout)
+    synthetic_image = bytearray(build.TARGET_SPECS[CAMRY_TARGET]["image"].read_bytes())
+    old_selector = build.TARGET_SPECS[CAMRY_TARGET]["runtime_software_id"].encode("ascii")
+    new_selector = b"8965F3307999"
+    if synthetic_image.count(old_selector) != 1:
+        raise AssertionError("Camry selector identity is not unique")
+    selector_offset = synthetic_image.find(old_selector)
+    synthetic_image[selector_offset:selector_offset + len(old_selector)] = new_selector
+    synthetic_path = Path(td) / "synthetic-new-profile-CodeFlash.bin"
+    synthetic_path.write_bytes(synthetic_image)
+    synthetic_out = Path(td) / "synthetic-new-profile"
+    synthetic_proc = subprocess.run(
+        [
+            sys.executable, str(build.BUILDER), "--codeflash", str(synthetic_path),
+            "--output-dir", str(synthetic_out),
+        ],
+        cwd=ROOT, check=True, capture_output=True, text=True,
+    )
+    synthetic_meta = json.loads(synthetic_proc.stdout)
 meta_path = OUT / f"{CAMRY_STEM}.json"
 meta = json.loads(meta_path.read_text())
 resident = (OUT / meta["resident"]["path"]).read_bytes()
@@ -144,17 +171,17 @@ check("resident/helper/config fit the common RAM geometry",
       meta["resident"]["headroom"] == meta["resident"]["limit"] - len(resident) and
       meta["helper"]["headroom"] == meta["helper"]["limit"] - len(helper) and
       meta["resident"]["relocations"] == 0 and meta["helper"]["relocations"] == 0)
-check("host-visible state and private scratch preserve exact safe boundaries",
-      host.STATE_SIZE == build.STATE_SIZE == 0x24 and
+state_base = int(meta["state"]["base"], 0)
+scratch_base = int(meta["scratch"]["base"], 0)
+rmba_start, _rmba_end = meta["firmware_contract"]["resolver_evidence"]["memory"]["application_rmba_exclusion"]
+check("host-visible state and private scratch preserve resolved safe boundaries",
+      host.STATE_SIZE == build.STATE_SIZE == meta["state"]["size"] == 0x24 and
       host.STATE_VERSION == build.STATE_VERSION == meta["state"]["version"] == 3 and
-      build.STATE_BASE + build.STATE_SIZE == build.CLASSIC_SCRATCH_BASE == 0xFEBF0280 and
-      build.STATE_BASE + build.STATE_SIZE <= build.APPLICATION_RMBA_PROTECTED_START and
-      build.CLASSIC_SCRATCH_BASE + build.CLASSIC_SCRATCH_SIZE == build.SECOC_OBJECT15_BASE and
+      state_base + build.STATE_SIZE == scratch_base and
+      state_base + build.STATE_SIZE <= rmba_start and
       meta["state"]["application_sid23_readable"] is True and
-      meta["scratch"] == {
-          "base": "0xFEBF0280", "size": 0x68, "end_exclusive": "0xFEBF02E8",
-          "object15_overlap": False,
-      })
+      meta["scratch"]["size"] == 0x68 and
+      int(meta["scratch"]["end_exclusive"], 0) == scratch_base + meta["scratch"]["size"])
 
 
 def run_core_simulator() -> str:
@@ -192,51 +219,48 @@ simulator_output = run_core_simulator()
 check("production pure-core macros execute under GNU RH850 sim",
       "ORACLE_SIM_RESULT=0x8a0c0de FAILURE=0 PASSES=36" in simulator_output)
 
-fw = meta["firmware_contract"]["camry"]
+fw = meta["firmware_contract"]["resolver_evidence"]
 execution = meta["firmware_contract"]["execution"]
 check("firmware-derived scheduler matches exact Camry machine structure",
       execution["coordinator"] == 0x637EE and
       execution["startup_count"] == 21 and
       execution["foreground"] == 0x66062 and
       execution["foreground_size"] == 92 and
-      execution["foreground_shape_sha256"] == build.FOREGROUND_SHAPE_SHA256 and
       execution["timing_flag"] == 0x31910 and
       execution["tick_counter"] == 0xFEBE39DB)
 check("stock foreground timer remains bound to exact firmware geometry",
-      fw["foreground_timer"] == {
+      execution["idle_fast"] == {
           "timer": "TAUJ0 channel 3",
           "counter": "TAUJ0CNT3",
-          "counter_address": "0xFFE5001C",
+          "counter_address": 0xFFE5001C,
           "count_hz": 80_000_000,
           "steady_counts": 400_000,
           "steady_period_us": 5_000,
           "direction": "down",
-          "flag": "FFFFB111 bit4",
+          "foreground_flag": "FFFFB111 bit4",
+          "minimum_remaining_counts": 240_000,
+          "minimum_remaining_us": 3_000,
+          "mode_initializer": 0x6639C,
+          "reload_stores": [0x665C6, 0x666AC],
+          "timer_table": 0x30DF0,
       })
 check("stock functional rule supplies the canonical raw-ring request carrier",
-      fw["request"] == {
-          "can_id": "0x00000777",
-          "hardware_classic_word": "0x00000777",
-          "label": "0x35",
-          "rule": 53,
-          "record_header": "0x00000408",
-          "canif_row": "0x00021FA8",
-      })
+      fw["request"]["request_id"] == 0x777 and
+      fw["request"]["request_rule_label"] == 0x35 and
+      fw["request"]["request_record_header"] == 0x408)
 check("software RX ring exposes independent producer geometry",
-      fw["rx_ring"]["base"] == "0xFEBE4038" and
-      fw["rx_ring"]["end_inclusive"] == "0xFEBE48D7" and
-      fw["rx_ring"]["capacity_words"] == 0x228 and
-      fw["rx_ring"]["classic8_record_words"] == 5 and
-      fw["rx_ring"]["classic8_record_bytes"] == 20)
+      fw["request"]["ring_base"] == 0xFEBE4038 and
+      fw["request"]["ring_base"] + fw["request"]["ring_words"] * 4 - 1 == 0xFEBE48D7 and
+      fw["request"]["ring_words"] == 0x228 and
+      fw["request"]["ring_producer"] == 0xFEBE48F8)
 check("paired response uses the stock primary diagnostic resource",
-      fw["response"]["can_id"] == "0x000007A9" and
-      fw["response"]["lower_handle"] == 53 and
-      fw["response"]["controller"] == 1 and fw["response"]["resource"] == 6 and
-      fw["response"]["software_confirmation_handle"] == "0x00F0")
-check("state read boundary is pinned to the exact application SID23 exclusion",
-      fw["application_rmba_exclusion"] == {
-          "start": "0xFEBF0288", "end_inclusive": "0xFEBF13CB",
-      } and meta["state"]["base"] == "0xFEBF025C" and meta["state"]["size"] == 0x24)
+      fw["request"]["response_id"] == 0x7A9 and
+      fw["signer_abi"]["response_handle"] == 53 and
+      fw["signer_abi"]["response_controller"] == 1 and
+      fw["signer_abi"]["response_resource"] == 6)
+check("state read boundary is pinned to the resolved application SID23 exclusion",
+      fw["memory"]["application_rmba_exclusion"] == [0xFEBF0288, 0xFEBF13CB] and
+      meta["state"]["base"] == "0xFEBF025C" and meta["state"]["size"] == 0x24)
 
 application = bytes(range(28))
 four_frames = host.build_request(application, 0xA7)
@@ -275,6 +299,45 @@ expected_targets = {
     "camry-8965F3307000", "crown-8965F3012000",
     "corolla-8965H1202000", "corolla-8965F1208000",
 }
+camry_spec = target_spec(CAMRY_TARGET)
+camry_contract = camry_spec["contract"]
+covered = compatibility_verdict(camry_contract)
+check("dump onboarding recognizes an exact current universal profile",
+      covered["status"] == "covered-by-current-build" and
+      covered["compatible"] is True and covered["current_build_works_offline"] is True)
+
+missing_contract = copy.deepcopy(camry_contract)
+missing_contract["identity"]["runtime_software_id"] = "8965F9999999"
+missing = compatibility_verdict(missing_contract)
+check("dump onboarding distinguishes a compatible missing profile",
+      missing["status"] == "compatible-profile-missing" and
+      missing["compatible"] is True and missing["current_build_works_offline"] is False)
+check("dump onboarding adds a missing selector to a buildable universal profile table",
+      len(synthetic_meta["universal_runtime"]["profiles"]) == 4 and
+      synthetic_meta["target"]["registered"] is False and
+      synthetic_meta["target"]["software_id"] == "8965H33030A0" and
+      next(
+          row for row in synthetic_meta["universal_runtime"]["profiles"]
+          if row["software_id"] == new_selector.decode("ascii")
+      )["targets"] == ["tss3-8965H33030A0"] and
+      synthetic_meta["staging"]["resident_offset"] > meta["staging"]["resident_offset"])
+
+conflicting_contract = copy.deepcopy(camry_contract)
+conflicting_contract["runtime_config"]["app_context"] += 4
+conflict = compatibility_verdict(conflicting_contract)
+check("dump onboarding rejects an ambiguous current selector",
+      conflict["status"] == "selector-conflict" and conflict["compatible"] is False)
+
+damaged_image = bytearray(camry_spec["image"].read_bytes())
+freshness_address = camry_contract["signer_abi"]["freshness_encode"]
+damaged_image[freshness_address:freshness_address + 16] = b"\0" * 16
+try:
+    resolve_request_signer_contract(bytes(damaged_image))
+except ContractError:
+    pass
+else:
+    raise AssertionError("dump resolver accepted firmware without the signer freshness primitive")
+print("PASS dump onboarding rejects firmware with an unresolved signer ABI")
 check("all exact targets share the same physical request/response contract",
       set(build.REQUEST_PROFILES) == expected_targets and
       all(

@@ -33,7 +33,9 @@
       "ram_runtime": {
         "profile": "camry-f33",
         "payloads": ["tss3-request-signer"],
-        "application_f181_hex": "023839363546333330373030300000000038413331313333303331303000000000"
+        "application_f181_hex": "023839363546333330373030300000000038413331313333303331303000000000",
+        "request_bus": 0,
+        "response_bus": 0
       }
     },
     "crown-8965F3012000": {
@@ -68,7 +70,9 @@
       "ram_runtime": {
         "profile": "crown-f30",
         "payloads": ["tss3-request-signer"],
-        "application_f181_hex": "023839363546333031323030300000000038413331313330303830303000000000"
+        "application_f181_hex": "023839363546333031323030300000000038413331313330303830303000000000",
+        "request_bus": 1,
+        "response_bus": 1
       }
     },
     "corolla-8965F1208000": {
@@ -103,7 +107,9 @@
       "ram_runtime": {
         "profile": "corolla-hf",
         "payloads": ["tss3-request-signer"],
-        "application_f181_hex": "023839363546313230383030300000000038413331313132313330303000000000"
+        "application_f181_hex": "023839363546313230383030300000000038413331313132313330303000000000",
+        "request_bus": 1,
+        "response_bus": 1
       }
     },
     "corolla-8965H1202000": {
@@ -139,7 +145,9 @@
       "ram_runtime": {
         "profile": "corolla-hf",
         "payloads": ["tss3-request-signer"],
-        "application_f181_hex": "023839363546313230383030300000000038413331313132303230303000000000"
+        "application_f181_hex": "023839363546313230383030300000000038413331313132303230303000000000",
+        "request_bus": 1,
+        "response_bus": 1
       }
     },
     "sienna-8965B4512000": {

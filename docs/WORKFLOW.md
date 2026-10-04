@@ -390,6 +390,29 @@ unchanged, followed by the ordinary signer call as the fallback. The builder
 proves the common timer table, channel-3 reload stores, mode initializer, and
 foreground machine shape in every registered CodeFlash image.
 
+For a newly acquired 1-MiB EPS CodeFlash dump, use the dump-driven onboarding
+command before adding registry metadata:
+
+```bash
+tools/toyota ram onboard path/to/CodeFlash.bin
+```
+
+The command recovers the runtime selector identity, boot transition, scheduler,
+RX ring, signer ABI, private-memory layout, and MPU transit permission directly
+from that dump. It reports whether the current universal binary already has the
+exact selector/config row. When the contract resolves but the row is absent, it
+adds the row to a candidate build, builds the payload, and runs both the
+post-foreground fallback and timer-bounded idle path against that exact image.
+The retained result contains `report.json`, `resolved_profile.json`, build
+artifacts, simulator ELFs, and simulator output under a unique
+`build/out/ram-runtime/onboard/` directory.
+
+Resolution is deliberately fail-closed. Missing or ambiguous machine evidence
+means “not proven compatible,” not proof that the firmware can never support
+the approach. CodeFlash cannot supply Panda logical-bus routing or prove
+ICU-S/RSCFD, MPU enforcement, cache publication, interrupt, or timing behavior;
+those remain registry/bench qualification inputs.
+
 ```bash
 # Build one target. Without --out, output is under build/out/ram-runtime/TARGET/.
 tools/toyota ram build camry-8965F3307000

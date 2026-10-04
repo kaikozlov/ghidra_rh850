@@ -226,13 +226,15 @@ blanket promise that every reset clears every local-RAM view. Target builders
 must continue to prove the exact boot/reset path and startup write survival
 from firmware.
 
-What remains target-specific is a small signer/I/O ABI: RX ring and producer,
+What differs per firmware is a small signer/I/O ABI: RX ring and producer,
 authenticated trip/reset cells, state/scratch placement, freshness encoder,
-command-5 wrapper/globals, lower CAN writer and transmit handle. Startup and
-foreground addresses are not curated profile data: the builder resolves the
-unique coordinator and common 92-byte foreground machine shape from each exact
-CodeFlash image, then emits its decoded startup span and ten stock calls into
-the selected runtime config. Exact CodeFlash hashes still bind that derivation.
+command-5 wrapper/globals, lower CAN writer and transmit handle. These values,
+the startup span, and the foreground calls are no longer a vehicle-named code
+table. The builder resolves them from unique machine structures in the supplied
+CodeFlash and rejects a missing or ambiguous structure. The registered exact
+CodeFlash hashes bind the resulting profiles; an unregistered dump is bound by
+the hash in its onboarding report. Panda logical-bus routing remains external
+registry metadata because it is not encoded by these CodeFlash structures.
 
 The shared binary currently contains three runtime configs for four targets;
 Corolla H/F resolve to the same application software ID and ABI:
@@ -412,6 +414,7 @@ surface:
 
 ```bash
 tools/toyota ram list
+tools/toyota ram onboard path/to/new/CodeFlash.bin
 tools/toyota ram build corolla-8965F1208000 --out build/out/corolla-f-request-signer
 tools/toyota ram kit crown-8965F3012000 --out EMPTY_KIT_DIRECTORY
 tools/toyota ram kit all --out EMPTY_KIT_SET_DIRECTORY
