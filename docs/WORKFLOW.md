@@ -427,8 +427,8 @@ Explicit onboarding and kit output directories must be empty. Each kit contains
 only the shared authenticated payload, host-consumed target metadata, the
 common host runtime, peer recovery, and `./tss3-request-signer`; it does not
 duplicate compiler intermediates or contain the historical direct-B6 runtime.
-The launcher performs its offline integrity/environment check automatically
-before every live command. `recover-peers` derives the EPS identity and
+`doctor` is the explicit offline integrity/environment check; no live command
+runs it implicitly. `recover-peers` derives the EPS identity and
 diagnostic bus from target metadata. The exact-F33 Camry kit also carries
 `ui-bringup`, `ui-worker`, `ui-resume`, and `ui-resume-warm` for its current
 openpilot startup-catcher integration.
@@ -448,6 +448,12 @@ tools/test tss3_request_signer
 
 # generic CodeFlash linker/simulator or generated simulation model
 tools/test codeflash_sim
+
+# ram_exec boot-identity transitions (transient F181, exact-boot handoff)
+tools/test ram_exec_boot_transitions
+
+# Camry F33 startup-catch bringup (race cancellation, native marker)
+tools/test camry_f33_startup_bringup
 ```
 
 Historical C7/B6 builders and the old Camry/Corolla packagers live only under

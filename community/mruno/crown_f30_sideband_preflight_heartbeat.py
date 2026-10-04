@@ -30,6 +30,7 @@ from exploit.common.ram_exec import (  # noqa: E402
     ensure_boardd_stopped,
 )
 from exploit.ephemeral_runtime import camry_f33_runtime_monitor as monitor  # noqa: E402
+from exploit.ephemeral_runtime.panda_eps import set_alloutput_mode  # noqa: E402
 from exploit.ephemeral_runtime.camry_f33_runtime_replay_discriminator import _read_memory  # noqa: E402
 from exploit.ephemeral_runtime.crown_f30_b6_inline_signer import (  # noqa: E402
     CONTROL_BUS,
@@ -56,7 +57,7 @@ def run(duration: float) -> dict[str, Any]:
         raise PreflightError("panda module unavailable") from exc
     uds_mod = _import_uds()
     panda = monitor.PandaTap(Panda())
-    monitor._alloutput_mode(panda)
+    set_alloutput_mode(panda)
     panda.set_canfd_auto(CONTROL_BUS, False)
     client = _make_uds_client(panda, uds_mod, ROUTE, timeout=0.3, response_pending_timeout=1.0)
     f181_hex, f181_ascii = _read_f181(client, uds_mod)

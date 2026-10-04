@@ -128,7 +128,7 @@ class PreflightTests(unittest.TestCase):
               patch.object(probe, '_make_uds_client', side_effect=lambda tap, *a, **kw: Client(tap)),
               patch.object(probe, '_read_f181', return_value=(probe.EXPECTED_F181_HEX, 'fixture')),
               patch.object(probe, '_read_memory', side_effect=read_memory),
-              patch.object(probe.monitor, '_alloutput_mode'),
+              patch.object(probe, 'set_alloutput_mode'),
               patch.object(probe.time, 'monotonic', side_effect=clock.monotonic),
               patch.object(probe.time, 'sleep', side_effect=clock.sleep)):
             result = probe.run(duration)
