@@ -428,10 +428,15 @@ only the shared authenticated payload, host-consumed target metadata, the
 common host runtime, peer recovery, and `./tss3-request-signer`; it does not
 duplicate compiler intermediates or contain the historical direct-B6 runtime.
 `doctor` is the explicit offline integrity/environment check; no live command
-runs it implicitly. `recover-peers` derives the EPS identity and
-diagnostic bus from target metadata. The exact-F33 Camry kit also carries
-`ui-bringup`, `ui-worker`, `ui-resume`, and `ui-resume-warm` for its current
-openpilot startup-catcher integration.
+runs it implicitly. `recover-peers` keeps the kit's EPS identity exact and
+binds each peer restart to the F181 observed at its topology-defined address
+before reset; it does not impose Camry peer part numbers. The diagnostic bus
+comes from the repinned kit metadata. Every kit also carries the UI bringup
+backend (`ui-bringup`, `ui-resume`, `ui-worker`, `ui-resume-warm`) and the
+startup race behind one target-neutral status protocol. Runtime buses are the
+shared repinned topology (Panda bus 0) for every target; kit metadata binds
+per-vehicle identity, and the registry's stock bus observations stay
+provenance. The manual-arm race requires the exact `06 50 03 00 32 01 F4 00` frame constructed by every registered target's bootloader.
 
 `install` records the application F181 once before helper activation, then
 waits for a successful signer request/response. `status`, `self-test`, and the
@@ -452,8 +457,8 @@ tools/test codeflash_sim
 # ram_exec boot-identity transitions (transient F181, exact-boot handoff)
 tools/test ram_exec_boot_transitions
 
-# Camry F33 startup-catch bringup (race cancellation, native marker)
-tools/test camry_f33_startup_bringup
+# TSS3 startup-catch bringup (race matching, cancellation, native marker)
+tools/test tss3_startup_bringup
 ```
 
 Historical C7/B6 builders and the old Camry/Corolla packagers live only under

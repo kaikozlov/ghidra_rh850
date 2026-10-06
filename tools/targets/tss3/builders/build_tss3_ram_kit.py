@@ -35,9 +35,11 @@ RUNTIME_FILES = (
     "exploit/ephemeral_runtime/panda_eps.py",
     "exploit/ephemeral_runtime/tss3_panda_lease.sh",
 )
-CAMRY_UI_RUNTIME_FILES = (
-    "exploit/ephemeral_runtime/camry_f33_request_signer_ui_bringup.py",
-    "exploit/ephemeral_runtime/camry_f33_startup_programming.py",
+# Shared repinned runtime topology: vehicle network + EPS diagnostics on bus 0.
+REPINNED_RUNTIME_BUS = 0
+UI_RUNTIME_FILES = (
+    "exploit/ephemeral_runtime/tss3_request_signer_ui_bringup.py",
+    "exploit/ephemeral_runtime/tss3_startup_programming.py",
 )
 COMPACT_RUNTIME_FILE = "exploit/ephemeral_runtime/tss3_request_signer_compact.py"
 
@@ -53,7 +55,14 @@ def _copy(src: Path, dst: Path) -> None:
 
 
 def _bound_metadata(metadata: dict, record: dict) -> dict:
-    """Bind the universal build to one target's runtime buses and identity."""
+    """Bind the universal build to one target's identity on the shared runtime bus.
+
+    Every maintained TSS3 vehicle runs the Toyota-B repin: the vehicle network
+    and EPS diagnostics (signer request/response, 0x7A1 session traffic) sit on
+    Panda bus 0 (opendbc tss3.py topology). The registry's per-target
+    request_bus/response_bus are stock-vehicle observations kept as provenance
+    and must never select a runtime bus, so all kits bind the repinned bus.
+    """
     runtime = record["ram_runtime"]
     return {
         "schema": metadata["schema"],
@@ -64,11 +73,11 @@ def _bound_metadata(metadata: dict, record: dict) -> dict:
         },
         "request": {
             **metadata["request"],
-            "bus": runtime["request_bus"],
+            "bus": REPINNED_RUNTIME_BUS,
         },
         "response": {
             **metadata["response"],
-            "bus": runtime["response_bus"],
+            "bus": REPINNED_RUNTIME_BUS,
         },
         "state": metadata["state"],
         "authenticated_payload": {
@@ -91,9 +100,8 @@ def _package(target: str, out: Path, codec: str, metadata: dict, payload_path: P
 
     for rel in RUNTIME_FILES:
         _copy(ROOT / rel, out / "runtime" / rel)
-    if target == "camry-8965F3307000":
-        for rel in CAMRY_UI_RUNTIME_FILES:
-            _copy(ROOT / rel, out / "runtime" / rel)
+    for rel in UI_RUNTIME_FILES:
+        _copy(ROOT / rel, out / "runtime" / rel)
     if codec == "compact":
         _copy(ROOT / COMPACT_RUNTIME_FILE, out / "runtime" / COMPACT_RUNTIME_FILE)
 

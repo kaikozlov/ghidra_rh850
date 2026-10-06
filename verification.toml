@@ -1084,8 +1084,8 @@ timeout = 600
 [suite.ram_exec_boot_transitions]
 tests = ["tests/runtime/verify_ram_exec_boot_transitions.py"]
 
-[suite.camry_f33_startup_bringup]
-tests = ["tests/targets/camry/verify_camry_f33_startup_bringup.py"]
+[suite.tss3_startup_bringup]
+tests = ["tests/targets/tss3/verify_tss3_startup_bringup.py"]
 
 [suite.camry_f33_08a_tx_probe]
 tests = ["tests/targets/camry/verify_camry_f33_08a_tx_probe.py"]

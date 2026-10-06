@@ -431,7 +431,7 @@ runtime host, peer recovery, and one launcher:
 ./tss3-request-signer status /tmp/tss3-request-signer-status.json
 ./tss3-request-signer self-test /tmp/tss3-request-signer-self-test.json
 ./tss3-request-signer benchmark-100hz 200 /tmp/tss3-request-signer-100hz.json
-# exact-F33 Camry startup-catcher integration only
+# guided UI bringup (manual arm: targets with a recovered startup race)
 ./tss3-request-signer ui-bringup /tmp/tss3-request-signer-ui-run
 ```
 
@@ -474,8 +474,17 @@ completed `50 03`, sent one `10 02`, and installed from the caught bootloader.
 After application return it required READY/Park/stationary, checked peer health
 without resetting either peer, and ran one fresh-signing self-test. Those runs
 showed that this startup-caught path could preserve healthy Brake/FRC state. The
-current exact-F33 Camry kit packages this backend as `ui-bringup`, `ui-resume`,
-`ui-worker`, and `ui-resume-warm`; other target kits do not carry it.
+UI bringup backend and the startup race are packaged in every request-signer
+kit as `ui-bringup`, `ui-resume`, `ui-worker`, and `ui-resume-warm` behind one
+target-neutral status protocol. All maintained TSS3 vehicles share the Toyota-B
+repinned topology (vehicle network and EPS diagnostics on Panda bus 0, per the
+opendbc TSS3 topology), so the race and signer transport run on bus 0 for every
+target and kit metadata binds per-vehicle identity only; stock-vehicle bus
+observations in the target registry stay provenance. All four registered
+CodeFlash images construct the same extended-session response:
+`06 50 03 00 32 01 F4 00` (`0x6204` in Camry/Crown and `0x61E8` in both
+Corollas). The race requires that exact frame. The Camry is simply the first
+vehicle on which the complete startup sequence was physically proven.
 
 FRC `0x1905` **Cruise Control Permission Flag** and `0x1906` **Main Switch
 Recognition Flag** are operational cruise state, not persistent health latches. In a
@@ -483,9 +492,11 @@ verified healthy startup run they were initially false (`1905=8000`,
 `1906=e000e0008000`) and later became true (`8080` / `e080e0008000`) after a normal
 drive with **no ECU reset**. Therefore startup success does not require those bits to
 already be asserted. They remain telemetry. The startup peer-health gate instead uses
-the pre-helper exact EPS F181, exact FRC/Brake identities, Brake `0x102D`
-fail-status/fail-control clear, and `0x102F` EPS-communication-open clear; the
-succeeding signer self-test supplies the functional post-activation EPS proof.
+the pre-helper exact EPS F181, observed FRC/Brake identity and communication at
+their topology-defined addresses, Brake `0x102D` fail-status/fail-control clear,
+and `0x102F` EPS-communication-open clear; the succeeding signer self-test
+supplies the functional post-activation EPS proof. Explicit peer recovery binds
+each reset to the exact F181 observed before it rather than one vehicle's part number.
 No DTC clear, peer reset, EPS reset, or EPS power cycle is part of a healthy
 `ui-bringup` run.
 

@@ -20,6 +20,8 @@ TARGET = recovery.RecoveryTarget(
     ),
     eps_bus=0,
 )
+PEER_FRC_F181 = bytes.fromhex("01" + "aa" * 15)
+PEER_BRAKE_F181 = bytes.fromhex("01" + "bb" * 15)
 
 
 class FakePanda:
@@ -65,7 +67,7 @@ class TestRecovery(unittest.TestCase):
         self.assertEqual((recovery.FRC_TX, recovery.FRC_BUS), (0x792, 0))
         self.assertEqual((recovery.BRAKE_TX, recovery.BRAKE_BUS), (0x7B0, 0))
 
-    def test_recovery_target_uses_request_signer_metadata_for_non_camry_bus(self):
+    def test_recovery_target_uses_bundle_repinned_bus_for_non_camry_target(self):
         with tempfile.TemporaryDirectory() as td:
             meta = Path(td) / "request-signer.json"
             meta.write_text(json.dumps({
@@ -73,12 +75,12 @@ class TestRecovery(unittest.TestCase):
                     "name": "crown-8965F3012000",
                     "application_f181_hex": "02" + "31" * 32,
                 },
-                "request": {"bus": 1},
+                "request": {"bus": 0},
             }))
             target = recovery.recovery_target(meta)
         self.assertEqual(target.name, "crown-8965F3012000")
         self.assertEqual(target.eps_f181, bytes.fromhex("02" + "31" * 32))
-        self.assertEqual(target.eps_bus, 1)
+        self.assertEqual(target.eps_bus, 0)
 
     def test_gts_permission_requires_distance_control_mode(self):
         for mode in range(6):
@@ -139,16 +141,19 @@ class TestRecovery(unittest.TestCase):
                 "0x102F": {"available": True, "eps_communication_open": False},
             },
         }
-        def read_peer_identity(_panda, tx_addr, _bus, _expected, label, *, timeout):
+        def read_peer_identity(_panda, tx_addr, _bus, label, *, timeout):
             self.assertNotEqual(tx_addr, recovery.EPS_TX)
-            return {"ecu": label, "timeout": timeout}
+            f181 = PEER_FRC_F181 if tx_addr == recovery.FRC_TX else PEER_BRAKE_F181
+            return {"ecu": label, "timeout": timeout, "f181": f181.hex()}
 
         panda = FakePanda()
         with (patch.dict(sys.modules, {"panda": types.SimpleNamespace(Panda=FakePanda)}),
-              patch.object(recovery, "read_exact_f181", side_effect=read_peer_identity) as identities,
+              patch.object(recovery, "read_f181", side_effect=read_peer_identity) as identities,
               patch.object(recovery, "read_fault_state", return_value=state)):
             result = recovery.control_domain_state(None, TARGET, panda=panda)
         self.assertEqual(identities.call_count, 2)
+        self.assertEqual(result["frc_identity"]["f181"], PEER_FRC_F181.hex())
+        self.assertEqual(result["brake_identity"]["f181"], PEER_BRAKE_F181.hex())
         self.assertEqual(result["eps_identity"]["verification"], "bound_by_install_pre_helper_f181")
         self.assertTrue(result["peer_health_observed"])
         self.assertEqual(result["verdict"], "control_domains_healthy")
@@ -217,12 +222,12 @@ class TestRecovery(unittest.TestCase):
                 if address == recovery.EPS_TX:
                     return bytes.fromhex("62f181") + TARGET.eps_f181
                 if address == recovery.FRC_TX:
-                    return bytes.fromhex("62f181") + recovery.EXPECTED_FRC_F181
+                    return bytes.fromhex("62f181") + PEER_FRC_F181
                 if address == recovery.BRAKE_TX:
                     if brake_reset_attempts["value"]:
                         brake_programming_poll["value"] += 1
                         self.fail("Brake F181 was polled after reset dispatch")
-                    return bytes.fromhex("62f181") + recovery.EXPECTED_BRAKE_F181
+                    return bytes.fromhex("62f181") + PEER_BRAKE_F181
             if pdu == bytes.fromhex("1002"):
                 return bytes.fromhex("5002003201f4")
             if pdu == bytes.fromhex("1101"):
@@ -319,7 +324,7 @@ class TestRecovery(unittest.TestCase):
                 events.append(("f181", f181_reads["value"], did))
                 if f181_reads["value"] == 1:
                     raise RuntimeError("still restarting")
-                return recovery.EXPECTED_BRAKE_F181
+                return PEER_BRAKE_F181
 
         fake_uds = types.SimpleNamespace(
             UdsClient=FakeUdsClient,
@@ -357,7 +362,7 @@ class TestRecovery(unittest.TestCase):
         self.assertIn(2.0, waits)
         self.assertIn(0.25, waits)
         self.assertEqual(result["verdict"], "brake_application_returned")
-        self.assertEqual(result["application_f181"], recovery.EXPECTED_BRAKE_F181.hex())
+        self.assertEqual(result["application_f181"], PEER_BRAKE_F181.hex())
         self.assertEqual(saved["verdict"], "brake_application_returned")
         self.assertTrue(panda.closed)
 
@@ -370,7 +375,7 @@ class TestRecovery(unittest.TestCase):
             with self.assertRaises(recovery.RecoveryError):
                 recovery.read_exact_f181(
                     panda, recovery.BRAKE_TX, recovery.BRAKE_BUS,
-                    recovery.EXPECTED_BRAKE_F181, "Brake/EPB",
+                    PEER_BRAKE_F181, "Brake/EPB",
                 )
 
     def test_failure_preserves_preclear_evidence_and_releases_panda(self):

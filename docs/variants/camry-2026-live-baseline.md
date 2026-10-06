@@ -7455,7 +7455,7 @@ current binary wake question.
 
 The new proximity result is directly useful to the existing automatic startup
 catcher. Current `kai-openpilot` had already moved the latency-sensitive
-`10 03 -> exact 50 03 -> 10 02` portion into native `pandad`, but its first TX
+`10 03 -> exact 06 50 03 00 32 01 F4 00 -> 10 02` portion into native `pandad`, but its first TX
 still waited for Panda ignition false->true. That wastes the tens of seconds
 between key-proximity wake and the driver's POWER press.
 
@@ -7466,7 +7466,7 @@ Panda intentionally leaves awake. Native `0x45A` starts a 10-Hz `10 03` prewarm
 on that already-live bus without enabling the other CAN transceivers. The native
 ignition edge still exists as the fallback and, when observed, promotes the same
 attempt to the original 20-ms/50-Hz catch, disables power-save, and sends
-`10 02` only after an exact positive `50 03`.
+`10 02` only after the exact `06 50 03 00 32 01 F4 00` frame recovered from every registered target's CodeFlash.
 
 To avoid turning a casual walk-by into permanent bus activity, prewarm stops
 after 60 seconds if ignition never arrives. It also re-arms as soon as native
