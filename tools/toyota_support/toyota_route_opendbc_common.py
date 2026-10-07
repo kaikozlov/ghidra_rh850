@@ -173,3 +173,112 @@ def lateral_reference_family(
             "boundary": "Latest <=100-ms rlog-publication state join; loggerd batch timestamps are not wire-order timestamps.",
         },
     }
+
+
+# Gear/READY evidence IDs that every route reducer must census across all
+# recorded channels: hybrid gear packet, Corolla gear corroboration,
+# generation-native gear packet, Ready Status input.
+GEAR_READY_CENSUS_IDS = (0x127, 0x2A1, 0x3BF, 0x51E)
+
+# Raw selected-field geometry per census ID as (start_bit, size) in the same
+# Motorola numbering as be_raw().  Values stay raw counts; the census asserts
+# no gear/READY label semantics.
+_GEAR_READY_CENSUS_FIELDS: dict[int, tuple[int, int]] = {
+    0x127: (47, 4),
+    0x2A1: (39, 8),
+    0x3BF: (7, 8),
+    0x51E: (7, 1),
+}
+
+
+def _motorola_min_dlc(start_bit: int, size: int) -> int:
+    wrap = max(0, size - 1 - (start_bit % 8))
+    return start_bit // 8 + (1 if wrap else 0) + 1
+
+
+class GearReadyCensus:
+    """All-source record census for the gear/READY evidence IDs.
+
+    Counts every recorded record per raw source/DLC across four distinct
+    channels -- received can (src<128), panda returned Tx echoes (128<=src<192),
+    panda rejected echoes (src>=192), and sendcan service records -- plus
+    per-source totals over ALL addresses, so a zero count for one ID still has
+    a coverage denominator.  Sources are never normalized to a physical bus
+    topology and no DLC is filtered.
+    """
+
+    RECEIVED = "received_can"
+    RETURNED = "returned_can_echo"
+    REJECTED = "rejected_can_echo"
+    SENDCAN = "sendcan"
+    _CHANNELS = (RECEIVED, RETURNED, REJECTED, SENDCAN)
+
+    def __init__(self) -> None:
+        self._source_totals: dict[str, dict[int, int]] = {c: collections.Counter() for c in self._CHANNELS}
+        self._id_counts: dict[str, dict[int, dict[tuple[int, int], int]]] = {
+            c: {a: collections.Counter() for a in GEAR_READY_CENSUS_IDS} for c in self._CHANNELS
+        }
+        self._id_field_values: dict[str, dict[int, dict[int, int]]] = {
+            c: {a: collections.Counter() for a in GEAR_READY_CENSUS_IDS} for c in self._CHANNELS
+        }
+
+    def add_can(self, src: int, address: int, dat: bytes) -> None:
+        """Feed one `can` service record; src>=128 are panda echoes, not vehicle traffic."""
+        channel = self.RECEIVED if src < 128 else (self.RETURNED if src < 192 else self.REJECTED)
+        self._add(channel, src, address, dat)
+
+    def add_sendcan(self, src: int, address: int, dat: bytes) -> None:
+        """Feed one `sendcan` service record (queued/attempted openpilot Tx)."""
+        self._add(self.SENDCAN, src, address, dat)
+
+    def _add(self, channel: str, src: int, address: int, dat: bytes) -> None:
+        self._source_totals[channel][src] += 1
+        counts = self._id_counts[channel].get(address)
+        if counts is None:
+            return
+        counts[(src, len(dat))] += 1
+        start_bit, size = _GEAR_READY_CENSUS_FIELDS[address]
+        if len(dat) >= _motorola_min_dlc(start_bit, size):
+            self._id_field_values[channel][address][be_raw(dat, start_bit, size)] += 1
+
+    def result(self, input_sha256: str, input_size: int) -> dict[str, Any]:
+        channels: dict[str, Any] = {}
+        for channel in self._CHANNELS:
+            ids: dict[str, Any] = {}
+            for address in GEAR_READY_CENSUS_IDS:
+                start_bit, size = _GEAR_READY_CENSUS_FIELDS[address]
+                ids[f"0x{address:03X}"] = {
+                    "frame_count": sum(self._id_counts[channel][address].values()),
+                    "source_dlc_counts": {
+                        f"src={src} dlc={dlc}": n
+                        for (src, dlc), n in sorted(self._id_counts[channel][address].items())
+                    },
+                    "selected_field": {
+                        "decoder": "be_raw",
+                        "start_bit": start_bit,
+                        "size": size,
+                        "min_dlc": _motorola_min_dlc(start_bit, size),
+                    },
+                    "selected_field_value_counts": {
+                        str(value): n for value, n in sorted(self._id_field_values[channel][address].items())
+                    },
+                }
+            channels[channel] = {
+                "record_count": sum(self._source_totals[channel].values()),
+                "source_totals": {str(src): n for src, n in sorted(self._source_totals[channel].items())},
+                "ids": ids,
+            }
+        return {
+            "census_schema": "toyota-gear-ready-all-source-census-v1",
+            "input_sha256": input_sha256,
+            "input_size": input_size,
+            "ids": [f"0x{a:03X}" for a in GEAR_READY_CENSUS_IDS],
+            "channel_definitions": {
+                self.RECEIVED: "can service records with src<128 (incoming vehicle traffic)",
+                self.RETURNED: "can service records with 128<=src<192 (panda returned Tx echo; src-128 = logical bus)",
+                self.REJECTED: "can service records with src>=192 (panda rejected Tx echo; src-192 = logical bus)",
+                self.SENDCAN: "sendcan service records (openpilot queued/attempted Tx; raw src)",
+            },
+            "channels": channels,
+            "boundary": "Raw per-source/per-DLC counts over every recorded channel, source and DLC; sources are never normalized to a physical bus topology and no DLC is filtered. A zero count proves only that this pinned input contains no such record, not that the vehicle never sends the ID. Selected-field value counts are raw decodes gated on sufficient DLC and assert no gear/READY label semantics.",
+        }

@@ -21,6 +21,7 @@ from pathlib import Path
 from typing import Any
 
 from tools.toyota_support.toyota_route_opendbc_common import (
+    GearReadyCensus,
     be_raw,
     lateral_reference_family,
     rate_hz,
@@ -108,6 +109,9 @@ def main() -> int:
     ap.add_argument("--rlog", type=Path, default=DEFAULT_RLOG)
     ap.add_argument("--openpilot-root", type=Path, required=True)
     ap.add_argument("--output", type=Path, default=DEFAULT_OUT)
+    ap.add_argument("--gear-audit", action="store_true",
+                    help="print the deterministic gear/READY all-source census JSON (with input SHA) to stdout "
+                         "and return without writing --output")
     args = ap.parse_args()
 
     expected = expected_source()
@@ -117,24 +121,13 @@ def main() -> int:
     if actual != {"sha256": expected["sha256"], "size": expected["size"]}:
         raise SystemExit(f"rlog identity mismatch: expected {expected}, got {actual}")
 
-    h_state = json.loads(H_STATE.read_text())
-    h_runtime = json.loads(H_RUNTIME.read_text())
-    exact_h_tx = [(int(x["can_id"], 16), int(x["length"])) for x in h_state["h_tx_pdu_descriptors"]]
-    exact_h_secoc_rx = [(int(x["can_id"], 16), int(x["secured_length"])) for x in h_runtime["secoc_records"]["records"]]
-    h030_rule = h_state["state_bridge"]["0x030"]["additive_field"]
-    m030 = re.fullmatch(r"sum\(payload_bytes_0_through_(\d+)\) \+ 0x([0-9A-Fa-f]+), low byte", h030_rule["formula"])
-    if not m030 or h030_rule["wire_byte"] != int(m030.group(1)) + 1:
-        raise SystemExit(f"unsupported exact-H 0x030 additive rule: {h030_rule}")
-    h030_last_data_byte = int(m030.group(1))
-    h030_addend = int(m030.group(2), 16)
-
     sys.path.insert(0, str(args.openpilot_root.resolve()))
     from openpilot.tools.lib.logreader import (
         LogReader,  # type: ignore[import-not-found]
     )
 
     frames: dict[tuple[int, int, int], list[tuple[int, bytes]]] = collections.defaultdict(list)
-    returned: collections.Counter[tuple[int, int, int]] = collections.Counter()
+    census = GearReadyCensus() if args.gear_audit else None
     carstate: dict[str, list[Any]] = collections.defaultdict(list)
     first_can_t: int | None = None
     last_can_t: int | None = None
@@ -150,6 +143,12 @@ def main() -> int:
 
     for ev in LogReader(str(args.rlog), sort_by_time=True):
         which = ev.which()
+        if census is not None:
+            if which in ("can", "sendcan"):
+                add = census.add_can if which == "can" else census.add_sendcan
+                for c in getattr(ev, which):
+                    add(int(c.src), int(c.address), bytes(c.dat))
+            continue
         if which == "can":
             t = int(ev.logMonoTime)
             first_can_t = t if first_can_t is None else min(first_can_t, t)
@@ -157,11 +156,8 @@ def main() -> int:
             for c in ev.can:
                 bus = int(c.src)
                 dat = bytes(c.dat)
-                key = (bus % 128, int(c.address), len(dat))
                 if bus < 128:
-                    frames[key].append((t, dat))
-                else:
-                    returned[(bus, int(c.address), len(dat))] += 1
+                    frames[(bus % 128, int(c.address), len(dat))].append((t, dat))
         elif which == "initData" and init is None:
             x = ev.initData
             init = {
@@ -218,8 +214,23 @@ def main() -> int:
             if any(k not in {"deprecated", "errors"} for k in d):
                 radar_tracks_nonempty += 1
 
+    if census is not None:
+        print(json.dumps(census.result(actual["sha256"], actual["size"]), indent=2, sort_keys=True))
+        return 0
+
     if not init or not car_params or not panda_state or first_can_t is None or last_can_t is None:
         raise SystemExit("rlog is missing required init/carParams/panda/CAN metadata")
+
+    h_state = json.loads(H_STATE.read_text())
+    h_runtime = json.loads(H_RUNTIME.read_text())
+    exact_h_tx = [(int(x["can_id"], 16), int(x["length"])) for x in h_state["h_tx_pdu_descriptors"]]
+    exact_h_secoc_rx = [(int(x["can_id"], 16), int(x["secured_length"])) for x in h_runtime["secoc_records"]["records"]]
+    h030_rule = h_state["state_bridge"]["0x030"]["additive_field"]
+    m030 = re.fullmatch(r"sum\(payload_bytes_0_through_(\d+)\) \+ 0x([0-9A-Fa-f]+), low byte", h030_rule["formula"])
+    if not m030 or h030_rule["wire_byte"] != int(m030.group(1)) + 1:
+        raise SystemExit(f"unsupported exact-H 0x030 additive rule: {h030_rule}")
+    h030_last_data_byte = int(m030.group(1))
+    h030_addend = int(m030.group(2), 16)
 
     def rows(addr: int, dlc: int, bus: int = 1) -> list[tuple[int, bytes]]:
         return frames.get((bus, addr, dlc), [])

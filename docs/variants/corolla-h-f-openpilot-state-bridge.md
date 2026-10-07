@@ -254,6 +254,13 @@ auxiliary/radar path on bus 1. The historical Corolla routes below observed the 
 network on stock-harness logical bus 1; that remains raw-capture provenance only and
 must not become a runtime parser fallback or a separate Corolla topology.
 
+**2026-10-07 recheck:** no change to the path or limits above. Both retained captures
+still show `B0[7]=1` in every `0x51E/8` frame, and no retained capture — no ICE startup
+and no Crown capture — ever exercises `0`, so the bit remains unvalidated as a `0/1`
+engagement/fault classifier. The consolidated gear/READY audit of this date is
+[below](#gear-and-ready-audit--2026-10-07); the Crown-side static path is audited in
+[crown-8965F3012000.md](crown-8965F3012000.md#gear-and-ready-audit--2026-10-07).
+
 ### 6.5 The cooperative system gate is a graded power-supply receive-validity/freeze state
 
 The previously unnamed cooperative gate is now bounded substantially farther upstream.
@@ -1102,19 +1109,19 @@ preserving the powertrain subtype:
 - HV: vehicle types `12514/12515/12823/12824`, install family
   `EMPS+ABS+BRKBST+FRC` (`405/435/466/498`).
 
-Thus ICE/HV remain one `TOYOTA_COROLLA_TSS3` control platform; HV adds category 466
-Brake Booster rather than changing the recovered EPS API. Runtime subtype detection is
-positive-evidence based: a queried Hybrid Control ECU or the generation-native `0x127`
-gear PDU sets `ToyotaFlags.HYBRID`; a category-466 `electricBrakeBooster` `carFw` entry
-is also accepted when available. The implementation normalizes Cap'n Proto `CarFw.ecu`
+The 2026-09-16 implementation treated ICE/HV as one `TOYOTA_COROLLA_TSS3` control
+platform; HV added category 466 Brake Booster rather than changing the recovered
+EPS API. Its subtype detection used positive evidence: a queried Hybrid Control
+ECU, generation-native `0x127`, or category-466 `electricBrakeBooster` `carFw`
+entry set `ToyotaFlags.HYBRID`. That implementation normalized Cap'n Proto `CarFw.ecu`
 to its raw integer before set membership: `_DynamicEnum` compares equal to the integer
 Ecu enum but has a different hash, so the former `{fw.ecu}` membership test could
 silently miss an actually queried Hybrid Control ECU. No extra category-466 startup
 probe is added merely for subtype detection.
 
-The gear source remains intentionally powertrain-specific rather than following the
-later contributor branch's switch to `0x3BF` for the hybrid. Current GTS+ exposes
-hybrid **Shift Position** in `HV_P5.ddb` DID `0x1061` (alternate `0x3061`): the primary
+The September-16 gear-source choice was powertrain-specific rather than following
+the contributor branch's switch to `0x3BF` for the hybrid. GTS+ exposes hybrid
+**Shift Position** in `HV_P5.ddb` DID `0x1061` (alternate `0x3061`): the primary
 byte uses `0=P,2=R,4=N,6=D,8=B`, while the parallel **Shift Position (Meter)** byte is
 one-hot `1=P,2=R,4=N,8=D,16=B`. ICE `Engine_P5.ddb` exposes **Shift Position (Current
 Position)** in DID `0x1424` and **Shift Position (Control Position)** in DID `0x1428`,
@@ -1122,18 +1129,78 @@ with the latter preserving the same `0/2/4/6/8` P/R/N/D/B-family ordering. These
 OEM diagnostic semantics, not direct CAN-ID mappings, but they confirm separate
 powertrain owners with common shift meaning.
 
-The retained wire evidence then selects the practical CarState carrier. Span's moving
-2025 hybrid segment has 3,662 checksum-valid `0x127` frames in about 60 s (~61 Hz), while
-its `0x3BF` appears only 60 times (~1 Hz); the 2023 public Corolla route also carries
-`0x3BF` at about 1 Hz and directly observes `0x80=P -> 0x40=R -> 0x10=D`. Therefore use
-`0x127` as the primary hybrid gear source when present and `0x3BF` as the generation-native
-ICE/fallback source. `0x3BF` remains valuable cross-powertrain corroboration, but making
-it the primary hybrid source would throw away a much higher-rate valid carrier.
+Span's moving 2025 hybrid segment has 3,662 checksum-valid `0x127` frames in about
+60 s (~61 Hz), while its `0x3BF` appears 60 times (~1 Hz). The public 2023 Corolla
+minute carries `0x3BF` with `0x80 -> 0x40 -> 0x10` transitions interpreted in the
+contributor material as P/R/D. These observations supported that implementation's
+different gear sources; they do not qualify a universal hybrid/non-hybrid rule
+or an automatic fallback. The later controlled comparison below supplies a
+stronger reason to retain Camry's ordinal carrier than background rate alone.
 
 The GTS compatibility bridge remains deliberately curated to those ten identities tied
 to retained H/F evidence. Other current GTS rows named Corolla are not promoted solely
 from a similar install-set label; later rows include a different `EMPS+FRC` architecture
 and require their own compatibility evidence.
+
+### Gear and READY audit — 2026-10-07
+
+**Keep the Camry gear/READY decoder unchanged. For Corolla, distinguish the
+observed carrier difference from a claim about what every vehicle transmits.**
+The original GTS `Meter_P5` DID `0x2931`, **A/T Indicator Operation 1**, defines
+`0x80=P, 0x40=R, 0x20=N, 0x10=D` in diagnostic byte 1. Controlled Camry captures
+independently establish those values in CAN `0x3BF` byte 0. This is not a GTS
+table declaring a CAN ID or identifying the physical sender.
+
+The public Corolla minute exercises P/R/D; Span's hybrid segment exercises D.
+The OEM dictionary and Camry observations corroborate Corolla Neutral=`0x20`,
+but **Neutral remains unobserved on either retained Corolla capture**.
+
+An all-source census finds no `0x127` in the public minute on any recorded
+`can`/`sendcan` source or DLC. Received-frame coverage is bus0=19,934,
+bus1=79,201, bus2=8,470. That establishes absence in this recording, not that an
+ICE Corolla never transmits the message. Span's recording has 3,662 incoming
+`0x127` frames, all on bus1.
+
+The controlled Camry B interval supplies the decisive distinction: five
+`0x3BF` samples retain Drive while `0x127` distinguishes B. All six P/R/N/D
+changes appear within 8 ms of the corresponding `0x127` change in receive-batch
+timestamps; they do not show a one-second shift delay. These are not physical
+latency measurements. See the [Camry comparison](camry-2026-live-baseline.md#83-generation-native-0x3bf-gear-indication)
+for the controlled evidence and its limits.
+
+**Contributor audit.** The [closed, unmerged commaai/opendbc PR
+#3791](https://github.com/commaai/opendbc/pull/3791) (head
+`355613d1a636c308b2268c4184ab2a815f69d2f3`) and the vendored copy in
+`community/albinoelephant/Corolla_Fingerprint_v1.zip` decode gear from `0x2A1` byte4
+(`P=1/R=2/D=4`; `N=8` inferred, never observed). The PR's DBC additionally defines
+`0x3BF` (`GEAR_PACKET_2`, same one-hot values) but no CarState code reads it, and
+neither the PR nor the vendored copy assigns `carNotReady` or decodes any READY field.
+Span's local refs mirror the split: `corolla-claude` `ffb523cdd` reads `0x2A1` byte4,
+while `starpilot-corolla-2025-tss3` `922bb38f5`/`933052236` switched to `0x3BF` byte0
+in change `01d3d1db5`. The retained hybrid minute confirms the stated problem:
+`0x2A1` byte4 is zero throughout. Its replacement `0x3BF` field reports Drive,
+but the same recording also supplies the existing `0x127` raw3 Drive carrier.
+The compared refs contain vendored opendbc. Neither contributor implements READY
+decoding, so their software adds no READY-semantic evidence.
+
+**GTS boundaries.** `PCS_P5` DID `0x1007` describes powertrain type, not a CAN
+decoder selector. A shared EPS database does not imply identical powertrain
+diagnostics. The relevant monitor rows require runtime support checks; catalog
+presence does not establish that an ECU answers them. The meter dictionary
+corrects the earlier investigation's claim that no matching enum was found:
+it was indexed under indicator operation, not gear.
+
+READY remains grounded in the exact H/F application path (§6.4), with bit 1
+observed throughout both retained Corolla captures. Neither exercises ICE
+startup or bit 0; Camry's controlled transition is separate vehicle evidence.
+On the stock Toyota-B harness, the observed state network is on logical bus1.
+The maintained physical repin places chassis/state traffic on bus0/2's relay
+path; `harnessStatus=flipped` alone does not establish that repin. See the
+[physical harness routing](../tooling/panda-toyota-routing.md#7-official-toyota-b--harness-box-topology)
+and [porting contract](../architecture/toyota-openpilot-porting-contract.md).
+The reproducible `--gear-audit` commands are in the
+[workflow](../WORKFLOW.md#gear-and-ready-evidence). They leave the historical
+route artifacts unchanged; this section owns the corrected interpretation.
 
 ## 10. Production boundary
 

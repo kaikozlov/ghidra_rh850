@@ -75,7 +75,7 @@ OLD_REQUIRED_IDS = {
 }
 
 
-from tools.toyota_support.toyota_route_opendbc_common import be_raw, lateral_reference_family, rate_hz, sha256, stats, toyota_checksum
+from tools.toyota_support.toyota_route_opendbc_common import GearReadyCensus, be_raw, lateral_reference_family, rate_hz, sha256, stats, toyota_checksum
 
 
 def expected_source() -> dict[str, object]:
@@ -90,6 +90,9 @@ def main() -> int:
     ap.add_argument("--rlog", type=Path, required=True)
     ap.add_argument("--openpilot-root", type=Path, required=True)
     ap.add_argument("--output", type=Path, default=DEFAULT_OUT)
+    ap.add_argument("--gear-audit", action="store_true",
+                    help="print the deterministic gear/READY all-source census JSON (with input SHA) to stdout "
+                         "and return without writing --output")
     args = ap.parse_args()
 
     src = expected_source()
@@ -103,19 +106,26 @@ def main() -> int:
     from openpilot.tools.lib.logreader import LogReader  # type: ignore[import-not-found]
 
     frames: dict[tuple[int, int, int], list[tuple[int, bytes]]] = collections.defaultdict(list)
+    census = GearReadyCensus() if args.gear_audit else None
     carstate: dict[str, list[Any]] = collections.defaultdict(list)
     first_t: int | None = None
     last_t: int | None = None
 
     for ev in LogReader(str(args.rlog), sort_by_time=True):
         which = ev.which()
+        if census is not None:
+            if which in ("can", "sendcan"):
+                add = census.add_can if which == "can" else census.add_sendcan
+                for c in getattr(ev, which):
+                    add(int(c.src), int(c.address), bytes(c.dat))
+            continue
         if which == "can":
             t = int(ev.logMonoTime)
             first_t = t if first_t is None else min(first_t, t)
             last_t = t if last_t is None else max(last_t, t)
             for c in ev.can:
+                dat = bytes(c.dat)
                 if c.src < 128:
-                    dat = bytes(c.dat)
                     frames[(int(c.src), int(c.address), len(dat))].append((t, dat))
         elif which == "carState":
             cs = ev.carState
@@ -127,6 +137,10 @@ def main() -> int:
                 carstate[name].append(getattr(cs, name))
             carstate["cruiseAvailable"].append(cs.cruiseState.available)
             carstate["cruiseEnabled"].append(cs.cruiseState.enabled)
+
+    if census is not None:
+        print(json.dumps(census.result(actual["sha256"], actual["size"]), indent=2, sort_keys=True))
+        return 0
 
     h_state = json.loads(H_STATE.read_text())
     h_runtime = json.loads(H_RUNTIME.read_text())

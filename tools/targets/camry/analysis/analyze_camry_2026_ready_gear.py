@@ -59,11 +59,55 @@ def transition_timeline(rows: list[dict], start_bit: int, size: int) -> list[dic
   return out
 
 
+def _gear_indication_comparison(gear_edges: list[dict], indication_edges: list[dict],
+                                indication_rows: list[dict], duration: float) -> dict:
+  # These are the independently observed Camry selector values, not DDB offsets.
+  indication_by_gear = {0: 0x80, 1: 0x40, 2: 0x20, 3: 0x10, 4: 0x10}
+  projected = []
+  for edge in gear_edges:
+    value = indication_by_gear[edge["value"]]
+    if not projected or value != projected[-1]["indication"]:
+      projected.append({**edge, "indication": value})
+  sequence_matches = [e["indication"] for e in projected] == [e["value"] for e in indication_edges]
+  pairs = []
+  if sequence_matches:
+    # Skip the initial samples: they are not observed selector transitions.
+    for gear, indication in zip(projected[1:], indication_edges[1:], strict=True):
+      pairs.append({
+        "0x127_raw": gear["value"],
+        "0x3BF_raw": indication["value"],
+        "0x127_seconds": gear["seconds"],
+        "0x3BF_seconds": indication["seconds"],
+        "receive_delta_ms": round((indication["seconds"] - gear["seconds"]) * 1000, 3),
+      })
+  b_intervals = []
+  for index, edge in enumerate(gear_edges):
+    if edge["value"] != 4:
+      continue
+    end = gear_edges[index + 1]["seconds"] if index + 1 < len(gear_edges) else duration
+    samples = [r for r in indication_rows if edge["seconds"] <= float(r["t"]) < end]
+    b_intervals.append({
+      "start_seconds": edge["seconds"], "end_seconds": end,
+      "frame_count": len(samples),
+      "0x3BF_raw_values": sorted({bytes.fromhex(r["data"])[0] for r in samples}),
+    })
+  return {
+    "projected_sequence_matches": sequence_matches,
+    "transition_pairs": pairs,
+    "max_abs_receive_delta_ms": max((abs(p["receive_delta_ms"]) for p in pairs), default=None),
+    "B_intervals": b_intervals,
+    "boundary": "Pairing requires matching complete value sequences after projecting 0x127 B to the observed 0x3BF D indication. Times are rounded receive-batch observations, not physical selector or wire latency; no one-second shift delay is inferred from the background rate.",
+  }
+
+
 def capture_summary(obj: dict) -> dict:
   gear = stream(obj, 1, 0x127, 8)
   ready = stream(obj, 1, 0x51E, 8)
   wheels = stream(obj, 1, 0x0AA, 8)
   gear_payloads = [bytes.fromhex(r["data"]) for r in gear]
+  indication = stream(obj, 1, 0x3BF, 8)
+  gear_edges = transition_timeline(gear, 47, 4)
+  indication_edges = transition_timeline(indication, 7, 8)
   return {
     "label": obj["capture"],
     "duration_s": round(float(obj["duration_s"]), 9),
@@ -72,8 +116,16 @@ def capture_summary(obj: dict) -> dict:
       "frame_count": len(gear),
       "checksum_matches": sum(toyota_checksum(0x127, d) == d[-1] for d in gear_payloads),
       "raw_values": sorted({be_signal(d, 47, 4) for d in gear_payloads}),
-      "transition_timeline": transition_timeline(gear, 47, 4),
+      "transition_timeline": gear_edges,
     },
+    "0x3BF": {
+      "frame_count": len(indication),
+      "raw_values": sorted({bytes.fromhex(r["data"])[0] for r in indication}),
+      "transition_timeline": indication_edges,
+    },
+    "gear_indication_comparison": _gear_indication_comparison(
+      gear_edges, indication_edges, indication, float(obj["duration_s"]),
+    ),
     "0x51E": {
       "frame_count": len(ready),
       "ready_values": sorted({be_signal(bytes.fromhex(r["data"]), 7, 1) for r in ready}),
@@ -87,9 +139,59 @@ def capture_summary(obj: dict) -> dict:
   }
 
 
+def _check_gts_meter(artifact: dict, root: Path | None) -> dict:
+  """Cross-check observed CAN values against OEM diagnostic metadata, offline."""
+  from tools.techstream.ddb_semantics import decode_p5_signal, monitor_rows
+  from tools.techstream.ddb_strings import load_string_db
+  from tools.techstream.parse_ddb import DDBParser
+  from tools.techstream.techstream_paths import gts_db_root, resolve_gts_root
+
+  db_root = gts_db_root(resolve_gts_root(root))
+  parser = DDBParser()
+  meter = parser.parse_ecu_db(db_root / "Meter_P5.ddb")
+  strings = load_string_db(parser, db_root / "M_English.ddb")
+  rows = monitor_rows(meter, strings, "Meter_P5.ddb", include_signal_info=True)
+  row, = [r for r in rows if r["primary_did"] == 0x2931 and r["monitor_key"] == 153]
+
+  def decode(row: dict, raw: int) -> dict:
+    info = row["signal_info"]
+    return decode_p5_signal(
+      bytes((0, raw)), bit_start=row["bit_start"], bit_end=row["bit_end"],
+      mul=info["mul"], div=info["div"], offset=info["offset"], signed=info["signed"],
+      decimal_point_count=info["decimal_point_count"], patterns=info["pattern_display"],
+    )
+
+  decoded = []
+  for raw, label in artifact["gear_indication"]["validated_camry_enum"].items():
+    result = decode(row, int(raw))
+    if result["pattern"] != label:
+      raise ValueError(f"GTS meter dictionary does not match observed Camry {label}: {result}")
+    lamps = []
+    for lamp_label in ("P", "R", "N", "D"):
+      lamp, = [r for r in rows if r["primary_did"] == 0x2931
+               and r["name"] == f"A/T Indicator Operation ({lamp_label})"]
+      if decode(lamp, int(raw))["converted_integer"] == 1:
+        lamps.append(lamp_label)
+    if lamps != [label]:
+      raise ValueError(f"GTS individual lamps disagree with {label}: {lamps}")
+    decoded.append({"synthetic_diagnostic_payload": bytes((0, int(raw))).hex(),
+                    "display": result["pattern"], "individual_lamps_on": lamps})
+  return {
+    "sources": {name: {"sha256": sha256(db_root / name), "size": (db_root / name).stat().st_size}
+                for name in ("Meter_P5.ddb", "M_English.ddb")},
+    "monitor": {key: value for key, value in row.items() if key != "raw"},
+    "monitor_raw_hex": row["raw"].hex(),
+    "decode_checks": decoded,
+    "boundary": "Synthetic diagnostic payload exercise, not a captured DID response. DDB byte1 is not CAN byte0: the controlled captures independently establish use of these values in 0x3BF. Runtime support and physical producer identity are not established.",
+  }
+
+
 def main() -> int:
   ap = argparse.ArgumentParser()
   ap.add_argument("--out", type=Path, default=DEFAULT_OUT)
+  ap.add_argument("--check-gts", action="store_true",
+                  help="also check the installed GTS+ meter dictionary against observed Camry values")
+  ap.add_argument("--gtsplus-root", type=Path, help="external GTS+ corpus root for --check-gts")
   args = ap.parse_args()
 
   first = load_gzip_json("camry_ready_gear_20260826.json.gz")
@@ -146,12 +248,25 @@ def main() -> int:
       },
       "interpretation": "The complete prior-art enum is now directly validated on this exact Camry by reversible stationary selector transitions: P=0, R=1, N=2, D=3, B=4. This closes the Camry gear-state measurement boundary; cross-model production use still follows each platform's evidence policy.",
     },
+    "gear_indication": {
+      "carrier": "0x3BF/8 bus1",
+      "field": "byte0",
+      "validated_camry_enum": {"128": "P", "64": "R", "32": "N", "16": "D"},
+      "first_run_sequence": [x["value"] for x in first_summary["0x3BF"]["transition_timeline"]],
+      "second_run_sequence": [x["value"] for x in b_summary["0x3BF"]["transition_timeline"]],
+      "interpretation": "Controlled Camry P/R/N/D/N/R/P transitions establish all four values, including Neutral. The separate B interval retains the Drive indication; this byte is not a complete replacement for hybrid 0x127 gear decoding.",
+      "cross_vehicle_boundary": "The retained public Corolla route exercises P/R/D and Span exercises D. Matching values corroborate Corolla Neutral but do not constitute a Corolla Neutral observation or prove that a vehicle never broadcasts 0x127.",
+      "oem_cross_check": "Run --check-gts to decode synthetic Meter_P5 DID 0x2931 value payloads with the original DDB dictionary and independent lamp bits; external GTS+ files are not required to regenerate this capture artifact.",
+    },
     "production_boundary": "This evidence validates read-only Ready/gear state decoding only. It does not establish Camry steering actuation, B6 producer/signing ownership, cruise engagement policy, or Panda actuation safety.",
   }
 
+  gts_check = _check_gts_meter(artifact, args.gtsplus_root) if args.check_gts else None
   args.out.parent.mkdir(parents=True, exist_ok=True)
   args.out.write_text(json.dumps(artifact, indent=2, sort_keys=True) + "\n")
   print(args.out)
+  if gts_check is not None:
+    print(json.dumps(gts_check, indent=2, sort_keys=True))
   return 0
 
 

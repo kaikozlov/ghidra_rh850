@@ -98,6 +98,52 @@ $UV python -m tools.targets.camry.analysis.plot_camry_20260930_vmc_status \
   and `--inventory` (see each module's `--help`) instead of any new wrapper
   script.
 
+### Gear and READY evidence
+
+Regenerate the controlled Camry selector evidence without external inputs:
+
+```bash
+tools/artifact regen camry_2026_ready_gear
+tools/test plan camry_2026_engagement
+tools/test camry_2026_engagement
+```
+
+With the installed GTS+ corpus, also check the original meter dictionary and
+individual indicator bits against the observed Camry values:
+
+```bash
+tools/artifact regen camry_2026_ready_gear -- --check-gts
+tools/gts did Meter_P5 0x2931 --json
+```
+
+`--check-gts` prints database identities and synthetic diagnostic decode results;
+it does not add an external dependency to the tracked capture artifact.
+Use `--gtsplus-root PATH` after `--` to select another installed corpus.
+This check compares meanings; it does not equate diagnostic byte offsets with
+CAN byte offsets or establish ECU runtime support.
+
+The existing Corolla reducers also expose a read-only all-source gear/READY
+census. With the external reader/runtime described above:
+
+```bash
+uv run --no-sync --project ../kai-openpilot/opendbc_repo python \
+  -m tools.targets.corolla.extract.extract_corolla_2023_public_route_opendbc_evidence \
+  --openpilot-root ../kai-openpilot \
+  --rlog REFERENCE/public_route_corolla_2023_segment0_rlog.zst --gear-audit
+uv run --no-sync --project ../kai-openpilot/opendbc_repo python \
+  -m tools.targets.corolla.extract.extract_span_2025_discord_rlog_opendbc_evidence \
+  --openpilot-root ../kai-openpilot --gear-audit
+```
+
+These commands print identity-bound JSON without replacing the default route
+artifacts. The census retains `can`/`sendcan`, original sources, DLCs, received
+traffic versus echoes, and per-source denominators. It does not filter to the
+port's configured bus or require an eight-byte payload to count an ID.
+The public-route rlog is an explicitly external input; Span's rlog is tracked.
+Neither source numbering nor `harnessStatus=flipped` establishes a physical repin.
+Conclusions belong in the [Camry report](variants/camry-2026-live-baseline.md#83-generation-native-0x3bf-gear-indication)
+and [Corolla report](variants/corolla-h-f-openpilot-state-bridge.md).
+
 ## Build workspace contract
 
 `build/` is ignored **workspace state**, not a source of repository truth. A

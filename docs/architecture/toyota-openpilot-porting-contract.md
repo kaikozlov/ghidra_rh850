@@ -344,18 +344,19 @@ What the exact segment-0 rlog *does* close is the old-openpilot role migration:
   range of `-471..348 deg` and `-270..410 deg/s`. A TSS3 DBC can therefore reuse
   those proved fields while defining the correct 32-byte message rather than
   pretending the old 8-byte PDU survived.
-- **Several normal `CarState` roles move, but gear is now a concrete reuse
-  candidate.** The 2023 route has no incoming `0x127`, `0x1D3`, `0x260`, `0x262`,
-  `0x283`, `0x320`, `0x343`, `0x399`, `0x3BC`, or `0x3F6`. Span's driving rlog
-  independently restores `0x127/8`: all **3,662/3,662** frames pass Toyota's
-  existing additive checksum and the retained prior-art `GEAR_PACKET_HYBRID.GEAR`
-  enum maps raw `3` to `D` throughout. The embedded `carParams` is MOCK, however,
-  so there is no independent logged gear-state oracle. Exact H independently retains
-  `0x127/8` as Rx PDU25 and regenerates signals 123..132; its scalar unpacker consumes
-  three conserved fields at B0/B1/B3-B4 but does **not** consume the older B5[3:0]
-  gear nibble. Thus carrier/layout continuity and raw-3 compatibility with prior-art D
-  are strong; target-native D semantics and P/R/N/B still require an independent gear
-  oracle or live transitions rather than a static EPS-side guess.
+- **Gear-source selection needs capture evidence, not a universal TSS3 layout.**
+  The retained public 2023 Corolla minute has no `0x127` on any recorded source,
+  including echoes and outgoing traffic; this does not prove the vehicle never
+  sends it. Span's retained hybrid capture supplies **3,662/3,662** checksum-valid
+  `0x127/8` frames, with raw `3` in **B5[7:4]**, corroborated as Drive by motion
+  and simultaneous `0x3BF`. Exact H's EPS unpacker does not consume that nibble.
+  The OEM meter dictionary and controlled Camry captures independently establish
+  `0x3BF` byte0 `P=0x80/R=0x40/N=0x20/D=0x10`; the Corolla recordings exercise
+  P/R/D and D respectively, not Neutral. Camry's B interval still reads D on
+  `0x3BF`, so retain its existing `0x127` decoder. Stock-harness bus1 evidence
+  must not be confused with the maintained physical repin's bus0/2 placement.
+  See the [Corolla evidence owner](../variants/corolla-h-f-openpilot-state-bridge.md)
+  and [controlled Camry comparison](../variants/camry-2026-live-baseline.md#83-generation-native-0x3bf-gear-indication).
 - **Ready Status is no longer a diagnostic-only oracle.** Exact H `0x51E/8`
   PDU29 signal154 unpacks **B0[7]** directly to `FEBE7D1B`, then
   `FEBE7D1B -> FEBEF052 -> FEBEB5A8 -> FEBEE811 -> DID 0x1033 Ready Status`.

@@ -402,6 +402,9 @@ tests = ["tests/toyota/verify_toyota_secoc_signer.py"]
 [suite.corolla_2023_public_route_opendbc_evidence]
 tests = ["tests/targets/corolla/verify_corolla_2023_public_route_opendbc_evidence.py"]
 
+[suite.toyota_gear_ready_census_accumulator]
+tests = ["tests/targets/corolla/verify_gear_ready_census_accumulator.py"]
+
 [suite.analysis_targets]
 tests = ["tests/tooling/verify_analysis_targets.py"]
 

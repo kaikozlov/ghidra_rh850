@@ -336,9 +336,55 @@ transfer the validation to a different Toyota platform.
 
 The deterministic artifact is `data/generated/camry_2026_ready_gear.json`, built
 by `tools/targets/camry/analysis/analyze_camry_2026_ready_gear.py` and checked by
-`tools/test camry_2026`. Exact capture/script hashes and the
+`tools/test camry_2026_engagement`. Exact capture/script hashes and the
 operator-sequence correction are pinned in
 `targets/camry-2026/raw-20260826/READY_GEAR_MANIFEST.txt`.
+
+### 8.3 Generation-native `0x3BF` gear indication
+
+**2026-10-07 reanalysis of the same 2026-08-26 captures:** `0x3BF` byte 0
+directly reports P/R/N/D on this Camry, but does **not** distinguish B from D.
+Keep the Camry port's `0x127` gear decoder and `0x51E` READY decoder unchanged.
+
+The original GTS+ `Meter_P5.ddb` names the matching dictionary **“A/T Indicator
+Operation 1”**, DID `0x2931`, rather than “gear” or “shift position”.
+Its diagnostic value byte 1 has these encodings:
+
+| Value | Toyota display | Controlled Camry `0x3BF` byte 0 |
+|---|---|---|
+| `0x80` | P | Observed in Park |
+| `0x40` | R | Observed in Reverse |
+| `0x20` | N | Observed on both visits to Neutral |
+| `0x10` | D | Observed in Drive **and during B** |
+
+The same DID separately defines each P/R/N/D indicator bit, corroborating the
+dictionary. This is OEM diagnostic metadata, **not** a table declaring CAN ID
+`0x3BF`: the controlled capture supplies that independent wire join. It does
+not establish the physical sender or support for this DID on a particular ECU.
+
+In the first capture, `0x3BF` follows the complete **P → R → N → D → N → R → P**
+sequence. All six changes are within **8 ms** of the corresponding `0x127`
+change in the retained receive timestamps. Those are receive-batch observations,
+not physical selector-to-wire latency. The roughly one-per-second background
+rate therefore must not be interpreted as a one-second delay on a shift.
+
+In the second capture, all five `0x3BF` samples inside the `0x127`-identified B
+interval retain `0x10`. That information loss, not background rate alone, is the
+concrete reason not to replace the hybrid ordinal gear decoder with this byte.
+
+The [Corolla investigation](corolla-h-f-openpilot-state-bridge.md) distinguishes
+the transfer: the public Corolla capture exercises P/R/D and Span's hybrid
+capture exercises D. Their matching values and the OEM dictionary corroborate
+Corolla N=`0x20`; they do **not** provide a Corolla Neutral observation.
+Crown wire gear remains unverified without its own recording.
+
+The existing READY/gear artifact now includes both carriers' transition
+timelines, sequence-qualified edge comparisons, and the sampled B interval.
+The analyzer's optional `--check-gts` reads the original meter/string databases
+and exercises their ordinary diagnostic decoder with synthetic value payloads;
+it does not query a vehicle or treat synthetic responses as observations.
+The normal artifact remains regenerable without the external GTS+ corpus.
+Reproduction commands are in the [workflow](../WORKFLOW.md#gear-and-ready-evidence).
 
 ## 9. Exact `8965F3307000` CodeFlash and target-native steering contract
 

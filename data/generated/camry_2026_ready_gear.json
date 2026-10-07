@@ -62,6 +62,52 @@
           }
         ]
       },
+      "0x3BF": {
+        "frame_count": 68,
+        "raw_values": [
+          16,
+          32,
+          64,
+          128
+        ],
+        "transition_timeline": [
+          {
+            "payload": "800001006f18922e",
+            "seconds": 0.052242,
+            "value": 128
+          },
+          {
+            "payload": "4000010052a61381",
+            "seconds": 12.560082,
+            "value": 64
+          },
+          {
+            "payload": "200001007225b4bd",
+            "seconds": 14.444417,
+            "value": 32
+          },
+          {
+            "payload": "100001005fd30159",
+            "seconds": 17.517438,
+            "value": 16
+          },
+          {
+            "payload": "200001009c71d189",
+            "seconds": 21.12186,
+            "value": 32
+          },
+          {
+            "payload": "400001007f3f0642",
+            "seconds": 23.014504,
+            "value": 64
+          },
+          {
+            "payload": "80000100713ad0ee",
+            "seconds": 25.184699,
+            "value": 128
+          }
+        ]
+      },
       "0x51E": {
         "frame_count": 66,
         "ready_values": [
@@ -82,6 +128,56 @@
         ]
       },
       "duration_s": 60.00031347,
+      "gear_indication_comparison": {
+        "B_intervals": [],
+        "boundary": "Pairing requires matching complete value sequences after projecting 0x127 B to the observed 0x3BF D indication. Times are rounded receive-batch observations, not physical selector or wire latency; no one-second shift delay is inferred from the background rate.",
+        "max_abs_receive_delta_ms": 7.883,
+        "projected_sequence_matches": true,
+        "transition_pairs": [
+          {
+            "0x127_raw": 1,
+            "0x127_seconds": 12.560082,
+            "0x3BF_raw": 64,
+            "0x3BF_seconds": 12.560082,
+            "receive_delta_ms": 0.0
+          },
+          {
+            "0x127_raw": 2,
+            "0x127_seconds": 14.443866,
+            "0x3BF_raw": 32,
+            "0x3BF_seconds": 14.444417,
+            "receive_delta_ms": 0.551
+          },
+          {
+            "0x127_raw": 3,
+            "0x127_seconds": 17.525321,
+            "0x3BF_raw": 16,
+            "0x3BF_seconds": 17.517438,
+            "receive_delta_ms": -7.883
+          },
+          {
+            "0x127_raw": 2,
+            "0x127_seconds": 21.129039,
+            "0x3BF_raw": 32,
+            "0x3BF_seconds": 21.12186,
+            "receive_delta_ms": -7.179
+          },
+          {
+            "0x127_raw": 1,
+            "0x127_seconds": 23.014504,
+            "0x3BF_raw": 64,
+            "0x3BF_seconds": 23.014504,
+            "receive_delta_ms": 0.0
+          },
+          {
+            "0x127_raw": 0,
+            "0x127_seconds": 25.192386,
+            "0x3BF_raw": 128,
+            "0x3BF_seconds": 25.184699,
+            "receive_delta_ms": -7.687
+          }
+        ]
+      },
       "label": "2026 Camry NRTD->READY + stationary gear sequence",
       "total_frames": 135866
     },
@@ -124,6 +220,25 @@
           }
         ]
       },
+      "0x3BF": {
+        "frame_count": 28,
+        "raw_values": [
+          16,
+          128
+        ],
+        "transition_timeline": [
+          {
+            "payload": "8000010076412d06",
+            "seconds": 0.020694,
+            "value": 128
+          },
+          {
+            "payload": "1000010078a3c7a3",
+            "seconds": 5.107709,
+            "value": 16
+          }
+        ]
+      },
       "0x51E": {
         "frame_count": 27,
         "ready_values": [
@@ -138,6 +253,30 @@
         ]
       },
       "duration_s": 25.000072204,
+      "gear_indication_comparison": {
+        "B_intervals": [
+          {
+            "0x3BF_raw_values": [
+              16
+            ],
+            "end_seconds": 13.626834,
+            "frame_count": 5,
+            "start_seconds": 9.480908
+          }
+        ],
+        "boundary": "Pairing requires matching complete value sequences after projecting 0x127 B to the observed 0x3BF D indication. Times are rounded receive-batch observations, not physical selector or wire latency; no one-second shift delay is inferred from the background rate.",
+        "max_abs_receive_delta_ms": 0.0,
+        "projected_sequence_matches": true,
+        "transition_pairs": [
+          {
+            "0x127_raw": 3,
+            "0x127_seconds": 5.107709,
+            "0x3BF_raw": 16,
+            "0x3BF_seconds": 5.107709,
+            "receive_delta_ms": 0.0
+          }
+        ]
+      },
       "label": "2026 Camry READY stationary D-B-D",
       "total_frames": 58712
     }
@@ -239,6 +378,32 @@
       "2": "N",
       "3": "D",
       "4": "B"
+    }
+  },
+  "gear_indication": {
+    "carrier": "0x3BF/8 bus1",
+    "cross_vehicle_boundary": "The retained public Corolla route exercises P/R/D and Span exercises D. Matching values corroborate Corolla Neutral but do not constitute a Corolla Neutral observation or prove that a vehicle never broadcasts 0x127.",
+    "field": "byte0",
+    "first_run_sequence": [
+      128,
+      64,
+      32,
+      16,
+      32,
+      64,
+      128
+    ],
+    "interpretation": "Controlled Camry P/R/N/D/N/R/P transitions establish all four values, including Neutral. The separate B interval retains the Drive indication; this byte is not a complete replacement for hybrid 0x127 gear decoding.",
+    "oem_cross_check": "Run --check-gts to decode synthetic Meter_P5 DID 0x2931 value payloads with the original DDB dictionary and independent lamp bits; external GTS+ files are not required to regenerate this capture artifact.",
+    "second_run_sequence": [
+      128,
+      16
+    ],
+    "validated_camry_enum": {
+      "128": "P",
+      "16": "D",
+      "32": "N",
+      "64": "R"
     }
   },
   "production_boundary": "This evidence validates read-only Ready/gear state decoding only. It does not establish Camry steering actuation, B6 producer/signing ownership, cruise engagement policy, or Panda actuation safety.",

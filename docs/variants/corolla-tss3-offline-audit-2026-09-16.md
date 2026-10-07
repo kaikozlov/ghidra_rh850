@@ -150,11 +150,13 @@ cruise-main OFF from ON. They also do not qualify hold/resume transitions or
 metric display behavior. A request-ID presence rule is not, by itself, an
 independent cruise-main oracle.
 
-GTS diagnostic enum labels corroborate shift meanings but are not a direct CAN
-wire mapping. The retained public route exercises `0x3BF` P/R/D, while its N
-value and the unexercised Corolla hybrid gear values retain the previously
-stated evidence boundaries. Vehicle mass, steering ratio, actuator delay, and
-dynamic tuning are also not physically validated by these decoder tests.
+At this checkpoint, GTS diagnostic enum labels corroborated shift meanings but
+were not a direct CAN wire mapping. The retained public route exercises `0x3BF`
+P/R/D, not Neutral. The [later gear investigation](corolla-h-f-openpilot-state-bridge.md)
+adds the OEM meter dictionary and controlled Camry Neutral observations;
+it does not turn them into a Corolla Neutral capture or qualify the unexercised
+Corolla hybrid values. Vehicle mass, steering ratio, actuator delay, and dynamic
+tuning are also not physically validated by these decoder tests.
 
 ## Tester-kit boundary
 

@@ -109,7 +109,7 @@ def _section_camry_2026_ready_gear():
     REPO = REPO_ROOT
     RAW = REPO / 'targets/camry-2026/raw-20260826'
     ART = REPO / 'data/generated/camry_2026_ready_gear.json'
-    BUILD = REPO / 'tools/targets/camry/analysis/analyze_camry_2026_ready_gear.py'
+    MODULE = 'tools.targets.camry.analysis.analyze_camry_2026_ready_gear'
 
     def sha(path: Path) -> str:
         return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -125,7 +125,7 @@ def _section_camry_2026_ready_gear():
     print('\n== deterministic artifact ==')
     with tempfile.TemporaryDirectory() as td:
         out = Path(td) / 'camry-ready-gear.json'
-        proc = subprocess.run([sys.executable, str(BUILD), '--out', str(out)], cwd=REPO, capture_output=True, text=True, check=False)
+        proc = subprocess.run([sys.executable, '-m', MODULE, '--out', str(out)], cwd=REPO, capture_output=True, text=True, check=False)
         check('READY/gear analyzer succeeds', proc.returncode == 0, proc.stderr[-300:])
         check('READY/gear artifact regenerates exactly', proc.returncode == 0 and out.read_bytes() == ART.read_bytes())
     print('\n== controlled Ready transition ==')
@@ -144,6 +144,28 @@ def _section_camry_2026_ready_gear():
     b = gear['evidence']['B_roundtrip']
     check('D/B/D transition times exact', [(x['seconds'], x['value']) for x in b] == [(0.020694, 0), (5.107709, 3), (9.480908, 4), (13.626834, 3)])
     check('B exact stable payload', b[2]['payload'] == '00100000004e8d1b')
+    print('\n== generation-native gear indication ==')
+    first = art['captures']['nrtd_to_ready_gear']
+    second = art['captures']['ready_b']
+    check('0x3BF exercises reversible P/R/N/D including Neutral',
+          [x['value'] for x in first['0x3BF']['transition_timeline']] == [0x80, 0x40, 0x20, 0x10, 0x20, 0x40, 0x80])
+    comparison = first['gear_indication_comparison']
+    check('all observed shifts pair within 8ms of the ordinal carrier',
+          comparison['projected_sequence_matches']
+          and len(comparison['transition_pairs']) == len(first['0x127']['transition_timeline']) - 1
+          and 0 < comparison['max_abs_receive_delta_ms'] < 8)
+    b_intervals = second['gear_indication_comparison']['B_intervals']
+    check('B is sampled but remains indistinguishable from Drive in 0x3BF',
+          len(b_intervals) == 1 and b_intervals[0]['frame_count'] > 0
+          and b_intervals[0]['0x3BF_raw_values'] == [0x10]
+          and [x['value'] for x in second['0x3BF']['transition_timeline']] == [0x80, 0x10])
+    from tools.targets.camry.analysis.analyze_camry_2026_ready_gear import _gear_indication_comparison
+    incomplete = _gear_indication_comparison(
+        first['0x127']['transition_timeline'], first['0x3BF']['transition_timeline'][:-1], [], 60,
+    )
+    check('missing indication transition cannot produce a partial latency claim',
+          not incomplete['projected_sequence_matches']
+          and incomplete['transition_pairs'] == [] and incomplete['max_abs_receive_delta_ms'] is None)
     print('\n== stationary corroboration ==')
     for name, count in (('nrtd_to_ready_gear', 6187), ('ready_b', 2677)):
         wheels = art['captures'][name]['0x0AA_stationary_corroboration']
