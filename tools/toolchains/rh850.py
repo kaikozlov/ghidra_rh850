@@ -4,10 +4,16 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+import math
+import re
 import shutil
 import subprocess
 import sys
+import tempfile
+import uuid
+from collections.abc import Sequence
 from pathlib import Path
 
 from tools import REPO_ROOT
@@ -246,7 +252,7 @@ def cmd_exec(args: argparse.Namespace) -> int:
     if command[:1] == ["--"]:
         command = command[1:]
     if not command:
-        raise Rh850ToolError("exec requires a command")
+        raise Rh850ToolError("toolchain run requires a command")
     base = _container_base(
         writable=args.work_dir is None,
         work_dir=args.work_dir,
@@ -254,42 +260,207 @@ def cmd_exec(args: argparse.Namespace) -> int:
     return _run(base + command).returncode
 
 
-def _container_path(path: Path) -> str:
-    resolved = path.resolve()
+def _bounded_container(
+    base: list[str], command: list[str], timeout: float,
+) -> subprocess.CompletedProcess[str]:
+    """Bound the process inside Docker as well as its host-side client."""
+    name = f"rh850-test-{uuid.uuid4().hex}"
+    args = [
+        *base[:-1], "--name", name, base[-1],
+        "timeout", "--signal=KILL", f"{timeout}s", *command,
+    ]
     try:
-        relative = resolved.relative_to(ROOT)
-    except ValueError as exc:
-        message = f"sim ELF must be inside the repository: {resolved}"
-        raise Rh850ToolError(message) from exc
-    return "/src/" + relative.as_posix()
+        return subprocess.run(
+            args, cwd=ROOT, capture_output=True, text=True, timeout=timeout + 10, check=False,
+        )
+    except (subprocess.TimeoutExpired, KeyboardInterrupt):
+        subprocess.run(
+            [_docker(), "rm", "-f", name], capture_output=True, timeout=10, check=False,
+        )
+        raise
+
+
+def validate_execution(
+    *, stop: str, assertions: Sequence[str], expected_output: Sequence[str],
+    gdb_commands: Sequence[str], timeout: float,
+) -> str:
+    """Validate a test contract before any compilation or simulator work."""
+    if not math.isfinite(timeout) or timeout <= 0:
+        raise Rh850ToolError("execution timeout must be positive and finite")
+    if not stop:
+        raise Rh850ToolError("test requires --stop (a symbol or numeric address)")
+    if re.fullmatch(r"0[xX][0-9a-fA-F]+|[0-9]+", stop):
+        address = int(stop, 16 if stop.lower().startswith("0x") else 10)
+        if not 0 <= address <= 0xFFFFFFFF:
+            raise Rh850ToolError("stop address is outside the 32-bit address space")
+        expression = f"0x{address:X}"
+    elif re.fullmatch(r"[A-Za-z_][A-Za-z0-9_.$]*", stop):
+        expression = f"(unsigned long)&{stop}"
+    else:
+        raise Rh850ToolError("stop must be a symbol or numeric address, not a GDB command")
+    if not assertions and not expected_output:
+        raise Rh850ToolError("test requires a postcondition: --assert or --expect")
+    if any(not value.strip() for value in (*assertions, *expected_output)):
+        raise Rh850ToolError("postconditions must not be empty")
+    if gdb_commands and not any(
+        re.match(r"^(run|continue)(\s|$)", command.strip()) for command in gdb_commands
+    ):
+        raise Rh850ToolError("an explicit GDB script must execute run or continue")
+    return expression
+
+
+def execute_elf(
+    *, elf_path: Path, stop: str, assertions: Sequence[str] = (),
+    memory_regions: Sequence[str] = (), gdb_commands: Sequence[str] = (),
+    expected_output: Sequence[str] = (), timeout: float = 30.0,
+    output_path: Path | None = None,
+) -> str:
+    """Execute to a checked completion point; never report load-only success."""
+    stop_expression = validate_execution(
+        stop=stop, assertions=assertions, expected_output=expected_output,
+        gdb_commands=gdb_commands, timeout=timeout,
+    )
+    elf = elf_path.resolve()
+    if not elf.is_file():
+        raise Rh850ToolError(f"ELF does not exist: {elf}")
+    _require_image()
+    target = "target sim --architecture v850e3v5"
+    for region in memory_regions:
+        target += f" --memory-region {region}"
+    commands = [
+        "set confirm off", "set pagination off",
+        'file "/out/' + elf.name.replace("\\", "\\\\").replace('"', '\\"') + '"',
+        target, "load", "starti",
+        f"set $rh850_stop = {stop_expression}",
+        'if $pc == $rh850_stop\nprintf "stop equals entry; no execution verified\\n"\nquit 1\nend',
+    ]
+    commands.extend(gdb_commands or (f"break *{stop_expression}", "continue"))
+    commands.append(
+        'if $pc != $rh850_stop\nprintf "unexpected stop: PC=0x%x expected=0x%x\\n", '
+        '$pc, $rh850_stop\nquit 1\nend'
+    )
+    for index, expression in enumerate(assertions, 1):
+        commands.extend((
+            f"set $rh850_check = !!({expression})",
+            f'printf "RH850_CHECK_{index}=%d\\n", $rh850_check',
+            f'if !$rh850_check\nprintf "postcondition {index} failed\\n"\nquit 1\nend',
+        ))
+    commands.append('printf "RH850_EXECUTION_VERIFIED\\n"')
+    output = ""
+    try:
+        try:
+            with tempfile.TemporaryDirectory(prefix="rh850-gdb-") as td:
+                script = Path(td) / "execute.gdb"
+                script.write_text("\n".join(commands) + "\n", encoding="utf-8")
+                base = _container_base(writable=False, work_dir=elf.parent)
+                base[-1:-1] = ["-v", f"{td}:/script:ro"]
+                proc = _bounded_container(
+                    base,
+                    ["v850-elf-gdb", "-nx", "-q", "-batch", "-x", "/script/execute.gdb"],
+                    timeout,
+                )
+        except subprocess.TimeoutExpired as exc:
+            output = "".join(
+                value.decode(errors="replace") if isinstance(value, bytes) else value or ""
+                for value in (exc.stdout, exc.stderr)
+            )
+            raise Rh850ToolError(f"execution timed out after {timeout:g}s\n{output}") from exc
+        output = proc.stdout + proc.stderr
+        if proc.returncode in (124, 137):
+            raise Rh850ToolError(f"execution timed out after {timeout:g}s\n{output}")
+        if proc.returncode != 0:
+            raise Rh850ToolError(f"execution failed (exit {proc.returncode})\n{output}")
+        if "RH850_EXECUTION_VERIFIED\n" not in output:
+            raise Rh850ToolError(f"execution did not complete its checks\n{output}")
+        for expected in expected_output:
+            if expected not in output:
+                raise Rh850ToolError(f"postcondition output lacks {expected!r}\n{output}")
+        return output
+    finally:
+        if output_path is not None:
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            output_path.write_text(output, encoding="utf-8")
+
+
+def _build_payload(sources: Sequence[Path], linker: Path, work: Path) -> Path:
+    """Link caller sources with the same freestanding ABI used by payload builders."""
+    inputs = [path.resolve() for path in (*sources, linker)]
+    for path in inputs:
+        if not path.is_file():
+            raise Rh850ToolError(f"build input does not exist: {path}")
+    _require_image()
+    base = _container_base(writable=False, work_dir=work)
+    mounts: dict[Path, str] = {}
+    mapped: list[str] = []
+    for path in inputs:
+        if path.is_relative_to(ROOT):
+            mapped.append(f"/src/{path.relative_to(ROOT)}")
+        else:
+            if path.parent not in mounts:
+                mounts[path.parent] = f"/input{len(mounts)}"
+            mapped.append(f"{mounts[path.parent]}/{path.name}")
+    # Preserve repository-relative includes and external inputs' sibling headers.
+    for parent, mount in mounts.items():
+        base[-1:-1] = ["-v", f"{parent}:{mount}:ro"]
+    # Linker INCLUDE paths are relative to its directory.
+    base[-1:-1] = ["-w", str(Path(mapped[-1]).parent)]
+    elf = work / "payload.elf"
+    proc = _bounded_container(base, [
+        "v850-elf-gcc", "-mv850e3v5", "-mno-app-regs", "-ffreestanding",
+        "-fno-builtin", "-Os", "-nostdlib", "-Wa,-mv850e3v5,-mextension",
+        f"-Wl,-T,{mapped[-1]}", "-Wl,--build-id=none",
+        *mapped[:-1], "-o", "/out/payload.elf",
+    ], 120.0)
+    (work / "build.txt").write_text(proc.stdout + proc.stderr, encoding="utf-8")
+    if proc.returncode != 0:
+        raise Rh850ToolError(f"payload build failed (exit {proc.returncode})\n{proc.stdout}{proc.stderr}")
+    return elf
 
 
 def cmd_sim(args: argparse.Namespace) -> int:
-    _require_image()
-    elf = args.elf
-    if not elf.is_absolute():
-        elf = ROOT / elf
-    if not elf.is_file():
-        raise Rh850ToolError(f"ELF does not exist: {elf}")
-
-    target = "target sim --architecture v850e3v5"
-    for region in args.memory_region:
-        target += f" --memory-region {region}"
-
-    gdb_args = [
-        "v850-elf-gdb",
-        "-q",
-        "-batch",
-        "-ex",
-        f"file {_container_path(elf)}",
-        "-ex",
-        target,
-        "-ex",
-        "load",
-    ]
-    for command in args.gdb_command:
-        gdb_args += ["-ex", command]
-    return _run(_container_base(writable=False) + gdb_args).returncode
+    validate_execution(
+        stop=args.stop, assertions=args.assertions, expected_output=args.expected_output,
+        gdb_commands=args.gdb_command, timeout=args.timeout,
+    )
+    if args.linker_script is None and len(args.inputs) != 1:
+        raise Rh850ToolError("supply one ELF, or sources with --linker-script")
+    if args.output_dir is None:
+        parent = ROOT / "build/out/rh850-payload"
+        parent.mkdir(parents=True, exist_ok=True)
+        work = Path(tempfile.mkdtemp(prefix=f"{args.inputs[0].stem}-", dir=parent))
+    else:
+        work = args.output_dir.resolve()
+        work.mkdir(parents=True, exist_ok=True)
+    report = {
+        "status": "failed", "stop": args.stop, "assertions": args.assertions,
+        "expected_output": args.expected_output, "timeout_seconds": args.timeout,
+    }
+    report_path = work / "report.json"
+    # Invalidate a previous successful report before starting another build.
+    report_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    (work / "output.txt").write_text("", encoding="utf-8")
+    try:
+        elf = (
+            _build_payload(args.inputs, args.linker_script, work)
+            if args.linker_script is not None else args.inputs[0].resolve()
+        )
+        report["elf"] = str(elf)
+        report["elf_sha256"] = hashlib.sha256(elf.read_bytes()).hexdigest()
+        output = execute_elf(
+            elf_path=elf, stop=args.stop, assertions=args.assertions,
+            memory_regions=args.memory_region, gdb_commands=args.gdb_command,
+            expected_output=args.expected_output, timeout=args.timeout,
+            output_path=work / "output.txt",
+        )
+        report["status"] = "passed"
+    except (Rh850ToolError, OSError, subprocess.SubprocessError) as exc:
+        report["error"] = str(exc)
+        raise
+    finally:
+        report_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    sys.stdout.write(output)
+    print(f"Payload test: PASS\nreport: {report_path}")
+    return 0
 
 
 def cmd_selftest(_args: argparse.Namespace) -> int:
@@ -316,10 +487,8 @@ def cmd_selftest(_args: argparse.Namespace) -> int:
 def cmd_codeflash_sim(args: argparse.Namespace) -> int:
     from tools.rh850_codeflash import CodeFlashSimError, load_spec, run
 
-    image = args.image if args.image.is_absolute() else ROOT / args.image
-    output_dir = args.output_dir
-    if output_dir is not None and not output_dir.is_absolute():
-        output_dir = ROOT / output_dir
+    image = args.image.resolve()
+    output_dir = args.output_dir.resolve() if args.output_dir is not None else None
 
     loads: dict[int, Path] = {}
     for value in args.load:
@@ -334,13 +503,13 @@ def cmd_codeflash_sim(args: argparse.Namespace) -> int:
             raise Rh850ToolError(f"--load address {raw_address!r} is outside 32-bit space")
         if address in loads:
             raise Rh850ToolError(f"duplicate --load address 0x{address:08X}")
-        loads[address] = Path(raw_path)
+        loads[address] = Path(raw_path).resolve()
 
     spec = None
     if args.spec is not None:
         if args.image_base is not None or args.entry is not None:
             raise Rh850ToolError("--base and --entry cannot override a spec")
-        spec_path = args.spec if args.spec.is_absolute() else ROOT / args.spec
+        spec_path = args.spec.resolve()
         try:
             spec = load_spec(ROOT, spec_path)
         except CodeFlashSimError as exc:
@@ -358,6 +527,9 @@ def cmd_codeflash_sim(args: argparse.Namespace) -> int:
             ram_loads=list(loads.items()),
             output_dir=output_dir,
             expected_output=args.expected_output,
+            stop=args.stop,
+            assertions=args.assertions,
+            timeout=args.timeout,
         )
     except CodeFlashSimError as exc:
         raise Rh850ToolError(str(exc)) from exc
@@ -405,6 +577,30 @@ def cmd_machine_model(args: argparse.Namespace) -> int:
         for path in changed:
             print(path.relative_to(ROOT))
     return 0
+
+
+def _execution_arguments(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("--stop", help="required completion symbol/address (or supplied by --spec)")
+    parser.add_argument(
+        "--assert", dest="assertions", action="append", default=[], metavar="EXPR",
+        help="GDB boolean expression required to hold at completion; repeat as needed",
+    )
+    parser.add_argument(
+        "--expect", dest="expected_output", action="append", default=[], metavar="TEXT",
+        help="required output from an explicit GDB script; repeat as needed",
+    )
+    parser.add_argument(
+        "--timeout", type=float, default=30.0, metavar="SECONDS",
+        help="finite execution deadline (default: 30 seconds)",
+    )
+    parser.add_argument(
+        "--memory-region", action="append", default=[], metavar="BASE,SIZE",
+        help="simulator RAM/flash mapping; repeat as needed",
+    )
+    parser.add_argument(
+        "--command", "-ex", dest="gdb_command", action="append", default=[],
+        help="advanced complete GDB script, including run/continue; repeat for each command",
+    )
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -488,24 +684,18 @@ def build_parser() -> argparse.ArgumentParser:
 
     p = test_sub.add_parser(
         "payload",
-        help="run a linked payload ELF in the GNU instruction simulator",
+        help="build sources or load an ELF, execute to --stop, and verify postconditions",
     )
-    p.add_argument("elf", type=Path)
+    p.add_argument("inputs", nargs="+", type=Path, metavar="INPUT")
     p.add_argument(
-        "--memory-region",
-        action="append",
-        default=[],
-        metavar="BASE,SIZE",
-        help="simulator RAM/flash mapping; repeat as needed",
+        "--linker-script", type=Path,
+        help="compile INPUT sources with this linker script before testing the resulting ELF",
     )
     p.add_argument(
-        "--command",
-        "-ex",
-        dest="gdb_command",
-        action="append",
-        default=[],
-        help="GDB command to execute after load; repeat as needed",
+        "--output-dir", type=Path,
+        help="retain build output, exact ELF, execution log, and verdict (default: unique build/out directory)",
     )
+    _execution_arguments(p)
     p.set_defaults(func=cmd_sim)
 
     p = test_sub.add_parser(
@@ -522,13 +712,6 @@ def build_parser() -> argparse.ArgumentParser:
         "--output-dir",
         type=Path,
         help="retain the modeled image, ELF, overlay audit, and simulator output",
-    )
-    p.add_argument(
-        "--expect",
-        dest="expected_output",
-        action="append",
-        default=[],
-        help="require a string in simulator output; repeat as needed",
     )
     p.add_argument(
         "--load",
@@ -548,21 +731,7 @@ def build_parser() -> argparse.ArgumentParser:
         type=lambda value: int(value, 0),
         help="entry address without --spec (default: CodeFlash base)",
     )
-    p.add_argument(
-        "--memory-region",
-        action="append",
-        default=[],
-        metavar="BASE,SIZE",
-        help="additional simulator memory mapping; repeat as needed",
-    )
-    p.add_argument(
-        "--command",
-        "-ex",
-        dest="gdb_command",
-        action="append",
-        default=[],
-        help="GDB command after load; repeat as needed",
-    )
+    _execution_arguments(p)
     p.set_defaults(func=cmd_codeflash_sim)
 
     p = test_sub.add_parser(
@@ -591,7 +760,7 @@ def main() -> int:
     args = parser.parse_args()
     try:
         return int(args.func(args))
-    except (Rh850ToolError, OSError, subprocess.CalledProcessError) as exc:
+    except (Rh850ToolError, OSError, subprocess.SubprocessError) as exc:
         parser.error(str(exc))
 
 

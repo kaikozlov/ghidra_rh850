@@ -44,6 +44,7 @@ SIM_MEMORY_REGIONS = (
     "0xFFFFB000,0x1000",
     "0xFFE50000,0x1000",
 )
+SIM_STOP = f"0x{HELPER_TRANSIT_BASE:08X}"  # every modeled run completes at helper transit
 
 
 def _require_empty(path: Path) -> None:
@@ -157,6 +158,7 @@ def _sim_spec(
         assembly=assembly,
         codeflash_size=0x100000,
         harness_address=HARNESS_ADDRESS,
+        stop=SIM_STOP,
         image_sha256=frozenset((digest,)),
         memory_regions=SIM_MEMORY_REGIONS,
         gdb=gdb,
@@ -216,7 +218,7 @@ def simulate_candidate(
             f'*(unsigned int *)0x{STARTUP_MARKER:08X}'
         ),
     )
-    fallback_output, runtime_elf = run_codeflash_sim(
+    _, runtime_elf = run_codeflash_sim(
         root=ROOT,
         image_path=image_path,
         spec=_sim_spec(assembly=harness, digest=digest, overlays=overlays, gdb=fallback_gdb),
@@ -255,9 +257,10 @@ def simulate_candidate(
     )
     if runtime_elf is None:
         raise RuntimeError("retained simulator ELF is missing")
-    idle_output = run_elf(
+    run_elf(
         root=ROOT,
         elf_path=runtime_elf,
+        stop=SIM_STOP,
         memory_regions=SIM_MEMORY_REGIONS,
         gdb_commands=idle_gdb,
         expected_output=(idle_expected,),

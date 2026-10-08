@@ -7,10 +7,10 @@ thing being operated on rather than the execution backend:
 |---|---|
 |Build or inspect the pinned GNU environment|`tools/rh850 toolchain …`|
 |Regenerate or check P1M-E projections|`tools/rh850 model update` or `tools/rh850 model check`|
-|Test a linked payload ELF|`tools/rh850 test payload ELF …`|
+|Build and test payload sources, or test a retained ELF|`tools/rh850 test payload INPUT… --stop POINT --assert EXPR`|
 |Test a raw or byte-pinned CodeFlash image|`tools/rh850 test codeflash IMAGE …`|
 |Test scenarios against registered exact firmware|`tools/rh850 test firmware TARGET SCENARIO…`|
-|Run the complete retained offline pipeline|`tools/test rh850`|
+|Run retained RH850 regression suites|`tools/test rh850`|
 
 The toolchain is GCC 16.2.0, binutils 2.46.1, and GDB 18.1 with
 repository-local simulator fixes. Builds and instruction simulation use the
@@ -32,16 +32,67 @@ a volatile local rather than a folded constant. This exercises C compilation,
 linking, full-image ELF loading, real low-address instruction fetch, far control
 flow, and basic register/stack/memory execution together.
 
-For a retained ELF, add the address ranges the program can touch and then give
-ordinary GDB commands:
+## Build, execute, and verify a payload
+
+One invocation compiles C/assembly sources, links at the addresses in the supplied
+linker script, runs that exact ELF to a completion point, and checks its result:
 
 ```bash
-tools/rh850 test payload build/out/example.elf \
-  --memory-region 0xFEBE0000,0x20000 \
-  -ex 'break rh850_sim_stop' \
-  -ex run \
-  -ex 'info registers'
+tools/rh850 test payload path/to/entry.S path/to/payload.c \
+  --linker-script path/to/payload.ld \
+  --memory-region 0xFEBF0000,0x10000 \
+  --stop payload_done \
+  --assert '*(unsigned int *)0xFEBF0100 == 0x12345678' \
+  --output-dir build/out/payload-experiment
 ```
+
+Here `payload_done` and the result address/value belong to the experiment, not
+to a stock firmware calibration. The CLI owns breakpoint installation, execution,
+and postcondition evaluation; no hand-written GDB run sequence is needed.
+Without `--linker-script`, supply one already-linked ELF:
+
+```bash
+tools/rh850 test payload build/out/payload-experiment/payload.elf \
+  --memory-region 0xFEBF0000,0x10000 \
+  --stop payload_done \
+  --assert '*(unsigned int *)0xFEBF0100 == 0x12345678'
+```
+
+Caller inputs and `--output-dir` resolve from the caller's working directory.
+Source compilation preserves repository-relative includes and external source
+directories' sibling headers. The compiler uses the pinned freestanding RH850
+ABI; the linker script owns placement and the entry point.
+
+Both payload and CodeFlash tests require:
+
+- a completion symbol as seen by GDB, or a numeric address, through `--stop`
+  (CodeFlash specs may supply it);
+- at least one postcondition: repeatable `--assert EXPR`, or `--expect TEXT`
+  for an explicit harness script's output;
+- a finite execution deadline, `--timeout SECONDS` (default 30).
+
+An entry-only stop, missing contract, failed predicate, unexpected final PC,
+debugger error, missing expected output, or timeout fails the command. Loading
+or inspecting an image alone is not a passing test. The timeout runs inside the
+container; a host-side deadline also removes the container if its client stalls.
+
+The payload command retains `payload.elf` and `build.txt` when building,
+`output.txt`, and `report.json` with the verdict, tested ELF hash, stop, and
+postconditions. Without `--output-dir`, it uses a unique directory beneath
+`build/out/rh850-payload/`. A failed rebuild cannot reuse an earlier passing
+verdict. Existing ELF inputs are tested in place and identified in the report.
+
+For multi-stage harnesses, repeat `--command`/`-ex` to supply the complete GDB
+execution script, including `run` or `continue`. The shared executor still
+checks completion and postconditions. Scripts run as a GDB command file so a
+debugger error terminates evaluation instead of falling through to a success
+message. Raw debugger inspection remains available through `toolchain run`;
+it has no test verdict.
+
+`tools/test rh850` selects the retained compiler-ABI, device-model, payload,
+CodeFlash, and exact-firmware suites. It does not automatically build or test
+an arbitrary new experiment, and does not include signer-host tests or the
+separate processor/project milestone audits.
 
 ## Specification-backed P1M-E machine
 
@@ -132,7 +183,7 @@ flowchart LR
 |FACI / CodeFlash|CodeFlash fetches execute from immutable registered image bytes. Scenario overlays and ordinary writes are rejected. Only the exact status-clear command has a modeled FACI transition.|Bounded implementation. Unsupported FACI commands fault before side effects; erase/program, protection, sequencer timing, and cache-coherency behavior remain unimplemented.|
 |ICU-S|Expose only recovered registers and exact command-five/callback transitions. Treat supplied output words as scenario state, not generated cryptography.|Implemented within that recovered boundary. No provisioned-key or AES-CMAC silicon claim.|
 |Integration|Expose model generation through `tools/rh850 model update` and `tools/rh850 model check`, and batched execution through `tools/rh850 test firmware`; bind identity through the existing target registry; retain one JSON report per scenario under `build/out/`.|Implemented. No parallel capability manifest, target whitelist, project lifecycle, backend selector, or legacy CLI alias exists.|
-|Verification|Discover target-owned scenario directories deterministically, run one Ghidra session per target, and require unique dynamic role resolution before exact-byte execution. Use synthetic processor semantics for instruction-level boundaries and GNU simulator runs only where an independent differential is useful.|Implemented as narrow gates. `tools/test rh850` runs the compiler ABI, generated device model, CodeFlash, and exact-firmware suites; `make verify-processor` owns the milestone synthetic processor and project audits.|
+|Verification|Discover target-owned scenario directories deterministically, run one Ghidra session per target, and require unique dynamic role resolution before exact-byte execution. Use synthetic processor semantics for instruction-level boundaries and GNU simulator runs only where an independent differential is useful.|Implemented as narrow gates. `tools/test rh850` runs compiler-ABI, generated device-model, source-to-result payload, CodeFlash, and exact-firmware regressions; `make verify-processor` owns the milestone synthetic processor and project audits.|
 
 Progress:
 
@@ -235,15 +286,16 @@ tools/rh850 test codeflash path/to/CodeFlash.bin \
   --entry 0x00012340 \
   --load 0xFEBF0000=path/to/resident.bin \
   --memory-region 0xFEBE0000,0x20000 \
-  -ex run \
-  -ex 'printf "RESULT=0x%x\n", *(unsigned int *)0xFEBF0100'
+  --stop 0xFEBF0080 \
+  --assert '*(unsigned int *)0xFEBF0100 == 0x12345678'
 ```
 
-This is the fast viability check for a newly acquired binary: no target
-knowledge required, entry may point into CodeFlash or any `--load` range,
-`--expect STR` (repeatable) requires strings in the output, and `-ex` commands
-append to the execution script. `--output-dir` retains the linked ELF,
-modeled image, and output for debugging.
+This tests an explicitly bounded experiment on a newly acquired binary: no
+registered-target knowledge is required, and entry may point into CodeFlash
+or any `--load` range. The stop and result in the example describe the loaded
+experimental resident. As with payload tests, a completion point and checked
+postcondition are mandatory; there is no default inspection-as-success path.
+`--output-dir` retains the linked ELF, modeled image, and output for debugging.
 
 ### Specs
 
@@ -258,8 +310,8 @@ tools/rh850 test codeflash firmware/camry-8965F3307000/CodeFlash.bin \
 
 A spec (see the JSON files in `tests/fixtures/rh850/`) pins the image size and
 SHA-256, an assembly harness (stock GP/TP/SP context, call-boundary stubs),
-RAM-load pockets (address + maximum size), memory regions, one ordered GDB
-script, and instruction overlays. Each overlay replaces bytes at a known
+RAM-load pockets (address + maximum size), memory regions, an explicit `stop`,
+one ordered GDB script, and instruction overlays. Each overlay replaces bytes at a known
 address — but only after verifying the original bytes still match, so any
 image drift aborts before execution. The harness models privileged
 boot/context installation and hardware-heavy callees; everything else (stock

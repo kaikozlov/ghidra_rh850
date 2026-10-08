@@ -2,6 +2,7 @@
   "assembly": "tests/fixtures/rh850/corolla_hf_runtime_canary_sim.S",
   "codeflash_size": 1048576,
   "harness_address": "0xFEF00000",
+  "stop": "0xFEBF0124",
   "image_sha256": [
     "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
     "fdb35b76891cf84a8b89e0a05c9c7c5cfcd27994cf85ccc01ff32828f53091f6"

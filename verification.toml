@@ -316,6 +316,9 @@ tests = ["tests/firmware/verify_p1m_device_profile.py"]
 [suite.rh850_firmware]
 tests = ["tests/tooling/verify_rh850_machine.py"]
 
+[suite.rh850_payload]
+tests = ["tests/tooling/verify_rh850_payload.py"]
+
 [suite.payload_gate]
 tests = ["tests/runtime/verify_payload_gate.py"]
 

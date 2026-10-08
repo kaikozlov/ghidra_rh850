@@ -27,6 +27,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from tools.toolchains.rh850 import Rh850ToolError, execute_elf, validate_execution
+
 DEFAULT_ENTRY_SYMBOL = "codeflash_sim_start"
 _HARNESS_REGION_SIZE = 0x1000
 
@@ -47,6 +49,7 @@ class Spec:
     assembly: Path
     codeflash_size: int
     harness_address: int
+    stop: str  # completion symbol or numeric address (no '*')
     image_sha256: frozenset[str] = field(default_factory=frozenset)
     entry_symbol: str = DEFAULT_ENTRY_SYMBOL
     memory_regions: tuple[str, ...] = ()
@@ -75,12 +78,16 @@ def load_spec(root: Path, path: Path) -> Spec:
         assembly = Path(raw["assembly"])
         codeflash_size = int(raw["codeflash_size"])
         harness_address = _address(raw["harness_address"], "harness_address")
+        stop = str(raw["stop"]).strip()
     except (KeyError, TypeError, ValueError) as exc:
         raise CodeFlashSimError(f"spec {path} lacks a valid {exc}") from exc
+    if not stop:
+        raise CodeFlashSimError(f"spec {path} has an empty stop")
     return Spec(
         assembly=assembly if assembly.is_absolute() else root / assembly,
         codeflash_size=codeflash_size,
         harness_address=harness_address,
+        stop=stop,
         image_sha256=frozenset(raw.get("image_sha256", ())),
         entry_symbol=raw.get("entry_symbol", DEFAULT_ENTRY_SYMBOL),
         memory_regions=tuple(raw.get("memory_regions", ())),
@@ -221,28 +228,30 @@ def run_elf(
     *,
     root: Path,
     elf_path: Path,
+    stop: str,
     memory_regions: Sequence[str] = (),
+    assertions: Sequence[str] = (),
     gdb_commands: Sequence[str] = (),
     expected_output: Sequence[str] = (),
+    timeout: float = 30.0,
     output_path: Path | None = None,
 ) -> str:
-    """Run one prepared simulator ELF with a fresh GDB command script."""
+    """Run one prepared simulator ELF through the central checked executor."""
     root = root.resolve()
     elf_path = elf_path if elf_path.is_absolute() else root / elf_path
-    args: list[str] = ["test", "payload", str(elf_path)]
-    for region in memory_regions:
-        args += ["--memory-region", region]
-    for command in gdb_commands:
-        args += ["-ex", command]
-    proc = _run_tool(root, args)
-    output = proc.stdout + proc.stderr
-    for expected in expected_output:
-        if expected not in output:
-            raise CodeFlashSimError(f"simulation output lacks {expected!r}\n{output}")
-    if output_path is not None:
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-        output_path.write_text(output, encoding="utf-8")
-    return output
+    try:
+        return execute_elf(
+            elf_path=elf_path,
+            stop=stop,
+            assertions=assertions,
+            memory_regions=memory_regions,
+            gdb_commands=gdb_commands,
+            expected_output=expected_output,
+            timeout=timeout,
+            output_path=output_path,
+        )
+    except Rh850ToolError as exc:
+        raise CodeFlashSimError(str(exc)) from exc
 
 
 def run(
@@ -256,6 +265,9 @@ def run(
     memory_regions: Sequence[str] = (),
     gdb_commands: Sequence[str] = (),
     expected_output: Sequence[str] = (),
+    assertions: Sequence[str] = (),
+    stop: str | None = None,
+    timeout: float = 30.0,
     output_dir: Path | None = None,
 ) -> tuple[str, Path | None]:
     """Execute the image; return (simulator output, retained ELF or None)."""
@@ -264,6 +276,22 @@ def run(
     image = image_path.read_bytes()
     if not image:
         raise CodeFlashSimError("CodeFlash image cannot be empty")
+
+    # The execution contract binds before any compilation or simulator work.
+    if stop is None:
+        stop = spec.stop if spec is not None else ""
+    script: tuple[str, ...] = ()
+    if gdb_commands:
+        script = tuple(gdb_commands)
+    elif spec is not None and spec.gdb:
+        script = spec.gdb
+    try:
+        validate_execution(
+            stop=stop, assertions=assertions, expected_output=expected_output,
+            gdb_commands=script, timeout=timeout,
+        )
+    except Rh850ToolError as exc:
+        raise CodeFlashSimError(str(exc)) from exc
     if spec is not None:
         image_base = 0
         if len(image) != spec.codeflash_size:
@@ -360,18 +388,15 @@ def run(
         )
 
         regions = tuple(memory_regions) + (spec.memory_regions if spec else ())
-        if gdb_commands:
-            script = tuple(gdb_commands)
-        elif spec is not None and spec.gdb:
-            script = spec.gdb
-        else:
-            script = ("starti", "x/8i $pc", "info registers pc")
         output = run_elf(
             root=root,
             elf_path=elf,
+            stop=stop,
             memory_regions=regions,
+            assertions=assertions,
             gdb_commands=script,
             expected_output=expected_output,
+            timeout=timeout,
             output_path=work / "output.txt",
         )
         return output, (None if temporary is not None else elf)

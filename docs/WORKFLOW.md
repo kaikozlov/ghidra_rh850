@@ -497,8 +497,8 @@ bytes. Run only the gate that owns the changed behavior:
 # signer build, codecs, metadata consumer, and host protocol
 tools/test tss3_request_signer
 
-# complete RH850 offline pipeline: compiler ABI, generated device model,
-# raw CodeFlash simulation, and exact registered-firmware scenarios
+# retained RH850 regressions: compiler ABI, device model, source-to-result
+# payload tests, CodeFlash simulation, and exact registered-firmware scenarios
 tools/test rh850
 
 # ram_exec boot-identity transitions (transient F181, exact-boot handoff)

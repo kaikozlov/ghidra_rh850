@@ -11,12 +11,16 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
+from typing import Any
 
+from exploit.common.rh850_build import nm_symbol
 from exploit.ephemeral_runtime import build_tss3_request_signer as signer_builder
 from exploit.patcher.build_payload import simulate_apply
 from exploit.patcher.patch_config import config_from_manifest
 from exploit.ram_runtime.target_profiles import supported_targets, target_spec
 from tools import REPO_ROOT
+from tools.rh850_codeflash import CodeFlashSimError, Overlay, Spec
+from tools.rh850_codeflash import run as run_codeflash
 from tools.security.build_secoc_patch_manifest import crc32
 from tools.targets.camry.builders import (
     build_camry_f33_gate2_root_result_patch as gate2_builder,
@@ -46,7 +50,7 @@ def run(command: list[str]) -> subprocess.CompletedProcess[str]:
 
 def simulate(image: Path, expected: str, *, spec: Path | None = None, load: str | None = None,
              entry: str | None = None, memory_region: str | None = None,
-             script: tuple[str, ...] = ()) -> None:
+             stop: str | None = None, script: tuple[str, ...] = ()) -> None:
     command = [
         str(ROOT / "tools/rh850"),
         "test",
@@ -63,6 +67,8 @@ def simulate(image: Path, expected: str, *, spec: Path | None = None, load: str 
         command += ["--load", load]
     if memory_region is not None:
         command += ["--memory-region", memory_region]
+    if stop is not None:
+        command += ["--stop", stop]
     for gdb_command in script:
         command += ["-ex", gdb_command]
     output = run(command).stdout
@@ -70,8 +76,8 @@ def simulate(image: Path, expected: str, *, spec: Path | None = None, load: str 
         raise AssertionError(f"simulation omitted {expected!r}\n{output}")
 
 
-def check_generic(work: Path) -> None:
-    """A synthetic resident against a synthetic image: no spec, no target knowledge."""
+def build_generic(work: Path) -> tuple[Path, int]:
+    """Compile a synthetic resident and its synthetic CodeFlash image for spec-less checks."""
     source = work / "program.S"
     source.write_text(
         "    .section .text\n"
@@ -80,40 +86,134 @@ def check_generic(work: Path) -> None:
         "    ld.w 0x200[r0], r10\n"
         "    mov 0xfebf0100, r11\n"
         "    st.w r10, 0[r11]\n"
-        "    jr _start\n"
+        "    .global generic_stop\n"
+        "generic_stop:\n"
+        "    br generic_stop\n"
     )
     rel_source = source.relative_to(ROOT)
-    rel_object = (work / "program.o").relative_to(ROOT)
+    rel_elf = (work / "program.elf").relative_to(ROOT)
     run([
         str(ROOT / "tools/rh850"), "toolchain", "run",
         "v850-elf-gcc", "-mv850e3v5", "-mno-app-regs", "-ffreestanding",
         "-fno-builtin", "-Os", "-nostdlib", "-Wa,-mv850e3v5,-mextension",
-        "-c", str(rel_source), "-o", str(rel_object),
+        "-Wl,-Ttext=0xFEBF0200", "-Wl,--entry=_start", "-Wl,--build-id=none",
+        str(rel_source), "-o", str(rel_elf),
     ])
     run([
         str(ROOT / "tools/rh850"), "toolchain", "run",
-        "v850-elf-objcopy", "-O", "binary",
-        str(rel_object), str((work / "program.bin").relative_to(ROOT)),
+        "v850-elf-objcopy", "-O", "binary", "-j", ".text",
+        str(rel_elf), str((work / "program.bin").relative_to(ROOT)),
     ])
 
     image = bytearray(b"\xFF" * 0x60000)
     struct.pack_into("<I", image, 0x200, 0x13579BDF)
     image_path = work / "new-target-CodeFlash.bin"
     image_path.write_bytes(image)
+    symbols = run([
+        str(ROOT / "tools/rh850"), "toolchain", "run", "v850-elf-nm", "-n", str(rel_elf),
+    ]).stdout
+    resident_end = nm_symbol(symbols, "generic_stop")
+    if resident_end is None:
+        raise AssertionError("linked generic stop symbol is missing")
+    return image_path, resident_end
 
+
+def generic_script(resident_end: int) -> tuple[str, ...]:
+    return (
+        f"break *0x{resident_end:X}",
+        "run",
+        'printf "GENERIC_RESULT=0x%x\\n", *(unsigned int *)0xFEBF0100',
+    )
+
+
+def check_generic(image: Path, resident_end: int) -> None:
+    """A synthetic resident against a synthetic image: no spec, no target knowledge."""
     simulate(
-        image_path,
+        image,
         "GENERIC_RESULT=0x13579bdf",
         entry="0xFEBF0200",
-        load=f"0xFEBF0200={work / 'program.bin'}",
+        load=f"0xFEBF0200={image.parent / 'program.bin'}",
         memory_region="0xFEBF0000,0x1000",
-        script=(
-            f"break *0x{0xFEBF0200 + (work / 'program.bin').stat().st_size - 2:X}",
-            "run",
-            'printf "GENERIC_RESULT=0x%x\\n", *(unsigned int *)0xFEBF0100',
-        ),
+        stop=f"0x{resident_end:X}",
+        script=generic_script(resident_end),
     )
     print("PASS generic resident on synthetic image (spec-less + -ex script)")
+
+
+def check_contract(work: Path, image: Path, resident_end: int) -> None:
+    """A green result must prove execution: postcondition, stop point, pinned bytes."""
+    spec_less: dict[str, Any] = {
+        "entry": 0xFEBF0200,
+        "ram_loads": ((0xFEBF0200, work / "program.bin"),),
+        "memory_regions": ("0xFEBF0000,0x1000",),
+        "gdb_commands": generic_script(resident_end),
+    }
+
+    def expect_rejection(what: str, diagnostic: str, **kwargs: Any) -> None:
+        try:
+            run_codeflash(root=ROOT, **kwargs)
+        except CodeFlashSimError as exc:
+            if diagnostic not in str(exc):
+                raise AssertionError(f"{what}: wrong rejection: {exc}") from exc
+            print(f"PASS rejects {what}")
+        else:
+            raise AssertionError(f"simulation must reject {what}")
+
+    expect_rejection(
+        "a run without a postcondition", "requires a postcondition",
+        image_path=image, stop=f"0x{resident_end:X}", **spec_less,
+    )
+    expect_rejection(
+        "a stop the resident never reaches", "unexpected stop",
+        image_path=image, stop="0xFEBF0000",
+        expected_output=("GENERIC_RESULT=0x13579bdf",), **spec_less,
+    )
+    expect_rejection(
+        "a GDB command supplied as the stop", "stop must be",
+        image_path=image, stop=f"*0x{resident_end:X}",
+        expected_output=("GENERIC_RESULT=0x13579bdf",), **spec_less,
+    )
+    expect_rejection(
+        "an expected output the resident does not print", "postcondition output lacks",
+        image_path=image, stop=f"0x{resident_end:X}",
+        expected_output=("GENERIC_RESULT=0x0badf00d",), **spec_less,
+    )
+
+    harness = work / "overlay_harness.S"
+    harness.write_text(
+        "    .section .sim.harness,\"ax\"\n"
+        "    .global codeflash_sim_start\n"
+        "codeflash_sim_start:\n"
+        "    br codeflash_sim_start\n\n"
+        "    .global codeflash_sim_stop\n"
+        "codeflash_sim_stop:\n"
+        "    br codeflash_sim_stop\n"
+        "    .section .sim.overlay.drift,\"ax\"\n"
+        "    .byte 0, 0, 0, 0\n"
+    )
+    overlay_image = work / "overlay-drift-CodeFlash.bin"
+    overlay_image.write_bytes(bytes(0x400))
+    overlay_spec = Spec(
+        assembly=harness,
+        codeflash_size=0x400,
+        harness_address=0xFEF00000,
+        stop="codeflash_sim_stop",
+        overlays=(
+            Overlay(section=".sim.overlay.drift", address=0x100, expected=b"\x11\x22\x33\x44"),
+        ),
+    )
+    try:
+        run_codeflash(
+            root=ROOT, image_path=overlay_image, spec=overlay_spec,
+            expected_output=("OVERLAY_PROBE_RESULT=1",),
+        )
+    except CodeFlashSimError as exc:
+        # Name the cause so a compile failure cannot masquerade as this rejection.
+        if "preimage" not in str(exc):
+            raise AssertionError(f"overlay drift must fail on the pinned preimage: {exc}") from exc
+        print("PASS rejects byte-pinned overlay drift")
+    else:
+        raise AssertionError("simulation must reject byte-pinned overlay drift")
 
 
 def check_gate2(work: Path) -> None:
@@ -191,7 +291,9 @@ def main() -> int:
     tmp_root.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="codeflash-sim-", dir=tmp_root) as td:
         work = Path(td)
-        check_generic(work)
+        image_path, resident_end = build_generic(work)
+        check_generic(image_path, resident_end)
+        check_contract(work, image_path, resident_end)
         check_gate2(work)
         check_built_resident(
             work,
