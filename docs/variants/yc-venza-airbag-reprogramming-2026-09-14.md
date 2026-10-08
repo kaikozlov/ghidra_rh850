@@ -904,7 +904,7 @@ actionable artifact.
 A re-read of the **application** image (`cflash.bin`, which the §5.9 census did
 not cover) finds the missing contract pieces as captured data.
 
-**Routine table.** At CodeFlash `0xC180`, immediately below the app RID
+**Routine table.** At CodeFlash `0xC184`, immediately below the app RID
 dispatcher (`venza_dcm_rid_start_dispatcher` `0x000C1C06`), sits a
 12-byte-record routine table with the same grammar as the EPS bootloader's
 table at its `0x8F44` — five StartRoutine-only RIDs, option-record length in
@@ -923,18 +923,42 @@ the second field:
 data; the mapping between them is **hypothesis** until the airbag's own
 handlers are seen.)
 
-**Region/CRC descriptor block.** `0xC128..0xC17F` holds the companion
-descriptor blob, full of RAM pointers (`0xFEBFBCC4`, `0xFEBFBCF8`,
-`0xFEBFBD20`), and — decisive for the payload question — records naming
-**`0xFEBFF800` and length `0x800`** (the §5.9 download window, joined) with
-trailer slots at **`0xFEBFFFF0` and `0xFEBFFFEC`**, plus a CodeFlash record
-around `0x0017FFEC/0x0017FFF0`. In the EPS the analogous tables (`0x8E00`
-region, `0x8DF0` CRC descriptor) define the payload image layout: CRC span,
-embedded-address/length slots, and CMAC-tag address. Here the `0xFEBFFF*`
-slots sit **outside** the 2-KiB download window (`..0xFEBFFBFF`), i.e. the
-tag/descriptor area is firmware-owned adjacent RAM rather than
-downloaded bytes — a layout difference from the EPS, where the whole
-4-KiB window includes the trailer and the callback slot at `+0xFD0`.
+**Region/CRC descriptor block.** `0xC128..0xC183` holds the companion
+descriptor blob. A count of two at `0xC130` is followed by two `0x28`-byte
+records. Both contain the exact RAM pair **`0xFEBFF800`, `0x800`** (the §5.9
+download window) and the exact CodeFlash pair **`0x00170000`, `0x10000`**.
+The same records contain terminal addresses `0xFEBFFFEC`/`0xFEBFFFF0` and
+`0x0017FFEC`/`0x0017FFF0`, plus RAM pointers `0xFEBFBCC4`,
+`0xFEBFBCF8`, and `0xFEBFBD20`. In the EPS the corresponding terminal
+offsets are the CRC fixup (`...FEC`) and 16-byte CMAC (`...FF0`).
+That field-role transfer remains **bounded** until the airbag bank consumer is
+recovered, but the addresses themselves are captured facts. The
+`0xFEBFFF*` trailer sits outside the 2-KiB download window
+(`..0xFEBFFBFF`), so unlike the EPS 4-KiB package it must be populated or
+owned by firmware rather than ordinary type-2 TransferData.
+
+**Calvin trigger semantics.** The retained community client says this
+explicitly: the `FF00` erase routine is the trigger that runs the
+already-uploaded payload, not the dump target. It first asks `10F0` to
+validate the 4-KiB image, then sends `31 01 FF00 45 00 <addr> <len>`
+without waiting for the response that never arrives. In the captured EPS
+handler the authenticated callback runs before ordinary erase completion and
+does not return, preempting that erase path. Therefore adapting Calvin's
+read-only body is the correct payload-core strategy; `FF00` naming alone does
+not mean the requested flash operation reaches FACI.
+
+**Adapted read-only core.** `exploit/dumper/venza_airbag_main.c` implements
+the Venza-specific body and
+`exploit/dumper/build_venza_airbag_payload.py` links it at `0xFEBFF800`,
+requires entry offset zero, rejects code larger than `0x800`, and zero-pads
+the raw type-2 image to exactly 2 KiB. The current pinned-toolchain build is
+678 bytes before padding. It reads only
+`0x00C00000..0x00FFFFFF` and emits the existing addressed-word protocol on
+`0x7A9`. P1x-C uses MCAN rather than the EPS RSCFD block, so the payload
+discovers the initialized MCAN0/MCAN1 instance, its configured Tx-element
+geometry, and the element retaining standard ID `0x7A9`; it then owns that
+element with interrupts disabled. This is an offline build/sizing result, not
+evidence that the airbag callback has executed on hardware.
 
 **No captured consumer.** The block's flash addresses have no direct xrefs;
 the surrounding pointer values show it is copied to RAM
@@ -947,24 +971,26 @@ register-indirect call whose target could be the window. The `FF00`/`10F0`
 (`0x00C0_0000..0x00FF_FFFF`), which also receives the type-2 completion
 notification (`{0x1005,…}` posted via bank call `0x00FF9BEA`).
 
-**Consequence: the payload question is now fully specified.** The wire
-trigger is pinned by the ECU's own table — `31 01 FF00 45 00 <addr_be32>
-<len_be32>` in RPRG mode, gated by a `10F0`-style validation pass. The
-remaining unknowns are exactly three, all inside the bank handlers:
+**Consequence: the wire-side shape and payload core are specified; the
+airbag wrapper is not.** The ECU's own table pins
+`31 01 FF00 45 00 <addr_be32> <len_be32>` in RPRG mode, gated by a
+`10F0`-style validation pass. The remaining unknowns are exactly three, all
+inside the bank handlers:
 
 1. the `10F0` authentication recipe (CRC span, CMAC key derivation from the
    §5.1 payload-build root `8AF2C470…` — EPS uses
    `Kpayload = AES-ENC(root, DID_0x201)` with a DID-`0x202` IV — and which
-   bytes the `0xFEBFFF0`/`0xFEBFFFEC` slots hold);
+   bytes the `0xFEBFFFF0`/`0xFEBFFFEC` slots hold);
 2. the `FF00` callback mechanics (slot address, register state at the
    indirect call, return contract);
 3. whether the bank's `FF00` gates on the `10F0` authorization bit the way
    the EPS engine does.
 
-A genuine airbag `.cuw` closes all three at once: its `EraseAndReproRoutine`
-member (§5.10 host schema) is Toyota's own RAM routine for this exact
-contract — layout, entry convention, and the handler's expected image shape
-in one artifact, reproducible offline.
+A genuine airbag `.cuw` remains the shortest route to a runnable wrapper: its
+`EraseAndReproRoutine` member (§5.10 host schema) supplies Toyota's exact RAM
+image, trailer construction, and entry convention for this ECU family. It
+does not expose the hidden bank handler by itself; a successful read-only
+bench invocation would separately observe the callback/gate behavior.
 
 ## 6. What the yc image changes for F33 EPS recovery
 

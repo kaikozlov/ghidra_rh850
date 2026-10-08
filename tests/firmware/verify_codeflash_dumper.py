@@ -88,6 +88,22 @@ for frame in startup_frames():
 r_error.feed(encode_control(CTRL_ERROR, 7))
 check("payload error marker invalidates protocol", any("payload error" in item for item in r_error.protocol_errors()))
 
+extra_base = 0x00C00000
+extra_size = 8
+r_extra = CodeFlashReassembler(expected_base=extra_base, expected_size=extra_size)
+for frame in startup_frames(start=extra_base, length=extra_size):
+    r_extra.feed(frame)
+r_extra.feed(encode_data(extra_base, 0x11223344, start=extra_base, length=extra_size))
+r_extra.feed(encode_data(extra_base + 4, 0x55667788, start=extra_base, length=extra_size))
+r_extra.feed(encode_control(CTRL_DONE, extra_size // 4))
+extra_report = r_extra.report(include_sanity=False)
+check(
+    "nonzero-base range reconstructs with its advertised geometry",
+    r_extra.complete
+    and bytes(r_extra.image) == bytes.fromhex("4433221188776655")
+    and extra_report["schema"] == "addressed-word-codeflash-dump-v1",
+)
+
 print("\n== out-of-order complete reconstruction from firmware truth ==")
 firmware_path = REPO / "firmware" / "RH850_P1M-E_CodeFlash.bin"
 firmware = firmware_path.read_bytes()
