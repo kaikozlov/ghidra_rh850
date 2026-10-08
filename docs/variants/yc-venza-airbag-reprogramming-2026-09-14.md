@@ -991,6 +991,34 @@ inside the bank handlers:
 3. whether the bank's `FF00` gates on the `10F0` authorization bit the way
    the EPS engine does.
 
+**The Renesas manuals close the CPU/RAM question, not Toyota's wrapper.**
+The retained RH850/P1x-C hardware manual (R01UH0517EJ0130) maps
+`0xFEBE0000..0xFEBFFBFF` as PE1 Local RAM and
+`0xFEBFFC00..0xFEBFFFFF` as its 1-KiB backup section.  PE1 instruction fetch
+is allowed from its own Local RAM, and the self-programming chapter explicitly
+requires programming code to execute from Local RAM while CodeFlash is being
+programmed.  Thus the ECU's `0xFEBFF800..0xFEBFFBFF` download area is a valid
+execution region; the two terminal words at `0xFEBFFFEC` and `0xFEBFFFF0` are
+deliberately outside it in backup Local RAM.  `STAC_LM0.RZEROMD` can make an
+Application Reset 1 initialize PE1 Local RAM either excluding or including that
+backup section, so the physical split is meaningful, although the selected mode
+and the two words' Toyota meanings remain unrecovered.
+
+The public Renesas Code Flash Library Type T01 contract
+(R01US0078ED0213) is deliberately integration-selected rather than a fixed
+payload ABI.  Its descriptor supplies
+an application-chosen `addrRam_u32`; `R_FCL_CopySections()` copies an ordered
+set of FCL and user sections there; and `R_FCL_CalcFctAddr()` translates a
+linked ROM function address into the copied RAM address before a normal
+function-pointer call.  The FCL manual defines neither RID `10F0`/`FF00`, a
+CMAC trailer, nor a fixed callback slot such as the EPS window's `+0xFD0`.
+The P1x-C hardware manual itself delegates flash command details to a separate
+Flash Hardware Interface manual, which is not in the retained reference set.
+Manufacturer documentation therefore supports executing the built read-only
+payload from this window but cannot supply the missing slot, authentication
+recipe, or calling convention; those are Toyota integration choices in the
+uncaptured bank.
+
 A genuine airbag `.cuw` remains the shortest route to a runnable wrapper: its
 `EraseAndReproRoutine` member (§5.10 host schema) supplies Toyota's exact RAM
 image, trailer construction, and entry convention for this ECU family. It
