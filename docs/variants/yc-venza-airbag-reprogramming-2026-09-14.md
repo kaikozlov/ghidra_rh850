@@ -898,6 +898,74 @@ ECU demands in programming mode is not table-driven: the per-ECU
 from Toyota TIS. §5.8's two-part `.cuw` validation remains the next
 actionable artifact.
 
+### 5.11 The execution contract: EPS-style `FF00`/`10F0` routine table is in the captured app image (2026-10-08)
+
+§5.9 bounded the execution question to the uncaptured extra-bank flash engine.
+A re-read of the **application** image (`cflash.bin`, which the §5.9 census did
+not cover) finds the missing contract pieces as captured data.
+
+**Routine table.** At CodeFlash `0xC180`, immediately below the app RID
+dispatcher (`venza_dcm_rid_start_dispatcher` `0x000C1C06`), sits a
+12-byte-record routine table with the same grammar as the EPS bootloader's
+table at its `0x8F44` — five StartRoutine-only RIDs, option-record length in
+the second field:
+
+| RID | option record | EPS counterpart behavior |
+|---|---|---|
+| `FF00` | `45 00 \|\| addr_be32 \|\| len_be32` (10 B) | erase + **indirect callback call** `jarl *(u32*)(window+0xFD0)` |
+| `10F0` | 10 B | CRC + AES-CMAC validation of the RAM image, sets region authorization |
+| `10F1` | 10 B | aliases `10F0` |
+| `10F2` | 10 B | validates a CodeFlash region, programs validity marker |
+| `10F3` | none | arms operation-bit-5 read-back comparison |
+
+(Right column is the documented EPS behavior from
+`docs/security/bootloader-payload-gate.md` — the airbag column is captured
+data; the mapping between them is **hypothesis** until the airbag's own
+handlers are seen.)
+
+**Region/CRC descriptor block.** `0xC128..0xC17F` holds the companion
+descriptor blob, full of RAM pointers (`0xFEBFBCC4`, `0xFEBFBCF8`,
+`0xFEBFBD20`), and — decisive for the payload question — records naming
+**`0xFEBFF800` and length `0x800`** (the §5.9 download window, joined) with
+trailer slots at **`0xFEBFFFF0` and `0xFEBFFFEC`**, plus a CodeFlash record
+around `0x0017FFEC/0x0017FFF0`. In the EPS the analogous tables (`0x8E00`
+region, `0x8DF0` CRC descriptor) define the payload image layout: CRC span,
+embedded-address/length slots, and CMAC-tag address. Here the `0xFEBFFF*`
+slots sit **outside** the 2-KiB download window (`..0xFEBFFBFF`), i.e. the
+tag/descriptor area is firmware-owned adjacent RAM rather than
+downloaded bytes — a layout difference from the EPS, where the whole
+4-KiB window includes the trailer and the callback slot at `+0xFD0`.
+
+**No captured consumer.** The block's flash addresses have no direct xrefs;
+the surrounding pointer values show it is copied to RAM
+(`0xFEBFBDxx`) and consumed by address after the §3–§4 programming handoff.
+The app's 19-slot RID dispatcher (`0x000C1C06`) does not decode `FF00`/`10F0`
+as small indices, and a full re-census of `boot.bin`
+(`ghidra/scripts/investigate/CensusVenzaRprgSidBytes.java`) again finds no
+register-indirect call whose target could be the window. The `FF00`/`10F0`
+*handlers* therefore live where §5.9 already put them: the extra-bank engine
+(`0x00C0_0000..0x00FF_FFFF`), which also receives the type-2 completion
+notification (`{0x1005,…}` posted via bank call `0x00FF9BEA`).
+
+**Consequence: the payload question is now fully specified.** The wire
+trigger is pinned by the ECU's own table — `31 01 FF00 45 00 <addr_be32>
+<len_be32>` in RPRG mode, gated by a `10F0`-style validation pass. The
+remaining unknowns are exactly three, all inside the bank handlers:
+
+1. the `10F0` authentication recipe (CRC span, CMAC key derivation from the
+   §5.1 payload-build root `8AF2C470…` — EPS uses
+   `Kpayload = AES-ENC(root, DID_0x201)` with a DID-`0x202` IV — and which
+   bytes the `0xFEBFFF0`/`0xFEBFFFEC` slots hold);
+2. the `FF00` callback mechanics (slot address, register state at the
+   indirect call, return contract);
+3. whether the bank's `FF00` gates on the `10F0` authorization bit the way
+   the EPS engine does.
+
+A genuine airbag `.cuw` closes all three at once: its `EraseAndReproRoutine`
+member (§5.10 host schema) is Toyota's own RAM routine for this exact
+contract — layout, entry convention, and the handler's expected image shape
+in one artifact, reproducible offline.
+
 ## 6. What the yc image changes for F33 EPS recovery
 
 ### It disproves one tempting interpretation
