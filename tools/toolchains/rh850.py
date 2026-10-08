@@ -367,29 +367,27 @@ def cmd_codeflash_sim(args: argparse.Namespace) -> int:
 
 
 def cmd_machine_run(args: argparse.Namespace) -> int:
-    from tools.emulation.p1me_machine import P1MEMachineError, run
+    from tools.emulation.p1me_machine import P1MEMachineError, run_many
 
     output_dir = args.output_dir
     if output_dir is None:
-        output_dir = (
-            ROOT / "build" / "out" / "rh850-machine"
-            / args.target / args.scenario.stem
-        )
+        batch_name = args.scenarios[0].stem if len(args.scenarios) == 1 else "batch"
+        output_dir = ROOT / "build" / "out" / "rh850-machine" / args.target / batch_name
     try:
-        report = run(
-            target=args.target,
-            scenario_path=args.scenario,
-            output_dir=output_dir,
-        )
+        reports = run_many(args.target, args.scenarios, output_dir)
     except P1MEMachineError as exc:
         raise Rh850ToolError(str(exc)) from exc
     print(json.dumps({
-        "schema": report["schema"],
-        "target": report["target"],
-        "scenario": report["scenario"],
-        "status": report["status"],
-        "instruction_count": report["instruction_count"],
-        "report": str((output_dir / "report.json").resolve()),
+        "target": args.target,
+        "reports": [
+            {
+                "scenario": report["scenario"],
+                "status": report["status"],
+                "instruction_count": report["instruction_count"],
+                "report": report["report_path"],
+            }
+            for report in reports
+        ],
     }, indent=2, sort_keys=True))
     return 0
 
@@ -500,13 +498,13 @@ def build_parser() -> argparse.ArgumentParser:
     )
     machine_sub = machine.add_subparsers(dest="machine_command", required=True)
 
-    p = machine_sub.add_parser("run", help="execute one strict machine scenario")
+    p = machine_sub.add_parser("run", help="execute strict machine scenarios in one target session")
     p.add_argument("target", help="registered analysis target")
-    p.add_argument("scenario", type=Path, help="machine scenario JSON")
+    p.add_argument("scenarios", nargs="+", type=Path, help="machine scenario JSON files")
     p.add_argument(
         "--output-dir",
         type=Path,
-        help="retain resolved run contract and execution report",
+        help="write one execution report per scenario",
     )
     p.set_defaults(func=cmd_machine_run)
 

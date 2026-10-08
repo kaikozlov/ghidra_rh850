@@ -1,0 +1,46 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry-f33-rscfd-transmit-buffer-halfword-read",
+  "entry": {
+    "role": "rscfd-transmit-buffer-halfword-read",
+    "scope": "function",
+    "shape_sha256": "8e49a0bf8bf3a1a29e104d2a16a92e063499f8ea357df01e11a0bca0db68aa41",
+    "instruction_count": 14,
+    "body_size": 36,
+    "offset": -30,
+    "requirements": []
+  },
+  "max_instructions": 10,
+  "stop_addresses": [
+    "0x00010000"
+  ],
+  "gpr_fill": "0",
+  "registers": {
+    "r6": "0xFFD24200",
+    "lp": "0x00010000",
+    "PSW": "0x20",
+    "PMR": "0"
+  },
+  "memory": [
+    {
+      "address": "0xFFD24200",
+      "hex": "3412",
+      "evidence": "scenario: documented 16-bit CFDTMIDpL access"
+    }
+  ],
+  "artifacts": [],
+  "checks": [
+    {
+      "name": "exact halfword-load helper returns through caller link",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x00010000"
+    },
+    {
+      "name": "halfword read observes CFDTMIDpL",
+      "kind": "register",
+      "register": "r10",
+      "equals": "0x1234"
+    }
+  ]
+}

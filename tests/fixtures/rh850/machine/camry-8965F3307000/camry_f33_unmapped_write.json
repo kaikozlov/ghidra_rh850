@@ -1,0 +1,36 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry-f33-exact-writer-rejects-unmapped-mmio",
+  "entry": {
+    "role": "exact-writer-rejects-unmapped-mmio",
+    "scope": "function",
+    "shape_sha256": "8e49a0bf8bf3a1a29e104d2a16a92e063499f8ea357df01e11a0bca0db68aa41",
+    "instruction_count": 14,
+    "body_size": 36,
+    "offset": -18,
+    "requirements": []
+  },
+  "max_instructions": 20,
+  "stop_addresses": [
+    "0x00010000"
+  ],
+  "gpr_fill": "0",
+  "registers": {
+    "sp": "0xFEBE2000",
+    "gp": "0xFEBEB800",
+    "tp": "0x00023DFC",
+    "r6": "0xFF000000",
+    "r7": "0x5A",
+    "lp": "0x00010000",
+    "PSW": "0",
+    "PMR": "0"
+  },
+  "memory": [],
+  "artifacts": [],
+  "checks": [],
+  "expected_fault": {
+    "kind": "unmapped-write",
+    "address": "0xFF000000",
+    "access": "write"
+  }
+}

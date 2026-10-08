@@ -1,0 +1,56 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry-f33-rejects-unsupported-icus-command",
+  "entry": {
+    "role": "rejects-unsupported-icus-command",
+    "scope": "function",
+    "shape_sha256": "8e49a0bf8bf3a1a29e104d2a16a92e063499f8ea357df01e11a0bca0db68aa41",
+    "instruction_count": 14,
+    "body_size": 36,
+    "offset": -6,
+    "requirements": []
+  },
+  "max_instructions": 20,
+  "stop_addresses": [
+    "0x00010000"
+  ],
+  "gpr_fill": "0",
+  "registers": {
+    "sp": "0xFEBE2000",
+    "gp": "0xFEBEB800",
+    "tp": "0x00023DFC",
+    "r6": "0xFFC5D000",
+    "r7": "4",
+    "lp": "0x00010000",
+    "PSW": "0",
+    "PMR": "0"
+  },
+  "memory": [
+    {
+      "address": "0xFFC5D000",
+      "hex": "00000000",
+      "evidence": "scenario: clean ICU-S command register before rejected write"
+    }
+  ],
+  "artifacts": [],
+  "checks": [
+    {
+      "name": "unsupported ICU-S command is rejected before the command-register write",
+      "kind": "memory",
+      "address": "0xFFC5D000",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "unsupported ICU-S command does not manufacture completion",
+      "kind": "event-count",
+      "operation": "icus-command",
+      "equals": "0"
+    }
+  ],
+  "expected_fault": {
+    "kind": "unsupported-icus-command",
+    "address": "0xFFC5D000",
+    "access": "write"
+  }
+}

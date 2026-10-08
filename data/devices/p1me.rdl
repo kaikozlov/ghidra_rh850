@@ -9,6 +9,18 @@ property alias_group { type = string; component = mem; };
 property reset_policy { type = string; component = mem; };
 property product_ids { type = string; component = addrmap; };
 property p_bus_hz { type = longint unsigned; component = addrmap; };
+property trigger { type = string; component = reg; };
+property status_register { type = string; component = reg; };
+property secondary_status_register { type = string; component = reg; };
+property access_register { type = string; component = reg; };
+property history_register { type = string; component = reg; };
+property reload_prefix { type = string; component = reg; };
+property counter_prefix { type = string; component = reg; };
+property payload_address { type = longint unsigned; component = reg; };
+property completion_value { type = longint unsigned; component = reg; };
+property channel_count { type = longint unsigned; component = reg; };
+property reset_control { type = string; component = mem; };
+property reset_rules { type = string; component = mem; };
 
 addrmap p1me {
     desc = "Renesas RH850/P1M-E R7F701381/R7F701383 functional machine model";
@@ -20,9 +32,17 @@ addrmap p1me {
     external mem { memwidth=8; mementries=0x100000; sw=r; evidence="manual"; source_ref="R01UH0585EJ0120 Table 4.1"; executable=true; reset_policy="retained nonvolatile"; } codeflash_user @ 0x00000000;
     external mem { memwidth=8; mementries=0x8000; sw=r; evidence="manual"; source_ref="R01UH0585EJ0120 Table 4.1"; executable=true; reset_policy="retained nonvolatile"; } codeflash_extended @ 0x01000000;
     external mem { memwidth=8; mementries=0x8000; sw=rw; evidence="manual"; source_ref="R01UH0585EJ0120 Table 4.1"; executable=false; reset_policy="retained nonvolatile; FACI writes only"; } dataflash @ 0xFF200000;
-    external mem { memwidth=8; mementries=0x20000; sw=rw; evidence="manual"; source_ref="R01UH0585EJ0120 Table 4.1"; executable=true; alias_group="local_ram"; reset_policy="STAC_LM0 by reset class"; } local_ram_pe1 @ 0xFEBE0000;
+    external mem {
+        memwidth=8; mementries=0x20000; sw=rw; evidence="manual"; source_ref="R01UH0585EJ0120 Table 4.1";
+        executable=true; alias_group="local_ram"; reset_policy="STAC_LM0 by reset class"; reset_control="STAC_LM0";
+        reset_rules="power-on:force;system-1-cvm:force;system-1-pin:controlled;system-2:controlled;application-1:controlled";
+    } local_ram_pe1 @ 0xFEBE0000;
     external mem { memwidth=8; mementries=0x20000; sw=rw; evidence="manual"; source_ref="R01UH0585EJ0120 Table 4.1"; executable=true; alias_group="local_ram"; reset_policy="STAC_LM0 by reset class"; } local_ram_self @ 0xFEDE0000;
-    external mem { memwidth=8; mementries=0x10000; sw=rw; evidence="manual"; source_ref="R01UH0585EJ0120 Table 4.1"; executable=true; reset_policy="STAC_GRAM for Application Reset 1"; } global_ram @ 0xFEEF8000;
+    external mem {
+        memwidth=8; mementries=0x10000; sw=rw; evidence="manual"; source_ref="R01UH0585EJ0120 Table 4.1";
+        executable=true; reset_policy="STAC_GRAM for Application Reset 1"; reset_control="STAC_GRAM";
+        reset_rules="power-on:force;system-1-cvm:force;system-1-pin:force;system-2:force;application-1:controlled";
+    } global_ram @ 0xFEEF8000;
 
     reg {
         regwidth=32; accesswidth=32; desc="Self-programming ID input word 0";
@@ -196,6 +216,7 @@ addrmap p1me {
     reg {
         regwidth=8; accesswidth=8; desc="FACI command-issuing area";
         evidence="manual"; source_ref="R01UH0615EJ0120 sections 3.3 and 4"; behavior="faci";
+        trigger="faci-command"; status_register="FSTATR"; access_register="FASTAT"; history_register="FCMDR";
         field { sw=w; } value[7:0];
     } FACI_COMMAND_AREA @ 0xFFA20000;
 
@@ -208,6 +229,7 @@ addrmap p1me {
     reg {
         regwidth=32; accesswidth=32; desc="ICU-S command register; recovered MAC generate writes (selector<<16)|5 and CMAC verify writes (selector<<16)|7";
         evidence="recovered"; source_ref="Exact target CodeFlash ICU-S driver accesses; public P1M-E manual only identifies ICU-S presence"; behavior="icus_recovered";
+        trigger="icus-command"; status_register="ICUSSTS"; secondary_status_register="ICUSSTS2";
         field { sw=rw; } value[31:0];
     } ICUSCMD @ 0xFFC5D000;
 
@@ -382,12 +404,14 @@ addrmap p1me {
     reg {
         regwidth=8; accesswidth=8; desc="Diagnostic Tx buffer control (HTH 0x13 -> n=16; TMTR bit 0)";
         evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD register tables; firmware-observed role"; behavior="rscfd";
+        trigger="rscfd-transmit"; payload_address=0xFFD24200; status_register="CFDTMSTS_CH1"; completion_value=4;
         field { sw=rw; } value[7:0];
     } CFDTMC16 @ 0xFFD20260;
 
     reg {
         regwidth=8; accesswidth=8; desc="Application CAN1 Tx buffer n=16 control (TMTR bit 0)";
         evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD register tables; exact firmware table binding"; behavior="rscfd";
+        trigger="rscfd-transmit"; payload_address=0xFFD24400; status_register="CFDTMSTS_CH1_16"; completion_value=4;
         field { sw=rw; } value[7:0];
     } CFDTMC_CH1_16 @ 0xFFD20270;
 
@@ -849,12 +873,14 @@ addrmap p1me {
     reg {
         regwidth=8; accesswidth=8; desc="TAUJ0 channel start trigger";
         evidence="manual"; source_ref="R01UH0585EJ0120 Table 24.10"; behavior="tauj";
+        trigger="tauj-start"; status_register="TAUJ0TE"; reload_prefix="TAUJ0CDR"; counter_prefix="TAUJ0CNT"; channel_count=4;
         field { sw=w; } value[7:0];
     } TAUJ0TS @ 0xFFE50054;
 
     reg {
         regwidth=8; accesswidth=8; desc="TAUJ0 channel stop trigger";
         evidence="manual"; source_ref="R01UH0585EJ0120 Table 24.10"; behavior="tauj";
+        trigger="tauj-stop"; status_register="TAUJ0TE"; reload_prefix="TAUJ0CDR"; counter_prefix="TAUJ0CNT"; channel_count=4;
         field { sw=w; } value[7:0];
     } TAUJ0TT @ 0xFFE50058;
 

@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import ast
 import subprocess
-from functools import lru_cache
+from collections.abc import Iterable
+from functools import cache, lru_cache
 from pathlib import Path
-from typing import Iterable
 
 REPO = Path(__file__).resolve().parents[2]
 
@@ -23,8 +23,11 @@ def _git_files(*pathspecs: str) -> list[str]:
 
 @lru_cache(maxsize=1)
 def _tracked_artifacts() -> tuple[str, ...]:
-    return tuple(_git_files("data/generated"))
-
+    tracked = set(_git_files("data/generated"))
+    tracked_files = set(_git_files())
+    for tool in _source_files_cached():
+        tracked.update(path for path in _declared_outputs(tool) if path in tracked_files)
+    return tuple(sorted(tracked))
 
 def tracked_artifacts() -> list[str]:
     return list(_tracked_artifacts())
@@ -70,16 +73,16 @@ def _path_expr(node: ast.AST) -> Path | None:
     return None
 
 
-@lru_cache(maxsize=None)
+@cache
 def _declared_outputs(tool: str) -> tuple[str, ...]:
     """Recover conventional OUT/OUTPUT constants from a Python producer."""
     path = REPO / tool
     if path.suffix != ".py":
-        return []
+        return ()
     try:
         tree = ast.parse(path.read_text(encoding="utf-8"))
     except (OSError, SyntaxError, UnicodeDecodeError):
-        return []
+        return ()
     out: list[str] = []
     for node in tree.body:
         targets: list[ast.expr] = []
@@ -135,7 +138,7 @@ def _naming_producer(path: str) -> str | None:
     return None
 
 
-@lru_cache(maxsize=None)
+@cache
 def _producer_candidates(path: str) -> tuple[str, ...]:
     """Return likely producers, preferring declared output ownership.
 
@@ -164,7 +167,7 @@ def producer_candidates(path: str) -> list[str]:
 
 
 def consumers(path: str) -> list[str]:
-    candidates = _git_files("tools", "tests")
+    candidates = _git_files("tools", "tests", "ghidra/scripts", "Makefile", "verification.toml")
     return [
         p for p in _mentions(path, candidates)
         if p not in {"tools/catalog/artifact_catalog.py"}

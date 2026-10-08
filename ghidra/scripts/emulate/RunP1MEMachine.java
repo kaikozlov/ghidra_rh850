@@ -29,8 +29,13 @@ import ghidra.program.model.address.AddressSetView;
 import ghidra.program.model.address.AddressSpace;
 import ghidra.program.model.lang.Register;
 import ghidra.program.model.lang.RegisterValue;
+import ghidra.program.model.listing.Function;
+import ghidra.program.model.listing.FunctionIterator;
 import ghidra.program.model.listing.Instruction;
+import ghidra.program.model.listing.InstructionIterator;
 import ghidra.program.model.pcode.PcodeOp;
+import ghidra.program.model.scalar.Scalar;
+import java.nio.charset.StandardCharsets;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -48,9 +53,9 @@ import java.util.Set;
 
 public class RunP1MEMachine extends GhidraScript {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-    private static final String CONTRACT_SCHEMA = "rh850-p1me-machine-run-v1";
-    private static final String MODEL_SCHEMA = "rh850-p1me-machine-v1";
-    private static final String SCENARIO_SCHEMA = "rh850-p1me-machine-scenario-v1";
+    private static final String CONTRACT_SCHEMA = "rh850-p1me-machine-run-v2";
+    private static final String MODEL_SCHEMA = "rh850-p1me-machine-v2";
+    private static final String SCENARIO_SCHEMA = "rh850-p1me-machine-scenario-v2";
 
     static final class MachineFault extends RuntimeException {
         final String kind;
@@ -93,6 +98,11 @@ public class RunP1MEMachine extends GhidraScript {
             this.operation = operation;
         }
     }
+    static final class ResetRule {
+        String reset_class;
+        String mode;
+    }
+
 
     static final class RegionDef {
         String name;
@@ -102,6 +112,8 @@ public class RunP1MEMachine extends GhidraScript {
         String access;
         boolean executable;
         String alias_group;
+        String reset_control;
+        List<ResetRule> reset_rules = new ArrayList<>();
         String reset_policy;
         String evidence;
         String source_ref;
@@ -124,6 +136,16 @@ public class RunP1MEMachine extends GhidraScript {
         String evidence;
         String source_ref;
         String description;
+        String trigger;
+        String status_register;
+        String secondary_status_register;
+        String access_register;
+        String history_register;
+        String reload_prefix;
+        String counter_prefix;
+        Long payload_address;
+        Long completion_value;
+        Long channel_count;
 
         boolean contains(long candidate, int width) {
             long end = candidate + Integer.toUnsignedLong(width);
@@ -138,12 +160,21 @@ public class RunP1MEMachine extends GhidraScript {
         }
     }
 
+    static final class ProductDef {
+        String product_id;
+    }
+
+    static final class EvidenceLayer {
+        List<RegionDef> regions = new ArrayList<>();
+        List<RegisterDef> registers = new ArrayList<>();
+    }
+
     static final class MachineSpec {
         String schema;
-        List<String> product_ids;
+        List<ProductDef> products;
         long p_bus_hz;
-        List<RegionDef> regions;
-        List<RegisterDef> registers;
+        EvidenceLayer manual;
+        EvidenceLayer target_derived;
     }
 
     static final class ImageDef {
@@ -194,10 +225,49 @@ public class RunP1MEMachine extends GhidraScript {
         String access;
     }
 
+    static final class EntryRequirement {
+        int index;
+        String mnemonic;
+        Integer operand;
+        String scalar;
+    }
+
+    static final class EntrySelector {
+        String role;
+        String scope;
+        String shape_sha256;
+        int instruction_count;
+        int body_size;
+        int offset;
+        List<EntryRequirement> requirements = new ArrayList<>();
+    }
+    static final class ResolvedEntry {
+        final long address;
+        final JsonObject proof;
+
+        ResolvedEntry(long address, JsonObject proof) {
+            this.address = address;
+            this.proof = proof;
+        }
+    }
+
+    static final class SelectorCandidate {
+        final long address;
+        final int bodySize;
+        final List<Instruction> instructions;
+
+        SelectorCandidate(long address, int bodySize, List<Instruction> instructions) {
+            this.address = address;
+            this.bodySize = bodySize;
+            this.instructions = instructions;
+        }
+    }
+
+
     static final class Scenario {
         String schema;
         String name;
-        String entry;
+        EntrySelector entry;
         long max_instructions;
         String reset = "none";
         List<String> stop_addresses = new ArrayList<>();
@@ -214,11 +284,12 @@ public class RunP1MEMachine extends GhidraScript {
         TargetDef target;
         String model_path;
         String model_sha256;
-        Scenario scenario;
+        List<Scenario> scenarios;
     }
 
     static final class Trace {
         long instructions;
+        final List<Long> recentPcs = new ArrayList<>();
         final Set<Long> executed = new HashSet<>();
         final Map<String, Long> syncCounts = new LinkedHashMap<>();
         final List<JsonObject> memoryAccesses = new ArrayList<>();
@@ -287,8 +358,9 @@ public class RunP1MEMachine extends GhidraScript {
             this.language = language;
             this.spec = spec;
             this.trace = trace;
-            this.regions = new ArrayList<>(spec.regions);
-            this.registers = new ArrayList<>(spec.registers);
+            this.regions = new ArrayList<>(spec.manual.regions);
+            this.registers = new ArrayList<>(spec.manual.registers);
+            this.registers.addAll(spec.target_derived.registers);
             regions.sort(Comparator.comparingLong(row -> row.start));
             for (RegisterDef register : registers) registersByName.put(register.name, register);
             registers.sort(Comparator.comparingLong(row -> row.address));
@@ -317,13 +389,41 @@ public class RunP1MEMachine extends GhidraScript {
         }
 
         RegionDef region(long address, int size) {
-            for (RegionDef region : regions) if (region.contains(address, size)) return region;
-            return null;
+            int low = 0;
+            int high = regions.size() - 1;
+            int candidate = -1;
+            while (low <= high) {
+                int middle = (low + high) >>> 1;
+                if (Long.compareUnsigned(regions.get(middle).start, address) <= 0) {
+                    candidate = middle;
+                    low = middle + 1;
+                }
+                else {
+                    high = middle - 1;
+                }
+            }
+            if (candidate < 0) return null;
+            RegionDef region = regions.get(candidate);
+            return region.contains(address, size) ? region : null;
         }
 
         RegisterDef register(long address, int size) {
-            for (RegisterDef register : registers) if (register.contains(address, size)) return register;
-            return null;
+            int low = 0;
+            int high = registers.size() - 1;
+            int candidate = -1;
+            while (low <= high) {
+                int middle = (low + high) >>> 1;
+                if (Long.compareUnsigned(registers.get(middle).address, address) <= 0) {
+                    candidate = middle;
+                    low = middle + 1;
+                }
+                else {
+                    high = middle - 1;
+                }
+            }
+            if (candidate < 0) return null;
+            RegisterDef register = registers.get(candidate);
+            return register.contains(address, size) ? register : null;
         }
 
         long pc(PcodeThread<byte[]> thread) {
@@ -478,15 +578,7 @@ public class RunP1MEMachine extends GhidraScript {
             trace.access("write", pc(thread), address, size, register.evidence);
         }
 
-        void resetRegion(String name, String resetClass) {
-            RegionDef region = null;
-            for (RegionDef candidate : regions) {
-                if (candidate.name.equals(name)) {
-                    region = candidate;
-                    break;
-                }
-            }
-            if (region == null) throw new IllegalStateException("machine model lacks region " + name);
+        void resetRegion(RegionDef region, String resetClass) {
             byte[] zero = new byte[region.size];
             setMemory(region.start, zero);
             if (region.alias_group != null) {
@@ -497,7 +589,7 @@ public class RunP1MEMachine extends GhidraScript {
             JsonObject event = new JsonObject();
             event.addProperty("kind", "reset-initialization");
             event.addProperty("reset_class", resetClass);
-            event.addProperty("region", name);
+            event.addProperty("region", region.name);
             event.addProperty("size", region.size);
             event.addProperty("evidence", region.source_ref);
             trace.deviceEvents.add(event);
@@ -518,38 +610,29 @@ public class RunP1MEMachine extends GhidraScript {
 
         void applyReset(String resetClass) {
             if (resetClass == null || resetClass.equals("none")) return;
-            if (resetClass.equals("power-on")) {
-                resetControl("STAC_LM0");
-                resetControl("STAC_GRAM");
-                resetRegion("local_ram_pe1", resetClass);
-                resetRegion("global_ram", resetClass);
-                return;
-            }
-            if (resetClass.equals("system-1-cvm")) {
-                resetControl("STAC_LM0");
-                resetControl("STAC_GRAM");
-                resetRegion("local_ram_pe1", resetClass);
-                resetRegion("global_ram", resetClass);
-                return;
-            }
-            if (resetClass.equals("system-1-pin") || resetClass.equals("system-2")) {
-                resetControl("STAC_GRAM");
-                if (resetControlEnabled("STAC_LM0")) {
-                    resetRegion("local_ram_pe1", resetClass);
+            boolean matched = false;
+            for (RegionDef region : regions) {
+                for (ResetRule rule : region.reset_rules) {
+                    if (!resetClass.equals(rule.reset_class)) continue;
+                    matched = true;
+                    if ("force".equals(rule.mode)) {
+                        resetControl(region.reset_control);
+                        resetRegion(region, resetClass);
+                    }
+                    else if ("controlled".equals(rule.mode)) {
+                        if (resetControlEnabled(region.reset_control)) {
+                            resetRegion(region, resetClass);
+                        }
+                    }
+                    else {
+                        throw new IllegalStateException(
+                            "machine model has unknown reset mode: " + rule.mode);
+                    }
                 }
-                resetRegion("global_ram", resetClass);
-                return;
             }
-            if (resetClass.equals("application-1")) {
-                if (resetControlEnabled("STAC_LM0")) {
-                    resetRegion("local_ram_pe1", resetClass);
-                }
-                if (resetControlEnabled("STAC_GRAM")) {
-                    resetRegion("global_ram", resetClass);
-                }
-                return;
+            if (!matched) {
+                throw new IllegalArgumentException("unsupported reset class: " + resetClass);
             }
-            throw new IllegalArgumentException("unsupported reset class: " + resetClass);
         }
 
         long unsigned(byte[] value) {
@@ -566,9 +649,17 @@ public class RunP1MEMachine extends GhidraScript {
                 memorySpace, address, size, true, Reason.INSPECT);
         }
 
+        RegisterDef requiredRegister(String owner, String relation, String name) {
+            RegisterDef register = name == null ? null : registersByName.get(name);
+            if (register == null) {
+                throw new IllegalStateException(owner + " lacks " + relation + " register metadata");
+            }
+            return register;
+        }
+
         void validateDeviceWrite(PcodeThread<byte[]> thread, RegisterDef register,
                                  byte[] value) {
-            if (register.name.equals("FACI_COMMAND_AREA")) {
+            if ("faci-command".equals(register.trigger)) {
                 int command = value[0] & 0xff;
                 if (command != 0x50) {
                     throw fault("unsupported-faci-command", thread, register.address,
@@ -576,42 +667,47 @@ public class RunP1MEMachine extends GhidraScript {
                         String.format("FACI command 0x%02X has no implemented state transition",
                             command));
                 }
-                RegisterDef status = registersByName.get("FSTATR");
+                RegisterDef status = requiredRegister(register.name, "status", register.status_register);
                 long statusValue = unsigned(memory(thread, status.address, status.size));
                 if ((statusValue & FSTATR_FRDY) == 0) {
                     throw fault("faci-not-ready", thread, register.address,
                         value.length, "write", register.evidence,
                         "FACI status-clear command requires FSTATR.FRDY=1");
                 }
-                RegisterDef accessStatus = registersByName.get("FASTAT");
-                RegisterDef commandHistory = registersByName.get("FCMDR");
+                RegisterDef accessStatus = requiredRegister(
+                    register.name, "access-status", register.access_register);
+                RegisterDef commandHistory = requiredRegister(
+                    register.name, "history", register.history_register);
                 memory(thread, accessStatus.address, accessStatus.size);
                 memory(thread, commandHistory.address, commandHistory.size);
             }
-            if (register.name.equals("ICUSCMD") && (unsigned(value) & 0xffff) != 5) {
+            if ("icus-command".equals(register.trigger) && (unsigned(value) & 0xffff) != 5) {
                 throw fault("unsupported-icus-command", thread, register.address,
                     value.length, "write", register.evidence,
                     String.format("ICU-S command 0x%04X has no recovered state transition",
                         unsigned(value) & 0xffff));
             }
-            if ("rscfd".equals(register.behavior) && (unsigned(value) & 1) != 0) {
-                long base = register.name.equals("CFDTMC16") ? 0xFFD24200L
-                    : register.name.equals("CFDTMC_CH1_16") ? 0xFFD24400L : 0;
-                if (base != 0) {
-                    memory(thread, base, 4);
-                    memory(thread, base + 4, 4);
-                    memory(thread, base + 12, 4);
-                    memory(thread, base + 16, 4);
+            if ("rscfd-transmit".equals(register.trigger) && (unsigned(value) & 1) != 0) {
+                if (register.payload_address == null) {
+                    throw new IllegalStateException(register.name + " lacks payload_address metadata");
                 }
+                long base = register.payload_address;
+                memory(thread, base, 4);
+                memory(thread, base + 4, 4);
+                memory(thread, base + 12, 4);
+                memory(thread, base + 16, 4);
             }
-            if ("tauj".equals(register.behavior)
-                    && (register.name.equals("TAUJ0TS") || register.name.equals("TAUJ0TT"))) {
-                memory(thread, registersByName.get("TAUJ0TE").address, 1);
-                if (register.name.equals("TAUJ0TS")) {
-                    long mask = unsigned(value) & 0xf;
-                    for (int channel = 0; channel < 4; channel++) {
+            if ("tauj-start".equals(register.trigger) || "tauj-stop".equals(register.trigger)) {
+                RegisterDef enabled = requiredRegister(
+                    register.name, "status", register.status_register);
+                memory(thread, enabled.address, enabled.size);
+                if ("tauj-start".equals(register.trigger)) {
+                    long mask = unsigned(value);
+                    int channels = Math.toIntExact(register.channel_count);
+                    for (int channel = 0; channel < channels; channel++) {
                         if ((mask & (1L << channel)) == 0) continue;
-                        RegisterDef reload = registersByName.get("TAUJ0CDR" + channel);
+                        RegisterDef reload = requiredRegister(
+                            register.name, "reload", register.reload_prefix + channel);
                         memory(thread, reload.address, reload.size);
                     }
                 }
@@ -630,6 +726,7 @@ public class RunP1MEMachine extends GhidraScript {
             event.addProperty("pc", hex32(pc(thread)));
             event.addProperty("register", register.name);
             event.addProperty("behavior", register.behavior);
+            event.addProperty("trigger", register.trigger);
             event.addProperty("value", hex32(unsigned(value)));
             event.addProperty("evidence", register.evidence);
             trace.deviceEvents.add(event);
@@ -637,19 +734,12 @@ public class RunP1MEMachine extends GhidraScript {
 
         void handleRscfdWrite(PcodeThread<byte[]> thread, RegisterDef register, byte[] value) {
             if ((unsigned(value) & 1) == 0) return;
-            long base;
-            String statusName;
-            if (register.name.equals("CFDTMC16")) {
-                base = 0xFFD24200L;
-                statusName = "CFDTMSTS_CH1";
+            if (register.payload_address == null || register.completion_value == null) {
+                throw new IllegalStateException(register.name + " lacks RSCFD trigger metadata");
             }
-            else if (register.name.equals("CFDTMC_CH1_16")) {
-                base = 0xFFD24400L;
-                statusName = "CFDTMSTS_CH1_16";
-            }
-            else {
-                return;
-            }
+            long base = register.payload_address;
+            RegisterDef status = requiredRegister(
+                register.name, "completion-status", register.status_register);
             byte[] header = memory(base, 8);
             byte[] data = memory(base + 12, 8);
             long id = unsigned(Arrays.copyOfRange(header, 0, 4)) & 0x1fffffffL;
@@ -670,30 +760,35 @@ public class RunP1MEMachine extends GhidraScript {
                 event.addProperty("data_hex", payloadHex);
                 event.addProperty("evidence", register.source_ref);
                 trace.deviceEvents.add(event);
-                setRegisterValue(statusName, 0x04);
+                setRegisterValue(status.name, register.completion_value);
                 setRegisterValue(register.name, 0);
             });
         }
 
         void handleTaujWrite(PcodeThread<byte[]> thread, RegisterDef register, byte[] value) {
-            long mask = unsigned(value) & 0xf;
-            if (!register.name.equals("TAUJ0TS") && !register.name.equals("TAUJ0TT")) return;
-            long enabled = unsigned(memory(registersByName.get("TAUJ0TE").address, 1));
-            boolean starting = register.name.equals("TAUJ0TS");
+            boolean starting = "tauj-start".equals(register.trigger);
+            if (!starting && !"tauj-stop".equals(register.trigger)) return;
+            int channels = Math.toIntExact(register.channel_count);
+            long mask = unsigned(value) & ((1L << channels) - 1);
+            RegisterDef enabledRegister = requiredRegister(
+                register.name, "status", register.status_register);
+            long enabled = unsigned(memory(enabledRegister.address, enabledRegister.size));
             long next = starting ? enabled | mask : enabled & ~mask;
             long issuePc = pc(thread);
-            setRegisterValue("TAUJ0TE", next);
+            setRegisterValue(enabledRegister.name, next);
             scheduleNextTick(() -> {
                 if (starting) {
-                    for (int channel = 0; channel < 4; channel++) {
+                    for (int channel = 0; channel < channels; channel++) {
                         if ((mask & (1L << channel)) == 0) continue;
-                        RegisterDef reload = registersByName.get("TAUJ0CDR" + channel);
-                        RegisterDef counter = registersByName.get("TAUJ0CNT" + channel);
+                        RegisterDef reload = requiredRegister(
+                            register.name, "reload", register.reload_prefix + channel);
+                        RegisterDef counter = requiredRegister(
+                            register.name, "counter", register.counter_prefix + channel);
                         setMemory(counter.address, memory(reload.address, reload.size));
                     }
                 }
                 JsonObject event = new JsonObject();
-                event.addProperty("kind", starting ? "tauj-start" : "tauj-stop");
+                event.addProperty("kind", register.trigger);
                 event.addProperty("pc", hex32(issuePc));
                 event.addProperty("scheduler_tick", trace.instructions);
                 event.addProperty("unit", 0);
@@ -704,14 +799,19 @@ public class RunP1MEMachine extends GhidraScript {
         }
 
         void handleFaciWrite(PcodeThread<byte[]> thread, RegisterDef register, byte[] value) {
-            if (!register.name.equals("FACI_COMMAND_AREA")) return;
             int command = value[0] & 0xff;
             if (command != 0x50) {
                 throw new IllegalStateException("FACI write validation was bypassed");
             }
-            long status = unsigned(memory(registersByName.get("FSTATR").address, 4));
-            long accessStatus = unsigned(memory(registersByName.get("FASTAT").address, 1));
-            long commandHistory = unsigned(memory(registersByName.get("FCMDR").address, 2));
+            RegisterDef statusRegister = requiredRegister(
+                register.name, "status", register.status_register);
+            RegisterDef accessRegister = requiredRegister(
+                register.name, "access-status", register.access_register);
+            RegisterDef historyRegister = requiredRegister(
+                register.name, "history", register.history_register);
+            long status = unsigned(memory(statusRegister.address, statusRegister.size));
+            long accessStatus = unsigned(memory(accessRegister.address, accessRegister.size));
+            long commandHistory = unsigned(memory(historyRegister.address, historyRegister.size));
             long nextStatus = status & ~FSTATR_STATUS_CLEAR_MASK;
             if ((accessStatus & FASTAT_ACCESS_ERROR_MASK) != 0) {
                 nextStatus |= FSTATR_ILGLERR;
@@ -719,11 +819,11 @@ public class RunP1MEMachine extends GhidraScript {
             long nextAccessStatus = (nextStatus & FSTATR_COMMAND_LOCK_MASK) != 0
                 ? accessStatus | FASTAT_CMDLK : accessStatus & ~FASTAT_CMDLK;
             faciSequence.add(command);
-            setRegisterValue("FCMDR", (command << 8) | ((commandHistory >>> 8) & 0xff));
-            setRegisterValue("FSTATR", nextStatus);
-            setRegisterValue("FASTAT", nextAccessStatus);
+            setRegisterValue(historyRegister.name, (command << 8) | ((commandHistory >>> 8) & 0xff));
+            setRegisterValue(statusRegister.name, nextStatus);
+            setRegisterValue(accessRegister.name, nextAccessStatus);
             JsonObject event = new JsonObject();
-            event.addProperty("kind", "faci-command");
+            event.addProperty("kind", register.trigger);
             event.addProperty("pc", hex32(pc(thread)));
             event.addProperty("command", String.format("0x%02X", command));
             event.add("sequence", GSON.toJsonTree(faciSequence));
@@ -733,29 +833,35 @@ public class RunP1MEMachine extends GhidraScript {
         }
 
         void handleIcusWrite(PcodeThread<byte[]> thread, RegisterDef register, byte[] value) {
-            if (!register.name.equals("ICUSCMD")) return;
             long word = unsigned(value);
             JsonObject event = new JsonObject();
-            event.addProperty("kind", "icus-command");
+            event.addProperty("kind", register.trigger);
             event.addProperty("pc", hex32(pc(thread)));
             event.addProperty("selector", (word >>> 16) & 0xffff);
             event.addProperty("command", word & 0xffff);
             event.addProperty("evidence", register.source_ref);
             trace.deviceEvents.add(event);
-            setRegisterValue("ICUSSTS", 0);
-            setRegisterValue("ICUSSTS2", 0);
+            RegisterDef status = requiredRegister(register.name, "status", register.status_register);
+            RegisterDef secondary = requiredRegister(
+                register.name, "secondary-status", register.secondary_status_register);
+            setRegisterValue(status.name, 0);
+            setRegisterValue(secondary.name, 0);
         }
 
         void handleRegisterWrite(PcodeThread<byte[]> thread, long address, int size, byte[] value) {
             RegisterDef register = register(address, size);
             if (register == null) return;
             registerWriteEvent(thread, register, value);
-            if ("rscfd".equals(register.behavior)) handleRscfdWrite(thread, register, value);
-            else if ("faci".equals(register.behavior)) handleFaciWrite(thread, register, value);
-            else if ("icus_recovered".equals(register.behavior)) {
-                handleIcusWrite(thread, register, value);
+            if (register.trigger == null) return;
+            switch (register.trigger) {
+                case "rscfd-transmit": handleRscfdWrite(thread, register, value); break;
+                case "faci-command": handleFaciWrite(thread, register, value); break;
+                case "icus-command": handleIcusWrite(thread, register, value); break;
+                case "tauj-start":
+                case "tauj-stop": handleTaujWrite(thread, register, value); break;
+                default: throw new IllegalStateException(
+                    "unknown machine-model trigger: " + register.trigger);
             }
-            else if ("tauj".equals(register.behavior)) handleTaujWrite(thread, register, value);
         }
 
         void afterWrite(PcodeThread<byte[]> thread, long address, int size, byte[] value) {
@@ -906,6 +1012,8 @@ public class RunP1MEMachine extends GhidraScript {
             }
             model.trace.instructions++;
             model.trace.executed.add(instruction.getAddress().getOffset());
+            model.trace.recentPcs.add(instruction.getAddress().getOffset());
+            if (model.trace.recentPcs.size() > 16) model.trace.recentPcs.remove(0);
             model.dispatchDueEvents();
         }
 
@@ -1003,6 +1111,144 @@ public class RunP1MEMachine extends GhidraScript {
         }
         return null;
     }
+    private String shapeHash(List<Instruction> instructions) throws Exception {
+        StringBuilder canonical = new StringBuilder();
+        for (Instruction instruction : instructions) {
+            canonical.append(instruction.getMnemonicString().toLowerCase())
+                .append(':').append(instruction.getLength()).append('\n');
+        }
+        return sha256(canonical.toString().getBytes(StandardCharsets.UTF_8));
+    }
+
+    private boolean requirementsMatch(
+            List<Instruction> instructions, List<EntryRequirement> requirements) {
+        for (EntryRequirement requirement : requirements) {
+            if (requirement.index < 0 || requirement.index >= instructions.size()) return false;
+            Instruction instruction = instructions.get(requirement.index);
+            if (!instruction.getMnemonicString().equalsIgnoreCase(requirement.mnemonic)) return false;
+            if (requirement.scalar != null) {
+                if (requirement.operand == null) return false;
+                Scalar scalar = instruction.getScalar(requirement.operand);
+                if (scalar == null || scalar.getUnsignedValue() != parseUnsigned(requirement.scalar)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private List<SelectorCandidate> functionCandidates(
+            EntrySelector selector, long imageBase, int imageSize) throws Exception {
+        List<SelectorCandidate> matches = new ArrayList<>();
+        FunctionIterator functions = currentProgram.getFunctionManager().getFunctions(true);
+        while (functions.hasNext()) {
+            Function function = functions.next();
+            long address = function.getEntryPoint().getOffset();
+            if (address < imageBase || address >= imageBase + imageSize) continue;
+            long bodyLength = function.getBody().getNumAddresses();
+            if (bodyLength != selector.body_size
+                    || function.getBody().getMinAddress().getOffset() != address
+                    || function.getBody().getMaxAddress().getOffset() - address + 1 != bodyLength) {
+                continue;
+            }
+            List<Instruction> instructions = new ArrayList<>();
+            InstructionIterator iterator =
+                currentProgram.getListing().getInstructions(function.getBody(), true);
+            while (iterator.hasNext()) instructions.add(iterator.next());
+            if (instructions.size() != selector.instruction_count
+                    || !shapeHash(instructions).equalsIgnoreCase(selector.shape_sha256)
+                    || !requirementsMatch(instructions, selector.requirements)) {
+                continue;
+            }
+            matches.add(new SelectorCandidate(address, Math.toIntExact(bodyLength), instructions));
+        }
+        return matches;
+    }
+
+    private List<SelectorCandidate> instructionCandidates(
+            EntrySelector selector, long imageBase, int imageSize) throws Exception {
+        List<Instruction> all = new ArrayList<>();
+        InstructionIterator iterator =
+            currentProgram.getListing().getInstructions(currentProgram.getMemory(), true);
+        while (iterator.hasNext()) {
+            Instruction instruction = iterator.next();
+            long address = instruction.getAddress().getOffset();
+            if (address >= imageBase && address < imageBase + imageSize) all.add(instruction);
+        }
+        List<SelectorCandidate> matches = new ArrayList<>();
+        for (int start = 0; start + selector.instruction_count <= all.size(); start++) {
+            List<Instruction> sequence =
+                all.subList(start, start + selector.instruction_count);
+            long expected = sequence.get(0).getAddress().getOffset();
+            int bodySize = 0;
+            boolean contiguous = true;
+            for (Instruction instruction : sequence) {
+                if (instruction.getAddress().getOffset() != expected) {
+                    contiguous = false;
+                    break;
+                }
+                bodySize += instruction.getLength();
+                expected += instruction.getLength();
+            }
+            if (!contiguous || bodySize != selector.body_size
+                    || !shapeHash(sequence).equalsIgnoreCase(selector.shape_sha256)
+                    || !requirementsMatch(sequence, selector.requirements)) {
+                continue;
+            }
+            matches.add(new SelectorCandidate(
+                sequence.get(0).getAddress().getOffset(), bodySize, new ArrayList<>(sequence)));
+        }
+        return matches;
+    }
+
+    private ResolvedEntry resolveEntry(
+            EntrySelector selector, byte[] codeflash, long imageBase) throws Exception {
+        if (selector == null || selector.role == null || selector.role.isBlank()
+                || selector.shape_sha256 == null || selector.shape_sha256.length() != 64
+                || selector.instruction_count <= 0 || selector.body_size <= 0) {
+            throw new IllegalArgumentException("entry selector is incomplete");
+        }
+        List<SelectorCandidate> matches;
+        if ("function".equals(selector.scope)) {
+            matches = functionCandidates(selector, imageBase, codeflash.length);
+        }
+        else if ("instructions".equals(selector.scope)) {
+            matches = instructionCandidates(selector, imageBase, codeflash.length);
+        }
+        else {
+            throw new IllegalArgumentException("unsupported entry selector scope: " + selector.scope);
+        }
+        if (matches.size() != 1) {
+            throw new IllegalArgumentException(
+                "entry role " + selector.role + " resolved to " + matches.size() + " candidates");
+        }
+        SelectorCandidate match = matches.get(0);
+        long resolved = match.address + selector.offset;
+        if (resolved < imageBase || resolved >= imageBase + codeflash.length) {
+            throw new IllegalArgumentException("resolved entry leaves CodeFlash: " + hex32(resolved));
+        }
+        Instruction entryInstruction = currentProgram.getListing().getInstructionAt(
+            currentProgram.getLanguage().getDefaultSpace().getAddress(resolved));
+        if (entryInstruction == null) {
+            throw new IllegalArgumentException("resolved entry is not an instruction: " + hex32(resolved));
+        }
+        int bodyOffset = Math.toIntExact(match.address - imageBase);
+        int entryOffset = Math.toIntExact(resolved - imageBase);
+        JsonObject proof = new JsonObject();
+        proof.addProperty("role", selector.role);
+        proof.addProperty("scope", selector.scope);
+        proof.addProperty("shape_sha256", selector.shape_sha256.toLowerCase());
+        proof.addProperty("candidate_count", matches.size());
+        proof.addProperty("base_address", hex32(match.address));
+        proof.addProperty("offset", selector.offset);
+        proof.addProperty("resolved_address", hex32(resolved));
+        proof.addProperty("matched_code_sha256", sha256(Arrays.copyOfRange(
+            codeflash, bodyOffset, bodyOffset + match.bodySize)));
+        proof.addProperty("entry_instruction_sha256", sha256(Arrays.copyOfRange(
+            codeflash, entryOffset, entryOffset + entryInstruction.getLength())));
+        return new ResolvedEntry(resolved, proof);
+    }
+
 
     private byte[] loadImage(ImageDef image, String label) throws Exception {
         Path path = Path.of(image.path);
@@ -1129,58 +1375,40 @@ public class RunP1MEMachine extends GhidraScript {
         return results;
     }
 
-    private JsonObject reportBase(RunContract contract, Trace trace) {
+    private JsonObject reportBase(
+            RunContract contract, Scenario scenario, Trace trace, JsonObject resolution) {
         JsonObject report = new JsonObject();
-        report.addProperty("schema", "rh850-p1me-machine-report-v1");
+        report.addProperty("schema", "rh850-p1me-machine-report-v2");
         report.addProperty("target", contract.target.name);
         report.addProperty("mcu", contract.target.mcu);
-        report.addProperty("scenario", contract.scenario.name);
+        report.addProperty("scenario", scenario.name);
         report.addProperty("engine", "Ghidra PcodeEmulator");
         report.addProperty("codeflash_sha256", contract.target.codeflash.sha256);
         report.addProperty("model_sha256", contract.model_sha256);
         report.addProperty("executable_overlays", false);
+        report.add("entry_resolution", resolution);
+        JsonObject resolvedContract = new JsonObject();
+        resolvedContract.add("entry", resolution.deepCopy());
+        resolvedContract.add("stop_addresses", GSON.toJsonTree(scenario.stop_addresses));
+        resolvedContract.addProperty("max_instructions", scenario.max_instructions);
+        resolvedContract.addProperty("reset", scenario.reset);
+        report.add("resolved_run_contract", resolvedContract);
         report.addProperty("instruction_count", trace.instructions);
         report.addProperty("unique_instruction_addresses", trace.executed.size());
+        JsonArray recent = new JsonArray();
+        for (long pc : trace.recentPcs) recent.add(hex32(pc));
+        report.add("recent_pcs", recent);
         report.add("sync_counts", GSON.toJsonTree(trace.syncCounts));
         report.add("memory_accesses", GSON.toJsonTree(trace.memoryAccesses));
         report.add("device_events", GSON.toJsonTree(trace.deviceEvents));
         return report;
     }
 
-    @Override
-    protected void run() throws Exception {
-        String[] args = getScriptArgs();
-        if (args.length != 2) {
-            throw new IllegalArgumentException("expected contract JSON and report JSON paths");
-        }
-        Path contractPath = Path.of(args[0]);
-        Path reportPath = Path.of(args[1]);
-        JsonObject contractJson = GSON.fromJson(Files.readString(contractPath), JsonObject.class);
-        requireKeys(contractJson, Set.of("schema", "target", "model_path", "model_sha256", "scenario"), "run contract");
-        JsonObject scenarioJson = contractJson.getAsJsonObject("scenario");
-        requireKeys(scenarioJson, Set.of("schema", "name", "entry", "max_instructions",
-            "stop_addresses", "registers", "memory", "pre_reset_memory", "artifacts", "checks",
-            "expected_fault", "reset"), "scenario");
-        RunContract contract = GSON.fromJson(contractJson, RunContract.class);
-        if (!CONTRACT_SCHEMA.equals(contract.schema)) throw new IllegalArgumentException("run contract schema drift");
-        if (!SCENARIO_SCHEMA.equals(contract.scenario.schema)) throw new IllegalArgumentException("scenario schema drift");
-        if (contract.scenario.max_instructions <= 0) throw new IllegalArgumentException("max_instructions must be positive");
-
-        byte[] modelBytes = Files.readAllBytes(Path.of(contract.model_path));
-        if (!sha256(modelBytes).equalsIgnoreCase(contract.model_sha256)) {
-            throw new IllegalArgumentException("machine model SHA-256 drift");
-        }
-        MachineSpec machineSpec = GSON.fromJson(new String(modelBytes), MachineSpec.class);
-        if (!MODEL_SCHEMA.equals(machineSpec.schema)) throw new IllegalArgumentException("machine model schema drift");
-        if (!machineSpec.product_ids.contains(contract.target.mcu)) {
-            throw new IllegalArgumentException("machine model does not support MCU " + contract.target.mcu);
-        }
-
-        SleighLanguage language = (SleighLanguage) currentProgram.getLanguage();
-        if (!language.getLanguageID().getIdAsString().equals(contract.target.processor)) {
-            throw new IllegalArgumentException("processor mismatch: " + language.getLanguageID());
-        }
-
+    private JsonObject runScenario(
+            RunContract contract, MachineSpec machineSpec, SleighLanguage language,
+            Scenario scenario, byte[] codeflash, byte[] dataflash) throws Exception {
+        ResolvedEntry resolved = resolveEntry(
+            scenario.entry, codeflash, parseUnsigned(contract.target.codeflash.base));
         Trace trace = new Trace();
         Model model = new Model(language, machineSpec, trace);
         Callbacks callbacks = new Callbacks(language, model);
@@ -1193,28 +1421,24 @@ public class RunP1MEMachine extends GhidraScript {
         model.attach(emulator);
         PcodeThread<byte[]> thread = emulator.newThread("PE1");
         model.initializeProcessorReset(thread);
-
-        byte[] codeflash = loadImage(contract.target.codeflash, "CodeFlash");
         model.setMemory(parseUnsigned(contract.target.codeflash.base), codeflash);
         if (contract.target.dataflash != null) {
-            byte[] dataflash = loadImage(contract.target.dataflash, "DataFlash");
             model.setMemory(parseUnsigned(contract.target.dataflash.base), dataflash);
         }
         model.initializeResetRegisters();
-        initializeMemoryRows(model, contract.scenario.pre_reset_memory);
-        model.applyReset(contract.scenario.reset);
-        initializeScenario(model, thread, language, contract.scenario);
+        initializeMemoryRows(model, scenario.pre_reset_memory);
+        model.applyReset(scenario.reset);
+        initializeScenario(model, thread, language, scenario);
 
-        long entry = parseUnsigned(contract.scenario.entry);
-        thread.overrideCounter(language.getDefaultSpace().getAddress(entry));
+        thread.overrideCounter(language.getDefaultSpace().getAddress(resolved.address));
         thread.overrideContextWithDefault();
         Set<Long> stops = new HashSet<>();
-        for (String value : contract.scenario.stop_addresses) stops.add(parseUnsigned(value));
+        for (String value : scenario.stop_addresses) stops.add(parseUnsigned(value));
 
         MachineFault fault = null;
         MachineHalt halt = null;
         try {
-            while (trace.instructions < contract.scenario.max_instructions
+            while (trace.instructions < scenario.max_instructions
                     && !stops.contains(thread.getCounter().getOffset())) {
                 thread.stepInstruction();
             }
@@ -1225,39 +1449,151 @@ public class RunP1MEMachine extends GhidraScript {
             if (fault == null && halt == null) throw exc;
         }
 
-        JsonObject report = reportBase(contract, trace);
-        report.addProperty("final_pc", hex32(thread.getCounter().getOffset()));
+        JsonObject report = reportBase(contract, scenario, trace, resolved.proof);
+        long finalPc = thread.getCounter().getOffset();
+        report.addProperty("final_pc", hex32(finalPc));
         if (fault != null) report.add("fault", fault.toJson());
         if (halt != null) report.addProperty("halt", halt.operation);
 
-        List<JsonObject> checks = evaluateChecks(model, thread, language, contract.scenario);
+        List<JsonObject> checks = evaluateChecks(model, thread, language, scenario);
         report.add("checks", GSON.toJsonTree(checks));
         boolean checksPassed = checks.stream().allMatch(row -> row.get("passed").getAsBoolean());
         boolean passed;
-        if (contract.scenario.expected_fault != null) {
-            ExpectedFault expected = contract.scenario.expected_fault;
+        String termination;
+        if (scenario.expected_fault != null) {
+            ExpectedFault expected = scenario.expected_fault;
             passed = fault != null
                 && (expected.kind == null || expected.kind.equals(fault.kind))
                 && (expected.address == null || parseUnsigned(expected.address) == fault.address)
                 && (expected.access == null || expected.access.equals(fault.access))
                 && checksPassed;
+            termination = passed ? "expected-fault"
+                : fault != null ? "unexpected-fault" : "missing-expected-fault";
         }
         else {
-            boolean completed = halt != null
-                || stops.contains(thread.getCounter().getOffset());
+            boolean atStop = stops.contains(finalPc);
+            boolean completed = halt != null || atStop;
             passed = fault == null && completed && checksPassed;
+            termination = fault != null ? "unexpected-fault"
+                : halt != null ? "halt"
+                : atStop ? "stop-address"
+                : trace.instructions >= scenario.max_instructions ? "instruction-budget"
+                : "incomplete";
         }
+        report.addProperty("termination_reason", termination);
         report.addProperty("passed", passed);
         report.addProperty("status",
-            passed && contract.scenario.expected_fault != null
+            passed && scenario.expected_fault != null
                 ? "verified-expected-fault"
                 : passed ? "verified-local-execution" : "failed");
         report.addProperty("evidence_boundary",
-            "exact firmware bytes plus manual/recovered model rules; no silicon or vehicle claim");
+            "exact firmware bytes plus explicit manual/recovered model rules; no silicon or vehicle claim");
+        return report;
+    }
+
+    private void validateScenarioJson(JsonObject scenarioJson) {
+        requireKeys(scenarioJson, Set.of("schema", "name", "entry", "max_instructions",
+            "stop_addresses", "registers", "memory", "pre_reset_memory", "artifacts", "checks",
+            "expected_fault", "reset"), "scenario");
+        JsonObject entry = scenarioJson.getAsJsonObject("entry");
+        requireKeys(entry, Set.of("role", "scope", "shape_sha256", "instruction_count",
+            "body_size", "offset", "requirements"), "entry selector");
+        JsonArray requirements = entry.getAsJsonArray("requirements");
+        for (JsonElement element : requirements) {
+            requireKeys(element.getAsJsonObject(),
+                Set.of("index", "mnemonic", "operand", "scalar"), "entry requirement");
+        }
+    }
+
+    @Override
+    protected void run() throws Exception {
+        String[] args = getScriptArgs();
+        if (args.length != 2) {
+            throw new IllegalArgumentException("expected contract JSON and report JSON paths");
+        }
+        Path contractPath = Path.of(args[0]);
+        Path reportPath = Path.of(args[1]);
+        JsonObject contractJson = GSON.fromJson(Files.readString(contractPath), JsonObject.class);
+        requireKeys(contractJson,
+            Set.of("schema", "target", "model_path", "model_sha256", "scenarios"),
+            "run contract");
+        for (JsonElement scenarioJson : contractJson.getAsJsonArray("scenarios")) {
+            validateScenarioJson(scenarioJson.getAsJsonObject());
+        }
+        RunContract contract = GSON.fromJson(contractJson, RunContract.class);
+        if (!CONTRACT_SCHEMA.equals(contract.schema)) {
+            throw new IllegalArgumentException("run contract schema drift");
+        }
+        if (contract.scenarios == null || contract.scenarios.isEmpty()) {
+            throw new IllegalArgumentException("run contract requires at least one scenario");
+        }
+        for (Scenario scenario : contract.scenarios) {
+            if (!SCENARIO_SCHEMA.equals(scenario.schema)) {
+                throw new IllegalArgumentException("scenario schema drift: " + scenario.name);
+            }
+            if (scenario.max_instructions <= 0) {
+                throw new IllegalArgumentException("max_instructions must be positive: " + scenario.name);
+            }
+        }
+
+        byte[] modelBytes = Files.readAllBytes(Path.of(contract.model_path));
+        if (!sha256(modelBytes).equalsIgnoreCase(contract.model_sha256)) {
+            throw new IllegalArgumentException("machine model SHA-256 drift");
+        }
+        MachineSpec machineSpec = GSON.fromJson(
+            new String(modelBytes, StandardCharsets.UTF_8), MachineSpec.class);
+        if (!MODEL_SCHEMA.equals(machineSpec.schema)) {
+            throw new IllegalArgumentException("machine model schema drift");
+        }
+        boolean productSupported = machineSpec.products.stream()
+            .anyMatch(product -> product.product_id.equals(contract.target.mcu));
+        if (!productSupported) {
+            throw new IllegalArgumentException("machine model does not describe MCU " + contract.target.mcu);
+        }
+
+        SleighLanguage language = (SleighLanguage) currentProgram.getLanguage();
+        if (!language.getLanguageID().getIdAsString().equals(contract.target.processor)) {
+            throw new IllegalArgumentException("processor mismatch: " + language.getLanguageID());
+        }
+        byte[] codeflash = loadImage(contract.target.codeflash, "CodeFlash");
+        byte[] dataflash = contract.target.dataflash == null
+            ? null : loadImage(contract.target.dataflash, "DataFlash");
+
+        JsonArray reports = new JsonArray();
+        boolean passed = true;
+        for (Scenario scenario : contract.scenarios) {
+            JsonObject report;
+            try {
+                report = runScenario(
+                    contract, machineSpec, language, scenario, codeflash, dataflash);
+            }
+            catch (Exception exc) {
+                report = new JsonObject();
+                report.addProperty("schema", "rh850-p1me-machine-report-v2");
+                report.addProperty("target", contract.target.name);
+                report.addProperty("mcu", contract.target.mcu);
+                report.addProperty("scenario", scenario.name);
+                report.addProperty("status", "failed");
+                report.addProperty("passed", false);
+                report.addProperty("termination_reason", "runner-error");
+                JsonObject error = new JsonObject();
+                error.addProperty("type", exc.getClass().getSimpleName());
+                error.addProperty("detail", exc.getMessage());
+                report.add("error", error);
+            }
+            reports.add(report);
+            passed &= report.get("passed").getAsBoolean();
+        }
+        JsonObject batch = new JsonObject();
+        batch.addProperty("schema", "rh850-p1me-machine-batch-report-v1");
+        batch.addProperty("target", contract.target.name);
+        batch.addProperty("mcu", contract.target.mcu);
+        batch.addProperty("passed", passed);
+        batch.add("reports", reports);
         Files.createDirectories(reportPath.getParent());
-        Files.writeString(reportPath, GSON.toJson(report) + "\n");
+        Files.writeString(reportPath, GSON.toJson(batch) + "\n");
         println("P1ME_MACHINE_REPORT=" + reportPath);
         println("P1ME_MACHINE_RESULT=" + (passed ? "PASS" : "FAIL"));
-        if (!passed) throw new IllegalStateException("P1M-E machine scenario failed; see " + reportPath);
+        if (!passed) throw new IllegalStateException("P1M-E machine batch failed; see " + reportPath);
     }
 }

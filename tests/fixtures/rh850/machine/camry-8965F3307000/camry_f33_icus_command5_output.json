@@ -1,17 +1,34 @@
 {
-  "schema": "rh850-p1me-machine-scenario-v1",
+  "schema": "rh850-p1me-machine-scenario-v2",
   "name": "camry-f33-exact-icus-command-five-output-callback",
-  "entry": "0x0008A5AE",
+  "entry": {
+    "role": "exact-icus-command-five-output-callback",
+    "scope": "instructions",
+    "shape_sha256": "7a660c536ae6cd2deccfb515979f687bed74195f37383efdcf8d7c7ef087fd7f",
+    "instruction_count": 26,
+    "body_size": 82,
+    "offset": 0,
+    "requirements": [
+      {
+        "index": 2,
+        "mnemonic": "mov",
+        "operand": 0,
+        "scalar": "2"
+      }
+    ]
+  },
   "max_instructions": 200,
-  "stop_addresses": ["0x00010000"],
+  "stop_addresses": [
+    "0x00010000"
+  ],
+  "gpr_fill": "0",
   "registers": {
-    "r1": "0", "r2": "0", "sp": "0xFEBE2000", "gp": "0xFEBEB800",
-    "tp": "0x00023DFC", "r6": "0", "r7": "0", "r8": "0", "r9": "0",
-    "r10": "0", "r11": "0", "r12": "0", "r13": "0", "r14": "0",
-    "r15": "0", "r16": "0", "r17": "0", "r18": "0", "r19": "0",
-    "r20": "0", "r21": "0", "r22": "0", "r23": "0", "r24": "0",
-    "r25": "0", "r26": "0", "r27": "0", "r28": "0", "r29": "0",
-    "ep": "0", "lp": "0x00010000", "PSW": "0", "PMR": "0"
+    "sp": "0xFEBE2000",
+    "gp": "0xFEBEB800",
+    "tp": "0x00023DFC",
+    "lp": "0x00010000",
+    "PSW": "0",
+    "PMR": "0"
   },
   "memory": [
     {

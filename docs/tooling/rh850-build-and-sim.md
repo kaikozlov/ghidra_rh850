@@ -47,6 +47,13 @@ The canonical device source is `data/devices/p1me.rdl`.
 - `data/p1m_sfr_labels.csv`, consumed by the Ghidra device-profile scripts;
 - `data/p1me_product_memory.json`, consumed by product/memory checks.
 
+All three projections and their code consumers are discoverable through
+`tools/artifact`. The generated machine model separates public-manual regions
+and registers from `target_derived` recovered register behavior. Its product
+records identify `R7F701381` and `R7F701383` individually; the runtime checks
+the selected target's exact MCU identity rather than treating “P1M-E” as one
+undifferentiated part.
+
 ### Architecture
 
 The machine has one owner for each layer:
@@ -58,16 +65,25 @@ The machine has one owner for each layer:
    MPU and interrupt system registers use the G3M selector map from
    R01US0123EJ0140.
 2. `data/devices/p1me.rdl` defines the P1M-E address spaces, register widths,
-   access policy, reset metadata, evidence class, and modeled behavior owner.
-   Generated JSON/CSV files are projections, not competing sources.
-3. `data/analysis_targets.json` binds the common P1M-E machine to one exact
-   MCU, processor language, CodeFlash identity, and optional DataFlash identity.
-4. A scenario supplies only external state: processor registers, RAM/register
-   values, reset class, stop addresses, checks, and hash-bound RAM artifacts.
-   `pre_reset_memory` exists only for exercising reset retention/clearing.
-5. `RunP1MEMachine.java` composes those layers with `PcodeEmulator`, enforces
-   execute/read/write policy before each operation, and retires queued peripheral
-   events at deterministic machine ticks before emitting the trace and verdict.
+   access policy, reset rules, evidence class, and peripheral trigger
+   relationships. Generated JSON/CSV files are projections, not competing
+   sources. Java dispatches generated trigger/reset metadata; it does not select
+   TAUJ, RSCFD, FACI, or ICU-S behavior by register-name tables.
+3. `data/analysis_targets.json` supplies exact MCU, processor language,
+   CodeFlash identity, and optional DataFlash identity. It is not a capability
+   whitelist.
+4. A scenario supplies external state, a target-independent structural
+   firmware-role selector, stop addresses, checks, and optional hash-bound RAM
+   artifacts. `gpr_fill` states the general-register baseline once; `registers`
+   contains only overrides and system-register state. `pre_reset_memory` exists
+   only for exercising reset retention/clearing.
+5. `RunP1MEMachine.java` resolves each role uniquely from the selected analyzed
+   firmware, records the structural and exact-byte proof, composes the machine
+   with `PcodeEmulator`, and enforces execute/read/write policy before each
+   operation. One target session loads immutable images and model data once,
+   then runs each scenario with fresh emulator state.
+6. Reports embed the resolved run contract, explicit termination reason, first
+   failing check data, fault provenance, and a bounded recent-PC window.
 
 ### Implementation plan and tracked status
 
@@ -80,31 +96,32 @@ device-model runtime.
 
 ```mermaid
 flowchart LR
-  Target["analysis_targets.json<br/>image + MCU identity"] --> Contract["hash-bound run contract"]
-  RDL["p1me.rdl<br/>regions + MMIO + reset metadata"] --> Projection["generated machine JSON"]
+  Target["analysis_targets.json<br/>exact image + MCU identity"] --> Resolver["unique firmware-role resolver"]
+  Scenario["scenario-v2<br/>shape + state + checks"] --> Resolver
+  RDL["p1me.rdl<br/>manual + recovered evidence layers"] --> Projection["generated machine JSON"]
   SLEIGH["RH850G3M SLEIGH<br/>CPU + system registers"] --> Emulator["PcodeEmulator"]
+  Resolver --> Contract["resolved run contract<br/>shape + exact-byte proof"]
   Contract --> Emulator
   Projection --> Emulator
   Emulator --> Policy["memory / alignment / MPU policy"]
-  Emulator --> Scheduler["deterministic peripheral event queue"]
-  Scheduler --> Devices["TAUJ / RSCFD / FACI / ICU-S"]
-  Policy --> Report["trace + checks + strict faults"]
-  Devices --> Report
+  Emulator --> Scheduler["metadata-driven device events"]
+  Policy --> Report["termination + checks + bounded context"]
+  Scheduler --> Report
 ```
 
 |Workstream|Design and invariant|Tracked status|
 |---|---|---|
 |CPU execution|Use the vendored RH850G3M SLEIGH language; preserve distinct decoded synchronization mnemonics while sharing one ordering-boundary p-code operation.|Implemented for the exact paths and synthetic instruction corpus. The processor fixture covers arithmetic/flags, loads/stores, branches, calls/returns, `CAXI` compare-exchange, `DI`/`EI`, system-register selectors, trap/exception return, MPU registers, and synchronization decode. This is not a claim that every G3M opcode has an independent semantic test.|
 |Memory subsystem|Load registered CodeFlash/DataFlash by exact hash; map LocalRAM, GlobalRAM, SFR, and alias regions from generated data; use the target language's little-endian byte order; enforce read/write/execute policy, initialized-state provenance, alignment, and per-register access widths before side effects.|Implemented. PE1/self LocalRAM aliases are kept coherent. Unknown MMIO, illegal widths, and uninitialized reads fault.|
-|Reset behavior|Initialize processor reset registers from the G3M architectural reset state; apply the P1M-E reset-source matrix; restore or retain STAC controls according to reset source before deciding which RAM regions to clear.|Implemented for `none`, `power-on`, `system-1-pin`, `system-1-cvm`, `system-2`, and `application-1`. Pin/System Reset 2 retain `STAC_LM0`; CVM reset restores it and therefore forces local initialization. Application Reset 1 consults both `STAC_LM0` and `STAC_GRAM`.|
-|Peripheral scheduler|Device writes may enqueue deterministic events keyed by retired machine ticks. Events run in insertion order at a shared tick; the report records the dispatch tick. No wall-clock polling or host sleeps participate.|Implemented. RSCFD transmit completion and TAUJ start/stop transitions use the queue. Machine ticks are deterministic ordering units, not silicon cycle timing.|
+|Reset behavior|Initialize processor reset registers from the G3M architectural reset state; apply generated P1M-E reset-source rules; restore or retain STAC controls according to reset source before deciding which RAM regions to clear.|Implemented for `none`, `power-on`, `system-1-pin`, `system-1-cvm`, `system-2`, and `application-1`. The reset matrix and STAC relationships come from the generated model rather than Java register-name branches.|
+|Peripheral scheduler|Generated trigger metadata may enqueue deterministic events keyed by retired machine ticks. Events run in insertion order at a shared tick; the report records the dispatch tick. No wall-clock polling or host sleeps participate.|Implemented. RSCFD transmit completion and TAUJ start/stop transitions use the queue. Machine ticks are deterministic ordering units, not silicon cycle timing.|
 |Interrupts|Model typed EIC registers, `PSW.ID` transitions, and exact firmware pending-bit acknowledge accesses without inventing interrupt delivery.|Bounded implementation. Priority arbitration and asynchronous peripheral exception entry/delivery remain unimplemented and MUST be added before a scenario can claim those paths.|
 |TAUJ|Model start/stop state, channel enable state, prescaler/mode storage, and reload-to-counter transfer used by the exact initialization path.|Implemented for the retained path. Continuous decrement, underflow, and interrupt generation remain outside the current evidence boundary.|
 |RSCFD|Model the recovered channel-1 transmit-buffer layout and transmit-request completion used by the exact writer.|Implemented for buffer 16. Receive FIFOs, arbitration, error states, and bus timing are not modeled.|
 |FACI / CodeFlash|CodeFlash fetches execute from immutable registered image bytes. Scenario overlays and ordinary writes are rejected. Only the exact status-clear command has a modeled FACI transition.|Bounded implementation. Unsupported FACI commands fault before side effects; erase/program, protection, sequencer timing, and cache-coherency behavior remain unimplemented.|
 |ICU-S|Expose only recovered registers and exact command-five/callback transitions. Treat supplied output words as scenario state, not generated cryptography.|Implemented within that recovered boundary. No provisioned-key or AES-CMAC silicon claim.|
-|Integration|Expose model generation and execution through `tools/rh850 machine model` and `tools/rh850 machine run`; bind targets through the existing registry; retain JSON contracts/reports under `build/out/`.|Implemented. No parallel manifest, target registry, or project lifecycle exists.|
-|Verification|Use synthetic processor semantics for instruction-level boundaries, strict machine fixtures for policy/reset/device transitions, exact CodeFlash scenarios for recovered paths, and GNU simulator runs only where an independent differential is useful.|Implemented as narrow gates. `tools/test rh850_machine` owns machine scenarios; `make verify-processor` owns the synthetic processor and project audits.|
+|Integration|Expose model generation and batched execution through `tools/rh850 machine model` and `tools/rh850 machine run`; bind identity through the existing target registry; retain one JSON report per scenario under `build/out/`.|Implemented. No parallel capability manifest, target whitelist, or project lifecycle exists.|
+|Verification|Discover target-owned scenario directories deterministically, run one Ghidra session per target, and require unique dynamic role resolution before exact-byte execution. Use synthetic processor semantics for instruction-level boundaries and GNU simulator runs only where an independent differential is useful.|Implemented as narrow gates. `tools/test rh850_machine` includes Camry and Crown exact bytes; `make verify-processor` owns the synthetic processor and project audits.|
 
 Progress:
 
@@ -145,18 +162,21 @@ Check that all projections match the source without rewriting them:
 tools/rh850 machine model --check
 ```
 
-Run a deterministic exact-firmware scenario by registered target name:
+Run one or more deterministic scenarios by registered target name:
 
 ```bash
 tools/rh850 machine run camry-8965F3307000 \
-  tests/fixtures/rh850/machine/camry_f33_ring_producer.json
+  tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_ring_producer.json \
+  tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_rscfd_tx.json
 ```
 
-Each retained run directory contains `run-contract.json` and `report.json`.
-The contract binds the image and model hashes, initial registers/RAM, artifact
-loads, stop addresses, and checks. Scenario RAM initialization is explicit;
-RAM artifacts require SHA-256 identities. Unsupported scenario fields and all
-attempts to initialize registered CodeFlash/DataFlash directly are rejected.
+The command writes one report per scenario. Each report embeds the resolved run
+contract: unique candidate count, resolved entry, structural signature, exact
+matched-code hash, exact entry-instruction hash, image/model identities, initial
+state contract, stop addresses, checks, and termination reason. Scenario RAM
+initialization is explicit; RAM artifacts require SHA-256 identities.
+Unsupported fields and all attempts to initialize registered
+CodeFlash/DataFlash directly are rejected before execution.
 
 The default functional profile establishes instruction, register, memory, and
 modeled-device behavior only. It makes no cycle-timing, silicon, vehicle, or
@@ -164,10 +184,10 @@ physical-safety claim. Register rules tagged `manual` come from the public
 Renesas manuals. Rules tagged `recovered`, notably ICU-S behavior, remain
 exact-firmware-derived rather than public silicon specifications.
 
-The retained Camry scenarios execute these stock CodeFlash paths without
-instruction overlays:
+The retained scenarios use semantic structural selectors, not fixed entry
+addresses. For the tracked Camry image the resolver currently produces:
 
-|Domain|Exact entry/path|Observed machine boundary|
+|Domain|Resolved Camry entry|Exercised machine boundary|
 |---|---|---|
 |Ring publication|`0x00080A4A`|producer record, `SYNCP`, cursor advance|
 |RSCFD transmit|`0x000852FE`|buffer-16 identifier/data and transmit request|
@@ -177,7 +197,12 @@ instruction overlays:
 |ICU-S command five|`0x0008A720`|validated command submission and recovered state|
 |ICU-S input callback|`0x0008A538`|four input words fed to the ICU-S data register|
 |ICU-S output callback|`0x0008A5AE`|four supplied output words copied to RAM|
-|Reset and MPU|application reset plus `0x00078AE6`|RAM clearing, aliases, deny, and overlap-grant rules|
+|Reset and MPU|`0x00078AEA` / `0x00078AE6`|RAM clearing, aliases, deny, and overlap-grant rules|
+
+The Crown fixture resolves the same portable byte-store role from the Crown
+image to `0x00077F16`; the equivalent Camry entry is `0x00078AE6`. This proves
+cross-target role resolution and exact execution, not semantic equivalence of
+the complete firmware images.
 
 Run the narrow gate with:
 
@@ -185,9 +210,9 @@ Run the narrow gate with:
 tools/test rh850_machine
 ```
 
-This gate also proves strict unknown-MMIO faults and rejection of executable
-CodeFlash overlays. It does not promote recovered ICU-S behavior to a manual
-silicon claim.
+This gate also proves strict schema rejection, unknown-MMIO faults, executable
+CodeFlash-overlay rejection, and unique role resolution on Camry and Crown
+bytes. It does not promote recovered ICU-S behavior to a manual silicon claim.
 
 ## CodeFlash simulation
 

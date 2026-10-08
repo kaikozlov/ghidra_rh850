@@ -1,0 +1,56 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry-f33-tauj-start-validates-reload-before-store",
+  "entry": {
+    "role": "tauj-start-validates-reload-before-store",
+    "scope": "function",
+    "shape_sha256": "8e49a0bf8bf3a1a29e104d2a16a92e063499f8ea357df01e11a0bca0db68aa41",
+    "instruction_count": 14,
+    "body_size": 36,
+    "offset": -18,
+    "requirements": []
+  },
+  "max_instructions": 10,
+  "stop_addresses": [
+    "0x00010000"
+  ],
+  "gpr_fill": "0",
+  "registers": {
+    "sp": "0xFEBE2000",
+    "gp": "0xFEBEB800",
+    "tp": "0x00023DFC",
+    "r6": "0xFFE50054",
+    "r7": "1",
+    "lp": "0x00010000",
+    "PSW": "0",
+    "PMR": "0"
+  },
+  "memory": [
+    {
+      "address": "0xFFE50054",
+      "hex": "00",
+      "evidence": "scenario: clean TAUJ start trigger before rejected request"
+    }
+  ],
+  "artifacts": [],
+  "checks": [
+    {
+      "name": "uninitialized timer start is rejected before trigger store",
+      "kind": "memory",
+      "address": "0xFFE50054",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "uninitialized timer start emits no register-write event",
+      "kind": "event-count",
+      "operation": "register-write",
+      "equals": "0"
+    }
+  ],
+  "expected_fault": {
+    "kind": "uninitialized-read",
+    "address": "0xFFE50000",
+    "access": "read"
+  }
+}

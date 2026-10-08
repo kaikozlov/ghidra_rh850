@@ -2,21 +2,29 @@
 """Resolve exact targets and execute strict P1M-E machine scenarios in Ghidra."""
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 import subprocess
+import tempfile
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
 from tools import REPO_ROOT
-from tools.emulation.generate_p1me_model import MACHINE_OUTPUT, generate
 from tools.project.analysis_target import target as resolve_target
-from tools.project.analysis_target import verified_file
 
 ROOT = REPO_ROOT
 SCRIPT = ROOT / "ghidra" / "scripts" / "emulate" / "RunP1MEMachine.java"
-SCENARIO_SCHEMA = "rh850-p1me-machine-scenario-v1"
-CONTRACT_SCHEMA = "rh850-p1me-machine-run-v1"
+MODEL = ROOT / "data/generated/p1me_machine.json"
+SCENARIO_SCHEMA = "rh850-p1me-machine-scenario-v2"
+CONTRACT_SCHEMA = "rh850-p1me-machine-run-v2"
+MODEL_SCHEMA = "rh850-p1me-machine-v2"
+GPR_NAMES = (
+    "r1", "r2", "sp", "gp", "tp",
+    *(f"r{index}" for index in range(6, 30)),
+    "ep", "lp",
+)
 
 
 class P1MEMachineError(RuntimeError):
@@ -33,112 +41,326 @@ def _absolute_input(path: Path, *, base: Path | None = None) -> Path:
     return ((base if base is not None else Path.cwd()) / path).resolve()
 
 
-def _load_scenario(path: Path) -> dict[str, Any]:
+def _require_keys(
+    value: dict[str, Any], *, allowed: set[str], required: set[str], context: str,
+) -> None:
+    unknown = sorted(set(value) - allowed)
+    missing = sorted(required - set(value))
+    if unknown:
+        raise P1MEMachineError(f"{context}: unsupported fields: {', '.join(unknown)}")
+    if missing:
+        raise P1MEMachineError(f"{context}: missing fields: {', '.join(missing)}")
+
+
+def _require_list(value: Any, context: str) -> list[Any]:
+    if not isinstance(value, list):
+        raise P1MEMachineError(f"{context}: expected a list")
+    return value
+
+
+def _validate_entry(entry: Any, context: str) -> dict[str, Any]:
+    if not isinstance(entry, dict):
+        raise P1MEMachineError(f"{context}: expected an object")
+    allowed = {
+        "role", "scope", "shape_sha256", "instruction_count", "body_size",
+        "offset", "requirements",
+    }
+    required = {"role", "scope", "shape_sha256", "instruction_count", "body_size"}
+    _require_keys(entry, allowed=allowed, required=required, context=context)
+    if entry["scope"] not in {"function", "instructions"}:
+        raise P1MEMachineError(f"{context}.scope: expected function or instructions")
+    digest = entry["shape_sha256"]
+    if not isinstance(digest, str) or len(digest) != 64:
+        raise P1MEMachineError(f"{context}.shape_sha256: expected 64 hex characters")
     try:
-        scenario = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exc:
-        raise P1MEMachineError(f"cannot read machine scenario {path}: {exc}") from exc
-    if not isinstance(scenario, dict) or scenario.get("schema") != SCENARIO_SCHEMA:
-        raise P1MEMachineError(f"machine scenario schema drift: {path}")
-    forbidden = {"overlay", "overlays", "instruction_overlay", "instruction_overlays"}
-    present = forbidden.intersection(scenario)
-    if present:
-        raise P1MEMachineError(
-            "machine scenarios cannot contain executable-byte overlays: "
-            + ", ".join(sorted(present))
+        int(digest, 16)
+    except ValueError as exc:
+        raise P1MEMachineError(f"{context}.shape_sha256: expected hexadecimal") from exc
+    if not isinstance(entry["instruction_count"], int) or entry["instruction_count"] <= 0:
+        raise P1MEMachineError(f"{context}.instruction_count: expected a positive integer")
+    if not isinstance(entry["body_size"], int) or entry["body_size"] <= 0:
+        raise P1MEMachineError(f"{context}.body_size: expected a positive integer")
+    requirements = _require_list(entry.get("requirements", []), f"{context}.requirements")
+    normalized_requirements: list[dict[str, Any]] = []
+    for index, requirement in enumerate(requirements):
+        item_context = f"{context}.requirements[{index}]"
+        if not isinstance(requirement, dict):
+            raise P1MEMachineError(f"{item_context}: expected an object")
+        _require_keys(
+            requirement,
+            allowed={"index", "mnemonic", "operand", "scalar"},
+            required={"index", "mnemonic"},
+            context=item_context,
         )
-    if not isinstance(scenario.get("name"), str) or not scenario["name"]:
-        raise P1MEMachineError("machine scenario requires a nonempty name")
-    if not isinstance(scenario.get("entry"), str):
-        raise P1MEMachineError("machine scenario entry must be an address string")
-    if not isinstance(scenario.get("max_instructions"), int) or scenario["max_instructions"] <= 0:
-        raise P1MEMachineError("machine scenario max_instructions must be positive")
-    scenario.setdefault("stop_addresses", [])
-    scenario.setdefault("reset", "none")
-    scenario.setdefault("registers", {})
-    scenario.setdefault("memory", [])
-    scenario.setdefault("artifacts", [])
-    scenario.setdefault("checks", [])
-    scenario_dir = path.parent
-    for artifact in scenario["artifacts"]:
-        if not isinstance(artifact, dict) or not isinstance(artifact.get("path"), str):
-            raise P1MEMachineError("every machine artifact requires a path")
-        artifact_path = _absolute_input(Path(artifact["path"]), base=scenario_dir)
-        if not artifact_path.is_file():
-            raise P1MEMachineError(f"machine artifact does not exist: {artifact_path}")
-        expected = artifact.get("sha256")
-        if not isinstance(expected, str):
-            raise P1MEMachineError(f"machine artifact requires sha256: {artifact_path}")
-        actual = _sha256(artifact_path)
-        if actual != expected.lower():
-            raise P1MEMachineError(f"machine artifact identity drift: {artifact_path}")
-        artifact["path"] = str(artifact_path)
-    return scenario
-
-
-def _image_contract(target_name: str, row: dict[str, Any], field: str) -> dict[str, Any] | None:
-    if field not in row:
-        return None
-    path = verified_file(target_name, field)
+        if not isinstance(requirement["index"], int) or requirement["index"] < 0:
+            raise P1MEMachineError(f"{item_context}.index: expected a non-negative integer")
+        if "scalar" in requirement and "operand" not in requirement:
+            raise P1MEMachineError(f"{item_context}: scalar requires operand")
+        normalized_requirements.append(requirement)
     return {
-        "path": str(path),
-        "sha256": row[f"{field}_sha256"],
-        "size": int(row[f"{field}_size"]),
-        "base": str(row[f"{field}_base"]),
+        **entry,
+        "offset": entry.get("offset", 0),
+        "requirements": normalized_requirements,
     }
 
 
-def run(*, target: str, scenario_path: Path, output_dir: Path) -> dict[str, Any]:
-    generate(check=True)
-    scenario_path = _absolute_input(scenario_path)
-    scenario = _load_scenario(scenario_path)
-    target_name, row = resolve_target(target)
-    if row.get("processor") != "v850e3:LE:32:default":
-        raise P1MEMachineError(
-            f"target {target_name} uses unsupported processor {row.get('processor')!r}"
+def _validate_memory_rows(rows: Any, context: str) -> list[dict[str, Any]]:
+    normalized = _require_list(rows, context)
+    for index, row in enumerate(normalized):
+        item_context = f"{context}[{index}]"
+        if not isinstance(row, dict):
+            raise P1MEMachineError(f"{item_context}: expected an object")
+        _require_keys(
+            row,
+            allowed={"address", "size", "hex", "fill", "evidence"},
+            required={"address", "evidence"},
+            context=item_context,
         )
-    codeflash = _image_contract(target_name, row, "codeflash")
-    if codeflash is None:
-        raise P1MEMachineError(f"target {target_name} has no registered CodeFlash")
-    model_sha = _sha256(MACHINE_OUTPUT)
+        if ("hex" in row) == ("fill" in row):
+            raise P1MEMachineError(f"{item_context}: specify exactly one of hex or fill")
+        if "fill" in row and "size" not in row:
+            raise P1MEMachineError(f"{item_context}: fill requires size")
+    return normalized
+
+
+def _validate_artifacts(rows: Any, context: str, base: Path) -> list[dict[str, Any]]:
+    normalized = _require_list(rows, context)
+    out: list[dict[str, Any]] = []
+    for index, row in enumerate(normalized):
+        item_context = f"{context}[{index}]"
+        if not isinstance(row, dict):
+            raise P1MEMachineError(f"{item_context}: expected an object")
+        _require_keys(
+            row,
+            allowed={"address", "path", "sha256", "executable", "evidence"},
+            required={"address", "path", "sha256", "executable", "evidence"},
+            context=item_context,
+        )
+        out.append({**row, "path": str(_absolute_input(Path(row["path"]), base=base))})
+    return out
+
+
+def _validate_checks(rows: Any, context: str) -> list[dict[str, Any]]:
+    normalized = _require_list(rows, context)
+    for index, row in enumerate(normalized):
+        item_context = f"{context}[{index}]"
+        if not isinstance(row, dict):
+            raise P1MEMachineError(f"{item_context}: expected an object")
+        _require_keys(
+            row,
+            allowed={"name", "kind", "register", "address", "size", "operation", "equals", "equals_hex"},
+            required={"name", "kind"},
+            context=item_context,
+        )
+        if row["kind"] not in {"register", "memory", "sync-count", "event-count"}:
+            raise P1MEMachineError(f"{item_context}.kind: unsupported check kind")
+    return normalized
+
+
+def load_scenario(path: Path) -> dict[str, Any]:
+    scenario_path = _absolute_input(path)
+    try:
+        raw = json.loads(scenario_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise P1MEMachineError(f"cannot load scenario {scenario_path}: {exc}") from exc
+    if not isinstance(raw, dict):
+        raise P1MEMachineError(f"{scenario_path}: scenario root must be an object")
+    allowed = {
+        "schema", "name", "entry", "max_instructions", "reset", "stop_addresses",
+        "gpr_fill", "registers", "memory", "pre_reset_memory", "artifacts", "checks",
+        "expected_fault",
+    }
+    required = {"schema", "name", "entry", "max_instructions", "stop_addresses", "checks"}
+    _require_keys(raw, allowed=allowed, required=required, context=str(scenario_path))
+    if raw["schema"] != SCENARIO_SCHEMA:
+        raise P1MEMachineError(f"{scenario_path}: scenario schema drift")
+    if not isinstance(raw["max_instructions"], int) or raw["max_instructions"] <= 0:
+        raise P1MEMachineError(f"{scenario_path}: max_instructions must be positive")
+    registers = raw.get("registers", {})
+    if not isinstance(registers, dict):
+        raise P1MEMachineError(f"{scenario_path}: registers must be an object")
+    if "gpr_fill" in raw:
+        fill = raw["gpr_fill"]
+        if not isinstance(fill, str):
+            raise P1MEMachineError(f"{scenario_path}: gpr_fill must be an integer string")
+        registers = {**dict.fromkeys(GPR_NAMES, fill), **registers}
+    expected_fault = raw.get("expected_fault")
+    if expected_fault is not None:
+        if not isinstance(expected_fault, dict):
+            raise P1MEMachineError(f"{scenario_path}: expected_fault must be an object or null")
+        _require_keys(
+            expected_fault,
+            allowed={"kind", "address", "access"},
+            required=set(),
+            context=f"{scenario_path}.expected_fault",
+        )
+    normalized = {
+        "schema": raw["schema"],
+        "name": raw["name"],
+        "entry": _validate_entry(raw["entry"], f"{scenario_path}.entry"),
+        "max_instructions": raw["max_instructions"],
+        "reset": raw.get("reset", "none"),
+        "stop_addresses": _require_list(raw["stop_addresses"], f"{scenario_path}.stop_addresses"),
+        "registers": registers,
+        "memory": _validate_memory_rows(raw.get("memory", []), f"{scenario_path}.memory"),
+        "pre_reset_memory": _validate_memory_rows(
+            raw.get("pre_reset_memory", []), f"{scenario_path}.pre_reset_memory",
+        ),
+        "artifacts": _validate_artifacts(
+            raw.get("artifacts", []), f"{scenario_path}.artifacts", scenario_path.parent,
+        ),
+        "checks": _validate_checks(raw["checks"], f"{scenario_path}.checks"),
+        "expected_fault": expected_fault,
+    }
+    return normalized
+
+
+def _hex_base(value: int | str) -> str:
+    return f"0x{(int(value, 0) if isinstance(value, str) else value):08X}"
+
+
+def _target_contract(target_name: str) -> dict[str, Any]:
+    resolved_name, target = resolve_target(target_name)
+    codeflash = ROOT / target["codeflash"]
+    if not codeflash.is_file():
+        raise P1MEMachineError(f"registered CodeFlash is missing: {codeflash}")
+    result: dict[str, Any] = {
+        "name": resolved_name,
+        "mcu": target["mcu"],
+        "processor": target["processor"],
+        "codeflash": {
+            "path": str(codeflash),
+            "sha256": target["codeflash_sha256"],
+            "size": target["codeflash_size"],
+            "base": _hex_base(target["codeflash_base"]),
+        },
+        "dataflash": None,
+    }
+    if target.get("dataflash"):
+        dataflash = ROOT / target["dataflash"]
+        if not dataflash.is_file():
+            raise P1MEMachineError(f"registered DataFlash is missing: {dataflash}")
+        result["dataflash"] = {
+            "path": str(dataflash),
+            "sha256": target["dataflash_sha256"],
+            "size": target["dataflash_size"],
+            "base": _hex_base(target["dataflash_base"]),
+        }
+    return result
+
+
+def _load_model() -> tuple[dict[str, Any], str]:
+    try:
+        model = json.loads(MODEL.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise P1MEMachineError(f"cannot load generated machine model: {exc}") from exc
+    if model.get("schema") != MODEL_SCHEMA:
+        raise P1MEMachineError("generated machine model schema drift")
+    return model, _sha256(MODEL)
+
+
+def _failure_summary(report: dict[str, Any]) -> str:
+    scenario = report.get("scenario", "<unknown>")
+    pieces = [f"{scenario}: {report.get('termination_reason', 'failed')}"]
+    if error := report.get("error"):
+        pieces.append(f"{error.get('type')}: {error.get('detail')}")
+    if fault := report.get("fault"):
+        pieces.append(
+            f"fault={fault.get('kind')} pc={fault.get('pc')} address={fault.get('address')}"
+        )
+    failed_check = next(
+        (row for row in report.get("checks", []) if not row.get("passed")), None,
+    )
+    if failed_check:
+        pieces.append(
+            f"check={failed_check.get('name')} expected={failed_check.get('expected')} "
+            f"actual={failed_check.get('actual')}"
+        )
+    if recent := report.get("recent_pcs"):
+        pieces.append("recent_pcs=" + ",".join(recent))
+    return "; ".join(pieces)
+
+
+def _execute(target_name: str, scenario_paths: Sequence[Path]) -> dict[str, Any]:
+    if not scenario_paths:
+        raise P1MEMachineError("at least one scenario is required")
+    target = _target_contract(target_name)
+    model, model_sha = _load_model()
+    products = {row["product_id"] for row in model["products"]}
+    if target["mcu"] not in products:
+        raise P1MEMachineError(f"machine model does not describe MCU {target['mcu']}")
+    scenarios = [load_scenario(path) for path in scenario_paths]
+    names = [scenario["name"] for scenario in scenarios]
+    if len(names) != len(set(names)):
+        raise P1MEMachineError("scenario names must be unique within one batch")
     contract = {
         "schema": CONTRACT_SCHEMA,
-        "target": {
-            "name": target_name,
-            "mcu": row["mcu"],
-            "processor": row["processor"],
-            "codeflash": codeflash,
-            "dataflash": _image_contract(target_name, row, "dataflash"),
-        },
-        "model_path": str(MACHINE_OUTPUT.resolve()),
+        "target": target,
+        "model_path": str(MODEL),
         "model_sha256": model_sha,
-        "scenario": scenario,
+        "scenarios": scenarios,
     }
+    with tempfile.TemporaryDirectory(prefix="p1me-machine-", dir=ROOT / "build" / "tmp") as tmp:
+        tmp_path = Path(tmp)
+        contract_path = tmp_path / "run-contract.json"
+        batch_report_path = tmp_path / "batch-report.json"
+        contract_path.write_text(json.dumps(contract, indent=2) + "\n", encoding="utf-8")
+        command = [
+            str(ROOT / "tools" / "gtarget"), target_name, "script", "run", str(SCRIPT),
+            "--", str(contract_path), str(batch_report_path),
+        ]
+        proc = subprocess.run(command, cwd=ROOT, text=True, capture_output=True, check=False)
+        if not batch_report_path.is_file():
+            detail = (proc.stderr or proc.stdout).strip()
+            raise P1MEMachineError(f"P1M-E machine runner failed before reporting: {detail}")
+        batch = json.loads(batch_report_path.read_text(encoding="utf-8"))
+    if batch.get("schema") != "rh850-p1me-machine-batch-report-v1":
+        raise P1MEMachineError("P1M-E machine batch report schema drift")
+    return batch
+
+
+def run_many(
+    target_name: str, scenario_paths: Sequence[Path], output_dir: Path,
+) -> list[dict[str, Any]]:
     output_dir = _absolute_input(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
-    contract_path = output_dir / "run-contract.json"
-    report_path = output_dir / "report.json"
-    contract_path.write_text(json.dumps(contract, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    report_path.unlink(missing_ok=True)
-    command = [
-        str(ROOT / "tools" / "gtarget"),
-        target_name,
-        "script",
-        "run",
-        str(SCRIPT),
-        "--",
-        str(contract_path),
-        str(report_path),
-    ]
-    proc = subprocess.run(command, cwd=ROOT, text=True, capture_output=True, check=False)
-    if not report_path.is_file():
-        detail = (proc.stderr or proc.stdout).strip()
-        raise P1MEMachineError(f"P1M-E machine did not produce a report: {detail}")
-    try:
-        report = json.loads(report_path.read_text(encoding="utf-8"))
-    except json.JSONDecodeError as exc:
-        raise P1MEMachineError(f"invalid P1M-E machine report: {report_path}") from exc
-    if proc.returncode != 0 or report.get("passed") is not True:
-        detail = report.get("fault") or report.get("status") or proc.stderr.strip()
-        raise P1MEMachineError(f"P1M-E machine scenario failed: {detail}")
+    batch = _execute(target_name, scenario_paths)
+    reports = batch["reports"]
+    for scenario_path, report in zip(scenario_paths, reports, strict=True):
+        output = output_dir / f"{Path(scenario_path).stem}.report.json"
+        output.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+        report["report_path"] = str(output)
+    failures = [report for report in reports if not report.get("passed")]
+    if failures:
+        raise P1MEMachineError("; ".join(_failure_summary(report) for report in failures))
+    return reports
+
+
+def run(target_name: str, scenario_path: Path, report_path: Path) -> dict[str, Any]:
+    batch = _execute(target_name, [scenario_path])
+    report = batch["reports"][0]
+    report_path = _absolute_input(report_path)
+    report_path.parent.mkdir(parents=True, exist_ok=True)
+    report_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    report["report_path"] = str(report_path)
+    if not report.get("passed"):
+        raise P1MEMachineError(_failure_summary(report))
     return report
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("target")
+    parser.add_argument("scenarios", nargs="+", type=Path)
+    parser.add_argument("--output-dir", type=Path, required=True)
+    args = parser.parse_args()
+    try:
+        reports = run_many(args.target, args.scenarios, args.output_dir)
+    except P1MEMachineError as exc:
+        parser.error(str(exc))
+    print(json.dumps({"reports": [report["report_path"] for report in reports]}, indent=2))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

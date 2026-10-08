@@ -72,6 +72,18 @@ SOURCE_METADATA = {
 
 def _access(value: Any) -> str:
     return str(value).rsplit(".", 1)[-1]
+def _reset_rules(value: Any) -> list[dict[str, str]]:
+    if value is None:
+        return []
+    rules: list[dict[str, str]] = []
+    for item in str(value).split(";"):
+        reset_class, separator, mode = item.partition(":")
+        if not separator or mode not in {"force", "controlled"}:
+            raise RuntimeError(f"invalid reset rule: {item!r}")
+        rules.append({"reset_class": reset_class, "mode": mode})
+    return rules
+
+
 
 
 def _compile() -> tuple[Any, str]:
@@ -96,6 +108,8 @@ def _model() -> tuple[dict[str, Any], list[dict[str, Any]], dict[str, Any]]:
                 "executable": bool(node.get_property("executable")),
                 "alias_group": node.get_property("alias_group"),
                 "reset_policy": node.get_property("reset_policy"),
+                "reset_control": node.get_property("reset_control"),
+                "reset_rules": _reset_rules(node.get_property("reset_rules")),
                 "evidence": node.get_property("evidence"),
                 "source_ref": node.get_property("source_ref"),
             })
@@ -111,7 +125,7 @@ def _model() -> tuple[dict[str, Any], list[dict[str, Any]], dict[str, Any]]:
                 ]
             else:
                 access_widths = [int(node.get_property("accesswidth")) // 8]
-            registers.append({
+            row = {
                 "name": node.inst_name,
                 "address": node.absolute_address,
                 "size": node.size,
@@ -122,20 +136,53 @@ def _model() -> tuple[dict[str, Any], list[dict[str, Any]], dict[str, Any]]:
                 "evidence": node.get_property("evidence"),
                 "source_ref": node.get_property("source_ref"),
                 "description": node.get_property("desc") or "",
-            })
+            }
+            for property_name in (
+                "trigger",
+                "status_register",
+                "secondary_status_register",
+                "access_register",
+                "history_register",
+                "reload_prefix",
+                "counter_prefix",
+                "payload_address",
+                "completion_value",
+                "channel_count",
+            ):
+                value = node.get_property(property_name)
+                if value is not None:
+                    row[property_name] = value
+            registers.append(row)
     regions.sort(key=lambda row: row["start"])
     registers.sort(key=lambda row: row["address"])
+    product_ids = str(top.get_property("product_ids")).split(",")
+    by_region = {row["name"]: row for row in regions}
+    product_bytes = {
+        "codeflash_bytes": by_region["codeflash_user"]["size"],
+        "extended_user_codeflash_bytes": by_region["codeflash_extended"]["size"],
+        "dataflash_bytes": by_region["dataflash"]["size"],
+        "local_ram_bytes": by_region["local_ram_pe1"]["size"],
+        "global_ram_bytes": by_region["global_ram"]["size"],
+    }
     machine = {
-        "schema": "rh850-p1me-machine-v1",
+        "schema": "rh850-p1me-machine-v2",
         "source": {
             "path": str(SOURCE.relative_to(ROOT)),
             "sha256": source_sha,
             "systemrdl_compiler": "1.33.0",
         },
-        "product_ids": str(top.get_property("product_ids")).split(","),
+        "products": [
+            {"product_id": product_id, "regulator": "DPS", **product_bytes}
+            for product_id in product_ids
+        ],
         "p_bus_hz": int(top.get_property("p_bus_hz")),
-        "regions": regions,
-        "registers": registers,
+        "manual": {
+            "regions": regions,
+            "registers": [row for row in registers if row["evidence"] == "manual"],
+        },
+        "target_derived": {
+            "registers": [row for row in registers if row["evidence"] != "manual"],
+        },
         "execution": {
             "engine": "Ghidra PcodeEmulator",
             "profile": "functional",
@@ -149,22 +196,16 @@ def _model() -> tuple[dict[str, Any], list[dict[str, Any]], dict[str, Any]]:
             "observed": "identity-bound hardware capture input",
         },
     }
-    by_region = {row["name"]: row for row in regions}
     by_register = {row["name"]: row for row in registers}
-    product_bytes = {
-        "codeflash_bytes": by_region["codeflash_user"]["size"],
-        "extended_user_codeflash_bytes": by_region["codeflash_extended"]["size"],
-        "dataflash_bytes": by_region["dataflash"]["size"],
-        "local_ram_bytes": by_region["local_ram_pe1"]["size"],
-        "global_ram_bytes": by_region["global_ram"]["size"],
-    }
     memory = {
         "schema_version": 1,
         "scope": "Renesas RH850/P1M-E product and address-space facts used to interpret the retained Toyota EPS dumps",
         "sources": SOURCE_METADATA,
         "products": {
-            product: {"regulator": "DPS", **product_bytes}
-            for product in machine["product_ids"]
+            product["product_id"]: {
+                key: value for key, value in product.items() if key != "product_id"
+            }
+            for product in machine["products"]
         },
         "address_space": {
             "codeflash_user_1mb": {"start": by_region["codeflash_user"]["start"], "end_exclusive": by_region["codeflash_user"]["end_exclusive"]},
@@ -176,10 +217,7 @@ def _model() -> tuple[dict[str, Any], list[dict[str, Any]], dict[str, Any]]:
             "global_ram": {"start": by_region["global_ram"]["start"], "end_exclusive": by_region["global_ram"]["end_exclusive"]},
         },
         "ram_execution": {
-            "architectural_fetch_views": ["local_ram_self", "global_ram"],
-            "firmware_proven_fetch_views": ["local_ram_pe1"],
-            "firmware_proof": "boot callback at 0x4350 loads a FEBF0000 callback through FEBF0FD0 and retained authenticated payloads execute it",
-            "publication_sequence": ["store", "dummy_read_same_memory", "SYNCP", "SYNCI", "branch"],
+            "architectural_fetch_views": ["local_ram_pe1", "local_ram_self", "global_ram"],
             "prefetch_initialized_bytes": 48,
             "global_ram_data_coherency": "write-through and hardware-maintained across PE and DMA",
         },
@@ -192,7 +230,6 @@ def _model() -> tuple[dict[str, Any], list[dict[str, Any]], dict[str, Any]]:
             "baseline_behavior": "the reset table initializes local and global RAM to zero unless the applicable STAC disable control is active",
             "local_ram_disable_control": "STAC_LM0 for System Reset 1 except CVM reset, System Reset 2, and Application Reset 1",
             "global_ram_disable_control": "STAC_GRAM for Application Reset 1",
-            "firmware_boundary": "direct boot/application handoffs are not assumed to be hardware resets",
         },
         "mpat": {
             "bit_layout": {"E": 7, "G": 6, "SX": 5, "SW": 4, "SR": 3, "UX": 2, "UW": 1, "UR": 0},
@@ -201,15 +238,8 @@ def _model() -> tuple[dict[str, Any], list[dict[str, Any]], dict[str, Any]]:
         },
         "timer": {
             "p_bus_hz": machine["p_bus_hz"],
-            "tauj1cnt0_address": 0xFFE51010,
-            "tauj1tps_address": 0xFFE51090,
-            "tauj1cmor0_address": 0xFFE51080,
-            "firmware_tauj1tps_value": 0xFFF2,
-            "firmware_tauj1cmor0_value": 0x156,
             "prs0": 2,
             "ck0_hz": machine["p_bus_hz"] // 4,
-            "security_delay_ticks": 200_000_000,
-            "security_delay_ms": 10_000,
         },
     }
     if by_register["STAC_GRAM"]["reset"] != 3 or by_register["STAC_LM0"]["reset"] != 3:
