@@ -184,6 +184,66 @@ descriptor bases, and the registry). The opcodes stay numeric: they belong to
 the Renesas security-hardware protocol, not to the SHE command numbering used
 by the EPS ICU-S.
 
+### Driver programming model (recovered from the Venza driver)
+
+Same Denso driver skeleton as the EPS (channel-state cells `0xE1`/`0xD2`,
+complement guards, per-service state pairs), but the lowest layer swaps
+register pokes for a **shared-memory descriptor ring a second core reads**.
+
+**Control/status window** (`0xFF1F00xx`, plus shared flags in `0xFEFF00Fx`):
+
+| Address | Recovered role |
+|---|---|
+| `0xFF1F0010` | control/pointer word: low bits = shared-memory base (driver masks `&0xFFFFFF \| 0xFE000000`), bit 26 = config flag (`0x8A04E`), bit 27 = **HSM-ready** (`0x86008`/`0x89E22` poll it) |
+| `0xFF1F0014` | ring index (four entries, wraps `0→3`; decremented then stored per submit) |
+| `0xFF1F0028` | boot: `\|= 4` by `0x114C` (interrupt/enable path) |
+| `0xFF1F0044` | trigger doorbell: `2` = descriptor queued; `4/8/0x10/0x20` = other kicks; `0x40` = HSM start (written once at driver start `0x86510` after setting the pointer) |
+| `0xFEFF00F4` | HSM status: bit 0 = ready gate for submits (`0x89F6E` → error `0x404` if clear) |
+| `0xFEFF00FC` | shared spinlock: bit 1 = submit lock (`0x89E60`, `__snooze` backoff), bit 3 = completion/config lock (`0x8A04E`) |
+
+**Descriptor template** (in `0xFEFF00xx` shared RAM; per-service bases in the
+table above):
+
+- `−1`: result byte, initialized `0x7F` (pending), written by the HSM;
+- `+0x00`: opcode dword;
+- `+0x08`: completion callback (RAM code pointer; sentinel `0xFFF1` set by the
+  submit wrapper `0x8A18A`, replaced by the service's finisher);
+- `+0x18`: state (`3` armed at build);
+- `+0x1C`: key/config selector byte (from the type-1 config record);
+- `+0x24`: timeout (`0x2580` MAC ops, `0xE10` block service; key update none);
+- op-specific fields: message/input and output pointers, bit-lengths
+  (`len<<3`), block counts (`bytes>>4`), staged expected-MAC buffer
+  (`0xFEFF0320` for verify), M1/M2/M3 pointers at request `+0x10/+0x30` and
+  M4/M5 at result `+0x00/+0x20` for key update;
+- submit-side fields: `+0x05` state byte (set 1 by `0x8A18A`), `+0x06` queued
+  flag (set 1 on ring insert; `4` = error, with error code at `+0x08`, e.g.
+  `0x37` on ring-full).
+
+**Submit sequence**: service adapter validates (global driver-ready cell
+`0xFEBFA298 == 0xE1` via `0xBD690`, per-service state pair) → builds the
+descriptor in shared RAM, sets service state `0xD2` (`0xE1` instead when the
+caller requested async mode) → `0xBD69E → 0x8A18A` (4-byte alignment check,
+state bytes, callback sentinel) → `0x89F6E(2,desc)` gates on `0xFEFF00F4`
+bit 0 → `0x89E60` takes the `0xFEFF00FC` bit-1 spinlock, decrements the ring
+index (wrap 3), claims the 4-byte slot at `shared_ptr + idx*4` if free,
+stores the descriptor pointer, marks `+0x06 = 1`, releases the lock (ring
+full → `0x401`) → trigger word `2` written to `0xFF1F0044`.
+
+**Completion**: the HSM writes the result byte at `descriptor−1` and the
+finisher callback at `+0x08` runs. The dispatching interrupt/poll source is
+**not yet pinned** to a specific EIINT channel (the boot initializer `0x114C`
+enables the `0xFF1F0028` path and performs the ICU-M hardware bring-up:
+`0x4001` enables at `0xFFC64200/0xFFC65400`, `0xA5`-unlock handshake sequences
+through `0xFFF8xxxx` clock/reset registers). Result classification mirrors the
+EPS: nonzero result byte = error index, plus submit-layer codes `0x401`
+(ring full), `0x404` (HSM not ready), `1` (bad trigger mode).
+
+Runtime-facing contrast with the EPS ICU-S: there is no register FIFO or
+`ICUSCMD` poke — a caller writes a descriptor into shared RAM, queues its
+pointer, and rings the doorbell. That makes the airbag ABI the *easier* one to
+drive from a RAM runtime (no per-block handshake), but also the more opaque
+one: opcode semantics live entirely in the HSM-side firmware we do not hold.
+
 ## 6. Cross-target comparison
 
 | Property | Sienna B4512 | Camry F33 | Crown F30 | Corolla F12/H12 | Venza airbag |
@@ -279,6 +339,11 @@ zero-I/O and 1-in/2-out shapes respectively.
   (runner table `0x1C7C0..0x1C7E0`); its semantics (4-byte result over
   16-byte-block input, config selector) are recovered shape only — see
   OPEN_QUESTIONS.
+- Airbag completion dispatch (who invokes the descriptor `+0x08` finisher and
+  on which interrupt) is not yet pinned to a specific EIINT channel; the
+  result-slot (`descriptor−1`) and callback mechanisms themselves are
+  corpus-verified. The §5 boot initializer `0x114C` enable sequence is
+  recorded but not decoded register-by-register.
 - Corolla/Crown TX descriptor *wire* joins (which physical PDU carries the
   `0x0030`-field authenticated frame, freshness source) are table-shape
   evidence; the Camry `0x030` join is the only live-observed one
