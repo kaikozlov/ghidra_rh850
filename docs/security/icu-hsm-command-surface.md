@@ -263,6 +263,50 @@ pointers + type-1 key-selector config + KAT function) appears in Camry
 both ABI families, with only the lowest adapter swapped (ICU-S register
 writes vs secure-service queue).
 
+### Shared SecOC engine layer — byte-level join across both ABI families
+
+The profile records above the crypto adapters carry the same authentication
+block in **all three profile families** (Sienna legacy EPS, TSS3 EPS, Venza
+airbag ICUMC), regardless of which crypto unit executes the MAC:
+
+```text
+u16 0x0080 | u16 0x001C | u16 0x0000 | LEN | FLAG | [u16 0x0002 TX only] | DataID
+```
+
+- `0x001C` = **28-bit MAC truncation** — the Toyota MAC-28 domain, identical
+  everywhere;
+- `LEN` = 8 for the classic-CAN `0x00F`, 4 for every CAN-FD profile and TX row
+  (recovered field, meaning not yet named);
+- `FLAG` = `0x0180` (classic RX `0x00F`), `0x0080` (CAN-FD RX), TX rows insert
+  `0x0002` before the DataID;
+- RX tables are **0x50-stride in all three families** (Sienna `0x25970+` six
+  rows, Corolla `0x256E8+` three, airbag `0x1D6C8+` four); TX rows are
+  **0x44-stride** in Corolla/Crown and the airbag. The EPS generation places
+  the block at the record tail (record `+0x46`), the airbag generation at the
+  record head — same fields, different phase;
+- marker constants `0x2424`/`0x2E04` appear in record bodies of both families.
+
+Verified instances (shared-DataID rows are byte-identical modulo DataID):
+Corolla TX `80 00 1C 00 00 00 04 00 80 00 02 00 | 00 30` vs airbag TX
+`… | 03 26` / `… | 00 24`; Sienna RX `… 08 00 80 01 | 00 0F` = Corolla RX
+`0x00F` = airbag RX `0x00F`.
+
+**DataID overlap across ECU types and vehicle lines** (same authentication
+domain, same selector-4/`KEY_1`, same MAC-28):
+
+| DataID | Sienna EPS RX | Corolla EPS RX | Venza airbag RX |
+|---|---|---|---|
+| `0x00F` | ✓ | ✓ | ✓ |
+| `0x0D7` | ✓ | ✓ | ✓ |
+| `0x090` | ✓ | — | ✓ |
+
+The `0x00F`/`0x0D7` rows are byte-identical auth blocks in a 2020 Sienna-family
+EPS, a 2023-25 Corolla EPS, and a 2021-22 Venza airbag sensor — three ECU
+types, two crypto-unit families, one generated SecOC engine configuration
+family. Implementation detail therefore maps across the ABI boundary: profile
+walking, DataID insertion, MAC-28 truncation, and freshness assembly are the
+same generated layer; only the MAC adapter below differs.
+
 ## 7. ICU-S driver programming model (recovered from the Sienna driver)
 
 The stock driver is a complete, self-contained ICUS programming reference —

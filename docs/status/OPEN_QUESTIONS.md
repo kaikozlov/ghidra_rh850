@@ -1287,8 +1287,17 @@ ledger context is useful.
   `0xBD8C8`, descriptor base `FEFF01E8`, opcode word `0x10`, 16-byte-block-count input
   plus a logical key selector copied from a type-1 config, whose completion callback
   delivers a 4-byte result. Its application consumer is engine-mediated (runner table
-  `0x1C7C0..0x1C7E0`), so no static owner is recovered. Recover which airbag feature
-  submits it (runner disassembly or a live GTS session) and what the 4-byte result
+  `0x1C7C0..0x1C7E0`), so no static owner is recovered. 2026-10-08 bounds: the
+  nine-entry runner table resolves to four engine bracket pairs
+  (`(0xDCA8E,0xDCAAE)`, `(0xDCACA,0xDCAEA)`, `(0xDCB06,0xDCB26)`,
+  `(0xDCB42,0xDCB62)` — begin/end state claims in the shared `0xE1/0xD2` idiom)
+  plus one diagnostic runner `0xBD412` that drives the RID `0x1010`
+  key-update family (`0x7BFE4/0x7C020/0x7C05A/0x7C0B4`); the opcode-`0x10`
+  registry record (`0x1C86C`: engine fn `0xBD44A`, sync API `0xBD8C8`) — like
+  all five services — reaches the HSM only through the common synchronous
+  submit `0x8A26A`, and no runner or text function references the record
+  directly. Recover which airbag feature selects record `0x1C86C` (deeper
+  engine disassembly or a live GTS session) and what the 4-byte result
   represents before assigning it any role.
 - **OQ-056 — TSS3 EPS stock SecOC-transmit wire join beyond Camry.** Camry F33 is the
   only target whose command-5 TX signer is live-observed on the wire (`0x030`, selector
