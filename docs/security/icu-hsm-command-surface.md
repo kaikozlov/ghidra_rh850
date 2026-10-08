@@ -203,7 +203,77 @@ pointers + type-1 key-selector config + KAT function) appears in Camry
 both ABI families, with only the lowest adapter swapped (ICU-S register
 writes vs secure-service queue).
 
-## 7. Boundaries and open questions
+## 7. ICU-S driver programming model (recovered from the Sienna driver)
+
+The stock driver is a complete, self-contained ICUS programming reference —
+including for command words the application never issues (the §3 dead stubs
+are working templates). Everything below is Sienna-verified firmware-static;
+the TSS3 builds use the same idiom at the §3 addresses.
+
+### Register map (`0xFFC5D0xx`)
+
+| Address | Name (corpus) | Recovered role |
+|---|---|---|
+| `0x00` | `ICUSCMD` | command word `(selector<<16)\|cmd`; the write **starts** the engine |
+| `0x04` | `ICUSDAT` | input FIFO push port (one 32-bit word per write; blocks are 4 words) |
+| `0x08` | `ICUSOUT` | output FIFO pop port (4 words per 128-bit result block) |
+| `0x0C` | `ICUSSTS` | status; bit `BUSY` (checked as bit 0) |
+| `0x10` | (error) | result/error code, low 12 bits; `0` = success (`icus_command_finalize`, decoder `0x89C8A` maps bits 0–11 to `idx+1\|0x1000`) |
+| `0x14` | `ICUSSTS2` | interrupt/status 2; bits 0/1 gate issue and drive the stream callbacks in the poll engine |
+| `0x18` | (init) | read `&1` at driver init (`icus_driver_initialize`) |
+| `0x1C` | `ICUSPARAM` | command parameter word (commands 1/3 load block count here instead of via `ICUSDAT`) |
+| `0x20` | (done) | bit 0 polled as completion latch (`FUN_00089F28`) |
+| `0x24` | (irq ack) | written by finalize/fifo-steps/hw-init to acknowledge |
+| `0x90–0xBC` | (staging) | 12-word block written by `FUN_00089C26` (self-test/key-update staging) |
+| `0xC0` | | set `0x600` at hardware init |
+| `0xE0` | `ICUSCTL` | block handshake: `1` = input block ready, `2` = output block consumed, `3` = command complete |
+| `0xE4` | | set 1 at hardware init; also written by the poll engine |
+| `0xF0–0xFC` | | cleared at init, reused by self-test |
+
+### Driver state cells (`0xFEBF131C–136D`, pointer/complement guarded)
+
+`131C/1320/1324` = stream callbacks (`icus_input_fifo_step` `0x89448`,
+`icus_output_fifo_step` `0x894BE`, `icus_command_finalize` `0x89510`) with
+complements at `1360/1364/1368`; `1328` = tracked command word; `132C/1334` =
+total input/output block counts; `1330/1338` = block indices; `1340/1344` =
+input/output pointers with complements at `1350/1354`; `136C` = channel state
+(`0`=uninitialized, `0xE1`=ready, `0xD2`=command in flight, `0xC3`=aborted →
+finalize returns `0x20`); `136D` = guard-failure flag; `1194/1198` = ISR-layer
+callback + complement, dispatched by EIINT channels **292/293** (marked
+reserved in the generic P1M-E table but active in this firmware).
+
+### Issue recipe (generalized from the four wired wrappers)
+
+1. Gate: `state == 0xE1` **and** `ICUSSTS.BUSY == 0` **and**
+   `(ICUSSTS2 & 3) == 0`.
+2. Set block counts (`132C` in / `1334` out), pointers + complements
+   (`1340/1350`, `1344/1354`), stream callbacks + complements, tracked command
+   (`1328`).
+3. Preload per command family: commands 1/3 write `ICUSPARAM = block_count`;
+   command 5 pushes its 16-byte length header through `ICUSDAT` (three
+   zero/BE32-length words) before the message stream; command 8 stages its
+   64-byte request as 4 input blocks (M1/M2/M3) with 3 output blocks
+   (M4/M5).
+4. `state = 0xD2`, then write `ICUSCMD = (selector<<16)|command` — the write
+   is the trigger.
+5. Completion: hardware raises EIINT 292/293 → `*_dispatch` calls the guarded
+   callback; the poll engine (`0x89E20`, or the `0x9C4`-iteration polled
+   fallback `0x87484`) dispatches on `ICUSSTS2`: bit 0 → input step
+   (`ICUSCTL=1`, push 16 bytes), bit 1 → output step (`ICUSCTL=2`, pop 16
+   bytes), completion → finalize (`ICUSCTL=3`, ack `0x24`, decode `0x10`).
+6. Zero-I/O commands (the dead `0xB`/INIT_RNG stub, any future `0xA`/`0xD`
+   probe) need no stream cells: register the finalize callback, set `1328`,
+   `state = 0xD2`, write the command word, poll `ICUSSTS.BUSY == 0`, then
+   classify via `FFC5D010 & 0xFFF`.
+
+The runtime-facing consequence: the existing F33 RAM-resident callers
+(`exploit/ephemeral_runtime/`) already exercise steps 1–5 through the stock
+driver for command 5; issuing the unexercised opcode family is the same
+sequence with different counts and command word — the Sienna orphan stubs
+(`0x89A4C` cmd-11, `0x89B70` cmd-`0x22`) are byte-level templates for
+zero-I/O and 1-in/2-out shapes respectively.
+
+## 8. Boundaries and open questions
 
 - The opcode-`0x10` airbag service's application consumer is engine-mediated
   (runner table `0x1C7C0..0x1C7E0`); its semantics (4-byte result over
@@ -221,7 +291,7 @@ writes vs secure-service queue).
 - Nothing here observes hardware: slot-4 generation permission/latency and all
   live opcode behavior remain dynamic questions (OQ-012/OQ-021 unchanged).
 
-## 8. Reproduction
+## 9. Reproduction
 
 ```text
 tools/test yc_venza_airbag_reprogramming     # airbag census byte pins
