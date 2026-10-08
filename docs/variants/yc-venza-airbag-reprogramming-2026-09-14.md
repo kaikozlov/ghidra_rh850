@@ -750,6 +750,74 @@ The deterministic analysis is
 `tools/techstream/analyze_reprogramming_root_pairs.py`; its committed result is
 `data/generated/gtsplus_2026/reprogramming_root_pair_analysis.json`.
 
+### 5.9 RequestDownload area model, the RAM download engine, and the execution boundary (2026-10-08)
+
+A full static pass over the RPRG SID `0x34` chain (analysis project functions
+`rprg_request_download_dispatch/setup`, `rprg_download_accept_crypto_check`,
+`FUN_010062e0`) closes the download architecture and bounds the "RAM payload
+execution" question that the EPS family answers differently.
+
+**Area model.** After the RPRG SecurityAccess lock (state byte at `FEBFAC1A`,
+bit 0, else NRC `0x33`), the `0x34` request carries `{area_tag, address, size}`.
+`FUN_010062e0` walks a 0x1c-stride area table at `*(TP−0x6B50)` = `FEBFC598`
+(relocated `boot.bin` `0x7B90`) and requires `rec[0] == tag`,
+`rec[1] <= addr <= rec[1]+rec[3]−1`, `0 < size <= rec[1]+rec[3]−addr`; on match
+it writes the area index and the translated destination
+`rec[2] + (addr − rec[1])`. Exactly two records exist:
+
+| tag | request window | translate | size | type byte `+0x18` |
+|---|---|---|---|---|
+| 0 | `0x00010000..0x0017FFFF` | identity | `0x170000` | 0 (encrypted CodeFlash path) |
+| 1 | `FEBFF800..FEBFFBFF` | identity → RAM | `0x800` | 2 (queued copy engine) |
+
+Misses reject with NRC `0x70`. The tag-0 window is exactly the meaningful
+MainPE CodeFlash region (`0x180000+` is fill).
+
+**Type-2 RAM download engine.** The type byte at record `+0x18` dispatches:
+type 2 queues through `FUN_01007352` (state cell `FEBFAF0C`, `1→4`, destination
+and total length at `FEBFAF10/18`); each `0x36` block feeds
+`FUN_01007372` (`→5`, source pointer/length at `FEBFAF14/1C`); the scheduler
+runner `0x01007542` dispatches states `{5,6}` to `FUN_010074d4`, which copies
+`min(chunk_cap, remaining)` per pass (cap from `*(TP−0x6A50)`, memcpy via
+`0x00FF9C4C`) and advances to `7` on completion; `0x37` polls `FUN_010073a4`
+(`state==7` resets to `1`); `FUN_0100741e` posts a `{0x1005,…}` notification.
+**No cryptographic transform appears anywhere in this path** — the copy is
+plaintext, so a RAM-area download requires only RPRG SecurityAccess, not the
+payload-build KDF of §5.1. A second engine (`FEBFAF20/24/28`, states `{2,3}`
+via `FUN_0100748a`, submitted from the `0x01006594` DID-area dispatcher feeding
+`0x010073b6`) implements the same copy shape for a synchronous feeder.
+
+**Execution boundary.** Nothing in the captured RPRG image transfers control
+into downloaded bytes. A full computed-call census of
+`0x01000000..0x01007587` finds 15 indirect `jarl`s, all service-table or
+TP-cell dispatch; the type-2 completion state `7` has no consumer that calls or
+jumps; and no EPS-style callback convention exists anywhere in `boot.bin`. The
+2-KiB `FEBFF800` window is a copy target only. This is a verified negative for
+the captured image — unlike the P1M-E EPS, where the flash engine invokes a
+downloaded RAM payload.
+
+**Why the type-0 question stays open.** The type-0 and type-1 handlers called
+from `rprg_download_accept_crypto_check` resolve to `0x00FFF3F8` /
+`0x00FFFE56`, and every library call from the RPRG (memcpy `0x00FF9C4C`,
+`0x00FF9CCE`, `0x00FF9BEA`, `0x00FFD748`, `0x00FF97C0`, …) lands in
+`0x00FF0000..0x00FFFFFF`. Per the RH850/P1x-C address map (R01UH0517EJ0130
+Figure 4.1), that span belongs to the part's **extra Code Flash bank**
+(`0x00C0_0000..0x00FF_FFFF`), which the 3-MiB `cflash.bin` does not cover (its
+`0x2B0000+` tail is `0x00` fill) and `boot.bin` does not contain. The flash-
+programming engine that would implement (or not) an EPS-style call into staging
+RAM therefore lives in an uncaptured flash bank, and the question cannot be
+answered from retained artifacts. `boot.bin` itself executes from the
+extended-user window at `0x0100_0000` (P1x-C extra flash), not from the
+`FEBF0924` RAM copy: near calls are PC-relative within the image and far calls
+reach backward into `0x00FFxxxx`, which is only non-negative from the
+`0x01000000` link base.
+
+**Consequence for a dump payload.** A Calvin-style payload can be delivered
+(SA → `0x34` tag 1 → `0x36` → `0x37`, plaintext) but nothing in the captured
+firmware will execute it. Closing the type-0/flash-engine question requires the
+extra-bank image first — the same chicken-and-egg that makes yc's
+glitch-acquisition the only demonstrated read path for this part so far.
+
 ## 6. What the yc image changes for F33 EPS recovery
 
 ### It disproves one tempting interpretation
