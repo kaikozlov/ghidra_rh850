@@ -17,7 +17,12 @@ esac; done
 field(){ python3 "$ROOT/tools/project/analysis_target.py" "$TARGET" --field "$1"; }
 PROJECT_NAME=$(field project_name); PROGRAM_NAME=$(field program_name)
 REGISTERED_WORK="$ROOT/$(field work_dir)"; PROJECT_DIR=${PROJECT_DIR_OVERRIDE:-$REGISTERED_WORK}
-CODEFLASH="$ROOT/$(field codeflash)"; DATAFLASH="$ROOT/$(field dataflash)"; EXPECTED_SHA=$(field codeflash_sha256); PROCESSOR=$(field processor)
+CODEFLASH="$ROOT/$(field codeflash)"; EXPECTED_SHA=$(field codeflash_sha256); PROCESSOR=$(field processor)
+# Optional registered images/context: absent fields keep the legacy P1M behavior
+# (DataFlash image + common P1M-E SFR map), so existing targets rebuild identically.
+DATAFLASH_REL=$(field dataflash 2>/dev/null || true)
+SFR_CONTEXT=$(field sfr_context 2>/dev/null || true); [[ -n "$SFR_CONTEXT" ]] || SFR_CONTEXT=p1m
+EXTENDED_USER_REL=$(field extended_user 2>/dev/null || true)
 SEEDS="$ROOT/$(field function_seeds)"
 DEVICE_PROFILE_SCRIPT=$(field device_profile_script)
 ENTRY_SEED_SCRIPT=$(field entry_seed_script)
@@ -40,8 +45,25 @@ PY
 )
 [[ "$(shasum -a 256 "$CODEFLASH" | cut -d' ' -f1)" == "$EXPECTED_SHA" ]] || { echo "CodeFlash identity drift" >&2; exit 1; }
 [[ "$(python3 -c 'from pathlib import Path; import sys; print(Path(sys.argv[1]).stat().st_size)' "$CODEFLASH")" == "$(field codeflash_size)" ]] || { echo "CodeFlash size drift" >&2; exit 1; }
-[[ "$(shasum -a 256 "$DATAFLASH" | cut -d' ' -f1)" == "$(field dataflash_sha256)" ]] || { echo "DataFlash identity drift" >&2; exit 1; }
-[[ "$(python3 -c 'from pathlib import Path; import sys; print(Path(sys.argv[1]).stat().st_size)' "$DATAFLASH")" == "$(field dataflash_size)" ]] || { echo "DataFlash size drift" >&2; exit 1; }
+IMPORT_POSTS=()
+if [[ -n "$DATAFLASH_REL" ]]; then
+  DATAFLASH="$ROOT/$DATAFLASH_REL"
+  [[ "$(shasum -a 256 "$DATAFLASH" | cut -d' ' -f1)" == "$(field dataflash_sha256)" ]] || { echo "DataFlash identity drift" >&2; exit 1; }
+  [[ "$(python3 -c 'from pathlib import Path; import sys; print(Path(sys.argv[1]).stat().st_size)' "$DATAFLASH")" == "$(field dataflash_size)" ]] || { echo "DataFlash size drift" >&2; exit 1; }
+  IMPORT_POSTS+=(-postScript AddDataFlash.java "$DATAFLASH")
+fi
+if [[ "$SFR_CONTEXT" == p1m ]]; then
+  IMPORT_POSTS+=(-postScript ApplyP1MDeviceProfile.java "$ROOT/data/p1m_sfr_labels.csv" -postScript ApplyP1MSfrTypes.java)
+elif [[ "$SFR_CONTEXT" != none ]]; then
+  echo "unsupported sfr_context '$SFR_CONTEXT' for $TARGET" >&2; exit 1
+fi
+if [[ -n "$EXTENDED_USER_REL" ]]; then
+  EXTENDED_USER="$ROOT/$EXTENDED_USER_REL"
+  [[ "$(shasum -a 256 "$EXTENDED_USER" | cut -d' ' -f1)" == "$(field extended_user_sha256)" ]] || { echo "extended-user identity drift" >&2; exit 1; }
+  [[ "$(python3 -c 'from pathlib import Path; import sys; print(Path(sys.argv[1]).stat().st_size)' "$EXTENDED_USER")" == "$(field extended_user_size)" ]] || { echo "extended-user size drift" >&2; exit 1; }
+  EXTENDED_USER_BASE=$(field extended_user_base)
+  IMPORT_POSTS+=(-postScript AddExtendedUser.java "$EXTENDED_USER" "$EXTENDED_USER_BASE" "$(printf '0x%X' "$(field extended_user_size)")")
+fi
 if [[ -e "$PROJECT_DIR/$PROJECT_NAME.gpr" || -e "$PROJECT_DIR/$PROJECT_NAME.rep" ]]; then
   ((FORCE)) || { echo "target project exists: $PROJECT_DIR (use --force)" >&2; exit 1; }
   rm -rf "$PROJECT_DIR"
@@ -59,11 +81,9 @@ source "$ROOT/tools/lib/ghidra_env.sh" full
 DAEMON_RE="AnalyzeHeadless.*${PROJECT_DIR}.*${PROJECT_NAME}"
 if pgrep -f "$DAEMON_RE" >/dev/null 2>&1; then echo "target AnalyzeHeadless already running for $PROJECT_DIR/$PROJECT_NAME" >&2; exit 1; fi
 runh(){ local stage=$1; shift; "$ROOT/tools/project/run_headless" --project-dir "$PROJECT_DIR" --project "$PROJECT_NAME" --label "$TARGET-$stage" --log "$BUILD_LOGS/targets/$TARGET/$stage.log" --quiet -- "$@"; }
-echo "[$TARGET 1/4] import registered images, common P1M-E map, and target context"
+echo "[$TARGET 1/4] import registered images and target-native context"
 runh import -import "$CODEFLASH" -processor "$PROCESSOR" -noanalysis \
-  -postScript AddDataFlash.java "$DATAFLASH" \
-  -postScript ApplyP1MDeviceProfile.java "$ROOT/data/p1m_sfr_labels.csv" \
-  -postScript ApplyP1MSfrTypes.java \
+  "${IMPORT_POSTS[@]}" \
   -postScript "$DEVICE_PROFILE_SCRIPT" \
   -commit "Import registered target images and target-native context"
 echo "[$TARGET 2/4] seed registered application roots and run base analysis"

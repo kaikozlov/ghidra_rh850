@@ -1,0 +1,31 @@
+address,provenance,note
+0x0089E60,docs/variants/yc-venza-airbag-reprogramming-2026-09-14.md,secure-service shared-RAM ring helper; reads 0xFF1F0014
+0x0089F6E,tests/targets/venza/verify_yc_venza_airbag_reprogramming.py,single writer of the 0xFF1F0044 service trigger
+0x008A04E,docs/security/icu-hsm-command-surface.md,secure-service shared pointer init/management at 0xFF1F0014
+0x008A18A,tests/targets/venza/verify_yc_venza_airbag_reprogramming.py,sole secure-service enqueue wrapper; called only by 0xBD69E
+0x00864E4,docs/variants/yc-venza-airbag-reprogramming-2026-09-14.md,secure boundary initialization
+0x0086510,docs/variants/yc-venza-airbag-reprogramming-2026-09-14.md,secure boundary initialization
+0x00BD69E,tests/targets/venza/verify_yc_venza_airbag_reprogramming.py,lower-adapter convergence into 0x8A18A; exactly five callers
+0x00BDC7A,tests/targets/venza/verify_yc_venza_airbag_reprogramming.py,MAC-generate adapter; opcode 0x12; descriptor FEFF02B8
+0x00BDE88,tests/targets/venza/verify_yc_venza_airbag_reprogramming.py,MAC-verify adapter; opcode 0x12; descriptor FEFF0330
+0x00BD8C8,docs/security/icu-hsm-command-surface.md,opcode 0x10 service adapter; descriptor FEFF01E8; 4-byte result; OQ-055
+0x00BE0CC,tests/targets/venza/verify_yc_venza_airbag_reprogramming.py,authenticated key-update adapter; opcode 0x31; descriptor FEFF0398
+0x00BDA6E,docs/security/icu-hsm-command-surface.md,opcode 0x04 mode-mapped query adapter; descriptor FEFF0250
+0x00BCCF4,docs/variants/yc-venza-airbag-reprogramming-2026-09-14.md,SecOC TX MAC-generation dispatcher
+0x00BCEFA,docs/variants/yc-venza-airbag-reprogramming-2026-09-14.md,SecOC RX MAC-verification dispatcher
+0x00BD2EC,tests/targets/venza/verify_yc_venza_airbag_reprogramming.py,RID 0x1010 key-update dispatcher (records 0/1)
+0x00B76D4,tests/targets/venza/verify_yc_venza_airbag_reprogramming.py,RID 0x1010 asynchronous worker
+0x00DD6F4,tests/targets/venza/verify_yc_venza_airbag_reprogramming.py,SecOC initialization; installs selector-4 config
+0x00DD23A,tests/targets/venza/verify_yc_venza_airbag_reprogramming.py,SecOC route-set helper (2 TX + 4 RX profiles)
+0x00DE09E,tests/targets/venza/verify_yc_venza_airbag_reprogramming.py,SecOC RX verification worker (0x50-byte profiles)
+0x00DE9F0,tests/targets/venza/verify_yc_venza_airbag_reprogramming.py,SecOC TX generation worker (0x44-byte profiles)
+0x00DDC0A,tests/targets/venza/verify_yc_venza_airbag_reprogramming.py,SecOC crypto-config setter (type 1 / selector 4)
+0x00DDC5C,tests/targets/venza/verify_yc_venza_airbag_reprogramming.py,SecOC crypto-config getter
+0x0062A6,tests/targets/venza/verify_yc_venza_airbag_reprogramming.py,RPRG payload-root KDF (AES-ECB over DID 0x0201)
+0x00630A,tests/targets/venza/verify_yc_venza_airbag_reprogramming.py,payload crypto context init (derived key + DID 0x0202 IV)
+0x0077B4,tests/targets/venza/verify_yc_venza_airbag_reprogramming.py,RPRG boot-SA root transform
+0x007820,tests/targets/venza/verify_yc_venza_airbag_reprogramming.py,RPRG boot-SA expected-key compare
+0x0017BC,docs/variants/yc-venza-airbag-reprogramming-2026-09-14.md,retained programming-handoff magic test
+0x0017D2,docs/variants/yc-venza-airbag-reprogramming-2026-09-14.md,retained programming-handoff magic clear
+0x00921E,docs/variants/yc-venza-airbag-reprogramming-2026-09-14.md,startup programming-mode body relocated from CodeFlash 0x921E
+0x00DF140,docs/security/icu-hsm-command-surface.md,secure-service result/state copy helper used by all five adapters

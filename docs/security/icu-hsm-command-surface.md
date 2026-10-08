@@ -20,11 +20,13 @@ airbag's different secure subsystem.
   the CodeFlash images. Two corpus-only caller-chain walks were delegated and
   are marked corpus-static where a chain closes only through data-space
   pointers.
-- Venza airbag (unregistered image): a disposable ad-hoc Ghidra project
-  (`build/work/venza-airbag`, raw import at base 0, `v850e3`) was seeded and
+- Venza airbag: now the registered target `venza-8917048E30` (CodeFlash plus
+  the `boot.bin` extended-user image at `0x01000000`; no DataFlash specimen
+  exists; no P1M-E SFR map is applied — different RH850 type). The census was
+  originally produced against a disposable ad-hoc project seeded and
   linear-swept by `ghidra/scripts/investigate/CensusVenzaSecureService.java`
   with follow-ups `FollowUpVenzaCensus.java`, `FollowUpVenzaCensus2.java`, and
-  `FollowUpVenzaOpcodes.java`. Every new airbag fact below is byte-pinned in
+  `FollowUpVenzaOpcodes.java`; every new airbag fact below is byte-pinned in
   `tests/targets/venza/verify_yc_venza_airbag_reprogramming.py`
   (`yc_venza_airbag_reprogramming` selector).
 - Sienna facts are the previously verified SECOC-015 census; this audit
@@ -217,6 +219,8 @@ tools/g x-ref to 0xFFC5D000                  # EPS register-site census (per tar
 tools/pseudo --target <T> <issuer-addr>      # issuer constants per corpus
 ```
 
-The disposable airbag project regenerates via `tools/project/run_headless` with
-`CensusVenzaSecureService.java` (see script header); it is workspace, not
-evidence.
+The registered airbag target rebuilds and queries like any other:
+`make rebuild-project TARGET=venza-8917048E30`, `tools/gtarget
+venza-8917048E30 ...`, `tools/pseudo --target venza-8917048E30 ...`. The
+census sweep scripts under `ghidra/scripts/investigate/` remain one-shot
+workspace tooling, not evidence.

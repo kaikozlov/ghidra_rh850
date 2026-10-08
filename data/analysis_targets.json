@@ -171,6 +171,35 @@
       "dataflash_base": "0xFF200000",
       "mcu": "R7F701381",
       "processor": "v850e3:LE:32:default"
+    },
+    "venza-8917048E30": {
+      "status": "reference",
+      "vehicle": "2021-2022 Toyota Venza HV airbag sensor assembly",
+      "software_id": "8917048E30",
+      "codeflash": "firmware/venza-8917048E30/cflash.bin",
+      "codeflash_sha256": "2dfaf7ce21cb04af1126192f574103f63802352f8717fa0f03986d5a11d067f9",
+      "capture_root": "community/yc/venza",
+      "project_name": "venza_8917048E30",
+      "program_name": "cflash.bin",
+      "snapshot_dir": "projects/venza-8917048E30",
+      "work_dir": "build/work/targets/venza-8917048E30/project",
+      "inventory_baseline": "data/targets/venza-8917048E30/ghidra_project_inventory.baseline.jsonl",
+      "decompiler_corpus": "data/generated/venza-8917048E30/decompilations.jsonl",
+      "rebuild_profile": "venza_airbag_v1",
+      "codeflash_size": 3145728,
+      "codeflash_base": "0x00000000",
+      "extended_user": "firmware/venza-8917048E30/boot.bin",
+      "extended_user_sha256": "943934abc9a5c676eff46f51f008baa39e4f533e66650ffcce54d7bfb6e6e6e2",
+      "extended_user_size": 32768,
+      "extended_user_base": "0x01000000",
+      "sfr_context": "none",
+      "mcu": "unknown (RH850 P1x-C family)",
+      "processor": "v850e3:LE:32:default",
+      "function_seeds": "data/targets/venza-8917048E30/function_seeds.csv",
+      "device_profile_script": "ApplyVenzaAirbagDeviceProfile.java",
+      "entry_seed_script": "SeedVenzaAirbagEntries.java",
+      "diagnostic_seed_script": "SeedVenzaAirbagDiagnostics.java",
+      "recovered_seed_script": "SeedVenzaAirbagRecoveredFunctions.java"
     }
   }
 }

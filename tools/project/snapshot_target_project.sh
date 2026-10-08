@@ -47,7 +47,7 @@ else
   echo "Initialized byte-identical two-build inventory baseline: $BASE"
 fi
 # Canonical corpus generation independently re-checks live inventory against BASE.
-python3 "$ROOT/tools/project/generate_target_decompiler_corpus.py" --target "$TARGET" --project-dir "$PROJECT_DIR" --output "$CORPUS"
+(cd "$ROOT" && python3 -m tools.project.generate_target_decompiler_corpus --target "$TARGET" --project-dir "$PROJECT_DIR" --output "$CORPUS")
 # Pack this verified work project under non-openable snapshot names.
 PACK="$TMP/packed"; mkdir -p "$PACK"
 python3 "$ROOT/tools/project/project_layout.py" pack --project-dir "$PROJECT_DIR" --snapshot-dir "$PACK" --project-name "$PN"
