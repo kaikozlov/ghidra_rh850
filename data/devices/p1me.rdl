@@ -1,0 +1,1105 @@
+// Canonical RH850/P1M-E executable device description.
+// Register descriptions migrated from data/p1m_sfr_labels.csv; that CSV is now a generated projection.
+property evidence { type = string; component = addrmap | mem | reg; };
+property source_ref { type = string; component = addrmap | mem | reg; };
+property behavior { type = string; component = reg; };
+property executable { type = boolean; component = mem; };
+property access_widths { type = string; component = reg; };
+property alias_group { type = string; component = mem; };
+property reset_policy { type = string; component = mem; };
+property product_ids { type = string; component = addrmap; };
+property p_bus_hz { type = longint unsigned; component = addrmap; };
+
+addrmap p1me {
+    desc = "Renesas RH850/P1M-E R7F701381/R7F701383 functional machine model";
+    evidence = "manual";
+    source_ref = "R01UH0585EJ0120 Rev.1.20; R01UH0615EJ0120 Rev.1.20; R01US0123EJ0140 Rev.1.40";
+    product_ids = "R7F701381,R7F701383";
+    p_bus_hz = 80000000;
+
+    external mem { memwidth=8; mementries=0x100000; sw=r; evidence="manual"; source_ref="R01UH0585EJ0120 Table 4.1"; executable=true; reset_policy="retained nonvolatile"; } codeflash_user @ 0x00000000;
+    external mem { memwidth=8; mementries=0x8000; sw=r; evidence="manual"; source_ref="R01UH0585EJ0120 Table 4.1"; executable=true; reset_policy="retained nonvolatile"; } codeflash_extended @ 0x01000000;
+    external mem { memwidth=8; mementries=0x8000; sw=rw; evidence="manual"; source_ref="R01UH0585EJ0120 Table 4.1"; executable=false; reset_policy="retained nonvolatile; FACI writes only"; } dataflash @ 0xFF200000;
+    external mem { memwidth=8; mementries=0x20000; sw=rw; evidence="manual"; source_ref="R01UH0585EJ0120 Table 4.1"; executable=true; alias_group="local_ram"; reset_policy="STAC_LM0 by reset class"; } local_ram_pe1 @ 0xFEBE0000;
+    external mem { memwidth=8; mementries=0x20000; sw=rw; evidence="manual"; source_ref="R01UH0585EJ0120 Table 4.1"; executable=true; alias_group="local_ram"; reset_policy="STAC_LM0 by reset class"; } local_ram_self @ 0xFEDE0000;
+    external mem { memwidth=8; mementries=0x10000; sw=rw; evidence="manual"; source_ref="R01UH0585EJ0120 Table 4.1"; executable=true; reset_policy="STAC_GRAM for Application Reset 1"; } global_ram @ 0xFEEF8000;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="Self-programming ID input word 0";
+        evidence="manual"; source_ref="R01UH0615EJ0120 sections 3.3 and 4"; behavior="faci";
+        field { sw=w; } value[31:0];
+    } SELFID0 @ 0xFFA08000;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="Self-programming ID input word 1";
+        evidence="manual"; source_ref="R01UH0615EJ0120 sections 3.3 and 4"; behavior="faci";
+        field { sw=w; } value[31:0];
+    } SELFID1 @ 0xFFA08004;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="Self-programming ID input word 2";
+        evidence="manual"; source_ref="R01UH0615EJ0120 sections 3.3 and 4"; behavior="faci";
+        field { sw=w; } value[31:0];
+    } SELFID2 @ 0xFFA08008;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="Self-programming ID input word 3";
+        evidence="manual"; source_ref="R01UH0615EJ0120 sections 3.3 and 4"; behavior="faci";
+        field { sw=w; } value[31:0];
+    } SELFID3 @ 0xFFA0800C;
+
+    reg {
+        regwidth=8; accesswidth=8; desc="Self-programming ID authentication status";
+        evidence="manual"; source_ref="R01UH0615EJ0120 sections 3.3 and 4"; behavior="faci";
+        field { sw=r; } value[7:0];
+    } SELFIDST @ 0xFFA08010;
+
+    reg {
+        regwidth=8; accesswidth=8; desc="Flash pin monitor";
+        evidence="manual"; source_ref="R01UH0615EJ0120 sections 3.3 and 4"; behavior="faci";
+        field { sw=r; } value[7:0];
+    } FPMON @ 0xFFA10000;
+
+    reg {
+        regwidth=8; accesswidth=8; desc="Flash access status";
+        evidence="manual"; source_ref="R01UH0615EJ0120 sections 3.3 and 4"; behavior="faci";
+        field { sw=rw; } value[7:0];
+    } FASTAT @ 0xFFA10010;
+
+    reg {
+        regwidth=8; accesswidth=8; desc="Flash access-error interrupt enable";
+        evidence="manual"; source_ref="R01UH0615EJ0120 sections 3.3 and 4"; behavior="faci";
+        field { sw=rw; } value[7:0];
+    } FAEINT @ 0xFFA10014;
+
+    reg {
+        regwidth=16; accesswidth=16; desc="CodeFlash memory-area selector";
+        evidence="manual"; source_ref="R01UH0615EJ0120 sections 3.3 and 4"; behavior="faci";
+        field { sw=rw; } value[15:0];
+    } FAREASELC @ 0xFFA10020;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="FACI command start address";
+        evidence="manual"; source_ref="R01UH0615EJ0120 sections 3.3 and 4"; behavior="faci";
+        field { sw=rw; } value[31:0];
+    } FSADDR @ 0xFFA10030;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="FACI command end address";
+        evidence="manual"; source_ref="R01UH0615EJ0120 sections 3.3 and 4"; behavior="faci";
+        field { sw=rw; } value[31:0];
+    } FEADDR @ 0xFFA10034;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="Flash sequencer status";
+        evidence="manual"; source_ref="R01UH0615EJ0120 sections 3.3 and 4"; behavior="faci";
+        access_widths="1,2,4";
+        field { sw=r; reset=0x8000; } value[31:0];
+    } FSTATR @ 0xFFA10080;
+
+    reg {
+        regwidth=16; accesswidth=16; desc="Flash program-or-erase mode entry";
+        evidence="manual"; source_ref="R01UH0615EJ0120 sections 3.3 and 4"; behavior="faci";
+        field { sw=rw; } value[15:0];
+    } FENTRYR @ 0xFFA10084;
+
+    reg {
+        regwidth=16; accesswidth=16; desc="CodeFlash protection control";
+        evidence="manual"; source_ref="R01UH0615EJ0120 sections 3.3 and 4"; behavior="faci";
+        field { sw=rw; } value[15:0];
+    } FPROTR @ 0xFFA10088;
+
+    reg {
+        regwidth=16; accesswidth=16; desc="Flash sequencer setup initialization";
+        evidence="manual"; source_ref="R01UH0615EJ0120 sections 3.3 and 4"; behavior="faci";
+        field { sw=rw; } value[15:0];
+    } FSUINITR @ 0xFFA1008C;
+
+    reg {
+        regwidth=8; accesswidth=8; desc="Flash lock-bit status";
+        evidence="manual"; source_ref="R01UH0615EJ0120 sections 3.3 and 4"; behavior="faci";
+        field { sw=r; } value[7:0];
+    } FLKSTAT @ 0xFFA10090;
+
+    reg {
+        regwidth=8; accesswidth=8; desc="FACI reset-transfer status";
+        evidence="manual"; source_ref="R01UH0615EJ0120 sections 3.3 and 4"; behavior="faci";
+        field { sw=r; } value[7:0];
+    } FRTSTAT @ 0xFFA10098;
+
+    reg {
+        regwidth=8; accesswidth=8; desc="FACI reset-transfer error interrupt enable";
+        evidence="manual"; source_ref="R01UH0615EJ0120 sections 3.3 and 4"; behavior="faci";
+        field { sw=rw; } value[7:0];
+    } FRTEINT @ 0xFFA1009C;
+
+    reg {
+        regwidth=16; accesswidth=16; desc="Last FACI command";
+        evidence="manual"; source_ref="R01UH0615EJ0120 sections 3.3 and 4"; behavior="faci";
+        field { sw=r; reset=0xffff; } value[15:0];
+    } FCMDR @ 0xFFA100A0;
+
+    reg {
+        regwidth=16; accesswidth=16; desc="Flash program-or-erase status";
+        evidence="manual"; source_ref="R01UH0615EJ0120 sections 3.3 and 4"; behavior="faci";
+        field { sw=r; } value[15:0];
+    } FPESTAT @ 0xFFA100C0;
+
+    reg {
+        regwidth=8; accesswidth=8; desc="DataFlash blank-check control";
+        evidence="manual"; source_ref="R01UH0615EJ0120 sections 3.3 and 4"; behavior="faci";
+        field { sw=rw; } value[7:0];
+    } FBCCNT @ 0xFFA100D0;
+
+    reg {
+        regwidth=8; accesswidth=8; desc="DataFlash blank-check status";
+        evidence="manual"; source_ref="R01UH0615EJ0120 sections 3.3 and 4"; behavior="faci";
+        field { sw=r; } value[7:0];
+    } FBCSTAT @ 0xFFA100D4;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="First programmed DataFlash address";
+        evidence="manual"; source_ref="R01UH0615EJ0120 sections 3.3 and 4"; behavior="faci";
+        field { sw=r; } value[31:0];
+    } FPSADDR @ 0xFFA100D8;
+
+    reg {
+        regwidth=16; accesswidth=16; desc="Flash sequencer process switch";
+        evidence="manual"; source_ref="R01UH0615EJ0120 sections 3.3 and 4"; behavior="faci";
+        field { sw=rw; } value[15:0];
+    } FCPSR @ 0xFFA100E0;
+
+    reg {
+        regwidth=16; accesswidth=16; desc="Flash sequencer processing-clock notification";
+        evidence="manual"; source_ref="R01UH0615EJ0120 sections 3.3 and 4"; behavior="faci";
+        field { sw=rw; } value[15:0];
+    } FPCKAR @ 0xFFA100E4;
+
+    reg {
+        regwidth=16; accesswidth=16; desc="Flash ECC encoder monitor";
+        evidence="manual"; source_ref="R01UH0615EJ0120 sections 3.3 and 4"; behavior="faci";
+        field { sw=r; } value[15:0];
+    } FECCEMON @ 0xFFA10100;
+
+    reg {
+        regwidth=16; accesswidth=16; desc="Flash ECC test-mode control";
+        evidence="manual"; source_ref="R01UH0615EJ0120 sections 3.3 and 4"; behavior="faci";
+        field { sw=rw; } value[15:0];
+    } FECCTMD @ 0xFFA10104;
+
+    reg {
+        regwidth=16; accesswidth=16; desc="Flash dummy ECC value";
+        evidence="manual"; source_ref="R01UH0615EJ0120 sections 3.3 and 4"; behavior="faci";
+        field { sw=rw; } value[15:0];
+    } FDMYECC @ 0xFFA10108;
+
+    reg {
+        regwidth=8; accesswidth=8; desc="FACI command-issuing area";
+        evidence="manual"; source_ref="R01UH0615EJ0120 sections 3.3 and 4"; behavior="faci";
+        field { sw=w; } value[7:0];
+    } FACI_COMMAND_AREA @ 0xFFA20000;
+
+    reg {
+        regwidth=16; accesswidth=16; desc="Boot-flash area selector";
+        evidence="manual"; source_ref="R01UH0615EJ0120 sections 3.3 and 4"; behavior="faci";
+        field { sw=rw; } value[15:0];
+    } BFASELR @ 0xFFC59008;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="ICU-S command register; recovered MAC generate writes (selector<<16)|5 and CMAC verify writes (selector<<16)|7";
+        evidence="recovered"; source_ref="Exact target CodeFlash ICU-S driver accesses; public P1M-E manual only identifies ICU-S presence"; behavior="icus_recovered";
+        field { sw=rw; } value[31:0];
+    } ICUSCMD @ 0xFFC5D000;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="ICU-S data/parameter word written beside ICUSCMD (firmware role)";
+        evidence="recovered"; source_ref="Exact target CodeFlash ICU-S driver accesses; public P1M-E manual only identifies ICU-S presence"; behavior="icus_recovered";
+        field { sw=rw; } value[31:0];
+    } ICUSDAT @ 0xFFC5D004;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="ICU-S output word consumed by recovered completion callbacks";
+        evidence="recovered"; source_ref="Exact target CodeFlash callbacks at 0x0008A514 and 0x0008A58A"; behavior="icus_recovered";
+        field { sw=rw; } value[31:0];
+    } ICUSOUT @ 0xFFC5D008;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="ICU-S status; driver polls bit 0 as busy/ready";
+        evidence="recovered"; source_ref="Exact target CodeFlash ICU-S driver accesses; public P1M-E manual only identifies ICU-S presence"; behavior="icus_recovered";
+        field { sw=rw; } value[31:0];
+    } ICUSSTS @ 0xFFC5D00C;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="ICU-S companion status; driver polls low bits with ICUSSTS";
+        evidence="recovered"; source_ref="Exact target CodeFlash ICU-S driver accesses; public P1M-E manual only identifies ICU-S presence"; behavior="icus_recovered";
+        field { sw=rw; } value[31:0];
+    } ICUSSTS2 @ 0xFFC5D014;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="ICU-S interrupt/status word read by the recovered service dispatcher";
+        evidence="recovered"; source_ref="Exact target CodeFlash dispatcher at 0x0008A4CE"; behavior="icus_recovered";
+        field { sw=rw; } value[31:0];
+    } ICUSIRQSTS @ 0xFFC5D018;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="ICU-S operation parameter written by recovered command setup";
+        evidence="recovered"; source_ref="Exact target CodeFlash command setup at 0x0008A63C"; behavior="icus_recovered";
+        field { sw=rw; } value[31:0];
+    } ICUSPARAM @ 0xFFC5D01C;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="ICU-S control/acknowledgement word written by recovered callbacks and reset paths";
+        evidence="recovered"; source_ref="Exact target CodeFlash callbacks at 0x0008A538 and 0x0008A5AE; driver reset path"; behavior="icus_recovered";
+        field { sw=rw; } value[31:0];
+    } ICUSCTL @ 0xFFC5D024;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="CodeFlash error-information control";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 31.2.2"; behavior="storage";
+        field { sw=rw; } value[31:0];
+    } UCFERRINT @ 0xFFC62000;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="CodeFlash ECC single-error status clear";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 31.2.2"; behavior="storage";
+        field { sw=w; } value[31:0];
+    } UCFSERSTCLR @ 0xFFC62004;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="CodeFlash ECC double-error and address-parity status clear";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 31.2.2"; behavior="storage";
+        field { sw=w; } value[31:0];
+    } UCFDERSTCLR @ 0xFFC62008;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="CodeFlash single-error count overflow status";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 31.2.2"; behavior="storage";
+        field { sw=r; } value[31:0];
+    } UCFOVFSTR @ 0xFFC6200C;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="CodeFlash ECC single-error status";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 31.2.2"; behavior="storage";
+        field { sw=r; } value[31:0];
+    } UCFSERSTR @ 0xFFC62020;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="CodeFlash ECC double-error and address-parity status";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 31.2.2"; behavior="storage";
+        field { sw=r; } value[31:0];
+    } UCFDERSTR @ 0xFFC62030;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="CodeFlash first single-error address";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 31.2.2"; behavior="storage";
+        field { sw=r; } value[31:0];
+    } UCF1SEDADR @ 0xFFC62040;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="CodeFlash second single-error address";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 31.2.2"; behavior="storage";
+        field { sw=r; } value[31:0];
+    } UCF2SEDADR @ 0xFFC62044;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="CodeFlash third single-error address";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 31.2.2"; behavior="storage";
+        field { sw=r; } value[31:0];
+    } UCF3SEDADR @ 0xFFC62048;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="CodeFlash fourth single-error address";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 31.2.2"; behavior="storage";
+        field { sw=r; } value[31:0];
+    } UCF4SEDADR @ 0xFFC6204C;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="CodeFlash double-error or address-parity error address";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 31.2.2"; behavior="storage";
+        field { sw=r; } value[31:0];
+    } UCFDEDADR @ 0xFFC620C0;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="CodeFlash address-parity control";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 31.2.2"; behavior="storage";
+        field { sw=rw; } value[31:0];
+    } CFAPCTL @ 0xFFC62100;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="CodeFlash ECC control for system-interconnect access";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 31.2.2"; behavior="storage";
+        field { sw=rw; } value[31:0];
+    } CFECCCTL_VCI2CFBA @ 0xFFC62200;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="CodeFlash ECC sub-test control for system-interconnect access";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 31.2.2"; behavior="storage";
+        field { sw=rw; } value[31:0];
+    } CFSTSTCTL_VCI2CFBA @ 0xFFC622F0;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="CodeFlash ECC control for PE1 access";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 31.2.2"; behavior="storage";
+        field { sw=rw; } value[31:0];
+    } CFECCCTL_PE1 @ 0xFFC62400;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="CodeFlash ECC sub-test control for PE1 access";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 31.2.2"; behavior="storage";
+        field { sw=rw; } value[31:0];
+    } CFSTSTCTL_PE1 @ 0xFFC624F0;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD common-FIFO status base (ch0/fifo0; +0x0C*ch +4*fifo)";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD register tables; firmware-observed role"; behavior="rscfd";
+        field { sw=rw; } value[31:0];
+    } CFSTS @ 0xFFD20178;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD common-FIFO status for application CAN1 (ch1/fifo0)";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD register tables; firmware-observed role"; behavior="rscfd";
+        field { sw=rw; } value[31:0];
+    } CFSTS_CH1 @ 0xFFD20184;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD common-FIFO pointer control base (write 0xFF advances)";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD register tables; firmware-observed role"; behavior="rscfd";
+        field { sw=rw; } value[31:0];
+    } CFPCTR @ 0xFFD201D8;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD common-FIFO pointer control for application CAN1";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD register tables; firmware-observed role"; behavior="rscfd";
+        field { sw=rw; } value[31:0];
+    } CFPCTR_CH1 @ 0xFFD201E4;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD Tx message-buffer control base (CFDTMCn.TMTR at +n)";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD register tables; firmware-observed role"; behavior="rscfd";
+        field { sw=rw; } value[31:0];
+    } CFDTMC @ 0xFFD20250;
+
+    reg {
+        regwidth=8; accesswidth=8; desc="Diagnostic Tx buffer control (HTH 0x13 -> n=16; TMTR bit 0)";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD register tables; firmware-observed role"; behavior="rscfd";
+        field { sw=rw; } value[7:0];
+    } CFDTMC16 @ 0xFFD20260;
+
+    reg {
+        regwidth=8; accesswidth=8; desc="Application CAN1 Tx buffer n=16 control (TMTR bit 0)";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD register tables; exact firmware table binding"; behavior="rscfd";
+        field { sw=rw; } value[7:0];
+    } CFDTMC_CH1_16 @ 0xFFD20270;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD Tx message-buffer status base (CFDTMSTSn at +n)";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD register tables; firmware-observed role"; behavior="rscfd";
+        field { sw=rw; } value[31:0];
+    } CFDTMSTS @ 0xFFD202D0;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD Tx status base for application CAN1 record";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD register tables; firmware-observed role"; behavior="rscfd";
+        field { sw=rw; } value[31:0];
+    } CFDTMSTS_CH1 @ 0xFFD202E0;
+
+    reg {
+        regwidth=8; accesswidth=8; desc="Application CAN1 Tx buffer n=16 status";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD register tables; exact firmware table binding"; behavior="rscfd";
+        field { sw=rw; } value[7:0];
+    } CFDTMSTS_CH1_16 @ 0xFFD202F0;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD common-FIFO message RAM base (CFID/CFPTR/CFDF window)";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD register tables; firmware-observed role"; behavior="rscfd";
+        field { sw=rw; } value[31:0];
+    } CFID @ 0xFFD23400;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD common-FIFO message RAM for application CAN1";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD register tables; firmware-observed role"; behavior="rscfd";
+        field { sw=rw; } value[31:0];
+    } CFID_CH1 @ 0xFFD23580;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD Tx message-buffer RAM base (0x20-byte entries)";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD register tables; firmware-observed role"; behavior="rscfd";
+        access_widths="1,2,4";
+        field { sw=rw; } value[31:0];
+    } CFDTMID @ 0xFFD24000;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="Diagnostic Tx message RAM for buffer n=16 (CAN 0x7A9 path)";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD register tables; firmware-observed role"; behavior="rscfd";
+        access_widths="1,2,4";
+        field { sw=rw; } value[31:0];
+    } CFDTMID16 @ 0xFFD24200;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="Diagnostic Tx buffer n=16 pointer/DLC word";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD Tx message-buffer RAM"; behavior="rscfd";
+        access_widths="1,2,4";
+        field { sw=rw; } value[31:0];
+    } CFDTMPTR16 @ 0xFFD24204;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="Diagnostic Tx buffer n=16 FD pointer/status word";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD Tx message-buffer RAM"; behavior="rscfd";
+        access_widths="1,2,4";
+        field { sw=rw; } value[31:0];
+    } CFDTMFDSTS16 @ 0xFFD24208;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="Diagnostic Tx buffer n=16 data bytes 0..3";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD Tx message-buffer RAM"; behavior="rscfd";
+        access_widths="1,2,4";
+        field { sw=rw; } value[31:0];
+    } CFDTMDF0_16 @ 0xFFD2420C;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="Diagnostic Tx buffer n=16 data bytes 4..7";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD Tx message-buffer RAM"; behavior="rscfd";
+        access_widths="1,2,4";
+        field { sw=rw; } value[31:0];
+    } CFDTMDF1_16 @ 0xFFD24210;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="Application CAN1 Tx message RAM buffer n=16 identifier";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD channel-1 Tx message-buffer RAM"; behavior="rscfd";
+        access_widths="1,2,4";
+        field { sw=rw; } value[31:0];
+    } CFDTMID_CH1_16 @ 0xFFD24400;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="Application CAN1 Tx message RAM buffer n=16 pointer/DLC word";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD channel-1 Tx message-buffer RAM"; behavior="rscfd";
+        access_widths="1,2,4";
+        field { sw=rw; } value[31:0];
+    } CFDTMPTR_CH1_16 @ 0xFFD24404;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="Application CAN1 Tx buffer n=16 FD pointer/status word";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD channel-1 Tx message-buffer RAM"; behavior="rscfd";
+        access_widths="1,2,4";
+        field { sw=rw; } value[31:0];
+    } CFDTMFDSTS_CH1_16 @ 0xFFD24408;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="Application CAN1 Tx buffer n=16 data bytes 0..3";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD channel-1 Tx message-buffer RAM"; behavior="rscfd";
+        access_widths="1,2,4";
+        field { sw=rw; } value[31:0];
+    } CFDTMDF0_CH1_16 @ 0xFFD2440C;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="Application CAN1 Tx buffer n=16 data bytes 4..7";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD channel-1 Tx message-buffer RAM"; behavior="rscfd";
+        access_widths="1,2,4";
+        field { sw=rw; } value[31:0];
+    } CFDTMDF1_CH1_16 @ 0xFFD24410;
+
+    reg {
+        regwidth=8; accesswidth=8; desc="ECM master error-source set trigger";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=w; } value[7:0];
+    } ECMMESET @ 0xFFD60000;
+
+    reg {
+        regwidth=8; accesswidth=8; desc="ECM master error-source clear trigger";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=w; } value[7:0];
+    } ECMMECLR @ 0xFFD60004;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="ECM master error-source status 0";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=r; } value[31:0];
+    } ECMMESSTR0 @ 0xFFD60008;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="ECM master error-source status 1";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=r; } value[31:0];
+    } ECMMESSTR1 @ 0xFFD6000C;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="ECM master error-source status 2";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=r; } value[31:0];
+    } ECMMESSTR2 @ 0xFFD60010;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="ECM master protection command; write 0xA5 before protected writes";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=w; } value[31:0];
+    } ECMMPCMD0 @ 0xFFD60014;
+
+    reg {
+        regwidth=8; accesswidth=8; desc="ECM checker error-source set trigger";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=w; } value[7:0];
+    } ECMCESET @ 0xFFD61000;
+
+    reg {
+        regwidth=8; accesswidth=8; desc="ECM checker error-source clear trigger";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=w; } value[7:0];
+    } ECMCECLR @ 0xFFD61004;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="ECM checker error-source status 0";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=r; } value[31:0];
+    } ECMCESSTR0 @ 0xFFD61008;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="ECM checker error-source status 1";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=r; } value[31:0];
+    } ECMCESSTR1 @ 0xFFD6100C;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="ECM checker error-source status 2";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=r; } value[31:0];
+    } ECMCESSTR2 @ 0xFFD61010;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="ECM checker protection command; write 0xA5 before protected writes";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=w; } value[31:0];
+    } ECMCPCMD0 @ 0xFFD61014;
+
+    reg {
+        regwidth=8; accesswidth=8; desc="ECM error-pulse configuration";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=rw; } value[7:0];
+    } ECMEPCFG @ 0xFFD62000;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="ECM maskable-interrupt configuration 0";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=rw; } value[31:0];
+    } ECMMICFG0 @ 0xFFD62004;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="ECM maskable-interrupt configuration 1";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=rw; } value[31:0];
+    } ECMMICFG1 @ 0xFFD62008;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="ECM maskable-interrupt configuration 2";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=rw; } value[31:0];
+    } ECMMICFG2 @ 0xFFD6200C;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="ECM non-maskable-interrupt configuration 0";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=rw; } value[31:0];
+    } ECMNMICFG0 @ 0xFFD62010;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="ECM non-maskable-interrupt configuration 1";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=rw; } value[31:0];
+    } ECMNMICFG1 @ 0xFFD62014;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="ECM non-maskable-interrupt configuration 2";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=rw; } value[31:0];
+    } ECMNMICFG2 @ 0xFFD62018;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="ECM internal-reset configuration 0";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=rw; } value[31:0];
+    } ECMIRCFG0 @ 0xFFD6201C;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="ECM internal-reset configuration 1";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=rw; } value[31:0];
+    } ECMIRCFG1 @ 0xFFD62020;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="ECM internal-reset configuration 2";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=rw; } value[31:0];
+    } ECMIRCFG2 @ 0xFFD62024;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="ECM error mask 0";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=rw; } value[31:0];
+    } ECMEMK0 @ 0xFFD62028;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="ECM error mask 1";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=rw; } value[31:0];
+    } ECMEMK1 @ 0xFFD6202C;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="ECM error mask 2";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=rw; } value[31:0];
+    } ECMEMK2 @ 0xFFD62030;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="ECM error-source status-clear trigger 0";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=w; } value[31:0];
+    } ECMESSTC0 @ 0xFFD62034;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="ECM error-source status-clear trigger 1";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=w; } value[31:0];
+    } ECMESSTC1 @ 0xFFD62038;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="ECM error-source status-clear trigger 2";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=w; } value[31:0];
+    } ECMESSTC2 @ 0xFFD6203C;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="ECM common protection command; write 0xA5 before protected writes";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=w; } value[31:0];
+    } ECMPCMD1 @ 0xFFD62040;
+
+    reg {
+        regwidth=8; accesswidth=8; desc="ECM common protection status";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=r; } value[7:0];
+    } ECMPS @ 0xFFD62044;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="ECM pseudo-error trigger 0";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=w; } value[31:0];
+    } ECMPE0 @ 0xFFD62048;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="ECM pseudo-error trigger 1";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=w; } value[31:0];
+    } ECMPE1 @ 0xFFD6204C;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="ECM pseudo-error trigger 2";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=w; } value[31:0];
+    } ECMPE2 @ 0xFFD62050;
+
+    reg {
+        regwidth=8; accesswidth=8; desc="ECM delay-timer control";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=rw; } value[7:0];
+    } ECMDTMCTL @ 0xFFD62054;
+
+    reg {
+        regwidth=16; accesswidth=16; desc="ECM delay-timer count";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=r; } value[15:0];
+    } ECMDTMR @ 0xFFD62058;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="ECM delay-timer compare";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=rw; } value[31:0];
+    } ECMDTMCMP @ 0xFFD6205C;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="ECM delay-timer configuration 0";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=rw; } value[31:0];
+    } ECMDTMCFG0 @ 0xFFD62060;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="ECM delay-timer configuration 1";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=rw; } value[31:0];
+    } ECMDTMCFG1 @ 0xFFD62064;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="ECM delay-timer configuration 2";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=rw; } value[31:0];
+    } ECMDTMCFG2 @ 0xFFD62068;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="ECM delay-timer configuration 3";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=rw; } value[31:0];
+    } ECMDTMCFG3 @ 0xFFD6206C;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="ECM delay-timer configuration 4";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=rw; } value[31:0];
+    } ECMDTMCFG4 @ 0xFFD62070;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="ECM delay-timer configuration 5";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=rw; } value[31:0];
+    } ECMDTMCFG5 @ 0xFFD62074;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="ECM error-output clear-invalidation configuration";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=rw; } value[31:0];
+    } ECMEOCCFG @ 0xFFD62078;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="ECM pseudo-error mask";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=rw; } value[31:0];
+    } ECMPEM @ 0xFFD6207C;
+
+    reg {
+        regwidth=8; accesswidth=8; desc="ECM error-pulse control";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=rw; } value[7:0];
+    } ECMEPCTL @ 0xFFD63000;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="TAUJ0 channel 0 data reload";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 24.3"; behavior="tauj";
+        field { sw=rw; } value[31:0];
+    } TAUJ0CDR0 @ 0xFFE50000;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="TAUJ0 channel 1 data reload";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 24.3"; behavior="tauj";
+        field { sw=rw; } value[31:0];
+    } TAUJ0CDR1 @ 0xFFE50004;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="TAUJ0 channel 2 data reload";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 24.3"; behavior="tauj";
+        field { sw=rw; } value[31:0];
+    } TAUJ0CDR2 @ 0xFFE50008;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="TAUJ0 channel 3 data reload";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 24.3"; behavior="tauj";
+        field { sw=rw; } value[31:0];
+    } TAUJ0CDR3 @ 0xFFE5000C;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="TAUJ0 channel 0 counter";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 24.3"; behavior="tauj";
+        field { sw=r; } value[31:0];
+    } TAUJ0CNT0 @ 0xFFE50010;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="TAUJ0 channel 1 counter";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 24.3"; behavior="tauj";
+        field { sw=r; } value[31:0];
+    } TAUJ0CNT1 @ 0xFFE50014;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="TAUJ0 channel 2 counter";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 24.3"; behavior="tauj";
+        field { sw=r; } value[31:0];
+    } TAUJ0CNT2 @ 0xFFE50018;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="TAUJ0 channel 3 counter";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 24.3"; behavior="tauj";
+        field { sw=r; } value[31:0];
+    } TAUJ0CNT3 @ 0xFFE5001C;
+
+    reg {
+        regwidth=8; accesswidth=8; desc="TAUJ0 channel 0 user mode";
+        evidence="manual"; source_ref="R01UH0585EJ0120 Table 24.10"; behavior="tauj";
+        field { sw=rw; } value[7:0];
+    } TAUJ0CMUR0 @ 0xFFE50020;
+
+    reg {
+        regwidth=8; accesswidth=8; desc="TAUJ0 channel 1 user mode";
+        evidence="manual"; source_ref="R01UH0585EJ0120 Table 24.10"; behavior="tauj";
+        field { sw=rw; } value[7:0];
+    } TAUJ0CMUR1 @ 0xFFE50024;
+
+    reg {
+        regwidth=8; accesswidth=8; desc="TAUJ0 channel 2 user mode";
+        evidence="manual"; source_ref="R01UH0585EJ0120 Table 24.10"; behavior="tauj";
+        field { sw=rw; } value[7:0];
+    } TAUJ0CMUR2 @ 0xFFE50028;
+
+    reg {
+        regwidth=8; accesswidth=8; desc="TAUJ0 channel 3 user mode";
+        evidence="manual"; source_ref="R01UH0585EJ0120 Table 24.10"; behavior="tauj";
+        field { sw=rw; } value[7:0];
+    } TAUJ0CMUR3 @ 0xFFE5002C;
+
+    reg {
+        regwidth=8; accesswidth=8; desc="TAUJ0 channel enable status";
+        evidence="manual"; source_ref="R01UH0585EJ0120 Table 24.10"; behavior="tauj";
+        field { sw=r; reset=0; } value[7:0];
+    } TAUJ0TE @ 0xFFE50050;
+
+    reg {
+        regwidth=8; accesswidth=8; desc="TAUJ0 channel start trigger";
+        evidence="manual"; source_ref="R01UH0585EJ0120 Table 24.10"; behavior="tauj";
+        field { sw=w; } value[7:0];
+    } TAUJ0TS @ 0xFFE50054;
+
+    reg {
+        regwidth=8; accesswidth=8; desc="TAUJ0 channel stop trigger";
+        evidence="manual"; source_ref="R01UH0585EJ0120 Table 24.10"; behavior="tauj";
+        field { sw=w; } value[7:0];
+    } TAUJ0TT @ 0xFFE50058;
+
+    reg {
+        regwidth=8; accesswidth=8; desc="TAUJ0 channel output";
+        evidence="manual"; source_ref="R01UH0585EJ0120 Table 24.10"; behavior="tauj";
+        field { sw=rw; reset=0; } value[7:0];
+    } TAUJ0TO @ 0xFFE5005C;
+
+    reg {
+        regwidth=8; accesswidth=8; desc="TAUJ0 channel output enable";
+        evidence="manual"; source_ref="R01UH0585EJ0120 Table 24.10"; behavior="tauj";
+        field { sw=rw; reset=0; } value[7:0];
+    } TAUJ0TOE @ 0xFFE50060;
+
+    reg {
+        regwidth=8; accesswidth=8; desc="TAUJ0 channel output active level";
+        evidence="manual"; source_ref="R01UH0585EJ0120 Table 24.10"; behavior="tauj";
+        field { sw=rw; reset=0; } value[7:0];
+    } TAUJ0TOL @ 0xFFE50064;
+
+    reg {
+        regwidth=8; accesswidth=8; desc="TAUJ0 channel reload data trigger";
+        evidence="manual"; source_ref="R01UH0585EJ0120 Table 24.10"; behavior="tauj";
+        field { sw=w; } value[7:0];
+    } TAUJ0RDT @ 0xFFE50068;
+
+    reg {
+        regwidth=8; accesswidth=8; desc="TAUJ0 channel reload status";
+        evidence="manual"; source_ref="R01UH0585EJ0120 Table 24.10"; behavior="tauj";
+        field { sw=r; reset=0; } value[7:0];
+    } TAUJ0RSF @ 0xFFE5006C;
+
+    reg {
+        regwidth=16; accesswidth=16; desc="TAUJ0 channel 0 mode";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 24.3"; behavior="tauj";
+        field { sw=rw; } value[15:0];
+    } TAUJ0CMOR0 @ 0xFFE50080;
+
+    reg {
+        regwidth=16; accesswidth=16; desc="TAUJ0 channel 1 mode";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 24.3"; behavior="tauj";
+        field { sw=rw; } value[15:0];
+    } TAUJ0CMOR1 @ 0xFFE50084;
+
+    reg {
+        regwidth=16; accesswidth=16; desc="TAUJ0 channel 2 mode";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 24.3"; behavior="tauj";
+        field { sw=rw; } value[15:0];
+    } TAUJ0CMOR2 @ 0xFFE50088;
+
+    reg {
+        regwidth=16; accesswidth=16; desc="TAUJ0 channel 3 mode";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 24.3"; behavior="tauj";
+        field { sw=rw; } value[15:0];
+    } TAUJ0CMOR3 @ 0xFFE5008C;
+
+    reg {
+        regwidth=16; accesswidth=16; desc="TAUJ0 prescaler";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 24.3"; behavior="tauj";
+        field { sw=rw; } value[15:0];
+    } TAUJ0TPS @ 0xFFE50090;
+
+    reg {
+        regwidth=16; accesswidth=16; desc="TAUJ0 base-clock reload selector";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 24.3"; behavior="tauj";
+        access_widths="1,2";
+        field { sw=rw; } value[15:0];
+    } TAUJ0BRS @ 0xFFE50094;
+
+    reg {
+        regwidth=8; accesswidth=8; desc="TAUJ0 channel reload data enable";
+        evidence="manual"; source_ref="R01UH0585EJ0120 Table 24.10"; behavior="tauj";
+        field { sw=rw; reset=0; } value[7:0];
+    } TAUJ0RDE @ 0xFFE500A0;
+
+    reg {
+        regwidth=8; accesswidth=8; desc="TAUJ0 channel reload data mode";
+        evidence="manual"; source_ref="R01UH0585EJ0120 Table 24.10"; behavior="tauj";
+        field { sw=rw; reset=0; } value[7:0];
+    } TAUJ0RDM @ 0xFFE500A4;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="TSG30 bit-extended HT-PWM W-phase compare register";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=rw; } value[31:0];
+    } TSG30CMPWE @ 0xFFE70180;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="TSG30 bit-extended HT-PWM V-phase compare register";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=rw; } value[31:0];
+    } TSG30CMPVE @ 0xFFE70184;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="TSG30 bit-extended HT-PWM U-phase compare register";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=rw; } value[31:0];
+    } TSG30CMPUE @ 0xFFE70188;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="TSG31 bit-extended HT-PWM W-phase compare register";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=rw; } value[31:0];
+    } TSG31CMPWE @ 0xFFE71180;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="TSG31 bit-extended HT-PWM V-phase compare register";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=rw; } value[31:0];
+    } TSG31CMPVE @ 0xFFE71184;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="TSG31 bit-extended HT-PWM U-phase compare register";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=rw; } value[31:0];
+    } TSG31CMPUE @ 0xFFE71188;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RAM initialization mode control for Global RAM; reset value 0x00000003";
+        evidence="manual"; source_ref="R01UH0585EJ0120 sections 8.3.7-8.3.8"; behavior="reset_stac";
+        field { sw=rw; reset=3; } value[31:0];
+    } STAC_GRAM @ 0xFFF81420;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RAM initialization mode control for Local RAM; reset value 0x00000003";
+        evidence="manual"; source_ref="R01UH0585EJ0120 sections 8.3.7-8.3.8"; behavior="reset_stac";
+        field { sw=rw; reset=3; } value[31:0];
+    } STAC_LM0 @ 0xFFF81520;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="EXTCLK1O divider; boot writes 0x50 for divide by 80";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=rw; } value[31:0];
+    } CLKD3DIV @ 0xFFF88818;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="EXTCLK1O divider status; boot polls synchronization and active state";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=r; } value[31:0];
+    } CLKD3STAT @ 0xFFF8881C;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="EXTCLK1O source selector; source 4 is CLK_LSB";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=rw; } value[31:0];
+    } CKSC3C @ 0xFFF890C0;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="EXTCLK1O selected-source status; boot polls until source 4 is active";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=r; } value[31:0];
+    } CKSC3S @ 0xFFF890C8;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="ADCG0 data supplementary information register 00; DMA source for sample ring";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=r; } value[31:0];
+    } ADCG0DIR00 @ 0xFFF91200;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="ADCG1 data supplementary information register 00; DMA source for sample ring";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=r; } value[31:0];
+    } ADCG1DIR00 @ 0xFFF92200;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="DMAC0 channel 0 channel master setting register";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=rw; } value[31:0];
+    } DM00CM @ 0xFFFF8100;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="DMAC1 channel 0 channel master setting register";
+        evidence="manual"; source_ref="R01UH0585EJ0120 register tables; firmware-observed role where stated"; behavior="storage";
+        field { sw=rw; } value[31:0];
+    } DM10CM @ 0xFFFF8120;
+
+    reg {
+        regwidth=16; accesswidth=16; desc="ECM maskable-error interrupt control (EIINT 8)";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 6.4.1, EICn register tables"; behavior="intc_eic";
+        access_widths="1,2";
+        field { sw=rw; } value[15:0];
+    } EIC8 @ 0xFFFFB010;
+
+    reg {
+        regwidth=16; accesswidth=16; desc="TAUJ0 CH0 interrupt control (EIINT 133)";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 6.4.1, EICn register tables"; behavior="intc_eic";
+        access_widths="1,2";
+        field { sw=rw; } value[15:0];
+    } EIC133 @ 0xFFFFB10A;
+
+    reg {
+        regwidth=16; accesswidth=16; desc="TAUJ0 CH1 interrupt control (EIINT 134)";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 6.4.1, EICn register tables"; behavior="intc_eic";
+        access_widths="1,2";
+        field { sw=rw; } value[15:0];
+    } EIC134 @ 0xFFFFB10C;
+
+    reg {
+        regwidth=16; accesswidth=16; desc="TAUJ0 CH2 interrupt control (EIINT 135)";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 6.4.1, EICn register tables"; behavior="intc_eic";
+        access_widths="1,2";
+        field { sw=rw; } value[15:0];
+    } EIC135 @ 0xFFFFB10E;
+
+    reg {
+        regwidth=16; accesswidth=16; desc="TAUJ0 CH3 interrupt control (foreground tick; EIRF bit 12 polled)";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 6.4.1, EICn register tables"; behavior="intc_eic";
+        access_widths="1,2";
+        field { sw=rw; } value[15:0];
+    } EIC136 @ 0xFFFFB110;
+
+    reg {
+        regwidth=16; accesswidth=16; desc="RSCAN CAN1 receive interrupt control (EIINT 187)";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 6.4.1, EICn register tables"; behavior="intc_eic";
+        access_widths="1,2";
+        field { sw=rw; } value[15:0];
+    } EIC187 @ 0xFFFFB176;
+
+    reg {
+        regwidth=16; accesswidth=16; desc="RSCAN CAN1 transmit interrupt control (EIINT 188)";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 6.4.1, EICn register tables"; behavior="intc_eic";
+        access_widths="1,2";
+        field { sw=rw; } value[15:0];
+    } EIC188 @ 0xFFFFB178;
+
+    reg {
+        regwidth=16; accesswidth=16; desc="ICU-S crypto-driver interrupt channel 292";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 6.4.1, EICn register tables"; behavior="intc_eic";
+        access_widths="1,2";
+        field { sw=rw; } value[15:0];
+    } EIC292 @ 0xFFFFB248;
+
+    reg {
+        regwidth=16; accesswidth=16; desc="ICU-S crypto-driver interrupt channel 293";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 6.4.1, EICn register tables"; behavior="intc_eic";
+        access_widths="1,2";
+        field { sw=rw; } value[15:0];
+    } EIC293 @ 0xFFFFB24A;
+
+    reg {
+        regwidth=16; accesswidth=16; desc="Flash sequencer-end interrupt control (EIINT 379)";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 6.4.1, EICn register tables"; behavior="intc_eic";
+        access_widths="1,2";
+        field { sw=rw; } value[15:0];
+    } EIC379 @ 0xFFFFB2F6;
+};

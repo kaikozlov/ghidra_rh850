@@ -1,0 +1,51 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v1",
+  "name": "camry-f33-system-reset-one-pin-stac-retention",
+  "entry": "0x00078AEA",
+  "max_instructions": 10,
+  "reset": "system-1-pin",
+  "stop_addresses": ["0x00010000"],
+  "registers": {
+    "r1": "0", "r2": "0", "sp": "0xFEBE2000", "gp": "0xFEBEB800",
+    "tp": "0x00023DFC", "r6": "0", "r7": "0", "r8": "0", "r9": "0",
+    "r10": "0", "r11": "0", "r12": "0", "r13": "0", "r14": "0",
+    "r15": "0", "r16": "0", "r17": "0", "r18": "0", "r19": "0",
+    "r20": "0", "r21": "0", "r22": "0", "r23": "0", "r24": "0",
+    "r25": "0", "r26": "0", "r27": "0", "r28": "0", "r29": "0",
+    "ep": "0", "lp": "0x00010000", "PSW": "0", "PMR": "0"
+  },
+  "pre_reset_memory": [
+    {"address": "0xFEBE1000", "hex": "a5a5a5a5", "evidence": "scenario: stale local RAM"},
+    {"address": "0xFEEF9000", "hex": "5a5a5a5a", "evidence": "scenario: stale global RAM"},
+    {"address": "0xFFF81520", "hex": "00000000", "evidence": "scenario: retained STAC_LM0 disables pin-reset clearing"},
+    {"address": "0xFFF81420", "hex": "00000000", "evidence": "scenario: stale STAC_GRAM before System Reset 1"}
+  ],
+  "memory": [],
+  "artifacts": [],
+  "checks": [
+    {
+      "name": "pin reset honors retained STAC_LM0 disable",
+      "kind": "memory", "address": "0xFEBE1000", "size": 4,
+      "equals_hex": "a5a5a5a5"
+    },
+    {
+      "name": "pin reset retains the STAC_LM0 control",
+      "kind": "memory", "address": "0xFFF81520", "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "pin reset initializes global RAM",
+      "kind": "memory", "address": "0xFEEF9000", "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "pin reset restores STAC_GRAM",
+      "kind": "memory", "address": "0xFFF81420", "size": 4,
+      "equals_hex": "03000000"
+    },
+    {
+      "name": "pin reset applies only the global RAM reset policy",
+      "kind": "event-count", "operation": "reset-initialization", "equals": "1"
+    }
+  ]
+}

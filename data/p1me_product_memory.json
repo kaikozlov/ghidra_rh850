@@ -29,6 +29,7 @@
       "path": "REFERENCE/r01uh0615ej0120-p1me-flash.pdf",
       "sha256": "67137458a8bd1046030f1db533cf12a2a948df27bb8d97ae1ec2614934a63b72",
       "revision": "R01UH0615EJ0120 Rev.1.20",
+      "date": "2018-03-23",
       "references": [
         "Section 3.3: FACI register area FFA10000 and command-issuing area FFA20000",
         "Section 4: exact FACI register offsets and access widths",
@@ -39,6 +40,7 @@
       "path": "REFERENCE/r01us0123ej0140-rh850g3m.pdf",
       "sha256": "a5202645d03cbb8191444c97d7fe27d1852f2c69d6b3196c4b5a171d2bab241b",
       "revision": "R01US0123EJ0140 Rev.1.40",
+      "date": "2018-12-22",
       "references": [
         "Chapter 3: exact G3M system-register numbers and selection IDs including MCFG0 HTCFG0 PMR MCC and CDBCR",
         "Table 3-55: MPAT E/G/SX/SW/SR/UX/UW/UR bit layout",
@@ -65,19 +67,51 @@
     }
   },
   "address_space": {
-    "codeflash_user_1mb": {"start": 0, "end_exclusive": 1048576},
-    "codeflash_extended_user": {"start": 16777216, "end_exclusive": 16809984},
-    "dataflash_1mb": {"start": 4280287232, "end_exclusive": 4280320000},
-    "dataflash_2mb": {"start": 4280287232, "end_exclusive": 4280352768},
-    "local_ram_pe1": {"start": 4273864704, "end_exclusive": 4273995776},
-    "local_ram_self": {"start": 4275961856, "end_exclusive": 4276092928},
-    "global_ram": {"start": 4277108736, "end_exclusive": 4277174272}
+    "codeflash_user_1mb": {
+      "start": 0,
+      "end_exclusive": 1048576
+    },
+    "codeflash_extended_user": {
+      "start": 16777216,
+      "end_exclusive": 16809984
+    },
+    "dataflash_1mb": {
+      "start": 4280287232,
+      "end_exclusive": 4280320000
+    },
+    "dataflash_2mb": {
+      "start": 4280287232,
+      "end_exclusive": 4280352768
+    },
+    "local_ram_pe1": {
+      "start": 4273864704,
+      "end_exclusive": 4273995776
+    },
+    "local_ram_self": {
+      "start": 4275961856,
+      "end_exclusive": 4276092928
+    },
+    "global_ram": {
+      "start": 4277108736,
+      "end_exclusive": 4277174272
+    }
   },
   "ram_execution": {
-    "architectural_fetch_views": ["local_ram_self", "global_ram"],
-    "firmware_proven_fetch_views": ["local_ram_pe1"],
+    "architectural_fetch_views": [
+      "local_ram_self",
+      "global_ram"
+    ],
+    "firmware_proven_fetch_views": [
+      "local_ram_pe1"
+    ],
     "firmware_proof": "boot callback at 0x4350 loads a FEBF0000 callback through FEBF0FD0 and retained authenticated payloads execute it",
-    "publication_sequence": ["store", "dummy_read_same_memory", "SYNCP", "SYNCI", "branch"],
+    "publication_sequence": [
+      "store",
+      "dummy_read_same_memory",
+      "SYNCP",
+      "SYNCI",
+      "branch"
+    ],
     "prefetch_initialized_bytes": 48,
     "global_ram_data_coherency": "write-through and hardware-maintained across PE and DMA"
   },
@@ -93,7 +127,16 @@
     "firmware_boundary": "direct boot/application handoffs are not assumed to be hardware resets"
   },
   "mpat": {
-    "bit_layout": {"E": 7, "G": 6, "SX": 5, "SW": 4, "SR": 3, "UX": 2, "UW": 1, "UR": 0},
+    "bit_layout": {
+      "E": 7,
+      "G": 6,
+      "SX": 5,
+      "SW": 4,
+      "SR": 3,
+      "UX": 2,
+      "UW": 1,
+      "UR": 0
+    },
     "0xB8": "enabled supervisor read/write/execute",
     "0xA8": "enabled supervisor read/execute"
   },

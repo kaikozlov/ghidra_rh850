@@ -366,6 +366,49 @@ def cmd_codeflash_sim(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_machine_run(args: argparse.Namespace) -> int:
+    from tools.emulation.p1me_machine import P1MEMachineError, run
+
+    output_dir = args.output_dir
+    if output_dir is None:
+        output_dir = (
+            ROOT / "build" / "out" / "rh850-machine"
+            / args.target / args.scenario.stem
+        )
+    try:
+        report = run(
+            target=args.target,
+            scenario_path=args.scenario,
+            output_dir=output_dir,
+        )
+    except P1MEMachineError as exc:
+        raise Rh850ToolError(str(exc)) from exc
+    print(json.dumps({
+        "schema": report["schema"],
+        "target": report["target"],
+        "scenario": report["scenario"],
+        "status": report["status"],
+        "instruction_count": report["instruction_count"],
+        "report": str((output_dir / "report.json").resolve()),
+    }, indent=2, sort_keys=True))
+    return 0
+
+
+def cmd_machine_model(args: argparse.Namespace) -> int:
+    from tools.emulation.generate_p1me_model import generate
+
+    try:
+        changed = generate(check=args.check)
+    except RuntimeError as exc:
+        raise Rh850ToolError(str(exc)) from exc
+    if not changed:
+        print("P1M-E model projections are current")
+    else:
+        for path in changed:
+            print(path.relative_to(ROOT))
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="rh850", description=__doc__)
     sub = parser.add_subparsers(dest="command_name", required=True)
@@ -450,6 +493,33 @@ def build_parser() -> argparse.ArgumentParser:
         help="GDB command after load; repeat as needed",
     )
     p.set_defaults(func=cmd_codeflash_sim)
+
+    machine = sub.add_parser(
+        "machine",
+        help="run exact firmware in the specification-backed P1M-E p-code machine",
+    )
+    machine_sub = machine.add_subparsers(dest="machine_command", required=True)
+
+    p = machine_sub.add_parser("run", help="execute one strict machine scenario")
+    p.add_argument("target", help="registered analysis target")
+    p.add_argument("scenario", type=Path, help="machine scenario JSON")
+    p.add_argument(
+        "--output-dir",
+        type=Path,
+        help="retain resolved run contract and execution report",
+    )
+    p.set_defaults(func=cmd_machine_run)
+
+    p = machine_sub.add_parser(
+        "model",
+        help="regenerate or check SystemRDL-derived P1M-E projections",
+    )
+    p.add_argument(
+        "--check",
+        action="store_true",
+        help="fail instead of writing when generated projections are stale",
+    )
+    p.set_defaults(func=cmd_machine_model)
 
     p = sub.add_parser(
         "exec",

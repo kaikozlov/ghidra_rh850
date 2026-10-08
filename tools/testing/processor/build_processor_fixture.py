@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """Build a synthetic RH850 instruction fixture for SLEIGH semantic checks."""
+
 from __future__ import annotations
 
 import argparse
 import json
 import struct
 from pathlib import Path
-
 
 ROOT = Path(__file__).resolve().parents[3]
 OUT_DIR = ROOT / "tests" / "fixtures" / "processor"
@@ -74,7 +74,6 @@ def enc_jarl_disp22(disp22: int, r2: int) -> bytes:
     # addr22: rel = ((s0005 << 16) | op1631) + inst_start
     # Format: bits[15:11]=r2, [10:6]=0x1E? Wait op0610 means bits 6-10.
     # ::jarl addr22, r1115 is (op0610=0x1E & r1115) ... & addr22
-    word0 = ((r2 & 0x1F) << 11) | (0x1E << 6)
     # Lower bit of displacement is always 0 (halfword aligned); stored in op1631 and s0005.
     # addr22 construction: rel = ((s0005 << 16) | op1631) + inst_start
     # where s0005 is bits 0-5 of first word? Looking at common.sinc:
@@ -102,7 +101,7 @@ def enc_jmp_lp() -> bytes:
     return u16((0x003 << 5) | 31)
 
 
-def enc_prepare_list12_imm5(list_bits: int, imm5: int) -> bytes:
+def enc_prepare_list12_imm5(imm5: int) -> bytes:
     # PREPARE list12, imm5 : prep0615=0x1E & prep0105 & prep1620=0x01
     # Uses 32-bit prep token. This is complex; emit a minimal form saving {lp}.
     # From v850_func.sinc: prepare PrepList, prep0105 is prep0615=0x1E & prep0105 & prep1620=0x01
@@ -200,6 +199,12 @@ def enc_sar_imm5(imm5: int, r2: int) -> bytes:
     # SAR imm5, reg2 : op0510=0x15
     return enc_imm5_reg(0x15, imm5, r2)
 
+def enc_caxi(r1: int, r2: int, r3: int) -> bytes:
+    word0 = ((r2 & 0x1F) << 11) | (0x3F << 5) | (r1 & 0x1F)
+    word1 = ((r3 & 0x1F) << 11) | 0x00EE
+    return u16(word0) + u16(word1)
+
+
 
 def build() -> tuple[bytes, list[dict]]:
     cases: list[dict] = []
@@ -280,7 +285,7 @@ def build() -> tuple[bytes, list[dict]]:
     })
 
     # Frame create/destroy.
-    add("prepare", enc_prepare_list12_imm5(0, 2), {
+    add("prepare", enc_prepare_list12_imm5(2), {
         "mnemonic_prefix": "prepare",
         "must_pcode_ops": ["STORE", "INT_SUB"],
     })
@@ -346,6 +351,55 @@ def build() -> tuple[bytes, list[dict]]:
         "must_pcode_ops": ["INT_SRIGHT"],
     })
 
+    # G3M synchronization mnemonics remain distinct even though the processor
+    # language gives them one ordering-boundary p-code userop.
+    add("synce", u16(0x001D), {
+        "mnemonic_prefix": "synce",
+        "must_pcode_ops": ["CALLOTHER"],
+        "userop": "__synchronize",
+    })
+    add("syncm", u16(0x001E), {
+        "mnemonic_prefix": "syncm",
+        "must_pcode_ops": ["CALLOTHER"],
+        "userop": "__synchronize",
+    })
+    add("syncp", u16(0x001F), {
+        "mnemonic_prefix": "syncp",
+        "must_pcode_ops": ["CALLOTHER"],
+        "userop": "__synchronize",
+    })
+    add("synci", u16(0x001C), {
+        "mnemonic_prefix": "synci",
+        "must_pcode_ops": ["CALLOTHER"],
+        "userop": "__synchronize",
+    })
+    add("caxi", enc_caxi(6, 10, 11), {
+        "mnemonic_prefix": "caxi",
+        "must_pcode_ops": ["LOAD", "STORE", "INT_SUB"],
+    })
+    add("di", u16(0x07E0) + u16(0x0160), {
+        "mnemonic_prefix": "di",
+        "must_pcode_ops": ["CALLOTHER"],
+        "userop": "__disable_irq",
+    })
+    add("ei", u16(0x87E0) + u16(0x0160), {
+        "mnemonic_prefix": "ei",
+        "must_pcode_ops": ["CALLOTHER"],
+        "userop": "__enable_irq",
+    })
+
+    add("trap-3", u16((0x3F << 5) | 3) + u16(0x0100), {
+        "mnemonic_prefix": "trap",
+    })
+    add("eiret", u16(0x07E0) + u16(0x0148), {
+        "mnemonic_prefix": "eiret",
+        "flow": "RETURN",
+    })
+    add("ldsr-psw", enc_ldsr(6, 5, 0), {
+        "mnemonic_prefix": "ldsr",
+        "operand_register": "PSW",
+    })
+
     add("ldsr-mcfg0", enc_ldsr(6, 0, 1), {
         "mnemonic_prefix": "ldsr",
         "operand_register": "MCFG0",
@@ -354,13 +408,33 @@ def build() -> tuple[bytes, list[dict]]:
         "mnemonic_prefix": "ldsr",
         "operand_register": "PMR",
     })
-    add("ldsr-mcc", enc_ldsr(0, 10, 5), {
+    add("ldsr-mcc", enc_ldsr(6, 10, 5), {
         "mnemonic_prefix": "ldsr",
         "operand_register": "MCC",
     })
     add("stsr-cdbcr", enc_stsr(24, 10, 13), {
         "mnemonic_prefix": "stsr",
         "operand_register": "CDBCR",
+    })
+    add("ldsr-mpat15", enc_ldsr(6, 30, 7), {
+        "mnemonic_prefix": "ldsr",
+        "operand_register": "MPAT15",
+    })
+    add("stsr-mcfg0", enc_stsr(0, 10, 1), {
+        "mnemonic_prefix": "stsr",
+        "operand_register": "MCFG0",
+    })
+    add("stsr-pmr", enc_stsr(11, 10, 2), {
+        "mnemonic_prefix": "stsr",
+        "operand_register": "PMR",
+    })
+    add("stsr-mcc", enc_stsr(10, 10, 5), {
+        "mnemonic_prefix": "stsr",
+        "operand_register": "MCC",
+    })
+    add("stsr-mpat15", enc_stsr(30, 10, 7), {
+        "mnemonic_prefix": "stsr",
+        "operand_register": "MPAT15",
     })
 
     return bytes(blob), cases

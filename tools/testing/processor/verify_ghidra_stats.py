@@ -21,6 +21,7 @@ _MEMORY_SIZE = (
     + 0x1000  # SFR_ICUS
     + 0x500  # SFR_CODEFLASH_ECC
     + 0x2000  # SFR_CLKGEN
+    + 0x1000  # SFR_STAC
     + 0x20 + 0x200 + 0x4 + 0x100  # FACI ID/register/command/config windows
     + 0x100 + 0x100 + 0x100 + 0x100  # ECM master/checker/common/pulse
     + 0x1000 + 0x1000  # SFR_ADCG0 / SFR_ADCG1
@@ -28,7 +29,7 @@ _MEMORY_SIZE = (
     + 0x2000  # SFR_TSG3
     + 0x3000  # SFR_TAUJ0/1/2
 )
-_SECTIONS = 24
+_SECTIONS = 25
 
 EXPECTED_MIN = {
     "functions": 5560,

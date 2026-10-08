@@ -1,0 +1,94 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v1",
+  "name": "camry-f33-application-reset-one-ram-clearing",
+  "entry": "0x00078AEA",
+  "max_instructions": 1,
+  "reset": "application-1",
+  "stop_addresses": [
+    "0x00010000"
+  ],
+  "registers": {
+    "r1": "0",
+    "r2": "0",
+    "sp": "0xFEBE2000",
+    "gp": "0xFEBEB800",
+    "tp": "0x00023DFC",
+    "r6": "0",
+    "r7": "0",
+    "r8": "0",
+    "r9": "0",
+    "r10": "0",
+    "r11": "0",
+    "r12": "0",
+    "r13": "0",
+    "r14": "0",
+    "r15": "0",
+    "r16": "0",
+    "r17": "0",
+    "r18": "0",
+    "r19": "0",
+    "r20": "0",
+    "r21": "0",
+    "r22": "0",
+    "r23": "0",
+    "r24": "0",
+    "r25": "0",
+    "r26": "0",
+    "r27": "0",
+    "r28": "0",
+    "r29": "0",
+    "ep": "0",
+    "lp": "0x00010000",
+    "PSW": "0",
+    "PMR": "0"
+  },
+  "pre_reset_memory": [
+    {
+      "address": "0xFEBE1000",
+      "hex": "a5a5a5a5",
+      "evidence": "scenario: stale PE1 local RAM before Application Reset 1"
+    },
+    {
+      "address": "0xFEEF9000",
+      "hex": "5a5a5a5a",
+      "evidence": "scenario: stale global RAM before Application Reset 1"
+    }
+  ],
+  "memory": [],
+  "artifacts": [],
+  "checks": [
+    {
+      "name": "post-reset return instruction reaches caller link",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x00010000"
+    },
+    {
+      "name": "Application Reset 1 clears PE1 local RAM",
+      "kind": "memory",
+      "address": "0xFEBE1000",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "Application Reset 1 clears the self-view local RAM alias",
+      "kind": "memory",
+      "address": "0xFEDE1000",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "Application Reset 1 clears global RAM",
+      "kind": "memory",
+      "address": "0xFEEF9000",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "Application Reset 1 applies two reset policies",
+      "kind": "event-count",
+      "operation": "reset-initialization",
+      "equals": "2"
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 {
   "processor": "v850e3:LE:32:default",
   "binary": "rh850_semantic_fixture.bin",
-  "size": 104,
+  "size": 164,
   "cases": [
     {
       "name": "sld.b",
@@ -248,8 +248,109 @@
       ]
     },
     {
-      "name": "ldsr-mcfg0",
+      "name": "synce",
       "addr": 88,
+      "size": 2,
+      "bytes": "1d00",
+      "mnemonic_prefix": "synce",
+      "must_pcode_ops": [
+        "CALLOTHER"
+      ],
+      "userop": "__synchronize"
+    },
+    {
+      "name": "syncm",
+      "addr": 92,
+      "size": 2,
+      "bytes": "1e00",
+      "mnemonic_prefix": "syncm",
+      "must_pcode_ops": [
+        "CALLOTHER"
+      ],
+      "userop": "__synchronize"
+    },
+    {
+      "name": "syncp",
+      "addr": 96,
+      "size": 2,
+      "bytes": "1f00",
+      "mnemonic_prefix": "syncp",
+      "must_pcode_ops": [
+        "CALLOTHER"
+      ],
+      "userop": "__synchronize"
+    },
+    {
+      "name": "synci",
+      "addr": 100,
+      "size": 2,
+      "bytes": "1c00",
+      "mnemonic_prefix": "synci",
+      "must_pcode_ops": [
+        "CALLOTHER"
+      ],
+      "userop": "__synchronize"
+    },
+    {
+      "name": "caxi",
+      "addr": 104,
+      "size": 4,
+      "bytes": "e657ee58",
+      "mnemonic_prefix": "caxi",
+      "must_pcode_ops": [
+        "LOAD",
+        "STORE",
+        "INT_SUB"
+      ]
+    },
+    {
+      "name": "di",
+      "addr": 108,
+      "size": 4,
+      "bytes": "e0076001",
+      "mnemonic_prefix": "di",
+      "must_pcode_ops": [
+        "CALLOTHER"
+      ],
+      "userop": "__disable_irq"
+    },
+    {
+      "name": "ei",
+      "addr": 112,
+      "size": 4,
+      "bytes": "e0876001",
+      "mnemonic_prefix": "ei",
+      "must_pcode_ops": [
+        "CALLOTHER"
+      ],
+      "userop": "__enable_irq"
+    },
+    {
+      "name": "trap-3",
+      "addr": 116,
+      "size": 4,
+      "bytes": "e3070001",
+      "mnemonic_prefix": "trap"
+    },
+    {
+      "name": "eiret",
+      "addr": 120,
+      "size": 4,
+      "bytes": "e0074801",
+      "mnemonic_prefix": "eiret",
+      "flow": "RETURN"
+    },
+    {
+      "name": "ldsr-psw",
+      "addr": 124,
+      "size": 4,
+      "bytes": "e62f2000",
+      "mnemonic_prefix": "ldsr",
+      "operand_register": "PSW"
+    },
+    {
+      "name": "ldsr-mcfg0",
+      "addr": 128,
       "size": 4,
       "bytes": "e6072008",
       "mnemonic_prefix": "ldsr",
@@ -257,7 +358,7 @@
     },
     {
       "name": "ldsr-pmr",
-      "addr": 92,
+      "addr": 132,
       "size": 4,
       "bytes": "e65f2010",
       "mnemonic_prefix": "ldsr",
@@ -265,19 +366,59 @@
     },
     {
       "name": "ldsr-mcc",
-      "addr": 96,
+      "addr": 136,
       "size": 4,
-      "bytes": "e0572028",
+      "bytes": "e6572028",
       "mnemonic_prefix": "ldsr",
       "operand_register": "MCC"
     },
     {
       "name": "stsr-cdbcr",
-      "addr": 100,
+      "addr": 140,
       "size": 4,
       "bytes": "f8574068",
       "mnemonic_prefix": "stsr",
       "operand_register": "CDBCR"
+    },
+    {
+      "name": "ldsr-mpat15",
+      "addr": 144,
+      "size": 4,
+      "bytes": "e6f72038",
+      "mnemonic_prefix": "ldsr",
+      "operand_register": "MPAT15"
+    },
+    {
+      "name": "stsr-mcfg0",
+      "addr": 148,
+      "size": 4,
+      "bytes": "e0574008",
+      "mnemonic_prefix": "stsr",
+      "operand_register": "MCFG0"
+    },
+    {
+      "name": "stsr-pmr",
+      "addr": 152,
+      "size": 4,
+      "bytes": "eb574010",
+      "mnemonic_prefix": "stsr",
+      "operand_register": "PMR"
+    },
+    {
+      "name": "stsr-mcc",
+      "addr": 156,
+      "size": 4,
+      "bytes": "ea574028",
+      "mnemonic_prefix": "stsr",
+      "operand_register": "MCC"
+    },
+    {
+      "name": "stsr-mpat15",
+      "addr": 160,
+      "size": 4,
+      "bytes": "fe574038",
+      "mnemonic_prefix": "stsr",
+      "operand_register": "MPAT15"
     }
   ]
 }

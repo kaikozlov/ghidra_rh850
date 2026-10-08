@@ -1,0 +1,48 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v1",
+  "name": "camry-f33-faci-status-clear-requires-ready",
+  "entry": "0x00078AE6",
+  "max_instructions": 20,
+  "stop_addresses": ["0x00010000"],
+  "registers": {
+    "r1": "0", "r2": "0", "sp": "0xFEBE2000", "gp": "0xFEBEB800",
+    "tp": "0x00023DFC", "r6": "0xFFA20000", "r7": "0x50", "r8": "0",
+    "r9": "0", "r10": "0", "r11": "0", "r12": "0", "r13": "0",
+    "r14": "0", "r15": "0", "r16": "0", "r17": "0", "r18": "0",
+    "r19": "0", "r20": "0", "r21": "0", "r22": "0", "r23": "0",
+    "r24": "0", "r25": "0", "r26": "0", "r27": "0", "r28": "0",
+    "r29": "0", "ep": "0", "lp": "0x00010000", "PSW": "0", "PMR": "0"
+  },
+  "memory": [
+    {
+      "address": "0xFFA10080", "hex": "00000000",
+      "evidence": "scenario: FACI command processing remains in progress"
+    },
+    {
+      "address": "0xFFA20000", "hex": "00",
+      "evidence": "scenario: clean command area before rejected write"
+    }
+  ],
+  "artifacts": [],
+  "checks": [
+    {
+      "name": "not-ready FACI emits no completion",
+      "kind": "event-count", "operation": "faci-command", "equals": "0"
+    },
+    {
+      "name": "not-ready FACI rejects before command-area write",
+      "kind": "memory", "address": "0xFFA20000", "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "rejected command leaves command history at reset",
+      "kind": "memory", "address": "0xFFA100A0", "size": 2,
+      "equals_hex": "ffff"
+    }
+  ],
+  "expected_fault": {
+    "kind": "faci-not-ready",
+    "address": "0xFFA20000",
+    "access": "write"
+  }
+}

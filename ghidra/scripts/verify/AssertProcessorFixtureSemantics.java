@@ -34,6 +34,15 @@ public class AssertProcessorFixtureSemantics extends GhidraScript {
         return ops;
     }
 
+    private String useropName(Instruction ins) {
+        for (PcodeOp op : ins.getPcode()) {
+            if (op.getOpcode() != PcodeOp.CALLOTHER) continue;
+            int index = (int) op.getInput(0).getOffset();
+            return currentProgram.getLanguage().getUserDefinedOpName(index);
+        }
+        return null;
+    }
+
     private boolean hasSignExtendFromLoad(Instruction ins, int loadSize) {
         PcodeOp[] ops = ins.getPcode();
         for (int i = 0; i < ops.length; i++) {
@@ -65,6 +74,15 @@ public class AssertProcessorFixtureSemantics extends GhidraScript {
         }
     }
 
+    private void stepInterruptControl(EmulatorHelper emu, String label,
+                                      String expectedUserop) throws Exception {
+        if (emu.step(monitor)) return;
+        String error = emu.getLastError();
+        if (error == null || !error.contains(expectedUserop)) {
+            fail(label + ": unexpected emulator failure: " + error);
+        }
+    }
+
     private void requireRegister(EmulatorHelper emu, String label,
                                  String register, long expected) {
         long actual = emu.readRegister(register).longValue() & 0xffffffffL;
@@ -85,6 +103,34 @@ public class AssertProcessorFixtureSemantics extends GhidraScript {
 
     private boolean pswBit(EmulatorHelper emu, int bit) {
         return (emu.readRegister("PSW").longValue() & (1L << bit)) != 0;
+    }
+
+    private void verifyLdsr(java.util.Map<String, Long> addrs, String name,
+                            String systemRegister, long value) throws Exception {
+        long address = requireCaseAddr(addrs, name);
+        if (address < 0) return;
+        EmulatorHelper emu = emulator(address);
+        try {
+            emu.writeRegister("r6", value);
+            step(emu, name);
+            requireRegister(emu, name, systemRegister, value);
+        } finally {
+            emu.dispose();
+        }
+    }
+
+    private void verifyStsr(java.util.Map<String, Long> addrs, String name,
+                            String systemRegister, long value) throws Exception {
+        long address = requireCaseAddr(addrs, name);
+        if (address < 0) return;
+        EmulatorHelper emu = emulator(address);
+        try {
+            emu.writeRegister(systemRegister, value);
+            step(emu, name);
+            requireRegister(emu, name, "r10", value);
+        } finally {
+            emu.dispose();
+        }
     }
 
     private void runExecutionVectors(java.util.Map<String, Long> addrs) throws Exception {
@@ -386,6 +432,121 @@ public class AssertProcessorFixtureSemantics extends GhidraScript {
                 emu.dispose();
             }
         }
+        a = requireCaseAddr(addrs, "caxi");
+        if (a >= 0) {
+            EmulatorHelper emu = emulator(a);
+            try {
+                emu.writeRegister("r6", 0x3000);
+                emu.writeRegister("r10", 0x11223344L);
+                emu.writeRegister("r11", 0x55667788L);
+                emu.writeRegister("PSW", 0);
+                emu.writeMemory(toAddr(0x3000),
+                        new byte[]{0x44, 0x33, 0x22, 0x11});
+                step(emu, "caxi compare-match");
+                requireRegister(emu, "caxi compare-match", "r11", 0x11223344L);
+                requireRegister(emu, "caxi compare-match memory", "r6", 0x3000);
+                long stored = ((long) emu.readMemoryByte(toAddr(0x3000)) & 0xff)
+                        | (((long) emu.readMemoryByte(toAddr(0x3001)) & 0xff) << 8)
+                        | (((long) emu.readMemoryByte(toAddr(0x3002)) & 0xff) << 16)
+                        | (((long) emu.readMemoryByte(toAddr(0x3003)) & 0xff) << 24);
+                if (stored != 0x55667788L || !pswBit(emu, 0)) {
+                    fail(String.format("caxi compare-match: mem=0x%x PSW=0x%x",
+                            stored, emu.readRegister("PSW").longValue()));
+                }
+            } finally {
+                emu.dispose();
+            }
+
+            emu = emulator(a);
+            try {
+                emu.writeRegister("r6", 0x3000);
+                emu.writeRegister("r10", 0x01020304L);
+                emu.writeRegister("r11", 0x55667788L);
+                emu.writeRegister("PSW", 0);
+                emu.writeMemory(toAddr(0x3000),
+                        new byte[]{0x44, 0x33, 0x22, 0x11});
+                step(emu, "caxi compare-miss");
+                requireRegister(emu, "caxi compare-miss", "r11", 0x11223344L);
+                long stored = ((long) emu.readMemoryByte(toAddr(0x3000)) & 0xff)
+                        | (((long) emu.readMemoryByte(toAddr(0x3001)) & 0xff) << 8)
+                        | (((long) emu.readMemoryByte(toAddr(0x3002)) & 0xff) << 16)
+                        | (((long) emu.readMemoryByte(toAddr(0x3003)) & 0xff) << 24);
+                if (stored != 0x11223344L || pswBit(emu, 0)) {
+                    fail(String.format("caxi compare-miss: mem=0x%x PSW=0x%x",
+                            stored, emu.readRegister("PSW").longValue()));
+                }
+            } finally {
+                emu.dispose();
+            }
+        }
+
+        a = requireCaseAddr(addrs, "di");
+        if (a >= 0) {
+            EmulatorHelper emu = emulator(a);
+            try {
+                emu.writeRegister("PSW", 0);
+                stepInterruptControl(emu, "di interrupt disable", "__disable_irq");
+                if (!pswBit(emu, 5)) fail("di did not set PSW.ID");
+            } finally {
+                emu.dispose();
+            }
+        }
+
+        a = requireCaseAddr(addrs, "ei");
+        if (a >= 0) {
+            EmulatorHelper emu = emulator(a);
+            try {
+                emu.writeRegister("PSW", 1L << 5);
+                stepInterruptControl(emu, "ei interrupt enable", "__enable_irq");
+                if (pswBit(emu, 5)) fail("ei did not clear PSW.ID");
+            } finally {
+                emu.dispose();
+            }
+        }
+
+        a = requireCaseAddr(addrs, "trap-3");
+        if (a >= 0) {
+            EmulatorHelper emu = emulator(a);
+            try {
+                emu.writeRegister("PSW", 0x10);
+                step(emu, "trap-3 architectural state");
+                requireRegister(emu, "trap-3 architectural state", "PC", 0x40);
+                requireRegister(emu, "trap-3 architectural state", "EIPC", a + 4);
+                requireRegister(emu, "trap-3 architectural state", "EIPSW", 0x10);
+                requireRegister(emu, "trap-3 architectural state", "EIIC", 0x43);
+                if (!pswBit(emu, 6) || !pswBit(emu, 5)) {
+                    fail(String.format("trap-3: PSW=0x%x lacks EP/ID",
+                            emu.readRegister("PSW").longValue()));
+                }
+            } finally {
+                emu.dispose();
+            }
+        }
+
+        a = requireCaseAddr(addrs, "eiret");
+        if (a >= 0) {
+            EmulatorHelper emu = emulator(a);
+            try {
+                emu.writeRegister("EIPC", 0x12345678L);
+                emu.writeRegister("EIPSW", 0x00070031L);
+                step(emu, "eiret architectural state");
+                requireRegister(emu, "eiret architectural state", "PC", 0x12345678L);
+                requireRegister(emu, "eiret architectural state", "PSW", 0x00070031L);
+            } finally {
+                emu.dispose();
+            }
+        }
+
+        verifyLdsr(addrs, "ldsr-psw", "PSW", 0x00070031L);
+        verifyLdsr(addrs, "ldsr-mcfg0", "MCFG0", 0x12345678L);
+        verifyLdsr(addrs, "ldsr-pmr", "PMR", 0x00000055L);
+        verifyLdsr(addrs, "ldsr-mcc", "MCC", 0x89abcdefL);
+        verifyLdsr(addrs, "ldsr-mpat15", "MPAT15", 0x000000b8L);
+        verifyStsr(addrs, "stsr-mcfg0", "MCFG0", 0x12345678L);
+        verifyStsr(addrs, "stsr-pmr", "PMR", 0x00000055L);
+        verifyStsr(addrs, "stsr-mcc", "MCC", 0x89abcdefL);
+        verifyStsr(addrs, "stsr-mpat15", "MPAT15", 0x000000a8L);
+        verifyStsr(addrs, "stsr-cdbcr", "CDBCR", 0x00000004L);
     }
 
     @Override
@@ -448,6 +609,12 @@ public class AssertProcessorFixtureSemantics extends GhidraScript {
                     fail(c.name + ": forbidden pcode op " + forbid + " in " + ops);
                 }
             }
+            if (c.userop != null) {
+                String actualUserop = useropName(ins);
+                if (!c.userop.equals(actualUserop)) {
+                    fail(c.name + ": userop=" + actualUserop + " expected " + c.userop);
+                }
+            }
             if (c.signExtend != null) {
                 if (c.signExtend && !hasSignExtendFromLoad(ins, c.loadSize)) {
                     fail(c.name + ": expected INT_SEXT for signed load; ops=" + ops);
@@ -501,6 +668,7 @@ public class AssertProcessorFixtureSemantics extends GhidraScript {
         Integer loadSize;
         Boolean signExtend;
         String flow;
+        String userop;
 
         static List<Case> parseAll(String text) {
             List<Case> out = new ArrayList<>();
@@ -525,6 +693,7 @@ public class AssertProcessorFixtureSemantics extends GhidraScript {
                 if (obj.contains("\"load_size\"")) c.loadSize = (int) extractLong(obj, "load_size");
                 if (obj.contains("\"sign_extend\"")) c.signExtend = extractBool(obj, "sign_extend");
                 c.flow = extractString(obj, "flow");
+                c.userop = extractString(obj, "userop");
                 out.add(c);
             }
             return out;

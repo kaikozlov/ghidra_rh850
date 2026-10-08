@@ -1,0 +1,2600 @@
+{
+  "schema": "rh850-p1me-machine-v1",
+  "source": {
+    "path": "data/devices/p1me.rdl",
+    "sha256": "48f8f7f07393cb6ce7512e7f1075a7b66f6acbe8ef877acc8b285a72db34fa13",
+    "systemrdl_compiler": "1.33.0"
+  },
+  "product_ids": [
+    "R7F701381",
+    "R7F701383"
+  ],
+  "p_bus_hz": 80000000,
+  "regions": [
+    {
+      "name": "codeflash_user",
+      "start": 0,
+      "end_exclusive": 1048576,
+      "size": 1048576,
+      "access": "r",
+      "executable": true,
+      "alias_group": null,
+      "reset_policy": "retained nonvolatile",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 Table 4.1"
+    },
+    {
+      "name": "codeflash_extended",
+      "start": 16777216,
+      "end_exclusive": 16809984,
+      "size": 32768,
+      "access": "r",
+      "executable": true,
+      "alias_group": null,
+      "reset_policy": "retained nonvolatile",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 Table 4.1"
+    },
+    {
+      "name": "local_ram_pe1",
+      "start": 4273864704,
+      "end_exclusive": 4273995776,
+      "size": 131072,
+      "access": "rw",
+      "executable": true,
+      "alias_group": "local_ram",
+      "reset_policy": "STAC_LM0 by reset class",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 Table 4.1"
+    },
+    {
+      "name": "local_ram_self",
+      "start": 4275961856,
+      "end_exclusive": 4276092928,
+      "size": 131072,
+      "access": "rw",
+      "executable": true,
+      "alias_group": "local_ram",
+      "reset_policy": "STAC_LM0 by reset class",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 Table 4.1"
+    },
+    {
+      "name": "global_ram",
+      "start": 4277108736,
+      "end_exclusive": 4277174272,
+      "size": 65536,
+      "access": "rw",
+      "executable": true,
+      "alias_group": null,
+      "reset_policy": "STAC_GRAM for Application Reset 1",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 Table 4.1"
+    },
+    {
+      "name": "dataflash",
+      "start": 4280287232,
+      "end_exclusive": 4280320000,
+      "size": 32768,
+      "access": "rw",
+      "executable": false,
+      "alias_group": null,
+      "reset_policy": "retained nonvolatile; FACI writes only",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 Table 4.1"
+    }
+  ],
+  "registers": [
+    {
+      "name": "SELFID0",
+      "address": 4288708608,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "w",
+      "reset": null,
+      "behavior": "faci",
+      "evidence": "manual",
+      "source_ref": "R01UH0615EJ0120 sections 3.3 and 4",
+      "description": "Self-programming ID input word 0"
+    },
+    {
+      "name": "SELFID1",
+      "address": 4288708612,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "w",
+      "reset": null,
+      "behavior": "faci",
+      "evidence": "manual",
+      "source_ref": "R01UH0615EJ0120 sections 3.3 and 4",
+      "description": "Self-programming ID input word 1"
+    },
+    {
+      "name": "SELFID2",
+      "address": 4288708616,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "w",
+      "reset": null,
+      "behavior": "faci",
+      "evidence": "manual",
+      "source_ref": "R01UH0615EJ0120 sections 3.3 and 4",
+      "description": "Self-programming ID input word 2"
+    },
+    {
+      "name": "SELFID3",
+      "address": 4288708620,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "w",
+      "reset": null,
+      "behavior": "faci",
+      "evidence": "manual",
+      "source_ref": "R01UH0615EJ0120 sections 3.3 and 4",
+      "description": "Self-programming ID input word 3"
+    },
+    {
+      "name": "SELFIDST",
+      "address": 4288708624,
+      "size": 1,
+      "access_widths": [
+        1
+      ],
+      "access": "r",
+      "reset": null,
+      "behavior": "faci",
+      "evidence": "manual",
+      "source_ref": "R01UH0615EJ0120 sections 3.3 and 4",
+      "description": "Self-programming ID authentication status"
+    },
+    {
+      "name": "FPMON",
+      "address": 4288741376,
+      "size": 1,
+      "access_widths": [
+        1
+      ],
+      "access": "r",
+      "reset": null,
+      "behavior": "faci",
+      "evidence": "manual",
+      "source_ref": "R01UH0615EJ0120 sections 3.3 and 4",
+      "description": "Flash pin monitor"
+    },
+    {
+      "name": "FASTAT",
+      "address": 4288741392,
+      "size": 1,
+      "access_widths": [
+        1
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "faci",
+      "evidence": "manual",
+      "source_ref": "R01UH0615EJ0120 sections 3.3 and 4",
+      "description": "Flash access status"
+    },
+    {
+      "name": "FAEINT",
+      "address": 4288741396,
+      "size": 1,
+      "access_widths": [
+        1
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "faci",
+      "evidence": "manual",
+      "source_ref": "R01UH0615EJ0120 sections 3.3 and 4",
+      "description": "Flash access-error interrupt enable"
+    },
+    {
+      "name": "FAREASELC",
+      "address": 4288741408,
+      "size": 2,
+      "access_widths": [
+        2
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "faci",
+      "evidence": "manual",
+      "source_ref": "R01UH0615EJ0120 sections 3.3 and 4",
+      "description": "CodeFlash memory-area selector"
+    },
+    {
+      "name": "FSADDR",
+      "address": 4288741424,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "faci",
+      "evidence": "manual",
+      "source_ref": "R01UH0615EJ0120 sections 3.3 and 4",
+      "description": "FACI command start address"
+    },
+    {
+      "name": "FEADDR",
+      "address": 4288741428,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "faci",
+      "evidence": "manual",
+      "source_ref": "R01UH0615EJ0120 sections 3.3 and 4",
+      "description": "FACI command end address"
+    },
+    {
+      "name": "FSTATR",
+      "address": 4288741504,
+      "size": 4,
+      "access_widths": [
+        1,
+        2,
+        4
+      ],
+      "access": "r",
+      "reset": 32768,
+      "behavior": "faci",
+      "evidence": "manual",
+      "source_ref": "R01UH0615EJ0120 sections 3.3 and 4",
+      "description": "Flash sequencer status"
+    },
+    {
+      "name": "FENTRYR",
+      "address": 4288741508,
+      "size": 2,
+      "access_widths": [
+        2
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "faci",
+      "evidence": "manual",
+      "source_ref": "R01UH0615EJ0120 sections 3.3 and 4",
+      "description": "Flash program-or-erase mode entry"
+    },
+    {
+      "name": "FPROTR",
+      "address": 4288741512,
+      "size": 2,
+      "access_widths": [
+        2
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "faci",
+      "evidence": "manual",
+      "source_ref": "R01UH0615EJ0120 sections 3.3 and 4",
+      "description": "CodeFlash protection control"
+    },
+    {
+      "name": "FSUINITR",
+      "address": 4288741516,
+      "size": 2,
+      "access_widths": [
+        2
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "faci",
+      "evidence": "manual",
+      "source_ref": "R01UH0615EJ0120 sections 3.3 and 4",
+      "description": "Flash sequencer setup initialization"
+    },
+    {
+      "name": "FLKSTAT",
+      "address": 4288741520,
+      "size": 1,
+      "access_widths": [
+        1
+      ],
+      "access": "r",
+      "reset": null,
+      "behavior": "faci",
+      "evidence": "manual",
+      "source_ref": "R01UH0615EJ0120 sections 3.3 and 4",
+      "description": "Flash lock-bit status"
+    },
+    {
+      "name": "FRTSTAT",
+      "address": 4288741528,
+      "size": 1,
+      "access_widths": [
+        1
+      ],
+      "access": "r",
+      "reset": null,
+      "behavior": "faci",
+      "evidence": "manual",
+      "source_ref": "R01UH0615EJ0120 sections 3.3 and 4",
+      "description": "FACI reset-transfer status"
+    },
+    {
+      "name": "FRTEINT",
+      "address": 4288741532,
+      "size": 1,
+      "access_widths": [
+        1
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "faci",
+      "evidence": "manual",
+      "source_ref": "R01UH0615EJ0120 sections 3.3 and 4",
+      "description": "FACI reset-transfer error interrupt enable"
+    },
+    {
+      "name": "FCMDR",
+      "address": 4288741536,
+      "size": 2,
+      "access_widths": [
+        2
+      ],
+      "access": "r",
+      "reset": 65535,
+      "behavior": "faci",
+      "evidence": "manual",
+      "source_ref": "R01UH0615EJ0120 sections 3.3 and 4",
+      "description": "Last FACI command"
+    },
+    {
+      "name": "FPESTAT",
+      "address": 4288741568,
+      "size": 2,
+      "access_widths": [
+        2
+      ],
+      "access": "r",
+      "reset": null,
+      "behavior": "faci",
+      "evidence": "manual",
+      "source_ref": "R01UH0615EJ0120 sections 3.3 and 4",
+      "description": "Flash program-or-erase status"
+    },
+    {
+      "name": "FBCCNT",
+      "address": 4288741584,
+      "size": 1,
+      "access_widths": [
+        1
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "faci",
+      "evidence": "manual",
+      "source_ref": "R01UH0615EJ0120 sections 3.3 and 4",
+      "description": "DataFlash blank-check control"
+    },
+    {
+      "name": "FBCSTAT",
+      "address": 4288741588,
+      "size": 1,
+      "access_widths": [
+        1
+      ],
+      "access": "r",
+      "reset": null,
+      "behavior": "faci",
+      "evidence": "manual",
+      "source_ref": "R01UH0615EJ0120 sections 3.3 and 4",
+      "description": "DataFlash blank-check status"
+    },
+    {
+      "name": "FPSADDR",
+      "address": 4288741592,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "r",
+      "reset": null,
+      "behavior": "faci",
+      "evidence": "manual",
+      "source_ref": "R01UH0615EJ0120 sections 3.3 and 4",
+      "description": "First programmed DataFlash address"
+    },
+    {
+      "name": "FCPSR",
+      "address": 4288741600,
+      "size": 2,
+      "access_widths": [
+        2
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "faci",
+      "evidence": "manual",
+      "source_ref": "R01UH0615EJ0120 sections 3.3 and 4",
+      "description": "Flash sequencer process switch"
+    },
+    {
+      "name": "FPCKAR",
+      "address": 4288741604,
+      "size": 2,
+      "access_widths": [
+        2
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "faci",
+      "evidence": "manual",
+      "source_ref": "R01UH0615EJ0120 sections 3.3 and 4",
+      "description": "Flash sequencer processing-clock notification"
+    },
+    {
+      "name": "FECCEMON",
+      "address": 4288741632,
+      "size": 2,
+      "access_widths": [
+        2
+      ],
+      "access": "r",
+      "reset": null,
+      "behavior": "faci",
+      "evidence": "manual",
+      "source_ref": "R01UH0615EJ0120 sections 3.3 and 4",
+      "description": "Flash ECC encoder monitor"
+    },
+    {
+      "name": "FECCTMD",
+      "address": 4288741636,
+      "size": 2,
+      "access_widths": [
+        2
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "faci",
+      "evidence": "manual",
+      "source_ref": "R01UH0615EJ0120 sections 3.3 and 4",
+      "description": "Flash ECC test-mode control"
+    },
+    {
+      "name": "FDMYECC",
+      "address": 4288741640,
+      "size": 2,
+      "access_widths": [
+        2
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "faci",
+      "evidence": "manual",
+      "source_ref": "R01UH0615EJ0120 sections 3.3 and 4",
+      "description": "Flash dummy ECC value"
+    },
+    {
+      "name": "FACI_COMMAND_AREA",
+      "address": 4288806912,
+      "size": 1,
+      "access_widths": [
+        1
+      ],
+      "access": "w",
+      "reset": null,
+      "behavior": "faci",
+      "evidence": "manual",
+      "source_ref": "R01UH0615EJ0120 sections 3.3 and 4",
+      "description": "FACI command-issuing area"
+    },
+    {
+      "name": "BFASELR",
+      "address": 4291137544,
+      "size": 2,
+      "access_widths": [
+        2
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "faci",
+      "evidence": "manual",
+      "source_ref": "R01UH0615EJ0120 sections 3.3 and 4",
+      "description": "Boot-flash area selector"
+    },
+    {
+      "name": "ICUSCMD",
+      "address": 4291153920,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "icus_recovered",
+      "evidence": "recovered",
+      "source_ref": "Exact target CodeFlash ICU-S driver accesses; public P1M-E manual only identifies ICU-S presence",
+      "description": "ICU-S command register; recovered MAC generate writes (selector<<16)|5 and CMAC verify writes (selector<<16)|7"
+    },
+    {
+      "name": "ICUSDAT",
+      "address": 4291153924,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "icus_recovered",
+      "evidence": "recovered",
+      "source_ref": "Exact target CodeFlash ICU-S driver accesses; public P1M-E manual only identifies ICU-S presence",
+      "description": "ICU-S data/parameter word written beside ICUSCMD (firmware role)"
+    },
+    {
+      "name": "ICUSOUT",
+      "address": 4291153928,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "icus_recovered",
+      "evidence": "recovered",
+      "source_ref": "Exact target CodeFlash callbacks at 0x0008A514 and 0x0008A58A",
+      "description": "ICU-S output word consumed by recovered completion callbacks"
+    },
+    {
+      "name": "ICUSSTS",
+      "address": 4291153932,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "icus_recovered",
+      "evidence": "recovered",
+      "source_ref": "Exact target CodeFlash ICU-S driver accesses; public P1M-E manual only identifies ICU-S presence",
+      "description": "ICU-S status; driver polls bit 0 as busy/ready"
+    },
+    {
+      "name": "ICUSSTS2",
+      "address": 4291153940,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "icus_recovered",
+      "evidence": "recovered",
+      "source_ref": "Exact target CodeFlash ICU-S driver accesses; public P1M-E manual only identifies ICU-S presence",
+      "description": "ICU-S companion status; driver polls low bits with ICUSSTS"
+    },
+    {
+      "name": "ICUSIRQSTS",
+      "address": 4291153944,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "icus_recovered",
+      "evidence": "recovered",
+      "source_ref": "Exact target CodeFlash dispatcher at 0x0008A4CE",
+      "description": "ICU-S interrupt/status word read by the recovered service dispatcher"
+    },
+    {
+      "name": "ICUSPARAM",
+      "address": 4291153948,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "icus_recovered",
+      "evidence": "recovered",
+      "source_ref": "Exact target CodeFlash command setup at 0x0008A63C",
+      "description": "ICU-S operation parameter written by recovered command setup"
+    },
+    {
+      "name": "ICUSCTL",
+      "address": 4291153956,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "icus_recovered",
+      "evidence": "recovered",
+      "source_ref": "Exact target CodeFlash callbacks at 0x0008A538 and 0x0008A5AE; driver reset path",
+      "description": "ICU-S control/acknowledgement word written by recovered callbacks and reset paths"
+    },
+    {
+      "name": "UCFERRINT",
+      "address": 4291174400,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 31.2.2",
+      "description": "CodeFlash error-information control"
+    },
+    {
+      "name": "UCFSERSTCLR",
+      "address": 4291174404,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "w",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 31.2.2",
+      "description": "CodeFlash ECC single-error status clear"
+    },
+    {
+      "name": "UCFDERSTCLR",
+      "address": 4291174408,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "w",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 31.2.2",
+      "description": "CodeFlash ECC double-error and address-parity status clear"
+    },
+    {
+      "name": "UCFOVFSTR",
+      "address": 4291174412,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "r",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 31.2.2",
+      "description": "CodeFlash single-error count overflow status"
+    },
+    {
+      "name": "UCFSERSTR",
+      "address": 4291174432,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "r",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 31.2.2",
+      "description": "CodeFlash ECC single-error status"
+    },
+    {
+      "name": "UCFDERSTR",
+      "address": 4291174448,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "r",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 31.2.2",
+      "description": "CodeFlash ECC double-error and address-parity status"
+    },
+    {
+      "name": "UCF1SEDADR",
+      "address": 4291174464,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "r",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 31.2.2",
+      "description": "CodeFlash first single-error address"
+    },
+    {
+      "name": "UCF2SEDADR",
+      "address": 4291174468,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "r",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 31.2.2",
+      "description": "CodeFlash second single-error address"
+    },
+    {
+      "name": "UCF3SEDADR",
+      "address": 4291174472,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "r",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 31.2.2",
+      "description": "CodeFlash third single-error address"
+    },
+    {
+      "name": "UCF4SEDADR",
+      "address": 4291174476,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "r",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 31.2.2",
+      "description": "CodeFlash fourth single-error address"
+    },
+    {
+      "name": "UCFDEDADR",
+      "address": 4291174592,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "r",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 31.2.2",
+      "description": "CodeFlash double-error or address-parity error address"
+    },
+    {
+      "name": "CFAPCTL",
+      "address": 4291174656,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 31.2.2",
+      "description": "CodeFlash address-parity control"
+    },
+    {
+      "name": "CFECCCTL_VCI2CFBA",
+      "address": 4291174912,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 31.2.2",
+      "description": "CodeFlash ECC control for system-interconnect access"
+    },
+    {
+      "name": "CFSTSTCTL_VCI2CFBA",
+      "address": 4291175152,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 31.2.2",
+      "description": "CodeFlash ECC sub-test control for system-interconnect access"
+    },
+    {
+      "name": "CFECCCTL_PE1",
+      "address": 4291175424,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 31.2.2",
+      "description": "CodeFlash ECC control for PE1 access"
+    },
+    {
+      "name": "CFSTSTCTL_PE1",
+      "address": 4291175664,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 31.2.2",
+      "description": "CodeFlash ECC sub-test control for PE1 access"
+    },
+    {
+      "name": "CFSTS",
+      "address": 4291953016,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "rscfd",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 17, RSCFD register tables; firmware-observed role",
+      "description": "RSCFD common-FIFO status base (ch0/fifo0; +0x0C*ch +4*fifo)"
+    },
+    {
+      "name": "CFSTS_CH1",
+      "address": 4291953028,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "rscfd",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 17, RSCFD register tables; firmware-observed role",
+      "description": "RSCFD common-FIFO status for application CAN1 (ch1/fifo0)"
+    },
+    {
+      "name": "CFPCTR",
+      "address": 4291953112,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "rscfd",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 17, RSCFD register tables; firmware-observed role",
+      "description": "RSCFD common-FIFO pointer control base (write 0xFF advances)"
+    },
+    {
+      "name": "CFPCTR_CH1",
+      "address": 4291953124,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "rscfd",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 17, RSCFD register tables; firmware-observed role",
+      "description": "RSCFD common-FIFO pointer control for application CAN1"
+    },
+    {
+      "name": "CFDTMC",
+      "address": 4291953232,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "rscfd",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 17, RSCFD register tables; firmware-observed role",
+      "description": "RSCFD Tx message-buffer control base (CFDTMCn.TMTR at +n)"
+    },
+    {
+      "name": "CFDTMC16",
+      "address": 4291953248,
+      "size": 1,
+      "access_widths": [
+        1
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "rscfd",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 17, RSCFD register tables; firmware-observed role",
+      "description": "Diagnostic Tx buffer control (HTH 0x13 -> n=16; TMTR bit 0)"
+    },
+    {
+      "name": "CFDTMC_CH1_16",
+      "address": 4291953264,
+      "size": 1,
+      "access_widths": [
+        1
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "rscfd",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 17, RSCFD register tables; exact firmware table binding",
+      "description": "Application CAN1 Tx buffer n=16 control (TMTR bit 0)"
+    },
+    {
+      "name": "CFDTMSTS",
+      "address": 4291953360,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "rscfd",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 17, RSCFD register tables; firmware-observed role",
+      "description": "RSCFD Tx message-buffer status base (CFDTMSTSn at +n)"
+    },
+    {
+      "name": "CFDTMSTS_CH1",
+      "address": 4291953376,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "rscfd",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 17, RSCFD register tables; firmware-observed role",
+      "description": "RSCFD Tx status base for application CAN1 record"
+    },
+    {
+      "name": "CFDTMSTS_CH1_16",
+      "address": 4291953392,
+      "size": 1,
+      "access_widths": [
+        1
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "rscfd",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 17, RSCFD register tables; exact firmware table binding",
+      "description": "Application CAN1 Tx buffer n=16 status"
+    },
+    {
+      "name": "CFID",
+      "address": 4291965952,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "rscfd",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 17, RSCFD register tables; firmware-observed role",
+      "description": "RSCFD common-FIFO message RAM base (CFID/CFPTR/CFDF window)"
+    },
+    {
+      "name": "CFID_CH1",
+      "address": 4291966336,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "rscfd",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 17, RSCFD register tables; firmware-observed role",
+      "description": "RSCFD common-FIFO message RAM for application CAN1"
+    },
+    {
+      "name": "CFDTMID",
+      "address": 4291969024,
+      "size": 4,
+      "access_widths": [
+        1,
+        2,
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "rscfd",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 17, RSCFD register tables; firmware-observed role",
+      "description": "RSCFD Tx message-buffer RAM base (0x20-byte entries)"
+    },
+    {
+      "name": "CFDTMID16",
+      "address": 4291969536,
+      "size": 4,
+      "access_widths": [
+        1,
+        2,
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "rscfd",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 17, RSCFD register tables; firmware-observed role",
+      "description": "Diagnostic Tx message RAM for buffer n=16 (CAN 0x7A9 path)"
+    },
+    {
+      "name": "CFDTMPTR16",
+      "address": 4291969540,
+      "size": 4,
+      "access_widths": [
+        1,
+        2,
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "rscfd",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 17, RSCFD Tx message-buffer RAM",
+      "description": "Diagnostic Tx buffer n=16 pointer/DLC word"
+    },
+    {
+      "name": "CFDTMFDSTS16",
+      "address": 4291969544,
+      "size": 4,
+      "access_widths": [
+        1,
+        2,
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "rscfd",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 17, RSCFD Tx message-buffer RAM",
+      "description": "Diagnostic Tx buffer n=16 FD pointer/status word"
+    },
+    {
+      "name": "CFDTMDF0_16",
+      "address": 4291969548,
+      "size": 4,
+      "access_widths": [
+        1,
+        2,
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "rscfd",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 17, RSCFD Tx message-buffer RAM",
+      "description": "Diagnostic Tx buffer n=16 data bytes 0..3"
+    },
+    {
+      "name": "CFDTMDF1_16",
+      "address": 4291969552,
+      "size": 4,
+      "access_widths": [
+        1,
+        2,
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "rscfd",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 17, RSCFD Tx message-buffer RAM",
+      "description": "Diagnostic Tx buffer n=16 data bytes 4..7"
+    },
+    {
+      "name": "CFDTMID_CH1_16",
+      "address": 4291970048,
+      "size": 4,
+      "access_widths": [
+        1,
+        2,
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "rscfd",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 17, RSCFD channel-1 Tx message-buffer RAM",
+      "description": "Application CAN1 Tx message RAM buffer n=16 identifier"
+    },
+    {
+      "name": "CFDTMPTR_CH1_16",
+      "address": 4291970052,
+      "size": 4,
+      "access_widths": [
+        1,
+        2,
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "rscfd",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 17, RSCFD channel-1 Tx message-buffer RAM",
+      "description": "Application CAN1 Tx message RAM buffer n=16 pointer/DLC word"
+    },
+    {
+      "name": "CFDTMFDSTS_CH1_16",
+      "address": 4291970056,
+      "size": 4,
+      "access_widths": [
+        1,
+        2,
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "rscfd",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 17, RSCFD channel-1 Tx message-buffer RAM",
+      "description": "Application CAN1 Tx buffer n=16 FD pointer/status word"
+    },
+    {
+      "name": "CFDTMDF0_CH1_16",
+      "address": 4291970060,
+      "size": 4,
+      "access_widths": [
+        1,
+        2,
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "rscfd",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 17, RSCFD channel-1 Tx message-buffer RAM",
+      "description": "Application CAN1 Tx buffer n=16 data bytes 0..3"
+    },
+    {
+      "name": "CFDTMDF1_CH1_16",
+      "address": 4291970064,
+      "size": 4,
+      "access_widths": [
+        1,
+        2,
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "rscfd",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 17, RSCFD channel-1 Tx message-buffer RAM",
+      "description": "Application CAN1 Tx buffer n=16 data bytes 4..7"
+    },
+    {
+      "name": "ECMMESET",
+      "address": 4292214784,
+      "size": 1,
+      "access_widths": [
+        1
+      ],
+      "access": "w",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "ECM master error-source set trigger"
+    },
+    {
+      "name": "ECMMECLR",
+      "address": 4292214788,
+      "size": 1,
+      "access_widths": [
+        1
+      ],
+      "access": "w",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "ECM master error-source clear trigger"
+    },
+    {
+      "name": "ECMMESSTR0",
+      "address": 4292214792,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "r",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "ECM master error-source status 0"
+    },
+    {
+      "name": "ECMMESSTR1",
+      "address": 4292214796,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "r",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "ECM master error-source status 1"
+    },
+    {
+      "name": "ECMMESSTR2",
+      "address": 4292214800,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "r",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "ECM master error-source status 2"
+    },
+    {
+      "name": "ECMMPCMD0",
+      "address": 4292214804,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "w",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "ECM master protection command; write 0xA5 before protected writes"
+    },
+    {
+      "name": "ECMCESET",
+      "address": 4292218880,
+      "size": 1,
+      "access_widths": [
+        1
+      ],
+      "access": "w",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "ECM checker error-source set trigger"
+    },
+    {
+      "name": "ECMCECLR",
+      "address": 4292218884,
+      "size": 1,
+      "access_widths": [
+        1
+      ],
+      "access": "w",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "ECM checker error-source clear trigger"
+    },
+    {
+      "name": "ECMCESSTR0",
+      "address": 4292218888,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "r",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "ECM checker error-source status 0"
+    },
+    {
+      "name": "ECMCESSTR1",
+      "address": 4292218892,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "r",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "ECM checker error-source status 1"
+    },
+    {
+      "name": "ECMCESSTR2",
+      "address": 4292218896,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "r",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "ECM checker error-source status 2"
+    },
+    {
+      "name": "ECMCPCMD0",
+      "address": 4292218900,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "w",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "ECM checker protection command; write 0xA5 before protected writes"
+    },
+    {
+      "name": "ECMEPCFG",
+      "address": 4292222976,
+      "size": 1,
+      "access_widths": [
+        1
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "ECM error-pulse configuration"
+    },
+    {
+      "name": "ECMMICFG0",
+      "address": 4292222980,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "ECM maskable-interrupt configuration 0"
+    },
+    {
+      "name": "ECMMICFG1",
+      "address": 4292222984,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "ECM maskable-interrupt configuration 1"
+    },
+    {
+      "name": "ECMMICFG2",
+      "address": 4292222988,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "ECM maskable-interrupt configuration 2"
+    },
+    {
+      "name": "ECMNMICFG0",
+      "address": 4292222992,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "ECM non-maskable-interrupt configuration 0"
+    },
+    {
+      "name": "ECMNMICFG1",
+      "address": 4292222996,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "ECM non-maskable-interrupt configuration 1"
+    },
+    {
+      "name": "ECMNMICFG2",
+      "address": 4292223000,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "ECM non-maskable-interrupt configuration 2"
+    },
+    {
+      "name": "ECMIRCFG0",
+      "address": 4292223004,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "ECM internal-reset configuration 0"
+    },
+    {
+      "name": "ECMIRCFG1",
+      "address": 4292223008,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "ECM internal-reset configuration 1"
+    },
+    {
+      "name": "ECMIRCFG2",
+      "address": 4292223012,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "ECM internal-reset configuration 2"
+    },
+    {
+      "name": "ECMEMK0",
+      "address": 4292223016,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "ECM error mask 0"
+    },
+    {
+      "name": "ECMEMK1",
+      "address": 4292223020,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "ECM error mask 1"
+    },
+    {
+      "name": "ECMEMK2",
+      "address": 4292223024,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "ECM error mask 2"
+    },
+    {
+      "name": "ECMESSTC0",
+      "address": 4292223028,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "w",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "ECM error-source status-clear trigger 0"
+    },
+    {
+      "name": "ECMESSTC1",
+      "address": 4292223032,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "w",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "ECM error-source status-clear trigger 1"
+    },
+    {
+      "name": "ECMESSTC2",
+      "address": 4292223036,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "w",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "ECM error-source status-clear trigger 2"
+    },
+    {
+      "name": "ECMPCMD1",
+      "address": 4292223040,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "w",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "ECM common protection command; write 0xA5 before protected writes"
+    },
+    {
+      "name": "ECMPS",
+      "address": 4292223044,
+      "size": 1,
+      "access_widths": [
+        1
+      ],
+      "access": "r",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "ECM common protection status"
+    },
+    {
+      "name": "ECMPE0",
+      "address": 4292223048,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "w",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "ECM pseudo-error trigger 0"
+    },
+    {
+      "name": "ECMPE1",
+      "address": 4292223052,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "w",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "ECM pseudo-error trigger 1"
+    },
+    {
+      "name": "ECMPE2",
+      "address": 4292223056,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "w",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "ECM pseudo-error trigger 2"
+    },
+    {
+      "name": "ECMDTMCTL",
+      "address": 4292223060,
+      "size": 1,
+      "access_widths": [
+        1
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "ECM delay-timer control"
+    },
+    {
+      "name": "ECMDTMR",
+      "address": 4292223064,
+      "size": 2,
+      "access_widths": [
+        2
+      ],
+      "access": "r",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "ECM delay-timer count"
+    },
+    {
+      "name": "ECMDTMCMP",
+      "address": 4292223068,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "ECM delay-timer compare"
+    },
+    {
+      "name": "ECMDTMCFG0",
+      "address": 4292223072,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "ECM delay-timer configuration 0"
+    },
+    {
+      "name": "ECMDTMCFG1",
+      "address": 4292223076,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "ECM delay-timer configuration 1"
+    },
+    {
+      "name": "ECMDTMCFG2",
+      "address": 4292223080,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "ECM delay-timer configuration 2"
+    },
+    {
+      "name": "ECMDTMCFG3",
+      "address": 4292223084,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "ECM delay-timer configuration 3"
+    },
+    {
+      "name": "ECMDTMCFG4",
+      "address": 4292223088,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "ECM delay-timer configuration 4"
+    },
+    {
+      "name": "ECMDTMCFG5",
+      "address": 4292223092,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "ECM delay-timer configuration 5"
+    },
+    {
+      "name": "ECMEOCCFG",
+      "address": 4292223096,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "ECM error-output clear-invalidation configuration"
+    },
+    {
+      "name": "ECMPEM",
+      "address": 4292223100,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "ECM pseudo-error mask"
+    },
+    {
+      "name": "ECMEPCTL",
+      "address": 4292227072,
+      "size": 1,
+      "access_widths": [
+        1
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "ECM error-pulse control"
+    },
+    {
+      "name": "TAUJ0CDR0",
+      "address": 4293197824,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "tauj",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 24.3",
+      "description": "TAUJ0 channel 0 data reload"
+    },
+    {
+      "name": "TAUJ0CDR1",
+      "address": 4293197828,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "tauj",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 24.3",
+      "description": "TAUJ0 channel 1 data reload"
+    },
+    {
+      "name": "TAUJ0CDR2",
+      "address": 4293197832,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "tauj",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 24.3",
+      "description": "TAUJ0 channel 2 data reload"
+    },
+    {
+      "name": "TAUJ0CDR3",
+      "address": 4293197836,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "tauj",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 24.3",
+      "description": "TAUJ0 channel 3 data reload"
+    },
+    {
+      "name": "TAUJ0CNT0",
+      "address": 4293197840,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "r",
+      "reset": null,
+      "behavior": "tauj",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 24.3",
+      "description": "TAUJ0 channel 0 counter"
+    },
+    {
+      "name": "TAUJ0CNT1",
+      "address": 4293197844,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "r",
+      "reset": null,
+      "behavior": "tauj",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 24.3",
+      "description": "TAUJ0 channel 1 counter"
+    },
+    {
+      "name": "TAUJ0CNT2",
+      "address": 4293197848,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "r",
+      "reset": null,
+      "behavior": "tauj",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 24.3",
+      "description": "TAUJ0 channel 2 counter"
+    },
+    {
+      "name": "TAUJ0CNT3",
+      "address": 4293197852,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "r",
+      "reset": null,
+      "behavior": "tauj",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 24.3",
+      "description": "TAUJ0 channel 3 counter"
+    },
+    {
+      "name": "TAUJ0CMUR0",
+      "address": 4293197856,
+      "size": 1,
+      "access_widths": [
+        1
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "tauj",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 Table 24.10",
+      "description": "TAUJ0 channel 0 user mode"
+    },
+    {
+      "name": "TAUJ0CMUR1",
+      "address": 4293197860,
+      "size": 1,
+      "access_widths": [
+        1
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "tauj",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 Table 24.10",
+      "description": "TAUJ0 channel 1 user mode"
+    },
+    {
+      "name": "TAUJ0CMUR2",
+      "address": 4293197864,
+      "size": 1,
+      "access_widths": [
+        1
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "tauj",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 Table 24.10",
+      "description": "TAUJ0 channel 2 user mode"
+    },
+    {
+      "name": "TAUJ0CMUR3",
+      "address": 4293197868,
+      "size": 1,
+      "access_widths": [
+        1
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "tauj",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 Table 24.10",
+      "description": "TAUJ0 channel 3 user mode"
+    },
+    {
+      "name": "TAUJ0TE",
+      "address": 4293197904,
+      "size": 1,
+      "access_widths": [
+        1
+      ],
+      "access": "r",
+      "reset": 0,
+      "behavior": "tauj",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 Table 24.10",
+      "description": "TAUJ0 channel enable status"
+    },
+    {
+      "name": "TAUJ0TS",
+      "address": 4293197908,
+      "size": 1,
+      "access_widths": [
+        1
+      ],
+      "access": "w",
+      "reset": null,
+      "behavior": "tauj",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 Table 24.10",
+      "description": "TAUJ0 channel start trigger"
+    },
+    {
+      "name": "TAUJ0TT",
+      "address": 4293197912,
+      "size": 1,
+      "access_widths": [
+        1
+      ],
+      "access": "w",
+      "reset": null,
+      "behavior": "tauj",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 Table 24.10",
+      "description": "TAUJ0 channel stop trigger"
+    },
+    {
+      "name": "TAUJ0TO",
+      "address": 4293197916,
+      "size": 1,
+      "access_widths": [
+        1
+      ],
+      "access": "rw",
+      "reset": 0,
+      "behavior": "tauj",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 Table 24.10",
+      "description": "TAUJ0 channel output"
+    },
+    {
+      "name": "TAUJ0TOE",
+      "address": 4293197920,
+      "size": 1,
+      "access_widths": [
+        1
+      ],
+      "access": "rw",
+      "reset": 0,
+      "behavior": "tauj",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 Table 24.10",
+      "description": "TAUJ0 channel output enable"
+    },
+    {
+      "name": "TAUJ0TOL",
+      "address": 4293197924,
+      "size": 1,
+      "access_widths": [
+        1
+      ],
+      "access": "rw",
+      "reset": 0,
+      "behavior": "tauj",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 Table 24.10",
+      "description": "TAUJ0 channel output active level"
+    },
+    {
+      "name": "TAUJ0RDT",
+      "address": 4293197928,
+      "size": 1,
+      "access_widths": [
+        1
+      ],
+      "access": "w",
+      "reset": null,
+      "behavior": "tauj",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 Table 24.10",
+      "description": "TAUJ0 channel reload data trigger"
+    },
+    {
+      "name": "TAUJ0RSF",
+      "address": 4293197932,
+      "size": 1,
+      "access_widths": [
+        1
+      ],
+      "access": "r",
+      "reset": 0,
+      "behavior": "tauj",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 Table 24.10",
+      "description": "TAUJ0 channel reload status"
+    },
+    {
+      "name": "TAUJ0CMOR0",
+      "address": 4293197952,
+      "size": 2,
+      "access_widths": [
+        2
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "tauj",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 24.3",
+      "description": "TAUJ0 channel 0 mode"
+    },
+    {
+      "name": "TAUJ0CMOR1",
+      "address": 4293197956,
+      "size": 2,
+      "access_widths": [
+        2
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "tauj",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 24.3",
+      "description": "TAUJ0 channel 1 mode"
+    },
+    {
+      "name": "TAUJ0CMOR2",
+      "address": 4293197960,
+      "size": 2,
+      "access_widths": [
+        2
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "tauj",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 24.3",
+      "description": "TAUJ0 channel 2 mode"
+    },
+    {
+      "name": "TAUJ0CMOR3",
+      "address": 4293197964,
+      "size": 2,
+      "access_widths": [
+        2
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "tauj",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 24.3",
+      "description": "TAUJ0 channel 3 mode"
+    },
+    {
+      "name": "TAUJ0TPS",
+      "address": 4293197968,
+      "size": 2,
+      "access_widths": [
+        2
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "tauj",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 24.3",
+      "description": "TAUJ0 prescaler"
+    },
+    {
+      "name": "TAUJ0BRS",
+      "address": 4293197972,
+      "size": 2,
+      "access_widths": [
+        1,
+        2
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "tauj",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 24.3",
+      "description": "TAUJ0 base-clock reload selector"
+    },
+    {
+      "name": "TAUJ0RDE",
+      "address": 4293197984,
+      "size": 1,
+      "access_widths": [
+        1
+      ],
+      "access": "rw",
+      "reset": 0,
+      "behavior": "tauj",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 Table 24.10",
+      "description": "TAUJ0 channel reload data enable"
+    },
+    {
+      "name": "TAUJ0RDM",
+      "address": 4293197988,
+      "size": 1,
+      "access_widths": [
+        1
+      ],
+      "access": "rw",
+      "reset": 0,
+      "behavior": "tauj",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 Table 24.10",
+      "description": "TAUJ0 channel reload data mode"
+    },
+    {
+      "name": "TSG30CMPWE",
+      "address": 4293329280,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "TSG30 bit-extended HT-PWM W-phase compare register"
+    },
+    {
+      "name": "TSG30CMPVE",
+      "address": 4293329284,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "TSG30 bit-extended HT-PWM V-phase compare register"
+    },
+    {
+      "name": "TSG30CMPUE",
+      "address": 4293329288,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "TSG30 bit-extended HT-PWM U-phase compare register"
+    },
+    {
+      "name": "TSG31CMPWE",
+      "address": 4293333376,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "TSG31 bit-extended HT-PWM W-phase compare register"
+    },
+    {
+      "name": "TSG31CMPVE",
+      "address": 4293333380,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "TSG31 bit-extended HT-PWM V-phase compare register"
+    },
+    {
+      "name": "TSG31CMPUE",
+      "address": 4293333384,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "TSG31 bit-extended HT-PWM U-phase compare register"
+    },
+    {
+      "name": "STAC_GRAM",
+      "address": 4294448160,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": 3,
+      "behavior": "reset_stac",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 sections 8.3.7-8.3.8",
+      "description": "RAM initialization mode control for Global RAM; reset value 0x00000003"
+    },
+    {
+      "name": "STAC_LM0",
+      "address": 4294448416,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": 3,
+      "behavior": "reset_stac",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 sections 8.3.7-8.3.8",
+      "description": "RAM initialization mode control for Local RAM; reset value 0x00000003"
+    },
+    {
+      "name": "CLKD3DIV",
+      "address": 4294477848,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "EXTCLK1O divider; boot writes 0x50 for divide by 80"
+    },
+    {
+      "name": "CLKD3STAT",
+      "address": 4294477852,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "r",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "EXTCLK1O divider status; boot polls synchronization and active state"
+    },
+    {
+      "name": "CKSC3C",
+      "address": 4294480064,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "EXTCLK1O source selector; source 4 is CLK_LSB"
+    },
+    {
+      "name": "CKSC3S",
+      "address": 4294480072,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "r",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "EXTCLK1O selected-source status; boot polls until source 4 is active"
+    },
+    {
+      "name": "ADCG0DIR00",
+      "address": 4294513152,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "r",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "ADCG0 data supplementary information register 00; DMA source for sample ring"
+    },
+    {
+      "name": "ADCG1DIR00",
+      "address": 4294517248,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "r",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "ADCG1 data supplementary information register 00; DMA source for sample ring"
+    },
+    {
+      "name": "DM00CM",
+      "address": 4294934784,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "DMAC0 channel 0 channel master setting register"
+    },
+    {
+      "name": "DM10CM",
+      "address": 4294934816,
+      "size": 4,
+      "access_widths": [
+        4
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "storage",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
+      "description": "DMAC1 channel 0 channel master setting register"
+    },
+    {
+      "name": "EIC8",
+      "address": 4294946832,
+      "size": 2,
+      "access_widths": [
+        1,
+        2
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "intc_eic",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 6.4.1, EICn register tables",
+      "description": "ECM maskable-error interrupt control (EIINT 8)"
+    },
+    {
+      "name": "EIC133",
+      "address": 4294947082,
+      "size": 2,
+      "access_widths": [
+        1,
+        2
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "intc_eic",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 6.4.1, EICn register tables",
+      "description": "TAUJ0 CH0 interrupt control (EIINT 133)"
+    },
+    {
+      "name": "EIC134",
+      "address": 4294947084,
+      "size": 2,
+      "access_widths": [
+        1,
+        2
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "intc_eic",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 6.4.1, EICn register tables",
+      "description": "TAUJ0 CH1 interrupt control (EIINT 134)"
+    },
+    {
+      "name": "EIC135",
+      "address": 4294947086,
+      "size": 2,
+      "access_widths": [
+        1,
+        2
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "intc_eic",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 6.4.1, EICn register tables",
+      "description": "TAUJ0 CH2 interrupt control (EIINT 135)"
+    },
+    {
+      "name": "EIC136",
+      "address": 4294947088,
+      "size": 2,
+      "access_widths": [
+        1,
+        2
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "intc_eic",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 6.4.1, EICn register tables",
+      "description": "TAUJ0 CH3 interrupt control (foreground tick; EIRF bit 12 polled)"
+    },
+    {
+      "name": "EIC187",
+      "address": 4294947190,
+      "size": 2,
+      "access_widths": [
+        1,
+        2
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "intc_eic",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 6.4.1, EICn register tables",
+      "description": "RSCAN CAN1 receive interrupt control (EIINT 187)"
+    },
+    {
+      "name": "EIC188",
+      "address": 4294947192,
+      "size": 2,
+      "access_widths": [
+        1,
+        2
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "intc_eic",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 6.4.1, EICn register tables",
+      "description": "RSCAN CAN1 transmit interrupt control (EIINT 188)"
+    },
+    {
+      "name": "EIC292",
+      "address": 4294947400,
+      "size": 2,
+      "access_widths": [
+        1,
+        2
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "intc_eic",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 6.4.1, EICn register tables",
+      "description": "ICU-S crypto-driver interrupt channel 292"
+    },
+    {
+      "name": "EIC293",
+      "address": 4294947402,
+      "size": 2,
+      "access_widths": [
+        1,
+        2
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "intc_eic",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 6.4.1, EICn register tables",
+      "description": "ICU-S crypto-driver interrupt channel 293"
+    },
+    {
+      "name": "EIC379",
+      "address": 4294947574,
+      "size": 2,
+      "access_widths": [
+        1,
+        2
+      ],
+      "access": "rw",
+      "reset": null,
+      "behavior": "intc_eic",
+      "evidence": "manual",
+      "source_ref": "R01UH0585EJ0120 section 6.4.1, EICn register tables",
+      "description": "Flash sequencer-end interrupt control (EIINT 379)"
+    }
+  ],
+  "execution": {
+    "engine": "Ghidra PcodeEmulator",
+    "profile": "functional",
+    "timing_claims": false,
+    "unknown_read_policy": "fault",
+    "codeflash_overlays": false
+  },
+  "evidence_boundary": {
+    "manual": "public specification-backed behavior",
+    "recovered": "exact-firmware-derived behavior; not a public silicon specification",
+    "observed": "identity-bound hardware capture input"
+  }
+}

@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 """Validate the P1M-E SFR label CSV against mapped windows and known landmarks."""
+
 from __future__ import annotations
 
 import csv
 import sys
 
 from tools import REPO_ROOT
+
 ROOT = REPO_ROOT
 CSV_PATH = ROOT / "data" / "p1m_sfr_labels.csv"
 
@@ -18,6 +20,7 @@ WINDOWS = {
     "SFR_RSCFD": (0xFFD20000, 0x10000),
     "SFR_ICUS": (0xFFC5D000, 0x1000),
     "SFR_CODEFLASH_ECC": (0xFFC62000, 0x500),
+    "SFR_STAC": (0xFFF81000, 0x1000),
     "SFR_CLKGEN": (0xFFF88000, 0x2000),
     "SFR_ECM_MASTER": (0xFFD60000, 0x100),
     "SFR_ECM_CHECKER": (0xFFD61000, 0x100),
@@ -65,7 +68,7 @@ REQUIRED = {
     0xFFA20000: ("FACI_COMMAND_AREA", 1),
     0xFFE5000C: ("TAUJ0CDR3", 4),
     0xFFE5001C: ("TAUJ0CNT3", 4),
-    0xFFE50086: ("TAUJ0CMOR3", 2),
+    0xFFE5008C: ("TAUJ0CMOR3", 2),
     0xFFE50090: ("TAUJ0TPS", 2),
     0xFFF91200: ("ADCG0DIR00", 4),
     0xFFF92200: ("ADCG1DIR00", 4),

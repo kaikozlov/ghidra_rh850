@@ -1,39 +1,42 @@
 address,name,size,access,comment
-# EI level interrupt-control registers (EICn @ 0xFFFFB000 + 2*n). Named channels
-# are those with verified firmware roles in docs/architecture/firmware-architecture.md.
-0xFFFFB010,EIC8,2,rw,ECM maskable-error interrupt control (EIINT 8)
-0xFFFFB10A,EIC133,2,rw,TAUJ0 CH0 interrupt control (EIINT 133)
-0xFFFFB10C,EIC134,2,rw,TAUJ0 CH1 interrupt control (EIINT 134)
-0xFFFFB10E,EIC135,2,rw,TAUJ0 CH2 interrupt control (EIINT 135)
-0xFFFFB110,EIC136,2,rw,TAUJ0 CH3 interrupt control (foreground tick; EIRF bit 12 polled)
-0xFFFFB176,EIC187,2,rw,RSCAN CAN1 receive interrupt control (EIINT 187)
-0xFFFFB178,EIC188,2,rw,RSCAN CAN1 transmit interrupt control (EIINT 188)
-0xFFFFB248,EIC292,2,rw,ICU-S crypto-driver interrupt channel 292
-0xFFFFB24A,EIC293,2,rw,ICU-S crypto-driver interrupt channel 293
-0xFFFFB2F6,EIC379,2,rw,Flash sequencer-end interrupt control (EIINT 379)
-# RSCFD / RSCAN-FD register bases used by Can transport (docs/communications/diagnostic-transport.md).
-# Channel-0 bases match the firmware peripheral table at 0x23000; channel-1
-# (application CAN1) and diagnostic Tx buffer n=16 are labeled explicitly.
-0xFFD20178,CFSTS,4,rw,RSCFD common-FIFO status base (ch0/fifo0; +0x0C*ch +4*fifo)
-0xFFD20184,CFSTS_CH1,4,rw,RSCFD common-FIFO status for application CAN1 (ch1/fifo0)
-0xFFD201D8,CFPCTR,4,rw,RSCFD common-FIFO pointer control base (write 0xFF advances)
-0xFFD201E4,CFPCTR_CH1,4,rw,RSCFD common-FIFO pointer control for application CAN1
-0xFFD20250,CFDTMC,4,rw,RSCFD Tx message-buffer control base (CFDTMCn.TMTR at +n)
-0xFFD20260,CFDTMC16,1,rw,Diagnostic Tx buffer control (HTH 0x13 -> n=16; TMTR bit 0)
-0xFFD202D0,CFDTMSTS,4,rw,RSCFD Tx message-buffer status base (CFDTMSTSn at +n)
-0xFFD202E0,CFDTMSTS_CH1,4,rw,RSCFD Tx status base for application CAN1 record
-0xFFD23400,CFID,4,rw,RSCFD common-FIFO message RAM base (CFID/CFPTR/CFDF window)
-0xFFD23580,CFID_CH1,4,rw,RSCFD common-FIFO message RAM for application CAN1
-0xFFD24000,CFDTMID,4,rw,RSCFD Tx message-buffer RAM base (0x20-byte entries)
-0xFFD24200,CFDTMID16,4,rw,Diagnostic Tx message RAM for buffer n=16 (CAN 0x7A9 path)
-# ICU-S crypto-driver command/status window (docs/security/secoc/application-chain.md).
-# ICUSCMD encoding is verified; companion offsets use firmware-observed roles.
+0xFFA08000,SELFID0,4,w,Self-programming ID input word 0
+0xFFA08004,SELFID1,4,w,Self-programming ID input word 1
+0xFFA08008,SELFID2,4,w,Self-programming ID input word 2
+0xFFA0800C,SELFID3,4,w,Self-programming ID input word 3
+0xFFA08010,SELFIDST,1,r,Self-programming ID authentication status
+0xFFA10000,FPMON,1,r,Flash pin monitor
+0xFFA10010,FASTAT,1,rw,Flash access status
+0xFFA10014,FAEINT,1,rw,Flash access-error interrupt enable
+0xFFA10020,FAREASELC,2,rw,CodeFlash memory-area selector
+0xFFA10030,FSADDR,4,rw,FACI command start address
+0xFFA10034,FEADDR,4,rw,FACI command end address
+0xFFA10080,FSTATR,4,r,Flash sequencer status
+0xFFA10084,FENTRYR,2,rw,Flash program-or-erase mode entry
+0xFFA10088,FPROTR,2,rw,CodeFlash protection control
+0xFFA1008C,FSUINITR,2,rw,Flash sequencer setup initialization
+0xFFA10090,FLKSTAT,1,r,Flash lock-bit status
+0xFFA10098,FRTSTAT,1,r,FACI reset-transfer status
+0xFFA1009C,FRTEINT,1,rw,FACI reset-transfer error interrupt enable
+0xFFA100A0,FCMDR,2,r,Last FACI command
+0xFFA100C0,FPESTAT,2,r,Flash program-or-erase status
+0xFFA100D0,FBCCNT,1,rw,DataFlash blank-check control
+0xFFA100D4,FBCSTAT,1,r,DataFlash blank-check status
+0xFFA100D8,FPSADDR,4,r,First programmed DataFlash address
+0xFFA100E0,FCPSR,2,rw,Flash sequencer process switch
+0xFFA100E4,FPCKAR,2,rw,Flash sequencer processing-clock notification
+0xFFA10100,FECCEMON,2,r,Flash ECC encoder monitor
+0xFFA10104,FECCTMD,2,rw,Flash ECC test-mode control
+0xFFA10108,FDMYECC,2,rw,Flash dummy ECC value
+0xFFA20000,FACI_COMMAND_AREA,1,w,FACI command-issuing area
+0xFFC59008,BFASELR,2,rw,Boot-flash area selector
 0xFFC5D000,ICUSCMD,4,rw,ICU-S command register; recovered MAC generate writes (selector<<16)|5 and CMAC verify writes (selector<<16)|7
 0xFFC5D004,ICUSDAT,4,rw,ICU-S data/parameter word written beside ICUSCMD (firmware role)
+0xFFC5D008,ICUSOUT,4,rw,ICU-S output word consumed by recovered completion callbacks
 0xFFC5D00C,ICUSSTS,4,rw,ICU-S status; driver polls bit 0 as busy/ready
 0xFFC5D014,ICUSSTS2,4,rw,ICU-S companion status; driver polls low bits with ICUSSTS
-0xFFC5D024,ICUSCTL,4,rw,ICU-S control word written during driver reset/abort path
-# CodeFlash ECC/address-parity safety registers from R01UH0585EJ0120 section 31.2.2.
+0xFFC5D018,ICUSIRQSTS,4,rw,ICU-S interrupt/status word read by the recovered service dispatcher
+0xFFC5D01C,ICUSPARAM,4,rw,ICU-S operation parameter written by recovered command setup
+0xFFC5D024,ICUSCTL,4,rw,ICU-S control/acknowledgement word written by recovered callbacks and reset paths
 0xFFC62000,UCFERRINT,4,rw,CodeFlash error-information control
 0xFFC62004,UCFSERSTCLR,4,w,CodeFlash ECC single-error status clear
 0xFFC62008,UCFDERSTCLR,4,w,CodeFlash ECC double-error and address-parity status clear
@@ -50,12 +53,29 @@ address,name,size,access,comment
 0xFFC622F0,CFSTSTCTL_VCI2CFBA,4,rw,CodeFlash ECC sub-test control for system-interconnect access
 0xFFC62400,CFECCCTL_PE1,4,rw,CodeFlash ECC control for PE1 access
 0xFFC624F0,CFSTSTCTL_PE1,4,rw,CodeFlash ECC sub-test control for PE1 access
-# EXTCLK1O clock-generation SFRs used by boot_extclk1_init (0x10C6).
-0xFFF88818,CLKD3DIV,4,rw,EXTCLK1O divider; boot writes 0x50 for divide by 80
-0xFFF8881C,CLKD3STAT,4,r,EXTCLK1O divider status; boot polls synchronization and active state
-0xFFF890C0,CKSC3C,4,rw,EXTCLK1O source selector; source 4 is CLK_LSB
-0xFFF890C8,CKSC3S,4,r,EXTCLK1O selected-source status; boot polls until source 4 is active
-# Error Control Module master and checker register windows.
+0xFFD20178,CFSTS,4,rw,RSCFD common-FIFO status base (ch0/fifo0; +0x0C*ch +4*fifo)
+0xFFD20184,CFSTS_CH1,4,rw,RSCFD common-FIFO status for application CAN1 (ch1/fifo0)
+0xFFD201D8,CFPCTR,4,rw,RSCFD common-FIFO pointer control base (write 0xFF advances)
+0xFFD201E4,CFPCTR_CH1,4,rw,RSCFD common-FIFO pointer control for application CAN1
+0xFFD20250,CFDTMC,4,rw,RSCFD Tx message-buffer control base (CFDTMCn.TMTR at +n)
+0xFFD20260,CFDTMC16,1,rw,Diagnostic Tx buffer control (HTH 0x13 -> n=16; TMTR bit 0)
+0xFFD20270,CFDTMC_CH1_16,1,rw,Application CAN1 Tx buffer n=16 control (TMTR bit 0)
+0xFFD202D0,CFDTMSTS,4,rw,RSCFD Tx message-buffer status base (CFDTMSTSn at +n)
+0xFFD202E0,CFDTMSTS_CH1,4,rw,RSCFD Tx status base for application CAN1 record
+0xFFD202F0,CFDTMSTS_CH1_16,1,rw,Application CAN1 Tx buffer n=16 status
+0xFFD23400,CFID,4,rw,RSCFD common-FIFO message RAM base (CFID/CFPTR/CFDF window)
+0xFFD23580,CFID_CH1,4,rw,RSCFD common-FIFO message RAM for application CAN1
+0xFFD24000,CFDTMID,4,rw,RSCFD Tx message-buffer RAM base (0x20-byte entries)
+0xFFD24200,CFDTMID16,4,rw,Diagnostic Tx message RAM for buffer n=16 (CAN 0x7A9 path)
+0xFFD24204,CFDTMPTR16,4,rw,Diagnostic Tx buffer n=16 pointer/DLC word
+0xFFD24208,CFDTMFDSTS16,4,rw,Diagnostic Tx buffer n=16 FD pointer/status word
+0xFFD2420C,CFDTMDF0_16,4,rw,Diagnostic Tx buffer n=16 data bytes 0..3
+0xFFD24210,CFDTMDF1_16,4,rw,Diagnostic Tx buffer n=16 data bytes 4..7
+0xFFD24400,CFDTMID_CH1_16,4,rw,Application CAN1 Tx message RAM buffer n=16 identifier
+0xFFD24404,CFDTMPTR_CH1_16,4,rw,Application CAN1 Tx message RAM buffer n=16 pointer/DLC word
+0xFFD24408,CFDTMFDSTS_CH1_16,4,rw,Application CAN1 Tx buffer n=16 FD pointer/status word
+0xFFD2440C,CFDTMDF0_CH1_16,4,rw,Application CAN1 Tx buffer n=16 data bytes 0..3
+0xFFD24410,CFDTMDF1_CH1_16,4,rw,Application CAN1 Tx buffer n=16 data bytes 4..7
 0xFFD60000,ECMMESET,1,w,ECM master error-source set trigger
 0xFFD60004,ECMMECLR,1,w,ECM master error-source clear trigger
 0xFFD60008,ECMMESSTR0,4,r,ECM master error-source status 0
@@ -68,7 +88,6 @@ address,name,size,access,comment
 0xFFD6100C,ECMCESSTR1,4,r,ECM checker error-source status 1
 0xFFD61010,ECMCESSTR2,4,r,ECM checker error-source status 2
 0xFFD61014,ECMCPCMD0,4,w,ECM checker protection command; write 0xA5 before protected writes
-# Error Control Module common register window. This is not the flash sequencer.
 0xFFD62000,ECMEPCFG,1,rw,ECM error-pulse configuration
 0xFFD62004,ECMMICFG0,4,rw,ECM maskable-interrupt configuration 0
 0xFFD62008,ECMMICFG1,4,rw,ECM maskable-interrupt configuration 1
@@ -102,38 +121,6 @@ address,name,size,access,comment
 0xFFD62078,ECMEOCCFG,4,rw,ECM error-output clear-invalidation configuration
 0xFFD6207C,ECMPEM,4,rw,ECM pseudo-error mask
 0xFFD63000,ECMEPCTL,1,rw,ECM error-pulse control
-# Flash interface (FACI) register and command windows from R01UH0615EJ0120.
-0xFFA08000,SELFID0,4,w,Self-programming ID input word 0
-0xFFA08004,SELFID1,4,w,Self-programming ID input word 1
-0xFFA08008,SELFID2,4,w,Self-programming ID input word 2
-0xFFA0800C,SELFID3,4,w,Self-programming ID input word 3
-0xFFA08010,SELFIDST,1,r,Self-programming ID authentication status
-0xFFA10000,FPMON,1,r,Flash pin monitor
-0xFFA10010,FASTAT,1,rw,Flash access status
-0xFFA10014,FAEINT,1,rw,Flash access-error interrupt enable
-0xFFA10020,FAREASELC,2,rw,CodeFlash memory-area selector
-0xFFA10030,FSADDR,4,rw,FACI command start address
-0xFFA10034,FEADDR,4,rw,FACI command end address
-0xFFA10080,FSTATR,4,r,Flash sequencer status
-0xFFA10084,FENTRYR,2,rw,Flash program-or-erase mode entry
-0xFFA10088,FPROTR,2,rw,CodeFlash protection control
-0xFFA1008C,FSUINITR,2,rw,Flash sequencer setup initialization
-0xFFA10090,FLKSTAT,1,r,Flash lock-bit status
-0xFFA10098,FRTSTAT,1,r,FACI reset-transfer status
-0xFFA1009C,FRTEINT,1,rw,FACI reset-transfer error interrupt enable
-0xFFA100A0,FCMDR,2,r,Last FACI command
-0xFFA100C0,FPESTAT,2,r,Flash program-or-erase status
-0xFFA100D0,FBCCNT,1,rw,DataFlash blank-check control
-0xFFA100D4,FBCSTAT,1,r,DataFlash blank-check status
-0xFFA100D8,FPSADDR,4,r,First programmed DataFlash address
-0xFFA100E0,FCPSR,2,rw,Flash sequencer process switch
-0xFFA100E4,FPCKAR,2,rw,Flash sequencer processing-clock notification
-0xFFA10100,FECCEMON,2,r,Flash ECC encoder monitor
-0xFFA10104,FECCTMD,2,rw,Flash ECC test-mode control
-0xFFA10108,FDMYECC,2,rw,Flash dummy ECC value
-0xFFA20000,FACI_COMMAND_AREA,1,w,FACI command-issuing area
-0xFFC59008,BFASELR,2,rw,Boot-flash area selector
-# TAUJ0 register landmarks used to derive the four application scheduler periods.
 0xFFE50000,TAUJ0CDR0,4,rw,TAUJ0 channel 0 data reload
 0xFFE50004,TAUJ0CDR1,4,rw,TAUJ0 channel 1 data reload
 0xFFE50008,TAUJ0CDR2,4,rw,TAUJ0 channel 2 data reload
@@ -142,27 +129,49 @@ address,name,size,access,comment
 0xFFE50014,TAUJ0CNT1,4,r,TAUJ0 channel 1 counter
 0xFFE50018,TAUJ0CNT2,4,r,TAUJ0 channel 2 counter
 0xFFE5001C,TAUJ0CNT3,4,r,TAUJ0 channel 3 counter
+0xFFE50020,TAUJ0CMUR0,1,rw,TAUJ0 channel 0 user mode
+0xFFE50024,TAUJ0CMUR1,1,rw,TAUJ0 channel 1 user mode
+0xFFE50028,TAUJ0CMUR2,1,rw,TAUJ0 channel 2 user mode
+0xFFE5002C,TAUJ0CMUR3,1,rw,TAUJ0 channel 3 user mode
+0xFFE50050,TAUJ0TE,1,r,TAUJ0 channel enable status
+0xFFE50054,TAUJ0TS,1,w,TAUJ0 channel start trigger
+0xFFE50058,TAUJ0TT,1,w,TAUJ0 channel stop trigger
+0xFFE5005C,TAUJ0TO,1,rw,TAUJ0 channel output
+0xFFE50060,TAUJ0TOE,1,rw,TAUJ0 channel output enable
+0xFFE50064,TAUJ0TOL,1,rw,TAUJ0 channel output active level
+0xFFE50068,TAUJ0RDT,1,w,TAUJ0 channel reload data trigger
+0xFFE5006C,TAUJ0RSF,1,r,TAUJ0 channel reload status
 0xFFE50080,TAUJ0CMOR0,2,rw,TAUJ0 channel 0 mode
-0xFFE50082,TAUJ0CMOR1,2,rw,TAUJ0 channel 1 mode
-0xFFE50084,TAUJ0CMOR2,2,rw,TAUJ0 channel 2 mode
-0xFFE50086,TAUJ0CMOR3,2,rw,TAUJ0 channel 3 mode
+0xFFE50084,TAUJ0CMOR1,2,rw,TAUJ0 channel 1 mode
+0xFFE50088,TAUJ0CMOR2,2,rw,TAUJ0 channel 2 mode
+0xFFE5008C,TAUJ0CMOR3,2,rw,TAUJ0 channel 3 mode
 0xFFE50090,TAUJ0TPS,2,rw,TAUJ0 prescaler
 0xFFE50094,TAUJ0BRS,2,rw,TAUJ0 base-clock reload selector
-# ADCG result-source registers and DMAC channel-master settings used by the
-# TAUJ0 CH0 phase-sample acquisition path. P1M-E manual register table maps
-# ADCG0DIR00/ADCG1DIR00 at FFF91200/FFF92200 and DM00CM/DM10CM at
-# FFFF8100/FFFF8120. Firmware DMA descriptors pair those ADCG sources with
-# Global RAM destinations FEEF81E0/FEEF8A20.
-0xFFF91200,ADCG0DIR00,4,r,ADCG0 data supplementary information register 00; DMA source for sample ring
-0xFFF92200,ADCG1DIR00,4,r,ADCG1 data supplementary information register 00; DMA source for sample ring
-0xFFFF8100,DM00CM,4,rw,DMAC0 channel 0 channel master setting register
-0xFFFF8120,DM10CM,4,rw,DMAC1 channel 0 channel master setting register
-# TSG3 motor-control timer extended HT-PWM compare registers. P1M-E manual
-# section 25.1.2 gives bases FFE70000/FFE71000; sections 25.3.48-50 define
-# 32-bit U/V/W extended compare registers at offsets 0x188/0x184/0x180.
+0xFFE500A0,TAUJ0RDE,1,rw,TAUJ0 channel reload data enable
+0xFFE500A4,TAUJ0RDM,1,rw,TAUJ0 channel reload data mode
 0xFFE70180,TSG30CMPWE,4,rw,TSG30 bit-extended HT-PWM W-phase compare register
 0xFFE70184,TSG30CMPVE,4,rw,TSG30 bit-extended HT-PWM V-phase compare register
 0xFFE70188,TSG30CMPUE,4,rw,TSG30 bit-extended HT-PWM U-phase compare register
 0xFFE71180,TSG31CMPWE,4,rw,TSG31 bit-extended HT-PWM W-phase compare register
 0xFFE71184,TSG31CMPVE,4,rw,TSG31 bit-extended HT-PWM V-phase compare register
 0xFFE71188,TSG31CMPUE,4,rw,TSG31 bit-extended HT-PWM U-phase compare register
+0xFFF81420,STAC_GRAM,4,rw,RAM initialization mode control for Global RAM; reset value 0x00000003
+0xFFF81520,STAC_LM0,4,rw,RAM initialization mode control for Local RAM; reset value 0x00000003
+0xFFF88818,CLKD3DIV,4,rw,EXTCLK1O divider; boot writes 0x50 for divide by 80
+0xFFF8881C,CLKD3STAT,4,r,EXTCLK1O divider status; boot polls synchronization and active state
+0xFFF890C0,CKSC3C,4,rw,EXTCLK1O source selector; source 4 is CLK_LSB
+0xFFF890C8,CKSC3S,4,r,EXTCLK1O selected-source status; boot polls until source 4 is active
+0xFFF91200,ADCG0DIR00,4,r,ADCG0 data supplementary information register 00; DMA source for sample ring
+0xFFF92200,ADCG1DIR00,4,r,ADCG1 data supplementary information register 00; DMA source for sample ring
+0xFFFF8100,DM00CM,4,rw,DMAC0 channel 0 channel master setting register
+0xFFFF8120,DM10CM,4,rw,DMAC1 channel 0 channel master setting register
+0xFFFFB010,EIC8,2,rw,ECM maskable-error interrupt control (EIINT 8)
+0xFFFFB10A,EIC133,2,rw,TAUJ0 CH0 interrupt control (EIINT 133)
+0xFFFFB10C,EIC134,2,rw,TAUJ0 CH1 interrupt control (EIINT 134)
+0xFFFFB10E,EIC135,2,rw,TAUJ0 CH2 interrupt control (EIINT 135)
+0xFFFFB110,EIC136,2,rw,TAUJ0 CH3 interrupt control (foreground tick; EIRF bit 12 polled)
+0xFFFFB176,EIC187,2,rw,RSCAN CAN1 receive interrupt control (EIINT 187)
+0xFFFFB178,EIC188,2,rw,RSCAN CAN1 transmit interrupt control (EIINT 188)
+0xFFFFB248,EIC292,2,rw,ICU-S crypto-driver interrupt channel 292
+0xFFFFB24A,EIC293,2,rw,ICU-S crypto-driver interrupt channel 293
+0xFFFFB2F6,EIC379,2,rw,Flash sequencer-end interrupt control (EIINT 379)

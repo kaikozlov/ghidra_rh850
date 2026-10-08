@@ -1,0 +1,32 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v1",
+  "name": "camry-f33-mctl-allows-misaligned-halfword-write",
+  "entry": "0x00078AEC",
+  "max_instructions": 20,
+  "stop_addresses": ["0x00010000"],
+  "registers": {
+    "r1": "0", "r2": "0", "sp": "0xFEBE2000", "gp": "0xFEBEB800",
+    "tp": "0x00023DFC", "r6": "0xFEBE0101", "r7": "0x1234", "r8": "0",
+    "r9": "0", "r10": "0", "r11": "0", "r12": "0", "r13": "0",
+    "r14": "0", "r15": "0", "r16": "0", "r17": "0", "r18": "0",
+    "r19": "0", "r20": "0", "r21": "0", "r22": "0", "r23": "0",
+    "r24": "0", "r25": "0", "r26": "0", "r27": "0", "r28": "0",
+    "r29": "0", "ep": "0", "lp": "0x00010000", "PSW": "0", "PMR": "0",
+    "MCTL": "2"
+  },
+  "memory": [
+    {"address": "0xFEBE0100", "hex": "00000000", "evidence": "scenario: write destination"}
+  ],
+  "artifacts": [],
+  "checks": [
+    {
+      "name": "MCTL.MA permits misaligned halfword write",
+      "kind": "memory", "address": "0xFEBE0100", "size": 4,
+      "equals_hex": "00341200"
+    },
+    {
+      "name": "writer returns through caller link",
+      "kind": "register", "register": "PC", "equals": "0x00010000"
+    }
+  ]
+}

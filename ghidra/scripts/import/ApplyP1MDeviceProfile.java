@@ -202,6 +202,8 @@ public class ApplyP1MDeviceProfile extends GhidraScript {
         // helper reads UCFDERSTR and clears it through UCFDERSTCLR.
         ensureUninitBlock("SFR_CODEFLASH_ECC", 0xFFC62000L, 0x500L,
                 true, true, false, true);
+        // RAM initialization disable controls for reset-class retention.
+        ensureUninitBlock("SFR_STAC", 0xFFF81000L, 0x1000L, true, true, false, true);
         // Clock-generation window. The boot path configures EXTCLK1O through
         // CLKD3DIV/CLKD3STAT and CKSC3C/CKSC3S; it does not reconfigure the PLL.
         ensureUninitBlock("SFR_CLKGEN", 0xFFF88000L, 0x2000L, true, true, false, true);

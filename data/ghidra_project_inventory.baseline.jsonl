@@ -18,6 +18,7 @@
 {"record":"memory_block","name":"SFR_ECM_PULSE","start":{"space":"ram","offset":"ffd63000"},"end":{"space":"ram","offset":"ffd630ff"},"size":256,"block_type":"Default","initialized":false,"overlay":false,"loaded":true,"read":true,"write":true,"execute":false,"volatile":true,"artificial":false,"source_infos":[{"destination_min":{"space":"ram","offset":"ffd63000"},"destination_max":{"space":"ram","offset":"ffd630ff"},"length":256,"mapped_range":null,"byte_mapping":null,"file_bytes":null}]}
 {"record":"memory_block","name":"SFR_TAUJ","start":{"space":"ram","offset":"ffe50000"},"end":{"space":"ram","offset":"ffe52fff"},"size":12288,"block_type":"Default","initialized":false,"overlay":false,"loaded":true,"read":true,"write":true,"execute":false,"volatile":true,"artificial":false,"source_infos":[{"destination_min":{"space":"ram","offset":"ffe50000"},"destination_max":{"space":"ram","offset":"ffe52fff"},"length":12288,"mapped_range":null,"byte_mapping":null,"file_bytes":null}]}
 {"record":"memory_block","name":"SFR_TSG3","start":{"space":"ram","offset":"ffe70000"},"end":{"space":"ram","offset":"ffe71fff"},"size":8192,"block_type":"Default","initialized":false,"overlay":false,"loaded":true,"read":true,"write":true,"execute":false,"volatile":true,"artificial":false,"source_infos":[{"destination_min":{"space":"ram","offset":"ffe70000"},"destination_max":{"space":"ram","offset":"ffe71fff"},"length":8192,"mapped_range":null,"byte_mapping":null,"file_bytes":null}]}
+{"record":"memory_block","name":"SFR_STAC","start":{"space":"ram","offset":"fff81000"},"end":{"space":"ram","offset":"fff81fff"},"size":4096,"block_type":"Default","initialized":false,"overlay":false,"loaded":true,"read":true,"write":true,"execute":false,"volatile":true,"artificial":false,"source_infos":[{"destination_min":{"space":"ram","offset":"fff81000"},"destination_max":{"space":"ram","offset":"fff81fff"},"length":4096,"mapped_range":null,"byte_mapping":null,"file_bytes":null}]}
 {"record":"memory_block","name":"SFR_CLKGEN","start":{"space":"ram","offset":"fff88000"},"end":{"space":"ram","offset":"fff89fff"},"size":8192,"block_type":"Default","initialized":false,"overlay":false,"loaded":true,"read":true,"write":true,"execute":false,"volatile":true,"artificial":false,"source_infos":[{"destination_min":{"space":"ram","offset":"fff88000"},"destination_max":{"space":"ram","offset":"fff89fff"},"length":8192,"mapped_range":null,"byte_mapping":null,"file_bytes":null}]}
 {"record":"memory_block","name":"SFR_ADCG0","start":{"space":"ram","offset":"fff91000"},"end":{"space":"ram","offset":"fff91fff"},"size":4096,"block_type":"Default","initialized":false,"overlay":false,"loaded":true,"read":true,"write":true,"execute":false,"volatile":true,"artificial":false,"source_infos":[{"destination_min":{"space":"ram","offset":"fff91000"},"destination_max":{"space":"ram","offset":"fff91fff"},"length":4096,"mapped_range":null,"byte_mapping":null,"file_bytes":null}]}
 {"record":"memory_block","name":"SFR_ADCG1","start":{"space":"ram","offset":"fff92000"},"end":{"space":"ram","offset":"fff92fff"},"size":4096,"block_type":"Default","initialized":false,"overlay":false,"loaded":true,"read":true,"write":true,"execute":false,"volatile":true,"artificial":false,"source_infos":[{"destination_min":{"space":"ram","offset":"fff92000"},"destination_max":{"space":"ram","offset":"fff92fff"},"length":4096,"mapped_range":null,"byte_mapping":null,"file_bytes":null}]}
@@ -8243,8 +8244,11 @@
 {"record":"user_symbol","address":{"space":"ram","offset":"ffc59008"},"symbol_type":"Label","qualified_name":"BFASELR","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffc5d000"},"symbol_type":"Label","qualified_name":"ICUSCMD","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffc5d004"},"symbol_type":"Label","qualified_name":"ICUSDAT","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffc5d008"},"symbol_type":"Label","qualified_name":"ICUSOUT","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffc5d00c"},"symbol_type":"Label","qualified_name":"ICUSSTS","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffc5d014"},"symbol_type":"Label","qualified_name":"ICUSSTS2","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffc5d018"},"symbol_type":"Label","qualified_name":"ICUSIRQSTS","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffc5d01c"},"symbol_type":"Label","qualified_name":"ICUSPARAM","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffc5d024"},"symbol_type":"Label","qualified_name":"ICUSCTL","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffc62000"},"symbol_type":"Label","qualified_name":"UCFERRINT","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffc62004"},"symbol_type":"Label","qualified_name":"UCFSERSTCLR","primary":true}
@@ -8268,12 +8272,23 @@
 {"record":"user_symbol","address":{"space":"ram","offset":"ffd201e4"},"symbol_type":"Label","qualified_name":"CFPCTR_CH1","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffd20250"},"symbol_type":"Label","qualified_name":"CFDTMC","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffd20260"},"symbol_type":"Label","qualified_name":"CFDTMC16","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd20270"},"symbol_type":"Label","qualified_name":"CFDTMC_CH1_16","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffd202d0"},"symbol_type":"Label","qualified_name":"CFDTMSTS","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffd202e0"},"symbol_type":"Label","qualified_name":"CFDTMSTS_CH1","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd202f0"},"symbol_type":"Label","qualified_name":"CFDTMSTS_CH1_16","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffd23400"},"symbol_type":"Label","qualified_name":"CFID","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffd23580"},"symbol_type":"Label","qualified_name":"CFID_CH1","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffd24000"},"symbol_type":"Label","qualified_name":"CFDTMID","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffd24200"},"symbol_type":"Label","qualified_name":"CFDTMID16","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd24204"},"symbol_type":"Label","qualified_name":"CFDTMPTR16","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd24208"},"symbol_type":"Label","qualified_name":"CFDTMFDSTS16","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd2420c"},"symbol_type":"Label","qualified_name":"CFDTMDF0_16","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd24210"},"symbol_type":"Label","qualified_name":"CFDTMDF1_16","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd24400"},"symbol_type":"Label","qualified_name":"CFDTMID_CH1_16","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd24404"},"symbol_type":"Label","qualified_name":"CFDTMPTR_CH1_16","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd24408"},"symbol_type":"Label","qualified_name":"CFDTMFDSTS_CH1_16","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd2440c"},"symbol_type":"Label","qualified_name":"CFDTMDF0_CH1_16","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd24410"},"symbol_type":"Label","qualified_name":"CFDTMDF1_CH1_16","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffd60000"},"symbol_type":"Label","qualified_name":"ECMMESET","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffd60004"},"symbol_type":"Label","qualified_name":"ECMMECLR","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffd60008"},"symbol_type":"Label","qualified_name":"ECMMESSTR0","primary":true}
@@ -8327,18 +8342,34 @@
 {"record":"user_symbol","address":{"space":"ram","offset":"ffe50014"},"symbol_type":"Label","qualified_name":"TAUJ0CNT1","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffe50018"},"symbol_type":"Label","qualified_name":"TAUJ0CNT2","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffe5001c"},"symbol_type":"Label","qualified_name":"TAUJ0CNT3","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffe50020"},"symbol_type":"Label","qualified_name":"TAUJ0CMUR0","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffe50024"},"symbol_type":"Label","qualified_name":"TAUJ0CMUR1","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffe50028"},"symbol_type":"Label","qualified_name":"TAUJ0CMUR2","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffe5002c"},"symbol_type":"Label","qualified_name":"TAUJ0CMUR3","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffe50050"},"symbol_type":"Label","qualified_name":"TAUJ0TE","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffe50054"},"symbol_type":"Label","qualified_name":"TAUJ0TS","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffe50058"},"symbol_type":"Label","qualified_name":"TAUJ0TT","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffe5005c"},"symbol_type":"Label","qualified_name":"TAUJ0TO","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffe50060"},"symbol_type":"Label","qualified_name":"TAUJ0TOE","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffe50064"},"symbol_type":"Label","qualified_name":"TAUJ0TOL","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffe50068"},"symbol_type":"Label","qualified_name":"TAUJ0RDT","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffe5006c"},"symbol_type":"Label","qualified_name":"TAUJ0RSF","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffe50080"},"symbol_type":"Label","qualified_name":"TAUJ0CMOR0","primary":true}
-{"record":"user_symbol","address":{"space":"ram","offset":"ffe50082"},"symbol_type":"Label","qualified_name":"TAUJ0CMOR1","primary":true}
-{"record":"user_symbol","address":{"space":"ram","offset":"ffe50084"},"symbol_type":"Label","qualified_name":"TAUJ0CMOR2","primary":true}
-{"record":"user_symbol","address":{"space":"ram","offset":"ffe50086"},"symbol_type":"Label","qualified_name":"TAUJ0CMOR3","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffe50084"},"symbol_type":"Label","qualified_name":"TAUJ0CMOR1","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffe50088"},"symbol_type":"Label","qualified_name":"TAUJ0CMOR2","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffe5008c"},"symbol_type":"Label","qualified_name":"TAUJ0CMOR3","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffe50090"},"symbol_type":"Label","qualified_name":"TAUJ0TPS","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffe50094"},"symbol_type":"Label","qualified_name":"TAUJ0BRS","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffe500a0"},"symbol_type":"Label","qualified_name":"TAUJ0RDE","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffe500a4"},"symbol_type":"Label","qualified_name":"TAUJ0RDM","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffe70180"},"symbol_type":"Label","qualified_name":"TSG30CMPWE","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffe70184"},"symbol_type":"Label","qualified_name":"TSG30CMPVE","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffe70188"},"symbol_type":"Label","qualified_name":"TSG30CMPUE","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffe71180"},"symbol_type":"Label","qualified_name":"TSG31CMPWE","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffe71184"},"symbol_type":"Label","qualified_name":"TSG31CMPVE","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffe71188"},"symbol_type":"Label","qualified_name":"TSG31CMPUE","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"fff81420"},"symbol_type":"Label","qualified_name":"STAC_GRAM","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"fff81520"},"symbol_type":"Label","qualified_name":"STAC_LM0","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"fff88818"},"symbol_type":"Label","qualified_name":"CLKD3DIV","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"fff8881c"},"symbol_type":"Label","qualified_name":"CLKD3STAT","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"fff890c0"},"symbol_type":"Label","qualified_name":"CKSC3C","primary":true}
@@ -9232,9 +9263,12 @@
 {"record":"listing_comment","address":{"space":"ram","offset":"ffc59008"},"comment_type":"PLATE","text":"Boot-flash area selector [rw, u16]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffc5d000"},"comment_type":"PLATE","text":"ICU-S command register; recovered MAC generate writes (selector<<16)|5 and CMAC verify writes (selector<<16)|7 [rw, u32]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffc5d004"},"comment_type":"PLATE","text":"ICU-S data/parameter word written beside ICUSCMD (firmware role) [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffc5d008"},"comment_type":"PLATE","text":"ICU-S output word consumed by recovered completion callbacks [rw, u32]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffc5d00c"},"comment_type":"PLATE","text":"ICU-S status; driver polls bit 0 as busy/ready [rw, u32]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffc5d014"},"comment_type":"PLATE","text":"ICU-S companion status; driver polls low bits with ICUSSTS [rw, u32]"}
-{"record":"listing_comment","address":{"space":"ram","offset":"ffc5d024"},"comment_type":"PLATE","text":"ICU-S control word written during driver reset/abort path [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffc5d018"},"comment_type":"PLATE","text":"ICU-S interrupt/status word read by the recovered service dispatcher [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffc5d01c"},"comment_type":"PLATE","text":"ICU-S operation parameter written by recovered command setup [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffc5d024"},"comment_type":"PLATE","text":"ICU-S control/acknowledgement word written by recovered callbacks and reset paths [rw, u32]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffc62000"},"comment_type":"PLATE","text":"CodeFlash error-information control [rw, u32]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffc62004"},"comment_type":"PLATE","text":"CodeFlash ECC single-error status clear [w, u32]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffc62008"},"comment_type":"PLATE","text":"CodeFlash ECC double-error and address-parity status clear [w, u32]"}
@@ -9257,12 +9291,23 @@
 {"record":"listing_comment","address":{"space":"ram","offset":"ffd201e4"},"comment_type":"PLATE","text":"RSCFD common-FIFO pointer control for application CAN1 [rw, u32]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffd20250"},"comment_type":"PLATE","text":"RSCFD Tx message-buffer control base (CFDTMCn.TMTR at +n) [rw, u32]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffd20260"},"comment_type":"PLATE","text":"Diagnostic Tx buffer control (HTH 0x13 -> n=16; TMTR bit 0) [rw, u8]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd20270"},"comment_type":"PLATE","text":"Application CAN1 Tx buffer n=16 control (TMTR bit 0) [rw, u8]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffd202d0"},"comment_type":"PLATE","text":"RSCFD Tx message-buffer status base (CFDTMSTSn at +n) [rw, u32]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffd202e0"},"comment_type":"PLATE","text":"RSCFD Tx status base for application CAN1 record [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd202f0"},"comment_type":"PLATE","text":"Application CAN1 Tx buffer n=16 status [rw, u8]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffd23400"},"comment_type":"PLATE","text":"RSCFD common-FIFO message RAM base (CFID/CFPTR/CFDF window) [rw, u32]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffd23580"},"comment_type":"PLATE","text":"RSCFD common-FIFO message RAM for application CAN1 [rw, u32]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffd24000"},"comment_type":"PLATE","text":"RSCFD Tx message-buffer RAM base (0x20-byte entries) [rw, u32]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffd24200"},"comment_type":"PLATE","text":"Diagnostic Tx message RAM for buffer n=16 (CAN 0x7A9 path) [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd24204"},"comment_type":"PLATE","text":"Diagnostic Tx buffer n=16 pointer/DLC word [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd24208"},"comment_type":"PLATE","text":"Diagnostic Tx buffer n=16 FD pointer/status word [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd2420c"},"comment_type":"PLATE","text":"Diagnostic Tx buffer n=16 data bytes 0..3 [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd24210"},"comment_type":"PLATE","text":"Diagnostic Tx buffer n=16 data bytes 4..7 [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd24400"},"comment_type":"PLATE","text":"Application CAN1 Tx message RAM buffer n=16 identifier [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd24404"},"comment_type":"PLATE","text":"Application CAN1 Tx message RAM buffer n=16 pointer/DLC word [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd24408"},"comment_type":"PLATE","text":"Application CAN1 Tx buffer n=16 FD pointer/status word [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd2440c"},"comment_type":"PLATE","text":"Application CAN1 Tx buffer n=16 data bytes 0..3 [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd24410"},"comment_type":"PLATE","text":"Application CAN1 Tx buffer n=16 data bytes 4..7 [rw, u32]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffd60000"},"comment_type":"PLATE","text":"ECM master error-source set trigger [w, u8]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffd60004"},"comment_type":"PLATE","text":"ECM master error-source clear trigger [w, u8]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffd60008"},"comment_type":"PLATE","text":"ECM master error-source status 0 [r, u32]"}
@@ -9316,18 +9361,34 @@
 {"record":"listing_comment","address":{"space":"ram","offset":"ffe50014"},"comment_type":"PLATE","text":"TAUJ0 channel 1 counter [r, u32]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffe50018"},"comment_type":"PLATE","text":"TAUJ0 channel 2 counter [r, u32]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffe5001c"},"comment_type":"PLATE","text":"TAUJ0 channel 3 counter [r, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffe50020"},"comment_type":"PLATE","text":"TAUJ0 channel 0 user mode [rw, u8]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffe50024"},"comment_type":"PLATE","text":"TAUJ0 channel 1 user mode [rw, u8]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffe50028"},"comment_type":"PLATE","text":"TAUJ0 channel 2 user mode [rw, u8]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffe5002c"},"comment_type":"PLATE","text":"TAUJ0 channel 3 user mode [rw, u8]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffe50050"},"comment_type":"PLATE","text":"TAUJ0 channel enable status [r, u8]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffe50054"},"comment_type":"PLATE","text":"TAUJ0 channel start trigger [w, u8]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffe50058"},"comment_type":"PLATE","text":"TAUJ0 channel stop trigger [w, u8]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffe5005c"},"comment_type":"PLATE","text":"TAUJ0 channel output [rw, u8]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffe50060"},"comment_type":"PLATE","text":"TAUJ0 channel output enable [rw, u8]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffe50064"},"comment_type":"PLATE","text":"TAUJ0 channel output active level [rw, u8]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffe50068"},"comment_type":"PLATE","text":"TAUJ0 channel reload data trigger [w, u8]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffe5006c"},"comment_type":"PLATE","text":"TAUJ0 channel reload status [r, u8]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffe50080"},"comment_type":"PLATE","text":"TAUJ0 channel 0 mode [rw, u16]"}
-{"record":"listing_comment","address":{"space":"ram","offset":"ffe50082"},"comment_type":"PLATE","text":"TAUJ0 channel 1 mode [rw, u16]"}
-{"record":"listing_comment","address":{"space":"ram","offset":"ffe50084"},"comment_type":"PLATE","text":"TAUJ0 channel 2 mode [rw, u16]"}
-{"record":"listing_comment","address":{"space":"ram","offset":"ffe50086"},"comment_type":"PLATE","text":"TAUJ0 channel 3 mode [rw, u16]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffe50084"},"comment_type":"PLATE","text":"TAUJ0 channel 1 mode [rw, u16]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffe50088"},"comment_type":"PLATE","text":"TAUJ0 channel 2 mode [rw, u16]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffe5008c"},"comment_type":"PLATE","text":"TAUJ0 channel 3 mode [rw, u16]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffe50090"},"comment_type":"PLATE","text":"TAUJ0 prescaler [rw, u16]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffe50094"},"comment_type":"PLATE","text":"TAUJ0 base-clock reload selector [rw, u16]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffe500a0"},"comment_type":"PLATE","text":"TAUJ0 channel reload data enable [rw, u8]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffe500a4"},"comment_type":"PLATE","text":"TAUJ0 channel reload data mode [rw, u8]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffe70180"},"comment_type":"PLATE","text":"TSG30 bit-extended HT-PWM W-phase compare register [rw, u32]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffe70184"},"comment_type":"PLATE","text":"TSG30 bit-extended HT-PWM V-phase compare register [rw, u32]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffe70188"},"comment_type":"PLATE","text":"TSG30 bit-extended HT-PWM U-phase compare register [rw, u32]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffe71180"},"comment_type":"PLATE","text":"TSG31 bit-extended HT-PWM W-phase compare register [rw, u32]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffe71184"},"comment_type":"PLATE","text":"TSG31 bit-extended HT-PWM V-phase compare register [rw, u32]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffe71188"},"comment_type":"PLATE","text":"TSG31 bit-extended HT-PWM U-phase compare register [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"fff81420"},"comment_type":"PLATE","text":"RAM initialization mode control for Global RAM; reset value 0x00000003 [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"fff81520"},"comment_type":"PLATE","text":"RAM initialization mode control for Local RAM; reset value 0x00000003 [rw, u32]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"fff88818"},"comment_type":"PLATE","text":"EXTCLK1O divider; boot writes 0x50 for divide by 80 [rw, u32]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"fff8881c"},"comment_type":"PLATE","text":"EXTCLK1O divider status; boot polls synchronization and active state [r, u32]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"fff890c0"},"comment_type":"PLATE","text":"EXTCLK1O source selector; source 4 is CLK_LSB [rw, u32]"}
@@ -10360,4 +10421,4 @@
 {"record":"bookmark","address":{"space":"ram","offset":"000d5ffc"},"type":"Analysis","category":"Address Table","comment":"Address table[16] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d603c"},"type":"Analysis","category":"Address Table","comment":"Address table[16] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d607c"},"type":"Analysis","category":"Address Table","comment":"Address table[16] created"}
-{"record":"totals","functions":6376,"instructions":183240,"symbols":8042,"memory_blocks":24,"body_ranges":6408,"body_addresses":502024,"user_function_names":1113,"user_symbols":1958,"listing_comments":989,"function_comments":502,"bookmarks":512,"name_sources":{"DEFAULT":5263,"USER_DEFINED":1113},"calling_conventions":{"__interrupt":24,"__stdcall":6352},"signature_sources":{"DEFAULT":6376}}
+{"record":"totals","functions":6376,"instructions":183240,"symbols":8072,"memory_blocks":25,"body_ranges":6408,"body_addresses":502024,"user_function_names":1113,"user_symbols":1988,"listing_comments":1019,"function_comments":502,"bookmarks":512,"name_sources":{"DEFAULT":5263,"USER_DEFINED":1113},"calling_conventions":{"__interrupt":24,"__stdcall":6352},"signature_sources":{"DEFAULT":6376}}

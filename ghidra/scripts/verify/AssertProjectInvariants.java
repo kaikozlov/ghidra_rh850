@@ -269,6 +269,7 @@ public class AssertProjectInvariants extends GhidraScript {
         requireBlock("GlobalRAM_A", 0xFEEF8000L, 0x8000L, true, true, true, false);
         requireBlock("GlobalRAM_B", 0xFEF00000L, 0x8000L, true, true, true, false);
         requireBlock("SFR_CODEFLASH_ECC", 0xFFC62000L, 0x500L, true, true, false, true);
+        requireBlock("SFR_STAC", 0xFFF81000L, 0x1000L, true, true, false, true);
         requireBlock("SFR_FACI", 0xFFA10000L, 0x200L, true, true, false, true);
         requireBlock("SFR_FACI_COMMAND", 0xFFA20000L, 0x4L, true, true, false, true);
         requireBlock("SFR_ECM_MASTER", 0xFFD60000L, 0x100L, true, true, false, true);

@@ -1,0 +1,81 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v1",
+  "name": "camry-f33-exact-icus-command-five-callback",
+  "entry": "0x0008A538",
+  "max_instructions": 200,
+  "stop_addresses": ["0x00010000"],
+  "registers": {
+    "r1": "0", "r2": "0", "sp": "0xFEBE2000", "gp": "0xFEBEB800",
+    "tp": "0x00023DFC", "r6": "0", "r7": "0", "r8": "0", "r9": "0",
+    "r10": "0", "r11": "0", "r12": "0", "r13": "0", "r14": "0",
+    "r15": "0", "r16": "0", "r17": "0", "r18": "0", "r19": "0",
+    "r20": "0", "r21": "0", "r22": "0", "r23": "0", "r24": "0",
+    "r25": "0", "r26": "0", "r27": "0", "r28": "0", "r29": "0",
+    "ep": "0", "lp": "0x00010000", "PSW": "0", "PMR": "0"
+  },
+  "memory": [
+    {
+      "address": "0xFEBF132C",
+      "hex": "0100000000000000",
+      "evidence": "recovered command-five block count and callback cursor"
+    },
+    {
+      "address": "0xFEBF1340",
+      "hex": "0002befE",
+      "evidence": "recovered command-five input pointer"
+    },
+    {
+      "address": "0xFEBF1350",
+      "hex": "fffd4101",
+      "evidence": "recovered command-five inverted input pointer"
+    },
+    {
+      "address": "0xFEBE0200",
+      "hex": "112233445566778899aabbccddeeff00",
+      "evidence": "scenario: command-five authenticated input block"
+    }
+  ],
+  "artifacts": [],
+  "checks": [
+    {
+      "name": "command-five callback returns success",
+      "kind": "register",
+      "register": "r10",
+      "equals": "0"
+    },
+    {
+      "name": "command-five callback returns through caller link",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x00010000"
+    },
+    {
+      "name": "native callback feeds the fourth input word to ICU-S",
+      "kind": "memory",
+      "address": "0xFFC5D004",
+      "size": 4,
+      "equals_hex": "ddeeff00"
+    },
+    {
+      "name": "native callback advances input pointer",
+      "kind": "memory",
+      "address": "0xFEBF1340",
+      "size": 4,
+      "equals_hex": "1002befe"
+    },
+    {
+      "name": "native callback advances block cursor",
+      "kind": "memory",
+      "address": "0xFEBF1330",
+      "size": 4,
+      "equals_hex": "01000000"
+    },
+    {
+      "name": "native callback acknowledges ICU-S output",
+      "kind": "memory",
+      "address": "0xFFC5D024",
+      "size": 4,
+      "equals_hex": "01000000"
+    }
+  ]
+}

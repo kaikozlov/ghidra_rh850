@@ -313,6 +313,9 @@ tests = ["tests/firmware/verify_motor_calibration_handlers.py"]
 [suite.p1m_device_profile]
 tests = ["tests/firmware/verify_p1m_device_profile.py"]
 
+[suite.rh850_machine]
+tests = ["tests/tooling/verify_rh850_machine.py"]
+
 [suite.payload_gate]
 tests = ["tests/runtime/verify_payload_gate.py"]
 

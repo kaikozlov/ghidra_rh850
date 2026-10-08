@@ -10,6 +10,7 @@ dependencies = [
     "pycryptodome==3.23.0",
     "unicorn==2.1.4",
     "numpy==2.4.6",
+    "systemrdl-compiler>=1.33.0",
 ]
 
 [build-system]

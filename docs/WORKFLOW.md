@@ -500,6 +500,9 @@ tools/test tss3_request_signer
 # generic CodeFlash linker/simulator or generated simulation model
 tools/test codeflash_sim
 
+# exact registered CodeFlash under the specification-backed P1M-E machine
+tools/test rh850_machine
+
 # ram_exec boot-identity transitions (transient F181, exact-boot handoff)
 tools/test ram_exec_boot_transitions
 
@@ -556,6 +559,7 @@ SFR_FACI_COMMAND   ffa20000..ffa20003  rw volatile
 SFR_FACI_CONFIG    ffc59000..ffc590ff  rw volatile
 SFR_ICUS           ffc5d000..ffc5dfff  rw volatile
 SFR_CODEFLASH_ECC  ffc62000..ffc624ff  rw volatile
+SFR_STAC           fff81000..fff81fff  rw volatile
 SFR_RSCFD          ffd20000..ffd2ffff  rw volatile
 SFR_ECM_*          ffd60000..ffd630ff  rw volatile, four mapped windows
 SFR_TAUJ           ffe50000..ffe52fff  rw volatile
