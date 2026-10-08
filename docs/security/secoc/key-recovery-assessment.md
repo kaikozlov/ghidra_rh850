@@ -122,8 +122,8 @@ The exact `FFC5D000` store encoding occurs at nine CodeFlash sites:
 | `0x8973A` | runtime selector plus command 5 | lower variable-length CMAC primitive if slot policy permits; stock diagnostic caller is fixed to 16 bytes (SECOC-069) |
 | `0x8990C` | runtime selector plus command 7 | live SecOC verification and SCA stimulus |
 | `0x89A2C` | command 8 | authenticated M1-M3 key update, not export |
-| `0x89A8A` | command 11 | initialization/test family; no key output recovered |
-| `0x89BB0` | command `0x22` | ICU initialization/lifecycle family |
+| `0x89A8A` | command 11 | unreferenced generated driver stub (dead code: no caller, pointer, or immediate reference in the image) — no stock PRNG initialization occurs |
+| `0x89BB0` | command `0x22` | unreferenced generated driver stub (dead code), `CMD_GET_ID` shape |
 | `0x89BF8` | abort/reset command `0x3F` | none |
 | `0x89DDC` | diagnostic word `0x7000` or `0x7100` | self-test/status family |
 

@@ -72,13 +72,23 @@ has two literal command sites absent from the four TSS3 builds:
 | `0x3F` (site A) | abort/reset (driver bring-up) | `0x8A26A` | `0x87D0A` | `0x8357A` | `= F12` | `0x8917A` |
 | `0x3F` (site B) | abort/replace (channel teardown) | `0x8ACA8` | `0x88748` | `0x83FB8` | `= F12` | `0x89BB8` |
 | `0x7000` / `0x7100` | diagnostic self-test/status (modes 1/2) | `0x8AE2E` | `0x888CE` | `0x8413E` | `= F12` | `0x89D3E` |
-| `11` (`0xB`) | RNG/init family — **no stock caller needed**; handled by completion ISR | absent | absent | absent | absent | `0x89A8A` |
-| `0x22` | ID/lifecycle family | absent | absent | absent | absent | `0x89BB0` |
+| `11` (`0xB`) | RNG/init family — **unreferenced generated stub (dead code)**: no stock caller, and no `jarl`/pointer/`mov32`/`ld24` reference anywhere in the image | absent | absent | absent | absent | `0x89A8A` |
+| `0x22` | ID/lifecycle family — unreferenced generated stub (dead code), same audit | absent | absent | absent | absent | `0x89BB0` |
 
 Completion handlers in the TSS3 builds still special-case tracked commands
 `0xB`/`0x3F` (Camry `0x8AF10`), so the driver library understands command 11
 even where no stock site issues it. Corolla F12/H12 issuer bodies are
 byte-identical (all seven decompilations hash-equal) and share one build.
+
+2026-10-08 dead-stub audit: both Sienna-only literal sites sit in store blocks
+that no discovered function owns. Each registers the shared
+`icus_command_finalize` (`0x89510`) callback exactly like the wired wrappers —
+seven `mov32 0x89510` sites exist (cmds 1/3, 5, 7, 8, abort `FUN_00089bb8`,
+plus these two) — but nothing in the 1 MiB image references the stub entries
+(`0x89A4C`, `0x89B70`) by any encoding. They are library artifacts of the
+generated driver's full SHE command set, not reachable operations: **no stock
+runtime initializes the ICU-S PRNG on any target, and nothing anywhere issues
+`CMD_RND` (`0xD`)**.
 
 No EPS application site issues any other command word; commands 9/10 remain
 reachable only through custom application-context code (the bounded
