@@ -818,6 +818,86 @@ firmware will execute it. Closing the type-0/flash-engine question requires the
 extra-bank image first — the same chicken-and-egg that makes yc's
 glitch-acquisition the only demonstrated read path for this part so far.
 
+
+### 5.10 Host-side CUW SecurityAccess: AES-128-ECB via CryptoAPI, two chained callback stages (2026-10-08)
+
+§5.8 modeled the host SecurityUp computation from tool behavior
+(`tools/techstream/cuw_security_up.py`). Disassembling both retained host
+generations — v18 (`software/Techstream/v18/unpacked/toyota/Toyota
+Diagnostics/Calibration Update Wizard/`: `Cuw.exe` imagebase 0x400000,
+`TCUWUnifiedUtils.dll` imagebase 0x10000000) and GTS+
+(`software/Techstream/gtsplus/gts-all-unprotected/CUWPlus/`) — recovers the
+implementing machine and confirms that model's shape.
+
+**Primitive: AES-128-ECB through Windows CryptoAPI.** No host module contains
+a local AES S-box; every AES operation goes through `advapi32`
+`CryptImportKey`/`CryptSetKeyParam`/`CryptEncrypt`/`CryptDecrypt`. The key is
+imported as a `PLAINTEXTKEYBLOB` with `CALG_AES_128` (`0x660E`), length 0x10,
+built from an ASCII-hex string; `CryptSetKeyParam(hKey, KP_MODE=4, 2)` selects
+ECB; transforms are single 16-byte blocks.
+
+| role | v18 `Cuw.exe` | GTS+ `CUW.dll` |
+|---|---|---|
+| blob builder + `CryptImportKey` | `0x56703C` (call `0x567128`) | `0x100158C0` region (`0x660E` imm at `0x100158D3`) |
+| KP_MODE=ECB setter | `0x5671C0` | `0x10015698`, `0x10015A1C` |
+| encrypt block | `0x56725C` (`CryptEncrypt` at `0x5672BB`) | same module, same imports |
+| decrypt block | `0x5673A8` (`CryptDecrypt` at `0x56740B`) | same module, same imports |
+| key+block wrappers (hex-decode key arg, one block) | `0x566DD8` (enc) / `0x5674C4` (dec) | — |
+
+**Two-stage skeleton.** `?CalcSeedKey@CUnifiedUtils@@QAE?AVCBytes@@PBE0@Z`
+(v18 `TCUWUnifiedUtils.dll` `0x10002B50`, lookup `sub_10001000`; GTS+
+`0x10001450`, lookup via `GetSecretInfo`) and
+`?CalcSeedKeyForSecurityUp@CCanCommonPrepareWriter@@…` (GTS+
+`TCUWCanCommonPrepareWriter.dll` `0x100014A0`) share one skeleton:
+
+1. `record = lookup(id)`, with id `0` pushed as a constant in every observed
+   call path (v18 `sub_10001000(0)`; GTS+ `GetSecretInfo(0)`).
+2. virtual slot `+0x58` `(record, input_b) → out16` — the wrapper hex-decodes
+   the record's ASCII key into the AES key.
+3. `out16` is `%02X`-formatted into a 32-char uppercase ASCII string.
+4. virtual slot `+0x54` `(hexstring, input_a) → key16`, returned as `CBytes`.
+
+The hex round-trip in steps 3–4 is byte-neutral, so the closed form is
+`key = T2(T1(root, b), a)` with one AES direction per slot. The §5.2 firmware
+ground truth (`Ktmp = AES-DEC(root, aux)`, `expected = AES-ENC(Ktmp, seed)`)
+fixes the binding — slot `0x58` = decrypt, `input_b` = the second 16-byte
+secret, slot `0x54` = encrypt, `input_a` = the ECU seed. That is exactly the
+§5.8 model `Kwork = AES-DEC(selector-0 root, ServiceAuthKey)`;
+`response = AES-ENC(Kwork, seed)`: `input_b` is the CUW-supplied
+`ServiceAuthKey`, `root` the selector-0 wrapping key, `Ktmp` the `Kwork`.
+The direction binding is **bounded** (firmware-must-match inference; the
+callback-object construction that would pin the slot pointers directly was
+not located — v18 `Cuw.exe` does not even import the `CUnifiedUtils`
+constructor). The argument roles are **recovered** from the airbag caller:
+GTS+ `TCUWP4CanSecurityAirbagPrepareWriter.dll` call site `0x10001196` passes
+`input_a` = 16 bytes read at response offset `0x10` after a response gate
+byte `0x34` (the ECU seed) and `input_b` = the second 16-byte value fetched
+through the app-data accessor (`GetServiceAuthKey` per the §5.8 import
+surface).
+
+**Root-table lineage and gating.** v18 embeds the selector table directly in
+`TCUWUnifiedUtils.dll` at `0x100051B0` — 17 records, 0x208 stride, ASCII-hex
+key at `+0`, selector id at `+0x204`. GTS+ delegates it to `SecretInfo.dll`
+(§5.8); the first 17 GTS+ records carry the same key sequence as the whole
+v18 table (their ids read 0x00, 0x04–0x13), so the newer table extends rather
+than replaces it. `GetSecretInfo` compares the requested id against
+`record+0x204` (five-record unrolled scan) only after `AuthorizeSecretInfo`
+sets the flag at `0x1000D088`; an unauthorized caller receives out-of-table
+record index `0x47` — a decoy, not a key. The cleaned `unpacked/gtsplus`
+copies of `SecretInfo.dll` and `TCUWCanCommonPrepareWriter.dll` are hollowed
+by deprotection (export entries decode mid-instruction); only the
+`gts-all-unprotected` dump disassembles. The selector-0 value and the
+verified absence of all four §5.8 firmware roots stay owned by §5.8 and
+`tools/techstream/analyze_reprogramming_root_pairs.py`; this section adds no
+key material beyond the v18 lineage confirmation.
+
+**Consequence for the dump path.** The host-side machine is fully offline
+reproducible for any family in the table, but the RPRG SecurityAccess this
+ECU demands in programming mode is not table-driven: the per-ECU
+`ServiceAuthKey`/`ECUAuthKey` material arrives only in a genuine airbag `.cuw`
+from Toyota TIS. §5.8's two-part `.cuw` validation remains the next
+actionable artifact.
+
 ## 6. What the yc image changes for F33 EPS recovery
 
 ### It disproves one tempting interpretation
