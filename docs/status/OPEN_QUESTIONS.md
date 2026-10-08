@@ -1280,25 +1280,25 @@ ledger context is useful.
   alongside the already-open `0x08A/0x081` proxy contract. The mid-aggregate observer is
   optional topology evidence; it is no longer needed to rediscover EPS software routing.
 
-- **OQ-055 — Venza airbag secure-service opcode `0x10` semantics and consumer.** The
+- **OQ-055 — Venza airbag secure-service opcode `0x10`: consumer resolved, result semantics open.** The
   exhaustive airbag census
   ([icu-hsm-command-surface.md](../security/icu-hsm-command-surface.md)) found a fifth
   ROM-registered secure service beyond the documented MAC/verify/key-update set: entry
   `0xBD8C8`, descriptor base `FEFF01E8`, opcode word `0x10`, 16-byte-block-count input
   plus a logical key selector copied from a type-1 config, whose completion callback
-  delivers a 4-byte result. Its application consumer is engine-mediated (runner table
-  `0x1C7C0..0x1C7E0`), so no static owner is recovered. 2026-10-08 bounds: the
-  nine-entry runner table resolves to four engine bracket pairs
-  (`(0xDCA8E,0xDCAAE)`, `(0xDCACA,0xDCAEA)`, `(0xDCB06,0xDCB26)`,
-  `(0xDCB42,0xDCB62)` — begin/end state claims in the shared `0xE1/0xD2` idiom)
-  plus one diagnostic runner `0xBD412` that drives the RID `0x1010`
-  key-update family (`0x7BFE4/0x7C020/0x7C05A/0x7C0B4`); the opcode-`0x10`
-  registry record (`0x1C86C`: engine fn `0xBD44A`, sync API `0xBD8C8`) — like
-  all five services — reaches the HSM only through the common synchronous
-  submit `0x8A26A`, and no runner or text function references the record
-  directly. Recover which airbag feature selects record `0x1C86C` (deeper
-  engine disassembly or a live GTS session) and what the 4-byte result
-  represents before assigning it any role.
+  delivers a 4-byte result. 2026-10-08 resolution: its registry record `0x1C86C` carries
+  an engine thunk `0xBD44A → 0x7C05A`, one of **four secure-service UDS RoutineControl
+  handlers** (`0x7BFE4` key-update, `0x7C020`, `0x7C05A` opcode-`0x10`, `0x7C0B4`) that
+  gate on a diagnostic session/state block at `0xFEF041C4` and stage through
+  `0xFEFF0158` — i.e. the opcode-`0x10` service is **diagnostic-routine-driven**
+  (the airbag counterpart of the EPS RID `0x100F`/`0x1010` crypto banks), not a
+  production SecOC operation. Corrections from the same pass: `0x8A26A` is a
+  two-instruction status-read helper (`return *0xFF1F0010`), not a submit — the real
+  common submit chain is `0xBD69E → 0x8A18A → 0x89F6E → 0x89E60`; and completion is
+  task-polled (see SECOC-087). Still open: which exact RoutineControl mode number
+  selects `0x7C05A`, and what the 4-byte result represents (KAT status vs identity vs
+  key-state) — resolve by a live GTS session or the `0xBD29E` routine-table decode
+  before assigning any role.
 - **OQ-056 — TSS3 EPS stock SecOC-transmit wire join beyond Camry.** Camry F33 is the
   only target whose command-5 TX signer is live-observed on the wire (`0x030`, selector
   4). Crown F30 and Corolla F12/H12 carry the same engine (0x44-stride TX profiles with

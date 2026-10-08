@@ -172,7 +172,7 @@ cells at `0x1C7FC/0x1C840/0x1C884/0x1C8A8/0x1C8C8`):
 |---|---|---|---|---|
 | `0xBDC7A` | `FEFF02B8` | `0x12` | MAC generation (SecOC TX DataIDs `0x0326/0x0024`, selector 4) | SecOC TX worker `0xDE9F0 → 0xBCCF4` |
 | `0xBDE88` | `FEFF0330` | `0x12` | MAC verification (four RX profiles incl. `0x00F/0x090/0x0D7/0x024`, selector 4) | SecOC RX worker `0xDE09E → 0xBCEFA` |
-| `0xBD8C8` | `FEFF01E8` | **`0x10`** (new) | 16-byte-block-count input + logical key selector from a type-1 config; callback delivers a 4-byte result | unresolved (engine-table-mediated; see OQ) |
+| `0xBD8C8` | `FEFF01E8` | **`0x10`** (new) | 16-byte-block-count input + logical key selector from a type-1 config; callback delivers a 4-byte result | **diagnostic RoutineControl** handler `0x7C05A` via engine thunk `0xBD44A` (session-gated at `0xFEF041C4`; exact routine mode and result meaning open — OQ-055) |
 | `0xBE0CC` | `FEFF0398` | `0x31` | authenticated 64-byte key update (SHE `CMD_LOAD_KEY` M1/M2/M3 → M4/M5) | RID `0x1010` worker (`0x7C13E` staging, `0xB76D4` async, dispatcher `0xBD2EC`) |
 | `0xBDA6E` | `FEFF0250` | **`0x04`** | mode-mapped query: caller byte `{1→0, 2→1, 4..14→n−2}` (SHE key-ID-like domain) | RID `0x1010` worker mode 2 (via `0xBD2EC` record 1) |
 
@@ -229,14 +229,23 @@ index (wrap 3), claims the 4-byte slot at `shared_ptr + idx*4` if free,
 stores the descriptor pointer, marks `+0x06 = 1`, releases the lock (ring
 full → `0x401`) → trigger word `2` written to `0xFF1F0044`.
 
-**Completion**: the HSM writes the result byte at `descriptor−1` and the
-finisher callback at `+0x08` runs. The dispatching interrupt/poll source is
-**not yet pinned** to a specific EIINT channel (the boot initializer `0x114C`
-enables the `0xFF1F0028` path and performs the ICU-M hardware bring-up:
-`0x4001` enables at `0xFFC64200/0xFFC65400`, `0xA5`-unlock handshake sequences
-through `0xFFF8xxxx` clock/reset registers). Result classification mirrors the
-EPS: nonzero result byte = error index, plus submit-layer codes `0x401`
-(ring full), `0x404` (HSM not ready), `1` (bad trigger mode).
+**Completion** (2026-10-08 closure): **task-polled, no interrupt dispatcher**. The
+HSM writes the result byte at `descriptor−1`; the finisher callback at `+0x08`
+runs in the polling owner's context. Evidence: no code outside the five adapters
+and three driver primitives references the FEFF flag window, ring registers, or
+descriptor addresses anywhere in the image (corpus + full disassembly);
+descriptors carry caller-side poll timeouts (`0x2580`/`0xE10`); init wraps in
+IRQ-disable critical sections (`0x89DC8/0x89DE8`); the `0x7CA68` application
+bring-up clears the FEFF ring under `di` and gates on status bits 31 then 28 of
+`0xFF1F0010` before enabling; the nine-runner table (`0x1C7C0`) is the
+scheduler-driven bracket set that moves the per-service `0xE1/0xD2` cells.
+`0x8A26A` is a two-instruction status-read helper (`return *0xFF1F0010`), not a
+submit; the common submit chain is `0xBD69E → 0x8A18A → 0x89F6E → 0x89E60`.
+Result classification: nonzero result byte = error index, plus submit-layer
+codes `0x401` (ring full), `0x404` (HSM not ready), `1` (bad trigger mode).
+Vector-level EIINT analysis was not performed; the `0x114C` boot sequence
+(`0x4001` enables at `0xFFC64200/0xFFC65400`, `0xA5`-unlock handshakes through
+`0xFFF8xxxx`) remains recorded but not decoded register-by-register.
 
 Runtime-facing contrast with the EPS ICU-S: there is no register FIFO or
 `ICUSCMD` poke — a caller writes a descriptor into shared RAM, queues its
@@ -275,8 +284,11 @@ u16 0x0080 | u16 0x001C | u16 0x0000 | LEN | FLAG | [u16 0x0002 TX only] | DataI
 
 - `0x001C` = **28-bit MAC truncation** — the Toyota MAC-28 domain, identical
   everywhere;
-- `LEN` = 8 for the classic-CAN `0x00F`, 4 for every CAN-FD profile and TX row
-  (recovered field, meaning not yet named);
+- `LEN` = **SecOC trailer length / minimum secured length** —
+  `(transmitted freshness + transmitted MAC)/8`: 8 for classic `0x00F`
+  (36+28 bits), 4 for CAN-FD/TX rows (4+28 bits), matching the Sienna profile
+  table's Trailer column; the RX worker `0xDE09E` uses it as a reject threshold
+  and payload base (`received < LEN` → reject, `payload = received − LEN`);
 - `FLAG` = `0x0180` (classic RX `0x00F`), `0x0080` (CAN-FD RX), TX rows insert
   `0x0002` before the DataID;
 - RX tables are **0x50-stride in all three families** (Sienna `0x25970+` six
@@ -379,15 +391,14 @@ zero-I/O and 1-in/2-out shapes respectively.
 
 ## 8. Boundaries and open questions
 
-- The opcode-`0x10` airbag service's application consumer is engine-mediated
-  (runner table `0x1C7C0..0x1C7E0`); its semantics (4-byte result over
-  16-byte-block input, config selector) are recovered shape only — see
-  OPEN_QUESTIONS.
-- Airbag completion dispatch (who invokes the descriptor `+0x08` finisher and
-  on which interrupt) is not yet pinned to a specific EIINT channel; the
-  result-slot (`descriptor−1`) and callback mechanisms themselves are
-  corpus-verified. The §5 boot initializer `0x114C` enable sequence is
-  recorded but not decoded register-by-register.
+- The opcode-`0x10` airbag service is diagnostic-routine-driven (RoutineControl
+  handler `0x7C05A`, session-gated at `0xFEF041C4`); the exact routine-mode
+  number and the meaning of its 4-byte result remain open — see OQ-055.
+- Airbag completion is task-polled (no interrupt dispatcher found; see §5
+  closure). Vector-level EIINT analysis was not performed on this project, and
+  the `0x114C` boot enable sequence remains recorded but not decoded
+  register-by-register — those bound the "no ISR" claim without proving it at
+  the vector-table level.
 - Corolla/Crown TX descriptor *wire* joins (which physical PDU carries the
   `0x0030`-field authenticated frame, freshness source) are table-shape
   evidence; the Camry `0x030` join is the only live-observed one
