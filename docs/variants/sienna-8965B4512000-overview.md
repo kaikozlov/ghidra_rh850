@@ -16,8 +16,8 @@ Calibration covered here (legacy reference, not the default target):
 - **Application:** base `0x20000`, entry `0x20880`
 
 The committed Sienna CodeFlash and DataFlash files are the source inputs.
-The recorded inventory contains **6,376 structurally discovered functions /
-183,240 decoded instructions**; its semantic-review counts are historical,
+The recorded inventory contains **7,090 structurally discovered functions /
+197,726 decoded instructions**; its semantic-review counts are historical,
 not a current whole-project progress measure. See the
 [Sienna coverage snapshot](../status/ANALYSIS_STATUS.md) and use
 `tools/gtarget show sienna-8965B4512000` for registered input/corpus paths.
@@ -79,7 +79,7 @@ Six application receive profiles use SecOC verification through **ICU-S slot
 - `0x00F` — synchronization;
 - `0x2E4` — steering torque/request command mode;
 - `0x131` — LTA angle/request command mode;
-- `0x132` — bounded snapshot-only/dead-end role in this calibration;
+- `0x132` — protected steering-controller state/prerequisite input;
 - `0x090` — protected rear-wheel-speed / steering-angle-speed family;
 - `0x0D7` — protected vehicle-speed / validity family.
 

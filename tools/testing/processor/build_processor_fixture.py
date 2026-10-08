@@ -204,6 +204,61 @@ def enc_caxi(r1: int, r2: int, r3: int) -> bytes:
     word1 = ((r3 & 0x1F) << 11) | 0x00EE
     return u16(word0) + u16(word1)
 
+def enc_xi(op1626: int, r1: int, r2: int, r3: int) -> bytes:
+    """RH850 Format XI register-register-register encoding."""
+    word0 = ((r2 & 0x1F) << 11) | (0x3F << 5) | (r1 & 0x1F)
+    word1 = ((r3 & 0x1F) << 11) | (op1626 & 0x7FF)
+    return u16(word0) + u16(word1)
+
+
+def enc_loop(r1: int, disp16: int) -> bytes:
+    return u16(0x06E0 | (r1 & 0x1F)) + u16((disp16 & 0xFFFE) | 1)
+
+
+def enc_search(op1626: int, r2: int, r3: int) -> bytes:
+    return u16(((r2 & 0x1F) << 11) | 0x07E0) + u16(
+        ((r3 & 0x1F) << 11) | op1626
+    )
+
+
+def enc_reg_bit(op1631: int, r1: int, r2: int) -> bytes:
+    return enc_reg_reg(0x3F, r1, r2) + u16(op1631)
+
+
+def enc_rotl_imm(imm5: int, r2: int, r3: int) -> bytes:
+    return enc_reg_reg(0x3F, imm5, r2) + u16(((r3 & 0x1F) << 11) | 0x0C4)
+
+
+def enc_fpu(op0004: int, r2: int, r3: int, op2126: int,
+            op1620: int, *, op2020: int = 0) -> bytes:
+    word0 = ((r2 & 0x1F) << 11) | (0x3F << 5) | (op0004 & 0x1F)
+    word1 = ((r3 & 0x1F) << 11) | ((op2126 & 0x3F) << 5)
+    word1 |= ((op2020 & 1) << 4) | (op1620 & 0x1F)
+    return u16(word0) + u16(word1)
+
+
+def enc_cmovf_s(fcbit: int, r1: int, r2: int, r3: int) -> bytes:
+    return enc_fpu(r1, r2, r3, 0x20, (fcbit & 0x7) << 1)
+
+def enc_cmpf_s(fcond: int, r2: int, r1: int, fcbit: int) -> bytes:
+    word0 = ((r2 & 0x1F) << 11) | (0x3F << 5) | (r1 & 0x1F)
+    word1 = ((fcond & 0xF) << 11) | (0x21 << 5) | ((fcbit & 0x7) << 1)
+    return u16(word0) + u16(word1)
+
+
+
+
+def enc_cache(cacheop: int, r1: int) -> bytes:
+    word0 = 0xE7E0 | (((cacheop >> 5) & 0x3) << 11) | (r1 & 0x1F)
+    word1 = ((cacheop & 0x1F) << 11) | 0x0160
+    return u16(word0) + u16(word1)
+
+
+def enc_pref(prefop: int, r1: int) -> bytes:
+    return u16(0xDFE0 | (r1 & 0x1F)) + u16(
+        ((prefop & 0x1F) << 11) | 0x0160
+    )
+
 
 
 def build() -> tuple[bytes, list[dict]]:
@@ -299,6 +354,11 @@ def build() -> tuple[bytes, list[dict]]:
         "must_pcode_ops": ["CALLIND"],
         "flow": "CALL",
     })
+    add("jarl_indirect_alias", enc_jarl_indirect(6, 6), {
+        "mnemonic_prefix": "jarl",
+        "must_pcode_ops": ["CALLIND"],
+        "flow": "CALL",
+    })
 
     # Inventory-driven risky ops: switch/callt/bitfield/bitmem/cmov/mulhi/sar.
     # switch embeds its signed-halfword table immediately after the opcode.
@@ -350,6 +410,94 @@ def build() -> tuple[bytes, list[dict]]:
         "mnemonic_prefix": "sar",
         "must_pcode_ops": ["INT_SRIGHT"],
     })
+    add("divq", enc_xi(0x2FC, 6, 10, 11), {
+        "mnemonic_prefix": "divq",
+        "must_pcode_ops": ["INT_SDIV", "CBRANCH"],
+    })
+    add("divqu", enc_xi(0x2FE, 6, 10, 11), {
+        "mnemonic_prefix": "divqu",
+        "must_pcode_ops": ["INT_DIV", "CBRANCH"],
+    })
+    add("loop", enc_loop(6, 4), {
+        "mnemonic_prefix": "loop",
+        "must_pcode_ops": ["INT_ADD", "CBRANCH"],
+    })
+    add("shl-reg", enc_xi(0x0C2, 6, 10, 11), {
+        "mnemonic_prefix": "shl",
+        "must_pcode_ops": ["INT_LEFT", "INT_AND"],
+    })
+    add("rotl-zero", enc_rotl_imm(0, 10, 11), {
+        "mnemonic_prefix": "rotl",
+        "must_pcode_ops": ["INT_LEFT", "INT_RIGHT"],
+    })
+    add("sch0r", enc_search(0x360, 10, 11), {
+        "mnemonic_prefix": "sch0r",
+        "must_pcode_ops": ["CBRANCH", "INT_RIGHT"],
+    })
+    add("sch1l", enc_search(0x366, 10, 11), {
+        "mnemonic_prefix": "sch1l",
+        "must_pcode_ops": ["CBRANCH", "INT_LEFT"],
+    })
+    add("bsh", enc_search(0x342, 10, 11), {
+        "mnemonic_prefix": "bsh",
+    })
+    add("hsh", enc_search(0x346, 10, 11), {
+        "mnemonic_prefix": "hsh",
+    })
+    add("set1-reg", enc_reg_bit(0x0E0, 6, 10), {
+        "mnemonic_prefix": "set1",
+        "must_pcode_ops": ["LOAD", "STORE", "INT_AND"],
+    })
+    add("ldl.w", enc_xi(0x378, 6, 0, 11), {
+        "mnemonic_prefix": "ldl.w",
+        "must_pcode_ops": ["LOAD"],
+    })
+    add("stc.w", enc_xi(0x37A, 6, 0, 11), {
+        "mnemonic_prefix": "stc.w",
+        "must_pcode_ops": ["STORE", "CBRANCH"],
+    })
+    add("cll", u16(0xFFFF) + u16(0xF160), {
+        "mnemonic_prefix": "cll",
+    })
+    add("cache", enc_cache(0x20, 6), {
+        "mnemonic_prefix": "cache",
+        "must_pcode_ops": ["CALLOTHER"],
+        "userop": "__cache",
+    })
+    add("pref", enc_pref(0, 6), {
+        "mnemonic_prefix": "pref",
+        "must_pcode_ops": ["CALLOTHER"],
+        "userop": "__prefetch",
+    })
+
+    # Every G3M floating mnemonic that had inherited fork spelling drift.
+    add("cvtf.dw", enc_fpu(0x04, 10, 12, 0x22, 0x10), {
+        "mnemonic_prefix": "cvtf.dw",
+        "must_pcode_ops": ["TRUNC"],
+    })
+    add("cvtf.ld", enc_fpu(0x01, 10, 12, 0x22, 0x12), {
+        "mnemonic_prefix": "cvtf.ld",
+        "must_pcode_ops": ["INT2FLOAT"],
+    })
+    add("cvtf.uld", enc_fpu(0x11, 10, 12, 0x22, 0x12), {
+        "mnemonic_prefix": "cvtf.uld",
+        "must_pcode_ops": ["INT2FLOAT"],
+    })
+    add("divf.d", enc_fpu(0x06, 10, 12, 0x23, 0x1E), {
+        "mnemonic_prefix": "divf.d",
+        "must_pcode_ops": ["FLOAT_DIV"],
+    })
+    add("floorf.sw", enc_fpu(0x03, 10, 11, 0x22, 0x00), {
+        "mnemonic_prefix": "floorf.sw",
+        "must_pcode_ops": ["FLOOR", "TRUNC"],
+    })
+    add("cmovf.s", enc_cmovf_s(2, 6, 10, 11), {
+        "mnemonic_prefix": "cmovf.s",
+    })
+    add("cmpf.sf", enc_cmpf_s(8, 10, 6, 2), {
+        "mnemonic_prefix": "cmpf.s",
+        "operand_contains": "sf",
+    })
 
     # G3M synchronization mnemonics remain distinct even though the processor
     # language gives them one ordering-boundary p-code userop.
@@ -388,6 +536,18 @@ def build() -> tuple[bytes, list[dict]]:
         "userop": "__enable_irq",
     })
 
+    add("rie", u16(0x0040), {
+        "mnemonic_prefix": "rie",
+        "flow": "BRANCH",
+    })
+    add("fetrap-3", u16((3 << 11) | 0x0040), {
+        "mnemonic_prefix": "fetrap",
+        "flow": "CALL",
+    })
+    add("ctret", u16(0x07E0) + u16(0x0144), {
+        "mnemonic_prefix": "ctret",
+        "flow": "RETURN",
+    })
     add("trap-3", u16((0x3F << 5) | 3) + u16(0x0100), {
         "mnemonic_prefix": "trap",
     })

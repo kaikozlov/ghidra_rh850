@@ -12,14 +12,19 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 VENDOR = ROOT / "ghidra" / "ghidra_v850"
 LANG = VENDOR / "data" / "languages"
+PATTERNS = VENDOR / "data" / "patterns"
 
-SOURCE_GLOBS = (
-    "*.slaspec",
-    "*.sinc",
-    "*.cspec",
-    "*.pspec",
-    "*.ldefs",
-    "*.opinion",
+SOURCE_GROUPS = (
+    (LANG, (
+        "*.slaspec",
+        "*.sinc",
+        "*.cspec",
+        "*.pspec",
+        "*.ldefs",
+        "*.opinion",
+        "*.dwarf",
+    )),
+    (PATTERNS, ("*.xml",)),
 )
 META_FILES = (
     VENDOR / "extension.properties",
@@ -38,10 +43,11 @@ def sha256_file(path: Path) -> str:
 
 def collect_sources() -> dict[str, str]:
     files: dict[str, str] = {}
-    for pattern in SOURCE_GLOBS:
-        for path in sorted(LANG.glob(pattern)):
-            rel = path.relative_to(ROOT).as_posix()
-            files[rel] = sha256_file(path)
+    for directory, patterns in SOURCE_GROUPS:
+        for pattern in patterns:
+            for path in sorted(directory.glob(pattern)):
+                rel = path.relative_to(ROOT).as_posix()
+                files[rel] = sha256_file(path)
     for path in META_FILES:
         if path.is_file():
             rel = path.relative_to(ROOT).as_posix()

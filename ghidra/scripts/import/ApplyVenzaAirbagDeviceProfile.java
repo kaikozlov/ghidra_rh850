@@ -8,6 +8,8 @@
 // tests/targets/venza/verify_yc_venza_airbag_reprogramming.py.
 import ghidra.app.script.GhidraScript;
 import ghidra.program.model.address.Address;
+import ghidra.program.model.data.ArrayDataType;
+import ghidra.program.model.data.ByteDataType;
 import ghidra.program.model.lang.Register;
 import ghidra.program.model.mem.Memory;
 import ghidra.program.model.mem.MemoryBlock;
@@ -44,6 +46,50 @@ public class ApplyVenzaAirbagDeviceProfile extends GhidraScript {
         println("Venza RAM window " + name + " " + b.getStart() + ".." + b.getEnd());
     }
 
+    private void partitionCodeFlashFill() throws Exception {
+        Memory mem = currentProgram.getMemory();
+        Address ffStart = toAddr(0x00180000L);
+        Address zeroStart = toAddr(0x002B0000L);
+
+        MemoryBlock code = mem.getBlock(toAddr(0));
+        if (code == null || !code.getStart().equals(toAddr(0)) ||
+                code.getEnd().getOffset() < 0x002FFFFFL) {
+            throw new IllegalStateException("unexpected Venza CodeFlash block");
+        }
+        if (code.getEnd().getOffset() >= ffStart.getOffset()) {
+            mem.split(code, ffStart);
+        }
+
+        MemoryBlock ffFill = mem.getBlock(ffStart);
+        if (ffFill == null || !ffFill.getStart().equals(ffStart)) {
+            throw new IllegalStateException("missing Venza FF-fill block");
+        }
+        if (ffFill.getEnd().getOffset() >= zeroStart.getOffset()) {
+            mem.split(ffFill, zeroStart);
+        }
+
+        code = mem.getBlock(toAddr(0));
+        ffFill = mem.getBlock(ffStart);
+        MemoryBlock zeroFill = mem.getBlock(zeroStart);
+        if (code.getEnd().getOffset() != 0x0017FFFFL ||
+                ffFill.getEnd().getOffset() != 0x002AFFFFL ||
+                zeroFill == null || zeroFill.getEnd().getOffset() != 0x002FFFFFL) {
+            throw new IllegalStateException("Venza CodeFlash partition drift");
+        }
+        code.setName("CodeFlash");
+        ffFill.setName("CodeFlashFFFill");
+        zeroFill.setName("CodeFlashZeroFill");
+        code.setExecute(true);
+        ffFill.setExecute(false);
+        zeroFill.setExecute(false);
+        if (getDataAt(ffStart) == null) {
+            createData(ffStart, new ArrayDataType(ByteDataType.dataType, 0x130000, 1));
+        }
+        if (getDataAt(zeroStart) == null) {
+            createData(zeroStart, new ArrayDataType(ByteDataType.dataType, 0x50000, 1));
+        }
+    }
+
     private void setRange(String reg, long value, long start, long endExclusive) throws Exception {
         Register r = currentProgram.getRegister(reg);
         if (r == null) throw new IllegalStateException("missing register " + reg);
@@ -73,6 +119,12 @@ public class ApplyVenzaAirbagDeviceProfile extends GhidraScript {
         if (mem.getBlock(toAddr(0x01000000L)) == null) {
             throw new IllegalStateException("AddExtendedUser must run first");
         }
+
+        // Exact capture boundary: executable/non-fill content ends at 0x17FFFF;
+        // 0x180000..0x2AFFFF is FF fill and 0x2B0000..0x2FFFFF is zero fill.
+        // Keeping the fill non-executable prevents direct-call analysis from
+        // manufacturing functions inside the erased optional-hook range.
+        partitionCodeFlashFill();
 
         // Recovered RAM windows: runtime relocation targets (FEBEA7B0.. code
         // segment, FEBF0924.. RPRG, FEBFB770.. crypto/data incl. GP=FEC0102C),

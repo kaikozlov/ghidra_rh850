@@ -35,7 +35,7 @@ EXPECTED_STAGES = {
     "conditioned_common_internal_stage",
     "conditioned_command_export",
     "command_plausibility_monitor",
-    "protected_132_snapshot_only",
+    "protected_132_control_state",
     "command_to_current_gap",
 }
 
@@ -270,7 +270,7 @@ def main() -> int:
     # conditioned 0x2E4 torque state BFA2 at C144; and the common branch
     # continues beyond C1BC through C1D4 -> B788 -> B87E monitoring/adaptation.
     # The Java project audit independently pins exact xref ownership for these
-    # stages and for the snapshot-only 0x132 branch.
+    # stages and the five newly recovered 0x132 control-state readers.
     lta = next(r for r in rows if r["stage"] == "protected_131_angle_controller")
     check("0x131 LTA artifact reaches alternate command C0D6",
           "0xFEBEC0D6" in lta["output_state"])
@@ -287,10 +287,11 @@ def main() -> int:
     check("late command monitor records C1D4 -> B788 and B87E",
           "0xFEBEC1D4 -> 0xFEBEB788" in monitor_stage["input_state"]
           and "87E" in monitor_stage["output_state"])
-    pdu132 = next(r for r in rows if r["stage"] == "protected_132_snapshot_only")
-    check("0x132 parallel PDU remains snapshot-only bounded negative",
-          pdu132["evidence_grade"] == "bounded"
-          and "zero runtime readers" in pdu132["hardware_or_calibration"])
+    pdu132 = next(r for r in rows if r["stage"] == "protected_132_control_state")
+    check("0x132 parallel PDU has recovered control-state consumers",
+          pdu132["evidence_grade"] == "recovered"
+          and all(token in pdu132["function_addr"] for token in
+                  ("0xc7376", "0xc746c", "0xc78e6", "0xc7f58")))
 
     # Ordering inside the foreground control pipeline is independently encoded
     # in CodeFlash: the 0x131 angle smoother/control stages run before the common

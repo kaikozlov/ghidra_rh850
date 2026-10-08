@@ -716,10 +716,12 @@ the mistakes are not re-made.
   continues beyond the old `C1BC` frontier through `C1D4 -> B788 -> B87E` and
   monitor/adaptation/fault consumers. Exhausting those consumers still finds no
   writer into the independently recovered `FEBE6Dxx` d/q-reference cone.
-  Protected `0x132` was checked in parallel; its six recovered post-snapshot
-  scalar destinations have zero runtime readers in this calibration. The prior
-  **conclusion** (no recovered static command-to-d/q transfer) survives, but its
-  evidence boundary is replaced by this larger dual-mode/common-cone audit.
+  The 2026-10-08 processor-pattern refresh subsequently disproved the parallel
+  `0x132` snapshot-only negative: five of its six post-snapshot destinations
+  have exact readers in `C7376/C746C/C78E6/C7F58`, where they gate or initialize
+  steering-controller state. None directly selects the recovered command modes
+  or writes the d/q-reference cone, so the no-direct-command-to-d/q result
+  survives while `0x132` is no longer classified as a dead-end snapshot.
 - **Canonical:** [../architecture/control-partition.md](../architecture/control-partition.md) §9.3;
   `data/motor_actuation_path.csv`; `tests/firmware/verify_motor_actuation_boundary.py`;
   `ghidra/scripts/verify/AssertMotorActuationBoundary.java`.

@@ -46,6 +46,9 @@ eps_cf = EPS_CFLASH.read_bytes()
 
 print("== immutable contributor artifacts ==")
 check("boot.bin is the exact 32-KiB artifact", len(boot) == 0x8000 and sha256(boot) == BOOT_SHA)
+check("CodeFlash meaningful region ends before exact fill partitions",
+      cf[0x180000:0x2B0000] == b"\xFF" * 0x130000
+      and cf[0x2B0000:0x300000] == b"\x00" * 0x50000)
 check("cflash.bin is the exact 3-MiB artifact", len(cf) == 0x300000 and sha256(cf) == CFLASH_SHA)
 check("RPRG build tag is at the extended-user tail", boot[0x7FD0:0x7FE2] == b"AUBIST_RPRG_201902")
 check("raw airbag identity 8917048E30 is retained", cf[0x17FFC6:0x17FFD0] == b"8917048E30")

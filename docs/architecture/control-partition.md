@@ -610,23 +610,28 @@ This corrects the earlier stopping point at `C1B8/C1BC`: that was not the end of
 the command cone. The stronger late-cone trace still does **not** produce a d/q
 reference.
 
-#### 9.3.4 Protected `0x132` parallel-PDU negative
+#### 9.3.4 Protected `0x132` parallel-PDU consumers
 
-CAN `0x132` is another SecOC-protected application input (PDU 35), so it was
-also audited as a possible parallel steering command. Its recovered scalar
-payload reaches `FEBEF061/62/63/64/F19A/F19C`, then
+CAN `0x132` is another SecOC-protected application input (PDU 35). Its
+recovered scalar payload reaches `FEBEF061/62/63/64/F19A/F19C`, then
 `system_mode_telemetry_snapshot @ 0xBA43A` copies those values to:
 
 ```text
 FEBEAD04 / FEBEAD05 / FEBEAD06 / FEBEAD07 / FEBEAE28 / FEBEAE2A
 ```
 
-Each of those six post-snapshot locations has only the snapshot writer and an
-initialization writer in the corrected project; none has a runtime reader.
-Configured signals 194/197 are separately classified store-only in the Rx
-consumer audit. `0x132` therefore has no recovered steering-actuation consumer
-in this calibration. This is a calibration-specific bounded negative, not a
-cross-Toyota semantic name for CAN `0x132`.
+The processor-pattern refresh disproves the former snapshot-only negative.
+Five destinations have runtime consumers: `AD04/AD06` jointly gate the state
+latch at `0xC7376`; `AD05` gates the transition logic at `0xC746C`; `AE28`
+initializes a controller-state bank at `0xC78E6`; and `AD07` drives the
+calibrated ramp/state calculation at `0xC7F58`. `AE2A` remains write-only.
+Configured signals 194/197 remain separately classified store-only in the Rx
+consumer audit.
+
+These are recovered steering-controller state/prerequisite consumers, not a
+third proven command-mode selector: none of the four functions writes the
+`FEBE6D28/6D2A` d/q references or selects `FEBEC13A/C13D`. The exact OEM field
+names and downstream authority of `0x132` remain unresolved.
 
 #### 9.3.5 d/q producer cone remains independently closed
 

@@ -140,7 +140,7 @@ def main() -> int:
     check("boot SID 0x31 body has no outside-function candidates",
           not routine_control_orphans, repr(routine_control_orphans))
 
-    reviewed_cluster = [
+    pointer_cluster_candidates = [
         row
         for row in rows
         if any(
@@ -149,10 +149,11 @@ def main() -> int:
             if pointer
         )
     ]
-    check("0x27C88 pointer cluster has 60 candidates", len(reviewed_cluster) == 60)
     check(
-        "0x27C88 pointer cluster is explicitly reviewed-unresolved",
-        all(row["adjudication_state"] == "unresolved-reviewed" for row in reviewed_cluster),
+        "0x27C88 pointer-cluster targets are all inside exact functions",
+        not pointer_cluster_candidates,
+        "still outside: " + ", ".join(
+            row["target_addr"] for row in pointer_cluster_candidates),
     )
 
     known_targets = {target for _, _, target in observed}

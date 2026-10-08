@@ -1,8 +1,8 @@
 //@author kaikozlov
 //@category Verification
-// Read-only evidence boundary for pointer-shaped clusters intentionally left
-// unresolved. This proves exact bytes/reference absence; it does not infer
-// callback semantics from plausible decoding.
+// Read-only evidence boundary for a pointer-shaped cluster whose 60 targets are
+// now exact functions but still have no executable walker or computed-call
+// consumer. Function-start patterns prove boundaries, not dispatch.
 import ghidra.app.script.GhidraScript;
 import ghidra.program.model.address.Address;
 import ghidra.program.model.listing.Function;
@@ -12,7 +12,7 @@ import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AssertReviewedPointerClusters extends GhidraScript {
+public class AssertRecoveredPointerClusters extends GhidraScript {
     private static final long START = 0x27c88L;
     private static final long END = 0x27d78L;
     private static final long DESCRIPTOR = 0x27d84L;
@@ -27,6 +27,7 @@ public class AssertReviewedPointerClusters extends GhidraScript {
         if (!SHA256.equals(hash(bytes))) failures.add("cluster byte hash changed");
 
         int targets = 0;
+        int exactFunctions = 0;
         int pointerReferences = 0;
         for (long pointerOffset = START; pointerOffset < END; pointerOffset += 4) {
             Address pointer = toAddr(pointerOffset);
@@ -39,11 +40,12 @@ public class AssertReviewedPointerClusters extends GhidraScript {
             Address target = toAddr(targetOffset);
             Function exact = getFunctionAt(target);
             Function containing = getFunctionContaining(target);
-            if (exact != null || containing != null) {
+            if (exact == null || containing == null
+                    || !containing.getEntryPoint().equals(target)) {
                 failures.add(String.format(
-                    "unresolved target became function-owned 0x%x%s",
-                    targetOffset,
-                    containing == null ? "" : String.format(" (entry 0x%x)", containing.getEntryPoint().getOffset())));
+                    "target is not an exact function entry 0x%x", targetOffset));
+            } else {
+                exactFunctions++;
             }
             if (getInstructionAt(target) == null) {
                 failures.add(String.format("target is not decoded at 0x%x", targetOffset));
@@ -82,6 +84,7 @@ public class AssertReviewedPointerClusters extends GhidraScript {
             failures.add("cluster descriptor became executable/function-owned");
         }
         if (targets != 60) failures.add("expected 60 targets, got " + targets);
+        if (exactFunctions != 60) failures.add("expected 60 exact functions, got " + exactFunctions);
         if (pointerReferences != 60) failures.add("expected 60 pointer-to-target data references, got " + pointerReferences);
         if (tableReferences != 1) failures.add("expected one data reference to cluster, got " + tableReferences);
         if (!failures.isEmpty()) {
@@ -89,8 +92,8 @@ public class AssertReviewedPointerClusters extends GhidraScript {
             throw new IllegalStateException("reviewed pointer cluster assertion failed");
         }
         println(String.format(
-            "ASSERT reviewed-pointer-clusters: targets=%d target_data_refs=%d table_refs=%d no_function_consumers=passed",
-            targets, pointerReferences, tableReferences));
+            "ASSERT recovered-pointer-clusters: targets=%d exact_functions=%d target_data_refs=%d table_refs=%d no_dispatch_refs=passed",
+            targets, exactFunctions, pointerReferences, tableReferences));
     }
 
     private static String hash(byte[] bytes) throws Exception {

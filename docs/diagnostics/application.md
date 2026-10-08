@@ -330,8 +330,10 @@ only 10 of those 196 targets represented as function entries; the
 firmware-proven table seed now recovers all 196, plus the direct/constant-veneer
 targets exposed by that graph. At the RDBI-recovery stage, two independent clean rebuilds converged exactly at
 6,288 functions / 183,183 instructions. The later dispatch-proven COM deadline
-monitor expansion in COM-006 adds 88 independent callback entries; the current
-project denominator is 6,376 functions / 183,240 instructions.
+monitor expansion in COM-006 adds 88 independent callback entries. The
+2026-10-08 processor-pattern refresh raises the current project denominator to
+7,090 functions / 197,726 instructions without changing the table-derived RDBI
+root set.
 
 A bounded depth-4 direct-call audit across all 242 RDBI roots finds no reference
 to the recovered command-5 generated-result buffer `FEBE51AA..FEBE51B9`, the

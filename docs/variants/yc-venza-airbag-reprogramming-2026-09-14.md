@@ -126,6 +126,11 @@ bytes above are the evidence. Meaningful/non-fill CodeFlash ends around
 `0x17FFFF`; `0x180000..0x2AFFFF` is `0xFF` fill and
 `0x2B0000..0x2FFFFF` is `0x00` fill in this capture.
 
+`ApplyVenzaAirbagDeviceProfile.java` now preserves that boundary in the analysis
+model: `0x000000..0x17FFFF` remains executable, while both exact fill ranges
+are separate non-executable blocks. This prevents an optional direct-call edge
+into erased `0xFF` space from manufacturing an unbounded false function.
+
 Portable byte assertions for the critical findings are in
 `tests/targets/venza/verify_yc_venza_airbag_reprogramming.py`.
 

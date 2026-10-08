@@ -1,7 +1,7 @@
 {
   "processor": "v850e3:LE:32:default",
   "binary": "rh850_semantic_fixture.bin",
-  "size": 164,
+  "size": 268,
   "cases": [
     {
       "name": "sld.b",
@@ -143,8 +143,19 @@
       "flow": "CALL"
     },
     {
-      "name": "switch",
+      "name": "jarl_indirect_alias",
       "addr": 48,
+      "size": 4,
+      "bytes": "e6c76031",
+      "mnemonic_prefix": "jarl",
+      "must_pcode_ops": [
+        "CALLIND"
+      ],
+      "flow": "CALL"
+    },
+    {
+      "name": "switch",
+      "addr": 52,
       "size": 2,
       "bytes": "4600",
       "mnemonic_prefix": "switch",
@@ -157,7 +168,7 @@
     },
     {
       "name": "callt",
-      "addr": 56,
+      "addr": 60,
       "size": 2,
       "bytes": "0402",
       "mnemonic_prefix": "callt",
@@ -169,7 +180,7 @@
     },
     {
       "name": "bins",
-      "addr": 60,
+      "addr": 64,
       "size": 4,
       "bytes": "e657d870",
       "mnemonic_prefix": "bins",
@@ -181,7 +192,7 @@
     },
     {
       "name": "set1",
-      "addr": 64,
+      "addr": 68,
       "size": 4,
       "bytes": "c61f0000",
       "mnemonic_prefix": "set1",
@@ -193,7 +204,7 @@
     },
     {
       "name": "clr1",
-      "addr": 68,
+      "addr": 72,
       "size": 4,
       "bytes": "c69f0000",
       "mnemonic_prefix": "clr1",
@@ -205,7 +216,7 @@
     },
     {
       "name": "tst1",
-      "addr": 72,
+      "addr": 76,
       "size": 4,
       "bytes": "c6df0000",
       "mnemonic_prefix": "tst1",
@@ -218,7 +229,7 @@
     },
     {
       "name": "cmovne",
-      "addr": 76,
+      "addr": 80,
       "size": 4,
       "bytes": "e657345b",
       "mnemonic_prefix": "cmovne",
@@ -228,7 +239,7 @@
     },
     {
       "name": "mulhi",
-      "addr": 80,
+      "addr": 84,
       "size": 4,
       "bytes": "e6561000",
       "mnemonic_prefix": "mulhi",
@@ -239,7 +250,7 @@
     },
     {
       "name": "sar",
-      "addr": 84,
+      "addr": 88,
       "size": 2,
       "bytes": "a452",
       "mnemonic_prefix": "sar",
@@ -248,8 +259,227 @@
       ]
     },
     {
+      "name": "divq",
+      "addr": 92,
+      "size": 4,
+      "bytes": "e657fc5a",
+      "mnemonic_prefix": "divq",
+      "must_pcode_ops": [
+        "INT_SDIV",
+        "CBRANCH"
+      ]
+    },
+    {
+      "name": "divqu",
+      "addr": 96,
+      "size": 4,
+      "bytes": "e657fe5a",
+      "mnemonic_prefix": "divqu",
+      "must_pcode_ops": [
+        "INT_DIV",
+        "CBRANCH"
+      ]
+    },
+    {
+      "name": "loop",
+      "addr": 100,
+      "size": 4,
+      "bytes": "e6060500",
+      "mnemonic_prefix": "loop",
+      "must_pcode_ops": [
+        "INT_ADD",
+        "CBRANCH"
+      ]
+    },
+    {
+      "name": "shl-reg",
+      "addr": 104,
+      "size": 4,
+      "bytes": "e657c258",
+      "mnemonic_prefix": "shl",
+      "must_pcode_ops": [
+        "INT_LEFT",
+        "INT_AND"
+      ]
+    },
+    {
+      "name": "rotl-zero",
+      "addr": 108,
+      "size": 4,
+      "bytes": "e057c458",
+      "mnemonic_prefix": "rotl",
+      "must_pcode_ops": [
+        "INT_LEFT",
+        "INT_RIGHT"
+      ]
+    },
+    {
+      "name": "sch0r",
+      "addr": 112,
+      "size": 4,
+      "bytes": "e057605b",
+      "mnemonic_prefix": "sch0r",
+      "must_pcode_ops": [
+        "CBRANCH",
+        "INT_RIGHT"
+      ]
+    },
+    {
+      "name": "sch1l",
+      "addr": 116,
+      "size": 4,
+      "bytes": "e057665b",
+      "mnemonic_prefix": "sch1l",
+      "must_pcode_ops": [
+        "CBRANCH",
+        "INT_LEFT"
+      ]
+    },
+    {
+      "name": "bsh",
+      "addr": 120,
+      "size": 4,
+      "bytes": "e057425b",
+      "mnemonic_prefix": "bsh"
+    },
+    {
+      "name": "hsh",
+      "addr": 124,
+      "size": 4,
+      "bytes": "e057465b",
+      "mnemonic_prefix": "hsh"
+    },
+    {
+      "name": "set1-reg",
+      "addr": 128,
+      "size": 4,
+      "bytes": "e657e000",
+      "mnemonic_prefix": "set1",
+      "must_pcode_ops": [
+        "LOAD",
+        "STORE",
+        "INT_AND"
+      ]
+    },
+    {
+      "name": "ldl.w",
+      "addr": 132,
+      "size": 4,
+      "bytes": "e607785b",
+      "mnemonic_prefix": "ldl.w",
+      "must_pcode_ops": [
+        "LOAD"
+      ]
+    },
+    {
+      "name": "stc.w",
+      "addr": 136,
+      "size": 4,
+      "bytes": "e6077a5b",
+      "mnemonic_prefix": "stc.w",
+      "must_pcode_ops": [
+        "STORE",
+        "CBRANCH"
+      ]
+    },
+    {
+      "name": "cll",
+      "addr": 140,
+      "size": 4,
+      "bytes": "ffff60f1",
+      "mnemonic_prefix": "cll"
+    },
+    {
+      "name": "cache",
+      "addr": 144,
+      "size": 4,
+      "bytes": "e6ef6001",
+      "mnemonic_prefix": "cache",
+      "must_pcode_ops": [
+        "CALLOTHER"
+      ],
+      "userop": "__cache"
+    },
+    {
+      "name": "pref",
+      "addr": 148,
+      "size": 4,
+      "bytes": "e6df6001",
+      "mnemonic_prefix": "pref",
+      "must_pcode_ops": [
+        "CALLOTHER"
+      ],
+      "userop": "__prefetch"
+    },
+    {
+      "name": "cvtf.dw",
+      "addr": 152,
+      "size": 4,
+      "bytes": "e4575064",
+      "mnemonic_prefix": "cvtf.dw",
+      "must_pcode_ops": [
+        "TRUNC"
+      ]
+    },
+    {
+      "name": "cvtf.ld",
+      "addr": 156,
+      "size": 4,
+      "bytes": "e1575264",
+      "mnemonic_prefix": "cvtf.ld",
+      "must_pcode_ops": [
+        "INT2FLOAT"
+      ]
+    },
+    {
+      "name": "cvtf.uld",
+      "addr": 160,
+      "size": 4,
+      "bytes": "f1575264",
+      "mnemonic_prefix": "cvtf.uld",
+      "must_pcode_ops": [
+        "INT2FLOAT"
+      ]
+    },
+    {
+      "name": "divf.d",
+      "addr": 164,
+      "size": 4,
+      "bytes": "e6577e64",
+      "mnemonic_prefix": "divf.d",
+      "must_pcode_ops": [
+        "FLOAT_DIV"
+      ]
+    },
+    {
+      "name": "floorf.sw",
+      "addr": 168,
+      "size": 4,
+      "bytes": "e357405c",
+      "mnemonic_prefix": "floorf.sw",
+      "must_pcode_ops": [
+        "FLOOR",
+        "TRUNC"
+      ]
+    },
+    {
+      "name": "cmovf.s",
+      "addr": 172,
+      "size": 4,
+      "bytes": "e657045c",
+      "mnemonic_prefix": "cmovf.s"
+    },
+    {
+      "name": "cmpf.sf",
+      "addr": 176,
+      "size": 4,
+      "bytes": "e6572444",
+      "mnemonic_prefix": "cmpf.s",
+      "operand_contains": "sf"
+    },
+    {
       "name": "synce",
-      "addr": 88,
+      "addr": 180,
       "size": 2,
       "bytes": "1d00",
       "mnemonic_prefix": "synce",
@@ -260,7 +490,7 @@
     },
     {
       "name": "syncm",
-      "addr": 92,
+      "addr": 184,
       "size": 2,
       "bytes": "1e00",
       "mnemonic_prefix": "syncm",
@@ -271,7 +501,7 @@
     },
     {
       "name": "syncp",
-      "addr": 96,
+      "addr": 188,
       "size": 2,
       "bytes": "1f00",
       "mnemonic_prefix": "syncp",
@@ -282,7 +512,7 @@
     },
     {
       "name": "synci",
-      "addr": 100,
+      "addr": 192,
       "size": 2,
       "bytes": "1c00",
       "mnemonic_prefix": "synci",
@@ -293,7 +523,7 @@
     },
     {
       "name": "caxi",
-      "addr": 104,
+      "addr": 196,
       "size": 4,
       "bytes": "e657ee58",
       "mnemonic_prefix": "caxi",
@@ -305,7 +535,7 @@
     },
     {
       "name": "di",
-      "addr": 108,
+      "addr": 200,
       "size": 4,
       "bytes": "e0076001",
       "mnemonic_prefix": "di",
@@ -316,7 +546,7 @@
     },
     {
       "name": "ei",
-      "addr": 112,
+      "addr": 204,
       "size": 4,
       "bytes": "e0876001",
       "mnemonic_prefix": "ei",
@@ -326,15 +556,39 @@
       "userop": "__enable_irq"
     },
     {
+      "name": "rie",
+      "addr": 208,
+      "size": 2,
+      "bytes": "4000",
+      "mnemonic_prefix": "rie",
+      "flow": "BRANCH"
+    },
+    {
+      "name": "fetrap-3",
+      "addr": 212,
+      "size": 2,
+      "bytes": "4018",
+      "mnemonic_prefix": "fetrap",
+      "flow": "CALL"
+    },
+    {
+      "name": "ctret",
+      "addr": 216,
+      "size": 4,
+      "bytes": "e0074401",
+      "mnemonic_prefix": "ctret",
+      "flow": "RETURN"
+    },
+    {
       "name": "trap-3",
-      "addr": 116,
+      "addr": 220,
       "size": 4,
       "bytes": "e3070001",
       "mnemonic_prefix": "trap"
     },
     {
       "name": "eiret",
-      "addr": 120,
+      "addr": 224,
       "size": 4,
       "bytes": "e0074801",
       "mnemonic_prefix": "eiret",
@@ -342,7 +596,7 @@
     },
     {
       "name": "ldsr-psw",
-      "addr": 124,
+      "addr": 228,
       "size": 4,
       "bytes": "e62f2000",
       "mnemonic_prefix": "ldsr",
@@ -350,7 +604,7 @@
     },
     {
       "name": "ldsr-mcfg0",
-      "addr": 128,
+      "addr": 232,
       "size": 4,
       "bytes": "e6072008",
       "mnemonic_prefix": "ldsr",
@@ -358,7 +612,7 @@
     },
     {
       "name": "ldsr-pmr",
-      "addr": 132,
+      "addr": 236,
       "size": 4,
       "bytes": "e65f2010",
       "mnemonic_prefix": "ldsr",
@@ -366,7 +620,7 @@
     },
     {
       "name": "ldsr-mcc",
-      "addr": 136,
+      "addr": 240,
       "size": 4,
       "bytes": "e6572028",
       "mnemonic_prefix": "ldsr",
@@ -374,7 +628,7 @@
     },
     {
       "name": "stsr-cdbcr",
-      "addr": 140,
+      "addr": 244,
       "size": 4,
       "bytes": "f8574068",
       "mnemonic_prefix": "stsr",
@@ -382,7 +636,7 @@
     },
     {
       "name": "ldsr-mpat15",
-      "addr": 144,
+      "addr": 248,
       "size": 4,
       "bytes": "e6f72038",
       "mnemonic_prefix": "ldsr",
@@ -390,7 +644,7 @@
     },
     {
       "name": "stsr-mcfg0",
-      "addr": 148,
+      "addr": 252,
       "size": 4,
       "bytes": "e0574008",
       "mnemonic_prefix": "stsr",
@@ -398,7 +652,7 @@
     },
     {
       "name": "stsr-pmr",
-      "addr": 152,
+      "addr": 256,
       "size": 4,
       "bytes": "eb574010",
       "mnemonic_prefix": "stsr",
@@ -406,7 +660,7 @@
     },
     {
       "name": "stsr-mcc",
-      "addr": 156,
+      "addr": 260,
       "size": 4,
       "bytes": "ea574028",
       "mnemonic_prefix": "stsr",
@@ -414,7 +668,7 @@
     },
     {
       "name": "stsr-mpat15",
-      "addr": 160,
+      "addr": 264,
       "size": 4,
       "bytes": "fe574038",
       "mnemonic_prefix": "stsr",

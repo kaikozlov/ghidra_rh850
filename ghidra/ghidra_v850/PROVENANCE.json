@@ -1,17 +1,39 @@
 {
   "name": "Renesas_v850",
   "language_id": "v850e3:LE:32:default",
-  "language_version": "0.2",
+  "language_version": "0.4",
   "upstream": {
     "url": "https://github.com/esaulenka/ghidra_v850",
     "baseline_commit": "14c1b5be32b8ec741ee626c8bca9885c58f7a473",
     "notes": "Vendored in-tree; local edits prioritize RH850/P1M-E R7F701381 correctness over upstreamability."
+  },
+  "comparisons": {
+    "ghidra": {
+      "url": "https://github.com/NationalSecurityAgency/ghidra",
+      "commit": "c7bc89dd29ee7f56b753b29a8bbabcb36ad3cae7",
+      "imported": [
+        "DWARF register mapping",
+        "function-start patterns"
+      ]
+    },
+    "rizin": {
+      "url": "https://github.com/rizinorg/rizin",
+      "commit": "0ed7bdfdaf186a26ff24eee62f41b10c154b5a99"
+    },
+    "radare2": {
+      "url": "https://github.com/radareorg/radare2",
+      "commit": "391dc446b5f12000c9588bff162a45689463eff6"
+    }
   },
   "target": {
     "mcu": "R7F701381",
     "family": "RH850/P1M-E",
     "core": "RH850G3M"
   },
+  "authorities": [
+    "R01US0123EJ0140 Rev.1.40 RH850G3M User's Manual: Software",
+    "R01UH0585EJ0120 Rev.1.20 RH850/P1M-E Group User's Manual: Hardware"
+  ],
   "ghidra": {
     "required_version": "12.1.4",
     "cli_required_version": "0.2.1"

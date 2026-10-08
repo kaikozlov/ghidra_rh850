@@ -95,17 +95,18 @@ calibration-specific partition (machine-readable in
 | `0x00F` | synchronization | freshness/trip/reset source; no scalar COM unpacker |
 | `0x2E4` | steering command | protected LKA torque request/value selects mode 1 and reaches common command `FEBEC144` |
 | `0x131` | steering command | protected `STEERING_LTA_2` request/angle drives an LTA controller, selects mode 2, and reaches `FEBEC144` |
-| `0x132` | protected snapshot | six recovered post-snapshot scalar destinations have zero runtime readers |
+| `0x132` | steering-control state/prerequisite | five of six post-snapshot scalars gate or initialize recovered controller state; no direct command-mode selection or d/q-reference write is established |
 | `0x090` | RR/RL rear-wheel speed + SSAV validity | signals 270/273 are the protected unordered RR/RL rear-wheel-speed pair and signal 276 is `CAN Steering Angle Speed (SSAV)`; protected status bits qualify steering validity without selecting a steering command mode |
 | `0x0D7` | SP1 vehicle speed/validity | signal 283 is protected `CAN Vehicle Speed (SP1)` and becomes the shared live vehicle-speed source; signal 280 is a protected invalidity/fault input; remaining staged fields terminate after snapshot publication |
 
 This distinction matters when interpreting key or traffic captures. Successful
 MAC verification on an ID proves the key/profile domain, but it does not imply
 that the PDU is an actuator command. Conversely, non-command protected PDUs can
-still be prerequisites for steering operation. In this image `0x090` contributes
-protected rear-wheel-speed, steering-angle-speed, and validity state to the
-steering cycle, while `0x0D7` contributes protected SP1 speed/status state. The only recovered protected command
-modes are `0x2E4` torque and `0x131` LTA angle.
+still be prerequisites for steering operation. In this image `0x132` gates or
+initializes recovered controller state, `0x090` contributes protected
+rear-wheel-speed, steering-angle-speed, and validity state, and `0x0D7`
+contributes protected SP1 speed/status state. The only recovered protected
+command-mode selectors are `0x2E4` torque and `0x131` LTA angle.
 
 The `0x0D7` audit also corrected one generated-COM evidence edge. Signal 280 is
 received through stack byte `SP+0x0B` and persisted to `FEBE8076`; signal 284

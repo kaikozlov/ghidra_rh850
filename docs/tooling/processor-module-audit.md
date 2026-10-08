@@ -1,6 +1,6 @@
 # Plugin verification: v850e3 SLEIGH against the P1M-E firmware
 
-> **Scope:** Sienna EPS `8965B4512000`
+> **Scope:** RH850G3M/P1M-E targets; Venza core decode only where explicitly bounded
 >
 > **Document type:** subsystem analysis
 >
@@ -96,10 +96,10 @@ Script: `ghidra/scripts/investigate/FindUndefinedInFunctions.java`
 (asserting companion: `ghidra/scripts/verify/AssertNoUndefinedInFunctions.java`).
 
 The current function bodies disassemble completely: **zero** undefined bytes
-occur inside any of the 6,376 functions. A SLEIGH decode failure would leave a hole
-inside a function; none exists, so the module decodes every instruction listed
-inside those current bodies. This does not establish that every executable body
-or compiler-emitted instruction has been discovered.
+occur inside any of the 7,090 functions. A SLEIGH decode failure would leave a
+hole inside a function; none exists, so the module decodes every instruction
+listed inside those current bodies. This does not establish that every
+executable body or compiler-emitted instruction has been discovered.
 
 That alone does **not** prove every decoded instruction has correct p-code.
 Semantic fixtures under `tests/fixtures/processor/` and the asserting scripts
@@ -280,17 +280,17 @@ then:
 ### Why the prefix bound is the only trusted trigger (measured, not asserted)
 
 `InventorySwitchTables.java` runs the recovery's bound+validation logic against
-**all 252** decoded `switch` opcodes in this image (not just the in-function
+**all 247** decoded `switch` opcodes in this image (not just the in-function
 ones) and emits `data/switch_table_inventory.csv`. The result:
 
 | Class | Count | Bound | Verdict |
 |---|---:|---|---|
 | Real switches | **20** | `cmp+bh` (17) / `addi+bc` (3) | recovered; all in-function |
-| Packed-case0 hits | 5 | packed-case0 (no prefix bound) | **false positives** — unreachable data misread as code (e.g. six `switch r12`/`nop` pairs in a row at `0xd38xx`; offsets like `+25600`, `+32767`, repeated `+0`) |
-| Other decoded `switch` | 227 | none | no plausible table (`no-bound` / `nested-switch`) |
+| Packed-case0 hits | 4 | packed-case0 (no prefix bound) | **false positives** — unreachable data misread as code (e.g. repeated `switch r12`/`nop` pairs in data at `0xd38xx`; offsets like `+25600`, `+32767`, repeated `+0`) |
+| Other decoded `switch` | 223 | none | no plausible table (`no-bound` / `nested-switch`) |
 
 Every real switch carries the compiler range check; the packed-case0 fallback
-matched **only** data (5/5 false positives), so it was removed as a recovery
+matched **only** data (4/4 false positives), so it was removed as a recovery
 trigger. Requiring the prefix bound recovers the same 20 tables with zero false
 positives.
 
@@ -305,7 +305,7 @@ proves three things each run:
   complete `COMPUTED_JUMP` case coverage (real switches are never missed);
 - **soundness** — no switch without a prefix bound is recovered (no data
   mislabelled as a switch table);
-- **the boundary itself** — the ~232 unrecovered `switch` opcodes are measured
+- **the boundary itself** — the 227 unrecovered `switch` opcodes are measured
   collisions, not an assumption: none carries the range check a real compiler
   switch requires.
 
@@ -316,9 +316,9 @@ compares it with the committed `data/switch_table_inventory.csv` baseline.
 
 Instructions that decode but intentionally use opaque `callother` p-code are
 listed by user-op name in `data/processor_unimpl_allowlist.txt`. The inventory
-resolves CALLOTHER indexes to `__disable_irq`, `__enable_irq`, `__nop`, and
-`__synchronize`; verification fails for either an unapproved used op or a stale
-allowlist entry.
+resolves CALLOTHER indexes to `__cache`, `__prefetch`, `__disable_irq`,
+`__enable_irq`, `__nop`, and `__synchronize`; verification fails for either an
+unapproved used op or a stale allowlist entry.
 
 ## Isolated install and processor fingerprint
 
@@ -328,8 +328,9 @@ installed into `build/cache/ghidra-home/.../Extensions/Renesas_v850/` (via
 mutated. A conflicting install-tree copy causes an actionable failure, and a
 clean `analyzeHeadless` subprocess proves that the isolated language resolves.
 
-`tools/project/fingerprint_processor.py` hashes every `.slaspec` / `.sinc` / `.cspec` /
-`.pspec` / `.ldefs` / metadata file plus the compiled SLA and Ghidra versions.
+`tools/project/fingerprint_processor.py` hashes language specifications,
+DWARF mappings, pattern XML, extension metadata, the compiled SLA, and Ghidra
+versions.
 Rebuilds write `processor_manifest.json` beside `build/work/project/`.
 `make work-project` performs a Ghidra-free source check. Processor audits and
 `make snapshot-project` require source files, compiled SLA hash, Ghidra version,
@@ -349,17 +350,19 @@ itself changed only inventory-version metadata; the compiled language and
 semantic project rows were unchanged at that milestone. This later P1M-E
 hardware-spec correction intentionally changes the processor language and
 persisted semantics. The current source fingerprint is
-`3d4137d656b4ca310f32b286fdb51fbdd3cf2d104b983768d2b032099868bf05`;
-two independent clean rebuilds of every registered target now agree under that
-fingerprint, and all five snapshots/corpora were regenerated. See
+`1f17e8061bf8d3592170c44ee480578c09fbc22565044799e78b46419305cb2b`;
+its compiled SLA is
+`89a88b9a445ed445774a0b8682aeeb2aa5edea2386b548db987a7097f257abd7`.
+Two independent clean rebuilds of every registered target agree under that
+compiled language. See
 [the migration journal](../history/2026-09/GHIDRA_12_1_4_MIGRATION_2026-09-21.md)
-for the earlier version-migration evidence.
+for the earlier version-only migration evidence.
 
 ## Exact project parity
 
-The current normalized project inventory has **6,376 functions, 183,240
-instructions, and 8,042 symbols**. Aggregate floors remain useful as a fast collapse
-detector, but they cannot detect equal-count substitutions. The deterministic
+The current normalized project inventory has **7,090 functions, 197,726
+instructions, and 8,813 symbols**. Aggregate floors remain useful as a fast
+collapse detector, but they cannot detect equal-count substitutions. The deterministic
 `ExportProjectInventory.java` exporter therefore records path-free Ghidra and
 program identity, every memory mapping, function entry/body/signature/parameter
 storage, user-defined symbol, listing/function comment, bookmark, and aggregate
@@ -414,20 +417,105 @@ decompilation-only entries are not counted as reviews. The earlier selected
 sweep and corrected-graph re-audit remain in the
 [historical report](../history/2026-08/CORRECTED_GRAPH_REAUDIT_2026-08-11.md).
 
-This in-function inventory is not an executable denominator. The separate
-outside-function exporter currently records 1,665 conservative candidate runs
-containing 17,147 decoded instructions; 1,605 remain unresolved and 60 remain
-reviewed-unresolved. Successive dispatch-proven recovery of the bootloader
-RoutineControl body, application RDBI callbacks, and COM deadline-monitor tables
-removed executable bodies from this conservative outside-function pool. The
-remaining candidates are not automatically promoted from plausible decoding or
-pointer shape.
+This in-function inventory is not an executable denominator. After importing
+the upstream function-start patterns, the separate outside-function exporter
+records 900 conservative candidate runs containing 7,186 decoded instructions
+in 18,138 bytes: 281 orphan decoded runs and 619 pointer-referenced runs, all
+unresolved. Two independent four-stage rebuilds converge at 7,090 functions /
+197,726 instructions, exactly +714 functions / +14,486 instructions over the
+prior 6,376 / 183,240 graph. The 60 targets referenced by `0x27C88..0x27D77`
+are exact functions now, while their missing dispatch consumer remains a
+separate bounded negative.
+
+## 2026-10-08 cross-implementation and G3M-manual audit
+
+The vendored language was compared instruction-by-instruction with Ghidra
+`c7bc89dd29ee7f56b753b29a8bbabcb36ad3cae7`, Rizin
+`0ed7bdfdaf186a26ff24eee62f41b10c154b5a99`, and radare2
+`391dc446b5f12000c9588bff162a45689463eff6`. The RH850G3M software manual
+R01US0123EJ0140 Rev.1.40 remains authoritative when those implementations
+disagree. Their broad G3K/G4/debug/hypervisor opcode sets were not copied into
+the exact G3M language.
+
+Useful upstream Ghidra assets are now retained locally:
+
+- `data/languages/v850.dwarf` maps the GCC DWARF register numbers, including
+  `sp`, `gp`, `tp`, `ep`, and `lp`;
+- `data/patterns/v850_patterns.xml` recognizes PREPARE/ADDI function prologues
+  after architectural return boundaries;
+- both assets participate in `processor_manifest.json` source fingerprints.
+
+The graph effect is reproducible rather than a one-project analyzer accident.
+Every registered target has byte-identical normalized inventories from two
+independent four-stage rebuilds:
+
+| Target | Functions before | Functions after | Δ | Instructions before | Instructions after | Δ |
+|---|---:|---:|---:|---:|---:|---:|
+| Sienna `8965B4512000` | 6,376 | 7,090 | +714 | 183,240 | 197,726 | +14,486 |
+| Camry `8965F3307000` | 6,056 | 7,181 | +1,125 | 187,475 | 207,434 | +19,959 |
+| Crown `8965F3012000` | 5,864 | 6,972 | +1,108 | 184,505 | 198,930 | +14,425 |
+| Corolla `8965F1208000` | 5,811 | 6,934 | +1,123 | 178,237 | 199,413 | +21,176 |
+| Corolla `8965H1202000` | 5,811 | 6,934 | +1,123 | 178,222 | 199,403 | +21,181 |
+| Venza airbag `8917048E30` | 4,006 | 10,391 | +6,385 | 154,859 | 297,293 | +142,434 |
+
+In Sienna, the recovered functions expose previously hidden, byte-verified
+readers at `0xC7376`, `0xC746C`, `0xC78E6`, and `0xC7F58`; the SecOC and
+motor-boundary reference assertions now include those reads instead of
+preserving stale negative censuses.
+
+The language-semantics change increments the V850E2M registration to
+version `0.3` and the RH850G3M registration to `0.4`; stale compiled languages
+therefore cannot silently satisfy a project fingerprint.
+
+The external opcode tables exposed six inherited mnemonic defects:
+`DIVQ`, `CVTF.DW`, `CVTF.LD`, `CVTF.ULD`, `DIVF.D`, and `FLOORF.SW` decoded as
+other instructions. The G3M manual additionally established `SF` (not `SD`) as
+floating compare condition 8 and the `CMOVF` true/false operand order. Fixtures
+now cover every corrected spelling and execute both `CMOVF.S` outcomes.
+
+The same manual audit corrected machine semantics rather than only display:
+
+- `CLL`, `LDL.W`, and `STC.W` now carry an explicit load-link address/valid
+  state; a conditional store fails after `CLL` or an address mismatch;
+- all divide forms avoid host division on a zero divisor, preserve the
+  architecturally undefined result registers in that case, and set `OV`;
+- register shifts and register-indexed bit operations use the specified low
+  five and three bits; `ROTL` updates `CY` from result bit 0 even for a zero
+  rotation;
+- bit searches return the architectural one-based position, return zero on no
+  match, and update `CY/OV/S/Z`; `BSH`/`HSH` derive `Z` from the lower
+  halfword;
+- `LOOP` always writes the decremented counter and flags before its branch
+  decision, and indirect `JARL` preserves an aliased source before writing the
+  link register;
+- `CALLT`/`CTRET` save and restore only `PSW(4:0)`;
+- `FETRAP`, `TRAP`, `RIE`, and `SYSCALL` save the G3M cause registers, clear
+  `PSW.UM`, set the specified exception-state bits, and select masked
+  `RBASE`/`EBASE` through `PSW.EBV`;
+- `CACHE` and `PREF` now emit named `__cache`/`__prefetch` userops instead of
+  undefined p-code.
+
+Selection-ID 0 no longer gives reserved G3M slots names imported from other
+RH850 variants. The Venza image is bounded to the P1x-C family, whose persisted
+hardware manual specifies RH850G3M cores, so it shares the core decoder and
+system-register semantics. Its exact device remains unknown: no P1M-E
+peripheral-register labels, memory capacities, or SFR claims transfer to it.
+
+Venza additionally required its exact capture boundary in the target profile:
+the `0x180000..0x2FFFFF` fill partition is non-executable and typed as data.
+That removes one direct-call-created function in erased space. Its larger
+pattern-recovery gain is deterministic discovery of previously disconnected
+entry-shaped code, not evidence for an exact device part or peripheral map.
 
 ## What these audits do *not* claim
 
 - Zero undefined bytes inside the current functions proves in-body decode
   coverage, not discovery of every executable body and not every
   p-code edge case (FP rounding, hypervisor ops, unexercised arithmetic forms, …).
+- Floating-point p-code uses Ghidra's round-to-nearest primitives and does not
+  deliver enabled IEEE-754 exceptions from `FPSR`; cache/prefetch userops do not
+  emulate cache contents; load-link invalidation by external agents is outside
+  instruction-level emulation.
 - Exact function/instruction counts are smoke signals; prefer the asserting
   invariant scripts and the generated semantic coverage ledger for coverage
   floors.
@@ -441,7 +529,7 @@ not disable "Address Tables" or "Non-Returning Functions" (a recommendation
 sometimes given for raw automotive images). This is deliberate for this image:
 
 - **Address Tables:** the over-eager-disassembly symptom it warns about *is*
-  present — 232 decoded `switch` opcodes are unreachable data misread as code
+  present — 227 decoded `switch` opcodes are unreachable data misread as code
   (see "Switch jump-table recovery" above). However most of those come from the
   general disassembly pass following word-aligned operands into data, not from
   this one analyzer, so disabling it alone would not remove them. The real

@@ -80,8 +80,9 @@ public class AssertSecocRxControlSurface extends GhidraScript {
         // BA43A promotes those values into steering-cycle state. AE02 has six
         // controller readers; AF00 is validity-gated by BFBA8.
         exact(0xfebeae02L,
-                "000ba9ee:WRITE", "000bdee6:WRITE", "000c8f0c:READ", "000c8f36:READ",
-                "000c910e:READ", "000c94e4:READ", "000c956e:READ", "000c9642:READ");
+                "000ba9ee:WRITE", "000bdee6:WRITE", "000c7388:READ", "000c7484:READ",
+                "000c8f0c:READ", "000c8f36:READ", "000c910e:READ", "000c94e4:READ",
+                "000c956e:READ", "000c9642:READ");
         exact(0xfebeaf00L, "000bab0c:WRITE", "000be040:WRITE", "000bfbb2:READ");
 
         // 0x090 protected status bits become steering validity prerequisites.

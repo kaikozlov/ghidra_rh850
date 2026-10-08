@@ -92,6 +92,13 @@ public class AssertProcessorFixtureSemantics extends GhidraScript {
         }
     }
 
+    private long readU32(EmulatorHelper emu, long address) {
+        return ((long) emu.readMemoryByte(toAddr(address)) & 0xff)
+                | (((long) emu.readMemoryByte(toAddr(address + 1)) & 0xff) << 8)
+                | (((long) emu.readMemoryByte(toAddr(address + 2)) & 0xff) << 16)
+                | (((long) emu.readMemoryByte(toAddr(address + 3)) & 0xff) << 24);
+    }
+
     private long requireCaseAddr(java.util.Map<String, Long> addrs, String name) {
         Long addr = addrs.get(name);
         if (addr == null) {
@@ -294,7 +301,7 @@ public class AssertProcessorFixtureSemantics extends GhidraScript {
             try {
                 long ctbp = 0x2000;
                 emu.writeRegister("CTBP", ctbp);
-                emu.writeRegister("PSW", 0x11);
+                emu.writeRegister("PSW", 0x40008011L);
                 // lbl = CTBP + (4<<1) = CTBP+8; halfword there is byte offset 0x20.
                 emu.writeMemory(toAddr(ctbp + 8), new byte[]{0x20, 0x00});
                 step(emu, "callt table lookup");
@@ -432,6 +439,271 @@ public class AssertProcessorFixtureSemantics extends GhidraScript {
                 emu.dispose();
             }
         }
+        a = requireCaseAddr(addrs, "jarl_indirect_alias");
+        if (a >= 0) {
+            EmulatorHelper emu = emulator(a);
+            try {
+                emu.writeRegister("r6", 0x12345678L);
+                step(emu, "jarl indirect alias");
+                requireRegister(emu, "jarl indirect alias", "PC", 0x12345678L);
+                requireRegister(emu, "jarl indirect alias", "r6", a + 4);
+            } finally {
+                emu.dispose();
+            }
+        }
+
+        a = requireCaseAddr(addrs, "divq");
+        if (a >= 0) {
+            EmulatorHelper emu = emulator(a);
+            try {
+                emu.writeRegister("r6", 0xfffffffeL);
+                emu.writeRegister("r10", 7);
+                step(emu, "divq signed");
+                requireRegister(emu, "divq signed", "r10", 0xfffffffdL);
+                requireRegister(emu, "divq signed", "r11", 1);
+            } finally {
+                emu.dispose();
+            }
+
+            emu = emulator(a);
+            try {
+                emu.writeRegister("r6", 0);
+                emu.writeRegister("r10", 0x12345678L);
+                emu.writeRegister("r11", 0xabcdef01L);
+                step(emu, "divq zero");
+                requireRegister(emu, "divq zero", "r10", 0x12345678L);
+                requireRegister(emu, "divq zero", "r11", 0xabcdef01L);
+                if (!pswBit(emu, 2)) fail("divq zero did not set PSW.OV");
+            } finally {
+                emu.dispose();
+            }
+        }
+
+        a = requireCaseAddr(addrs, "divqu");
+        if (a >= 0) {
+            EmulatorHelper emu = emulator(a);
+            try {
+                emu.writeRegister("r6", 3);
+                emu.writeRegister("r10", 0xfffffffeL);
+                step(emu, "divqu unsigned");
+                requireRegister(emu, "divqu unsigned", "r10", 0x55555554L);
+                requireRegister(emu, "divqu unsigned", "r11", 2);
+            } finally {
+                emu.dispose();
+            }
+        }
+
+        a = requireCaseAddr(addrs, "loop");
+        if (a >= 0) {
+            EmulatorHelper emu = emulator(a);
+            try {
+                emu.writeRegister("r6", 1);
+                emu.writeRegister("PSW", 0);
+                step(emu, "loop terminal");
+                requireRegister(emu, "loop terminal", "r6", 0);
+                requireRegister(emu, "loop terminal", "PC", a + 4);
+                if (!pswBit(emu, 0) || !pswBit(emu, 3)) {
+                    fail("loop terminal did not update Z/CY");
+                }
+            } finally {
+                emu.dispose();
+            }
+
+            emu = emulator(a);
+            try {
+                emu.writeRegister("r6", 2);
+                step(emu, "loop taken");
+                requireRegister(emu, "loop taken", "r6", 1);
+                requireRegister(emu, "loop taken", "PC", a - 4);
+            } finally {
+                emu.dispose();
+            }
+        }
+
+        a = requireCaseAddr(addrs, "shl-reg");
+        if (a >= 0) {
+            EmulatorHelper emu = emulator(a);
+            try {
+                emu.writeRegister("r6", 36); // architectural shift count is low 5 bits
+                emu.writeRegister("r10", 0x10000001L);
+                emu.writeRegister("PSW", 0);
+                step(emu, "shl register count");
+                requireRegister(emu, "shl register count", "r11", 0x10);
+                if (!pswBit(emu, 3)) fail("shl register count did not set carry");
+            } finally {
+                emu.dispose();
+            }
+        }
+
+        a = requireCaseAddr(addrs, "rotl-zero");
+        if (a >= 0) {
+            EmulatorHelper emu = emulator(a);
+            try {
+                emu.writeRegister("r10", 0x80000001L);
+                emu.writeRegister("PSW", 0);
+                step(emu, "rotl zero");
+                requireRegister(emu, "rotl zero", "r11", 0x80000001L);
+                if (!pswBit(emu, 3)) fail("rotl zero did not copy result bit 0 to CY");
+            } finally {
+                emu.dispose();
+            }
+        }
+
+        a = requireCaseAddr(addrs, "sch0r");
+        if (a >= 0) {
+            EmulatorHelper emu = emulator(a);
+            try {
+                emu.writeRegister("r10", 0xfffffffeL);
+                emu.writeRegister("PSW", 0x6);
+                step(emu, "sch0r first bit");
+                requireRegister(emu, "sch0r first bit", "r11", 1);
+                if (!pswBit(emu, 3) || pswBit(emu, 2) || pswBit(emu, 1)) {
+                    fail("sch0r flags do not match found-first-bit result");
+                }
+            } finally {
+                emu.dispose();
+            }
+        }
+
+        a = requireCaseAddr(addrs, "sch1l");
+        if (a >= 0) {
+            EmulatorHelper emu = emulator(a);
+            try {
+                emu.writeRegister("r10", 0x80000000L);
+                step(emu, "sch1l first bit");
+                requireRegister(emu, "sch1l first bit", "r11", 1);
+            } finally {
+                emu.dispose();
+            }
+
+            emu = emulator(a);
+            try {
+                emu.writeRegister("r10", 0);
+                step(emu, "sch1l not found");
+                requireRegister(emu, "sch1l not found", "r11", 0);
+                if (!pswBit(emu, 0) || pswBit(emu, 3)) {
+                    fail("sch1l not-found flags are incorrect");
+                }
+            } finally {
+                emu.dispose();
+            }
+        }
+
+        a = requireCaseAddr(addrs, "bsh");
+        if (a >= 0) {
+            EmulatorHelper emu = emulator(a);
+            try {
+                emu.writeRegister("r10", 0x12340000L);
+                emu.writeRegister("PSW", 0);
+                step(emu, "bsh lower-half flags");
+                requireRegister(emu, "bsh lower-half flags", "r11", 0x34120000L);
+                if (!pswBit(emu, 0) || !pswBit(emu, 3)) {
+                    fail("bsh did not derive Z/CY from the lower halfword");
+                }
+            } finally {
+                emu.dispose();
+            }
+        }
+
+        a = requireCaseAddr(addrs, "hsh");
+        if (a >= 0) {
+            EmulatorHelper emu = emulator(a);
+            try {
+                emu.writeRegister("r10", 0x80010000L);
+                emu.writeRegister("PSW", 0);
+                step(emu, "hsh lower-half flags");
+                requireRegister(emu, "hsh lower-half flags", "r11", 0x80010000L);
+                if (!pswBit(emu, 0) || !pswBit(emu, 3) || !pswBit(emu, 1)) {
+                    fail("hsh did not derive Z/CY from lower halfword and S from word");
+                }
+            } finally {
+                emu.dispose();
+            }
+        }
+
+        a = requireCaseAddr(addrs, "set1-reg");
+        if (a >= 0) {
+            EmulatorHelper emu = emulator(a);
+            try {
+                emu.writeRegister("r6", 0x3000);
+                emu.writeRegister("r10", 11); // low 3 bits select bit 3
+                emu.writeMemory(toAddr(0x3000), new byte[]{0});
+                step(emu, "set1 register bit index");
+                if ((emu.readMemoryByte(toAddr(0x3000)) & 0xff) != 0x08) {
+                    fail("set1 register bit index did not mask to three bits");
+                }
+            } finally {
+                emu.dispose();
+            }
+        }
+
+        long ldlAddr = requireCaseAddr(addrs, "ldl.w");
+        long stcAddr = requireCaseAddr(addrs, "stc.w");
+        long cllAddr = requireCaseAddr(addrs, "cll");
+        if (ldlAddr >= 0 && stcAddr >= 0 && cllAddr >= 0) {
+            EmulatorHelper emu = emulator(ldlAddr);
+            try {
+                emu.writeRegister("r6", 0x3000);
+                emu.writeMemory(toAddr(0x3000),
+                        new byte[]{0x44, 0x33, 0x22, 0x11});
+                step(emu, "ldl.w link");
+                requireRegister(emu, "ldl.w link", "r11", 0x11223344L);
+                emu.writeRegister("r11", 0x55667788L);
+                emu.writeRegister("PC", stcAddr);
+                step(emu, "stc.w linked success");
+                requireRegister(emu, "stc.w linked success", "r11", 1);
+                if (readU32(emu, 0x3000) != 0x55667788L) {
+                    fail("stc.w linked success did not store");
+                }
+            } finally {
+                emu.dispose();
+            }
+
+            emu = emulator(ldlAddr);
+            try {
+                emu.writeRegister("r6", 0x3000);
+                emu.writeMemory(toAddr(0x3000),
+                        new byte[]{0x44, 0x33, 0x22, 0x11});
+                step(emu, "ldl.w before cll");
+                emu.writeRegister("PC", cllAddr);
+                step(emu, "cll clears link");
+                emu.writeRegister("r11", 0x55667788L);
+                emu.writeRegister("PC", stcAddr);
+                step(emu, "stc.w after cll");
+                requireRegister(emu, "stc.w after cll", "r11", 0);
+                if (readU32(emu, 0x3000) != 0x11223344L) {
+                    fail("stc.w after cll unexpectedly stored");
+                }
+            } finally {
+                emu.dispose();
+            }
+        }
+
+        a = requireCaseAddr(addrs, "cmovf.s");
+        if (a >= 0) {
+            EmulatorHelper emu = emulator(a);
+            try {
+                emu.writeRegister("r6", 0x11111111L);
+                emu.writeRegister("r10", 0x22222222L);
+                emu.writeRegister("FPSR", 1L << 26);
+                step(emu, "cmovf.s true");
+                requireRegister(emu, "cmovf.s true", "r11", 0x11111111L);
+            } finally {
+                emu.dispose();
+            }
+
+            emu = emulator(a);
+            try {
+                emu.writeRegister("r6", 0x11111111L);
+                emu.writeRegister("r10", 0x22222222L);
+                emu.writeRegister("FPSR", 0);
+                step(emu, "cmovf.s false");
+                requireRegister(emu, "cmovf.s false", "r11", 0x22222222L);
+            } finally {
+                emu.dispose();
+            }
+        }
+
         a = requireCaseAddr(addrs, "caxi");
         if (a >= 0) {
             EmulatorHelper emu = emulator(a);
@@ -504,19 +776,75 @@ public class AssertProcessorFixtureSemantics extends GhidraScript {
             }
         }
 
+        a = requireCaseAddr(addrs, "rie");
+        if (a >= 0) {
+            EmulatorHelper emu = emulator(a);
+            try {
+                long originalPsw = (1L << 30) | (1L << 15) | 0x10;
+                emu.writeRegister("PSW", originalPsw);
+                emu.writeRegister("EBASE", 0x2400);
+                step(emu, "rie architectural state");
+                requireRegister(emu, "rie architectural state", "PC", 0x2460);
+                requireRegister(emu, "rie architectural state", "FEPC", a);
+                requireRegister(emu, "rie architectural state", "FEPSW", originalPsw);
+                requireRegister(emu, "rie architectural state", "FEIC", 0x60);
+                if (!pswBit(emu, 7) || !pswBit(emu, 6) || !pswBit(emu, 5)
+                        || pswBit(emu, 30)) {
+                    fail("rie did not apply NP/EP/ID/UM exception state");
+                }
+            } finally {
+                emu.dispose();
+            }
+        }
+
+        a = requireCaseAddr(addrs, "fetrap-3");
+        if (a >= 0) {
+            EmulatorHelper emu = emulator(a);
+            try {
+                emu.writeRegister("PSW", 1L << 30);
+                emu.writeRegister("RBASE", 0x2600);
+                step(emu, "fetrap architectural state");
+                requireRegister(emu, "fetrap architectural state", "PC", 0x2630);
+                requireRegister(emu, "fetrap architectural state", "FEPC", a + 2);
+                requireRegister(emu, "fetrap architectural state", "FEIC", 0x33);
+                if (!pswBit(emu, 7) || !pswBit(emu, 6) || !pswBit(emu, 5)
+                        || pswBit(emu, 30)) {
+                    fail("fetrap did not apply NP/EP/ID/UM exception state");
+                }
+            } finally {
+                emu.dispose();
+            }
+        }
+
+        a = requireCaseAddr(addrs, "ctret");
+        if (a >= 0) {
+            EmulatorHelper emu = emulator(a);
+            try {
+                emu.writeRegister("CTPC", 0x12345678L);
+                emu.writeRegister("CTPSW", 0x1b);
+                emu.writeRegister("PSW", 0x123456e0L);
+                step(emu, "ctret lower flags");
+                requireRegister(emu, "ctret lower flags", "PC", 0x12345678L);
+                requireRegister(emu, "ctret lower flags", "PSW", 0x123456fbL);
+            } finally {
+                emu.dispose();
+            }
+        }
+
         a = requireCaseAddr(addrs, "trap-3");
         if (a >= 0) {
             EmulatorHelper emu = emulator(a);
             try {
-                emu.writeRegister("PSW", 0x10);
+                long originalPsw = (1L << 30) | (1L << 15) | 0x10;
+                emu.writeRegister("PSW", originalPsw);
+                emu.writeRegister("EBASE", 0x2200);
                 step(emu, "trap-3 architectural state");
-                requireRegister(emu, "trap-3 architectural state", "PC", 0x40);
+                requireRegister(emu, "trap-3 architectural state", "PC", 0x2240);
                 requireRegister(emu, "trap-3 architectural state", "EIPC", a + 4);
-                requireRegister(emu, "trap-3 architectural state", "EIPSW", 0x10);
+                requireRegister(emu, "trap-3 architectural state", "EIPSW", originalPsw);
                 requireRegister(emu, "trap-3 architectural state", "EIIC", 0x43);
-                if (!pswBit(emu, 6) || !pswBit(emu, 5)) {
-                    fail(String.format("trap-3: PSW=0x%x lacks EP/ID",
-                            emu.readRegister("PSW").longValue()));
+                if (!pswBit(emu, 6) || !pswBit(emu, 5) || pswBit(emu, 30)) {
+                    fail("trap-3 did not apply EP/ID/UM exception state");
                 }
             } finally {
                 emu.dispose();
@@ -598,6 +926,17 @@ public class AssertProcessorFixtureSemantics extends GhidraScript {
                             + c.operandRegister + ": " + ins);
                 }
             }
+            if (c.operandContains != null) {
+                StringBuilder operands = new StringBuilder();
+                for (int op = 0; op < ins.getNumOperands(); op++) {
+                    if (op != 0) operands.append(", ");
+                    operands.append(ins.getDefaultOperandRepresentation(op));
+                }
+                if (!operands.toString().contains(c.operandContains)) {
+                    fail(c.name + ": operands=" + operands
+                            + " expected to contain " + c.operandContains);
+                }
+            }
             Set<String> ops = pcodeOpNames(ins);
             for (String need : c.mustPcodeOps) {
                 if (!ops.contains(need)) {
@@ -664,6 +1003,7 @@ public class AssertProcessorFixtureSemantics extends GhidraScript {
         String mnemonicPrefix;
         String operandRegister;
         List<String> mustPcodeOps = new ArrayList<>();
+        String operandContains;
         List<String> forbidPcodeOps = new ArrayList<>();
         Integer loadSize;
         Boolean signExtend;
@@ -688,6 +1028,7 @@ public class AssertProcessorFixtureSemantics extends GhidraScript {
                 c.addr = extractLong(obj, "addr");
                 c.mnemonicPrefix = extractString(obj, "mnemonic_prefix");
                 c.operandRegister = extractString(obj, "operand_register");
+                c.operandContains = extractString(obj, "operand_contains");
                 c.mustPcodeOps = extractStringArray(obj, "must_pcode_ops");
                 c.forbidPcodeOps = extractStringArray(obj, "forbid_pcode_ops");
                 if (obj.contains("\"load_size\"")) c.loadSize = (int) extractLong(obj, "load_size");

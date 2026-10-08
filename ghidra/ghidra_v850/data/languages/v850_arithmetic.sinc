@@ -14,13 +14,22 @@
 
 # DIVH reg1, reg2
 :divh r0004, r1115 is op0510=0x02 & r0004 & r1115 {
-	local reg2:4 = r1115;
-	local reg1:4 = sext(r0004:2);
-	setOV ((reg2 == 0x80000000 && reg1 == 0xFFFFFFFF) || reg1 == 0);
-	if (reg1 == 0) goto <divh_done>;
-	r1115 = reg2 s/ reg1;
-	set_S_Z (r1115);
-	<divh_done>
+	local dividend:4 = r1115;
+	local divisor:4 = sext(r0004:2);
+	if (divisor == 0) goto <div_zero>;
+	if (dividend == 0x80000000 && divisor == 0xffffffff) goto <div_overflow>;
+		r1115 = dividend s/ divisor;
+		clrOV();
+		set_S_Z(r1115);
+		goto <div_done>;
+	<div_overflow>
+		r1115 = 0x80000000;
+		$(PSW_OV) = 1;
+		set_S_Z(r1115);
+		goto <div_done>;
+	<div_zero>
+		$(PSW_OV) = 1;
+	<div_done>
 }
 
 macro saturate(value) {
@@ -180,58 +189,122 @@ macro saturate(value) {
 # DIVH reg1, reg2, reg3
 :divh R0004, R1115, R2731 is op0510=0x3F & R0004 & R1115; op1626=0x280 & R2731 {
 	local divisor:4 = sext(R0004[0,16]);
-	local quot:4 = R1115 s/ divisor;
-	local mod:4 = R1115 s% divisor;
-	setOV ((R1115 == 0x80000000 && divisor == 0xFFFFFFFF) || divisor == 0);
-	set_S_Z (quot);
-	R1115 = quot;
-	R2731 = mod;
+	local dividend:4 = R1115;
+	if (divisor == 0) goto <div_zero>;
+	if (dividend == 0x80000000 && divisor == 0xffffffff) goto <div_overflow>;
+		local quot:4 = dividend s/ divisor;
+		local mod:4 = dividend s% divisor;
+		clrOV();
+		set_S_Z(quot);
+		R1115 = quot;
+		R2731 = mod;
+		goto <div_done>;
+	<div_overflow>
+		$(PSW_OV) = 1;
+		$(PSW_S) = 1;
+		$(PSW_Z) = 0;
+		R1115 = 0x80000000;
+		R2731 = 0;
+		goto <div_done>;
+	<div_zero>
+		$(PSW_OV) = 1;
+	<div_done>
 }
 # DIVHU reg1, reg2, reg3
 :divhu R0004, R1115, R2731 is op0510=0x3F & R0004 & R1115; op1626=0x282 & R2731 {
 	local divisor:4 = zext(R0004[0,16]);
-	local quot:4 = R1115 / divisor;
-	local mod:4 = R1115 % divisor;
-	setOV (divisor == 0);
-	set_S_Z (quot);
-	R1115 = quot;
-	R2731 = mod;
+	local dividend:4 = R1115;
+	if (divisor == 0) goto <div_zero>;
+		local quot:4 = dividend / divisor;
+		local mod:4 = dividend % divisor;
+		clrOV();
+		set_S_Z(quot);
+		R1115 = quot;
+		R2731 = mod;
+		goto <div_done>;
+	<div_zero>
+		$(PSW_OV) = 1;
+	<div_done>
 }
 # DIV reg1, reg2, reg3
 :div R0004, R1115, R2731 is op0510=0x3F & R0004 & R1115; op1626=0x2C0 & R2731 {
-	local quot:4 = R1115 s/ R0004;
-	local mod:4 = R1115 s% R0004;
-	setOV ((R1115 == 0x80000000 && R0004 == 0xFFFFFFFF) || R0004 == 0);
-	set_S_Z (quot);
-	R1115 = quot;
-	R2731 = mod;
+	local divisor:4 = R0004;
+	local dividend:4 = R1115;
+	if (divisor == 0) goto <div_zero>;
+	if (dividend == 0x80000000 && divisor == 0xffffffff) goto <div_overflow>;
+		local quot:4 = dividend s/ divisor;
+		local mod:4 = dividend s% divisor;
+		clrOV();
+		set_S_Z(quot);
+		R1115 = quot;
+		R2731 = mod;
+		goto <div_done>;
+	<div_overflow>
+		$(PSW_OV) = 1;
+		$(PSW_S) = 1;
+		$(PSW_Z) = 0;
+		R1115 = 0x80000000;
+		R2731 = 0;
+		goto <div_done>;
+	<div_zero>
+		$(PSW_OV) = 1;
+	<div_done>
 }
 # DIVQ reg1, reg2, reg3
-:div R0004, R1115, R2731 is op0510=0x3F & R0004 & R1115; op1626=0x2FC & R2731 {
-	local quot:4 = R1115 s/ R0004;
-	local mod:4 = R1115 s% R0004;
-	setOV ((R1115 == 0x80000000 && R0004 == 0xFFFFFFFF) || R0004 == 0);
-	set_S_Z (quot);
-	R1115 = quot;
-	R2731 = mod;
+:divq R0004, R1115, R2731 is op0510=0x3F & R0004 & R1115; op1626=0x2FC & R2731 {
+	local divisor:4 = R0004;
+	local dividend:4 = R1115;
+	if (divisor == 0) goto <div_zero>;
+	if (dividend == 0x80000000 && divisor == 0xffffffff) goto <div_overflow>;
+		local quot:4 = dividend s/ divisor;
+		local mod:4 = dividend s% divisor;
+		clrOV();
+		set_S_Z(quot);
+		R1115 = quot;
+		R2731 = mod;
+		goto <div_done>;
+	<div_overflow>
+		$(PSW_OV) = 1;
+		$(PSW_S) = 1;
+		$(PSW_Z) = 0;
+		R1115 = 0x80000000;
+		R2731 = 0;
+		goto <div_done>;
+	<div_zero>
+		$(PSW_OV) = 1;
+	<div_done>
 }
 # DIVU reg1, reg2, reg3
 :divu R0004, R1115, R2731 is op0510=0x3F & R0004 & R1115; op1626=0x2C2 & R2731 {
-	local quot:4 = R1115 / R0004;
-	local mod:4 = R1115 % R0004;
-	setOV (R0004 == 0);
-	set_S_Z (quot);
-	R1115 = quot;
-	R2731 = mod;
+	local divisor:4 = R0004;
+	local dividend:4 = R1115;
+	if (divisor == 0) goto <div_zero>;
+		local quot:4 = dividend / divisor;
+		local mod:4 = dividend % divisor;
+		clrOV();
+		set_S_Z(quot);
+		R1115 = quot;
+		R2731 = mod;
+		goto <div_done>;
+	<div_zero>
+		$(PSW_OV) = 1;
+	<div_done>
 }
 # DIVQU reg1, reg2, reg3
 :divqu R0004, R1115, R2731 is op0510=0x3F & R0004 & R1115; op1626=0x2FE & R2731 {
-	local quot:4 = R1115 / R0004;
-	local mod:4 = R1115 % R0004;
-	setOV (R0004 == 0);
-	set_S_Z (quot);
-	R1115 = quot;
-	R2731 = mod;
+	local divisor:4 = R0004;
+	local dividend:4 = R1115;
+	if (divisor == 0) goto <div_zero>;
+		local quot:4 = dividend / divisor;
+		local mod:4 = dividend % divisor;
+		clrOV();
+		set_S_Z(quot);
+		R1115 = quot;
+		R2731 = mod;
+		goto <div_done>;
+	<div_zero>
+		$(PSW_OV) = 1;
+	<div_done>
 }
 
 # SATSUB reg1, reg2, reg3

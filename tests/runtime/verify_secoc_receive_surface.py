@@ -211,9 +211,11 @@ def _section_secoc_rx_control_surface():
     print('== profile census ==')
     check('surface has exactly six rows', len(rows) == 6)
     check('surface CAN IDs are exact', list(by_id) == expected_ids, repr(list(by_id)))
-    check('exact role classes', [by_id[i]['role_class'] for i in expected_ids] == ['synchronization', 'steering_command', 'steering_command', 'protected_snapshot', 'rear_wheel_speed_and_steering_angle_speed_validity', 'sp1_vehicle_speed_validity'])
+    check('exact role classes', [by_id[i]['role_class'] for i in expected_ids] == ['synchronization', 'steering_command', 'steering_command', 'steering_control_state', 'rear_wheel_speed_and_steering_angle_speed_validity', 'sp1_vehicle_speed_validity'])
     check('only 0x2E4 and 0x131 select command modes', {i for i, r in by_id.items() if r['command_mode'] != 'none'} == {740, 305})
-    check('0x132 remains bounded snapshot negative', by_id[306]['evidence_grade'] == 'bounded')
+    check('0x132 has recovered control-state consumers',
+          by_id[306]['evidence_grade'] == 'recovered'
+          and 'C7376' in by_id[306]['derived_control_state'])
     print('\n== firmware SecOC records ==')
     records = [153968 + i * 80 for i in range(6)]
     check('record IDs match ledger', [u16(a + 10) for a in records] == expected_ids)

@@ -5,8 +5,10 @@ the source of truth for the `v850e3:LE:32:default` language used by this repo's
 RH850/P1M-E analysis.
 
 It has diverged from upstream and is edited freely to serve this project's
-firmware analysis. There is no intent to keep patches upstreamable; correctness
-for the RH850/P1M-E (`R7F701381`) target takes priority.
+firmware analysis. There is no intent to keep patches upstreamable; exact
+RH850G3M/P1M-E behavior takes priority. The Venza target reuses the core
+instruction decoder, but its exact RH850 subtype and peripheral map remain
+unestablished and do not inherit P1M-E system-register or SFR claims.
 
 Machine-readable provenance lives in [`PROVENANCE.json`](PROVENANCE.json).
 Processor-module audits against this firmware are recorded in
@@ -55,9 +57,14 @@ point. Notable areas under active modification for the P1M-E target:
 
 - `data/languages/v850.cspec` — RH850/G3 calling-convention model.
 - `data/languages/v850.pspec` — processor volatility (P1M-E peripheral windows).
-- `data/languages/v850e3.sinc` — RH850 instructions and system-register maps.
+- `data/languages/v850e3.sinc` — RH850G3M instructions, atomics, cache/prefetch
+  userops, and system-register maps.
 - `data/languages/v850_load_store.sinc` / `v850_arithmetic.sinc` — verified
-  load/store and arithmetic p-code semantics (`sld.b`/`sld.h` sext, signed
-  `divh`, saturating `PSW.SAT`/`OV`).
-- `data/languages/v850_float.sinc` — `ceilf.suw` constructor correction.
-- Language version `0.2` / extension metadata `12.1.4` (see `PROVENANCE.json`).
+  load/store, divide, and saturating-arithmetic p-code semantics.
+- `data/languages/v850_float.sinc` — G3M floating-point mnemonics, operand order,
+  and conversion dataflow.
+- `data/languages/v850.dwarf` — GCC DWARF register mapping.
+- `data/patterns/` — Ghidra function-start patterns for PREPARE/ADDI prologues
+  following architectural returns.
+- Language versions `0.3` (V850E2M) and `0.4` (RH850G3M), with extension
+  metadata pinned to Ghidra `12.1.4` (see `PROVENANCE.json`).

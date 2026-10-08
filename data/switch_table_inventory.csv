@@ -35,9 +35,8 @@ switch_addr,in_function,function_addr,table_base,bound_kind,bound_size,validate_
 0001bca6,N,-,0001bca8,,0,N,no-bound
 0002161c,N,-,0002161e,packed-case0,122,Y,
 0002196a,N,-,0002196c,,0,N,no-bound
-0002b99a,N,-,0002b99c,,0,N,packed-case0:nested-switch
-0002ba0a,N,-,0002ba0c,packed-case0,80,Y,
-0003041c,N,-,0003041e,,0,N,no-bound
+0003051c,N,-,0003051e,,0,N,no-bound
+00030f74,N,-,00030f76,,0,N,no-bound
 00033b8e,Y,00033b08,00033b90,cmp+bh,7,Y,
 00039b60,Y,00039b38,00039b62,cmp+bh,4,Y,
 0003b200,Y,0003b13a,0003b202,cmp+bh,6,Y,
@@ -112,11 +111,7 @@ switch_addr,in_function,function_addr,table_base,bound_kind,bound_size,validate_
 000d0c14,N,-,000d0c16,,0,N,no-bound
 000d0c3c,N,-,000d0c3e,,0,N,no-bound
 000d0c64,N,-,000d0c66,,0,N,no-bound
-000d0d04,N,-,000d0d06,,0,N,no-bound
 000d0d2c,N,-,000d0d2e,,0,N,no-bound
-000d0d54,N,-,000d0d56,,0,N,no-bound
-000d0d7c,N,-,000d0d7e,,0,N,no-bound
-000d0da4,N,-,000d0da6,,0,N,no-bound
 000d0e44,N,-,000d0e46,,0,N,no-bound
 000d0e6c,N,-,000d0e6e,,0,N,no-bound
 000d0e94,N,-,000d0e96,,0,N,no-bound

@@ -63,15 +63,15 @@
 }
 
 # CMOVF.D fcbit, reg1, reg2, reg3
-:cmovf.d fcbit1719, R1115pair, R0004pair, R2731pair is R1115pair & op0510=0x3F & R0004pair; R2731pair & op2126=0b100000 & op2020=1 & fcbit1719 & op1616=0 {
+:cmovf.d fcbit1719, R0004pair, R1115pair, R2731pair is R1115pair & op0510=0x3F & R0004pair; R2731pair & op2126=0b100000 & op2020=1 & fcbit1719 & op1616=0 {
   local tmp:8 = zext(FPSR >> (fcbit1719:1 + 24:1)) & 0x1;
-  R2731pair = (tmp * R1115pair) | ((1-tmp) * R0004pair);
+  R2731pair = (tmp * R0004pair) | ((1-tmp) * R1115pair);
 }
 
 # CMOVF.S fcbit, reg1, reg2, reg3
-:cmovf.s fcbit1719, R1115, R0004, R2731 is R1115 & op0510=0x3F & R0004; R2731 & op2126=0b100000 & op2020=0 & fcbit1719 & op1616=0 {
+:cmovf.s fcbit1719, R0004, R1115, R2731 is R1115 & op0510=0x3F & R0004; R2731 & op2126=0b100000 & op2020=0 & fcbit1719 & op1616=0 {
   local tmp:4 = (FPSR >> (fcbit1719:1 + 24:1)) & 0x1;
-  R2731 = (tmp * R1115) | ((1-tmp) * R0004);
+  R2731 = (tmp * R0004) | ((1-tmp) * R1115);
 }
 
 macro compare_float(fcond, reg2, reg1, result) {
@@ -79,7 +79,8 @@ macro compare_float(fcond, reg2, reg1, result) {
   local eq = ((fcond & 6) == 2) && (reg2 f== reg1);
   local lt = ((fcond & 6) == 4) && (reg2 f<  reg1);
   local le = ((fcond & 6) == 6) && (reg2 f<= reg1);
-  # TODO (fcond & 8) throws exception when unordered
+  # Trap delivery for enabled IEEE-754 invalid-operation exceptions is outside
+  # SLEIGH p-code; the non-trapping comparison result and FPSR.CC update are modeled.
   result = zext(un || eq || lt || le);
 }
 
@@ -103,10 +104,11 @@ macro compare_float(fcond, reg2, reg1, result) {
   FPSR = (FPSR & ~ones) | newbit;
 }
 
-# TODO: do something with the current rounding mode
+# P-code has no dynamic rounding-mode input; conversions use Ghidra's floating
+# primitive while preserving the architectural operand and result widths.
 # CVTF.DL reg2, reg3
 :cvtf.dl R1115pair, R2731pair is R1115pair & op0510=0x3F & op0004=0b00100; R2731pair & op2126=0b100010 & op1620=0b10100 {
-  R2731pair = int2float(R1115pair);
+  R2731pair = trunc(R1115pair);
 }
 
 # CVTF.DS reg2, reg3
@@ -125,12 +127,12 @@ macro compare_float(fcond, reg2, reg1, result) {
 }
 
 # CVTF.DW reg2, reg3
-:cvtf.sw R1115pair, R2731 is R1115pair & op0510=0x3F & op0004=0b00100; R2731 & op2126=0b100010 & op1620=0b10000 {
+:cvtf.dw R1115pair, R2731 is R1115pair & op0510=0x3F & op0004=0b00100; R2731 & op2126=0b100010 & op1620=0b10000 {
   R2731 = trunc(R1115pair);
 }
 
 # CVTF.LD reg2, reg3
-:cvtf.ls R1115pair, R2731pair is R1115pair & op0510=0x3F & op0004=0b00001; R2731pair & op2126=0b100010 & op1620=0b10010 {
+:cvtf.ld R1115pair, R2731pair is R1115pair & op0510=0x3F & op0004=0b00001; R2731pair & op2126=0b100010 & op1620=0b10010 {
   R2731pair = int2float(R1115pair);
 }
 
@@ -165,23 +167,43 @@ macro compare_float(fcond, reg2, reg1, result) {
 }
 
 # CVTF.ULD reg2, reg3
-:cvtf.uls R1115pair, R2731pair is R1115pair & op0510=0x3F & op0004=0b10001; R2731pair & op2126=0b100010 & op1620=0b10010 {
-  R2731pair = int2float(R1115pair);
+:cvtf.uld R1115pair, R2731pair is R1115pair & op0510=0x3F & op0004=0b10001; R2731pair & op2126=0b100010 & op1620=0b10010 {
+  if ((R1115pair >> 63) == 0) goto <small>;
+    local folded:8 = (R1115pair >> 1) | (R1115pair & 1);
+    local two:8 = 2;
+    local folded_float:8 = int2float(folded);
+    local two_float:8 = int2float(two);
+    R2731pair = folded_float f* two_float;
+    goto <done>;
+  <small>
+    R2731pair = int2float(R1115pair);
+  <done>
 }
 
 # CVTF.ULS reg2, reg3
 :cvtf.uls R1115pair, R2731 is R1115pair & op0510=0x3F & op0004=0b10001; R2731 & op2126=0b100010 & op1620=0b00010 {
-  R2731 = int2float(R1115pair);
+  if ((R1115pair >> 63) == 0) goto <small>;
+    local folded:8 = (R1115pair >> 1) | (R1115pair & 1);
+    local two:8 = 2;
+    local folded_float:4 = int2float(folded);
+    local two_float:4 = int2float(two);
+    R2731 = folded_float f* two_float;
+    goto <done>;
+  <small>
+    R2731 = int2float(R1115pair);
+  <done>
 }
 
 # CVTF.UWD reg2, reg3
 :cvtf.uwd R1115, R2731pair is R1115 & op0510=0x3F & op0004=0b10000; R2731pair & op2126=0b100010 & op1620=0b10010 {
-  R2731pair = int2float(R1115);
+  local unsigned_value:8 = zext(R1115);
+  R2731pair = int2float(unsigned_value);
 }
 
 # CVTF.UWS reg2, reg3
 :cvtf.uws R1115, R2731 is R1115 & op0510=0x3F & op0004=0b10000; R2731 & op2126=0b100010 & op1620=0b00010 {
-  R2731 = int2float(R1115);
+  local unsigned_value:8 = zext(R1115);
+  R2731 = int2float(unsigned_value);
 }
 
 # CVTF.WD reg2, reg3
@@ -195,7 +217,7 @@ macro compare_float(fcond, reg2, reg1, result) {
 }
 
 # DIVF.D reg1, reg2, reg3
-:divf.s R0004pair, R1115pair, R2731pair is R0004pair & op0510=0x3F & R1115pair; R2731pair & op2126=0b100011 & op1620=0b11110 {
+:divf.d R0004pair, R1115pair, R2731pair is R0004pair & op0510=0x3F & R1115pair; R2731pair & op2126=0b100011 & op1620=0b11110 {
   R2731pair = R1115pair f/ R0004pair;
 }
 
@@ -244,7 +266,7 @@ macro compare_float(fcond, reg2, reg1, result) {
 }
 
 # FLOORF.SW reg2, reg3
-:floorf.suw R1115, R2731 is R1115 & op0510=0x3F & op0004=0b00011; R2731 & op2126=0b100010 & op1620=0b00000 {
+:floorf.sw R1115, R2731 is R1115 & op0510=0x3F & op0004=0b00011; R2731 & op2126=0b100010 & op1620=0b00000 {
   R2731 = trunc(floor(R1115));
 }
 

@@ -288,17 +288,20 @@ rebuild therefore recovers them without interactive edits. The asserting floor
 also covers the other firmware-proven indirect tables and rejects any literal
 call whose destination lacks an exact function entry.
 
-The nearby 60-pointer array at `0x27C88..0x27D77`, including the wrapper-shaped
-targets referenced by `0x27D08..0x27D54`, is intentionally not seeded. Its
-bytes are valid CodeFlash pointers to entry-shaped runs, but this image has no
-referenced executable walker or computed-call consumer. The negative is now
-stronger than "unreferenced": the descriptor array at `0x27E94` has exactly six
-recovered accessors, and every one consumes `desc+0x04` (bounds-checked
-`32x4` table at `0x27C08`) plus code slots `+0x10/+0x14/+0x18/+0x1C/+0x20` —
-never `desc+0x0C`, which is where `0x27C88` sits. The sole live xref to
-`0x27C88` is a single DATA word at `0x27D84`, the canonical data-reference
-graph contains no function-owned reference, and all 60 target pointer
-literals occur only inside the table itself. Prologue shape and pointer shape
-alone do not prove dispatch; the cluster stays `unresolved-reviewed` in
-`data/outside_function_candidates.csv` as a bounded structural negative, with
-no consumed selector path in this calibration.
+The nearby 60-pointer array at `0x27C88..0x27D77`, including the
+wrapper-shaped targets referenced by `0x27D08..0x27D54`, is not seeded as a
+dispatch table. Importing Ghidra's generic V850 PREPARE/ADDI function-start
+patterns now recovers all 60 targets as exact function entries on a clean
+rebuild. That closes their code boundaries; it does not prove that this
+calibration dispatches through the array.
+
+The consumer negative remains stronger than "unreferenced": the descriptor
+array at `0x27E94` has exactly six recovered accessors, and every one consumes
+`desc+0x04` (bounds-checked `32x4` table at `0x27C08`) plus code slots
+`+0x10/+0x14/+0x18/+0x1C/+0x20` — never `desc+0x0C`, where `0x27C88` sits.
+The sole live xref to `0x27C88` is a DATA word at `0x27D84`; all 60 target
+pointer literals occur only inside the table; and no executable walker or
+computed-call consumer is recovered. `AssertRecoveredPointerClusters.java`
+pins the bytes, exact function entries, data references, and absence of a
+non-table dispatch reference. Function-start and pointer shape remain
+insufficient to claim a consumed selector path.

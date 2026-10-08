@@ -304,14 +304,16 @@ common command state `FEBEC144`. A separate `0xCA0B4` branch reuses
 `FEBEAE60` for command plausibility/range supervision. Thus the protected
 `0x131` stream is both a steering-control and supervision input in this image.
 
-**CAN `0x132`** was checked specifically as a possible parallel actuator path.
-Signals 191/192/193/196/195/198 are copied by `0x56FC2` into
-`FEBEF064/061/062/063/F19C/F19A` respectively and then by `0xBA43A` into
-`FEBEAD06/AD04/AD05/AD07/AE28/AE2A`. All six post-snapshot locations have
-exactly two direct references in the corrected project: the snapshot WRITE and
-an initialization WRITE. They have no runtime READ. Signals 194/197 are already
-in the stored-no-direct-consumer bucket above. Therefore no recovered scalar
-field of protected `0x132` reaches steering actuation in this calibration.
+**CAN `0x132`** supplies protected steering-controller state rather than a
+third recovered command mode. Signals 191/192/193/196/195/198 are copied by
+`0x56FC2` into `FEBEF064/061/062/063/F19C/F19A` respectively and then by
+`0xBA43A` into `FEBEAD06/AD04/AD05/AD07/AE28/AE2A`. The refreshed graph
+recovers runtime readers for five of those six destinations: `AD04/AD06` at
+`0xC7376`, `AD05` at `0xC746C`, `AE28` at `0xC78E6`, and `AD07` at `0xC7F58`.
+Those functions gate, initialize, or update steering-controller state. `AE2A`
+remains write-only, and signals 194/197 remain in the
+stored-no-direct-consumer bucket. No recovered `0x132` consumer directly
+selects the `C13A/C13D` command modes or writes the d/q-reference state.
 
 One corpus representation caveat is now pinned explicitly: instruction
 `0x572B0` reads byte `FEBE8001` (signal 196) and `0x572B4` writes `FEBEF063`,
@@ -331,7 +333,7 @@ COM/staging consumers gives the calibration-specific partition recorded in
 | `0x00F` | synchronization | SecOC trip/reset freshness source; no scalar COM unpacker and no steering command selection |
 | `0x2E4` | steering command | authenticated LKA torque request/value; selects `FEBEC13D` mode 1 and enters `FEBEC144` from `FEBEBFA2` |
 | `0x131` | steering command | authenticated `STEERING_LTA_2` request/angle; selects `FEBEC13A` mode 2 and enters `FEBEC144` from controller output `FEBEC0D6` |
-| `0x132` | protected snapshot | six recovered post-snapshot scalars have zero runtime readers; bounded non-actuation result |
+| `0x132` | steering-control state/prerequisite | five of six post-snapshot scalars gate or initialize recovered controller state; no direct command-mode selector or d/q-reference write is established |
 | `0x090` | rear-wheel speed + steering-angle-speed validity prerequisite | signals 270/273 form the protected RR/RL rear-wheel-speed pair; signal 276 is protected `CAN Steering Angle Speed (SSAV)`; status bits feed steering validity gates; none selects `C13A/C13D` command mode |
 | `0x0D7` | SP1 vehicle speed / validity | signal 283 is protected `CAN Vehicle Speed (SP1)` and becomes `FEBEB6F2` then `application_vehicle_speed_raw`; protected status can force a fault/event path; remaining fields terminate in snapshot state |
 
@@ -436,10 +438,11 @@ referencesâ€”one `BA43A` snapshot WRITE and one subsystem-initialization WRITEâ€
 and no runtime READ.
 
 The resulting distinction is operationally important for target bring-up: the
-only recovered SecOC **command** PDUs in this Sienna calibration are `0x2E4`
-and `0x131`. A target can still require other authenticated streams such as
-`0x090` or `0x0D7` as prerequisite sensor/validity state, so key recovery and
-message-profile discovery must not be reduced to checking command IDs alone.
+only recovered SecOC **command-mode selectors** in this Sienna calibration are
+`0x2E4` and `0x131`. Other authenticated streams are not telemetry-only:
+`0x132` now has recovered controller-state consumers, while `0x090` and
+`0x0D7` provide prerequisite sensor/validity state. Key recovery and
+message-profile discovery therefore cannot be reduced to checking command IDs.
 
 ### 5.5 Signals 95..100 form a dormant crypto-test input bank
 

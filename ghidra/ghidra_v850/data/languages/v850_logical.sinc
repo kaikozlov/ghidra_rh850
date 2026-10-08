@@ -73,28 +73,32 @@
 	setZ(var & (1 << op1113));
 }
 
-# SET1 reg2, [reg1]
+# Register bit indices use only the low three bits (R01US0123EJ0140).
 :set1 R1115, [R0004] is op0510=0x3F & R0004 & R1115; op1631=0xE0 {
+	local bit:4 = R1115 & 7;
 	local var = *:1 R0004;
-	*:1 R0004 = var | (1 << R1115);
-	setZ(var & (1 << R1115));
+	*:1 R0004 = var | (1 << bit);
+	setZ(var & (1 << bit));
 }
 # NOT1 reg2, [reg1]
 :not1 R1115, [R0004] is op0510=0x3F & R0004 & R1115; op1631=0xE2 {
+	local bit:4 = R1115 & 7;
 	local var = *:1 R0004;
-	*:1 R0004 = var ^ (1 << R1115);
-	setZ(var & (1 << R1115));
+	*:1 R0004 = var ^ (1 << bit);
+	setZ(var & (1 << bit));
 }
 # CLR1 reg2, [reg1]
 :clr1 R1115, [R0004] is op0510=0x3F & R0004 & R1115; op1631=0xE4 {
+	local bit:4 = R1115 & 7;
 	local var = *:1 R0004;
-	*:1 R0004 = var & ~(1 << R1115);
-	setZ(var & (1 << R1115));
+	*:1 R0004 = var & ~(1 << bit);
+	setZ(var & (1 << bit));
 }
 # TST1 reg2, [reg1]
 :tst1 R1115, [R0004] is op0510=0x3F & R0004 & R1115; op1631=0xE6 {
+	local bit:4 = R1115 & 7;
 	local var = *:1 R0004;
-	setZ(var & (1 << R1115));
+	setZ(var & (1 << bit));
 }
 
 

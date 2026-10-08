@@ -217,8 +217,8 @@ public class AssertMotorActuationBoundary extends GhidraScript {
                 "000c02fe:READ", "000c05d4:WRITE", "000c07dc:READ",
                 "000c08c6:WRITE", "000c0d00:WRITE", "000c0ef4:READ");
 
-        // Protected 0x132 parallel-PDU audit: after the BA43A snapshot, all six
-        // recovered scalar destinations have no runtime reader at all.
+        // Protected 0x132 parallel-PDU audit: the refreshed graph recovers
+        // five runtime readers after BA43A; AE2A remains write-only.
         // Signal 196 is a useful decompiler-alias regression: the instruction
         // graph reads canonical byte FEBE8001 even though pseudocode currently
         // renders it as DAT_febe8000._1_1_.
@@ -226,11 +226,16 @@ public class AssertMotorActuationBoundary extends GhidraScript {
                 "0004ab90:DATA", "000572b0:READ", "00057d5a:WRITE");
         assertExactRefs(0xfebef063L,
                 "000572b4:WRITE", "0005b348:WRITE", "000ba8f4:READ");
-        assertExactRefs(0xfebead04L, "000ba8d6:WRITE", "000bdfb2:WRITE");
-        assertExactRefs(0xfebead05L, "000ba8dc:WRITE", "000bdfb4:WRITE");
-        assertExactRefs(0xfebead06L, "000ba8ea:WRITE", "000bdfb6:WRITE");
-        assertExactRefs(0xfebead07L, "000ba8f8:WRITE", "000bdfb8:WRITE");
-        assertExactRefs(0xfebeae28L, "000ba8e2:WRITE", "000be25a:WRITE");
+        assertExactRefs(0xfebead04L,
+                "000ba8d6:WRITE", "000bdfb2:WRITE", "000c7382:READ");
+        assertExactRefs(0xfebead05L,
+                "000ba8dc:WRITE", "000bdfb4:WRITE", "000c7480:READ");
+        assertExactRefs(0xfebead06L,
+                "000ba8ea:WRITE", "000bdfb6:WRITE", "000c7384:READ");
+        assertExactRefs(0xfebead07L,
+                "000ba8f8:WRITE", "000bdfb8:WRITE", "000c7f5c:READ");
+        assertExactRefs(0xfebeae28L,
+                "000ba8e2:WRITE", "000be25a:WRITE", "000c78ea:READ");
         assertExactRefs(0xfebeae2aL, "000ba8f0:WRITE", "000be25e:WRITE");
 
         // Complete direct-reference lock for the d/q-reference feeder state.

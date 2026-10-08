@@ -35,14 +35,22 @@ work_paths: list[Path] = []
 snapshot_paths: list[Path] = []
 for name, row in targets.items():
     print(f"\n== {name} ==")
-    cf = ROOT / row["codeflash"]; df = ROOT / row["dataflash"]
+    cf = ROOT / row["codeflash"]
     check(f"{name} CodeFlash exists/size", cf.is_file() and cf.stat().st_size == row["codeflash_size"])
     check(f"{name} CodeFlash hash", cf.is_file() and sha(cf) == row["codeflash_sha256"])
-    check(f"{name} DataFlash exists/size", df.is_file() and df.stat().st_size == row["dataflash_size"])
-    check(f"{name} DataFlash hash", df.is_file() and sha(df) == row["dataflash_sha256"])
-    check(f"{name} bases exact", row["codeflash_base"] == "0x00000000" and row["dataflash_base"] == "0xFF200000")
-    expected_mcu = "R7F701383" if name.startswith("corolla-") else "R7F701381"
-    check(f"{name} RH850 target exact", row["mcu"] == expected_mcu and row["processor"] == "v850e3:LE:32:default")
+    if "dataflash" in row:
+        df = ROOT / row["dataflash"]
+        check(f"{name} DataFlash exists/size", df.is_file() and df.stat().st_size == row["dataflash_size"])
+        check(f"{name} DataFlash hash", df.is_file() and sha(df) == row["dataflash_sha256"])
+        check(f"{name} bases exact", row["codeflash_base"] == "0x00000000" and row["dataflash_base"] == "0xFF200000")
+        expected_mcu = "R7F701383" if name.startswith("corolla-") else "R7F701381"
+        check(f"{name} RH850 target exact", row["mcu"] == expected_mcu and row["processor"] == "v850e3:LE:32:default")
+    else:
+        extended = ROOT / row["extended_user"]
+        check(f"{name} extended-user exists/size", extended.is_file() and extended.stat().st_size == row["extended_user_size"])
+        check(f"{name} extended-user hash", extended.is_file() and sha(extended) == row["extended_user_sha256"])
+        check(f"{name} image bases exact", row["codeflash_base"] == "0x00000000" and row["extended_user_base"] == "0x01000000")
+        check(f"{name} bounded RH850 target", row["mcu"] == "unknown (RH850 P1x-C family)" and row["processor"] == "v850e3:LE:32:default")
     check(f"{name} safe Ghidra names", bool(name_re.fullmatch(row["project_name"])) and bool(name_re.fullmatch(row["program_name"])))
     work = ROOT / row["work_dir"]; snap = ROOT / row["snapshot_dir"]
     work_paths.append(work); snapshot_paths.append(snap)

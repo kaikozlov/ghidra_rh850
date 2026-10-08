@@ -92,7 +92,7 @@ if [[ -d "$PROJECT_DIR/$PROJECT_NAME.rep" ]]; then
     -postScript AssertApplicationInterfaceStateJoins.java \
     -postScript AssertRecoveredCallbackTables.java \
     -postScript AssertFunctionDiscoveryFloor.java --mutation-self-test \
-    -postScript AssertReviewedPointerClusters.java \
+    -postScript AssertRecoveredPointerClusters.java \
     -postScript AssertMemorySafetyPaths.java \
     -postScript AssertMotorActuationBoundary.java \
     -postScript AssertIcusStage7Static.java \
@@ -118,7 +118,7 @@ if [[ -d "$PROJECT_DIR/$PROJECT_NAME.rep" ]]; then
 
   echo "Verified instruction inventory: $INV_OUT"
   echo "Verified switch-table inventory: $SWITCH_OUT"
-  grep -E 'ASSERT (processor-fixture|undefined-in-functions|system-register-ops|project-invariants|application-rx-map|secoc-rx-surface|application-tx-semantics|application-interface-joins|function-discovery-floor|reviewed-pointer-clusters|memory-safety-paths|motor-actuation-boundary|icus-stage7|switch-tables|decompiler-invariants|processor-userops)|AssertRecoveredCallbackTables: PASS' \
+  grep -E 'ASSERT (processor-fixture|undefined-in-functions|system-register-ops|project-invariants|application-rx-map|secoc-rx-surface|application-tx-semantics|application-interface-joins|function-discovery-floor|recovered-pointer-clusters|memory-safety-paths|motor-actuation-boundary|icus-stage7|switch-tables|decompiler-invariants|processor-userops)|AssertRecoveredCallbackTables: PASS' \
     "$FIXTURE_LOG" "$PROJECT_LOG" || true
 else
   echo "NOTE: $PROJECT_DIR missing; skipped full-program processor audits"

@@ -1,4 +1,4 @@
-# Analysis status matrix — Sienna snapshot (2026-08-15)
+# Analysis status matrix — Sienna processor refresh (2026-10-08)
 
 Historical coverage notes for the Sienna `8965B4512000` analysis, originating
 with the **2026-08-15 inventory snapshot** and including later corpus/variant
@@ -9,7 +9,7 @@ question references, [PRIORITIES.md](PRIORITIES.md) for the current queue, and
 the [variant reports](../variants/README.md) for calibration-specific state.
 
 Corrected normalized project-inventory SHA-256:
-`19d5a7fc1c0465b6ab62936e5f12fc95f130197ee3e095f77215c982b11f02c8`.
+`c2accb82d1713565b695b75df916ca8ff62d14f6ef17f3afd244a00ad4bf027a`.
 The inventory was produced byte-identically by two separately invoked four-stage
 rebuilds. Committed-project promotion is a separate final lifecycle gate.
 
@@ -18,14 +18,14 @@ rebuilds. Committed-project promotion is a separate final lifecycle gate.
 | Dimension | Snapshot value | Evidence boundary and source |
 |---|---:|---|
 | Firmware bytes mapped | CodeFlash 1,048,576 B; DataFlash 32,768 B | Exact published/committed binaries; SHA-256 `21140bbd…fde` and `81d87b67…ecb8`; SECOC-044 identifies a unique one-bit CodeFlash region-1 inconsistency at `0xBB1C4 A2→82` whose reconstruction restores the stock boot CRC and local instruction semantics. The committed artifact remains unchanged for provenance; project inventory records 14 memory blocks including mapped overlays |
-| Decoded CodeFlash instructions | 183,240 | Ghidra listing total in `data/ghidra_project_inventory.baseline.jsonl`; this is decode coverage, not semantic coverage |
-| Decoded instructions outside functions | 17,147 instructions / 48,164 bytes | `data/outside_function_summary.json`; conservative runs can include data decoded as instructions |
-| Known function entries | 6,376 | Byte-identical two-rebuild project inventory; zero undefined bytes applies inside these function bodies only |
+| Decoded CodeFlash instructions | 197,726 | Ghidra listing total in `data/ghidra_project_inventory.baseline.jsonl`; this is decode coverage, not semantic coverage |
+| Decoded instructions outside functions | 7,186 instructions / 18,138 bytes | `data/outside_function_summary.json`; conservative runs can include data decoded as instructions |
+| Known function entries | 7,090 | Byte-identical two-rebuild project inventory; zero undefined bytes applies inside these function bodies only |
 | Validated indirect callback tables | 12 tables / 456 nonzero target pointers | `AssertFunctionDiscoveryFloor.java` against firmware bytes; includes the prior XCP/RoutineControl/RDBI tables plus three dispatch-proven COM deadline-monitor callback tables at `0x28524`, `0x28558`, and `0x286D0` |
 | Bounded pointer wrappers | 6 | Processor function-discovery assertion; structural wrapper references, not callback semantics |
-| Unresolved outside-function candidates | 1,665 total: 703 orphan decoded runs, 962 pointer-referenced runs | `data/outside_function_summary.json`; adjudication is 1,605 `unresolved` plus 60 `unresolved-reviewed` |
+| Unresolved outside-function candidates | 900 total: 281 orphan decoded runs, 619 pointer-referenced runs | `data/outside_function_summary.json`; all remain `unresolved` |
 | Indirect-dispatch resolution | 456 nonzero pointers in the 12 proven tables resolve to exact function entries; direct-call gaps 0 and constant-veneer target gaps 0 | Processor assertion. This is not a denominator for every possible computed call in the image |
-| Dense `0x27C88` pointer cluster | 60 targets remain unresolved-reviewed | No executable walker/computed-call consumer is evidenced; they are not promoted from pointer shape alone |
+| Dense `0x27C88` pointer cluster | 60 exact pattern-recovered function entries | No executable walker/computed-call consumer is evidenced; function boundaries do not promote the array to a dispatch table |
 
 ## Semantic and verification coverage
 
