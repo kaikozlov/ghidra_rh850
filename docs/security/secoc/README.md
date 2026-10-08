@@ -49,6 +49,7 @@ See [../../status/PRIORITIES.md](../../status/PRIORITIES.md).
 | [key-recovery-assessment.md](key-recovery-assessment.md) | Existing-key recovery routes and their evidence boundaries |
 | [us20250300993-dynamic-key-patent.md](us20250300993-dynamic-key-patent.md) | Toyota 2024-priority dynamic SecOC-key patent: claim scope, threat model, HSM/SHE implications, and exact-F33 comparison |
 | [candidate-f05-payload.md](candidate-f05-payload.md) | Vance candidate-f05 DataFlash-dump payload semantics/provenance |
+| [../icu-hsm-command-surface.md](../icu-hsm-command-surface.md) | Cross-target (not this calibration): every application-issued ICU-S/ICUMC command across all EPS dumps and the Venza airbag |
 
 ## Important boundaries
 

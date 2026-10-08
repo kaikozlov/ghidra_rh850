@@ -1279,3 +1279,23 @@ ledger context is useful.
   transmitter/link, stock request handoff, signing owner, and source-suppression mechanism,
   alongside the already-open `0x08A/0x081` proxy contract. The mid-aggregate observer is
   optional topology evidence; it is no longer needed to rediscover EPS software routing.
+
+- **OQ-055 — Venza airbag secure-service opcode `0x10` semantics and consumer.** The
+  exhaustive airbag census
+  ([icu-hsm-command-surface.md](../security/icu-hsm-command-surface.md)) found a fifth
+  ROM-registered secure service beyond the documented MAC/verify/key-update set: entry
+  `0xBD8C8`, descriptor base `FEFF01E8`, opcode word `0x10`, 16-byte-block-count input
+  plus a logical key selector copied from a type-1 config, whose completion callback
+  delivers a 4-byte result. Its application consumer is engine-mediated (runner table
+  `0x1C7C0..0x1C7E0`), so no static owner is recovered. Recover which airbag feature
+  submits it (runner disassembly or a live GTS session) and what the 4-byte result
+  represents before assigning it any role.
+- **OQ-056 — TSS3 EPS stock SecOC-transmit wire join beyond Camry.** Camry F33 is the
+  only target whose command-5 TX signer is live-observed on the wire (`0x030`, selector
+  4). Crown F30 and Corolla F12/H12 carry the same engine (0x44-stride TX profiles with
+  a `DataID 0x0030`-field first record: Crown `0x25676+`, Corolla `0x2581E+`) wired to
+  their command-5 channels, but the physical PDU/freshness join for those calibrations
+  is table-shape evidence only. A bus capture on a Crown/Corolla EPS should confirm
+  which transmitted frame carries the `0x0030`-authenticated payload before the
+  family-wide "production TX signer" statement is used for those two targets' wire
+  behavior.

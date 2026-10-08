@@ -17,6 +17,7 @@ calibrations are compared under [../variants/README.md](../variants/README.md).
 | Keyless execution surface | Cross-image audit of key-free execution paths; reusable triage screen for future dumps | [keyless-exec-surface-assessment.md](keyless-exec-surface-assessment.md) |
 | Application SecurityAccess | Extended-session level 2 unlock | [application-security-access.md](application-security-access.md) |
 | SecOC | Runtime CAN message authentication and ICU-S software-path assessment | [secoc/README.md](secoc/README.md) |
+| App↔HSM command surface | Exhaustive cross-target census of every ICU-S/ICUMC command the application can issue (all EPS dumps + Venza airbag) | [icu-hsm-command-surface.md](icu-hsm-command-surface.md) |
 | Ephemeral SecOC bypass | Fail-stock RAM-only bootstrap, lifetime, hook, and internal-command feasibility | [ephemeral-secoc-bypass.md](ephemeral-secoc-bypass.md) |
 | Memory-safety audit | Externally reachable input-handler vulnerabilities | [memory-safety-audit.md](memory-safety-audit.md) |
 

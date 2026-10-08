@@ -189,5 +189,32 @@ check("authenticated key-update dispatcher is exact", sha256(cf[0xBD2EC:0xBD37C]
 check("authenticated 64-byte/48-byte lower adapter is exact", sha256(cf[0xBE0CC:0xBE1DA]) == "adea5483aa15706e8fcae2ee368143584e92037f3e7b2c01d5893fa3e219ca27")
 check("RoutineControl application dispatcher body is exact", sha256(cf[0xC6672:0xC6776]) == "e7dbd1793c2df4dc30efd47dcea3f51e67b29043053ed7085531aa4839b49212")
 
+print("\n== secure-service command census (2026-10-08 exhaustive pass) ==")
+# The MainPE-to-secure-subsystem surface is exactly five lower adapters, each
+# reached through the convergence point 0xBD69E -> enqueue 0x8A18A. The five
+# request-builder call sites, their descriptor bases, and their service
+# opcodes are pinned here. Registry cells hold the sync-API pointers of the
+# five ROM-registered crypto services.
+ADAPTER_CALL_SITES = (0xBD98C, 0xBDB2C, 0xBDD50, 0xBDFA4, 0xBE1B8)
+for site in ADAPTER_CALL_SITES:
+    check(f"adapter call site {site:#x} is jarl 0xBD69E", cf[site:site + 4] in (
+        bytes.fromhex("bfff12fd"), bytes.fromhex("bfff72fb"), bytes.fromhex("bfff4ef9"),
+        bytes.fromhex("bffffaf6"), bytes.fromhex("bfffe6f4")))
+check("MAC-generate descriptor opcode store is movea 0x12 at 0xBDD00", cf[0xBDD00:0xBDD04] == bytes.fromhex("200e1200"))
+check("key-update descriptor opcode store is movea 0x31 at 0xBE17A", cf[0xBE17A:0xBE17E] == bytes.fromhex("209e3100"))
+check("service opcode 0x10 descriptor store is movea 0x10 at 0xBD942", cf[0xBD942:0xBD946] == bytes.fromhex("200e1000"))
+check("service opcode 0x04 descriptor store is mov 0x4 at 0xBDAFE", cf[0xBDAFE:0xBDB00] == bytes.fromhex("040a"))
+REGISTRY_SYNC_CELLS = {
+    0x1C7FC: 0xBDC7A,  # MAC generate (opcode 0x12)
+    0x1C840: 0xBDE88,  # MAC verify (opcode 0x12)
+    0x1C884: 0xBD8C8,  # 16-byte-block service (opcode 0x10)
+    0x1C8A8: 0xBE0CC,  # authenticated key update (opcode 0x31)
+    0x1C8C8: 0xBDA6E,  # mode-mapped service (opcode 0x04)
+}
+for cell, ptr in REGISTRY_SYNC_CELLS.items():
+    check(f"service registry cell {cell:#x} holds sync API {ptr:#x}", struct.unpack_from("<I", cf, cell)[0] == ptr)
+check("service trigger 0xFF1F0044 has its single writer at 0x89FBA", cf[0x89FBA:0x89FC0] == bytes.fromhex("6be745001d50"))
+check("queue pointer 0xFF1F0014 is read by the ring helper at 0x89E80", cf[0x89E80:0x89E86] == bytes.fromhex("210f15001f9a"))
+
 print(f"\nResults: {passed} passed, {failed} failed")
 raise SystemExit(1 if failed else 0)
