@@ -438,6 +438,12 @@ def build() -> tuple[bytes, list[dict]]:
         "mnemonic_prefix": "sch1l",
         "must_pcode_ops": ["CBRANCH", "INT_LEFT"],
     })
+    add("sch1r", enc_search(0x362, 10, 11), {
+        "mnemonic_prefix": "sch1r",
+    })
+    add("sch0l", enc_search(0x364, 10, 11), {
+        "mnemonic_prefix": "sch0l",
+    })
     add("bsh", enc_search(0x342, 10, 11), {
         "mnemonic_prefix": "bsh",
     })
@@ -596,6 +602,41 @@ def build() -> tuple[bytes, list[dict]]:
         "mnemonic_prefix": "stsr",
         "operand_register": "MPAT15",
     })
+
+    # Intervening writes for LDL.W/STC.W reservation-lifetime regressions.
+    # r7 (or ep/sp) selects the write address independently of the link in r6.
+    for mnemonic, opcode, low_bit in (
+        ("b", 0x3A, 0), ("h", 0x3B, 0), ("w", 0x3B, 1)
+    ):
+        add(f"link-st.{mnemonic}16", enc_ld_st16(opcode, 7, 10, low_bit),
+            {"mnemonic_prefix": f"st.{mnemonic}"})
+    for mnemonic, word0, word1 in (
+        ("b", 0x0787, 0x500D), ("h", 0x07A7, 0x500D),
+        ("w", 0x0787, 0x500F), ("dw", 0x07A7, 0x500F)
+    ):
+        add(f"link-st.{mnemonic}23", u16(word0) + u16(word1) + u16(0),
+            {"mnemonic_prefix": f"st.{mnemonic}"})
+    for mnemonic, word in (("b", 0x5380), ("h", 0x5480), ("w", 0x5501)):
+        add(f"link-sst.{mnemonic}", u16(word),
+            {"mnemonic_prefix": f"sst.{mnemonic}"})
+    for mnemonic, opcode in (("b", 0x372), ("h", 0x376), ("w", 0x37A)):
+        for direction, word0 in (("inc", 0x17E7), ("dec", 0x27E7)):
+            add(f"link-st.{mnemonic}-{direction}",
+                u16(word0) + u16((10 << 11) | opcode),
+                {"mnemonic_prefix": f"st.{mnemonic}"})
+    for mnemonic, immediate_op, register_op in (
+        ("set1", 0, 0xE0), ("not1", 1, 0xE2), ("clr1", 2, 0xE4)
+    ):
+        add(f"link-{mnemonic}-imm", enc_bit3_mem(immediate_op, 3, 7, 0),
+            {"mnemonic_prefix": mnemonic})
+        add(f"link-{mnemonic}-reg", enc_reg_bit(register_op, 7, 10),
+            {"mnemonic_prefix": mnemonic})
+    add("link-caxi", enc_caxi(7, 10, 11), {"mnemonic_prefix": "caxi"})
+    add("link-prepare", enc_prepare_list12_imm5(0), {"mnemonic_prefix": "prepare"})
+    add("link-pushsp", u16(0x47EA) + u16(0x5960), {"mnemonic_prefix": "pushsp"})
+    add("feret", u16(0x07E0) + u16(0x014A), {"mnemonic_prefix": "feret"})
+    add("rie-imm", u16(0x07F0) + u16(0), {"mnemonic_prefix": "rie"})
+    add("syscall-3", u16(0xD7E3) + u16(0x0160), {"mnemonic_prefix": "syscall"})
 
     return bytes(blob), cases
 

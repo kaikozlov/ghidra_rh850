@@ -25,6 +25,7 @@
 # SST.B disp7[ep], reg2
 :sst.b op0006[ep], R1115 is op0710=0x07 & op0006 & R1115 & ep {
 	local addr:4 = op0006 + ep;
+	invalidate_link_store(addr, 1);
 	*:1 addr = R1115 : 1;
 }
 # SLD.H disp8[ep], reg2
@@ -37,6 +38,7 @@
 :sst.h disp8[ep], R1115 is op0710=0x09 & op0006 & R1115 & ep
 [ disp8 = op0006 * 2; ] {
 	local addr:4 = disp8 + ep;
+	invalidate_link_store(addr, 2);
 	*:2 addr = R1115 : 2;
 }
 # SLD.W disp8[ep], reg2
@@ -49,6 +51,7 @@
 :sst.w disp8[ep], R1115 is op0710=0x0A & op0000 = 1 & op0106 & R1115 & ep
 [ disp8 = op0106 * 4; ] {
 	local addr:4 = disp8 + ep;
+	invalidate_link_store(addr, 4);
 	*:4 addr = R1115;
 }
 
@@ -71,17 +74,20 @@
 # ST.B reg2, disp16[reg1]
 :st.b R1115, s1631[R0004] is op0510=0x3A & R0004 & R1115; s1631 {
 	local addr:4 = s1631 + R0004;
+	invalidate_link_store(addr, 1);
 	*:1 addr = R1115 : 1;
 }
 # ST.H reg2, disp16[reg1]
 :st.h R1115, s1631[R0004] is op0510=0x3B & R0004 & R1115; s1631 & op1616=0 {
 	local addr:4 = s1631 + R0004;
+	invalidate_link_store(addr, 2);
 	*:2 addr = R1115 : 2;
 }
 # ST.W reg2, disp16[reg1]
 :st.w R1115, disp16[R0004] is op0510=0x3B & R0004 & R1115; s1731 & op1616=1 
 [ disp16 = s1731 * 2; ]{
 	local addr:4 = disp16 + R0004;
+	invalidate_link_store(addr, 4);
 	*:4 addr = R1115;
 }
 
@@ -107,12 +113,14 @@
 :st.b R2731, disp23[R0004] is op0515=0x03C & R0004; R2731 & op2026 & op1619=0xD; s3247
 [ disp23 = (s3247 << 7) | op2026; ] {
 	local addr:4 = disp23 + R0004;
+	invalidate_link_store(addr, 1);
 	*:1 addr = R2731 : 1;
 }
 # ST.W reg3, disp23[reg1]
 :st.w R2731, disp23[R0004] is op0515=0x03C & R0004; R2731 & op2126 & op1620=0xF; s3247
 [ disp23 = (s3247 << 7) | (op2126 << 1); ] {
 	local addr:4 = disp23 + R0004;
+	invalidate_link_store(addr, 4);
 	*:4 addr = R2731;
 }
 # LD.BU disp23[reg1], reg3
@@ -131,6 +139,7 @@
 :st.h R2731, disp23[R0004] is op0515=0x03D & R0004; R2731 & op2126 & op1620=0xD; s3247
 [ disp23 = (s3247 << 7) | (op2126 << 1); ] {
 	local addr:4 = disp23 + R0004;
+	invalidate_link_store(addr, 2);
 	*:2 addr = R2731 : 2;
 }
 

@@ -98,6 +98,7 @@ attach variables [ SR0004_d SR1115_d ] [
 :st.dw R2731pairEx, disp23[R0004] is op0515=0x3D & R0004; R2731pairEx & op2126 & op1620=0xF; s3247
 [ disp23 = (s3247 << 7) | (op2126 << 1); ] {
     local addr:4 = disp23 + R0004;
+    invalidate_link_store(addr, 8);
     *:8 addr = R2731pairEx;
 }
 
@@ -243,31 +244,37 @@ attach variables [ SR0004_d SR1115_d ] [
 
 # ST.B reg3, [reg1]+
 :st.b R2731, [R0004]+	is op0515=0x0BF & R0004 ; op1626=0x372 & R2731 {
+	invalidate_link_store(R0004, 1);
 	*:1 R0004 = R2731;
 	R0004 = R0004 + 1;
 }
 # ST.B reg3, [reg1]-
 :st.b R2731, [R0004]-	is op0515=0x13F & R0004 ; op1626=0x372 & R2731 {
+	invalidate_link_store(R0004, 1);
 	*:1 R0004 = R2731;
 	R0004 = R0004 - 1;
 }
 # ST.H reg3, [reg1]+
 :st.h R2731, [R0004]+	is op0515=0x0BF & R0004 ; op1626=0x376 & R2731 {
+	invalidate_link_store(R0004, 2);
 	*:2 R0004 = R2731;
 	R0004 = R0004 + 2;
 }
 # ST.H reg3, [reg1]-
 :st.h R2731, [R0004]-	is op0515=0x13F & R0004 ; op1626=0x376 & R2731 {
+	invalidate_link_store(R0004, 2);
 	*:2 R0004 = R2731;
 	R0004 = R0004 - 2;
 }
 # ST.W reg3, [reg1]+
 :st.w R2731, [R0004]+	is op0515=0x0BF & R0004 ; op1626=0x37A & R2731 {
+	invalidate_link_store(R0004, 4);
 	*:4 R0004 = R2731;
 	R0004 = R0004 + 4;
 }
 # ST.W reg3, [reg1]-
 :st.w R2731, [R0004]-	is op0515=0x13F & R0004 ; op1626=0x37A & R2731 {
+	invalidate_link_store(R0004, 4);
 	*:4 R0004 = R2731;
 	R0004 = R0004 - 4;
 }
@@ -341,11 +348,13 @@ buildPushSp: is counter=0 { }
 buildPushSp: is counter=1 & rXX [ counter=0; regNum=regNum+1; ]
 {
 	mult_addr = mult_addr - 4;
+	invalidate_link_store(mult_addr, 4);
 	*mult_addr = rXX;
 }
 buildPushSp: is rXX & buildPushSp [ counter=counter-1; regNum=regNum+1; ]
 {
 	mult_addr = mult_addr - 4;
+	invalidate_link_store(mult_addr, 4);
 	*mult_addr = rXX;
 	build buildPushSp;
 }

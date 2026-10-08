@@ -66,5 +66,5 @@ point. Notable areas under active modification for the P1M-E target:
 - `data/languages/v850.dwarf` — GCC DWARF register mapping.
 - `data/patterns/` — Ghidra function-start patterns for PREPARE/ADDI prologues
   following architectural returns.
-- Language versions `0.3` (V850E2M) and `0.4` (RH850G3M), with extension
+- Language versions `0.4` (V850E2M) and `0.5` (RH850G3M), with extension
   metadata pinned to Ghidra `12.1.4` (see `PROVENANCE.json`).

@@ -20,6 +20,7 @@ macro exception_vector(result, offset) {
 @endif
 
 macro enter_fe_exception(return_pc, cause, offset, handler) {
+	clear_link();
 	FEPC = return_pc;
 	FEPSW = PSW;
 	FEIC = cause;
@@ -32,6 +33,7 @@ macro enter_fe_exception(return_pc, cause, offset, handler) {
 }
 
 macro enter_ei_exception(return_pc, cause, offset, handler) {
+	clear_link();
 	EIPC = return_pc;
 	EIPSW = PSW;
 	EIIC = cause;
@@ -111,6 +113,7 @@ macro enter_ei_exception(return_pc, cause, offset, handler) {
 :caxi [R0004], R1115, R2731 is op0510=0x3F & R0004 & R1115; op1626=0xEE & R2731 {
 	local token = *:4 R0004;
 	local result = R1115 - token;
+	invalidate_link_store(R0004, 4);
 	*:4 R0004 = token * zext(result != 0) +
 				R2731 * zext(result == 0);
 	R2731 = token;
@@ -154,12 +157,14 @@ macro enter_ei_exception(return_pc, cause, offset, handler) {
 }
 # EIRET
 :eiret is op0515=0x3F; op1631=0x0148 {
+	clear_link();
 	PC = EIPC;
 	PSW = EIPSW;
 	return [PC];
 }
 # FERET
 :feret is op0515=0x3F; op1631=0x014A {
+	clear_link();
 	PC = FEPC;
 	PSW = FEPSW;
 	return [PC];
@@ -179,6 +184,7 @@ macro enter_ei_exception(return_pc, cause, offset, handler) {
 # SYSCALL vector8
 :syscall vector8 is op0515=0x6BF & op0004; op3031=0 & op2729 & op1626=0x160
 [ vector8 = (op2729 << 5) | op0004; ] {
+	clear_link();
 	EIPC = inst_next;
 	EIPSW = PSW;
 	EIIC = vector8 + 0x8000;

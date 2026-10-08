@@ -5,22 +5,24 @@
             endian="little"
             size="32"
             variant="V850E2M"
-            version="0.3"
+            version="0.4"
             slafile="v850e2.sla"
             processorspec="v850.pspec"
             id="v850:LE:32:default">
     <description>Renesas v850 Module</description>
     <compiler name="default" spec="v850.cspec" id="default"/>
+    <external_name tool="DWARF.register.mapping.file" name="v850.dwarf"/>
   </language> 
   <language processor="v850"
             endian="little"
             size="32"
             variant="RH850G3M (P1M-E)"
-            version="0.4"
+            version="0.5"
             slafile="v850e3.sla"
             processorspec="v850.pspec"
             id="v850e3:LE:32:default">
     <description>Renesas RH850G3M for RH850/P1M-E</description>
     <compiler name="default" spec="v850.cspec" id="default"/>
+    <external_name tool="DWARF.register.mapping.file" name="v850.dwarf"/>
   </language> 
 </language_definitions>

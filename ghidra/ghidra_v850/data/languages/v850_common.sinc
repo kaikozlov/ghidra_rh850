@@ -47,6 +47,24 @@ define context popspContext
 ;
 @endif
 
+# RH850G3M Table 5-3: local writes invalidate reservations in 32-byte units.
+# Check both endpoints so an unaligned write spanning two units hits either.
+# The legacy V850E2 language has no load-link monitor.
+macro invalidate_link_store(addr, width) {
+@if defined(V850E3)
+	local last:4 = addr + width - 1;
+	local linked_unit:4 = ll_addr & 0xffffffe0;
+	ll_valid = ll_valid & zext((addr & 0xffffffe0) != linked_unit)
+		& zext((last & 0xffffffe0) != linked_unit);
+@endif
+}
+
+macro clear_link() {
+@if defined(V850E3)
+	ll_valid = 0;
+@endif
+}
+
 
 @define PSW_PP  "PSW[19,1]"
 @define PSW_NPW "PSW[18,1]"

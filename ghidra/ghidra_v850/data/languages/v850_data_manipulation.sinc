@@ -165,7 +165,7 @@ macro SearchLeft(count, value, pattern) {
 	clrOV();
 	$(PSW_S) = 0;
 	$(PSW_Z)  = (count == 0);
-	$(PSW_CY) = (count != 0);
+	$(PSW_CY) = (count == 32);
 	R2731 = count;
 }
 # SCH1R reg2, reg3
@@ -175,7 +175,7 @@ macro SearchLeft(count, value, pattern) {
 	clrOV();
 	$(PSW_S) = 0;
 	$(PSW_Z)  = (count == 0);
-	$(PSW_CY) = (count != 0);
+	$(PSW_CY) = (count == 32);
 	R2731 = count;
 }
 # SCH0L reg2, reg3
@@ -185,7 +185,7 @@ macro SearchLeft(count, value, pattern) {
 	clrOV();
 	$(PSW_S) = 0;
 	$(PSW_Z)  = (count == 0);
-	$(PSW_CY) = (count != 0);
+	$(PSW_CY) = (count == 32);
 	R2731 = count;
 }
 # SCH1L reg2, reg3
@@ -195,7 +195,7 @@ macro SearchLeft(count, value, pattern) {
 	clrOV();
 	$(PSW_S) = 0;
 	$(PSW_Z)  = (count == 0);
-	$(PSW_CY) = (count != 0);
+	$(PSW_CY) = (count == 32);
 	R2731 = count;
 }
 

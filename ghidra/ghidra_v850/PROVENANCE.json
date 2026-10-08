@@ -1,7 +1,7 @@
 {
   "name": "Renesas_v850",
   "language_id": "v850e3:LE:32:default",
-  "language_version": "0.4",
+  "language_version": "0.5",
   "upstream": {
     "url": "https://github.com/esaulenka/ghidra_v850",
     "baseline_commit": "14c1b5be32b8ec741ee626c8bca9885c58f7a473",

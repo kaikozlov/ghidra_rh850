@@ -140,6 +140,116 @@ public class AssertProcessorFixtureSemantics extends GhidraScript {
         }
     }
 
+    private void verifySearchBoundaries(java.util.Map<String, Long> addrs) throws Exception {
+        String[] names = {"sch0r", "sch1r", "sch0l", "sch1l"};
+        long[][] inputs = {
+            {0xfffffffeL, 0x7fffffffL, 0xffffffffL},
+            {1, 0x80000000L, 0},
+            {0x7fffffffL, 0xfffffffeL, 0xffffffffL},
+            {0x80000000L, 1, 0},
+        };
+        long[] results = {1, 32, 0};
+        // G3M pp. 290-293: CY marks the final searched bit, Z marks no match.
+        long[] flags = {0x10, 0x18, 0x11}; // SAT preserved; OV and S cleared.
+        for (int i = 0; i < names.length; i++) {
+            long address = requireCaseAddr(addrs, names[i]);
+            if (address < 0) continue;
+            for (int j = 0; j < results.length; j++) {
+                String label = names[i] + " result " + results[j];
+                EmulatorHelper emu = emulator(address);
+                try {
+                    emu.writeRegister("r10", inputs[i][j]);
+                    emu.writeRegister("PSW", 0x1f);
+                    step(emu, label);
+                    requireRegister(emu, label, "r11", results[j]);
+                    requireRegister(emu, label, "PSW", flags[j]);
+                } finally {
+                    emu.dispose();
+                }
+            }
+        }
+    }
+
+    private void requireConditionalStore(EmulatorHelper emu, long stcAddr,
+                                          String label, boolean succeeds) throws Exception {
+        emu.writeRegister("r6", 0x3000);
+        emu.writeRegister("r11", 0x55667788L);
+        emu.writeRegister("PC", stcAddr);
+        step(emu, label);
+        requireRegister(emu, label, "r11", succeeds ? 1 : 0);
+        long expected = succeeds ? 0x55667788L : 0x11223344L;
+        if (readU32(emu, 0x3000) != expected) {
+            fail(label + ": conditional store changed memory incorrectly");
+        }
+    }
+
+    private EmulatorHelper linkedEmulator(long ldlAddr) throws Exception {
+        EmulatorHelper emu = emulator(ldlAddr);
+        emu.writeRegister("r6", 0x3000);
+        emu.writeMemory(toAddr(0x3000), new byte[]{0x44, 0x33, 0x22, 0x11});
+        step(emu, "establish reservation");
+        return emu;
+    }
+
+    private void verifyLinkLifetime(java.util.Map<String, Long> addrs) throws Exception {
+        long ldlAddr = requireCaseAddr(addrs, "ldl.w");
+        long stcAddr = requireCaseAddr(addrs, "stc.w");
+        if (ldlAddr < 0 || stcAddr < 0) return;
+        // Same 32-byte unit but a different word must invalidate; the next unit
+        // must not. Exercise every local-store encoding and both CAXI outcomes.
+        for (String name : new java.util.TreeSet<>(addrs.keySet())) {
+            if (!name.startsWith("link-")) continue;
+            for (long writeAddr : new long[]{0x3010, 0x3020}) {
+                int outcomes = name.equals("link-caxi") ? 2 : 1;
+                for (int outcome = 0; outcome < outcomes; outcome++) {
+                    EmulatorHelper emu = linkedEmulator(ldlAddr);
+                    String label = name + " at " + Long.toHexString(writeAddr)
+                            + " outcome " + outcome;
+                    try {
+                        emu.writeMemory(toAddr(writeAddr), new byte[8]);
+                        emu.writeRegister("r7", writeAddr);
+                        emu.writeRegister("ep", writeAddr);
+                        emu.writeRegister("sp", writeAddr + (name.equals("link-pushsp") ? 8 : 4));
+                        emu.writeRegister("r10", outcome == 0 ? 0 : 1);
+                        emu.writeRegister("r11", 0x42);
+                        emu.writeRegister("lp", 0x42);
+                        emu.writeRegister("PC", addrs.get(name));
+                        step(emu, label);
+                        requireConditionalStore(emu, stcAddr, label, writeAddr == 0x3020);
+                    } finally {
+                        emu.dispose();
+                    }
+                }
+            }
+        }
+
+        // G3M Table 5-3: exceptions and EIRET/FERET invalidate, CTRET does not.
+        for (String name : new String[]{"rie", "rie-imm", "fetrap-3", "trap-3",
+                                        "syscall-3", "eiret", "feret", "ctret"}) {
+            long address = requireCaseAddr(addrs, name);
+            if (address < 0) continue;
+            EmulatorHelper emu = linkedEmulator(ldlAddr);
+            try {
+                emu.writeRegister("EIPC", stcAddr);
+                emu.writeRegister("FEPC", stcAddr);
+                emu.writeRegister("CTPC", stcAddr);
+                emu.writeRegister("EIPSW", 0);
+                emu.writeRegister("FEPSW", 0);
+                emu.writeRegister("CTPSW", 0);
+                emu.writeRegister("PSW", 0);
+                emu.writeRegister("RBASE", 0x2200);
+                emu.writeRegister("SCBP", 0x4000);
+                emu.writeRegister("SCCFG", 3);
+                emu.writeMemory(toAddr(0x400c), new byte[]{0, 1, 0, 0});
+                emu.writeRegister("PC", address);
+                step(emu, name + " with reservation");
+                requireConditionalStore(emu, stcAddr, "stc.w after " + name, name.equals("ctret"));
+            } finally {
+                emu.dispose();
+            }
+        }
+    }
+
     private void runExecutionVectors(java.util.Map<String, Long> addrs) throws Exception {
         long a;
 
@@ -549,45 +659,7 @@ public class AssertProcessorFixtureSemantics extends GhidraScript {
             }
         }
 
-        a = requireCaseAddr(addrs, "sch0r");
-        if (a >= 0) {
-            EmulatorHelper emu = emulator(a);
-            try {
-                emu.writeRegister("r10", 0xfffffffeL);
-                emu.writeRegister("PSW", 0x6);
-                step(emu, "sch0r first bit");
-                requireRegister(emu, "sch0r first bit", "r11", 1);
-                if (!pswBit(emu, 3) || pswBit(emu, 2) || pswBit(emu, 1)) {
-                    fail("sch0r flags do not match found-first-bit result");
-                }
-            } finally {
-                emu.dispose();
-            }
-        }
-
-        a = requireCaseAddr(addrs, "sch1l");
-        if (a >= 0) {
-            EmulatorHelper emu = emulator(a);
-            try {
-                emu.writeRegister("r10", 0x80000000L);
-                step(emu, "sch1l first bit");
-                requireRegister(emu, "sch1l first bit", "r11", 1);
-            } finally {
-                emu.dispose();
-            }
-
-            emu = emulator(a);
-            try {
-                emu.writeRegister("r10", 0);
-                step(emu, "sch1l not found");
-                requireRegister(emu, "sch1l not found", "r11", 0);
-                if (!pswBit(emu, 0) || pswBit(emu, 3)) {
-                    fail("sch1l not-found flags are incorrect");
-                }
-            } finally {
-                emu.dispose();
-            }
-        }
+        verifySearchBoundaries(addrs);
 
         a = requireCaseAddr(addrs, "bsh");
         if (a >= 0) {
@@ -678,6 +750,7 @@ public class AssertProcessorFixtureSemantics extends GhidraScript {
                 emu.dispose();
             }
         }
+        verifyLinkLifetime(addrs);
 
         a = requireCaseAddr(addrs, "cmovf.s");
         if (a >= 0) {

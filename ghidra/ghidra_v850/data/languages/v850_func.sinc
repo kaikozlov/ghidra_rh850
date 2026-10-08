@@ -101,7 +101,11 @@ DispList: { DispList21 }		is DispList21 & prep27=0				{ }
 }
 
 
-macro push(reg) { sp = sp - 4; *:4 sp = reg; }
+macro push(reg) {
+	sp = sp - 4;
+	invalidate_link_store(sp, 4);
+	*:4 sp = reg;
+}
 
 PrepList20:	r20					is 				prep27=1 & r20			{	push(r20); }
 PrepList20:						is 				prep27=0				{ }

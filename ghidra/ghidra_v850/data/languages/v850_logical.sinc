@@ -49,6 +49,7 @@
 :set1 op1113, s1631[R0004] is op0510=0x3E & op1415=0 & op1113 & R0004; s1631 {
 	local addr:4 = s1631 + R0004;
 	local var = *:1 addr;
+	invalidate_link_store(addr, 1);
 	*:1 addr = var | (1 << op1113);
 	setZ(var & (1 << op1113));
 }
@@ -56,6 +57,7 @@
 :not1 op1113, s1631[R0004] is op0510=0x3E & op1415=1 & op1113 & R0004; s1631 {
 	local addr:4 = s1631 + R0004;
 	local var = *:1 addr;
+	invalidate_link_store(addr, 1);
 	*:1 addr = var ^ (1 << op1113);
 	setZ(var & (1 << op1113));
 }
@@ -63,6 +65,7 @@
 :clr1 op1113, s1631[R0004] is op0510=0x3E & op1415=2 & op1113 & R0004; s1631 {
 	local addr:4 = s1631 + R0004;
 	local var = *:1 addr;
+	invalidate_link_store(addr, 1);
 	*:1 addr = var & ~(1 << op1113);
 	setZ(var & (1 << op1113));
 }
@@ -77,6 +80,7 @@
 :set1 R1115, [R0004] is op0510=0x3F & R0004 & R1115; op1631=0xE0 {
 	local bit:4 = R1115 & 7;
 	local var = *:1 R0004;
+	invalidate_link_store(R0004, 1);
 	*:1 R0004 = var | (1 << bit);
 	setZ(var & (1 << bit));
 }
@@ -84,6 +88,7 @@
 :not1 R1115, [R0004] is op0510=0x3F & R0004 & R1115; op1631=0xE2 {
 	local bit:4 = R1115 & 7;
 	local var = *:1 R0004;
+	invalidate_link_store(R0004, 1);
 	*:1 R0004 = var ^ (1 << bit);
 	setZ(var & (1 << bit));
 }
@@ -91,6 +96,7 @@
 :clr1 R1115, [R0004] is op0510=0x3F & R0004 & R1115; op1631=0xE4 {
 	local bit:4 = R1115 & 7;
 	local var = *:1 R0004;
+	invalidate_link_store(R0004, 1);
 	*:1 R0004 = var & ~(1 << bit);
 	setZ(var & (1 << bit));
 }

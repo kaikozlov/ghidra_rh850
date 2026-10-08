@@ -350,9 +350,9 @@ itself changed only inventory-version metadata; the compiled language and
 semantic project rows were unchanged at that milestone. This later P1M-E
 hardware-spec correction intentionally changes the processor language and
 persisted semantics. The current source fingerprint is
-`1f17e8061bf8d3592170c44ee480578c09fbc22565044799e78b46419305cb2b`;
+`219148ff9a4c095219d5fc1f46a7bf1f5c517094e5c0da0a2dc79e9115e4c357`;
 its compiled SLA is
-`89a88b9a445ed445774a0b8682aeeb2aa5edea2386b548db987a7097f257abd7`.
+`a7560830060d2bbe28708aec5e35cd5ec495d1bf8d1f9009803548def5532f4a`.
 Two independent clean rebuilds of every registered target agree under that
 compiled language. See
 [the migration journal](../history/2026-09/GHIDRA_12_1_4_MIGRATION_2026-09-21.md)
@@ -464,7 +464,7 @@ motor-boundary reference assertions now include those reads instead of
 preserving stale negative censuses.
 
 The language-semantics change increments the V850E2M registration to
-version `0.3` and the RH850G3M registration to `0.4`; stale compiled languages
+version `0.4` and the RH850G3M registration to `0.5`; stale compiled languages
 therefore cannot silently satisfy a project fingerprint.
 
 The external opcode tables exposed six inherited mnemonic defects:
@@ -475,15 +475,19 @@ now cover every corrected spelling and execute both `CMOVF.S` outcomes.
 
 The same manual audit corrected machine semantics rather than only display:
 
-- `CLL`, `LDL.W`, and `STC.W` now carry an explicit load-link address/valid
-  state; a conditional store fails after `CLL` or an address mismatch;
+- `CLL`, `LDL.W`, and `STC.W` carry an explicit load-link address/valid state.
+  A conditional store fails after `CLL`, an address mismatch, exception entry,
+  or `EIRET`/`FERET`. `CTRET` preserves the link. Local writes invalidate links
+  in the same 32-byte unit (G3M Table 5-3), including scalar, short, extended,
+  bit-update, `CAXI`, `PREPARE`, and `PUSHSP` stores; adjacent units do not;
 - all divide forms avoid host division on a zero divisor, preserve the
   architecturally undefined result registers in that case, and set `OV`;
 - register shifts and register-indexed bit operations use the specified low
   five and three bits; `ROTL` updates `CY` from result bit 0 even for a zero
   rotation;
 - bit searches return the architectural one-based position, return zero on no
-  match, and update `CY/OV/S/Z`; `BSH`/`HSH` derive `Z` from the lower
+  match, set `CY` only for a match at the final searched bit (result 32), set
+  `Z` only for no match, and clear `OV/S`; `BSH`/`HSH` derive `Z` from the lower
   halfword;
 - `LOOP` always writes the decremented counter and flags before its branch
   decision, and indirect `JARL` preserves an aliased source before writing the
@@ -506,6 +510,18 @@ the `0x180000..0x2FFFFF` fill partition is non-executable and typed as data.
 That removes one direct-call-created function in erased space. Its larger
 pattern-recovery gain is deterministic discovery of previously disconnected
 entry-shaped code, not evidence for an exact device part or peripheral map.
+
+The post-commit review found and corrected three gaps in the initial refresh:
+the load-link lifetime above was incomplete, the bit-search carry fixture
+endorsed the wrong first-bit result, and the imported DWARF file was not
+registered in either language definition. Both languages now declare
+`DWARF.register.mapping.file`; an installed-Ghidra smoke resolved all 32
+registers and the stack register for each. The processor fixture now contains
+96 instruction cases and executes reservation-lifetime sequences for each local
+write encoding and modeled exception transition, plus first/last/no-match search
+boundaries. A separate instruction-sequence smoke confirms that
+`LDL.W → EIRET → STC.W` fails without writing and that
+`SCH0R(0xFFFFFFFE)` returns 1 with `CY=0`.
 
 ## What these audits do *not* claim
 
