@@ -126,7 +126,10 @@ def _compile_harness(root: Path, work: Path, spec: Spec) -> None:
         ]
     dump_args.append("/out/harness.o")
     script = f"{shlex.join(compile_args)} && {shlex.join(dump_args)}"
-    _run_tool(root, ("exec", "--work-dir", str(work), "sh", "-ec", script))
+    _run_tool(
+        root,
+        ("toolchain", "run", "--work-dir", str(work), "sh", "-ec", script),
+    )
 
 
 def _apply_overlays(image: bytes, work: Path, spec: Spec) -> bytes:
@@ -207,7 +210,7 @@ def _link(
     _run_tool(
         root,
         (
-            "exec", "--work-dir", str(work), "sh", "-ec",
+            "toolchain", "run", "--work-dir", str(work), "sh", "-ec",
             " && ".join(shlex.join(command) for command in commands),
         ),
     )
@@ -226,7 +229,7 @@ def run_elf(
     """Run one prepared simulator ELF with a fresh GDB command script."""
     root = root.resolve()
     elf_path = elf_path if elf_path.is_absolute() else root / elf_path
-    args: list[str] = ["sim", str(elf_path)]
+    args: list[str] = ["test", "payload", str(elf_path)]
     for region in memory_regions:
         args += ["--memory-region", region]
     for command in gdb_commands:

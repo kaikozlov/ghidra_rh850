@@ -5,7 +5,7 @@ The analysis toolchain: processor module, scripts, verification.
 | Report | Scope |
 |---|---|
 | [processor-module-audit.md](processor-module-audit.md) | Audit of the vendored `ghidra_v850` processor module: SLEIGH semantics, semantic coverage ledger, calling-convention model |
-| [rh850-build-and-sim.md](rh850-build-and-sim.md) | Pinned single-image RH850 GNU toolchain behind `tools/rh850`: image build/doctor/selftest, CodeFlash-realistic execution testing, and simulator usage (no compiler-profile selection) |
+| [rh850-build-and-sim.md](rh850-build-and-sim.md) | Unified `tools/rh850` workflow for the pinned toolchain, payload tests, CodeFlash tests, exact-firmware scenarios, and generated P1M-E model |
 | [renesas-rfp-rv40f.md](renesas-rfp-rv40f.md) | External-source recovery of the Renesas Flash Programmer RV40F serial protocol and its bounded ICU-S configuration interface |
 | [techstream.md](techstream.md) | External-source recovery of Toyota Techstream V18.00.003 (installer 18.00.008): J2534 diagnostic architecture, SecurityAccess implementations, CUW reflash flow, and the ptshim32 CAN traffic logger |
 | [techstream-capture-procedure.md](techstream-capture-procedure.md) | Isolated-bench capture, hashing, normalization, redaction, and evidence labeling for official J2534 traces |

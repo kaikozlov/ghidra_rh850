@@ -1,18 +1,29 @@
 # RH850 build and execution testing
 
-`tools/rh850` supports one pinned GNU `v850-elf` toolchain: GCC 16.2.0,
-binutils 2.46.1, and GDB 18.1 with repository-local simulator fixes.
-Builds and instruction simulation use the same image and `v850e3v5`
-architecture. There is no GCC 13 compatibility path or compiler-profile selection.
+`tools/rh850` is the single interactive entry point. Its hierarchy names the
+thing being operated on rather than the execution backend:
 
-Use the repository wrapper rather than assembling ad-hoc Docker commands:
+|Task|Command|
+|---|---|
+|Build or inspect the pinned GNU environment|`tools/rh850 toolchain …`|
+|Regenerate or check P1M-E projections|`tools/rh850 model update` or `tools/rh850 model check`|
+|Test a linked payload ELF|`tools/rh850 test payload ELF …`|
+|Test a raw or byte-pinned CodeFlash image|`tools/rh850 test codeflash IMAGE …`|
+|Test scenarios against registered exact firmware|`tools/rh850 test firmware TARGET SCENARIO…`|
+|Run the complete retained offline pipeline|`tools/test rh850`|
+
+The toolchain is GCC 16.2.0, binutils 2.46.1, and GDB 18.1 with
+repository-local simulator fixes. Builds and instruction simulation use the
+same image and `v850e3v5` architecture. There is no GCC 13 compatibility path,
+compiler-profile selection, backend-selection flag, or legacy command alias.
+On a prepared host, verify the environment with:
 
 ```bash
-tools/rh850 doctor
-tools/rh850 selftest
+tools/rh850 toolchain doctor
+tools/rh850 toolchain self-test
 ```
 
-`selftest` builds a full 1 MiB low-address CodeFlash section with executable
+`toolchain self-test` builds a full 1 MiB low-address CodeFlash section with
 code at `0x0008F800`, plus a freestanding C function and assembly harness in
 high RAM. It checks that all CodeFlash blocks remain distinct, crosses between
 CodeFlash and RAM with positive and negative format-VI branches, executes the C
@@ -25,7 +36,7 @@ For a retained ELF, add the address ranges the program can touch and then give
 ordinary GDB commands:
 
 ```bash
-tools/rh850 sim build/out/example.elf \
+tools/rh850 test payload build/out/example.elf \
   --memory-region 0xFEBE0000,0x20000 \
   -ex 'break rh850_sim_stop' \
   -ex run \
@@ -34,14 +45,14 @@ tools/rh850 sim build/out/example.elf \
 
 ## Specification-backed P1M-E machine
 
-`tools/rh850 machine` uses Ghidra's modern `PcodeEmulator` and the vendored
-RH850G3M SLEIGH language. It is separate from GNU `sim/v850`: the p-code
-machine loads the exact registered CodeFlash/DataFlash identities, rejects
-CodeFlash overlays, applies the SystemRDL memory/register model, and faults on
-an unmapped or uninitialized read instead of supplying zero.
+`tools/rh850 test firmware` uses Ghidra's modern `PcodeEmulator` and the
+vendored RH850G3M SLEIGH language. It is separate from GNU `sim/v850`: the
+p-code machine loads the exact registered CodeFlash/DataFlash identities,
+rejects CodeFlash overlays, applies the SystemRDL memory/register model, and
+faults on an unmapped or uninitialized read instead of supplying zero.
 
 The canonical device source is `data/devices/p1me.rdl`.
-`tools/rh850 machine model` compiles it into:
+`tools/rh850 model update` compiles it into:
 
 - `data/generated/p1me_machine.json`, consumed by the Ghidra machine;
 - `data/p1m_sfr_labels.csv`, consumed by the Ghidra device-profile scripts;
@@ -120,8 +131,8 @@ flowchart LR
 |RSCFD|Model the recovered channel-1 transmit-buffer layout and transmit-request completion used by the exact writer.|Implemented for buffer 16. Receive FIFOs, arbitration, error states, and bus timing are not modeled.|
 |FACI / CodeFlash|CodeFlash fetches execute from immutable registered image bytes. Scenario overlays and ordinary writes are rejected. Only the exact status-clear command has a modeled FACI transition.|Bounded implementation. Unsupported FACI commands fault before side effects; erase/program, protection, sequencer timing, and cache-coherency behavior remain unimplemented.|
 |ICU-S|Expose only recovered registers and exact command-five/callback transitions. Treat supplied output words as scenario state, not generated cryptography.|Implemented within that recovered boundary. No provisioned-key or AES-CMAC silicon claim.|
-|Integration|Expose model generation and batched execution through `tools/rh850 machine model` and `tools/rh850 machine run`; bind identity through the existing target registry; retain one JSON report per scenario under `build/out/`.|Implemented. No parallel capability manifest, target whitelist, or project lifecycle exists.|
-|Verification|Discover target-owned scenario directories deterministically, run one Ghidra session per target, and require unique dynamic role resolution before exact-byte execution. Use synthetic processor semantics for instruction-level boundaries and GNU simulator runs only where an independent differential is useful.|Implemented as narrow gates. `tools/test rh850_machine` includes Camry and Crown exact bytes; `make verify-processor` owns the synthetic processor and project audits.|
+|Integration|Expose model generation through `tools/rh850 model update` and `tools/rh850 model check`, and batched execution through `tools/rh850 test firmware`; bind identity through the existing target registry; retain one JSON report per scenario under `build/out/`.|Implemented. No parallel capability manifest, target whitelist, project lifecycle, backend selector, or legacy CLI alias exists.|
+|Verification|Discover target-owned scenario directories deterministically, run one Ghidra session per target, and require unique dynamic role resolution before exact-byte execution. Use synthetic processor semantics for instruction-level boundaries and GNU simulator runs only where an independent differential is useful.|Implemented as narrow gates. `tools/test rh850` runs the compiler ABI, generated device model, CodeFlash, and exact-firmware suites; `make verify-processor` owns the milestone synthetic processor and project audits.|
 
 Progress:
 
@@ -159,13 +170,13 @@ a provisioned key or emulate the hardware AES-CMAC implementation.
 Check that all projections match the source without rewriting them:
 
 ```bash
-tools/rh850 machine model --check
+tools/rh850 model check
 ```
 
 Run one or more deterministic scenarios by registered target name:
 
 ```bash
-tools/rh850 machine run camry-8965F3307000 \
+tools/rh850 test firmware camry-8965F3307000 \
   tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_ring_producer.json \
   tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_rscfd_tx.json
 ```
@@ -207,7 +218,7 @@ the complete firmware images.
 Run the narrow gate with:
 
 ```bash
-tools/test rh850_machine
+tools/test rh850_firmware
 ```
 
 This gate also proves strict schema rejection, unknown-MMIO faults, executable
@@ -216,11 +227,11 @@ bytes. It does not promote recovered ICU-S behavior to a manual silicon claim.
 
 ## CodeFlash simulation
 
-`codeflash-sim` executes a raw CodeFlash image at its real addresses, with
-optional RAM residents loaded at exact addresses:
+`tools/rh850 test codeflash` executes a raw CodeFlash image at its real
+addresses, with optional RAM residents loaded at exact addresses:
 
 ```bash
-tools/rh850 codeflash-sim path/to/CodeFlash.bin \
+tools/rh850 test codeflash path/to/CodeFlash.bin \
   --entry 0x00012340 \
   --load 0xFEBF0000=path/to/resident.bin \
   --memory-region 0xFEBE0000,0x20000 \
@@ -240,7 +251,7 @@ Once a target's execution contract is understood, capture it as a spec and
 everything becomes byte-pinned:
 
 ```bash
-tools/rh850 codeflash-sim firmware/camry-8965F3307000/CodeFlash.bin \
+tools/rh850 test codeflash firmware/camry-8965F3307000/CodeFlash.bin \
   --spec tests/fixtures/rh850/camry_f33_gate2_codeflash_sim.json \
   --expect 'GATE2_RESULT=0x222 FRESHNESS_ARG=1 ROOT_BOOL=1'
 ```
@@ -276,7 +287,7 @@ H/F RAM residents, and the universal signer fallback/idle paths on every
 registered Camry, Crown, and Corolla H/F CodeFlash:
 
 ```bash
-tools/test codeflash_sim
+tools/test rh850_codeflash
 ```
 
 These executions found a real pre-deployment defect: a non-inlined `call0`
@@ -311,7 +322,7 @@ applies two patches:
   backing store for `0x00000000..0x000FFFFF` with a complete 1 MiB store —
   without it every `0x8000`-byte block overwrites the previous alias.
 
-`tools/rh850 selftest` covers both fixes before accepting the simulator.
+`tools/rh850 toolchain self-test` covers both fixes before accepting the simulator.
 
 ## Rebuilding the GNU setup
 
@@ -322,12 +333,12 @@ pinned commit. `tools/rh850` owns the single image tag used by every command.
 Build and verify it with:
 
 ```bash
-tools/rh850 build-image
-tools/rh850 doctor
-tools/rh850 selftest
+tools/rh850 toolchain build
+tools/rh850 toolchain doctor
+tools/rh850 toolchain self-test
 ```
 
-`tools/rh850 image` prints the canonical tag without requiring Docker.
+`tools/rh850 toolchain image` prints the canonical tag without requiring Docker.
 Generic callers should use the wrapper rather than copying version strings
 into argument defaults. `--toolchain`, `--image`, and `build-compat-image` are
 not supported; `RH850_TOOLCHAIN_IMAGE` no longer changes image selection.
@@ -339,13 +350,14 @@ an image or compiler override. A compiler upgrade can change bytes without
 changing behavior, so field-qualified historical binaries remain separate from
 newly built artifacts until the new artifacts receive their own qualification.
 
-`tools/rh850 exec ...` is the escape hatch for invoking any `v850-elf-*`
-program with the repository mounted at `/src`; for example,
-`tools/rh850 exec v850-elf-objdump -d build/out/example.elf`. Builders use
-`tools/rh850 exec --work-dir PATH ...` when they need a scratch directory
-mounted at `/out`; dependent compile, conversion, and inspection commands are
-batched into one container invocation. `tools/rh850_toolchain.py` provides the
-canonical command construction and provenance to Python callers.
+`tools/rh850 toolchain run ...` is the escape hatch for invoking any
+`v850-elf-*` program with the repository mounted at `/src`; for example,
+`tools/rh850 toolchain run v850-elf-objdump -d build/out/example.elf`.
+Builders use `tools/rh850 toolchain run --work-dir PATH ...` when they need a
+scratch directory mounted at `/out`; dependent compile, conversion, and
+inspection commands are batched into one container invocation.
+`tools/rh850_toolchain.py` provides the canonical command construction and
+provenance to Python callers.
 
 ## Official Renesas options
 

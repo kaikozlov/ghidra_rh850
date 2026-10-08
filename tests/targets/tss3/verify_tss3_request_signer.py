@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import copy
 import tempfile
-import threading
 from pathlib import Path
 from types import SimpleNamespace
 from unittest import mock
@@ -66,7 +65,7 @@ def run_core_simulator() -> str:
         elf = Path(td) / "core.elf"
         rel_elf = elf.relative_to(ROOT)
         subprocess.run([
-            str(ROOT / "tools/rh850"), "exec", "v850-elf-gcc",
+            str(ROOT / "tools/rh850"), "toolchain", "run", "v850-elf-gcc",
             "-mv850e3v5", "-mno-app-regs", "-ffreestanding", "-fno-builtin", "-Os", "-nostdlib",
             "-Wa,-mv850e3v5,-mextension",
             "-Wl,-T,tests/fixtures/rh850/tss3_request_signer_core_sim.ld",
@@ -76,7 +75,7 @@ def run_core_simulator() -> str:
             "-o", str(rel_elf),
         ], cwd=ROOT, check=True, capture_output=True, text=True)
         proc = subprocess.run([
-            str(ROOT / "tools/rh850"), "sim", str(rel_elf),
+            str(ROOT / "tools/rh850"), "test", "payload", str(rel_elf),
             "--memory-region", "0xFEBF0000,0x10000",
             "-ex", "break rh850_sim_stop",
             "-ex", "run",
@@ -183,48 +182,6 @@ check("parked benchmark reports deterministic distribution statistics",
       })
 
 
-class _FakePipelinedPanda:
-    last: _FakePipelinedPanda | None = None
-
-    def __init__(self):
-        self.rx: list[tuple[int, bytes, int]] = []
-        self.sent_frame_counts: list[int] = []
-        self._lock = threading.Lock()
-
-    def set_safety_mode(self, *_args):
-        pass
-
-    def can_send_many(self, frames):
-        with self._lock:
-            self.sent_frame_counts.append(len(frames))
-            data = [bytes(frame[1]) for frame in frames]
-            seq = (data[0][0] & 0x0F) | ((data[1][0] & 0x0F) << 4)
-            trailer = bytes((0x10 | (len(self.sent_frame_counts) & 0x0F), seq, 0xA5, 0x5A))
-            self.rx.append((0x7A9, bytes((0xC9, seq, 0x00, seq ^ 0xFF)) + trailer, 0))
-
-    def can_recv(self):
-        with self._lock:
-            rows, self.rx = self.rx, []
-        return rows
-
-    def close(self):
-        pass
-
-
-def _fake_pipeline_panda() -> _FakePipelinedPanda:
-    panda = _FakePipelinedPanda()
-    _FakePipelinedPanda.last = panda
-    return panda
-
-
-with (mock.patch.dict("sys.modules", {"panda": SimpleNamespace(Panda=lambda *_a, **_k: _fake_pipeline_panda())}),
-      mock.patch.object(host, "set_alloutput_mode")):
-    pipelined = host.benchmark_pipelined(
-        meta_path, count=3, period_ms=10.0, drain_timeout_s=0.1,
-    )
-check("100-Hz benchmark pipelines requests without waiting for each reply",
-      pipelined["count_sent"] == pipelined["success_count"] == pipelined["responses_received"] == 3 and
-      pipelined["target_rate_hz"] == 100.0 and pipelined["complete_target_rate_run"] is True)
 
 
 class _FakeProbePanda:

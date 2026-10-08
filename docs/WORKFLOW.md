@@ -21,12 +21,12 @@ the firmware *is*, see [OVERVIEW.md](OVERVIEW.md).
   `14c1b5be32b8ec741ee626c8bca9885c58f7a473`; see
   `ghidra/ghidra_v850/README.md` and `PROVENANCE.json`).
 - Docker for target-native RH850 payload compilation/execution testing — only
-  the `tools/rh850` build/simulation workflows need it; read-only Ghidra
-  analysis does not. The
-  single pinned GNU toolchain and compiled-in V850/RH850 GDB simulator are
-  exposed through `tools/rh850`. On a clean machine run `tools/rh850 build-image`,
-  then `tools/rh850 doctor` and `tools/rh850 selftest`. There is no compiler-profile
-  selection or image override. See
+  the `tools/rh850` workflows need it; read-only Ghidra analysis does not.
+  The single pinned GNU toolchain and compiled-in V850/RH850 GDB simulator are
+  exposed through `tools/rh850`. On a clean machine run
+  `tools/rh850 toolchain build`, then `tools/rh850 toolchain doctor` and
+  `tools/rh850 toolchain self-test`. There is no compiler-profile selection or
+  image override. See
   [RH850 build and execution testing](tooling/rh850-build-and-sim.md).
 
 There is no separate processor install step. `tools/project/install_v850_extension.sh` (invoked
@@ -497,11 +497,9 @@ bytes. Run only the gate that owns the changed behavior:
 # signer build, codecs, metadata consumer, and host protocol
 tools/test tss3_request_signer
 
-# generic CodeFlash linker/simulator or generated simulation model
-tools/test codeflash_sim
-
-# exact registered CodeFlash under the specification-backed P1M-E machine
-tools/test rh850_machine
+# complete RH850 offline pipeline: compiler ABI, generated device model,
+# raw CodeFlash simulation, and exact registered-firmware scenarios
+tools/test rh850
 
 # ram_exec boot-identity transitions (transient F181, exact-boot handoff)
 tools/test ram_exec_boot_transitions

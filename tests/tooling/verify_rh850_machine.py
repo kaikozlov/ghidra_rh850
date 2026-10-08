@@ -48,8 +48,8 @@ def check_exact_scenarios(output_root: Path) -> None:
         output_dir = output_root / target
         proc = run([
             str(REPO_ROOT / "tools/rh850"),
-            "machine",
-            "run",
+            "test",
+            "firmware",
             target,
             *(str(path) for path in scenarios),
             "--output-dir",
@@ -98,8 +98,9 @@ def check_schema_rejection(output_root: Path) -> None:
     path = output_root / "invalid-schema.json"
     path.write_text(json.dumps(scenario, indent=2) + "\n", encoding="utf-8")
     proc = run([
-        str(REPO_ROOT / "tools/rh850"), "machine", "run", "camry-8965F3307000",
-        str(path), "--output-dir", str(output_root / "invalid-schema-output"),
+        str(REPO_ROOT / "tools/rh850"), "test", "firmware",
+        "camry-8965F3307000", str(path),
+        "--output-dir", str(output_root / "invalid-schema-output"),
     ], expect_success=False)
     if "unsupported fields: mystery" not in proc.stderr:
         raise AssertionError(f"wrong strict-schema failure:\n{proc.stderr}")
@@ -130,8 +131,9 @@ def check_executable_overlay_rejection(output_root: Path) -> None:
     scenario_path = output_root / "forbidden-overlay.json"
     scenario_path.write_text(json.dumps(scenario, indent=2) + "\n", encoding="utf-8")
     proc = run([
-        str(REPO_ROOT / "tools/rh850"), "machine", "run", "camry-8965F3307000",
-        str(scenario_path), "--output-dir", str(output_root / "forbidden-overlay-output"),
+        str(REPO_ROOT / "tools/rh850"), "test", "firmware",
+        "camry-8965F3307000", str(scenario_path),
+        "--output-dir", str(output_root / "forbidden-overlay-output"),
     ], expect_success=False)
     if "cannot overlay registered image region codeflash_user" not in proc.stderr:
         raise AssertionError(f"wrong executable-overlay failure:\n{proc.stderr}")
@@ -139,7 +141,7 @@ def check_executable_overlay_rejection(output_root: Path) -> None:
 
 
 def main() -> int:
-    run([str(REPO_ROOT / "tools/rh850"), "machine", "model", "--check"])
+    run([str(REPO_ROOT / "tools/rh850"), "model", "check"])
     with tempfile.TemporaryDirectory(prefix="verify-rh850-machine-", dir=REPO_ROOT / "build/tmp") as tmp:
         output_root = Path(tmp)
         check_exact_scenarios(output_root)

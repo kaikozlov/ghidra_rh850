@@ -3429,8 +3429,9 @@ preservation, epoch change, message-counter increment/wrap, FV4 construction,
 and success/error/busy response packing. The harness deliberately stops before
 stock freshness/command-5/CAN calls and MMIO.
 The repository-owned GNU simulator carries a local fix for upstream
-`sim/v850`'s broken format-VI `imm32` reconstruction; `tools/rh850 selftest`
-exercises both forward and backward far `jarl32`/`jr32`; the request-signer
+`sim/v850`'s broken format-VI `imm32` reconstruction;
+`tools/rh850 toolchain self-test` exercises both forward and backward far
+`jarl32`/`jr32`; the request-signer
 harness itself uses `jarl32`. This removes the artificial far-call decoder boundary.
 Stock functions and P1M-E MMIO still require explicit models/mapped code or
 hardware before simulator execution can say anything about their behavior.

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build and execute RH850/V850E3 code with the pinned GNU toolchain."""
+"""Build and test RH850 payloads and firmware with the pinned toolchain."""
 
 from __future__ import annotations
 
@@ -152,7 +152,7 @@ def _image_id() -> str:
     if proc.returncode != 0:
         raise Rh850ToolError(
             f"Docker image {IMAGE!r} is missing; "
-            "build it with `tools/rh850 build-image`."
+            "build it with `tools/rh850 toolchain build`."
         )
     return proc.stdout.strip()
 
@@ -309,7 +309,7 @@ def cmd_selftest(_args: argparse.Namespace) -> int:
             raise Rh850ToolError(
                 f"simulator completed without expected result {expected!r}"
             )
-    print("selftest: PASS")
+    print("toolchain self-test: PASS")
     return 0
 
 
@@ -362,7 +362,7 @@ def cmd_codeflash_sim(args: argparse.Namespace) -> int:
     except CodeFlashSimError as exc:
         raise Rh850ToolError(str(exc)) from exc
     sys.stdout.write(output)
-    print("codeflash-sim: PASS")
+    print("CodeFlash test: PASS")
     return 0
 
 
@@ -409,35 +409,108 @@ def cmd_machine_model(args: argparse.Namespace) -> int:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="rh850", description=__doc__)
-    sub = parser.add_subparsers(dest="command_name", required=True)
+    sub = parser.add_subparsers(dest="area", required=True)
 
-    p = sub.add_parser("build-image", help="build the pinned toolchain")
+    toolchain = sub.add_parser(
+        "toolchain",
+        help="manage or invoke the single pinned GNU toolchain",
+    )
+    toolchain_sub = toolchain.add_subparsers(
+        dest="toolchain_command",
+        required=True,
+    )
+
+    p = toolchain_sub.add_parser("build", help="build the pinned toolchain image")
     p.set_defaults(func=cmd_build_image)
 
-    p = sub.add_parser(
+    p = toolchain_sub.add_parser(
         "image",
         help="print the pinned image tag without requiring Docker",
     )
     p.set_defaults(func=cmd_image)
-    p = sub.add_parser("info", help="print canonical toolchain metadata as JSON")
+
+    p = toolchain_sub.add_parser(
+        "info",
+        help="print canonical toolchain metadata as JSON",
+    )
     p.set_defaults(func=cmd_info)
 
-
-    p = sub.add_parser(
+    p = toolchain_sub.add_parser(
         "doctor",
         help="show compiler/GDB identities and simulator architecture support",
     )
     p.set_defaults(func=cmd_doctor)
 
-    p = sub.add_parser(
-        "selftest",
-        help="execute low-CodeFlash and high-RAM v850e3v5 regression programs",
+    p = toolchain_sub.add_parser(
+        "self-test",
+        help="run the low-CodeFlash and high-RAM simulator regression",
     )
     p.set_defaults(func=cmd_selftest)
 
-    p = sub.add_parser(
-        "codeflash-sim",
-        help="execute a modeled raw CodeFlash image at its real RH850 addresses",
+    p = toolchain_sub.add_parser(
+        "run",
+        help="run a v850-elf tool inside the pinned image",
+    )
+    p.add_argument(
+        "--work-dir",
+        type=Path,
+        help=(
+            "mount a builder scratch directory at /out "
+            "and mount the repository read-only"
+        ),
+    )
+    p.add_argument("command", nargs=argparse.REMAINDER)
+    p.set_defaults(func=cmd_exec)
+
+    model = sub.add_parser(
+        "model",
+        help="manage the generated SystemRDL-backed P1M-E device model",
+    )
+    model_sub = model.add_subparsers(dest="model_command", required=True)
+
+    p = model_sub.add_parser(
+        "update",
+        help="regenerate P1M-E machine, SFR, and product projections",
+    )
+    p.set_defaults(func=cmd_machine_model, check=False)
+
+    p = model_sub.add_parser(
+        "check",
+        help="fail if generated P1M-E projections are stale",
+    )
+    p.set_defaults(func=cmd_machine_model, check=True)
+
+    test = sub.add_parser(
+        "test",
+        help="exercise a payload, CodeFlash image, or exact firmware scenario",
+    )
+    test_sub = test.add_subparsers(dest="test_kind", required=True)
+
+    p = test_sub.add_parser(
+        "payload",
+        help="run a linked payload ELF in the GNU instruction simulator",
+    )
+    p.add_argument("elf", type=Path)
+    p.add_argument(
+        "--memory-region",
+        action="append",
+        default=[],
+        metavar="BASE,SIZE",
+        help="simulator RAM/flash mapping; repeat as needed",
+    )
+    p.add_argument(
+        "--command",
+        "-ex",
+        dest="gdb_command",
+        action="append",
+        default=[],
+        help="GDB command to execute after load; repeat as needed",
+    )
+    p.set_defaults(func=cmd_sim)
+
+    p = test_sub.add_parser(
+        "codeflash",
+        help="run a raw or byte-pinned CodeFlash image in the GNU simulator",
     )
     p.add_argument("image", type=Path)
     p.add_argument(
@@ -492,15 +565,17 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p.set_defaults(func=cmd_codeflash_sim)
 
-    machine = sub.add_parser(
-        "machine",
-        help="run exact firmware in the specification-backed P1M-E p-code machine",
+    p = test_sub.add_parser(
+        "firmware",
+        help="run checked scenarios against exact registered P1M-E firmware",
     )
-    machine_sub = machine.add_subparsers(dest="machine_command", required=True)
-
-    p = machine_sub.add_parser("run", help="execute strict machine scenarios in one target session")
     p.add_argument("target", help="registered analysis target")
-    p.add_argument("scenarios", nargs="+", type=Path, help="machine scenario JSON files")
+    p.add_argument(
+        "scenarios",
+        nargs="+",
+        type=Path,
+        help="machine scenario JSON files",
+    )
     p.add_argument(
         "--output-dir",
         type=Path,
@@ -508,53 +583,6 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p.set_defaults(func=cmd_machine_run)
 
-    p = machine_sub.add_parser(
-        "model",
-        help="regenerate or check SystemRDL-derived P1M-E projections",
-    )
-    p.add_argument(
-        "--check",
-        action="store_true",
-        help="fail instead of writing when generated projections are stale",
-    )
-    p.set_defaults(func=cmd_machine_model)
-
-    p = sub.add_parser(
-        "exec",
-        help="run a v850-elf tool inside the pinned image",
-    )
-    p.add_argument(
-        "--work-dir",
-        type=Path,
-        help=(
-            "mount a builder scratch directory at /out "
-            "and mount the repository read-only"
-        ),
-    )
-    p.add_argument("command", nargs=argparse.REMAINDER)
-    p.set_defaults(func=cmd_exec)
-
-    p = sub.add_parser(
-        "sim",
-        help="load a repository ELF in the GNU V850/RH850 instruction simulator",
-    )
-    p.add_argument("elf", type=Path)
-    p.add_argument(
-        "--memory-region",
-        action="append",
-        default=[],
-        metavar="BASE,SIZE",
-        help="simulator RAM/flash mapping; repeat as needed",
-    )
-    p.add_argument(
-        "--command",
-        "-ex",
-        dest="gdb_command",
-        action="append",
-        default=[],
-        help="GDB command to execute after load; repeat as needed",
-    )
-    p.set_defaults(func=cmd_sim)
     return parser
 
 

@@ -47,7 +47,14 @@ def run(command: list[str]) -> subprocess.CompletedProcess[str]:
 def simulate(image: Path, expected: str, *, spec: Path | None = None, load: str | None = None,
              entry: str | None = None, memory_region: str | None = None,
              script: tuple[str, ...] = ()) -> None:
-    command = [str(ROOT / "tools/rh850"), "codeflash-sim", str(image), "--expect", expected]
+    command = [
+        str(ROOT / "tools/rh850"),
+        "test",
+        "codeflash",
+        str(image),
+        "--expect",
+        expected,
+    ]
     if spec is not None:
         command += ["--spec", str(spec)]
     if entry is not None:
@@ -78,13 +85,13 @@ def check_generic(work: Path) -> None:
     rel_source = source.relative_to(ROOT)
     rel_object = (work / "program.o").relative_to(ROOT)
     run([
-        str(ROOT / "tools/rh850"), "exec",
+        str(ROOT / "tools/rh850"), "toolchain", "run",
         "v850-elf-gcc", "-mv850e3v5", "-mno-app-regs", "-ffreestanding",
         "-fno-builtin", "-Os", "-nostdlib", "-Wa,-mv850e3v5,-mextension",
         "-c", str(rel_source), "-o", str(rel_object),
     ])
     run([
-        str(ROOT / "tools/rh850"), "exec",
+        str(ROOT / "tools/rh850"), "toolchain", "run",
         "v850-elf-objcopy", "-O", "binary",
         str(rel_object), str((work / "program.bin").relative_to(ROOT)),
     ])

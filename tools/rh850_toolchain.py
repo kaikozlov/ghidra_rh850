@@ -12,14 +12,21 @@ RH850 = ROOT / "tools" / "rh850"
 
 
 def command(work_dir: Path, *args: str) -> list[str]:
-    """Return a tools/rh850 exec command with work_dir mounted at /out."""
-    return [str(RH850), "exec", "--work-dir", str(work_dir), *args]
+    """Return a pinned-toolchain command with work_dir mounted at /out."""
+    return [
+        str(RH850),
+        "toolchain",
+        "run",
+        "--work-dir",
+        str(work_dir),
+        *args,
+    ]
 
 
 def metadata() -> dict[str, Any]:
     """Return canonical image provenance after verifying that the image exists."""
     proc = subprocess.run(
-        [str(RH850), "info"],
+        [str(RH850), "toolchain", "info"],
         cwd=ROOT,
         check=True,
         capture_output=True,
