@@ -31,11 +31,8 @@ with tempfile.TemporaryDirectory() as td:
 j = json.loads(ART.read_text())
 check("schema and exact firmware are pinned",
       j["schema"] == "camry-f33-b6-command-composition-v1"
-      and j["target"] == {
-        "software_id": "8965F3307000",
-        "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
-        "corpus_function_count": 6065,
-      })
+      and j["target"]["software_id"] == "8965F3307000"
+      and j["target"]["codeflash_sha256"] == "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7")
 
 sel = j["selector_census"]
 check("all CB00-aware functions are exhausted",
@@ -52,10 +49,10 @@ check("all 49 CB00-aware functions have one non-overlapping semantic category",
       }
       and set().union(*(set(v) for v in sel["CB00_semantic_partition"].values())) == set(sel["CB00_decompiled_functions"])
       and sum(len(v) for v in sel["CB00_semantic_partition"].values()) == 49)
-check("ADB0 has only the two semantic runtime readers",
-      sel["ADB0_decompiled_functions"] == ["0x0CB73A", "0x0CEFFC"]
+check("ADB0 has three recovered semantic runtime readers",
+      sel["ADB0_decompiled_functions"] == ["0x0CA614", "0x0CB73A", "0x0CEFFC"]
       and sorted({r["function"] for r in sel["ADB0_direct_references"] if r["type"] == "READ"})
-          == ["0x0CB73A", "0x0CEFFC"])
+          == ["0x0CA614", "0x0CB73A", "0x0CEFFC"])
 check("B6 target snapshot AE90 feeds the recovered control family",
       {r["function"] for r in sel["AE90_direct_references"] if r["type"] == "READ"}
       >= {"0x0CBA80", "0x0CBB66", "0x0CCF0E"})

@@ -98,7 +98,10 @@ def section_tss3_opendbc_port() -> int:
     check("aggregate packs the mapped chain", all(tok in funcs[0x37E48]["decompiled_c"] for tok in ("DAT_febe6e28", "DAT_febe6d78 = iVar2 + iVar4", "DAT_febe6d72 = (short)iVar5")))
     check("map is nonlinear lookup interpolation", all(tok in funcs[0x38678]["decompiled_c"] for tok in ("DAT_00031d44", "(&PTR_DAT_000210f4)", "if ((int)param_1 < 1)")))
     check("publish maps extended Q sum conditioned by sibling axis", all(tok in funcs[0x3879E]["decompiled_c"] for tok in ("DAT_febe6d78", "DAT_febe6d70", "FUN_00038678")))
-    check("0x030 staging formula exact", "* 100) / 0x2000" in funcs[0x4C490]["decompiled_c"] and "puVar4 + 0x30d8" in funcs[0x4C490]["decompiled_c"])
+    tx030 = funcs[0x4C490]["decompiled_c"]
+    check("0x030 staging formula exact",
+          all(tok in tx030 for tok in ("-0x50e8", "-0x3694", "/ 0x100) * 100", "/ 0x2000"))
+          and m["staging_formula"] == "signed16(((((int)(-signed16(FEBE6718)) * unsigned16(FEBEE8D8)) / 0x100) * 100) / 0x2000)")
     check("signal33 packs signed BE16 at B22", "FUN_0007d31e(0x21,0x16,0x10,0" in funcs[0x4C97A]["decompiled_c"] and "DAT_febe8c2e = DAT_febe816c" in funcs[0x4C97A]["decompiled_c"])
     check("mapped-feedback census exact", [x["entry"] for x in evid["fixed_gp_census"]["mapped_current_feedback_gp_minus_0x4a00"]] == ["0x0003879E", "0x00057FD2", "0x00059448", "0x0005D12C"])
     check("extended Q-sum census exact", [x["entry"] for x in evid["fixed_gp_census"]["did1151_q_current_upstream_gp_minus_0x4a8e"]] == ["0x00037E48", "0x00037F92", "0x00059448", "0x0005C7B6", "0x0005CA3A", "0x0005D12C"])

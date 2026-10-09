@@ -29,7 +29,8 @@ import struct
 from collections import defaultdict
 from pathlib import Path
 
-from tools.targets.camry.support.camry_f33_corpus import CORPUS, IMAGE, IMAGE_SHA256, REPO
+from tools import REPO_ROOT as REPO
+from tools.targets.camry.support.camry_f33_corpus import CORPUS, IMAGE, IMAGE_SHA256
 
 OUT = REPO / "data/generated/camry_8965F3307000_command_cone_ingress.json"
 
@@ -146,7 +147,7 @@ def build() -> dict:
     need(len(image) == 0x100000 and hashlib.sha256(image).hexdigest() == IMAGE_SHA256,
          "F33 image drift")
     funcs = corpus_map()
-    need(len(funcs) == 6065, "F33 corpus function count drift")
+    need(len(funcs) == 7178, "F33 corpus function count drift")
 
     rx: dict[int, dict] = {}
     for i in range(RX_COUNT):
@@ -214,13 +215,13 @@ def build() -> dict:
          "indirect signal-id table drift")
     need({x["can_id"] for x in indirect} == set(range(0x013, 0x020)),
          "indirect PDU family drift")
-    token(0x693FE, funcs, "FUN_0007e72a(DAT_000257da,DAT_000257f6,8,local_54);",
-          "local_54[0x40] = 0x5a;", "DAT_00030e2f <= bVar4")
-    token(0x697F4, funcs, "FUN_0007e72a(DAT_000257ee,DAT_0002580a,8,acStack_34 + 3);",
-          "DAT_00030e2f <= bVar2")
-    token(0x7E72A, funcs, "(&DAT_febe4a48)[uVar3 + (param_2 & 0xffff)]",
-          "puVar4[uVar2 - 0x6ec2]")
-    token(0x7D12A, funcs, "puVar8[uVar7 - 0x6ec2]", "puVar8 + ((param_2 & 0xffff) - 0x6db8)")
+    token(0x693FE, funcs, "FUN_0007e72a(DAT_000257da,DAT_000257f6,8,",
+          "[0x40] = 0x5a;", "DAT_00030e2f <=")
+    token(0x697F4, funcs, "FUN_0007e72a(DAT_000257ee,DAT_0002580a,8,",
+          "DAT_00030e2f <=")
+    token(0x7E72A, funcs, "(&DAT_febe4a48)[", "(param_2 & 0xffff)]",
+          " - 0x6ec2]")
+    token(0x7D12A, funcs, " - 0x6ec2]", " + ((param_2 & 0xffff) - 0x6db8)")
 
     # transforms applied inside unpackers (FUN_0004AFCC offset helper)
     token(0x4AFCC, funcs, "iVar1 = (param_3 & 0xffff) - (int)param_2;", "*param_4 = (short)iVar1;")
@@ -359,12 +360,12 @@ def build() -> dict:
     # writers derive B140 from the exact u16 calibration at 0xAEF4C; BF97A's
     # reset/default writer uses the adjacent rounded constant 0x7637.
     need(pair_map.get(0xFEBEAC64) == 0xFEBEB140, "AC64 scale snapshot drift")
-    token(0xB3866, funcs, "uVar1 = (uint)(ushort)PTR_DAT_000aef4c;",
-          "DAT_febeb140 = DAT_febeb13c;", "0x2774564e / uVar1")
-    token(0xB389C, funcs, "uVar1 = (uint)(ushort)PTR_DAT_000aef4c;",
-          "DAT_febeb140 = DAT_febeb13c;", "0x2774564e / uVar1")
-    token(0xB38D2, funcs, "uVar5 = (uint)(ushort)PTR_DAT_000aef4c;",
-          "0x2774564e / uVar5", "*(undefined2 *)(puVar2 + -0x6c0) = uVar4;")
+    token(0xB3866, funcs, " = (uint)DAT_000aef4c;",
+          "DAT_febeb140 = DAT_febeb13c;", "0x2774564e / ")
+    token(0xB389C, funcs, " = (uint)DAT_000aef4c;",
+          "DAT_febeb140 = DAT_febeb13c;", "0x2774564e / ")
+    token(0xB38D2, funcs, " = (uint)DAT_000aef4c;",
+          "0x2774564e / ", "-0x6c0) =")
     token(0xBF97A, funcs, "*(undefined2 *)(puVar4 + -0x6c0) = 0x7637;")
     scale_cal = struct.unpack_from("<H", image, 0xAEF4C)[0]
     scale_runtime = 0x2774564E // scale_cal
@@ -374,8 +375,8 @@ def build() -> dict:
     scale_writers = sorted(k for k, refs in scale_acc.items() if "WRITE" in refs)
     need(scale_writers == ["0xB3866", "0xB389C", "0xB38D2", "0xBF97A"],
          f"FEBEB140 writer census drift: {scale_writers}")
-    token(0x3BDC6, funcs, "puVar4 = &LAB_0000569a;", "(&DAT_000317e0)[uVar1]",
-          "*(short *)(&UNK_ffffb9f2 + (int)puVar2) = (short)puVar4;")
+    token(0x3BDC6, funcs, "= 0x569a;", "&DAT_000317e0 +",
+          "*(short *)(&UNK_ffffb9f2 + (int)puVar2) = (short)")
     token(0xB338C, funcs, "DAT_febeb112 = 0x5a;")
     token(0xB330A, funcs, "DAT_febeb112 = 0;")
     need(pair_map.get(0xFEBEAC2B) == 0xFEBEB112, "AC2B diagnostic snapshot drift")
@@ -463,8 +464,8 @@ def build() -> dict:
     token(0xB7374, funcs, "iVar2 = FUN_000ff254();", "puVar1[-0x4ac] = iVar2 == 0;")
     need(GP - 0x4AC == 0xFEBEB354 and pair_map.get(0xFEBEAC3C) == 0xFEBEB354,
          "AC3C integrity-bank snapshot drift")
-    token(0x62D5E, funcs, "(&DAT_00020850)[uVar1] != (&DAT_00017da0)[uVar1]",
-          "FUN_00070a92(iVar3,&DAT_febf0668,&DAT_febf10a4,&DAT_febf10c8);")
+    token(0x62D5E, funcs, "(&DAT_00020850)[", "BYTE_ARRAY_00010000[",
+          "uVar1 + 0x7da0]", "FUN_00070a92(iVar3,&DAT_febf0668,&DAT_febf10a4,&DAT_febf10c8);")
     token(0x62E12, funcs, "return DAT_febf0668;")
 
     # AC50's validity mask is also an internal mirror, not COM-derived.
@@ -578,7 +579,7 @@ def build() -> dict:
     need(GP + 4000 == 0xFEBEC7A0 and GP + 0xFBC == 0xFEBEC7BC
          and GP + 0xFAC == 0xFEBEC7AC and GP + 0xFAA == 0xFEBEC7AA, "gain cell layout drift")
     token(0xCB82C, funcs, "DAT_febec7a2 = DAT_febec7a0 * (ushort)DAT_febec7b6;",
-          "DAT_febec7a4 = DAT_febec7bc * (ushort)bVar3;")
+          "DAT_febec7a4 = DAT_febec7bc * (ushort)")
     token(0xCB73A, funcs, "DAT_febec7bf == '\\0'", "(DAT_febeadb0 == '1')",
           "DAT_febeae02 < *(ushort *)((&PTR_DAT_000b1464)[DAT_febeac3c & 1] + 0x24)",
           "DAT_febec7b5 = 1;")
@@ -683,11 +684,12 @@ def build() -> dict:
     token(0xBE846, funcs, "iVar8 = (DAT_febef1c6 * 0x931) / 0x10;",
           "local_2c[0] = (DAT_febef1c8 * 0x931) / 0x10;",
           "*(undefined2 *)(puVar10 + 0x696) = (undefined2)local_2c[0];")
-    token(0xBEFD6, funcs, "puVar8 = (undefined *)((DAT_febef1c0 * 1999) / 0x100);",
-          "puVar6 = (undefined *)((DAT_febef1ca * 0x3e77) / 0x100);",
-          "*(undefined4 *)(puVar7 + 0x700) = local_18[0];")
+    token(0xBEFD6, funcs, "(DAT_febef1c0 * 1999) / 0x100;",
+          "(DAT_febef1ca * 0x3e77) / 0x100;",
+          "+ 0x700) = local_18[0];")
     token(0xC310E, funcs, "DAT_febebf58 = (DAT_febebf58 + DAT_febeae0c) - (int)DAT_febebfa0;",
-          "DAT_febebfa0 = (short)((DAT_febebf58 * 0x400) / (int)PTR_LAB_000af564);")
+          "iVar1 = DAT_febebf58 * 0x400;", "iVar1 = iVar1 / DAT_000af564;",
+          "DAT_febebfa0 = (short)iVar1;")
     token(0xC2F26, funcs, "DAT_febeace7 == '\\0'", "DAT_febeacc0 == '\\x01'",
           "DAT_febebfb1 = 0x5a;")
     token(0xBECF4, funcs, "FUN_000d1d5c(DAT_febef1b6,30000,auStack_6);",
@@ -696,7 +698,7 @@ def build() -> dict:
     need(pair_map.get(0xFEBEAE02) == 0xFEBEBEDE, "FEBEAE02 pair drift")
     need(any(r == 0xFEBE809A and w == 0xFEBEF1B6 for r, w in raw_stage), "sig246 stage drift")
     token(0xBB7FA, funcs, "((DAT_febeb11a & 0xff00) == 0x500)", "DAT_febeb37c == 'Z'",
-          "*(short *)(puVar5 + -0x8c0) = (short)puVar6;")
+          "*(short *)(puVar5 + -0x8c0) = (short)")
     need(GP - 0x8C0 == 0xFEBEAF40, "FEBEAF40 layout drift")
     token(0xB7728, funcs, "DAT_febef093 != '\\0'", "DAT_febef094 != '\\0'")
     token(0xBE4C2, funcs, "uVar13 = FUN_000be4a4(DAT_febef0f1);", "puVar7[0x666] = (char)uVar13;")

@@ -66,6 +66,10 @@ FUNCTIONS = {
   0x0BF33E: "command/current mirror",
   0x0C1F7A: "transition-mode command task",
   0x0C2000: "steady-mode command task",
+  0x0CA558: "B6 signal271 sibling-state readiness gate",
+  0x0CA614: "ADB0 0x19/0x1B state gate",
+  0x0CAAA2: "ADB0 0x19/0x1B target-angle state initializer",
+  0x0CB0FC: "B6 signal267 state-mode processor",
   0x0CB2A2: "B6 route-health readiness flags",
   0x0CB664: "special-0x31 transient companion qualification",
   0x0CB73A: "special-0x31 transient activation state",
@@ -148,11 +152,11 @@ FIELD_MAP = [
   {"signal": 264, "wire": "B6[6:4]", "raw": "FEBE80BE", "stage": "FEBEF132", "snapshot": "FEBEADB1", "role": "snapshotted companion; no runtime reader recovered"},
   {"signal": 265, "wire": "B6[2]", "raw": "FEBE80C0", "stage": "FEBEF134", "snapshot": "FEBEADBB", "role": "additive-term suppression companion"},
   {"signal": 266, "wire": "B6[1:0]", "raw": "FEBE80C1", "stage": "FEBEF135", "snapshot": None, "role": "companion state"},
-  {"signal": 267, "wire": "B7[7:6]", "raw": "FEBE80C2", "stage": "FEBEF136", "snapshot": "FEBEADC2", "role": "snapshotted companion; no runtime reader recovered"},
+  {"signal": 267, "wire": "B7[7:6]", "raw": "FEBE80C2", "stage": "FEBEF136", "snapshot": "FEBEADC2", "role": "sibling-state mode selector"},
   {"signal": 268, "wire": "B7[5:0]", "raw": "FEBE80C3", "stage": "FEBEF137", "snapshot": "FEBEADBC", "role": "application modulo-64 sequence"},
   {"signal": 269, "wire": "B8", "raw": "FEBE80C4", "stage": "FEBEF138", "snapshot": "FEBEADBD", "role": "cooperative supervisor percentage"},
   {"signal": 270, "wire": "B9", "raw": "FEBE80C5", "stage": "FEBEF139", "snapshot": "FEBEADBE", "role": "cooperative supervisor percentage"},
-  {"signal": 271, "wire": "B10[7]", "raw": "FEBE80C6", "stage": "FEBEF13A", "snapshot": "FEBEADC1", "role": "snapshotted companion; no runtime reader recovered"},
+  {"signal": 271, "wire": "B10[7]", "raw": "FEBE80C6", "stage": "FEBEF13A", "snapshot": "FEBEADC1", "role": "sibling-state readiness companion"},
   {"signal": 272, "wire": "B10[5]", "raw": "FEBE80C7", "stage": "FEBEF13C", "snapshot": "FEBEADE5", "role": "snapshotted companion; no runtime reader recovered"},
   {"signal": 273, "wire": "B10[2:0]", "raw": "FEBE80CA", "stage": "FEBEF14D", "snapshot": "FEBEADD9", "role": "health-qualified publication companion"},
 ]
@@ -220,7 +224,7 @@ def analyze() -> dict[str, Any]:
   if h(image) != EXPECTED_SHA256:
     raise RuntimeError("exact F33 CodeFlash identity drift")
   corpus = load_corpus()
-  if len(corpus) != 6065:
+  if len(corpus) != 7178:
     raise RuntimeError(f"canonical corpus function count drift: {len(corpus)}")
   missing = sorted(set(FUNCTIONS) - set(corpus))
   if missing:
@@ -304,16 +308,16 @@ def analyze() -> dict[str, Any]:
     raw_stage_snapshot_census.append(row)
 
   snapshot_reader_expectations = {
-    261: ["0x0CB73A", "0x0CEFFC"],
-    262: ["0x0CBA80", "0x0CBB66", "0x0CCF0E", "0x0CEE7C"],
+    261: ["0x0CA614", "0x0CB73A", "0x0CEFFC"],
+    262: ["0x0CAAA2", "0x0CBA80", "0x0CBB66", "0x0CCF0E", "0x0CEE7C"],
     263: ["0x0CB664"],
     264: [],
     265: ["0x0CDA20"],
-    267: [],
+    267: ["0x0CB0FC"],
     268: ["0x0CEC8A"],
     269: ["0x0CE3AA"],
     270: ["0x0CDFF8"],
-    271: [],
+    271: ["0x0CA558"],
     272: [],
     273: ["0x0CFDA0"],
   }
@@ -384,9 +388,8 @@ def analyze() -> dict[str, Any]:
   }
   expected_gate_writers = {
     "AC2B_diag_gate": ["0x0BCBD8", "0x0BF97A"],
-    "B112_diag_source": ["0x0B3314", "0x0B338C", "0x0BF97A"],
+    "B112_diag_source": ["0x0B330A", "0x0B338C", "0x0BF97A"],
     "AC5A_output_scale": ["0x0BCBD8", "0x0BF97A"],
-    "B1F8_output_scale_source": ["0x0B4B6C", "0x0B4EF4", "0x0BF97A"],
     "AC29_enable": ["0x0BCAA6", "0x0BF97A"],
     "AC2A_inhibit": ["0x0BCAA6", "0x0BF97A"],
     "8B28_internal_status": ["0x0572E6", "0x059448"],
@@ -414,7 +417,11 @@ def analyze() -> dict[str, Any]:
     "global_com_state_normalizes_to_acbd": all(x in c[0xBCD62] for x in ("cVar1 = puVar38[0x3800]", "cVar21 = cVar1", "cVar21 = '\\x04'", "cVar21 = '\\x01'", "puVar38[-0xb43] = cVar21")) or all(x in c[0xBCD62] for x in ("cVar1 = puVar38[0x3800]", "cVar44 = cVar1", "cVar44 = '\\x04'", "cVar44 = '\\x01'", "puVar38[-0xb43] = cVar44")),
     "b6_health_requires_status_zero": all(x in c[0xCEFA4] for x in ("FUN_000bdb76(0x11)", "FUN_000bdb76(0x1a)", "puVar2[0x12ff] = bVar1 && puVar2[-0xa47] == '\\0'")),
     "id11_maps_bank2_only_when_health_and_acbd_allow": all(x in c[0xCEFFC] for x in ("DAT_febecb00 = 7", "DAT_febeacbd == '\\0'", "DAT_febecaff == '\\x01'", "DAT_febeadb0 == '\\v'", "DAT_febecb00 = 2")),
+    "id11_does_not_arm_ca614_state_gate": all(x in c[0xCA614] for x in ("DAT_febeadb0 != '\\x19'", "DAT_febeadb0 != '\\x1b'")) and "DAT_febeadb0 == '\\v'" not in c[0xCA614],
     "sig263_is_special_0x31_transient_condition_not_id11_gate": all(x in c[0xCB664] for x in ("DAT_febeaddd == '\\0'", "DAT_febeaddd != '\\0'", "DAT_febec7b4")) and all(x in c[0xCB73A] for x in ("DAT_febec7b4", "DAT_febeadb0 == '1'", "DAT_febec7bf = '\\x01'")),
+    "ca614_sibling_state_initializes_from_target_angle": "FUN_000caaa2();" in c[0xCA614] and "DAT_febec6d8 = (undefined2)((DAT_febeae90 * 0x27) / 0x400);" in c[0xCAAA2],
+    "signal267_drives_sibling_state_mode": "DAT_febeadc2 == '\\x02'" in c[0xCB0FC] and "DAT_febec6ec" in c[0xCB0FC],
+    "signal271_participates_sibling_state_readiness": "DAT_febeadc1 != '\\0'" in c[0xCA558] and "DAT_febec6a1" in c[0xCA558],
     "sig265_one_suppresses_controller_term": "DAT_febeadbb != '\\x01'" in c[0xCDA20] and "FUN_000d0a06" in c[0xCDA20],
     "route_status_participates_readiness": "puVar4[-0xa47] == '\\0'" in c[0xCB2A2],
     "app_sequence_is_independent_modulo_counter": all(x in c[0xCEC8A] for x in ("DAT_febeadbc", "DAT_febecada", "DAT_000b0620", "DAT_000b0622")),

@@ -418,7 +418,7 @@ def analyze() -> dict[str, Any]:
         "B24:B26", "B27[7:2]",
     ]
     messages[0]["configured_only_note"] = (
-        "signals 36, 37 and 283 are assigned to PDU0 by the exact signal->PDU table but no literal call to either generated pack helper exists anywhere in the 6,065-function canonical corpus; no wire field is invented for them"
+        f"signals 36, 37 and 283 are assigned to PDU0 by the exact signal->PDU table but no literal call to either generated pack helper exists anywhere in the {len(rows):,}-function canonical corpus; no wire field is invented for them"
     )
     messages[1]["fault_join"] = {
         "base_monitor_state": "FEBEBDE4 -> FEBEE82B -> 0x4C1C0 -> FEBE8100",

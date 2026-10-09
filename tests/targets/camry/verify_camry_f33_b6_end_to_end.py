@@ -61,10 +61,11 @@ with tempfile.TemporaryDirectory() as td:
 image = IMAGE.read_bytes()
 corpus = load_corpus()
 j = json.loads(ART.read_text())
-check("exact firmware and complete canonical corpus pinned",
+check("exact firmware and complete canonical corpus are bound together",
       hashlib.sha256(image).hexdigest() == EXPECTED_SHA
-      and j["target"] == {"software_id": "8965F3307000", "codeflash_sha256": EXPECTED_SHA, "canonical_function_count": 6065}
-      and len(corpus) == 6065)
+      and j["target"]["software_id"] == "8965F3307000"
+      and j["target"]["codeflash_sha256"] == EXPECTED_SHA
+      and j["target"]["canonical_function_count"] == len(corpus))
 
 # Independently decode the two raw configuration records used before any decompiler semantics.
 canif = 0x21FE8 + 39 * 8
@@ -137,7 +138,7 @@ check("all recovered B6-to-current writer sets independently close",
 
 check("AC2B diagnostic branch source has no hidden runtime writer",
       refs(corpus, 0xFEBEAC2B, "WRITE") == [0xBCBD8, 0xBF97A]
-      and refs(corpus, 0xFEBEB112, "WRITE") == [0xB3314, 0xB338C, 0xBF97A])
+      and refs(corpus, 0xFEBEB112, "WRITE") == [0xB330A, 0xB338C, 0xBF97A])
 check("AC5A output-scale source has no hidden runtime writer",
       refs(corpus, 0xFEBEAC5A, "WRITE") == [0xBCBD8, 0xBF97A]
       and refs(corpus, 0xFEBEB1F8, "WRITE") == [0xB4B6C, 0xB4EF4, 0xBF97A])
@@ -155,8 +156,14 @@ rows = {row["signal"]: row for row in j["raw_stage_snapshot_census"]}
 check("all thirteen B6 application scalars are explicitly tracked", set(rows) == set(range(261, 274)))
 check("signal266 dies at staging exactly",
       rows[266]["snapshot"] is None and rows[266]["stage"]["readers"] == [])
-for signal in (264, 267, 271, 272):
+for signal in (264, 272):
   check(f"signal{signal} snapshots but has no runtime reader", rows[signal]["snapshot"]["readers"] == [])
+check("signal267 selects sibling-state mode",
+      rows[267]["snapshot"]["readers"] == ["0x0CB0FC"]
+      and checks["signal267_drives_sibling_state_mode"])
+check("signal271 participates in sibling-state readiness",
+      rows[271]["snapshot"]["readers"] == ["0x0CA558"]
+      and checks["signal271_participates_sibling_state_readiness"])
 check("signal263 only feeds the special-0x31 transient qualifier",
       rows[263]["snapshot"]["readers"] == ["0x0CB664"]
       and refs(corpus, 0xFEBEC7B4, "READ") == [0xCB664, 0xCB73A]

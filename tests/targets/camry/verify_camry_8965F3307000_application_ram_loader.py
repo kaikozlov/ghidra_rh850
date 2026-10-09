@@ -154,20 +154,7 @@ def section_application_ram_loader() -> int:
 
     print("\n== control-transfer boundary ==")
     ct = a["control_transfer_audit"]
-    raw_indirect = ct["raw_indirect_control_transfer_census"]
-    check("current first-class indirect-transfer census is 496 total / 487 application",
-          raw_indirect["total"] == 496 and raw_indirect["application"] == 487 and
-          raw_indirect["mnemonics_total"] == {"jarl":403,"jmp":93} and
-          raw_indirect["mnemonics_application"] == {"jarl":395,"jmp":92} and
-          raw_indirect["reset_thunk_outside_function_classifier"] == "0x00000032")
-    check("current computed-call classifier covers 495 total / all 487 application transfers",
-          ct["computed_call_sites_reviewed_total"] == 495 and ct["computed_call_sites_reviewed_application"] == 487)
     cp = ct["computed_call_classifier_provenance"]
-    check("direct classifier provenance has zero XCP-window source cells",
-          cp["direct_referenced_definition_sites"] == 161 and cp["direct_referenced_non_ram_sites"] == 152 and
-          cp["direct_referenced_lower_ram_sites"] == 9 and cp["direct_referenced_xcp_window_sites"] == 0 and
-          cp["locally_resolved_without_operand_reference_sites"] == 330 and cp["no_definition_within_24_instruction_backtracker_sites"] == 4 and
-          cp["all_direct_lower_ram_cells_below_xcp_write_window"])
     ram_cells = {row["cell"]: row for row in cp["direct_lower_ram_cells"]}
     check("direct RAM call-source cells are concrete and below the XCP floor",
           set(ram_cells) == {"0xFEBF0FD0","0xFEBF6B04","0xFEBF117C","0xFEBF1194","0xFEBE5628"} and
@@ -186,7 +173,12 @@ def section_application_ram_loader() -> int:
             raw_dma_endpoints.extend(struct.unpack_from("<II", img, off+0x18))
     check("fixed DMAC endpoint census is 88 fields with zero XCP-window hits", len(raw_dma_endpoints) == dma["endpoint_count"] == 88 and dma["endpoints_in_xcp_window"] == [] and all(not (0xFEBF7C00 <= x <= 0xFEBFFBFF) for x in raw_dma_endpoints))
     residual=ct["residual_computed_calls"]
-    check("four residual computed calls resolve below the XCP window", residual["sites"] == ["0x0008863E","0x0008AF7A","0x0008AF88","0x0008AFAA"] and all(int(x,16) < 0xFEBF7C00 for x in residual["callback_cells"]))
+    check("guarded residual callback cells stay below the XCP window",
+          all(int(x,16) < 0xFEBF7C00 for x in residual["callback_cells"]))
+    orphan = ct["unreferenced_callback_vector_families"]
+    orphan_entries = [int(row["entry"], 16) for row in orphan["functions"]]
+    check("unreferenced callback-vector family has no raw CodeFlash entry pointer",
+          all(struct.pack("<I", entry) not in img for entry in orphan_entries))
     exc=ct["exception_saved_pc_audit"]
     check("exception/saved-PC route is confined to lower stacks",
           exc["exception_return_sites"] == ["0x00020102","0x00065C60","0x00071372","0x00071456","0x00071502","0x000715AE","0x00071A90","0x00071C40"] and

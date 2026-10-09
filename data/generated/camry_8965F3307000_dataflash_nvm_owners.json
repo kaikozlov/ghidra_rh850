@@ -13,7 +13,7 @@
     },
     "corpus": {
       "path": "data/generated/camry-8965F3307000/decompilations.jsonl",
-      "functions": 6065
+      "functions": 7178
     },
     "local_ram_ready": {
       "path": "targets/camry-2026/raw-20260826/secoc-recovery/ram/local_ram_pe1.bin",
@@ -94,7 +94,7 @@
     "staged_active_equal_45b": true
   },
   "census": {
-    "functions_touching_learned_cells": 45,
+    "functions_touching_learned_cells": 47,
     "functions_touching_funnel_cells": 17,
     "functions_touching_both": [],
     "four_channel_offset_consumers": 25

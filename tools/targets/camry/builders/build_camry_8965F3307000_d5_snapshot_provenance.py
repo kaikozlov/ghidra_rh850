@@ -4,7 +4,7 @@
 "D5" names the 0x5Dxxx snapshot-mirror trio (0x5D12C/0x5D5E0/0x5D6DC, driven by
 0x58B1A under selector switches) plus the acquisition staging FEBE822C..FEBE8260
 that feeds it.  This builder deterministically re-derives, from the canonical
-6,065-function decompiler corpus and the exact CodeFlash image:
+7,178-function decompiler corpus and the exact CodeFlash image:
 
 * the staging writer/reader census and per-writer copy edges,
 * the group-input consume API over hardware-fed GlobalRAM rings,
@@ -28,7 +28,8 @@ import re
 import struct
 from pathlib import Path
 
-from tools.targets.camry.support.camry_f33_corpus import CORPUS, IMAGE, IMAGE_SHA256, REPO
+from tools import REPO_ROOT as REPO
+from tools.targets.camry.support.camry_f33_corpus import CORPUS, IMAGE, IMAGE_SHA256
 
 OUT = REPO / "data/generated/camry_8965F3307000_d5_snapshot_provenance.json"
 
@@ -137,17 +138,38 @@ def build() -> dict:
     b = lambda ea: body(funcs, ea)
 
     # --- staging census -----------------------------------------------------
-    staging_writers = sorted({ea for ea, _, kind, _ in refs(funcs, *STAGING, ("WRITE",))})
+    staging_writers = {ea for ea, _, kind, _ in refs(funcs, *STAGING, ("WRITE",))}
+    # Ghidra records indexed array bases as DATA references. Preserve the two
+    # exact computed writers whose p-code stores cover the staging boundary.
+    computed_staging_writers = {
+        "0x00050c38": all(
+            token in b("0x00050c38")
+            for token in ("&DAT_febe8260 + iVar3 * 4", "= 0;")
+        ),
+        "0x00058c9a": all(
+            token in b("0x00058c9a")
+            for token in (
+                "(&DAT_febe822c)[iVar3] = 0x8000;",
+                "(&DAT_febe8238)[iVar3] = 0x8000;",
+            )
+        ),
+    }
+    staging_writers.update(ea for ea, proven in computed_staging_writers.items() if proven)
+    staging_writers = sorted(staging_writers)
     staging_readers = sorted({ea for ea, _, kind, _ in refs(funcs, *STAGING, ("READ",))})
 
     # 0x58c9a seeds only invalid markers into staging -> init/reset only.
     init_markers = sorted(set(
         re.findall(r"\((?:&DAT_febe8(?:22c|238))\)\[iVar\d+\] = (0x8000);", b("0x00058c9a"))
     ))
-    init_only = init_markers == ["0x8000"] and "0x00058c9a" in staging_writers
+    init_only = init_markers == ["0x8000"] and computed_staging_writers["0x00058c9a"]
 
     # --- ring producer census ----------------------------------------------
-    ring_writers = sorted({ea for ea, _, kind, _ in refs(funcs, *RING_ZONE, ("WRITE",))})
+    ring_writers = {ea for ea, _, kind, _ in refs(funcs, *RING_ZONE, ("WRITE",))}
+    ring_initializer = b("0x00060aa8")
+    if all(token in ring_initializer for token in ("&DAT_feef90f8", "&DAT_feef910c", "0x800800")):
+        ring_writers.add("0x00060aa8")
+    ring_writers = sorted(ring_writers)
     ring_init = {
         "0x0005fa3a",  # zero rings A/B + head counters FEEF90E0/FEEF90E4
         "0x0005fa84",  # zero rings C/D + head counters FEEF90E8..FEEF90F4

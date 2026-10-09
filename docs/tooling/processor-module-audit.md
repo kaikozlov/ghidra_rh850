@@ -449,10 +449,15 @@ The graph effect is reproducible rather than a one-project analyzer accident.
 Every registered target has byte-identical normalized inventories from two
 independent four-stage rebuilds:
 
+The “before” columns are the tracked normalized inventories immediately before
+the processor refresh. Camry's separately recovered 6,065-real-function
+checkpoint had not yet been promoted as that baseline; the current 7,178 count
+is +1,113 relative to that byte-audited checkpoint.
+
 | Target | Functions before | Functions after | Δ | Instructions before | Instructions after | Δ |
 |---|---:|---:|---:|---:|---:|---:|
 | Sienna `8965B4512000` | 6,376 | 7,090 | +714 | 183,240 | 197,726 | +14,486 |
-| Camry `8965F3307000` | 6,056 | 7,181 | +1,125 | 187,475 | 207,434 | +19,959 |
+| Camry `8965F3307000` | 6,056 | 7,178 | +1,122 | 187,475 | 205,829 | +18,354 |
 | Crown `8965F3012000` | 5,864 | 6,972 | +1,108 | 184,505 | 198,930 | +14,425 |
 | Corolla `8965F1208000` | 5,811 | 6,934 | +1,123 | 178,237 | 199,413 | +21,176 |
 | Corolla `8965H1202000` | 5,811 | 6,934 | +1,123 | 178,222 | 199,403 | +21,181 |
@@ -462,6 +467,32 @@ In Sienna, the recovered functions expose previously hidden, byte-verified
 readers at `0xC7376`, `0xC746C`, `0xC78E6`, and `0xC7F58`; the SecOC and
 motor-boundary reference assertions now include those reads instead of
 preserving stale negative censuses.
+
+Camry is the clearest quality check because the larger recovered graph was
+re-audited against target bytes rather than accepted by count. Marking exact
+CodeFlash `0x10000..0x17FFF` as non-executable calibration/metadata removed
+three pattern-created phantom starts (`0xB21CA`, `0xB1406`, `0xC11D2`) and their
+fabricated callers. The retained graph newly resolves the callback-table
+targets `0x3B400/0x3B434` and `0x3B4A8/0x3B4DC` into the shared state machine
+at `0x6AE7C`, plus previously missing reads of B6 application-state snapshots.
+Those data references refine command-magnitude supervision and sibling-state
+readiness; they do not add an external ingress or an output-authority path.
+
+The stronger graph also improves the exploit negative without turning coverage
+into proof by count. The target-native recensus covers every function-owned
+indirect transfer, reduces all directly referenced RAM call sources to five
+fixed cells below the application XCP write floor, finds no static or raw
+CodeFlash pointer into the retained high-tail carrier, and keeps all recovered
+DMAC endpoints outside that window. Fifty parameter-vector call sites in ten
+unreferenced library routines remain an explicit static-analysis boundary.
+Exact counts, addresses, and the resulting bounded negative are owned by the
+[Camry report](../variants/camry-2026-live-baseline.md#135-control-transfer-audit-the-missing-primitive).
+
+The corrected G3M register map changes decompiler names and system-state
+interpretation, not firmware bytes. No current vehicle or exploit conclusion
+depended on the former `SPID`/`IMSR`/`RDBCR` labels; persisted projects and
+corpora were nevertheless rebuilt so future register dataflow starts from
+`PID`/`PMR`/`CDBCR` rather than carrying the stale aliases forward.
 
 The language-semantics change increments the V850E2M registration to
 version `0.4` and the RH850G3M registration to `0.5`; stale compiled languages

@@ -1261,11 +1261,11 @@
     ],
     "fault_status": {
       "path": "data/generated/camry_8965F3307000_fault_status.json",
-      "sha256": "2da89bde460eeeb11f378897962fe7274c62706b71e519e118ce8a438abec901"
+      "sha256": "d1c2fa85b2b9433146596ea43ccc38cbb1d3f12e07d8d9c8bf3e62ebd069c43f"
     },
     "gtsplus_semantics": {
       "path": "data/generated/gtsplus_2026/camry_8965F3307000_emps_semantics.json",
-      "sha256": "f1e204b1eaed562e2c8ce5746df8792381e211f2deed013641657f7d96c7218c"
+      "sha256": "0714517d26befb64b16c505e5be568a8383f1ce13832a7220133076a0a9b31d8"
     }
   },
   "special_paths": {
@@ -1367,7 +1367,7 @@
   },
   "target": {
     "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
-    "corpus_function_count": 6065,
+    "corpus_function_count": 7178,
     "software_id": "8965F3307000"
   }
 }

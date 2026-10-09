@@ -13,7 +13,7 @@
     "0x035C4C": {
       "body_sha256": "205df4739724fda0b8e0e8c09e44df61b42568bc5c92e9673462d3801db70b2a",
       "body_size": 156,
-      "decompiled_c_sha256": "3e906dbcd17a61aaae80894070bec3d401728ef663463e967f5c30e7db338df5",
+      "decompiled_c_sha256": "9504bb6536cb2cbca2f9ef662d0ccf5fdd597a0d4a49db5643ae896cbbbf3764",
       "role": "motor-driving EE40C consumer"
     },
     "0x05899E": {
@@ -52,6 +52,12 @@
       "decompiled_c_sha256": "a0a1bc36b72aa2bff3cfe42f8ed1b95faba0f44a2a7b6fb6e7a62fbab2dc0b06",
       "role": "steady-state command-composition caller"
     },
+    "0x0CA614": {
+      "body_sha256": "d94931cebc53126f817febc51513e0a71a05591e0038c29f8ae3d5b83ab1a17b",
+      "body_size": 258,
+      "decompiled_c_sha256": "2d71ce15af85e4fa61564e51737d0d2ad5410064e3c171b871cd807d57464f01",
+      "role": "ADB0 0x19/0x1B state gate"
+    },
     "0x0CB73A": {
       "body_sha256": "7f7324938d9d266f3e374ded2f494f0fb7c0366efcc2a39c15ec620e28014cb1",
       "body_size": 226,
@@ -61,7 +67,7 @@
     "0x0CBB66": {
       "body_sha256": "ea547c863e4e2ecd9f6001acb26f7eab3d109a91d820a734b3d14ff2da5a19a3",
       "body_size": 282,
-      "decompiled_c_sha256": "16dd54b7c6aa14364d8627b01cfdb9be2901460ede2b561e998757fc61b7655f",
+      "decompiled_c_sha256": "d1d4f0f811e2e50c42280db6b82219d944b576904e73103ce6536a66bef097b7",
       "role": "B6 target-angle input conditioning"
     },
     "0x0CBC80": {
@@ -73,19 +79,19 @@
     "0x0CBF9E": {
       "body_sha256": "8e7e3059ae33cc76049f06c503b2b46d943c9a0e20938cc01d6cc98906a7cf10",
       "body_size": 154,
-      "decompiled_c_sha256": "230c40ee7e74443760ced374bd68984e50f9ebb3cd722856f07072a912e04c16",
+      "decompiled_c_sha256": "52c312f1c2a62539647c35ad95e0f59f3ded0d08c236490443d22dcbac918532",
       "role": "local C81A damping/assist addend"
     },
     "0x0CCDF8": {
       "body_sha256": "45cf097f8be599c362fee1a0ce99620765de7d7f881c8fb5569d7271e05a7468",
       "body_size": 188,
-      "decompiled_c_sha256": "d4310e412f1d436b394bd7c36a3b5880cd043d30b11faf782f195ecb7bd399f6",
+      "decompiled_c_sha256": "3ab9c5b170df58c1a890237dc87b16cb1f50f8ecb10e5c364a455220dc98105a",
       "role": "B6 supervisor output conditioning"
     },
     "0x0CCF0E": {
       "body_sha256": "f5a250c7631463c3446661d0084dc80810d9c6ca49609fd334175507f1707cd9",
       "body_size": 164,
-      "decompiled_c_sha256": "3353830a99610a156f2add53f9778f0411c1435b00f7d02c1b0c0dd7f36cb2f2",
+      "decompiled_c_sha256": "9ae5e4afbe80bcbaff3e2ee8b2a91b654102eb22f40d233995860993bb25a6ec",
       "role": "B6 target-angle scale/continuity stage"
     },
     "0x0CCFB2": {
@@ -97,7 +103,7 @@
     "0x0CD128": {
       "body_sha256": "4ea271ee3c13dee80ee2712b8a82fb23c5c3ef1d3b5fb2e58c3d088e0e2a2671",
       "body_size": 376,
-      "decompiled_c_sha256": "952052f74ea04eb413dc79cea183b4a8e58a1f8730eedd9fa523d548cb3df2df",
+      "decompiled_c_sha256": "821c6c3ddc1010c247382e830cec56e5b54af9cbef9e0c474dfeafb5c346a3a4",
       "role": "target-minus-measured B6 controller"
     },
     "0x0CDFD4": {
@@ -109,13 +115,13 @@
     "0x0CDFF8": {
       "body_sha256": "c98e0bccbb22324f1f4d55db3666683ad4b8167f689fa9d7d1e27e92d8a47d25",
       "body_size": 182,
-      "decompiled_c_sha256": "73c4ac8c1d1187ad2a582c30bf5776b25367ac7c4819e4fa2e6be98208eaa146",
+      "decompiled_c_sha256": "bf74f3d353522d75462dc64fd8e015636cb17faae3ae09af3e92810e6ab66ca7",
       "role": "mode-selected B6 supervisor"
     },
     "0x0CE144": {
       "body_sha256": "e8e705ee619f6ba492e9c5f59847dacb914977cf7983c3f7edbcf05e343444e7",
       "body_size": 298,
-      "decompiled_c_sha256": "a9232a30f639fadbdbf17efae31b44c33ed13a2465a1575e11dbea00fb52e153",
+      "decompiled_c_sha256": "c8bedd90f4e54ed2db513502b3756d08fe47094e9a16429ff07c92e08868c481",
       "role": "mode-selected B6 supervisor"
     },
     "0x0CE384": {
@@ -127,7 +133,7 @@
     "0x0CE6F4": {
       "body_sha256": "48271f642ac3b97a6c69295487439a0fb7addb7f1ee8f3666e3eef03aa8a4748",
       "body_size": 92,
-      "decompiled_c_sha256": "e443a62f1dbe022903479f3dece020de0a46dcdac3a53e2da04bc5393ab52375",
+      "decompiled_c_sha256": "f2c280bca7b18857dc5dcc2a7918ea1dc4060c4c204988a0306ea307af23ee8b",
       "role": "B6 supervisor consolidation"
     },
     "0x0CEFFC": {
@@ -139,7 +145,7 @@
     "0x0CF148": {
       "body_sha256": "69362bbbc374f98398617a91545b147e4b9a0353a40be0205c4a1dff7d7ad197",
       "body_size": 228,
-      "decompiled_c_sha256": "0be3dbfa40ff6aa704a71536f4e5b6972a23795413d7475bd3c89756342073e8",
+      "decompiled_c_sha256": "0f0c7620bba3af95b5cca93446ce8c6fdcd4f5cc2d6b7a22e5e22a2b8bc119a3",
       "role": "B6 supervisor gain state"
     },
     "0x0CF22C": {
@@ -157,25 +163,25 @@
     "0x0CF2B2": {
       "body_sha256": "ac1e88a5f7a5620c751302d7b76d9cb7d2f14246cf49349ee429acb33559493b",
       "body_size": 138,
-      "decompiled_c_sha256": "060a6c27b44d55ecfe834e820b1f76c0bf60c5393aa20b4f6ae10db896f977a6",
+      "decompiled_c_sha256": "aa91599107bc3f4dd69f7c6b2ea390e9fde048c8843c2f8ffcd17abca96ca12e",
       "role": "B6 supervisor ramp to CB38"
     },
     "0x0D0218": {
       "body_sha256": "a509a296f50e426acede52ea4730ae44322e4d9fe309e8c93c553a5c674307b1",
       "body_size": 108,
-      "decompiled_c_sha256": "86a83e81391d2644bc90639a1ef1bc3cb68e03daae0a0b7843fa36f25af038dd",
+      "decompiled_c_sha256": "a828b79715c81640a7ede3f37edbe85a58465e9c1a8361129a39cb29d42eba33",
       "role": "ordinary assist sum including CB38"
     },
     "0x0D0284": {
       "body_sha256": "b4eadcf0a0f2d412955c6ed2776087bccac004c30a96401894801ba943676f71",
       "body_size": 86,
-      "decompiled_c_sha256": "f578b2443a65f2072829c3b118eb17aea3996e6f2d30d8f1b7081b72279fd6ef",
+      "decompiled_c_sha256": "10b9a5c39b0c8b342f92cbad28074ace6d9d66e5630039026effebcd4925dc87",
       "role": "shared command scale/clamp"
     },
     "0x0D02DA": {
       "body_sha256": "edb65881363e0b33f0a565d075c487c6cf94f785e0a9590e8743eff834eee238",
       "body_size": 168,
-      "decompiled_c_sha256": "36c913717aa8c7917cd9769b010d77455cfc44d706159504e0b322ff0a701d6d",
+      "decompiled_c_sha256": "2b0e04e2ce1fe5179136658f214d536024bc58bb9126d86a2e2c544432c4ea03",
       "role": "shared command slew/filter"
     },
     "0x0D0382": {
@@ -187,19 +193,19 @@
     "0x0D039E": {
       "body_sha256": "993f8f98ca99f2370ae504726245106eda7443287bea6834ba32b757da35539e",
       "body_size": 142,
-      "decompiled_c_sha256": "38a0d4bcdca3fbc457399078d19668350a80c2ce1ac84500b5c86d55d36129f4",
+      "decompiled_c_sha256": "b1b5b46545b5729aba8b13184fd0652deeffe5bfc9a84b2d29ed2a01bc82c597",
       "role": "shared base plus local addend composition"
     },
     "0x0D042C": {
       "body_sha256": "5cec1b3bd6f5bbbce2832ae7ff417f75db1e11f053d568c143f8a48ee13539e5",
       "body_size": 80,
-      "decompiled_c_sha256": "6b7e4905113f7ac8dc2d2b95f304ab4b33ea743d3ffa3196c7f3013184689a1e",
+      "decompiled_c_sha256": "3d59d9771c66e6bb670a825a21d96f39e92fbb393825134321ccace032d5b7da",
       "role": "shared pre-slew command output"
     },
     "0x0D047C": {
       "body_sha256": "b7995271dcae87283b114788eb9719f086ea7ef78fde1e73ed9fa7336cec3e4c",
       "body_size": 48,
-      "decompiled_c_sha256": "d327428e65c672f725dbb19125837d7d3346fa997c994d3bb7e15d23c3d7e7ba",
+      "decompiled_c_sha256": "b515c8173254fcf4d71e57598d1306f271a50e16beddcbf30e3d4ff56b24408b",
       "role": "shared post-slew/override output"
     },
     "0x0D0674": {
@@ -229,7 +235,7 @@
     "0x0D0EEC": {
       "body_sha256": "e58077923617544434467a6d0279d5037aa2cf1398960ef0fe62126f37e23231",
       "body_size": 488,
-      "decompiled_c_sha256": "398bde3d9db0aad7c48424f2e21338cdbb2646fd6254c3d58f27809757c96e85",
+      "decompiled_c_sha256": "1e972cafb3e6afc4d60a0cbff2c63596f7dda6bdb87dc1bb53de2dd94b6e4f17",
       "role": "B6 supervisor cyclic coordinator"
     },
     "0x0D1100": {
@@ -261,6 +267,7 @@
   "selector_census": {
     "ADB0_address": "0xFEBEADB0",
     "ADB0_decompiled_functions": [
+      "0x0CA614",
       "0x0CB73A",
       "0x0CEFFC"
     ],
@@ -274,6 +281,11 @@
         "from": "0x000c09ba",
         "function": "0x0BF97A",
         "type": "WRITE"
+      },
+      {
+        "from": "0x000ca628",
+        "function": "0x0CA614",
+        "type": "READ"
       },
       {
         "from": "0x000cb746",
@@ -296,6 +308,11 @@
         "from": "0x000c09b6",
         "function": "0x0BF97A",
         "type": "WRITE"
+      },
+      {
+        "from": "0x000caaa6",
+        "function": "0x0CAAA2",
+        "type": "READ"
       },
       {
         "from": "0x000cba84",
@@ -719,6 +736,7 @@
     }
   },
   "semantic_checks": {
+    "adb0_runtime_readers_are_bounded_selector_state_gates": true,
     "b6_angle_enters_supervisor": true,
     "b6_supervisor_and_shared_composition_have_distinct_wrappers": true,
     "b6_supervisor_reaches_cb38": true,
@@ -726,11 +744,11 @@
     "c81a_is_local_not_raw_b6_target": true,
     "d0218_adds_cb38_to_ordinary_terms": true,
     "d039e_retains_shared_base_and_local_addend": true,
+    "id11_does_not_arm_ca614_state_gate": true,
     "id11_does_not_arm_special_transient": true,
     "id11_maps_to_bank2": true,
     "motor_snapshot_uses_same_cc64": true,
     "no_cb00_function_directly_writes_or_reads_final_funnel": true,
-    "only_adb0_runtime_readers_are_bank_decode_and_special_transient": true,
     "post_slew_override_is_internal_not_b6_selected": true,
     "shared_command_coordinator_always_calls_same_funnel": true
   },
@@ -986,7 +1004,7 @@
   },
   "target": {
     "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
-    "corpus_function_count": 6065,
+    "corpus_function_count": 7178,
     "software_id": "8965F3307000"
   }
 }

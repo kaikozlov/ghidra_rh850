@@ -1,6 +1,6 @@
 {
   "fixed_gp_census": {
-    "boundary": "Whole 6,065-function canonical Ghidra data-reference census to exact GP-resolved RAM addresses. Computed aliases without a Ghidra data reference, value-set pointer recovery, DMA/peripheral mutation, and unrecovered code remain outside this negative proof.",
+    "boundary": "Whole 7,178-function canonical Ghidra data-reference census to exact GP-resolved RAM addresses. Computed aliases without a Ghidra data reference, value-set pointer recovery, DMA/peripheral mutation, and unrecovered code remain outside this negative proof.",
     "driver_torque_source": {
       "cooperative_c8_d1_intersection": [],
       "entries": [
@@ -1278,10 +1278,17 @@
           "ref_type": "READ",
           "to_addr": "0xfebe66a8",
           "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004db8e",
+          "operand_index": 0,
+          "ref_type": "PARAM",
+          "to_addr": "0x000061a8",
+          "to_space": "ram"
         }
       ],
-      "decompiled_c": "\nundefined4 did_1035_steering_wheel_torque(undefined4 param_1)\n\n{\n  int iVar1;\n  int local_c [2];\n  \n  if (DAT_febe6af0 == -0x5aa5a55b) {\n    local_c[0] = (DAT_febe66a8 * 1000) / 0x100;\n    FUN_0007012a(local_c[0],25000,0xffff9e58,local_c);\n    iVar1 = (int)(short)local_c[0];\n  }\n  else {\n    iVar1 = -0x8000;\n  }\n  FUN_0006a5ac(iVar1,param_1);\n  return 0;\n}\n\n",
-      "decompiled_c_sha256": "0bf5f2183338e42e43a8eab60c3b063882a548e0ae4751bf106b7f0305c4c070",
+      "decompiled_c": "\n/* WARNING: Removing unreachable block (ram,0x0004dba0) */\n\nundefined4 did_1035_steering_wheel_torque(undefined4 param_1)\n\n{\n  int iVar1;\n  int local_c [2];\n  \n  if (DAT_febe6af0 == -0x5aa5a55b) {\n    local_c[0] = (DAT_febe66a8 * 1000) / 0x100;\n    FUN_0007012a(local_c[0],25000,0xffff9e58,local_c);\n    iVar1 = (int)(short)local_c[0];\n  }\n  else {\n    iVar1 = -0x8000;\n  }\n  FUN_0006a5ac(iVar1,param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "98e390feafc17a2044d100d7ee33cddcf05c96bd6550dfc1aba214f202461448",
       "entry": "0x0004DB70"
     },
     {
@@ -1310,8 +1317,8 @@
           "to_space": "ram"
         }
       ],
-      "decompiled_c": "\nundefined4 did_1036_steering_angle_velocity(undefined4 param_1)\n\n{\n  short asStack_a [3];\n  \n  asStack_a[0] = (short)((DAT_febe66a4 * 0x168) / 0x400);\n  FUN_00070110((int)asStack_a[0],0x7fff,0xffff8000,asStack_a);\n  FUN_0006a5ac((int)asStack_a[0],param_1);\n  return 0;\n}\n\n",
-      "decompiled_c_sha256": "8b9539fdb2fb8bdb53495a1ca71a028ff9141ae392313505271d7e62e11bcd17",
+      "decompiled_c": "\n/* WARNING: Removing unreachable block (ram,0x0004dbda) */\n\nundefined4 did_1036_steering_angle_velocity(undefined4 param_1)\n\n{\n  short asStack_a [3];\n  \n  asStack_a[0] = (short)((DAT_febe66a4 * 0x168) / 0x400);\n  FUN_00070110((int)asStack_a[0],0x7fff,0xffff8000,asStack_a);\n  FUN_0006a5ac((int)asStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "7aa549cdff6f745637ab45a684eca480f1bad5bf311cc5c900ab5097f083ae61",
       "entry": "0x0004DBBC"
     },
     {
@@ -1340,8 +1347,8 @@
           "to_space": "ram"
         }
       ],
-      "decompiled_c": "\nundefined4 did_1151_motor_actual_current_q_axis(undefined4 param_1)\n\n{\n  short asStack_a [3];\n  \n  asStack_a[0] = (short)((DAT_febe670e * 100) / 0x80);\n  FUN_00070110((int)asStack_a[0],0x7fff,0xffff8000,asStack_a);\n  FUN_0006a5ac((int)asStack_a[0],param_1);\n  return 0;\n}\n\n",
-      "decompiled_c_sha256": "f8320b0f0de7a3f40b7d7311a81ddcb33128c3a2456a3d974804c9a04c9ff2af",
+      "decompiled_c": "\n/* WARNING: Removing unreachable block (ram,0x0004e3b2) */\n\nundefined4 did_1151_motor_actual_current_q_axis(undefined4 param_1)\n\n{\n  short asStack_a [3];\n  \n  asStack_a[0] = (short)((DAT_febe670e * 100) / 0x80);\n  FUN_00070110((int)asStack_a[0],0x7fff,0xffff8000,asStack_a);\n  FUN_0006a5ac((int)asStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "50c381575e218a1642ca3a967a912a145c691a1e8543e5736b37b758af414dd2",
       "entry": "0x0004E394"
     },
     {
@@ -2314,29 +2321,15 @@
         {
           "from_addr": "0x00058154",
           "operand_index": 2,
-          "ref_type": "READ",
+          "ref_type": "DATA",
           "to_addr": "0xfebe7014",
           "to_space": "ram"
         },
         {
-          "from_addr": "0x00058154",
-          "operand_index": 2,
-          "ref_type": "READ",
-          "to_addr": "0xfebe7016",
-          "to_space": "ram"
-        },
-        {
           "from_addr": "0x0005815e",
           "operand_index": 2,
-          "ref_type": "WRITE",
+          "ref_type": "DATA",
           "to_addr": "0xfebef17c",
-          "to_space": "ram"
-        },
-        {
-          "from_addr": "0x0005815e",
-          "operand_index": 2,
-          "ref_type": "WRITE",
-          "to_addr": "0xfebef17e",
           "to_space": "ram"
         },
         {
@@ -6489,13 +6482,6 @@
         },
         {
           "from_addr": "0x000663ce",
-          "operand_index": 2,
-          "ref_type": "DATA",
-          "to_addr": "0x0000419f",
-          "to_space": "ram"
-        },
-        {
-          "from_addr": "0x000663ce",
           "operand_index": 1,
           "ref_type": "WRITE",
           "to_addr": "0xffe50000",
@@ -6635,8 +6621,8 @@
           "to_space": "ram"
         }
       ],
-      "decompiled_c": "\nvoid FUN_0006639c(void)\n\n{\n  byte bVar1;\n  \n  TAUJ0TPS = 0;\n  TAUJ0BRS._0_1_ = 0;\n  TAUJ0CMOR0 = 0;\n  TAUJ0CMOR2 = 0;\n  DAT_ffe50088 = 0;\n  DAT_ffe5008c = 0;\n  DAT_ffe50020 = 0;\n  DAT_ffe50024 = 0;\n  DAT_ffe50028 = 0;\n  DAT_ffe5002c = 0;\n  TAUJ0CDR0 = (uint)(PTR_FUN_00030df0 + DAT_00030df4 + -1);\n  TAUJ0CDR1 = (uint)(PTR_LAB_00030dfc + (int)PTR_LAB_00030df8 + -1);\n  TAUJ0CDR2 = (uint)(PTR_LAB_00030e04 + (int)PTR_DAT_00030e00 + -1);\n  TAUJ0CDR3 = (uint)(PTR_LAB_0000270e_2_00030e0c + DAT_00030e08 + -1);\n  bVar1 = DAT_ffe50060;\n  DAT_ffe50060 = bVar1 & 0xf0;\n  bVar1 = DAT_ffe5005c;\n  DAT_ffe5005c = bVar1 & 0xf0;\n  bVar1 = DAT_ffe500a0;\n  DAT_ffe500a0 = bVar1 & 0xf0;\n  bVar1 = DAT_ffe500a4;\n  DAT_ffe500a4 = bVar1 & 0xf0;\n  return;\n}\n\n",
-      "decompiled_c_sha256": "7e1d0f3a5e4c0ad12afbe1ce2be5a9dac94878b594b929a8b1bf61934a169e8e",
+      "decompiled_c": "\nvoid FUN_0006639c(void)\n\n{\n  byte bVar1;\n  \n  TAUJ0TPS = 0;\n  TAUJ0BRS._0_1_ = 0;\n  TAUJ0CMOR0 = 0;\n  TAUJ0CMOR1 = 0;\n  TAUJ0CMOR2 = 0;\n  TAUJ0CMOR3 = 0;\n  TAUJ0CMUR0 = '\\0';\n  TAUJ0CMUR1 = '\\0';\n  TAUJ0CMUR2 = '\\0';\n  TAUJ0CMUR3 = '\\0';\n  TAUJ0CDR0 = (uint)(PTR_FUN_00030df0 + DAT_00030df4 + -1);\n  TAUJ0CDR1 = (DAT_00030dfc + DAT_00030df8) - 1;\n  TAUJ0CDR2 = (DAT_00030e04 + DAT_00030e00) - 1;\n  TAUJ0CDR3 = (DAT_00030e0c + DAT_00030e08) - 1;\n  bVar1 = TAUJ0TOE;\n  TAUJ0TOE = bVar1 & 0xf0;\n  bVar1 = TAUJ0TO;\n  TAUJ0TO = bVar1 & 0xf0;\n  bVar1 = TAUJ0RDE;\n  TAUJ0RDE = bVar1 & 0xf0;\n  bVar1 = TAUJ0RDM;\n  TAUJ0RDM = bVar1 & 0xf0;\n  return;\n}\n\n",
+      "decompiled_c_sha256": "472f084785f48c4c8eb17bb9d1064552bbe09484711261d40a0a685eef83b5a3",
       "entry": "0x0006639C"
     },
     {
@@ -6694,13 +6680,6 @@
         },
         {
           "from_addr": "0x0006654c",
-          "operand_index": 2,
-          "ref_type": "DATA",
-          "to_addr": "0x00003e7f",
-          "to_space": "ram"
-        },
-        {
-          "from_addr": "0x0006654c",
           "operand_index": 1,
           "ref_type": "WRITE",
           "to_addr": "0xffe20000",
@@ -6716,22 +6695,8 @@
         {
           "from_addr": "0x00066554",
           "operand_index": 2,
-          "ref_type": "DATA",
-          "to_addr": "0x00003e7f",
-          "to_space": "ram"
-        },
-        {
-          "from_addr": "0x00066554",
-          "operand_index": 2,
           "ref_type": "WRITE",
           "to_addr": "0xffe2000c",
-          "to_space": "ram"
-        },
-        {
-          "from_addr": "0x00066558",
-          "operand_index": 2,
-          "ref_type": "DATA",
-          "to_addr": "0x00003e7f",
           "to_space": "ram"
         },
         {
@@ -6799,13 +6764,6 @@
         },
         {
           "from_addr": "0x0006657e",
-          "operand_index": 2,
-          "ref_type": "DATA",
-          "to_addr": "0x00003e7f",
-          "to_space": "ram"
-        },
-        {
-          "from_addr": "0x0006657e",
           "operand_index": 1,
           "ref_type": "WRITE",
           "to_addr": "0xffe21000",
@@ -6821,22 +6779,8 @@
         {
           "from_addr": "0x00066582",
           "operand_index": 2,
-          "ref_type": "DATA",
-          "to_addr": "0x00003e7f",
-          "to_space": "ram"
-        },
-        {
-          "from_addr": "0x00066582",
-          "operand_index": 2,
           "ref_type": "WRITE",
           "to_addr": "0xffe2100c",
-          "to_space": "ram"
-        },
-        {
-          "from_addr": "0x00066584",
-          "operand_index": 2,
-          "ref_type": "DATA",
-          "to_addr": "0x00003e7f",
           "to_space": "ram"
         },
         {
@@ -6883,13 +6827,6 @@
         },
         {
           "from_addr": "0x000665ac",
-          "operand_index": 2,
-          "ref_type": "DATA",
-          "to_addr": "0x00003e7f",
-          "to_space": "ram"
-        },
-        {
-          "from_addr": "0x000665ac",
           "operand_index": 1,
           "ref_type": "WRITE",
           "to_addr": "0xffe50000",
@@ -6900,13 +6837,6 @@
           "operand_index": 2,
           "ref_type": "READ",
           "to_addr": "0x00030df8",
-          "to_space": "ram"
-        },
-        {
-          "from_addr": "0x000665b8",
-          "operand_index": 2,
-          "ref_type": "DATA",
-          "to_addr": "0x00007cff",
           "to_space": "ram"
         },
         {
@@ -6980,8 +6910,8 @@
           "to_space": "ram"
         }
       ],
-      "decompiled_c": "\nvoid FUN_00066512(void)\n\n{\n  ushort uVar1;\n  byte bVar2;\n  undefined4 uVar3;\n  \n  uVar3 = FUN_000701c4(0xffc0);\n  Ramffe20000 = DAT_00030e14 + -1;\n  Ramffe20004 = DAT_00030e18 + -1;\n  Ramffe2000c = DAT_00030e1c + -1;\n  Ramffe20014 = DAT_00030e20 + -1;\n  Ramffe20020 = DAT_00030e10 + -1;\n  Ramffe20038 = DAT_00030e10 + -1;\n  uVar1 = Ramffe2005c;\n  Ramffe2005c = uVar1 & 0xbed4;\n  uVar1 = Ramffe20058;\n  Ramffe20058 = uVar1 & 0xbed4;\n  Ramffe21000 = DAT_00030e14 + -1;\n  Ramffe21004 = DAT_00030e18 + -1;\n  Ramffe2100c = DAT_00030e1c + -1;\n  Ramffe21014 = DAT_00030e20 + -1;\n  uVar1 = Ramffe2105c;\n  Ramffe2105c = uVar1 & 0xffd0;\n  uVar1 = Ramffe21058;\n  Ramffe21058 = uVar1 & 0xffd0;\n  TAUJ0CDR0 = (uint)(PTR_FUN_00030df0 + -1);\n  TAUJ0CDR1 = (uint)(PTR_LAB_00030df8 + -1);\n  TAUJ0CDR2 = (uint)(PTR_DAT_00030e00 + -1);\n  TAUJ0CDR3 = DAT_00030e08 - 1;\n  bVar2 = DAT_ffe50060;\n  DAT_ffe50060 = bVar2 & 0xf0;\n  bVar2 = DAT_ffe5005c;\n  DAT_ffe5005c = bVar2 & 0xf0;\n  FUN_000701ea(uVar3);\n  return;\n}\n\n",
-      "decompiled_c_sha256": "55bbb8746aa9deb6b609dcd0f6c1a5fd585b2807742d583f32397f824673ae3e",
+      "decompiled_c": "\nvoid FUN_00066512(void)\n\n{\n  ushort uVar1;\n  byte bVar2;\n  undefined4 uVar3;\n  \n  uVar3 = FUN_000701c4(0xffc0);\n  Ramffe20000 = DAT_00030e14 + -1;\n  Ramffe20004 = DAT_00030e18 + -1;\n  Ramffe2000c = DAT_00030e1c + -1;\n  Ramffe20014 = DAT_00030e20 + -1;\n  Ramffe20020 = DAT_00030e10 + -1;\n  Ramffe20038 = DAT_00030e10 + -1;\n  uVar1 = Ramffe2005c;\n  Ramffe2005c = uVar1 & 0xbed4;\n  uVar1 = Ramffe20058;\n  Ramffe20058 = uVar1 & 0xbed4;\n  Ramffe21000 = DAT_00030e14 + -1;\n  Ramffe21004 = DAT_00030e18 + -1;\n  Ramffe2100c = DAT_00030e1c + -1;\n  Ramffe21014 = DAT_00030e20 + -1;\n  uVar1 = Ramffe2105c;\n  Ramffe2105c = uVar1 & 0xffd0;\n  uVar1 = Ramffe21058;\n  Ramffe21058 = uVar1 & 0xffd0;\n  TAUJ0CDR0 = (uint)(PTR_FUN_00030df0 + -1);\n  TAUJ0CDR1 = DAT_00030df8 - 1;\n  TAUJ0CDR2 = DAT_00030e00 - 1;\n  TAUJ0CDR3 = DAT_00030e08 - 1;\n  bVar2 = TAUJ0TOE;\n  TAUJ0TOE = bVar2 & 0xf0;\n  bVar2 = TAUJ0TO;\n  TAUJ0TO = bVar2 & 0xf0;\n  FUN_000701ea(uVar3);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "92ee97ba92b293fa529afed3e17a8c4c5d1884357d7b9f79360c8de9dd7562a5",
       "entry": "0x00066512"
     },
     {
@@ -9077,13 +9007,6 @@
         {
           "from_addr": "0x000bd344",
           "operand_index": 2,
-          "ref_type": "DATA",
-          "to_addr": "0x00008001",
-          "to_space": "ram"
-        },
-        {
-          "from_addr": "0x000bd344",
-          "operand_index": 2,
           "ref_type": "WRITE",
           "to_addr": "0xfebeae04",
           "to_space": "ram"
@@ -9093,13 +9016,6 @@
           "operand_index": 2,
           "ref_type": "READ",
           "to_addr": "0xfebef1be",
-          "to_space": "ram"
-        },
-        {
-          "from_addr": "0x000bd356",
-          "operand_index": 2,
-          "ref_type": "DATA",
-          "to_addr": "0x00008001",
           "to_space": "ram"
         },
         {
@@ -9189,13 +9105,6 @@
         {
           "from_addr": "0x000bd38c",
           "operand_index": 2,
-          "ref_type": "DATA",
-          "to_addr": "0x00008001",
-          "to_space": "ram"
-        },
-        {
-          "from_addr": "0x000bd38c",
-          "operand_index": 2,
           "ref_type": "WRITE",
           "to_addr": "0xfebeae08",
           "to_space": "ram"
@@ -9212,13 +9121,6 @@
           "operand_index": 2,
           "ref_type": "READ",
           "to_addr": "0xfebef192",
-          "to_space": "ram"
-        },
-        {
-          "from_addr": "0x000bd3a6",
-          "operand_index": 2,
-          "ref_type": "DATA",
-          "to_addr": "0x00008001",
           "to_space": "ram"
         },
         {
@@ -9560,13 +9462,6 @@
         {
           "from_addr": "0x000bd47c",
           "operand_index": 2,
-          "ref_type": "DATA",
-          "to_addr": "0x00008001",
-          "to_space": "ram"
-        },
-        {
-          "from_addr": "0x000bd47c",
-          "operand_index": 2,
           "ref_type": "WRITE",
           "to_addr": "0xfebeae4c",
           "to_space": "ram"
@@ -9609,13 +9504,6 @@
         {
           "from_addr": "0x000bd49a",
           "operand_index": 2,
-          "ref_type": "DATA",
-          "to_addr": "0x00008001",
-          "to_space": "ram"
-        },
-        {
-          "from_addr": "0x000bd49a",
-          "operand_index": 2,
           "ref_type": "WRITE",
           "to_addr": "0xfebeae4e",
           "to_space": "ram"
@@ -9637,13 +9525,6 @@
         {
           "from_addr": "0x000bd4b4",
           "operand_index": 2,
-          "ref_type": "DATA",
-          "to_addr": "0x00008001",
-          "to_space": "ram"
-        },
-        {
-          "from_addr": "0x000bd4b4",
-          "operand_index": 2,
           "ref_type": "WRITE",
           "to_addr": "0xfebeae50",
           "to_space": "ram"
@@ -9653,13 +9534,6 @@
           "operand_index": 2,
           "ref_type": "READ",
           "to_addr": "0xfebef1c4",
-          "to_space": "ram"
-        },
-        {
-          "from_addr": "0x000bd4c6",
-          "operand_index": 2,
-          "ref_type": "DATA",
-          "to_addr": "0x00008001",
           "to_space": "ram"
         },
         {
@@ -11541,8 +11415,8 @@
           "to_space": "ram"
         }
       ],
-      "decompiled_c": "\nvoid FUN_000cda20(void)\n\n{\n  uint uVar1;\n  undefined *puVar2;\n  int iVar3;\n  int iVar4;\n  int local_c [2];\n  \n  puVar2 = &LAB_febeb800;\n  local_c[0] = DAT_febec91c;\n  uVar1 = DAT_febecb00 & 7;\n  if (((DAT_febec924 == DAT_febec9b0) || (DAT_febec924 == DAT_febec9dc)) ||\n     (DAT_febec918 = DAT_febec9b0, DAT_febec9b0 != DAT_febec9dc)) {\n    DAT_febec918 = DAT_febec924;\n  }\n  if ((DAT_febecb00 & 7) == 0) {\n    local_c[0] = 0;\n  }\n  else if (uVar1 == 7) {\n    local_c[0] = 0;\n    uVar1 = 0;\n  }\n  else {\n    uVar1 = (int)((int)DAT_febeca32 * (uint)DAT_febeca30) / 0x10;\n    if (((DAT_febeadbb != '\\x01') && ((DAT_febeca9b != '\\x02' || ((int)uVar1 < 0)))) &&\n       ((DAT_febeca9b != '\\x01' || (-1 < (int)uVar1)))) {\n      puVar2 = &LAB_febeb800;\n      FUN_000d0a06(DAT_febec918,uVar1,local_c);\n    }\n  }\n  iVar3 = *(int *)((&PTR_LAB_000b146c)[(byte)puVar2[-0xbc4] & 1] + 0xac);\n  iVar4 = iVar3;\n  if ((local_c[0] - iVar3 < 0 !=\n       (local_c[0] < 0 != iVar3 < 0 && iVar3 < 0 == local_c[0] - iVar3 < 0) || local_c[0] == iVar3)\n     && (iVar4 = -iVar3,\n        local_c[0] + iVar3 < 0 ==\n        (local_c[0] < 0 != iVar4 < 0 && iVar4 < 0 == local_c[0] + iVar3 < 0) && local_c[0] != iVar4)\n     ) {\n    iVar4 = local_c[0];\n  }\n  *(uint *)(puVar2 + 0x1120) = uVar1;\n  *(int *)(puVar2 + 0x111c) = local_c[0];\n  *(int *)(puVar2 + 0x1124) = iVar4;\n  *(int *)(puVar2 + 0x11b0) = iVar4;\n  *(int *)(puVar2 + 0x11dc) = iVar4;\n  return;\n}\n\n",
-      "decompiled_c_sha256": "924c1f7d902e3e63d5562ca90debe9b9bf6b7abce8d482a98877a8c627ea1243",
+      "decompiled_c": "\n/* WARNING: Removing unreachable block (ram,0x000cda7a) */\n\nvoid FUN_000cda20(void)\n\n{\n  uint uVar1;\n  undefined *puVar2;\n  int iVar3;\n  int iVar4;\n  int local_c [2];\n  \n  puVar2 = &LAB_febeb800;\n  local_c[0] = DAT_febec91c;\n  uVar1 = DAT_febecb00 & 7;\n  if (((DAT_febec924 == DAT_febec9b0) || (DAT_febec924 == DAT_febec9dc)) ||\n     (DAT_febec918 = DAT_febec9b0, DAT_febec9b0 != DAT_febec9dc)) {\n    DAT_febec918 = DAT_febec924;\n  }\n  if ((DAT_febecb00 & 7) == 0) {\n    local_c[0] = 0;\n  }\n  else if (uVar1 == 7) {\n    local_c[0] = 0;\n    uVar1 = 0;\n  }\n  else {\n    uVar1 = (int)((int)DAT_febeca32 * (uint)DAT_febeca30) / 0x10;\n    if (((DAT_febeadbb != '\\x01') && ((DAT_febeca9b != '\\x02' || ((int)uVar1 < 0)))) &&\n       ((DAT_febeca9b != '\\x01' || (-1 < (int)uVar1)))) {\n      puVar2 = &LAB_febeb800;\n      FUN_000d0a06(DAT_febec918,uVar1,local_c);\n    }\n  }\n  iVar3 = *(int *)(*(int *)(&DAT_000b146c + ((byte)puVar2[-0xbc4] & 1) * 4) + 0xac);\n  iVar4 = iVar3;\n  if ((local_c[0] - iVar3 < 0 !=\n       (local_c[0] < 0 != iVar3 < 0 && iVar3 < 0 == local_c[0] - iVar3 < 0) || local_c[0] == iVar3)\n     && (iVar4 = -iVar3,\n        local_c[0] + iVar3 < 0 ==\n        (local_c[0] < 0 != iVar4 < 0 && iVar4 < 0 == local_c[0] + iVar3 < 0) && local_c[0] != iVar4)\n     ) {\n    iVar4 = local_c[0];\n  }\n  *(uint *)(puVar2 + 0x1120) = uVar1;\n  *(int *)(puVar2 + 0x111c) = local_c[0];\n  *(int *)(puVar2 + 0x1124) = iVar4;\n  *(int *)(puVar2 + 0x11b0) = iVar4;\n  *(int *)(puVar2 + 0x11dc) = iVar4;\n  return;\n}\n\n",
+      "decompiled_c_sha256": "9a9518f23d425e7721f8514454193434cb537f346965208349e1a80931a67635",
       "entry": "0x000CDA20"
     },
     {
@@ -11676,8 +11550,8 @@
           "to_space": "ram"
         }
       ],
-      "decompiled_c": "\nvoid FUN_000ccf0e(void)\n\n{\n  int iVar1;\n  int iVar2;\n  uint uVar3;\n  \n  iVar1 = DAT_febeae90 * 2;\n  iVar2 = 0x7fff;\n  if ((iVar1 + -0x7fff < 0 != (iVar1 < 0 && -1 < iVar1 + -0x7fff) || iVar1 == 0x7fff) &&\n     (iVar2 = iVar1, iVar1 + 0x7fff < 0 != (-1 < iVar1 && iVar1 + 0x7fff < 0) || iVar1 == -0x7fff))\n  {\n    iVar2 = -0x7fff;\n  }\n  DAT_febec9fc = (short)iVar2;\n  DAT_febec8b4 = (int)DAT_febec9fc;\n  if (((DAT_febec8b8 == DAT_febec9a0) || (DAT_febec8b8 == DAT_febec9cc)) ||\n     (iVar2 = DAT_febec9a0, DAT_febec9a0 != DAT_febec9cc)) {\n    iVar2 = DAT_febec8b8;\n  }\n  if (DAT_febec8b4 == DAT_febecaa4) {\n    uVar3 = (uint)(byte)(DAT_febeca97 + 1);\n  }\n  else {\n    DAT_febec8a8 = DAT_febec8b4 - iVar2;\n    uVar3 = 1;\n    DAT_febecaa4 = DAT_febec9fc;\n  }\n  DAT_febeca97 = *(&PTR_LAB_000b146c)[DAT_febeac3c & 1];\n  DAT_febec8ac = DAT_febec8a8 / (int)(uint)DAT_febeca97;\n  if (uVar3 < DAT_febeca97) {\n    DAT_febec8b4 = DAT_febec8ac + iVar2;\n    DAT_febeca97 = (byte)uVar3;\n  }\n  DAT_febec99c = DAT_febec8b4;\n  DAT_febec9c8 = DAT_febec8b4;\n  return;\n}\n\n",
-      "decompiled_c_sha256": "3353830a99610a156f2add53f9778f0411c1435b00f7d02c1b0c0dd7f36cb2f2",
+      "decompiled_c": "\nvoid FUN_000ccf0e(void)\n\n{\n  int iVar1;\n  uint uVar2;\n  uint uVar3;\n  int iVar4;\n  \n  iVar1 = DAT_febeae90 * 2;\n  iVar4 = 0x7fff;\n  if ((iVar1 + -0x7fff < 0 != (iVar1 < 0 && -1 < iVar1 + -0x7fff) || iVar1 == 0x7fff) &&\n     (iVar4 = iVar1, iVar1 + 0x7fff < 0 != (-1 < iVar1 && iVar1 + 0x7fff < 0) || iVar1 == -0x7fff))\n  {\n    iVar4 = -0x7fff;\n  }\n  DAT_febec9fc = (short)iVar4;\n  DAT_febec8b4 = (int)DAT_febec9fc;\n  if (((DAT_febec8b8 == DAT_febec9a0) || (DAT_febec8b8 == DAT_febec9cc)) ||\n     (iVar1 = DAT_febec9a0, DAT_febec9a0 != DAT_febec9cc)) {\n    iVar1 = DAT_febec8b8;\n  }\n  if (DAT_febec8b4 == DAT_febecaa4) {\n    uVar2 = (uint)(byte)(DAT_febeca97 + 1);\n  }\n  else {\n    DAT_febec8a8 = DAT_febec8b4 - iVar1;\n    uVar2 = 1;\n    DAT_febecaa4 = DAT_febec9fc;\n  }\n  DAT_febeca97 = **(byte **)(&DAT_000b146c + (DAT_febeac3c & 1) * 4);\n  uVar3 = (uint)DAT_febeca97;\n  DAT_febec8ac = DAT_febec8a8;\n  if (uVar3 != 0) {\n    if (DAT_febec8a8 == -0x80000000 && uVar3 == 0xffffffff) {\n      DAT_febec8ac = -0x80000000;\n    }\n    else {\n      DAT_febec8ac = DAT_febec8a8 / (int)uVar3;\n    }\n  }\n  if (uVar2 < uVar3) {\n    DAT_febec8b4 = DAT_febec8ac + iVar1;\n    DAT_febeca97 = (byte)uVar2;\n  }\n  DAT_febec99c = DAT_febec8b4;\n  DAT_febec9c8 = DAT_febec8b4;\n  return;\n}\n\n",
+      "decompiled_c_sha256": "9ae5e4afbe80bcbaff3e2ee8b2a91b654102eb22f40d233995860993bb25a6ec",
       "entry": "0x000CCF0E"
     },
     {
@@ -11918,8 +11792,8 @@
           "to_space": "ram"
         }
       ],
-      "decompiled_c": "\nvoid FUN_000cdff8(void)\n\n{\n  short sVar1;\n  undefined2 uVar2;\n  int iVar3;\n  undefined *puVar4;\n  short sVar5;\n  short sVar6;\n  undefined4 uVar7;\n  int iVar8;\n  short sVar9;\n  int iVar10;\n  uint uVar11;\n  \n  uVar2 = DAT_febeae02;\n  puVar4 = &LAB_febeb800;\n  uVar11 = (uint)DAT_febeadbe;\n  iVar8 = (int)(short)((DAT_febecb00 & 7) + (DAT_febeac3c & 1) * 8);\n  iVar10 = (int)DAT_febeca36;\n  iVar3 = (int)DAT_febeca82;\n  if (((iVar10 == iVar3) || (iVar10 == DAT_febeca90)) || (iVar3 != DAT_febeca90)) {\n    iVar3 = iVar10;\n  }\n  uVar7 = FUN_000d095e(iVar3);\n  sVar5 = FUN_000d0768((&PTR_LAB_000d3db4)[iVar8 * 0x57],uVar7);\n  sVar6 = FUN_000d0844((&PTR_LAB_000d3db8)[iVar8 * 0x57],uVar2);\n  iVar10 = ((int)sVar6 * (int)sVar5) / 0x100;\n  sVar1 = *(short *)(&PTR_PTR_000d3cdc)[iVar8 * 0x57];\n  iVar8 = (int)sVar1;\n  if (iVar3 < 1) {\n    iVar10 = -iVar10;\n  }\n  iVar3 = (int)(iVar10 * uVar11) / 100;\n  sVar9 = sVar1;\n  if (iVar3 - iVar8 < 0 != (iVar3 < 0 != iVar8 < 0 && iVar8 < 0 == iVar3 - iVar8 < 0) ||\n      iVar3 == iVar8) {\n    iVar10 = -iVar8;\n    if (iVar3 + iVar8 < 0 == (iVar3 < 0 != iVar10 < 0 && iVar10 < 0 == iVar3 + iVar8 < 0) &&\n        iVar3 != iVar10) {\n      sVar9 = (short)iVar3;\n    }\n    else {\n      sVar9 = (short)iVar10;\n    }\n  }\n  *(short *)(puVar4 + 0x1238) = sVar5;\n  *(short *)(puVar4 + 0x123a) = sVar6;\n  *(short *)(puVar4 + 0x123c) = sVar1;\n  *(int *)(puVar4 + 0x1128) = iVar3;\n  *(short *)(puVar4 + 0x123e) = sVar9;\n  *(short *)(puVar4 + 0x127a) = sVar9;\n  *(short *)(puVar4 + 0x1288) = sVar9;\n  return;\n}\n\n",
-      "decompiled_c_sha256": "73c4ac8c1d1187ad2a582c30bf5776b25367ac7c4819e4fa2e6be98208eaa146",
+      "decompiled_c": "\n/* WARNING: Removing unreachable block (ram,0x000ce07c) */\n/* WARNING: Removing unreachable block (ram,0x000ce068) */\n\nvoid FUN_000cdff8(void)\n\n{\n  short sVar1;\n  undefined2 uVar2;\n  int iVar3;\n  undefined *puVar4;\n  short sVar5;\n  short sVar6;\n  undefined4 uVar7;\n  int iVar8;\n  short sVar9;\n  int iVar10;\n  uint uVar11;\n  \n  uVar2 = DAT_febeae02;\n  puVar4 = &LAB_febeb800;\n  uVar11 = (uint)DAT_febeadbe;\n  iVar8 = (int)(short)((DAT_febecb00 & 7) + (DAT_febeac3c & 1) * 8);\n  iVar10 = (int)DAT_febeca36;\n  iVar3 = (int)DAT_febeca82;\n  if (((iVar10 == iVar3) || (iVar10 == DAT_febeca90)) || (iVar3 != DAT_febeca90)) {\n    iVar3 = iVar10;\n  }\n  uVar7 = FUN_000d095e(iVar3);\n  sVar5 = FUN_000d0768((&PTR_LAB_000d3db4)[iVar8 * 0x57],uVar7);\n  sVar6 = FUN_000d0844((&PTR_LAB_000d3db8)[iVar8 * 0x57],uVar2);\n  iVar10 = ((int)sVar6 * (int)sVar5) / 0x100;\n  sVar1 = *(short *)(&PTR_DAT_000d3cdc)[iVar8 * 0x57];\n  iVar8 = (int)sVar1;\n  if (iVar3 < 1) {\n    iVar10 = -iVar10;\n  }\n  iVar3 = (int)(iVar10 * uVar11) / 100;\n  sVar9 = sVar1;\n  if (iVar3 - iVar8 < 0 != (iVar3 < 0 != iVar8 < 0 && iVar8 < 0 == iVar3 - iVar8 < 0) ||\n      iVar3 == iVar8) {\n    iVar10 = -iVar8;\n    if (iVar3 + iVar8 < 0 == (iVar3 < 0 != iVar10 < 0 && iVar10 < 0 == iVar3 + iVar8 < 0) &&\n        iVar3 != iVar10) {\n      sVar9 = (short)iVar3;\n    }\n    else {\n      sVar9 = (short)iVar10;\n    }\n  }\n  *(short *)(puVar4 + 0x1238) = sVar5;\n  *(short *)(puVar4 + 0x123a) = sVar6;\n  *(short *)(puVar4 + 0x123c) = sVar1;\n  *(int *)(puVar4 + 0x1128) = iVar3;\n  *(short *)(puVar4 + 0x123e) = sVar9;\n  *(short *)(puVar4 + 0x127a) = sVar9;\n  *(short *)(puVar4 + 0x1288) = sVar9;\n  return;\n}\n\n",
+      "decompiled_c_sha256": "bf74f3d353522d75462dc64fd8e015636cb17faae3ae09af3e92810e6ab66ca7",
       "entry": "0x000CDFF8"
     },
     {
@@ -12039,8 +11913,8 @@
           "to_space": "ram"
         }
       ],
-      "decompiled_c": "\nvoid FUN_000ce3aa(void)\n\n{\n  int iVar1;\n  uint uVar2;\n  uint uVar3;\n  \n  if (((DAT_febec934 == DAT_febec994) || (DAT_febec934 == DAT_febec9c0)) ||\n     (iVar1 = DAT_febec994, DAT_febec994 != DAT_febec9c0)) {\n    iVar1 = DAT_febec934;\n  }\n  uVar2 = (uint)DAT_febeadbd;\n  uVar3 = uVar2;\n  if (DAT_000b05c2 < uVar2) {\n    uVar3 = (uint)DAT_000b05c2;\n  }\n  if (uVar2 == 0xc9) {\n    uVar3 = (uint)*(ushort *)((&PTR_LAB_000b146c)[DAT_febeac3c & 1] + 0x8e);\n  }\n  else if (uVar2 == 0xca) {\n    uVar3 = (uint)*(ushort *)((&PTR_LAB_000b146c)[DAT_febeac3c & 1] + 0x90);\n  }\n  else {\n    if (uVar2 != 0xcb) {\n      DAT_febec940 = (int)(iVar1 * uVar3) / 100;\n      DAT_febec998 = DAT_febec940;\n      DAT_febec9c4 = DAT_febec940;\n      return;\n    }\n    uVar3 = (uint)*(ushort *)((&PTR_LAB_000b146c)[DAT_febeac3c & 1] + 0x92);\n  }\n  DAT_febec940 = iVar1 - (uVar3 * 0xa4) / 0x3200;\n  DAT_febec998 = DAT_febec940;\n  DAT_febec9c4 = DAT_febec940;\n  return;\n}\n\n",
-      "decompiled_c_sha256": "9761eaf338d450c65b4da3c2977e12792f25ddd640e6c2ea2f55c9a386adc3f3",
+      "decompiled_c": "\n/* WARNING: Removing unreachable block (ram,0x000ce3fe) */\n/* WARNING: Removing unreachable block (ram,0x000ce442) */\n\nvoid FUN_000ce3aa(void)\n\n{\n  int iVar1;\n  uint uVar2;\n  uint uVar3;\n  \n  if (((DAT_febec934 == DAT_febec994) || (DAT_febec934 == DAT_febec9c0)) ||\n     (iVar1 = DAT_febec994, DAT_febec994 != DAT_febec9c0)) {\n    iVar1 = DAT_febec934;\n  }\n  uVar2 = (uint)DAT_febeadbd;\n  uVar3 = uVar2;\n  if (DAT_000b05c2 < uVar2) {\n    uVar3 = (uint)DAT_000b05c2;\n  }\n  if (uVar2 == 0xc9) {\n    uVar3 = (uint)*(ushort *)(*(int *)(&DAT_000b146c + (DAT_febeac3c & 1) * 4) + 0x8e);\n  }\n  else if (uVar2 == 0xca) {\n    uVar3 = (uint)*(ushort *)(*(int *)(&DAT_000b146c + (DAT_febeac3c & 1) * 4) + 0x90);\n  }\n  else {\n    if (uVar2 != 0xcb) {\n      DAT_febec940 = (int)(iVar1 * uVar3) / 100;\n      DAT_febec998 = DAT_febec940;\n      DAT_febec9c4 = DAT_febec940;\n      return;\n    }\n    uVar3 = (uint)*(ushort *)(*(int *)(&DAT_000b146c + (DAT_febeac3c & 1) * 4) + 0x92);\n  }\n  DAT_febec940 = iVar1 - (uVar3 * 0xa4) / 0x3200;\n  DAT_febec998 = DAT_febec940;\n  DAT_febec9c4 = DAT_febec940;\n  return;\n}\n\n",
+      "decompiled_c_sha256": "cf04c57b3661a6971bcd3ac23afc62702f4c805c03c47e4c09e1360ec9f3910c",
       "entry": "0x000CE3AA"
     },
     {
@@ -12197,8 +12071,8 @@
           "to_space": "ram"
         }
       ],
-      "decompiled_c": "\nvoid FUN_000ced28(void)\n\n{\n  undefined1 uVar1;\n  ushort uVar2;\n  undefined *puVar3;\n  int iVar4;\n  int iVar5;\n  bool bVar6;\n  ushort uVar7;\n  \n  uVar7 = DAT_febecae2;\n  puVar3 = &LAB_febeb800;\n  uVar2 = (ushort)DAT_febecb00;\n  iVar4 = FUN_000d095e((int)DAT_febeae22);\n  iVar5 = (int)*(short *)(&PTR_LAB_000d3dd8)\n                         [(short)((uVar2 & 7) + (short)(((byte)puVar3[-0xbc4] & 1) << 3)) * 0x57];\n  if (((uVar2 & 7) == 7) ||\n     (iVar4 - iVar5 < 0 != (iVar4 < 0 != iVar5 < 0 && iVar5 < 0 == iVar4 - iVar5 < 0) ||\n      iVar4 == iVar5)) {\n    uVar1 = 0;\n    bVar6 = false;\n    uVar7 = 0;\n  }\n  else {\n    uVar1 = 1;\n    if (uVar7 < *(ushort *)((&PTR_LAB_000b146c)[(byte)puVar3[-0xbc4] & 1] + 8)) {\n      uVar7 = uVar7 + 1;\n    }\n    bVar6 = *(ushort *)((&PTR_LAB_000b146c)[(byte)puVar3[-0xbc4] & 1] + 8) <= uVar7;\n  }\n  *(short *)(puVar3 + 0x12e4) =\n       *(short *)(&PTR_LAB_000d3dd8)\n                 [(short)((uVar2 & 7) + (short)(((byte)puVar3[-0xbc4] & 1) << 3)) * 0x57];\n  *(ushort *)(puVar3 + 0x12e2) = uVar7;\n  puVar3[0x12f6] = uVar1;\n  puVar3[0x12f7] = bVar6;\n  return;\n}\n\n",
-      "decompiled_c_sha256": "dc2ad62382ecd4b2a616e2c7d930f8de4974692d49459fa89e984a3b60a3dc82",
+      "decompiled_c": "\nvoid FUN_000ced28(void)\n\n{\n  undefined1 uVar1;\n  ushort uVar2;\n  undefined *puVar3;\n  int iVar4;\n  int iVar5;\n  bool bVar6;\n  ushort uVar7;\n  \n  uVar7 = DAT_febecae2;\n  puVar3 = &LAB_febeb800;\n  uVar2 = (ushort)DAT_febecb00;\n  iVar4 = FUN_000d095e((int)DAT_febeae22);\n  iVar5 = (int)*(short *)(&PTR_LAB_000d3dd8)\n                         [(short)((uVar2 & 7) + (short)(((byte)puVar3[-0xbc4] & 1) << 3)) * 0x57];\n  if (((uVar2 & 7) == 7) ||\n     (iVar4 - iVar5 < 0 != (iVar4 < 0 != iVar5 < 0 && iVar5 < 0 == iVar4 - iVar5 < 0) ||\n      iVar4 == iVar5)) {\n    uVar1 = 0;\n    bVar6 = false;\n    uVar7 = 0;\n  }\n  else {\n    uVar1 = 1;\n    if (uVar7 < *(ushort *)(*(int *)(&DAT_000b146c + ((byte)puVar3[-0xbc4] & 1) * 4) + 8)) {\n      uVar7 = uVar7 + 1;\n    }\n    bVar6 = *(ushort *)(*(int *)(&DAT_000b146c + ((byte)puVar3[-0xbc4] & 1) * 4) + 8) <= uVar7;\n  }\n  *(short *)(puVar3 + 0x12e4) =\n       *(short *)(&PTR_LAB_000d3dd8)\n                 [(short)((uVar2 & 7) + (short)(((byte)puVar3[-0xbc4] & 1) << 3)) * 0x57];\n  *(ushort *)(puVar3 + 0x12e2) = uVar7;\n  puVar3[0x12f6] = uVar1;\n  puVar3[0x12f7] = bVar6;\n  return;\n}\n\n",
+      "decompiled_c_sha256": "1ca5ddcf4919d26abe38c611dce7f69523eb584e6d10d90ee86cf8bd86a21488",
       "entry": "0x000CED28"
     },
     {
@@ -12283,8 +12157,8 @@
           "to_space": "ram"
         }
       ],
-      "decompiled_c": "\nvoid FUN_000ceda4(void)\n\n{\n  short sVar1;\n  undefined1 uVar2;\n  ushort uVar3;\n  undefined *puVar4;\n  int iVar5;\n  int iVar6;\n  bool bVar7;\n  ushort uVar8;\n  \n  uVar8 = DAT_febecae6;\n  puVar4 = &LAB_febeb800;\n  uVar3 = (ushort)DAT_febecb00;\n  iVar5 = FUN_000d095e((int)DAT_febeae24);\n  sVar1 = *(short *)(&PTR_LAB_000d3ddc)\n                    [(short)((uVar3 & 7) + (short)(((byte)puVar4[-0xbc4] & 1) << 3)) * 0x57];\n  iVar6 = (int)sVar1;\n  if (((uVar3 & 7) == 7) ||\n     (iVar5 - iVar6 < 0 == (iVar5 < 0 != iVar6 < 0 && iVar6 < 0 == iVar5 - iVar6 < 0))) {\n    uVar2 = 0;\n    bVar7 = false;\n    uVar8 = 0;\n  }\n  else {\n    uVar2 = 1;\n    if (uVar8 < *(ushort *)((&PTR_LAB_000b146c)[(byte)puVar4[-0xbc4] & 1] + 0xe)) {\n      uVar8 = uVar8 + 1;\n    }\n    bVar7 = *(ushort *)((&PTR_LAB_000b146c)[(byte)puVar4[-0xbc4] & 1] + 0xe) <= uVar8;\n  }\n  *(short *)(puVar4 + 0x12e8) = sVar1;\n  *(ushort *)(puVar4 + 0x12e6) = uVar8;\n  puVar4[0x12f8] = uVar2;\n  puVar4[0x12f9] = bVar7;\n  return;\n}\n\n",
-      "decompiled_c_sha256": "709cddbd5b0c46146b81e022372e91d664e35ce62c99a53ef41f6b6e5f2eac80",
+      "decompiled_c": "\nvoid FUN_000ceda4(void)\n\n{\n  short sVar1;\n  undefined1 uVar2;\n  ushort uVar3;\n  undefined *puVar4;\n  int iVar5;\n  int iVar6;\n  bool bVar7;\n  ushort uVar8;\n  \n  uVar8 = DAT_febecae6;\n  puVar4 = &LAB_febeb800;\n  uVar3 = (ushort)DAT_febecb00;\n  iVar5 = FUN_000d095e((int)DAT_febeae24);\n  sVar1 = *(short *)(&PTR_LAB_000d3ddc)\n                    [(short)((uVar3 & 7) + (short)(((byte)puVar4[-0xbc4] & 1) << 3)) * 0x57];\n  iVar6 = (int)sVar1;\n  if (((uVar3 & 7) == 7) ||\n     (iVar5 - iVar6 < 0 == (iVar5 < 0 != iVar6 < 0 && iVar6 < 0 == iVar5 - iVar6 < 0))) {\n    uVar2 = 0;\n    bVar7 = false;\n    uVar8 = 0;\n  }\n  else {\n    uVar2 = 1;\n    if (uVar8 < *(ushort *)(*(int *)(&DAT_000b146c + ((byte)puVar4[-0xbc4] & 1) * 4) + 0xe)) {\n      uVar8 = uVar8 + 1;\n    }\n    bVar7 = *(ushort *)(*(int *)(&DAT_000b146c + ((byte)puVar4[-0xbc4] & 1) * 4) + 0xe) <= uVar8;\n  }\n  *(short *)(puVar4 + 0x12e8) = sVar1;\n  *(ushort *)(puVar4 + 0x12e6) = uVar8;\n  puVar4[0x12f8] = uVar2;\n  puVar4[0x12f9] = bVar7;\n  return;\n}\n\n",
+      "decompiled_c_sha256": "212acbcd3797e79930009f6fe0fb3070e20683756c55322d573b312729988a6e",
       "entry": "0x000CEDA4"
     },
     {
@@ -12478,8 +12352,8 @@
           "to_space": "ram"
         }
       ],
-      "decompiled_c": "\nvoid FUN_000cee7c(void)\n\n{\n  int iVar1;\n  int iVar2;\n  short sVar3;\n  short sVar4;\n  short sVar5;\n  char cVar6;\n  char cVar7;\n  char cVar8;\n  ushort uVar9;\n  ushort uVar10;\n  uint uVar11;\n  undefined *puVar12;\n  uint uVar13;\n  int iVar14;\n  byte bVar15;\n  undefined1 uVar16;\n  \n  puVar12 = &LAB_febeb800;\n  bVar15 = DAT_febecb00 & 7;\n  FUN_000cee46();\n  uVar11 = DAT_000b061c;\n  sVar3 = *(short *)(puVar12 + 0x12de);\n  sVar4 = *(short *)(puVar12 + -0x970);\n  sVar5 = *(short *)(puVar12 + 0x12a4);\n  cVar6 = puVar12[0x12b6];\n  cVar7 = puVar12[0x12fa];\n  cVar8 = puVar12[0x12f5];\n  uVar16 = puVar12[0x12fb];\n  uVar9 = *(ushort *)(puVar12 + 0x12ea);\n  uVar10 = *(ushort *)(puVar12 + 0x12ec);\n  uVar13 = FUN_000d0970((int)sVar4);\n  iVar14 = FUN_000d0970((int)sVar4 - (int)sVar5 / 2);\n  iVar2 = (int)sVar3 * (uint)uVar10;\n  if (bVar15 != 7) {\n    if (cVar6 != '\\0') goto LAB_000cef06;\n    if (((cVar7 == '\\x01') || (cVar8 == '\\x01')) ||\n       (iVar1 = uVar13 - uVar9, iVar1 < 0 == ((int)uVar13 < 0 && -1 < iVar1) && uVar13 != uVar9)) {\n      uVar16 = 1;\n      goto LAB_000cef06;\n    }\n    if ((int)(uVar13 - uVar11) < 0 ==\n        ((int)uVar13 < 0 != (int)uVar11 < 0 && (int)uVar11 < 0 == (int)(uVar13 - uVar11) < 0) &&\n        uVar13 != uVar11) {\n      uVar16 = iVar14 - iVar2 < 0 == (iVar14 < 0 != iVar2 < 0 && iVar2 < 0 == iVar14 - iVar2 < 0) &&\n               iVar14 != iVar2;\n      goto LAB_000cef06;\n    }\n  }\n  uVar16 = 0;\nLAB_000cef06:\n  puVar12[0x12fb] = uVar16;\n  return;\n}\n\n",
-      "decompiled_c_sha256": "e4d6595b804b0d02fe7ffb45808618bf4635d09eac166c1265b9e2020108c193",
+      "decompiled_c": "\n/* WARNING: Removing unreachable block (ram,0x000ceec2) */\n\nvoid FUN_000cee7c(void)\n\n{\n  int iVar1;\n  int iVar2;\n  short sVar3;\n  short sVar4;\n  short sVar5;\n  char cVar6;\n  char cVar7;\n  char cVar8;\n  ushort uVar9;\n  ushort uVar10;\n  uint uVar11;\n  undefined *puVar12;\n  uint uVar13;\n  int iVar14;\n  byte bVar15;\n  undefined1 uVar16;\n  \n  puVar12 = &LAB_febeb800;\n  bVar15 = DAT_febecb00 & 7;\n  FUN_000cee46();\n  uVar11 = DAT_000b061c;\n  sVar3 = *(short *)(puVar12 + 0x12de);\n  sVar4 = *(short *)(puVar12 + -0x970);\n  sVar5 = *(short *)(puVar12 + 0x12a4);\n  cVar6 = puVar12[0x12b6];\n  cVar7 = puVar12[0x12fa];\n  cVar8 = puVar12[0x12f5];\n  uVar16 = puVar12[0x12fb];\n  uVar9 = *(ushort *)(puVar12 + 0x12ea);\n  uVar10 = *(ushort *)(puVar12 + 0x12ec);\n  uVar13 = FUN_000d0970((int)sVar4);\n  iVar14 = FUN_000d0970((int)sVar4 - (int)sVar5 / 2);\n  iVar2 = (int)sVar3 * (uint)uVar10;\n  if (bVar15 != 7) {\n    if (cVar6 != '\\0') goto LAB_000cef06;\n    if (((cVar7 == '\\x01') || (cVar8 == '\\x01')) ||\n       (iVar1 = uVar13 - uVar9, iVar1 < 0 == ((int)uVar13 < 0 && -1 < iVar1) && uVar13 != uVar9)) {\n      uVar16 = 1;\n      goto LAB_000cef06;\n    }\n    if ((int)(uVar13 - uVar11) < 0 ==\n        ((int)uVar13 < 0 != (int)uVar11 < 0 && (int)uVar11 < 0 == (int)(uVar13 - uVar11) < 0) &&\n        uVar13 != uVar11) {\n      uVar16 = iVar14 - iVar2 < 0 == (iVar14 < 0 != iVar2 < 0 && iVar2 < 0 == iVar14 - iVar2 < 0) &&\n               iVar14 != iVar2;\n      goto LAB_000cef06;\n    }\n  }\n  uVar16 = 0;\nLAB_000cef06:\n  puVar12[0x12fb] = uVar16;\n  return;\n}\n\n",
+      "decompiled_c_sha256": "4f3dce0879fe3ca7ed35f55271aa122d0e701dbbbb536d4a87f4acc4dcc4cb5c",
       "entry": "0x000CEE7C"
     },
     {
@@ -12636,8 +12510,8 @@
   "software_id": "8965F3307000",
   "source_corpus": {
     "boundary": "First-class exact-F33 canonical Ghidra corpus; every promoted function/reference row is independently exact-body-range-hash-bound to the image.",
-    "function_count": 6073,
+    "function_count": 7178,
     "path": "data/generated/camry-8965F3307000/decompilations.jsonl",
-    "sha256": "db011a14c7fc05aabba4aa193ad495c1e8e94dbc196ac683d9e907100be59320"
+    "sha256": "e17dcec4c17ae7e77d0143b4e098604a13740e0c1f845f4409b1a8cf5e98d37c"
   }
 }

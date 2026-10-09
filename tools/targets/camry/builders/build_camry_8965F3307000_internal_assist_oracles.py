@@ -17,7 +17,8 @@ import json
 import struct
 from pathlib import Path
 
-from tools.targets.camry.support.camry_f33_corpus import CORPUS, IMAGE, IMAGE_SHA256, REPO
+from tools import REPO_ROOT as REPO
+from tools.targets.camry.support.camry_f33_corpus import CORPUS, IMAGE, IMAGE_SHA256
 
 OUT = REPO / "data/generated/camry_8965F3307000_internal_assist_oracles.json"
 GTS = REPO / "data/generated/gtsplus_2026/camry_8965F3307000_emps_semantics.json"
@@ -140,9 +141,9 @@ def main() -> int:
     tokens(funcs, 0xD0D7C,
            "uVar1 = (uint)DAT_febeae3c;",
            "(int)DAT_febec5ee * uVar1",
-           "DAT_febeae12 = SUB42(puVar3,0);",
+           "DAT_febeae12 = (undefined2)",
            "(int)DAT_febecb38 * uVar1",
-           "DAT_febeae6e = SUB42(puVar3,0);")
+           "DAT_febeae6e = (undefined2)")
     tokens(funcs, 0xBF3AA,
            "DAT_febee8b6 = DAT_febeae12;",
            "DAT_febee8c2 = DAT_febeae6e;")
@@ -213,7 +214,9 @@ def main() -> int:
     tokens(funcs, 0xC9812,
            "uVar3 = (uint)DAT_febec156;",
            "FUN_000d0768((&PTR_DAT_000d39dc)[uVar3 & 3],uVar5);",
-           "*(short *)(puVar4 + 0xdec) = (short)((iVar6 * 0x400) / (int)DAT_000b0174);")
+           "iVar6 = iVar6 * 0x400;",
+           "iVar6 = iVar6 / iVar7;",
+           "*(short *)(puVar4 + 0xdec) = (short)iVar6;")
     need(0xFEBEB800 + 0xDEC == 0xFEBEC5EC, "C9812 C5EC GP geometry drift")
     tokens(funcs, 0xC9A84,
            "iVar2 = (int)*(short *)(puVar4 + 0xdec) + (int)*(short *)(puVar4 + -0xc06);",
@@ -493,7 +496,9 @@ def main() -> int:
     e40a_readers = direct_users(funcs, 0xFEBEE40A, "READ")
     v6772_readers = direct_users(funcs, 0xFEBE6772, "READ")
     need(cc62_readers == [0xC4F04, 0xD0AAE], f"FEBECC62 canonical direct-reader drift: {cc62_readers}")
-    need(v6772_readers == [0x4E7D6], f"FEBE6772 reader set drift: {v6772_readers}")
+    need(v6772_readers == [0x3B400, 0x3B4A8, 0x4E7D6], f"FEBE6772 reader set drift: {v6772_readers}")
+    tokens(funcs, 0x3B400, "FUN_0006a522((int)DAT_febe6772", "DAT_febe6f6e", "DAT_0002b5d8")
+    tokens(funcs, 0x3B4A8, "FUN_0006a522((int)DAT_febe6772", "DAT_febe6f74", "DAT_0002b5dc")
 
     # Pre-slew model value -> post-slew/override actuation command.
     tokens(funcs, 0xD042C,
@@ -621,6 +626,11 @@ def main() -> int:
             "FEBEAC56_direct_readers": [f"0x{x:08X}" for x in ac56_readers],
             "FEBEE40A_direct_readers": [f"0x{x:08X}" for x in e40a_readers],
             "FEBE6772_direct_readers": [f"0x{x:08X}" for x in v6772_readers],
+            "threshold_predicates": {
+                "0x0003B400": "absolute/saturated FEBE6772 versus FEBE6F6E plus ROM threshold DAT_0002B5D8",
+                "0x0003B4A8": "absolute/saturated FEBE6772 versus FEBE6F74 plus ROM threshold DAT_0002B5DC",
+                "registration": "0x0003B3D0/0x0003B478 register the predicates through callback tables 0x27F64/0x27F98 and generic state machine 0x0006AE7C",
+            },
             "mirror_tail": {
                 "0x35C4C": "FEBEE40A -> FEBE6AF6",
                 "0x387CE": "FEBE6AF6 -> FEBE6E22/FEBE6E24",
@@ -630,10 +640,12 @@ def main() -> int:
             },
             "classification": (
                 "verified distinction: AC56/EE40A/FEBE6772 is the diagnostic/model mirror of the pre-slew CC62 value. "
-                "Its 6AF6->6E22/6E24 tail terminates in snapshot/report consumers. The physical motor-driving mirror is "
-                "the sibling AC54/EE40C branch below. Canonical direct-reader census alone is insufficient to infer that "
-                "CC62 is non-actuating because D042C writes CC62 and immediately reuses the same value intra-function to "
-                "form CC66."
+                "Two recovered callback predicates (3B400/3B4A8) also compare its saturated magnitude against "
+                "FEBE6F6E/FEBE6F74 plus fixed ROM thresholds; they return status into the generic 6AE7C state machine "
+                "and do not write the command funnel. The 6AF6->6E22/6E24 tail terminates in snapshot/report consumers. "
+                "The physical motor-driving mirror is the sibling AC54/EE40C branch below. Canonical direct-reader "
+                "census alone is insufficient to infer that CC62 is non-actuating because D042C writes CC62 and "
+                "immediately reuses the same value intra-function to form CC66."
             ),
         },
         "physical_actuation_funnel": {

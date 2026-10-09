@@ -28,7 +28,8 @@ with tempfile.TemporaryDirectory() as td:
     check("artifact regenerates byte-exact", p.returncode == 0 and out.read_bytes() == ART.read_bytes())
 
 art = json.loads(ART.read_text())
-check("target identity exact", art["target"]["software_id"] == "8965F3307000" and art["target"]["corpus_function_count"] == 6065)
+check("exact target firmware identity", art["target"]["software_id"] == "8965F3307000"
+      and art["target"]["codeflash_sha256"] == "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7")
 check("exact RDBI table denominator pinned", art["exact_rdbi_table"] == {"offset":"0x2928C", "record_count":241})
 sel = art["selector_state_direct_rdbi"]
 check("selector cells have no direct exact-F33 RDBI callback", sel["cells"] == {"FEBEC156":[], "FEBEC158":[]})
@@ -126,9 +127,10 @@ terms = art["d0218_term_semantic_closure"]
 check("all eight B6-inactive D0218 value terms retain structural provenance classes",
       {r["cell"] for r in terms["terms"]} == {"FEBEC43C","FEBEC4C0","FEBEC3BA","FEBECC2C","FEBEBF3C","FEBECB38","FEBEC5EE","FEBECBE8"})
 obs = art["command_value_torque_observable_branch"]
-check("1C02 pre-slew observable branch is pinned separately from the motor-driving sibling",
+check("1C02 mirror readers include the recovered threshold monitors",
       obs["FEBECC62_canonical_direct_readers"] == ["0x000C4F04","0x000D0AAE"]
-      and obs["FEBE6772_direct_readers"] == ["0x0004E7D6"]
+      and obs["FEBE6772_direct_readers"] == ["0x0003B400","0x0003B4A8","0x0004E7D6"]
+      and set(obs["threshold_predicates"]) == {"0x0003B400","0x0003B4A8","registration"}
       and obs["mirror_tail"]["FEBE6AF6_direct_readers"] == ["0x000387CE"]
       and obs["mirror_tail"]["FEBE6E22_direct_readers"] == ["0x00059448","0x0005CA3A","0x0005D12C"])
 funnel = art["physical_actuation_funnel"]

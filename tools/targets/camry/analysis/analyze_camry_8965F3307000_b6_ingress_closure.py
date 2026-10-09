@@ -26,7 +26,7 @@ LIVE_INGRESS = f33.CAPTURE / "raw-20260910/f33-ingress/session-summary.json"
 TOPOLOGY = ROOT / "data/generated/gtsplus_2026/camry_8965F3307000_emps_semantics.json"
 EBU_TOPOLOGY = ROOT / "data/generated/camry_2026_ebu_topology.json"
 SHA = f33.IMAGE_SHA256
-COUNT = 6065
+COUNT = 7178
 
 # Entries whose exact graph placement matters to this proof.  Three of these were
 # historically missing from the canonical graph and are now explicit target seeds.

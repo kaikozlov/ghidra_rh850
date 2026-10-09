@@ -225,15 +225,9 @@
         },
         {
           "from": "0x0005a016",
-          "kind": "WRITE",
+          "kind": "DATA",
           "region": "com_staging",
           "to": "0xfebe7fa6"
-        },
-        {
-          "from": "0x0005a016",
-          "kind": "WRITE",
-          "region": "com_staging",
-          "to": "0xfebe7fa8"
         },
         {
           "from": "0x0005a022",
@@ -495,15 +489,9 @@
         },
         {
           "from": "0x0005c2d6",
-          "kind": "WRITE",
+          "kind": "DATA",
           "region": "ef_snapshot",
           "to": "0xfebef17c"
-        },
-        {
-          "from": "0x0005c2d6",
-          "kind": "WRITE",
-          "region": "ef_snapshot",
-          "to": "0xfebef17e"
         },
         {
           "from": "0x0005c2e4",
@@ -3122,7 +3110,7 @@
   },
   "sources": {
     "corpus": "data/generated/camry-8965F3307000/decompilations.jsonl",
-    "corpus_sha256": "760d19ce641e3e73b89bfc65185ffa08f16e563cc7a83a07f0594a42889c001d",
+    "corpus_sha256": "e17dcec4c17ae7e77d0143b4e098604a13740e0c1f845f4409b1a8cf5e98d37c",
     "image": "firmware/camry-8965F3307000/CodeFlash.bin"
   },
   "staging": {
@@ -3270,7 +3258,6 @@
       "0x00043448",
       "0x00047d62",
       "0x000486d0",
-      "0x00050c58",
       "0x00059448",
       "0x0005c7b6",
       "0x0005ca3a",
@@ -3296,7 +3283,7 @@
   },
   "target": {
     "analysis_target": "camry-8965F3307000",
-    "corpus_function_count": 6065,
+    "corpus_function_count": 7178,
     "image_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
     "mcu": "R7F701381 (RH850/P1M-E)",
     "software_id": "8965F3307000"

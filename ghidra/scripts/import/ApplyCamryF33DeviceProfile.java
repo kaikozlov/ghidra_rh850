@@ -4,7 +4,11 @@
 // Applies only F33-proven context after the common P1M-E chip profile.
 import ghidra.app.script.GhidraScript;
 import ghidra.program.model.address.Address;
+import ghidra.program.model.data.ArrayDataType;
+import ghidra.program.model.data.ByteDataType;
 import ghidra.program.model.lang.Register;
+import ghidra.program.model.mem.Memory;
+import ghidra.program.model.mem.MemoryBlock;
 import ghidra.program.model.symbol.SourceType;
 import java.math.BigInteger;
 import java.security.MessageDigest;
@@ -30,11 +34,46 @@ public class ApplyCamryF33DeviceProfile extends GhidraScript {
         else if(!name.equals(sym.getName())) sym.setName(name,SourceType.USER_DEFINED);
         currentProgram.getListing().setComment(a,ghidra.program.model.listing.CodeUnit.PLATE_COMMENT,comment);
     }
+    private void partitionLowCalibration() throws Exception {
+        Memory mem=currentProgram.getMemory();
+        Address calibrationStart=toAddr(0x00010000L);
+        Address applicationDataStart=toAddr(0x00018000L);
+        MemoryBlock code=mem.getBlock(toAddr(0));
+        if(code==null||!code.getStart().equals(toAddr(0))||code.getEnd().getOffset()<0x000FFFFFL){
+            throw new IllegalStateException("unexpected F33 CodeFlash block");
+        }
+        if(code.getEnd().getOffset()>=calibrationStart.getOffset()) mem.split(code,calibrationStart);
+        MemoryBlock calibration=mem.getBlock(calibrationStart);
+        if(calibration==null||!calibration.getStart().equals(calibrationStart)){
+            throw new IllegalStateException("missing F33 low-calibration block");
+        }
+        if(calibration.getEnd().getOffset()>=applicationDataStart.getOffset()){
+            mem.split(calibration,applicationDataStart);
+        }
+        code=mem.getBlock(toAddr(0));
+        calibration=mem.getBlock(calibrationStart);
+        MemoryBlock application=mem.getBlock(applicationDataStart);
+        if(code.getEnd().getOffset()!=0x0000FFFFL||
+                calibration.getEnd().getOffset()!=0x00017FFFL||
+                application==null||application.getEnd().getOffset()!=0x000FFFFFL){
+            throw new IllegalStateException("F33 CodeFlash partition drift");
+        }
+        code.setName("CodeFlash");
+        calibration.setName("CodeFlashLowCalibration");
+        application.setName("CodeFlashApplication");
+        code.setExecute(true);
+        calibration.setExecute(false);
+        application.setExecute(true);
+        if(getDataAt(calibrationStart)==null){
+            createData(calibrationStart,new ArrayDataType(ByteDataType.dataType,0x8000,1));
+        }
+    }
     @Override public void run() throws Exception {
         String actual=imageSha(); if(!IMAGE_SHA.equals(actual)) throw new IllegalStateException("wrong F33 image "+actual);
         if (currentProgram.getMemory().getBlock(toAddr(0xFEDE0000L)) == null) {
             throw new IllegalStateException("ApplyP1MDeviceProfile must run first");
         }
+        partitionLowCalibration();
 
         // Exact F33 0x715B4 context loader: INTBP=20200, EBASE=20000,
         // GP=FEBEB800, TP=23DFC, SP=FEBE2000. GP/TP remain fixed application-wide.

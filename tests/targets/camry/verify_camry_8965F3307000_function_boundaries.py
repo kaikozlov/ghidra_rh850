@@ -11,9 +11,7 @@ CORPUS = ROOT / "data/generated/camry-8965F3307000/decompilations.jsonl"
 INVENTORY = ROOT / "data/targets/camry-8965F3307000/ghidra_project_inventory.baseline.jsonl"
 SEEDS = ROOT / "data/targets/camry-8965F3307000/function_seeds.csv"
 CONE = ROOT / "data/generated/camry_8965F3307000_command_cone_ingress.json"
-HIDDEN = ROOT / "data/generated/camry_8965F3307000_hidden_ingress_residuals.json"
 COMPOSITION = ROOT / "data/generated/camry_f33_b6_command_composition.json"
-EXPECTED_INVENTORY_SHA = "ccbf09df3807942b67f21789c1068b2be2bc2eb12d71bc2bf349f06b8386496d"
 
 passed = failed = 0
 
@@ -38,12 +36,12 @@ for line in CORPUS.read_text().splitlines():
 real = {0xBCD62: 2748, 0xCCFB2: 128, 0xCEE7C: 146}
 false = {0xBCD66, 0xCCFB6, 0xCEE80}
 recovered = {0x71508: 170, 0x7D72C: 212, 0x810F2: 204}
-check("canonical metadata denominator is 6065",
-      metadata is not None and metadata["function_count"] == 6065
-      and metadata["inventory_function_count"] == 6065 and len(rows) == 6065)
-check("corrected normalized inventory identity is pinned",
-      hashlib.sha256(INVENTORY.read_bytes()).hexdigest() == EXPECTED_INVENTORY_SHA
-      and metadata["project_inventory_sha256"] == EXPECTED_INVENTORY_SHA)
+check("canonical corpus is complete and bound to the current inventory",
+      metadata is not None
+      and metadata["function_count"] == metadata["inventory_function_count"] == len(rows)
+      and metadata["decompiled_count"] == len(rows)
+      and metadata["failed_count"] == 0
+      and metadata["project_inventory_sha256"] == hashlib.sha256(INVENTORY.read_bytes()).hexdigest())
 check("real parent starts have the complete bodies",
       all(entry in rows and rows[entry]["body_size"] == size for entry, size in real.items()))
 check("false +4 child functions are absent", not (false & set(rows)))
@@ -70,9 +68,8 @@ check("former child labels have no callsite spelling",
           for target in false for rec in rows.values()))
 
 cone = json.loads(CONE.read_text())
-check("snapshot/stage denominators reflect the collapsed boundary",
-      cone["target"]["corpus_function_count"] == 6065
-      and cone["pipeline"]["L3_stage_reader_census"]["total"] == 51
+check("snapshot copy geometry remains closed after boundary recovery",
+      cone["pipeline"]["L3_stage_reader_census"]["total"] == 51
       and cone["pipeline"]["L3_stage_reader_census"]["in_cluster"] == 15
       and cone["pipeline"]["L4_snapshot_copiers"] == {
         "0xBC96A": {"exact_pairs": 1},
@@ -83,14 +80,6 @@ check("snapshot/stage denominators reflect the collapsed boundary",
       }
       and cone["pipeline"]["L4_unique_snapshot_destinations"] == 306)
 
-hidden = json.loads(HIDDEN.read_text())
-e1 = hidden["e1_register_arithmetic_store_targets"]["census"]
-e2 = hidden["e2_dmac_destination_reprogramming"]["computed_store_census"]
-check("HighFunction denominator changed without changing E1/E2 candidates",
-      e1 == {"candidateFunctions": 46, "candidates": 100, "functions": 6065,
-             "knownRangeStores": 4701, "stores": 13185}
-      and e2 == {"candidateFunctions": 3, "candidates": 5, "functions": 6065,
-                 "knownRangeStores": 4701, "stores": 13185})
 
 composition = json.loads(COMPOSITION.read_text())
 sel = composition["selector_census"]

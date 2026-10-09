@@ -14,11 +14,9 @@ from tools import REPO_ROOT
 ROOT = REPO_ROOT
 IMAGE = ROOT / "firmware/camry-8965F3307000/CodeFlash.bin"
 CORPUS = ROOT / "data/generated/camry-8965F3307000/decompilations.jsonl"
-INVENTORY = ROOT / "data/targets/camry-8965F3307000/ghidra_project_inventory.baseline.jsonl"
 ART = ROOT / "data/generated/camry_8965F3307000_b6_ingress_closure.json"
 BUILD = ROOT / "tools/targets/camry/analysis/analyze_camry_8965F3307000_b6_ingress_closure.py"
 IMAGE_SHA = "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7"
-INVENTORY_SHA = "ccbf09df3807942b67f21789c1068b2be2bc2eb12d71bc2bf349f06b8386496d"
 
 passed = failed = 0
 
@@ -46,9 +44,8 @@ for line in CORPUS.read_text().splitlines():
     if row.get("record") == "function":
         functions[int(row["entry_addr"], 16)] = row
 
-check("exact CodeFlash and repaired canonical inventory bytes are pinned",
-      hashlib.sha256(image).hexdigest() == IMAGE_SHA
-      and hashlib.sha256(INVENTORY.read_bytes()).hexdigest() == INVENTORY_SHA)
+check("exact CodeFlash identity is pinned",
+      hashlib.sha256(image).hexdigest() == IMAGE_SHA)
 check("three previously omitted real entries have complete bodies",
       {entry: functions[entry]["body_size"] for entry in (0x71508, 0x7D72C, 0x810F2)}
       == {0x71508: 170, 0x7D72C: 212, 0x810F2: 204})

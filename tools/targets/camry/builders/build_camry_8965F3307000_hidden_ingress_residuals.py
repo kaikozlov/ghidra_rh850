@@ -36,13 +36,14 @@ SCRIPT = ROOT / "ghidra/scripts/investigate/AuditComputedStoreTargets.java"
 OUT = ROOT / "data/generated/camry_8965F3307000_hidden_ingress_residuals.json"
 
 E1_FUNCTIONS = {
-    0x3B8E4, 0x3C108, 0x3C116, 0x3C184, 0x3C19C,
-    0x7B248, 0x7B2C4, 0x7DD64, 0x7E364, 0x7FC0E, 0x82294, 0x8300E,
-    0x830D0, 0x832F4, 0x850C2, 0x850E0, 0x8E772, 0x8E790, 0x8E7A4,
-    0x8E7BA, 0x8E7D0, 0x8F60E, 0x8F6B2, 0x93C6C, 0x93C9A, 0x93DE8,
-    0x93E5C, 0x93EF6, 0x93F4E, 0x9405C, 0xB9CBE, 0xB9D5E, 0xB9DFC,
-    0xB9EAA, 0xBA052, 0xBA134, 0xBA170, 0xBA284, 0xBA398, 0xBA4EA,
-    0xBEF80, 0xBEF8E, 0xCB45E, 0xCF4DA, 0xCF4F8, 0xCF51C,
+    0x3B8E4, 0x3BD8E, 0x3C108, 0x3C116, 0x3C184, 0x3C19C,
+    0x7B248, 0x7B2C4, 0x7DD64, 0x7E364, 0x7FC0E, 0x82294, 0x82880,
+    0x8300E, 0x830D0, 0x832F4, 0x850C2, 0x850E0, 0x8E772, 0x8E790,
+    0x8E7A4, 0x8E7BA, 0x8E7D0, 0x8F60E, 0x8F6B2, 0x93C6C, 0x93C9A,
+    0x93DE8, 0x93E5C, 0x93EF6, 0x93F4E, 0x9405C, 0xB9CBE, 0xB9D5E,
+    0xB9DFC, 0xB9EAA, 0xBA052, 0xBA134, 0xBA170, 0xBA284, 0xBA398,
+    0xBA4EA, 0xBEF80, 0xBEF8E, 0xCA242, 0xCB45E, 0xCF4DA, 0xCF4F8,
+    0xCF51C,
 }
 E2_FALSE_POSITIVE_FUNCTIONS = {0x607FE, 0x6080E, 0x609B0}
 DMAC_DEST_OFFSETS = {0x04, 0x14}
@@ -159,9 +160,9 @@ def census_summary(c: dict, *, candidates: int, functions: int) -> None:
     need(c["summary"] == {
         "candidateFunctions": functions,
         "candidates": candidates,
-        "functions": 6065,
-        "knownRangeStores": 4701,
-        "stores": 13185,
+        "functions": 7178,
+        "knownRangeStores": 5438,
+        "stores": 14059,
     }, "computed-store census denominator drift")
 
 
@@ -169,11 +170,11 @@ def build() -> dict:
     image = IMAGE.read_bytes()
     need(len(image) == 0x100000 and sha(image) == IMAGE_SHA256, "exact F33 image drift")
     rows, total = load_function_corpus(CORPUS)
-    need(total == 6065, f"F33 corpus denominator drift: {total}")
+    need(total == 7178, f"F33 corpus denominator drift: {total}")
 
     e1 = load_json(E1)
     e2 = load_json(E2)
-    census_summary(e1, candidates=100, functions=46)
+    census_summary(e1, candidates=103, functions=49)
     census_summary(e2, candidates=5, functions=3)
     e1_funcs = {int(x, 16) for x in e1["candidate_functions"]}
     e2_funcs = {int(x, 16) for x in e2["candidate_functions"]}
@@ -185,8 +186,7 @@ def build() -> dict:
     # 0..7; the status arrays are all explicitly bounded to <0x18.
     calls_3b960 = literal_call_args(rows, 0x3B960)
     need(calls_3b960 == list(range(8)), f"3B960 literal index set drift: {calls_3b960}")
-    t = ctext(rows, 0x3B8E4)
-    need("(&DAT_febe7090)[param_1 & 0xff]" in t, "3B8E4 indexed target drift")
+    need("(param_1 & 0xff) < 3" in ctext(rows, 0x3BD8E), "3BD8E three-entry bound drift")
     for entry in (0x3C116, 0x3C184, 0x3C19C):
         need("< 0x18" in ctext(rows, entry), f"{entry:#x} 24-entry bound drift")
 
@@ -206,7 +206,8 @@ def build() -> dict:
 
     # E1-C: XCP/communication manager state arrays.
     need(struct.unpack_from("<H", image, 0x22AE4)[0] == 0x70, "XCP state pointer count drift")
-    need(image[0x22AE6:0x22AE8] == bytes((4, 4)), "XCP state row counts drift")
+    need(image[0x22AE6:0x22AEA] == bytes((4, 4, 4, 7)), "XCP state/configuration row counts drift")
+    need("(uint)uVar1 < (uint)DAT_00022ae7" in ctext(rows, 0x82880), "82880 configured row bound drift")
     need(image[0x22ABF] == 1 and image[0x22ABC] == 1 and image[0x22ABD] == 8, "XCP scratch bounds drift")
     need(struct.unpack_from("<H", image, 0x21C68)[0] == 0x1E8 and image[0x21C54] == 0x30, "COM status-map bounds drift")
     need(struct.unpack_from("<H", image, 0x22E3C)[0] == 47 and struct.unpack_from("<H", image, 0x22E3E)[0] == 9 and image[0x22E41] == 3, "CAN rule-state bounds drift")
@@ -224,7 +225,7 @@ def build() -> dict:
     # E1-E: the storage/logical-block family is exactly three state rows and all
     # writer entry points recover their index through that three-row domain.
     need("uVar1 < 3" in ctext(rows, 0x93F0E), "logical-block lookup bound drift")
-    need("while (uVar1 < 3)" in ctext(rows, 0x93ABA), "logical-block init bound drift")
+    need(re.search(r"} while \([^)]* < 3\);", ctext(rows, 0x93ABA)), "logical-block init bound drift")
     block_buffers = [struct.unpack_from("<I", image, 0x25E94 + i * 8)[0] for i in range(3)]
     need(block_buffers == [0xFEBE5651, 0xFEBE5751, 0xFEBE5851], f"logical-block buffers drift: {block_buffers}")
     need("if (1 < (uVar1 & 0xffff))" in ctext(rows, 0x9405C), "two-slot ring wrap drift")
@@ -233,6 +234,7 @@ def build() -> dict:
     # diagnostic helpers.
     need("while (uVar1 < 5)" in ctext(rows, 0xBA642), "BA642 five-channel bound drift")
     need("thunk_FUN_000bef80(0)" in ctext(rows, 0x3D348), "BEF80 literal index drift")
+    need("DAT_febec628 < 0x13" in ctext(rows, 0xCA242), "CA242 ring bound drift")
     need("DAT_febec740 < 0x13" in ctext(rows, 0xCB45E), "CB45E ring bound drift")
     for entry in (0xCF4DA, 0xCF4F8, 0xCF51C):
         need("< 3" in ctext(rows, entry), f"{entry:#x} three-entry bound drift")
@@ -254,13 +256,12 @@ def build() -> dict:
 
     # Direct recovered destination writers. +0x04 is initialized only by 6082C;
     # +0x14 is initialized by 6082C and refreshed by 60A6A. 6091E is read-only.
-    # The simple '=' screen includes the read-only return line for 6091E, so pin
-    # writer semantics explicitly by the exact assignment spellings.
-    plus04_writers = sorted(entry for entry, row in rows.items() if "*(undefined4 *)(iVar4 + -0x7bfc) =" in str(row.get("decompiled_c", "")))
-    plus14_writers = sorted(entry for entry, row in rows.items() if (
-        "*(undefined4 *)(iVar4 + -0x7bec) =" in str(row.get("decompiled_c", "")) or
-        "*(undefined4 *)(iVar3 + -0x7bec) =" in str(row.get("decompiled_c", ""))
-    ))
+    # Match the destination offsets and assignment form, not decompiler-local
+    # variable names, which can change when unrelated function recovery improves.
+    plus04_store = re.compile(r"\*\(undefined4 \*\)\([^;\n]*\+ -0x7bfc\) =")
+    plus14_store = re.compile(r"\*\(undefined4 \*\)\([^;\n]*\+ -0x7bec\) =")
+    plus04_writers = sorted(entry for entry, row in rows.items() if plus04_store.search(str(row.get("decompiled_c", ""))))
+    plus14_writers = sorted(entry for entry, row in rows.items() if plus14_store.search(str(row.get("decompiled_c", ""))))
     need(plus04_writers == [0x6082C], f"DMAC +04 writer set drift: {plus04_writers}")
     need(plus14_writers == [0x6082C, 0x60A6A], f"DMAC +14 writer set drift: {plus14_writers}")
     need("return *(undefined4 *)((param_1 & 0xff) * 0x40 + -0x7bfc);" in ctext(rows, 0x6091E), "DMAC +04 reader drift")
@@ -313,13 +314,13 @@ def build() -> dict:
             "candidate_function_count": len(E1_FUNCTIONS),
             "candidate_functions": [hx(x) for x in sorted(E1_FUNCTIONS)],
             "closure_groups": [
-                {"name": "71f2_status_arrays", "functions": [hx(x) for x in (0x3B8E4,0x3C108,0x3C116,0x3C184,0x3C19C)], "bound": "3B8E4 receives literal lanes 0..7; 3C108/116/184/19C are bounded to indices <0x18; none reaches FEBE71F2"},
+                {"name": "71f2_status_arrays", "functions": [hx(x) for x in (0x3B8E4,0x3BD8E,0x3C108,0x3C116,0x3C184,0x3C19C)], "bound": "3B8E4 receives literal lanes 0..7; 3BD8E is bounded to indices <3; 3C108/116/184/19C are bounded to indices <0x18; none reaches FEBE71F2"},
                 {"name": "generated_com_bookkeeping", "functions": [hx(x) for x in (0x7B248,0x7B2C4,0x7DD64,0x7E364,0x7FC0E)], "bound": "exact manager/event/route counts confine writes to 0xFEBE48xx..0xFEBE4Fxx; the five generated-COM buffers are fixed at FEBE3DF8..FEBE3EA0"},
-                {"name": "xcp_can_manager_state", "functions": [hx(x) for x in (0x82294,0x8300E,0x830D0,0x832F4,0x850C2,0x850E0)], "bound": "exact state/rule counts confine writes to FEBE493E..FEBE503A"},
+                {"name": "xcp_can_manager_state", "functions": [hx(x) for x in (0x82294,0x82880,0x8300E,0x830D0,0x832F4,0x850C2,0x850E0)], "bound": "exact state/rule counts confine writes to FEBE493E..FEBE503A; 82880's configured row count is four and its inner span is 4*7 entries"},
                 {"name": "diagnostic_event_state", "functions": [hx(x) for x in (0x8E772,0x8E790,0x8E7A4,0x8E7BA,0x8E7D0,0x8F60E,0x8F6B2)], "bound": "event arrays are <0x60 and the linked diagnostic-list path has exactly three node IDs, confining writes below FEBE5527"},
                 {"name": "logical_block_state", "functions": [hx(x) for x in (0x93C6C,0x93C9A,0x93DE8,0x93E5C,0x93EF6,0x93F4E,0x9405C)], "bound": "logical-block index domain is exactly 0..2; backing buffers are FEBE5651/FEBE5751/FEBE5851; ring index wraps at two slots"},
                 {"name": "five_channel_snapshot_state", "functions": [hx(x) for x in (0xB9CBE,0xB9D5E,0xB9DFC,0xB9EAA,0xBA052,0xBA134,0xBA170,0xBA284,0xBA398,0xBA4EA,0xBEF80,0xBEF8E)], "bound": "top-level BA642 index is 0..4 and BEF80/BEF8E is called with literal 0; writes remain below FEBEBF3C"},
-                {"name": "cbxx_diagnostic_state", "functions": [hx(x) for x in (0xCB45E,0xCF4DA,0xCF4F8,0xCF51C)], "bound": "CB45E ring index is <=0x13 and CF4xx helpers are <3; writes remain below the steering-command CCxx region"},
+                {"name": "cbxx_diagnostic_state", "functions": [hx(x) for x in (0xCA242,0xCB45E,0xCF4DA,0xCF4F8,0xCF51C)], "bound": "CA242/CB45E ring indices are <=0x13 and CF4xx helpers are <3; writes remain below the steering-command CCxx region"},
             ],
             "result": "zero recovered register-arithmetic STORE path can land on any audited steering command/current target once exact runtime/configuration index bounds are applied",
             "boundary": "unknown/unbounded pointer stores and memory-safety bugs are not promoted to impossible; this closes VAR-084 E1 specifically, not arbitrary pointer corruption",

@@ -1,6 +1,8 @@
 {
   "command_value_torque_observable_branch": {
     "FEBE6772_direct_readers": [
+      "0x0003B400",
+      "0x0003B4A8",
       "0x0004E7D6"
     ],
     "FEBEAC56_direct_readers": [
@@ -21,7 +23,7 @@
       "0x0005CF1C",
       "0x0005D5E0"
     ],
-    "classification": "verified distinction: AC56/EE40A/FEBE6772 is the diagnostic/model mirror of the pre-slew CC62 value. Its 6AF6->6E22/6E24 tail terminates in snapshot/report consumers. The physical motor-driving mirror is the sibling AC54/EE40C branch below. Canonical direct-reader census alone is insufficient to infer that CC62 is non-actuating because D042C writes CC62 and immediately reuses the same value intra-function to form CC66.",
+    "classification": "verified distinction: AC56/EE40A/FEBE6772 is the diagnostic/model mirror of the pre-slew CC62 value. Two recovered callback predicates (3B400/3B4A8) also compare its saturated magnitude against FEBE6F6E/FEBE6F74 plus fixed ROM thresholds; they return status into the generic 6AE7C state machine and do not write the command funnel. The 6AF6->6E22/6E24 tail terminates in snapshot/report consumers. The physical motor-driving mirror is the sibling AC54/EE40C branch below. Canonical direct-reader census alone is insufficient to infer that CC62 is non-actuating because D042C writes CC62 and immediately reuses the same value intra-function to form CC66.",
     "mirror_tail": {
       "0x35C4C": "FEBEE40A -> FEBE6AF6",
       "0x387CE": "FEBE6AF6 -> FEBE6E22/FEBE6E24",
@@ -40,7 +42,12 @@
       ]
     },
     "observable_chain": "FEBECC62 -> D0AAE/FEBEAC56 -> BF33E/FEBEE40A -> 5D5E0/FEBE6772 -> DID 0x1C02 Command Value Torque",
-    "pre_slew_value": "FEBECC62"
+    "pre_slew_value": "FEBECC62",
+    "threshold_predicates": {
+      "0x0003B400": "absolute/saturated FEBE6772 versus FEBE6F6E plus ROM threshold DAT_0002B5D8",
+      "0x0003B4A8": "absolute/saturated FEBE6772 versus FEBE6F74 plus ROM threshold DAT_0002B5DC",
+      "registration": "0x0003B3D0/0x0003B478 register the predicates through callback tables 0x27F64/0x27F98 and generic state machine 0x0006AE7C"
+    }
   },
   "current_gtsplus_boundary": {
     "named_anchor": {
@@ -1064,7 +1071,7 @@
   },
   "target": {
     "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
-    "corpus_function_count": 6065,
+    "corpus_function_count": 7178,
     "software_id": "8965F3307000"
   }
 }

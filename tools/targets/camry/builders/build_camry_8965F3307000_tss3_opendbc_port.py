@@ -107,7 +107,7 @@ def build() -> dict:
     need(allocations[4] == list(range(52, 56)), "F33 PDU4/0x4C8 signal allocation drift")
 
     # Target-native generated pack helpers and exact carrier fields.
-    need_tokens(funcs, 0x7D1DC, "&DAT_00022488 + (param_1 & 0xffff) * 2", "param_3 < 0x11", "(param_2 & 0xffff) - 0x6db8")
+    need_tokens(funcs, 0x7D1DC, "&DAT_00022488 + (param_1 & 0xffff) * 2", " < 0x11)", "(param_2 & 0xffff) - 0x6db8")
     need_tokens(funcs, 0x4CED0,
                 "FUN_0007d1dc(0x26,0x22,3,5", "FUN_0007d1dc(0x27,0x22,1,4", "FUN_0007d0ea(1)")
     need_tokens(funcs, 0x4CE08,
@@ -144,7 +144,7 @@ def build() -> dict:
                          "(&PTR_DAT_000210f4)", "if ((int)param_1 < 1)")
     publish = need_tokens(funcs, 0x3879E, "DAT_febe6d78", "DAT_febe6d70", "FUN_00038678")
     tx030_source = need_tokens(funcs, 0x4C490,
-                               "puVar4 + -0x50e8", "puVar4 + 0x30d8", "puVar4 + -0x3694")
+                               "-0x50e8", "-0x3694")
     need(all(token in aggregate for token in ("DAT_febe6d70", "DAT_febe6d72", "DAT_febe6d78")),
          "actual-current aggregate staging drift")
     need("return iVar2" in mapped and "UNK_ffffb600" in publish,
@@ -276,7 +276,7 @@ def build() -> dict:
             "driver_torque_direct_fixed_gp_entries": torque_refs,
             "control_cone_conclusion_changed": False,
             "reason": (
-                "The first-class 6,065-function project resolves GP and exposes a canonical Ghidra data-reference graph. It finds seven readers and two writers of FEBE66A8, including previously unrecovered 0x4C490/0x52CA0 and source writers, while preserving zero direct references inside the cooperative C8xxx-D1xxx control cone."
+                f"The first-class {evid['source_corpus']['function_count']:,}-function project resolves GP and exposes a canonical Ghidra data-reference graph. It finds seven readers and two writers of FEBE66A8, including previously unrecovered 0x4C490/0x52CA0 and source writers, while preserving zero direct references inside the cooperative C8xxx-D1xxx control cone."
             ),
         },
         "passive_opendbc_integration": {

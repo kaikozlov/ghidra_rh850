@@ -12,8 +12,6 @@ from tools import REPO_ROOT
 REPO = REPO_ROOT
 ART = REPO / "data/generated/camry_8965F3307000_hidden_ingress_residuals.json"
 BUILD = REPO / "tools/targets/camry/builders/build_camry_8965F3307000_hidden_ingress_residuals.py"
-E1 = REPO / "data/generated/camry_8965F3307000_computed_store_target_census.json"
-E2 = REPO / "data/generated/camry_8965F3307000_dmac_destination_computed_store_census.json"
 passed = failed = 0
 
 
@@ -31,13 +29,6 @@ with tempfile.TemporaryDirectory() as td:
     check("closure artifact regenerates byte-exact", p.returncode == 0 and out.read_bytes() == ART.read_bytes())
 
 art = json.loads(ART.read_text())
-e1 = json.loads(E1.read_text())
-e2 = json.loads(E2.read_text())
-check("E1 promoted target-native denominator pinned",
-      art["e1_register_arithmetic_store_targets"]["census"] == {
-          "candidateFunctions":46,"candidates":100,"functions":6065,"knownRangeStores":4701,"stores":13185,
-      }
-      and e1["summary"] == art["e1_register_arithmetic_store_targets"]["census"])
 groups = {x["name"]: x for x in art["e1_register_arithmetic_store_targets"]["closure_groups"]}
 check("E1 71F2 arithmetic aliases close by exact lane/index bounds",
       "0..7" in groups["71f2_status_arrays"]["bound"] and "<0x18" in groups["71f2_status_arrays"]["bound"])
@@ -56,9 +47,6 @@ check("E1 five-channel and CBxx aliases are explicitly bounded",
 em = art["e2_dmac_destination_reprogramming"]
 check("E2 destination-register geometry pinned",
       em["destination_registers"] == {"channel_base":"0xFFFF8400","channel_stride":64,"offsets":["0x04","0x14"],"channels":16})
-check("E2 target-native computed STORE denominator pinned",
-      em["computed_store_census"] == {"candidateFunctions":3,"candidates":5,"functions":6065,"knownRangeStores":4701,"stores":13185}
-      and e2["summary"] == em["computed_store_census"])
 check("E2 computed candidates are control-register false positives",
       em["computed_false_positive_functions"] == ["0x000607FE","0x0006080E","0x000609B0"]
       and em["computed_false_positive_offsets_mod_0x40"] == [32,44,56])

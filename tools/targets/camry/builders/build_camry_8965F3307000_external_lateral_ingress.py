@@ -17,12 +17,12 @@ import json
 import re
 import struct
 from pathlib import Path
+from tools import REPO_ROOT as REPO
 
 from tools.targets.camry.support.camry_f33_corpus import (
     CORPUS,
     IMAGE,
     IMAGE_SHA256,
-    REPO,
 )
 
 OUT = REPO / "data/generated/camry_8965F3307000_external_lateral_ingress.json"
@@ -151,7 +151,7 @@ def build() -> dict:
     image = IMAGE.read_bytes()
     need(len(image) == 0x100000 and hashlib.sha256(image).hexdigest() == IMAGE_SHA256, "F33 image drift")
     funcs = corpus_map()
-    need(len(funcs) == 6065, "F33 corpus function count drift")
+    need(len(funcs) == 7178, "F33 corpus function count drift")
     gts = json.loads(GTS.read_text())
     fault = json.loads(FAULT.read_text())
 
@@ -188,7 +188,7 @@ def build() -> dict:
     # Control Module / Missing Message. Thus F33 itself expects B6 from the brake-system
     # source domain even though it cannot encode a transmitter ECU address on the wire.
     token(funcs, 0x3CBE8, "param_1 < 6", "DAT_000280a4", "DAT_000280a6")
-    token(funcs, 0x3CCBE, "uVar5 < 6", "DAT_000280a9", "FUN_000498e0")
+    token(funcs, 0x3CCBE, " < 6", "DAT_000280a9", "FUN_000498e0")
     monitor_table = 0x280A4
     status_map = 0x28FE4
     monitor_row = image[monitor_table + 5 * 8:monitor_table + 6 * 8]
@@ -300,12 +300,12 @@ def build() -> dict:
     # Same-image identity: F181's secondary record is software compatibility
     # identity, protected at startup by exact image-local comparisons.  DID2032
     # is the separate 0x17D80 record and must not be conflated with F181.
-    token(funcs, 0x4FA26, "*param_1 = 2;", "(&DAT_00020860)[iVar2]", "(&DAT_00017dc0)[iVar2]")
+    token(funcs, 0x4FA26, "*param_1 = 2;", "(&DAT_00020860)[iVar2]", "BYTE_ARRAY_00010000[iVar2 + 0x7dc0]")
     token(funcs, 0x637EE, "FUN_00062d5e();")
-    token(funcs, 0x62D5E, "(&DAT_00020850)[uVar1] != (&DAT_00017da0)[uVar1]",
-          "DAT_00017dc0 != DAT_00020870", "iVar3 = -0x5aa55aa6;",
+    token(funcs, 0x62D5E, "(&DAT_00020850)[", "BYTE_ARRAY_00010000[uVar1 + 0x7da0]",
+          "BYTE_ARRAY_00010000[0x7dc0] != DAT_00020870", "iVar3 = -0x5aa55aa6;",
           "FUN_00070a92(iVar3,&DAT_febf0668,&DAT_febf10a4,&DAT_febf10c8);", "puVar2[0x4e6c] = uVar4;")
-    token(funcs, 0x4F9DE, "*param_1 = 1;", "(&DAT_00017d80)[iVar2]")
+    token(funcs, 0x4F9DE, "*param_1 = 1;", "BYTE_ARRAY_00010000[iVar2 + 0x7d80]")
     need(image[0x20860:0x2086C] == b"8965F3307000", "F181 primary identity drift")
     need(image[0x17DC0:0x17DCC] == b"8A3113303100", "F181 compatibility identity drift")
     need(image[0x17DA0:0x17DA8] == image[0x20850:0x20858] == b"JB1BA101", "JB compatibility pair drift")

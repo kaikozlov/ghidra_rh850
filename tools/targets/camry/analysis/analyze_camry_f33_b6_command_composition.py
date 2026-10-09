@@ -67,6 +67,7 @@ FINAL_CELLS = {
 # Functions whose bodies establish the semantic path.  The exhaustive selector
 # and writer censuses below are independent of this curated evidence set.
 FUNCTIONS = {
+  0x0CA614: "ADB0 0x19/0x1B state gate",
   0x0CBB66: "B6 target-angle input conditioning",
   0x0CCF0E: "B6 target-angle scale/continuity stage",
   0x0CCFB2: "B6 target-angle supervisor staging",
@@ -161,7 +162,7 @@ def analyze() -> dict[str, Any]:
   if image_sha != EXPECTED_SHA256:
     raise RuntimeError(f"exact F33 CodeFlash SHA mismatch: {image_sha}")
   corpus = load_corpus()
-  if len(corpus) != 6065:
+  if len(corpus) != 7178:
     raise RuntimeError(f"canonical corpus function count drift: {len(corpus)}")
   missing = set(FUNCTIONS) - set(corpus)
   if missing:
@@ -169,7 +170,7 @@ def analyze() -> dict[str, Any]:
 
   f = {entry: corpus[entry]["decompiled_c"] for entry in FUNCTIONS}
 
-  # Exhaustive selector census: every function in the complete 6065-function
+  # Exhaustive selector census: every function in the complete 7178-function
   # corpus containing CB00/ADB0, plus exact direct references.
   cb00_funcs = funcs_referencing(corpus, "DAT_febecb00")
   adb0_funcs = funcs_referencing(corpus, "DAT_febeadb0")
@@ -236,13 +237,18 @@ def analyze() -> dict[str, Any]:
       and "DAT_febecb00 = 2;" in f[0xCEFFC]
       and "DAT_febecb00 = 7;" in f[0xCEFFC]
     ),
-    "only_adb0_runtime_readers_are_bank_decode_and_special_transient": (
+    "adb0_runtime_readers_are_bounded_selector_state_gates": (
       sorted({r["function"] for r in adb0_refs if r["type"] == "READ"})
-      == ["0x0CB73A", "0x0CEFFC"]
+      == ["0x0CA614", "0x0CB73A", "0x0CEFFC"]
     ),
     "id11_does_not_arm_special_transient": (
       "DAT_febeadb0 == '1'" in f[0xCB73A]
       and "DAT_febeadb0 == '1'" not in f[0xCEFFC]
+    ),
+    "id11_does_not_arm_ca614_state_gate": (
+      "DAT_febeadb0 != '\\x19'" in f[0xCA614]
+      and "DAT_febeadb0 != '\\x1b'" in f[0xCA614]
+      and "DAT_febeadb0 == '\\v'" not in f[0xCA614]
     ),
     "b6_angle_enters_supervisor": (
       "DAT_febeae90" in f[0xCBB66]

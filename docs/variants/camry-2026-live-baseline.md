@@ -659,7 +659,7 @@ Exact F33 diagnostic joins close the feedback side:
   with validity magic `0xA5AA5AA5`. The **±2109 raw (~±8.238 N.m)** bound is an
   **acquisition/representation clamp, not an override threshold**.
 - DID1151 **Motor Actual Current Q Axis** callback `0x4E394` computes
-  **(raw*100)/0x80**. The first-class 6,065-function Ghidra graph resolves
+  **(raw*100)/0x80**. The current canonical Ghidra graph resolves
   `GP-0x5158` to `FEBE66A8` and finds **9 direct driver-torque references
   (7 reads / 2 writes)**; it resolves `GP-0x50F2` to `FEBE670E` and finds
   **6 direct Q-current references (4 reads / 2 writes)**. **Neither exact
@@ -859,26 +859,31 @@ function; the F33 firmware bytes above remain the authority for that write path.
 
 ### 13.5 Control-transfer audit: the missing primitive
 
-CORR-186 refreshes the current denominator to the first-class **6,065-function**
-F33 project. `ExportIndirectControlTransfers.java` now reports **496** decoded
-indirect transfers total (**403 `jarl` + 93 `jmp`**) and **487** in application
-CodeFlash (**395 `jarl` + 92 `jmp`**). `ClassifyComputedCallTargets.java` classifies
-**495 / 487** respectively; the one total-count difference is the reset thunk
-`jmp 0x1E1E[r0] @ 0x32`, which has no containing function and is outside the
-application region. This supersedes the older 312/305 scratch-corpus denominator.
+The processor-refresh project reports **995 function-owned decoded indirect
+transfers** (**896 `jarl` + 99 `jmp`**) and **986** in application CodeFlash
+(**887 `jarl` + 99 `jmp`**). All 99 `jmp` rows are eight-byte fixed-immediate
+thunks at `0xFDD90..0xFF240`: each loads one distinct CodeFlash target
+(`0x32C94..0xBEF8E`) into `r12` and terminates with `jmp [r12]`. They improve
+tail-call/function coverage but do not add a writable function-pointer source.
 
-Of the 495 classifier sites, **161** have a nearest defining load with a direct
-operand reference: 152 reference CodeFlash/data objects, **9** reference lower-RAM
-cells, and **zero** reference `FEBF7C00..FEBFFBFF`. Another 330 have a locally
-resolved register/field definition without an operand reference; the remaining
-four exceed the local 24-instruction backtracker and are closed separately below.
+`ClassifyComputedCallTargets.java` covers all 995 sites. **197** have a nearest
+defining load with a direct operand reference: 188 reference CodeFlash/data
+objects, **9** reference lower-RAM cells, and **zero** reference
+`FEBF7C00..FEBFFBFF`. Another 744 have a locally resolved definition without an
+operand reference. Of the 54 sites beyond the local 24-instruction backtracker,
+50 are parameter-vector calls inside ten related library routines
+`0x6C358..0x6F910`. Those routines have no recovered incoming reference, no raw
+CodeFlash u32 entry pointer, and no global data reference; an undiscovered caller
+that supplies their callback vectors remains explicitly outside the static
+negative. The remaining four are closed separately below.
+
 The nine directly referenced lower-RAM sites reduce to five concrete cells, all
 below the XCP floor: boot-only `FEBF0FD0` (`0x435E/0x437C/0x440E`), `FEBF6B04`
 (`0x73EE6`, with writer `0x73EEE` selecting only fixed CodeFlash `0x766F4/0x767EA`),
 `FEBF117C`, `FEBF1194`, and `FEBE5628`. The `FEBE5628` service callback is derived
 from fixed CodeFlash service configuration; recovered request bytes do not become
-a function address. Thus the stronger current census adds lower-RAM dispatch state
-but still recovers **no XCP-writable call-source cell**.
+a function address. The current census therefore recovers **no XCP-writable
+call-source cell**.
 
 A separate Ghidra reference census finds no recovered static reference into
 `FEBF7C00..FEBFFBFF`, and a raw whole-CodeFlash u32 census finds **zero embedded
@@ -2182,7 +2187,7 @@ The dynamic B6-independent magnitude enters earlier. `D0218` writes `FEBECC48`; 
 
 `FEBEC43C + FEBEC4C0 + FEBEC3BA + FEBECC2C + FEBEBF3C + clamp(FEBECB38 + FEBEC5EE, +/-B132C/2) + FEBECBE8`.
 
-The direct runtime writers are all internal C/D-family algorithm state: `CF2B2 -> FEBECB38`, `C9A84 -> FEBEC5EE`, `C7E36 -> FEBEC43C`, `C8678 -> FEBEC4C0`, `C74AC -> FEBEC3BA`, `D0162 -> FEBECC2C`, `C2B64 -> FEBEBF3C`, and `CFCD4 -> FEBECBE8`. `FEBEAC2B` is an internal diagnostic/control snapshot (`BCBD8 <- FEBEB112`; `B338C` sets `0x5A`, `B330A/B3314` clear it), while `CB73A` can set `FEBEC7BF=1` only with B6 sig261 snapshot `FEBEADB0=='1'`. The complete generated-COM denominator in §29 therefore remains intact: this is an **EPS-internal baseline-assist path**, not a second generated-COM target ingress.
+The direct runtime writers are all internal C/D-family algorithm state: `CF2B2 -> FEBECB38`, `C9A84 -> FEBEC5EE`, `C7E36 -> FEBEC43C`, `C8678 -> FEBEC4C0`, `C74AC -> FEBEC3BA`, `D0162 -> FEBECC2C`, `C2B64 -> FEBEBF3C`, and `CFCD4 -> FEBECBE8`. `FEBEAC2B` is an internal diagnostic/control snapshot (`BCBD8 <- FEBEB112`; `B338C` sets `0x5A`, `B330A` clears it), while `CB73A` can set `FEBEC7BF=1` only with B6 sig261 snapshot `FEBEADB0=='1'`. The complete generated-COM denominator in §29 therefore remains intact: this is an **EPS-internal baseline-assist path**, not a second generated-COM target ingress.
 
 This also bounds the retained-drive interpretation. VAR-075 pins the `FEBEC5EE` moving-mode contribution to zero in both retained drives because its `0x0D5` s213 source is identically zero; the other `D0218` terms remain live and, through the now-verified `CC62 -> CC66/CC64 -> AC54/EE40C` chain, can have a real current-control consequence with B6 absent. But semantic closure of all eight terms finds no independently recovered **lane-target** magnitude: they reduce to measured torque, torque+speed maps, internal aggregation/ROM state, `|torque|` curves, and angle return/dither/excitation. VAR-081 identifies the interval as LTA/LCA active. The unresolved question is therefore what upstream state/value gives this shared funnel factory lane-centering authority with B6 absent, not whether `CC62` reaches the motor. Nothing here authorizes output.
 
@@ -2190,7 +2195,7 @@ This also bounds the retained-drive interpretation. VAR-075 pins the `FEBEC5EE` 
 
 **Default-bank terms themselves have no unpublished milliradian.** With `CB00=7`, `C43C` is `clamp(C472+C45A+C44C)` from driver-torque snapshot `AC44`, speed `ADF6`, and filtered measured-angle rate `C172` (delta of `AC88`). `C4C0` is a torque×speed map. `C3BA`/`CC2C`/`BF3C` stay inside the torque family. `CD094` blends return state `CA36` toward `C172` under that default bank; dither/return copies peripheral `EC14`/`EC18`. None of the eight term writers reads B6 `ADB0` or the B6 COM window. Combined with VAR-077 (only B6 supplies COM value/mode into `CC50/CC62`), the retained hands-light motor correlation with published `0x08A` error is **not an F33 COM input** (VAR-092). The command is adjacent to EPS, not into it.
 
-Deterministic evidence is the `baseline_internal_assist_path` section of `data/generated/camry_8965F3307000_command_cone_ingress.json`, generated from the exact 6,065-function F33 corpus and verified by `tests/targets/camry/verify_camry_8965F3307000_command_cone_ingress.py`.
+Deterministic evidence is the `baseline_internal_assist_path` section of `data/generated/camry_8965F3307000_command_cone_ingress.json`, generated from the current canonical F33 corpus and verified by `tests/targets/camry/verify_camry_8965F3307000_command_cone_ingress.py`.
 
 ## 31. Drive-mode baseline-assist selector: Sport selects the only distinct healthy C2B64 bank
 
@@ -2225,6 +2230,54 @@ A tempting selector join also collapses under exact calibration bytes. `C9812` s
 For any future passive validation capture, the most discriminating EPS reads remain: **`0x1C38` first** as a direct proxy for `FEBECB38`; **`0x1C02` second** as Toyota-named **pre-slew Command Value Torque diagnostic state**; and **`0x1C3E` as a control** expected to stay quiet under the retained-drive moving-mode conditions. VAR-083 now gives `1C02` a stronger interpretation: its `CC62` source is physically relevant because the same value continues intra-function into `CC66/CC64`, even though the `AC56/EE40A/1C02` copy itself is the diagnostic sibling rather than the motor-driving `AC54/EE40C` branch. These reads can be synchronized with FRC `0x1601`/`0x1914`; none requires or authorizes steering output.
 
 Deterministic evidence is `data/generated/camry_8965F3307000_internal_assist_oracles.json`, generated by `tools/targets/camry/builders/build_camry_8965F3307000_internal_assist_oracles.py` and verified by `tests/targets/camry/verify_camry_8965F3307000_internal_assist_oracles.py`.
+
+### Processor-refresh recovery: target semantics and false-function cleanup
+
+The 2026-10-08 from-scratch processor/profile rebuild expands the current
+canonical graph to **7,178 functions**, all decompiled without failure and bound
+to the promoted normalized inventory. The additional 1,113 starts are improved
+analysis coverage, not 1,113 new firmware behaviors or vehicle observations.
+Only the exact-byte/dataflow closures below are promoted as new target knowledge.
+
+The refresh resolves four exact table targets that the
+previous project left as raw words.  The existing schedulers `0x3B3D0` and
+`0x3B478` pass state at `FEBE7040` / `FEBE704C`, identical `(0, 6)` count
+parameters at `0x2B5D0` / `0x2B5D4`, and callback tables `0x27F64` /
+`0x27F98` to the shared transition machine at `0x6AE7C`.  Stock bytes
+`0x2BB30=0` and `0x2BB34=0` select that machine rather than its reset path.
+`0x5EC24` and `0x5F610` invoke both schedulers under their existing
+mode-parameter gates.
+
+The newly recovered predicates are a paired exact-F33 command-magnitude
+monitor:
+
+| Predicate | Input | Reference | Raw threshold | Result |
+|---|---|---|---:|---|
+| `0x3B400` | `abs(int16(FEBE6772))` | `uint16(FEBE6F6E)` | `0x0780` | `0x22` when `abs(input)-reference >= 0x0780`, otherwise `0x11` |
+| `0x3B4A8` | `abs(int16(FEBE6772))` | `uint16(FEBE6F74)` | `0x0780` | same |
+
+Each predicate occupies callback slots 0 and 1 of its table.  Transition
+callback `0x3B434` calls `0x51C66(0x6E, 800)`, `0x545DE(3)`, and
+`0x51CF6(0, 800)`; paired callback `0x3B4DC` uses `(0x6D, 800)`, `2`, and
+`(1, 800)`.  This establishes internal state/diagnostic supervision of the
+same pre-slew Command Value Torque cell exposed by DID `0x1C02`.  It does
+**not** add an ingress, write `FEBE6772`, authorize steering, or establish an
+OEM name or engineering unit for either reference.
+The same refresh corrects three earlier B6 field bounds. `ADB0` has a third
+reader at `CA614`: IDs `0x19/0x1B` select `CAAA2`, which initializes sibling
+state `C6D8` from target-angle snapshot `AE90`. Signal267 snapshot `ADC2` is
+read by `CB0FC` as a sibling-state mode selector; signal271 snapshot `ADC1` is
+read by `CA558` in a readiness condition. These paths refine the application
+state model but do not add an ingress, an ID11-exclusive command writer, or an
+output authorization.
+
+The exact low-CodeFlash region `0x10000..0x17FFF` is now represented in the
+Camry Ghidra profile as non-executable calibration/metadata.  Firmware copies
+`0x10000..0x17DEF` to LocalRAM and never branches into it; treating its bytes
+as instructions had fabricated callsites at `0x10F02/0x10F06/0x10F0A` and
+three phantom function starts (`0xB21CA`, `0xB1406`, `0xC11D2`).  The
+partition removes those starts while retaining all four monitor callbacks
+above.
 
 
 ## 33. Exhaustive Bus-4 field census: no ordinary external CAN field reproduces as the steering carrier
@@ -2293,7 +2346,7 @@ same-function `CC62 -> CC66` value-flow. The physical command/current chain is:
 → `3835E/FEBE6DC8` + `384D8/FEBE6DD6`
 → downstream motor-control transform `38162`.
 
-The writer sets are narrow and mechanically pinned in the exact 6,065-function corpus.
+The writer sets are narrow and mechanically pinned in the current canonical corpus.
 `CC64` is written by `D047C` plus reset/clear `D01B4`; `AC54` by `D0AAE` plus reset;
 `EE40C` by `BF33E` plus reset; `6AF4` by `35C4C` plus the common state consolidator;
 `6E0A` by `387BA` plus consolidator; `6DEC` by `38502` plus consolidator; `6DC8` by
@@ -2393,7 +2446,7 @@ The direct vehicle observation remains evidence to explain, but it no longer dem
 ## 36. E1/E2 closure: computed STORE arithmetic and runtime DMAC destination provenance are clean
 
 VAR-085 executes the two falsifiers left open by §35 against the exact F33 image and the
-canonical **6,065-function** decompiler corpus. The reusable target-native resolver is
+current canonical decompiler corpus. The reusable target-native resolver is
 `ghidra/scripts/investigate/AuditComputedStoreTargets.java`. It works on HighFunction STORE
 pointer expressions, recovers conservative unsigned-32 address ranges through constants,
 casts, adds/subtracts, masks, shifts, multiplies, `PTRADD/PTRSUB`, and bounded PHIs, and
@@ -2401,9 +2454,9 @@ reports only target intersections that are not already represented by a canonica
 reference. Unknown/unbounded pointers are deliberately not converted into false certainty;
 that general memory-corruption class remains separate from E1/E2.
 
-**E1 — register-arithmetic STORE targets.** Across **13,183** recovered STORE operations,
-**4,701** have a statically bounded target range. Scanning the command/current/D0218 target
-set produces **100 candidate STORE rows in 46 functions** before exact runtime/configuration
+**E1 — register-arithmetic STORE targets.** Across **14,059** recovered STORE operations,
+**5,438** have a statically bounded target range. Scanning the command/current/D0218 target
+set produces **103 candidate STORE rows in 49 functions** before exact runtime/configuration
 bounds are applied. Every candidate collapses outside the target cell it only overlapped
 under the coarse range analysis:
 
@@ -4051,7 +4104,7 @@ Live READY-state values from the retained 2026-08-26 PE1 LocalRAM dump:
   the consistency checkers (`FUN_00035532` family) report clean;
 - the `A55A5AA5` marker family is intact at `FEBE6AAA`.
 
-The decisive census: over the 6,065-function canonical corpus, **45 functions
+The decisive census: over the current canonical corpus, **45 functions
 touch learned `FEBE6Axx` cells, 17 touch the `D0218` assist-funnel cells
 (`C43C/C4C0/C3BA/CC2C/BF3C/CB08/CB20/CC50/CC60`), and exactly zero touch
 both.** The learned-adaptation machinery and the assist funnel are disjoint
@@ -4830,7 +4883,7 @@ DLC audit in VAR-155.
 Using the bit-field definitions in Renesas `R01UH0585EJ0120` Rev.1.20 §§17.4.3,
 17.4.4 and 17.11.1 gives the exact timing below.  The test
 `tests/targets/camry/verify_camry_8965F3307000_canfd_timing.py` re-derives the constants from
-the canonical 6,065-function F33 corpus and verifies the arithmetic.
+the current canonical F33 corpus and verifies the arithmetic.
 
 | phase | F33 clock/divider | TSEG1 | TSEG2 | SJW | Tq/bit | bit rate | sample point |
 |---|---:|---:|---:|---:|---:|---:|---:|
@@ -5252,7 +5305,7 @@ The comparison therefore says nothing about EPS-side B6 composition.
 VAR-148 now answers that EPS-side question directly from CodeFlash instead. Accepted
 ID11 maps to `CB00=2`, its target-angle controller reaches `CB38`, and `D0218` adds
 `CB38` inside the ordinary EPS assist sum before the single shared `CC48 -> CC64`
-current-command funnel. An exhaustive 6,065-function selector/writer census finds no
+current-command funnel. An exhaustive current-corpus selector/writer census finds no
 ID11-exclusive replacement writer. Thus the receiver behavior is not merely
 "coexistence plausible": **ID11 B6 is structurally co-modulated with the ordinary EPS
 assist/current terms.**
@@ -5619,14 +5672,15 @@ AC54 -> EE40C` and into the motor/current-control side.  `D039E` retains the sha
 from measured/local rate state, not from the raw B6 target.
 
 The remaining escape hatches were exhaustively checked rather than inferred from this one
-path.  Across the complete **6,065-function** canonical F33 corpus, exactly **49 functions**
+path. Across the current canonical F33 corpus, exactly **49 functions**
 reference `CB00`. They are exhaustively partitioned, with no overlap or remainder, into
 **9 mode/mirror-status**, **28 controller/calibration/supervision**, **7 readiness/fault-supervision**,
 **2 bank-selection**, and **3 gain/output-shaping** functions. None directly reads or writes
 any of the final command-funnel cells.
-`ADB0` has exactly two runtime readers: `CEFFC` and `CB73A`.  `CB73A` is the one special
-transient capable of changing the ordinary sum, but its literal condition is
-**`ADB0 == 0x31`**, whereas ID11 is **`0x0B`**.  It therefore is not the ID11 path.  A
+`ADB0` has three runtime readers: `CEFFC`, `CB73A`, and `CA614`. `CEFFC` performs
+the normal ID-to-bank mapping. `CB73A` is the one special **`ADB0 == 0x31`**
+transient, whereas ID11 is **`0x0B`**. `CA614` handles the separate `0x19/0x1B`
+state-initialization path. None is an ID11-exclusive replacement writer. A
 complete direct-writer census of `CC48/CC4C/CC4E/CC60/CC50/CC62/CC64/AC54/EE40C` finds one
 runtime writer per stage plus reset/initialization writers and no later `CB00`- or
 `ADB0`-selected replacement writer.
@@ -5659,9 +5713,9 @@ selector reference and every direct writer of the shared command funnel.
 ## 66. Exact-F33 B6 end-to-end software gate closure: one 17-rung live discriminator (VAR-149)
 
 The remaining development-B6 problem is no longer usefully described as a single
-"SecOC acceptance" question.  Exact `8965F3307000` CodeFlash plus the complete
-6,065-function canonical corpus now close the recovered software path from the
-physical B6 receive descriptor through the motor-current model, including the
+"SecOC acceptance" question. Exact `8965F3307000` CodeFlash plus the current
+canonical corpus close the recovered software path from the physical B6 receive descriptor
+through the motor-current model, including the
 common EPS gates *after* the cooperative B6 controller.  This section joins the
 previously separate transport, SecOC, COM, controller-composition, and current-path
 proofs into one ordered execution map.
@@ -5727,17 +5781,17 @@ staging/snapshot:
 
 | signal | wire bits | snapshot / fate | exact downstream role |
 |---|---|---|---|
-| 261 | B3[5:0] | `ADB0` -> `CEFFC/CB73A` | **Target Lateral ID**; ID11 maps to `CB00=2` |
+| 261 | B3[5:0] | `ADB0` -> `CA614/CB73A/CEFFC` | **Target Lateral ID**; ID11 maps to `CB00=2`; IDs `0x19/0x1B` select a sibling-state initialization path |
 | 262 | B4:B5 s16BE | `AE90` -> `CBA80/CBB66/CCF0E/CEE7C` | target steering angle/controller input |
 | 263 | B6[7] | `ADDD` -> `CB664` | qualifies the **special `ADB0==0x31` transient only**; not a normal ID11 bank-admission requirement |
 | 264 | B6[6:4] | `ADB1` | snapshotted; zero runtime readers recovered |
 | 265 | B6[2] | `ADBB` -> `CDA20` | value `1` suppresses one controller term; `0` permits it |
 | 266 | B6[1:0] | stops at `F135` | no application snapshot/runtime reader recovered |
-| 267 | B7[7:6] | `ADC2` | snapshotted; zero runtime readers recovered |
+| 267 | B7[7:6] | `ADC2` -> `CB0FC` | sibling-state mode selector; value `2` selects its recovered alternate mode |
 | 268 | B7[5:0] | `ADBC` -> `CEC8A` | independent modulo-64 application sequence |
 | 269 | B8 | `ADBD` -> `CE3AA` | `/100` cooperative contribution percentage |
 | 270 | B9 | `ADBE` -> `CDFF8` | `/100` cooperative contribution percentage |
-| 271 | B10[7] | `ADC1` | snapshotted; zero runtime readers recovered |
+| 271 | B10[7] | `ADC1` -> `CA558` | sibling-state readiness companion; zero participates in the recovered readiness condition |
 | 272 | B10[5] | `ADE5` | snapshotted; zero runtime readers recovered |
 | 273 | B10[2:0] | `ADD9` -> `CFDA0` | health-qualified publication companion; no command-magnitude role recovered |
 
@@ -5749,8 +5803,9 @@ separate observable facts.
 
 The current fork's active sender is consistent with every recovered **normal-ID11** application-side
 requirement at opendbc `f207c273b645`: ID11; signed target angle in B4:B5;
-signal265=0; modulo-64 signal268; signals269/270=`100/100`; and the currently
-unconsumed/health-publication companions left zero. Signal263 is also zero, but exact
+signal265=0; modulo-64 signal268; signals269/270=`100/100`; signal267=0 leaves
+the sibling-state mode on its default path; signal271=0 participates in the
+recovered readiness condition; and the remaining secondary companions stay zero. Signal263 is also zero, but exact
 `CB664 -> C7B4 -> CB73A` closure now shows that bit only qualifies the separate
 `ADB0==0x31` transient; it is harmless here rather than an ID11 admission requirement.  The 28-byte zero template also
 keeps the non-extracted B3..B10 residual bits zero.  Its B6 application cadence is one
@@ -5771,7 +5826,7 @@ First, the cooperative controller itself does not guarantee a nonzero contributi
 therefore does not imply `CB38!=0`.
 
 Second, **`D0218` can omit `CB38` entirely**.  `BCBD8` snapshots internal
-`FEBEB112 -> FEBEAC2B`; exact internal APIs `B338C` and `B330A/B3314` set/clear that
+`FEBEB112 -> FEBEAC2B`; exact internal APIs `B338C` and `B330A` set/clear that
 state.  When `AC2B==0x5A`, `D0218` takes its reduced diagnostic/service branch
 `C4C0+C3BA+BF3C`.  Only the normal `AC2B!=0x5A`, `C7BF!=1` branch contains
 `clamp(CB38+C5EE)`.  The special `C7BF` transient is separately bound to literal
@@ -5816,7 +5871,7 @@ same `6AF4 -> 6E0A` current model. The recovered exact-F33 chain then reaches
 exact target-native **motor-current-model convergence**, not a new claim that the final
 TSG3 hardware PWM commit has been recovered target-natively for F33.
 
-The 6,065-function direct-writer census is exact from `CB00/CB20/CB38` through
+The current-corpus direct-writer census is exact from `CB00/CB20/CB38` through
 `CC48/CC4C/CC4E/CC60/CC50/CC62/CC66/CC64`, `AC54/EE40C`, and
 `6AF4/6E0A/6DEC/6DC8/6DD6`: each state has only the recovered runtime writer plus the
 known reset/init writer(s).  The gate-source censuses similarly close `AC2B/B112`,
@@ -5998,7 +6053,7 @@ that threshold.
 
 `AC2B==0x5A` is important because it makes `D0218` take the reduced branch that omits
 `CB38`. Its source is internal diagnostic/service state (`B112`, set by `B338C` and
-cleared by `B330A/B3314`). The recent retained routes do not show a command that asks for
+cleared by `B330A`). The recent retained routes do not show a command that asks for
 that service state: each of routes 37/3E/3F/45/48 contains only three single-frame EPS
 SID `0x3E` TesterPresent requests on `0x7A1`. There is no BA/service request in those
 routes that reaches the recovered `B338C` set path.
@@ -6305,11 +6360,11 @@ Machine-readable retained-session reductions are
 
 ## 69. Exact B6 ingress/source closure (VAR-153, CORR-186)
 
-The three real functions omitted from the canonical graph are now promoted from raw
-CodeFlash: receive-interrupt wrapper `0x71508` (170 bytes), generated-COM route callback
-`0x7D72C` (212 bytes), and normal CanIf receive callback `0x810F2` (204 bytes). This raises
-the current canonical denominator from 6,062 to **6,065** functions and inventory SHA-256
-to `ccbf09df3807942b67f21789c1068b2be2bc2eb12d71bc2bf349f06b8386496d`. It does not
+At the CORR-186 checkpoint, three real functions omitted from the then-canonical graph
+were promoted from raw CodeFlash: receive-interrupt wrapper `0x71508` (170 bytes),
+generated-COM route callback `0x7D72C` (212 bytes), and normal CanIf receive callback
+`0x810F2` (204 bytes). That checkpoint raised the denominator from 6,062 to **6,065**
+functions. The later processor refresh supersedes that denominator and inventory identity. It does not
 restore CORR-181's false `BCD66/CCFB6/CEE80` +4 child splits; those remain absent.
 
 The complete configured ingress path is now deterministic:

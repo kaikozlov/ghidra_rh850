@@ -71,7 +71,7 @@
         "subbus_sequence": "0x33"
       },
       "path": "data/generated/gtsplus_2026/camry_8965F3307000_emps_semantics.json",
-      "sha256": "f1e204b1eaed562e2c8ce5746df8792381e211f2deed013641657f7d96c7218c",
+      "sha256": "0714517d26befb64b16c505e5be568a8383f1ce13832a7220133076a0a9b31d8",
       "skid": {
         "bus_index": 32,
         "bus_name": "Bus 4",
@@ -117,7 +117,7 @@
     "0x0006A3BE": {
       "body_sha256": "227c8ab097ee8448e441c6a8c8095396e122c250996dc20b07fb2439646514b9",
       "body_size": 50,
-      "decompiled_c_sha256": "c936262574cf1980de74b136f1773cf7c705c9c0a49f60622ca98272d5a3a418",
+      "decompiled_c_sha256": "c0b4452a66f6fb1a34cfea339128dc14e76813585f9604da1d43f1a04534243f",
       "role": "legacy Toyota checksum dispatcher"
     },
     "0x0006A410": {
@@ -141,7 +141,7 @@
     "0x00079EDE": {
       "body_sha256": "c13bd6248633f1b6e69410a75cf6eef47fba52fb322f9723a3461d818df70383",
       "body_size": 56,
-      "decompiled_c_sha256": "1ee21db74bfb4654f8eb21d8ae7e171492ed4f6956471b22a5d08254a7962e86",
+      "decompiled_c_sha256": "e46df78f289f101ddaeedc2fa874da13793f96a08edd5311f3743fd7f882e27e",
       "role": "software Rx ring foreground drain aggregate"
     },
     "0x0007A232": {
@@ -159,49 +159,49 @@
     "0x0007D72C": {
       "body_sha256": "ab6c3514c592e1a007d7d38abf723d22b905037b3ae7132cdcc5c1c73ec5b239",
       "body_size": 212,
-      "decompiled_c_sha256": "2298e822ae2f6a42ba8d93c596af4c73201d673b78313b5e5e9482ad430780dc",
+      "decompiled_c_sha256": "ba786b971d3ac964fffff0f49111e32230c4bf80fadfff7a4391e108f1fdba93",
       "role": "generated-COM receive callback"
     },
     "0x00080884": {
       "body_sha256": "c0de6567d5050a5e20668ab20d35fc09b6858402f6313512122a466d388ce7a7",
       "body_size": 82,
-      "decompiled_c_sha256": "15c3d5f89dd74d56672d6bf4257b8d4e1753f5aa24aad17efe064ba6e5c25bc5",
+      "decompiled_c_sha256": "5c3876309b7aba9771e2f771122d805fcb8a2f3c4c51af8549534dbc91c33aaf",
       "role": "software Rx callback fanout"
     },
     "0x000808D6": {
       "body_sha256": "32d2a5120a17b88d913a27eb0458c8143cd62f3f663304dbd4bdf590c4865a7c",
       "body_size": 296,
-      "decompiled_c_sha256": "b57bff1416b958e4630441be8630a37c5b4fba3adf1825d8adc562892a171b72",
+      "decompiled_c_sha256": "582aa002d8afe874814f932beafeb8b51da2139b4c9f625c50d3f5a4a9846ef3",
       "role": "software Rx ring drain"
     },
     "0x000809FE": {
       "body_sha256": "ef763eddd79af93b61cb6d2ced5bfc34aa1dd6d23e97701d1e3b83606657e1ed",
       "body_size": 76,
-      "decompiled_c_sha256": "a90f76dfd6b5016839615a74d335f9630b64971eeaf97a089fd1f1a5b53ac6be",
+      "decompiled_c_sha256": "a3699733b4aefb6617a0a76ed0c3601e71bd1ec8f55330f90c43fe03537bf061",
       "role": "software Rx ring controller loop"
     },
     "0x00080A4A": {
       "body_sha256": "1766a98c93308777908f3ae71f2753385a001f094f7fe92475ebe91173269543",
       "body_size": 248,
-      "decompiled_c_sha256": "c17fa84be25e576de2ed5c8280407c505015d0d44aa9f75619ff10992409a25c",
+      "decompiled_c_sha256": "5d9f137c2b4ab0f03e05ee5804e9ef1db18385475171bd329d4c2d8a16447145",
       "role": "software Rx ring writer"
     },
     "0x00080B42": {
       "body_sha256": "d2ae5e4e46d9f7437fb93fc98c0482ed417b10c1bab71a59cea54bc44f131696",
       "body_size": 128,
-      "decompiled_c_sha256": "a42386b7fbac077a546bf07b8221d6077b127812fb083333049bb0cd2d84117d",
+      "decompiled_c_sha256": "9385d1364276ce3ca646923249799794bbf58aaa5516534e5c9fb29dbc839191",
       "role": "generic Rx admission/ring writer"
     },
     "0x000810F2": {
       "body_sha256": "b5cfa2ca048a5c88f3e0379d5c0b0288b58e3e30366d95d00355ec41ea37a452",
       "body_size": 204,
-      "decompiled_c_sha256": "8b750f991aa5fc6926cd40b3c67d9cf10cb12529b686bfaeebc4ce18c294ad65",
+      "decompiled_c_sha256": "0b2ee182e9cdfebf7c50801001df497886253972d69a72919aec0d804d310834",
       "role": "normal CanIf Rx callback"
     },
     "0x00081CA6": {
       "body_sha256": "2b7c5736393c68204635d71cf7306a67685445f4451aeae9f29516e75cdbb4f5",
       "body_size": 112,
-      "decompiled_c_sha256": "456b08d00ee23c39783b4d3cb169fefc641ec40b0edf1b623cc00b59ba76ae91",
+      "decompiled_c_sha256": "5ac6f1b17bf6c0c0cfface11d0d907cc1c0b0ad94e925ac36ff491f029020de8",
       "role": "PduR upper-route dispatcher"
     },
     "0x00081D16": {
@@ -213,7 +213,7 @@
     "0x00081D30": {
       "body_sha256": "10182dc0838fac121551d4dea3a9d10f19781b00a8d790c38c3e689f995154a7",
       "body_size": 172,
-      "decompiled_c_sha256": "a3691e5c637b257d16067bb003ee6df6182c8793d13dbea7171682397ee93515",
+      "decompiled_c_sha256": "d57d7b3299a9dc7a034c9a6a1a01974064eef050fecf763cf9b8fffc0405703d",
       "role": "PduR lower-route dispatcher"
     },
     "0x00083CE4": {
@@ -231,19 +231,19 @@
     "0x00083E0C": {
       "body_sha256": "4be598c25cb77a04f365b0285d4f77255bb0e39d499b6df171f48223357049f3",
       "body_size": 206,
-      "decompiled_c_sha256": "493acad25a3c9526885edec2ab130c2a7e15c960f326325575e2e6a2f9cb1879",
+      "decompiled_c_sha256": "fc40ce38d035cb3727bec35bc1eeb3c9ec0406e95eae117e3329f8afe1dbe45a",
       "role": "RSCFD FIFO drain"
     },
     "0x00083EDA": {
       "body_sha256": "1fadb1ab277e22a8f906d430cd26b5c897cff0459461578654da9a2ad02e7263",
       "body_size": 24,
-      "decompiled_c_sha256": "51f2dcc81a7967f29a7cb0c0892812d28844ef9711dad2efdb760f1f1106c614",
+      "decompiled_c_sha256": "06f40e49bb18de5ad832c2289d3dd16011ad3628c64ba467d44501fb00899bad",
       "role": "RSCFD group receive wrapper"
     },
     "0x000847A4": {
       "body_sha256": "c547bafb72d3b9e29161df03317926141e8396936c00c1610931d4e9c9e2a5e6",
       "body_size": 120,
-      "decompiled_c_sha256": "c30f333cf6b9a8a4fd9a14aebc03d5bd8caf0b2731f7f13d1ab48770bfba1ad7",
+      "decompiled_c_sha256": "42816576b4e9fdaecafa822d268f69021432880d2c339a2e59aebbdfbda6dfb5",
       "role": "RSCFD global acceptance-filter programmer"
     },
     "0x0008E772": {
@@ -279,7 +279,7 @@
     "0x0008ED8E": {
       "body_sha256": "e6c911e4b184c893852edc5bdb6d4def70c576e874c9ad9882dbe9e03ca58697",
       "body_size": 88,
-      "decompiled_c_sha256": "18c75c67e26409b64a3b6705c8639b2fdfba114b03f3172e6bbbba123032cbba",
+      "decompiled_c_sha256": "e8bb8fed4db2363f1bc10a04e5edc8c412d0b1097c3ae8aeb86f15d10b4c4a99",
       "role": "opposite queue-family public ingress"
     },
     "0x0008EE7C": {
@@ -291,7 +291,7 @@
     "0x0008EF84": {
       "body_sha256": "5e77a544e80caf61935cef232d3c1bbbb5bb89a1fb1dfa6ede4cde694629fbcc",
       "body_size": 66,
-      "decompiled_c_sha256": "c00f5e037bf587dbb28b17acf93e426510041f1b1569eac7420e0dd1d9b77e8e",
+      "decompiled_c_sha256": "a0c0d97b5d70bafeaf9f641008a0c9b95e181247a72b58667c02f0c835b529c7",
       "role": "SecOC receive queue consumer loop"
     },
     "0x0008EFF8": {
@@ -321,7 +321,7 @@
     "0x0008F746": {
       "body_sha256": "4cb7b08ada0b7e058aed4e9f44083b931a920427548e6d29abeb4f523e4fd1b7",
       "body_size": 396,
-      "decompiled_c_sha256": "93cb772b5edb0033fc06c733ff3d68ec4fa7403a602d6276fbec6b38e30013a9",
+      "decompiled_c_sha256": "e9a646c79a017e031eb6be6588769d797a77a959e9059b1a9eba2cc34799c8cb",
       "role": "SecOC freshness/auth verification coordinator"
     },
     "0x0008F906": {
@@ -339,7 +339,7 @@
     "0x0008FABA": {
       "body_sha256": "e937244dfdbef8ec132299da455ddf9d6f5ff5cad5defed1b0485592a3b4aefd",
       "body_size": 152,
-      "decompiled_c_sha256": "4de42c4237abe4911dd800b2bd85feca410e7f47d131ccae5240faae2c872e8c",
+      "decompiled_c_sha256": "e70e87c8353c5c41320cd62a41454c90a5873ebabf583d0337a3259a53031131",
       "role": "opposite queue-family insertion helper"
     },
     "0x00090204": {
@@ -537,8 +537,8 @@
     "Joined to the Sep-10 ID63 marker experiment, the direct Panda B6 disappears before successful F33 controller1 decode/CanIf admission while native B6 continues to reach the same family1/profile2 queue."
   ],
   "target": {
-    "canonical_function_count": 6065,
-    "canonical_inventory_sha256": "ccbf09df3807942b67f21789c1068b2be2bc2eb12d71bc2bf349f06b8386496d",
+    "canonical_function_count": 7178,
+    "canonical_inventory_sha256": "9a8f80dfff2237d1aa6a4af26a7e4adfd5152f586ba38d5dae2c592f40627322",
     "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
     "software_id": "8965F3307000"
   }
