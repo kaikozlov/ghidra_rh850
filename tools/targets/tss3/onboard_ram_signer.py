@@ -6,21 +6,22 @@ import argparse
 import hashlib
 import json
 import subprocess
-import sys
 import tempfile
 from pathlib import Path
 from typing import Any
 
 from exploit.ephemeral_runtime.build_tss3_request_signer import (
-        STATE_MAGIC,
-        STATE_VERSION,
-        STAGING_BASE,
-        STAGING_LIMIT,
-        build_request_signer,
+    STAGING_BASE,
+    STAGING_LIMIT,
+    STATE_MAGIC,
+    STATE_VERSION,
+    build_request_signer,
 )
+from exploit.ram_runtime.target_profiles import registered_targets
 from exploit.ram_runtime.tss3_request_signer_contract import (
-    ContractError,
     HELPER_TRANSIT_BASE,
+    ContractError,
+    probe_request_signer_contract,
 )
 from tools import REPO_ROOT
 from tools.rh850_codeflash import (
@@ -32,6 +33,7 @@ from tools.rh850_codeflash import (
     run as run_codeflash_sim,
 )
 from tools.security.build_ephemeral_runtime_manifest import is_jarl22, jarl22_target
+from tools.targets.tss3.request_signer_machine import verify_request_signer_target
 
 ROOT = REPO_ROOT
 CACHE_PUBLICATION = bytes.fromhex("1f001c00")  # syncp; synci
@@ -292,27 +294,41 @@ def onboard(image_path: Path, output_dir: Path | None = None) -> tuple[dict[str,
     if output_dir is not None:
         _require_empty(out)
 
+    probe = probe_request_signer_contract(image)
+    capabilities = {
+        "schema": probe["schema"],
+        "compatible": probe["compatible"],
+        "components": probe["components"],
+    }
+    if not probe["compatible"]:
+        unresolved = next(
+            (name, row)
+            for name, row in probe["components"].items()
+            if row["status"] == "missing-or-ambiguous"
+        )
+        report = {
+            "schema": "tss3-request-signer-onboarding-v1",
+            "codeflash": {"path": str(image_path), "sha256": digest, "size": len(image)},
+            "status": "not-proven-compatible",
+            "reason": f"{unresolved[0]}: {unresolved[1]['reason']}",
+            "capabilities": capabilities,
+        }
+        (out / "report.json").write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
+        return report, 1
+
     build_dir = out / "build"
     profile_path = build_dir / "resolved_request_signer_profile.json"
     try:
         metadata = build_request_signer(
             codeflash=image_path, output_dir=build_dir, stem="resolved_request_signer",
         )
-    except ContractError as exc:
-        report = {
-            "schema": "tss3-request-signer-onboarding-v1",
-            "codeflash": {"path": str(image_path), "sha256": digest, "size": len(image)},
-            "status": "not-proven-compatible",
-            "reason": str(exc),
-        }
-        (out / "report.json").write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
-        return report, 1
-    except (OSError, RuntimeError, ValueError, subprocess.SubprocessError) as exc:
+    except (ContractError, OSError, RuntimeError, ValueError, subprocess.SubprocessError) as exc:
         report = {
             "schema": "tss3-request-signer-onboarding-v1",
             "codeflash": {"path": str(image_path), "sha256": digest, "size": len(image)},
             "status": "candidate-build-failed",
             "reason": str(exc),
+            "capabilities": capabilities,
         }
         (out / "report.json").write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
         return report, 1
@@ -323,6 +339,7 @@ def onboard(image_path: Path, output_dir: Path | None = None) -> tuple[dict[str,
         "codeflash": {"path": str(image_path), "sha256": digest, "size": len(image)},
         "identity": contract["identity"],
         **metadata["compatibility"],
+        "capabilities": capabilities,
         "resolved_profile": "build/resolved_request_signer_profile.json",
         "artifacts": {
             "metadata": "build/resolved_request_signer.json",
@@ -343,6 +360,37 @@ def onboard(image_path: Path, output_dir: Path | None = None) -> tuple[dict[str,
         report["reason"] = str(exc)
         (out / "report.json").write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
         return report, 1
+
+    registered_target = next(
+        (
+            name
+            for name, target in registered_targets().items()
+            if target["codeflash_sha256"] == digest
+        ),
+        None,
+    )
+    if registered_target is None:
+        report["machine_verification"] = {
+            "status": "not-run-unregistered-analysis-target",
+            "reason": (
+                "dynamic contract, candidate build, and GNU simulation passed; "
+                "P1M-E execution requires registered exact MCU/project metadata"
+            ),
+        }
+    else:
+        try:
+            report["machine_verification"] = verify_request_signer_target(
+                target=registered_target,
+                contract=contract,
+                output_dir=out / "machine",
+            )
+        except (OSError, RuntimeError, ValueError) as exc:
+            report["status"] = "machine-verification-failed"
+            report["reason"] = str(exc)
+            (out / "report.json").write_text(
+                json.dumps(report, indent=2, sort_keys=True) + "\n",
+            )
+            return report, 1
     (out / "report.json").write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
     return report, 0
 

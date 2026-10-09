@@ -14,6 +14,7 @@ from exploit.ephemeral_runtime import tss3_request_signer_compact as compact_hos
 from exploit.ram_runtime.target_profiles import registered_specs, spec_from_codeflash
 from exploit.ram_runtime.tss3_request_signer_contract import (
     ContractError,
+    probe_request_signer_contract,
     resolve_request_signer_contract,
 )
 from tools import REPO_ROOT
@@ -130,11 +131,32 @@ except RuntimeError:
 else:
     raise AssertionError("universal profile table accepted an ambiguous selector")
 print("PASS universal profile table rejects an ambiguous selector")
+for target, spec in SPECS.items():
+    probe = probe_request_signer_contract(spec["image"].read_bytes())
+    check(
+        f"{target} exposes every dynamically required signer component",
+        probe["compatible"]
+        and probe["contract"]["codeflash_sha256"] == spec["sha256"]
+        and all(
+            row["status"] == "resolved"
+            for row in probe["components"].values()
+        ),
+    )
+
 
 damaged_image = bytearray(SPECS[CAMRY_TARGET]["image"].read_bytes())
 camry_contract = SPECS[CAMRY_TARGET]["contract"]
 freshness_address = camry_contract["signer_abi"]["freshness_encode"]
 damaged_image[freshness_address:freshness_address + 16] = b"\0" * 16
+damaged_probe = probe_request_signer_contract(bytes(damaged_image))
+check(
+    "capability probe preserves independent results after signer ABI damage",
+    not damaged_probe["compatible"]
+    and damaged_probe["components"]["identity"]["status"] == "resolved"
+    and damaged_probe["components"]["request"]["status"] == "resolved"
+    and damaged_probe["components"]["signer_abi"]["status"] == "missing-or-ambiguous"
+    and damaged_probe["components"]["memory"]["status"] == "blocked",
+)
 try:
     resolve_request_signer_contract(bytes(damaged_image))
 except ContractError:

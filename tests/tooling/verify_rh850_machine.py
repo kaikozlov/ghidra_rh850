@@ -8,7 +8,9 @@ import subprocess
 import tempfile
 from pathlib import Path
 
+from exploit.ram_runtime.target_profiles import supported_targets, target_spec
 from tools import REPO_ROOT
+from tools.targets.tss3.request_signer_machine import verify_request_signer_target
 
 FIXTURE_ROOT = REPO_ROOT / "tests/fixtures/rh850/machine"
 PORTABLE_STORE_SELECTOR = {
@@ -80,6 +82,29 @@ def check_exact_scenarios(output_root: Path) -> None:
                 f"PASS {target}/{scenario_path.name}: {report['status']}, "
                 f"entry={resolution['resolved_address']}, "
                 f"{report['instruction_count']} exact instructions"
+            )
+
+def check_dynamic_request_signer_targets(output_root: Path) -> None:
+    for target in supported_targets():
+        spec = target_spec(target)
+        result = verify_request_signer_target(
+            target=target,
+            contract=spec["contract"],
+            output_dir=output_root / "dynamic-request-signer" / target,
+        )
+        if result["codeflash_sha256"] != spec["sha256"]:
+            raise AssertionError(f"{target}: dynamic machine verification image drift")
+        if result["scenario_count"] != 8:
+            raise AssertionError(f"{target}: dynamic machine scenario count drift")
+        for row in result["scenarios"]:
+            resolution = row["entry_resolution"]
+            if row["status"] != "verified-local-execution":
+                raise AssertionError(f"{target}/{row['name']}: execution status drift")
+            if resolution["candidate_count"] != 1:
+                raise AssertionError(f"{target}/{row['name']}: entry resolution is ambiguous")
+            print(
+                f"PASS {target}/{row['name']}: entry={resolution['resolved_address']}, "
+                f"{row['instruction_count']} exact instructions"
             )
 
 
@@ -481,6 +506,7 @@ def main() -> int:
     with tempfile.TemporaryDirectory(prefix="verify-rh850-machine-", dir=REPO_ROOT / "build/tmp") as tmp:
         output_root = Path(tmp)
         check_exact_scenarios(output_root)
+        check_dynamic_request_signer_targets(output_root)
         check_schema_rejection(output_root)
         check_executable_overlay_rejection(output_root)
         check_fault_check_error_boundary(output_root)

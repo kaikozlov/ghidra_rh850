@@ -443,21 +443,30 @@ command before adding registry metadata:
 tools/toyota ram onboard path/to/CodeFlash.bin
 ```
 
-The command recovers the runtime selector identity, boot transition, scheduler,
-RX ring, signer ABI, private-memory layout, and MPU transit permission directly
-from that dump. It reports whether the registered universal profile table
-already contains the exact selector/config row; a missing row is inserted into
-that candidate build before compilation. The compiled simulator ELF is reused
-for separate clean-process fallback and timer-bounded idle executions against
-the supplied image. The retained result contains `report.json`, the resolved
-profile and build artifacts under `build/`, one simulator ELF, and per-scenario
-output under a unique `build/out/ram-runtime/onboard/` directory.
+The command resolves and reports `geometry`, selector identity, boot transition,
+scheduler, RX ring and functional acceptance rule, native receive/foreground
+path, signer ABI, private-memory layout, and MPU transit permission directly
+from that dump. Components are reported independently as `resolved`,
+`missing-or-ambiguous`, or `blocked`; a required failure means “not proven
+compatible,” not proof that the firmware can never support the approach.
 
-Resolution is deliberately fail-closed. Missing or ambiguous machine evidence
-means “not proven compatible,” not proof that the firmware can never support
-the approach. CodeFlash cannot supply Panda logical-bus routing or prove
-ICU-S/RSCFD, MPU enforcement, cache publication, interrupt, or timing behavior;
-those remain registry/bench qualification inputs.
+It then reports whether the registered universal profile table already contains
+the exact selector/config row; a missing row is inserted into that candidate
+build before compilation. The compiled simulator ELF is reused for separate
+clean-process fallback and timer-bounded idle executions against the supplied
+image. For an exact registered target, onboarding also generates the same eight
+target-neutral P1M-E scenarios from the resolved contract and executes TAUJ,
+freshness, request publication, native `0x777` receive→foreground, response
+transmit, and ICU-S submit/input/output behavior. An otherwise compatible
+unregistered image reports `not-run-unregistered-analysis-target` until exact
+MCU/project metadata is registered.
+
+The retained result contains `report.json`, the resolved profile and build
+artifacts under `build/`, GNU simulator outputs under `simulation/`, and, where
+registered, generated scenarios plus one P1M-E report each under `machine/`.
+These checks do not establish Panda logical-bus routing, provisioned ICU-S
+cryptography, cache publication, silicon MPU enforcement, cycle timing, or
+vehicle behavior; those remain registry/bench/vehicle qualification inputs.
 
 ```bash
 # Build one target. Without --out, output is under build/out/ram-runtime/TARGET/.
@@ -498,7 +507,8 @@ bytes. Run only the gate that owns the changed behavior:
 tools/test tss3_request_signer
 
 # retained RH850 regressions: compiler ABI, device model, source-to-result
-# payload tests, CodeFlash simulation, and exact registered-firmware scenarios
+# payload tests, CodeFlash simulation, and dynamically resolved signer scenarios
+# on every registered target
 tools/test rh850
 
 # ram_exec boot-identity transitions (transient F181, exact-boot handoff)

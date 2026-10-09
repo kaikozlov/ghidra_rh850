@@ -61,14 +61,34 @@ def _require_list(value: Any, context: str) -> list[Any]:
 def _validate_entry(entry: Any, context: str) -> dict[str, Any]:
     if not isinstance(entry, dict):
         raise P1MEMachineError(f"{context}: expected an object")
+    scope = entry.get("scope")
+    if scope == "resolved-address":
+        _require_keys(
+            entry,
+            allowed={"role", "scope", "address"},
+            required={"role", "scope", "address"},
+            context=context,
+        )
+        try:
+            address = int(entry["address"], 0)
+        except (TypeError, ValueError) as exc:
+            raise P1MEMachineError(
+                f"{context}.address: expected an integer string",
+            ) from exc
+        if not 0 <= address <= 0xFFFFFFFF:
+            raise P1MEMachineError(f"{context}.address: outside 32-bit address space")
+        return entry
+
     allowed = {
         "role", "scope", "shape_sha256", "instruction_count", "body_size",
         "offset", "requirements",
     }
     required = {"role", "scope", "shape_sha256", "instruction_count", "body_size"}
     _require_keys(entry, allowed=allowed, required=required, context=context)
-    if entry["scope"] not in {"function", "instructions"}:
-        raise P1MEMachineError(f"{context}.scope: expected function or instructions")
+    if scope not in {"function", "instructions"}:
+        raise P1MEMachineError(
+            f"{context}.scope: expected function, instructions, or resolved-address",
+        )
     digest = entry["shape_sha256"]
     if not isinstance(digest, str) or len(digest) != 64:
         raise P1MEMachineError(f"{context}.shape_sha256: expected 64 hex characters")

@@ -249,6 +249,7 @@ public class RunP1MEMachine extends GhidraScript {
     static final class EntrySelector {
         String role;
         String scope;
+        String address;
         String shape_sha256;
         int instruction_count;
         int body_size;
@@ -594,18 +595,19 @@ public class RunP1MEMachine extends GhidraScript {
         }
 
         void initializeProcessorReset(PcodeThread<byte[]> thread) {
-            Map<String, Long> resetValues = Map.of(
-                "PSW", 0x20L,
-                "MCTL", 0L,
-                "MPM", 0L,
-                "ASID", 0L,
-                "ISPR", 0L,
-                "PMR", 0L,
-                "INTCFG", 0L,
-                "ICSR", 0L,
+            Map<String, Long> resetValues = Map.ofEntries(
+                Map.entry("PSW", 0x20L),
+                Map.entry("FPEC", 0L),
+                Map.entry("MCTL", 0L),
+                Map.entry("MPM", 0L),
+                Map.entry("ASID", 0L),
+                Map.entry("ISPR", 0L),
+                Map.entry("PMR", 0L),
+                Map.entry("INTCFG", 0L),
+                Map.entry("ICSR", 0L),
                 // SLEIGH-internal monitor state: a fresh machine has no reservation.
-                "ll_addr", 0L,
-                "ll_valid", 0L
+                Map.entry("ll_addr", 0L),
+                Map.entry("ll_valid", 0L)
             );
             for (Map.Entry<String, Long> row : resetValues.entrySet()) {
                 Register register = language.getRegister(row.getKey());
@@ -1583,8 +1585,40 @@ public class RunP1MEMachine extends GhidraScript {
 
     private ResolvedEntry resolveEntry(
             EntrySelector selector, byte[] codeflash, long imageBase) throws Exception {
-        if (selector == null || selector.role == null || selector.role.isBlank()
-                || selector.shape_sha256 == null || selector.shape_sha256.length() != 64
+        if (selector == null || selector.role == null || selector.role.isBlank()) {
+            throw new IllegalArgumentException("entry selector is incomplete");
+        }
+        if ("resolved-address".equals(selector.scope)) {
+            if (selector.address == null) {
+                throw new IllegalArgumentException("resolved entry selector has no address");
+            }
+            long resolved = parseUnsigned(selector.address);
+            if (resolved < imageBase || resolved >= imageBase + codeflash.length) {
+                throw new IllegalArgumentException(
+                    "resolved entry leaves CodeFlash: " + hex32(resolved));
+            }
+            Instruction instruction = currentProgram.getListing().getInstructionAt(
+                currentProgram.getLanguage().getDefaultSpace().getAddress(resolved));
+            if (instruction == null) {
+                throw new IllegalArgumentException(
+                    "resolved entry is not an instruction: " + hex32(resolved));
+            }
+            int offset = Math.toIntExact(resolved - imageBase);
+            String instructionHash = sha256(Arrays.copyOfRange(
+                codeflash, offset, offset + instruction.getLength()));
+            JsonObject proof = new JsonObject();
+            proof.addProperty("role", selector.role);
+            proof.addProperty("scope", selector.scope);
+            proof.addProperty("source", "dump-resolved runtime contract");
+            proof.addProperty("candidate_count", 1);
+            proof.addProperty("base_address", hex32(resolved));
+            proof.addProperty("offset", 0);
+            proof.addProperty("resolved_address", hex32(resolved));
+            proof.addProperty("matched_code_sha256", instructionHash);
+            proof.addProperty("entry_instruction_sha256", instructionHash);
+            return new ResolvedEntry(resolved, proof);
+        }
+        if (selector.shape_sha256 == null || selector.shape_sha256.length() != 64
                 || selector.instruction_count <= 0 || selector.body_size <= 0) {
             throw new IllegalArgumentException("entry selector is incomplete");
         }
@@ -1891,12 +1925,17 @@ public class RunP1MEMachine extends GhidraScript {
             "stop_addresses", "registers", "memory", "pre_reset_memory", "artifacts", "checks",
             "expected_fault", "reset", "events"), "scenario");
         JsonObject entry = scenarioJson.getAsJsonObject("entry");
-        requireKeys(entry, Set.of("role", "scope", "shape_sha256", "instruction_count",
-            "body_size", "offset", "requirements"), "entry selector");
-        JsonArray requirements = entry.getAsJsonArray("requirements");
-        for (JsonElement element : requirements) {
-            requireKeys(element.getAsJsonObject(),
-                Set.of("index", "mnemonic", "operand", "scalar"), "entry requirement");
+        if ("resolved-address".equals(entry.get("scope").getAsString())) {
+            requireKeys(entry, Set.of("role", "scope", "address"), "entry selector");
+        }
+        else {
+            requireKeys(entry, Set.of("role", "scope", "shape_sha256", "instruction_count",
+                "body_size", "offset", "requirements"), "entry selector");
+            JsonArray requirements = entry.getAsJsonArray("requirements");
+            for (JsonElement element : requirements) {
+                requireKeys(element.getAsJsonObject(),
+                    Set.of("index", "mnemonic", "operand", "scalar"), "entry requirement");
+            }
         }
     }
 

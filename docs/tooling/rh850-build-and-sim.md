@@ -134,16 +134,21 @@ The machine has one owner for each layer:
 3. `data/analysis_targets.json` supplies exact MCU, processor language,
    CodeFlash identity, and optional DataFlash identity. It is not a capability
    whitelist.
-4. A scenario supplies external state, a target-independent structural
-   firmware-role selector, stop addresses, checks, optional hash-bound RAM
-   artifacts, and instruction-boundary external events. `gpr_fill` states the
-   general-register baseline once; `registers` contains overrides and
-   system-register state. `pre_reset_memory` exercises reset retention/clearing.
-5. `RunP1MEMachine.java` resolves each role uniquely from the selected analyzed
-   firmware, records the structural and exact-byte proof, composes the machine
-   with `PcodeEmulator`, and enforces execute/read/write policy before each
-   operation. One target session loads immutable images and model data once,
-   then runs each scenario with fresh emulator state.
+4. Retained device-model regression scenarios supply external state, a
+   target-independent structural firmware-role selector, stop addresses, checks,
+   optional hash-bound RAM artifacts, and instruction-boundary external events.
+   The maintained request signer does not use target-owned compatibility
+   scenarios: the raw-dump resolver inventories its required roles and state,
+   then materializes the same target-neutral functional scenarios for every
+   registered image. `gpr_fill` states the general-register baseline once;
+   `registers` contains overrides and system-register state.
+   `pre_reset_memory` exercises reset retention/clearing.
+5. `RunP1MEMachine.java` resolves structural roles uniquely or accepts an
+   address already resolved from the exact dump-bound runtime contract. It
+   records the structural or contract-derived exact-byte proof, composes the
+   machine with `PcodeEmulator`, and enforces execute/read/write policy before
+   each operation. One target session loads immutable images and model data
+   once, then runs each scenario with fresh emulator state.
 6. Reports embed the resolved run contract, external inputs, explicit termination
    reason, check results, fault provenance, and a bounded recent-PC window.
    An output-inspection fault becomes a failed check with a structured `error`
@@ -162,11 +167,11 @@ device-model runtime.
 
 ```mermaid
 flowchart LR
-  Target["analysis_targets.json<br/>exact image + MCU identity"] --> Resolver["unique firmware-role resolver"]
-  Scenario["scenario-v2<br/>shape + state + checks"] --> Resolver
+  Target["analysis_targets.json<br/>exact image + MCU identity"] --> Resolver["raw-dump component resolver"]
+  Resolver --> Scenario["target-neutral scenarios<br/>resolved state + checks"]
   RDL["p1me.rdl<br/>manual + recovered evidence layers"] --> Projection["generated machine JSON"]
   SLEIGH["RH850G3M SLEIGH<br/>CPU + system registers"] --> Emulator["PcodeEmulator"]
-  Resolver --> Contract["resolved run contract<br/>shape + exact-byte proof"]
+  Scenario --> Contract["resolved run contract<br/>exact-image-bound entries"]
   Contract --> Emulator
   Projection --> Emulator
   Emulator --> Policy["memory / alignment / MPU policy"]
@@ -187,7 +192,7 @@ flowchart LR
 |FACI / CodeFlash|CodeFlash fetches execute from immutable registered image bytes. Scenario overlays and ordinary writes are rejected. Only the exact status-clear command has a modeled FACI transition.|Bounded implementation. Unsupported FACI commands fault before side effects; erase/program, protection, sequencer timing, and cache-coherency behavior remain unimplemented.|
 |ICU-S|Expose only recovered registers and exact command-five/callback transitions. Treat supplied output words as scenario state, not generated cryptography.|Implemented within that recovered boundary. No provisioned-key or AES-CMAC silicon claim.|
 |Integration|Expose model generation through `tools/rh850 model update` and `tools/rh850 model check`, and batched execution through `tools/rh850 test firmware`; bind identity through the existing target registry; retain one JSON report per scenario under `build/out/`.|Implemented. No parallel capability manifest, target whitelist, project lifecycle, backend selector, or legacy CLI alias exists.|
-|Verification|Discover target-owned scenarios deterministically and require unique role resolution before exact-byte execution; retain instruction fixtures and negative machine cases.|`tools/test rh850_firmware` runs the machine gate. `make verify-processor` now requires it after the synthetic instruction fixture, before optional working-project audits. GNU simulation remains an independent backend.|
+|Verification|Resolve every signer component from raw bytes and generate one functional scenario set for every registered signer target; retain target-specific fixtures only for device-model regression and negative cases.|`tools/test rh850_firmware` runs all generated signer scenarios on Camry, Crown, and both Corolla images, then the retained machine-boundary fixtures. `make verify-processor` requires this gate after the synthetic instruction fixture. GNU simulation remains an independent backend and raw-image build check.|
 
 Progress:
 
@@ -200,7 +205,8 @@ Progress:
   INTC-register, and recovered ICU-S paths required by retained scenarios.
 - [x] Add exact-firmware and negative regression scenarios and CLI integration.
 - [x] Add manual-backed EIINT arbitration/entry/return, explicit TAUJ clock
-  progression, and an exact Camry receive-to-foreground scenario.
+  progression, and dump-resolved request receive-to-foreground execution across
+  every registered signer target.
 - [ ] Add mutating FACI commands and CodeFlash coherency only with an exact
   programming path and byte-level postconditions.
 - [ ] Extend peripherals and instruction tests incrementally from failing exact
@@ -228,21 +234,64 @@ Check that all projections match the source without rewriting them:
 tools/rh850 model check
 ```
 
-Run one or more deterministic scenarios by registered target name:
+### Raw-image signer compatibility and generated scenarios
+
+The signer onboarding command is the compatibility entry point:
+
+```bash
+tools/toyota ram onboard path/to/CodeFlash.bin
+```
+
+It does not select a vehicle-named scenario set. The raw-byte resolver reports
+`geometry`, `identity`, `execution`, `boot`, `request`, `receive`, `signer_abi`,
+`memory`, and `mpu` independently as `resolved`, `missing-or-ambiguous`, or
+`blocked`. A complete dump is classified as `covered-by-current-build` when its
+runtime selector and resolved configuration already match the universal build,
+or `compatible-profile-missing` when the same payload can be rebuilt with one
+additional profile. Any missing or ambiguous required part fails closed before
+compilation.
+
+The command builds that resolved candidate and runs the two exact-image GNU
+simulations. When the image hash belongs to a registered analysis target, it
+also generates and runs the same P1M-E functional suite from the resolved
+contract. An otherwise compatible unregistered image retains a successful
+candidate build/GNU result but reports
+`not-run-unregistered-analysis-target` for the P1M-E layer: exact MCU and
+analyzed-project metadata must be registered before Ghidra execution.
+
+The generated suite has no calibration-named JSON inputs:
+
+|Domain|Dynamic source|Checked execution|
+|---|---|---|
+|TAUJ0 setup|resolved mode initializer|native mode and prescaler stores|
+|Freshness|resolved signer ABI|native four-bit encoder input, output, and length|
+|Request publication|resolved producer, ring base, and cursors|five-word record, cursor advance, `SYNCP`|
+|Request receive→foreground|resolved `0x777` rule/label, state gates, foreground, INTBP vector, and post-drain stop|TAUJ underflow, FIFO5, IRQ187 entry/`EIRET`, exact ring record, foreground consumption|
+|Response transmit|structural RSCFD role plus resolved `gp`/`tp` and response ID|buffer-16 identifier/data and transmit request|
+|ICU-S submit|structural command-five role plus dump-relative engine globals|validated command submission and in-flight state|
+|ICU-S input callback|structural callback role plus dump-relative input state|four input words and acknowledgement|
+|ICU-S output callback|structural callback role plus dump-relative output state|four supplied output words, cursor advance, and acknowledgement|
+
+`tools/test rh850_firmware` requires those eight scenarios to pass on every
+registered signer target: Camry, Crown, Corolla F, and Corolla H. Target-owned
+fixtures under `tests/fixtures/rh850/machine/` are retained only for
+device-model boundaries and negative behavior, not as a target compatibility
+matrix.
+
+Individual retained model scenarios remain available by registered target:
 
 ```bash
 tools/rh850 test firmware camry-8965F3307000 \
-  tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_can_foreground.json \
-  tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_rscfd_tx.json
+  tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_faci_command.json \
+  tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_application_reset.json
 ```
 
-The command writes one report per scenario. Each report embeds the resolved run
-contract: unique candidate count, resolved entry, structural signature, exact
-matched-code hash, exact entry-instruction hash, image/model identities, initial
-state contract, stop addresses, checks, and termination reason. Scenario RAM
-initialization is explicit; RAM artifacts require SHA-256 identities.
-Unsupported fields and all attempts to initialize registered
-CodeFlash/DataFlash directly are rejected before execution.
+Each report embeds the resolved run contract: unique candidate count or
+dump-contract source, resolved entry, exact entry-instruction hash,
+image/model identities, initial state, stop addresses, checks, termination,
+and bounded recent-PC context. Scenario RAM initialization is explicit; RAM
+artifacts require SHA-256 identities. Unsupported fields and attempts to
+initialize registered CodeFlash/DataFlash directly are rejected.
 
 External `events` require `kind`, nonnegative `after_instructions`, and
 `evidence`. Supported kinds:
@@ -250,94 +299,23 @@ External `events` require `kind`, nonnegative `after_instructions`, and
 - `clock`: positive `p_bus_cycles`; advances enabled modeled TAUJ channels.
 - `can-rx`: `fifo`, `boundary: "post-filter"`, `can_id`, and `data_hex`;
   optional `fd`, `extended`, 12-bit `label`, and 16-bit `timestamp`.
-  Classical lengths are 0–8; FD additionally permits 12/16/20/24/32/48/64 bytes.
-  Label/timestamp are explicit accepted-message metadata, not recovered by a
-  simulated filter or timestamp clock.
+  Classical lengths are 0–8; FD additionally permits 12/16/20/24/32/48/64
+  bytes. Label/timestamp are explicit accepted-message metadata, not recovered
+  by a simulated filter or timestamp clock.
 - `interrupt`: `channel`; requests a modeled EIC source. Unknown/reserved
   channels fail closed.
 
 Stop addresses are terminal: events scheduled after reaching a stop are not
 executed. Unsupported modes and missing state remain faults.
 
-
-The default functional profile establishes instruction, register, memory, and
+The functional profile establishes instruction, register, memory, and
 modeled-device behavior only. It makes no cycle-timing, silicon, vehicle, or
-physical-safety claim. Register rules tagged `manual` come from the public
-Renesas manuals. Rules tagged `recovered`, notably ICU-S behavior, remain
-exact-firmware-derived rather than public silicon specifications.
-
-The retained scenarios use semantic structural selectors, not fixed entry
-addresses. For the tracked Camry image the resolver currently produces:
-
-|Domain|Resolved Camry entry|Exercised machine boundary|
-|---|---|---|
-|Ring publication|`0x00080A4A`|producer record, `SYNCP`, cursor advance|
-|RSCFD transmit|`0x000852FE`|buffer-16 identifier/data and transmit request|
-|TAUJ0 setup|`0x0006639C`|mode, prescaler, and calibrated reload values|
-|INTC acknowledge|`0x00066062`|EIC136 pending-bit poll and clear|
-|CAN receive to foreground|`0x00066062`|TAUJ underflow/poll, common FIFO 5, IRQ187 entry/native return, software-ring publication and foreground consumption|
-|FACI command|`0x00078AE6`|status-clear command and ready state|
-|ICU-S command five|`0x0008A720`|validated command submission and recovered state|
-|ICU-S input callback|`0x0008A538`|four input words fed to the ICU-S data register|
-|ICU-S output callback|`0x0008A5AE`|four supplied output words copied to RAM|
-|Reset and MPU|`0x00078AEA` / `0x00078AE6`|RAM clearing, aliases, deny, and overlap-grant rules|
-
-The Crown fixture resolves the same portable byte-store role from the Crown
-image to `0x00077F16`; the equivalent Camry entry is `0x00078AE6`. This proves
-cross-target role resolution and exact execution, not semantic equivalence of
-the complete firmware images.
-
-### Exact Camry receive-to-foreground proof
-
-`camry_f33_can_foreground.json` exercises stock `8965F3307000` CodeFlash
-(`42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7`).
-The scenario supplies a synthetic classical `0x7A1` frame
-`02 3e 00 00 00 00 00 00` after acceptance filtering, with label `0x34`.
-Exact rule 43 at `0x23368` supplies that ID/label and destination `0x2000`
-(common FIFO 5). This is not the normal `0x090`/B6 RFIFO1 path.
-
-Byte/disassembly checks matter here: table cells `0x22FA0`, `0x22FAC`, and
-`0x22FB4` contain **FIFO-3 base addresses**, but the native `0x83D40` reader adds
-`8`, `8`, and `0x100`, selecting FIFO 5 at `0xFFD2018C`, `0xFFD201EC`, and
-`0xFFD23680`. The actual INTBP word at `0x204EC` points to `0x66100`, not
-`0x71508`.
-
-```mermaid
-flowchart LR
-  RX["post-filter 0x7A1<br/>CFIFO5"] --> IRQ["IRQ187<br/>vector 0x66100"]
-  IRQ --> ISR["0x66812 → 0x83F30<br/>0x83D40 drains FIFO"]
-  ISR --> Ring["0x80B42 → 0x80A4A<br/>software ring"]
-  ISR --> Return["native EIRET<br/>0x71372"]
-  Clock["400000 P-Bus cycles<br/>TAUJ0 CH3 underflow"] --> Poll["foreground 0x66062<br/>poll/clear EIC136"]
-  Return --> Poll
-  Poll --> Drain["0x7A254 → 0x79EDE<br/>ring consumer/callback"]
-  Ring --> Drain
-```
-
-The verified run executes **1,274 exact instructions** and stops at `0x7A272`,
-immediately after the foreground ring-drain call. Twelve postconditions check
-the preserved record bytes, producer/consumer cursor advancement, empty queue,
-timer acknowledgement, one interrupt entry/return, saved poll PC, and released
-ISPR priority.
-
-The starting state is deliberately bounded: scenario-owned zero Local RAM,
-explicit online/started communication state and completed initialization gate,
-operating CAN status, and a pre-running steady-period timer. No executable
-overlay, replacement ISR, boot emulation, diagnostic-service completion, or
-vehicle observation is claimed. Controller-mode initialization/status evolution
-outside those supplied preconditions remains unmodeled.
-
-
-Run the narrow gate with:
-
-```bash
-tools/test rh850_firmware
-```
-
-This gate also covers strict schema/event rejection, unknown-MMIO and unsupported
-device-event faults, executable-overlay rejection, unique role resolution on
-Camry/Crown, and preservation of an execution fault when subsequent output
-inspections fail. It does not promote recovered ICU-S behavior to a silicon claim.
+physical-safety claim. The request event begins after acceptance filtering;
+the resolver proves the exact stock rule and native downstream path but the
+machine does not execute RSCFD acceptance filters. ICU-S output words are
+supplied scenario state, not provisioned-key cryptography. Register rules tagged
+`manual` come from the public Renesas manuals; rules tagged `recovered` remain
+exact-firmware-derived.
 
 ## CodeFlash simulation
 
