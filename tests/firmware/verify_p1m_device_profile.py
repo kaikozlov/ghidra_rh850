@@ -17,6 +17,9 @@ WINDOWS = {
     "SFR_FACI_COMMAND": (0xFFA20000, 0x4),
     "SFR_FACI_CONFIG": (0xFFC59000, 0x100),
     "SFR_EIC": (0xFFFFB000, 0x1000),
+    # CPU-internal register page (PE guard, EI level interrupt controls
+    # EIC8/EIC9/EIC16..); manual SFR list rows marked "CPU", e.g. FFFEEA10 H.
+    "SFR_CPU_INTERNAL": (0xFFFEE000, 0x1000),
     "SFR_RSCFD": (0xFFD20000, 0x10000),
     "SFR_ICUS": (0xFFC5D000, 0x1000),
     "SFR_CODEFLASH_ECC": (0xFFC62000, 0x500),
