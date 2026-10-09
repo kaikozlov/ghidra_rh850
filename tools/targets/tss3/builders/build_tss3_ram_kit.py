@@ -19,6 +19,7 @@ from exploit.ram_runtime.target_profiles import (
     supported_targets,
 )
 from tools import REPO_ROOT
+from tools.targets.tss3.console import render_kit
 
 ROOT = REPO_ROOT
 LAUNCHER = ROOT / "exploit/ephemeral_runtime/tss3_request_signer_launcher.sh"
@@ -156,6 +157,7 @@ def main() -> int:
         "--codec", choices=CODECS, default=DEFAULT_CODEC,
         help="four-frame is the default; compact is experimental and explicit",
     )
+    parser.add_argument("--json", action="store_true", help="print the full JSON result instead of the human summary")
     args = parser.parse_args()
     try:
         result = (
@@ -166,7 +168,10 @@ def main() -> int:
     except (OSError, RuntimeError, ValueError) as exc:
         print(f"refusing: {exc}", file=sys.stderr)
         return 2
-    print(json.dumps(result, indent=2, sort_keys=True))
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+    else:
+        print(render_kit(result, str(args.out)))
     return 0
 
 

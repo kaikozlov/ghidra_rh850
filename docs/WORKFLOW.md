@@ -464,6 +464,9 @@ MCU/project metadata is registered.
 The retained result contains `report.json`, the resolved profile and build
 artifacts under `build/`, GNU simulator outputs under `simulation/`, and, where
 registered, generated scenarios plus one P1M-E report each under `machine/`.
+Commands print a short human summary by default; pass `--json` to any `ram`
+subcommand for the previous full-JSON stdout (the complete report is always on
+disk regardless).
 These checks do not establish Panda logical-bus routing, provisioned ICU-S
 cryptography, cache publication, silicon MPU enforcement, cycle timing, or
 vehicle behavior; those remain registry/bench/vehicle qualification inputs.

@@ -162,6 +162,8 @@ def cmd_ram_build(args: argparse.Namespace) -> int:
     command = ["--target", args.target, "--codec", args.codec]
     if args.out is not None:
         command.extend(("--output-dir", str(args.out)))
+    if args.json:
+        command.append("--json")
     return _run_path(ROOT / "exploit/ephemeral_runtime/build_tss3_request_signer.py", command)
 
 
@@ -169,6 +171,8 @@ def cmd_ram_onboard(args: argparse.Namespace) -> int:
     command = [str(args.codeflash)]
     if args.out is not None:
         command.extend(("--out", str(args.out)))
+    if args.json:
+        command.append("--json")
     return _run_path(
         TOOLS / "targets/tss3/onboard_ram_signer.py",
         command,
@@ -176,10 +180,14 @@ def cmd_ram_onboard(args: argparse.Namespace) -> int:
 
 
 def cmd_ram_kit(args: argparse.Namespace) -> int:
+    command = ["--target", args.target, "--out", str(args.out), "--codec", args.codec]
+    if args.json:
+        command.append("--json")
     return _run_path(
         TOOLS / "targets/tss3/builders/build_tss3_ram_kit.py",
-        ["--target", args.target, "--out", str(args.out), "--codec", args.codec],
+        command,
     )
+
 
 
 def cmd_target_list(args: argparse.Namespace) -> int:
@@ -280,7 +288,18 @@ def build_parser() -> argparse.ArgumentParser:
     q.add_argument("--offset", type=int, default=0)
     q.set_defaults(func=cmd_e2e)
 
-    q = sub.add_parser("ram", help="discover/build exact-target RAM-resident payloads")
+    q = sub.add_parser(
+        "ram",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        help="TSS3 RAM signer: onboard a dump, build artifacts, package a kit",
+        description=(
+            "RAM-resident TSS3 request signer workflow.\n"
+            "  onboard DUMP   verify one new EPS CodeFlash dump end to end\n"
+            "  kit TARGET     package a verified kit (builds internally)\n"
+            "  list           show registered targets\n"
+            "  build TARGET   emit signer artifacts only, without packaging"
+        ),
+    )
     qs = q.add_subparsers(dest="ram_command", required=True)
     l = qs.add_parser("list", help="list registered RAM-runtime targets and payloads")
     l.add_argument("query", nargs="?")
@@ -289,6 +308,7 @@ def build_parser() -> argparse.ArgumentParser:
     b.add_argument("target")
     b.add_argument("--out", type=Path)
     b.add_argument("--codec", choices=("four-frame", "compact"), default="four-frame")
+    b.add_argument("--json", action="store_true", help="print full JSON instead of the human summary")
     b.set_defaults(func=cmd_ram_build)
     o = qs.add_parser(
         "onboard",
@@ -296,11 +316,13 @@ def build_parser() -> argparse.ArgumentParser:
     )
     o.add_argument("codeflash", type=Path)
     o.add_argument("--out", type=Path)
+    o.add_argument("--json", action="store_true", help="print the full JSON report instead of the human summary")
     o.set_defaults(func=cmd_ram_onboard)
     k = qs.add_parser("kit", help="package one exact target or all registered targets")
     k.add_argument("target")
     k.add_argument("--out", type=Path, required=True)
     k.add_argument("--codec", choices=("four-frame", "compact"), default="four-frame")
+    k.add_argument("--json", action="store_true", help="print the full JSON result instead of the human summary")
     k.set_defaults(func=cmd_ram_kit)
 
     q = sub.add_parser("target", help="discover/run target-specific workflows")

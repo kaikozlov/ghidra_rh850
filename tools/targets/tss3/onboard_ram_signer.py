@@ -33,6 +33,7 @@ from tools.rh850_codeflash import (
     run as run_codeflash_sim,
 )
 from tools.security.build_ephemeral_runtime_manifest import is_jarl22, jarl22_target
+from tools.targets.tss3.console import render_onboard
 from tools.targets.tss3.request_signer_machine import verify_request_signer_target
 
 ROOT = REPO_ROOT
@@ -294,6 +295,11 @@ def onboard(image_path: Path, output_dir: Path | None = None) -> tuple[dict[str,
     if output_dir is not None:
         _require_empty(out)
 
+    def finish(report: dict[str, Any], status: int) -> tuple[dict[str, Any], int]:
+        report["output_dir"] = str(out)
+        (out / "report.json").write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
+        return report, status
+
     probe = probe_request_signer_contract(image)
     capabilities = {
         "schema": probe["schema"],
@@ -313,8 +319,7 @@ def onboard(image_path: Path, output_dir: Path | None = None) -> tuple[dict[str,
             "reason": f"{unresolved[0]}: {unresolved[1]['reason']}",
             "capabilities": capabilities,
         }
-        (out / "report.json").write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
-        return report, 1
+        return finish(report, 1)
 
     build_dir = out / "build"
     profile_path = build_dir / "resolved_request_signer_profile.json"
@@ -330,8 +335,7 @@ def onboard(image_path: Path, output_dir: Path | None = None) -> tuple[dict[str,
             "reason": str(exc),
             "capabilities": capabilities,
         }
-        (out / "report.json").write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
-        return report, 1
+        return finish(report, 1)
 
     contract = json.loads(profile_path.read_text(encoding="utf-8"))
     report: dict[str, Any] = {
@@ -358,8 +362,7 @@ def onboard(image_path: Path, output_dir: Path | None = None) -> tuple[dict[str,
     except (OSError, RuntimeError) as exc:
         report["status"] = "simulation-failed"
         report["reason"] = str(exc)
-        (out / "report.json").write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
-        return report, 1
+        return finish(report, 1)
 
     registered_target = next(
         (
@@ -387,24 +390,24 @@ def onboard(image_path: Path, output_dir: Path | None = None) -> tuple[dict[str,
         except (OSError, RuntimeError, ValueError) as exc:
             report["status"] = "machine-verification-failed"
             report["reason"] = str(exc)
-            (out / "report.json").write_text(
-                json.dumps(report, indent=2, sort_keys=True) + "\n",
-            )
-            return report, 1
-    (out / "report.json").write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
-    return report, 0
+            return finish(report, 1)
+    return finish(report, 0)
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("codeflash", type=Path)
     parser.add_argument("--out", type=Path, help="empty output directory; default creates a unique build/out result")
+    parser.add_argument("--json", action="store_true", help="print the full JSON report instead of the human summary")
     args = parser.parse_args()
     try:
         report, status = onboard(args.codeflash, args.out)
     except (OSError, RuntimeError, subprocess.SubprocessError, json.JSONDecodeError) as exc:
         parser.error(str(exc))
-    print(json.dumps(report, indent=2, sort_keys=True))
+    if args.json:
+        print(json.dumps(report, indent=2, sort_keys=True))
+    else:
+        print(render_onboard(report))
     return status
 
 
