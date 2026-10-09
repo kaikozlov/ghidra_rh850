@@ -157,6 +157,66 @@ def _validate_checks(rows: Any, context: str) -> list[dict[str, Any]]:
     return normalized
 
 
+def _validate_events(rows: Any, context: str) -> list[dict[str, Any]]:
+    normalized = _require_list(rows, context)
+    fields = {
+        "clock": {"p_bus_cycles"},
+        "can-rx": {"fifo", "can_id", "data_hex", "extended", "fd", "boundary", "label", "timestamp"},
+        "interrupt": {"channel"},
+    }
+    for index, row in enumerate(normalized):
+        item_context = f"{context}[{index}]"
+        if not isinstance(row, dict) or row.get("kind") not in fields:
+            raise P1MEMachineError(f"{item_context}: unsupported external event")
+        kind = row["kind"]
+        required = {
+            "clock": {"p_bus_cycles"},
+            "can-rx": {"fifo", "can_id", "data_hex", "boundary"},
+            "interrupt": {"channel"},
+        }[kind]
+        _require_keys(
+            row,
+            allowed={"kind", "after_instructions", "evidence"} | fields[kind],
+            required={"kind", "after_instructions", "evidence"} | required,
+            context=item_context,
+        )
+        tick = row["after_instructions"]
+        if type(tick) is not int or not 0 <= tick <= 0x7FFFFFFFFFFFFFFF:
+            raise P1MEMachineError(f"{item_context}: after_instructions must be a nonnegative signed-64 integer")
+        if kind == "clock":
+            if type(row["p_bus_cycles"]) is not int or not 0 < row["p_bus_cycles"] <= 0x7FFFFFFFFFFFFFFF:
+                raise P1MEMachineError(f"{item_context}: p_bus_cycles must be a positive signed-64 integer")
+        elif kind == "interrupt":
+            if type(row["channel"]) is not int or not 0 <= row["channel"] < 512:
+                raise P1MEMachineError(f"{item_context}: invalid interrupt channel")
+        else:
+            if row["boundary"] != "post-filter":
+                raise P1MEMachineError(f"{item_context}: only the explicit post-filter receive boundary is supported")
+            if type(row["fifo"]) is not int or not 0 <= row["fifo"] < 9:
+                raise P1MEMachineError(f"{item_context}: invalid common receive FIFO")
+            for field, maximum in (("label", 0xFFF), ("timestamp", 0xFFFF)):
+                if field in row and (type(row[field]) is not int or not 0 <= row[field] <= maximum):
+                    raise P1MEMachineError(f"{item_context}: invalid receive {field}")
+            for flag in ("extended", "fd"):
+                if flag in row and type(row[flag]) is not bool:
+                    raise P1MEMachineError(f"{item_context}: {flag} must be boolean")
+            try:
+                identifier = int(row["can_id"], 0)
+                payload = bytes.fromhex(row["data_hex"])
+            except (ValueError, TypeError) as exc:
+                raise P1MEMachineError(f"{item_context}: invalid CAN identifier or data") from exc
+            if not 0 <= identifier <= (0x1FFFFFFF if row.get("extended") else 0x7FF):
+                raise P1MEMachineError(f"{item_context}: CAN identifier exceeds frame format")
+            lengths = {0, 1, 2, 3, 4, 5, 6, 7, 8}
+            if row.get("fd"):
+                lengths |= {12, 16, 20, 24, 32, 48, 64}
+            if len(payload) not in lengths:
+                raise P1MEMachineError(f"{item_context}: invalid CAN payload length")
+            row["can_id"] = hex(identifier)
+            row["data_hex"] = payload.hex()
+    return normalized
+
+
 def load_scenario(path: Path) -> dict[str, Any]:
     scenario_path = _absolute_input(path)
     try:
@@ -168,7 +228,7 @@ def load_scenario(path: Path) -> dict[str, Any]:
     allowed = {
         "schema", "name", "entry", "max_instructions", "reset", "stop_addresses",
         "gpr_fill", "registers", "memory", "pre_reset_memory", "artifacts", "checks",
-        "expected_fault",
+        "expected_fault", "events",
     }
     required = {"schema", "name", "entry", "max_instructions", "stop_addresses", "checks"}
     _require_keys(raw, allowed=allowed, required=required, context=str(scenario_path))
@@ -211,6 +271,7 @@ def load_scenario(path: Path) -> dict[str, Any]:
         ),
         "checks": _validate_checks(raw["checks"], f"{scenario_path}.checks"),
         "expected_fault": expected_fault,
+        "events": _validate_events(raw.get("events", []), f"{scenario_path}.events"),
     }
     return normalized
 

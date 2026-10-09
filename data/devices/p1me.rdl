@@ -16,6 +16,19 @@ property access_register { type = string; component = reg; };
 property history_register { type = string; component = reg; };
 property reload_prefix { type = string; component = reg; };
 property counter_prefix { type = string; component = reg; };
+property interrupt_channel { type = longint unsigned; component = reg; };
+property interrupt_register { type = string; component = reg; };
+property interrupt_register_prefix { type = string; component = reg; };
+property interrupt_channel_base { type = longint unsigned; component = reg; };
+property mode_prefix { type = string; component = reg; };
+property prescaler_register { type = string; component = reg; };
+property control_register { type = string; component = reg; };
+property pointer_register { type = string; component = reg; };
+property window_register { type = string; component = reg; };
+property channel_control_register { type = string; component = reg; };
+property global_control_register { type = string; component = reg; };
+property fifo_index { type = longint unsigned; component = reg; };
+property fifo_channel { type = longint unsigned; component = reg; };
 property payload_address { type = longint unsigned; component = reg; };
 property completion_value { type = longint unsigned; component = reg; };
 property channel_count { type = longint unsigned; component = reg; };
@@ -372,27 +385,36 @@ addrmap p1me {
     } CFSTSTCTL_PE1 @ 0xFFC624F0;
 
     reg {
-        regwidth=32; accesswidth=32; desc="RSCFD common-FIFO status base (ch0/fifo0; +0x0C*ch +4*fifo)";
-        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD register tables; firmware-observed role"; behavior="rscfd";
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDCFCC3 (CFCCk = base+0x118+4k, k=3): CFIFO 3 configuration and control; CFE bit 0 enable, CFRXIE bit 1 receive-interrupt enable, CFTXIE bit 2 transmit-interrupt enable, CFPLS[6:4] payload size, CFDC[10:8] depth (0,4,8,16,32,48,64,128 messages), CFIM bit 12 interrupt source (1=every message), CFIGCV[15:13] fill threshold eighths, CFM[17:16] mode 00=receive; FIFO 3 serves CAN channel m=k/3=1";
+        evidence="manual"; source_ref="R01UH0585EJ0120 Tables 17.12 and 17.132, section 17.4.8.1 (pages 797, 989-992)"; behavior="rscfd";
+        status_register="CFSTS_CH1"; pointer_register="CFPCTR_CH1"; window_register="CFID_CH1"; channel_control_register="C1CTR"; global_control_register="GCTR"; interrupt_register="EIC187"; fifo_index=3; fifo_channel=1;
+        field { sw=rw; reset=0; } value[31:0];
+    } CFCC3 @ 0xFFD20124;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD common-FIFO status base (CFSTSk = base+0x178+4k, k=0..8)";
+        evidence="manual"; source_ref="R01UH0585EJ0120 Tables 17.12 and 17.133; firmware-observed role"; behavior="rscfd";
         field { sw=rw; } value[31:0];
     } CFSTS @ 0xFFD20178;
 
     reg {
-        regwidth=32; accesswidth=32; desc="RSCFD common-FIFO status for application CAN1 (ch1/fifo0)";
-        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD register tables; firmware-observed role"; behavior="rscfd";
-        field { sw=rw; } value[31:0];
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDCFSTS3 (CFSTSk = base+0x178+4k, k=3): transmit/receive FIFO 3 status; CAN channel m=k/3=1; CFMC[15:8] message count, CFTXIF bit 4, CFRXIF bit 3, CFMLT bit 2, CFFLL bit 1, CFEMP bit 0; flags clear on write 0 to the flag with 1 elsewhere; reset CFEMP=1";
+        evidence="manual"; source_ref="R01UH0585EJ0120 Tables 17.12 and 17.133, section 17.4.8.2 (pages 797, 992-995); SFR list FFD20184; firmware table 0x22FA0 stores this FIFO-3 base while native reader 0x83D40 computes the operative CFSTS5 at +8"; behavior="rscfd";
+        control_register="CFCC3"; pointer_register="CFPCTR_CH1"; interrupt_register="EIC187"; fifo_index=3; fifo_channel=1;
+        field { sw=rw; reset=1; } value[31:0];
     } CFSTS_CH1 @ 0xFFD20184;
 
     reg {
-        regwidth=32; accesswidth=32; desc="RSCFD common-FIFO pointer control base (write 0xFF advances)";
+        regwidth=32; accesswidth=32; desc="RSCFD common-FIFO pointer control base (CFPCTRk = base+0x1D8+4k, k=0..8; write 0xFF to CFPC[7:0] advances)";
         evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD register tables; firmware-observed role"; behavior="rscfd";
         field { sw=rw; } value[31:0];
     } CFPCTR @ 0xFFD201D8;
 
     reg {
-        regwidth=32; accesswidth=32; desc="RSCFD common-FIFO pointer control for application CAN1";
-        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD register tables; firmware-observed role"; behavior="rscfd";
-        field { sw=rw; } value[31:0];
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDCFPCTR3 (CFPCTRk = base+0x1D8+4k, k=3): CFIFO 3 pointer control; CFPC[7:0] write-only; receive mode: write 0xFF moves the read pointer to the next unread message and decrements CFMC (requires CFE=1 and CFEMP=0)";
+        evidence="manual"; source_ref="R01UH0585EJ0120 Tables 17.12 and 17.134, section 17.4.8.3 (pages 797, 996-997); SFR list FFD201E4; firmware table 0x22FAC stores this FIFO-3 base while native reader 0x83D40 computes the operative CFPCTR5 at +8"; behavior="rscfd";
+        status_register="CFSTS_CH1"; control_register="CFCC3"; fifo_index=3; fifo_channel=1;
+        field { sw=w; } value[31:0];
     } CFPCTR_CH1 @ 0xFFD201E4;
 
     reg {
@@ -434,16 +456,367 @@ addrmap p1me {
     } CFDTMSTS_CH1_16 @ 0xFFD202F0;
 
     reg {
-        regwidth=32; accesswidth=32; desc="RSCFD common-FIFO message RAM base (CFID/CFPTR/CFDF window)";
+        regwidth=32; accesswidth=32; desc="RSCFD common-FIFO access-window base (CFIDk = base+0x3400+0x80k, k=0..8; window: ID, +4 PTR, +8 FDCSTS, +0x0C..+0x48 DF0..DF15)";
         evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD register tables; firmware-observed role"; behavior="rscfd";
         field { sw=rw; } value[31:0];
     } CFID @ 0xFFD23400;
 
     reg {
-        regwidth=32; accesswidth=32; desc="RSCFD common-FIFO message RAM for application CAN1";
-        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD register tables; firmware-observed role"; behavior="rscfd";
-        field { sw=rw; } value[31:0];
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDCFID3 (CFIDk = base+0x3400+0x80k, k=3): CFIFO 3 access window; CFIDE bit 31, CFRTR bit 30, CFID[28:0]; +0x04 CFDCFPTR3 (CFDLC[31:28], CFPTR[27:16], CFTS[15:0]), +0x08 CFDCFFDCSTS3 (CFFDF bit 2, CFBRS bit 1, CFESI bit 0), +0x0C CFDCFDF0_3 .. +0x48 CFDCFDF15_3 (16 data words); receive mode reads alias the oldest unread message";
+        evidence="manual"; source_ref="R01UH0585EJ0120 Tables 17.12, 17.135-17.138, section 17.4.8.4-17.4.8.7 (pages 797-798, 997-1004); SFR list FFD23580-FFD235C8; firmware table 0x22FB4 stores this FIFO-3 window base while native reader 0x83D40 computes the operative CFID5 at +0x100"; behavior="rscfd";
+        status_register="CFSTS_CH1"; fifo_index=3; fifo_channel=1;
+        access_widths="1,2,4";
+        field { sw=r; reset=0; } value[31:0];
     } CFID_CH1 @ 0xFFD23580;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDCFPTR3 (CFID3 window +0x04): CFIFO 3 access pointer; CFDLC[31:28] DLC of the unread message (CAN FD: 9-15 = 12/16/20/24/32/48/64 bytes), CFPTR[27:16] label, CFTS[15:0] timestamp; read-only in receive mode";
+        evidence="manual"; source_ref="R01UH0585EJ0120 Table 17.136, section 17.4.8.5 (pages 999-1001); SFR list FFD23584"; behavior="rscfd";
+        status_register="CFSTS_CH1"; fifo_index=3; fifo_channel=1;
+        access_widths="1,2,4";
+        field { sw=r; reset=0; } value[31:0];
+    } CFPTR_CH1 @ 0xFFD23584;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDCFFDCSTS3 (CFID3 window +0x08): CFIFO 3 CAN FD configuration/status; CFFDF bit 2 (1=CAN FD frame), CFBRS bit 1, CFESI bit 0";
+        evidence="manual"; source_ref="R01UH0585EJ0120 Table 17.137, section 17.4.8.6 (pages 1001-1002); SFR list FFD23588"; behavior="rscfd";
+        status_register="CFSTS_CH1"; fifo_index=3; fifo_channel=1;
+        access_widths="1,2,4";
+        field { sw=r; reset=0; } value[31:0];
+    } CFFDCSTS_CH1 @ 0xFFD23588;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDCFDF0_3 (CFID3 window +0x0C): CFIFO 3 unread-message data bytes 0..3; read-only in receive mode";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17.4.8.7, Tables 17.12 and 17.138 (page 1003); SFR list FFD2358C"; behavior="rscfd";
+        status_register="CFSTS_CH1"; fifo_index=3; fifo_channel=1;
+        access_widths="1,2,4";
+        field { sw=r; reset=0; } value[31:0];
+    } CFDF0_CH1 @ 0xFFD2358C;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDCFDF1_3 (CFID3 window +0x10): CFIFO 3 unread-message data bytes 4..7; read-only in receive mode";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17.4.8.7, Tables 17.12 and 17.138 (page 1003); SFR list FFD23590"; behavior="rscfd";
+        status_register="CFSTS_CH1"; fifo_index=3; fifo_channel=1;
+        access_widths="1,2,4";
+        field { sw=r; reset=0; } value[31:0];
+    } CFDF1_CH1 @ 0xFFD23590;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDCFDF2_3 (CFID3 window +0x14): CFIFO 3 unread-message data bytes 8..11; read-only in receive mode";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17.4.8.7, Tables 17.12 and 17.138 (page 1003); SFR list FFD23594"; behavior="rscfd";
+        status_register="CFSTS_CH1"; fifo_index=3; fifo_channel=1;
+        access_widths="1,2,4";
+        field { sw=r; reset=0; } value[31:0];
+    } CFDF2_CH1 @ 0xFFD23594;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDCFDF3_3 (CFID3 window +0x18): CFIFO 3 unread-message data bytes 12..15; read-only in receive mode";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17.4.8.7, Tables 17.12 and 17.138 (page 1003); SFR list FFD23598"; behavior="rscfd";
+        status_register="CFSTS_CH1"; fifo_index=3; fifo_channel=1;
+        access_widths="1,2,4";
+        field { sw=r; reset=0; } value[31:0];
+    } CFDF3_CH1 @ 0xFFD23598;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDCFDF4_3 (CFID3 window +0x1C): CFIFO 3 unread-message data bytes 16..19; read-only in receive mode";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17.4.8.7, Tables 17.12 and 17.138 (page 1003); SFR list FFD2359C"; behavior="rscfd";
+        status_register="CFSTS_CH1"; fifo_index=3; fifo_channel=1;
+        access_widths="1,2,4";
+        field { sw=r; reset=0; } value[31:0];
+    } CFDF4_CH1 @ 0xFFD2359C;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDCFDF5_3 (CFID3 window +0x20): CFIFO 3 unread-message data bytes 20..23; read-only in receive mode";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17.4.8.7, Tables 17.12 and 17.138 (page 1003); SFR list FFD235A0"; behavior="rscfd";
+        status_register="CFSTS_CH1"; fifo_index=3; fifo_channel=1;
+        access_widths="1,2,4";
+        field { sw=r; reset=0; } value[31:0];
+    } CFDF5_CH1 @ 0xFFD235A0;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDCFDF6_3 (CFID3 window +0x24): CFIFO 3 unread-message data bytes 24..27; read-only in receive mode";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17.4.8.7, Tables 17.12 and 17.138 (page 1003); SFR list FFD235A4"; behavior="rscfd";
+        status_register="CFSTS_CH1"; fifo_index=3; fifo_channel=1;
+        access_widths="1,2,4";
+        field { sw=r; reset=0; } value[31:0];
+    } CFDF6_CH1 @ 0xFFD235A4;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDCFDF7_3 (CFID3 window +0x28): CFIFO 3 unread-message data bytes 28..31; read-only in receive mode";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17.4.8.7, Tables 17.12 and 17.138 (page 1003); SFR list FFD235A8"; behavior="rscfd";
+        status_register="CFSTS_CH1"; fifo_index=3; fifo_channel=1;
+        access_widths="1,2,4";
+        field { sw=r; reset=0; } value[31:0];
+    } CFDF7_CH1 @ 0xFFD235A8;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDCFDF8_3 (CFID3 window +0x2C): CFIFO 3 unread-message data bytes 32..35; read-only in receive mode";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17.4.8.7, Tables 17.12 and 17.138 (page 1003); SFR list FFD235AC"; behavior="rscfd";
+        status_register="CFSTS_CH1"; fifo_index=3; fifo_channel=1;
+        access_widths="1,2,4";
+        field { sw=r; reset=0; } value[31:0];
+    } CFDF8_CH1 @ 0xFFD235AC;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDCFDF9_3 (CFID3 window +0x30): CFIFO 3 unread-message data bytes 36..39; read-only in receive mode";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17.4.8.7, Tables 17.12 and 17.138 (page 1003); SFR list FFD235B0"; behavior="rscfd";
+        status_register="CFSTS_CH1"; fifo_index=3; fifo_channel=1;
+        access_widths="1,2,4";
+        field { sw=r; reset=0; } value[31:0];
+    } CFDF9_CH1 @ 0xFFD235B0;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDCFDF10_3 (CFID3 window +0x34): CFIFO 3 unread-message data bytes 40..43; read-only in receive mode";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17.4.8.7, Tables 17.12 and 17.138 (page 1003); SFR list FFD235B4"; behavior="rscfd";
+        status_register="CFSTS_CH1"; fifo_index=3; fifo_channel=1;
+        access_widths="1,2,4";
+        field { sw=r; reset=0; } value[31:0];
+    } CFDF10_CH1 @ 0xFFD235B4;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDCFDF11_3 (CFID3 window +0x38): CFIFO 3 unread-message data bytes 44..47; read-only in receive mode";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17.4.8.7, Tables 17.12 and 17.138 (page 1003); SFR list FFD235B8"; behavior="rscfd";
+        status_register="CFSTS_CH1"; fifo_index=3; fifo_channel=1;
+        access_widths="1,2,4";
+        field { sw=r; reset=0; } value[31:0];
+    } CFDF11_CH1 @ 0xFFD235B8;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDCFDF12_3 (CFID3 window +0x3C): CFIFO 3 unread-message data bytes 48..51; read-only in receive mode";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17.4.8.7, Tables 17.12 and 17.138 (page 1003); SFR list FFD235BC"; behavior="rscfd";
+        status_register="CFSTS_CH1"; fifo_index=3; fifo_channel=1;
+        access_widths="1,2,4";
+        field { sw=r; reset=0; } value[31:0];
+    } CFDF12_CH1 @ 0xFFD235BC;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDCFDF13_3 (CFID3 window +0x40): CFIFO 3 unread-message data bytes 52..55; read-only in receive mode";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17.4.8.7, Tables 17.12 and 17.138 (page 1003); SFR list FFD235C0"; behavior="rscfd";
+        status_register="CFSTS_CH1"; fifo_index=3; fifo_channel=1;
+        access_widths="1,2,4";
+        field { sw=r; reset=0; } value[31:0];
+    } CFDF13_CH1 @ 0xFFD235C0;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDCFDF14_3 (CFID3 window +0x44): CFIFO 3 unread-message data bytes 56..59; read-only in receive mode";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17.4.8.7, Tables 17.12 and 17.138 (page 1003); SFR list FFD235C4"; behavior="rscfd";
+        status_register="CFSTS_CH1"; fifo_index=3; fifo_channel=1;
+        access_widths="1,2,4";
+        field { sw=r; reset=0; } value[31:0];
+    } CFDF14_CH1 @ 0xFFD235C4;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDCFDF15_3 (CFID3 window +0x48): CFIFO 3 unread-message data bytes 60..63; read-only in receive mode";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17.4.8.7, Tables 17.12 and 17.138 (page 1003); SFR list FFD235C8"; behavior="rscfd";
+        status_register="CFSTS_CH1"; fifo_index=3; fifo_channel=1;
+        access_widths="1,2,4";
+        field { sw=r; reset=0; } value[31:0];
+    } CFDF15_CH1 @ 0xFFD235C8;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDCFCC5 (CFCCk = base+0x118+4k, k=5): CFIFO 5 configuration and control; CFE bit 0 enable, CFRXIE bit 1 receive-interrupt enable, CFTXIE bit 2 transmit-interrupt enable, CFPLS[6:4] payload size, CFDC[10:8] depth (0,4,8,16,32,48,64,128 messages), CFIM bit 12 interrupt source (1=every message), CFIGCV[15:13] fill threshold eighths, CFM[17:16] mode 00=receive; FIFO 5 serves CAN channel m=k/3=1; native diagnostic receive path: firmware config tables 0x22F68/0x22F6C store C1CTR/C1STS and 0x22FA0-0x22FB4 store FIFO-3 bases, and reader 0x83D40 computes the operative FIFO-5 registers by adding +8 to status/pointer/control and +0x100 to the window; GAFL rule 43 (GAFLID 0x7A1, label 0x34, GAFLFDP 0x2000 = bit 13-8 = k 5) targets this FIFO";
+        evidence="manual"; source_ref="R01UH0585EJ0120 Tables 17.12 and 17.132, section 17.4.8.1 (pages 797, 989-992); SFR list FFD2012C; exact-firmware FIFO-5 selection at FFD2012C = stored base FFD20124 + 8"; behavior="rscfd";
+        status_register="CFSTS5"; pointer_register="CFPCTR5"; window_register="CFID5"; channel_control_register="C1CTR"; global_control_register="GCTR"; interrupt_register="EIC187"; fifo_index=5; fifo_channel=1;
+        field { sw=rw; reset=0; } value[31:0];
+    } CFCC5 @ 0xFFD2012C;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDCFSTS5 (CFSTSk = base+0x178+4k, k=5): transmit/receive FIFO 5 status; CAN channel m=k/3=1; CFMC[15:8] message count, CFTXIF bit 4, CFRXIF bit 3, CFMLT bit 2, CFFLL bit 1, CFEMP bit 0; flags clear on write 0 to the flag with 1 elsewhere; reset CFEMP=1";
+        evidence="manual"; source_ref="R01UH0585EJ0120 Tables 17.12 and 17.133, section 17.4.8.2 (pages 797, 992-995); SFR list FFD2018C; exact-firmware FIFO-5 selection at FFD2018C = stored base FFD20184 + 8"; behavior="rscfd";
+        control_register="CFCC5"; pointer_register="CFPCTR5"; interrupt_register="EIC187"; fifo_index=5; fifo_channel=1;
+        field { sw=rw; reset=1; } value[31:0];
+    } CFSTS5 @ 0xFFD2018C;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDCFPCTR5 (CFPCTRk = base+0x1D8+4k, k=5): CFIFO 5 pointer control; CFPC[7:0] write-only; receive mode: write 0xFF moves the read pointer to the next unread message and decrements CFMC (requires CFE=1 and CFEMP=0)";
+        evidence="manual"; source_ref="R01UH0585EJ0120 Tables 17.12 and 17.134, section 17.4.8.3 (pages 797, 996-997); SFR list FFD201EC; exact-firmware FIFO-5 selection at FFD201EC = stored base FFD201E4 + 8"; behavior="rscfd";
+        status_register="CFSTS5"; control_register="CFCC5"; fifo_index=5; fifo_channel=1;
+        field { sw=w; } value[31:0];
+    } CFPCTR5 @ 0xFFD201EC;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDCFID5 (CFIDk = base+0x3400+0x80k, k=5): CFIFO 5 access window; CFIDE bit 31, CFRTR bit 30, CFID[28:0]; +0x04 CFDCFPTR5 (CFDLC[31:28], CFPTR[27:16], CFTS[15:0]), +0x08 CFDCFFDCSTS5 (CFFDF bit 2, CFBRS bit 1, CFESI bit 0), +0x0C CFDCFDF0_5 .. +0x48 CFDCFDF15_5 (16 data words); receive mode reads alias the oldest unread message";
+        evidence="manual"; source_ref="R01UH0585EJ0120 Tables 17.12, 17.135-17.138, section 17.4.8.4-17.4.8.7 (pages 797-798, 997-1004); SFR list FFD23680-FFD236C8; exact-firmware FIFO-5 selection at FFD23680 = stored base FFD23580 + 0x100"; behavior="rscfd";
+        status_register="CFSTS5"; fifo_index=5; fifo_channel=1;
+        access_widths="1,2,4";
+        field { sw=r; reset=0; } value[31:0];
+    } CFID5 @ 0xFFD23680;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDCFPTR5 (CFID5 window +0x04): CFIFO 5 access pointer; CFDLC[31:28] DLC of the unread message (CAN FD: 9-15 = 12/16/20/24/32/48/64 bytes), CFPTR[27:16] label, CFTS[15:0] timestamp; read-only in receive mode";
+        evidence="manual"; source_ref="R01UH0585EJ0120 Table 17.136, section 17.4.8.5 (pages 999-1001); SFR list FFD23684"; behavior="rscfd";
+        status_register="CFSTS5"; fifo_index=5; fifo_channel=1;
+        access_widths="1,2,4";
+        field { sw=r; reset=0; } value[31:0];
+    } CFPTR5 @ 0xFFD23684;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDCFFDCSTS5 (CFID5 window +0x08): CFIFO 5 CAN FD configuration/status; CFFDF bit 2 (1=CAN FD frame), CFBRS bit 1, CFESI bit 0";
+        evidence="manual"; source_ref="R01UH0585EJ0120 Table 17.137, section 17.4.8.6 (pages 1001-1002); SFR list FFD23688"; behavior="rscfd";
+        status_register="CFSTS5"; fifo_index=5; fifo_channel=1;
+        access_widths="1,2,4";
+        field { sw=r; reset=0; } value[31:0];
+    } CFFDCSTS5 @ 0xFFD23688;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDCFDF0_5 (CFID5 window +0x0C): CFIFO 5 unread-message data bytes 0..3; read-only in receive mode";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17.4.8.7, Tables 17.12 and 17.138 (page 1003); SFR list FFD2368C"; behavior="rscfd";
+        status_register="CFSTS5"; fifo_index=5; fifo_channel=1;
+        access_widths="1,2,4";
+        field { sw=r; reset=0; } value[31:0];
+    } CFDF0_5 @ 0xFFD2368C;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDCFDF1_5 (CFID5 window +0x10): CFIFO 5 unread-message data bytes 4..7; read-only in receive mode";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17.4.8.7, Tables 17.12 and 17.138 (page 1003); SFR list FFD23690"; behavior="rscfd";
+        status_register="CFSTS5"; fifo_index=5; fifo_channel=1;
+        access_widths="1,2,4";
+        field { sw=r; reset=0; } value[31:0];
+    } CFDF1_5 @ 0xFFD23690;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDCFDF2_5 (CFID5 window +0x14): CFIFO 5 unread-message data bytes 8..11; read-only in receive mode";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17.4.8.7, Tables 17.12 and 17.138 (page 1003); SFR list FFD23694"; behavior="rscfd";
+        status_register="CFSTS5"; fifo_index=5; fifo_channel=1;
+        access_widths="1,2,4";
+        field { sw=r; reset=0; } value[31:0];
+    } CFDF2_5 @ 0xFFD23694;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDCFDF3_5 (CFID5 window +0x18): CFIFO 5 unread-message data bytes 12..15; read-only in receive mode";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17.4.8.7, Tables 17.12 and 17.138 (page 1003); SFR list FFD23698"; behavior="rscfd";
+        status_register="CFSTS5"; fifo_index=5; fifo_channel=1;
+        access_widths="1,2,4";
+        field { sw=r; reset=0; } value[31:0];
+    } CFDF3_5 @ 0xFFD23698;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDCFDF4_5 (CFID5 window +0x1C): CFIFO 5 unread-message data bytes 16..19; read-only in receive mode";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17.4.8.7, Tables 17.12 and 17.138 (page 1003); SFR list FFD2369C"; behavior="rscfd";
+        status_register="CFSTS5"; fifo_index=5; fifo_channel=1;
+        access_widths="1,2,4";
+        field { sw=r; reset=0; } value[31:0];
+    } CFDF4_5 @ 0xFFD2369C;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDCFDF5_5 (CFID5 window +0x20): CFIFO 5 unread-message data bytes 20..23; read-only in receive mode";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17.4.8.7, Tables 17.12 and 17.138 (page 1003); SFR list FFD236A0"; behavior="rscfd";
+        status_register="CFSTS5"; fifo_index=5; fifo_channel=1;
+        access_widths="1,2,4";
+        field { sw=r; reset=0; } value[31:0];
+    } CFDF5_5 @ 0xFFD236A0;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDCFDF6_5 (CFID5 window +0x24): CFIFO 5 unread-message data bytes 24..27; read-only in receive mode";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17.4.8.7, Tables 17.12 and 17.138 (page 1003); SFR list FFD236A4"; behavior="rscfd";
+        status_register="CFSTS5"; fifo_index=5; fifo_channel=1;
+        access_widths="1,2,4";
+        field { sw=r; reset=0; } value[31:0];
+    } CFDF6_5 @ 0xFFD236A4;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDCFDF7_5 (CFID5 window +0x28): CFIFO 5 unread-message data bytes 28..31; read-only in receive mode";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17.4.8.7, Tables 17.12 and 17.138 (page 1003); SFR list FFD236A8"; behavior="rscfd";
+        status_register="CFSTS5"; fifo_index=5; fifo_channel=1;
+        access_widths="1,2,4";
+        field { sw=r; reset=0; } value[31:0];
+    } CFDF7_5 @ 0xFFD236A8;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDCFDF8_5 (CFID5 window +0x2C): CFIFO 5 unread-message data bytes 32..35; read-only in receive mode";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17.4.8.7, Tables 17.12 and 17.138 (page 1003); SFR list FFD236AC"; behavior="rscfd";
+        status_register="CFSTS5"; fifo_index=5; fifo_channel=1;
+        access_widths="1,2,4";
+        field { sw=r; reset=0; } value[31:0];
+    } CFDF8_5 @ 0xFFD236AC;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDCFDF9_5 (CFID5 window +0x30): CFIFO 5 unread-message data bytes 36..39; read-only in receive mode";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17.4.8.7, Tables 17.12 and 17.138 (page 1003); SFR list FFD236B0"; behavior="rscfd";
+        status_register="CFSTS5"; fifo_index=5; fifo_channel=1;
+        access_widths="1,2,4";
+        field { sw=r; reset=0; } value[31:0];
+    } CFDF9_5 @ 0xFFD236B0;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDCFDF10_5 (CFID5 window +0x34): CFIFO 5 unread-message data bytes 40..43; read-only in receive mode";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17.4.8.7, Tables 17.12 and 17.138 (page 1003); SFR list FFD236B4"; behavior="rscfd";
+        status_register="CFSTS5"; fifo_index=5; fifo_channel=1;
+        access_widths="1,2,4";
+        field { sw=r; reset=0; } value[31:0];
+    } CFDF10_5 @ 0xFFD236B4;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDCFDF11_5 (CFID5 window +0x38): CFIFO 5 unread-message data bytes 44..47; read-only in receive mode";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17.4.8.7, Tables 17.12 and 17.138 (page 1003); SFR list FFD236B8"; behavior="rscfd";
+        status_register="CFSTS5"; fifo_index=5; fifo_channel=1;
+        access_widths="1,2,4";
+        field { sw=r; reset=0; } value[31:0];
+    } CFDF11_5 @ 0xFFD236B8;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDCFDF12_5 (CFID5 window +0x3C): CFIFO 5 unread-message data bytes 48..51; read-only in receive mode";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17.4.8.7, Tables 17.12 and 17.138 (page 1003); SFR list FFD236BC"; behavior="rscfd";
+        status_register="CFSTS5"; fifo_index=5; fifo_channel=1;
+        access_widths="1,2,4";
+        field { sw=r; reset=0; } value[31:0];
+    } CFDF12_5 @ 0xFFD236BC;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDCFDF13_5 (CFID5 window +0x40): CFIFO 5 unread-message data bytes 52..55; read-only in receive mode";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17.4.8.7, Tables 17.12 and 17.138 (page 1003); SFR list FFD236C0"; behavior="rscfd";
+        status_register="CFSTS5"; fifo_index=5; fifo_channel=1;
+        access_widths="1,2,4";
+        field { sw=r; reset=0; } value[31:0];
+    } CFDF13_5 @ 0xFFD236C0;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDCFDF14_5 (CFID5 window +0x44): CFIFO 5 unread-message data bytes 56..59; read-only in receive mode";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17.4.8.7, Tables 17.12 and 17.138 (page 1003); SFR list FFD236C4"; behavior="rscfd";
+        status_register="CFSTS5"; fifo_index=5; fifo_channel=1;
+        access_widths="1,2,4";
+        field { sw=r; reset=0; } value[31:0];
+    } CFDF14_5 @ 0xFFD236C4;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDCFDF15_5 (CFID5 window +0x48): CFIFO 5 unread-message data bytes 60..63; read-only in receive mode";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17.4.8.7, Tables 17.12 and 17.138 (page 1003); SFR list FFD236C8"; behavior="rscfd";
+        status_register="CFSTS5"; fifo_index=5; fifo_channel=1;
+        access_widths="1,2,4";
+        field { sw=r; reset=0; } value[31:0];
+    } CFDF15_5 @ 0xFFD236C8;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDGCFG: global configuration; CMPOC bit 5 payload-overflow mode (0 = frame whose payload exceeds storage size is not stored; 1 = stored with excess payload discarded), DRE bit 2 DLC replacement, ITRCP[31:16] interval-timer prescaler, TSBTCS[15:13]/TSSS bit 12/TSP[11:8] timestamp clock; reset 0x0";
+        evidence="manual"; source_ref="R01UH0585EJ0120 Table 17.106, section 17.4.4.1 (pages 948-950); SFR list FFD20084"; behavior="rscfd";
+        field { sw=rw; reset=0; } value[31:0];
+    } GCFG @ 0xFFD20084;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDGCTR: global control; GSLPR bit 2 global stop, GMDC[1:0] bits 1-0 (00 global operating, 01 global reset, 10 global test); reset 0x5 (global reset with stop)";
+        evidence="manual"; source_ref="R01UH0585EJ0120 Table 17.107, section 17.4.4.2 (page 952); SFR list FFD20088"; behavior="rscfd";
+        field { sw=rw; reset=5; } value[31:0];
+    } GCTR @ 0xFFD20088;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDGSTS: global status; GRAMINIT bit 3, GSLPSTS bit 2, GHLTSTS bit 1, GRSTSTS bit 0; reset 0xD";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17.4.4.3, Table 17.108 (pages 954-955)"; behavior="rscfd";
+        access_widths="1,2,4";
+        field { sw=r; reset=13; } value[31:0];
+    } GSTS @ 0xFFD2008C;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDC1CTR (CmCTR = base+0x04+0x10*m, m=1): CAN1 channel control; CHMDC[1:0] bits 1-0 (00 channel communication, 01 channel reset, 10 channel halt), CSLPR bit 2 channel stop; reset 0x5 (channel reset and stop)";
+        evidence="manual"; source_ref="R01UH0585EJ0120 Table 17.96, section 17.4.3.2 (pages 923-925); SFR list FFD20014"; behavior="rscfd";
+        field { sw=rw; reset=5; } value[31:0];
+    } C1CTR @ 0xFFD20014;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDC1STS (CmSTS = base+0x08+0x10*m, m=1): CAN1 channel status; TEC[31:24] and REC[23:16] error counters, ESIF bit 8, COMSTS bit 7, RECSTS bit 6, TRMSTS bit 5, BOSTS bit 4, EPSTS bit 3, CSLPSTS bit 2, CHLTSTS bit 1, CRSTSTS bit 0; reset 0x5 (channel stop + channel reset state); native diagnostic receive gate 0x83EF2 polls (C1STS & 7) == 0 before entering the CFIFO receive path";
+        evidence="manual"; source_ref="R01UH0585EJ0120 Tables 17.12 and 17.97, section 17.4.3.3 (pages 797, 928-929); SFR list FFD20018; firmware table 0x22F6C stores this address; native gate 0x83EF2 masks with 7"; behavior="rscfd";
+        access_widths="1,2,4";
+        field { sw=rw; reset=5; } value[31:0];
+    } C1STS @ 0xFFD20018;
 
     reg {
         regwidth=32; accesswidth=32; desc="RSCFD Tx message-buffer RAM base (0x20-byte entries)";
@@ -872,15 +1245,17 @@ addrmap p1me {
 
     reg {
         regwidth=8; accesswidth=8; desc="TAUJ0 channel start trigger";
-        evidence="manual"; source_ref="R01UH0585EJ0120 Table 24.10"; behavior="tauj";
+        evidence="manual"; source_ref="R01UH0585EJ0120 Table 24.10; sections 24.3 and 24.12.1"; behavior="tauj";
         trigger="tauj-start"; status_register="TAUJ0TE"; reload_prefix="TAUJ0CDR"; counter_prefix="TAUJ0CNT"; channel_count=4;
+        interrupt_register_prefix="EIC"; interrupt_channel_base=133; mode_prefix="TAUJ0CMOR"; prescaler_register="TAUJ0TPS";
         field { sw=w; } value[7:0];
     } TAUJ0TS @ 0xFFE50054;
 
     reg {
         regwidth=8; accesswidth=8; desc="TAUJ0 channel stop trigger";
-        evidence="manual"; source_ref="R01UH0585EJ0120 Table 24.10"; behavior="tauj";
+        evidence="manual"; source_ref="R01UH0585EJ0120 Table 24.10; sections 24.3 and 24.12.1"; behavior="tauj";
         trigger="tauj-stop"; status_register="TAUJ0TE"; reload_prefix="TAUJ0CDR"; counter_prefix="TAUJ0CNT"; channel_count=4;
+        interrupt_register_prefix="EIC"; interrupt_channel_base=133; mode_prefix="TAUJ0CMOR"; prescaler_register="TAUJ0TPS";
         field { sw=w; } value[7:0];
     } TAUJ0TT @ 0xFFE50058;
 
@@ -1060,72 +1435,82 @@ addrmap p1me {
     } DM10CM @ 0xFFFF8120;
 
     reg {
-        regwidth=16; accesswidth=16; desc="ECM maskable-error interrupt control (EIINT 8)";
-        evidence="manual"; source_ref="R01UH0585EJ0120 section 6.4.1, EICn register tables"; behavior="intc_eic";
+        regwidth=16; accesswidth=16; desc="ECM maskable-error interrupt control (EIINT 8); EIRF bit 12, EIMK bit 7, EITB bit 6, EIP[3:0], EICT bit 15; synchronous edge detection";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 6.2.2 Table 6.4, Table 6.11; SFR list FFFEEA10"; behavior="intc_eic";
+        interrupt_channel=8;
         access_widths="1,2";
-        field { sw=rw; } value[15:0];
-    } EIC8 @ 0xFFFFB010;
+        field { sw=rw; reset=0x8F; } value[15:0];
+    } EIC8 @ 0xFFFEEA10;
 
     reg {
-        regwidth=16; accesswidth=16; desc="TAUJ0 CH0 interrupt control (EIINT 133)";
-        evidence="manual"; source_ref="R01UH0585EJ0120 section 6.4.1, EICn register tables"; behavior="intc_eic";
+        regwidth=16; accesswidth=16; desc="TAUJ0 CH0 interrupt control (EIINT 133, INTTAUJ0I0); synchronous edge detection: EIRF bit 12 auto-cleared on CPU acceptance; source code 0x1085, INTBP offset +214H";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 6.2.2 Table 6.4, Table 6.11"; behavior="intc_eic";
+        interrupt_channel=133;
         access_widths="1,2";
-        field { sw=rw; } value[15:0];
+        field { sw=rw; reset=0x8F; } value[15:0];
     } EIC133 @ 0xFFFFB10A;
 
     reg {
-        regwidth=16; accesswidth=16; desc="TAUJ0 CH1 interrupt control (EIINT 134)";
-        evidence="manual"; source_ref="R01UH0585EJ0120 section 6.4.1, EICn register tables"; behavior="intc_eic";
+        regwidth=16; accesswidth=16; desc="TAUJ0 CH1 interrupt control (EIINT 134, INTTAUJ0I1); synchronous edge detection; source code 0x1086, INTBP offset +218H";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 6.2.2 Table 6.4, Table 6.11"; behavior="intc_eic";
+        interrupt_channel=134;
         access_widths="1,2";
-        field { sw=rw; } value[15:0];
+        field { sw=rw; reset=0x8F; } value[15:0];
     } EIC134 @ 0xFFFFB10C;
 
     reg {
-        regwidth=16; accesswidth=16; desc="TAUJ0 CH2 interrupt control (EIINT 135)";
-        evidence="manual"; source_ref="R01UH0585EJ0120 section 6.4.1, EICn register tables"; behavior="intc_eic";
+        regwidth=16; accesswidth=16; desc="TAUJ0 CH2 interrupt control (EIINT 135, INTTAUJ0I2); synchronous edge detection; source code 0x1087, INTBP offset +21CH";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 6.2.2 Table 6.4, Table 6.11"; behavior="intc_eic";
+        interrupt_channel=135;
         access_widths="1,2";
-        field { sw=rw; } value[15:0];
+        field { sw=rw; reset=0x8F; } value[15:0];
     } EIC135 @ 0xFFFFB10E;
 
     reg {
-        regwidth=16; accesswidth=16; desc="TAUJ0 CH3 interrupt control (foreground tick; EIRF bit 12 polled)";
-        evidence="manual"; source_ref="R01UH0585EJ0120 section 6.4.1, EICn register tables"; behavior="intc_eic";
+        regwidth=16; accesswidth=16; desc="TAUJ0 CH3 interrupt control (EIINT 136, INTTAUJ0I3; foreground tick; EIRF bit 12 polled); synchronous edge detection; source code 0x1088, INTBP offset +220H";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 6.2.2 Table 6.4, Table 6.11"; behavior="intc_eic";
+        interrupt_channel=136;
         access_widths="1,2";
-        field { sw=rw; } value[15:0];
+        field { sw=rw; reset=0x8F; } value[15:0];
     } EIC136 @ 0xFFFFB110;
 
     reg {
-        regwidth=16; accesswidth=16; desc="RSCAN CAN1 receive interrupt control (EIINT 187)";
-        evidence="manual"; source_ref="R01UH0585EJ0120 section 6.4.1, EICn register tables"; behavior="intc_eic";
+        regwidth=16; accesswidth=16; desc="RSCFD CAN1 transmit/receive-FIFO receive-completion interrupt control (EIINT 187, INTRCAN1REC; CFIFO receive path); high-level detection: EIRF bit 12 read-only, follows CFRXIF gated by CFRXIE, not cleared by acceptance; source code 0x10BB, INTBP offset +2ECH";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 6.2.2 Table 6.4, Tables 6.11 and 17.8"; behavior="intc_eic";
+        interrupt_channel=187;
         access_widths="1,2";
-        field { sw=rw; } value[15:0];
+        field { sw=rw; reset=0x808F; } value[15:0];
     } EIC187 @ 0xFFFFB176;
 
     reg {
-        regwidth=16; accesswidth=16; desc="RSCAN CAN1 transmit interrupt control (EIINT 188)";
-        evidence="manual"; source_ref="R01UH0585EJ0120 section 6.4.1, EICn register tables"; behavior="intc_eic";
+        regwidth=16; accesswidth=16; desc="RSCFD CAN1 transmit interrupt control (EIINT 188, INTRCAN1TRX); high-level detection: EIRF bit 12 read-only; source code 0x10BC, INTBP offset +2F0H";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 6.2.2 Table 6.4, Tables 6.11 and 17.8"; behavior="intc_eic";
+        interrupt_channel=188;
         access_widths="1,2";
-        field { sw=rw; } value[15:0];
+        field { sw=rw; reset=0x808F; } value[15:0];
     } EIC188 @ 0xFFFFB178;
 
     reg {
-        regwidth=16; accesswidth=16; desc="ICU-S crypto-driver interrupt channel 292";
-        evidence="manual"; source_ref="R01UH0585EJ0120 section 6.4.1, EICn register tables"; behavior="intc_eic";
+        regwidth=16; accesswidth=16; desc="EIINT 292 interrupt control; channel reserved in Table 6.11 (no peripheral source documented); bound to the exact-firmware crypto driver; no manual reset row exists";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 6.2.2 Table 6.4, Table 6.11 (reserved channel 292)"; behavior="intc_eic";
+        interrupt_channel=292;
         access_widths="1,2";
         field { sw=rw; } value[15:0];
     } EIC292 @ 0xFFFFB248;
 
     reg {
-        regwidth=16; accesswidth=16; desc="ICU-S crypto-driver interrupt channel 293";
-        evidence="manual"; source_ref="R01UH0585EJ0120 section 6.4.1, EICn register tables"; behavior="intc_eic";
+        regwidth=16; accesswidth=16; desc="EIINT 293 interrupt control; channel reserved in Table 6.11 (no peripheral source documented); bound to the exact-firmware crypto driver; no manual reset row exists";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 6.2.2 Table 6.4, Table 6.11 (reserved channel 293)"; behavior="intc_eic";
+        interrupt_channel=293;
         access_widths="1,2";
         field { sw=rw; } value[15:0];
     } EIC293 @ 0xFFFFB24A;
 
     reg {
-        regwidth=16; accesswidth=16; desc="Flash sequencer-end interrupt control (EIINT 379)";
-        evidence="manual"; source_ref="R01UH0585EJ0120 section 6.4.1, EICn register tables"; behavior="intc_eic";
+        regwidth=16; accesswidth=16; desc="Flash sequencer-end interrupt control (EIINT 379, INTFLENDNM); synchronous edge detection; source code 0x117B, INTBP offset +5ECH";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 6.2.2 Table 6.4, Table 6.11; SFR list FFFFB2F6"; behavior="intc_eic";
+        interrupt_channel=379;
         access_widths="1,2";
-        field { sw=rw; } value[15:0];
+        field { sw=rw; reset=0x8F; } value[15:0];
     } EIC379 @ 0xFFFFB2F6;
 };

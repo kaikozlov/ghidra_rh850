@@ -135,17 +135,21 @@ The machine has one owner for each layer:
    CodeFlash identity, and optional DataFlash identity. It is not a capability
    whitelist.
 4. A scenario supplies external state, a target-independent structural
-   firmware-role selector, stop addresses, checks, and optional hash-bound RAM
-   artifacts. `gpr_fill` states the general-register baseline once; `registers`
-   contains only overrides and system-register state. `pre_reset_memory` exists
-   only for exercising reset retention/clearing.
+   firmware-role selector, stop addresses, checks, optional hash-bound RAM
+   artifacts, and instruction-boundary external events. `gpr_fill` states the
+   general-register baseline once; `registers` contains overrides and
+   system-register state. `pre_reset_memory` exercises reset retention/clearing.
 5. `RunP1MEMachine.java` resolves each role uniquely from the selected analyzed
    firmware, records the structural and exact-byte proof, composes the machine
    with `PcodeEmulator`, and enforces execute/read/write policy before each
    operation. One target session loads immutable images and model data once,
    then runs each scenario with fresh emulator state.
-6. Reports embed the resolved run contract, explicit termination reason, first
-   failing check data, fault provenance, and a bounded recent-PC window.
+6. Reports embed the resolved run contract, external inputs, explicit termination
+   reason, check results, fault provenance, and a bounded recent-PC window.
+   An output-inspection fault becomes a failed check with a structured `error`
+   and `actual: "unavailable"`; it never replaces the original execution fault.
+   `termination_reason: "expected-fault"` describes execution independently of
+   check success. A failing check still makes the report and CLI fail.
 
 ### Implementation plan and tracked status
 
@@ -175,15 +179,15 @@ flowchart LR
 |---|---|---|
 |CPU execution|Use the vendored RH850G3M SLEIGH language; preserve distinct decoded synchronization mnemonics while sharing one ordering-boundary p-code operation.|Implemented for the exact paths and synthetic instruction corpus. The processor fixture covers arithmetic/flags, loads/stores, branches, calls/returns, `CAXI` compare-exchange, `DI`/`EI`, system-register selectors, trap/exception return, MPU registers, and synchronization decode. This is not a claim that every G3M opcode has an independent semantic test.|
 |Memory subsystem|Load registered CodeFlash/DataFlash by exact hash; map LocalRAM, GlobalRAM, SFR, and alias regions from generated data; use the target language's little-endian byte order; enforce read/write/execute policy, initialized-state provenance, alignment, and per-register access widths before side effects.|Implemented. PE1/self LocalRAM aliases are kept coherent. Unknown MMIO, illegal widths, and uninitialized reads fault.|
-|Reset behavior|Initialize processor reset registers from the G3M architectural reset state; apply generated P1M-E reset-source rules; restore or retain STAC controls according to reset source before deciding which RAM regions to clear.|Implemented for `none`, `power-on`, `system-1-pin`, `system-1-cvm`, `system-2`, and `application-1`. The reset matrix and STAC relationships come from the generated model rather than Java register-name branches.|
-|Peripheral scheduler|Generated trigger metadata may enqueue deterministic events keyed by retired machine ticks. Events run in insertion order at a shared tick; the report records the dispatch tick. No wall-clock polling or host sleeps participate.|Implemented. RSCFD transmit completion and TAUJ start/stop transitions use the queue. Machine ticks are deterministic ordering units, not silicon cycle timing.|
-|Interrupts|Model typed EIC registers, `PSW.ID` transitions, and exact firmware pending-bit acknowledge accesses without inventing interrupt delivery.|Bounded implementation. Priority arbitration and asynchronous peripheral exception entry/delivery remain unimplemented and MUST be added before a scenario can claim those paths.|
-|TAUJ|Model start/stop state, channel enable state, prescaler/mode storage, and reload-to-counter transfer used by the exact initialization path.|Implemented for the retained path. Continuous decrement, underflow, and interrupt generation remain outside the current evidence boundary.|
-|RSCFD|Model the recovered channel-1 transmit-buffer layout and transmit-request completion used by the exact writer.|Implemented for buffer 16. Receive FIFOs, arbitration, error states, and bus timing are not modeled.|
+|Reset behavior|Initialize architectural reset registers and the SLEIGH-internal load-link monitor centrally; apply generated P1M-E reset-source rules before deciding which RAM regions to clear.|Implemented for `none`, `power-on`, `system-1-pin`, `system-1-cvm`, `system-2`, and `application-1`. A fresh machine has `ll_valid=0` and initialized `ll_addr`; scenarios need no monitor workaround.|
+|Peripheral scheduler|Complete instruction-triggered device events at retirement, then apply external inputs before the next instruction. Equal-boundary external inputs retain scenario order.|Implemented. `after_instructions` selects a deterministic boundary; `clock.p_bus_cycles` supplies independent peripheral-clock progression. There is no inferred CPU-cycle ratio or wall-clock polling.|
+|Interrupts|Arbitrate modeled EIC requests using EIMK, PSW.ID/NP, PMR, ISPR, priority, and channel-number tie-break; save EIPC/EIPSW/EIIC and select direct or INTBP vectors; invalidate the load-link reservation.|Implemented for modeled EIINT channels. Edge acceptance clears EIRF; level requests remain until their source clears. Native `EIRET` applies automatic ISPR release when pre-return EP=0 and INTCFG.ISPC=0; protected software ISPR writes are ignored. Reserved channels without a supported reset contract fault on injection.|
+|TAUJ|Progress software-triggered interval timers from explicit P-Bus cycles, applying CK0–CK2 prescalers, retaining fractional progress, reloading on underflow, and raising the channel request.|Implemented for the bounded TAUJ0 interval path, including MD0 immediate-start requests. CK3/BRS and other timer modes fault rather than invent behavior. Clock events are functional stimulus, not CPU/silicon timing.|
+|RSCFD|Retain buffer-16 transmit behavior; model common receive FIFOs 3 and 5 using generated control/status/window/pointer/interrupt relationships.|Receive inputs explicitly start **post-filter**. Mode/enable gates, payload capacity, queue depth, overflow, interrupt threshold, sticky flags, oldest-message windows, and native pointer pops are modeled. CAN1's receive level is the OR of modeled FIFO sources. Acceptance-filter execution, global RFIFOs, arbitration, bus timing, and error-state evolution are not modeled.|
 |FACI / CodeFlash|CodeFlash fetches execute from immutable registered image bytes. Scenario overlays and ordinary writes are rejected. Only the exact status-clear command has a modeled FACI transition.|Bounded implementation. Unsupported FACI commands fault before side effects; erase/program, protection, sequencer timing, and cache-coherency behavior remain unimplemented.|
 |ICU-S|Expose only recovered registers and exact command-five/callback transitions. Treat supplied output words as scenario state, not generated cryptography.|Implemented within that recovered boundary. No provisioned-key or AES-CMAC silicon claim.|
 |Integration|Expose model generation through `tools/rh850 model update` and `tools/rh850 model check`, and batched execution through `tools/rh850 test firmware`; bind identity through the existing target registry; retain one JSON report per scenario under `build/out/`.|Implemented. No parallel capability manifest, target whitelist, project lifecycle, backend selector, or legacy CLI alias exists.|
-|Verification|Discover target-owned scenario directories deterministically, run one Ghidra session per target, and require unique dynamic role resolution before exact-byte execution. Use synthetic processor semantics for instruction-level boundaries and GNU simulator runs only where an independent differential is useful.|Implemented as narrow gates. `tools/test rh850` runs compiler-ABI, generated device-model, source-to-result payload, CodeFlash, and exact-firmware regressions; `make verify-processor` owns the milestone synthetic processor and project audits.|
+|Verification|Discover target-owned scenarios deterministically and require unique role resolution before exact-byte execution; retain instruction fixtures and negative machine cases.|`tools/test rh850_firmware` runs the machine gate. `make verify-processor` now requires it after the synthetic instruction fixture, before optional working-project audits. GNU simulation remains an independent backend.|
 
 Progress:
 
@@ -195,8 +199,8 @@ Progress:
 - [x] Add deterministic peripheral scheduling and the exact TAUJ, RSCFD, FACI,
   INTC-register, and recovered ICU-S paths required by retained scenarios.
 - [x] Add exact-firmware and negative regression scenarios and CLI integration.
-- [ ] Add interrupt arbitration/exception delivery only when an exact target path
-  and manual-backed acceptance case require it.
+- [x] Add manual-backed EIINT arbitration/entry/return, explicit TAUJ clock
+  progression, and an exact Camry receive-to-foreground scenario.
 - [ ] Add mutating FACI commands and CodeFlash coherency only with an exact
   programming path and byte-level postconditions.
 - [ ] Extend peripherals and instruction tests incrementally from failing exact
@@ -204,9 +208,9 @@ Progress:
 
 The functional model currently covers PE1/self LocalRAM aliasing,
 STAC-controlled Application/System reset RAM rules, G3M alignment and MPU
-overlap permissions, per-register MMIO access widths, TAUJ0 control state, EIC
-register accesses, recovered RSCFD transmit buffers, the FACI status-clear
-command, and the explicitly recovered ICU-S register surface. Unknown MMIO,
+overlap permissions, per-register MMIO access widths, TAUJ0 interval progression,
+EIINT delivery, common receive FIFOs, recovered RSCFD transmit buffers, the FACI
+status-clear command, and the explicitly recovered ICU-S surface. Unknown MMIO,
 illegal widths, uninitialized state, and unsupported FACI commands are hard
 faults carrying PC, address, size, access kind, and evidence provenance.
 A known register without a behavior model remains ordinary typed storage; it
@@ -228,7 +232,7 @@ Run one or more deterministic scenarios by registered target name:
 
 ```bash
 tools/rh850 test firmware camry-8965F3307000 \
-  tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_ring_producer.json \
+  tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_can_foreground.json \
   tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_rscfd_tx.json
 ```
 
@@ -239,6 +243,22 @@ state contract, stop addresses, checks, and termination reason. Scenario RAM
 initialization is explicit; RAM artifacts require SHA-256 identities.
 Unsupported fields and all attempts to initialize registered
 CodeFlash/DataFlash directly are rejected before execution.
+
+External `events` require `kind`, nonnegative `after_instructions`, and
+`evidence`. Supported kinds:
+
+- `clock`: positive `p_bus_cycles`; advances enabled modeled TAUJ channels.
+- `can-rx`: `fifo`, `boundary: "post-filter"`, `can_id`, and `data_hex`;
+  optional `fd`, `extended`, 12-bit `label`, and 16-bit `timestamp`.
+  Classical lengths are 0–8; FD additionally permits 12/16/20/24/32/48/64 bytes.
+  Label/timestamp are explicit accepted-message metadata, not recovered by a
+  simulated filter or timestamp clock.
+- `interrupt`: `channel`; requests a modeled EIC source. Unknown/reserved
+  channels fail closed.
+
+Stop addresses are terminal: events scheduled after reaching a stop are not
+executed. Unsupported modes and missing state remain faults.
+
 
 The default functional profile establishes instruction, register, memory, and
 modeled-device behavior only. It makes no cycle-timing, silicon, vehicle, or
@@ -255,6 +275,7 @@ addresses. For the tracked Camry image the resolver currently produces:
 |RSCFD transmit|`0x000852FE`|buffer-16 identifier/data and transmit request|
 |TAUJ0 setup|`0x0006639C`|mode, prescaler, and calibrated reload values|
 |INTC acknowledge|`0x00066062`|EIC136 pending-bit poll and clear|
+|CAN receive to foreground|`0x00066062`|TAUJ underflow/poll, common FIFO 5, IRQ187 entry/native return, software-ring publication and foreground consumption|
 |FACI command|`0x00078AE6`|status-clear command and ready state|
 |ICU-S command five|`0x0008A720`|validated command submission and recovered state|
 |ICU-S input callback|`0x0008A538`|four input words fed to the ICU-S data register|
@@ -266,15 +287,57 @@ image to `0x00077F16`; the equivalent Camry entry is `0x00078AE6`. This proves
 cross-target role resolution and exact execution, not semantic equivalence of
 the complete firmware images.
 
+### Exact Camry receive-to-foreground proof
+
+`camry_f33_can_foreground.json` exercises stock `8965F3307000` CodeFlash
+(`42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7`).
+The scenario supplies a synthetic classical `0x7A1` frame
+`02 3e 00 00 00 00 00 00` after acceptance filtering, with label `0x34`.
+Exact rule 43 at `0x23368` supplies that ID/label and destination `0x2000`
+(common FIFO 5). This is not the normal `0x090`/B6 RFIFO1 path.
+
+Byte/disassembly checks matter here: table cells `0x22FA0`, `0x22FAC`, and
+`0x22FB4` contain **FIFO-3 base addresses**, but the native `0x83D40` reader adds
+`8`, `8`, and `0x100`, selecting FIFO 5 at `0xFFD2018C`, `0xFFD201EC`, and
+`0xFFD23680`. The actual INTBP word at `0x204EC` points to `0x66100`, not
+`0x71508`.
+
+```mermaid
+flowchart LR
+  RX["post-filter 0x7A1<br/>CFIFO5"] --> IRQ["IRQ187<br/>vector 0x66100"]
+  IRQ --> ISR["0x66812 → 0x83F30<br/>0x83D40 drains FIFO"]
+  ISR --> Ring["0x80B42 → 0x80A4A<br/>software ring"]
+  ISR --> Return["native EIRET<br/>0x71372"]
+  Clock["400000 P-Bus cycles<br/>TAUJ0 CH3 underflow"] --> Poll["foreground 0x66062<br/>poll/clear EIC136"]
+  Return --> Poll
+  Poll --> Drain["0x7A254 → 0x79EDE<br/>ring consumer/callback"]
+  Ring --> Drain
+```
+
+The verified run executes **1,274 exact instructions** and stops at `0x7A272`,
+immediately after the foreground ring-drain call. Twelve postconditions check
+the preserved record bytes, producer/consumer cursor advancement, empty queue,
+timer acknowledgement, one interrupt entry/return, saved poll PC, and released
+ISPR priority.
+
+The starting state is deliberately bounded: scenario-owned zero Local RAM,
+explicit online/started communication state and completed initialization gate,
+operating CAN status, and a pre-running steady-period timer. No executable
+overlay, replacement ISR, boot emulation, diagnostic-service completion, or
+vehicle observation is claimed. Controller-mode initialization/status evolution
+outside those supplied preconditions remains unmodeled.
+
+
 Run the narrow gate with:
 
 ```bash
 tools/test rh850_firmware
 ```
 
-This gate also proves strict schema rejection, unknown-MMIO faults, executable
-CodeFlash-overlay rejection, and unique role resolution on Camry and Crown
-bytes. It does not promote recovered ICU-S behavior to a manual silicon claim.
+This gate also covers strict schema/event rejection, unknown-MMIO and unsupported
+device-event faults, executable-overlay rejection, unique role resolution on
+Camry/Crown, and preservation of an execution fault when subsequent output
+inspections fail. It does not promote recovered ICU-S behavior to a silicon claim.
 
 ## CodeFlash simulation
 

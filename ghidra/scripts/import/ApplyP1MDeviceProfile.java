@@ -192,6 +192,8 @@ public class ApplyP1MDeviceProfile extends GhidraScript {
                 "432-entry x32-bit Global RAM ring fed from ADCG0DIR00 by DMAC");
         label(0xFEEF8A20L, "ADCG1_DMA_SAMPLE_RING",
                 "432-entry x32-bit Global RAM ring fed from ADCG1DIR00 by DMAC");
+        // INTC1 EIC0..31 use the separate low-channel bank (P1M-E section 6.2.2).
+        ensureUninitBlock("SFR_EIC0_31", 0xFFFEEA00L, 0x40L, true, true, false, true);
         // EIC / interrupt-control SFRs (EIC136, EIC292, EIC293, …).
         ensureUninitBlock("SFR_EIC", 0xFFFFB000L, 0x1000L, true, true, false, true);
         // RSCFD / RSCAN channel register window used by application CAN.

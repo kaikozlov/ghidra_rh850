@@ -148,6 +148,19 @@ def _model() -> tuple[dict[str, Any], list[dict[str, Any]], dict[str, Any]]:
                 "payload_address",
                 "completion_value",
                 "channel_count",
+                "interrupt_channel",
+                "interrupt_register",
+                "interrupt_register_prefix",
+                "interrupt_channel_base",
+                "mode_prefix",
+                "prescaler_register",
+                "control_register",
+                "pointer_register",
+                "window_register",
+                "channel_control_register",
+                "global_control_register",
+                "fifo_index",
+                "fifo_channel",
             ):
                 value = node.get_property(property_name)
                 if value is not None:

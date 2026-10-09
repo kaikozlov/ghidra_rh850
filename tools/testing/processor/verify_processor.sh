@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Processor semantic gate: SLEIGH compile, synthetic fixture checks, and
+# Processor semantic gate: SLEIGH compile, synthetic fixture checks, the exact
+# firmware machine regression suite (tools/test rh850_firmware), and
 # (when a working project exists) full-program audits via tools/project/run_headless so
 # the isolated extension is used without mutating GHIDRA_HOME.
 set -euo pipefail
@@ -52,6 +53,9 @@ grep -q 'ASSERT processor-fixture: all .* cases passed' "$FIXTURE_LOG" || {
   echo "synthetic fixture did not report success" >&2
   exit 1
 }
+
+echo "==> Firmware machine regression (rh850_firmware)"
+"$ROOT/tools/test" rh850_firmware
 
 echo "==> Working-project audits (if present)"
 if [[ -d "$PROJECT_DIR/$PROJECT_NAME.rep" ]]; then

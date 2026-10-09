@@ -26,8 +26,8 @@
   "memory": [
     {
       "address": "0xFFFFB110",
-      "hex": "0010",
-      "evidence": "scenario: EIC136.EIRF pending"
+      "hex": "cf10",
+      "evidence": "scenario: EIC136.EIRF pending with the exact F33 00CF masked, polled configuration"
     }
   ],
   "artifacts": [],
@@ -43,7 +43,7 @@
       "kind": "memory",
       "address": "0xFFFFB110",
       "size": 2,
-      "equals_hex": "0000"
+      "equals_hex": "cf00"
     }
   ]
 }

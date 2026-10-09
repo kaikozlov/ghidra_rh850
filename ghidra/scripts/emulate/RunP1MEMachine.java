@@ -40,6 +40,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -146,6 +147,19 @@ public class RunP1MEMachine extends GhidraScript {
         Long payload_address;
         Long completion_value;
         Long channel_count;
+        Integer interrupt_channel;
+        Integer interrupt_channel_base;
+        String interrupt_register_prefix;
+        String interrupt_register;
+        String mode_prefix;
+        String prescaler_register;
+        String control_register;
+        String pointer_register;
+        String window_register;
+        String channel_control_register;
+        String global_control_register;
+        Integer fifo_index;
+        Integer fifo_channel;
 
         boolean contains(long candidate, int width) {
             long end = candidate + Integer.toUnsignedLong(width);
@@ -263,6 +277,22 @@ public class RunP1MEMachine extends GhidraScript {
         }
     }
 
+    static final class ExternalEvent {
+        String kind;
+        long after_instructions;
+        String evidence;
+        Long p_bus_cycles;
+        Integer fifo;
+        Integer channel;
+        String can_id;
+        String data_hex;
+        boolean extended;
+        boolean fd;
+        String boundary;
+        int label;
+        int timestamp;
+    }
+
 
     static final class Scenario {
         String schema;
@@ -276,6 +306,7 @@ public class RunP1MEMachine extends GhidraScript {
         List<MemoryInit> pre_reset_memory = new ArrayList<>();
         List<ArtifactLoad> artifacts = new ArrayList<>();
         List<CheckDef> checks = new ArrayList<>();
+        List<ExternalEvent> events = new ArrayList<>();
         ExpectedFault expected_fault;
     }
 
@@ -330,6 +361,21 @@ public class RunP1MEMachine extends GhidraScript {
         }
     }
 
+    static final class ReceiveFifo {
+        final RegisterDef control, status, pointer, window, global, channel, interrupt;
+        final ArrayDeque<byte[]> messages = new ArrayDeque<>();
+
+        ReceiveFifo(Model model, RegisterDef control) {
+            this.control = control;
+            status = model.requiredRegister(control.name, "status", control.status_register);
+            pointer = model.requiredRegister(control.name, "pointer", control.pointer_register);
+            window = model.requiredRegister(control.name, "window", control.window_register);
+            global = model.requiredRegister(control.name, "global", control.global_control_register);
+            channel = model.requiredRegister(control.name, "channel", control.channel_control_register);
+            interrupt = model.requiredRegister(control.name, "interrupt", control.interrupt_register);
+        }
+    }
+
     static final class Model {
         static final long FASTAT_ACCESS_ERROR_MASK = 0x88;
         static final long FASTAT_CMDLK = 0x10;
@@ -344,6 +390,16 @@ public class RunP1MEMachine extends GhidraScript {
         final List<RegionDef> regions;
         final List<RegisterDef> registers;
         final Map<String, RegisterDef> registersByName = new HashMap<>();
+        final Map<Integer, RegisterDef> interruptRegisters = new LinkedHashMap<>();
+        final Map<Integer, ReceiveFifo> receiveFifos = new HashMap<>();
+        // R01UH0585EJ0120 Table 17.132: CFDC and CFPLS encodings.
+        static final int[] FIFO_DEPTHS = {0, 4, 8, 16, 32, 48, 64, 128};
+        static final int[] PAYLOAD_LENGTHS = {8, 12, 16, 20, 24, 32, 48, 64};
+        RegisterDef timerStart;
+        long[] timerRemainders;
+        List<ExternalEvent> externalEvents = List.of();
+        int nextExternalEvent;
+        long registerBeforeWrite;
         final List<Integer> faciSequence = new ArrayList<>();
         final Map<String, List<RegionDef>> aliases = new HashMap<>();
         final PriorityQueue<ScheduledEvent> scheduledEvents = new PriorityQueue<>(
@@ -362,11 +418,28 @@ public class RunP1MEMachine extends GhidraScript {
             this.registers = new ArrayList<>(spec.manual.registers);
             this.registers.addAll(spec.target_derived.registers);
             regions.sort(Comparator.comparingLong(row -> row.start));
-            for (RegisterDef register : registers) registersByName.put(register.name, register);
+            for (RegisterDef register : registers) {
+                registersByName.put(register.name, register);
+                if ("intc_eic".equals(register.behavior)) {
+                    if (register.interrupt_channel == null) {
+                        throw new IllegalArgumentException(register.name + " lacks interrupt channel metadata");
+                    }
+                    interruptRegisters.put(register.interrupt_channel, register);
+                }
+            }
             registers.sort(Comparator.comparingLong(row -> row.address));
             for (RegionDef region : regions) {
                 if (region.alias_group != null) {
                     aliases.computeIfAbsent(region.alias_group, ignored -> new ArrayList<>()).add(region);
+                }
+            }
+            for (RegisterDef register : registers) {
+                if (register.window_register != null) {
+                    receiveFifos.put(register.fifo_index, new ReceiveFifo(this, register));
+                }
+                if ("tauj-start".equals(register.trigger)) {
+                    timerStart = register;
+                    timerRemainders = new long[Math.toIntExact(register.channel_count)];
                 }
             }
         }
@@ -438,12 +511,101 @@ public class RunP1MEMachine extends GhidraScript {
             return Utils.bytesToLong(value, value.length, language.isBigEndian()) & 0xffffffffL;
         }
 
+        void processorRegister(PcodeThread<byte[]> thread, String name, long value) {
+            Register register = language.getRegister(name);
+            if (register == null) throw new IllegalArgumentException("unknown processor register: " + name);
+            thread.getState().setVar(register, bytes(value, register.getNumBytes(), language.isBigEndian()));
+        }
+
+        void requestInterrupt(PcodeThread<byte[]> thread, int channel) {
+            RegisterDef eic = interruptRegisters.get(channel);
+            if (eic == null || eic.reset == null) {
+                throw fault("unsupported-interrupt", thread, channel, 0, "request", "manual",
+                    "interrupt channel is not described by the device model");
+            }
+            setRegisterValue(eic.name, unsigned(memory(eic.address, eic.size)) | 0x1000);
+            JsonObject event = new JsonObject();
+            event.addProperty("kind", "interrupt-request");
+            event.addProperty("channel", channel);
+            event.addProperty("scheduler_tick", trace.instructions);
+            trace.deviceEvents.add(event);
+        }
+
+        void deliverInterrupt(PcodeThread<byte[]> thread) {
+            long psw = processorRegister(thread, "PSW");
+            if ((psw & 0xa0) != 0) return;
+            long serviced = processorRegister(thread, "ISPR") & 0xffff;
+            int ceiling = serviced == 0 ? 16 : Long.numberOfTrailingZeros(serviced);
+            long pmr = processorRegister(thread, "PMR");
+            RegisterDef selected = null;
+            int priority = 16;
+            boolean priorityMasked = false;
+            for (RegisterDef eic : interruptRegisters.values()) {
+                if (eic.reset == null) continue;
+                long value = unsigned(memory(eic.address, eic.size));
+                if ((value & 0x1080) != 0x1000) continue;
+                int candidate = (int) value & 15;
+                if (candidate >= ceiling) continue;
+                if ((pmr & (1L << candidate)) != 0) {
+                    priorityMasked = true;
+                    continue;
+                }
+                if (candidate < priority || (candidate == priority && selected != null
+                        && eic.interrupt_channel < selected.interrupt_channel)) {
+                    priority = candidate;
+                    selected = eic;
+                }
+            }
+            long icsr = processorRegister(thread, "ICSR");
+            processorRegister(thread, "ICSR", (icsr & ~1L) | (priorityMasked ? 1L : 0L));
+            if (selected == null) return;
+            long control = unsigned(memory(selected.address, selected.size));
+            long base = processorRegister(thread, (psw & 0x8000) == 0 ? "RBASE" : "EBASE");
+            long handler;
+            if ((control & 0x40) != 0 && (base & 1) == 0) {
+                long vector = (processorRegister(thread, "INTBP") & 0xfffffe00L)
+                    + selected.interrupt_channel * 4L;
+                beforeRead(thread, vector, 4);
+                handler = unsigned(memory(thread, vector, 4));
+            }
+            else {
+                handler = (base & 0xfffffe00L) + 0x100 + ((base & 1) == 0 ? priority * 16 : 0);
+            }
+            long returnPc = pc(thread);
+            processorRegister(thread, "EIPC", returnPc);
+            processorRegister(thread, "EIPSW", psw);
+            processorRegister(thread, "EIIC", 0x1000 + selected.interrupt_channel);
+            processorRegister(thread, "PSW", (psw & ~0x40000040L) | 0x20);
+            processorRegister(thread, "ll_valid", 0);
+            if ((processorRegister(thread, "INTCFG") & 1) == 0) {
+                processorRegister(thread, "ISPR", serviced | (1L << priority));
+            }
+            // Edge requests clear on acceptance; level requests remain until their source clears.
+            if ((control & 0x8000) == 0) setRegisterValue(selected.name, control & ~0x1000L);
+            thread.overrideCounter(memorySpace.getAddress(handler));
+            JsonObject event = new JsonObject();
+            event.addProperty("kind", "interrupt-enter");
+            event.addProperty("channel", selected.interrupt_channel);
+            event.addProperty("priority", priority);
+            event.addProperty("return_pc", hex32(returnPc));
+            event.addProperty("handler", hex32(handler));
+            event.addProperty("scheduler_tick", trace.instructions);
+            trace.deviceEvents.add(event);
+        }
+
         void initializeProcessorReset(PcodeThread<byte[]> thread) {
             Map<String, Long> resetValues = Map.of(
                 "PSW", 0x20L,
                 "MCTL", 0L,
                 "MPM", 0L,
-                "ASID", 0L
+                "ASID", 0L,
+                "ISPR", 0L,
+                "PMR", 0L,
+                "INTCFG", 0L,
+                "ICSR", 0L,
+                // SLEIGH-internal monitor state: a fresh machine has no reservation.
+                "ll_addr", 0L,
+                "ll_valid", 0L
             );
             for (Map.Entry<String, Long> row : resetValues.entrySet()) {
                 Register register = language.getRegister(row.getKey());
@@ -575,6 +737,11 @@ public class RunP1MEMachine extends GhidraScript {
                     register.evidence, "register is not software-writable: " + register.name);
             }
             validateDeviceWrite(thread, register, value);
+            if ((register.fifo_index != null && receiveFifos.containsKey(register.fifo_index)
+                    && receiveFifos.get(register.fifo_index).status == register)
+                    || ("intc_eic".equals(register.behavior) && register.reset != null)) {
+                registerBeforeWrite = unsigned(memory(thread, register.address, register.size));
+            }
             trace.access("write", pc(thread), address, size, register.evidence);
         }
 
@@ -709,6 +876,7 @@ public class RunP1MEMachine extends GhidraScript {
                         RegisterDef reload = requiredRegister(
                             register.name, "reload", register.reload_prefix + channel);
                         memory(thread, reload.address, reload.size);
+                        timerClockDivisor(thread, channel);
                     }
                 }
             }
@@ -765,6 +933,178 @@ public class RunP1MEMachine extends GhidraScript {
             });
         }
 
+        long registerValue(RegisterDef register) {
+            return unsigned(memory(register.address, register.size));
+        }
+
+        void refreshReceiveFifo(ReceiveFifo fifo) {
+            long control = registerValue(fifo.control);
+            int depth = FIFO_DEPTHS[(int) (control >>> 8) & 7];
+            int count = fifo.messages.size();
+            long status = registerValue(fifo.status) & 0x1c;
+            status |= ((long) count << 8) | (count == 0 ? 1 : 0)
+                | (depth != 0 && count == depth ? 2 : 0);
+            setRegisterValue(fifo.status.name, status);
+            if (count != 0) setMemory(fifo.window.address, fifo.messages.peek());
+            refreshReceiveInterrupt(fifo);
+        }
+
+        void refreshReceiveInterrupt(ReceiveFifo fifo) {
+            long old = registerValue(fifo.interrupt);
+            boolean requested = false;
+            for (ReceiveFifo source : receiveFifos.values()) {
+                if (source.interrupt == fifo.interrupt && (registerValue(source.status) & 8) != 0
+                        && (registerValue(source.control) & 2) != 0) {
+                    requested = true;
+                    break;
+                }
+            }
+            setRegisterValue(fifo.interrupt.name, (old & ~0x1000L) | (requested ? 0x1000 : 0));
+        }
+
+        void receiveFrame(PcodeThread<byte[]> thread, ExternalEvent input) {
+            ReceiveFifo fifo = receiveFifos.get(input.fifo);
+            if (fifo == null || !"post-filter".equals(input.boundary)) {
+                throw fault("unsupported-can-receive", thread, 0, 0, "event", "scenario",
+                    "only a modeled common FIFO at the explicit post-filter boundary is supported");
+            }
+            long control = registerValue(fifo.control);
+            if ((control & 0x30000) != 0) {
+                throw fault("unsupported-fifo-mode", thread, fifo.control.address, 4,
+                    "event", "manual", "only common-FIFO receive mode is implemented");
+            }
+            int depth = FIFO_DEPTHS[(int) (control >>> 8) & 7];
+            int capacity = PAYLOAD_LENGTHS[(int) (control >>> 4) & 7];
+            byte[] payload = parseHex(input.data_hex);
+            long config = registerValue(requiredRegister(fifo.control.name, "configuration", "GCFG"));
+            String discarded = null;
+            if ((registerValue(fifo.global) & 7) != 0 || (registerValue(fifo.channel) & 7) != 0) {
+                discarded = "controller-not-operating";
+            }
+            else if ((control & 1) == 0 || depth == 0) discarded = "fifo-disabled";
+            else if (payload.length > capacity && (config & 0x20) == 0) discarded = "payload-capacity";
+            else if (fifo.messages.size() == depth) {
+                setRegisterValue(fifo.status.name, registerValue(fifo.status) | 4);
+                discarded = "fifo-full";
+            }
+            if (discarded == null) {
+                int thresholdEighths = ((int) (control >>> 13) & 7) + 1;
+                if ((control & 0x1000) == 0 && depth == 4 && (thresholdEighths & 1) != 0) {
+                    throw fault("unsupported-fifo-threshold", thread, fifo.control.address, 4,
+                        "event", "manual", "four-message FIFO requires an even threshold eighth");
+                }
+                byte[] window = new byte[76];
+                int dlc = payload.length <= 8 ? payload.length : 9;
+                while (dlc > 8 && PAYLOAD_LENGTHS[dlc - 8] != payload.length) dlc++;
+                System.arraycopy(bytes(parseUnsigned(input.can_id) | (input.extended ? 0x80000000L : 0),
+                    4, false), 0, window, 0, 4);
+                System.arraycopy(bytes(((long) dlc << 28) | ((long) input.label << 16) | input.timestamp,
+                    4, false), 0, window, 4, 4);
+                window[8] = (byte) (input.fd ? 4 : 0);
+                System.arraycopy(payload, 0, window, 12, Math.min(payload.length, capacity));
+                fifo.messages.add(window);
+                if ((control & 0x1000) != 0 || fifo.messages.size() * 8 >= depth * thresholdEighths) {
+                    setRegisterValue(fifo.status.name, registerValue(fifo.status) | 8);
+                }
+                refreshReceiveFifo(fifo);
+            }
+            JsonObject event = GSON.toJsonTree(input).getAsJsonObject();
+            event.addProperty("kind", discarded == null ? "can-rx" : "can-rx-discard");
+            if (discarded != null) event.addProperty("reason", discarded);
+            event.addProperty("scheduler_tick", trace.instructions);
+            trace.deviceEvents.add(event);
+        }
+
+        void handleReceiveWrite(PcodeThread<byte[]> thread, RegisterDef register, byte[] value) {
+            ReceiveFifo fifo = register.fifo_index == null ? null : receiveFifos.get(register.fifo_index);
+            if (fifo == null) return;
+            if (register == fifo.status) {
+                // CFMC/CFEMP/CFFLL are read-only; the three sticky flags clear by writing zero.
+                setRegisterValue(register.name, registerBeforeWrite & (registerValue(register) | ~0x1cL));
+                refreshReceiveInterrupt(fifo);
+            }
+            else if (register == fifo.control) {
+                if ((registerValue(register) & 1) == 0) {
+                    fifo.messages.clear();
+                    refreshReceiveFifo(fifo);
+                }
+                else refreshReceiveInterrupt(fifo);
+            }
+            else if (register == fifo.pointer) {
+                if ((unsigned(value) & 0xff) != 0xff || (registerValue(fifo.control) & 1) == 0
+                        || fifo.messages.isEmpty()) {
+                    throw fault("invalid-fifo-pop", thread, register.address, value.length,
+                        "write", "manual", "receive FIFO pop requires CFE=1, unread data, and CFPC=0xFF");
+                }
+                fifo.messages.remove();
+                refreshReceiveFifo(fifo);
+                JsonObject event = new JsonObject();
+                event.addProperty("kind", "can-rx-pop");
+                event.addProperty("fifo", register.fifo_index);
+                event.addProperty("remaining", fifo.messages.size());
+                event.addProperty("scheduler_tick", trace.instructions);
+                trace.deviceEvents.add(event);
+            }
+        }
+
+        long timerClockDivisor(PcodeThread<byte[]> thread, int channel) {
+            RegisterDef modeReg = requiredRegister(timerStart.name, "mode", timerStart.mode_prefix + channel);
+            long mode = registerValue(modeReg);
+            int clock = (int) (mode >>> 14) & 3;
+            if ((mode & 0x371e) != 0 || clock == 3) {
+                throw fault("unsupported-timer-mode", thread, modeReg.address, modeReg.size,
+                    "clock", "manual", "only software-triggered interval mode on CK0..CK2 is implemented");
+            }
+            long prescaler = registerValue(requiredRegister(timerStart.name, "prescaler", timerStart.prescaler_register));
+            return 1L << ((prescaler >>> (clock * 4)) & 15);
+        }
+
+        void advanceClock(PcodeThread<byte[]> thread, long cycles) {
+            if (timerStart == null) throw new IllegalStateException("machine model lacks TAUJ");
+            long enabled = registerValue(requiredRegister(timerStart.name, "status", timerStart.status_register));
+            for (int channel = 0; channel < timerRemainders.length; channel++) {
+                if ((enabled & (1L << channel)) == 0) continue;
+                long divisor = timerClockDivisor(thread, channel);
+                long remainder = cycles % divisor + timerRemainders[channel];
+                long ticks = cycles / divisor + remainder / divisor;
+                timerRemainders[channel] = remainder % divisor;
+                RegisterDef counter = requiredRegister(timerStart.name, "counter", timerStart.counter_prefix + channel);
+                RegisterDef reload = requiredRegister(timerStart.name, "reload", timerStart.reload_prefix + channel);
+                long current = registerValue(counter);
+                long underflows = 0;
+                if (ticks <= current) current -= ticks;
+                else {
+                    long period = registerValue(reload) + 1;
+                    long remaining = ticks - current - 1;
+                    underflows = 1 + remaining / period;
+                    current = period - 1 - remaining % period;
+                    requestInterrupt(thread, timerStart.interrupt_channel_base + channel);
+                }
+                setRegisterValue(counter.name, current);
+                JsonObject event = new JsonObject();
+                event.addProperty("kind", "tauj-clock");
+                event.addProperty("channel", channel);
+                event.addProperty("p_bus_cycles", cycles);
+                event.addProperty("underflows", underflows);
+                event.addProperty("counter", current);
+                event.addProperty("scheduler_tick", trace.instructions);
+                trace.deviceEvents.add(event);
+            }
+        }
+
+        void dispatchExternalEvents(PcodeThread<byte[]> thread) {
+            while (nextExternalEvent < externalEvents.size()
+                    && externalEvents.get(nextExternalEvent).after_instructions <= trace.instructions) {
+                ExternalEvent input = externalEvents.get(nextExternalEvent++);
+                switch (input.kind) {
+                    case "clock": advanceClock(thread, input.p_bus_cycles); break;
+                    case "can-rx": receiveFrame(thread, input); break;
+                    case "interrupt": requestInterrupt(thread, input.channel); break;
+                    default: throw new IllegalArgumentException("unknown external event " + input.kind);
+                }
+            }
+        }
+
         void handleTaujWrite(PcodeThread<byte[]> thread, RegisterDef register, byte[] value) {
             boolean starting = "tauj-start".equals(register.trigger);
             if (!starting && !"tauj-stop".equals(register.trigger)) return;
@@ -785,6 +1125,11 @@ public class RunP1MEMachine extends GhidraScript {
                         RegisterDef counter = requiredRegister(
                             register.name, "counter", register.counter_prefix + channel);
                         setMemory(counter.address, memory(reload.address, reload.size));
+                        timerRemainders[channel] = 0;
+                        RegisterDef mode = requiredRegister(register.name, "mode", register.mode_prefix + channel);
+                        if ((registerValue(mode) & 1) != 0) {
+                            requestInterrupt(thread, register.interrupt_channel_base + channel);
+                        }
                     }
                 }
                 JsonObject event = new JsonObject();
@@ -852,6 +1197,12 @@ public class RunP1MEMachine extends GhidraScript {
             RegisterDef register = register(address, size);
             if (register == null) return;
             registerWriteEvent(thread, register, value);
+            if ("intc_eic".equals(register.behavior) && register.reset != null) {
+                long writable = (register.reset & 0x8000) == 0 ? 0x10cf : 0xcf;
+                setRegisterValue(register.name,
+                    (registerBeforeWrite & ~writable) | (registerValue(register) & writable));
+            }
+            handleReceiveWrite(thread, register, value);
             if (register.trigger == null) return;
             switch (register.trigger) {
                 case "rscfd-transmit": handleRscfdWrite(thread, register, value); break;
@@ -956,6 +1307,10 @@ public class RunP1MEMachine extends GhidraScript {
     static final class Callbacks implements PcodeEmulationCallbacks<byte[]> {
         final SleighLanguage language;
         final Model model;
+        boolean interruptReturn;
+        boolean automaticPriorityReturn;
+        boolean protectedIsprWrite;
+        long isprBeforeInstruction;
 
         Callbacks(SleighLanguage language, Model model) {
             this.language = language;
@@ -977,6 +1332,17 @@ public class RunP1MEMachine extends GhidraScript {
                                              Instruction instruction, PcodeProgram program) {
             model.requireExecute(
                 thread, instruction.getAddress().getOffset(), instruction.getLength());
+            String mnemonic = instruction.getMnemonicString();
+            interruptReturn = "eiret".equals(mnemonic);
+            automaticPriorityReturn = interruptReturn
+                && (model.processorRegister(thread, "PSW") & 0x40) == 0
+                && (model.processorRegister(thread, "INTCFG") & 1) == 0;
+            Register destination = "ldsr".equals(mnemonic) ? instruction.getRegister(1) : null;
+            protectedIsprWrite = destination != null && "ISPR".equals(destination.getName())
+                && (model.processorRegister(thread, "INTCFG") & 1) == 0;
+            if (automaticPriorityReturn || protectedIsprWrite) {
+                isprBeforeInstruction = model.processorRegister(thread, "ISPR");
+            }
         }
 
         @Override
@@ -1003,6 +1369,20 @@ public class RunP1MEMachine extends GhidraScript {
 
         @Override
         public void afterExecuteInstruction(PcodeThread<byte[]> thread, Instruction instruction) {
+            if (automaticPriorityReturn) {
+                model.processorRegister(thread, "ISPR", isprBeforeInstruction & (isprBeforeInstruction - 1));
+            }
+            else if (protectedIsprWrite) {
+                model.processorRegister(thread, "ISPR", isprBeforeInstruction);
+            }
+            if (interruptReturn) {
+                JsonObject event = new JsonObject();
+                event.addProperty("kind", "interrupt-return");
+                event.addProperty("pc", hex32(instruction.getAddress().getOffset()));
+                event.addProperty("return_pc", hex32(model.pc(thread)));
+                event.addProperty("scheduler_tick", model.trace.instructions + 1);
+                model.trace.deviceEvents.add(event);
+            }
             switch (instruction.getMnemonicString()) {
                 case "synce" -> model.trace.sync("SYNCE");
                 case "syncm" -> model.trace.sync("SYNCM");
@@ -1325,47 +1705,56 @@ public class RunP1MEMachine extends GhidraScript {
             boolean passed;
             String actual;
             String expected = check.equals != null ? check.equals : check.equals_hex;
-            switch (check.kind) {
-                case "register": {
-                    Register register = language.getRegister(check.register);
-                    if (register == null) throw new IllegalArgumentException("unknown check register: " + check.register);
-                    byte[] value = thread.getState().getVar(register, Reason.INSPECT);
-                    long number = Utils.bytesToLong(value, value.length, language.isBigEndian());
-                    actual = hex32(number);
-                    passed = number == parseUnsigned(check.equals);
-                    break;
-                }
-                case "memory": {
-                    if (check.size == null || check.size <= 0) {
-                        throw new IllegalArgumentException("memory check requires positive size");
+            try {
+                switch (check.kind) {
+                    case "register": {
+                        Register register = language.getRegister(check.register);
+                        if (register == null) throw new IllegalArgumentException("unknown check register: " + check.register);
+                        byte[] value = thread.getState().getVar(register, Reason.INSPECT);
+                        long number = Utils.bytesToLong(value, value.length, language.isBigEndian());
+                        actual = hex32(number);
+                        passed = number == parseUnsigned(check.equals);
+                        break;
                     }
-                    long address = parseUnsigned(check.address);
-                    byte[] value = model.emulator.getSharedState().getVar(
-                        model.memorySpace, address, check.size, true, Reason.INSPECT);
-                    StringBuilder text = new StringBuilder();
-                    for (byte b : value) text.append(String.format("%02x", b & 0xff));
-                    actual = text.toString();
-                    passed = actual.equalsIgnoreCase(check.equals_hex);
-                    break;
+                    case "memory": {
+                        if (check.size == null || check.size <= 0) {
+                            throw new IllegalArgumentException("memory check requires positive size");
+                        }
+                        long address = parseUnsigned(check.address);
+                        byte[] value = model.emulator.getSharedState().getVar(
+                            model.memorySpace, address, check.size, true, Reason.INSPECT);
+                        StringBuilder text = new StringBuilder();
+                        for (byte b : value) text.append(String.format("%02x", b & 0xff));
+                        actual = text.toString();
+                        passed = actual.equalsIgnoreCase(check.equals_hex);
+                        break;
+                    }
+                    case "sync-count": {
+                        Long count = model.trace.syncCounts.get(check.operation);
+                        if (count == null) throw new IllegalArgumentException("unknown sync operation: " + check.operation);
+                        actual = Long.toString(count);
+                        passed = count == parseUnsigned(check.equals);
+                        break;
+                    }
+                    case "event-count": {
+                        long count = model.trace.deviceEvents.stream()
+                            .filter(row -> row.has("kind")
+                                && row.get("kind").getAsString().equals(check.operation))
+                            .count();
+                        actual = Long.toString(count);
+                        passed = count == parseUnsigned(check.equals);
+                        break;
+                    }
+                    default:
+                        throw new IllegalArgumentException("unknown check kind: " + check.kind);
                 }
-                case "sync-count": {
-                    Long count = model.trace.syncCounts.get(check.operation);
-                    if (count == null) throw new IllegalArgumentException("unknown sync operation: " + check.operation);
-                    actual = Long.toString(count);
-                    passed = count == parseUnsigned(check.equals);
-                    break;
-                }
-                case "event-count": {
-                    long count = model.trace.deviceEvents.stream()
-                        .filter(row -> row.has("kind")
-                            && row.get("kind").getAsString().equals(check.operation))
-                        .count();
-                    actual = Long.toString(count);
-                    passed = count == parseUnsigned(check.equals);
-                    break;
-                }
-                default:
-                    throw new IllegalArgumentException("unknown check kind: " + check.kind);
+            }
+            catch (RuntimeException exc) {
+                MachineFault inspectionFault = cause(exc, MachineFault.class);
+                if (inspectionFault == null) throw exc;
+                result.add("error", inspectionFault.toJson());
+                actual = "unavailable";
+                passed = false;
             }
             result.addProperty("expected", expected);
             result.addProperty("actual", actual);
@@ -1392,6 +1781,7 @@ public class RunP1MEMachine extends GhidraScript {
         resolvedContract.add("stop_addresses", GSON.toJsonTree(scenario.stop_addresses));
         resolvedContract.addProperty("max_instructions", scenario.max_instructions);
         resolvedContract.addProperty("reset", scenario.reset);
+        resolvedContract.add("events", GSON.toJsonTree(scenario.events));
         report.add("resolved_run_contract", resolvedContract);
         report.addProperty("instruction_count", trace.instructions);
         report.addProperty("unique_instruction_addresses", trace.executed.size());
@@ -1430,6 +1820,8 @@ public class RunP1MEMachine extends GhidraScript {
         model.applyReset(scenario.reset);
         initializeScenario(model, thread, language, scenario);
 
+        model.externalEvents = new ArrayList<>(scenario.events);
+        model.externalEvents.sort(Comparator.comparingLong(event -> event.after_instructions));
         thread.overrideCounter(language.getDefaultSpace().getAddress(resolved.address));
         thread.overrideContextWithDefault();
         Set<Long> stops = new HashSet<>();
@@ -1440,6 +1832,9 @@ public class RunP1MEMachine extends GhidraScript {
         try {
             while (trace.instructions < scenario.max_instructions
                     && !stops.contains(thread.getCounter().getOffset())) {
+                model.dispatchDueEvents();
+                model.dispatchExternalEvents(thread);
+                model.deliverInterrupt(thread);
                 thread.stepInstruction();
             }
         }
@@ -1462,12 +1857,12 @@ public class RunP1MEMachine extends GhidraScript {
         String termination;
         if (scenario.expected_fault != null) {
             ExpectedFault expected = scenario.expected_fault;
-            passed = fault != null
+            boolean expectedFault = fault != null
                 && (expected.kind == null || expected.kind.equals(fault.kind))
                 && (expected.address == null || parseUnsigned(expected.address) == fault.address)
-                && (expected.access == null || expected.access.equals(fault.access))
-                && checksPassed;
-            termination = passed ? "expected-fault"
+                && (expected.access == null || expected.access.equals(fault.access));
+            passed = expectedFault && checksPassed;
+            termination = expectedFault ? "expected-fault"
                 : fault != null ? "unexpected-fault" : "missing-expected-fault";
         }
         else {
@@ -1494,7 +1889,7 @@ public class RunP1MEMachine extends GhidraScript {
     private void validateScenarioJson(JsonObject scenarioJson) {
         requireKeys(scenarioJson, Set.of("schema", "name", "entry", "max_instructions",
             "stop_addresses", "registers", "memory", "pre_reset_memory", "artifacts", "checks",
-            "expected_fault", "reset"), "scenario");
+            "expected_fault", "reset", "events"), "scenario");
         JsonObject entry = scenarioJson.getAsJsonObject("entry");
         requireKeys(entry, Set.of("role", "scope", "shape_sha256", "instruction_count",
             "body_size", "offset", "requirements"), "entry selector");

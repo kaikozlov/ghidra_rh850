@@ -172,7 +172,7 @@ public class ApplyP1MSfrTypes extends GhidraScript {
         DataType txBuf = buildTxMessageBuffer();
 
         long[] eics = {
-                0xFFFFB010L, 0xFFFFB10AL, 0xFFFFB10CL, 0xFFFFB10EL, 0xFFFFB110L,
+                0xFFFEEA10L, 0xFFFFB10AL, 0xFFFFB10CL, 0xFFFFB10EL, 0xFFFFB110L,
                 0xFFFFB176L, 0xFFFFB178L, 0xFFFFB248L, 0xFFFFB24AL, 0xFFFFB2F6L
         };
         for (long a : eics) {

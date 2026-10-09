@@ -561,6 +561,7 @@ SFR_STAC           fff81000..fff81fff  rw volatile
 SFR_RSCFD          ffd20000..ffd2ffff  rw volatile
 SFR_ECM_*          ffd60000..ffd630ff  rw volatile, four mapped windows
 SFR_TAUJ           ffe50000..ffe52fff  rw volatile
+SFR_EIC0_31        fffeea00..fffeea3f  rw volatile
 SFR_EIC            ffffb000..ffffbfff  rw volatile
 ```
 
@@ -590,7 +591,7 @@ tools/test full                   # explicit portable sweep
 tools/test local                  # explicit external/live-project sweep
 make verify                       # alias for core
 make verify-sleigh                # SLEIGH compile + isolated install
-make verify-processor             # processor fixtures + working-project audits
+make verify-processor             # processor fixtures + firmware-machine gate + working-project audits
 make verify-project-parity        # exact working-project inventory vs baseline
 ```
 
