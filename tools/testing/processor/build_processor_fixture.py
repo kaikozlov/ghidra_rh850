@@ -468,12 +468,21 @@ def build() -> tuple[bytes, list[dict]]:
     add("cache", enc_cache(0x20, 6), {
         "mnemonic_prefix": "cache",
         "must_pcode_ops": ["CALLOTHER"],
-        "userop": "__cache",
+        "userop": "__cibii",
+    })
+    add("cache-chbii", enc_cache(0x00, 6), {
+        "mnemonic_prefix": "cache",
+        "must_pcode_ops": ["CALLOTHER"],
+        "userop": "__chbii",
+    })
+    add("cache-cll", enc_cache(0x7E, 6), {
+        "mnemonic_prefix": "cache",
+        "must_pcode_ops": [],
     })
     add("pref", enc_pref(0, 6), {
         "mnemonic_prefix": "pref",
         "must_pcode_ops": ["CALLOTHER"],
-        "userop": "__prefetch",
+        "userop": "__prefi",
     })
 
     # Every G3M floating mnemonic that had inherited fork spelling drift.

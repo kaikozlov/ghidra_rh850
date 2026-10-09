@@ -4,6 +4,14 @@
 // Args: <absolute-manifest-json>
 import ghidra.app.script.GhidraScript;
 import ghidra.app.emulator.EmulatorHelper;
+import ghidra.app.util.PseudoDisassembler;
+import ghidra.app.util.PseudoInstruction;
+import ghidra.program.database.ProgramDB;
+import ghidra.program.model.lang.Language;
+import ghidra.program.model.lang.LanguageID;
+import ghidra.program.model.lang.UnknownInstructionException;
+import ghidra.program.util.DefaultLanguageService;
+import java.io.ByteArrayInputStream;
 import ghidra.program.model.address.Address;
 import ghidra.program.model.listing.Instruction;
 import ghidra.program.model.pcode.PcodeOp;
@@ -950,6 +958,559 @@ public class AssertProcessorFixtureSemantics extends GhidraScript {
         verifyStsr(addrs, "stsr-cdbcr", "CDBCR", 0x00000004L);
     }
 
+    private void verifyMaddfLanguageBoundary() throws Exception {
+        // R01US0001EJ0100 pp. 374, 380, 386, 388: E2M four-register forms.
+        // The low bit of reg4 is instruction bit 23, not bit 16.
+        String[] mnemonics = {"maddf.s", "msubf.s", "nmaddf.s", "nmsubf.s"};
+        float[] results = {10.0f, 2.0f, -10.0f, -2.0f};
+        for (String id : new String[]{"v850:LE:32:default", "v850e3:LE:32:default"}) {
+            boolean e2m = id.equals("v850:LE:32:default");
+            Language language = DefaultLanguageService.getLanguageService()
+                    .getLanguage(new LanguageID(id));
+            ProgramDB program = new ProgramDB("maddf-boundary", language,
+                    language.getDefaultCompilerSpec(), this);
+            int transaction = program.startTransaction("instruction boundary fixtures");
+            try {
+                Address base = program.getAddressFactory().getDefaultAddressSpace()
+                        .getAddress(0x100);
+                program.getMemory().createInitializedBlock("instructions", base,
+                        new ByteArrayInputStream(new byte[0x100]), 0x100, monitor, false);
+                PseudoDisassembler decoder = new PseudoDisassembler(program);
+                for (int operation = 0; operation < mnemonics.length; operation++) {
+                    for (int destination : new int[]{12, 13}) {
+                        int word0 = (8 << 11) | 0x07e0 | 6;
+                        int word1 = (10 << 11) | 0x0500 | (operation << 5)
+                                | (destination & 0x1e) | ((destination & 1) << 7);
+                        byte[] bytes = {(byte) word0, (byte) (word0 >> 8),
+                                (byte) word1, (byte) (word1 >> 8)};
+                        String label = id + " " + mnemonics[operation] + " r" + destination;
+                        Address address = program.getAddressFactory().getDefaultAddressSpace()
+                                .getAddress(0x100 + 8 * operation + 4 * (destination - 12));
+                        program.getMemory().setBytes(address, bytes);
+                        PseudoInstruction instruction;
+                        try {
+                            instruction = decoder.disassemble(address);
+                        } catch (UnknownInstructionException expected) {
+                            if (e2m) fail(label + ": documented E2M instruction not decoded");
+                            continue;
+                        }
+                        if (instruction == null) {
+                            if (e2m) fail(label + ": documented E2M instruction not decoded");
+                            continue;
+                        }
+                        if (!e2m) {
+                            fail(label + ": E2M-only encoding decoded as " + instruction);
+                            continue;
+                        }
+                        if (!mnemonics[operation].equals(instruction.getMnemonicString())
+                                || instruction.getLength() != 4
+                                || !("r" + destination).equals(
+                                        instruction.getDefaultOperandRepresentation(3))) {
+                            fail(label + ": wrong mnemonic, length or destination: " + instruction);
+                            continue;
+                        }
+                        EmulatorHelper emu = new EmulatorHelper(program);
+                        try {
+                            emu.writeRegister("PC", address.getOffset());
+                            emu.writeRegister("r6", Float.floatToRawIntBits(2.0f));
+                            emu.writeRegister("r8", Float.floatToRawIntBits(3.0f));
+                            emu.writeRegister("r10", Float.floatToRawIntBits(4.0f));
+                            emu.writeRegister("r" + destination, 0xdeadbeefL);
+                            step(emu, label);
+                            requireRegister(emu, label, "r" + destination,
+                                    Float.floatToRawIntBits(results[operation]));
+                            requireRegister(emu, label, "r10", Float.floatToRawIntBits(4.0f));
+                        } finally {
+                            emu.dispose();
+                        }
+                    }
+                }
+            } finally {
+                program.endTransaction(transaction, false);
+                program.release(this);
+            }
+        }
+        println("Checked MADDF-family E2M/G3M boundary and even/odd destinations");
+    }
+
+
+    private record FusedReference(int bits, int flags) {}
+
+    // Independent oracle: signed arbitrary-width integers at a common binary
+    // exponent, followed by one quotient/remainder rounding decision. No host
+    // floating-point arithmetic or 64-bit jam/alignment algorithm is reused.
+    private java.math.BigInteger floatInteger(int bits) {
+        int magnitude = bits & 0x7fffffff;
+        java.math.BigInteger value = java.math.BigInteger.valueOf(
+                magnitude == 0 ? 0 : (magnitude & 0x7fffff) | 0x800000);
+        return bits < 0 ? value.negate() : value;
+    }
+
+    private int floatExponent(int bits) {
+        return ((bits >>> 23) & 0xff) - 150;
+    }
+
+    private FusedReference roundFusedInteger(java.math.BigInteger value, int exponent,
+            int mode, int control, boolean quarterCancellation) {
+        int sign = value.signum() < 0 ? 0x80000000 : 0;
+        java.math.BigInteger magnitude = value.abs();
+        if (magnitude.signum() == 0) return new FusedReference(mode == 3 ? 0x80000000 : 0, 0);
+        int top = magnitude.bitLength() - 1 + exponent;
+        if (top < -126) {
+            boolean minimum = mode == 2 && sign == 0 || mode == 3 && sign != 0;
+            if (mode == 0 && (control & 0x800000) != 0) {
+                minimum = top >= -127 || quarterCancellation && top == -128
+                        && magnitude.bitCount() == 1;
+            }
+            return new FusedReference(sign | (minimum ? 0x00800000 : 0),
+                    (control & 0x40) == 0 ? 3 : 2);
+        }
+        int shift = magnitude.bitLength() - 24;
+        java.math.BigInteger quotient = magnitude;
+        java.math.BigInteger remainder = java.math.BigInteger.ZERO;
+        java.math.BigInteger divisor = java.math.BigInteger.ONE;
+        if (shift > 0) {
+            divisor = divisor.shiftLeft(shift);
+            java.math.BigInteger[] division = magnitude.divideAndRemainder(divisor);
+            quotient = division[0];
+            remainder = division[1];
+        } else {
+            quotient = magnitude.shiftLeft(-shift);
+        }
+        boolean inexact = remainder.signum() != 0;
+        int halfway = remainder.shiftLeft(1).compareTo(divisor);
+        boolean increment = mode == 0 ? halfway > 0 || halfway == 0 && quotient.testBit(0)
+                : inexact && (mode == 2 && sign == 0 || mode == 3 && sign != 0);
+        if (increment) quotient = quotient.add(java.math.BigInteger.ONE);
+        if (quotient.bitLength() > 24) {
+            quotient = quotient.shiftRight(1);
+            top++;
+        }
+        int flags = inexact ? 1 : 0;
+        if (top > 127) {
+            flags |= (control & 0x80) == 0 ? 5 : 4;
+            boolean finite = mode == 1 || mode == 2 && sign != 0 || mode == 3 && sign == 0;
+            return new FusedReference(sign | (finite ? 0x7f7fffff : 0x7f800000), flags);
+        }
+        return new FusedReference(sign | ((top + 127) << 23)
+                | (quotient.intValue() & 0x7fffff), flags);
+    }
+
+    private FusedReference fusedReference(int a, int b, int c, int operation,
+            int mode, int control, boolean e2m) {
+        java.math.BigInteger product = floatInteger(a).multiply(floatInteger(b));
+        int productExponent = floatExponent(a) + floatExponent(b);
+        FusedReference roundedProduct = roundFusedInteger(product, productExponent, 0, control, false);
+        if (e2m && (roundedProduct.bits() & 0x7fffffff) == 0x7f800000) {
+            int bits = ((a ^ b) & 0x80000000) | 0x7f800000;
+            if (operation >= 2) bits ^= 0x80000000;
+            return new FusedReference(bits, (control & 0x80) == 0 ? 5 : 4);
+        }
+        int commonExponent = Math.min(productExponent, floatExponent(c));
+        java.math.BigInteger addend = floatInteger(c);
+        if ((operation & 1) != 0) addend = addend.negate();
+        java.math.BigInteger sum = product.shiftLeft(productExponent - commonExponent)
+                .add(addend.shiftLeft(floatExponent(c) - commonExponent));
+        FusedReference rounded = roundFusedInteger(sum, commonExponent, mode, control,
+                !e2m && ((operation & 1) != 0 || c < 0));
+        int bits = rounded.bits();
+        if (sum.signum() == 0 && product.signum() == 0 && (c & 0x7fffffff) == 0) {
+            int productSign = (a ^ b) & 0x80000000;
+            int addendSign = (c & 0x80000000) ^ ((operation & 1) << 31);
+            if (productSign == addendSign) bits = productSign;
+        }
+        if (operation >= 2) bits ^= 0x80000000;
+        return new FusedReference(bits, rounded.flags());
+    }
+
+    private void putWords(ProgramDB program, long offset, int word0, int word1) throws Exception {
+        program.getMemory().setBytes(program.getAddressFactory().getDefaultAddressSpace()
+                .getAddress(offset), new byte[]{(byte) word0, (byte) (word0 >>> 8),
+                        (byte) word1, (byte) (word1 >>> 8)});
+    }
+
+    private void resetFused(EmulatorHelper emu, boolean e2m, int operation,
+            int a, int b, int c, int control) {
+        emu.writeRegister("PC", 0x100 + 4 * operation);
+        emu.writeRegister("r6", Integer.toUnsignedLong(a));
+        emu.writeRegister("r8", Integer.toUnsignedLong(b));
+        emu.writeRegister("r10", Integer.toUnsignedLong(c));
+        emu.writeRegister("r12", 0xdeadbeefL);
+        emu.writeRegister("FPSR", Integer.toUnsignedLong(control));
+        emu.writeRegister("FPEPC", 0x88);
+        emu.writeRegister("FPEC", 0);
+        emu.writeRegister("PSW", 0x20);
+        emu.writeRegister("EIPC", 0x44);
+        emu.writeRegister("EIPSW", 0);
+        emu.writeRegister("EIIC", 0);
+        if (e2m) {
+            emu.writeRegister("BSEL", 0x2000);
+        } else {
+            emu.writeRegister("RBASE", 0x400);
+            emu.writeRegister("EBASE", 0x600);
+            emu.writeRegister("FPIPR", 3);
+            emu.writeRegister("PMR", 0);
+            emu.writeRegister("ISPR", 0);
+            emu.writeRegister("INTCFG", 1);
+            emu.writeRegister("ICSR", 1);
+        }
+    }
+
+    private void checkFusedResult(EmulatorHelper emu, boolean e2m, int operation,
+            int a, int b, int c, int control, int bits, int flags, boolean flushed,
+            String label) throws Exception {
+        resetFused(emu, e2m, operation, a, b, c, control);
+        step(emu, label);
+        requireRegister(emu, label, e2m ? "r12" : "r10", Integer.toUnsignedLong(bits));
+        int expectedControl = control | flags | (!e2m && flushed ? 0x400000 : 0);
+        requireRegister(emu, label, "FPSR", Integer.toUnsignedLong(expectedControl));
+        requireRegister(emu, label, "FPEPC", 0x88);
+        requireRegister(emu, label, "FPEC", 0);
+        requireRegister(emu, label, "PC", 0x104 + 4 * operation);
+    }
+
+    private int randomNormal(java.util.Random random) {
+        return (random.nextBoolean() ? 0x80000000 : 0)
+                | ((1 + random.nextInt(254)) << 23) | random.nextInt(0x800000);
+    }
+
+    private void verifyExactFusedArithmetic() throws Exception {
+        int numericalChecks = 0;
+        int transitionChecks = 0;
+        for (boolean e2m : new boolean[]{true, false}) {
+            String id = e2m ? "v850:LE:32:default" : "v850e3:LE:32:default";
+            Language language = DefaultLanguageService.getLanguageService().getLanguage(new LanguageID(id));
+            ProgramDB program = new ProgramDB("exact-fused", language, language.getDefaultCompilerSpec(), this);
+            int transaction = program.startTransaction("fused numerical and exception fixtures");
+            try {
+                program.getMemory().createInitializedBlock("instructions",
+                        program.getAddressFactory().getDefaultAddressSpace().getAddress(0),
+                        new ByteArrayInputStream(new byte[0x1000]), 0x1000, monitor, false);
+                for (int operation = 0; operation < 4; operation++) {
+                    int word1 = (10 << 11) | (e2m ? 0x500 | (operation << 5) | 12 : 0x4e0 | (operation << 1));
+                    putWords(program, 0x100 + 4 * operation, (8 << 11) | 0x7e0 | 6, word1);
+                }
+                // Architectural operations used by pending-exception/alias sequences.
+                for (int reg = 8; reg <= 10; reg++) {
+                    putWords(program, 0x130 + 4 * (reg - 8), (8 << 11) | 0x7e0 | reg, 0x40);
+                    putWords(program, 0x13c + 4 * (reg - 8), (reg << 11) | 0x7e0 | 6, 0x20);
+                }
+                putWords(program, 0x148, (11 << 11) | 0x7e0 | 6, 0x20);
+                putWords(program, 0x14c, (6 << 11) | 0x7e0 | 6, 0x20);
+                putWords(program, 0x150, 0x001d, 0);
+                putWords(program, 0x154, (5 << 11) | 0x7e0 | 6, 0x20);
+                putWords(program, 0x158, (11 << 11) | 0x7e0 | 6, 0x1020);
+                putWords(program, 0x15c, (7 << 11) | 0x7e0 | 6, 0x0820);
+                putWords(program, 0x160, (10 << 11) | 0x7e0 | 6, 0x1020);
+                putWords(program, 0x164, 0x87e0, 0x0160);
+                putWords(program, 0x168, 0x07e0, 0x0148);
+                putWords(program, 0x16c, 0x07e0, 0x014a);
+                putWords(program, 0x170, (8 << 11) | 0x7e0 | 6, (10 << 11) | 0x0460);
+                putWords(program, 0x174, (8 << 11) | 0x7e2, (10 << 11) | 0x0442);
+                putWords(program, 0x17c, (8 << 11) | 0x7e0 | 12, 0x1040);
+                putWords(program, 0x11c, (8 << 11) | 0x7e0 | 6,
+                        e2m ? (10 << 11) | 0x500 | 6 : (6 << 11) | 0x4e0);
+                putWords(program, 0x120, (8 << 11) | 0x7e0 | 6,
+                        e2m ? (10 << 11) | 0x500 : 0x4e0);
+                putWords(program, 0x124, (8 << 11) | 0x7e0,
+                        e2m ? (10 << 11) | 0x500 | 12 | 0x80 : (10 << 11) | 0x4e0);
+                EmulatorHelper emu = new EmulatorHelper(program);
+                try {
+                    java.util.Random random = new java.util.Random(0x850f32L);
+                    int[][] boundaries = {
+                        {0x3f800001, 0x3fc00000, 0x3f800001},
+                        {0x3f800001, 0x3f7ffffe, 0xbf800000},
+                        {0x7f7fffff, 0x40000000, 0xff7fffff},
+                        {0x3f800000, 0x3f800000, 0x33800000},
+                        {0xbf800000, 0x3f800000, 0xb3800000},
+                        {0x00800000, 0x3f000000, 0},
+                        {0x00800000, 0x3e800000, 0},
+                        {0x00800000, 0x3fa00000, 0x80800000},
+                        {0x3f800001, 0x3f800001, 0x00800000},
+                        {0, 0xbf800000, 0x80000000},
+                        {0x3f800000, 0x3f800000, 0xbf800000}
+                    };
+                    for (int operation = 0; operation < 4; operation++) {
+                        for (int mode = 0; mode < (e2m ? 1 : 4); mode++) {
+                            for (int fn = 0; fn < (e2m ? 1 : 2); fn++) {
+                                int control = 0x20000 | (mode << 18) | (fn << 23) | 8 | (0x10 << 10);
+                                for (int[] inputs : boundaries) {
+                                    FusedReference expected = fusedReference(inputs[0], inputs[1], inputs[2], operation, mode, control, e2m);
+                                    checkFusedResult(emu, e2m, operation, inputs[0], inputs[1], inputs[2], control,
+                                            expected.bits(), expected.flags(), false, id + " boundary " + numericalChecks++);
+                                }
+                                for (int sample = 0; sample < 64; sample++) {
+                                    int a = randomNormal(random), b = randomNormal(random), c = randomNormal(random);
+                                    FusedReference expected = fusedReference(a, b, c, operation, mode, control, e2m);
+                                    checkFusedResult(emu, e2m, operation, a, b, c, control, expected.bits(),
+                                            expected.flags(), false, id + " differential " + numericalChecks++);
+                                }
+                                for (int sample = 0; sample < 32; sample++) {
+                                    int a = (random.nextBoolean() ? 0x80000000 : 0)
+                                            | ((30 + random.nextInt(195)) << 23) | random.nextInt(0x800000);
+                                    int b = 0x3f800000 | random.nextInt(0x800000);
+                                    // Rounded product supplies only an adversarial input,
+                                    // never the expected fused result.
+                                    int c = Float.floatToRawIntBits(Float.intBitsToFloat(a)
+                                            * Float.intBitsToFloat(b)) ^ 0x80000000;
+                                    if ((operation & 1) != 0) c ^= 0x80000000;
+                                    FusedReference expected = fusedReference(a, b, c, operation, mode, control, e2m);
+                                    checkFusedResult(emu, e2m, operation, a, b, c, control, expected.bits(),
+                                            expected.flags(), false, id + " cancellation " + numericalChecks++);
+                                }
+                            }
+                        }
+                        int[][] exceptional = {
+                            {0x7fc01234, 0x3f800000, 0, 0x7fc00000, 0},
+                            {0x7f800001, 0x3f800000, 0, 0x7fc00000, 0x10},
+                            {0, 0x7f800000, 0, 0x7fc00000, 0x10},
+                            {0, 0x7f800000, 0x7fc12345, 0x7fc00000, 0},
+                            {0x7f800000, 0x3f800000, 0, operation >= 2 ? 0xff800000 : 0x7f800000, 0},
+                            {0x7f800000, 0x3f800000, (operation & 1) == 0 ? 0xff800000 : 0x7f800000, 0x7fc00000, 0x10},
+                            {0x7f7fffff, 0x40000000, (operation & 1) == 0 ? 0xff800000 : 0x7f800000,
+                                e2m ? 0x7fc00000 : operation >= 2 ? 0x7f800000 : 0xff800000, e2m ? 0x10 : 0}
+                        };
+                        for (int[] inputs : exceptional) {
+                            checkFusedResult(emu, e2m, operation, inputs[0], inputs[1], inputs[2], 0x20000,
+                                    inputs[3], inputs[4], false, id + " special " + numericalChecks++);
+                        }
+                        int c = (operation & 1) != 0 ? 0xbf800000 : 0x3f800000;
+                        checkFusedResult(emu, e2m, operation, 1, 0x3f800000, c, 0x20000,
+                                operation >= 2 ? 0xbf800000 : 0x3f800000, 1, true, id + " input flush " + numericalChecks++);
+                    }
+                    resetFused(emu, e2m, 0, 0x40000000, 0x40400000, 0x40800000, 0x20000);
+                    emu.writeRegister("PC", 0x11c);
+                    step(emu, id + " destination aliases multiplicand");
+                    requireRegister(emu, id, "r6", e2m ? 0x41200000 : 0x41000000);
+                    numericalChecks++;
+                    resetFused(emu, e2m, 0, 0x40000000, 0x40400000, 0x40800000, 0x20000);
+                    emu.writeRegister("r0", 0);
+                    emu.writeRegister("PC", 0x120);
+                    step(emu, id + " discarded r0 destination");
+                    requireRegister(emu, id, "r0", 0);
+                    emu.writeRegister("PC", 0x124);
+                    step(emu, id + " r0 multiplicand");
+                    requireRegister(emu, id, e2m ? "r13" : "r10", 0x40800000);
+                    numericalChecks += 2;
+                    transitionChecks += verifyFusedTransitions(emu, e2m, id);
+                } finally {
+                    emu.dispose();
+                }
+            } finally {
+                program.endTransaction(transaction, false);
+                program.release(this);
+            }
+        }
+        println("Checked exact-fused: " + numericalChecks + " numerical vectors; "
+                + transitionChecks + " exception/control sequences");
+    }
+
+    private int verifyFusedTransitions(EmulatorHelper emu, boolean e2m, String id) throws Exception {
+        int checks = 0;
+        int precise = e2m ? 0x100000 : 0x200000;
+        // Enabled V/O/U/I suppress the destination. XC/FPEPC update, XP stays.
+        int[][] enabled = {
+            {0, 0x7f800000, 0, 0x10},
+            {0x7f7fffff, 0x40000000, 0, 4},
+            {0x00800000, 0x3f000000, 0, 2},
+            {0x3f800000, 0x3f800000, 0x33800000, 1}
+        };
+        for (int[] inputs : enabled) {
+            String label = id + " precise " + inputs[3];
+            int control = 0x20000 | precise | (inputs[3] << 5) | 8;
+            resetFused(emu, e2m, 0, inputs[0], inputs[1], inputs[2], control);
+            step(emu, label);
+            requireRegister(emu, label, e2m ? "r12" : "r10", e2m ? 0xdeadbeefL : Integer.toUnsignedLong(inputs[2]));
+            requireRegister(emu, label, "FPSR", control | (inputs[3] << 10) | (e2m ? 0x10000 : 0));
+            requireRegister(emu, label, "FPEPC", 0x100);
+            requireRegister(emu, label, "EIPC", 0x100);
+            requireRegister(emu, label, "EIIC", 0x71);
+            requireRegister(emu, label, "PC", e2m ? 0x70 : 0x470);
+            checks++;
+        }
+        if (!e2m) {
+            String label = id + " mandatory E";
+            resetFused(emu, false, 0, 1, 0x3f800000, 0, precise);
+            step(emu, label);
+            requireRegister(emu, label, "r10", 0);
+            requireRegister(emu, label, "FPSR", precise | (0x20 << 10));
+            requireRegister(emu, label, "EIIC", 0x71);
+            checks++;
+            resetFused(emu, false, 0, 0x00800000, 0x3f000000, 0, precise);
+            step(emu, label + " subnormal result");
+            requireRegister(emu, label, "FPSR", precise | (0x20 << 10));
+            requireRegister(emu, label, "EIIC", 0x71);
+            checks++;
+            int flushedControl = precise | 0x20000 | 0x20;
+            resetFused(emu, false, 0, 1, 0x3f800000, 0x3f800000, flushedControl);
+            step(emu, label + " enabled input-flush inexact");
+            requireRegister(emu, label, "r10", 0x3f800000);
+            requireRegister(emu, label, "FPSR", flushedControl | 0x400000 | (1 << 10));
+            requireRegister(emu, label, "EIIC", 0x71);
+            checks++;
+        }
+        String label = id + " imprecise pending";
+        int control = 0x20000 | 0x200 | 8;
+        resetFused(emu, e2m, 0, 0, 0x7f800000, 0x3f800000, control);
+        step(emu, label);
+        requireRegister(emu, label, "FPEC", 1);
+        requireRegister(emu, label, "FPEPC", 0x100);
+        requireRegister(emu, label, "FPSR", control | (0x10 << 10));
+        requireRegister(emu, label, "EIPC", 0x44);
+        requireRegister(emu, label, "PC", 0x104);
+        emu.writeRegister("PC", 0x170);
+        step(emu, label + " non-fused invalidated");
+        requireRegister(emu, label, "r10", 0x3f800000);
+        if (!e2m) {
+            emu.writeRegister("PC", 0x174);
+            step(emu, label + " half conversion invalidated");
+            requireRegister(emu, label, "r10", 0x3f800000);
+        }
+        emu.writeRegister("PC", 0x104);
+        step(emu, label + " fused invalidated");
+        requireRegister(emu, label, "FPEPC", 0x100);
+        requireRegister(emu, label, "FPSR", control | (0x10 << 10));
+        requireRegister(emu, label, e2m ? "r12" : "r10", e2m ? 0xdeadbeefL : 0x3f800000);
+        emu.writeRegister("PC", 0x154);
+        emu.writeRegister("r6", 0);
+        step(emu, label + " release via PSW");
+        requireRegister(emu, label, "FPEC", 0);
+        requireRegister(emu, label, "EIPC", 0x158);
+        requireRegister(emu, label, "EIIC", 0x72);
+        requireRegister(emu, label, "PC", e2m ? 0x70 : 0x470);
+        checks++;
+        // Software cancellation is not an exception acknowledgement.
+        resetFused(emu, e2m, 0, 0, 0x7f800000, 0, control);
+        step(emu, label);
+        emu.writeRegister("r6", 0);
+        emu.writeRegister("PC", 0x148);
+        step(emu, label + " cancel");
+        requireRegister(emu, label, "FPEC", 0);
+        requireRegister(emu, label, "EIPC", 0x44);
+        emu.writeRegister("r6", 1);
+        emu.writeRegister("PC", 0x148);
+        step(emu, label + " cannot post");
+        requireRegister(emu, label, "FPEC", 0);
+        checks++;
+        // Register views must share configuration/status with FPSR.
+        int seed = 0xa5000000 | 0x20000 | ((e2m ? 0 : 2) << 18) | (0x15 << 10) | (0x12 << 5) | 3;
+        if (!e2m) seed |= 0x400000;
+        resetFused(emu, e2m, 0, 0, 0, 0, seed);
+        emu.writeRegister("PC", 0x130);
+        step(emu, label + " read FPST");
+        requireRegister(emu, label, "r8", (0x15 << 8) | (!e2m ? 0x20 : 0) | 3);
+        emu.writeRegister("PC", 0x134);
+        step(emu, label + " read FPCC");
+        requireRegister(emu, label, "r8", 0xa5);
+        emu.writeRegister("PC", 0x138);
+        step(emu, label + " read FPCFG");
+        requireRegister(emu, label, "r8", ((e2m ? 0 : 2) << 8) | 0x12);
+        emu.writeRegister("PC", 0x144);
+        emu.writeRegister("r6", e2m ? 5 : 0x105);
+        step(emu, label + " write FPCFG");
+        int configured = (seed & 0xfff3fc1f) | ((e2m ? 0 : 1) << 18) | (5 << 5);
+        requireRegister(emu, label, "FPSR", Integer.toUnsignedLong(configured));
+        emu.writeRegister("PC", 0x140);
+        emu.writeRegister("r6", 0x5a);
+        step(emu, label + " write FPCC");
+        configured = (configured & 0xffffff) | 0x5a000000;
+        requireRegister(emu, label, "FPSR", Integer.toUnsignedLong(configured));
+        emu.writeRegister("PC", 0x13c);
+        emu.writeRegister("r6", (3 << 8) | 9);
+        step(emu, label + " write FPST");
+        configured = (configured & (e2m ? 0xfffe03e0 : 0xffbf03e0)) | (3 << 10) | 9;
+        requireRegister(emu, label, "FPSR", Integer.toUnsignedLong(configured));
+        checks++;
+        if (!e2m) {
+            // PMFP describes PMR-masked FPI, independent of the PSW ID mask.
+            // PM15 covers both priorities 15 and 16 (G3M Table 3-33).
+            for (int priority : new int[]{3, 16}) {
+                resetFused(emu, false, 0, 0, 0x7f800000, 0, control);
+                emu.writeRegister("FPIPR", priority);
+                emu.writeRegister("PMR", priority == 16 ? 0x8000 : 0xfff8);
+                step(emu, label + " PMR status");
+                requireRegister(emu, label, "ICSR", 3);
+                emu.writeRegister("PC", 0x17c);
+                step(emu, label + " architectural status read");
+                requireRegister(emu, label, "r8", 3);
+                emu.writeRegister("PC", 0x148);
+                emu.writeRegister("r6", 0);
+                step(emu, label + " masked cancellation");
+                requireRegister(emu, label, "ICSR", 1);
+                requireRegister(emu, label, "FPEC", 0);
+                checks++;
+            }
+            // Each ordinary priority register can release an already pending FPI.
+            for (int release : new int[]{0x158, 0x15c, 0x160}) {
+                resetFused(emu, false, 0, 0, 0x7f800000, 0, control);
+                emu.writeRegister("PSW", 0);
+                if (release == 0x158) emu.writeRegister("PMR", 0xfff8);
+                if (release == 0x15c) { emu.writeRegister("FPIPR", 7); emu.writeRegister("ISPR", 8); }
+                if (release == 0x160) emu.writeRegister("ISPR", 8);
+                step(emu, label + " masked priority");
+                requireRegister(emu, label, "FPEC", 1);
+                emu.writeRegister("PC", release);
+                emu.writeRegister("r6", release == 0x15c ? 2 : 0);
+                step(emu, label + " release priority");
+                requireRegister(emu, label, "FPEC", 0);
+                requireRegister(emu, label, "ICSR", 1);
+                requireRegister(emu, label, "EIIC", 0x72);
+                requireRegister(emu, label, "EIPC", release + 4);
+                requireRegister(emu, label, "PC", 0x470);
+                checks++;
+            }
+        }
+        // SYNCE synchronizes pending FPI; EI releases the ordinary ID mask.
+        for (int release : new int[]{0x150, 0x164}) {
+            resetFused(emu, e2m, 0, 0, 0x7f800000, 0, control);
+            step(emu, label);
+            if (release == 0x150) emu.writeRegister("PSW", 0);
+            emu.writeRegister("PC", release);
+            step(emu, label + " synchronized release");
+            requireRegister(emu, label, "FPEC", 0);
+            requireRegister(emu, label, "EIPC", release + (release == 0x150 ? 2 : 4));
+            requireRegister(emu, label, "EIIC", 0x72);
+            requireRegister(emu, label, "PC", e2m ? 0x70 : 0x470);
+            checks++;
+        }
+        // Interrupt returns acknowledge FPI against the restored PSW/PC.
+        for (int release : new int[]{0x168, 0x16c}) {
+            resetFused(emu, e2m, 0, 0, 0x7f800000, 0, control);
+            step(emu, label);
+            emu.writeRegister(release == 0x168 ? "EIPC" : "FEPC", 0x234);
+            emu.writeRegister(release == 0x168 ? "EIPSW" : "FEPSW", 0);
+            emu.writeRegister("PC", release);
+            step(emu, label + " return release");
+            requireRegister(emu, label, "FPEC", 0);
+            requireRegister(emu, label, "EIPC", 0x234);
+            requireRegister(emu, label, "EIIC", 0x72);
+            requireRegister(emu, label, "PC", e2m ? 0x70 : 0x470);
+            checks++;
+        }
+        if (!e2m) {
+            resetFused(emu, false, 0, 0, 0x7f800000, 0, control);
+            emu.writeRegister("PSW", 0);
+            emu.writeRegister("ISPR", 0x28);
+            emu.writeRegister("INTCFG", 0);
+            step(emu, label + " priority ceiling");
+            emu.writeRegister("EIPC", 0x234);
+            emu.writeRegister("EIPSW", 0);
+            emu.writeRegister("PC", 0x168);
+            step(emu, label + " automatic priority return");
+            requireRegister(emu, label, "ISPR", 0x20);
+            requireRegister(emu, label, "FPEC", 0);
+            requireRegister(emu, label, "EIPC", 0x234);
+            checks++;
+            resetFused(emu, false, 0, 0, 0x7f800000, 0, control | precise);
+            emu.writeRegister("PSW", 0x400080a0L);
+            step(emu, label + " precise bypasses masks and selects EBASE");
+            requireRegister(emu, label, "PC", 0x670);
+            requireRegister(emu, label, "EIPSW", 0x400080a0L);
+            requireRegister(emu, label, "PSW", 0x80e0);
+            checks++;
+        }
+        return checks;
+    }
     @Override
     public void run() throws Exception {
         String[] args = getScriptArgs();
@@ -1062,6 +1623,8 @@ public class AssertProcessorFixtureSemantics extends GhidraScript {
         }
 
         runExecutionVectors(addrs);
+        verifyMaddfLanguageBoundary();
+        verifyExactFusedArithmetic();
 
         if (!failures.isEmpty()) {
             throw new IllegalStateException(failures.size() + " fixture failures: "

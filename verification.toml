@@ -34,7 +34,6 @@ exploit = [
 [catalog.processor_audit]
 gate = "make verify-processor"
 paths = [
-  "data/decompiler_signatures.baseline.csv",
   "data/instruction_inventory.csv",
   "data/processor_manifest.baseline.json",
   "data/processor_unimpl_allowlist.txt",

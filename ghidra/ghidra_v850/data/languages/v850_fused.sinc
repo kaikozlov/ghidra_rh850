@@ -1,0 +1,235 @@
+# Binary32 fused arithmetic: R01US0123EJ0140 6.1, pp. 402-409;
+# R01US0001EJ0100 Part 4, 5.3 and pp. 374-389.
+# NaN payload/sign are not specified by these manuals. This model emits the
+# canonical quiet NaN 0x7fc00000, not a claimed silicon payload.
+
+macro fp32_shift_right_jam(result, value, distance) {
+  local count:4 = distance;
+  result = value;
+  if (count == 0) goto <done>;
+  if (count < 64) goto <short>;
+    result = zext(value != 0);
+    goto <done>;
+  <short>
+  local lost:8 = value << (64 - count);
+  result = (value >> count) | zext(lost != 0);
+  <done>
+}
+
+# Inputs are captured before any output write; architectural aliases are safe.
+# Nonzero finite significands are normalized at bit 61, with one carry bit.
+# The product has at most 48 significant bits. Alignment retains every bit
+# needed for cancellation; discarded distant bits are represented by sticky
+# bit 0. One final guard/round/sticky decision rounds the exact fused value.
+macro fp32_fused(result, raised, flushed, source_a, source_b, source_c, operation, control) {
+  local a:4 = source_a;
+  local b:4 = source_b;
+  local c:4 = source_c;
+  local action:4 = operation;
+  local aa:4 = a & 0x7fffffff;
+  local bb:4 = b & 0x7fffffff;
+  local cc:4 = c & 0x7fffffff;
+  local mode:4 = (control >> 18) & 3;
+@if defined(V850E2M)
+  # Other E2M RM settings and FS=0 are prohibited by the architecture manual.
+  mode = 0;
+@endif
+  result = 0;
+  raised = 0;
+  flushed = 0;
+  local subnormal:1 = ((aa != 0) && (aa < 0x00800000))
+      || ((bb != 0) && (bb < 0x00800000)) || ((cc != 0) && (cc < 0x00800000));
+  if (!subnormal) goto <classified_inputs>;
+  if ((control & 0x20000) != 0) goto <flush_inputs>;
+    raised = 0x20;
+    goto <finished>;
+  <flush_inputs>
+  flushed = 1;
+  if ((aa == 0) || (aa >= 0x00800000)) goto <a_ready>;
+    a = a & 0x80000000;
+    aa = 0;
+  <a_ready>
+  if ((bb == 0) || (bb >= 0x00800000)) goto <b_ready>;
+    b = b & 0x80000000;
+    bb = 0;
+  <b_ready>
+  if ((cc == 0) || (cc >= 0x00800000)) goto <classified_inputs>;
+    c = c & 0x80000000;
+    cc = 0;
+  <classified_inputs>
+  local product_sign:4 = (a ^ b) >> 31;
+  local addend_sign:4 = (c >> 31) ^ (action & 1);
+  if (((aa > 0x7f800000) && ((aa & 0x400000) == 0))
+      || ((bb > 0x7f800000) && ((bb & 0x400000) == 0))
+      || ((cc > 0x7f800000) && ((cc & 0x400000) == 0))) goto <invalid>;
+  # The per-instruction tables give QNaN precedence over 0*infinity.
+  if ((aa > 0x7f800000) || (bb > 0x7f800000) || (cc > 0x7f800000)) goto <nan_result>;
+  if (((aa == 0) && (bb == 0x7f800000))
+      || ((bb == 0) && (aa == 0x7f800000))) goto <invalid>;
+  if ((aa == 0x7f800000) || (bb == 0x7f800000)) goto <infinite_product>;
+
+  local significand_a:8 = zext(aa & 0x7fffff) | 0x800000;
+  local significand_b:8 = zext(bb & 0x7fffff) | 0x800000;
+  if (aa != 0) goto <a_nonzero>;
+    significand_a = 0;
+  <a_nonzero>
+  if (bb != 0) goto <b_nonzero>;
+    significand_b = 0;
+  <b_nonzero>
+  local product:8 = significand_a * significand_b;
+  local product_exponent:4 = (aa >> 23) + (bb >> 23) - 254;
+  if (product == 0) goto <zero_product>;
+  if (product < 0x800000000000) goto <product_low>;
+    product = product << 14;
+    product_exponent = product_exponent + 1;
+    goto <product_normalized>;
+  <product_low>
+    product = product << 15;
+  <product_normalized>
+@if defined(V850E2M)
+  # E2M additionally detects multiplication overflow before the fused add.
+  # This is a documented difference from G3M, not intermediate rounding of
+  # an otherwise representable product (MADDF-family instruction supplements).
+  if (product_exponent s> 127) goto <product_overflow>;
+  if ((product_exponent == 127) && (product >= 0x3fffffe000000000)) goto <product_overflow>;
+@endif
+  if (cc == 0x7f800000) goto <infinite_addend>;
+  local magnitude:8 = product;
+  local exponent:4 = product_exponent;
+  local sign:4 = product_sign;
+  if (cc == 0) goto <normalize_sum>;
+  local addend:8 = (zext(cc & 0x7fffff) | 0x800000) << 38;
+  local addend_exponent:4 = (cc >> 23) - 127;
+  local distance:4 = 0;
+  if (product_exponent s< addend_exponent) goto <align_product>;
+    distance = product_exponent - addend_exponent;
+    fp32_shift_right_jam(addend, addend, distance);
+    goto <aligned>;
+  <align_product>
+    distance = addend_exponent - product_exponent;
+    fp32_shift_right_jam(product, product, distance);
+    exponent = addend_exponent;
+  <aligned>
+  if (product_sign != addend_sign) goto <subtract>;
+    magnitude = product + addend;
+    goto <normalize_sum>;
+  <subtract>
+  if (product < addend) goto <addend_larger>;
+    magnitude = product - addend;
+    goto <normalize_sum>;
+  <addend_larger>
+    magnitude = addend - product;
+    sign = addend_sign;
+  <normalize_sum>
+  if (magnitude == 0) goto <cancelled>;
+  if (magnitude < 0x4000000000000000) goto <normalize_left>;
+    fp32_shift_right_jam(magnitude, magnitude, 1);
+    exponent = exponent + 1;
+    goto <normalized>;
+  <normalize_left>
+    local shift:4 = lzcount(magnitude) - 2;
+    magnitude = magnitude << shift;
+    exponent = exponent - shift;
+  <normalized>
+  if (exponent s< -126) goto <underflow>;
+  local significand:8 = magnitude >> 38;
+  local remainder:8 = magnitude & 0x3fffffffff;
+  local increment:1 = 0;
+  if (mode != 0) goto <directed>;
+    increment = (remainder > 0x2000000000)
+        || ((remainder == 0x2000000000) && ((significand & 1) != 0));
+    goto <round>;
+  <directed>
+    increment = (remainder != 0) && (((mode == 2) && (sign == 0)) || ((mode == 3) && (sign != 0)));
+  <round>
+  significand = significand + zext(increment);
+  if (remainder == 0) goto <precision_ready>;
+    raised = raised | 1;
+  <precision_ready>
+  if (significand < 0x1000000) goto <rounded>;
+    significand = significand >> 1;
+    exponent = exponent + 1;
+  <rounded>
+  if (exponent s> 127) goto <overflow>;
+  result = (sign << 31) | ((exponent + 127) << 23) | (significand:4 & 0x7fffff);
+  goto <finished>;
+
+  <underflow>
+  if ((control & 0x20000) != 0) goto <flush_result>;
+    raised = 0x20;
+    goto <finished>;
+  <flush_result>
+  raised = 2;
+  if ((control & 0x40) != 0) goto <underflow_flags_ready>;
+    raised = raised | 1;
+  <underflow_flags_ready>
+  result = sign << 31;
+  if (((mode == 2) && (sign == 0)) || ((mode == 3) && (sign != 0))) goto <minimum_normal>;
+@if defined(V850E3)
+  if ((mode != 0) || ((control & 0x800000) == 0)) goto <finished>;
+  if (exponent s>= -127) goto <minimum_normal>;
+  # G3M 6.1.11: the exact quarter-minimum cancellation boundary flushes
+  # upward for subtract, or add of a negative addend, rather than to zero.
+  if ((exponent == -128) && (magnitude == 0x2000000000000000)
+      && (((action & 1) != 0) || ((c & 0x80000000) != 0))) goto <minimum_normal>;
+@endif
+  goto <finished>;
+  <minimum_normal>
+  result = result | 0x00800000;
+  goto <finished>;
+
+  <overflow>
+  raised = raised | 4;
+  if ((control & 0x80) != 0) goto <overflow_flags_ready>;
+    raised = raised | 1;
+  <overflow_flags_ready>
+  result = (sign << 31) | 0x7f800000;
+  if ((mode == 1) || ((mode == 2) && (sign != 0)) || ((mode == 3) && (sign == 0))) goto <maximum_finite>;
+  goto <finished>;
+  <maximum_finite>
+  result = (sign << 31) | 0x7f7fffff;
+  goto <finished>;
+
+@if defined(V850E2M)
+  <product_overflow>
+  if ((cc == 0x7f800000) && (product_sign != addend_sign)) goto <invalid>;
+  raised = 4;
+  if ((control & 0x80) != 0) goto <product_overflow_flags_ready>;
+    raised = raised | 1;
+  <product_overflow_flags_ready>
+  result = (product_sign << 31) | 0x7f800000;
+  goto <finished>;
+@endif
+  <zero_product>
+  if (cc == 0x7f800000) goto <infinite_addend>;
+  if (cc != 0) goto <unchanged_addend>;
+  if (product_sign != addend_sign) goto <cancelled>;
+    result = product_sign << 31;
+    goto <finished>;
+  <unchanged_addend>
+    result = (addend_sign << 31) | cc;
+    goto <finished>;
+  <cancelled>
+    result = zext(mode == 3) << 31;
+    goto <finished>;
+  <infinite_product>
+  if ((cc == 0x7f800000) && (product_sign != addend_sign)) goto <invalid>;
+    result = (product_sign << 31) | 0x7f800000;
+    goto <finished>;
+  <infinite_addend>
+    result = (addend_sign << 31) | 0x7f800000;
+    goto <finished>;
+  <invalid>
+    raised = 0x10;
+  <nan_result>
+    result = 0x7fc00000;
+  <finished>
+  # Input flushing is inexact unless invalid/unimplemented or a QNaN result
+  # supersedes the arithmetic (G3M 6.1.6; E2M Part 4, 5.3.1).
+  if ((flushed == 0) || ((raised & 0x30) != 0) || ((result & 0x7fffffff) > 0x7f800000)) goto <input_flags_ready>;
+    raised = raised | 1;
+  <input_flags_ready>
+  if ((action < 2) || ((result & 0x7fffffff) > 0x7f800000)) goto <done>;
+    result = result ^ 0x80000000;
+  <done>
+}

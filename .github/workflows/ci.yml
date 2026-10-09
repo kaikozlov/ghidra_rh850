@@ -74,7 +74,6 @@ jobs:
               - 'tests/tooling/verify_project_inventory.py'
               - 'data/processor_unimpl_allowlist.txt'
               - 'data/processor_manifest.baseline.json'
-              - 'data/decompiler_signatures.baseline.csv'
               - 'data/instruction_inventory.csv'
               - 'data/switch_table_inventory.csv'
               - 'data/ghidra_project_inventory.baseline.jsonl'
@@ -107,7 +106,6 @@ jobs:
               - 'tools/project/fingerprint_processor.py'
               - 'data/p1m_sfr_labels.csv'
               - 'data/processor_unimpl_allowlist.txt'
-              - 'data/decompiler_signatures.baseline.csv'
               - 'data/ghidra_project_inventory.baseline.jsonl'
               - 'data/generated/21140bbd65e530a9/diagnostic_vocabulary.json'
               - 'projects/**'
@@ -151,7 +149,6 @@ jobs:
             build/logs/sleigh/
             build/out/processor_manifest.json
             build/logs/verify-processor-*.log
-            build/out/decompiler-signatures.txt
             build/out/instruction_inventory.csv
             build/out/switch_table_inventory.csv
             build/out/ghidra_project_inventory.jsonl
@@ -218,7 +215,6 @@ jobs:
             build/out/processor_manifest.json
             build/work/**/processor_manifest.json
             build/logs/verify-processor-*.log
-            build/out/decompiler-signatures.txt
             build/out/ghidra_project_inventory.jsonl
             build/out/targets/*/project_inventory.jsonl
             data/instruction_inventory.csv

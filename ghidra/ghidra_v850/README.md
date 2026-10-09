@@ -57,14 +57,35 @@ point. Notable areas under active modification for the P1M-E target:
 
 - `data/languages/v850.cspec` — RH850/G3 calling-convention model.
 - `data/languages/v850.pspec` — processor volatility (P1M-E peripheral windows).
-- `data/languages/v850e3.sinc` — RH850G3M instructions, atomics, cache/prefetch
-  userops, and system-register maps.
+- `data/languages/v850e3.sinc` — RH850G3M instructions, atomics, named
+  `CACHE`/`PREF` operations, and system-register maps.
 - `data/languages/v850_load_store.sinc` / `v850_arithmetic.sinc` — verified
   load/store, divide, and saturating-arithmetic p-code semantics.
-- `data/languages/v850_float.sinc` — G3M floating-point mnemonics, operand order,
-  and conversion dataflow.
+- `data/languages/v850_float.sinc` — floating-point mnemonics, operand order,
+  conversion dataflow, and V850E2M-only four-register multiply-add forms.
+- `data/languages/v850_fused.sinc` — integer binary32 fused multiply-add,
+  single rounding, special values, and architecture-specific flush behavior.
+- `data/languages/v850_special.sinc` — shared FPU register views, exception
+  entry, pending-exception cancellation, and interrupt-mask/return handling.
 - `data/languages/v850.dwarf` — GCC DWARF register mapping.
 - `data/patterns/` — Ghidra function-start patterns for PREPARE/ADDI prologues
   following architectural returns.
-- Language versions `0.4` (V850E2M) and `0.5` (RH850G3M), with extension
-  metadata pinned to Ghidra `12.1.4` (see `PROVENANCE.json`).
+- Language versions `0.7` (V850E2M and RH850G3M), with extension metadata
+  pinned to Ghidra `12.1.4` (see `PROVENANCE.json`). `MADDF`/`MSUBF`/`NMADDF`/
+  `NMSUBF` remain supported in V850E2M, gated out of the G3M language.
+  `CACHE`/`PREF` use the G3M manual's named operations (Table 7-7/7-8).
+
+The four V850E2M multiply-add forms and four G3M fused forms execute through
+integer p-code, not separately rounded `FLOAT_MULT`/`FLOAT_ADD` operations.
+G3M supports all four rounding modes and flush-to-nearest; V850E2M's legal
+settings require nearest-even rounding and subnormal flushing. The E2M
+manual additionally requires multiplication-overflow detection before the
+fused addition. Enabled exceptions suppress the destination and update the
+architectural FPU state; pending imprecise exceptions invalidate subsequent
+floating-point instructions.
+
+These are instruction-boundary semantics, not FPU pipeline timing. The manuals
+do not specify a NaN payload/sign selection rule; the model emits canonical
+quiet NaN `0x7fc00000`, not a silicon-specific payload. Other floating-point
+arithmetic/conversion instructions still use Ghidra's ordinary floating
+primitives and do not gain a complete exception model from this change.

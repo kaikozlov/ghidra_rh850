@@ -44,6 +44,115 @@ macro enter_ei_exception(return_pc, cause, offset, handler) {
 	exception_vector(handler, offset);
 }
 
+# FPU register views are aliases, not independent configuration/status storage.
+# R01US0123EJ0140 3.4; R01US0001EJ0100 Part 4, 2.2.
+macro fp_refresh_views() {
+	FPST = ((FPSR >> 2) & 0x3f00) | (FPSR & 0x1f);
+@if defined(V850E3)
+	FPST = FPST | ((FPSR >> 17) & 0x20);
+@else
+	FPST = FPST | (FPSR & 0x10000);
+@endif
+	FPCC = FPSR >> 24;
+	FPCFG = ((FPSR >> 10) & 0x300) | ((FPSR >> 5) & 0x1f);
+}
+
+macro fp_read_control(result, reg) {
+	fp_refresh_views();
+	result = 0;
+	if (reg == 6) goto <fpsr>;
+	if (reg == 7) goto <fpepc>;
+	if (reg == 8) goto <fpst>;
+	if (reg == 9) goto <fpcc>;
+	if (reg == 10) goto <fpcfg>;
+	result = FPEC;
+	goto <done>;
+	<fpsr> result = FPSR; goto <done>;
+	<fpepc> result = FPEPC; goto <done>;
+	<fpst> result = FPST; goto <done>;
+	<fpcc> result = FPCC; goto <done>;
+	<fpcfg> result = FPCFG;
+	<done>
+}
+
+macro fp_write_control(reg, value) {
+	local input:4 = value;
+	if (reg == 6) goto <fpsr>;
+	if (reg == 7) goto <fpepc>;
+	if (reg == 8) goto <fpst>;
+	if (reg == 9) goto <fpcc>;
+	if (reg == 10) goto <fpcfg>;
+	# Software may cancel FPIVD, but cannot post a new exception.
+	FPEC = FPEC & input & 1;
+@if defined(V850E3)
+	if ((FPEC & 1) != 0) goto <done>;
+	ICSR = ICSR & 0xfffffffd;
+@endif
+	goto <done>;
+	<fpsr> FPSR = input; goto <done>;
+	<fpepc> FPEPC = input & 0xfffffffe; goto <done>;
+	<fpst>
+@if defined(V850E3)
+		FPSR = (FPSR & 0xffbf03e0) | ((input & 0x3f00) << 2)
+			| ((input & 0x20) << 17) | (input & 0x1f);
+@else
+		FPSR = (FPSR & 0xfffe03e0) | ((input & 0x3f00) << 2)
+			| (input & 0x10000) | (input & 0x1f);
+@endif
+		goto <done>;
+	<fpcc> FPSR = (FPSR & 0x00ffffff) | ((input & 0xff) << 24); goto <done>;
+	<fpcfg>
+		FPSR = (FPSR & 0xfff3fc1f) | ((input & 0x300) << 10)
+			| ((input & 0x1f) << 5);
+	<done>
+	fp_refresh_views();
+}
+
+# Instruction-boundary delivery. Physical FPU pipeline latency is not modeled.
+# FPI uses the ordinary PSW and G3M interrupt-priority masks (4.1.5 / 6.1.7).
+macro fp_acknowledge_pending(next_pc) {
+@if defined(V850E3)
+	# PMFP reports PMR masking, independently of ID/NP or the ISPR ceiling.
+	ICSR = ICSR & 0xfffffffd;
+@endif
+	if ((FPEC & 1) == 0) goto <done>;
+@if defined(V850E3)
+	local priority:4 = FPIPR & 0x1f;
+	if (priority < 16) goto <priority_ready>;
+		priority = 16;
+	<priority_ready>
+	local mask_priority:4 = priority;
+	if (mask_priority < 16) goto <mask_ready>;
+		mask_priority = 15;
+	<mask_ready>
+	local priority_masked:4 = zext((PMR & (1 << mask_priority)) != 0);
+	ICSR = ICSR | (priority_masked << 1);
+	if (priority_masked != 0) goto <done>;
+	local ceiling:4 = (1 << (priority + 1)) - 1;
+	if ((ISPR & ceiling & 0xffff) != 0) goto <done>;
+@endif
+	if ((PSW & 0xa0) != 0) goto <done>;
+	local return_pc:4 = next_pc;
+	local handler:4 = 0;
+	FPEC = 0;
+	enter_ei_exception(return_pc, 0x72, 0x70, handler);
+@if defined(V850E2M)
+	ECR = (ECR & 0xffff0000) | 0x72;
+@endif
+	call [handler];
+	<done>
+}
+
+macro fp_return_priority() {
+@if defined(V850E3)
+	if ($(PSW_EP) != 0) goto <done>;
+	if ((INTCFG & 1) != 0) goto <done>;
+	# Clear only the highest-priority active interrupt (lowest set bit).
+	ISPR = ISPR & (ISPR - 1);
+	<done>
+@endif
+}
+
 # NOP
 :nop is op0015=0x0000 {
 	__nop();
@@ -51,6 +160,7 @@ macro enter_ei_exception(return_pc, cause, offset, handler) {
 
 # SYNCE
 :synce is op0015=0x001D {
+	fp_acknowledge_pending(inst_next);
 	__synchronize();
 }
 # SYNCM
@@ -101,12 +211,64 @@ macro enter_ei_exception(return_pc, cause, offset, handler) {
 }
 
 # LDSR reg2, regID
-:ldsr R0004, SR1115 is op0510=0x3F & SR1115 & R0004; op1631=0x20 {
-	SR1115 = R0004;
+:ldsr R0004, SR1115 is op0510=0x3F & SR1115 & R0004 & op1115!=5 & op1115; op1631=0x20 {
+	local reg:4 = op1115;
+	local fpu:1 = (reg >= 6) && (reg <= 11);
+@if defined(V850E2M)
+	fpu = fpu && (BSEL == 0x2000);
+@endif
+	if (!fpu) goto <ordinary>;
+		fp_write_control(reg, R0004);
+		goto <written>;
+	<ordinary>
+		SR1115 = R0004;
+	<written>
 }
+:ldsr R0004, SR1115 is op0510=0x3F & SR1115 & R0004 & op1115=5; op1631=0x20 {
+	SR1115 = R0004;
+	fp_acknowledge_pending(inst_next);
+}
+
+@if defined(V850E3)
+# Priority changes may release an already reported, masked FPI exception.
+:ldsr R0004, SR1115_1, 1 is op0510=0x3F & SR1115_1 & R0004 & op1115!=7; op1626=0x20 & op2731=0x01 {
+	SR1115_1 = R0004;
+}
+:ldsr R0004, SR1115_1, 1 is op0510=0x3F & SR1115_1 & R0004 & op1115=7; op1626=0x20 & op2731=0x01 {
+	SR1115_1 = R0004;
+	fp_acknowledge_pending(inst_next);
+}
+:ldsr R0004, SR1115_2, 2 is op0510=0x3F & SR1115_2 & R0004 & op1115!=10 & op1115!=11 & op1115!=13; op1626=0x20 & op2731=0x02 {
+	SR1115_2 = R0004;
+}
+:ldsr R0004, SR1115_2, 2 is op0510=0x3F & SR1115_2 & R0004 & op1115=10; op1626=0x20 & op2731=0x02 {
+	if ((INTCFG & 1) == 0) goto <written>;
+		SR1115_2 = R0004;
+	<written>
+	fp_acknowledge_pending(inst_next);
+}
+:ldsr R0004, SR1115_2, 2 is op0510=0x3F & SR1115_2 & R0004 & op1115=11; op1626=0x20 & op2731=0x02 {
+	SR1115_2 = R0004;
+	fp_acknowledge_pending(inst_next);
+}
+:ldsr R0004, SR1115_2, 2 is op0510=0x3F & SR1115_2 & R0004 & op1115=13; op1626=0x20 & op2731=0x02 {
+	SR1115_2 = R0004;
+	fp_acknowledge_pending(inst_next);
+}
+@endif
 # STSR regID, reg2
-:stsr SR0004, R1115 is op0510=0x3F & R1115 & SR0004; op1631=0x40 {
-	R1115 = SR0004;
+:stsr SR0004, R1115 is op0510=0x3F & R1115 & SR0004 & op0004; op1631=0x40 {
+	local reg:4 = op0004;
+	local fpu:1 = (reg >= 6) && (reg <= 11);
+@if defined(V850E2M)
+	fpu = fpu && (BSEL == 0x2000);
+@endif
+	if (!fpu) goto <ordinary>;
+		fp_read_control(R1115, reg);
+		goto <done>;
+	<ordinary>
+		R1115 = SR0004;
+	<done>
 }
 
 # CAXI [reg1], reg2, reg3
@@ -142,10 +304,12 @@ macro enter_ei_exception(return_pc, cause, offset, handler) {
 	if ($(PSW_EP) == 0) && $(PSW_NP) goto <fe_exc>;
 		PC = EIPC;
 		PSW = EIPSW;
+		fp_acknowledge_pending(PC);
 		return [PC];
 	<fe_exc>
 		PC = FEPC;
 		PSW = FEPSW;
+		fp_acknowledge_pending(PC);
 		return [PC];
 }
 @endif
@@ -158,15 +322,19 @@ macro enter_ei_exception(return_pc, cause, offset, handler) {
 # EIRET
 :eiret is op0515=0x3F; op1631=0x0148 {
 	clear_link();
+	fp_return_priority();
 	PC = EIPC;
 	PSW = EIPSW;
+	fp_acknowledge_pending(PC);
 	return [PC];
 }
 # FERET
 :feret is op0515=0x3F; op1631=0x014A {
 	clear_link();
+	fp_return_priority();
 	PC = FEPC;
 	PSW = FEPSW;
+	fp_acknowledge_pending(PC);
 	return [PC];
 }
 
@@ -178,6 +346,7 @@ macro enter_ei_exception(return_pc, cause, offset, handler) {
 # EI
 :ei is op0015=0x87E0; op1631=0x0160 {
 	$(PSW_ID) = 0;
+	fp_acknowledge_pending(inst_next);
 	__enable_irq();
 }
 

@@ -151,8 +151,6 @@ attach variables [ SR0004_d SR1115_d ] [
 :stsr SR0004_d, R1115, 13 is op0510=0x3F & R1115 & SR0004_d; op1626=0x40 & op2731=0x0D { R1115 = SR0004_d; }
 
 # LDSR reg2, regID, selId -- implemented RH850G3M selection IDs
-:ldsr R0004, SR1115_1, 1  is op0510=0x3F & SR1115_1 & R0004; op1626=0x20 & op2731=0x01 { SR1115_1 = R0004; }
-:ldsr R0004, SR1115_2, 2  is op0510=0x3F & SR1115_2 & R0004; op1626=0x20 & op2731=0x02 { SR1115_2 = R0004; }
 :ldsr R0004, SR1115_4, 4  is op0510=0x3F & SR1115_4 & R0004; op1626=0x20 & op2731=0x04 { SR1115_4 = R0004; }
 :ldsr R0004, SR1115_5, 5  is op0510=0x3F & SR1115_5 & R0004; op1626=0x20 & op2731=0x05 { SR1115_5 = R0004; }
 :ldsr R0004, SR1115_6, 6  is op0510=0x3F & SR1115_6 & R0004; op1626=0x20 & op2731=0x06 { SR1115_6 = R0004; }
@@ -429,20 +427,26 @@ with : op2026=0x0D {		# msb < 16, lsb < 16
 }
 
 
-# unknown special instructions (documented in separate RH850 manual?..)
+# CACHE cacheop, [reg1] -- R01US0123EJ0140 Table 7-7 defines exactly five
+# cache operations plus the CLL alias at cacheop 1111110. Reserved cacheop
+# values raise a reserved-instruction exception on G3M and stay undecoded.
+cacheop: "chbii", R0004 is op1112=0 & R0004; op2731=0 { __chbii(R0004); }
+cacheop: "cibii", R0004 is op1112=1 & R0004; op2731=0 { __cibii(R0004); }
+cacheop: "cfali", R0004 is op1112=2 & R0004; op2731=0 { __cfali(R0004); }
+cacheop: "cisti", R0004 is op1112=3 & R0004; op2731=0 { __cisti(R0004); }
+cacheop: "cildi", R0004 is op1112=3 & R0004; op2731=1 { __cildi(R0004); }
+cacheop: "cll" is op1112=3; op2731=0x1E { ll_valid = 0; }
 
-#{ "cache",	two (0xe7e0, 0x0160),	two (0xe7e0, 0x07ff),	{CACHEOP, R1}, 		2, PROCESSOR_V850E3V5_UP },
-:cache cacheop, R0004	is op0510=0x3F & op1315=0x7 & R0004 & op1112 ; op1626=0x160 & op2731 [ cacheop = (op1112<<5) | op2731; ] {
-	local operation:4 = cacheop;
-	local address:4 = R0004;
-	__cache(operation, address);
+:cache cacheop is (op0510=0x3F & op1315=0x7; op1626=0x160) & cacheop {
+	build cacheop;
 }
 
-#{ "pref",	two (0xdfe0, 0x0160),	two (0xffe0, 0x07ff),	{PREFOP, R1}, 		2, PROCESSOR_V850E3V5_UP },
-:pref op2731, R0004		is op0515=0x6FF & R0004 ; op1626=0x160 & op2731 {
-	local operation:4 = op2731;
-	local address:4 = R0004;
-	__prefetch(operation, address);
+# PREF prefop, [reg1] -- R01US0123EJ0140 Table 7-8 defines only the
+# PREFI operation (prefop 00000); all other values are reserved on G3M
+# and stay undecoded.
+prefop: "prefi", R0004 is R0004; op2731=0 { __prefi(R0004); }
+:pref prefop is (op0515=0x6FF; op1626=0x160) & prefop {
+	build prefop;
 }
 
 
@@ -453,59 +457,24 @@ with : op2026=0x0D {		# msb < 16, lsb < 16
 # Floating-point Convert Single to Half(Single)
 #{ "cvtf.hs",	two (0x07e2, 0x0442),	two (0x07ff, 0x07ff),	{R2, R3},				0, PROCESSOR_V850E3V5_UP },
 :cvtf.hs R1115, R2731	is op0010=0x7E2 & R1115 ; op1626=0x442 & R2731 {
+	if ((FPEC & 1) != 0) goto <fp_invalidated>;
 	# This instruction arithmetically converts the half-precision floating-point format contents 
 	# in the lower 16 bits of generalpurpose register reg2 to single-precision floating-point format, 
 	# rounding the result in accordance with the current rounding mode, and stores the result in general-purpose register reg3.
 	local tmp:2 = R1115:2;
 	R2731 = float2float(tmp);
+	<fp_invalidated>
 }
 # Floating-point Convert Single to Half (Single)
 #{ "cvtf.sh",	two (0x07e3, 0x0442),	two (0x07ff, 0x07ff),	{R2, R3},				0, PROCESSOR_V850E3V5_UP },
 :cvtf.sh R1115, R2731	is op0010=0x7E3 & R1115 ; op1626=0x442 & R2731 {
+	if ((FPEC & 1) != 0) goto <fp_invalidated>;
 	# This instruction arithmetically converts the single-precision floating-point format contents in general-purpose register
 	# reg2 to half-precision floating-point format, rounding the result in accordance with the current rounding mode. The result
 	# is zero-extended to word length and stored in general-purpose register reg3.
 	local tmp:2 = float2float(R1115);
 	R2731 = zext(tmp);
-}
-# Floating-point Fused-Multiply-add (Single)
-#{ "fmaf.s",	two (0x07e0, 0x04e0),	two (0x07e0, 0x07ff),	{R1, R2, R3},				0, PROCESSOR_V850E3V5_UP },
-:fmaf.s R0004, R1115, R2731		is op0510=0x03F & R0004 & R1115 ; op1626=0x4E0 & R2731 {
-	# This instruction multiplies the single-precision floating-point format contents in general-purpose register reg2 with the
-	# single-precision floating-point format contents in general-purpose register reg1, adds the single-precision floating-point
-	# format contents in general-purpose register reg3, and stores the result in general-purpose register reg3. The operation is
-	# executed as if it were of infinite accuracy. The result of the multiply operation is not rounded, but the result of the add
-	# operation is rounded, in accordance with the current rounding mode.
-	R2731 = R0004 f* R1115 f+ R2731;
-}
-# Floating-point Fused-Multiply-subtract (Single)
-#{ "fmsf.s",	two (0x07e0, 0x04e2),	two (0x07e0, 0x07ff),	{R1, R2, R3},				0, PROCESSOR_V850E3V5_UP },
-:fmsf.s R0004, R1115, R2731		is op0510=0x03F & R0004 & R1115 ; op1626=0x4E2 & R2731 {
-	# This instruction multiplies the single-precision floating-point format contents in general-purpose register reg2 with the
-	# single-precision floating-point format contents in general-purpose register reg1, subtracts the single-precision floatingpoint format contents 
-	# in general-purpose register reg3, and stores the result in general-purpose register reg3. The operation is executed as if it were of infinite accuracy. 
-	# The result of the multiply operation is not rounded, but the result of the subtract operation is rounded, in accordance with the current rounding mode.
-	R2731 = R0004 f* R1115 f- R2731;
-}
-# Floating-point Fused-Negate-Multiply-add (Single)
-#{ "fnmaf.s",	two (0x07e0, 0x04e4),	two (0x07e0, 0x07ff),	{R1, R2, R3},				0, PROCESSOR_V850E3V5_UP },
-:fnmaf.s R0004, R1115, R2731		is op0510=0x03F & R0004 & R1115 ; op1626=0x4E4 & R2731 {
-	# This instruction multiplies the single-precision floating-point format contents in general-purpose register reg2 with the
-	# single-precision floating-point format contents in general-purpose register reg1, adds the single-precision floating-point
-	# format contents in general-purpose register reg3, inverts the sign, and stores the result in general-purpose register reg3.
-	# The operation is executed as if it were of infinite accuracy. The result of the multiply operation is not rounded, but the
-	# result of the add operation is rounded, in accordance with the current rounding mode.
-	R2731 = f- (R0004 f* R1115 f+ R2731);
-}
-# Floating-point Fused-Negate-Multiply-subtrat (Single)
-#{ "fnmsf.s",	two (0x07e0, 0x04e6),	two (0x07e0, 0x07ff),	{R1, R2, R3},				0, PROCESSOR_V850E3V5_UP },
-:fnmsf.s R0004, R1115, R2731		is op0510=0x03F & R0004 & R1115 ; op1626=0x4E6 & R2731 {
-	# This instruction multiplies the single-precision floating-point format contents in general-purpose register reg2 with the
-	# single-precision floating-point format contents in general-purpose register reg1, subtracts the single-precision floatingpoint format contents 
-	# in general-purpose register reg3, inverts the sign, and stores the result in general-purpose register reg3. 
-	# The operation is executed as if it were of infinite accuracy. The result of the multiply operation is not rounded, but
-	# the result of the subtract operation is rounded, in accordance with the current rounding mode.
-	R2731 = R2731 f- R0004 f* R1115;
+	<fp_invalidated>
 }
 
 

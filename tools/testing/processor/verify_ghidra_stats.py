@@ -16,6 +16,7 @@ _MEMORY_SIZE = (
     + 0x8000  # DataFlash
     + 0x20000 + 0x20000  # LocalRAM PE1 view / byte-mapped self alias
     + 0x8000 + 0x8000  # GlobalRAM_A / GlobalRAM_B
+    + 0x40  # SFR_EIC0_31 INTC1 low-channel EIC bank (P1M-E 6.2.2)
     + 0x1000  # SFR_EIC
     + 0x10000  # SFR_RSCFD
     + 0x1000  # SFR_ICUS
@@ -29,7 +30,7 @@ _MEMORY_SIZE = (
     + 0x2000  # SFR_TSG3
     + 0x3000  # SFR_TAUJ0/1/2
 )
-_SECTIONS = 25
+_SECTIONS = 26
 
 EXPECTED_MIN = {
     "functions": 5560,

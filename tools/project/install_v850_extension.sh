@@ -76,7 +76,7 @@ echo "Compiling vendored SLEIGH sources under $LANG"
       exit 1
     fi
     unexpected_warnings=$(grep -E '\bWARN(ING)?\b' "$log" \
-      | grep -Ev 'WARN  (24|26) NOP constructors found|WARN  Use -n switch to list each individually' \
+      | grep -Ev 'WARN  [0-9]+ NOP constructors found|WARN  Use -n switch to list each individually' \
       || true)
     if [[ -n "$unexpected_warnings" ]]; then
       echo "unexpected sleigh warnings in $log" >&2

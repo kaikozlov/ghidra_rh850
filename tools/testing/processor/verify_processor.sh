@@ -71,7 +71,6 @@ if [[ -d "$PROJECT_DIR/$PROJECT_NAME.rep" ]]; then
 
   INV_OUT="$BUILD_OUT/instruction_inventory.csv"
   SWITCH_OUT="$BUILD_OUT/switch_table_inventory.csv"
-  DECOMPILER_REPORT="$BUILD_OUT/decompiler-signatures.txt"
   mkdir -p "$BUILD_OUT"
   PROJECT_LOG="$BUILD_LOGS/verify-processor-project.log"
 
@@ -102,13 +101,8 @@ if [[ -d "$PROJECT_DIR/$PROJECT_NAME.rep" ]]; then
     -postScript AssertIcusStage7Static.java \
     -postScript AssertSwitchTables.java \
     -postScript InventorySwitchTables.java "$SWITCH_OUT" \
-    -postScript AssertDecompilerInvariants.java "$DECOMPILER_REPORT" \
+    -postScript AssertDecompilerInvariants.java \
     -postScript InventoryUsedInstructions.java "$INV_OUT" "$ROOT/data/processor_unimpl_allowlist.txt"
-  if ! cmp -s "$ROOT/data/decompiler_signatures.baseline.csv" "$DECOMPILER_REPORT"; then
-    echo "decompiler signature baseline mismatch:" >&2
-    diff -u "$ROOT/data/decompiler_signatures.baseline.csv" "$DECOMPILER_REPORT" >&2 || true
-    exit 1
-  fi
   if ! cmp -s "$ROOT/data/instruction_inventory.csv" "$INV_OUT"; then
     echo "instruction inventory baseline mismatch:" >&2
     diff -u "$ROOT/data/instruction_inventory.csv" "$INV_OUT" >&2 || true

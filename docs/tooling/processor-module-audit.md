@@ -121,9 +121,9 @@ close the highest-impact gaps for this firmware:
 Landmark decompiler checks (secrets at `0xBFD8`/`0xBFE8`, ISR calling
 convention, session-control decompilation, SecurityAccess expected-key,
 ICU dispatch callee, boot reset) live in
-`AssertDecompilerInvariants.java`; the gate writes deterministic normalized-C
-hashes to `build/out/decompiler-signatures.txt`, compares them with
-`data/decompiler_signatures.baseline.csv`, and uploads the report in CI.
+`AssertDecompilerInvariants.java`; it checks recovered calling conventions,
+parameter widths, secret-address references and successful decompilation.
+It does not pin the spelling or whole-text hash of decompiled C.
 Every non-thunk function must carry an explicit `__stdcall` or `__interrupt`
 prototype — Ghidra's anonymous `unknown`/`default` is treated as a failure.
 
@@ -315,10 +315,13 @@ compares it with the committed `data/switch_table_inventory.csv` baseline.
 ## Accepted unimplemented ops
 
 Instructions that decode but intentionally use opaque `callother` p-code are
-listed by user-op name in `data/processor_unimpl_allowlist.txt`. The inventory
-resolves CALLOTHER indexes to `__cache`, `__prefetch`, `__disable_irq`,
-`__enable_irq`, `__nop`, and `__synchronize`; verification fails for either an
-unapproved used op or a stale allowlist entry.
+listed by user-op name in `data/processor_unimpl_allowlist.txt`. The current
+firmware inventory resolves CALLOTHER indexes to `__disable_irq`,
+`__enable_irq`, `__nop`, and `__synchronize` only; verification fails for
+either an unapproved used op or a stale allowlist entry. `cache`/`pref`
+do not occur in this image, so their named operation user-ops
+(`__chbii`, `__cibii`, `__cfali`, `__cisti`, `__cildi`, `__prefi`) are
+exercised by the synthetic fixture instead of the firmware inventory.
 
 ## Isolated install and processor fingerprint
 
@@ -347,14 +350,12 @@ byte-for-byte with the committed baseline instead of mutating tracked evidence.
 
 The repository is pinned to Ghidra **12.1.4**. The 12.1.3→12.1.4 migration
 itself changed only inventory-version metadata; the compiled language and
-semantic project rows were unchanged at that milestone. This later P1M-E
-hardware-spec correction intentionally changes the processor language and
-persisted semantics. The current source fingerprint is
-`219148ff9a4c095219d5fc1f46a7bf1f5c517094e5c0da0a2dc79e9115e4c357`;
-its compiled SLA is
-`a7560830060d2bbe28708aec5e35cd5ec495d1bf8d1f9009803548def5532f4a`.
-Two independent clean rebuilds of every registered target agree under that
-compiled language. See
+semantic project rows were unchanged at that milestone. Later P1M-E
+hardware-spec and G3M-instruction corrections intentionally change the
+processor language and persisted semantics; the current source fingerprint and
+compiled-SLA hash live in `data/processor_manifest.baseline.json` and are
+restated in the latest audit round below. Two independent clean rebuilds of
+every registered target agree under each compiled language. See
 [the migration journal](../history/2026-09/GHIDRA_12_1_4_MIGRATION_2026-09-21.md)
 for the earlier version-only migration evidence.
 
@@ -554,15 +555,145 @@ boundaries. A separate instruction-sequence smoke confirms that
 `LDL.W → EIRET → STC.W` fails without writing and that
 `SCH0R(0xFFFFFFFE)` returns 1 with `CY=0`.
 
+## 2026-10-09 cross-implementation re-audit and G3M instruction closure
+
+A second instruction-census pass re-compared the vendored language with the
+same pinned Ghidra, rizin, and radare2 trees recorded in
+`ghidra/ghidra_v850/PROVENANCE.json`, against a mnemonic-level enumeration of
+the G3M software manual. That comparison did not identify a missing G3M
+mnemonic; it does not establish complete operand-form coverage or semantic
+correctness. Architecture masks and primary manuals, not the union of decoded
+mnemonic strings, determine which language should accept an instruction.
+
+- `SATS`, `ROUNDF.*`, `DST`, `EST`, `DBRET`/`DBTRAP`/`DBPUSH`/`DBCP`/`DBTAG`,
+  `HVCALL`/`HVTRAP`, TLB, DSP-accumulator, trace, and the `BINSL`/`DIVN`
+  families do not occur anywhere in the G3M manual text; they stay out of the
+  exact-G3M language. rizin's `stasub` spelling is its own typo for `satsub`.
+- Upstream Ghidra's `V850e3.sinc` computes `ROTL` carry as `CY = (shift != 0)`;
+  the G3M manual (Flags table, p. 280) specifies result bit 0 *including* a
+  zero rotation. The vendored ROTL and its fixture were already correct and are
+  retained.
+- Upstream's `default_symbols` (fixed trap handlers at `ram:0x30..0x60`) and
+  `sysreg` default memory block describe V850E1/E2 fixed vectors. G3M selects
+  vectors through RBASE/EBASE, which this language already models and the
+  device-profile scripts recover; the upstream defaults are not adopted.
+
+The re-audit did surface two real defects, both fixed:
+
+1. **Architecture-specific floating support.** The V850E2M software manual,
+   R01US0001EJ0100, explicitly documents `MADDF.S`, `MSUBF.S`, `NMADDF.S`, and
+   `NMSUBF.S` on pp. 374, 380, 386, and 388. The reference radare2 opcode
+   table marks them `V850_CPU_E2V3`, not `V850_CPU_E3V5_UP`. They are not
+   G3K-only instructions. An initial deletion from the shared float file
+   incorrectly removed them from the existing V850E2M language too; the four
+   constructors and their split `reg4` operand are restored behind
+   `V850E2M`. They remain excluded from the G3M language because its instruction
+   catalogue does not document them. A missing mnemonic in a firmware
+   inventory does not justify removing support from a different architecture.
+2. **Named `CACHE`/`PREF` operations.** Both instructions previously decoded
+   every operation value into opaque numeric `__cache(op, addr)` /
+   `__prefetch(op, addr)` calls. Per manual Table 7-7/7-8 they now decode only
+   the defined operations with named user-ops — `__chbii`, `__cibii`,
+   `__cfali`, `__cisti`, `__cildi`, `__prefi` — display the manual's operation
+   names (`cache chbii, r6`, `pref prefi, r6`), treat cacheop `1111110` as the
+   CLL alias (clears the load-link monitor), and leave reserved operation
+   values undecoded as they behave in hardware.
+
+The processor fixture grew from 96 to 98 cases (`cache`/`chbii` and the
+`cache`-encoded CLL alias). This round also refreshed
+`data/processor_manifest.baseline.json` and initially bumped V850E2M to `0.5`
+and RH850G3M to `0.6`. Restoring the E2M-only forms increments V850E2M to
+`0.6`; G3M remains `0.6`. The current identities are recorded in the baseline
+manifest. The existing fixture verifier additionally exercises all four E2M
+operations with even and odd destinations, and rejects the same encodings
+under G3M. At that decode-only checkpoint, these vectors established decode
+boundaries and finite arithmetic dataflow, not fused rounding or enabled FPU
+exception behavior.
+The stale claim that the firmware inventory resolved `__cache`/`__prefetch`
+CALLOTHERs was corrected: the image uses only `__nop`, `__disable_irq`,
+`__enable_irq`, and `__synchronize`.
+
+Re-running the legacy-Sienna rebuild exposed an unrelated latent defect from
+commit `15e00abf` (2026-10-08): `ApplyP1MDeviceProfile` gained the
+evidence-backed `SFR_EIC0_31` window (0x40 bytes at `0xFFFEEA00`, P1M-E
+section 6.2.2 INTC1 low-channel bank) without updating
+`tools/testing/processor/verify_ghidra_stats.py`, which still pinned 25
+sections / 1,526,884 bytes. The verifier now expects the 26-section inventory;
+the rebuilt graph itself is unchanged (7,090 functions / 197,726 instructions).
+
+## 2026-10-09 exact binary32 multiply-add execution
+
+Language version `0.7` replaces the separately rounded expressions for
+V850E2M `MADDF.S`/`MSUBF.S`/`NMADDF.S`/`NMSUBF.S` and RH850G3M
+`FMAF.S`/`FMSF.S`/`FNMAF.S`/`FNMSF.S` with an integer-p-code fused core.
+The product retains its full 48 significant bits; alignment uses guard/sticky
+information and there is one final rounding decision. Operands are captured
+before writing the destination, including aliased and architectural `r0`
+operands.
+
+Authorities are R01US0123EJ0140 Rev.1.40 §§6.1.6–6.1.11 and pp. 402–409,
+and R01US0001EJ0100 Rev.1.00 Part 4 §§2.2, 5.3 and pp. 374–389.
+The architecture-specific differences are intentional:
+
+- G3M implements RN/RZ/RP/RM, signed-zero flushing, FN flush-to-nearest
+  including its quarter-minimum cancellation exception, and mandatory
+  unimplemented-operation exceptions for subnormal inputs/results with FS=0.
+- V850E2M's legal configuration is RN with FS=1; other RM settings and FS=0
+  are prohibited by its manual. Its multiply-add supplements additionally
+  detect multiplication overflow before the addition, even when a finite
+  addend would otherwise cancel that overflow.
+- Enabled exceptions preserve the destination, update XC/FPEPC, and enter
+  the precise handler or report a pending imprecise exception. Disabled
+  exceptions accumulate XP without replacing the previous enabled cause.
+  G3M input-flush state is sticky. FPST/FPCC/FPCFG are views of FPSR.
+- Pending FPI uses PSW masking and G3M FPIPR/PMR/ISPR priority, supports
+  cancellation through FPEC, and is released through the ordinary LDSR,
+  SYNCE, EI, EIRET and FERET paths. ICSR.PMFP reports PMR-masked FPI,
+  including priority 16's shared PM15 bit, and clears on cancellation or
+  release without changing PMEI. Floating-point instructions other than
+  TRFSR do not update their destinations while FPIVD is pending.
+
+**Verified in Ghidra's actual p-code emulator:** 3,922 numerical vectors
+against an independent arbitrary-width signed-integer/quotient-remainder
+oracle, plus 32 exception/control sequences. Coverage includes deep
+cancellation, rounding ties and directed rounding, intermediate overflow,
+flush boundaries, infinities, signaling/quiet NaNs, destination aliases,
+`r0`, precise/imprecise delivery, register views, priority masking and
+interrupt returns. The existing 98-case processor fixture also passes.
+Both languages compile and the isolated G3M language resolves. Processor
+source and compiled identities are recorded in
+`data/processor_manifest.baseline.json`, not duplicated here.
+
+The processor gate no longer compares whole-decompilation text hashes or
+literal C spellings. Those incidental checks changed with valid interrupt
+p-code; they were removed rather than repinned. Structured ABI/reference
+checks and exact normalized project/instruction/switch inventories remain.
+
+For Sienna `8965B4512000`, two independent four-stage version-0.7 rebuilds
+exported identical normalized inventories. `make verify-processor` passed,
+including firmware-machine regression and all working-project invariants.
+The 7,090-function canonical decompiler corpus was regenerated against that
+inventory; `tools/test decompiler_corpus` and selected-target project parity
+passed. Function/instruction totals remain 7,090 / 197,726, with zero undefined
+bytes inside recovered functions. Committed project snapshots were not
+promoted; the potentially-mutated live Camry session was left untouched.
+
+The NaN class is modeled, but the manuals do not define payload/sign selection:
+canonical quiet NaN `0x7fc00000` is a documented model convention.
+Imprecise delivery is modeled at instruction boundaries, not with physical
+pipeline latency. Neither is claimed as a silicon-observed result.
+
 ## What these audits do *not* claim
 
 - Zero undefined bytes inside the current functions proves in-body decode
   coverage, not discovery of every executable body and not every
   p-code edge case (FP rounding, hypervisor ops, unexercised arithmetic forms, …).
-- Floating-point p-code uses Ghidra's round-to-nearest primitives and does not
-  deliver enabled IEEE-754 exceptions from `FPSR`; cache/prefetch userops do not
-  emulate cache contents; load-link invalidation by external agents is outside
-  instruction-level emulation.
+- Other floating-point arithmetic/conversion instructions still use Ghidra's
+  ordinary floating primitives without a complete FPSR exception model.
+  The eight multiply-add forms above have fused numerical and architectural
+  exception semantics; that does not make the entire FPU instruction-exact.
+  Cache/prefetch userops do not emulate cache contents; load-link invalidation
+  by external agents is outside instruction-level emulation.
 - Exact function/instruction counts are smoke signals; prefer the asserting
   invariant scripts and the generated semantic coverage ledger for coverage
   floors.

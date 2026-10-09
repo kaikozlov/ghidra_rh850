@@ -1,7 +1,7 @@
 {
   "processor": "v850e3:LE:32:default",
   "binary": "rh850_semantic_fixture.bin",
-  "size": 404,
+  "size": 412,
   "cases": [
     {
       "name": "sld.b",
@@ -412,22 +412,41 @@
       "must_pcode_ops": [
         "CALLOTHER"
       ],
-      "userop": "__cache"
+      "userop": "__cibii"
+    },
+    {
+      "name": "cache-chbii",
+      "addr": 156,
+      "size": 4,
+      "bytes": "e6e76001",
+      "mnemonic_prefix": "cache",
+      "must_pcode_ops": [
+        "CALLOTHER"
+      ],
+      "userop": "__chbii"
+    },
+    {
+      "name": "cache-cll",
+      "addr": 160,
+      "size": 4,
+      "bytes": "e6ff60f1",
+      "mnemonic_prefix": "cache",
+      "must_pcode_ops": []
     },
     {
       "name": "pref",
-      "addr": 156,
+      "addr": 164,
       "size": 4,
       "bytes": "e6df6001",
       "mnemonic_prefix": "pref",
       "must_pcode_ops": [
         "CALLOTHER"
       ],
-      "userop": "__prefetch"
+      "userop": "__prefi"
     },
     {
       "name": "cvtf.dw",
-      "addr": 160,
+      "addr": 168,
       "size": 4,
       "bytes": "e4575064",
       "mnemonic_prefix": "cvtf.dw",
@@ -437,7 +456,7 @@
     },
     {
       "name": "cvtf.ld",
-      "addr": 164,
+      "addr": 172,
       "size": 4,
       "bytes": "e1575264",
       "mnemonic_prefix": "cvtf.ld",
@@ -447,7 +466,7 @@
     },
     {
       "name": "cvtf.uld",
-      "addr": 168,
+      "addr": 176,
       "size": 4,
       "bytes": "f1575264",
       "mnemonic_prefix": "cvtf.uld",
@@ -457,7 +476,7 @@
     },
     {
       "name": "divf.d",
-      "addr": 172,
+      "addr": 180,
       "size": 4,
       "bytes": "e6577e64",
       "mnemonic_prefix": "divf.d",
@@ -467,7 +486,7 @@
     },
     {
       "name": "floorf.sw",
-      "addr": 176,
+      "addr": 184,
       "size": 4,
       "bytes": "e357405c",
       "mnemonic_prefix": "floorf.sw",
@@ -478,14 +497,14 @@
     },
     {
       "name": "cmovf.s",
-      "addr": 180,
+      "addr": 188,
       "size": 4,
       "bytes": "e657045c",
       "mnemonic_prefix": "cmovf.s"
     },
     {
       "name": "cmpf.sf",
-      "addr": 184,
+      "addr": 192,
       "size": 4,
       "bytes": "e6572444",
       "mnemonic_prefix": "cmpf.s",
@@ -493,7 +512,7 @@
     },
     {
       "name": "synce",
-      "addr": 188,
+      "addr": 196,
       "size": 2,
       "bytes": "1d00",
       "mnemonic_prefix": "synce",
@@ -504,7 +523,7 @@
     },
     {
       "name": "syncm",
-      "addr": 192,
+      "addr": 200,
       "size": 2,
       "bytes": "1e00",
       "mnemonic_prefix": "syncm",
@@ -515,7 +534,7 @@
     },
     {
       "name": "syncp",
-      "addr": 196,
+      "addr": 204,
       "size": 2,
       "bytes": "1f00",
       "mnemonic_prefix": "syncp",
@@ -526,7 +545,7 @@
     },
     {
       "name": "synci",
-      "addr": 200,
+      "addr": 208,
       "size": 2,
       "bytes": "1c00",
       "mnemonic_prefix": "synci",
@@ -537,7 +556,7 @@
     },
     {
       "name": "caxi",
-      "addr": 204,
+      "addr": 212,
       "size": 4,
       "bytes": "e657ee58",
       "mnemonic_prefix": "caxi",
@@ -549,7 +568,7 @@
     },
     {
       "name": "di",
-      "addr": 208,
+      "addr": 216,
       "size": 4,
       "bytes": "e0076001",
       "mnemonic_prefix": "di",
@@ -560,7 +579,7 @@
     },
     {
       "name": "ei",
-      "addr": 212,
+      "addr": 220,
       "size": 4,
       "bytes": "e0876001",
       "mnemonic_prefix": "ei",
@@ -571,7 +590,7 @@
     },
     {
       "name": "rie",
-      "addr": 216,
+      "addr": 224,
       "size": 2,
       "bytes": "4000",
       "mnemonic_prefix": "rie",
@@ -579,7 +598,7 @@
     },
     {
       "name": "fetrap-3",
-      "addr": 220,
+      "addr": 228,
       "size": 2,
       "bytes": "4018",
       "mnemonic_prefix": "fetrap",
@@ -587,7 +606,7 @@
     },
     {
       "name": "ctret",
-      "addr": 224,
+      "addr": 232,
       "size": 4,
       "bytes": "e0074401",
       "mnemonic_prefix": "ctret",
@@ -595,14 +614,14 @@
     },
     {
       "name": "trap-3",
-      "addr": 228,
+      "addr": 236,
       "size": 4,
       "bytes": "e3070001",
       "mnemonic_prefix": "trap"
     },
     {
       "name": "eiret",
-      "addr": 232,
+      "addr": 240,
       "size": 4,
       "bytes": "e0074801",
       "mnemonic_prefix": "eiret",
@@ -610,7 +629,7 @@
     },
     {
       "name": "ldsr-psw",
-      "addr": 236,
+      "addr": 244,
       "size": 4,
       "bytes": "e62f2000",
       "mnemonic_prefix": "ldsr",
@@ -618,7 +637,7 @@
     },
     {
       "name": "ldsr-mcfg0",
-      "addr": 240,
+      "addr": 248,
       "size": 4,
       "bytes": "e6072008",
       "mnemonic_prefix": "ldsr",
@@ -626,7 +645,7 @@
     },
     {
       "name": "ldsr-pmr",
-      "addr": 244,
+      "addr": 252,
       "size": 4,
       "bytes": "e65f2010",
       "mnemonic_prefix": "ldsr",
@@ -634,7 +653,7 @@
     },
     {
       "name": "ldsr-mcc",
-      "addr": 248,
+      "addr": 256,
       "size": 4,
       "bytes": "e6572028",
       "mnemonic_prefix": "ldsr",
@@ -642,7 +661,7 @@
     },
     {
       "name": "stsr-cdbcr",
-      "addr": 252,
+      "addr": 260,
       "size": 4,
       "bytes": "f8574068",
       "mnemonic_prefix": "stsr",
@@ -650,7 +669,7 @@
     },
     {
       "name": "ldsr-mpat15",
-      "addr": 256,
+      "addr": 264,
       "size": 4,
       "bytes": "e6f72038",
       "mnemonic_prefix": "ldsr",
@@ -658,7 +677,7 @@
     },
     {
       "name": "stsr-mcfg0",
-      "addr": 260,
+      "addr": 268,
       "size": 4,
       "bytes": "e0574008",
       "mnemonic_prefix": "stsr",
@@ -666,7 +685,7 @@
     },
     {
       "name": "stsr-pmr",
-      "addr": 264,
+      "addr": 272,
       "size": 4,
       "bytes": "eb574010",
       "mnemonic_prefix": "stsr",
@@ -674,7 +693,7 @@
     },
     {
       "name": "stsr-mcc",
-      "addr": 268,
+      "addr": 276,
       "size": 4,
       "bytes": "ea574028",
       "mnemonic_prefix": "stsr",
@@ -682,7 +701,7 @@
     },
     {
       "name": "stsr-mpat15",
-      "addr": 272,
+      "addr": 280,
       "size": 4,
       "bytes": "fe574038",
       "mnemonic_prefix": "stsr",
@@ -690,196 +709,196 @@
     },
     {
       "name": "link-st.b16",
-      "addr": 276,
+      "addr": 284,
       "size": 4,
       "bytes": "47570000",
       "mnemonic_prefix": "st.b"
     },
     {
       "name": "link-st.h16",
-      "addr": 280,
+      "addr": 288,
       "size": 4,
       "bytes": "67570000",
       "mnemonic_prefix": "st.h"
     },
     {
       "name": "link-st.w16",
-      "addr": 284,
+      "addr": 292,
       "size": 4,
       "bytes": "67570100",
       "mnemonic_prefix": "st.w"
     },
     {
       "name": "link-st.b23",
-      "addr": 288,
+      "addr": 296,
       "size": 6,
       "bytes": "87070d500000",
       "mnemonic_prefix": "st.b"
     },
     {
       "name": "link-st.h23",
-      "addr": 296,
+      "addr": 304,
       "size": 6,
       "bytes": "a7070d500000",
       "mnemonic_prefix": "st.h"
     },
     {
       "name": "link-st.w23",
-      "addr": 304,
+      "addr": 312,
       "size": 6,
       "bytes": "87070f500000",
       "mnemonic_prefix": "st.w"
     },
     {
       "name": "link-st.dw23",
-      "addr": 312,
+      "addr": 320,
       "size": 6,
       "bytes": "a7070f500000",
       "mnemonic_prefix": "st.dw"
     },
     {
       "name": "link-sst.b",
-      "addr": 320,
+      "addr": 328,
       "size": 2,
       "bytes": "8053",
       "mnemonic_prefix": "sst.b"
     },
     {
       "name": "link-sst.h",
-      "addr": 324,
+      "addr": 332,
       "size": 2,
       "bytes": "8054",
       "mnemonic_prefix": "sst.h"
     },
     {
       "name": "link-sst.w",
-      "addr": 328,
+      "addr": 336,
       "size": 2,
       "bytes": "0155",
       "mnemonic_prefix": "sst.w"
     },
     {
       "name": "link-st.b-inc",
-      "addr": 332,
+      "addr": 340,
       "size": 4,
       "bytes": "e7177253",
       "mnemonic_prefix": "st.b"
     },
     {
       "name": "link-st.b-dec",
-      "addr": 336,
+      "addr": 344,
       "size": 4,
       "bytes": "e7277253",
       "mnemonic_prefix": "st.b"
     },
     {
       "name": "link-st.h-inc",
-      "addr": 340,
+      "addr": 348,
       "size": 4,
       "bytes": "e7177653",
       "mnemonic_prefix": "st.h"
     },
     {
       "name": "link-st.h-dec",
-      "addr": 344,
+      "addr": 352,
       "size": 4,
       "bytes": "e7277653",
       "mnemonic_prefix": "st.h"
     },
     {
       "name": "link-st.w-inc",
-      "addr": 348,
+      "addr": 356,
       "size": 4,
       "bytes": "e7177a53",
       "mnemonic_prefix": "st.w"
     },
     {
       "name": "link-st.w-dec",
-      "addr": 352,
+      "addr": 360,
       "size": 4,
       "bytes": "e7277a53",
       "mnemonic_prefix": "st.w"
     },
     {
       "name": "link-set1-imm",
-      "addr": 356,
+      "addr": 364,
       "size": 4,
       "bytes": "c71f0000",
       "mnemonic_prefix": "set1"
     },
     {
       "name": "link-set1-reg",
-      "addr": 360,
+      "addr": 368,
       "size": 4,
       "bytes": "e757e000",
       "mnemonic_prefix": "set1"
     },
     {
       "name": "link-not1-imm",
-      "addr": 364,
+      "addr": 372,
       "size": 4,
       "bytes": "c75f0000",
       "mnemonic_prefix": "not1"
     },
     {
       "name": "link-not1-reg",
-      "addr": 368,
+      "addr": 376,
       "size": 4,
       "bytes": "e757e200",
       "mnemonic_prefix": "not1"
     },
     {
       "name": "link-clr1-imm",
-      "addr": 372,
+      "addr": 380,
       "size": 4,
       "bytes": "c79f0000",
       "mnemonic_prefix": "clr1"
     },
     {
       "name": "link-clr1-reg",
-      "addr": 376,
+      "addr": 384,
       "size": 4,
       "bytes": "e757e400",
       "mnemonic_prefix": "clr1"
     },
     {
       "name": "link-caxi",
-      "addr": 380,
+      "addr": 388,
       "size": 4,
       "bytes": "e757ee58",
       "mnemonic_prefix": "caxi"
     },
     {
       "name": "link-prepare",
-      "addr": 384,
+      "addr": 392,
       "size": 4,
       "bytes": "80072100",
       "mnemonic_prefix": "prepare"
     },
     {
       "name": "link-pushsp",
-      "addr": 388,
+      "addr": 396,
       "size": 4,
       "bytes": "ea476059",
       "mnemonic_prefix": "pushsp"
     },
     {
       "name": "feret",
-      "addr": 392,
+      "addr": 400,
       "size": 4,
       "bytes": "e0074a01",
       "mnemonic_prefix": "feret"
     },
     {
       "name": "rie-imm",
-      "addr": 396,
+      "addr": 404,
       "size": 4,
       "bytes": "f0070000",
       "mnemonic_prefix": "rie"
     },
     {
       "name": "syscall-3",
-      "addr": 400,
+      "addr": 408,
       "size": 4,
       "bytes": "e3d76001",
       "mnemonic_prefix": "syscall"

@@ -32,6 +32,11 @@ define register offset=0x80 size=4 [
 
 define register offset=0x1000 size=4 [ PC ];
 
+@if defined(V850E2M)
+# FPU-bank SR11 (BSEL=0x2000), distinct from the legacy CPU-bank SR11.
+define register offset=0x1010 size=4 [ FPEC ];
+@endif
+
 @if defined(V850E3)
 # Internal state used to model multi-register stack operations and the
 # architectural load-link monitor. These are not software-visible registers.
@@ -90,8 +95,13 @@ define pcodeop __halt;
 define pcodeop __snooze;
 define pcodeop __disable_irq;
 define pcodeop __enable_irq;
-define pcodeop __cache;
-define pcodeop __prefetch;
+# Named G3M cache/prefetch operations (R01US0123EJ0140 Tables 7-7 and 7-8).
+define pcodeop __chbii;
+define pcodeop __cibii;
+define pcodeop __cfali;
+define pcodeop __cisti;
+define pcodeop __cildi;
+define pcodeop __prefi;
 
 
 
@@ -256,8 +266,12 @@ define token prep(32)
 attach variables [op0_1720] [r0 r2 gp r6 r8 r10 r12 r14 r16 r18 r20 r22 r24 r26 r28 ep];
 attach variables [op1_1720] [r1 sp tp r7 r9 r11 r13 r15 r17 r19 r21 r23 r25 r27 r29 lp];
 
-reg4: op0_1720 is op2323=0 & op0_1720 { export op0_1720; }
+@if defined(V850E2M)
+# E2M Format F:I reg4: bits 20..17 supply the high bits; bit 23 is the LSB.
+reg4: "r0" is op2323=0 & op1720=0 { local discard:4 = 0; export discard; }
+reg4: op0_1720 is op2323=0 & op0_1720 & op1720!=0 { export op0_1720; }
 reg4: op1_1720 is op2323=1 & op1_1720 { export op1_1720; }
+@endif
 
 attach variables [ xR0004 xR1115 xR2731]
 	[ r0 r1 r2 sp gp tp r6 r7 r8 r9 r10 r11 r12 r13 r14 r15 r16 r17 r18 r19 r20 r21 r22 r23 r24 r25 r26 r27 r28 r29 ep lp ];

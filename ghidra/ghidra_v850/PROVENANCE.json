@@ -1,7 +1,7 @@
 {
   "name": "Renesas_v850",
   "language_id": "v850e3:LE:32:default",
-  "language_version": "0.5",
+  "language_version": "0.7",
   "upstream": {
     "url": "https://github.com/esaulenka/ghidra_v850",
     "baseline_commit": "14c1b5be32b8ec741ee626c8bca9885c58f7a473",
@@ -32,7 +32,8 @@
   },
   "authorities": [
     "R01US0123EJ0140 Rev.1.40 RH850G3M User's Manual: Software",
-    "R01UH0585EJ0120 Rev.1.20 RH850/P1M-E Group User's Manual: Hardware"
+    "R01UH0585EJ0120 Rev.1.20 RH850/P1M-E Group User's Manual: Hardware",
+    "R01US0001EJ0100 Rev.1.00 V850E2M User's Manual: Architecture (V850E2M language)"
   ],
   "ghidra": {
     "required_version": "12.1.4",
