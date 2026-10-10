@@ -327,9 +327,10 @@ class _FakeProbePanda:
     def __init__(self):
         self.request_count = 0
         self.rx: list[tuple[int, bytes, int]] = []
+        self.safety_modes: list[tuple[int, int]] = []
 
-    def set_safety_mode(self, *_args):
-        pass
+    def set_safety_mode(self, mode, param=0):
+        self.safety_modes.append((int(mode), int(param)))
 
     def can_send_many(self, frames):
         self.request_count += 1
@@ -348,8 +349,7 @@ class _FakeProbePanda:
 fake_probe_panda = _FakeProbePanda()
 with (mock.patch.object(host, "load_security_secret", return_value=(b"\x00" * 16, "test")),
       mock.patch.object(host, "execute_ram_payload", return_value={"direct_bootloader": True}) as execute,
-      mock.patch.object(host, "wait_for_f181", return_value={"ok": True}) as wait_for_application,
-      mock.patch.object(host, "set_alloutput_mode")):
+      mock.patch.object(host, "wait_for_f181", return_value={"ok": True}) as wait_for_application):
     direct = host.install(
         OUT / meta["authenticated_payload"]["path"], meta_path,
         direct_boot=True, panda=fake_probe_panda,
@@ -361,15 +361,16 @@ check("post-activation install success is proved by the signer response, not a s
       execute.call_args.kwargs["allow_direct_boot"] is True and
       execute.call_args.kwargs["programming_already_requested"] is True and
       wait_for_application.call_count == 1 and
-      wait_for_application.call_args.kwargs["expected_f181_hex"] == meta["target"]["application_f181_hex"])
+      wait_for_application.call_args.kwargs["expected_f181_hex"] == meta["target"]["application_f181_hex"] and
+      fake_probe_panda.safety_modes[-1] == (host.ELM327_SAFETY_MODE, 1))
 
 fake_self_test_panda = _FakeProbePanda()
-with (mock.patch.dict("sys.modules", {"panda": SimpleNamespace(Panda=lambda *_a, **_k: fake_self_test_panda)}),
-      mock.patch.object(host, "set_alloutput_mode")):
+with mock.patch.dict("sys.modules", {"panda": SimpleNamespace(Panda=lambda *_a, **_k: fake_self_test_panda)}):
     signer_self_test = host.self_test(meta_path, panda=fake_self_test_panda)
 check("fresh signer self-test needs no post-activation diagnostic transport",
       signer_self_test["passed"] is True and signer_self_test["response"]["status"] == 0 and
-      fake_self_test_panda.request_count == 1)
+      fake_self_test_panda.request_count == 1 and
+      fake_self_test_panda.safety_modes[-1] == (host.ELM327_SAFETY_MODE, 1))
 
 BUILD_TEMP.cleanup()
 print("PASS TSS3 request signer behavior")
