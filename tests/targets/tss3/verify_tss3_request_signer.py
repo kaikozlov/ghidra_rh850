@@ -324,16 +324,36 @@ check("pipelined completion verdict rejects a wedged signer that exhausted the s
 
 
 class _FakeProbePanda:
-    def __init__(self):
+    def __init__(self, *, safety_mode=host.ELM327_SAFETY_MODE, safety_param=1,
+                 respond=True, receipt_offset=host.TX_RECEIPT_ACCEPTED_BUS_OFFSET):
         self.request_count = 0
         self.rx: list[tuple[int, bytes, int]] = []
         self.safety_modes: list[tuple[int, int]] = []
+        self.health_state = {"safety_mode": safety_mode, "safety_param": safety_param}
+        self.respond = respond
+        self.receipt_offset = receipt_offset
+
+    def health(self):
+        return dict(self.health_state)
+
+    def get_version(self):
+        return "DEV-92eb5651-DEBUG"
+
+    def get_signature(self):
+        return b"\xA5" * 128
+
+    def up_to_date(self, fn=None):
+        return True
 
     def set_safety_mode(self, mode, param=0):
         self.safety_modes.append((int(mode), int(param)))
 
     def can_send_many(self, frames):
         self.request_count += 1
+        for frame in frames:
+            self.rx.append((int(frame[0]), b"", int(frame[2]) + self.receipt_offset))
+        if not self.respond:
+            return
         data = [bytes(frame[1]) for frame in frames]
         seq = (data[0][0] & 0x0F) | ((data[1][0] & 0x0F) << 4)
         self.rx.append((0x7A9, bytes((0xC9, seq, 0x00, seq ^ 0xFF, 0x10 | (self.request_count & 0x0F), seq, 0xA5, 0x5A)), 0))
@@ -364,6 +384,30 @@ check("post-activation install success is proved by the signer response, not a s
       wait_for_application.call_args.kwargs["expected_f181_hex"] == meta["target"]["application_f181_hex"] and
       fake_probe_panda.safety_modes[-1] == (host.ELM327_SAFETY_MODE, 1))
 
+check("successful probe records the active safety mode and accepted TX receipts",
+      direct["signer_session"]["safety_mode_ok"] is True and
+      direct["signer_session"]["safety_mode_reported"] == host.ELM327_SAFETY_MODE and
+      direct["signer_session"]["tx_receipts_accepted"] == 4 and
+      direct["signer_session"]["tx_receipts_rejected"] == 0 and
+      direct["signer_session"]["panda_version"] == "DEV-92eb5651-DEBUG")
+
+silent_panda = _FakeProbePanda(safety_mode=0, safety_param=0, respond=False,
+                               receipt_offset=host.TX_RECEIPT_REJECTED_BUS_OFFSET)
+with (mock.patch.object(host, "load_security_secret", return_value=(b"\x00" * 16, "test")),
+      mock.patch.object(host, "execute_ram_payload", return_value={"direct_bootloader": True}),
+      mock.patch.object(host, "wait_for_f181", return_value={"ok": True}),
+      mock.patch.object(host, "SIGNER_PROBE_TIMEOUT_SECONDS", 0.25)):
+    silent = host.install(
+        OUT / meta["authenticated_payload"]["path"], meta_path,
+        direct_boot=True, panda=silent_panda,
+    )
+check("failed probe still records the silent safety fallback and rejected TX receipts",
+      silent["verdict"] == "application_live_but_request_signer_probe_failed" and
+      silent["signer_session"]["safety_mode_ok"] is False and
+      silent["signer_session"]["safety_mode_reported"] == 0 and
+      silent["signer_session"]["tx_receipts_accepted"] == 0 and
+      silent["signer_session"]["tx_receipts_rejected"] > 0)
+
 fake_self_test_panda = _FakeProbePanda()
 with mock.patch.dict("sys.modules", {"panda": SimpleNamespace(Panda=lambda *_a, **_k: fake_self_test_panda)}):
     signer_self_test = host.self_test(meta_path, panda=fake_self_test_panda)
@@ -371,6 +415,24 @@ check("fresh signer self-test needs no post-activation diagnostic transport",
       signer_self_test["passed"] is True and signer_self_test["response"]["status"] == 0 and
       fake_self_test_panda.request_count == 1 and
       fake_self_test_panda.safety_modes[-1] == (host.ELM327_SAFETY_MODE, 1))
+
+fw_dir = BUILD_ROOT / "fw-file"
+fw_dir.mkdir(parents=True, exist_ok=True)
+(fw_dir / "panda_h7.bin.signed").write_bytes(b"\x00" * 16 + b"\xA5" * 128)
+fake_panda_module = SimpleNamespace(
+    FW_PATH=str(fw_dir),
+    McuType=SimpleNamespace(H7=SimpleNamespace(config=SimpleNamespace(app_fn="panda_h7.bin.signed"))),
+    Panda=SimpleNamespace(
+        get_signature_from_firmware=lambda fn: Path(fn).read_bytes()[-128:],
+    ),
+)
+with mock.patch.dict("sys.modules", {"panda": fake_panda_module}):
+    identity_session = host.RequestSignerSession(meta, panda=_FakeProbePanda())
+check("session telemetry proves the running firmware matches the flash-candidate file",
+      identity_session.telemetry["panda_signature_matches_fw_file"] is True and
+      identity_session.telemetry["fw_file_signature_hex_prefix"] == "a5" * 8 and
+      identity_session.telemetry["panda_signature_hex_prefix"] == "a5" * 8)
+identity_session.close()
 
 BUILD_TEMP.cleanup()
 print("PASS TSS3 request signer behavior")

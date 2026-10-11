@@ -177,6 +177,12 @@ four `0x777` records were accepted onto CAN (`bus+128`) or rejected by Panda
 (`bus+192`). Capturing those TX receipts is the direct transport discriminator;
 it does not require changing the resident.
 
+The maintained host now records that witness: the install JSON carries a
+`signer_session` block with the post-`set_safety_mode` health readback
+(`safety_mode_reported`, `safety_mode_ok`), the running Panda version and
+signature-versus-flash-file identity, and per-probe TX receipt counts
+(`tx_receipts_accepted` / `tx_receipts_rejected`).
+
 ### Historical host mode and exact-machine cross-check (2026-10-10)
 
 Do not infer the failed 2026-10-10/11 request-signer safety mode from current
