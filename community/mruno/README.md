@@ -111,3 +111,39 @@ only `0x1DA`, and this script does not count frames that the UDS client consumes
 from the shared Panda receive queue during its own requests. See the
 [preflight review](../../docs/variants/crown-8965F3012000.md#contributor-preflight-review-2026-09-14)
 for the narrowed interpretation and read-only tooling fix.
+
+## 2026-10-10/11 request-signer bringup logs
+
+The retained ZIPs below are contributor-supplied startup/request-signer runs after
+physically repinning the Toyota-B CAN0/CAN1 pairs onto the CAN0/CAN2 intercept
+path. They are source evidence and are retained unchanged.
+
+| File | Size | SHA-256 | Context |
+|---|---:|---|---|
+| `bringup-logs/tss3-bringup-runs-20261010.zip` | 18,373 | `a2aae02f7af3343a18ed50f3b40f356d9b6b9224e5ab68d118a8518dcc28fbf7` | Three runs while the contributor reported Sunnypilot `release-tizi`; startup PROGRAMMING catch and application F181 return succeeded, while the request-signer probe received no `0x7A9` signer response. |
+| `bringup-logs/tss3-bringup-runs-20261011-c3x-debug.zip` | 20,154 | `a06fb54d72fb68082c5d7bef8f434ccd413015bbf241d9e5fec08ec4c759c1cd` | Three repeat runs after the contributor reported Panda `DEV-92eb5651-DEBUG`, hardware type 9 / C3X SPI. The same payload and request-signer timeout reproduced. |
+| `bringup-logs/tss3-bringup-terminal-output.txt` | 3,852 | `bce1237b417c79adee74da573b181cdcc1f4c6582e9ab60af0d030ea8745b07e` | Contributor-collated terminal output and harness context for the first batch. |
+
+Across all six retained install records the authenticated payload SHA-256 is
+`c1cfd265611feb8e47438f81a3f4c508afea52a2be98c55ccf8d2346d7398a5d`.
+The startup catcher reaches PROGRAMMING and the application subsequently answers
+exact F181 `8965F3012000 / 8A3113008000`; the recurring failure is the absence of
+a successful request-signer response. The later debug-Panda reproduction means
+the earlier release-Panda `SAFETY_ALLOUTPUT -> SILENT` behavior is not sufficient
+to explain the Crown failure.
+
+`execution.telemetry_frames == 0` is **not** a census of CAN traffic during the
+request-signer probe. That field belongs to the short authenticated RAM-exec
+handoff window and counts only its selected `0x7A9` telemetry events. The old
+bundle also carries no resident activation-state readback, so these runs do not
+establish whether the request resident initialized, consumed `0x777`, reached
+command 5, or attempted the `0x7A9` response.
+
+The startup logs are not relay-side attribution evidence: startup uses ELM327
+with the intercept relay bypassed. In the 2026-10-11 captures, selected ordinary
+chassis frames `0x030`, `0x101`, and `0x51E` appear on logical bus 2 while the
+EPS diagnostic `0x7A9` response is observed on both buses 0 and 2. This asymmetry
+is a discriminator candidate, not proof of EPS-side ownership. The maintained
+read-only next test is `tools/toyota eps-probe --open-relay --execute`, which
+opens the relay with debug allOutput passthrough and polls F181 independently on
+logical buses 0 and 2 before restoring the bypassed ELM327 state.

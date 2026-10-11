@@ -1,0 +1,37 @@
+## Run 1 — T223914 (first attempt, pandad killed manually)
+
+{"schema":"tss3-request-signer-ui-status-v1","stage":"armed","title":"Request-signer bringup armed","detail":"Press the brake and POWER normally. Keep the vehicle in Park.","progress":5,"done":false,"error":false,"output_dir":"/tmp/tss3-request-signer-ui-bringup-20261010T223914"}
+INFO: connecting to panda 070032000a51333038363231
+{"schema":"tss3-request-signer-ui-status-v1","stage":"programming","title":"EPS programming caught","detail":"Installing the volatile 0x08A request signer into EPS RAM.","progress":20,"done":false,"error":false,"output_dir":"/tmp/tss3-request-signer-ui-bringup-20261010T223914"}
+INFO: connecting to panda 070032000a51333038363231
+INFO: connecting to panda 070032000a51333038363231
+INFO: connecting to panda 070032000a51333038363231
+{"schema":"tss3-request-signer-ui-status-v1","stage":"error","title":"Request-signer bringup failed","detail":"UiBringupError: request-signer install/probe failed: application_live_but_request_signer_probe_failed","progress":0,"done":false,"error":true,"output_dir":"/tmp/tss3-request-signer-ui-bringup-20261010T223914"}
+
+## Run 2 — T224613 (Windows Terminal, car fully off + 60s wait)
+
+{"schema":"tss3-request-signer-ui-status-v1","stage":"armed","title":"Request-signer bringup armed","detail":"Press the brake and POWER normally. Keep the vehicle in Park.","progress":5,"done":false,"error":false,"output_dir":"/tmp/tss3-request-signer-ui-bringup-20261010T224613"}
+INFO: connecting to panda 070032000a51333038363231
+{"schema":"tss3-request-signer-ui-status-v1","stage":"programming","title":"EPS programming caught","detail":"Installing the volatile 0x08A request signer into EPS RAM.","progress":20,"done":false,"error":false,"output_dir":"/tmp/tss3-request-signer-ui-bringup-20261010T224613"}
+INFO: connecting to panda 070032000a51333038363231
+INFO: connecting to panda 070032000a51333038363231
+INFO: connecting to panda 070032000a51333038363231
+{"schema":"tss3-request-signer-ui-status-v1","stage":"error","title":"Request-signer bringup failed","detail":"UiBringupError: request-signer install/probe failed: application_live_but_request_signer_probe_failed","progress":0,"done":false,"error":true,"output_dir":"/tmp/tss3-request-signer-ui-bringup-20261010T224613"}
+
+## Run 3 — T224758 (Windows Terminal, immediate retry)
+
+{"schema":"tss3-request-signer-ui-status-v1","stage":"armed","title":"Request-signer bringup armed","detail":"Press the brake and POWER normally. Keep the vehicle in Park.","progress":5,"done":false,"error":false,"output_dir":"/tmp/tss3-request-signer-ui-bringup-20261010T224758"}
+INFO: connecting to panda 070032000a51333038363231
+{"schema":"tss3-request-signer-ui-status-v1","stage":"programming","title":"EPS programming caught","detail":"Installing the volatile 0x08A request signer into EPS RAM.","progress":20,"done":false,"error":false,"output_dir":"/tmp/tss3-request-signer-ui-bringup-20261010T224758"}
+INFO: connecting to panda 070032000a51333038363231
+INFO: connecting to panda 070032000a51333038363231
+INFO: connecting to panda 070032000a51333038363231
+{"schema":"tss3-request-signer-ui-status-v1","stage":"error","title":"Request-signer bringup failed","detail":"UiBringupError: request-signer install/probe failed: application_live_but_request_signer_probe_failed","progress":0,"done":false,"error":true,"output_dir":"/tmp/tss3-request-signer-ui-bringup-20261010T224758"}
+
+## Device / harness context
+
+- comma 3x, sunnypilot, LAN 192.168.211.215
+- Toyota Crown 2024 (8965F3012000 / 8A3113008000)
+- Toyota-B harness repinned 2026-10-10: green<->blue, orange<->pink, both sides
+- CAN bus traffic confirmed: bus 0 (167 unique addrs), bus 1 (22 unique addrs incl 0x160 + 0x180-0x18c radar), bus 2 (mirror of bus 0)
+- pandad killed before each run; manager.py also killed before run 1
