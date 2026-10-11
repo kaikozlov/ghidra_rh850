@@ -1,0 +1,830 @@
+{
+  "control_domain_state": {
+    "brake_identity": {
+      "address": "0x7B0",
+      "bus": 0,
+      "f181": "01463135323633334b3030303000000000"
+    },
+    "eps_identity": {
+      "expected_f181_hex": "023839363546333330373030300000000038413331313333303331303000000000",
+      "verification": "bound_by_install_pre_helper_f181"
+    },
+    "fault_state": {
+      "brake": {
+        "0x102D": {
+          "available": true,
+          "did": "0x102D",
+          "fail_control": false,
+          "fail_status": false,
+          "raw": "30106f00ff001d00bf048000d0106840"
+        },
+        "0x102F": {
+          "available": true,
+          "did": "0x102F",
+          "eps_communication_open": false,
+          "raw": "f700fd007c00a9080000"
+        }
+      },
+      "frc": {
+        "0x1903": {
+          "available": true,
+          "control_mode": 0,
+          "control_mode_label": "unknown",
+          "did": "0x1903",
+          "raw": "00"
+        },
+        "0x1905": {
+          "available": true,
+          "cruise_control_allowed": false,
+          "did": "0x1905",
+          "raw": "8000"
+        },
+        "0x1906": {
+          "acc_not_available_icon": false,
+          "available": true,
+          "did": "0x1906",
+          "main_switch_recognized": false,
+          "raw": "e000e0008000"
+        },
+        "0x1B09": {
+          "available": false,
+          "did": "0x1B09",
+          "error": "RecoveryError: UDS 0x22 negative response: NRC 0x31"
+        }
+      }
+    },
+    "frc_identity": {
+      "address": "0x792",
+      "bus": 0,
+      "f181": "0138363436463333313530303000000000"
+    },
+    "peer_health_observed": true,
+    "schema": "tss3-control-domain-state-v2",
+    "target": "camry-8965F3307000",
+    "verdict": "control_domains_healthy"
+  },
+  "request_signer_install": {
+    "entry_condition": "exact_bootloader_f181",
+    "execution": {
+      "boot_f181_ascii": "\u0002!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+      "boot_f181_hex": "022121212121212121212121212121212121212121212121212121212121212121",
+      "boot_sid23_probe": {
+        "error": "NegativeResponseError",
+        "status": "rejected"
+      },
+      "direct_bootloader": true,
+      "f181_ascii": null,
+      "f181_hex": null,
+      "handler_done": false,
+      "initial_f181_ascii": "\u0002!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+      "initial_f181_attempts": 1,
+      "initial_f181_hex": "022121212121212121212121212121212121212121212121212121212121212121",
+      "programming_already_requested": true,
+      "programming_handoff": {
+        "boot_f181_hex": "022121212121212121212121212121212121212121212121212121212121212121",
+        "direct_bootloader": true,
+        "route": {
+          "elm327_param": 1,
+          "rx": 1961,
+          "rx_bus": 0,
+          "semantic_path": "normal-harness",
+          "tx": 1953,
+          "tx_bus": 0
+        }
+      },
+      "ram_exec_geometry": {
+        "evidence": "dynamic:camry-8965F3307000",
+        "load_addr": 4273930240,
+        "load_size": 4096
+      },
+      "route": {
+        "bus": 0,
+        "cpu_index": 0,
+        "elm327_param": 1,
+        "uds_variant": "old"
+      },
+      "security_access": {
+        "secret_value_recorded": false,
+        "seed_length": 16
+      },
+      "telemetry_frames": 0,
+      "timed_out": true,
+      "timing": {
+        "phase_after_start_ms": {
+          "boot_prepared": 96.849496,
+          "complete": 861.386065,
+          "initial_f181_complete": 80.425665,
+          "panda_connected": 51.793959,
+          "payload_trigger_complete": 779.931423,
+          "safety_configured": 67.898008,
+          "security_access_complete": 130.619678,
+          "started": 0.0
+        },
+        "phase_monotonic_ns": {
+          "boot_prepared": 5370142932012,
+          "complete": 5370907468581,
+          "initial_f181_complete": 5370126508181,
+          "panda_connected": 5370097876475,
+          "payload_trigger_complete": 5370826013939,
+          "safety_configured": 5370113980524,
+          "security_access_complete": 5370176702194,
+          "started": 5370046082516
+        }
+      },
+      "unidentified_app_handoff_allowed": false
+    },
+    "payload_sha256": "c1cfd265611feb8e47438f81a3f4c508afea52a2be98c55ccf8d2346d7398a5d",
+    "pre_helper_f181": {
+      "attempts": [
+        {
+          "at_monotonic": 5371.125025169,
+          "f181_ascii": null,
+          "f181_hex": null,
+          "ok": false
+        },
+        {
+          "at_monotonic": 5371.245682938,
+          "f181_ascii": "\u00028965F3307000\u0000\u0000\u0000\u00008A3113303100",
+          "f181_hex": "023839363546333330373030300000000038413331313333303331303000000000",
+          "ok": true
+        }
+      ],
+      "first_success": {
+        "at_monotonic": 5371.245682938,
+        "f181_ascii": "\u00028965F3307000\u0000\u0000\u0000\u00008A3113303100",
+        "f181_hex": "023839363546333330373030300000000038413331313333303331303000000000",
+        "ok": true
+      },
+      "ok": true
+    },
+    "schema": "tss3-request-signer-install-v1",
+    "signer_probe": {
+      "attempts": 1,
+      "passed": true,
+      "request": {
+        "application_hex": "0000000880002d4700000000007fff007fff0000c000100032000100",
+        "bus": 0,
+        "can_id": "0x00000777",
+        "carrier": "functional-nibble4",
+        "codec": "four-frame",
+        "fd": false,
+        "frames_hex": [
+          "810000000880002d",
+          "904700000000007f",
+          "a1ff007fff0000c0",
+          "b000100032000100"
+        ]
+      },
+      "response": {
+        "bus": 0,
+        "can_id": "0x000007A9",
+        "elapsed_ms": 11.339310999574082,
+        "fv4": 6,
+        "mac28": "cce282a",
+        "seq": 1,
+        "status": 0,
+        "trailer": "6cce282a"
+      }
+    },
+    "signer_session": {
+      "fw_file": "/data/openpilot/panda/python/../board/obj/panda_h7.bin.signed",
+      "fw_file_signature_hex_prefix": "b3d9a0324cddaa9e",
+      "panda_signature_hex_prefix": "b3d9a0324cddaa9e",
+      "panda_signature_matches_fw_file": true,
+      "panda_version": "DEV-92eb5651-DEBUG",
+      "safety_mode_ok": true,
+      "safety_mode_reported": 3,
+      "safety_mode_requested": 3,
+      "safety_param_reported": 1,
+      "safety_param_requested": 1,
+      "tx_receipts_accepted": 4,
+      "tx_receipts_rejected": 0
+    },
+    "timing": {
+      "application_probe_complete_monotonic_ns": 5371245689605,
+      "application_probe_ms": 338.119256,
+      "execution_complete_monotonic_ns": 5370907570349,
+      "execution_ms": 861.889799,
+      "install_complete_monotonic_ns": 5371324117525,
+      "install_started_monotonic_ns": 5370045680550,
+      "signer_probe_complete_monotonic_ns": 5371324112525,
+      "total_ms": 1278.436975
+    },
+    "verdict": "request_signer_live_probe_pass"
+  },
+  "request_signer_self_test": {
+    "passed": true,
+    "request": {
+      "application_hex": "0000000880002d4700000000007fff007fff0000c000100032000100",
+      "bus": 0,
+      "can_id": "0x00000777",
+      "carrier": "functional-nibble4",
+      "codec": "four-frame",
+      "fd": false,
+      "frames_hex": [
+        "810000000880002d",
+        "904700000000007f",
+        "a1ff007fff0000c0",
+        "b000100032000100"
+      ]
+    },
+    "response": {
+      "bus": 0,
+      "can_id": "0x000007A9",
+      "elapsed_ms": 7.982652000464441,
+      "fv4": 7,
+      "mac28": "4bf307a",
+      "seq": 1,
+      "status": 0,
+      "trailer": "74bf307a"
+    },
+    "schema": "tss3-request-signer-self-test-v1"
+  },
+  "schema": "tss3-request-signer-ui-bringup-v1",
+  "startup_programming": {
+    "armed_monotonic_ns": 5367225030551,
+    "armed_t_ms": 26.191526,
+    "boot_f181_hex": "022121212121212121212121212121212121212121212121212121212121212121",
+    "ecu_reset": false,
+    "f181_samples": [
+      {
+        "f181_ascii": null,
+        "f181_hex": null,
+        "t_ms": 2791.013429
+      },
+      {
+        "f181_ascii": "\u0002!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+        "f181_hex": "022121212121212121212121212121212121212121212121212121212121212121",
+        "t_ms": 2834.016794
+      }
+    ],
+    "payload_upload": false,
+    "persistent_flash_writes": false,
+    "positive_extended": {
+      "address": "0x7A9",
+      "bus": 0,
+      "data_hex": "065003003201f400",
+      "t_ms": 2709.437072
+    },
+    "positive_extended_monotonic_ns": 5369908276097,
+    "programming_after_50_03_ms": 0.082966,
+    "programming_tx_monotonic_ns": 5369908359063,
+    "programming_tx_t_ms": 2709.520038,
+    "route": {
+      "bus": 0,
+      "elm327_param": 1,
+      "rx": "0x7A9",
+      "tx": "0x7A1"
+    },
+    "rx": [
+      {
+        "address": "0x7A9",
+        "bus": 2,
+        "data_hex": "065003003201f400",
+        "t_ms": 2709.437072
+      },
+      {
+        "address": "0x7A9",
+        "bus": 0,
+        "data_hex": "065003003201f400",
+        "t_ms": 2709.437072
+      },
+      {
+        "address": "0x7A9",
+        "bus": 2,
+        "data_hex": "037f107800000000",
+        "t_ms": 2720.499934
+      },
+      {
+        "address": "0x7A9",
+        "bus": 0,
+        "data_hex": "037f107800000000",
+        "t_ms": 2720.499934
+      }
+    ],
+    "schema": "tss3-startup-programming-v1",
+    "security_access_used": false,
+    "start_monotonic_ns": 5367198839025,
+    "target": "camry-8965F3307000",
+    "tx": [
+      {
+        "kind": "10_03",
+        "t_ms": 26.37475
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 46.401116
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 67.247143
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 88.854082
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 109.897602
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 130.870448
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 151.565959
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 173.371433
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 194.255375
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 215.201034
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 235.218963
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 255.635837
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 276.664202
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 297.367369
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 317.565917
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 339.506751
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 359.958624
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 380.944074
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 401.584951
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 423.535941
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 444.293169
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 465.097166
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 488.887991
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 509.813442
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 529.819028
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 550.552299
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 573.481954
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 594.266525
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 615.109219
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 638.307563
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 658.812091
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 678.87455
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 699.514491
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 723.907796
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 744.044784
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 764.865811
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 785.44591
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 806.535106
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 826.992604
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 847.392343
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 868.324305
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 889.530008
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 909.915737
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 930.876708
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 951.574355
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 973.429619
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 994.306062
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 1015.106726
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 1038.89302
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 1059.770608
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 1080.719913
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 1101.588283
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 1123.576251
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 1144.29723
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 1165.124508
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 1188.288426
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 1208.853161
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 1228.985305
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 1249.577017
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 1270.117898
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 1290.120672
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 1310.940137
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 1330.963744
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 1351.605819
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 1372.185553
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 1392.293115
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 1413.038416
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 1433.227433
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 1454.91937
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 1475.164427
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 1496.016235
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 1517.013351
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 1539.964569
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 1560.88976
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 1580.971541
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 1601.689448
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 1623.483881
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 1644.321106
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 1665.141197
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 1685.216208
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 1706.365454
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 1727.005082
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 1747.475184
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 1768.456467
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 1789.793207
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 1810.552831
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 1831.303496
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 1851.747193
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 1873.505742
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 1894.279324
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 1915.117747
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 1938.999402
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 1959.878033
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 1980.888325
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 2001.628002
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 2023.480297
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 2044.367157
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 2065.211621
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 2088.992655
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 2109.823527
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 2129.885986
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 2150.595611
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 2173.554433
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 2194.318275
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 2215.198468
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 2235.338685
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 2256.349446
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 2276.746582
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 2297.45678
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 2318.31062
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 2339.74194
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 2360.720046
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 2381.13739
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 2401.554681
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 2423.549732
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 2444.334564
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 2465.30642
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 2489.497909
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 2510.486327
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 2531.090279
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 2551.854226
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 2572.67739
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 2593.321132
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 2614.236272
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 2635.175681
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 2656.218056
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 2676.860653
+      },
+      {
+        "kind": "10_03",
+        "t_ms": 2697.515176
+      },
+      {
+        "kind": "10_02",
+        "t_ms": 2709.520038
+      }
+    ],
+    "verdict": "bootloader_caught_during_normal_startup"
+  },
+  "verdict": "startup_caught_fresh_signer_peer_state_healthy_self_test_pass"
+}

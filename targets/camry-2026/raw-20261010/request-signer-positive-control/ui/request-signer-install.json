@@ -1,0 +1,149 @@
+{
+  "entry_condition": "exact_bootloader_f181",
+  "execution": {
+    "boot_f181_ascii": "\u0002!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+    "boot_f181_hex": "022121212121212121212121212121212121212121212121212121212121212121",
+    "boot_sid23_probe": {
+      "error": "NegativeResponseError",
+      "status": "rejected"
+    },
+    "direct_bootloader": true,
+    "f181_ascii": null,
+    "f181_hex": null,
+    "handler_done": false,
+    "initial_f181_ascii": "\u0002!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+    "initial_f181_attempts": 1,
+    "initial_f181_hex": "022121212121212121212121212121212121212121212121212121212121212121",
+    "programming_already_requested": true,
+    "programming_handoff": {
+      "boot_f181_hex": "022121212121212121212121212121212121212121212121212121212121212121",
+      "direct_bootloader": true,
+      "route": {
+        "elm327_param": 1,
+        "rx": 1961,
+        "rx_bus": 0,
+        "semantic_path": "normal-harness",
+        "tx": 1953,
+        "tx_bus": 0
+      }
+    },
+    "ram_exec_geometry": {
+      "evidence": "dynamic:camry-8965F3307000",
+      "load_addr": 4273930240,
+      "load_size": 4096
+    },
+    "route": {
+      "bus": 0,
+      "cpu_index": 0,
+      "elm327_param": 1,
+      "uds_variant": "old"
+    },
+    "security_access": {
+      "secret_value_recorded": false,
+      "seed_length": 16
+    },
+    "telemetry_frames": 0,
+    "timed_out": true,
+    "timing": {
+      "phase_after_start_ms": {
+        "boot_prepared": 96.849496,
+        "complete": 861.386065,
+        "initial_f181_complete": 80.425665,
+        "panda_connected": 51.793959,
+        "payload_trigger_complete": 779.931423,
+        "safety_configured": 67.898008,
+        "security_access_complete": 130.619678,
+        "started": 0.0
+      },
+      "phase_monotonic_ns": {
+        "boot_prepared": 5370142932012,
+        "complete": 5370907468581,
+        "initial_f181_complete": 5370126508181,
+        "panda_connected": 5370097876475,
+        "payload_trigger_complete": 5370826013939,
+        "safety_configured": 5370113980524,
+        "security_access_complete": 5370176702194,
+        "started": 5370046082516
+      }
+    },
+    "unidentified_app_handoff_allowed": false
+  },
+  "payload_sha256": "c1cfd265611feb8e47438f81a3f4c508afea52a2be98c55ccf8d2346d7398a5d",
+  "pre_helper_f181": {
+    "attempts": [
+      {
+        "at_monotonic": 5371.125025169,
+        "f181_ascii": null,
+        "f181_hex": null,
+        "ok": false
+      },
+      {
+        "at_monotonic": 5371.245682938,
+        "f181_ascii": "\u00028965F3307000\u0000\u0000\u0000\u00008A3113303100",
+        "f181_hex": "023839363546333330373030300000000038413331313333303331303000000000",
+        "ok": true
+      }
+    ],
+    "first_success": {
+      "at_monotonic": 5371.245682938,
+      "f181_ascii": "\u00028965F3307000\u0000\u0000\u0000\u00008A3113303100",
+      "f181_hex": "023839363546333330373030300000000038413331313333303331303000000000",
+      "ok": true
+    },
+    "ok": true
+  },
+  "schema": "tss3-request-signer-install-v1",
+  "signer_probe": {
+    "attempts": 1,
+    "passed": true,
+    "request": {
+      "application_hex": "0000000880002d4700000000007fff007fff0000c000100032000100",
+      "bus": 0,
+      "can_id": "0x00000777",
+      "carrier": "functional-nibble4",
+      "codec": "four-frame",
+      "fd": false,
+      "frames_hex": [
+        "810000000880002d",
+        "904700000000007f",
+        "a1ff007fff0000c0",
+        "b000100032000100"
+      ]
+    },
+    "response": {
+      "bus": 0,
+      "can_id": "0x000007A9",
+      "elapsed_ms": 11.339310999574082,
+      "fv4": 6,
+      "mac28": "cce282a",
+      "seq": 1,
+      "status": 0,
+      "trailer": "6cce282a"
+    }
+  },
+  "signer_session": {
+    "fw_file": "/data/openpilot/panda/python/../board/obj/panda_h7.bin.signed",
+    "fw_file_signature_hex_prefix": "b3d9a0324cddaa9e",
+    "panda_signature_hex_prefix": "b3d9a0324cddaa9e",
+    "panda_signature_matches_fw_file": true,
+    "panda_version": "DEV-92eb5651-DEBUG",
+    "safety_mode_ok": true,
+    "safety_mode_reported": 3,
+    "safety_mode_requested": 3,
+    "safety_param_reported": 1,
+    "safety_param_requested": 1,
+    "tx_receipts_accepted": 4,
+    "tx_receipts_rejected": 0
+  },
+  "timing": {
+    "application_probe_complete_monotonic_ns": 5371245689605,
+    "application_probe_ms": 338.119256,
+    "execution_complete_monotonic_ns": 5370907570349,
+    "execution_ms": 861.889799,
+    "install_complete_monotonic_ns": 5371324117525,
+    "install_started_monotonic_ns": 5370045680550,
+    "signer_probe_complete_monotonic_ns": 5371324112525,
+    "total_ms": 1278.436975
+  },
+  "verdict": "request_signer_live_probe_pass"
+}

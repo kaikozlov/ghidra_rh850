@@ -1,0 +1,28 @@
+{
+  "passed": true,
+  "request": {
+    "application_hex": "0000000880002d4700000000007fff007fff0000c000100032000100",
+    "bus": 0,
+    "can_id": "0x00000777",
+    "carrier": "functional-nibble4",
+    "codec": "four-frame",
+    "fd": false,
+    "frames_hex": [
+      "810000000880002d",
+      "904700000000007f",
+      "a1ff007fff0000c0",
+      "b000100032000100"
+    ]
+  },
+  "response": {
+    "bus": 0,
+    "can_id": "0x000007A9",
+    "elapsed_ms": 13.130771999385615,
+    "fv4": 7,
+    "mac28": "a4a2f6b",
+    "seq": 1,
+    "status": 0,
+    "trailer": "7a4a2f6b"
+  },
+  "schema": "tss3-request-signer-self-test-v1"
+}
