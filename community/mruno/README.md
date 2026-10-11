@@ -147,3 +147,32 @@ is a discriminator candidate, not proof of EPS-side ownership. The maintained
 read-only next test is `tools/toyota eps-probe --open-relay --execute`, which
 opens the relay with debug allOutput passthrough and polls F181 independently on
 logical buses 0 and 2 before restoring the bypassed ELM327 state.
+
+### C3X SPI transport review (2026-10-10)
+
+The contributor's C3X reports Panda hardware type 9 (`TRES`) over SPI. A source
+review of the exact `kai-openpilot/tss3-expand` Panda pin does not identify a
+C3X-specific four-frame transport defect:
+
+- Both `TRES` (comma 3X) and `CUATRO` (comma four) Panda board definitions set
+  `has_spi = true` and share the same Panda SPI endpoint implementation.
+- The four classic 8-byte request frames occupy only 56 bytes including Panda's
+  6-byte CAN header per frame, far below the 4032-byte Python SPI transfer
+  payload bound.
+- `Panda.can_send_many()` intentionally emits the whole 56-byte batch as one SPI
+  endpoint-3 write. Panda firmware's `comms_can_write()` explicitly loops over
+  every packed CAN record in one endpoint write and calls `can_send()` for each;
+  this is not a one-CAN-frame-per-SPI-transfer interface.
+- Endpoint 3 NACKs when its CAN-TX flow-control gate is not ready. Python's
+  `PandaSpiHandle.bulkWrite()` propagates/retries those NACKs; the retained Crown
+  failure is instead `no request-signer response`, not a SPI NACK/timeout from
+  the send operation.
+- Panda HITL contains bulk `can_send_many()` stress/integrity coverage in
+  addition to explicit SPI control/bulk transfer tests.
+
+Therefore C3X SPI is currently a low-probability root cause. The missing host
+witness is one layer later: the signer probe discards Panda TX-return/rejection
+rows while waiting for `0x7A9`, so the retained run does not tell us whether all
+four `0x777` records were accepted onto CAN (`bus+128`) or rejected by Panda
+(`bus+192`). Capturing those TX receipts is the direct transport discriminator;
+it does not require changing the resident.
