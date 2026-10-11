@@ -186,7 +186,13 @@ def execute_open_relay_probe(buses: tuple[int, ...], timeout: float) -> dict[str
             "results": _probe_buses(panda, uds_mod, buses, timeout),
         }
     finally:
-        panda.close()
+        # Restore the physical relay bypass before releasing a direct-Panda
+        # handle. Panda() disables heartbeat checks, so handle close alone does
+        # not guarantee an automatic return to a non-intercepting mode.
+        try:
+            panda.set_safety_mode(ELM327_SAFETY_MODE, DEFAULT_ELM327_PARAM)
+        finally:
+            panda.close()
 
 
 def parse_bus(value: str) -> int:
