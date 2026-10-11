@@ -2,7 +2,7 @@
   "schema": "rh850-p1me-machine-v2",
   "source": {
     "path": "data/devices/p1me.rdl",
-    "sha256": "b53a4332d84bdb2b4c741f04563df7f3a28c336ae9022f314b90c4b6af898b15",
+    "sha256": "e94eddc6879053a0a9a5427612524ed4837c6d15d6dded274bdbfbe727989b27",
     "systemrdl_compiler": "1.33.0"
   },
   "products": [
@@ -1059,6 +1059,42 @@
         "completion_value": 4
       },
       {
+        "name": "CFDTMC_CH1_6",
+        "address": 4291953254,
+        "size": 1,
+        "access_widths": [
+          1
+        ],
+        "access": "rw",
+        "reset": null,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 section 17, RSCFD register tables; exact registered-firmware response route",
+        "description": "Application CAN1 Tx buffer local resource 6 control (TMTR bit 0)",
+        "trigger": "rscfd-transmit",
+        "status_register": "CFDTMSTS_CH1_6",
+        "payload_address": 4291969728,
+        "completion_value": 4
+      },
+      {
+        "name": "CFDTMC_CH1_7",
+        "address": 4291953255,
+        "size": 1,
+        "access_widths": [
+          1
+        ],
+        "access": "rw",
+        "reset": null,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 section 17, RSCFD register tables; exact registered-firmware response route",
+        "description": "Application CAN1 Tx buffer local resource 7 control (TMTR bit 0)",
+        "trigger": "rscfd-transmit",
+        "status_register": "CFDTMSTS_CH1_7",
+        "payload_address": 4291969760,
+        "completion_value": 4
+      },
+      {
         "name": "CFDTMC_CH1_16",
         "address": 4291953264,
         "size": 1,
@@ -1103,6 +1139,34 @@
         "evidence": "manual",
         "source_ref": "R01UH0585EJ0120 section 17, RSCFD register tables; firmware-observed role",
         "description": "RSCFD Tx status base for application CAN1 record"
+      },
+      {
+        "name": "CFDTMSTS_CH1_6",
+        "address": 4291953382,
+        "size": 1,
+        "access_widths": [
+          1
+        ],
+        "access": "rw",
+        "reset": 0,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 section 17, RSCFD register tables; exact registered-firmware response route",
+        "description": "Application CAN1 Tx buffer local resource 6 status"
+      },
+      {
+        "name": "CFDTMSTS_CH1_7",
+        "address": 4291953383,
+        "size": 1,
+        "access_widths": [
+          1
+        ],
+        "access": "rw",
+        "reset": 0,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 section 17, RSCFD register tables; exact registered-firmware response route",
+        "description": "Application CAN1 Tx buffer local resource 7 status"
       },
       {
         "name": "CFDTMSTS_CH1_16",
@@ -1949,6 +2013,166 @@
         "evidence": "manual",
         "source_ref": "R01UH0585EJ0120 section 17, RSCFD Tx message-buffer RAM",
         "description": "Diagnostic Tx buffer n=16 data bytes 4..7"
+      },
+      {
+        "name": "CFDTMID_CH1_6",
+        "address": 4291969728,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "rw",
+        "reset": null,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 section 17, RSCFD Tx message-buffer RAM; exact registered-firmware response route",
+        "description": "Application CAN1 Tx message RAM buffer local resource 6 identifier"
+      },
+      {
+        "name": "CFDTMPTR_CH1_6",
+        "address": 4291969732,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "rw",
+        "reset": null,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 section 17, RSCFD Tx message-buffer RAM; exact registered-firmware response route",
+        "description": "Application CAN1 Tx buffer local resource 6 pointer/DLC word"
+      },
+      {
+        "name": "CFDTMFDSTS_CH1_6",
+        "address": 4291969736,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "rw",
+        "reset": null,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 section 17, RSCFD Tx message-buffer RAM; exact registered-firmware response route",
+        "description": "Application CAN1 Tx buffer local resource 6 FD pointer/status word"
+      },
+      {
+        "name": "CFDTMDF0_CH1_6",
+        "address": 4291969740,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "rw",
+        "reset": null,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 section 17, RSCFD Tx message-buffer RAM; exact registered-firmware response route",
+        "description": "Application CAN1 Tx buffer local resource 6 data bytes 0..3"
+      },
+      {
+        "name": "CFDTMDF1_CH1_6",
+        "address": 4291969744,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "rw",
+        "reset": null,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 section 17, RSCFD Tx message-buffer RAM; exact registered-firmware response route",
+        "description": "Application CAN1 Tx buffer local resource 6 data bytes 4..7"
+      },
+      {
+        "name": "CFDTMID_CH1_7",
+        "address": 4291969760,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "rw",
+        "reset": null,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 section 17, RSCFD Tx message-buffer RAM; exact registered-firmware response route",
+        "description": "Application CAN1 Tx message RAM buffer local resource 7 identifier"
+      },
+      {
+        "name": "CFDTMPTR_CH1_7",
+        "address": 4291969764,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "rw",
+        "reset": null,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 section 17, RSCFD Tx message-buffer RAM; exact registered-firmware response route",
+        "description": "Application CAN1 Tx buffer local resource 7 pointer/DLC word"
+      },
+      {
+        "name": "CFDTMFDSTS_CH1_7",
+        "address": 4291969768,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "rw",
+        "reset": null,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 section 17, RSCFD Tx message-buffer RAM; exact registered-firmware response route",
+        "description": "Application CAN1 Tx buffer local resource 7 FD pointer/status word"
+      },
+      {
+        "name": "CFDTMDF0_CH1_7",
+        "address": 4291969772,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "rw",
+        "reset": null,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 section 17, RSCFD Tx message-buffer RAM; exact registered-firmware response route",
+        "description": "Application CAN1 Tx buffer local resource 7 data bytes 0..3"
+      },
+      {
+        "name": "CFDTMDF1_CH1_7",
+        "address": 4291969776,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "rw",
+        "reset": null,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 section 17, RSCFD Tx message-buffer RAM; exact registered-firmware response route",
+        "description": "Application CAN1 Tx buffer local resource 7 data bytes 4..7"
       },
       {
         "name": "CFDTMID_CH1_16",

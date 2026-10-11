@@ -456,18 +456,28 @@ def _receive_scenario(contract: dict[str, Any]) -> dict[str, Any]:
 
 def _rscfd_tx_scenario(contract: dict[str, Any]) -> dict[str, Any]:
     response_id = contract["request"]["response_id"]
+    signer_abi = contract["signer_abi"]
+    controller = signer_abi["response_controller"]
+    resource = signer_abi["response_resource"]
     payload = bytes.fromhex("1122334455667788")
     descriptor = (
         PAYLOAD.to_bytes(4, "little")
         + response_id.to_bytes(4, "little")
         + bytes.fromhex("0000000008000000")
     )
+    status_address = 0xFFD202D0 + controller * 0x10 + resource
+    message_address = 0xFFD24000 + controller * 0x200 + resource * 0x20
     return _scenario(
         name="tss3-dynamic-response-rscfd-transmit",
         entry=RSCFD_TX_ENTRY,
         contract=contract,
         max_instructions=1000,
-        registers={"r6": 1, "r7": 16, "r8": 2, "r9": DESCRIPTOR},
+        registers={
+            "r6": controller,
+            "r7": resource,
+            "r8": 2,
+            "r9": DESCRIPTOR,
+        },
         memory=[
             {
                 "address": _hx(DESCRIPTOR),
@@ -485,14 +495,14 @@ def _rscfd_tx_scenario(contract: dict[str, Any]) -> dict[str, Any]:
             {
                 "name": "firmware writes the response CAN identifier",
                 "kind": "memory",
-                "address": "0xFFD24400",
+                "address": _hx(message_address),
                 "size": 4,
                 "equals_hex": _le(response_id, 4),
             },
             {
                 "name": "firmware writes the response payload",
                 "kind": "memory",
-                "address": "0xFFD2440C",
+                "address": _hx(message_address + 0xC),
                 "size": 8,
                 "equals_hex": payload.hex(),
             },
@@ -505,7 +515,7 @@ def _rscfd_tx_scenario(contract: dict[str, Any]) -> dict[str, Any]:
             {
                 "name": "RSCFD records successful transmit result",
                 "kind": "memory",
-                "address": "0xFFD202F0",
+                "address": _hx(status_address),
                 "size": 1,
                 "equals_hex": "04",
             },

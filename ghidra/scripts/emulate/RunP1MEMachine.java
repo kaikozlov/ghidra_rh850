@@ -384,6 +384,8 @@ public class RunP1MEMachine extends GhidraScript {
         static final long FSTATR_ILGLERR = 0x4000;
         static final long FSTATR_STATUS_CLEAR_MASK = 0x3703c;
         static final long FSTATR_COMMAND_LOCK_MASK = 0x27068;
+        static final long RSCFD_TX_RAM_BASE = 0xFFD24000L;
+        static final long RSCFD_TX_RECORD_SIZE = 0x20L;
 
         final SleighLanguage language;
         final MachineSpec spec;
@@ -908,6 +910,12 @@ public class RunP1MEMachine extends GhidraScript {
                 throw new IllegalStateException(register.name + " lacks RSCFD trigger metadata");
             }
             long base = register.payload_address;
+            long bufferOffset = base - RSCFD_TX_RAM_BASE;
+            if (bufferOffset < 0 || bufferOffset % RSCFD_TX_RECORD_SIZE != 0) {
+                throw new IllegalStateException(
+                    register.name + " has an invalid RSCFD payload address");
+            }
+            long buffer = bufferOffset / RSCFD_TX_RECORD_SIZE;
             RegisterDef status = requiredRegister(
                 register.name, "completion-status", register.status_register);
             byte[] header = memory(base, 8);
@@ -924,7 +932,7 @@ public class RunP1MEMachine extends GhidraScript {
                 event.addProperty("pc", hex32(issuePc));
                 event.addProperty("scheduler_tick", trace.instructions);
                 event.addProperty("controller", "RSCFD");
-                event.addProperty("buffer", 16);
+                event.addProperty("buffer", buffer);
                 event.addProperty("can_id", hex32(id));
                 event.addProperty("pointer_raw", hex32(pointerRaw));
                 event.addProperty("data_hex", payloadHex);

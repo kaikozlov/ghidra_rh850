@@ -438,6 +438,20 @@ addrmap p1me {
     } CFDTMC_CH1_16 @ 0xFFD20270;
 
     reg {
+        regwidth=8; accesswidth=8; desc="Application CAN1 Tx buffer local resource 6 control (TMTR bit 0)";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD register tables; exact registered-firmware response route";
+        behavior="rscfd"; trigger="rscfd-transmit"; payload_address=0xFFD242C0; status_register="CFDTMSTS_CH1_6"; completion_value=4;
+        field { sw=rw; } value[7:0];
+    } CFDTMC_CH1_6 @ 0xFFD20266;
+
+    reg {
+        regwidth=8; accesswidth=8; desc="Application CAN1 Tx buffer local resource 7 control (TMTR bit 0)";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD register tables; exact registered-firmware response route";
+        behavior="rscfd"; trigger="rscfd-transmit"; payload_address=0xFFD242E0; status_register="CFDTMSTS_CH1_7"; completion_value=4;
+        field { sw=rw; } value[7:0];
+    } CFDTMC_CH1_7 @ 0xFFD20267;
+
+    reg {
         regwidth=32; accesswidth=32; desc="RSCFD Tx message-buffer status base (CFDTMSTSn at +n)";
         evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD register tables; firmware-observed role"; behavior="rscfd";
         field { sw=rw; } value[31:0];
@@ -454,6 +468,20 @@ addrmap p1me {
         evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD register tables; exact firmware table binding"; behavior="rscfd";
         field { sw=rw; } value[7:0];
     } CFDTMSTS_CH1_16 @ 0xFFD202F0;
+
+    reg {
+        regwidth=8; accesswidth=8; desc="Application CAN1 Tx buffer local resource 6 status";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD register tables; exact registered-firmware response route";
+        behavior="rscfd";
+        field { sw=rw; reset=0; } value[7:0];
+    } CFDTMSTS_CH1_6 @ 0xFFD202E6;
+
+    reg {
+        regwidth=8; accesswidth=8; desc="Application CAN1 Tx buffer local resource 7 status";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD register tables; exact registered-firmware response route";
+        behavior="rscfd";
+        field { sw=rw; reset=0; } value[7:0];
+    } CFDTMSTS_CH1_7 @ 0xFFD202E7;
 
     reg {
         regwidth=32; accesswidth=32; desc="RSCFD common-FIFO access-window base (CFIDk = base+0x3400+0x80k, k=0..8; window: ID, +4 PTR, +8 FDCSTS, +0x0C..+0x48 DF0..DF15)";
@@ -894,6 +922,76 @@ addrmap p1me {
         access_widths="1,2,4";
         field { sw=rw; } value[31:0];
     } CFDTMDF1_CH1_16 @ 0xFFD24410;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="Application CAN1 Tx message RAM buffer local resource 6 identifier";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD Tx message-buffer RAM; exact registered-firmware response route";
+        behavior="rscfd"; access_widths="1,2,4";
+        field { sw=rw; } value[31:0];
+    } CFDTMID_CH1_6 @ 0xFFD242C0;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="Application CAN1 Tx buffer local resource 6 pointer/DLC word";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD Tx message-buffer RAM; exact registered-firmware response route";
+        behavior="rscfd"; access_widths="1,2,4";
+        field { sw=rw; } value[31:0];
+    } CFDTMPTR_CH1_6 @ 0xFFD242C4;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="Application CAN1 Tx buffer local resource 6 FD pointer/status word";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD Tx message-buffer RAM; exact registered-firmware response route";
+        behavior="rscfd"; access_widths="1,2,4";
+        field { sw=rw; } value[31:0];
+    } CFDTMFDSTS_CH1_6 @ 0xFFD242C8;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="Application CAN1 Tx buffer local resource 6 data bytes 0..3";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD Tx message-buffer RAM; exact registered-firmware response route";
+        behavior="rscfd"; access_widths="1,2,4";
+        field { sw=rw; } value[31:0];
+    } CFDTMDF0_CH1_6 @ 0xFFD242CC;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="Application CAN1 Tx buffer local resource 6 data bytes 4..7";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD Tx message-buffer RAM; exact registered-firmware response route";
+        behavior="rscfd"; access_widths="1,2,4";
+        field { sw=rw; } value[31:0];
+    } CFDTMDF1_CH1_6 @ 0xFFD242D0;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="Application CAN1 Tx message RAM buffer local resource 7 identifier";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD Tx message-buffer RAM; exact registered-firmware response route";
+        behavior="rscfd"; access_widths="1,2,4";
+        field { sw=rw; } value[31:0];
+    } CFDTMID_CH1_7 @ 0xFFD242E0;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="Application CAN1 Tx buffer local resource 7 pointer/DLC word";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD Tx message-buffer RAM; exact registered-firmware response route";
+        behavior="rscfd"; access_widths="1,2,4";
+        field { sw=rw; } value[31:0];
+    } CFDTMPTR_CH1_7 @ 0xFFD242E4;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="Application CAN1 Tx buffer local resource 7 FD pointer/status word";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD Tx message-buffer RAM; exact registered-firmware response route";
+        behavior="rscfd"; access_widths="1,2,4";
+        field { sw=rw; } value[31:0];
+    } CFDTMFDSTS_CH1_7 @ 0xFFD242E8;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="Application CAN1 Tx buffer local resource 7 data bytes 0..3";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD Tx message-buffer RAM; exact registered-firmware response route";
+        behavior="rscfd"; access_widths="1,2,4";
+        field { sw=rw; } value[31:0];
+    } CFDTMDF0_CH1_7 @ 0xFFD242EC;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="Application CAN1 Tx buffer local resource 7 data bytes 4..7";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD Tx message-buffer RAM; exact registered-firmware response route";
+        behavior="rscfd"; access_widths="1,2,4";
+        field { sw=rw; } value[31:0];
+    } CFDTMDF1_CH1_7 @ 0xFFD242F0;
 
     reg {
         regwidth=8; accesswidth=8; desc="ECM master error-source set trigger";
