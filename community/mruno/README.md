@@ -132,6 +132,20 @@ a successful request-signer response. The later debug-Panda reproduction means
 the earlier release-Panda `SAFETY_ALLOUTPUT -> SILENT` behavior is not sufficient
 to explain the Crown failure.
 
+Two contributor-supplied follow-up directories, `bringup-elm-1/` and
+`bringup-elm-2/`, again return the exact Crown application identity and then time
+out after 38 and 37 request-signer attempts respectively. Their install records
+are `77df9704…e20a` and `b2777571…9e69` SHA-256. Despite the contributor labeling
+these as ELM-kit runs, neither install JSON contains the `signer_session` object
+added by commit `ed749eba`. That object is unconditionally retained after a
+probe reaches the timeout loop and is present in the exact ELM bundle sent for
+this test (`tss3_request_signer.py` SHA-256 `503f920f…88ea2`). Therefore these
+records do **not** prove that the instrumented ELM host was the code actually
+executed. They are consistent with an older `/data/tss3-oracle` installation or
+another older `exploit.ephemeral_runtime.tss3_request_signer` taking import
+precedence. Startup success does not distinguish those cases because the startup
+catcher already uses ELM327 independently of the recurring signer session.
+
 `execution.telemetry_frames == 0` is **not** a census of CAN traffic during the
 request-signer probe. That field belongs to the short authenticated RAM-exec
 handoff window and counts only its selected `0x7A9` telemetry events. The old

@@ -1,0 +1,108 @@
+{
+  "entry_condition": "exact_bootloader_f181",
+  "execution": {
+    "boot_f181_ascii": "\u0002!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+    "boot_f181_hex": "022121212121212121212121212121212121212121212121212121212121212121",
+    "boot_sid23_probe": {
+      "error": "NegativeResponseError",
+      "status": "rejected"
+    },
+    "direct_bootloader": true,
+    "f181_ascii": null,
+    "f181_hex": null,
+    "handler_done": false,
+    "initial_f181_ascii": "\u0002!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+    "initial_f181_attempts": 1,
+    "initial_f181_hex": "022121212121212121212121212121212121212121212121212121212121212121",
+    "programming_already_requested": true,
+    "programming_handoff": {
+      "boot_f181_hex": "022121212121212121212121212121212121212121212121212121212121212121",
+      "direct_bootloader": true,
+      "route": {
+        "elm327_param": 1,
+        "rx": 1961,
+        "rx_bus": 0,
+        "semantic_path": "normal-harness",
+        "tx": 1953,
+        "tx_bus": 0
+      }
+    },
+    "ram_exec_geometry": {
+      "evidence": "dynamic:crown-8965F3012000",
+      "load_addr": 4273930240,
+      "load_size": 4096
+    },
+    "route": {
+      "bus": 0,
+      "cpu_index": 0,
+      "elm327_param": 1,
+      "uds_variant": "old"
+    },
+    "security_access": {
+      "secret_value_recorded": false,
+      "seed_length": 16
+    },
+    "telemetry_frames": 0,
+    "timed_out": true,
+    "timing": {
+      "phase_after_start_ms": {
+        "boot_prepared": 100.974189,
+        "complete": 970.498799,
+        "initial_f181_complete": 83.989385,
+        "panda_connected": 53.417803,
+        "payload_trigger_complete": 888.899081,
+        "safety_configured": 69.829261,
+        "security_access_complete": 146.730404,
+        "started": 0.0
+      },
+      "phase_monotonic_ns": {
+        "boot_prepared": 516189501101,
+        "complete": 517059025711,
+        "initial_f181_complete": 516172516297,
+        "panda_connected": 516141944715,
+        "payload_trigger_complete": 516977425993,
+        "safety_configured": 516158356173,
+        "security_access_complete": 516235257316,
+        "started": 516088526912
+      }
+    },
+    "unidentified_app_handoff_allowed": false
+  },
+  "payload_sha256": "c1cfd265611feb8e47438f81a3f4c508afea52a2be98c55ccf8d2346d7398a5d",
+  "pre_helper_f181": {
+    "attempts": [
+      {
+        "at_monotonic": 517.287004277,
+        "f181_ascii": null,
+        "f181_hex": null,
+        "ok": false
+      },
+      {
+        "at_monotonic": 517.416934576,
+        "f181_ascii": "\u00028965F3012000\u0000\u0000\u0000\u00008A3113008000",
+        "f181_hex": "023839363546333031323030300000000038413331313330303830303000000000",
+        "ok": true
+      }
+    ],
+    "first_success": {
+      "at_monotonic": 517.416934576,
+      "f181_ascii": "\u00028965F3012000\u0000\u0000\u0000\u00008A3113008000",
+      "f181_hex": "023839363546333031323030300000000038413331313330303830303000000000",
+      "ok": true
+    },
+    "ok": true
+  },
+  "schema": "tss3-request-signer-install-v1",
+  "signer_probe_error": "RequestSignerError: no successful request-signer response after 37 attempts: no request-signer response for seq 37",
+  "timing": {
+    "application_probe_complete_monotonic_ns": 517416943642,
+    "application_probe_ms": 357.68232,
+    "execution_complete_monotonic_ns": 517059261322,
+    "execution_ms": 974.339336,
+    "install_complete_monotonic_ns": 520481468552,
+    "install_started_monotonic_ns": 516084921986,
+    "signer_probe_complete_monotonic_ns": 520481460483,
+    "total_ms": 4396.546566
+  },
+  "verdict": "application_live_but_request_signer_probe_failed"
+}
