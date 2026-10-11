@@ -176,3 +176,31 @@ rows while waiting for `0x7A9`, so the retained run does not tell us whether all
 four `0x777` records were accepted onto CAN (`bus+128`) or rejected by Panda
 (`bus+192`). Capturing those TX receipts is the direct transport discriminator;
 it does not require changing the resident.
+
+### Historical host mode and exact-machine cross-check (2026-10-10)
+
+Do not infer the failed 2026-10-10/11 request-signer safety mode from current
+HEAD. The retained original `build/out/mruno/tss3-oracle-mruno.zip` contains the
+pre-`2b72792f` host and its `RequestSignerSession` explicitly calls
+`set_alloutput_mode()`. Commit `2b72792f` later changed that recurring signer
+session to release-safe ELM327. Thus the original failed bundle and current
+source have different Panda safety-mode behavior even though the authenticated
+EPS payload is unchanged.
+
+Current exact-machine verification also narrows the EPS-side implementation
+risk. `tools/test rh850_firmware` passes the eight generated request-signer
+scenarios for every registered exact image. For Crown `8965F3012000`, the
+resolved response ABI is handle 51 -> RSCFD controller 1 / local resource 7.
+Commit `937a7a7f` adds that exact resource to the P1M-E model; the Crown response
+scenario now executes the exact firmware transmit primitive and records one
+classic `0x7A9` transmit from absolute RSCFD buffer 23. Separate exact Crown
+scenarios execute native post-filter `0x777` reception through IRQ187 into the
+software ring with the expected `0x00000408` record and execute the recovered
+freshness / ICU-S command-five submit and callback primitives.
+
+This is strong functional evidence for the recovered stock primitives and their
+addresses, but it is not silicon/vehicle proof and is not one monolithic
+resident-from-reset simulation. A prior throwaway execution of the assembled
+Crown helper already reached `request_count=1` and the real lower CAN writer;
+its response check failed before resource 7 was modeled, which is consistent
+with a simulator coverage gap rather than evidence of a helper defect.
