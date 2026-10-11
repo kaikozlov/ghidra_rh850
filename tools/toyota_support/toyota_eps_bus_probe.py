@@ -26,6 +26,9 @@ APPLICATION_SOFTWARE_ID_DID = 0xF181
 ELM327_SAFETY_MODE = 3
 DEFAULT_ELM327_PARAM = 1  # nonzero -> CAN_MODE_NORMAL in pinned Panda firmware
 DEFAULT_BUSES = (0, 1, 2)
+OPEN_RELAY_BUSES = (0, 2)
+ALLOUTPUT_SAFETY_MODE = 17
+ALLOUTPUT_PASSTHROUGH_PARAM = 1
 TOYOTA_B_REPIN_CANDIDATE_BUS = 1
 
 
@@ -104,28 +107,20 @@ def _import_uds() -> Any:
     raise RuntimeError("cannot import a supported UDS module")
 
 
-def execute_probe(plan: ProbePlan, timeout: float) -> list[dict[str, object]]:
-    try:
-        from panda import Panda
-    except ImportError as error:
-        raise RuntimeError("cannot import panda; run this on a comma/openpilot environment") from error
-
-    uds_mod = _import_uds()
-    panda = Panda()
-    panda.set_safety_mode(plan.elm327_safety_mode, plan.elm327_param)
-
+def _probe_buses(panda: Any, uds_mod: Any, buses: tuple[int, ...], timeout: float) -> list[dict[str, object]]:
     results: list[dict[str, object]] = []
-    for bus in plan.buses:
+    for bus in buses:
         result: dict[str, object] = {"bus": bus, "status": "no-response"}
         try:
+            panda.can_clear(0xFFFF)
             uds = uds_mod.UdsClient(
                 panda,
-                plan.tx_addr,
-                plan.rx_addr,
+                TX_ADDR,
+                RX_ADDR,
                 bus,
                 timeout=timeout,
             )
-            payload = uds.read_data_by_identifier(plan.did)
+            payload = uds.read_data_by_identifier(APPLICATION_SOFTWARE_ID_DID)
         except Exception as error:  # execution helper must record each bus independently.
             result["error"] = f"{type(error).__name__}: {error}"
         else:
@@ -139,6 +134,59 @@ def execute_probe(plan: ProbePlan, timeout: float) -> list[dict[str, object]]:
                 result["f181_ascii"] = text
         results.append(result)
     return results
+
+
+def execute_probe(plan: ProbePlan, timeout: float) -> list[dict[str, object]]:
+    try:
+        from panda import Panda
+    except ImportError as error:
+        raise RuntimeError("cannot import panda; run this on a comma/openpilot environment") from error
+
+    uds_mod = _import_uds()
+    panda = Panda()
+    try:
+        panda.set_safety_mode(plan.elm327_safety_mode, plan.elm327_param)
+        return _probe_buses(panda, uds_mod, plan.buses, timeout)
+    finally:
+        panda.close()
+
+
+def execute_open_relay_probe(buses: tuple[int, ...], timeout: float) -> dict[str, object]:
+    """Identify the EPS side of the CAN0/CAN2 intercept pair without mutating the ECU.
+
+    allOutput parameter 1 opens the harness relay while preserving software
+    forwarding. Host-originated frames are not forwarding inputs, so an F181
+    request sent on one logical bus reaches only that physical relay side.
+    """
+    try:
+        from panda import Panda
+    except ImportError as error:
+        raise RuntimeError("cannot import panda; run this on a comma/openpilot environment") from error
+
+    uds_mod = _import_uds()
+    panda = Panda()
+    try:
+        for bus in OPEN_RELAY_BUSES:
+            panda.set_canfd_auto(bus, False)
+        panda.set_safety_mode(ALLOUTPUT_SAFETY_MODE, ALLOUTPUT_PASSTHROUGH_PARAM)
+        health = panda.health()
+        if (
+            int(health.get("safety_mode", -1)) != ALLOUTPUT_SAFETY_MODE
+            or int(health.get("safety_param", -1)) != ALLOUTPUT_PASSTHROUGH_PARAM
+        ):
+            raise RuntimeError(
+                "Panda did not enter allOutput passthrough; "
+                f"observed safety_mode={health.get('safety_mode')} safety_param={health.get('safety_param')}"
+            )
+        return {
+            "health": {
+                key: health.get(key)
+                for key in ("safety_mode", "safety_param", "car_harness_status", "spi_error_count", "safety_tx_blocked")
+            },
+            "results": _probe_buses(panda, uds_mod, buses, timeout),
+        }
+    finally:
+        panda.close()
 
 
 def parse_bus(value: str) -> int:
@@ -168,6 +216,14 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--timeout", type=float, default=0.25)
     parser.add_argument(
+        "--open-relay",
+        action="store_true",
+        help=(
+            "open the CAN0/CAN2 intercept relay with allOutput passthrough and probe F181 on the selected side(s); "
+            "requires a debug/ALLOW_DEBUG Panda and defaults to buses 0 and 2"
+        ),
+    )
+    parser.add_argument(
         "--execute",
         action="store_true",
         help="perform the read-only F181 probes; without this flag only print the plan",
@@ -177,7 +233,9 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main() -> int:
     args = build_parser().parse_args()
-    buses = tuple(dict.fromkeys(args.buses or DEFAULT_BUSES))
+    buses = tuple(dict.fromkeys(args.buses or (OPEN_RELAY_BUSES if args.open_relay else DEFAULT_BUSES)))
+    if args.open_relay and any(bus not in OPEN_RELAY_BUSES for bus in buses):
+        raise SystemExit("--open-relay probes only logical buses 0 and 2")
     try:
         plan = build_plan(buses, args.elm327_param)
     except ValueError as error:
@@ -205,9 +263,17 @@ def main() -> int:
             ),
         },
         "mode": "execute" if args.execute else "dry-run",
+        "relay": {
+            "state": "open-software-passthrough" if args.open_relay else "closed-bypass",
+            "safety_mode": ALLOUTPUT_SAFETY_MODE if args.open_relay else ELM327_SAFETY_MODE,
+            "safety_param": ALLOUTPUT_PASSTHROUGH_PARAM if args.open_relay else plan.elm327_param,
+        },
     }
     if args.execute:
-        output["results"] = execute_probe(plan, args.timeout)
+        if args.open_relay:
+            output["open_relay_probe"] = execute_open_relay_probe(plan.buses, args.timeout)
+        else:
+            output["results"] = execute_probe(plan, args.timeout)
     print(json.dumps(output, indent=2, sort_keys=True))
     return 0
 

@@ -569,6 +569,29 @@ A positive result would establish a direct stock-wire programming path without
 making that route equivalent to the CAN0/CAN2 interception topology required for
 normal openpilot operation.
 
+## 14.2 Relay-open side attribution
+
+A bypassed relay makes the CAN0/CAN2 sides electrically common, so seeing the
+same EPS response on both logical buses does **not** identify which side owns the
+EPS after interception. `tools/toyota eps-probe --open-relay` is the bounded
+side-attribution test for that question. It selects debug-only
+`SAFETY_ALLOUTPUT` with passthrough parameter 1, verifies from Panda health that
+the requested safety mode actually stuck, and performs only F181 reads on
+logical buses 0 and 2. Host-originated requests are not inputs to Panda's
+software forwarding hook, so only the relay side physically attached to the EPS
+can originate the matching diagnostic response.
+
+```bash
+tools/toyota eps-probe --open-relay
+tools/toyota eps-probe --open-relay --execute
+```
+
+This test establishes relay-side diagnostic reachability only. It does not prove
+producer ownership for arbitrary CAN IDs, request-signer activation, or vehicle
+control behavior. It requires a debug/`ALLOW_DEBUG` Panda; release firmware must
+fail the safety-mode attestation rather than silently turning the result into a
+SILENT-mode negative.
+
 ## 15. Correct tooling behavior
 
 The robust diagnostic workflow is:

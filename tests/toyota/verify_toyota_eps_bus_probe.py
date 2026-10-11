@@ -11,8 +11,11 @@ from tools import REPO_ROOT
 REPO = REPO_ROOT
 
 from tools.toyota_support.toyota_eps_bus_probe import (
+    ALLOUTPUT_PASSTHROUGH_PARAM,
+    ALLOUTPUT_SAFETY_MODE,
     APPLICATION_SOFTWARE_ID_DID,
     DEFAULT_BUSES,
+    OPEN_RELAY_BUSES,
     DEFAULT_ELM327_PARAM,
     ELM327_SAFETY_MODE,
     RX_ADDR,
@@ -78,6 +81,33 @@ check("dry-run emits both harness-orientation implementations", len(output["fdca
 check("dry-run records the direct diagnostic candidate as param1 + bus1", output["toyota_b_repin_candidate"]["elm327_param"] == 1 and output["toyota_b_repin_candidate"]["bus"] == 1)
 check("dry-run does not call that candidate relay-topology equivalent", output["toyota_b_repin_candidate"]["scope"] == "direct-diagnostic-route" and output["toyota_b_repin_candidate"]["relay_topology_equivalent"] is False)
 check("dry-run keeps candidate dynamically unconfirmed", "confirmation required" in output["toyota_b_repin_candidate"]["status"])
+check("default dry-run leaves the relay bypassed", output["relay"] == {"state": "closed-bypass", "safety_mode": ELM327_SAFETY_MODE, "safety_param": 1})
+
+open_relay = subprocess.run(
+    [str(script), "eps-probe", "--open-relay"],
+    cwd=REPO,
+    capture_output=True,
+    text=True,
+    check=False,
+)
+check("open-relay dry-run succeeds", open_relay.returncode == 0, open_relay.stderr.strip())
+open_relay_output = json.loads(open_relay.stdout)
+check("open-relay probe defaults to the two intercept sides", open_relay_output["plan"]["buses"] == list(OPEN_RELAY_BUSES) == [0, 2])
+check("open-relay probe requests allOutput passthrough",
+      open_relay_output["relay"] == {
+          "state": "open-software-passthrough",
+          "safety_mode": ALLOUTPUT_SAFETY_MODE,
+          "safety_param": ALLOUTPUT_PASSTHROUGH_PARAM,
+      })
+
+invalid_open_relay = subprocess.run(
+    [str(script), "eps-probe", "--open-relay", "--bus", "1"],
+    cwd=REPO,
+    capture_output=True,
+    text=True,
+    check=False,
+)
+check("open-relay probe rejects the unsplit bus", invalid_open_relay.returncode != 0)
 
 custom = subprocess.run(
     [str(script), "eps-probe", "--bus", "1", "--elm327-param", "0"],
