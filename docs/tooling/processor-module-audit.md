@@ -805,8 +805,9 @@ understanding or a zero-false-positive whole-program graph.
 
 IDA Professional `9.5.261001.a12ef234` was audited independently at both
 layers: the installed arm64 `nec850.dylib` processor module and
-`hexv850.dylib` decompiler backend. The official IDA SDK nec850 source at
-commit `2a9143f2f4abd7f54fe20d1e40fb68391d19c4cb` supplies readable processor
+`hexv850.dylib` decompiler backend. The official, MIT-licensed
+[IDA SDK nec850 source](https://github.com/HexRaysSA/ida-sdk/tree/2a9143f2f4abd7f54fe20d1e40fb68391d19c4cb/src/module/nec850)
+at commit `2a9143f2f4abd7f54fe20d1e40fb68391d19c4cb` supplies readable processor
 prior art; installed-binary hashes and ancillary-file provenance are recorded
 in `ghidra/ghidra_v850/PROVENANCE.json`. Proprietary binary behavior was used
 only for comparison. It is not copied implementation and does not outrank the
@@ -840,6 +841,31 @@ switches, and ABI allocation. In this fork those responsibilities are split
 between SLEIGH p-code, the compiler spec, Ghidra analyzers, and the existing
 target scripts.
 
+Concrete arm64 backend sites, using the binary identity above:
+
+| Address | Recovered behavior | Ghidra-side owner |
+|---|---|---|
+| `0x5658` | Instruction-to-microcode dispatch with CPU-capability checks and a helper-call table | SLEIGH profile selection and instruction p-code |
+| `0x1280` | Architectural helper-call generation, including system-register/selector arguments and PSW access | Named system-register dataflow in `v850_special.sinc` |
+| `0x555C` → `0x5124` | Prologue-analysis callback and saved-register metadata transfer; the latter records LP/CTPC offsets and flags | Compiler specs, PREPARE/DISPOSE p-code and compiler-helper analysis |
+| `0x53A0` / `0x547C` | Serialization/loading of `psi`, `lroff`, `ctpcoff`, `iflags` | No direct file-format equivalent; relevant machine state is modeled in p-code |
+| `0x4B5C`, table `0x3F5850` | Name recognition for 44 GHS/COM 64-bit arithmetic-helper entries | Existing `V850CompilerHelperAnalyzer` contracts and call-fixups cover the table |
+
+The prologue callback is at vtable slot `0x3F56D0`; the two preceding slots
+are destructors, not additional analysis callbacks. The saved-register transfer
+and serializer were decompiled, rather than inferred from the field-name
+strings. This establishes the metadata path, not complete parity with every
+private prologue heuristic.
+
+Some backend differences favor retaining the existing Ghidra model: Hex-Rays
+uses opaque helpers for saturating arithmetic, clipping and several bit
+manipulations for which the fork already emits numerical p-code and flags.
+Its compiler/`eabi32` varargs-collector gate at `0x11F94C` does not establish a
+`va_list` ABI for these firmware targets. Ghidra compiler specs alone do not
+express all IDA variadic-float promotion behavior; no speculative ABI change
+was made without a demonstrated consumer.
+
+
 The vendored function pattern had accidentally shortened only the
 `jmp [lp]`-followed `PREPARE ..., simm16/imm16` alternatives to five bytes.
 Both instructions are six bytes. The patterns now exactly match installed
@@ -853,6 +879,107 @@ instruction boundaries. The stale overlapping Sienna function and the
 security conclusion derived from it are corrected in `KEYLESS-008` /
 `CORR-203`. This is why raw halfword mnemonics and permissive overlapping-code
 recovery are not accepted as target evidence.
+
+### Live differential check and indexed-store width correction
+
+The reference copies of both dylibs, the debugger XML, instruction comments,
+and function patterns were checked against the installed bundle by SHA-256;
+they match. No second copy or proprietary implementation import was needed.
+The public SDK exposes processor implementation, whereas `hexrays.hpp`
+exposes the decompiler API, not its implementation.
+
+An isolated ELF wrapper around the existing 98-case synthetic processor
+fixture was decoded by installed IDA 9.5 with the RH850 processor selected.
+All instruction lengths matched. There were 93 exact mnemonic-prefix matches;
+one difference was presentation (`cmovne` versus `cmov nz`), and four were
+substantive decode disagreements:
+
+| Bytes | Vendored decode | Installed IDA decode |
+|---|---|---|
+| `e7 17 76 53` | `st.h r10,[r7]+` | `stc.h r10,[r7]` |
+| `e7 27 76 53` | `st.h r10,[r7]-` | `stc.h r10,[r7]` |
+| `e7 17 7a 53` | `st.w r10,[r7]+` | `stc.w r10,[r7]` |
+| `e7 27 7a 53` | `st.w r10,[r7]-` | `stc.w r10,[r7]` |
+
+The IDA instructions have no post-index operand flags for these four encodings.
+The readable SDK explains the result: `ana.cpp` cases `0x376` and `0x37A`
+do not discriminate the first halfword's `r2` field, unlike byte-store case
+`0x372`. This is a reason not to adopt IDA decoding blindly, not a hardware
+execution result. Exact G3M availability remains bounded: R01US0123EJ0140
+describes post-index addressing on pp. 35–36, but its load/store instruction
+entries list only displacement forms. This comparison does not resolve that
+manual inconsistency or change the existing profile acceptance boundary.
+
+Executing the six existing indexed-store forms in Ghidra revealed a separate,
+unambiguous model defect. The byte and halfword constructors assigned a
+four-byte register directly to `*:1` / `*:2`; emitted p-code wrote all four
+bytes. The four constructors now truncate the source to `R2731:1` / `R2731:2`.
+This fixes modeled memory effects without borrowing IDA's conditional-store
+interpretation.
+
+With `r10=0x12345678`, zeroed destination memory and no valid load-link,
+the actual p-code emulator produced:
+
+| Indexed store, both directions | Before: four destination bytes | After: four destination bytes |
+|---|---|---|
+| `ST.B` | `78 56 34 12` | `78 00 00 00` |
+| `ST.H` | `78 56 34 12` | `78 56 00 00` |
+| `ST.W` control | `78 56 34 12` | `78 56 34 12` |
+
+The corrected smoke passed under both the G3M and broad RH850 profiles;
+source registers stayed unchanged and base registers advanced or retreated by
+the access width. `AssertProcessorFixtureSemantics` now checks stored values,
+neighboring-byte sentinels, source preservation and address updates for all six
+forms. Its complete run passed all 98 instruction cases, 3,922 fused numerical
+vectors and 32 exception/control sequences. The old reservation-lifetime
+vectors alone could not detect the overwrite because they stored zero into
+zeroed memory.
+
+The changed languages are G3M `0.9` and broad RH850 `1.1`; V850E2M and E1F are
+unchanged. The processor identity baseline was regenerated from the installed
+extension. These are offline model checks, not silicon or vehicle observations.
+
+### SDK-derived switch recovery gaps
+
+The second comparison found real gaps within already-supported switch
+families, not a need for another analyzer. IDA's `regfinder.cpp` folds
+`MOVHI`; `switch.cpp` accepts immediate/register base additions and both
+`MOVEA` and two-operand immediate `ADD` low-case normalization.
+
+`V850SwitchAnalyzer` now follows:
+
+- a `MOVHI` high half composed with a signed `MOVEA` low half;
+- immediate `ADD`/`ADDI` table or element bases;
+- either operand of a register addition as the proven constant base;
+- `add -min, index` normalization, following the index register backward
+  even when the dispatch uses a different destination register.
+
+Unknown register writers still terminate constant recovery. Normalization
+also stops at an intervening write instead of borrowing an older unrelated
+offset. No extra trust policy or target-address special case was added.
+
+New real-analyzer fixtures reproduced missing computed targets, missing
+function-body case arms and wrong case labels before the change. The complete
+`AssertV850SwitchAnalysis` run passes afterward, including an unknown-base
+negative. A separate stripped-binary smoke, with generic decompiler switch
+analysis disabled, recovered all three computed edges and decompiled the
+MOVHI/MOVEA plus reversed-add dispatch into cases **5, 6 and 7**, returning
+**1, 2 and 3**, with default **15**. The temporary smoke inputs/scripts were
+removed. Existing checks pinned to warning prose were removed; structural
+switch, reference, body and case-value checks remain.
+
+Fresh four-stage rebuilds of all six registered targets with both corrections
+matched their canonical normalized inventories. Camry's final disposable build
+was reused after confirming its processor identity; Crown, Corolla F/H, Sienna
+and Venza were rebuilt into separate `build/work/ida-final-*` directories.
+All 45,497 canonical decompilations were regenerated without failures, and
+`tools/test decompiler_corpus` passed across the registered corpora.
+
+All six projects were promoted through `make finalize-project` after clean
+daemon shutdown, processor-identity and exact inventory-parity checks, and
+packed-snapshot validation. The committed snapshots now carry the final
+processor checkpoint. Pre-existing user working projects were not replaced,
+and no canonical inventory baseline changes were needed.
 
 ## What these audits do *not* claim
 

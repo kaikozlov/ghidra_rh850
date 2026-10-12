@@ -260,6 +260,37 @@ public class AssertProcessorFixtureSemantics extends GhidraScript {
         }
     }
 
+    private void verifyIndexedStoreWidths(java.util.Map<String, Long> addrs) throws Exception {
+        String[] widths = {"b", "h", "w"};
+        long[] expectedWords = {0xaabbcc78L, 0xaabb5678L, 0x12345678L};
+        for (int width = 0; width < widths.length; width++) {
+            for (int direction : new int[]{1, -1}) {
+                String name = "link-st." + widths[width] + (direction > 0 ? "-inc" : "-dec");
+                long address = requireCaseAddr(addrs, name);
+                if (address < 0) continue;
+                EmulatorHelper emu = emulator(address);
+                try {
+                    emu.writeRegister("r7", 0x3000);
+                    emu.writeRegister("r10", 0x12345678);
+                    emu.writeRegister("ll_valid", 0);
+                    emu.writeRegister("ll_addr", 0);
+                    emu.writeMemory(toAddr(0x2fff),
+                            new byte[]{0x55, (byte) 0xdd, (byte) 0xcc, (byte) 0xbb, (byte) 0xaa, 0x66});
+                    step(emu, name + " store width");
+                    if (readU32(emu, 0x3000) != expectedWords[width]
+                            || emu.readMemoryByte(toAddr(0x2fff)) != 0x55
+                            || emu.readMemoryByte(toAddr(0x3004)) != 0x66) {
+                        fail(name + ": wrong stored value or adjacent memory overwritten");
+                    }
+                    requireRegister(emu, name, "r7", 0x3000 + direction * (1 << width));
+                    requireRegister(emu, name, "r10", 0x12345678);
+                } finally {
+                    emu.dispose();
+                }
+            }
+        }
+    }
+
     private void runExecutionVectors(java.util.Map<String, Long> addrs) throws Exception {
         long a;
 
@@ -761,6 +792,7 @@ public class AssertProcessorFixtureSemantics extends GhidraScript {
             }
         }
         verifyLinkLifetime(addrs);
+        verifyIndexedStoreWidths(addrs);
 
         a = requireCaseAddr(addrs, "cmovf.s");
         if (a >= 0) {

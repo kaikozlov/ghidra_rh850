@@ -187,7 +187,6 @@ public class V850SwitchAnalyzer extends AbstractAnalyzer {
 	private class SwitchCase {
 		final Family family;
 		final Instruction dispatch;
-		final int indexReg;
 		long lowcase = 0;
 		int ncases;
 		Address defaultAddr;
@@ -198,10 +197,9 @@ public class V850SwitchAnalyzer extends AbstractAnalyzer {
 		int elementShift = 0;
 		private Address[] decodedTargets;
 
-		SwitchCase(Family family, Instruction dispatch, int indexReg) {
+		SwitchCase(Family family, Instruction dispatch) {
 			this.family = family;
 			this.dispatch = dispatch;
-			this.indexReg = indexReg;
 		}
 
 		Address[] targets(Memory memory, TaskMonitor monitor) throws CancelledException {
@@ -310,7 +308,7 @@ public class V850SwitchAnalyzer extends AbstractAnalyzer {
 		if (idx <= 0 || idx > 31) {
 			return null;
 		}
-		SwitchCase cand = new SwitchCase(Family.NATIVE_SWITCH, dispatch, idx);
+		SwitchCase cand = new SwitchCase(Family.NATIVE_SWITCH, dispatch);
 		cand.tableAddr = dispatch.getMaxAddress().add(1);
 		cand.elementSize = 2;
 		cand.signedElements = true;
@@ -362,7 +360,7 @@ public class V850SwitchAnalyzer extends AbstractAnalyzer {
 		if (shift != 1 && shift != 2) {
 			return null;
 		}
-		SwitchCase cand = new SwitchCase(Family.DIRECT_TABLE, dispatch, idx);
+		SwitchCase cand = new SwitchCase(Family.DIRECT_TABLE, dispatch);
 		cand.elementSize = 1 << shift;
 		cand.tableAddr = dispatch.getAddress().getNewAddress(tableOffset);
 		return matchBound(cand, cur) ? cand : null;
@@ -411,7 +409,7 @@ public class V850SwitchAnalyzer extends AbstractAnalyzer {
 				return null;
 			}
 		}
-		SwitchCase cand = new SwitchCase(Family.LOADED_TABLE, dispatch, idx);
+		SwitchCase cand = new SwitchCase(Family.LOADED_TABLE, dispatch);
 		cand.elementSize = load.size;
 		cand.signedElements = load.signed;
 		cand.elementBase = elbase != null ? elbase : 0L;
@@ -479,26 +477,52 @@ public class V850SwitchAnalyzer extends AbstractAnalyzer {
 	}
 
 	/**
-	 * Matches {@code add rBase, rIdx} where rIdx is the tracked register and rBase holds a
-	 * tracked constant. Consumes the instruction and returns the constant, or returns null
-	 * without consuming.
+	 * Matches an immediate or constant-register base addition, following the other
+	 * operand as the index. Returns null without consuming an unproven addition.
 	 */
 	private Long matchBaseAdd(Cursor cur) {
 		int p = skipCopies(cur);
 		Instruction insn = cur.peekAt(p);
-		if (insn == null || !insn.getMnemonicString().equalsIgnoreCase("add") ||
-			insn.getNumOperands() != 2) {
+		if (insn == null) {
 			return null;
 		}
-		Register src = getRegister(insn, 0);
-		Register dst = getRegister(insn, 1);
-		if (src == null || dst == null || regIndex(dst) != cur.reg) {
+		String mnemonic = insn.getMnemonicString().toLowerCase();
+		boolean addi = mnemonic.equals("addi") && insn.getNumOperands() == 3;
+		if (!addi && !(mnemonic.equals("add") && insn.getNumOperands() == 2)) {
 			return null;
 		}
-		Long value = trackConstant(cur.slice, p, regIndex(src));
+		Register dst = getRegister(insn, addi ? 2 : 1);
+		if (dst == null || regIndex(dst) != cur.reg) {
+			return null;
+		}
+		Scalar imm = getScalar(insn, 0);
+		Long value;
+		int index = cur.reg;
+		if (imm != null) {
+			value = imm.getSignedValue();
+			if (addi) {
+				Register src = getRegister(insn, 1);
+				if (src == null) {
+					return null;
+				}
+				index = regIndex(src);
+			}
+		}
+		else {
+			Register src = getRegister(insn, 0);
+			if (src == null) {
+				return null;
+			}
+			value = trackConstant(cur.slice, p + 1, regIndex(src));
+			if (value == null) {
+				value = trackConstant(cur.slice, p + 1, cur.reg);
+				index = regIndex(src);
+			}
+		}
 		if (value == null) {
 			return null;
 		}
+		cur.reg = index;
 		cur.pos = p + 1;
 		return value;
 	}
@@ -525,7 +549,7 @@ public class V850SwitchAnalyzer extends AbstractAnalyzer {
 
 	/**
 	 * Bounded constant tracker: the value held by {@code reg} just before slice[pos] executes.
-	 * Scans backwards for mov/movea/addi/add/jarl definitions; gives up at unknown writers.
+	 * Scans backwards for mov/movhi/movea/addi/add/jarl definitions; stops at unknown writers.
 	 */
 	private Long trackConstant(List<Instruction> slice, int usePos, int reg) {
 		if (reg == 0) {
@@ -549,20 +573,26 @@ public class V850SwitchAnalyzer extends AbstractAnalyzer {
 					return src != null ? trackConstant(slice, p + 1, regIndex(src)) : null;
 				}
 			}
-			else if ((m.equals("movea") || m.equals("addi")) && nops == 3) {
+			else if ((m.equals("movea") || m.equals("addi") || m.equals("movhi")) && nops == 3) {
 				Scalar imm = getScalar(insn, 0);
 				Register src = getRegister(insn, 1);
 				Register dst = getRegister(insn, 2);
 				if (imm != null && src != null && dst != null && regIndex(dst) == reg) {
 					Long base = trackConstant(slice, p + 1, regIndex(src));
-					return base == null ? null : (base + imm.getSignedValue()) & 0xffffffffL;
+					long offset = imm.getSignedValue();
+					if (m.equals("movhi")) {
+						offset <<= 16;
+					}
+					return base == null ? null : (base + offset) & 0xffffffffL;
 				}
 			}
 			else if (m.equals("add") && nops == 2) {
 				Register a = getRegister(insn, 0);
 				Register b = getRegister(insn, 1);
-				if (a != null && b != null && regIndex(b) == reg) {
-					Long va = trackConstant(slice, p + 1, regIndex(a));
+				Scalar imm = getScalar(insn, 0);
+				if ((a != null || imm != null) && b != null && regIndex(b) == reg) {
+					Long va = imm != null ? Long.valueOf(imm.getSignedValue()) :
+						trackConstant(slice, p + 1, regIndex(a));
 					Long vb = trackConstant(slice, p + 1, reg);
 					return (va == null || vb == null) ? null : (va + vb) & 0xffffffffL;
 				}
@@ -583,7 +613,7 @@ public class V850SwitchAnalyzer extends AbstractAnalyzer {
 
 	/**
 	 * Matches the range-check prefix: an unsigned conditional branch (bh/bnh/bc/bnc) near the
-	 * dispatch, the cmp/addi providing the bound, and optional movea normalization. Advances
+	 * dispatch, the cmp/addi providing the bound, and optional index normalization. Advances
 	 * the cursor past everything matched.
 	 */
 	private boolean matchBound(SwitchCase cand, Cursor cur) {
@@ -633,7 +663,7 @@ public class V850SwitchAnalyzer extends AbstractAnalyzer {
 				}
 				cand.ncases = (int) (bound + (addOne ? 1 : 0));
 				cand.defaultAddr = defaultAddr;
-				matchNormalize(cand, cur.slice, j + 1);
+				matchNormalize(cand, cur.slice, j + 1, cur.reg);
 				cur.pos = j + 1;
 				return true;
 			}
@@ -706,25 +736,29 @@ public class V850SwitchAnalyzer extends AbstractAnalyzer {
 		return fall;
 	}
 
-	/** Optional normalization: movea -minv, rSrc, rIdx means case values start at minv. */
-	private void matchNormalize(SwitchCase cand, List<Instruction> slice, int from) {
+	/** Optional movea/add-immediate normalization sets the original case-value origin. */
+	private void matchNormalize(SwitchCase cand, List<Instruction> slice, int from, int index) {
 		int limit = Math.min(slice.size(), from + NORMALIZE_WINDOW);
 		for (int k = from; k < limit; k++) {
 			Instruction insn = slice.get(k);
-			if (!insn.getMnemonicString().equalsIgnoreCase("movea") || insn.getNumOperands() != 3) {
-				continue;
+			String mnemonic = insn.getMnemonicString().toLowerCase();
+			boolean movea = mnemonic.equals("movea") && insn.getNumOperands() == 3;
+			boolean add = mnemonic.equals("add") && insn.getNumOperands() == 2;
+			if (movea || add) {
+				Scalar imm = getScalar(insn, 0);
+				Register src = getRegister(insn, 1);
+				Register dst = getRegister(insn, movea ? 2 : 1);
+				if (imm != null && src != null && dst != null && regIndex(dst) == index) {
+					long minv = -imm.getSignedValue();
+					if (minv != 0 && Math.abs(minv) < 0x10000L) {
+						cand.lowcase = minv;
+					}
+					return;
+				}
 			}
-			Scalar imm = getScalar(insn, 0);
-			Register src = getRegister(insn, 1);
-			Register dst = getRegister(insn, 2);
-			if (imm == null || src == null || dst == null || regIndex(dst) != cand.indexReg) {
-				continue;
+			if (writesReg(insn, index)) {
+				return;
 			}
-			long minv = -imm.getSignedValue();
-			if (minv != 0 && Math.abs(minv) < 0x10000L) {
-				cand.lowcase = minv;
-			}
-			return;
 		}
 	}
 

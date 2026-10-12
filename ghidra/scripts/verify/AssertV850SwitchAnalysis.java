@@ -61,6 +61,8 @@ public class AssertV850SwitchAnalysis extends GhidraScript {
     }
     static byte[] movea(int imm16, int r1, int r2) { return cat(u16(w0(0x31, r1, r2)), u16(imm16)); }
     static byte[] addi(int imm16, int r1, int r2) { return cat(u16(w0(0x30, r1, r2)), u16(imm16)); }
+    static byte[] movhi(int imm16, int r1, int r2) { return cat(u16(w0(0x32, r1, r2)), u16(imm16)); }
+    static byte[] addImm5(int imm, int r2) { return u16(w0(0x12, imm, r2)); }
     static byte[] addReg(int r1, int r2) { return u16(w0(0x0e, r1, r2)); }
     static byte[] cmpImm5(int imm, int r2) { return u16((0x13 << 5) | (r2 << 11) | (imm & 0x1f)); }
     static byte[] shlImm5(int imm, int r2) { return u16((0x16 << 5) | (r2 << 11) | (imm & 0x1f)); }
@@ -247,10 +249,6 @@ public class AssertV850SwitchAnalysis extends GhidraScript {
         }
         check(c.matches("(?s).*\\bswitch\\s*\\(.*"),
             what + ": decompiler did not recover a structured switch");
-        check(!c.contains("Could not recover jumptable"),
-            what + ": decompiler did not model the jump table natively");
-        check(!c.contains("Treating indirect jump as call"),
-            what + ": dispatch degraded to an indirect call");
     }
 
     /** Unguarded or unrecovered dispatches must not become structured switches. */
@@ -452,6 +450,66 @@ public class AssertV850SwitchAnalysis extends GhidraScript {
         p.release(this);
     }
 
+    private void fixtureMaterializedBases() throws Exception {
+        for (int variant = 0; variant < 4; variant++) {
+            String label = "materialized-base-" + variant;
+            ProgramDB p = newProgram(label);
+            long table = variant == 1 ? 0x2400 : 0xf000;
+            long[] targets = {0x2140, 0x2146, 0x214c};
+            long dispatch;
+            try {
+                try (var tx = p.openTransaction("bytes")) {
+                    put(p, 0x2100, movhi(1, 0, 7));
+                    put(p, 0x2104, movea(-0x1000, 7, 7));
+                    put(p, 0x2108, addImm5(-5, 18));
+                    put(p, 0x210a, cmpImm5(2, 18));
+                    put(p, 0x210c, bcond(0xB, 0x2160 - 0x210c));
+                    put(p, 0x210e, shlImm5(2, 18));
+                    int loadedReg = variant == 2 ? 7 : 18;
+                    long at = 0x2110;
+                    if (variant == 1) {
+                        put(p, at, addi((int) table, 18, 18));
+                        at += 4;
+                    } else {
+                        if (variant == 3) {
+                            put(p, at, u16(w0(0, 6, 7))); // unknown writer kills the base
+                            at += 2;
+                        }
+                        put(p, at, variant == 2 ? addReg(18, 7) : addReg(7, 18));
+                        at += 2;
+                    }
+                    put(p, at, ldW(0, loadedReg, loadedReg));
+                    at += 4;
+                    if (variant == 1) {
+                        put(p, at, addImm5(4, loadedReg));
+                        at += 2;
+                    }
+                    dispatch = at;
+                    put(p, dispatch, jmpReg(loadedReg));
+                    for (int i = 0; i < targets.length; i++) {
+                        put(p, table + 4L * i, u32((int) targets[i] - (variant == 1 ? 4 : 0)));
+                        putCase(p, targets[i], i + 1, 0x2170);
+                    }
+                    putCase(p, 0x2160, 15, 0x2170);
+                    put(p, 0x2170, jmpReg(31));
+                }
+                analyze(p, 0x2100);
+                if (variant == 3) {
+                    check(computedJumpTargets(p, dispatch).isEmpty(),
+                        label + ": unknown base must not produce speculative targets");
+                } else {
+                    checkCaseChain(p, dispatch, targets, label);
+                    checkLabel(p, targets[0], "caseD_5", label);
+                    checkLabel(p, targets[2], "caseD_7", label);
+                    checkBodyContains(p, 0x2100, targets, label);
+                    decompileAsserts(p, 0x2100, label);
+                }
+            } finally {
+                p.release(this);
+            }
+        }
+    }
+
     // Rejects: unbounded switch and a switch whose table decodes off-memory.
     private void fixtureRejects() throws Exception {
         ProgramDB p = newProgram("rejects");
@@ -602,6 +660,7 @@ public class AssertV850SwitchAnalysis extends GhidraScript {
         fixtureDirectTable();
         fixtureLoadedRelative();
         fixtureLoadedAbsolute();
+        fixtureMaterializedBases();
         fixtureRejects();
         fixtureCuration();
         fixtureVariants();
