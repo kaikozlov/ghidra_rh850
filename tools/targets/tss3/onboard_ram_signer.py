@@ -397,6 +397,7 @@ def onboard(image_path: Path, output_dir: Path | None = None) -> tuple[dict[str,
             report["machine_verification"] = verify_request_signer_target(
                 target=registered_target,
                 contract=contract,
+                helper_path=build_dir / metadata["helper"]["path"],
                 output_dir=out / "machine",
             )
         except (OSError, RuntimeError, ValueError) as exc:

@@ -126,6 +126,46 @@
         },
         "unmapped_after_first_sync": 0
       },
+      "request_08a_freshness": {
+        "epoch_first_message_low2": {
+          "1": 198
+        },
+        "epoch_frame_counts": {
+          "1": 1,
+          "11": 1,
+          "12": 194,
+          "4": 1,
+          "8": 1
+        },
+        "epochs_observed": 198,
+        "frame_count": 2355,
+        "interpretation": "0x08A uses the current 0x00F reset-low2 and reanchors SecOC message-low2 to 1 at each observed reset epoch, then advances it by one per request. B26 also advances modulo-64, but its phase relative to SecOC message-low2 is capture-dependent, so it is not the SecOC message counter.",
+        "latest_sync_reset_low2_matches": 2352,
+        "mapped_after_first_sync": 2352,
+        "message_low2_minus_request_sequence_low2": {
+          "2": 2352
+        },
+        "same_epoch_delta_pairs": {
+          "msg1/seq1": 2153,
+          "msg2/seq26": 1
+        },
+        "same_epoch_message_low2_delta": {
+          "1": 2153,
+          "2": 1
+        },
+        "same_epoch_request_sequence_delta": {
+          "1": 2153,
+          "26": 1
+        },
+        "wire_message_low2_delta": {
+          "1": 2353,
+          "2": 1
+        },
+        "wire_request_sequence_delta": {
+          "1": 2353,
+          "26": 1
+        }
+      },
       "source": {
         "path": "REFERENCE/public_route_corolla_2023_segment0_rlog.zst",
         "sha256": "d246a55988889253c8d155f04b132b1bb443fdd74f1e6bad68eef8879a5c477b"
@@ -205,6 +245,7 @@
       },
       "wire_counts": {
         "0x00F": 588,
+        "0x08A": 2355,
         "0x0D7": 2943,
         "mapped_0x0D7_after_first_00F": 2940
       }
@@ -230,6 +271,39 @@
           "1": 2796
         },
         "unmapped_after_first_sync": 0
+      },
+      "request_08a_freshness": {
+        "epoch_first_message_low2": {
+          "1": 201
+        },
+        "epoch_frame_counts": {
+          "12": 199,
+          "4": 1,
+          "5": 1
+        },
+        "epochs_observed": 201,
+        "frame_count": 2400,
+        "interpretation": "0x08A uses the current 0x00F reset-low2 and reanchors SecOC message-low2 to 1 at each observed reset epoch, then advances it by one per request. B26 also advances modulo-64, but its phase relative to SecOC message-low2 is capture-dependent, so it is not the SecOC message counter.",
+        "latest_sync_reset_low2_matches": 2397,
+        "mapped_after_first_sync": 2397,
+        "message_low2_minus_request_sequence_low2": {
+          "1": 2397
+        },
+        "same_epoch_delta_pairs": {
+          "msg1/seq1": 2196
+        },
+        "same_epoch_message_low2_delta": {
+          "1": 2196
+        },
+        "same_epoch_request_sequence_delta": {
+          "1": 2196
+        },
+        "wire_message_low2_delta": {
+          "1": 2399
+        },
+        "wire_request_sequence_delta": {
+          "1": 2399
+        }
       },
       "source": {
         "path": "community/spanconstant/span_67fd5b833889fedf_00000010--17084916da--3--rlog.zst",
@@ -309,6 +383,7 @@
       },
       "wire_counts": {
         "0x00F": 600,
+        "0x08A": 2400,
         "0x0D7": 3000,
         "mapped_0x0D7_after_first_00F": 2997
       }
@@ -334,6 +409,10 @@
       196
     ],
     "receiver_reset_candidate_search_replays_all_post_sync_d7": true,
+    "request_08a_b26_is_not_secoc_message_counter": true,
+    "request_08a_normal_adjacent_frames_advance_both_counters_by_one": true,
+    "request_08a_reanchors_message_low2_to_one_on_each_observed_sync_epoch": true,
+    "request_08a_same_epoch_message_low2_tracks_request_count_mod4": true,
     "span_logged_order_exercises_current_minus_1_overlap": true,
     "span_reset_transition_intervals_280_to_320ms": [
       199,
@@ -343,6 +422,12 @@
   },
   "evidence_boundary": "Exact H/F firmware proves receiver-side 0x00F and D7/B6 freshness semantics. The two captures prove wire evolution but are not exact H/F firmware-identity joins and the slot-4 key is unavailable, so their MAC28 values are not independently cryptographically verified here. D7 is used as the live ordinary-PDU oracle because exact H/F puts D7 and B6 under the same authenticated 0x00F trip/reset state while retaining independent per-PDU message8 slots. No D7 message counter is transferred to B6.",
   "prior_art_note": "Current comma/opendbc Toyota SecOC code independently treats 0x00F RESET_CNT changes as the event that resets per-PDU sender message counters. That is useful sender-side prior art, but the live H/F-family conclusion above is based on D7 wire evolution and exact H receiver code, not transferred from the older Toyota implementation.",
+  "request_08a_signer_implication": {
+    "application_sequence_boundary": "0x08A B26 advances independently. Its message-low2 phase differs between the 2023 public and 2025 Span captures, so the signer must not derive SecOC message8 from B26.",
+    "cryptographic_boundary": "These captures validate 0x08A FV4/freshness evolution only. They do not prove that Corolla EPS ICU-S slot 4 contains the same key as the external 0x08A producer; a live native-0x08A command-5 equality oracle is still required for that key-domain join.",
+    "freshness_policy": "The maintained request signer policy is directly corroborated on both retained Corolla road captures: use the authenticated 0x00F trip/reset, start a private 0x08A message counter at 1 whenever that epoch changes, and increment it by one for each subsequent 0x08A request in the epoch.",
+    "observed_on_both_corolla_generations": true
+  },
   "schema": 1,
   "static_h_f_receiver": {
     "applies_to": {

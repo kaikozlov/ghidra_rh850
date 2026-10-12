@@ -282,6 +282,7 @@ public class RunP1MEMachine extends GhidraScript {
         String kind;
         long after_instructions;
         String evidence;
+        String address;
         Long p_bus_cycles;
         Integer fifo;
         Integer channel;
@@ -1110,6 +1111,7 @@ public class RunP1MEMachine extends GhidraScript {
                     case "clock": advanceClock(thread, input.p_bus_cycles); break;
                     case "can-rx": receiveFrame(thread, input); break;
                     case "interrupt": requestInterrupt(thread, input.channel); break;
+                    case "memory-write": externalMemoryWrite(input); break;
                     default: throw new IllegalArgumentException("unknown external event " + input.kind);
                 }
             }
@@ -1262,6 +1264,32 @@ public class RunP1MEMachine extends GhidraScript {
             finally {
                 internalWrite = false;
             }
+        }
+
+        void externalMemoryWrite(ExternalEvent input) {
+            long address = parseUnsigned(input.address);
+            byte[] value = parseHex(input.data_hex);
+            RegionDef region = region(address, value.length);
+            if (region == null
+                    || region.name.startsWith("codeflash")
+                    || region.name.equals("dataflash")) {
+                throw new IllegalArgumentException("external memory-write requires mapped writable RAM at "
+                    + hex32(address) + " size=" + value.length);
+            }
+            setMemory(address, value);
+            if (region.alias_group != null) {
+                long delta = address - region.start;
+                for (RegionDef alias : aliases.get(region.alias_group)) {
+                    if (alias != region) setMemory(alias.start + delta, value);
+                }
+            }
+            JsonObject event = new JsonObject();
+            event.addProperty("kind", "external-memory-write");
+            event.addProperty("address", hex32(address));
+            event.addProperty("size", value.length);
+            event.addProperty("scheduler_tick", trace.instructions);
+            event.addProperty("evidence", input.evidence);
+            trace.deviceEvents.add(event);
         }
 
         void initializeMemory(long address, byte[] value, String evidence) {

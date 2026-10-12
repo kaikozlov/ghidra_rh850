@@ -131,6 +131,18 @@ except RuntimeError:
 else:
     raise AssertionError("universal profile table accepted an ambiguous selector")
 print("PASS universal profile table rejects an ambiguous selector")
+expected_confirmation_paths = {
+    "camry-8965F3307000": (0x00085240, 0xFEBE5036, 0x0008043C, 0x0008152E),
+    "crown-8965F3012000": (0x000813D0, 0xFEBE4AE6, 0x0007DAA8, 0x0007EB4A),
+    "corolla-8965F1208000": (0x0007E550, 0xFEBE4F22, 0x0007974C, 0x0007A83E),
+    "corolla-8965H1202000": (0x0007E550, 0xFEBE4F22, 0x0007974C, 0x0007A83E),
+}
+expected_slot4_configs = {
+    "camry-8965F3307000": 0x00025828,
+    "crown-8965F3012000": 0x00025564,
+    "corolla-8965F1208000": 0x0002570C,
+    "corolla-8965H1202000": 0x0002570C,
+}
 for target, spec in SPECS.items():
     probe = probe_request_signer_contract(spec["image"].read_bytes())
     check(
@@ -142,6 +154,42 @@ for target, spec in SPECS.items():
             for row in probe["components"].values()
         ),
     )
+    abi = probe["contract"]["signer_abi"]
+    completion, slot, dispatcher, noop = expected_confirmation_paths[target]
+    check(
+        f"{target} proves fixed command5 config is target-native type1/selector4",
+        abi["slot4_config"] == expected_slot4_configs[target]
+        and abi["command5_config_type"] == 1
+        and abi["command5_selector"] == 4
+        and spec["image"].read_bytes()[abi["slot4_config"]:abi["slot4_config"] + 32]
+            == bytes.fromhex("0100000004000000000000000000000000000000000000000000cc000f000000"),
+    )
+    check(
+        f"{target} proves private confirmation handle F0 follows the native completion path to a no-op",
+        abi["lower_tx_completion"] == completion
+        and abi["response_confirmation_slot"] == slot
+        and abi["software_confirmation_handle"] == 0x00F0
+        and abi["software_confirmation_dispatcher"] == dispatcher
+        and abi["software_confirmation_noop"] == noop
+        and spec["image"].read_bytes()[noop:noop + 2] == bytes.fromhex("7f00"),
+    )
+
+# The primary 0x7A9 response is selected by CanIf class-2 HTH routing, not by
+# how many unrelated transmit resources happen to exist. Remove Camry's fifth
+# resource to reproduce Crown's four-row topology; the primary diagnostic
+# lower handle/resource must remain unchanged.
+camry_contract = SPECS[CAMRY_TARGET]["contract"]
+camry_abi = camry_contract["signer_abi"]
+four_resource_image = bytearray(SPECS[CAMRY_TARGET]["image"].read_bytes())
+row4 = camry_abi["resource_table"] + 4 * 10
+four_resource_image[row4:row4 + 10] = b"\0" * 10
+four_resource_contract = resolve_request_signer_contract(bytes(four_resource_image))
+check(
+    "primary diagnostic response routing is independent of optional fifth resource",
+    four_resource_contract["signer_abi"]["resource_row_count"] == 4
+    and four_resource_contract["signer_abi"]["response_handle"] == camry_abi["response_handle"]
+    and four_resource_contract["signer_abi"]["response_resource"] == camry_abi["response_resource"],
+)
 
 
 damaged_image = bytearray(SPECS[CAMRY_TARGET]["image"].read_bytes())
@@ -393,9 +441,15 @@ check("successful probe records the active safety mode and accepted TX receipts"
 
 silent_panda = _FakeProbePanda(safety_mode=0, safety_param=0, respond=False,
                                receipt_offset=host.TX_RECEIPT_REJECTED_BUS_OFFSET)
+fake_resident_state = {
+    "magic": f"0x{host.STATE_MAGIC:08X}", "magic_ok": True,
+    "version": host.STATE_VERSION, "version_ok": True, "initialized": True,
+    "request_count": 0, "success_count": 0, "response_count": 0,
+}
 with (mock.patch.object(host, "load_security_secret", return_value=(b"\x00" * 16, "test")),
       mock.patch.object(host, "execute_ram_payload", return_value={"direct_bootloader": True}),
       mock.patch.object(host, "wait_for_f181", return_value={"ok": True}),
+      mock.patch.object(host, "read_resident_state", return_value=fake_resident_state) as read_state,
       mock.patch.object(host, "SIGNER_PROBE_TIMEOUT_SECONDS", 0.25)):
     silent = host.install(
         OUT / meta["authenticated_payload"]["path"], meta_path,
@@ -407,6 +461,54 @@ check("failed probe still records the silent safety fallback and rejected TX rec
       silent["signer_session"]["safety_mode_reported"] == 0 and
       silent["signer_session"]["tx_receipts_accepted"] == 0 and
       silent["signer_session"]["tx_receipts_rejected"] > 0)
+check("failed probe retains target-bound resident state readback",
+      read_state.call_count == 1 and
+      read_state.call_args.args[0]["state"]["base"] == meta["state"]["base"] and
+      read_state.call_args.args[1] is silent_panda and
+      silent["resident_state_after_probe"] == fake_resident_state)
+
+class _FakeStateUdsClient:
+    def __init__(self, *_args, **_kwargs):
+        self.sessions = []
+        self.requests = []
+
+    def diagnostic_session_control(self, session):
+        self.sessions.append(session)
+
+    def _uds_request(self, service, *, data):
+        self.requests.append((service, bytes(data)))
+        raw = bytearray(host.STATE_SIZE)
+        raw[0:4] = host.STATE_MAGIC.to_bytes(4, "little")
+        raw[4] = host.STATE_VERSION
+        raw[5] = 1
+        raw[8:12] = (7).to_bytes(4, "little")
+        raw[12:16] = (6).to_bytes(4, "little")
+        raw[16:20] = (5).to_bytes(4, "little")
+        return bytes(raw)
+
+
+fake_state_client = _FakeStateUdsClient()
+fake_uds_module = SimpleNamespace(
+    UdsClient=lambda *_a, **_k: fake_state_client,
+    SESSION_TYPE=SimpleNamespace(EXTENDED_DIAGNOSTIC=3),
+    SERVICE_TYPE=SimpleNamespace(READ_MEMORY_BY_ADDRESS=0x23),
+)
+with mock.patch.object(host, "_import_uds", return_value=fake_uds_module):
+    decoded_state = host.read_resident_state(meta, fake_probe_panda)
+check("resident state readback uses target-bound application SID23 geometry",
+      meta["state"] == {
+          "version": host.STATE_VERSION,
+          "base": "0xFEBF025C",
+          "size": host.STATE_SIZE,
+          "layout": "sid23-adjacent-local",
+      }
+      and fake_state_client.sessions == [3]
+      and fake_state_client.requests == [(0x23, bytes.fromhex("1501febf025c24"))]
+      and decoded_state["magic_ok"] is True
+      and decoded_state["initialized"] is True
+      and decoded_state["request_count"] == 7
+      and decoded_state["success_count"] == 6
+      and decoded_state["response_count"] == 5)
 
 fake_self_test_panda = _FakeProbePanda()
 with mock.patch.dict("sys.modules", {"panda": SimpleNamespace(Panda=lambda *_a, **_k: fake_self_test_panda)}):

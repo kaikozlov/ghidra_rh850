@@ -1202,6 +1202,47 @@ The reproducible `--gear-audit` commands are in the
 [workflow](../WORKFLOW.md#gear-and-ready-evidence). They leave the historical
 route artifacts unchanged; this section owns the corrected interpretation.
 
+### tss3-expand decoder checkpoint — 2026-10-10
+
+The adjacent `kai-openpilot/opendbc_repo` **local `tss3-expand` worktree** now
+keeps one `TOYOTA_COROLLA_TSS3` platform without an unconditional HYBRID flag.
+Hybrid selection uses positive evidence: a queried Hybrid Control ECU, a queried
+`electricBrakeBooster` ECU, or `0x127` on the configured chassis bus. Actual
+Cap'n Proto `_DynamicEnum` records for both diagnostic categories were exercised;
+the two known EPS secondary F181 records are not used as powertrain selectors.
+The sedan wheelbase is corrected to **2.70 m**, matching Toyota's published
+[106.3-inch specification](https://www.toyota.com/content/dam/toyota/brochures/pdf/2025/corolla_ebrochure.pdf)
+(page 21); the other inherited tuning values are not newly vehicle-qualified.
+
+ICE selects `0x3BF` byte 0's one-hot gear field; hybrid retains native `0x127`,
+including its distinction between Drive and B. No hybrid-to-meter fallback is
+introduced. The shared Camry/Crown hybrid gear and READY paths are unchanged.
+The retained ICE capture has no `0x0FE` on any received source, so ICE does not
+require or decode the hybrid cruise-button message. Its 59 `0x24D` frames have
+inactive legacy switch bits; those button semantics remain unmapped rather than
+being assigned from ID/DLC similarity. The existing HUD-derived LTA toggle
+remains decoded for both powertrains.
+
+**Offline decoder proof, not post-repin routing proof:** the retained public
+2023 and Span-attributed 2025 segments above were replayed with their original
+CAN-batch timestamps and unchanged payloads. Stock-harness source 1 was explicitly
+projected onto logical relay buses 0/2; original source 0 was projected onto
+auxiliary bus 1 and original mirrored source 2 was omitted. This projection is
+only a decoder fixture: it neither observes nor verifies the physical repin or
+which emitter is present on each relay half. Runtime bus assignments were not
+changed. After five seconds of warmup, all **5,609** public-ICE decoder samples
+were CAN-valid and exercised Park/Reverse/Drive; all **5,500** Span-hybrid samples
+were CAN-valid and decoded Drive. These are decoder outputs, not independent
+dashboard observations. Corolla Neutral remains unobserved.
+
+Focused Toyota/Corolla/Camry and platform/interface verification passed **29
+tests**; changed Python files passed Ruff. Obsolete full-firmware-inventory
+assertions were removed, not repinned with guessed camera versions. Firmware
+matching remains unchanged: the complete stored inventory uniquely matches each
+known EPS variant, while EPS-only input still does not match. Missing camera and
+Span non-EPS firmware captures remain data gaps. This checkpoint makes no
+signer, source-suppression, longitudinal-authority, or road-qualification claim.
+
 ## 10. Production boundary
 
 **2026-09-16 readiness correction:** the [offline confidence

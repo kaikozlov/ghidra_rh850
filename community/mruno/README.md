@@ -208,19 +208,53 @@ source have different Panda safety-mode behavior even though the authenticated
 EPS payload is unchanged.
 
 Current exact-machine verification also narrows the EPS-side implementation
-risk. `tools/test rh850_firmware` passes the eight generated request-signer
-scenarios for every registered exact image. For Crown `8965F3012000`, the
-resolved response ABI is handle 51 -> RSCFD controller 1 / local resource 7.
-Commit `937a7a7f` adds that exact resource to the P1M-E model; the Crown response
-scenario now executes the exact firmware transmit primitive and records one
-classic `0x7A9` transmit from absolute RSCFD buffer 23. Separate exact Crown
-scenarios execute native post-filter `0x777` reception through IRQ187 into the
-software ring with the expected `0x00000408` record and execute the recovered
-freshness / ICU-S command-five submit and callback primitives.
+risk. `tools/test rh850_firmware` now passes twelve generated request-signer
+scenarios for every registered exact image, including complete helper timeout
+and modeled-completion/status-0 transactions through each target's lower CAN
+writer plus the native transmit-completion dispatch of the pending `00F0`
+software handle.
 
-This is strong functional evidence for the recovered stock primitives and their
-addresses, but it is not silicon/vehicle proof and is not one monolithic
-resident-from-reset simulation. A prior throwaway execution of the assembled
-Crown helper already reached `request_count=1` and the real lower CAN writer;
-its response check failed before resource 7 was modeled, which is consistent
-with a simulator coverage gap rather than evidence of a helper defect.
+The 2026-10-12 Crown audit replaced the earlier resource-count heuristic with
+the exact stock-primary mailbox association. Crown CanIf associates primary
+`0x7A9` with local HTH0 -> global HTH2 -> handle 50/controller 1/resource 6.
+Secondary `0x7A8` uses handle 51/controller 1/resource 7. Camry independently
+resolves primary `0x7A9` to handle 53/resource 6 and Corolla to handle
+50/resource 6.
+
+Deeper recovery changes the interpretation of the old Crown selection.
+`812A2` is the `Can_Write`-shaped lower API: its first argument chooses a
+hardware transmit object, while the caller's PDU supplies the CAN ID. The exact
+handle map is `(50 -> controller 1/resource 6, 51 -> controller 1/resource 7)`.
+Both take the same ordinary-transmit-buffer path in `8153A`; `8148E` writes the
+PDU's ID into that buffer's `TMID` register before requesting transmission.
+There is no lower comparison that binds resource 7 to `0x7A8`.
+
+Focused exact-firmware runs therefore produce the same supplied `0x7A9` and
+eight payload bytes through both routes: handle 50 uses global transmit buffer
+22 and handle 51 uses buffer 23. A separate resource-7 completion run consumes
+the helper's `00F0` software-confirmation value and reaches the same no-op
+handler. The old handle-51/resource-7 payload was consequently using a valid
+alternate mailbox, not a mailbox incapable of sending `0x7A9`.
+
+The observable difference is availability. `8153A` returns 2 without issuing a
+frame when the selected transmit-buffer status has any `TMSTS & 0x1E` bit set.
+Those bits cover a pending request, a completed/aborted result awaiting clear,
+and an abort request; the P1M-E manual defines them in sections 17.3.10.1–2.
+The focused idle-resource-7 run succeeds, while a focused busy-resource-7 run
+returns 2 and emits no frame. Functional-model success initializes that status
+idle and does not prove its value on Mruno's EPS.
+
+The current profile retains handle 50/resource 6 because it matches the stock
+primary association and every successful application F181 response proves that
+mailbox operational on the field unit. This is a conservative stock-aligned
+selection, not a correction of an ID-invalid resource 7. None of the retained
+failed runs captured resident counters, the lower return value, or either
+transmit-buffer status, so they cannot establish mailbox selection as the
+cause.
+
+Separate exact Crown scenarios execute native post-filter `0x777` reception
+through IRQ187 into the software ring, the recovered freshness and ICU-S
+command-five paths, and the complete helper through handle 50/resource 6. The
+older throwaway readback of `request_count=1` proves that one complete request
+was assembled; because that counter increments before command five and the
+lower writer, it does not prove that either later stage ran.

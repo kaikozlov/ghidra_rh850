@@ -11,16 +11,17 @@ tracked JSON remains reproducible without vendoring cereal/logreader into this r
 """
 from __future__ import annotations
 
-from tools.targets.corolla.support.corolla_h_constants import H_CAPTURE
-from tools import REPO_ROOT
 import argparse
 import bisect
 import collections
 import json
-import statistics
-import sys
 from pathlib import Path
+import statistics
 from typing import Any
+
+from tools import REPO_ROOT
+from tools.targets.corolla.support.corolla_h_constants import H_CAPTURE
+
 
 REPO = REPO_ROOT
 H_VERIFY = REPO / "data/generated/corolla_8965H1202000_b6_secoc_verification.json"
@@ -78,6 +79,77 @@ def reset_candidates(current: int, reset_low2: int) -> list[tuple[int, int]]:
         if 0 <= candidate <= 0xFFFFF and (candidate & 3) == reset_low2:
             out.append((delta, candidate))
     return out
+
+
+def analyze_08a_freshness(
+    sync: list[tuple[int, int, int, int, int, bytes]],
+    request: list[tuple[int, int, int, int, int, int, bytes]],
+) -> dict[str, Any]:
+    """Join 0x08A FV4 to the latest logged 0x00F epoch.
+
+    0x08A is produced outside the EPS, so this is wire evidence for the shared
+    sender freshness policy rather than an EPS-CodeFlash provenance claim.
+    """
+    sync_keys = [(row[0], row[1]) for row in sync]
+    mapped: list[dict[str, int]] = []
+    for t, seq, fv4, msg2, reset2, b26, _dat in request:
+        j = bisect.bisect_right(sync_keys, (t, seq)) - 1
+        if j < 0:
+            continue
+        trip, reset = sync[j][2], sync[j][3]
+        mapped.append({
+            "t": t, "seq": seq, "trip": trip, "reset": reset,
+            "message_low2": msg2, "reset_low2": reset2, "request_sequence": b26,
+            "reset_matches_latest_sync": int((reset & 3) == reset2),
+        })
+
+    epochs: dict[tuple[int, int], list[dict[str, int]]] = collections.defaultdict(list)
+    for row in mapped:
+        if row["reset_matches_latest_sync"]:
+            epochs[(row["trip"], row["reset"])].append(row)
+
+    same_epoch_msg_delta: collections.Counter[int] = collections.Counter()
+    same_epoch_request_delta: collections.Counter[int] = collections.Counter()
+    same_epoch_delta_pairs: collections.Counter[str] = collections.Counter()
+    for rows in epochs.values():
+        for before, after in zip(rows, rows[1:]):
+            msg_delta = (after["message_low2"] - before["message_low2"]) & 3
+            request_delta = (after["request_sequence"] - before["request_sequence"]) & 0x3F
+            same_epoch_msg_delta[msg_delta] += 1
+            same_epoch_request_delta[request_delta] += 1
+            same_epoch_delta_pairs[f"msg{msg_delta}/seq{request_delta}"] += 1
+
+    ordered_epochs = sorted(epochs.values(), key=lambda rows: (rows[0]["t"], rows[0]["seq"]))
+    first_message_low2 = collections.Counter(rows[0]["message_low2"] for rows in ordered_epochs)
+    phase = collections.Counter(
+        (row["message_low2"] - (row["request_sequence"] & 3)) & 3
+        for row in mapped
+    )
+    wire_msg_delta = collections.Counter(
+        (request[i][3] - request[i - 1][3]) & 3 for i in range(1, len(request))
+    )
+    wire_request_delta = collections.Counter(
+        (request[i][5] - request[i - 1][5]) & 0x3F for i in range(1, len(request))
+    )
+    return {
+        "frame_count": len(request),
+        "mapped_after_first_sync": len(mapped),
+        "latest_sync_reset_low2_matches": sum(row["reset_matches_latest_sync"] for row in mapped),
+        "epochs_observed": len(epochs),
+        "epoch_frame_counts": counter_json(collections.Counter(len(rows) for rows in epochs.values())),
+        "epoch_first_message_low2": counter_json(first_message_low2),
+        "same_epoch_message_low2_delta": counter_json(same_epoch_msg_delta),
+        "same_epoch_request_sequence_delta": counter_json(same_epoch_request_delta),
+        "same_epoch_delta_pairs": counter_json(same_epoch_delta_pairs),
+        "wire_message_low2_delta": counter_json(wire_msg_delta),
+        "wire_request_sequence_delta": counter_json(wire_request_delta),
+        "message_low2_minus_request_sequence_low2": counter_json(phase),
+        "interpretation": (
+            "0x08A uses the current 0x00F reset-low2 and reanchors SecOC message-low2 to 1 at each observed reset epoch, "
+            "then advances it by one per request. B26 also advances modulo-64, but its phase relative to SecOC message-low2 "
+            "is capture-dependent, so it is not the SecOC message counter."
+        ),
+    }
 
 
 def expected_locked_sha(path: Path) -> str:
@@ -172,6 +244,7 @@ def analyze_capture(name: str, path: Path, LogReader: Any, expected_sha: str) ->
     # distinguishes 0x00F-before-D7 from D7-before-0x00F inside one batched CAN event.
     sync: list[tuple[int, int, int, int, int, bytes]] = []
     d7: list[tuple[int, int, int, int, int, bytes]] = []
+    request_08a: list[tuple[int, int, int, int, int, int, bytes]] = []
     frame_seq = 0
     for ev in LogReader(str(path), sort_by_time=True):
         if ev.which() != "can":
@@ -190,8 +263,11 @@ def analyze_capture(name: str, path: Path, LogReader: Any, expected_sha: str) ->
             elif addr == 0x0D7:
                 fv4, msg2, reset2 = decode_fd_ordinary_fv4(dat)
                 d7.append((t, seq, fv4, msg2, reset2, dat))
+            elif addr == 0x08A:
+                fv4, msg2, reset2 = decode_fd_ordinary_fv4(dat)
+                request_08a.append((t, seq, fv4, msg2, reset2, dat[26] & 0x3F, dat))
 
-    if not sync or not d7:
+    if not sync or not d7 or not request_08a:
         raise SystemExit(f"{name}: missing 0x00F or 0x0D7 on incoming logical bus 1")
 
     sync_periods = [sync[i][0] - sync[i - 1][0] for i in range(1, len(sync))]
@@ -336,7 +412,11 @@ def analyze_capture(name: str, path: Path, LogReader: Any, expected_sha: str) ->
             "path": str(path.relative_to(REPO)) if path.is_relative_to(REPO) else str(path),
             "sha256": actual_sha,
         },
-        "wire_counts": {"0x00F": len(sync), "0x0D7": len(d7), "mapped_0x0D7_after_first_00F": len(mapped)},
+        "wire_counts": {
+            "0x00F": len(sync), "0x0D7": len(d7), "0x08A": len(request_08a),
+            "mapped_0x0D7_after_first_00F": len(mapped),
+        },
+        "request_08a_freshness": analyze_08a_freshness(sync, request_08a),
         "sync_00f": {
             "trip_values": trip_values,
             "trip_values_hex": [f"0x{x:04X}" for x in trip_values],
@@ -519,10 +599,44 @@ def main() -> int:
                 and public["d7_receiver_model_replay"]["complete_15_frame_epochs"]
                 == public["d7_receiver_model_replay"]["complete_epochs_exact_message8_1_through_15"]
             ),
+            "request_08a_reanchors_message_low2_to_one_on_each_observed_sync_epoch": (
+                span["request_08a_freshness"]["epoch_first_message_low2"] == {"1": span["request_08a_freshness"]["epochs_observed"]}
+                and public["request_08a_freshness"]["epoch_first_message_low2"] == {"1": public["request_08a_freshness"]["epochs_observed"]}
+            ),
+            "request_08a_same_epoch_message_low2_tracks_request_count_mod4": (
+                all(
+                    int(key.split("/")[0][3:]) == (int(key.split("/")[1][3:]) & 3)
+                    for capture in (span, public)
+                    for key in capture["request_08a_freshness"]["same_epoch_delta_pairs"]
+                )
+            ),
+            "request_08a_normal_adjacent_frames_advance_both_counters_by_one": (
+                span["request_08a_freshness"]["same_epoch_delta_pairs"].get("msg1/seq1", 0) > 2000
+                and public["request_08a_freshness"]["same_epoch_delta_pairs"].get("msg1/seq1", 0) > 2000
+            ),
+            "request_08a_b26_is_not_secoc_message_counter": (
+                span["request_08a_freshness"]["message_low2_minus_request_sequence_low2"]
+                != public["request_08a_freshness"]["message_low2_minus_request_sequence_low2"]
+            ),
             "interpretation": (
                 "The live D7 sequence exercises the exact H reset search/window model under logged receive order: in Span, every new 0x00F is stored before "
                 "one same-logMonoTime old-reset D7, which therefore maps to current-1; the next new-reset D7 seeds a new ordinary epoch, and within an epoch "
                 "message8 advances by one. Physical sub-event timing inside one batched CAN publication is not independently reconstructed."
+            ),
+        },
+        "request_08a_signer_implication": {
+            "observed_on_both_corolla_generations": True,
+            "freshness_policy": (
+                "The maintained request signer policy is directly corroborated on both retained Corolla road captures: use the authenticated 0x00F trip/reset, "
+                "start a private 0x08A message counter at 1 whenever that epoch changes, and increment it by one for each subsequent 0x08A request in the epoch."
+            ),
+            "application_sequence_boundary": (
+                "0x08A B26 advances independently. Its message-low2 phase differs between the 2023 public and 2025 Span captures, so the signer must not derive "
+                "SecOC message8 from B26."
+            ),
+            "cryptographic_boundary": (
+                "These captures validate 0x08A FV4/freshness evolution only. They do not prove that Corolla EPS ICU-S slot 4 contains the same key as the external "
+                "0x08A producer; a live native-0x08A command-5 equality oracle is still required for that key-domain join."
             ),
         },
         "b6_sender_implication": {

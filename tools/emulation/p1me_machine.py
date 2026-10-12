@@ -183,6 +183,7 @@ def _validate_events(rows: Any, context: str) -> list[dict[str, Any]]:
         "clock": {"p_bus_cycles"},
         "can-rx": {"fifo", "can_id", "data_hex", "extended", "fd", "boundary", "label", "timestamp"},
         "interrupt": {"channel"},
+        "memory-write": {"address", "data_hex"},
     }
     for index, row in enumerate(normalized):
         item_context = f"{context}[{index}]"
@@ -193,6 +194,7 @@ def _validate_events(rows: Any, context: str) -> list[dict[str, Any]]:
             "clock": {"p_bus_cycles"},
             "can-rx": {"fifo", "can_id", "data_hex", "boundary"},
             "interrupt": {"channel"},
+            "memory-write": {"address", "data_hex"},
         }[kind]
         _require_keys(
             row,
@@ -209,6 +211,18 @@ def _validate_events(rows: Any, context: str) -> list[dict[str, Any]]:
         elif kind == "interrupt":
             if type(row["channel"]) is not int or not 0 <= row["channel"] < 512:
                 raise P1MEMachineError(f"{item_context}: invalid interrupt channel")
+        elif kind == "memory-write":
+            try:
+                address = int(row["address"], 0)
+                payload = bytes.fromhex(row["data_hex"])
+            except (ValueError, TypeError) as exc:
+                raise P1MEMachineError(f"{item_context}: invalid memory address or data") from exc
+            if not payload:
+                raise P1MEMachineError(f"{item_context}: memory write cannot be empty")
+            if not 0 <= address <= 0xFFFFFFFF or address + len(payload) - 1 > 0xFFFFFFFF:
+                raise P1MEMachineError(f"{item_context}: memory write exceeds 32-bit address space")
+            row["address"] = hex(address)
+            row["data_hex"] = payload.hex()
         else:
             if row["boundary"] != "post-filter":
                 raise P1MEMachineError(f"{item_context}: only the explicit post-filter receive boundary is supported")

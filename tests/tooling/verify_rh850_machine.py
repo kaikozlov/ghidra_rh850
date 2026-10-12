@@ -8,6 +8,7 @@ import subprocess
 import tempfile
 from pathlib import Path
 
+from exploit.ephemeral_runtime import build_tss3_request_signer as signer_builder
 from exploit.ram_runtime.target_profiles import supported_targets, target_spec
 from tools import REPO_ROOT
 from tools.targets.tss3.request_signer_machine import verify_request_signer_target
@@ -85,16 +86,21 @@ def check_exact_scenarios(output_root: Path) -> None:
             )
 
 def check_dynamic_request_signer_targets(output_root: Path) -> None:
-    for target in supported_targets():
+    targets = supported_targets()
+    build_dir = output_root / "dynamic-request-signer-build"
+    metadata = signer_builder.build_request_signer(target=targets[0], output_dir=build_dir)
+    helper_path = build_dir / metadata["helper"]["path"]
+    for target in targets:
         spec = target_spec(target)
         result = verify_request_signer_target(
             target=target,
             contract=spec["contract"],
+            helper_path=helper_path,
             output_dir=output_root / "dynamic-request-signer" / target,
         )
         if result["codeflash_sha256"] != spec["sha256"]:
             raise AssertionError(f"{target}: dynamic machine verification image drift")
-        if result["scenario_count"] != 8:
+        if result["scenario_count"] != 12:
             raise AssertionError(f"{target}: dynamic machine scenario count drift")
         for row in result["scenarios"]:
             resolution = row["entry_resolution"]
@@ -318,6 +324,26 @@ def check_event_schema_rejections(output_root: Path) -> None:
                 "after_instructions": True,
                 "evidence": "scenario: boolean schedule tick probe",
                 "p_bus_cycles": 8,
+            },
+        ),
+        (
+            "memory-write-empty",
+            {
+                "kind": "memory-write",
+                "after_instructions": 0,
+                "evidence": "scenario: invalid empty asynchronous completion",
+                "address": "0xFEBF0000",
+                "data_hex": "",
+            },
+        ),
+        (
+            "memory-write-address-overflow",
+            {
+                "kind": "memory-write",
+                "after_instructions": 0,
+                "evidence": "scenario: invalid overflowing asynchronous completion",
+                "address": "0xFFFFFFFF",
+                "data_hex": "0000",
             },
         ),
         (

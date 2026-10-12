@@ -354,6 +354,12 @@ def _section_corolla_hf_secoc_00f_freshness_bridge():
     check('new-reset D7 follows ~20ms later', 19000000 <= st['first_d7_new_reset_delay_ns_min'] <= st['first_d7_new_reset_delay_ns_median'] <= st['first_d7_new_reset_delay_ns_max'] <= 21000000)
     check('all first new-reset Span D7 frames start low2=1', st['first_d7_new_reset_message_low2'] == {'1': 200})
     check('cross-capture conclusion binds Span current-1 overlap to logged order', ART['cross_capture_conclusions']['span_logged_order_exercises_current_minus_1_overlap'] is True)
+    s8 = span['request_08a_freshness']
+    check('Span has 2400 0x08A frames and 2397 post-sync joins', span['wire_counts']['0x08A'] == s8['frame_count'] == 2400 and s8['mapped_after_first_sync'] == 2397)
+    check('every joined Span 0x08A uses current sync reset-low2', s8['latest_sync_reset_low2_matches'] == 2397)
+    check('all 201 observed Span 0x08A epochs begin message-low2=1', s8['epochs_observed'] == 201 and s8['epoch_first_message_low2'] == {'1': 201})
+    check('normal Span 0x08A frames advance SecOC and B26 counters together', s8['same_epoch_delta_pairs'] == {'msg1/seq1': 2196})
+    check('Span 0x08A SecOC message phase is B26+1 mod4', s8['message_low2_minus_request_sequence_low2'] == {'1': 2397})
     print('\n== independent public-route replay ==')
     pub = ART['captures']['public_2023']
     ps = pub['sync_00f']
@@ -368,6 +374,16 @@ def _section_corolla_hf_secoc_00f_freshness_bridge():
     check('public live reset candidates are current/current-1 only', pd['candidate_delta_counts'] == {'-1': 196, '0': 2744})
     check('public same-epoch reconstructed message8 always +1', pd['same_epoch_message8_delta_counts'] == {'1': 2742})
     check('all 194 complete public epochs are message8 1..15', pd['complete_15_frame_epochs'] == pd['complete_epochs_exact_message8_1_through_15'] == 194)
+    p8 = pub['request_08a_freshness']
+    check('public route has 2355 0x08A frames and 2352 post-sync joins', pub['wire_counts']['0x08A'] == p8['frame_count'] == 2355 and p8['mapped_after_first_sync'] == 2352)
+    check('every joined public 0x08A uses current sync reset-low2', p8['latest_sync_reset_low2_matches'] == 2352)
+    check('all 198 observed public 0x08A epochs begin message-low2=1', p8['epochs_observed'] == 198 and p8['epoch_first_message_low2'] == {'1': 198})
+    check('public 0x08A normal adjacency is +1 with one logged 26-frame gap', p8['same_epoch_delta_pairs'] == {'msg1/seq1': 2153, 'msg2/seq26': 1})
+    check('public 0x08A SecOC message phase is B26+2 mod4', p8['message_low2_minus_request_sequence_low2'] == {'2': 2352})
+    req = ART['request_08a_signer_implication']
+    check('both Corolla generations corroborate maintained 0x08A reset-local freshness policy', req['observed_on_both_corolla_generations'] is True and ART['cross_capture_conclusions']['request_08a_reanchors_message_low2_to_one_on_each_observed_sync_epoch'] is True)
+    check('0x08A message counter tracks frame count but is not B26', ART['cross_capture_conclusions']['request_08a_same_epoch_message_low2_tracks_request_count_mod4'] is True and ART['cross_capture_conclusions']['request_08a_b26_is_not_secoc_message_counter'] is True)
+    check('Corolla 0x08A key-domain equality remains a live cryptographic boundary', 'live native-0x08A command-5 equality oracle' in req['cryptographic_boundary'])
     print('\n== B6 sender consequence and boundary ==')
     imp = ART['b6_sender_implication']
     check('00F exposes 36/46 meaningful B6 freshness bits', imp['what_00f_reveals'].startswith('36/46'))

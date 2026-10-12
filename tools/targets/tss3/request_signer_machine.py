@@ -2,11 +2,17 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 from typing import Any
 
+from exploit.ephemeral_runtime.build_tss3_request_signer import CONFIG_BASE, CONFIG_FIELDS
+from exploit.ephemeral_runtime.tss3_request_signer import SAFE_APPLICATION, build_request
+from exploit.ram_runtime.tss3_request_signer_contract import HELPER_TRANSIT_BASE
+from tools import REPO_ROOT
 from tools.emulation.p1me_machine import run_many
+from tools.project.analysis_target import target as resolve_target
 
 SCHEMA = "rh850-p1me-machine-scenario-v2"
 REPORT_SCHEMA = "tss3-request-signer-machine-verification-v1"
@@ -523,6 +529,372 @@ def _rscfd_tx_scenario(contract: dict[str, Any]) -> dict[str, Any]:
     )
 
 
+def _lower_can_response_scenario(contract: dict[str, Any]) -> dict[str, Any]:
+    """Execute the helper-facing lower CanIf-style response wrapper end to end.
+
+    This closes the target-specific hop that sits above the generic RSCFD Tx
+    primitive: lower handle -> controller/resource route map, controller-online
+    gate, classic-PDU parsing, and the selected hardware transmit resource.
+    """
+    response_id = contract["request"]["response_id"]
+    signer_abi = contract["signer_abi"]
+    controller = signer_abi["response_controller"]
+    resource = signer_abi["response_resource"]
+    handle = signer_abi["response_handle"]
+    online = signer_abi["lower_online_state_base"] + controller * 2
+    payload = bytes.fromhex("1122334455667788")
+    # Exact PduInfo shape emitted by tss3_request_signer_helper.S:
+    # software confirmation handle, length/reserved, CAN ID, payload pointer.
+    pdu = (
+        (0x00F0).to_bytes(2, "little")
+        + bytes((8, 0))
+        + response_id.to_bytes(4, "little")
+        + PAYLOAD.to_bytes(4, "little")
+    )
+    message_address = 0xFFD24000 + controller * 0x200 + resource * 0x20
+    return _scenario(
+        name="tss3-dynamic-response-lower-can-wrapper",
+        entry=_resolved("dump-resolved-lower-can-writer", signer_abi["lower_can_write"]),
+        contract=contract,
+        max_instructions=5000,
+        registers={"r6": handle, "r7": DESCRIPTOR},
+        memory=[
+            {
+                "address": _hx(LOCAL_RAM),
+                "size": LOCAL_RAM_SIZE,
+                "fill": 0,
+                "evidence": "scenario: zeroed application LocalRAM baseline",
+            },
+            {
+                "address": _hx(online),
+                "hex": "a857",
+                "evidence": "exact lower-wrapper controller-online gate value 0x57A8",
+            },
+            {
+                "address": _hx(DESCRIPTOR),
+                "hex": pdu.hex(),
+                "evidence": "helper-shaped lower CAN response PDU",
+            },
+            {
+                "address": _hx(PAYLOAD),
+                "hex": payload.hex(),
+                "evidence": "scenario: eight-byte request-signer response payload",
+            },
+        ],
+        checks=[
+            _return_check("lower CAN wrapper returns through caller link"),
+            {
+                "name": "lower CAN wrapper reports success",
+                "kind": "register",
+                "register": "r10",
+                "equals": "0",
+            },
+            {
+                "name": "lower CAN wrapper routes the response CAN identifier",
+                "kind": "memory",
+                "address": _hx(message_address),
+                "size": 4,
+                "equals_hex": _le(response_id, 4),
+            },
+            {
+                "name": "lower CAN wrapper routes the response payload",
+                "kind": "memory",
+                "address": _hx(message_address + 0xC),
+                "size": 8,
+                "equals_hex": payload.hex(),
+            },
+            {
+                "name": "lower CAN wrapper reaches one RSCFD transmit",
+                "kind": "event-count",
+                "operation": "can-tx",
+                "equals": "1",
+            },
+        ],
+    )
+
+
+
+def _lower_can_completion_scenario(contract: dict[str, Any]) -> dict[str, Any]:
+    """Dispatch the helper's private software handle through native Tx completion."""
+    signer_abi = contract["signer_abi"]
+    slot = signer_abi["response_confirmation_slot"]
+    return _scenario(
+        name="tss3-dynamic-response-lower-can-completion",
+        entry=_resolved(
+            "dump-resolved-lower-can-tx-completion",
+            signer_abi["lower_tx_completion"],
+        ),
+        contract=contract,
+        max_instructions=1000,
+        registers={
+            "r6": signer_abi["response_controller"],
+            "r7": signer_abi["response_resource"],
+        },
+        memory=[
+            {
+                "address": _hx(LOCAL_RAM),
+                "size": LOCAL_RAM_SIZE,
+                "fill": 0,
+                "evidence": "scenario: zeroed application LocalRAM baseline",
+            },
+            {
+                "address": _hx(slot),
+                "hex": _le(signer_abi["software_confirmation_handle"], 2),
+                "evidence": "helper private software-confirmation handle pending",
+            },
+        ],
+        checks=[
+            _return_check("lower CAN completion returns through caller link"),
+            {
+                "name": "lower CAN completion consumes the private software handle",
+                "kind": "memory",
+                "address": _hx(slot),
+                "size": 2,
+                "equals_hex": "ffff",
+            },
+        ],
+    )
+
+
+def _whole_helper_scenario(
+    contract: dict[str, Any], *, helper_path: Path, trampoline: int,
+    command_completed: bool,
+) -> dict[str, Any]:
+    """Execute the assembled universal helper across one complete request.
+
+    The timeout case leaves the native ICU-S command in flight. The success case
+    supplies only the recovered asynchronous completion state after submission;
+    exact submit/input/output callback scenarios remain separate, and neither
+    case pretends to model provisioned key material.
+    """
+    request = contract["request"]
+    signer_abi = contract["signer_abi"]
+    state_base = contract["memory"]["state_base"]
+    runtime_config = contract["runtime_config"]
+    command5_globals = signer_abi["command5_globals"]
+    scratch_base = contract["memory"]["scratch_base"]
+
+    helper_path = helper_path.resolve()
+    helper = helper_path.read_bytes()
+    helper_sha = hashlib.sha256(helper).hexdigest()
+    config = b"".join(int(runtime_config[name]).to_bytes(4, "little") for name in CONFIG_FIELDS)
+
+    state = bytearray(0x24)
+    state[0:4] = (0x4C433841).to_bytes(4, "little")
+    state[4] = 3
+    state[5] = 1
+    state[32:34] = (0).to_bytes(2, "little")
+
+    request_frames = build_request(SAFE_APPLICATION, 1)
+    header = request["request_record_header"]
+    ring = b"".join(
+        header.to_bytes(4, "little")
+        + ((~header) & 0xFFFFFFFF).to_bytes(4, "little")
+        + request["request_id"].to_bytes(4, "little")
+        + frame
+        for frame in request_frames
+    )
+    # Every classic eight-byte 0x777 record occupies five ring words.
+    producer_index = 5 * len(request_frames)
+    online_state = signer_abi["lower_online_state_base"] + signer_abi["response_controller"] * 2
+    message_address = (
+        0xFFD24000
+        + signer_abi["response_controller"] * 0x200
+        + signer_abi["response_resource"] * 0x20
+    )
+    helper_end = HELPER_TRANSIT_BASE + len(helper)
+
+    scenario = _scenario(
+        name=(
+            "tss3-dynamic-whole-request-signer-helper-success"
+            if command_completed
+            else "tss3-dynamic-whole-request-signer-helper-timeout"
+        ),
+        entry=_resolved("exact-codeflash-indirect-call-trampoline", trampoline),
+        contract=contract,
+        max_instructions=200000,
+        stop=trampoline + 4,
+        registers={"r12": HELPER_TRANSIT_BASE},
+        memory=[
+            {
+                "address": _hx(LOCAL_RAM),
+                "size": LOCAL_RAM_SIZE,
+                "fill": 0,
+                "evidence": "scenario: zeroed application LocalRAM baseline",
+            },
+            {
+                "address": _hx(CONFIG_BASE),
+                "hex": config.hex(),
+                "evidence": "exact dump-resolved universal runtime config",
+            },
+            {
+                "address": _hx(state_base),
+                "hex": bytes(state).hex(),
+                "evidence": "resident-initialized request-signer state",
+            },
+            {
+                "address": _hx(request["ring_producer"]),
+                "hex": producer_index.to_bytes(2, "little").hex() + "000000000000",
+                "evidence": "four complete request records pending at the producer",
+            },
+            {
+                "address": _hx(request["ring_base"]),
+                "hex": ring.hex(),
+                "evidence": "four exact classic 0x777 request records",
+            },
+            {
+                "address": _hx(signer_abi["auth_trip"]),
+                "hex": "01000000",
+                "evidence": "scenario authenticated trip epoch",
+            },
+            {
+                "address": _hx(signer_abi["auth_reset"]),
+                "hex": "01000000",
+                "evidence": "scenario authenticated reset epoch",
+            },
+            {
+                "address": _hx(command5_globals - 0x34),
+                "hex": "e1",
+                "evidence": "dump-relative ICU-S idle state",
+            },
+            {
+                "address": _hx(command5_globals - 0x28),
+                "hex": "e100d2",
+                "evidence": "dump-relative command-router idle and available-lock state",
+            },
+            {
+                "address": _hx(command5_globals - 0x210),
+                "hex": "e1",
+                "evidence": "dump-relative cryptographic manager initialized-idle state",
+            },
+            {
+                "address": _hx(command5_globals - 0x234),
+                "hex": "d2",
+                "evidence": "dump-relative cryptographic manager available-lock state",
+            },
+            {
+                "address": "0xFFC5D00C",
+                "hex": "00000000",
+                "evidence": "ICU-S not-busy status",
+            },
+            {
+                "address": "0xFFC5D014",
+                "hex": "00000000",
+                "evidence": "ICU-S companion ready status",
+            },
+            {
+                "address": _hx(online_state),
+                "hex": "a857",
+                "evidence": "target lower CAN controller online state",
+            },
+            {
+                "address": _hx(helper_end),
+                "size": 48,
+                "fill": 0,
+                "evidence": "initialized speculative instruction-fetch guard after helper",
+            },
+        ],
+        checks=[
+            {
+                "name": "whole helper returns through exact indirect-call trampoline",
+                "kind": "register",
+                "register": "PC",
+                "equals": _hx(trampoline + 4),
+            },
+            {
+                "name": "whole helper assembles one four-frame request",
+                "kind": "memory",
+                "address": _hx(state_base + 8),
+                "size": 4,
+                "equals_hex": "01000000",
+            },
+            {
+                "name": "whole helper counts one lower response transmit",
+                "kind": "memory",
+                "address": _hx(state_base + 16),
+                "size": 4,
+                "equals_hex": "01000000",
+            },
+            {
+                "name": "whole helper emits one modeled CAN response",
+                "kind": "event-count",
+                "operation": "can-tx",
+                "equals": "1",
+            },
+            {
+                "name": "whole helper routes the response CAN identifier",
+                "kind": "memory",
+                "address": _hx(message_address),
+                "size": 4,
+                "equals_hex": _le(request["response_id"], 4),
+            },
+            {
+                "name": "whole helper packs private response magic",
+                "kind": "memory",
+                "address": _hx(message_address + 0xC),
+                "size": 1,
+                "equals_hex": "c9",
+            },
+        ],
+    )
+    expected_response = "c90100fe51122334" if command_completed else "c90102fe00000000"
+    scenario["checks"].extend([
+        {
+            "name": "whole helper exposes the command result",
+            "kind": "memory",
+            "address": _hx(state_base + 20),
+            "size": 4,
+            "equals_hex": "00010010" if command_completed else "02000110",
+        },
+        {
+            "name": "whole helper packs the complete response status",
+            "kind": "memory",
+            "address": _hx(message_address + 0xC),
+            "size": 8,
+            "equals_hex": expected_response,
+        },
+    ])
+    if command_completed:
+        scenario["checks"].append({
+            "name": "whole helper counts one successful signature",
+            "kind": "memory",
+            "address": _hx(state_base + 12),
+            "size": 4,
+            "equals_hex": "01000000",
+        })
+        scenario["events"] = [
+            {
+                "kind": "memory-write",
+                "after_instructions": 2000,
+                "evidence": (
+                    "modeled asynchronous ICU-S output after exact command-five submission; "
+                    "output bytes are scenario data, not a cryptographic claim"
+                ),
+                "address": _hx(scratch_base + 52),
+                "data_hex": "112233445566778899aabbccddeeff00",
+            },
+            {
+                "kind": "memory-write",
+                "after_instructions": 2000,
+                "evidence": (
+                    "modeled asynchronous ICU-S completion after exact command-five submission"
+                ),
+                "address": _hx(command5_globals + 0xC),
+                "data_hex": "10000000" + "00" * 12 + "0100",
+            },
+        ]
+    scenario["artifacts"] = [
+        {
+            "address": _hx(HELPER_TRANSIT_BASE),
+            "path": str(helper_path),
+            "sha256": helper_sha,
+            "executable": True,
+            "evidence": "current built universal request-signer helper",
+        }
+    ]
+    return scenario
+
+
 def _icus_scenarios(contract: dict[str, Any]) -> list[dict[str, Any]]:
     base = contract["signer_abi"]["command5_globals"]
     submit = _scenario(
@@ -738,28 +1110,61 @@ def _icus_scenarios(contract: dict[str, Any]) -> list[dict[str, Any]]:
     return [submit, input_callback, output_callback]
 
 
-def request_signer_machine_scenarios(contract: dict[str, Any]) -> list[dict[str, Any]]:
+def request_signer_machine_scenarios(
+    contract: dict[str, Any], *, helper_path: Path, trampoline: int,
+) -> list[dict[str, Any]]:
     return [
         _tauj_scenario(contract),
         _freshness_scenario(contract),
         _ring_scenario(contract),
         _receive_scenario(contract),
         _rscfd_tx_scenario(contract),
+        _lower_can_response_scenario(contract),
+        _lower_can_completion_scenario(contract),
+        _whole_helper_scenario(
+            contract, helper_path=helper_path, trampoline=trampoline, command_completed=False,
+        ),
+        _whole_helper_scenario(
+            contract, helper_path=helper_path, trampoline=trampoline, command_completed=True,
+        ),
         *_icus_scenarios(contract),
     ]
+
+
+def _helper_trampoline(target_name: str, expected_sha256: str) -> int:
+    resolved_name, target = resolve_target(target_name)
+    codeflash = REPO_ROOT / target["codeflash"]
+    image = codeflash.read_bytes()
+    if hashlib.sha256(image).hexdigest() != expected_sha256:
+        raise RuntimeError(f"{resolved_name}: request-signer machine CodeFlash identity drift")
+    # Any exact-CodeFlash `jarl [r12], lp` is sufficient as a model-only
+    # trampoline into the executable RAM artifact. Choose the first aligned
+    # instance deterministically and stop at its return address.
+    pattern = bytes.fromhex("ecc760f9")
+    hits = [
+        offset for offset in range(0, len(image) - len(pattern) + 1, 2)
+        if image[offset:offset + len(pattern)] == pattern
+    ]
+    if not hits:
+        raise RuntimeError(f"{resolved_name}: no exact indirect-call trampoline")
+    return hits[0]
 
 
 def verify_request_signer_target(
     *,
     target: str,
     contract: dict[str, Any],
+    helper_path: Path,
     output_dir: Path,
 ) -> dict[str, Any]:
     output_dir = output_dir.resolve()
     scenario_dir = output_dir / "scenarios"
     report_dir = output_dir / "reports"
     scenario_dir.mkdir(parents=True, exist_ok=True)
-    scenarios = request_signer_machine_scenarios(contract)
+    trampoline = _helper_trampoline(target, contract["codeflash_sha256"])
+    scenarios = request_signer_machine_scenarios(
+        contract, helper_path=helper_path, trampoline=trampoline,
+    )
     paths: list[Path] = []
     for scenario in scenarios:
         path = scenario_dir / f"{scenario['name']}.json"

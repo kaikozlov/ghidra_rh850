@@ -242,9 +242,19 @@ Corolla H/F resolve to the same application software ID and ABI:
 | exact target | Panda bus | RX ring / producer | resident state | response lower handle | signer scratch | command-5 globals |
 |---|---:|---|---|---:|---|---|
 | Camry `8965F3307000` | 0 | `FEBE4038` / `FEBE48F8` | `FEBF025C` | 53 | `FEBF0280` | `FEBF13A0` |
-| Crown `8965F3012000` | 1 | `FEBE3E98` / `FEBE475A` | `FEBF025C` | 51 | `FEBF0280` | `FEBF13A0` |
+| Crown `8965F3012000` | 1 | `FEBE3E98` / `FEBE475A` | `FEBF025C` | 50 | `FEBF0280` | `FEBF13A0` |
 | Corolla `8965H1202000` | 1 | `FEBE3F4C` / `FEBE480C` | `FEBFF9F0` | 50 | `FEF07F98` | `FEBF1264` |
 | Corolla `8965F1208000` | 1 | `FEBE3F4C` / `FEBE480C` | `FEBFF9F0` | 50 | `FEF07F98` | `FEBF1264` |
+
+The response handle is derived from the exact generated CanIf diagnostic class,
+not from the total number of configured transmit resources. In all four images,
+class 2 contains primary/functional `0x7A9` on local HTH0 and secondary `0x7A8`
+on local HTH1; the class-route base is 2, so `0x7A9` resolves to global HTH2.
+That is resource 6 / lower handle 53 on Camry and resource 6 / lower handle 50
+on Crown and Corolla. The former four-resource heuristic incorrectly selected
+Crown HTH3 / handle 51 / resource 7, which is the secondary `0x7A8` route. The
+machine verification now executes both the exact lower wrapper and the complete
+assembled helper against the selected primary route on every registered image.
 
 All four default to the same four-message classic standard-`0x777` request
 codec, standard-`0x7A9` response, and 36-byte command-5 authentication domain.
@@ -258,6 +268,122 @@ The common resident code is bounded below the runtime-config block in
 Corolla scratch begins at `FEF07F98`; zero relocations and the common bound are
 checked from linked artifacts. The runtime config fixes an earlier portability
 defect in which the shared helper used F3 command-5 globals on Corolla.
+
+### Cross-variant request-signer audit (2026-10-12)
+
+The current request signer was re-audited specifically for Camry assumptions
+that could have leaked into Crown or Corolla H/F. Most of the runtime is now
+genuinely dump-resolved. The audit replaced one unsupported Crown mailbox
+heuristic with the exact stock-primary association and leaves two hardware/key
+boundaries that CodeFlash alone cannot close.
+
+| surface | Camry | Crown | Corolla H/F | audit result |
+|---|---|---|---|---|
+| application context | `715B4` | `709E4` | `6A8C4` | exact per-image context loader |
+| software RX ring / producer | `FEBE4038 / FEBE48F8` | `FEBE3E98 / FEBE475A` | `FEBE3F4C / FEBE480C` | exact producer/ring tables; machine receive scenario passes |
+| `0x777` acceptance | rule label 53 | label 50 | label 50 | exact rule routes all three to diagnostic CFIFO5; exact IRQ187/ring path passes |
+| authenticated trip/reset | `FEBE55C0/55C4` | `FEBE50EC/50F0` | `FEBE54AC/54B0` | target freshness code; Crown old signer and Corolla `0x00F` evidence independently corroborate |
+| freshness encoder | `90566` | `8E006` | `89876` | target-native body/signature plus exact execution scenario |
+| command-5 wrapper/globals | `89BC2 / FEBF13A0` | `87662 / FEBF13A0` | `82ED2 / FEBF1264` | target-native wrapper/global addresses; exact submit/input/output scenarios pass |
+| lower CAN writer | `85112` | `812A2` | `7E422` | target-native lower wrapper; complete helper emits both timeout and modeled-completion responses |
+| primary `0x7A9` lower route | handle 53 / resource 6 | **handle 50 / resource 6** | handle 50 / resource 6 | exact CanIf diagnostic HTH + class-route + lower route map |
+| software confirmation | `85240 -> 8043C -> 8152E` | `813D0 -> 7DAA8 -> 7EB4A` | `7E550 -> 7974C -> 7A83E` | exact lower completion maps controller/resource back to pending `00F0`; dispatcher sends the `F0` class to a one-instruction `jmp [lp]` no-op |
+
+The lower completion entries above are the transmit-interrupt path, not the
+similarly shaped cancellation wrappers at `lower_can_write + 0xDC`. Exact
+completion-table recovery binds the selected resource back to the pending
+software-handle cell (`FEBE5036`, `FEBE4AE6`, or `FEBE4F22` respectively), and
+the machine scenario consumes `00F0` from that cell through the target's
+dispatcher.
+
+Corolla F `8965F1208000` and H `8965H1202000` have different exact
+CodeFlash identities and F181 responses but the same recovered signer-facing
+machine contract. Their five-row transmit-resource table maps primary `0x7A9`
+to local HTH0 -> global HTH2 -> handle 50/controller 1/resource 6, secondary
+`0x7A8` to handle 51/resource 7, and the fifth object to handle 52/resource 8.
+The old five-row heuristic already selected row 2, so neither Corolla profile
+received the Crown alternate-mailbox selection. The shared runtime selector
+`8965F1208000` is bounded by byte-identical boot calls/runtime configuration;
+the host manifest still binds the complete target-specific application F181.
+
+The Crown response row records the stock primary association, not an ID
+restriction on the lower hardware object. The previous resolver inferred
+handle 51/resource 7 solely from the number of transmit-resource rows. Exact
+Crown CanIf data instead associates primary `0x7A9` with local HTH0 -> global
+HTH2 -> handle 50/resource 6, while secondary `0x7A8` uses handle 51/resource 7.
+That establishes which object the stock upper stack selects.
+
+Deeper recovery of `812A2 -> 8153A -> 8148E` shows that the request signer calls
+the `Can_Write`-shaped lower API beneath that upper association. Handles 50 and
+51 map to controller 1 transmit buffers 6 and 7 respectively, but the supplied
+`Can_PduType.id` is written into the selected buffer's `TMID` register on every
+call. No lower gate compares handle 51 with `0x7A8`. Focused exact execution
+therefore sends the same supplied `0x7A9` through either handle: resource 6
+becomes global buffer 22 and resource 7 becomes global buffer 23. The `00F0`
+software-confirmation value is also consumed through the resource-7 completion
+path and reaches the same no-op.
+
+The real behavioral difference is mailbox state. For ordinary transmit buffers,
+`8153A` returns 2 without writing a frame when `TMSTS & 0x1E` is nonzero:
+pending transmit request, completed/aborted result awaiting clear, or abort
+request (P1M-E manual sections 17.3.10.1–2). A focused resource-7-busy scenario
+exercises that exact rejection. The machine's successful resource-7 case starts
+idle and therefore cannot establish the field value of `TMSTS7`.
+
+Consequently, the old handle-51/resource-7 selection was unsupported by its
+resource-count heuristic but is not a demonstrated firmware defect: it is a
+valid alternate transmit mailbox while idle. The current profile uses
+handle 50/resource 6 because that is the stock `0x7A9` association and the
+retained application F181 response independently demonstrates that primary
+mailbox live. The old field logs contain neither resident counters nor mailbox
+status, so they cannot attribute their no-response result to either selection.
+
+The complete-helper status-0 scenario schedules recovered ICU-S
+done/status/length and supplied output bytes only after exact command-five
+submission. It proves that each target's wrapper, helper checks, success counter,
+response packing, lower route, and modeled RSCFD transmit compose. It does not
+model provisioned-key cryptography, interrupt timing, or silicon.
+
+The common memory placement was also checked rather than inferred from Camry.
+Camry has live proof for `FEBFF9F0..FEBFFBFB`; Crown's earlier B6 resident ran
+from the same retained tail on hardware. H/F startup shadow-copy analysis ends
+at `FEBFF9EF` and excludes the tail from recovered startup writes; the retained
+2023 Albino and 2025 Span LocalRAM dumps also show the entire 524-byte tail zero
+after ordinary application use. The shared helper's `FEF07C00..FEF07F3B`
+GlobalRAM placement has zero recovered exact application references on every
+registered target, lies in the target-native supervisor R/W/X GlobalRAM MPU
+region, and the final 1 KiB is all-zero in retained Camry, 2023 Corolla and 2025
+Corolla GlobalRAM captures. Corolla scratch starts at `FEF07F98`, leaving both
+the assembled 828-byte helper and the 48-byte speculative-fetch guard below it.
+This is strong placement/lifetime evidence, but current-helper execution from
+GlobalRAM is hardware-live only on Camry; Crown/Corolla still benefit from a
+resident-state readback when a field probe fails.
+
+The shared `0x08A` freshness policy is no longer a Camry-only assumption.
+Re-reading the retained 2025 Span and 2023 public Corolla road logs against the
+latest preceding `0x00F` shows that every post-sync `0x08A` trailer carries the
+current reset-low2. Every observed new reset epoch begins at SecOC
+message-low2=1, then normal adjacent requests advance message-low2 by one.
+`0x08A` B26 also advances, but its phase differs between the two captures
+(Span: message-low2 = B26-low2+1; public 2023: +2), proving B26 is not the SecOC
+message counter. This directly supports the helper's private reset-local message
+counter. Canonical counts and the one public-route logging gap are retained in
+`data/generated/corolla_hf_secoc_00f_freshness_bridge.json`.
+
+Two boundaries remain separate from CodeFlash portability:
+
+- **Corolla current-runtime hardware qualification.** H/F exact code and retained
+  RAM captures make the high-tail/GlobalRAM placement strong, but the current
+  universal resident/helper composition has not yet received the same live
+  state/counter witness as Camry. A failed clean probe should read resident
+  state before inventing a new firmware theory.
+- **External `0x08A` key-domain equality.** Camry has a retained 3/3 native
+  `0x08A` equality oracle proving EPS slot 4 reproduces the stock `00 8A` MAC.
+  Crown's live old B6 signer proves its EPS slot-4 command-5 capability, and H/F
+  firmware proves selector-4 use for protected EPS traffic, but neither fact
+  alone proves that another vehicle's external `0x08A` producer shares the EPS
+  slot-4 secret. Crown and Corolla need their own passive native-`0x08A`
+  command-5 equality witness before signed replacement traffic is promoted.
 
 The one-message canonical-reconstruction codec is retained only as an explicit
 experiment. Its stock-TSS3 steering experiment was reported broken, so it is
@@ -485,6 +611,12 @@ CodeFlash images construct the same extended-session response:
 `06 50 03 00 32 01 F4 00` (`0x6204` in Camry/Crown and `0x61E8` in both
 Corollas). The race requires that exact frame. The Camry is simply the first
 vehicle on which the complete startup sequence was physically proven.
+
+The openpilot fork exposes the same manual bringup and `Tss3OracleAutoArm`
+controls in Developer settings on both the legacy comma-three/C3X UI and the
+comma-four `mici` UI. Both frontends use one process runner and status parser;
+the manual page remains reachable when the kit is missing so it can report the
+exact installation or compatibility failure.
 
 FRC `0x1905` **Cruise Control Permission Flag** and `0x1906` **Main Switch
 Recognition Flag** are operational cruise state, not persistent health latches. In a

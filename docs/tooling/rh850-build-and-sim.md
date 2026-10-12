@@ -268,11 +268,14 @@ The generated suite has no calibration-named JSON inputs:
 |Request publication|resolved producer, ring base, and cursors|five-word record, cursor advance, `SYNCP`|
 |Request receive→foreground|resolved `0x777` rule/label, state gates, foreground, INTBP vector, and post-drain stop|TAUJ underflow, FIFO5, IRQ187 entry/`EIRET`, exact ring record, foreground consumption|
 |Response transmit|structural RSCFD role plus resolved `gp`/`tp`, response ID, controller, and local resource|exact resource identifier/data/control/status and one modeled transmit event|
+|Lower response wrapper|resolved lower CAN writer, online-state base, lower handle, route map, controller/resource, and response ID|helper-shaped `0x00F0`/length/ID/data-pointer PDU traverses the target wrapper and exact classic-Tx path to one modeled RSCFD transmit|
+|Whole request-signer timeout|current built helper artifact plus the dump-resolved runtime config, four exact software-ring records, freshness/command-five state, and lower response route|the assembled helper consumes all four fragments, reaches the exact synchronous command-five path, packs status 2 after the bounded poll expires, and transmits the complete private `0x7A9` error response through the selected target wrapper|
+|Whole request-signer completion|the same execution plus scheduled writes of supplied ICU-S output/completion state after exact submission|the exact wrapper observes completion, the helper validates done/status/length, increments its success counter, packs status 0 plus the supplied CMAC prefix, and transmits the complete response; supplied output remains scenario data, not provisioned-key cryptography|
 |ICU-S submit|structural command-five role plus dump-relative engine globals|validated command submission and in-flight state|
 |ICU-S input callback|structural callback role plus dump-relative input state|four input words and acknowledgement|
 |ICU-S output callback|structural callback role plus dump-relative output state|four supplied output words, cursor advance, and acknowledgement|
 
-`tools/test rh850_firmware` requires those eight scenarios to pass on every
+`tools/test rh850_firmware` requires those eleven scenarios to pass on every
 registered signer target: Camry, Crown, Corolla F, and Corolla H. Target-owned
 fixtures under `tests/fixtures/rh850/machine/` are retained only for
 device-model boundaries and negative behavior, not as a target compatibility
@@ -304,6 +307,10 @@ External `events` require `kind`, nonnegative `after_instructions`, and
   by a simulated filter or timestamp clock.
 - `interrupt`: `channel`; requests a modeled EIC source. Unknown/reserved
   channels fail closed.
+- `memory-write`: 32-bit `address` and non-empty `data_hex`; supplies a
+  deterministic asynchronous write to modeled writable RAM. It is explicit
+  scenario state and does not invoke CPU-store callbacks or imply hardware
+  timing.
 
 Stop addresses are terminal: events scheduled after reaching a stop are not
 executed. Unsupported modes and missing state remain faults.
@@ -312,8 +319,9 @@ The functional profile establishes instruction, register, memory, and
 modeled-device behavior only. It makes no cycle-timing, silicon, vehicle, or
 physical-safety claim. The request event begins after acceptance filtering;
 the resolver proves the exact stock rule and native downstream path but the
-machine does not execute RSCFD acceptance filters. ICU-S output words are
-supplied scenario state, not provisioned-key cryptography. Register rules tagged
+machine does not execute RSCFD acceptance filters. ICU-S output/completion words
+may be supplied as scheduled scenario state; they are not provisioned-key
+cryptography. Register rules tagged
 `manual` come from the public Renesas manuals; rules tagged `recovered` remain
 exact-firmware-derived.
 
