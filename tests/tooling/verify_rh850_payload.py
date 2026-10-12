@@ -154,6 +154,55 @@ unsigned bits_far(void) { return (*FAR & 1u) != 0; }
 /* 0x9000 has no sign-extended 16-bit encoding from r0: keep materializing. */
 unsigned bits_boundary(void) { return (*BOUND & 2u) != 0; }
 
+/* Keep calls independent so the reference calculation cannot mask a bad
+ * combine/reload transformation by being optimized together with the probe. */
+#define PROBE __attribute__((noipa))
+volatile unsigned shape_hits;
+PROBE unsigned signed_negative(volatile signed char *p) { return *p < 0; }
+PROBE unsigned signed_nonnegative(volatile signed char *p) { return *p >= 0; }
+PROBE int signed_select_lt(volatile signed char *p, int a, int b) { return *p < 0 ? a : b; }
+PROBE int signed_select_ge(volatile signed char *p, int a, int b) { return *p >= 0 ? a : b; }
+PROBE unsigned signed_branch(volatile signed char *p) {
+    if (*p < 0) { shape_hits += 3; return 9; }
+    shape_hits += 5;
+    return 17;
+}
+PROBE unsigned inverted_byte(unsigned char *p) { return ((*p >> 3) & 1u) ^ 1u; }
+PROBE unsigned inverted_word(unsigned *p) { return ((*p >> 7) & 1u) ^ 1u; }
+PROBE unsigned volatile_low_bit(volatile unsigned *p) { return (*p & 1u) != 0; }
+PROBE unsigned volatile_half_low_bit(volatile unsigned short *p) { return (*p & 1u) != 0; }
+
+static unsigned check_bit_shapes(void) {
+    unsigned expected_hits = 0;
+    unsigned word;
+    unsigned char byte;
+    volatile unsigned short half;
+    volatile signed char *signed_byte = (volatile signed char *)VP;
+    shape_hits = 0;
+    for (unsigned i = 0; i < 256; ++i) {
+        *VP = i;
+        *VW = 0x96a53c00u | i;
+        word = *VW;
+        byte = i;
+        half = (unsigned short)(0xa500u | i);
+        unsigned negative = i >= 128;
+        if (signed_negative(signed_byte) != negative) return 0x10000u + i;
+        if (signed_nonnegative(signed_byte) != !negative) return 0x20000u + i;
+        if (signed_select_lt(signed_byte, 0x369, -0x247) !=
+            (negative ? 0x369 : -0x247)) return 0x30000u + i;
+        if (signed_select_ge(signed_byte, -0x729, 0x151) !=
+            (negative ? 0x151 : -0x729)) return 0x40000u + i;
+        if (signed_branch(signed_byte) != (negative ? 9u : 17u)) return 0x50000u + i;
+        expected_hits += negative ? 3u : 5u;
+        if (shape_hits != expected_hits) return 0x60000u + i;
+        if (inverted_byte(&byte) != (1u ^ ((i >> 3) & 1u))) return 0x70000u + i;
+        if (inverted_word(&word) != (1u ^ ((i >> 7) & 1u))) return 0x80000u + i;
+        if (volatile_low_bit(VW) != (i & 1u)) return 0x90000u + i;
+        if (volatile_half_low_bit(&half) != (i & 1u)) return 0xa0000u + i;
+    }
+    return 0;
+}
+
 static unsigned one_bit(unsigned char v, unsigned b) {
     return (unsigned)((v >> b) & 1u);
 }
@@ -222,6 +271,8 @@ unsigned check_bits(unsigned char *p4) {
         acc = acc * 31u + (e0 ^ e1 ^ e2 ^ e3 ^ e4 ^ e5 ^ e6 ^ e7) + v;
     }
     acc ^= neg_check(p4);
+    unsigned shape_failure = check_bit_shapes();
+    if (shape_failure) return shape_failure;
     return acc ^ 0x5a5a1234u;
 }
 """,
@@ -280,6 +331,34 @@ unsigned check_bits(unsigned char *p4) {
     neg = function_mnemonics(elf, "_neg_check")
     assert "tst1" in neg, neg
     print("PASS native memory bit tests with volatile reads, widths, and liveness preserved")
+
+    for name in ("_signed_nonnegative", "_signed_select_lt", "_signed_select_ge",
+                 "_signed_branch", "_inverted_byte", "_inverted_word"):
+        body = function_mnemonics(elf, name)
+        assert "tst1" in body, (name, body)
+    for name, load in (("_volatile_low_bit", "ld.w"),
+                       ("_volatile_half_low_bit", "ld.hu")):
+        body = function_mnemonics(elf, name)
+        assert load in body and "tst1" not in body, (name, body)
+
+    # Different optimization passes expose different RTL shapes. Execute the
+    # exhaustive signed/inverse-bit checks, not just assembler acceptance.
+    command = [str(CLI), "toolchain", "run", "--work-dir", str(work)]
+    for optimization in ("Oz", "O2"):
+        compiled = subprocess.run(
+            [*command, "v850-elf-gcc", "-mv850e3v5", "-mno-app-regs",
+             f"-{optimization}", "-ffreestanding", "-fno-builtin", "-nostdlib",
+             "-Wl,-T,/out/bits.ld,--build-id=none",
+             "/out/bits_entry.S", "/out/bits.c", "-o", f"/out/bits-{optimization}.elf"],
+            text=True, capture_output=True, timeout=60, check=False,
+        )
+        assert compiled.returncode == 0, (optimization, compiled.stdout, compiled.stderr)
+        invoke(
+            work, f"bits-{optimization}.elf", "--stop", "bits_stop",
+            "--output-dir", f"bits-result-{optimization}",
+            "--assert", "*(unsigned int *)0x2000 == 0x4c555dff",
+        )
+    print("PASS signed/inverse bit tests and low-bit volatile widths at Os/Oz/O2")
 
     # Older ISAs may use different extension sequences; none may receive an
     # unsupported instruction (in particular, CMOV on the original V850).

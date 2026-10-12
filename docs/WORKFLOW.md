@@ -475,6 +475,17 @@ See [compiler frame handling](tooling/rh850-build-and-sim.md#non-returning-c-fun
 and [far calls](tooling/rh850-build-and-sim.md#per-callee-far-calls) for the
 required toolchain rebuild and call-placement contract.
 
+Builds retain `<stem>_debug/` with the resident/helper ELFs (DWARF source
+locations, types, and CFI), disassembly, symbol/relocation listings, linker
+scripts, generated config header, and raw `.su` reports. Metadata `debug`
+indexes those files and the exact compiler commands; `toolchain` records the
+image tag and image ID. These are offline developer artifacts: only `.text`
+is extracted into the uploaded binaries. See
+[source-level debugging](tooling/rh850-build-and-sim.md#c-frame-unwinding).
+The poll marker aliases a compiler-owned C label once outside the loop, so
+loop duplication cannot redefine it; the CodeFlash suite exercises fallback
+and idle-fast behavior with the resident compiled at `-O2` as well as `-Os`.
+
 The shared resident services a pending private-ring record immediately only
 while the foreground flag is clear and TAUJ0 channel 3 has more than 240,000
 counts (3 ms of the 5-ms interval) remaining; it rechecks the flag before
@@ -529,9 +540,10 @@ tools/toyota ram kit all --out EMPTY_KIT_SET_DIRECTORY
 ```
 
 Explicit onboarding and kit output directories must be empty. Each kit contains
-only the shared authenticated payload, host-consumed target metadata, the
-common host runtime, peer recovery, and `./tss3-request-signer`; it does not
-duplicate compiler intermediates or contain the historical direct-B6 runtime.
+the shared authenticated payload, target metadata, the common host runtime,
+peer recovery, and `./tss3-request-signer`. The bundle also retains the build's
+debug directory and compiler metadata; none of it is uploaded. Kits do not
+contain the historical direct-B6 runtime.
 `doctor` is the explicit offline integrity/environment check; no live command
 runs it implicitly. `recover-peers` keeps the kit's EPS identity exact and
 binds each peer restart to the F181 observed at its topology-defined address

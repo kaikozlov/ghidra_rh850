@@ -73,6 +73,9 @@ are required. Volatile accesses keep their width and read count, and a loaded
 byte that is also used elsewhere keeps its load. The post-reload flag
 definitions and consumers are explicit. Memory displacements are signed
 16-bit values, as specified by the RH850G3M instruction set.
+The payload regression executes signed-byte conditions/selections, inverse
+nonvolatile byte/word bits, and low-bit volatile halfword/word access checks
+across all byte values at `-Os`, `-Oz`, and `-O2`.
 
 ### Per-callee far calls
 
@@ -106,6 +109,16 @@ V850 emits `.debug_frame` even when unwind tables are disabled, and GDB prefers
 that information to prologue scanning. Correcting the metadata—not stripping
 it—makes caller SP, return PC, and saved-register recovery trustworthy for
 the covered frame shapes.
+
+The signer build retains resident/helper ELFs with DWARF and `.debug_frame`
+under metadata `debug.directory`; `debug.units` lists the ELF, disassembly,
+stack reports, and compiler command for each unit. Source paths are relative
+to the repository. Load the corresponding resident and helper ELFs with
+GDB `add-symbol-file` when debugging the staged simulator image: their linked
+VMAs already match the copied RAM code. The non-loadable debug sections never
+enter the extracted payload `.text`. The helper can unwind into the resident;
+the intentionally save-free, nonreturning resident has no saved incoming PC,
+so its caller chain stops there.
 
 `tools/test rh850_codeflash` exercises raw instruction stepping and memory
 writes, symbolized PREPARE/FP/leaf frames, partial prologues, and real compiled-C

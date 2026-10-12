@@ -67,6 +67,8 @@ def _bound_metadata(metadata: dict, record: dict) -> dict:
     runtime = record["ram_runtime"]
     return {
         "schema": metadata["schema"],
+        "toolchain": metadata["toolchain"],
+        "debug": metadata["debug"],
         "target": {
             "name": record["name"],
             "application_f181_hex": runtime["application_f181_hex"],
@@ -98,6 +100,8 @@ def _package(target: str, out: Path, codec: str, metadata: dict, payload_path: P
         encoding="utf-8",
     )
     _copy(payload_path, bundle / "payload.bin")
+    debug_directory = metadata["debug"]["directory"]
+    shutil.copytree(payload_path.parent / debug_directory, bundle / debug_directory)
 
     for rel in RUNTIME_FILES:
         _copy(ROOT / rel, out / "runtime" / rel)
