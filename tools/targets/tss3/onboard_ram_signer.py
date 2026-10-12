@@ -12,6 +12,7 @@ from typing import Any
 
 from exploit.ephemeral_runtime.build_tss3_request_signer import (
     CONFIG_BASE,
+    CONFIG_FIELDS,
     CONFIG_OFFSETS,
     STAGING_BASE,
     STAGING_LIMIT,
@@ -126,10 +127,12 @@ def _build_harness_source(contract: dict[str, Any], image: bytes) -> tuple[str, 
         expected=image[context:context + 36],
     ))
 
+    shadow_copy = execution["startup_shadow_copy"]["function"]
     for offset in range(execution["startup_first"], execution["startup_after"], 4):
         if is_jarl22(image, offset):
-            add_return(jarl22_target(image, offset), f"startup_{offset:06x}")
-
+            target = jarl22_target(image, offset)
+            if target != shadow_copy:
+                add_return(target, f"startup_{offset:06x}")
     startup_final = execution["startup_final"]
     if startup_final in occupied:
         raise RuntimeError("startup-final target overlaps another modeled call")
@@ -187,10 +190,14 @@ def simulate_candidate(
     harness.write_text(source, encoding="utf-8")
 
     staging = staging_path.read_bytes()
-    if staging.count(CACHE_PUBLICATION) != 2:
+    resident_offset = int(metadata["staging"]["resident_offset"])
+    staging_code = staging[:resident_offset]
+    if staging_code.count(CACHE_PUBLICATION) != 2:
         raise RuntimeError("request-signer staging no longer contains two cache-publication sequences")
     simulator_staging = output_dir / "request_signer_simulator.bin"
-    simulator_staging.write_bytes(staging.replace(CACHE_PUBLICATION, b"\0" * 4))
+    simulator_staging.write_bytes(
+        staging_code.replace(CACHE_PUBLICATION, b"\0" * 4) + staging[resident_offset:]
+    )
 
     state = contract["runtime_config"]["state_base"]
     producer = contract["runtime_config"]["ring_producer"]
@@ -199,6 +206,14 @@ def simulate_candidate(
     resident_handoff = int(metadata["staging"]["resident_handoff"], 0)
     digest = contract["codeflash_sha256"]
     load = ((STAGING_BASE, simulator_staging),)
+    resident_base = int(metadata["resident"]["base"], 0)
+    resident_size = int(metadata["resident"]["size"])
+    helper_base = int(metadata["helper"]["base"], 0)
+    helper_size = int(metadata["helper"]["size"])
+    runtime_output_dir = output_dir / "runtime"
+    resident_dump = runtime_output_dir / "observed-resident.bin"
+    helper_dump = runtime_output_dir / "observed-helper.bin"
+    config_dump = runtime_output_dir / "observed-config.bin"
 
     config = contract["runtime_config"]
     fallback_expected = (
@@ -219,6 +234,18 @@ def simulate_candidate(
         "run",
         f"break *0x{HELPER_TRANSIT_BASE:08X}",
         "continue",
+        (
+            f"dump binary memory /out/{resident_dump.name} "
+            f"0x{resident_base:08X} 0x{resident_base + resident_size:08X}"
+        ),
+        (
+            f"dump binary memory /out/{helper_dump.name} "
+            f"0x{helper_base:08X} 0x{helper_base + helper_size:08X}"
+        ),
+        (
+            f"dump binary memory /out/{config_dump.name} "
+            f"0x{CONFIG_BASE:08X} 0x{CONFIG_BASE + len(CONFIG_FIELDS) * 4:08X}"
+        ),
         (
             f'printf "UNIVERSAL_DUMP_FALLBACK STATE=0x%x VERSION=%u INIT=%u TICK=%u '
             f'CONTEXT=0x%x STARTUP=0x%x APP_CONTEXT=0x%x RING=0x%x COMMAND5=0x%x '
@@ -241,6 +268,29 @@ def simulate_candidate(
         expected_output=(fallback_expected,),
         output_dir=output_dir / "runtime",
     )
+    resident_expected = (
+        staging_path.parent / metadata["resident"]["path"]
+    ).read_bytes()
+    resident_observed = resident_dump.read_bytes()
+    resident_compare_offset = (
+        int(metadata["state"]["size"])
+        if state == resident_base
+        else 0
+    )
+    if resident_observed[resident_compare_offset:] != resident_expected[resident_compare_offset:]:
+        raise RuntimeError(
+            "resident bytes changed outside the intentional post-startup state prefix"
+        )
+    helper_expected = (
+        staging_path.parent / metadata["helper"]["path"]
+    ).read_bytes()
+    if helper_dump.read_bytes() != helper_expected:
+        raise RuntimeError("GlobalRAM helper changed during the modeled application startup")
+    config_expected = b"".join(
+        int(config[name]).to_bytes(4, "little") for name in CONFIG_FIELDS
+    )
+    if config_dump.read_bytes() != config_expected:
+        raise RuntimeError("runtime config changed during the modeled application startup")
 
     idle_expected = (
         "UNIVERSAL_DUMP_IDLE "
@@ -286,9 +336,17 @@ def simulate_candidate(
         "elf": str(runtime_elf.relative_to(output_dir.parent)),
         "fallback_output": "simulation/runtime/output.txt",
         "idle_output": "simulation/idle-output.txt",
+        "retention_checks": {
+            "exact_startup_shadow_copy": contract["execution"]["startup_shadow_copy"],
+            "resident_compared_from_offset": resident_compare_offset,
+            "resident_size": resident_size,
+            "helper_size": helper_size,
+            "config_size": len(config_expected),
+        },
         "proof_boundary": (
-            "instruction execution and modeled startup/foreground transitions only; "
-            "ICU-S, RSCFD, MPU enforcement, cache publication, interrupts, and timing remain unmodeled"
+            "instruction execution, exact startup shadow copy, copied-artifact retention, "
+            "and modeled remaining startup/foreground transitions only; ICU-S, RSCFD, "
+            "MPU enforcement, cache publication, interrupts, and timing remain unmodeled"
         ),
     }
 

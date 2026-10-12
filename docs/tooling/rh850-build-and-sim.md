@@ -251,11 +251,15 @@ or `compatible-profile-missing` when the same payload can be rebuilt with one
 additional profile. Any missing or ambiguous required part fails closed before
 compilation.
 
-The command builds that resolved candidate and runs the two exact-image GNU
-simulations. When the image hash belongs to a registered analysis target, it
-also generates and runs the same P1M-E functional suite from the resolved
-contract. An otherwise compatible unregistered image retains a successful
-candidate build/GNU result but reports
+The command builds that resolved candidate and runs two exact-image GNU
+simulations. The boot/context/hardware-heavy calls remain explicit overlays, but
+the dump-resolved `0x10000..0x17DEF` startup shadow copy executes as exact
+CodeFlash. At helper entry the runner byte-compares the copied resident outside
+Corolla's intentional 36-byte state prefix, the complete runtime config, and the
+GlobalRAM helper against the built artifacts. When the image hash belongs to a
+registered analysis target, onboarding also generates and runs the same P1M-E
+functional suite from the resolved contract. An otherwise compatible
+unregistered image retains a successful candidate build/GNU result but reports
 `not-run-unregistered-analysis-target` for the P1M-E layer: exact MCU and
 analyzed-project metadata must be registered before Ghidra execution.
 
@@ -263,19 +267,21 @@ The generated suite has no calibration-named JSON inputs:
 
 |Domain|Dynamic source|Checked execution|
 |---|---|---|
+|Startup shadow boundary|exact startup-call target whose fixed copy is `0x10000..0x17DEF` → `FEBF7C00..FEBFF9EF`|first and final words copied; a nonzero sentinel beginning at resident base `FEBFF9F0` remains unchanged|
 |TAUJ0 setup|resolved mode initializer|native mode and prescaler stores|
 |Freshness|resolved signer ABI|native four-bit encoder input, output, and length|
 |Request publication|resolved producer, ring base, and cursors|five-word record, cursor advance, `SYNCP`|
 |Request receive→foreground|resolved `0x777` rule/label, state gates, foreground, INTBP vector, and post-drain stop|TAUJ underflow, FIFO5, IRQ187 entry/`EIRET`, exact ring record, foreground consumption|
 |Response transmit|structural RSCFD role plus resolved `gp`/`tp`, response ID, controller, and local resource|exact resource identifier/data/control/status and one modeled transmit event|
 |Lower response wrapper|resolved lower CAN writer, online-state base, lower handle, route map, controller/resource, and response ID|helper-shaped `0x00F0`/length/ID/data-pointer PDU traverses the target wrapper and exact classic-Tx path to one modeled RSCFD transmit|
+|Lower response completion|resolved native Tx-completion entry and pending software-handle slot|private handle `0x00F0` is consumed through the target dispatcher and no-op confirmation callback|
 |Whole request-signer timeout|current built helper artifact plus the dump-resolved runtime config, four exact software-ring records, freshness/command-five state, and lower response route|the assembled helper consumes all four fragments, reaches the exact synchronous command-five path, packs status 2 after the bounded poll expires, and transmits the complete private `0x7A9` error response through the selected target wrapper|
 |Whole request-signer completion|the same execution plus scheduled writes of supplied ICU-S output/completion state after exact submission|the exact wrapper observes completion, the helper validates done/status/length, increments its success counter, packs status 0 plus the supplied CMAC prefix, and transmits the complete response; supplied output remains scenario data, not provisioned-key cryptography|
 |ICU-S submit|structural command-five role plus dump-relative engine globals|validated command submission and in-flight state|
 |ICU-S input callback|structural callback role plus dump-relative input state|four input words and acknowledgement|
 |ICU-S output callback|structural callback role plus dump-relative output state|four supplied output words, cursor advance, and acknowledgement|
 
-`tools/test rh850_firmware` requires those eleven scenarios to pass on every
+`tools/test rh850_firmware` requires those thirteen scenarios to pass on every
 registered signer target: Camry, Crown, Corolla F, and Corolla H. Target-owned
 fixtures under `tests/fixtures/rh850/machine/` are retained only for
 device-model boundaries and negative behavior, not as a target compatibility
@@ -317,13 +323,15 @@ executed. Unsupported modes and missing state remain faults.
 
 The functional profile establishes instruction, register, memory, and
 modeled-device behavior only. It makes no cycle-timing, silicon, vehicle, or
-physical-safety claim. The request event begins after acceptance filtering;
-the resolver proves the exact stock rule and native downstream path but the
-machine does not execute RSCFD acceptance filters. ICU-S output/completion words
-may be supplied as scheduled scenario state; they are not provisioned-key
-cryptography. Register rules tagged
-`manual` come from the public Renesas manuals; rules tagged `recovered` remain
-exact-firmware-derived.
+physical-safety claim. The startup-shadow scenario executes the exact CPU copy
+loop and ordinary RAM writes, but neither machine backend models instruction
+cache contents or proves the hardware publication effect of dummy-read /
+`SYNCP` / `SYNCI`. The request event begins after acceptance filtering; the
+resolver proves the exact stock rule and native downstream path but the machine
+does not execute RSCFD acceptance filters. ICU-S output/completion words may be
+supplied as scheduled scenario state; they are not provisioned-key
+cryptography. Register rules tagged `manual` come from the public Renesas
+manuals; rules tagged `recovered` remain exact-firmware-derived.
 
 ## CodeFlash simulation
 

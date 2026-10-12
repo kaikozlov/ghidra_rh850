@@ -125,6 +125,56 @@ def _return_check(name: str = "firmware returns through caller link") -> dict[st
         "equals": _hx(RETURN_ADDRESS),
     }
 
+def _shadow_copy_scenario(contract: dict[str, Any]) -> dict[str, Any]:
+    shadow = contract["execution"]["startup_shadow_copy"]
+    destination = shadow["destination"]
+    end = destination + shadow["size"]
+    resident_marker = bytes(range(1, 65))
+    return _scenario(
+        name="tss3-dynamic-startup-shadow-copy-boundary",
+        entry=_resolved("dump-resolved-startup-shadow-copy", shadow["function"]),
+        contract=contract,
+        max_instructions=100000,
+        memory=[
+            {
+                "address": _hx(LOCAL_RAM),
+                "size": LOCAL_RAM_SIZE,
+                "fill": 0xA5,
+                "evidence": "scenario-owned nonzero LocalRAM baseline",
+            },
+            {
+                "address": _hx(end),
+                "hex": resident_marker.hex(),
+                "evidence": "resident-boundary overwrite sentinel",
+            },
+        ],
+        checks=[
+            _return_check("startup shadow copy returns through caller link"),
+            {
+                "name": "startup shadow copy writes its first CodeFlash word",
+                "kind": "memory",
+                "address": _hx(destination),
+                "size": 4,
+                "equals_hex": shadow["source_first_word_hex"],
+            },
+            {
+                "name": "startup shadow copy writes its final CodeFlash word",
+                "kind": "memory",
+                "address": _hx(end - 4),
+                "size": 4,
+                "equals_hex": shadow["source_last_word_hex"],
+            },
+            {
+                "name": "startup shadow copy stops before the resident",
+                "kind": "memory",
+                "address": _hx(end),
+                "size": len(resident_marker),
+                "equals_hex": resident_marker.hex(),
+            },
+        ],
+    )
+
+
 
 def _tauj_scenario(contract: dict[str, Any]) -> dict[str, Any]:
     entry = contract["execution"]["idle_fast"]["mode_initializer"]
@@ -702,7 +752,7 @@ def _whole_helper_scenario(
         + signer_abi["response_controller"] * 0x200
         + signer_abi["response_resource"] * 0x20
     )
-    helper_end = HELPER_TRANSIT_BASE + len(helper)
+
 
     scenario = _scenario(
         name=(
@@ -786,12 +836,6 @@ def _whole_helper_scenario(
                 "address": _hx(online_state),
                 "hex": "a857",
                 "evidence": "target lower CAN controller online state",
-            },
-            {
-                "address": _hx(helper_end),
-                "size": 48,
-                "fill": 0,
-                "evidence": "initialized speculative instruction-fetch guard after helper",
             },
         ],
         checks=[
@@ -1114,6 +1158,7 @@ def request_signer_machine_scenarios(
     contract: dict[str, Any], *, helper_path: Path, trampoline: int,
 ) -> list[dict[str, Any]]:
     return [
+        _shadow_copy_scenario(contract),
         _tauj_scenario(contract),
         _freshness_scenario(contract),
         _ring_scenario(contract),

@@ -33,10 +33,29 @@ compact_meta = build.build_request_signer(target=CAMRY_TARGET, codec="compact", 
 meta_path = OUT / "camry_8965F3307000_request_signer.json"
 
 
+
 def check(name: str, cond: object) -> None:
     if not cond:
         raise AssertionError(name)
     print(f"PASS {name}")
+for artifact_name in ("resident", "helper"):
+    artifact_meta = meta[artifact_name]
+    artifact = (OUT / artifact_meta["path"]).read_bytes()
+    check_name = f"{artifact_name} artifact carries an explicit speculative-fetch guard"
+    check(
+        check_name,
+        artifact_meta["size"] == len(artifact)
+        and artifact_meta["guard_size"] == build.SPECULATIVE_FETCH_GUARD_SIZE
+        and artifact_meta["code_size"] + artifact_meta["guard_size"] <= len(artifact)
+        and artifact[-artifact_meta["guard_size"]:] == bytes(artifact_meta["guard_size"]),
+    )
+try:
+    build.validate_cmp_immediates("cmp 0xc9, r6\n", label="regression fixture")
+except RuntimeError:
+    pass
+else:
+    raise AssertionError("builder accepted an out-of-range RH850 cmp immediate")
+print("PASS builder rejects GNU-as truncation of RH850 cmp immediates")
 
 
 synthetic_image = bytearray(SPECS[CAMRY_TARGET]["image"].read_bytes())
@@ -143,6 +162,12 @@ expected_slot4_configs = {
     "corolla-8965F1208000": 0x0002570C,
     "corolla-8965H1202000": 0x0002570C,
 }
+expected_shadow_copy = {
+    "camry-8965F3307000": 0x000636D4,
+    "crown-8965F3012000": 0x00062AD4,
+    "corolla-8965F1208000": 0x0005C992,
+    "corolla-8965H1202000": 0x0005C992,
+}
 for target, spec in SPECS.items():
     probe = probe_request_signer_contract(spec["image"].read_bytes())
     check(
@@ -153,6 +178,15 @@ for target, spec in SPECS.items():
             row["status"] == "resolved"
             for row in probe["components"].values()
         ),
+    )
+    shadow = probe["contract"]["execution"]["startup_shadow_copy"]
+    check(
+        f"{target} binds the exact startup shadow copy before the resident boundary",
+        shadow["function"] == expected_shadow_copy[target]
+        and shadow["source"] == 0x00010000
+        and shadow["destination"] == 0xFEBF7C00
+        and shadow["size"] == 0x7DF0
+        and shadow["destination"] + shadow["size"] == 0xFEBFF9F0,
     )
     abi = probe["contract"]["signer_abi"]
     completion, slot, dispatcher, noop = expected_confirmation_paths[target]
@@ -189,6 +223,16 @@ check(
     four_resource_contract["signer_abi"]["resource_row_count"] == 4
     and four_resource_contract["signer_abi"]["response_handle"] == camry_abi["response_handle"]
     and four_resource_contract["signer_abi"]["response_resource"] == camry_abi["response_resource"],
+)
+
+shadow_damaged_image = bytearray(SPECS[CAMRY_TARGET]["image"].read_bytes())
+shadow_function = SPECS[CAMRY_TARGET]["contract"]["execution"]["startup_shadow_copy"]["function"]
+shadow_damaged_image[shadow_function] ^= 1
+shadow_damaged_probe = probe_request_signer_contract(bytes(shadow_damaged_image))
+check(
+    "capability probe rejects firmware without the exact startup shadow-copy boundary",
+    not shadow_damaged_probe["compatible"]
+    and shadow_damaged_probe["components"]["execution"]["status"] == "missing-or-ambiguous",
 )
 
 

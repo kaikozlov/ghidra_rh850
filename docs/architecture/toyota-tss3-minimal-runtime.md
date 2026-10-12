@@ -214,11 +214,11 @@ Publishing newly written RAM code requires the G3M ordering from the CPU
 manual: complete the stores, perform a dummy read from the written region,
 execute `SYNCP`, execute `SYNCI`, then branch to it. The processor can
 speculatively fetch up to 48 bytes beyond the code body, so that trailing range
-must also be initialized and access-permitted. Every maintained RAM-code
-builder now validates the assembled dummy-read/`SYNCP`/`SYNCI` sequence; images
-whose destination lacks existing safe tail bytes carry a 48-byte zero guard.
-Global-RAM data writes are hardware-coherent/write-through on P1M-E, but that
-does not replace instruction-cache publication.
+must also be initialized and access-permitted. The universal request-signer
+builder rejects missing publication sequences and makes a 48-byte zero guard
+part of both copied executable artifacts; their metadata separates code and
+guard sizes. Global-RAM data writes are hardware-coherent/write-through on
+P1M-E, but that does not replace instruction-cache publication.
 
 RAM clearing is reset-class-specific. `STAC_LM0` controls local-RAM
 initialization for the reset classes listed by the device manual; it is not a
@@ -263,11 +263,15 @@ repeating the low/high nibbles of the complete 8-bit transaction sequence. Each
 message contributes seven consecutive bytes, so the helper reconstructs all 28
 application bytes verbatim.
 
-The common resident code is bounded below the runtime-config block in
-`FEBFF9F0..FEBFFBFB`. The helper remains bounded to 920 bytes (`0x398`) because
-Corolla scratch begins at `FEF07F98`; zero relocations and the common bound are
-checked from linked artifacts. The runtime config fixes an earlier portability
-defect in which the shared helper used F3 command-5 globals on Corolla.
+The common resident contains 334 bytes of code plus an explicit 48-byte
+speculative-fetch guard and remains below the runtime-config block in
+`FEBFF9F0..FEBFFBFB`. The helper contains 828 bytes of code plus its own
+48-byte guard and remains bounded to the 920-byte (`0x398`) executable pocket
+because Corolla scratch begins at `FEF07F98`. Zero relocations, no direct
+target call from the helper, signed-`imm5` compare operands, publication
+sequences, and both guarded bounds are checked from linked artifacts. The
+runtime config fixes an earlier portability defect in which the shared helper
+used F3 command-5 globals on Corolla.
 
 ### Cross-variant request-signer audit (2026-10-12)
 
@@ -345,19 +349,47 @@ response packing, lower route, and modeled RSCFD transmit compose. It does not
 model provisioned-key cryptography, interrupt timing, or silicon.
 
 The common memory placement was also checked rather than inferred from Camry.
+All four startup schedules call the same 36-byte copy loop: CodeFlash
+`00010000..00017DEF` is copied to LocalRAM `FEBF7C00..FEBFF9EF`, ending exactly
+one byte before the resident at `FEBFF9F0`. The resolver now requires that
+exact call and boundary. A generated P1M-E scenario executes the real loop,
+checks its first and final copied words, and proves that a nonzero sentinel at
+the resident boundary is unchanged on Camry, Crown, Corolla F, and Corolla H.
+The GNU lifecycle run likewise leaves that call unstubbed and byte-compares the
+post-startup resident, runtime config, and GlobalRAM helper with the built
+artifacts.
+
+The application GlobalRAM initializers are bounded far below the helper.
+Camry/Crown clear and initialize `FEEF80A0..FEEF9157`; Corolla H/F use
+`FEEF8000..FEEF972F`. The complete recovered corpora have no exact application
+data reference into `FEF07C00..FEF07FFF`, and the raw images have no aligned
+pointer literal into that final 1 KiB. The helper pocket is supervisor R/W/X in
+both recovered application MPU contexts. Retained Camry, 2023 Corolla, and 2025
+Corolla captures independently show the final 1 KiB all-zero after ordinary
+application use.
+
 Camry has live proof for `FEBFF9F0..FEBFFBFB`; Crown's earlier B6 resident ran
-from the same retained tail on hardware. H/F startup shadow-copy analysis ends
-at `FEBFF9EF` and excludes the tail from recovered startup writes; the retained
-2023 Albino and 2025 Span LocalRAM dumps also show the entire 524-byte tail zero
-after ordinary application use. The shared helper's `FEF07C00..FEF07F3B`
-GlobalRAM placement has zero recovered exact application references on every
-registered target, lies in the target-native supervisor R/W/X GlobalRAM MPU
-region, and the final 1 KiB is all-zero in retained Camry, 2023 Corolla and 2025
-Corolla GlobalRAM captures. Corolla scratch starts at `FEF07F98`, leaving both
-the assembled 828-byte helper and the 48-byte speculative-fetch guard below it.
-This is strong placement/lifetime evidence, but current-helper execution from
-GlobalRAM is hardware-live only on Camry; Crown/Corolla still benefit from a
-resident-state readback when a field probe fails.
+from the same retained tail on hardware. Camry/Crown keep state
+`FEBF025C..FEBF027F` immediately before scratch `FEBF0280..FEBF02E7`; the state
+remains below the SID23 exclusion and scratch ends before the object-15 mirror.
+Corolla initializes its state over the already-executed first 36 resident bytes
+only after all startup calls return, and uses `FEF07F98..FEF07FFF` for scratch.
+The complete helper artifact ends at `FEF07F6C`, leaving 44 bytes before that
+scratch. This is strong placement/lifetime evidence, but current-helper
+execution from GlobalRAM is hardware-live only on Camry; Crown/Corolla still
+benefit from resident-state readback when a field probe fails.
+
+The historical Camry failures now map to explicit cross-target gates:
+
+| historical failure class | current closure |
+|---|---|
+| first field carrier returned to the application with resident, helper, and state read back as zero; the exact cause was bounded to that experimental boot/application shape | copies occur after the five boot-transition calls; the exact application shadow writer executes in lifecycle simulation; post-startup resident/config/helper bytes are compared |
+| helper code copied after application startup without a closed publication/coherency contract | helper executes at its staged GlobalRAM address; dummy read + `SYNCP` + `SYNCI` and a copied 48-byte guard are build invariants |
+| GNU assembler silently truncated out-of-range `cmp imm5` operands | builder rejects every numeric compare immediate outside `[-16,15]` in resident, helper, included core, and generated staging source |
+| VMA-zero local helper call became an absolute low-address call | resident/helper retain zero relocations; helper has no direct target call; stock calls are indirect through the selected config |
+| hand-replayed stock code clobbered live GPR semantics | the maintained resident no longer clones the receive graph; persistent locals use callee-saved registers and exact stock foreground functions run unchanged |
+| word-reading a halfword-aligned startup JARL could issue an unaligned load | resident reconstructs each instruction from two aligned `ld.hu` reads |
+
 
 The shared `0x08A` freshness policy is no longer a Camry-only assumption.
 Re-reading the retained 2025 Span and 2023 public Corolla road logs against the

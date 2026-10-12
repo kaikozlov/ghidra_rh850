@@ -100,7 +100,7 @@ def check_dynamic_request_signer_targets(output_root: Path) -> None:
         )
         if result["codeflash_sha256"] != spec["sha256"]:
             raise AssertionError(f"{target}: dynamic machine verification image drift")
-        if result["scenario_count"] != 12:
+        if result["scenario_count"] != 13:
             raise AssertionError(f"{target}: dynamic machine scenario count drift")
         for row in result["scenarios"]:
             resolution = row["entry_resolution"]
