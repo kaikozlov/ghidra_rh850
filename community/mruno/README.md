@@ -258,3 +258,73 @@ command-five paths, and the complete helper through handle 50/resource 6. The
 older throwaway readback of `request_count=1` proves that one complete request
 was assembled; because that counter increments before command five and the
 lower writer, it does not prove that either later stage ran.
+
+### September B6 live-positive comparison (2026-10-12 audit)
+
+The locally retained pre-repin car kit
+`crown-8965F3012000-car-kit-d3e91bb3.zip` has SHA-256
+`a66f47d80fd4e2aff2b93ac8d5d59f2604438d67d7fb47fa14c5ca78284a7d1a`
+and an internally consistent manifest. Its source identity is exactly
+`d3e91bb36d2547e9990f6a6c4caaf04895049248`; its authenticated payload is
+`028ef56f5d22fb9b29c6287de2cb03f2c37d8702e818fe627f62fbe7c2616e62`.
+The archive contains the original authority probe, including the
+`tools.targets` import and fixed 350-ms baseline bugs. The contributor's live
+run used the two local fixes later committed as `50f6f3fd`: inline
+`u32_delta`, and a 350-ms minimum / 2.5-s witness deadline. Those host-only
+fixes did not change the resident, helper, or authenticated payload.
+
+That live result is a strong but bounded positive control for the current
+request signer:
+
+| Boundary | September B6 observation | Current `0x08A` relationship |
+|---|---|---|
+| Boot transition and resident | Exact Crown application returned and the resident at `FEBFF9F0` remained live | Same resident base and same exact 21-call Crown startup span; the recovered startup shadow copy ends exactly at `FEBFF9F0` |
+| ICU-S signer | Native-B6 equality and two moving runs completed through Crown `0x87662`, type 1 / selector 4; signed counts advanced `9 -> 19 -> 29` with matching command-five attempts and clean status | Same wrapper, globals, freshness encoder, and type 1 / selector 4 configuration; this rules out a generic Crown slot-4 or command-five incompatibility |
+| Helper memory | The 588-byte helper was loaded after startup into LocalRAM `FEBF0000` and read back through SID `0x23` before arming | The request signer instead executes from GlobalRAM `FEF07C00`; exact MPU, no-reference, startup-retention, cache-publication, and instruction-machine checks cover it, but the B6 run is not a live proof of that placement |
+| Host ingress | Valid ISO-TP `C6/C7` single frames reached the stock DCM buffer on pre-repin Panda bus 1 | Four deliberately non-ISO-TP `0x777` frames are tapped from the software RX ring on post-repin bus 0; the old run does not prove this path |
+| Signed domain | The helper signed Data ID `0x00B6` using freshness reconstructed from the native B6 | The helper signs Data ID `0x008A` with a private message counter in the authenticated current trip/reset epoch; the common command-five ABI transfers, not the complete domain behavior |
+| Result publication | The helper mutated the already queued native B6 and needed no private CAN response | The request signer must transmit an eight-byte `0x7A9` response through the lower CAN writer; the B6 result cannot validate this new egress |
+| Panda route | Stock-harness `bus1,param1` | The maintained repin deliberately moves EPS diagnostics and signer traffic to `bus0,param1`; the retained startup catches and exact application F181 responses prove that diagnostic route |
+
+The six failed October runs all used payload
+`c1cfd265611feb8e47438f81a3f4c508afea52a2be98c55ccf8d2346d7398a5d`.
+A clean rebuild at `7a8e9c1f` reproduces that digest exactly and confirms its
+Crown profile selected handle 51 / resource 7. A clean rebuild at `fb8525a5`
+reproduces the corrected bundle digest
+`27aa242408d52b6536a1476d8b638ec38ba69781cbc98626bd924bbb710a29e9`
+exactly and selects the stock-primary handle 50 / resource 6. As established
+above, resource 7 is a valid alternate transmitter when idle, so this is a
+real stock-association/availability regression in the failed artifact but is
+not by itself proof of the field timeout's cause.
+
+At `42610ebc`, the current rebuilt payload is
+`72ffc3eebbec7966177c700a12e3d132f4a5bd03682e61f266bfea62815f8122`.
+It retains the corrected primary response route and adds a 48-byte
+speculative-fetch guard after each RAM code region, dummy-read plus
+`SYNCP`/`SYNCI` publication, exact startup-shadow-copy simulation, and
+out-of-range RH850 `cmp`-immediate rejection. Its resident/helper executable
+sizes remain 334/828 bytes before the guards. This is the artifact to use for
+the next Crown discriminator; neither corrected digest has a retained Crown
+vehicle result yet.
+
+The old kit also had a stronger offline `doctor` dependency check: it imported
+Crypto, Panda, and opendbc before accepting the environment. The unified
+launcher's hash-only check had dropped that witness. The maintained launcher
+now loads the exact Panda, UDS, ISO-TP, and AES dependencies during `doctor`;
+this detects a wrong Python/openpilot environment before vehicle access. This
+host inspection gap did not cause the recorded October timeouts because those
+runs reached Panda, programming, and application F181.
+
+The next result must retain the current `signer_session` and
+`resident_state_after_probe` objects. Their boundary is diagnostic:
+
+- invalid magic/version or `initialized=false`: resident/startup retention;
+- accepted TX receipts with `request_count=0`: Crown raw-ring ingress;
+- `request_count>0`, `success_count=0`: freshness or command five;
+- `success_count>0`, `response_count=0`: lower-writer rejection/busy state;
+- `response_count>0` with no host `0x7A9`: physical routing or host receive.
+
+The old B6 result therefore removes generic Crown boot, high-tail retention,
+and slot-4 command-five failure from the leading explanations. It does not
+remove the three mechanisms introduced specifically for `0x08A`: GlobalRAM
+execution, raw-ring request ingress, and private response egress.
