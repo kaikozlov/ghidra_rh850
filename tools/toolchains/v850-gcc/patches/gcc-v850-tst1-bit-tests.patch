@@ -1,0 +1,649 @@
+From: ghidra_rh850 project
+Subject: [PATCH] v850: select native TST1 for ordinary C byte bit tests
+
+GCC's V850 backend never selected tst1 for plain C bit tests: the only
+recognizer for it requires a post-reload ZERO_EXTRACT-of-memory shape
+that nothing builds, so "if ((*p & mask) == 0)", wait loops, and boolean
+returns lowered to ld.bu;andi;cmp even when the tested value had no
+other use. Add combine-time recognizers for the shapes GCC actually
+builds while folding the byte load into the test: branch, boolean value,
+inverted boolean, bit-0 AND, and signed bit-7 forms, each splitting
+after reload into tst1 plus setf or a Z-flag branch, and a setf pattern
+for CCZ comparisons that the pre-existing anonymous tst1 splitter emits.
+
+Safety rules baked into the patterns: every pattern matches QI-mode
+memories so a volatile word or halfword access is never narrowed to
+tst1's byte read; the one SImode pattern (*v850_tst1_wide) requires a
+nonvolatile memory itself, not just via its producers, and bit index
+0..7; each pattern holds exactly one memory so two volatile reads are
+never merged; and the loaded value is only folded when combine can
+eliminate the load, so a live loaded byte keeps its ld.bu. The signed
+bit-7 cmov forms split after reload into the explicit CCZ set of
+*v850_tst1 plus a cmov that reads reg:CCZ (*movsicc_ccz), the same
+arrangement *movsicc_normal uses, so no pass sees a hidden flag write.
+
+The tst1 emitters require tst1_memory_operand: Format VIII (CLR1, SET1,
+NOT1, TST1) computes the effective address as GR[reg1] +
+sign-extend(disp16) per the RH850G3M software manual, and binutils
+flags the D16 operand V850_OPERAND_SIGNED, so the predicate accepts a
+base register with any displacement whose sign-extended low 16 bits
+reproduce the address (negative displacements and constants such as
+0xffff8123 encode as -32477). Addresses that do not fit, for example
++0x9000 from r0, are left to normal materialization. rtx_costs prices
+only the recognized memory-backed single-bit shapes so combine prefers
+the tst1 forms.
+
+tst1 and setf are PROCESSOR_ALL in the assembler tables, so no new ISA
+gates are introduced; only the new cmov forms keep the existing
+TARGET_V850E_UP gate of the cmov instruction they reuse.
+
+Keep this local patch until equivalent support lands upstream.
+
+Pinned base: GCC 78d4ac73dd391005b895a6148cd9831e28e1208b.
+---
+ gcc/config/v850/predicates.md |   34 +
+ gcc/config/v850/v850.cc       |   46 +
+ gcc/config/v850/v850.md       |  423 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 503 insertions(+)
+
+diff --git a/gcc/config/v850/predicates.md b/gcc/config/v850/predicates.md
+--- a/gcc/config/v850/predicates.md
++++ b/gcc/config/v850/predicates.md
+@@ -568,4 +568,38 @@
+     return code == NE;
+ 
+   return 0;
++})
++
++
++
++;; Return true if OP is a memory whose address tst1 can encode: any
++;; base register with a displacement whose sign-extended low 16 bits
++;; reproduce the address, because Format VIII (CLR1, SET1, NOT1, TST1)
++;; computes the address as GR[reg1] + sign-extend (disp16).  tst1 has
++;; no lo-sum, sda, zda or tda forms.
++
++(define_predicate "tst1_memory_operand"
++  (match_code "mem")
++{
++  rtx addr = XEXP (op, 0);
++  rtx disp = NULL_RTX;
++
++  if (REG_P (addr)
++      || (SUBREG_P (addr) && REG_P (SUBREG_REG (addr))))
++    return true;
++
++  if (GET_CODE (addr) == PLUS
++      && (REG_P (XEXP (addr, 0))
++	  || (SUBREG_P (XEXP (addr, 0)) && REG_P (SUBREG_REG (XEXP (addr, 0)))))
++      && CONST_INT_P (XEXP (addr, 1)))
++    disp = XEXP (addr, 1);
++  else if (CONST_INT_P (addr))
++    disp = addr;
++
++  if (disp == NULL_RTX)
++    return false;
++
++  /* The address equals its own sign-extended low 16 bits.  */
++  unsigned HOST_WIDE_INT lo = UINTVAL (disp) & 0xffffffffu;
++  return (lo & 0xffff8000u) == 0 || (lo & 0xffff8000u) == 0xffff8000u;
+ })
+diff --git a/gcc/config/v850/v850.cc b/gcc/config/v850/v850.cc
+--- a/gcc/config/v850/v850.cc
++++ b/gcc/config/v850/v850.cc
+@@ -360,7 +360,53 @@
+       else
+ 	*total = 20;
+       return true;
++
+ 
++    case AND:
++      /* A single-bit mask on a byte memory is the load-and-test half of
++	 one tst1 instruction.  */
++      if (mode == QImode && outer_code == ZERO_EXTEND
++	  && MEM_P (XEXP (x, 0))
++	  && CONST_INT_P (XEXP (x, 1))
++	  && exact_log2 (UINTVAL (XEXP (x, 1))) >= 0)
++	{
++	  *total = COSTS_N_INSNS (1);
++	  return true;
++	}
++      return false;
++
++    case XOR:
++      /* Flipping exactly the bit that a single-bit extraction of a
++	 byte memory tests is free: tst1 followed by setf z computes the
++	 inverted bit.  (xor (zero_extend (and <byte memory> 1)) 1)
++	 likewise is one tst1 plus setf.  A volatile word access is not
++	 narrowed, so only QI memories count there.  */
++      if (outer_code == ZERO_EXTRACT
++	  && CONST_INT_P (XEXP (x, 1))
++	  && exact_log2 (UINTVAL (XEXP (x, 1))) >= 0)
++	{
++	  rtx src = XEXP (x, 0);
++	  if (SUBREG_P (src) || GET_CODE (src) == ZERO_EXTEND)
++	    src = XEXP (src, 0);
++	  if (MEM_P (src)
++	      && (GET_MODE (src) == QImode || !MEM_VOLATILE_P (src)))
++	    {
++	      *total = 0;
++	      return true;
++	    }
++	}
++      if (XEXP (x, 1) == const1_rtx
++	  && GET_CODE (XEXP (x, 0)) == ZERO_EXTEND
++	  && GET_CODE (XEXP (XEXP (x, 0), 0)) == AND
++	  && GET_MODE (XEXP (XEXP (x, 0), 0)) == QImode
++	  && MEM_P (XEXP (XEXP (XEXP (x, 0), 0), 0))
++	  && CONST_INT_P (XEXP (XEXP (XEXP (x, 0), 0), 1))
++	  && UINTVAL (XEXP (XEXP (XEXP (x, 0), 0), 1)) == 1)
++	{
++	  *total = COSTS_N_INSNS (2);
++	  return true;
++	}
++      return false;
+     case ZERO_EXTRACT:
+       if (outer_code == COMPARE)
+ 	*total = 0;
+diff --git a/gcc/config/v850/v850.md b/gcc/config/v850/v850.md
+--- a/gcc/config/v850/v850.md
++++ b/gcc/config/v850/v850.md
+@@ -325,7 +325,7 @@
+                                   (const_int 1)
+                                   (match_operand:QI 1 "const_int_operand" "n"))
+ 		 (const_int 0)))]
+-  "reload_completed"
++  "reload_completed && tst1_memory_operand (operands[0], VOIDmode)"
+   "tst1 %1,%0"
+   [(set_attr "length" "4")])
+ 
+@@ -346,7 +346,453 @@
+ 						      (match_dup 2))
+ 				     (const_int 0)))
+    (set (match_dup 0) (ne:SI (reg:CCZ CC_REGNUM) (const_int 0)))])
++
++;; Ordinary C byte bit tests, such as "if ((*p & 0x10) == 0)" or wait
++;; loops like "while ((*p & mask) == 0)", lower to ld.bu;andi;cmp;branch
++;; because nothing matches the ZERO_EXTRACT shapes combine builds while
++;; folding the load into the test.  tst1 tests one bit of memory in one
++;; instruction, so add the missing recognizers.  They only accept QI
++;; mode memories: a volatile access may not be narrowed to tst1's byte
++;; read, and the loaded byte is only folded in when it has no other use
++;; (combine never eliminates a load whose value is still live).  The
++;; zero_extend wrapper shows up for volatile accesses; for plain
++;; memories combine drops it.  A single tst1 reads the byte exactly as
++;; often as the load it replaces, so volatile accesses keep their
++;; count and order.
+ 
++(define_insn_and_split "*cbranch_tst1"
++  [(set (pc)
++	(if_then_else
++	 (match_operator 0 "comparison_operator"
++			 [(zero_extract:SI (zero_extend:SI (match_operand:QI 1 "tst1_memory_operand" "m"))
++					   (const_int 1)
++					   (match_operand:QI 2 "const_int_operand" "n"))
++			  (const_int 0)])
++	 (label_ref (match_operand 3 "" ""))
++	 (pc)))]
++  "(GET_CODE (operands[0]) == EQ || GET_CODE (operands[0]) == NE)
++   && IN_RANGE (INTVAL (operands[2]), 0, 7)"
++  "#"
++  "reload_completed"
++  [(set (reg:CCZ CC_REGNUM)
++	(compare (zero_extract:SI (match_dup 1)
++				  (const_int 1)
++				  (match_dup 2))
++		 (const_int 0)))
++   (set (pc)
++	(if_then_else (match_op_dup 0 [(reg:CCZ CC_REGNUM) (const_int 0)])
++		      (label_ref (match_dup 3))
++		      (pc)))]
++  "")
++
++(define_insn_and_split "*cbranch_tst1_mem"
++  [(set (pc)
++	(if_then_else
++	 (match_operator 0 "comparison_operator"
++			 [(zero_extract:SI (match_operand:QI 1 "tst1_memory_operand" "m")
++					   (const_int 1)
++					   (match_operand:QI 2 "const_int_operand" "n"))
++			  (const_int 0)])
++	 (label_ref (match_operand 3 "" ""))
++	 (pc)))]
++  "(GET_CODE (operands[0]) == EQ || GET_CODE (operands[0]) == NE)
++   && IN_RANGE (INTVAL (operands[2]), 0, 7)"
++  "#"
++  "reload_completed"
++  [(set (reg:CCZ CC_REGNUM)
++	(compare (zero_extract:SI (match_dup 1)
++				  (const_int 1)
++				  (match_dup 2))
++		 (const_int 0)))
++   (set (pc)
++	(if_then_else (match_op_dup 0 [(reg:CCZ CC_REGNUM) (const_int 0)])
++		      (label_ref (match_dup 3))
++		      (pc)))]
++  "")
++
++(define_insn_and_split "*tst1_ext"
++  [(set (match_operand:SI 0 "register_operand" "=r")
++	(zero_extract:SI (zero_extend:SI (match_operand:QI 1 "tst1_memory_operand" "m"))
++			 (const_int 1)
++			 (match_operand:QI 2 "const_int_operand" "n")))]
++  "IN_RANGE (INTVAL (operands[2]), 0, 7)"
++  "#"
++  "reload_completed"
++  [(set (reg:CCZ CC_REGNUM)
++	(compare (zero_extract:SI (match_dup 1)
++				  (const_int 1)
++				  (match_dup 2))
++		 (const_int 0)))
++   (set (match_dup 0) (ne:SI (reg:CCZ CC_REGNUM) (const_int 0)))]
++  "")
++
++(define_insn_and_split "*tst1_mem"
++  [(set (match_operand:SI 0 "register_operand" "=r")
++	(zero_extract:SI (match_operand:QI 1 "tst1_memory_operand" "m")
++			 (const_int 1)
++			 (match_operand:QI 2 "const_int_operand" "n")))]
++  "IN_RANGE (INTVAL (operands[2]), 0, 7)"
++  "#"
++  "reload_completed"
++  [(set (reg:CCZ CC_REGNUM)
++	(compare (zero_extract:SI (match_dup 1)
++				  (const_int 1)
++				  (match_dup 2))
++		 (const_int 0)))
++   (set (match_dup 0) (ne:SI (reg:CCZ CC_REGNUM) (const_int 0)))]
++  "")
++
++;; Boolean value of a memory bit, as in "return (*p & mask) == 0".
++
++(define_insn_and_split "*tst1_eqne_ext"
++  [(set (match_operand:SI 0 "register_operand" "=r")
++	(match_operator:SI 1 "comparison_operator"
++	 [(zero_extract:SI (zero_extend:SI (match_operand:QI 2 "tst1_memory_operand" "m"))
++			   (const_int 1)
++			   (match_operand:QI 3 "const_int_operand" "n"))
++	  (const_int 0)]))]
++  "(GET_CODE (operands[1]) == EQ || GET_CODE (operands[1]) == NE)
++   && IN_RANGE (INTVAL (operands[3]), 0, 7)"
++  "#"
++  "reload_completed"
++  [(set (reg:CCZ CC_REGNUM)
++	(compare (zero_extract:SI (match_dup 2)
++				  (const_int 1)
++				  (match_dup 3))
++		 (const_int 0)))
++   (set (match_dup 0)
++	(match_op_dup 1 [(reg:CCZ CC_REGNUM) (const_int 0)]))]
++  "")
++
++(define_insn_and_split "*tst1_eqne_mem"
++  [(set (match_operand:SI 0 "register_operand" "=r")
++	(match_operator:SI 1 "comparison_operator"
++	 [(zero_extract:SI (match_operand:QI 2 "tst1_memory_operand" "m")
++			   (const_int 1)
++			   (match_operand:QI 3 "const_int_operand" "n"))
++	  (const_int 0)]))]
++  "(GET_CODE (operands[1]) == EQ || GET_CODE (operands[1]) == NE)
++   && IN_RANGE (INTVAL (operands[3]), 0, 7)"
++  "#"
++  "reload_completed"
++  [(set (reg:CCZ CC_REGNUM)
++	(compare (zero_extract:SI (match_dup 2)
++				  (const_int 1)
++				  (match_dup 3))
++		 (const_int 0)))
++   (set (match_dup 0)
++	(match_op_dup 1 [(reg:CCZ CC_REGNUM) (const_int 0)]))]
++  "")
++
++;; ((mem >> p) & 1) ^ 1 canonicalizes to an extraction of bit p of the
++;; value xor'ed with 1 << p, which is the inverted bit; tst1 with setf z
++;; computes it with the same single byte read.
++
++(define_insn_and_split "*nottst1_xor_ext"
++  [(set (match_operand:SI 0 "register_operand" "=r")
++	(zero_extract:SI (xor:SI (zero_extend:SI (match_operand:QI 1 "tst1_memory_operand" "m"))
++				 (match_operand:SI 2 "const_int_operand" "n"))
++			 (const_int 1)
++			 (match_operand:QI 3 "const_int_operand" "n")))]
++  "IN_RANGE (INTVAL (operands[3]), 0, 7)
++   && (UINTVAL (operands[2]) == (HOST_WIDE_INT_1U << UINTVAL (operands[3])))"
++  "#"
++  "reload_completed"
++  [(set (reg:CCZ CC_REGNUM)
++	(compare (zero_extract:SI (match_dup 1)
++				  (const_int 1)
++				  (match_dup 3))
++		 (const_int 0)))
++   (set (match_dup 0) (eq:SI (reg:CCZ CC_REGNUM) (const_int 0)))]
++  "")
++
++(define_insn_and_split "*nottst1_xor_mem"
++  [(set (match_operand:SI 0 "register_operand" "=r")
++	(zero_extract:SI (xor:SI (match_operand:QI 1 "tst1_memory_operand" "m")
++				 (match_operand:QI 2 "const_int_operand" "n"))
++			 (const_int 1)
++			 (match_operand:QI 3 "const_int_operand" "n")))]
++  "IN_RANGE (INTVAL (operands[3]), 0, 7)
++   && (UINTVAL (operands[2]) == (HOST_WIDE_INT_1U << UINTVAL (operands[3])))"
++  "#"
++  "reload_completed"
++  [(set (reg:CCZ CC_REGNUM)
++	(compare (zero_extract:SI (match_dup 1)
++				  (const_int 1)
++				  (match_dup 3))
++		 (const_int 0)))
++   (set (match_dup 0) (eq:SI (reg:CCZ CC_REGNUM) (const_int 0)))]
++  "")
++
++;; A signed comparison of a byte with zero only looks at bit 7.  tst1
++;; sets Z when that bit is clear, so lt becomes ne and ge becomes eq.
++
++(define_insn_and_split "*tst1_sign_lt"
++  [(set (match_operand:SI 0 "register_operand" "=r")
++	(lt:SI (sign_extend:SI (match_operand:QI 1 "tst1_memory_operand" "m"))
++	       (const_int 0)))]
++  ""
++  "#"
++  "reload_completed"
++  [(set (reg:CCZ CC_REGNUM)
++	(compare (zero_extract:SI (match_dup 1)
++				  (const_int 1)
++				  (const_int 7))
++		 (const_int 0)))
++   (set (match_dup 0) (ne:SI (reg:CCZ CC_REGNUM) (const_int 0)))]
++  "")
++
++(define_insn_and_split "*tst1_sign_ge"
++  [(set (match_operand:SI 0 "register_operand" "=r")
++	(ge:SI (sign_extend:SI (match_operand:QI 1 "tst1_memory_operand" "m"))
++	       (const_int 0)))]
++  ""
++  "#"
++  "reload_completed"
++  [(set (reg:CCZ CC_REGNUM)
++	(compare (zero_extract:SI (match_dup 1)
++				  (const_int 1)
++				  (const_int 7))
++		 (const_int 0)))
++   (set (match_dup 0) (eq:SI (reg:CCZ CC_REGNUM) (const_int 0)))]
++  "")
++
++(define_insn_and_split "*cbranch_tst1_sign_lt"
++  [(set (pc)
++	(if_then_else
++	 (lt (sign_extend:SI (match_operand:QI 0 "tst1_memory_operand" "m"))
++		(const_int 0))
++	 (label_ref (match_operand 1 "" ""))
++	 (pc)))]
++  ""
++  "#"
++  "reload_completed"
++  [(set (reg:CCZ CC_REGNUM)
++	(compare (zero_extract:SI (match_dup 0)
++				  (const_int 1)
++				  (const_int 7))
++		 (const_int 0)))
++   (set (pc)
++	(if_then_else (ne:SI (reg:CCZ CC_REGNUM) (const_int 0))
++		      (label_ref (match_dup 1))
++		      (pc)))]
++  "")
++
++(define_insn_and_split "*cbranch_tst1_sign_ge"
++  [(set (pc)
++	(if_then_else
++	 (ge (sign_extend:SI (match_operand:QI 0 "tst1_memory_operand" "m"))
++		(const_int 0))
++	 (label_ref (match_operand 1 "" ""))
++	 (pc)))]
++  ""
++  "#"
++  "reload_completed"
++  [(set (reg:CCZ CC_REGNUM)
++	(compare (zero_extract:SI (match_dup 0)
++				  (const_int 1)
++				  (const_int 7))
++		 (const_int 0)))
++   (set (pc)
++	(if_then_else (eq:SI (reg:CCZ CC_REGNUM) (const_int 0))
++		      (label_ref (match_dup 1))
++		      (pc)))]
++  "")
++
++;; For a plain (non-volatile) memory combine may keep the folded word
++;; in memory when it canonicalizes ((mem >> p) & 1) ^ 1 to an
++;; extraction of bit p of mem ^ (1 << p).  Only a nonvolatile word may
++;; be read as the byte tst1 tests; a volatile word access must not be
++;; narrowed.
++
++(define_insn "*v850_tst1_wide"
++  [(set (reg:CCZ CC_REGNUM)
++	(compare (zero_extract:SI (match_operand:SI 0 "tst1_memory_operand" "m")
++				  (const_int 1)
++				  (match_operand:QI 1 "const_int_operand" "n"))
++		 (const_int 0)))]
++  "reload_completed
++   && !MEM_VOLATILE_P (operands[0])
++   && IN_RANGE (INTVAL (operands[1]), 0, 7)"
++  "tst1 %1,%0"
++  [(set_attr "length" "4")])
++
++;; The same signed-byte comparison selects between two values.  Like
++;; *movsicc_normal, split after reload into an explicit flag set plus a
++;; cmov that reads it, so no pass ever sees a hidden flag write: the
++;; producer is *v850_tst1 on bit 7 and the consumer is *movsicc_ccz.
++;; tst1 only sets Z, so lt becomes ne and ge becomes eq.
++
++(define_insn_and_split "*movsicc_tst1_sign_lt"
++  [(set (match_operand:SI 0 "register_operand" "=r")
++	(if_then_else:SI
++	 (lt (sign_extend:SI (match_operand:QI 1 "tst1_memory_operand" "m"))
++	     (const_int 0))
++	 (match_operand:SI 2 "reg_or_int5_operand" "rJ")
++	 (match_operand:SI 3 "reg_or_0_operand" "rI")))]
++  "(TARGET_V850E_UP)"
++  "#"
++  "reload_completed"
++  [(set (reg:CCZ CC_REGNUM)
++	(compare:CCZ (zero_extract:SI (match_dup 1)
++				      (const_int 1)
++				      (const_int 7))
++		     (const_int 0)))
++   (set (match_dup 0)
++	(if_then_else:SI (ne:CCZ (reg:CCZ CC_REGNUM) (const_int 0))
++			 (match_dup 2) (match_dup 3)))]
++  "")
++
++(define_insn_and_split "*movsicc_tst1_sign_ge"
++  [(set (match_operand:SI 0 "register_operand" "=r")
++	(if_then_else:SI
++	 (ge (sign_extend:SI (match_operand:QI 1 "tst1_memory_operand" "m"))
++	     (const_int 0))
++	 (match_operand:SI 2 "reg_or_int5_operand" "rJ")
++	 (match_operand:SI 3 "reg_or_0_operand" "rI")))]
++  "(TARGET_V850E_UP)"
++  "#"
++  "reload_completed"
++  [(set (reg:CCZ CC_REGNUM)
++	(compare:CCZ (zero_extract:SI (match_dup 1)
++				      (const_int 1)
++				      (const_int 7))
++		     (const_int 0)))
++   (set (match_dup 0)
++	(if_then_else:SI (eq:CCZ (reg:CCZ CC_REGNUM) (const_int 0))
++			 (match_dup 2) (match_dup 3)))]
++  "")
++
++;; cmov consuming the Z flag a tst1 just set, mirroring
++;; movsicc_normal_cc for the CCZ-only comparisons tst1 produces.
++(define_insn "*movsicc_ccz"
++  [(set (match_operand:SI 0 "register_operand" "=r")
++	(if_then_else:SI
++	 (match_operator:CCZ 1 "comparison_operator"
++			     [(reg:CCZ CC_REGNUM) (const_int 0)])
++	 (match_operand:SI 2 "reg_or_int5_operand" "rJ")
++	 (match_operand:SI 3 "reg_or_0_operand" "rI")))]
++  "reload_completed && (TARGET_V850E_UP)
++   && (GET_CODE (operands[1]) == EQ || GET_CODE (operands[1]) == NE)"
++  "cmov %c1,%2,%z3,%0"
++  [(set_attr "length" "6")])
++
++(define_insn_and_split "*nottst1_wide"
++  [(set (match_operand:SI 0 "register_operand" "=r")
++	(zero_extract:SI (xor:SI (match_operand:SI 1 "tst1_memory_operand" "m")
++				 (match_operand:SI 2 "const_int_operand" "n"))
++			 (const_int 1)
++			 (match_operand:QI 3 "const_int_operand" "n")))]
++  "!MEM_VOLATILE_P (operands[1])
++   && IN_RANGE (INTVAL (operands[3]), 0, 7)
++   && (UINTVAL (operands[2]) == (HOST_WIDE_INT_1U << UINTVAL (operands[3])))"
++  "#"
++  "reload_completed"
++  [(set (reg:CCZ CC_REGNUM)
++	(compare (zero_extract:SI (match_dup 1)
++				  (const_int 1)
++				  (match_dup 3))
++		 (const_int 0)))
++   (set (match_dup 0) (eq:SI (reg:CCZ CC_REGNUM) (const_int 0)))]
++  "")
++
++;; Bit 0 has no shift to turn into an extraction, so it stays an AND in
++;; QI mode under a zero_extend.  Only the QI load is folded in, and
++;; only when its value has no other use.
++
++(define_insn_and_split "*cbranch_tst1_zand"
++  [(set (pc)
++	(if_then_else
++	 (match_operator 0 "comparison_operator"
++			 [(zero_extend:SI (and:QI (match_operand:QI 1 "tst1_memory_operand" "m")
++						  (match_operand:QI 2 "const_int_operand" "n")))
++			  (const_int 0)])
++	 (label_ref (match_operand 3 "" ""))
++	 (pc)))]
++  "(GET_CODE (operands[0]) == EQ || GET_CODE (operands[0]) == NE)
++   && IN_RANGE (exact_log2 (UINTVAL (operands[2])), 0, 7)"
++  "#"
++  "reload_completed"
++  [(set (reg:CCZ CC_REGNUM)
++	(compare (zero_extract:SI (match_dup 1)
++				  (const_int 1)
++				  (match_dup 2))
++		 (const_int 0)))
++   (set (pc)
++	(if_then_else (match_op_dup 0 [(reg:CCZ CC_REGNUM) (const_int 0)])
++		      (label_ref (match_dup 3))
++		      (pc)))]
++  "{
++     operands[2] = GEN_INT (exact_log2 (UINTVAL (operands[2])));
++   }")
++
++(define_insn_and_split "*tst1_zand0_ext"
++  [(set (match_operand:SI 0 "register_operand" "=r")
++	(zero_extend:SI (and:QI (match_operand:QI 1 "tst1_memory_operand" "m")
++				(const_int 1))))]
++  ""
++  "#"
++  "reload_completed"
++  [(set (reg:CCZ CC_REGNUM)
++	(compare (zero_extract:SI (match_dup 1)
++				  (const_int 1)
++				  (const_int 0))
++		 (const_int 0)))
++   (set (match_dup 0) (ne:SI (reg:CCZ CC_REGNUM) (const_int 0)))]
++  "")
++
++(define_insn_and_split "*nottst1_and0_ext"
++  [(set (match_operand:SI 0 "register_operand" "=r")
++	(and:SI (not:SI (zero_extend:SI (match_operand:QI 1 "tst1_memory_operand" "m")))
++		(const_int 1)))]
++  ""
++  "#"
++  "reload_completed"
++  [(set (reg:CCZ CC_REGNUM)
++	(compare (zero_extract:SI (match_dup 1)
++				  (const_int 1)
++				  (const_int 0))
++		 (const_int 0)))
++   (set (match_dup 0) (eq:SI (reg:CCZ CC_REGNUM) (const_int 0)))]
++  "")
++
++
++;; A plain (non-volatile) memory keeps a QI-mode load, so the same
++;; inverted-bit shape appears over a subreg of the memory.
++
++(define_insn_and_split "*nottst1_xor_subreg"
++  [(set (match_operand:SI 0 "register_operand" "=r")
++	(zero_extract:SI (xor:SI (subreg:SI (match_operand:QI 1 "tst1_memory_operand" "m") 0)
++				 (match_operand:SI 2 "const_int_operand" "n"))
++			 (const_int 1)
++			 (match_operand:QI 3 "const_int_operand" "n")))]
++  "IN_RANGE (INTVAL (operands[3]), 0, 7)
++   && (UINTVAL (operands[2]) == (HOST_WIDE_INT_1U << UINTVAL (operands[3])))"
++  "#"
++  "reload_completed"
++  [(set (reg:CCZ CC_REGNUM)
++	(compare (zero_extract:SI (match_dup 1)
++				  (const_int 1)
++				  (match_dup 3))
++		 (const_int 0)))
++   (set (match_dup 0) (eq:SI (reg:CCZ CC_REGNUM) (const_int 0)))]
++  "")
++(define_insn_and_split "*nottst1_xorzand"
++  [(set (match_operand:SI 0 "register_operand" "=r")
++	(xor:SI (zero_extend:SI (and:QI (match_operand:QI 1 "tst1_memory_operand" "m")
++					(const_int 1)))
++		(const_int 1)))]
++  ""
++  "#"
++  "reload_completed"
++  [(set (reg:CCZ CC_REGNUM)
++	(compare (zero_extract:SI (match_dup 1)
++				  (const_int 1)
++				  (const_int 0))
++		 (const_int 0)))
++   (set (match_dup 0) (eq:SI (reg:CCZ CC_REGNUM) (const_int 0)))]
++  "")
++
+ (define_expand "cbranchsi4"
+   [(set (pc)
+ 	(if_then_else
+@@ -1125,6 +1571,17 @@
+         (match_operator:SI 1 "comparison_operator"
+ 	 [(reg:CC CC_REGNUM) (const_int 0)]))]
+   "reload_completed"
++  "setf %c1,%0"
++  [(set_attr "length" "4")])
++
++
++;; setf for comparisons of a CCZ value, such as the one tst1 produces.
++(define_insn "*setcc_ccz_insn"
++  [(set (match_operand:SI 0 "register_operand" "=r")
++	(match_operator:SI 1 "comparison_operator"
++	 [(reg:CCZ CC_REGNUM) (const_int 0)]))]
++  "reload_completed
++   && (GET_CODE (operands[1]) == EQ || GET_CODE (operands[1]) == NE)"
+   "setf %c1,%0"
+   [(set_attr "length" "4")])
+ 
+@@ -1256,7 +1713,7 @@
+ 	(if_then_else:SI
+ 	 (match_operator 1 "comparison_operator"
+ 			 [(zero_extract:SI
+-			   (match_operand:QI 2 "memory_operand" "m")
++			   (match_operand:QI 2 "tst1_memory_operand" "m")
+ 			   (const_int 1)
+ 			   (match_operand 3 "const_int_operand" "n"))
+ 			  (const_int 0)])
+@@ -1273,7 +1730,7 @@
+ 	(if_then_else:SI
+ 	 (match_operator 1 "comparison_operator"
+ 			 [(zero_extract:SI
+-			   (match_operand:QI 2 "memory_operand" "m")
++			   (match_operand:QI 2 "tst1_memory_operand" "m")
+ 			   (const_int 1)
+ 			   (match_operand 3 "const_int_operand" "n"))
+ 			  (const_int 0)])

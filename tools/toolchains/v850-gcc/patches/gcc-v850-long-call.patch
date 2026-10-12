@@ -1,0 +1,189 @@
+From: ghidra_rh850 project
+Subject: [PATCH] v850: support per-callee long_call with native JARL disp32
+
+The global -mlong-calls option intentionally forbids PC-relative calls and
+therefore materializes addresses even for nearby callees. Add a function
+long_call attribute so one distant callee does not pessimize its callers'
+other calls. On V850E2 and later, annotated symbolic calls use the native
+six-byte JARL disp32, including calls returning values. Track that length
+in the machine description rather than silently widening assembler output.
+
+Older ISAs use the existing register-indirect long-call sequence. Keep
+-mlong-calls' no-PC-relative policy unchanged, and retain short symbolic
+calls and ordinary indirect calls for unannotated functions. No linker
+relaxation or global displacement-size override is required. The driver
+enables GAS aliases with -mextension so ordinary gcc -c accepts the
+explicit-width JARL mnemonic without caller-supplied assembler flags.
+
+Pinned base: GCC 78d4ac73dd391005b895a6148cd9831e28e1208b, with the native
+byte-swap and noreturn frame patches applied first.
+---
+diff --git a/gcc/config/v850/v850.cc b/gcc/config/v850/v850.cc
+--- a/gcc/config/v850/v850.cc
++++ b/gcc/config/v850/v850.cc
+@@ -2004,10 +2004,9 @@
+     (name, NULL, DECL_ATTRIBUTES (decl));
+ }
+ 
+-/* Handle an "interrupt" attribute; arguments as in
+-   struct attribute_spec.handler.  */
++/* Handle attributes that require a function declaration.  */
+ static tree
+-v850_handle_interrupt_attribute (tree *node, tree name,
++v850_handle_function_attribute (tree *node, tree name,
+                                  tree args ATTRIBUTE_UNUSED,
+                                  int flags ATTRIBUTE_UNUSED,
+                                  bool * no_add_attrs)
+@@ -2020,6 +2019,19 @@
+     }
+ 
+   return NULL_TREE;
++}
++
++/* Explicit far callees must remain reachable without imposing long calls on
++   every other call in the translation unit.  Indirect calls already carry
++   their complete target address in a register.  */
++bool
++v850_long_call_p (rtx address)
++{
++  if (!SYMBOL_REF_P (address))
++    return false;
++  tree decl = SYMBOL_REF_DECL (address);
++  return decl != NULL_TREE
++    && lookup_attribute ("long_call", DECL_ATTRIBUTES (decl)) != NULL_TREE;
+ }
+ 
+ /* Handle a "sda", "tda" or "zda" attribute; arguments as in
+@@ -3126,9 +3138,11 @@
+   /* { name, min_len, max_len, decl_req, type_req, fn_type_req,
+        affects_type_identity, handler, exclude } */
+   { "interrupt_handler", 0, 0, true,  false, false, false,
+-    v850_handle_interrupt_attribute, NULL },
++    v850_handle_function_attribute, NULL },
+   { "interrupt",         0, 0, true,  false, false, false,
+-    v850_handle_interrupt_attribute, NULL },
++    v850_handle_function_attribute, NULL },
++  { "long_call",         0, 0, true,  false, false, false,
++    v850_handle_function_attribute, NULL },
+   { "sda",               0, 0, true,  false, false, false,
+     v850_handle_data_area_attribute, NULL },
+   { "tda",               0, 0, true,  false, false, false,
+diff --git a/gcc/config/v850/v850.md b/gcc/config/v850/v850.md
+--- a/gcc/config/v850/v850.md
++++ b/gcc/config/v850/v850.md
+@@ -1687,7 +1687,8 @@
+   ""
+   {
+     if (! call_address_operand (XEXP (operands[0], 0), QImode)
+-	|| TARGET_LONG_CALLS)
++	|| TARGET_LONG_CALLS
++	|| (!TARGET_V850E2_UP && v850_long_call_p (XEXP (operands[0], 0))))
+       XEXP (operands[0], 0) = force_reg (SImode, XEXP (operands[0], 0));
+     if (TARGET_LONG_CALLS)
+       emit_call_insn (gen_call_internal_long (XEXP (operands[0], 0), operands[1]));
+@@ -1702,7 +1703,8 @@
+ 	 (match_operand:SI 1 "general_operand" "g,g"))
+    (clobber (reg:CC CC_REGNUM))
+    (clobber (reg:SI 31))]
+-  "! TARGET_LONG_CALLS"
++  "!TARGET_LONG_CALLS
++   && (TARGET_V850E2_UP || !v850_long_call_p (operands[0]))"
+   {
+     if (which_alternative == 1)
+       {
+@@ -1712,16 +1714,21 @@
+         return "jarl .+4, r31 ; add 4, r31 ; jmp %0";
+       }
+ 
+-    return "jarl %0, r31";
++    return v850_long_call_p (operands[0]) ? "jarl32 %0, r31" : "jarl %0, r31";
+   }
+-  [(set_attr "length" "4,8")])
++  [(set (attr "length")
++	(if_then_else (eq_attr "alternative" "0")
++	  (if_then_else (match_test "v850_long_call_p (operands[0])")
++	    (const_int 6) (const_int 4))
++	  (const_int 8)))])
+ 
+ (define_insn "call_internal_long"
+   [(call (mem:QI (match_operand:SI 0 "call_address_operand" "S,r"))
+ 	 (match_operand:SI 1 "general_operand" "g,g"))
+    (clobber (reg:CC CC_REGNUM))
+    (clobber (reg:SI 31))]
+-  "TARGET_LONG_CALLS"
++  "TARGET_LONG_CALLS
++   || (!TARGET_V850E2_UP && v850_long_call_p (operands[0]))"
+ {
+   if (which_alternative == 0)
+     {
+@@ -1751,7 +1758,8 @@
+   ""
+   {
+     if (! call_address_operand (XEXP (operands[1], 0), QImode)
+-	|| TARGET_LONG_CALLS)
++	|| TARGET_LONG_CALLS
++	|| (!TARGET_V850E2_UP && v850_long_call_p (XEXP (operands[1], 0))))
+       XEXP (operands[1], 0) = force_reg (SImode, XEXP (operands[1], 0));
+     if (TARGET_LONG_CALLS)
+       emit_call_insn (gen_call_value_internal_long (operands[0],
+@@ -1770,7 +1778,8 @@
+ 	      (match_operand:SI 2 "general_operand" "g,g")))
+    (clobber (reg:CC CC_REGNUM))
+    (clobber (reg:SI 31))]
+-  "! TARGET_LONG_CALLS"
++  "!TARGET_LONG_CALLS
++   && (TARGET_V850E2_UP || !v850_long_call_p (operands[1]))"
+   {
+     if (which_alternative == 1)
+       {
+@@ -1780,9 +1789,13 @@
+         return "jarl .+4, r31 ; add 4, r31 ; jmp %1";
+       }
+ 
+-    return "jarl %1, r31";
++    return v850_long_call_p (operands[1]) ? "jarl32 %1, r31" : "jarl %1, r31";
+   }
+-  [(set_attr "length" "4,8")])
++  [(set (attr "length")
++	(if_then_else (eq_attr "alternative" "0")
++	  (if_then_else (match_test "v850_long_call_p (operands[1])")
++	    (const_int 6) (const_int 4))
++	  (const_int 8)))])
+ 
+ (define_insn "call_value_internal_long"
+   [(set (match_operand 0 "" "=r,r")
+@@ -1790,7 +1803,8 @@
+ 	      (match_operand:SI 2 "general_operand" "g,g")))
+    (clobber (reg:CC CC_REGNUM))
+    (clobber (reg:SI 31))]
+-  "TARGET_LONG_CALLS"
++  "TARGET_LONG_CALLS
++   || (!TARGET_V850E2_UP && v850_long_call_p (operands[1]))"
+ {
+   if (which_alternative == 0)
+     {
+diff --git a/gcc/config/v850/v850-protos.h b/gcc/config/v850/v850-protos.h
+--- a/gcc/config/v850/v850-protos.h
++++ b/gcc/config/v850/v850-protos.h
+@@ -31,6 +31,7 @@
+ 
+ #ifdef RTX_CODE
+ extern rtx    v850_return_addr              (int);
++extern bool   v850_long_call_p              (rtx);
+ extern const char *output_move_single       (rtx *);
+ extern char * construct_save_jarl           (rtx);
+ extern char * construct_restore_jr          (rtx);
+diff --git a/gcc/config/v850/v850.h b/gcc/config/v850/v850.h
+--- a/gcc/config/v850/v850.h
++++ b/gcc/config/v850/v850.h
+@@ -105,7 +105,9 @@
+ #define TARGET_V850E_UP    ((TARGET_V850E)    || TARGET_V850E2_UP)
+ #define TARGET_ALL         ((TARGET_V850)     || TARGET_V850E_UP)
+ 
+-#define ASM_SPEC "%{m850es:-mv850e1}%{!mv850es:%{mv*:-mv%*}} \
++/* Explicit-width JARL aliases let the compiler select six bytes without
++   changing the assembler's default displacement size or enabling relaxation.  */
++#define ASM_SPEC "%{m850es:-mv850e1}%{!mv850es:%{mv*:-mv%*}} -mextension \
+ %{mrelax:-mrelax} \
+ %{m8byte-align:-m8byte-align} \
+ %{msoft-float:-msoft-float} \

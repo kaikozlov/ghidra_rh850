@@ -51,7 +51,7 @@ SIM_MEMORY_REGIONS = (
     "0xFFE50000,0x1000",
 )
 SIM_STOP = f"0x{HELPER_TRANSIT_BASE:08X}"  # every modeled run completes at helper transit
-
+SIM_INITIAL_SP = 0xFEBE2000  # installed by the harness and the context overlay
 
 def _require_empty(path: Path) -> None:
     if path.exists() and any(path.iterdir()):
@@ -74,7 +74,7 @@ def _build_harness_source(contract: dict[str, Any], image: bytes) -> tuple[str, 
             "    .section .sim.harness,\"ax\"\n"
             "    .global codeflash_sim_start\n"
             "codeflash_sim_start:\n"
-            "    mov 0xfebe2000, sp\n"
+            f"    mov 0x{SIM_INITIAL_SP:08x}, sp\n"
             "    jr32 exploit_entry\n\n"
             "    .global codeflash_sim_stop\n"
             "codeflash_sim_stop:\n"
@@ -115,7 +115,7 @@ def _build_harness_source(contract: dict[str, Any], image: bytes) -> tuple[str, 
         "    .section .sim.overlay.context,\"ax\"\n"
         f"    mov 0x{gp:08x}, gp\n"
         f"    mov 0x{tp:08x}, tp\n"
-        "    mov 0xfebe2000, sp\n"
+        f"    mov 0x{SIM_INITIAL_SP:08x}, sp\n"
         "    mov 0x43545831, r10\n"
         f"    mov 0x{CONTEXT_MARKER:08x}, r11\n"
         "    st.w r10, 0[r11]\n"
@@ -216,13 +216,18 @@ def simulate_candidate(
     config_dump = runtime_output_dir / "observed-config.bin"
 
     config = contract["runtime_config"]
+    # The resident is a zero-frame nonreturning unit: the context overlay
+    # installs SP once before any compiled prologue runs, so a retained C
+    # frame must surface as a lowered $sp at the helper-transit stop shared
+    # by both modeled runs.
+    resident_sp_expected = f"SP=0x{SIM_INITIAL_SP:x}"
     fallback_expected = (
         "UNIVERSAL_DUMP_FALLBACK "
         f"STATE=0x{STATE_MAGIC:x} VERSION={STATE_VERSION} INIT=1 TICK=1 "
         "CONTEXT=0x43545831 STARTUP=0x53544152 "
         f"APP_CONTEXT=0x{config['app_context']:x} RING=0x{config['ring_base']:x} "
         f"COMMAND5=0x{config['command5_sync']:x} LOWER_TX=0x{config['lower_can_write']:x} "
-        f"RESPONSE_HANDLE={config['response_handle']}"
+        f"RESPONSE_HANDLE={config['response_handle']} {resident_sp_expected}"
     )
     fallback_gdb = (
         "set {unsigned char}0xFFFFB111 = 0x10",
@@ -249,7 +254,7 @@ def simulate_candidate(
         (
             f'printf "UNIVERSAL_DUMP_FALLBACK STATE=0x%x VERSION=%u INIT=%u TICK=%u '
             f'CONTEXT=0x%x STARTUP=0x%x APP_CONTEXT=0x%x RING=0x%x COMMAND5=0x%x '
-            f'LOWER_TX=0x%x RESPONSE_HANDLE=%u\\n", *(unsigned int *)0x{state:08X}, '
+            f'LOWER_TX=0x%x RESPONSE_HANDLE=%u SP=0x%x\\n", *(unsigned int *)0x{state:08X}, '
             f'*(unsigned char *)0x{state + 4:08X}, *(unsigned char *)0x{state + 5:08X}, '
             f'*(unsigned char *)0x{tick:08X}, *(unsigned int *)0x{CONTEXT_MARKER:08X}, '
             f'*(unsigned int *)0x{STARTUP_MARKER:08X}, '
@@ -257,7 +262,7 @@ def simulate_candidate(
             f'*(unsigned int *)0x{CONFIG_BASE + CONFIG_OFFSETS["ring_base"]:08X}, '
             f'*(unsigned int *)0x{CONFIG_BASE + CONFIG_OFFSETS["command5_sync"]:08X}, '
             f'*(unsigned int *)0x{CONFIG_BASE + CONFIG_OFFSETS["lower_can_write"]:08X}, '
-            f'*(unsigned int *)0x{CONFIG_BASE + CONFIG_OFFSETS["response_handle"]:08X}'
+            f'*(unsigned int *)0x{CONFIG_BASE + CONFIG_OFFSETS["response_handle"]:08X}, $sp'
         ),
     )
     _, runtime_elf = run_codeflash_sim(
@@ -295,7 +300,7 @@ def simulate_candidate(
     idle_expected = (
         "UNIVERSAL_DUMP_IDLE "
         f"STATE=0x{STATE_MAGIC:x} VERSION={STATE_VERSION} INIT=1 TICK=0 "
-        "COUNTER=300000 CONTEXT=0x43545831 STARTUP=0x53544152"
+        f"COUNTER=300000 CONTEXT=0x43545831 STARTUP=0x53544152 {resident_sp_expected}"
     )
     idle_gdb = (
         "set {unsigned char}0xFFFFB111 = 0x10",
@@ -314,10 +319,10 @@ def simulate_candidate(
         "continue",
         (
             f'printf "UNIVERSAL_DUMP_IDLE STATE=0x%x VERSION=%u INIT=%u TICK=%u '
-            f'COUNTER=%u CONTEXT=0x%x STARTUP=0x%x\\n", *(unsigned int *)0x{state:08X}, '
+            f'COUNTER=%u CONTEXT=0x%x STARTUP=0x%x SP=0x%x\\n", *(unsigned int *)0x{state:08X}, '
             f'*(unsigned char *)0x{state + 4:08X}, *(unsigned char *)0x{state + 5:08X}, '
             f'*(unsigned char *)0x{tick:08X}, *(unsigned int *)0xFFE5001C, '
-            f'*(unsigned int *)0x{CONTEXT_MARKER:08X}, *(unsigned int *)0x{STARTUP_MARKER:08X}'
+            f'*(unsigned int *)0x{CONTEXT_MARKER:08X}, *(unsigned int *)0x{STARTUP_MARKER:08X}, $sp'
         ),
     )
     if runtime_elf is None:
@@ -342,6 +347,7 @@ def simulate_candidate(
             "resident_size": resident_size,
             "helper_size": helper_size,
             "config_size": len(config_expected),
+            "resident_sp_at_helper_entry": f"0x{SIM_INITIAL_SP:08X}",
         },
         "proof_boundary": (
             "instruction execution, exact startup shadow copy, copied-artifact retention, "

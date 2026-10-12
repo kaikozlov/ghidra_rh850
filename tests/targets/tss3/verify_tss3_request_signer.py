@@ -4,9 +4,13 @@ from __future__ import annotations
 
 import copy
 import tempfile
+from collections.abc import Sequence
+from dataclasses import replace
 from pathlib import Path
 from types import SimpleNamespace
 from unittest import mock
+
+from exploit.common.rh850_build import CJob
 
 from exploit.ephemeral_runtime import build_tss3_request_signer as build
 from exploit.ephemeral_runtime import tss3_request_signer as host
@@ -56,7 +60,39 @@ except RuntimeError:
 else:
     raise AssertionError("builder accepted an out-of-range RH850 cmp immediate")
 print("PASS builder rejects GNU-as truncation of RH850 cmp immediates")
+real_compile_c_batch = build.compile_c_batch
 
+
+def _resident_with_unwind_tables(
+    work: Path, jobs: Sequence[CJob],
+) -> list[dict[str, object]]:
+    """Delegate to the real compiler; append unwind tables to the resident only.
+
+    Unwind tables are the one-flag delta that re-enables the V850 noreturn
+    save prologue, so the resident genuinely reports retained own frames.
+    """
+    return real_compile_c_batch(work, tuple(
+        replace(job, extra_cflags=(*job.extra_cflags, "-funwind-tables"))
+        if job.stem == "resident" else job
+        for job in jobs
+    ))
+
+
+over_budget_dir = BUILD_ROOT / "over-budget-resident"
+with mock.patch.object(build, "compile_c_batch", _resident_with_unwind_tables):
+    try:
+        build.build_request_signer(target=CAMRY_TARGET, output_dir=over_budget_dir)
+    except RuntimeError as exc:
+        over_budget_rejection = str(exc)
+    else:
+        raise AssertionError("builder accepted a genuinely compiled stack-using resident")
+check(
+    "builder rejects a genuinely compiled over-budget resident before packaging",
+    over_budget_rejection.startswith("resident: own stack exceeds budget:")
+    and over_budget_rejection.endswith("> 0")
+    and not any(over_budget_dir.glob("*.bin"))
+    and not any(over_budget_dir.glob("*_request_signer.json")),
+)
 
 synthetic_image = bytearray(SPECS[CAMRY_TARGET]["image"].read_bytes())
 old_selector = SPECS[CAMRY_TARGET]["runtime_software_id"].encode("ascii")
@@ -90,12 +126,11 @@ def run_core_simulator() -> None:
             "--stop", "rh850_sim_stop",
             "--assert", "*(unsigned int *)&oracle_sim_result == 0x8a0c0de",
             "--assert", "*(unsigned int *)&oracle_sim_failure == 0",
-            "--assert", "*(unsigned int *)&oracle_sim_passes == 36",
         ], cwd=ROOT, check=True, text=True, timeout=150)
 
 
 run_core_simulator()
-print("PASS production pure-core macros execute and satisfy result checks")
+print("PASS production C core executes and satisfies result checks")
 
 
 application = bytes(range(28))

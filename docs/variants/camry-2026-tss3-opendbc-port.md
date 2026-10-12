@@ -3410,7 +3410,7 @@ before and after the counter read; the post-foreground helper call remains the
 fallback.
 
 Compact reconstruction remains available only for a deliberate experiment.
-The normal builder emits no compact template or assembly path, and normal
+The normal builder emits no compact template or reconstruction path, and normal
 request-signer kits omit the compact Python module. `--codec compact` on
 `tools/toyota ram build` or `tools/toyota ram kit` produces a separately
 identified compact-only artifact; there is no default fallback.
@@ -3419,15 +3419,17 @@ identity-bound capture is promoted here as vehicle qualification for the
 compact experiment.
 
 The target code remains split at a testable boundary.
-`tss3_request_signer_core.inc` owns CPU/memory-only four-message assembly,
+`tss3_request_signer_core.h` owns the pure C four-message assembler,
 optional compact reconstruction, private freshness update, and response
-packing. The focused verification suite compiles a target-native `v850e3v5`
-harness and executes both codec macros under GNU `sim/v850`,
+packing; `tss3_request_signer_helper.c` owns the ring and stock-function calls.
+The focused verification suite compiles a target-native `v850e3v5`
+harness and executes both C codecs under GNU `sim/v850`,
 including verbatim four-fragment assembly, sequence/order rejection, compact
-inactive and LTA/LCA reconstruction, ABI global-pointer/record-size
-preservation, epoch change, message-counter increment/wrap, FV4 construction,
-and success/error/busy response packing. The harness deliberately stops before
-stock freshness/command-5/CAN calls and MMIO.
+inactive and LTA/LCA reconstruction, epoch change, message-counter
+increment/wrap, FV4 construction, and success/error/busy response packing.
+The core harness deliberately stops before stock freshness/command-5/CAN
+calls and MMIO. The separate exact-firmware helper scenarios check the caller
+register/stack ABI and producer reload after a record arrives during signing.
 The repository-owned GNU simulator carries a local fix for upstream
 `sim/v850`'s broken format-VI `imm32` reconstruction;
 `tools/rh850 toolchain self-test` exercises both forward and backward far

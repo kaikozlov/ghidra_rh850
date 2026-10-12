@@ -1,0 +1,220 @@
+From: ghidra_rh850 project
+Subject: [PATCH] v850: emit correct .debug_frame CFI for PREPARE/DISPOSE frames
+
+The V850 backend defines DWARF2_FRAME_INFO (v850.h), so GCC always emits
+.debug_frame for this target even without -g and regardless of
+-fno-unwind-tables/-fno-asynchronous-unwind-tables. GDB prefers DWARF CFI
+over its prologue scanner whenever a frame entry exists, so the contents
+of that section must describe the frame truthfully. It did not:
+
+- The PREPARE instruction is emitted from a hand-built PARALLEL whose
+  elements are flagged with v850_all_frame_related, but the insn itself
+  was never marked RTX_FRAME_RELATED_P. dwarf2cfi only processes
+  frame-related insns, so the register saves and the stack adjustment of
+  the PREPARE were missing from the FDE: callee-saved registers (r29 and
+  the return address in particular) had no rules and the CFA offset
+  ignored the saved-register area, making GDB compute the wrong caller
+  SP/PC and read garbage for saved registers. Marking the insn is
+  sufficient: dwarf2out_frame_debug_expr processes PARALLEL saves against
+  the pre-adjustment CFA before applying the SP adjustment of the first
+  element, which matches PREPARE semantics exactly.
+
+- The epilogue was never described at all. Restoring a register from
+  memory has no rule in dwarf2out_frame_debug_expr, so the DISPOSE
+  parallel and the one-by-one restore moves are described with explicit
+  REG_CFA notes instead (the mechanism other backends use for the same
+  purpose): REG_CFA_RESTORE for every restored register (including lp,
+  i.e. the DWARF return column) and REG_CFA_ADJUST_CFA for the SP growth.
+  The frame-pointer epilogue move (mov r29,sp) gets a REG_CFA_ADJUST_CFA
+  note switching the CFA register back to SP with the offset preserved,
+  and increment_stack no longer distinguishes prologue from epilogue: an
+  SP adjustment is frame-related wherever it appears, so rows are now
+  emitted for the epilogue ADDI as well.
+
+No code is generated differently; only CFI notes and the FDE contents
+change. Functions that save nothing (including the noreturn no-saves
+case) still get no rows. The one-by-one prologue path was already marked
+frame-related and is untouched. Interrupt-handler callt/reti sequences
+keep their existing (undocumented) behavior.
+
+Pinned base: GCC 78d4ac73dd391005b895a6148cd9831e28e1208b with
+gcc-v850-bswapsi2 and the noreturn prologue patch already applied.
+---
+ gcc/config/v850/v850.cc | 81 +++++++++++++++++++++++++++++++++---------------
+ 1 file changed, 57 insertions(+), 24 deletions(-)
+
+diff --git a/gcc/config/v850/v850.cc b/gcc/config/v850/v850.cc
+--- a/gcc/config/v850/v850.cc
++++ b/gcc/config/v850/v850.cc
+@@ -1595,7 +1595,7 @@ use_prolog_function (int num_save, int frame_size)
+ }
+ 
+ static void
+-increment_stack (signed int amount, bool in_prologue)
++increment_stack (signed int amount)
+ {
+   rtx inc;
+ 
+@@ -1609,14 +1609,12 @@ increment_stack (signed int amount, bool in_prologue)
+       rtx reg = gen_rtx_REG (Pmode, 12);
+ 
+       inc = emit_move_insn (reg, inc);
+-      if (in_prologue)
+-	F (inc);
++      F (inc);
+       inc = reg;
+     }
+ 
+   inc = emit_insn (gen_addsi3_clobber_flags (stack_pointer_rtx, stack_pointer_rtx, inc));
+-  if (in_prologue)
+-    F (inc);
++  F (inc);
+ }
+ 
+ void
+@@ -1668,11 +1666,11 @@ expand_prologue (void)
+     {
+       if (num_save == 0)
+ 	{
+-	  increment_stack (- (actual_fsize + crtl->args.pretend_args_size), true);
++	  increment_stack (- (actual_fsize + crtl->args.pretend_args_size));
+ 	  actual_fsize = 0;
+ 	}
+       else
+-	increment_stack (- crtl->args.pretend_args_size, true);
++	increment_stack (- crtl->args.pretend_args_size);
+     }
+ 
+   /* See if we have an insn that allocates stack space and saves the particular
+@@ -1730,6 +1728,14 @@ expand_prologue (void)
+ 	    {
+ 	      rtx insn = emit_insn (save_all);
+ 	      INSN_CODE (insn) = code;
++	      /* The PARALLEL elements are flagged with
++		 v850_all_frame_related above.  Flagging the insn itself
++		 makes dwarf2out describe the PREPARE: the register
++		 saves are recorded against the pre-adjustment CFA and
++		 the stack adjustment of the first element updates the
++		 CFA offset, which yields correct CFI without a
++		 REG_FRAME_RELATED_EXPR note.  */
++	      RTX_FRAME_RELATED_P (insn) = 1;
+ 	      actual_fsize -= alloc_stack;
+ 
+ 	    }
+@@ -1765,7 +1771,7 @@ expand_prologue (void)
+ 	  offset = init_stack_alloc - 4;
+ 
+ 	  if (init_stack_alloc)
+-	    increment_stack (- (signed) init_stack_alloc, true);
++	    increment_stack (- (signed) init_stack_alloc);
+ 
+ 	  /* Save the return pointer first.  */
+ 	  if (num_save > 0 && REGNO (save_regs[num_save-1]) == LINK_POINTER_REGNUM)
+@@ -1794,7 +1800,7 @@ expand_prologue (void)
+      > 32K or we just called a function to save the registers and needed more
+      stack.  */
+   if (actual_fsize > init_stack_alloc)
+-    increment_stack (init_stack_alloc - actual_fsize, true);
++    increment_stack (init_stack_alloc - actual_fsize);
+ 
+   /* If we need a frame pointer, set it up now.  */
+   if (frame_pointer_needed)
+@@ -1825,7 +1831,17 @@ expand_epilogue (void)
+ 
+   /* Cut off any dynamic stack created.  */
+   if (frame_pointer_needed)
+-    emit_move_insn (stack_pointer_rtx, hard_frame_pointer_rtx);
++    {
++      rtx insn = emit_move_insn (stack_pointer_rtx,
++				 hard_frame_pointer_rtx);
++      /* The CFA stays anchored to the frame pointer while it is live.
++	 Once we move it back into SP, describe that, so that the stack
++	 adjustments and DISPOSE below update the CFA rule again.  */
++      RTX_FRAME_RELATED_P (insn) = 1;
++      add_reg_note (insn, REG_CFA_ADJUST_CFA,
++		    gen_rtx_SET (stack_pointer_rtx,
++				 hard_frame_pointer_rtx));
++    }
+ 
+   /* Identify all of the saved registers.  */
+   num_restore = 0;
+@@ -1878,10 +1894,23 @@ expand_epilogue (void)
+ 	      rtx insn;
+ 
+ 	      actual_fsize -= alloc_stack;
+-	      increment_stack (actual_fsize, false);
++	      increment_stack (actual_fsize);
+ 
+ 	      insn = emit_jump_insn (restore_all);
+ 	      INSN_CODE (insn) = code;
++	      /* dwarf2out_frame_debug_expr has no rule for restoring a
++		 register from memory, so describe the DISPOSE with
++		 explicit REG_CFA notes: every register comes back to
++		 its caller value and SP grows past the saved-register
++		 area.  */
++	      RTX_FRAME_RELATED_P (insn) = 1;
++	      for (i = 0; i < num_restore; i++)
++		add_reg_note (insn, REG_CFA_RESTORE, restore_regs[i]);
++	      add_reg_note (insn, REG_CFA_ADJUST_CFA,
++			    gen_rtx_SET (stack_pointer_rtx,
++					 gen_rtx_PLUS (Pmode,
++						       stack_pointer_rtx,
++						       GEN_INT (alloc_stack))));
+ 	    }
+ 	  else
+ 	    restore_all = NULL_RTX;
+@@ -1904,7 +1933,7 @@ expand_epilogue (void)
+ 
+       /* Deallocate the rest of the stack if it is > 32K.  */
+       if ((unsigned int) actual_fsize > init_stack_free)
+-	increment_stack (actual_fsize - init_stack_free, false);
++	increment_stack (actual_fsize - init_stack_free);
+ 
+       /* Special case interrupt functions that save all registers
+ 	 for a call.  */
+@@ -1924,29 +1953,33 @@ expand_epilogue (void)
+ 	  if (num_restore > 0
+ 	      && REGNO (restore_regs [num_restore - 1]) == LINK_POINTER_REGNUM)
+ 	    {
+-	      emit_move_insn (restore_regs[--num_restore],
+-			      gen_rtx_MEM (SImode,
+-					   plus_constant (Pmode,
+-							  stack_pointer_rtx,
+-							  offset)));
++	      rtx insn = emit_move_insn (restore_regs[--num_restore],
++					 gen_rtx_MEM (SImode,
++						      plus_constant (Pmode,
++								     stack_pointer_rtx,
++								     offset)));
++	      RTX_FRAME_RELATED_P (insn) = 1;
++	      add_reg_note (insn, REG_CFA_RESTORE,
++			    restore_regs[num_restore]);
+ 	      offset -= 4;
+ 	    }
+ 
+ 	  for (i = 0; i < num_restore; i++)
+ 	    {
+-	      emit_move_insn (restore_regs[i],
+-			      gen_rtx_MEM (SImode,
+-					   plus_constant (Pmode,
+-							  stack_pointer_rtx,
+-							  offset)));
++	      rtx insn = emit_move_insn (restore_regs[i],
++					 gen_rtx_MEM (SImode,
++						      plus_constant (Pmode,
++								     stack_pointer_rtx,
++								     offset)));
++	      RTX_FRAME_RELATED_P (insn) = 1;
++	      add_reg_note (insn, REG_CFA_RESTORE, restore_regs[i]);
+ 
+ 	      emit_use (restore_regs[i]);
+ 	      offset -= 4;
+ 	    }
+ 
+ 	  /* Cut back the remainder of the stack.  */
+-	  increment_stack (init_stack_free + crtl->args.pretend_args_size,
+-			   false);
++	  increment_stack (init_stack_free + crtl->args.pretend_args_size);
+ 	}
+ 
+       /* And return or use reti for interrupt handlers.  */

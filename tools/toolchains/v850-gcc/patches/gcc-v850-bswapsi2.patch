@@ -1,0 +1,41 @@
+From: ghidra_rh850 project
+Subject: [PATCH] v850: lower 32-bit byte swaps to BSW on V850E2 and later
+
+GCC's V850 backend lacks bswapsi2, so __builtin_bswap32 can require a
+__bswapsi2 libcall even on RH850. Describe the native instruction using
+GCC's standard byte-swap operation. BSW changes condition codes, including
+a carry result that is not an arithmetic carry; clobber CC rather than
+allowing an earlier comparison to survive across it.
+
+Restrict the pattern to V850E2 and later. Original V850 and V850E1 retain
+their existing lowering. Keep this local patch until equivalent support
+lands upstream.
+
+Pinned base: GCC 78d4ac73dd391005b895a6148cd9831e28e1208b.
+---
+ gcc/config/v850/v850.md | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
+
+diff --git a/gcc/config/v850/v850.md b/gcc/config/v850/v850.md
+--- a/gcc/config/v850/v850.md
++++ b/gcc/config/v850/v850.md
+@@ -1043,6 +1043,19 @@
+   "not %1,%0"
+   [(set_attr "length" "2")])
+ 
++;; -----------------------------------------------------------------
++;; BYTE SWAP
++;; -----------------------------------------------------------------
++
++(define_insn "bswapsi2"
++  [(set (match_operand:SI 0 "register_operand" "=r")
++	(bswap:SI (match_operand:SI 1 "register_operand" "r")))
++   (clobber (reg:CC CC_REGNUM))]
++  "TARGET_V850E2_UP"
++  "bsw %1,%0"
++  [(set_attr "length" "4")])
++
++
+ ;; -----------------------------------------------------------------
+ ;; BIT FIELDS
+ ;; -----------------------------------------------------------------

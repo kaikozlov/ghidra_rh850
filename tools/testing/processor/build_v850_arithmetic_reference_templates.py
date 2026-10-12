@@ -27,10 +27,10 @@ byte-identically (sha256 verified when this producer was introduced) with:
 5e56594815854de5eca35c7c04b11705d0f19c02, GDB 18.1): its image history was
 audited to be that same recipe and GCC configure command
 (docs/tooling/processor-module-audit.md), with the ``/build/gcc`` tree kept so
-``make all-target-libgcc`` can run in place.  The disassembly pass itself runs
-through the pinned runner ``tools/rh850 toolchain run`` (image
-ghidra-rh850-v850-gcc:16.2.0-binutils2.46.1-gdb18.1-simfix2, built from the
-same tracked Dockerfile), so no host toolchain is required beyond Docker.
+``make all-target-libgcc`` can run in place. The original disassembly image was
+``ghidra-rh850-v850-gcc:16.2.0-binutils2.46.1-gdb18.1-simfix2``. Regeneration uses
+the current pinned ``tools/rh850 toolchain run`` image and records that identity;
+the committed reference objects retain their original hashes.
 ``helpers.o`` (adddi3/subdi3 carry idioms; GCC inlines DImode add/sub, so
 libgcc ships no __adddi3 object) is rebuilt byte-identically with:
 
@@ -59,6 +59,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from tools.toolchains.rh850 import IMAGE
+
 REPO_ROOT = Path(__file__).resolve().parents[3]
 REF_DIR = REPO_ROOT / "data/reference/v850-gcc-libgcc/16.2.0"
 OUTPUT = (
@@ -69,7 +71,6 @@ SCHEMA = "v850-arithmetic-reference-templates-v1"
 
 # Pinned toolchain identity (see tools/toolchains/rh850.py IMAGE).
 OBJDUMP = "/opt/gcc-v850-elf-master/bin/v850-elf-objdump"
-TOOLCHAIN_IMAGE = "ghidra-rh850-v850-gcc:16.2.0-binutils2.46.1-gdb18.1-simfix2"
 GCC_RELEASE = "releases/gcc-16.2.0"
 GCC_VERSION = "16.2.0"
 BINUTILS_VERSION = "2.46.1"
@@ -468,7 +469,7 @@ def build() -> dict:
             "gcc_release": GCC_RELEASE,
             "gcc_version": GCC_VERSION,
             "binutils_version": BINUTILS_VERSION,
-            "toolchain_image": TOOLCHAIN_IMAGE,
+            "toolchain_image": IMAGE,
             "toolchain_identities": toolchain_identities(),
             "upstream_sha256": UPSTREAM_SHA256,
             "reference_objects": {

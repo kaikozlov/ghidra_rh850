@@ -254,7 +254,7 @@ That is resource 6 / lower handle 53 on Camry and resource 6 / lower handle 50
 on Crown and Corolla. The former four-resource heuristic incorrectly selected
 Crown HTH3 / handle 51 / resource 7, which is the secondary `0x7A8` route. The
 machine verification now executes both the exact lower wrapper and the complete
-assembled helper against the selected primary route on every registered image.
+compiled C helper against the selected primary route on every registered image.
 
 All four default to the same four-message classic standard-`0x777` request
 codec, standard-`0x7A9` response, and 36-byte command-5 authentication domain.

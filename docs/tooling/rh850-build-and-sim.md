@@ -13,9 +13,9 @@ thing being operated on rather than the execution backend:
 |Run retained RH850 regression suites|`tools/test rh850`|
 
 The toolchain is GCC 16.2.0, binutils 2.46.1, and GDB 18.1 with
-repository-local simulator fixes. Builds and instruction simulation use the
-same image and `v850e3v5` architecture. There is no GCC 13 compatibility path,
-compiler-profile selection, backend-selection flag, or legacy command alias.
+repository-local compiler, debugger, and simulator fixes. Builds and instruction simulation
+use the same image and `v850e3v5` architecture. There is no GCC 13 compatibility
+path, compiler-profile selection, backend-selection flag, or legacy command alias.
 On a prepared host, verify the environment with:
 
 ```bash
@@ -27,10 +27,93 @@ tools/rh850 toolchain self-test
 code at `0x0008F800`, plus a freestanding C function and assembly harness in
 high RAM. It checks that all CodeFlash blocks remain distinct, crosses between
 CodeFlash and RAM with positive and negative format-VI branches, executes the C
-function, and verifies deterministic RAM results. The C function computes from
-a volatile local rather than a folded constant. This exercises C compilation,
-linking, full-image ELF loading, real low-address instruction fetch, far control
-flow, and basic register/stack/memory execution together.
+functions, and verifies deterministic RAM results. The arithmetic function computes
+from a volatile local rather than a folded constant; the byte-swap function executes
+`__builtin_bswap32()` on its argument. This exercises C compilation, linking,
+full-image ELF loading, real low-address instruction fetch, far control flow,
+native byte swapping, and basic register/stack/memory execution together.
+
+### Native C byte swapping
+
+Use `__builtin_bswap32(value)` in C; no inline-assembly wrapper is needed.
+The pinned GCC build applies
+[`gcc-v850-bswapsi2.patch`](../../tools/toolchains/v850-gcc/patches/gcc-v850-bswapsi2.patch)
+to lower a register-valued 32-bit byte swap to one `BSW` instruction on V850E2
+and later, including the configured RH850 `v850e3v5`. The pattern declares the
+instruction's condition-code clobber. Older V850/V850E1 lowering is unchanged.
+
+Rebuild with `tools/rh850 toolchain build` to install the
+`-codegen1-unwind1` image revision. `tools/test rh850_payload` exercises
+native byte swapping and bit tests, comparisons across those operations,
+far-call argument/return behavior, instruction sizes, and ISA compatibility.
+
+### Non-returning C functions
+
+[`gcc-v850-noreturn-save-omit.patch`](../../tools/toolchains/v850-gcc/patches/gcc-v850-noreturn-save-omit.patch)
+omits saves of incoming registers in ordinary `noreturn` functions only when
+optimization is enabled and exceptions, unwind tables, and asynchronous unwind
+tables are disabled. Locals, spills, and outgoing arguments still get their
+required stack space. Returning functions and interrupt handlers retain their
+normal save rules; the ABI is not weakened.
+
+`toolchain self-test` compiles probes that require a zero-frame permanent loop,
+retain space for volatile locals and a fifth argument, and preserve register
+saves for returning/interrupt functions, exception/unwind modes, and `-O0`.
+The signer build separately enforces its
+[own-frame budgets](../WORKFLOW.md#ram-resident-tss3-build-and-kit-workflow);
+an older compiler cannot silently produce the larger-stack payload.
+
+### Native C byte bit tests
+
+[`gcc-v850-tst1-bit-tests.patch`](../../tools/toolchains/v850-gcc/patches/gcc-v850-tst1-bit-tests.patch)
+recognizes the byte-load and single-bit-test shapes produced by ordinary C.
+For example, `while ((*flag & 0x10u) == 0)` can use `TST1` and a branch;
+boolean results use `TST1` and `SETF`. No inline assembly or volatile bitfields
+are required. Volatile accesses keep their width and read count, and a loaded
+byte that is also used elsewhere keeps its load. The post-reload flag
+definitions and consumers are explicit. Memory displacements are signed
+16-bit values, as specified by the RH850G3M instruction set.
+
+### Per-callee far calls
+
+[`gcc-v850-long-call.patch`](../../tools/toolchains/v850-gcc/patches/gcc-v850-long-call.patch)
+adds the function-declaration attribute `__attribute__((long_call))`.
+On V850E2 and later, including RH850, an annotated direct call uses the native
+six-byte `JARL disp32`; ordinary nearby calls retain four-byte `JARL disp22`.
+The compiler accounts for the instruction length itself and enables the GAS
+explicit-width aliases through its driver; callers need no extra assembler
+flags. Older ISAs use the existing full-address indirect sequence.
+
+Use the attribute on the distant callee declaration, not `-mlong-calls` on the
+whole translation unit. The global option still has its documented meaning:
+prohibit PC-relative calls. No assembler displacement-size override or linker
+relaxation is needed. The signer marks only its fixed GlobalRAM helper.
+
+### C frame unwinding
+
+[`gdb-v850-frame-unwind.patch`](../../tools/toolchains/v850-gcc/patches/gdb-v850-frame-unwind.patch)
+reads the cached caller SP as a value, not as a saved-register address. It
+also uses FP only after the prologue establishes it, skips MOV's embedded
+32-bit immediate, and ends prologue scanning at native far and register calls.
+Call displacements and instructions after a call are not treated as stack setup.
+This repairs the assertion reached by instruction stepping, backtraces,
+and target-memory assignments in raw RAM code.
+
+[`gcc-v850-frame-cfi.patch`](../../tools/toolchains/v850-gcc/patches/gcc-v850-frame-cfi.patch)
+fixes the complementary compiled-C case: GCC must describe PREPARE register
+saves and stack allocation, then the epilogue's restores and stack release.
+V850 emits `.debug_frame` even when unwind tables are disabled, and GDB prefers
+that information to prologue scanning. Correcting the metadata—not stripping
+it—makes caller SP, return PC, and saved-register recovery trustworthy for
+the covered frame shapes.
+
+`tools/test rh850_codeflash` exercises raw instruction stepping and memory
+writes, symbolized PREPARE/FP/leaf frames, partial prologues, and real compiled-C
+frames with their CFI retained. Symbol-less code without recoverable function
+boundaries still cannot supply a complete backtrace.
+
+Canary scenarios locate the built tick-wait instruction and stop after one
+foreground cycle; compiler layout changes do not require repinning addresses.
 
 ## Build, execute, and verify a payload
 
@@ -275,13 +358,14 @@ The generated suite has no calibration-named JSON inputs:
 |Response transmit|structural RSCFD role plus resolved `gp`/`tp`, response ID, controller, and local resource|exact resource identifier/data/control/status and one modeled transmit event|
 |Lower response wrapper|resolved lower CAN writer, online-state base, lower handle, route map, controller/resource, and response ID|helper-shaped `0x00F0`/length/ID/data-pointer PDU traverses the target wrapper and exact classic-Tx path to one modeled RSCFD transmit|
 |Lower response completion|resolved native Tx-completion entry and pending software-handle slot|private handle `0x00F0` is consumed through the target dispatcher and no-op confirmation callback|
-|Whole request-signer timeout|current built helper artifact plus the dump-resolved runtime config, four exact software-ring records, freshness/command-five state, and lower response route|the assembled helper consumes all four fragments, reaches the exact synchronous command-five path, packs status 2 after the bounded poll expires, and transmits the complete private `0x7A9` error response through the selected target wrapper|
+|Whole request-signer timeout|current compiled C helper artifact plus the dump-resolved runtime config, four exact software-ring records, freshness/command-five state, and lower response route|the helper consumes all four fragments, reaches the exact synchronous command-five path, packs status 2 after the bounded poll expires, and transmits the complete private `0x7A9` error response through the selected target wrapper|
 |Whole request-signer completion|the same execution plus scheduled writes of supplied ICU-S output/completion state after exact submission|the exact wrapper observes completion, the helper validates done/status/length, increments its success counter, packs status 0 plus the supplied CMAC prefix, and transmits the complete response; supplied output remains scenario data, not provisioned-key cryptography|
+|Producer reload during signing|completion scenario plus an unrelated ring record published while command 5 is waiting|the helper reloads the producer after its response and consumes the arriving record before returning; whole-helper scenarios also check stack/application/callee-saved register preservation|
 |ICU-S submit|structural command-five role plus dump-relative engine globals|validated command submission and in-flight state|
 |ICU-S input callback|structural callback role plus dump-relative input state|four input words and acknowledgement|
 |ICU-S output callback|structural callback role plus dump-relative output state|four supplied output words, cursor advance, and acknowledgement|
 
-`tools/test rh850_firmware` requires those thirteen scenarios to pass on every
+`tools/test rh850_firmware` requires these scenarios to pass on every
 registered signer target: Camry, Crown, Corolla F, and Corolla H. Target-owned
 fixtures under `tests/fixtures/rh850/machine/` are retained only for
 device-model boundaries and negative behavior, not as a target compatibility
@@ -389,6 +473,12 @@ GlobalRAM helper through the complete post-foreground fallback, the other
 through the timer-bounded idle branch. Boot, context, startup-final, and
 hardware-heavy foreground callees are explicit generated overlays; their
 preimages remain bound to the supplied dump.
+
+Both paths also check that the resident reaches helper entry with the SP
+installed by the context overlay: the C resident must retain no stack frame.
+Mid-run changes use ordinary `set {type}` memory assignments; the former
+binary-file `restore` workaround is no longer needed. See
+[C frame unwinding](#c-frame-unwinding) for the compiler and debugger repairs.
 
 One gate runs every modeled scenario — generic synthetic image, the F33
 Gate-2 stock/root-only/stage-2/stage-3 differential, the F33 and Corolla

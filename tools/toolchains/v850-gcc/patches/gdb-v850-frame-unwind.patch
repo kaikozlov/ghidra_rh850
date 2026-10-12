@@ -1,0 +1,155 @@
+From: ghidra_rh850 project
+Subject: [PATCH] gdb: v850: fix frame ids and frameless base reconstruction
+
+v850_frame_this_id builds the frame id from
+saved_regs[E_SP_REGNUM].addr (), but v850_frame_cache records the
+calling frame's stack pointer with set_value (), the constant-value
+encoding.  Since the trad-frame accessors gained kind asserts, the
+addr () call aborts GDB with an internal error whenever a V850 frame
+id is computed: stepping an instruction (set_step_frame), producing a
+backtrace, or re-establishing frames after a target memory write all
+crash at trad-frame.h "addr: Assertion `m_kind ==
+trad_frame_saved_reg_kind::ADDR' failed".
+
+v850_frame_cache also bails out before scanning the prologue whenever
+fp (r29) reads zero, treating the frame as outermost.  That rule is
+false for frameless code and for raw RAM code entered with the frame
+pointer never established: the stack pointer is still valid, the
+executed part of the prologue can still be analyzed, and the caller
+remains recoverable through lp.
+
+Finally, the prologue scanner misparses "mov <imm32>,<reg>" (a
+two-byte instruction with a four-byte immediate, binutils' "32 bit
+MOV").  It walks into the immediate and then treats the immediate's
+tail halfword as the start of a four-byte instruction, swallowing the
+instruction that follows -- typically the "add <imm>,sp" allocating
+the frame.  GCC -Os emits this form right after "prepare" when
+loading a call address, so the reconstructed sp offset and every
+saved-register address come out four bytes short.  Skip the
+immediate, following the decoding rule binutils uses for the same
+bytes.
+
+The scanner also fails to end the prologue at the two remaining call
+forms.  A six-byte "jarl32 <disp32>,<reg>" (or "jr32") is consumed as a
+two-byte instruction, so the displacement halfwords are decoded as
+prologue code -- an immediate whose low halfword is 0x1a5c reads as
+"add -4,sp" and shifts the reconstructed CFA.  And an indirect
+"jarl [<reg>],<reg>" is skipped as an unknown four-byte instruction,
+so the scan continues past the call and attributes body stores and
+stack adjustments after it to the prologue.  End the scan at both,
+consuming all six bytes of the 32-bit displacement form, matching the
+predicates binutils decodes for the same bytes.
+
+Read the previous stack pointer through the constant-value accessor, and
+select the frame base from fp only when the prologue analysis saw fp being
+established.
+A frame whose reconstructed base is zero (no valid stack at all)
+still marks the outermost frame, and no caller is invented where no
+boundary can be recovered.
+
+Pinned base: GDB 6a5e5259790e5a854ddbb69eb486b9245fcfeee8
+(gdb-18.1-release), which carries the same defects.
+---
+ gdb/v850-tdep.c | 56 +++++++++++++++++++++++++++++++++-----------------------
+ 1 file changed, 33 insertions(+), 23 deletions(-)
+
+diff --git a/gdb/v850-tdep.c b/gdb/v850-tdep.c
+index a373964..da9d9cd 100644
+--- a/gdb/v850-tdep.c
++++ b/gdb/v850-tdep.c
+@@ -810,12 +810,29 @@ v850_analyze_prologue (struct gdbarch *gdbarch,
+ 
+       insn = read_memory_integer (current_pc, 2, byte_order);
+       current_pc += 2;
+-      if ((insn & 0x0780) >= 0x0600)	/* Four byte instruction?  */
++      if ((insn & 0xffe0) == 0x0620)
++	/* mov <imm32>,<reg> -- a two-byte instruction carrying a
++	   four-byte immediate.  The immediate is not an instruction;
++	   skip it, or the scan desynchronizes with the code and
++	   swallows the instructions that follow.  */
++	current_pc += 4;
++      else if ((insn & 0x0780) >= 0x0600)	/* Four byte instruction?  */
+ 	{
+ 	  insn2 = read_memory_integer (current_pc, 2, byte_order);
+ 	  current_pc += 2;
+ 	}
+ 
++      if ((insn & 0xffe0) == 0x02e0)
++	{			/* jarl32 <disp32>,<reg> or jr32 <disp32> */
++	  /* Six-byte instruction: the four displacement bytes are not
++	     instructions.  Consuming only the first halfword would
++	     deserialize the scan and decode the displacement halfwords
++	     as prologue code (an immediate like 0x1a5c reads as
++	     "add -4,sp").  A call or jump also ends the prologue.  */
++	  current_pc += 4;
++	  break;
++	}
++
+       if ((insn & 0xffc0) == ((10 << 11) | 0x0780) && !regsave_func_p)
+ 	{			/* jarl <func>,10 */
+ 	  long low_disp = insn2 & ~(long) 1;
+@@ -874,7 +891,9 @@ v850_analyze_prologue (struct gdbarch *gdbarch,
+ 	}
+       else if ((insn & 0x07c0) == 0x0780	/* jarl or jr */
+ 	       || (insn & 0xffe0) == 0x0060	/* jmp */
+-	       || (insn & 0x0780) == 0x0580)	/* branch */
++	       || (insn & 0x0780) == 0x0580	/* branch */
++	       || ((insn & 0xffe0) == 0xc7e0	/* jarl [<reg>],<reg> */
++		   && (insn2 & 0x07ff) == 0x0160))
+ 	{
+ 	  break;		/* Ran into end of prologue.  */
+ 	}
+@@ -1242,15 +1261,6 @@ v850_frame_cache (const frame_info_ptr &this_frame, void **this_cache)
+   cache = v850_alloc_frame_cache (this_frame);
+   *this_cache = cache;
+ 
+-  /* In principle, for normal frames, fp holds the frame pointer,
+-     which holds the base address for the current stack frame.
+-     However, for functions that don't need it, the frame pointer is
+-     optional.  For these "frameless" functions the frame pointer is
+-     actually the frame pointer of the calling frame.  */
+-  cache->base = get_frame_register_unsigned (this_frame, E_FP_REGNUM);
+-  if (cache->base == 0)
+-    return cache;
+-
+   cache->pc = get_frame_func (this_frame);
+   current_pc = get_frame_pc (this_frame);
+   if (cache->pc != 0)
+@@ -1260,17 +1270,16 @@ v850_frame_cache (const frame_info_ptr &this_frame, void **this_cache)
+       v850_analyze_prologue (gdbarch, cache->pc, current_pc, cache, ctbp);
+     }
+ 
+-  if (!cache->uses_fp)
+-    {
+-      /* We didn't find a valid frame, which means that CACHE->base
+-	 currently holds the frame pointer for our calling frame.  If
+-	 we're at the start of a function, or somewhere half-way its
+-	 prologue, the function's frame probably hasn't been fully
+-	 setup yet.  Try to reconstruct the base address for the stack
+-	 frame by looking at the stack pointer.  For truly "frameless"
+-	 functions this might work too.  */
+-      cache->base = get_frame_register_unsigned (this_frame, E_SP_REGNUM);
+-    }
++  /* A zero or scratch fp is normal in frameless code and before the
++     prologue establishes fp.  Only use it after seeing that setup.  */
++  if (cache->uses_fp)
++    cache->base = get_frame_register_unsigned (this_frame, E_FP_REGNUM);
++  else
++    cache->base = get_frame_register_unsigned (this_frame, E_SP_REGNUM);
++
++  /* This marks the outermost frame.  */
++  if (cache->base == 0)
++    return cache;
+ 
+   /* Now that we have the base address for the stack frame we can
+      calculate the value of sp in the calling frame.  */
+@@ -1315,7 +1324,8 @@ v850_frame_this_id (const frame_info_ptr &this_frame, void **this_cache,
+   if (cache->base == 0)
+     return;
+ 
+-  *this_id = frame_id_build (cache->saved_regs[E_SP_REGNUM].addr (), cache->pc);
++  /* The caller SP is a computed value, not the address of a saved register.  */
++  *this_id = frame_id_build (cache->saved_regs[E_SP_REGNUM].value (), cache->pc);
+ }
+ 
+ static const struct frame_unwind_legacy v850_frame_unwind (

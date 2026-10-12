@@ -448,6 +448,33 @@ binary implements the four-frame classic-CAN contract for every registered
 Camry, Crown, and Corolla H/F target. Target builds retain separate metadata
 for host bus/F181 binding, but their default payload SHA-256 is identical.
 
+The maintained helper and foreground scheduler are freestanding C:
+[`tss3_request_signer_helper.c`](../exploit/ephemeral_runtime/tss3_request_signer_helper.c),
+[`tss3_request_signer_core.h`](../exploit/ephemeral_runtime/tss3_request_signer_core.h),
+and [`tss3_request_signer_resident.c`](../exploit/ephemeral_runtime/tss3_request_signer_resident.c).
+The small resident `.S` entry installs the stock CPU context before any C
+prologue; interrupt enable and atomic tick-bit clear remain CPU instructions.
+The generated boot staging/copy shell also remains assembly.
+
+The builder uses the pinned GCC's native byte swaps, byte bit tests, and
+non-returning-frame optimization, and reserves the firmware application registers
+with `-mno-app-regs`. Only `helper_entry` carries `__attribute__((long_call))`:
+its GlobalRAM call uses native six-byte JARL, while nearby calls remain four bytes.
+There is no global `-mlong-calls` or linker-relaxation dependency. Only the
+helper disables loop-invariant motion: for the default four-frame build,
+reloading constants trades four code bytes for twelve fewer stack bytes.
+It links readonly constants into the copied
+code, rejects writable globals and relocations, checks C layouts against the
+host config, and enforces both code-plus-fetch-guard budgets and Corolla's
+reclaimed entry prefix. It also rejects missing/unbounded compiler stack reports
+or summed own C frames above **0 bytes for the resident / 24 bytes for the helper**.
+Metadata `stack_frames` reports bytes per C function, **not** total stack usage
+including stock firmware or interrupts. Onboarding checks the resident's actual
+SP at helper entry through both fallback and idle paths.
+See [compiler frame handling](tooling/rh850-build-and-sim.md#non-returning-c-functions)
+and [far calls](tooling/rh850-build-and-sim.md#per-callee-far-calls) for the
+required toolchain rebuild and call-placement contract.
+
 The shared resident services a pending private-ring record immediately only
 while the foreground flag is clear and TAUJ0 channel 3 has more than 240,000
 counts (3 ms of the 5-ms interval) remaining; it rechecks the flag before
@@ -474,7 +501,7 @@ It then reports whether the registered universal profile table already contains
 the exact selector/config row; a missing row is inserted into that candidate
 build before compilation. The compiled simulator ELF is reused for separate
 clean-process fallback and timer-bounded idle executions against the supplied
-image. For an exact registered target, onboarding also generates the same eight
+image. For an exact registered target, onboarding also generates the
 target-neutral P1M-E scenarios from the resolved contract and executes TAUJ,
 freshness, request publication, native `0x777` receive→foreground, response
 transmit, and ICU-S submit/input/output behavior. An otherwise compatible

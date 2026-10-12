@@ -1,0 +1,46 @@
+From: ghidra_rh850 project
+Subject: [PATCH] v850: omit saved-register frames for optimized non-returning functions
+
+The V850 prologue reserves space for, and saves, every call-saved
+register a function touches plus the link pointer, even when the
+function is known never to return. Permanent firmware loops (for
+example the TSS3 request signer foreground resident) then pay prologue
+code and stack for incoming register values that no caller and no
+unwinder can ever consume.
+
+Skip the saved-register scan in compute_register_save_size for ordinary
+functions declared not to return, but only when optimization is enabled
+and no consumer of the saved state can exist: exception handling off
+and neither synchronous nor asynchronous unwind tables requested.
+Locals, spills and outgoing argument areas are accounted outside this
+function, so genuine stack needs survive. Interrupt handlers take the
+earlier branch of the same function and keep their complete
+architectural saves, and every returning function keeps its saves,
+so the change is invisible to the ordinary ABI.
+
+Keep this local patch until equivalent support lands upstream.
+
+Pinned base: GCC 78d4ac73dd391005b895a6148cd9831e28e1208b.
+---
+ gcc/config/v850/v850.cc | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/gcc/config/v850/v850.cc b/gcc/config/v850/v850.cc
+--- a/gcc/config/v850/v850.cc
++++ b/gcc/config/v850/v850.cc
+@@ -1460,7 +1460,14 @@ compute_register_save_size (long * p_reg_saved)
+ 	    break;
+ 	  }
+     }
+-  else
++  /* A non-returning ordinary function needs no incoming register values
++     when neither exception handling nor stack unwinding can consume them.
++     Interrupt handlers above retain their complete architectural saves.  */
++  else if (!(optimize > 0
++	     && TREE_THIS_VOLATILE (current_function_decl)
++	     && !flag_exceptions
++	     && !flag_unwind_tables
++	     && !flag_asynchronous_unwind_tables))
+     {
+       /* Find the first register that needs to be saved.  */
+       for (i = 0; i <= 31; i++)

@@ -20,12 +20,15 @@ RUN /src/binutils/configure --target="${TARGET_ARCH}" --prefix="${TOOLCHAIN_PATH
 WORKDIR /src
 COPY patches/binutils-v850-sim-imm32.patch /tmp/binutils-v850-sim-imm32.patch
 COPY patches/binutils-v850-sim-codeflash-map.patch /tmp/binutils-v850-sim-codeflash-map.patch
+COPY patches/gdb-v850-frame-unwind.patch /tmp/gdb-v850-frame-unwind.patch
 RUN git clone --depth=1 --branch=gdb-18.1-release https://sourceware.org/git/binutils-gdb.git gdb \
  && test "$(git -C gdb rev-parse HEAD)" = "${GDB_COMMIT}" \
  && git -C gdb apply --check /tmp/binutils-v850-sim-imm32.patch \
  && git -C gdb apply /tmp/binutils-v850-sim-imm32.patch \
  && git -C gdb apply --check /tmp/binutils-v850-sim-codeflash-map.patch \
- && git -C gdb apply /tmp/binutils-v850-sim-codeflash-map.patch
+ && git -C gdb apply /tmp/binutils-v850-sim-codeflash-map.patch \
+ && git -C gdb apply --check /tmp/gdb-v850-frame-unwind.patch \
+ && git -C gdb apply /tmp/gdb-v850-frame-unwind.patch
 WORKDIR /build/gdb
 RUN /src/gdb/configure --target="${TARGET_ARCH}" --prefix="${TOOLCHAIN_PATH}" --disable-nls --disable-werror \
       --disable-binutils --disable-gas --disable-gprof --disable-gprofng --disable-ld --disable-gold --disable-gdbserver \
@@ -37,6 +40,21 @@ ARG GCC_COMMIT=78d4ac73dd391005b895a6148cd9831e28e1208b
 RUN test -n "${GCC_REF}" && test -n "${GCC_COMMIT}" \
  && git clone --depth=1 --branch="${GCC_REF}" https://gcc.gnu.org/git/gcc.git gcc \
  && test "$(git -C gcc rev-parse HEAD)" = "${GCC_COMMIT}"
+COPY patches/gcc-v850-bswapsi2.patch /tmp/gcc-v850-bswapsi2.patch
+RUN git -C /src/gcc apply --check /tmp/gcc-v850-bswapsi2.patch \
+ && git -C /src/gcc apply /tmp/gcc-v850-bswapsi2.patch
+COPY patches/gcc-v850-noreturn-save-omit.patch /tmp/gcc-v850-noreturn-save-omit.patch
+RUN git -C /src/gcc apply --check /tmp/gcc-v850-noreturn-save-omit.patch \
+ && git -C /src/gcc apply /tmp/gcc-v850-noreturn-save-omit.patch
+COPY patches/gcc-v850-frame-cfi.patch /tmp/gcc-v850-frame-cfi.patch
+RUN git -C /src/gcc apply --check /tmp/gcc-v850-frame-cfi.patch \
+ && git -C /src/gcc apply /tmp/gcc-v850-frame-cfi.patch
+COPY patches/gcc-v850-tst1-bit-tests.patch /tmp/gcc-v850-tst1-bit-tests.patch
+RUN git -C /src/gcc apply --check /tmp/gcc-v850-tst1-bit-tests.patch \
+ && git -C /src/gcc apply /tmp/gcc-v850-tst1-bit-tests.patch
+COPY patches/gcc-v850-long-call.patch /tmp/gcc-v850-long-call.patch
+RUN git -C /src/gcc apply --check /tmp/gcc-v850-long-call.patch \
+ && git -C /src/gcc apply /tmp/gcc-v850-long-call.patch
 WORKDIR /build/gcc
 RUN /src/gcc/configure --target="${TARGET_ARCH}" --prefix="${TOOLCHAIN_PATH}" --disable-nls --enable-languages=c \
       --without-headers --with-gnu-as --with-gnu-ld --disable-shared --disable-libssp --disable-threads --with-newlib \
@@ -53,5 +71,5 @@ WORKDIR /src
 CMD ["/bin/bash"]
 
 LABEL org.opencontainers.image.title="ghidra_rh850 GNU V850/RH850 toolchain"
-LABEL org.opencontainers.image.description="GNU C compiler, binutils and GDB with repository-local V850/RH850 simulator fixes"
+LABEL org.opencontainers.image.description="GNU C compiler with native RH850 bit operations, per-callee far calls and frame fixes; binutils and GDB with V850/RH850 simulation and unwinding fixes"
 LABEL org.opencontainers.image.source="https://github.com/kaikozlov/ghidra_rh850"

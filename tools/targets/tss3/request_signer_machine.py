@@ -593,7 +593,7 @@ def _lower_can_response_scenario(contract: dict[str, Any]) -> dict[str, Any]:
     handle = signer_abi["response_handle"]
     online = signer_abi["lower_online_state_base"] + controller * 2
     payload = bytes.fromhex("1122334455667788")
-    # Exact PduInfo shape emitted by tss3_request_signer_helper.S:
+    # Exact PduInfo shape emitted by tss3_request_signer_helper.c:
     # software confirmation handle, length/reserved, CAN ID, payload pointer.
     pdu = (
         (0x00F0).to_bytes(2, "little")
@@ -710,7 +710,7 @@ def _whole_helper_scenario(
     contract: dict[str, Any], *, helper_path: Path, trampoline: int,
     command_completed: bool,
 ) -> dict[str, Any]:
-    """Execute the assembled universal helper across one complete request.
+    """Execute the compiled universal helper across one complete request.
 
     The timeout case leaves the native ICU-S command in flight. The success case
     supplies only the recovered asynchronous completion state after submission;
@@ -764,7 +764,10 @@ def _whole_helper_scenario(
         contract=contract,
         max_instructions=200000,
         stop=trampoline + 4,
-        registers={"r12": HELPER_TRANSIT_BASE},
+        registers={
+            "r12": HELPER_TRANSIT_BASE,
+            **{f"r{reg}": 0x5A000000 | reg for reg in (2, *range(20, 30))},
+        },
         memory=[
             {
                 "address": _hx(LOCAL_RAM),
@@ -898,6 +901,16 @@ def _whole_helper_scenario(
             "equals_hex": expected_response,
         },
     ])
+    for register, expected in {
+        "sp": STACK, "gp": contract["execution"]["gp"], "tp": contract["execution"]["tp"],
+        **{f"r{reg}": 0x5A000000 | reg for reg in (2, *range(20, 30))},
+    }.items():
+        scenario["checks"].append({
+            "name": f"whole helper preserves caller {register}",
+            "kind": "register",
+            "register": register,
+            "equals": _hx(expected),
+        })
     if command_completed:
         scenario["checks"].append({
             "name": "whole helper counts one successful signature",
@@ -936,6 +949,46 @@ def _whole_helper_scenario(
             "evidence": "current built universal request-signer helper",
         }
     ]
+    return scenario
+
+
+def _producer_reload_scenario(
+    contract: dict[str, Any], *, helper_path: Path, trampoline: int,
+) -> dict[str, Any]:
+    """Publish another record while the synchronous command is still running."""
+    scenario = _whole_helper_scenario(
+        contract, helper_path=helper_path, trampoline=trampoline, command_completed=True,
+    )
+    scenario["name"] = "tss3-dynamic-whole-helper-producer-reload"
+    request = contract["request"]
+    header = request["request_record_header"]
+    record = (
+        _le(header, 4) + _le(header ^ 0xFFFFFFFF, 4)
+        + _le(request["request_id"] + 1, 4) + "00" * 8
+    )
+    scenario["events"].extend([
+        {
+            "kind": "memory-write",
+            "after_instructions": 2000,
+            "address": _hx(request["ring_base"] + 20 * 4),
+            "data_hex": record,
+            "evidence": "scenario: unrelated classic record arrives during command-five wait",
+        },
+        {
+            "kind": "memory-write",
+            "after_instructions": 2000,
+            "address": _hx(request["ring_producer"]),
+            "data_hex": _le(25, 2),
+            "evidence": "scenario: producer publishes the new record before helper returns",
+        },
+    ])
+    scenario["checks"].append({
+        "name": "helper reloads producer after signing and consumes the arriving record",
+        "kind": "memory",
+        "address": _hx(contract["memory"]["state_base"] + 32),
+        "size": 2,
+        "equals_hex": _le(25, 2),
+    })
     return scenario
 
 
@@ -1172,6 +1225,7 @@ def request_signer_machine_scenarios(
         _whole_helper_scenario(
             contract, helper_path=helper_path, trampoline=trampoline, command_completed=True,
         ),
+        _producer_reload_scenario(contract, helper_path=helper_path, trampoline=trampoline),
         *_icus_scenarios(contract),
     ]
 

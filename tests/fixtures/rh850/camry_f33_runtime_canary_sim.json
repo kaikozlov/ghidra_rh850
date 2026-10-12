@@ -2,7 +2,6 @@
   "assembly": "tests/fixtures/rh850/camry_f33_runtime_canary_sim.S",
   "codeflash_size": 1048576,
   "harness_address": "0xFEF00000",
-  "stop": "0xFEBF0128",
   "image_sha256": [
     "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7"
   ],
@@ -18,8 +17,6 @@
     "set {unsigned int}0xFEF01004 = 0",
     "set {unsigned int}0xFEF01008 = 0",
     "set {unsigned int}0xFEBE7000 = 0xDEADBEEF",
-    "break *0xFEBF0128",
-    "run",
     "printf \"RAM_HEARTBEAT=0x%x TICK=%u FLAG=0x%x CONTEXT=0x%x STARTUP=0x%x FOREGROUND=0x%x STOCK_ZERO=0x%x\\n\", *(unsigned int *)0xFEBFFB80, *(unsigned char *)0xFEBE39DB, *(unsigned char *)0xFFFFB111, *(unsigned int *)0xFEF01000, *(unsigned int *)0xFEF01004, *(unsigned int *)0xFEF01008, *(unsigned int *)0xFEBE7000"
   ],
   "loads": [

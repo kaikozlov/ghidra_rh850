@@ -19,10 +19,25 @@ from pathlib import Path
 from tools import REPO_ROOT
 
 ROOT = REPO_ROOT
-IMAGE = "ghidra-rh850-v850-gcc:16.2.0-binutils2.46.1-gdb18.1-simfix2"
+IMAGE = "ghidra-rh850-v850-gcc:16.2.0-binutils2.46.1-gdb18.1-simfix2-bswap1-noreturn1-codegen1-unwind1"
 DOCKERFILE = ROOT / "tools" / "toolchains" / "v850-gcc" / "Dockerfile"
 SELFTEST_RESULT = "RH850_SELFTEST_RESULT=0x12cb5687"
 SELFTEST_CODEFLASH_RESULT = "RH850_CODEFLASH_RESULT=0xc0deface"
+SELFTEST_BSWAP_RESULT = "RH850_BSWAP_RESULT=0x78563412"
+# Check generated frame/save invariants, not incidental register allocation
+# or exact frame sizes in functions that must retain their ABI saves.
+SELFTEST_NORETURN_RESULTS = (
+    "RH850_NORETURN_MIN_FRAME=0",
+    "RH850_NORETURN_MIN_SAVES=0",
+    "RH850_NORETURN_LOCALS_RETAINED=1",
+    "RH850_NORETURN_FRAME_SAVES=0",
+    "RH850_RETURNING_SAVES=1",
+    "RH850_IRQ_NORETURN_SAVES=1",
+    "RH850_EXC_NORETURN_SAVES=1",
+    "RH850_UNWIND_NORETURN_SAVES=1",
+    "RH850_ASYNC_NORETURN_SAVES=1",
+    "RH850_UNOPTIMIZED_NORETURN_SAVES=1",
+)
 
 SELFTEST_SCRIPT = r"""
 set -eu
@@ -32,6 +47,9 @@ cat >"$work/selftest.c" <<'EOF'
 unsigned int selftest_compute(unsigned int x) {
   volatile unsigned int value = x;
   return (value + 0x5678u) ^ 0x00ff00ffu;
+}
+unsigned selftest_bswap(unsigned value) {
+  return __builtin_bswap32(value);
 }
 EOF
 cat >"$work/selftest.S" <<'EOF'
@@ -73,6 +91,10 @@ low_jump:
     mov 0x12340000, r6
     jarl32 _selftest_compute, lp
     mov 0xfebf1000, r11
+    st.w r10, 0[r11]
+    mov 0x12345678, r6
+    jarl32 _selftest_bswap, lp
+    mov 0xfebf1008, r11
     st.w r10, 0[r11]
     .global rh850_sim_stop
 rh850_sim_stop:
@@ -118,7 +140,91 @@ v850-elf-gdb -q -batch \
   -ex "break rh850_sim_stop" \
   -ex "break rh850_sim_fail_stop" \
   -ex run \
-  -ex 'printf "RH850_SELFTEST_RESULT=0x%x\nRH850_CODEFLASH_RESULT=0x%x\n", *(unsigned int *)0xFEBF1000, *(unsigned int *)0xFEBF1004'
+  -ex 'printf "RH850_SELFTEST_RESULT=0x%x\nRH850_CODEFLASH_RESULT=0x%x\nRH850_BSWAP_RESULT=0x%x\n", *(unsigned int *)0xFEBF1000, *(unsigned int *)0xFEBF1004, *(unsigned int *)0xFEBF1008'
+
+# The no-local loop must lose its entire frame. Genuine locals/outgoing
+# arguments and saves needed by returning, interrupt, or unwind paths remain.
+cat >"$work/noreturn_probes.c" <<'EOF'
+extern void step(void);
+extern unsigned poll(void);
+extern void send5(unsigned, unsigned, unsigned, unsigned, unsigned);
+
+/* Never returns, needs no locals: the whole saved-register frame is
+   dead weight. */
+__attribute__((noreturn, noinline))
+void noreturn_min(void) {
+  for (;;) step();
+}
+
+/* Never returns but keeps genuine stack: three volatile locals and a
+   fifth outgoing argument word that cannot live in r6-r9. */
+__attribute__((noreturn, noinline))
+void noreturn_frame(void) {
+  volatile unsigned local[3];
+  local[0] = poll();
+  local[2] = poll();
+  for (;;) {
+    local[1] = local[0] + 1u;
+    send5(local[0], local[1], local[2], local[0], local[1]);
+  }
+}
+
+/* Ordinary returning function with sixteen values live across a call:
+   must still save the call-saved registers and link pointer it uses. */
+__attribute__((noinline))
+unsigned returning_saved(const volatile unsigned *p) {
+  unsigned a = p[0], b = p[1], c = p[2], d = p[3];
+  unsigned e = p[4], f = p[5], g = p[6], h = p[7];
+  unsigned i = p[8], j = p[9], k = p[10], l = p[11];
+  unsigned m = p[12], n = p[13], o = p[14], q = p[15];
+  step();
+  return a + b + c + d + e + f + g + h + i + j + k + l + m + n + o + q;
+}
+
+/* Non-returning interrupt handler: the architectural save path must be
+   untouched by the omission. */
+__attribute__((interrupt, noreturn, noinline))
+void irq_noreturn(void) {
+  for (;;) step();
+}
+EOF
+su_bytes() {
+  awk -F'\t' -v fn="$1" '{ n = split($1, a, ":"); if (a[n] == fn) print $2 }' "$2"
+}
+fn_body() {
+  awk -v fn="_$1" 'index($0, fn ":") == 1 { p = 1 } p { print } p && $0 ~ /\.size/ { exit }' "$2"
+}
+has_saves() {
+  if fn_body "$1" "$2" | grep -qE 'prepare[[:space:]]*\{[^}]*r(2[0-9]|31)[^}]*\}|st\.w[[:space:]]+r(2[0-9]|31),[0-9-]+\[sp\]'; then
+    printf 1
+  else
+    printf 0
+  fi
+}
+compile_probes() {
+  v850-elf-gcc -mv850e3v5 -mno-app-regs -ffreestanding -fno-builtin -Os \
+    -fno-exceptions -fno-unwind-tables -fno-asynchronous-unwind-tables "$@" \
+    -S -fstack-usage "$work/noreturn_probes.c" -o "$work/noreturn_probes.s"
+}
+compile_probes
+printf 'RH850_NORETURN_MIN_FRAME=%s\n' "$(su_bytes noreturn_min "$work/noreturn_probes.su")"
+printf 'RH850_NORETURN_MIN_SAVES=%s\n' "$(has_saves noreturn_min "$work/noreturn_probes.s")"
+printf 'RH850_NORETURN_LOCALS_RETAINED=%s\n' "$(
+  if test "$(su_bytes noreturn_frame "$work/noreturn_probes.su")" -ge 16; then printf 1; else printf 0; fi
+)"
+printf 'RH850_NORETURN_FRAME_SAVES=%s\n' "$(has_saves noreturn_frame "$work/noreturn_probes.s")"
+printf 'RH850_RETURNING_SAVES=%s\n' "$(has_saves returning_saved "$work/noreturn_probes.s")"
+printf 'RH850_IRQ_NORETURN_SAVES=%s\n' "$(
+  if fn_body irq_noreturn "$work/noreturn_probes.s" | grep -qE '__save_all_interrupt|st\.w[[:space:]]+r31,[0-9-]+\[sp\]'; then printf 1; else printf 0; fi
+)"
+compile_probes -fexceptions
+printf 'RH850_EXC_NORETURN_SAVES=%s\n' "$(has_saves noreturn_min "$work/noreturn_probes.s")"
+compile_probes -funwind-tables
+printf 'RH850_UNWIND_NORETURN_SAVES=%s\n' "$(has_saves noreturn_min "$work/noreturn_probes.s")"
+compile_probes -fasynchronous-unwind-tables
+printf 'RH850_ASYNC_NORETURN_SAVES=%s\n' "$(has_saves noreturn_min "$work/noreturn_probes.s")"
+compile_probes -O0
+printf 'RH850_UNOPTIMIZED_NORETURN_SAVES=%s\n' "$(has_saves noreturn_min "$work/noreturn_probes.s")"
 """
 
 
@@ -475,7 +581,12 @@ def cmd_selftest(_args: argparse.Namespace) -> int:
         sys.stderr.write(proc.stderr)
     if proc.returncode != 0:
         return proc.returncode
-    for expected in (SELFTEST_RESULT, SELFTEST_CODEFLASH_RESULT):
+    for expected in (
+        SELFTEST_RESULT,
+        SELFTEST_CODEFLASH_RESULT,
+        SELFTEST_BSWAP_RESULT,
+        *SELFTEST_NORETURN_RESULTS,
+    ):
         if expected not in proc.stdout:
             raise Rh850ToolError(
                 f"simulator completed without expected result {expected!r}"

@@ -4,7 +4,7 @@
   "gcc_release": "releases/gcc-16.2.0",
   "gcc_version": "16.2.0",
   "binutils_version": "2.46.1",
-  "toolchain_image": "ghidra-rh850-v850-gcc:16.2.0-binutils2.46.1-gdb18.1-simfix2",
+  "toolchain_image": "ghidra-rh850-v850-gcc:16.2.0-binutils2.46.1-gdb18.1-simfix2-bswap1",
   "toolchain_identities": {
    "gcc": "v850-elf-gcc (GCC) 16.2.0",
    "objdump": "GNU objdump (GNU Binutils) 2.46.1"
