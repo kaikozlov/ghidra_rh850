@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Compile vendored SLEIGH and install into an isolated Ghidra user-home
-# Extensions directory. Never mutates $GHIDRA_HOME/Ghidra/Extensions.
+# Compile vendored SLEIGH and processor analyzers, then install into an isolated
+# Ghidra user-home. Never mutates $GHIDRA_HOME/Ghidra/Extensions.
 set -euo pipefail
 
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
@@ -58,6 +58,7 @@ fi
 rm -rf "$BUILD_EXT"
 mkdir -p "$BUILD_EXT"
 rsync -a --delete --exclude '.git' --exclude '*.sla' "$VENDOR/" "$BUILD_EXT/"
+python3 "$ROOT/tools/project/build_compiler_policy_specs.py" "$LANG"
 
 echo "Compiling vendored SLEIGH sources under $LANG"
 (
@@ -87,6 +88,27 @@ echo "Compiling vendored SLEIGH sources under $LANG"
 )
 [[ -f "$LANG/v850e3.sla" ]] || { echo "sleigh did not produce v850e3.sla" >&2; exit 1; }
 
+# Processor analyzers are ordinary extension classes, discovered by Ghidra's
+# class search. Build them alongside the languages, never in the source tree.
+JAVA_SOURCES=()
+while IFS= read -r source; do
+  JAVA_SOURCES+=("$source")
+done < <(find "$BUILD_EXT/src/main/java" -name '*.java' -type f | sort)
+if [[ ${#JAVA_SOURCES[@]} -gt 0 ]]; then
+  CLASSPATH=""
+  for dependency in "$GHIDRA_HOME"/Ghidra/{Framework,Features,Processors}/*/lib/*.jar; do
+    [[ -f "$dependency" ]] || continue
+    CLASSPATH="${CLASSPATH:+$CLASSPATH:}$dependency"
+  done
+  CLASSES="$BUILD_EXT/build/classes"
+  mkdir -p "$CLASSES" "$BUILD_EXT/lib"
+  javac --release 21 -encoding UTF-8 -cp "$CLASSPATH" \
+    -d "$CLASSES" "${JAVA_SOURCES[@]}"
+  jar --create --file "$BUILD_EXT/lib/Renesas_v850.jar" \
+    --date=2000-01-01T00:00:00Z -C "$CLASSES" .
+  rm -rf "$BUILD_EXT/build"
+fi
+
 echo "Installing Renesas_v850 -> $EXT_DIR"
 mkdir -p "$(dirname "$EXT_DIR")"
 rsync -a --delete "$BUILD_EXT/" "$EXT_DIR/"
@@ -98,7 +120,7 @@ python3 "$ROOT/tools/project/fingerprint_processor.py" \
   --write "$MANIFEST"
 
 # Emit a small env file callers can source.
-ENV_FILE="$BUILD_CACHE/ghidra-processor.env"
+ENV_FILE="${GHIDRA_PROCESSOR_ENV_FILE:-$BUILD_CACHE/ghidra-processor.env}"
 cat >"$ENV_FILE" <<EOF
 export GHIDRA_HOME="$GHIDRA_HOME"
 export GHIDRA_ISOLATED_HOME="$USER_HOME"

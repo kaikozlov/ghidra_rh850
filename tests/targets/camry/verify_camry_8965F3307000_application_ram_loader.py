@@ -189,7 +189,7 @@ def section_application_ram_loader() -> int:
     check("only one recovered application DMAC channel programmer remains", dma["recovered_channel_programmers"] == ["0x00060A6A"] and dma["fixed_global_setup"] == "0x00060A10" and dma["recovered_channel_register_accessors"] == ["0x0006091E","0x00060934","0x00060940","0x000609B0","0x00060A6A"])
     ctbp=ct["ctbp_writer_census"]
     raw_ctbp=find_ldsr_writers(img,20,0)
-    check("whole-image CTBP writer census closes CALLT-base retargeting", raw_ctbp == [(0x25E,0,bytes.fromhex("e0a72000"))] and ctbp["writers"] == [{"address":"0x0000025E","bytes":"e0a72000","source_register":"r0"}] and ctbp["all_ctbp_writers_census_closed"] and ctbp["only_writer_sets_zero"])
+    check("whole-image CTBP writer census proves fixed zero context", raw_ctbp == [(0x25E,0,bytes.fromhex("e0a72000"))] and ctbp["writers"] == [{"address":"0x0000025E","bytes":"e0a72000","source_register":"r0"}] and ctbp["all_ctbp_writers_census_closed"] and ctbp["only_writer_sets_zero"])
     vec=ct["fixed_vector_base_setup"]
     check("application INTBP/EBASE setup uses fixed CodeFlash bases", img[0x715B4:0x715E4] == bytes.fromhex("2b06000202000000eb2720082b06000002000000eb1f2008240600b8befe2506fc3d020023060020befe7f002c0682e9") and vec["intbp"] == "0x00020200" and vec["ebase"] == "0x00020000" and vec["values_are_fixed_immediates"] and vec["tester_controlled_vector_base_recovered"] is False)
     arch = a["architectures"]

@@ -5,24 +5,56 @@
             endian="little"
             size="32"
             variant="V850E2M"
-            version="0.7"
+            version="0.8"
             slafile="v850e2.sla"
-            processorspec="v850.pspec"
+            processorspec="v850_generic.pspec"
             id="v850:LE:32:default">
-    <description>Renesas v850 Module</description>
-    <compiler name="default" spec="v850.cspec" id="default"/>
+    <description>Renesas V850E2M</description>
+    <compiler name="GHS MULTI" spec="v850_ghs.cspec" id="default"/>
+    <compiler name="GCC (old V850 ABI)" spec="v850_gcc.cspec" id="gcc"/>
+    <compiler name="CC-RH" spec="v850_ccrh.cspec" id="ccrh"/>
     <external_name tool="DWARF.register.mapping.file" name="v850.dwarf"/>
   </language> 
   <language processor="v850"
             endian="little"
             size="32"
             variant="RH850G3M (P1M-E)"
-            version="0.7"
+            version="0.8"
             slafile="v850e3.sla"
             processorspec="v850.pspec"
             id="v850e3:LE:32:default">
     <description>Renesas RH850G3M for RH850/P1M-E</description>
-    <compiler name="default" spec="v850.cspec" id="default"/>
+    <compiler name="GHS MULTI" spec="v850_ghs.cspec" id="default"/>
+    <compiler name="GCC (old V850 ABI)" spec="v850_gcc.cspec" id="gcc"/>
+    <compiler name="CC-RH" spec="v850_ccrh.cspec" id="ccrh"/>
     <external_name tool="DWARF.register.mapping.file" name="v850.dwarf"/>
   </language> 
+  <language processor="v850"
+            endian="little"
+            size="32"
+            variant="RH850 broad (DSP/SIMD/virtualization)"
+            version="1.0"
+            slafile="v850rh850.sla"
+            processorspec="v850_generic.pspec"
+            id="v850e3x:LE:32:default">
+    <description>Renesas RH850 with DSP, SIMD, virtualization, trace and debug</description>
+    <compiler name="GHS MULTI" spec="v850_ghs.cspec" id="default"/>
+    <compiler name="GCC (old V850 ABI)" spec="v850_gcc.cspec" id="gcc"/>
+    <compiler name="CC-RH" spec="v850_ccrh.cspec" id="ccrh"/>
+    <external_name tool="DWARF.register.mapping.file" name="v850.dwarf"/>
+  </language>
+  <language processor="v850"
+            endian="little"
+            size="32"
+            variant="V850E1F"
+            version="1.0"
+            slafile="v850e1f.sla"
+            processorspec="v850_generic.pspec"
+            id="v850e1f:LE:32:default">
+    <description>Renesas V850E1F with legacy general-register floating-point instructions</description>
+    <compiler name="GHS MULTI" spec="v850_ghs.cspec" id="default"/>
+    <compiler name="GCC (old V850 ABI)" spec="v850_gcc.cspec" id="gcc"/>
+    <compiler name="CC-RH" spec="v850_ccrh.cspec" id="ccrh"/>
+    <external_name tool="DWARF.register.mapping.file" name="v850.dwarf"/>
+  </language>
 </language_definitions>

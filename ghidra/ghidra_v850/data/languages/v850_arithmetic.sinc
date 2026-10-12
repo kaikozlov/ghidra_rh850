@@ -129,8 +129,10 @@ macro saturate(value) {
 
 # ADDI imm16, reg1, reg2
 :addi s1631, R0004, R1115 is op0510=0x30 & R1115 & R0004; s1631 {
+	# flags read the SOURCE value: compute them before the destination
+	# write so an aliased reg2 == reg1 cannot double-add.
+	flags_add(R0004, s1631);
 	R1115 = R0004 + s1631;
-	flags_add (R0004, s1631);
 }
 
 # MOV imm32, reg1
@@ -325,12 +327,16 @@ macro saturate(value) {
 	R2731 = res:4;
 }
 
+# MAC/MACU reg3 is a READ of the accumulate pair (R2731pair read view) and
+# reg4 a WRITE through the raw window (R01US0209EJ0220 pp.116-117: reg3 and
+# reg4 are even-numbered registers, r0 included -- the r0:r1 accumulate
+# source reads (0 || r1) and a reg4=r0 write commits only r1).
 # MAC reg1, reg2, reg3, reg4
-:mac R0004, R1115, R2731pair, R1620pair is op0510=0x3F & R0004 & R1115; op2126=0x1E & op1616=0 & R1620pair & R2731pair {
-	R1620pair = R2731pair + sext(R0004) * sext(R1115);
+:mac R0004, R1115, R2731pair, xR1620pair is op0510=0x3F & R0004 & R1115; op2126=0x1E & op1616=0 & xR1620pair & R2731pair {
+	xR1620pair = R2731pair + sext(R0004) * sext(R1115);
 }
 # MACU reg1, reg2, reg3, reg4
-:macu R0004, R1115, R2731pair, R1620pair is op0510=0x3F & R0004 & R1115; op2126=0x1F & op1616=0 & R1620pair & R2731pair {
-	R1620pair = R2731pair + zext(R0004) * zext(R1115);
+:macu R0004, R1115, R2731pair, xR1620pair is op0510=0x3F & R0004 & R1115; op2126=0x1F & op1616=0 & xR1620pair & R2731pair {
+	xR1620pair = R2731pair + zext(R0004) * zext(R1115);
 }
 

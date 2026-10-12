@@ -23,7 +23,17 @@ macro enter_fe_exception(return_pc, cause, offset, handler) {
 	clear_link();
 	FEPC = return_pc;
 	FEPSW = PSW;
+@if defined(V850SIMD)
+	if ((HVCFG & 1) == 0) goto <fe_virtual_saved>;
+	if ((PSWH & 0x80000000) != 0) goto <fe_virtual_saved>;
+	FEPSWH = PSWH;
+	<fe_virtual_saved>
+@endif
+@if defined(V850E1F)
+	ECR = (ECR & 0xffff) | ((cause & 0xffff) << 16);
+@else
 	FEIC = cause;
+@endif
 	$(PSW_UM) = 0;
 	$(PSW_NP) = 1;
 	$(PSW_EP) = 1;
@@ -36,7 +46,17 @@ macro enter_ei_exception(return_pc, cause, offset, handler) {
 	clear_link();
 	EIPC = return_pc;
 	EIPSW = PSW;
+@if defined(V850SIMD)
+	if ((HVCFG & 1) == 0) goto <ei_virtual_saved>;
+	if ((PSWH & 0x80000000) != 0) goto <ei_virtual_saved>;
+	EIPSWH = PSWH;
+	<ei_virtual_saved>
+@endif
+@if defined(V850E1F)
+	ECR = (ECR & 0xffff0000) | (cause & 0xffff);
+@else
 	EIIC = cause;
+@endif
 	$(PSW_UM) = 0;
 	$(PSW_EP) = 1;
 	$(PSW_ID) = 1;
@@ -44,6 +64,84 @@ macro enter_ei_exception(return_pc, cause, offset, handler) {
 	exception_vector(handler, offset);
 }
 
+@if defined(V850SIMD)
+# System-register HV permission is SV in conventional mode, and requires
+# Host+SV in virtualization mode (R01UH0865EJ0140 Table 2.3).
+macro virtual_hv_reg_check(pc) {
+	if ($(PSW_UM) != 0) goto <hv_denied>;
+	if ((HVCFG & 1) == 0) goto <hv_allowed>;
+	if ((PSWH & 0x80000000) == 0) goto <hv_allowed>;
+	<hv_denied>
+	local hv_handler:4 = 0;
+	enter_fe_exception(pc, 0xa0, 0xa0, hv_handler);
+	goto [hv_handler];
+	<hv_allowed>
+}
+
+macro virtual_sv_check(pc) {
+	if ($(PSW_UM) == 0) goto <sv_allowed>;
+	local sv_handler:4 = 0;
+	enter_fe_exception(pc, 0xa0, 0xa0, sv_handler);
+	goto [sv_handler];
+	<sv_allowed>
+}
+
+# FXU execution and selID-10 access permission (R01UH0770EJ0121 Tables 3.2,
+# 3.3, 3.14): PSW.CU1 (bit 17) gates every FXU instruction and every
+# extended floating-point function system register. With CU1 clear the
+# access takes the resumable FE-level coprocessor-unusable exception UCPOP,
+# cause 81H (coprocessor 1), vector 80H, and the faulting instruction
+# address is saved in FEPC. The unconditional indirect goto ends the
+# faulted constructor before any side effect: destination registers, FXSR,
+# FXXC/FXXP, W registers, and memory all stay untouched. Call this as the
+# first statement of an FXU constructor with the faulting instruction
+# address (inst_start).
+macro fxu_check(pc) {
+	if ((PSW & 0x00020000) != 0) goto <fxu_ok>;
+	local fxu_handler:4 = 0;
+	enter_fe_exception(pc, 0x81, 0x80, fxu_handler);
+	goto [fxu_handler];
+	<fxu_ok>
+}
+
+# FXSR additionally requires supervisor mode (Table 3.54, "CU1 and SV"):
+# user mode with CU1 set takes the FE-level privilege instruction exception
+# PIE, cause A0H, vector A0H. CU1 is checked first because user mode with
+# CU1 clear is still UCPOP (Table 3.3).
+macro fxu_check_sv(pc) {
+	if ((PSW & 0x00020000) != 0) goto <fxu_cu1_ok>;
+	local fxu_ucpop_handler:4 = 0;
+	enter_fe_exception(pc, 0x81, 0x80, fxu_ucpop_handler);
+	goto [fxu_ucpop_handler];
+	<fxu_cu1_ok>
+	if ($(PSW_UM) == 0) goto <fxu_ok>;
+	local fxu_pie_handler:4 = 0;
+	enter_fe_exception(pc, 0xa0, 0xa0, fxu_pie_handler);
+	goto [fxu_pie_handler];
+	<fxu_ok>
+}
+
+# Indexed descriptor views and LDM.MP/STM.MP remain SV in both modes.
+# Only MPBK is raised to HV (R01UH0865EJ0140 Table 3.12).
+macro mpu_sv_check(pc) {
+	if ($(PSW_UM) == 0) goto <mpu_ok>;
+	local mpu_handler:4 = 0;
+	enter_fe_exception(pc, 0xa0, 0xa0, mpu_handler);
+	goto [mpu_handler];
+	<mpu_ok>
+}
+
+macro mpu_indexed_check(pc, reg_id) {
+	if (reg_id == 17) goto <bank_permission>;
+	mpu_sv_check(pc);
+	goto <permission_done>;
+	<bank_permission>
+	virtual_hv_reg_check(pc);
+	<permission_done>
+}
+@endif
+
+@if defined(V850E2M) || defined(V850E3)
 # FPU register views are aliases, not independent configuration/status storage.
 # R01US0123EJ0140 3.4; R01US0001EJ0100 Part 4, 2.2.
 macro fp_refresh_views() {
@@ -152,12 +250,13 @@ macro fp_return_priority() {
 	<done>
 @endif
 }
+@endif
 
 # NOP
-:nop is op0015=0x0000 {
-	__nop();
-}
+:nop is op0015=0x0000 {}
 
+# SYNCE/SYNCM/SYNCP are V850E2M+/RH850 instructions (absent on V850E1).
+@if !(defined(V850E1F))
 # SYNCE
 :synce is op0015=0x001D {
 	fp_acknowledge_pending(inst_next);
@@ -171,13 +270,16 @@ macro fp_return_priority() {
 :syncp is op0015=0x001F {
 	__synchronize();
 }
+@endif
 
+@if !(defined(V850E1F))
 # RIE
 :rie is op0015=0x0040 {
 	local handler:4 = 0;
 	enter_fe_exception(inst_start, 0x60, 0x60, handler);
 	goto [handler];
 }
+@endif
 
 # SWITCH reg1
 :switch R0004 is op0515=0x002 & R0004 {
@@ -187,12 +289,14 @@ macro fp_return_priority() {
 	goto [addr];
 }
 
+@if !(defined(V850E1F))
 # FETRAP vector4
 :fetrap op1114 is op0010=0x040 & op1515=0 & op1114 & op1115!=0 {
 	local handler:4 = 0;
 	enter_fe_exception(inst_next, op1114 + 0x30, 0x30, handler);
 	call [handler];
 }
+@endif
 
 # CALLT imm6
 :callt op0005 is op0615=0x008 & op0005 {
@@ -203,42 +307,76 @@ macro fp_return_priority() {
 	call [addr];
 }
 
+@if !(defined(V850E1F))
 # RIE imm5, imm4
 :rie op1115, op0003 is op0410=0x7F & op1115 & op0003; op1631=0 {
 	local handler:4 = 0;
 	enter_fe_exception(inst_start, 0x60, 0x60, handler);
 	goto [handler];
 }
+@endif
 
 # LDSR reg2, regID
-:ldsr R0004, SR1115 is op0510=0x3F & SR1115 & R0004 & op1115!=5 & op1115; op1631=0x20 {
-	local reg:4 = op1115;
-	local fpu:1 = (reg >= 6) && (reg <= 11);
-@if defined(V850E2M)
-	fpu = fpu && (BSEL == 0x2000);
+:ldsr R0004, SR1115 is op0510=0x3F & SR1115 & R0004 & op1115!=5
+@if defined(V850E1F)
+	& op1115!=4
+@else
+	& (op1115<6 | op1115>11)
 @endif
-	if (!fpu) goto <ordinary>;
-		fp_write_control(reg, R0004);
-		goto <written>;
-	<ordinary>
-		SR1115 = R0004;
-	<written>
-}
-:ldsr R0004, SR1115 is op0510=0x3F & SR1115 & R0004 & op1115=5; op1631=0x20 {
+@if defined(V850SIMD)
+	& op1115!=12 & op1115!=15 & op1115!=18 & op1115!=19
+@endif
+	& op1115; op1631=0x20 {
 	SR1115 = R0004;
+}
+@if !(defined(V850E1F))
+# Decode the floating-control register class statically. A runtime branch on
+# the instruction's fixed register ID creates impossible constant-flow paths.
+:ldsr R0004, SR1115 is op0510=0x3F & SR1115 & R0004 & op1115>=6 & op1115<=11 & op1115; op1631=0x20 {
+@if defined(V850E2M)
+	if (BSEL != 0x2000) goto <ordinary>;
+@endif
+	local reg:4 = op1115;
+	fp_write_control(reg, R0004);
+@if defined(V850E2M)
+	goto <written>;
+	<ordinary>
+	SR1115 = R0004;
+	<written>
+@endif
+}
+@endif
+:ldsr R0004, SR1115 is op0510=0x3F & SR1115 & R0004 & op1115=5; op1631=0x20 {
+@if defined(V850SIMD)
+	virtual_sv_check(inst_start);
+	virtual_write_psw(R0004);
+@else
+	SR1115 = R0004;
+@endif
+@if !(defined(V850E1F))
 	fp_acknowledge_pending(inst_next);
+@endif
 }
 
 @if defined(V850E3)
 # Priority changes may release an already reported, masked FPI exception.
-:ldsr R0004, SR1115_1, 1 is op0510=0x3F & SR1115_1 & R0004 & op1115!=7; op1626=0x20 & op2731=0x01 {
+:ldsr R0004, SR1115_1, 1 is op0510=0x3F & SR1115_1 & R0004 & op1115!=7
+@if defined(V850SIMD)
+	& op1115!=0 & op1115!=1 & op1115!=6 & op1115!=8
+	& op1115!=16 & op1115!=17 & op1115!=20
+@endif
+	; op1626=0x20 & op2731=0x01 {
 	SR1115_1 = R0004;
 }
 :ldsr R0004, SR1115_1, 1 is op0510=0x3F & SR1115_1 & R0004 & op1115=7; op1626=0x20 & op2731=0x01 {
 	SR1115_1 = R0004;
 	fp_acknowledge_pending(inst_next);
 }
-:ldsr R0004, SR1115_2, 2 is op0510=0x3F & SR1115_2 & R0004 & op1115!=10 & op1115!=11 & op1115!=13; op1626=0x20 & op2731=0x02 {
+:ldsr R0004, SR1115_2, 2 is op0510=0x3F & SR1115_2 & R0004 & op1115!=10 & op1115!=11 & op1115!=13
+@if defined(V850SIMD)
+	& op1115!=0 & op1115!=14
+@endif
+	; op1626=0x20 & op2731=0x02 {
 	SR1115_2 = R0004;
 }
 :ldsr R0004, SR1115_2, 2 is op0510=0x3F & SR1115_2 & R0004 & op1115=10; op1626=0x20 & op2731=0x02 {
@@ -257,20 +395,36 @@ macro fp_return_priority() {
 }
 @endif
 # STSR regID, reg2
-:stsr SR0004, R1115 is op0510=0x3F & R1115 & SR0004 & op0004; op1631=0x40 {
-	local reg:4 = op0004;
-	local fpu:1 = (reg >= 6) && (reg <= 11);
-@if defined(V850E2M)
-	fpu = fpu && (BSEL == 0x2000);
+:stsr SR0004, R1115 is op0510=0x3F & R1115 & SR0004
+@if defined(V850VECTOR)
+	& op0004!=12
+@if defined(V850SIMD)
+	& op0004!=15 & op0004!=18 & op0004!=19
 @endif
-	if (!fpu) goto <ordinary>;
-		fp_read_control(R1115, reg);
-		goto <done>;
-	<ordinary>
-		R1115 = SR0004;
-	<done>
+@endif
+@if !(defined(V850E1F))
+	& (op0004<6 | op0004>11)
+@endif
+	& op0004; op1631=0x40 {
+	R1115 = SR0004;
 }
+@if !(defined(V850E1F))
+:stsr SR0004, R1115 is op0510=0x3F & R1115 & SR0004 & op0004>=6 & op0004<=11 & op0004; op1631=0x40 {
+@if defined(V850E2M)
+	if (BSEL != 0x2000) goto <ordinary>;
+@endif
+	local reg:4 = op0004;
+	fp_read_control(R1115, reg);
+@if defined(V850E2M)
+	goto <done>;
+	<ordinary>
+	R1115 = SR0004;
+	<done>
+@endif
+}
+@endif
 
+@if !(defined(V850E1F))
 # CAXI [reg1], reg2, reg3
 :caxi [R0004], R1115, R2731 is op0510=0x3F & R0004 & R1115; op1626=0xEE & R2731 {
 	local token = *:4 R0004;
@@ -281,6 +435,7 @@ macro fp_return_priority() {
 	R2731 = token;
 	flags_sub(R1115, token);
 }
+@endif
 
 # TRAP imm5
 :trap op0004 is op0515=0x3F & op0004; op1631=0x0100 {
@@ -298,45 +453,71 @@ macro fp_return_priority() {
 :halt is op0515=0x3F; op1631=0x0120 {
 	__halt();
 }
-@if defined(V850E2M)
-# RETI is a V850E2 compatibility instruction; RH850G3M uses EIRET/FERET.
-:reti is op0515=0x3F; op1631=0x0140 {
+@if defined(V850E2M) || defined(V850E1F)
+# Legacy RETI; RH850G3M uses EIRET/FERET.
+:reti is op0515=0x3F & op1115=0 & op0004=0; op1631=0x0140 & op2731=0 {
 	if ($(PSW_EP) == 0) && $(PSW_NP) goto <fe_exc>;
 		PC = EIPC;
 		PSW = EIPSW;
+@if !(defined(V850E1F))
 		fp_acknowledge_pending(PC);
+@endif
 		return [PC];
 	<fe_exc>
 		PC = FEPC;
 		PSW = FEPSW;
+@if !(defined(V850E1F))
 		fp_acknowledge_pending(PC);
+@endif
 		return [PC];
 }
 @endif
 # CTRET
-:ctret is op0515=0x3F; op1631=0x0144 {
+:ctret is op0515=0x3F & op1115=0 & op0004=0; op1631=0x0144 & op2731=0 {
 	PC = CTPC;
 	PSW = (PSW & 0xffffffe0) | (CTPSW & 0x1f);
 	return [PC];
 }
+@if !(defined(V850E1F))
 # EIRET
-:eiret is op0515=0x3F; op1631=0x0148 {
+:eiret is op0515=0x3F & op1115=0 & op0004=0; op1631=0x0148 & op2731=0 {
+@if defined(V850SIMD)
+	virtual_sv_check(inst_start);
+@endif
 	clear_link();
 	fp_return_priority();
 	PC = EIPC;
 	PSW = EIPSW;
+@if defined(V850SIMD)
+	if ((HVCFG & 1) == 0) goto <ei_return_selected>;
+	if ((PSWH & 0x80000000) != 0) goto <ei_return_selected>;
+	virtual_select_context(EIPSWH);
+	<ei_return_selected>
+	virtual_write_psw(PSW);
+@endif
 	fp_acknowledge_pending(PC);
 	return [PC];
 }
 # FERET
-:feret is op0515=0x3F; op1631=0x014A {
+:feret is op0515=0x3F & op1115=0 & op0004=0; op1631=0x014A & op2731=0 {
+@if defined(V850SIMD)
+	virtual_sv_check(inst_start);
+@endif
 	clear_link();
 	fp_return_priority();
 	PC = FEPC;
 	PSW = FEPSW;
+@if defined(V850SIMD)
+	if ((HVCFG & 1) == 0) goto <fe_return_selected>;
+	if ((PSWH & 0x80000000) != 0) goto <fe_return_selected>;
+	virtual_select_context(FEPSWH);
+	<fe_return_selected>
+	virtual_write_psw(PSW);
+@endif
 	fp_acknowledge_pending(PC);
 	return [PC];
 }
+@endif
 
 # DI
 :di is op0015=0x07E0; op1631=0x0160 {
@@ -346,10 +527,13 @@ macro fp_return_priority() {
 # EI
 :ei is op0015=0x87E0; op1631=0x0160 {
 	$(PSW_ID) = 0;
+@if !(defined(V850E1F))
 	fp_acknowledge_pending(inst_next);
+@endif
 	__enable_irq();
 }
 
+@if !(defined(V850E1F))
 # SYSCALL vector8
 :syscall vector8 is op0515=0x6BF & op0004; op3031=0 & op2729 & op1626=0x160
 [ vector8 = (op2729 << 5) | op0004; ] {
@@ -367,4 +551,5 @@ macro fp_return_priority() {
 	local handler:4 = SCBP + (*:4 addr);
 	call [handler];
 }
+@endif
 

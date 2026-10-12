@@ -2,5 +2,4 @@
 # Format: userop<TAB>reason
 __disable_irq	DI privilege/interrupt-controller side effect is opaque; PSW.ID is modeled by the instruction
 __enable_irq	EI privilege/interrupt-controller side effect is opaque; PSW.ID is modeled by the instruction
-__nop	NOP intentionally has no architectural state change
 __synchronize	pipeline/cache synchronization has no additional static-analysis state

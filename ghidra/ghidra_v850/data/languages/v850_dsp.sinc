@@ -1,0 +1,1532 @@
+# Legacy V850E2H-class packed DSP instructions (64-bit V registers).
+#
+# Encoding authority: IDA SDK nec850 ana.cpp categories 4/5, cross-checked
+# with GNU binutils sim/v850/v850.igen. The public simulator supplies
+# recovered pack/convert/move/absolute/modadd behavior, not a complete
+# silicon specification. Simple lane arithmetic is a bounded numeric
+# model; compound operations without a recovered algorithm use explicit
+# architecture intrinsics with the recovered input/output registers.
+#
+# All instructions are format X (bits 10..5 = 111111, bit 26 = 1, bit 16 = 0):
+#   cat=4 -> op1626 0x600..0x67E, cat=5 -> op1626 0x680..0x6FE.
+
+define pcodeop __vcalc_h;
+define pcodeop __vcalc_w;
+
+# VMAX/VMIN update both the index GPR and the destination vector
+# (IDA SDK ins.cpp CF_USE1|CF_CHG1|CF_USE2|CF_CHG3). Architecture intrinsics
+# preserve the recovered two-output contract without inventing the index
+# algorithm. Their internal result record packs index at bits 0..31 and
+# vector at bits 32..95; it is not an architectural register format.
+define pcodeop __vmaxgt_h;
+define pcodeop __vmaxge_h;
+define pcodeop __vmaxgt_w;
+define pcodeop __vmaxge_w;
+define pcodeop __vminlt_h;
+define pcodeop __vminle_h;
+define pcodeop __vminlt_w;
+define pcodeop __vminle_w;
+:vmaxgt.h R0004, vR1115, vR2731 is op0510=0x3F & R0004 & vR1115; op1626=0x650 & op2727=0 & vR2731 {
+	local outputs:16 = __vmaxgt_h(R0004, vR1115, vR2731);
+	R0004 = outputs:4;
+	vR2731[0,32] = outputs[32,32];
+	vR2731[32,32] = outputs[64,32];
+}
+:vmaxge.h R0004, vR1115, vR2831 is op0510=0x3F & R0004 & vR1115; op1626=0x650 & op2727=1 & vR2831 {
+	local outputs:16 = __vmaxge_h(R0004, vR1115, vR2831);
+	R0004 = outputs:4;
+	vR2831[0,32] = outputs[32,32];
+	vR2831[32,32] = outputs[64,32];
+}
+:vmaxgt.w R0004, vR1115, vR2731 is op0510=0x3F & R0004 & vR1115; op1626=0x652 & op2727=0 & vR2731 {
+	local outputs:16 = __vmaxgt_w(R0004, vR1115, vR2731);
+	R0004 = outputs:4;
+	vR2731[0,32] = outputs[32,32];
+	vR2731[32,32] = outputs[64,32];
+}
+:vmaxge.w R0004, vR1115, vR2831 is op0510=0x3F & R0004 & vR1115; op1626=0x652 & op2727=1 & vR2831 {
+	local outputs:16 = __vmaxge_w(R0004, vR1115, vR2831);
+	R0004 = outputs:4;
+	vR2831[0,32] = outputs[32,32];
+	vR2831[32,32] = outputs[64,32];
+}
+:vminlt.h R0004, vR1115, vR2731 is op0510=0x3F & R0004 & vR1115; op1626=0x654 & op2727=0 & vR2731 {
+	local outputs:16 = __vminlt_h(R0004, vR1115, vR2731);
+	R0004 = outputs:4;
+	vR2731[0,32] = outputs[32,32];
+	vR2731[32,32] = outputs[64,32];
+}
+:vminle.h R0004, vR1115, vR2831 is op0510=0x3F & R0004 & vR1115; op1626=0x654 & op2727=1 & vR2831 {
+	local outputs:16 = __vminle_h(R0004, vR1115, vR2831);
+	R0004 = outputs:4;
+	vR2831[0,32] = outputs[32,32];
+	vR2831[32,32] = outputs[64,32];
+}
+:vminlt.w R0004, vR1115, vR2731 is op0510=0x3F & R0004 & vR1115; op1626=0x656 & op2727=0 & vR2731 {
+	local outputs:16 = __vminlt_w(R0004, vR1115, vR2731);
+	R0004 = outputs:4;
+	vR2731[0,32] = outputs[32,32];
+	vR2731[32,32] = outputs[64,32];
+}
+:vminle.w R0004, vR1115, vR2831 is op0510=0x3F & R0004 & vR1115; op1626=0x656 & op2727=1 & vR2831 {
+	local outputs:16 = __vminle_w(R0004, vR1115, vR2831);
+	R0004 = outputs:4;
+	vR2831[0,32] = outputs[32,32];
+	vR2831[32,32] = outputs[64,32];
+}
+
+# Software-visible SESR view used by the public DSP simulator.
+:ldsr R0004, "SESR", 0 is op0510=0x3f & R0004 & op1115=12; op1631=0x20 {
+	SESR = R0004;
+}
+:stsr "SESR", R1115, 0 is op0510=0x3f & R1115 & op0004=12; op1631=0x40 {
+	R1115 = SESR;
+}
+
+# ------------------------------------------------------------- macros
+# SLEIGH macros are expanded in place, so they avoid labels entirely.
+
+# Saturating narrowing uses the public simulator's SAT16/SAT32 behavior.
+macro vsat16(res, value) {
+	local r:4 = value;
+	local hi:4 = zext(r s> 0x7fff);
+	local lo:4 = zext(r s< -0x8000);
+	local bounded:4 = (r * zext((hi == 0) && (lo == 0)))
+		+ (0x7fff * hi) + (-0x8000 * lo);
+	SESR = SESR | (zext((hi != 0) || (lo != 0)) * 3);
+	res = bounded:2;
+}
+macro vsat32(res, value) {
+	local r:8 = value;
+	local hi:8 = zext(r s> 0x7fffffff);
+	local lo:8 = zext(r s< -0x80000000);
+	local bounded:8 = (r * zext((hi == 0) && (lo == 0)))
+		+ (0x7fffffff * hi) + (-0x80000000 * lo);
+	SESR = SESR | (zext((hi != 0) || (lo != 0)) * 3);
+	res = bounded:4;
+}
+macro vsat_add16(res, a, b) {
+	local sum:4 = sext(a) + sext(b);
+	vsat16(res, sum);
+}
+macro vsat_sub16(res, a, b) {
+	local difference:4 = sext(a) - sext(b);
+	vsat16(res, difference);
+}
+macro vsat_add32(res, a, b) {
+	local sum:8 = sext(a) + sext(b);
+	vsat32(res, sum);
+}
+macro vsat_sub32(res, a, b) {
+	local difference:8 = sext(a) - sext(b);
+	vsat32(res, difference);
+}
+
+macro vaddsat_h(d, a, b) {
+	vsat_add16(d[0,16], a[0,16], b[0,16]);
+	vsat_add16(d[16,16], a[16,16], b[16,16]);
+	vsat_add16(d[32,16], a[32,16], b[32,16]);
+	vsat_add16(d[48,16], a[48,16], b[48,16]);
+}
+macro vsubsat_h(d, a, b) {
+	vsat_sub16(d[0,16], a[0,16], b[0,16]);
+	vsat_sub16(d[16,16], a[16,16], b[16,16]);
+	vsat_sub16(d[32,16], a[32,16], b[32,16]);
+	vsat_sub16(d[48,16], a[48,16], b[48,16]);
+}
+macro vaddsat_w(d, a, b) {
+	vsat_add32(d[0,32], a[0,32], b[0,32]);
+	vsat_add32(d[32,32], a[32,32], b[32,32]);
+}
+macro vsubsat_w(d, a, b) {
+	vsat_sub32(d[0,32], a[0,32], b[0,32]);
+	vsat_sub32(d[32,32], a[32,32], b[32,32]);
+}
+
+# |a| with the most negative value saturating (binutils sim ABS16/ABS32).
+macro vabs16(res, a) {
+	local v:4 = sext(a);
+	local neg:4 = zext(v s< 0);
+	local minimum:4 = zext(v == -0x8000);
+	local magnitude:4 = (v * zext((neg == 0) && (minimum == 0)))
+		+ ((0 - v) * zext((neg != 0) && (minimum == 0)))
+		+ (0x7fff * minimum);
+	SESR = SESR | (zext(minimum != 0) * 3);
+	res = magnitude:2;
+}
+macro vabs32(res, a) {
+	local v:8 = sext(a);
+	local neg:8 = zext(v s< 0);
+	local minimum:8 = zext(v == -0x80000000);
+	local magnitude:8 = (v * zext((neg == 0) && (minimum == 0)))
+		+ ((0 - v) * zext((neg != 0) && (minimum == 0)))
+		+ (0x7fffffff * minimum);
+	SESR = SESR | (zext(minimum != 0) * 3);
+	res = magnitude:4;
+}
+# Negate with saturation of the most negative value.
+macro vneg16(res, a) {
+	local negated:4 = 0 - sext(a);
+	vsat16(res, negated);
+}
+macro vneg32(res, a) {
+	local negated:8 = 0 - sext(a);
+	vsat32(res, negated);
+}
+# VADD/VSUB: lane-wise add/subtract.
+:vadd.h vR0004, vR1115, vR2731 is op0510=0x3F & vR0004 & vR1115; op1626=0x600 & vR2731 {
+	vR2731[0,16] = vR0004[0,16] + vR1115[0,16];
+	vR2731[16,16] = vR0004[16,16] + vR1115[16,16];
+	vR2731[32,16] = vR0004[32,16] + vR1115[32,16];
+	vR2731[48,16] = vR0004[48,16] + vR1115[48,16];
+}
+
+:vsub.h vR0004, vR1115, vR2731 is op0510=0x3F & vR0004 & vR1115; op1626=0x604 & vR2731 {
+	vR2731[0,16] = vR0004[0,16] - vR1115[0,16];
+	vR2731[16,16] = vR0004[16,16] - vR1115[16,16];
+	vR2731[32,16] = vR0004[32,16] - vR1115[32,16];
+	vR2731[48,16] = vR0004[48,16] - vR1115[48,16];
+}
+
+:vadd.w vR0004, vR1115, vR2731 is op0510=0x3F & vR0004 & vR1115; op1626=0x602 & vR2731 {
+	vR2731[0,32] = vR0004[0,32] + vR1115[0,32];
+	vR2731[32,32] = vR0004[32,32] + vR1115[32,32];
+}
+
+:vsub.w vR0004, vR1115, vR2731 is op0510=0x3F & vR0004 & vR1115; op1626=0x606 & vR2731 {
+	vR2731[0,32] = vR0004[0,32] - vR1115[0,32];
+	vR2731[32,32] = vR0004[32,32] - vR1115[32,32];
+}
+
+# VADDS/VSUBS: add/sub with scaling, lane = (a op b) >> 1 (inferred).
+:vadds.h vR0004, vR1115, vR2731 is op0510=0x3F & vR0004 & vR1115; op1626=0x608 & vR2731 {
+	vR2731[0,16] = (vR0004[0,16] + vR1115[0,16]) >> 1;
+	vR2731[16,16] = (vR0004[16,16] + vR1115[16,16]) >> 1;
+	vR2731[32,16] = (vR0004[32,16] + vR1115[32,16]) >> 1;
+	vR2731[48,16] = (vR0004[48,16] + vR1115[48,16]) >> 1;
+}
+
+:vsubs.h vR0004, vR1115, vR2731 is op0510=0x3F & vR0004 & vR1115; op1626=0x60C & vR2731 {
+	vR2731[0,16] = (vR0004[0,16] - vR1115[0,16]) >> 1;
+	vR2731[16,16] = (vR0004[16,16] - vR1115[16,16]) >> 1;
+	vR2731[32,16] = (vR0004[32,16] - vR1115[32,16]) >> 1;
+	vR2731[48,16] = (vR0004[48,16] - vR1115[48,16]) >> 1;
+}
+
+:vadds.w vR0004, vR1115, vR2731 is op0510=0x3F & vR0004 & vR1115; op1626=0x60A & vR2731 {
+	vR2731[0,32] = (vR0004[0,32] + vR1115[0,32]) >> 1;
+	vR2731[32,32] = (vR0004[32,32] + vR1115[32,32]) >> 1;
+}
+
+:vsubs.w vR0004, vR1115, vR2731 is op0510=0x3F & vR0004 & vR1115; op1626=0x60E & vR2731 {
+	vR2731[0,32] = (vR0004[0,32] - vR1115[0,32]) >> 1;
+	vR2731[32,32] = (vR0004[32,32] - vR1115[32,32]) >> 1;
+}
+
+# VADDSAT/VSUBSAT: lane-wise saturating add/subtract.
+:vaddsat.h vR0004, vR1115, vR2731 is op0510=0x3F & vR0004 & vR1115; op1626=0x610 & vR2731 {
+	vaddsat_h(vR2731, vR0004, vR1115);
+}
+
+:vsubsat.h vR0004, vR1115, vR2731 is op0510=0x3F & vR0004 & vR1115; op1626=0x614 & vR2731 {
+	vsubsat_h(vR2731, vR0004, vR1115);
+}
+
+:vaddsat.w vR0004, vR1115, vR2731 is op0510=0x3F & vR0004 & vR1115; op1626=0x612 & vR2731 {
+	vaddsat_w(vR2731, vR0004, vR1115);
+}
+
+:vsubsat.w vR0004, vR1115, vR2731 is op0510=0x3F & vR0004 & vR1115; op1626=0x616 & vR2731 {
+	vsubsat_w(vR2731, vR0004, vR1115);
+}
+
+# VMUL.H: even-halfword products into the two word lanes; VMUL.W: low word of each word-lane product.
+:vmul.h vR0004, vR1115, vR2731 is op0510=0x3F & vR0004 & vR1115; op1626=0x618 & vR2731 {
+	local p0:4 = sext(vR0004[0,16]) * sext(vR1115[0,16]);
+	local p32:4 = sext(vR0004[32,16]) * sext(vR1115[32,16]);
+	vR2731[0,32] = p0;
+	vR2731[32,32] = p32;
+}
+
+:vmul.w vR0004, vR1115, vR2731 is op0510=0x3F & vR0004 & vR1115; op1626=0x61A & vR2731 {
+	vR2731[0,32] = vR0004[0,32] * vR1115[0,32];
+	vR2731[32,32] = vR0004[32,32] * vR1115[32,32];
+}
+
+# VMULT: truncated (Q-format scaled) multiply. H keeps product bits 31..16 per halfword lane;
+# W keeps product bits 63..32 per word lane (inferred).
+:vmult.h vR0004, vR1115, vR2731 is op0510=0x3F & vR0004 & vR1115; op1626=0x61C & vR2731 {
+	local p0:4 = sext(vR0004[0,16]) * sext(vR1115[0,16]);
+	local p16:4 = sext(vR0004[16,16]) * sext(vR1115[16,16]);
+	local p32:4 = sext(vR0004[32,16]) * sext(vR1115[32,16]);
+	local p48:4 = sext(vR0004[48,16]) * sext(vR1115[48,16]);
+	vR2731[0,16] = p0[16,16];
+	vR2731[16,16] = p16[16,16];
+	vR2731[32,16] = p32[16,16];
+	vR2731[48,16] = p48[16,16];
+}
+
+:vmult.w vR0004, vR1115, vR2731 is op0510=0x3F & vR0004 & vR1115; op1626=0x61E & vR2731 {
+	local sa0:8 = sext(vR0004[0,32]);
+	local sb0:8 = sext(vR1115[0,32]);
+	local p0:8 = sa0 * sb0;
+	vR2731[0,32] = p0[32,32];
+	local sa32:8 = sext(vR0004[32,32]);
+	local sb32:8 = sext(vR1115[32,32]);
+	local p32:8 = sa32 * sb32;
+	vR2731[32,32] = p32[32,32];
+}
+
+# VCMP: lane compares produce all-ones/all-zeros masks.
+:vcmpeq.h vR0004, vR1115, vR2731 is op0510=0x3F & vR0004 & vR1115; op1626=0x620 & vR2731 {
+	local a0:4 = sext(vR0004[0,16]);
+	local a16:4 = sext(vR0004[16,16]);
+	local a32:4 = sext(vR0004[32,16]);
+	local a48:4 = sext(vR0004[48,16]);
+	local b0:4 = sext(vR1115[0,16]);
+	local b16:4 = sext(vR1115[16,16]);
+	local b32:4 = sext(vR1115[32,16]);
+	local b48:4 = sext(vR1115[48,16]);
+	vR2731[0,16] = zext(a0 == b0) * 0xffff;
+	vR2731[16,16] = zext(a16 == b16) * 0xffff;
+	vR2731[32,16] = zext(a32 == b32) * 0xffff;
+	vR2731[48,16] = zext(a48 == b48) * 0xffff;
+}
+
+:vcmpeq.w vR0004, vR1115, vR2731 is op0510=0x3F & vR0004 & vR1115; op1626=0x622 & vR2731 {
+	vR2731[0,32] = zext(vR0004[0,32] == vR1115[0,32]) * 0xffffffff;
+	vR2731[32,32] = zext(vR0004[32,32] == vR1115[32,32]) * 0xffffffff;
+}
+
+:vcmpne.h vR0004, vR1115, vR2731 is op0510=0x3F & vR0004 & vR1115; op1626=0x624 & vR2731 {
+	local a0:4 = sext(vR0004[0,16]);
+	local a16:4 = sext(vR0004[16,16]);
+	local a32:4 = sext(vR0004[32,16]);
+	local a48:4 = sext(vR0004[48,16]);
+	local b0:4 = sext(vR1115[0,16]);
+	local b16:4 = sext(vR1115[16,16]);
+	local b32:4 = sext(vR1115[32,16]);
+	local b48:4 = sext(vR1115[48,16]);
+	vR2731[0,16] = zext(a0 != b0) * 0xffff;
+	vR2731[16,16] = zext(a16 != b16) * 0xffff;
+	vR2731[32,16] = zext(a32 != b32) * 0xffff;
+	vR2731[48,16] = zext(a48 != b48) * 0xffff;
+}
+
+:vcmpne.w vR0004, vR1115, vR2731 is op0510=0x3F & vR0004 & vR1115; op1626=0x626 & vR2731 {
+	vR2731[0,32] = zext(vR0004[0,32] != vR1115[0,32]) * 0xffffffff;
+	vR2731[32,32] = zext(vR0004[32,32] != vR1115[32,32]) * 0xffffffff;
+}
+
+:vcmplt.h vR0004, vR1115, vR2731 is op0510=0x3F & vR0004 & vR1115; op1626=0x628 & vR2731 {
+	local a0:4 = sext(vR0004[0,16]);
+	local a16:4 = sext(vR0004[16,16]);
+	local a32:4 = sext(vR0004[32,16]);
+	local a48:4 = sext(vR0004[48,16]);
+	local b0:4 = sext(vR1115[0,16]);
+	local b16:4 = sext(vR1115[16,16]);
+	local b32:4 = sext(vR1115[32,16]);
+	local b48:4 = sext(vR1115[48,16]);
+	vR2731[0,16] = zext(a0 s< b0) * 0xffff;
+	vR2731[16,16] = zext(a16 s< b16) * 0xffff;
+	vR2731[32,16] = zext(a32 s< b32) * 0xffff;
+	vR2731[48,16] = zext(a48 s< b48) * 0xffff;
+}
+
+:vcmplt.w vR0004, vR1115, vR2731 is op0510=0x3F & vR0004 & vR1115; op1626=0x62A & vR2731 {
+	vR2731[0,32] = zext(vR0004[0,32] s< vR1115[0,32]) * 0xffffffff;
+	vR2731[32,32] = zext(vR0004[32,32] s< vR1115[32,32]) * 0xffffffff;
+}
+
+:vcmple.h vR0004, vR1115, vR2731 is op0510=0x3F & vR0004 & vR1115; op1626=0x62C & vR2731 {
+	local a0:4 = sext(vR0004[0,16]);
+	local a16:4 = sext(vR0004[16,16]);
+	local a32:4 = sext(vR0004[32,16]);
+	local a48:4 = sext(vR0004[48,16]);
+	local b0:4 = sext(vR1115[0,16]);
+	local b16:4 = sext(vR1115[16,16]);
+	local b32:4 = sext(vR1115[32,16]);
+	local b48:4 = sext(vR1115[48,16]);
+	vR2731[0,16] = zext(a0 s<= b0) * 0xffff;
+	vR2731[16,16] = zext(a16 s<= b16) * 0xffff;
+	vR2731[32,16] = zext(a32 s<= b32) * 0xffff;
+	vR2731[48,16] = zext(a48 s<= b48) * 0xffff;
+}
+
+:vcmple.w vR0004, vR1115, vR2731 is op0510=0x3F & vR0004 & vR1115; op1626=0x62E & vR2731 {
+	vR2731[0,32] = zext(vR0004[0,32] s<= vR1115[0,32]) * 0xffffffff;
+	vR2731[32,32] = zext(vR0004[32,32] s<= vR1115[32,32]) * 0xffffffff;
+}
+
+# VMSUM: word lane j = h(2j)*h'(2j) + h(2j+1)*h'(2j+1); VMSUM.W is a plain word product (replaces).
+:vmsum.h vR0004, vR1115, vR2731 is op0510=0x3F & vR0004 & vR1115; op1626=0x64C & vR2731 {
+	local p0e:4 = sext(vR0004[0,16]) * sext(vR1115[0,16]);
+	local p0o:4 = sext(vR0004[16,16]) * sext(vR1115[16,16]);
+	vR2731[0,32] = p0e + p0o;
+	local p32e:4 = sext(vR0004[32,16]) * sext(vR1115[32,16]);
+	local p32o:4 = sext(vR0004[48,16]) * sext(vR1115[48,16]);
+	vR2731[32,32] = p32e + p32o;
+}
+
+:vmsum.w vR0004, vR1115, vR2731 is op0510=0x3F & vR0004 & vR1115; op1626=0x64E & vR2731 {
+	vR2731[0,32] = vR0004[0,32] * vR1115[0,32];
+	vR2731[32,32] = vR0004[32,32] * vR1115[32,32];
+}
+
+# The public simulator does not implement these multiply/complex families.
+# Keep their full operand dataflow in architecture intrinsics instead of
+# inventing Q scaling, complex-lane packing, or accumulation/rounding laws.
+define pcodeop __vmsumad_h;
+define pcodeop __vmsumad_w;
+define pcodeop __vmsumadre_h;
+define pcodeop __vmsumadim_h;
+define pcodeop __vmsumadre_w;
+define pcodeop __vmsumadim_w;
+define pcodeop __vmsumadrn_h;
+define pcodeop __vmadsat_h;
+define pcodeop __vmadsat_w;
+define pcodeop __vmadrn_h;
+define pcodeop __vmadrn_w;
+define pcodeop __vmulcx_h;
+define pcodeop __vmulcx_w;
+:vmsumad.h vR0004, vR1115, vR2731 is op0510=0x3F & vR0004 & vR1115; op1626=0x630 & vR2731 {
+	vR2731 = __vmsumad_h(vR0004, vR1115, vR2731);
+}
+:vmsumad.w vR0004, vR1115, vR2731 is op0510=0x3F & vR0004 & vR1115; op1626=0x632 & vR2731 {
+	vR2731 = __vmsumad_w(vR0004, vR1115, vR2731);
+}
+:vmsumadre.h vR0004, vR1115, vR2731 is op0510=0x3F & vR0004 & vR1115; op1626=0x638 & vR2731 {
+	vR2731 = __vmsumadre_h(vR0004, vR1115, vR2731);
+}
+:vmsumadim.h vR0004, vR1115, vR2731 is op0510=0x3F & vR0004 & vR1115; op1626=0x634 & vR2731 {
+	vR2731 = __vmsumadim_h(vR0004, vR1115, vR2731);
+}
+:vmsumadre.w vR0004, vR1115, vR2731 is op0510=0x3F & vR0004 & vR1115; op1626=0x63A & vR2731 {
+	vR2731 = __vmsumadre_w(vR0004, vR1115, vR2731);
+}
+:vmsumadim.w vR0004, vR1115, vR2731 is op0510=0x3F & vR0004 & vR1115; op1626=0x636 & vR2731 {
+	vR2731 = __vmsumadim_w(vR0004, vR1115, vR2731);
+}
+:vmsumadrn.h vR0004, vR1115, vR2731 is op0510=0x3F & vR0004 & vR1115; op1626=0x63C & vR2731 {
+	vR2731 = __vmsumadrn_h(vR0004, vR1115, vR2731);
+}
+:vmadsat.h vR0004, vR1115, vR2731 is op0510=0x3F & vR0004 & vR1115; op1626=0x640 & vR2731 {
+	vR2731 = __vmadsat_h(vR0004, vR1115, vR2731);
+}
+:vmadsat.w vR0004, vR1115, vR2731 is op0510=0x3F & vR0004 & vR1115; op1626=0x642 & vR2731 {
+	vR2731 = __vmadsat_w(vR0004, vR1115, vR2731);
+}
+:vmadrn.h vR0004, vR1115, vR2731 is op0510=0x3F & vR0004 & vR1115; op1626=0x644 & vR2731 {
+	vR2731 = __vmadrn_h(vR0004, vR1115, vR2731);
+}
+:vmadrn.w vR0004, vR1115, vR2731 is op0510=0x3F & vR0004 & vR1115; op1626=0x646 & vR2731 {
+	vR2731 = __vmadrn_w(vR0004, vR1115, vR2731);
+}
+:vmulcx.h vR0004, vR1115, vR2731 is op0510=0x3F & vR0004 & vR1115; op1626=0x648 & vR2731 {
+	vR2731 = __vmulcx_h(vR0004, vR1115);
+}
+:vmulcx.w vR0004, vR1115, vR2731 is op0510=0x3F & vR0004 & vR1115; op1626=0x64A & vR2731 {
+	vR2731 = __vmulcx_w(vR0004, vR1115);
+}
+
+# VADD.DW/VSUB.DW: whole-register 64-bit add/subtract.
+:vadd.dw vR0004, vR1115, vR2731 is op0510=0x3F & vR0004 & vR1115; op1626=0x658 & vR2731 {
+	vR2731 = vR0004 + vR1115;
+}
+
+:vsub.dw vR0004, vR1115, vR2731 is op0510=0x3F & vR0004 & vR1115; op1626=0x65A & vR2731 {
+	vR2731 = vR0004 - vR1115;
+}
+
+# VBIQ has two vector outputs (IDA SDK ins.cpp CF_CHG2|CF_CHG3).
+# The intrinsic record contains complete vreg2/vreg3 results; no guessed
+# filter recurrence or partial-lane updates are substituted.
+define pcodeop __vbiq_h;
+:vbiq.h vR0004, vR1115, vR2731 is op0510=0x3F & vR0004 & vR1115; op1626=0x65C & vR2731 {
+	local outputs:16 = __vbiq_h(vR0004, vR1115, vR2731);
+	vR1115 = outputs:8;
+	vR2731 = outputs[64,64];
+}
+# PK/PKQ/CNV family: reference semantics from the binutils v850 simulator.
+# pki16i32 v1, v2, v3 writes sign-extended halfwords into BOTH v2 and v3.
+:pki16i32 vR0004, vR1115, vR2731 is op0510=0x3F & vR0004 & vR1115; op1626=0x66A & vR2731 {
+	# Snapshot the source first: vreg2/vreg3 may alias vreg1. Each 16-bit
+	# lane sign-extends into its own 32-bit word lane (sim v850.igen 3944).
+	local v:8 = vR0004;
+	local h0:4 = sext(v[0,16]);
+	local h1:4 = sext(v[16,16]);
+	local h2:4 = sext(v[32,16]);
+	local h3:4 = sext(v[48,16]);
+	vR1115 = zext(h0) | (zext(h1) << 32);
+	vR2731 = zext(h2) | (zext(h3) << 32);
+}
+
+
+:pki16ui8 vR0004, vR1115, vR2731 is op0510=0x3F & vR0004 & vR1115; op1626=0x666 & vR2731 {
+	# EVEN bytes (bit offsets 0,16,32,48) of each source pack into the result:
+	# vreg1 bytes 0,2,4,6 -> result bytes 0-3; vreg2 bytes 0,2,4,6 -> result
+	# bytes 4-7 (sim v850.igen 3967: (v >> 8) & 0xff00 selects original bits
+	# 16..23, not 8..15).
+	vR2731[0,8] = vR0004[0,8];
+	vR2731[8,8] = vR0004[16,8];
+	vR2731[16,8] = vR0004[32,8];
+	vR2731[24,8] = vR0004[48,8];
+	vR2731[32,8] = vR1115[0,8];
+	vR2731[40,8] = vR1115[16,8];
+	vR2731[48,8] = vR1115[32,8];
+	vR2731[56,8] = vR1115[48,8];
+}
+
+
+# pkui8i16 v1, v2, v3: zero-extended even bytes to v2, odd bytes to v3.
+:pkui8i16 vR0004, vR1115, vR2731 is op0510=0x3F & vR0004 & vR1115; op1626=0x66C & vR2731 {
+	# Unpack bytes into the LOW byte of each 16-bit lane (bit offsets
+	# 0,16,32,48): bytes 0-3 -> vreg2, bytes 4-7 -> vreg3 (sim v850.igen
+	# 4098: (v << 8) & 0x00ff0000 deposits original byte1 at bits 16..23).
+	local v:8 = vR0004;
+	vR1115 = zext(v[0,8]) | (zext(v[8,8]) << 16) | (zext(v[16,8]) << 32) | (zext(v[24,8]) << 48);
+	vR2731 = zext(v[32,8]) | (zext(v[40,8]) << 16) | (zext(v[48,8]) << 32) | (zext(v[56,8]) << 48);
+}
+
+
+# pkq15q31 v1, v2, v3: halfwords of v1 zero-extended into the word lanes of v2 and v3.
+:pkq15q31 vR0004, vR1115, vR2731 is op0510=0x3F & vR0004 & vR1115; op1626=0x668 & vR2731 {
+	local v:8 = vR0004;
+	vR1115 = ((v & 0xffff) << 16) | ((v & 0xffff0000) << 32);
+	vR2731 = ((v & 0xffff00000000) >> 16) | (v & 0xffff000000000000);
+}
+
+# Saturating pack inputs are snapshotted before either destination lane.
+# Q30 values occupy the full signed accumulator in the simulator model.
+:pkq30q31 vR0004, vR1115, vR2731 is op0510=0x3F & vR0004 & vR1115; op1626=0x65E & vR2731 {
+	local q0:8 = vR0004 << 1;
+	local q32:8 = vR1115 << 1;
+	vsat32(vR2731[0,32], q0);
+	vsat32(vR2731[32,32], q32);
+}
+
+:pki64i32 vR0004, vR1115, vR2731 is op0510=0x3F & vR0004 & vR1115; op1626=0x662 & vR2731 {
+	local a0:8 = vR0004;
+	local a32:8 = vR1115;
+	vsat32(vR2731[0,32], a0);
+	vsat32(vR2731[32,32], a32);
+}
+
+:pki32i16 vR0004, vR1115, vR2731 is op0510=0x3F & vR0004 & vR1115; op1626=0x664 & vR2731 {
+	local a0:4 = vR0004[0,32];
+	local a16:4 = vR0004[32,32];
+	local a32:4 = vR1115[0,32];
+	local a48:4 = vR1115[32,32];
+	vsat16(vR2731[0,16], a0);
+	vsat16(vR2731[16,16], a16);
+	vsat16(vR2731[32,16], a32);
+	vsat16(vR2731[48,16], a48);
+}
+
+# pkq31q15: ROUND_Q31_Q15 then SAT16 per the binutils simulator.
+:pkq31q15 vR0004, vR1115, vR2731 is op0510=0x3F & vR0004 & vR1115; op1626=0x660 & vR2731 {
+	local rounded0:4 = ((vR0004[0,32] + 0x8000) >> 15) & 0xffff;
+	local rounded16:4 = ((vR0004[32,32] + 0x8000) >> 15) & 0xffff;
+	local rounded32:4 = ((vR1115[0,32] + 0x8000) >> 15) & 0xffff;
+	local rounded48:4 = ((vR1115[32,32] + 0x8000) >> 15) & 0xffff;
+	vsat16(vR2731[0,16], rounded0);
+	vsat16(vR2731[16,16], rounded16);
+	vsat16(vR2731[32,16], rounded32);
+	vsat16(vR2731[48,16], rounded48);
+}
+
+# CNV conversions between fractional vector formats (binutils simulator semantics;
+# the destination keeps the untouched lanes).
+:cnvq15q30 vR1115, vR2731 is op0510=0x3F & op0004=4 & vR1115; op1626=0x67E & vR2731 {
+	local v:8 = sext(vR1115[0,16]);
+	vR2731 = v << 15;
+}
+
+:cnvq31q62 vR1115, vR2731 is op0510=0x3F & op0004=5 & vR1115; op1626=0x67E & vR2731 {
+	local v:8 = sext(vR1115[0,32]);
+	vR2731 = v << 31;
+}
+
+:cnvq30q15 vR1115, vR2731 is op0510=0x3F & op0004=6 & vR1115; op1626=0x67E & vR2731 {
+	local rounded:8 = ((vR1115 + 0x40000000) >> 47) & 0xffff;
+	local word:4 = rounded:4;
+	vsat16(vR2731[0,16], word);
+}
+
+:cnvq62q31 vR1115, vR2731 is op0510=0x3F & op0004=7 & vR1115; op1626=0x67E & vR2731 {
+	local rounded:8 = ((vR1115 + 0x40000000) >> 31) & 0xffffffff;
+	vsat32(vR2731[0,32], rounded);
+}
+
+# EXPQ31's destination is a GPR in IDA (ana.cpp conversion-map entry 8),
+# unlike the public simulator's vector destination. Preserve that real
+# operand contract without assuming the simulator's differing ABI.
+define pcodeop __expq31;
+:expq31 vR1115, R2731 is op0510=0x3F & op0004=8 & vR1115; op1626=0x67E & R2731 {
+	R2731 = __expq31(vR1115);
+}
+
+# VABS/VNEG (binutils simulator semantics with 0x8000/0x80000000 saturating).
+:vabs.h vR1115, vR2731 is op0510=0x3F & op0004=0 & vR1115; op1626=0x67E & vR2731 {
+	vabs16(vR2731[0,16], vR1115[0,16]);
+	vabs16(vR2731[16,16], vR1115[16,16]);
+	vabs16(vR2731[32,16], vR1115[32,16]);
+	vabs16(vR2731[48,16], vR1115[48,16]);
+}
+
+:vabs.w vR1115, vR2731 is op0510=0x3F & op0004=1 & vR1115; op1626=0x67E & vR2731 {
+	vabs32(vR2731[0,32], vR1115[0,32]);
+	vabs32(vR2731[32,32], vR1115[32,32]);
+}
+
+:vneg.h vR1115, vR2731 is op0510=0x3F & op0004=2 & vR1115; op1626=0x67E & vR2731 {
+	vneg16(vR2731[0,16], vR1115[0,16]);
+	vneg16(vR2731[16,16], vR1115[16,16]);
+	vneg16(vR2731[32,16], vR1115[32,16]);
+	vneg16(vR2731[48,16], vR1115[48,16]);
+}
+
+:vneg.w vR1115, vR2731 is op0510=0x3F & op0004=3 & vR1115; op1626=0x67E & vR2731 {
+	vneg32(vR2731[0,32], vR1115[0,32]);
+	vneg32(vR2731[32,32], vR1115[32,32]);
+}
+
+# VMAX/VMIN: lane-wise min/max with strict/non-strict tie-breaking written packed
+# into the general-purpose destination (IDA operand shape; semantics inferred).
+# GT/GE/LT/LE select which source wins an exact tie.
+
+
+
+
+
+
+
+
+# VCALC.H/W: microcoded vector operation selected by the vector-control register
+# (v24..v31) whose index bits are scattered across instruction bits 31, 15, and 4.
+# The composite operation is configuration state outside the instruction stream.
+:vcalc.h v24, vR0003, vR1114, vR2730 is op0510=0x3F & op0404=0 & op1515=0 & vR0003 & vR1114; op1626=0x670 & op3131=0 & vR2730 & v24 {
+	vR2730 = __vcalc_h(v24, vR0003, vR1114);
+}
+
+:vcalc.h v25, vR0003, vR1114, vR2730 is op0510=0x3F & op0404=1 & op1515=0 & vR0003 & vR1114; op1626=0x670 & op3131=0 & vR2730 & v25 {
+	vR2730 = __vcalc_h(v25, vR0003, vR1114);
+}
+
+:vcalc.h v26, vR0003, vR1114, vR2730 is op0510=0x3F & op0404=0 & op1515=1 & vR0003 & vR1114; op1626=0x670 & op3131=0 & vR2730 & v26 {
+	vR2730 = __vcalc_h(v26, vR0003, vR1114);
+}
+
+:vcalc.h v27, vR0003, vR1114, vR2730 is op0510=0x3F & op0404=1 & op1515=1 & vR0003 & vR1114; op1626=0x670 & op3131=0 & vR2730 & v27 {
+	vR2730 = __vcalc_h(v27, vR0003, vR1114);
+}
+
+:vcalc.h v28, vR0003, vR1114, vR2730 is op0510=0x3F & op0404=0 & op1515=0 & vR0003 & vR1114; op1626=0x670 & op3131=1 & vR2730 & v28 {
+	vR2730 = __vcalc_h(v28, vR0003, vR1114);
+}
+
+:vcalc.h v29, vR0003, vR1114, vR2730 is op0510=0x3F & op0404=1 & op1515=0 & vR0003 & vR1114; op1626=0x670 & op3131=1 & vR2730 & v29 {
+	vR2730 = __vcalc_h(v29, vR0003, vR1114);
+}
+
+:vcalc.h v30, vR0003, vR1114, vR2730 is op0510=0x3F & op0404=0 & op1515=1 & vR0003 & vR1114; op1626=0x670 & op3131=1 & vR2730 & v30 {
+	vR2730 = __vcalc_h(v30, vR0003, vR1114);
+}
+
+:vcalc.h v31, vR0003, vR1114, vR2730 is op0510=0x3F & op0404=1 & op1515=1 & vR0003 & vR1114; op1626=0x670 & op3131=1 & vR2730 & v31 {
+	vR2730 = __vcalc_h(v31, vR0003, vR1114);
+}
+
+:vcalc.w v24, vR0003, vR1114, vR2730 is op0510=0x3F & op0404=0 & op1515=0 & vR0003 & vR1114; op1626=0x672 & op3131=0 & vR2730 & v24 {
+	vR2730 = __vcalc_w(v24, vR0003, vR1114);
+}
+
+:vcalc.w v25, vR0003, vR1114, vR2730 is op0510=0x3F & op0404=1 & op1515=0 & vR0003 & vR1114; op1626=0x672 & op3131=0 & vR2730 & v25 {
+	vR2730 = __vcalc_w(v25, vR0003, vR1114);
+}
+
+:vcalc.w v26, vR0003, vR1114, vR2730 is op0510=0x3F & op0404=0 & op1515=1 & vR0003 & vR1114; op1626=0x672 & op3131=0 & vR2730 & v26 {
+	vR2730 = __vcalc_w(v26, vR0003, vR1114);
+}
+
+:vcalc.w v27, vR0003, vR1114, vR2730 is op0510=0x3F & op0404=1 & op1515=1 & vR0003 & vR1114; op1626=0x672 & op3131=0 & vR2730 & v27 {
+	vR2730 = __vcalc_w(v27, vR0003, vR1114);
+}
+
+:vcalc.w v28, vR0003, vR1114, vR2730 is op0510=0x3F & op0404=0 & op1515=0 & vR0003 & vR1114; op1626=0x672 & op3131=1 & vR2730 & v28 {
+	vR2730 = __vcalc_w(v28, vR0003, vR1114);
+}
+
+:vcalc.w v29, vR0003, vR1114, vR2730 is op0510=0x3F & op0404=1 & op1515=0 & vR0003 & vR1114; op1626=0x672 & op3131=1 & vR2730 & v29 {
+	vR2730 = __vcalc_w(v29, vR0003, vR1114);
+}
+
+:vcalc.w v30, vR0003, vR1114, vR2730 is op0510=0x3F & op0404=0 & op1515=1 & vR0003 & vR1114; op1626=0x672 & op3131=1 & vR2730 & v30 {
+	vR2730 = __vcalc_w(v30, vR0003, vR1114);
+}
+
+:vcalc.w v31, vR0003, vR1114, vR2730 is op0510=0x3F & op0404=1 & op1515=1 & vR0003 & vR1114; op1626=0x672 & op3131=1 & vR2730 & v31 {
+	vR2730 = __vcalc_w(v31, vR0003, vR1114);
+}
+
+# Vector shifts; the count comes from a general-purpose register.
+:vsar.dw R0004, vR1115, vR2731 is op0510=0x3F & R0004 & vR1115; op1626=0x686 & vR2731 {
+	vR2731 = vR1115 s>> (R0004 & 0x3f);
+}
+
+:vshr.dw R0004, vR1115, vR2731 is op0510=0x3F & R0004 & vR1115; op1626=0x688 & vR2731 {
+	vR2731 = vR1115 >> (R0004 & 0x3f);
+}
+
+:vshl.dw R0004, vR1115, vR2731 is op0510=0x3F & R0004 & vR1115; op1626=0x68A & vR2731 {
+	vR2731 = vR1115 << (R0004 & 0x3f);
+}
+
+:vsar.w R0004, vR1115, vR2731 is op0510=0x3F & R0004 & vR1115; op1626=0x68C & vR2731 {
+	vR2731[0,32] = vR1115[0,32] s>> (R0004 & 0x1f);
+	vR2731[32,32] = vR1115[32,32] s>> (R0004 & 0x1f);
+}
+
+:vshr.w R0004, vR1115, vR2731 is op0510=0x3F & R0004 & vR1115; op1626=0x68E & vR2731 {
+	vR2731[0,32] = vR1115[0,32] >> (R0004 & 0x1f);
+	vR2731[32,32] = vR1115[32,32] >> (R0004 & 0x1f);
+}
+
+:vshl.w R0004, vR1115, vR2731 is op0510=0x3F & R0004 & vR1115; op1626=0x690 & vR2731 {
+	vR2731[0,32] = vR1115[0,32] << (R0004 & 0x1f);
+	vR2731[32,32] = vR1115[32,32] << (R0004 & 0x1f);
+}
+
+:vsar.h R0004, vR1115, vR2731 is op0510=0x3F & R0004 & vR1115; op1626=0x692 & vR2731 {
+	vR2731[0,16] = vR1115[0,16] s>> (R0004 & 0xf);
+	vR2731[16,16] = vR1115[16,16] s>> (R0004 & 0xf);
+	vR2731[32,16] = vR1115[32,16] s>> (R0004 & 0xf);
+	vR2731[48,16] = vR1115[48,16] s>> (R0004 & 0xf);
+}
+
+:vshr.h R0004, vR1115, vR2731 is op0510=0x3F & R0004 & vR1115; op1626=0x694 & vR2731 {
+	vR2731[0,16] = vR1115[0,16] >> (R0004 & 0xf);
+	vR2731[16,16] = vR1115[16,16] >> (R0004 & 0xf);
+	vR2731[32,16] = vR1115[32,16] >> (R0004 & 0xf);
+	vR2731[48,16] = vR1115[48,16] >> (R0004 & 0xf);
+}
+
+:vshl.h R0004, vR1115, vR2731 is op0510=0x3F & R0004 & vR1115; op1626=0x696 & vR2731 {
+	vR2731[0,16] = vR1115[0,16] << (R0004 & 0xf);
+	vR2731[16,16] = vR1115[16,16] << (R0004 & 0xf);
+	vR2731[32,16] = vR1115[32,16] << (R0004 & 0xf);
+	vR2731[48,16] = vR1115[48,16] << (R0004 & 0xf);
+}
+
+# Vector shifts by immediate. The immediate-6 forms carry bit 17 as the high bit,
+# so each constant is a separate constructor.
+:vsar.dw op0004, vR1115, vR2731 is op0510=0x3F & op0004 & vR1115; op1626=0x698 & vR2731 {
+	vR2731 = vR1115 s>> op0004;
+}
+
+:vsar.dw imm, vR1115, vR2731 is op0510=0x3F & op0004 & vR1115; op1626=0x69A & vR2731
+[ imm = op0004 | 32; ] {
+	vR2731 = vR1115 s>> imm;
+}
+
+:vshr.dw op0004, vR1115, vR2731 is op0510=0x3F & op0004 & vR1115; op1626=0x69C & vR2731 {
+	vR2731 = vR1115 >> op0004;
+}
+
+:vshr.dw imm, vR1115, vR2731 is op0510=0x3F & op0004 & vR1115; op1626=0x69E & vR2731
+[ imm = op0004 | 32; ] {
+	vR2731 = vR1115 >> imm;
+}
+
+:vshl.dw op0004, vR1115, vR2731 is op0510=0x3F & op0004 & vR1115; op1626=0x6A0 & vR2731 {
+	vR2731 = vR1115 << op0004;
+}
+
+:vsar.w op0004, vR1115, vR2731 is op0510=0x3F & op0004 & vR1115; op1626=0x6A4 & vR2731 {
+	vR2731[0,32] = vR1115[0,32] s>> op0004;
+	vR2731[32,32] = vR1115[32,32] s>> op0004;
+}
+
+:vshr.w op0004, vR1115, vR2731 is op0510=0x3F & op0004 & vR1115; op1626=0x6A6 & vR2731 {
+	vR2731[0,32] = vR1115[0,32] >> op0004;
+	vR2731[32,32] = vR1115[32,32] >> op0004;
+}
+
+:vshl.w op0004, vR1115, vR2731 is op0510=0x3F & op0004 & vR1115; op1626=0x6A8 & vR2731 {
+	vR2731[0,32] = vR1115[0,32] << op0004;
+	vR2731[32,32] = vR1115[32,32] << op0004;
+}
+
+# Halfword shifts by 4-bit immediate; instruction bit 4 separates VSAR from VSHR.
+:vsar.h op0003, vR1115, vR2731 is op0510=0x3F & op0003 & op0404=0 & vR1115; op1626=0x6AA & vR2731 {
+	vR2731[0,16] = vR1115[0,16] s>> op0003;
+	vR2731[16,16] = vR1115[16,16] s>> op0003;
+	vR2731[32,16] = vR1115[32,16] s>> op0003;
+	vR2731[48,16] = vR1115[48,16] s>> op0003;
+}
+
+:vshr.h op0003, vR1115, vR2731 is op0510=0x3F & op0003 & op0404=1 & vR1115; op1626=0x6AA & vR2731 {
+	vR2731[0,16] = vR1115[0,16] >> op0003;
+	vR2731[16,16] = vR1115[16,16] >> op0003;
+	vR2731[32,16] = vR1115[32,16] >> op0003;
+	vR2731[48,16] = vR1115[48,16] >> op0003;
+}
+
+:vshl.h op0003, vR1115, vR2731 is op0510=0x3F & op0003 & op0404=0 & vR1115; op1626=0x6AC & vR2731 {
+	vR2731[0,16] = vR1115[0,16] << op0003;
+	vR2731[16,16] = vR1115[16,16] << op0003;
+	vR2731[32,16] = vR1115[32,16] << op0003;
+	vR2731[48,16] = vR1115[48,16] << op0003;
+}
+
+# VAND/VOR/VXOR/VNOT.
+:vand vR0004, vR1115, vR2731 is op0510=0x3F & vR0004 & vR1115; op1626=0x680 & vR2731 {
+	vR2731 = vR0004 & vR1115;
+}
+
+:vor vR0004, vR1115, vR2731 is op0510=0x3F & vR0004 & vR1115; op1626=0x682 & vR2731 {
+	vR2731 = vR0004 | vR1115;
+}
+
+:vxor vR0004, vR1115, vR2731 is op0510=0x3F & vR0004 & vR1115; op1626=0x684 & vR2731 {
+	vR2731 = vR0004 ^ vR1115;
+}
+
+# ---- cat=5 vector data movement, per ana.cpp cases 0x2D/0x2E/0x2F and the
+# binutils simulator (mov/dup semantics: lane insert / broadcast).
+# Selector fields: type = hw1 bits 4-1 (op0104), imm bits in op0000/op0002,
+# subop2 = hw1 bits 4-0 (op0004).
+:vnot vR1115, vR2731 is op0510=0x3F & op0004=4 & vR1115; op1626=0x6DC & vR2731 {
+	vR2731 = ~vR1115;
+}
+
+:vbswap.h vR1115, vR2731 is op0510=0x3F & op0004=5 & vR1115; op1626=0x6DC & vR2731 {
+	local s0:2 = vR1115[0,16];
+	vR2731[0,16] = ((s0 & 0xff) << 8) | (s0 >> 8);
+	local s1:2 = vR1115[16,16];
+	vR2731[16,16] = ((s1 & 0xff) << 8) | (s1 >> 8);
+	local s2:2 = vR1115[32,16];
+	vR2731[32,16] = ((s2 & 0xff) << 8) | (s2 >> 8);
+	local s3:2 = vR1115[48,16];
+	vR2731[48,16] = ((s3 & 0xff) << 8) | (s3 >> 8);
+}
+
+:vbswap.w vR1115, vR2731 is op0510=0x3F & op0004=6 & vR1115; op1626=0x6DC & vR2731 {
+	local a:4 = vR1115[0,32];
+	vR2731[0,32] = ((a & 0xff) << 24) | ((a & 0xff00) << 8) | ((a >> 8) & 0xff00) | (a >> 24);
+	local b:4 = vR1115[32,32];
+	vR2731[32,32] = ((b & 0xff) << 24) | ((b & 0xff00) << 8) | ((b >> 8) & 0xff00) | (b >> 24);
+}
+
+:vbswap.dw vR1115, vR2731 is op0510=0x3F & op0004=7 & vR1115; op1626=0x6DC & vR2731 {
+	local q0:1 = vR1115[0,8];   local q1:1 = vR1115[8,8];
+	local q2:1 = vR1115[16,8];  local q3:1 = vR1115[24,8];
+	local q4:1 = vR1115[32,8];  local q5:1 = vR1115[40,8];
+	local q6:1 = vR1115[48,8];  local q7:1 = vR1115[56,8];
+	vR2731[56,8] = q0; vR2731[48,8] = q1; vR2731[40,8] = q2; vR2731[32,8] = q3;
+	vR2731[24,8] = q4; vR2731[16,8] = q5; vR2731[8,8] = q6;  vR2731[0,8] = q7;
+}
+:vnot vR1115, vR2731 is op0510=0x3F & op0004=4 & vR1115; op1626=0x6DE & vR2731 {
+	vR2731 = ~vR1115;
+}
+
+:vbswap.h vR1115, vR2731 is op0510=0x3F & op0004=5 & vR1115; op1626=0x6DE & vR2731 {
+	local s0:2 = vR1115[0,16];
+	vR2731[0,16] = ((s0 & 0xff) << 8) | (s0 >> 8);
+	local s1:2 = vR1115[16,16];
+	vR2731[16,16] = ((s1 & 0xff) << 8) | (s1 >> 8);
+	local s2:2 = vR1115[32,16];
+	vR2731[32,16] = ((s2 & 0xff) << 8) | (s2 >> 8);
+	local s3:2 = vR1115[48,16];
+	vR2731[48,16] = ((s3 & 0xff) << 8) | (s3 >> 8);
+}
+
+:vbswap.w vR1115, vR2731 is op0510=0x3F & op0004=6 & vR1115; op1626=0x6DE & vR2731 {
+	local a:4 = vR1115[0,32];
+	vR2731[0,32] = ((a & 0xff) << 24) | ((a & 0xff00) << 8) | ((a >> 8) & 0xff00) | (a >> 24);
+	local b:4 = vR1115[32,32];
+	vR2731[32,32] = ((b & 0xff) << 24) | ((b & 0xff00) << 8) | ((b >> 8) & 0xff00) | (b >> 24);
+}
+
+:vbswap.dw vR1115, vR2731 is op0510=0x3F & op0004=7 & vR1115; op1626=0x6DE & vR2731 {
+	local q0:1 = vR1115[0,8];   local q1:1 = vR1115[8,8];
+	local q2:1 = vR1115[16,8];  local q3:1 = vR1115[24,8];
+	local q4:1 = vR1115[32,8];  local q5:1 = vR1115[40,8];
+	local q6:1 = vR1115[48,8];  local q7:1 = vR1115[56,8];
+	vR2731[56,8] = q0; vR2731[48,8] = q1; vR2731[40,8] = q2; vR2731[32,8] = q3;
+	vR2731[24,8] = q4; vR2731[16,8] = q5; vR2731[8,8] = q6;  vR2731[0,8] = q7;
+}
+
+# VITLV family: two-operand (vreg2, vreg3). Interleave permutation is a
+# documented inference (no public semantics; sim does not implement it).
+:vitlv.h vR1115, vR2731 is op0510=0x3F & op0004=0 & vR1115; op1626=0x6DE & vR2731 {
+	vR2731[0,16] = vR1115[0,16];
+	vR2731[16,16] = vR1115[32,16];
+	vR2731[32,16] = vR1115[16,16];
+	vR2731[48,16] = vR1115[48,16];
+}
+
+:vitlvhw.h vR1115, vR2731 is op0510=0x3F & op0004=1 & vR1115; op1626=0x6DE & vR2731 {
+	vR2731[32,16] = vR1115[0,16];
+	vR2731[48,16] = vR1115[32,16];
+}
+
+:vitlvwh.h vR1115, vR2731 is op0510=0x3F & op0004=2 & vR1115; op1626=0x6DE & vR2731 {
+	vR2731[0,16] = vR1115[16,16];
+	vR2731[16,16] = vR1115[48,16];
+}
+
+:vitlv.w vR1115, vR2731 is op0510=0x3F & op0004=3 & vR1115; op1626=0x6DE & vR2731 {
+	vR2731[0,32] = vR1115[0,32];
+	vR2731[32,32] = vR1115[32,32];
+}
+
+# MOV.H imm2, vreg2, vreg3 (op1626 0x6DC, subop2 bits 4-2 == 0): copy
+# halfword 0 of vreg2 into halfword lane imm2 of vreg3 (other lanes kept).
+:mov.h 0, vR1115, vR2731 is op0510=0x3F & op0304=0 & op0002=0 & vR1115; op1626=0x6DC & vR2731 {
+	vR2731[0,16] = vR1115[0,16];
+}
+
+:mov.h 1, vR1115, vR2731 is op0510=0x3F & op0304=0 & op0002=1 & vR1115; op1626=0x6DC & vR2731 {
+	vR2731[16,16] = vR1115[0,16];
+}
+
+:mov.h 2, vR1115, vR2731 is op0510=0x3F & op0304=0 & op0002=2 & vR1115; op1626=0x6DC & vR2731 {
+	vR2731[32,16] = vR1115[0,16];
+}
+
+:mov.h 3, vR1115, vR2731 is op0510=0x3F & op0304=0 & op0002=3 & vR1115; op1626=0x6DC & vR2731 {
+	vR2731[48,16] = vR1115[0,16];
+}
+
+# DUP.H imm2 (0x6DC, subop2 bits 4-3 == 10): broadcast halfword imm2.
+:dup.h 0, vR1115, vR2731 is op0510=0x3F & op0304=2 & op0002=0 & vR1115; op1626=0x6DC & vR2731 {
+	local h:8 = zext(vR1115[0,16]);
+	vR2731 = h | (h << 16) | (h << 32) | (h << 48);
+}
+
+:dup.h 1, vR1115, vR2731 is op0510=0x3F & op0304=2 & op0002=1 & vR1115; op1626=0x6DC & vR2731 {
+	local h:8 = zext(vR1115[16,16]);
+	vR2731 = h | (h << 16) | (h << 32) | (h << 48);
+}
+
+:dup.h 2, vR1115, vR2731 is op0510=0x3F & op0304=2 & op0002=2 & vR1115; op1626=0x6DC & vR2731 {
+	local h:8 = zext(vR1115[32,16]);
+	vR2731 = h | (h << 16) | (h << 32) | (h << 48);
+}
+
+:dup.h 3, vR1115, vR2731 is op0510=0x3F & op0304=2 & op0002=3 & vR1115; op1626=0x6DC & vR2731 {
+	local h:8 = zext(vR1115[48,16]);
+	vR2731 = h | (h << 16) | (h << 32) | (h << 48);
+}
+
+# DUP.W imm1 (0x6DE, subop2 bits 4-3 == 11): broadcast word imm1.
+:dup.w 0, vR1115, vR2731 is op0510=0x3F & op0304=3 & op0000=0 & vR1115; op1626=0x6DE & vR2731 {
+	local w:8 = zext(vR1115[0,32]);
+	vR2731 = w | (w << 32);
+}
+
+:dup.w 1, vR1115, vR2731 is op0510=0x3F & op0304=3 & op0000=1 & vR1115; op1626=0x6DE & vR2731 {
+	local w:8 = zext(vR1115[32,32]);
+	vR2731 = w | (w << 32);
+}
+
+# MOV.W imm1 (0x6DA): word-lane insert; register forms per binutils.
+:mov.w 0, vR1115, vR2731 is op0510=0x3F & op0104=0 & op0000=0 & vR1115; op1626=0x6DA & vR2731 {
+	vR2731[0,32] = vR1115[0,32];
+}
+
+:mov.w 1, vR1115, vR2731 is op0510=0x3F & op0104=0 & op0000=1 & vR1115; op1626=0x6DA & vR2731 {
+	vR2731[32,32] = vR1115[0,32];
+}
+
+:mov.w 0, r1115, vR2731 is op0510=0x3F & op0104=8 & op0000=0 & r1115; op1626=0x6DA & vR2731 {
+	vR2731[0,32] = r1115;
+}
+
+:mov.w 1, r1115, vR2731 is op0510=0x3F & op0104=8 & op0000=1 & r1115; op1626=0x6DA & vR2731 {
+	vR2731[32,32] = r1115;
+}
+
+:mov.w 0, vR1115, R2731 is op0510=0x3F & op0104=4 & op0000=0 & vR1115; op1626=0x6DA & R2731 {
+	R2731 = vR1115[0,32];
+}
+
+:mov.w 1, vR1115, R2731 is op0510=0x3F & op0104=4 & op0000=1 & vR1115; op1626=0x6DA & R2731 {
+	R2731 = vR1115[32,32];
+}
+
+# MOV.DW: full 64-bit moves between vector registers and GPR pairs.
+# The GPR-pair write goes through the raw window (an r0:r1 destination
+# commits only r1); pair sources use the read views.
+:mov.dw vR1115, xR2731pair is op0510=0x3F & op0104=0xC & vR1115; op1626=0x6DA & xR2731pair {
+	xR2731pair = vR1115;
+}
+
+:mov.dw R1115pair, vR2731 is op0510=0x3F & op0104=0xE & R1115pair; op1626=0x6DA & vR2731 {
+	vR2731 = R1115pair;
+}
+
+# VSHUFL.B r1, v2, v3: byte lane shuffle; r1 holds eight 3-bit source selectors.
+:vshufl.b R0004, vR1115, vR2731 is op0510=0x3F & R0004 & vR1115; op1626=0x6AE & vR2731 {
+	local selectors:4 = R0004;
+	local source:8 = vR1115;
+	local result:8 = 0;
+	result = result | ((source >> (((selectors >> 0) & 7) << 3)) & 0xff);
+	result = result | (((source >> (((selectors >> 3) & 7) << 3)) & 0xff) << 8);
+	result = result | (((source >> (((selectors >> 6) & 7) << 3)) & 0xff) << 16);
+	result = result | (((source >> (((selectors >> 9) & 7) << 3)) & 0xff) << 24);
+	result = result | (((source >> (((selectors >> 12) & 7) << 3)) & 0xff) << 32);
+	result = result | (((source >> (((selectors >> 15) & 7) << 3)) & 0xff) << 40);
+	result = result | (((source >> (((selectors >> 18) & 7) << 3)) & 0xff) << 48);
+	result = result | (((source >> (((selectors >> 21) & 7) << 3)) & 0xff) << 56);
+	vR2731 = result;
+}
+
+# VCMOV / VCONCAT.B: the auxiliary operand index (v24..v31 / r8..r15) is encoded in
+# scattered instruction bits 31, 15 and 4 (IDA decode shape).
+# vcmov vctr, v1, v2, v3: per-lane conditional move on the vctr halfword lanes.
+:vcmov v24, vR0003, vR1114, vR2730 is op0510=0x3F & op0404=0 & op1515=0 & vR0003 & vR1114; op1626=0x6B0 & op3131=0 & vR2730 & v24 {
+	local c0:2 = zext(v24[0,16] != 0);
+	vR2730[0,16] = (vR0003[0,16] * c0) + (vR1114[0,16] * zext(c0 == 0));
+	local c16:2 = zext(v24[16,16] != 0);
+	vR2730[16,16] = (vR0003[16,16] * c16) + (vR1114[16,16] * zext(c16 == 0));
+	local c32:2 = zext(v24[32,16] != 0);
+	vR2730[32,16] = (vR0003[32,16] * c32) + (vR1114[32,16] * zext(c32 == 0));
+	local c48:2 = zext(v24[48,16] != 0);
+	vR2730[48,16] = (vR0003[48,16] * c48) + (vR1114[48,16] * zext(c48 == 0));
+}
+
+:vcmov v25, vR0003, vR1114, vR2730 is op0510=0x3F & op0404=1 & op1515=0 & vR0003 & vR1114; op1626=0x6B0 & op3131=0 & vR2730 & v25 {
+	local c0:2 = zext(v25[0,16] != 0);
+	vR2730[0,16] = (vR0003[0,16] * c0) + (vR1114[0,16] * zext(c0 == 0));
+	local c16:2 = zext(v25[16,16] != 0);
+	vR2730[16,16] = (vR0003[16,16] * c16) + (vR1114[16,16] * zext(c16 == 0));
+	local c32:2 = zext(v25[32,16] != 0);
+	vR2730[32,16] = (vR0003[32,16] * c32) + (vR1114[32,16] * zext(c32 == 0));
+	local c48:2 = zext(v25[48,16] != 0);
+	vR2730[48,16] = (vR0003[48,16] * c48) + (vR1114[48,16] * zext(c48 == 0));
+}
+
+:vcmov v26, vR0003, vR1114, vR2730 is op0510=0x3F & op0404=0 & op1515=1 & vR0003 & vR1114; op1626=0x6B0 & op3131=0 & vR2730 & v26 {
+	local c0:2 = zext(v26[0,16] != 0);
+	vR2730[0,16] = (vR0003[0,16] * c0) + (vR1114[0,16] * zext(c0 == 0));
+	local c16:2 = zext(v26[16,16] != 0);
+	vR2730[16,16] = (vR0003[16,16] * c16) + (vR1114[16,16] * zext(c16 == 0));
+	local c32:2 = zext(v26[32,16] != 0);
+	vR2730[32,16] = (vR0003[32,16] * c32) + (vR1114[32,16] * zext(c32 == 0));
+	local c48:2 = zext(v26[48,16] != 0);
+	vR2730[48,16] = (vR0003[48,16] * c48) + (vR1114[48,16] * zext(c48 == 0));
+}
+
+:vcmov v27, vR0003, vR1114, vR2730 is op0510=0x3F & op0404=1 & op1515=1 & vR0003 & vR1114; op1626=0x6B0 & op3131=0 & vR2730 & v27 {
+	local c0:2 = zext(v27[0,16] != 0);
+	vR2730[0,16] = (vR0003[0,16] * c0) + (vR1114[0,16] * zext(c0 == 0));
+	local c16:2 = zext(v27[16,16] != 0);
+	vR2730[16,16] = (vR0003[16,16] * c16) + (vR1114[16,16] * zext(c16 == 0));
+	local c32:2 = zext(v27[32,16] != 0);
+	vR2730[32,16] = (vR0003[32,16] * c32) + (vR1114[32,16] * zext(c32 == 0));
+	local c48:2 = zext(v27[48,16] != 0);
+	vR2730[48,16] = (vR0003[48,16] * c48) + (vR1114[48,16] * zext(c48 == 0));
+}
+
+:vcmov v28, vR0003, vR1114, vR2730 is op0510=0x3F & op0404=0 & op1515=0 & vR0003 & vR1114; op1626=0x6B0 & op3131=1 & vR2730 & v28 {
+	local c0:2 = zext(v28[0,16] != 0);
+	vR2730[0,16] = (vR0003[0,16] * c0) + (vR1114[0,16] * zext(c0 == 0));
+	local c16:2 = zext(v28[16,16] != 0);
+	vR2730[16,16] = (vR0003[16,16] * c16) + (vR1114[16,16] * zext(c16 == 0));
+	local c32:2 = zext(v28[32,16] != 0);
+	vR2730[32,16] = (vR0003[32,16] * c32) + (vR1114[32,16] * zext(c32 == 0));
+	local c48:2 = zext(v28[48,16] != 0);
+	vR2730[48,16] = (vR0003[48,16] * c48) + (vR1114[48,16] * zext(c48 == 0));
+}
+
+:vcmov v29, vR0003, vR1114, vR2730 is op0510=0x3F & op0404=1 & op1515=0 & vR0003 & vR1114; op1626=0x6B0 & op3131=1 & vR2730 & v29 {
+	local c0:2 = zext(v29[0,16] != 0);
+	vR2730[0,16] = (vR0003[0,16] * c0) + (vR1114[0,16] * zext(c0 == 0));
+	local c16:2 = zext(v29[16,16] != 0);
+	vR2730[16,16] = (vR0003[16,16] * c16) + (vR1114[16,16] * zext(c16 == 0));
+	local c32:2 = zext(v29[32,16] != 0);
+	vR2730[32,16] = (vR0003[32,16] * c32) + (vR1114[32,16] * zext(c32 == 0));
+	local c48:2 = zext(v29[48,16] != 0);
+	vR2730[48,16] = (vR0003[48,16] * c48) + (vR1114[48,16] * zext(c48 == 0));
+}
+
+:vcmov v30, vR0003, vR1114, vR2730 is op0510=0x3F & op0404=0 & op1515=1 & vR0003 & vR1114; op1626=0x6B0 & op3131=1 & vR2730 & v30 {
+	local c0:2 = zext(v30[0,16] != 0);
+	vR2730[0,16] = (vR0003[0,16] * c0) + (vR1114[0,16] * zext(c0 == 0));
+	local c16:2 = zext(v30[16,16] != 0);
+	vR2730[16,16] = (vR0003[16,16] * c16) + (vR1114[16,16] * zext(c16 == 0));
+	local c32:2 = zext(v30[32,16] != 0);
+	vR2730[32,16] = (vR0003[32,16] * c32) + (vR1114[32,16] * zext(c32 == 0));
+	local c48:2 = zext(v30[48,16] != 0);
+	vR2730[48,16] = (vR0003[48,16] * c48) + (vR1114[48,16] * zext(c48 == 0));
+}
+
+:vcmov v31, vR0003, vR1114, vR2730 is op0510=0x3F & op0404=1 & op1515=1 & vR0003 & vR1114; op1626=0x6B0 & op3131=1 & vR2730 & v31 {
+	local c0:2 = zext(v31[0,16] != 0);
+	vR2730[0,16] = (vR0003[0,16] * c0) + (vR1114[0,16] * zext(c0 == 0));
+	local c16:2 = zext(v31[16,16] != 0);
+	vR2730[16,16] = (vR0003[16,16] * c16) + (vR1114[16,16] * zext(c16 == 0));
+	local c32:2 = zext(v31[32,16] != 0);
+	vR2730[32,16] = (vR0003[32,16] * c32) + (vR1114[32,16] * zext(c32 == 0));
+	local c48:2 = zext(v31[48,16] != 0);
+	vR2730[48,16] = (vR0003[48,16] * c48) + (vR1114[48,16] * zext(c48 == 0));
+}
+
+# vconcat.b r4(8..15), v1, v2, v3: per-byte select between v1 and v2 by r4 bits.
+:vconcat.b r8, vR0003, vR1114, vR2730 is op0510=0x3F & op0404=0 & op1515=0 & vR0003 & vR1114; op1626=0x6B2 & op3131=0 & vR2730 & r8 {
+	local s0:1 = (r8 & 1) != 0;
+	vR2730[0,8] = (vR1114[0,8] * s0) + (vR0003[0,8] * (s0 == 0));
+	local s1:1 = (r8 & 2) != 0;
+	vR2730[8,8] = (vR1114[8,8] * s1) + (vR0003[8,8] * (s1 == 0));
+	local s2:1 = (r8 & 4) != 0;
+	vR2730[16,8] = (vR1114[16,8] * s2) + (vR0003[16,8] * (s2 == 0));
+	local s3:1 = (r8 & 8) != 0;
+	vR2730[24,8] = (vR1114[24,8] * s3) + (vR0003[24,8] * (s3 == 0));
+	local s4:1 = (r8 & 16) != 0;
+	vR2730[32,8] = (vR1114[32,8] * s4) + (vR0003[32,8] * (s4 == 0));
+	local s5:1 = (r8 & 32) != 0;
+	vR2730[40,8] = (vR1114[40,8] * s5) + (vR0003[40,8] * (s5 == 0));
+	local s6:1 = (r8 & 64) != 0;
+	vR2730[48,8] = (vR1114[48,8] * s6) + (vR0003[48,8] * (s6 == 0));
+	local s7:1 = (r8 & 128) != 0;
+	vR2730[56,8] = (vR1114[56,8] * s7) + (vR0003[56,8] * (s7 == 0));
+}
+
+:vconcat.b r9, vR0003, vR1114, vR2730 is op0510=0x3F & op0404=1 & op1515=0 & vR0003 & vR1114; op1626=0x6B2 & op3131=0 & vR2730 & r9 {
+	local s0:1 = (r9 & 1) != 0;
+	vR2730[0,8] = (vR1114[0,8] * s0) + (vR0003[0,8] * (s0 == 0));
+	local s1:1 = (r9 & 2) != 0;
+	vR2730[8,8] = (vR1114[8,8] * s1) + (vR0003[8,8] * (s1 == 0));
+	local s2:1 = (r9 & 4) != 0;
+	vR2730[16,8] = (vR1114[16,8] * s2) + (vR0003[16,8] * (s2 == 0));
+	local s3:1 = (r9 & 8) != 0;
+	vR2730[24,8] = (vR1114[24,8] * s3) + (vR0003[24,8] * (s3 == 0));
+	local s4:1 = (r9 & 16) != 0;
+	vR2730[32,8] = (vR1114[32,8] * s4) + (vR0003[32,8] * (s4 == 0));
+	local s5:1 = (r9 & 32) != 0;
+	vR2730[40,8] = (vR1114[40,8] * s5) + (vR0003[40,8] * (s5 == 0));
+	local s6:1 = (r9 & 64) != 0;
+	vR2730[48,8] = (vR1114[48,8] * s6) + (vR0003[48,8] * (s6 == 0));
+	local s7:1 = (r9 & 128) != 0;
+	vR2730[56,8] = (vR1114[56,8] * s7) + (vR0003[56,8] * (s7 == 0));
+}
+
+:vconcat.b r10, vR0003, vR1114, vR2730 is op0510=0x3F & op0404=0 & op1515=1 & vR0003 & vR1114; op1626=0x6B2 & op3131=0 & vR2730 & r10 {
+	local s0:1 = (r10 & 1) != 0;
+	vR2730[0,8] = (vR1114[0,8] * s0) + (vR0003[0,8] * (s0 == 0));
+	local s1:1 = (r10 & 2) != 0;
+	vR2730[8,8] = (vR1114[8,8] * s1) + (vR0003[8,8] * (s1 == 0));
+	local s2:1 = (r10 & 4) != 0;
+	vR2730[16,8] = (vR1114[16,8] * s2) + (vR0003[16,8] * (s2 == 0));
+	local s3:1 = (r10 & 8) != 0;
+	vR2730[24,8] = (vR1114[24,8] * s3) + (vR0003[24,8] * (s3 == 0));
+	local s4:1 = (r10 & 16) != 0;
+	vR2730[32,8] = (vR1114[32,8] * s4) + (vR0003[32,8] * (s4 == 0));
+	local s5:1 = (r10 & 32) != 0;
+	vR2730[40,8] = (vR1114[40,8] * s5) + (vR0003[40,8] * (s5 == 0));
+	local s6:1 = (r10 & 64) != 0;
+	vR2730[48,8] = (vR1114[48,8] * s6) + (vR0003[48,8] * (s6 == 0));
+	local s7:1 = (r10 & 128) != 0;
+	vR2730[56,8] = (vR1114[56,8] * s7) + (vR0003[56,8] * (s7 == 0));
+}
+
+:vconcat.b r11, vR0003, vR1114, vR2730 is op0510=0x3F & op0404=1 & op1515=1 & vR0003 & vR1114; op1626=0x6B2 & op3131=0 & vR2730 & r11 {
+	local s0:1 = (r11 & 1) != 0;
+	vR2730[0,8] = (vR1114[0,8] * s0) + (vR0003[0,8] * (s0 == 0));
+	local s1:1 = (r11 & 2) != 0;
+	vR2730[8,8] = (vR1114[8,8] * s1) + (vR0003[8,8] * (s1 == 0));
+	local s2:1 = (r11 & 4) != 0;
+	vR2730[16,8] = (vR1114[16,8] * s2) + (vR0003[16,8] * (s2 == 0));
+	local s3:1 = (r11 & 8) != 0;
+	vR2730[24,8] = (vR1114[24,8] * s3) + (vR0003[24,8] * (s3 == 0));
+	local s4:1 = (r11 & 16) != 0;
+	vR2730[32,8] = (vR1114[32,8] * s4) + (vR0003[32,8] * (s4 == 0));
+	local s5:1 = (r11 & 32) != 0;
+	vR2730[40,8] = (vR1114[40,8] * s5) + (vR0003[40,8] * (s5 == 0));
+	local s6:1 = (r11 & 64) != 0;
+	vR2730[48,8] = (vR1114[48,8] * s6) + (vR0003[48,8] * (s6 == 0));
+	local s7:1 = (r11 & 128) != 0;
+	vR2730[56,8] = (vR1114[56,8] * s7) + (vR0003[56,8] * (s7 == 0));
+}
+
+:vconcat.b r12, vR0003, vR1114, vR2730 is op0510=0x3F & op0404=0 & op1515=0 & vR0003 & vR1114; op1626=0x6B2 & op3131=1 & vR2730 & r12 {
+	local s0:1 = (r12 & 1) != 0;
+	vR2730[0,8] = (vR1114[0,8] * s0) + (vR0003[0,8] * (s0 == 0));
+	local s1:1 = (r12 & 2) != 0;
+	vR2730[8,8] = (vR1114[8,8] * s1) + (vR0003[8,8] * (s1 == 0));
+	local s2:1 = (r12 & 4) != 0;
+	vR2730[16,8] = (vR1114[16,8] * s2) + (vR0003[16,8] * (s2 == 0));
+	local s3:1 = (r12 & 8) != 0;
+	vR2730[24,8] = (vR1114[24,8] * s3) + (vR0003[24,8] * (s3 == 0));
+	local s4:1 = (r12 & 16) != 0;
+	vR2730[32,8] = (vR1114[32,8] * s4) + (vR0003[32,8] * (s4 == 0));
+	local s5:1 = (r12 & 32) != 0;
+	vR2730[40,8] = (vR1114[40,8] * s5) + (vR0003[40,8] * (s5 == 0));
+	local s6:1 = (r12 & 64) != 0;
+	vR2730[48,8] = (vR1114[48,8] * s6) + (vR0003[48,8] * (s6 == 0));
+	local s7:1 = (r12 & 128) != 0;
+	vR2730[56,8] = (vR1114[56,8] * s7) + (vR0003[56,8] * (s7 == 0));
+}
+
+:vconcat.b r13, vR0003, vR1114, vR2730 is op0510=0x3F & op0404=1 & op1515=0 & vR0003 & vR1114; op1626=0x6B2 & op3131=1 & vR2730 & r13 {
+	local s0:1 = (r13 & 1) != 0;
+	vR2730[0,8] = (vR1114[0,8] * s0) + (vR0003[0,8] * (s0 == 0));
+	local s1:1 = (r13 & 2) != 0;
+	vR2730[8,8] = (vR1114[8,8] * s1) + (vR0003[8,8] * (s1 == 0));
+	local s2:1 = (r13 & 4) != 0;
+	vR2730[16,8] = (vR1114[16,8] * s2) + (vR0003[16,8] * (s2 == 0));
+	local s3:1 = (r13 & 8) != 0;
+	vR2730[24,8] = (vR1114[24,8] * s3) + (vR0003[24,8] * (s3 == 0));
+	local s4:1 = (r13 & 16) != 0;
+	vR2730[32,8] = (vR1114[32,8] * s4) + (vR0003[32,8] * (s4 == 0));
+	local s5:1 = (r13 & 32) != 0;
+	vR2730[40,8] = (vR1114[40,8] * s5) + (vR0003[40,8] * (s5 == 0));
+	local s6:1 = (r13 & 64) != 0;
+	vR2730[48,8] = (vR1114[48,8] * s6) + (vR0003[48,8] * (s6 == 0));
+	local s7:1 = (r13 & 128) != 0;
+	vR2730[56,8] = (vR1114[56,8] * s7) + (vR0003[56,8] * (s7 == 0));
+}
+
+:vconcat.b r14, vR0003, vR1114, vR2730 is op0510=0x3F & op0404=0 & op1515=1 & vR0003 & vR1114; op1626=0x6B2 & op3131=1 & vR2730 & r14 {
+	local s0:1 = (r14 & 1) != 0;
+	vR2730[0,8] = (vR1114[0,8] * s0) + (vR0003[0,8] * (s0 == 0));
+	local s1:1 = (r14 & 2) != 0;
+	vR2730[8,8] = (vR1114[8,8] * s1) + (vR0003[8,8] * (s1 == 0));
+	local s2:1 = (r14 & 4) != 0;
+	vR2730[16,8] = (vR1114[16,8] * s2) + (vR0003[16,8] * (s2 == 0));
+	local s3:1 = (r14 & 8) != 0;
+	vR2730[24,8] = (vR1114[24,8] * s3) + (vR0003[24,8] * (s3 == 0));
+	local s4:1 = (r14 & 16) != 0;
+	vR2730[32,8] = (vR1114[32,8] * s4) + (vR0003[32,8] * (s4 == 0));
+	local s5:1 = (r14 & 32) != 0;
+	vR2730[40,8] = (vR1114[40,8] * s5) + (vR0003[40,8] * (s5 == 0));
+	local s6:1 = (r14 & 64) != 0;
+	vR2730[48,8] = (vR1114[48,8] * s6) + (vR0003[48,8] * (s6 == 0));
+	local s7:1 = (r14 & 128) != 0;
+	vR2730[56,8] = (vR1114[56,8] * s7) + (vR0003[56,8] * (s7 == 0));
+}
+
+:vconcat.b r15, vR0003, vR1114, vR2730 is op0510=0x3F & op0404=1 & op1515=1 & vR0003 & vR1114; op1626=0x6B2 & op3131=1 & vR2730 & r15 {
+	local s0:1 = (r15 & 1) != 0;
+	vR2730[0,8] = (vR1114[0,8] * s0) + (vR0003[0,8] * (s0 == 0));
+	local s1:1 = (r15 & 2) != 0;
+	vR2730[8,8] = (vR1114[8,8] * s1) + (vR0003[8,8] * (s1 == 0));
+	local s2:1 = (r15 & 4) != 0;
+	vR2730[16,8] = (vR1114[16,8] * s2) + (vR0003[16,8] * (s2 == 0));
+	local s3:1 = (r15 & 8) != 0;
+	vR2730[24,8] = (vR1114[24,8] * s3) + (vR0003[24,8] * (s3 == 0));
+	local s4:1 = (r15 & 16) != 0;
+	vR2730[32,8] = (vR1114[32,8] * s4) + (vR0003[32,8] * (s4 == 0));
+	local s5:1 = (r15 & 32) != 0;
+	vR2730[40,8] = (vR1114[40,8] * s5) + (vR0003[40,8] * (s5 == 0));
+	local s6:1 = (r15 & 64) != 0;
+	vR2730[48,8] = (vR1114[48,8] * s6) + (vR0003[48,8] * (s6 == 0));
+	local s7:1 = (r15 & 128) != 0;
+	vR2730[56,8] = (vR1114[56,8] * s7) + (vR0003[56,8] * (s7 == 0));
+}
+
+# MODADD r: modulo-arithmetic update of the (inc<<16 | value) pair.
+# Reference: binutils v850 simulator.
+:modadd r1215 is op0510=0x3F & op0404=0 & op1111=0 & r1215; op1626=0x6D8 {
+	# The operand encodes the even pair (r, r+1): inc/value in r, limit in r+1.
+	local inc:4 = r1215[0,32] >> 16;
+	local val:4 = r1215[0,32] & 0xffff;
+	local max:4 = r1215[32,32] & 0xffff;
+	local nxt:4 = val + inc;
+	local wrap_hi:4 = zext((inc s> 0) && (nxt > max));
+	local wrap_lo:4 = zext((inc s< 0) && (nxt s< 0));
+	nxt = (nxt * zext((wrap_hi == 0) && (wrap_lo == 0))) + (max * wrap_lo);
+	r1215[0,32] = (inc << 16) | (nxt & 0xffff);
+}
+
+# ---------------------------------------------------------------- vector memory
+# VLD/VST move a full 64-bit vector between memory and a V register.
+# Addressing modes: post-increment, post-decrement, post-increment by the
+# amount in a general-purpose index register, modulo and bit-reverse
+# addressing driven by a register pair (IDA cacheop FMT3/FMT4/FMT45 forms;
+# the addressing update for the inferred modulo/bit-reverse cases mirrors
+# MODADD: pair = (base/limit registers)).
+
+macro vbitrev32(res, x) {
+	local r:4 = x;
+	local m:4;
+	m = ((r >> 0) ^ (r >> 31)) & 1;
+	r = r ^ ((m << 0) | (m << 31));
+	m = ((r >> 1) ^ (r >> 30)) & 1;
+	r = r ^ ((m << 1) | (m << 30));
+	m = ((r >> 2) ^ (r >> 29)) & 1;
+	r = r ^ ((m << 2) | (m << 29));
+	m = ((r >> 3) ^ (r >> 28)) & 1;
+	r = r ^ ((m << 3) | (m << 28));
+	m = ((r >> 4) ^ (r >> 27)) & 1;
+	r = r ^ ((m << 4) | (m << 27));
+	m = ((r >> 5) ^ (r >> 26)) & 1;
+	r = r ^ ((m << 5) | (m << 26));
+	m = ((r >> 6) ^ (r >> 25)) & 1;
+	r = r ^ ((m << 6) | (m << 25));
+	m = ((r >> 7) ^ (r >> 24)) & 1;
+	r = r ^ ((m << 7) | (m << 24));
+	m = ((r >> 8) ^ (r >> 23)) & 1;
+	r = r ^ ((m << 8) | (m << 23));
+	m = ((r >> 9) ^ (r >> 22)) & 1;
+	r = r ^ ((m << 9) | (m << 22));
+	m = ((r >> 10) ^ (r >> 21)) & 1;
+	r = r ^ ((m << 10) | (m << 21));
+	m = ((r >> 11) ^ (r >> 20)) & 1;
+	r = r ^ ((m << 11) | (m << 20));
+	m = ((r >> 12) ^ (r >> 19)) & 1;
+	r = r ^ ((m << 12) | (m << 19));
+	m = ((r >> 13) ^ (r >> 18)) & 1;
+	r = r ^ ((m << 13) | (m << 18));
+	m = ((r >> 14) ^ (r >> 17)) & 1;
+	r = r ^ ((m << 14) | (m << 17));
+	m = ((r >> 15) ^ (r >> 16)) & 1;
+	r = r ^ ((m << 15) | (m << 16));
+	res = r;
+}
+
+:vld.dw [R0004]+, vR2731 is op0510=0x3F & R0004 & op1115=0; op1626=0x6E0 & vR2731 {
+	vR2731 = *:8 R0004;
+	R0004 = R0004 + 8;
+}
+
+:vld.dw [R0004]r1115+, vR2731 is op0510=0x3F & R0004 & r1115; op1626=0x6E0 & vR2731 {
+	vR2731 = *:8 R0004;
+	R0004 = R0004 + r1115;
+}
+
+:vld.dw [R0004]-, vR2731 is op0510=0x3F & R0004 & op1115=0; op1626=0x6E2 & vR2731 {
+	vR2731 = *:8 R0004;
+	R0004 = R0004 - 8;
+}
+
+:vld.dw [R0004]"mod" r1215, vR2731 is op0510=0x3F & R0004 & op1111=1 & r1215; op1626=0x6E2 & vR2731 {
+	vR2731 = *:8 R0004;
+	local base:4 = r1215[0,32];
+	local limit:4 = r1215[32,32];
+	local nxt:4 = R0004 + 8;
+	local wrap:4 = zext(nxt > limit);
+	R0004 = (nxt * zext(wrap == 0)) + (base * wrap);
+}
+
+:vst.dw vR2731, [R0004]"rev" R1115pair is op0510=0x3F & R0004 & R1115pair; op1626=0x6E6 & vR2731 {
+	*:8 R0004 = vR2731;
+	local base:4 = R1115pair[0,32];
+	local span:4 = R1115pair[32,32] - base;
+	local off:4 = R0004 - base;
+	local rev:4 = 0;
+	vbitrev32(rev, off);
+	R0004 = base + (rev & span);
+}
+
+:vst.dw vR2731, [R0004]+ is op0510=0x3F & R0004 & op1115=0; op1626=0x6E4 & vR2731 {
+	*:8 R0004 = vR2731;
+	R0004 = R0004 + 8;
+}
+
+:vst.dw vR2731, [R0004]r1115+ is op0510=0x3F & R0004 & r1115; op1626=0x6E4 & vR2731 {
+	*:8 R0004 = vR2731;
+	R0004 = R0004 + r1115;
+}
+
+:vst.dw vR2731, [R0004]- is op0510=0x3F & R0004 & op1115=0; op1626=0x6E6 & vR2731 {
+	*:8 R0004 = vR2731;
+	R0004 = R0004 - 8;
+}
+
+:vst.dw vR2731, [R0004]"mod" r1215 is op0510=0x3F & R0004 & op1111=1 & r1215; op1626=0x6E6 & vR2731 {
+	*:8 R0004 = vR2731;
+	local base:4 = r1215[0,32];
+	local limit:4 = r1215[32,32];
+	local nxt:4 = R0004 + 8;
+	local wrap:4 = zext(nxt > limit);
+	R0004 = (nxt * zext(wrap == 0)) + (base * wrap);
+}
+
+:vld.w [R0004]+, vR2731 is op0510=0x3F & R0004 & op1115=0; op1626=0x6E8 & vR2731 {
+	vR2731 = *:8 R0004;
+	R0004 = R0004 + 8;
+}
+
+:vld.w [R0004]r1115+, vR2731 is op0510=0x3F & R0004 & r1115; op1626=0x6E8 & vR2731 {
+	vR2731 = *:8 R0004;
+	R0004 = R0004 + r1115;
+}
+
+:vld.w [R0004]-, vR2731 is op0510=0x3F & R0004 & op1115=0; op1626=0x6EA & vR2731 {
+	vR2731 = *:8 R0004;
+	R0004 = R0004 - 8;
+}
+
+:vld.w [R0004]"mod" r1215, vR2731 is op0510=0x3F & R0004 & op1111=1 & r1215; op1626=0x6EA & vR2731 {
+	vR2731 = *:8 R0004;
+	local base:4 = r1215[0,32];
+	local limit:4 = r1215[32,32];
+	local nxt:4 = R0004 + 8;
+	local wrap:4 = zext(nxt > limit);
+	R0004 = (nxt * zext(wrap == 0)) + (base * wrap);
+}
+
+:vst.w vR2731, [R0004]"rev" R1115pair is op0510=0x3F & R0004 & R1115pair; op1626=0x6EE & vR2731 {
+	*:8 R0004 = vR2731;
+	local base:4 = R1115pair[0,32];
+	local span:4 = R1115pair[32,32] - base;
+	local off:4 = R0004 - base;
+	local rev:4 = 0;
+	vbitrev32(rev, off);
+	R0004 = base + (rev & span);
+}
+
+:vst.w vR2731, [R0004]+ is op0510=0x3F & R0004 & op1115=0; op1626=0x6EC & vR2731 {
+	*:8 R0004 = vR2731;
+	R0004 = R0004 + 8;
+}
+
+:vst.w vR2731, [R0004]r1115+ is op0510=0x3F & R0004 & r1115; op1626=0x6EC & vR2731 {
+	*:8 R0004 = vR2731;
+	R0004 = R0004 + r1115;
+}
+
+:vst.w vR2731, [R0004]- is op0510=0x3F & R0004 & op1115=0; op1626=0x6EE & vR2731 {
+	*:8 R0004 = vR2731;
+	R0004 = R0004 - 8;
+}
+
+:vst.w vR2731, [R0004]"mod" r1215 is op0510=0x3F & R0004 & op1111=1 & r1215; op1626=0x6EE & vR2731 {
+	*:8 R0004 = vR2731;
+	local base:4 = r1215[0,32];
+	local limit:4 = r1215[32,32];
+	local nxt:4 = R0004 + 8;
+	local wrap:4 = zext(nxt > limit);
+	R0004 = (nxt * zext(wrap == 0)) + (base * wrap);
+}
+
+:vld.h [R0004]+, vR2731 is op0510=0x3F & R0004 & op1115=0; op1626=0x6F0 & vR2731 {
+	vR2731 = *:8 R0004;
+	R0004 = R0004 + 8;
+}
+
+:vld.h [R0004]r1115+, vR2731 is op0510=0x3F & R0004 & r1115; op1626=0x6F0 & vR2731 {
+	vR2731 = *:8 R0004;
+	R0004 = R0004 + r1115;
+}
+
+:vld.h [R0004]-, vR2731 is op0510=0x3F & R0004 & op1115=0; op1626=0x6F2 & vR2731 {
+	vR2731 = *:8 R0004;
+	R0004 = R0004 - 8;
+}
+
+:vld.h [R0004]"mod" r1215, vR2731 is op0510=0x3F & R0004 & op1111=1 & r1215; op1626=0x6F2 & vR2731 {
+	vR2731 = *:8 R0004;
+	local base:4 = r1215[0,32];
+	local limit:4 = r1215[32,32];
+	local nxt:4 = R0004 + 8;
+	local wrap:4 = zext(nxt > limit);
+	R0004 = (nxt * zext(wrap == 0)) + (base * wrap);
+}
+
+:vst.h vR2731, [R0004]"rev" R1115pair is op0510=0x3F & R0004 & R1115pair; op1626=0x6F6 & vR2731 {
+	*:8 R0004 = vR2731;
+	local base:4 = R1115pair[0,32];
+	local span:4 = R1115pair[32,32] - base;
+	local off:4 = R0004 - base;
+	local rev:4 = 0;
+	vbitrev32(rev, off);
+	R0004 = base + (rev & span);
+}
+
+:vst.h vR2731, [R0004]+ is op0510=0x3F & R0004 & op1115=0; op1626=0x6F4 & vR2731 {
+	*:8 R0004 = vR2731;
+	R0004 = R0004 + 8;
+}
+
+:vst.h vR2731, [R0004]r1115+ is op0510=0x3F & R0004 & r1115; op1626=0x6F4 & vR2731 {
+	*:8 R0004 = vR2731;
+	R0004 = R0004 + r1115;
+}
+
+:vst.h vR2731, [R0004]- is op0510=0x3F & R0004 & op1115=0; op1626=0x6F6 & vR2731 {
+	*:8 R0004 = vR2731;
+	R0004 = R0004 - 8;
+}
+
+:vst.h vR2731, [R0004]"mod" r1215 is op0510=0x3F & R0004 & op1111=1 & r1215; op1626=0x6F6 & vR2731 {
+	*:8 R0004 = vR2731;
+	local base:4 = r1215[0,32];
+	local limit:4 = r1215[32,32];
+	local nxt:4 = R0004 + 8;
+	local wrap:4 = zext(nxt > limit);
+	R0004 = (nxt * zext(wrap == 0)) + (base * wrap);
+}
+
+:vld.b [R0004]+, vR2731 is op0510=0x3F & R0004 & op1115=0; op1626=0x6F8 & vR2731 {
+	vR2731 = *:8 R0004;
+	R0004 = R0004 + 8;
+}
+
+:vld.b [R0004]r1115+, vR2731 is op0510=0x3F & R0004 & r1115; op1626=0x6F8 & vR2731 {
+	vR2731 = *:8 R0004;
+	R0004 = R0004 + r1115;
+}
+
+:vld.b [R0004]-, vR2731 is op0510=0x3F & R0004 & op1115=0; op1626=0x6FA & vR2731 {
+	vR2731 = *:8 R0004;
+	R0004 = R0004 - 8;
+}
+
+:vld.b [R0004]"mod" r1215, vR2731 is op0510=0x3F & R0004 & op1111=1 & r1215; op1626=0x6FA & vR2731 {
+	vR2731 = *:8 R0004;
+	local base:4 = r1215[0,32];
+	local limit:4 = r1215[32,32];
+	local nxt:4 = R0004 + 8;
+	local wrap:4 = zext(nxt > limit);
+	R0004 = (nxt * zext(wrap == 0)) + (base * wrap);
+}
+
+:vst.b vR2731, [R0004]+ is op0510=0x3F & R0004 & op1115=0; op1626=0x6FC & vR2731 {
+	*:8 R0004 = vR2731;
+	R0004 = R0004 + 8;
+}
+
+:vst.b vR2731, [R0004]r1115+ is op0510=0x3F & R0004 & r1115; op1626=0x6FC & vR2731 {
+	*:8 R0004 = vR2731;
+	R0004 = R0004 + r1115;
+}
+
+:vst.b vR2731, [R0004]- is op0510=0x3F & R0004 & op1115=0; op1626=0x6FE & vR2731 {
+	*:8 R0004 = vR2731;
+	R0004 = R0004 - 8;
+}
+
+:vst.b vR2731, [R0004]"mod" r1215 is op0510=0x3F & R0004 & op1111=1 & r1215; op1626=0x6FE & vR2731 {
+	*:8 R0004 = vR2731;
+	local base:4 = r1215[0,32];
+	local limit:4 = r1215[32,32];
+	local nxt:4 = R0004 + 8;
+	local wrap:4 = zext(nxt > limit);
+	R0004 = (nxt * zext(wrap == 0)) + (base * wrap);
+}
+
+# VLD.DW/VST.DW with 9-bit word-scaled displacement (subop 0x20..0x23).
+:vld.dw disp[R0004], vR2731 is op0510=0x3F & R0004 & op1115; op1626=0x6C0 & vR2731
+[ disp = (op1115) << 2; ] {
+	vR2731 = *:8 (R0004 + disp);
+}
+
+:vld.dw disp[R0004], vR2731 is op0510=0x3F & R0004 & op1115; op1626=0x6C2 & vR2731
+[ disp = (op1115 | (1 << 6)) << 2; ] {
+	vR2731 = *:8 (R0004 + disp);
+}
+
+:vst.dw vR2731, disp[R0004] is op0510=0x3F & R0004 & op1115; op1626=0x6C4 & vR2731
+[ disp = (op1115) << 2; ] {
+	*:8 (R0004 + disp) = vR2731;
+}
+
+:vst.dw vR2731, disp[R0004] is op0510=0x3F & R0004 & op1115; op1626=0x6C6 & vR2731
+[ disp = (op1115 | (1 << 6)) << 2; ] {
+	*:8 (R0004 + disp) = vR2731;
+}
+

@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
-# Processor semantic gate: SLEIGH compile, synthetic fixture checks, the exact
-# firmware machine regression suite (tools/test rh850_firmware), and
-# (when a working project exists) full-program audits via tools/project/run_headless so
-# the isolated extension is used without mutating GHIDRA_HOME.
+# Processor semantic gate: language execution, automatic analysis fixtures,
+# firmware machine regression, and optional full-program audits through the
+# isolated extension. Never mutates GHIDRA_HOME.
 set -euo pipefail
 
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)
@@ -48,11 +47,24 @@ FIXTURE_LOG="$BUILD_LOGS/verify-processor-fixture.log"
   -loader-baseAddr 0x0 \
   -noanalysis \
   -postScript AssertProcessorFixtureSemantics.java "$MANIFEST" \
+  -postScript AssertV850ExtendedIsa.java \
+  -postScript AssertV850ExtendedRegisters.java \
+  -postScript AssertV850Virtualization.java \
+  -postScript AssertV850E1f.java \
+  -postScript AssertV850RegisterAnalysis.java \
+  -postScript AssertV850SwitchAnalysis.java \
+  -postScript AssertV850CompilerHelpers.java \
   -deleteProject
 grep -q 'ASSERT processor-fixture: all .* cases passed' "$FIXTURE_LOG" || {
   echo "synthetic fixture did not report success" >&2
   exit 1
 }
+for capability in extended-isa extended-registers virtualization e1f register-analysis switch-analysis compiler-helpers; do
+  grep -q "ASSERT v850-$capability: passed" "$FIXTURE_LOG" || {
+    echo "processor $capability fixture did not report success" >&2
+    exit 1
+  }
+done
 
 echo "==> Firmware machine regression (rh850_firmware)"
 "$ROOT/tools/test" rh850_firmware

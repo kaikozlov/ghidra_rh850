@@ -1,29 +1,21 @@
 //@author kaikozlov
 //@category Analysis
-// Apply the RH850/G3 ABI prototype (__stdcall) to every recovered function that
-// is not already an ISR wrapper (__interrupt). The cspec default_proto is
-// named __stdcall, but Ghidra leaves newly created functions on "unknown"
-// until a convention is set explicitly — which is why landmark decompiler
-// signatures previously reported unknown even after the cspec rewrite.
-//
-// Run AFTER RecoverVectorHandlers so true ISR wrappers keep __interrupt.
-// Rebuild also re-runs this under -noanalysis after the annotate-stage commit
-// (see tools/project/rebuild_project.sh): two ordinary bodies at 0x3b0be/0x6f0d0 are
-// absent from the function iterator until that reopen, and would otherwise
-// remain unknown for project/decompiler invariants.
-// Idempotent: already-correct conventions are left alone.
+// Assign the selected compiler's default prototype only to functions with an
+// unknown/default convention. Preserve ISR, compiler-helper, analyzer policy,
+// and explicitly assigned conventions; thunks inherit their destination.
+// Run after entry/helper analysis and again after the final rebuild reopen.
 import ghidra.app.script.GhidraScript;
 import ghidra.program.model.listing.Function;
 import ghidra.program.model.listing.FunctionIterator;
 import ghidra.program.model.listing.FunctionManager;
 
 public class ApplyCallingConventions extends GhidraScript {
-    private static final String ABI = "__stdcall";
     private static final String ISR = "__interrupt";
 
     @Override
     public void run() throws Exception {
         FunctionManager fm = currentProgram.getFunctionManager();
+        String abi = currentProgram.getCompilerSpec().getDefaultCallingConvention().getName();
         int stdcall = 0;
         int interrupt = 0;
         int skipped = 0;
@@ -37,7 +29,8 @@ public class ApplyCallingConventions extends GhidraScript {
                 interrupt++;
                 continue;
             }
-            if (ABI.equals(current)) {
+            if (!Function.UNKNOWN_CALLING_CONVENTION_STRING.equals(current) &&
+                !Function.DEFAULT_CALLING_CONVENTION_STRING.equals(current)) {
                 skipped++;
                 continue;
             }
@@ -48,18 +41,18 @@ public class ApplyCallingConventions extends GhidraScript {
                 continue;
             }
             try {
-                f.setCallingConvention(ABI);
+                f.setCallingConvention(abi);
                 stdcall++;
             } catch (Exception ex) {
                 failed++;
-                println("WARN: could not set " + ABI + " on " + f.getName()
+                println("WARN: could not set " + abi + " on " + f.getName()
                         + " @ " + f.getEntryPoint() + ": " + ex.getMessage());
             }
         }
 
         println(String.format(
                 "ApplyCallingConventions: set %s=%d preserved %s=%d already_ok/skipped=%d failed=%d",
-                ABI, stdcall, ISR, interrupt, skipped, failed));
+                abi, stdcall, ISR, interrupt, skipped, failed));
         if (failed > 0) {
             throw new IllegalStateException(failed + " calling-convention apply failures");
         }

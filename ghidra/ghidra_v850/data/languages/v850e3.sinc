@@ -7,13 +7,21 @@
 # R01US0123EJ0140 Chapter 3; reserved slots deliberately remain unnamed.
 define register offset=0x180 size=4 [
     # selID = 1
+@if defined(V850SIMD)
+    SPID    _       RBASE   EBASE   INTBP   MCTL    PID     FPIPR
+@else
     MCFG0   _       RBASE   EBASE   INTBP   MCTL    PID     FPIPR
+@endif
     _       _       _       SCCFG   SCBP    _       _       _
     _       _       _       _       _       _       _       _
     _       _       _       _       _       _       _       _
 
     # selID = 2
+@if defined(V850SIMD)
+    PEID    _       _       _       _       _       MEA     ASID
+@else
     HTCFG0  _       _       _       _       _       MEA     ASID
+@endif
     MEI     _       ISPR    PMR     ICSR    INTCFG  _       _
     _       _       _       _       _       _       _       _
     _       _       _       _       _       _       _       _
@@ -51,13 +59,21 @@ define register offset=0x180 size=4 [
 
 
 attach variables [ SR0004_1 SR1115_1 ] [
+@if defined(V850SIMD)
+    SPID    _       RBASE   EBASE   INTBP   MCTL    PID     FPIPR
+@else
     MCFG0   _       RBASE   EBASE   INTBP   MCTL    PID     FPIPR
+@endif
     _       _       _       SCCFG   SCBP    _       _       _
     _       _       _       _       _       _       _       _
     _       _       _       _       _       _       _       _
 ];
 attach variables [ SR0004_2 SR1115_2 ] [
+@if defined(V850SIMD)
+    PEID    _       _       _       _       _       MEA     ASID
+@else
     HTCFG0  _       _       _       _       _       MEA     ASID
+@endif
     MEI     _       ISPR    PMR     ICSR    INTCFG  _       _
     _       _       _       _       _       _       _       _
     _       _       _       _       _       _       _       _
@@ -94,6 +110,8 @@ attach variables [ SR0004_d SR1115_d ] [
 ];
 
 
+# ST.DW reads the pair (the r0:r1 store reads (0 || r1)); LD.DW writes
+# through the raw window so a load into r0:r1 commits only r1.
 # ST.DW reg3, disp23[reg1]
 :st.dw R2731pairEx, disp23[R0004] is op0515=0x3D & R0004; R2731pairEx & op2126 & op1620=0xF; s3247
 [ disp23 = (s3247 << 7) | (op2126 << 1); ] {
@@ -104,10 +122,10 @@ attach variables [ SR0004_d SR1115_d ] [
 
 # ld.dw 0x7a00009 0xffe0001f
 # LD.DW disp23[reg1], reg3
-:ld.dw disp23[R0004], R2731pairEx is op0515=0x03d & R0004; R2731pairEx & op2126 & op1620=0x09; s3247
+:ld.dw disp23[R0004], xR2731pairEx is op0515=0x03d & R0004; xR2731pairEx & op2126 & op1620=0x09; s3247
 [ disp23 = (s3247 << 7) | (op2126 << 1); ] {
     local addr:4 = disp23 + R0004;
-    R2731pairEx = *:8 addr;
+    xR2731pairEx = *:8 addr;
 }
 
 
@@ -142,17 +160,30 @@ attach variables [ SR0004_d SR1115_d ] [
 
 
 # STSR regID, reg2, selId -- implemented RH850G3M selection IDs
-:stsr SR0004_1, R1115, 1  is op0510=0x3F & R1115 & SR0004_1; op1626=0x40 & op2731=0x01 { R1115 = SR0004_1; }
-:stsr SR0004_2, R1115, 2  is op0510=0x3F & R1115 & SR0004_2; op1626=0x40 & op2731=0x02 { R1115 = SR0004_2; }
+:stsr SR0004_1, R1115, 1 is op0510=0x3F & R1115 & SR0004_1
+@if defined(V850SIMD)
+	& op0004!=0 & op0004!=1 & op0004!=8
+	& op0004!=16 & op0004!=17 & op0004!=20
+@endif
+	; op1626=0x40 & op2731=0x01 { R1115 = SR0004_1; }
+:stsr SR0004_2, R1115, 2 is op0510=0x3F & R1115 & SR0004_2
+@if defined(V850SIMD)
+	& op0004!=0 & op0004!=14
+@endif
+	; op1626=0x40 & op2731=0x02 { R1115 = SR0004_2; }
 :stsr SR0004_4, R1115, 4  is op0510=0x3F & R1115 & SR0004_4; op1626=0x40 & op2731=0x04 { R1115 = SR0004_4; }
-:stsr SR0004_5, R1115, 5  is op0510=0x3F & R1115 & SR0004_5; op1626=0x40 & op2731=0x05 { R1115 = SR0004_5; }
+:stsr SR0004_5, R1115, 5  is op0510=0x3F & R1115 & SR0004_5 & op0004<16; op1626=0x40 & op2731=0x05 { R1115 = SR0004_5; }
 :stsr SR0004_6, R1115, 6  is op0510=0x3F & R1115 & SR0004_6; op1626=0x40 & op2731=0x06 { R1115 = SR0004_6; }
 :stsr SR0004_7, R1115, 7  is op0510=0x3F & R1115 & SR0004_7; op1626=0x40 & op2731=0x07 { R1115 = SR0004_7; }
 :stsr SR0004_d, R1115, 13 is op0510=0x3F & R1115 & SR0004_d; op1626=0x40 & op2731=0x0D { R1115 = SR0004_d; }
 
 # LDSR reg2, regID, selId -- implemented RH850G3M selection IDs
 :ldsr R0004, SR1115_4, 4  is op0510=0x3F & SR1115_4 & R0004; op1626=0x20 & op2731=0x04 { SR1115_4 = R0004; }
-:ldsr R0004, SR1115_5, 5  is op0510=0x3F & SR1115_5 & R0004; op1626=0x20 & op2731=0x05 { SR1115_5 = R0004; }
+:ldsr R0004, SR1115_5, 5  is op0510=0x3F & SR1115_5 & R0004 & op1115<16
+@if defined(V850SIMD)
+	& op1115!=0
+@endif
+	; op1626=0x20 & op2731=0x05 { SR1115_5 = R0004; }
 :ldsr R0004, SR1115_6, 6  is op0510=0x3F & SR1115_6 & R0004; op1626=0x20 & op2731=0x06 { SR1115_6 = R0004; }
 :ldsr R0004, SR1115_7, 7  is op0510=0x3F & SR1115_7 & R0004; op1626=0x20 & op2731=0x07 { SR1115_7 = R0004; }
 :ldsr R0004, SR1115_d, 13 is op0510=0x3F & SR1115_d & R0004; op1626=0x20 & op2731=0x0D { SR1115_d = R0004; }
@@ -181,8 +212,8 @@ attach variables [ SR0004_d SR1115_d ] [
 	ll_valid = 0;
 }
 
-# CLL
-:cll is op0015=0xffff; op1631=0xf160 {
+# The canonical CLL spelling is the fully fixed CACHE-family encoding.
+:cll is op0015=0xFFFF; op1631=0xF160 {
 	ll_valid = 0;
 }
 
@@ -282,7 +313,8 @@ attach variables [ SR0004_d SR1115_d ] [
 
 # attach registers to regNum
 #[ r0 r1 r2 sp gp tp r6 r7 r8 r9 r10 r11 r12 r13 r14 r15 r16 r17 r18 r19 r20 r21 r22 r23 r24 r25 r26 r27 r28 r29 ep lp ];
-rXX: r0		is r0 & regNum=0	{ export r0; }
+@if !(defined(V850SIMD))
+rXX: r0		is r0 & regNum=0	{ local discard:4 = 0; export discard; }
 rXX: r1		is r1 & regNum=1	{ export r1; }
 rXX: r2		is r2 & regNum=2	{ export r2; }
 rXX: sp		is sp & regNum=3	{ export sp; }
@@ -368,6 +400,7 @@ buildPushSp: is rXX & buildPushSp [ counter=counter-1; regNum=regNum+1; ]
 	build buildPushSp;
 	sp = tmp;	
 }
+@endif
 
 
 # rotate left
@@ -435,7 +468,7 @@ cacheop: "cibii", R0004 is op1112=1 & R0004; op2731=0 { __cibii(R0004); }
 cacheop: "cfali", R0004 is op1112=2 & R0004; op2731=0 { __cfali(R0004); }
 cacheop: "cisti", R0004 is op1112=3 & R0004; op2731=0 { __cisti(R0004); }
 cacheop: "cildi", R0004 is op1112=3 & R0004; op2731=1 { __cildi(R0004); }
-cacheop: "cll" is op1112=3; op2731=0x1E { ll_valid = 0; }
+cacheop: "cll", R0004 is op1112=3 & R0004 & op0004!=0x1F; op2731=0x1E { ll_valid = 0; }
 
 :cache cacheop is (op0510=0x3F & op1315=0x7; op1626=0x160) & cacheop {
 	build cacheop;

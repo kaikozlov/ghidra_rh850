@@ -8517,9 +8517,13 @@
 {"record":"user_symbol","address":{"space":"ram","offset":"ffd201ec"},"symbol_type":"Label","qualified_name":"CFPCTR5","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffd20250"},"symbol_type":"Label","qualified_name":"CFDTMC","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffd20260"},"symbol_type":"Label","qualified_name":"CFDTMC16","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd20266"},"symbol_type":"Label","qualified_name":"CFDTMC_CH1_6","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd20267"},"symbol_type":"Label","qualified_name":"CFDTMC_CH1_7","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffd20270"},"symbol_type":"Label","qualified_name":"CFDTMC_CH1_16","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffd202d0"},"symbol_type":"Label","qualified_name":"CFDTMSTS","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffd202e0"},"symbol_type":"Label","qualified_name":"CFDTMSTS_CH1","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd202e6"},"symbol_type":"Label","qualified_name":"CFDTMSTS_CH1_6","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd202e7"},"symbol_type":"Label","qualified_name":"CFDTMSTS_CH1_7","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffd202f0"},"symbol_type":"Label","qualified_name":"CFDTMSTS_CH1_16","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffd23400"},"symbol_type":"Label","qualified_name":"CFID","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffd23580"},"symbol_type":"Label","qualified_name":"CFID_CH1","primary":true}
@@ -8566,6 +8570,16 @@
 {"record":"user_symbol","address":{"space":"ram","offset":"ffd24208"},"symbol_type":"Label","qualified_name":"CFDTMFDSTS16","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffd2420c"},"symbol_type":"Label","qualified_name":"CFDTMDF0_16","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffd24210"},"symbol_type":"Label","qualified_name":"CFDTMDF1_16","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd242c0"},"symbol_type":"Label","qualified_name":"CFDTMID_CH1_6","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd242c4"},"symbol_type":"Label","qualified_name":"CFDTMPTR_CH1_6","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd242c8"},"symbol_type":"Label","qualified_name":"CFDTMFDSTS_CH1_6","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd242cc"},"symbol_type":"Label","qualified_name":"CFDTMDF0_CH1_6","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd242d0"},"symbol_type":"Label","qualified_name":"CFDTMDF1_CH1_6","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd242e0"},"symbol_type":"Label","qualified_name":"CFDTMID_CH1_7","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd242e4"},"symbol_type":"Label","qualified_name":"CFDTMPTR_CH1_7","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd242e8"},"symbol_type":"Label","qualified_name":"CFDTMFDSTS_CH1_7","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd242ec"},"symbol_type":"Label","qualified_name":"CFDTMDF0_CH1_7","primary":true}
+{"record":"user_symbol","address":{"space":"ram","offset":"ffd242f0"},"symbol_type":"Label","qualified_name":"CFDTMDF1_CH1_7","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffd24400"},"symbol_type":"Label","qualified_name":"CFDTMID_CH1_16","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffd24404"},"symbol_type":"Label","qualified_name":"CFDTMPTR_CH1_16","primary":true}
 {"record":"user_symbol","address":{"space":"ram","offset":"ffd24408"},"symbol_type":"Label","qualified_name":"CFDTMFDSTS_CH1_16","primary":true}
@@ -9582,9 +9596,13 @@
 {"record":"listing_comment","address":{"space":"ram","offset":"ffd201ec"},"comment_type":"PLATE","text":"\"RSCFD0CFDCFPCTR5 (CFPCTRk = base+0x1D8+4k, k=5): CFIFO 5 pointer control; CFPC[7:0] write-only; receive mode: write 0xFF moves the read pointer to the next unread message and decrements CFMC (requires CFE=1 and CFEMP=0)\" [w, u32]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffd20250"},"comment_type":"PLATE","text":"RSCFD Tx message-buffer control base (CFDTMCn.TMTR at +n) [rw, u32]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffd20260"},"comment_type":"PLATE","text":"Diagnostic Tx buffer control (HTH 0x13 -> n=16; TMTR bit 0) [rw, u8]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd20266"},"comment_type":"PLATE","text":"Application CAN1 Tx buffer local resource 6 control (TMTR bit 0) [rw, u8]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd20267"},"comment_type":"PLATE","text":"Application CAN1 Tx buffer local resource 7 control (TMTR bit 0) [rw, u8]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffd20270"},"comment_type":"PLATE","text":"Application CAN1 Tx buffer n=16 control (TMTR bit 0) [rw, u8]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffd202d0"},"comment_type":"PLATE","text":"RSCFD Tx message-buffer status base (CFDTMSTSn at +n) [rw, u32]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffd202e0"},"comment_type":"PLATE","text":"RSCFD Tx status base for application CAN1 record [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd202e6"},"comment_type":"PLATE","text":"Application CAN1 Tx buffer local resource 6 status [rw, u8]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd202e7"},"comment_type":"PLATE","text":"Application CAN1 Tx buffer local resource 7 status [rw, u8]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffd202f0"},"comment_type":"PLATE","text":"Application CAN1 Tx buffer n=16 status [rw, u8]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffd23400"},"comment_type":"PLATE","text":"\"RSCFD common-FIFO access-window base (CFIDk = base+0x3400+0x80k, k=0..8; window: ID, +4 PTR, +8 FDCSTS, +0x0C..+0x48 DF0..DF15)\" [rw, u32]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffd23580"},"comment_type":"PLATE","text":"\"RSCFD0CFDCFID3 (CFIDk = base+0x3400+0x80k, k=3): CFIFO 3 access window; CFIDE bit 31, CFRTR bit 30, CFID[28:0]; +0x04 CFDCFPTR3 (CFDLC[31:28], CFPTR[27:16], CFTS[15:0]), +0x08 CFDCFFDCSTS3 (CFFDF bit 2, CFBRS bit 1, CFESI bit 0), +0x0C CFDCFDF0_3 .. +0x48 CFDCFDF15_3 (16 data words); receive mode reads alias the oldest unread message\" [r, u32]"}
@@ -9631,6 +9649,16 @@
 {"record":"listing_comment","address":{"space":"ram","offset":"ffd24208"},"comment_type":"PLATE","text":"Diagnostic Tx buffer n=16 FD pointer/status word [rw, u32]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffd2420c"},"comment_type":"PLATE","text":"Diagnostic Tx buffer n=16 data bytes 0..3 [rw, u32]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffd24210"},"comment_type":"PLATE","text":"Diagnostic Tx buffer n=16 data bytes 4..7 [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd242c0"},"comment_type":"PLATE","text":"Application CAN1 Tx message RAM buffer local resource 6 identifier [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd242c4"},"comment_type":"PLATE","text":"Application CAN1 Tx buffer local resource 6 pointer/DLC word [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd242c8"},"comment_type":"PLATE","text":"Application CAN1 Tx buffer local resource 6 FD pointer/status word [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd242cc"},"comment_type":"PLATE","text":"Application CAN1 Tx buffer local resource 6 data bytes 0..3 [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd242d0"},"comment_type":"PLATE","text":"Application CAN1 Tx buffer local resource 6 data bytes 4..7 [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd242e0"},"comment_type":"PLATE","text":"Application CAN1 Tx message RAM buffer local resource 7 identifier [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd242e4"},"comment_type":"PLATE","text":"Application CAN1 Tx buffer local resource 7 pointer/DLC word [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd242e8"},"comment_type":"PLATE","text":"Application CAN1 Tx buffer local resource 7 FD pointer/status word [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd242ec"},"comment_type":"PLATE","text":"Application CAN1 Tx buffer local resource 7 data bytes 0..3 [rw, u32]"}
+{"record":"listing_comment","address":{"space":"ram","offset":"ffd242f0"},"comment_type":"PLATE","text":"Application CAN1 Tx buffer local resource 7 data bytes 4..7 [rw, u32]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffd24400"},"comment_type":"PLATE","text":"Application CAN1 Tx message RAM buffer n=16 identifier [rw, u32]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffd24404"},"comment_type":"PLATE","text":"Application CAN1 Tx message RAM buffer n=16 pointer/DLC word [rw, u32]"}
 {"record":"listing_comment","address":{"space":"ram","offset":"ffd24408"},"comment_type":"PLATE","text":"Application CAN1 Tx buffer n=16 FD pointer/status word [rw, u32]"}
@@ -10619,4 +10647,4 @@
 {"record":"bookmark","address":{"space":"ram","offset":"000d5ffc"},"type":"Analysis","category":"Address Table","comment":"Address table[16] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d603c"},"type":"Analysis","category":"Address Table","comment":"Address table[16] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000d607c"},"type":"Analysis","category":"Address Table","comment":"Address table[16] created"}
-{"record":"totals","functions":7090,"instructions":197726,"symbols":8859,"memory_blocks":26,"body_ranges":7116,"body_addresses":555975,"user_function_names":634,"user_symbols":1555,"listing_comments":1065,"function_comments":502,"bookmarks":382,"name_sources":{"DEFAULT":6456,"USER_DEFINED":634},"calling_conventions":{"__interrupt":23,"__stdcall":7067},"signature_sources":{"DEFAULT":7090}}
+{"record":"totals","functions":7090,"instructions":197726,"symbols":8873,"memory_blocks":26,"body_ranges":7116,"body_addresses":555975,"user_function_names":634,"user_symbols":1569,"listing_comments":1079,"function_comments":502,"bookmarks":382,"name_sources":{"DEFAULT":6456,"USER_DEFINED":634},"calling_conventions":{"__interrupt":23,"__stdcall":7067},"signature_sources":{"DEFAULT":7090}}

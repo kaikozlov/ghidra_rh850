@@ -1,0 +1,1827 @@
+# RH850 SIMD floating-point instructions (W registers, 128-bit, four
+# single-precision lanes).
+#
+# PRIMARY AUTHORITIES:
+#   - R01UH0770EJ0121 (RH850/E2x-FCC2 User's Manual: Hardware) section
+#     3.2.6, the extended floating-point (FXU) architecture of this target:
+#     exception detection/enable/preservation model (Figures 3.38/3.39),
+#     per-cause rules 3.2.6.2(6), the input/result flush Tables 3.122-3.124,
+#     the NaN result Table 3.125, the conversion result Table 3.126 and the
+#     masked-exception initial values Table 3.121.
+#   - R01US0209EJ0220 (RH850G4MH User's Manual: Software) chapter 2.5, the
+#     per-instruction [Operation] blocks and operation-result tables
+#     (pp. 387-496).
+# Encodings are cross-checked against the installed IDA census
+# (build/out/ida-v850-census.json).
+#
+# LANE/STATUS CONTRACT (every floating-point constructor below):
+#   * fxu_check gates the whole constructor on PSW.CU1 (FE-level UCPOP,
+#     cause 81H / vector 80H, no state change).
+#   * ALL FOUR lanes are evaluated first; the commit macro then decides in
+#     ONE place between writing every lane (no enabled exception: sticky
+#     XP/FXXP accumulate the 5-bit causes, XC retained) and leaving the
+#     destination unchanged with the EI-level extended floating-point
+#     operation exception FXE (EIIC 75H, vector RBASE/EBASE+70H, EIPC = the
+#     faulting instruction), which replaces FXSR.XC with the OR over lanes
+#     and FXXC with the per-lane 6-bit packing (E,V,Z,O,U,I at bytes
+#     0/8/16/24; R01UH0770 Table 3.59 and Figure 3.38).
+#   * Input flushes set FXSR.IF (bit 22) immediately, so they accumulate
+#     even on trapping instructions (R01UH0770 3.2.6.2(8) caution 4).
+#     FXSR.XP is accumulated independently of FXXP and is never
+#     reconstructed from software-modified FXXP state.
+#   * Lane causes use the canonical encoding I=0x1, U=0x2, O=0x4, Z=0x8,
+#     V=0x10, E=0x20, matching the FXSR.XC/XP bit order I,U,O,Z,V,E.
+#   * Operands are snapshotted into locals before any write, so register
+#     aliasing (wreg3 = wreg1/wreg2) is architecturally safe.
+#
+# Format M (bits 10..5 = 111111): category 10 => op1626 0x580..0x5DE,
+# conversions/unary at 0x5A0 with the 5-bit selector in hw1 bits 4-0.
+#
+# Double-precision intermediates: add/sub/div/sqrt/rsqrt lanes are computed
+# as a double-precision p-code operation and then rounded to single in the
+# current FXSR.RM. This is exact for products of two singles and for
+# sums/quotients whose exponent spread fits 53 bits; the residual
+# double-rounding corners (sticky bits beyond 53) are the documented model
+# limitation of p-code, consistent with the scalar float.sinc treatment.
+
+
+# ---------------------------------------------------------------------
+# Numeric neighbors of a finite single: next up/down in the total order
+# (monotonic across subnormals and through ±0).
+macro f32_next_up(out, bits) {
+  if ((bits & 0x80000000) != 0) goto <nu_neg>;
+  out = bits + 1;
+  goto <nu_done>;
+  <nu_neg>
+  if (bits != 0x80000000) goto <nu_neg_nz>;
+  out = 0;
+  goto <nu_done>;
+  <nu_neg_nz>
+  out = bits - 1;
+  <nu_done>
+}
+
+macro f32_next_down(out, bits) {
+  if ((bits & 0x80000000) != 0) goto <nd_neg>;
+  if (bits != 0) goto <nd_pos_nz>;
+  out = 0x80000000;
+  goto <nd_done>;
+  <nd_pos_nz>
+  out = bits - 1;
+  goto <nd_done>;
+  <nd_neg>
+  out = bits + 1;
+  <nd_done>
+}
+
+macro h16_next_up(out, bits) {
+  if ((bits & 0x8000) != 0) goto <hnu_neg>;
+  out = bits + 1;
+  goto <hnu_done>;
+  <hnu_neg>
+  if (bits != 0x8000) goto <hnu_neg_nz>;
+  out = 0;
+  goto <hnu_done>;
+  <hnu_neg_nz>
+  out = bits - 1;
+  <hnu_done>
+}
+
+macro h16_next_down(out, bits) {
+  if ((bits & 0x8000) != 0) goto <hnd_neg>;
+  if (bits != 0) goto <hnd_pos_nz>;
+  out = 0x8000;
+  goto <hnd_done>;
+  <hnd_pos_nz>
+  out = bits - 1;
+  goto <hnd_done>;
+  <hnd_neg>
+  out = bits + 1;
+  <hnd_done>
+}
+
+# Result negation for the N-suffix butterfly forms: finite results and
+# infinities flip the sign bit; NaN results keep the value mandated by
+# R01UH0770 Table 3.125 (7fffffff or a Q-NaN payload).
+macro f32_neg_if_not_nan(r) {
+  if ((r & 0x7fffffff) > 0x7f800000) goto <neg_skip>;
+  r = r ^ 0x80000000;
+  <neg_skip>
+}
+
+# Round a finite double-precision intermediate to single precision in the
+# current FXSR rounding mode (0 RN, 1 RZ, 2 RP, 3 RM) and raise the inexact
+# cause (I = 0x1) when the single result differs from the intermediate.
+# Callers guarantee the value is nonzero, finite, and neither subnormal nor
+# overflowing in single precision, so only precision rounding is needed.
+# The RN pick comes from the p-code float2float conversion; directed modes
+# step to the neighboring single with the correct orientation (RZ depends
+# on the sign, RP always rounds up, RM always rounds down).
+macro simd_round_d2s(cause, out, exact) {
+  local mode:4 = (FXSR >> 18) & 3;
+  local s:4 = float2float(exact);
+  local s8:8 = float2float(s);
+  out = s;
+  if (s8 f== exact) goto <rd_done>;
+  cause = cause | 0x1;
+  if (mode == 0) goto <rd_done>;
+  local neg:1 = exact f< 0;
+  if (s8 f< exact) goto <rd_rounded_down>;
+  # s sits above the intermediate: s is the upper neighbor
+  if (mode == 2) goto <rd_done>;
+  if (mode == 3) goto <rd_take_lower>;
+  if (neg == 0) goto <rd_take_lower>;
+  goto <rd_done>;
+  <rd_rounded_down>
+  # s sits below the intermediate: s is the lower neighbor
+  if (mode == 3) goto <rd_done>;
+  if (mode == 2) goto <rd_take_upper>;
+  if (neg != 0) goto <rd_take_upper>;
+  goto <rd_done>;
+  <rd_take_lower>
+  f32_next_down(out, s);
+  goto <rd_done>;
+  <rd_take_upper>
+  f32_next_up(out, s);
+  <rd_done>
+}
+
+# One lane of binary SIMD arithmetic. Per the G4MH [Operation] blocks the
+# result is wreg2 op wreg1, so callers pass x = the wreg2 lane and y = the
+# wreg1 lane; kind 0 = add, 1 = multiply, 2 = divide, 3 = subtract.
+# Implements R01UH0770 3.2.6.2 in lane-local form: subnormal input flush
+# (Table 3.122, IF + I) or the unimplemented operation exception (E);
+# Table 3.125 NaN results (S-NaN or an invalid real-number operation give
+# the canonical 7fffffff, Q-NaN-only keeps the wreg2 > wreg1 payload);
+# division-by-zero; subnormal RESULT flush before rounding (Table 3.123,
+# plus the FN flush-to-nearest half-minimum rule of Table 3.124) or E when
+# FS = 0; overflow with the Table 3.121 initial values; RM-directed
+# rounding; exact-zero sign rules (IEEE 754 6.3: only RM negates an exact
+# add/sub cancellation).
+macro simd_fp_op(cause, out, x, y, operation) {
+  local kind:4 = operation;
+  local a:4 = x;
+  local b:4 = y;
+  local aa:4 = a & 0x7fffffff;
+  local bb:4 = b & 0x7fffffff;
+  local flushed:1 = 0;
+  cause = 0;
+  out = 0;
+  # -- subnormal inputs (R01UH0770 3.2.6.2(8)) --
+  local sub_in:1 = ((aa != 0) && (aa < 0x00800000))
+    || ((bb != 0) && (bb < 0x00800000));
+  if (sub_in == 0) goto <inputs_ready>;
+  if ((FXSR & 0x20000) != 0) goto <flush_inputs>;
+  cause = 0x20;
+  goto <op_done>;
+  <flush_inputs>
+  flushed = 1;
+  FXSR = FXSR | 0x400000;
+  if ((aa == 0) || (aa >= 0x00800000)) goto <a_ready>;
+  a = a & 0x80000000;
+  aa = 0;
+  <a_ready>
+  if ((bb == 0) || (bb >= 0x00800000)) goto <inputs_ready>;
+  b = b & 0x80000000;
+  bb = 0;
+  <inputs_ready>
+  # -- NaN operands (R01UH0770 Table 3.125) --
+  if ((aa <= 0x7f800000) && (bb <= 0x7f800000)) goto <no_nan>;
+  if (((aa > 0x7f800000) && ((aa & 0x400000) == 0))
+    || ((bb > 0x7f800000) && ((bb & 0x400000) == 0))) goto <invalid_op>;
+  if (aa > 0x7f800000) goto <qnan_a>;
+  out = b;
+  goto <op_done>;
+  <qnan_a>
+  out = a;
+  goto <op_done>;
+  <no_nan>
+  # -- zero / infinity combinations (G4MH operation-result tables) --
+  local a_inf:1 = aa == 0x7f800000;
+  local b_inf:1 = bb == 0x7f800000;
+  local a_zero:1 = aa == 0;
+  local b_zero:1 = bb == 0;
+  if (kind == 2) goto <div_combo>;
+  if (kind == 1) goto <mul_combo>;
+  # add/sub: inf + (-inf) and inf - inf are invalid; other inf cases and
+  # the zero combinations fall through to the (exact) double computation
+  if ((a_inf == 0) || (b_inf == 0)) goto <combo_ok>;
+  local same_sign:1 = (a & 0x80000000) == (b & 0x80000000);
+  if (kind == 0) goto <add_combo>;
+  if (same_sign != 0) goto <invalid_op>;
+  goto <combo_ok>;
+  <add_combo>
+  if (same_sign != 0) goto <combo_ok>;
+  goto <invalid_op>;
+  <mul_combo>
+  if ((a_zero != 0) && (b_inf != 0)) goto <invalid_op>;
+  if ((b_zero != 0) && (a_inf != 0)) goto <invalid_op>;
+  goto <combo_ok>;
+  <div_combo>
+  if ((a_zero != 0) && (b_zero != 0)) goto <invalid_op>;
+  if (a_inf != 0) goto <div_a_inf>;
+  if (b_inf != 0) goto <div_b_inf>;
+  if (b_zero == 0) goto <combo_ok>;
+  # finite nonzero dividend over a zero divisor: Z with correctly signed inf
+  cause = cause | 0x8;
+  out = ((a ^ b) & 0x80000000) | 0x7f800000;
+  goto <op_done>;
+  <div_a_inf>
+  if (b_inf != 0) goto <invalid_op>;
+  out = ((a ^ b) & 0x80000000) | 0x7f800000;
+  goto <op_done>;
+  <div_b_inf>
+  # finite dividend over an infinite divisor: exact correctly signed zero
+  out = (a ^ b) & 0x80000000;
+  goto <op_done>;
+  <invalid_op>
+  cause = cause | 0x10;
+  out = 0x7fffffff;
+  goto <op_done>;
+  <combo_ok>
+  local da:8 = float2float(a);
+  local db:8 = float2float(b);
+  local exact:8 = 0;
+  if (kind == 1) goto <k_mul>;
+  if (kind == 2) goto <k_div>;
+  if (kind == 3) goto <k_sub>;
+  exact = da f+ db;
+  goto <exact_ready>;
+  <k_sub> exact = da f- db; goto <exact_ready>;
+  <k_mul> exact = da f* db; goto <exact_ready>;
+  <k_div> exact = da f/ db;
+  <exact_ready>
+  local pos:8 = abs(exact);
+  local infs:4 = 0x7f800000;
+  local inf8:8 = float2float(infs);
+  if (pos f== inf8) goto <res_inf>;
+  if (pos f!= 0) goto <res_nonzero>;
+  # exact zero: keep the double op's sign; an exact add/sub cancellation
+  # is -0 only under RM (IEEE 754 6.3)
+  out = float2float(exact);
+  if ((kind == 1) || (kind == 2)) goto <op_fin>;
+  if (((FXSR >> 18) & 3) != 3) goto <op_fin>;
+  out = 0x80000000;
+  goto <op_fin>;
+  <res_inf>
+  # an infinity produced by infinite operands propagates exactly
+  out = float2float(exact);
+  goto <op_fin>;
+  <res_nonzero>
+  local tiny:4 = 0x00800000;
+  local tiny8:8 = float2float(tiny);
+  if (pos f>= tiny8) goto <res_magnitude_ok>;
+  # subnormal result BEFORE rounding: FS = 1 flushes (Table 3.123/3.124),
+  # FS = 0 raises E, which preempts the U/I accounting
+  if ((FXSR & 0x20000) != 0) goto <res_underflow>;
+  cause = 0x20;
+  goto <op_done>;
+  <res_magnitude_ok>
+  local maxf:4 = 0x7f7fffff;
+  local max8:8 = float2float(maxf);
+  if (pos f<= max8) goto <res_round>;
+  goto <res_overflow>;
+  <res_underflow>
+  cause = cause | 0x2;
+  cause = cause | zext((FXSR & 0x40) == 0);
+  local mode:4 = (FXSR >> 18) & 3;
+  local neg:1 = exact f< 0;
+  out = 0;
+  if (neg == 0) goto <uf_signed>;
+  out = 0x80000000;
+  <uf_signed>
+  if (mode == 2) goto <uf_rp>;
+  if (mode == 3) goto <uf_rm>;
+  if (mode != 0) goto <op_fin>;
+  if ((FXSR & 0x800000) == 0) goto <op_fin>;
+  local halfmin:4 = 0x00400000;
+  local half8:8 = float2float(halfmin);
+  if (pos f>= half8) goto <uf_min_normal>;
+  goto <op_fin>;
+  <uf_rp>
+  if (neg != 0) goto <op_fin>;
+  out = 0x00800000;
+  goto <op_fin>;
+  <uf_rm>
+  if (neg == 0) goto <op_fin>;
+  out = 0x80800000;
+  goto <op_fin>;
+  <uf_min_normal>
+  out = out | 0x00800000;
+  goto <op_fin>;
+  <res_overflow>
+  cause = cause | 0x4;
+  cause = cause | zext((FXSR & 0x80) == 0);
+  local omode:4 = (FXSR >> 18) & 3;
+  local oneg:1 = exact f< 0;
+  out = 0;
+  if (oneg == 0) goto <of_signed>;
+  out = 0x80000000;
+  <of_signed>
+  if (omode == 0) goto <of_inf>;
+  if (omode == 1) goto <of_max>;
+  if (omode == 2) goto <of_rp>;
+  if (oneg == 0) goto <of_max>;
+  goto <of_inf>;
+  <of_rp>
+  if (oneg == 0) goto <of_inf>;
+  goto <of_max>;
+  <of_inf>
+  out = out | 0x7f800000;
+  goto <op_fin>;
+  <of_max>
+  out = out | 0x7f7fffff;
+  goto <op_fin>;
+  <res_round>
+  simd_round_d2s(cause, out, exact);
+  <op_fin>
+  # a flushed input is inexact unless V/Z was detected or a Q-NaN operand
+  # supplied the result (R01UH0770 3.2.6.2(6)(a))
+  if (flushed == 0) goto <op_done>;
+  if ((cause & 0x18) != 0) goto <op_done>;
+  if ((out & 0x7fffffff) > 0x7f800000) goto <op_done>;
+  cause = cause | 0x1;
+  <op_done>
+}
+
+# One lane of SIMD SQRTF.S4 / RSQRTF.S4 (kind 0 = sqrt, 1 = reciprocal
+# square root). RECIPF.S4 is a DIVF.S4 lane with a constant 1.0 dividend
+# (R01UH0770 3.2.6.2(10)(d)) and therefore reuses simd_fp_op directly.
+# Negative operands (including -inf) are invalid with the canonical 7fff
+# ffff; ±0 gives -0 for sqrt and a correctly signed infinity with Z for
+# rsqrt; +inf gives +inf / +0; a subnormal operand follows the FS rules.
+# Normal inputs can neither overflow nor produce a subnormal result in
+# either operation, so plain mode rounding applies.
+macro simd_fp_unary(cause, out, x, operation) {
+  local kind:4 = operation;
+  local v:4 = x;
+  local vv:4 = v & 0x7fffffff;
+  local flushed:1 = 0;
+  cause = 0;
+  out = 0;
+  if ((vv == 0) || (vv >= 0x00800000)) goto <u_ready>;
+  if ((FXSR & 0x20000) != 0) goto <u_flush>;
+  cause = 0x20;
+  goto <u_done>;
+  <u_flush>
+  flushed = 1;
+  FXSR = FXSR | 0x400000;
+  v = v & 0x80000000;
+  vv = 0;
+  <u_ready>
+  if (vv <= 0x7f800000) goto <u_not_nan>;
+  if ((vv & 0x400000) != 0) goto <u_qnan>;
+  goto <u_invalid>;
+  <u_qnan>
+  out = v;
+  goto <u_done>;
+  <u_not_nan>
+  if (vv != 0) goto <u_nonzero>;
+  if (kind == 0) goto <u_sqrt_zero>;
+  cause = cause | 0x8;
+  out = (v & 0x80000000) | 0x7f800000;
+  goto <u_done>;
+  <u_sqrt_zero>
+  out = v;
+  goto <u_done>;
+  <u_nonzero>
+  if ((v & 0x80000000) == 0) goto <u_positive>;
+  <u_invalid>
+  cause = cause | 0x10;
+  out = 0x7fffffff;
+  goto <u_done>;
+  <u_positive>
+  if (vv != 0x7f800000) goto <u_finite>;
+  if (kind == 0) goto <u_inf_sqrt>;
+  out = 0;
+  goto <u_done>;
+  <u_inf_sqrt>
+  out = 0x7f800000;
+  goto <u_done>;
+  <u_finite>
+  local d8:8 = float2float(v);
+  local root_value:8 = sqrt(d8);
+  if (kind == 0) goto <u_round>;
+  local one8:8 = 0x3ff0000000000000;
+  root_value = one8 f/ root_value;
+  <u_round>
+  simd_round_d2s(cause, out, root_value);
+  <u_done>
+  if (flushed == 0) goto <u_fin_done>;
+  if ((cause & 0x18) != 0) goto <u_fin_done>;
+  if ((out & 0x7fffffff) > 0x7f800000) goto <u_fin_done>;
+  cause = cause | 0x1;
+  <u_fin_done>
+}
+
+# One lane of MAXF/MINF (and the RF reduction forms). x = the higher-priority
+# wreg2 operand, y = the wreg1 operand. S-NaN anywhere is invalid with the
+# canonical 7fffffff (Table 3.125); a single Q-NaN operand yields the real
+# operand (Table 3.125 note 4); two Q-NaNs keep the wreg2 payload (note 1).
+# ±0 ties keep wreg2 for max and wreg1 for min (Table 3.125 (c)); for the
+# reduction forms callers pass x = the odd (higher) lane and y = the even
+# lane, which reproduces the odd/even tie rules of (c). MIN/MAX never flush
+# subnormal inputs and never raise E (R01UH0770 3.2.6.2(8)(c)/(d)).
+macro simd_minmax_lane(cause, out, x, y, pick_max) {
+  local is_max:1 = pick_max;
+  local xx:4 = x;
+  local yy:4 = y;
+  local xmag:4 = xx & 0x7fffffff;
+  local ymag:4 = yy & 0x7fffffff;
+  cause = 0;
+  out = 0;
+  local snan:1 = ((xmag > 0x7f800000) && ((xmag & 0x400000) == 0))
+    || ((ymag > 0x7f800000) && ((ymag & 0x400000) == 0));
+  if (snan == 0) goto <mm_no_snan>;
+  cause = 0x10;
+  out = 0x7fffffff;
+  goto <mm_done>;
+  <mm_no_snan>
+  if ((xmag <= 0x7f800000) && (ymag <= 0x7f800000)) goto <mm_real>;
+  if (xmag > 0x7f800000) goto <mm_x_nan>;
+  # only y is Q-NaN: the real x operand wins
+  goto <mm_take_x>;
+  <mm_x_nan>
+  if (ymag > 0x7f800000) goto <mm_both_qnan>;
+  # only x is Q-NaN: the real y operand wins
+  goto <mm_take_y>;
+  <mm_both_qnan>
+  out = xx;
+  goto <mm_done>;
+  <mm_real>
+  if (is_max != 0) goto <mm_max>;
+  if (xx f< yy) goto <mm_take_x>;
+  goto <mm_take_y>;
+  <mm_max>
+  if (yy f> xx) goto <mm_take_y>;
+  <mm_take_x>
+  out = xx;
+  goto <mm_done>;
+  <mm_take_y>
+  out = yy;
+  <mm_done>
+}
+
+# Vector-wide commit of per-lane results/causes. Aggregates the lane causes
+# (OR for FXSR.XC, 6-bit/5-bit per-lane packing for FXXC/FXXP per Tables
+# 3.59/3.60), runs the enable check, and either writes all four lanes with
+# the masked (preservation) accumulation into FXSR.XP/FXXP, or takes the
+# FXE with the destination fully suppressed.
+macro simd_fp_guard(out, cause, fxxc_packed, instruction_pc) {
+  # XE bits 9-5 = V,Z,O,U,I -> EI=0x20, EU=0x40, EO=0x80, EZ=0x100, EV=0x200.
+  # E (0x20 in `cause`) has no enable and always traps.
+  out = ((cause & 0x20) != 0)
+    || (((cause & 0x10) != 0) && ((FXSR & 0x200) != 0))
+    || (((cause & 0x8) != 0) && ((FXSR & 0x100) != 0))
+    || (((cause & 0x4) != 0) && ((FXSR & 0x80) != 0))
+    || (((cause & 0x2) != 0) && ((FXSR & 0x40) != 0))
+    || (((cause & 0x1) != 0) && ((FXSR & 0x20) != 0));
+  if (out == 0) goto <fpu_ok>;
+  # XC/FXXC first, then the FXE: EI-level resumable exception, EIIC 0x75,
+  # vector RBASE/EBASE+0x70 (R01UH0770 3.2.6.2(7), Tables 3.95/3.98).
+  FXSR = (FXSR & 0xffff03ff) | (cause << 10);
+  FXXC = fxxc_packed;
+  local fxe_handler:4 = 0;
+  enter_ei_exception(instruction_pc, 0x75, 0x70, fxe_handler);
+  call [fxe_handler];
+  <fpu_ok>
+}
+
+macro simd_vector_commit(wreg3, lane_result0, lane_result1, lane_result2, lane_result3, ra0, ra1, ra2, ra3, instruction_pc) {
+  local raised:4 = (ra0 | ra1) | (ra2 | ra3);
+  local fxxc:4 = (ra0 & 0x3f) | ((ra1 & 0x3f) << 8) | ((ra2 & 0x3f) << 16) | ((ra3 & 0x3f) << 24);
+  local fxxp:4 = (ra0 & 0x1f) | ((ra1 & 0x1f) << 8) | ((ra2 & 0x1f) << 16) | ((ra3 & 0x1f) << 24);
+  local sup:1 = 0;
+  simd_fp_guard(sup, raised, fxxc, instruction_pc);
+  if (sup != 0) goto <commit_suppressed>;
+  # masked: preservation bits accumulate (FXSR.XP from the lane OR,
+  # FXXP per way); FXSR.XC is retained (Figure 3.39)
+  FXSR = FXSR | (raised & 0x1f);
+  FXXP = FXXP | fxxp;
+  wreg3[0,32] = lane_result0;
+  wreg3[32,32] = lane_result1;
+  wreg3[64,32] = lane_result2;
+  wreg3[96,32] = lane_result3;
+  <commit_suppressed>
+}
+
+# ---------------------------------------------------------------------
+# 3-operand lane arithmetic. Result lanes: WR[wreg3](wN) = w2(wN) op w1(wN)
+# with a = wreg1 lanes (wR0004) and b = wreg2 lanes (wR1115).
+:divf.s4 wR0004, wR1115, wR2731 is op0510=0x3F & wR0004 & wR1115; op1626=0x5AE & wR2731 {
+  fxu_check(inst_start);
+  local a0:4 = wR0004[0,32]; local a1:4 = wR0004[32,32];
+  local a2:4 = wR0004[64,32]; local a3:4 = wR0004[96,32];
+  local b0:4 = wR1115[0,32]; local b1:4 = wR1115[32,32];
+  local b2:4 = wR1115[64,32]; local b3:4 = wR1115[96,32];
+  local lane_result0:4 = 0; local lane_result1:4 = 0; local lane_result2:4 = 0; local lane_result3:4 = 0;
+  local ra0:4 = 0; local ra1:4 = 0; local ra2:4 = 0; local ra3:4 = 0;
+  simd_fp_op(ra0, lane_result0, b0, a0, 2);
+  simd_fp_op(ra1, lane_result1, b1, a1, 2);
+  simd_fp_op(ra2, lane_result2, b2, a2, 2);
+  simd_fp_op(ra3, lane_result3, b3, a3, 2);
+  simd_vector_commit(wR2731, lane_result0, lane_result1, lane_result2, lane_result3, ra0, ra1, ra2, ra3, inst_start);
+}
+
+:subf.s4 wR0004, wR1115, wR2731 is op0510=0x3F & wR0004 & wR1115; op1626=0x5A6 & wR2731 {
+  fxu_check(inst_start);
+  local a0:4 = wR0004[0,32]; local a1:4 = wR0004[32,32];
+  local a2:4 = wR0004[64,32]; local a3:4 = wR0004[96,32];
+  local b0:4 = wR1115[0,32]; local b1:4 = wR1115[32,32];
+  local b2:4 = wR1115[64,32]; local b3:4 = wR1115[96,32];
+  local lane_result0:4 = 0; local lane_result1:4 = 0; local lane_result2:4 = 0; local lane_result3:4 = 0;
+  local ra0:4 = 0; local ra1:4 = 0; local ra2:4 = 0; local ra3:4 = 0;
+  simd_fp_op(ra0, lane_result0, b0, a0, 3);
+  simd_fp_op(ra1, lane_result1, b1, a1, 3);
+  simd_fp_op(ra2, lane_result2, b2, a2, 3);
+  simd_fp_op(ra3, lane_result3, b3, a3, 3);
+  simd_vector_commit(wR2731, lane_result0, lane_result1, lane_result2, lane_result3, ra0, ra1, ra2, ra3, inst_start);
+}
+
+:addf.s4 wR0004, wR1115, wR2731 is op0510=0x3F & wR0004 & wR1115; op1626=0x5A4 & wR2731 {
+  fxu_check(inst_start);
+  local a0:4 = wR0004[0,32]; local a1:4 = wR0004[32,32];
+  local a2:4 = wR0004[64,32]; local a3:4 = wR0004[96,32];
+  local b0:4 = wR1115[0,32]; local b1:4 = wR1115[32,32];
+  local b2:4 = wR1115[64,32]; local b3:4 = wR1115[96,32];
+  local lane_result0:4 = 0; local lane_result1:4 = 0; local lane_result2:4 = 0; local lane_result3:4 = 0;
+  local ra0:4 = 0; local ra1:4 = 0; local ra2:4 = 0; local ra3:4 = 0;
+  simd_fp_op(ra0, lane_result0, b0, a0, 0);
+  simd_fp_op(ra1, lane_result1, b1, a1, 0);
+  simd_fp_op(ra2, lane_result2, b2, a2, 0);
+  simd_fp_op(ra3, lane_result3, b3, a3, 0);
+  simd_vector_commit(wR2731, lane_result0, lane_result1, lane_result2, lane_result3, ra0, ra1, ra2, ra3, inst_start);
+}
+
+:mulf.s4 wR0004, wR1115, wR2731 is op0510=0x3F & wR0004 & wR1115; op1626=0x5A8 & wR2731 {
+  fxu_check(inst_start);
+  local a0:4 = wR0004[0,32]; local a1:4 = wR0004[32,32];
+  local a2:4 = wR0004[64,32]; local a3:4 = wR0004[96,32];
+  local b0:4 = wR1115[0,32]; local b1:4 = wR1115[32,32];
+  local b2:4 = wR1115[64,32]; local b3:4 = wR1115[96,32];
+  local lane_result0:4 = 0; local lane_result1:4 = 0; local lane_result2:4 = 0; local lane_result3:4 = 0;
+  local ra0:4 = 0; local ra1:4 = 0; local ra2:4 = 0; local ra3:4 = 0;
+  simd_fp_op(ra0, lane_result0, b0, a0, 1);
+  simd_fp_op(ra1, lane_result1, b1, a1, 1);
+  simd_fp_op(ra2, lane_result2, b2, a2, 1);
+  simd_fp_op(ra3, lane_result3, b3, a3, 1);
+  simd_vector_commit(wR2731, lane_result0, lane_result1, lane_result2, lane_result3, ra0, ra1, ra2, ra3, inst_start);
+}
+
+# MAXF/MINF: S-NaN is invalid (MIN/MAX count as arithmetic operations,
+# R01UH0770 3.2.6.2(6)(b)); Q-NaN yields the real operand; ±0 ties keep
+# wreg2 for MAX and wreg1 for MIN (Table 3.125 (c)). Subnormal inputs are
+# never flushed and never raise E (3.2.6.2(8)(c)/(d)).
+:maxf.s4 wR0004, wR1115, wR2731 is op0510=0x3F & wR0004 & wR1115; op1626=0x5AA & wR2731 {
+  fxu_check(inst_start);
+  local a0:4 = wR0004[0,32]; local a1:4 = wR0004[32,32];
+  local a2:4 = wR0004[64,32]; local a3:4 = wR0004[96,32];
+  local b0:4 = wR1115[0,32]; local b1:4 = wR1115[32,32];
+  local b2:4 = wR1115[64,32]; local b3:4 = wR1115[96,32];
+  local lane_result0:4 = 0; local lane_result1:4 = 0; local lane_result2:4 = 0; local lane_result3:4 = 0;
+  local ra0:4 = 0; local ra1:4 = 0; local ra2:4 = 0; local ra3:4 = 0;
+  simd_minmax_lane(ra0, lane_result0, b0, a0, 1);
+  simd_minmax_lane(ra1, lane_result1, b1, a1, 1);
+  simd_minmax_lane(ra2, lane_result2, b2, a2, 1);
+  simd_minmax_lane(ra3, lane_result3, b3, a3, 1);
+  simd_vector_commit(wR2731, lane_result0, lane_result1, lane_result2, lane_result3, ra0, ra1, ra2, ra3, inst_start);
+}
+
+:minf.s4 wR0004, wR1115, wR2731 is op0510=0x3F & wR0004 & wR1115; op1626=0x5AC & wR2731 {
+  fxu_check(inst_start);
+  local a0:4 = wR0004[0,32]; local a1:4 = wR0004[32,32];
+  local a2:4 = wR0004[64,32]; local a3:4 = wR0004[96,32];
+  local b0:4 = wR1115[0,32]; local b1:4 = wR1115[32,32];
+  local b2:4 = wR1115[64,32]; local b3:4 = wR1115[96,32];
+  local lane_result0:4 = 0; local lane_result1:4 = 0; local lane_result2:4 = 0; local lane_result3:4 = 0;
+  local ra0:4 = 0; local ra1:4 = 0; local ra2:4 = 0; local ra3:4 = 0;
+  simd_minmax_lane(ra0, lane_result0, b0, a0, 0);
+  simd_minmax_lane(ra1, lane_result1, b1, a1, 0);
+  simd_minmax_lane(ra2, lane_result2, b2, a2, 0);
+  simd_minmax_lane(ra3, lane_result3, b3, a3, 0);
+  simd_vector_commit(wR2731, lane_result0, lane_result1, lane_result2, lane_result3, ra0, ra1, ra2, ra3, inst_start);
+}
+
+# ---------------------------------------------------------------------
+# Reduction forms (R): G4MH [Operation]: w3 <- max/min(wreg2 odd pair),
+# w2 <- (wreg1 odd pair), w1 <- (wreg2 even pair), w0 <- (wreg1 even pair);
+# arithmetic reductions subtract/divide the HIGHER lane from/by the lower
+# (wreg1[1] - wreg1[0] etc.).
+:addrf.s4 wR0004, wR1115, wR2731 is op0510=0x3F & wR0004 & wR1115; op1626=0x5B4 & wR2731 {
+  fxu_check(inst_start);
+  local a0:4 = wR0004[0,32]; local a1:4 = wR0004[32,32];
+  local a2:4 = wR0004[64,32]; local a3:4 = wR0004[96,32];
+  local b0:4 = wR1115[0,32]; local b1:4 = wR1115[32,32];
+  local b2:4 = wR1115[64,32]; local b3:4 = wR1115[96,32];
+  local lane_result0:4 = 0; local lane_result1:4 = 0; local lane_result2:4 = 0; local lane_result3:4 = 0;
+  local ra0:4 = 0; local ra1:4 = 0; local ra2:4 = 0; local ra3:4 = 0;
+  simd_fp_op(ra0, lane_result0, a1, a0, 0);
+  simd_fp_op(ra1, lane_result1, b1, b0, 0);
+  simd_fp_op(ra2, lane_result2, a3, a2, 0);
+  simd_fp_op(ra3, lane_result3, b3, b2, 0);
+  simd_vector_commit(wR2731, lane_result0, lane_result1, lane_result2, lane_result3, ra0, ra1, ra2, ra3, inst_start);
+}
+
+:subrf.s4 wR0004, wR1115, wR2731 is op0510=0x3F & wR0004 & wR1115; op1626=0x5B6 & wR2731 {
+  fxu_check(inst_start);
+  local a0:4 = wR0004[0,32]; local a1:4 = wR0004[32,32];
+  local a2:4 = wR0004[64,32]; local a3:4 = wR0004[96,32];
+  local b0:4 = wR1115[0,32]; local b1:4 = wR1115[32,32];
+  local b2:4 = wR1115[64,32]; local b3:4 = wR1115[96,32];
+  local lane_result0:4 = 0; local lane_result1:4 = 0; local lane_result2:4 = 0; local lane_result3:4 = 0;
+  local ra0:4 = 0; local ra1:4 = 0; local ra2:4 = 0; local ra3:4 = 0;
+  simd_fp_op(ra0, lane_result0, a1, a0, 3);
+  simd_fp_op(ra1, lane_result1, b1, b0, 3);
+  simd_fp_op(ra2, lane_result2, a3, a2, 3);
+  simd_fp_op(ra3, lane_result3, b3, b2, 3);
+  simd_vector_commit(wR2731, lane_result0, lane_result1, lane_result2, lane_result3, ra0, ra1, ra2, ra3, inst_start);
+}
+
+:mulrf.s4 wR0004, wR1115, wR2731 is op0510=0x3F & wR0004 & wR1115; op1626=0x5B8 & wR2731 {
+  fxu_check(inst_start);
+  local a0:4 = wR0004[0,32]; local a1:4 = wR0004[32,32];
+  local a2:4 = wR0004[64,32]; local a3:4 = wR0004[96,32];
+  local b0:4 = wR1115[0,32]; local b1:4 = wR1115[32,32];
+  local b2:4 = wR1115[64,32]; local b3:4 = wR1115[96,32];
+  local lane_result0:4 = 0; local lane_result1:4 = 0; local lane_result2:4 = 0; local lane_result3:4 = 0;
+  local ra0:4 = 0; local ra1:4 = 0; local ra2:4 = 0; local ra3:4 = 0;
+  simd_fp_op(ra0, lane_result0, a1, a0, 1);
+  simd_fp_op(ra1, lane_result1, b1, b0, 1);
+  simd_fp_op(ra2, lane_result2, a3, a2, 1);
+  simd_fp_op(ra3, lane_result3, b3, b2, 1);
+  simd_vector_commit(wR2731, lane_result0, lane_result1, lane_result2, lane_result3, ra0, ra1, ra2, ra3, inst_start);
+}
+
+# MAXRF/MINRF: ±0 ties keep the ODD element for MAXRF and the EVEN element
+# for MINRF (Table 3.125 (c)); x = the odd lane of each source pair.
+:maxrf.s4 wR0004, wR1115, wR2731 is op0510=0x3F & wR0004 & wR1115; op1626=0x5BA & wR2731 {
+  fxu_check(inst_start);
+  local a0:4 = wR0004[0,32]; local a1:4 = wR0004[32,32];
+  local a2:4 = wR0004[64,32]; local a3:4 = wR0004[96,32];
+  local b0:4 = wR1115[0,32]; local b1:4 = wR1115[32,32];
+  local b2:4 = wR1115[64,32]; local b3:4 = wR1115[96,32];
+  local lane_result0:4 = 0; local lane_result1:4 = 0; local lane_result2:4 = 0; local lane_result3:4 = 0;
+  local ra0:4 = 0; local ra1:4 = 0; local ra2:4 = 0; local ra3:4 = 0;
+  simd_minmax_lane(ra0, lane_result0, a1, a0, 1);
+  simd_minmax_lane(ra1, lane_result1, b1, b0, 1);
+  simd_minmax_lane(ra2, lane_result2, a3, a2, 1);
+  simd_minmax_lane(ra3, lane_result3, b3, b2, 1);
+  simd_vector_commit(wR2731, lane_result0, lane_result1, lane_result2, lane_result3, ra0, ra1, ra2, ra3, inst_start);
+}
+
+:minrf.s4 wR0004, wR1115, wR2731 is op0510=0x3F & wR0004 & wR1115; op1626=0x5BC & wR2731 {
+  fxu_check(inst_start);
+  local a0:4 = wR0004[0,32]; local a1:4 = wR0004[32,32];
+  local a2:4 = wR0004[64,32]; local a3:4 = wR0004[96,32];
+  local b0:4 = wR1115[0,32]; local b1:4 = wR1115[32,32];
+  local b2:4 = wR1115[64,32]; local b3:4 = wR1115[96,32];
+  local lane_result0:4 = 0; local lane_result1:4 = 0; local lane_result2:4 = 0; local lane_result3:4 = 0;
+  local ra0:4 = 0; local ra1:4 = 0; local ra2:4 = 0; local ra3:4 = 0;
+  simd_minmax_lane(ra0, lane_result0, a1, a0, 0);
+  simd_minmax_lane(ra1, lane_result1, b1, b0, 0);
+  simd_minmax_lane(ra2, lane_result2, a3, a2, 0);
+  simd_minmax_lane(ra3, lane_result3, b3, b2, 0);
+  simd_vector_commit(wR2731, lane_result0, lane_result1, lane_result2, lane_result3, ra0, ra1, ra2, ra3, inst_start);
+}
+
+# ---------------------------------------------------------------------
+# Crossed forms (X): the wreg1 operand lanes cross within pairs
+# (w0 uses wreg1[1], w1 uses wreg1[0], w2 uses wreg1[3], w3 uses wreg1[2]).
+:addxf.s4 wR0004, wR1115, wR2731 is op0510=0x3F & wR0004 & wR1115; op1626=0x5C4 & wR2731 {
+  fxu_check(inst_start);
+  local a0:4 = wR0004[0,32]; local a1:4 = wR0004[32,32];
+  local a2:4 = wR0004[64,32]; local a3:4 = wR0004[96,32];
+  local b0:4 = wR1115[0,32]; local b1:4 = wR1115[32,32];
+  local b2:4 = wR1115[64,32]; local b3:4 = wR1115[96,32];
+  local lane_result0:4 = 0; local lane_result1:4 = 0; local lane_result2:4 = 0; local lane_result3:4 = 0;
+  local ra0:4 = 0; local ra1:4 = 0; local ra2:4 = 0; local ra3:4 = 0;
+  simd_fp_op(ra0, lane_result0, b0, a1, 0);
+  simd_fp_op(ra1, lane_result1, b1, a0, 0);
+  simd_fp_op(ra2, lane_result2, b2, a3, 0);
+  simd_fp_op(ra3, lane_result3, b3, a2, 0);
+  simd_vector_commit(wR2731, lane_result0, lane_result1, lane_result2, lane_result3, ra0, ra1, ra2, ra3, inst_start);
+}
+
+:subxf.s4 wR0004, wR1115, wR2731 is op0510=0x3F & wR0004 & wR1115; op1626=0x5C6 & wR2731 {
+  fxu_check(inst_start);
+  local a0:4 = wR0004[0,32]; local a1:4 = wR0004[32,32];
+  local a2:4 = wR0004[64,32]; local a3:4 = wR0004[96,32];
+  local b0:4 = wR1115[0,32]; local b1:4 = wR1115[32,32];
+  local b2:4 = wR1115[64,32]; local b3:4 = wR1115[96,32];
+  local lane_result0:4 = 0; local lane_result1:4 = 0; local lane_result2:4 = 0; local lane_result3:4 = 0;
+  local ra0:4 = 0; local ra1:4 = 0; local ra2:4 = 0; local ra3:4 = 0;
+  simd_fp_op(ra0, lane_result0, b0, a1, 3);
+  simd_fp_op(ra1, lane_result1, b1, a0, 3);
+  simd_fp_op(ra2, lane_result2, b2, a3, 3);
+  simd_fp_op(ra3, lane_result3, b3, a2, 3);
+  simd_vector_commit(wR2731, lane_result0, lane_result1, lane_result2, lane_result3, ra0, ra1, ra2, ra3, inst_start);
+}
+
+:mulxf.s4 wR0004, wR1115, wR2731 is op0510=0x3F & wR0004 & wR1115; op1626=0x5C8 & wR2731 {
+  fxu_check(inst_start);
+  local a0:4 = wR0004[0,32]; local a1:4 = wR0004[32,32];
+  local a2:4 = wR0004[64,32]; local a3:4 = wR0004[96,32];
+  local b0:4 = wR1115[0,32]; local b1:4 = wR1115[32,32];
+  local b2:4 = wR1115[64,32]; local b3:4 = wR1115[96,32];
+  local lane_result0:4 = 0; local lane_result1:4 = 0; local lane_result2:4 = 0; local lane_result3:4 = 0;
+  local ra0:4 = 0; local ra1:4 = 0; local ra2:4 = 0; local ra3:4 = 0;
+  simd_fp_op(ra0, lane_result0, b0, a1, 1);
+  simd_fp_op(ra1, lane_result1, b1, a0, 1);
+  simd_fp_op(ra2, lane_result2, b2, a3, 1);
+  simd_fp_op(ra3, lane_result3, b3, a2, 1);
+  simd_vector_commit(wR2731, lane_result0, lane_result1, lane_result2, lane_result3, ra0, ra1, ra2, ra3, inst_start);
+}
+
+# ---------------------------------------------------------------------
+# Butterfly forms: even lanes take the first operation, odd lanes the
+# second; N negates the result; X crosses the wreg1 lanes (G4MH
+# [Operation] blocks: ADDSUBF w0 = w2[0] - w1[0], w1 = w2[1] + w1[1], ...).
+:addsubf.s4 wR0004, wR1115, wR2731 is op0510=0x3F & wR0004 & wR1115; op1626=0x5D0 & wR2731 {
+  fxu_check(inst_start);
+  local a0:4 = wR0004[0,32]; local a1:4 = wR0004[32,32];
+  local a2:4 = wR0004[64,32]; local a3:4 = wR0004[96,32];
+  local b0:4 = wR1115[0,32]; local b1:4 = wR1115[32,32];
+  local b2:4 = wR1115[64,32]; local b3:4 = wR1115[96,32];
+  local lane_result0:4 = 0; local lane_result1:4 = 0; local lane_result2:4 = 0; local lane_result3:4 = 0;
+  local ra0:4 = 0; local ra1:4 = 0; local ra2:4 = 0; local ra3:4 = 0;
+  simd_fp_op(ra0, lane_result0, b0, a0, 3);
+  simd_fp_op(ra1, lane_result1, b1, a1, 0);
+  simd_fp_op(ra2, lane_result2, b2, a2, 3);
+  simd_fp_op(ra3, lane_result3, b3, a3, 0);
+  simd_vector_commit(wR2731, lane_result0, lane_result1, lane_result2, lane_result3, ra0, ra1, ra2, ra3, inst_start);
+}
+
+:subaddf.s4 wR0004, wR1115, wR2731 is op0510=0x3F & wR0004 & wR1115; op1626=0x5D2 & wR2731 {
+  fxu_check(inst_start);
+  local a0:4 = wR0004[0,32]; local a1:4 = wR0004[32,32];
+  local a2:4 = wR0004[64,32]; local a3:4 = wR0004[96,32];
+  local b0:4 = wR1115[0,32]; local b1:4 = wR1115[32,32];
+  local b2:4 = wR1115[64,32]; local b3:4 = wR1115[96,32];
+  local lane_result0:4 = 0; local lane_result1:4 = 0; local lane_result2:4 = 0; local lane_result3:4 = 0;
+  local ra0:4 = 0; local ra1:4 = 0; local ra2:4 = 0; local ra3:4 = 0;
+  simd_fp_op(ra0, lane_result0, b0, a0, 0);
+  simd_fp_op(ra1, lane_result1, b1, a1, 3);
+  simd_fp_op(ra2, lane_result2, b2, a2, 0);
+  simd_fp_op(ra3, lane_result3, b3, a3, 3);
+  simd_vector_commit(wR2731, lane_result0, lane_result1, lane_result2, lane_result3, ra0, ra1, ra2, ra3, inst_start);
+}
+
+:addsubxf.s4 wR0004, wR1115, wR2731 is op0510=0x3F & wR0004 & wR1115; op1626=0x5D4 & wR2731 {
+  fxu_check(inst_start);
+  local a0:4 = wR0004[0,32]; local a1:4 = wR0004[32,32];
+  local a2:4 = wR0004[64,32]; local a3:4 = wR0004[96,32];
+  local b0:4 = wR1115[0,32]; local b1:4 = wR1115[32,32];
+  local b2:4 = wR1115[64,32]; local b3:4 = wR1115[96,32];
+  local lane_result0:4 = 0; local lane_result1:4 = 0; local lane_result2:4 = 0; local lane_result3:4 = 0;
+  local ra0:4 = 0; local ra1:4 = 0; local ra2:4 = 0; local ra3:4 = 0;
+  simd_fp_op(ra0, lane_result0, b0, a1, 3);
+  simd_fp_op(ra1, lane_result1, b1, a0, 0);
+  simd_fp_op(ra2, lane_result2, b2, a3, 3);
+  simd_fp_op(ra3, lane_result3, b3, a2, 0);
+  simd_vector_commit(wR2731, lane_result0, lane_result1, lane_result2, lane_result3, ra0, ra1, ra2, ra3, inst_start);
+}
+
+:subaddxf.s4 wR0004, wR1115, wR2731 is op0510=0x3F & wR0004 & wR1115; op1626=0x5D6 & wR2731 {
+  fxu_check(inst_start);
+  local a0:4 = wR0004[0,32]; local a1:4 = wR0004[32,32];
+  local a2:4 = wR0004[64,32]; local a3:4 = wR0004[96,32];
+  local b0:4 = wR1115[0,32]; local b1:4 = wR1115[32,32];
+  local b2:4 = wR1115[64,32]; local b3:4 = wR1115[96,32];
+  local lane_result0:4 = 0; local lane_result1:4 = 0; local lane_result2:4 = 0; local lane_result3:4 = 0;
+  local ra0:4 = 0; local ra1:4 = 0; local ra2:4 = 0; local ra3:4 = 0;
+  simd_fp_op(ra0, lane_result0, b0, a1, 0);
+  simd_fp_op(ra1, lane_result1, b1, a0, 3);
+  simd_fp_op(ra2, lane_result2, b2, a3, 0);
+  simd_fp_op(ra3, lane_result3, b3, a2, 3);
+  simd_vector_commit(wR2731, lane_result0, lane_result1, lane_result2, lane_result3, ra0, ra1, ra2, ra3, inst_start);
+}
+
+:addsubnf.s4 wR0004, wR1115, wR2731 is op0510=0x3F & wR0004 & wR1115; op1626=0x5D8 & wR2731 {
+  fxu_check(inst_start);
+  local a0:4 = wR0004[0,32]; local a1:4 = wR0004[32,32];
+  local a2:4 = wR0004[64,32]; local a3:4 = wR0004[96,32];
+  local b0:4 = wR1115[0,32]; local b1:4 = wR1115[32,32];
+  local b2:4 = wR1115[64,32]; local b3:4 = wR1115[96,32];
+  local lane_result0:4 = 0; local lane_result1:4 = 0; local lane_result2:4 = 0; local lane_result3:4 = 0;
+  local ra0:4 = 0; local ra1:4 = 0; local ra2:4 = 0; local ra3:4 = 0;
+  simd_fp_op(ra0, lane_result0, b0, a0, 3);
+  simd_fp_op(ra1, lane_result1, b1, a1, 0);
+  simd_fp_op(ra2, lane_result2, b2, a2, 3);
+  simd_fp_op(ra3, lane_result3, b3, a3, 0);
+  f32_neg_if_not_nan(lane_result0);
+  f32_neg_if_not_nan(lane_result1);
+  f32_neg_if_not_nan(lane_result2);
+  f32_neg_if_not_nan(lane_result3);
+  simd_vector_commit(wR2731, lane_result0, lane_result1, lane_result2, lane_result3, ra0, ra1, ra2, ra3, inst_start);
+}
+
+:subaddnf.s4 wR0004, wR1115, wR2731 is op0510=0x3F & wR0004 & wR1115; op1626=0x5DA & wR2731 {
+  fxu_check(inst_start);
+  local a0:4 = wR0004[0,32]; local a1:4 = wR0004[32,32];
+  local a2:4 = wR0004[64,32]; local a3:4 = wR0004[96,32];
+  local b0:4 = wR1115[0,32]; local b1:4 = wR1115[32,32];
+  local b2:4 = wR1115[64,32]; local b3:4 = wR1115[96,32];
+  local lane_result0:4 = 0; local lane_result1:4 = 0; local lane_result2:4 = 0; local lane_result3:4 = 0;
+  local ra0:4 = 0; local ra1:4 = 0; local ra2:4 = 0; local ra3:4 = 0;
+  simd_fp_op(ra0, lane_result0, b0, a0, 0);
+  simd_fp_op(ra1, lane_result1, b1, a1, 3);
+  simd_fp_op(ra2, lane_result2, b2, a2, 0);
+  simd_fp_op(ra3, lane_result3, b3, a3, 3);
+  f32_neg_if_not_nan(lane_result0);
+  f32_neg_if_not_nan(lane_result1);
+  f32_neg_if_not_nan(lane_result2);
+  f32_neg_if_not_nan(lane_result3);
+  simd_vector_commit(wR2731, lane_result0, lane_result1, lane_result2, lane_result3, ra0, ra1, ra2, ra3, inst_start);
+}
+
+:addsubnxf.s4 wR0004, wR1115, wR2731 is op0510=0x3F & wR0004 & wR1115; op1626=0x5DC & wR2731 {
+  fxu_check(inst_start);
+  local a0:4 = wR0004[0,32]; local a1:4 = wR0004[32,32];
+  local a2:4 = wR0004[64,32]; local a3:4 = wR0004[96,32];
+  local b0:4 = wR1115[0,32]; local b1:4 = wR1115[32,32];
+  local b2:4 = wR1115[64,32]; local b3:4 = wR1115[96,32];
+  local lane_result0:4 = 0; local lane_result1:4 = 0; local lane_result2:4 = 0; local lane_result3:4 = 0;
+  local ra0:4 = 0; local ra1:4 = 0; local ra2:4 = 0; local ra3:4 = 0;
+  simd_fp_op(ra0, lane_result0, b0, a1, 3);
+  simd_fp_op(ra1, lane_result1, b1, a0, 0);
+  simd_fp_op(ra2, lane_result2, b2, a3, 3);
+  simd_fp_op(ra3, lane_result3, b3, a2, 0);
+  f32_neg_if_not_nan(lane_result0);
+  f32_neg_if_not_nan(lane_result1);
+  f32_neg_if_not_nan(lane_result2);
+  f32_neg_if_not_nan(lane_result3);
+  simd_vector_commit(wR2731, lane_result0, lane_result1, lane_result2, lane_result3, ra0, ra1, ra2, ra3, inst_start);
+}
+
+:subaddnxf.s4 wR0004, wR1115, wR2731 is op0510=0x3F & wR0004 & wR1115; op1626=0x5DE & wR2731 {
+  fxu_check(inst_start);
+  local a0:4 = wR0004[0,32]; local a1:4 = wR0004[32,32];
+  local a2:4 = wR0004[64,32]; local a3:4 = wR0004[96,32];
+  local b0:4 = wR1115[0,32]; local b1:4 = wR1115[32,32];
+  local b2:4 = wR1115[64,32]; local b3:4 = wR1115[96,32];
+  local lane_result0:4 = 0; local lane_result1:4 = 0; local lane_result2:4 = 0; local lane_result3:4 = 0;
+  local ra0:4 = 0; local ra1:4 = 0; local ra2:4 = 0; local ra3:4 = 0;
+  simd_fp_op(ra0, lane_result0, b0, a1, 0);
+  simd_fp_op(ra1, lane_result1, b1, a0, 3);
+  simd_fp_op(ra2, lane_result2, b2, a3, 0);
+  simd_fp_op(ra3, lane_result3, b3, a2, 3);
+  f32_neg_if_not_nan(lane_result0);
+  f32_neg_if_not_nan(lane_result1);
+  f32_neg_if_not_nan(lane_result2);
+  f32_neg_if_not_nan(lane_result3);
+  simd_vector_commit(wR2731, lane_result0, lane_result1, lane_result2, lane_result3, ra0, ra1, ra2, ra3, inst_start);
+}
+
+# ---------------------------------------------------------------------
+# Fused multiply-add family (category 01): per lane
+# wreg3 = fma/fms/fnma/fnms(wreg2, wreg1, wreg3) via the exact scalar
+# fused helper with the FXSR control word. All four lanes are evaluated
+# numerically FIRST (fp32_fused never early-exits), the cause bits are
+# ORed across elements (G4MH p.432 note) and one commit decides: no
+# enabled exception -> every lane written and sticky causes accumulated
+# into FXSR.XP/FXXP; enabled exception -> destination unchanged, FXSR.XC
+# replaced with the OR over lanes, FXXC replaced with the per-lane packing,
+# and the FXE pends (EIIC 75H, vector +70H).
+macro simd_fma4(wreg3, wreg1, wreg2, action, instruction_pc) {
+  local a0:4 = wreg2[0,32]; local a1:4 = wreg2[32,32];
+  local a2:4 = wreg2[64,32]; local a3:4 = wreg2[96,32];
+  local b0:4 = wreg1[0,32]; local b1:4 = wreg1[32,32];
+  local b2:4 = wreg1[64,32]; local b3:4 = wreg1[96,32];
+  local c0:4 = wreg3[0,32]; local c1:4 = wreg3[32,32];
+  local c2:4 = wreg3[64,32]; local c3:4 = wreg3[96,32];
+  local res0:4 = 0; local res1:4 = 0; local res2:4 = 0; local res3:4 = 0;
+  local ra0:4 = 0; local ra1:4 = 0; local ra2:4 = 0; local ra3:4 = 0;
+  local fl0:4 = 0; local fl1:4 = 0; local fl2:4 = 0; local fl3:4 = 0;
+  fp32_fused(res0, ra0, fl0, a0, b0, c0, action, FXSR, 1);
+  fp32_fused(res1, ra1, fl1, a1, b1, c1, action, FXSR, 1);
+  fp32_fused(res2, ra2, fl2, a2, b2, c2, action, FXSR, 1);
+  fp32_fused(res3, ra3, fl3, a3, b3, c3, action, FXSR, 1);
+  local oraise:4 = (ra0 | ra1) | (ra2 | ra3);
+  local ofxxc:4 = (ra0 & 0x3f) | ((ra1 & 0x3f) << 8) | ((ra2 & 0x3f) << 16) | ((ra3 & 0x3f) << 24);
+  local ofxxp:4 = (ra0 & 0x1f) | ((ra1 & 0x1f) << 8) | ((ra2 & 0x1f) << 16) | ((ra3 & 0x1f) << 24);
+  local oflush:4 = (fl0 | fl1) | (fl2 | fl3);
+  # IF accumulates even when the instruction traps (caution 4 of 3.2.6.2(8))
+  FXSR = FXSR | (oflush << 22);
+  local sup:1 = 0;
+  simd_fp_guard(sup, oraise, ofxxc, instruction_pc);
+  if (sup != 0) goto <fma_suppressed>;
+  wreg3[0,32] = res0;
+  wreg3[32,32] = res1;
+  wreg3[64,32] = res2;
+  wreg3[96,32] = res3;
+  FXSR = FXSR | (oraise & 0x1f);
+  FXXP = FXXP | ofxxp;
+  <fma_suppressed>
+}
+
+:fmaf.s4 wR0004, wR1115, wR2731 is op0510=0x3F & wR0004 & wR1115; op1626=0x4C0 & wR2731 {
+  fxu_check(inst_start);
+  simd_fma4(wR2731, wR0004, wR1115, 0, inst_start);
+}
+
+:fmsf.s4 wR0004, wR1115, wR2731 is op0510=0x3F & wR0004 & wR1115; op1626=0x4C2 & wR2731 {
+  fxu_check(inst_start);
+  simd_fma4(wR2731, wR0004, wR1115, 1, inst_start);
+}
+
+:fnmaf.s4 wR0004, wR1115, wR2731 is op0510=0x3F & wR0004 & wR1115; op1626=0x4C4 & wR2731 {
+  fxu_check(inst_start);
+  simd_fma4(wR2731, wR0004, wR1115, 2, inst_start);
+}
+
+:fnmsf.s4 wR0004, wR1115, wR2731 is op0510=0x3F & wR0004 & wR1115; op1626=0x4C6 & wR2731 {
+  fxu_check(inst_start);
+  simd_fma4(wR2731, wR0004, wR1115, 3, inst_start);
+}
+
+# ---------------------------------------------------------------------
+# CMPF.S4: per-lane comparison (all-ones/all-zeros) into wreg3.
+# cmpf(fcond, A = wreg2, B = wreg1): less = A < B (G4MH p.410). An S-NaN
+# operand is an invalid operation condition for ANY fcond ("floating-point
+# arithmetic instructions including comparison instructions ... any
+# SignalingNaN received as an operand value is regarded as an invalid
+# operation condition"); a Q-NaN lane is invalid only when fcond[3] is set
+# (unordered-signaling conditions 8-15). With the exception enabled the
+# comparison result is not set (vector suppressed); with it masked the
+# result is architecturally undefined - this model delivers the cmpf
+# formula value. No FPSR/FXSR flag update beyond the V accounting; the
+# flags move explicitly via TRFSRV.W4. CMPF never flushes and never
+# raises E (3.2.6.2(8)(c)/(d)).
+:cmpf.s4 fcond1720, wR0004, wR1115, wR2731 is op0510=0x3F & wR0004 & wR1115; op2325=3 & op2122=0 & op1616=0 & fcond1720 & wR2731 {
+  fxu_check(inst_start);
+  local comparison_code:4 = fcond1720;
+  local b0:4 = wR1115[0,32]; local b1:4 = wR1115[32,32];
+  local b2:4 = wR1115[64,32]; local b3:4 = wR1115[96,32];
+  local a0:4 = wR0004[0,32]; local a1:4 = wR0004[32,32];
+  local a2:4 = wR0004[64,32]; local a3:4 = wR0004[96,32];
+  local res0:4 = 0; local res1:4 = 0; local res2:4 = 0; local res3:4 = 0;
+  compare_float(comparison_code:1, b0, a0, res0);
+  compare_float(comparison_code:1, b1, a1, res1);
+  compare_float(comparison_code:1, b2, a2, res2);
+  compare_float(comparison_code:1, b3, a3, res3);
+  local lane_result0:4 = 0 - res0;
+  local lane_result1:4 = 0 - res1;
+  local lane_result2:4 = 0 - res2;
+  local lane_result3:4 = 0 - res3;
+  local sn0:1 = (((b0 & 0x7fffffff) > 0x7f800000) && ((b0 & 0x400000) == 0))
+    || (((a0 & 0x7fffffff) > 0x7f800000) && ((a0 & 0x400000) == 0));
+  local sn1:1 = (((b1 & 0x7fffffff) > 0x7f800000) && ((b1 & 0x400000) == 0))
+    || (((a1 & 0x7fffffff) > 0x7f800000) && ((a1 & 0x400000) == 0));
+  local sn2:1 = (((b2 & 0x7fffffff) > 0x7f800000) && ((b2 & 0x400000) == 0))
+    || (((a2 & 0x7fffffff) > 0x7f800000) && ((a2 & 0x400000) == 0));
+  local sn3:1 = (((b3 & 0x7fffffff) > 0x7f800000) && ((b3 & 0x400000) == 0))
+    || (((a3 & 0x7fffffff) > 0x7f800000) && ((a3 & 0x400000) == 0));
+  local qn0:1 = nan(b0) || nan(a0);
+  local qn1:1 = nan(b1) || nan(a1);
+  local qn2:1 = nan(b2) || nan(a2);
+  local qn3:1 = nan(b3) || nan(a3);
+  local sig:1 = (comparison_code & 8) != 0;
+  local ra0:4 = zext(sn0 || (qn0 && sig)) << 4;
+  local ra1:4 = zext(sn1 || (qn1 && sig)) << 4;
+  local ra2:4 = zext(sn2 || (qn2 && sig)) << 4;
+  local ra3:4 = zext(sn3 || (qn3 && sig)) << 4;
+  simd_vector_commit(wR2731, lane_result0, lane_result1, lane_result2, lane_result3, ra0, ra1, ra2, ra3, inst_start);
+}
+
+# ---------------------------------------------------------------------
+# Single -> integer conversion lanes. mode: 0 RN (ROUNDF), 1 RZ (TRNCF),
+# 2 RP (CEILF), 3 RM (FLOORF); CVTF passes FXSR.RM. NaN, ±inf and
+# out-of-range sources raise V and saturate (G4MH tables p.407-408,
+# 418-421, 465-468; R01UH0770 Table 3.126: NaN -> 8000 0000H signed /
+# 0000 0000H unsigned); inexact sources raise I; a subnormal source
+# flushes to a signed zero (IF + I) with FS=1, while FS=0 raises E which
+# preempts the lower-priority inexact accounting. The range check applies
+# to the ROUNDED value, so e.g. CEILF just below -2^31 rounds into range
+# without V.
+macro simd_cvt_sw_lane(out, raised, x, rounding_mode) {
+  local mode:4 = rounding_mode;
+  local xv:4 = x;
+  local isNan:1 = nan(x);
+  raised = 0;
+  out = 0;
+  local xmag:4 = xv & 0x7fffffff;
+  if ((xmag == 0) || (xmag >= 0x00800000)) goto <csw_ready>;
+  if ((FXSR & 0x20000) != 0) goto <csw_flush>;
+  raised = 0x20;
+  goto <csw_done>;
+  <csw_flush>
+  xv = xv & 0x80000000;
+  FXSR = FXSR | 0x400000;
+  raised = 0x1;
+  <csw_ready>
+  if (isNan == 0) goto <csw_not_nan>;
+  raised = raised | 0x10;
+  out = 0x80000000;
+  goto <csw_done>;
+  <csw_not_nan>
+  if (xmag != 0x7f800000) goto <csw_numeric>;
+  raised = raised | 0x10;
+  out = 0x7fffffff;
+  if ((xv & 0x80000000) == 0) goto <csw_done>;
+  out = 0x80000000;
+  goto <csw_done>;
+  <csw_numeric>
+  local x8:8 = float2float(xv);
+  local t:8 = 0;
+  if (mode == 0) goto <csw_rne>;
+  if (mode == 2) goto <csw_ceil>;
+  if (mode == 3) goto <csw_floor>;
+  t = trunc(x8);
+  goto <csw_range>;
+  <csw_ceil>
+  t = trunc(ceil(x8));
+  goto <csw_range>;
+  <csw_floor>
+  t = trunc(floor(x8));
+  goto <csw_range>;
+  <csw_rne>
+  local tr:8 = trunc(x8);
+  local trf:8 = int2float(tr);
+  local frac:8 = x8 f- trf;
+  local half:8 = 0x3fe0000000000000;
+  local nhalf:8 = 0xbfe0000000000000;
+  local up:1 = (frac f> half) || ((frac f== half) && ((tr & 1) != 0));
+  local down:1 = (frac f< nhalf) || ((frac f== nhalf) && ((tr & 1) != 0));
+  t = tr + zext(up) - zext(down);
+  <csw_range>
+  local limhi:8 = 0x7fffffff;
+  local limlo:8 = 0xffffffff80000000;
+  if (t s< limlo) goto <csw_saturate_lo>;
+  if (t s> limhi) goto <csw_saturate_hi>;
+  out = t:4;
+  local tf:8 = int2float(t);
+  raised = raised | zext(tf f!= x8);
+  goto <csw_done>;
+  <csw_saturate_lo>
+  raised = raised | 0x10;
+  out = 0x80000000;
+  goto <csw_done>;
+  <csw_saturate_hi>
+  raised = raised | 0x10;
+  out = 0x7fffffff;
+  <csw_done>
+}
+
+macro simd_cvt_suw_lane(out, raised, x, rounding_mode) {
+  local mode:4 = rounding_mode;
+  local xv:4 = x;
+  local isNan:1 = nan(x);
+  raised = 0;
+  out = 0;
+  local xmag:4 = xv & 0x7fffffff;
+  if ((xmag == 0) || (xmag >= 0x00800000)) goto <csuw_ready>;
+  if ((FXSR & 0x20000) != 0) goto <csuw_flush>;
+  raised = 0x20;
+  goto <csuw_done>;
+  <csuw_flush>
+  xv = xv & 0x80000000;
+  FXSR = FXSR | 0x400000;
+  raised = 0x1;
+  <csuw_ready>
+  if (isNan == 0) goto <csuw_not_nan>;
+  raised = raised | 0x10;
+  out = 0;
+  goto <csuw_done>;
+  <csuw_not_nan>
+  if (xmag != 0x7f800000) goto <csuw_numeric>;
+  raised = raised | 0x10;
+  out = 0xffffffff;
+  if ((xv & 0x80000000) == 0) goto <csuw_done>;
+  out = 0;
+  goto <csuw_done>;
+  <csuw_numeric>
+  # A negative source is invalid with a 0 result for every unsigned
+  # conversion (G4MH p.417-418 operation-result table: -Normal -> 0[V];
+  # only +-0 converts to 0 without V)
+  if ((xv & 0x80000000) == 0) goto <csuw_conv>;
+  if (xmag == 0) goto <csuw_conv>;
+  raised = raised | 0x10;
+  out = 0;
+  goto <csuw_done>;
+  <csuw_conv>
+  local x8:8 = float2float(xv);
+  local t:8 = 0;
+  if (mode == 0) goto <csuw_rne>;
+  if (mode == 2) goto <csuw_ceil>;
+  if (mode == 3) goto <csuw_floor>;
+  t = trunc(x8);
+  goto <csuw_range>;
+  <csuw_ceil>
+  t = trunc(ceil(x8));
+  goto <csuw_range>;
+  <csuw_floor>
+  t = trunc(floor(x8));
+  goto <csuw_range>;
+  <csuw_rne>
+  local tr:8 = trunc(x8);
+  local trf:8 = int2float(tr);
+  local frac:8 = x8 f- trf;
+  local half:8 = 0x3fe0000000000000;
+  local nhalf:8 = 0xbfe0000000000000;
+  local up:1 = (frac f> half) || ((frac f== half) && ((tr & 1) != 0));
+  local down:1 = (frac f< nhalf) || ((frac f== nhalf) && ((tr & 1) != 0));
+  t = tr + zext(up) - zext(down);
+  <csuw_range>
+  local zero:8 = 0;
+  local limhi:8 = 0xffffffff;
+  if (t s< zero) goto <csuw_saturate_lo>;
+  if (t s> limhi) goto <csuw_saturate_hi>;
+  out = t:4;
+  local tf:8 = int2float(t);
+  raised = raised | zext(tf f!= x8);
+  goto <csuw_done>;
+  <csuw_saturate_lo>
+  raised = raised | 0x10;
+  out = 0;
+  goto <csuw_done>;
+  <csuw_saturate_hi>
+  raised = raised | 0x10;
+  out = 0xffffffff;
+  <csuw_done>
+}
+
+# Integer -> single conversion lanes (CVTF.WS4 / CVTF.UWS4): the integer
+# value is exact in double precision; rounding to single follows the
+# current FXSR.RM and raises I when precision is lost (G4MH p.422-423).
+macro simd_cvt_ws_lane(cause, out, x) {
+  local integer:8 = sext(x);
+  local e8:8 = int2float(integer);
+  cause = 0;
+  simd_round_d2s(cause, out, e8);
+}
+
+macro simd_cvt_uws_lane(cause, out, x) {
+  local integer:8 = zext(x);
+  local e8:8 = int2float(integer);
+  cause = 0;
+  simd_round_d2s(cause, out, e8);
+}
+
+# Half -> single conversion lane (CVTF.HS4, source in the low 16 bits).
+# Always exact except NaN handling (R01UH0770 Table 3.126): a half S-NaN
+# gives the canonical 7fffffff with V; a half Q-NaN widens with the same
+# sign and its payload in single fraction bits 22-13. Subnormal halves are
+# widened exactly and are never flushed; HS4 never raises E
+# (R01UH0770 3.2.6.2(8)(c)/(d)).
+macro simd_cvt_hs_lane(cause, out, h) {
+  local hh:2 = h;
+  local s4:4 = zext(hh & 0x8000);
+  local e4:4 = zext((hh >> 10) & 0x1f);
+  local f4:4 = zext(hh & 0x3ff);
+  cause = 0;
+  out = 0;
+  if (e4 != 0x1f) goto <hs_not_special>;
+  if (f4 == 0) goto <hs_inf>;
+  if ((f4 & 0x200) != 0) goto <hs_qnan>;
+  cause = 0x10;
+  out = 0x7fffffff;
+  goto <hs_done>;
+  <hs_qnan>
+  out = (s4 << 16) | 0x7f800000 | (f4 << 13);
+  goto <hs_done>;
+  <hs_inf>
+  out = (s4 << 16) | 0x7f800000;
+  goto <hs_done>;
+  <hs_not_special>
+  if (e4 != 0) goto <hs_normal>;
+  if (f4 == 0) goto <hs_zero>;
+  # half subnormal: value = frac x 2^-24; normalize into the single field
+  local m:4 = f4;
+  local lz:4 = lzcount(m);
+  local bitlen:4 = 32 - lz;
+  local eb:4 = 102 + bitlen;
+  m = m << (24 - bitlen);
+  out = (s4 << 16) | (eb << 23) | (m & 0x7fffff);
+  goto <hs_done>;
+  <hs_zero>
+  out = s4 << 16;
+  goto <hs_done>;
+  <hs_normal>
+  local nb:4 = e4 - 15 + 127;
+  out = (s4 << 16) | (nb << 23) | (f4 << 13);
+  <hs_done>
+}
+
+# Single -> half conversion lane (CVTF.SH4, result zero-extended into the
+# word). NaN per Table 3.126 (S-NaN -> 7FFFH with V; Q-NaN keeps the sign
+# with the fraction's top ten bits). Subnormal SOURCES follow the FS rules;
+# a subnormal RESULT (before rounding, judged in half precision) flushes
+# per Tables 3.123/3.124 with U (+I unless EU enabled) or raises E with
+# FS=0. Overflow uses the IEEE unbounded-exponent rule: O is detected only
+# when the value rounded at half PRECISION with an unbounded exponent
+# still exceeds the half maximum (RN >= halfway 65520, RZ only >= 65536,
+# RP/RM away from zero already above 65504); the delivered value is the
+# Table 3.121 initial value. No-O values above the half maximum still
+# round to the half maximum and are inexact.
+macro simd_cvt_sh_lane(cause, out, x) {
+  local xv:4 = x;
+  local xmag:4 = xv & 0x7fffffff;
+  cause = 0;
+  out = 0;
+  if ((xmag == 0) || (xmag >= 0x00800000)) goto <sh_ready>;
+  if ((FXSR & 0x20000) != 0) goto <sh_flush>;
+  cause = 0x20;
+  goto <sh_done>;
+  <sh_flush>
+  xv = xv & 0x80000000;
+  xmag = 0;
+  FXSR = FXSR | 0x400000;
+  cause = 0x1;
+  <sh_ready>
+  if (xmag <= 0x7f800000) goto <sh_not_nan>;
+  if ((xmag & 0x400000) != 0) goto <sh_qnan>;
+  cause = 0x10;
+  out = 0x7fff;
+  goto <sh_done>;
+  <sh_qnan>
+  local qw:4 = ((xv >> 16) & 0x8000) | 0x7c00 | ((xv >> 13) & 0x3ff);
+  out = qw:2;
+  goto <sh_done>;
+  <sh_not_nan>
+  if (xmag != 0x7f800000) goto <sh_finite>;
+  local iw:4 = ((xv >> 16) & 0x8000) | 0x7c00;
+  out = iw:2;
+  goto <sh_done>;
+  <sh_finite>
+  if (xmag != 0) goto <sh_nonzero>;
+  local zw:4 = (xv >> 16) & 0x8000;
+  out = zw:2;
+  goto <sh_done>;
+  <sh_nonzero>
+  local x8:8 = float2float(xv);
+  local pos:8 = abs(x8);
+  local mode:4 = (FXSR >> 18) & 3;
+  local neg:1 = x8 f< 0;
+  local maxh:2 = 0x7bff;
+  local max8:8 = float2float(maxh);
+  local minh:2 = 0x0400;
+  local tiny8:8 = float2float(minh);
+  local halfh:2 = 0x0200;
+  local half8:8 = float2float(halfh);
+  local t16:8 = 65536;
+  local two16:8 = int2float(t16);
+  local t20:8 = 65520;
+  local thresh:8 = int2float(t20);
+  if (pos f<= max8) goto <sh_small>;
+  # above the half maximum: decide overflow per the unbounded-exponent rule
+  if (mode == 0) goto <sh_big_rn>;
+  if (mode == 1) goto <sh_big_rz>;
+  if (mode == 2) goto <sh_big_rp>;
+  if (neg != 0) goto <sh_big_inf>;
+  if (pos f>= two16) goto <sh_big_max>;
+  goto <sh_ret_max>;
+  <sh_big_rp>
+  if (neg != 0) goto <sh_big_rz>;
+  <sh_big_inf>
+  cause = cause | 0x4;
+  cause = cause | zext((FXSR & 0x80) == 0);
+  out = 0x7c00;
+  if (neg == 0) goto <sh_done>;
+  out = 0xfc00;
+  goto <sh_done>;
+  <sh_big_rn>
+  if (pos f>= thresh) goto <sh_big_inf>;
+  goto <sh_ret_max>;
+  <sh_big_rz>
+  if (pos f>= two16) goto <sh_big_max>;
+  <sh_ret_max>
+  cause = cause | 0x1;
+  out = 0x7bff;
+  if (neg == 0) goto <sh_done>;
+  out = 0xfbff;
+  goto <sh_done>;
+  <sh_big_max>
+  cause = cause | 0x4;
+  cause = cause | zext((FXSR & 0x80) == 0);
+  out = 0x7bff;
+  if (neg == 0) goto <sh_done>;
+  out = 0xfbff;
+  goto <sh_done>;
+  <sh_small>
+  if (pos f>= tiny8) goto <sh_round>;
+  # subnormal half result before rounding
+  if ((FXSR & 0x20000) != 0) goto <sh_underflow>;
+  cause = 0x20;
+  goto <sh_done>;
+  <sh_underflow>
+  cause = cause | 0x2;
+  cause = cause | zext((FXSR & 0x40) == 0);
+  out = 0;
+  if (neg == 0) goto <sh_uf_signed>;
+  out = 0x8000;
+  <sh_uf_signed>
+  if (mode == 2) goto <sh_uf_rp>;
+  if (mode == 3) goto <sh_uf_rm>;
+  if (mode != 0) goto <sh_done>;
+  if ((FXSR & 0x800000) == 0) goto <sh_done>;
+  if (pos f>= half8) goto <sh_uf_min>;
+  goto <sh_done>;
+  <sh_uf_rp>
+  if (neg != 0) goto <sh_done>;
+  out = 0x0400;
+  goto <sh_done>;
+  <sh_uf_rm>
+  if (neg == 0) goto <sh_done>;
+  out = 0x8400;
+  goto <sh_done>;
+  <sh_uf_min>
+  out = out | 0x0400;
+  goto <sh_done>;
+  <sh_round>
+  local s:2 = float2float(x8);
+  local s8:8 = float2float(s);
+  out = s;
+  if (s8 f== x8) goto <sh_done>;
+  cause = cause | 0x1;
+  if (mode == 0) goto <sh_done>;
+  if (s8 f< x8) goto <sh_case_a>;
+  # s is the upper neighbor
+  if (mode == 2) goto <sh_done>;
+  if (mode == 3) goto <sh_b_down>;
+  if (neg == 0) goto <sh_b_down>;
+  goto <sh_done>;
+  <sh_case_a>
+  # s is the lower neighbor
+  if (mode == 3) goto <sh_done>;
+  if (mode == 2) goto <sh_a_up>;
+  if (neg != 0) goto <sh_a_up>;
+  goto <sh_done>;
+  <sh_a_up>
+  h16_next_up(out, s);
+  goto <sh_done>;
+  <sh_b_down>
+  h16_next_down(out, s);
+  <sh_done>
+}
+
+# ---------------------------------------------------------------------
+# ROUNDF family: round to nearest-even regardless of FXSR.RM
+# (G4MH p.465-468).
+:roundf.sw4 wR1115, wR2731 is op0510=0x3F & op0004=0 & wR1115; op1626=0x5A0 & wR2731 {
+  fxu_check(inst_start);
+  local x0:4 = wR1115[0,32]; local x1:4 = wR1115[32,32];
+  local x2:4 = wR1115[64,32]; local x3:4 = wR1115[96,32];
+  local o0:4 = 0; local o1:4 = 0; local o2:4 = 0; local o3:4 = 0;
+  local ra0:4 = 0; local ra1:4 = 0; local ra2:4 = 0; local ra3:4 = 0;
+  simd_cvt_sw_lane(o0, ra0, x0, 0);
+  simd_cvt_sw_lane(o1, ra1, x1, 0);
+  simd_cvt_sw_lane(o2, ra2, x2, 0);
+  simd_cvt_sw_lane(o3, ra3, x3, 0);
+  simd_vector_commit(wR2731, o0, o1, o2, o3, ra0, ra1, ra2, ra3, inst_start);
+}
+
+:roundf.suw4 wR1115, wR2731 is op0510=0x3F & op0004=1 & wR1115; op1626=0x5A0 & wR2731 {
+  fxu_check(inst_start);
+  local x0:4 = wR1115[0,32]; local x1:4 = wR1115[32,32];
+  local x2:4 = wR1115[64,32]; local x3:4 = wR1115[96,32];
+  local o0:4 = 0; local o1:4 = 0; local o2:4 = 0; local o3:4 = 0;
+  local ra0:4 = 0; local ra1:4 = 0; local ra2:4 = 0; local ra3:4 = 0;
+  simd_cvt_suw_lane(o0, ra0, x0, 0);
+  simd_cvt_suw_lane(o1, ra1, x1, 0);
+  simd_cvt_suw_lane(o2, ra2, x2, 0);
+  simd_cvt_suw_lane(o3, ra3, x3, 0);
+  simd_vector_commit(wR2731, o0, o1, o2, o3, ra0, ra1, ra2, ra3, inst_start);
+}
+
+# TRNCF: round toward zero regardless of FXSR.RM.
+:trncf.sw4 wR1115, wR2731 is op0510=0x3F & op0004=2 & wR1115; op1626=0x5A0 & wR2731 {
+  fxu_check(inst_start);
+  local x0:4 = wR1115[0,32]; local x1:4 = wR1115[32,32];
+  local x2:4 = wR1115[64,32]; local x3:4 = wR1115[96,32];
+  local o0:4 = 0; local o1:4 = 0; local o2:4 = 0; local o3:4 = 0;
+  local ra0:4 = 0; local ra1:4 = 0; local ra2:4 = 0; local ra3:4 = 0;
+  simd_cvt_sw_lane(o0, ra0, x0, 1);
+  simd_cvt_sw_lane(o1, ra1, x1, 1);
+  simd_cvt_sw_lane(o2, ra2, x2, 1);
+  simd_cvt_sw_lane(o3, ra3, x3, 1);
+  simd_vector_commit(wR2731, o0, o1, o2, o3, ra0, ra1, ra2, ra3, inst_start);
+}
+
+:trncf.suw4 wR1115, wR2731 is op0510=0x3F & op0004=3 & wR1115; op1626=0x5A0 & wR2731 {
+  fxu_check(inst_start);
+  local x0:4 = wR1115[0,32]; local x1:4 = wR1115[32,32];
+  local x2:4 = wR1115[64,32]; local x3:4 = wR1115[96,32];
+  local o0:4 = 0; local o1:4 = 0; local o2:4 = 0; local o3:4 = 0;
+  local ra0:4 = 0; local ra1:4 = 0; local ra2:4 = 0; local ra3:4 = 0;
+  simd_cvt_suw_lane(o0, ra0, x0, 1);
+  simd_cvt_suw_lane(o1, ra1, x1, 1);
+  simd_cvt_suw_lane(o2, ra2, x2, 1);
+  simd_cvt_suw_lane(o3, ra3, x3, 1);
+  simd_vector_commit(wR2731, o0, o1, o2, o3, ra0, ra1, ra2, ra3, inst_start);
+}
+
+# CEILF/FLOORF: round toward +inf / -inf regardless of FXSR.RM.
+:ceilf.sw4 wR1115, wR2731 is op0510=0x3F & op0004=4 & wR1115; op1626=0x5A0 & wR2731 {
+  fxu_check(inst_start);
+  local x0:4 = wR1115[0,32]; local x1:4 = wR1115[32,32];
+  local x2:4 = wR1115[64,32]; local x3:4 = wR1115[96,32];
+  local o0:4 = 0; local o1:4 = 0; local o2:4 = 0; local o3:4 = 0;
+  local ra0:4 = 0; local ra1:4 = 0; local ra2:4 = 0; local ra3:4 = 0;
+  simd_cvt_sw_lane(o0, ra0, x0, 2);
+  simd_cvt_sw_lane(o1, ra1, x1, 2);
+  simd_cvt_sw_lane(o2, ra2, x2, 2);
+  simd_cvt_sw_lane(o3, ra3, x3, 2);
+  simd_vector_commit(wR2731, o0, o1, o2, o3, ra0, ra1, ra2, ra3, inst_start);
+}
+
+:ceilf.suw4 wR1115, wR2731 is op0510=0x3F & op0004=5 & wR1115; op1626=0x5A0 & wR2731 {
+  fxu_check(inst_start);
+  local x0:4 = wR1115[0,32]; local x1:4 = wR1115[32,32];
+  local x2:4 = wR1115[64,32]; local x3:4 = wR1115[96,32];
+  local o0:4 = 0; local o1:4 = 0; local o2:4 = 0; local o3:4 = 0;
+  local ra0:4 = 0; local ra1:4 = 0; local ra2:4 = 0; local ra3:4 = 0;
+  simd_cvt_suw_lane(o0, ra0, x0, 2);
+  simd_cvt_suw_lane(o1, ra1, x1, 2);
+  simd_cvt_suw_lane(o2, ra2, x2, 2);
+  simd_cvt_suw_lane(o3, ra3, x3, 2);
+  simd_vector_commit(wR2731, o0, o1, o2, o3, ra0, ra1, ra2, ra3, inst_start);
+}
+
+:floorf.sw4 wR1115, wR2731 is op0510=0x3F & op0004=6 & wR1115; op1626=0x5A0 & wR2731 {
+  fxu_check(inst_start);
+  local x0:4 = wR1115[0,32]; local x1:4 = wR1115[32,32];
+  local x2:4 = wR1115[64,32]; local x3:4 = wR1115[96,32];
+  local o0:4 = 0; local o1:4 = 0; local o2:4 = 0; local o3:4 = 0;
+  local ra0:4 = 0; local ra1:4 = 0; local ra2:4 = 0; local ra3:4 = 0;
+  simd_cvt_sw_lane(o0, ra0, x0, 3);
+  simd_cvt_sw_lane(o1, ra1, x1, 3);
+  simd_cvt_sw_lane(o2, ra2, x2, 3);
+  simd_cvt_sw_lane(o3, ra3, x3, 3);
+  simd_vector_commit(wR2731, o0, o1, o2, o3, ra0, ra1, ra2, ra3, inst_start);
+}
+
+:floorf.suw4 wR1115, wR2731 is op0510=0x3F & op0004=7 & wR1115; op1626=0x5A0 & wR2731 {
+  fxu_check(inst_start);
+  local x0:4 = wR1115[0,32]; local x1:4 = wR1115[32,32];
+  local x2:4 = wR1115[64,32]; local x3:4 = wR1115[96,32];
+  local o0:4 = 0; local o1:4 = 0; local o2:4 = 0; local o3:4 = 0;
+  local ra0:4 = 0; local ra1:4 = 0; local ra2:4 = 0; local ra3:4 = 0;
+  simd_cvt_suw_lane(o0, ra0, x0, 3);
+  simd_cvt_suw_lane(o1, ra1, x1, 3);
+  simd_cvt_suw_lane(o2, ra2, x2, 3);
+  simd_cvt_suw_lane(o3, ra3, x3, 3);
+  simd_vector_commit(wR2731, o0, o1, o2, o3, ra0, ra1, ra2, ra3, inst_start);
+}
+
+# CVTF.SW4/SUW4: rounding per FXSR.RM (G4MH Table 2.17 p.385); every lane
+# computes first, one commit decides (per-way FXXC/FXXP packing).
+:cvtf.sw4 wR1115, wR2731 is op0510=0x3F & op0004=8 & wR1115; op1626=0x5A0 & wR2731 {
+  fxu_check(inst_start);
+  local rm:4 = (FXSR >> 18) & 3;
+  local x0:4 = wR1115[0,32]; local x1:4 = wR1115[32,32];
+  local x2:4 = wR1115[64,32]; local x3:4 = wR1115[96,32];
+  local o0:4 = 0; local o1:4 = 0; local o2:4 = 0; local o3:4 = 0;
+  local ra0:4 = 0; local ra1:4 = 0; local ra2:4 = 0; local ra3:4 = 0;
+  simd_cvt_sw_lane(o0, ra0, x0, rm);
+  simd_cvt_sw_lane(o1, ra1, x1, rm);
+  simd_cvt_sw_lane(o2, ra2, x2, rm);
+  simd_cvt_sw_lane(o3, ra3, x3, rm);
+  simd_vector_commit(wR2731, o0, o1, o2, o3, ra0, ra1, ra2, ra3, inst_start);
+}
+
+:cvtf.suw4 wR1115, wR2731 is op0510=0x3F & op0004=9 & wR1115; op1626=0x5A0 & wR2731 {
+  fxu_check(inst_start);
+  local rm:4 = (FXSR >> 18) & 3;
+  local x0:4 = wR1115[0,32]; local x1:4 = wR1115[32,32];
+  local x2:4 = wR1115[64,32]; local x3:4 = wR1115[96,32];
+  local o0:4 = 0; local o1:4 = 0; local o2:4 = 0; local o3:4 = 0;
+  local ra0:4 = 0; local ra1:4 = 0; local ra2:4 = 0; local ra3:4 = 0;
+  simd_cvt_suw_lane(o0, ra0, x0, rm);
+  simd_cvt_suw_lane(o1, ra1, x1, rm);
+  simd_cvt_suw_lane(o2, ra2, x2, rm);
+  simd_cvt_suw_lane(o3, ra3, x3, rm);
+  simd_vector_commit(wR2731, o0, o1, o2, o3, ra0, ra1, ra2, ra3, inst_start);
+}
+
+:cvtf.ws4 wR1115, wR2731 is op0510=0x3F & op0004=10 & wR1115; op1626=0x5A0 & wR2731 {
+  fxu_check(inst_start);
+  local x0:4 = wR1115[0,32]; local x1:4 = wR1115[32,32];
+  local x2:4 = wR1115[64,32]; local x3:4 = wR1115[96,32];
+  local o0:4 = 0; local o1:4 = 0; local o2:4 = 0; local o3:4 = 0;
+  local ra0:4 = 0; local ra1:4 = 0; local ra2:4 = 0; local ra3:4 = 0;
+  simd_cvt_ws_lane(ra0, o0, x0);
+  simd_cvt_ws_lane(ra1, o1, x1);
+  simd_cvt_ws_lane(ra2, o2, x2);
+  simd_cvt_ws_lane(ra3, o3, x3);
+  simd_vector_commit(wR2731, o0, o1, o2, o3, ra0, ra1, ra2, ra3, inst_start);
+}
+
+:cvtf.uws4 wR1115, wR2731 is op0510=0x3F & op0004=11 & wR1115; op1626=0x5A0 & wR2731 {
+  fxu_check(inst_start);
+  local x0:4 = wR1115[0,32]; local x1:4 = wR1115[32,32];
+  local x2:4 = wR1115[64,32]; local x3:4 = wR1115[96,32];
+  local o0:4 = 0; local o1:4 = 0; local o2:4 = 0; local o3:4 = 0;
+  local ra0:4 = 0; local ra1:4 = 0; local ra2:4 = 0; local ra3:4 = 0;
+  simd_cvt_uws_lane(ra0, o0, x0);
+  simd_cvt_uws_lane(ra1, o1, x1);
+  simd_cvt_uws_lane(ra2, o2, x2);
+  simd_cvt_uws_lane(ra3, o3, x3);
+  simd_vector_commit(wR2731, o0, o1, o2, o3, ra0, ra1, ra2, ra3, inst_start);
+}
+
+# CVTF.HS4: the half-precision source sits in the LOW half of each word lane.
+:cvtf.hs4 wR1115, wR2731 is op0510=0x3F & op0004=12 & wR1115; op1626=0x5A0 & wR2731 {
+  fxu_check(inst_start);
+  local x0:4 = wR1115[0,32]; local x1:4 = wR1115[32,32];
+  local x2:4 = wR1115[64,32]; local x3:4 = wR1115[96,32];
+  local o0:4 = 0; local o1:4 = 0; local o2:4 = 0; local o3:4 = 0;
+  local ra0:4 = 0; local ra1:4 = 0; local ra2:4 = 0; local ra3:4 = 0;
+  simd_cvt_hs_lane(ra0, o0, x0[0,16]);
+  simd_cvt_hs_lane(ra1, o1, x1[0,16]);
+  simd_cvt_hs_lane(ra2, o2, x2[0,16]);
+  simd_cvt_hs_lane(ra3, o3, x3[0,16]);
+  simd_vector_commit(wR2731, o0, o1, o2, o3, ra0, ra1, ra2, ra3, inst_start);
+}
+
+# CVTF.SH4: results are zero-extended to word lanes.
+:cvtf.sh4 wR1115, wR2731 is op0510=0x3F & op0004=13 & wR1115; op1626=0x5A0 & wR2731 {
+  fxu_check(inst_start);
+  local x0:4 = wR1115[0,32]; local x1:4 = wR1115[32,32];
+  local x2:4 = wR1115[64,32]; local x3:4 = wR1115[96,32];
+  local h0:2 = 0; local h1:2 = 0; local h2:2 = 0; local h3:2 = 0;
+  local ra0:4 = 0; local ra1:4 = 0; local ra2:4 = 0; local ra3:4 = 0;
+  simd_cvt_sh_lane(ra0, h0, x0);
+  simd_cvt_sh_lane(ra1, h1, x1);
+  simd_cvt_sh_lane(ra2, h2, x2);
+  simd_cvt_sh_lane(ra3, h3, x3);
+  local o0:4 = zext(h0);
+  local o1:4 = zext(h1);
+  local o2:4 = zext(h2);
+  local o3:4 = zext(h3);
+  simd_vector_commit(wR2731, o0, o1, o2, o3, ra0, ra1, ra2, ra3, inst_start);
+}
+
+# ABSF/NEGF: pure sign-bit operations on every lane - not arithmetic
+# operations for exception purposes (R01UH0770 3.2.6.2(6)(b), Table 3.125
+# note 3: a NaN operand is transformed on the sign bit alone), never
+# flushed, never E.
+:absf.s4 wR1115, wR2731 is op0510=0x3F & op0004=16 & wR1115; op1626=0x5A0 & wR2731 {
+  fxu_check(inst_start);
+  wR2731[0,32] = wR1115[0,32] & 0x7fffffff;
+  wR2731[32,32] = wR1115[32,32] & 0x7fffffff;
+  wR2731[64,32] = wR1115[64,32] & 0x7fffffff;
+  wR2731[96,32] = wR1115[96,32] & 0x7fffffff;
+}
+
+:negf.s4 wR1115, wR2731 is op0510=0x3F & op0004=17 & wR1115; op1626=0x5A0 & wR2731 {
+  fxu_check(inst_start);
+  wR2731[0,32] = wR1115[0,32] ^ 0x80000000;
+  wR2731[32,32] = wR1115[32,32] ^ 0x80000000;
+  wR2731[64,32] = wR1115[64,32] ^ 0x80000000;
+  wR2731[96,32] = wR1115[96,32] ^ 0x80000000;
+}
+
+:sqrtf.s4 wR1115, wR2731 is op0510=0x3F & op0004=18 & wR1115; op1626=0x5A0 & wR2731 {
+  fxu_check(inst_start);
+  local x0:4 = wR1115[0,32]; local x1:4 = wR1115[32,32];
+  local x2:4 = wR1115[64,32]; local x3:4 = wR1115[96,32];
+  local o0:4 = 0; local o1:4 = 0; local o2:4 = 0; local o3:4 = 0;
+  local ra0:4 = 0; local ra1:4 = 0; local ra2:4 = 0; local ra3:4 = 0;
+  simd_fp_unary(ra0, o0, x0, 0);
+  simd_fp_unary(ra1, o1, x1, 0);
+  simd_fp_unary(ra2, o2, x2, 0);
+  simd_fp_unary(ra3, o3, x3, 0);
+  simd_vector_commit(wR2731, o0, o1, o2, o3, ra0, ra1, ra2, ra3, inst_start);
+}
+
+# RECIPF.S4 computes 1/x exactly like DIVF.S4 with a 1.0 dividend
+# (R01UH0770 3.2.6.2(10)(d)); the DIVF lane op therefore provides the
+# complete Z/V/U/I/E accounting.
+:recipf.s4 wR1115, wR2731 is op0510=0x3F & op0004=19 & wR1115; op1626=0x5A0 & wR2731 {
+  fxu_check(inst_start);
+  # Numeric literals in float context are RAW BIT PATTERNS in SLEIGH:
+  # 0x3f800000 is 1.0f.
+  local f_one:4 = 0x3f800000;
+  local x0:4 = wR1115[0,32]; local x1:4 = wR1115[32,32];
+  local x2:4 = wR1115[64,32]; local x3:4 = wR1115[96,32];
+  local o0:4 = 0; local o1:4 = 0; local o2:4 = 0; local o3:4 = 0;
+  local ra0:4 = 0; local ra1:4 = 0; local ra2:4 = 0; local ra3:4 = 0;
+  simd_fp_op(ra0, o0, f_one, x0, 2);
+  simd_fp_op(ra1, o1, f_one, x1, 2);
+  simd_fp_op(ra2, o2, f_one, x2, 2);
+  simd_fp_op(ra3, o3, f_one, x3, 2);
+  simd_vector_commit(wR2731, o0, o1, o2, o3, ra0, ra1, ra2, ra3, inst_start);
+}
+
+:rsqrtf.s4 wR1115, wR2731 is op0510=0x3F & op0004=20 & wR1115; op1626=0x5A0 & wR2731 {
+  fxu_check(inst_start);
+  local x0:4 = wR1115[0,32]; local x1:4 = wR1115[32,32];
+  local x2:4 = wR1115[64,32]; local x3:4 = wR1115[96,32];
+  local o0:4 = 0; local o1:4 = 0; local o2:4 = 0; local o3:4 = 0;
+  local ra0:4 = 0; local ra1:4 = 0; local ra2:4 = 0; local ra3:4 = 0;
+  simd_fp_unary(ra0, o0, x0, 1);
+  simd_fp_unary(ra1, o1, x1, 1);
+  simd_fp_unary(ra2, o2, x2, 1);
+  simd_fp_unary(ra3, o3, x3, 1);
+  simd_vector_commit(wR2731, o0, o1, o2, o3, ra0, ra1, ra2, ra3, inst_start);
+}
+
+:movv.w4 wR1115, wR2731 is op0510=0x3F & op0004=0x1E & wR1115; op1626=0x5A0 & wR2731 {
+  fxu_check(inst_start);
+  wR2731 = wR1115;
+}
+
+# TRFSRV.W4 imm3, wreg2: publish per-lane (lane != 0) bits to PSW.Z per the
+# 3-bit immediate (G4MH p.494 [Operation]): 0-3 select a lane, 4 = AND of
+# lanes, 5 = OR of lanes. For 6-7 the manual NOTE is explicit: "The value
+# of PSW.Z becomes 0 if 6 or 7 is specified in imm3." Only PSW.Z is
+# written; no other PSW bit is touched. No floating-point exceptions.
+:trfsrv.w4 op2729, wR1115 is op0510=0x3F & op0004=0x1F & wR1115; op1626=0x5A0 & op2729 & op3031=0 {
+  fxu_check(inst_start);
+  local val0:1 = wR1115[0,32] != 0;
+  local val1:1 = wR1115[32,32] != 0;
+  local val2:1 = wR1115[64,32] != 0;
+  local val3:1 = wR1115[96,32] != 0;
+  local selector:4 = op2729;
+  local z:1 = 0;
+  if (selector == 0) goto <s0>;
+  if (selector == 1) goto <s1>;
+  if (selector == 2) goto <s2>;
+  if (selector == 3) goto <s3>;
+  if (selector == 4) goto <sand>;
+  if (selector == 5) goto <sor>;
+  z = 0;
+  goto <done>;
+  <s0> z = val0; goto <done>;
+  <s1> z = val1; goto <done>;
+  <s2> z = val2; goto <done>;
+  <s3> z = val3; goto <done>;
+  <sand> z = val0 && val1 && val2 && val3; goto <done>;
+  <sor> z = val0 || val1 || val2 || val3;
+  <done>
+  $(PSW_Z) = z;
+}
+
+# FLPV.S4 imm2, wreg2, wreg3: alternating-negation flip transform; the
+# exact per-lane layout follows the manual's [Operation] block.
+:flpv.s4 0, wR1115, wR2731 is op0510=0x3F & op0002=0 & wR1115; op1626=0x5A0 & wR2731 {
+  fxu_check(inst_start);
+  wR2731[96,32] = wR1115[96,32];
+  wR2731[64,32] = wR1115[64,32] ^ 0x80000000;
+  wR2731[32,32] = wR1115[32,32];
+  wR2731[0,32] = wR1115[0,32] ^ 0x80000000;
+}
+
+:flpv.s4 1, wR1115, wR2731 is op0510=0x3F & op0002=1 & wR1115; op1626=0x5A0 & wR2731 {
+  fxu_check(inst_start);
+  local b0:4 = wR1115[0,32]; local b1:4 = wR1115[32,32];
+  local b2:4 = wR1115[64,32]; local b3:4 = wR1115[96,32];
+  wR2731[96,32] = b2;
+  wR2731[64,32] = b3 ^ 0x80000000;
+  wR2731[32,32] = b0;
+  wR2731[0,32] = b1 ^ 0x80000000;
+}
+
+:flpv.s4 2, wR1115, wR2731 is op0510=0x3F & op0002=2 & wR1115; op1626=0x5A0 & wR2731 {
+  fxu_check(inst_start);
+  wR2731[96,32] = wR1115[96,32] ^ 0x80000000;
+  wR2731[64,32] = wR1115[64,32];
+  wR2731[32,32] = wR1115[32,32] ^ 0x80000000;
+  wR2731[0,32] = wR1115[0,32];
+}
+
+:flpv.s4 3, wR1115, wR2731 is op0510=0x3F & op0002=3 & wR1115; op1626=0x5A0 & wR2731 {
+  fxu_check(inst_start);
+  local b0:4 = wR1115[0,32]; local b1:4 = wR1115[32,32];
+  local b2:4 = wR1115[64,32]; local b3:4 = wR1115[96,32];
+  wR2731[96,32] = b2 ^ 0x80000000;
+  wR2731[64,32] = b3;
+  wR2731[32,32] = b0 ^ 0x80000000;
+  wR2731[0,32] = b1;
+}
+
+# ---------------------------------------------------------------------
+# 48-bit extended SIMD instructions (format X, op=0x3D, instr2 bit16=1,
+# subop4 0xE). All displacements drop their low alignment bits, and the
+# manual notes the upper subop bits beyond the register fields are ignored.
+# CMOVF.W4 is exempt from flushing and from every floating-point exception
+# (R01UH0770 3.2.6.2(6)(b), 3.2.6.2(8)(c)/(d)).
+:cmovf.w4 wR3236, wR0004, wR1115, wR2731 is op0510=0x3D & wR0004 & wR1115;
+	op1620=0x1D & op2426=6 & op2323=0 & op2222=0 & op2121=0 & wR2731; wR3236 {
+  fxu_check(inst_start);
+  local cond0:4 = zext(wR3236[0,32] != 0);
+  wR2731[0,32] = (wR0004[0,32] * cond0) + (wR1115[0,32] * zext(cond0 == 0));
+  local cond1:4 = zext(wR3236[32,32] != 0);
+  wR2731[32,32] = (wR0004[32,32] * cond1) + (wR1115[32,32] * zext(cond1 == 0));
+  local cond2:4 = zext(wR3236[64,32] != 0);
+  wR2731[64,32] = (wR0004[64,32] * cond2) + (wR1115[64,32] * zext(cond2 == 0));
+  local cond3:4 = zext(wR3236[96,32] != 0);
+  wR2731[96,32] = (wR0004[96,32] * cond3) + (wR1115[96,32] * zext(cond3 == 0));
+}
+
+# SHFLV.W4 imm12, wreg1, wreg2, wreg3: per-lane 8-way select; selectors 0-3
+# read wreg1 lanes, 4-7 read wreg2 lanes.
+:shflv.w4 imm12, wR0004, wR1115, wR2731 is op0510=0x3D & wR0004 & wR1115;
+	op1620=0x1D & op2426=6 & op2323=1 & op2222=0 & op2121 & wR2731; imm3242
+[ imm12 = (op2121 << 11) | imm3242; ] {
+  fxu_check(inst_start);
+  local sel0:4 = (imm12 >> 0) & 7;
+  local sel1:4 = (imm12 >> 3) & 7;
+  local sel2:4 = (imm12 >> 6) & 7;
+  local sel3:4 = (imm12 >> 9) & 7;
+  local s0:4 = wR0004[0,32]; local s1:4 = wR0004[32,32];
+  local s2:4 = wR0004[64,32]; local s3:4 = wR0004[96,32];
+  local s4:4 = wR1115[0,32]; local s5:4 = wR1115[32,32];
+  local s6:4 = wR1115[64,32]; local s7:4 = wR1115[96,32];
+  wR2731[0,32] = (s0 * zext(sel0 == 0)) + (s1 * zext(sel0 == 1))
+    + (s2 * zext(sel0 == 2)) + (s3 * zext(sel0 == 3))
+    + (s4 * zext(sel0 == 4)) + (s5 * zext(sel0 == 5))
+    + (s6 * zext(sel0 == 6)) + (s7 * zext(sel0 == 7));
+  wR2731[32,32] = (s0 * zext(sel1 == 0)) + (s1 * zext(sel1 == 1))
+    + (s2 * zext(sel1 == 2)) + (s3 * zext(sel1 == 3))
+    + (s4 * zext(sel1 == 4)) + (s5 * zext(sel1 == 5))
+    + (s6 * zext(sel1 == 6)) + (s7 * zext(sel1 == 7));
+  wR2731[64,32] = (s0 * zext(sel2 == 0)) + (s1 * zext(sel2 == 1))
+    + (s2 * zext(sel2 == 2)) + (s3 * zext(sel2 == 3))
+    + (s4 * zext(sel2 == 4)) + (s5 * zext(sel2 == 5))
+    + (s6 * zext(sel2 == 6)) + (s7 * zext(sel2 == 7));
+  wR2731[96,32] = (s0 * zext(sel3 == 0)) + (s1 * zext(sel3 == 1))
+    + (s2 * zext(sel3 == 2)) + (s3 * zext(sel3 == 3))
+    + (s4 * zext(sel3 == 4)) + (s5 * zext(sel3 == 5))
+    + (s6 * zext(sel3 == 6)) + (s7 * zext(sel3 == 7));
+}
+
+# LDV.QW disp16[reg1], wreg3: quad-word load (disp low 4 bits read as 0).
+:ldv.qw s4863[R0004], wR2731 is op0510=0x3D & R0004; op1620=0x1D & op2426=2 & op2323=1 & op2122=0 & wR2731; s4863 {
+  fxu_check(inst_start);
+  wR2731 = *:16 (R0004 + (s4863 & 0xfffffff0));
+}
+
+:stv.qw wR2731, s4863[R0004] is op0510=0x3D & R0004; op1620=0x1D & op2426=2 & op2323=1 & op2122=1 & wR2731; s4863 {
+  fxu_check(inst_start);
+  *:16 (R0004 + (s4863 & 0xfffffff0)) = wR2731;
+}
+
+:stv.qw wR2731, s4863[R0004] is op0510=0x3D & R0004; op1620=0x1D & op2426=2 & op2323=1 & op2122=2 & wR2731; s4863 {
+  fxu_check(inst_start);
+  *:16 (R0004 + (s4863 & 0xfffffff0)) = wR2731;
+}
+
+:stv.qw wR2731, s4863[R0004] is op0510=0x3D & R0004; op1620=0x1D & op2426=2 & op2323=1 & op2122=3 & wR2731; s4863 {
+  fxu_check(inst_start);
+  *:16 (R0004 + (s4863 & 0xfffffff0)) = wR2731;
+}
+
+# LDV.W imm4, disp16[reg1], wreg3: one word load broadcast to the lanes
+# selected by imm4 (disp low 2 bits read as 0).
+:ldv.w imm4, s4863[R0004], wR2731 is op0510=0x3D & R0004; op1620=0x1D & op2626=0 & op2525=0 & op2424 & op2323 & op2222 & op2121 & wR2731; s4863
+[ imm4 = (op2424 << 3) | (op2323 << 2) | (op2222 << 1) | op2121; ] {
+  fxu_check(inst_start);
+  local val:4 = *:4 (R0004 + (s4863 & 0xfffffffc));
+  local m0:4 = imm4 & 1;
+  local m1:4 = (imm4 >> 1) & 1;
+  local m2:4 = (imm4 >> 2) & 1;
+  local m3:4 = (imm4 >> 3) & 1;
+  wR2731[0,32] = (val * m0) + (wR2731[0,32] * zext(m0 == 0));
+  wR2731[32,32] = (val * m1) + (wR2731[32,32] * zext(m1 == 0));
+  wR2731[64,32] = (val * m2) + (wR2731[64,32] * zext(m2 == 0));
+  wR2731[96,32] = (val * m3) + (wR2731[96,32] * zext(m3 == 0));
+}
+
+# STV.W imm2, wreg3, disp16[reg1]: store the single word lane imm2.
+:stv.w op2122, wR2731, s4863[R0004] is op0510=0x3D & R0004; op1620=0x1D & op2426=2 & op2323=0 & op2122 & wR2731; s4863 {
+  fxu_check(inst_start);
+  local lane:4 = op2122;
+  local val:4 = (wR2731[0,32] * zext(lane == 0)) + (wR2731[32,32] * zext(lane == 1))
+    + (wR2731[64,32] * zext(lane == 2)) + (wR2731[96,32] * zext(lane == 3));
+  *:4 (R0004 + (s4863 & 0xfffffffc)) = val;
+}
+
+# LDV.DW imm2, disp16[reg1], wreg3: one double-word load broadcast to the
+# double-word lanes selected by imm2 (disp low 3 bits read as 0).
+:ldv.dw op2122, s4863[R0004], wR2731 is op0510=0x3D & R0004; op1620=0x1D & op2426=3 & op2323=0 & op2122 & wR2731; s4863 {
+  fxu_check(inst_start);
+  local val:8 = *:8 (R0004 + (s4863 & 0xfffffff8));
+  local m0:4 = op2122 & 1;
+  local m1:4 = (op2122 >> 1) & 1;
+  wR2731[0,64] = (val * zext(m0)) + (wR2731[0,64] * zext(m0 == 0));
+  wR2731[64,64] = (val * zext(m1)) + (wR2731[64,64] * zext(m1 == 0));
+}
+
+# STV.DW imm1, wreg3, disp16[reg1]: store double-word lane imm1.
+:stv.dw op2121, wR2731, s4863[R0004] is op0510=0x3D & R0004; op1620=0x1D & op2426=3 & op2323=1 & op2222=0 & op2121 & wR2731; s4863 {
+  fxu_check(inst_start);
+  local lane:4 = op2121;
+  local val:8 = (wR2731[0,64] * zext(lane == 0)) + (wR2731[64,64] * zext(lane == 1));
+  *:8 (R0004 + (s4863 & 0xfffffff8)) = val;
+}
+
+# LDVZ.H4 disp16[reg1], wreg3: double-word load, 16-bit units zero-extended
+# into the LOW half of each word lane.
+:ldvz.h4 s4863[R0004], wR2731 is op0510=0x3D & R0004; op1620=0x1D & op2426=3 & op2323=1 & op2222=1 & op2121=0 & wR2731; s4863 {
+  fxu_check(inst_start);
+  local val:8 = *:8 (R0004 + (s4863 & 0xfffffff8));
+  wR2731[0,32] = zext(val[0,16]);
+  wR2731[32,32] = zext(val[16,16]);
+  wR2731[64,32] = zext(val[32,16]);
+  wR2731[96,32] = zext(val[48,16]);
+}
+
+# STVZ.H4 wreg3, disp16[reg1]: pack the four LOW halfword lanes into one
+# double-word store.
+:stvz.h4 wR2731, s4863[R0004] is op0510=0x3D & R0004; op1620=0x1D & op2426=3 & op2323=1 & op2222=1 & op2121=1 & wR2731; s4863 {
+  fxu_check(inst_start);
+  local val:8 = zext(wR2731[0,16]) | (zext(wR2731[32,16]) << 16)
+    | (zext(wR2731[64,16]) << 32) | (zext(wR2731[96,16]) << 48);
+  *:8 (R0004 + (s4863 & 0xfffffff8)) = val;
+}

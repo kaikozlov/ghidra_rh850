@@ -1,6 +1,6 @@
-# Plugin verification: v850e3 SLEIGH against the P1M-E firmware
+# V850/RH850 processor and automatic-analysis audit
 
-> **Scope:** RH850G3M/P1M-E targets; Venza core decode only where explicitly bounded
+> **Scope:** vendored V850/RH850 plugin, including broader family functionality; firmware results remain target-specific
 >
 > **Document type:** subsystem analysis
 >
@@ -14,13 +14,15 @@
 >
 > **Related:** [WORKFLOW](../WORKFLOW.md), [firmware-architecture](../architecture/firmware-architecture.md)
 
-This records audits of the vendored `ghidra/ghidra_v850` processor module
-against the RH850/P1M-E CodeFlash. **Decode coverage is not the same as p-code
-semantic correctness.** The checks below are layered:
+This owns architectural and automatic-analysis evidence for
+`ghidra/ghidra_v850`. Earlier firmware counts, addresses and conclusions below
+are **legacy Sienna `8965B4512000` checkpoints**, unless another target is named.
+They are not the plugin's support boundary. Decode coverage and p-code semantic
+correctness remain separate; the checks are layered:
 
 | Layer | What it proves | How to run |
 |---|---|---|
-| SLEIGH compile | Sources parse and produce `v850e3.sla` | `make verify-sleigh` |
+| SLEIGH compile | All four architectural profiles parse and compile | `make verify-sleigh` |
 | Synthetic fixtures | Selected encodings plus executed register/memory/flag vectors | `make verify-processor` |
 | Function-body decode | No undefined bytes inside recovered functions | `AssertNoUndefinedInFunctions` |
 | System-register naming | Every `ldsr`/`stsr` operand is named | `AssertSystemRegisterNames` |
@@ -30,7 +32,7 @@ semantic correctness.** The checks below are layered:
 | LocalRAM overlays | Typed payload/SecOC/DID/checkpoint roots on LocalRAM | `ApplyRamTypes` |
 | Vector recovery | INTBP/EBASE handlers + `__interrupt` | `RecoverVectorHandlers` |
 | Calling conventions | Explicit `__stdcall` on non-ISR functions | `ApplyCallingConventions` |
-| Switch tables | In-function `switch` jump tables + xrefs | `RecoverSwitchTables` / `AssertSwitchTables` |
+| Switch tables | Automatic native/direct-jump/loaded-relative/loaded-absolute recovery; target annotations remain available | `V850SwitchAnalyzer` / `AssertV850SwitchAnalysis` |
 
 Automated gate:
 
@@ -95,11 +97,10 @@ table entries.
 Script: `ghidra/scripts/investigate/FindUndefinedInFunctions.java`
 (asserting companion: `ghidra/scripts/verify/AssertNoUndefinedInFunctions.java`).
 
-The current function bodies disassemble completely: **zero** undefined bytes
-occur inside any of the 7,090 functions. A SLEIGH decode failure would leave a
-hole inside a function; none exists, so the module decodes every instruction
-listed inside those current bodies. This does not establish that every
-executable body or compiler-emitted instruction has been discovered.
+The recorded legacy-Sienna checkpoint had **zero undefined bytes** inside its
+7,090 recovered functions. This establishes in-body decode only for that
+checkpoint, not discovery of every executable body or compiler idiom and not
+a reason to omit broader instruction or automatic-analysis support.
 
 That alone does **not** prove every decoded instruction has correct p-code.
 Semantic fixtures under `tests/fixtures/processor/` and the asserting scripts
@@ -315,11 +316,13 @@ compares it with the committed `data/switch_table_inventory.csv` baseline.
 ## Accepted unimplemented ops
 
 Instructions that decode but intentionally use opaque `callother` p-code are
-listed by user-op name in `data/processor_unimpl_allowlist.txt`. The current
-firmware inventory resolves CALLOTHER indexes to `__disable_irq`,
-`__enable_irq`, `__nop`, and `__synchronize` only; verification fails for
-either an unapproved used op or a stale allowlist entry. `cache`/`pref`
-do not occur in this image, so their named operation user-ops
+listed by user-op name in `data/processor_unimpl_allowlist.txt`. The historical
+inventory included an opaque `__nop`; NOP now has its actual empty architectural
+effect and advances PC normally without a user-op or emulator workaround.
+Interrupt-controller and synchronization effects remain explicit intrinsics.
+The instruction-inventory producer rejects both unapproved used operations and
+stale allowlist entries. `cache`/`pref` do not occur in the legacy-Sienna checkpoint,
+so their named operation user-ops
 (`__chbii`, `__cibii`, `__cfali`, `__cisti`, `__cildi`, `__prefi`) are
 exercised by the synthetic fixture instead of the firmware inventory.
 
@@ -683,15 +686,183 @@ canonical quiet NaN `0x7fc00000` is a documented model convention.
 Imprecise delivery is modeled at instruction boundaries, not with physical
 pipeline latency. Neither is claimed as a silicon-observed result.
 
+## Broader plugin implementation
+
+Architectural profiles are independent of analysis and compiler selection.
+The [module README](../../ghidra/ghidra_v850/README.md) lists the language IDs;
+[WORKFLOW](../WORKFLOW.md#compiler-and-register-analysis-policy) owns options and
+rebuild commands. Exact G3M decoding remains available alongside the broader
+profile; a current firmware census does not exclude other family functionality.
+
+- **Register/ABI analysis:** fixed EP/CTBP/GP/TP values are explicit options,
+  not compulsory target assumptions. Callee-save policy for EP/GP/TP/r2 selects
+  native compiler-spec variants, so it affects unresolved indirect calls as
+  well as direct calls. GHS MULTI is the default compiler; old-GCC and CC-RH
+  retain their distinct scalar/aggregate alignment and hidden-return contracts.
+- **CALLT:** CTBP values are collected across flowed paths before recovery.
+  A call site resolves only when every observation agrees and no path is
+  unknown. Initialized table entries produce data/xrefs, executable targets
+  produce computed calls and functions, and zero offsets remain valid.
+  Writable-memory trust is respected by both custom and generic propagation.
+  Ordinary LDSR selectors are decoded separately from FPU selectors: symbolic
+  propagation no longer explores an impossible FPU branch that discards a known
+  CTBP value. Runtime vectors cover changing, zero, agreeing, conflicting and
+  unknown incoming CTBP values.
+- **Switches:** the analyzer recognizes native, direct-jump, loaded-relative
+  and loaded-absolute tables from instruction/dataflow structure. Table bounds
+  and branch targets are checked before mutation. The existing target scripts
+  remain annotation owners; they are not a substitute for generic recovery.
+- **Compiler helpers:** stripped GHS/GCC save/restore and arithmetic routines
+  are recognized from code structure or compiler-generated byte templates,
+  not from names alone. Call-fixups carry stack/register and numerical effects;
+  unknown caller-clobbered values remain independent opaque results, not zero.
+  Epilogue bytes, including orphan decoded epilogues and conditional local exits,
+  do not establish a new helper entry. Existing functions, calls and direct
+  unconditional tail jumps from other functions do. This prevents false function
+  splits and the resulting no-return/caller truncation.
+  The old-GCC aggregate-return analyzer examines the formal return type, avoiding
+  an indirect-pointer/aggregate signature oscillation on repeated analysis.
+- **Broader architecture:** DSP/SIMD operands and aliasing, FX status/control
+  views, indexed MPU descriptors and Host/Guest register transfers have explicit
+  p-code dataflow. Fused SIMD and ROUNDF conversion models include status and
+  destination-suppression transitions, not merely mnemonic recognition.
+  Scalar and paired `r0` reads supply zero; pair destinations discard the low word
+  without changing `r1`'s high-word result. Native execution checks source,
+  destination and aliased MAC/FP pairs, MODADD, and G3M PUSHSP/POPSP zero boundaries.
+- **Trace/debug:** DBPUSH traces a register range rather than changing SP;
+  DBCP/DBTAG preserve their event inputs. Legacy DBTRAP/DBRET save/restore
+  debug PC/PSW and change DIR.DM using the V850E1 architectural contract.
+
+Undocumented legacy private-context/TLB/DSP compound effects remain typed
+intrinsics with their known inputs and outputs. They are not aliased to unrelated
+G4MH Host/Guest registers or replaced with invented arithmetic. V850E1F has
+numeric dataflow and recovered EFG/ECT masks; exact vendor EFG retention,
+TRFF flag mapping and exceptional result rules require the unavailable
+`U16374EJ1V0UM00` instruction manual. Those boundaries are explicit operations,
+not silently discarded instructions. Static lifting and native offline execution
+do not establish silicon timing or vehicle behavior.
+
+Native offline validation compiles all four language profiles and executes these
+complete fixture scripts, not selected passing assertions:
+
+| Fixture | Exercised behavior |
+|---|---|
+| `AssertProcessorFixtureSemantics` | 98 machine cases; 3,922 fused numerical vectors and 32 exception/control sequences |
+| `AssertV850ExtendedIsa` | 156 decode vectors plus executed DSP/SIMD, conversion, pair-alias, burst-memory and debug transitions |
+| `AssertV850ExtendedRegisters` | 14 register-access fixtures |
+| `AssertV850Virtualization` | Indexed MPU, Host/Guest state and exception transitions |
+| `AssertV850E1f` | 16 legacy fixtures, with the explicit undocumented-effects boundary above |
+| `AssertV850RegisterAnalysis` | Context options, direct/indirect ABI policy and CTBP flow joins |
+| `AssertV850SwitchAnalysis` | All four table idioms, recovered control flow and rejection boundaries |
+| `AssertV850CompilerHelpers` | Stripped recognition, numerical decompilation, independent clobbers, escaping stack effects and execution of real save/remainder bodies |
+
+The firmware-machine regression also passes. These checks establish the
+implemented offline behavior they exercise, not whole-ISA silicon qualification.
+
+Two fresh four-stage rebuilds of each registered target produced byte-identical
+normalized inventories. The canonical inventories and full decompiler corpora
+were regenerated against the installed processor manifest:
+
+| Target | Complete decompilations |
+|---|---:|
+| Camry `8965F3307000` | 7,178 |
+| Crown `8965F3012000` | 6,971 |
+| Corolla `8965F1208000` | 6,934 |
+| Corolla `8965H1202000` | 6,934 |
+| Sienna `8965B4512000` | 7,090 |
+| Venza `8917048E30` | 10,390 |
+
+All 45,497 records exported without decompiler failures. This is export
+completeness, not proof that every recovered function is genuine or every
+indirect branch is resolved. Full Sienna working-project invariants,
+instruction/userop coverage and exact live semantic-ledger comparison passed;
+its function entries, bodies and no-return flags were unchanged. The
+`rh850_compiler_abi` and `decompiler_corpus` verification selectors also passed.
+Rebuilds used disposable `build/work/processor-final/` projects. All six were
+promoted through `make snapshot-project` after clean daemon shutdown,
+processor-identity and inventory-parity checks, and packed-snapshot validation.
+Pre-existing user working projects and sessions were not replaced.
+
+Venza's dynamic CTBP path was checked against instructions and references:
+`LDSR r11,CTBP` at `0x17038` installs `0x17060`; CALLT sites
+`0x17092`, `0x17096` and `0x1709a` reference the corresponding halfword entries
+and trampolines. `LDSR r28,CTBP` at `0x170a6` restores the saved runtime value.
+Those table references already existed before this change and are not claimed
+as new discoveries. The regenerated `0x17092` pseudocode additionally retains
+the FPEC/FPIPR/PMR/ISPR guard and EBASE exception-vector dispatch, with the same
+function body. The indirect switch at `0x170b8` remains unresolved.
+
+Residual data-as-code is not hidden by the rebuild comparison. In Crown,
+`45 00` at `0x1a4dc` decodes as `switch tp`, not CALLT; the surrounding repeated
+halfword table is reached through a data load in `0xc9cea`, and its computed
+reference to `0x25212` does not establish a real call. Venza's `0xc974` still
+has bad-instruction pseudocode despite shedding decoded table bytes; its
+`callt 0x19` at `0xc99a` is unresolved, not a positive recovery example.
+These existing ambiguous regions are not evidence of complete firmware
+understanding or a zero-false-positive whole-program graph.
+
+## 2026-10-11 IDA 9.5 processor/decompiler prior-art audit
+
+IDA Professional `9.5.261001.a12ef234` was audited independently at both
+layers: the installed arm64 `nec850.dylib` processor module and
+`hexv850.dylib` decompiler backend. The official IDA SDK nec850 source at
+commit `2a9143f2f4abd7f54fe20d1e40fb68391d19c4cb` supplies readable processor
+prior art; installed-binary hashes and ancillary-file provenance are recorded
+in `ghidra/ghidra_v850/PROVENANCE.json`. Proprietary binary behavior was used
+only for comparison. It is not copied implementation and does not outrank the
+Renesas manuals or exact target bytes.
+
+The bundle inventory also contains `rh850.xml` / `rh850-core.xml` debugger
+register descriptions, `necv850.cmt` instruction comments, and
+`cfg/ghidra_patterns/V850`. No V850 signature library or type library was
+present. The debugger XML has no decoder semantics. The shipped Ghidra
+function pattern is byte-identical to current upstream Ghidra's file.
+
+The processor-module comparison covered:
+
+- the V850, V850E/E1/E2M, and broad RH850 decoder variants;
+- direct and computed flow/xref generation, the CTBP halfword call table, and
+  fixed CTBP/GP/TP/EP register options;
+- register-value propagation, stack aliases, `PREPARE`, stack stores, and
+  GCC/Green Hills save/restore helper thunks;
+- four switch families: native `switch`, direct `jmp` tables, and loaded
+  relative/absolute target tables;
+- the old-GCC and CC-RH argument allocators, including r6-r9, register/stack
+  splitting, aggregates, varargs, and r10:r11 returns.
+
+The Hex-Rays backend consumes the processor's saved-register/frame metadata,
+link-register and CTPC offsets, and instruction flags. It lowers architectural
+system-register accesses and non-C operations to helpers, recognizes named
+Green Hills 64-bit arithmetic helpers, and performs its ordinary microcode
+optimizations. That explains some IDA quality without revealing a second
+instruction decoder: the processor module owns decode, xrefs, stack recovery,
+switches, and ABI allocation. In this fork those responsibilities are split
+between SLEIGH p-code, the compiler spec, Ghidra analyzers, and the existing
+target scripts.
+
+The vendored function pattern had accidentally shortened only the
+`jmp [lp]`-followed `PREPARE ..., simm16/imm16` alternatives to five bytes.
+Both instructions are six bytes. The patterns now exactly match installed
+IDA's Ghidra-pattern copy and current upstream Ghidra, preventing a
+truncated instruction tail from satisfying that function-start pattern.
+
+The clean rebuild also disproved a prior CALLT interpretation rather than
+turning it into a processor feature: Sienna `22 02 @ 0x1d5c` and H/F
+`22 02 @ 0x1d40` are interior halfwords of four-byte `mulu` instructions, not
+instruction boundaries. The stale overlapping Sienna function and the
+security conclusion derived from it are corrected in `KEYLESS-008` /
+`CORR-203`. This is why raw halfword mnemonics and permissive overlapping-code
+recovery are not accepted as target evidence.
+
 ## What these audits do *not* claim
 
 - Zero undefined bytes inside the current functions proves in-body decode
   coverage, not discovery of every executable body and not every
   p-code edge case (FP rounding, hypervisor ops, unexercised arithmetic forms, …).
-- Other floating-point arithmetic/conversion instructions still use Ghidra's
-  ordinary floating primitives without a complete FPSR exception model.
-  The eight multiply-add forms above have fused numerical and architectural
-  exception semantics; that does not make the entire FPU instruction-exact.
+- Some scalar floating-point arithmetic/conversion forms still use Ghidra's
+  ordinary primitives without a complete FPSR exception model. Fused and
+  ROUNDF status semantics, and the broader SIMD models, do not make the entire
+  FPU silicon-exact; documented double-rounding/pipeline limits remain.
   Cache/prefetch userops do not emulate cache contents; load-link invalidation
   by external agents is outside instruction-level emulation.
 - Exact function/instruction counts are smoke signals; prefer the asserting
@@ -700,11 +871,12 @@ pipeline latency. Neither is claimed as a silicon-observed result.
 - A provisioned SecOC key or live ICU-S behavior cannot be proven from this
   dump alone; see the firmware evidence docs for dynamic caveats.
 
-## Why auto-analysis options are left on defaults
+## Historical legacy-Sienna auto-analysis defaults
 
-The rebuild (`tools/project/rebuild_project.sh`) runs Ghidra's default analyzers and does
-not disable "Address Tables" or "Non-Returning Functions" (a recommendation
-sometimes given for raw automotive images). This is deliberate for this image:
+The recorded legacy-Sienna rebuild (`tools/project/rebuild_project.sh`) ran
+Ghidra's default analyzers without disabling "Address Tables" or
+"Non-Returning Functions". These observations describe that image/checkpoint,
+not a restriction on generic switch or compiler-helper recognition:
 
 - **Address Tables:** the over-eager-disassembly symptom it warns about *is*
   present — 227 decoded `switch` opcodes are unreachable data misread as code

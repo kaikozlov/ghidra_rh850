@@ -1,13 +1,8 @@
 @include "v850_fused.sinc"
 
-# Commit only when no enabled exception occurred. XC/FPEPC retain the last
-# enabled exception; XP and G3M IF are sticky. Negation is in the numeric core.
-macro fp_multiply_add(destination, a, b, c, operation, instruction_pc, next_pc) {
-  if ((FPEC & 1) != 0) goto <done>;
-  local result:4 = 0;
-  local raised:4 = 0;
-  local flushed:4 = 0;
-  fp32_fused(result, raised, flushed, a, b, c, operation, FPSR);
+# Scalar FP result commit shared by fused arithmetic and integer rounding.
+# XC/FPEPC retain the last enabled exception; XP and G3M IF are sticky.
+macro fp_commit_result(destination, result, raised, flushed, instruction_pc, next_pc) {
 @if defined(V850E3)
   FPSR = FPSR | (flushed << 22);
 @endif
@@ -41,10 +36,20 @@ macro fp_multiply_add(destination, a, b, c, operation, instruction_pc, next_pc) 
   <done>
 }
 
+macro fp_multiply_add(destination, a, b, c, operation, instruction_pc, next_pc) {
+  if ((FPEC & 1) != 0) goto <done>;
+  local result:4 = 0;
+  local raised:4 = 0;
+  local flushed:4 = 0;
+  fp32_fused(result, raised, flushed, a, b, c, operation, FPSR, 0);
+  fp_commit_result(destination, result, raised, flushed, instruction_pc, next_pc);
+  <done>
+}
+
 # ABSF.D reg2, reg3
-:absf.d R1115pair, R2731pair is R1115pair & op0510=0x3F & op0004=0b00000; R2731pair & op2126=0b100010 & op1620=0b11000 {
+:absf.d R1115pair, xR2731pair is R1115pair & op0510=0x3F & op0004=0b00000; xR2731pair & op2126=0b100010 & op1620=0b11000 {
   if ((FPEC & 1) != 0) goto <fp_invalidated>;
-  R2731pair = abs(R1115pair);
+  xR2731pair = abs(R1115pair);
   <fp_invalidated>
 }
 
@@ -56,9 +61,9 @@ macro fp_multiply_add(destination, a, b, c, operation, instruction_pc, next_pc) 
 }
 
 # ADDF.D reg1, reg2, reg3
-:addf.d R0004pair, R1115pair, R2731pair is R1115pair & op0510=0x3F & R0004pair ; R2731pair & op2126=0b100011 & op1620=0b10000 {
+:addf.d R0004pair, R1115pair, xR2731pair is R1115pair & op0510=0x3F & R0004pair ; xR2731pair & op2126=0b100011 & op1620=0b10000 {
   if ((FPEC & 1) != 0) goto <fp_invalidated>;
-  R2731pair = R1115pair f+ R0004pair;
+  xR2731pair = R1115pair f+ R0004pair;
   <fp_invalidated>
 }
 
@@ -70,18 +75,18 @@ macro fp_multiply_add(destination, a, b, c, operation, instruction_pc, next_pc) 
 }
 
 # CEILF.DL reg2, reg3
-:ceilf.dl R1115pair, R2731pair is R1115pair & op0510=0x3F & op0004=0b00010; R2731pair & op2126=0b100010 & op1620=0b10100 {
+:ceilf.dl R1115pair, xR2731pair is R1115pair & op0510=0x3F & op0004=0b00010; xR2731pair & op2126=0b100010 & op1620=0b10100 {
   if ((FPEC & 1) != 0) goto <fp_invalidated>;
   local tmp:8 = ceil(float2float(R1115pair));
-  R2731pair = trunc(tmp);
+  xR2731pair = trunc(tmp);
   <fp_invalidated>
 }
 
 # CEILF.DUL reg2, reg3
-:ceilf.dul R1115pair, R2731pair is R1115pair & op0510=0x3F & op0004=0b10010; R2731pair & op2126=0b100010 & op1620=0b10100 {
+:ceilf.dul R1115pair, xR2731pair is R1115pair & op0510=0x3F & op0004=0b10010; xR2731pair & op2126=0b100010 & op1620=0b10100 {
   if ((FPEC & 1) != 0) goto <fp_invalidated>;
   local tmp:8 = ceil(float2float(R1115pair));
-  R2731pair = trunc(tmp);
+  xR2731pair = trunc(tmp);
   <fp_invalidated>
 }
 
@@ -100,18 +105,18 @@ macro fp_multiply_add(destination, a, b, c, operation, instruction_pc, next_pc) 
 }
 
 # CEILF.SL reg2, reg3
-:ceilf.sl R1115, R2731pair is R1115 & op0510=0x3F & op0004=0b00010; R2731pair & op2126=0b100010 & op1620=0b00100 {
+:ceilf.sl R1115, xR2731pair is R1115 & op0510=0x3F & op0004=0b00010; xR2731pair & op2126=0b100010 & op1620=0b00100 {
   if ((FPEC & 1) != 0) goto <fp_invalidated>;
   local tmp:8 = ceil(float2float(R1115));
-  R2731pair = trunc(tmp);
+  xR2731pair = trunc(tmp);
   <fp_invalidated>
 }
 
 # CEILF.SUL reg2, reg3
-:ceilf.sul R1115, R2731pair is R1115 & op0510=0x3F & op0004=0b10010; R2731pair & op2126=0b100010 & op1620=0b00100 {
+:ceilf.sul R1115, xR2731pair is R1115 & op0510=0x3F & op0004=0b10010; xR2731pair & op2126=0b100010 & op1620=0b00100 {
   if ((FPEC & 1) != 0) goto <fp_invalidated>;
   local tmp:8 = ceil(float2float(R1115));
-  R2731pair = trunc(tmp);
+  xR2731pair = trunc(tmp);
   <fp_invalidated>
 }
 
@@ -130,10 +135,10 @@ macro fp_multiply_add(destination, a, b, c, operation, instruction_pc, next_pc) 
 }
 
 # CMOVF.D fcbit, reg1, reg2, reg3
-:cmovf.d fcbit1719, R0004pair, R1115pair, R2731pair is R1115pair & op0510=0x3F & R0004pair; R2731pair & op2126=0b100000 & op2020=1 & fcbit1719 & op1616=0 {
+:cmovf.d fcbit1719, R0004pair, R1115pair, xR2731pair is R1115pair & op0510=0x3F & R0004pair; xR2731pair & op2126=0b100000 & op2020=1 & fcbit1719 & op1616=0 {
   if ((FPEC & 1) != 0) goto <fp_invalidated>;
   local tmp:8 = zext(FPSR >> (fcbit1719:1 + 24:1)) & 0x1;
-  R2731pair = (tmp * R0004pair) | ((1-tmp) * R1115pair);
+  xR2731pair = (tmp * R0004pair) | ((1-tmp) * R1115pair);
   <fp_invalidated>
 }
 
@@ -184,9 +189,9 @@ macro compare_float(fcond, reg2, reg1, result) {
 # P-code has no dynamic rounding-mode input; conversions use Ghidra's floating
 # primitive while preserving the architectural operand and result widths.
 # CVTF.DL reg2, reg3
-:cvtf.dl R1115pair, R2731pair is R1115pair & op0510=0x3F & op0004=0b00100; R2731pair & op2126=0b100010 & op1620=0b10100 {
+:cvtf.dl R1115pair, xR2731pair is R1115pair & op0510=0x3F & op0004=0b00100; xR2731pair & op2126=0b100010 & op1620=0b10100 {
   if ((FPEC & 1) != 0) goto <fp_invalidated>;
-  R2731pair = trunc(R1115pair);
+  xR2731pair = trunc(R1115pair);
   <fp_invalidated>
 }
 
@@ -198,9 +203,9 @@ macro compare_float(fcond, reg2, reg1, result) {
 }
 
 # CVTF.DUL reg2, reg3
-:cvtf.dul R1115pair, R2731pair is R1115pair & op0510=0x3F & op0004=0b10100; R2731pair & op2126=0b100010 & op1620=0b10100 {
+:cvtf.dul R1115pair, xR2731pair is R1115pair & op0510=0x3F & op0004=0b10100; xR2731pair & op2126=0b100010 & op1620=0b10100 {
   if ((FPEC & 1) != 0) goto <fp_invalidated>;
-  R2731pair = trunc(R1115pair);
+  xR2731pair = trunc(R1115pair);
   <fp_invalidated>
 }
 
@@ -219,9 +224,9 @@ macro compare_float(fcond, reg2, reg1, result) {
 }
 
 # CVTF.LD reg2, reg3
-:cvtf.ld R1115pair, R2731pair is R1115pair & op0510=0x3F & op0004=0b00001; R2731pair & op2126=0b100010 & op1620=0b10010 {
+:cvtf.ld R1115pair, xR2731pair is R1115pair & op0510=0x3F & op0004=0b00001; xR2731pair & op2126=0b100010 & op1620=0b10010 {
   if ((FPEC & 1) != 0) goto <fp_invalidated>;
-  R2731pair = int2float(R1115pair);
+  xR2731pair = int2float(R1115pair);
   <fp_invalidated>
 }
 
@@ -233,23 +238,23 @@ macro compare_float(fcond, reg2, reg1, result) {
 }
 
 # CVTF.SD reg2, reg3
-:cvtf.sd R1115, R2731pair is R1115 & op0510=0x3F & op0004=0b00010; R2731pair & op2126=0b100010 & op1620=0b10010 {
+:cvtf.sd R1115, xR2731pair is R1115 & op0510=0x3F & op0004=0b00010; xR2731pair & op2126=0b100010 & op1620=0b10010 {
   if ((FPEC & 1) != 0) goto <fp_invalidated>;
-  R2731pair = float2float(R1115);
+  xR2731pair = float2float(R1115);
   <fp_invalidated>
 }
 
 # CVTF.SL reg2, reg3
-:cvtf.sl R1115, R2731pair is R1115 & op0510=0x3F & op0004=0b00100; R2731pair & op2126=0b100010 & op1620=0b00100 {
+:cvtf.sl R1115, xR2731pair is R1115 & op0510=0x3F & op0004=0b00100; xR2731pair & op2126=0b100010 & op1620=0b00100 {
   if ((FPEC & 1) != 0) goto <fp_invalidated>;
-  R2731pair = trunc(R1115);
+  xR2731pair = trunc(R1115);
   <fp_invalidated>
 }
 
 # CVTF.SUL reg2, reg3
-:cvtf.sul R1115, R2731pair is R1115 & op0510=0x3F & op0004=0b10100; R2731pair & op2126=0b100010 & op1620=0b00100 {
+:cvtf.sul R1115, xR2731pair is R1115 & op0510=0x3F & op0004=0b10100; xR2731pair & op2126=0b100010 & op1620=0b00100 {
   if ((FPEC & 1) != 0) goto <fp_invalidated>;
-  R2731pair = trunc(R1115);
+  xR2731pair = trunc(R1115);
   <fp_invalidated>
 }
 
@@ -268,17 +273,17 @@ macro compare_float(fcond, reg2, reg1, result) {
 }
 
 # CVTF.ULD reg2, reg3
-:cvtf.uld R1115pair, R2731pair is R1115pair & op0510=0x3F & op0004=0b10001; R2731pair & op2126=0b100010 & op1620=0b10010 {
+:cvtf.uld R1115pair, xR2731pair is R1115pair & op0510=0x3F & op0004=0b10001; xR2731pair & op2126=0b100010 & op1620=0b10010 {
   if ((FPEC & 1) != 0) goto <fp_invalidated>;
   if ((R1115pair >> 63) == 0) goto <small>;
     local folded:8 = (R1115pair >> 1) | (R1115pair & 1);
     local two:8 = 2;
     local folded_float:8 = int2float(folded);
     local two_float:8 = int2float(two);
-    R2731pair = folded_float f* two_float;
+    xR2731pair = folded_float f* two_float;
     goto <done>;
   <small>
-    R2731pair = int2float(R1115pair);
+    xR2731pair = int2float(R1115pair);
   <done>
   <fp_invalidated>
 }
@@ -300,10 +305,10 @@ macro compare_float(fcond, reg2, reg1, result) {
 }
 
 # CVTF.UWD reg2, reg3
-:cvtf.uwd R1115, R2731pair is R1115 & op0510=0x3F & op0004=0b10000; R2731pair & op2126=0b100010 & op1620=0b10010 {
+:cvtf.uwd R1115, xR2731pair is R1115 & op0510=0x3F & op0004=0b10000; xR2731pair & op2126=0b100010 & op1620=0b10010 {
   if ((FPEC & 1) != 0) goto <fp_invalidated>;
   local unsigned_value:8 = zext(R1115);
-  R2731pair = int2float(unsigned_value);
+  xR2731pair = int2float(unsigned_value);
   <fp_invalidated>
 }
 
@@ -316,9 +321,9 @@ macro compare_float(fcond, reg2, reg1, result) {
 }
 
 # CVTF.WD reg2, reg3
-:cvtf.wd R1115, R2731pair is R1115 & op0510=0x3F & op0004=0b00000; R2731pair & op2126=0b100010 & op1620=0b10010 {
+:cvtf.wd R1115, xR2731pair is R1115 & op0510=0x3F & op0004=0b00000; xR2731pair & op2126=0b100010 & op1620=0b10010 {
   if ((FPEC & 1) != 0) goto <fp_invalidated>;
-  R2731pair = int2float(R1115);
+  xR2731pair = int2float(R1115);
   <fp_invalidated>
 }
 
@@ -330,9 +335,9 @@ macro compare_float(fcond, reg2, reg1, result) {
 }
 
 # DIVF.D reg1, reg2, reg3
-:divf.d R0004pair, R1115pair, R2731pair is R0004pair & op0510=0x3F & R1115pair; R2731pair & op2126=0b100011 & op1620=0b11110 {
+:divf.d R0004pair, R1115pair, xR2731pair is R0004pair & op0510=0x3F & R1115pair; xR2731pair & op2126=0b100011 & op1620=0b11110 {
   if ((FPEC & 1) != 0) goto <fp_invalidated>;
-  R2731pair = R1115pair f/ R0004pair;
+  xR2731pair = R1115pair f/ R0004pair;
   <fp_invalidated>
 }
 
@@ -344,18 +349,18 @@ macro compare_float(fcond, reg2, reg1, result) {
 }
 
 # FLOORF.DL reg2, reg3
-:floorf.dl R1115pair, R2731pair is R1115pair & op0510=0x3F & op0004=0b00011; R2731pair & op2126=0b100010 & op1620=0b10100 {
+:floorf.dl R1115pair, xR2731pair is R1115pair & op0510=0x3F & op0004=0b00011; xR2731pair & op2126=0b100010 & op1620=0b10100 {
   if ((FPEC & 1) != 0) goto <fp_invalidated>;
   local tmp:8 = floor(float2float(R1115pair));
-  R2731pair = trunc(tmp);
+  xR2731pair = trunc(tmp);
   <fp_invalidated>
 }
 
 # FLOORF.DUL reg2, reg3
-:floorf.dul R1115pair, R2731pair is R1115pair & op0510=0x3F & op0004=0b10011; R2731pair & op2126=0b100010 & op1620=0b10100 {
+:floorf.dul R1115pair, xR2731pair is R1115pair & op0510=0x3F & op0004=0b10011; xR2731pair & op2126=0b100010 & op1620=0b10100 {
   if ((FPEC & 1) != 0) goto <fp_invalidated>;
   local tmp:8 = floor(float2float(R1115pair));
-  R2731pair = trunc(tmp);
+  xR2731pair = trunc(tmp);
   <fp_invalidated>
 }
 
@@ -374,19 +379,267 @@ macro compare_float(fcond, reg2, reg1, result) {
 }
 
 # FLOORF.SL reg2, reg3
-:floorf.sl R1115, R2731pair is R1115 & op0510=0x3F & op0004=0b00011; R2731pair & op2126=0b100010 & op1620=0b00100 {
+:floorf.sl R1115, xR2731pair is R1115 & op0510=0x3F & op0004=0b00011; xR2731pair & op2126=0b100010 & op1620=0b00100 {
   if ((FPEC & 1) != 0) goto <fp_invalidated>;
   local tmp:8 = floor(float2float(R1115));
-  R2731pair = trunc(tmp);
+  xR2731pair = trunc(tmp);
   <fp_invalidated>
 }
 
 # FLOORF.SUL reg2, reg3
-:floorf.sul R1115, R2731pair is R1115 & op0510=0x3F & op0004=0b10011; R2731pair & op2126=0b100010 & op1620=0b00100 {
+:floorf.sul R1115, xR2731pair is R1115 & op0510=0x3F & op0004=0b10011; xR2731pair & op2126=0b100010 & op1620=0b00100 {
   if ((FPEC & 1) != 0) goto <fp_invalidated>;
   local tmp:8 = floor(float2float(R1115));
-  R2731pair = trunc(tmp);
+  xR2731pair = trunc(tmp);
   <fp_invalidated>
+}
+
+
+# Round-to-nearest, ties-to-even conversions. The p-code round() primitive
+# does NOT implement ties-to-even, so the tie cases are selected explicitly
+# (R01US0209EJ0220 2.4.4.68 p.354 for the scalar form).
+# SLEIGH has no floating-point literals: thresholds and limits are carried
+# as IEEE-754 bit patterns via sized locals. Masked-exception datapath
+# results follow the G4MH ROUNDF descriptions: NaN/negative inputs to the
+# unsigned forms produce 0, positive overflow (including +inf) produces the
+# unsigned maximum; signed forms saturate to the matching signed extreme,
+# NaN produces the signed minimum (pp.346/354).
+macro round_ieee_to_signed64(dest, source) {
+	local value:8 = source;
+	local half:8 = 0x3fe0000000000000;
+	local nhalf:8 = 0xbfe0000000000000;
+	local integer:8 = trunc(value);
+	local integral:8 = int2float(integer);
+	local fraction:8 = value f- integral;
+	if ((fraction f> half) || ((fraction f== half) && ((integer & 1) != 0))) goto <round_up>;
+	if ((fraction f< nhalf) || ((fraction f== nhalf) && ((integer & 1) != 0))) goto <round_down>;
+	goto <rounded>;
+	<round_up>
+	integer = integer + 1;
+	goto <rounded>;
+	<round_down>
+	integer = integer - 1;
+	<rounded>
+	dest = integer;
+}
+
+macro round_f64_to_word_ne(dest, source, unsigned_mode) {
+	local value:8 = source;
+	local unsigned:1 = unsigned_mode;
+	local maximum:4 = 0x7fffffff;
+	local minimum:4 = 0x80000000;
+	local positive_limit:8 = 0x41e0000000000000;
+	local negative_limit:8 = 0xc1e0000000000000;
+	if (unsigned == 0) goto <limits_ready>;
+	maximum = 0xffffffff;
+	minimum = 0;
+	positive_limit = 0x41f0000000000000;
+	negative_limit = 0;
+	<limits_ready>
+	dest = minimum;
+	if (nan(value)) goto <done>;
+	if (value f< negative_limit) goto <done>;
+	if (!(value f< positive_limit)) goto <saturate_upper>;
+	local integer:8 = 0;
+	round_ieee_to_signed64(integer, value);
+	if (unsigned != 0) goto <unsigned_value>;
+	if (integer s> 0x7fffffff) goto <saturate_upper>;
+	goto <in_range>;
+	<unsigned_value>
+	if (integer > 0xffffffff) goto <saturate_upper>;
+	<in_range>
+	dest = integer:4;
+	goto <done>;
+	<saturate_upper>
+	dest = maximum;
+	<done>
+}
+
+
+macro round_f64_to_long_ne(dest, source) {
+	local value:8 = source;
+	local positive_limit:8 = 0x43e0000000000000;
+	local negative_limit:8 = 0xc3e0000000000000;
+	dest = 0x8000000000000000;
+	if (nan(value)) goto <done>;
+	if (value f< negative_limit) goto <done>;
+	if (!(value f< positive_limit)) goto <maximum>;
+	round_ieee_to_signed64(dest, value);
+	goto <done>;
+	<maximum>
+	dest = 0x7fffffffffffffff;
+	<done>
+}
+
+macro round_f64_to_ulong_ne(dest, source) {
+	local value:8 = source;
+	local positive_limit:8 = 0x43f0000000000000;
+	local signed_limit:8 = 0x43e0000000000000;
+	dest = 0;
+	if (nan(value)) goto <done>;
+	if (value f< 0) goto <done>;
+	if (!(value f< positive_limit)) goto <maximum>;
+	if (!(value f< signed_limit)) goto <upper_half>;
+	round_ieee_to_signed64(dest, value);
+	goto <done>;
+	<upper_half>
+	# Binary64 spacing is at least 1024 here: every input is integral.
+	local low:8 = value f- signed_limit;
+	dest = trunc(low) + 0x8000000000000000;
+	goto <done>;
+	<maximum>
+	dest = 0xffffffffffffffff;
+	<done>
+}
+
+# ROUNDF has a fixed nearest-even mode, independent of FPSR.RM.
+# Invalid (V) supersedes inexact (I); FS-clear subnormal inputs raise E.
+# Numeric limits and exception rules: R01US0209EJ0220 pp.340-355;
+# input flushing/status precedence: R01US0123EJ0140 §§3.4/6.1.
+macro fp_round_integer(result, raised, flushed, source, unsigned_mode, wide_mode, double_source) {
+	local value:8 = source;
+	local unsigned:1 = unsigned_mode;
+	local wide:1 = wide_mode;
+	local is_double:1 = double_source;
+	local magnitude:8 = value & 0x7fffffffffffffff;
+	local normal_limit:8 = 0x0010000000000000;
+	if (is_double != 0) goto <normal_limit_ready>;
+	normal_limit = 0x3810000000000000;
+	<normal_limit_ready>
+	raised = 0;
+	flushed = 0;
+	if ((magnitude == 0) || (magnitude >= normal_limit)) goto <input_ready>;
+	if ((FPSR & 0x20000) != 0) goto <flush_input>;
+	raised = 0x20;
+	result = 0;
+	goto <done>;
+	<flush_input>
+	flushed = 1;
+	value = value & 0x8000000000000000;
+	<input_ready>
+	if (wide != 0) goto <wide_result>;
+	local word:4 = 0;
+	round_f64_to_word_ne(word, value, unsigned);
+	result = sext(word);
+	if (unsigned == 0) goto <numeric_ready>;
+	result = zext(word);
+	goto <numeric_ready>;
+	<wide_result>
+	if (unsigned != 0) goto <unsigned_result>;
+	round_f64_to_long_ne(result, value);
+	goto <numeric_ready>;
+	<unsigned_result>
+	round_f64_to_ulong_ne(result, value);
+	<numeric_ready>
+	if (nan(value)) goto <invalid>;
+	if ((unsigned != 0) && (value f< 0)) goto <invalid>;
+	if ((wide != 0) && (unsigned != 0)) goto <unsigned_wide_range>;
+	local positive_limit:8 = 0x43e0000000000000;
+	local negative_limit:8 = 0xc3e0000000000000;
+	if (!(value f< positive_limit)) goto <invalid>;
+	if (value f< negative_limit) goto <invalid>;
+	if (wide != 0) goto <in_range>;
+	local integer:8 = 0;
+	round_ieee_to_signed64(integer, value);
+	if (unsigned != 0) goto <unsigned_word_range>;
+	if ((integer s< -0x80000000) || (integer s> 0x7fffffff)) goto <invalid>;
+	goto <in_range>;
+	<unsigned_word_range>
+	if (integer > 0xffffffff) goto <invalid>;
+	goto <in_range>;
+	<unsigned_wide_range>
+	local unsigned_limit:8 = 0x43f0000000000000;
+	if (!(value f< unsigned_limit)) goto <invalid>;
+	<in_range>
+	local converted:8 = int2float(result);
+	if ((unsigned == 0) || ((result & 0x8000000000000000) == 0)) goto <conversion_ready>;
+	local folded:8 = (result >> 1) | (result & 1);
+	converted = int2float(folded);
+	local two:8 = 0x4000000000000000;
+	converted = converted f* two;
+	<conversion_ready>
+	raised = zext((converted f!= value) || (flushed != 0));
+	goto <done>;
+	<invalid>
+	raised = 0x10;
+	<done>
+}
+
+:roundf.sw R1115, R2731 is R1115 & op0510=0x3F & op0004=0b00000; R2731 & op2126=0b100010 & op1620=0b00000 {
+	if ((FPEC & 1) != 0) goto <done>;
+	local result:8 = 0;
+	local raised:4 = 0;
+	local flushed:4 = 0;
+	fp_round_integer(result, raised, flushed, float2float(R1115), 0:1, 0:1, 0:1);
+	local word:4 = result:4;
+	fp_commit_result(R2731, word, raised, flushed, inst_start, inst_next);
+	<done>
+}
+:roundf.suw R1115, R2731 is R1115 & op0510=0x3F & op0004=0b10000; R2731 & op2126=0b100010 & op1620=0b00000 {
+	if ((FPEC & 1) != 0) goto <done>;
+	local result:8 = 0;
+	local raised:4 = 0;
+	local flushed:4 = 0;
+	fp_round_integer(result, raised, flushed, float2float(R1115), 1:1, 0:1, 0:1);
+	local word:4 = result:4;
+	fp_commit_result(R2731, word, raised, flushed, inst_start, inst_next);
+	<done>
+}
+:roundf.sl R1115, xR2731pair is R1115 & op0510=0x3F & op0004=0b00000; xR2731pair & op2126=0b100010 & op1620=0b00100 {
+	if ((FPEC & 1) != 0) goto <done>;
+	local result:8 = 0;
+	local raised:4 = 0;
+	local flushed:4 = 0;
+	fp_round_integer(result, raised, flushed, float2float(R1115), 0:1, 1:1, 0:1);
+	fp_commit_result(xR2731pair, result, raised, flushed, inst_start, inst_next);
+	<done>
+}
+:roundf.sul R1115, xR2731pair is R1115 & op0510=0x3F & op0004=0b10000; xR2731pair & op2126=0b100010 & op1620=0b00100 {
+	if ((FPEC & 1) != 0) goto <done>;
+	local result:8 = 0;
+	local raised:4 = 0;
+	local flushed:4 = 0;
+	fp_round_integer(result, raised, flushed, float2float(R1115), 1:1, 1:1, 0:1);
+	fp_commit_result(xR2731pair, result, raised, flushed, inst_start, inst_next);
+	<done>
+}
+:roundf.dw R1115pair, R2731 is R1115pair & op0510=0x3F & op0004=0b00000; R2731 & op2126=0b100010 & op1620=0b10000 {
+	if ((FPEC & 1) != 0) goto <done>;
+	local result:8 = 0;
+	local raised:4 = 0;
+	local flushed:4 = 0;
+	fp_round_integer(result, raised, flushed, R1115pair, 0:1, 0:1, 1:1);
+	local word:4 = result:4;
+	fp_commit_result(R2731, word, raised, flushed, inst_start, inst_next);
+	<done>
+}
+:roundf.duw R1115pair, R2731 is R1115pair & op0510=0x3F & op0004=0b10000; R2731 & op2126=0b100010 & op1620=0b10000 {
+	if ((FPEC & 1) != 0) goto <done>;
+	local result:8 = 0;
+	local raised:4 = 0;
+	local flushed:4 = 0;
+	fp_round_integer(result, raised, flushed, R1115pair, 1:1, 0:1, 1:1);
+	local word:4 = result:4;
+	fp_commit_result(R2731, word, raised, flushed, inst_start, inst_next);
+	<done>
+}
+:roundf.dl R1115pair, xR2731pair is R1115pair & op0510=0x3F & op0004=0b00000; xR2731pair & op2126=0b100010 & op1620=0b10100 {
+	if ((FPEC & 1) != 0) goto <done>;
+	local result:8 = 0;
+	local raised:4 = 0;
+	local flushed:4 = 0;
+	fp_round_integer(result, raised, flushed, R1115pair, 0:1, 1:1, 1:1);
+	fp_commit_result(xR2731pair, result, raised, flushed, inst_start, inst_next);
+	<done>
+}
+:roundf.dul R1115pair, xR2731pair is R1115pair & op0510=0x3F & op0004=0b10000; xR2731pair & op2126=0b100010 & op1620=0b10100 {
+	if ((FPEC & 1) != 0) goto <done>;
+	local result:8 = 0;
+	local raised:4 = 0;
+	local flushed:4 = 0;
+	fp_round_integer(result, raised, flushed, R1115pair, 1:1, 1:1, 1:1);
+	fp_commit_result(xR2731pair, result, raised, flushed, inst_start, inst_next);
+	<done>
 }
 
 # FLOORF.SUW reg2, reg3
@@ -412,11 +665,11 @@ macro compare_float(fcond, reg2, reg1, result) {
 @endif
 
 # MAXF.D reg1, reg2, reg3
-:maxf.d R0004pair, R1115pair, R2731pair is R0004pair & op0510=0x3F & R1115pair; R2731pair & op2126=0b100011 & op1620=0b11000 {
+:maxf.d R0004pair, R1115pair, xR2731pair is R0004pair & op0510=0x3F & R1115pair; xR2731pair & op2126=0b100011 & op1620=0b11000 {
   if ((FPEC & 1) != 0) goto <fp_invalidated>;
   tmp_cond:1 = R1115pair f> R0004pair;
-  # R2731pair = (R1115pair * zext(tmp_cond == 1)) | (R0004pair * zext(tmp_cond == 0) );
-  condition(R2731pair, tmp_cond, R1115pair, R0004pair);
+  # xR2731pair = (R1115pair * zext(tmp_cond == 1)) | (R0004pair * zext(tmp_cond == 0) );
+  condition(xR2731pair, tmp_cond, R1115pair, R0004pair);
   <fp_invalidated>
 }
 
@@ -430,11 +683,11 @@ macro compare_float(fcond, reg2, reg1, result) {
 }
 
 # MINF.D reg1, reg2, reg3
-:minf.d R0004pair, R1115pair, R2731pair is R0004pair & op0510=0x3F & R1115pair; R2731pair & op2126=0b100011 & op1620=0b11010 {
+:minf.d R0004pair, R1115pair, xR2731pair is R0004pair & op0510=0x3F & R1115pair; xR2731pair & op2126=0b100011 & op1620=0b11010 {
   if ((FPEC & 1) != 0) goto <fp_invalidated>;
   tmp_cond:1 = R1115pair f< R0004pair;
-  # R2731pair = (R1115pair * zext(tmp_cond == 1)) | (R0004pair * zext(tmp_cond == 0) );
-  condition(R2731pair, tmp_cond, R1115pair, R0004pair);
+  # xR2731pair = (R1115pair * zext(tmp_cond == 1)) | (R0004pair * zext(tmp_cond == 0) );
+  condition(xR2731pair, tmp_cond, R1115pair, R0004pair);
   <fp_invalidated>
 }
 
@@ -455,9 +708,9 @@ macro compare_float(fcond, reg2, reg1, result) {
 @endif
 
 # MULF.D reg1, reg2, reg3
-:mulf.d R0004pair, R1115pair, R2731pair is R0004pair & op0510=0x3F & R1115pair; R2731pair & op2126=0b100011 & op1620=0b10100 {
+:mulf.d R0004pair, R1115pair, xR2731pair is R0004pair & op0510=0x3F & R1115pair; xR2731pair & op2126=0b100011 & op1620=0b10100 {
   if ((FPEC & 1) != 0) goto <fp_invalidated>;
-  R2731pair = R1115pair f* R0004pair;
+  xR2731pair = R1115pair f* R0004pair;
   <fp_invalidated>
 }
 
@@ -469,9 +722,9 @@ macro compare_float(fcond, reg2, reg1, result) {
 }
 
 # NEGF.D reg2, reg3
-:negf.d R1115pair, R2731pair is R1115pair & op0510=0x3F & op0004=0b00001; R2731pair & op2126=0b100010 & op1620=0b11000 {
+:negf.d R1115pair, xR2731pair is R1115pair & op0510=0x3F & op0004=0b00001; xR2731pair & op2126=0b100010 & op1620=0b11000 {
   if ((FPEC & 1) != 0) goto <fp_invalidated>;
-  R2731pair = f- R1115pair;
+  xR2731pair = f- R1115pair;
   <fp_invalidated>
 }
 
@@ -496,37 +749,41 @@ macro compare_float(fcond, reg2, reg1, result) {
 @endif
 
 # RECIPF.D reg2, reg3
-:recipf.d R1115pair, R2731pair is R1115pair & op0510=0x3F & op0004=0b00001; R2731pair & op2126=0b100010 & op1620=0b11110 {
+:recipf.d R1115pair, xR2731pair is R1115pair & op0510=0x3F & op0004=0b00001; xR2731pair & op2126=0b100010 & op1620=0b11110 {
   if ((FPEC & 1) != 0) goto <fp_invalidated>;
-  R2731pair = 1 f/ R1115pair;
+  local f_one_d:8 = 0x3ff0000000000000;
+  xR2731pair = f_one_d f/ R1115pair;
   <fp_invalidated>
 }
 
 # RECIPF.S reg2, reg3
 :recipf.s R1115, R2731 is R1115 & op0510=0x3F & op0004=0b00001; R2731 & op2126=0b100010 & op1620=0b01110 {
   if ((FPEC & 1) != 0) goto <fp_invalidated>;
-  R2731 = 1 f/ R1115;
+  local f_one:4 = 0x3f800000;
+  R2731 = f_one f/ R1115;
   <fp_invalidated>
 }
 
 # RSQRTF.D reg2, reg3
-:rsqrtf.d R1115pair, R2731pair is R1115pair & op0510=0x3F & op0004=0b00010; R2731pair & op2126=0b100010 & op1620=0b11110 {
+:rsqrtf.d R1115pair, xR2731pair is R1115pair & op0510=0x3F & op0004=0b00010; xR2731pair & op2126=0b100010 & op1620=0b11110 {
   if ((FPEC & 1) != 0) goto <fp_invalidated>;
-  R2731pair = 1 f/ sqrt(R1115pair);
+  local f_one_d2:8 = 0x3ff0000000000000;
+  xR2731pair = f_one_d2 f/ sqrt(R1115pair);
   <fp_invalidated>
 }
 
 # RSQRTF.S reg2, reg3
 :rsqrtf.s R1115, R2731 is R1115 & op0510=0x3F & op0004=0b00010; R2731 & op2126=0b100010 & op1620=0b01110 {
   if ((FPEC & 1) != 0) goto <fp_invalidated>;
-  R2731 = 1 f/ sqrt(R1115);
+  local f_one2:4 = 0x3f800000;
+  R2731 = f_one2 f/ sqrt(R1115);
   <fp_invalidated>
 }
 
 # SQRTF.D reg2, reg3
-:sqrtf.d R1115pair, R2731pair is R1115pair & op0510=0x3F & op0004=0b00000; R2731pair & op2126=0b100010 & op1620=0b11110 {
+:sqrtf.d R1115pair, xR2731pair is R1115pair & op0510=0x3F & op0004=0b00000; xR2731pair & op2126=0b100010 & op1620=0b11110 {
   if ((FPEC & 1) != 0) goto <fp_invalidated>;
-  R2731pair = sqrt(R1115pair);
+  xR2731pair = sqrt(R1115pair);
   <fp_invalidated>
 }
 
@@ -539,9 +796,9 @@ macro compare_float(fcond, reg2, reg1, result) {
 
 
 # SUBF.D reg1, reg2, reg3
-:subf.d R0004pair, R1115pair, R2731pair is R0004pair & op0510=0x3F & R1115pair; R2731pair & op2126=0b100011 & op1620=0b10010 {
+:subf.d R0004pair, R1115pair, xR2731pair is R0004pair & op0510=0x3F & R1115pair; xR2731pair & op2126=0b100011 & op1620=0b10010 {
   if ((FPEC & 1) != 0) goto <fp_invalidated>;
-  R2731pair = R1115pair f- R0004pair;
+  xR2731pair = R1115pair f- R0004pair;
   <fp_invalidated>
 }
 
@@ -559,16 +816,16 @@ macro compare_float(fcond, reg2, reg1, result) {
 }
 
 # TRNCF.DL reg2, reg3
-:trncf.dl R1115pair, R2731pair is R1115pair & op0510=0x3F & op0004=0b00001; R2731pair & op2126=0b100010 & op1620=0b10100 {
+:trncf.dl R1115pair, xR2731pair is R1115pair & op0510=0x3F & op0004=0b00001; xR2731pair & op2126=0b100010 & op1620=0b10100 {
   if ((FPEC & 1) != 0) goto <fp_invalidated>;
-  R2731pair = trunc(R1115pair);
+  xR2731pair = trunc(R1115pair);
   <fp_invalidated>
 }
 
 # TRNCF.DUL reg2, reg3
-:trncf.dul R1115pair, R2731pair is R1115pair & op0510=0x3F & op0004=0b10001; R2731pair & op2126=0b100010 & op1620=0b10100 {
+:trncf.dul R1115pair, xR2731pair is R1115pair & op0510=0x3F & op0004=0b10001; xR2731pair & op2126=0b100010 & op1620=0b10100 {
   if ((FPEC & 1) != 0) goto <fp_invalidated>;
-  R2731pair = trunc(R1115pair);
+  xR2731pair = trunc(R1115pair);
   <fp_invalidated>
 }
 
@@ -587,16 +844,16 @@ macro compare_float(fcond, reg2, reg1, result) {
 }
 
 # TRNCF.SL reg2, reg3
-:trncf.sl R1115, R2731pair is R1115 & op0510=0x3F & op0004=0b00001; R2731pair & op2126=0b100010 & op1620=0b00100 {
+:trncf.sl R1115, xR2731pair is R1115 & op0510=0x3F & op0004=0b00001; xR2731pair & op2126=0b100010 & op1620=0b00100 {
   if ((FPEC & 1) != 0) goto <fp_invalidated>;
-  R2731pair = trunc(R1115);
+  xR2731pair = trunc(R1115);
   <fp_invalidated>
 }
 
 # TRNCF.SUL reg2, reg3
-:trncf.sul R1115, R2731pair is R1115 & op0510=0x3F & op0004=0b10001; R2731pair & op2126=0b100010 & op1620=0b00100 {
+:trncf.sul R1115, xR2731pair is R1115 & op0510=0x3F & op0004=0b10001; xR2731pair & op2126=0b100010 & op1620=0b00100 {
   if ((FPEC & 1) != 0) goto <fp_invalidated>;
-  R2731pair = trunc(R1115);
+  xR2731pair = trunc(R1115);
   <fp_invalidated>
 }
 

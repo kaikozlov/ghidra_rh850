@@ -21,11 +21,12 @@ macro fp32_shift_right_jam(result, value, distance) {
 # The product has at most 48 significant bits. Alignment retains every bit
 # needed for cancellation; discarded distant bits are represented by sticky
 # bit 0. One final guard/round/sticky decision rounds the exact fused value.
-macro fp32_fused(result, raised, flushed, source_a, source_b, source_c, operation, control) {
+macro fp32_fused(result, raised, flushed, source_a, source_b, source_c, operation, control, is_vector) {
   local a:4 = source_a;
   local b:4 = source_b;
   local c:4 = source_c;
   local action:4 = operation;
+  local vector_mode:4 = is_vector;
   local aa:4 = a & 0x7fffffff;
   local bb:4 = b & 0x7fffffff;
   local cc:4 = c & 0x7fffffff;
@@ -40,6 +41,10 @@ macro fp32_fused(result, raised, flushed, source_a, source_b, source_c, operatio
   local subnormal:1 = ((aa != 0) && (aa < 0x00800000))
       || ((bb != 0) && (bb < 0x00800000)) || ((cc != 0) && (cc < 0x00800000));
   if (!subnormal) goto <classified_inputs>;
+  # R01US0123EJ0140 3.4 FPSR.FS: with FS SET, subnormal inputs/results are
+  # flushed WITHOUT the unimplemented-operation exception; with FS CLEAR they
+  # raise E (raised bit 0x20 -> XC bit 15), which the commit layer always
+  # treats as trapping.
   if ((control & 0x20000) != 0) goto <flush_inputs>;
     raised = 0x20;
     goto <finished>;
@@ -155,21 +160,39 @@ macro fp32_fused(result, raised, flushed, source_a, source_b, source_c, operatio
   goto <finished>;
 
   <underflow>
+  # A subnormal RESULT with FS CLEAR is equally an unimplemented-operation
+  # exception (same FPSR.FS rule); with FS SET the flush path below runs.
   if ((control & 0x20000) != 0) goto <flush_result>;
     raised = 0x20;
     goto <finished>;
   <flush_result>
   raised = 2;
+  # Inexact accompanies the flushed underflow only when the UNDERFLOW trap
+  # is disabled (R01US0123EJ0140 6.1). Primary G3M FPSR bitmap (3.4):
+  # XE = bits 9-5 (V,Z,O,U,I) so EU = bit 6 = 0x40.
   if ((control & 0x40) != 0) goto <underflow_flags_ready>;
     raised = raised | 1;
   <underflow_flags_ready>
   result = sign << 31;
+  # Flush value per rounding mode (R01UH0770 Table 3.123): RP flushes a
+  # positive subnormal result up to the minimum normal, RM a negative one
+  # down; every other directed mode keeps the signed zero.
   if (((mode == 2) && (sign == 0)) || ((mode == 3) && (sign != 0))) goto <minimum_normal>;
+  if (mode != 0) goto <finished>;
 @if defined(V850E3)
-  if ((mode != 0) || ((control & 0x800000) == 0)) goto <finished>;
+  # RN + FN flush-to-nearest (R01UH0770 Table 3.124): at or above HALF the
+  # minimum normal the result flushes up to the minimum normal; below that,
+  # and always with FN = 0, it flushes to the signed zero. This rule is
+  # shared by the scalar FPU and the SIMD lanes, so the is_vector gate sits
+  # AFTER it.
+  if ((control & 0x800000) == 0) goto <finished>;
   if (exponent s>= -127) goto <minimum_normal>;
-  # G3M 6.1.11: the exact quarter-minimum cancellation boundary flushes
+  # G3M 6.1.11: the exact QUARTER-minimum cancellation boundary flushes
   # upward for subtract, or add of a negative addend, rather than to zero.
+  # The FCC2 vector profile has NO such special case (R01UH0770 Table 3.124:
+  # FS|FN|RN with an exact quarter-minimum result flushes to +0), so only
+  # this rule is gated off for SIMD lanes via is_vector.
+  if (vector_mode != 0) goto <finished>;
   if ((exponent == -128) && (magnitude == 0x2000000000000000)
       && (((action & 1) != 0) || ((c & 0x80000000) != 0))) goto <minimum_normal>;
 @endif
@@ -222,7 +245,26 @@ macro fp32_fused(result, raised, flushed, source_a, source_b, source_c, operatio
   <invalid>
     raised = 0x10;
   <nan_result>
+  if (vector_mode == 0) goto <nan_scalar>;
+    # FCC2 vector profile (R01UH0770 Table 3.125): any S-NaN input, and any
+    # invalid operation on real numbers, produces the canonical 7fffffff;
+    # only Q-NaN-only inputs propagate a payload, selected by the
+    # architectural priority wreg2 > wreg1 > wreg3 (source_a = wreg2,
+    # source_b = wreg1, source_c = wreg3). The invalid cause has already
+    # been raised on entry to <invalid>, so it takes precedence here.
+    if ((raised & 0x10) != 0) goto <nan_canonical>;
+    if ((source_a & 0x7fffffff) > 0x7f800000) goto <nan_take_a>;
+    if ((source_b & 0x7fffffff) > 0x7f800000) goto <nan_take_b>;
+    if ((source_c & 0x7fffffff) > 0x7f800000) goto <nan_take_c>;
+    goto <nan_canonical>;
+    <nan_take_a> result = source_a; goto <nan_picked>;
+    <nan_take_b> result = source_b; goto <nan_picked>;
+    <nan_take_c> result = source_c; goto <nan_picked>;
+    <nan_canonical> result = 0x7fffffff;
+    goto <nan_picked>;
+    <nan_scalar>
     result = 0x7fc00000;
+    <nan_picked>
   <finished>
   # Input flushing is inexact unless invalid/unimplemented or a QNaN result
   # supersedes the arithmetic (G3M 6.1.6; E2M Part 4, 5.3.1).

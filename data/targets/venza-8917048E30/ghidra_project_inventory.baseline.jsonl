@@ -729,7 +729,7 @@
 {"record":"function","entry":{"space":"ram","offset":"0000b212"},"body_ranges":[{"min":{"space":"ram","offset":"0000b212"},"max":{"space":"ram","offset":"0000b365"}}],"body_address_count":340,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":null,"name_source":"DEFAULT","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
 {"record":"function","entry":{"space":"ram","offset":"0000b366"},"body_ranges":[{"min":{"space":"ram","offset":"0000b366"},"max":{"space":"ram","offset":"0000b3fd"}}],"body_address_count":152,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":null,"name_source":"DEFAULT","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
 {"record":"function","entry":{"space":"ram","offset":"0000b3fe"},"body_ranges":[{"min":{"space":"ram","offset":"0000b3fe"},"max":{"space":"ram","offset":"0000b411"}}],"body_address_count":20,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":null,"name_source":"DEFAULT","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
-{"record":"function","entry":{"space":"ram","offset":"0000c974"},"body_ranges":[{"min":{"space":"ram","offset":"0000c7b4"},"max":{"space":"ram","offset":"0000c8b9"}},{"min":{"space":"ram","offset":"0000c8e6"},"max":{"space":"ram","offset":"0000c9f1"}}],"body_address_count":530,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":null,"name_source":"DEFAULT","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
+{"record":"function","entry":{"space":"ram","offset":"0000c974"},"body_ranges":[{"min":{"space":"ram","offset":"0000c7b4"},"max":{"space":"ram","offset":"0000c7d5"}},{"min":{"space":"ram","offset":"0000c890"},"max":{"space":"ram","offset":"0000c8b9"}},{"min":{"space":"ram","offset":"0000c974"},"max":{"space":"ram","offset":"0000c9a3"}}],"body_address_count":124,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":null,"name_source":"DEFAULT","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
 {"record":"function","entry":{"space":"ram","offset":"0000f556"},"body_ranges":[{"min":{"space":"ram","offset":"0000f556"},"max":{"space":"ram","offset":"0000f573"}},{"min":{"space":"ram","offset":"0000f575"},"max":{"space":"ram","offset":"0000f58f"}},{"min":{"space":"ram","offset":"0000f591"},"max":{"space":"ram","offset":"0000f599"}}],"body_address_count":66,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":null,"name_source":"DEFAULT","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
 {"record":"function","entry":{"space":"ram","offset":"0000f650"},"body_ranges":[{"min":{"space":"ram","offset":"0000f650"},"max":{"space":"ram","offset":"0000f67b"}}],"body_address_count":44,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":null,"name_source":"DEFAULT","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
 {"record":"function","entry":{"space":"ram","offset":"0000f67c"},"body_ranges":[{"min":{"space":"ram","offset":"0000f67c"},"max":{"space":"ram","offset":"0000f693"}}],"body_address_count":24,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":null,"name_source":"DEFAULT","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
@@ -8348,8 +8348,7 @@
 {"record":"function","entry":{"space":"ram","offset":"000db11a"},"body_ranges":[{"min":{"space":"ram","offset":"000db11a"},"max":{"space":"ram","offset":"000db175"}}],"body_address_count":92,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":null,"name_source":"DEFAULT","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
 {"record":"function","entry":{"space":"ram","offset":"000db176"},"body_ranges":[{"min":{"space":"ram","offset":"000db176"},"max":{"space":"ram","offset":"000db1c3"}}],"body_address_count":78,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":null,"name_source":"DEFAULT","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
 {"record":"function","entry":{"space":"ram","offset":"000db1c4"},"body_ranges":[{"min":{"space":"ram","offset":"000db1c4"},"max":{"space":"ram","offset":"000db297"}}],"body_address_count":212,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":null,"name_source":"DEFAULT","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
-{"record":"function","entry":{"space":"ram","offset":"000db298"},"body_ranges":[{"min":{"space":"ram","offset":"000db298"},"max":{"space":"ram","offset":"000db37f"}}],"body_address_count":232,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":null,"name_source":"DEFAULT","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
-{"record":"function","entry":{"space":"ram","offset":"000db380"},"body_ranges":[{"min":{"space":"ram","offset":"000db380"},"max":{"space":"ram","offset":"000db39b"}}],"body_address_count":28,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":null,"name_source":"DEFAULT","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
+{"record":"function","entry":{"space":"ram","offset":"000db298"},"body_ranges":[{"min":{"space":"ram","offset":"000db298"},"max":{"space":"ram","offset":"000db39b"}}],"body_address_count":260,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":null,"name_source":"DEFAULT","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
 {"record":"function","entry":{"space":"ram","offset":"000db39c"},"body_ranges":[{"min":{"space":"ram","offset":"000db39c"},"max":{"space":"ram","offset":"000db3dd"}}],"body_address_count":66,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":null,"name_source":"DEFAULT","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
 {"record":"function","entry":{"space":"ram","offset":"000db3de"},"body_ranges":[{"min":{"space":"ram","offset":"000db3de"},"max":{"space":"ram","offset":"000db3f7"}}],"body_address_count":26,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":null,"name_source":"DEFAULT","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
 {"record":"function","entry":{"space":"ram","offset":"000db3f8"},"body_ranges":[{"min":{"space":"ram","offset":"000db3f8"},"max":{"space":"ram","offset":"000db405"}}],"body_address_count":14,"is_thunk":false,"thunk_target":{"space":"NO_ADDRESS","offset":null},"is_inline":false,"is_external":false,"user_name":null,"name_source":"DEFAULT","signature_source":"DEFAULT","calling_convention":"__stdcall","return":{"source":"DEFAULT","formal_type":{"path":"/undefined","length":1},"data_type":{"path":"/undefined","length":1},"storage":"<UNASSIGNED>"},"parameters":[],"varargs":false,"no_return":false,"custom_storage":false,"stack_purge_size":2147483647}
@@ -10502,12 +10501,9 @@
 {"record":"bookmark","address":{"space":"ram","offset":"0000c278"},"type":"Analysis","category":"Address Table","comment":"Address table[3] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"0000c370"},"type":"Analysis","category":"Address Table","comment":"Address table[3] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"0000c7ce"},"type":"Error","category":"Bad Instruction","comment":"Could not follow disassembly flow into non-existing memory at fffb657a (flow from 0000c7ce)"}
-{"record":"bookmark","address":{"space":"ram","offset":"0000c820"},"type":"Error","category":"Bad Instruction","comment":"Could not follow disassembly flow into non-existing memory at ffed5da2 (flow from 0000c820)"}
-{"record":"bookmark","address":{"space":"ram","offset":"0000c84e"},"type":"Error","category":"Bad Instruction","comment":"Could not follow disassembly flow into non-existing memory at fff151f8 (flow from 0000c84e)"}
+{"record":"bookmark","address":{"space":"ram","offset":"0000c7d6"},"type":"Error","category":"Bad Instruction","comment":"Unable to resolve constructor at 0000c7d6 (flow from 0000c7d4)"}
 {"record":"bookmark","address":{"space":"ram","offset":"0000c8ba"},"type":"Error","category":"Bad Instruction","comment":"Unable to resolve constructor at 0000c8ba (flow from 0000c8b8)"}
-{"record":"bookmark","address":{"space":"ram","offset":"0000c930"},"type":"Error","category":"Bad Instruction","comment":"Could not follow disassembly flow into non-existing memory at fff166b6 (flow from 0000c930)"}
-{"record":"bookmark","address":{"space":"ram","offset":"0000c9ac"},"type":"Error","category":"Bad Instruction","comment":"Could not follow disassembly flow into non-existing memory at ffe11efa (flow from 0000c9ac)"}
-{"record":"bookmark","address":{"space":"ram","offset":"0000c9f2"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 0000c9f0)"}
+{"record":"bookmark","address":{"space":"ram","offset":"0000c9a4"},"type":"Error","category":"Bad Instruction","comment":"Unable to resolve constructor at 0000c9a4 (flow from 0000c9a2)"}
 {"record":"bookmark","address":{"space":"ram","offset":"0000f574"},"type":"Error","category":"Bad Instruction","comment":"Failed to disassemble at 0000f574 due to conflicting instruction (flow from 0000f574)"}
 {"record":"bookmark","address":{"space":"ram","offset":"0000f590"},"type":"Error","category":"Bad Instruction","comment":"Failed to disassemble at 0000f590 due to conflicting instruction (flow from 0000f590)"}
 {"record":"bookmark","address":{"space":"ram","offset":"0000f596"},"type":"Error","category":"Bad Instruction","comment":"Maximum run of repeated byte instructions exceeded (flow from 0000f592)"}
@@ -10516,29 +10512,62 @@
 {"record":"bookmark","address":{"space":"ram","offset":"0000f72c"},"type":"Error","category":"Bad Instruction","comment":"Maximum run of repeated byte instructions exceeded (flow from 0000f728)"}
 {"record":"bookmark","address":{"space":"ram","offset":"0000fd04"},"type":"Error","category":"Bad Instruction","comment":"Maximum run of repeated byte instructions exceeded (flow from 0000fd00)"}
 {"record":"bookmark","address":{"space":"ram","offset":"000101f8"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"000101fc"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
 {"record":"bookmark","address":{"space":"ram","offset":"000104e0"},"type":"Error","category":"Bad Instruction","comment":"Failed to disassemble at 000104e0 due to conflicting instruction at 000104e2 (flow from 000104da)"}
 {"record":"bookmark","address":{"space":"ram","offset":"00010896"},"type":"Error","category":"Bad Instruction","comment":"Failed to disassemble at 00010896 due to conflicting instruction at 00010898 (flow from 00010890)"}
 {"record":"bookmark","address":{"space":"ram","offset":"000115a0"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 0001159e)"}
 {"record":"bookmark","address":{"space":"ram","offset":"00011750"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 0001174e)"}
 {"record":"bookmark","address":{"space":"ram","offset":"0001186c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 0001186a)"}
 {"record":"bookmark","address":{"space":"ram","offset":"0001188c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00011890"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00011894"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00011898"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"0001189c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
 {"record":"bookmark","address":{"space":"ram","offset":"000118b0"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"000118b4"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"000118b8"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"000118bc"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"000118c0"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
 {"record":"bookmark","address":{"space":"ram","offset":"000118d8"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 000118d6)"}
 {"record":"bookmark","address":{"space":"ram","offset":"00011908"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00011906)"}
 {"record":"bookmark","address":{"space":"ram","offset":"00011914"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00011912)"}
 {"record":"bookmark","address":{"space":"ram","offset":"00011a30"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00011a34"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00011a38"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00011a3c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00011a40"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
 {"record":"bookmark","address":{"space":"ram","offset":"00011c40"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00011c44"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00011c48"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00011c4c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00011c50"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
 {"record":"bookmark","address":{"space":"ram","offset":"00011c78"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00011c76)"}
 {"record":"bookmark","address":{"space":"ram","offset":"00011c88"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00011c86)"}
 {"record":"bookmark","address":{"space":"ram","offset":"00011c9c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00011c9a)"}
 {"record":"bookmark","address":{"space":"ram","offset":"00011d68"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00011d6c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00011d70"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00011d74"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00011d78"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
 {"record":"bookmark","address":{"space":"ram","offset":"00011e30"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00011e2e)"}
 {"record":"bookmark","address":{"space":"ram","offset":"00011e58"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00011e56)"}
 {"record":"bookmark","address":{"space":"ram","offset":"00011ee8"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00011eec"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00011ef0"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00011ef4"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00011ef8"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
 {"record":"bookmark","address":{"space":"ram","offset":"00011fb0"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00011fae)"}
 {"record":"bookmark","address":{"space":"ram","offset":"00011fd8"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00011fd6)"}
 {"record":"bookmark","address":{"space":"ram","offset":"0001208c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012090"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012094"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012098"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"0001209c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
 {"record":"bookmark","address":{"space":"ram","offset":"000121e4"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"000121e8"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"000121ec"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"000121f0"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"000121f4"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
 {"record":"bookmark","address":{"space":"ram","offset":"00012288"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012286)"}
 {"record":"bookmark","address":{"space":"ram","offset":"0001229c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 0001229a)"}
 {"record":"bookmark","address":{"space":"ram","offset":"0001233c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 0001233a)"}
@@ -10546,16 +10575,429 @@
 {"record":"bookmark","address":{"space":"ram","offset":"0001252c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 0001252a)"}
 {"record":"bookmark","address":{"space":"ram","offset":"00012540"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 0001253e)"}
 {"record":"bookmark","address":{"space":"ram","offset":"00012648"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"0001264c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012650"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012654"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012658"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
 {"record":"bookmark","address":{"space":"ram","offset":"0001267c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012680"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012684"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012688"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"0001268c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
 {"record":"bookmark","address":{"space":"ram","offset":"00012690"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012694"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012698"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"0001269c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"000126a0"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
 {"record":"bookmark","address":{"space":"ram","offset":"0001279c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 0001279a)"}
 {"record":"bookmark","address":{"space":"ram","offset":"000128f0"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 000128ee)"}
 {"record":"bookmark","address":{"space":"ram","offset":"00012988"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012986)"}
 {"record":"bookmark","address":{"space":"ram","offset":"0001299c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"000129a0"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"000129a4"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"000129a8"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"000129ac"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"000129b0"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"000129b4"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"000129b8"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"000129bc"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"000129c0"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"000129c4"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"000129c8"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"000129cc"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"000129d0"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"000129d4"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"000129d8"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"000129dc"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"000129e0"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 000129de)"}
+{"record":"bookmark","address":{"space":"ram","offset":"000129e4"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"000129e8"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 000129e6)"}
+{"record":"bookmark","address":{"space":"ram","offset":"000129ec"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 000129ea)"}
+{"record":"bookmark","address":{"space":"ram","offset":"000129f0"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"000129f4"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 000129f2)"}
+{"record":"bookmark","address":{"space":"ram","offset":"000129f8"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 000129f6)"}
+{"record":"bookmark","address":{"space":"ram","offset":"000129fc"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012a00"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 000129fe)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012a04"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012a02)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012a08"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012a0c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012a10"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012a14"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012a18"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012a16)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012a1c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012a1a)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012a20"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012a1e)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012a24"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012a28"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012a2c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012a30"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012a34"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012a38"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012a3c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012a40"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012a44"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012a48"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012a4c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012a4a)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012a50"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012a4e)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012a54"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012a58"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012a56)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012a5c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012a5a)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012a60"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012a5e)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012a64"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012a68"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012a6c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012a6a)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012a70"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012a6e)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012a74"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012a78"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012a7c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012a80"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012a84"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012a82)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012a88"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012a8c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012a8a)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012a90"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012a94"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012a98"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012a9c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012aa0"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012a9e)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012aa4"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012aa8"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012aa6)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012aac"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012ab0"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012ab4"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012ab2)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012ab8"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012abc"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012ac0"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012ac4"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012ac8"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012acc"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012ad0"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012ad4"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012ad8"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012adc"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012ada)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012ae0"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012ae4"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012ae8"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012ae6)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012aec"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012af0"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012af4"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012af8"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012afc"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012b00"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012b04"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012b08"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012b0c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012b10"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012b14"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012b18"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012b16)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012b1c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012b20"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012b24"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012b28"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012b2c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012b30"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012b34"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012b38"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012b3c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012b40"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012b44"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012b48"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012b4c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012b4a)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012b50"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012b4e)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012b54"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012b52)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012b58"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012b5c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012b60"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012b64"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012b68"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012b6c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012b70"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012b6e)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012b74"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012b78"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012b76)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012b7c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012b80"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012b84"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012b88"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012b8c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012b90"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012b94"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012b98"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012b9c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012ba0"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012ba4"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012ba8"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012ba6)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012bac"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012bb0"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012bae)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012bb4"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012bb2)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012bb8"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012bb6)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012bbc"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012bc0"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012bc4"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012bc8"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012bcc"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012bd0"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012bd4"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012bd2)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012bd8"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012bdc"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012bda)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012be0"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012bde)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012be4"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012be8"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012be6)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012bec"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012bf0"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012bf4"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012bf8"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012bfc"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012c00"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012c04"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012c08"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012c0c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012c0a)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012c10"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012c14"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012c18"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012c1c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012c20"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012c24"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012c28"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012c2c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012c30"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012c34"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012c38"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012c3c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012c40"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012c44"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012c48"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012c4c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012c4a)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012c50"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012c4e)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012c54"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012c58"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012c56)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012c5c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012c60"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012c5e)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012c64"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012c68"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012c6c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012c70"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012c74"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012c78"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012c7c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012c80"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012c84"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012c88"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012c8c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012c90"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012c94"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012c98"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012c9c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012ca0"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012ca4"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012ca8"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012cac"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012cb0"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012cae)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012cb4"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012cb8"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012cbc"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012cc0"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012cc4"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012cc8"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012ccc"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012cd0"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012cce)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012cd4"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012cd2)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012cd8"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012cdc"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012ce0"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012cde)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012ce4"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012ce2)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012ce8"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012cec"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012cea)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012cf0"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012cf4"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012cf8"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012cfc"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012d00"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012d04"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012d08"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012d0c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012d10"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012d0e)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012d14"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012d12)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012d18"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012d1c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012d20"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012d1e)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012d24"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012d28"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012d2c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012d2a)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012d30"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012d34"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012d38"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012d3c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012d40"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012d44"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012d48"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012d4c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012d50"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012d54"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012d58"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012d5c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012d60"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012d64"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012d68"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012d6c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012d70"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012d74"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012d78"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012d7c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012d80"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012d84"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012d88"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012d8c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012d90"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012d94"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012d98"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012d9c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012da0"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012da4"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012da8"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012dac"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012db0"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012dae)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012db4"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012db2)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012db8"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012dbc"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012dba)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012dc0"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012dc4"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012dc2)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012dc8"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012dcc"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012dca)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012dd0"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012dd4"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012dd8"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012ddc"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012de0"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012dde)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012de4"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012de2)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012de8"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012dec"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012df0"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012df4"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012df8"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012dfc"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012dfa)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012e00"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012dfe)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012e04"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012e02)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012e08"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012e06)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012e0c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012e0a)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012e10"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012e14"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012e18"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012e16)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012e1c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012e20"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012e24"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012e28"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012e2c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012e30"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012e34"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012e38"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012e3c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012e40"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012e44"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012e48"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012e4c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012e50"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012e54"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012e58"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012e5c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012e60"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012e64"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012e68"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012e6c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012e70"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012e74"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012e78"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012e7c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012e80"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012e84"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012e88"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012e8c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012e90"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012e94"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012e98"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012e9c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012ea0"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012ea4"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012ea8"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012eac"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012eb0"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012eae)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012eb4"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012eb8"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012ebc"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012ec0"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012ec4"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012ec8"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012ecc"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012ed0"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012ed4"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012ed8"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012edc"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012ee0"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012ee4"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012ee8"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012eec"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012ef0"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012ef4"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012ef2)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012ef8"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012efc"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012f00"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012f04"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012f02)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012f08"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012f0c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012f10"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012f14"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012f18"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012f1c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012f20"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012f1e)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012f24"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012f28"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012f2c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012f30"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012f34"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012f32)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012f38"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012f3c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012f40"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012f44"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012f48"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012f4c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012f50"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012f4e)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012f54"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012f52)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012f58"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012f5c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012f60"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012f64"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012f62)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012f68"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012f66)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012f6c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012f70"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012f6e)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012f74"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012f72)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012f78"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012f76)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012f7c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012f7a)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012f80"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012f7e)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012f84"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012f82)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012f88"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012f86)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012f8c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012f8a)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012f90"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012f94"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012f92)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012f98"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012f9c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012fa0"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012fa4"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012fa2)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012fa8"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012fac"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012fb0"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 00012fae)"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012fb4"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012fb8"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012fbc"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012fc0"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012fc4"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012fc8"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012fcc"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012fd0"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00012fd4"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
 {"record":"bookmark","address":{"space":"ram","offset":"000150f0"},"type":"Analysis","category":"Address Table","comment":"Address table[3] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000151e0"},"type":"Analysis","category":"Address Table","comment":"Address table[3] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000191e4"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 000191e2)"}
 {"record":"bookmark","address":{"space":"ram","offset":"00019218"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00019220"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"00019224"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0"}
+{"record":"bookmark","address":{"space":"ram","offset":"0001922c"},"type":"Error","category":"Bad Instruction","comment":"Failed to resolve varnode <r1115>, index=0 (flow from 0001922a)"}
 {"record":"bookmark","address":{"space":"ram","offset":"0001930a"},"type":"Error","category":"Bad Instruction","comment":"Failed to disassemble at 0001930a due to conflicting instruction at 0001930c (flow from 00019306)"}
 {"record":"bookmark","address":{"space":"ram","offset":"00019376"},"type":"Error","category":"Bad Instruction","comment":"Failed to disassemble at 00019376 due to conflicting instruction at 00019378 (flow from 00019374)"}
 {"record":"bookmark","address":{"space":"ram","offset":"0001c3e8"},"type":"Analysis","category":"Address Table","comment":"Address table[3] created"}
@@ -10783,8 +11225,8 @@
 {"record":"bookmark","address":{"space":"ram","offset":"000273f0"},"type":"Analysis","category":"Address Table","comment":"Address table[3] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"00027408"},"type":"Analysis","category":"Address Table","comment":"Address table[157] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"00027688"},"type":"Analysis","category":"Address Table","comment":"Address table[243] created"}
-{"record":"bookmark","address":{"space":"ram","offset":"00027a58"},"type":"Analysis","category":"Address Table","comment":"Address table[7] created"}
-{"record":"bookmark","address":{"space":"ram","offset":"00027a80"},"type":"Analysis","category":"Address Table","comment":"Address table[43] created"}
+{"record":"bookmark","address":{"space":"ram","offset":"00027a58"},"type":"Analysis","category":"Address Table","comment":"Address table[3] created"}
+{"record":"bookmark","address":{"space":"ram","offset":"00027a68"},"type":"Analysis","category":"Address Table","comment":"Address table[3] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"00027cf0"},"type":"Analysis","category":"Address Table","comment":"Address table[9] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"00027d38"},"type":"Analysis","category":"Address Table","comment":"Address table[11] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"0002e7a0"},"type":"Analysis","category":"Address Table","comment":"Address table[3] created"}
@@ -10810,7 +11252,7 @@
 {"record":"bookmark","address":{"space":"ram","offset":"00032860"},"type":"Analysis","category":"Address Table","comment":"Address table[23] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000328c4"},"type":"Analysis","category":"Address Table","comment":"Address table[13] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"00032910"},"type":"Analysis","category":"Address Table","comment":"Address table[43] created"}
-{"record":"bookmark","address":{"space":"ram","offset":"000329f8"},"type":"Analysis","category":"Address Table","comment":"Address table[173] created"}
+{"record":"bookmark","address":{"space":"ram","offset":"000329fc"},"type":"Analysis","category":"Address Table","comment":"Address table[172] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"00032cf4"},"type":"Analysis","category":"Address Table","comment":"Address table[18] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"00032d7c"},"type":"Analysis","category":"Address Table","comment":"Address table[25] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"00032df8"},"type":"Analysis","category":"Address Table","comment":"Address table[4] created"}
@@ -10842,7 +11284,6 @@
 {"record":"bookmark","address":{"space":"ram","offset":"00034728"},"type":"Analysis","category":"Address Table","comment":"Address table[5] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"00034790"},"type":"Analysis","category":"Address Table","comment":"Address table[13] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"0003482c"},"type":"Analysis","category":"Address Table","comment":"Address table[9] created"}
-{"record":"bookmark","address":{"space":"ram","offset":"00034900"},"type":"Analysis","category":"Address Table","comment":"Address table[3] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"00034910"},"type":"Analysis","category":"Address Table","comment":"Address table[3] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000349b8"},"type":"Analysis","category":"Address Table","comment":"Address table[3] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"000349d8"},"type":"Analysis","category":"Address Table","comment":"Address table[3] created"}
@@ -11182,4 +11623,4 @@
 {"record":"bookmark","address":{"space":"ram","offset":"01007a78"},"type":"Analysis","category":"Address Table","comment":"Address table[3] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"01007ac8"},"type":"Analysis","category":"Address Table","comment":"Address table[3] created"}
 {"record":"bookmark","address":{"space":"ram","offset":"01007bb0"},"type":"Analysis","category":"Address Table","comment":"Address table[4] created"}
-{"record":"totals","functions":10391,"instructions":297293,"symbols":13510,"memory_blocks":8,"body_ranges":10489,"body_addresses":836891,"user_function_names":23,"user_symbols":36,"listing_comments":18,"function_comments":0,"bookmarks":730,"name_sources":{"DEFAULT":10368,"USER_DEFINED":23},"calling_conventions":{"__stdcall":10391},"signature_sources":{"DEFAULT":10391}}
+{"record":"totals","functions":10390,"instructions":297477,"symbols":13509,"memory_blocks":8,"body_ranges":10489,"body_addresses":836485,"user_function_names":23,"user_symbols":36,"listing_comments":18,"function_comments":0,"bookmarks":1172,"name_sources":{"DEFAULT":10367,"USER_DEFINED":23},"calling_conventions":{"__stdcall":10390},"signature_sources":{"DEFAULT":10390}}

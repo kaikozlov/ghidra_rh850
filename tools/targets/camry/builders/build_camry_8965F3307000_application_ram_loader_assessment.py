@@ -445,7 +445,7 @@ def build() -> dict:
     need(len(dmac_endpoints)==88, f"DMAC endpoint census size drift: {len(dmac_endpoints)}")
     need(dmac_window_hits==[], f"fixed DMAC endpoint enters XCP window: {dmac_window_hits}")
 
-    # Close CALLT base retargeting against the exact image, including undiscovered
+    # Close CTBP provenance against the exact image, including undiscovered
     # instruction islands. CTBP is system-register id 20, selector 0 under the
     # repository RH850/E3 SLEIGH. The only matching LDSR in the complete 1-MiB
     # CodeFlash is reset's `ldsr r0,CTBP` at 0x25E, fixing CTBP to zero.
@@ -674,7 +674,7 @@ def build() -> dict:
           "writers":ctbp_writers,
           "all_ctbp_writers_census_closed":True,
           "only_writer_sets_zero":True,
-          "verdict":"CALLT base cannot be retargeted by application/tester state in the exact image; the sole LDSR-to-CTBP is reset's ldsr r0,CTBP at 0x25E",
+          "verdict":"CTBP cannot be retargeted by application/tester state in the exact image; the sole LDSR-to-CTBP is reset's ldsr r0,CTBP at 0x25E; this does not establish a live CALLT consumer",
         },
         "audit_scripts":{
           "computed_calls":{"path":"ghidra/scripts/investigate/ClassifyComputedCallTargets.java","sha256":sha_file(ROOT / "ghidra/scripts/investigate/ClassifyComputedCallTargets.java")},

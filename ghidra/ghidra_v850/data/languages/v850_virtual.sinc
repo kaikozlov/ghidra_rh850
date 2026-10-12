@@ -1,0 +1,131 @@
+# G4MH host/guest architectural context, broad-language only.
+# R01UH0865EJ0140 Tables 3.1/3.21-3.25/3.50 and Section 4.3;
+# R01US0432EJ0110 EIRET/FERET/HVTRAP operations.
+# Existing register names represent the currently selected context. The
+# two backing banks below preserve the inactive context during a mode
+# transition; they are not extra guest partitions (the architectural
+# guest-context register file is shared between GPIDs).
+
+define register offset=0x1400 size=4 [
+    GMEIPC GMEIPSW GMFEPC GMFEPSW _ GMPSW GMMEA _
+    GMMEI _ _ _ _ GMEIIC GMFEIC _
+    GMSPID GMSPIDLIST _ GMEBASE GMINTBP GMINTCFG GMPLMR _
+    GMSVLOCK GMMPM _ _ GMEIWR GMFEWR GMPEID _
+];
+define register offset=0x1480 size=4 [
+    HMEIPC HMEIPSW HMFEPC HMFEPSW _ HMPSW HMMEA _
+    HMMEI _ _ _ _ HMEIIC HMFEIC _
+    HMSPID HMSPIDLIST _ HMEBASE HMINTBP HMINTCFG HMPLMR _
+    HMSVLOCK HMMPM _ _ HMEIWR HMFEWR HMPEID _
+];
+define register offset=0x1500 size=4 [
+    PSWH EIPSWH FEPSWH HVCFG GMCFG HVSB SVLOCK SPIDLIST PLMR
+];
+
+attach variables [ VSR0004 VSR1115 ] [
+    GMEIPC GMEIPSW GMFEPC GMFEPSW _ GMPSW GMMEA _
+    GMMEI _ _ _ _ GMEIIC GMFEIC _
+    GMSPID GMSPIDLIST _ GMEBASE GMINTBP GMINTCFG GMPLMR _
+    GMSVLOCK GMMPM _ _ GMEIWR GMFEWR GMPEID _
+];
+
+# Swap all twenty banked architectural registers, not just PSW/PC.
+# A same-mode return may change GPID but must not reload the active bank.
+macro virtual_select_context(next_pswh) {
+    if (((PSWH ^ next_pswh) & 0x80000000) == 0) goto <selected>;
+    if ((PSWH & 0x80000000) != 0) goto <leave_guest>;
+    HMEIPC = EIPC;
+    HMEIPSW = EIPSW;
+    HMFEPC = FEPC;
+    HMFEPSW = FEPSW;
+    HMPSW = PSW;
+    HMMEA = MEA;
+    HMMEI = MEI;
+    HMEIIC = EIIC;
+    HMFEIC = FEIC;
+    HMSPID = SPID;
+    HMSPIDLIST = SPIDLIST;
+    HMEBASE = EBASE;
+    HMINTBP = INTBP;
+    HMINTCFG = INTCFG;
+    HMPLMR = PLMR;
+    HMSVLOCK = SVLOCK;
+    HMMPM = MPM;
+    HMEIWR = EIWR;
+    HMFEWR = FEWR;
+    HMPEID = PEID;
+    EIPC = GMEIPC;
+    EIPSW = GMEIPSW;
+    FEPC = GMFEPC;
+    FEPSW = GMFEPSW;
+    PSW = GMPSW;
+    MEA = GMMEA;
+    MEI = GMMEI;
+    EIIC = GMEIIC;
+    FEIC = GMFEIC;
+    SPID = GMSPID;
+    SPIDLIST = GMSPIDLIST;
+    EBASE = GMEBASE;
+    INTBP = GMINTBP;
+    INTCFG = GMINTCFG;
+    PLMR = GMPLMR;
+    SVLOCK = GMSVLOCK;
+    MPM = GMMPM;
+    EIWR = GMEIWR;
+    FEWR = GMFEWR;
+    PEID = GMPEID;
+    goto <selected>;
+    <leave_guest>
+    GMEIPC = EIPC;
+    GMEIPSW = EIPSW;
+    GMFEPC = FEPC;
+    GMFEPSW = FEPSW;
+    GMPSW = PSW;
+    GMMEA = MEA;
+    GMMEI = MEI;
+    GMEIIC = EIIC;
+    GMFEIC = FEIC;
+    GMSPID = SPID;
+    GMSPIDLIST = SPIDLIST;
+    GMEBASE = EBASE;
+    GMINTBP = INTBP;
+    GMINTCFG = INTCFG;
+    GMPLMR = PLMR;
+    GMSVLOCK = SVLOCK;
+    GMMPM = MPM;
+    GMEIWR = EIWR;
+    GMFEWR = FEWR;
+    GMPEID = PEID;
+    EIPC = HMEIPC;
+    EIPSW = HMEIPSW;
+    FEPC = HMFEPC;
+    FEPSW = HMFEPSW;
+    PSW = HMPSW;
+    MEA = HMMEA;
+    MEI = HMMEI;
+    EIIC = HMEIIC;
+    FEIC = HMFEIC;
+    SPID = HMSPID;
+    SPIDLIST = HMSPIDLIST;
+    EBASE = HMEBASE;
+    INTBP = HMINTBP;
+    INTCFG = HMINTCFG;
+    PLMR = HMPLMR;
+    SVLOCK = HMSVLOCK;
+    MPM = HMMPM;
+    EIWR = HMEIWR;
+    FEWR = HMFEWR;
+    PEID = HMPEID;
+    <selected>
+    PSWH = next_pswh & 0x80000700;
+}
+
+# Guest CU permissions and EBV remain constrained on LDSR and local returns.
+macro virtual_write_psw(input) {
+    local updated:4 = input;
+    if ((HVCFG & 1) == 0) goto <psw_ready>;
+    if ((PSWH & 0x80000000) == 0) goto <psw_ready>;
+    updated = (updated & 0x43f080ff) | (updated & GMCFG & 0x00030000) | 0x8000;
+    <psw_ready>
+    PSW = updated;
+}

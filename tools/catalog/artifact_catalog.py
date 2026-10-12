@@ -47,11 +47,15 @@ def _source_files() -> list[str]:
 
 def _mentions(path: str, candidates: Iterable[str]) -> list[str]:
     found: list[str] = []
-    needle = path.encode()
+    needles = [path.encode()]
+    module_data = "ghidra/ghidra_v850/data/"
+    if path.startswith(module_data):
+        needles.append(path.removeprefix(module_data).encode())
     for rel in candidates:
         p = REPO / rel
         try:
-            if needle in p.read_bytes():
+            content = p.read_bytes()
+            if any(needle in content for needle in needles):
                 found.append(rel)
         except (OSError, IsADirectoryError):
             continue
@@ -97,7 +101,7 @@ def _declared_outputs(tool: str) -> tuple[str, ...]:
                 resolved = _path_expr(value)
                 if resolved is not None:
                     rel = resolved.as_posix().lstrip("./")
-                    if rel.startswith("data/"):
+                    if rel.startswith(("data/", "ghidra/ghidra_v850/data/")):
                         out.append(rel)
     # Generic tools often declare their artifact only as argparse --out/--output
     # defaults rather than module constants. Recover those defaults as local
@@ -114,7 +118,7 @@ def _declared_outputs(tool: str) -> tuple[str, ...]:
         resolved = _path_expr(default)
         if resolved is not None:
             rel = resolved.as_posix().lstrip("./")
-            if rel.startswith("data/"):
+            if rel.startswith(("data/", "ghidra/ghidra_v850/data/")):
                 out.append(rel)
     return tuple(dict.fromkeys(out))
 
@@ -167,7 +171,8 @@ def producer_candidates(path: str) -> list[str]:
 
 
 def consumers(path: str) -> list[str]:
-    candidates = _git_files("tools", "tests", "ghidra/scripts", "Makefile", "verification.toml")
+    candidates = _git_files("tools", "tests", "ghidra/scripts",
+                            "ghidra/ghidra_v850/src", "Makefile", "verification.toml")
     return [
         p for p in _mentions(path, candidates)
         if p not in {"tools/catalog/artifact_catalog.py"}

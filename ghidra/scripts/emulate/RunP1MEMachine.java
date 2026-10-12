@@ -1443,7 +1443,6 @@ public class RunP1MEMachine extends GhidraScript {
     }
 
     public static final class Rh850Userops extends AnnotatedPcodeUseropLibrary<byte[]> {
-        @PcodeUserop public void __nop() {}
         @PcodeUserop public void __synchronize() {}
         @PcodeUserop public void __disable_irq() {}
         @PcodeUserop public void __enable_irq() {}

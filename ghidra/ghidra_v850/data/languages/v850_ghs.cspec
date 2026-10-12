@@ -1,33 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-  Renesas V850 / RH850 compiler specification.
+  Renesas V850/RH850 compiler specification — Green Hills MULTI (RH850 ABI).
 
-  Calling convention models the firmware-observed RH850/G3 ABI used by the
-  analyzed P1M-E images. It is compatible with the Green-Hills-style RH850 ABI
-  exposed by GCC's -mghs mode, but it is NOT the standard Renesas CC-RH ABI:
-  exact Sienna and Camry F33 both have normally called leaf 0x1478 that starts
-  `mov r6,ep` and returns without restoring ep, while CC-RH V2.08 documents r30
-  as fixed or callee-saved. Register classification is therefore pinned from
-  firmware call/prologue behavior rather than inferred from a compiler name:
+  Models the GHS MULTI RH850 ABI as classified by the IDA nec850 module
+  (ABI_RH850 + abi_align8) and the GHS ABI notes:
 
-    r0        reads-as-zero (see v850_common.sinc); volatile
+    r0        reads-as-zero; volatile
     r1,r2     volatile (assembler temporary)
     sp  (r3)  stack pointer (preserved)
     gp  (r4)  global pointer (preserved; set once at reset)
     tp  (r5)  text/small-data pointer (preserved)
-    r6..r9    integer argument registers (volatile)
+    r6..r9    integer/pointer argument registers (volatile)
     r10       return value, low word (volatile)
     r11       return value, high word / 64-bit (volatile)
     r12..r19  volatile scratch
     r20..r29  callee-saved "save registers"
-    ep (r30)  element pointer (volatile)
-    lp (r31)  link pointer / return address (clobbered by every jarl/call)
+    ep  (r30) element pointer (volatile)
+    lp  (r31) link pointer (clobbered by every jarl/call)
 
-  Subroutine calls use `jarl ..., reg` (compiler emits lp); returns use
-  `jmp [lp]` or `dispose ..., [reg]` (see v850_func.sinc). Interrupt/exception
-  handlers exit via eiret/reti/feret to a saved EIPC/FEPC context
-  (see v850_special.sinc), not via lp.
+  GHS scalar/aggregate placement:
+    - 8-byte scalar arguments occupy even-aligned register pairs;
+    - structures and unions use a hidden return buffer pointer in r6;
+      r6/r10 are caller-clobbered on return, not a returned pointer/value.
+
+  Aggregate arguments larger than the available registers split across the
+  remaining registers and then the stack (register-stack split), matching
+  the scattered argloc allocation of the reference module.
+
+  Varargs keep the integer register sequence; callers promote arguments.
 -->
 <compiler_spec>
   <data_organization>
@@ -55,15 +56,22 @@
     <range space="ram"/>
   </global>
   <stackpointer register="sp" space="ram" growth="negative"/>
+  <returnaddress>
+    <register name="lp"/>
+  </returnaddress>
 
   <default_proto>
     <prototype name="__stdcall" extrapop="0" stackshift="0">
-      <!-- Integer args in r6..r9, then the caller's stack (decrementing sp).
-           The caller owns and cleans up any stack arguments (extrapop=0). -->
+      <!-- Integer args in r6..r9, then the caller's stack (extrapop=0). -->
       <input>
-        <pentry minsize="1" maxsize="4" extension="inttype">
-          <register name="r6"/>
-        </pentry>
+        <group>
+          <pentry minsize="4" maxsize="4" storage="hiddenret">
+            <register name="r6"/>
+          </pentry>
+          <pentry minsize="1" maxsize="4" extension="inttype">
+            <register name="r6"/>
+          </pentry>
+        </group>
         <pentry minsize="1" maxsize="4" extension="inttype">
           <register name="r7"/>
         </pentry>
@@ -76,27 +84,50 @@
         <pentry minsize="1" maxsize="500" align="4">
           <addr offset="0" space="stack"/>
         </pentry>
-        <!-- Values larger than one register span consecutive arg registers
-             (e.g. a 64-bit arg in r6:r7, r8:r9). -->
+        <!-- GHS 8-byte alignment: 8-byte scalars take even-aligned
+             register pairs (r6:r7 or r8:r9). The datatype filter splits
+             by signedness in Ghidra, so int and uint both need the rule. -->
+        <rule>
+          <datatype name="int" minsize="5" maxsize="8"/>
+          <join align="true"/>
+        </rule>
+        <rule>
+          <datatype name="uint" minsize="5" maxsize="8"/>
+          <join align="true"/>
+        </rule>
+        <rule>
+          <datatype name="float" minsize="5" maxsize="8"/>
+          <join align="true"/>
+        </rule>
+        <!-- Any other multi-word value splits across remaining registers
+             and then the stack. -->
         <rule>
           <datatype name="any"/>
-          <join align="true"/>
+          <join/>
         </rule>
       </input>
       <output>
         <pentry minsize="1" maxsize="4" extension="inttype">
           <register name="r10"/>
         </pentry>
-        <pentry minsize="1" maxsize="4" extension="inttype">
+        <pentry minsize="1" maxsize="4">
           <register name="r11"/>
         </pentry>
-        <!-- A 64-bit return value occupies r10:r11. -->
+        <!-- GHS RH850: structures and unions are returned through a hidden
+             return buffer pointer in r6 (ABI_RH850), never in registers. -->
+        <rule>
+          <datatype name="struct"/>
+          <hidden_return voidlock="true"/>
+        </rule>
+        <rule>
+          <datatype name="union"/>
+          <hidden_return voidlock="true"/>
+        </rule>
         <rule>
           <datatype name="any"/>
           <join/>
         </rule>
       </output>
-      <!-- Callee-saved: survive every call. -->
       <unaffected>
         <register name="sp"/>
         <register name="gp"/>
@@ -112,7 +143,6 @@
         <register name="r28"/>
         <register name="r29"/>
       </unaffected>
-      <!-- Caller-saved (volatile): clobbered by a call. -->
       <killedbycall>
         <register name="r0"/>
         <register name="r1"/>
@@ -137,12 +167,8 @@
     </prototype>
   </default_proto>
 
-  <!-- Interrupt / exception handler prototype.
-       An EIINT / FE / DIR handler takes no ABI arguments and returns to a
-       saved EIPC/FEPC context via eiret/reti/feret, not via lp. Because it
-       interrupts arbitrary code it must preserve every GPR it touches, so all
-       general registers are unaffected. Apply manually to handler functions
-       (e.g. the EIINT 292/293 crypto-driver callback wrappers). -->
+  <!-- Interrupt / exception handler prototype: no ABI arguments, returns to
+       a saved EIPC/FEPC context via eiret/reti/feret; preserves every GPR. -->
   <prototype name="__interrupt" extrapop="0" stackshift="0">
     <input></input>
     <output killedbycall="true"></output>

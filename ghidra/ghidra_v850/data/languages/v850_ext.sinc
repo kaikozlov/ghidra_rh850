@@ -1,0 +1,963 @@
+# RH850 extended system instructions: clip, link/conditional load-store
+# variants, MP register bursts, extended system-register access (LDTC/STTC/
+# LDVC/STVC), TLB maintenance, hypervisor and debug trap/call, and
+# virtualization bank operations.
+#
+# Encoding authority: IDA nec850 decoder (REFERENCE/ida-sdk/src/module/nec850
+# ana.cpp format I/X cases) cross-checked with the installed-oracle census
+# (build/out/ida-v850-census.json) and the GNU binutils opcode table.
+# Public G4MH manuals own CLIP, MPU, FXU and host/guest virtualization.
+# Legacy LDTC/STTC/LDVC/STVC, HVCALL, EST/DST and TLB encodings are
+# recovered from the SDK; opaque architecture intrinsics preserve their
+# transfers without inventing the undocumented bank/privilege contract.
+# Multi-register bursts are unrolled over the encoded register indices.
+
+define pcodeop __tlbs;
+define pcodeop __tlbr;
+define pcodeop __tlbw;
+define pcodeop __tlbvi;
+define pcodeop __tlbai;
+define pcodeop __hvcall;
+define pcodeop __dbhvtrap;
+define pcodeop __dbcp;
+define pcodeop __dbtag;
+define pcodeop __est;
+define pcodeop __dst;
+define pcodeop __resbank;
+define pcodeop __rmtrap;
+define pcodeop __ldtc_sr;
+define pcodeop __sttc_sr;
+define pcodeop __ldtc_gr;
+define pcodeop __sttc_gr;
+define pcodeop __ldtc_vr;
+define pcodeop __sttc_vr;
+define pcodeop __ldvc_sr;
+define pcodeop __stvc_sr;
+
+define pcodeop __dbpush;
+define pcodeop __ldtc_pc;
+define pcodeop __sttc_pc;
+define pcodeop __breakpoint;
+
+# CLIP flags (R01US0209EJ0220 pp.47-50): CY clears; SAT accumulates OV.
+macro flags_clip(res, saturated) {
+	$(PSW_CY) = 0;
+	setOV(saturated);
+	set_S_Z(res);
+	$(PSW_SAT) = $(PSW_SAT) || $(PSW_OV);
+}
+
+# ------------------------------------------------------------- CLIP
+# clip.b reg1, reg2: saturate reg1 to signed 8-bit range into reg2.
+:clip.b R0004, R1115 is op0510=0x3F & R0004 & R1115; op1626=0x008 {
+	local v:4 = R0004;
+	local hi:4 = zext(v s> 0x7f);
+	local lo:4 = zext(v s< -0x80);
+	R1115 = (v * zext((hi == 0) && (lo == 0))) + (0x7f * hi) + (-0x80 * lo);
+	flags_clip(R1115, (hi != 0) || (lo != 0));
+}
+
+:clip.bu R0004, R1115 is op0510=0x3F & R0004 & R1115; op1626=0x00A {
+	local v:4 = R0004;
+	local hi:4 = zext(v > 0xff);
+	R1115 = (v * zext(hi == 0)) + (0xff * hi);
+	flags_clip(R1115, hi != 0);
+}
+
+:clip.h R0004, R1115 is op0510=0x3F & R0004 & R1115; op1626=0x00C {
+	local v:4 = R0004;
+	local hi:4 = zext(v s> 0x7fff);
+	local lo:4 = zext(v s< -0x8000);
+	R1115 = (v * zext((hi == 0) && (lo == 0))) + (0x7fff * hi) + (-0x8000 * lo);
+	flags_clip(R1115, (hi != 0) || (lo != 0));
+}
+
+:clip.hu R0004, R1115 is op0510=0x3F & R0004 & R1115; op1626=0x00E {
+	local v:4 = R0004;
+	local hi:4 = zext(v > 0xffff);
+	R1115 = (v * zext(hi == 0)) + (0xffff * hi);
+	flags_clip(R1115, hi != 0);
+}
+
+# ------------------------------------- load-linked / store-conditional
+# ldl.bu [reg1], reg2: byte load-reserved (mirrors LDL.W at width 1).
+:ldl.bu [R0004], R2731 is op0515=0x07F & R0004; op1626=0x370 & R2731 {
+	local addr:4 = R0004;
+	R2731 = zext(*:1 addr);
+	ll_addr = addr;
+	ll_valid = 1;
+}
+
+# ldl.hu [reg1], reg2: halfword load-reserved. The documented encoding has
+# r2 = 1; the installed IDA oracle additionally decodes r2 = 0, so both
+# halfword r2 values are accepted here.
+:ldl.hu [R0004], R2731 is op0515=0x07F & R0004; op1626=0x374 & R2731 {
+	local addr:4 = R0004;
+	R2731 = zext(*:2 addr);
+	ll_addr = addr;
+	ll_valid = 1;
+}
+
+:ldl.hu [R0004], R2731 is op0515=0x03F & R0004; op1626=0x374 & R2731 {
+	local addr:4 = R0004;
+	R2731 = zext(*:2 addr);
+	ll_addr = addr;
+	ll_valid = 1;
+}
+
+# stc.b reg2, [reg1]: byte store-conditional.
+:stc.b R2731, [R0004] is op0515=0x03F & R0004; op1626=0x372 & R2731 {
+	local addr:4 = R0004;
+	local value:1 = R2731:1;
+	if (ll_valid == 0) goto <failed>;
+	if (ll_addr != addr) goto <failed>;
+		*:1 addr = value;
+		R2731 = 1;
+		goto <done>;
+	<failed>
+		R2731 = 0;
+	<done>
+	ll_valid = 0;
+}
+
+# stc.h reg2, [reg1]: halfword store-conditional.
+:stc.h R2731, [R0004] is op0515=0x03F & R0004; op1626=0x376 & R2731 {
+	local addr:4 = R0004;
+	local value:2 = R2731:2;
+	if (ll_valid == 0) goto <failed>;
+	if (ll_addr != addr) goto <failed>;
+		*:2 addr = value;
+		R2731 = 1;
+		goto <done>;
+	<failed>
+		R2731 = 0;
+	<done>
+	ll_valid = 0;
+}
+
+# ------------------------------------- MP register bursts
+# LDM.MP [reg1], eh-et / STM.MP eh-et, [reg1] (R01US0432EJ0110 pp.17-23;
+# R01US0209EJ0220 documents the pair as available only on the
+# PID[31:24] = 07H RH850G4MH2 architecture profile -- the broad family
+# model keeps the decode for that capability window):
+# supervisor-only bursts that reload/store the MPU region descriptor set
+# {MPLA[cur], MPUA[cur], MPAT[cur]} for regions eh..et in ascending order,
+# three consecutive word-aligned words per region (low 2 bits of each
+# address masked to 0; reg1 keeps its original value). The burst processes
+# the entries "regardless of the value of MPIDX" and never modifies it; the
+# bank selected by MPBK is the only one processed. eh/et are the ENCODED
+# region-number endpoints (word1 r2, word2 r3). The 32-way expansion below
+# covers the whole 5-bit region range; only in-range cells participate.
+# Descriptor storage is the per-region/per-bank file addressed by
+# mpu_bank_cell -- the same backing the selID-5 indexed LDSR/STSR views
+# project (register layout documented in v850_common.sinc). The macro
+# resolves in the broad profile only (MPBK is state defined under
+# V850SIMD in v850_common.sinc).
+@if defined(V850SIMD)
+macro mpu_bank_cell(cell, region) {
+	cell = 0x1100 + ((MPBK & 1) * 0x180) + ((region & 0x1f) * 12);
+}
+
+macro ldm_mp_region(region_number, region_start, region_end, base) {
+	local cur:4 = region_number;
+	local eh:4 = region_start;
+	local et:4 = region_end;
+	if (cur < eh) goto <lskip>;
+	if (cur > et) goto <lskip>;
+	local off:4 = (cur - eh) * 12;
+	local cell:4 = 0;
+	mpu_bank_cell(cell, cur);
+	local low:4 = *:4 ((base & 0xfffffffc) + off) & 0xfffffffc;
+	local high:4 = *:4 ((base & 0xfffffffc) + off + 4) & 0xfffffffc;
+	local attr:4 = *:4 ((base & 0xfffffffc) + off + 8) & 0xffffc0bf;
+	if ((SVLOCK & 1) != 0) goto <lskip>;
+	*[register]:4 (cell) = low;
+	*[register]:4 (cell + 4) = high;
+	*[register]:4 (cell + 8) = attr;
+	<lskip>
+}
+
+macro stm_mp_region(region_number, region_start, region_end, base) {
+	local cur:4 = region_number;
+	local eh:4 = region_start;
+	local et:4 = region_end;
+	if (cur < eh) goto <sskip>;
+	if (cur > et) goto <sskip>;
+	local off:4 = (cur - eh) * 12;
+	local cell:4 = 0;
+	mpu_bank_cell(cell, cur);
+	*:4 ((base & 0xfffffffc) + off) = *[register]:4 (cell);
+	*:4 ((base & 0xfffffffc) + off + 4) = *[register]:4 (cell + 4);
+	*:4 ((base & 0xfffffffc) + off + 8) = *[register]:4 (cell + 8);
+	<sskip>
+}
+
+:ldm.mp [R0004], op1115, op2731 is op0510=0x3F & R0004 & op1115; op1626=0x166 & op2731 {
+	mpu_sv_check(inst_start);
+	ldm_mp_region(0, op1115, op2731, R0004);
+	ldm_mp_region(1, op1115, op2731, R0004);
+	ldm_mp_region(2, op1115, op2731, R0004);
+	ldm_mp_region(3, op1115, op2731, R0004);
+	ldm_mp_region(4, op1115, op2731, R0004);
+	ldm_mp_region(5, op1115, op2731, R0004);
+	ldm_mp_region(6, op1115, op2731, R0004);
+	ldm_mp_region(7, op1115, op2731, R0004);
+	ldm_mp_region(8, op1115, op2731, R0004);
+	ldm_mp_region(9, op1115, op2731, R0004);
+	ldm_mp_region(10, op1115, op2731, R0004);
+	ldm_mp_region(11, op1115, op2731, R0004);
+	ldm_mp_region(12, op1115, op2731, R0004);
+	ldm_mp_region(13, op1115, op2731, R0004);
+	ldm_mp_region(14, op1115, op2731, R0004);
+	ldm_mp_region(15, op1115, op2731, R0004);
+	ldm_mp_region(16, op1115, op2731, R0004);
+	ldm_mp_region(17, op1115, op2731, R0004);
+	ldm_mp_region(18, op1115, op2731, R0004);
+	ldm_mp_region(19, op1115, op2731, R0004);
+	ldm_mp_region(20, op1115, op2731, R0004);
+	ldm_mp_region(21, op1115, op2731, R0004);
+	ldm_mp_region(22, op1115, op2731, R0004);
+	ldm_mp_region(23, op1115, op2731, R0004);
+	ldm_mp_region(24, op1115, op2731, R0004);
+	ldm_mp_region(25, op1115, op2731, R0004);
+	ldm_mp_region(26, op1115, op2731, R0004);
+	ldm_mp_region(27, op1115, op2731, R0004);
+	ldm_mp_region(28, op1115, op2731, R0004);
+	ldm_mp_region(29, op1115, op2731, R0004);
+	ldm_mp_region(30, op1115, op2731, R0004);
+	ldm_mp_region(31, op1115, op2731, R0004);
+
+}
+
+:stm.mp op1115, op2731, [R0004] is op0510=0x3F & R0004 & op1115; op1626=0x164 & op2731 {
+	mpu_sv_check(inst_start);
+	stm_mp_region(0, op1115, op2731, R0004);
+	stm_mp_region(1, op1115, op2731, R0004);
+	stm_mp_region(2, op1115, op2731, R0004);
+	stm_mp_region(3, op1115, op2731, R0004);
+	stm_mp_region(4, op1115, op2731, R0004);
+	stm_mp_region(5, op1115, op2731, R0004);
+	stm_mp_region(6, op1115, op2731, R0004);
+	stm_mp_region(7, op1115, op2731, R0004);
+	stm_mp_region(8, op1115, op2731, R0004);
+	stm_mp_region(9, op1115, op2731, R0004);
+	stm_mp_region(10, op1115, op2731, R0004);
+	stm_mp_region(11, op1115, op2731, R0004);
+	stm_mp_region(12, op1115, op2731, R0004);
+	stm_mp_region(13, op1115, op2731, R0004);
+	stm_mp_region(14, op1115, op2731, R0004);
+	stm_mp_region(15, op1115, op2731, R0004);
+	stm_mp_region(16, op1115, op2731, R0004);
+	stm_mp_region(17, op1115, op2731, R0004);
+	stm_mp_region(18, op1115, op2731, R0004);
+	stm_mp_region(19, op1115, op2731, R0004);
+	stm_mp_region(20, op1115, op2731, R0004);
+	stm_mp_region(21, op1115, op2731, R0004);
+	stm_mp_region(22, op1115, op2731, R0004);
+	stm_mp_region(23, op1115, op2731, R0004);
+	stm_mp_region(24, op1115, op2731, R0004);
+	stm_mp_region(25, op1115, op2731, R0004);
+	stm_mp_region(26, op1115, op2731, R0004);
+	stm_mp_region(27, op1115, op2731, R0004);
+	stm_mp_region(28, op1115, op2731, R0004);
+	stm_mp_region(29, op1115, op2731, R0004);
+	stm_mp_region(30, op1115, op2731, R0004);
+	stm_mp_region(31, op1115, op2731, R0004);
+
+}
+@endif
+
+# ------------------------------------- extended system registers
+# LDTC/STTC/LDVC/STVC field and operand authority: SDK ana.cpp 2170-2237.
+# No public G4MH LDSR/STSR description defines this legacy context bank.
+# Keep context slot indices explicit; do not alias them to the current
+# system-register bank or to the unrelated G4MH Host/Guest banks.
+# LDTC.VR is the exceptional field order: its source pair starts at r2,
+# and its other-context destination is r1 (ana.cpp 2203-2206).
+:ldtc.sr R0004, op1115, op2731 is op0510=0x3F & R0004 & op1115; op1626=0x030 & op2731 {
+	local context_regid:4 = op1115;
+	local context_selid:4 = op2731;
+	__ldtc_sr(context_regid, context_selid, R0004);
+}
+
+:sttc.sr op0004, R1115, op2731 is op0510=0x3F & op0004 & R1115; op1626=0x050 & op2731 {
+	local context_regid:4 = op0004;
+	local context_selid:4 = op2731;
+	R1115 = __sttc_sr(context_regid, context_selid);
+}
+
+:ldtc.gr R0004, R1115, 0 is op0510=0x3F & R0004 & R1115 & op1115; op1626=0x032 & op2731=0 {
+	local context_regid:4 = op1115;
+	__ldtc_gr(context_regid, 0:4, R0004);
+}
+
+:sttc.gr R0004, R1115, 0 is op0510=0x3F & R0004 & R1115 & op0004; op1626=0x052 & op2731=0 {
+	local context_regid:4 = op0004;
+	R1115 = __sttc_gr(context_regid, 0:4);
+}
+
+# SDK emu.cpp tracks the adjacent GPR for these 64-bit transfers. The
+# r31 encoding still decodes, but its unspecified successor is kept opaque
+# instead of accidentally reading/writing EIPC at register-space 0x80.
+define pcodeop __context_gpr_successor_read;
+define pcodeop __context_gpr_successor_write;
+:ldtc.vr R1115, R0004, 1 is op0510=0x3F & R1115 & R0004 & op0004 & op1115; op1626=0x032 & op2731=1 {
+	local context_regid:4 = op0004;
+	local source_index:4 = op1115;
+	local high:4;
+	if (source_index == 31) goto <unpaired>;
+	high = *[register]:4 ((source_index + 1) << 2);
+	goto <paired>;
+	<unpaired>
+	high = __context_gpr_successor_read(source_index);
+	<paired>
+	local pair:8 = zext(R1115) | (zext(high) << 32);
+	__ldtc_vr(context_regid, 1:4, pair);
+}
+
+:sttc.vr R0004, R1115, 1 is op0510=0x3F & R0004 & R1115 & op0004 & op1115; op1626=0x052 & op2731=1 {
+	local context_regid:4 = op0004;
+	local destination_index:4 = op1115;
+	local pair:8 = __sttc_vr(context_regid, 1:4);
+	R1115 = pair:4;
+	local high:4 = pair[32,32];
+	if (destination_index == 31) goto <unpaired>;
+	*[register]:4 ((destination_index + 1) << 2) = high;
+	goto <done>;
+	<unpaired>
+	__context_gpr_successor_write(destination_index, high);
+	<done>
+}
+
+# ldtc.pc reg1 / sttc.pc reg1: program-counter transfer (selid 0x1F).
+:ldtc.pc R0004 is op0510=0x3F & R0004; op1626=0x032 & op2731=0x1F {
+	# Loads the OTHER context's PC: no current-PC change, no branch.
+	__ldtc_pc(0x1f:4, R0004);
+}
+
+:sttc.pc R1115 is op0510=0x3F & R1115; op1626=0x052 & op2731=0x1F {
+	R1115 = __sttc_pc(0x1f:4);
+}
+
+# ldvc.sr/stvc.sr: virtual-machine system-register access (field layout
+# mirrors LDTC/STTC).
+:ldvc.sr R0004, op1115, op2731 is op0510=0x3F & R0004 & op1115; op1626=0x034 & op2731 {
+	local context_regid:4 = op1115;
+	local context_selid:4 = op2731;
+	__ldvc_sr(context_regid, context_selid, R0004);
+}
+
+:stvc.sr op0004, R1115, op2731 is op0510=0x3F & op0004 & R1115; op1626=0x054 & op2731 {
+	local context_regid:4 = op0004;
+	local context_selid:4 = op2731;
+	R1115 = __stvc_sr(context_regid, context_selid);
+}
+
+# PUSHSP/POPSP reg-list bursts (R01US0209EJ0220 pp.135-141; subop 0x160
+# with r2=8/0xC, rh = word1 r1, rt = word2 r3): PUSHSP pre-decrements an
+# independent tmp cursor and stores ascending rh..rt (GR[rh] lands at the
+# highest address, GR[rt] at the final SP), then commits SP; POPSP loads
+# descending rt..rh (GR[rt] consumes the lowest address first) and commits
+# SP at the end; rh > rt stores/loads nothing. The 32-way expansions below
+# cover every encoded register index -- PUSHSP ascending, POPSP descending
+# -- and only in-range entries touch SP or memory.
+#
+# Manual [Operation] (R01US0209EJ0220 pp.135/140): the tmp cursor moves
+# while sp stays untouched until the final commit, so a range that includes
+# sp stores the ORIGINAL sp value on PUSHSP; r0 is architecturally constant
+# zero, so PUSHSP stores literal 0 for it (never the raw register-space
+# word) and POPSP discards its load; POPSP also never loads sp (p.136
+# Cautions 1) -- each discarded word is still consumed so tmp advances
+# uniformly. Every address has its low 2 bits masked to 0.
+macro pushsp_one(tmp, register_number, rh, rt) {
+	local cur:4 = register_number;
+	if (cur < rh) goto <pskip>;
+	if (cur > rt) goto <pskip>;
+	tmp = tmp - 4;
+	if (cur != 0) goto <preg>;
+	*:4 (tmp & 0xfffffffc) = 0;
+	goto <pdone>;
+	<preg>
+	*:4 (tmp & 0xfffffffc) = *[register]:4 (cur << 2);
+	<pdone>
+	<pskip>
+}
+
+macro popsp_one(tmp, register_number, rh, rt) {
+	local cur:4 = register_number;
+	if (cur < rh) goto <oskip>;
+	if (cur > rt) goto <oskip>;
+	if (cur == 0) goto <oadvance>;
+	if (cur == 3) goto <oadvance>;
+	*[register]:4 (cur << 2) = *:4 (tmp & 0xfffffffc);
+	<oadvance>
+	tmp = tmp + 4;
+	<oskip>
+}
+
+# PUSHSP: pre-decrement ascending burst storing GPRs rh..rt (the 32-way
+# expansion covers every cur; only in-range entries touch SP or memory).
+:pushsp R0004, R2731 is op0510=0x3F & op1115=8 & R0004 & op0004; op1626=0x160 & R2731 & op2731 {
+	# rh/rt are the ENCODED register indices (word1 bits 0-4, word2 bits
+	# 31-27); the register operands above carry the display names.
+	local rh:4 = op0004;
+	local rt:4 = op2731;
+	local pushsp_tmp:4 = sp;
+	pushsp_one(pushsp_tmp, 0, rh, rt);
+	pushsp_one(pushsp_tmp, 1, rh, rt);
+	pushsp_one(pushsp_tmp, 2, rh, rt);
+	pushsp_one(pushsp_tmp, 3, rh, rt);
+	pushsp_one(pushsp_tmp, 4, rh, rt);
+	pushsp_one(pushsp_tmp, 5, rh, rt);
+	pushsp_one(pushsp_tmp, 6, rh, rt);
+	pushsp_one(pushsp_tmp, 7, rh, rt);
+	pushsp_one(pushsp_tmp, 8, rh, rt);
+	pushsp_one(pushsp_tmp, 9, rh, rt);
+	pushsp_one(pushsp_tmp, 10, rh, rt);
+	pushsp_one(pushsp_tmp, 11, rh, rt);
+	pushsp_one(pushsp_tmp, 12, rh, rt);
+	pushsp_one(pushsp_tmp, 13, rh, rt);
+	pushsp_one(pushsp_tmp, 14, rh, rt);
+	pushsp_one(pushsp_tmp, 15, rh, rt);
+	pushsp_one(pushsp_tmp, 16, rh, rt);
+	pushsp_one(pushsp_tmp, 17, rh, rt);
+	pushsp_one(pushsp_tmp, 18, rh, rt);
+	pushsp_one(pushsp_tmp, 19, rh, rt);
+	pushsp_one(pushsp_tmp, 20, rh, rt);
+	pushsp_one(pushsp_tmp, 21, rh, rt);
+	pushsp_one(pushsp_tmp, 22, rh, rt);
+	pushsp_one(pushsp_tmp, 23, rh, rt);
+	pushsp_one(pushsp_tmp, 24, rh, rt);
+	pushsp_one(pushsp_tmp, 25, rh, rt);
+	pushsp_one(pushsp_tmp, 26, rh, rt);
+	pushsp_one(pushsp_tmp, 27, rh, rt);
+	pushsp_one(pushsp_tmp, 28, rh, rt);
+	pushsp_one(pushsp_tmp, 29, rh, rt);
+	pushsp_one(pushsp_tmp, 30, rh, rt);
+	pushsp_one(pushsp_tmp, 31, rh, rt);
+	sp = pushsp_tmp;
+}
+
+# POPSP: descending load of GPRs rt..rh (expansion runs 31..0 so GR[rt]
+# consumes the lowest address first, mirroring the manual's cur ← rt loop);
+# SP is committed once, at the end.
+:popsp R0004, R2731 is op0510=0x3F & op1115=0xC & R0004 & op0004; op1626=0x160 & R2731 & op2731 {
+	local rh:4 = op0004;
+	local rt:4 = op2731;
+	local popsp_tmp:4 = sp;
+	popsp_one(popsp_tmp, 31, rh, rt);
+	popsp_one(popsp_tmp, 30, rh, rt);
+	popsp_one(popsp_tmp, 29, rh, rt);
+	popsp_one(popsp_tmp, 28, rh, rt);
+	popsp_one(popsp_tmp, 27, rh, rt);
+	popsp_one(popsp_tmp, 26, rh, rt);
+	popsp_one(popsp_tmp, 25, rh, rt);
+	popsp_one(popsp_tmp, 24, rh, rt);
+	popsp_one(popsp_tmp, 23, rh, rt);
+	popsp_one(popsp_tmp, 22, rh, rt);
+	popsp_one(popsp_tmp, 21, rh, rt);
+	popsp_one(popsp_tmp, 20, rh, rt);
+	popsp_one(popsp_tmp, 19, rh, rt);
+	popsp_one(popsp_tmp, 18, rh, rt);
+	popsp_one(popsp_tmp, 17, rh, rt);
+	popsp_one(popsp_tmp, 16, rh, rt);
+	popsp_one(popsp_tmp, 15, rh, rt);
+	popsp_one(popsp_tmp, 14, rh, rt);
+	popsp_one(popsp_tmp, 13, rh, rt);
+	popsp_one(popsp_tmp, 12, rh, rt);
+	popsp_one(popsp_tmp, 11, rh, rt);
+	popsp_one(popsp_tmp, 10, rh, rt);
+	popsp_one(popsp_tmp, 9, rh, rt);
+	popsp_one(popsp_tmp, 8, rh, rt);
+	popsp_one(popsp_tmp, 7, rh, rt);
+	popsp_one(popsp_tmp, 6, rh, rt);
+	popsp_one(popsp_tmp, 5, rh, rt);
+	popsp_one(popsp_tmp, 4, rh, rt);
+	popsp_one(popsp_tmp, 3, rh, rt);
+	popsp_one(popsp_tmp, 2, rh, rt);
+	popsp_one(popsp_tmp, 1, rh, rt);
+	popsp_one(popsp_tmp, 0, rh, rt);
+	sp = popsp_tmp;
+}
+
+
+# ------------------------------------- extended FP system registers
+# LDSR/STSR selID 10 (R01UH0770EJ0121 Tables 3.54-3.60). Access permission
+# is checked before any side effect: every selID-10 register requires
+# PSW.CU1 (FE-level UCPOP, cause 81H, vector 80H when clear) and FXSR
+# additionally requires supervisor mode (FE-level PIE, cause A0H, vector
+# A0H from user mode; CU1 is checked first per Table 3.3). The register
+# operands display the Table 3.54 names through the SR0004_a/SR1115_a
+# attachment in v850_common.sinc. FXST/FXCFG are NOT independent storage:
+# reads project canonical FXSR (Table 3.55: writable FN23, IF22, RM19:18,
+# FS17, XC15:10, XE9:5, XP4:0; bit 21 reads 1, all other bits 0) and
+# writes update only the reflected fields. FXINFO is read-only constant 3
+# (NFPU=1, RSIZE=1, Table 3.57). FXXC/FXXP hold the per-arithmetic-way
+# cause/preservation bits packed at shifts 0/8/16/24 (Tables 3.59-3.60)
+# and never alias FXSR.
+@if defined(V850SIMD)
+:ldsr R0004, SR1115_a, 10 is op0510=0x3F & R0004 & SR1115_a & op1115=6; op1626=0x20 & op2731=0x0A {
+	fxu_check_sv(inst_start);
+	FXSR = (R0004 & 0x00ceffff) | 0x00200000;
+}
+:stsr SR0004_a, R1115, 10 is op0510=0x3F & SR0004_a & R1115 & op0004=6; op1626=0x40 & op2731=0x0A {
+	fxu_check_sv(inst_start);
+	R1115 = (FXSR & 0x00ceffff) | 0x00200000;
+}
+:ldsr R0004, SR1115_a, 10 is op0510=0x3F & R0004 & SR1115_a & op1115=8; op1626=0x20 & op2731=0x0A {
+	fxu_check(inst_start);
+	# FXST write: FXSR.XC[15:10] <- val[13:8], FXSR.IF[22] <- val[5],
+	# FXSR.XP[4:0] <- val[4:0]; every other FXSR field is preserved.
+	FXSR = (FXSR & 0xffbf03e0)
+		| ((R0004 & 0x3f00) << 2) | (((R0004 >> 5) & 1) << 22) | (R0004 & 0x1f);
+}
+:stsr SR0004_a, R1115, 10 is op0510=0x3F & SR0004_a & R1115 & op0004=8; op1626=0x40 & op2731=0x0A {
+	fxu_check(inst_start);
+	R1115 = ((FXSR >> 2) & 0x3f00) | ((FXSR >> 17) & 0x20) | (FXSR & 0x1f);
+}
+:ldsr R0004, SR1115_a, 10 is op0510=0x3F & R0004 & SR1115_a & op1115=9; op1626=0x20 & op2731=0x0A {
+	fxu_check(inst_start);
+	# FXINFO is read-only (writes are ignored)
+}
+:stsr SR0004_a, R1115, 10 is op0510=0x3F & SR0004_a & R1115 & op0004=9; op1626=0x40 & op2731=0x0A {
+	fxu_check(inst_start);
+	R1115 = 3;
+}
+:ldsr R0004, SR1115_a, 10 is op0510=0x3F & R0004 & SR1115_a & op1115=10; op1626=0x20 & op2731=0x0A {
+	fxu_check(inst_start);
+	# FXCFG write: FXSR.RM[19:18] <- val[9:8], FXSR.XE[9:5] <- val[4:0];
+	# every other FXSR field is preserved.
+	FXSR = (FXSR & 0xfff3fc1f) | ((R0004 & 0x300) << 10) | ((R0004 & 0x1f) << 5);
+}
+:stsr SR0004_a, R1115, 10 is op0510=0x3F & SR0004_a & R1115 & op0004=10; op1626=0x40 & op2731=0x0A {
+	fxu_check(inst_start);
+	R1115 = ((FXSR >> 10) & 0x300) | ((FXSR >> 5) & 0x1f);
+}
+:ldsr R0004, SR1115_a, 10 is op0510=0x3F & R0004 & SR1115_a & op1115=12; op1626=0x20 & op2731=0x0A {
+	fxu_check(inst_start);
+	FXXC = R0004 & 0x3f3f3f3f;
+}
+:stsr SR0004_a, R1115, 10 is op0510=0x3F & SR0004_a & R1115 & op0004=12; op1626=0x40 & op2731=0x0A {
+	fxu_check(inst_start);
+	R1115 = FXXC;
+}
+:ldsr R0004, SR1115_a, 10 is op0510=0x3F & R0004 & SR1115_a & op1115=13; op1626=0x20 & op2731=0x0A {
+	fxu_check(inst_start);
+	FXXP = R0004 & 0x1f1f1f1f;
+}
+:stsr SR0004_a, R1115, 10 is op0510=0x3F & SR0004_a & R1115 & op0004=13; op1626=0x40 & op2731=0x0A {
+	fxu_check(inst_start);
+	R1115 = FXXP;
+}
+
+# ------------------------------------- indexed MPU descriptor access
+# LDSR/STSR selID 5 (R01UH0770EJ0121 Table 3.61; R01UH0865EJ0140 Table
+# 3.12): MPIDX = SR16,5, MPBK = SR17,5, MPLA = SR20,5, MPUA = SR21,5,
+# MPAT = SR22,5; the display names come from the SR0004_9/SR1115_9
+# attachment in v850_common.sinc (the SR0004_5/SR1115_5 fields stay
+# attached to the G3M selID-5 register set in v850e3.sinc, so the two
+# views coexist on disjoint regIDs). All five registers are SV permission
+# in the conventional (non-virtualization) mode modeled here (Table 3.12
+# HVE = 0; MPBK rises to HV when virtualization is enabled): user-mode
+# access takes the FE-level PIE (cause A0H, vector A0H) before any side
+# effect. The descriptor views address the region selected by MPIDX[4:0]
+# in the bank selected by the one-bit MPBK[0] -- the same per-region,
+# per-bank backing the LDM.MP/STM.MP bursts move -- with the write masks
+# of Tables 3.70-3.72 (MPLA/MPUA bits 1:0 and MPAT bits 13:8 and 6 read
+# 0). The full 5-bit region range is live: the G4MH virtualization
+# profile that defines MPBK implements 32 entries (R01UH0865EJ0140 Table
+# 3.13 NMPUE = 31).
+:ldsr R0004, SR1115_9, 5 is op0510=0x3F & R0004 & SR1115_9 & op1115>=16 & op1115; op1626=0x20 & op2731=0x05 {
+	local mpu_regid:4 = op1115;
+	mpu_indexed_check(inst_start, mpu_regid);
+	if (mpu_regid == 16) goto <w_mpidx>;
+	if ((SVLOCK & 1) != 0) goto <w_done>;
+	if (mpu_regid == 17) goto <w_mpbk>;
+	local cell:4 = 0;
+	mpu_bank_cell(cell, MPIDX);
+	if (mpu_regid == 21) goto <w_mpua>;
+	if (mpu_regid == 22) goto <w_mpat>;
+	# MPLA
+	*[register]:4 cell = R0004 & 0xfffffffc;
+	goto <w_done>;
+	<w_mpua>
+	*[register]:4 (cell + 4) = R0004 & 0xfffffffc;
+	goto <w_done>;
+	<w_mpat>
+	*[register]:4 (cell + 8) = R0004 & 0xffffc0bf;
+	goto <w_done>;
+	<w_mpidx>
+	MPIDX = R0004 & 0x1f;
+	goto <w_done>;
+	<w_mpbk>
+	local bank:4 = R0004 & 3;
+	if (bank > 1) goto <w_done>;
+	MPBK = bank;
+	<w_done>
+}
+
+:stsr SR0004_9, R1115, 5 is op0510=0x3F & SR0004_9 & R1115 & op0004>=16 & op0004; op1626=0x40 & op2731=0x05 {
+	local mpu_regid:4 = op0004;
+	mpu_indexed_check(inst_start, mpu_regid);
+	if (mpu_regid == 16) goto <r_mpidx>;
+	if (mpu_regid == 17) goto <r_mpbk>;
+	R1115 = 0;
+	local cell:4 = 0;
+	mpu_bank_cell(cell, MPIDX);
+	if (mpu_regid == 21) goto <r_mpua>;
+	if (mpu_regid == 22) goto <r_mpat>;
+	# MPLA
+	R1115 = *[register]:4 cell;
+	goto <r_done>;
+	<r_mpua>
+	R1115 = *[register]:4 (cell + 4);
+	goto <r_done>;
+	<r_mpat>
+	R1115 = *[register]:4 (cell + 8);
+	goto <r_done>;
+	<r_mpidx>
+	R1115 = MPIDX & 0x1f;
+	goto <r_done>;
+	<r_mpbk>
+	R1115 = MPBK & 3;
+	<r_done>
+}
+@endif
+
+# ------------------------------------- TLB maintenance
+:tlbai is op0510=0x3F & op1115=0x10; op1626=0x160 & op2731=0x11 {
+	__tlbai();
+}
+
+:tlbvi is op0510=0x3F & op1115=0x10; op1626=0x160 & op2731=0x10 {
+	__tlbvi();
+}
+
+:tlbs is op0510=0x3F & op1115=0x10; op1626=0x160 & op2731=0x18 {
+	__tlbs();
+}
+
+:tlbw is op0510=0x3F & op1115=0x10; op1626=0x160 & op2731=0x1C {
+	__tlbw();
+}
+
+:tlbr is op0510=0x3F & op1115=0x10; op1626=0x160 & op2731=0x1D {
+	__tlbr();
+}
+
+# ------------------------------------- hypervisor / debug / traps
+:hvtrap op0004 is op0510=0x3F & op1115=0 & op0004; op1626=0x110 {
+	if ((HVCFG & 1) != 0) goto <virtual_enabled>;
+	local rie_handler:4 = 0;
+	enter_fe_exception(inst_start, 0x60, 0x60, rie_handler);
+	goto [rie_handler];
+	<virtual_enabled>
+	virtual_sv_check(inst_start);
+	local prior_pswh:4 = PSWH;
+	local host_pswh:4 = PSWH & 0x7fffffff;
+	virtual_select_context(host_pswh);
+	local handler:4 = 0;
+	enter_ei_exception(inst_next, 0xf000 + op0004, 0x20, handler);
+	# The transition has already selected Host; save the original GM/GPID.
+	EIPSWH = prior_pswh;
+	goto [handler];
+}
+
+:hvcall imm8 is op0510=0x3F & op1115=0x1A & op0004; op1626=0x160 & op2731 & op3031=1
+[ imm8 = op0004 | ((op2731 & 7) << 5); ] {
+	local immediate:4 = imm8;
+	__hvcall(immediate);
+}
+
+:est is op0510=0x3F; op1626=0x132 {
+	__est();
+}
+
+:dst is op0510=0x3F; op1626=0x134 {
+	__dst();
+}
+
+# Legacy V850E1 debug contract, U14559EJ3V0UM pp.66-67, §§6.2.3/6.3.2.
+# The synthetic debug bank is distinct from G4MH Host/Guest return state.
+:dbret is op0510=0x3F & op1115=0 & op0004=0; op1626=0x146 & op2731=0 {
+	PC = dbg_pc;
+	PSW = dbg_psw;
+	dbg_dir = dbg_dir & 0xfffffffe;
+	return [dbg_pc];
+}
+
+:dbtrap is op0010=0x040 & op1115=0x1F & op0004=0 {
+	dbg_pc = inst_next;
+	dbg_psw = PSW;
+	PSW = PSW | 0xe0;
+	dbg_dir = dbg_dir | 1;
+	PC = 0x60;
+	goto 0x60;
+}
+
+:dbhvtrap is op0010=0x040 & op1115=0x1C & op0004=0 {
+	__dbhvtrap();
+}
+
+:dbcp is op0010=0x040 & op1115=0x1D & op0004=0 {
+	local instruction_pc:4 = inst_start;
+	__dbcp(instruction_pc);
+}
+
+:dbtag imm10 is op0510=0x3F & op1115=0x19 & op0004; op1626=0x160 & op2731
+[ imm10 = (op2731 << 5) | op0004; ] {
+	local immediate:4 = imm10;
+	local instruction_pc:4 = inst_start;
+	__dbtag(instruction_pc, immediate);
+}
+
+:rmtrap is op0010=0x040 & op1115=0x1E & op0004=0 {
+	__rmtrap();
+}
+
+:resbank is op0510=0x3F & op1115=0; op1626=0x160 & op2731=0x10 {
+	__resbank();
+}
+
+# Software trace output, not an architectural SP/memory push (SDK ins.cpp).
+define pcodeop __dbpush_gpr;
+macro dbpush_gpr(number, low, high) {
+	local current:4 = number;
+	if ((current < low) || (current > high)) goto <done>;
+	local value:4 = 0;
+	if (current == 0) goto <value_ready>;
+	value = *[register]:4 (current << 2);
+	<value_ready>
+	__dbpush_gpr(current, value);
+	<done>
+}
+:dbpush R0004, R2731 is op0515=0x2FF & R0004 & op0004; op1626=0x160 & R2731 & op2731 {
+	local low:4 = op0004;
+	local high:4 = op2731;
+	local instruction_pc:4 = inst_start;
+	__dbpush(instruction_pc, low, high);
+	dbpush_gpr(0:4, low, high);
+	dbpush_gpr(1:4, low, high);
+	dbpush_gpr(2:4, low, high);
+	dbpush_gpr(3:4, low, high);
+	dbpush_gpr(4:4, low, high);
+	dbpush_gpr(5:4, low, high);
+	dbpush_gpr(6:4, low, high);
+	dbpush_gpr(7:4, low, high);
+	dbpush_gpr(8:4, low, high);
+	dbpush_gpr(9:4, low, high);
+	dbpush_gpr(10:4, low, high);
+	dbpush_gpr(11:4, low, high);
+	dbpush_gpr(12:4, low, high);
+	dbpush_gpr(13:4, low, high);
+	dbpush_gpr(14:4, low, high);
+	dbpush_gpr(15:4, low, high);
+	dbpush_gpr(16:4, low, high);
+	dbpush_gpr(17:4, low, high);
+	dbpush_gpr(18:4, low, high);
+	dbpush_gpr(19:4, low, high);
+	dbpush_gpr(20:4, low, high);
+	dbpush_gpr(21:4, low, high);
+	dbpush_gpr(22:4, low, high);
+	dbpush_gpr(23:4, low, high);
+	dbpush_gpr(24:4, low, high);
+	dbpush_gpr(25:4, low, high);
+	dbpush_gpr(26:4, low, high);
+	dbpush_gpr(27:4, low, high);
+	dbpush_gpr(28:4, low, high);
+	dbpush_gpr(29:4, low, high);
+	dbpush_gpr(30:4, low, high);
+	dbpush_gpr(31:4, low, high);
+}
+
+# 0xFFFFFFFF: reserved breakpoint encoding (IDA oracle artifact; not in the
+# public Renesas manuals).
+:breakpoint is op0015=0xFFFF; op1631=0xFFFF {
+	__breakpoint();
+}
+
+# G4MH virtualization system registers, R01UH0865EJ0140 Tables
+# 3.21-3.25/3.50. Exact G3M has none of these added register selectors.
+:ldsr R0004, "HVCFG", 1 is op0510=0x3f & R0004 & op1115=16; op1626=0x20 & op2731=1 {
+	virtual_hv_reg_check(inst_start);
+	HVCFG = R0004 & 1 & ((PID >> 23) & 1);
+	if ((HVCFG & 1) != 0) goto <cfg_done>;
+	PSWH = 0;
+	<cfg_done>
+}
+:stsr "HVCFG", R1115, 1 is op0510=0x3f & R1115 & op0004=16; op1626=0x40 & op2731=1 {
+	virtual_hv_reg_check(inst_start);
+	R1115 = HVCFG & 1;
+}
+:ldsr R0004, "GMCFG", 1 is op0510=0x3f & R0004 & op1115=17; op1626=0x20 & op2731=1 {
+	virtual_hv_reg_check(inst_start);
+	if ((HVCFG & 1) == 0) goto <cfg_done>;
+	GMCFG = R0004 & 0x00030013;
+	GMPSW = (GMPSW & 0xfff8ffff) | (GMPSW & GMCFG & 0x00030000);
+	<cfg_done>
+}
+:stsr "GMCFG", R1115, 1 is op0510=0x3f & R1115 & op0004=17; op1626=0x40 & op2731=1 {
+	virtual_hv_reg_check(inst_start);
+	R1115 = 0;
+	if ((HVCFG & 1) == 0) goto <cfg_done>;
+	R1115 = GMCFG & 0x00030013;
+	<cfg_done>
+}
+:ldsr R0004, "PSWH", 0 is op0510=0x3f & R0004 & op1115=15; op1631=0x20 {
+	virtual_hv_reg_check(inst_start);
+	# Read-only: mode transitions are exception/return effects, not LDSR.
+}
+:stsr "PSWH", R1115, 0 is op0510=0x3f & R1115 & op0004=15; op1631=0x40 {
+	if ((HVCFG & 1) != 0) goto <readable>;
+	virtual_hv_reg_check(inst_start);
+	R1115 = 0;
+	goto <read_done>;
+	<readable>
+	# User-readable in virtualization mode (Table 3.20 note 2).
+	R1115 = PSWH & 0x80000700;
+	<read_done>
+}
+:ldsr R0004, "EIPSWH", 0 is op0510=0x3f & R0004 & op1115=18; op1631=0x20 {
+	virtual_hv_reg_check(inst_start);
+	if ((HVCFG & 1) == 0) goto <saved_done>;
+	EIPSWH = R0004 & 0x80000700;
+	<saved_done>
+}
+:stsr "EIPSWH", R1115, 0 is op0510=0x3f & R1115 & op0004=18; op1631=0x40 {
+	virtual_hv_reg_check(inst_start);
+	R1115 = 0;
+	if ((HVCFG & 1) == 0) goto <saved_done>;
+	R1115 = EIPSWH & 0x80000700;
+	<saved_done>
+}
+:ldsr R0004, "FEPSWH", 0 is op0510=0x3f & R0004 & op1115=19; op1631=0x20 {
+	virtual_hv_reg_check(inst_start);
+	if ((HVCFG & 1) == 0) goto <saved_done>;
+	FEPSWH = R0004 & 0x80000700;
+	<saved_done>
+}
+:stsr "FEPSWH", R1115, 0 is op0510=0x3f & R1115 & op0004=19; op1631=0x40 {
+	virtual_hv_reg_check(inst_start);
+	R1115 = 0;
+	if ((HVCFG & 1) == 0) goto <saved_done>;
+	R1115 = FEPSWH & 0x80000700;
+	<saved_done>
+}
+:ldsr R0004, "HVSB", 1 is op0510=0x3f & R0004 & op1115=20; op1626=0x20 & op2731=1 {
+	virtual_hv_reg_check(inst_start);
+	if ((HVCFG & 1) == 0) goto <notification_done>;
+	HVSB = R0004;
+	<notification_done>
+}
+:stsr "HVSB", R1115, 1 is op0510=0x3f & R1115 & op0004=20; op1626=0x40 & op2731=1 {
+	if ((HVCFG & 1) != 0) goto <notification_readable>;
+	virtual_sv_check(inst_start);
+	R1115 = 0;
+	goto <notification_done>;
+	<notification_readable>
+	R1115 = HVSB;
+	<notification_done>
+}
+:ldsr R0004, "SVLOCK", 1 is op0510=0x3f & R0004 & op1115=8; op1626=0x20 & op2731=1 {
+	virtual_sv_check(inst_start);
+	SVLOCK = R0004 & 1;
+}
+:stsr "SVLOCK", R1115, 1 is op0510=0x3f & R1115 & op0004=8; op1626=0x40 & op2731=1 {
+	virtual_sv_check(inst_start);
+	R1115 = SVLOCK & 1;
+}
+:ldsr R0004, "SPID", 1 is op0510=0x3f & R0004 & op1115=0; op1626=0x20 & op2731=1 {
+	virtual_sv_check(inst_start);
+	if ((SVLOCK & 1) != 0) goto <spid_done>;
+	local requested:4 = R0004 & 0x1f;
+	if (((SPIDLIST >> requested) & 1) == 0) goto <spid_done>;
+	SPID = requested;
+	<spid_done>
+}
+:stsr "SPID", R1115, 1 is op0510=0x3f & R1115 & op0004=0; op1626=0x40 & op2731=1 {
+	virtual_sv_check(inst_start);
+	R1115 = SPID & 0x1f;
+}
+:ldsr R0004, "SPIDLIST", 1 is op0510=0x3f & R0004 & op1115=1; op1626=0x20 & op2731=1 {
+	virtual_sv_check(inst_start);
+	# Read-only external system configuration (Table 3.39).
+}
+:stsr "SPIDLIST", R1115, 1 is op0510=0x3f & R1115 & op0004=1; op1626=0x40 & op2731=1 {
+	virtual_sv_check(inst_start);
+	R1115 = SPIDLIST;
+}
+:ldsr R0004, "PID", 1 is op0510=0x3f & R0004 & op1115=6; op1626=0x20 & op2731=1 {
+	virtual_sv_check(inst_start);
+	# Read-only processor capability/identity.
+}
+:ldsr R0004, "PEID", 2 is op0510=0x3f & R0004 & op1115=0; op1626=0x20 & op2731=2 {
+	virtual_sv_check(inst_start);
+	# Active PEID is read-only in Host and Guest (Tables 3.49/3.70).
+}
+:stsr "PEID", R1115, 2 is op0510=0x3f & R1115 & op0004=0; op1626=0x40 & op2731=2 {
+	R1115 = PEID & 0x1f;
+}
+:ldsr R0004, "PLMR", 2 is op0510=0x3f & R0004 & op1115=14; op1626=0x20 & op2731=2 {
+	virtual_sv_check(inst_start);
+	PLMR = R0004 & 0x3f;
+}
+:stsr "PLMR", R1115, 2 is op0510=0x3f & R1115 & op0004=14; op1626=0x40 & op2731=2 {
+	virtual_sv_check(inst_start);
+	R1115 = PLMR & 0x3f;
+}
+:ldsr R0004, "MPM", 5 is op0510=0x3f & R0004 & op1115=0; op1626=0x20 & op2731=5 {
+	virtual_sv_check(inst_start);
+	if ((SVLOCK & 1) != 0) goto <mpm_done>;
+	MPM = R0004;
+	<mpm_done>
+}
+
+# Inactive guest-context registers are operated from Host with HV
+# permission. Direct GMSPID/GMMPM writes bypass SVLOCK (Tables
+# 3.61/3.67 notes), unlike the active-context SPID/MPM paths above.
+:ldsr R0004, VSR1115, 9 is op0510=0x3f & R0004 & VSR1115 & op1115; op1626=0x20 & op2731=9 {
+	virtual_hv_reg_check(inst_start);
+	if ((HVCFG & 1) == 0) goto <guest_done>;
+	local value:4 = R0004;
+	local guest_regid:4 = op1115;
+	if (guest_regid == 0) goto <guest_pc>;
+	if (guest_regid == 2) goto <guest_pc>;
+	if (guest_regid == 5) goto <guest_psw>;
+	if (guest_regid == 16) goto <guest_spid>;
+	if (guest_regid == 17) goto <guest_spidlist>;
+	if (guest_regid == 22) goto <guest_plmr>;
+	if (guest_regid == 24) goto <guest_lock>;
+	if (guest_regid == 30) goto <guest_peid>;
+	goto <guest_write>;
+	<guest_pc>
+	value = value & 0xfffffffe;
+	goto <guest_write>;
+	<guest_psw>
+	value = (value & 0x43f080ff) | (value & GMCFG & 0x00030000) | 0x8000;
+	goto <guest_write>;
+	<guest_spid>
+	value = value & 0x1f;
+	if (((SPIDLIST >> value) & 1) == 0) goto <guest_done>;
+	goto <guest_write>;
+	<guest_spidlist>
+	value = value & SPIDLIST;
+	goto <guest_write>;
+	<guest_plmr>
+	value = value & 0x3f;
+	goto <guest_write>;
+	<guest_lock>
+	value = value & 1;
+	goto <guest_write>;
+	<guest_peid>
+	value = value & 0x1f;
+	<guest_write>
+	VSR1115 = value;
+	<guest_done>
+}
+:stsr VSR0004, R1115, 9 is op0510=0x3f & R1115 & VSR0004; op1626=0x40 & op2731=9 {
+	virtual_hv_reg_check(inst_start);
+	R1115 = 0;
+	if ((HVCFG & 1) == 0) goto <guest_done>;
+	R1115 = VSR0004;
+	<guest_done>
+}

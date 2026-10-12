@@ -84,10 +84,12 @@ public class AssertProcessorFixtureSemantics extends GhidraScript {
 
     private void stepInterruptControl(EmulatorHelper emu, String label,
                                       String expectedUserop) throws Exception {
-        if (emu.step(monitor)) return;
-        String error = emu.getLastError();
-        if (error == null || !error.contains(expectedUserop)) {
-            fail(label + ": unexpected emulator failure: " + error);
+        try {
+            emu.getEmulator().executeInstruction(false, monitor);
+        } catch (ghidra.pcode.emulate.UnimplementedCallOtherException expected) {
+            if (!expected.getMessage().contains(expectedUserop)) {
+                throw expected;
+            }
         }
     }
 

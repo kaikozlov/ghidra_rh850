@@ -3988,3 +3988,25 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **GTS semantic correction:** Toyota names `0x1905` **Cruise Control Permission Flag** and `0x1906` bit8 **Main Switch Recognition Flag**. Both describe current cruise state. `0x1906` bit40 is separately the **ACC Not Available Icon Lighting Request Flag**. None is a persistent proof that the peer ECU failed to recover from EPS programming.
 - **Maintained contract:** `drcc_permission_observed()` remains a live cruise-state diagnostic only for explicit recovery/debugging. The startup control-domain report does not derive or publish a DRCC-permission verdict. Startup `peer_health_observed()` instead requires peer identity/liveness at the topology-defined FRC/Brake addresses plus Brake `0x102D` fail-status/fail-control clear and `0x102F` EPS-communication-open clear; only the kit-bound EPS identity remains target-exact. Explicit peer recovery binds each reset to the F181 observed immediately before it rather than Camry part numbers. The normal startup flow then requires a fresh resident-signing self-test. Healthy startup no longer resets Brake/FRC or waits for `0x1905`/MAIN to assert.
 - **Canonical:** `targets/camry-2026/raw-20260920/startup-ui-transient-drcc-permission/`; `tests/targets/tss3/verify_tss3_post_install_recovery.py`; `exploit/ephemeral_runtime/tss3_post_install_recovery.py`; `exploit/ephemeral_runtime/tss3_request_signer_ui_bringup.py`; [Toyota TSS3 minimal runtime](../architecture/toyota-tss3-minimal-runtime.md).
+
+### CORR-203 — Interior MULU halfwords were misdecoded as boot CALLT sites
+
+- **Wrong:** KEYLESS-008 treated Sienna bytes `22 02 @ 0x1D5C` and H/F bytes
+  `22 02 @ 0x1D40` as `callt 0x22`, then joined CTBP zero to the halfword at
+  CodeFlash `0x44` and claimed a fixed boot call-table edge.
+- **Root cause:** the raw two-byte token was interpreted without preserving the
+  containing instruction boundary. A stale Sienna project also had an
+  overlapping auto-analysis function at `0x1D58`, which made the interior
+  halfword appear executable.
+- **Right:** exact bytes are `fb 0f 22 02`: four-byte
+  `mulu r27,r1,r0 @ 0x1D5A` on Sienna and `@ 0x1D3E` on H/F. The containing
+  functions coherently compute `(param_2 & 0xffff) * 20000`; there is no CALLT
+  edge at either claimed address. A full RH850/E3 LDSR decode independently
+  proves the sole CTBP writer in each image is `ldsr r0,CTBP @ 0x25E`, so CTBP
+  remains exact zero context, but it closes no security pivot at these sites.
+- **Consequence:** KEYLESS-008 is retained as disproved. KEYLESS-014's
+  target-native computed-control-flow negative stands independently and no
+  other keyless-execution closure relies on the false edge.
+- **Canonical:** [../security/keyless-exec-surface-assessment.md](../security/keyless-exec-surface-assessment.md)
+  §10; [FINDINGS KEYLESS-008](FINDINGS.md);
+  `tests/runtime/verify_keyless_exec_surface.py`.

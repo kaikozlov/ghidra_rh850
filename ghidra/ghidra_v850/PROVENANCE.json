@@ -1,11 +1,11 @@
 {
   "name": "Renesas_v850",
   "language_id": "v850e3:LE:32:default",
-  "language_version": "0.7",
+  "language_version": "0.8",
   "upstream": {
     "url": "https://github.com/esaulenka/ghidra_v850",
     "baseline_commit": "14c1b5be32b8ec741ee626c8bca9885c58f7a473",
-    "notes": "Vendored in-tree; local edits prioritize RH850/P1M-E R7F701381 correctness over upstreamability."
+    "notes": "Vendored in-tree; architecture-specific semantics follow primary manuals, while automatic register, switch and compiler-helper analysis is not restricted to the current firmware targets."
   },
   "comparisons": {
     "ghidra": {
@@ -23,6 +23,17 @@
     "radare2": {
       "url": "https://github.com/radareorg/radare2",
       "commit": "391dc446b5f12000c9588bff162a45689463eff6"
+    },
+    "ida": {
+      "installed_version": "9.5.261001.a12ef234",
+      "sdk_url": "https://github.com/HexRaysSA/ida-sdk",
+      "sdk_commit": "2a9143f2f4abd7f54fe20d1e40fb68391d19c4cb",
+      "processor_sha256": "2d618072c2c2f4b17d4e060b711d303663fd42008be49756410acaf4dcea1508",
+      "decompiler_sha256": "0bebe2e93ef96920f3a6f1d751135e453e739c8865f0c154b7e231103673cacd",
+      "imported": [
+        "complete PREPARE imm16 function-start pattern widths"
+      ],
+      "notes": "Behavior-level comparison only for proprietary binaries; readable processor prior art comes from the official SDK. Renesas manuals and exact target bytes remain architectural authority."
     }
   },
   "target": {
@@ -33,7 +44,13 @@
   "authorities": [
     "R01US0123EJ0140 Rev.1.40 RH850G3M User's Manual: Software",
     "R01UH0585EJ0120 Rev.1.20 RH850/P1M-E Group User's Manual: Hardware",
-    "R01US0001EJ0100 Rev.1.00 V850E2M User's Manual: Architecture (V850E2M language)"
+    "R01US0001EJ0100 Rev.1.00 V850E2M User's Manual: Architecture (V850E2M language)",
+    "R01US0209EJ0220 Rev.2.20 RH850G4MH User's Manual: Software (broad RH850 language)",
+    "R01US0432EJ0110 Rev.1.10 RH850G4MH Virtualization User's Manual: Software (broad RH850 language)",
+    "R01UH0865EJ0140 Rev.1.40 RH850G4MH Virtualization User's Manual: Hardware (Host/Guest register banks, permissions and MPU bank selection)",
+    "R01UH0770EJ0121 Rev.1.21 RH850/E2x-FCC2 User's Manual: Hardware (FXU and indexed MPU register semantics)",
+    "R01UH0128ED0730 Rev.7.30 V850E/PHO3 Hardware User Manual pp.104-105 (legacy E1F EFG/ECT registers)",
+    "U14559EJ3V0UM V850E1 User's Manual: Architecture (legacy DBTRAP/DBRET and DIR.DM transitions)"
   ],
   "ghidra": {
     "required_version": "12.1.4",

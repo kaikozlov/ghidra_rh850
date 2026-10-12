@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  Renesas V850/RH850 compiler specification — GCC (old V850 ABI).
+
+  Models the classic V850 GCC ABI (IDA nec850 ABI_OLDGCC), documented at
+  https://www.filibeto.org/unix/tru64/lib/ossc/doc/cygnus_doc-99r1/html/6_embed/embV850.html
+  and exposed by GCC's v850/rh850 ports:
+
+    - arguments in r6..r9, then the caller's stack;
+    - parameters use their natural alignment: 8-byte values occupy
+      even-aligned register pairs and 8-byte stack slots (IDA
+      inf_set_big_arg_align for ABI_OLDGCC);
+    - scalar/pointer returns in r10 (32-bit) or r10:r11 (64-bit);
+    - structures/unions no larger than 8 bytes are returned in
+      r10 (:r11) when their flattened layout permits;
+    - structures/unions larger than 8 bytes passed by value are converted
+      to pass-by-invisible-reference (caller passes a pointer);
+    - structures/unions larger than 8 bytes returned by value use a hidden
+      return buffer pointer in r6 (the compiler copies r6 into r10 before
+      returning; modeled here with hidden_return as on mips o32).
+
+  Register classification matches the firmware-observed default: r20..r29,
+  sp, gp, tp preserved; ep (r30) volatile; lp clobbered by calls.
+-->
+<compiler_spec>
+  <data_organization>
+     <absolute_max_alignment value="0" />
+     <machine_alignment value="4" />
+     <default_alignment value="1" />
+     <default_pointer_alignment value="4" />
+     <pointer_size value="4" />
+     <wchar_size value="4" />
+     <short_size value="2" />
+     <integer_size value="4" />
+     <long_size value="4" />
+     <long_long_size value="8" />
+     <float_size value="4" />
+     <double_size value="8" />
+     <long_double_size value="8" />
+     <size_alignment_map>
+          <entry size="1" alignment="1" />
+          <entry size="2" alignment="2" />
+          <entry size="4" alignment="4" />
+          <entry size="8" alignment="8" />
+     </size_alignment_map>
+  </data_organization>
+  <global>
+    <range space="ram"/>
+  </global>
+  <stackpointer register="sp" space="ram" growth="negative"/>
+  <returnaddress>
+    <register name="lp"/>
+  </returnaddress>
+
+  <default_proto>
+    <prototype name="__stdcall" extrapop="0" stackshift="0">
+      <input>
+        <pentry minsize="1" maxsize="4" extension="inttype">
+          <register name="r6"/>
+        </pentry>
+        <pentry minsize="1" maxsize="4" extension="inttype">
+          <register name="r7"/>
+        </pentry>
+        <pentry minsize="1" maxsize="4" extension="inttype">
+          <register name="r8"/>
+        </pentry>
+        <pentry minsize="1" maxsize="4" extension="inttype">
+          <register name="r9"/>
+        </pentry>
+        <pentry minsize="1" maxsize="500" align="4">
+          <addr offset="0" space="stack"/>
+        </pentry>
+        <!-- Old GCC: structures/unions larger than 8 bytes passed by value
+             are converted to pass-by-invisible-reference. -->
+        <rule>
+          <datatype name="struct" minsize="9"/>
+          <convert_to_ptr/>
+        </rule>
+        <rule>
+          <datatype name="union" minsize="9"/>
+          <convert_to_ptr/>
+        </rule>
+        <!-- Natural alignment: 8-byte values take even-aligned register
+             pairs; everything else splits across remaining registers and
+             then the stack. -->
+        <rule>
+          <datatype name="any"/>
+          <join align="true"/>
+        </rule>
+      </input>
+      <output>
+        <pentry minsize="1" maxsize="4" extension="inttype">
+          <register name="r10"/>
+        </pentry>
+        <pentry minsize="1" maxsize="4">
+          <register name="r11"/>
+        </pentry>
+        <!-- Old GCC: structures/unions larger than 8 bytes are returned
+             through a hidden return buffer pointer in r6, and the callee
+             copies r6 into r10 before returning. Ghidra 12.1.4's
+             compiler_spec.rxg only permits the voidlock attribute on
+             <hidden_return>, so this uses the schema-valid plain form:
+             with no storage="hiddenret" pentry in the input list, the
+             HIDDENRET_SPECIALREG allocation draws the pointer from the
+             first general-purpose entry (r6) and shifts later arguments
+             to r7+, while the non-void form keeps the r6->r10 pointer
+             echo on return. -->
+        <rule>
+          <datatype name="struct" minsize="9"/>
+          <hidden_return/>
+        </rule>
+        <rule>
+          <datatype name="union" minsize="9"/>
+          <hidden_return/>
+        </rule>
+        <!-- 8-byte or smaller aggregates return in r10 (:r11). -->
+        <rule>
+          <datatype name="any"/>
+          <join/>
+        </rule>
+      </output>
+      <unaffected>
+        <register name="sp"/>
+        <register name="gp"/>
+        <register name="tp"/>
+        <register name="r20"/>
+        <register name="r21"/>
+        <register name="r22"/>
+        <register name="r23"/>
+        <register name="r24"/>
+        <register name="r25"/>
+        <register name="r26"/>
+        <register name="r27"/>
+        <register name="r28"/>
+        <register name="r29"/>
+      </unaffected>
+      <killedbycall>
+        <register name="r0"/>
+        <register name="r1"/>
+        <register name="r2"/>
+        <register name="r6"/>
+        <register name="r7"/>
+        <register name="r8"/>
+        <register name="r9"/>
+        <register name="r10"/>
+        <register name="r11"/>
+        <register name="r12"/>
+        <register name="r13"/>
+        <register name="r14"/>
+        <register name="r15"/>
+        <register name="r16"/>
+        <register name="r17"/>
+        <register name="r18"/>
+        <register name="r19"/>
+        <register name="ep"/>
+        <register name="lp"/>
+      </killedbycall>
+    </prototype>
+  </default_proto>
+
+  <!-- Interrupt / exception handler prototype: no ABI arguments, returns to
+       a saved EIPC/FEPC context via eiret/reti/feret; preserves every GPR. -->
+  <prototype name="__interrupt" extrapop="0" stackshift="0">
+    <input></input>
+    <output killedbycall="true"></output>
+    <unaffected>
+      <register name="r1"/>
+      <register name="r2"/>
+      <register name="sp"/>
+      <register name="gp"/>
+      <register name="tp"/>
+      <register name="r6"/>
+      <register name="r7"/>
+      <register name="r8"/>
+      <register name="r9"/>
+      <register name="r10"/>
+      <register name="r11"/>
+      <register name="r12"/>
+      <register name="r13"/>
+      <register name="r14"/>
+      <register name="r15"/>
+      <register name="r16"/>
+      <register name="r17"/>
+      <register name="r18"/>
+      <register name="r19"/>
+      <register name="r20"/>
+      <register name="r21"/>
+      <register name="r22"/>
+      <register name="r23"/>
+      <register name="r24"/>
+      <register name="r25"/>
+      <register name="r26"/>
+      <register name="r27"/>
+      <register name="r28"/>
+      <register name="r29"/>
+      <register name="ep"/>
+      <register name="lp"/>
+    </unaffected>
+  </prototype>
+</compiler_spec>

@@ -12,7 +12,6 @@ from exploit.common.ram_exec import TOYOTA_P1ME_PAYLOAD_BUILD_SECRET
 
 SIENNA = REPO / "firmware/RH850_P1M-E_CodeFlash.bin"
 F33 = REPO / "firmware/camry-8965F3307000/CodeFlash.bin"
-CSPEC = REPO / "ghidra/ghidra_v850/data/languages/v850.cspec"
 WILLEM_PAYLOAD = REPO / "tests/fixtures/payloads/ram_dump_payload.bin"
 
 SIENNA_SHA256 = "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde"
@@ -53,12 +52,6 @@ working_shellcode = inspection.shellcode_region[:WILLEM_SHELLCODE_SIZE]
 check("Willem payload authenticates and decrypts", inspection.cmac_valid and inspection.crc_residue == 0xFFFFFFFF and inspection.callback_address == 0xFEBF0000)
 check("Willem working shellcode executable prefix identity", hashlib.sha256(working_shellcode).hexdigest() == WILLEM_SHELLCODE_SHA256)
 check("Willem payload is zero-padded after the 438-byte shellcode", not any(inspection.shellcode_region[WILLEM_SHELLCODE_SIZE:]))
-
-cspec = CSPEC.read_text(encoding="utf-8")
-unaffected = cspec.split("<unaffected>", 1)[1].split("</unaffected>", 1)[0]
-for reg in range(20, 30):
-    check(f"cspec keeps r{reg} callee-saved", f'name="r{reg}"' in unaffected)
-check("cspec models ep/r30 volatile", 'name="ep"' not in unaffected and 'name="r30"' not in unaffected)
 
 print(f"\nSummary: {passed} passed, {failed} failed")
 raise SystemExit(1 if failed else 0)

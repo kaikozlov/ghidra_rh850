@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fingerprint the vendored Renesas_v850 processor sources."""
+"""Fingerprint the vendored Renesas_v850 languages and processor analyzers."""
 from __future__ import annotations
 
 import argparse
@@ -23,13 +23,18 @@ SOURCE_GROUPS = (
         "*.ldefs",
         "*.opinion",
         "*.dwarf",
+        "*.xml",
     )),
     (PATTERNS, ("*.xml",)),
+    (VENDOR / "data" / "arithmetic", ("*.json",)),
+    (VENDOR / "src" / "main" / "java", ("**/*.java",)),
 )
 META_FILES = (
     VENDOR / "extension.properties",
     VENDOR / "Module.manifest",
     VENDOR / "PROVENANCE.json",
+    ROOT / "tools" / "project" / "build_compiler_policy_specs.py",
+    ROOT / "tools" / "testing" / "processor" / "build_v850_arithmetic_reference_templates.py",
 )
 
 
@@ -55,11 +60,29 @@ def collect_sources() -> dict[str, str]:
     return files
 
 
+def collect_compiled(sla: Path) -> dict[str, str]:
+    extension = sla.parent.parent.parent
+    artifacts = [
+        extension / "data" / "languages" / f"{source.stem}.sla"
+        for source in sorted(LANG.glob("*.slaspec"))
+    ]
+    if any((VENDOR / "src" / "main" / "java").rglob("*.java")):
+        artifacts.append(extension / "lib" / "Renesas_v850.jar")
+    for pattern in ("*.cspec", "*.ldefs", "*.pspec", "*.opinion", "*.dwarf", "*.xml"):
+        artifacts.extend(sorted((extension / "data" / "languages").glob(pattern)))
+    artifacts.extend(sorted((extension / "data" / "patterns").glob("*.xml")))
+    artifacts.extend(sorted((extension / "data" / "arithmetic").glob("*.json")))
+    return {
+        path.relative_to(extension).as_posix(): sha256_file(path)
+        for path in artifacts
+    }
+
+
 def build_manifest(
     *,
     ghidra_version: str | None = None,
     cli_version: str | None = None,
-    sla_hash: str | None = None,
+    compiled_files: dict[str, str] | None = None,
 ) -> dict[str, object]:
     files = collect_sources()
     ordered = sorted(files.items())
@@ -70,13 +93,13 @@ def build_manifest(
         aggregate.update(digest.encode())
         aggregate.update(b"\0")
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "language_id": "v850e3:LE:32:default",
         "source_fingerprint": aggregate.hexdigest(),
         "files": dict(ordered),
         "ghidra_version": ghidra_version,
         "ghidra_cli_version": cli_version,
-        "compiled_sla_sha256": sla_hash,
+        "compiled_files": compiled_files,
     }
 
 
@@ -91,17 +114,16 @@ def main() -> int:
     )
     parser.add_argument("--ghidra-version")
     parser.add_argument("--cli-version")
-    parser.add_argument("--sla", type=Path, help="Compiled v850e3.sla to hash")
+    parser.add_argument("--sla", type=Path, help="Compiled v850e3.sla in the built extension to fingerprint")
     args = parser.parse_args()
 
     if args.source_only and not args.expect:
         parser.error("--source-only requires --expect")
 
-    sla_hash = sha256_file(args.sla) if args.sla else None
     manifest = build_manifest(
         ghidra_version=args.ghidra_version,
         cli_version=args.cli_version,
-        sla_hash=sla_hash,
+        compiled_files=collect_compiled(args.sla) if args.sla else None,
     )
 
     if args.expect:
@@ -121,7 +143,7 @@ def main() -> int:
                     file=sys.stderr,
                 )
                 return 2
-            fields.extend(["ghidra_version", "ghidra_cli_version", "compiled_sla_sha256"])
+            fields.extend(["ghidra_version", "ghidra_cli_version", "compiled_files"])
 
         mismatches = [
             field for field in fields if expected.get(field) != manifest.get(field)

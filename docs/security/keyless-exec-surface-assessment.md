@@ -246,21 +246,27 @@ Thus the ordering is a real pre-SA side effect but cannot bootstrap a fresh
 locked ECU into TransferData/programming. H/F carry the complete WDBI and
 RequestDownload bodies at `-0x1C`; `KEYLESS-009` pins this prerequisite chain.
 
-## 10. Live handoff CPU control state: CTBP is not attacker-retained
+## 10. CTBP is fixed at reset; the former boot CALLT edge is disproved
 
 `0x9F00` explicitly establishes most boot CPU state: it disables interrupts,
 masks them, writes fixed PSW/EBASE/INTBP values, installs boot SP/GP/TP, and
-sets `MPM=0`. It does not itself write CTBP, so the retained CALLT base was
-audited separately rather than assumed safe.
+sets `MPM=0`. It does not itself write CTBP, so CTBP was audited separately
+rather than assumed safe.
 
-Across all three images the raw instruction `ldsr r0,CTBP` occurs exactly once,
-at reset startup `0x25E`. There is no application CTBP writer. Therefore the
-live application-to-boot handoff inherits `CTBP=0`, not tester-selected state.
-The Sienna boot CALLT at `0x1D5C` uses selector `0x22`; with CTBP zero the table
-entry is the fixed CodeFlash halfword at `0x44`, target `0x1E1E`. H/F relocate
-the call site to `0x1D40` and the table target to `0x1E02`, exactly `-0x1C`.
-This closes the otherwise plausible "retain a system-register call-table base"
-pivot. `KEYLESS-008` pins the raw instruction/table facts.
+A whole-image, two-byte-aligned decode of every RH850/E3 LDSR encoding targeting
+CTBP finds exactly one writer in each image: `ldsr r0,CTBP @ 0x25E`. There is
+no application CTBP writer, so the live application-to-boot handoff inherits
+`CTBP=0`, not tester-selected state.
+
+The former CALLT interpretation was wrong. Sienna bytes `22 02 @ 0x1D5C` are
+the second halfword of the four-byte `mulu r27,r1,r0 @ 0x1D5A`; H/F bytes
+`22 02 @ 0x1D40` are likewise the second halfword of `mulu @ 0x1D3E`. The
+containing functions coherently compute `(param_2 & 0xffff) * 20000`. Stale
+overlapping auto-analysis had treated those interior halfwords as
+`callt 0x22` and incorrectly joined unrelated table halfwords at `0x44`.
+Therefore CTBP's exact value is recovered context, but no CALLT-based pivot is
+closed by these sites. `KEYLESS-008` retains this correction; `CORR-203`
+records the superseded security claim.
 
 ## 11. Failed boot-SA computation does not expose a response-stack oracle
 
@@ -396,8 +402,9 @@ The census also produced 98 decoded computed transfers outside a recognized
 function body. Their definition chains were reviewed separately: 16 are in the
 `0x10000..0x1FFFF` calibration region, two in the `0x20000` vector/identity
 area, and the remainder are auto-analysis gaps/data or target-specific callback
-fragments. None of their target-definition chains reads the XCP window. The
-real CALLT concern is independently closed by §10: CTBP is fixed to zero.
+fragments. None of their target-definition chains reads the XCP window.
+The specific CALLT sites previously cited here are disproved by §10. This
+computed-transfer result stands independently and does not rely on them.
 Configured H XCP/async callback tables are separately raw-byte pinned by
 `tools/test corolla_h`.
 

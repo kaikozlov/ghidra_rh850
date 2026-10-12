@@ -691,7 +691,7 @@
       "image_bytes_scanned": 1048576,
       "only_writer_sets_zero": true,
       "sleigh_encoding": "op0510=0x3F, SR1115=20, op1626=0x20, op2731=0",
-      "verdict": "CALLT base cannot be retargeted by application/tester state in the exact image; the sole LDSR-to-CTBP is reset's ldsr r0,CTBP at 0x25E",
+      "verdict": "CTBP cannot be retargeted by application/tester state in the exact image; the sole LDSR-to-CTBP is reset's ldsr r0,CTBP at 0x25E; this does not establish a live CALLT consumer",
       "writers": [
         {
           "address": "0x0000025E",

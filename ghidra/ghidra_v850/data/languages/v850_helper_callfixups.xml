@@ -1,0 +1,518 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  GHS MULTI V850/RH850 64-bit arithmetic runtime call fixups.
+
+  SINGLE AUTHORITATIVE SOURCE: V850CompilerHelperAnalyzer loads this file
+  from the module data directory at runtime and installs any missing
+  callfixup into the active program via SpecExtension (persisted with the
+  program and honored by the decompiler). The compiler specs intentionally
+  do NOT carry copies of these definitions; nothing is inserted from this
+  file into any .cspec.
+
+  ABI (GHS MULTI RH850, matching v850_ghs.cspec's __stdcall prototype):
+    64-bit arg a in r6 (low word) : r7 (high word)
+    64-bit arg b in r8 (low word) : r9 (high word)
+    64-bit result  in r10 (low word) : r11 (high word)
+    boolean result in r10 (0/1)
+    shift count   in r8 (32-bit forms) or r8:r9 (64-bit forms)
+  The join pieces are most-significant-first in Ghidra, so on this
+  little-endian language the low word occupies the lower-numbered register.
+
+  Signedness follows the GHS runtime contracts:
+    div64/rem64/lt64/le64/abs64/shra_* are signed; udiv64/urem64/ult64/
+    ule64/shrl_* are unsigned; add/sub/mul/and/or/xor/eq/ne/shll are
+    sign-agnostic. The installed Hex-Rays V850 backend's helper descriptor
+    table maps gh_mul64 and gh_mul64o to the same QWORD m_mul value lowering
+    (table entries 0x3f5850/0x3f5868 in the recorded 9.5.261001 backend).
+    This is a recovered decompiler value contract, not proof that the two
+    physical runtime functions have identical overflow/flag side effects.
+-->
+<callfixups>
+  <callfixup name="v850_ghs_add64">
+    <target name="gh_add64"/>
+    <target name="__gh_add64"/>
+    <target name="___gh_add64"/>
+    <pcode>
+      <body><![CDATA[
+        local a:8 = (zext(r7) << 32) | zext(r6);
+        local b:8 = (zext(r9) << 32) | zext(r8);
+        local res:8 = a + b;
+        r10 = res:4;
+        r11 = res(4);
+      ]]></body>
+    </pcode>
+  </callfixup>
+
+  <callfixup name="v850_ghs_sub64">
+    <target name="gh_sub64"/>
+    <target name="__gh_sub64"/>
+    <target name="___gh_sub64"/>
+    <pcode>
+      <body><![CDATA[
+        local a:8 = (zext(r7) << 32) | zext(r6);
+        local b:8 = (zext(r9) << 32) | zext(r8);
+        local res:8 = a - b;
+        r10 = res:4;
+        r11 = res(4);
+      ]]></body>
+    </pcode>
+  </callfixup>
+
+  <callfixup name="v850_ghs_mul64">
+    <target name="gh_mul64"/>
+    <target name="gh_mul64o"/>
+    <target name="__gh_mul64"/>
+    <target name="___gh_mul64"/>
+    <target name="COM_mul64"/>
+    <pcode>
+      <body><![CDATA[
+        local a:8 = (zext(r7) << 32) | zext(r6);
+        local b:8 = (zext(r9) << 32) | zext(r8);
+        local res:8 = a * b;
+        r10 = res:4;
+        r11 = res(4);
+      ]]></body>
+    </pcode>
+  </callfixup>
+
+  <callfixup name="v850_ghs_and64">
+    <target name="gh_and64"/>
+    <target name="__gh_and64"/>
+    <target name="___gh_and64"/>
+    <pcode>
+      <body><![CDATA[
+        local a:8 = (zext(r7) << 32) | zext(r6);
+        local b:8 = (zext(r9) << 32) | zext(r8);
+        local res:8 = a & b;
+        r10 = res:4;
+        r11 = res(4);
+      ]]></body>
+    </pcode>
+  </callfixup>
+
+  <callfixup name="v850_ghs_or64">
+    <target name="gh_or64"/>
+    <target name="__gh_or64"/>
+    <target name="___gh_or64"/>
+    <pcode>
+      <body><![CDATA[
+        local a:8 = (zext(r7) << 32) | zext(r6);
+        local b:8 = (zext(r9) << 32) | zext(r8);
+        local res:8 = a | b;
+        r10 = res:4;
+        r11 = res(4);
+      ]]></body>
+    </pcode>
+  </callfixup>
+
+  <callfixup name="v850_ghs_xor64">
+    <target name="gh_xor64"/>
+    <target name="__gh_xor64"/>
+    <target name="___gh_xor64"/>
+    <pcode>
+      <body><![CDATA[
+        local a:8 = (zext(r7) << 32) | zext(r6);
+        local b:8 = (zext(r9) << 32) | zext(r8);
+        local res:8 = a ^ b;
+        r10 = res:4;
+        r11 = res(4);
+      ]]></body>
+    </pcode>
+  </callfixup>
+
+  <callfixup name="v850_ghs_div64">
+    <target name="gh_div64"/>
+    <target name="__gh_div64"/>
+    <target name="___gh_div64"/>
+    <target name="COM_div64"/>
+    <pcode>
+      <body><![CDATA[
+        local a:8 = (zext(r7) << 32) | zext(r6);
+        local b:8 = (zext(r9) << 32) | zext(r8);
+        local res:8 = a s/ b;
+        r10 = res:4;
+        r11 = res(4);
+      ]]></body>
+    </pcode>
+  </callfixup>
+
+  <callfixup name="v850_ghs_udiv64">
+    <target name="gh_udiv64"/>
+    <target name="__gh_udiv64"/>
+    <target name="___gh_udiv64"/>
+    <target name="COM_udiv64"/>
+    <pcode>
+      <body><![CDATA[
+        local a:8 = (zext(r7) << 32) | zext(r6);
+        local b:8 = (zext(r9) << 32) | zext(r8);
+        local res:8 = a / b;
+        r10 = res:4;
+        r11 = res(4);
+      ]]></body>
+    </pcode>
+  </callfixup>
+
+  <callfixup name="v850_ghs_rem64">
+    <target name="gh_rem64"/>
+    <target name="__gh_rem64"/>
+    <target name="___gh_rem64"/>
+    <target name="COM_rem64"/>
+    <pcode>
+      <body><![CDATA[
+        local a:8 = (zext(r7) << 32) | zext(r6);
+        local b:8 = (zext(r9) << 32) | zext(r8);
+        local res:8 = a s% b;
+        r10 = res:4;
+        r11 = res(4);
+      ]]></body>
+    </pcode>
+  </callfixup>
+
+  <callfixup name="v850_ghs_urem64">
+    <target name="gh_urem64"/>
+    <target name="__gh_urem64"/>
+    <target name="___gh_urem64"/>
+    <target name="COM_urem64"/>
+    <pcode>
+      <body><![CDATA[
+        local a:8 = (zext(r7) << 32) | zext(r6);
+        local b:8 = (zext(r9) << 32) | zext(r8);
+        local res:8 = a % b;
+        r10 = res:4;
+        r11 = res(4);
+      ]]></body>
+    </pcode>
+  </callfixup>
+
+  <callfixup name="v850_ghs_neg64">
+    <target name="gh_neg64"/>
+    <target name="__gh_neg64"/>
+    <target name="___gh_neg64"/>
+    <target name="COM_neg64"/>
+    <pcode>
+      <body><![CDATA[
+        local a:8 = (zext(r7) << 32) | zext(r6);
+        local res:8 = 0 - a;
+        r10 = res:4;
+        r11 = res(4);
+      ]]></body>
+    </pcode>
+  </callfixup>
+
+  <callfixup name="v850_ghs_abs64">
+    <target name="gh_abs64"/>
+    <target name="__gh_abs64"/>
+    <target name="___gh_abs64"/>
+    <pcode>
+      <body><![CDATA[
+        local a:8 = (zext(r7) << 32) | zext(r6);
+        local res:8 = a;
+        if (a s< 0) goto <negative>;
+        goto <done>;
+        <negative>
+        res = 0 - a;
+        <done>
+        r10 = res:4;
+        r11 = res(4);
+      ]]></body>
+    </pcode>
+  </callfixup>
+  <!-- These three payloads preserve the complete pinned GCC 16.2 V850
+       helper machine behavior, including counts outside the C-defined
+       0..63 domain. The reference first computes 32-count modulo 2^32,
+       chooses an arm by its signed value, then uses 32-bit shifts with
+       the hardware low-five-bit count. Count zero is a separate arm.
+       data/arithmetic/v850_arithmetic_reference_templates.json owns the
+       exact whole-body recognition inputs; do not reuse the GHS payload. -->
+  <callfixup name="v850_gcc_ashldi3">
+    <pcode>
+      <body><![CDATA[
+        local low:4 = r6;
+        local high:4 = r7;
+        local count:4 = r8 & 0x1f;
+        local remaining:4 = 32 - r8;
+        if (r8 == 0) goto <done>;
+        if (remaining s<= 0) goto <large>;
+        high = (high << count) | (low >> (remaining & 0x1f));
+        low = low << count;
+        goto <done>;
+        <large>
+        high = low << count;
+        low = 0;
+        <done>
+        r10 = low;
+        r11 = high;
+      ]]></body>
+    </pcode>
+  </callfixup>
+
+  <callfixup name="v850_gcc_lshrdi3">
+    <pcode>
+      <body><![CDATA[
+        local low:4 = r6;
+        local high:4 = r7;
+        local count:4 = r8 & 0x1f;
+        local remaining:4 = 32 - r8;
+        if (r8 == 0) goto <done>;
+        if (remaining s<= 0) goto <large>;
+        low = (low >> count) | (high << (remaining & 0x1f));
+        high = high >> count;
+        goto <done>;
+        <large>
+        low = high >> count;
+        high = 0;
+        <done>
+        r10 = low;
+        r11 = high;
+      ]]></body>
+    </pcode>
+  </callfixup>
+
+  <callfixup name="v850_gcc_ashrdi3">
+    <pcode>
+      <body><![CDATA[
+        local low:4 = r6;
+        local high:4 = r7;
+        local count:4 = r8 & 0x1f;
+        local remaining:4 = 32 - r8;
+        if (r8 == 0) goto <done>;
+        if (remaining s<= 0) goto <large>;
+        low = (low >> count) | (high << (remaining & 0x1f));
+        high = high s>> count;
+        goto <done>;
+        <large>
+        low = high s>> count;
+        high = high s>> 31;
+        <done>
+        r10 = low;
+        r11 = high;
+      ]]></body>
+    </pcode>
+  </callfixup>
+
+
+  <callfixup name="v850_ghs_shll_64_32">
+    <target name="gh_shll_64_32"/>
+    <target name="gh_shll64_32"/>
+    <target name="COM_shll_64_32"/>
+    <target name="gh_lsh64"/>
+    <target name="__gh_lsh64"/>
+    <pcode>
+      <body><![CDATA[
+        local a:8 = (zext(r7) << 32) | zext(r6);
+        local c:4 = r8 & 0x3f;
+        local cnt:8 = zext(c);
+        local res:8 = a << cnt;
+        r10 = res:4;
+        r11 = res(4);
+      ]]></body>
+    </pcode>
+  </callfixup>
+
+  <callfixup name="v850_ghs_shrl_64_32">
+    <target name="gh_shrl_64_32"/>
+    <target name="gh_shrl64_32"/>
+    <target name="COM_shrl_64_32"/>
+    <target name="gh_rsh64"/>
+    <target name="__gh_rsh64"/>
+    <pcode>
+      <body><![CDATA[
+        local a:8 = (zext(r7) << 32) | zext(r6);
+        local c:4 = r8 & 0x3f;
+        local cnt:8 = zext(c);
+        local res:8 = a >> cnt;
+        r10 = res:4;
+        r11 = res(4);
+      ]]></body>
+    </pcode>
+  </callfixup>
+
+  <callfixup name="v850_ghs_shra_64_32">
+    <target name="gh_shra_64_32"/>
+    <target name="gh_shra64_32"/>
+    <target name="COM_shra_64_32"/>
+    <target name="gh_rsa64"/>
+    <target name="__gh_rsa64"/>
+    <pcode>
+      <body><![CDATA[
+        local a:8 = (zext(r7) << 32) | zext(r6);
+        local c:4 = r8 & 0x3f;
+        local cnt:8 = zext(c);
+        local res:8 = a s>> cnt;
+        r10 = res:4;
+        r11 = res(4);
+      ]]></body>
+    </pcode>
+  </callfixup>
+
+  <callfixup name="v850_ghs_shll_64_64">
+    <target name="gh_shll_64_64"/>
+    <target name="gh_shll64_64"/>
+    <target name="gh_lsa64"/>
+    <target name="__gh_lsa64"/>
+    <pcode>
+      <body><![CDATA[
+        local a:8 = (zext(r7) << 32) | zext(r6);
+        local cnt:8 = ((zext(r9) << 32) | zext(r8)) & 0x3f;
+        local res:8 = a << cnt;
+        r10 = res:4;
+        r11 = res(4);
+      ]]></body>
+    </pcode>
+  </callfixup>
+
+  <callfixup name="v850_ghs_shrl_64_64">
+    <target name="gh_shrl_64_64"/>
+    <target name="gh_shrl64_64"/>
+    <pcode>
+      <body><![CDATA[
+        local a:8 = (zext(r7) << 32) | zext(r6);
+        local cnt:8 = ((zext(r9) << 32) | zext(r8)) & 0x3f;
+        local res:8 = a >> cnt;
+        r10 = res:4;
+        r11 = res(4);
+      ]]></body>
+    </pcode>
+  </callfixup>
+
+  <callfixup name="v850_ghs_shra_64_64">
+    <target name="gh_shra_64_64"/>
+    <target name="gh_shra64_64"/>
+    <pcode>
+      <body><![CDATA[
+        local a:8 = (zext(r7) << 32) | zext(r6);
+        local cnt:8 = ((zext(r9) << 32) | zext(r8)) & 0x3f;
+        local res:8 = a s>> cnt;
+        r10 = res:4;
+        r11 = res(4);
+      ]]></body>
+    </pcode>
+  </callfixup>
+
+  <callfixup name="v850_ghs_eq64">
+    <target name="gh_eq64"/>
+    <target name="__gh_eq64"/>
+    <target name="___gh_eq64"/>
+    <pcode>
+      <body><![CDATA[
+        local a:8 = (zext(r7) << 32) | zext(r6);
+        local b:8 = (zext(r9) << 32) | zext(r8);
+        r10 = zext(a == b);
+      ]]></body>
+    </pcode>
+  </callfixup>
+
+  <callfixup name="v850_ghs_ne64">
+    <target name="gh_ne64"/>
+    <target name="__gh_ne64"/>
+    <target name="___gh_ne64"/>
+    <pcode>
+      <body><![CDATA[
+        local a:8 = (zext(r7) << 32) | zext(r6);
+        local b:8 = (zext(r9) << 32) | zext(r8);
+        r10 = zext(a != b);
+      ]]></body>
+    </pcode>
+  </callfixup>
+
+  <callfixup name="v850_ghs_lt64">
+    <target name="gh_lt64"/>
+    <target name="__gh_lt64"/>
+    <target name="___gh_lt64"/>
+    <pcode>
+      <body><![CDATA[
+        local a:8 = (zext(r7) << 32) | zext(r6);
+        local b:8 = (zext(r9) << 32) | zext(r8);
+        r10 = zext(a s< b);
+      ]]></body>
+    </pcode>
+  </callfixup>
+
+  <callfixup name="v850_ghs_le64">
+    <target name="gh_le64"/>
+    <target name="__gh_le64"/>
+    <target name="___gh_le64"/>
+    <pcode>
+      <body><![CDATA[
+        local a:8 = (zext(r7) << 32) | zext(r6);
+        local b:8 = (zext(r9) << 32) | zext(r8);
+        r10 = zext(a s<= b);
+      ]]></body>
+    </pcode>
+  </callfixup>
+
+  <callfixup name="v850_ghs_ult64">
+    <target name="gh_ult64"/>
+    <target name="__gh_ult64"/>
+    <target name="___gh_ult64"/>
+    <pcode>
+      <body><![CDATA[
+        local a:8 = (zext(r7) << 32) | zext(r6);
+        local b:8 = (zext(r9) << 32) | zext(r8);
+        r10 = zext(a < b);
+      ]]></body>
+    </pcode>
+  </callfixup>
+
+  <callfixup name="v850_ghs_ule64">
+    <target name="gh_ule64"/>
+    <target name="__gh_ule64"/>
+    <target name="___gh_ule64"/>
+    <pcode>
+      <body><![CDATA[
+        local a:8 = (zext(r7) << 32) | zext(r6);
+        local b:8 = (zext(r9) << 32) | zext(r8);
+        r10 = zext(a <= b);
+      ]]></body>
+    </pcode>
+  </callfixup>
+
+  <!-- GCC libgcc three-way compares: 0 (a<b), 1 (a==b), 2 (a>b) in r10.
+       The other libgcc DI helpers (__adddi3 and family) reuse the GHS
+       payloads above; their register ABI and results are identical.
+       The payload is deliberately branch-free: 1 + (a>b) - (a<b) is the
+       exact three-way contract, and the decompiler never prunes an
+       untaken constant-condition CBRANCH arm, so a branchy encoding can
+       never constant-fold at constant call sites (the result would stay
+       a MULTIEQUAL of the three arms). The straight-line form keeps the
+       two relation ops live for variable arguments and folds 0/1/2 for
+       constant arguments. `a s> b` lowers to a REVERSED INT_SLESS, so
+       each payload contributes exactly two comparison ops. -->
+  <callfixup name="v850_gcc_cmpdi2">
+    <target name="__cmpdi2"/>
+    <pcode>
+      <body><![CDATA[
+        local a:8 = (zext(r7) << 32) | zext(r6);
+        local b:8 = (zext(r9) << 32) | zext(r8);
+        local lt:1 = a s< b;
+        local gt:1 = a s> b;
+        local ltv:4 = zext(lt);
+        local gtv:4 = zext(gt);
+        r10 = 1 + gtv - ltv;
+      ]]></body>
+    </pcode>
+  </callfixup>
+
+  <callfixup name="v850_gcc_ucmpdi2">
+    <target name="__ucmpdi2"/>
+    <pcode>
+      <body><![CDATA[
+        local a:8 = (zext(r7) << 32) | zext(r6);
+        local b:8 = (zext(r9) << 32) | zext(r8);
+        local lt:1 = a < b;
+        local gt:1 = a > b;
+        local ltv:4 = zext(lt);
+        local gtv:4 = zext(gt);
+        r10 = 1 + gtv - ltv;
+      ]]></body>
+    </pcode>
+  </callfixup>
+
+
+  <!-- GCC libgcc overflow-checked variants (__addvdi3 & family) are
+       deliberately given NO callfixup payloads: they call abort() on
+       signed overflow, and a fixup body cannot express that conditional
+       call, so applying one would delete observable control flow. The
+       analyzer contracts them by name and signature only and leaves the
+       call intact. -->
+</callfixups>

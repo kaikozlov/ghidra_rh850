@@ -8,10 +8,19 @@ define space ram      type=ram_space      size=4  default;
 define space register type=register_space size=4;
 
 # general purpose registers
+# r0 is architecturally fixed zero: the scalar operand subtables below read
+# it as constant 0 and discard writes, so its raw storage is display-only.
+# It therefore lives OUTSIDE the 8-byte pair window at offset 0x00: the
+# r0r1 pair spans [r0sink | r1], so writing the r0:r1 pair commits the high
+# word to r1 and the architecturally discarded low word lands in r0sink --
+# no instruction ever writes r0's own storage. r1..lp keep their offsets,
+# and the r0sink low half is never read back through any pair view (see
+# the R0004pair/R1115pair/R2731pair read subtables below).
 define register offset=0x00 size=4 
-	[ r0 r1 r2 sp gp tp r6 r7 r8 r9 r10 r11 r12 r13 r14 r15 r16 r17 r18 r19 r20 r21 r22 r23 r24 r25 r26 r27 r28 r29 ep lp ];
+	[ r0sink r1 r2 sp gp tp r6 r7 r8 r9 r10 r11 r12 r13 r14 r15 r16 r17 r18 r19 r20 r21 r22 r23 r24 r25 r26 r27 r28 r29 ep lp ];
 define register offset=0x00 size=8 
 	[ r0r1  r2sp  gptp  r6r7  r8r9  r10r11  r12r13  r14r15  r16r17  r18r19  r20r21  r22r23  r24r25  r26r27  r28r29  eplp  ];
+define register offset=0x1080 size=4 [ r0 ];
 
 # special registers
 @if defined(V850E2M)
@@ -28,6 +37,16 @@ define register offset=0x80 size=4 [
     CTPC    CTPSW   _       _       CTBP    _       _       _
     _       _       _       _       EIWR    FEWR    _       BSEL
 ];
+@elif defined(V850E1F)
+# V850E/PHO3 E1F register IDs (R01UH0128ED0730 Table 3-3).
+define register offset=0x80 size=4 [
+    EIPC    EIPSW   FEPC    FEPSW   ECR     PSW     _       _
+    _       _       _       _       _       _       _       _
+    CTPC    CTPSW   DBPC    DBPSW   CTBP    _       _       _
+    _       _       _       _       _       _       _       _
+];
+# E1F floating-point arithmetic flag and control registers.
+define register offset=0x1010 size=4 [ EFG ECT ];
 @endif
 
 define register offset=0x1000 size=4 [ PC ];
@@ -70,6 +89,61 @@ macro clear_link() {
 @endif
 }
 
+@if defined(V850VECTOR)
+# DSP SESR is SR12,0 in the public V850E3V5 simulator model
+# (sim/v850/v850-sim.h): OV bit 0, accumulated SOV bit 1.
+define register offset=0xb0 size=4 [ SESR ];
+# RH850 DSP vector registers (64-bit) and SIMD FPU registers (128-bit).
+# Separate architectural register files: V0-V31 hold packed 16/32/64-bit
+# integer lanes; W0-W31 hold four 32-bit floating-point lanes.
+define register offset=0x2000 size=8 [
+	v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15
+	v16 v17 v18 v19 v20 v21 v22 v23 v24 v25 v26 v27 v28 v29 v30 v31
+];
+define register offset=0x2100 size=16 [
+	w0 w1 w2 w3 w4 w5 w6 w7 w8 w9 w10 w11 w12 w13 w14 w15
+	w16 w17 w18 w19 w20 w21 w22 w23 w24 w25 w26 w27 w28 w29 w30 w31
+];
+# Debug-mode return context (DBPC/DBPSW equivalents); not software-visible
+# through LDSR/STSR on the RH850 profiles modeled here.
+define register offset=0x1020 size=4 [ dbg_pc dbg_psw dbg_dir ];
+
+# G4MH SIMD floating-point status/control (broad-language only): mirrors the
+# G3M FPSR bit layout so the scalar fp32_fused helper can consume it directly.
+@if defined(V850SIMD)
+# Extended floating-point function system registers (R01UH0770EJ0121
+# Table 3.54; selID 10): FXSR regID 6, FXST 8, FXINFO 9, FXCFG 10, FXXC 12,
+# FXXP 13. FXSR is the only storage; its canonical value is
+# (v & 0x00ceffff) | 0x00200000 (FN23, IF22, RM19:18, FS17, XC15:10, XE9:5,
+# XP4:0 writable, bit 21 reads 1, Table 3.55). FXST/FXCFG project FXSR
+# fields and FXINFO reads as constant 3, so those three varnodes hold no
+# state of their own -- they exist so the selID-10 constructors can display
+# the Table 3.54 names through the SR0004_a/SR1115_a attachment. FXXC/FXXP
+# carry the per-arithmetic-way cause/preservation bits (Tables 3.59-3.60)
+# and never alias FXSR.
+define register offset=0x1030 size=4 [ FXSR FXST FXINFO FXCFG FXXC FXXP ];
+# Indexed MPU descriptor state (R01UH0770EJ0121 Tables 3.61, 3.69-3.72;
+# R01UH0865EJ0140 Tables 2.5/3.12/3.13 and Section 5.1.8): MPIDX (SR16,5)
+# holds the 5-bit index of the region whose {MPLA, MPUA, MPAT} (SR20-22,5)
+# is exposed through the indexed system-register interface, and MPBK
+# (SR17,5, SV permission; HV when virtualization is enabled) selects the
+# descriptor bank processed by LDM.MP/STM.MP, the indexed views, and the
+# protection checks -- the architecture allows two banks (MPCFG.NBK =
+# banks minus one). MPBK.BK occupies bits 1:0, not just bit 0
+# (R01UH0864EJ0150 Table 3.72): an out-of-range write is ignored,
+# preserving the old bank. This broad profile models the two-bank extent.
+# The G4MH virtualization profile that defines MPBK implements 32 entries
+# (Table 3.13 NMPUE = 31), so the whole 5-bit region range is
+# architecturally addressable and the per-region, per-bank descriptor file
+# is addressed directly in register space as 0x1100 + bank*0x180 +
+# region*12 (+0 MPLA, +4 MPUA, +8 MPAT); E2x-FCC2 implements only 24
+# entries (its regions 24-31 are an undefined-register window, R01UH0770
+# Table 3.69). The MPLA/MPUA/MPAT varnodes are display anchors only: every
+# access projects that backing.
+define register offset=0x1050 size=4 [ MPIDX MPLA MPUA MPAT MPBK ];
+@endif
+@endif
+
 
 @define PSW_PP  "PSW[19,1]"
 @define PSW_NPW "PSW[18,1]"
@@ -89,7 +163,6 @@ macro clear_link() {
 
 
 
-define pcodeop __nop;
 define pcodeop __synchronize;
 define pcodeop __halt;
 define pcodeop __snooze;
@@ -103,6 +176,10 @@ define pcodeop __cisti;
 define pcodeop __cildi;
 define pcodeop __prefi;
 
+# Analysis-only nondeterministic result of an ABI-clobbered register.
+# A callfixup replaces CALL, so the native call's kill effects must be
+# retained explicitly. This is not an instruction or a physical helper.
+define pcodeop __v850_abi_clobber;
 
 
 macro ternary(res, cond, avar, bvar) {
@@ -119,6 +196,9 @@ macro condition(res, cond, true_val, false_val) {
 
 define token instr(16)
 	op0000 = (0,0)
+	op0002 = (0,1)
+	op0104 = (1,4)
+	op0304 = (3,4)
 	op0003 = (0,3)
 	op0004 = (0,4)
 	op0005 = (0,5)
@@ -139,23 +219,33 @@ define token instr(16)
 	op0710 = (7,10)
 	op1112 = (11,12)
 	op1113 = (11,13)
-	op1114 = (11,14)
+op1111 = (11,11)
+op1114 = (11,14)
 	op1115 = (11,15)
 	op1315 = (13,15)
 	op1415 = (14,15)
 	op1515 = (15,15)
+vR0004 = (0,4)
+vR0003 = (0,3)
+vR1115 = (11,15)
+vR1114 = (11,14)
+wR0004 = (0,4)
+wR1115 = (11,15)
+xr1215 = (12,15)
+op0404 = (4,4)
 	xR0004 = (0,4)
-	R0004pair = (0,4)
+	xR0004pair = (0,4)
 	xR1115 = (11,15)
 	r0004 = (0,4)
 	r1115 = (11,15)
-	R1115pair = (11,15)
+	xR1115pair = (11,15)
 	s0003 = (0,3) signed
 	s0004 = (0,4) signed
 	s0404 = (4,4) signed
 	s0005 = (0,5) signed
 	s1115 = (11,15) signed
 	SR0004 = (0,4)
+	VSR0004 = (0,4)
 	SR0004_1 = (0,4)
 	SR0004_2 = (0,4)
 	SR0004_3 = (0,4)
@@ -172,6 +262,7 @@ define token instr(16)
 	SR0004_f = (0,4)
 	VR0004 = (0,4)
 	SR1115 = (11,15)
+	VSR1115 = (11,15)
 	SR1115_1 = (11,15)
 	SR1115_2 = (11,15)
 	SR1115_3 = (11,15)
@@ -217,20 +308,36 @@ define token instr2(16)
 	op3030 = (14,14)
 	op3031 = (14,15)
 	op3131 = (15,15)
+vR2731 = (11,15)
+vR2730 = (11,14)
+vR2831 = (12,15)
+wR2731 = (11,15)
+op2121 = (5,5)
+op2222 = (6,6)
+op2424 = (8,8)
+op2525 = (9,9)
+op2626 = (10,10)
+op1722 = (1,6)
+op2325 = (7,9)
 	r1620 = (0,4)
 	xR2731 = (11,15)
-	R1620pair = (0,4)
-	R2731pair = (11,15)
-	R2731pairEx = (12,15)
+	xR1620pair = (0,4)
+	xR2731pair = (11,15)
+	xR2731pairEx = (12,15)
 	s1631 = (0,15) signed
 	s1731 = (1,15) signed
 	s1821 = (2,5) signed
 	fcond2730 = (11,14)
+	fcond1720 = (1,4)
 	fcbit1719 = (1,3)
 ;
 define token instr3(16)
 	op3247 = (0,15)
 	s3247 = (0,15) signed
+wR3236 = (0,4)
+wR4347 = (11,15)
+imm3242 = (0,10)
+s4863 = (0,15) signed
 ;
 define token instr4(16)
 	op4863 = (0,15);
@@ -262,6 +369,21 @@ define token prep(32)
 	prep2627 = (26,27)
 ;
 
+@if defined(V850SIMD)
+attach variables [ SR0004_a SR1115_a ] [
+    _ _ _ _ _ _ FXSR _
+    FXST FXINFO FXCFG _ FXXC FXXP _ _
+    _ _ _ _ _ _ _ _
+    _ _ _ _ _ _ _ _
+];
+attach variables [ SR0004_9 SR1115_9 ] [
+    _ _ _ _ _ _ _ _
+    _ _ _ _ _ _ _ _
+    MPIDX MPBK _ _ MPLA MPUA MPAT _
+    _ _ _ _ _ _ _ _
+];
+@endif
+
 
 attach variables [op0_1720] [r0 r2 gp r6 r8 r10 r12 r14 r16 r18 r20 r22 r24 r26 r28 ep];
 attach variables [op1_1720] [r1 sp tp r7 r9 r11 r13 r15 r17 r19 r21 r23 r25 r27 r29 lp];
@@ -277,13 +399,65 @@ attach variables [ xR0004 xR1115 xR2731]
 	[ r0 r1 r2 sp gp tp r6 r7 r8 r9 r10 r11 r12 r13 r14 r15 r16 r17 r18 r19 r20 r21 r22 r23 r24 r25 r26 r27 r28 r29 ep lp ];
 attach variables [ r0004 r1115 r1620 prep1620r ]
 	[ _  r1 r2 sp gp tp r6 r7 r8 r9 r10 r11 r12 r13 r14 r15 r16 r17 r18 r19 r20 r21 r22 r23 r24 r25 r26 r27 r28 r29 ep lp ];
-attach variables [ R0004pair R1115pair R1620pair R2731pair ]
+attach variables [ xR0004pair xR1115pair xR1620pair xR2731pair ]
 	[ r0r1 _ r2sp _ gptp _ r6r7 _ r8r9 _ r10r11 _ r12r13 _ r14r15 _ r16r17 _ r18r19 _ r20r21 _ r22r23 _ r24r25 _ r26r27 _ r28r29 _ eplp _ ];
-attach variables [ R2731pairEx ]  # the same as R2731pair, but LSB is ignored
+attach variables [ xR2731pairEx ]  # the same as xR2731pair, but LSB is ignored
 	[ r0r1 r2sp gptp r6r7 r8r9 r10r11 r12r13 r14r15 r16r17 r18r19 r20r21 r22r23 r24r25 r26r27 r28r29 eplp ];
+
+# Pair-register operand views, mirroring the scalar R0004/R1115/R2731
+# zero handling above. The x...pair fields export the raw 8-byte window
+# and are used where an instruction WRITES a pair: that is exact for every
+# pair except r0:r1, whose write commits the high word to r1 and discards
+# the low word into r0sink (writes to r0 are architecturally discarded).
+# Reading is different -- r0 always reads as zero -- so these read views
+# yield (0 || r1) for the r0:r1 pair regardless of the discarded sink
+# contents, and the raw window for every other pair. The attach-list index
+# of r0r1 is 0, hence the "=0" match, the same idiom the scalar zero tests
+# use. xR1620pair needs no read view (MAC/MACU only ever write reg4).
+@if !(defined(V850E1F))
+R0004pair: xR0004pair is xR0004pair & xR0004pair=0	{ local x:8 = zext(r1) << 32; export x; }
+R0004pair: xR0004pair is xR0004pair					{ export xR0004pair; }
+
+R1115pair: xR1115pair is xR1115pair & xR1115pair=0	{ local x:8 = zext(r1) << 32; export x; }
+R1115pair: xR1115pair is xR1115pair					{ export xR1115pair; }
+@endif
+
+R2731pair: xR2731pair is xR2731pair & xR2731pair=0	{ local x:8 = zext(r1) << 32; export x; }
+R2731pair: xR2731pair is xR2731pair					{ export xR2731pair; }
+
+@if defined(V850E3)
+R2731pairEx: xR2731pairEx is xR2731pairEx & xR2731pairEx=0	{ local x:8 = zext(r1) << 32; export x; }
+R2731pairEx: xR2731pairEx is xR2731pairEx					{ export xR2731pairEx; }
+@endif
 
 attach names [fcond2730]
   ["f" "un" "eq" "ueq" "olt" "ult" "ole" "ule" "sf" "ngle" "seq" "ngl" "lt" "nge" "le" "ngt"];
+
+@if defined(V850VECTOR)
+attach variables [ vR0004 vR1115 vR2731 ]
+	[ v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15
+	  v16 v17 v18 v19 v20 v21 v22 v23 v24 v25 v26 v27 v28 v29 v30 v31 ];
+attach variables [ vR0003 vR1114 vR2730 vR2831 ]
+	[ v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 ];
+attach variables [ wR0004 wR1115 wR2731 wR3236 wR4347 ]
+	[ w0 w1 w2 w3 w4 w5 w6 w7 w8 w9 w10 w11 w12 w13 w14 w15
+	  w16 w17 w18 w19 w20 w21 w22 w23 w24 w25 w26 w27 w28 w29 w30 w31 ];
+# GPR pairs for MODADD and vector modulo addressing: the 4-bit field value v
+# addresses the pair (2v, 2v+1), matching the binutils simulator reg2e = v<<1.
+attach variables [ xr1215 ]
+	[ r0r1 r2sp gptp r6r7 r8r9 r10r11 r12r13 r14r15 r16r17 r18r19 r20r21
+	  r22r23 r24r25 r26r27 r28r29 eplp ];
+# Modulo/bit-reverse pair read view (MODADD and the vector "mod" forms):
+# the r0 half reads as zero like the R...pair views above. MODADD also
+# rewrites the inc/value low half -- for r0:r1 that write lands in the
+# discard sink (or the dead low word of this view), so the write stays
+# discarded while nonzero pairs keep their raw window.
+r1215: xr1215 is xr1215 & xr1215=0	{ local x:8 = zext(r1) << 32; export x; }
+r1215: xr1215 is xr1215			{ export xr1215; }
+# Floating-point condition names for the SIMD compare (bits 17-20).
+attach names [fcond1720]
+  ["f" "un" "eq" "ueq" "olt" "ult" "ole" "ule" "sf" "ngle" "seq" "ngl" "lt" "nge" "le" "ngt"];
+@endif
 
 
 @if defined(V850E2M)
@@ -300,6 +474,14 @@ attach variables [ SR0004 SR1115 ] [
     FPST    FPCC    FPCFG   FPEC    _       EIIC    FEIC    _
     CTPC    CTPSW   _       _       CTBP    _       _       _
     _       _       _       _       EIWR    FEWR    _       BSEL
+];
+@elif defined(V850E1F)
+# V850E/PHO3 E1F register IDs (R01UH0128ED0730 Table 3-3).
+attach variables [ SR0004 SR1115 ] [
+    EIPC    EIPSW   FEPC    FEPSW   ECR     PSW     _       _
+    _       _       _       _       _       _       _       _
+    CTPC    CTPSW   DBPC    DBPSW   CTBP    _       _       _
+    _       _       _       _       _       _       _       _
 ];
 @endif
 

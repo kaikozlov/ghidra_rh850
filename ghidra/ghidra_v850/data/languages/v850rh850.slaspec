@@ -1,0 +1,24 @@
+# RH850 broad ISA profile: G3M base plus the DSP vector (V register),
+# SIMD floating-point (W register/S4), and extended system families that the
+# installed IDA oracle decodes (census: build/out/ida-v850-census.json).
+# The exact-G3M v850e3 language is unchanged; this variant layers the
+# additional families on the same base definitions.
+@define V850E3 1
+@define V850VECTOR 1
+@define V850SIMD 1
+
+
+@include "v850_common.sinc"
+@include "v850_cond.sinc"
+@include "v850e3.sinc"
+@include "v850_virtual.sinc"
+@include "v850_arithmetic.sinc"
+@include "v850_logical.sinc"
+@include "v850_data_manipulation.sinc"
+@include "v850_func.sinc"
+@include "v850_special.sinc"
+@include "v850_load_store.sinc"
+@include "v850_float.sinc"
+@include "v850_dsp.sinc"
+@include "v850_simd.sinc"
+@include "v850_ext.sinc"

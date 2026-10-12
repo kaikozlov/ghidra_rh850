@@ -1,0 +1,454 @@
+# V850E1F floating-point unit (mnemonic set and encodings per the IDA
+# nec850 E1F block, ref. U16374EJ1V0UM). The E1F FPU operates on the
+# general-purpose registers as single-precision values and adds two FPU
+# registers: EFG (floating-point arithmetic FLAG register) and ECT
+# (floating-point arithmetic CONTROL register).
+#
+# ---------------------------------------------------------------------
+# Contract classification. Every semantic below is labeled, and every
+# contract that is not recoverable from a primary source is represented
+# ONLY as an explicit unresolved-E1F intrinsic (a user pcodeop), so the
+# unknown vendor behavior stays opaque to analysis (the same convention
+# this module already uses for interrupt-control instructions and the
+# AssertProcessorFixtureSemantics stepInterruptControl pattern) instead
+# of being invented as dataflow. Nothing guessed is asserted by
+# AssertV850E1f.java.
+#
+# [D] Documented, PHO3 R01UH0128ED0730 Rev.7.30 (V850E1 core device):
+#     - pp.104-105 Tables 3-10..3-12: EFG bits RO13 IV12 ZD11 VF10 UD9
+#       PR8 TR4 OV2 S1 Z0, all other bits fixed at 0, reset value 0;
+#       ECT bits IT12 ZT11 VT10 UT9 PT8, others fixed 0, reset 0;
+#       ECT only gates TR ("Each bit of ECT is a mask bit for one
+#       condition"; with the mask set a detection sets the cause bit AND
+#       TR, without it only the cause bit); TR "summarizes the state of
+#       the FPU: 1: Abnormal condition detected: one of the bits 12 to 8
+#       of the ECT register is set"; OV = overflow "during
+#       floating-point to integer conversion"; S/Z = operation result
+#       negative/zero; RO: 0 = operation in progress, 1 = FPU idle.
+#     - CPU overview: the FPU is "single precision, according to IEEE
+#       754-85 standard".
+#     - pp.98-99 Table 3-5: V850E1 PSW condition bits Z0 S1 OV2 CY3
+#       SAT4 (context only; TRFF's mapping is unresolved).
+#     - Reset table: EFG = ECT = 0.
+#     - R01US0001EJ0100 Appendix E: V850E1 provides no floating-point
+#       exception; flags are consumed only by software polling.
+# [I] IEEE 754-1985-mandated, given PHO3's conformance statement, and
+#     implemented as real p-code: correctly rounded add/sub/mul/div
+#     results (round to nearest, ties to even - the standard's default
+#     and the only mode EFG/ECT exposes no control for); the five
+#     exception CONDITIONS (invalid operation incl. sNaN operands,
+#     0*inf, inf-inf, 0/0, inf/inf; divide by zero for finite nonzero
+#     dividend; overflow; underflow as tininess + inexact, with the
+#     standard permitting pre/post-rounding tininess detection - this
+#     model detects post-rounding; inexactness); +-infinity RESULTS on
+#     overflow and divide-by-zero; gradual underflow (subnormals);
+#     float->int conversion rounding of in-range values. These
+#     conditions are computed exactly and fed to the unresolved status
+#     intrinsic below; only their DETECTION is claimed, not their
+#     retention or visibility rules.
+# [U] UNRESOLVED, represented exclusively by intrinsics. The exact
+#     vendor contracts live in the FPU volume of the V850E1 core
+#     architecture manual - MISSING PREREQUISITE, exact and named:
+#     "V850E1 32-Bit Microprocessor Core Architecture (Floating Point
+#     Operation Unit) (User's Manual)" U16374EJ1V0UM00, November 2008
+#     (base volume: U14559EJ3V1UM00, February 2004); both numbers and
+#     titles are quoted by Renesas R01TU0011ED0100 V850E/PHO3 Operating
+#     Precautions, p.20 "(C) Valid Specification". Confirmed NOT
+#     publicly retrievable (renesas.com legacy paths, Wayback CDX across
+#     the Renesas/NEC doc hosts, archive.org incl. bitsavers NEC,
+#     alldatasheet [all V850E1 items are the base volume U14559EJ3V1UM],
+#     every mirror the source scout could reach); no open implementation
+#     (binutils-gdb sim, GCC, rizin, radare2) implements the E1F FPU;
+#     IDA decodes it citing U16374EJ1V0UM without flag semantics.
+#       e1f_status_unresolved(EFG, cause, result) -> EFG
+#         how an instruction's detected conditions (cause: OV=bit5,
+#         IV=bit4, ZD=bit3, VF=bit2, UD=bit1, PR=bit0), the operation
+#         result sign/zero, and RO are merged into EFG: the per-op
+#         update and retention rules are unknown.
+#       e1f_trff_unresolved(PSW, EFG) -> PSW
+#         which EFG bits TRFF publishes into which PSW bits (the EFG
+#         Z/S/OV/flag positions 0/1/2/4 numerically coincide with the
+#         PSW Z/S/OV/SAT positions of Table 3-5, but that alignment
+#         proves no transfer contract).
+#       e1f_cvt_range_unresolved(src, mode) -> word
+#         the result value of a float->int conversion whose magnitude
+#         overflows int32 (or whose input is NaN); no family table is
+#         E1F authority, so no saturation value is invented.
+#       e1f_minmax_nan_unresolved(a, b, pick) -> word
+#         the result of minf.s/maxf.s when an operand is NaN.
+#     Modeled value (documented boundary, module convention of
+#     v850_fused.sinc): invalid arithmetic produces the canonical quiet
+#     NaN 0x7fc00000 - IEEE 754-1985 requires a NaN result but leaves
+#     the payload to the implementation; the payload is not silicon
+#     truth and fixtures assert only NaN-ness. LDFF/LDFC keep only the
+#     defined register bits (a reserved bit is physically absent) and
+#     the documented TR derivation then runs on the merged value.
+# ---------------------------------------------------------------------
+
+define pcodeop e1f_status_unresolved;
+define pcodeop e1f_trff_unresolved;
+define pcodeop e1f_cvt_range_unresolved;
+define pcodeop e1f_minmax_nan_unresolved;
+
+# ---- EFG/ECT bit positions (PHO3 Table 3-11 / Table 3-12) [D] ----
+@define E1F_RO 0x2000
+@define E1F_IV 0x1000
+@define E1F_ZD 0x0800
+@define E1F_VF 0x0400
+@define E1F_UD 0x0200
+@define E1F_PR 0x0100
+@define E1F_TR 0x0010
+@define E1F_OV 0x0004
+@define E1F_S  0x0002
+@define E1F_Z  0x0001
+@define E1F_EFG_BITS 0x3F17	# RO..PR, TR, OV, S, Z; all else fixed 0 [D]
+@define E1F_ECT_BITS 0x1F00	# IT..PT; all else fixed 0 [D]
+
+# TR is a derived state bit: the OR of every detected condition whose ECT
+# mask is set (PHO3 p.105) [D]. Recomputed after every EFG/ECT write, so
+# loading a new mask (LDFC) or new flags (LDFF) updates TR immediately.
+# This derivation is real p-code and runs on whatever EFG value the
+# (unresolved) producer left; the fixture exercises it through LDFF/LDFC,
+# which are fully real.
+macro e1f_refresh_tr() {
+	local hit:4 = EFG & ECT;	# cause bits 12..8 align with masks 12..8 [D]
+	EFG = (EFG & ~$(E1F_TR)) | (zext(hit != 0) << 4);
+}
+
+# Hand an instruction's computed conditions and result to the unresolved
+# EFG merge [U]. The inputs are real dataflow (the decompiler sees EFG
+# depend on the operands); the update/retention rule stays opaque, and
+# the documented TR derivation runs after it in dataflow order.
+macro e1f_status(cause, ov, result) {
+	local conditions:4 = cause;
+	local overflow:1 = ov;
+	EFG = e1f_status_unresolved(EFG,
+		(conditions & 0x1f) | (zext(overflow != 0) << 5), result);
+	e1f_refresh_tr();
+}
+
+# Single-precision operation with exact exception-condition inputs [I].
+# kind: 0=add 1=sub 2=mul 3=div; result = src2 op src1; the result value
+# is real IEEE p-code.
+# Condition exactness: sums/products of binary32 operands are exact in
+# binary64 whenever the operand exponent-field gap is <= 29 (<= 53
+# significant bits), and a gap > 29 can only round to the larger
+# operand, so the dropped operand alone decides inexactness; a 24x24-bit
+# significand product is always exact in binary64; division is exact iff
+# the odd part of the divisor significand divides the dividend
+# significand (the quotient is then a <=24-bit significand times a power
+# of two).
+macro e1f_arith(dest, src1, src2, kind) {
+	local a:4 = src1;
+	local b:4 = src2;
+	local action:4 = kind;
+	local aa:4;
+	local bb:4;
+	local cause:4 = 0;
+	local r:4 = 0;
+	local a8:8;
+	local b8:8;
+	local d8:8;
+	local pr:1 = 0;
+	local ea:4;
+	local eb:4;
+	local md:8;
+	local mn:8;
+	if (action != 1) goto <ready>;
+	a = a ^ 0x80000000;		# subtraction is addition of the negated subtrahend
+	<ready>
+	aa = a & 0x7fffffff;
+	bb = b & 0x7fffffff;
+	a8 = float2float(a);
+	b8 = float2float(b);
+	# IEEE 754-1985 7.1: a signaling NaN operand is an invalid operation;
+	# a quiet NaN operand propagates without a flag. [I]
+	if ((aa > 0x7f800000) && ((aa & 0x400000) == 0)) goto <invalid>;
+	if ((bb > 0x7f800000) && ((bb & 0x400000) == 0)) goto <invalid>;
+	if ((aa > 0x7f800000) || (bb > 0x7f800000)) goto <nan_result>;
+	if (action == 3) goto <division>;
+	if (action == 2) goto <multiply>;
+	# ---- addition (subtraction via the sign flip above) ----
+	if ((aa == 0x7f800000) || (bb == 0x7f800000)) goto <add_infinite>;
+	r = b f+ a;
+	d8 = b8 f+ a8;
+	pr = float2float(r) f!= d8;
+	ea = aa >> 23;
+	eb = bb >> 23;
+	if (ea >= eb) goto <a_wide>;
+	if (((eb - ea) > 29) && (aa != 0)) goto <dropped>;
+	goto <round_flags>;
+	<a_wide>
+	if (((ea - eb) > 29) && (bb != 0)) goto <dropped>;
+	goto <round_flags>;
+	# ---- multiplication ----
+	<multiply>
+	if ((aa == 0x7f800000) || (bb == 0x7f800000)) goto <mul_infinite>;
+	r = b f* a;
+	d8 = b8 f* a8;			# 24x24-bit significands: exact in binary64
+	pr = float2float(r) f!= d8;
+	goto <round_flags>;
+	# ---- division: result = b / a ----
+	<division>
+	if ((aa == 0x7f800000) && (bb == 0x7f800000)) goto <invalid>;
+	if (aa == 0x7f800000) goto <div_by_inf>;
+	if (bb == 0x7f800000) goto <inf_div>;
+	if (aa == 0) goto <div_by_zero>;
+	r = b f/ a;
+	d8 = b8 f/ a8;
+	pr = float2float(r) f!= d8;
+	md = zext(aa & 0x7fffff) | (zext(aa >= 0x00800000) << 23);
+	if ((md & 1) != 0) goto <md_odd>;
+	<md_strip>				# isolate the odd part of the divisor
+	md = md >> 1;
+	if ((md & 1) == 0) goto <md_strip>;
+	<md_odd>
+	mn = zext(bb & 0x7fffff) | (zext(bb >= 0x00800000) << 23);
+	if ((mn % md) == 0) goto <round_flags>;
+	goto <dropped>;
+	# ---- IEEE special combinations [I] ----
+	<div_by_zero>			# 0/0 is invalid; x/0 sets ZD and returns +-inf
+	if (bb == 0) goto <invalid>;
+	cause = cause | 0x08;
+	r = ((b ^ a) & 0x80000000) | 0x7f800000;
+	goto <finish>;
+	<div_by_inf>			# finite (or zero) / infinity: exact signed zero
+	r = (b ^ a) & 0x80000000;
+	goto <finish>;
+	<inf_div>				# infinity / finite (or zero): +-inf, no flag
+	r = ((b ^ a) & 0x80000000) | 0x7f800000;
+	goto <finish>;
+	<mul_infinite>			# 0 * infinity is invalid
+	if ((aa == 0) || (bb == 0)) goto <invalid>;
+	r = ((b ^ a) & 0x80000000) | 0x7f800000;
+	goto <finish>;
+	<add_infinite>
+	if ((aa == 0x7f800000) && (bb == 0x7f800000)) goto <add_inf_inf>;
+	if (aa == 0x7f800000) goto <take_a>;
+	r = b;					# b is +-inf: adding finite a preserves it
+	goto <finish>;
+	<take_a>
+	r = a;
+	goto <finish>;
+	<add_inf_inf>			# same-sign infinities add; opposite signs are invalid
+	if (((a ^ b) & 0x80000000) != 0) goto <invalid>;
+	r = a;
+	goto <finish>;
+	<invalid>
+	cause = 0x10;			# IV [I]
+	<nan_result>
+	r = 0x7fc00000;			# NaN result is IEEE-mandated; payload is a
+	goto <finish>;			# documented model value, not silicon truth
+	# ---- rounding-driven conditions [I] ----
+	<dropped>
+	pr = 1;					# bits below the binary32 window exist
+	<round_flags>
+	# Overflow: the rounded magnitude exceeds the largest finite binary32
+	# (post-rounding detection, permitted by IEEE 754-1985 7.3); overflow
+	# is always inexact, so VF comes with PR.
+	if ((r & 0x7fffffff) == 0x7f800000) goto <overflowed>;
+	# Tininess: the rounded result is below the normal range; the UD flag
+	# additionally requires loss of accuracy (IEEE 754-1985 7.5).
+	if ((r & 0x7fffffff) >= 0x00800000) goto <flags_ready>;
+	cause = cause | (zext(pr != 0) << 1);
+	goto <flags_ready>;
+	<overflowed>
+	cause = cause | 0x05;	# VF | PR
+	<flags_ready>
+	cause = cause | zext(pr != 0);	# PR
+	<finish>
+	dest = r;				# the IEEE result write happens before the
+	e1f_status(cause, 0, r);# unresolved status boundary [U]
+}
+
+# Float -> signed word conversion. mode 0 = cvt.sw (round to nearest -
+# the decode-name convention; every nearest variant agrees on the values
+# the fixture uses), mode 1 = trnc.sw (round toward zero). In-range
+# magnitudes convert with real p-code [I]; the documented OV condition
+# (PHO3 Table 3-11 bit 2) is computed as an input to the unresolved
+# status merge; the RESULT VALUE of an overflowing (or NaN) conversion
+# is the e1f_cvt_range_unresolved intrinsic [U] - no family saturation
+# endpoint is invented.
+macro e1f_cvt_sw(dest, src, mode) {
+	local conversion_mode:4 = mode;
+	local x:4 = src;
+	local xx:4 = x & 0x7fffffff;
+	local fexp:4 = xx >> 23;
+	local mag:8;
+	local low:8;
+	local half:8;
+	local k:4;
+	local cause:4 = 0;
+	local ov:1 = 0;
+	local r:4 = 0;
+	if (xx <= 0x7f800000) goto <finite>;
+	cause = 0x10;			# IV: NaN converts as an invalid operation [I condition]
+	r = e1f_cvt_range_unresolved(x, conversion_mode);
+	goto <finish>;
+	<finite>
+	if (xx >= 0x00800000) goto <normal>;
+	r = x & 0x80000000;		# |x| < 2^-126 rounds to signed zero
+	if (xx == 0) goto <finish>;
+	cause = 0x01;			# PR: a nonzero fraction is always lost
+	goto <finish>;
+	<normal>
+	mag = zext((xx & 0x7fffff) | 0x800000);
+	if (fexp < 126) goto <rounds_to_zero>;
+	if (fexp > 189) goto <out_of_range>;
+	if (fexp >= 151) goto <wide>;
+	k = 150 - fexp;		# fraction bits below the integer part: 0..24
+	if (k == 0) goto <ranged>;
+	low = mag & ((1:8 << k) - 1);
+	mag = mag >> k;
+	cause = cause | zext(low != 0);	# a lost fraction is inexact
+	if (conversion_mode != 0) goto <ranged>;	# truncate: magnitude kept as-is
+	half = 1:8 << (k - 1);				# nearest, ties to even [I]
+	if (low < half) goto <ranged>;
+	mag = mag + zext((low > half) || ((mag & 1) != 0));
+	goto <ranged>;
+	<wide>					# integer with trailing zero bits: field 151..189
+	mag = mag << (fexp - 150);
+	goto <ranged>;
+	<rounds_to_zero>
+	r = x & 0x80000000;
+	cause = cause | 0x01;
+	goto <finish>;
+	# ---- range check and signed assembly ----
+	<ranged>
+	if (mag <= 0x7fffffff) goto <fits>;
+	if (mag != 0x80000000) goto <out_of_range>;
+	if ((x & 0x80000000) == 0) goto <out_of_range>;
+	r = 0x80000000;			# -2^31 is exactly representable [I]
+	goto <finish>;
+	<out_of_range>
+	ov = 1;					# OV: conversion overflow [D condition]
+	r = e1f_cvt_range_unresolved(x, conversion_mode);
+	goto <finish>;
+	<fits>
+	r = mag:4;
+	if ((x & 0x80000000) == 0) goto <finish>;
+	r = 0 - r;
+	<finish>
+	dest = r;
+	e1f_status(cause, ov, r);
+}
+
+# Signed word -> float conversion: IEEE round-to-nearest with real
+# p-code [I]; the PR input for a lost fraction and the merge remain
+# unresolved [U].
+macro e1f_cvt_ws(dest, src) {
+	local r:4 = int2float(src);
+	local cause:4 = 0;
+	local wide:8 = int2float(src);	# int32 -> binary64 is exact
+	cause = zext(float2float(r) f!= wide);
+	dest = r;
+	e1f_status(cause, 0, r);
+}
+
+# minf.s/maxf.s numeric select: numeric operands select with a strict
+# `f<` (decode-name semantics); a NaN operand routes the RESULT through
+# e1f_minmax_nan_unresolved [U]. The status update is unresolved [U].
+macro e1f_minmax(dest, src1, src2, pick_max) {
+	local a:4 = src1;
+	local b:4 = src2;
+	local action:4 = pick_max;
+	local r:4;
+	if (((a & 0x7fffffff) > 0x7f800000)
+		|| ((b & 0x7fffffff) > 0x7f800000)) goto <nan>;
+	r = a;
+	if (action != 0) goto <do_max>;
+	if (!(b f< a)) goto <publish>;
+	r = b;		# min: ties keep reg1's value
+	goto <publish>;
+	<do_max>
+	if (!(a f< b)) goto <publish>;
+	r = b;		# max: ties keep reg1's value
+	goto <publish>;
+	<nan>
+	r = e1f_minmax_nan_unresolved(a, b, action);
+	<publish>
+	dest = r;
+	e1f_status(0, 0, r);
+}
+
+# Format F:I reg1, reg2, reg3: reg3 = reg2 op reg1 (single precision).
+:divf.s R0004, R1115, R2731 is op0510=0x3F & R0004 & R1115; op1626=0x3E0 & R2731 {
+	e1f_arith(R2731, R0004, R1115, 3);
+}
+
+:subf.s R0004, R1115, R2731 is op0510=0x3F & R0004 & R1115; op1626=0x3E4 & R2731 {
+	e1f_arith(R2731, R0004, R1115, 1);
+}
+
+:addf.s R0004, R1115, R2731 is op0510=0x3F & R0004 & R1115; op1626=0x3E8 & R2731 {
+	e1f_arith(R2731, R0004, R1115, 0);
+}
+
+:mulf.s R0004, R1115, R2731 is op0510=0x3F & R0004 & R1115; op1626=0x3EC & R2731 {
+	e1f_arith(R2731, R0004, R1115, 2);
+}
+
+:minf.s R0004, R1115, R2731 is op0510=0x3F & R0004 & R1115; op1626=0x3F0 & R2731 {
+	e1f_minmax(R2731, R0004, R1115, 0);
+}
+
+:maxf.s R0004, R1115, R2731 is op0510=0x3F & R0004 & R1115; op1626=0x3F4 & R2731 {
+	e1f_minmax(R2731, R0004, R1115, 1);
+}
+
+# Format F:II reg2, reg3.
+:cvt.sw R1115, R2731 is op0510=0x3F & R1115; op1626=0x360 & R2731 {
+	e1f_cvt_sw(R2731, R1115, 0);
+}
+
+:trnc.sw R1115, R2731 is op0510=0x3F & R1115; op1626=0x368 & R2731 {
+	e1f_cvt_sw(R2731, R1115, 1);
+}
+
+:cvt.ws R1115, R2731 is op0510=0x3F & R1115; op1626=0x370 & R2731 {
+	e1f_cvt_ws(R2731, R1115);
+}
+
+# negf/absf are pure sign-bit operations on the value; their EFG effect
+# (if any) is unresolved [U].
+:negf.s R1115, R2731 is op0510=0x3F & R1115; op1626=0x3F8 & R2731 {
+	R2731 = R1115 ^ 0x80000000;
+	e1f_status(0, 0, R2731);
+}
+
+:absf.s R1115, R2731 is op0510=0x3F & R1115; op1626=0x3FC & R2731 {
+	R2731 = R1115 & 0x7fffffff;
+	e1f_status(0, 0, R2731);
+}
+
+# Format F:IV: FPU register transfers. STFF/LDFF move EFG, STFC/LDFC
+# move ECT, all real p-code: reserved bits of both registers are
+# physically absent (PHO3 pp.104-105 diagrams) [D], so loads keep only
+# the defined bits, and the documented TR derivation then runs [D].
+# Whether software can set the cause bits through LDFF, and what LDFF
+# does to RO, is part of the unresolved status contract [U].
+:stff "efg", R2731 is op0510=0x3F; op1626=0x378 & R2731 & op2731!=0 {
+	R2731 = EFG;
+}
+
+# TRFF publishes the EFG condition flags into the PSW [decode name];
+# which bits go where is exactly the unresolved contract of
+# e1f_trff_unresolved [U]. NOTE: the E1F encoding overlaps the RH850
+# LDL space, so the E1F language must be selected to decode it.
+:trff is op0510=0x3F; op1626=0x378 & op2731=0 {
+	PSW = e1f_trff_unresolved(PSW, EFG);
+}
+
+:stfc "ect", R2731 is op0510=0x3F; op1626=0x37C & R2731 {
+	R2731 = ECT;
+}
+
+:ldff R1115, "efg" is op0510=0x3F & R1115; op1626=0x37A & op2731=0 {
+	EFG = R1115 & $(E1F_EFG_BITS);
+	e1f_refresh_tr();
+}
+
+:ldfc R1115, "ect" is op0510=0x3F & R1115; op1626=0x37E & op2731=0 {
+	ECT = R1115 & $(E1F_ECT_BITS);
+	e1f_refresh_tr();
+}

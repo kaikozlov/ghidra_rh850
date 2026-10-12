@@ -1,0 +1,15 @@
+# V850E1F (V850E1 core + FPU, U16374EJ1V0UM). The E2M/E3 FPU encodings and
+# the E2 search instructions are not part of this core; the E1F FPU space is
+# defined in v850_e1f.sinc (CVT.SW owns the encoding E2 uses for SCH0R).
+@define V850E1F 1
+
+
+@include "v850_common.sinc"
+@include "v850_arithmetic.sinc"
+@include "v850_logical.sinc"
+@include "v850_data_manipulation.sinc"
+@include "v850_cond.sinc"
+@include "v850_func.sinc"
+@include "v850_special.sinc"
+@include "v850_load_store.sinc"
+@include "v850_e1f.sinc"

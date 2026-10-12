@@ -36,12 +36,32 @@ and installs into an isolated Ghidra user-home under `build/cache/ghidra-home/` 
 `-Duser.home`. It does **not** generate files in the vendored tree or mutate
 `$GHIDRA_HOME/Ghidra/Extensions`.
 
-The in-tree `v850.cspec` models the firmware-observed RH850/G3 calling
-convention (r6–r9 args, r10 return, callee-saved r20–r29, **volatile r30/ep**,
-lp link register, `__interrupt` prototype). Exact Sienna/F33 code disproves the
-standard CC-RH ep-preservation rule; the model is GHS-compatible without
-claiming a specific Toyota compiler vendor/version. Processor audits:
+The default compiler is **GHS MULTI** (`default`,
+`data/languages/v850_ghs.cspec`): r6–r9 arguments, r10/r10:r11 scalar returns,
+callee-saved r20–r29 and volatile r30/ep, plus `__interrupt`. The plugin also
+provides old-V850 GCC (`gcc`) and CC-RH (`ccrh`) compiler specs. Compiler choice
+is separate from architectural language and target-specific GP/TP context.
+Processor evidence and implementation boundaries:
 [tooling/processor-module-audit.md](tooling/processor-module-audit.md).
+
+### Compiler and register-analysis policy
+
+`V850RegisterAnalyzer` exposes `Fixed CTBP value`, `Fixed GP value`,
+`Fixed TP value` and `Fixed EP value` in its analysis options. Empty values
+preserve supplied context and permit instruction-flow recovery; a hexadecimal
+value explicitly seeds function entries. Clearing a seed restores only the
+analyzer-owned context, not unrelated target annotations.
+
+`Callee-save policy registers` controls `{ep, gp, tp, r2}`. Empty keeps the
+selected compiler ABI; `none` makes all four volatile; a comma/space-separated
+subset preserves exactly those registers. Installation derives native compiler
+variants such as `default-callee-ep_gp_tp`. These change both direct and
+unresolved indirect-call contracts without changing argument/return placement.
+
+`Recover CALLT targets` resolves CTBP-relative halfword tables from agreeing
+dataflow observations, including zero offsets. The normal
+`Trust values read from writable memory` option controls writable tables;
+unproven conditional CTBP joins do not produce speculative functions or calls.
 
 ## Python tooling
 
@@ -607,6 +627,20 @@ make verify-sleigh                # SLEIGH compile + isolated install
 make verify-processor             # processor fixtures + firmware-machine gate + working-project audits
 make verify-project-parity        # exact working-project inventory vs baseline
 ```
+
+The processor fixtures cover all four language profiles. Their optional
+whole-program audits and the live semantic-coverage ledger are legacy-Sienna
+checks, not selected-target-generic suites. For a fresh disposable Sienna project:
+
+```bash
+make verify-processor PROJECT_DIR="$PWD/build/work/sienna-rebuild"
+GHIDRA_ANALYSIS_TARGET=sienna-8965B4512000 \
+  make verify-semantic-coverage-live PROJECT_DIR="$PWD/build/work/sienna-rebuild"
+```
+
+Use the actual rebuilt directory; neither command rebuilds it. The explicit
+target environment selects Sienna for the coverage exporter even when the
+registry default is another target.
 
 `verification.toml` lists suites and external prerequisites. It does not
 assign tests to changed files. Broad sweeps and Ghidra rebuilds are release or

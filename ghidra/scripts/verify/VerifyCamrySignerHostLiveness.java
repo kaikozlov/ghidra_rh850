@@ -48,11 +48,7 @@ public class VerifyCamrySignerHostLiveness extends GhidraScript {
                 if (get(e, 0xfebf02d0L) != 2) throw new Exception("unexpected oracle path");
                 return true;
             }
-            // The RH850 SLEIGH names NOP as an unimplemented __nop userop.
-            // Its architectural effect is only advancing the 16-bit PC.
-            if (e.readMemoryByte(toAddr(pc)) == 0 && e.readMemoryByte(toAddr(pc + 1)) == 0) {
-                e.writeRegister("PC", pc + 2);
-            } else if (!e.step(monitor)) throw new Exception(e.getLastError());
+            if (!e.step(monitor)) throw new Exception(e.getLastError());
         }
         throw new Exception("helper failed to return or reach domain copy");
     }

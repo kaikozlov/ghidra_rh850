@@ -61,6 +61,19 @@ def _section_keyless_exec_surface():
             offs.append(i)
             start = i + 1
 
+    def find_ldsr_writers(image: bytes, system_register: int, selector: int) -> list[tuple[int, int, bytes]]:
+        writers: list[tuple[int, int, bytes]] = []
+        for off in range(0, len(image) - 3, 2):
+            word = struct.unpack_from('<I', image, off)[0]
+            if (
+                ((word >> 5) & 0x3F) == 0x3F
+                and ((word >> 11) & 0x1F) == system_register
+                and ((word >> 16) & 0x7FF) == 0x20
+                and ((word >> 27) & 0x1F) == selector
+            ):
+                writers.append((off, word & 0x1F, image[off:off + 4]))
+        return writers
+
     def uds_table(image: bytes, base: int) -> list[bytes]:
         raw = image[base:base + UDS_RECORD_COUNT * 8]
         if len(raw) != UDS_RECORD_COUNT * 8:
@@ -203,17 +216,14 @@ def _section_keyless_exec_surface():
     check('fixed live-handoff record requests programming session', SIENNA[203028:203028 + 20] == struct.pack('<IIIII', 0, 1953, 0, 0, 2))
     for image_name, image in FOREIGN.items():
         check(f'{image_name}: TransferData complete body transfers at -0x1C for context-bypass audit', exact_shifted_body(image, 19898, 56))
-    print('== KEYLESS-008: live handoff cannot inherit attacker-selected CTBP ==')
-    CTBP_ZERO = bytes.fromhex('e0a72000')
+    print('== KEYLESS-008: exact images fix CTBP to zero at reset ==')
     for image_name, image in IMAGES.items():
-        hits = [off for off in range(len(image) - len(CTBP_ZERO) + 1) if image[off:off + len(CTBP_ZERO)] == CTBP_ZERO]
-        check(f'{image_name}: CTBP-zero instruction occurs exactly once at reset startup ({[hex(x) for x in hits]})', hits == [606])
-        check(f'{image_name}: live 0x9F00 handoff does not rewrite CTBP', CTBP_ZERO not in image[40704:40804])
-    check('Sienna boot CALLT 0x22 is pinned at 0x1D5C', SIENNA[7516:7518] == bytes.fromhex('2202'))
-    check('Sienna CTBP=0 table entry 0x22 resolves to fixed 0x1E1E', struct.unpack_from('<H', SIENNA, 68)[0] == 7710)
-    for image_name, image in FOREIGN.items():
-        check(f'{image_name}: relocated boot CALLT 0x22 is pinned at 0x1D40', image[7488:7490] == bytes.fromhex('2202'))
-        check(f'{image_name}: CTBP=0 table target relocates exactly -0x1C', struct.unpack_from('<H', image, 68)[0] == 7682)
+        writers = find_ldsr_writers(image, system_register=20, selector=0)
+        check(
+            f'{image_name}: whole-image CTBP writer census is reset ldsr r0,CTBP only',
+            writers == [(0x25E, 0, bytes.fromhex('e0a72000'))],
+            repr([(hex(off), reg, raw.hex()) for off, reg, raw in writers]),
+        )
     print('== KEYLESS-009: RequestDownload pre-SA side effects cannot arm a transfer ==')
     request_download = canonical_function('uds_request_download')
     wdbi = canonical_function('uds_write_data_by_identifier')

@@ -1,7 +1,7 @@
 //@author kaikozlov
 //@category Analysis
-// Apply RH850/P1M-E R7F701381 memory map, SFR volatility labels, and
-// boot/application GP/TP register context. Invoked during project import.
+// Apply RH850/P1M-E R7F701381/R7F701383 memory map, SFR volatility labels,
+// and boot/application GP/TP context.
 import ghidra.app.script.GhidraScript;
 import ghidra.program.model.address.Address;
 import ghidra.program.model.data.DataType;
