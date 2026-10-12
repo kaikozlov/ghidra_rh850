@@ -11,6 +11,8 @@ from pathlib import Path
 from typing import Any
 
 from exploit.ephemeral_runtime.build_tss3_request_signer import (
+    CONFIG_BASE,
+    CONFIG_OFFSETS,
     STAGING_BASE,
     STAGING_LIMIT,
     STATE_MAGIC,
@@ -198,10 +200,14 @@ def simulate_candidate(
     digest = contract["codeflash_sha256"]
     load = ((STAGING_BASE, simulator_staging),)
 
+    config = contract["runtime_config"]
     fallback_expected = (
         "UNIVERSAL_DUMP_FALLBACK "
         f"STATE=0x{STATE_MAGIC:x} VERSION={STATE_VERSION} INIT=1 TICK=1 "
-        "CONTEXT=0x43545831 STARTUP=0x53544152"
+        "CONTEXT=0x43545831 STARTUP=0x53544152 "
+        f"APP_CONTEXT=0x{config['app_context']:x} RING=0x{config['ring_base']:x} "
+        f"COMMAND5=0x{config['command5_sync']:x} LOWER_TX=0x{config['lower_can_write']:x} "
+        f"RESPONSE_HANDLE={config['response_handle']}"
     )
     fallback_gdb = (
         "set {unsigned char}0xFFFFB111 = 0x10",
@@ -215,10 +221,16 @@ def simulate_candidate(
         "continue",
         (
             f'printf "UNIVERSAL_DUMP_FALLBACK STATE=0x%x VERSION=%u INIT=%u TICK=%u '
-            f'CONTEXT=0x%x STARTUP=0x%x\\n", *(unsigned int *)0x{state:08X}, '
+            f'CONTEXT=0x%x STARTUP=0x%x APP_CONTEXT=0x%x RING=0x%x COMMAND5=0x%x '
+            f'LOWER_TX=0x%x RESPONSE_HANDLE=%u\\n", *(unsigned int *)0x{state:08X}, '
             f'*(unsigned char *)0x{state + 4:08X}, *(unsigned char *)0x{state + 5:08X}, '
             f'*(unsigned char *)0x{tick:08X}, *(unsigned int *)0x{CONTEXT_MARKER:08X}, '
-            f'*(unsigned int *)0x{STARTUP_MARKER:08X}'
+            f'*(unsigned int *)0x{STARTUP_MARKER:08X}, '
+            f'*(unsigned int *)0x{CONFIG_BASE + CONFIG_OFFSETS["app_context"]:08X}, '
+            f'*(unsigned int *)0x{CONFIG_BASE + CONFIG_OFFSETS["ring_base"]:08X}, '
+            f'*(unsigned int *)0x{CONFIG_BASE + CONFIG_OFFSETS["command5_sync"]:08X}, '
+            f'*(unsigned int *)0x{CONFIG_BASE + CONFIG_OFFSETS["lower_can_write"]:08X}, '
+            f'*(unsigned int *)0x{CONFIG_BASE + CONFIG_OFFSETS["response_handle"]:08X}'
         ),
     )
     _, runtime_elf = run_codeflash_sim(
