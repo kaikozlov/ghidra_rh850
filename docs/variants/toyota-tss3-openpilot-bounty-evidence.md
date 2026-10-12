@@ -214,7 +214,7 @@ current build identity.
 The retained [session summary](../../targets/camry-2026/raw-20260910/working-steering/summary.json),
 [verbatim runtime artifacts, hashes, and replay procedure](../../targets/camry-2026/raw-20260910/working-steering/runtime/README.md),
 [exact working delta](../../targets/camry-2026/raw-20260910/working-steering/kai-opendbc-c7-working-tree.patch),
-and [field runbook](../../exploit/ephemeral_runtime/camry_f33_runtime_monitor_runbook.md#known-working-openpilot-steering-fallback)
+and [field runbook](../../tools/targets/camry/research/ram_runtime/monitor/camry_f33_runtime_monitor_runbook.md#known-working-openpilot-steering-fallback)
 are the reproduction sources.
 
 The rlog records C7 commands, Panda returns, vehicle state, and wheel response;

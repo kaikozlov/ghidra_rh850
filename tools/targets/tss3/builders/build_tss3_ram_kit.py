@@ -9,7 +9,7 @@ import sys
 import tempfile
 from pathlib import Path
 
-from exploit.ephemeral_runtime.build_tss3_request_signer import (
+from tools.targets.tss3.builders.build_tss3_request_signer import (
     DEFAULT_CODEC,
     build_request_signer,
 )
@@ -22,27 +22,28 @@ from tools import REPO_ROOT
 from tools.targets.tss3.console import render_kit
 
 ROOT = REPO_ROOT
-LAUNCHER = ROOT / "exploit/ephemeral_runtime/tss3_request_signer_launcher.sh"
+LAUNCHER = ROOT / "exploit/ram_runtime/tss3_request_signer_launcher.sh"
 TARGETS = supported_targets()
 CODECS = (DEFAULT_CODEC, "compact")
 RUNTIME_FILES = (
+    "tools/__init__.py",
     "tsk/__init__.py",
     "tsk/lib/__init__.py",
     "tsk/lib/programming.py",
     "tsk/lib/diagnostic_route.py",
     "exploit/common/ram_exec.py",
-    "exploit/ephemeral_runtime/tss3_request_signer.py",
-    "exploit/ephemeral_runtime/tss3_post_install_recovery.py",
-    "exploit/ephemeral_runtime/panda_eps.py",
-    "exploit/ephemeral_runtime/tss3_panda_lease.sh",
+    "exploit/ram_runtime/tss3_request_signer.py",
+    "exploit/ram_runtime/tss3_post_install_recovery.py",
+    "exploit/ram_runtime/panda_eps.py",
+    "exploit/ram_runtime/tss3_panda_lease.sh",
 )
 # Shared repinned runtime topology: vehicle network + EPS diagnostics on bus 0.
 REPINNED_RUNTIME_BUS = 0
 UI_RUNTIME_FILES = (
-    "exploit/ephemeral_runtime/tss3_request_signer_ui_bringup.py",
-    "exploit/ephemeral_runtime/tss3_startup_programming.py",
+    "exploit/ram_runtime/tss3_request_signer_ui_bringup.py",
+    "exploit/ram_runtime/tss3_startup_programming.py",
 )
-COMPACT_RUNTIME_FILE = "exploit/ephemeral_runtime/tss3_request_signer_compact.py"
+COMPACT_RUNTIME_FILE = "exploit/ram_runtime/tss3_request_signer_compact.py"
 
 
 def _require_empty(out: Path) -> None:

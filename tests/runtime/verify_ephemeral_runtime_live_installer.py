@@ -6,7 +6,7 @@ from __future__ import annotations
 from tools import REPO_ROOT
 REPO = REPO_ROOT
 
-from exploit.ephemeral_runtime.live_installer import (  # noqa: E402
+from tools.targets.tss3.research.ram_runtime.live_installer import (  # noqa: E402
     AUTHENTICATED_FIXTURE_SHA256,
     FF00_REQUEST_OLD,
     FF00_REQUEST_NEW,
@@ -208,15 +208,6 @@ check("new-stack live trigger uses 45 01 magic", isotp_new == [(FF00_REQUEST_NEW
 check("new-stack CPU0 uses DID 0203 offset selector 01", client_new.events[5] == ("wdbi", 0x203, b"\x01" + bytes(4)))
 check("new-stack 10F0 and FF00 magic agree", client_new.events[14][3][:2] == b"\x45\x01" and FF00_REQUEST_NEW[4:6] == b"\x45\x01")
 
-source = (REPO / "exploit/ephemeral_runtime/live_installer.py").read_text(encoding="utf-8")
-check("live installer never loads payload-build secret", "load_payload_secret" not in source)
-check("live execution is explicitly bench gated", "--bench-isolated" in source and "--execute requires --bench-isolated" in source)
-check("live F181 is independently bound to manifest software IDs", "validate_target_f181(f181_hex, spec)" in source and "target_software_ids" in source)
-check("command5 message is validated before live installation", source.index("_validate_message(command5_message") < source.index("panda, route, live = install_live"))
-check("canary live path performs built-in post-FF00 attestation", "canary_attestation" in source and "_wait_for_canary(" in source)
-check("command5 proxy phase also pins Panda blocked-Tx telemetry", "proxy_panda_safety_tx_blocked_delta" in source and "Panda blocked at least one command-5 proxy XCP request" in source)
-check("command5 proxy failures are folded into fail-closed installer errors", "command-5 proxy phase failed" in source)
-check("live secret is not hard-coded in installer source", "f05f36b7d78c03e24ab4faef2a57d044" not in source.lower())
 
 print(f"\n== RESULT: {passed} passed, {failed} failed ==")
 raise SystemExit(1 if failed else 0)

@@ -14,23 +14,24 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 ROOT = REPO_ROOT
-BUILDER = ROOT / "exploit/ephemeral_runtime/build_crown_f30_b6_inline_signer.py"
-LAUNCHER = ROOT / "exploit/ephemeral_runtime/crown_f30_b6_inline_signer_launcher.sh"
+BUILDER = ROOT / "tools/targets/crown/research/ram_runtime/build_crown_f30_b6_inline_signer.py"
+LAUNCHER = ROOT / "tools/targets/crown/research/ram_runtime/crown_f30_b6_inline_signer_launcher.sh"
 PROGRAMMING_HELPER_SOURCE_COMMIT = "fdded7183e41bed42d0c74b1a204e8883e543a6f"
 PROGRAMMING_HELPER_HASHES = {
     "tsk/lib/programming.py": "ab6aba3b47cd4ab2fa2ad680504dfe9f013c7f936f02169ba3334c1435829905",
     "tsk/lib/diagnostic_route.py": "703739d2257eb27fd0dfbfc60beea3883e661ae05f1ad6b04ee64e57c87c22d9",
 }
 RUNTIME_FILES = (
+    "tools/__init__.py",
     "tsk/__init__.py",
     "tsk/lib/__init__.py",
     "tsk/lib/programming.py",
     "tsk/lib/diagnostic_route.py",
     "exploit/common/ram_exec.py",
-    "exploit/ephemeral_runtime/crown_f30_b6_inline_signer.py",
-    "exploit/ephemeral_runtime/camry_f33_runtime_monitor.py",
-    "exploit/ephemeral_runtime/camry_f33_runtime_replay_discriminator.py",
-    "exploit/ephemeral_runtime/tss3_panda_lease.sh",
+    "tools/targets/crown/research/ram_runtime/crown_f30_b6_inline_signer.py",
+    "tools/targets/camry/research/ram_runtime/monitor/camry_f33_runtime_monitor.py",
+    "tools/targets/camry/research/ram_runtime/monitor/camry_f33_runtime_replay_discriminator.py",
+    "exploit/ram_runtime/tss3_panda_lease.sh",
     "tools/targets/crown/live/crown_f30_diag_mailbox_probe.py",
     "tools/targets/crown/live/crown_f30_resident_soak.py",
     "tools/targets/crown/live/crown_f30_authority_probe.py",

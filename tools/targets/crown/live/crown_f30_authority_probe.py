@@ -23,7 +23,7 @@ from typing import Any
 
 ROOT = REPO_ROOT
 
-from exploit.ephemeral_runtime import crown_f30_b6_inline_signer as signer
+import tools.targets.crown.research.ram_runtime.crown_f30_b6_inline_signer as signer
 
 BASELINE_MIN_SECONDS = 0.350
 BASELINE_TIMEOUT_SECONDS = 2.500

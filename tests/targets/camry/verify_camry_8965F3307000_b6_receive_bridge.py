@@ -11,10 +11,10 @@ def section_b6_receive_bridge() -> int:
     import hashlib, json, struct
 
     ROOT = REPO_ROOT
-    from exploit.ephemeral_runtime import build_camry_f33_b6_bridge as bridge_builder
-    BRIDGE_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_bridge.bin"
-    BRIDGE_AUDIT = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_b6_bridge_build.json"
-    BRIDGE_SOURCE = ROOT / "exploit/ephemeral_runtime/camry_f33_b6_bridge.S"
+    import tools.targets.camry.research.ram_runtime.b6.build_camry_f33_b6_bridge as bridge_builder
+    BRIDGE_BIN = ROOT / "tools/targets/camry/research/ram_runtime/b6/audited/camry_f33_b6_bridge.bin"
+    BRIDGE_AUDIT = ROOT / "tools/targets/camry/research/ram_runtime/b6/audited/audited_camry_f33_b6_bridge_build.json"
+    BRIDGE_SOURCE = ROOT / "tools/targets/camry/research/ram_runtime/b6/camry_f33_b6_bridge.S"
     IMAGE = ROOT / "firmware/camry-8965F3307000/CodeFlash.bin"
     p = f = 0
 

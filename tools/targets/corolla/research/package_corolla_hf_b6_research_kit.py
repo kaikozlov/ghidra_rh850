@@ -14,12 +14,13 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 ROOT = REPO_ROOT
-BUILDER = ROOT / "exploit/ephemeral_runtime/build_corolla_hf_b6_inline_signer.py"
-LAUNCHER = ROOT / "exploit/ephemeral_runtime/corolla_hf_b6_inline_signer_launcher.sh"
+BUILDER = ROOT / "tools/targets/corolla/research/ram_runtime/build_corolla_hf_b6_inline_signer.py"
+LAUNCHER = ROOT / "tools/targets/corolla/research/ram_runtime/corolla_hf_b6_inline_signer_launcher.sh"
 RUNTIME_FILES = (
+    "tools/__init__.py",
     "exploit/common/ram_exec.py",
-    "exploit/ephemeral_runtime/corolla_hf_b6_inline_signer.py",
-    "exploit/ephemeral_runtime/tss3_panda_lease.sh",
+    "tools/targets/corolla/research/ram_runtime/corolla_hf_b6_inline_signer.py",
+    "exploit/ram_runtime/tss3_panda_lease.sh",
 )
 
 

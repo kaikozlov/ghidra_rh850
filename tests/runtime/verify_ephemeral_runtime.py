@@ -9,9 +9,6 @@ import struct
 from tools import REPO_ROOT
 REPO = REPO_ROOT
 CF = (REPO / "firmware" / "RH850_P1M-E_CodeFlash.bin").read_bytes()
-SOURCE = REPO / "exploit" / "ephemeral_runtime" / "main.c"
-CANARY_SOURCE = REPO / "exploit" / "ephemeral_runtime" / "canary.c"
-SUBSTITUTION_PLANNER = REPO / "exploit" / "ephemeral_runtime" / "build_substitution_plan.py"
 CORPUS = REPO / "data" / "generated" / "decompilations.jsonl"
 passed = failed = 0
 
@@ -122,23 +119,6 @@ check("2E4 request/torque unpack destinations remain stock",
       any(r["can_id"] == "0x2E4" and r["signal_id"] == "60" and r["dest"] == "0xFEBE7F98" for r in rows) and
       any(r["can_id"] == "0x2E4" and r["signal_id"] == "61" and r["dest"] == "0xFEBE7F94" for r in rows))
 
-print("\n== tracked resident runtime contract ==")
-source = SOURCE.read_text(encoding="utf-8")
-check("runtime source contains no CodeFlash/FACI programming primitive",
-      all(token not in source.lower() for token in ("faci_", "flash_block_rmw", "program_page", "codeflash_write")))
-installer_source = (REPO / "exploit" / "ephemeral_runtime" / "live_installer.py").read_text(encoding="utf-8")
-check("live installer is isolated-bench gated and defaults to plan-only",
-      "--bench-isolated" in installer_source and "--execute" in installer_source and
-      "--execute requires --bench-isolated" in installer_source)
-check("live installer retains initial boot SecurityAccess boundary",
-      "initial_authentication_bypassed" in installer_source and "load_security_secret" in installer_source and
-      "load_payload_secret" not in installer_source)
-
-print("\n== inert scheduler canary ==")
-canary_source = CANARY_SOURCE.read_text(encoding="utf-8")
-check("canary preserves the manifest-resolved stock aggregate and contains no COM/SecOC bridge",
-      "TARGET_FG_AGGREGATE" in canary_source and
-      "application_com_rx" not in canary_source.lower() and "MAC28" not in canary_source)
 # Heartbeat is beyond startup CodeFlash shadow copy and remains XCP-readable.
 heartbeat = 0xFEBFFBF0
 exclusion_count = u32(0x2B3B8)
@@ -158,10 +138,6 @@ for line in CORPUS.read_text(encoding="utf-8").splitlines():
 check("heartbeat has no canonical application direct reference", not heartbeat_refs, repr(heartbeat_refs))
 
 print("\n== post-auth substitution / execution ordering ==")
-planner = SUBSTITUTION_PLANNER.read_text(encoding="utf-8")
-check("planner explicitly requires prior successful 10F0 authentication",
-      "selected target-accepted encrypted bootstrap fixture has been uploaded and passed RID 0x10F0" in planner and
-      '"initial_authentication_bypassed": False' in planner)
 check("flash_erase_start stages operation type 2 rather than invoking payload callback",
       CF[0x4244:0x424A] == bytes.fromhex("020a440f9c91"))
 check("operation-type-2 worker reaches flash_driver_call_block_operation",

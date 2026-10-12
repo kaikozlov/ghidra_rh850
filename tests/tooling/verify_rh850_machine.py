@@ -8,7 +8,7 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-from exploit.ephemeral_runtime import build_tss3_request_signer as signer_builder
+import tools.targets.tss3.builders.build_tss3_request_signer as signer_builder
 from exploit.ram_runtime.target_profiles import supported_targets, target_spec
 from tools import REPO_ROOT
 from tools.targets.tss3.request_signer_machine import verify_request_signer_target

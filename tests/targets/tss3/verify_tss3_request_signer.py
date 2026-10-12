@@ -12,9 +12,9 @@ from unittest import mock
 
 from exploit.common.rh850_build import CJob
 
-from exploit.ephemeral_runtime import build_tss3_request_signer as build
-from exploit.ephemeral_runtime import tss3_request_signer as host
-from exploit.ephemeral_runtime import tss3_request_signer_compact as compact_host
+import tools.targets.tss3.builders.build_tss3_request_signer as build
+import exploit.ram_runtime.tss3_request_signer as host
+import exploit.ram_runtime.tss3_request_signer_compact as compact_host
 from exploit.ram_runtime.target_profiles import registered_specs, spec_from_codeflash
 from exploit.ram_runtime.tss3_request_signer_contract import (
     ContractError,

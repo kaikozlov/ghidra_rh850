@@ -16,7 +16,7 @@ from typing import Any
 from unittest import mock
 
 from exploit.common.rh850_build import CJob, compile_c_batch, nm_symbol
-from exploit.ephemeral_runtime import build_tss3_request_signer as signer_builder
+import tools.targets.tss3.builders.build_tss3_request_signer as signer_builder
 from exploit.patcher.build_payload import simulate_apply
 from exploit.patcher.patch_config import config_from_manifest
 from exploit.ram_runtime.target_profiles import supported_targets, target_spec
@@ -990,7 +990,7 @@ def main() -> int:
         check_gate2(work)
         check_built_resident(
             work,
-            builder=ROOT / "exploit/ephemeral_runtime/build_camry_f33_command5_carrier.py",
+            builder=ROOT / "tools/targets/camry/research/ram_runtime/bootstrap/build_camry_f33_command5_carrier.py",
             binary_name="camry_f33_runtime_canary",
             pocket=776,
             spec=F33_SPEC,
@@ -1003,7 +1003,7 @@ def main() -> int:
         )
         check_built_resident(
             work,
-            builder=ROOT / "exploit/ephemeral_runtime/build_corolla_hf_command5_carrier.py",
+            builder=ROOT / "tools/targets/corolla/research/ram_runtime/build_corolla_hf_command5_carrier.py",
             binary_name="corolla_hf_runtime_canary",
             pocket=464,
             spec=COROLLA_SPEC,

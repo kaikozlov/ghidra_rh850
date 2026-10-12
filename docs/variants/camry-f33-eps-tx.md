@@ -374,7 +374,7 @@ reaches the observed Bus-4 domain. If the lower driver physically completes the
 replay but Panda never sees the exact frame, selective EBU/Brake-domain forwarding remains the leading
 explanation and a comma-side sender with the EPS used only as a MAC oracle stays
 the simpler architecture. Detailed field ordering and proof boundaries are in
-[`../../exploit/ephemeral_runtime/camry_f33_08a_sender_experiments.md`](../../exploit/ephemeral_runtime/camry_f33_08a_sender_experiments.md).
+[`../../tools/targets/camry/research/ram_runtime/oracle/camry_f33_08a_sender_experiments.md`](../../tools/targets/camry/research/ram_runtime/oracle/camry_f33_08a_sender_experiments.md).
 
 ### 12.1 Live result — 2026-09-18
 
@@ -441,7 +441,7 @@ corrected resident survives and initializes, but its first C9 request left
 B0:B1=`C9 C9`. The oracle now follows the already-live C6/C7 rule and keys only
 on durable N-SDU **B1=`C9`**, because B0 is the unsupported SID and is not a
 stable recurring-carrier byte. Field procedure:
-[`camry_f33_08a_oracle_stream.md`](../../exploit/ephemeral_runtime/camry_f33_08a_oracle_stream.md).
+[`camry_f33_08a_oracle_stream.md`](../../tools/targets/camry/research/ram_runtime/oracle/camry_f33_08a_oracle_stream.md).
 
 ### 12.3 Live oracle KAT closes crypto; CanTp STmin is now the bottleneck
 

@@ -9,8 +9,8 @@ import sys
 from tools import REPO_ROOT
 ROOT = REPO_ROOT
 
-from exploit.ephemeral_runtime import build_camry_f33_08a_fd_oracle as build
-from exploit.ephemeral_runtime import camry_f33_08a_fd_oracle as host
+import tools.targets.camry.research.ram_runtime.oracle.build_camry_f33_08a_fd_oracle as build
+import tools.targets.camry.research.ram_runtime.oracle.camry_f33_08a_fd_oracle as host
 
 OUT = ROOT / "build/out/ephemeral-runtime/camry-f33-08a-fd-oracle"
 

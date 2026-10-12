@@ -449,9 +449,9 @@ Camry, Crown, and Corolla H/F target. Target builds retain separate metadata
 for host bus/F181 binding, but their default payload SHA-256 is identical.
 
 The maintained helper and foreground scheduler are freestanding C:
-[`tss3_request_signer_helper.c`](../exploit/ephemeral_runtime/tss3_request_signer_helper.c),
-[`tss3_request_signer_core.h`](../exploit/ephemeral_runtime/tss3_request_signer_core.h),
-and [`tss3_request_signer_resident.c`](../exploit/ephemeral_runtime/tss3_request_signer_resident.c).
+[`tss3_request_signer_helper.c`](../exploit/ram_runtime/request_signer/tss3_request_signer_helper.c),
+[`tss3_request_signer_core.h`](../exploit/ram_runtime/request_signer/tss3_request_signer_core.h),
+and [`tss3_request_signer_resident.c`](../exploit/ram_runtime/request_signer/tss3_request_signer_resident.c).
 The small resident `.S` entry installs the stock CPU context before any C
 prologue; interrupt enable and atomic tick-bit clear remain CPU instructions.
 The generated boot staging/copy shell also remains assembly.

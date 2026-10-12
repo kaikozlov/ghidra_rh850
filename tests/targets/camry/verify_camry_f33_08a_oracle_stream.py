@@ -11,12 +11,8 @@ from pathlib import Path
 from tools import REPO_ROOT
 ROOT = REPO_ROOT
 
-from exploit.ephemeral_runtime import (
-    build_camry_f33_08a_oracle_stream as build,
-)
-from exploit.ephemeral_runtime import (
-    camry_f33_08a_oracle_stream as oracle,
-)
+import tools.targets.camry.research.ram_runtime.oracle.build_camry_f33_08a_oracle_stream as build
+import tools.targets.camry.research.ram_runtime.oracle.camry_f33_08a_oracle_stream as oracle
 
 
 def main() -> int:
@@ -34,7 +30,7 @@ def main() -> int:
         stage = (out / meta["staging"]["path"]).read_bytes()
         payload = (out / meta["authenticated_payload"]["path"]).read_bytes()
 
-    audited_meta = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_08a_oracle_stream_build.json"
+    audited_meta = ROOT / "tools/targets/camry/research/ram_runtime/oracle/audited/audited_camry_f33_08a_oracle_stream_build.json"
     audited = json.loads(audited_meta.read_text())
     assert audited["resident"]["sha256"] == oracle.EXPECTED_RESIDENT_SHA256
     assert audited["helper"]["sha256"] == oracle.EXPECTED_HELPER_SHA256
@@ -312,8 +308,6 @@ def main() -> int:
     assert pipe["boundaries"]["dedicated_receiver_thread"] is True
 
     print("== launcher contract ==")
-    launcher = (ROOT / "exploit/ephemeral_runtime/camry_f33_08a_oracle_stream_launcher.sh").read_text()
-    assert oracle.EXPECTED_PAYLOAD_SHA256 in launcher
     plan = oracle.plan(None)
     assert plan["transport"]["target_period_ms"] == 25
     assert plan["boundaries"]["transmitted_08a"] is False

@@ -34,7 +34,7 @@ Stock Toyota architecture and integration qualification are separate questions.
 the scope of the retained demonstrations. A reported development result is not
 upstream platform support or evidence that a different target shares its interface.
 
-**September-17 `0x08A` sender-experiment checkpoint:** the exact F33 car kit now packages two deliberately separate, non-actuating discriminators. `f33-sign verify-native-08a` asks the already-live-qualified selector-4 command-5 path to reproduce stock `0x08A` MAC28 without transmitting `0x08A`. After a full EPS power-off, `f33-08a-route` installs a different volatile resident/helper and replays one unchanged stock Target-Lateral-ID0 `0x08A` through exact HTH0 lower object 47 / writer `0x85112`; the helper uses special software handle `0x00F0` and `FEBE502A` departure as a physical-completion witness. Both host and resident reject a nonzero Target Lateral ID and one successful EPS transmit closes the probe for that boot. The routing result distinguishes an EPS-local Tx path that reaches Panda from a selectively forwarded EBU/local segment. It does not yet create a new sender freshness stream or authorize longitudinal output. Runbook: [the F33 `0x08A` sender experiments](../../exploit/ephemeral_runtime/camry_f33_08a_sender_experiments.md).
+**September-17 `0x08A` sender-experiment checkpoint:** the exact F33 car kit now packages two deliberately separate, non-actuating discriminators. `f33-sign verify-native-08a` asks the already-live-qualified selector-4 command-5 path to reproduce stock `0x08A` MAC28 without transmitting `0x08A`. After a full EPS power-off, `f33-08a-route` installs a different volatile resident/helper and replays one unchanged stock Target-Lateral-ID0 `0x08A` through exact HTH0 lower object 47 / writer `0x85112`; the helper uses special software handle `0x00F0` and `FEBE502A` departure as a physical-completion witness. Both host and resident reject a nonzero Target Lateral ID and one successful EPS transmit closes the probe for that boot. The routing result distinguishes an EPS-local Tx path that reaches Panda from a selectively forwarded EBU/local segment. It does not yet create a new sender freshness stream or authorize longitudinal output. Runbook: [the F33 `0x08A` sender experiments](../../tools/targets/camry/research/ram_runtime/oracle/camry_f33_08a_sender_experiments.md).
 
 **September-17 same-cycle DRCC checkpoint:** application reappearance after the
 volatile bootstrap is not sufficient evidence that the rest of the vehicle has
@@ -3889,8 +3889,8 @@ not modify the ECU bootstrap, payloads, signing implementation, wire protocol,
 transport timing, steering limits, or process start/stop policy. It was tested
 offline; nothing was deployed to the comma or exercised against the vehicle.
 
-The current backend `exploit/ephemeral_runtime/camry_f33_oracle_ui_bringup.py`
-emits summary schema `camry-f33-oracle-ui-bringup-v1` and verdict
+The backend at this checkpoint was `camry_f33_oracle_ui_bringup.py` (now owned by
+`exploit/ram_runtime/tss3_request_signer_ui_bringup.py`). It emitted summary schema `camry-f33-oracle-ui-bringup-v1` and verdict
 `startup_caught_fresh_signer_peer_state_healthy_self_test_pass`. The automatic
 host consumer still expected the older known-answer verdict, so a successful
 current-backend run could be classified as failed. Its failure path could then

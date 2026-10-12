@@ -24,13 +24,13 @@ def _section_corolla_hf_command5_runtime_carrier():
     ART = ROOT / 'data/generated/corolla_hf_command5_runtime_carrier.json'
     EVID = ROOT / 'data/generated/corolla_hf_command5_runtime_carrier_evidence.json'
     BUILDER = ROOT / 'tools/targets/corolla/builders/build_corolla_hf_command5_runtime_carrier.py'
-    RUNTIME_BUILDER = ROOT / 'exploit/ephemeral_runtime/build_corolla_hf_command5_carrier.py'
-    PROXY_SOURCE = ROOT / 'exploit/ephemeral_runtime/corolla_hf_command5_proxy.c'
-    CANARY_SOURCE = ROOT / 'exploit/ephemeral_runtime/corolla_hf_canary.c'
-    PROXY_AUDIT = ROOT / 'exploit/ephemeral_runtime/audited_corolla_hf_command5_proxy_build.json'
-    CANARY_AUDIT = ROOT / 'exploit/ephemeral_runtime/audited_corolla_hf_canary_build.json'
-    PROXY_BIN = ROOT / 'exploit/ephemeral_runtime/audited/corolla_hf_command5_proxy.bin'
-    CANARY_BIN = ROOT / 'exploit/ephemeral_runtime/audited/corolla_hf_runtime_canary.bin'
+    RUNTIME_BUILDER = ROOT / 'tools/targets/corolla/research/ram_runtime/build_corolla_hf_command5_carrier.py'
+    PROXY_SOURCE = ROOT / 'tools/targets/corolla/research/ram_runtime/corolla_hf_command5_proxy.c'
+    CANARY_SOURCE = ROOT / 'tools/targets/corolla/research/ram_runtime/corolla_hf_canary.c'
+    PROXY_AUDIT = ROOT / 'tools/targets/corolla/research/ram_runtime/audited/audited_corolla_hf_command5_proxy_build.json'
+    CANARY_AUDIT = ROOT / 'tools/targets/corolla/research/ram_runtime/audited/audited_corolla_hf_canary_build.json'
+    PROXY_BIN = ROOT / 'tools/targets/corolla/research/ram_runtime/audited/corolla_hf_command5_proxy.bin'
+    CANARY_BIN = ROOT / 'tools/targets/corolla/research/ram_runtime/audited/corolla_hf_runtime_canary.bin'
     H = ROOT / 'community/albinoelephant/normalized/8965H1202000_CodeFlash.bin'
     F = ROOT / 'community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin'
     RAMREQ = ROOT / 'data/variant_ram_exec_requirements.json'
@@ -105,10 +105,10 @@ def _section_corolla_hf_direct_command5():
     import tempfile
     from pathlib import Path
     ROOT = REPO_ROOT
-    TOOL = ROOT / 'exploit/ephemeral_runtime/corolla_hf_direct_command5.py'
-    PROXY = ROOT / 'exploit/ephemeral_runtime/audited/corolla_hf_command5_proxy.bin'
-    SOURCE = ROOT / 'exploit/ephemeral_runtime/corolla_hf_command5_proxy.c'
-    import exploit.ephemeral_runtime.corolla_hf_direct_command5 as mod
+    TOOL = ROOT / 'tools/targets/corolla/research/ram_runtime/corolla_hf_direct_command5.py'
+    PROXY = ROOT / 'tools/targets/corolla/research/ram_runtime/audited/corolla_hf_command5_proxy.bin'
+    SOURCE = ROOT / 'tools/targets/corolla/research/ram_runtime/corolla_hf_command5_proxy.c'
+    import tools.targets.corolla.research.ram_runtime.corolla_hf_direct_command5 as mod
     plan = mod.build_plan()
     check('audited proxy identity exact', PROXY.stat().st_size == 424 and plan['package']['shellcode_sha256'] == '62e4880eaa1bb7dd79fb1f47f4ce44033d1201550a20812a6a103ace00dde183')
     check('direct proxy package identity exact', plan['package']['payload_sha256'] == 'a81b367febb819f4016a0880c707b82fb7f46f1bad5ec59119e43aec0140bfc5' and plan['package']['payload_size'] == 4096)

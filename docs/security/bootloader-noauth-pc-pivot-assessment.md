@@ -194,7 +194,7 @@ and the exact pinned encrypted `ram_dump_payload.bin` fixture is already known
 to pass the Sienna 4 KiB CRC/CMAC payload gate with DID `0201/0202` set to zero.
 That means execution does not require the payload-build secret.
 
-`exploit/ephemeral_runtime/live_installer.py` now composes the complete guarded
+`tools/targets/tss3/research/ram_runtime/live_installer.py` now composes the complete guarded
 host workflow:
 
 ```text

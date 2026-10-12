@@ -742,8 +742,8 @@ multiple stock SecOC frames.
    issues command 8 or writes flash.
 
 The tracked exact-F33 implementation is
-`exploit/ephemeral_runtime/camry_f33_icus_ramkey_probe.py` with audited helper
-artifacts under `exploit/ephemeral_runtime/audited/`. The old command-13 key-export
+`tools/targets/camry/research/ram_runtime/command5/camry_f33_icus_ramkey_probe.py` with audited helper
+artifacts under `tools/targets/camry/research/ram_runtime/command5/audited/`. The old command-13 key-export
 probe was removed because its selector/four-output contract did not match SHE
 `CMD_EXPORT_RAM_KEY` and no longer represented the strongest register-map hypothesis.
 

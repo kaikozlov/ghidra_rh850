@@ -26,10 +26,10 @@ from exploit.common.ram_exec import (  # noqa: E402
     _read_f181,
     ensure_boardd_stopped,
 )
-from exploit.ephemeral_runtime import camry_f33_runtime_monitor as monitor  # noqa: E402
-from exploit.ephemeral_runtime.panda_eps import set_alloutput_mode  # noqa: E402
-from exploit.ephemeral_runtime.camry_f33_runtime_replay_discriminator import _read_memory  # noqa: E402
-from exploit.ephemeral_runtime.crown_f30_b6_inline_signer import (  # noqa: E402
+import tools.targets.camry.research.ram_runtime.monitor.camry_f33_runtime_monitor as monitor
+from exploit.ram_runtime.panda_eps import set_alloutput_mode  # noqa: E402
+from tools.targets.camry.research.ram_runtime.monitor.camry_f33_runtime_replay_discriminator import _read_memory  # noqa: E402
+from tools.targets.crown.research.ram_runtime.crown_f30_b6_inline_signer import (  # noqa: E402
     CONTROL_BUS,
     LEGACY_SIDEBAND_CAN_ID,
     EXPECTED_F181_HEX,

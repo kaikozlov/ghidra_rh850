@@ -15,7 +15,7 @@ import time
 from pathlib import Path
 from typing import Any
 
-from exploit.ephemeral_runtime import crown_f30_b6_inline_signer as signer
+import tools.targets.crown.research.ram_runtime.crown_f30_b6_inline_signer as signer
 
 
 class SoakError(RuntimeError):

@@ -93,7 +93,7 @@
   },
   "runtime_candidates": {
     "fixed_36_command5_proxy": {
-      "binary": "exploit/ephemeral_runtime/audited/camry_f33_command5_proxy.bin",
+      "binary": "tools/targets/camry/research/ram_runtime/bootstrap/audited/camry_f33_command5_proxy.bin",
       "entry_offset": 0,
       "headroom": 348,
       "input_length": 36,
@@ -104,7 +104,7 @@
       "size": 428
     },
     "inert_canary": {
-      "binary": "exploit/ephemeral_runtime/audited/camry_f33_runtime_canary.bin",
+      "binary": "tools/targets/camry/research/ram_runtime/bootstrap/audited/camry_f33_runtime_canary.bin",
       "command5_calls": false,
       "entry_offset": 0,
       "headroom": 474,
@@ -150,7 +150,7 @@
   "schema": "camry-8965f3307000-command5-runtime-carrier-v1",
   "sources": {
     "canary_audit": {
-      "path": "exploit/ephemeral_runtime/audited_camry_f33_runtime_canary_build.json",
+      "path": "tools/targets/camry/research/ram_runtime/bootstrap/audited/audited_camry_f33_runtime_canary_build.json",
       "sha256": "417a9be21ea56aa0c7ebcda578dba953aadbba4d50ed9d12bc7e4d93f2566a31"
     },
     "codeflash": {
@@ -170,7 +170,7 @@
       "sha256": "a920ecd5cfaa96986be2ac7dd0257cac842edf9c456f37aabd157a47a6fa3845"
     },
     "proxy_audit": {
-      "path": "exploit/ephemeral_runtime/audited_camry_f33_command5_proxy_build.json",
+      "path": "tools/targets/camry/research/ram_runtime/bootstrap/audited/audited_camry_f33_command5_proxy_build.json",
       "sha256": "9a39d930b69448fa79d6108eae0d967dc25cd54c2cad6c84900d2e66761446d0"
     },
     "ram_exec_requirements": {
@@ -260,8 +260,8 @@
       }
     },
     "runtime_builder": {
-      "path": "exploit/ephemeral_runtime/build_camry_f33_command5_carrier.py",
-      "sha256": "5d3fade706691793e811aa3735ab9e5218195cb2ccf32e3f1dfee51f1480a563"
+      "path": "tools/targets/camry/research/ram_runtime/bootstrap/build_camry_f33_command5_carrier.py",
+      "sha256": "5760c409d5de812c161270f0eb362d5307ed2aefe25e120eef2f2ed7d428a3a4"
     }
   },
   "static_low_carrier_geometry": {

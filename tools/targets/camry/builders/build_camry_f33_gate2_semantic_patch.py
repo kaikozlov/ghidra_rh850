@@ -22,15 +22,11 @@ from typing import Any
 ROOT = REPO_ROOT
 
 from exploit.patcher.build_payload import (
-    DEFAULT_TEMPLATE,
     build_authenticated_payload,
     build_configured_payload,
     inject_config,
     sha256_bytes,
     simulate_apply,
-)
-from exploit.patcher.build_shellcode_template import (
-    build as build_shellcode_template,
 )
 from exploit.patcher.patch_config import (
     PatchConfigV1,
@@ -50,6 +46,7 @@ EXPECTED_STAGE1_SHA256 = "272843a2c1d179f91105d7f103f213034f850dc476c96dad48067f
 EXPECTED_STAGE1_FIXUP = 0xD9AF33AF
 EXPECTED_STAGE2_FIXUP = 0xD12ADB05
 EXPECTED_FINAL_SHA256 = "6a371a2a17641ee5408777f06d303e34699d65dbde01e94cf89ffece7578d59c"
+REVIEWED_TEMPLATE = ROOT / "tools/targets/camry/research/ram_runtime/b6/audited/generic_shellcode_template.bin"
 EXPECTED_TEMPLATE_SHA256 = "74d22b4116ce212a43090d76ba00ed4d97e7a3f082e45c5bcb4921e2ecc5fb22"
 
 STAGE1_VA = 0x8F952
@@ -211,15 +208,11 @@ def build_stage2_manifest(stage1: bytes, stage1_manifest: dict[str, Any]) -> dic
 
 
 def materialize_template(out: Path) -> Path:
-    """Copy or rebuild the exact reviewed generic shellcode template into the package."""
+    """Copy the exact reviewed generic shellcode template into the package."""
     package_template = out / "generic_shellcode_template.bin"
-    source = DEFAULT_TEMPLATE
-    if not source.exists() or sha256(source.read_bytes()) != EXPECTED_TEMPLATE_SHA256:
-        rebuilt = out / ".template-rebuild.bin"
-        meta = build_shellcode_template(rebuilt)
-        if meta.get("template_sha256") != EXPECTED_TEMPLATE_SHA256:
-            raise ValueError("rebuilt generic shellcode template SHA-256 drift")
-        source = rebuilt
+    if sha256(REVIEWED_TEMPLATE.read_bytes()) != EXPECTED_TEMPLATE_SHA256:
+        raise ValueError("reviewed generic shellcode template SHA-256 drift")
+    source = REVIEWED_TEMPLATE
     shutil.copy2(source, package_template)
     if sha256(package_template.read_bytes()) != EXPECTED_TEMPLATE_SHA256:
         raise ValueError("packaged generic shellcode template SHA-256 drift")
@@ -227,14 +220,11 @@ def materialize_template(out: Path) -> Path:
         json.dumps({
             "schema": "camry-f33-gate2-stage2-template-v1",
             "sha256": EXPECTED_TEMPLATE_SHA256,
-            "source": "exploit/patcher/shellcode.c",
+            "source": str(REVIEWED_TEMPLATE.relative_to(ROOT)),
             "config_offset": 0xF70,
             "size": package_template.stat().st_size,
         }, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
-    rebuilt = out / ".template-rebuild.bin"
-    rebuilt.unlink(missing_ok=True)
-    rebuilt.with_suffix(rebuilt.suffix + ".json").unlink(missing_ok=True)
     return package_template
 
 def build_post_apply_payload(*, source_image: bytes, manifest: dict[str, Any], template: bytes, payload_secret: bytes, out: Path) -> dict[str, Any]:

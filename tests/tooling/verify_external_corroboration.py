@@ -181,7 +181,7 @@ def main() -> int:
         and telescope_probe["layer3"]["registers"]["DCRA1COUT"] == 0xFFFFFFFF,
     )
 
-    corolla_canary = (REPO / "exploit/ephemeral_runtime/audited/corolla_hf_runtime_canary.bin").read_bytes()
+    corolla_canary = (REPO / "tools/targets/corolla/research/ram_runtime/audited/corolla_hf_runtime_canary.bin").read_bytes()
     telescope_canary_plain = bytearray(corolla_canary)
     telescope_canary_plain.extend(bytes(0xFD0 - len(telescope_canary_plain)))
     telescope_canary_plain.extend(struct.pack("<I", 0xFEBF0000))

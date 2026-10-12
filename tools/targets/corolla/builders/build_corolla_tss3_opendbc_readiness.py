@@ -35,8 +35,8 @@ B6_SECOC = REPO / "data/generated/corolla_8965H1202000_b6_secoc_verification.jso
 LIMITS = REPO / "data/generated/corolla_hf_steering_limits.json"
 CMD5 = REPO / "data/generated/corolla_hf_command5_portability.json"
 CARRIER = REPO / "data/generated/corolla_hf_command5_runtime_carrier.json"
-DIRECT_CANARY = REPO / "exploit/ephemeral_runtime/corolla_hf_direct_canary.py"
-DIRECT_COMMAND5 = REPO / "exploit/ephemeral_runtime/corolla_hf_direct_command5.py"
+DIRECT_CANARY = REPO / "tools/targets/corolla/research/ram_runtime/corolla_hf_direct_canary.py"
+DIRECT_COMMAND5 = REPO / "tools/targets/corolla/research/ram_runtime/corolla_hf_direct_command5.py"
 H_RUNTIME = REPO / "data/generated/ephemeral_runtime_target_manifest_8965H1202000.json"
 SPAN_ZIP = REPO / "community/spanconstant/spanconstant_tsk.zip"
 SPAN_MEMBER = "tsk/uds-sweep/ready_capture.ndjson"
@@ -541,7 +541,7 @@ def main() -> int:
             ],
         },
         "highest_value_next_evidence": [
-            "On the isolated exact H/F specimen, run exploit/ephemeral_runtime/corolla_hf_direct_canary.py first, then the guarded selector-4 command-5 probe after reset-to-stock confirmation; this is the remaining live prerequisite for the EPS-resident B6 signer used by the openpilot branch.",
+            "On the isolated exact H/F specimen, run tools/targets/corolla/research/ram_runtime/corolla_hf_direct_canary.py first, then the guarded selector-4 command-5 probe after reset-to-stock confirmation; this is the remaining live prerequisite for the EPS-resident B6 signer used by the openpilot branch.",
             "On the vehicle, preserve F181 and capture the relay-correct stock-LTA off -> active -> off transition, then validate that the resident helper emits native authenticated B6 and that EPS response follows openpilot's bounded target-angle sideband.",
             "Recover the physical Corolla 0x08A producer/pre-signing path and establish how openpilot could become the sole qualified request source without competing on the unsplit network; only then stage native-long and PCS/AEB coexistence validation.",
             "Capture Ready=0 plus recoverable and latched steering faults to finish openpilot temporary/permanent fault policy. Gear, core cruise state, set speed, driver torque, and longitudinal request semantics are no longer evidence blockers; request-source ownership remains open.",

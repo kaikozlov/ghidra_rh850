@@ -241,7 +241,7 @@ ledger context is useful.
   resume generic callback/xref searching unless dynamic behavior falsifies a
   specific static assumption. Canonical:
   [../security/ephemeral-secoc-bypass.md](../security/ephemeral-secoc-bypass.md);
-  `exploit/ephemeral_runtime/`.
+  `tools/targets/tss3/research/ram_runtime/`.
 - **OQ-008 — Cross-calibration semantic patch resolver validation.** SECOC-045
   rediscovers the Sienna authenticated-delivery gate from a fresh unannotated
   CodeFlash-only import with no target/MAC-result/CRC addresses embedded in the

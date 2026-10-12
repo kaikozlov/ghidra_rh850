@@ -534,7 +534,7 @@ recovered boot SecurityAccess secret
   -> arbitrary boot-context RAM execution
 ```
 
-`exploit/ephemeral_runtime/build_substitution_plan.py` binds the RAM-dump fixture
+`tools/targets/tss3/research/ram_runtime/build_substitution_plan.py` binds the RAM-dump fixture
 SHA directly before emitting substitutions.
 
 ## 9. Transition back to normal application
@@ -586,7 +586,7 @@ remains unobserved.
 
 ### 9.4 Audited resident build
 
-Tracked implementation: `exploit/ephemeral_runtime/`.
+Tracked implementation: `tools/targets/tss3/research/ram_runtime/`.
 
 Pinned build result:
 
@@ -807,7 +807,7 @@ Static work now supports a complete runtime architecture, so the next steps
 should validate it in increasing-risk order rather than resume broad xref work.
 
 1. **Bench-prove transition + scheduler ownership with the inert runtime.** The
-   tracked `exploit/ephemeral_runtime/canary.c` performs the same
+   tracked `tools/targets/tss3/research/ram_runtime/canary.c` performs the same
    boot/context/startup transition and preserves stock `0x65750` whole; it never
    calls `application_com_rx_indication`. Its audited build is 332 bytes and
    increments heartbeat `FEBFFBF0`, which is readable through stock application

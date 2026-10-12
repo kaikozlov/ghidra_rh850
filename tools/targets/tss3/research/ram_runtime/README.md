@@ -1,0 +1,751 @@
+# RAM runtime research history
+
+This directory owns the shared RAM-only SecOC experiments and their historical
+research notes. It is not the maintained host runtime or public build surface.
+
+| Owner | Contents |
+|---|---|
+| [`exploit/ram_runtime/`](../../../../../exploit/ram_runtime/) | Maintained signer host, startup/recovery tools, and `request_signer/` C payload |
+| [`tools/targets/tss3/builders/`](../../builders/) | Maintained request-signer and kit builders |
+| This directory | Shared canary, bridge, command-5 proxy, and direct-B6 research |
+| [Camry research](../../../camry/research/ram_runtime/) | `bootstrap/`, `b6/`, `command5/`, `monitor/`, `oracle/`, and `routing/` experiments |
+| [Corolla research](../../../corolla/research/ram_runtime/) | H/F carrier and direct-B6 experiments |
+| [Crown research](../../../crown/research/ram_runtime/) | F30 direct-B6 experiments |
+
+Each research owner keeps its reviewed binaries and frozen build manifests in
+`audited/`. Manifest source paths and hashes identify the original build
+checkpoint; they are not rewritten to impersonate a build after relocation.
+The binaries remain unchanged. See the [audit policy](audited/README.md).
+
+The maintained TSS3 runtime is the exact-target `tss3-request-signer`. Discover,
+build, and package it through:
+
+```bash
+tools/toyota ram list
+tools/toyota ram build TARGET
+tools/toyota ram kit TARGET --out EMPTY_KIT_DIRECTORY
+```
+
+See the [RAM-resident TSS3 workflow](../../../../../docs/WORKFLOW.md#ram-resident-tss3-build-and-kit-workflow)
+and the [current runtime contract](../../../../../docs/architecture/toyota-tss3-minimal-runtime.md#current-exact-target-request-signer-contract).
+The sections below retain Sienna, Camry, Crown, and Corolla experiments at their
+recorded checkpoints. References to direct C7/B6 control, target-specific kit
+builders, and vehicle-named launchers are historical unless a section explicitly
+links back to the public workflow above.
+
+Deploy a generated kit into a fresh directory; never overlay it on a historical
+kit because removed launchers are intentionally absent from the new manifest.
+The exact-F33 Camry kit additionally exposes the maintained `ui-*`
+startup-catcher commands through `tss3-request-signer`.
+
+The universal staging profile selector is executable verification, not an
+untested transfer assumption. It reads the 12-byte `8965F...` identity from
+CodeFlash `0x20860` in three 32-bit comparisons, then copies the selected runtime
+config into the retained high-RAM config block. The `rh850_codeflash` simulation
+runs that actual staging selector against every registered exact CodeFlash image
+and now asserts selected config witnesses (`app_context`, RX-ring base,
+command-5 wrapper, lower CAN writer, and response handle) before the resident
+continues. Crown `8965F3012000` selects `0x709E4 / FEBE3E98 / 0x87662 /
+0x812A2 / 51`; Corolla `8965F1208000` selects `0x6A8C4 / FEBE3F4C /
+0x82ED2 / 0x7E422 / 50`. This rules out a current selector branch/table mix-up;
+it does not prove the later target-specific resident timing or peripheral
+behavior on vehicle hardware.
+
+## What changed architecturally
+
+The earlier design assumed the application needed to rediscover a retained RAM
+callback after startup. That is unnecessary.
+
+The authenticated/MEM-SAFE-001 RAM payload can remain the top-level owner of the
+application transition and foreground schedule:
+
+```text
+bootloader RAM execution
+  -> stock boot transition prefix
+  -> stock application CPU context init
+  -> stock application startup initializer sequence
+  -> enable interrupts
+  -> resident RAM foreground scheduler shell
+       -> stock tasks before communication/SecOC
+       -> snapshot marked 0x2E4 / 0x131 secured records
+       -> stock communication + SecOC verification/cleanup
+       -> if stock did not deliver the marked record:
+            stock application_com_rx_indication(PDU, saved_frame)
+       -> stock COM unpack/system-mode/control task
+       -> remaining stock foreground tasks
+       -> next TAUJ0 CH3 tick
+```
+
+No stock callback needs to point back into RAM. On a real reset the resident
+`FEBF0000..FEBF0307` code is cleared, so the ECU returns to the unmodified stock
+boot/application path.
+
+## Why the bridge is placed here
+
+`FUN_00065750` contains this relevant order:
+
+```text
+0x68C0C
+0x791C4     communication stack; contains SecOC verify/Gate-2 processing
+0x96BAC
+0x68DE6
+0x57AC2     COM unpack + system-mode/control processing
+0x6547C
+```
+
+The runtime snapshots selected SecOC queue records immediately before `0x791C4`
+and calls the stock COM delivery API only after `0x791C4/0x96BAC/0x68DE6`, but
+before `0x57AC2`.
+
+That preserves the stock generated COM unpackers and all recovered downstream
+steering arbitration, clamp/rate-limit, plausibility, and fault logic. It does
+not inject motor current/PWM state directly.
+
+## Command marker and stock fallback
+
+Only the two recovered protected steering profiles are bridged:
+
+| CAN | SecOC record | Raw secured buffer | Queue descriptor | COM PDU | COM update counter |
+|---:|---:|---:|---:|---:|---:|
+| `0x2E4` | 1 | `FEBE5490..5497` | `FEBE545A` | 6 | `FEBE5332` |
+| `0x131` | 2 | `FEBE5498..549F` | `FEBE5462` | 26 | `FEBE5346` |
+
+A frame requests the local bridge only when its MAC28 is all zero: byte 4 low
+nibble plus bytes 5..7. This is the same transform used by the existing
+MAC28-only behavioral-proof tooling. The four authentic payload bytes and byte
+4 high freshness nibble are preserved.
+
+The runtime saves the COM update counter before stock SecOC processing. If stock
+processing changes that counter, the frame was already delivered and the RAM
+bridge does nothing. If the counter is unchanged, the marked saved frame is
+passed to `application_com_rx_indication @ 0x7C640`, which performs the normal
+COM buffer copy/validity/update work.
+
+An `active_mask` edge-detects each SecOC queue descriptor, preventing a single
+asynchronous pending record from being replayed on every foreground tick. When
+comma traffic stops, no new marked queue record exists and no bridge delivery
+occurs; normal stock COM timeout behavior therefore resumes.
+
+## Startup fidelity
+
+The runtime does not carry a duplicated 21-entry startup function table. After
+`application_cpu_context_init @ 0x70524` installs application `EBASE`, `INTBP`,
+`GP`, `TP`, and `SP`, the shim walks the **actual stock `jarl disp22`
+instructions** at `0x62760..0x627B0`, decodes each target, and invokes it.
+
+The foreground TAUJ0 CH3 poll/clear also uses the same RH850 `tst1` / `clr1`
+operations as stock `0x64FD0..0x64FD6`.
+
+## Retained-size proof
+
+The retained application-RWX pocket is:
+
+```text
+FEBF0000..FEBF0307   0x308 bytes / 776 bytes
+```
+
+Pinned Docker build:
+
+```bash
+uv run --locked python tools/targets/tss3/research/ram_runtime/build_shellcode.py
+```
+
+Current audited result:
+
+```text
+entry offset: 0
+.text size:   704 bytes (0x2C0)
+headroom:     72 bytes
+relocations:  0
+sha256:       8f486d36ae38d233165563ad2cc4a71d006cf5c8cf9a876345a3b6ab72f10495
+```
+
+Exact source/toolchain identity is in `audited_build.json`.
+
+## Inert first-hardware canary
+
+`canary.c` uses the same boot/context/startup transition but leaves stock
+`FOREGROUND_AGGREGATE @ 0x65750` intact. It does not inspect SecOC records and
+does not call `application_com_rx_indication`. Its only added behavior is a
+heartbeat counter at `FEBFFBF0`.
+
+That cell is deliberately chosen because it:
+
+- is above the startup CodeFlash-shadow copy end `FEBFF9EF`;
+- lies inside the normal application LocalRAM range;
+- lies outside all five shared XCP/RMBA exclusions;
+- has no canonical application direct reference;
+- can therefore be observed through the existing read-only SID `0x23` probe.
+
+Build:
+
+```bash
+uv run --locked python tools/targets/tss3/research/ram_runtime/build_canary.py
+```
+
+Audited result:
+
+```text
+entry offset: 0
+.text size:   332 bytes
+headroom:     444 bytes
+relocations:  0
+sha256:       81176c6e1c33451cfa63bd3b4a0e07b8b0fb952c70b3d67442f1a294ed6b651e
+heartbeat:    FEBFFBF0
+```
+
+Plan/read the heartbeat without writes:
+
+```bash
+uv run --locked python exploit/followups/application_rmba_probe.py \
+  --probe-ephemeral-canary
+```
+
+Live RMBA execution retains the tool's existing `--bench-isolated --execute`
+guard and F181/route binding.
+
+## Post-auth substitution plan
+
+`build_substitution_plan.py` composes either audited runtime with the already
+verified MEM-SAFE-001 primitive. It does **not** perform SecurityAccess, payload
+authentication, TransferData, or RoutineControl itself.
+
+For Sienna `8965B4512000`, the committed public encrypted RAM-dump fixture
+`tests/fixtures/payloads/ram_dump_payload.bin` already satisfies the exact
+bootloader payload gate with tester `DID 0x0201/0x0202 = 00*16`; this is pinned
+by `tests/runtime/verify_payload_gate.py`. After that fixture has passed RID `0x10F0` in
+the same bootloader session, the plan:
+
+1. replaces only `FEBF0000..` runtime bytes using <=15-byte raw substitutions;
+2. writes callback cell `FEBF0FD0 = FEBF0000` **last**;
+3. records the existing `31 01 FF 00 45 00 000E0000 00008000` execution trigger.
+
+```bash
+uv run --locked python tools/targets/tss3/research/ram_runtime/build_substitution_plan.py \
+  --variant canary
+```
+
+The flash path is important here: `flash_erase_start @ 0x41E0` stages operation
+type 2. On the asynchronous erase-worker path, `flash_driver_call_block_operation
+@ 0x4332` loads `FEBF0FD0` and invokes that callback. The resident canary/runtime
+never returns, so the normal block-operation completion path is preempted. No
+CodeFlash-programming primitive is implemented by this workstream.
+
+The canary plan is the required first hardware variant. The bridge variant
+should not be used until scheduler ownership, heartbeat progression, and
+reset-to-stock behavior have been established independently.
+
+## What remains unproven
+
+The implementation is statically constructible, but these are still dynamic:
+
+- direct bootloader-RAM -> application transition on isolated hardware;
+- foreground timing/jitter with the 704-byte scheduler shell;
+- live observation that marked `0x2E4`/`0x131` records are captured once and
+  delivered through COM as modeled;
+- steering behavioral proof under the same stock downstream safety pipeline;
+- bootloader SecurityAccess still requires the separately recovered Sienna boot
+  SA secret; a matching CUW/payload is **not** required for the initial
+  authenticated image on `8965B4512000` because the pinned public fixture is
+  already gate-valid.
+
+The first hardware payload should be an inert canary/runtime-telemetry variant,
+not a steering command. A successful RAM transition is not itself proof of the
+SecOC bridge or steering behavior.
+
+## RAM-only command-5 proxy
+
+`command5_proxy.c` reuses the same boot→application transition and stock startup,
+but does not intercept SecOC or COM delivery. After application initialization
+it calls the stock serialized MAC-generation dispatcher `0x88350` through clean
+driver record 0, with selector fixed to protected slot 4 and a caller-chosen
+input length up to 80 bytes.
+
+The Sienna target manifest binds record-0 completion to the private done/status
+cells `FEBF13BC/FEBF13BD` and binds a 128-byte mailbox at
+`FEBFFB80..FEBFFBFF`. That mailbox is inside the existing no-application-SA XCP
+read/write window and has zero canonical application direct xrefs. The matching
+host planner/live client is `../command5/ram_proxy.py`.
+
+Pinned build:
+
+```bash
+uv run --locked python tools/targets/tss3/research/ram_runtime/build_command5_proxy.py
+```
+
+Current audited result:
+
+```text
+entry offset: 0
+.text size:   546 bytes (0x222)
+headroom:     230 bytes
+relocations:  0
+sha256:       273202dc591810b2f587ab8fac044599b57b4e07a24ff61d36b7131b97c00660
+```
+
+The proxy does **not** remove the initial bootstrap requirement: installing RAM
+code still uses the separately recovered bootloader SecurityAccess +
+authenticated payload/MEM-SAFE-001 chain. Once installed, individual command-5
+requests require no application SecurityAccess and no CodeFlash mutation. Live
+slot-4 command-5 permission remains a hardware result.
+
+The canary and command-5 proxy are separate runtime variants because the proxy
+mailbox includes `FEBFFBF0`, the canary heartbeat cell.
+
+## Corolla H/F static carrier candidates
+
+Corolla `8965H1202000` / `8965F1208000` use a separate target-native build;
+the Sienna 546-byte proxy and its `FEBF0000..FEBF0307` retention proof do not
+transfer by address. Exact H/F static analysis instead bounds a 464-byte candidate
+pocket at `FEBF0000..FEBF01CF`: the first recovered normalized direct/simple-GP
+reference is `FEBF01D0`, and H MPU region 5 (`FEBEF400..FEBF33FC`) gives that
+pocket supervisor R/W/X (`MPAT=0xB8`) in both recovered application contexts.
+This remains a bounded reference census, not live retention proof.
+
+Two reviewed executables are tracked separately:
+
+```text
+audited/corolla_hf_runtime_canary.bin   298 bytes  sha256 ec4a3116...3fca2df
+audited/corolla_hf_command5_proxy.bin  424 bytes  sha256 62e4880e...dde183
+```
+
+Both have `_exploit` at offset zero, zero ELF relocations, and inlined target
+calls so loading at `FEBF0000` cannot branch to a VMA-zero helper. The fixed
+proxy uses H/F command-5 dispatcher `0x82750`, record 0, selector 4, completion
+cells `FEBF1280/FEBF1281`, and exactly 36 input bytes. Its 60-byte mailbox is
+`FEBFFB80..FEBFFBBB`; it initializes `request_state=0` after stock startup and
+before interrupts. The canary never calls command 5 and uses `FEBFFB80` as its heartbeat.
+
+Build into disposable output with:
+
+```bash
+uv run --locked python tools/targets/corolla/research/ram_runtime/build_corolla_hf_command5_carrier.py
+```
+
+The builder uses the repository's pinned `tools/rh850` image and records its
+exact image identity in each audit. `--promote-audited` is the explicit path for
+replacing tracked binaries and metadata after review.
+
+These H/F executables remain **unverified application-retention candidates** and H/F
+remain deliberately absent from `data/variant_ram_exec_requirements.json`. The
+simulator executes the corrected canary against both tracked H/F CodeFlash images,
+but upload, live retention/MPU state, peripherals, interrupts, and timing remain
+hardware gates.
+
+Albino's August-18 range-dump acquisition already required successful authenticated
+bootloader RAM execution on this physical Corolla. The later `eps-telescope` probe
+adds the clean transcript needed to reproduce that bootstrap exactly: boot SA succeeds,
+zero-0201/0202 authenticates a 4-KiB `FEBF0000` package through RID `0x10F0`, and
+read-only shellcode executes. Pinned upstream reconstruction additionally matches the
+live payload CMAC tag and DCRA CRC-fixup state. That makes a **directly packaged H/F
+inert canary** preferable to replaying the Sienna fixture and patching it after
+authentication. The dedicated plan/live tool is:
+
+```bash
+# plan only; emits the exact audited package/choreography
+uv run --locked python tools/targets/corolla/research/ram_runtime/corolla_hf_direct_canary.py
+
+# live use is deliberately double-gated and exact-F181 bound; the fixed
+# Toyota P1M-E boot SecurityAccess root is built into the runtime
+uv run --locked python tools/targets/corolla/research/ram_runtime/corolla_hf_direct_canary.py \
+  --bus <panda-bus> --elm327-param <param> --execute --bench-isolated
+```
+
+The 298-byte audited canary packages deterministically into a 4096-byte encrypted
+payload with SHA-256
+`b6d4b261ef6fb614ef0c9f8cd72bc7e7fb7608a793f9094ec76fe226bd884367`,
+callback/CRC descriptor `FEBF0000`, terminal CRC residue `FFFFFFFF`, and a valid
+CMAC. The optional pinned-upstream external gate independently rebuilds this same
+canary through `eps-telescope`'s own envelope algorithm and obtains the same ciphertext
+SHA-256. The live tool reproduces the telescope-observed zero `0203/0201/0202`,
+`01 46 01 00 FEBF0000 1000` RequestDownload, `45 00` RID-`10F0` option, and
+old-stack FF00 trigger. It performs **no post-10F0 RAM substitution**, rejects any
+non-audited payload, pins both application and boot F181, and requires
+`FEBFFB80` canary-signature/heartbeat progression after application F181 reappears. Direct Panda
+access also fails closed if either modern `pandad` or legacy `boardd` still owns the device. It
+intentionally has no command-5 proxy mode.
+
+A successful canary still has to be observed on hardware before promoting H/F RAM
+execution geometry. The 424-byte proxy is hardened for the second stage: all
+target calls are emitted inline so loading at `FEBF0000` cannot turn a helper
+call into a VMA-zero branch. After the stock startup JARLs and final init it
+clears `request_state` before `ei`, so stale high-LocalRAM contents cannot
+launch command 5. The host stages the fixed 36-byte input first and commits
+state `1` last. The stock adjacent done/status bytes at `FEBF1280/FEBF1281`
+are sampled as one halfword after completion and status is mirrored into mailbox
+byte `FEBFFB81`; synchronous non-busy dispatcher errors are mirrored there too.
+This gives the host an explicit result inside the XCP-readable mailbox.
+
+The corresponding exact-target second-stage host is plan-only by default:
+
+```bash
+uv run --locked python tools/targets/corolla/research/ram_runtime/corolla_hf_direct_command5.py
+```
+
+Its audited 424-byte proxy packages directly into a zero-DID 4096-byte envelope
+with SHA-256 `a81b367febb819f4016a0880c707b82fb7f46f1bad5ec59119e43aec0140bfc5`.
+Live mode additionally requires `--execute --bench-isolated`, a retained successful
+`corolla_hf_direct_canary.py` result, and explicit `--reset-to-stock-confirmed`.
+It fills the output/status with sentinels, writes `request_state=1` last, and reports
+success only after state returns to idle with mirrored status zero, output length 16,
+and a non-sentinel 16-byte output. It performs no steering-CAN transmission and no
+flash write. Independent CMAC agreement and latency/jitter remain subsequent live
+gates; nothing in this section enables vehicle actuation.
+
+Canonical evidence:
+`../../data/generated/corolla_hf_command5_runtime_carrier.json` and VAR-049/VAR-050.
+
+### Minimal H/F inline-signer candidate
+
+> **2026-09-17 integration supersession:** this section documents the retained
+> target-specific Corolla bring-up implementation. Recurring control is unified
+> functional C7 across the field targets, but installation is target-shaped.
+> Camry/Crown use an exact-F181 high-tail resident plus the historical
+> post-startup functional-C6 helper transfer; Corolla H/F embed their helper in
+> the authenticated LocalRAM payload and copy it into the startup-surviving low
+> pocket. C6 is therefore **installation-only** on F33/F30; C7 is the recurring
+> steering-control wire. Packaged field kits perform no boot-context GlobalRAM
+> helper write. The experimental self-dispatching/`FEF07C00` payload remains in
+> the builder for architecture work only. Two healthy-F33 attempts with that
+> path returned to stock application with the expected high resident absent,
+> while the exact old audited replay payload subsequently passed byte-exact on
+> the same replacement rack.
+
+>
+> **Offline audit:** the host lifecycle/tester-validation defects found by the
+> Corolla handoff audit have been fixed: Corolla attestation allows only its
+> intentional mutable startup prefix while pinning the immutable foreground;
+> NRTD/READY phase checks, wheel-fault/freshness checks, decoded Park, explicit
+> failure-path release, and attempt-local failure records are enforced. The kit
+> is therefore intended for **stationary signer qualification**, not automatic
+> road qualification. Corolla's native-shape stock-ACC cancel carrier is
+> implemented; receiver acceptance plus physical steering/coexistence remain
+> separate vehicle-qualification items; see
+> [the Corolla handoff audit](../../../../../docs/variants/corolla-tss3-tester-handoff-audit-2026-09-16.md).
+> **Superseded handoff:** the 2026-09-17 unified-C7 package and its
+> `bringup`/`replace-current` workflow are historical direct-B6 research. They
+> are not an alternate current installation path. Current target discovery,
+> exact payload builds, peer recovery, and tester kits are owned by
+> `tools/toyota ram`.
+
+`build_corolla_hf_b6_inline_signer.py` is the first target-native composition of
+the carrier and protected-B6 paths. It does not reuse Camry RAM or SecOC
+addresses. Exact H/F firmware resolves the insertion point as `0x7744A`
+(receive work drained) immediately before `0x636C0` (SecOC periodic), with B6
+queue record `FEBE5366`, secured buffer `FEBE53C0`, and synchronous command-5
+wrapper `0x82ED2`.
+
+The deterministic build has two parts:
+
+```text
+FEBFF9F0..FEBFFBFA  522-byte recurring scheduler/hook (2 bytes spare)
+FEBF0000..FEBF01CB  460-byte signing helper (4 bytes spare)
+```
+
+The resident copies the helper from the authenticated 4-KiB staging image before
+application startup. Exact H/F CodeFlash now closes startup survival for both
+pieces. Startup copy `0x5C992` materializes CodeFlash `0x10000..17DEF` only into
+`FEBF7C00..FEBFF9EF`, stopping immediately before the resident. The LocalRAM
+initializer reached through `0x5F9D4 -> 0x5FE6A -> 0x6149A` begins its first
+variable clear at `FEBF0200`, 48 bytes after the helper's conservative end, and
+its other clears begin at `FEBF0554`, `FEBF05CC`, and `FEBF0B4C`. The tracked
+whole-image direct/simple-GP census contains zero references in either payload
+range. This verifies the stock startup transition; arbitrary later computed
+pointers, externally initiated memory writes, and undocumented hardware writers remain outside
+the reference census. To fit the exact 524-byte high-tail limit without
+inventing another RAM region, the resident reclaims its own one-shot startup
+prefix at `FEBFF9F0..FEBFFA5B` as 108 bytes of resident-private state and
+command-5 scratch after final initialization. Recurring foreground code starts
+at `FEBFFABA`, so those writes cannot overwrite a future instruction.
+
+The Camry resident already established why an external camera-side B6 census is
+not the carrier test: with stock LTA disabled and the host producer quiesced, the
+EPS-local queue delivered 119 distinct native B6 frames in 1.000102 seconds
+(118.99 Hz), although no native B6 was visible at the Panda tap. The Corolla
+helper runs at that same EPS-local post-receive/pre-SecOC boundary. Its first
+distinct native B6 is a no-mutation oracle: the helper reconstructs
+freshness from authenticated `0x00F` state plus committed B6 state, calls Toyota's
+slot-4 command-5 path, and requires exact native trailer equality. Only then can
+a fresh nonzero C7 sequence replace B3 low six bits with Target Lateral ID
+11 and B4:B5 with the requested target. The request is the proven Camry-shaped
+extended `0x1FDC0002` frame on stock Toyota-B bus 1. Corolla's native
+extended-CAN receive callback copies it to `FEBE4B20`; the helper accepts only
+`00 C7 seq 00 target_hi target_lo 00 00` and consumes each nonzero sequence
+once before attempting command 5, so a stopped sender cannot leave a reusable
+active request behind. Every other native application byte,
+including signal261 sequence and inhibit/plausibility fields, is preserved. A
+busy/error/mismatch path leaves native B6 untouched; the runtime has no CAN-send,
+SecOC-result override, or flash-write primitive.
+
+Build either first-class target and run the narrow deterministic gate with:
+
+```bash
+uv run --locked python tools/targets/corolla/research/ram_runtime/build_corolla_hf_b6_inline_signer.py \
+  --target 8965H1202000
+tools/test corolla_hf_b6_inline_signer
+```
+
+The generated target bundle is installed on comma hardware while the car is in
+NRTD (`READY=0`):
+
+```bash
+uv run --locked python tools/targets/corolla/research/ram_runtime/corolla_hf_b6_inline_signer.py \
+  --payload build/out/ephemeral-runtime/corolla-hf-b6-inline-signer/corolla_8965H1202000_b6_inline_signer_payload.bin \
+  --meta build/out/ephemeral-runtime/corolla-hf-b6-inline-signer/corolla_8965H1202000_b6_inline_signer.json \
+  install --execute --nrtd-confirmed
+```
+
+Use the `8965F1208000` bundle for Span's secondary F181. The installer binds
+the full application F181, boot F181, CodeFlash hash recorded by the builder,
+bus-1 route, payload hash, and C7 contract before upload. `status` reads the
+resident oracle state through the ordinary application UDS SID `0x23` memory
+read path; neither installation nor runtime status depends on XCP. State
+`native-mac-verified` is the prerequisite for allowing ordinary openpilot C7
+commands to modify B6; `failed` means B6 remains stock. Status also decodes the
+last generated-COM B6 scalar destinations at `FEBE7D94..FEBE7DA2`, including
+the native signal261 sequence and whether the observed secondary fields match
+the firmware-derived minimal ID11 tuple. This is a persistent extraction view,
+not a live queue snapshot. The returned `qualification` is deliberately strict:
+only `ready_for_stationary_c7=true` authorizes the next stationary experiment.
+`awaiting-native-b6` means the exact replacement mechanism has no carrier yet;
+it is not a signing failure and must not be worked around by transmitting a
+second B6 stream. A nonminimal secondary tuple is reported for exact-calibration
+review rather than silently replacing Corolla fields with Camry constants. Full
+EPS power loss is the rollback.
+
+For a copyable tester bundle, build one exact target at a time:
+
+```bash
+uv run --locked python tools/targets/corolla/research/package_corolla_hf_b6_research_kit.py \
+  --target 8965H1202000 --out EMPTY_H_KIT_DIRECTORY
+uv run --locked python tools/targets/corolla/research/package_corolla_hf_b6_research_kit.py \
+  --target 8965F1208000 --out EMPTY_F_KIT_DIRECTORY
+```
+
+Each output contains `corolla-tss3-signer`, the exact payload/metadata pair,
+only the runtime dependencies needed on comma hardware, and a hashed manifest.
+The builder refuses a nonempty output directory so obsolete runtime files cannot
+silently survive into a new kit.
+
+The artifact has **firmware-verified startup survival**, but remains live-unproven
+on Corolla until an isolated run closes EPS-local native-B6 presence, slot-4
+permission, native-oracle equality, and command-5 latency under ordinary
+command-7 load. Those live gates distinguish target behavior from RAM placement;
+they are no longer prerequisites for claiming that the helper/resident survive
+the recovered stock startup sequence.
+
+## Camry `8965F3307000` high-tail carrier and application-mode loader boundary
+
+Exact F33 static construction from VAR-056 is now superseded by the target's
+2026-08-26 live startup-retention evidence (VAR-057 / CORR-119). The old
+`FEBF0000..FEBF0307` pocket remains a reproducible static hole and valid
+authenticated **boot staging** area, but the real stock application startup
+**overwrites it**. Do not deploy the audited low-linked canary/proxy as a
+post-startup resident.
+
+The actual verified resident geometry is:
+
+- `FEBFF9F0..FEBFFBFB`, exactly **524 bytes**;
+- byte-exact after real stock application startup, retained SHA-256
+  `89ffed31c24e746a57171e6f3e22f99d1e78d57b63bccb8778c7fe715d18800c`;
+- marker execution proven; stock F181 returned; Panda `safety_tx_blocked_delta=0`;
+- MPU region 1 `FEBF7C00..FEBFFBFC`, context-0 `0xB8` supervisor R/W/X and
+  context-1 `0xA8` supervisor R/X.
+
+The Camry runtime builders emit review output under `build/out` by default.
+Replacing a tracked reviewed binary or metadata record is an explicit
+`--promote-audited` operation; ordinary builds and verification runs do not
+mutate the audited evidence set.
+
+F33 also retains XCP write/DAQ callbacks and the software write window
+`FEBF7C00..FEBFFBFF`, but they are **not stock-reachable on this calibration**.
+Rule46's hardware-formatted `0x9FDC0002` is extended CAN `0x1FDC0002`, with
+extended response `0x1FE00002`. Sep-6 live observation proved that this ingress
+reaches `FEBE4C34` staging. However, before CONNECT/opcode parsing, `0x821D6`
+calls `0x830C0 -> 0x98E80`; fixed CodeFlash `0x30D68=0x5A` makes that hook
+return nonzero, so stock protocol dispatch stops there. XCP therefore cannot be
+used as the production installer without first modifying firmware, which defeats
+the non-persistent stock-path requirement.
+
+What is **not** yet available is an already-running-application PC pivot into
+the tail. A 312-site computed-call audit (305 application), Ghidra reference
+census, and raw high-tail pointer census recover no XCP-writable callback/saved-PC
+cell; the only fixed LocalRAM indirect-call pointer is boot-only `FEBF0FD0`.
+F33's seven recovered fixed DMAC descriptor families add 22 records / 88 endpoint
+fields and have zero endpoints in the XCP window, closing the obvious fixed-DMA
+composition. The remaining negative is bounded against computed aliases, a separate
+undiscovered DMA/hardware path, unenumerated nonzero CTBP writers, and undiscovered
+code. No production execution PoC should guess a pointer.
+
+The high-tail geometry is now recorded in
+`data/variant_ram_exec_requirements.json`. Machine-readable architecture assessment:
+`data/generated/camry_8965F3307000_application_ram_loader_assessment.json`. Canonical:
+[../../docs/variants/camry-2026-live-baseline.md](../../../../../docs/variants/camry-2026-live-baseline.md) §§12.6–13 · VAR-057.
+
+## Camry F33 `0x08A` SecOC-sender discriminators
+
+The exact F33 command-5 probe now includes a passive `verify-native-08a` mode: it
+captures stock `0x00F` + `0x08A`, enumerates only freshness values compatible
+with the observed FV4, and asks ICU-S selector 4 to reproduce the native MAC28.
+It transmits neither `0x08A` nor B6.
+
+A separate routing experiment, `camry_f33_08a_tx_probe.py`, answers the next
+question without constructing a new secured frame. Its authenticated boot stage
+places a 284-byte high-tail scheduler at `FEBFF9F0` and a 310-byte helper in the
+already-proved executable GlobalRAM transit slot `FEF07C00`. The host captures
+one fresh byte-exact stock `0x08A` with Target Lateral ID 0 and requires that
+its exact FV4+MAC-bearing bytes do not naturally repeat before the treatment.
+The helper then asks exact F33 lower writer `0x85112` / HTH0 lower object 47 to replay that
+unchanged 32-byte frame once as CAN-FD ID word `0x4000008A`.
+
+The software-PDU handle is the special value `0x00F0`. Exact F33 stores that
+handle in HTH0 pending cell `FEBE502A`; once our Tx no longer owns the HTH, the
+cell changes to idle or a successor stock handle, while `0x00F0` confirmation
+itself terminates in no-op `0x8152E`. This provides a physical-completion witness
+without forging a normal `0x030` completion.
+Both host and helper reject nonzero Target Lateral ID, one successful lower Tx
+closes the probe for the boot, and there is no command-5 call, SecOC bypass, B6
+operation, or flash write in the routing helper. A post-Tx exact duplicate at
+Panda is evidence that EPS-local `0x08A` Tx crosses the EBU/local-segment
+boundary; completed lower-driver Tx without that duplicate supports selective
+forwarding. It is not Brake-acceptance or actuation evidence. Field ordering:
+`camry_f33_08a_sender_experiments.md`.
+
+
+The live result selected the oracle branch: selector 4 reproduced stock `0x08A`
+MAC28 on 3/3 samples, while the EPS-origin replay physically completed but did
+not reach Panda. `camry_f33_08a_oracle_stream.py` records the historical ISO-TP
+`0x7A1/0x7A9` transport qualification; its receiver-controlled FF->FC latency is
+not the selected driving carrier.
+
+`tss3_request_signer.py` uses the four-message carrier on the stock functional
+`0x777` acceptance rule. Headers `8s`, `9S`, `As`, `BS` identify ordered
+fragments 0..3; `s/S` repeat the low/high nibbles of the complete 8-bit
+transaction sequence. Each frame carries seven consecutive application bytes,
+so all 28 bytes reach the signer verbatim. Fragment 0 restarts assembly;
+continuations must be ordered and repeat the sequence nibbles.
+
+The canonical builder emits one self-selecting payload for Camry, Crown, and
+Corolla H/F under one interface. While the stock foreground flag is clear, the
+resident services pending private-ring records only when the shared TAUJ0
+channel-3 down-counter has more than 3 ms remaining, with a second flag check
+before helper entry. The unchanged stock foreground schedule and tick update
+run normally, and the post-foreground helper call remains the fallback.
+Completed requests are signed once with selector-4 command 5 and answered by
+one classic standard-`0x7A9` response. The path uses no CanTp/DCM flow control,
+SecOC bypass, or resident-side `0x08A`/B6 transmit.
+
+The one-message compact reconstruction remains experimental because the
+steering experiment reported it broken with stock TSS3 steering. It is excluded
+from default builds and packages. An experiment must request `--codec compact`
+through `tools/toyota ram build` or `tools/toyota ram kit`; there is no silent
+fallback or runtime auto-selection. No identity-bound capture has been promoted
+here as vehicle qualification for that experiment.
+
+See `camry_f33_08a_oracle_stream.md` for the superseded diagnostic-transport
+measurements and the Camry opendbc-port document for the current carrier
+contract.
+
+## Camry F33 generic ABI-preserving runtime monitor
+
+The Sep-6 C residents failed because their `call0(unsigned int address)` trampoline injected the target address into RH850 `r6` before Toyota startup/foreground targets. The direct-`JARL disp32` correction remains the runtime foundation, but the preferred live artifact is now **generic** rather than a compiled steering profile.
+
+`camry_f33_runtime_monitor.S` is a 520/524-byte high-tail resident (4 bytes headroom) with zero relocations. Its authenticated boot-stage shell is 648/776 bytes. Through foreground count 223 it adds no application-memory writes. From count 224 onward it owns only `FEBF0000..FEBF0057` for monitor control/current snapshots and reads host-selected aligned LocalRAM windows.
+
+The host-to-resident control channel reuses the already-live-proven exact-F33 extended-CAN receive path. Eight-byte frames on `0x1FDC0002` are copied by stock firmware into `FEBE4C34`; the monitor recognizes only `00 F3 seq opcode arg32-le`. These frames are deliberately not stock XCP commands and the monitor does not patch the fixed `0x30D68=0x5A` XCP-dispatch gate. Opcodes `0x10..0x17` set eight watch slots, `0x20` starts/stops sampling, and `0x21` requests one snapshot. RUN samples all enabled 4-byte windows once per stock foreground tick (~5 ms nominal). The host reads the coherent current snapshot through application SID `0x23`.
+
+The Python host interface is `camry_f33_runtime_monitor.py`. After one NRTD install returns `runtime_monitor_live`, transition directly NRTD->READY without OFF and use `status`, `watch`, `run`, `stop`, `snapshot`, `capture`, or the interactive `shell`. Watch addresses are host-validated to exact-F33 LocalRAM and rounded down to a 4-byte window; the resident independently rejects unaligned stored windows. The resident implements no source-memory write, dynamic call, steering/B6 transmit, SecOC bypass, command-5 operation, or flash write.
+
+Audited v1 identities:
+
+```text
+staged shell:    648 / 776 bytes
+high-tail code:  520 / 524 bytes
+headroom:          4 bytes
+relocations:       0
+stage SHA-256:   873cae752190d66ba9ca94ba926fd1af3defe50c785cbcf1555659d3f77d91ff
+resident SHA:    297a53171b7a643c63cdd1da7884f60bfb208b38449fcda01d15a3f827246e6d
+auth payload:    a6e3bf4d8efd42446cf3bd0e5e4752eba5a466217257d225c6059e04dd386aa2
+```
+
+The earlier ABI-preserving source-term discriminator and the C-based B6 observer/bridge remain tracked for evidence/reproducibility, but they are not the preferred live workflow. Field sequence: `camry_f33_runtime_monitor_runbook.md`.
+
+
+The generated v18 Camry car kit exposes `./f33` as the general monitor entry point, `./f33-sign` for the bounded command-5 oracle, and `./f33-08a-route` for the one-shot EPS-origin routing discriminator; `./f33 doctor` validates imports, paths, and payload identity while the vehicle is OFF, and live commands own Panda/openpilot shutdown and all fixed monitor arguments.
+
+## Complete guarded live installer
+
+The previously separate bootstrap and substitution pieces are joined by
+`live_installer.py`. For the exact Sienna target it performs, in order:
+
+```text
+application F181 identity check
+  -> 10 01 / 10 03 / 10 02 programming transition
+  -> boot SecurityAccess with separately supplied recovered secret
+  -> 2E 0203 / 0201 / 0202 (0201/0202 all zero)
+  -> upload pinned encrypted ram_dump_payload.bin to FEBF0000 (4 x 0x400)
+  -> 31 01 10F0 CRC+CMAC authentication
+  -> <=15-byte MEM-SAFE-001 substitutions for selected runtime
+  -> FEBF0FD0 = FEBF0000 written last
+  -> raw FF00 trigger (45 00 old stack / 45 01 new stack)
+  -> canary only: wait for application F181, enter EXTENDED, read FEBFFBF0 twice via SID 0x23, require progression
+```
+
+Plan-only examples:
+
+```bash
+uv run --locked python tools/targets/tss3/research/ram_runtime/live_installer.py --variant canary
+uv run --locked python tools/targets/tss3/research/ram_runtime/live_installer.py --variant command5-proxy
+```
+
+A live command-5 bench run can install the proxy, wait for its XCP mailbox, and
+issue one 7/12/36-byte request in the same process:
+
+```bash
+uv run --locked python tools/targets/tss3/research/ram_runtime/live_installer.py \
+  --variant command5-proxy \
+  --session-dir <f181-bound-session> \
+  --command5-message <authenticated-domain-hex> \
+  --execute --bench-isolated
+```
+
+The installer is an operational composition of already-verified primitives,
+not evidence that the target ICU-S slot permits command 5. The canary variant now
+performs its own post-FF00 attestation in the same invocation: application F181
+must reappear as a manifest-pinned target and the manifest-selected heartbeat
+cell must advance through stock application SID `0x23`. For the command-5
+variant, live slot-4 permission remains the final hardware discriminator. The
+bridge variant does not depend on command-5 slot permission but still requires
+dynamic queue/COM/steering proof after installation.
+
+## Target manifests and new EPS images
+
+The runtime sources no longer contain calibration addresses. Resolve a bare
+CodeFlash image first:
+
+```bash
+tools/security/resolve_ephemeral_runtime_image.sh path/to/CodeFlash.bin \
+  build/out/target-ephemeral-runtime.json
+```
+
+Only a manifest with `runtime_build_ready=true` may feed the builders:
+
+```bash
+uv run --locked python tools/targets/tss3/research/ram_runtime/build_canary.py \
+  --manifest build/out/target-ephemeral-runtime.json
+uv run --locked python tools/targets/tss3/research/ram_runtime/build_shellcode.py \
+  --manifest build/out/target-ephemeral-runtime.json
+```
+
+`target_config.py` validates the current Level-1 scheduler shape and renders the
+sole C address contract. A foreign image that matches the application/SecOC
+shape but lacks exact SHA-bound RAM retention evidence is intentionally rejected.
+The canary additionally requires a verified target observation cell.
+
+The Sienna target manifest reproduces both pre-refactor audited payloads
+byte-for-byte; this is pinned by the resolver/runtime tests.
+
+`build_substitution_plan.py` remains intentionally stricter than the generic
+compiler: it consumes target geometry from the manifest but currently refuses
+any CodeFlash SHA except the Sienna image because no authenticated bootstrap
+fixture is proven for another target.

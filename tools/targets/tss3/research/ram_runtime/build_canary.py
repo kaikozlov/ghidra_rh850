@@ -1,0 +1,90 @@
+#!/usr/bin/env python3
+"""Build the inert RAM-only scheduler-ownership canary."""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import subprocess
+import tempfile
+from pathlib import Path
+
+
+from tools import REPO_ROOT as REPO
+
+
+from tools.targets.tss3.research.ram_runtime.target_config import TargetConfigError, load_manifest, manifest_sha256, render_header, target_values
+from tools.rh850_toolchain import command as rh850_command, metadata as toolchain_metadata
+SOURCE = REPO / "tools/targets/tss3/research/ram_runtime/canary.c"
+DEFAULT_OUTPUT = REPO / "build" / "out" / "ephemeral-runtime" / "ephemeral_scheduler_canary.bin"
+DEFAULT_MANIFEST = REPO / "data/generated/ephemeral_runtime_target_manifest_4512000.json"
+
+
+def sha256(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()
+
+
+def main() -> int:
+    p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument("output", nargs="?", type=Path, default=DEFAULT_OUTPUT)
+    p.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST)
+    args = p.parse_args()
+    toolchain = toolchain_metadata()
+    try:
+        manifest = load_manifest(args.manifest)
+        values = target_values(manifest)
+        if not manifest["ram_execution_geometry"].get("canary_observation_address"):
+            raise TargetConfigError("target manifest lacks a verified canary observation address")
+    except (TargetConfigError, OSError, ValueError, KeyError, json.JSONDecodeError) as exc:
+        p.error(f"invalid target manifest: {exc}")
+    retained_limit = values["RETAINED_SIZE"]
+
+    with tempfile.TemporaryDirectory(prefix="ephemeral-canary-") as td:
+        work = Path(td)
+        (work / "target_config.h").write_text(render_header(manifest), encoding="utf-8")
+        base = rh850_command(work)
+        subprocess.run(base + [
+            "v850-elf-gcc", "-mv850e3v5", "-mno-app-regs", "-fPIC",
+            "-ffreestanding", "-fno-toplevel-reorder", "-fno-delete-null-pointer-checks",
+            "-fno-builtin", "-I/out", "-Os", "-nostdlib", "-Wl,-Ttext=0", "-Wl,-e,_exploit",
+            "-Wl,--build-id=none", "/src/tools/targets/tss3/research/ram_runtime/canary.c", "-o", "/out/canary.elf",
+        ], check=True)
+        subprocess.run(base + ["v850-elf-objcopy", "-O", "binary", "-j", ".text", "/out/canary.elf", "/out/canary.bin"], check=True)
+        relocs = subprocess.run(base + ["v850-elf-readelf", "-r", "/out/canary.elf"], check=True, capture_output=True, text=True).stdout
+        nm = subprocess.run(base + ["v850-elf-nm", "-n", "/out/canary.elf"], check=True, capture_output=True, text=True).stdout
+        blob = (work / "canary.bin").read_bytes()
+
+    entry = next((int(x.split()[0], 16) for x in nm.splitlines() if x.split()[-1:] == ["_exploit"]), None)
+    if entry != 0:
+        p.error(f"unexpected entry offset: {entry}")
+    if len(blob) > retained_limit:
+        p.error(f"canary too large: {len(blob)} > {retained_limit}")
+    if "There are no relocations in this file." not in relocs:
+        p.error("canary contains relocations")
+
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    args.output.write_bytes(blob)
+    meta = {
+        "schema": "p1me-ephemeral-scheduler-canary-v1",
+        "target": manifest["ram_execution_geometry"].get("variant_id") or manifest["image"]["sha256"],
+        "source": str(SOURCE.relative_to(REPO)),
+        "source_sha256": sha256(SOURCE.read_bytes()),
+        "target_manifest": str(args.manifest.relative_to(REPO)) if args.manifest.is_relative_to(REPO) else str(args.manifest),
+        "target_manifest_sha256": manifest_sha256(args.manifest),
+        "target_codeflash_sha256": manifest["image"]["sha256"],
+        "toolchain": toolchain,
+        "size": len(blob),
+        "headroom": retained_limit - len(blob),
+        "sha256": sha256(blob),
+        "entry_offset": entry,
+        "relocations": 0,
+        "heartbeat_address": f"0x{values['CANARY_HEARTBEAT']:08X}",
+        "live_status": "not-bench-validated",
+    }
+    args.output.with_suffix(args.output.suffix + ".json").write_text(json.dumps(meta, indent=2, sort_keys=True) + "\n")
+    print(json.dumps(meta, indent=2, sort_keys=True))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

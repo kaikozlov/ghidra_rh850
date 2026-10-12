@@ -1,0 +1,226 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+KIT_ROOT="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)"
+PY="${F33_PYTHON:-/usr/local/venv/bin/python}"
+OPENPILOT_ROOT="${F33_OPENPILOT_ROOT:-/data/openpilot}"
+TOOL="${F33_INLINE_SIGNER_PATH:-$KIT_ROOT/runtime/tools/targets/camry/research/ram_runtime/b6/camry_f33_b6_inline_signer.py}"
+RECOVERY_TOOL="${F33_RECOVERY_PATH:-$KIT_ROOT/runtime/exploit/ram_runtime/tss3_post_install_recovery.py}"
+PAYLOAD="${F33_INLINE_PAYLOAD_PATH:-$KIT_ROOT/ram_payloads/camry_f33_b6_inline_signer_payload.bin}"
+HELPER="${F33_INLINE_HELPER_PATH:-$KIT_ROOT/ram_payloads/camry_f33_b6_inline_signer_helper_padded.bin}"
+META="${F33_INLINE_META_PATH:-$KIT_ROOT/ram_payloads/camry_f33_b6_inline_signer.json}"
+RECOVERY_META="${F33_RECOVERY_META_PATH:-$KIT_ROOT/ram_payloads/tss3_recovery_target.json}"
+INSTALL_RECORD="${F33_INLINE_INSTALL_RECORD:-/tmp/camry-f33-b6-inline-signer-install.json}"
+ARM_RECORD="${F33_INLINE_ARM_RECORD:-/tmp/camry-f33-b6-inline-signer-arm.json}"
+RECOVERY_RECORD="${F33_RECOVERY_RECORD:-/tmp/camry-f33-post-install-recovery.json}"
+PANDA_LEASE_LIB="${F33_PANDA_LEASE_LIB:-$KIT_ROOT/runtime/exploit/ram_runtime/tss3_panda_lease.sh}"
+
+export PYTHONPATH="$KIT_ROOT/runtime:$OPENPILOT_ROOT"
+cd "$KIT_ROOT"
+
+die() { printf 'f33-secoc: %s\n' "$*" >&2; exit 2; }
+[[ -f "$PANDA_LEASE_LIB" ]] || die "Panda lease helper missing: $PANDA_LEASE_LIB"
+# shellcheck source=/dev/null
+source "$PANDA_LEASE_LIB"
+
+usage() {
+  cat <<'USAGE'
+usage: ./f33-secoc COMMAND
+
+Offline:
+  ./f33-secoc doctor
+  ./f33-secoc plan
+
+NRTD / Park / stationary:
+  ./f33-secoc install
+
+Then transition directly to READY / Park / stationary without OFF:
+  ./f33-secoc load-arm
+  ./f33-secoc recover-drcc [OUTPUT_JSON]
+
+After openpilot has resumed:
+  ./f33-secoc status [OUTPUT_JSON]
+  ./f33-secoc quiet-source [OUTPUT_JSON]
+
+Legacy one-use helper override only (not supported by the supervised default):
+  ./f33-secoc replace-once TARGET_RAW [OUTPUT_JSON]
+
+load-arm transfers the post-startup helper over the EPS's existing extended
+0x1FDC0002 ingress, reads it back byte-for-byte with SID23, arms, then requires
+the helper to reproduce one untouched Toyota B6 trailer exactly with local
+command 5. The supervised helper keeps replacing native B6 only while changed
+nonzero C7 generations renew its seven-foreground-tick receive-loss counter.
+Unchanged sequences never renew it; expiry or sequence zero leaves native B6
+untouched. This new binary still requires vehicle/cadence qualification.
+recover-drcc is retained as exact-car diagnostic/forensic tooling. It runs the
+DTC-clear transport already proven in READY without EPS reset or power cycle,
+then reads the FRC DRCC permission DIDs. The exact-car result is already known:
+clearing the communication-warning/DTC state did **not** re-enable DRCC in that
+ignition cycle. The command therefore preserves evidence and reports current
+permission state; it is not a runtime recovery strategy.
+Full EPS OFF removes the resident/helper.
+USAGE
+}
+
+require_layout() {
+  [[ -x "$PY" ]] || die "Python unavailable: $PY"
+  [[ -d "$OPENPILOT_ROOT" ]] || die "openpilot root unavailable: $OPENPILOT_ROOT"
+  [[ -f "$TOOL" ]] || die "inline signer runtime missing: $TOOL"
+  [[ -f "$RECOVERY_TOOL" ]] || die "post-install recovery runtime missing: $RECOVERY_TOOL"
+  [[ -f "$PAYLOAD" ]] || die "inline signer payload missing: $PAYLOAD"
+  [[ -f "$HELPER" ]] || die "inline signer helper missing: $HELPER"
+  [[ -f "$META" ]] || die "inline signer metadata missing: $META"
+  [[ -f "$RECOVERY_META" ]] || die "recovery target metadata missing: $RECOVERY_META"
+}
+
+verify_openpilot_ready_parked() {
+  "$PY" - <<'PY'
+import sys
+import time
+import openpilot.cereal.messaging as messaging
+from openpilot.cereal import log
+from opendbc.car import structs
+
+sm = messaging.SubMaster(["deviceState", "pandaStates", "carState"])
+deadline = time.monotonic() + 3.0
+failure = "no fresh openpilot state"
+while time.monotonic() < deadline:
+    sm.update(100)
+    if not sm.alive["pandaStates"] or not sm.alive["carState"]:
+        failure = "pandaStates/carState not both alive"
+        continue
+    pandas = [p for p in sm["pandaStates"] if p.pandaType != log.PandaState.PandaType.unknown]
+    if not pandas or not any(p.ignitionLine or p.ignitionCan for p in pandas):
+        failure = "vehicle ignition is not active"
+        continue
+    if not sm["deviceState"].started:
+        failure = "openpilot is not onroad; host B6 producer is not active"
+        continue
+    cs = sm["carState"]
+    if cs.gearShifter != structs.CarState.GearShifter.park:
+        failure = f"gear is not Park: {cs.gearShifter}"
+        continue
+    speeds = (cs.wheelSpeeds.fl, cs.wheelSpeeds.fr, cs.wheelSpeeds.rl, cs.wheelSpeeds.rr)
+    if max(abs(float(x)) for x in speeds) > 0.1:
+        failure = f"wheel speed is not stationary: {speeds}"
+        continue
+    print("f33-secoc pre-lease READY/Park/stationary guard: PASS")
+    sys.exit(0)
+raise SystemExit(f"f33-secoc pre-lease guard failed: {failure}")
+PY
+}
+
+run_bounded() {
+  local seconds="$1" rc
+  shift
+  set +e
+  timeout --signal=TERM --kill-after=2 "${seconds}s" "$PY" "$TOOL" \
+    --payload "$PAYLOAD" --helper "$HELPER" --meta "$META" "$@"
+  rc=$?
+  set -e
+  if [[ $rc -eq 124 || $rc -eq 137 ]]; then
+    die "inline signer command exceeded ${seconds}s absolute runtime bound"
+  fi
+  return "$rc"
+}
+
+run_recovery_bounded() {
+  local seconds="$1" rc
+  shift
+  set +e
+  timeout --signal=TERM --kill-after=2 "${seconds}s" "$PY" "$RECOVERY_TOOL" "$@"
+  rc=$?
+  set -e
+  if [[ $rc -eq 124 || $rc -eq 137 ]]; then
+    die "post-install recovery exceeded ${seconds}s absolute runtime bound"
+  fi
+  return "$rc"
+}
+
+doctor() {
+  require_layout
+  "$PY" - <<'PY' >/dev/null
+import Crypto, panda, opendbc.car
+import tools.targets.camry.research.ram_runtime.b6.camry_f33_b6_inline_signer
+from tsk.lib.programming import enter_programming_bootloader, uds_client
+PY
+  run_bounded 5 plan >/dev/null
+  printf 'f33-secoc doctor: PASS\n'
+}
+
+cmd="${1:-}"
+[[ -n "$cmd" ]] || { usage; exit 2; }
+shift || true
+case "$cmd" in
+  -h|--help|help) usage ;;
+  doctor)
+    [[ $# -eq 0 ]] || die "doctor takes no arguments"
+    doctor
+    ;;
+  plan)
+    [[ $# -eq 0 ]] || die "plan takes no arguments"
+    doctor >/dev/null
+    run_bounded 5 plan
+    ;;
+  install)
+    [[ $# -eq 0 ]] || die "install takes no arguments"
+    doctor >/dev/null
+    quiesce_panda_owner
+    run_bounded 30 install --execute --nrtd-confirmed --output "$INSTALL_RECORD"
+    ;;
+  load-arm)
+    [[ $# -eq 0 ]] || die "load-arm takes no arguments"
+    doctor >/dev/null
+    quiesce_panda_owner
+    run_bounded 20 load-arm --execute --parked-stationary-confirmed --output "$ARM_RECORD"
+    ;;
+  recover-drcc)
+    [[ $# -le 1 ]] || die "recover-drcc accepts at most one OUTPUT_JSON"
+    doctor >/dev/null
+    verify_openpilot_ready_parked
+    quiesce_panda_owner
+    recovery_output="${1:-$RECOVERY_RECORD}"
+    run_recovery_bounded 25 clear --meta "$RECOVERY_META" --execute --ready-parked-confirmed --output "$recovery_output"
+    _release_direct_panda_lease || die "Panda ownership did not return to openpilot after DRCC diagnostic clear"
+    verify_openpilot_ready_parked
+    ;;
+  status)
+    [[ $# -le 1 ]] || die "status accepts at most one OUTPUT_JSON"
+    doctor >/dev/null
+    quiesce_panda_owner
+    if [[ $# -eq 1 ]]; then
+      run_bounded 12 status --parked-stationary-confirmed --output "$1"
+    else
+      run_bounded 12 status --parked-stationary-confirmed
+    fi
+    ;;
+  quiet-source)
+    [[ $# -le 1 ]] || die "quiet-source accepts at most one OUTPUT_JSON"
+    doctor >/dev/null
+    # Prove the normal producer is genuinely onroad/parked before taking Panda
+    # away from openpilot. During the lease we intentionally do not require a
+    # fresh 0x51E/0x0AA/0x127 sample because pandad itself is quiesced.
+    verify_openpilot_ready_parked
+    quiesce_panda_owner
+    if [[ $# -eq 1 ]]; then
+      run_bounded 8 quiet-source --execute --duration 1.0 --parked-stationary-confirmed --output "$1"
+    else
+      run_bounded 8 quiet-source --execute --duration 1.0 --parked-stationary-confirmed
+    fi
+    ;;
+  replace-once)
+    [[ $# -ge 1 && $# -le 2 ]] || die "replace-once requires TARGET_RAW and accepts optional OUTPUT_JSON"
+    target_raw="$1"
+    shift
+    [[ "$target_raw" =~ ^-?[0-9]+$ ]] || die "TARGET_RAW must be a signed decimal integer"
+    doctor >/dev/null
+    verify_openpilot_ready_parked
+    quiesce_panda_owner
+    if [[ $# -eq 1 ]]; then
+      run_bounded 8 replace-once --execute --parked-stationary-confirmed --target-raw "$target_raw" --output "$1"
+    else
+      run_bounded 8 replace-once --execute --parked-stationary-confirmed --target-raw "$target_raw"
+    fi
+    ;;
+  *) die "unknown command '$cmd' (run ./f33-secoc --help)" ;;
+esac

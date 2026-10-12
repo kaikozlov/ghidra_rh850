@@ -1,0 +1,167 @@
+#!/usr/bin/env python3
+"""Build the one-boot exact-F33 0x090 signer and route40 observer."""
+from __future__ import annotations
+
+import argparse
+import json
+
+import struct
+import subprocess
+
+import tempfile
+from pathlib import Path
+
+from tools import REPO_ROOT as REPO
+
+
+from exploit.common.payload_package import package_shellcode
+from exploit.common.ram_exec import TOYOTA_P1ME_PAYLOAD_BUILD_SECRET
+from tools.targets.camry.research.ram_runtime.oracle.build_camry_f33_08a_tx_probe import PROFILE_DATA_OFFSET, STAGING_BASE, STAGING_LIMIT, align, staging_source
+from tools.targets.camry.research.ram_runtime.monitor.build_camry_f33_runtime_replay_discriminator import BOOT_SYMBOLS, EXPECTED_RESIDENT_JARL_TARGETS, IMAGE, IMAGE_SHA256, RESIDENT_BASE, RESIDENT_END, RESIDENT_LIMIT, RESIDENT_SYMBOLS, compile_asm, jarl_targets, nm_symbol, sha_bytes, sha_file, verify_static_contract
+from tools.targets.corolla.research.ram_runtime.build_corolla_hf_command5_carrier import validate_toolchain
+from tools.targets.tss3.research.ram_runtime.build_tss3_unified_b6_signer import TARGETS, UNIVERSAL_HELPER_TRANSIT_BASE, UNIVERSAL_HELPER_TRANSIT_LIMIT, _verify_globalram_transit
+
+RESIDENT_SOURCE = REPO / "tools/targets/camry/research/ram_runtime/routing/camry_f33_route40_observer.S"
+HELPER_SOURCE = REPO / "tools/targets/camry/research/ram_runtime/routing/camry_f33_route40_observer_helper.S"
+BUILDER = Path(__file__).resolve()
+DEFAULT_OUTPUT_DIR = REPO / "build/out/ephemeral-runtime/camry-f33-route40-observer"
+COMMAND5_SYNC = 0x00089BC2
+MAILBOX_BASE = 0xFEBF0000
+MAILBOX_SIZE = 0x74
+MAILBOX_MAGIC = 0x52303946
+FIRST_HELPER_TICK = 224
+ROUTE_INDEX = 40
+
+
+def need(value: bool, message: str) -> None:
+    if not value:
+        raise RuntimeError(message)
+
+
+def verify_contract(image: bytes) -> None:
+    verify_static_contract(image)
+    need(struct.unpack_from("<H", image, 0x22840 + 80)[0] == 0x0167, "PDU40 COM offset drift")
+    need(image[0x226C2 + 320:0x226C2 + 328] == bytes.fromhex("00002000000c0c00"), "PDU40 profile drift")
+    need(struct.unpack_from("<HH", image, 0x229CE + 160) == (40, 0xFFFF), "route40 destination drift")
+    need(struct.unpack_from("<I", image, 0x21E08)[0] == 0x0007D72C, "group0 callback drift")
+    need(image[0x8E772:0x8E77A] == bytes.fromhex("c6000606a0ffb10d"), "generation helper drift")
+    need(image[0x8E7BA:0x8E7C2] == bytes.fromhex("c6000606a0fff105"), "B7 counter helper drift")
+    need(image[0x89C04:0x89C08] == bytes.fromhex("bfff3cf8"), "command5 wrapper drift")
+    need(image[0x89C4C:0x89C5A] == bytes.fromhex("4437bd5b010a440fbc5b00527f00"), "command5 callback drift")
+    need(MAILBOX_BASE + MAILBOX_SIZE <= 0xFEBF0308, "mailbox exceeds reference-free LocalRAM prefix")
+    resident = RESIDENT_SOURCE.read_text()
+    helper = HELPER_SOURCE.read_text()
+    for token in ("jarl32 helper_entry, lp", "movea 29, r0, r7", "0x52303946"):
+        need(token in resident, f"resident invariant missing: {token}")
+    for token in ("mov 0xf500", "mov 0x9000", "jarl32 command5_sync, lp", "movea -0x6c51"):
+        need(token in helper, f"helper invariant missing: {token}")
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description=__doc__)
+    
+    ap.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
+    args = ap.parse_args()
+    
+    image = IMAGE.read_bytes()
+    if sha_bytes(image) != IMAGE_SHA256:
+        ap.error("8965F3307000 image identity mismatch")
+    try:
+        verify_contract(image)
+    except (OSError, RuntimeError, ValueError) as exc:
+        ap.error(str(exc))
+    
+
+    with tempfile.TemporaryDirectory(prefix="camry-f33-route40-one-boot-") as td:
+        work = Path(td)
+        try:
+            toolchain = validate_toolchain(work / "toolchain")
+            helper = compile_asm(work=work, source=str(HELPER_SOURCE.relative_to(REPO)),
+            stem="helper", vma=UNIVERSAL_HELPER_TRANSIT_BASE,
+            symbols={"command5_sync": COMMAND5_SYNC}, source_in_repo=True,)
+            helper_blob = helper["blob"]; assert isinstance(helper_blob, bytes)
+            need(nm_symbol(str(helper["nm"]), "helper_entry") == UNIVERSAL_HELPER_TRANSIT_BASE, "helper entry drift")
+            need(len(helper_blob) <= UNIVERSAL_HELPER_TRANSIT_LIMIT, "helper exceeds GlobalRAM carrier")
+            need(jarl_targets(str(helper["disasm"])) == [COMMAND5_SYNC], "helper call surface drift")
+            helper_blob += b"\0" * (-len(helper_blob) % 4)
+            transit = _verify_globalram_transit("camry-8965F3307000", TARGETS["camry-8965F3307000"], image)
+
+            resident = compile_asm(work=work, source=str(RESIDENT_SOURCE.relative_to(REPO)),
+            stem="resident", vma=RESIDENT_BASE,
+            symbols={**RESIDENT_SYMBOLS, "helper_entry": UNIVERSAL_HELPER_TRANSIT_BASE}, source_in_repo=True,)
+            resident_blob = resident["blob"]; assert isinstance(resident_blob, bytes)
+            need(nm_symbol(str(resident["nm"]), "resident_entry") == RESIDENT_BASE, "resident entry drift")
+            need(len(resident_blob) <= RESIDENT_LIMIT, "resident exceeds high-tail carrier")
+            expected_targets = list(EXPECTED_RESIDENT_JARL_TARGETS)
+            expected_targets.insert(23, UNIVERSAL_HELPER_TRANSIT_BASE)
+            need(jarl_targets(str(resident["disasm"])) == expected_targets, "resident call order drift")
+
+            resident_offset = PROFILE_DATA_OFFSET
+            helper_offset = align(resident_offset + len(resident_blob), 4)
+            need(helper_offset + len(helper_blob) <= STAGING_LIMIT, "resident/helper exceed staging budget")
+            (work / "resident.bin").write_bytes(resident_blob)
+            (work / "helper.bin").write_bytes(helper_blob)
+            (work / "staging.S").write_text(staging_source(
+                resident_offset=resident_offset, resident_size=len(resident_blob),
+                helper_offset=helper_offset, helper_size=len(helper_blob),
+            ), encoding="utf-8")
+            stage = compile_asm(work=work, source="staging.S", stem="staging",
+            vma=STAGING_BASE, symbols=BOOT_SYMBOLS, source_in_repo=False,)
+            stage_blob = stage["blob"]; assert isinstance(stage_blob, bytes)
+            embedded_end = helper_offset + len(helper_blob)
+            if len(stage_blob) < embedded_end:
+                stage_blob += b"\0" * (embedded_end - len(stage_blob))
+            need(len(stage_blob) <= STAGING_LIMIT, "staging exceeds authenticated budget")
+            need(stage_blob[resident_offset:resident_offset+len(resident_blob)] == resident_blob, "resident embedding drift")
+            need(stage_blob[helper_offset:helper_offset+len(helper_blob)] == helper_blob, "helper embedding drift")
+        except (OSError, RuntimeError, subprocess.CalledProcessError, ValueError) as exc:
+            ap.error(str(exc))
+
+        payload = package_shellcode(stage_blob, secret=TOYOTA_P1ME_PAYLOAD_BUILD_SECRET)
+        args.output_dir.mkdir(parents=True, exist_ok=True)
+        resident_path = args.output_dir / "camry_f33_route40_observer_resident.bin"
+        helper_path = args.output_dir / "camry_f33_route40_observer_helper.bin"
+        stage_path = args.output_dir / "camry_f33_route40_observer.bin"
+        payload_path = args.output_dir / "camry_f33_route40_observer_payload.bin"
+        resident_path.write_bytes(resident_blob); helper_path.write_bytes(helper_blob)
+        stage_path.write_bytes(stage_blob); payload_path.write_bytes(payload)
+        meta = {
+            "schema": "camry-f33-route40-observer-build-v2",
+            "target": {"software_id": "8965F3307000", "codeflash_sha256": IMAGE_SHA256},
+            "purpose": "one-NRTD-install READY-time 0x090 signing plus sticky route40 observation",
+            "toolchain": toolchain,
+            "resident": {"path": resident_path.name, "base": f"0x{RESIDENT_BASE:08X}",
+                         "end_limit": f"0x{RESIDENT_END:08X}", "size": len(resident_blob),
+                         "headroom": RESIDENT_LIMIT-len(resident_blob), "sha256": sha_bytes(resident_blob),
+                         "relocations": resident["relocations"], "first_helper_tick": FIRST_HELPER_TICK},
+            "helper": {"path": helper_path.name, "base": f"0x{UNIVERSAL_HELPER_TRANSIT_BASE:08X}",
+                       "size": len(helper_blob), "limit": UNIVERSAL_HELPER_TRANSIT_LIMIT,
+                       "headroom": UNIVERSAL_HELPER_TRANSIT_LIMIT-len(helper_blob),
+                       "sha256": sha_bytes(helper_blob), "relocations": helper["relocations"],
+                       "transit_mpu": transit},
+            "staging": {"path": stage_path.name, "base": f"0x{STAGING_BASE:08X}",
+                        "size": len(stage_blob), "limit": STAGING_LIMIT,
+                        "resident_offset": resident_offset, "helper_offset": helper_offset,
+                        "sha256": sha_bytes(stage_blob), "relocations": stage["relocations"]},
+            "authenticated_payload": {"path": payload_path.name, "size": len(payload), "sha256": sha_bytes(payload)},
+            "mailbox": {"base": f"0x{MAILBOX_BASE:08X}", "size": MAILBOX_SIZE,
+                        "magic": f"0x{MAILBOX_MAGIC:08X}", "latched_frame_offset": 0x54},
+            "control": {"can_id": "0x1FDC0002", "magic": "00 F5",
+                        "opcodes": {"0x30..0x38": "domain words", "0x39": "sign DataID 0090", "0x10": "arm trailer"}},
+            "route40": {"raw_com": "0xFEBE4BAF", "generation": "0xFEBE5360", "invalid_counter": "0xFEBE53C0"},
+            "mutation_boundary": {"persistent_flash_write": False, "route_table_patch": False,
+                                  "secoc_bypass": False, "resident_can_transmit": False,
+                                  "route_or_source_object_writes": False,
+                                  "command5_driver_record0_control_writes": True,
+                                  "added_mailbox_writes": "FEBF0000..FEBF0073"},
+            "sources": {"resident": {"path": str(RESIDENT_SOURCE.relative_to(REPO)), "sha256": sha_file(RESIDENT_SOURCE)},
+                        "helper": {"path": str(HELPER_SOURCE.relative_to(REPO)), "sha256": sha_file(HELPER_SOURCE)},
+                        "builder": {"path": str(BUILDER.relative_to(REPO)), "sha256": sha_file(BUILDER)}},
+        }
+        (args.output_dir / "camry_f33_route40_observer.json").write_text(json.dumps(meta, indent=2, sort_keys=True)+"\n")
+        print(json.dumps(meta, indent=2, sort_keys=True))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

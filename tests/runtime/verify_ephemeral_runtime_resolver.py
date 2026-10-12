@@ -19,13 +19,13 @@ COROLLA_SEM_PATH = REPO / "data/generated/ephemeral_runtime_resolution_8965H1202
 JAVA = REPO / "ghidra/scripts/investigate/ResolveEphemeralRuntime.java"
 GEOMETRY_DB = REPO / "data/variant_ram_exec_requirements.json"
 BOOTSTRAP_DB = REPO / "data/variant_bootstrap_profiles.json"
-BRIDGE_SOURCE = REPO / "exploit/ephemeral_runtime/main.c"
-CANARY_SOURCE = REPO / "exploit/ephemeral_runtime/canary.c"
+BRIDGE_SOURCE = REPO / "tools/targets/tss3/research/ram_runtime/main.c"
+CANARY_SOURCE = REPO / "tools/targets/tss3/research/ram_runtime/canary.c"
 passed = failed = 0
 
 import tools.security.build_ephemeral_runtime_manifest as mod
 COROLLA_CF, COROLLA_SOURCE = mod.load_codeflash(COROLLA_RANGE_PATH)
-import exploit.ephemeral_runtime.target_config as config
+import tools.targets.tss3.research.ram_runtime.target_config as config
 
 
 def check(name: str, condition: object, detail: str = "") -> None:

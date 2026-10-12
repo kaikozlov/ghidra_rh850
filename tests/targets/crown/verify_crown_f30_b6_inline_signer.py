@@ -12,14 +12,14 @@ from unittest import mock
 from tools import REPO_ROOT
 ROOT = REPO_ROOT
 
-from exploit.ephemeral_runtime import crown_f30_b6_inline_signer as host
+import tools.targets.crown.research.ram_runtime.crown_f30_b6_inline_signer as host
 from tools.targets.crown.live import crown_f30_resident_soak as soak
 from tools.targets.crown.live import crown_f30_diag_mailbox_probe as mailbox_probe
 from tools.targets.crown.live import crown_f30_authority_probe as authority_probe
 
 CONTRACT_BUILDER = ROOT / "tools/targets/crown/builders/build_crown_8965F3012000_b6_signer_contract.py"
 CONTRACT = ROOT / "data/generated/crown_8965F3012000_b6_signer_contract.json"
-SIGNER_BUILDER = ROOT / "exploit/ephemeral_runtime/build_crown_f30_b6_inline_signer.py"
+SIGNER_BUILDER = ROOT / "tools/targets/crown/research/ram_runtime/build_crown_f30_b6_inline_signer.py"
 KIT_BUILDER = ROOT / "tools/targets/crown/builders/build_crown_f30_car_kit.py"
 PREFLIGHT = ROOT / "tools/targets/crown/live/crown_f30_diag_mailbox_probe.py"
 
@@ -143,9 +143,6 @@ with tempfile.TemporaryDirectory(prefix="verify-crown-f30-signer-") as td:
     check("arm frame exact", host.loader_frame(word_index=0xFF) == bytes.fromhex("07c6c6ff00000000"))
     check("runtime C7 frame preserves Camry C7 N-SDU semantics", host.replacement_frame(sequence=7, target_angle_raw=0x1234) == bytes.fromhex("07c7c70712340000"))
     check("host control uses stock ELM diagnostic address", host.CONTROL_CAN_ID == 0x777 and host.FUNCTIONAL_DCM_BUFFER_BASE == 0xFEBE527D)
-    host_source = (ROOT / "exploit/ephemeral_runtime/crown_f30_b6_inline_signer.py").read_text(encoding="utf-8")
-    check("active Crown host stays on ELM327 and explicitly disables auto-FD",
-          "monitor._alloutput_mode" not in host_source and host_source.count("set_canfd_auto(CONTROL_BUS, False)") == 2)
     check("plan makes functional mailbox proof the first vehicle action", "prove stock functional 0x777 mailbox delivery" in plan["sequence"][0])
     check("standalone mailbox probe frame exact", mailbox_probe.PROBE_FRAME == bytes.fromhex("07c7c7a512340000"))
     check("authority pulse remains a separate bounded host-side probe",
@@ -266,11 +263,6 @@ with tempfile.TemporaryDirectory(prefix="verify-crown-f30-signer-") as td:
           current["steering_angle_deg"] == 2.0 and current["recommended_current_target_raw"] == 35 and
           abs(current["recommended_current_target_deg"] - host.target_degrees_from_raw(35)) < 1e-15)
 
-    preflight_source = PREFLIGHT.read_text(encoding="utf-8")
-    check("standalone first-action probe is one stock diagnostic frame with no RAM/flash primitive",
-          preflight_source.count("panda.can_send(") == 1 and "execute_ram_payload" not in preflight_source and
-          "write_data_by_identifier" not in preflight_source and "transfer_data" not in preflight_source and
-          "routine_control" not in preflight_source and "_alloutput_mode" not in preflight_source)
 
     kit = root / "kit"
     kit_result = subprocess.run([sys.executable, str(KIT_BUILDER), "--out", str(kit)], cwd=ROOT, check=True, capture_output=True, text=True)

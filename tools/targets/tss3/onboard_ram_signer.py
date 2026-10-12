@@ -10,7 +10,7 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
-from exploit.ephemeral_runtime.build_tss3_request_signer import (
+from tools.targets.tss3.builders.build_tss3_request_signer import (
     CONFIG_BASE,
     CONFIG_FIELDS,
     CONFIG_OFFSETS,

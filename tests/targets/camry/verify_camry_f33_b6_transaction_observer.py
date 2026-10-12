@@ -10,19 +10,19 @@ from tools import REPO_ROOT
 ROOT = REPO_ROOT
 
 from exploit.common.payload_package import inspect_payload, package_shellcode
-from exploit.ephemeral_runtime.camry_f33_b6_transaction_observer import (
+from tools.targets.camry.research.ram_runtime.b6.camry_f33_b6_transaction_observer import (
     TELEMETRY_BASE,
     TELEMETRY_FIELDS,
     TELEMETRY_SIZE,
     decode_telemetry,
 )
 
-AUDITED_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_transaction_observer.bin"
-AUDIT = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_b6_transaction_observer_build.json"
-BUILDER = ROOT / "exploit/ephemeral_runtime/build_camry_f33_b6_transaction_observer.py"
-INSTALLER = ROOT / "exploit/ephemeral_runtime/camry_f33_b6_transaction_observer_install.py"
-BRIDGE_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_bridge.bin"
-BRIDGE_AUDIT = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_b6_bridge_build.json"
+AUDITED_BIN = ROOT / "tools/targets/camry/research/ram_runtime/b6/audited/camry_f33_b6_transaction_observer.bin"
+AUDIT = ROOT / "tools/targets/camry/research/ram_runtime/b6/audited/audited_camry_f33_b6_transaction_observer_build.json"
+BUILDER = ROOT / "tools/targets/camry/research/ram_runtime/b6/build_camry_f33_b6_transaction_observer.py"
+INSTALLER = ROOT / "tools/targets/camry/research/ram_runtime/b6/camry_f33_b6_transaction_observer_install.py"
+BRIDGE_BIN = ROOT / "tools/targets/camry/research/ram_runtime/b6/audited/camry_f33_b6_bridge.bin"
+BRIDGE_AUDIT = ROOT / "tools/targets/camry/research/ram_runtime/b6/audited/audited_camry_f33_b6_bridge_build.json"
 IMAGE = ROOT / "firmware/camry-8965F3307000/CodeFlash.bin"
 
 
@@ -103,7 +103,7 @@ inspection = inspect_payload(payload, secret=secret)
 check("authenticated payload is deterministic and valid", len(payload) == 0x1000 and
       sha(payload) == "5be3e474c965e3111957227f7db44b30aa2c6eca6ba341a8279ceea043e2728d" and
       inspection.cmac_valid and inspection.crc_residue == 0xFFFFFFFF and inspection.callback_address == 0xFEBF0000)
-import exploit.ephemeral_runtime.camry_f33_b6_transaction_observer_install as installer
+import tools.targets.camry.research.ram_runtime.b6.camry_f33_b6_transaction_observer_install as installer
 check("installer pins payload/shellcode and exact current route", installer.EXPECTED_PAYLOAD_SHA256 == sha(payload) and
       installer.OBSERVER_SHELLCODE_SHA256 == sha(blob) and installer.ROUTE.bus == 0 and installer.ROUTE.elm327_param == 1)
 plan = installer.plan(Path("/nonexistent/observer.bin"))

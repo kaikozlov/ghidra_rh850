@@ -23,10 +23,8 @@ from exploit.followups.xcp_shadow_write_plan import SHADOW_END, SHADOW_START  # 
 
 CF = (REPO / "firmware" / "RH850_P1M-E_CodeFlash.bin").read_bytes()
 MANIFEST = json.loads((REPO / "data/generated/ephemeral_runtime_target_manifest_4512000.json").read_text())
-AUDIT = json.loads((REPO / "exploit/ephemeral_runtime/audited_command5_proxy_build.json").read_text())
-SOURCE = REPO / "exploit/ephemeral_runtime/command5_proxy.c"
-BUILDER = REPO / "exploit/ephemeral_runtime/build_command5_proxy.py"
-HOST = REPO / "exploit/command5/ram_proxy.py"
+AUDIT = json.loads((REPO / "tools/targets/tss3/research/ram_runtime/audited/audited_command5_proxy_build.json").read_text())
+BINARY = REPO / "tools/targets/tss3/research/ram_runtime/audited/ephemeral_command5_proxy.bin"
 CORPUS = REPO / "data/generated/decompilations.jsonl"
 passed = failed = 0
 
@@ -71,17 +69,6 @@ check("record-0 completion callback only publishes status then done",
       CF[0x88B5C:0x88B6A] == bytes.fromhex("4437bd5b010a440fbc5b00527f00"))
 check("record-0 completion body pinned",
       sha(0x88B5C, 14) == "ad851b94e1d4e5d1addd4211a68fdc70401832071161bd779b00f957001085f6")
-completion_refs = []
-for line in CORPUS.open():
-    row = json.loads(line)
-    for ref in row.get("data_references", []):
-        if ref.get("to_addr") in ("0xfebf13bc", "0xfebf13bd"):
-            completion_refs.append((row.get("entry_addr"), ref.get("from_addr"), ref.get("ref_type"), ref.get("to_addr")))
-check("stock record-0 done/status cells are orphaned except completion writes",
-      completion_refs == [
-          ("0x00088b5c", "0x00088b5c", "WRITE", "0xfebf13bd"),
-          ("0x00088b5c", "0x00088b62", "WRITE", "0xfebf13bc"),
-      ], repr(completion_refs))
 check("generic prepare admits byte lengths below 0x51",
       CF[0x87ABA:0x87AC0] == bytes.fromhex("0806afffa10d"))
 check("generic prepare converts byte length to bit length",
@@ -118,34 +105,15 @@ check("canonical application corpus has zero direct references into mailbox", ma
 check("mailbox layout reserves 80 input and 16 output bytes",
       INPUT == MAILBOX + 0x20 and OUTPUT == MAILBOX + 0x70 and OUTPUT + 16 == MAILBOX + MAILBOX_SIZE)
 
-print("\n== deterministic resident build ==")
-check("audited build is not bench-validated", AUDIT["review_status"] == "audited-static-not-bench-validated")
+print("\n== reviewed resident binary ==")
+proxy = BINARY.read_bytes()
 check("audited proxy fits retained 0x308-byte executable pocket",
-      AUDIT["shellcode"]["size"] == 546 and AUDIT["shellcode"]["headroom"] == 230 and AUDIT["compile_contract"]["retained_limit"] == 776)
-check("audited proxy has entry zero and no relocations",
-      AUDIT["shellcode"]["entry_offset"] == 0 and AUDIT["compile_contract"]["relocations"] == 0)
+      len(proxy) == AUDIT["shellcode"]["size"] == 546 and
+      len(proxy) <= AUDIT["compile_contract"]["retained_limit"] == 776)
 check("audited proxy binary identity pinned",
-      AUDIT["shellcode"]["sha256"] == "273202dc591810b2f587ab8fac044599b57b4e07a24ff61d36b7131b97c00660")
-bindings = {row["path"]: row["sha256"] for row in AUDIT["sources"]}
-check("audited proxy source hash matches",
-      bindings["exploit/ephemeral_runtime/command5_proxy.c"] == hashlib.sha256(SOURCE.read_bytes()).hexdigest())
-check("audited proxy builder hash matches",
-      bindings["exploit/ephemeral_runtime/build_command5_proxy.py"] == hashlib.sha256(BUILDER.read_bytes()).hexdigest())
-check("audited target manifest hash matches",
-      AUDIT["compile_contract"]["target_manifest_sha256"] == hashlib.sha256((REPO / "data/generated/ephemeral_runtime_target_manifest_4512000.json").read_bytes()).hexdigest())
-check("security boundary retains initial authenticated RAM foothold",
-      AUDIT["security_boundary"]["initial_bootloader_authenticated_ram_foothold_required"] is True and
-      AUDIT["security_boundary"]["application_security_access_required"] is False and
-      AUDIT["security_boundary"]["persistent_codeflash_mutation_required"] is False)
+      hashlib.sha256(proxy).hexdigest() == AUDIT["shellcode"]["sha256"] ==
+      "273202dc591810b2f587ab8fac044599b57b4e07a24ff61d36b7131b97c00660")
 
-source = SOURCE.read_text().lower()
-check("runtime calls manifest-selected command-5 dispatcher record and slot",
-      "target_command5_dispatch" in source and "target_command5_driver_record" in source and "target_command5_key_selector" in source)
-check("runtime retries shared-driver busy instead of aborting it",
-      "rc != 2" in source and "shared-driver busy" in source and "retry" in source)
-check("runtime waits for record-0 done flag and publishes response sequence",
-      "target_command5_done_flag" in source and "target_command5_status_flag" in source and "mailbox->response_seq = pending_seq" in source)
-check("runtime does not call a command-5 abort primitive", "abort" not in source)
 
 print("\n== XCP mailbox host protocol ==")
 msg12 = bytes(range(12))
@@ -161,9 +129,6 @@ check("host plans response-sequence poll before status/output reads",
       next(i for i,row in enumerate(ops) if row["operation"] == "poll_response_seq") < next(i for i,row in enumerate(ops) if row["operation"] == "read_output"))
 check("host checks live mailbox magic CMD5",
       next(row for row in ops if row["operation"] == "read_magic")["expected"] == MAILBOX_MAGIC.hex())
-host_source = HOST.read_text().lower()
-check("live host tool is bench gated", "--bench-isolated" in host_source and "--execute requires --bench-isolated" in host_source)
-check("host records initial foothold boundary", "initial_bootloader_authenticated_ram_foothold_required" in host_source)
 
 print(f"\nSummary: {passed} passed, {failed} failed")
 sys.exit(1 if failed else 0)

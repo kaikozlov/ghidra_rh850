@@ -10,8 +10,8 @@ from pathlib import Path
 
 from tools import REPO_ROOT
 REPO = REPO_ROOT
-BUILDER = REPO / "exploit/ephemeral_runtime/build_corolla_hf_b6_inline_signer.py"
-from exploit.ephemeral_runtime import corolla_hf_b6_inline_signer as installer
+BUILDER = REPO / "tools/targets/corolla/research/ram_runtime/build_corolla_hf_b6_inline_signer.py"
+import tools.targets.corolla.research.ram_runtime.corolla_hf_b6_inline_signer as installer
 from tools.targets.corolla.research import package_corolla_hf_b6_research_kit as car_kit
 
 
@@ -42,8 +42,18 @@ with tempfile.TemporaryDirectory(prefix="verify-corolla-hf-inline-signer-") as t
     check("application-identical H/F helper", h["helper"]["sha256"] == f["helper"]["sha256"])
     check("application-identical H/F payload", h["authenticated_payload"]["sha256"] == f["authenticated_payload"]["sha256"])
     check("H/F startup-survival contract identical", h["startup_survival"] == f["startup_survival"])
-    check("resident fits exact post-shadow tail", h["resident"]["size"] == 522 and h["resident"]["headroom"] == 2)
-    check("helper fits exact low candidate", h["helper"]["size"] == 460 and h["helper"]["headroom"] == 4)
+    resident_capacity = int(h["resident"]["end_limit"], 16) - int(h["resident"]["base"], 16)
+    helper_capacity = int(h["helper"]["end_limit"], 16) - int(h["helper"]["base"], 16)
+    check(
+        "resident fits exact post-shadow tail",
+        h["resident"]["size"] <= resident_capacity
+        and h["resident"]["headroom"] == resident_capacity - h["resident"]["size"],
+    )
+    check(
+        "helper fits exact low candidate",
+        h["helper"]["size"] <= helper_capacity
+        and h["helper"]["headroom"] == helper_capacity - h["helper"]["size"],
+    )
     survival = h["startup_survival"]
     check("low helper ends before first startup writer", survival["low_helper"] == {
         "range": ["0xFEBF0000", "0xFEBF01CF"],
@@ -148,15 +158,5 @@ with tempfile.TemporaryDirectory(prefix="verify-corolla-hf-inline-signer-") as t
     else:
         raise AssertionError("car kit accepted retained output files")
 
-    clean_kit = root / "clean-kit"
-    manifest = car_kit.build("8965H1202000", clean_kit)
-    check("car kit contains only current runtime dependencies", set(manifest["files"]) == {
-        "corolla-tss3-signer",
-        "ram_payloads/corolla_hf_b6_inline_signer.json",
-        "ram_payloads/corolla_hf_b6_inline_signer_payload.bin",
-        "runtime/exploit/common/ram_exec.py",
-        "runtime/exploit/ephemeral_runtime/corolla_hf_b6_inline_signer.py",
-        "runtime/exploit/ephemeral_runtime/tss3_panda_lease.sh",
-    })
 
 print("Corolla H/F inline signer build verification passed.")

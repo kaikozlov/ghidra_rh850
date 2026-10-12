@@ -1,0 +1,179 @@
+#!/usr/bin/env python3
+"""Build the RAM-only 8965B4512000 ephemeral SecOC scheduler bridge."""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import subprocess
+import tempfile
+from pathlib import Path
+
+
+from tools import REPO_ROOT as REPO
+
+
+from tools.targets.tss3.research.ram_runtime.target_config import TargetConfigError, load_manifest, manifest_sha256, render_header, target_values
+from tools.rh850_toolchain import command as rh850_command, metadata as toolchain_metadata
+SOURCE = REPO / "tools/targets/tss3/research/ram_runtime/main.c"
+DEFAULT_OUTPUT = REPO / "build" / "out" / "ephemeral-runtime" / "ephemeral_secoc_runtime.bin"
+DEFAULT_MANIFEST = REPO / "data/generated/ephemeral_runtime_target_manifest_4512000.json"
+
+
+class RuntimeBuildError(RuntimeError):
+    pass
+
+
+def sha256_bytes(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()
+
+
+def compile_args(gcc: str, source: str, output: str) -> list[str]:
+    return [
+        gcc,
+        "-mv850e3v5",
+        "-mno-app-regs",
+        "-fPIC",
+        "-ffreestanding",
+        "-fno-toplevel-reorder",
+        "-fno-delete-null-pointer-checks",
+        "-fno-builtin",
+        "-I/out",
+        "-Os",
+        "-nostdlib",
+        "-Wl,-Ttext=0",
+        "-Wl,-e,_exploit",
+        "-Wl,--build-id=none",
+        source,
+        "-o",
+        output,
+    ]
+
+
+def entry_address(nm_text: str) -> int | None:
+    for line in nm_text.splitlines():
+        parts = line.split()
+        if len(parts) >= 3 and parts[-1] == "_exploit":
+            try:
+                return int(parts[0], 16)
+            except ValueError:
+                return None
+    return None
+
+
+def docker_base(work: Path) -> list[str]:
+    return rh850_command(work)
+
+
+def build(output: Path, *, manifest_path: Path = DEFAULT_MANIFEST) -> dict:
+    toolchain = toolchain_metadata()
+    try:
+        manifest = load_manifest(manifest_path)
+        values = target_values(manifest)
+    except (TargetConfigError, OSError, ValueError, KeyError, json.JSONDecodeError) as exc:
+        raise RuntimeBuildError(f"invalid target manifest: {exc}") from exc
+    retained_base = values["RETAINED_BASE"]
+    retained_end = values["RETAINED_END"]
+    retained_limit = values["RETAINED_SIZE"]
+
+    with tempfile.TemporaryDirectory(prefix="ephemeral-secoc-runtime-") as td:
+        work = Path(td)
+        (work / "target_config.h").write_text(render_header(manifest), encoding="utf-8")
+        base = docker_base(work)
+        subprocess.run(
+            base + compile_args(
+                "v850-elf-gcc", "/src/tools/targets/tss3/research/ram_runtime/main.c", "/out/runtime.elf"
+            ),
+            check=True,
+        )
+        subprocess.run(
+            base + ["v850-elf-objcopy", "-O", "binary", "-j", ".text", "/out/runtime.elf", "/out/runtime.bin"],
+            check=True,
+        )
+        nm_text = subprocess.run(
+            base + ["v850-elf-nm", "-n", "/out/runtime.elf"],
+            check=True, capture_output=True, text=True,
+        ).stdout
+        reloc_text = subprocess.run(
+            base + ["v850-elf-readelf", "-r", "/out/runtime.elf"],
+            check=True, capture_output=True, text=True,
+        ).stdout
+        disasm = subprocess.run(
+            base + ["v850-elf-objdump", "-dr", "/out/runtime.elf"],
+            check=True, capture_output=True, text=True,
+        ).stdout
+        shellcode = (work / "runtime.bin").read_bytes()
+
+    entry = entry_address(nm_text)
+    if entry != 0:
+        raise RuntimeBuildError(f"exploit entry is not offset zero: {entry!r}")
+    if not shellcode:
+        raise RuntimeBuildError("empty .text output")
+    if len(shellcode) > retained_limit:
+        raise RuntimeBuildError(
+            f"runtime exceeds manifest retained pocket: 0x{len(shellcode):X} > 0x{retained_limit:X}"
+        )
+    if "There are no relocations in this file." not in reloc_text:
+        raise RuntimeBuildError("runtime ELF contains relocations; payload is not self-contained")
+
+    # These are compiler-output sentinels, not substitutes for the firmware tests.
+    required_disasm = (
+        f"mov\t0x{values['BOOT_INIT_0']:x}, r12",
+        f"mov\t0x{values['APP_CPU_CONTEXT_INIT']:x}, r12",
+        f"tst1\t{values['TICK_BIT']}, {values['TICK_DISPLACEMENT']}[r0]",
+        f"clr1\t{values['TICK_BIT']}, {values['TICK_DISPLACEMENT']}[r0]",
+        f"mov\t0x{values['BRIDGE_DESC_BASE']:x}",
+        f"mov\t0x{values['BRIDGE_RAW_BASE']:x}",
+        f"mov\t0x{values['AGG_1']:x}",
+        f"mov\t0x{values['APPLICATION_COM_RX']:x}",
+        f"mov\t0x{values['AGG_4']:x}",
+    )
+    missing = [token for token in required_disasm if token not in disasm]
+    if missing:
+        raise RuntimeBuildError(f"compiled runtime is missing expected instruction sentinels: {missing}")
+
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_bytes(shellcode)
+    metadata = {
+        "schema": "p1me-ephemeral-secoc-runtime-v1",
+        "target": manifest["ram_execution_geometry"].get("variant_id") or manifest["image"]["sha256"],
+        "source": str(SOURCE.relative_to(REPO)),
+        "source_sha256": sha256_bytes(SOURCE.read_bytes()),
+        "toolchain": toolchain,
+        "entry_offset": entry,
+        "size": len(shellcode),
+        "sha256": sha256_bytes(shellcode),
+        "target_manifest": str(manifest_path.relative_to(REPO)) if manifest_path.is_relative_to(REPO) else str(manifest_path),
+        "target_manifest_sha256": manifest_sha256(manifest_path),
+        "target_codeflash_sha256": manifest["image"]["sha256"],
+        "retained_base": retained_base,
+        "retained_end_exclusive": retained_end,
+        "retained_limit": retained_limit,
+        "headroom": retained_limit - len(shellcode),
+        "relocations": 0,
+        "persistence": "ram-only-no-codeflash-write; reset retention depends on reset class and STAC_LM0",
+        "live_status": "not-bench-validated",
+    }
+    output.with_suffix(output.suffix + ".json").write_text(
+        json.dumps(metadata, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+    return metadata
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("output", nargs="?", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST)
+    
+    args = parser.parse_args()
+    try:
+        metadata = build(args.output, manifest_path=args.manifest)
+    except (RuntimeBuildError, OSError, subprocess.CalledProcessError) as exc:
+        parser.error(str(exc))
+    print(json.dumps(metadata, indent=2, sort_keys=True))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

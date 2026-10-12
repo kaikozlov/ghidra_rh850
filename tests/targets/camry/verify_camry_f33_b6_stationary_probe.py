@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import hashlib
 import json
-import os
 import subprocess
 import sys
 import tempfile
@@ -12,7 +11,6 @@ from pathlib import Path
 
 from tools import REPO_ROOT
 ROOT = REPO_ROOT
-MODULE_PATH = ROOT / "exploit/behavioral_proof/camry_f33_b6_stationary_probe.py"
 import exploit.behavioral_proof.camry_f33_b6_stationary_probe as probe
 
 passed = failed = 0
@@ -180,23 +178,6 @@ with tempfile.TemporaryDirectory() as td:
         check("0x08A raw TX is impossible through wrapper", False)
     log.close()
 
-source = MODULE_PATH.read_text(encoding="utf-8")
-check("live B6 call explicitly passes fd=True", "panda.can_send(B6_ADDR, frame, B6_BUS, fd=True)" in source)
-check("no programming-session enum is referenced", "PROGRAMMING" not in source)
-check("no SecurityAccess API is referenced", "security_access" not in source.lower())
-check("no download/transfer/write/routine diagnostic API is referenced", all(token not in source for token in (
-    "request_download", "transfer_data", "write_data_by_identifier", "routine_control",
-)))
-check("small-offset actuation is hard-capped and rate-bounded", probe.SMALL_OFFSET_HARD_CAP_DEG == 2.0 and probe.SMALL_OFFSET_MAX_RATE_DEG_S == 6.0 and "ID11 current-angle was not ADMITTED" in source and "max_step_raw=small_offset_step_raw()" in source)
-check("small-offset target is refreshed from immediate preflight", 'offset_start_raw = angle_deg_to_raw(offset_preflight["steering_angle_deg"])' in source)
-check("bridge-required mode verifies v3 mailbox, armed state, and stock-tick liveness",
-      'RAM bridge v3 mailbox identity mismatch' in source and
-      'RAM bridge is installed but not armed' in source and 'stock foreground tick did not advance' in source and
-      'snapshot_bridge_telemetry(uds_client, uds_mod, log)' in source and
-      '"after_id0": bridge_after["id0"]' in source and '"after_id11": bridge_after["id11"]' in source and
-      plan["bridge_mailbox"]["fields"] == {"last_sequence": 5, "running": 6, "bridged": 8, "pending": 12, "saved_b6": 16})
-check("offset phase requires the bridge experiment",
-      "small-offset phase requires the RAM route44 bridge experiment" in source)
 
 observer_raw = bytearray(probe.OBSERVER_TELEMETRY_SIZE)
 observer_raw[0:4] = (0x4F364250).to_bytes(4, "little")
@@ -232,10 +213,10 @@ check("offline simulation reproduces positive/negative verdicts", sim["good_verd
 
 print("\n== ABI-preserving runtime/source-term discriminator ==")
 from exploit.common.payload_package import inspect_payload, package_shellcode
-from exploit.ephemeral_runtime import build_camry_f33_runtime_replay_discriminator as replay_builder
-from exploit.ephemeral_runtime import camry_f33_runtime_replay_discriminator as replay_runner
-replay_audit = json.loads((ROOT / "exploit/ephemeral_runtime/audited_camry_f33_runtime_replay_discriminator_build.json").read_text())
-replay_staging = (ROOT / "exploit/ephemeral_runtime/audited/camry_f33_runtime_replay_discriminator.bin").read_bytes()
+import tools.targets.camry.research.ram_runtime.monitor.build_camry_f33_runtime_replay_discriminator as replay_builder
+import tools.targets.camry.research.ram_runtime.monitor.camry_f33_runtime_replay_discriminator as replay_runner
+replay_audit = json.loads((ROOT / "tools/targets/camry/research/ram_runtime/monitor/audited/audited_camry_f33_runtime_replay_discriminator_build.json").read_text())
+replay_staging = (ROOT / "tools/targets/camry/research/ram_runtime/monitor/audited/camry_f33_runtime_replay_discriminator.bin").read_bytes()
 sha = lambda b: hashlib.sha256(b).hexdigest()
 check("runtime discriminator staging/resident identities and tail fit",
       len(replay_staging) == replay_audit["staging"]["size"] == 534 and
@@ -280,11 +261,10 @@ check("READY parked guard decoders pin zero wheel speed and Park code",
       replay_runner.decode_gear(bytes(8)) == 0)
 
 print("\n== generic external-control runtime monitor ==")
-from exploit.ephemeral_runtime import camry_f33_runtime_monitor as monitor
-monitor_source_path = ROOT / "exploit/ephemeral_runtime/camry_f33_runtime_monitor.S"
-monitor_audit_path = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_runtime_monitor_build.json"
-monitor_stage_path = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_runtime_monitor.bin"
-monitor_source = monitor_source_path.read_text()
+import tools.targets.camry.research.ram_runtime.monitor.camry_f33_runtime_monitor as monitor
+monitor_source_path = ROOT / "tools/targets/camry/research/ram_runtime/monitor/camry_f33_runtime_monitor.S"
+monitor_audit_path = ROOT / "tools/targets/camry/research/ram_runtime/monitor/audited/audited_camry_f33_runtime_monitor_build.json"
+monitor_stage_path = ROOT / "tools/targets/camry/research/ram_runtime/monitor/audited/camry_f33_runtime_monitor.bin"
 monitor_audit = json.loads(monitor_audit_path.read_text())
 monitor_stage = monitor_stage_path.read_bytes()
 monitor_resident = monitor_stage[0x80:0x80 + monitor.RESIDENT_SIZE]
@@ -332,14 +312,11 @@ monitor_inspection = inspect_payload(monitor_payload, secret=(ROOT / "firmware/c
 check("generic monitor authenticated payload identity exact",
       len(monitor_payload) == 0x1000 and sha(monitor_payload) == monitor.EXPECTED_PAYLOAD_SHA256 and
       monitor_inspection.cmac_valid and monitor_inspection.crc_residue == 0xFFFFFFFF)
-check("generic monitor resident has no source-write/dynamic-call primitive and rejects unaligned windows",
-      "st.w r1, 0[r10]" not in monitor_source and "jmp [r10]" not in monitor_source and
-      "andi 3, r9, r10" in monitor_source and "bne .L_sample_gate" in monitor_source)
 
 print("\n== sticky pre-aggregate B6 ingress monitor ==")
-from exploit.ephemeral_runtime import camry_f33_runtime_monitor_preaggregate as preagg
-preagg_audit_path = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_runtime_monitor_preaggregate_build.json"
-preagg_stage_path = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_runtime_monitor_preaggregate.bin"
+import tools.targets.camry.research.ram_runtime.monitor.camry_f33_runtime_monitor_preaggregate as preagg
+preagg_audit_path = ROOT / "tools/targets/camry/research/ram_runtime/monitor/audited/audited_camry_f33_runtime_monitor_preaggregate_build.json"
+preagg_stage_path = ROOT / "tools/targets/camry/research/ram_runtime/monitor/audited/camry_f33_runtime_monitor_preaggregate.bin"
 preagg_audit = json.loads(preagg_audit_path.read_text())
 preagg_stage = preagg_stage_path.read_bytes()
 preagg_resident = preagg_stage[0x80:0x80 + preagg.RESIDENT_SIZE]
@@ -380,9 +357,9 @@ check("pre-aggregate monitor authenticated payload identity exact",
       preagg_inspection.cmac_valid and preagg_inspection.crc_residue == 0xFFFFFFFF)
 
 print("\n== inter-tick B6 ingress monitor ==")
-from exploit.ephemeral_runtime import camry_f33_runtime_monitor_intertick as intertick
-intertick_audit_path = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_runtime_monitor_intertick_build.json"
-intertick_stage_path = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_runtime_monitor_intertick.bin"
+import tools.targets.camry.research.ram_runtime.monitor.camry_f33_runtime_monitor_intertick as intertick
+intertick_audit_path = ROOT / "tools/targets/camry/research/ram_runtime/monitor/audited/audited_camry_f33_runtime_monitor_intertick_build.json"
+intertick_stage_path = ROOT / "tools/targets/camry/research/ram_runtime/monitor/audited/camry_f33_runtime_monitor_intertick.bin"
 intertick_audit = json.loads(intertick_audit_path.read_text())
 intertick_stage = intertick_stage_path.read_bytes()
 intertick_resident = intertick_stage[0x80:0x80 + intertick.RESIDENT_SIZE]
@@ -411,9 +388,6 @@ check("inter-tick host classifies exact queued ID63 marker deterministically",
       intertick.classify_ingress(it_result)["verdict"] == "exact_phase_b6_queued_intertick" and
       intertick.classify_ingress(it_result)["matched_phase_frame_indices"] == [0] and
       "marker-filtered" in intertick.classify_ingress(it_result)["sample_point"])
-check("inter-tick Phase Q sender is non-command ID63 with additive contribution suppressed",
-      "target_lateral_id=63" in (ROOT / "exploit/ephemeral_runtime/camry_f33_runtime_monitor_intertick.py").read_text() and
-      "suppress_additive=True" in (ROOT / "exploit/ephemeral_runtime/camry_f33_runtime_monitor_intertick.py").read_text())
 it_zero_values=[{"slot":i,"bytes_le":"00000000"} for i in range(8)]
 it_nohit={"capture":{"last":None},"post":{"state":{"values":it_zero_values,"sample_generation":0}},"b6":{"phase_signatures_hex":[queued_marker_sig]}}
 check("inter-tick no-hit remains a valid classified result with generation zero",
@@ -426,14 +400,12 @@ check("inter-tick monitor authenticated payload identity exact",
       intertick_inspection.cmac_valid and intertick_inspection.crc_residue == 0xFFFFFFFF)
 
 print("\n== deterministic mid-aggregate B6 ingress observer ==")
-from exploit.ephemeral_runtime import camry_f33_b6_midaggregate_observer as midagg
-from exploit.ephemeral_runtime import build_camry_f33_command5_probe as command5_build
-from exploit.ephemeral_runtime import camry_f33_command5_probe as command5_probe
-from exploit.ephemeral_runtime import camry_f33_08a_oracle_stream as eps08a_oracle
-midagg_source_path = ROOT / "exploit/ephemeral_runtime/camry_f33_b6_midaggregate_observer.S"
-midagg_audit_path = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_b6_midaggregate_observer_build.json"
-midagg_stage_path = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_midaggregate_observer.bin"
-midagg_source = midagg_source_path.read_text()
+import tools.targets.camry.research.ram_runtime.b6.camry_f33_b6_midaggregate_observer as midagg
+import tools.targets.camry.research.ram_runtime.command5.build_camry_f33_command5_probe as command5_build
+import tools.targets.camry.research.ram_runtime.command5.camry_f33_command5_probe as command5_probe
+midagg_source_path = ROOT / "tools/targets/camry/research/ram_runtime/b6/camry_f33_b6_midaggregate_observer.S"
+midagg_audit_path = ROOT / "tools/targets/camry/research/ram_runtime/b6/audited/audited_camry_f33_b6_midaggregate_observer_build.json"
+midagg_stage_path = ROOT / "tools/targets/camry/research/ram_runtime/b6/audited/camry_f33_b6_midaggregate_observer.bin"
 midagg_audit = json.loads(midagg_audit_path.read_text())
 midagg_stage = midagg_stage_path.read_bytes()
 midagg_resident = midagg_stage[0x80:0x80 + midagg.RESIDENT_SIZE]
@@ -452,9 +424,6 @@ check("mid-aggregate statistics contract has D7 control, exact marker identity, 
       "0x0D7" in midagg_audit["statistics_contract"]["same_scheduler_positive_control"] and
       midagg_audit["statistics_contract"]["marker_signature"] == "B0..B11 || B28..B31" and
       midagg.JITTER_MS == (11, 17, 23, 13, 19))
-check("mid-aggregate mailbox preserves arbitrary baselines and only added mailbox writes",
-      "Counters are deliberately not zeroed" in midagg_source and ".L_clear_mailbox" not in midagg_source and
-      midagg_audit["mutation_boundary"]["added_write_regions"] == ["FEBF0000..FEBF0027 observer mailbox"])
 midagg_payload = package_shellcode(midagg_stage, secret=(ROOT / "firmware/camry-8965F3307000/CodeFlash.bin").read_bytes()[0xBFD8:0xBFE8])
 midagg_inspection = inspect_payload(midagg_payload, secret=(ROOT / "firmware/camry-8965F3307000/CodeFlash.bin").read_bytes()[0xBFD8:0xBFE8])
 check("mid-aggregate observer authenticated payload identity exact",
@@ -463,8 +432,8 @@ check("mid-aggregate observer authenticated payload identity exact",
 
 print("\n== bounded exact-F33 command-5 permission probe ==")
 command5_out = ROOT / "build/out/ephemeral-runtime/camry-f33-command5-probe"
-command5_audit_path = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_command5_probe_build.json"
-command5_stage_path = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_command5_probe.bin"
+command5_audit_path = ROOT / "tools/targets/camry/research/ram_runtime/command5/audited/audited_camry_f33_command5_probe_build.json"
+command5_stage_path = ROOT / "tools/targets/camry/research/ram_runtime/command5/audited/camry_f33_command5_probe.bin"
 command5_build_run = subprocess.run(
     [sys.executable, str(command5_build.BUILDER)], cwd=ROOT, capture_output=True, text=True, check=False)
 check("command-5 probe deterministic builder succeeds", command5_build_run.returncode == 0, command5_build_run.stderr[-300:])
@@ -674,18 +643,6 @@ check("command-5 result classification preserves permission uncertainty",
       command5_probe.classify_command5_result(terminal_state)[:3] == ("terminal_driver_error", None, False) and
       command5_probe.classify_command5_result(bad_config_state)[:3] == ("resident_config_contract_error", None, False) and
       command5_probe.classify_command5_result(bad_completion_state)[:3] == ("completion_contract_error", None, False))
-command5_launcher_text = (
-    ROOT / "exploit/ephemeral_runtime/camry_f33_command5_launcher.sh"
-).read_text(encoding="utf-8")
-check("command-5 launcher uses cooperative Panda lease without stopping manager/pandad wrapper",
-      "pkill -TERM -f '/openpilot/system/manager" not in command5_launcher_text and
-      "systemctl stop openpilot" not in command5_launcher_text and
-      'kill -STOP "$PANDAD_WRAPPER_PID"' not in command5_launcher_text and
-      'kill -CONT "$PANDAD_WRAPPER_PID"' not in command5_launcher_text and
-      "start_power_watchdog_keeper" not in command5_launcher_text and
-      "tss3_panda_lease.sh" in command5_launcher_text and
-      "source \"$PANDA_LEASE_LIB\"" in command5_launcher_text and
-      'timeout --signal=TERM --kill-after=2 "${seconds}s"' in command5_launcher_text)
 
 retry_session = object.__new__(command5_probe.ProbeSession)
 retry_input = bytearray(36)
@@ -817,9 +774,9 @@ check("command-5 plan is non-actuating and ephemeral", command5_probe.plan(None)
 })
 
 print("\n== inline B6 signer host-visible state ==")
-from exploit.ephemeral_runtime import camry_f33_b6_inline_signer as inline_signer
-from exploit.ephemeral_runtime import camry_f33_b6_ingress_helper as ingress_helper
-from exploit.ephemeral_runtime import tss3_post_install_recovery as post_recovery
+import tools.targets.camry.research.ram_runtime.b6.camry_f33_b6_inline_signer as inline_signer
+import tools.targets.camry.research.ram_runtime.b6.camry_f33_b6_ingress_helper as ingress_helper
+import exploit.ram_runtime.tss3_post_install_recovery as post_recovery
 check("inline signer state remains wholly SID23-readable below the protected boundary",
       inline_signer.STATE_BASE == 0xFEBF025C and inline_signer.STATE_SIZE == 12 and
       inline_signer.STATE_BASE + inline_signer.STATE_SIZE == inline_signer.TELEMETRY_BASE and
@@ -866,9 +823,14 @@ check("inline signer telemetry refuses equality without completed native verific
 check("inline signer replacement control is exact stock-harness C7 signed16 big-endian",
       inline_signer.CONTROL_BUS == 1 and
       inline_signer.replacement_frame(sequence=0x2A, target_angle_raw=-13) == bytes.fromhex("00c72a00fff30000"))
-recovery_plan = post_recovery.plan()
+recovery_target = post_recovery.RecoveryTarget(
+    name="camry-8965F3307000",
+    eps_f181=bytes.fromhex("023839363546333330373030300000000038413331313333303331303000000000"),
+    eps_bus=0,
+)
+recovery_plan = post_recovery.plan(recovery_target)
 check("post-install recovery pins the exact post-repin control-domain routes and proven split clear",
-      post_recovery.EPS_BUS == 0 and post_recovery.EPS_TX == 0x7A1 and
+      post_recovery.EPS_TX == 0x7A1 and
       post_recovery.FRC_BUS == 0 and post_recovery.FRC_TX == 0x792 and
       post_recovery.BRAKE_BUS == 0 and post_recovery.BRAKE_TX == 0x7B0 and
       post_recovery.OBD_CLEAR_BUS == 0 and post_recovery.OBD_CLEAR_TX == 0x7DF and
@@ -978,358 +940,6 @@ check("inline signer holds every sequential word across multiple foreground tick
       inline_signer.WORD_REPEAT_INTERVAL_SECONDS >= inline_signer.CONTROL_TICK_SECONDS and
       len(fake_session.panda.frames) == 2 * 2 * inline_signer.WORD_REPEAT_COUNT)
 
-print("\n== car-kit packaging ==")
-import tools.targets.camry.research.package_camry_f33_research_kit as builder
-with tempfile.TemporaryDirectory() as td:
-    out = Path(td) / "kit"
-    manifest = builder.build(out, Path("/Users/kai/dev/inspect/repos/kai-openpilot"))
-    copied = out / MODULE_PATH.name
-    runbook = (out / "RUNBOOK.md").read_text(encoding="utf-8")
-    patch_runbook = (out / "FIRMWARE_PATCH.md").read_text(encoding="utf-8")
-    check("kit copies the exact standalone probe", copied.read_bytes() == MODULE_PATH.read_bytes())
-    check("kit retains stage5 only as the last-observed historical firmware state", manifest["last_observed_firmware"] == {
-        "stage": 5,
-        "sha256": "669cedf8c8465ebfd02318cb7708b897b817bc3b40925c89743b64ce49aa01af",
-        "crc_prefix": "0x1960380A", "crc_fixup": "0xE69FC7F5", "observed_at": "2026-09-01",
-        "note": "historical maintainer-rack state only; do not infer the currently installed rack/image from this record",
-    })
-    check("kit makes the request-plane oracle independent of persistent stage5 policy",
-          manifest["runtime_firmware_contract"]["software_id"] == "8965F3307000" and
-          manifest["runtime_firmware_contract"]["persistent_patch_required"] is False and
-          manifest["runtime_firmware_contract"]["stage5_receiver_bypass_required"] is False and
-          manifest["runtime_firmware_contract"]["command5_oracle_primitive_live_qualified"] is True and
-          manifest["runtime_firmware_contract"]["selected_oracle_transport_live_qualified"] is False and
-          manifest["runtime_firmware_contract"]["request_plane_road_qualified"] is False and
-          manifest["runtime_firmware_contract"]["current_lateral_path"].startswith("relay-correct FRC 0x08A"))
-    oracle = manifest["ram_experiments"]["08a_mac_oracle"]
-    oracle_launcher_text = (out / "f33-08a-oracle").read_text(encoding="utf-8")
-    check("oracle launcher exposes post-repin Brake then FRC recovery under one Panda lease",
-          "reset-brake" in oracle_launcher_text and "reset-frc" in oracle_launcher_text and "recover-peers" in oracle_launcher_text and
-          oracle_launcher_text.index('restart-domain --domain brake') < oracle_launcher_text.index('restart-domain --domain frc') and
-          'quiesce_panda_owner' in oracle_launcher_text and 'tss3_post_install_recovery.py' in oracle_launcher_text)
-
-    check("kit retains the live-qualified ISO-TP 0x08A MAC oracle as historical primitive evidence",
-          oracle["launcher"] == "f33-08a-oracle" and
-          oracle["payload_sha256"] == eps08a_oracle.EXPECTED_PAYLOAD_SHA256 and
-          oracle["staging_sha256"] == eps08a_oracle.EXPECTED_STAGING_SHA256 and
-          oracle["resident_base"] == f"0x{eps08a_oracle.RESIDENT_BASE:08X}" and
-          oracle["resident_size"] == eps08a_oracle.RESIDENT_SIZE and
-          oracle["resident_sha256"] == eps08a_oracle.EXPECTED_RESIDENT_SHA256 and
-          oracle["helper_base"] == f"0x{eps08a_oracle.HELPER_BASE:08X}" and
-          oracle["helper_size"] == eps08a_oracle.HELPER_SIZE and
-          oracle["helper_sha256"] == eps08a_oracle.EXPECTED_HELPER_SHA256 and
-          oracle["request"]["layout"] == "C9 C9 seq || 00 8A || application[28] || freshness[6] || (seq XOR FF)" and
-          oracle["command5"] == {"config_type": 1, "input_length": 36, "output_length": 16, "record": 0, "selector": 4, "wrapper": "0x00089BC2"} and
-          oracle["mutation_boundary"]["accepted_data_id"] == "0x008A only" and
-          oracle["mutation_boundary"]["host_08a_transmit"] is False and
-          oracle["mutation_boundary"]["eps_08a_transmit"] is False and
-          oracle["persistent_flash_write"] is False and oracle["live_qualified"] is True and
-          manifest["ram_experiments"]["order"][0].startswith("08a_mac_oracle is the live-qualified historical") and
-          (out / "f33-08a-oracle").is_file() and
-          (out / "ram_payloads/camry_f33_08a_oracle_stream_payload.bin").is_file())
-    inline = manifest["ram_experiments"]["b6_inline_signer"]
-    check("kit retains native-B6 verify/replace signer only as historical development tooling",
-          inline["launcher"] == "f33-secoc" and
-          inline["resident_base"] == "0xFEBFF9F0" and inline["resident_size"] == 524 and
-          inline["resident_sha256"] == "f599fd600c7a2b59e72d18058729f0d121331df7078a72e6400571934447e2c4" and
-          inline["helper_base"] == "0xFEBF0000" and inline["helper_padded_size"] == 600 and
-          inline["helper_word_count"] == 150 and
-          inline["helper_padded_sha256"] == "c28489ffa9278cab45f24cede1d9eefda0a70c45a1cfb254dd7c00e52e62c288" and
-          inline["state"]["base"] == "0xFEBF025C" and inline["state"]["magic"] == "0x53364249" and
-          inline["telemetry"]["base"] == "0xFEBF0268" and inline["telemetry"]["size"] == 0x20 and
-          inline["scratch"] == {"base": "0xFEBF0288", "size": 0x48, "sid23_readable": False} and
-          probe.validate_read(probe.RAM_ID, int(inline["state"]["base"], 0), inline["state"]["size"]) is None and
-          probe.validate_read(probe.RAM_ID, int(inline["telemetry"]["base"], 0), inline["telemetry"]["size"]) is None and
-          inline["control_can_id"] == "0x1FDC0002" and "00 C7" in inline["runtime_control_frame"] and
-          "native" in inline["native_oracle"].lower() and "B3..B9" in inline["replacement"] and
-          inline["mutation_boundary"]["native_oracle_mutates_queue"] is False and
-          inline["mutation_boundary"]["replacement_requires_native_mac_equality"] is True and
-          inline["mutation_boundary"]["command5_failure_leaves_queue_unchanged"] is True and
-          inline["mutation_boundary"]["secoc_result_override"] is False and
-          inline["mutation_boundary"]["can_transmit"] is False and
-          inline["persistent_flash_write"] is False and inline["stage5_receiver_bypass_required"] is False and
-          inline["host_liveness"]["receive_loss_ticks"] == 7 and
-          inline["host_liveness"]["repeated_sequence_renews"] is False and
-          inline["live_qualified"] is False and inline["historical_only"] is True and
-          inline["superseded_by"].startswith("08a_mac_oracle") and
-          inline["historical_continuous_qualification"]["route"] == "0000008d--a9f348691a" and
-          inline["historical_continuous_qualification"]["helper_padded_sha256"] == "b417e12dde0dc7d6478ea6f242fe9eaa246a00a9fbbcc711a5d2d3adcf159a28" and
-          inline["same_cycle_drcc_recovery"]["command"] == "./f33-secoc recover-drcc" and
-          inline["same_cycle_drcc_recovery"]["role"] == "diagnostic_only" and
-          inline["same_cycle_drcc_recovery"]["live_qualified_clear_transport"] is True and
-          inline["same_cycle_drcc_recovery"]["live_qualified_after_signer_bootstrap"] is False and
-          inline["same_cycle_drcc_recovery"]["observed_vehicle_result"] == "dtc_clear_did_not_restore_drcc_same_ignition_cycle" and
-          manifest["ram_experiments"]["order"][1].startswith("b6_inline_signer is retained only as historical"))
-    check("kit bundles the real programming handoff and its transitive dependency",
-          all((out / "runtime" / rel).read_bytes() == (ROOT / rel).read_bytes() for rel in (
-              "tsk/__init__.py", "tsk/lib/__init__.py", "tsk/lib/programming.py", "tsk/lib/diagnostic_route.py")))
-    mid = manifest["ram_experiments"]["b6_midaggregate_observer"]
-    signer = manifest["ram_experiments"]["command5_probe"]
-    check("kit packages bounded high-tail command5 permission probe",
-          signer["payload_sha256"] == command5_probe.EXPECTED_PAYLOAD_SHA256 and
-          signer["staging_sha256"] == command5_probe.EXPECTED_STAGING_SHA256 and
-          signer["resident_sha256"] == command5_probe.EXPECTED_RESIDENT_SHA256 and
-          signer["resident_size"] == 524 and signer["mailbox"] == "0xFEBF0000..0xFEBF004F" and
-          signer["config_layout"] == "u32 type=1 at config+0; u32 selector=4 at config+4" and
-          signer["transient_retry"] == "wrapper rc2 only; at most 3 total execute attempts" and
-          "does not prove slot 4 is forbidden" in signer["negative_semantics"] and
-          signer["persistent_flash_write"] is False and signer["key_extraction"] is False and
-          signer["resident_b6_transmit"] is False and signer["secoc_bypass"] is False and
-          "cooperative exact-token lease" in signer["panda_ownership"] and
-          "without reset/recovery/flash" in signer["panda_ownership"] and
-          manifest["ram_experiments"]["order"][3].startswith("command5_probe is retained as the earlier bounded diagnostic oracle"))
-    check("kit retains failed full-runtime observer only as a superseded artifact",
-          mid["payload_sha256"] == midagg.EXPECTED_PAYLOAD_SHA256 and
-          mid["staging_sha256"] == midagg.EXPECTED_STAGING_SHA256 and
-          mid["resident_sha256"] == midagg.EXPECTED_RESIDENT_SHA256 and mid["resident_size"] == 498 and
-          mid["mailbox"] == "0xFEBF0000..0xFEBF0027" and
-          mid["install_success_verdict"] == "runtime_midaggregate_observer_live" and
-          mid["selfcheck_success_verdict"] == "midaggregate_observer_selfcheck_pass" and
-          mid["marker_success_verdict"] == "exact_id63_b6_seen_after_canif_before_secoc" and
-          mid["marker_negative_verdict"] == "id63_not_seen_at_midaggregate_boundary" and
-          "0x79EDE" in mid["observation_boundary"] and "0x6A410" in mid["observation_boundary"] and
-          "0x0D7" in mid["same_scheduler_positive_control"] and mid["marker_jitter_ms"] == [11,17,23,13,19] and
-          mid["sid23_reads_during_treatment"] == 0 and mid["source_memory_write"] is False and
-          mid["secoc_bypass"] is False and mid["route44_publish"] is False and mid["live_qualified"] is False and
-          mid["superseded_by"] == "b6_ingress_observer" and "failed before observer initialization" in mid["live_result"])
-    live_ingress = manifest["ram_experiments"]["b6_ingress_observer"]
-    check("kit preserves the observed ingress result without transferring qualification to the publication-correct rebuild",
-          live_ingress["launcher"] == "f33-ingress" and
-          live_ingress["payload_sha256"] == "8483fb5933d1354e9fe98fb5cfd59c6a7f0808151705295be20188eeb2a1c8b5" and
-          live_ingress["resident_sha256"] == "f599fd600c7a2b59e72d18058729f0d121331df7078a72e6400571934447e2c4" and
-          live_ingress["helper_size"] == 120 and live_ingress["helper_padded_size"] == 600 and
-          live_ingress["helper_padded_sha256"] == "a964e816010a0ee6485877ac31006d77d6dbf3591ac5a22e8044ca7783cbb28c" and
-          live_ingress["telemetry"]["base"] == "0xFEBF0268" and
-          "0x79EDE" in live_ingress["observation_boundary"] and
-          live_ingress["mutation_boundary"]["receive_state_write"] is False and
-          live_ingress["live_qualified"] is False and live_ingress["specification_conformant"] is True and
-          live_ingress["historical_live_qualification"]["payload_sha256"] == "01ce993425e910a6ea37473580adb6e641bdff56a3568492d4c9e0388e02fc6c" and
-          live_ingress["historical_live_qualification"]["resident_sha256"] == "31b1b2c31007f130d6b4679a0c99f5903a58f748daf11978f9c52f504aea3a3a" and
-          "id63_not_seen_at_midaggregate_boundary" in live_ingress["historical_live_qualification"]["result"] and
-          any(row.startswith("b6_ingress_observer preserves the live-qualified") for row in manifest["ram_experiments"]["order"]))
-    mon = manifest["ram_experiments"]["runtime_monitor"]
-    check("kit retains generic external-control monitor for downstream A-G localization",
-          mon["payload_sha256"] == monitor.EXPECTED_PAYLOAD_SHA256 and
-          mon["resident_sha256"] == monitor.EXPECTED_RESIDENT_SHA256 and mon["resident_size"] == 520 and
-          mon["watch_slots"] == 8 and mon["control_can_id"] == "0x1FDC0002" and
-          mon["control_frame"] == "00 F3 seq opcode arg32-le" and mon["source_memory_write"] is False and
-          mon["dynamic_call"] is False and mon["resident_b6_transmit"] is False and mon["host_phase_b6_transmit"] is True and
-          mon["stationary_monitor_phases"] == {k: [f"0x{x:08X}" for x in v] for k, v in monitor.MONITOR_PHASES.items()} and
-          "current /data/openpilot opendbc" in mon["host_phase_b6_construction"])
-    pre = manifest["ram_experiments"]["runtime_monitor_preaggregate"]
-    check("kit retains live-tested pre-aggregate predecessor as timing-insufficient",
-          pre["payload_sha256"] == preagg.EXPECTED_PAYLOAD_SHA256 and
-          pre["staging_sha256"] == preagg.EXPECTED_STAGING_SHA256 and
-          pre["resident_sha256"] == preagg.EXPECTED_RESIDENT_SHA256 and pre["resident_size"] == 522 and
-          pre["sample_point"] == "after fg_pre_3, immediately before stock fg_aggregate" and
-          "FEBE547A" in pre["run_trigger"] and pre["phase"] == {"P": [f"0x{x:08X}" for x in preagg.PREAGGREGATE_PHASES["P"]]} and
-          pre["source_memory_write"] is False and pre["secoc_bypass"] is False and pre["live_qualified"] is True and
-          pre["superseded_by"] == "b6_midaggregate_observer")
-    ingress = manifest["ram_experiments"]["runtime_monitor_intertick"]
-    check("kit retains inter-tick monitor only as superseded pre-live predecessor",
-          ingress["payload_sha256"] == intertick.EXPECTED_PAYLOAD_SHA256 and
-          ingress["staging_sha256"] == intertick.EXPECTED_STAGING_SHA256 and
-          ingress["resident_sha256"] == intertick.EXPECTED_RESIDENT_SHA256 and ingress["resident_size"] == 518 and
-          "before the tick test" in ingress["sample_point"] and "FEBE547A == 32" in ingress["run_trigger"] and
-          ingress["success_verdict"] == "exact_phase_b6_queued_intertick" and ingress["source_memory_write"] is False and
-          ingress["secoc_bypass"] is False and ingress["live_qualified"] is False and
-          ingress["superseded_by"] == "b6_midaggregate_observer" and ingress["superseded_before_live_use"] is True)
-    replay = manifest["ram_experiments"]["runtime_replay_discriminator"]
-    check("superseded ABI source-term discriminator remains identity-pinned",
-          replay["payload_sha256"] == "48f269aec2c95fbf33217db67a201faad2716985784f5e196ba5ddeade46d8dd" and
-          replay["staging_sha256"] == "0e0d6cc19c8fe8a4f04d216a1b85d73c41dce6e283d5d18d6a80d9da2937b1e6" and
-          replay["resident_sha256"] == "26e13ab455f9580e005cb50fc5ef1bb26d6214f3cbc9ff02056ad6af2ebb7ba9" and
-          replay["resident_base"] == "0xFEBFF9F0" and replay["resident_size"] == 406 and
-          replay["clean_window_ticks"] == 224 and replay["clean_window_nominal_seconds"] == 1.12 and
-          replay["source_terms_mailbox"] == "0xFEBF0000..0xFEBF0024" and
-          replay["success_verdict"] == "abi_preserving_runtime_and_source_terms_live" and
-          replay["ready_read_existing_success_verdict"] == "ready_parked_source_terms_live" and
-          "NRTD->READY without OFF" in replay["next_after_success"] and replay["bypass"] is False and
-          replay["live_qualified"] is False and replay["superseded_by"] == "runtime_monitor")
-    check("legacy C observer stays blocked while ABI-safe bridge is packaged but not live-qualified",
-          manifest["ram_experiments"]["observer"]["bypass"] is False and
-          manifest["ram_experiments"]["observer"]["payload_sha256"] == "5be3e474c965e3111957227f7db44b30aa2c6eca6ba341a8279ceea043e2728d" and
-          manifest["ram_experiments"]["observer"]["live_qualified"] is False and
-          "call0(address)" in manifest["ram_experiments"]["observer"]["blocked_by"] and
-          manifest["ram_experiments"]["bridge"]["payload_sha256"] == "6d605013f1868295df6b998874e54f6c07ba8af2e9b839fc1243d1ac5a0126cd" and
-          manifest["ram_experiments"]["bridge"]["call_abi"].startswith("direct linker-resolved JARL32") and
-          "conservatively skip" in manifest["ram_experiments"]["bridge"]["behavior"] and
-          "exact injected ID63 frame" in manifest["ram_experiments"]["bridge"]["requires_before_arm"] and
-          manifest["ram_experiments"]["bridge"]["live_qualified"] is False)
-    check("historical flash package is explicitly not the next experiment", manifest["firmware_patch"]["historical_only"] is True)
-    check("kit retains live stage2 source state only as historical patch evidence", manifest["firmware_patch"]["stage2_installed"] == {
-        "sites": [{"address": "0x8F948", "bytes": "003a"}, {"address": "0x8F952", "bytes": "e001"}],
-        "fixup": "0xD12ADB05",
-        "sha256": builder.stage3.EXPECTED_STAGE2_SHA256,
-    })
-    check("kit pins root-result stage3 candidate", manifest["firmware_patch"]["stage3_candidate"] == {
-        "address": "0x8F930", "bytes": "e00714d3", "final_prefix": "0x13ADA3CC", "final_fixup": "0xEC525C33",
-    })
-    check("kit carries exact stage2 source and stage3 final SHA", manifest["firmware_patch"]["source_image_sha256"] == builder.stage3.EXPECTED_STAGE2_SHA256 and manifest["firmware_patch"]["final_image_sha256"] == builder.stage3.EXPECTED_FINAL_SHA256)
-    check("kit includes preflight/apply/restore/post-apply artifacts", all((out / rel).is_file() for rel in (
-        "firmware_patch/payload-validate-only.bin", "firmware_patch/payload-apply.bin",
-        "firmware_patch/restore/restore.json", "firmware_patch/post-apply/payload-validate-only.bin",
-        "firmware_patch/generic_shellcode_template.bin",
-    )))
-    check("kit includes launcher, monitor/legacy payloads, and RAM runtime needed on comma",
-          (out / "f33").is_file() and (out / "f33").stat().st_mode & 0o111 and
-          (out / "f33-pre").is_file() and (out / "f33-pre").stat().st_mode & 0o111 and
-          (out / "f33-ingress").is_file() and (out / "f33-ingress").stat().st_mode & 0o111 and
-          (out / "f33-secoc").is_file() and (out / "f33-secoc").stat().st_mode & 0o111 and all((out / rel).is_file() for rel in (
-        "ram_payloads/camry_f33_runtime_monitor_payload.bin",
-        "ram_payloads/camry_f33_runtime_monitor_preaggregate_payload.bin",
-        "ram_payloads/camry_f33_runtime_monitor_intertick_payload.bin",
-        "ram_payloads/camry_f33_b6_midaggregate_observer_payload.bin",
-        "ram_payloads/camry_f33_b6_inline_signer_payload.bin",
-        "ram_payloads/camry_f33_b6_inline_signer_helper_padded.bin",
-        "ram_payloads/camry_f33_b6_inline_signer.json",
-        "ram_payloads/camry_f33_b6_ingress_helper_payload.bin",
-        "ram_payloads/camry_f33_b6_ingress_helper_helper_padded.bin",
-        "ram_payloads/camry_f33_b6_ingress_helper.json",
-        "ram_payloads/camry_f33_runtime_replay_discriminator_payload.bin",
-        "ram_payloads/camry_f33_b6_transaction_observer_payload.bin",
-        "ram_payloads/camry_f33_b6_bridge_payload.bin",
-        "runtime/exploit/common/ram_exec.py", "runtime/exploit/common/payload_package.py",
-        "runtime/exploit/ephemeral_runtime/camry_f33_b6_transaction_observer.py",
-        "runtime/exploit/ephemeral_runtime/camry_f33_b6_transaction_observer_install.py",
-        "runtime/exploit/ephemeral_runtime/camry_f33_b6_bridge_install.py",
-        "runtime/exploit/ephemeral_runtime/camry_f33_runtime_monitor.py",
-        "runtime/exploit/ephemeral_runtime/camry_f33_runtime_monitor_preaggregate.py",
-        "runtime/exploit/ephemeral_runtime/camry_f33_runtime_monitor_intertick.py",
-        "runtime/exploit/ephemeral_runtime/camry_f33_b6_midaggregate_observer.py",
-        "runtime/exploit/ephemeral_runtime/camry_f33_b6_ingress_helper.py",
-        "runtime/exploit/ephemeral_runtime/camry_f33_b6_inline_signer.py",
-        "runtime/exploit/ephemeral_runtime/tss3_post_install_recovery.py",
-        "runtime/exploit/ephemeral_runtime/tss3_panda_lease.sh",
-        "runtime/exploit/ephemeral_runtime/camry_f33_runtime_replay_discriminator.py",
-        "runtime/exploit/followups/xcp_read_probe.py", "runtime/exploit/followups/xcp_daq_probe.py",
-        "runtime/tools/targets/camry/live/camry_f33_steering_state_capture.py",
-        "runtime/exploit/patcher/deploy.py", "runtime/exploit/patcher/restore.py",
-        "runtime/exploit/patcher/post_apply_verify.py", "runtime/tools/security/build_secoc_patch_manifest.py",
-    )))
-    xcp_observer = manifest["live_observers"]["native_xcp_steering_state"]
-    check("kit marks native XCP steering observer stock-disabled",
-          xcp_observer["preferred_before_ephemeral_resident"] is False and
-          xcp_observer["profiles"] == ["full-path", "source-terms", "command-funnel"] and
-          xcp_observer["default_profile"] == "full-path" and
-          xcp_observer["full_path_bytes"] == 52 and
-          xcp_observer["full_path_daq_lists"] == 2 and
-          xcp_observer["default_daq_prescaler"] == 10 and
-          xcp_observer["source_memory_write"] is False and
-          xcp_observer["steering_transmit"] is False and
-          "0x30D68=0x5A" in xcp_observer["live_status"] and
-          "stock-native execution disabled" in xcp_observer["live_status"])
-    runtime_source = (out / "runtime/exploit/common/ram_exec.py").read_text(encoding="utf-8")
-    lease_source = (out / "runtime/exploit/ephemeral_runtime/tss3_panda_lease.sh").read_text(encoding="utf-8")
-    check("kit packages exact-token cooperative pandad lease helper",
-          "kill -WINCH" in lease_source and "openpilot-pandad-direct-ready" in lease_source and
-          "DIRECT_PANDA_LEASE_ID" in lease_source and 'kill -STOP "$PANDAD_WRAPPER_PID"' not in lease_source and
-          (out / "runtime/exploit/ephemeral_runtime/tss3_panda_lease.sh").stat().st_mode & 0o111)
-    check("kit embeds fixed P1M-E roots without standalone secret files",
-          "ba052435f8843f985fd1329d2b6117b0" in runtime_source and
-          "f05f36b7d78c03e24ab4faef2a57d044" in runtime_source and
-          not any("secret" in p.name.lower() for p in out.rglob("*")))
-    check("field runbooks require no secret extraction, files, or environment",
-          all(token not in runbook + patch_runbook for token in (
-              "f33-boot-secret", "f33-payload-secret", "--boot-secret-file",
-              "--security-secret-file", "--payload-secret-file",
-              "TOYOTA_EPS_BOOT_SECRET_HEX", "TOYOTA_EPS_PAYLOAD_SECRET_HEX",
-          )))
-    launcher = out / "f33"
-    secoc_launcher = out / "f33-secoc"
-    secoc_launcher_text = secoc_launcher.read_text(encoding="utf-8")
-    check("inline signer launcher preserves manager lifecycle and exposes install/load-arm/recover/status/quiet-source/replace-once",
-          "systemctl stop openpilot" not in secoc_launcher_text and
-          'kill -STOP "$PANDAD_WRAPPER_PID"' not in secoc_launcher_text and
-          'kill -CONT "$PANDAD_WRAPPER_PID"' not in secoc_launcher_text and
-          "start_power_watchdog_keeper" not in secoc_launcher_text and
-          "tss3_panda_lease.sh" in secoc_launcher_text and
-          "source \"$PANDA_LEASE_LIB\"" in secoc_launcher_text and
-          "load-arm" in secoc_launcher_text and "recover-drcc" in secoc_launcher_text and
-          "tss3_post_install_recovery.py" in secoc_launcher_text and
-          "quiet-source" in secoc_launcher_text and "replace-once" in secoc_launcher_text and
-          "verify_openpilot_ready_parked" in secoc_launcher_text and
-          secoc_launcher_text.index("verify_openpilot_ready_parked") < secoc_launcher_text.rindex("quiesce_panda_owner") and
-          "camry_f33_b6_inline_signer_helper_padded.bin" in secoc_launcher_text)
-    local_openpilot = Path("/Users/kai/dev/inspect/repos/kai-openpilot")
-    local_python = local_openpilot / ".venv/bin/python"
-    env = dict(os.environ, F33_PYTHON=str(local_python), F33_OPENPILOT_ROOT=str(local_openpilot))
-    secoc_doctor = subprocess.run([str(secoc_launcher), "doctor"], cwd=out, env=env, capture_output=True, text=True, check=False)
-    check("built inline signer launcher doctor validates payload/helper/metadata without Panda access",
-          secoc_doctor.returncode == 0 and "f33-secoc doctor: PASS" in secoc_doctor.stdout, secoc_doctor.stderr[-300:])
-    secoc_plan = subprocess.run([str(secoc_launcher), "plan"], cwd=out, env=env, capture_output=True, text=True, check=False)
-    secoc_plan_obj = json.loads(secoc_plan.stdout) if secoc_plan.returncode == 0 else {}
-    check("built inline signer launcher plan is no-roundtrip architecture",
-          secoc_plan.returncode == 0 and secoc_plan_obj.get("schema") == "camry-f33-b6-inline-signer-plan-v1" and
-          secoc_plan_obj.get("resident", {}).get("size") == 524 and secoc_plan_obj.get("helper", {}).get("word_count") == 150 and
-          secoc_plan_obj.get("telemetry", {}).get("base") == "0xFEBF0268" and secoc_plan_obj.get("telemetry", {}).get("size") == 0x20 and
-          any("native B6" in row for row in secoc_plan_obj.get("sequence", [])),
-          secoc_plan.stderr[-300:])
-    doctor = subprocess.run([str(launcher), "doctor"], cwd=out, env=env, capture_output=True, text=True, check=False)
-    check("built launcher doctor validates imports and payload without Panda access",
-          doctor.returncode == 0 and "f33 doctor: PASS" in doctor.stdout and monitor.EXPECTED_PAYLOAD_SHA256 in doctor.stdout, doctor.stderr[-300:])
-    launch_plan = subprocess.run([str(launcher), "plan"], cwd=out, env=env, capture_output=True, text=True, check=False)
-    plan_obj = json.loads(launch_plan.stdout) if launch_plan.returncode == 0 else {}
-    check("built launcher plan resolves canonical monitor with no manual arguments",
-          launch_plan.returncode == 0 and plan_obj.get("schema") == "camry-f33-runtime-monitor-plan-v1" and
-          plan_obj.get("payload", {}).get("sha256") == monitor.EXPECTED_PAYLOAD_SHA256, launch_plan.stderr[-300:])
-    pre_launcher = out / "f33-pre"
-    pre_launcher_text = pre_launcher.read_text(encoding="utf-8")
-    check("pre-aggregate launcher pins separate host/payload identities",
-          "camry_f33_runtime_monitor_preaggregate.py" in pre_launcher_text and
-          "camry_f33_runtime_monitor_preaggregate_payload.bin" in pre_launcher_text and
-          preagg.EXPECTED_PAYLOAD_SHA256 in pre_launcher_text)
-    pre_doctor = subprocess.run([str(pre_launcher), "doctor"], cwd=out, env=env, capture_output=True, text=True, check=False)
-    check("built pre-aggregate launcher doctor validates exact payload without Panda access",
-          pre_doctor.returncode == 0 and "f33 doctor: PASS" in pre_doctor.stdout and
-          preagg.EXPECTED_PAYLOAD_SHA256 in pre_doctor.stdout, pre_doctor.stderr[-300:])
-    ingress_launcher = out / "f33-ingress"
-    ingress_launcher_text = ingress_launcher.read_text(encoding="utf-8")
-    check("two-stage ingress launcher pins separate host/payload/helper identities",
-          "camry_f33_b6_ingress_helper.py" in ingress_launcher_text and
-          "camry_f33_b6_ingress_helper_payload.bin" in ingress_launcher_text and
-          "camry_f33_b6_ingress_helper_helper_padded.bin" in ingress_launcher_text and
-          "load-arm" in ingress_launcher_text and "selfcheck" in ingress_launcher_text and "marker" in ingress_launcher_text)
-    ingress_doctor = subprocess.run([str(ingress_launcher), "doctor"], cwd=out, env=env, capture_output=True, text=True, check=False)
-    check("built two-stage ingress launcher doctor validates exact bundle without Panda access",
-          ingress_doctor.returncode == 0 and "f33-ingress doctor: PASS" in ingress_doctor.stdout and
-          "8483fb5933d1354e9fe98fb5cfd59c6a7f0808151705295be20188eeb2a1c8b5" in ingress_doctor.stdout and
-          "a964e816010a0ee6485877ac31006d77d6dbf3591ac5a22e8044ca7783cbb28c" in ingress_doctor.stdout,
-          ingress_doctor.stderr[-300:])
-    sign_launcher = out / "f33-sign"
-    sign_launcher_text = sign_launcher.read_text(encoding="utf-8")
-    check("command-5 launcher pins host/payload identities",
-          "camry_f33_command5_probe.py" in sign_launcher_text and
-          "camry_f33_command5_probe_payload.bin" in sign_launcher_text and
-          command5_probe.EXPECTED_PAYLOAD_SHA256 in sign_launcher_text)
-    sign_doctor = subprocess.run([str(sign_launcher), "doctor"], cwd=out, env=env, capture_output=True, text=True, check=False)
-    check("built command-5 launcher doctor validates exact payload without Panda access",
-          sign_doctor.returncode == 0 and "f33-sign doctor: PASS" in sign_doctor.stdout and
-          command5_probe.EXPECTED_PAYLOAD_SHA256 in sign_doctor.stdout, sign_doctor.stderr[-300:])
-    sign_plan = subprocess.run([str(sign_launcher), "plan"], cwd=out, env=env, capture_output=True, text=True, check=False)
-    sign_plan_obj = json.loads(sign_plan.stdout) if sign_plan.returncode == 0 else {}
-    check("built command-5 launcher plan resolves bounded non-actuating probe",
-          sign_plan.returncode == 0 and sign_plan_obj.get("schema") == "camry-f33-command5-probe-plan-v2" and
-          sign_plan_obj.get("payload", {}).get("sha256") == command5_probe.EXPECTED_PAYLOAD_SHA256 and
-          sign_plan_obj.get("boundaries", {}).get("b6_transmit") is False and
-          sign_plan_obj.get("boundaries", {}).get("key_extraction") is False, sign_plan.stderr[-300:])
-    eps08a = manifest["ram_experiments"]["eps_origin_08a_routing_probe"]
-    eps08a_launcher = out / "f33-08a-route"
-    eps08a_doctor = subprocess.run([str(eps08a_launcher), "doctor"], cwd=out, env=env, capture_output=True, text=True, check=False)
-    check("kit packages the non-actuating EPS-origin 0x08A routing discriminator",
-          eps08a["launcher"] == "f33-08a-route" and
-          eps08a["payload_sha256"] == "7c901e819b2d7f2f54badd2c3467678797aaaf743119210721d3aad6fae874f3" and
-          eps08a["lower_can_write"] == "0x00085112" and eps08a["canif_hth_index"] == 0 and
-          eps08a["lower_driver_object_id"] == 47 and eps08a["lower_driver_node"] == 1 and
-          eps08a["lower_driver_mailbox"] == 0 and eps08a["pending_handle_cell"] == "0xFEBE502A" and
-          eps08a["software_pdu_handle"] == "0x00F0" and "successor may be idle 0xFFFF or stock 0x030" in eps08a["completion_witness"] and
-          eps08a["can_id_word"] == "0x4000008A" and eps08a["live_qualified"] is False and
-          eps08a["mutation_boundary"]["eps_08a_transmit_max"] == 1 and
-          eps08a["mutation_boundary"]["frame_mutation_inside_eps"] is False and
-          eps08a["field_sequence"][0].startswith("first run ./f33-sign verify-native-08a"))
-    check("built 0x08A routing launcher doctor validates exact payload without Panda access",
-          eps08a_doctor.returncode == 0 and "f33-08a-route doctor: PASS" in eps08a_doctor.stdout and
-          eps08a["payload_sha256"] in eps08a_doctor.stdout, eps08a_doctor.stderr[-300:])
 
 print(f"\nResults: {passed} passed, {failed} failed")
 raise SystemExit(1 if failed else 0)

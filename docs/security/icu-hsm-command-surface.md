@@ -383,7 +383,7 @@ reserved in the generic P1M-E table but active in this firmware).
    classify via `FFC5D010 & 0xFFF`.
 
 The runtime-facing consequence: the existing F33 RAM-resident callers
-(`exploit/ephemeral_runtime/`) already exercise steps 1–5 through the stock
+(`tools/targets/camry/research/ram_runtime/`) already exercise steps 1–5 through the stock
 driver for command 5; issuing the unexercised opcode family is the same
 sequence with different counts and command word — the Sienna orphan stubs
 (`0x89A4C` cmd-11, `0x89B70` cmd-`0x22`) are byte-level templates for

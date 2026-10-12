@@ -569,12 +569,12 @@ without reinjecting B6.
 Tracked files:
 
 ```text
-exploit/ephemeral_runtime/camry_f33_b6_transaction_observer.c
-exploit/ephemeral_runtime/build_camry_f33_b6_transaction_observer.py
-exploit/ephemeral_runtime/camry_f33_b6_transaction_observer.py
-exploit/ephemeral_runtime/camry_f33_b6_transaction_observer_install.py
-exploit/ephemeral_runtime/audited/camry_f33_b6_transaction_observer.bin
-exploit/ephemeral_runtime/audited_camry_f33_b6_transaction_observer_build.json
+tools/targets/camry/research/ram_runtime/b6/camry_f33_b6_transaction_observer.c
+tools/targets/camry/research/ram_runtime/b6/build_camry_f33_b6_transaction_observer.py
+tools/targets/camry/research/ram_runtime/b6/camry_f33_b6_transaction_observer.py
+tools/targets/camry/research/ram_runtime/b6/camry_f33_b6_transaction_observer_install.py
+tools/targets/camry/research/ram_runtime/b6/audited/camry_f33_b6_transaction_observer.bin
+tools/targets/camry/research/ram_runtime/b6/audited/audited_camry_f33_b6_transaction_observer_build.json
 tests/verify_camry_f33_b6_transaction_observer.py
 ```
 
@@ -636,11 +636,11 @@ high-tail region, so the two residents are not used simultaneously.
 Tracked files:
 
 ```text
-exploit/ephemeral_runtime/camry_f33_b6_bridge.c
-exploit/ephemeral_runtime/build_camry_f33_b6_bridge.py
-exploit/ephemeral_runtime/camry_f33_b6_bridge_install.py
-exploit/ephemeral_runtime/audited/camry_f33_b6_bridge.bin
-exploit/ephemeral_runtime/audited_camry_f33_b6_bridge_build.json
+tools/targets/camry/research/ram_runtime/b6/camry_f33_b6_bridge.c
+tools/targets/camry/research/ram_runtime/b6/build_camry_f33_b6_bridge.py
+tools/targets/camry/research/ram_runtime/b6/camry_f33_b6_bridge_install.py
+tools/targets/camry/research/ram_runtime/b6/audited/camry_f33_b6_bridge.bin
+tools/targets/camry/research/ram_runtime/b6/audited/audited_camry_f33_b6_bridge_build.json
 tests/verify_camry_f33_b6_bridge_install.py
 ```
 
@@ -681,7 +681,7 @@ The bridge has not yet been live-tested on the vehicle.
 ## Current field runbook already in the repository
 
 ```text
-exploit/ephemeral_runtime/camry_f33_b6_observer_runbook.md
+tools/targets/camry/research/ram_runtime/b6/camry_f33_b6_observer_runbook.md
 ```
 
 It contains commands for:
@@ -794,14 +794,14 @@ Receive-path / observer / bridge implementation:
 
 ```text
 exploit/behavioral_proof/camry_f33_b6_stationary_probe.py
-exploit/ephemeral_runtime/camry_f33_b6_transaction_observer.c
-exploit/ephemeral_runtime/build_camry_f33_b6_transaction_observer.py
-exploit/ephemeral_runtime/camry_f33_b6_transaction_observer.py
-exploit/ephemeral_runtime/camry_f33_b6_transaction_observer_install.py
-exploit/ephemeral_runtime/camry_f33_b6_bridge.c
-exploit/ephemeral_runtime/build_camry_f33_b6_bridge.py
-exploit/ephemeral_runtime/camry_f33_b6_bridge_install.py
-exploit/ephemeral_runtime/camry_f33_b6_observer_runbook.md
+tools/targets/camry/research/ram_runtime/b6/camry_f33_b6_transaction_observer.c
+tools/targets/camry/research/ram_runtime/b6/build_camry_f33_b6_transaction_observer.py
+tools/targets/camry/research/ram_runtime/b6/camry_f33_b6_transaction_observer.py
+tools/targets/camry/research/ram_runtime/b6/camry_f33_b6_transaction_observer_install.py
+tools/targets/camry/research/ram_runtime/b6/camry_f33_b6_bridge.c
+tools/targets/camry/research/ram_runtime/b6/build_camry_f33_b6_bridge.py
+tools/targets/camry/research/ram_runtime/b6/camry_f33_b6_bridge_install.py
+tools/targets/camry/research/ram_runtime/b6/camry_f33_b6_observer_runbook.md
 ```
 
 Persistent experiment builders:

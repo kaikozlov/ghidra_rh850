@@ -399,7 +399,7 @@ writers, live lifetime conflicts, or peripheral/timing behavior. H/F therefore
 remain absent from `data/variant_ram_exec_requirements.json`; hardware validation
 must run the 298-byte canary and prove upload, heartbeat progression, application
 health, and reset-to-stock. Only then may the plan-first
-`exploit/ephemeral_runtime/corolla_hf_direct_command5.py` expose the 424-byte proxy.
+`tools/targets/corolla/research/ram_runtime/corolla_hf_direct_command5.py` expose the 424-byte proxy.
 Its live mode requires the retained successful canary result and packages the proxy
 as zero-DID 4-KiB envelope SHA-256 `a81b367f…140bfc5`, writes output/status
 sentinels, commits state `1` last, and accepts only mirrored status zero with a

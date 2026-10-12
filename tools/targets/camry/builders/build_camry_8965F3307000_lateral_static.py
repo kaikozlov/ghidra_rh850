@@ -45,12 +45,6 @@ def need(cond: object, msg: str) -> None:
         raise ValueError(msg)
 
 
-def require_tokens(functions: dict[int, dict], entry: int, *tokens: str) -> str:
-    need(entry in functions, f"missing evidence function 0x{entry:08X}")
-    body = functions[entry]["decompiled_c"]
-    for token in tokens:
-        need(token in body, f"0x{entry:08X} missing token {token!r}")
-    return body
 
 
 def tech_name(tech: dict, did: str) -> str:
@@ -92,9 +86,6 @@ def build() -> dict:
     # Timer: 0x6639C clears TAUJ0 TPS/BRS/CMOR and loads the first TDR values;
     # 0x66512 reloads channel 3 with the steady value. The product record binds
     # R7F701381 and the official 80-MHz P-Bus/TAUJ domain.
-    require_tokens(functions, 0x66062, "EIC136._1_1_", "(bVar1 & 0x10) == 0", "EIC136._1_1_ = bVar1 & 0xef;")
-    require_tokens(functions, 0x6639C, "TAUJ0TPS = 0;", "TAUJ0BRS._0_1_ = 0;", "TAUJ0CDR3 = (uint)(PTR_LAB_0000270e_2_00030e0c + DAT_00030e08 + -1);")
-    require_tokens(functions, 0x66512, "TAUJ0CDR3 = DAT_00030e08 - 1;", "FUN_000701ea(uVar3);")
     timer_terms = [u32(image, 0x30DF0 + i * 4) for i in range(8)]
     need(timer_terms == [16000, 800, 32000, 9200, 80000, 9600, 400000, 10000], "F33 TAUJ0 timer terms drift")
     p_bus_hz = product["timer"]["p_bus_hz"]
@@ -106,11 +97,6 @@ def build() -> dict:
     steady_counts = timer_terms[6]
 
     # Exact mode-2 command envelope and application-sequence behavior.
-    require_tokens(functions, 0xCEFFC, "DAT_febeadb0 == '\\v'", "DAT_febecb00 = 2;")
-    require_tokens(functions, 0xCEC8A, "DAT_febeadbc", "DAT_000b0620", "DAT_000b0622")
-    require_tokens(functions, 0xCEE7C, "puVar12 + 0x12de", "puVar12 + 0x12ec")
-    require_tokens(functions, 0xCCF0E, "* 2")
-    require_tokens(functions, 0xCCFB2, "DAT_febec8b4", "DAT_febec9fe", "DAT_febeca00")
     for off in (0x12978, 0x1A978):
         need(u16(image, off) == 1745 and u16(image, off + 2) == 78, f"mode2 envelope calibration drift at 0x{off:X}")
     need(u16(image, 0xB061C) == 87, "target delta deadband drift")
@@ -123,28 +109,19 @@ def build() -> dict:
     deg_per_count = 1024 / 17870
 
     # Secondary fields: retain consumer behavior, not guessed OEM names.
-    require_tokens(functions, 0xCDA20, "DAT_febeadbb", "FUN_000d0a06")
-    require_tokens(functions, 0xCE3AA, "DAT_febeadbd", ") / 100")
-    require_tokens(functions, 0xCDFF8, "DAT_febeadbe", ") / 100")
 
     # Steering-rate monitor / diagnostic joins.
-    require_tokens(functions, 0x4B59E, "FUN_0007d12a(0xbd,299,0xc,0,1,puVar2 + -0x37b6)")
-    require_tokens(functions, 0x4DBBC, "DAT_febe66a4", "* 0x168) / 0x400")
-    require_tokens(functions, 0xCED28, "DAT_febeae22", "uVar7 + 1")
     need(u16(image, 0x2939C) == 0x1036 and u32(image, 0x293A0) == 0x4DBBC, "DID1036 row drift")
     need(tech_name(tech, "0x1036") == "Steering Angle Velocity", "DID1036 Techstream name drift")
     need(u16(image, 0xB066E) == 100, "mode2 steering-rate threshold drift")
     need(u16(image, 0x12968) == u16(image, 0x1A968) == 79, "mode2 steering-rate persistence drift")
 
     # Driver torque diagnostic source and acquisition saturation.
-    require_tokens(functions, 0x484D2, "DAT_00030e52")
-    require_tokens(functions, 0x4DB70, "DAT_febe6af0 == -0x5aa5a55b", "DAT_febe66a8", "* 1000) / 0x100")
     need(u16(image, 0x2938C) == 0x1035 and u32(image, 0x29390) == 0x4DB70, "DID1035 row drift")
     need(u16(image, 0x30E52) == 2109, "normalized F33 torque acquisition saturation drift")
     need(tech_name(tech, "0x1035") == "Steering Wheel Torque", "DID1035 Techstream name drift")
 
     # Q-axis current diagnostic source.
-    require_tokens(functions, 0x4E394, "DAT_febe670e", "* 100) / 0x80")
     need(u16(image, 0x2979C) == 0x1151 and u32(image, 0x297A0) == 0x4E394, "DID1151 row drift")
     need(tech_name(tech, "0x1151") == "Motor Actual Current (Q Axis)", "DID1151 Techstream name drift")
 

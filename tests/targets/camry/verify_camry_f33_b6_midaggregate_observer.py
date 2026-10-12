@@ -10,12 +10,12 @@ import sys
 
 from tools import REPO_ROOT
 ROOT = REPO_ROOT
-from exploit.ephemeral_runtime import camry_f33_b6_midaggregate_observer as host
-from exploit.ephemeral_runtime import build_camry_f33_b6_midaggregate_observer as build
+import tools.targets.camry.research.ram_runtime.b6.camry_f33_b6_midaggregate_observer as host
+import tools.targets.camry.research.ram_runtime.b6.build_camry_f33_b6_midaggregate_observer as build
 
 OUT = ROOT / "build/out/ephemeral-runtime/camry-f33-b6-midaggregate-observer"
-AUDIT = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_b6_midaggregate_observer_build.json"
-AUDITED_STAGE = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_midaggregate_observer.bin"
+AUDIT = ROOT / "tools/targets/camry/research/ram_runtime/b6/audited/audited_camry_f33_b6_midaggregate_observer_build.json"
+AUDITED_STAGE = ROOT / "tools/targets/camry/research/ram_runtime/b6/audited/camry_f33_b6_midaggregate_observer.bin"
 subprocess.run([sys.executable, str(build.BUILDER)], cwd=ROOT, check=True, stdout=subprocess.DEVNULL)
 meta = json.loads((OUT / "build.json").read_text())
 resident = (OUT / meta["resident"]["path"]).read_bytes()

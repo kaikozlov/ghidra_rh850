@@ -70,7 +70,7 @@
     "sample_count": 5639
   },
   "highest_value_next_evidence": [
-    "On the isolated exact H/F specimen, run exploit/ephemeral_runtime/corolla_hf_direct_canary.py first, then the guarded selector-4 command-5 probe after reset-to-stock confirmation; this is the remaining live prerequisite for the EPS-resident B6 signer used by the openpilot branch.",
+    "On the isolated exact H/F specimen, run tools/targets/corolla/research/ram_runtime/corolla_hf_direct_canary.py first, then the guarded selector-4 command-5 probe after reset-to-stock confirmation; this is the remaining live prerequisite for the EPS-resident B6 signer used by the openpilot branch.",
     "On the vehicle, preserve F181 and capture the relay-correct stock-LTA off -> active -> off transition, then validate that the resident helper emits native authenticated B6 and that EPS response follows openpilot's bounded target-angle sideband.",
     "Recover the physical Corolla 0x08A producer/pre-signing path and establish how openpilot could become the sole qualified request source without competing on the unsplit network; only then stage native-long and PCS/AEB coexistence validation.",
     "Capture Ready=0 plus recoverable and latched steering faults to finish openpilot temporary/permanent fault policy. Gear, core cruise state, set speed, driver torque, and longitudinal request semantics are no longer evidence blockers; request-source ownership remains open.",
@@ -253,7 +253,7 @@
         "verified_variant_ram_exec_requirement_promoted": false
       },
       "canary": {
-        "binary": "exploit/ephemeral_runtime/audited/corolla_hf_runtime_canary.bin",
+        "binary": "tools/targets/corolla/research/ram_runtime/audited/corolla_hf_runtime_canary.bin",
         "entry_offset": 0,
         "headroom": 166,
         "heartbeat_address": "0xFEBFFB80",
@@ -288,7 +288,7 @@
           "payload_build_secret_value_recorded": false,
           "payload_sha256": "b6d4b261ef6fb614ef0c9f8cd72bc7e7fb7608a793f9094ec76fe226bd884367",
           "payload_size": 4096,
-          "shellcode_path": "exploit/ephemeral_runtime/audited/corolla_hf_runtime_canary.bin",
+          "shellcode_path": "tools/targets/corolla/research/ram_runtime/audited/corolla_hf_runtime_canary.bin",
           "shellcode_sha256": "ec4a31160b877c9067361fe3296f151c5a5ca38835ee8f8f22aa9a6fe3fca2df",
           "shellcode_size": 298
         },
@@ -306,7 +306,7 @@
           "required_boot_f181_hex": "022121212121212121212121212121212121212121212121212121212121212121",
           "tracked_codeflash_sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f"
         },
-        "tool": "exploit/ephemeral_runtime/corolla_hf_direct_canary.py"
+        "tool": "tools/targets/corolla/research/ram_runtime/corolla_hf_direct_canary.py"
       },
       "direct_command5": {
         "live_guards": {
@@ -327,7 +327,7 @@
           "payload_build_secret_value_recorded": false,
           "payload_sha256": "a81b367febb819f4016a0880c707b82fb7f46f1bad5ec59119e43aec0140bfc5",
           "payload_size": 4096,
-          "shellcode_path": "exploit/ephemeral_runtime/audited/corolla_hf_command5_proxy.bin",
+          "shellcode_path": "tools/targets/corolla/research/ram_runtime/audited/corolla_hf_command5_proxy.bin",
           "shellcode_sha256": "62e4880eaa1bb7dd79fb1f47f4ce44033d1201550a20812a6a103ace00dde183",
           "shellcode_size": 424
         },
@@ -366,10 +366,10 @@
           "required_application_f181_hex": "023839363546313230383030300000000038413331313132303230303000000000",
           "required_boot_f181_hex": "022121212121212121212121212121212121212121212121212121212121212121"
         },
-        "tool": "exploit/ephemeral_runtime/corolla_hf_direct_command5.py"
+        "tool": "tools/targets/corolla/research/ram_runtime/corolla_hf_direct_command5.py"
       },
       "proxy": {
-        "binary": "exploit/ephemeral_runtime/audited/corolla_hf_command5_proxy.bin",
+        "binary": "tools/targets/corolla/research/ram_runtime/audited/corolla_hf_command5_proxy.bin",
         "busy_behavior": "shared-driver busy result 2 leaves request_state=1 so the next foreground iteration retries; no command-7 abort primitive is called",
         "dispatcher": "0x00082750",
         "done_flag": "0xFEBF1280",

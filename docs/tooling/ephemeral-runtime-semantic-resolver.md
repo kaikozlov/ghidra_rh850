@@ -221,10 +221,10 @@ Once the manifest says `runtime_build_ready=true`, both RH850 sources are built
 from a generated `target_config.h`:
 
 ```bash
-uv run --locked python exploit/ephemeral_runtime/build_canary.py \
+uv run --locked python tools/targets/tss3/research/ram_runtime/build_canary.py \
   --manifest build/out/new_eps_ephemeral_runtime.json
 
-uv run --locked python exploit/ephemeral_runtime/build_shellcode.py \
+uv run --locked python tools/targets/tss3/research/ram_runtime/build_shellcode.py \
   --manifest build/out/new_eps_ephemeral_runtime.json
 ```
 

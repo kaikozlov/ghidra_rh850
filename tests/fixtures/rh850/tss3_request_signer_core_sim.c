@@ -9,7 +9,7 @@
  * the entry stack and the simulator stop label.
  */
 #define ORACLE_SIM_TEST_COMPACT 1
-#include "../../../exploit/ephemeral_runtime/tss3_request_signer_core.h"
+#include "../../../exploit/ram_runtime/request_signer/tss3_request_signer_core.h"
 
 volatile uint32_t oracle_sim_failure;
 volatile uint32_t oracle_sim_passes;

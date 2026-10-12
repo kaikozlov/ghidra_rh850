@@ -22,26 +22,16 @@ from exploit.common.ram_exec import (
 from exploit.ram_runtime.target_profiles import target_spec
 
 
-from exploit.ephemeral_runtime import camry_f33_08a_tx_probe as eps08a_probe
-from exploit.ephemeral_runtime import camry_f33_b6_bridge_install as bridge_install
-from exploit.ephemeral_runtime import (
-    camry_f33_b6_midaggregate_observer as midaggregate_observer,
-)
-from exploit.ephemeral_runtime import (
-    camry_f33_b6_transaction_observer_install as observer_install,
-)
-from exploit.ephemeral_runtime import camry_f33_command5_probe as command5_probe
-from exploit.ephemeral_runtime import camry_f33_route40_observer as route40_observer
-from exploit.ephemeral_runtime import camry_f33_runtime_monitor as runtime_monitor
-from exploit.ephemeral_runtime import (
-    camry_f33_runtime_monitor_intertick as intertick_monitor,
-)
-from exploit.ephemeral_runtime import (
-    camry_f33_runtime_monitor_preaggregate as preaggregate_monitor,
-)
-from exploit.ephemeral_runtime import (
-    camry_f33_runtime_replay_discriminator as replay_discriminator,
-)
+import tools.targets.camry.research.ram_runtime.oracle.camry_f33_08a_tx_probe as eps08a_probe
+import tools.targets.camry.research.ram_runtime.b6.camry_f33_b6_bridge_install as bridge_install
+import tools.targets.camry.research.ram_runtime.b6.camry_f33_b6_midaggregate_observer as midaggregate_observer
+import tools.targets.camry.research.ram_runtime.b6.camry_f33_b6_transaction_observer_install as observer_install
+import tools.targets.camry.research.ram_runtime.command5.camry_f33_command5_probe as command5_probe
+import tools.targets.camry.research.ram_runtime.routing.camry_f33_route40_observer as route40_observer
+import tools.targets.camry.research.ram_runtime.monitor.camry_f33_runtime_monitor as runtime_monitor
+import tools.targets.camry.research.ram_runtime.monitor.camry_f33_runtime_monitor_intertick as intertick_monitor
+import tools.targets.camry.research.ram_runtime.monitor.camry_f33_runtime_monitor_preaggregate as preaggregate_monitor
+import tools.targets.camry.research.ram_runtime.monitor.camry_f33_runtime_replay_discriminator as replay_discriminator
 from tools.targets.camry.builders import build_camry_f33_crypto_result_patch as stage5
 from tools.targets.camry.builders import (
     build_camry_f33_gate2_root_result_patch as stage3,
@@ -51,46 +41,46 @@ from tools.targets.camry.builders import (
 )
 
 PROBE = ROOT / "exploit/behavioral_proof/camry_f33_b6_stationary_probe.py"
-RUNBOOK_TEMPLATE = ROOT / "exploit/ephemeral_runtime/camry_f33_runtime_monitor_runbook.md"
-PERSISTENT_RUNBOOK = ROOT / "exploit/ephemeral_runtime/camry_f33_persistent_signer_runbook.md"
-EPS08A_RUNBOOK = ROOT / "exploit/ephemeral_runtime/camry_f33_08a_sender_experiments.md"
-ROUTE40_RUNBOOK = ROOT / "exploit/ephemeral_runtime/camry_f33_090_route40_experiment.md"
-FIELD_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_field_launcher.sh"
-PREAGG_FIELD_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_field_preaggregate_launcher.sh"
-MIDAGG_FIELD_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_field_midaggregate_launcher.sh"
-COMMAND5_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_command5_launcher.sh"
-ROUTE40_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_route40_observer_launcher.sh"
-EPS08A_TX_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_08a_tx_probe_launcher.sh"
-EPS08A_ORACLE_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_08a_oracle_stream_launcher.sh"
-INLINE_SIGNER_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_b6_inline_signer_launcher.sh"
-ICUS_RAMKEY_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_icus_ramkey_probe_launcher.sh"
-PERSISTENT_SIGNER_LAUNCHER = ROOT / "exploit/ephemeral_runtime/camry_f33_persistent_signer_launcher.sh"
+RUNBOOK_TEMPLATE = ROOT / "tools/targets/camry/research/ram_runtime/monitor/camry_f33_runtime_monitor_runbook.md"
+PERSISTENT_RUNBOOK = ROOT / "tools/targets/camry/research/ram_runtime/b6/camry_f33_persistent_signer_runbook.md"
+EPS08A_RUNBOOK = ROOT / "tools/targets/camry/research/ram_runtime/oracle/camry_f33_08a_sender_experiments.md"
+ROUTE40_RUNBOOK = ROOT / "tools/targets/camry/research/ram_runtime/routing/camry_f33_090_route40_experiment.md"
+FIELD_LAUNCHER = ROOT / "tools/targets/camry/research/ram_runtime/monitor/camry_f33_field_launcher.sh"
+PREAGG_FIELD_LAUNCHER = ROOT / "tools/targets/camry/research/ram_runtime/monitor/camry_f33_field_preaggregate_launcher.sh"
+MIDAGG_FIELD_LAUNCHER = ROOT / "tools/targets/camry/research/ram_runtime/b6/camry_f33_field_midaggregate_launcher.sh"
+COMMAND5_LAUNCHER = ROOT / "tools/targets/camry/research/ram_runtime/command5/camry_f33_command5_launcher.sh"
+ROUTE40_LAUNCHER = ROOT / "tools/targets/camry/research/ram_runtime/routing/camry_f33_route40_observer_launcher.sh"
+EPS08A_TX_LAUNCHER = ROOT / "tools/targets/camry/research/ram_runtime/oracle/camry_f33_08a_tx_probe_launcher.sh"
+EPS08A_ORACLE_LAUNCHER = ROOT / "tools/targets/camry/research/ram_runtime/oracle/camry_f33_08a_oracle_stream_launcher.sh"
+INLINE_SIGNER_LAUNCHER = ROOT / "tools/targets/camry/research/ram_runtime/b6/camry_f33_b6_inline_signer_launcher.sh"
+ICUS_RAMKEY_LAUNCHER = ROOT / "tools/targets/camry/research/ram_runtime/command5/camry_f33_icus_ramkey_probe_launcher.sh"
+PERSISTENT_SIGNER_LAUNCHER = ROOT / "tools/targets/camry/research/ram_runtime/b6/camry_f33_persistent_signer_launcher.sh"
 F33_IMAGE = f33.IMAGE
-OBSERVER_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_transaction_observer.bin"
-BRIDGE_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_bridge.bin"
-REPLAY_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_runtime_replay_discriminator.bin"
-MONITOR_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_runtime_monitor.bin"
-PREAGG_MONITOR_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_runtime_monitor_preaggregate.bin"
-INTERTICK_MONITOR_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_runtime_monitor_intertick.bin"
-MIDAGG_OBSERVER_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_midaggregate_observer.bin"
-COMMAND5_PROBE_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_command5_probe.bin"
-ROUTE40_OBSERVER_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_route40_observer.bin"
-ROUTE40_OBSERVER_META = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_route40_observer_build.json"
-EPS08A_TX_PROBE_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_08a_tx_probe.bin"
-EPS08A_TX_PROBE_META = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_08a_tx_probe_build.json"
-EPS08A_ORACLE_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_08a_oracle_stream.bin"
-EPS08A_ORACLE_META = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_08a_oracle_stream_build.json"
+OBSERVER_BIN = ROOT / "tools/targets/camry/research/ram_runtime/b6/audited/camry_f33_b6_transaction_observer.bin"
+BRIDGE_BIN = ROOT / "tools/targets/camry/research/ram_runtime/b6/audited/camry_f33_b6_bridge.bin"
+REPLAY_BIN = ROOT / "tools/targets/camry/research/ram_runtime/monitor/audited/camry_f33_runtime_replay_discriminator.bin"
+MONITOR_BIN = ROOT / "tools/targets/camry/research/ram_runtime/monitor/audited/camry_f33_runtime_monitor.bin"
+PREAGG_MONITOR_BIN = ROOT / "tools/targets/camry/research/ram_runtime/monitor/audited/camry_f33_runtime_monitor_preaggregate.bin"
+INTERTICK_MONITOR_BIN = ROOT / "tools/targets/camry/research/ram_runtime/monitor/audited/camry_f33_runtime_monitor_intertick.bin"
+MIDAGG_OBSERVER_BIN = ROOT / "tools/targets/camry/research/ram_runtime/b6/audited/camry_f33_b6_midaggregate_observer.bin"
+COMMAND5_PROBE_BIN = ROOT / "tools/targets/camry/research/ram_runtime/command5/audited/camry_f33_command5_probe.bin"
+ROUTE40_OBSERVER_BIN = ROOT / "tools/targets/camry/research/ram_runtime/routing/audited/camry_f33_route40_observer.bin"
+ROUTE40_OBSERVER_META = ROOT / "tools/targets/camry/research/ram_runtime/routing/audited/audited_camry_f33_route40_observer_build.json"
+EPS08A_TX_PROBE_BIN = ROOT / "tools/targets/camry/research/ram_runtime/oracle/audited/camry_f33_08a_tx_probe.bin"
+EPS08A_TX_PROBE_META = ROOT / "tools/targets/camry/research/ram_runtime/oracle/audited/audited_camry_f33_08a_tx_probe_build.json"
+EPS08A_ORACLE_BIN = ROOT / "tools/targets/camry/research/ram_runtime/oracle/audited/camry_f33_08a_oracle_stream.bin"
+EPS08A_ORACLE_META = ROOT / "tools/targets/camry/research/ram_runtime/oracle/audited/audited_camry_f33_08a_oracle_stream_build.json"
 # Supervised continuous substitution preserves the road helper's steady-state
 # behavior, but stops after seven foreground ticks without a changed host
 # generation. Its new identity has instruction-level, not vehicle, validation.
-INLINE_SIGNER_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_inline_signer_supervised.bin"
-INLINE_SIGNER_HELPER = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_inline_signer_supervised_helper_padded.bin"
-INLINE_SIGNER_META = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_b6_inline_signer_supervised_build.json"
-ICUS_RAMKEY_HELPER9 = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_icus_ramkey_cmd9_helper_padded.bin"
-ICUS_RAMKEY_HELPER10 = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_icus_ramkey_cmd10_helper_padded.bin"
-ICUS_RAMKEY_META = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_icus_ramkey_probe.json"
-INGRESS_HELPER = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_ingress_helper_helper_padded.bin"
-INGRESS_META = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_b6_ingress_helper_build.json"
+INLINE_SIGNER_BIN = ROOT / "tools/targets/camry/research/ram_runtime/b6/audited/camry_f33_b6_inline_signer_supervised.bin"
+INLINE_SIGNER_HELPER = ROOT / "tools/targets/camry/research/ram_runtime/b6/audited/camry_f33_b6_inline_signer_supervised_helper_padded.bin"
+INLINE_SIGNER_META = ROOT / "tools/targets/camry/research/ram_runtime/b6/audited/audited_camry_f33_b6_inline_signer_supervised_build.json"
+ICUS_RAMKEY_HELPER9 = ROOT / "tools/targets/camry/research/ram_runtime/command5/audited/camry_f33_icus_ramkey_cmd9_helper_padded.bin"
+ICUS_RAMKEY_HELPER10 = ROOT / "tools/targets/camry/research/ram_runtime/command5/audited/camry_f33_icus_ramkey_cmd10_helper_padded.bin"
+ICUS_RAMKEY_META = ROOT / "tools/targets/camry/research/ram_runtime/command5/audited/camry_f33_icus_ramkey_probe.json"
+INGRESS_HELPER = ROOT / "tools/targets/camry/research/ram_runtime/b6/audited/camry_f33_b6_ingress_helper_helper_padded.bin"
+INGRESS_META = ROOT / "tools/targets/camry/research/ram_runtime/b6/audited/audited_camry_f33_b6_ingress_helper_build.json"
 DEFAULT_OPENPILOT = Path("/Users/kai/dev/inspect/repos/kai-openpilot")
 RUNTIME_FILES = [
     "tsk/__init__.py",
@@ -99,24 +89,24 @@ RUNTIME_FILES = [
     "tsk/lib/diagnostic_route.py",
     "exploit/common/payload_package.py",
     "exploit/common/ram_exec.py",
-    "exploit/ephemeral_runtime/camry_f33_b6_transaction_observer.py",
-    "exploit/ephemeral_runtime/camry_f33_b6_transaction_observer_install.py",
-    "exploit/ephemeral_runtime/camry_f33_b6_bridge_install.py",
-    "exploit/ephemeral_runtime/camry_f33_runtime_replay_discriminator.py",
-    "exploit/ephemeral_runtime/camry_f33_runtime_monitor.py",
-    "exploit/ephemeral_runtime/camry_f33_runtime_monitor_preaggregate.py",
-    "exploit/ephemeral_runtime/camry_f33_runtime_monitor_intertick.py",
-    "exploit/ephemeral_runtime/camry_f33_b6_midaggregate_observer.py",
-    "exploit/ephemeral_runtime/camry_f33_b6_ingress_helper.py",
-    "exploit/ephemeral_runtime/camry_f33_command5_probe.py",
-    "exploit/ephemeral_runtime/camry_f33_route40_observer.py",
-    "exploit/ephemeral_runtime/camry_f33_08a_tx_probe.py",
-    "exploit/ephemeral_runtime/camry_f33_08a_oracle_stream.py",
-    "exploit/ephemeral_runtime/camry_f33_b6_inline_signer.py",
-    "exploit/ephemeral_runtime/tss3_post_install_recovery.py",
-    "exploit/ephemeral_runtime/camry_f33_icus_ramkey_probe.py",
-    "exploit/ephemeral_runtime/camry_f33_persistent_signer.py",
-    "exploit/ephemeral_runtime/tss3_panda_lease.sh",
+    "tools/targets/camry/research/ram_runtime/b6/camry_f33_b6_transaction_observer.py",
+    "tools/targets/camry/research/ram_runtime/b6/camry_f33_b6_transaction_observer_install.py",
+    "tools/targets/camry/research/ram_runtime/b6/camry_f33_b6_bridge_install.py",
+    "tools/targets/camry/research/ram_runtime/monitor/camry_f33_runtime_replay_discriminator.py",
+    "tools/targets/camry/research/ram_runtime/monitor/camry_f33_runtime_monitor.py",
+    "tools/targets/camry/research/ram_runtime/monitor/camry_f33_runtime_monitor_preaggregate.py",
+    "tools/targets/camry/research/ram_runtime/monitor/camry_f33_runtime_monitor_intertick.py",
+    "tools/targets/camry/research/ram_runtime/b6/camry_f33_b6_midaggregate_observer.py",
+    "tools/targets/camry/research/ram_runtime/b6/camry_f33_b6_ingress_helper.py",
+    "tools/targets/camry/research/ram_runtime/command5/camry_f33_command5_probe.py",
+    "tools/targets/camry/research/ram_runtime/routing/camry_f33_route40_observer.py",
+    "tools/targets/camry/research/ram_runtime/oracle/camry_f33_08a_tx_probe.py",
+    "tools/targets/camry/research/ram_runtime/oracle/camry_f33_08a_oracle_stream.py",
+    "tools/targets/camry/research/ram_runtime/b6/camry_f33_b6_inline_signer.py",
+    "exploit/ram_runtime/tss3_post_install_recovery.py",
+    "tools/targets/camry/research/ram_runtime/command5/camry_f33_icus_ramkey_probe.py",
+    "tools/targets/camry/research/ram_runtime/b6/camry_f33_persistent_signer.py",
+    "exploit/ram_runtime/tss3_panda_lease.sh",
     "exploit/followups/xcp_read_probe.py",
     "exploit/followups/xcp_daq_probe.py",
     "exploit/followups/xcp_runtime_state_probe.py",
@@ -694,7 +684,7 @@ def build(out: Path, openpilot: Path) -> dict:
                 "same_cycle_drcc_recovery": {
                     "command": "./f33-secoc recover-drcc",
                     "role": "diagnostic_only",
-                    "tool": "runtime/exploit/ephemeral_runtime/tss3_post_install_recovery.py",
+                    "tool": "runtime/exploit/ram_runtime/tss3_post_install_recovery.py",
                     "physical_clear": "14FFFFFF on the six exact-car responders that accepted it",
                     "functional_clear": "0x7DF Mode 04 on Panda bus 0; require 0x7E8/7EA/7EB/7ED/7EE positive 44",
                     "acceptance": "all 11 known physical responders have no status&0xAF fault records and FRC DID1905 permits cruise without DID1906 ACC-not-available",

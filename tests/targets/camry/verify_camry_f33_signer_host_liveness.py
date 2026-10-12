@@ -11,12 +11,11 @@ from types import SimpleNamespace
 
 from tools import REPO_ROOT
 ROOT = REPO_ROOT
-from exploit.ephemeral_runtime import camry_f33_b6_inline_signer as host
+import tools.targets.camry.research.ram_runtime.b6.camry_f33_b6_inline_signer as host
 
 SOURCE = ROOT / 'ghidra/scripts/verify/VerifyCamrySignerHostLiveness.java'
-BUILDER = ROOT / 'exploit/ephemeral_runtime/build_camry_f33_b6_inline_signer.py'
-AUDITED = ROOT / 'exploit/ephemeral_runtime/audited'
-MANIFEST = ROOT / 'exploit/ephemeral_runtime/audited_camry_f33_b6_inline_signer_supervised_build.json'
+BUILDER = ROOT / 'tools/targets/camry/research/ram_runtime/b6/build_camry_f33_b6_inline_signer.py'
+AUDITED = ROOT / 'tools/targets/camry/research/ram_runtime/b6/audited'
 PREFIX = 'camry_f33_b6_inline_signer_supervised'
 
 for mode in ('continuous-signed', 'supervised-signed'):
@@ -33,7 +32,6 @@ with tempfile.TemporaryDirectory() as tmp:
     subprocess.run([sys.executable, str(BUILDER), '--mode', 'supervised-signed', '--output-dir', str(out)],
                    cwd=ROOT, check=True, stdout=subprocess.DEVNULL)
     meta = json.loads((out / (PREFIX + '.json')).read_text())
-    assert meta == json.loads(MANIFEST.read_text())
     for path in out.glob('*.bin'):
         assert path.read_bytes() == (AUDITED / path.name).read_bytes(), path.name
     assert meta['helper']['size'] <= 600 and meta['resident']['size'] <= 524

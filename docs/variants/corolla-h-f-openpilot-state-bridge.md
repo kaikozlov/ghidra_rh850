@@ -968,7 +968,7 @@ Albino's same-car `eps-telescope` replay now makes that first experiment directl
 operational instead of leaving the bootstrap implicit. The exact specimen reports
 application F181 `8965F1208000 / 8A3111202000`, boot F181 `02 || 32*0x21`, and
 successful boot SecurityAccess plus `0x10F0` authentication of a zero-0201/0202
-4-KiB `FEBF0000` envelope. `exploit/ephemeral_runtime/corolla_hf_direct_canary.py`
+4-KiB `FEBF0000` envelope. `tools/targets/corolla/research/ram_runtime/corolla_hf_direct_canary.py`
 therefore packages the audited 298-byte canary directly under the target's
 payload-build secret into deterministic ciphertext SHA-256
 `b6d4b261ef6fb614ef0c9f8cd72bc7e7fb7608a793f9094ec76fe226bd884367`,

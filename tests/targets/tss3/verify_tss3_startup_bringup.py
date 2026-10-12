@@ -9,12 +9,8 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest import mock
 
-from exploit.ephemeral_runtime import (
-    tss3_request_signer_ui_bringup as ui_bringup,
-)
-from exploit.ephemeral_runtime import (
-    tss3_startup_programming as startup_programming,
-)
+import exploit.ram_runtime.tss3_request_signer_ui_bringup as ui_bringup
+import exploit.ram_runtime.tss3_startup_programming as startup_programming
 from tools.targets.tss3.builders import (
     build_tss3_ram_kit as kit_builder,
 )
@@ -145,7 +141,8 @@ with tempfile.TemporaryDirectory() as td:
         "ram_runtime": {"application_f181_hex": "ab", "request_bus": 1, "response_bus": 1},
     }
     base = {"schema": "tss3-request-signer-build-v1", "request": {}, "response": {},
-            "state": {}, "authenticated_payload": {"sha256": "x"}}
+            "state": {}, "authenticated_payload": {"sha256": "x"},
+            "toolchain": {}, "debug": {}}
     bound = kit_builder._bound_metadata(base, record)
     check("kit metadata binds the repinned runtime bus even for stock-bus-1 targets",
           bound["request"]["bus"] == 0 and bound["response"]["bus"] == 0 and

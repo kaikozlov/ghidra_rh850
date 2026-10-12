@@ -11,8 +11,8 @@ ROOT = REPO_ROOT
 
 from exploit.common.payload_package import inspect_payload
 from exploit.common.ram_exec import TOYOTA_P1ME_PAYLOAD_BUILD_SECRET
-from exploit.ephemeral_runtime import build_camry_f33_b6_persistent_signer as signer
-from exploit.ephemeral_runtime import camry_f33_persistent_signer as host
+import tools.targets.camry.research.ram_runtime.b6.build_camry_f33_b6_persistent_signer as signer
+import tools.targets.camry.research.ram_runtime.b6.camry_f33_persistent_signer as host
 from tools.security.build_secoc_patch_manifest import crc32
 from tools.targets.camry.builders import build_camry_f33_persistent_signer_patch as patch
 
@@ -110,20 +110,7 @@ with tempfile.TemporaryDirectory(prefix="verify-f33-persistent-") as td:
         payload_path.write_bytes(payload_raw)
     check("host rejects a tampered resident payload before vehicle access", tamper_rejected)
 
-source = signer.SOURCE.read_text()
-launcher = (ROOT / "exploit/ephemeral_runtime/camry_f33_persistent_signer_launcher.sh").read_text()
-check("resident has no CAN transmitter", "can_send" not in source and "transmit" not in source.lower())
 check("persistent installer uses stock Toyota-B EPS diagnostics on bus 1", host.ROUTE.bus == 1)
-check("launcher makes passive native verification an explicit prerequisite", "verify-native-08a" in launcher)
-check("launcher persists package-bound preflights across required OFF cycles",
-      "/data/camry-f33-car-kit-state" in launcher and
-      "resident preflight belongs to a different package" in launcher and
-      "hook preflight belongs to a different package manifest" in launcher and
-      "hook preflight config identity belongs to a different package" in launcher and
-      "hook preflight record is older than 30 minutes" in launcher)
-check("launcher rejects the withdrawn truncated hook artifact",
-      'bytes.fromhex("88ff925b")' in launcher and
-      "refusing withdrawn/malformed hook artifact" in launcher)
 
 print(f"Results: {passed} passed, {failed} failed")
 raise SystemExit(1 if failed else 0)

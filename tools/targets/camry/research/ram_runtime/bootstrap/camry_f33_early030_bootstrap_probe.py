@@ -1,0 +1,315 @@
+#!/usr/bin/env python3
+"""Live exact-F33 stale-bridge + early fresh native 0x030 bootstrap discriminator."""
+from __future__ import annotations
+
+import argparse, hashlib, json, multiprocessing, time
+from pathlib import Path
+from types import SimpleNamespace
+from typing import Any
+
+
+
+
+import tools.targets.tss3.research.ram_runtime.tss3_unified_b6_signer as s
+
+SCHEMA = "camry-f33-early030-bootstrap-probe-v1"
+EXPECTED_APP = "023839363546333330373030300000000038413331313333303331303000000000"
+EXPECTED_BOOT = "02" + "21" * 32
+EARLY030_TELEMETRY_ADDR = 0xFEBFFBF8
+EARLY030_TELEMETRY_SIZE = 4
+
+class ProbeError(RuntimeError): pass
+
+
+SPI_RECV_YIELD_SECONDS = 0.0015
+
+
+class _YieldingPandaTap(s.monitor.PandaTap):
+    """PandaTap that yields the SPI flock between host receive polls.
+
+    The stock ISO-TP helper busy-polls can_recv(). On Comma 4's SPI-only Panda,
+    yielding 1.5 ms after each complete receive transaction lets the independent
+    bridge process acquire the kernel flock between diagnostic polls. A parked
+    read-only stress run measured 249/249 100-Hz worker slots with zero misses.
+    """
+    def can_recv(self):
+        rows = super().can_recv()
+        time.sleep(SPI_RECV_YIELD_SECONDS)
+        return rows
+
+
+def _bridge_process_worker(conn, serial: str) -> None:
+    """Own a second SPI Panda handle and send only the stale 0x030 bridge.
+
+    Panda's SPI transport already uses an OS flock around each complete transfer.
+    A separate process therefore competes at the kernel lock boundary instead of
+    starving behind the in-process threading.Lock used by UDS/bootstrap traffic.
+    This worker never reads CAN and never changes Panda safety/configuration.
+    """
+    from panda import Panda
+    panda = None
+    try:
+        panda = Panda(serial=serial, cli=False)
+        conn.send({"ready": True})
+        cmd = conn.recv()
+        if cmd.get("op") != "start":
+            raise ProbeError(f"bridge worker expected start, got {cmd}")
+        frame = bytes.fromhex(str(cmd["frame_hex"]))
+        if len(frame) != 32:
+            raise ProbeError("bridge worker requires exact 32-byte frame")
+        next_ns = int(cmd["first_send_ns"])
+        stop = False
+        sent = 0
+        missed_slots = 0
+        first_sent_ns = None
+        last_sent_ns = None
+        max_send_gap_ns = 0
+        while not stop:
+            if conn.poll():
+                msg = conn.recv()
+                if msg.get("op") == "stop":
+                    stop = True
+                    break
+            now_ns = time.monotonic_ns()
+            if now_ns < next_ns:
+                time.sleep(min((next_ns - now_ns) / 1e9, 0.001))
+                continue
+            if now_ns - next_ns >= s.BOOTSTRAP_030_PERIOD_NS:
+                skipped = (now_ns - next_ns) // s.BOOTSTRAP_030_PERIOD_NS
+                missed_slots += int(skipped)
+                next_ns += int(skipped) * s.BOOTSTRAP_030_PERIOD_NS
+            panda.can_send(s.EPS_STATUS_CAN_ID, frame, s.CONTROL_BUS, fd=True)
+            sent_ns = time.monotonic_ns()
+            if last_sent_ns is not None:
+                max_send_gap_ns = max(max_send_gap_ns, sent_ns - last_sent_ns)
+            sent += 1
+            first_sent_ns = sent_ns if first_sent_ns is None else first_sent_ns
+            last_sent_ns = sent_ns
+            next_ns += s.BOOTSTRAP_030_PERIOD_NS
+        conn.send({
+            "bus": s.CONTROL_BUS,
+            "can_id": "0x030",
+            "period_ms": s.BOOTSTRAP_030_PERIOD_NS / 1e6,
+            "frame_hex": frame.hex(),
+            "sent": sent,
+            "missed_slots": missed_slots,
+            "first_send_monotonic_ns": first_sent_ns,
+            "last_send_monotonic_ns": last_sent_ns,
+            "max_send_gap_ms": max_send_gap_ns / 1e6,
+            "transport": "separate-process-spi-flock",
+            "error": None,
+        })
+    except Exception as exc:
+        try:
+            conn.send({"error": f"{type(exc).__name__}: {exc}"})
+        except Exception:
+            pass
+    finally:
+        if panda is not None:
+            panda.close()
+        conn.close()
+
+
+class _Process030Bridge:
+    def __init__(self, serial: str) -> None:
+        ctx = multiprocessing.get_context("spawn")
+        self.parent, child = ctx.Pipe(duplex=True)
+        self.process = ctx.Process(target=_bridge_process_worker, args=(child, serial), daemon=True)
+        self.process.start()
+        if not self.parent.poll(5.0):
+            self.process.terminate(); self.process.join(timeout=1.0)
+            raise ProbeError("separate-process 0x030 bridge worker did not become ready")
+        ready = self.parent.recv()
+        if ready.get("ready") is not True:
+            self.process.join(timeout=1.0)
+            raise ProbeError(f"separate-process 0x030 bridge worker failed startup: {ready}")
+        self.started = False
+
+    def start(self, frame: bytes, first_send_ns: int) -> None:
+        self.parent.send({"op": "start", "frame_hex": frame.hex(), "first_send_ns": int(first_send_ns)})
+        self.started = True
+
+    def stop(self) -> dict[str, Any]:
+        if not self.started:
+            self.parent.send({"op": "stop"})
+        else:
+            self.parent.send({"op": "stop"})
+        if not self.parent.poll(2.0):
+            self.process.terminate(); self.process.join(timeout=1.0)
+            raise ProbeError("separate-process 0x030 bridge worker did not stop")
+        result = self.parent.recv()
+        self.process.join(timeout=1.0)
+        if self.process.is_alive():
+            self.process.terminate(); self.process.join(timeout=1.0)
+        if result.get("error"):
+            raise ProbeError(f"separate-process 0x030 bridge failed: {result['error']}")
+        return result
+
+    def abort(self) -> None:
+        try:
+            if self.process.is_alive():
+                self.parent.send({"op": "stop"})
+                self.process.join(timeout=0.5)
+        except Exception:
+            pass
+        if self.process.is_alive():
+            self.process.terminate(); self.process.join(timeout=1.0)
+
+def _load(bundle: Path) -> tuple[dict[str,Any],bytes]:
+    meta=json.loads((bundle/"camry_f33_early030.json").read_text(encoding="utf-8"))
+    if meta.get("schema")!="camry-f33-early030-discriminator-build-v1": raise ProbeError("bundle schema mismatch")
+    if meta["target"]["application_f181_hex"]!=EXPECTED_APP or meta["target"]["boot_f181_hex"]!=EXPECTED_BOOT:
+        raise ProbeError("bundle identity drift")
+    p=bundle/meta["authenticated_payload"]["path"]; raw=p.read_bytes()
+    if len(raw)!=0x1000 or hashlib.sha256(raw).hexdigest()!=meta["authenticated_payload"]["sha256"]:
+        raise ProbeError("authenticated payload hash/size mismatch")
+    return meta,raw
+
+def _poll_first_changed_030(panda: Any, replay: bytes, *, timeout: float=2.0) -> dict[str,Any] | None:
+    deadline=time.monotonic()+timeout
+    while time.monotonic()<deadline:
+        rows=panda.can_recv() or []
+        now=time.monotonic_ns()
+        for addr,dat,bus in rows:
+            if int(bus)==s.CONTROL_BUS and int(addr)==s.EPS_STATUS_CAN_ID:
+                b=bytes(dat)
+                if len(b)==32 and b!=replay:
+                    return {"monotonic_ns":now,"frame_hex":b.hex(),"bus":int(bus)}
+        if not rows: time.sleep(0.001)
+    return None
+
+def run(bundle_dir: Path) -> dict[str,Any]:
+    meta,payload=_load(bundle_dir)
+    nrtd=s.verify_nrtd_ready(route=s.ROUTE, ready_buses=frozenset({1}))
+    s.ensure_boardd_stopped()
+    from panda import Panda
+    uds_mod=s._import_uds()
+    secret,secret_source=s.load_security_secret()
+    panda=_YieldingPandaTap(Panda())
+    bridge=None; bridge_result=None
+    try:
+        panda.set_heartbeat_disabled()
+        s.set_alloutput_mode(panda)
+        panda.set_canfd_auto(s.CONTROL_BUS, False)
+        # Pre-open the independent SPI writer before capturing the final native
+        # frame so starting replay costs only one Pipe message, not a Panda open.
+        bridge=_Process030Bridge(str(panda.get_usb_serial()))
+        app=s._make_uds_client(panda,uds_mod,s.ROUTE,timeout=0.3,response_pending_timeout=1.0)
+        f181_hex,f181_ascii=s._read_f181(app,uds_mod)
+        if f181_hex is None or f181_hex.lower()!=EXPECTED_APP:
+            raise ProbeError(f"exact application F181 mismatch: {f181_hex}")
+        frc_before=s._read_frc_bootstrap_state(panda,uds_mod)
+        if not s._healthy_frc_drcc_baseline(frc_before):
+            raise ProbeError(f"FRC baseline is not DRCC-healthy: {frc_before}")
+
+        app.diagnostic_session_control(uds_mod.SESSION_TYPE.DEFAULT)
+        app.diagnostic_session_control(uds_mod.SESSION_TYPE.EXTENDED_DIAGNOSTIC)
+        time.sleep(0.7)
+        captured=s._capture_latest_native_030(panda)
+        replay=bytes.fromhex(captured["frame_hex"])
+        health_before=panda.can_health(s.CONTROL_BUS)
+        blocked_before=int(panda.health().get("safety_tx_blocked",0))
+        first_send_ns=int(captured["last_monotonic_ns"])+s.BOOTSTRAP_030_PERIOD_NS
+        bridge.start(replay,first_send_ns)
+
+        b=SimpleNamespace(target={"boot_f181_hex":EXPECTED_BOOT,"application_f181_hex":EXPECTED_APP})
+        boot_route,handoff=s._enter_programming_preserve_safety(b,panda,uds_mod,reappearance_timeout=8.0)
+        boot,boot_f181_hex,boot_f181_ascii,sid23=s._prepare_boot_client(panda,uds_mod,s.ROUTE,boot_route,expected_boot_f181_hex=EXPECTED_BOOT)
+        seed=s._security_access(boot,uds_mod,secret)
+        trigger_begin=time.monotonic_ns()
+        s._upload_and_trigger(panda,boot,uds_mod,s.ROUTE,payload,geometry=s.GEOMETRY)
+        trigger_sent=time.monotonic_ns()
+
+        changed=_poll_first_changed_030(panda,replay,timeout=2.0)
+        # Stop stale traffic immediately on the first genuinely different 0x030.
+        # If none appears, still stop after the bounded observation window and
+        # preserve the remaining application/FRC/telemetry evidence instead of
+        # throwing it away.
+        changed_seen_ns=time.monotonic_ns()
+        bridge_result=bridge.stop(); bridge=None
+        if changed is not None:
+            changed["bridge_stop_ms_after_observation"]=(time.monotonic_ns()-changed_seen_ns)/1e6
+            immediate=s._make_uds_client(panda,uds_mod,s.ROUTE,timeout=0.08,response_pending_timeout=0.12)
+            imm_hex,imm_ascii=s._read_f181(immediate,uds_mod)
+            changed["application_f181_immediately_after"]={"hex":imm_hex,"ascii":imm_ascii}
+            changed["ms_after_trigger_send"]=(changed["monotonic_ns"]-trigger_sent)/1e6
+            changed["ms_after_last_native_pre_handoff"]=(changed["monotonic_ns"]-int(captured["last_monotonic_ns"]))/1e6
+
+        app_return=s._wait_application_on_panda(b,panda,uds_mod,timeout=3.0)
+        if not app_return["ok"]: raise ProbeError(f"application did not return after early030 resident: {app_return}")
+        app_client=s._make_uds_client(panda,uds_mod,s.ROUTE,timeout=0.3,response_pending_timeout=1.0)
+        # Exact F33 application rejects SID23 in default session. The telemetry
+        # read is after stale replay has stopped and after exact app F181 return,
+        # so enter EXTENDED here without changing the startup timing under test.
+        app_client.diagnostic_session_control(uds_mod.SESSION_TYPE.EXTENDED_DIAGNOSTIC)
+        telemetry_raw=s._read_memory(app_client,uds_mod,EARLY030_TELEMETRY_ADDR,EARLY030_TELEMETRY_SIZE)
+        forced_trailer=telemetry_raw.hex()
+        observed_trailer=(bytes.fromhex(changed["frame_hex"])[28:32].hex() if changed is not None else None)
+        trailer_match=(observed_trailer is not None and forced_trailer != "00000000" and forced_trailer==observed_trailer)
+        early_030_telemetry={
+            "address":f"0x{EARLY030_TELEMETRY_ADDR:08X}",
+            "raw_hex":telemetry_raw.hex(),
+            "forced_trailer_hex":forced_trailer,
+            "first_observed_trailer_hex":observed_trailer,
+            "trailer_matches_first_non_replay":trailer_match,
+            "outside_resident": True,
+            "one_shot_proven_on_wire": trailer_match,
+        }
+
+        frc_after=s._read_frc_bootstrap_state(panda,uds_mod)
+        blocked_after=int(panda.health().get("safety_tx_blocked",0))
+        health_after=panda.can_health(s.CONTROL_BUS)
+        validity_errors=[]
+        if bridge_result["missed_slots"]!=0:
+            validity_errors.append(f"stale bridge missed {bridge_result['missed_slots']} native 10-ms slots")
+        if blocked_after!=blocked_before:
+            validity_errors.append(f"Panda TX blocked delta {blocked_before}->{blocked_after}")
+        if changed is None:
+            validity_errors.append("no non-replay 0x030 observed in bounded post-trigger window")
+        if not early_030_telemetry["one_shot_proven_on_wire"]:
+            validity_errors.append("resident one-shot was not proven as the first non-replay 0x030 on wire")
+        valid=not validity_errors
+        if not valid:
+            verdict="invalid_or_unproven_early_030"
+        else:
+            verdict=("early_fresh_030_preserved_frc_drcc" if s._healthy_frc_drcc_baseline(frc_after)
+                     else "frc_acc_unavailable_despite_proven_early_fresh_030")
+        return {
+            "schema":SCHEMA,"success":valid,"target":meta["target"],"nrtd_guard":nrtd,
+            "f181_before":{"hex":f181_hex,"ascii":f181_ascii},"frc_before":frc_before,
+            "captured_native_030":captured,"stale_bridge":bridge_result,
+            "programming_handoff":handoff,"boot":{"f181_hex":boot_f181_hex,"f181_ascii":boot_f181_ascii,"sid23_probe":sid23},
+            "security_access":{"seed_length":len(seed),"secret_value_recorded":False,"secret_source":secret_source},
+            "trigger":{"begin_monotonic_ns":trigger_begin,"sent_monotonic_ns":trigger_sent},
+            "first_non_replay_030":changed,"early_030_telemetry":early_030_telemetry,
+            "application_return":app_return,"frc_after":frc_after,
+            "valid":valid,"validity_errors":validity_errors,"verdict":verdict,
+            "can_health_before":health_before,"can_health_after":health_after,"safety_tx_blocked_delta":blocked_after-blocked_before,
+            "persistent_flash_writes":False,"dtc_clear_performed":False,
+        }
+    finally:
+        if bridge is not None:
+            try: bridge.abort()
+            except Exception: pass
+        try: panda.set_safety_mode(s.ELM327_SAFETY_MODE,s.ROUTE.elm327_param)
+        finally: panda.close()
+
+def main() -> int:
+    ap=argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--bundle-dir",type=Path,required=True)
+    ap.add_argument("--execute",action="store_true")
+    ap.add_argument("--output",type=Path)
+    a=ap.parse_args()
+    if not a.execute:
+        print(json.dumps({"schema":SCHEMA,"execute_required":True,"bundle_dir":str(a.bundle_dir)},indent=2)); return 0
+    try: result=run(a.bundle_dir)
+    except Exception as exc:
+        result={"schema":"camry-f33-early030-bootstrap-probe-failure-v1","success":False,"error":f"{type(exc).__name__}: {exc}"}
+        if a.output:
+            a.output.parent.mkdir(parents=True,exist_ok=True); a.output.write_text(json.dumps(result,indent=2,sort_keys=True)+"\n")
+        print(json.dumps(result,indent=2,sort_keys=True)); return 2
+    if a.output:
+        a.output.parent.mkdir(parents=True,exist_ok=True); a.output.write_text(json.dumps(result,indent=2,sort_keys=True)+"\n")
+    print(json.dumps(result,indent=2,sort_keys=True)); return 0 if result.get("valid", True) else 2
+
+if __name__=="__main__": raise SystemExit(main())

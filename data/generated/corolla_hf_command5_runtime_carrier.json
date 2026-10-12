@@ -49,7 +49,7 @@
   },
   "runtime_candidates": {
     "fixed_b6_command5_proxy": {
-      "binary": "exploit/ephemeral_runtime/audited/corolla_hf_command5_proxy.bin",
+      "binary": "tools/targets/corolla/research/ram_runtime/audited/corolla_hf_command5_proxy.bin",
       "busy_behavior": "shared-driver busy result 2 leaves request_state=1 so the next foreground iteration retries; no command-7 abort primitive is called",
       "dispatcher": "0x00082750",
       "done_flag": "0xFEBF1280",
@@ -64,7 +64,7 @@
       "status_flag": "0xFEBF1281"
     },
     "inert_canary": {
-      "binary": "exploit/ephemeral_runtime/audited/corolla_hf_runtime_canary.bin",
+      "binary": "tools/targets/corolla/research/ram_runtime/audited/corolla_hf_runtime_canary.bin",
       "entry_offset": 0,
       "headroom": 166,
       "heartbeat_address": "0xFEBFFB80",
@@ -87,7 +87,7 @@
   "schema": "corolla-hf-command5-runtime-carrier-v1",
   "sources": {
     "canary_audit": {
-      "path": "exploit/ephemeral_runtime/audited_corolla_hf_canary_build.json",
+      "path": "tools/targets/corolla/research/ram_runtime/audited/audited_corolla_hf_canary_build.json",
       "sha256": "b9dd554e2c9d77c3337d0e8a6aca3e76c65ccc33c2938f03e1e52cbb00e65075"
     },
     "command5_portability": {
@@ -95,7 +95,7 @@
       "sha256": "04ccb290562ce1ccb4372ddf372f8951ea73088f237d0aa6b328d240c6113e55"
     },
     "proxy_audit": {
-      "path": "exploit/ephemeral_runtime/audited_corolla_hf_command5_proxy_build.json",
+      "path": "tools/targets/corolla/research/ram_runtime/audited/audited_corolla_hf_command5_proxy_build.json",
       "sha256": "3fb1b4842bc612017d0790491fdc9559a943160be595db6308ee79bcccc87887"
     },
     "ram_exec_requirements": {
@@ -103,8 +103,8 @@
       "sha256": "b511b8f98f155469c8cd208d1dcb03da75298174f8fe52c4937290ef3cb004f8"
     },
     "runtime_builder": {
-      "path": "exploit/ephemeral_runtime/build_corolla_hf_command5_carrier.py",
-      "sha256": "59a1ecc3915e9d641e231de9c0de138a188359bf0ba3432d271120fddeb6b4bb"
+      "path": "tools/targets/corolla/research/ram_runtime/build_corolla_hf_command5_carrier.py",
+      "sha256": "a86adc89e3af84f048fdfbaf6818a2030a87d8870cd72f26bbe0d9efc40aa577"
     },
     "static_evidence": {
       "path": "data/generated/corolla_hf_command5_runtime_carrier_evidence.json",

@@ -164,7 +164,7 @@ def cmd_ram_build(args: argparse.Namespace) -> int:
         command.extend(("--output-dir", str(args.out)))
     if args.json:
         command.append("--json")
-    return _run_path(ROOT / "exploit/ephemeral_runtime/build_tss3_request_signer.py", command)
+    return _run_path(ROOT / "tools/targets/tss3/builders/build_tss3_request_signer.py", command)
 
 
 def cmd_ram_onboard(args: argparse.Namespace) -> int:

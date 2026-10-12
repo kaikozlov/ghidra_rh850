@@ -28,9 +28,9 @@ Techstream online flow is in
 not yet proven.
 
 The RAM-only fail-stock alternative to the persistent SecOC patch is assessed in
-[ephemeral-secoc-bypass.md](ephemeral-secoc-bypass.md). Its current architecture
+[ephemeral-secoc-bypass.md](ephemeral-secoc-bypass.md). That research architecture
 uses a callback-free retained foreground scheduler and stock COM delivery; the
-tracked 704-byte runtime is under `exploit/ephemeral_runtime/` and remains
+tracked 704-byte runtime is under `tools/targets/tss3/research/ram_runtime/` and remains
 unvalidated on hardware.
 
 ## Important distinctions

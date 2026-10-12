@@ -11,7 +11,7 @@ from unittest.mock import patch
 
 from tools import REPO_ROOT
 ROOT = REPO_ROOT
-from exploit.ephemeral_runtime import tss3_post_install_recovery as recovery
+import exploit.ram_runtime.tss3_post_install_recovery as recovery
 
 TARGET = recovery.RecoveryTarget(
     name="camry-8965F3307000",

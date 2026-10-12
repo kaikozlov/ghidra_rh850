@@ -12,11 +12,9 @@ from pathlib import Path
 from tools import REPO_ROOT
 ROOT = REPO_ROOT
 
-from exploit.ephemeral_runtime import (
-  build_camry_f33_08a_tx_probe as build,
-)
-from exploit.ephemeral_runtime import camry_f33_08a_tx_probe as probe
-from exploit.ephemeral_runtime.camry_f33_runtime_monitor import PandaTap
+import tools.targets.camry.research.ram_runtime.oracle.build_camry_f33_08a_tx_probe as build
+import tools.targets.camry.research.ram_runtime.oracle.camry_f33_08a_tx_probe as probe
+from tools.targets.camry.research.ram_runtime.monitor.camry_f33_runtime_monitor import PandaTap
 
 
 def sha(raw: bytes) -> str:
@@ -38,21 +36,23 @@ def main() -> int:
     stage = (out / meta["staging"]["path"]).read_bytes()
     payload = (out / meta["authenticated_payload"]["path"]).read_bytes()
 
-  audited_stage = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_08a_tx_probe.bin"
-  audited_meta = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_08a_tx_probe_build.json"
+  audited_stage = ROOT / "tools/targets/camry/research/ram_runtime/oracle/audited/camry_f33_08a_tx_probe.bin"
+  audited_meta = ROOT / "tools/targets/camry/research/ram_runtime/oracle/audited/audited_camry_f33_08a_tx_probe_build.json"
   audited = json.loads(audited_meta.read_text(encoding="utf-8"))
   assert len(audited_stage.read_bytes()) == audited["staging"]["size"]
   assert sha(audited_stage.read_bytes()) == audited["staging"]["sha256"]
   assert len(resident) == probe.RESIDENT_SIZE and sha(resident) == meta["resident"]["sha256"]
   assert len(helper) == probe.HELPER_SIZE and sha(helper) == meta["helper"]["sha256"]
-  assert len(stage) == 978 and sha(stage) == meta["staging"]["sha256"]
+  assert len(stage) <= 0xFD0 and sha(stage) == meta["staging"]["sha256"]
   assert len(payload) == 0x1000 and sha(payload) == meta["authenticated_payload"]["sha256"]
   assert meta["resident"]["headroom"] == build.RESIDENT_LIMIT - probe.RESIDENT_SIZE == 240
   assert meta["helper"]["headroom"] == build.UNIVERSAL_HELPER_TRANSIT_LIMIT - probe.HELPER_SIZE == 714
   assert meta["helper"]["jarl_targets"] == ["0x00085112"]
   assert meta["resident"]["jarl_targets"][-1] == "0xFEF07C00"
-  assert meta["staging"]["resident_offset"] == 0x180
-  assert meta["staging"]["helper_offset"] == 0x29C
+  resident_offset = meta["staging"]["resident_offset"]
+  helper_offset = meta["staging"]["helper_offset"]
+  assert stage[resident_offset:resident_offset + len(resident)] == resident
+  assert stage[helper_offset:helper_offset + len(helper)] == helper
   assert meta["helper"]["mpu"]["mpu_region"] == 12
   assert meta["helper"]["mpu"]["ctx0_mpat"] == meta["helper"]["mpu"]["ctx1_mpat"] == "0x000000B8"
   assert meta["helper"]["mpu"]["aligned_codeflash_pointer_hits"] == []

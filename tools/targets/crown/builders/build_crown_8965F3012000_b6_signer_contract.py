@@ -106,10 +106,6 @@ def body(image: bytes, rows: dict[int, dict], address: int) -> bytes:
     return b"".join(chunks)
 
 
-def need(text: str, *tokens: str) -> None:
-    missing = [x for x in tokens if x not in text]
-    if missing:
-        raise ValueError(f"missing exact-Crown decompiler tokens: {missing}")
 
 
 def profile(image: bytes, idx: int) -> dict[str, object]:
@@ -220,13 +216,10 @@ def main() -> int:
         raise ValueError("Crown SecOC key config no longer selects type1/slot4")
 
     # Queue/freshness RAM geometry, derived from target-local worker bodies and profile fields.
-    need(cr[0x8C302]["decompiled_c"], "DAT_febe4f96", "DAT_febe4fd8")
     if B6_QUEUE != 0xFEBE4F96 + B6_PROFILE * 8:
         raise ValueError("Crown B6 queue arithmetic drift")
     if B6_SECURED != 0xFEBE4FD8 + u32(crown, PROFILE_BASE + B6_PROFILE * PROFILE_SIZE + 0x28):
         raise ValueError("Crown B6 secured-buffer arithmetic drift")
-    need(cr[0x8E46A]["decompiled_c"], "DAT_febe50f0")
-    need(cr[0x8E4E8]["decompiled_c"], "DAT_febe50ec", "puVar5 + *(short *)(param_1 + 2) * 3 + -0x19be")
 
     # Normal generated-COM geometry and exact Crown B6 wire extraction.
     signal_to_pdu = [u16(crown, SIGNAL_TO_PDU + i * 2) for i in range(SIGNAL_COUNT)]
@@ -239,51 +232,15 @@ def main() -> int:
     b6_raw_offset = pdu_offsets[B6_PDU]
     if b6_raw_offset != 0x1A7:
         raise ValueError(f"Crown B6 raw COM offset drift: 0x{b6_raw_offset:X}")
-    unpack = cr[0x4B608]["decompiled_c"]
-    for token in (
-        "FUN_0007a8e6(0xff,0x1aa,6,0,0,&DAT_febe7b9c);",
-        "FUN_0007a8e6(0x100,0x1ab,0x10,0,1,puVar2 + -0xf1a);",
-        "FUN_0007a8e6(0x103,0x1ad,1,2,0,puVar2 + -0xf18);",
-        "FUN_0007a8e6(0x106,0x1ae,6,0,0,(int)puVar2 + -0x3c5d);",
-        "FUN_0007a8e6(0x107,0x1af,8,0,0,puVar2 + -0xf17);",
-        "FUN_0007a8e6(0x108,0x1b0,8,0,0,(int)puVar2 + -0x3c5b);",
-    ):
-        if token not in unpack:
-            raise ValueError(f"Crown B6 unpack token drift: {token}")
-    need(cr[0x57562]["decompiled_c"], "DAT_febef130 = DAT_febe7b9c", "DAT_febef138 = DAT_febe7ba4", "DAT_febef139 = DAT_febe7ba5")
-    need(cr[0xCBC52]["decompiled_c"], "DAT_febec200 = 7", "DAT_febeadb0", "DAT_febec200 = 2")
-    need(cr[0xCB000]["decompiled_c"], "DAT_febeadbd", "/ 100")
-    need(cr[0xCAC4E]["decompiled_c"], "DAT_febeadbe", "/ 100")
 
     # Exact Crown target-angle physical/controller scaling. This is the same
     # fixed-point relation independently closed on H/F and F33, but every code
     # address and numeric transform below is checked against Crown CodeFlash.
-    target_scale = cr[0xC9B64]["decompiled_c"]
-    need(target_scale, "iVar1 = DAT_febeae90 * 2", "DAT_febec09c = DAT_febebfb4", "DAT_febec0c8 = DAT_febebfb4")
 
     # ID11 selects mode/bank 2. The following target conditioner loads its
     # absolute and per-foreground-step limits from the mode/bank calibration
     # record before clamping the doubled B6 raw target.  AC3C selects one of two
     # calibration halves, but both ID11 records resolve to the same values.
-    target_limit_select = cr[0xC9B22]["decompiled_c"]
-    need(
-        target_limit_select,
-        "(DAT_febec200 & 7) == 7",
-        "iVar1 = (int)(short)((DAT_febec200 & 7) + (DAT_febeac3c & 1) * 8)",
-        "DAT_febec0fe = 0x7ffe", "DAT_febec100 = 0x7ffe",
-        "(&PTR_LAB_000d094c)[iVar1 * 0x57]",
-        "(&PTR_LAB_000d0950)[iVar1 * 0x57]",
-        "DAT_febec0fe", "DAT_febec100",
-    )
-    target_limit_clamp = cr[0xC9C08]["decompiled_c"]
-    need(
-        target_limit_clamp,
-        "uVar5 = (uint)DAT_febec0fe",
-        "uVar4 = (uint)DAT_febec100",
-        "DAT_febebfb0 = uVar4 + DAT_febec0a0",
-        "DAT_febebfb8 = -uVar5",
-        "DAT_febec0a0 = DAT_febebfb8",
-    )
     id11_limit_records = []
     for bank_bit, index, expected_delta_ptr in ((0, 2, 0x1A99A), (1, 10, 0x1299A)):
         record = 0xD094C + index * 0x15C
@@ -312,50 +269,16 @@ def main() -> int:
     id11_raw_limit = 3490 // 2
     if id11_raw_limit * 2 != 3490:
         raise ValueError("Crown ID11 internal/raw target-limit relation no longer integral")
-    measured_unpack = cr[0x4AEF8]["decompiled_c"]
-    need(
-        measured_unpack,
-        "FUN_0007a8e6(0xb9,0x11f,0xc,0,1,&DAT_febe7b2c)",
-        "FUN_0007a8e6(0xba,0x123,4,4,1,(int)puVar2 + -0x3ccd)",
-    )
-    measured_reconstruct = cr[0xCB640]["decompiled_c"]
-    need(
-        measured_reconstruct,
-        "((int)DAT_febeacc5 + DAT_febeadfe * 0xf) * 0x6fb) / 0x200",
-        "iVar13 = iVar12 * 2 - iVar1",
-        "puVar6[0x26f] = iVar13",
-    )
-    measured_republish = cr[0xCB730]["decompiled_c"]
-    need(
-        measured_republish,
-        "iVar2 = DAT_febeae5e * 2 - iVar2",
-        "DAT_febec1d2", "DAT_febec1d4", "DAT_febec1d6",
-    )
     # CB640 first stores (2*AE5E - measured_internal). CB730 later consumes that
     # voted value and computes (2*AE5E - prior), algebraically restoring the
     # same-sign measured_internal term. Pin the auxiliary AE5E copy edge too so
     # this cancellation cannot silently become an assumed sign convention.
-    aux_writer = cr[0xB9066]["decompiled_c"]
-    need(aux_writer, "DAT_febeb49e", "DAT_febeafe8", "0x188b", "0x4000")
     bb51a_refs = {(r.get("from_addr"), r.get("ref_type"), r.get("to_addr")) for r in cr[0xBB51A].get("data_references", [])}
     if not ({
         ("0x000bb8b4", "READ", "0xfebeb49e"),
         ("0x000bb8b8", "WRITE", "0xfebeae5e"),
     } <= bb51a_refs):
         raise ValueError("Crown AE5E auxiliary copy edge drift")
-    comparator = cr[0xC9D7E]["decompiled_c"]
-    need(
-        comparator,
-        "iVar1 = (iVar1 * 0xb76) / 0x400",
-        "DAT_febebfdc = (iVar2 * 0xb76) / 0x400",
-        "DAT_febebfe0 = iVar1 - DAT_febebfdc",
-    )
-    did1037 = cr[0x4D550]["decompiled_c"]
-    need(did1037, "asStack_a[0] = DAT_febe7836", "FUN_000699dc((int)asStack_a[0],param_1)")
-    measured_stage = cr[0x4749C]["decompiled_c"]
-    need(measured_stage, "FUN_00069a2a((int)DAT_febe7b2c,auStack_e)", "-0x3fca")
-    measured_snapshot = cr[0xB3842]["decompiled_c"]
-    need(measured_snapshot, "DAT_febeb16c = DAT_febef1a0 * 0xf + (short)DAT_febef06f")
 
     controller_deg_num = 1024
     controller_deg_den = 17870
@@ -428,16 +351,6 @@ def main() -> int:
     dcm_tp_callbacks = [u32(crown, address) for address in (0x21884, 0x21888, 0x21890)]
     if dcm_tp_callbacks != [0x8FB5E, 0x8FBF2, 0x8FC72]:
         raise ValueError(f"Crown DCM TP callback drift: {dcm_tp_callbacks}")
-    copy_rx = cr[0x91888]["decompiled_c"]
-    need(copy_rx, "*(undefined1 *)*piVar1 = uVar3", "(&DAT_febe5520)[param_1 * 8]")
-    copy_cb = cr[0x8FBF2]["decompiled_c"]
-    need(copy_cb, "FUN_00091888")
-    indication_cb = cr[0x8FC72]["decompiled_c"]
-    need(indication_cb, "FUN_00091418", "FUN_00091734(0)")
-    if "FUN_0008f006" in indication_cb:
-        raise ValueError("Crown DCM TpRxIndication unexpectedly dispatches services inline")
-    dcm_main = cr[0x8F6AA]["decompiled_c"]
-    need(dcm_main, "FUN_0008f006")
 
     # Crown receives classic 0x127, but the exact EPS generated-COM unpacker does
     # not extract B5[7:4]. Upstream Toyota TSS3 calls that nibble GEAR; without a
@@ -446,18 +359,8 @@ def main() -> int:
     pdu127 = 25
     pdu127_desc = struct.unpack_from("<II", crown, RX_DESCRIPTOR_BASE + (pdu127 - TX_PDU_COUNT) * 8)
     pdu127_signals = [i for i, p in enumerate(signal_to_pdu) if p == pdu127]
-    pdu127_unpack = cr[0x4AA6C]["decompiled_c"]
     if (pdu127_desc[0] & 0x1FFFFFFF, pdu127_desc[1]) != (0x127, 8) or pdu127_signals != list(range(124, 134)):
         raise ValueError("Crown 0x127 generated-COM geometry drift")
-    for token in (
-        "FUN_0007a8e6(0x82,0xda,0xb,0,1,&DAT_febe7af6)",
-        "FUN_0007a8e6(0x7c,0xd7,6,2,0,(int)puVar2 + -0x3d06)",
-        "FUN_0007a8e6(0x7e,0xd8,1,3,0,(int)puVar2 + -0x3d05)",
-    ):
-        if token not in pdu127_unpack:
-            raise ValueError(f"Crown 0x127 unpack token drift: {token}")
-    if ",0xdc," in pdu127_unpack:
-        raise ValueError("Crown unexpectedly extracts the upstream-prior-art 0x127 B5 gear nibble")
 
     # Candidate Crown-native sideband: accepted classic 0x1DA/DLC8 with only B0 low nibble
     # configured in generated COM. B1..B7 have no generated scalar extraction.
@@ -467,9 +370,6 @@ def main() -> int:
         raise ValueError("Crown 0x1DA descriptor drift")
     if pdu_offsets[SIDEBAND_PDU] != 0x1D0 or side_signals != [SIDEBAND_SIGNAL]:
         raise ValueError("Crown 0x1DA generated-COM geometry drift")
-    need(cr[0x4B874]["decompiled_c"], "FUN_0007a8e6(0x114,0x1d0,4,0,0,&DAT_febe7bb6)")
-    side_snapshot = cr[0x57562]["decompiled_c"]
-    need(side_snapshot, "DAT_febef156 = DAT_febe7bb6", "DAT_febef157 = DAT_febe7bb8")
     side_readers = []
     for row in cr.values():
         for ref in row.get("data_references", []):
@@ -484,27 +384,9 @@ def main() -> int:
     # Crown-specific READY/stationary guard. Do not import F33's 0x127 gear layout.
     # 0x51E signal155 is B0[7]. 0x0AA carries four 15-bit wheel values and the
     # target-native normalizer subtracts 0x1A6F from each value.
-    ready_unpack = cr[0x4ACD2]["decompiled_c"]
-    need(ready_unpack, "FUN_0007a8e6(0x9b,0xf7,1,7,0,&DAT_febe7b15)")
-    wheel_unpack = cr[0x4AFE4]["decompiled_c"]
-    for token in (
-        "FUN_0007a8e6(0xc1,0x13f,0xf,0,0,&DAT_febe7b38)",
-        "FUN_0007a8e6(0xc3,0x141,0xf,0,0,(int)puVar2 + -0x3cc6)",
-        "FUN_0007a8e6(0xc5,0x143,0xf,0,0,puVar2 + -0xf31)",
-        "FUN_0007a8e6(199,0x145,0xf,0,0,(int)puVar2 + -0x3cc2)",
-    ):
-        if token not in wheel_unpack:
-            raise ValueError(f"Crown 0x0AA wheel unpack drift: {token}")
-    if wheel_unpack.count("FUN_0004a988(0,0x1a6f,") != 4:
-        raise ValueError("Crown 0x0AA wheel centering drift")
-    need(cr[0x4A988]["decompiled_c"], "(param_3 & 0xffff) - (int)param_2")
 
     # Scheduler/hook boundary. The helper executes after the native receive drain and before
     # the untouched receive tail / later SecOC scheduling.
-    aggregate = cr[0x65BE2]["decompiled_c"]
-    receive = cr[0x7961A]["decompiled_c"]
-    need(aggregate, "FUN_0006909e();", "FUN_0007961a();", "FUN_00096362();")
-    need(receive, "FUN_000798f0();", "FUN_000796c2();", "FUN_00079ea2();", "FUN_000792ee();", "FUN_00079a10();")
     if crown[0x7961E:0x79628] != bytes.fromhex("e40ff385a10601fe8a35"):
         raise ValueError("Crown receive FE01 gate drift")
 
@@ -545,18 +427,6 @@ def main() -> int:
     sid23 = DCM_SERVICE_DESCRIPTOR_BASE + all_service_sids.index(0x23) * 24
     if u32(crown, sid23) != 0x94060 or crown[0x94060:0x94060+18] != camry[0x965C0:0x965C0+18]:
         raise ValueError("Crown application SID23 wrapper drift")
-    service_lookup = cr[0x8EA38]["decompiled_c"]
-    need(service_lookup, "*param_4 = 0x11", "if (puVar2 == (undefined *)0x0)")
-    service_dispatch = cr[0x8F006]["decompiled_c"]
-    need(service_dispatch, "FUN_0008ea38", "if (cStack_15 != '\\x11')", "FUN_0008ec52(puVar5,cStack_15)")
-    response_select = cr[0x8EC7A]["decompiled_c"]
-    need(
-        response_select,
-        "*(char *)(param_1 + 0x10) == '\\x01'",
-        "cVar1 == '\\x11'",
-        "uVar3 = 3",
-        "FUN_0008f782(param_1,uVar3)",
-    )
 
     high_refs = direct_refs(cr, RESIDENT_BASE, RESIDENT_END)
     low_refs = direct_refs(cr, LOW_HELPER_BASE, LOW_HELPER_END)

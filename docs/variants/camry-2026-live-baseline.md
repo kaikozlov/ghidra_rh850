@@ -2688,10 +2688,10 @@ with `--require-bridge`. Bridge queue/zero-MAC/injection counts test the native
 PduR44 handoff directly. No nonzero steering offset is allowed before the same
 run reports `ADMITTED`.
 
-Deterministic evidence: `exploit/ephemeral_runtime/camry_f33_b6_bridge.c`,
-`exploit/ephemeral_runtime/build_camry_f33_b6_bridge.py`,
-`exploit/ephemeral_runtime/audited/camry_f33_b6_bridge.bin`,
-`exploit/ephemeral_runtime/audited_camry_f33_b6_bridge_build.json`, and
+Deterministic evidence: `tools/targets/camry/research/ram_runtime/b6/camry_f33_b6_bridge.c`,
+`tools/targets/camry/research/ram_runtime/b6/build_camry_f33_b6_bridge.py`,
+`tools/targets/camry/research/ram_runtime/b6/audited/camry_f33_b6_bridge.bin`,
+`tools/targets/camry/research/ram_runtime/b6/audited/audited_camry_f33_b6_bridge_build.json`, and
 `tests/targets/camry/verify_camry_8965F3307000_b6_receive_bridge.py`.
 
 ## 41. `0x08A` placement/authentication bounds: FRC publisher closed; internal signer split remains open (VAR-091 / later source correction)
@@ -5913,7 +5913,7 @@ The boundary windows deliberately repeat across adjacent phases (`5364`, `F1F8`,
 `CB38`, `AC28/CC60`, `EE40C`) so a phase change does not create an observational gap.
 Exact aligned watch addresses and first-divergence interpretations are generated in
 `stationary_monitor_phases` of `data/generated/camry_f33_b6_end_to_end.json` and copied to
-`exploit/ephemeral_runtime/camry_f33_runtime_monitor_runbook.md`.
+`tools/targets/camry/research/ram_runtime/monitor/camry_f33_runtime_monitor_runbook.md`.
 
 That makes the next failure classification mechanical.  Queue unchanged means the
 problem is before/at F33 ingress. Queue changes but route44 does not means the remaining
@@ -6322,7 +6322,7 @@ D7 advances + complete host TX returns + no ID63 marker
 ```
 
 At this historical checkpoint the observer was static-ready and **not yet live-qualified**. The build is pinned by
-`exploit/ephemeral_runtime/build_camry_f33_b6_midaggregate_observer.py`; deterministic static,
+`tools/targets/camry/research/ram_runtime/b6/build_camry_f33_b6_midaggregate_observer.py`; deterministic static,
 ABI, statistics, and classification checks are in
 `tests/targets/camry/verify_camry_f33_b6_midaggregate_observer.py`.
 Section 70.5 records the completed live experiment and the replacement of this
@@ -6529,9 +6529,9 @@ at most twice and reports it as transient/ambiguous. Any negative result leaves 
 permission unresolved; it does not by itself localize failure to ICU-S policy/lifecycle.
 
 The deterministic builder, audited stage, host client, and field launcher are
-`exploit/ephemeral_runtime/build_camry_f33_command5_probe.py`,
-`exploit/ephemeral_runtime/audited/camry_f33_command5_probe.bin`,
-`exploit/ephemeral_runtime/camry_f33_command5_probe.py`, and packaged `f33-sign`.
+`tools/targets/camry/research/ram_runtime/command5/build_camry_f33_command5_probe.py`,
+`tools/targets/camry/research/ram_runtime/command5/audited/camry_f33_command5_probe.bin`,
+`tools/targets/camry/research/ram_runtime/command5/camry_f33_command5_probe.py`, and packaged `f33-sign`.
 `tests/targets/camry/verify_camry_f33_b6_stationary_probe.py` pins the firmware records, call targets, linked
 identities, mailbox decoder, and opendbc-compatible authenticated-domain construction.
 

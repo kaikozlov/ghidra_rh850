@@ -16,8 +16,8 @@ or upload procedure was changed.
 
 ## 1. Post-startup resident attestation contradicts the Corolla memory lifecycle
 
-Source: `exploit/ephemeral_runtime/tss3_unified_b6_signer.py:392-401,550-562` and
-`exploit/ephemeral_runtime/tss3_unified_b6_signer_resident.S:47-64` at the reviewed
+Source: `tools/targets/tss3/research/ram_runtime/tss3_unified_b6_signer.py:392-401,550-562` and
+`tools/targets/tss3/research/ram_runtime/tss3_unified_b6_signer_resident.S:47-64` at the reviewed
 analysis revision.
 
 The host Session constructor compares a hash over the entire resident memory

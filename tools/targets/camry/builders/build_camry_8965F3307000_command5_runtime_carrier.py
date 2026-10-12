@@ -22,13 +22,13 @@ REPO = REPO_ROOT
 
 from tools.targets.camry.support.camry_f33_corpus import IMAGE, IMAGE_SHA256
 CODEFLASH_ART = REPO / "data/generated/camry_8965F3307000_codeflash.json"
-RUNTIME_BUILDER = REPO / "exploit/ephemeral_runtime/build_camry_f33_command5_carrier.py"
-PROXY_SOURCE = REPO / "exploit/ephemeral_runtime/corolla_hf_command5_proxy.c"
-CANARY_SOURCE = REPO / "exploit/ephemeral_runtime/camry_f33_runtime_canary.c"
-PROXY_AUDIT = REPO / "exploit/ephemeral_runtime/audited_camry_f33_command5_proxy_build.json"
-CANARY_AUDIT = REPO / "exploit/ephemeral_runtime/audited_camry_f33_runtime_canary_build.json"
-PROXY_BIN = REPO / "exploit/ephemeral_runtime/audited/camry_f33_command5_proxy.bin"
-CANARY_BIN = REPO / "exploit/ephemeral_runtime/audited/camry_f33_runtime_canary.bin"
+RUNTIME_BUILDER = REPO / "tools/targets/camry/research/ram_runtime/bootstrap/build_camry_f33_command5_carrier.py"
+PROXY_SOURCE = REPO / "tools/targets/corolla/research/ram_runtime/corolla_hf_command5_proxy.c"
+CANARY_SOURCE = REPO / "tools/targets/camry/research/ram_runtime/bootstrap/camry_f33_runtime_canary.c"
+PROXY_AUDIT = REPO / "tools/targets/camry/research/ram_runtime/bootstrap/audited/audited_camry_f33_command5_proxy_build.json"
+CANARY_AUDIT = REPO / "tools/targets/camry/research/ram_runtime/bootstrap/audited/audited_camry_f33_runtime_canary_build.json"
+PROXY_BIN = REPO / "tools/targets/camry/research/ram_runtime/bootstrap/audited/camry_f33_command5_proxy.bin"
+CANARY_BIN = REPO / "tools/targets/camry/research/ram_runtime/bootstrap/audited/camry_f33_runtime_canary.bin"
 RAMREQ = REPO / "data/variant_ram_exec_requirements.json"
 HIGH_TAIL = f33.CAPTURE / "raw-20260826/high-tail-20260826.json"
 LOW_RETENTION = f33.CAPTURE / "raw-20260826/stock-retention-20260826.json"
@@ -97,7 +97,8 @@ def validate_audit(audit: dict, binary: Path, source: Path, *, kind: str, size: 
     shell = audit["shellcode"]
     need(shell["size"] == size and shell["sha256"] == digest and shell["headroom"] == 776 - size, f"{kind} shell identity drift")
     need(binary.stat().st_size == size and sha_file(binary) == digest, f"{kind} audited binary drift")
-    need(audit["source"] == {"path": str(source.relative_to(REPO)), "sha256": sha_file(source)}, f"{kind} source binding drift")
+    # Audit paths identify the original build; relocation must preserve source bytes.
+    need(audit["source"]["sha256"] == sha_file(source), f"{kind} source bytes drift")
     cc = audit["compile_contract"]
     need(cc["architecture"] == "v850e3v5" and cc["entry_offset"] == 0 and cc["relocations"] == 0, f"{kind} entry/relocation drift")
     need(cc["candidate_base"] == "0xFEBF0000" and cc["candidate_end_exclusive"] == "0xFEBF0308" and cc["candidate_limit"] == 776, f"{kind} carrier geometry drift")

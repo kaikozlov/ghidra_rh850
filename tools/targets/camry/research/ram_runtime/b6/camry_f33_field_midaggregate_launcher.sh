@@ -1,0 +1,108 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Field launcher for the ingress observer carried by the live-qualified
+# high-tail loader. The host owns Panda exclusively for every live operation.
+KIT_ROOT="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)"
+PY="${F33_PYTHON:-/usr/local/venv/bin/python}"
+OPENPILOT_ROOT="${F33_OPENPILOT_ROOT:-/data/openpilot}"
+TOOL="${F33_INGRESS_HELPER_PATH:-$KIT_ROOT/runtime/tools/targets/camry/research/ram_runtime/b6/camry_f33_b6_ingress_helper.py}"
+PAYLOAD="${F33_INGRESS_PAYLOAD_PATH:-$KIT_ROOT/ram_payloads/camry_f33_b6_ingress_helper_payload.bin}"
+HELPER="${F33_INGRESS_HELPER_BIN_PATH:-$KIT_ROOT/ram_payloads/camry_f33_b6_ingress_helper_helper_padded.bin}"
+META="${F33_INGRESS_META_PATH:-$KIT_ROOT/ram_payloads/camry_f33_b6_ingress_helper.json}"
+INSTALL_RECORD="${F33_INGRESS_INSTALL_RECORD:-/tmp/camry-f33-b6-ingress-install.json}"
+ARM_RECORD="${F33_INGRESS_ARM_RECORD:-/tmp/camry-f33-b6-ingress-arm.json}"
+SELFCHECK_RECORD="${F33_INGRESS_SELFCHECK_RECORD:-/tmp/camry-f33-b6-ingress-selfcheck.json}"
+MARKER_RECORD="${F33_INGRESS_MARKER_RECORD:-/tmp/camry-f33-b6-ingress-marker.json}"
+PANDA_LEASE_LIB="${F33_PANDA_LEASE_LIB:-$KIT_ROOT/runtime/exploit/ram_runtime/tss3_panda_lease.sh}"
+
+export PYTHONPATH="$OPENPILOT_ROOT:$KIT_ROOT/runtime"
+cd "$KIT_ROOT"
+die() { printf 'f33-ingress: %s\n' "$*" >&2; exit 2; }
+[[ -f "$PANDA_LEASE_LIB" ]] || die "Panda lease helper missing: $PANDA_LEASE_LIB"
+# shellcheck source=/dev/null
+source "$PANDA_LEASE_LIB"
+
+usage() {
+  cat <<'USAGE'
+usage: ./f33-ingress COMMAND [ARGS]
+
+NRTD / Park / stationary:
+  ./f33-ingress install
+
+Then transition directly to READY / Park / stationary without OFF:
+  ./f33-ingress load-arm
+  ./f33-ingress selfcheck [--duration-seconds N]
+  ./f33-ingress marker [--duration-seconds N] [--bus 0]
+
+Offline/read-only:
+  ./f33-ingress doctor
+  ./f33-ingress status
+
+Do not run marker unless selfcheck returns midaggregate_observer_selfcheck_pass.
+Full EPS OFF removes the resident/helper.
+USAGE
+}
+
+require_layout() {
+  [[ -x "$PY" ]] || die "Python unavailable: $PY"
+  [[ -d "$OPENPILOT_ROOT" ]] || die "openpilot root unavailable: $OPENPILOT_ROOT"
+  for path in "$TOOL" "$PAYLOAD" "$HELPER" "$META"; do [[ -f "$path" ]] || die "required file missing: $path"; done
+}
+
+run_bounded() {
+  local seconds="$1" rc
+  shift
+  set +e
+  timeout --signal=TERM --kill-after=2 "${seconds}s" "$PY" "$TOOL" --payload "$PAYLOAD" --helper "$HELPER" --meta "$META" "$@"
+  rc=$?
+  set -e
+  if [[ $rc -eq 124 || $rc -eq 137 ]]; then die "command exceeded ${seconds}s runtime bound"; fi
+  return "$rc"
+}
+
+doctor() {
+  require_layout
+  "$PY" - "$PAYLOAD" "$HELPER" "$META" <<'PY'
+import pathlib, sys
+from tools.targets.camry.research.ram_runtime.b6.camry_f33_b6_inline_signer import load_bundle
+b = load_bundle(payload=pathlib.Path(sys.argv[1]), helper=pathlib.Path(sys.argv[2]), meta=pathlib.Path(sys.argv[3]))
+assert b.meta.get("mode") == "ingress-observer"
+print("f33-ingress doctor: PASS")
+print(f"payload_sha256={b.meta['authenticated_payload']['sha256']}")
+print(f"helper_sha256={b.meta['helper']['padded_sha256']}")
+print(f"resident_sha256={b.resident_sha256}")
+PY
+}
+
+cmd="${1:-}"
+[[ -n "$cmd" ]] || { usage; exit 2; }
+shift || true
+case "$cmd" in
+  -h|--help|help) usage ;;
+  doctor) [[ $# -eq 0 ]] || die "doctor takes no arguments"; doctor ;;
+  install)
+    [[ $# -eq 0 ]] || die "install takes no arguments"
+    doctor >/dev/null; quiesce_panda_owner
+    run_bounded 30 install --execute --nrtd-confirmed --output "$INSTALL_RECORD"
+    ;;
+  load-arm)
+    [[ $# -eq 0 ]] || die "load-arm takes no arguments"
+    doctor >/dev/null; quiesce_panda_owner
+    run_bounded 20 load-arm --execute --parked-stationary-confirmed --output "$ARM_RECORD"
+    ;;
+  status)
+    [[ $# -eq 0 ]] || die "status takes no arguments"
+    doctor >/dev/null; quiesce_panda_owner
+    run_bounded 12 status --parked-stationary-confirmed
+    ;;
+  selfcheck)
+    doctor >/dev/null; quiesce_panda_owner
+    run_bounded 12 selfcheck "$@" --execute --parked-stationary-confirmed --output "$SELFCHECK_RECORD"
+    ;;
+  marker)
+    doctor >/dev/null; quiesce_panda_owner
+    run_bounded 12 marker "$@" --execute --parked-stationary-confirmed --output "$MARKER_RECORD"
+    ;;
+  *) die "unknown command '$cmd' (run ./f33-ingress --help)" ;;
+esac

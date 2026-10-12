@@ -9,14 +9,14 @@ from pathlib import Path
 from tools import REPO_ROOT
 ROOT = REPO_ROOT
 from exploit.common.payload_package import inspect_payload, package_shellcode
-from exploit.ephemeral_runtime import build_camry_f33_b6_bridge as builder
+import tools.targets.camry.research.ram_runtime.b6.build_camry_f33_b6_bridge as builder
 
-MOD = ROOT / "exploit/ephemeral_runtime/camry_f33_b6_bridge_install.py"
-AUDITED_BIN = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_b6_bridge.bin"
-AUDIT = ROOT / "exploit/ephemeral_runtime/audited_camry_f33_b6_bridge_build.json"
-BUILDER = ROOT / "exploit/ephemeral_runtime/build_camry_f33_b6_bridge.py"
+MOD = ROOT / "tools/targets/camry/research/ram_runtime/b6/camry_f33_b6_bridge_install.py"
+AUDITED_BIN = ROOT / "tools/targets/camry/research/ram_runtime/b6/audited/camry_f33_b6_bridge.bin"
+AUDIT = ROOT / "tools/targets/camry/research/ram_runtime/b6/audited/audited_camry_f33_b6_bridge_build.json"
+BUILDER = ROOT / "tools/targets/camry/research/ram_runtime/b6/build_camry_f33_b6_bridge.py"
 IMAGE = ROOT / "firmware/camry-8965F3307000/CodeFlash.bin"
-import exploit.ephemeral_runtime.camry_f33_b6_bridge_install as m
+import tools.targets.camry.research.ram_runtime.b6.camry_f33_b6_bridge_install as m
 
 audit = json.loads(AUDIT.read_text())
 blob = AUDITED_BIN.read_bytes()

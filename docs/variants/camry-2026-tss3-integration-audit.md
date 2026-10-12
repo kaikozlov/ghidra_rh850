@@ -185,7 +185,7 @@ Three nearby symptoms must remain separate:
 The next experiment is receiver-state localization, not tuning, another road
 drive, a new Panda permission, `0x08A` spoofing, or another persistent result
 patch. First qualify the ABI-preserving generic monitor exactly as specified by
-[the runtime-monitor runbook](../../exploit/ephemeral_runtime/camry_f33_runtime_monitor_runbook.md).
+[the runtime-monitor runbook](../../tools/targets/camry/research/ram_runtime/monitor/camry_f33_runtime_monitor_runbook.md).
 The older B6 observer and bridge are not valid substitutes: both use the
 ABI-corrupting `call0(address)` trampoline covered by CORR-167.
 

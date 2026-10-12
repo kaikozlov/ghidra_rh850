@@ -325,7 +325,7 @@ crypto_generate_driver_dispatch(
 ```
 
 The resident binary is built from
-`exploit/ephemeral_runtime/command5_proxy.c`. The pinned `v850-gcc` build is
+`tools/targets/tss3/research/ram_runtime/command5_proxy.c`. The pinned `v850-gcc` build is
 **546 bytes (`0x222`)**, leaving **230 bytes** unused in the verified
 `FEBF0000..FEBF0307` retained executable pocket, with entry offset zero and no
 relocations. A reset clears the resident pocket and returns the ECU to stock

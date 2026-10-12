@@ -8,8 +8,8 @@ import json
 from tools import REPO_ROOT
 ROOT = REPO_ROOT
 
-from exploit.ephemeral_runtime import build_camry_f33_icus_ramkey_probe as build
-from exploit.ephemeral_runtime import camry_f33_icus_ramkey_probe as host
+import tools.targets.camry.research.ram_runtime.command5.build_camry_f33_icus_ramkey_probe as build
+import tools.targets.camry.research.ram_runtime.command5.camry_f33_icus_ramkey_probe as host
 
 passed = failed = 0
 
@@ -37,9 +37,9 @@ check("literal command 0x22 configures one input and two output blocks",
       image[0x8AC26:0x8AC2C] == bytes.fromhex("010a640f2d5b") and
       image[0x8AC4E:0x8AC52] == bytes.fromhex("6457355b"))
 
-meta_path = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_icus_ramkey_probe.json"
-helper9_path = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_icus_ramkey_cmd9_helper_padded.bin"
-helper10_path = ROOT / "exploit/ephemeral_runtime/audited/camry_f33_icus_ramkey_cmd10_helper_padded.bin"
+meta_path = ROOT / "tools/targets/camry/research/ram_runtime/command5/audited/camry_f33_icus_ramkey_probe.json"
+helper9_path = ROOT / "tools/targets/camry/research/ram_runtime/command5/audited/camry_f33_icus_ramkey_cmd9_helper_padded.bin"
+helper10_path = ROOT / "tools/targets/camry/research/ram_runtime/command5/audited/camry_f33_icus_ramkey_cmd10_helper_padded.bin"
 meta = json.loads(meta_path.read_text())
 helper9 = helper9_path.read_bytes()
 helper10 = helper10_path.read_bytes()

@@ -14,13 +14,13 @@ def section_command5_runtime_carrier() -> int:
     ART=ROOT/'data/generated/camry_8965F3307000_command5_runtime_carrier.json'
     BUILD=ROOT/'tools/targets/camry/builders/build_camry_8965F3307000_command5_runtime_carrier.py'
     IMAGE=ROOT/'firmware/camry-8965F3307000/CodeFlash.bin'
-    RUNTIME_BUILDER=ROOT/'exploit/ephemeral_runtime/build_camry_f33_command5_carrier.py'
-    PROXY_AUDIT=ROOT/'exploit/ephemeral_runtime/audited_camry_f33_command5_proxy_build.json'
-    CANARY_AUDIT=ROOT/'exploit/ephemeral_runtime/audited_camry_f33_runtime_canary_build.json'
-    PROXY_BIN=ROOT/'exploit/ephemeral_runtime/audited/camry_f33_command5_proxy.bin'
-    CANARY_BIN=ROOT/'exploit/ephemeral_runtime/audited/camry_f33_runtime_canary.bin'
-    PROXY_SOURCE=ROOT/'exploit/ephemeral_runtime/corolla_hf_command5_proxy.c'
-    CANARY_SOURCE=ROOT/'exploit/ephemeral_runtime/camry_f33_runtime_canary.c'
+    RUNTIME_BUILDER=ROOT/'tools/targets/camry/research/ram_runtime/bootstrap/build_camry_f33_command5_carrier.py'
+    PROXY_AUDIT=ROOT/'tools/targets/camry/research/ram_runtime/bootstrap/audited/audited_camry_f33_command5_proxy_build.json'
+    CANARY_AUDIT=ROOT/'tools/targets/camry/research/ram_runtime/bootstrap/audited/audited_camry_f33_runtime_canary_build.json'
+    PROXY_BIN=ROOT/'tools/targets/camry/research/ram_runtime/bootstrap/audited/camry_f33_command5_proxy.bin'
+    CANARY_BIN=ROOT/'tools/targets/camry/research/ram_runtime/bootstrap/audited/camry_f33_runtime_canary.bin'
+    PROXY_SOURCE=ROOT/'tools/targets/corolla/research/ram_runtime/corolla_hf_command5_proxy.c'
+    CANARY_SOURCE=ROOT/'tools/targets/camry/research/ram_runtime/bootstrap/camry_f33_runtime_canary.c'
     p=f=0
     def sha(b:bytes)->str:return hashlib.sha256(b).hexdigest()
     def check(name:str,cond:object)->None:
