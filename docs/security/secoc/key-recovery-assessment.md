@@ -276,6 +276,39 @@ overlapping `0xFF207800..0xFF207FFF`. Renesas/third-party documentation identifi
 this end region as ICU-S-reserved, but the observed bytes are readback behavior,
 not a plaintext key dump.
 
+**Why the reservation is independent of application firmware.** Renesas's
+[ICU-S architecture description](https://www.renesas.com/en/blogs/achieving-root-trust-secure-boot-automotive-rh850-and-r-car-devices-part-2)
+and its earlier [ICU-S block diagram/overview](https://studylib.net/doc/9957285/security_in_automotive_applications---renesas-e)
+describe a fixed SHE state machine, AES/TRNG hardware, protected RAM, and
+ICU-S-arbitrated access to DataFlash. The application uses the ICU-S register
+interface; its read permissions are not CPU privilege/MPU settings that a
+CodeFlash patch can simply turn off. Renesas support explicitly confirms that
+[once ICU-S is enabled, its reserved flash is inaccessible to CPU and serial
+programming access](https://community.renesas.com/mcu/rh850/f/rh850-rl78f/17721/regarding-icu-region-access-in-data-flash).
+Renesas's [Flash Programmer V3.01 manual, §2.3.4](https://www.renesas.com/en/document/man/renesas-flash-programmer-v301-flash-memory-programming-software-users-manual)
+describes a persistent on-chip ICU-S enable operation that cannot be canceled
+by RFP; [Lauterbach's RH850 debugger manual](https://www2.lauterbach.com/pdf/debugger_rh850.pdf)
+describes a device-dependent disable sequence only after flash erasure, which
+also erases the ICU-S region. Neither source proves that exact P1M-E enabling
+is implemented by a physically blown fuse rather than a protected configuration
+cell/lifecycle latch. The distinction is chip configuration versus application
+code, **not** a board-level external security component.
+
+**Observed CPU read behavior is narrower than an assumed hardware return
+code.** The exact 2026 Camry F33 RAM-resident reader traversed the entire
+32-KiB DataFlash address space outside the stock application's two-range
+filter, including the last 2 KiB; the protected tail returned only `00`/`FF`
+bytes (1,064/984 respectively) without an acquisition-level exception or
+transaction failure. See [Camry baseline §10](../../variants/camry-2026-live-baseline.md#10-exact-dataflash--cpu-visible-ram-secoc-key-recovery-result).
+This does **not** determine whether the silicon deliberately masks the read,
+the array is unprogrammed, or the CPU observes undefined readback. Renesas's
+[RH850 Data Flash Library manual](https://www.renesas.com/en/document/apn/rh850-data-flash-libraries)
+warns that reading erased DataFlash is undefined and can cause ECC exceptions,
+subject to device configuration; that is not a specified ICU-S protected-range
+return value. A flash-programming/erasure command rejection, an application
+range-validator rejection, and a CPU load's returned bytes are separate
+observations. The underlying protected key-slot bytes have not been exposed.
+
 Bypassing serial-programming prohibition or an ID code grants a more capable
 MainPE/flash access path. It does not by itself defeat an ICU-S hardware read
 barrier. A debugger is still valuable for installing a deterministic trigger or
