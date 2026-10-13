@@ -510,6 +510,28 @@ conflicts. The retained hashes are:
 - GlobalRAM `FEEF8000..FEF07FFF` / 64 KiB:
   `53c8370237c681d4105c513be5096461ac735ffcb9577995c7203216165006a4`.
 
+The exact F33 CodeFlash independently contains the application's **software**
+DataFlash read exclusion: `FUN_0004FC48` checks request bounds and compares
+against the two inclusive intervals stored at `0x29244`,
+`FF207800..FF207FFF` (final 2 KiB) and `FF206C00..FF206EFF`
+(optional-object bank). Native Ghidra disassembly confirms the table load at
+`0x4FC68` and two-entry overlap loop; caller `FUN_0004FC8E` invokes this gate
+for memory ID 2 before the DataFlash copy operation. The same exact 16-byte
+table appears in the retained Sienna, Crown, and both Corolla EPS CodeFlash
+images at their respective target-specific offsets. This is a **patchable
+application policy**, not evidence that the underlying ICU-S flash becomes
+readable to the MainPE. Renesas documents that an enabled ICU-S owns its
+reserved DataFlash region exclusively, including against CPU and serial access
+(<https://community.renesas.com/mcu/rh850/f/rh850-rl78f/17721/regarding-icu-region-access-in-data-flash>).
+
+The separate, already-successful F33 RAM-resident range reader acquired all
+32 KiB **without relying on the application's software read allow-list**.
+Its `FF207800..FF207FFF` readback contains exactly 1,064 `00` bytes and
+984 `FF` bytes (no other values); those bytes are not a plaintext key dump
+and cannot identify the physically stored ICU-S slot state. A CodeFlash
+patch to the application validator therefore would not advance raw key
+recovery on this captured device.
+
 The DataFlash storage result is unambiguous at the already-recovered NvM
 geometry. Object 15 occupies the familiar raw/xor55/xoraa records at
 `0xFF206E00/0xFF206D00/0xFF206C00`, but **all three copies are invalid** and
