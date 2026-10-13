@@ -276,23 +276,57 @@ overlapping `0xFF207800..0xFF207FFF`. Renesas/third-party documentation identifi
 this end region as ICU-S-reserved, but the observed bytes are readback behavior,
 not a plaintext key dump.
 
-**Why the reservation is independent of application firmware.** Renesas's
-[ICU-S architecture description](https://www.renesas.com/en/blogs/achieving-root-trust-secure-boot-automotive-rh850-and-r-car-devices-part-2)
-and its earlier [ICU-S block diagram/overview](https://studylib.net/doc/9957285/security_in_automotive_applications---renesas-e)
-describe a fixed SHE state machine, AES/TRNG hardware, protected RAM, and
-ICU-S-arbitrated access to DataFlash. The application uses the ICU-S register
-interface; its read permissions are not CPU privilege/MPU settings that a
-CodeFlash patch can simply turn off. Renesas support explicitly confirms that
-[once ICU-S is enabled, its reserved flash is inaccessible to CPU and serial
-programming access](https://community.renesas.com/mcu/rh850/f/rh850-rl78f/17721/regarding-icu-region-access-in-data-flash).
+**The concrete enforcement point is the flash-side access-control path, not the
+MainPE MPU and not merely the ICU-S cryptographic state machine.** P1M-E group
+manual R01UH0585EJ0120 Rev.1.20 §31.4.1 places DataFlash behind the SoC
+interconnect as a bus slave. It states that memory resources have slave-side
+guards, explicitly including **flash guards**; ordinary bus accesses carry
+address, PEID, SPID and read/write context, while the flash guards are called
+out as the exception to the normal SPID-based guard scheme. For an illegal
+guarded read, the bus transaction completes with an error response and undefined
+data. Renesas's earlier
+[ICU-S block diagram/overview](https://studylib.net/doc/9957285/security_in_automotive_applications---renesas-e)
+shows the secure special case more directly: the CPU's normal DataFlash access
+path and the ICU-S finite-state-machine path meet at a distinct **Flash Control**
+block in front of DataFlash / the **ICU Exclusive Data Flash**. Its accompanying
+text says that CPU-versus-ICU-S DataFlash access is *arbitrated by ICU-S* and
+that the dedicated region can be read, written and erased only by ICU-S.
+
+The best-supported hardware model is therefore:
+
+```text
+MainPE load/store ----> SoC interconnect ----> flash guard / Flash Control ----> DataFlash array
+                                                ^                 |
+ICU-S FSM --------------------------------------+                 +--> ICU-exclusive tail
+```
+
+The ICU-S state machine is the authorized client; the **flash guard / Flash
+Control logic is the element on the memory path that denies the MainPE's direct
+access**. This is below application privilege and independent of the
+application's own DataFlash range validator. Renesas support independently
+confirms that
+[before enable the reserved region is writable by ordinary self/serial programming,
+while after enable it is inaccessible to CPU and serial programming](https://community.renesas.com/mcu/rh850/f/rh850-rl78f/17721/regarding-icu-region-access-in-data-flash).
+The public P1M-E manual does not expose the ICU-S-specific flash-guard comparator,
+enable latch, or a register that application code can rewrite to turn that
+ownership back off; those implementation details are in the restricted ICUSE
+boundary rather than the public MainPE/flash API.
+
+For program/erase operations the public P1M-E Flash Memory Hardware Interface
+manual gives the adjacent mechanism explicitly: the flash sequencer consists of
+FACI plus FCU, and FACI reports a **Data flash access error** when a command
+targets a reserved DataFlash area. Direct CPU reads are a separate path, so that
+FACI error must not be projected onto the observed load behavior below.
+
 Renesas's [Flash Programmer V3.01 manual, §2.3.4](https://www.renesas.com/en/document/man/renesas-flash-programmer-v301-flash-memory-programming-software-users-manual)
 describes a persistent on-chip ICU-S enable operation that cannot be canceled
 by RFP; [Lauterbach's RH850 debugger manual](https://www2.lauterbach.com/pdf/debugger_rh850.pdf)
 describes a device-dependent disable sequence only after flash erasure, which
-also erases the ICU-S region. Neither source proves that exact P1M-E enabling
-is implemented by a physically blown fuse rather than a protected configuration
-cell/lifecycle latch. The distinction is chip configuration versus application
-code, **not** a board-level external security component.
+also erases the ICU-S region. Neither source proves whether exact P1M-E stores
+that enable state in a blown fuse, protected flash/configuration cell, or another
+lifecycle latch. What is established is that the resulting access decision is
+enforced in the on-chip flash/security path, not by Toyota application code or
+a board-level component.
 
 **Observed CPU read behavior is narrower than an assumed hardware return
 code.** The exact 2026 Camry F33 RAM-resident reader traversed the entire
