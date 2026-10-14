@@ -1,0 +1,72 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_freshness_encode_capacity_low_byte",
+  "entry": {
+    "role": "wire freshness encoding with bit-capacity output",
+    "scope": "resolved-address",
+    "address": "0x90566"
+  },
+  "max_instructions": 500,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "r6": "0xfebe4000",
+    "r7": "0xfebe4081",
+    "r8": "0xfebe4040"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe4000",
+      "hex": "34120000debc0a005a00032e",
+      "evidence": "explicit 16/20/8/2-bit field values with requested format at offset11"
+    },
+    {
+      "address": "0xfebe4040",
+      "hex": "2d010000",
+      "evidence": "in/out bit capacity; admission compares only its low byte"
+    },
+    {
+      "address": "0xfebe407d",
+      "size": 16,
+      "fill": 165,
+      "evidence": "unaligned wire destination and surrounding canaries"
+    }
+  ],
+  "checks": [
+    {
+      "name": "exact encoded wire or untouched rejected destination",
+      "kind": "memory",
+      "address": "0xfebe407d",
+      "size": 16,
+      "equals_hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5"
+    },
+    {
+      "name": "reported bit capacity or preserved rejected capacity",
+      "kind": "memory",
+      "address": "0xfebe4040",
+      "size": 4,
+      "equals_hex": "2d010000"
+    },
+    {
+      "name": "source record unchanged",
+      "kind": "memory",
+      "address": "0xfebe4000",
+      "size": 12,
+      "equals_hex": "34120000debc0a005a00032e"
+    },
+    {
+      "name": "stack unchanged",
+      "kind": "register",
+      "register": "sp",
+      "equals": "0xfebe2000"
+    }
+  ]
+}

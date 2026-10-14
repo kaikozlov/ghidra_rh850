@@ -1,0 +1,90 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_reset_candidate_minus2_first",
+  "entry": {
+    "role": "ordered reset-low-bit candidate search",
+    "scope": "resolved-address",
+    "address": "0x909ca"
+  },
+  "max_instructions": 1000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "r6": "0xe0000000",
+    "r7": "0xfebe4020",
+    "r8": "0xfebe4040"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1e00",
+      "size": 512,
+      "fill": 0,
+      "evidence": "isolated stack"
+    },
+    {
+      "address": "0xfebe55c4",
+      "hex": "07000000",
+      "evidence": "explicit current reset counter"
+    },
+    {
+      "address": "0xfebe4020",
+      "hex": "000000000000000000000104",
+      "evidence": "parsed truncated reset-low bits at offset10"
+    },
+    {
+      "address": "0xfebe4040",
+      "hex": "0200000002000000efbeadde0000efbe00000000",
+      "evidence": "two-bit reset mask, requested matching ordinal at offset12, sentinel output fields"
+    }
+  ],
+  "checks": [
+    {
+      "name": "candidate availability status",
+      "kind": "register",
+      "register": "r10",
+      "equals": "0x1"
+    },
+    {
+      "name": "current reset remains unchanged",
+      "kind": "memory",
+      "address": "0xfebe55c4",
+      "size": 4,
+      "equals_hex": "07000000"
+    },
+    {
+      "name": "parsed wire input remains unchanged",
+      "kind": "memory",
+      "address": "0xfebe4020",
+      "size": 12,
+      "equals_hex": "000000000000000000000104"
+    },
+    {
+      "name": "stack restored",
+      "kind": "register",
+      "register": "sp",
+      "equals": "0xfebe2000"
+    },
+    {
+      "name": "selected reset candidate",
+      "kind": "memory",
+      "address": "0xfebe4048",
+      "size": 4,
+      "equals_hex": "05000000"
+    },
+    {
+      "name": "candidate order index",
+      "kind": "memory",
+      "address": "0xfebe404e",
+      "size": 2,
+      "equals_hex": "0300"
+    }
+  ]
+}

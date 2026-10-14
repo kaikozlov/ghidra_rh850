@@ -7634,8 +7634,8 @@ no evidence about that function.
 
 ### 77.2 Executed contracts and durable prototypes
 
-`SeedCamryF33RecoveredFunctions.java` now owns these target-specific names,
-formal parameter types, return contracts, and comments:
+The first verified increment put these target-specific names, formal parameter
+types, return contracts, and comments in `SeedCamryF33RecoveredFunctions.java`:
 
 | Entry | Recovered contract | Evidence boundary |
 |---|---|---|
@@ -7644,9 +7644,9 @@ formal parameter types, return contracts, and comments:
 | `0x8A134` | `f33_memzero(destination, byte_count)`; byte alignment prelude, bulk blocks and word/byte tails | Exact firmware execution checks short unaligned and bulk/tail writes; zero-length cases make no destination write |
 | `0x90D6A` | `f33_freshness_commit_pending(slot, verification_result)`: slot `<2` and low-byte result `==1` copy 12 bytes from `FEBE55F4+12*slot` to `FEBE55DC+12*slot` | Pending-to-committed, not rollback or PDU dequeue; executed slot selection, rejected inputs and byte truncation |
 
-The offline execution used the registered firmware bytes in the RH850 machine,
-without replacement implementations: 248 memory alignment/length cases, six
-freshness cases, and the complete boot copy. Nine representative permanent
+That increment's offline execution used the registered firmware bytes in the
+RH850 machine, without replacement implementations: 248 memory alignment/length
+cases, six freshness cases, and the complete boot copy. Nine representative permanent
 scenarios live in
 [`tests/fixtures/rh850/machine/camry-8965F3307000/`](../../tests/fixtures/rh850/machine/camry-8965F3307000/).
 These establish the exercised software paths, not ECU timing or a road result.
@@ -7689,3 +7689,47 @@ The final current-to-PWM path, NvM restore grouping, calibration units and
 physical signal identities retain their existing bounded status until their
 specific producer/consumer chains are established. Neither whole-image review
 nor the primitive executions above close those questions by implication.
+
+### 77.4 Freshness wire layouts and reconstruction
+
+The same target-native seed now persists five further function contracts and
+four packed types under `/CamryF33`. Offsets below are bytes; the wire-format
+lengths **4 and 46 are bits**, not byte counts.
+
+| Type | Size | Recovered layout and boundary |
+|---|---:|---|
+| `F33FreshnessSlot` | 4 | `selector:u16@0`, `slot:s16@2`. The ordinary wrapper requires selector zero and slot 0/1; the reconstruction leaf does not validate them. `selector` is a bounded structural name, not a recovered OEM FreshnessID. |
+| `F33FreshnessWire` | 12 | `trip:u32@0`, `reset:u32@4`, `message:u16@8`, `reset_low2:u8@10`, `bit_length:u8@11`. This is the decoded/encoding record, not the committed-history layout. |
+| `F33FreshnessHistory` | 12 | Trip, reset and message occupy the first ten bytes at the same offsets. The final two bytes remain opaque: reconstruction preserves them, whereas commit copies all twelve bytes. |
+| `F33FreshnessSearch` | 20 | Message width `u32@0`, reset-low width `u32@4`, selected reset `u32@8`, skipped matching ordinal `u16@12`, candidate index `u16@14`, advance-message flag `u8@16`, opaque final three bytes. The skip count is unsigned, as shown by `SLD.HU` / `ZXH`. |
+
+| Entry / durable name | Exact recovered behavior |
+|---|---|
+| `0x90566` / `f33_freshness_encode_wire` | Encodes four bits into one high-nibble byte, or 46 bits into six MSB-first bytes. Admission compares only the low byte of the pointed-to bit capacity. Insufficient capacity changes neither output nor capacity; otherwise an unsupported format sets capacity zero without writing wire bytes. |
+| `0x90736` / `f33_freshness_decode_wire` | Length 4 reads one byte and produces zero trip/reset plus 2-bit message and reset-low values. Length 46 reads six bytes containing 16/20/8/2 bits. Unused low wire bits are ignored. Any other full-word length zeroes all twelve output bytes without reading the input, including an unmapped input in the executed case. |
+| `0x909CA` / `f33_freshness_select_reset_candidate` | Reloads current reset at `0xFEBE55C4` on each attempt. Searches current, −1, +1, −2, +2 within `0..0xFFFFF`, matches the configured low bits, and skips the requested matching ordinal. Returns 1 with a candidate/index or 0 when exhausted; a failed candidate field is unspecified. With two reset-low bits, −2 and +2 can both match. |
+| `0x90A48` / `f33_freshness_reconstruct_ordinary` | Reads current trip and a critical-section snapshot of the selected committed history. A newer trip/reset seeds the message from the received low bits; the same epoch reconstructs its congruent message and optionally advances one interval. Reset ceiling or message overflow produces message `0xFF` with return zero; the outer wrapper maps that sentinel to `0x24`. An older epoch returns `0x23` while candidate index is below four, otherwise `0x22`, without output writes. Successful reconstruction writes ten bytes only. |
+| `0x90B1C` / `f33_freshness_reconstruct_candidate` | Composes search and reconstruction, with the output pointer in `r9`. Message width is `clamp(bit_length−2,0,8)`; reset-low width is two except that input lengths zero and one are retained. An older matching −2 candidate can return `0x23`, while skipping that match selects an admissible +2 candidate. No candidate returns `0x22` without output writes. |
+
+The caller's register dataflow required a real ABI correction, not renamed
+decompiler temporaries. The complete `0x909CA..0x90A47` leaf preserves `r6..r9`.
+Its sole caller at `0x90B76` immediately invokes `0x90A48` at `0x90B7E` without
+reloading those registers. Applying the generic caller-saved convention to that
+leaf invented uninitialized arguments in the second call. Marking this one leaf
+inline makes the decompiler execute its real p-code and preserves the actual
+`slot, received, search, reconstructed` forwarding. The general calling
+convention is unchanged; no synthetic replacement implementation is used.
+
+Twenty-one additional permanent machine scenarios were executed from the exact
+CodeFlash, including the composed wrapper paths. Bounded sweeps also exercised
+all four new-epoch message residues and all reset-search directions. These
+checks establish the exercised software paths and boundaries, not every possible
+interleaving or a vehicle result.
+
+One negative boundary is important: a **zeroed unsupported-format parse record
+is not independently rejected by `0x90B1C`**. The direct new-epoch execution
+returns success with message zero. This does not prove CAN admission or acceptance
+of an authenticated transaction: the supplying callers, format configuration,
+and authentication result remain separate gates. Conversely, the decoder's
+zero marker alone must not be documented as a complete transaction rejection.
+

@@ -538,7 +538,7 @@
   ],
   "target": {
     "canonical_function_count": 7178,
-    "canonical_inventory_sha256": "fb674401efbc41e581dc476c6e06d0b79a99d560c08520f3a05bc506c823859d",
+    "canonical_inventory_sha256": "8a6ed91c8a7ff47a520c778c75fa5d02c0929a30abf7271c0bfe0577abd07d1d",
     "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
     "software_id": "8965F3307000"
   }
