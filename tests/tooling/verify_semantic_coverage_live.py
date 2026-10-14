@@ -10,20 +10,25 @@ from pathlib import Path
 
 
 from tools import REPO_ROOT
+from tools.project.analysis_target import target
 REPO = REPO_ROOT
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--project-dir", type=Path, default=REPO / "build" / "work" / "project")
+    parser.add_argument("--target", default=os.environ.get("GHIDRA_ANALYSIS_TARGET"))
+    parser.add_argument("--project-dir", type=Path)
     args = parser.parse_args()
+    target_name, metadata = target(args.target)
+    project_dir = args.project_dir or REPO / metadata["work_dir"]
     with tempfile.TemporaryDirectory(prefix="semantic-coverage-live-") as directory:
         temporary = Path(directory)
         csv_out = temporary / "semantic_coverage_ledger.csv"
         summary_out = temporary / "semantic_coverage_summary.json"
         environment = os.environ.copy()
         environment.update({
-            "PROJECT_DIR": str(args.project_dir.resolve()),
+            "GHIDRA_ANALYSIS_TARGET": target_name,
+            "PROJECT_DIR": str(project_dir.resolve()),
             "CSV_OUT": str(csv_out),
             "SUMMARY_OUT": str(summary_out),
         })
@@ -31,8 +36,8 @@ def main() -> int:
             [str(REPO / "tools" / "project" / "export_ghidra_project.sh"), "semantic-coverage"],
             cwd=REPO, env=environment, check=True,
         )
-        expected_csv = REPO / "data" / "semantic_coverage_ledger.csv"
-        expected_summary = REPO / "data" / "semantic_coverage_summary.json"
+        expected_csv = REPO / metadata["semantic_coverage_ledger"]
+        expected_summary = REPO / metadata["semantic_coverage_summary"]
         if csv_out.read_bytes() != expected_csv.read_bytes():
             print("FAIL: live semantic coverage CSV differs from committed artifact")
             return 1

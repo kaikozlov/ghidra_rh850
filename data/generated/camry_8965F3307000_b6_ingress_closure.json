@@ -129,7 +129,7 @@
     "0x00071508": {
       "body_sha256": "0a68ffc255d72f4c3429e63355652dbedd2857d6961910d52be1d635a85a0691",
       "body_size": 170,
-      "decompiled_c_sha256": "7a6015b78384b6c65f9c050de59e617bba3b52bd166e9befbd53d4addff3f7ba",
+      "decompiled_c_sha256": "006fd614292cf8b4c31b94ae110a17d1eb209df6b9a45060b0b20c7973467c65",
       "role": "controller-1 receive interrupt wrapper"
     },
     "0x00079EBA": {
@@ -159,7 +159,7 @@
     "0x0007D72C": {
       "body_sha256": "ab6c3514c592e1a007d7d38abf723d22b905037b3ae7132cdcc5c1c73ec5b239",
       "body_size": 212,
-      "decompiled_c_sha256": "ba786b971d3ac964fffff0f49111e32230c4bf80fadfff7a4391e108f1fdba93",
+      "decompiled_c_sha256": "7802e041ecd9ad0f271d3d76cbec3e2ba7c5b410cedccab7d8f3d8702c9d2b5d",
       "role": "generated-COM receive callback"
     },
     "0x00080884": {
@@ -273,19 +273,19 @@
     "0x0008E9C6": {
       "body_sha256": "6b400bd052e65702face2c4b5322f5015806d14f350e1a4789d9cadc98a56864",
       "body_size": 218,
-      "decompiled_c_sha256": "8f1b7f81dc3d8bdf83d9b868a5aa7a8e37fd09a15bae905172ccdd154851f6e9",
+      "decompiled_c_sha256": "5fd3cde9fbbae252c304e5fa7c9c62fee4f9f978f9b74268d58d498b4686a602",
       "role": "SecOC queue insert/copy"
     },
     "0x0008ED8E": {
       "body_sha256": "e6c911e4b184c893852edc5bdb6d4def70c576e874c9ad9882dbe9e03ca58697",
       "body_size": 88,
-      "decompiled_c_sha256": "e8bb8fed4db2363f1bc10a04e5edc8c412d0b1097c3ae8aeb86f15d10b4c4a99",
+      "decompiled_c_sha256": "2ef5b78cd15da8cc17227bcd752086a04e5032bad65ee2ce31b9cb85dac2c710",
       "role": "opposite queue-family public ingress"
     },
     "0x0008EE7C": {
       "body_sha256": "3e113bff721b8ff9bd851cf58707757fd44b31943ad56b6265ba93e4cdfe6690",
       "body_size": 62,
-      "decompiled_c_sha256": "3a45ab77ef32f118861141ba7e401a9c6e620e3234811e3b63fd2bdc9732e777",
+      "decompiled_c_sha256": "83c1430a4856a3182e88d44fe668c69fae8f86ab09e1eea22a33ccf201c2075a",
       "role": "SecOC secured-PDU ingress"
     },
     "0x0008EF84": {
@@ -333,7 +333,7 @@
     "0x0008F98C": {
       "body_sha256": "f05b334c3f7b1a28cd80a4cd04acde7cd7d726a65ae427b2fd47c30d5108ed7b",
       "body_size": 58,
-      "decompiled_c_sha256": "43650ebe23d12efa6f695801bcf2911f75d30a48e621974350b1b16295a8427b",
+      "decompiled_c_sha256": "b9277ddeab2241f399ca3a27a6716ae0ddc0915366a1300f21c813fd3a24a33b",
       "role": "SecOC one-PDU verify/deliver transaction"
     },
     "0x0008FABA": {
@@ -538,7 +538,7 @@
   ],
   "target": {
     "canonical_function_count": 7178,
-    "canonical_inventory_sha256": "9a8f80dfff2237d1aa6a4af26a7e4adfd5152f586ba38d5dae2c592f40627322",
+    "canonical_inventory_sha256": "fb674401efbc41e581dc476c6e06d0b79a99d560c08520f3a05bc506c823859d",
     "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
     "software_id": "8965F3307000"
   }

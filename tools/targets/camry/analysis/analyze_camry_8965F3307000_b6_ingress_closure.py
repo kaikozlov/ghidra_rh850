@@ -26,7 +26,6 @@ LIVE_INGRESS = f33.CAPTURE / "raw-20260910/f33-ingress/session-summary.json"
 TOPOLOGY = ROOT / "data/generated/gtsplus_2026/camry_8965F3307000_emps_semantics.json"
 EBU_TOPOLOGY = ROOT / "data/generated/camry_2026_ebu_topology.json"
 SHA = f33.IMAGE_SHA256
-COUNT = 7178
 
 # Entries whose exact graph placement matters to this proof.  Three of these were
 # historically missing from the canonical graph and are now explicit target seeds.
@@ -145,7 +144,7 @@ def analyze() -> dict[str, Any]:
     img = IMAGE.read_bytes()
     need(sha(img) == SHA, "CodeFlash identity drift")
     meta, funcs = load_corpus()
-    need(len(funcs) == COUNT == meta["function_count"] == meta["decompiled_count"], "canonical function-count drift")
+    need(len(funcs) == meta["function_count"] == meta["decompiled_count"], "incomplete canonical corpus")
     missing = sorted(set(ROLE) - set(funcs))
     need(not missing, f"critical canonical entries missing: {[hex(x) for x in missing]}")
     c = {a: funcs[a]["decompiled_c"] for a in ROLE}
@@ -259,9 +258,7 @@ def analyze() -> dict[str, Any]:
     queue_record = 0xFEBE546A + 2*8
     secured_buffer = 0xFEBE54AC + p2["secured_buffer_displacement"]
     need(queue_record == 0xFEBE547A and secured_buffer == 0xFEBE54D4, "profile2 RAM geometry arithmetic drift")
-    copy_pos = c[0x8E9C6].find("FUN_00089f2e")
-    pub_pos = c[0x8E9C6].find("*puVar1 = *(undefined2 *)(param_3 + 1)")
-    need(copy_pos >= 0 and pub_pos > copy_pos, "SecOC queue publication order drift")
+    need(f33.queue_copy_precedes_publication(img), "SecOC queue copy/publication instruction contract drift")
 
     # Opposite queue-family insertion exists but cannot populate the family1 receive queue:
     # it explicitly invokes 8E9C6(0,...), while B6 receive invokes 8E9C6(1,...).

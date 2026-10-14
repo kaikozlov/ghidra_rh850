@@ -178,7 +178,7 @@
     "0x038162": {
       "body_sha256": "fe6b7eff71c8177b1441e1db3851e074a6c6536bfe54267c36ba4054407d8037",
       "body_size": 504,
-      "decompiled_c_sha256": "c04eb61d1816c7173891958f4313f6c4609c3302faad5d866d938317f826b242",
+      "decompiled_c_sha256": "fe5bc96b0da5b82b102a5f2baac2e01d8073709cc89d0740a8285b5bcccce4a3",
       "role": "downstream motor-current processing"
     },
     "0x03835E": {
@@ -232,7 +232,7 @@
     "0x058B5E": {
       "body_sha256": "0c6eb6b596dfffdc298158d0ae8928ae17ba244ba1716fcd7119b357170351d9",
       "body_size": 294,
-      "decompiled_c_sha256": "d59eaefb795deaf43e04c8ca2ff7757d6ee6150ab7967020be1ca0f3ed00cd55",
+      "decompiled_c_sha256": "f1485cd62abd6e15146e85801334906d747b9399aec96f3de644f632cf96fa14",
       "role": "generated-COM/application task coordinator"
     },
     "0x05DF5C": {
@@ -280,7 +280,7 @@
     "0x088FC0": {
       "body_sha256": "885e8edb09d35f0cedea452efa003b4807344487e6394ba156b32491d6eaabd2",
       "body_size": 172,
-      "decompiled_c_sha256": "7d2cb6e4984c649b78e76c13c93eb9186783cbcab64d55fbd1c9ccfa0f951a49",
+      "decompiled_c_sha256": "55f706dee435ae7427bab5aaa842ec63acff210e9e783abacfe6618166154567",
       "role": "ICU-S operation descriptor builder"
     },
     "0x089646": {
@@ -304,25 +304,25 @@
     "0x08E9C6": {
       "body_sha256": "6b400bd052e65702face2c4b5322f5015806d14f350e1a4789d9cadc98a56864",
       "body_size": 218,
-      "decompiled_c_sha256": "8f1b7f81dc3d8bdf83d9b868a5aa7a8e37fd09a15bae905172ccdd154851f6e9",
+      "decompiled_c_sha256": "5fd3cde9fbbae252c304e5fa7c9c62fee4f9f978f9b74268d58d498b4686a602",
       "role": "SecOC level-1 queue insert/copy"
     },
     "0x08ECB2": {
       "body_sha256": "d1e16041f8e55bec3173a949a783c8dfe9742447c88a3c737fd23e253c4064eb",
       "body_size": 98,
-      "decompiled_c_sha256": "114a7cf4b6ad8380b17f528d12b215486587f759357c71259f7b261b2b63ee71",
+      "decompiled_c_sha256": "b212317e97830a3e7c39e19830d9654a9789be83238eb8d48d2846dad5504e54",
       "role": "SecOC authentication-input builder"
     },
     "0x08EE7C": {
       "body_sha256": "3e113bff721b8ff9bd851cf58707757fd44b31943ad56b6265ba93e4cdfe6690",
       "body_size": 62,
-      "decompiled_c_sha256": "3a45ab77ef32f118861141ba7e401a9c6e620e3234811e3b63fd2bdc9732e777",
+      "decompiled_c_sha256": "83c1430a4856a3182e88d44fe668c69fae8f86ab09e1eea22a33ccf201c2075a",
       "role": "SecOC secured-PDU ingress"
     },
     "0x08F19A": {
       "body_sha256": "4493ed372daab2a3ebe3f1b3db0711dccba925a90a30c22f24f6f907a0822311",
       "body_size": 54,
-      "decompiled_c_sha256": "952e53cc389e671f9f8a766264f2ffcda05afe69005718c036d68f8c7f4c3a57",
+      "decompiled_c_sha256": "fe898b779b6dddf6ec59801a9918cc3f2e79378d55a0ea2d3e55552ee83bae5e",
       "role": "authenticated sync snapshot"
     },
     "0x08F34A": {
@@ -334,7 +334,7 @@
     "0x08F434": {
       "body_sha256": "23baff101c49428738e2bc8273c7a2fdda32598028fa5665fb8a90d060286bc4",
       "body_size": 156,
-      "decompiled_c_sha256": "b10b7ffd20e8b46b47f0bd80a2901b2877cc0c1112ee5b77db36e21846afcba9",
+      "decompiled_c_sha256": "2e6ac8b35447cd32fa425e7c0e171020e05a7b93ec1de03fe628b67c80625909",
       "role": "FV4/MAC28 extractor"
     },
     "0x08F546": {
@@ -406,7 +406,7 @@
     "0x090D6A": {
       "body_sha256": "35f2d6793551e9624ea98bcad296eda11c060b891faf9e25ec34e6d8ff9a2906",
       "body_size": 52,
-      "decompiled_c_sha256": "acedfac930d4f5d9b52bea19847347f3754874bddb3f4f2d2474f8e83def8796",
+      "decompiled_c_sha256": "81666fd4580eaf26b127a84e6ea433dadcd2c253da29b284bbb1e4085c5215e1",
       "role": "pending-to-committed freshness commit"
     },
     "0x0B330A": {
@@ -436,7 +436,7 @@
     "0x0BCAA6": {
       "body_sha256": "971f50c0bd3fc1a62def879d53093851a798307343cd4ad2118ead06f2975d20",
       "body_size": 306,
-      "decompiled_c_sha256": "0e120fb6608d613c77c6a19bed3906c8363614845b517ae0dfb8dd29eecb1b06",
+      "decompiled_c_sha256": "d1085ab76e3d7b3b90600a0fadc3363a67f72d9fd7a941ecf5f54c8fe1f59145",
       "role": "common steering actuator-enable/inhibit decoder"
     },
     "0x0BCBD8": {
@@ -454,7 +454,7 @@
     "0x0BCD62": {
       "body_sha256": "76d78c2605f902e96eb723f662d9fba543b1d1db85aedf62b9b3894b8c0220aa",
       "body_size": 2748,
-      "decompiled_c_sha256": "19bf7567411c639b46708348553e5183d492431751af42f570855b4661508793",
+      "decompiled_c_sha256": "92bf38fe2429215245f39996a22a519cae52923fbd92b88fb9762386fabeb55e",
       "role": "application snapshot + cooperative-controller wrapper"
     },
     "0x0BF33E": {
@@ -550,7 +550,7 @@
     "0x0CDA20": {
       "body_sha256": "5544519f0d68f69e32f1aa6e1a0ce56a487cf29aa8288239746b79ff9418f5be",
       "body_size": 192,
-      "decompiled_c_sha256": "9a9518f23d425e7721f8514454193434cb537f346965208349e1a80931a67635",
+      "decompiled_c_sha256": "f898cff61cdc7b8dc9c3156f855bc4ee00f8276378c4948a264650b169609af0",
       "role": "B6 sig265-controlled supervisor term"
     },
     "0x0CDFF8": {

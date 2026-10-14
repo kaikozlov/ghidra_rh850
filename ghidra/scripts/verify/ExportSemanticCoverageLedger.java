@@ -34,6 +34,7 @@ public class ExportSemanticCoverageLedger extends GhidraScript {
     private static final long LOCAL_RAM_END = 0xFEC00000L; // exclusive
     private static final long APPLICATION_BASE = 0x20000L;
     private static final long SCHEDULER_ROOT = 0x64fccL;
+    private boolean legacySienna;
 
     private static final String HEADER = String.join(",",
             "entry_addr",
@@ -88,10 +89,14 @@ public class ExportSemanticCoverageLedger extends GhidraScript {
     @Override
     public void run() throws Exception {
         String[] args = getScriptArgs();
-        if (args.length != 1) {
+        if (args.length != 3) {
             throw new IllegalArgumentException(
-                    "expected absolute CSV output path");
+                    "expected absolute CSV output path, target ID, and executable SHA-256");
         }
+        if (!args[2].equalsIgnoreCase(currentProgram.getExecutableSHA256())) {
+            throw new IllegalStateException("selected target does not match project executable");
+        }
+        legacySienna = "sienna-8965B4512000".equals(args[1]);
         Path outPath = Path.of(args[0]);
         if (!outPath.isAbsolute()) {
             throw new IllegalArgumentException("CSV output path must be absolute: " + outPath);
@@ -187,7 +192,7 @@ public class ExportSemanticCoverageLedger extends GhidraScript {
     private String discoverySource(Function function, ReferenceManager rm, String nameSource) {
         if (function.getName().startsWith("direct_call_target_")) return "direct-call seed";
         for (Reference reference : rm.getReferencesTo(function.getEntryPoint())) {
-            if (reference.getSource() == SourceType.USER_DEFINED
+            if (legacySienna && reference.getSource() == SourceType.USER_DEFINED
                     && reference.getReferenceType().isData()
                     && inCallbackPointerRange(reference.getFromAddress().getOffset())) {
                 return "callback-table seed";
@@ -223,10 +228,10 @@ public class ExportSemanticCoverageLedger extends GhidraScript {
         return src == null ? "UNKNOWN" : src.name();
     }
 
-    private static String rootKind(long entry, String cc) {
-        // Only mark roots that Ghidra/architecture already classify reliably.
+    private String rootKind(long entry, String cc) {
+        // A legacy scheduler address must not classify another target's code.
         if ("__interrupt".equals(cc)) return "interrupt";
-        if (entry == SCHEDULER_ROOT) return "scheduler";
+        if (legacySienna && entry == SCHEDULER_ROOT) return "scheduler";
         return "";
     }
 

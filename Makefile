@@ -101,7 +101,7 @@ verify-processor:
 
 # Full local gate: firmware suites + SLEIGH + processor audits + exact parity.
 verify-semantic-coverage-live:
-	$(PYTHON) tests/tooling/verify_semantic_coverage_live.py --project-dir "$(PROJECT_DIR)"
+	$(PYTHON) tests/tooling/verify_semantic_coverage_live.py --target "$(TARGET)" --project-dir "$(PROJECT_DIR)"
 
 verify-ghidra: verify-full verify-sleigh verify-processor verify-semantic-coverage-live verify-project-parity
 
@@ -139,10 +139,10 @@ generate-processor-fixture:
 	$(PYTHON) -m tools.testing.processor.build_processor_fixture
 
 generate-function-discovery:
-	GHIDRA_ANALYSIS_TARGET="$(LEGACY_SIENNA_TARGET)" PROJECT_DIR="$(LEGACY_SIENNA_PROJECT_DIR)" tools/project/export_ghidra_project.sh outside-functions
+	GHIDRA_ANALYSIS_TARGET="$(TARGET)" PROJECT_DIR="$(PROJECT_DIR)" tools/project/export_ghidra_project.sh outside-functions
 
 generate-semantic-coverage:
-	GHIDRA_ANALYSIS_TARGET="$(LEGACY_SIENNA_TARGET)" PROJECT_DIR="$(LEGACY_SIENNA_PROJECT_DIR)" tools/project/export_ghidra_project.sh semantic-coverage
+	GHIDRA_ANALYSIS_TARGET="$(TARGET)" PROJECT_DIR="$(PROJECT_DIR)" tools/project/export_ghidra_project.sh semantic-coverage
 
 generate-decompiler-corpus:
 ifeq ($(TARGET),$(LEGACY_SIENNA_TARGET))

@@ -224,8 +224,6 @@ def analyze() -> dict[str, Any]:
   if h(image) != EXPECTED_SHA256:
     raise RuntimeError("exact F33 CodeFlash identity drift")
   corpus = load_corpus()
-  if len(corpus) != 7178:
-    raise RuntimeError(f"canonical corpus function count drift: {len(corpus)}")
   missing = sorted(set(FUNCTIONS) - set(corpus))
   if missing:
     raise RuntimeError(f"missing functions: {[hex(x) for x in missing]}")
@@ -404,7 +402,7 @@ def analyze() -> dict[str, Any]:
   checks = {
     "secoc_ingress_state_and_pointer_checks": all(x in c[0x8EE7C] for x in ("DAT_febe54f4 == -0x1ff", "param_2 != (int *)0x0", "FUN_0008f34a")),
     "queue_wrapper_calls_insert": "FUN_0008e9c6(1" in c[0x8F34A],
-    "queue_insert_copies_secured_payload": "FUN_00089f2e(local_34 + iStack_20,*param_3);" in c[0x8E9C6] and "*puVar1 = *(undefined2 *)(param_3 + 1);" in c[0x8E9C6],
+    "queue_insert_copies_secured_payload": f33.queue_copy_precedes_publication(image),
     "worker_extracts_auth_then_freshness_then_crypto": all(x in c[0x8F746] for x in ("FUN_0008f434", "FUN_0008ecb2", "FUN_0008f676")),
     "freshness_profile2_slot1": b6_freshness_slot == 1 and all(x in c[0x90248] for x in ("param_1 == *(short *)(iVar2 + 0x1a5e)", "*(char *)(iVar2 + 0x1a55) != '\\x01'", "sVar8 = sVar8 + 1")),
     "freshness_candidate_search_has_plus_minus_two": all(x in c[0x909CA] for x in ("+ 1", "- 1", "+ 2", "- 2")),

@@ -1,6 +1,6 @@
 {
   "compiled_files": {
-    "data/arithmetic/v850_arithmetic_reference_templates.json": "83189078577120afc53964811213b10e7320a72f18d15bef70249dd44a804dcf",
+    "data/arithmetic/v850_arithmetic_reference_templates.json": "5519feefb16e95a3a20cb8f83e46f2200d36edeb70cfc2ac94d0d09ecd55cd67",
     "data/languages/v850.dwarf": "0d6a894482cd2bea5d62a6dee09af59f7b19adc55089d42529e76e618471720b",
     "data/languages/v850.ldefs": "d7a9f7ebdcbe9407e6e85ccabc2adbcf7f440905689a8c716ae777dc395ebe72",
     "data/languages/v850.opinion": "01b3073bd126e754bd6568da60c4628cbb5660241b1f9d79122948e4131cf9d6",
@@ -69,7 +69,7 @@
   "files": {
     "ghidra/ghidra_v850/Module.manifest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "ghidra/ghidra_v850/PROVENANCE.json": "e0628d71cc64aff3e6edf9c74231dbacbc7a047d2187829b5ef499aeb3e4d1af",
-    "ghidra/ghidra_v850/data/arithmetic/v850_arithmetic_reference_templates.json": "83189078577120afc53964811213b10e7320a72f18d15bef70249dd44a804dcf",
+    "ghidra/ghidra_v850/data/arithmetic/v850_arithmetic_reference_templates.json": "5519feefb16e95a3a20cb8f83e46f2200d36edeb70cfc2ac94d0d09ecd55cd67",
     "ghidra/ghidra_v850/data/languages/v850.dwarf": "0d6a894482cd2bea5d62a6dee09af59f7b19adc55089d42529e76e618471720b",
     "ghidra/ghidra_v850/data/languages/v850.ldefs": "c186d71bd1fde8d5247e525bb281bd033dbe5afa812cfb00b7a574ec48d5eb47",
     "ghidra/ghidra_v850/data/languages/v850.opinion": "01b3073bd126e754bd6568da60c4628cbb5660241b1f9d79122948e4131cf9d6",
@@ -108,11 +108,11 @@
     "ghidra/ghidra_v850/src/main/java/ghidra/app/plugin/core/analysis/V850RegisterAnalyzer.java": "77ebeb7e3ff35deec785766807e408af95f7c911c0ce4a1880849ccfd800bb2a",
     "ghidra/ghidra_v850/src/main/java/ghidra/app/plugin/core/analysis/V850SwitchAnalyzer.java": "0be34135ac1516fdf95cbec5b26f35d06bf1b4c9db1de0a469caf022810ce678",
     "tools/project/build_compiler_policy_specs.py": "fb90cc84a9a2cb460ce12d7054e833fd9049f2549d532bf4d204f0337ce8b639",
-    "tools/testing/processor/build_v850_arithmetic_reference_templates.py": "9434cca5a631f3797b5e616c089a51979b5f25a2ac2b2d8397f7875359aaae2c"
+    "tools/testing/processor/build_v850_arithmetic_reference_templates.py": "c0685977b825e8b23bcdaad36865a5775f7b966beb7ed0563383cf1de551ddea"
   },
   "ghidra_cli_version": "0.2.1",
   "ghidra_version": "12.1.4",
   "language_id": "v850e3:LE:32:default",
   "schema_version": 2,
-  "source_fingerprint": "0a1fd825326dd7aca8a3ac2cd07c2e2a0a76304dba395f743bf8339ee65e285b"
+  "source_fingerprint": "0b2bc60315e559d590045c301142b01376717c30c2b36c2065b0db3c1ca60bcd"
 }

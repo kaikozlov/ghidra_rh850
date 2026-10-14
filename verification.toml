@@ -354,7 +354,7 @@ tests = ["tests/tooling/verify_semantic_coverage.py"]
 [suite.semantic_coverage_live]
 tests = ["tests/tooling/verify_semantic_coverage_live.py"]
 modes = ["local"]
-args = ["--project-dir", "build/work/project"]
+args = ["--target", "sienna-8965B4512000", "--project-dir", "build/work/project"]
 
 [suite.semantic_review_promotions]
 tests = ["tests/tooling/verify_semantic_review_promotions.py"]

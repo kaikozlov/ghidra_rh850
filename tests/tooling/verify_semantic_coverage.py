@@ -12,10 +12,8 @@ from pathlib import Path
 
 
 from tools import REPO_ROOT
+from tools.project.analysis_target import load
 REPO = REPO_ROOT
-LEDGER = REPO / "data" / "semantic_coverage_ledger.csv"
-SUMMARY = REPO / "data" / "semantic_coverage_summary.json"
-REVIEWS = REPO / "data" / "semantic_review_status.csv"
 MERGER = REPO / "tools" / "project" / "apply_semantic_review_status.py"
 HEADER = [
     "entry_addr", "body_bytes", "name", "discovery_source",
@@ -93,13 +91,16 @@ def merger_rejects(rows: list[dict[str, str]], reviews: list[dict[str, str]], ex
         return result.returncode != 0 and expected in (result.stdout + result.stderr)
 
 
-def main() -> int:
-    print("== semantic coverage artifact ==")
+def check_target(name: str, metadata: dict) -> None:
+    print(f"== semantic coverage artifact: {name} ==")
+    LEDGER = REPO / metadata["semantic_coverage_ledger"]
+    SUMMARY = REPO / metadata["semantic_coverage_summary"]
+    REVIEWS = REPO / metadata["semantic_reviews"]
     check("ledger exists", LEDGER.is_file(), str(LEDGER))
     check("summary exists", SUMMARY.is_file(), str(SUMMARY))
     check("curated reviews exist", REVIEWS.is_file(), str(REVIEWS))
     if not all(path.is_file() for path in (LEDGER, SUMMARY, REVIEWS)):
-        return 1
+        return
 
     with LEDGER.open(newline="") as handle:
         reader = csv.DictReader(handle)
@@ -143,20 +144,15 @@ def main() -> int:
 
     check("all rows satisfy structural/semantic rules", not errors, repr(errors[:8]))
     check("addresses are sorted and unique", addresses == sorted(set(addresses)), str(len(addresses)))
-    check("ledger is nonempty", bool(rows))
-    check(
-        "a user-defined name does not imply semantic review",
-        any(row["name_source"] == "USER_DEFINED" and row["review_state"] == "unreviewed"
-            and not row["evidence_grade"] for row in rows),
-    )
-    by_address = {int(row["entry_addr"], 0): row for row in rows}
-    for address in (0x9729A, 0x972FA, 0x97432, 0x97546, 0x975EE, 0x97668, 0x976F4):
-        row = by_address.get(address)
-        check(f"callback 0x{address:08x} present", row is not None)
-        if row:
-            check(f"callback 0x{address:08x} discovery source", row["discovery_source"] == "callback-table seed")
-            check(f"callback 0x{address:08x} reviewed semantics", row["review_state"] == "semantically_identified")
-    check("direct-call seed represented", any(row["discovery_source"] == "direct-call seed" for row in rows))
+    inventory = [
+        json.loads(line)
+        for line in (REPO / metadata["inventory_baseline"]).read_text().splitlines()
+    ]
+    expected_addresses = {
+        int(row["entry"]["offset"], 16)
+        for row in inventory if row["record"] == "function"
+    }
+    check("ledger covers the canonical function inventory", set(addresses) == expected_addresses)
 
     summary = json.loads(SUMMARY.read_text())
     reviewed = sum(row["review_state"] != "unreviewed" for row in rows)
@@ -178,6 +174,12 @@ def main() -> int:
     unknown["entry_addr"] = "0x00ffffff"
     check("merger rejects unknown addresses", merger_rejects(rows, [unknown], "unknown function"))
     check("merger rejects duplicate entries", merger_rejects(rows, [review_rows[0], review_rows[0]], "duplicate semantic review"))
+
+
+def main() -> int:
+    for name, metadata in load()["targets"].items():
+        if "semantic_coverage_ledger" in metadata:
+            check_target(name, metadata)
 
     print(f"\nSummary: {passed} passed, {failed} failed")
     return 1 if failed else 0

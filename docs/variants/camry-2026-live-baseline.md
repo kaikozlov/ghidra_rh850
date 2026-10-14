@@ -7602,3 +7602,90 @@ Toyota's own wake-active traffic is visible.
 The existing Python warm-uploader/backend is unchanged except for recording the
 new wake-relative timing fields. Exact RAM install, READY/Park/stationary guard,
 peer-health check, and signer self-test remain the same.
+
+## 77. 2026-10-14 whole-image semantic reconstruction
+
+Scope: registered EPS target **`camry-8965F3307000`**, its exact CodeFlash and
+DataFlash, and the target-native four-stage rebuild. This does not reconstruct
+the absent FRC or brake-ECU firmware and does not establish new vehicle behavior.
+This section owns whole-image reconstruction conclusions; the earlier subsystem
+sections retain their more detailed evidence and capture boundaries.
+
+### 77.1 Coverage is not understanding
+
+The target now uses the existing semantic-coverage and outside-function
+machinery, with paths owned by
+[`analysis_targets.json`](../../data/analysis_targets.json). Structural exports
+check executable identity and do not apply Sienna's fixed-address callback-table
+rules to Camry. Curated reviews are distinct from generated metrics:
+
+- [`semantic_review_status.csv`](../../data/targets/camry-8965F3307000/semantic_review_status.csv)
+  records a function's conclusion, evidence source, grade, and execution status.
+- [`semantic_coverage_summary.json`](../../data/targets/camry-8965F3307000/semantic_coverage_summary.json)
+  reports the generated counts, not an estimated percentage of OEM intent recovered.
+- [`outside_function_summary.json`](../../data/targets/camry-8965F3307000/outside_function_summary.json)
+  is a conservative candidate census, not a missing-function count. Candidate
+  decoded-byte totals are sums of runs, not unique executable-byte coverage.
+
+A generic function name does not imply an unknown algorithm; a descriptive name
+does not imply a verified contract. Likewise, an unreviewed ledger row means no
+conclusion has been entered there, not that the earlier subsystem reports contain
+no evidence about that function.
+
+### 77.2 Executed contracts and durable prototypes
+
+`SeedCamryF33RecoveredFunctions.java` now owns these target-specific names,
+formal parameter types, return contracts, and comments:
+
+| Entry | Recovered contract | Evidence boundary |
+|---|---|---|
+| `0x35E4` | `f33_boot_copy_flash_driver_to_ram`: copies `0xCB` words from CodeFlash `0x8370..0x869B` to RAM `0xFEBF1000..0xFEBF132B`, reads back the last word, then `SYNCM` / `SYNCI` | Exact copied span and both canaries executed; not a measurement of physical cache timing |
+| `0x89F2E` | `f33_memcpy_forward(destination, source, byte_count)`, returning the original destination; word transfers require both pointers four-byte aligned | Exact firmware execution checks destination contents, source preservation, canaries, return value and stack; not an overlap-safe `memmove` |
+| `0x8A134` | `f33_memzero(destination, byte_count)`; byte alignment prelude, bulk blocks and word/byte tails | Exact firmware execution checks short unaligned and bulk/tail writes; zero-length cases make no destination write |
+| `0x90D6A` | `f33_freshness_commit_pending(slot, verification_result)`: slot `<2` and low-byte result `==1` copy 12 bytes from `FEBE55F4+12*slot` to `FEBE55DC+12*slot` | Pending-to-committed, not rollback or PDU dequeue; executed slot selection, rejected inputs and byte truncation |
+
+The offline execution used the registered firmware bytes in the RH850 machine,
+without replacement implementations: 248 memory alignment/length cases, six
+freshness cases, and the complete boot copy. Nine representative permanent
+scenarios live in
+[`tests/fixtures/rh850/machine/camry-8965F3307000/`](../../tests/fixtures/rh850/machine/camry-8965F3307000/).
+These establish the exercised software paths, not ECU timing or a road result.
+
+The memory prototypes recover previously omitted arguments in callers. For
+example, `0x88FC0` now exposes message-copy length and padding-zero length, and
+`0x8E9C6` exposes the enqueue copy's third argument. Queue copy-before-length-
+publication is checked from the exact `0x8E9FA..0x8EA25` instruction sequence,
+not generated variable/function spelling. Obsolete freshness spelling assertions
+were removed rather than renamed; the executable regressions protect the actual
+copy direction and admission conditions.
+
+### 77.3 Phase and decompiler boundaries
+
+The boot copy makes RAM callback `0xFEBF12B8` correspond to CodeFlash `0x8628`.
+Application routines `0x88F92` / `0x88FC0` later zero and populate overlapping
+crypto buffers. A permanent RAM-function interpretation is therefore wrong for
+the application phase. The existing one-byte, uninitialized-RAM function output
+is not a recovered implementation; the ROM source and relocation must be read
+together. The relocation regression does not execute the callback's privileged
+device accesses.
+
+Boot TP base `0x869C` contains pointer-bearing data, while its current function
+interpretation yields bad-data pseudocode. That output is not evidence of a
+meaningful function. Dispatcher/data typing and the apparent incoming call must
+be resolved before treating the discovered-function set as closed.
+
+At `0x3614`, disassembly writes and polls `CDBCR` / `ICCTRL` bits, but the current
+decompiler register model folds the waits into infinite loops and removes later
+instructions. The G3M software manual **R01US0123EJ0140**, Table 3-64 (p.110),
+specifies that `CDBCR.CDBCLR` bit 1 is write-only and **always reads zero**.
+Table 3-60 (p.106) specifies that `ICCTRL.ICHCLR` bit 8 reads one until clearing
+completes, then zero. The first apparent infinite loop is therefore contradicted
+by documented register semantics; the second requires asynchronous hardware
+completion rather than a constant register value. No physical completion timing
+is established here. Raw instructions, dataflow, and hardware authority remain
+necessary proof; a successful decompiler export is insufficient.
+
+The final current-to-PWM path, NvM restore grouping, calibration units and
+physical signal identities retain their existing bounded status until their
+specific producer/consumer chains are established. Neither whole-image review
+nor the primitive executions above close those questions by implication.

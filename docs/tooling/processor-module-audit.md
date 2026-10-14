@@ -364,7 +364,7 @@ for the earlier version-only migration evidence.
 
 ## Exact project parity
 
-The current normalized project inventory has **7,090 functions, 197,726
+The legacy Sienna normalized project inventory has **7,090 functions, 197,726
 instructions, and 8,813 symbols**. Aggregate floors remain useful as a fast
 collapse detector, but they cannot detect equal-count substitutions. The deterministic
 `ExportProjectInventory.java` exporter therefore records path-free Ghidra and
@@ -384,13 +384,14 @@ spurious functions when `ghidra/scripts/investigate` was present.
 Whole-image structural function inventory (not full semantic understanding):
 
 - Exporter: `ghidra/scripts/verify/ExportSemanticCoverageLedger.java`
-  (read-only headless against `build/work/project/` only).
-- Generator: `make generate-semantic-coverage` /
-  `tools/project/export_ghidra_project.sh semantic-coverage`
-- Artifacts: `data/semantic_coverage_ledger.csv` and
-  `data/semantic_coverage_summary.json`
-- Gate: `tests/tooling/verify_semantic_coverage.py` (runs in the
-  `tools/test full` / `local` sweeps, not core)
+  (read-only, executable-hash-bound, against disposable `build/work/` projects).
+- Generator: `make generate-semantic-coverage TARGET=... PROJECT_DIR=...`;
+  commands and lifecycle are owned by [WORKFLOW](../WORKFLOW.md#verification).
+- Artifact/review paths: `data/analysis_targets.json` fields
+  `semantic_coverage_ledger`, `semantic_coverage_summary`, and `semantic_reviews`.
+  Legacy Sienna retains its top-level paths; Camry uses its target directory.
+- Gate: `tests/tooling/verify_semantic_coverage.py` checks all registered coverage
+  targets, including equality with each canonical function-entry inventory.
 
 Each CSV row is one discovered function, sorted by entry address, with Ghidra
 discovery and name provenance, calling convention, caller/callee counts,
@@ -415,14 +416,15 @@ DATA reference into CodeFlash that is not a function entry (scalars included),
 not a table-only classifier. The ledger deliberately does **not** claim that
 every function is behaviorally understood.
 
-Current review counts are generated in `data/semantic_coverage_summary.json`.
-The curated conclusions live in `data/semantic_review_status.csv`; automatic
-decompilation-only entries are not counted as reviews. The earlier selected
-sweep and corrected-graph re-audit remain in the
+Review counts are generated in each target's registered summary. Curated
+conclusions are separate inputs; automatic decompilation-only entries are not
+counted as reviews. Camry's reconstruction evidence and remaining boundaries are
+owned by [its report](../variants/camry-2026-live-baseline.md#77-2026-10-14-whole-image-semantic-reconstruction).
+The earlier Sienna selected sweep and corrected-graph re-audit remain in the
 [historical report](../history/2026-08/CORRECTED_GRAPH_REAUDIT_2026-08-11.md).
 
-This in-function inventory is not an executable denominator. After importing
-the upstream function-start patterns, the separate outside-function exporter
+This in-function inventory is not an executable denominator. For **Sienna**,
+after importing the upstream function-start patterns, the outside-function exporter
 records 900 conservative candidate runs containing 7,186 decoded instructions
 in 18,138 bytes: 281 orphan decoded runs and 619 pointer-referenced runs, all
 unresolved. Two independent four-stage rebuilds converge at 7,090 functions /

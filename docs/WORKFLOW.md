@@ -668,18 +668,27 @@ make verify-project-parity        # exact working-project inventory vs baseline
 ```
 
 The processor fixtures cover all four language profiles. Their optional
-whole-program audits and the live semantic-coverage ledger are legacy-Sienna
-checks, not selected-target-generic suites. For a fresh disposable Sienna project:
+whole-program audits remain legacy-Sienna checks:
 
 ```bash
-make verify-processor PROJECT_DIR="$PWD/build/work/sienna-rebuild"
-GHIDRA_ANALYSIS_TARGET=sienna-8965B4512000 \
-  make verify-semantic-coverage-live PROJECT_DIR="$PWD/build/work/sienna-rebuild"
+make verify-processor TARGET=sienna-8965B4512000 PROJECT_DIR="$PWD/build/work/sienna-rebuild"
 ```
 
-Use the actual rebuilt directory; neither command rebuilds it. The explicit
-target environment selects Sienna for the coverage exporter even when the
-registry default is another target.
+Semantic coverage and outside-function discovery use the selected target's
+registered artifact paths and enforce its executable hash. Camry and Sienna
+have registered coverage/review inputs; Sienna-only dispatch-table rules are
+not transferred to Camry. Against an already rebuilt, stopped Camry project:
+
+```bash
+make generate-semantic-coverage TARGET=camry-8965F3307000 PROJECT_DIR="$PWD/build/work/targets/camry-8965F3307000/project"
+make generate-function-discovery TARGET=camry-8965F3307000 PROJECT_DIR="$PWD/build/work/targets/camry-8965F3307000/project"
+make verify-semantic-coverage-live TARGET=camry-8965F3307000 PROJECT_DIR="$PWD/build/work/targets/camry-8965F3307000/project"
+```
+
+These commands do not rebuild the project. The portable `semantic_coverage`
+suite checks each registered coverage ledger against its canonical function
+inventory. A reviewed row or a completed decompilation is not a claim of complete
+behavioral understanding; evidence grades and execution status remain separate.
 
 `verification.toml` lists suites and external prerequisites. It does not
 assign tests to changed files. Broad sweeps and Ghidra rebuilds are release or
@@ -805,15 +814,17 @@ not maintain a second hardware map.
    it catches equal-count substitutions and annotation drift that floors miss.
 
 When a deliberate seed/annotation change alters the inventory, run
-`make update-project-baseline PROJECT_DIR_A=/abs/rebuild-a
-PROJECT_DIR_B=/abs/rebuild-b`. The update fails unless two independent fresh
+`make update-project-baseline TARGET=camry-8965F3307000 PROJECT_DIR_A=/abs/rebuild-a
+PROJECT_DIR_B=/abs/rebuild-b` (select the actual target). The update fails unless two independent fresh
 rebuilds produce byte-identical canonical inventories. Review the tracked diff,
 then rerun `make verify-project-parity`. Ordinary verification never updates the
 baseline.
 
-The whole-image corpus is the decompilation source; use `tools/pseudo` to read
-functions. `data/semantic_review_status.csv` retains human review conclusions.
-The semantic coverage/ranking tools provide navigation, not additional proof.
+The whole-image corpus is the decompilation source; use `tools/pseudo --target
+TARGET` to read functions. The registry's `semantic_reviews` path owns curated
+function conclusions; its `function_discovery_reviews` path owns adjudicated
+outside-function clusters. Exporters regenerate the corresponding ledgers and
+summaries. Structural coverage/ranking provides navigation, not additional proof.
 
 ## CI
 
