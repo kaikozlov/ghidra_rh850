@@ -256,7 +256,7 @@
     "0x06679E": {
       "body_sha256": "2799dc80b6170e177b6728d658bf5d9d35bcfa4bafcbacc65056df2f26cca134",
       "body_size": 24,
-      "decompiled_c_sha256": "d65e47f0ed4f5bd3f51c52105d8a29644ecf6500ba8af0d735ad1eadb9bcfc06",
+      "decompiled_c_sha256": "83618d2ae4bcce7b8c4d46292f8aa9289511a3fac565aa28a7989203c7bd5dbd",
       "role": "shared command task wrapper"
     },
     "0x0667E6": {
@@ -784,7 +784,7 @@
     "0x0D0AF6": {
       "body_sha256": "2eda8a4e734a3cd248c83c9cd41f906e0191ee48afa5ba72a73640da00823fc9",
       "body_size": 228,
-      "decompiled_c_sha256": "a73f2ed99427c3899d106d2bf56025540d7c6efb484c63178951fb4a866875f9",
+      "decompiled_c_sha256": "862867b9d02e5b95a5da36015f94f149a63c47ec815a2ecdb5ca3ce0c6ab4374",
       "role": "shared command aggregate"
     },
     "0x0D0EEC": {

@@ -1,0 +1,104 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_torque_decode_bounded_history",
+  "entry": {
+    "role": "full torque decode: signed calibrated channels, mode override, bounded history center and final amplitude clamp; explicitly initialized software state, no sensor acquisition or physical torque claim",
+    "scope": "resolved-address",
+    "address": "0x484f0"
+  },
+  "max_instructions": 20000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "isolated initialized nested-call stack"
+    },
+    {
+      "address": "0xfebe8a1c",
+      "hex": "5a",
+      "evidence": "software consume cadence is enabled"
+    },
+    {
+      "address": "0xfebe71ec",
+      "hex": "2000",
+      "evidence": "bit5 overrides selection to the negated full second-pair difference"
+    },
+    {
+      "address": "0xfebe7cb7",
+      "hex": "00",
+      "evidence": "default paired selection must be overridden"
+    },
+    {
+      "address": "0xfebe81e6",
+      "hex": "3408d007ff0f0000",
+      "evidence": "explicit four 12-bit decoded sensor values"
+    },
+    {
+      "address": "0xfebe6ad2",
+      "hex": "0008000800080008",
+      "evidence": "explicit midscale calibration zero points"
+    },
+    {
+      "address": "0xfebe7dfa",
+      "hex": "803e",
+      "evidence": "deliberately out-of-center retained software state exercises the preliminary +/-5120 center clamp"
+    }
+  ],
+  "checks": [
+    {
+      "name": "full native aggregate returns to the caller sentinel",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "nested calls restore the caller stack",
+      "kind": "register",
+      "register": "sp",
+      "equals": "0xfebe2000"
+    },
+    {
+      "name": "mode override selects the negated full second-pair difference",
+      "kind": "memory",
+      "address": "0xfebe7de8",
+      "size": 1,
+      "equals_hex": "01"
+    },
+    {
+      "name": "final decode has its independent signed amplitude clamp",
+      "kind": "memory",
+      "address": "0xfebe7dea",
+      "size": 2,
+      "equals_hex": "3d08"
+    },
+    {
+      "name": "channel mirrors and bounded-center tracking retain their distinct values",
+      "kind": "memory",
+      "address": "0xfebe7dec",
+      "size": 16,
+      "equals_hex": "e1ff1d001bfbe604c4ff34f698139813"
+    },
+    {
+      "name": "unsigned raw subtraction preserves signed differences",
+      "kind": "memory",
+      "address": "0xfebe7dfc",
+      "size": 16,
+      "equals_hex": "34000000d0ffffffff07000000f8ffff"
+    }
+  ]
+}

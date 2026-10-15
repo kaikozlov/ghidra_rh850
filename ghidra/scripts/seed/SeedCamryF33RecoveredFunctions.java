@@ -2142,6 +2142,117 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     getFunctionAt(toAddr(0x38C7CL)).setComment("Transform limited first-bank regulated axis commands to phase triplet6E68/6A/6C using output-frame coefficients; signed saturation +/-32767. Compensation and modulation offset/clipping follow.");
     getFunctionAt(toAddr(0x38D6CL)).setComment("Second-bank regulated axis-to-phase transform, publishing6E70/72/74. Not the same interface as measured-frame feedback coefficients or reference compensation.");
   }
+  private void annotateSensingPipeline() throws Exception {
+    DataType v = VoidDataType.dataType;
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u16 = UnsignedShortDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    DataType s16 = ShortDataType.dataType;
+    DataType s32 = IntegerDataType.dataType;
+    semanticFunction(0x6091EL, "f33_read_transfer_descriptor_head", u32,
+        new ParameterImpl("channel", u8, currentProgram))
+        .setComment("Read u32 at FFFF8404+64*low8(channel). R6-scaled signed displacement, NOT GP-relative "
+            + "FEBE3C00. No local channel bound; physical descriptor-block identity remains separate.");
+    semanticFunction(0x60940L, "f33_count_transfer_entries", u16,
+        new ParameterImpl("channel", u8, currentProgram))
+        .setComment("Channels<16 combine low/high halfwords of descriptor+08/+18 using low16 arithmetic; "
+            + "otherwise return0. BaseFFFF8400 is independent of GP. A count does not establish sample age.");
+    semanticFunction(0x668E2L, "f33_consume_rsent_sensor_slots", v)
+        .setComment("On odd5F28 consume two slot records through62B32 and publish5F02..5F10; increment5F28 "
+            + "on every call. Software one-of-two cadence, not proof that hardware supplied a new frame.");
+    semanticFunction(0x4845EL, "f33_select_torque_pair_differences", s16,
+        new ParameterImpl("first_pair", s16, currentProgram),
+        new ParameterImpl("second_pair", s16, currentProgram))
+        .setComment("R6/R7 are the saturated A-B and C-D differences, BEFORE their /2 diagnostic mirrors. "
+            + "7CB7 selects (first-second)/2, negated second, or first. Nonzero71EC bits5/6 override: "
+            + "bit5 selects negated second, otherwise first. Publish the effective selector at7DE8.");
+    semanticFunction(0x4849AL, "f33_bound_torque_tracking_step", s16,
+        new ParameterImpl("value", s16, currentProgram),
+        new ParameterImpl("previous", s16, currentProgram))
+        .setComment("FIRST clamp previous to+/-5120, then bound value within that center+/-u16[30E50]. "
+            + "Exact window is5120. This is not an unbounded previous-value-centered slew limiter.");
+    semanticFunction(0x484D2L, "f33_clamp_decoded_torque", s16,
+        new ParameterImpl("value", s16, currentProgram))
+        .setComment("Clamp signed16 input to+/-s16[30E52], exact2109 raw counts, and return in R10.");
+    semanticFunction(0x484F0L, "f33_decode_torque_sensor_channels", v)
+        .setComment("Only on8A1C==5A: subtract four zero points from unsigned raw channels, apply signed "
+            + "ROM gains/div2048, publish channel/pair mirrors, select from the full pair differences, bound the tracking center/step "
+            + "and independently amplitude-clamp into7DEA. Alternate software cadence retains state.");
+    semanticFunction(0x48684L, "f33_publish_selected_torque_feedback", v)
+        .setComment("On8A1C==5A publish7E0C from6870 if686C==5A, otherwise7DEA; else hold. "
+            + "The selection byte alone is not a physical sensor-health classification.");
+    semanticFunction(0x486D0L, "f33_condition_measured_phase_currents", v)
+        .setComment("Two triples: reconcile offset references, learn only when -768<6D7C<768 and each history "
+            + "is>=2294; this is separate from reconstruction when any history>30474. Select signed gains "
+            + "by difference sign, saturate wide product before /16384, clamp+/-32767, retain raw mirrors. "
+            + "Replace the selected phase by minus the other two; ties favor phase1 over0, then phase2.");
+    semanticFunction(0x47D62L, "f33_select_electrical_angle_sample", u16,
+        new ParameterImpl("channel", u8, currentProgram))
+        .setComment("Channel1 selects8250, all others824C. Store7D90 and RETURN the selected halfword inR10. "
+            + "The real leaf preserves caller R7, reused as the correction-table bank.");
+    // Preserve the actual R7 bank across this leaf, not an invented extra return or ABI shim.
+    getFunctionAt(toAddr(0x47D62L)).setInline(true);
+    semanticFunction(0x47DA2L, "f33_correct_electrical_angle_sample", s16,
+        new ParameterImpl("enabled", u8, currentProgram),
+        new ParameterImpl("bank", u8, currentProgram),
+        new ParameterImpl("phase", s16, currentProgram))
+        .setComment("When enabled==5A subtract signed-byte circular interpolation at A0C0+256*bank. "
+            + "Index255 wraps to0; signed division256 truncates toward zero. Return narrowed signed16 phase.");
+    semanticFunction(0x47DF8L, "f33_accumulate_electrical_angle", s32,
+        new ParameterImpl("previous", s32, currentProgram),
+        new ParameterImpl("phase", s16, currentProgram))
+        .setComment("Wrap signed low-half delta into[-32768,32768), preserve the new phase low16, and adjust "
+            + "the coarse accumulator by06660000 around+/-03330000. Software counts, not established turns.");
+    semanticFunction(0x47E4CL, "f33_update_electrical_angle_feedback", v)
+        .setComment("Select by71EC.bit7, correct using6A7B and the retained channel bank, accumulate into7DA0 "
+            + "and publish7D92. Normally copy to7D78/7D94;7566==5A substitutes7576/7578 only in publication. "
+            + "Feeds rotating-frame coefficients; physical sensor mount is not inferred.");
+  }
+  private void annotateRateObserver() throws Exception {
+    DataType v = VoidDataType.dataType;
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType s32 = IntegerDataType.dataType;
+    StructureDataType sample =
+        new StructureDataType(new CategoryPath("/CamryF33"), "F33RateObserverSample", 0);
+    sample.setPackingEnabled(true);
+    sample.add(u8, "state", "Candidate state or retained C08E.");
+    sample.add(u8, "qualification", "Candidate C0B6 or retained C08F; not a new-sample guarantee.");
+    sample.add(new ArrayDataType(u8, 2, 1), "reserved", "Unwritten padding.");
+    sample.add(s32, "rate", "Signed rate at offset4; zero on a failed sample gate with nonzero divisor.");
+    semanticFunction(0xC452EL, "f33_sample_rate_observer", v,
+        new ParameterImpl("sample", new PointerDataType(resolve(sample), 4), currentProgram))
+        .setComment("Require AD3C!=0/3,BFB9==5A,BFC5==0 and C0B4>=selected threshold1. Delta is low32 "
+            + "ABA4-(ABA0<<7)-(ABA8<<7); rate=(delta/8)/((u16AC12<<4)/1024). Failed gate zeroes delta "
+            + "but RETAINS state/qualification. A zero divisor alone holds oldC084. Output layout is8 bytes.");
+    semanticFunction(0xC45C0L, "f33_commit_rate_observer", v)
+        .setComment("Always run C330C source snapshot/qualification prework. Only AC07==5A samples and "
+            + "commits C08F,then C08E,then C084 under PMRFFC0. Closed outer gate holds publication.");
+    semanticFunction(0xC3F56L, "f33_reset_rate_observer", v)
+        .setComment("Reset external-source acquisition throughC2E14, then C084,C06C,C08E/F and C090/91. "
+            + "Sibling estimator, acquisition verdicts and cross-rate interface have separate reset owners.");
+    semanticFunction(0xC492CL, "f33_qualify_rate_observer_acquisition", v)
+        .setComment("Snapshot source/status/complement/residual inputs, acknowledge reseed one-shots, then "
+            + "run consistencyC4640 and plausibility/channel routingC489C. Qualification is distinct from "
+            + "C45C0 sampling and from actual hardware arrival timing.");
+    semanticFunction(0xC4BCEL, "f33_update_rate_observer_deadband", v)
+        .setComment("Initialize band until state11/22 latches initialization; select32 for11/other,0 for22, "
+            + "adapt one count per invocation, retain direction-dependent active band, then publish "
+            + "deadband excessC0CC and stateC0D0 under PMR. Invalid state reinitializes on each call.");
+    semanticFunction(0xC71D0L, "f33_update_observer_dependent_assist_bound", v)
+        .setComment("C08F==0 targets gain0 with coefficient16384; otherwise target1024 with286 unless the "
+            + "completion latch still requires clearing. Retained accumulator divisor16384. "
+            + "C37E=1792+3328*C37C/1024: qualification loss reduces the bound, NOT to zero.");
+    semanticFunction(0xC7286L, "f33_map_observer_rate_to_assist_bound", v)
+        .setComment("Clamp C084 symmetrically to+/-32767, map its magnitude through B0126 and publish "
+            + "C378. This is an assist amplitude bound, not a phase counter or sample-age flag.");
+    semanticFunction(0xC72C0L, "f33_compose_observer_dependent_assist", v)
+        .setComment("Sum signed16 C894,C4A0,C3EA,C524,C2E2 into s32C330; clamp toC378 intoC334, then "
+            + "to min(C37E,C37A), narrow intoC3A0. D0162 consumes this term intoCC2C: no direct C084 "
+            + "read in the command slice does NOT mean independence from the observer.");
+    semanticFunction(0xD0C16L, "f33_publish_rate_observer_interface", v)
+        .setComment("Copy external-source qualifierBFC5 toAC08; under PMRFFC0 publish C084->AC1C and "
+            + "C08E->AC09. Do not conflate this interface snapshot with the direct nested-assist consumers.");
+  }
   private void annotateAssistComposition() throws Exception {
     DataType v = VoidDataType.dataType;
     DataType s16 = ShortDataType.dataType;
@@ -2589,6 +2700,8 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     annotateApplicationRecordApis();
     annotateNvmDirectOperations();
     annotateControlPipeline();
+    annotateSensingPipeline();
+    annotateRateObserver();
     annotateAssistComposition();
     annotateApplicationLifecycle();
     annotateServiceLifecycle();

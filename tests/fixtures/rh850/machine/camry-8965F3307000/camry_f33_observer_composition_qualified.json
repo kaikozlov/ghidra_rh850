@@ -1,0 +1,169 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_observer_composition_qualified",
+  "entry": {
+    "role": "real observer subsequence C45C0 -> C4BCE including source qualification, sampling, protected publication and stateful deadband; acquisition consistency prework and subsequent consumers are outside this boundary",
+    "scope": "resolved-address",
+    "address": "0xd0c6c"
+  },
+  "max_instructions": 20000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0xd0c74"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "isolated initialized nested-call stack"
+    },
+    {
+      "address": "0xfebeac01",
+      "hex": "0000",
+      "evidence": "external-source qualifier is clearing; source status snapshot is explicit"
+    },
+    {
+      "address": "0xfebeac18",
+      "hex": "6079feff",
+      "evidence": "real prework negates this input into ABA4"
+    },
+    {
+      "address": "0xfebebf6d",
+      "hex": "0509",
+      "evidence": "clear qualifier reaches its ten-invocation boundary during prework"
+    },
+    {
+      "address": "0xfebebfc5",
+      "hex": "5a",
+      "evidence": "previous external-source override must clear before sample admission"
+    },
+    {
+      "address": "0xfebeac07",
+      "hex": "5a",
+      "evidence": "observer publication is enabled"
+    },
+    {
+      "address": "0xfebead3c",
+      "hex": "01",
+      "evidence": "ordinary threshold branch"
+    },
+    {
+      "address": "0xfebebfb9",
+      "hex": "5a",
+      "evidence": "sample gate result distinguishes the two transitions"
+    },
+    {
+      "address": "0xfebec0b4",
+      "hex": "0200",
+      "evidence": "acquisition count exceeds exact threshold1"
+    },
+    {
+      "address": "0xfebec0b6",
+      "hex": "5a22",
+      "evidence": "candidate qualifier and state; rejected case must not publish these"
+    },
+    {
+      "address": "0xfebeaba0",
+      "hex": "64000000",
+      "evidence": "explicit sibling average"
+    },
+    {
+      "address": "0xfebeaba8",
+      "hex": "00000000",
+      "evidence": "explicit retained estimator correction"
+    },
+    {
+      "address": "0xfebeac12",
+      "hex": "7155",
+      "evidence": "exact calibration-derived normal scale; divisor341"
+    },
+    {
+      "address": "0xfebec084",
+      "hex": "19fcffff",
+      "evidence": "prior rate must be replaced, including on sample-gate failure"
+    },
+    {
+      "address": "0xfebec08e",
+      "hex": "1100",
+      "evidence": "previous state and qualification differ from the candidate"
+    },
+    {
+      "address": "0xfebec0b8",
+      "hex": "64000000200000002000000020000000000001000903000011",
+      "evidence": "initialized positive-direction history: prior sample100 and selected/target/active bands32; candidate state22 requests zero width but must not discard the retained active band"
+    }
+  ],
+  "checks": [
+    {
+      "name": "real observer subsequence reaches the next consumer stage",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0xd0c74"
+    },
+    {
+      "name": "nested calls restore the caller stack",
+      "kind": "register",
+      "register": "sp",
+      "equals": "0xfebe2000"
+    },
+    {
+      "name": "source prework clears the prior override at its threshold",
+      "kind": "memory",
+      "address": "0xfebebfc5",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "source qualification counters retain their distinct transition",
+      "kind": "memory",
+      "address": "0xfebebf6d",
+      "size": 2,
+      "equals_hex": "000a"
+    },
+    {
+      "name": "committed rate reflects the sample gate rather than holding the prior rate",
+      "kind": "memory",
+      "address": "0xfebec084",
+      "size": 4,
+      "equals_hex": "1f000000"
+    },
+    {
+      "name": "published state and qualification select candidate or retained pair",
+      "kind": "memory",
+      "address": "0xfebec08e",
+      "size": 2,
+      "equals_hex": "225a"
+    },
+    {
+      "name": "zero-width request advances the target one count while direction retains the active band",
+      "kind": "memory",
+      "address": "0xfebec0bc",
+      "size": 12,
+      "equals_hex": "000000001f00000020000000"
+    },
+    {
+      "name": "retained active band suppresses the new positive sample without changing its published state",
+      "kind": "memory",
+      "address": "0xfebec0cc",
+      "size": 5,
+      "equals_hex": "0000000022"
+    },
+    {
+      "name": "both publication critical sections restore the original priority mask",
+      "kind": "register",
+      "register": "PMR",
+      "equals": "0xff00"
+    }
+  ]
+}

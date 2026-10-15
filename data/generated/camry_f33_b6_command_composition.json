@@ -229,7 +229,7 @@
     "0x0D0AF6": {
       "body_sha256": "2eda8a4e734a3cd248c83c9cd41f906e0191ee48afa5ba72a73640da00823fc9",
       "body_size": 228,
-      "decompiled_c_sha256": "a73f2ed99427c3899d106d2bf56025540d7c6efb484c63178951fb4a866875f9",
+      "decompiled_c_sha256": "862867b9d02e5b95a5da36015f94f149a63c47ec815a2ecdb5ca3ce0c6ab4374",
       "role": "shared command-composition coordinator"
     },
     "0x0D0EEC": {

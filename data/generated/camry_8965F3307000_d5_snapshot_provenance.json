@@ -5,7 +5,7 @@
       "0xFEBE5F30"
     ],
     "writers": {
-      "0x00066824": "getter 0x6217e (group-input channels 0/8) -> FEBE5EC8..5EDE; getter 0x629a2 (torque-sensor record pack) -> FEBE5F12..5F30",
+      "0x00066824": "getter 0x6217e (group-input channels 0/8) -> FEBE5EC8..5EDE; getter 0x629a2 (serial-sensor record pack) -> FEBE5F12..5F30",
       "0x000668e2": "getter 0x62b32 (hardware comm-entry values) -> FEBE5F02..5F10, gated on FEBE5F28 bit0",
       "0x00066932": "getters 0x62abc/0x62b18/0x6294e -> FEBE5EE0..5F00 and FEBE5F18..5F24",
       "0x00098f4c": "one-time init: zeroes FEBE5EBC..5EC3 and sets FEBE5EC4=1"
@@ -40,7 +40,7 @@
       "0x00037e48",
       "0x000bf33e"
     ],
-    "conclusion": "The only READ into these regions from any checked function is 0xBF33E reading FEBEAC54..FEBEAC7E, i.e. the already-verified B6-selected command-torque cone. 0x59448's FEBE7Fxx references are WRITEs (it cannot source COM values). No D5-path function reads generated COM/CAN staging.",
+    "conclusion": "The only READ into these regions from any checked function is 0xBF33E reading FEBEAC54..FEBEAC7E in the shared command-torque cone. 0x59448's FEBE7Fxx references are WRITEs, not COM-value reads. The checked D5 functions do not directly read generated COM staging.",
     "hits": {
       "0x00059448": [
         {
@@ -2910,14 +2910,14 @@
     ]
   },
   "command_torque_chain": {
-    "classification": "internal control state whose sole external input is the already-proved protected B6 target-angle ingress",
+    "classification": "internal command composition with protected-B6 and B6-independent assist contributions; this terminal is not proof of exclusive B6 provenance",
     "steps": [
       "DID 0x1C02 (0x0004e7d6): signed16(((FEBE6772 * FEBEE8A6)/0x2000)*100/0x100)",
       "0x0005d5e0 mirror: FEBE6772 = FEBEE40A",
-      "0x000bf33e: FEBEE40A = FEBEAC56 (the VAR-065-verified B6-selected internal command cone)"
+      "0x000bf33e: FEBEE40A = FEBEAC56 (diagnostic mirror of the shared command cone)"
     ]
   },
-  "conclusion": "The D5/snapshot/group-input path carries only (a) hardware/peripheral-fed shared-memory acquisition (DMAC rings + serial torque-sensor interface + ADC scan config), (b) internal control state (current loop, field weakening, angle integrator, rotation math), (c) the protected-B6-derived command-torque terminal, and (d) structural constants (invalid markers, zeroed error words). No generated COM/CAN value and no second-CAN route enters these cells; with controller-1 B6 absent this snapshot surface cannot carry hidden lateral command/state.",
+  "conclusion": "The recovered D5/snapshot/group-input path joins hardware/peripheral-fed shared-memory acquisition (DMAC rings, serial-sensor records and ADC scan configuration), internal current/angle/control state, the shared command-torque diagnostic terminal, and structural constants. The checked direct-reference graph identifies no alternate COM/CAN ingress. B6 absence does not eliminate the terminal's internal assist contributions or prove zero commanded output.",
   "did_export_callbacks": {
     "0x1035 steering_wheel_torque": "0x0004db70",
     "0x1091 torque_sensor_1_output": "0x0004dd62",
@@ -2984,11 +2984,11 @@
       "0x6213e": 8,
       "0x62a86/0x62af4": 14
     },
-    "descriptor_block": "FEBE3C00 + idx*0x40, 16 channels",
+    "descriptor_block": "FFFF8400 + idx*0x40, 16 channels; R6-scaled displacement, not GP-relative",
     "entry_semantics": "value = (entry & 0x7ff8) << 1; consume clears low halfword (ack)",
-    "fill_count_getter": "0x00060940 (reads seq@+0x18 vs base@+0x08)",
+    "fill_count_getter": "0x00060940 (combines low/high halfwords at +0x18 and +0x08 with low16 arithmetic)",
     "ring_base_map": "0x000620dc (ring size 0x1b0)",
-    "ring_layout": "contiguous FEEF80A0..FEEF90E0 followed by head counters FEEF90E0..FEEF90F4 and per-channel comm-entry blocks FEEF90F8..FEEF912B"
+    "ring_layout": "contiguous FEEF80A0..FEEF90E0 followed by head counters FEEF90E0..FEEF90F4 and four 24-byte comm-entry slots FEEF90F8..FEEF9157"
   },
   "ring_producers": {
     "application_code_writers": [
@@ -3084,14 +3084,8 @@
         "role": "serial driver B"
       },
       "0x0006378c": {
-        "named_sfr": [
-          "DCRA1CIN (CRC1 input register)"
-        ],
-        "raw_hits": [
-          "0xFFD51000",
-          "0xFFD51004",
-          "0xFFD51020"
-        ],
+        "named_sfr": [],
+        "raw_hits": [],
         "role": "CRC unit B"
       }
     },
@@ -3101,7 +3095,48 @@
       "0xFEEF9130"
     ]
   },
-  "schema": "camry-8965f3307000-d5-snapshot-provenance-v1",
+  "schema": "camry-8965f3307000-d5-snapshot-provenance-v2",
+  "serial_sensor_records": {
+    "config_tables": {
+      "chan_fifo_len_0x31411": [
+        20,
+        20
+      ],
+      "chan_fifo_ptrs_0x313fc": [
+        "0xFEEF8050",
+        "0xFEEF8078"
+      ],
+      "desc_channel_0x31676": [
+        "0x02",
+        "0x0A"
+      ],
+      "group_offsets_0x30f2c": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "group_offsets_0x30f34": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "image_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
+      "sensor_type_0x31678": [
+        "0x00",
+        "0x11"
+      ]
+    },
+    "electrical_angle_consumer": "0x50BBC scales f0 into824C/8250; 47D62 selects, 47DA2 corrects and 47DF8 accumulates it; 47B70 forms coefficients used by36144. Physical sensor mount is unassigned; this is not the RSENT torque or CAN0x025 wheel-angle path.",
+    "frame_decode": "0x00062488 (five-u16/ten-byte frame, 2-bit sequence check at FEBE3928, table-driven checksum 0x623ee, unpack 14/14/12-bit into FEBE38D0/D2/D4)",
+    "frame_fetch": "0x00061008 (per-channel 20x u16 FIFOs via flash PTR table 0x313fc)",
+    "record_pack": "0x000629a2 (two 12-byte records from FEBE38D0[i*6]; channel type 0x11 from table 0x31678 negates the 14-bit pairs)"
+  },
   "single_can_controller": {
     "conclusion": "A second CAN controller does not exist on this MCU; combined with the VAR-065 47-rule exhaustion of the single controller's acceptance surface, no second-CAN ingress route can feed the D5 path.",
     "mcu": "R7F701381 (RH850/P1M-E)",
@@ -3110,13 +3145,13 @@
   },
   "sources": {
     "corpus": "data/generated/camry-8965F3307000/decompilations.jsonl",
-    "corpus_sha256": "e17dcec4c17ae7e77d0143b4e098604a13740e0c1f845f4409b1a8cf5e98d37c",
+    "corpus_sha256": "aa53d830736cc9f48b3affcb444b5abd1384a98c971a379137dced17bb119eb6",
     "image": "firmware/camry-8965F3307000/CodeFlash.bin"
   },
   "staging": {
     "classification": {
       "0x00050b6a": "copies acquisition block FEBE5EC8..5EDE (group-input getter 0x6217e output) into FEBE822C..8242",
-      "0x00050bbc": "copies torque-sensor records FEBE5F12..5F30 into FEBE8244..825E with x4 scaling on FEBE824C/824E/8250/8252",
+      "0x00050bbc": "copies serial-sensor records FEBE5F12..5F30 into FEBE8244..825E with x4 scaling on FEBE824C/824E/8250/8252",
       "0x00050c38": "zero-fill of FEBE8260..8263 (error-words slot, no data payload)",
       "0x00058c9a": "init/reset only: seeds FEBE822C..8242 with invalid marker 0x8000 and constants (closes VAR-071's bounded second-staging-writer question)",
       "0x00059448": "snapshot distributor: staging -> freeze buffer FEBE5Cxx and working cells; its FEBE7Fxx references are WRITEs only"
@@ -3283,49 +3318,9 @@
   },
   "target": {
     "analysis_target": "camry-8965F3307000",
-    "corpus_function_count": 7178,
+    "corpus_function_count": 7187,
     "image_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
     "mcu": "R7F701381 (RH850/P1M-E)",
     "software_id": "8965F3307000"
-  },
-  "torque_sensor_serial": {
-    "config_tables": {
-      "chan_fifo_len_0x31411": [
-        20,
-        20
-      ],
-      "chan_fifo_ptrs_0x313fc": [
-        "0xFEEF8050",
-        "0xFEEF8078"
-      ],
-      "desc_channel_0x31676": [
-        "0x02",
-        "0x0A"
-      ],
-      "group_offsets_0x30f2c": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5
-      ],
-      "group_offsets_0x30f34": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5
-      ],
-      "image_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
-      "sensor_type_0x31678": [
-        "0x00",
-        "0x11"
-      ]
-    },
-    "frame_decode": "0x00062488 (5-byte frame, 2-bit sequence check at FEBE3928, CRC verify 0x623ee, unpack 14/14/12-bit into FEBE38D0/D2/D4)",
-    "frame_fetch": "0x00061008 (per-channel 20x u16 FIFOs via flash PTR table 0x313fc)",
-    "record_pack": "0x000629a2 (two 12-byte records from FEBE38D0[i*6]; channel type 0x11 from table 0x31678 negates the 14-bit pairs)"
   }
 }

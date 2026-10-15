@@ -4,11 +4,11 @@
 "D5" names the 0x5Dxxx snapshot-mirror trio (0x5D12C/0x5D5E0/0x5D6DC, driven by
 0x58B1A under selector switches) plus the acquisition staging FEBE822C..FEBE8260
 that feeds it.  This builder deterministically re-derives, from the canonical
-7,178-function decompiler corpus and the exact CodeFlash image:
+registered target decompiler corpus and the exact CodeFlash image:
 
 * the staging writer/reader census and per-writer copy edges,
 * the group-input consume API over hardware-fed GlobalRAM rings,
-* the serial torque-sensor frame decode chain,
+* the serial-sensor frame decode chain and its electrical-angle consumer,
 * the driver-torque / command-current / command-torque working-cell chains and
   their Techstream/GTS+ DID export formulas,
 * a CAN-join guard proving no D5-path function reads the generated-COM receive
@@ -233,7 +233,7 @@ def build() -> dict:
             guard[ea] = hits
 
     artifact = {
-        "schema": "camry-8965f3307000-d5-snapshot-provenance-v1",
+        "schema": "camry-8965f3307000-d5-snapshot-provenance-v2",
         "target": {
             "analysis_target": "camry-8965F3307000",
             "software_id": "8965F3307000",
@@ -263,7 +263,7 @@ def build() -> dict:
                     "output) into FEBE822C..8242"
                 ),
                 "0x00050bbc": (
-                    "copies torque-sensor records FEBE5F12..5F30 into FEBE8244..825E with "
+                    "copies serial-sensor records FEBE5F12..5F30 into FEBE8244..825E with "
                     "x4 scaling on FEBE824C/824E/8250/8252"
                 ),
                 "0x00050c38": "zero-fill of FEBE8260..8263 (error-words slot, no data payload)",
@@ -288,7 +288,7 @@ def build() -> dict:
             "writers": {
                 "0x00066824": (
                     "getter 0x6217e (group-input channels 0/8) -> FEBE5EC8..5EDE; getter "
-                    "0x629a2 (torque-sensor record pack) -> FEBE5F12..5F30"
+                    "0x629a2 (serial-sensor record pack) -> FEBE5F12..5F30"
                 ),
                 "0x00066932": "getters 0x62abc/0x62b18/0x6294e -> FEBE5EE0..5F00 and FEBE5F18..5F24",
                 "0x000668e2": (
@@ -299,8 +299,8 @@ def build() -> dict:
             },
         },
         "group_input_api": {
-            "descriptor_block": "FEBE3C00 + idx*0x40, 16 channels",
-            "fill_count_getter": "0x00060940 (reads seq@+0x18 vs base@+0x08)",
+            "descriptor_block": "FFFF8400 + idx*0x40, 16 channels; R6-scaled displacement, not GP-relative",
+            "fill_count_getter": "0x00060940 (combines low/high halfwords at +0x18 and +0x08 with low16 arithmetic)",
             "ring_base_map": "0x000620dc (ring size 0x1b0)",
             "accessors": {
                 "0x00060630": {"table": "0xFEEF80A0", "entries": 0x50},
@@ -312,7 +312,7 @@ def build() -> dict:
             "d5_channels": {"0x620fe": 0, "0x6213e": 8, "0x62a86/0x62af4": 0xE},
             "ring_layout": (
                 "contiguous FEEF80A0..FEEF90E0 followed by head counters FEEF90E0..FEEF90F4 "
-                "and per-channel comm-entry blocks FEEF90F8..FEEF912B"
+                "and four 24-byte comm-entry slots FEEF90F8..FEEF9157"
             ),
         },
         "ring_producers": {
@@ -333,17 +333,22 @@ def build() -> dict:
             "sfr_evidence": sfr_refs,
             "sfr_name_source": MANUAL,
         },
-        "torque_sensor_serial": {
+        "serial_sensor_records": {
             "frame_fetch": (
                 "0x00061008 (per-channel 20x u16 FIFOs via flash PTR table 0x313fc)"
             ),
             "frame_decode": (
-                "0x00062488 (5-byte frame, 2-bit sequence check at FEBE3928, CRC verify "
-                "0x623ee, unpack 14/14/12-bit into FEBE38D0/D2/D4)"
+                "0x00062488 (five-u16/ten-byte frame, 2-bit sequence check at FEBE3928, "
+                "table-driven checksum 0x623ee, unpack 14/14/12-bit into FEBE38D0/D2/D4)"
             ),
             "record_pack": (
                 "0x000629a2 (two 12-byte records from FEBE38D0[i*6]; channel type 0x11 from "
                 "table 0x31678 negates the 14-bit pairs)"
+            ),
+            "electrical_angle_consumer": (
+                "0x50BBC scales f0 into824C/8250; 47D62 selects, 47DA2 corrects and 47DF8 "
+                "accumulates it; 47B70 forms coefficients used by36144. Physical sensor mount "
+                "is unassigned; this is not the RSENT torque or CAN0x025 wheel-angle path."
             ),
             "config_tables": builder_facts(),
         },
@@ -391,11 +396,11 @@ def build() -> dict:
             "steps": [
                 "DID 0x1C02 (0x0004e7d6): signed16(((FEBE6772 * FEBEE8A6)/0x2000)*100/0x100)",
                 "0x0005d5e0 mirror: FEBE6772 = FEBEE40A",
-                "0x000bf33e: FEBEE40A = FEBEAC56 (the VAR-065-verified B6-selected internal command cone)",
+                "0x000bf33e: FEBEE40A = FEBEAC56 (diagnostic mirror of the shared command cone)",
             ],
             "classification": (
-                "internal control state whose sole external input is the already-proved "
-                "protected B6 target-angle ingress"
+                "internal command composition with protected-B6 and B6-independent "
+                "assist contributions; this terminal is not proof of exclusive B6 provenance"
             ),
         },
         "structural_constants": {
@@ -426,9 +431,9 @@ def build() -> dict:
             "hits": guard,
             "conclusion": (
                 "The only READ into these regions from any checked function is 0xBF33E "
-                "reading FEBEAC54..FEBEAC7E, i.e. the already-verified B6-selected "
-                "command-torque cone. 0x59448's FEBE7Fxx references are WRITEs (it cannot "
-                "source COM values). No D5-path function reads generated COM/CAN staging."
+                "reading FEBEAC54..FEBEAC7E in the shared command-torque cone. "
+                "0x59448's FEBE7Fxx references are WRITEs, not COM-value reads. "
+                "The checked D5 functions do not directly read generated COM staging."
             ),
         },
         "single_can_controller": {
@@ -442,14 +447,13 @@ def build() -> dict:
             ),
         },
         "conclusion": (
-            "The D5/snapshot/group-input path carries only (a) hardware/peripheral-fed "
-            "shared-memory acquisition (DMAC rings + serial torque-sensor interface + ADC "
-            "scan config), (b) internal control state (current loop, field weakening, angle "
-            "integrator, rotation math), (c) the protected-B6-derived command-torque "
-            "terminal, and (d) structural constants (invalid markers, zeroed error words). "
-            "No generated COM/CAN value and no second-CAN route enters these cells; with "
-            "controller-1 B6 absent this snapshot surface cannot carry hidden lateral "
-            "command/state."
+            "The recovered D5/snapshot/group-input path joins hardware/peripheral-fed "
+            "shared-memory acquisition (DMAC rings, serial-sensor records and ADC "
+            "scan configuration), internal current/angle/control state, the shared "
+            "command-torque diagnostic terminal, and structural constants. "
+            "The checked direct-reference graph identifies no alternate COM/CAN "
+            "ingress. B6 absence does not eliminate the terminal's internal assist "
+            "contributions or prove zero commanded output."
         ),
         "boundary": [
             "Negative proofs are scoped to the canonical direct data-reference graph: computed aliases without a recovered reference, DMA/hardware mutation of LocalRAM outside the GlobalRAM rings, and unrecovered code remain outside the proof.",
