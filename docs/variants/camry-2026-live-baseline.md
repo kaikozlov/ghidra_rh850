@@ -4099,57 +4099,64 @@ SecOC queue / route44 raw-COM / application publication and common controller-he
 state. Repeating an `0x08A` forwarding-block experiment would test the wrong layer.
 
 
-## 55. DataFlash NvM closure: learned state does not feed the assist funnel (VAR-112)
+## 55. DataFlash descriptors, retained state and the learned-state evidence boundary (VAR-112)
 
-The maintainer challenge to CORR-151/VAR-111 — "unless there's something in the
-DataFlash we haven't looked at, this is bullshit" — is now answered with bytes
-rather than narrative. The exact-F33 `DataFlash.bin` had previously been only
-key-window-scanned (VAR-055); its NvM object/layout layer was never decoded.
+**Corrected 2026-10-14 for exact `camry-8965F3307000`.** The earlier claim that
+learned DataFlash state cannot feed the assist funnel was not established.
+Disjoint same-function reference sets do not exclude propagation through
+intermediate functions or RAM. Equal staged/active values in one capture also
+do not establish absence of a runtime dependency. Neither observation closes
+the learned-state explanation for B6-independent steering.
 
-The boot NvM job table is recovered at ROM `0x27636`: 48 stride-6 handles
-`{u16 payload_len, u16 pad, u16 page}` read through `FUN_00074884` (length),
-`FUN_00077314` (allocation pages), and `FUN_00074892` (page<<6 base). Handles
-map DataFlash pages 479..432 with payload lengths 32/16/8. The committed-marker
-rule (`storage_index == 480 - page` plus the `0xAAAAAAAA` trailer, verified
-against the reference analyzer's independent decode) yields **9/48 committed
-slots** on the retained `231fbdde…4432` dump: the object-0 raw/XOR55/XORAA
-family at slots 1/5/9 is fully committed; the adjacent interleaved banks
-(slots 2-4, 6-8, 10-12 — the 8-byte learned-state pages) are uncommitted.
+Exact instructions recover a six-byte descriptor table at **`0x27634`**:
+`{page:u16, payload_bytes:u16, option:u8, opaque:u8}`. The unsigned bound read
+by `0x77982` and other callers is **123**, at `0x27928`. Accessors
+`0x74892`, `0x74884`, `0x748A2` read offsets 0, 2 and 4 respectively.
+Descriptor zero has page `FFFF`; it is excluded from the physical-record census.
+Descriptors 1..48 occupy single pages 479..432. Descriptors 49..122 include
+larger allocations, down to page 256. All registered option bytes are zero.
 
-Live READY-state values from the retained 2026-08-26 PE1 LocalRAM dump:
+The previous decoder incorrectly started each record at its **length field**
+`0x27636`, pairing that length with the **next descriptor's page**. For example,
+page 479 belongs to handle 1 with length 16, not handle 0 with length 32; page
+477 belongs to handle 3 with length 8, not the preceding length 16. Its
+`handle//3` and `handle%3` object/copy labels had no recovered grouping authority
+and are removed.
 
-- the four-channel torque-sensor offsets are at the **neutral `0x0800`
-  default** in both staged (`FEBE6AD2`) and active (`FEBE6AE6`) images —
-  the four LE u16 channels each read `0x0800`, exactly the neutral value
-  the Corolla's RID `0x1109` restore path writes;
-- the 45-byte learned block is staged==active (`FEBE6A26`/`FEBE6A84`), so
-  the consistency checkers (`FUN_00035532` family) report clean;
-- the `A55A5AA5` marker family is intact at `FEBE6AAA`.
+`0x748B0` determines the whole allocation, including record overhead.
+`0x778FE` locates the trailer at `allocation_pages*64−4`; it is not always
+at byte 60 of the first page. The read chain at `0x77B12` checks the trailer
+through `0x77AA8`, then the stored handle through `0x7786A`, then payload and,
+for larger records, additional checksum handling. The stored header must match
+the **descriptor handle**, not a general `480−page` formula.
 
-The decisive census: over the current canonical corpus, **45 functions
-touch learned `FEBE6Axx` cells, 17 touch the `D0218` assist-funnel cells
-(`C43C/C4C0/C3BA/CC2C/BF3C/CB08/CB20/CC50/CC60`), and exactly zero touch
-both.** The learned-adaptation machinery and the assist funnel are disjoint
-reference cones on this image.
+On the retained DataFlash SHA `231fbdde…4432`, **57 of 122 mapped records**
+have both the expected handle and final `AAAAAAAA` marker. Nine are within the
+original 48-single-page subset. These are **marker observations**, not a
+claim that all 57 records pass checksum validation or form valid application
+copy consensus. Raw/XOR55/XORAA grouping must come from the application
+restore/selection machinery, not page order or payload resemblance alone.
 
-Consequences:
+The retained **2026-08-26 post-application→boot-handoff PE1 LocalRAM capture**
+still shows four `0x0800` words at both `FEBE6AD2` and `FEBE6AE6`, and equal
+45-byte windows at `FEBE6A26` / `FEBE6A84`. Those are capture-specific values,
+not an architectural exclusion. The old assertion of an `A55A5AA5` marker at
+`FEBE6AAA` is withdrawn: the captured word there is `80008000`, and that address
+starts inside the active 45-byte window.
 
-1. Learned DataFlash adaptation **does not modulate** the B6-independent
-   actuation path. The neutral live offsets rule out a mis-learned torque
-   offset masquerading as steering authority, and the disjoint cones rule out
-   any direct learned-state contribution into the funnel.
-2. The witness paradox therefore cannot be dissolved by "the EPS learned
-   something weird"; the stock-authority handoff remains exactly where
-   CORR-151 bounded it — chassis-side, outside F33's external-command and
-   learned-state surfaces.
-3. Object-identity grouping (which physical slots form one logical object's
-   three copies) is deliberately not asserted here; recovering the
-   application-side restore table that performs that grouping remains open.
+The maintained analysis now uses instruction-anchored canonical data references,
+not decompiler address spelling. Its `FEBE6Axx` versus assist-cell census remains
+a **direct-reference** measurement, not exhaustive alias analysis or transitive
+dataflow. The influence conclusion is explicitly unresolved; application
+copy grouping and learned-state propagation retain their separate evidence
+requirements.
 
-Deterministic evidence: `tools/targets/camry/analysis/analyze_camry_8965F3307000_dataflash_nvm_owners.py`
-against the tracked CodeFlash/DataFlash/corpus/LocalRAM inputs, verified by
-`tests/targets/camry/verify_camry_8965F3307000_dataflash_nvm_owners.py` (byte-identical
-regeneration plus all closure pillars).
+Owner: `tools/targets/camry/analysis/analyze_camry_8965F3307000_dataflash_nvm_owners.py`.
+Its generated artifact records every descriptor and marker result without
+printing payload/key bytes. Regression coverage protects descriptor alignment,
+the firmware-supplied table bound, sentinel exclusion, multi-page trailer
+placement, handle matching and truncated allocations. Exact instruction
+executions and durable Ghidra contracts are described in §77.6.
 
 
 ## 56. Native Bus-1 FRC egress bound: direct carriers are negative; absence/private transport is not proved (VAR-113)
@@ -7782,4 +7789,39 @@ Verification used the unchanged registered CodeFlash:
   dispatch/context and meaningful curve boundaries and were executed from
   their tracked paths. No malformed-table completeness or vehicle result
   is implied.
+
+### 77.6 NvM descriptor and allocation reconstruction
+
+The corrected storage interpretation is owned by §55. The target-native seed
+adds `F33NvmDescriptor`, the complete table and count, and seven formal contracts:
+
+| Entry / durable name | Recovered behavior |
+|---|---|
+| `74884` / `f33_nvm_payload_length` | Unsigned payload length, zero-extended in `r10`; input handle is truncated to 16 bits. |
+| `74892` / `f33_nvm_base_offset` | Descriptor page shifted left six. No local bound or sentinel rejection; handle zero returns `003FFFC0`. |
+| `748A2` / `f33_nvm_descriptor_option` | Unsigned option byte. The registered table contains only zero; no OEM bit meanings are assigned. |
+| `748B0` / `f33_nvm_allocation_pages` | For length `n`, option `b`: `(n + (n>32 ? 4 : 0) + (b!=0 ? 12 : 4) + 64) >> 6`. |
+| `748E4` / `f33_nvm_record_offset` | `base_offset + low16(allocation_index)*allocation_pages*64 + byte_offset`, with native 32-bit arithmetic. The third argument is in `r8`; allocation index is not asserted to be an application copy identity. |
+| `77314` / `f33_nvm_payload_page_count` | `(((n + (n & 3)) & FFFF) + 60) >> 6`. Literal narrowing matters; this is not an unrestricted generic rounding formula. |
+| `778FE` / `f33_nvm_trailer_offset` | `allocation_pages*64−4`, relative to the start of the allocation. |
+
+The three accessors and allocation helper preserve `r7/r8` throughout their
+real bodies. Generic caller-saved assumptions had therefore invented undefined
+second/third arguments in `748E4`. Inlining those four actual p-code bodies
+restores the complete three-argument expression without replacing instructions
+or changing the global ABI.
+
+Four hundred exact-CodeFlash executions checked length, page and composed-offset
+results for all 123 indices, all nine registered length classes, explicit
+low-16 truncation, and rejection at the outer `77982` bound. In particular,
+a 64-byte payload uses **one payload page but two allocation pages**; a
+248-byte payload has its trailer at offset **316**, not 60. Seven permanent
+scenarios retain these boundaries and were executed from their tracked paths.
+No flash erase/program operation or vehicle experiment was performed.
+
+Two independent clean rebuilds agreed on 7,181 functions; live semantic coverage
+matched the regenerated ledger (21 verified entries and one bounded entry).
+The NvM decoder/regeneration, semantic-coverage and four B6 consumer checks
+passed. These checks establish the exercised software contracts, not checksum
+validity of all captured records, logical copy consensus or vehicle behavior.
 

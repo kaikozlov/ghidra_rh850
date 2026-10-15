@@ -1,38 +1,30 @@
 #!/usr/bin/env python3
-"""Exact-F33 DataFlash NvM owner/layout closure against the retained 2026-08-26 dump.
+"""Exact-F33 NvM descriptors, record markers and retained RAM observations.
 
-Answers the maintainer question raised against CORR-151/VAR-111: does anything in
-the unexamined F33 DataFlash (learned NvM state) feed the assist funnel and thus
-potentially explain B6-independent stock steering?
+The descriptor accessors at 74884/74892/748A2 and allocation helper 748B0
+establish the six-byte table at 27634. The bound read by 77982 is at 27928.
+Handle zero has page FFFF; the remaining descriptors include multi-page
+allocations, not just the first 48 single-page records.
 
-Evidence layers, all tracked repository inputs:
+Record header/commit-marker checks are not checksum validation or application
+copy consensus. Likewise, a direct-reference census cannot exclude transitive
+learned-state influence on assist. This tool records those evidence boundaries
+instead of treating a neutral-looking snapshot as an architectural proof.
 
-1. CodeFlash job table at ``0x27634`` (stride 6: u16 payload_len, u16 page, u16 pad),
-   decoded from ``FUN_00074884/77314/74892`` in the canonical decompiler corpus:
-   the 48 handles cover DataFlash pages 479..432 as 16 objects x 3 triplicate
-   copies (raw/XOR55/XORAA).
-2. Physical DataFlash record decode (committed marker rule: first u16 == storage
-   index and final u32 == 0xAAAAAAAA) for the retained dump, yielding per-object
-   valid-copy/consensus state.
-3. Live staged-vs-active learned-state values read from the retained READY-state
-   PE1 LocalRAM dump (post application->boot handoff snapshot).
-4. Direct-reference census over the corpus: which functions touch learned NvM RAM
-   cells versus assist-funnel cells (the D0218 term/composition family).
-
-The tool prints no raw key material and only structural/calibration state.
+All inputs are tracked. No payload or key bytes are printed.
 """
 
 from __future__ import annotations
 
-from tools.targets.camry.support import camry_f33_corpus as f33
-from tools import REPO_ROOT
 import argparse
 import hashlib
 import json
-import re
 import struct
 import sys
 from pathlib import Path
+
+from tools import REPO_ROOT
+from tools.targets.camry.support import camry_f33_corpus as f33
 
 REPO = REPO_ROOT
 
@@ -40,26 +32,24 @@ F33_CODEFLASH = f33.IMAGE
 F33_DATAFLASH = f33.DATAFLASH
 F33_CORPUS = f33.CORPUS
 F33_RAM = f33.CAPTURE / "raw-20260826/secoc-recovery/ram/local_ram_pe1.bin"
+OUTPUT = REPO / "data/generated/camry_8965F3307000_dataflash_nvm_owners.json"
 
-JOB_TABLE = 0x27636  # FUN_00074884 length-field base; stride-6 {u16 len, u16 pad, u16 page}
+JOB_TABLE = 0x27634  # stride 6: u16 page, u16 payload length, u8 option, u8 opaque
+JOB_COUNT = 0x27928
 JOB_STRIDE = 6
-
-TRIPPLICATE_PAGES = range(432, 480)
 DATAFLASH_BASE = 0xFF200000
 PAGE_SIZE = 64
 
-# Live learned-state cells recovered from the corpus consistency checkers.
-# FUN_00035532 compares four staged vs active offset bytes; the encoded NvM
-# images at FEBE6AD2/6AE6 carry the four channels as little-endian u16 pairs
-# (live value 0x0800 each, the neutral default).
+# Retained RAM windows. Their values alone do not identify logical NvM objects
+# or establish whether they can influence the assist path transitively.
 LEARNED_CELLS = {
     "staged_45b_block": (0xFEBE6A26, 45),
     "active_45b_block": (0xFEBE6A84, 45),
     "four_channel_offsets_staged": (0xFEBE6AD2, 8),
     "four_channel_offsets_active": (0xFEBE6AE6, 8),
-    "marker_block": (0xFEBE6AAA, 16),
-    "obj5_baseline_a": (0xFEBE7D70, 8),
-    "obj5_baseline_b": (0xFEBE7D78, 8),
+    "window_6aaa": (0xFEBE6AAA, 16),
+    "window_7d70": (0xFEBE7D70, 8),
+    "window_7d78": (0xFEBE7D78, 8),
 }
 
 # Assist-funnel cells from VAR-104/CORR-135 (D0218 term/composition family).
@@ -68,7 +58,7 @@ FUNNEL_CELLS = (
     0xFEBECB08, 0xFEBECB20, 0xFEBECC50, 0xFEBECC60,
 )
 
-NEUTRAL_OFFSET = 0x0800
+CAPTURE_OFFSET_WORD = 0x0800
 
 
 def sha256(data: bytes) -> str:
@@ -87,86 +77,72 @@ def load_corpus_functions(path: Path) -> list[dict]:
 
 
 def decode_job_table(codeflash: bytes) -> list[dict]:
-    """Decode the NvM job table the record layer reads via FUN_00074884."""
+    """Decode complete descriptors using the firmware's handle bound."""
     rows = []
-    for handle in range(48):
+    count = struct.unpack_from("<H", codeflash, JOB_COUNT)[0]
+    for handle in range(count):
         off = JOB_TABLE + handle * JOB_STRIDE
-        payload_len, _pad, page = struct.unpack_from("<HHH", codeflash, off)
-        obj, copy = handle // 3, handle % 3
+        page, payload_len, option, opaque = struct.unpack_from("<HHBB", codeflash, off)
+        # Literal 748B0 arithmetic; do not confuse this with 77314's payload
+        # page count, which excludes record overhead.
+        allocation_pages = (
+            payload_len + (4 if payload_len > 32 else 0)
+            + (12 if option else 4) + PAGE_SIZE
+        ) >> 6
         rows.append({
             "handle": handle,
-            "object": obj,
-            "copy": copy,  # 0 raw, 1 xor55, 2 xoraa (by descending page order)
-            "payload_len": payload_len,
             "page": page,
+            "payload_len": payload_len,
+            "option_byte": option,
+            "opaque_05": opaque,
+            "allocation_pages": allocation_pages,
             "rom_offset": off,
         })
     return rows
 
 
 def decode_dataflash_records(dump: bytes, jobs: list[dict]) -> list[dict]:
+    """Check the handle and final-allocation marker, not complete validity."""
     out = []
     for job in jobs:
-        page = job["page"]
-        off = page * PAGE_SIZE
-        rec = dump[off:off + PAGE_SIZE]
-        storage_index = struct.unpack_from("<H", rec, 0)[0]
-        trailer = rec[-4:].hex()
-        # Committed marker rule: storage index is the descending slot number
-        # (page 479 -> storage index 1, page 478 -> 2, ...), and the trailer
-        # is the 0xAAAAAAAA commit marker.
-        expected_index = 480 - page
-        committed = trailer == "aaaaaaaa" and storage_index == expected_index
+        if job["page"] == 0xFFFF:
+            continue
+        off = job["page"] * PAGE_SIZE
+        size = job["allocation_pages"] * PAGE_SIZE
+        if off + size > len(dump):
+            raise ValueError(f"descriptor {job['handle']} extends beyond DataFlash")
+        stored_handle = struct.unpack_from("<H", dump, off)[0]
+        # 7786A compares the stored u16 with the actual descriptor handle.
+        # 778FE/77AA8 locate and compare the last word of the whole allocation.
+        header_matches = stored_handle == job["handle"]
+        marker_present = struct.unpack_from("<I", dump, off + size - 4)[0] == 0xAAAAAAAA
         out.append({
-            **job,
-            "storage_index": storage_index,
-            "expected_storage_index": expected_index,
-            "committed": committed,
-            "record_hex_prefix": rec[:16].hex(),
+            "handle": job["handle"],
+            "dataflash_address": f"0x{DATAFLASH_BASE + off:08x}",
+            "stored_handle": stored_handle,
+            "header_matches_handle": header_matches,
+            "commit_marker_present": marker_present,
+            "markers_match": header_matches and marker_present,
         })
     return out
 
 
-def consensus(records: list[dict]) -> dict:
-    """Per-slot committed census.
-
-    Object identity (which slots form one logical object's three copies) is not
-    asserted here: the boot job table gives one handle per physical slot, and
-    the application-side restore table that groups copies is not yet recovered
-    for F33. What is asserted is the per-slot committed state, verified by the
-    committed marker rule and cross-checked against the reference analyzer's
-    independent decode of the same dump.
-    """
-    committed = [r for r in records if r["committed"]]
-    by_page_desc = {480 - r["page"]: r for r in records}
-    groups: dict[str, dict] = {}
-    # Verified object-0 copy family from payload consensus: si 1/5/9 decode to
-    # identical payloads. Report the four stride-4 interleaved banks separately.
-    banks = {
-        "bank_si_1_5_9_...": range(1, 13, 4),
-        "bank_si_2_6_10_...": range(2, 13, 4),
-        "bank_si_3_7_11_...": range(3, 13, 4),
-        "bank_si_4_8_12_...": range(4, 13, 4),
-        "bank_si_13_37": range(13, 49, 12),
-    }
-    for name, sis in banks.items():
-        rows = [by_page_desc[si] for si in sis if si in by_page_desc]
-        groups[name] = {
-            "slots": [480 - r["page"] for r in rows],
-            "committed": sum(1 for r in rows if r["committed"]),
-            "total": len(rows),
-        }
+def marker_census(records: list[dict]) -> dict:
+    """Keep marker observations separate from logical copy identity."""
+    matching = [r["handle"] for r in records if r["markers_match"]]
     return {
-        "committed_slots": len(committed),
-        "total_slots": len(records),
-        "slot_census": groups,
+        "mapped_records": len(records),
+        "records_with_both_markers": len(matching),
+        "matching_handles": matching,
+        "single_page_handles_1_48_with_markers": sum(1 <= h <= 48 for h in matching),
+        "checksum_or_copy_consensus_checked": False,
     }
 
 
 def main() -> int:
     doc = (__doc__ or "").splitlines()
     ap = argparse.ArgumentParser(description=doc[0] if doc else "F33 DataFlash NvM owner closure")
-    ap.add_argument("--output", type=Path, default=None, help="write JSON artifact")
+    ap.add_argument("--output", type=Path, default=OUTPUT, help="write JSON artifact")
     ap.add_argument("--json", action="store_true", help="print JSON to stdout")
     args = ap.parse_args()
 
@@ -176,7 +152,7 @@ def main() -> int:
 
     jobs = decode_job_table(codeflash)
     records = decode_dataflash_records(dataflash, jobs)
-    per_object = consensus(records)
+    markers = marker_census(records)
 
     # Live learned-state values from the retained READY LocalRAM dump.
     ram = F33_RAM.read_bytes()
@@ -186,31 +162,30 @@ def main() -> int:
         live[name] = ram[va - ram_base:va - ram_base + n].hex()
 
     offsets = bytes.fromhex(live["four_channel_offsets_active"])
-    four_channel_neutral = all(b == NEUTRAL_OFFSET for b in struct.unpack("<4H", offsets))
+    four_channel_words_equal_0800 = all(b == CAPTURE_OFFSET_WORD for b in struct.unpack("<4H", offsets))
     staged_active_equal = live["staged_45b_block"] == live["active_45b_block"]
 
-    # Direct-reference census over the corpus.
-    learned_rx = re.compile(r"febe6a[0-9a-f]{2}", re.IGNORECASE)
-    funnel_rx = re.compile(
-        r"febe(c43c|c4c0|c3ba|cc2c|bf3c|cb08|cb20|cc50|cc60)", re.IGNORECASE
-    )
-    learned_fns, funnel_fns, both_fns = [], [], []
+    # Instruction-anchored direct references survive decompiler renaming.
+    # Neither this census nor an empty intersection is transitive dataflow.
+    learned_fns, funnel_fns, both_fns, four_channel_consumers = [], [], [], []
     for rec in corpus:
-        c = rec.get("decompiled_c") or ""
-        has_l = bool(learned_rx.search(c))
-        has_f = bool(funnel_rx.search(c))
+        addresses = {
+            int(ref["to_addr"], 16) for ref in rec["data_references"]
+            if ref["to_space"] == "ram"
+        }
+        has_l = any(0xFEBE6A00 <= address < 0xFEBE6B00 for address in addresses)
+        has_f = bool(addresses.intersection(FUNNEL_CELLS))
         if has_l:
             learned_fns.append(rec["entry_addr"])
         if has_f:
             funnel_fns.append(rec["entry_addr"])
         if has_l and has_f:
             both_fns.append(rec["entry_addr"])
-
-    four_channel_consumers = [r["entry_addr"] for r in corpus
-                              if re.search(r"febe6a[d-f][0-9a-f]", (r.get("decompiled_c") or ""), re.IGNORECASE)]
+        if any(0xFEBE6AD0 <= address < 0xFEBE6B00 for address in addresses):
+            four_channel_consumers.append(rec["entry_addr"])
 
     result = {
-        "schema": "camry-8965f3307000-dataflash-nvm-owner-closure-v1",
+        "schema": "camry-8965f3307000-dataflash-nvm-owner-closure-v2",
         "software_id": "8965F3307000",
         "question": "Does unexamined F33 DataFlash learned NvM state feed the assist funnel?",
         "inputs": {
@@ -225,28 +200,33 @@ def main() -> int:
         },
         "job_table": {
             "rom_address": f"0x{JOB_TABLE:05x}",
-            "decoded_from": ["FUN_00074884", "FUN_00077314", "FUN_00074892"],
+            "decoded_from": ["0x74884", "0x74892", "0x748a2", "0x748b0", "0x77982"],
             "handle_count": len(jobs),
-            "layout": "48 physical slots, pages 479..432; per-slot committed state (object grouping not asserted)",
+            "count_address": f"0x{JOB_COUNT:05x}",
+            "layout": "u16 page; u16 payload length; u8 option; u8 opaque; stride6",
+            "sentinel_handles": [job["handle"] for job in jobs if job["page"] == 0xFFFF],
+            "descriptors": jobs,
         },
-        "slot_census": per_object,
+        "record_marker_census": markers,
+        "record_markers": records,
         "live_learned_state": {
             **live,
-            "four_channel_offsets_neutral": four_channel_neutral,
+            "four_channel_words_equal_0800": four_channel_words_equal_0800,
             "staged_active_equal_45b": staged_active_equal,
         },
         "census": {
+            "method": "canonical instruction-anchored direct data references; not transitive closure",
             "functions_touching_learned_cells": len(learned_fns),
             "functions_touching_funnel_cells": len(funnel_fns),
             "functions_touching_both": both_fns,
             "four_channel_offset_consumers": len(four_channel_consumers),
         },
         "conclusion": {
-            "dataflash_learned_state_feeds_assist_funnel": False,
+            "dataflash_learned_state_feeds_assist_funnel": None,
             "reasons": [
-                "four-channel torque offsets live at neutral 0x0800 with staged==active",
-                "no corpus function touches both a learned NvM cell and an assist-funnel cell",
-                "objects 7-11 have no committed records at all on this car",
+                "a same-function reference intersection cannot exclude indirect state propagation",
+                "equal staged/active snapshot values do not establish absence of a runtime dependency",
+                "record markers do not identify application copy groups or validate all checksums",
             ],
         },
     }
@@ -258,12 +238,10 @@ def main() -> int:
         print(text)
     else:
         print(f"job table: {len(jobs)} handles at ROM 0x{JOB_TABLE:05x}")
-        print(f"committed slots: {per_object['committed_slots']}/{per_object['total_slots']}")
-        for name, info in per_object["slot_census"].items():
-            print(f"  {name}: committed {info['committed']}/{info['total']} (slots {info['slots']})")
-        print(f"live four-channel offsets neutral: {four_channel_neutral}")
+        print(f"records with both markers: {markers['records_with_both_markers']}/{markers['mapped_records']}")
+        print(f"live four-channel words equal 0x0800: {four_channel_words_equal_0800}")
         print(f"learned-cell functions: {len(learned_fns)}, funnel functions: {len(funnel_fns)}, both: {len(both_fns)}")
-        print("conclusion: DataFlash learned state does NOT feed the assist funnel on this car")
+        print("assist influence: unresolved by this descriptor/snapshot/direct-reference analysis")
     return 0
 
 

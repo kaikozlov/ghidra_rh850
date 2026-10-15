@@ -274,6 +274,71 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
             + "then 14A2; state byte FEBF2904 == 2 enters services, state1 returns. "
             + "The full state1 interrupt return was executed without replacing callees.");
   }
+  private void annotateNvmDescriptors() throws Exception {
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u16 = UnsignedShortDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    StructureDataType descriptor =
+        new StructureDataType(new CategoryPath("/CamryF33"), "F33NvmDescriptor", 0);
+    descriptor.setPackingEnabled(true);
+    descriptor.add(u16, "page", "64-byte DataFlash page; descriptor zero contains FFFF.");
+    descriptor.add(u16, "payload_bytes", "Unsigned payload length; not the allocation size.");
+    descriptor.add(u8, "option", "All registered descriptors contain zero; nonzero changes allocation overhead.");
+    descriptor.add(u8, "opaque_05", "No field semantics recovered.");
+    int count = currentProgram.getMemory().getShort(toAddr(0x27928L)) & 0xFFFF;
+    semanticData(0x27634L, new ArrayDataType(resolve(descriptor), count, 6),
+        "f33_nvm_descriptors",
+        "Count at27928 is123. Record0 has sentinel pageFFFF; records1..122 include "
+        + "multi-page allocations. A length-based table start at27636 wrongly "
+        + "pairs each length with the next record's page. No logical copy grouping "
+        + "or XOR mask is encoded by a simple handle/3 calculation.");
+    semanticData(0x27928L, u16, "f33_nvm_descriptor_count",
+        "Unsigned upper bound used by77982 and other record requests.");
+    semanticFunction(0x74884L, "f33_nvm_payload_length", u32,
+        new ParameterImpl("handle", u16, currentProgram))
+        .setComment("Return descriptor payload_bytes, zero-extended to r10. "
+            + "No local handle bound check. The field is at27636+6*handle.");
+    semanticFunction(0x74892L, "f33_nvm_base_offset", u32,
+        new ParameterImpl("handle", u16, currentProgram))
+        .setComment("Return descriptor page shifted left six, using27634+6*handle. "
+            + "No local bound or sentinel rejection; handle0 returns003FFFC0.");
+    semanticFunction(0x748A2L, "f33_nvm_descriptor_option", u32,
+        new ParameterImpl("handle", u16, currentProgram))
+        .setComment("Return unsigned byte27638+6*handle. The registered123 "
+            + "descriptors all contain zero. No local handle bound check.");
+    semanticFunction(0x748B0L, "f33_nvm_allocation_pages", u32,
+        new ParameterImpl("handle", u16, currentProgram))
+        .setComment("Let n=payload length and b=descriptor option. Return "
+            + "(n + (n>32 ? 4:0) + (b!=0 ? 12:4) + 64) >> 6. "
+            + "This includes record overhead and differs from payload page count. "
+            + "Exact execution covers all nine registered length classes. "
+            + "This helper and74884/74892/748A2 preserve r7/r8 throughout: "
+            + "inline their real p-code so748E4 retains its second and third arguments.");
+    getFunctionAt(toAddr(0x74884L)).setInline(true);
+    getFunctionAt(toAddr(0x74892L)).setInline(true);
+    getFunctionAt(toAddr(0x748A2L)).setInline(true);
+    getFunctionAt(toAddr(0x748B0L)).setInline(true);
+    semanticFunction(0x748E4L, "f33_nvm_record_offset", u32,
+        new ParameterImpl("handle", u16, currentProgram),
+        new ParameterImpl("allocation_index", u16, currentProgram),
+        new ParameterImpl("byte_offset", u32, currentProgram))
+        .setComment("Return base_offset + allocation_index*allocation_pages*64 "
+            + "+ byte_offset with native32-bit arithmetic. First two inputs are "
+            + "truncated to16 bits. Helpers preserve the forwarded r7/r8 values; "
+            + "they are not undefined extra outputs. Executed for all123 "
+            + "descriptor indices plus explicit low16 truncation.");
+    semanticFunction(0x77314L, "f33_nvm_payload_page_count", u32,
+        new ParameterImpl("handle", u16, currentProgram))
+        .setComment("For payload length n return (((n + (n & 3)) & FFFF) + 60) >> 6. "
+            + "Keep literal narrowing/rounding; do not substitute a generic ceil "
+            + "for arbitrary lengths. Registered lengths are multiples of eight. "
+            + "A64-byte payload returns1 here but allocation_pages returns2.");
+    semanticFunction(0x778FEL, "f33_nvm_trailer_offset", u32,
+        new ParameterImpl("handle", u16, currentProgram))
+        .setComment("Return allocation_pages*64 - 4. 77AA8 reads the commit marker "
+            + "there and comparesAAAAAAAA; the trailer is not always at byte60 "
+            + "of the first page. Executed for every registered length class.");
+  }
   @Override public void run() throws Exception {
     String[] args = getScriptArgs();
     if (args.length != 1) throw new IllegalArgumentException("expected function_seeds.csv path");
@@ -299,6 +364,7 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     annotateBootAndFreshness();
     annotateFreshnessLayouts();
     annotateBootDispatchAndCurves();
+    annotateNvmDescriptors();
     println("SeedCamryF33RecoveredFunctions: seeded " + count
         + " evidence-backed entries and applied exact-F33 semantic prototypes");
   }
