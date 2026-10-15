@@ -2818,6 +2818,80 @@ In the accepted case, a previous positive-direction band32 is retained despite
 the new zero-width request: the target advances32→31, but active band32 still
 publishes zero excess. Both cases check priority-mask restoration.
 
+#### Reference acquisition precedes established-source tracking
+
+`C44E2` always performs reset/reseed and source prework. With `AD13==5A`,
+it initializes the external count/marker from `AE0E/AD31` once while `C070==0`,
+then runs acquisition/tracking, source-band selection, center following and
+publication. Otherwise `C33E6` clears the published copies, not the underlying
+acquired reference. Inside `C43E0`, **`BFF0==5A` switches from acquisition
+`C3740` to difference tracking `C419C`**. The reference is not recomputed from
+every subsequent external sample.
+
+`C3740` requires source enable `BFB6==5A`; failure clears both acquisition
+counters and model accumulators. With enable present, modes0/3 hold state;
+every other byte admits source selection. External acceptance requires
+`BFFA/BFAF==5A` and `BFF8>=1`. `C36A8` copies `BFF4→BFD8` and marks `BFF1=5A`,
+then selects the external branch for `AD3C==1 || AD3E==2`, the model branch
+for remaining `AD3E==1`, or neither otherwise. Acceptance is not proof of a
+fresh hardware sample or a committed estimator reference.
+
+| Acquisition branch | Admission and progression | Publication / retention |
+|---|---|---|
+| External `C34F8` | `BFF1/BFB7==5A`, `BFC5/BFC4==0`, wrapped signed16 `abs(BF9C)<160`, `abs(BF98)<512`; increment unsigned16 `BFE8` | Commit only when incremented count **exceeds10** and `C0DE==5A`. Elapsed count pins10 even if `C0DE` rejects; failed outer admission resets0. |
+| Model `C35DC`, admitted | `BFC5==0`, `C045/C044/C042==5A`, `AD18==11`, unsigned `ADF4>=3840` | Accumulate signed quotient/remainder of `BF78/2000`; at incremented unsigned16 count≥2000 publish quotient sum plus remainder sum/2000, then **clear** both accumulators and count. |
+| Model, qualifier interrupted | `BFC5==0`, any other model admission predicate fails | **Hold** `BFDC/BFE0/BFEA`; this interruption does not restart the window. |
+| Model, source qualifier asserted | `BFC5!=0` | Clear accumulators/count. Prior committed reference remains separate. |
+
+The absolute-value helper `D095E` is **not saturating**: its final `sxh r10`
+narrowing makes `INT16_MIN` return−32768, which passes both signed `<` gates.
+The [wrapped-minimum native scenario](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_estimator_source_wrapped_minimum_amplitudes.json)
+confirms reference commitment with both raw amplitudes at that value.
+This does not establish that either physical producer can emit it. The
+decompiler's unary-minus C can hide the narrowing; the instruction and native
+result define this boundary.
+
+The external commit is
+`BFD4=low32(correction+BF78−BF84−BF7C+BFD8+BF70)`.
+`C3498` derives the correction from `BF7C−BF70`, coefficient `AE38` and map
+`AF5CE`, preserving low32 shifts/products, unsigned normalization and signed
+division. Its real **signed R10 return** was previously lost by a void prototype.
+Both branches publish `BFD4`, inverse `BFE4`, valid marker `BFF0=5A` and source
+marker `BFF2=A5` under PMR`FFC0`. These arithmetic and invocation-count contracts
+do not establish engineering units or elapsed-time gains.
+
+`C36DE` retains `BFEC/BFEE` until a valid reference exists. With an accepted
+external marker, both come from the `AF570[BFB8]` curve at `BFF8`; otherwise
+both exact mode/default calibrations are **8000** (`AF582/AF584 = 40 1F`
+little-endian). The adjacent `AF580` is a separate unsigned16 window2000, not
+a combined32-bit value.
+
+The [external warmup boundary](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_estimator_source_external_warmup_boundary.json)
+and [reference commit](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_estimator_source_external_reference_commit.json)
+execute source selection and its real callees: accepting sample300 at count9→10
+holds reference900; starting at count10 instead commits1220 and its inverse.
+The [model window](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_estimator_source_model_window_commit.json)
+commits4001 and clears its accumulators, while the
+[qualifier interruption](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_estimator_source_model_qualifier_pause.json)
+preserves the same partially accumulated window. These are native exact-code
+results with explicit RAM preconditions and no replacement callees.
+
+Publication `C331C` distinguishes `BFD4→ABA0` from accepted sample `BFD8→BF88`,
+difference `C074→BF8C` and center `C080→BF90`. `C4358` projects an accepted
+sample as `C07C=low32(C080+BFD8)`, not `C080+BFD4`. Its disabled branch clears
+acceptance/warmup markers but retains `C07C`. Separately,
+`BC9E8→C32AA` scales `AF8C` through `D1272(...,45,4)` into `AC18`, then
+negates it into `ABA4`.
+
+Reset/reseed acknowledgements are not final-value witnesses. `C3F7A` handles
+`C091==5A` by setting center `C080=C0B0`, accumulator `C078=C0B0<<11` and
+acknowledgement `C08D=5A`. `C3FA0` handles `C090==5A` by clearing reference
+validity, acquisition/tracking state and center, setting `C08C=5A`, but retaining
+accepted sample `BFD8`. Neither clears its own request. `C4046` calls reseed
+**before** reset: when both requests are set, reset clears the newly seeded
+center before subsequent source prework. Separate acknowledgement consumption
+and qualification remain part of the `C492C` path.
+
 #### Observer-dependent bounds are not a zero-output veto
 
 `C71D0` evolves retained gain `C37C` and a completion latch. The exact calibrated
@@ -2856,10 +2930,114 @@ The observer slice updates some consumers every second generation, while the
 central slice uses its own cadence bits. PMR-protected publications do not make
 all snapshots one atomic control generation. `D0C16` separately publishes
 `C084/C08E` into `AC1C/AC09` and the external-source qualifier into`AC08`.
-Remaining dependencies include the complete raw estimator/source identities,
-the second `C88A` contribution, producer-domain constraints, engineering units
-and hardware-time alignment. These boundaries do not block the software
-sample/qualification/deadband/assist contracts above.
+Remaining dependencies include physical/raw source identities, the full
+consistency/plausibility and center-following domains, the second `C88A`
+contribution, calibration units and hardware-time alignment. Acquisition,
+publication and reset/reseed order are recovered software contracts, not
+exhaustive observer or physical-system closure.
+
+### 34.8 Thermal limit arbitration and diagnostic projections
+
+Thermal diagnostics do not identify a single global limiting source.
+`3A4A0` first reduces ECU-side limits independently for two banks, then combines
+each minimum with its motor-side limit `6FAC/6FAE`. It selects bank0 when
+`6764&3==0`, otherwise bank1, and publishes that bank's effective minimum into
+current-limit owner0 (`BB736 → BD34`). Later request reduction and current
+consumption are separate operations.
+
+The ECU reduction uses **later-wins equality**, not first-wins selection:
+
+| Reduction order / source code | Bank0 limit | Bank1 limit | Temperature reported for that source |
+|---|---|---|---|
+| First / 2 | `6F68` | `6F6A` | `6F36` |
+| Second / 4 | `6F30` | `6F32` | `6F12` |
+| Third / 5 | `6EE0` | `6EE2` | `6EAE` |
+| Last / 3 | `700C` | `700E` | `6FE2` |
+
+These are structural source codes, not DTCs or recovered component names.
+An ECU source is diagnostically active only when its minimum is **strictly
+below** bank nominal22170/11085. The motor diagnostic independently tests its
+own limit against that nominal and reports `6F82`. Both can be active even
+though only the smaller current limit determines owner0. Equality to nominal
+clears the corresponding diagnostic source/temperature.
+
+The native
+[`thermal_limit_arbitration_tied_sources`](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_thermal_limit_arbitration_tied_sources.json)
+composition executes both reductions, source selection, real ROM lookups and
+owner publication. Equal bank0 candidates select source3 and its temperature;
+the stronger motor limit1800 controls owner0 without replacing that ECU
+diagnostic source. The neighboring owner cells remain untouched.
+
+`3A406` separately maps the four temperature states and the effective limit,
+then selects the result with smallest saturated absolute magnitude, keeping
+the earlier value on a tie. In this exact image, all five maps at
+`2B3FC/2B420/2B43C/2B458/2B474` are flat **−22170** before their terminators.
+The signed/unsigned axis sentinels are not interpolation endpoints. `37FD2`
+uses this publication `6F7E` as a signed floor in its ordinary branch, before
+the separate `71EC&3` half-scaling and retained transition filter. Constant
+calibration does not mean this floor can never bind.
+
+#### A released thermal request can remain current-limiting
+
+The exact mask `AF0CC=1` separates raw thermal owner0 from owners1..9.
+`BB88C` converts owner0 into a retained release envelope at **owner7**.
+Decreases apply immediately. An increase is held while both
+`abs_sat(s16 B054)<=256` and previous output<=11085; a nominal owner0 request
+therefore does not imply an immediately nominal effective limit.
+
+When an increase is admitted, `BEE2<512 && BEF0==11` chooses mode2 and unsigned
+coefficient115828; other states choose mode1/coefficient4666. A mode change
+resets the counter and anchors the base at the previous output. After incrementing
+the saturating counter `n`, the candidate is
+`base+floor(n*n*coefficient/65536)`, capped at the target. A nonzero upper word
+of the coefficient product also selects the target. These are invocation counts,
+not an elapsed cooling-time model.
+
+The native
+[`boundary_holds`](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_thermal_release_boundary_holds.json)
+scenario keeps owner7 at1800 despite nominal owner0 at22170 when amplitude is
+exactly256. The
+[`mode_change_reseeds`](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_thermal_release_mode_change_reseeds.json)
+scenario changes amplitude to257 and verifies mode2 reseeding: the prior
+counter/base are replaced, and the first quadratic step publishes1801.
+
+`BB7FA` normally reduces owners1..9, including owner7. Its special
+family0500 path (`B37C==5A`, `B20E!=11/22`) uses exclusion mask`AECD4=21`:
+owners0/5 are omitted, **not owner7**. It publishes the bound, a separate
+signed minimum of owners6/9, status and route marker into`AF3C..AF42`.
+`C1DE0` separately snapshots all ten raw owner slots into`B010[0..9]`.
+Service admission checks every snapshot slot except5 against22170 (§77.24).
+Thus a cleared thermal diagnostic, restored raw thermal request, released
+owner7 envelope and service admission are distinct states and generations.
+
+
+#### Diagnostic names, aliases and sentinel boundaries
+
+Current `EMPS_P5` Data List rows name DID1063 as **Thermistor Temperature** and
+DIDs1C06/1C07 as **ECU/Motor Estimate Temperature of Overheat Prevention Part**.
+The exact sixteen-byte firmware table records at `293FC/2945C/29A7C/29A8C`
+bind these to `4DC9A/4DC9A/4E86A/4E8B8`; this is a diagnostic join, not a CAN
+signal assignment.
+
+`482BE/48326` condition staged inputs6492/6498. If a retained accumulator's
+high half disagrees with its prior output, the filter state is reseeded from
+the input before filtering. Both use ROM31808; `4838E` publishes the signed
+maximum of their converted values into7DDA. DID1063 and its System2 DID1069
+alias both read that same result. Their callbacks emit
+`clamp(s16(7DDA*10/128),−500,2000)` as BE16, with diagnostic units0.1°C.
+Likewise, the exact DID1034/1039 table rows at2937C/293CC share callback4DB3E
+and source66BA: the System2 label does not create an independent voltage
+observation. That callback emits `min(u16(66BA)*100/256,2500)` in0.01V.
+
+DIDs1C06/1C07 use the same temperature scaling only when their separate
+activity bytes6F6C/6F6D are nonzero. Otherwise they emit **`0x7FFF`**, not
+zero degrees. A temperature diagnostic therefore neither proves the final
+current-limit winner nor reports an unconditional temperature measurement.
+
+**Remaining boundary:** upstream thermal estimators, component identities,
+heating/cooling dynamics and input-generation alignment are not established
+by this arbitration composition. No physical heating, voltage or timing
+experiment was performed, and no peripheral model was added.
 
 ## 35. Hidden-ingress false-negative audit: no concrete alternate producer found; residuals closed in §36
 
@@ -9978,12 +10156,65 @@ is a software request-lifecycle result, not execution of every mode callback.
 | 6 | `B3224(1..4)` and internal producers | Family0500 service sequencing and particular motor-sample substitutions, not a generic diagnostic inhibit. |
 | 9 | `4D604`, diagnostic programming/handoff adapter | Family0900, behind higher-priority fault/health transitions; readiness-dependent handoff. |
 
-The fault aggregate selects current/previous source records with complements.
-Its codes represent **actions**, not DTC identities. Real producers include the
-NvM record0100 non-success/non-pending path `3588A`. `3C232` qualifies first-word
-bits0/1/3/4 with `71EC.bit15`; hard/soft branches latch `B190` while waiting.
-The no-action branch alone cancels event0. Published `EB9A` comes from limiting
-state `BCC2`, so admission can depend on a prior software limiting/ramp result.
+The fault aggregate uses24 source slots with12-byte stride. Marker `71CC[i]`
+selects current record `7200+12*i` for5A, retained record `7320+12*i` forA5,
+or neither otherwise. Only five halfwords are used. **Integrity is per-word,
+not whole-record:** words0/4 require their separate complements, while words1/2/3
+are ORed even if those checks fail. Their roles are mode actions, internal status
+actions, output-owner actions, ancillary actions, and qualification classes.
+They are not DTC identities; real producers include the NvM record0100
+non-success/non-pending path `3588A`.
+
+`3BE88` reduces aggregate classes to zero, a single bit, or8000 for multiple
+bits. `3BEDA` combines that result with the redundant prior qualification:
+candidate classes intersecting ROM mask3E1C become8000; a nonzero candidate
+disjoint from a nonzero prior class also becomes8000 before ORing the prior.
+A zero candidate retains the prior, except it clears4000 while bit15 is clear.
+`3BDC6` publishes `71EC`, XOR5555/XORAAAA copies `7108/710A`, and the minimum
+enabled amplitude limit at `71F2` under PMR`FFC0`.
+
+| Qualification bits | Exact limit from `317E0` |
+|---|---|
+| 0–1 | 14965 |
+| 2–8 | 11085 |
+| 9–15; or no enabled bit | 22170 |
+
+This is the command-amplitude bound traced through `EF8E/AC52` in §30, not a
+command source, age counter, or a `BD34` current-limit owner. Bit15 by itself
+does not reduce this bound below nominal.
+
+Only a prior-zero→nonzero qualification sets `71E4=5A`. `3BF3A` then strips
+masks12/70/C00 from words0/1/2 of matching **current** records and repairs
+their word0 complements; retained records remain untouched. Dispatch still
+uses the aggregate already computed before this source mutation. With
+`71EC.bit15` set, overrides `7440/7442/7444` retain these masked actions and
+`7446` is retained; without it, overrides clear. The writer `3C19C` similarly
+strips a mutable incoming template when its class overlaps the retained
+qualification, before OR-merging it into a current record.
+
+`3C232` takes hard action bit0 or bit15-qualified bit1, otherwise soft bit3
+or qualified bit4. Both branches latch `B190` while waiting for their respective
+zero-output gates; only the no-action branch cancels event0. Published `EB9A`
+comes from limiting state `BCC2`, so admission can depend on a prior ramp result.
+`3C290` selects internal status4/3/2 from prioritized action bits and publishes
+it through `BACF8→BCBD`. Its counter increments while≤50, reaching **51**;
+without action it reports whether the counter≤50, then resets only at
+unsigned `EB9A>=22170`. This is an invocation counter, not measured time.
+
+`3C470` routes combinations into the existing output/channel/validity bitmask
+owners, independently of the scalar current-limit slots. Ancillary word3
+routes event15 and substitution/channel requests. Its bit15 reaches
+`4C5E8→8143`, the0351 override flag: it is **not** qualification word4.bit15.
+
+The composed [fault aggregation scenario](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_fault_aggregate_partial_integrity_and_qualification.json)
+executes the real reducers, qualifier, source maintenance and dispatchers.
+Bad protected words in a retained record are rejected while its unprotected
+status/ancillary actions still publish; the accepted single class produces its
+limit and strips only current-source masks. The run also distinguishes the
+0351 flag from qualification bit15, preserves record padding and independent
+current-limit owners, and checks mode-request cancellation and PMR restoration.
+It does not inject a physical fault, exercise every monitor or prove hardware
+output response. Monitor-specific detection and Dem/DTC joins remain separate.
 
 The health path separately qualifies analog input, received control/status and
 application latches. `B4FFC` votes states0/11/22/33, routes the **new** state
@@ -10142,27 +10373,36 @@ requests in postwork. Foreground request reconciliation/mode publication occurs
 in a different context. Owner requests, reduced flags, selected outputs and
 mode caches are therefore not a single synchronous state transition.
 
-**Remaining high-value dependencies:** upstream estimator/source recurrences and
-reset/reseed domains; monitor-to-fault-action and diagnostic joins; OEM service
-identities; calibration units and physical analog identity; ADC/DMA sample
-freshness; hardware channel feedback and output-update timing. The sensing and
-observer contracts in §§34.6–34.7 do not require a complete peripheral or NvM
-emulator. Static connectivity is not exhaustive semantic closure or a vehicle result.
+**Remaining high-value dependencies:** complete estimator consistency/plausibility
+and center-following domains; monitor detection-to-action and Dem/DTC joins;
+upstream thermal estimation; OEM service identities, calibration units and
+physical source identity; ADC/DMA freshness and hardware feedback/update timing.
+The recovered acquisition, fault-action and thermal-arbitration contracts do not
+require a complete peripheral or NvM emulator. Static connectivity and bounded
+native scenarios are not exhaustive semantic closure or vehicle results.
 
-**Verification checkpoint (2026-10-15, sensing and observer composition).** Two
-independent four-stage rebuilds plus signature finalization agreed on the
-canonical inventory. Native torque decoding, current-conditioning boundary/tie
-selection, circular electrical-angle correction and composed observer/deadband
-transitions passed on the unmodified image with explicit RAM inputs. Regenerated
-C retains the angle-bank argument, full torque-pair arguments and eight-byte
-observer result. Coverage, function-boundary, D5 provenance, command-cone,
-assist-oracle and B6 composition/end-to-end/ingress gates passed; live coverage
-matched the canonical ledger exactly. The matching project and corpus were
-promoted after clean daemon teardown. Evidence links resolve. No peripheral
-model was extended.
+**Verification checkpoint (2026-10-15, thermal, fault-action and estimator
+acquisition).** Independent four-stage rebuilds plus signature finalization
+agreed on the canonical inventory. Native compositions passed for thermal
+source arbitration and retained release, selective fault-record integrity and
+qualification, external-reference warmup, model-window commit/pause, and the
+wrapped `INT16_MIN` admission boundary. All used unmodified firmware and
+explicit RAM inputs, without replacement callees or peripheral-model extension.
+Regenerated C preserves the thermal reduction values, scalar release coefficients
+and signed estimator-correction return; the documented absolute-value narrowing
+still requires instruction/native evidence.
 
-The preceding `a602ee87` checkpoint contains the assist/service lifecycle
-compositions; `4f055cc6` contains the command-tail, negative-current-reference
-and mode-request evidence. The latter's historical post-auth helper regression
+Coverage, function-boundary, D5 provenance, command-cone, assist-oracle and B6
+composition/end-to-end/ingress gates passed; live coverage matched the canonical
+ledger exactly. The command-cone producer's obsolete decompiler-spelling check
+was removed, retaining its exact calibration-table and runtime-writer checks.
+The matching project/corpus were promoted after clean teardown. Changed
+subsystem evidence links resolve. These are software reconstruction results,
+not new vehicle observations.
+
+The preceding `1e3a1d53` checkpoint contains sensing and observer/deadband
+composition; `a602ee87` contains the assist/service lifecycle compositions;
+`4f055cc6` contains command-tail, negative-current-reference and mode-request
+evidence. The latter's historical post-auth helper regression
 used stubbed stock aggregate calls; that remains emulator-local evidence, not
 native execution of those aggregates or a vehicle result.

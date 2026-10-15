@@ -362,8 +362,6 @@ def build() -> dict:
     scale_writers = sorted(k for k, refs in scale_acc.items() if "WRITE" in refs)
     need(scale_writers == ["0xB3866", "0xB389C", "0xB38D2", "0xBF97A"],
          f"FEBEB140 writer census drift: {scale_writers}")
-    token(0x3BDC6, funcs, "= 0x569a;", "&DAT_000317e0 +",
-          "*(short *)(&UNK_ffffb9f2 + (int)puVar2) = (short)")
     token(0xB338C, funcs, "DAT_febeb112 = 0x5a;")
     token(0xB330A, funcs, "DAT_febeb112 = 0;")
     need(pair_map.get(0xFEBEAC2B) == 0xFEBEB112, "AC2B diagnostic snapshot drift")

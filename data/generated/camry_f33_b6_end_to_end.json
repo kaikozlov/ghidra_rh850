@@ -790,7 +790,7 @@
     "0x0D0EEC": {
       "body_sha256": "e58077923617544434467a6d0279d5037aa2cf1398960ef0fe62126f37e23231",
       "body_size": 488,
-      "decompiled_c_sha256": "774f2291f58bc043a824853abe0e0b8c83bdedcf017cc53774c7ad70d3cf88b7",
+      "decompiled_c_sha256": "4c761a37e3f8553565eab1d2a046189bcc6eeff4a95eaad94de288b11cdee2ec",
       "role": "cooperative-controller aggregate"
     },
     "0x0D1100": {

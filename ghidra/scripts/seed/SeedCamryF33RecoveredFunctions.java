@@ -2253,6 +2253,272 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
         .setComment("Copy external-source qualifierBFC5 toAC08; under PMRFFC0 publish C084->AC1C and "
             + "C08E->AC09. Do not conflate this interface snapshot with the direct nested-assist consumers.");
   }
+  private void annotateEstimatorAcquisition() throws Exception {
+    DataType v = VoidDataType.dataType;
+    DataType s32 = IntegerDataType.dataType;
+    DataType u16 = UnsignedShortDataType.dataType;
+    getFunctionAt(toAddr(0xD095EL)).setComment("Exact instruction contract: sign-extend input16; negate "
+        + "nonpositive input, then SXH R10 again. INT16_MIN therefore returns -32768 in signed32 R10, "
+        + "not32768 or32767. Decompiled unary-minus C can hide this narrowing; use instructions/native "
+        + "evidence for signed amplitude gates such asC34F8.");
+    semanticFunction(0xC3498L, "f33_estimator_reference_correction", s32)
+        .setComment("Return signed correction in R10, also storeBFD0; former void inference lost it. "
+            + "BFC8=low32(BF7C-BF70); normalize its abs32 with low32 left shift10, unsigned division "
+            + "byAE38 and capFFFF (zero coefficient gives input0). MapAF5CE; low32 multiply byAE38, "
+            + "signed divide1024 intoBFCC, then negate when BFC8>=0. Preserve wrap and division order.");
+    semanticFunction(0xC34F8L, "f33_acquire_external_estimator_reference", v)
+        .setComment("Require BFF1/BFB7==5A, BFC5/BFC4==0, wrapped abs16(BF9C)<160 and abs16(BF98)<512. "
+            + "D095E returns -32768 for INT16_MIN, so that raw value passes both signed comparisons. "
+            + "Increment u16BFE8; only count>10 withC0DE==5A publishes. Elapsed count pins10 even if "
+            + "C0DE rejects; failed outer gate resets0. BFD4=correction+BF78-BF84-BF7C+BFD8+BF70 "
+            + "with low32 arithmetic; under PMRFFC0 publish inverseBFE4,validBFF0=5A,markerBFF2=A5.");
+    semanticFunction(0xC35C4L, "f33_select_external_reference_acquisition", v)
+        .setComment("Clear model windowBFEA and accumulatorsBFDC/BFE0 before the external-reference "
+            + "warmup/commit. Accepted sample and committed estimator reference are distinct states.");
+    semanticFunction(0xC35DCL, "f33_accumulate_model_estimator_reference", v)
+        .setComment("BFC5!=0 clears model accumulators/count. Otherwise failed C045/C044/C042==5A, "
+            + "AD18==11 orADF4>=3840 gate HOLDS them. Qualified passes accumulate signed BF78/2000 "
+            + "and BF78%2000. At incremented u16count>=2000 publish quotient-sum+remainder-sum/2000 "
+            + "and inverse/markers under PMRFFC0, then CLEAR accumulators/count. Counts are invocations.");
+    semanticFunction(0xC368CL, "f33_select_model_reference_acquisition", v)
+        .setComment("Invalidate accepted-external markerBFF1, warmupBFE8, source markerBFFA and countBFF8 "
+            + "before model accumulation. A failed model qualifier can still retain its prior window.");
+    semanticFunction(0xC36A8L, "f33_latch_estimator_external_sample", v)
+        .setComment("CopyBFF4->BFD8 and setBFF1=5A. AD3C==1 orAD3E==2 selects external acquisition; "
+            + "otherwise AD3E==1 selects model acquisition, which clears the accepted marker again. "
+            + "Other combinations retain the sample without invoking either acquisition channel.");
+    semanticFunction(0xC36DEL, "f33_update_estimator_source_limits", v)
+        .setComment("Without BFF0==5A retain BFEC/BFEE. With valid reference and BFFA==5A map BFF8 "
+            + "through AF570[BFB8] into both. Otherwise selectAF582 or mode2AF584; BOTH exact defaults "
+            + "are8000 (little-endian401F), not320/500. No local BFB8 bounds check.");
+    semanticFunction(0xC3740L, "f33_select_estimator_acquisition_source", v)
+        .setComment("BFB6!=5A clears accepted marker, both acquisition counters and model accumulators. "
+            + "Otherwise AD3C==0/3 holds state; every other byte admits selection. Mode2 choosesAF7D0, "
+            + "othersAF7CE (both1). BFFA/BFAF==5A and BFF8>=threshold accept the external sample; "
+            + "otherwise select model accumulation. Finally update source limits.");
+    semanticFunction(0xC331CL, "f33_publish_raw_estimator_state", v)
+        .setComment("Snapshot inputs before PMRFFC0, then publish BFD4->ABA0, BFD8->BF88, C074->BF8C, "
+            + "C080->BF90, BF50->BF94 plus acquisition/mode/status bytes and BFEC/BFEE limits. "
+            + "ABA0 is the acquired reference, not accepted sampleBFD8; publication is not hardware freshness.");
+    semanticFunction(0xC33E6L, "f33_clear_published_estimator_state", v)
+        .setComment("Under PMRFFC0 clear ABA0, published BF88..BF94, BF B9..C3 status bytes and BFAA/BFAC "
+            + "limits. Does not itself clear the underlying BFD4 acquisition reference.");
+    semanticFunction(0xC32AAL, "f33_refresh_observer_source_term", v)
+        .setComment("Publish ABA4=low32(-AC18) and BFC4=AC02 before observer sampling.");
+    semanticFunction(0xBC9E8L, "f33_scale_observer_source_term", v)
+        .setComment("Invoke D1272(AF8C,45,4,&result) and publish result atAC18. The later C32AA negate "
+            + "is a separate update; no physical-source identity is inferred from this scaling.");
+    semanticFunction(0xC2E14L, "f33_clear_observer_source_term", v)
+        .setComment("Clear ABA4,BFC4,BF6D,BF6E,BFC5; not a whole raw-estimator reset.");
+    semanticFunction(0xC3F7AL, "f33_apply_estimator_center_reseed", v)
+        .setComment("When C091==5A setC080=C0B0,C078=low32(C0B0<<11),C08D=5A; otherwise clearC08D. "
+            + "The requestC091 remains set until its separate consumer acknowledges it.");
+    semanticFunction(0xC3FA0L, "f33_apply_estimator_acquisition_reset", v)
+        .setComment("C090==5A clears reference/inverse validity, acquisition windows, model qualifiers, "
+            + "limits, difference tracker and center; setsC08C=5A. Does not clear requestC090 or "
+            + "accepted sampleBFD8. Without request only clear acknowledgementC08C.");
+    semanticFunction(0xC43E0L, "f33_run_estimator_acquisition_or_tracking", v)
+        .setComment("Refresh qualifiers; BFF0==5A selects established-reference difference trackingC419C, "
+            + "otherwise source acquisitionC3740. Then update external-source projectionC4358. "
+            + "Reference acquisition is not repeated on every established tracking pass.");
+    semanticFunction(0xC4358L, "f33_update_estimator_source_projection", v)
+        .setComment("AD3C==0/3 or mode2+AD3E1+AD250+AD271 clearsBFF1/C068/BFFA but retainsC07C. "
+            + "Otherwise acceptedBFF1==5A projectsC07C=low32(C080+BFD8); absent acceptance invokes "
+            + "C424C prediction. Projection usesBFD8, notBFD4.");
+    semanticFunction(0xC44E2L, "f33_run_raw_estimator_cycle", v)
+        .setComment("Always apply reseed/reset and source/secondary-tracker preworkC4046. AD13==5A "
+            + "seeds BFF8/BFFA fromAE0E/AD31 once whileC070==0, then acquisition/tracking, source-band "
+            + "selection, center following and publication. Otherwise clear only published copiesC33E6.");
+    semanticData(0xAF580L, u16, "f33_estimator_reference_window",
+        "Unsigned16 divisor/count threshold2000; not a fused32-bit scalar with following calibration.");
+    semanticData(0xAF582L, u16, "f33_estimator_source_limit_default", "Exact default8000.");
+    semanticData(0xAF584L, u16, "f33_estimator_source_limit_mode2", "Exact mode2 default8000.");
+  }
+  private void annotateThermalArbitration() throws Exception {
+    DataType v = VoidDataType.dataType;
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u16 = UnsignedShortDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    DataType s16 = ShortDataType.dataType;
+    DataType s32 = IntegerDataType.dataType;
+    DataType byteOut = new PointerDataType(u8, 4);
+    Function choose = semanticFunction(0x3A2D2L, "f33_choose_thermal_limit_source", u32,
+        new ParameterImpl("current", u16, currentProgram),
+        new ParameterImpl("candidate", u16, currentProgram),
+        new ParameterImpl("source", byteOut, currentProgram),
+        new ParameterImpl("candidate_source", u8, currentProgram));
+    choose.setInline(true);
+    choose.setComment("With nonnull source, candidate<=current replaces both limit and source; ties choose "
+        + "the later candidate. Null source retains current. Real leaf preserves R8 across the selector's "
+        + "successive calls; inline its actual effects rather than inventing pointer arguments.");
+    semanticFunction(0x3A2E8L, "f33_select_ecu_thermal_limit", u32,
+        new ParameterImpl("source", byteOut, currentProgram),
+        new ParameterImpl("bank", u8, currentProgram))
+        .setComment("Reduce sources2,4,5,3 in that order, with later equal minima winning. Bank0 reads "
+            + "6F68/6F30/6EE0/700C; nonzero bank reads their +2 partners. Null source returns nominal "
+            + "22170 or11085 without reading the limits.");
+    semanticFunction(0x3A35EL, "f33_select_ecu_thermal_diagnostic", s32,
+        new ParameterImpl("limit", u16, currentProgram),
+        new ParameterImpl("source", u8, currentProgram),
+        new ParameterImpl("active_source", byteOut, currentProgram),
+        new ParameterImpl("bank", u8, currentProgram))
+        .setComment("Only limit below bank nominal22170/11085 and source2/3/4/5 publishes its source "
+            + "and signed temperature6F36/6FE2/6F12/6EAE. Otherwise publish source0 and return0; "
+            + "null output returns0 without a write. Not selection of the globally strongest motor limit.");
+    semanticFunction(0x3A3B0L, "f33_select_motor_thermal_diagnostic", v,
+        new ParameterImpl("limit", u16, currentProgram),
+        new ParameterImpl("nominal", u16, currentProgram),
+        new ParameterImpl("active", byteOut, currentProgram),
+        new ParameterImpl("temperature", new PointerDataType(s16, 4), currentProgram))
+        .setComment("Limit strictly below nominal publishes active1 and signed6F82; equality or above "
+            + "publishes active0/temperature0. Both output pointers are required.");
+    semanticFunction(0x3A3CEL, "f33_select_smaller_magnitude_s16", s32,
+        new ParameterImpl("first", s16, currentProgram),
+        new ParameterImpl("second", s16, currentProgram))
+        .setComment("Rank by saturated absolute magnitude (-32768 ranks32767), retain original signed "
+            + "value and choose first on equality. Return is full sign-extended R10.");
+    semanticFunction(0x3A406L, "f33_map_thermal_current_floor", v,
+        new ParameterImpl("current_limit", u16, currentProgram))
+        .setComment("Map four signed temperature states and unsigned effective limit; retain the smallest "
+            + "absolute output at6F7E. All five exact maps are flat -22170 before their sentinels. "
+            + "37FD2 applies this as a signed floor in its ordinary current-component branch.");
+    semanticFunction(0x3A4A0L, "f33_arbitrate_thermal_current_limits", v)
+        .setComment("Compute both ECU minima, combine each with its motor limit6FAC/6FAE, and choose "
+            + "bank0 iff6764&3==0. Publish effective limit to owner0 viaBB736, but publish ECU and motor "
+            + "diagnostic activity/temperatures independently at6F6C..6F7C. No new-sample or heating proof.");
+    semanticFunction(0xBB736L, "f33_set_current_limit_request", v,
+        new ParameterImpl("owner", u32, currentProgram),
+        new ParameterImpl("limit", u16, currentProgram))
+        .setComment("For low8(owner)<10 replace BD34[owner] only. Request publication is distinct from "
+            + "later masked reductions and current-control consumption.");
+    semanticFunction(0x482BEL, "f33_filter_thermistor_channel0", v)
+        .setComment("Filter unsigned6492 into7DD2/7DDC; mismatch of accumulator high16 and previous "
+            + "output reseeds from the input before6A678. Map via31808 into signed7DCE.");
+    semanticFunction(0x48326L, "f33_filter_thermistor_channel1", v)
+        .setComment("Companion6498 ->7DD4/7DE0 -> signed7DD6, with the same coherence repair and ROM map. "
+            + "This is software conditioning of staged inputs, not hardware sample-freshness proof.");
+    semanticFunction(0x4838EL, "f33_update_thermistor_channels", v)
+        .setComment("Run both channel filters; publish signed max(7DCE,7DD6) at7DDA and mark7DCC=5A. "
+            + "Exact RDBI1063/1069 aliases expose this same publication, not two independent values.");
+    semanticFunction(0x4DB3EL, "f33_rdbi_1034_callback", u32,
+        new ParameterImpl("output", byteOut, currentProgram))
+        .setComment("RDBI1034/1039 aliases: scale unsigned66BA by100/256, cap2500, encode BE16, return0. "
+            + "Current EMPS_P5 names these battery voltage, with wire units0.01V.");
+    semanticFunction(0x4DC9AL, "f33_rdbi_1063_callback", u32,
+        new ParameterImpl("output", byteOut, currentProgram))
+        .setComment("RDBI1063/1069 aliases: signed7DDA*10/128, narrow16, clamp[-500,2000], encodeBE16. "
+            + "Current EMPS_P5 names thermistor temperature with wire units0.1degC.");
+    semanticFunction(0x4E86AL, "f33_rdbi_1c06_callback", u32,
+        new ParameterImpl("output", byteOut, currentProgram))
+        .setComment("ECU overheat-prevention estimate:6F6C==0 emits7FFF sentinel, not zero degrees. "
+            + "Otherwise scale signed6F7A*10/128 and clamp[-500,2000]; encodeBE16 and return0.");
+    semanticFunction(0x4E8B8L, "f33_rdbi_1c07_callback", u32,
+        new ParameterImpl("output", byteOut, currentProgram))
+        .setComment("Motor overheat-prevention estimate:6F6D==0 emits7FFF sentinel; otherwise scale "
+            + "signed6F7C*10/128 and clamp[-500,2000]. Diagnostic visibility is not the global limit winner.");
+    semanticFunction(0xBB74AL, "f33_reduce_thermal_current_requests", u32)
+        .setComment("Return min(22170, enabled BD34 owners). AF0CC=1 selects only owner0. Full R10 "
+            + "return is consumed byBB88C; the former void inference lost this value.");
+    semanticFunction(0xBB786L, "f33_reduce_other_current_requests", u32)
+        .setComment("Return min(22170, BD34 owners excluded by AF0CC). Exact mask1 selects owners1..9, "
+            + "including the retained thermal-release owner7.");
+    semanticFunction(0xBB7C2L, "f33_reduce_service_current_requests", u32)
+        .setComment("Return min(22170, BD34 owners whose AECD4 bit is clear). Exact mask21 excludes "
+            + "owners0/5, not the retained thermal-release owner7.");
+    semanticFunction(0xBB7FAL, "f33_publish_other_current_limit", v)
+        .setComment("Use service reduction only for family0500,B37C==5A,B20E!=11/22; otherwise normal "
+            + "nonthermal reduction. AF3C=3 at22170,0 atzero,1 otherwise. Under PMRFF80 publish limitAF40, "
+            + "signed min(owner6,owner9) atAF42 and B37C atAF3D; publish route markerAF3E afterward.");
+    semanticFunction(0xBB88CL, "f33_update_thermal_release_envelope", v)
+        .setComment("Target is owner0 reduction. Drops apply immediately; rises hold if abs_sat(B054)<=256 "
+            + "and previous output<=11085. Otherwise mode2 for BEE2<512 and BEF0==11 uses coefficient115828; "
+            + "mode1 uses4666. Mode change resets counter/base to0/old output. Increment saturating counter; "
+            + "candidate=base+floor(n*n*coefficient/65536), capped to target, with high-product overflow "
+            + "also selecting target. Publish owner7 and BD48/4A/4C/4E; counts are invocations, not time.");
+    semanticFunction(0xC1DE0L, "f33_snapshot_health_and_service_inputs", v)
+        .setComment("Copy status, observer, analog and all ten BD34 current-limit owner cells into the "
+            + "health/service snapshot, including B010[0..9]. B84B8 checks every owner except5 against22170. "
+            + "This sequential snapshot is not an atomic hardware sample or instantaneous owner publication.");
+    semanticData(0xAF0CCL, u32, "f33_thermal_current_owner_mask",
+        "Mask1 selects thermal owner0; complement selects owners1..9.");
+    semanticData(0xAECD4L, u32, "f33_service_current_owner_exclusions",
+        "Mask21 excludes owner0 and owner5 in the special service reduction.");
+    semanticData(0xAF0D8L, u32, "f33_thermal_release_coefficient_mode2",
+        "Unsigned scalar115828 for the n-squared release envelope, not a CodeFlash pointer.");
+    semanticData(0xAF0DCL, u32, "f33_thermal_release_coefficient_mode1",
+        "Unsigned scalar4666 for the n-squared release envelope.");
+  }
+  private void annotateFaultActions() throws Exception {
+    DataType v = VoidDataType.dataType;
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u16 = UnsignedShortDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    DataType words = new PointerDataType(u16, 4);
+    semanticFunction(0x3C008L, "f33_aggregate_fault_actions", v)
+        .setComment("Select 24 current7200 or retained7320 records by71CC markers5A/A5, stride12. "
+            + "Only words0/4 require their separate complements; words1/2/3 are ORed independently. "
+            + "Qualify aggregate word4, optionally OR7440..7446 when71EC.bit15, dispatch four action "
+            + "words, then mirror all five at71F4..71FC. Source stripping affects later aggregation.");
+    semanticFunction(0x3C19CL, "f33_merge_fault_action_record", v,
+        new ParameterImpl("actions", words, currentProgram),
+        new ParameterImpl("slot", u32, currentProgram))
+        .setComment("For low8(slot)<24, mutate the five-word input when its word4 overlaps71EC: "
+            + "clear word0 bits12, word1 bits70 and word2 bitsC00 (hex masks). OR into current record "
+            + "at7200+12*slot; AND corresponding word0/4 complements with inverse input. Does not mark "
+            + "the record current. The sixth halfword in the stride is not part of this contract.");
+    semanticFunction(0x3C7FEL, "f33_encode_fault_action_kind", v,
+        new ParameterImpl("slot", u8, currentProgram),
+        new ParameterImpl("kind", u8, currentProgram))
+        .setComment("Build five action words, suppress the entire template if word4 intersects ROM317DC, "
+            + "then merge into the slot. Word3 is ancillary action flags; word4 is qualification class. "
+            + "Kind32(hex) sets word3.bit15, not the qualifier bit15. Kinds are not DTC identities.");
+    semanticFunction(0x3BFCEL, "f33_qualify_fault_action_aggregate", v,
+        new ParameterImpl("actions", words, currentProgram))
+        .setComment("Optionally OR317D8 into local word4 only when317D4==5A (exact byte0 disables). "
+            + "Classify word4, advance retained qualification, then maintain current records and overrides "
+            + "from the original action words. Does not replace the caller's aggregate words.");
+    semanticFunction(0x3BE88L, "f33_classify_fault_qualification", v,
+        new ParameterImpl("classes", u32, currentProgram))
+        .setComment("Classify low16 mask into71EE: zero->0, one bit->that bit, multiple bits->8000. "
+            + "These internal classes are not diagnostic event IDs or OEM fault names.");
+    semanticFunction(0x3BEBAL, "f33_vote_fault_qualification", u32)
+        .setComment("Vote71EC with XOR5555/XORAAAA copies7108/710A using707AC; ignore voter status "
+            + "and return the voted unsigned16 value in full R10.");
+    semanticFunction(0x3BEDAL, "f33_update_fault_qualification", v)
+        .setComment("Candidate71EE intersecting317DA=3E1C becomes8000. Nonzero candidate disjoint from "
+            + "nonzero prior vote also becomes8000, then OR prior. Zero candidate retains prior except "
+            + "clears4000 if prior bit15 is clear. Publish redundant qualification/limit;71E4=5A only "
+            + "for prior0 -> new nonzero.");
+    semanticFunction(0x3BDC6L, "f33_publish_fault_qualification_limit", v,
+        new ParameterImpl("classes", u16, currentProgram))
+        .setComment("Under PMRFFC0 publish71EC and XOR copies7108/710A, plus minimum enabled317E0 "
+            + "entry at71F2 (default22170). Bits0/1 select14965, bits2..8 select11085, remaining bits "
+            + "select22170. This is an amplitude bound, not a command or an age counter.");
+    semanticFunction(0x3BF3AL, "f33_maintain_qualified_fault_actions", v,
+        new ParameterImpl("mode_actions", u16, currentProgram),
+        new ParameterImpl("status_actions", u16, currentProgram),
+        new ParameterImpl("output_actions", u16, currentProgram))
+        .setComment("On first nonzero qualification71E4==5A, strip masks12/70/C00 from current records "
+            + "whose word4 intersects71EC, repairing word0 complements. Retained records are untouched. "
+            + "With71EC.bit15, accumulate those masks in7440/42/44 and retain7446; otherwise clear overrides.");
+    semanticFunction(0x3C290L, "f33_route_fault_status_actions", v,
+        new ParameterImpl("actions", u32, currentProgram))
+        .setComment("Bits2/1/0 or bit15-qualified6/5/4 select status4/3/2 viaBACF8. Active status "
+            + "increments71F0 while <=317DE=50, so the retained ceiling is51. No action publishes "
+            + "(counter<=50), then resets the counter only if unsignedEB9A>22169.");
+    semanticFunction(0x3C470L, "f33_route_fault_output_actions", v,
+        new ParameterImpl("actions", u32, currentProgram))
+        .setComment("Route output action combinations through5737A owner2/5/6 and channel/validity "
+            + "owners2/3/4. Some combinations awaitEB9A==0 orEB9C<=11085;71EC selects qualifier and "
+            + "channel retention. These bitmask owners are distinct from the BD34 current-limit slots.");
+    semanticFunction(0x3C6A8L, "f33_route_fault_ancillary_actions", v,
+        new ParameterImpl("actions", u32, currentProgram))
+        .setComment("Word3 routes event15, software substitutions, paired channel selections and "
+            + "owner-specific validity actions. Bit15 publishes the4C5E8 flag for0351; it does not "
+            + "set71EC.bit15. Request writes do not themselves prove hardware response.");
+    semanticData(0x317E0L, new ArrayDataType(u16, 16, 2), "f33_fault_class_amplitude_limits",
+        "Minimum active class limit published at71F2; bits0/1=14965,2..8=11085,9..15=22170.");
+  }
   private void annotateAssistComposition() throws Exception {
     DataType v = VoidDataType.dataType;
     DataType s16 = ShortDataType.dataType;
@@ -2702,6 +2968,9 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     annotateControlPipeline();
     annotateSensingPipeline();
     annotateRateObserver();
+    annotateEstimatorAcquisition();
+    annotateThermalArbitration();
+    annotateFaultActions();
     annotateAssistComposition();
     annotateApplicationLifecycle();
     annotateServiceLifecycle();

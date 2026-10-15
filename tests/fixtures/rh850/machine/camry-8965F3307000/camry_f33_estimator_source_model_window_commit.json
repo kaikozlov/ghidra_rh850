@@ -1,0 +1,143 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_estimator_source_model_window_commit",
+  "entry": {
+    "role": "real source selection, external warmup or model quotient/remainder accumulation, protected reference publication and source limits; explicit software inputs, no physical-source or timing claim",
+    "scope": "resolved-address",
+    "address": "0xc3740"
+  },
+  "max_instructions": 20000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "isolated initialized nested-call stack"
+    },
+    {
+      "address": "0xfebebf70",
+      "hex": "2800000000000000a10f000064000000000000001400000000000000000000000000000000000000ff0100009f0000000000000000000000000000000000005a0000000000005a5a0000000000000000000000000000000000000000000000000000000084030000de0000009e0f0000cf0700007bfcffff0a00cf077b00c8010000ffa52c0100000100000000000000",
+      "evidence": "explicit source sample300, reference900 and inverse, accepted-input gates159/511, external warmup and model accumulator state; publication flags initially clear with source markerFF"
+    },
+    {
+      "address": "0xfebead3c",
+      "hex": "010000",
+      "evidence": "mode1 selects external recurrence when accepted"
+    },
+    {
+      "address": "0xfebeae38",
+      "hex": "0004",
+      "evidence": "coefficient1024 makes the correction-map input60, inside the exact zero-ordinate interval"
+    },
+    {
+      "address": "0xfebead18",
+      "hex": "11",
+      "evidence": "model acquisition state gate"
+    },
+    {
+      "address": "0xfebeadf4",
+      "hex": "a00f",
+      "evidence": "raw input4000 exceeds model threshold3840"
+    },
+    {
+      "address": "0xfebec042",
+      "hex": "5a005a5a",
+      "evidence": "three model qualification flags, with C045 deliberately cleared in the pause case"
+    },
+    {
+      "address": "0xfebec0de",
+      "hex": "5a",
+      "evidence": "separate external-reference qualification admitted"
+    }
+  ],
+  "checks": [
+    {
+      "name": "real source selector returns",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "nested stack restored",
+      "kind": "register",
+      "register": "sp",
+      "equals": "0xfebe2000"
+    },
+    {
+      "name": "protected publication restores priority mask",
+      "kind": "register",
+      "register": "PMR",
+      "equals": "0xff00"
+    },
+    {
+      "name": "reference commit or retention obeys the selected acquisition boundary",
+      "kind": "memory",
+      "address": "0xfebebfd4",
+      "size": 4,
+      "equals_hex": "a10f0000"
+    },
+    {
+      "name": "reference inverse belongs to the same publication",
+      "kind": "memory",
+      "address": "0xfebebfe4",
+      "size": 4,
+      "equals_hex": "5ef0ffff"
+    },
+    {
+      "name": "accepted sample is independent of reference publication",
+      "kind": "memory",
+      "address": "0xfebebfd8",
+      "size": 4,
+      "equals_hex": "de000000"
+    },
+    {
+      "name": "model accumulators clear on publication but hold across a failed qualifier",
+      "kind": "memory",
+      "address": "0xfebebfdc",
+      "size": 8,
+      "equals_hex": "0000000000000000"
+    },
+    {
+      "name": "warmup and window counters have distinct reset and retention contracts",
+      "kind": "memory",
+      "address": "0xfebebfe8",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "limits follow new publication only after acquisition succeeds",
+      "kind": "memory",
+      "address": "0xfebebfec",
+      "size": 4,
+      "equals_hex": "401f401f"
+    },
+    {
+      "name": "reference validity and accepted-sample marker are distinct",
+      "kind": "memory",
+      "address": "0xfebebff0",
+      "size": 4,
+      "equals_hex": "5a00a5a5"
+    },
+    {
+      "name": "model fallback invalidates external qualification count and marker",
+      "kind": "memory",
+      "address": "0xfebebff8",
+      "size": 3,
+      "equals_hex": "000000"
+    }
+  ]
+}
