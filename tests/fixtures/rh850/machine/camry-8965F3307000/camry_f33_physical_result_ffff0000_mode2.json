@@ -1,0 +1,46 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_physical_result_ffff0000_mode2",
+  "entry": {
+    "role": "actual Camry application record instructions with explicit RAM preconditions; no replaced callees",
+    "scope": "resolved-address",
+    "address": "0x77d66"
+  },
+  "max_instructions": 20000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "isolated initialized nested-call stack"
+    },
+    {
+      "address": "0xfebf6b70",
+      "hex": "a5a5a580a5a502a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a50000ffffbebafecaefbeaddea5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a50100a5a5a5a5a5a5a5a5a5a5a5a5a50200a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a500000040a5a5a5a50000002006a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "evidence": "nonzero completion context, invalid buffer pointers, active service6 and sticky diagnostic masks"
+    }
+  ],
+  "checks": [
+    {
+      "name": "actual class phase error mask and complete cleanup with gaps preserved",
+      "kind": "memory",
+      "address": "0xfebf6b70",
+      "size": 368,
+      "equals_hex": "a5a5a581a5a501a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5000000000000000000000000a5a5a5a500000000a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5ffffa5a5a5a5a5a5a5a5a5a5a5a5a50000a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a500010040a5a5a5a50000002006a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5"
+    }
+  ]
+}

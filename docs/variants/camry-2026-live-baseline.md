@@ -8786,3 +8786,75 @@ then passed. The three dependent artifacts were regenerated; all six targeted
 checks and live-coverage parity passed. The stopped project and corpus were
 promoted. No physical flash operation or vehicle behavior was exercised.
 
+### 77.19 2026-10-15 physical result finalization and diagnostic mask translation
+
+Exact F33 physical completion is now separated from logical notification.
+`0x77D66` marks a non1 raw result in`6B73.bit0`, translates the **full32-bit**
+word at`6C10` through eight8-byte rows at`0x27C38`, then reports the side
+status before validating the dispatch route. Only mode`6C4B`1/2 and storage
+handle`6C3C < 123` reach`0x76722`. No read/write direction is assigned to
+those mode numbers from this table alone.
+
+|Raw32 result|Mode1 class (`row+4`)|Mode2 class (`row+5`)|
+|---|---|---|
+|`00000001`|`00`|`00`|
+|`0000FFFF`|`81`|`FD`|
+|`0000FFFE`|`7F`|`7F`|
+|`0000FFFD`|`81`|`FD`|
+|`0000FFFC`|`FD`|`83`|
+|`0000FFFB`|`FD`|`FD`|
+|`0000FFFA`|`FF`|`FF`|
+|`FFFF0000`|`7F`|`7F`|
+
+Unmatched full words produce class`FD`; the native`1234FFFC` case does not
+alias the`0000FFFC` row. `0x76722` maps class0 to state`6B76=0`, class`83`
+to4, and every other nonzero class to1. Its completion hooks reach the
+two-byte `JMPLP` leaves at`73CA0/73CA2`: **they do not publish a logical
+result or an application completion**. The buffer/context registers prepared
+by the caller are not dereferenced by this implementation.
+
+`0x76554` truncates its requested state to8 bits. States0/1/2/4 are stored
+unconditionally;3 is stored only from prior state2; other values preserve
+the byte. These are recovered transitions, not assigned AUTOSAR/OEM enum
+names. Side status`6C4C`1/2 reaches its diagnostic mapper even when the later
+mode or handle gate rejects; invalid-route cases therefore are not
+side-effect-free.
+
+Every`0x77D66` path zeros the dispatch counter`6C20` and resets completion
+context: `6C10/6C14/6C18/6C4B/6C4C=0`, `6C3C=FFFF`. Callback-published
+result`6C1C`, selector`6C4A` and unrelated context survive. Native tests
+start with nonzero gaps and invalid buffer-pointer values, verify exact
+cleanup, and cover both result columns, all eight raw rows, unknown full
+words, last-valid/invalid handles and invalid mode.
+
+**Recovered dataflow omitted by the old C.** `0x79826` was rendered as an
+empty17-iteration loop under an inferred void/no-argument signature.
+Its instructions actually intersect full32 input`r6` with each source
+mask in the17-row table at`0x27CE4`, OR matching destination masks into
+`r10`, and return that word. Multiple rows contribute; unmapped bits
+contribute nothing. Native composite input reaches the final row, and
+input`8000` produces output`80000000`. The tracked seed now represents
+the input/return contract and table layout rather than substituting an
+implementation. The fresh canonical C now contains the typed table lookup,
+conditional OR and returned mask; the empty loop is gone.
+
+The class mapper`0x76A3A` truncates to8 bits; the side-status mapper`0x76A1C`
+compares a full32-bit input. Both feed`0x7971C`, which first translates the
+mask and then uses service byte`6CCC`:6..8 and16..18 OR`6CC0`;C/D OR both
+`6CC0` and`6CC8`; other service codes preserve both. Existing bits remain
+set. These mask namespaces are distinct from physical result classes,
+logical result bytes and operation-notification events.
+
+Thirty-six native scenarios passed before annotation replay;25 distinct
+behavior regressions are retained. Thirteen function contracts and both
+table layouts are represented in the target seed. Logical publication and
+the acquisition scheduler remain separate downstream work.
+
+The two independent rebuilds agreed on **7,187 functions** and **142 curated
+reviews:134 verified,8 bounded**; the929 outside-function candidates remain
+unresolved. All25 retained scenarios passed against the fresh project,
+followed by the six dependent target selectors and exact live/canonical
+coverage parity. The registered artifacts, corpus and cleanly stopped
+snapshot were regenerated and promoted. This is instruction-level software
+evidence, not physical flash or vehicle behavior.
+

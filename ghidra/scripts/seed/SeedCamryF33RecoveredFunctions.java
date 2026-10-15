@@ -1225,6 +1225,99 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
             + "time, or a second independent read. Native precedence/second/exhaustion/zero "
             + "cases plus the real forced-stop polling loop.");
   }
+  private void annotateNvmPhysicalResults() throws Exception {
+    CategoryPath category = new CategoryPath("/CamryF33");
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u16 = UnsignedShortDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    StructureDataType classes = new StructureDataType(category, "F33NvmPhysicalResultClass", 0);
+    classes.setPackingEnabled(true);
+    classes.add(u32, "raw_result", "Exact full32 comparison; FFFF0000 is not0000FFFF.");
+    classes.add(u8, "mode1_class", "Selected when completion mode6C4B equals1.");
+    classes.add(u8, "other_class", "Selected otherwise; only mode2 is subsequently dispatched.");
+    classes.add(Undefined2DataType.dataType, "opaque_06", "Not read by77D66.");
+    semanticData(0x27C38L, new ArrayDataType(resolve(classes), 8, 8),
+        "f33_nvm_physical_result_classes", "Eight full32 result/class pairs; unmatched result classFD. "
+        + "These classes are not operation-notification events.");
+    StructureDataType masks = new StructureDataType(category, "F33NvmDiagnosticMaskMap", 0);
+    masks.setPackingEnabled(true);
+    masks.add(u32, "source_mask", "Any intersecting input bit selects this row.");
+    masks.add(u32, "destination_mask", "OR into the full32 result; not first-match lookup.");
+    semanticData(0x27CE4L, new ArrayDataType(resolve(masks), 17, 8),
+        "f33_nvm_diagnostic_mask_map", "Seventeen rows consumed by79826. Input8000 maps80000000; "
+        + "input01000000 reaches the final row and maps00020000. Unmapped bits contribute nothing.");
+    semanticData(0xFEBF6B73L, u8, "f33_nvm_physical_attempt_flags",
+        "7697E sets bit0 when completion raw result is not1; other bits retain independent writers.");
+    semanticData(0xFEBF6B76L, u8, "f33_nvm_physical_result_state",
+        "76554 accepts0/1/2/4 unconditionally and3 only from2; others ignored. Not an OEM enum.");
+    semanticData(0xFEBF6C10L, u32, "f33_nvm_completion_raw_result",
+        "77D66 compares full32 before cleanup; distinct from callback-published result6C1C.");
+    semanticData(0xFEBF6C3CL, u16, "f33_nvm_completion_storage_handle",
+        "77D66 dispatches only below123; reset storesFFFF.");
+    semanticData(0xFEBF6C4BL, u8, "f33_nvm_completion_mode",
+        "Only1/2 dispatch the result class; do not infer read/write direction solely from the number.");
+    semanticData(0xFEBF6C4CL, u8, "f33_nvm_completion_side_status",
+        "77D46 maps1->source mask2 and2->source mask1 before the mode/handle dispatch gate.");
+    semanticData(0xFEBF6CC0L, u32, "f33_nvm_service_diagnostic_mask",
+        "Sticky OR of translated bits for service6..8,C/D,16..18.");
+    semanticData(0xFEBF6CC8L, u32, "f33_nvm_service_cd_diagnostic_mask",
+        "Additional sticky OR only for serviceC/D; not overwritten by the general accumulator.");
+    semanticData(0xFEBF6CCCL, u8, "f33_nvm_diagnostic_service",
+        "Byte selector consumed by7971C; unrelated to application family or physical result class.");
+    semanticFunction(0x76554L, "f33_nvm_set_physical_result_state", VoidDataType.dataType,
+        new ParameterImpl("state", u8, currentProgram))
+        .setComment("Low8 input0/1/2/4 stores unconditionally;3 stores only if old6B76==2. "
+            + "All other values preserve the byte. Native guarded, unguarded, high-bit and ignored cases.");
+    semanticFunction(0x76722L, "f33_nvm_publish_physical_class", VoidDataType.dataType,
+        new ParameterImpl("result_class", u8, currentProgram))
+        .setComment("Low8 class0 sets6B76=0 and calls76ACE. Class83 sets4; other nonzero "
+            + "classes set1, report the class and call76ADA. Their73CA0/73CA2 targets are "
+            + "JMPLP leaves, not logical publication. Extra r7/r8/r9 prepared by77D66 "
+            + "are not consumed in this implementation.");
+    semanticFunction(0x7697EL, "f33_nvm_mark_physical_attempt_error", VoidDataType.dataType)
+        .setComment("SET1 bit0 of6B73; preserve other bits. Invoked before completion dispatch gates.");
+    semanticFunction(0x769F6L, "f33_nvm_report_class_byte", VoidDataType.dataType,
+        new ParameterImpl("result_class", u8, currentProgram))
+        .setComment("Zero-extend low8 then forward to76A3A; no independent event or callback semantics.");
+    semanticFunction(0x76A1CL, "f33_nvm_accumulate_side_status", VoidDataType.dataType,
+        new ParameterImpl("status", u32, currentProgram))
+        .setComment("Full32 input0->source mask1,1->2,other->8000; call7971C. "
+            + "Unlike the class mapper this input is not truncated to a byte.");
+    semanticFunction(0x76A3AL, "f33_nvm_accumulate_result_class", VoidDataType.dataType,
+        new ParameterImpl("result_class", u8, currentProgram))
+        .setComment("Low8 classes21/22/FD->source mask8,7F->4,81->20,83->40,FF->10, "
+            + "other->8000. Then actual7971C translation and service-specific sticky OR. "
+            + "Class0 is not special here;76722 skips this mapper for class0.");
+    semanticFunction(0x76AC0L, "f33_nvm_report_physical_class", VoidDataType.dataType,
+        new ParameterImpl("result_class", u8, currentProgram))
+        .setComment("Zero-extend low8 and forward through769F6 to the class-mask mapper.");
+    semanticFunction(0x77BECL, "f33_nvm_reset_completion_context", VoidDataType.dataType)
+        .setComment("Zero6C4C,6C10,6C4B; set6C3C=FFFF; store identity(0) into6C14/6C18. "
+            + "Preserve published result6C1C, selector6C4A and unrelated fields. "
+            + "Native whole-context canaries verify cleanup after both dispatched and rejected results.");
+    semanticFunction(0x77D2EL, "f33_nvm_mark_non_success_result", VoidDataType.dataType)
+        .setComment("Full32 completion result6C10!=1 sets6B73.bit0 through7697E; no other gate.");
+    semanticFunction(0x77D46L, "f33_nvm_report_completion_side_status", VoidDataType.dataType)
+        .setComment("Side byte6C4C==1 calls76A1C(1);==2 calls76A1C(0); others do nothing. "
+            + "77D66 calls this before validating completion mode/handle.");
+    semanticFunction(0x77D66L, "f33_nvm_finish_physical_result", VoidDataType.dataType)
+        .setComment("Mark non1 result, scan8 full32 rows at27C38, default classFD; report "
+            + "side status before dispatch gates. Modes1/2 and storage handle<123 call76722. "
+            + "Mode1 loads6C14 into r7; mode2 loads6C18; no pointee is read by the consumer. "
+            + "Always zero6C20 and reset completion context, even on invalid mode/handle. "
+            + "Native both columns, unknown fullword, last/invalid handle, side effects and preserved gaps.");
+    semanticFunction(0x7971CL, "f33_nvm_accumulate_diagnostic_mask", VoidDataType.dataType,
+        new ParameterImpl("source_mask", u32, currentProgram))
+        .setComment("Translate through79826 first. Service byte6CCC in6..8 or16..18 "
+            + "ORs6CC0; C/D OR both6CC0 and6CC8; other services leave both unchanged. "
+            + "Preserve existing mask bits; neither mask is a logical/application completion code.");
+    semanticFunction(0x79826L, "f33_nvm_translate_diagnostic_mask", u32,
+        new ParameterImpl("source_mask", u32, currentProgram))
+        .setComment("Scan all17 {input_mask,output_mask} rows at27CE4. If input intersects "
+            + "the row mask, OR its output into r10, initially0. Full32 input/output; "
+            + "unmapped bits ignored. Missing input/return types previously hid the work "
+            + "as an empty loop in C; actual native composite/high-output/unmapped cases verify it.");
+  }
   private void annotateDataFlashReads() throws Exception {
     DataType u8 = UnsignedCharDataType.dataType;
     DataType u16 = UnsignedShortDataType.dataType;
@@ -1410,6 +1503,7 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     annotateApplicationReadCompletion();
     annotateNvmQueues();
     annotateNvmStartup();
+    annotateNvmPhysicalResults();
     annotateDataFlashReads();
     annotateFaciSubmission();
     annotatePwmCompareStaging();
