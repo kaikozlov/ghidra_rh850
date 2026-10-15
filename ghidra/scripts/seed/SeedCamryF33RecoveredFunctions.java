@@ -433,7 +433,9 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     StructureDataType descriptor =
         new StructureDataType(category, "F33NvmLogicalDescriptor", 0);
     descriptor.setPackingEnabled(true);
-    descriptor.add(Undefined4DataType.dataType, "opaque_00", "Not interpreted here.");
+    descriptor.add(u8, "opaque_00", "Not interpreted here.");
+    descriptor.add(u8, "queue_key", "73328 reads this byte; normal queue index is3+key. No execution-priority claim.");
+    descriptor.add(Undefined2DataType.dataType, "opaque_02", "Not interpreted here.");
     descriptor.add(u8, "buffer_mode", "All 124 registered rows contain1. Selectors use mode4 for scratch storage.");
     descriptor.add(Undefined1DataType.dataType, "opaque_05", "Not interpreted here.");
     descriptor.add(u16, "payload_bytes", "Length passed by the logical read callback.");
@@ -821,7 +823,7 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     StructureDataType result = new StructureDataType(category, "F33NvmLogicalResultCell", 0);
     result.setPackingEnabled(true);
     result.add(u8, "result", "71D0A stores only this byte before notification.");
-    result.add(u8, "opaque_01", "Preserved by71D0A; no broader role assigned.");
+    result.add(u8, "write_inhibit", "743F8 rejects exactly1; other values pass.71CA0 initializes2 in this target.");
     semanticData(0xFEBF6000L, new ArrayDataType(resolve(result), logicalCount, 2),
         "f33_nvm_logical_results", "Byte result in a two-byte cell; not a halfword store.");
     StructureDataType stage = new StructureDataType(category, "F33NvmReadCopyStage", 0);
@@ -972,6 +974,194 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
             + "phase, preserve recovered producer index and set active objectFFFF. "
             + "Invalid phase/object performs cleanup only. Hardware-backed read-failure "
             + "classification and accepted whole-write rearming remain separate.");
+  }
+  private void annotateNvmQueues() throws Exception {
+    CategoryPath category = new CategoryPath("/CamryF33");
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u16 = UnsignedShortDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    DataType pointer = new PointerDataType(VoidDataType.dataType, 4);
+    DataType operation = getDataAt(toAddr(0xFEBF6AECL)).getDataType();
+    DataType operationPointer = new PointerDataType(operation, 4);
+    StructureDataType slot = new StructureDataType(category, "F33NvmQueueSlot", 0);
+    slot.setPackingEnabled(true);
+    slot.add(u32, "operation", "9DA70AE7 denotes a free slot.");
+    slot.add(pointer, "read_buffer", "Copied from operation+8; not dereferenced by enqueue.");
+    slot.add(pointer, "write_buffer", "Copied from operation+C; not dereferenced by enqueue.");
+    slot.add(u16, "logical_handle", "FFFF in a free slot.");
+    slot.add(u16, "next", "FFFF terminates the singly linked chain.");
+    DataType slotType = resolve(slot);
+    StructureDataType header = new StructureDataType(category, "F33NvmQueueHeader", 0);
+    header.setPackingEnabled(true);
+    header.add(u16, "head", "Both head/tailFFFF denotes empty.");
+    header.add(u16, "tail", "Exactly one sentinel is inconsistent.");
+    DataType headerType = resolve(header);
+    semanticData(0xFEBF6128L, new ArrayDataType(slotType, 123, 16),
+        "f33_nvm_queue_slots", "123 slots, not124. Cold free pool0 contains122; pool1 contains0..121.");
+    semanticData(0xFEBF68D8L, operation, "f33_nvm_zero_handle_operation",
+        "Separate operation-layout record, NOT a queue-slot layout. Padding+6 is preserved.");
+    semanticData(0xFEBF68E8L, new ArrayDataType(headerType, 127, 4),
+        "f33_nvm_queue_headers", "Free pools0/1, reserved queue2, normal queues3+descriptor.queue_key.");
+    semanticData(0xFEBF6AE4L, u16, "f33_nvm_reserved_free_count", "Cold value1.");
+    semanticData(0xFEBF6AE6L, u16, "f33_nvm_normal_free_count", "Cold value122.");
+    semanticData(0xFEBF6AE8L, u16, "f33_nvm_reserved_used_count", "Cold value0.");
+    semanticData(0xFEBF6AEAL, u16, "f33_nvm_normal_used_count", "Cold value0.");
+    semanticData(0xFEBF6126L, u16, "f33_nvm_reset_notification_exclusion",
+        "73078 suppresses result6 for this logical handle.73F0A does not initialize this field.");
+    semanticFunction(0x71CA0L, "f33_nvm_initialize_logical_cells", VoidDataType.dataType)
+        .setComment("Initialize124 result bytes0. Set write-inhibit1 iff descriptor+A bit11 "
+            + "is clear and bit4 set, otherwise2; all registered flags0 yield2. Clear scan halfword60F8.");
+    semanticFunction(0x71CF8L, "f33_nvm_get_write_inhibit", u32,
+        new ParameterImpl("logical_handle", u16, currentProgram))
+        .setComment("Zero-extend byte6001+2*low16(handle); no local bound.");
+    semanticFunction(0x71D28L, "f33_nvm_read_logical_result", u32,
+        new ParameterImpl("logical_handle", u16, currentProgram),
+        new ParameterImpl("output", new PointerDataType(u8, 4), currentProgram))
+        .setComment("Store result byte6000+2*low16(handle) through output; return0. No bound/null check.");
+    semanticFunction(0x73078L, "f33_nvm_notify_reset_result", VoidDataType.dataType,
+        new ParameterImpl("logical_handle", u16, currentProgram),
+        new ParameterImpl("operation", u32, currentProgram))
+        .setComment("Publish logical result6 unless low16 handle equalsFEBF6126. Result6 is not event6.");
+    semanticFunction(0x730A2L, "f33_nvm_clear_queue_headers", VoidDataType.dataType)
+        .setComment("Set head/tailFFFF in all127 headers; do not inspect slots.");
+    semanticFunction(0x730C0L, "f33_nvm_queue_index", u32,
+        new ParameterImpl("base", u32, currentProgram),
+        new ParameterImpl("offset", u32, currentProgram))
+        .setComment("Return low16(base+offset), zero-extended. No queue bounds check.");
+    semanticFunction(0x730C8L, "f33_nvm_reset_slot_range_notifying", VoidDataType.dataType,
+        new ParameterImpl("queue", u16, currentProgram),
+        new ParameterImpl("first", u16, currentProgram),
+        new ParameterImpl("last", u16, currentProgram))
+        .setComment("Relink inclusive range. For nonfree old markers, logical2..123 calls "
+            + "73078 before clearing; invalid logical calls72130 then still clears. "
+            + "Final nextFFFF. No queue/range validation; not proof of a warm-boot entry.");
+    semanticFunction(0x7314EL, "f33_nvm_reset_slot_range", VoidDataType.dataType,
+        new ParameterImpl("queue", u16, currentProgram),
+        new ParameterImpl("first", u16, currentProgram),
+        new ParameterImpl("last", u16, currentProgram))
+        .setComment("Set header and inclusive unsigned16 range to free marker, NULL buffers, "
+            + "logicalFFFF, ascending next; last.nextFFFF. Preserve r10:7319A carries "
+            + "pool1 across this call. Inline actual p-code, not an invented return value. "
+            + "No range validation; lastFFFF wraps the loop.");
+    getFunctionAt(toAddr(0x7314EL)).setInline(true);
+    semanticFunction(0x7319AL, "f33_nvm_reset_pooled_queues", VoidDataType.dataType,
+        new ParameterImpl("notify", u8, currentProgram))
+        .setComment("Clear127 headers; reset pool0 slot122 and pool1 slots0..121. "
+            + "Exactly notify==1 selects old-operation notifications. Set free counts1/122 "
+            + "and used counts0/0. Does not initialize the notification-exclusion handle.");
+    semanticFunction(0x73212L, "f33_nvm_reset_zero_handle_operation", VoidDataType.dataType,
+        new ParameterImpl("notify", u8, currentProgram))
+        .setComment("When notify==1 and marker nonfree, call73078(handle0,old marker). "
+            + "Then marker9DA70AE7, logicalFFFF, NULL buffers; preserve padding+6.");
+    semanticFunction(0x7324CL, "f33_nvm_initialize_queues", VoidDataType.dataType)
+        .setComment("Reset pooled queues and dedicated logical-zero record without old-operation notifications.");
+    semanticFunction(0x73260L, "f33_nvm_reset_queues_notifying", VoidDataType.dataType)
+        .setComment("Reset pooled queues and logical-zero record with notify mode1. "
+            + "Native proof includes retained request, exclusion and invalid retained logical.");
+    semanticFunction(0x732C0L, "f33_nvm_check_queue_empty", u32,
+        new ParameterImpl("header", new PointerDataType(headerType, 4), currentProgram),
+        new ParameterImpl("empty", new PointerDataType(u8, 4), currentProgram))
+        .setComment("Both sentinels:empty1/return0; neither:empty0/return0. Exactly one "
+            + "sentinel calls72130, returns1 and leaves output unchanged.");
+    semanticFunction(0x732F6L, "f33_nvm_check_slot_partition", u32,
+        new ParameterImpl("index", u16, currentProgram),
+        new ParameterImpl("queue", u16, currentProgram))
+        .setComment("Queues0/2 accept only122; all other queue values accept0..121. "
+            + "Invalid slot calls72130 and returns1, else0. Does not bound queue itself.");
+    semanticFunction(0x73328L, "f33_nvm_queue_key", u32,
+        new ParameterImpl("logical_handle", u16, currentProgram))
+        .setComment("Zero-extend descriptor BYTE+1; no local handle bound or priority semantics.");
+    semanticFunction(0x734EEL, "f33_nvm_uses_reserved_queue", u32,
+        new ParameterImpl("logical_handle", u16, currentProgram),
+        new ParameterImpl("operation", u32, currentProgram))
+        .setComment("True only for queue_key0 and marker22AA8A36 or1C646989. "
+            + "Every registered descriptor has nonzero key, so all use the normal pool.");
+    semanticFunction(0x73552L, "f33_nvm_unlink_queue_slot", VoidDataType.dataType,
+        new ParameterImpl("header", new PointerDataType(headerType, 4), currentProgram),
+        new ParameterImpl("index", u16, currentProgram),
+        new ParameterImpl("previous", u16, currentProgram))
+        .setComment("PreviousFFFF replaces head with next, otherwise previous.next=next. "
+            + "If nextFFFF, update tail to previous or the new empty head. No checks, "
+            + "slot clearing or count update. Preserve r10 used by7358C; inline real p-code.");
+    getFunctionAt(toAddr(0x73552L)).setInline(true);
+    semanticFunction(0x7358CL, "f33_nvm_pop_queue_head", u32,
+        new ParameterImpl("queue", u16, currentProgram),
+        new ParameterImpl("index", new PointerDataType(u16, 4), currentProgram))
+        .setComment("Validate header consistency, nonempty and head partition, then unlink "
+            + "head and store index; return0. Rejection returns1 without output assignment. "
+            + "No marker check, slot clearing, counter update or queue bound.");
+    semanticFunction(0x735E6L, "f33_nvm_append_queue_slot", u32,
+        new ParameterImpl("queue", u16, currentProgram),
+        new ParameterImpl("index", u16, currentProgram))
+        .setComment("Empty tail sets head; otherwise validate old tail partition and link "
+            + "its next. Set tail=index and new nextFFFF. Return0 or1 on old-tail failure. "
+            + "Does not validate new index or head/tail consistency.");
+    semanticFunction(0x73640L, "f33_nvm_copy_operation_to_slot", VoidDataType.dataType,
+        new ParameterImpl("slot", new PointerDataType(slotType, 4), currentProgram),
+        new ParameterImpl("operation", operationPointer, currentProgram))
+        .setComment("Copy operation+0/+4/+8/+C into slot+0/+C/+4/+8; preserve slot.next. "
+            + "Preserve r10, carrying append success through7365C; inline actual p-code.");
+    getFunctionAt(toAddr(0x73640L)).setInline(true);
+    semanticFunction(0x7365CL, "f33_nvm_append_operation", u32,
+        new ParameterImpl("queue", u16, currentProgram),
+        new ParameterImpl("index", u16, currentProgram),
+        new ParameterImpl("operation", operationPointer, currentProgram))
+        .setComment("Append index, then copy operation only on success. Return append status.");
+    semanticFunction(0x73686L, "f33_nvm_enqueue_pooled_operation", u32,
+        new ParameterImpl("operation", operationPointer, currentProgram))
+        .setComment("Select free pool0/1 and queue2/3+key. Pop before checking free marker "
+            + "and appending destination; failures after pop do NOT roll back. Only "
+            + "successful append decrements free/increments used. Empty pool with count0 "
+            + "sets service3 state2; other inconsistencies call72130. Return0/1. "
+            + "No local logical bound or payload dereference.");
+    semanticFunction(0x73F0AL, "f33_nvm_initialize_logical_module", VoidDataType.dataType)
+        .setComment("Actual full initializer executes5772 instructions under explicit "
+            + "RAM preconditions. Initialize logical cells, buffer overrides, abortF0, "
+            + "pending/active records and queues. Preserve service-state bytes,6126,6B14 "
+            + "and padding.7477A clears the same6B18 word once in this target. "
+            + "No implied blanket zeroing or reset-path completion.");
+    semanticFunction(0x741ECL, "f33_nvm_check_logical_handle", u32,
+        new ParameterImpl("logical_handle", u16, currentProgram),
+        new ParameterImpl("api", u8, currentProgram),
+        new ParameterImpl("allow_zero", u8, currentProgram))
+        .setComment("Accept2..123, additionally0 iff allow_zero==1. Otherwise call "
+            + "71D88(14,0,api,A), whose exact body returns0, then return1. No init gate.");
+    semanticFunction(0x7423AL, "f33_nvm_check_not_pending", u32,
+        new ParameterImpl("logical_handle", u16, currentProgram),
+        new ParameterImpl("api", u8, currentProgram))
+        .setComment("Reject exactly logical result2 with return1; other byte values return0.");
+    semanticFunction(0x74388L, "f33_nvm_check_buffer_argument", u32,
+        new ParameterImpl("logical_handle", u16, currentProgram),
+        new ParameterImpl("buffer", pointer, currentProgram),
+        new ParameterImpl("api", u8, currentProgram))
+        .setComment("NonNULL passes without descriptor or pointee access. NULL passes "
+            + "only modes2/4; registered mode1 rejects it. No alignment/extent validation.");
+    semanticFunction(0x743BCL, "f33_nvm_check_read_request", u32,
+        new ParameterImpl("logical_handle", u16, currentProgram),
+        new ParameterImpl("buffer", pointer, currentProgram))
+        .setComment("Check handle with api6/allow_zero0. If valid, evaluate BOTH pending "
+            + "and buffer checks, even when pending; return0 iff both pass, else1.");
+    semanticFunction(0x743F8L, "f33_nvm_check_write_inhibit", u32,
+        new ParameterImpl("logical_handle", u16, currentProgram))
+        .setComment("Set service6 state1, reject exactly write_inhibit1 and set state2. "
+            + "Call ordinary service notifier; target747DE is JMP LP. No mutex or "
+            + "flash protection claim. Values0/2/FF pass.");
+    semanticFunction(0x74422L, "f33_nvm_check_write_request", u32,
+        new ParameterImpl("logical_handle", u16, currentProgram),
+        new ParameterImpl("buffer", pointer, currentProgram))
+        .setComment("Api7 handle check, then pending and buffer checks; only when both "
+            + "pass evaluate write-inhibit. Return0 iff all pass.");
+    semanticFunction(0x73FE8L, "f33_nvm_enqueue_read", u32,
+        new ParameterImpl("logical_handle", u16, currentProgram),
+        new ParameterImpl("destination", pointer, currentProgram))
+        .setComment("Validate then72E2E(A1A62093,handle,destination,NULL). Return0 "
+            + "means queued, NOT data acquired or completion. Payload need not be "
+            + "initialized/aligned at this layer; successful result becomes pending2.");
+    semanticFunction(0x74014L, "f33_nvm_enqueue_write", u32,
+        new ParameterImpl("logical_handle", u16, currentProgram),
+        new ParameterImpl("source", pointer, currentProgram))
+        .setComment("Validate then72E2E(22AA8A36,handle,NULL,source). Return0 means "
+            + "queued, not flash committed. Source is not dereferenced here.");
   }
   private void annotateDataFlashReads() throws Exception {
     DataType u8 = UnsignedCharDataType.dataType;
@@ -1156,6 +1346,7 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     annotateNvmRecordIntegrity();
     annotateApplicationRecords();
     annotateApplicationReadCompletion();
+    annotateNvmQueues();
     annotateDataFlashReads();
     annotateFaciSubmission();
     annotatePwmCompareStaging();

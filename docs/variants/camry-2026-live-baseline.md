@@ -8433,7 +8433,7 @@ hex, not an inferred continuation of the earlier groups.
 | Storage | Recovered layout |
 |---|---|
 | `2B010` | 124 logical-indexed two-byte routes: object low byte, family high byte. Logical0/1 contain `FFFF`. |
-| `FEBF6000` | 124 two-byte result cells. `71D0A` writes only byte0; byte1 remains uninterpreted and is preserved by that writer. |
+| `FEBF6000` | 124 two-byte result cells. `71D0A` writes only byte0; byte1 is the local write-inhibit field recovered in §77.16 and is preserved by that writer. |
 | `FEBF0358` | 16 family1 completion bytes, distinct from the redundant application statuses at `0328/1088/10AC`. |
 | `FEBF0B08` | Four96-byte read-staging slots, selected by `object & 3`; each has32-byte raw/XOR55/XORAA lanes. |
 | `FEBF0698` | Four32-bit failure-mask words, one per shared slot. |
@@ -8553,4 +8553,118 @@ regenerated; all six targeted checks and live-coverage parity passed. The
 relevant daemons were stopped before snapshot/corpus promotion. Throwaway
 inputs, including the captured-payload probe, were removed; no vehicle result
 or whole-project verification is claimed.
+
+### 77.16 2026-10-15 logical initialization, admission and queue transitions
+
+The full logical-module initializer `73F0A` executes to its real return in
+5,772 instructions. The queue initializer `7324C` takes3,337. Both start
+with explicitly nonzero RAM; exact post-state checks distinguish writes from
+assumed cold-zero values. No callee is replaced. Thirty-one more contracts,
+typed queue slots/headers and the separate logical-zero record are persisted
+in `SeedCamryF33RecoveredFunctions.java` and the existing review CSV.
+
+**Geometry and initialization.**
+
+| Address | Layout and cold initialization |
+|---|---|
+| `FEBF6000` | 124 cells `{result8, write_inhibit8}`. `71CA0` writes result0 and, in this exact configuration, inhibit2. |
+| `FEBF6128` | **123** sixteen-byte slots: marker32, read pointer32, write pointer32, logical16, next16. Marker `9DA70AE7`, pointersNULL, logicalFFFF. |
+| `FEBF68D8` | Separate sixteen-byte operation record: marker32, logical16, preserved padding16, read pointer32, write pointer32. It is not slot124. |
+| `FEBF68E8` | 127 `{head16,tail16}` headers. Pool0 contains only slot122; pool1 links slots0..121; other headers startFFFF/FFFF. |
+| `FEBF6AE4/6AE6` | Free counts1/122. |
+| `FEBF6AE8/6AEA` | Used counts0/0. |
+
+`73F0A` also initializes the pending operation, active-operation fields, buffer
+overrides, abort byte `6102=F0`, and word `6B18=0`. It preserves the service-state
+bytes, notification-exclusion halfword `6126`, buffer-retry byte `6B14`,
+record padding and other gaps. In particular, `7217E` writes `6124=1`,
+`6125=0`, and `6122=FFFF`, **not** `6126`. This helper proof does not imply
+that all these fields retain nonzero values after an actual cold reset;
+reset-to-application ordering remains a separate execution boundary.
+
+Logical descriptor **byte+1** is the queue key; byte+4 remains the independently
+typed buffer mode. Normal queued operations use header `3+key`. The exact
+registered keys are nonzero: logical0→FF, logical1→7B, logical2..123→the
+logical number. Thus public logical123 reaches the last header126.
+`734EE` selects the reserved class only for key0 and marker `22AA8A36` or
+`1C646989`; that unregistered configuration is instruction-derived, not a
+native execution result. The key is not named execution priority.
+
+**Admission is not acquisition.** `73FE8` validates and queues a read marker
+`A1A62093`; `74014` queues a write marker `22AA8A36`. Public handles are
+low16 values2..123. Invalid handles return1 without reading administration
+RAM. The common handle helper additionally permits zero only when its
+`allow_zero` byte equals1; these two public callers pass0.
+
+For a valid handle, both the pending-result and buffer gates execute even
+when result2 already rejects the request. The registered buffer mode1 rejects
+NULL. A nonNULL pointer passes without reading its pointee or validating its
+alignment or extent. Native probes admit an uninitialized odd-address source.
+Only writes then consult the second logical-cell byte: **exactly1 rejects;
+0,2 andFF pass**. Reads ignore it. `71CA0` derives that byte from descriptor
+flags:1 iff bit11 is clear and bit4 set, otherwise2; all registered flags are0.
+This local software gate is not a claim about physical flash protection.
+
+`72E2E` builds the operation record, sets service3 state1, submits it, and
+publishes logical result2 only after successful enqueue. `720D6`/`720E2`
+are not a demonstrated lock/unlock pair: the first stores the service byte,
+the latter reaches a notifier whose registered `747DE` body is `JMP LP`.
+The write-inhibit check similarly sets service6 state1 or2. No interrupt
+exclusion, mutex, acquisition or durable flash commit is inferred.
+
+**Queue transitions are not transactional.** `7358C` validates sentinel
+consistency, nonempty state and head partition before unlinking the head.
+Queues0/2 accept only slot122; other queue values accept0..121. The helper
+does not bound the queue id itself. Early rejection preserves its output.
+`735E6` validates an existing tail before appending, but does not validate
+the new index or the entire chain.
+
+`73686` pops the free head **before** checking its free marker and appending
+to the destination queue. Bad marker or bad destination tail returns1 with
+the free head already advanced, unchanged counters and no pending-result
+publication. There is no local rollback. Empty free pool with count0 instead
+sets service3 state2. Structural errors call `72130`: the exercised path
+publishes fault mask `04` / aggregate `03` and changes abortF0→0F.
+These are synthetic inconsistent-state probes, not evidence that the
+deployed scheduler generates those inconsistencies.
+
+Actual `7314E`, `73552`, and `73640` preserve live `r10`. Their real p-code
+is now inlined so queue1 survives cold range initialization and append/pop
+status survives record copying/unlinking. No synthetic return value or
+replacement implementation is introduced. Middle/tail/singleton removals
+and append to a nonempty destination have explicit link and canary checks.
+
+**Notifying reset is distinct from boot mode.** `73260` selects mode1 for
+both pool and dedicated-record reset. A retained nonfree slot with valid
+logical2..123 invokes `73078`, which publishes **result6** unless that handle
+equals `6126`. An invalid retained logical raises the fault and is still
+cleared. The dedicated record notifies logical0 with its old operation marker.
+Result6 is not event6 and does not denote normal read success. These calls
+establish the reset helper's behavior, not that a warm-reset vector reaches it.
+
+**Application admission boundary.** With the real initialized pools,
+`68626(object0)` accepts all three `73FE8` calls for logical2/6/A, consuming
+three slots, setting their result bytes2 and family busyFF. It resets the
+selected mask but **preserves the existing completion byte**, whetherFF
+or5A, and does not read or fill staging. Those two executed preconditions
+make the field lifetime explicit; they do not establish a system deadlock
+or complete the physical-acquisition/scheduler pipeline.
+
+Thirty-seven selected native scenarios passed;27 behavior regressions are
+retained. Their boundaries include exact initializer stores, high-bit
+truncation and public bounds, pending/NULL/write-inhibit rejection, no
+pointee access during enqueue, exhaustion versus corruption, post-pop
+residue, linked-list edits and reset notification exclusion.
+
+Independent four-stage rebuilds plus finalization agreed on **7,187 functions**
+and **121 curated reviews** (113 verified, eight bounded); outside-function
+candidates remain929. All27 retained cases passed against the fresh project.
+Canonical C now preserves queue1 across the cold initializer and the actual
+append/pop return dataflow. Ghidra reports that the second range-reset call
+could not also be inlined, but its queue argument is correctly retained;
+the native full-initializer proof does not depend on that rendering.
+The three dependent NvM/B6 artifacts were regenerated, all six targeted
+checks and live-coverage parity passed, and the stopped project/corpus were
+promoted. No vehicle experiment, full-project sweep or complete asynchronous
+restoration claim accompanies this increment.
 
