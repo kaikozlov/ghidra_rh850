@@ -7669,10 +7669,12 @@ is not a recovered implementation; the ROM source and relocation must be read
 together. The relocation regression does not execute the callback's privileged
 device accesses.
 
-Boot TP base `0x869C` contains pointer-bearing data, while its current function
-interpretation yields bad-data pseudocode. That output is not evidence of a
-meaningful function. Dispatcher/data typing and the apparent incoming call must
-be resolved before treating the discovered-function set as closed.
+Boot TP base `0x869C` is now typed as eight interrupt-dispatch records, not a
+function. The apparent incoming reference came from calibration datum `101`
+at `0x18108`, misclassified as `JMP TP`. Recovered curve types remove that false
+code, and explicit seeds recover the previously absent boot vector/dispatcher
+roots. The exact table traversal and executable boundary checks are in §77.5;
+this repair does not establish that all other function boundaries are closed.
 
 At `0x3614`, disassembly writes and polls `CDBCR` / `ICCTRL` bits, but the current
 decompiler register model folds the waits into infinite loops and removes later
@@ -7732,4 +7734,52 @@ returns success with message zero. This does not prove CAN admission or acceptan
 of an authenticated transaction: the supplying callers, format configuration,
 and authentication result remain separate gates. Conversely, the decoder's
 zero marker alone must not be documented as a complete transaction rejection.
+
+### 77.5 Boot dispatch and calibration/data ownership
+
+The target seed now persists these additional entries and data layouts:
+
+| Entry or data | Recovered contract |
+|---|---|
+| `0x100`, `0x10C` | `f33_boot_eiint_vector` executes `SYNCP` and branches to `f33_boot_eiint_context`. The latter saves `r6`, `EIPC`, `EIPSW`, reads `EIIC`, enables interrupts, saves `r1..lp`, dispatches, restores the context and executes `EIRET`. These are hardware entries, not ordinary C argument/return contracts. |
+| `0x748` | `f33_boot_dispatch_eiic(eiic)` walks eight-byte records from TP and calls the first exact match or `FFFFFFFF` default. |
+| `0x869C..0x86DB` | Eight `F33BootInterruptEntry` records: causes `1087,10B8,10B9,10BB,10BC,10C0,10C1,FFFFFFFF`, with handlers `1E44,1E50,1E5E,1E6C,1E7A,1E88,1E96,1EA4`. The following `27F/32A0` pair is **not** traversed; its consumer remains unidentified. |
+| `0x1E44` | `f33_boot_tauj0_ch2_callback`: cause `1087` is **TAUJ0 channel 2**, per P1M-E hardware manual **R01UH0585EJ0120**, p.284. The real call chain is `1E44 → 1CE8 → 1E04 → 14A2`; byte `FEBF2904 == 2` enters services, while state 1 returns. |
+| `0xC29B2` | `f33_curve16_interpolate_with_slope(curve, x, slope_q9)` returns an unsigned-16-valued result in the full `r10` register and writes a signed-16 slope result through `r8`. It is not a cached segment-index output. |
+| `0x18100`, `0x10100` | Each now has its first two rows typed as `F33Curve16`: sixteen four-byte `{x:s16,y:u16}` points followed by four opaque bytes, total stride `0x44`. `C28AE/C28FC` select these through the two base pointers at `B144C`, indexed by `FEBEAC3C & 1`. Other offsets in those calibration banks use different formats. |
+
+The curve helper compares signed axes, linearly interpolates the selected
+segment and narrows the value to unsigned16. Its value denominator is narrowed
+to signed16 before division. It clamps at **point 15**, not the trailing
+`(32767,65535)` pair, and extrapolates segment zero below the first axis value.
+For the first row at `18100`, input `−1` therefore returns `65535`, not zero;
+input `32767` returns `44605`, not `65535`.
+
+The second output uses quantized Q8 segment slopes, chooses the maxima with
+neighboring slopes, blends them across the selected interval, rescales to Q9
+and narrows to signed16 without saturation. Zero-width slope segments use the
+signed fallback at `AF88C` (`0x7800`). Native 32-bit multiplication, shifts,
+`DIVQ` and narrowing remain part of the contract; ordinary mathematical
+division alone does not describe all exceptional or overflowing inputs.
+Neither physical axis units nor the OEM meaning of the bank selector has been
+recovered. The `0x8000` difference between these **two CodeFlash pointers** is
+not Sienna's combined-image address adjustment.
+
+Verification used the unchanged registered CodeFlash:
+
+- Four direct dispatch cases exercised first/last known causes and both
+  sentinel/default selection. In particular, cause `27F` reaches `1EA4`,
+  not the post-sentinel pointer `32A0`.
+- A 50-instruction run entered at `100`, traversed the real state-1 timer
+  callback and returned by `EIRET`. It preserved all 31 GPRs and both stack
+  canaries, restored PSW and cleared ISPR. Interrupt context was seeded
+  explicitly, with `FPEC=0`; this does not prove physical acquisition,
+  nested interrupts, pending-FPI behavior or the state-2 service schedule.
+- Fifty-four curve runs compared actual instructions against an independent
+  ordered-segment arithmetic model: every first-row knot and its immediate
+  neighbors, negative extrapolation, upper clamping, a second row, and
+  duplicate-x slope fallbacks. Seven permanent scenarios retain the
+  dispatch/context and meaningful curve boundaries and were executed from
+  their tracked paths. No malformed-table completeness or vehicle result
+  is implied.
 

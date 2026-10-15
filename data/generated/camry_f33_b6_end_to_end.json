@@ -532,7 +532,7 @@
     "0x0CCF0E": {
       "body_sha256": "f5a250c7631463c3446661d0084dc80810d9c6ca49609fd334175507f1707cd9",
       "body_size": 164,
-      "decompiled_c_sha256": "9ae5e4afbe80bcbaff3e2ee8b2a91b654102eb22f40d233995860993bb25a6ec",
+      "decompiled_c_sha256": "ad9b454e5d3d6cff3c1be957ba7aa627ea257e33144ac0fbb86a43fa76431e80",
       "role": "B6 target-angle scale/continuity"
     },
     "0x0CCFB2": {
@@ -550,7 +550,7 @@
     "0x0CDA20": {
       "body_sha256": "5544519f0d68f69e32f1aa6e1a0ce56a487cf29aa8288239746b79ff9418f5be",
       "body_size": 192,
-      "decompiled_c_sha256": "f898cff61cdc7b8dc9c3156f855bc4ee00f8276378c4948a264650b169609af0",
+      "decompiled_c_sha256": "b467fa544d636782ad506aba6c43d64fb66bc2c1861407c96973a8fde37ed59e",
       "role": "B6 sig265-controlled supervisor term"
     },
     "0x0CDFF8": {
@@ -568,7 +568,7 @@
     "0x0CE3AA": {
       "body_sha256": "79982dca675d0187026a4e6ee2ddb3cbba818c98981d1edb6a1d218ecfe0e676",
       "body_size": 170,
-      "decompiled_c_sha256": "cf04c57b3661a6971bcd3ac23afc62702f4c805c03c47e4c09e1360ec9f3910c",
+      "decompiled_c_sha256": "d0b435703f3d8a6b90149d99588d72df4783d59953022933358f13b5d69e9f1a",
       "role": "B6 sig269-weighted supervisor"
     },
     "0x0CE51C": {
@@ -580,7 +580,7 @@
     "0x0CE594": {
       "body_sha256": "3f65c2dfea68424ed95624e3797e8a0c478def774a781e6bcbe9a14ba2fcfc4e",
       "body_size": 312,
-      "decompiled_c_sha256": "dfa181025a89fb96d9661305be8dca92efac2dc557668122d4bbb4258ae745b0",
+      "decompiled_c_sha256": "4efd9714ef2540165d54f09fffe8d5bf3d1403bd8be580a969ed5365914cfbe3",
       "role": "cooperative supervisor shaping"
     },
     "0x0CE6F4": {
@@ -622,7 +622,7 @@
     "0x0CECD6": {
       "body_sha256": "2aed8a7ce1ca39769c97c1b473bff1e02176889c637212fb17dff78ad2b4dd43",
       "body_size": 82,
-      "decompiled_c_sha256": "cba388e3642f8adf29f593c73e353d0e8eb911a547372f139a3eebd52d461bc4",
+      "decompiled_c_sha256": "98cfd7198e708788e086563fc9945c9a8de3671c0aa057dfe3fc85e2cf208406",
       "role": "sequence-dependent persistence state"
     },
     "0x0CEE20": {
@@ -3004,7 +3004,7 @@
     }
   ],
   "target": {
-    "canonical_function_count": 7178,
+    "canonical_function_count": 7181,
     "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
     "software_id": "8965F3307000"
   }

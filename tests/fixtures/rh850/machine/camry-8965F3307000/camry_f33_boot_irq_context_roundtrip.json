@@ -1,0 +1,300 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_boot_irq_context_roundtrip",
+  "entry": {
+    "role": "boot EIINT vector through inactive periodic handler and EIRET",
+    "scope": "resolved-address",
+    "address": "0x100"
+  },
+  "max_instructions": 500,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "r1": "0x1010101",
+    "r2": "0x2020202",
+    "sp": "0xfebe2000",
+    "gp": "0xfebf9800",
+    "tp": "0x869c",
+    "r6": "0x6060606",
+    "r7": "0x7070707",
+    "r8": "0x8080808",
+    "r9": "0x9090909",
+    "r10": "0xa0a0a0a",
+    "r11": "0xb0b0b0b",
+    "r12": "0xc0c0c0c",
+    "r13": "0xd0d0d0d",
+    "r14": "0xe0e0e0e",
+    "r15": "0xf0f0f0f",
+    "r16": "0x10101010",
+    "r17": "0x11111111",
+    "r18": "0x12121212",
+    "r19": "0x13131313",
+    "r20": "0x14141414",
+    "r21": "0x15151515",
+    "r22": "0x16161616",
+    "r23": "0x17171717",
+    "r24": "0x18181818",
+    "r25": "0x19191919",
+    "r26": "0x1a1a1a1a",
+    "r27": "0x1b1b1b1b",
+    "r28": "0x1c1c1c1c",
+    "r29": "0x1d1d1d1d",
+    "ep": "0x1e1e1e1e",
+    "lp": "0x1f1f1f1f",
+    "PSW": "0x3f",
+    "EIPSW": "0x1f",
+    "EIPC": "0x798",
+    "EIIC": "0x1087",
+    "FPEC": "0x0",
+    "PMR": "0x0",
+    "FPIPR": "0x0",
+    "ISPR": "0x4",
+    "INTCFG": "0x0",
+    "RBASE": "0x0",
+    "EBASE": "0x0"
+  },
+  "stop_addresses": [
+    "0x798",
+    "0x1e50",
+    "0x1e5e",
+    "0x1e6c",
+    "0x1e7a",
+    "0x1e88",
+    "0x1e96",
+    "0x1ea4",
+    "0x32a0"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1bfc",
+      "size": 1032,
+      "fill": 165,
+      "evidence": "isolated interrupt stack and both canaries"
+    },
+    {
+      "address": "0xfebf2904",
+      "hex": "01",
+      "evidence": "boot state1: real periodic handler returns without entering state2 services"
+    }
+  ],
+  "checks": [
+    {
+      "name": "preserved r1",
+      "kind": "register",
+      "register": "r1",
+      "equals": "0x1010101"
+    },
+    {
+      "name": "preserved r2",
+      "kind": "register",
+      "register": "r2",
+      "equals": "0x2020202"
+    },
+    {
+      "name": "preserved sp",
+      "kind": "register",
+      "register": "sp",
+      "equals": "0xfebe2000"
+    },
+    {
+      "name": "preserved gp",
+      "kind": "register",
+      "register": "gp",
+      "equals": "0xfebf9800"
+    },
+    {
+      "name": "preserved tp",
+      "kind": "register",
+      "register": "tp",
+      "equals": "0x869c"
+    },
+    {
+      "name": "preserved r6",
+      "kind": "register",
+      "register": "r6",
+      "equals": "0x6060606"
+    },
+    {
+      "name": "preserved r7",
+      "kind": "register",
+      "register": "r7",
+      "equals": "0x7070707"
+    },
+    {
+      "name": "preserved r8",
+      "kind": "register",
+      "register": "r8",
+      "equals": "0x8080808"
+    },
+    {
+      "name": "preserved r9",
+      "kind": "register",
+      "register": "r9",
+      "equals": "0x9090909"
+    },
+    {
+      "name": "preserved r10",
+      "kind": "register",
+      "register": "r10",
+      "equals": "0xa0a0a0a"
+    },
+    {
+      "name": "preserved r11",
+      "kind": "register",
+      "register": "r11",
+      "equals": "0xb0b0b0b"
+    },
+    {
+      "name": "preserved r12",
+      "kind": "register",
+      "register": "r12",
+      "equals": "0xc0c0c0c"
+    },
+    {
+      "name": "preserved r13",
+      "kind": "register",
+      "register": "r13",
+      "equals": "0xd0d0d0d"
+    },
+    {
+      "name": "preserved r14",
+      "kind": "register",
+      "register": "r14",
+      "equals": "0xe0e0e0e"
+    },
+    {
+      "name": "preserved r15",
+      "kind": "register",
+      "register": "r15",
+      "equals": "0xf0f0f0f"
+    },
+    {
+      "name": "preserved r16",
+      "kind": "register",
+      "register": "r16",
+      "equals": "0x10101010"
+    },
+    {
+      "name": "preserved r17",
+      "kind": "register",
+      "register": "r17",
+      "equals": "0x11111111"
+    },
+    {
+      "name": "preserved r18",
+      "kind": "register",
+      "register": "r18",
+      "equals": "0x12121212"
+    },
+    {
+      "name": "preserved r19",
+      "kind": "register",
+      "register": "r19",
+      "equals": "0x13131313"
+    },
+    {
+      "name": "preserved r20",
+      "kind": "register",
+      "register": "r20",
+      "equals": "0x14141414"
+    },
+    {
+      "name": "preserved r21",
+      "kind": "register",
+      "register": "r21",
+      "equals": "0x15151515"
+    },
+    {
+      "name": "preserved r22",
+      "kind": "register",
+      "register": "r22",
+      "equals": "0x16161616"
+    },
+    {
+      "name": "preserved r23",
+      "kind": "register",
+      "register": "r23",
+      "equals": "0x17171717"
+    },
+    {
+      "name": "preserved r24",
+      "kind": "register",
+      "register": "r24",
+      "equals": "0x18181818"
+    },
+    {
+      "name": "preserved r25",
+      "kind": "register",
+      "register": "r25",
+      "equals": "0x19191919"
+    },
+    {
+      "name": "preserved r26",
+      "kind": "register",
+      "register": "r26",
+      "equals": "0x1a1a1a1a"
+    },
+    {
+      "name": "preserved r27",
+      "kind": "register",
+      "register": "r27",
+      "equals": "0x1b1b1b1b"
+    },
+    {
+      "name": "preserved r28",
+      "kind": "register",
+      "register": "r28",
+      "equals": "0x1c1c1c1c"
+    },
+    {
+      "name": "preserved r29",
+      "kind": "register",
+      "register": "r29",
+      "equals": "0x1d1d1d1d"
+    },
+    {
+      "name": "preserved ep",
+      "kind": "register",
+      "register": "ep",
+      "equals": "0x1e1e1e1e"
+    },
+    {
+      "name": "preserved lp",
+      "kind": "register",
+      "register": "lp",
+      "equals": "0x1f1f1f1f"
+    },
+    {
+      "name": "returned to saved EIPC",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "restored interrupted flags",
+      "kind": "register",
+      "register": "PSW",
+      "equals": "0x1f"
+    },
+    {
+      "name": "released active interrupt priority",
+      "kind": "register",
+      "register": "ISPR",
+      "equals": "0x0"
+    },
+    {
+      "name": "stack lower canary",
+      "kind": "memory",
+      "address": "0xfebe1bfc",
+      "size": 4,
+      "equals_hex": "a5a5a5a5"
+    },
+    {
+      "name": "stack upper canary",
+      "kind": "memory",
+      "address": "0xfebe2000",
+      "size": 4,
+      "equals_hex": "a5a5a5a5"
+    }
+  ]
+}

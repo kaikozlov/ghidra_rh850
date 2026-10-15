@@ -1,4 +1,8 @@
 address,provenance,note
+0x00000100,firmware/camry-8965F3307000/CodeFlash.bin,boot EIINT vector saves exception context and calls 0x748 at 0x130 before EIRET
+0x0000010C,firmware/camry-8965F3307000/CodeFlash.bin,boot EIINT context-save body reached by the vector branch at 0x102
+0x00000748,firmware/camry-8965F3307000/CodeFlash.bin,EIIC table traversal reached from the boot vector; key match or FFFFFFFF sentinel selects the handler
+0x00001E44,firmware/camry-8965F3307000/CodeFlash.bin,first boot interrupt-table handler at 0x86A0; calls 0x1CE8 at 0x1E48
 0x00034C56,data/generated/camry_8965F3307000_lateral_decompiler_evidence.json,exact-F33 function entry promoted by prior generated decompiler evidence
 0x00035A06,data/generated/camry_8965F3307000_lateral_decompiler_evidence.json;data/generated/camry_8965F3307000_tss3_tx_decompiler_evidence.json,exact-F33 function entry promoted by prior generated decompiler evidence
 0x00046994,data/generated/camry_8965F3307000_lateral_decompiler_evidence.json,exact-F33 function entry promoted by prior generated decompiler evidence
