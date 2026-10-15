@@ -2624,12 +2624,13 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
             + "to accumulator/output, cap output at32000 and return signed16. Exact mode1/3 biases are0.");
     semanticFunction(0x3A5D4L, "f33_restore_motor_thermal_model", v)
         .setComment("Seed56-byte local from211E8 then get application record6. Status!=10 or markerA55A "
-            + "uses ROM terms307/2893 per branch. Otherwise retain four saved terms unless an absent7BF8 byte, "
-            + "marker!=5AA5 and3A56E==5A jointly select zero terms. Physical persistence is outside this API.");
+            + "uses ROM terms307/2893 per branch. Otherwise use saved terms unless at least one7BF8 byte "
+            + "is zero, marker==0 and selected signed source difference>32000. Marker is passed in realR6 "
+            + "to3A56E. Restore chooses live poles; it does not erase the record or prove durability.");
     semanticFunction(0x3AD72L, "f33_restore_ecu_source3_thermal_model", v)
         .setComment("Seed56-byte local from21220 then get record6; use fields24/26/28/2A and marker32 "
-            + "(hex offsets). Status/marker rejection uses zero ROM terms; conditional zero selection "
-            + "also requires3AD0C==5A. Not a fresh acquisition or durable-write acknowledgement.");
+            + "(hex offsets). Status!=10 or markerA55A uses zero ROM terms. Otherwise conditional zero "
+            + "requires an absent7BF8 byte and3AD0C(marker)==5A: marker0 and selected difference>32000.");
     semanticFunction(0x3B684L, "f33_stage_dual_thermal_squared_inputs", s32,
         new ParameterImpl("upper", s16, currentProgram),
         new ParameterImpl("lower", s16, currentProgram))
@@ -2640,7 +2641,111 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
         .setComment("Low32 squares of32-bit6EFC and signed16 6EEC/6EEE, then signed calibration bounds, "
             + "publish6EF0/6EF4/6EF8. Do not replace low32 multiplication by an unbounded mathematical square.");
     semanticData(0x21258L, new ArrayDataType(u8, 16, 1), "f33_thermal_offset_source_pairs",
-        "Eight normal/alternate source-index pairs. Both indices for selectors4..7 are0.");
+        "Eight normal/alternate index pairs: selectors0/1/4..7 use0; selector2 uses1; selector3 uses2.");
+  }
+  private void annotateRemainingEcuThermalModels() throws Exception {
+    DataType v = VoidDataType.dataType;
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u16 = UnsignedShortDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    DataType s16 = ShortDataType.dataType;
+    DataType s32 = IntegerDataType.dataType;
+    semanticFunction(0x39D26L, "f33_update_ecu_source2_thermal_estimate", v)
+        .setComment("Only zero6F34 requires7DCC/7BF6 both5A and record6 restoration. Initialized model "
+            + "continues without those validity gates. First6764&3!=0 with6F35==0 rebases both pole pairs "
+            + "and latches alternate gains5A; clearing6764 does not revert it. Publish signed branch maximum6F36.");
+    semanticFunction(0x39DA8L, "f33_update_ecu_source2_thermal_branch0", s32,
+        new ParameterImpl("upper", s16, currentProgram),
+        new ParameterImpl("lower", s16, currentProgram),
+        new ParameterImpl("alternate_gains", u8, currentProgram))
+        .setComment("Drive70B4 and poles6F4C/6F50; gains23/10 or54/6, bias512. Base divisors13/5000 "
+            + "scale1536 only when sat_abs16(64E2)>32 AND signed drive>1638400; otherwise unsigned "
+            + "speed map is flat1024. Selector0 offset/following returns signedR10 and stores6F40.");
+    semanticFunction(0x3A00AL, "f33_update_ecu_source2_thermal_branch1", s32,
+        new ParameterImpl("upper", s16, currentProgram),
+        new ParameterImpl("lower", s16, currentProgram),
+        new ParameterImpl("alternate_gains", u8, currentProgram))
+        .setComment("Independent drive70B8/poles6F60/6F64, same exact coefficients as branch0, "
+            + "speed axis6694 and selector1 offset/following. Return/store adjusted6F54.");
+    semanticFunction(0x39F3CL, "f33_rebase_ecu_source2_thermal_branch0", v)
+        .setComment("Convert each old pole by signed /2048, multiply old gain23/10, divide new54/6, "
+            + "then symmetric saturating32 multiply2048. Preserve staged truncation; not exact real-valued rescaling.");
+    semanticFunction(0x3A19EL, "f33_rebase_ecu_source2_thermal_branch1", v)
+        .setComment("Same staged conversion for6F60/6F64 before first alternate-gain model update.");
+    semanticFunction(0x39B6AL, "f33_update_ecu_source4_thermal_estimate", v)
+        .setComment("Only zero6F10 requires7DCC/7BF6 both5A and39A1C restoration. Then calculate "
+            + "adjusted estimate and store real signedR10 low16 at6F12; nonzero marker bypasses initialization gates.");
+    semanticFunction(0x39A94L, "f33_calculate_ecu_source4_thermal_estimate", s32)
+        .setComment("Drive70B0 updates two poles with exact divisors1/1. High-load scale1536 truncates "
+            + "these divisors back to1. Gains0/0 leave raw bias1536; selector2 adds offset source index1 "
+            + "and optional following. Return adjusted estimate inR10, not void.");
+    semanticFunction(0x3933AL, "f33_update_ecu_source5_thermal_estimate", v)
+        .setComment("Only zero6EAC requires7DCC/7BF6 both5A and390FE restoration. Store calculated "
+            + "signedR10 low16 at6EAE; initialized updates do not require fresh admission bytes.");
+    semanticFunction(0x391E6L, "f33_calculate_ecu_source5_thermal_estimate", s32)
+        .setComment("Six poles6EC0..6ED4: first three use6EF0, last three70B0. Divisors200/420/1/1/1/1, "
+            + "gains13/100/0/0/0/0 and bias0. Clamp summed contributions then selector3 offset/following "
+            + "using source index2. Return adjusted signedR10; zero-gain poles still evolve.");
+    semanticFunction(0x3A27EL, "f33_publish_ecu_source2_thermal_limit_maps", v)
+        .setComment("Signed6F36 selects nonflat2B3C4/2B3E0 curves into6F68/6F6A. Bank0 reaches5542 "
+            + "at18560; bank1 reaches0 at19376. Signed-axis7FFF terminates; FFFF ordinate is not an endpoint.");
+    semanticFunction(0x39BC4L, "f33_publish_ecu_source4_thermal_limit_maps", v)
+        .setComment("Signed6F12 selects2B32C/2B348 into6F30/6F32. Bank0 reaches5542 at16512 and "
+            + "bank1 reaches0 at16628. Zero pole gains do not disable this offset-driven derating path.");
+    semanticFunction(0x393A4L, "f33_publish_ecu_source5_thermal_limit_maps", v)
+        .setComment("Signed6EAE selects2B2B8/2B2D4 into6EE0/6EE2. Bank0 reaches5542 at18560, "
+            + "bank1 reaches0 at15216. Distinct from flat motor/source3 maps and the signed current floor.");
+    semanticFunction(0x39C78L, "f33_restore_ecu_source2_thermal_model", v)
+        .setComment("Record6 terms08/0A/0C/0E, marker32. Exact status10 and marker!=A55A admit saved "
+            + "terms, conditionally zeroed for marker0/selected difference>32000 with a zero7BF8 byte. "
+            + "Rejected record uses3390/222 per branch. 6764&3 chooses initial gains and6F35; seed poles "
+            + "from contribution*4096/gain then saturating multiply128.");
+    semanticFunction(0x39A1CL, "f33_restore_ecu_source4_thermal_model", v)
+        .setComment("Record6 terms10/12 and common marker32/conditional-zero contract. Rejection uses "
+            + "zero defaults. Exact gains0/0 seed both poles0 even with nonzero saved contributions.");
+    semanticFunction(0x390FEL, "f33_restore_ecu_source5_thermal_model", v)
+        .setComment("Record6 terms18..22 and marker32; same exact-status and conditional-zero contract. "
+            + "Rejected record uses539/3803/0/0/0/0. Seed via signed contribution*4096/gain followed by "
+            + "saturating multiply128; zero gain seeds0. Does not rewrite the retained record.");
+    semanticFunction(0x39C12L, "f33_should_zero_ecu_source2_thermal_seed", u32,
+        new ParameterImpl("record_marker", u16, currentProgram))
+        .setComment("Return5A only for marker0 and selected signed difference>32000. 7BF8 low0/high "
+            + "nonzero selects7DD0-7DCE; low nonzero/high0 selects7DD8-7DD6; otherwise use minimum. "
+            + "Update selected6F38/6F3C histories; retain an unselected history.");
+    semanticFunction(0x39930L, "f33_should_zero_ecu_source4_thermal_seed", u32,
+        new ParameterImpl("record_marker", u16, currentProgram))
+        .setComment("Same strict32000/marker0/source-byte selection; selected difference histories6F28/6F2C.");
+    semanticFunction(0x3906EL, "f33_should_zero_ecu_source5_thermal_seed", u32,
+        new ParameterImpl("record_marker", u16, currentProgram))
+        .setComment("Same strict32000/marker0/source-byte selection; histories6ED8/6EDC. Caller39126 "
+            + "loads record+32 intoR6 and preserves it through the39152 call; no invented NvM return argument.");
+    semanticFunction(0x3A56EL, "f33_should_zero_motor_thermal_seed", u32,
+        new ParameterImpl("record_marker", u16, currentProgram))
+        .setComment("Same strict32000/marker0/source-byte selection; selected histories6F84/6F88.");
+    semanticFunction(0x3AD0CL, "f33_should_zero_ecu_source3_thermal_seed", u32,
+        new ParameterImpl("record_marker", u16, currentProgram))
+        .setComment("Same strict32000/marker0/source-byte selection; selected histories6FE4/6FE8.");
+    DataType point = currentProgram.getDataTypeManager().getDataType("/CamryF33/F33CurvePointS16U16");
+    DataType currentCurve = new ArrayDataType(point, 7, 4);
+    semanticData(0x2B3C4L, currentCurve, "f33_ecu_source2_current_curve_bank0", "Signed-axis7FFF sentinel; final real ordinate5542.");
+    semanticData(0x2B3E0L, currentCurve, "f33_ecu_source2_current_curve_bank1", "Nonflat current limit reaches0 at19376.");
+    semanticData(0x2B32CL, currentCurve, "f33_ecu_source4_current_curve_bank0", "Nonflat current limit reaches5542 at16512.");
+    semanticData(0x2B348L, currentCurve, "f33_ecu_source4_current_curve_bank1", "Nonflat current limit reaches0 at16628.");
+    semanticData(0x2B2B8L, currentCurve, "f33_ecu_source5_current_curve_bank0", "Nonflat current limit reaches5542 at18560.");
+    semanticData(0x2B2D4L, currentCurve, "f33_ecu_source5_current_curve_bank1", "Nonflat current limit reaches0 at15216.");
+    StructureDataType record = new StructureDataType(new CategoryPath("/CamryF33"), "F33ThermalHistoryRecord", 0);
+    record.setPackingEnabled(true);
+    record.add(new ArrayDataType(s16, 4, 2), "motor_terms", "Two restored contributions per branch, not raw poles.");
+    record.add(new ArrayDataType(s16, 4, 2), "source2_terms", "Two restored contributions per branch.");
+    record.add(new ArrayDataType(s16, 2, 2), "source4_terms", "Exact zero gains discard these when seeding poles.");
+    record.add(new ArrayDataType(u8, 4, 1), "opaque_14", "Not interpreted by the reconstructed restore consumers.");
+    record.add(new ArrayDataType(s16, 6, 2), "source5_terms", "Six contributions; four have exact zero gains.");
+    record.add(new ArrayDataType(s16, 4, 2), "source3_terms", "Four exact zero-gain contributions.");
+    record.add(new ArrayDataType(u8, 6, 1), "opaque_2c", "Not interpreted by these restore consumers.");
+    record.add(u16, "marker", "A55A rejects; zero permits conditional zero seeding; other accepted markers retain terms.");
+    record.add(new ArrayDataType(u8, 4, 1), "opaque_34", "Copied by the56-byte getter; interpretation remains separate.");
+    semanticData(0xFEBEF4D0L, resolve(record), "f33_thermal_history_record",
+        "Family0 object6 live RAM mirror, not physical flash. All restore consumers copy before exact status10 admission.");
   }
   private void annotateThermalArbitration() throws Exception {
     DataType v = VoidDataType.dataType;
@@ -3118,9 +3223,9 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
             + "clamp magnitude to0..29125, then restore torque sign using AF888=1024/AF88A=-1024. "
             + "BF3C is signed32 assistance, not the nonnegative intermediate. Publish both curve slopes.");
     semanticFunction(0xC4DF2L, "f33_condition_assist_torque", v)
-        .setComment("Condition bounded C150 through retained accumulator/output recurrences and C4D68. "
-            + "C12A selects bypass/reseed coefficients, not an external command. Input correction C523C uses "
-            + "bounded AC90 memory; C52FA narrows AC44+C146 to signed16 BEFORE its clamp.");
+        .setComment("Clamp C150 to+/-2109, then advance retained two-stage recurrence. C12A==1 seeds "
+            + "stage1 with low32(input*408474)/1024 and blend1024, but does not clear stage2 history. "
+            + "Ordinary stage1 preserves low32 accumulator/shift arithmetic before signed division408474.");
     semanticFunction(0xC8678L, "f33_update_torque_rate_assist_compensation", v)
         .setComment("Map signed torque rateC266 and multiply by a narrowed factor from assistance slopeBF40 "
             + "and adjacent speed maps. Publish bounded signed32 C4C0. Preserve low32 products and the real "
@@ -3156,6 +3261,185 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
         new ParameterImpl("value", s32, currentProgram))
         .setComment("Apply C2F4 then C2F6 through separate low32 products and signed divisions1024. "
             + "Publish C2E4/C2E8 and return the second signed32 result in R10.");
+  }
+  private void annotateAssistConditioning() throws Exception {
+    DataType v = VoidDataType.dataType;
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u16 = UnsignedShortDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    StructureDataType gain = new StructureDataType(new CategoryPath("/CamryF33"), "F33GainSlewState", 0);
+    gain.setPackingEnabled(true);
+    gain.add(u16, "down_target", "Selected only when direction2 and current>=this target.");
+    gain.add(u16, "down_step", "Unsigned bounded downward step.");
+    gain.add(u16, "up_target", "Default/upward target.");
+    gain.add(u16, "up_step", "Unsigned bounded upward step.");
+    gain.add(u16, "current", "Retained gain, updated by CE8DA.");
+    gain.add(u8, "direction", "2 permits downward path; otherwise use upward/default path.");
+    gain.add(u8, "padding", "Not consumed.");
+    DataType gainPointer = new PointerDataType(resolve(gain), 4);
+    semanticFunction(0xCE8DAL, "f33_step_retained_unsigned_gain", v,
+        new ParameterImpl("state", gainPointer, currentProgram))
+        .setComment("Generic retained unsigned gain step used by eight producers. Direction2 and "
+            + "current>=down_target select bounded subtraction; otherwise step toward up_target. "
+            + "Write only current at+8; not a torque-specific policy or elapsed-time controller.");
+    Function prepare = semanticFunction(0xC5106L, "f33_prepare_torque_memory_gain_parameters", v,
+        new ParameterImpl("state", gainPointer, currentProgram),
+        new ParameterImpl("mode", u32, currentProgram));
+    prepare.setComment("Low8 mode<7 selects16-byte D2FB8 row in bankAC3C&1: three dereferenced "
+        + "halfword pointers plus inline up_target. Otherwise retain parameters and select direction1. "
+        + "Real leaf preserves R6 for following CE8DA; inline its actual p-code, not an invented return.");
+    prepare.setInline(true);
+    long[][] otherPreparations = {
+        {0xC660EL, 0xC2A4L}, {0xC6C24L, 0xC2F4L}, {0xC79BAL, 0xC3F4L},
+        {0xC7CB6L, 0xC42CL}, {0xC7D76L, 0xC438L}, {0xC88B0L, 0xC4DCL}, {0xC8FFAL, 0xC544L}
+    };
+    for (long[] row : otherPreparations) {
+      Function sibling = semanticFunction(row[0], "f33_prepare_gain_parameters_" + Long.toHexString(row[1]), v,
+          new ParameterImpl("state", gainPointer, currentProgram),
+          new ParameterImpl("mode", u32, currentProgram));
+      sibling.setInline(true);
+      sibling.setComment("Same12-byte state and preserved R6 as C5106, feeding CE8DA. Exact94-byte body "
+          + "differs only in ROM pointer/global displacements; calibration values remain producer-local. "
+          + "Inline real p-code so the shared helper's typed argument remains connected in every caller.");
+    }
+    StructureDataType calibration = new StructureDataType(new CategoryPath("/CamryF33"), "F33GainSlewCalibration", 0);
+    calibration.setPackingEnabled(true);
+    DataType halfwordPointer = new PointerDataType(u16, 4);
+    calibration.add(halfwordPointer, "down_target", "Dereferenced by C5106.");
+    calibration.add(halfwordPointer, "down_step", "Dereferenced by C5106.");
+    calibration.add(u16, "up_target", "Inline value, not a pointer.");
+    calibration.add(u16, "opaque_0a", "Not consumed by C5106.");
+    calibration.add(halfwordPointer, "up_step", "Dereferenced by C5106.");
+    semanticData(0xD2FB8L, new ArrayDataType(resolve(calibration), 14, 16),
+        "f33_torque_memory_gain_calibrations",
+        "Both banks/all seven modes resolve targets1024 and down_step0. Up_step0 in bank0,3 in bank1.");
+    semanticFunction(0xC4CF0L, "f33_initialize_assist_torque_conditioner", v)
+        .setComment("Initialize both retained recurrences, denominators408474/6347, outputs/history "
+            + "and selector/repair latches. This reset is distinct from a later C12A reseed.");
+    semanticFunction(0xC4D68L, "f33_update_retained_assist_torque_output", v)
+        .setComment("Denominator1024 for C12A==1, otherwise6347 when unsigned AC4A<=512 or4607. "
+            + "Rescale old accumulator using low32(newD<<10)/oldD, then add C108-oldC112. "
+            + "Narrow low32(newAccumulator<<10)/newD into C112/C128; history is not independently cleared.");
+    semanticFunction(0xC4E94L, "f33_update_torque_conditioner_slope_blend", v)
+        .setComment("Produce C114 from previous BF40 before current base surface/slope publication. "
+            + "Caller AC31 admission can retain this coefficient while torque recurrences advance.");
+    semanticFunction(0xC4F04L, "f33_update_torque_conditioner_reseed_selector", v)
+        .setComment("Threshold is unsigned AC84 only for ADFA.high0500 and AC41==5A, otherwise signed AC4C. "
+            + "Previous command/base-assist magnitudes and low-nine AC50 bits gate entry/retention. "
+            + "Entry also tests input/output magnitude difference and command-rate residual. "
+            + "All four exact margins0 admit equality; common failure clears retained C12A.");
+    semanticFunction(0xC4FDAL, "f33_repair_assist_torque_conditioner_state", v)
+        .setComment("Strict consistency band(-384,384); equality repairs. Indications1/2 repair first "
+            + "accumulator/model,4/8 repair second accumulator/output,10 initializes zero second denominator. "
+            + "Second-stage differences SXH before comparison. Publish C11E and OR into sticky C120; do not write C128.");
+    semanticFunction(0xC50E8L, "f33_initialize_torque_memory_gain", v)
+        .setComment("Initialize C12C/C12E/C130/C132/C134 to1024. Combined with all exact D2FB8 rows, "
+            + "this makes C134 invariant1024 from initialized state.");
+    semanticFunction(0xC5164L, "f33_update_torque_memory_gain", v)
+        .setComment("ModeCB00 only when CAB7==1, otherwise7. Prepare stack state, run real CE8DA "
+            + "with preserved R6, then publish parameter tuple and C134. Not evidence of varying initialized gain.");
+    semanticFunction(0xC51C6L, "f33_initialize_torque_memory_correction", v)
+        .setComment("Reset bounded-memory correction state separately from torque recurrence initialization.");
+    semanticFunction(0xC51F0L, "f33_update_torque_memory_band_amplitude", v)
+        .setComment("Selector-strided torque-magnitude curve supplies C14A; diagnostic AC2B==5A requests zero band.");
+    semanticFunction(0xC523CL, "f33_update_torque_memory_correction", v)
+        .setComment("First use seeds signed32 offset=-AC90; in-band motion retains it and excursions move "
+            + "the band boundary. Scalar low32(1440*u16(AC5E))/262144; zero scalar gives zero raw correction. "
+            + "Speed gain then SXH, retained gain then SXH, and final+/-256 clamp publish C146.");
+    semanticFunction(0xC52FAL, "f33_publish_bounded_assist_torque_input", v)
+        .setComment("SXH(AC44+C146) BEFORE +/-2109 clamp into C150; not wide saturating addition.");
+    semanticFunction(0xC5326L, "f33_update_torque_memory_speed_gain", v)
+        .setComment("Unsigned ADF6 selects selector-strided speed curve into C148. Separate slow-domain "
+            + "caller requires captured ACBC&8; base assist may consume retained gain.");
+    semanticFunction(0xC5360L, "f33_initialize_assist_surface_selection", v)
+        .setComment("Initialize retained source-transition qualification and source/selector publications.");
+    semanticFunction(0xC5372L, "f33_qualify_assist_surface_transition", v)
+        .setComment("Separate AD18/AD5F source snapshots and six signed wrapped-magnitude gates qualify "
+            + "source mismatch. Exact B1172=0 makes every admitted invocation immediately set C154=5A "
+            + "and clear C152; no nonzero debounce. Rejection clears both. Signed-minimum wrap is not saturation.");
+    semanticFunction(0xC54A2L, "f33_update_retained_assist_surface_source", v)
+        .setComment("Priority diagnostic66, AC94 magic override11, then five complement markers/AC50 "
+            + "admission. Admitted but unqualified holds C158; qualified selects55 or77/44/88/0. "
+            + "Failed marker/status admission clears source without waiting.");
+    semanticFunction(0xC5554L, "f33_publish_assist_surface_selector", v)
+        .setComment("Regenerate C156 from C158:77->1,44->2,88->3,otherwise0. Calibration source, not a command.");
+    semanticFunction(0xC6182L, "f33_update_assist_torque_input_delta", v)
+        .setComment("First use or C12A==1 suppresses delta but still updates previous C150. Otherwise "
+            + "use full signed32 difference, low32 multiply1250/div16 and saturation+/-32767; "
+            + "separately stored C250 is narrowed. Caller can retain this state on non5A generation.");
+  }
+  private void annotatePairedMonitorActions() throws Exception {
+    DataType v = VoidDataType.dataType;
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    DataType s32 = IntegerDataType.dataType;
+    semanticFunction(0x427F2L, "f33_publish_channel_monitor_actions_a", v)
+        .setComment("Rebuild fault slot2 from14 statuses7818..7825: retain old five words, clear current, "
+            + "merge pending/confirmed templates, then select current. Qualification71EC.bit0 and "
+            + "diagnostic reporting admission are separate. Aggregate status10 has no diagnostic callbacks "
+            + "and is excluded from the third summary and both channel caches.");
+    semanticFunction(0x437B4L, "f33_publish_channel_monitor_actions_b", v)
+        .setComment("Parallel slot3 reduction from7928..7935 with71EC.bit1 and distinct action kinds. "
+            + "Phase status11 can coexist with aggregate status22, producing ancillary action without "
+            + "phase confirmation; aggregate10 is excluded from third summary and channel caches.");
+    semanticFunction(0x42A38L, "f33_set_channel_monitor_status_a", v,
+        new ParameterImpl("index", u32, currentProgram), new ParameterImpl("status", u8, currentProgram))
+        .setComment("Bound unsigned index<14 before storing one status byte at7818+index.");
+    semanticFunction(0x439FAL, "f33_set_channel_monitor_status_b", v,
+        new ParameterImpl("index", u32, currentProgram), new ParameterImpl("status", u8, currentProgram))
+        .setComment("Bound unsigned index<14 before storing one status byte at7928+index.");
+    semanticFunction(0x425F6L, "f33_step_channel_phase_monitors_a", v)
+        .setComment("Three conditioned phase/comparison predicates run retained window qualification "
+            + "with strict count>25 confirmation; separately aggregate any phase failure count>=1 "
+            + "with zero confirmation limits. Event38/39/3A reporting does not gate action status.");
+    semanticFunction(0x435B8L, "f33_step_channel_phase_monitors_b", v)
+        .setComment("Parallel phase qualification and immediate aggregate counter monitor; diagnostic "
+            + "events1B/1C/1D are separate from slot3 action kinds.");
+    semanticFunction(0x4270EL, "f33_classify_channel_phase_sample_a", u32)
+        .setComment("Failure22: sat_abs16(sample)>19968 or source62E4==0/comparison<-19968, "
+            + "with unsigned7DA6<=4298 and signed62DC>-32768. Neutral33 on unadmitted abnormality, otherwise11.");
+    semanticFunction(0x436D0L, "f33_classify_channel_phase_sample_b", u32)
+        .setComment("Matching sample/comparison classifier with source62E5 and unsigned7DA8 admission.");
+    semanticFunction(0x42D04L, "f33_classify_channel_sample_sum_a", u32)
+        .setComment("Gate8B28&40004 clear and EB88==5A or all phase magnitudes<19968. "
+            + "Admitted abs(sum)>4302 plus6368==5A fails22; <=4302 with valid5A and7B30FFFF passes11. "
+            + "Other admitted cases33; failed admission44.");
+    semanticFunction(0x43CC8L, "f33_classify_channel_sample_sum_b", u32)
+        .setComment("Parallel sum classifier with6369 validity and7B32FFFF pass marker; same exact thresholds.");
+    semanticFunction(0x42506L, "f33_step_channel_difference_latch_a", v)
+        .setComment("Separate snapshot producer: abs(unsigned-sample difference sum)>21103 and "
+            + "gate<=4298 accumulate failure through15, then next invocation publishes5A. "
+            + "Healthy count reaches25 before next invocation clears failure/publishesA5; qualification freezes state.");
+    semanticFunction(0x434C8L, "f33_step_channel_difference_latch_b", v)
+        .setComment("Parallel delayed snapshot latch; retain failure high-water count. Later5CA3A "
+            + "snapshot and4337A consumption are separate generations.");
+    semanticFunction(0x42486L, "f33_sum_channel_snapshot_differences_a", s32)
+        .setComment("Sum three unsigned sample differences from8238..823C versus822C..8230. "
+            + "Exact31E5E==5A selects retained members refreshed by EAC1 and individual validity.");
+    semanticFunction(0x43448L, "f33_sum_channel_snapshot_differences_b", s32)
+        .setComment("Parallel sum from823E..8242 versus8232..8236 with31E66==5A and independent validity.");
+    semanticFunction(0x41F74L, "f33_classify_channel_negative_pair_a", u32)
+        .setComment("ROM28508 predicate: both signed comparison members<-19968 return22, otherwise11.");
+    semanticFunction(0x42F32L, "f33_classify_channel_negative_pair_b", u32)
+        .setComment("Parallel ROM2867C predicate; same strict signed bounds.");
+    semanticFunction(0x422B8L, "f33_classify_channel_residual_a", u32)
+        .setComment("ROM2853C callback; zero companion status and8B28&40004 admit residual/reference "
+            + "windows. Failure uses abs(reference)<2895, abs(filtered)>6103, bounded abs(629E) "
+            + "and unsigned minimum7DA6. Pass separately requires EB88==0 and7B34FFFF; verify CMP/branches, "
+            + "not the decompiler's misleading overflow-expression precedence.");
+    semanticFunction(0x43276L, "f33_classify_channel_residual_b", u32)
+        .setComment("Parallel ROM286B0 residual classifier with7DA8 gate and7B36FFFF pass marker. "
+            + "Unsigned minimum remains an independent conjunct of the pass branch.");
+    semanticFunction(0x427C2L, "f33_classify_channel_phase_failure_count_a", u32)
+        .setComment("Any retained phase failure counter>=exact byte threshold1 returns22, otherwise11. "
+            + "ROM285A4 has no reporting callbacks; can confirm before an individual phase.");
+    semanticFunction(0x43784L, "f33_classify_channel_phase_failure_count_b", u32)
+        .setComment("Parallel immediate aggregate predicate at ROM28718; not itself a diagnostic event.");
+    semanticFunction(0x42BEEL, "f33_classify_channel_raw_lower_bound_a", u32)
+        .setComment("Low16 8B28 must clear. Any raw6238/3A/3C<10224 with its636C/D/E validity5A "
+            + "fails22; all>=10224 and all valid pass11. Otherwise33; closed gate44.");
+    semanticFunction(0x43BB0L, "f33_classify_channel_raw_lower_bound_b", u32)
+        .setComment("Parallel623E/6240/6242 with636F/70/71 validity and high16 8B28 gate.");
   }
   private void annotateServiceLifecycle() throws Exception {
     DataType v = VoidDataType.dataType;
@@ -3563,12 +3847,15 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     annotateRetainedEstimatorQualification();
     annotateEstablishedTracking();
     annotateThermalModels();
+    annotateRemainingEcuThermalModels();
     annotateThermalArbitration();
     annotateFaultActions();
+    annotatePairedMonitorActions();
     annotateDiagnosticEventLifecycle();
     annotateDiagnosticAgingAndClear();
     annotateDiagnosticTransactions();
     annotateAssistComposition();
+    annotateAssistConditioning();
     annotateApplicationLifecycle();
     annotateServiceLifecycle();
     annotateDataFlashReads();

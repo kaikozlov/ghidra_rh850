@@ -83,3 +83,11 @@ address,provenance,note
 0x000CEE7C,data/generated/camry_8965F3307000_decompiler_evidence.json;data/generated/camry_8965F3307000_lateral_decompiler_evidence.json,exact-F33 fallthrough function start; supersedes erroneous +4 seed 0x000CEE80
 0x000CEF26,data/generated/camry_8965F3307000_lateral_decompiler_evidence.json,exact-F33 function entry promoted by prior generated decompiler evidence
 0x000CEFFC,data/generated/camry_8965F3307000_decompiler_evidence.json;data/generated/camry_8965F3307000_lateral_decompiler_evidence.json,exact-F33 function entry promoted by prior generated decompiler evidence
+0x00041F74,firmware/camry-8965F3307000/CodeFlash.bin,paired-monitor ROM callback pointers at28508/2850C; complete instruction body41F74..41F99
+0x00042F32,firmware/camry-8965F3307000/CodeFlash.bin,paired-monitor ROM callback pointers at2867C/28680; complete instruction body42F32..42F57
+0x000422B8,firmware/camry-8965F3307000/CodeFlash.bin,paired-monitor ROM callback pointers at2853C/28540; complete instruction body422B8..4238D
+0x00043276,firmware/camry-8965F3307000/CodeFlash.bin,paired-monitor ROM callback pointers at286B0/286B4; complete instruction body43276..4334B
+0x000427C2,firmware/camry-8965F3307000/CodeFlash.bin,paired-monitor ROM callback pointers at285A4/285A8/285AC; complete instruction body427C2..427ED
+0x00043784,firmware/camry-8965F3307000/CodeFlash.bin,paired-monitor ROM callback pointers at28718/2871C/28720; complete instruction body43784..437AF
+0x00042BEE,firmware/camry-8965F3307000/CodeFlash.bin,paired-monitor ROM callback pointers at28614/28618; complete instruction body42BEE..42C67
+0x00043BB0,firmware/camry-8965F3307000/CodeFlash.bin,paired-monitor ROM callback pointers at28788/2878C; complete instruction body43BB0..43C2B

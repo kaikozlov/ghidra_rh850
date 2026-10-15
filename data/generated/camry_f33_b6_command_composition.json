@@ -229,13 +229,13 @@
     "0x0D0AF6": {
       "body_sha256": "2eda8a4e734a3cd248c83c9cd41f906e0191ee48afa5ba72a73640da00823fc9",
       "body_size": 228,
-      "decompiled_c_sha256": "862867b9d02e5b95a5da36015f94f149a63c47ec815a2ecdb5ca3ce0c6ab4374",
+      "decompiled_c_sha256": "647c5f42ef44c5f4cf5135fe328c58282bd7d980a761d89bdc17467797d93888",
       "role": "shared command-composition coordinator"
     },
     "0x0D0EEC": {
       "body_sha256": "e58077923617544434467a6d0279d5037aa2cf1398960ef0fe62126f37e23231",
       "body_size": 488,
-      "decompiled_c_sha256": "4c761a37e3f8553565eab1d2a046189bcc6eeff4a95eaad94de288b11cdee2ec",
+      "decompiled_c_sha256": "71f61a73da53e563839894c05c81a40b730e400d7b0da05812c8d6d445362c5d",
       "role": "B6 supervisor cyclic coordinator"
     },
     "0x0D1100": {
@@ -1004,7 +1004,7 @@
   },
   "target": {
     "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
-    "corpus_function_count": 7187,
+    "corpus_function_count": 7195,
     "software_id": "8965F3307000"
   }
 }

@@ -1,0 +1,50 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_paired_monitor_preconfirmation_action_composition",
+  "entry": {
+    "role": "real 5EAC0..5EAD8 second-channel monitor interval: staged signed phase20000 advances failure count24 to exact25 without confirming event1B; independent zero-threshold aggregate confirms and slot3 receives only ancillary kinds0A/28, protecting the differing preconfirmation transition; no physical-source freshness or actuator-response claim",
+    "scope": "resolved-address",
+    "address": "0x5eac0"
+  },
+  "max_instructions": 24000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000", "gp": "0xfebeb800", "tp": "0x23dfc", "lp": "0x798",
+    "PSW": "0x20", "FPEC": "0x0", "PMR": "0xfe00"
+  },
+  "stop_addresses": ["0x5ead8"],
+  "memory": [
+    {"address": "0xfebe1800", "size": 2048, "fill": 165, "evidence": "isolated real nested-call stack"},
+    {"address": "0xfebe5f00", "size": 11520, "fill": 0, "evidence": "explicit staged diagnostic, snapshot, monitor, action-record and channel-cache RAM through8BFF; no producer replacement or ROM overlay"},
+    {"address": "0xfebeeb80", "size": 16, "fill": 0, "evidence": "ordinary application context, including clear EB88 special bypass"},
+    {"address": "0xfebeeb85", "hex": "5a", "evidence": "admit enabled second-channel monitor updates"},
+    {"address": "0xfebe7e7e", "hex": "204e00000000", "evidence": "staged second-channel signed samples20000,0,0; first magnitude exceeds ROM2B8A0=19968 with sample-rate gate7DA8=0"},
+    {"address": "0xfebe7e8a", "hex": "000000000000", "evidence": "staged paired comparison samples"},
+    {"address": "0xfebe78ec", "hex": "11001100000000001800000018000000", "evidence": "retained preconfirmed state, failure counter24 and high-water24; exact25 is not strictly above ROM2B864=25"},
+    {"address": "0xfebe7224", "hex": "010004000c0000000000a5a5", "evidence": "distinct prior slot3 action and stride-tail canary"},
+    {"address": "0xfebe7142", "hex": "feff", "evidence": "prior slot3 mode complement"},
+    {"address": "0xfebe71a2", "hex": "ffff", "evidence": "prior slot3 qualification complement"},
+    {"address": "0xfebe7344", "hex": "000000000000000000003c3c", "evidence": "retained slot3 stride-tail must remain distinct"},
+    {"address": "0xfebe82d4", "hex": "01", "evidence": "diagnostic lifecycle1 cannot affect independent software counter or action transitions"}
+  ],
+  "checks": [
+    {"name": "real second-channel interval reaches next monitor boundary", "kind": "register", "register": "PC", "equals": "0x5ead8"},
+    {"name": "nested monitor calls unwind", "kind": "register", "register": "sp", "equals": "0xfebe2000"},
+    {"name": "priority mask preserved", "kind": "register", "register": "PMR", "equals": "0xfe00"},
+    {"name": "exact25 remains packed preconfirmed00110011 rather than confirmed22", "kind": "memory", "address": "0xfebe78ec", "size": 16, "equals_hex": "11001100000000001900010019000000"},
+    {"name": "independent aggregate observes nonzero failure count and immediately confirms", "kind": "memory", "address": "0xfebe791c", "size": 12, "equals_hex": "220000000000010001000000"},
+    {"name": "phase0 status11 and aggregate10 status22 remain distinct", "kind": "memory", "address": "0xfebe7928", "size": 14, "equals_hex": "1100000000000000000022000000"},
+    {"name": "pending summary publishes while aggregate-only confirmation is excluded from third summary", "kind": "memory", "address": "0xfebe7936", "size": 3, "equals_hex": "5a1100"},
+    {"name": "only kinds0A and28 contribute ancillary22 without mode or qualifier action", "kind": "memory", "address": "0xfebe7224", "size": 12, "equals_hex": "00000000000022000000a5a5"},
+    {"name": "old slot3 action retained without copying unused tail", "kind": "memory", "address": "0xfebe7344", "size": 12, "equals_hex": "010004000c00000000003c3c"},
+    {"name": "new ancillary-only record has all-ones mode complement", "kind": "memory", "address": "0xfebe7142", "size": 2, "equals_hex": "ffff"},
+    {"name": "new ancillary-only record has all-ones qualification complement", "kind": "memory", "address": "0xfebe71a2", "size": 2, "equals_hex": "ffff"},
+    {"name": "slot3 becomes current after rebuilding action", "kind": "memory", "address": "0xfebe71cf", "size": 1, "equals_hex": "5a"},
+    {"name": "channel fault cache4 sees either status", "kind": "memory", "address": "0xfebe615f", "size": 1, "equals_hex": "11"},
+    {"name": "separate preconfirmation cache3 recognizes status11", "kind": "memory", "address": "0xfebe8180", "size": 1, "equals_hex": "5a"},
+    {"name": "no diagnostic event1B current bitmap publication", "kind": "memory", "address": "0xfebe6090", "size": 4, "equals_hex": "00000000"},
+    {"name": "no diagnostic event1B first retained bitmap publication", "kind": "memory", "address": "0xfebe60c0", "size": 4, "equals_hex": "00000000"},
+    {"name": "no diagnostic event1B second retained bitmap publication", "kind": "memory", "address": "0xfebe60f0", "size": 4, "equals_hex": "00000000"}
+  ]
+}

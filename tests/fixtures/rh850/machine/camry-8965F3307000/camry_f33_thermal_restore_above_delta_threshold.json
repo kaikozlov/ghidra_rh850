@@ -1,0 +1,278 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_thermal_restore_above_delta_threshold",
+  "entry": {
+    "role": "real5F8CC..5F900 interval: five real record6 restorations at selected difference32001: marker0 and exact status10 zero saved contributions above threshold, followed by actual models, nonflat maps and arbitration; no replacement callees, physical sample freshness or durable-storage claim",
+    "scope": "resolved-address",
+    "address": "0x5f8cc"
+  },
+  "max_instructions": 30000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "r28": "0x10",
+    "r29": "0x301",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xfe00"
+  },
+  "stop_addresses": [
+    "0x5f904"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1800",
+      "size": 2048,
+      "fill": 165,
+      "evidence": "isolated nested-call stack; actual scheduler interval has no enclosing prologue"
+    },
+    {
+      "address": "0xfebe6400",
+      "size": 3328,
+      "fill": 0,
+      "evidence": "explicit model, offset, following and staged-drive state; overrides distinguish histories and sources"
+    },
+    {
+      "address": "0xfebe7bf0",
+      "size": 480,
+      "fill": 0,
+      "evidence": "explicit acquisition/restore source snapshots; no physical freshness claim"
+    },
+    {
+      "address": "0xfebebd34",
+      "size": 20,
+      "fill": 165,
+      "evidence": "independent current-limit owner canaries; real arbitration may replace only owner0"
+    },
+    {
+      "address": "0xfebe7014",
+      "hex": "6842803a983a",
+      "evidence": "exact21258 selectors use source0 for source2/source3/motor, source1 for source4, source2 for source5"
+    },
+    {
+      "address": "0xfebe6764",
+      "hex": "0000",
+      "evidence": "bank1 also triggers source2 one-time alternate-gain conversion; restoration cases use bank0"
+    },
+    {
+      "address": "0xfebe7bf6",
+      "hex": "5a",
+      "evidence": "model-initialization admission byte"
+    },
+    {
+      "address": "0xfebe7dcc",
+      "hex": "5a",
+      "evidence": "second model-initialization admission byte"
+    },
+    {
+      "address": "0xfebe7bf8",
+      "hex": "0001",
+      "evidence": "low byte0/high byte nonzero selects the first difference, not the minimum of both"
+    },
+    {
+      "address": "0xfebe7dce",
+      "hex": "18fc1979",
+      "evidence": "selected signed difference tests the exact strict32000 restoration threshold"
+    },
+    {
+      "address": "0xfebe7dd6",
+      "hex": "64006500",
+      "evidence": "unselected difference1 must not override the selected channel"
+    },
+    {
+      "address": "0xfebef4d0",
+      "hex": "2c019001f4015802050dde005c114d0137004200000000001b02db0e01000200030004000b000c000d000e00000000000000000000000000",
+      "evidence": "real object6 descriptor mirror: nonzero saved terms and marker0 at byte32hex; immutable input to all five restore owners"
+    },
+    {
+      "address": "0xfebf030e",
+      "hex": "10",
+      "evidence": "real family0 getter copies RAM then returns exact retained status10, without physical storage"
+    }
+  ],
+  "checks": [
+    {
+      "name": "real model-map-arbitration interval reaches boundary",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x5f904"
+    },
+    {
+      "name": "nested stack restored",
+      "kind": "register",
+      "register": "sp",
+      "equals": "0xfebe2000"
+    },
+    {
+      "name": "priority mask restored",
+      "kind": "register",
+      "register": "PMR",
+      "equals": "0xfe00"
+    },
+    {
+      "name": "source2 branch0 pole recurrence after real gain selection",
+      "kind": "memory",
+      "address": "0xfebe6f4c",
+      "size": 8,
+      "equals_hex": "0000000000000000"
+    },
+    {
+      "name": "source2 branch1 remains independent",
+      "kind": "memory",
+      "address": "0xfebe6f60",
+      "size": 8,
+      "equals_hex": "0000000000000000"
+    },
+    {
+      "name": "source2 branch0 adjusted estimate and contributions",
+      "kind": "memory",
+      "address": "0xfebe6f40",
+      "size": 6,
+      "equals_hex": "684400000000"
+    },
+    {
+      "name": "source2 branch1 adjusted estimate and contributions",
+      "kind": "memory",
+      "address": "0xfebe6f54",
+      "size": 6,
+      "equals_hex": "684400000000"
+    },
+    {
+      "name": "source2 signed maximum",
+      "kind": "memory",
+      "address": "0xfebe6f36",
+      "size": 2,
+      "equals_hex": "6844"
+    },
+    {
+      "name": "source4 zero-gain model retains bias and selected offset",
+      "kind": "memory",
+      "address": "0xfebe6f12",
+      "size": 8,
+      "equals_hex": "8040000600000000"
+    },
+    {
+      "name": "source5 six real pole updates",
+      "kind": "memory",
+      "address": "0xfebe6ec0",
+      "size": 24,
+      "equals_hex": "000000000000000000000000000000000000000000000000"
+    },
+    {
+      "name": "source5 adjusted estimate raw model and separate contributions",
+      "kind": "memory",
+      "address": "0xfebe6eae",
+      "size": 16,
+      "equals_hex": "983a0000000000000000000000000000"
+    },
+    {
+      "name": "source3 zero contributions do not remove its offset",
+      "kind": "memory",
+      "address": "0xfebe6fe2",
+      "size": 2,
+      "equals_hex": "6842"
+    },
+    {
+      "name": "motor branches use the same staged drives but distinct coefficients",
+      "kind": "memory",
+      "address": "0xfebe6f82",
+      "size": 2,
+      "equals_hex": "e843"
+    },
+    {
+      "name": "source2 actual temperature-to-current maps",
+      "kind": "memory",
+      "address": "0xfebe6f68",
+      "size": 4,
+      "equals_hex": "8b4a753a"
+    },
+    {
+      "name": "source4 actual temperature-to-current maps",
+      "kind": "memory",
+      "address": "0xfebe6f30",
+      "size": 4,
+      "equals_hex": "a6159e0c"
+    },
+    {
+      "name": "source5 actual temperature-to-current maps",
+      "kind": "memory",
+      "address": "0xfebe6ee0",
+      "size": 4,
+      "equals_hex": "0053de11"
+    },
+    {
+      "name": "source3 actual temperature-to-current maps",
+      "kind": "memory",
+      "address": "0xfebe700c",
+      "size": 4,
+      "equals_hex": "9a56753a"
+    },
+    {
+      "name": "independent bank minima and selected diagnostic source",
+      "kind": "memory",
+      "address": "0xfebe6f6c",
+      "size": 18,
+      "equals_hex": "0400a615a6159e0c9a569a56753a80400000"
+    },
+    {
+      "name": "thermal signed floor remains separate from nonflat current maps",
+      "kind": "memory",
+      "address": "0xfebe6f7e",
+      "size": 2,
+      "equals_hex": "66a9"
+    },
+    {
+      "name": "selected current limit reaches only owner0",
+      "kind": "memory",
+      "address": "0xfebebd34",
+      "size": 20,
+      "equals_hex": "a615a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5"
+    },
+    {
+      "name": "source2 restore uses selected difference and holds other history",
+      "kind": "memory",
+      "address": "0xfebe6f38",
+      "size": 8,
+      "equals_hex": "017d000000000000"
+    },
+    {
+      "name": "source4 restore uses selected difference and holds other history",
+      "kind": "memory",
+      "address": "0xfebe6f28",
+      "size": 8,
+      "equals_hex": "017d000000000000"
+    },
+    {
+      "name": "source5 restore uses selected difference and holds other history",
+      "kind": "memory",
+      "address": "0xfebe6ed8",
+      "size": 8,
+      "equals_hex": "017d000000000000"
+    },
+    {
+      "name": "motor restore uses selected difference and holds other history",
+      "kind": "memory",
+      "address": "0xfebe6f84",
+      "size": 8,
+      "equals_hex": "017d000000000000"
+    },
+    {
+      "name": "source3 restore uses selected difference and holds other history",
+      "kind": "memory",
+      "address": "0xfebe6fe4",
+      "size": 8,
+      "equals_hex": "017d000000000000"
+    },
+    {
+      "name": "shared retained record is not rewritten by restoration",
+      "kind": "memory",
+      "address": "0xfebef4d0",
+      "size": 56,
+      "equals_hex": "2c019001f4015802050dde005c114d0137004200000000001b02db0e01000200030004000b000c000d000e00000000000000000000000000"
+    }
+  ]
+}

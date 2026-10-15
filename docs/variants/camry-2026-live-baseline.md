@@ -2603,19 +2603,102 @@ omitting a contribution does not reset its producer.
 
 #### Conditioned torque and the signed base surface
 
-`C523C` derives a bounded-memory correction from signed32 `AC90`: first use
-seeds the offset to `-AC90`; excursions beyond the mapped band move that offset,
-while the in-band residual produces a proportional correction. Torque magnitude,
-speed and retained mode coefficients shape the band/gain. Diagnostic `AC2B==5A`
-makes the band amplitude zero. Scaling narrows to signed16 before `C51AC`,
-which scales and narrows again before the final correction clamp.
+The command domain snapshots `ED04→AC44`, `AF64→AC90`, `B121→AC2F` and
+`BEF0→AC30` through `BCBD8`. The separate `BCD62→D0EEC` domain snapshots
+the requests into `AD5F/AD18`, qualifies source changes through `C5372`,
+conditionally refreshes speed gain `C148` on captured `ACBC&8`, and later
+updates the retained correction gain. Qualification and selection are not
+one atomic acquisition transaction.
 
-`C52FA` computes **`s16(AC44+C146)` before clamping** into `C150`. The two-stage
-`C4DF2/C4D68` recurrences then produce `C128`; denominator changes rescale
-retained accumulators. `C12A` selects bypass/reseed behavior, not another command
-source. Its detector observes previous command/base-assist and feedback residuals;
-`C4FDA` checks the accumulator/output representations, repairs them and latches
-repair indications into `C120`.
+`C5372` qualifies a mismatch between those requests and retained `C158` only
+when six signed magnitude gates pass: `ADF2/C124/C150≤77`,
+`C23C/C266≤144`, and `C1A2≤40`. These absolute-value operations wrap:
+signed minimum stays negative rather than saturating. Exact **`B1172=0`**
+makes every admitted invocation immediately clear counter `C152` and set
+`C154=5A`; there is no nonzero elapsed debounce in this image. Rejection
+clears both. Physical reachability of the signed-minimum corner is unclaimed.
+
+`C54A2` then applies distinct source-selection precedence:
+
+1. Diagnostic `AC2B==5A` forces source66.
+2. `AC94==5AA5A55A` forces source11.
+3. Otherwise all five `AC98..ACA8` words must equal `A55A5AA5` and low-nine
+   `AC50` bits must be clear. If admitted but `C154!=5A`, retain the old source.
+   With qualification, `AC30==44 && AC40!=5A` selects55; otherwise request
+   `AC2F=11/22/33` selects77/44/88, and other requests select0.
+4. Failed marker/status admission clears the source without waiting.
+
+`C5554` regenerates selector `C156`: sources77/44/88 map to1/2/3, all others0.
+These are calibration choices, not an external torque command. Besides the
+ordinary curves below, source11 selects adjacent pointers from `D2DE0`;
+source55 selects `base+0x880` twice; diagnostic66 selects one static curve
+from `D2E00/44/88/CC` according to `AC2C`.
+
+`C523C` derives a bounded-memory correction from signed32 `AC90`: first use
+seeds offset `C13C=-AC90`; in-band motion retains the offset, while excursions
+move it to the band boundary. Its scalar is
+`g=low32(1440*u16(AC5E))/262144`; zero `g` publishes zero raw correction,
+otherwise band width is `(s16(C14A)<<10)/g`. Torque magnitude selects `C14A`;
+diagnostic `AC2B==5A` requests zero band amplitude. Residual scaling by speed
+gain `C148` narrows with `SXH` before `C51AC`, which scales by unsigned `C134`
+and narrows again. The final correction `C146` is clamped to±256.
+
+The nominal adaptation has an exact-image limit: `C50E8` initializes `C134`
+and its parameter tuple to1024. All seven `D2FB8` calibration rows in both
+banks resolve downward/upward targets1024 and downward step0; upward step
+is0 in bank0 and3 in bank1. Thus **C134 remains1024 from this initializer**
+under these rows. The generic retained gain algorithm does not establish a
+varying initialized correction gain. The 16-byte rows contain three pointers
+and an inline halfword. `C5106` preserves R6 for the following `CE8DA` call;
+the tracked annotation exposes that real state-pointer dataflow.
+
+`C52FA` computes **`s16(AC44+C146)` before clamping** to±2109 into `C150`.
+The reseed detector `C4F04` observes previous command/base-assist/rate outputs.
+Its threshold `T` is unsigned `AC84` only for `ADFA.high==0500 && AC41==5A`;
+otherwise it is **signed** `AC4C`. Common admission requires low-nine `AC50`
+bits clear and:
+
+```text
+abs(CC62) - T >= 0
+abs(low32(BF3C*u16(AC64))/32768) - T >= 0
+```
+
+Entry from `C12A==0` additionally requires:
+
+```text
+abs(C150) - abs(C128) >= 0
+abs(CC62-low32(C4C0*u16(AC64))/32768) - T >= 0
+```
+
+All four exact calibration margins are zero: **equality admits**, including
+zero-threshold cases. Common admission failure clears an already-retained
+selector. This is not another command source or a strict “exceeds saturation”
+test.
+
+The two retained recurrences preserve machine truncation and wrapping. For
+stage one, let `u` be bounded input, `A=C0F0`, `m=C124`, previous input
+`p=C110`, and `D=408474`:
+
+```text
+C12A==1:  A=low32(u*D)/1024; m=u; k=1024
+otherwise: A=low32(A+p+u-2*m); m=low32(A<<10)/D; k=s16(C114)
+C108=low32(m+low32(k*(u-m))/1024); C110=u
+```
+
+Stage two chooses denominator1024 for `C12A==1`, otherwise6347 when unsigned
+`AC4A≤512`, else4607. It rescales old accumulator `C0F4` by
+`low32(newD<<10)/oldD`, preserving the low32 product before division1024,
+then advances by `C108-oldC112`. Its narrowed shifted quotient becomes both
+`C112` and `C128`. **A C12A reseed does not independently clear stage-two
+history**, so it does not universally imply `C128=C150`.
+
+Before recurrence, `C4FDA` repairs inconsistent accumulator/output
+representations. All four tolerances are384 with a **strict** interior band:
+equality repairs. First-stage repair bits1/2 and second-stage bits4/8 select
+which representation is replaced; a zero second denominator seeds1024 and
+sets bit`0x10`. Second-stage differences narrow to signed16 before comparison.
+It publishes current indication `C11E` and ORs it into retained `C120`, but
+does not directly replace `C128`.
 
 `C58B8` supplies speed index/fraction `C1A4/C1A6`. `C28FC` selects adjacent
 0x44-byte curves from bank18100 or10100. Healthy rows use
@@ -2632,6 +2715,16 @@ executes the real selector and both curve interpolators. It verifies negative
 final assistance after positive magnitude limiting, including signed fractional
 division truncating toward zero. It does not assign physical units or establish
 reachability of every selector/fraction combination.
+
+The [conditioning-to-surface composition](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_assist_conditioning_reseed_to_surface.json)
+executes actual `D0B5A..D0B6A`: equality admits `C12A:0→1`, consistent zero
+history produces `C128=-1024`, and the real surface publishes `BF3C=-19371`.
+Upstream source/correction publication and later compensation are outside
+this interval. `D0AF6` captures `AC31` once: non5A still advances selection,
+bounded input, repair, recurrences and base assistance, while selected
+coefficients, reseed detection and compensation can hold. `C4E94` consumes
+the **previous** `BF40`; a new base-assist output is not proof of wholly fresh
+inputs or same-generation slope feedback.
 
 #### Dynamic and nested terms
 
@@ -3235,7 +3328,8 @@ signed bounds−6400/32000. Preserve these separate truncation stages.
 Zero ECU source3 contribution gains do **not** eliminate its offset path.
 `3B960` selects a staged offset from `7014` unless both `7BF8` masks22/2200
 are nonzero, in which case it uses `7074`. The exact selector table gives
-selectors4..7 index0 in either bank. It adds/clamps the offset and applies
+selectors0/1/4..7 index0, selector2 index1 and selector3 index2 in either bank.
+It adds/clamps the offset and applies
 per-selector initialization and mode1/3 following. At absolute change≥128,
 the retained signed16.16 accumulator follows with coefficient800/65536;
 smaller changes set the relevant completion flag. A stale accumulator is
@@ -3271,12 +3365,86 @@ cadence is not automatically every child's update period.
 The drives themselves are software-staged squared-input combinations:
 `3B684` forms bounded low32 sums from `66E6/66E8` and `66EA/66EC` into
 `70B4/70B8`; `397E6` squares staged inputs into `6EF0/6EF4/6EF8`.
-These are not independently established measurements of watts. Restore wrappers
-read application record6 through the existing NvM API; rejected motor records
-select saved-term defaults307/2893 per branch, while source3 selects zeros.
-Record-marker qualification, upstream input freshness, the other ECU estimators
-and physical persistence remain explicit boundaries, not prerequisites for
-these software recurrence and arbitration contracts.
+These are not independently established measurements of watts. Upstream input
+freshness and physical persistence remain separate from the software models.
+
+#### ECU models that actually reduce the current request
+
+The other ECU sources use the same pole/contribution primitives but different
+exact coefficients and **nonflat** current maps:
+
+| Source/root | Drives and poles | Exact coefficients | Adjusted publication |
+|---|---|---|---|
+| Source2 `39D26` | `70B4→6F4C/50`; `70B8→6F60/64` | Divisors13/5000; gains23/10 or54/6; bias512 | Maximum of two branches → `6F36` |
+| Source4 `39B6A` | `70B0→6F20/24` | Divisors1/1; gains0/0; bias1536 | Offset source1 → `6F12` |
+| Source5 `3933A` | `6EF0→6EC0/4/8`; `70B0→6ECC/D0/D4` | Divisors200/420/1/1/1/1; gains13/100/0/0/0/0; bias0 | Offset source2 → `6EAE` |
+
+Uninitialized models require both `7DCC/7BF6==5A`; initialized updates do not
+recheck these bytes. Source2's first nonzero `6764&3` rebases both retained
+pole pairs and latches alternate gains. Clearing that selector does not undo
+the latch. Rebase computes `pole/2048 * oldGain/newGain`, with separate signed
+truncations, then symmetric saturating multiplication2048. Its strict
+amplitude>32/drive>1638400 branch scales divisors to19/7500. Source4's
+amplitude>32/drive>6553600 branch still truncates both scaled divisors to1.
+Zero contribution gains do not eliminate the source4 bias/offset or its
+subsequent derating map.
+
+| Source | Bank0 final real limit | Bank1 zero-limit breakpoint |
+|---|---|---|
+| 2: `2B3C4/2B3E0` | 5542 at estimate18560 | 19376 |
+| 4: `2B32C/2B348` | 5542 at estimate16512 | 16628 |
+| 5: `2B2B8/2B2D4` | 5542 at estimate18560 | 15216 |
+
+Each has seven signed-axis/unsigned-ordinate pairs including its terminating
+`7FFF/FFFF` row. These internal estimate thresholds are not assigned Celsius
+or OEM component identities. `6764&3` selects **one bank**, not the minimum
+across both banks. Existing arbitration independently retains diagnostic
+source/temperature and reduces the chosen ECU request against the motor request.
+
+The [gain-switch scheduler composition](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_ecu_thermal_models_gain_switch_derates.json)
+executes `5F8CC..5F904`: all five models, their real maps and owner arbitration.
+With explicit retained state and absent initialization-valid markers, source2
+rebases and advances, source4 publishes16512, source5 publishes15407, and
+selected bank1 source5 requests **zero owner0**. Other current-limit owners
+remain untouched; the independent signed floor remains−22170. This establishes
+software derating, not fresh physical temperature or an electrical response.
+
+#### Shared thermal-history restoration
+
+All five models copy family0 object6's **56-byte RAM mirror** at `FEBEF4D0`
+before inspecting its raw status. Exact status`10`, not merely its high nibble,
+and marker-at-offset`32` unequal to`A55A` admit saved terms:
+
+| Model | Saved signed16 contribution offsets, hexadecimal | Rejected-record defaults |
+|---|---|---|
+| Motor | `00/02/04/06` | 307/2893 per branch |
+| Source2 | `08/0A/0C/0E` | 3390/222 per branch |
+| Source4 | `10/12` | 0/0 |
+| Source5 | `18/1A/1C/1E/20/22` | 539/3803/0/0/0/0 |
+| Source3 | `24/26/28/2A` | All zero |
+
+These are contributions, not raw poles. Seeding performs signed
+`contribution*4096/gain`, then symmetric saturating multiplication128;
+zero gain seeds a zero pole.
+
+Accepted terms are conditionally zeroed only with a zero byte in `7BF8`,
+record marker0, and selected signed difference **strictly greater than32000**.
+Low byte0/high nonzero selects `7DD0−7DCE`; low nonzero/high0 selects
+`7DD8−7DD6`; otherwise the predicate uses their minimum. Selected histories
+refresh while an unselected history holds. Marker`5AA5` bypasses the outer
+conditional; other accepted nonzero markers also retain saved terms because
+the predicate requires zero. Equality32000 retains them.
+
+The [equality](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_thermal_restore_at_delta_threshold.json)
+and [above-threshold](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_thermal_restore_above_delta_threshold.json)
+compositions restore every model through the real getter, then update/map/
+arbitrate them in the actual scheduler interval. With the same saved record,
+selected difference32000 retains source5 contributions and diagnostic source5;
+32001 zeros the restored contributions and source4 becomes the winner. Both
+leave the source record unchanged and publish owner0=5542 through bank0.
+The other, unselected difference is1: it must not replace the selected one.
+The record's upstream writer, physical durability, source freshness and physical
+temperature interpretation remain explicit dependencies.
 
 #### A released thermal request can remain current-limiting
 
@@ -8643,10 +8811,11 @@ processor execution/high-IR checks, the firmware-machine gate, six targeted
 coverage/NvM/B6 checks and live coverage parity passed. The processor gate's
 optional Sienna-specific whole-program audits were not run against Camry.
 
-The final current-to-PWM path, NvM restore grouping, calibration units and
-physical signal identities retain their existing bounded status until their
-specific producer/consumer chains are established. Neither whole-image review
-nor the primitive executions above close those questions by implication.
+The primitive executions above do not close downstream application semantics
+by implication. [§34](#34-exact-f33-commandcurrent-pipeline-and-cross-rate-publication)
+owns the later software regulation, compare staging and thermal reconstruction;
+the following sections own application-record restoration. Physical signal
+identities, units and hardware timing remain separate evidence boundaries.
 
 ### 77.4 Freshness wire layouts and reconstruction
 
@@ -10514,8 +10683,116 @@ status/ancillary actions still publish; the accepted single class produces its
 limit and strips only current-source masks. The run also distinguishes the
 0351 flag from qualification bit15, preserves record padding and independent
 current-limit owners, and checks mode-request cancellation and PMR restoration.
-It does not inject a physical fault, exercise every monitor or prove hardware
-output response. Monitor-specific detection and Dem/DTC joins remain separate.
+It does not inject a physical fault or prove hardware output response. The
+paired sample-monitor join below closes one substantial producer family;
+other monitor families remain separate.
+
+#### Paired sample-monitor qualification feeds independent action records
+
+`5E9F2` runs the two families after sample conditioning in modes0200..0522;
+negative-pair monitors have the narrower020C..0522 admission. `5E444` owns
+transition/reinitialization. Roots `427F2/437B4` reduce fourteen status bytes
+at `7818/7928` into fault slots2/3, respectively, with qualification bits
+`71EC.0/.1`. The following event numbers are hexadecimal **diagnostic event
+arguments**, not fault-action kinds, recovered OEM DTC names or wire IDs:
+
+| Status index | Predicate/producer family | Diagnostic events, first / second channel |
+|---|---|---|
+| 0–2 | Conditioned phase/comparison samples; `425F6/435B8` | `38/39/3A` / `1B/1C/1D` |
+| 3 | Conditioned triplet sum; `42CAA/43C6E` | `41` / `24` |
+| 4–6 | Both comparison members below−19968; `41E96/42E54` | `4A/4B/4C` / `2D/2E/2F` |
+| 7–9 | Filtered-source/reference residuals; `4218A/43148` | `43/44/45` / `26/27/28` |
+| 10 | Any phase failure counter≥1 | **No diagnostic reporting callbacks** |
+| 11 | Cached source status; `42A6A/43A2C` | `86` / `87`, capture kind32 |
+| 12 | Separately produced/snapshotted difference latch | `36` / `19` |
+| 13 | Raw sample lower bound and per-sample validity | `136` / `139` |
+
+ROM vectors `28508..287EC` bind predicates and report callbacks. Healthy
+observation through `51E2C→52A2A` sets the separate `6120` bitmap; it does
+not clear the three failure-history banks. The bounded setters accept
+unsigned status index<14.
+
+Phase predicates fail for saturated signed16 magnitude>19968, or for a
+comparison<−19968 when the source byte is zero, only with unsigned channel
+gate≤4298 and signed shared source `62DC>−32768`. Unadmitted abnormality
+returns33, ordinary pass11, failure22. The sum predicate separately requires
+`8B28&40004==0` and either special `EB88==5A` or all phase magnitudes<19968.
+Its failure threshold is strict magnitude>4302; pass admits equality but
+also requires channel-valid5A and a `FFFF` pass marker.
+
+Raw predicates require the relevant half of `8B28` clear. Any raw value<10224
+with its individual validity5A fails; all values≥10224 and all valid pass.
+Residual producers filter signed-saturated staged sources using
+`accumulator += 14564*(source-previous_output)`, then divide by65536.
+Their failure window combines reference magnitude<2895, filtered magnitude>6103,
+bounded magnitude of `629E`, and an unsigned minimum channel gate. Ordinary
+limits are316/1088; special `EB88==5A` uses198/627. Pass additionally requires
+`EB88==0`, filtered magnitude≤6103 and its `FFFF` marker.
+**The ordinary pass gate≥1088 is an independent conjunct.** The raw
+decompiler boolean expression misleadingly attaches it only to source-bound
+equality; instructions `4236C..42374` and native regressions
+[below](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_monitor_residual_pass_below_gate.json)
+and [at](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_monitor_residual_pass_at_gate.json)
+the1088 boundary show rejection33 below the gate and pass11 at equality even
+with source0. This consequential decompiler ambiguity warrants a separate
+boundary regression rather than relying on the broader phase-monitor cases.
+
+Retained qualification is not a single Boolean debounce. Generic `6AE7C`
+uses ten-byte state; `6B31A` additionally maintains window timers. Passing
+accumulation/confirmation use `1100/2200`, failing accumulation/confirmation
+use `11/22`, and `00110011` carries pending failure plus transition indication.
+Confirmation is **strictly above** the respective count:
+
+| Family | Exact calibration tuple, first and second channels |
+|---|---|
+| Negative-pair counters | 15/15 |
+| Residual windows | 80/120/80/120 |
+| Phase windows | 25/100/25/100 |
+| Aggregate-counter monitor | 0/0/0 |
+| Cached source status | 200/200 |
+| Raw lower-bound counters | 80/80 |
+| Sum windows | 20/50/20/50 |
+
+Reset clears counters/status/high-water history; disabled/qualification paths
+instead retain confirmed states, discard pending paths and preserve high-water
+history. Most producers require their `71EC` qualification bit clear and
+`EB85==5A`; negative-pair and cached-source producers have distinct admission.
+The delayed snapshot latch separately reaches failing count15 before the
+following invocation publishes5A, or healthy count25 before the following
+invocation clears failure/publishesA5. Qualification freezes that producer.
+Its later snapshot/consumer is not the same generation.
+
+For action reduction, define index sets `G={0,1,2,3,4,5,6,12,13}`,
+`H={0,1,2,4,5,6,12}`, `J={3,7,8,9,13}`, and `K={0,1,2,3,4,5,6,12}`.
+The roots retain the previous five words, clear current, OR-merge these
+templates, then select current:
+
+| Exact status condition | First / second action kind |
+|---|---|
+| `(OR(G)&11)==11` | `0A / 0A` |
+| `(OR(H)&22)==22` | `23 / 24` |
+| `(OR(J)&22)==22` | `1B / 1C` |
+| `(status[11]&22)==22` | `1D / 1E` |
+| `(status[10]&22)==22` | `27 / 28` |
+| `(OR(G)&22)==22` and qualification bit clear | `0A / 0A` |
+| `(OR(K)&22)==22` | `32 / 32` |
+
+Status10 confirms as soon as a phase failure counter becomes nonzero, before
+the phase itself must confirm. It can already cause an ancillary action without
+a corresponding diagnostic event. It is excluded from both channel caches and
+the third summary: that summary tests whether the OR of all *other* statuses
+is neither0 nor11.
+
+The [confirmed composition](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_paired_monitor_confirmed_action_composition.json)
+runs the real first-channel scheduler interval: failing phase count25→26
+produces status22 and action words `0010/0040/0825/A14A/0001`, even though
+diagnostic lifecycle1 inhibits attempted event38 reporting. The
+[preconfirmation composition](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_paired_monitor_preconfirmation_action_composition.json)
+leaves the second phase at exact count25/status11 while aggregate10 is22:
+only ancillary word`0022` publishes, and the third summary stays zero.
+Both execute real callbacks, retained-record replacement, complements and
+caches. These are software state/action results; raw-sample freshness,
+OEM sample units, invocation timing and actuator response remain unproved.
 
 The health path separately qualifies analog input, received control/status and
 application latches. `B4FFC` votes states0/11/22/33, routes the **new** state
@@ -10902,22 +11179,24 @@ requests in postwork. Foreground request reconciliation/mode publication occurs
 in a different context. Owner requests, reduced flags, selected outputs and
 mode caches are therefore not a single synchronous state transition.
 
-**Remaining high-value dependencies:** remaining monitor detection-to-action and
-Dem/DTC joins; production reachability across diagnostic groups and physical
-persistence; other ECU thermal estimators and restore qualification; OEM service
-identities, calibration units and physical source identity; ADC/DMA freshness
-and hardware feedback/update timing.
+**Remaining high-value dependencies:** other monitor detection-to-action and
+Dem/DTC joins; production reachability across diagnostic groups; thermal-history
+write lifecycle and physical persistence; remaining control/calibration
+interactions; OEM service identities, calibration units and physical source
+identity; ADC/DMA freshness and hardware feedback/update timing.
 The recovered application, fault-action and diagnostic contracts do not require
 a complete peripheral or NvM emulator. Static connectivity and bounded native
 scenarios are not exhaustive semantic closure or vehicle results.
 
-**Verification checkpoint (2026-10-15, retained estimator qualification and diagnostic transactions).**
+**Verification checkpoint (2026-10-15, thermal models, torque conditioning and monitor/action composition).**
 Independent four-stage rebuilds plus signature finalization agreed on the
-canonical inventory. Native compositions passed for retained qualification
-through actual rate publication, two-record RAM/queue publication, old-request
-acknowledgement followed by queued restart, and failure latching while a peer
-remains pending. These use unmodified firmware and explicit RAM inputs,
-without replacement callees or peripheral-model extension.
+canonical inventory. Native scheduler compositions passed for all thermal
+models through derating arbitration, saved-term restoration at and above its
+strict boundary, torque-conditioner reseeding through signed base assistance,
+and pending/confirmed phase monitors through real fault records independently
+of diagnostic admission. Separate residual-pass boundary regressions resolve
+the consequential decompiler ambiguity. These use unmodified firmware and
+explicit RAM inputs, without replacement callees or peripheral-model extension.
 
 Coverage, function-boundary, D5 provenance, command-cone, assist-oracle,
 B6 composition/end-to-end/ingress, CodeFlash, external-ingress and retained-log
@@ -10925,11 +11204,13 @@ reconciliation gates passed. Live coverage matched the canonical ledger exactly;
 project parity passed and matching project/corpus were promoted after clean
 teardown.
 
-The boundary regression retains complete-body, false-child exclusion,
-receive-path recovery and inventory-bound corpus checks. Obsolete seed/C-spelling
-and census-count assertions were removed, not repinned to changed decompiler
-output or the more complete copy-edge normalizer. Consequential parser,
-calibration and composed-execution regressions remain.
+The preceding `66b15249` checkpoint contains retained estimator qualification
+through rate publication and diagnostic RAM/queue publication, completion
+barriers and queued restart. Its boundary regression retains complete-body,
+false-child exclusion, receive-path recovery and inventory-bound corpus checks.
+Obsolete seed/C-spelling and census-count assertions were removed rather than
+repinned; consequential parser, calibration and composed-execution regressions
+remain.
 
 Retained-log provenance was regenerated with the existing external reader
 runtime. That replay emitted a corrupted-events warning on historical route

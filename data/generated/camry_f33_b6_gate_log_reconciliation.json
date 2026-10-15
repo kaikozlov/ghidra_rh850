@@ -2140,9 +2140,9 @@
   "schema": "camry-f33-b6-gate-log-reconciliation-v1",
   "sources": {
     "exact_f33_corpus": "data/generated/camry-8965F3307000/decompilations.jsonl",
-    "exact_f33_corpus_sha256": "bbe51b3fe68bd2f2254e98063d5e876b3c8a73a75b210a26e4960b89bf4e8735",
+    "exact_f33_corpus_sha256": "19393a2f44d47857dc601e34d098943cb99cc207d9d8d5113b3fb56a11d2b22a",
     "external_ingress_artifact": "data/generated/camry_8965F3307000_external_lateral_ingress.json",
-    "external_ingress_artifact_sha256": "d5db62b4dd122ccf893397821c49ec338272d0344df2d623f2c90cec7dfb8fd2",
+    "external_ingress_artifact_sha256": "8ee4130623974ca16403e45bdb344a8f27cd0b1516caae2473dac9f52e9dd5cd",
     "f33_port_artifact": "data/generated/camry_8965F3307000_tss3_opendbc_port.json",
     "f33_port_artifact_sha256": "55f70788dab0e8b7a9d2727806ed6403872d9d2981e1ca58cbe9ef921887c4d1",
     "freshness_artifact": "data/generated/camry_b6_freshness_contract.json",
