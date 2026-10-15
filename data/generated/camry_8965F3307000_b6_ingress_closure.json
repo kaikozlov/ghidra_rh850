@@ -87,7 +87,7 @@
     "0x0004BD46": {
       "body_sha256": "db4f6577d4a3250c7277730ee2f3c3e3fb71ffa83c6103ff1cd4c5b982f65b62",
       "body_size": 390,
-      "decompiled_c_sha256": "6276e8aafdd85f37619cff2c474ffadf71e60dfada9a26a16b39ad04c7c08368",
+      "decompiled_c_sha256": "dc079fc834334287d34d19a001af35f2ce5613cec0839d18ba4a03aeae5788a4",
       "role": "generated-COM route44 unpacker"
     },
     "0x00066026": {
@@ -99,7 +99,7 @@
     "0x000667B6": {
       "body_sha256": "14f79d49ceb6a6eb8b9089f4ca4416a08dafcb623822a33cf9529cd24fce730c",
       "body_size": 48,
-      "decompiled_c_sha256": "8908e3d8c76c00691d7da6e3491b101390776c626b0f3a8e48ba972ae5068224",
+      "decompiled_c_sha256": "dc792d19243e181380ef846a53d1093612546a8805d111ac018c159b1f52b4f2",
       "role": "CAN receive interrupt task"
     },
     "0x000667E6": {
@@ -537,8 +537,8 @@
     "Joined to the Sep-10 ID63 marker experiment, the direct Panda B6 disappears before successful F33 controller1 decode/CanIf admission while native B6 continues to reach the same family1/profile2 queue."
   ],
   "target": {
-    "canonical_function_count": 7195,
-    "canonical_inventory_sha256": "580184895bfe5884a50645d5c95567da4840324c558abc67f7e348d9d54dc88e",
+    "canonical_function_count": 7232,
+    "canonical_inventory_sha256": "686fc1d0092225f9893237141a7529ae76417e543fb2de614b0a1b510e6a23f5",
     "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
     "software_id": "8965F3307000"
   }

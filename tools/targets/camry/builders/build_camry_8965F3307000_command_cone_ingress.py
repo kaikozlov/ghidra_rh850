@@ -432,9 +432,15 @@ def build() -> dict:
         source = int(meta["source"], 16)
         need(any(r == source and w == stage for r, w in stage_edges),
              f"selector validity stage drift {source:08X}->{stage:08X}")
-    token(0x4B8F4, funcs, "FUN_000498e0(0x15)")
-    token(0x4BF4E, funcs, "FUN_000498e0(0x1c)")
-    token(0x4BFB2, funcs, "FUN_000498e0(0x1d)")
+    # Exact selector ->498E0 -> staged-status stores, independent of the
+    # getter's decompiler name or its recovered byte return type.
+    for address, expected in (
+        (0x4B9E0, "20361500bffffcde445781c8"),
+        (0x4BF9E, "20361c00bfff3ed94457d5c8"),
+        (0x4BFE8, "20361d00bffff4d84457d8c8"),
+    ):
+        need(image[address:address + 12] == bytes.fromhex(expected),
+             f"selector receive-status publication drift at0x{address:X}")
 
     token(0xB3430, funcs, "cVar2 = puVar6[0x3850];", "puVar6[-0x6dc] = cVar10;")
     token(0xB3686, funcs, "cVar2 = puVar6[0x3850];", "cVar11 = puVar6[0x38a1];",
@@ -487,7 +493,7 @@ def build() -> dict:
             **selector_validity,
             "classification": (
                 "resolved COM-receive status/gate state, not selector value: FEBEF0C2/FEBEF0A0/FEBEF157 "
-                "are staged FUN_000498e0 PDU-validity results for 0x13B/0x490/0x1DA companion paths; "
+                "are staged 498E0 PDU-validity results for 0x13B/0x490/0x1DA companion paths; "
                 "FEBEF000<-FEBE7F68 is the shared extraction/debounce gate. They can suppress qualification "
                 "but do not choose a parameter bank directly. Absent 0x490/0x1DA traffic cannot provide a fresh valid value."
             ),

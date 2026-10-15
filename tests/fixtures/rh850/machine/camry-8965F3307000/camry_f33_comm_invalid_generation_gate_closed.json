@@ -1,0 +1,32 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_comm_invalid_generation_gate_closed",
+  "entry": {"role": "Real 5F1B4..5F206 communication-monitor scheduler interval: six actual producers then slot16 action rebuild. Staged monitored status slot23=1 is invalid-only, not confirmed timeout; gate E824/7BBA closed. No injected CAN traffic, physical-age or vehicle-effect claim.", "scope": "resolved-address", "address": "0x5f1b4"},
+  "max_instructions": 24000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {"sp": "0xfebe2000", "gp": "0xfebeb800", "tp": "0x23dfc", "lp": "0x798", "PSW": "0x20", "FPEC": "0x0", "PMR": "0xfe00"},
+  "stop_addresses": ["0x5f206"],
+  "memory": [
+    {"address": "0xfebe1800", "size": 2048, "fill": 165, "evidence": "isolated nested-call stack"},
+    {"address": "0xfebe5f00", "size": 11520, "fill": 0, "evidence": "explicit staged application, diagnostic, producer and action RAM; no replacement callees or executable overlays"},
+    {"address": "0xfebee800", "size": 512, "fill": 0, "evidence": "explicit communication qualification input boundary; E806 and E824 are zero"},
+    {"address": "0xfebebef1", "hex": "5a", "evidence": "prior speed-status override0 must clear when7F3A&1010 is zero"},
+    {"address": "0xfebe7f25", "hex": "01", "evidence": "498E0 status slot23: lower producer invalid bit only; exact table28FE4 maps slot23 toPDU41"},
+    {"address": "0xfebe82d4", "hex": "01", "evidence": "diagnostic reporting inhibited independently of producer status publication"},
+    {"address": "0xfebe72c0", "hex": "010004000c0000000000a5a5", "evidence": "prior slot16 action words and untouched stride-tail canary"},
+    {"address": "0xfebe73e0", "hex": "000000000000000000003c3c", "evidence": "retained slot16 tail must not be copied"}
+  ],
+  "checks": [
+    {"name": "real scheduler interval completes", "kind": "register", "register": "PC", "equals": "0x5f206"},
+    {"name": "nested producers unwind", "kind": "register", "register": "sp", "equals": "0xfebe2000"},
+    {"name": "invalid-only row1 publishes22", "kind": "memory", "address": "0xfebe7489", "size": 1, "equals_hex": "22"},
+    {"name": "invalid-only does not assert timeout diagnostic latch", "kind": "memory", "address": "0xfebe7453", "size": 1, "equals_hex": "00"},
+    {"name": "closed gate admits no slot16 action", "kind": "memory", "address": "0xfebe72c0", "size": 12, "equals_hex": "00000000000000000000a5a5"},
+    {"name": "prior action retained without tail copy", "kind": "memory", "address": "0xfebe73e0", "size": 12, "equals_hex": "010004000c00000000003c3c"},
+    {"name": "slot16 current selected", "kind": "memory", "address": "0xfebe71dc", "size": 1, "equals_hex": "5a"},
+    {"name": "zero bus-error mask clears override0", "kind": "memory", "address": "0xfebebef1", "size": 1, "equals_hex": "00"},
+    {"name": "no communication action complements", "kind": "memory", "address": "0xfebe715c", "size": 2, "equals_hex": "ffff"},
+    {"name": "no communication qualification complement", "kind": "memory", "address": "0xfebe71bc", "size": 2, "equals_hex": "ffff"}
+  ]
+}

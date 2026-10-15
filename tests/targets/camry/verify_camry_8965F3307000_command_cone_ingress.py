@@ -205,7 +205,6 @@ cbc80 = _camry_decompiled(0xCBC80)
 bca08 = _camry_decompiled(0xBCA08)
 c1be4 = _camry_decompiled(0xC1BE4)
 d0674 = _camry_decompiled(0xD0674)
-cf2b2 = _camry_decompiled(0xCF2B2)
 
 check("stock state passes CC60 through CC50 unchanged (guard fallbacks 0x100/0x0)",
       "DAT_000b04c4" in cb9c8 and "0xffff" in cb9c8
@@ -235,9 +234,6 @@ check("AC10 base-swap payload is internal AC68, not B6-derived",
       and "DAT_febeafa8 = DAT_febeac68;" in c1be4)
 check("CC94/CC98 override writer is internal-only (no B6 references)",
       "DAT_febecc94 = -DAT_febecc80;" in d0674 and "DAT_febeadb0" not in d0674)
-check("CB38 ramp target comes from CB08/CB20 supervisor state",
-      "DAT_febecb08" in cf2b2 and "DAT_febecb20" in cf2b2
-      and "DAT_febecb38" in cf2b2)
 
 
 # VAR-111: close the H-like CB38 branch as exact dormant protected-B6 machinery,

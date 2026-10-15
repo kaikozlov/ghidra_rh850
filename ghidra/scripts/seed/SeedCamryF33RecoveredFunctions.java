@@ -2738,14 +2738,87 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     record.add(new ArrayDataType(s16, 4, 2), "motor_terms", "Two restored contributions per branch, not raw poles.");
     record.add(new ArrayDataType(s16, 4, 2), "source2_terms", "Two restored contributions per branch.");
     record.add(new ArrayDataType(s16, 2, 2), "source4_terms", "Exact zero gains discard these when seeding poles.");
-    record.add(new ArrayDataType(u8, 4, 1), "opaque_14", "Not interpreted by the reconstructed restore consumers.");
+    record.add(new ArrayDataType(s16, 2, 2), "offset_terms", "707C then707A; restored in reverse argument order by3B60C.");
     record.add(new ArrayDataType(s16, 6, 2), "source5_terms", "Six contributions; four have exact zero gains.");
     record.add(new ArrayDataType(s16, 4, 2), "source3_terms", "Four exact zero-gain contributions.");
-    record.add(new ArrayDataType(u8, 6, 1), "opaque_2c", "Not interpreted by these restore consumers.");
+    record.add(u32, "writer_zero", "All three record6 writers publish zero.");
+    record.add(u16, "ancillary_snapshot", "Normal writer captures E8AC; clear/invalidate use7F80. Physical identity unresolved.");
     record.add(u16, "marker", "A55A rejects; zero permits conditional zero seeding; other accepted markers retain terms.");
-    record.add(new ArrayDataType(u8, 4, 1), "opaque_34", "Copied by the56-byte getter; interpretation remains separate.");
+    record.add(new ArrayDataType(s16, 2, 2), "drive_epoch_maxima", "Current run maximum merged with the two restored maxima; marker admission differs from model terms.");
     semanticData(0xFEBEF4D0L, resolve(record), "f33_thermal_history_record",
         "Family0 object6 live RAM mirror, not physical flash. All restore consumers copy before exact status10 admission.");
+  }
+  private void annotateThermalHistoryLifecycle() throws Exception {
+    DataType v = VoidDataType.dataType;
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u16 = UnsignedShortDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    DataType s16 = ShortDataType.dataType;
+    DataType s32 = IntegerDataType.dataType;
+    semanticFunction(0x3A9EAL, "f33_check_thermal_raw_estimate_margin", u32)
+        .setComment("Return real R10 A5 iff minimum of five bank0 maps>=21248. Map raw model maxima "
+            + "plus common10880 and margins803/3370/0/0/983 after symmetric32767 saturation. "
+            + "Publish adjusted inputs6FB4..6FBC, maps6FBE..6FC6, minimum6FC8 and status6FB1.");
+    semanticFunction(0x3AB78L, "f33_check_thermal_contribution_count", u32)
+        .setComment("Map maximum individual contribution of each model, then require maximum map "
+            + "output strictly below unsigned688C/2. Maps2FB64..2FBC7: motor/source3 flat125; "
+            + "source2/4/5 step125 to65534 at1229. Counter251 rejects equality,252 admits flat125. "
+            + "Publish maxima6FCA..6FD2, maps6FD4..6FDC, maximum6FDE and real R10/status6FB2.");
+    semanticFunction(0x3ACC4L, "f33_update_thermal_history_qualification", v)
+        .setComment("Snapshot6764 before both tests. Publish6FB0=A5 only when both returnA5 and "
+            + "the entire saved word is zero, otherwise5A. No physical temperature/time claim.");
+    semanticFunction(0x3206CL, "f33_initialize_thermal_shutdown_counter", v)
+        .setComment("Clear688C; map30E78 at constant input0 to set688E=15000 invocations.");
+    semanticFunction(0x32090L, "f33_step_thermal_shutdown_request", v)
+        .setComment("Increment688C while below688E and previous6FB0!=A5; otherwise request event27. "
+            + "Schedulers call this before the current thermal qualification publication.");
+    semanticFunction(0x39512L, "f33_publish_thermal_history_record", v)
+        .setComment("Nonzero7071 admits56-byte family0 record6. Marker5AA5 if7BF8!=0, otherwise "
+            + "FFFF iff6FB0A5, else0. Cache6F00/02 into6EE6/8. Ignore setter acceptance and arm6EE4=1.");
+    semanticFunction(0x395F0L, "f33_reset_thermal_models_and_history_record", v)
+        .setComment("Clear model contributions/poles, offset poles and drive maxima, not every "
+            + "published limit or initialization marker. Publish zero terms, ancillary7F80 and marker0; "
+            + "clear6EE6/8, ignore setter acceptance and arm6EE4=1.");
+    semanticFunction(0x3967CL, "f33_invalidate_thermal_history_record", v)
+        .setComment("Publish ROM default terms, ancillary7F80 and rejecting markerA55A while retaining "
+            + "cached6EE6/8 maxima. Ignore setter acceptance; unlike normal/clear publication do not arm6EE4.");
+    semanticFunction(0x393F0L, "f33_poll_thermal_history_record_status", v)
+        .setComment("Only tracker6EE4==1 polls object6: exact10 becomesFF, high-nibble30 becomesFE, "
+            + "all other statuses retain1. No transaction identity ties this poll to accepted publication.");
+    semanticFunction(0x483ECL, "f33_publish_thermal_reference_record", v)
+        .setComment("Require7DCC5A; publish signed7DCE/7DD6 plus zero word to family0 record5. "
+            + "Set7DE4=1 before setter; acceptance ignored. Independent from record6's7071 gate.");
+    semanticFunction(0xB2CC2L, "f33_snapshot_retained_control_records", v)
+        .setComment("Compose record5, record6 and gated estimator record8 publications. Called by "
+            + "B2CFE on mode0701/event27 before B1620(0702), not itself an AEB00 family hook. "
+            + "Separate admission/queues/trackers, not an atomic or durable snapshot.");
+    semanticFunction(0x35114L, "f33_service_clear_thermal_history", s32)
+        .setComment("Phase0 resets squared drive and models, publishes records6/5, sets phase5A, returns-1. "
+            + "Phase5A waits while either tracker==1, then clears phase and returns0 only if bothFF, else-6.");
+    semanticFunction(0x3B55AL, "f33_should_zero_restored_thermal_offset", u32,
+        new ParameterImpl("record_marker", s16, currentProgram))
+        .setComment("Select signed absolute reference7DCE/7DD6 by7BF8 byte availability, otherwise "
+            + "their maximum. Return5A only for selected<14720 AND marker0; not a reference delta. "
+            + "Always snapshot references into707E/7080; real marker arrives in R6.");
+    semanticFunction(0x3B5A8L, "f33_seed_thermal_offset_pole", s32,
+        new ParameterImpl("contribution", s16, currentProgram),
+        new ParameterImpl("gain", s16, currentProgram))
+        .setComment("Gain0 returns0; otherwise signed contribution*4096/gain, then saturating multiply128.");
+    semanticFunction(0x3B60CL, "f33_restore_thermal_offset_terms", v)
+        .setComment("Copy record6 before exact status10/marker!=A55A admission. Zero-byte7BF8 and "
+            + "marker!=5AA5 permit3B55A conditional zero. Restore+16 then+14 through gains100/25; "
+            + "rejection uses exact zero defaults. Seed baseline outputs7074/76/78 to14720.");
+    semanticFunction(0x3985CL, "f33_restore_thermal_drive_epoch_maxima", v)
+        .setComment("Copy record6, accept tail+34/+36 on exact status10 WITHOUT checking markerA55A. "
+            + "Otherwise clear both restored maxima6F06/08. Separate from model-term validity.");
+    semanticFunction(0x398A0L, "f33_update_thermal_drive_epoch_maxima", v)
+        .setComment("Filter70B0 with divisor30000/gain25, clamp contribution0..32767 and retain run "
+            + "maximum6F04. Merge that one maximum with restored6F06/08 into6F00/02; ties permitted. "
+            + "Do not feed current outputs back into the restored pair.");
+    semanticData(0xFEBE6FB0L, new ArrayDataType(u8, 3, 1), "f33_thermal_history_qualification",
+        "Combined/raw-estimate/contribution-count results. A5 qualified;5A not qualified.");
+    semanticData(0xFEBE688CL, u16, "f33_thermal_shutdown_count", "Invocation count, not a wall-clock unit.");
+    semanticData(0xFEBE688EL, u16, "f33_thermal_shutdown_count_limit", "Initialized15000 from30E78 at input0.");
   }
   private void annotateThermalArbitration() throws Exception {
     DataType v = VoidDataType.dataType;
@@ -3441,6 +3514,231 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     semanticFunction(0x43BB0L, "f33_classify_channel_raw_lower_bound_b", u32)
         .setComment("Parallel623E/6240/6242 with636F/70/71 validity and high16 8B28 gate.");
   }
+  private void annotateSharedMonitorComposition() throws Exception {
+    DataType v = VoidDataType.dataType;
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u16 = UnsignedShortDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    StructureDataType state = new StructureDataType(new CategoryPath("/CamryF33"), "F33EscalatingMonitorState", 0);
+    state.setPackingEnabled(true);
+    state.add(u32, "packed_status", "Lower confirmed/pending status and upper transition publication.");
+    for (String field : new String[]{"passing_count", "failing_count", "failing_high_water", "recovery_count", "elapsed_count"})
+      state.add(u16, field, null);
+    DataType stateType = resolve(state);
+    DataType statePointer = new PointerDataType(stateType, 4);
+    DataType halfwords = new PointerDataType(u16, 4);
+    DataType words = new PointerDataType(u32, 4);
+    semanticFunction(0x6BDB4L, "f33_step_escalating_monitor", u32,
+        new ParameterImpl("state", statePointer, currentProgram),
+        new ParameterImpl("calibration", halfwords, currentProgram),
+        new ParameterImpl("callbacks", words, currentProgram))
+        .setComment("Fourteen-byte retained state, eight-u16 calibration and17-slot callback vector. "
+            + "Saturating counters, strict confirmation thresholds, recovery/elapsed escalation. "
+            + "Packed result is written to state, NOT returned: normal API return is11.");
+    semanticFunction(0x6BA64L, "f33_retain_disabled_escalating_monitor", v,
+        new ParameterImpl("state", statePointer, currentProgram),
+        new ParameterImpl("calibration", halfwords, currentProgram))
+        .setComment("Reclassify from counters; retain confirmed22/escalated44 and confirmed pass2200, "
+            + "discard pending paths. Failure high-water survives.");
+    semanticFunction(0x6FF1CL, "f33_force_monitor_escalation", v,
+        new ParameterImpl("state", statePointer, currentProgram),
+        new ParameterImpl("calibration", halfwords, currentProgram),
+        new ParameterImpl("callbacks", words, currentProgram))
+        .setComment("Require finite fail/elapsed thresholds. Execute transition callbacks, publish44, "
+            + "seed failure/elapsed to threshold+1, clear passing/recovery, preserve failure high-water.");
+    long[] stateAddresses = {0x7C00L,0x7C1CL,0x7C74L,0x7C90L,0x7CF0L,0x7D04L,0x7CC8L,0x7CDCL,0x7D18L,0x7D2CL};
+    for (int i = 0; i < stateAddresses.length; i++)
+      semanticData(0xFEBE0000L + stateAddresses[i], stateType, "f33_shared_snapshot_monitor_" + i,
+          "Slot0 retained state; snapshot-change detection and qualification are separate generations.");
+    semanticFunction(0x47116L, "f33_publish_shared_snapshot_monitor_actions", v)
+        .setComment("Rebuild slot0. Groups{0,2,8}/{1,3,9} select7CB7 with groupB priority. "
+            + "Kinds05/10/11/2F/30; qualification can force escalation. Upper pending transitions "
+            + "also affect686D selected-source hold without changing confirmed group selection.");
+    semanticFunction(0x44928L, "f33_publish_shared_condition_monitor_actions", v)
+        .setComment("Rebuild slot1 from nine statuses. Current classifier36066(2,643E)==1 OR earlier "
+            + "snapshot63DC==1 selects kind0B for common confirmed fault, otherwise17. "
+            + "Inverse monitors7/8 affect actions/summary but are excluded from both channel caches.");
+    semanticFunction(0x473D6L, "f33_publish_shared_snapshot_monitor_status", v,
+        new ParameterImpl("index", u32, currentProgram), new ParameterImpl("packed", u32, currentProgram))
+        .setComment("Unsigned index<11: low byte to7CAC[index], bits16..23 to7CB9[index].");
+    semanticFunction(0x44B0CL, "f33_publish_shared_condition_monitor_status", v,
+        new ParameterImpl("index", u32, currentProgram), new ParameterImpl("packed", u32, currentProgram))
+        .setComment("Unsigned index<9: publish only low status byte at79DC[index].");
+    long[] predicateAddresses = {0x43FB2L,0x44064L,0x44654L,0x44702L,0x447C4L,0x448B2L,
+        0x4611CL,0x461BAL,0x463F2L,0x46490L,0x46AA6L,0x46AC6L,0x46C58L,0x46F62L,
+        0x47470L,0x4749CL,0x47538L,0x47564L,0x47606L,0x4770CL,0x4782AL,0x47860L,0x479C6L,0x479FCL};
+    String[] predicateNames = {"inverse_gate_a","inverse_gate_b","direct_source_a","direct_source_b",
+        "paired_shared_gate_a","paired_shared_gate_b","snapshot_status_a","snapshot_status_recovery_a",
+        "snapshot_status_b","snapshot_status_recovery_b","selected_source_hold","selected_source_hold_recovery",
+        "snapshot_sample_bounds_recovery_a","snapshot_sample_bounds_recovery_b",
+        "snapshot_bit3_a","snapshot_bit3_recovery_a","snapshot_bit3_b","snapshot_bit3_recovery_b",
+        "snapshot_low_gate_a","snapshot_low_gate_b","snapshot_bit2_a","snapshot_bit2_recovery_a",
+        "snapshot_bit2_b","snapshot_bit2_recovery_b"};
+    for (int i = 0; i < predicateAddresses.length; i++)
+      semanticFunction(predicateAddresses[i], "f33_classify_" + predicateNames[i], u32)
+          .setComment("Exact slot0/1 callback predicate. Return11/22/33/44 protocol; software source, "
+              + "qualification and retained-snapshot conditions are not physical freshness guarantees.");
+    long[] retained = {0x462D8L,0x465AEL,0x46D92L,0x4709CL,0x478CEL,0x47A6AL};
+    String[] retainedNames = {"status_a","status_b","sample_bounds_a","sample_bounds_b","bit2_a","bit2_b"};
+    for (int i = 0; i < retained.length; i++)
+      semanticFunction(retained[i], "f33_request_shared_monitor_escalation_" + retainedNames[i], v)
+          .setComment("Slot0 callback in the retained/escalation family; action and diagnostic reporting "
+              + "remain independent. See exact callback vector and shared-monitor composition report.");
+    semanticData(0xFEBE7CACL, new ArrayDataType(u8, 11, 1), "f33_shared_snapshot_status", "Slot0 lower statuses.");
+    semanticData(0xFEBE7CB9L, new ArrayDataType(u8, 11, 1), "f33_shared_snapshot_transition", "Slot0 upper transition bytes.");
+    semanticData(0xFEBE79DCL, new ArrayDataType(u8, 9, 1), "f33_shared_condition_status", "Slot1 statuses, including inverse7/8.");
+  }
+  private void annotateCommunicationStatusComposition() throws Exception {
+    DataType v = VoidDataType.dataType;
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    semanticFunction(0x49888L, "f33_update_application_receive_statuses", v)
+        .setComment("Rebuild30 status bytes: raw-marker-nonzero bit0 plus confirmed-timeout bit1. "
+            + "Admission can preserve old state; status generation is not a timestamp.");
+    semanticFunction(0x498E0L, "f33_get_application_receive_status", u8,
+        new ParameterImpl("selector", u32, currentProgram))
+        .setComment("Read7F0E[selector] for selector<30, otherwise return1.");
+    semanticFunction(0x49708L, "f33_classify_receive_monitor_admission", u8,
+        new ParameterImpl("channel", u32, currentProgram), new ParameterImpl("group", u32, currentProgram),
+        new ParameterImpl("selector", u32, currentProgram))
+        .setComment("Channel1/2, grouped status, group enable/bypass11 and E82A gates. "
+            + "Separate return2 retains prior monitor state instead of declaring healthy.");
+    for (long address : new long[]{0x4975CL,0x497A8L})
+      semanticFunction(address, address == 0x4975CL ? "f33_advance_receive_timeout" : "f33_retain_receive_timeout", u32,
+          new ParameterImpl("selector", u32, currentProgram))
+          .setComment("Raw marker5A drives strict counter>threshold timeout; other marker clears. "
+              + "Confirmed timeout retention is distinct from raw invalidity.");
+    semanticFunction(0x3CC36L, "f33_publish_receive_fault_bank", v,
+        new ParameterImpl("bank", u8, currentProgram), new ParameterImpl("status", u8, currentProgram))
+        .setComment("R6 bank/R7 status: zero publishes0 and healthy edge; invalid-only publishes22; "
+            + "original bit1 set publishes44 and first-failure edge. Local latch updates despite Dem inhibition.");
+    semanticFunction(0x3CCBEL, "f33_update_configured_receive_fault_banks", v)
+        .setComment("Six280A4 rows join monitor bank, status selector and diagnostic event. "
+            + "All exact-image mode bytesA5 admit publication. Preserve real R7 status dataflow3CCD6..3CCF4.");
+    semanticFunction(0x3CE40L, "f33_update_communication_qualification_monitors", v)
+        .setComment("Compose six receive rows, bus-status adapters and internal7F68 summary. "
+            + "7F68 modes1/2 retain the previous summary; mode3 publishes44.");
+    semanticFunction(0x3CEDAL, "f33_publish_selected_source_fault_edges", v)
+        .setComment("Application selected-source diagnostic adapters; not a CAN frame decoder.");
+    semanticFunction(0x3D0A0L, "f33_publish_source_family_fault_edges", v)
+        .setComment("Application source-family diagnostic edges remain distinct from action selection.");
+    semanticFunction(0x3D31CL, "f33_set_communication_monitor_status", v,
+        new ParameterImpl("index", u32, currentProgram), new ParameterImpl("status", u8, currentProgram));
+    semanticFunction(0x3D348L, "f33_compose_communication_status_fault_actions", v)
+        .setComment("Rebuild slot16/kind16 from communication, receive-qualification and service-status "
+            + "sources. Optional E824/7BBA gate affects7489 mask22, not44. Cache7475 is exact7486==22.");
+    semanticFunction(0x3D436L, "f33_update_received_content_monitor_a", v)
+        .setComment("Thresholds pass0/fail20, eventDE confirmed failure; callback vector has no ordinary pass reporter.");
+    semanticFunction(0x3D4D0L, "f33_update_received_content_monitor_b", v)
+        .setComment("Parallel content monitor with eventDF; not a raw timeout predicate.");
+    semanticFunction(0x3D472L, "f33_classify_received_content_a", u32)
+        .setComment("Return44 unless7F68==0 and8052==0, then22 iff804D==1, otherwise11.");
+    semanticFunction(0x3D50CL, "f33_classify_received_content_b", u32)
+        .setComment("Return44 unless7F68==0 and8052==0, then22 iff804E==1, otherwise11.");
+    semanticFunction(0x3D6A6L, "f33_publish_local_status_link_fault", v)
+        .setComment("8294.bit0 publishes local index0=22 and reportsEC; healthy publishes0 without ordinary pass.");
+    semanticFunction(0x3D6D2L, "f33_compose_local_status_fault_actions", v)
+        .setComment("Slot12 ORs only74A8/74A9/74AD. Complete22 selects kind17; ANY nonzero "
+            + "publishes615B11 and prevents healthy diagnostic-cache refresh, even preconfirmation11.");
+    semanticFunction(0x3D724L, "f33_set_local_status_monitor_status", v,
+        new ParameterImpl("index", u32, currentProgram), new ParameterImpl("status", u8, currentProgram));
+    semanticFunction(0x3D756L, "f33_update_qualified_local_status_monitor", v)
+        .setComment("Index5, thresholds40/40; F3 failure callback, healthy-observed51E2C on pass confirmation.");
+    semanticFunction(0x3D790L, "f33_classify_qualified_local_status", u32)
+        .setComment("8278 fails22/passes11 only with qualification. Channel state2 counts67A0 "
+            + "to5 before switching65F1 admission to65F6/7; closed gate44.");
+    semanticFunction(0x3D83AL, "f33_update_paired_local_status_monitor", v)
+        .setComment("Paired827D/827E monitor index4; any low status produces74C8 inhibition of individual predicates.");
+    semanticFunction(0x3D916L, "f33_update_individual_local_status_a", v);
+    semanticFunction(0x3D9C8L, "f33_update_individual_local_status_b", v);
+    semanticFunction(0x3D892L, "f33_classify_paired_local_status", u32)
+        .setComment("Failure only when both827D and827E equal5A.");
+    semanticFunction(0x3D8B2L, "f33_classify_paired_local_status_recovery", u32)
+        .setComment("Confirmed-state paired predicate; both827D/827E5A is failure.");
+    semanticFunction(0x3D95EL, "f33_classify_individual_local_status_a", u32)
+        .setComment("Return44 while74C8==5A; otherwise classify827E as22/11.");
+    semanticFunction(0x3DA10L, "f33_classify_individual_local_status_b", u32)
+        .setComment("Return44 while74C8==5A; otherwise classify827D as22/11.");
+    semanticFunction(0x61404L, "f33_update_local_status_packet", v)
+        .setComment("389E5A admits local four-halfword MMIO read, CRC and6000 header check. "
+            + "At25 failed admitted updates latch3840; healthy publication does not clear an already latched fault. "
+            + "Hardware packet availability remains an explicit boundary.");
+    semanticFunction(0x615F0L, "f33_update_local_status_bit_latch", v)
+        .setComment("Count published3838.bit10; exact BYTE315CA==20 latches3846. "
+            + "Removing bit resets byte counter, not latch;61526 initializes it.");
+    semanticData(0xFEBE7F0EL, new ArrayDataType(u8, 30, 1), "f33_application_receive_status",
+        "Bit0 raw marker nonzero; bit1 confirmed timeout. Thirty status selectors, not CAN IDs.");
+  }
+  private void annotateAngleControllerComposition() throws Exception {
+    DataType v = VoidDataType.dataType;
+    DataType u16 = UnsignedShortDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    DataType s16 = ShortDataType.dataType;
+    DataType s32 = IntegerDataType.dataType;
+    semanticFunction(0xCEFFCL, "f33_select_angle_controller_mode", v)
+        .setComment("DefaultCB00=7. RequireACBD0/CAFF1; ADB0 values1/4/11/10/19/18 map modes0..5.");
+    semanticFunction(0xCD032L, "f33_update_selected_angle_target", v)
+        .setComment("Compose interpolation and bounds; mode7 still produces target, with32766 limit overrides.");
+    semanticFunction(0xCCF0EL, "f33_interpolate_selected_angle_target", v)
+        .setComment("Signed32 AE90 doubled/clamped32767, then six-generation retained interpolation; "
+            + "generations1..5 add delta/6 and generation6 selects complete target.");
+    semanticFunction(0xCCFB2L, "f33_bound_selected_angle_target", v)
+        .setComment("Bound target around prior selected value and magnitude, publishC8B8/C9A0/C9CC. "
+            + "Ordinary limits are bank/mode dependent; mode7 bypasses slew with32766 limits.");
+    semanticFunction(0xCEB7AL, "f33_update_angle_feedback_offset_and_publication", v)
+        .setComment("Compose qualified offset capture and corrected feedback; lost qualification may hold last feedback.");
+    semanticFunction(0xCEADAL, "f33_publish_offset_corrected_angle_feedback", v)
+        .setComment("Saturate2*AE5E-voted(CABC/CAC0/CAC4) to signed16 including-32768; publishCAD2/4/6 when qualified.");
+    semanticFunction(0xCD128L, "f33_update_angle_error_and_derivative", v)
+        .setComment("Scale voted target/feedback2934/1024; error clamp18000. Separate bounded "
+            + "error filterCA32 and retained derivative stateC910; derivative publication capped1600.");
+    semanticFunction(0xCD094L, "f33_filter_angle_controller_measured_rate", v)
+        .setComment("ClampC172 to4279 then retained69/256 filter; publishCA36/82/90, save old stateCA0E.");
+    semanticFunction(0xCDFD4L, "f33_compose_angle_controller_terms", v)
+        .setComment("Target-driven feedforward, error-driven P/I/D feedback, and direction/persistence attenuation.");
+    semanticFunction(0xCD2A0L, "f33_update_angle_target_rate_feedforward", s32)
+        .setComment("Bounded-difference target memory and retained rate filter; real R10 return consumed byCD538.");
+    semanticFunction(0xCD382L, "f33_map_angle_target_feedforward", s32)
+        .setComment("Mapped target shaping with real R10 return, not void despite original auto signature.");
+    semanticFunction(0xCD45CL, "f33_calculate_angle_target_feedforward", s32)
+        .setComment("Alternate speed/target formula, real R10 contribution returned toCD538 composition.");
+    semanticFunction(0xCDA20L, "f33_update_angle_error_integral", v)
+        .setComment("Mode0 clears. Otherwise ADBB1 or previousCA9B direction can block integration; "
+            + "blocked update retains rawC91C. Allowed saturated addition uses voted bounded state. "
+            + "Bank0 bound786432, bank1 bound589824.");
+    semanticFunction(0xCDC48L, "f33_compose_filtered_angle_error_feedback", v)
+        .setComment("P+integral/512+D clamps128000 then retained filtering. Exact second-stage "
+            + "limits differ materially: inspected bank0 rows zero, bank1 mode-specific nonzero.");
+    semanticFunction(0xCE144L, "f33_compose_angle_controller_prelimit_output", v)
+        .setComment("Measured-rate term plus scaled feedforward/feedback. Nonzero active modes "
+            + "retain output and suppress following limiting update while unsignedAE02<128.");
+    semanticFunction(0xCE26EL, "f33_reset_angle_controller_control_state", v)
+        .setComment("Mode7 clears controller error/PID/filter/composite states, seedsC950 from10*selected "
+            + "target, but does NOT clear finalCB38 slew history or envelope accumulatorCB04.");
+    semanticFunction(0xCE594L, "f33_limit_angle_controller_output", v)
+        .setComment("ADBD scaling or special offsets, previous-output slew then absolute clamp. "
+            + "Equality admitted; publishCAAC/CAAD/CA9B and retained center. Mode0 center is zero.");
+    semanticFunction(0xCE6F4L, "f33_shape_angle_controller_target", v)
+        .setComment("VoteCA46/7C/8A and apply sign-selected curve/1024 intoCA2E/80/8E.");
+    semanticFunction(0xCCEB4L, "f33_publish_angle_controller_target_triplicate", v)
+        .setComment("Retained gain, inner slew and magnitude clamp publish one target redundantly "
+            + "toCAA6/8/A, not three independent producers. Exact inner limits65280/12800.");
+    semanticFunction(0xCF148L, "f33_update_angle_controller_retained_envelope", v)
+        .setComment("Unsigned accumulator rescaled when denominator changes; denominator floor1. "
+            + "Mode11 rises,22/33 decay. Inclusive snap boundaries256-H/H. Consistent retained state "
+            + "supports0..256; arbitrary corrupt accumulator is not universally clamped.");
+    semanticFunction(0xCF22CL, "f33_vote_angle_target_and_update_fade_latch", v)
+        .setComment("VoteCAA6/8/A. Non7 setsCB36=2; never-active mode7 suppresses target. "
+            + "At gain0 clear activity but still admit that invocation's prior-active voted target.");
+    semanticFunction(0xCF2B2L, "f33_slew_and_clamp_angle_controller_contribution", v)
+        .setComment("Scale target*gain/256, slew from votedCB38/30/32, then absolute clamp and "
+            + "triplicate publication. Zero gain/activity does not immediately erase output history.");
+    semanticData(0xFEBECAA6L, new ArrayDataType(s16, 3, 2), "f33_angle_controller_target_triplicate",
+        "One calculated target, three redundant publications.");
+    semanticData(0xFEBECB04L, u32, "f33_angle_controller_envelope_accumulator", "Unsigned retained gain accumulator.");
+    semanticData(0xFEBECB20L, new ArrayDataType(u16, 8, 2), "f33_angle_controller_envelope_parameters",
+        "Gain,rise,fall,fast,snap,old denominator,final slew,final absolute. Mode7 retains coefficients.");
+  }
   private void annotateServiceLifecycle() throws Exception {
     DataType v = VoidDataType.dataType;
     DataType u8 = UnsignedCharDataType.dataType;
@@ -3848,14 +4146,18 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     annotateEstablishedTracking();
     annotateThermalModels();
     annotateRemainingEcuThermalModels();
+    annotateThermalHistoryLifecycle();
     annotateThermalArbitration();
     annotateFaultActions();
     annotatePairedMonitorActions();
+    annotateSharedMonitorComposition();
+    annotateCommunicationStatusComposition();
     annotateDiagnosticEventLifecycle();
     annotateDiagnosticAgingAndClear();
     annotateDiagnosticTransactions();
     annotateAssistComposition();
     annotateAssistConditioning();
+    annotateAngleControllerComposition();
     annotateApplicationLifecycle();
     annotateServiceLifecycle();
     annotateDataFlashReads();

@@ -1,0 +1,47 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_shared_slot1_qualification_inverse_monitor_join",
+  "entry": {
+    "role": "Real 5EAE6..5EB18 shared slot1 monitor/action interval distinguishes qualification bit0 retaining confirmed first-channel monitors from active second-channel confirmation, plus inverse monitor8 enabled by that same bit. Inverse monitor7 is skipped, reports a healthy observation, but republishes retained failure22. Real predicate and Dem callbacks compose kinds23/24/1B/1C/32/0A without executable overlays. No physical source freshness claim.",
+    "scope": "resolved-address", "address": "0x5eae6"
+  },
+  "max_instructions": 40000,
+  "reset": "none", "gpr_fill": "0x0",
+  "registers": {"sp": "0xfebe2000", "gp": "0xfebeb800", "tp": "0x23dfc", "lp": "0x798", "r29": "0x301", "PSW": "0x20", "FPEC": "0x0", "PMR": "0xfe00"},
+  "stop_addresses": ["0x5eb18"],
+  "memory": [
+    {"address": "0xfebe1800", "size": 2048, "fill": 165, "evidence": "isolated real nested-call stack"},
+    {"address": "0xfebe5f00", "size": 11520, "fill": 0, "evidence": "staged application, diagnostic, snapshot and monitor RAM through8BFF; no replacement callee or executable overlay"},
+    {"address": "0xfebeeb80", "size": 16, "fill": 0, "evidence": "ordinary application context"},
+    {"address": "0xfebeeb80", "hex": "5a", "evidence": "ordinary source context"},
+    {"address": "0xfebeeb85", "hex": "5a", "evidence": "admit enabled monitors"},
+    {"address": "0xfebe71ec", "hex": "0100", "evidence": "first-channel bit0 inhibits ordinary monitors but enables inverse monitor8; bit1 clear permits second-channel ordinary monitors but skips inverse monitor7"},
+    {"address": "0xfebe7da6", "hex": "01190119", "evidence": "both unsigned gates6401; inverse8 strictly exceeds6400"},
+    {"address": "0xfebe7db0", "hex": "0010", "evidence": "shared source4096 meets inverse8 inclusive upper threshold"},
+    {"address": "0xfebe8292", "hex": "5a", "evidence": "second-channel direct failure source for44702"},
+    {"address": "0xfebe79a0", "hex": "11001100000014001400", "evidence": "common pending state is discarded by qualification rather than confirmed"},
+    {"address": "0xfebe79ac", "hex": "22000000000015001500", "evidence": "first-channel confirmed failure survives ordinary qualification disable"},
+    {"address": "0xfebe7988", "hex": "22000000000015001500", "evidence": "first-channel second predicate also retains confirmed failure"},
+    {"address": "0xfebe79b8", "hex": "11001100000014001400", "evidence": "active second-channel failure20 confirms at21"},
+    {"address": "0xfebe7970", "hex": "22000000000033003300", "evidence": "inverse7 failure51 is retained verbatim on skip, even though healthy-observation callback runs"},
+    {"address": "0xfebe797c", "hex": "11001100000032003200", "evidence": "inverse8 pending failure50; exact calibration pass0/fail50 requires the next failure51 to confirm"},
+    {"address": "0xfebe82d4", "hex": "01", "evidence": "inhibit failure reports8C/E3 without suppressing action or healthy-observation joins"}
+  ],
+  "checks": [
+    {"name": "real interval completes", "kind": "register", "register": "PC", "equals": "0x5eb18"},
+    {"name": "nested calls unwind", "kind": "register", "register": "sp", "equals": "0xfebe2000"},
+    {"name": "priority mask restored", "kind": "register", "register": "PMR", "equals": "0xfe00"},
+    {"name": "common pending path cleared but high-water20 preserved", "kind": "memory", "address": "0xfebe79a0", "size": 10, "equals_hex": "00000000000000001400"},
+    {"name": "qualified first-channel confirmed state retained", "kind": "memory", "address": "0xfebe79ac", "size": 10, "equals_hex": "22000000000015001500"},
+    {"name": "active second-channel confirms21", "kind": "memory", "address": "0xfebe79b8", "size": 10, "equals_hex": "22000000000015001500"},
+    {"name": "skipped inverse7 retains its failure counters", "kind": "memory", "address": "0xfebe7970", "size": 10, "equals_hex": "22000000000033003300"},
+    {"name": "inverse8 confirms on failure51 above6400 at shared4096 equality", "kind": "memory", "address": "0xfebe797c", "size": 10, "equals_hex": "22000000000033003300"},
+    {"name": "source status array reflects ordinary retention and inverse qualification", "kind": "memory", "address": "0xfebe79dc", "size": 10, "equals_hex": "0022222200000022225a"},
+    {"name": "six action kinds merge distinct mode ancillary and qualification namespaces", "kind": "memory", "address": "0xfebe720c", "size": 10, "equals_hex": "120040002f0dc2e30300"},
+    {"name": "mode complement", "kind": "memory", "address": "0xfebe713e", "size": 2, "equals_hex": "edff"},
+    {"name": "qualification complement", "kind": "memory", "address": "0xfebe719e", "size": 2, "equals_hex": "fcff"},
+    {"name": "skipped inverse7 still marks eventE2 healthy-observed", "kind": "memory", "address": "0xfebe613c", "size": 4, "equals_hex": "04000000"},
+    {"name": "active8C report inhibited", "kind": "memory", "address": "0xfebe60a0", "size": 4, "equals_hex": "00000000"},
+    {"name": "activeE3 report inhibited despite kind1C action", "kind": "memory", "address": "0xfebe60ac", "size": 4, "equals_hex": "00000000"}
+  ]
+}

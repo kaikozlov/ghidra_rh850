@@ -401,6 +401,13 @@ def analyze() -> dict[str, Any]:
       raise RuntimeError(f"{name} writer drift: {gate_source_census[name]['writers']}")
 
   snapshot_pairs = set(exact_pairs(0xBCD62, corpus))
+  # Numeric references survive recovered array types. The native controller
+  # compositions separately check retained gain, terminal fade and clamp order.
+  controller_refs = {
+    entry: {(int(ref["to_addr"], 16), ref["ref_type"])
+            for ref in corpus[entry].get("data_references", [])}
+    for entry in (0xCF148, 0xCF2B2)
+  }
   # BCE30..BCE48 maps global COM states 0/2 unchanged, 3->4, others->1
   # into r29; BD00A..BD00C publishes r29 at the recovered ACBD reference.
   # CEFA8..CEFE0 calls grouped-status selectors 0x11/0x1A, inhibits when
@@ -446,8 +453,16 @@ def analyze() -> dict[str, Any]:
     "sig269_scales_supervisor": "DAT_febeadbd" in c[0xCE3AA] and "/ 100" in c[0xCE3AA],
     "sig273_is_health_qualified_publication": "puVar1[0x13f2] = puVar1[-0xa27]" in c[0xCFDA0] and "puVar1[-0xa47] != '\\0'" in c[0xCFDA0],
     "target_controller_is_target_minus_measured": all(x in c[0xCD128] for x in ("DAT_febec8b8", "DAT_febecb00", "DAT_febec8e0")),
-    "gain_ramp_exists": all(x in c[0xCF148] for x in ("DAT_febecb20", "DAT_febecb22", "DAT_febecb24", "DAT_febecb26", "DAT_febecb28")),
-    "final_b6_term_is_gain_slew_magnitude_limited": all(x in c[0xCF2B2] for x in ("DAT_febecb08", "DAT_febecb20", "DAT_febecb2c", "DAT_febecb2e", "DAT_febecb38")),
+    "gain_ramp_exists": (
+      all((address, "READ") in controller_refs[0xCF148]
+          for address in (0xFEBECB20, 0xFEBECB22, 0xFEBECB24, 0xFEBECB26, 0xFEBECB28))
+      and {(0xFEBECB04, "WRITE"), (0xFEBECB20, "WRITE")} <= controller_refs[0xCF148]
+    ),
+    "final_b6_term_is_gain_slew_magnitude_limited": (
+      all((address, "READ") in controller_refs[0xCF2B2]
+          for address in (0xFEBECB08, 0xFEBECB20, 0xFEBECB2C, 0xFEBECB2E))
+      and (0xFEBECB38, "WRITE") in controller_refs[0xCF2B2]
+    ),
     "ordinary_sum_adds_b6_term_only_in_normal_branch": all(x in c[0xD0218] for x in ("DAT_febeac2b == 'Z'", "DAT_febec7bf != '\\x01'", "DAT_febecb38", "DAT_febec5ee", "DAT_febecc48")),
     "ac2b_is_internal_diagnostic_service_gate": "DAT_febeb112 = 0x5a" in c[0xB338C] and "DAT_febeb112 = 0" in c[0xB330A] and "DAT_febeac2b = DAT_febeb112" in c[0xBCBD8],
     "ac5a_is_internal_ramped_scale": "DAT_febeac5a = DAT_febeb1f8" in c[0xBCBD8] and "DAT_febeb1f8" in c[0xB4B6C] and "0x400" in c[0xB4EF4],

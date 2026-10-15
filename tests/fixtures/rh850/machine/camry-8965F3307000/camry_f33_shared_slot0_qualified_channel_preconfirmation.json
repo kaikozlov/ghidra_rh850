@@ -1,0 +1,48 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_shared_slot0_qualified_channel_preconfirmation",
+  "entry": {
+    "role": "Real 5EB2A..5EB62 shared-source monitor/action/source-selection interval. Qualification bit5 retains first-channel escalated44; second-channel snapshot change advances failure20 to exact25, still pending11. Root requests kinds10/2F, but the real merger clears kind10 mode/channel/limit bits on qualification overlap, retaining its class20 and kind2F ancillary0400. Pending transition separately requests selected-source hold. Staged snapshots, not physical freshness.",
+    "scope": "resolved-address", "address": "0x5eb2a"
+  },
+  "max_instructions": 40000,
+  "reset": "none", "gpr_fill": "0x0",
+  "registers": {"sp": "0xfebe2000", "gp": "0xfebeb800", "tp": "0x23dfc", "lp": "0x798", "PSW": "0x20", "FPEC": "0x0", "PMR": "0xfe00"},
+  "stop_addresses": ["0x5eb62"],
+  "memory": [
+    {"address": "0xfebe1800", "size": 2048, "fill": 165, "evidence": "isolated real nested-call stack"},
+    {"address": "0xfebe5f00", "size": 11520, "fill": 0, "evidence": "staged application, diagnostic, snapshot and monitor RAM through8BFF; no executable overlay or replacement callee"},
+    {"address": "0xfebeeb80", "size": 16, "fill": 0, "evidence": "ordinary application context"},
+    {"address": "0xfebeeb85", "hex": "5a", "evidence": "admit enabled source monitors"},
+    {"address": "0xfebe8a24", "hex": "5a", "evidence": "staged five-generation admission pulse from5672C"},
+    {"address": "0xfebe71ec", "hex": "2000", "evidence": "first-channel qualification bit5 set; second-channel bit6 clear"},
+    {"address": "0xfebe7db2", "hex": "4d08", "evidence": "unsigned gate2125, admitting main snapshot-change failure at equality"},
+    {"address": "0xfebe6334", "hex": "01", "evidence": "second-channel snapshot counter differs from retained7C31; actual snapshot producer5CF1C is outside interval"},
+    {"address": "0xfebe7c00", "hex": "4400000000001a001e000000c900", "evidence": "first-channel escalated state retained by6BA64; high-water30, failure26, elapsed201"},
+    {"address": "0xfebe7c1c", "hex": "1100110000001400140000000000", "evidence": "second-channel pending failure20 advances by ROM step5 to exact threshold25, not confirmation"},
+    {"address": "0xfebe6870", "hex": "3412", "evidence": "prior selected output must be retained when686D requests hold"},
+    {"address": "0xfebe7200", "hex": "010004000c0000000000a5a5", "evidence": "prior slot0 record and unused stride-tail canary"},
+    {"address": "0xfebe7320", "hex": "000000000000000000003c3c", "evidence": "retained-record tail must not be overwritten"},
+    {"address": "0xfebe82d4", "hex": "01", "evidence": "diagnostic inhibition does not suppress software monitor or action publication"}
+  ],
+  "checks": [
+    {"name": "real monitor action and selection interval completes", "kind": "register", "register": "PC", "equals": "0x5eb62"},
+    {"name": "nested calls unwind", "kind": "register", "register": "sp", "equals": "0xfebe2000"},
+    {"name": "priority mask restored", "kind": "register", "register": "PMR", "equals": "0xfe00"},
+    {"name": "qualified escalated first-channel state retains all counters", "kind": "memory", "address": "0xfebe7c00", "size": 14, "equals_hex": "4400000000001a001e000000c900"},
+    {"name": "exact25 remains pending with transition halfword11", "kind": "memory", "address": "0xfebe7c1c", "size": 14, "equals_hex": "1100110000001900190000000000"},
+    {"name": "first escalated and second pending lower statuses", "kind": "memory", "address": "0xfebe7cac", "size": 11, "equals_hex": "4411000000000000000000"},
+    {"name": "only first channel is selected and source remains admitted", "kind": "memory", "address": "0xfebe7cb7", "size": 2, "equals_hex": "015a"},
+    {"name": "upper transition status separately preserves pending11", "kind": "memory", "address": "0xfebe7cb9", "size": 11, "equals_hex": "0011000000000000000000"},
+    {"name": "summary OR distinguishes mixed44 and11", "kind": "memory", "address": "0xfebe7cc4", "size": 2, "equals_hex": "5a55"},
+    {"name": "qualification filters kind10 while preserving class20 and ancillary0400", "kind": "memory", "address": "0xfebe7200", "size": 12, "equals_hex": "00000000000000042000a5a5"},
+    {"name": "old five words retained without copying tail", "kind": "memory", "address": "0xfebe7320", "size": 12, "equals_hex": "010004000c00000000003c3c"},
+    {"name": "slot0 selected current", "kind": "memory", "address": "0xfebe71cc", "size": 1, "equals_hex": "5a"},
+    {"name": "filtered mode complement", "kind": "memory", "address": "0xfebe713c", "size": 2, "equals_hex": "ffff"},
+    {"name": "qualification complement", "kind": "memory", "address": "0xfebe719c", "size": 2, "equals_hex": "dfff"},
+    {"name": "pending upper status independently requests source hold", "kind": "memory", "address": "0xfebe686c", "size": 3, "equals_hex": "5a5a01"},
+    {"name": "prior selected output held", "kind": "memory", "address": "0xfebe6870", "size": 2, "equals_hex": "3412"},
+    {"name": "channel cache8 sees nonzero status", "kind": "memory", "address": "0xfebe6163", "size": 1, "equals_hex": "11"},
+    {"name": "separate cache6 sees recognized packed mask", "kind": "memory", "address": "0xfebe8183", "size": 1, "equals_hex": "5a"}
+  ]
+}

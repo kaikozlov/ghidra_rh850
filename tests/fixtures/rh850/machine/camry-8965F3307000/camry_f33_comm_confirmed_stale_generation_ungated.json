@@ -1,0 +1,32 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_comm_confirmed_stale_generation_ungated",
+  "entry": {"role": "Real 5F1B4..5F206 interval: staged status23=3 combines lower-layer invalid bit and admitted confirmed-timeout bit. Row1 publishes44, latches timeout eventAA locally despite Dem inhibition, and selects slot16 kind16 with both optional gates closed. Timeout state is staged, not proof of elapsed physical time or CAN reception.", "scope": "resolved-address", "address": "0x5f1b4"},
+  "max_instructions": 24000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {"sp": "0xfebe2000", "gp": "0xfebeb800", "tp": "0x23dfc", "lp": "0x798", "PSW": "0x20", "FPEC": "0x0", "PMR": "0xfe00"},
+  "stop_addresses": ["0x5f206"],
+  "memory": [
+    {"address": "0xfebe1800", "size": 2048, "fill": 165, "evidence": "isolated nested-call stack"},
+    {"address": "0xfebe5f00", "size": 11520, "fill": 0, "evidence": "explicit application, diagnostic and action state; no code overlays or substituted callees"},
+    {"address": "0xfebee800", "size": 512, "fill": 0, "evidence": "both optional action gates E824 and7BBA remain zero"},
+    {"address": "0xfebe7f25", "hex": "03", "evidence": "staged invalid plus confirmed-timeout monitored status23"},
+    {"address": "0xfebe82d4", "hex": "01", "evidence": "real eventAA reporter inhibited by lifecycle independently of local latch"},
+    {"address": "0xfebe72c0", "hex": "010004000c0000000000a5a5", "evidence": "prior slot16 five-word record and tail canary"},
+    {"address": "0xfebe73e0", "hex": "000000000000000000003c3c", "evidence": "separate retained stride-tail canary"}
+  ],
+  "checks": [
+    {"name": "real scheduler interval completes", "kind": "register", "register": "PC", "equals": "0x5f206"},
+    {"name": "nested calls unwind", "kind": "register", "register": "sp", "equals": "0xfebe2000"},
+    {"name": "timeout bit selects44 rather than22", "kind": "memory", "address": "0xfebe7489", "size": 1, "equals_hex": "44"},
+    {"name": "local timeout latch persists despite Dem inhibit", "kind": "memory", "address": "0xfebe7453", "size": 1, "equals_hex": "5a"},
+    {"name": "mask44 selects kind16 without gate", "kind": "memory", "address": "0xfebe72c0", "size": 12, "equals_hex": "02001000000400000040a5a5"},
+    {"name": "prior action retained", "kind": "memory", "address": "0xfebe73e0", "size": 12, "equals_hex": "010004000c00000000003c3c"},
+    {"name": "mode complement", "kind": "memory", "address": "0xfebe715c", "size": 2, "equals_hex": "fdff"},
+    {"name": "qualification complement", "kind": "memory", "address": "0xfebe71bc", "size": 2, "equals_hex": "ffbf"},
+    {"name": "eventAA inhibited current bitmap", "kind": "memory", "address": "0xfebe60a4", "size": 4, "equals_hex": "00000000"},
+    {"name": "eventAA inhibited retained bitmap", "kind": "memory", "address": "0xfebe60d4", "size": 4, "equals_hex": "00000000"},
+    {"name": "eventAA inhibited second retained bitmap", "kind": "memory", "address": "0xfebe6104", "size": 4, "equals_hex": "00000000"}
+  ]
+}

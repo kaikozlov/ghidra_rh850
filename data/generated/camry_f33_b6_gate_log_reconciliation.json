@@ -121,7 +121,7 @@
         "ACCC": {
           "direct_road_proxy": false,
           "road_bound": "continuous 0x0D7 proves source-PDU wire liveness but not the internal generated status byte itself",
-          "static_source": "FEBE80A5 = FUN_000498E0(0x17) generated status -> FEBEF093 -> FEBEACCC; not a directly encoded CAN scalar"
+          "static_source": "FEBE80A5 = receive-status selector0x17 through 0x498E0 -> FEBEF093 -> FEBEACCC; not a directly encoded CAN scalar"
         },
         "ACCD": {
           "active_b6_latest_within_25ms": {
@@ -280,7 +280,7 @@
         "ACCC": {
           "direct_road_proxy": false,
           "road_bound": "continuous 0x0D7 proves source-PDU wire liveness but not the internal generated status byte itself",
-          "static_source": "FEBE80A5 = FUN_000498E0(0x17) generated status -> FEBEF093 -> FEBEACCC; not a directly encoded CAN scalar"
+          "static_source": "FEBE80A5 = receive-status selector0x17 through 0x498E0 -> FEBEF093 -> FEBEACCC; not a directly encoded CAN scalar"
         },
         "ACCD": {
           "active_b6_latest_within_25ms": {
@@ -440,7 +440,7 @@
         "ACCC": {
           "direct_road_proxy": false,
           "road_bound": "continuous 0x0D7 proves source-PDU wire liveness but not the internal generated status byte itself",
-          "static_source": "FEBE80A5 = FUN_000498E0(0x17) generated status -> FEBEF093 -> FEBEACCC; not a directly encoded CAN scalar"
+          "static_source": "FEBE80A5 = receive-status selector0x17 through 0x498E0 -> FEBEF093 -> FEBEACCC; not a directly encoded CAN scalar"
         },
         "ACCD": {
           "active_b6_latest_within_25ms": {
@@ -599,7 +599,7 @@
         "ACCC": {
           "direct_road_proxy": false,
           "road_bound": "continuous 0x0D7 proves source-PDU wire liveness but not the internal generated status byte itself",
-          "static_source": "FEBE80A5 = FUN_000498E0(0x17) generated status -> FEBEF093 -> FEBEACCC; not a directly encoded CAN scalar"
+          "static_source": "FEBE80A5 = receive-status selector0x17 through 0x498E0 -> FEBEF093 -> FEBEACCC; not a directly encoded CAN scalar"
         },
         "ACCD": {
           "active_b6_latest_within_25ms": {
@@ -758,7 +758,7 @@
         "ACCC": {
           "direct_road_proxy": false,
           "road_bound": "continuous 0x0D7 proves source-PDU wire liveness but not the internal generated status byte itself",
-          "static_source": "FEBE80A5 = FUN_000498E0(0x17) generated status -> FEBEF093 -> FEBEACCC; not a directly encoded CAN scalar"
+          "static_source": "FEBE80A5 = receive-status selector0x17 through 0x498E0 -> FEBEF093 -> FEBEACCC; not a directly encoded CAN scalar"
         },
         "ACCD": {
           "active_b6_latest_within_25ms": {
@@ -917,7 +917,7 @@
         "ACCC": {
           "direct_road_proxy": false,
           "road_bound": "continuous 0x0D7 proves source-PDU wire liveness but not the internal generated status byte itself",
-          "static_source": "FEBE80A5 = FUN_000498E0(0x17) generated status -> FEBEF093 -> FEBEACCC; not a directly encoded CAN scalar"
+          "static_source": "FEBE80A5 = receive-status selector0x17 through 0x498E0 -> FEBEF093 -> FEBEACCC; not a directly encoded CAN scalar"
         },
         "ACCD": {
           "active_b6_latest_within_25ms": {
@@ -1076,7 +1076,7 @@
         "ACCC": {
           "direct_road_proxy": false,
           "road_bound": "continuous 0x0D7 proves source-PDU wire liveness but not the internal generated status byte itself",
-          "static_source": "FEBE80A5 = FUN_000498E0(0x17) generated status -> FEBEF093 -> FEBEACCC; not a directly encoded CAN scalar"
+          "static_source": "FEBE80A5 = receive-status selector0x17 through 0x498E0 -> FEBEF093 -> FEBEACCC; not a directly encoded CAN scalar"
         },
         "ACCD": {
           "active_b6_latest_within_25ms": {
@@ -1235,7 +1235,7 @@
         "ACCC": {
           "direct_road_proxy": false,
           "road_bound": "continuous 0x0D7 proves source-PDU wire liveness but not the internal generated status byte itself",
-          "static_source": "FEBE80A5 = FUN_000498E0(0x17) generated status -> FEBEF093 -> FEBEACCC; not a directly encoded CAN scalar"
+          "static_source": "FEBE80A5 = receive-status selector0x17 through 0x498E0 -> FEBEF093 -> FEBEACCC; not a directly encoded CAN scalar"
         },
         "ACCD": {
           "active_b6_latest_within_25ms": {
@@ -1398,7 +1398,7 @@
         "ACCC": {
           "direct_road_proxy": false,
           "road_bound": "continuous 0x0D7 proves source-PDU wire liveness but not the internal generated status byte itself",
-          "static_source": "FEBE80A5 = FUN_000498E0(0x17) generated status -> FEBEF093 -> FEBEACCC; not a directly encoded CAN scalar"
+          "static_source": "FEBE80A5 = receive-status selector0x17 through 0x498E0 -> FEBEF093 -> FEBEACCC; not a directly encoded CAN scalar"
         },
         "ACCD": {
           "active_b6_latest_within_25ms": {},
@@ -1555,7 +1555,7 @@
         "ACCC": {
           "direct_road_proxy": false,
           "road_bound": "continuous 0x0D7 proves source-PDU wire liveness but not the internal generated status byte itself",
-          "static_source": "FEBE80A5 = FUN_000498E0(0x17) generated status -> FEBEF093 -> FEBEACCC; not a directly encoded CAN scalar"
+          "static_source": "FEBE80A5 = receive-status selector0x17 through 0x498E0 -> FEBEF093 -> FEBEACCC; not a directly encoded CAN scalar"
         },
         "ACCD": {
           "active_b6_latest_within_25ms": {
@@ -1716,7 +1716,7 @@
         "ACCC": {
           "direct_road_proxy": false,
           "road_bound": "continuous 0x0D7 proves source-PDU wire liveness but not the internal generated status byte itself",
-          "static_source": "FEBE80A5 = FUN_000498E0(0x17) generated status -> FEBEF093 -> FEBEACCC; not a directly encoded CAN scalar"
+          "static_source": "FEBE80A5 = receive-status selector0x17 through 0x498E0 -> FEBEF093 -> FEBEACCC; not a directly encoded CAN scalar"
         },
         "ACCD": {
           "active_b6_latest_within_25ms": {},
@@ -1873,7 +1873,7 @@
         "ACCC": {
           "direct_road_proxy": false,
           "road_bound": "continuous 0x0D7 proves source-PDU wire liveness but not the internal generated status byte itself",
-          "static_source": "FEBE80A5 = FUN_000498E0(0x17) generated status -> FEBEF093 -> FEBEACCC; not a directly encoded CAN scalar"
+          "static_source": "FEBE80A5 = receive-status selector0x17 through 0x498E0 -> FEBEF093 -> FEBEACCC; not a directly encoded CAN scalar"
         },
         "ACCD": {
           "active_b6_latest_within_25ms": {
@@ -2032,7 +2032,7 @@
         "ACCC": {
           "direct_road_proxy": false,
           "road_bound": "continuous 0x0D7 proves source-PDU wire liveness but not the internal generated status byte itself",
-          "static_source": "FEBE80A5 = FUN_000498E0(0x17) generated status -> FEBEF093 -> FEBEACCC; not a directly encoded CAN scalar"
+          "static_source": "FEBE80A5 = receive-status selector0x17 through 0x498E0 -> FEBEF093 -> FEBEACCC; not a directly encoded CAN scalar"
         },
         "ACCD": {
           "active_b6_latest_within_25ms": {
@@ -2140,9 +2140,9 @@
   "schema": "camry-f33-b6-gate-log-reconciliation-v1",
   "sources": {
     "exact_f33_corpus": "data/generated/camry-8965F3307000/decompilations.jsonl",
-    "exact_f33_corpus_sha256": "19393a2f44d47857dc601e34d098943cb99cc207d9d8d5113b3fb56a11d2b22a",
+    "exact_f33_corpus_sha256": "7149a5ffd9924cf1d76484f0a72635c8f9a45f01ef508b0842bb21e19e530e9f",
     "external_ingress_artifact": "data/generated/camry_8965F3307000_external_lateral_ingress.json",
-    "external_ingress_artifact_sha256": "8ee4130623974ca16403e45bdb344a8f27cd0b1516caae2473dac9f52e9dd5cd",
+    "external_ingress_artifact_sha256": "7ab4cfe96d4b9dfa1fd66bd0370cb45263f578f774f7ca223f4f2efcdd2b29c0",
     "f33_port_artifact": "data/generated/camry_8965F3307000_tss3_opendbc_port.json",
     "f33_port_artifact_sha256": "55f70788dab0e8b7a9d2727806ed6403872d9d2981e1ca58cbe9ef921887c4d1",
     "freshness_artifact": "data/generated/camry_b6_freshness_contract.json",

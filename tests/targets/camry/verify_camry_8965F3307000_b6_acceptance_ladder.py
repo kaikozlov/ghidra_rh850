@@ -70,9 +70,9 @@ def section_b6_acceptance_ladder() -> int:
     check("normal PDU receive indication clears the same PDU-state family",
           ("DATA", "0xfebe52d8") in refs(0x8E772) and
           "= 0;" in funcs[0x8E772]["decompiled_c"])
-    check("B6 unpacker publishes status at FEBE80C9",
-          ("WRITE", "0xfebe80c9") in refs(0x4BD46) and
-          "FUN_000498e0(0x1a)" in funcs[0x4BD46]["decompiled_c"])
+    check("B6 selector1A status return is published at FEBE80C9",
+          image[0x4BEBC:0x4BEC8] == bytes.fromhex("20361a00bfff20da4457c9c8") and
+          ("WRITE", "0xfebe80c9") in refs(0x4BD46))
     check("B6 status stages FEBE80C9 -> FEBEF13E",
           ("READ", "0xfebe80c9") in refs(0x58074) and
           ("WRITE", "0xfebef13e") in refs(0x58074))

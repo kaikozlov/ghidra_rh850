@@ -187,7 +187,16 @@ def build() -> dict:
     # Control Module / Missing Message. Thus F33 itself expects B6 from the brake-system
     # source domain even though it cannot encode a transmitter ECU address on the wire.
     token(funcs, 0x3CBE8, "param_1 < 6", "DAT_000280a4", "DAT_000280a6")
-    token(funcs, 0x3CCBE, " < 6", "DAT_000280a9", "FUN_000498e0")
+    # Selector/bank loads, real status call, R10->R7 forwarding, bank->R6 and
+    # publication call, followed by the six-row loop bound. Names/types in the
+    # decompiler may change without changing this receive-monitor wire join.
+    need(
+        image[0x3CCD6:0x3CCDE] == bytes.fromhex("653064d080ff06cc")
+        and image[0x3CCE2:0x3CCE4] == bytes.fromhex("0a38")
+        and image[0x3CCF2:0x3CCF8] == bytes.fromhex("1a30bfff42ff")
+        and image[0x3CD0C:0x3CD12] == bytes.fromhex("41e266e2c1dd"),
+        "receive-monitor selector/status/publication dataflow or six-row bound drift",
+    )
     monitor_table = 0x280A4
     status_map = 0x28FE4
     monitor_row = image[monitor_table + 5 * 8:monitor_table + 6 * 8]

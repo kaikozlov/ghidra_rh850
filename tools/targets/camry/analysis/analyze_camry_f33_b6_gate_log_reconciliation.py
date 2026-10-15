@@ -262,7 +262,7 @@ def scan_route(LogReader, route_name: str, files: list[tuple[int, Path]]) -> dic
       },
       'ACCC': {
         'direct_road_proxy': False,
-        'static_source': 'FEBE80A5 = FUN_000498E0(0x17) generated status -> FEBEF093 -> FEBEACCC; not a directly encoded CAN scalar',
+        'static_source': 'FEBE80A5 = receive-status selector0x17 through 0x498E0 -> FEBEF093 -> FEBEACCC; not a directly encoded CAN scalar',
         'road_bound': 'continuous 0x0D7 proves source-PDU wire liveness but not the internal generated status byte itself',
       },
       'CAFC': {

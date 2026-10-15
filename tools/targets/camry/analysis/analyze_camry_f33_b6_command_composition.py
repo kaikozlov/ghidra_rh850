@@ -72,7 +72,7 @@ FUNCTIONS = {
   0x0CCF0E: "B6 target-angle scale/continuity stage",
   0x0CCFB2: "B6 target-angle supervisor staging",
   0x0CEFFC: "Target Lateral ID to controller bank",
-  0x0CE384: "default-bank versus B6-bank controller dispatch",
+  0x0CE384: "mode7 reset versus active angle-controller dispatch",
   0x0CDFD4: "B6-bank controller aggregate",
   0x0CD128: "target-minus-measured B6 controller",
   0x0CDFF8: "mode-selected B6 supervisor",
@@ -227,8 +227,14 @@ def analyze() -> dict[str, Any]:
       "decompiled_c_sha256": rec["decompiled_c_sha256"],
     }
 
-  # Semantic predicates are all mechanically checked against the canonical
-  # decompilation, while body hashes bind those statements to exact CodeFlash.
+  # Keep concrete producer/consumer edges independent of typed-array spelling.
+  controller_refs = {
+    entry: {(int(ref["to_addr"], 16), ref["ref_type"])
+            for ref in corpus[entry].get("data_references", [])}
+    for entry in (0xCCDF8, 0xCF22C, 0xCF2B2)
+  }
+  # Instruction/dataflow predicates and corpus semantics are bound to the
+  # exact CodeFlash identity; native compositions separately exercise behavior.
   semantic_checks = {
     "id11_maps_to_bank2": (
       "DAT_febeadb0 == '\\v'" in f[0xCEFFC]
@@ -256,15 +262,18 @@ def analyze() -> dict[str, Any]:
       and all(x in f[0xCD128] for x in ("DAT_febec8b8", "DAT_febec9a0", "DAT_febec9cc", "DAT_febecb00"))
     ),
     "bank2_uses_b6_controller_not_default_branch": (
-      "(DAT_febecb00 & 7) == 7" in f[0xCE384]
-      and "FUN_000cdfd4();" in f[0xCE384]
-      and "FUN_000cdff8();" in f[0xCE384]
-      and "FUN_000ce144();" in f[0xCE384]
+      # CB00&7==7 branches to CE26E reset; non7 calls CDFD4, CDFF8, CE144.
+      image[0xCE388:0xCE3A6] == bytes.fromhex(
+        "840f0113c10e0700670a820dbfff40fcbfff60fcbfffa8fdb505bfffccfe"
+      )
     ),
     "b6_supervisor_reaches_cb38": (
-      all(x in f[0xCCDF8] for x in ("DAT_febecaa6", "DAT_febecaa8", "DAT_febecaaa"))
-      and "DAT_febecb08" in f[0xCF22C]
-      and all(x in f[0xCF2B2] for x in ("DAT_febecb08", "DAT_febecb20", "DAT_febecb38"))
+      all((address, "WRITE") in controller_refs[0xCCDF8]
+          and (address, "READ") in controller_refs[0xCF22C]
+          for address in (0xFEBECAA6, 0xFEBECAA8, 0xFEBECAAA))
+      and (0xFEBECB08, "WRITE") in controller_refs[0xCF22C]
+      and {(0xFEBECB08, "READ"), (0xFEBECB20, "READ"), (CB38, "WRITE")}
+          <= controller_refs[0xCF2B2]
     ),
     "d0218_adds_cb38_to_ordinary_terms": (
       all(x in f[0xD0218] for x in (

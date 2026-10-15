@@ -91,3 +91,40 @@ address,provenance,note
 0x00043784,firmware/camry-8965F3307000/CodeFlash.bin,paired-monitor ROM callback pointers at28718/2871C/28720; complete instruction body43784..437AF
 0x00042BEE,firmware/camry-8965F3307000/CodeFlash.bin,paired-monitor ROM callback pointers at28614/28618; complete instruction body42BEE..42C67
 0x00043BB0,firmware/camry-8965F3307000/CodeFlash.bin,paired-monitor ROM callback pointers at28788/2878C; complete instruction body43BB0..43C2B
+0x0003D472,firmware/camry-8965F3307000/CodeFlash.bin,monitor callback pointers at280D4/280D8
+0x0003D50C,firmware/camry-8965F3307000/CodeFlash.bin,monitor callback pointers at28108/2810C
+0x0003D790,firmware/camry-8965F3307000/CodeFlash.bin,monitor callback pointers at2813C/28140
+0x0003D892,firmware/camry-8965F3307000/CodeFlash.bin,monitor callback pointers at28170/28174
+0x0003D8B2,firmware/camry-8965F3307000/CodeFlash.bin,monitor callback pointers at28178
+0x0003D95E,firmware/camry-8965F3307000/CodeFlash.bin,monitor callback pointers at281AC/281B0/281B4
+0x0003DA10,firmware/camry-8965F3307000/CodeFlash.bin,monitor callback pointers at281E8/281EC/281F0
+0x00043FB2,firmware/camry-8965F3307000/CodeFlash.bin,monitor callback pointers at287F0/287F4
+0x00044064,firmware/camry-8965F3307000/CodeFlash.bin,monitor callback pointers at28824/28828
+0x00044654,firmware/camry-8965F3307000/CodeFlash.bin,monitor callback pointers at288F4/288F8
+0x00044702,firmware/camry-8965F3307000/CodeFlash.bin,monitor callback pointers at28928/2892C
+0x000447C4,firmware/camry-8965F3307000/CodeFlash.bin,monitor callback pointers at2895C/28960
+0x000448B2,firmware/camry-8965F3307000/CodeFlash.bin,monitor callback pointers at28990/28994
+0x0004611C,firmware/camry-8965F3307000/CodeFlash.bin,monitor callback pointers at28CF0/28CF4
+0x000461BA,firmware/camry-8965F3307000/CodeFlash.bin,monitor callback pointers at28CF8
+0x000462D8,firmware/camry-8965F3307000/CodeFlash.bin,monitor callback pointers at28D2C
+0x000463F2,firmware/camry-8965F3307000/CodeFlash.bin,monitor callback pointers at28D34/28D38
+0x00046490,firmware/camry-8965F3307000/CodeFlash.bin,monitor callback pointers at28D3C
+0x000465AE,firmware/camry-8965F3307000/CodeFlash.bin,monitor callback pointers at28D70
+0x00046AA6,firmware/camry-8965F3307000/CodeFlash.bin,monitor callback pointers at28D78/28D7C
+0x00046AC6,firmware/camry-8965F3307000/CodeFlash.bin,monitor callback pointers at28D80
+0x00046C58,firmware/camry-8965F3307000/CodeFlash.bin,monitor callback pointers at28DBC
+0x00046D92,firmware/camry-8965F3307000/CodeFlash.bin,monitor callback pointers at28DF0
+0x00046F62,firmware/camry-8965F3307000/CodeFlash.bin,monitor callback pointers at28E00
+0x0004709C,firmware/camry-8965F3307000/CodeFlash.bin,monitor callback pointers at28E34
+0x00047470,firmware/camry-8965F3307000/CodeFlash.bin,monitor callback pointers at28E3C/28E40
+0x0004749C,firmware/camry-8965F3307000/CodeFlash.bin,monitor callback pointers at28E44
+0x00047538,firmware/camry-8965F3307000/CodeFlash.bin,monitor callback pointers at28E80/28E84
+0x00047564,firmware/camry-8965F3307000/CodeFlash.bin,monitor callback pointers at28E88
+0x00047606,firmware/camry-8965F3307000/CodeFlash.bin,monitor callback pointers at28EC4/28EC8/28ECC
+0x0004770C,firmware/camry-8965F3307000/CodeFlash.bin,monitor callback pointers at28F08/28F0C/28F10
+0x0004782A,firmware/camry-8965F3307000/CodeFlash.bin,monitor callback pointers at28F4C/28F50
+0x00047860,firmware/camry-8965F3307000/CodeFlash.bin,monitor callback pointers at28F54
+0x000478CE,firmware/camry-8965F3307000/CodeFlash.bin,monitor callback pointers at28F88
+0x000479C6,firmware/camry-8965F3307000/CodeFlash.bin,monitor callback pointers at28F90/28F94
+0x000479FC,firmware/camry-8965F3307000/CodeFlash.bin,monitor callback pointers at28F98
+0x00047A6A,firmware/camry-8965F3307000/CodeFlash.bin,monitor callback pointers at28FCC

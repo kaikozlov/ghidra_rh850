@@ -208,7 +208,7 @@
     "0x04BD46": {
       "body_sha256": "db4f6577d4a3250c7277730ee2f3c3e3fb71ffa83c6103ff1cd4c5b982f65b62",
       "body_size": 390,
-      "decompiled_c_sha256": "6276e8aafdd85f37619cff2c474ffadf71e60dfada9a26a16b39ad04c7c08368",
+      "decompiled_c_sha256": "dc079fc834334287d34d19a001af35f2ce5613cec0839d18ba4a03aeae5788a4",
       "role": "generated-COM PDU44 application unpacker"
     },
     "0x0572E6": {
@@ -526,31 +526,31 @@
     "0x0CCDF8": {
       "body_sha256": "45cf097f8be599c362fee1a0ce99620765de7d7f881c8fb5569d7271e05a7468",
       "body_size": 188,
-      "decompiled_c_sha256": "3ab9c5b170df58c1a890237dc87b16cb1f50f8ecb10e5c364a455220dc98105a",
+      "decompiled_c_sha256": "76ddf6c371e85ceb3bb4048ef0079453cea4eb544c7970d8eae8a709a51836f2",
       "role": "cooperative supervisor output conditioning"
     },
     "0x0CCF0E": {
       "body_sha256": "f5a250c7631463c3446661d0084dc80810d9c6ca49609fd334175507f1707cd9",
       "body_size": 164,
-      "decompiled_c_sha256": "ad9b454e5d3d6cff3c1be957ba7aa627ea257e33144ac0fbb86a43fa76431e80",
+      "decompiled_c_sha256": "779b6a28c017c1af07509e759275b6c0edcfad4da5d07b194e83c9467f7e7bbd",
       "role": "B6 target-angle scale/continuity"
     },
     "0x0CCFB2": {
       "body_sha256": "1d89d80f813fba9da521a9984ce9b335200b66832f371b620a92053b4c100047",
       "body_size": 128,
-      "decompiled_c_sha256": "3bf2c461409a44ff97396056555fc3544c07221fce6b81859677ad6d2ad87c7f",
+      "decompiled_c_sha256": "78e42c85985189ef26540164fe7fc23d45b9b49c8a56eff051b8b81991d295f3",
       "role": "B6 target-angle per-step limiter"
     },
     "0x0CD128": {
       "body_sha256": "4ea271ee3c13dee80ee2712b8a82fb23c5c3ef1d3b5fb2e58c3d088e0e2a2671",
       "body_size": 376,
-      "decompiled_c_sha256": "821c6c3ddc1010c247382e830cec56e5b54af9cbef9e0c474dfeafb5c346a3a4",
+      "decompiled_c_sha256": "f70fcde16ca5f5897e4333ef0c785917faf1c621dce3d0cd267121fff49d1c3b",
       "role": "target-minus-measured controller"
     },
     "0x0CDA20": {
       "body_sha256": "5544519f0d68f69e32f1aa6e1a0ce56a487cf29aa8288239746b79ff9418f5be",
       "body_size": 192,
-      "decompiled_c_sha256": "b467fa544d636782ad506aba6c43d64fb66bc2c1861407c96973a8fde37ed59e",
+      "decompiled_c_sha256": "3a539cdc633b415d7a1dc7873a946c4941b2575e8065f6c37a44f897a30264e1",
       "role": "B6 sig265-controlled supervisor term"
     },
     "0x0CDFF8": {
@@ -562,7 +562,7 @@
     "0x0CE144": {
       "body_sha256": "e8e705ee619f6ba492e9c5f59847dacb914977cf7983c3f7edbcf05e343444e7",
       "body_size": 298,
-      "decompiled_c_sha256": "3c7b67fc593a43fdbb6ceb06c3134aaf62fc51ad8420c3396a9c73b30c5d8199",
+      "decompiled_c_sha256": "102b12def84b6e68e55eb28c02855c5d29eb56650045f7f64bc2349673ebade0",
       "role": "bank-selected cooperative supervisor"
     },
     "0x0CE3AA": {
@@ -580,13 +580,13 @@
     "0x0CE594": {
       "body_sha256": "3f65c2dfea68424ed95624e3797e8a0c478def774a781e6bcbe9a14ba2fcfc4e",
       "body_size": 312,
-      "decompiled_c_sha256": "e7bd0508bf51ff4374e862f95b07a18dab9f15a4eeaab226be9064dd42d57715",
+      "decompiled_c_sha256": "5740abbd939bb8440af3f1aff5d38e33ecc4898f921b648889d032e0edb0d819",
       "role": "cooperative supervisor shaping"
     },
     "0x0CE6F4": {
       "body_sha256": "48271f642ac3b97a6c69295487439a0fb7addb7f1ee8f3666e3eef03aa8a4748",
       "body_size": 92,
-      "decompiled_c_sha256": "2cd6ef47757a4d237553119b6fddc5fd38dc5ee4118c32c44c25b2da5cc75147",
+      "decompiled_c_sha256": "a044948fe8165542e2a1ed2e1097f32c9df8a0accfdea57b59071e06101c9dd4",
       "role": "cooperative supervisor consolidation"
     },
     "0x0CE772": {
@@ -652,7 +652,7 @@
     "0x0CEFFC": {
       "body_sha256": "551e4f9d934fa59020839ad2bb9d0019f744cebe580558f3ef5c129b0821f5da",
       "body_size": 78,
-      "decompiled_c_sha256": "c35a062da1e28ebb5b328de01be83a277a88752390c383e311093881e5a6f5df",
+      "decompiled_c_sha256": "9addb9ab9bd7cbd17228ac7b6ca15aa91b4ea9f6b0e7b9b66c50c52e51ba6489",
       "role": "Target Lateral ID to cooperative bank"
     },
     "0x0CF0B6": {
@@ -664,31 +664,31 @@
     "0x0CF0EA": {
       "body_sha256": "7877ddc6853710214edd1fd93e12f51a08dbde900dc541acc286e0bad96916db",
       "body_size": 94,
-      "decompiled_c_sha256": "9c04a4d5cdbda0a632f9b84bc90dbc745a62536d0c0eedc948e7c84f15533cbe",
+      "decompiled_c_sha256": "f02eb81df3bc2d6bb8def7aae1ad93407a1c5757085db45f747e2403abf00ff1",
       "role": "cooperative gain-rate calibration load"
     },
     "0x0CF148": {
       "body_sha256": "69362bbbc374f98398617a91545b147e4b9a0353a40be0205c4a1dff7d7ad197",
       "body_size": 228,
-      "decompiled_c_sha256": "0f0c7620bba3af95b5cca93446ce8c6fdcd4f5cc2d6b7a22e5e22a2b8bc119a3",
+      "decompiled_c_sha256": "581f26d68589252f602fb0fd7a1d53ff9772e18ceb96e00f2454a5c20a8ea56a",
       "role": "cooperative gain ramp CB20"
     },
     "0x0CF22C": {
       "body_sha256": "a500cacf1aa86c88f8130c5a83cd2afc7a4b23db0ff323c9fa68bca923055aab",
       "body_size": 74,
-      "decompiled_c_sha256": "562ff7989afad1d4d53ed6a1a1be14beb1596f1f571ae21c5f74191cb3cc910f",
+      "decompiled_c_sha256": "3ad53afa8ba0775db69db40523d6e8e482fa51f9c59ca8fd372d9839bee7fd71",
       "role": "cooperative controller output select CB08"
     },
     "0x0CF276": {
       "body_sha256": "83ee6b6b22ff968c01a943492629725f5952214a305f58b5fe3846424f165060",
       "body_size": 60,
-      "decompiled_c_sha256": "b505b764a2d728140f9d67f6f6ee2482eb8172d914bc00573beece0a6a6912d0",
+      "decompiled_c_sha256": "94b3cf7455e9c974487ffbaf69d756d4a5e623a6952ae3331fd53b92264d338c",
       "role": "cooperative output slew/magnitude limits"
     },
     "0x0CF2B2": {
       "body_sha256": "ac1e88a5f7a5620c751302d7b76d9cb7d2f14246cf49349ee429acb33559493b",
       "body_size": 138,
-      "decompiled_c_sha256": "aa91599107bc3f4dd69f7c6b2ea390e9fde048c8843c2f8ffcd17abca96ca12e",
+      "decompiled_c_sha256": "a2a943c9b5ab5bb3f2c44e65821fb4358cbcf0fdd8956eb2b86af7341db74933",
       "role": "final cooperative contribution CB38"
     },
     "0x0CFDA0": {
@@ -790,7 +790,7 @@
     "0x0D0EEC": {
       "body_sha256": "e58077923617544434467a6d0279d5037aa2cf1398960ef0fe62126f37e23231",
       "body_size": 488,
-      "decompiled_c_sha256": "71f61a73da53e563839894c05c81a40b730e400d7b0da05812c8d6d445362c5d",
+      "decompiled_c_sha256": "efb383c945ae63cc319052875266b9daf4eed2e5661ade30ccab8a241d7d0d07",
       "role": "cooperative-controller aggregate"
     },
     "0x0D1100": {
@@ -3008,7 +3008,7 @@
     }
   ],
   "target": {
-    "canonical_function_count": 7195,
+    "canonical_function_count": 7232,
     "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
     "software_id": "8965F3307000"
   }

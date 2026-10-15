@@ -1,0 +1,197 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_thermal_snapshot_rejected_requests_still_arm_trackers",
+  "entry": {
+    "role": "Real mode0701/event27 snapshot helper composes record5, record6 and the gated record8 adapter. Record8 is explicitly disabled; checks asynchronous request admission versus software trackers, never physical durability.",
+    "scope": "resolved-address",
+    "address": "0xb2cc2"
+  },
+  "max_instructions": 20000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xfe00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1800",
+      "size": 2048,
+      "fill": 165,
+      "evidence": "isolated initialized stack for real nested firmware calls"
+    },
+    {
+      "address": "0xfebe6eb0",
+      "size": 480,
+      "fill": 0,
+      "evidence": "explicit model/history publication state"
+    },
+    {
+      "address": "0xfebe7071",
+      "hex": "5a",
+      "evidence": "nonzero thermal-history publication gate"
+    },
+    {
+      "address": "0xfebe6fb0",
+      "hex": "a5",
+      "evidence": "previous completed thermal qualification"
+    },
+    {
+      "address": "0xfebe7bf8",
+      "hex": "0000",
+      "evidence": "zero source qualification word selects FFFF marker with6FB0A5"
+    },
+    {
+      "address": "0xfebe7dcc",
+      "hex": "5a003412",
+      "evidence": "record5 gate and first staged reference"
+    },
+    {
+      "address": "0xfebe7dd6",
+      "hex": "4523",
+      "evidence": "second staged reference"
+    },
+    {
+      "address": "0xfebe7de4",
+      "hex": "00",
+      "evidence": "unarmed record5 completion tracker"
+    },
+    {
+      "address": "0xfebeacee",
+      "hex": "00",
+      "evidence": "separate estimator record8 producer explicitly disabled"
+    },
+    {
+      "address": "0xfebee8ac",
+      "hex": "5634",
+      "evidence": "staged ancillary halfword; physical identity not asserted"
+    },
+    {
+      "address": "0xfebe6f00",
+      "hex": "64003200",
+      "evidence": "current drive-history maxima"
+    },
+    {
+      "address": "0xfebef430",
+      "size": 8,
+      "fill": 204,
+      "evidence": "record5 RAM mirror differs from new payload"
+    },
+    {
+      "address": "0xfebef4d0",
+      "size": 56,
+      "fill": 204,
+      "evidence": "record6 RAM mirror differs from new payload"
+    },
+    {
+      "address": "0xfebf0308",
+      "size": 32,
+      "fill": 16,
+      "evidence": "old exact10 statuses, not proof of newly submitted work"
+    },
+    {
+      "address": "0xfebf0488",
+      "size": 260,
+      "fill": 255,
+      "evidence": "all65 request cells empty; opaque bytes retained"
+    },
+    {
+      "address": "0xfebf0672",
+      "hex": "5a",
+      "evidence": "raw API admission gate"
+    },
+    {
+      "address": "0xfebf10aa",
+      "hex": "0f",
+      "evidence": "matching XOR55 gate encoding"
+    },
+    {
+      "address": "0xfebf10ce",
+      "hex": "f0",
+      "evidence": "matching XORAA gate encoding"
+    },
+    {
+      "address": "0xfebf067a",
+      "hex": "0000",
+      "evidence": "empty producer and consumer"
+    }
+  ],
+  "checks": [
+    {
+      "name": "real composition returns",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "stack restored",
+      "kind": "register",
+      "register": "sp",
+      "equals": "0xfebe2000"
+    },
+    {
+      "name": "record6 tracker armed even when setter rejects",
+      "kind": "memory",
+      "address": "0xfebe6ee4",
+      "size": 1,
+      "equals_hex": "01"
+    },
+    {
+      "name": "record5 tracker armed before setter acceptance",
+      "kind": "memory",
+      "address": "0xfebe7de4",
+      "size": 1,
+      "equals_hex": "01"
+    },
+    {
+      "name": "writer caches current maxima independently of API acceptance",
+      "kind": "memory",
+      "address": "0xfebe6ee6",
+      "size": 4,
+      "equals_hex": "64003200"
+    },
+    {
+      "name": "two independent enqueue outcomes, consumer does not execute",
+      "kind": "memory",
+      "address": "0xfebf067a",
+      "size": 2,
+      "equals_hex": "0000"
+    },
+    {
+      "name": "old success versus newly pending record5 and6 statuses",
+      "kind": "memory",
+      "address": "0xfebf030d",
+      "size": 2,
+      "equals_hex": "1010"
+    },
+    {
+      "name": "real queue cells or fully rejected publication",
+      "kind": "memory",
+      "address": "0xfebf0488",
+      "size": 12,
+      "equals_hex": "ffffffffffffffffffffffff"
+    },
+    {
+      "name": "rejected record5 leaves its old mirror",
+      "kind": "memory",
+      "address": "0xfebef430",
+      "size": 8,
+      "equals_hex": "cccccccccccccccc"
+    },
+    {
+      "name": "rejected record6 leaves its old mirror",
+      "kind": "memory",
+      "address": "0xfebef4d0",
+      "size": 56,
+      "equals_hex": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+    }
+  ]
+}
