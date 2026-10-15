@@ -2,7 +2,7 @@
   "schema": "rh850-p1me-machine-v2",
   "source": {
     "path": "data/devices/p1me.rdl",
-    "sha256": "4f549fb63f5152a81ddc34ad9327bc632ac2b64cae4f54075e1a43fba473d26e",
+    "sha256": "ab57f38764e18d432b36b3b8de2127a9a452d9e299285af36e7b00e1acaa36d2",
     "systemrdl_compiler": "1.33.0"
   },
   "products": [
@@ -290,11 +290,13 @@
           4
         ],
         "access": "rw",
-        "reset": null,
+        "reset": 0,
         "behavior": "faci",
         "evidence": "manual",
-        "source_ref": "R01UH0615EJ0120 sections 3.3 and 4",
-        "description": "FACI command start address"
+        "source_ref": "R01UH0615EJ0120 page14 Table4.5",
+        "description": "FACI command start address",
+        "trigger": "faci-address",
+        "status_register": "FSTATR"
       },
       {
         "name": "FEADDR",
@@ -304,11 +306,13 @@
           4
         ],
         "access": "rw",
-        "reset": null,
+        "reset": 0,
         "behavior": "faci",
         "evidence": "manual",
-        "source_ref": "R01UH0615EJ0120 sections 3.3 and 4",
-        "description": "FACI command end address"
+        "source_ref": "R01UH0615EJ0120 page15 Table4.6",
+        "description": "FACI command end address",
+        "trigger": "faci-address",
+        "status_register": "FSTATR"
       },
       {
         "name": "FSTATR",
@@ -334,11 +338,13 @@
           2
         ],
         "access": "rw",
-        "reset": null,
+        "reset": 0,
         "behavior": "faci",
         "evidence": "manual",
-        "source_ref": "R01UH0615EJ0120 sections 3.3 and 4",
-        "description": "Flash program-or-erase mode entry"
+        "source_ref": "R01UH0615EJ0120 pages21-22 Table4.8",
+        "description": "Flash program-or-erase mode entry",
+        "trigger": "faci-dataflash-mode",
+        "status_register": "FSTATR"
       },
       {
         "name": "FPROTR",
@@ -509,6 +515,21 @@
         "description": "Flash sequencer processing-clock notification"
       },
       {
+        "name": "FLEMU",
+        "address": 4288741616,
+        "size": 1,
+        "access_widths": [
+          1
+        ],
+        "access": "rw",
+        "reset": 0,
+        "behavior": "faci",
+        "evidence": "manual",
+        "source_ref": "R01UH0615EJ0120 page35 Table4.22",
+        "description": "Flash emulation control; only unchanged normal mode is modeled, not OCD-controlled error/timing emulation",
+        "trigger": "faci-normal-emulation"
+      },
+      {
         "name": "FECCEMON",
         "address": 4288741632,
         "size": 2,
@@ -561,12 +582,19 @@
         "reset": null,
         "behavior": "faci",
         "evidence": "manual",
-        "source_ref": "R01UH0615EJ0120 sections 3.3 and 4",
+        "source_ref": "R01UH0615EJ0120 pages14-15,28,45-47,67-68",
         "description": "FACI command-issuing area",
         "trigger": "faci-command",
         "status_register": "FSTATR",
         "access_register": "FASTAT",
-        "history_register": "FCMDR"
+        "history_register": "FCMDR",
+        "start_address_register": "FSADDR",
+        "end_address_register": "FEADDR",
+        "mode_register": "FBCCNT",
+        "emulation_register": "FLEMU",
+        "enable_register": "FHVE15",
+        "secondary_enable_register": "FHVE3",
+        "control_register": "FENTRYR"
       },
       {
         "name": "BFASELR",
@@ -3440,6 +3468,21 @@
         "description": "RAM initialization mode control for Local RAM; reset value 0x00000003"
       },
       {
+        "name": "FHVE3",
+        "address": 4294452240,
+        "size": 4,
+        "access_widths": [
+          4
+        ],
+        "access": "rw",
+        "reset": 0,
+        "behavior": "faci",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 page2878 Table35.16",
+        "description": "Flash program/erase/blank-check software enable, bit0; reset excludes application reset 1",
+        "trigger": "faci-enable"
+      },
+      {
         "name": "CLKD3DIV",
         "address": 4294477848,
         "size": 4,
@@ -3494,6 +3537,21 @@
         "evidence": "manual",
         "source_ref": "R01UH0585EJ0120 register tables; firmware-observed role where stated",
         "description": "EXTCLK1O selected-source status; boot polls until source 4 is active"
+      },
+      {
+        "name": "FHVE15",
+        "address": 4294485040,
+        "size": 4,
+        "access_widths": [
+          4
+        ],
+        "access": "rw",
+        "reset": 0,
+        "behavior": "faci",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 page2877 Tables35.14-35.15",
+        "description": "Flash program/erase/blank-check software enable, bit0; both FHVE controls must be one",
+        "trigger": "faci-enable"
       },
       {
         "name": "ADCG0DIR00",

@@ -217,6 +217,9 @@ public class ApplyP1MDeviceProfile extends GhidraScript {
         ensureUninitBlock("SFR_FACI", 0xFFA10000L, 0x200L, true, true, false, true);
         ensureUninitBlock("SFR_FACI_COMMAND", 0xFFA20000L, 0x4L, true, true, false, true);
         ensureUninitBlock("SFR_FACI_CONFIG", 0xFFC59000L, 0x100L, true, true, false, true);
+        // Flash software enables: P1M-E Table35.14, distinct four-byte registers.
+        ensureUninitBlock("SFR_FHVE3", 0xFFF82410L, 0x4L, true, true, false, true);
+        ensureUninitBlock("SFR_FHVE15", 0xFFF8A430L, 0x4L, true, true, false, true);
         // Error Control Module master, checker, common, and error-pulse windows.
         ensureUninitBlock("SFR_ECM_MASTER", 0xFFD60000L, 0x100L, true, true, false, true);
         ensureUninitBlock("SFR_ECM_CHECKER", 0xFFD61000L, 0x100L, true, true, false, true);

@@ -14,6 +14,12 @@ property status_register { type = string; component = reg; };
 property secondary_status_register { type = string; component = reg; };
 property access_register { type = string; component = reg; };
 property history_register { type = string; component = reg; };
+property start_address_register { type = string; component = reg; };
+property end_address_register { type = string; component = reg; };
+property mode_register { type = string; component = reg; };
+property emulation_register { type = string; component = reg; };
+property enable_register { type = string; component = reg; };
+property secondary_enable_register { type = string; component = reg; };
 property reload_prefix { type = string; component = reg; };
 property counter_prefix { type = string; component = reg; };
 property interrupt_channel { type = longint unsigned; component = reg; };
@@ -113,14 +119,16 @@ addrmap p1me {
 
     reg {
         regwidth=32; accesswidth=32; desc="FACI command start address";
-        evidence="manual"; source_ref="R01UH0615EJ0120 sections 3.3 and 4"; behavior="faci";
-        field { sw=rw; } value[31:0];
+        evidence="manual"; source_ref="R01UH0615EJ0120 page14 Table4.5"; behavior="faci";
+        trigger="faci-address"; status_register="FSTATR";
+        field { sw=rw; reset=0; } value[31:0];
     } FSADDR @ 0xFFA10030;
 
     reg {
         regwidth=32; accesswidth=32; desc="FACI command end address";
-        evidence="manual"; source_ref="R01UH0615EJ0120 sections 3.3 and 4"; behavior="faci";
-        field { sw=rw; } value[31:0];
+        evidence="manual"; source_ref="R01UH0615EJ0120 page15 Table4.6"; behavior="faci";
+        trigger="faci-address"; status_register="FSTATR";
+        field { sw=rw; reset=0; } value[31:0];
     } FEADDR @ 0xFFA10034;
 
     reg {
@@ -132,8 +140,9 @@ addrmap p1me {
 
     reg {
         regwidth=16; accesswidth=16; desc="Flash program-or-erase mode entry";
-        evidence="manual"; source_ref="R01UH0615EJ0120 sections 3.3 and 4"; behavior="faci";
-        field { sw=rw; } value[15:0];
+        evidence="manual"; source_ref="R01UH0615EJ0120 pages21-22 Table4.8"; behavior="faci";
+        trigger="faci-dataflash-mode"; status_register="FSTATR";
+        field { sw=rw; reset=0; } value[15:0];
     } FENTRYR @ 0xFFA10084;
 
     reg {
@@ -209,6 +218,13 @@ addrmap p1me {
     } FPCKAR @ 0xFFA100E4;
 
     reg {
+        regwidth=8; accesswidth=8; desc="Flash emulation control; only unchanged normal mode is modeled, not OCD-controlled error/timing emulation";
+        evidence="manual"; source_ref="R01UH0615EJ0120 page35 Table4.22"; behavior="faci";
+        trigger="faci-normal-emulation";
+        field { sw=rw; reset=0; } value[7:0];
+    } FLEMU @ 0xFFA100F0;
+
+    reg {
         regwidth=16; accesswidth=16; desc="Flash ECC encoder monitor";
         evidence="manual"; source_ref="R01UH0615EJ0120 sections 3.3 and 4"; behavior="faci";
         field { sw=r; } value[15:0];
@@ -228,8 +244,11 @@ addrmap p1me {
 
     reg {
         regwidth=8; accesswidth=8; desc="FACI command-issuing area";
-        evidence="manual"; source_ref="R01UH0615EJ0120 sections 3.3 and 4"; behavior="faci";
+        evidence="manual"; source_ref="R01UH0615EJ0120 pages14-15,28,45-47,67-68"; behavior="faci";
         trigger="faci-command"; status_register="FSTATR"; access_register="FASTAT"; history_register="FCMDR";
+        control_register="FENTRYR"; mode_register="FBCCNT"; emulation_register="FLEMU";
+        start_address_register="FSADDR"; end_address_register="FEADDR";
+        enable_register="FHVE15"; secondary_enable_register="FHVE3";
         field { sw=w; } value[7:0];
     } FACI_COMMAND_AREA @ 0xFFA20000;
 
@@ -1630,4 +1649,18 @@ addrmap p1me {
         access_widths="1,2";
         field { sw=rw; reset=0x8F; } value[15:0];
     } EIC379 @ 0xFFFFB2F6;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="Flash program/erase/blank-check software enable, bit0; reset excludes application reset 1";
+        evidence="manual"; source_ref="R01UH0585EJ0120 page2878 Table35.16"; behavior="faci";
+        trigger="faci-enable";
+        field { sw=rw; reset=0; } value[31:0];
+    } FHVE3 @ 0xFFF82410;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="Flash program/erase/blank-check software enable, bit0; both FHVE controls must be one";
+        evidence="manual"; source_ref="R01UH0585EJ0120 page2877 Tables35.14-35.15"; behavior="faci";
+        trigger="faci-enable";
+        field { sw=rw; reset=0; } value[31:0];
+    } FHVE15 @ 0xFFF8A430;
 };

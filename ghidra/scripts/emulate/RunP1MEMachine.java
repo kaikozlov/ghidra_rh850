@@ -142,6 +142,12 @@ public class RunP1MEMachine extends GhidraScript {
         String secondary_status_register;
         String access_register;
         String history_register;
+        String start_address_register;
+        String end_address_register;
+        String mode_register;
+        String emulation_register;
+        String enable_register;
+        String secondary_enable_register;
         String reload_prefix;
         String counter_prefix;
         Long payload_address;
@@ -227,6 +233,7 @@ public class RunP1MEMachine extends GhidraScript {
         String kind;
         String register;
         String address;
+        String source_address;
         Integer size;
         String operation;
         String equals;
@@ -402,11 +409,12 @@ public class RunP1MEMachine extends GhidraScript {
         static final int[] FIFO_DEPTHS = {0, 4, 8, 16, 32, 48, 64, 128};
         static final int[] PAYLOAD_LENGTHS = {8, 12, 16, 20, 24, 32, 48, 64};
         RegisterDef timerStart;
+        RegionDef dataFlash;
         long[] timerRemainders;
         List<ExternalEvent> externalEvents = List.of();
         int nextExternalEvent;
         long registerBeforeWrite;
-        final List<Integer> faciSequence = new ArrayList<>();
+        int faciPendingCommand;
         final Map<String, List<RegionDef>> aliases = new HashMap<>();
         final PriorityQueue<ScheduledEvent> scheduledEvents = new PriorityQueue<>(
             Comparator.comparingLong((ScheduledEvent event) -> event.tick)
@@ -435,6 +443,7 @@ public class RunP1MEMachine extends GhidraScript {
             }
             registers.sort(Comparator.comparingLong(row -> row.address));
             for (RegionDef region : regions) {
+                if ("dataflash".equals(region.name)) dataFlash = region;
                 if (region.alias_group != null) {
                     aliases.computeIfAbsent(region.alias_group, ignored -> new ArrayList<>()).add(region);
                 }
@@ -746,7 +755,9 @@ public class RunP1MEMachine extends GhidraScript {
             validateDeviceWrite(thread, register, value);
             if ((register.fifo_index != null && receiveFifos.containsKey(register.fifo_index)
                     && receiveFifos.get(register.fifo_index).status == register)
-                    || ("intc_eic".equals(register.behavior) && register.reset != null)) {
+                    || ("intc_eic".equals(register.behavior) && register.reset != null)
+                    || "faci-address".equals(register.trigger)
+                    || "faci-dataflash-mode".equals(register.trigger)) {
                 registerBeforeWrite = unsigned(memory(thread, register.address, register.size));
             }
             trace.access("write", pc(thread), address, size, register.evidence);
@@ -834,26 +845,30 @@ public class RunP1MEMachine extends GhidraScript {
         void validateDeviceWrite(PcodeThread<byte[]> thread, RegisterDef register,
                                  byte[] value) {
             if ("faci-command".equals(register.trigger)) {
-                int command = value[0] & 0xff;
-                if (command != 0x50) {
-                    throw fault("unsupported-faci-command", thread, register.address,
-                        value.length, "write", register.evidence,
-                        String.format("FACI command 0x%02X has no implemented state transition",
-                            command));
-                }
+                validateFaciWrite(thread, register, value);
+            }
+            if ("faci-address".equals(register.trigger)) {
                 RegisterDef status = requiredRegister(register.name, "status", register.status_register);
-                long statusValue = unsigned(memory(thread, status.address, status.size));
-                if ((statusValue & FSTATR_FRDY) == 0) {
-                    throw fault("faci-not-ready", thread, register.address,
+                memory(thread, status.address, status.size);
+            }
+            if ("faci-dataflash-mode".equals(register.trigger)) {
+                RegisterDef status = requiredRegister(register.name, "status", register.status_register);
+                long previous = unsigned(memory(thread, register.address, register.size));
+                long incoming = unsigned(value);
+                if ((unsigned(memory(thread, status.address, status.size)) & FSTATR_FRDY) != 0
+                        && (previous != 0 && previous != 0x80
+                            || (incoming >>> 8) == 0xaa
+                                && (incoming & 0xff) != 0 && (incoming & 0xff) != 0x80)) {
+                    throw fault("unsupported-faci-mode", thread, register.address,
                         value.length, "write", register.evidence,
-                        "FACI status-clear command requires FSTATR.FRDY=1");
+                        "mode transitions are bounded to read/DataFlash P/E; CodeFlash/FWE and illegal-mode errors are not modeled");
                 }
-                RegisterDef accessStatus = requiredRegister(
-                    register.name, "access-status", register.access_register);
-                RegisterDef commandHistory = requiredRegister(
-                    register.name, "history", register.history_register);
-                memory(thread, accessStatus.address, accessStatus.size);
-                memory(thread, commandHistory.address, commandHistory.size);
+            }
+            if ("faci-normal-emulation".equals(register.trigger)
+                    && (unsigned(value) != 0 || unsigned(memory(thread, register.address, register.size)) != 0)) {
+                throw fault("unsupported-faci-emulation", thread, register.address,
+                    value.length, "write", register.evidence,
+                    "only unchanged normal FLEMU mode is modeled; OCD write permission is not inferred");
             }
             if ("icus-command".equals(register.trigger) && (unsigned(value) & 0xffff) != 5) {
                 throw fault("unsupported-icus-command", thread, register.address,
@@ -1158,9 +1173,73 @@ public class RunP1MEMachine extends GhidraScript {
             });
         }
 
+        void validateFaciWrite(PcodeThread<byte[]> thread, RegisterDef register, byte[] value) {
+            int command = value[0] & 0xff;
+            if (command != 0x50 && command != 0x71 && command != 0xd0) {
+                throw fault("unsupported-faci-command", thread, register.address,
+                    value.length, "write", register.evidence,
+                    String.format("FACI command 0x%02X has no implemented state transition", command));
+            }
+            if ((command == 0xd0 && faciPendingCommand != 0x71)
+                    || (command != 0xd0 && faciPendingCommand != 0)) {
+                throw fault("unsupported-faci-sequence", thread, register.address,
+                    value.length, "write", register.evidence,
+                    "supported sequences are 50 and DataFlash blank-check 71,D0");
+            }
+            RegisterDef status = requiredRegister(register.name, "status", register.status_register);
+            if ((unsigned(memory(thread, status.address, status.size)) & FSTATR_FRDY) == 0) {
+                throw fault("faci-not-ready", thread, register.address,
+                    value.length, "write", register.evidence, "FACI command requires FSTATR.FRDY=1");
+            }
+            RegisterDef access = requiredRegister(register.name, "access-status", register.access_register);
+            RegisterDef history = requiredRegister(register.name, "history", register.history_register);
+            long accessValue = unsigned(memory(thread, access.address, access.size));
+            memory(thread, history.address, history.size);
+            RegisterDef control = requiredRegister(register.name, "control", register.control_register);
+            long controlValue = unsigned(memory(thread, control.address, control.size)) & 0x81;
+            if (command == 0x50) {
+                if (controlValue != 1 && controlValue != 0x80) {
+                    throw fault("unsupported-faci-mode", thread, register.address,
+                        value.length, "write", register.evidence,
+                        "FACI status clear requires CodeFlash or DataFlash P/E mode");
+                }
+                return;
+            }
+            RegisterDef mode = requiredRegister(register.name, "mode", register.mode_register);
+            RegisterDef emulation = requiredRegister(register.name, "emulation", register.emulation_register);
+            RegisterDef start = requiredRegister(register.name, "start-address", register.start_address_register);
+            RegisterDef end = requiredRegister(register.name, "end-address", register.end_address_register);
+            RegisterDef enable = requiredRegister(register.name, "enable", register.enable_register);
+            RegisterDef secondaryEnable = requiredRegister(
+                register.name, "secondary-enable", register.secondary_enable_register);
+            if ((accessValue & FASTAT_CMDLK) != 0
+                    || controlValue != 0x80
+                    || unsigned(memory(thread, mode.address, mode.size)) != 0
+                    || unsigned(memory(thread, emulation.address, emulation.size)) != 0
+                    || unsigned(memory(thread, enable.address, enable.size)) != 1
+                    || unsigned(memory(thread, secondaryEnable.address, secondaryEnable.size)) != 1) {
+                throw fault("unsupported-faci-mode", thread, register.address,
+                    value.length, "write", register.evidence,
+                    "blank-check submission requires both FHVE enables, unlocked DataFlash P/E, incremental, normal mode");
+            }
+            if (command == 0x71) return; // Address validation belongs to complete command submission.
+            long first = unsigned(memory(thread, start.address, start.size)) & 0x7fffc;
+            long last = unsigned(memory(thread, end.address, end.size)) & 0x7fffc;
+            if (dataFlash == null) throw new IllegalStateException("FACI blank check lacks DataFlash region");
+            if (first > last || last + 4 > dataFlash.size || last - first + 4 > 0x10000) {
+                throw fault("unsupported-faci-range", thread, register.address,
+                    value.length, "write", register.evidence,
+                    "blank-check range must be ordered and contained in the registered DataFlash region");
+            }
+        }
+
         void handleFaciWrite(PcodeThread<byte[]> thread, RegisterDef register, byte[] value) {
             int command = value[0] & 0xff;
-            if (command != 0x50) {
+            if (command == 0x71) {
+                faciPendingCommand = command;
+                return;
+            }
+            if (command != 0x50 && command != 0xd0) {
                 throw new IllegalStateException("FACI write validation was bypassed");
             }
             RegisterDef statusRegister = requiredRegister(
@@ -1170,26 +1249,34 @@ public class RunP1MEMachine extends GhidraScript {
             RegisterDef historyRegister = requiredRegister(
                 register.name, "history", register.history_register);
             long status = unsigned(memory(statusRegister.address, statusRegister.size));
-            long accessStatus = unsigned(memory(accessRegister.address, accessRegister.size));
-            long commandHistory = unsigned(memory(historyRegister.address, historyRegister.size));
-            long nextStatus = status & ~FSTATR_STATUS_CLEAR_MASK;
-            if ((accessStatus & FASTAT_ACCESS_ERROR_MASK) != 0) {
-                nextStatus |= FSTATR_ILGLERR;
+            JsonArray sequence = new JsonArray();
+            if (command == 0xd0) {
+                sequence.add(faciPendingCommand);
+                setRegisterValue(historyRegister.name, 0xd071);
+                setRegisterValue(statusRegister.name, status & ~FSTATR_FRDY);
+                // Completion, blankness and first-nonblank address require external inputs.
             }
-            long nextAccessStatus = (nextStatus & FSTATR_COMMAND_LOCK_MASK) != 0
-                ? accessStatus | FASTAT_CMDLK : accessStatus & ~FASTAT_CMDLK;
-            faciSequence.add(command);
-            setRegisterValue(historyRegister.name, (command << 8) | ((commandHistory >>> 8) & 0xff));
-            setRegisterValue(statusRegister.name, nextStatus);
-            setRegisterValue(accessRegister.name, nextAccessStatus);
+            else {
+                long accessStatus = unsigned(memory(accessRegister.address, accessRegister.size));
+                long commandHistory = unsigned(memory(historyRegister.address, historyRegister.size));
+                long nextStatus = status & ~FSTATR_STATUS_CLEAR_MASK;
+                if ((accessStatus & FASTAT_ACCESS_ERROR_MASK) != 0) nextStatus |= FSTATR_ILGLERR;
+                long nextAccessStatus = (nextStatus & FSTATR_COMMAND_LOCK_MASK) != 0
+                    ? accessStatus | FASTAT_CMDLK : accessStatus & ~FASTAT_CMDLK;
+                setRegisterValue(historyRegister.name, (command << 8) | ((commandHistory >>> 8) & 0xff));
+                setRegisterValue(statusRegister.name, nextStatus);
+                setRegisterValue(accessRegister.name, nextAccessStatus);
+            }
+            sequence.add(command);
             JsonObject event = new JsonObject();
             event.addProperty("kind", register.trigger);
             event.addProperty("pc", hex32(pc(thread)));
             event.addProperty("command", String.format("0x%02X", command));
-            event.add("sequence", GSON.toJsonTree(faciSequence));
+            event.add("sequence", sequence);
+            event.addProperty("transition", command == 0xd0 ? "blank-check-started" : "status-cleared");
             event.addProperty("evidence", register.source_ref);
             trace.deviceEvents.add(event);
-            faciSequence.clear();
+            faciPendingCommand = 0;
         }
 
         void handleIcusWrite(PcodeThread<byte[]> thread, RegisterDef register, byte[] value) {
@@ -1222,6 +1309,27 @@ public class RunP1MEMachine extends GhidraScript {
             switch (register.trigger) {
                 case "rscfd-transmit": handleRscfdWrite(thread, register, value); break;
                 case "faci-command": handleFaciWrite(thread, register, value); break;
+                case "faci-address":
+                    RegisterDef addressStatus = requiredRegister(register.name, "status", register.status_register);
+                    setRegisterValue(register.name, (registerValue(addressStatus) & FSTATR_FRDY) != 0
+                        ? unsigned(value) & ~3L : registerBeforeWrite);
+                    break;
+                case "faci-dataflash-mode": {
+                    RegisterDef modeStatus = requiredRegister(register.name, "status", register.status_register);
+                    long incoming = unsigned(value);
+                    long next = registerBeforeWrite;
+                    if ((registerValue(modeStatus) & FSTATR_FRDY) != 0) {
+                        next = (incoming >>> 8) == 0xaa && registerBeforeWrite == 0
+                            ? incoming & 0x80 : 0;
+                    }
+                    setRegisterValue(register.name, next);
+                    break;
+                }
+                case "faci-normal-emulation":
+                    break; // Validated zero-to-zero write; no OCD-mode behavior is inferred.
+                case "faci-enable":
+                    setRegisterValue(register.name, unsigned(value) & 1);
+                    break;
                 case "dataflash-ecc-clear":
                     // Only writes covering the low ERRCLR bit act on status.
                     if (address == register.address && (unsigned(value) & 1) != 0) {
@@ -1832,6 +1940,19 @@ public class RunP1MEMachine extends GhidraScript {
                         for (byte b : value) text.append(String.format("%02x", b & 0xff));
                         actual = text.toString();
                         passed = actual.equalsIgnoreCase(check.equals_hex);
+                        break;
+                    }
+                    case "memory-equal": {
+                        if (check.size == null || check.size <= 0) {
+                            throw new IllegalArgumentException("memory-equal check requires positive size");
+                        }
+                        byte[] value = model.emulator.getSharedState().getVar(model.memorySpace,
+                            parseUnsigned(check.address), check.size, true, Reason.INSPECT);
+                        byte[] source = model.emulator.getSharedState().getVar(model.memorySpace,
+                            parseUnsigned(check.source_address), check.size, true, Reason.INSPECT);
+                        passed = java.util.Arrays.equals(value, source);
+                        expected = "equal";
+                        actual = passed ? "equal" : "different";
                         break;
                     }
                     case "sync-count": {

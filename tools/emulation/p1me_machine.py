@@ -168,11 +168,11 @@ def _validate_checks(rows: Any, context: str) -> list[dict[str, Any]]:
             raise P1MEMachineError(f"{item_context}: expected an object")
         _require_keys(
             row,
-            allowed={"name", "kind", "register", "address", "size", "operation", "equals", "equals_hex"},
+            allowed={"name", "kind", "register", "address", "source_address", "size", "operation", "equals", "equals_hex"},
             required={"name", "kind"},
             context=item_context,
         )
-        if row["kind"] not in {"register", "memory", "sync-count", "event-count"}:
+        if row["kind"] not in {"register", "memory", "memory-equal", "sync-count", "event-count"}:
             raise P1MEMachineError(f"{item_context}.kind: unsupported check kind")
     return normalized
 

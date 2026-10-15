@@ -173,11 +173,9 @@ def check_fault_check_error_boundary(output_root: Path) -> None:
     """Original execution fault must survive failing postcondition inspections.
 
     The retained byte-store primitive faults on an unmapped destination before
-    any RAM write lands, so both postcondition checks inspect memory that was
-    never initialized. The runner must publish the per-scenario report with the
-    execution fault at the top, a termination_reason that reflects that fault,
-    and one structured inspection error per failing check instead of throwing
-    away or replacing the report.
+    any RAM write lands. Ordinary checks and the second operand of a memory-equal
+    check inspect uninitialized RAM. The report must retain the execution fault
+    and publish each structured inspection error, not fabricate equal bytes.
     """
     scenario = {
         "schema": "rh850-p1me-machine-scenario-v2",
@@ -196,7 +194,10 @@ def check_fault_check_error_boundary(output_root: Path) -> None:
             "PSW": "0",
             "PMR": "0",
         },
-        "memory": [],
+        "memory": [{
+            "address": "0xFEBE0100", "hex": "5a",
+            "evidence": "initialized first operand; comparison source remains uninitialized",
+        }],
         "artifacts": [],
         "checks": [
             {
@@ -212,6 +213,13 @@ def check_fault_check_error_boundary(output_root: Path) -> None:
                 "address": "0xFEEF8000",
                 "size": 1,
                 "equals_hex": "00",
+            },
+            {
+                "name": "comparison requires initialized second operand",
+                "kind": "memory-equal",
+                "address": "0xFEBE0100",
+                "source_address": "0xFEBE0104",
+                "size": 1,
             },
         ],
         "expected_fault": {
@@ -262,6 +270,40 @@ def check_fault_check_error_boundary(output_root: Path) -> None:
                 f"consumer failure summary dropped {fragment!r}:\n{proc.stderr}"
             )
     print("PASS original execution fault survives failing uninitialized-RAM inspection checks")
+
+
+def check_memory_equality_failure(output_root: Path) -> None:
+    """A real store producing different bytes must fail a memory-equal check."""
+    scenario = {
+        "schema": "rh850-p1me-machine-scenario-v2",
+        "name": "memory-equal-detects-different-bytes",
+        "entry": PORTABLE_STORE_SELECTOR,
+        "max_instructions": 20,
+        "stop_addresses": ["0x00010000"],
+        "gpr_fill": "0",
+        "registers": {"r6": "0xFEBE0100", "r7": "0x12", "lp": "0x00010000"},
+        "memory": [{
+            "address": "0xFEBE0104", "hex": "13",
+            "evidence": "comparison byte differs from the real firmware store's input",
+        }],
+        "checks": [{
+            "name": "different stored and source byte",
+            "kind": "memory-equal", "address": "0xFEBE0100",
+            "source_address": "0xFEBE0104", "size": 1,
+        }],
+    }
+    path = output_root / "memory-equal-different.json"
+    path.write_text(json.dumps(scenario, indent=2) + "\n", encoding="utf-8")
+    run([
+        str(REPO_ROOT / "tools/rh850"), "test", "firmware",
+        "camry-8965F3307000", str(path), "--output-dir", str(output_root),
+    ], expect_success=False)
+    report = json.loads((output_root / "memory-equal-different.report.json").read_text())
+    check = report["checks"][0]
+    if (report.get("passed") is not False or check.get("passed") is not False
+            or check.get("actual") != "different" or "error" in check):
+        raise AssertionError(f"unequal initialized bytes must fail comparison: {report!r}")
+    print("PASS memory-equal detects different initialized bytes")
 
 
 def check_event_schema_rejections(output_root: Path) -> None:
@@ -604,6 +646,7 @@ def main() -> int:
         check_schema_rejection(output_root)
         check_executable_overlay_rejection(output_root)
         check_fault_check_error_boundary(output_root)
+        check_memory_equality_failure(output_root)
         check_event_schema_rejections(output_root)
         check_execution_event_boundaries(output_root)
         check_register_input_boundaries(output_root)

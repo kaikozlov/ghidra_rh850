@@ -24,6 +24,7 @@ address,name,size,access,comment
 0xFFA100D8,FPSADDR,4,r,First programmed DataFlash address
 0xFFA100E0,FCPSR,2,rw,Flash sequencer process switch
 0xFFA100E4,FPCKAR,2,rw,Flash sequencer processing-clock notification
+0xFFA100F0,FLEMU,1,rw,"Flash emulation control; only unchanged normal mode is modeled, not OCD-controlled error/timing emulation"
 0xFFA10100,FECCEMON,2,r,Flash ECC encoder monitor
 0xFFA10104,FECCTMD,2,rw,Flash ECC test-mode control
 0xFFA10108,FDMYECC,2,rw,Flash dummy ECC value
@@ -220,10 +221,12 @@ address,name,size,access,comment
 0xFFE71188,TSG31CMPUE,4,rw,TSG31 bit-extended HT-PWM U-phase compare register
 0xFFF81420,STAC_GRAM,4,rw,RAM initialization mode control for Global RAM; reset value 0x00000003
 0xFFF81520,STAC_LM0,4,rw,RAM initialization mode control for Local RAM; reset value 0x00000003
+0xFFF82410,FHVE3,4,rw,"Flash program/erase/blank-check software enable, bit0; reset excludes application reset 1"
 0xFFF88818,CLKD3DIV,4,rw,EXTCLK1O divider; boot writes 0x50 for divide by 80
 0xFFF8881C,CLKD3STAT,4,r,EXTCLK1O divider status; boot polls synchronization and active state
 0xFFF890C0,CKSC3C,4,rw,EXTCLK1O source selector; source 4 is CLK_LSB
 0xFFF890C8,CKSC3S,4,r,EXTCLK1O selected-source status; boot polls until source 4 is active
+0xFFF8A430,FHVE15,4,rw,"Flash program/erase/blank-check software enable, bit0; both FHVE controls must be one"
 0xFFF91200,ADCG0DIR00,4,r,ADCG0 data supplementary information register 00; DMA source for sample ring
 0xFFF92200,ADCG1DIR00,4,r,ADCG1 data supplementary information register 00; DMA source for sample ring
 0xFFFEEA10,EIC8,2,rw,"ECM maskable-error interrupt control (EIINT 8); EIRF bit 12, EIMK bit 7, EITB bit 6, EIP[3:0], EICT bit 15; synchronous edge detection"

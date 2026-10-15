@@ -1,0 +1,167 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_record_blank",
+  "entry": {
+    "role": "actual77B12 record admission including mandatory marker blank check; no replacement callee",
+    "scope": "resolved-address",
+    "address": "0x77b12"
+  },
+  "max_instructions": 20000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "r6": "0x1",
+    "r7": "0xfebe2104",
+    "r8": "0x0",
+    "FPEC": "0x0",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "isolated nested-call stack"
+    },
+    {
+      "address": "0xfebe2100",
+      "size": 24,
+      "fill": 165,
+      "evidence": "destination and surrounding canaries"
+    },
+    {
+      "address": "0xfebf6cb0",
+      "hex": "01000e00",
+      "evidence": "explicit software admission-state precondition from788B6; not a startup observation"
+    },
+    {
+      "address": "0xfebf6b22",
+      "hex": "0000",
+      "evidence": "explicit driver admission bytes consumed by74A36/74A5A"
+    },
+    {
+      "address": "0xfebf6c28",
+      "hex": "00000000",
+      "evidence": "explicit fresh-job checksum accumulator"
+    },
+    {
+      "address": "0xfebf6c4d",
+      "hex": "00",
+      "evidence": "explicit completion-bank selector within the two-entry bound at784C0"
+    },
+    {
+      "address": "0xffc5d020",
+      "hex": "00000000",
+      "evidence": "explicit opaque ICU-S sample permitting this software path; no readiness claim"
+    },
+    {
+      "address": "0xffa10080",
+      "hex": "00800000",
+      "evidence": "explicit idle FSTATR.FRdy before the command sequence"
+    },
+    {
+      "address": "0xffa10084",
+      "hex": "0000",
+      "evidence": "explicit flash read mode before the command sequence"
+    },
+    {
+      "address": "0xffa10010",
+      "hex": "00",
+      "evidence": "explicit absence of flash access-error/command-lock flags"
+    },
+    {
+      "address": "0xffa100a0",
+      "hex": "0000",
+      "evidence": "explicit prior command-history state"
+    }
+  ],
+  "checks": [
+    {
+      "name": "blank marker region leaves destination unchanged",
+      "kind": "memory",
+      "address": "0xfebe2100",
+      "size": 24,
+      "equals_hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5"
+    },
+    {
+      "name": "completion result",
+      "kind": "memory",
+      "address": "0xfebf6c1c",
+      "size": 4,
+      "equals_hex": "fcff0000"
+    },
+    {
+      "name": "selected completion bank notified",
+      "kind": "memory",
+      "address": "0xfebf6c55",
+      "size": 1,
+      "equals_hex": "01"
+    },
+    {
+      "name": "active handle released",
+      "kind": "memory",
+      "address": "0xfebf6c44",
+      "size": 2,
+      "equals_hex": "ffff"
+    },
+    {
+      "name": "active base released",
+      "kind": "memory",
+      "address": "0xfebf6c24",
+      "size": 4,
+      "equals_hex": "ffffffff"
+    },
+    {
+      "name": "checksum accumulator cleared",
+      "kind": "memory",
+      "address": "0xfebf6c28",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "FHVE15 disabled",
+      "kind": "memory",
+      "address": "0xfff8a430",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "FHVE3 disabled",
+      "kind": "memory",
+      "address": "0xfff82410",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "read mode restored",
+      "kind": "memory",
+      "address": "0xffa10084",
+      "size": 2,
+      "equals_hex": "0000"
+    }
+  ],
+  "events": [
+    {
+      "kind": "register-input",
+      "after_instructions": 1000,
+      "register": "FBCSTAT",
+      "value": "0x0",
+      "evidence": "explicit hypothetical completed blank-check result; not measured hardware timing or a blankness inference from dump bytes"
+    },
+    {
+      "kind": "register-input",
+      "after_instructions": 1000,
+      "register": "FSTATR",
+      "value": "0x8000",
+      "evidence": "explicit hypothetical completed blank-check result; not measured hardware timing or a blankness inference from dump bytes"
+    }
+  ]
+}

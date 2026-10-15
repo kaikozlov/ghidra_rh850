@@ -605,6 +605,18 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
         + "addsC000/C0000000 respectively.");
     semanticData(0xFEBF6C46L, u16, "f33_nvm_payload_chunks_remaining",
         "Decremented only after an accepted payload copy by7771A.");
+    Function bind = semanticFunction(0x778C6L, "f33_nvm_bind_record_context", VoidDataType.dataType,
+        new ParameterImpl("context", new PointerDataType(resolve(commit), 4), currentProgram),
+        new ParameterImpl("record", recordPointer, currentProgram));
+    bind.setComment("Store r7 at context+0; preserve r6/r7/r10. Inline the real "
+        + "six-byte body so77B12 retains the record pointer for772D8.");
+    bind.setInline(true);
+    Function destination = semanticFunction(0x772D8L, "f33_nvm_set_read_destination", VoidDataType.dataType,
+        new ParameterImpl("context", recordPointer, currentProgram),
+        new ParameterImpl("destination", bytes, currentProgram));
+    destination.setComment("Store r7 at record-context+8; preserve r6/r7/r10. "
+        + "No destination bound or alignment validation.");
+    destination.setInline(true);
     semanticFunction(0x77356L, "f33_nvm_sum_bytes", u32,
         new ParameterImpl("byte_count", u16, currentProgram),
         new ParameterImpl("source", bytes, currentProgram))
@@ -648,9 +660,9 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
             + "against context.checksum16 before copying; mismatch returnsFFFC "
             + "without destination write or remaining-count decrement. Larger "
             + "payloads copy before the later777CA checksum check. Native proof "
-            + "starts at post-read7775E and stops before the real epilogue. "
-            + "Lower788B6 reads are separately executed with explicit ICU-S/ECC "
-            + "inputs; this is not a complete NvM job or application restoration proof.");
+            + "includes post-read7775E boundaries and a complete captured16-byte "
+            + "read through77B12 with explicit ICU-S/ECC/blank-check inputs. "
+            + "Full multi-chunk acquisition and application restoration remain separate.");
     semanticFunction(0x777CAL, "f33_nvm_read_payload_checksum", u32,
         new ParameterImpl("handle", u16, currentProgram),
         new ParameterImpl("record_offset", u32, currentProgram),
@@ -660,12 +672,35 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
             + "compares the full word; mismatch returnsFFFC. No rollback of "
             + "earlier destination copies. Native proof starts at post-read777FC; "
             + "not an end-to-end hardware read or application restoration proof.");
+    semanticFunction(0x77B12L, "f33_nvm_begin_record_read", VoidDataType.dataType,
+        new ParameterImpl("handle", u16, currentProgram),
+        new ParameterImpl("destination", bytes, currentProgram),
+        new ParameterImpl("read_option", u8, currentProgram))
+        .setComment("Reject low16(handle)>=123 or NULL destination before setup. "
+            + "Bind the contexts, set remaining chunks/base, then read marker with "
+            + "option1 regardless of caller option. Admit header and first payload "
+            + "chunk; return pending if chunks remain. Otherwise check the large "
+            + "checksum when length>32 and publish status through77640. Entry does "
+            + "not reset the checksum accumulator. Complete captured16-byte record "
+            + "execution covers explicit blank/nonblank hardware results, destination "
+            + "canaries and completion cleanup; full multi-chunk and application "
+            + "request/notification closure remain separate.");
   }
   private void annotateDataFlashReads() throws Exception {
     DataType u8 = UnsignedCharDataType.dataType;
     DataType u16 = UnsignedShortDataType.dataType;
     DataType u32 = UnsignedIntegerDataType.dataType;
     DataType words = new PointerDataType(u32, 4);
+    Function load8 = semanticFunction(0x78AD4L, "f33_load_u8", u32,
+        new ParameterImpl("source", new PointerDataType(u8, 4), currentProgram));
+    load8.setComment("MOV r6,EP; SLD.BU [EP],r10; JMP LP. Zero-extend to full32 "
+        + "r10; preserve r6/r7/r8. Inline real p-code, not a replacement helper.");
+    load8.setInline(true);
+    Function load16 = semanticFunction(0x78ADAL, "f33_load_u16", u32,
+        new ParameterImpl("source", new PointerDataType(u16, 4), currentProgram));
+    load16.setComment("MOV r6,EP; SLD.HU [EP],r10; JMP LP. Zero-extend to full32 "
+        + "r10; preserve r6/r7/r8. Keep FACI pointer dataflow across actual calls.");
+    load16.setInline(true);
     Function load = semanticFunction(0x78AE0L, "f33_load_u32", u32,
         new ParameterImpl("source", words, currentProgram));
     load.setComment("MOV r6,EP; SLD.W [EP],r10; JMP LP. Preserve r6/r7/r8. "
@@ -722,6 +757,47 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
             + "zero to2, nonzero to5. Return5 does not undo destination stores. "
             + "Conditional native execution is not a hardware readiness or "
             + "complete application NvM restoration claim.");
+  }
+  private void annotateFaciSubmission() throws Exception {
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    semanticFunction(0x78B3AL, "f33_flash_set_software_enables", VoidDataType.dataType,
+        new ParameterImpl("value", u32, currentProgram))
+        .setComment("Write full32 input to FHVE15 atFFF8A430 then FHVE3 atFFF82410; "
+            + "read back FHVE3 and SYNCP. Hardware exposes only bit0; both enables "
+            + "are required for programming/erasure/blank checking. This function "
+            + "does not validate the input or verify both values.");
+    semanticFunction(0x78DE2L, "f33_faci_check_dataflash_addresses", u32)
+        .setComment("Return1 when full FSADDR<8000 and unsigned(FEADDR+3)<=7FFF, "
+            + "else7. No start<=end or span check. Real address-register writes "
+            + "discard low two bits; the final-word end input7FFF reads as7FFC.");
+    semanticFunction(0x78EC6L, "f33_faci_submit_range_command", u32,
+        new ParameterImpl("start_offset", u32, currentProgram),
+        new ParameterImpl("end_offset", u32, currentProgram),
+        new ParameterImpl("command", u8, currentProgram))
+        .setComment("Clear EIC379 request, set FBCCNT=0 only for command71, "
+            + "write FCPSR=0, FSADDR, FEADDR, then command byte. Check address "
+            + "readback through78DE2; appendD0 only for result1. Preserve that "
+            + "result through the final store helper. Result7 leaves a prefix "
+            + "without D0; this is submission, not hardware completion.");
+    semanticFunction(0x79044L, "f33_faci_decode_completion_status", u32)
+        .setComment("FBCSTAT bit0 and software operation byte6CAC==3 return5 "
+            + "before inspecting FSTATR. Otherwise PRGERR(bit12) returns3, then "
+            + "ERSERR(bit13) returns4, otherwise0. No FRDY or CMDLK check here.");
+    semanticFunction(0x7892AL, "f33_dataflash_blank_check", u32,
+        new ParameterImpl("dataflash_offset", u32, currentProgram),
+        new ParameterImpl("byte_count", u32, currentProgram))
+        .setComment("Ordered ICU-S/software-state/range gates match788B6 except "
+            + "there is no destination argument. Enter DataFlash P/E, enable both "
+            + "FHVE controls, set operation3 and submit71,D0. Poll status, leave "
+            + "P/E and disable enables on the completed path. Return2 for blank, "
+            + "7 for nonblank,8 for completion/setup failure; admissionB/4/C/3. "
+            + "Native blank/nonblank results are explicit hardware inputs. "
+            + "Timeout reaches realB3 forced-stop, still an unsupported model boundary.");
+    Function sync = semanticFunction(0x7940EL, "f33_syncp", VoidDataType.dataType);
+    sync.setComment("SYNCP; JMP LP. Inline the actual ordering operation; no "
+        + "GPR modification or physical completion/timing claim.");
+    sync.setInline(true);
   }
   private void repairCodeTail(long entry, long tail, long last) throws Exception {
     Function function = getFunctionAt(toAddr(entry));
@@ -792,6 +868,7 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     annotateNvmLogicalRequests();
     annotateNvmRecordIntegrity();
     annotateDataFlashReads();
+    annotateFaciSubmission();
     annotatePwmCompareStaging();
     println("SeedCamryF33RecoveredFunctions: seeded " + count
         + " evidence-backed entries and applied exact-F33 semantic prototypes");

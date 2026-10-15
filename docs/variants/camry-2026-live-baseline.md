@@ -8058,11 +8058,12 @@ The actual analyzer separately evaluated the retained DataFlash and found
 
 **Checkpoint boundary:** the checksum-only increment's attempted complete
 low-level read at `788B6` stopped at `78AE2` reading unmapped **`FFC5D020`**.
-[§77.12](#7712-physical-dataflash-read-and-explicit-hardware-inputs) now executes
-that lower read path with explicit hardware inputs. The original integrity
-scenarios still start at post-read `7775E` or `777FC` and stop before their
-epilogues; they do not establish a complete NvM job, logical copy consensus or
-learned-parameter restoration.
+[§77.12](#7712-physical-dataflash-read-and-explicit-hardware-inputs) executes
+that lower read path with explicit hardware inputs; [§77.13](#7713-2026-10-15-blank-check-submission-and-complete-small-record-read)
+extends this to the complete `77B12` small-record call. The original integrity
+scenarios still isolate post-read `7775E` / `777FC` boundaries. Neither those
+boundary tests nor the small-record call close multi-chunk acquisition,
+logical copy consensus or learned-parameter restoration.
 
 Fresh canonical decompilation now retains the actual source-byte reads and
 32-bit sum return, typed destination copy, and both checksum comparisons.
@@ -8205,4 +8206,99 @@ rejections, six targeted coverage/NvM/B6 checks and live-coverage parity passed.
 The working project was stopped before snapshot/corpus promotion. These checks
 do not close the higher NvM request/notification machine or application-side
 copy consensus.
+
+### 77.13 2026-10-15 blank-check submission and complete small-record read
+
+The complete `77B12` call now executes the real marker blank check, marker/header/
+payload reads, additive integrity check, destination copy, completion-bank
+callback and active-record cleanup for captured physical handle1. CodeFlash
+and DataFlash remain immutable; no replacement callee supplies a success value.
+**Hardware completion and blankness are explicit hypothetical inputs, not
+observations of a flash device or inferred properties of captured bytes.**
+
+The first full-call runs stopped at the previously unmapped `FLEMU`
+(`FFA100F0`), then `FHVE15` (`FFF8A430`). Primary manuals establish the missing
+registers and their constraints:
+
+| Surface | Primary authority | Modeled boundary |
+|---|---|---|
+| `FLEMU`, `FFA100F0` | Flash manual R01UH0615EJ0120 p35 / Table4.22 | Byte access; reset0. Only an unchanged normal-mode zero write is supported. OCD-controlled error/timing emulation is not inferred. |
+| `FHVE15`, `FFF8A430`; `FHVE3`, `FFF82410` | Hardware manual R01UH0585EJ0120 pp2877–2878 / Tables35.14–35.16 | Word accesses, bit0 controls; **both** must be one for blank checking. The Ghidra profile maps each exact four-byte volatile register, not a speculative whole bank. |
+| `FSADDR` / `FEADDR` | Flash manual pp14–15 / Tables4.5–4.6 | Low two bits read zero; busy writes are ignored. End input `7FFF` therefore reads back as `7FFC`, admitting the final word. |
+| `FENTRYR` | Flash manual pp21–22 / Table4.8 | Key bits read zero; busy writes are ignored. Supported read/DataFlash states follow the documented bad-key clearing and ready re-write clearing rules. CodeFlash/FWE entry and illegal-mode error generation remain unmodeled. |
+| Blank-check `71,D0` | Flash manual pp28,45–47,67–68 | Normal, incremental DataFlash P/E submission with both software enables. `D0` clears `FRDY` and records `FCMDR=D071`; result, completion and first-nonblank address are not manufactured. |
+
+The same `71,D0` bytes mean **Lock Bit Read** in CodeFlash P/E mode; the model
+does not confuse this with DataFlash blank checking. Unsupported modes and
+reversed/out-of-device ranges stop before the current write, rather than
+pretending to implement the silicon's command-lock/error response. Status
+clear now also requires a P/E mode; its existing scenarios supply that
+previously omitted precondition.
+
+Flash-manual §6.3.15 explicitly makes erased-but-unprogrammed DataFlash read
+values undefined. Neither an all-`FF` test nor this dump's record marker can
+replace the hardware blank-check result. Without completion input, the actual
+poll loop reached the `B3` forced-stop boundary after **7,801 instructions**;
+forced-stop behavior remains unsupported. Instruction boundaries used to
+inject completion are not elapsed-time measurements, and no ready interrupt
+is synthesized.
+
+Recovered software contracts:
+
+- `78AD4` / `78ADA`: unsigned byte/halfword loads, zero-extended to full32 `r10`;
+  preserve the pointer and other input registers. Real p-code inlining repairs
+  the later FACI pointer dataflow.
+- `78B3A`: write full input to FHVE15, then FHVE3, read back FHVE3, then `SYNCP`.
+  It neither validates the input nor compares both register values.
+- `78DE2`: return1 if full `FSADDR<8000` and unsigned `FEADDR+3<=7FFF`, else7.
+  There is **no** start/end ordering or span test here.
+- `78EC6`: clear EIC379 request; command71 clears `FBCCNT`; set `FCPSR=0` and
+  start/end; issue the first command byte; check address readback; append `D0`
+  only for result1. Return that result through the register-preserving store
+  helper. Result7 leaves a prefix without starting the operation.
+- `79044`: `FBCSTAT.bit0 && operation_byte_6CAC==3` returns5 **before**
+  inspecting FSTATR. Otherwise `PRGERR` returns3, then `ERSERR` returns4,
+  otherwise0. This helper does not test `FRDY` or `CMDLK`.
+- `7892A`: the admitted completed blank/nonblank paths return2/7, restore read
+  mode and disable both FHVE controls. Error/timeout recovery remains bounded.
+
+`77B12` rejects low16 handle≥123 or NULL destination before setup. It binds
+the record context and destination, sets base/chunk count, then forces
+**read option1 for the marker**, regardless of the caller's option. The
+header/payload use the caller's option. Entry does not clear the checksum
+accumulator. A successful partial multi-chunk read returns pending; completion
+instead publishes through `77640` and clears the active handle, base and
+accumulator—not every context field.
+
+With explicit nonblank completion, physical handle1 copied all16 captured
+payload bytes and preserved both destination canaries in **2,385 instructions**.
+The `memory-equal` check compares RAM directly with registered DataFlash, so
+no payload/key bytes are duplicated in the fixture. With explicit blank
+completion, the destination stayed unchanged in **1,331 instructions** and
+the published result was `FFFC`. The two retained cases exercise completion
+bank1 / bank0 respectively: table `27CC0` selects `27C0C+20→76248` or
+`27BA4+20→7502C`; both store the status at `FEBF6C1C`, then set their
+`FEBF6C58` / `FEBF6C55` notification byte. This is not yet the higher
+logical-request notification/consensus chain.
+
+Thirty-eight selected boundary/record scenarios passed across this increment;
+22 are retained. They cover load zero extension, address readback and busy
+writes, keyed mode transitions, both enable gates, mode/opcode distinction,
+partial submission, result priority, completed blank/nonblank paths and
+record cleanup. All22 retained scenarios and five existing FACI regressions
+passed, as did the generated-model check and device-profile verification.
+A deliberately unequal `memory-equal` smoke returned a failed check and CLI
+status2 without dumping compared bytes.
+
+Two independent four-stage rebuilds plus calling-convention finalization agreed
+on **7,187 functions** and **72 curated reviews** (66 verified, six bounded).
+The outside-function census remains929. Canonical C now retains the submission
+return value, names `FBCSTAT`/`FSTATR` directly without a lost-pointer `extraout`,
+and binds the typed record/destination fields directly in `77B12`.
+The rebuilt FHVE windows are four-byte, volatile, uninitialized and
+non-executable. All22 new retained cases plus the five existing FACI cases
+passed against the fresh project; six targeted coverage/NvM/B6 checks and
+live-coverage parity passed. The comparison-error regressions also preserve an
+original execution fault when the second comparison operand is uninitialized.
+The relevant daemon was stopped before snapshot/corpus promotion.
 

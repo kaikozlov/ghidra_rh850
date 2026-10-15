@@ -27,6 +27,11 @@
   },
   "memory": [
     {
+      "address": "0xFFA10084",
+      "hex": "8000",
+      "evidence": "explicit DataFlash P/E mode required for FACI command acceptance"
+    },
+    {
       "address": "0xFFA10010",
       "hex": "10",
       "evidence": "scenario: command lock caused by retained FLWEERR"
