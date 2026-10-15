@@ -1163,6 +1163,40 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
         .setComment("Validate then72E2E(22AA8A36,handle,NULL,source). Return0 means "
             + "queued, not flash committed. Source is not dereferenced here.");
   }
+  private void annotateNvmStartup() throws Exception {
+    DataType u16 = UnsignedShortDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    semanticFunction(0x632B2L, "f33_clear_application_ram_4k", VoidDataType.dataType)
+        .setComment("Zero1024 words atFEBE7000..FEBE7FFF; preserve adjacent words. "
+            + "Actual5122-instruction call, distinct from the boot96KiB LocalRAM clear.");
+    semanticFunction(0x679B8L, "f33_nvm_initialize_family1_application", VoidDataType.dataType)
+        .setComment("For49 request cells write stateFF/objectFFFF, preserving byte+1. "
+            + "For16 objects zero checksum seed, publish status0/55/AA and clear "
+            + "floor(payload_bytes/4) words through the application descriptor. "
+            + "Includes disabled descriptors' buffers. Clear0686..068A and068E, "
+            + "set active object068C=FFFF; preserve068B and unrelated completion/staging. "
+            + "Native full call2115 instructions; no flash acquisition.");
+    semanticFunction(0x68324L, "f33_nvm_submit_bulk_reads", u32)
+        .setComment("For family1 completion!=5A and nonFFFF first handle, submit "
+            + "base/base+4/base+8 to slot(object&3) raw/55/AA destinations, ignoring "
+            + "each enqueue result, then set completionFF. No family busy gate or "
+            + "payload access. Then process family0 descriptor handle ranges. "
+            + "ReturnFF if any eligible object attempted, otherwise0. Native proof "
+            + "covers all11 enabled family1 objects, a rejected pending copy and "
+            + "already-complete arrays; family0 acquisition remains separate.");
+    semanticFunction(0x68626L, "f33_nvm_submit_family1_read_copies", u32,
+        new ParameterImpl("object", u16, currentProgram))
+        .setComment("Read descriptor before gating on busy0 and first handle!=FFFF; "
+            + "no local object bound. Submit three copies through73FE8, ignore their "
+            + "return values, set busyFF and slot failure mask005A5A5A, return0. "
+            + "Rejected gate returnsFF. Preserve completion byte and staging; this "
+            + "is submission, not acquired data or completed restoration.");
+    semanticFunction(0x7936EL, "f33_nvm_initialize_dataflash_read_controls", VoidDataType.dataType)
+        .setComment("Write EEPRDCYCL=F, DFECCCTL=4000, DFERRINT=0, DFTSTCTL=4000. "
+            + "Manual PROT01 keys are not retained: normal ECC enabled, ECC test "
+            + "disabled, notification enables cleared. Eight native instructions "
+            + "from nonzero control state; no physical timing or ECM delivery proof.");
+  }
   private void annotateDataFlashReads() throws Exception {
     DataType u8 = UnsignedCharDataType.dataType;
     DataType u16 = UnsignedShortDataType.dataType;
@@ -1347,6 +1381,7 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     annotateApplicationRecords();
     annotateApplicationReadCompletion();
     annotateNvmQueues();
+    annotateNvmStartup();
     annotateDataFlashReads();
     annotateFaciSubmission();
     annotatePwmCompareStaging();

@@ -27,7 +27,7 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x0000137a,30,FUN_0000137a,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,4,0,,1,0,1,0,0,0,boot,unreviewed,,,,,,
 0x00001398,24,FUN_00001398,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,3,0,,0,0,0,0,0,0,boot,unreviewed,,,,,,
 0x000013b0,84,FUN_000013b0,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,8,0,,3,0,3,0,1,0,boot,unreviewed,,,,,,
-0x00001404,116,FUN_00001404,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,0,8,0,,2,0,2,0,0,0,boot,unreviewed,,,,,,
+0x00001404,116,FUN_00001404,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,0,8,0,,2,0,2,1,0,0,boot,unreviewed,,,,,,
 0x00001478,22,FUN_00001478,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,0,0,,0,0,0,0,0,0,boot,unreviewed,,,,,,
 0x0000148e,20,FUN_0000148e,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,2,0,,1,0,0,0,0,0,boot,unreviewed,,,,,,
 0x000014a2,28,FUN_000014a2,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,3,0,,1,1,0,0,0,0,boot,unreviewed,,,,,,
@@ -2859,7 +2859,7 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x00062e1e,38,FUN_00062e1e,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,0,1,373,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x00062e44,38,FUN_00062e44,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x00062e6a,1096,FUN_00062e6a,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,0,0,0,259,0,0,application,unreviewed,,,,,,
-0x000632b2,22,FUN_000632b2,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,2,0,2,0,0,0,application,unreviewed,,,,,,
+0x000632b2,22,f33_clear_application_ram_4k,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,0,0,,2,0,2,0,0,0,application,semantically_identified,verified,tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_application_zero_4k.json,instruction_semantics,passed,2026-10-15,Zero1024 words atFEBE7000..7FFF; preserve both adjacent words. Native5122 instructions. Separate from startup Local/Global RAM loops.
 0x000632c8,32,FUN_000632c8,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,6,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x000632e8,60,FUN_000632e8,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,1,0,0,application,unreviewed,,,,,,
 0x00063324,20,FUN_00063324,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,2,0,,0,0,0,0,1,0,application,unreviewed,,,,,,
@@ -3057,7 +3057,7 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x00067948,60,FUN_00067948,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,1,0,0,0,3,0,application,unreviewed,,,,,,
 0x00067984,46,FUN_00067984,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,1,1,0,0,1,0,application,unreviewed,,,,,,
 0x000679b2,6,FUN_000679b2,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,1,1,0,0,0,0,application,unreviewed,,,,,,
-0x000679b8,154,FUN_000679b8,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,13,0,7,0,4,0,application,unreviewed,,,,,,
+0x000679b8,154,f33_nvm_initialize_family1_application,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,1,0,,13,0,7,0,4,0,application,semantically_identified,verified,tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_family1_initialize_application_state.json,instruction_semantics,passed,2026-10-15,Initialize49 request cells with stateFF/objectFFFF and preserve byte+1. Zero16 seeds and descriptor buffers including disabled entries; publish0/55/AA statuses. Exact owned fields and untouched completion/staging/gaps checked from nonzero RAM.
 0x00067a52,6,FUN_00067a52,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,1,0,1,0,0,0,application,unreviewed,,,,,,
 0x00067a58,114,FUN_00067a58,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,5,0,0,,4,4,2,0,1,0,application,unreviewed,,,,,,
 0x00067aca,28,FUN_00067aca,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,3,0,0,,0,0,0,0,1,0,application,unreviewed,,,,,,
@@ -3080,13 +3080,13 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x000681f8,222,FUN_000681f8,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,3,0,,25,0,20,0,2,0,application,unreviewed,,,,,,
 0x000682d6,66,FUN_000682d6,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,4,0,,3,2,3,0,0,0,application,unreviewed,,,,,,
 0x00068318,12,FUN_00068318,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
-0x00068324,264,FUN_00068324,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,5,2,2,0,5,0,application,unreviewed,,,,,,
+0x00068324,264,f33_nvm_submit_bulk_reads,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,1,0,,5,2,2,0,5,0,application,structurally_bounded,bounded,tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_bulk_read_all_family1.json;tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_bulk_read_one_pending_copy.json;tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_bulk_read_already_complete.json,instruction_semantics,passed,2026-10-15,Submit enabled noncomplete family1 objects' three logical copies and mark completionFF even when an enqueue rejects. Actual33 queued operations and pending-copy partial admission checked; already-complete arrays leave queues untouched. Family0 range path statically recovered but not yet natively exercised.
 0x0006842c,92,FUN_0006842c,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,2,2,0,0,2,0,application,unreviewed,,,,,,
 0x00068488,62,FUN_00068488,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,3,0,,1,1,1,0,1,0,application,unreviewed,,,,,,
 0x000684c6,10,FUN_000684c6,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,0,0,,1,0,1,0,0,0,application,unreviewed,,,,,,
 0x000684d0,110,FUN_000684d0,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,5,1,1,0,2,0,application,unreviewed,,,,,,
 0x0006853e,232,FUN_0006853e,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,9,1,6,0,4,0,application,unreviewed,,,,,,
-0x00068626,120,FUN_00068626,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,2,1,1,0,1,0,application,unreviewed,,,,,,
+0x00068626,120,f33_nvm_submit_family1_read_copies,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,1,0,,2,1,1,0,1,0,application,semantically_identified,verified,tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_queue_arm_read_completion_5a.json,instruction_semantics,passed,2026-10-15,Read descriptor before busy/FFFF gate; three actual enqueue calls then busyFF and slot mask005A5A5A. Preserve completion5A and staging; callers must manage completion lifecycle. No local object bound and no acquired-data claim.
 0x0006869e,254,FUN_0006869e,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,1,0,,6,3,3,0,3,0,application,unreviewed,,,,,,
 0x0006879c,66,FUN_0006879c,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,2,0,,1,0,1,0,0,0,application,unreviewed,,,,,,
 0x000687de,188,FUN_000687de,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,2,0,,1,1,1,0,5,0,application,unreviewed,,,,,,
@@ -3900,7 +3900,7 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x000792fc,26,f33_icus20_second_read_bit0,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,10,1,0,,0,0,0,1,0,0,application,semantically_identified,verified,tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_icus20_second_read_1_to_0.json,instruction_semantics,passed,2026-10-14,"Read FFC5D020 twice through78AE0 and return bit0 of the second word. Native external transitions between the two samples prove the first result is discarded; the first access remains. No OEM bit name, reset, busy/ready or completion interpretation."
 0x00079316,86,FUN_00079316,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,0,5,0,,1,1,1,0,0,0,application,unreviewed,,,,,,
 0x0007936c,2,FUN_0007936c,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
-0x0007936e,26,FUN_0007936e,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,0,0,,0,0,0,3,0,0,application,unreviewed,,,,,,
+0x0007936e,26,f33_nvm_initialize_dataflash_read_controls,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,2,0,0,,0,0,0,4,0,0,application,semantically_identified,verified,tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_dataflash_read_controls_initialize.json,instruction_semantics,passed,2026-10-15,Eight instructions write EEPRDCYCL F; DFECCCTL4000; DFERRINT0; DFTSTCTL4000. Manual-keyed control semantics restore normal ECC and disable test/notification; key reads zero. No physical timing or ECM-delivery proof.
 0x00079388,12,FUN_00079388,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,1,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x0007939c,20,FUN_0007939c,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,5,1,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x000793b0,12,FUN_000793b0,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,8,1,0,,0,0,0,0,0,0,application,unreviewed,,,,,,

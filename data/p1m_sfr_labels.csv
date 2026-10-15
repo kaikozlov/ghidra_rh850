@@ -30,8 +30,12 @@ address,name,size,access,comment
 0xFFA10108,FDMYECC,2,rw,Flash dummy ECC value
 0xFFA20000,FACI_COMMAND_AREA,1,w,FACI command-issuing area
 0xFFC59008,BFASELR,2,rw,Boot-flash area selector
+0xFFC59810,EEPRDCYCL,1,rw,"DataFlash read-cycle code; low4 bits, codes0..2 prohibited; model does not synthesize timing"
+0xFFC5B000,DFECCCTL,4,rw,"DataFlash ECC control; PROT[15:14]=01 permits low2-bit update, protection bits read0"
 0xFFC5B004,DFERSTR,4,r,DataFlash ECC status: bit0 SEDF and bit1 DEDF; error generation is an explicit external input
 0xFFC5B008,DFERSTC,4,w,DataFlash ECC status clear: writing low-bit ERRCLR=1 clears SEDF/DEDF; zero has no effect
+0xFFC5B014,DFERRINT,4,rw,DataFlash ECC notification enables EOVFIE/DEDIE/SEDIE in low3 bits; ECM delivery not synthesized
+0xFFC5B01C,DFTSTCTL,4,rw,"DataFlash ECC test control; PROT[15:14]=01 permits ECCTST bit0 update, protection bits read0"
 0xFFC5D000,ICUSCMD,4,rw,ICU-S command register; recovered MAC generate writes (selector<<16)|5 and CMAC verify writes (selector<<16)|7
 0xFFC5D004,ICUSDAT,4,rw,ICU-S data/parameter word written beside ICUSCMD (firmware role)
 0xFFC5D008,ICUSOUT,4,rw,ICU-S output word consumed by recovered completion callbacks

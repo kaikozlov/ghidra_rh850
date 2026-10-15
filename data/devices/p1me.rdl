@@ -259,6 +259,20 @@ addrmap p1me {
     } BFASELR @ 0xFFC59008;
 
     reg {
+        regwidth=8; accesswidth=8; desc="DataFlash read-cycle code; low4 bits, codes0..2 prohibited; model does not synthesize timing";
+        evidence="manual"; source_ref="R01UH0585EJ0120 page2876 Table35.13"; behavior="storage";
+        trigger="dataflash-read-cycle";
+        field { sw=rw; reset=0xF; } value[7:0];
+    } EEPRDCYCL @ 0xFFC59810;
+
+    reg {
+        regwidth=32; accesswidth=16; access_widths="2,4"; desc="DataFlash ECC control; PROT[15:14]=01 permits low2-bit update, protection bits read0";
+        evidence="manual"; source_ref="R01UH0585EJ0120 page2539 Table31.18"; behavior="storage";
+        trigger="dataflash-ecc-control";
+        field { sw=rw; reset=0; } value[31:0];
+    } DFECCCTL @ 0xFFC5B000;
+
+    reg {
         regwidth=32; accesswidth=32; desc="DataFlash ECC status: bit0 SEDF and bit1 DEDF; error generation is an explicit external input";
         evidence="manual"; source_ref="R01UH0585EJ0120 page2540 Table31.19"; behavior="storage";
         field { sw=r; reset=0; } value[31:0];
@@ -270,6 +284,20 @@ addrmap p1me {
         trigger="dataflash-ecc-clear"; status_register="DFERSTR";
         field { sw=w; reset=0; } value[31:0];
     } DFERSTC @ 0xFFC5B008;
+
+    reg {
+        regwidth=32; accesswidth=8; access_widths="1,2,4"; desc="DataFlash ECC notification enables EOVFIE/DEDIE/SEDIE in low3 bits; ECM delivery not synthesized";
+        evidence="manual"; source_ref="R01UH0585EJ0120 page2544 Table31.23"; behavior="storage";
+        trigger="dataflash-ecc-notification";
+        field { sw=rw; reset=6; } value[31:0];
+    } DFERRINT @ 0xFFC5B014;
+
+    reg {
+        regwidth=32; accesswidth=16; access_widths="2,4"; desc="DataFlash ECC test control; PROT[15:14]=01 permits ECCTST bit0 update, protection bits read0";
+        evidence="manual"; source_ref="R01UH0585EJ0120 page2546 Table31.25"; behavior="storage";
+        trigger="dataflash-ecc-test";
+        field { sw=rw; reset=0; } value[31:0];
+    } DFTSTCTL @ 0xFFC5B01C;
 
     reg {
         regwidth=32; accesswidth=32; desc="ICU-S command register; recovered MAC generate writes (selector<<16)|5 and CMAC verify writes (selector<<16)|7";

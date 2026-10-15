@@ -8668,3 +8668,61 @@ checks and live-coverage parity passed, and the stopped project/corpus were
 promoted. No vehicle experiment, full-project sweep or complete asynchronous
 restoration claim accompanies this increment.
 
+### 77.17 2026-10-15 RAM initialization, bulk submission and ECC controls
+
+Exact target remains `camry-8965F3307000`. This increment separates application
+initialization, queued acquisition and the lower driver's hardware setup.
+None is evidence that the other has completed.
+
+|Entry / execution boundary|Recovered contract and native evidence|
+|---|---|
+|`0x679B8` application initialization|49 request cells become state`FF`/object`FFFF`, preserving byte+1; byte+3 belongs to the object halfword. All16 checksum seeds become0 and status replicas become0/`55`/`AA`. Every descriptor buffer is cleared by `floor(length/4)` words, including disabled descriptors. `0686..068A` and cursor`068E` are cleared, active object`068C` becomes`FFFF`, and gap`068B` is preserved. The2115-instruction call checks the complete affected application extent from nonzero RAM, including untouched completion/staging areas.|
+|`0x632B2` application RAM clear|Exactly1024 word stores clear `FEBE7000..FEBE7FFF`; both adjacent words survive. Native5122 instructions. This is not the larger boot RAM clear.|
+|`0x1426..0x1466` startup-loop slice|204815 instructions clear96KiB at `FEBE8000..FEBFFFFF` and64KiB at `FEEF8000..FEF07FFF`, preserving the lower32KiB of LocalRAM. The first loop's start`FEBF7C00` exceeds end`FEBE7000`, so it executes no stores. The scenario enters after earlier hardware setup and stops at`0x1468` before its hardware write: neither complete reset nor warm-boot behavior is claimed.|
+|`0x68324` bulk family1 submission|For completion other than`5A` and a non-`FFFF` first handle, enqueue the three logical copies into raw/`55`/`AA` staging destinations selected by `object&3`, then set completion`FF`. Individual enqueue results are ignored. All11 enabled descriptors produce33 actual queued operations in12911 instructions, leaving89 normal free slots. A separately pending middle copy rejects while the other two queue; completion still becomes`FF` (1434 instructions). All-complete arrays return0 without accessing uninitialized queues (594 instructions). The subsequent family0 range path remains **bounded**, not natively closed by these cases.|
+|`0x68626` single-object submission|Read the descriptor before checking busy and the `FFFF` handle sentinel; no local object bound. On admission, call the real enqueue routine three times, then set busy`FF` and the slot mask`005A5A5A`; return0. The retained call starts with completion`5A` and proves it remains`5A`: this helper does not rearm completion or acquire payloads.|
+|`0x7936E` DataFlash read controls|Eight instructions write `EEPRDCYCL=F`, `DFECCCTL=4000`, `DFERRINT=0`, `DFTSTCTL=4000`. Starting with nonzero ECC/test/notification controls verifies that normal ECC is restored, test mode and notifications are disabled, and protection-key bits do not remain set.|
+
+**Manual-backed machine boundary.** P1M-E hardware manual Tables31.18,
+31.23,31.25 and35.13 define the four additional generated registers.
+`DFECCCTL` and `DFTSTCTL` accept the low-halfword `PROT=01` key; rejected
+keys and writes to the upper halfword preserve the controlled fields.
+`DFERRINT` retains only bits2..0. `EEPRDCYCL` retains its low nibble;
+codes0..2 are prohibited,3..8 encode4..9 cycles, and9..F encode10 cycles.
+The model represents register semantics, not elapsed flash cycles.
+
+The old model faulted on the first `0x7936E` write at`FFC59810`.
+The new model passed23 native control scenarios: accepted/rejected keys,
+halfword/word access, rejected byte access, reserved-bit masking,
+notification writes, prohibited read-cycle code, and unsupported
+non-normal-ECC/test-mode payload reads. It deliberately does not turn the
+registered dump into ECC-test bits or synthesize correction, ECC errors,
+ECM delivery or timing. Ghidra gains only the exact one-byte read-cycle
+window; the existing32-byte volatile ECC bank already covers its controls.
+
+**Remaining lower-initializer boundary.** Full `0x681F8` execution first
+exposed the intentionally uninitialized opaque ICU-S word at`FFC5D020`.
+With an explicit supplied zero—not an inferred reset value—the firmware
+runs19016 instructions before the unsupported `B3` FACI forced-stop write
+through `0x78CE6`. The checked prefix initializes both1024-byte publication
+areas (`0708..0B07` and`0C88..1087`), read/write staging, family completion
+and logical queues. `0x749D0` additionally clears`FEBF6B1C`, outside the
+logical initializer's stores. This is a verified fault boundary, **not**
+successful physical-driver initialization, command completion or restored
+application data. The forced-stop path remains the next hardware-model
+prerequisite.
+
+Thirty native regressions are retained for this increment. They include the
+previously exercised single-object completion-preservation contract; the
+unsupported full-initializer probe remains diagnostic workspace evidence.
+
+Independent four-stage rebuilds and finalization agreed on **7,187 functions**.
+The curated set is now **126 reviews** (117 verified, nine bounded), with
+929 outside-function candidates unchanged. All30 retained scenarios passed
+on the fresh project. The shared `rh850_device_model` and `rh850_firmware`
+selectors passed, including the generated signer scenarios and retained
+machine boundaries. The three dependent NvM/B6 artifacts were regenerated;
+all six targeted checks and live-coverage parity passed. The stopped
+project and canonical corpus were promoted. These are offline instruction
+and model results, not a vehicle or physical flash-timing result.
+

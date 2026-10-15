@@ -1,0 +1,42 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_df_non_normal_read_ffc5b01c_1",
+  "entry": {
+    "role": "actual Camry application record instructions with explicit RAM preconditions; no replaced callees",
+    "scope": "resolved-address",
+    "address": "0x78ae0"
+  },
+  "max_instructions": 20000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xff00",
+    "r6": "0xff200000"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "isolated initialized nested-call stack"
+    },
+    {
+      "address": "0xffc5b01c",
+      "hex": "01000000",
+      "evidence": "non-normal ECC mode cannot be treated as ordinary payload read"
+    }
+  ],
+  "checks": [],
+  "expected_fault": {
+    "kind": "unsupported-dataflash-ecc-mode"
+  }
+}

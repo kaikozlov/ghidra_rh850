@@ -706,6 +706,13 @@ public class RunP1MEMachine extends GhidraScript {
                     throw fault("read-prohibited", thread, address, size, "read",
                         region.evidence, "region is not software-readable: " + region.name);
                 }
+                if ("dataflash".equals(region.name)
+                        && (registerValue(registersByName.get("DFECCCTL")) != 0
+                            || registerValue(registersByName.get("DFTSTCTL")) != 0)) {
+                    throw fault("unsupported-dataflash-ecc-mode", thread, address, size, "read",
+                        "manual:R01UH0585EJ0120 Tables31.18 and31.25",
+                        "DataFlash payload reads are modeled only with normal ECC enabled and test mode disabled");
+                }
                 trace.access("read", pc(thread), address, size, region.evidence);
                 return;
             }
@@ -757,7 +764,9 @@ public class RunP1MEMachine extends GhidraScript {
                     && receiveFifos.get(register.fifo_index).status == register)
                     || ("intc_eic".equals(register.behavior) && register.reset != null)
                     || "faci-address".equals(register.trigger)
-                    || "faci-dataflash-mode".equals(register.trigger)) {
+                    || "faci-dataflash-mode".equals(register.trigger)
+                    || "dataflash-ecc-control".equals(register.trigger)
+                    || "dataflash-ecc-test".equals(register.trigger)) {
                 registerBeforeWrite = unsigned(memory(thread, register.address, register.size));
             }
             trace.access("write", pc(thread), address, size, register.evidence);
@@ -869,6 +878,11 @@ public class RunP1MEMachine extends GhidraScript {
                 throw fault("unsupported-faci-emulation", thread, register.address,
                     value.length, "write", register.evidence,
                     "only unchanged normal FLEMU mode is modeled; OCD write permission is not inferred");
+            }
+            if ("dataflash-read-cycle".equals(register.trigger) && (unsigned(value) & 0xf) < 3) {
+                throw fault("prohibited-dataflash-read-cycle", thread, register.address,
+                    value.length, "write", register.evidence,
+                    "EEPRDCYCL codes0..2 are prohibited; no timing behavior is synthesized");
             }
             if ("icus-command".equals(register.trigger) && (unsigned(value) & 0xffff) != 5) {
                 throw fault("unsupported-icus-command", thread, register.address,
@@ -1337,6 +1351,22 @@ public class RunP1MEMachine extends GhidraScript {
                             register.name, "status", register.status_register);
                         setRegisterValue(status.name, registerValue(status) & ~3L);
                     }
+                    break;
+                case "dataflash-read-cycle":
+                    setRegisterValue(register.name, unsigned(value) & 0xf);
+                    break;
+                case "dataflash-ecc-control":
+                case "dataflash-ecc-test": {
+                    long incoming = unsigned(value);
+                    long writable = "dataflash-ecc-control".equals(register.trigger) ? 3 : 1;
+                    // Upper-halfword writes cannot carry the low-halfword protection key.
+                    long next = address == register.address && (incoming & 0xc000) == 0x4000
+                        ? incoming & writable : registerBeforeWrite;
+                    setRegisterValue(register.name, next & writable);
+                    break;
+                }
+                case "dataflash-ecc-notification":
+                    setRegisterValue(register.name, registerValue(register) & 7);
                     break;
                 case "icus-command": handleIcusWrite(thread, register, value); break;
                 case "tauj-start":

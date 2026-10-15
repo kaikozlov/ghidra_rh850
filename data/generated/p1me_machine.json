@@ -2,7 +2,7 @@
   "schema": "rh850-p1me-machine-v2",
   "source": {
     "path": "data/devices/p1me.rdl",
-    "sha256": "ab57f38764e18d432b36b3b8de2127a9a452d9e299285af36e7b00e1acaa36d2",
+    "sha256": "00406a0ee601e9beca577b51bb2ef8772889e1c6b25085702a5b1126ae261530",
     "systemrdl_compiler": "1.33.0"
   },
   "products": [
@@ -611,6 +611,37 @@
         "description": "Boot-flash area selector"
       },
       {
+        "name": "EEPRDCYCL",
+        "address": 4291139600,
+        "size": 1,
+        "access_widths": [
+          1
+        ],
+        "access": "rw",
+        "reset": 15,
+        "behavior": "storage",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 page2876 Table35.13",
+        "description": "DataFlash read-cycle code; low4 bits, codes0..2 prohibited; model does not synthesize timing",
+        "trigger": "dataflash-read-cycle"
+      },
+      {
+        "name": "DFECCCTL",
+        "address": 4291145728,
+        "size": 4,
+        "access_widths": [
+          2,
+          4
+        ],
+        "access": "rw",
+        "reset": 0,
+        "behavior": "storage",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 page2539 Table31.18",
+        "description": "DataFlash ECC control; PROT[15:14]=01 permits low2-bit update, protection bits read0",
+        "trigger": "dataflash-ecc-control"
+      },
+      {
         "name": "DFERSTR",
         "address": 4291145732,
         "size": 4,
@@ -641,6 +672,39 @@
         "description": "DataFlash ECC status clear: writing low-bit ERRCLR=1 clears SEDF/DEDF; zero has no effect",
         "trigger": "dataflash-ecc-clear",
         "status_register": "DFERSTR"
+      },
+      {
+        "name": "DFERRINT",
+        "address": 4291145748,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "rw",
+        "reset": 6,
+        "behavior": "storage",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 page2544 Table31.23",
+        "description": "DataFlash ECC notification enables EOVFIE/DEDIE/SEDIE in low3 bits; ECM delivery not synthesized",
+        "trigger": "dataflash-ecc-notification"
+      },
+      {
+        "name": "DFTSTCTL",
+        "address": 4291145756,
+        "size": 4,
+        "access_widths": [
+          2,
+          4
+        ],
+        "access": "rw",
+        "reset": 0,
+        "behavior": "storage",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 page2546 Table31.25",
+        "description": "DataFlash ECC test control; PROT[15:14]=01 permits ECCTST bit0 update, protection bits read0",
+        "trigger": "dataflash-ecc-test"
       },
       {
         "name": "UCFERRINT",

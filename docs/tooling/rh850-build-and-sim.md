@@ -286,7 +286,7 @@ flowchart LR
 |TAUJ|Progress software-triggered interval timers from explicit P-Bus cycles, applying CK0–CK2 prescalers, retaining fractional progress, reloading on underflow, and raising the channel request.|Implemented for the bounded TAUJ0 interval path, including MD0 immediate-start requests. CK3/BRS and other timer modes fault rather than invent behavior. Clock events are functional stimulus, not CPU/silicon timing.|
 |RSCFD|Retain the exact registered signer response resources plus the diagnostic transmit buffer; model common receive FIFOs 3 and 5 using generated control/status/window/pointer/interrupt relationships.|Transmit events identify the buffer derived from the modeled message-RAM address. Receive inputs explicitly start **post-filter**. Mode/enable gates, payload capacity, queue depth, overflow, interrupt threshold, sticky flags, oldest-message windows, and native pointer pops are modeled. CAN1's receive level is the OR of modeled FIFO sources. Acceptance-filter execution, global RFIFOs, arbitration, bus timing, and error-state evolution are not modeled.|
 |FACI / CodeFlash|Keep image bytes immutable. Model status clear in P/E mode and incremental DataFlash blank-check submission `71,D0`, including both FHVE enables, keyed read/DataFlash mode transitions, address-register readback and busy-write suppression.|Bounded implementation. Submission clears `FRDY`; completion, blankness and first-nonblank address require explicit inputs. No dump-derived blankness, automatic ready interrupt, erase/program, forced-stop, CodeFlash/FWE entry, OCD emulation or sequencer timing. Unsupported commands/modes/ranges fault before the current write rather than inventing a hardware error response.|
-|DataFlash ECC|Use manual-backed `DFERSTR`/`DFERSTC` widths and reset values. A low-bit clear write clears `SEDF`/`DEDF`; zero has no effect.|Bounded implementation. Error flags are explicit external inputs; no ECC generation/correction, error-address capture, overflow, notification or flash timing is synthesized.|
+|DataFlash ECC/read controls|Use manual-backed `DFERSTR`/`DFERSTC` widths/reset and low-bit error clearing; keyed `DFECCCTL`/`DFTSTCTL` fields, masked `DFERRINT`, and `EEPRDCYCL` codes3..F.|Bounded implementation. Protection keys read zero; rejected keys preserve prior fields. Codes0..2 fault as prohibited. Non-normal ECC/test-mode payload reads fault rather than silently using ordinary dump bytes. Error flags remain explicit inputs; no ECC generation/correction, test-bit payload, error-address capture, overflow, ECM delivery or flash timing is synthesized.|
 |ICU-S|Expose only recovered registers and exact command-five/callback transitions. Treat supplied output words and the opaque offset20 word as scenario state, not generated cryptography or readiness.|Implemented within that recovered boundary. Offset20 has no assumed reset and supports only observed word reads; physical write semantics and bit meaning remain unknown. No provisioned-key or AES-CMAC silicon claim.|
 |Integration|Expose model generation through `tools/rh850 model update` and `tools/rh850 model check`, and batched execution through `tools/rh850 test firmware`; bind identity through the existing target registry; retain one JSON report per scenario under `build/out/`.|Implemented. No parallel capability manifest, target whitelist, project lifecycle, backend selector, or legacy CLI alias exists.|
 |Verification|Resolve every signer component from raw bytes and generate one functional scenario set for every registered signer target; retain target-specific fixtures only for device-model regression and negative cases.|`tools/test rh850_firmware` runs all generated signer scenarios on Camry, Crown, and both Corolla images, then the retained machine-boundary fixtures. `make verify-processor` requires this gate after the synthetic instruction fixture. GNU simulation remains an independent backend and raw-image build check.|
@@ -313,7 +313,7 @@ The functional model currently covers PE1/self LocalRAM aliasing,
 STAC-controlled Application/System reset RAM rules, G3M alignment and MPU
 overlap permissions, per-register MMIO access widths, TAUJ0 interval progression,
 EIINT delivery, common receive FIFOs, recovered RSCFD transmit buffers, FACI
-status clear and DataFlash blank-check submission, DataFlash ECC-flag clearing,
+status clear and DataFlash blank-check submission, DataFlash ECC/read controls,
 and the explicitly recovered ICU-S surface. Unknown MMIO,
 illegal widths, uninitialized state, and unsupported FACI commands are hard
 faults carrying PC, address, size, access kind, and evidence provenance.
@@ -328,8 +328,13 @@ a provisioned key or emulate the hardware AES-CMAC implementation.
 The offset20 word (`ICUSREG20`) specifically requires an explicit preload or
 scheduled register input. Its two-read and one-read Camry consumers establish
 bit extraction, not a hardware busy/ready contract. The Ghidra profile maps the
-manual's 32-byte DataFlash ECC bank as volatile; this does not grant the machine
-access to registers absent from its generated definition.
+manual's 32-byte DataFlash ECC bank and exact one-byte `EEPRDCYCL` window as
+volatile; this does not grant the machine access to registers absent from its
+generated definition. P1M-E hardware manual Tables31.18/31.23/31.25 and35.13
+define the protected fields, notification enables and read-cycle encodings.
+The Camry `0x7936E` initializer executes against those controls from nonzero
+state; that leaf result is not proof of the larger driver's initialization,
+which also reaches the separately unsupported FACI forced-stop command.
 
 FACI blank checking is deliberately nonmutating and input-driven. Renesas flash
 manual R01UH0615EJ0120 §6.3.15 says erased-but-unprogrammed DataFlash reads are

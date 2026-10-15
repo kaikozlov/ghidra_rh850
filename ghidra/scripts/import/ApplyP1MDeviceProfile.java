@@ -198,6 +198,8 @@ public class ApplyP1MDeviceProfile extends GhidraScript {
         ensureUninitBlock("SFR_EIC", 0xFFFFB000L, 0x1000L, true, true, false, true);
         // RSCFD / RSCAN channel register window used by application CAN.
         ensureUninitBlock("SFR_RSCFD", 0xFFD20000L, 0x10000L, true, true, false, true);
+        ensureUninitBlock("SFR_DATAFLASH_READ_CYCLE", 0xFFC59810L, 0x1L,
+                true, true, false, true);
         // DataFlash ECC register bank: P1M-E Table31.17, FFC5B000..FFC5B01F.
         ensureUninitBlock("SFR_DATAFLASH_ECC", 0xFFC5B000L, 0x20L,
                 true, true, false, true);

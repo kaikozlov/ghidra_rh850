@@ -1,0 +1,48 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_df_notification_word_mask",
+  "entry": {
+    "role": "actual Camry application record instructions with explicit RAM preconditions; no replaced callees",
+    "scope": "resolved-address",
+    "address": "0x78af2"
+  },
+  "max_instructions": 20000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xff00",
+    "r6": "0xffc5b014",
+    "r7": "0xffffffff"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "isolated initialized nested-call stack"
+    },
+    {
+      "address": "0xffc5b014",
+      "hex": "00000000",
+      "evidence": "explicit notification enable state"
+    }
+  ],
+  "checks": [
+    {
+      "name": "only notification enable bits retained",
+      "kind": "memory",
+      "address": "0xffc5b014",
+      "size": 4,
+      "equals_hex": "07000000"
+    }
+  ]
+}

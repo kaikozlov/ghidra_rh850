@@ -23,6 +23,7 @@ WINDOWS = {
     # EIC8/EIC9/EIC16..); manual SFR list rows marked "CPU", e.g. FFFEEA10 H.
     "SFR_CPU_INTERNAL": (0xFFFEE000, 0x1000),
     "SFR_RSCFD": (0xFFD20000, 0x10000),
+    "SFR_DATAFLASH_READ_CYCLE": (0xFFC59810, 0x1),
     # P1M-E Table31.17: the complete DataFlash ECC bank, not a whole SFR page.
     "SFR_DATAFLASH_ECC": (0xFFC5B000, 0x20),
     "SFR_ICUS": (0xFFC5D000, 0x1000),
