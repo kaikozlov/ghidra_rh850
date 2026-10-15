@@ -220,7 +220,7 @@
     "0x058074": {
       "body_sha256": "0c4d0104e4c90a5679e8a9fc567485460ce8a0710d4cbb61518d5e6498880057",
       "body_size": 1934,
-      "decompiled_c_sha256": "b3e729c48f7dcd290cc53ab4cec63dc8da88265b50056ec0589d2ab9d44d5807",
+      "decompiled_c_sha256": "995712c9f2e95b07f5f9a2944cb3e3163685bdc349830beb5db86dc90ec1083a",
       "role": "generated-COM stage copier"
     },
     "0x05899E": {
@@ -724,7 +724,7 @@
     "0x0D039E": {
       "body_sha256": "993f8f98ca99f2370ae504726245106eda7443287bea6834ba32b757da35539e",
       "body_size": 142,
-      "decompiled_c_sha256": "b1b5b46545b5729aba8b13184fd0652deeffe5bfc9a84b2d29ed2a01bc82c597",
+      "decompiled_c_sha256": "a083ccf964ad1cc7db41274d3c3d33502d711a59d3dc8499c3439e80c6b1f53f",
       "role": "shared command + local damping composition"
     },
     "0x0D042C": {
@@ -3004,7 +3004,7 @@
     }
   ],
   "target": {
-    "canonical_function_count": 7181,
+    "canonical_function_count": 7187,
     "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
     "software_id": "8965F3307000"
   }

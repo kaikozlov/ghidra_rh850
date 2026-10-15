@@ -2,7 +2,11 @@ address,provenance,note
 0x00000100,firmware/camry-8965F3307000/CodeFlash.bin,boot EIINT vector saves exception context and calls 0x748 at 0x130 before EIRET
 0x0000010C,firmware/camry-8965F3307000/CodeFlash.bin,boot EIINT context-save body reached by the vector branch at 0x102
 0x00000748,firmware/camry-8965F3307000/CodeFlash.bin,EIIC table traversal reached from the boot vector; key match or FFFFFFFF sentinel selects the handler
+0x0000079A,firmware/camry-8965F3307000/CodeFlash.bin,direct JARL at1408; recovered28-byte register-write/readback routine ending in JMP LP
+0x000007B6,firmware/camry-8965F3307000/CodeFlash.bin,direct JARL at140C; recovered76-byte register-write/poll routine ending in JMP LP
+0x00001404,firmware/camry-8965F3307000/CodeFlash.bin,PREPARE LP entry through DISPOSE at1474; startup-like sequence and RAM-clear loops; external reachability remains unclosed
 0x00001E44,firmware/camry-8965F3307000/CodeFlash.bin,first boot interrupt-table handler at 0x86A0; calls 0x1CE8 at 0x1E48
+0x00008370,firmware/camry-8965F3307000/CodeFlash.bin,start of35E4 copied code;42-byte RAM-table dispatcher through DISPOSE at8396; real relocation and dispatch executed
 0x00034C56,data/generated/camry_8965F3307000_lateral_decompiler_evidence.json,exact-F33 function entry promoted by prior generated decompiler evidence
 0x00035A06,data/generated/camry_8965F3307000_lateral_decompiler_evidence.json;data/generated/camry_8965F3307000_tss3_tx_decompiler_evidence.json,exact-F33 function entry promoted by prior generated decompiler evidence
 0x00046994,data/generated/camry_8965F3307000_lateral_decompiler_evidence.json,exact-F33 function entry promoted by prior generated decompiler evidence
@@ -42,6 +46,8 @@ address,provenance,note
 0x00066512,data/generated/camry_8965F3307000_lateral_decompiler_evidence.json,exact-F33 function entry promoted by prior generated decompiler evidence
 0x0006A5FA,data/generated/camry_8965F3307000_decompiler_evidence.json,exact-F33 function entry promoted by prior generated decompiler evidence
 0x00071508,firmware/camry-8965F3307000/CodeFlash.bin,exact-F33 interrupt wrapper; raw entry begins syncp and returns with eiret; required by B6 hardware-RX ingress closure
+0x0007162E,firmware/camry-8965F3307000/CodeFlash.bin,computed jump target at71BB4; ECM command/retry and exception-return control flow; no OEM fault-role closure implied
+0x00071AE4,firmware/camry-8965F3307000/CodeFlash.bin,application INTBP slot8 at20220 contains71AE4; ECM status routing and computed transfer to7162E
 0x0007D0EA,data/generated/camry_8965F3307000_tss3_tx_decompiler_evidence.json,exact-F33 function entry promoted by prior generated decompiler evidence
 0x0007D12A,data/generated/camry_8965F3307000_decompiler_evidence.json,exact-F33 function entry promoted by prior generated decompiler evidence
 0x0007D1DC,data/generated/camry_8965F3307000_tss3_tx_decompiler_evidence.json,exact-F33 function entry promoted by prior generated decompiler evidence

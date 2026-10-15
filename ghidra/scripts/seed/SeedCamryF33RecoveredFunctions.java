@@ -3,6 +3,7 @@
 // Seed exact-F33 entries and apply target-native, execution-backed semantic types.
 import ghidra.app.script.GhidraScript;
 import ghidra.program.model.address.Address;
+import ghidra.program.model.address.AddressSet;
 import ghidra.program.model.listing.*;
 import ghidra.program.model.data.*;
 import ghidra.program.model.symbol.SourceType;
@@ -659,6 +660,44 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
             + "earlier destination copies. Native proof starts at post-read777FC; "
             + "not an end-to-end hardware read or application restoration proof.");
   }
+  private void repairCodeTail(long entry, long tail, long last) throws Exception {
+    Function function = getFunctionAt(toAddr(entry));
+    if (function == null) throw new IllegalStateException("missing repair entry " + toAddr(entry));
+    currentProgram.getListing().clearCodeUnits(toAddr(tail), toAddr(last), false);
+    if (!disassemble(toAddr(tail))) {
+      throw new IllegalStateException("failed to recover code tail " + toAddr(tail));
+    }
+    function.setBody(new AddressSet(toAddr(entry), toAddr(last)));
+  }
+  private void annotateRecoveredBootEntries() throws Exception {
+    // D48 is inside the four-byte MULHI atD46, not an entry. Its incoming
+    // parameter reference is a scalar delay count, not a control-flow edge.
+    repairCodeTail(0xC9AL, 0xD46L, 0xE53L);
+    // The undefined4 datum at8374 covered MOV/BR instructions, truncating
+    // this real copied-code dispatcher to its four-byte PREPARE.
+    repairCodeTail(0x8370L, 0x8374L, 0x8399L);
+    Function dispatch = getFunctionAt(toAddr(0x8370L));
+    dispatch.setName("f33_boot_ram_dispatch", SourceType.USER_DEFINED);
+    dispatch.setComment("Boot-phase source of the dispatcher copied by35E4 to "
+        + "FEBF1000. Scan eight-byte {u32 key,u32 handler} records atFEBF0F00 "
+        + "until key equals full32-bit r6 orFFFFFFFF; call the selected handler. "
+        + "No local table bound. r6-r9 are unchanged before the call; DISPOSE "
+        + "does not change callback result registers. No complete callback ABI "
+        + "is imposed. Native execution covers matching/fallback selection and "
+        + "real35E4 relocation followed by RAM instruction execution, stopping "
+        + "before the callback. Synthetic input table; no flash operation.");
+    semanticFunction(0x71C68L, "f33_spin_wait", VoidDataType.dataType,
+        new ParameterImpl("outer_iterations", UnsignedIntegerDataType.dataType, currentProgram))
+        .setComment("Full32-bit nonzero outer count; each iteration decrements "
+            + "an inner counter from155 to zero. Zero bypasses both loops. "
+            + "Exact execution takes4 instructions for zero,313*n+5 for "
+            + "positive tested n=1,2,3400. These are instruction counts, not "
+            + "clock-cycle or wall-time calibration. No ordinary return value.");
+    semanticData(0x30D8CL, UnsignedIntegerDataType.dataType,
+        "f33_startup_spin_iteration_count",
+        "Scalar3400 (D48), loaded by63ABC and passed to71C68. "
+        + "Not a pointer into the instruction atD46.");
+  }
   @Override public void run() throws Exception {
     String[] args = getScriptArgs();
     if (args.length != 1) throw new IllegalArgumentException("expected function_seeds.csv path");
@@ -680,6 +719,7 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
         count++;
       }
     }
+    annotateRecoveredBootEntries();
     annotateMemoryPrimitives();
     annotateRedundantStatePrimitives();
     annotateBootAndFreshness();

@@ -8070,3 +8070,62 @@ Two independent rebuilds agreed on 7,181 functions and 51 curated reviews
 live-coverage parity passed; the stopped working project and regenerated corpus
 were promoted together.
 
+### 77.11 Recovered code ownership and relocated dispatch
+
+Two listing defects were reproduced and repaired in the target-native seed.
+Fresh working-project inspection confirms the corrected instructions and bodies:
+
+| Entry | Previous listed body | Correct instruction span | Correct body |
+|---|---:|---|---:|
+| `C9A` | 172 bytes | `C9A..E53`, including four-byte `MULHI` at `D46` and return at `E52` | 442 bytes |
+| `8370` | 4 bytes | `8370..8399`, through the `DISPOSE` at `8396` | 42 bytes |
+
+The old instruction at `D48` decoded the second half of the real `MULHI`;
+it is not an entry point. Its incoming parameter reference at `63ABC` loads
+the word at `30D8C`: **3400**, a scalar passed to `71C68`, not a function
+pointer. The caller chain is
+`637EE → 6385C → 63D4A → 63C5C → 63A18`.
+`71C68` is now `f33_spin_wait(u32 outer_iterations)`: each nonzero outer
+iteration runs a 155-step decrement loop. Four native runs with counts
+0, 1, 2 and 3400 agree with four instructions for zero and `313*n+5` for
+the positive cases. This is not a clock-cycle or wall-time calibration.
+
+At `8374`, an `undefined4` data unit covered real `MOV` / `BR` instructions.
+The complete dispatcher is now named `f33_boot_ram_dispatch`. It scans
+eight-byte `{u32 key, u32 handler}` records at `FEBF0F00`, stopping at an exact
+full-width `r6` match or the `FFFFFFFF` sentinel. It has no local table bound.
+Before the computed call it preserves `r6..r9`; a complete callback prototype
+is deliberately **not** imposed from the selector alone.
+
+Five native dispatch cases passed, including the actual `35E4` copy followed
+by execution of the copied instructions at **`FEBF1000`**. That composed run
+takes 1,049 instructions and produces the relocated return link `FEBF1026`.
+The three retained scenarios cover first-match selection, rejection of a
+false low16 match, and copied-RAM execution. They use an explicit synthetic
+input table and stop **before** the selected callback. They do not establish
+the OEM table contents, callback behavior or a flash operation.
+
+Six additional code roots are now represented in the rebuild:
+
+- `79A` and `7B6`: direct calls at `1408` / `140C`, with complete
+  register-write/readback and poll bodies.
+- `1404`: a complete `PREPARE` / `DISPOSE` sequence containing calls and
+  RAM-clear loops. External reachability remains unclosed. Its first unsigned
+  clear loop is empty because `FEBF7C00` is already above its bound `FEBE7000`;
+  the firmware constants are preserved, not “repaired.”
+- `8370`: the copied dispatcher above.
+- `71AE4`: the application INTBP slot at `20220` contains this entry.
+  Its ECM-status routing includes the computed transfer at `71BB4` to
+  `7162E`, which is also seeded. OEM fault classification, full recovery
+  behavior and physical device effects remain unclosed.
+
+Two independent rebuilds agreed on **7,187 functions** and 53 curated reviews
+(49 verified, four bounded). The outside-function census fell from 958 to
+929 candidates: 513 pointer-referenced runs, 411 orphan decoded runs and five
+ambiguous-data candidates. These are still candidates, not 929 missing
+functions or a measure of remaining OEM intent.
+
+The three tracked dispatch scenarios, six targeted coverage/NvM/B6 checks,
+and live-coverage parity passed. The corrected listing was inspected in the
+rebuilt working project before clean teardown and snapshot/corpus promotion.
+
