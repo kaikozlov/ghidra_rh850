@@ -866,6 +866,11 @@ for the PC-pivot question rather than dismissed by service name:
   writer. The selectors format/read bounded event IDs and merge event-data buffers
   into the DCM response; the catalogue is not a function-pointer/address table.
 
+The later [application diagnostic reconstruction](#7725-diagnostic-admission-application-writes-and-routine-lifecycles)
+owns admission, control-state effects, asynchronous results and cancellation.
+The bounds in this section concern control-transfer primitives, not semantic
+closure of those application operations.
+
 Thus every **recovered configured application diagnostic class with plausible
 write/control semantics** is now bounded away from a tester-chosen PC transfer.
 This is not a general memory-safety proof of undiscovered code, but there is no
@@ -11730,6 +11735,160 @@ requests in postwork. Foreground request reconciliation/mode publication occurs
 in a different context. Owner requests, reduced flags, selected outputs and
 mode caches are therefore not a single synchronous state transition.
 
+### 77.25 Diagnostic admission, application writes and routine lifecycles
+
+This exact-image slice joins configured diagnostics to the application owners
+above. The contracts below are **recovered** from decompilation, instructions,
+ROM records and dataflow; native assertions are scoped separately. An accepted
+request, an application state change, a software completion report, persistence
+and physical behavior are different events. No OEM names or engineering units
+are assigned from the numerical identifiers alone.
+
+#### Service admission precedes callback-local conditions
+
+`91566` initializes the28-byte message context5630, invokes the first policy
+stage, resolves the service and its session/security policy, then invokes the
+second policy stage before dispatch. The exact first hook is disabled and the
+second enabled. `90F98` selects from the shared23-row service bank25C54:
+
+| Logical service-list selector | Configured surface |
+|---|---|
+| 2 | The17 ordinary services enumerated in §13.4 |
+| 3 | `10/14/28/31/3E/85`, with a separate session-control descriptor |
+| 4 | `10/19/22/3E/AB`; session-control/tester-present admit1/40, the other rows40 |
+
+These are logical selectors, not proven CAN-bus identities. Unknown selectors
+fall back to list0, the selector2 list. All23 service-level security-list pointers
+are null, which independently admits that check; this does not bypass the
+session, application, class or callback conditions. In the ordinary list,
+WDBI2E admits sessions2/3; RoutineControl31 admits1/2/3.
+The matched row is stored before policy checks. Service absence produces NRC11,
+session rejection7F and security rejection33. Generic subfunction resolution
+uses separate16-byte records, masks request bit7, and returns13/12/7E/33 for
+short request/absence/session/security rejection. Its byte1 load actually
+precedes the declared-length check; this is not an independent buffer-safety proof.
+
+The configured second hook `90EFE→8B0FC→4D17A` admits only
+`81CC==5A &&81AC==5A &&7F97!=5A`. It **always publishes addressing bit0 to819A**,
+including on rejection. Rejection returns8 and selects silent disposition3,
+not a fabricated NRC. An earlier service/session rejection never reaches that
+publication. Several routine-local `819A==1` conditions therefore inspect
+retained addressing state, not the current DCM session number.
+
+`81AC` is refreshed from application state/mode by `4CFA8`; `509A4` publishes
+81CC and a separate crypto-availability state81CD. Their generations are not
+atomic with foreground DCM. `4A456` also distinguishes immediate communication
+inhibit7F97 from delayed COM inhibit7F96: assertion sets both5A; release clears
+7F97 immediately. It increments counter7F98 while its entry value is below the
+exact ROM threshold76; only a later invocation entering at76 clears7F96.
+Diagnostic admission and ordinary transmit inhibition
+therefore need not change together.
+
+Direct dispatch `91410` reserves the positive SID prefix before invoking
+operation0. Generic subfunction dispatch `91466` reserves two prefix bytes,
+retains suppress-positive bit7 and clears that bit in the request. Active
+callback5628 and message5630 are retained separately from response completion.
+`9165E` calls operation2 before clearing active state; `916AC` notifies
+operation3. Neither notification alone proves cancellation/completion of a
+previously requested application operation.
+
+#### Configured writes: immediate state versus queued records
+
+WDBI resolves configured classes, metadata presence, exact payload length,
+class session/security policy, then the application precondition/action.
+The class bank2603C has five configured rows plus an unused zero row.
+0204 uses class1; the other writes use class3. Those classes add no write
+session/security restrictions because their list counts are zero.
+Metadata2927C is a separate read/length/presence catalogue, not the write table.
+
+Ten configured preconditions reject only unsigned `E892>512`; equality is
+admitted. 2012 has no local precondition. 2013/2014 additionally require
+`80A5==0 &&80A0==0`: **80A5 is receive status, not adjacent generation80A4**.
+Their byte-load opcode is `a497a5c8`. All callbacks below are fixed CodeFlash
+entries in table25640.
+
+| DID | Exact payload | Application effect and completion boundary |
+|---|---|---|
+| 0204 | Two bytes; only byte1 bit7 used | Stage81AF=11/21 and owner81B2=2E10. Later workers request AF47 mode/availability changes, conditionally rewrite record7 and distinguish completion with/without queued diagnostic operation6. |
+| 2001 | Only byte01 accepted by this image's validation | Request record101 reset/rewrite. Setter ignores the supplied byte; the eventual record uses existing application state. Pending is not persistence. |
+| 2002 | Byte00/01 | Stage encoded55AAAA55/AA5555AA atB31C for record102. LiveB314 is separately reloaded and qualified. |
+| 2005/2006/2007/2008/2009/200D | Any one byte | Stage record103 selectors3/4/5/6/7/8, replacing eventual record bytes2/3/4/5/6/7 respectively. One shared staging triple, not six queues. |
+| 2010 | Byte00, or aliases01/02 | Stage encoded pairB480/B484 and flagB472=44; return immediate success and clear owner. LiveB474/B478 remain separate. No recovered reader establishes activation or persistence of the staged pair. |
+| 2012 | Only byte01 | LatchB18F=5A immediately, affecting availability and thermal-reference/history qualification. Does not clear81B2 or request persistence. |
+| 2013 | Big-endian unsigned16 | WriteB418 immediately over the full0..65535 range, without callback clamp. Gated service-control computation consumes it later; writing it does not enable that service. Clear owner; no persistence request. |
+| 2014 | Byte00/01 → state00/5A | Select qualification modeB3D2 and its measurement thresholds. Invalid bytes preserve the mode; every callback path clears owner. No persistence request. |
+
+Record103 service `B674E` serializes against peer operations, submits the staged
+byte through `B66D2`, polls record status, acknowledges success/failure and
+reloads/derives compatibility masks after success. Initial admission neither
+publishes the live record nor proves durable storage.
+
+`8E506` does not re-run an action whose retained result is2: it polls the shared
+completion byte, treatingFF as still pending. Owner81B2 and completion3B20 are
+not independent per-DID transaction records. `8B632` stages fewer than8 bytes for
+the side path, but still passes the **original** pointer/length to the action;
+that staging cap is not a general action-length guard. Configured outer metadata
+restricts these writes to one or two payload bytes.
+
+#### Routines: capability, request, result and cancellation
+
+RoutineControl uses configured IDs26918, control-support records269B9 and
+callback table256DC. Numeric control1/2/3 means start/stop/results; it is not the
+wrapper's operation/status argument. 100E/F support start only;110A/D additionally
+support stop; the other configured rows support start/results. Local dispatch
+enable `8E624` returns constant5A in this image, not a side-status-derived gate.
+
+| RID | Recovered action / result ownership |
+|---|---|
+| 1000/1001/1100 | Build identifier/family capability bitmaps and complete immediately; results return the retained byte. Configured support is not proof that every advertised callback has an implementation. |
+| 1002 | Request lifecycle normalization throughAF47=44. ScheduledB9212 acknowledges consumption and sets normalization state even when a lower group is still running; acknowledgement is not group convergence. |
+| 1004 | RequireFFFF start input, then request diagnostic history operation5. Queue acceptance may return success while result remains running; later persistence/lifecycle owner reports completion. |
+| 1007 | Restart lifecycle group0; result waits for five status words and distinguishes all-success from another terminal combination. No local819A or E892 gate. |
+| 1008 | Restart lifecycle group2; wait for five dependent state bytes. No local819A or E892 gate. |
+| 1009 | Request/poll record103 reset; software success, pending and failure remain distinct. The exact precondition does not inherit Sienna's extra feature/state gates. |
+| 100E/100F | Activate fixed internal crypto banks when idle. 100F retains the fixed16-byte command5 input/private-result boundary from §13.3; callbacks do not write output/length or expose arbitrary signing. |
+| 1010 | Configured start/results support, but both callbacks null. Selection exhausts with status3; no implemented key-update action is recovered through this row. |
+| 1103 | Request application service1 through the existing acquisition lifecycle, not direct physical acquisition. Its local admission also excludes a running1109 request. |
+| 1106 | Restart three lifecycle groups; complete only after all report44, otherwise distinguish waiting from terminal failure. |
+| 1108 | Queue diagnostic checkpoint/reset operation2; existing diagnostic persistence/completion barriers own the result. |
+| 1109 | Request learned record100 reset when required. Already-clear published marker can complete immediately; otherwise follow the asynchronous redundant-record update. |
+| 110A | Start application service2. Stop of a running result requests its cancellation latch but leaves the result running; stop of a terminal nonzero result clears it. |
+| 110B | Both callbacks are exact immediate-success no-ops: no output, output-length or result-cell write. A configured result descriptor does not establish an81A8 result. |
+| 110C | Start application service3 using the established retained-center/extrema lifecycle; admission additionally needs published ID2 completionE889. No configured stop control. |
+| 110D | Start application service4. Stop has the same request-versus-result distinction as110A, with its own cancellation latch. |
+
+Common raw-unit and receive-status gates, duplicate-running results and
+cross-routine exclusions remain callback-specific. In particular1007/1008 are
+not covered by a blanket “all routines require the same local conditions”
+claim. The existing service1–4 admission, mode transition, substitution and
+completion owners in §77.24 remain authoritative; the callbacks do not replace them.
+
+Result bytes819B..81AA are updated by `508CC` only while the selected result is1.
+Completion status10 leaves it running;0 maps to success2,30 to cancellation0,
+other terminal statuses to failure3. Ordinary result clearing preserves running
+slots. More importantly, **wrapper operation/status≥2 resets only shared
+routine-class staging**, through `8B83C→8B7B8`. It does not invoke a per-RID stop
+action or cancel an application service. This differs from110A/110D control2.
+
+Both callback searches have a consequential exact loop: precondition return3
+retries the **same matched row synchronously**; only mismatch/null advances.
+No configured non-null precondition returns3. Unknown IDs and null1010 exhaust
+normally. This is neither asynchronous pending nor next-entry search.
+
+Native compositions cover the
+[extended-session write while COM remains inhibited](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_diagnostic_service_extended_write_during_com_inhibition.json),
+[earlier session denial](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_diagnostic_service_session_denial_precedes_application_gate.json)
+and [application-gate drop with addressing publication](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_diagnostic_service_application_gate_drop_retains_address_kind.json),
+stopping before transport publication. Separate real class/action compositions
+cover [record103 staging](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_diagnostic_write_2005_stages_record103.json),
+[2010 alias2 and immediate success](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_diagnostic_write_2010_alias2_returns_success.json),
+[80A5 status rejection](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_diagnostic_write_2014_receive_status_blocks.json),
+[stop-as-cancellation-request](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_diagnostic_routine_stop_requests_cancel.json),
+[queued history request](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_diagnostic_routine_history_request_queues.json)
+and [normalization acknowledgement before group completion](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_diagnostic_routine_normalization_ack_not_group_completion.json).
+These explicit-RAM software scenarios do not establish physical persistence,
+sensor/actuator effects, external request reachability or all interrupt interleavings.
+
 **Remaining high-value dependencies:** the other monitor/action and Dem/DTC
 joins; production reachability across diagnostic groups; remaining numerical
 control-map surfaces and cross-task retention; physical persistence of the
@@ -11740,8 +11899,8 @@ The recovered application, fault-action and diagnostic contracts do not require
 a complete peripheral or NvM emulator. Static connectivity and bounded native
 scenarios are not exhaustive semantic closure or vehicle results.
 
-**Verification checkpoint (2026-10-15, compensation generations, paired-source
-monitors and transmit publication).**
+**Verification checkpoint (2026-10-15, diagnostic admission, application writes
+and routine lifecycles).**
 Composed native scenarios passed against the rebuilt A project with unmodified
 CodeFlash and explicit RAM, without replacement callees or peripheral-model
 extensions. Independent four-stage A/B rebuilds and signature finalization
@@ -11752,15 +11911,22 @@ A, not independently on B.
 
 Coverage, function-boundary, D5 provenance, assist-oracle, command-cone,
 B6 composition/end-to-end/ingress, CodeFlash, external-ingress, retained-log
-reconciliation, protected030 transmit and complete EPS transmit gates passed,
-as did the protected-B6 acceptance ladder. A redundant whole-dictionary MAC-domain
-assertion was removed; profile-derived payload/freshness/length invariants remain.
+reconciliation, protected030 transmit, complete EPS transmit and application
+RAM-loader gates passed, as did the protected-B6 acceptance ladder. Rebuilt
+decompilation retains both record103 staging arguments and the typed
+service/subfunction selection through callback dispatch.
 Static-only reviews remain **recovered**; **verified** applies to the cited
 executed assertions, not every branch in an annotated function.
 Retained-log regeneration reported corrupted events on historical route
 `0000001c--574c06b528`; raw captures were unchanged. This checkpoint does not
 establish physical persistence, input freshness, vehicle reachability or
 whole-image semantic closure.
+
+The preceding `afa19f4b` checkpoint contains dynamic-compensation generations,
+paired-source monitors and transmit publication. Its native compositions,
+independent rebuilds and matching promoted evidence passed. A redundant
+whole-dictionary MAC-domain assertion was removed there; profile-derived
+payload/freshness/length invariants remain.
 
 The preceding `de19285e` checkpoint contains selected-angle control, shared
 monitors, communication generations and thermal-history publication, with

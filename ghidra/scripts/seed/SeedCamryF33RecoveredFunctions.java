@@ -3991,6 +3991,633 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     semanticData(0xFEBE755CL, new ArrayDataType(u8, 10, 1), "f33_paired_source_monitor_status", "Slot4 lower statuses;4/5 excluded from reduction.");
     semanticData(0xFEBE756AL, new ArrayDataType(u8, 10, 1), "f33_paired_source_monitor_transition", "Upper packed transition bytes.");
   }
+  private void annotateDiagnosticServiceAdmission() throws Exception {
+    CategoryPath category = new CategoryPath("/CamryF33");
+    DataType v = VoidDataType.dataType;
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u16 = UnsignedShortDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    DataType bytes = new PointerDataType(u8, 4);
+    DataType halfwords = new PointerDataType(u16, 4);
+    DataType infoPointer = new PointerDataType(
+        currentProgram.getDataTypeManager().getDataType("/CamryF33/F33PduInfo"), 4);
+    StructureDataType message = new StructureDataType(category, "F33DcmMessageContext", 0);
+    message.setPackingEnabled(true);
+    message.add(bytes, "request", "Advanced after admitted SID/subfunction prefixes.");
+    message.add(u32, "request_length", "Remaining request bytes.");
+    message.add(bytes, "response", "Advanced past separately counted prefixes.");
+    message.add(u32, "response_length", "Response body length, excluding retained prefix count.");
+    message.add(u8, "addressing_kind", "Low bit supplied to application gate;1 selects functional response suppression.");
+    message.add(u8, "suppress_positive", "Captured subfunction bit7.");
+    message.add(u16, "opaque_12", "Not interpreted here.");
+    message.add(u32, "response_capacity", "Remaining response capacity after prefix reservation.");
+    message.add(u8, "service_id", "Original request SID retained by91566.");
+    message.add(u8, "opaque_19", "Not interpreted here.");
+    message.add(u16, "service_list_selector", "Selector2/3/4; not a CAN channel identity.");
+    DataType messageType = resolve(message);
+    DataType messagePointer = new PointerDataType(messageType, 4);
+    FunctionDefinitionDataType callback = new FunctionDefinitionDataType(category, "F33DcmServiceCallback");
+    callback.setReturnType(v);
+    callback.setArguments(new ParameterDefinitionImpl("operation", u8, null),
+        new ParameterDefinitionImpl("message", messagePointer, null));
+    DataType callbackPointer = new PointerDataType(callback, 4);
+    StructureDataType subfunction = new StructureDataType(category, "F33DcmSubfunction", 0);
+    subfunction.setPackingEnabled(true);
+    subfunction.add(callbackPointer, "callback", "Fixed operation callback or null.");
+    subfunction.add(bytes, "security", "Null list independently admits security check.");
+    subfunction.add(bytes, "sessions", "Allowed session bytes.");
+    subfunction.add(u8, "subfunction", "Compared with request byte1 masked7F.");
+    subfunction.add(u8, "security_count", "Non-null zero-count list rejects.");
+    subfunction.add(u8, "session_count", "Session list extent.");
+    subfunction.add(u8, "opaque_0f", "Not interpreted here.");
+    DataType subfunctionPointer = new PointerDataType(resolve(subfunction), 4);
+    StructureDataType service = new StructureDataType(category, "F33DcmService", 0);
+    service.setPackingEnabled(true);
+    service.add(callbackPointer, "callback", "Direct service callback or null.");
+    service.add(bytes, "security", "Exact configured service lists are null.");
+    service.add(bytes, "sessions", "Allowed sessions, distinct from application traffic gate.");
+    service.add(subfunctionPointer, "subfunctions", "Fixed16-byte records.");
+    service.add(u8, "sid", "Request service identifier.");
+    service.add(u8, "has_subfunctions", "Exact1 selects generic subfunction dispatch except SID31.");
+    service.add(u8, "security_count", "Security list extent.");
+    service.add(u8, "session_count", "Session list extent.");
+    service.add(u8, "subfunction_count", "Subfunction table extent.");
+    service.add(new ArrayDataType(u8, 3, 1), "opaque_15", "Not interpreted here.");
+    DataType serviceType = resolve(service);
+    DataType servicePointer = new PointerDataType(serviceType, 4);
+    StructureDataType serviceList = new StructureDataType(category, "F33DcmServiceList", 0);
+    serviceList.setPackingEnabled(true);
+    serviceList.add(u16, "selector", "Matched by913F0; unknown falls back to row0.");
+    serviceList.add(u8, "count", "Number of halfword indices.");
+    serviceList.add(u8, "opaque_03", "Not interpreted here.");
+    serviceList.add(halfwords, "indices", "Indices into the shared23-row service table.");
+    DataType serviceListType = resolve(serviceList);
+    StructureDataType selection = new StructureDataType(category, "F33DcmServiceSelection", 0);
+    selection.add(new PointerDataType(serviceListType, 4), "list", "Input service list.");
+    selection.add(servicePointer, "service", "Output selected row, even on policy rejection.");
+    DataType selectionPointer = new PointerDataType(resolve(selection), 4);
+    StructureDataType subSelection = new StructureDataType(category, "F33DcmSubfunctionSelection", 0);
+    subSelection.add(servicePointer, "service", "Input service row.");
+    subSelection.add(subfunctionPointer, "subfunction", "Output selected row; second stack word is not an unrelated local.");
+    DataType subSelectionPointer = new PointerDataType(resolve(subSelection), 4);
+    StructureDataType route = new StructureDataType(category, "F33DcmRequestRoute", 0);
+    route.add(u8, "addressing_kind", "Copied into message context.");
+    route.add(u8, "opaque_01", "Not interpreted here.");
+    route.add(u16, "service_list_selector", "Logical selector2/3/4, not a CAN bus.");
+    DataType routePointer = new PointerDataType(resolve(route), 4);
+    semanticFunction(0x4D17AL, "f33_check_diagnostic_application_admission", u32,
+        new ParameterImpl("addressing_kind", u8, currentProgram))
+        .setComment("Always publish addressing kind819A. Return0 only for81CC=5A,81AC=5A and7F97!=5A; otherwise1. Does not test delayed COM inhibit7F96.");
+    semanticFunction(0x8B0FCL, "f33_check_diagnostic_addressing_admission", u32,
+        new ParameterImpl("addressing_flags", u8, currentProgram))
+        .setComment("Pass bit0 to4D17A and preserve its consequential full R10 result; not void.");
+    semanticFunction(0x90EFEL, "f33_dcm_application_policy_hook", u32,
+        new ParameterImpl("service_id", u8, currentProgram),
+        new ParameterImpl("request", bytes, currentProgram),
+        new ParameterImpl("request_length", u16, currentProgram),
+        new ParameterImpl("addressing_flags", u8, currentProgram),
+        new ParameterImpl("service_list_selector", u16, currentProgram),
+        new ParameterImpl("negative_response", bytes, currentProgram))
+        .setComment("Configured second policy hook uses fourth argument R9 only; map nonzero8B0FC result to8, otherwise0. Return8 selects silent-drop disposition, not a fabricated NRC.");
+    semanticFunction(0x90F18L, "f33_dcm_check_session_list", u32,
+        new ParameterImpl("allowed", bytes, currentProgram),
+        new ParameterImpl("count", u8, currentProgram))
+        .setComment("Null list allows; nonnull list requires current595C session in count bytes. Nonnull zero-count rejects. Return0 allowed,1 rejected.");
+    semanticFunction(0x90F58L, "f33_dcm_check_security_list", u32,
+        new ParameterImpl("allowed", bytes, currentProgram),
+        new ParameterImpl("count", u8, currentProgram))
+        .setComment("Null list allows; otherwise match current security getter result against count bytes. Nonnull zero-count rejects. Separate from application/group admission.");
+    semanticFunction(0x90F98L, "f33_dcm_resolve_service", u32,
+        new ParameterImpl("message", messagePointer, currentProgram),
+        new ParameterImpl("selection", selectionPointer, currentProgram),
+        new ParameterImpl("has_subfunction", bytes, currentProgram),
+        new ParameterImpl("negative_response", bytes, currentProgram))
+        .setComment("Search service-list u16 indices into24-byte rows; no own zero-request-length guard. Store selected row before session/security checks. NRC11 absent,7F session rejection,33 security rejection. Subfunction flag only when configured byte1 and SID!=31.");
+    semanticFunction(0x9105AL, "f33_dcm_resolve_subfunction", u32,
+        new ParameterImpl("message", messagePointer, currentProgram),
+        new ParameterImpl("selection", subSelectionPointer, currentProgram),
+        new ParameterImpl("negative_response", bytes, currentProgram))
+        .setComment("Select request byte1 masked7F among16-byte rows. Actual load precedes length>=2 check. NRC13 short,12 absent,7E session rejection,33 security rejection; selected pointer published before policy checks.");
+    semanticFunction(0x910FAL, "f33_dcm_invoke_request_policy", u32,
+        new ParameterImpl("service_id", u8, currentProgram),
+        new ParameterImpl("message", messagePointer, currentProgram),
+        new ParameterImpl("stage", u32, currentProgram),
+        new ParameterImpl("negative_response", bytes, currentProgram))
+        .setComment("Stage bit1 selects hook family; bit0 selects post-SID request and adds address flag10. Clamp byte extent toFFFF. Exact first hook disabled, second enabled. Preserve nonzero callback result; only result1 is an NRC path in the service entry.");
+    semanticFunction(0x913C2L, "f33_dcm_initialize_message_context", v,
+        new ParameterImpl("service_list_selector", u16, currentProgram),
+        new ParameterImpl("addressing_kind", u8, currentProgram),
+        new ParameterImpl("request", infoPointer, currentProgram),
+        new ParameterImpl("response", infoPointer, currentProgram))
+        .setComment("Initialize28-byte5630 context from two eight-byte PduInfo descriptors. Request and response extents read as unsigned16; response length and suppression reset.");
+    semanticFunction(0x913F0L, "f33_dcm_select_service_list", u32,
+        new ParameterImpl("selector", u16, currentProgram))
+        .setComment("Exact selectors2/3/4 select rows0/1/2 at25C0C. Unknown selector falls back to row0; not a CAN-bus identity claim.");
+    semanticFunction(0x91410L, "f33_dcm_dispatch_direct_service", v,
+        new ParameterImpl("message", messagePointer, currentProgram),
+        new ParameterImpl("service", servicePointer, currentProgram))
+        .setComment("Write positive SID prefix; advance request and response pointers and reduce capacities before callback. Set header count1. Null callback selects disposition3, not an implicit worker.");
+    semanticFunction(0x91466L, "f33_dcm_dispatch_subfunction_service", v,
+        new ParameterImpl("message", messagePointer, currentProgram),
+        new ParameterImpl("service", servicePointer, currentProgram))
+        .setComment("Resolve typed service/subfunction pair, then both post-SID policy stages. Preserve bit7 as suppress-positive flag and clear it in request; copy subfunction prefix. Set header count2 and active callback before operation0. Failed policy never invokes action.");
+    semanticFunction(0x91566L, "f33_dcm_begin_service_request", v,
+        new ParameterImpl("route", routePointer, currentProgram),
+        new ParameterImpl("request", infoPointer, currentProgram),
+        new ParameterImpl("response", infoPointer, currentProgram))
+        .setComment("Initialize context; run first policy, service/session/security resolution, then second policy before direct/subfunction dispatch. Result1 stages NRC; other nonzero policy results choose silent disposition3. Session denial precedes application addressing publication.");
+    semanticFunction(0x9139EL, "f33_dcm_clear_active_service", v)
+        .setComment("Clear retained service ID562C, callback5628 and header count562D, then reset negative-response state.");
+    semanticFunction(0x9165EL, "f33_dcm_cancel_active_service", v)
+        .setComment("If active callback exists, clear negative-response state and call operation2 with5630; then finish local cleanup and clear active service. Does not itself prove downstream control/persistence cancellation.");
+    semanticFunction(0x916ACL, "f33_dcm_notify_active_service_operation_three", v)
+        .setComment("Invoke active callback with operation3 and5630 when nonnull; no inferred completion or physical result.");
+    semanticFunction(0x91688L, "f33_dcm_get_message_context", messagePointer)
+        .setComment("Return the retained28-byte message context5630; not an opaque scalar.");
+    semanticFunction(0x91AE0L, "f33_dcm_get_security_level", u32,
+        new ParameterImpl("level", bytes, currentProgram))
+        .setComment("Null output returns0 without a read; otherwise return9240E status and its byte output.");
+    semanticFunction(0x91AF4L, "f33_dcm_get_session", u32,
+        new ParameterImpl("session", bytes, currentProgram))
+        .setComment("Null output returns0 without a read; otherwise return924FC status and its byte output.");
+    semanticFunction(0x924FCL, "f33_dcm_read_session_snapshot", u32,
+        new ParameterImpl("session", bytes, currentProgram))
+        .setComment("Copy current595C under the recovered critical section and return0; session membership is checked by callers.");
+    semanticFunction(0x4A456L, "f33_update_application_communication_inhibits", v)
+        .setComment("Condition E86D=5A and(7F95=0 or E860!=0) and7F94=1 immediately sets7F96/97=5A and clears7F98. On release clear7F97 immediately; only clear7F96 once invocation counter reaches ROM317B8.");
+    semanticFunction(0x4CFA8L, "f33_refresh_mode_diagnostic_admission", v)
+        .setComment("Publish81AC from captured E826, published E8CC and4CF66. Specified transitions clear diagnostic service/security state and event88; retained prior E826/7F97 detect transitions. Not atomic with foreground DCM.");
+    semanticFunction(0x509A4L, "f33_refresh_diagnostic_application_availability", v)
+        .setComment("E826=33/11 or7BBA=5A clears81CC; otherwise5A. Separate crypto availability81CD additionally requires7F97!=5A, with transition cleanup5704E. The two publications are not interchangeable.");
+    semanticData(0x25C54L, new ArrayDataType(serviceType, 23, 24), "f33_dcm_service_rows",
+        "Shared23-row bank; selector2 exposes17 entries, selector3 six, selector4 five. Not17 globally unique rows.");
+    semanticData(0x25C0CL, new ArrayDataType(serviceListType, 3, 8), "f33_dcm_service_lists",
+        "Selectors2/3/4 index shared descriptors; fallback is selector2 row.");
+    semanticData(0xFEBE5630L, messageType, "f33_dcm_message_context",
+        "Mutable request/response cursors and retained routing; not an immutable whole-transaction snapshot.");
+    semanticData(0xFEBE5628L, callbackPointer, "f33_dcm_active_service_callback",
+        "Installed before operation0; operation2/3 notifications use the same retained message context.");
+  }
+  private void annotateDiagnosticWritesAndRoutines() throws Exception {
+    CategoryPath category = new CategoryPath("/CamryF33");
+    DataType v = VoidDataType.dataType;
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u16 = UnsignedShortDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    DataType s32 = IntegerDataType.dataType;
+    DataType bytes = new PointerDataType(u8, 4);
+    DataType halves = new PointerDataType(u16, 4);
+    DataType pointer = new PointerDataType(v, 4);
+    DataType messagePointer = new PointerDataType(
+        currentProgram.getDataTypeManager().getDataType("/CamryF33/F33DcmMessageContext"), 4);
+    semanticFunction(0x4D118L, "f33_diag_translate_application_request_status", u32,
+        new ParameterImpl("application_status", s32, currentProgram))
+        .setComment("0\u21920,-12\u21924,-7\u21928,-6\u21925,-1\u21922,other\u21929;negativeapplicationstatusesmuststay32-bit.");
+    semanticFunction(0x4D36EL, "f33_select_available_did_metadata", u32,
+        new ParameterImpl("did", u16, currentProgram))
+        .setComment("Scans242 records2927C stride16 kind0, optional gate result5A, storesindex81B8; returns0/3.");
+    semanticFunction(0x4D47EL, "f33_did_metadata_always_available", u32)
+        .setComment("4D47E movea5A,r0,r10;4D482jmplp;usedmetadata2013/14.");
+    semanticFunction(0x4D492L, "f33_get_selected_did_payload_length", v,
+        new ParameterImpl("length", halves, currentProgram))
+        .setComment("Metadata index81B8, readsu16record+2, writes0 if out of range.");
+    semanticFunction(0x4FD2EL, "f33_start_pending_write_mode_request", v)
+        .setComment("81AF11 ->35AA2,B9320(11),12;21->B9320(22),22. Invokedwhile81B2=2E10.");
+    semanticFunction(0x4FD68L, "f33_finish_pending_write_mode_request", v)
+        .setComment("81AF12->clear;22->5199E(operation6diagnosticqueue),clear;otherunchanged.");
+    semanticFunction(0x4FD88L, "f33_write_0204_precondition", u32)
+        .setComment("UnsignedE892>ROM318AE512 =>5 else0;LDHU/CMP/CMOVH4FD88..4FD9A.");
+    semanticFunction(0x4FD9CL, "f33_write_0204_stage_mode_persistence", u32,
+        new ParameterImpl("payload", bytes, currentProgram),
+        new ParameterImpl("unused_length", u16, currentProgram))
+        .setComment("4FDA0 tst1bit7,1[r6];81AF=11/21,81B2=2E10,r10=2. Byte0 ignored.");
+    semanticFunction(0x4FDB8L, "f33_write_2001_precondition", u32)
+        .setComment("Exact20-byte identity to4FD88.");
+    semanticFunction(0x4FDCCL, "f33_write_2001_request_record101_reset", u32,
+        new ParameterImpl("payload", bytes, currentProgram),
+        new ParameterImpl("unused_length", u16, currentProgram))
+        .setComment("ExactAEBA8 allzero limitsB5A74 acceptedbyte1. B5EBA ignoresbyte,setsB25511/returns1;callbackstatus2,owner2E10;invalid4,clearowner.");
+    semanticFunction(0x4FE02L, "f33_write_2002_precondition", u32)
+        .setComment("Exact20-byte identity to4FD88.");
+    semanticFunction(0x4FE16L, "f33_write_2002_stage_record102_mode", u32,
+        new ParameterImpl("payload", bytes, currentProgram),
+        new ParameterImpl("unused_length", u16, currentProgram))
+        .setComment("Byte0/1->55AAAA55/AA5555AA B7092;2/pending. Other4 clearsowner only.");
+    semanticFunction(0x4FE5EL, "f33_write_2005_precondition", u32)
+        .setComment("Exact20-byte identity to4FD88.");
+    semanticFunction(0x4FE72L, "f33_write_2005_stage_record103_slot3", u32,
+        new ParameterImpl("payload", bytes, currentProgram),
+        new ParameterImpl("unused_length", u16, currentProgram))
+        .setComment("Byte readtor7,selector3r6 at4FE78..7C; B69A8 staging,2E10,status2.");
+    semanticFunction(0x4FE8EL, "f33_write_2006_precondition", u32)
+        .setComment("Exact20-byte identity to4FD88.");
+    semanticFunction(0x4FEA2L, "f33_write_2006_stage_record103_slot4", u32,
+        new ParameterImpl("payload", bytes, currentProgram),
+        new ParameterImpl("unused_length", u16, currentProgram))
+        .setComment("Byte readtor7,selector4;B69A8 staging,2E10,status2.");
+    semanticFunction(0x4FEBEL, "f33_write_2007_precondition", u32)
+        .setComment("Exact20-byte identity to4FD88.");
+    semanticFunction(0x4FED2L, "f33_write_2007_stage_record103_slot5", u32,
+        new ParameterImpl("payload", bytes, currentProgram),
+        new ParameterImpl("unused_length", u16, currentProgram))
+        .setComment("Byte readtor7,selector5;B69A8 staging,2E10,status2.");
+    semanticFunction(0x4FEEEL, "f33_write_2008_precondition", u32)
+        .setComment("Exact20-byte identity to4FD88.");
+    semanticFunction(0x4FF02L, "f33_write_2008_stage_record103_slot6", u32,
+        new ParameterImpl("payload", bytes, currentProgram),
+        new ParameterImpl("unused_length", u16, currentProgram))
+        .setComment("Byte readtor7,selector6;B69A8 staging,2E10,status2.");
+    semanticFunction(0x4FF1EL, "f33_write_2009_precondition", u32)
+        .setComment("Exact20-byte identity to4FD88.");
+    semanticFunction(0x4FF32L, "f33_write_2009_stage_record103_slot7", u32,
+        new ParameterImpl("payload", bytes, currentProgram),
+        new ParameterImpl("unused_length", u16, currentProgram))
+        .setComment("Byte readtor7,selector7;B69A8 staging,2E10,status2.");
+    semanticFunction(0x4FF56L, "f33_write_200d_precondition", u32)
+        .setComment("Exact20-byte identity to4FD88.");
+    semanticFunction(0x4FF6AL, "f33_write_200d_stage_record103_slot8", u32,
+        new ParameterImpl("payload", bytes, currentProgram),
+        new ParameterImpl("unused_length", u16, currentProgram))
+        .setComment("Byte readtor7,selector8;B69A8 staging,2E10,status2.");
+    semanticFunction(0x4FF86L, "f33_write_2010_precondition", u32)
+        .setComment("Exact20-byte identity to4FD88.");
+    semanticFunction(0x4FF9AL, "f33_write_2010_stage_mode_pair", u32,
+        new ParameterImpl("payload", bytes, currentProgram),
+        new ParameterImpl("unused_length", u16, currentProgram))
+        .setComment("4FFB0 subtract1,4FFB4 cmp1,4FFB6 unsignedbh accepts1 AND2 aliases;0 alternatepair. B8FB2 returns0.4FFCA4D118 returns0/4;4FFD8 storedoesnotclobberr10. NOTvoid.");
+    semanticFunction(0x4FFE0L, "f33_write_2012_precondition", u32)
+        .setComment("00527f00=mov0,r10;jmplp, unconditional.");
+    semanticFunction(0x4FFE4L, "f33_write_2012_latch_availability_override", u32,
+        new ParameterImpl("payload", bytes, currentProgram),
+        new ParameterImpl("unused_length", u16, currentProgram))
+        .setComment("Byte1->B41A4/latchB18F5A,status0;else4. Doesnotclear81B2.");
+    semanticFunction(0x4FFFEL, "f33_write_2013_precondition", u32)
+        .setComment("GNU exact40bytes:80A5!=0 OR80A0!=0 ORu16E892>512=>5 else0. a497a5c8 displacementc8a5 loads80A5, NOT80A4. Seeded from the exact callback pointer.");
+    semanticFunction(0x50026L, "f33_write_2013_service_numeric_target", u32,
+        new ParameterImpl("payload", bytes, currentProgram),
+        new ParameterImpl("unused_length", u16, currentProgram))
+        .setComment("5002C/2E loads,50030 shl8,50032or;B8A4C fullu16setterB418;owner0/status0.");
+    semanticFunction(0x50042L, "f33_write_2014_precondition", u32)
+        .setComment("Exact40-byte identity4FFFE, GNU decoded50042..50068;receive-status80A5 separate fromgeneration80A4.");
+    semanticFunction(0x5006AL, "f33_write_2014_service_qualification_mode", u32,
+        new ParameterImpl("payload", bytes, currentProgram),
+        new ParameterImpl("unused_length", u16, currentProgram))
+        .setComment("0/1->B3D2 0/5A throughB85A2;invalid4 no setter. All clear81B2.");
+    semanticFunction(0x500A2L, "f33_diag_routine_1001_admit", u32)
+        .setComment("Raw500A2..AC819A==1?5:0;nooperationinputconsumed.");
+    semanticFunction(0x500AEL, "f33_diag_routine_1001_family_capabilities", u32,
+        new ParameterImpl("control_type", u8, currentProgram),
+        new ParameterImpl("unused_input", bytes, currentProgram),
+        new ParameterImpl("unused_input_length", u16, currentProgram),
+        new ParameterImpl("output", bytes, currentProgram),
+        new ParameterImpl("output_length", halves, currentProgram))
+        .setComment("start:4D222(out,32) builds high-byte family support bitmap using low-byte-zero RID entries;outlen32,result2. results:byte,outlen1;other=>7. No asynchronous application service. Raw500AE..50886: R6zxbcontrols1/2/3;R9output;fifthargumentatentrySP+0pointsu16length(st.h);return32-bitR10;inputargumentsunusedbytheseactions. Result requestsproduce1byte;starts/stops0exceptcapabilitystarts32.");
+    semanticFunction(0x500F8L, "f33_diag_routine_1000_admit", u32)
+        .setComment("819A==1?5:0.");
+    semanticFunction(0x50104L, "f33_diag_routine_1000_capabilities", u32,
+        new ParameterImpl("control_type", u8, currentProgram),
+        new ParameterImpl("unused_input", bytes, currentProgram),
+        new ParameterImpl("unused_input_length", u16, currentProgram),
+        new ParameterImpl("output", bytes, currentProgram),
+        new ParameterImpl("output_length", halves, currentProgram))
+        .setComment("start:4D308(1000,out,32) builds10xx RID support bitmap from26918;outlen=32;result=2 immediately. results:copy result byte,outlen1. Other direct control=>7. No asynchronous application service. Raw500AE..50886: R6zxbcontrols1/2/3;R9output;fifthargumentatentrySP+0pointsu16length(st.h);return32-bitR10;inputargumentsunusedbytheseactions. Result requestsproduce1byte;starts/stops0exceptcapabilitystarts32.");
+    semanticFunction(0x50152L, "f33_diag_routine_1002_admit", u32,
+        new ParameterImpl("control_type", u8, currentProgram))
+        .setComment("819A==1=>5. start requires unsignedE892<=CodeFlash318AE (0200);already running=>8;results accepted;other=>7. Proof50164..72. Raw50152..5081E zxbR6andfullR10return0/5/7/8;gate details in companion recovery rows.");
+    semanticFunction(0x5018EL, "f33_diag_routine_1002_normalize_lifecycle", u32,
+        new ParameterImpl("control_type", u8, currentProgram),
+        new ParameterImpl("unused_input", bytes, currentProgram),
+        new ParameterImpl("unused_input_length", u16, currentProgram),
+        new ParameterImpl("output", bytes, currentProgram),
+        new ParameterImpl("output_length", halves, currentProgram))
+        .setComment("start:35AA2 conditionally requests internal6AE2=22 normalization (only when6AF0 neitherFFFFFFFF norA55A5AA5 and6ADD neither88 nor11 and6AE2!=11), thenB9320(44) writesAF47, unconditionally marks result1,outlen0. ScheduledB9212 consumes44: ifAF46!=5A andB8D9C(1)==5A thenB8DDA(1) restarts lifecycle groupB439;setsAF46=5A,AF44 active,consumesAF47 and reports selector2 success. This is normalization acknowledgement, NOT lower group convergence. A rejected lower restart still sets normalization flag and acknowledges. Later normalizer request88 clearsAF46. Result3 returns byte,len1. Raw500AE..50886: R6zxbcontrols1/2/3;R9output;fifthargumentatentrySP+0pointsu16length(st.h);return32-bitR10;inputargumentsunusedbytheseactions. Result requestsproduce1byte;starts/stops0exceptcapabilitystarts32.");
+    semanticFunction(0x501D0L, "f33_diag_routine_1004_admit", u32,
+        new ParameterImpl("control_type", u8, currentProgram),
+        new ParameterImpl("input", bytes, currentProgram))
+        .setComment("Raw501D0..50212;819Ainhibit,startFFFFpayload,819E==1duplicate;noinputlengthconsumed.");
+    semanticFunction(0x50214L, "f33_diag_routine_1004_request_history_rewrite", u32,
+        new ParameterImpl("control_type", u8, currentProgram),
+        new ParameterImpl("unused_input", bytes, currentProgram),
+        new ParameterImpl("unused_input_length", u16, currentProgram),
+        new ParameterImpl("output", bytes, currentProgram),
+        new ParameterImpl("output_length", halves, currentProgram))
+        .setComment("start calls518E0 operation5 producer, translates return through4D118,marks result1 on0,len0. Idle producer immediately5551A history initialization then lifecycle85;busy producer deduplicates5/6 in four slots or writes producer slot (no full acknowledgement). Parent-owned5F91C/5F972 scheduler and51A98 later apply global AA/A5 hold, then85 needs89C4==0 for selector3 success,otherwise failure20;dispatcher51A12 may start queued request afterwards. No persistent success is implied by immediate callback return0. Raw500AE..50886: R6zxbcontrols1/2/3;R9output;fifthargumentatentrySP+0pointsu16length(st.h);return32-bitR10;inputargumentsunusedbytheseactions. Result requestsproduce1byte;starts/stops0exceptcapabilitystarts32.");
+    semanticFunction(0x50258L, "f33_diag_routine_1007_admit", u32,
+        new ParameterImpl("control_type", u8, currentProgram))
+        .setComment("start requiresB8D9C(0)==5A,then result!=1;failure5 or duplicate8. No819A or speed gate. Results always admitted;other=>7. Raw50152..5081E zxbR6andfullR10return0/5/7/8;gate details in companion recovery rows.");
+    semanticFunction(0x5028EL, "f33_diag_routine_1007_restart_lifecycle_group0", u32,
+        new ParameterImpl("control_type", u8, currentProgram),
+        new ParameterImpl("unused_input", bytes, currentProgram),
+        new ParameterImpl("unused_input_length", u16, currentProgram),
+        new ParameterImpl("output", bytes, currentProgram),
+        new ParameterImpl("output_length", halves, currentProgram))
+        .setComment("startB8DDA(0) initializes B438=11,counterB440=0 (with shared dependent reinitializers whenB439!=11),result1,len0. B8D9C(0) checksB439 andB43A, notB438. B8B38 waits five status wordsB2D4/B26C/B324/B490/B352 high bytes88;all low bytes22=>group22 and selector4 success;otherwisegroup44 andfail20. Waiting timeout setsB43C=5A but does not directly acknowledge. Control type3 returns result byte,len1. Raw500AE..50886: R6zxbcontrols1/2/3;R9output;fifthargumentatentrySP+0pointsu16length(st.h);return32-bitR10;inputargumentsunusedbytheseactions. Result requestsproduce1byte;starts/stops0exceptcapabilitystarts32.");
+    semanticFunction(0x502CAL, "f33_diag_routine_1008_admit", u32,
+        new ParameterImpl("control_type", u8, currentProgram))
+        .setComment("startB8D9C(2)==5A,then result!=1;failure5/duplicate8. Kind2 checksB438/B439,notB43A. No819A/speed gate;results admitted. Raw50152..5081E zxbR6andfullR10return0/5/7/8;gate details in companion recovery rows.");
+    semanticFunction(0x50300L, "f33_diag_routine_1008_restart_lifecycle_group2", u32,
+        new ParameterImpl("control_type", u8, currentProgram),
+        new ParameterImpl("unused_input", bytes, currentProgram),
+        new ParameterImpl("unused_input_length", u16, currentProgram),
+        new ParameterImpl("output", bytes, currentProgram),
+        new ParameterImpl("output_length", halves, currentProgram))
+        .setComment("startB8E52 restarts five dependencies,setsB43A=11,counterB442=0,result1,len0. B8CCE waits B2CE/B25C/B302/B462/B334;all22=>selector5 success andgroup22;all no longer11 but not all22=>failure20 andgroup44;otherwise waits withB43D timeout flag. Results byte,len1. Raw500AE..50886: R6zxbcontrols1/2/3;R9output;fifthargumentatentrySP+0pointsu16length(st.h);return32-bitR10;inputargumentsunusedbytheseactions. Result requestsproduce1byte;starts/stops0exceptcapabilitystarts32.");
+    semanticFunction(0x5033AL, "f33_diag_routine_1009_admit", u32,
+        new ParameterImpl("control_type", u8, currentProgram))
+        .setComment("819A!=1;start result!=1 else8;results admitted;other7. No additional feature/E958 gate in THIS F33 raw precondition! Do not transfer Sienna semantics. Raw50152..5081E zxbR6andfullR10return0/5/7/8;gate details in companion recovery rows.");
+    semanticFunction(0x50366L, "f33_diag_routine_1009_reset_record103", u32,
+        new ParameterImpl("control_type", u8, currentProgram),
+        new ParameterImpl("unused_input", bytes, currentProgram),
+        new ParameterImpl("unused_input_length", u16, currentProgram),
+        new ParameterImpl("output", bytes, currentProgram),
+        new ParameterImpl("output_length", halves, currentProgram))
+        .setComment("startB69C6 resets B6990/B692A and setsB2C9=11,result1,len0. B6658 waitsB2C8/B2CA not22,thenB65CA queues selector103 with first8 zero,last8 FF;state22 pollsFF0C4(103):exact10 success=>B2C9=44,selector6 success plus reinit;high20 remains pending;other=>state88 and selector6 fail20. Results byte,len1. Admission, RAM reset and asynchronous selector103 persistence are distinct. Raw500AE..50886: R6zxbcontrols1/2/3;R9output;fifthargumentatentrySP+0pointsu16length(st.h);return32-bitR10;inputargumentsunusedbytheseactions. Result requestsproduce1byte;starts/stops0exceptcapabilitystarts32.");
+    semanticFunction(0x503A0L, "f33_diag_routine_1100_admit", u32)
+        .setComment("Raw503A0..AA819A==1?5:0.");
+    semanticFunction(0x503ACL, "f33_diag_routine_1100_capabilities", u32,
+        new ParameterImpl("control_type", u8, currentProgram),
+        new ParameterImpl("unused_input", bytes, currentProgram),
+        new ParameterImpl("unused_input_length", u16, currentProgram),
+        new ParameterImpl("output", bytes, currentProgram),
+        new ParameterImpl("output_length", halves, currentProgram))
+        .setComment("start4D308(1100,out,32) builds11xx RID support bitmap,result2,outlen32;results byte,len1;other7. Raw500AE..50886: R6zxbcontrols1/2/3;R9output;fifthargumentatentrySP+0pointsu16length(st.h);return32-bitR10;inputargumentsunusedbytheseactions. Result requestsproduce1byte;starts/stops0exceptcapabilitystarts32.");
+    semanticFunction(0x503FAL, "f33_diag_routine_1103_admit", u32,
+        new ParameterImpl("control_type", u8, currentProgram))
+        .setComment("819A!=1;start35A06()==1 and81A6!=1,then81A3!=1;5 vs8.35A06 raw gatesE81A==1,66B8>=30E32,E892<=30E34,80A5/80A0==0,saturatingabs66A8<512,clear6764&81FF. Results allowed;other7. Raw50152..5081E zxbR6andfullR10return0/5/7/8;gate details in companion recovery rows.");
+    semanticFunction(0x5043EL, "f33_diag_routine_1103_request_service1", u32,
+        new ParameterImpl("control_type", u8, currentProgram),
+        new ParameterImpl("unused_input", bytes, currentProgram),
+        new ParameterImpl("unused_input_length", u16, currentProgram),
+        new ParameterImpl("output", bytes, currentProgram),
+        new ParameterImpl("output_length", halves, currentProgram))
+        .setComment("start35A96 sets6AE2=11 andreturns2;callback converts to0,result1,len0.357C0 later requestsB3224(1),sets6ADD=88 on queued-1 or reportsselector8 failure. Existing family0500\u21920522 acquisition, selector100 learned quad+marker and service cleanup ownership in \u00a777.24 applies. This is not direct physical acquisition or immediate persistence. Results byte,len1. Raw500AE..50886: R6zxbcontrols1/2/3;R9output;fifthargumentatentrySP+0pointsu16length(st.h);return32-bitR10;inputargumentsunusedbytheseactions. Result requestsproduce1byte;starts/stops0exceptcapabilitystarts32.");
+    semanticFunction(0x5047EL, "f33_diag_routine_1106_admit", u32,
+        new ParameterImpl("control_type", u8, currentProgram))
+        .setComment("819A!=1;start unsignedE892<=0200,thenresult!=1 else8;results allowed;other7. Raw50152..5081E zxbR6andfullR10return0/5/7/8;gate details in companion recovery rows.");
+    semanticFunction(0x504BCL, "f33_diag_routine_1106_restart_lifecycle_groups", u32,
+        new ParameterImpl("control_type", u8, currentProgram),
+        new ParameterImpl("unused_input", bytes, currentProgram),
+        new ParameterImpl("unused_input_length", u16, currentProgram),
+        new ParameterImpl("output", bytes, currentProgram),
+        new ParameterImpl("output_length", halves, currentProgram))
+        .setComment("startB524A invokesB5EC6/B707A/B8FA8 andsetsB214=11,result1,len0. B51BE succeeds onlyB311/B471/B256 all44\u2192group22 andselector9 success;when none remain11/22 but notall44\u2192group44 andfail20;otherwise waits. No local callback persistence/done assumption. Results byte,len1. Raw500AE..50886: R6zxbcontrols1/2/3;R9output;fifthargumentatentrySP+0pointsu16length(st.h);return32-bitR10;inputargumentsunusedbytheseactions. Result requestsproduce1byte;starts/stops0exceptcapabilitystarts32.");
+    semanticFunction(0x504F6L, "f33_diag_routine_1108_admit", u32,
+        new ParameterImpl("control_type", u8, currentProgram))
+        .setComment("819A!=1;start result!=1 else8;no local speed gate;results allowed;other7. Raw50152..5081E zxbR6andfullR10return0/5/7/8;gate details in companion recovery rows.");
+    semanticFunction(0x50524L, "f33_diag_routine_1108_request_checkpoint_reset", u32,
+        new ParameterImpl("control_type", u8, currentProgram),
+        new ParameterImpl("unused_input", bytes, currentProgram),
+        new ParameterImpl("unused_input_length", u16, currentProgram),
+        new ParameterImpl("output", bytes, currentProgram),
+        new ParameterImpl("output_length", halves, currentProgram))
+        .setComment("start517DC operation2 producer and4D118;on0 result1,len0. Idle51788 performs multi-owner diagnostic reset/preservation then lifecycle82;busy deduplicates2/6 or writes producer slot,no capacity acknowledgement. Existing diagnostic scheduler51A98 requires all four persistence phaseszero for82 success;AA/A5 anygroup holds;other terminal phase yieldsfail20. Aggregateoperation86 canack both selector3/A via4D0E8. Results byte,len1. Raw500AE..50886: R6zxbcontrols1/2/3;R9output;fifthargumentatentrySP+0pointsu16length(st.h);return32-bitR10;inputargumentsunusedbytheseactions. Result requestsproduce1byte;starts/stops0exceptcapabilitystarts32.");
+    semanticFunction(0x50568L, "f33_diag_routine_1109_admit", u32,
+        new ParameterImpl("control_type", u8, currentProgram))
+        .setComment("819A!=1;startE892<=0200,81A3!=1,80A0==0,80A5==0,E81E==0,E884!=5A,E88A!=5A,then ownresult!=1 (8);otherwise5. Results allowed;other7. Proof5057A..5C8. Raw50152..5081E zxbR6andfullR10return0/5/7/8;gate details in companion recovery rows.");
+    semanticFunction(0x505D8L, "f33_diag_routine_1109_request_record100_reset", u32,
+        new ParameterImpl("control_type", u8, currentProgram),
+        new ParameterImpl("unused_input", bytes, currentProgram),
+        new ParameterImpl("unused_input_length", u16, currentProgram),
+        new ParameterImpl("output", bytes, currentProgram),
+        new ParameterImpl("output_length", halves, currentProgram))
+        .setComment("startB90CA(22,1),4D118:pending-1 maps2 then callback0+result1;immediate0 givesresult2;other errors propagate. B90CA rejects modefamily0100/0900;nonzero publishedF208 triggers3599E to queue redundant selector100 defaultquad0800+marker0 when6AF0!=0 andsetsB495=5A,B497=5A,B498=1. If marker already0 returns0 (no required update). B906A waits publishedF00F==11,44 terminalsuccess;otherterminalfails;B8FEE reportsselectorB andclearsrequesterbit. Callback acceptance, redundant application record submission, lower NvMsoftwarecompletion and physical durability differ. Raw500AE..50886: R6zxbcontrols1/2/3;R9output;fifthargumentatentrySP+0pointsu16length(st.h);return32-bitR10;inputargumentsunusedbytheseactions. Result requestsproduce1byte;starts/stops0exceptcapabilitystarts32.");
+    semanticFunction(0x5062CL, "f33_diag_routine_110a_admit", u32,
+        new ParameterImpl("control_type", u8, currentProgram))
+        .setComment("819A!=1. startB84B8(kind1) qualified,81A6!=1,E884/E88A!=5A,ownresult!=1 (8). stopresult!=0 else8;results accepted;other7. Kind1 is retainedR6 at50646,not absentargument. Raw50152..5081E zxbR6andfullR10return0/5/7/8;gate details in companion recovery rows.");
+    semanticFunction(0x50698L, "f33_diag_routine_110a_control_service2", u32,
+        new ParameterImpl("control_type", u8, currentProgram),
+        new ParameterImpl("unused_input", bytes, currentProgram),
+        new ParameterImpl("unused_input_length", u16, currentProgram),
+        new ParameterImpl("output", bytes, currentProgram),
+        new ParameterImpl("output_length", halves, currentProgram))
+        .setComment("startB3224(2),4D118;queued=>callback0,B85D0 clearsstoplatch,result1,len0. stop whenrunning1 callsB85BC (B3DD=5A,B3CB=0) but leavesresult1;when terminal nonzero clearsresult0;len0. Existing family0520 kind1 engine, B303E completion and forcedexitB3194 apply. Results byte,len1. Raw500AE..50886: R6zxbcontrols1/2/3;R9output;fifthargumentatentrySP+0pointsu16length(st.h);return32-bitR10;inputargumentsunusedbytheseactions. Result requestsproduce1byte;starts/stops0exceptcapabilitystarts32.");
+    semanticFunction(0x50702L, "f33_diag_routine_110b_admit_noop", u32)
+        .setComment("Raw50702mov0,R10;50704jmpLP.");
+    semanticFunction(0x50706L, "f33_diag_routine_110b_action_noop", u32)
+        .setComment("Raw50706mov0,R10;50708jmpLP;NOoutputlengthor81A8resultaccess.");
+    semanticFunction(0x5070AL, "f33_diag_routine_110c_admit", u32,
+        new ParameterImpl("control_type", u8, currentProgram))
+        .setComment("819A!=1;startB84B8(kind2),81A6!=1,E884/E88A!=5A,andE889!=0;ownresult!=1 else8. E889 is published ID2 completionB3CA,not generic NvM validity. No stop support. Raw50152..5081E zxbR6andfullR10return0/5/7/8;gate details in companion recovery rows.");
+    semanticFunction(0x5076AL, "f33_diag_routine_110c_request_service3", u32,
+        new ParameterImpl("control_type", u8, currentProgram),
+        new ParameterImpl("unused_input", bytes, currentProgram),
+        new ParameterImpl("unused_input_length", u16, currentProgram),
+        new ParameterImpl("output", bytes, currentProgram),
+        new ParameterImpl("output_length", halves, currentProgram))
+        .setComment("startB3224(3),4D118 queued=>callback0,result1,len0. Existing0520 kind2 preserves center/extrema andresumestracking;B303E emitsselectorE;forcedexit fails (no stop latch). Results byte,len1. Raw500AE..50886: R6zxbcontrols1/2/3;R9output;fifthargumentatentrySP+0pointsu16length(st.h);return32-bitR10;inputargumentsunusedbytheseactions. Result requestsproduce1byte;starts/stops0exceptcapabilitystarts32.");
+    semanticFunction(0x507B2L, "f33_diag_routine_110d_admit", u32,
+        new ParameterImpl("control_type", u8, currentProgram))
+        .setComment("819A!=1;startB84B8(kind3),81A6!=1,E884/E88A!=5A,ownresult!=1 else8. stopresult!=0 else8;results allowed. Raw50152..5081E zxbR6andfullR10return0/5/7/8;gate details in companion recovery rows.");
+    semanticFunction(0x50820L, "f33_diag_routine_110d_control_service4", u32,
+        new ParameterImpl("control_type", u8, currentProgram),
+        new ParameterImpl("unused_input", bytes, currentProgram),
+        new ParameterImpl("unused_input_length", u16, currentProgram),
+        new ParameterImpl("output", bytes, currentProgram),
+        new ParameterImpl("output_length", halves, currentProgram))
+        .setComment("startB3224(4),4D118 queued=>callback0,B85CA clearsstoplatch,result1,len0. stoprunning1 callsB85AE settingB3DC=5A,B3CB=0,doesnotterminallycompleteresult;terminalnonzero clearsresult0. Existing0520kind3 andB303E/forcedexit cleanup apply. Results byte,len1. Raw500AE..50886: R6zxbcontrols1/2/3;R9output;fifthargumentatentrySP+0pointsu16length(st.h);return32-bitR10;inputargumentsunusedbytheseactions. Result requestsproduce1byte;starts/stops0exceptcapabilitystarts32.");
+    semanticFunction(0x5088AL, "f33_diag_routine_clear_nonrunning_results", v,
+        new ParameterImpl("preserve_selector2", u8, currentProgram))
+        .setComment("Alwayspreservesrunning1;argument5Aadditionallypreservesindex2.4D582calls0.");
+    semanticFunction(0x508CCL, "f33_diag_routine_publish_terminal_result", v,
+        new ParameterImpl("result_selector", u8, currentProgram),
+        new ParameterImpl("completion_status", u8, currentProgram))
+        .setComment("Onlyselector<16andcurrentresult1;status10noop,0\u21922,30\u21920,other\u21923.8-bitselector/statusmasking;no meaningfulreturn.");
+    semanticFunction(0x8B396L, "f33_reset_write_did_transaction", v)
+        .setComment("Clearsindex3B1E/completion3B20/lifecycle3B21/actionstatus3B25; sidestatus1,opaqueFF.");
+    semanticFunction(0x8B400L, "f33_dcm_probe_did_metadata", u32,
+        new ParameterImpl("did", u16, currentProgram))
+        .setComment("Transparent call4D36E; r10 result consumed951DA/9521E despite former void.");
+    semanticFunction(0x8B40EL, "f33_dcm_selected_did_payload_length", v,
+        new ParameterImpl("length", halves, currentProgram))
+        .setComment("Transparent call4D492; pointerr6 must be preserved in ABI.");
+    semanticFunction(0x8B572L, "f33_write_did_precondition_phase", u32,
+        new ParameterImpl("matched_index", halves, currentProgram),
+        new ParameterImpl("did", u16, currentProgram))
+        .setComment("Lifecycle3B21=0/1 andlowerstatus merge; consumes8E4BC status, emitsbyte-normalized meaningfulr10.");
+    semanticFunction(0x8B632L, "f33_write_did_payload_phase", u32,
+        new ParameterImpl("matched_index", u16, currentProgram),
+        new ParameterImpl("payload", bytes, currentProgram),
+        new ParameterImpl("length", u16, currentProgram))
+        .setComment("8B66C cmp8,66E unsigned guard for7-byte staging; originalpointer/length still passed8E506 at6E0..6E8.8B6FC merge result survives stores through71C and consumedcaller758. NOTvoid.");
+    semanticFunction(0x8B720L, "f33_write_did_request_adapter", u32,
+        new ParameterImpl("did", u16, currentProgram),
+        new ParameterImpl("payload", bytes, currentProgram),
+        new ParameterImpl("length", u16, currentProgram),
+        new ParameterImpl("nrc", bytes, currentProgram))
+        .setComment("8B742 prephase;746/754/758 r10 dataflow.2->adapter10 andcompletionFF,else8E6EC translatesNRC.");
+    semanticFunction(0x8B7B8L, "f33_diag_reset_routine_class_state", v)
+        .setComment("Resets3B2C..35 andbuffers3B36[32],3B56[49],3B87[68];noapplicationservicecancelorresultpublication. Configuredwrapperoperation/status>=2\u21928B83C\u2192thisreset,distinctfromcontrol-type2stop.");
+    semanticFunction(0x8B858L, "f33_diag_routine_crypto_admit", u32)
+        .setComment("8B85Ccalls8B854whichmov0,R10;jmpLP.");
+    semanticFunction(0x8B864L, "f33_diag_routine_100e_activate_fixed_crypto_bank0", u32)
+        .setComment("6A028activatesonly5096==0;callbackreturns0,nooutput/lengthaccess.");
+    semanticFunction(0x8B872L, "f33_diag_routine_100f_activate_fixed_crypto_bank1", u32)
+        .setComment("6A0AEactivatesonly509B==0;callbackreturns0;fixed16bytecommand5boundarymaintained.");
+    semanticFunction(0x8BC86L, "f33_diag_routine_begin_admission", u32,
+        new ParameterImpl("rid", u16, currentProgram),
+        new ParameterImpl("control_type", u8, currentProgram),
+        new ParameterImpl("callback_index", halves, currentProgram),
+        new ParameterImpl("encoded_input", bytes, currentProgram),
+        new ParameterImpl("input_length", u16, currentProgram))
+        .setComment("Stages7bytes sideevent88000010,selectsprecondition via8E562,persists3B30..33;pendingstatus2 retained.");
+    semanticFunction(0x8BD7CL, "f33_diag_routine_run_action_phase", u32,
+        new ParameterImpl("control_type", u8, currentProgram),
+        new ParameterImpl("callback_index", u16, currentProgram),
+        new ParameterImpl("encoded_input", bytes, currentProgram),
+        new ParameterImpl("input_length", u16, currentProgram),
+        new ParameterImpl("output", bytes, currentProgram),
+        new ParameterImpl("output_length", halves, currentProgram))
+        .setComment("Sideevent88000011,8E5BCcall8BE1A/8BE8E,captures32maxoutputorresultbyte,merges8E602,clearsstateonterminal.");
+    semanticFunction(0x8BF60L, "f33_diag_routine_application_class", u32,
+        new ParameterImpl("control_type", u8, currentProgram),
+        new ParameterImpl("configured_index", u16, currentProgram),
+        new ParameterImpl("encoded_input", u32, currentProgram),
+        new ParameterImpl("output", bytes, currentProgram),
+        new ParameterImpl("unused_length", halves, currentProgram),
+        new ParameterImpl("nrc", bytes, currentProgram))
+        .setComment("8BC86\u21928BD7C;2-byteinputfromu32high/low;constantlength7;selectedindex3B2C;pending2mapsreturn10;8E6ECmapsotherreturns. Fifthargumentunused.");
+    semanticFunction(0x8E4BCL, "f33_find_write_did_and_check_precondition", u32,
+        new ParameterImpl("matched_index", halves, currentProgram),
+        new ParameterImpl("did", u16, currentProgram))
+        .setComment("8E4C0 savesdid,4C2 indexptr;13-entry table25640. Fullr10 cmp3 at4F0 re-enters SAME index at4CA via4F2; increments only4F6. Storesu16 index4FE.");
+    semanticFunction(0x8E506L, "f33_dispatch_or_poll_write_did_action", u32,
+        new ParameterImpl("completion_status", u8, currentProgram),
+        new ParameterImpl("matched_index", u16, currentProgram),
+        new ParameterImpl("payload", bytes, currentProgram),
+        new ParameterImpl("length", u16, currentProgram))
+        .setComment("8E50A..510 savesargs;3B25==2 bypassescallback, usescompletion withFF->2;elseboundedfixedcallback. Storeslateststatus8B7AE.");
+    semanticFunction(0x8E562L, "f33_diag_routine_select_precondition", u32,
+        new ParameterImpl("callback_index", halves, currentProgram),
+        new ParameterImpl("rid", u16, currentProgram),
+        new ParameterImpl("control_type", u8, currentProgram),
+        new ParameterImpl("input", bytes, currentProgram),
+        new ParameterImpl("input_length", u16, currentProgram))
+        .setComment("8E566/56C retainu16RID;56E zxbcontrol;594 ld.hu original fifthargument;5A0 indirectcall row+4;5A4/A6 fullR10==3 re-enters sameindex;5AA only mismatch/null increments;5B4 writesu16index.");
+    semanticFunction(0x8E5BCL, "f33_diag_routine_dispatch_action", u32,
+        new ParameterImpl("callback_index", u16, currentProgram),
+        new ParameterImpl("control_type", u8, currentProgram),
+        new ParameterImpl("input", bytes, currentProgram),
+        new ParameterImpl("input_length", u16, currentProgram),
+        new ParameterImpl("output", bytes, currentProgram),
+        new ParameterImpl("output_length", halves, currentProgram))
+        .setComment("8E5C0/C2/C4 zxh/zxb/zxh;5C8 bounds19;5D6+5F6 row+8;5E2+5EC loadoriginalstackarg6/5 andshuffle5argcallback;5FA indirectcall.");
+    semanticFunction(0x8E602L, "f33_merge_two_diagnostic_statuses", u32,
+        new ParameterImpl("application_status", u8, currentProgram),
+        new ParameterImpl("lower_status", u8, currentProgram),
+        new ParameterImpl("success_status", u8, currentProgram),
+        new ParameterImpl("pending_status", u8, currentProgram))
+        .setComment("ZXB R6/R7/R8/R9 at8E602..608; choose pending if either input is pending, otherwise local failure or nonzero side result after local success. MOV R9,R10 at8E620 and JMP LP guarantee full zero-extended32 result0..255.");
+    semanticFunction(0x8E624L, "f33_diag_routine_local_dispatch_enabled", u32)
+        .setComment("Exactfunctionreturns5Aunconditionally;nominalside-statusargumentisignored. No status-dependent admission inferred.");
+    semanticFunction(0x8E6ECL, "f33_diagnostic_status_to_nrc", u32,
+        new ParameterImpl("status", u8, currentProgram),
+        new ParameterImpl("nrc", bytes, currentProgram))
+        .setComment("status0 =>0,NRC0;other =>1 andconfigured byte mapping, no pending scheduling itself.");
+    semanticFunction(0x94288L, "f33_dcm_resolve_did_group", u32,
+        new ParameterImpl("did", u16, currentProgram),
+        new ParameterImpl("table_kind", u8, currentProgram),
+        new ParameterImpl("group", halves, currentProgram),
+        new ParameterImpl("capabilities", bytes, currentProgram))
+        .setComment("Writes capability0 then invokes94148 forkind1 or941EC; actual resolver r10 is consumed9586C. Existing void prototype is wrong.");
+    semanticFunction(0x95978L, "f33_dcm_write_did_service", u32,
+        new ParameterImpl("operation", u8, currentProgram),
+        new ParameterImpl("message", messagePointer, currentProgram))
+        .setComment("0 starts9586C,2 cancels958F4; all paths meaningful r10.");
+    semanticFunction(0x972F2L, "f33_diag_routine_control_type_supported", u32,
+        new ParameterImpl("configured_index", u16, currentProgram),
+        new ParameterImpl("control_type", u8, currentProgram))
+        .setComment("269B9+15*index offsets4/9/1 forcontrols1/2/3;0supported,1rejected;indexbound26492.");
+    semanticFunction(0xB41A4L, "f33_latch_availability_override", v)
+        .setComment("DirectB18F5A;noNvMrequest.");
+    semanticFunction(0xB51BEL, "f33_monitor_routine_1106_lifecycle_groups", v)
+        .setComment("B214=11waitsB311/B471/B256;all44success,otherterminalfail;selector9.");
+    semanticFunction(0xB5EBAL, "f33_request_record101_reset_write", u32)
+        .setComment("B5EBA..C4 onlystoresB255=11 andreturns1;incomingr6payloadunused.");
+    semanticFunction(0xB6658L, "f33_monitor_routine_1009_record103_reset", v)
+        .setComment("B2C9states11\u219222\u219244/88;B65CAqueues103;FF0C4status10success/high20pending;selector6.");
+    semanticFunction(0xB66D2L, "f33_submit_staged_record103_byte_write", v)
+        .setComment("Copieslive8bytes,selector1..8 replacesone,magicA55A5AA5,FF09C103;sharedstagingnotqueue.");
+    semanticFunction(0xB674EL, "f33_service_record103_byte_write", v)
+        .setComment("11->22 request whenpeerstatesnot22;pollrecord103;10->44reload/ack,20xwait,other88ackfailure.");
+    semanticFunction(0xB69A8L, "f33_stage_record103_byte_write", v,
+        new ParameterImpl("selector", u8, currentProgram),
+        new ParameterImpl("value", u8, currentProgram))
+        .setComment("B69BEB69C0 stores incomingr6 selectoratB2CC,r7 valueB2CB. B6990/B692A preserveboth registers. Corpus void(void) losesABI.");
+    semanticFunction(0xB7092L, "f33_stage_record102_mode_write", v,
+        new ParameterImpl("encoded_mode", u32, currentProgram))
+        .setComment("Resetsqualification,B31211,B31Cencodedmode,doesnotwriteliveB314.");
+    semanticFunction(0xB85A2L, "f33_set_service_qualification_mode", v,
+        new ParameterImpl("mode", u8, currentProgram))
+        .setComment("DirectbyteB3D2;B7CD0/B8474thresholdselection.");
+    semanticFunction(0xB8A4CL, "f33_set_service_numeric_target", v,
+        new ParameterImpl("target", u16, currentProgram))
+        .setComment("Directu16storeB418,consumedB89E0 onlywhenB40C5A.");
+    semanticFunction(0xB8B38L, "f33_monitor_routine_1007_lifecycle_group", v)
+        .setComment("B438=11waitsfive88xxstatuses;all8822success,otherterminalfail;selector4.");
+    semanticFunction(0xB8CCEL, "f33_monitor_routine_1008_lifecycle_group", v)
+        .setComment("B43A=11waitsfivegroupbytes;all22success,othernon11terminalfail;selector5.");
+    semanticFunction(0xB8FB2L, "f33_stage_encoded_mode_pair", u32,
+        new ParameterImpl("first", u32, currentProgram),
+        new ParameterImpl("second", u32, currentProgram))
+        .setComment("B47244,B480/B484=pair,r10=0. No recoveredreader ofstagedpair;NOTliveB474/B478.");
+    semanticFunction(0xB906AL, "f33_monitor_pending_learned_record_updates", v)
+        .setComment("B494/B495requestflags,publishedF011/F00Fstates;callsB8FEE11successor22fail;selectorBrequesterbit1handledthere.");
+    semanticFunction(0xB9212L, "f33_consume_lifecycle_normalization_request", v)
+        .setComment("AF47request44conditionallyrestartsB439,alwayssetsAF46=5Aandacknowledgesselector2thenconsumesrequest;notgroupcompletion.");
+    semanticFunction(0xFE09CL, "f33_stage_encoded_mode_pair_thunk", u32,
+        new ParameterImpl("first", u32, currentProgram),
+        new ParameterImpl("second", u32, currentProgram))
+        .setComment("TransparentthunktoB8FB2;return0used4FF9A.");
+    semanticFunction(0xFE0C4L, "f33_record103_byte_write_thunk", v,
+        new ParameterImpl("selector", u8, currentProgram),
+        new ParameterImpl("value", u8, currentProgram))
+        .setComment("Transparent CodeFlashthunk->B69A8, actualselectors3..8 fromconfiguredwritecallbacks.");
+    semanticFunction(0xFE1B4L, "f33_set_service_qualification_mode_thunk", v,
+        new ParameterImpl("mode", u8, currentProgram))
+        .setComment("TransparentthunkB85A2 from5006A.");
+    semanticFunction(0xFE1C8L, "f33_set_service_numeric_target_thunk", v,
+        new ParameterImpl("target", u16, currentProgram))
+        .setComment("TransparentthunkB8A4C from50026.");
+    FunctionDefinitionDataType writeDidPrecondition = new FunctionDefinitionDataType(category, "F33WriteDidPrecondition");
+    writeDidPrecondition.setReturnType(u32);
+    FunctionDefinitionDataType writeDidAction = new FunctionDefinitionDataType(category, "F33WriteDidAction");
+    writeDidAction.setReturnType(u32);
+    writeDidAction.setArguments(new ParameterDefinitionImpl("payload", bytes, null),
+        new ParameterDefinitionImpl("length", u16, null));
+    StructureDataType writeDid = new StructureDataType(category, "F33WriteDidCallbacks", 0);
+    writeDid.setPackingEnabled(true);
+    writeDid.add(u16, "identifier", "Configured diagnostic identifier.");
+    writeDid.add(u16, "opaque_02", "Zero in the exact registered table.");
+    writeDid.add(new PointerDataType(writeDidPrecondition, 4), "precondition", "Fixed callback or null; return3 retries same matched row.");
+    writeDid.add(new PointerDataType(writeDidAction, 4), "action", "Fixed callback or null; admission is separate from completion.");
+    semanticData(0x25640L, new ArrayDataType(resolve(writeDid), 13, 12), "f33_write_did_callbacks",
+        "Exact configured application callback records; no inferred OEM service names.");
+    FunctionDefinitionDataType routinePrecondition = new FunctionDefinitionDataType(category, "F33RoutinePrecondition");
+    routinePrecondition.setReturnType(u32);
+    routinePrecondition.setArguments(new ParameterDefinitionImpl("control_type", u8, null),
+        new ParameterDefinitionImpl("input", bytes, null),
+        new ParameterDefinitionImpl("input_length", u16, null));
+    FunctionDefinitionDataType routineAction = new FunctionDefinitionDataType(category, "F33RoutineAction");
+    routineAction.setReturnType(u32);
+    routineAction.setArguments(new ParameterDefinitionImpl("control_type", u8, null),
+        new ParameterDefinitionImpl("input", bytes, null),
+        new ParameterDefinitionImpl("input_length", u16, null),
+        new ParameterDefinitionImpl("output", bytes, null),
+        new ParameterDefinitionImpl("output_length", halves, null));
+    StructureDataType routine = new StructureDataType(category, "F33RoutineCallbacks", 0);
+    routine.setPackingEnabled(true);
+    routine.add(u16, "identifier", "Configured diagnostic identifier.");
+    routine.add(u16, "opaque_02", "Zero in the exact registered table.");
+    routine.add(new PointerDataType(routinePrecondition, 4), "precondition", "Fixed callback or null; return3 retries same matched row.");
+    routine.add(new PointerDataType(routineAction, 4), "action", "Fixed callback or null; admission is separate from completion.");
+    semanticData(0x256DCL, new ArrayDataType(resolve(routine), 19, 12), "f33_routine_callbacks",
+        "Exact configured application callback records; no inferred OEM service names.");
+    // Real leaves preserve the staged write's incoming R6/R7; a generic call
+    // model otherwise invents extraout values. The local-enable leaf is exact5A.
+    getFunctionAt(toAddr(0xB6990L)).setInline(true);
+    getFunctionAt(toAddr(0xB692AL)).setInline(true);
+    getFunctionAt(toAddr(0x8E624L)).setInline(true);
+  }
   private void annotateServiceLifecycle() throws Exception {
     DataType v = VoidDataType.dataType;
     DataType u8 = UnsignedCharDataType.dataType;
@@ -4413,6 +5040,8 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     annotateCompensationPublication();
     annotateTxPublication();
     annotatePairedSourceMonitorComposition();
+    annotateDiagnosticServiceAdmission();
+    annotateDiagnosticWritesAndRoutines();
     annotateApplicationLifecycle();
     annotateServiceLifecycle();
     annotateDataFlashReads();

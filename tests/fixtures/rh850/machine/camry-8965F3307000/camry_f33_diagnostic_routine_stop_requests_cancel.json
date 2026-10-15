@@ -1,0 +1,40 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_diagnostic_routine_stop_requests_cancel",
+  "entry": {
+    "role": "RID110A indexed action dispatcher reaches real stop callback: cancellation is requested without inventing terminal diagnostic completion",
+    "scope": "resolved-address",
+    "address": "0x8e5bc"
+  },
+  "max_instructions": 4000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000", "gp": "0xfebeb800", "tp": "0x23dfc", "lp": "0x798",
+    "r6": "0xf", "r7": "0x2", "r8": "0xfebe1a40", "r9": "0x7",
+    "PSW": "0x20", "FPEC": "0x0", "PMR": "0xff00"
+  },
+  "stop_addresses": ["0x798"],
+  "memory": [
+    {"address": "0xfebe1c00", "size": 1024, "fill": 165, "evidence": "initialized nested-call stack"},
+    {"address": "0xfebe2000", "hex": "001abefe201abefe", "evidence": "ABI stack arguments: output pointer and u16 output-length pointer"},
+    {"address": "0xfebe1a00", "hex": "a5a5a5a5a5a5a5a5", "evidence": "output canaries; stop has no output bytes"},
+    {"address": "0xfebe1a20", "hex": "a5a5", "evidence": "output-length canary"},
+    {"address": "0xfebe1a40", "hex": "00000000000000", "evidence": "explicit unused callback input staging"},
+    {"address": "0xfebe81a7", "hex": "01", "evidence": "RID110A running result; admission itself is outside direct action execution"},
+    {"address": "0xfebeb3cb", "hex": "0107", "evidence": "engine continuing status and unrelated active phase"},
+    {"address": "0xfebeb3dd", "hex": "00", "evidence": "ID2 stop latch initially clear"},
+    {"address": "0xfebeb10e", "hex": "04", "evidence": "ID2 request remains pending until scheduler cleanup"}
+  ],
+  "checks": [
+    {"name": "returns through complete dispatcher/callback/stop chain", "kind": "register", "register": "PC", "equals": "0x798"},
+    {"name": "returns 32-bit success", "kind": "register", "register": "r10", "equals": "0x0"},
+    {"name": "restores caller stack", "kind": "register", "register": "sp", "equals": "0xfebe2000"},
+    {"name": "stop requests ID2 cancellation", "kind": "memory", "address": "0xfebeb3dd", "size": 1, "equals_hex": "5a"},
+    {"name": "stop clears continuing status without cleaning active phase", "kind": "memory", "address": "0xfebeb3cb", "size": 2, "equals_hex": "0007"},
+    {"name": "stop does not manufacture terminal diagnostic result", "kind": "memory", "address": "0xfebe81a7", "size": 1, "equals_hex": "01"},
+    {"name": "stop does not dequeue service", "kind": "memory", "address": "0xfebeb10e", "size": 1, "equals_hex": "04"},
+    {"name": "stop returns no output payload", "kind": "memory", "address": "0xfebe1a20", "size": 2, "equals_hex": "0000"},
+    {"name": "output storage remains untouched", "kind": "memory", "address": "0xfebe1a00", "size": 8, "equals_hex": "a5a5a5a5a5a5a5a5"}
+  ]
+}

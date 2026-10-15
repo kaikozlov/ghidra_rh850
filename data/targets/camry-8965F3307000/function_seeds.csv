@@ -136,3 +136,27 @@ address,provenance,note
 0x0003DB68,firmware/camry-8965F3307000/CodeFlash.bin,paired-source predicate callback at28258/2825C
 0x0003DC76,firmware/camry-8965F3307000/CodeFlash.bin,paired-source predicate callback at2828C/28290
 0x0003DCF4,firmware/camry-8965F3307000/CodeFlash.bin,paired-source predicate callback at282C0/282C4
+0x0004D47E,firmware/camry-8965F3307000/CodeFlash.bin,DID metadata gate pointer at29744; DID metadata gate pointer at29784; DID metadata gate pointer at29794; DID metadata gate pointer at2A114; DID metadata gate pointer at2A124
+0x0004FD9C,firmware/camry-8965F3307000/CodeFlash.bin,configured diagnostic callback pointer at25648
+0x0004FDB8,firmware/camry-8965F3307000/CodeFlash.bin,configured diagnostic callback pointer at25650
+0x0004FE02,firmware/camry-8965F3307000/CodeFlash.bin,configured diagnostic callback pointer at2565C
+0x0004FE5E,firmware/camry-8965F3307000/CodeFlash.bin,configured diagnostic callback pointer at25668
+0x0004FE8E,firmware/camry-8965F3307000/CodeFlash.bin,configured diagnostic callback pointer at25674
+0x0004FEBE,firmware/camry-8965F3307000/CodeFlash.bin,configured diagnostic callback pointer at25680
+0x0004FEEE,firmware/camry-8965F3307000/CodeFlash.bin,configured diagnostic callback pointer at2568C
+0x0004FF1E,firmware/camry-8965F3307000/CodeFlash.bin,configured diagnostic callback pointer at25698
+0x0004FF56,firmware/camry-8965F3307000/CodeFlash.bin,configured diagnostic callback pointer at256A4
+0x0004FF86,firmware/camry-8965F3307000/CodeFlash.bin,configured diagnostic callback pointer at256B0
+0x0004FFE0,firmware/camry-8965F3307000/CodeFlash.bin,configured diagnostic callback pointer at256BC
+0x0004FFFE,firmware/camry-8965F3307000/CodeFlash.bin,configured diagnostic callback pointer at256C8
+0x00050042,firmware/camry-8965F3307000/CodeFlash.bin,configured diagnostic callback pointer at256D4
+0x000500A2,firmware/camry-8965F3307000/CodeFlash.bin,configured diagnostic callback pointer at256EC
+0x00050152,firmware/camry-8965F3307000/CodeFlash.bin,configured diagnostic callback pointer at256F8
+0x000501D0,firmware/camry-8965F3307000/CodeFlash.bin,configured diagnostic callback pointer at25704
+0x0005033A,firmware/camry-8965F3307000/CodeFlash.bin,configured diagnostic callback pointer at25728
+0x000503A0,firmware/camry-8965F3307000/CodeFlash.bin,configured diagnostic callback pointer at25758
+0x0005047E,firmware/camry-8965F3307000/CodeFlash.bin,configured diagnostic callback pointer at25770
+0x000504F6,firmware/camry-8965F3307000/CodeFlash.bin,configured diagnostic callback pointer at2577C
+0x00050568,firmware/camry-8965F3307000/CodeFlash.bin,configured diagnostic callback pointer at25788
+0x00050702,firmware/camry-8965F3307000/CodeFlash.bin,configured diagnostic callback pointer at257A0
+0x00050706,firmware/camry-8965F3307000/CodeFlash.bin,configured diagnostic callback pointer at257A4

@@ -1,0 +1,31 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_diagnostic_write_2010_alias2_returns_success",
+  "entry": {"role": "Real8B720 precondition+action path proves2010 payload02 aliases01, calls actualFE09C/B8FB2, returns the meaningful r10 result formerly lost by a void4FF9A prototype, and clears81B2. Staged pairB480/B484 is not live pairB474/B478. No persistence completion or external request admission is claimed.", "scope": "resolved-address", "address": "0x8b720"},
+  "max_instructions": 5000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {"sp": "0xfebe2000", "gp": "0xfebeb800", "tp": "0x23dfc", "lp": "0x798", "r6": "0x2010", "r7": "0xfebe4000", "r8": "0x1", "r9": "0xfebe4010", "PSW": "0x20", "FPEC": "0x0", "PMR": "0xfe00"},
+  "stop_addresses": ["0x798"],
+  "memory": [
+    {"address": "0xfebe1800", "size": 2048, "fill": 165, "evidence": "explicit real nested-call stack"},
+    {"address": "0xfebe4000", "hex": "02", "evidence": "nonobvious accepted alias for payload01"},
+    {"address": "0xfebe4010", "hex": "a5", "evidence": "NRC output must become zero for successful adapter return"},
+    {"address": "0xfebe81b2", "hex": "10ba", "evidence": "prior callback owner must clear on2010 immediate success"},
+    {"address": "0xfebee892", "hex": "0002", "evidence": "common guard exact equality admitted"},
+    {"address": "0xfebeb470", "size": 24, "fill": 0, "evidence": "explicit staging flag and pair"},
+    {"address": "0xfebeb474", "hex": "1122334455667788", "evidence": "live pair canary remains unchanged; callback writes only separate staged pair"},
+    {"address": "0xfebf3b1e", "hex": "000000000101ff00", "evidence": "idle write engine with concrete selector/lifecycle/status bytes"}
+  ],
+  "checks": [
+    {"name": "real nested adapter returns", "kind": "register", "register": "PC", "equals": "0x798"},
+    {"name": "real stack restored", "kind": "register", "register": "sp", "equals": "0xfebe2000"},
+    {"name": "nonvoid2010 callback returns adapter success", "kind": "register", "register": "r10", "equals": "0x0"},
+    {"name": "successful NRC output", "kind": "memory", "address": "0xfebe4010", "size": 1, "equals_hex": "00"},
+    {"name": "2010 clears shared callback owner", "kind": "memory", "address": "0xfebe81b2", "size": 2, "equals_hex": "0000"},
+    {"name": "actual setter stages pair flag44", "kind": "memory", "address": "0xfebeb472", "size": 1, "equals_hex": "44"},
+    {"name": "payload02 aliases01 staged magic pair", "kind": "memory", "address": "0xfebeb480", "size": 8, "equals_hex": "aa5555aa55aaaa55"},
+    {"name": "live pair not replaced by staging setter", "kind": "memory", "address": "0xfebeb474", "size": 8, "equals_hex": "1122334455667788"},
+    {"name": "engine records index9 and completes", "kind": "memory", "address": "0xfebf3b1e", "size": 8, "equals_hex": "090000000101ff00"}
+  ]
+}
