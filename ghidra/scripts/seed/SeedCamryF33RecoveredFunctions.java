@@ -2,6 +2,7 @@
 //@category Seed
 // Seed exact-F33 entries and apply target-native, execution-backed semantic types.
 import ghidra.app.script.GhidraScript;
+import ghidra.program.database.SpecExtension;
 import ghidra.program.model.address.Address;
 import ghidra.program.model.address.AddressSet;
 import ghidra.program.model.listing.*;
@@ -2519,6 +2520,167 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     semanticData(0x317E0L, new ArrayDataType(u16, 16, 2), "f33_fault_class_amplitude_limits",
         "Minimum active class limit published at71F2; bits0/1=14965,2..8=11085,9..15=22170.");
   }
+  private void annotateDiagnosticEventLifecycle() throws Exception {
+    DataType v = VoidDataType.dataType;
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u16 = UnsignedShortDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    DataType bytes = new PointerDataType(u8, 4);
+    CategoryPath category = new CategoryPath("/CamryF33");
+    StructureDataType application = new StructureDataType(category, "F33DiagnosticApplicationSample", 0);
+    application.add(new ArrayDataType(u8, 56, 1), "raw", "Software-source projection; not a hardware sample.");
+    DataType applicationOut = new PointerDataType(resolve(application), 4);
+    StructureDataType capture = new StructureDataType(category, "F33DiagnosticCapture", 0);
+    capture.setPackingEnabled(true);
+    capture.add(new ArrayDataType(u8, 72, 1), "profile_prefix", "Selected source profile.");
+    capture.add(new ArrayDataType(u8, 72, 1), "supplemental", "Retained85AC copy or zero-filled.");
+    capture.add(u16, "event", "Internal event index, not packed DTC.");
+    capture.add(u16, "event_copy", "Duplicate event index, not an inverse.");
+    capture.add(new ArrayDataType(u8, 36, 1), "extended_prefix", "Profile-dependent software fields.");
+    capture.add(u16, "selected_sample", "Kind4 AC56; kind10 AFA4; default B02C.");
+    capture.add(new ArrayDataType(u8, 30, 1), "extended_middle", "Profile-dependent software fields.");
+    capture.add(ShortDataType.dataType, "ecu_thermal_estimate", "Signed6F7A publication.");
+    capture.add(ShortDataType.dataType, "motor_thermal_estimate", "Signed6F7C publication.");
+    capture.add(u8, "ecu_thermal_source", "6F6C source, independent of global limiting winner.");
+    capture.add(u8, "motor_thermal_active", "6F6D activity.");
+    capture.add(new ArrayDataType(u8, 18, 1), "extended_tail", "Software fields through offsetEF.");
+    DataType captureType = resolve(capture);
+    DataType captureOut = new PointerDataType(captureType, 4);
+    semanticFunction(0x52784L, "f33_get_diagnostic_event_state", u32,
+        new ParameterImpl("event", u32, currentProgram))
+        .setComment("Low16 event1..17F(hex) returns bits0/1/2 from6090/60C0/60F0 bitmaps; otherwise0. "
+            + "These three internal generations are not by themselves the UDS eight-bit status byte.");
+    semanticFunction(0x51C66L, "f33_report_diagnostic_event_failure", v,
+        new ParameterImpl("event", u32, currentProgram),
+        new ParameterImpl("capture_kind", u16, currentProgram))
+        .setComment("Low16 event1..17F, excluding lifecycle82D4 states1/2/4/6. Snapshot old82D5, then "
+            + "set it5A if event descriptor byte4.bit7. Only entry current-bit0 clear invokes bitmap "
+            + "failure, capture and classifier assertion; statistics path can run separately. The "
+            + "second argument selects capture profile4/10/default, not an occurrence count.");
+    semanticFunction(0x51D5EL, "f33_report_diagnostic_event_pass", v,
+        new ParameterImpl("event", u32, currentProgram))
+        .setComment("Same event/lifecycle admission as failure. Read ENTRY current bit, invoke bitmap "
+            + "pass, then release the descriptor's classifier when entry bit was set. Thus5F85==AA "
+            + "can inhibit bitmap mutation without inhibiting classifier decrement.");
+    semanticFunction(0x522E4L, "f33_mark_diagnostic_event_failed", v,
+        new ParameterImpl("event", u32, currentProgram),
+        new ParameterImpl("prior_qualification", u8, currentProgram))
+        .setComment("Unless5F85==AA, atomically set all three event bitmap bits on a new current failure; "
+            + "dirty5F81/82 and5F84.bit1. Descriptor flags and packedDTC determine bounded pending-code "
+            + "counter updates and6028/602A requests. No local event bounds check; caller owns admission.");
+    semanticFunction(0x523E2L, "f33_mark_diagnostic_event_passed", v,
+        new ParameterImpl("event", u32, currentProgram))
+        .setComment("Unless5F85==AA, ordinary pass clears only current6090 bit and dirties5F81. "
+            + "Exact exception list0E/51/BE/FF/20/120 clears all three bits even if only retained bits "
+            + "were set, dirties5F81/82 and5F84.bit5. Does not itself clear captures or classifier latches.");
+    semanticFunction(0x50FC8L, "f33_assert_diagnostic_classifier", v,
+        new ParameterImpl("classification", u8, currentProgram))
+        .setComment("Descriptor class2/4/8/0F/10/20/40/80/F0 selects its16-bit counter and class-specific "
+            + "latches. Counter increments wrap16; not saturating. Unknown classes make no update.");
+    semanticFunction(0x514BCL, "f33_release_diagnostic_classifier", v,
+        new ParameterImpl("classification", u8, currentProgram))
+        .setComment("Decrement the selected class counter only if nonzero. Existing class/aging flags "
+            + "are not cleared here; classifier aging/projection remains a separate operation.");
+    semanticFunction(0x51BB6L, "f33_gate_diagnostic_event_capture", v,
+        new ParameterImpl("event", u32, currentProgram),
+        new ParameterImpl("capture_kind", u16, currentProgram),
+        new ParameterImpl("prior_qualification", u8, currentProgram))
+        .setComment("Descriptor byte0 must intersect2, or6 when prior qualification==5A. Forward "
+            + "capture kind and boolean prior qualification to52E18; event validity belongs to caller.");
+    semanticFunction(0x51BE8L, "f33_update_diagnostic_event_statistics", v,
+        new ParameterImpl("event", u32, currentProgram),
+        new ParameterImpl("prior_qualification", u8, currentProgram))
+        .setComment("Only prior qualification0 admits descriptor byte4 classes81/82/86..8C. Increment "
+            + "their selected5470C/54632 counter up toFFFF. This can run even when current event already "
+            + "failed, independently of first-failure bitmap/capture/classifier work.");
+    semanticFunction(0x52E18L, "f33_capture_diagnostic_event", v,
+        new ParameterImpl("event", u16, currentProgram),
+        new ParameterImpl("capture_kind", u16, currentProgram),
+        new ParameterImpl("qualified", u8, currentProgram))
+        .setComment("Construct240-byte profile4/10/default record, fill supplemental72 bytes from85AC "
+            + "or zeros when qualified==1, and write duplicate event words at90/92. Only then check "
+            + "6150==AA storage inhibit. Under PMRFF00, unqualified first capture fills82DC once; "
+            + "615A==5A and nonzero packedDTC distinct from both prior records also fills83CC. "
+            + "Qualified capture fills84BC. Update occupancy/dirty flags and consume615A on replacement.");
+    Function copy = semanticFunction(0x52A8AL, "f33_copy_diagnostic_capture", v,
+        new ParameterImpl("destination", captureOut, currentProgram),
+        new ParameterImpl("source", captureOut, currentProgram));
+    String convention = "__f33_capture_copy";
+    String prototype = "<prototype name=\"__f33_capture_copy\" extrapop=\"0\" stackshift=\"0\">"
+        + "<input><pentry minsize=\"4\" maxsize=\"4\"><register name=\"r6\"/></pentry>"
+        + "<pentry minsize=\"4\" maxsize=\"4\"><register name=\"r7\"/></pentry></input><output/>"
+        + "<unaffected><register name=\"r2\"/><register name=\"sp\"/><register name=\"gp\"/>"
+        + "<register name=\"tp\"/><register name=\"r6\"/><register name=\"r7\"/>"
+        + "<register name=\"r8\"/><register name=\"r9\"/><register name=\"r10\"/>"
+        + "<register name=\"r11\"/><register name=\"r12\"/><register name=\"r13\"/>"
+        + "<register name=\"r14\"/><register name=\"r15\"/><register name=\"r16\"/>"
+        + "<register name=\"r17\"/><register name=\"r18\"/><register name=\"r20\"/>"
+        + "<register name=\"r21\"/><register name=\"r22\"/><register name=\"r23\"/>"
+        + "<register name=\"r24\"/><register name=\"r25\"/><register name=\"r26\"/>"
+        + "<register name=\"r27\"/><register name=\"r28\"/><register name=\"r29\"/></unaffected>"
+        + "<killedbycall><register name=\"r1\"/><register name=\"r19\"/><register name=\"ep\"/>"
+        + "<register name=\"lp\"/></killedbycall></prototype>";
+    if (!prototype.equals(currentProgram.getOptions(SpecExtension.SPEC_EXTENSION)
+        .getString("prototype_" + convention, null))) {
+      new SpecExtension(currentProgram).addReplaceCompilerSpecExtension(prototype, monitor);
+    }
+    copy.setCallingConvention(convention);
+    copy.setInline(false);
+    copy.setComment("Copy60 words forward. Exact leaf changes only R1/R19/EP and flags; call also "
+        + "changes LP. Its target-local convention preserves R10 carrying saved PMR in52E18. "
+        + "Do not invent a mask return or rely on repeated-loop inlining, which fails at later calls.");
+    semanticFunction(0x52A76L, "f33_clear_diagnostic_supplement", v,
+        new ParameterImpl("destination", bytes, currentProgram))
+        .setComment("Clear18 words (72 bytes); used only for the supplemental region, not the whole capture.");
+    semanticFunction(0x52DFCL, "f33_copy_diagnostic_supplement", v,
+        new ParameterImpl("destination", bytes, currentProgram),
+        new ParameterImpl("source", bytes, currentProgram))
+        .setComment("Copy18 words (72 bytes) forward; the retained85AC supplement is distinct from current profile data.");
+    semanticFunction(0x53DB8L, "f33_build_diagnostic_capture_kind10", v,
+        new ParameterImpl("output", captureOut, currentProgram))
+        .setComment("Populate profile/extended fields from staged software sources and kind10 application "
+            + "sample. Preserve supplemental/event regions for52E18. Thermal D8/DA/DC/DD fields copy "
+            + "6F7A/6F7C/6F6C/6F6D; selected sampleB8 comes fromAFA4.");
+    semanticFunction(0x53FFEL, "f33_build_diagnostic_capture_kind4", v,
+        new ParameterImpl("output", captureOut, currentProgram))
+        .setComment("Kind4 staged source bank; selected sampleB8 comes fromAC56. Same240-byte layout "
+            + "and thermal publication fields, but not the same acquisition generation as kind10.");
+    semanticFunction(0x54244L, "f33_build_diagnostic_capture_default", v,
+        new ParameterImpl("output", captureOut, currentProgram))
+        .setComment("Default staged source bank with application selector50; selected sampleB8 comes "
+            + "fromB02C and limit/positive flag useAFD0 rather thanAF40. No hardware-freshness claim.");
+    semanticFunction(0xBDF84L, "f33_snapshot_diagnostic_application", v,
+        new ParameterImpl("output", applicationOut, currentProgram),
+        new ParameterImpl("capture_kind", u16, currentProgram))
+        .setComment("Forward real R6 output pointer to profile4/10/default snapshot. Each writes56 bytes; "
+            + "the output buffer is not an unused integer argument.");
+    semanticFunction(0xBDFACL, "f33_snapshot_diagnostic_application_kind10", v,
+        new ParameterImpl("output", applicationOut, currentProgram))
+        .setComment("56-byte staged application projection; signedAF40 supplies limit and positive flag, "
+            + "AFA4 supplies selected sample. Trailing padding is explicitly zeroed.");
+    semanticFunction(0xBE070L, "f33_snapshot_diagnostic_application_kind4", v,
+        new ParameterImpl("output", applicationOut, currentProgram))
+        .setComment("Same application layout as kind10 but selected sample comes fromAC56.");
+    semanticFunction(0xBE134L, "f33_snapshot_diagnostic_application_default", v,
+        new ParameterImpl("output", applicationOut, currentProgram))
+        .setComment("Same application layout with signedAFD0 limit/positive flag and B02C sample.");
+    semanticFunction(0x3210AL, "f33_publish_record_coherence_fault", v)
+        .setComment("Only while6899==0: report event12E with capture kind10, retain slot23, merge action "
+            + "kind1, mark current and latch6899=5A. Diagnostic admission failure does not suppress the "
+            + "fault record or cause a later retry. Exact event maps to packed45D604/C05D604.");
+    semanticFunction(0x3C116L, "f33_retain_and_clear_fault_record", v,
+        new ParameterImpl("slot", u32, currentProgram))
+        .setComment("Low8 slot<24: copy five current halfwords and two complements to retained storage, "
+            + "markA5, clear five current words and set complementsFFFF. Stride-tail halfwords untouched.");
+    semanticFunction(0x3C108L, "f33_select_retained_fault_record", v,
+        new ParameterImpl("slot", u32, currentProgram))
+        .setComment("StoreA5 to71CC[low8(slot)]; no local bounds check.");
+    semanticFunction(0x3C184L, "f33_select_current_fault_record", v,
+        new ParameterImpl("slot", u32, currentProgram))
+        .setComment("Store5A to71CC[low8(slot)] only for slot<24.");
+    semanticData(0xFEBE82DCL, new ArrayDataType(captureType, 3, 240), "f33_diagnostic_capture_slots",
+        "First unqualified, distinct-code unqualified and qualified240-byte records. RAM publication is not durable persistence.");
+  }
   private void annotateAssistComposition() throws Exception {
     DataType v = VoidDataType.dataType;
     DataType s16 = ShortDataType.dataType;
@@ -2971,6 +3133,7 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     annotateEstimatorAcquisition();
     annotateThermalArbitration();
     annotateFaultActions();
+    annotateDiagnosticEventLifecycle();
     annotateAssistComposition();
     annotateApplicationLifecycle();
     annotateServiceLifecycle();

@@ -1,0 +1,122 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_monitor_fault_actions_survive_dem_inhibit",
+  "entry": {
+    "role": "real event12E one-shot publication with diagnostic reporting inhibited: retain prior fault record, publish new action kind1 and latch the monitor; no physical fault-injection or final output-response claim",
+    "scope": "resolved-address",
+    "address": "0x3210a"
+  },
+  "max_instructions": 20000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "isolated initialized nested-call stack"
+    },
+    {
+      "address": "0xfebe7100",
+      "hex": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000f7ff00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000ffff00000000000000000000000000000000000000000000005a00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000080002002001c0030000a5a5000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003c3c0000000000000000",
+      "evidence": "slot23 current record and correct complements, empty retained record with a distinct untouched stride-tail canary; qualification zero"
+    },
+    {
+      "address": "0xfebe6899",
+      "hex": "00",
+      "evidence": "one-shot fault publication has not latched"
+    },
+    {
+      "address": "0xfebe82d4",
+      "hex": "01",
+      "evidence": "exact diagnostic lifecycle state1 inhibits the event reporter"
+    },
+    {
+      "address": "0xfebe6090",
+      "size": 144,
+      "fill": 165,
+      "evidence": "independent current/retained diagnostic event bitmap canaries"
+    }
+  ],
+  "checks": [
+    {
+      "name": "real monitor and nested record publishers return",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "nested stack restored",
+      "kind": "register",
+      "register": "sp",
+      "equals": "0xfebe2000"
+    },
+    {
+      "name": "priority mask preserved",
+      "kind": "register",
+      "register": "PMR",
+      "equals": "0xff00"
+    },
+    {
+      "name": "diagnostic inhibition does not suppress the new action record",
+      "kind": "memory",
+      "address": "0xfebe7314",
+      "size": 12,
+      "equals_hex": "010004000c0000000000a5a5"
+    },
+    {
+      "name": "old five-word record is retained without copying the unused tail",
+      "kind": "memory",
+      "address": "0xfebe7434",
+      "size": 12,
+      "equals_hex": "080002002001c00300003c3c"
+    },
+    {
+      "name": "current mode-action complement matches the new action",
+      "kind": "memory",
+      "address": "0xfebe716a",
+      "size": 2,
+      "equals_hex": "feff"
+    },
+    {
+      "name": "retained mode-action complement belongs to the old record",
+      "kind": "memory",
+      "address": "0xfebe713a",
+      "size": 2,
+      "equals_hex": "f7ff"
+    },
+    {
+      "name": "current record is selected only after replacement publication",
+      "kind": "memory",
+      "address": "0xfebe71e3",
+      "size": 1,
+      "equals_hex": "5a"
+    },
+    {
+      "name": "one-shot monitor latches despite inhibited diagnostic reporting",
+      "kind": "memory",
+      "address": "0xfebe6899",
+      "size": 1,
+      "equals_hex": "5a"
+    },
+    {
+      "name": "inhibited diagnostic reporter leaves all event bitmap generations unchanged",
+      "kind": "memory",
+      "address": "0xfebe6090",
+      "size": 144,
+      "equals_hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5"
+    }
+  ]
+}

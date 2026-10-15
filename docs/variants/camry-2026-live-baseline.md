@@ -10223,6 +10223,89 @@ the exact0522 `AFCE!=11` condition. It does not cancel event1. The analog chain
 from8210 through48146/7DB0/57F00/C1DE0 toB080 is recovered; physical channel
 identity, OEM units and OEM health-state names remain unresolved.
 
+#### Diagnostic state, capture and control actions have separate lifetimes
+
+The diagnostic event APIs are not the control-fault permission system.
+`3210A`, used by the application record-coherence monitors, calls failure
+reporter `51C66(0x12E,10)`, retains fault slot23, merges action-kind1, selects
+the current record and sets one-shot latch `6899=5A`. Reporting inhibition
+does **not** suppress these subsequent actions or arrange a later report retry.
+The [composed monitor scenario](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_monitor_fault_actions_survive_dem_inhibit.json)
+executes this separation with `82D4=1`: diagnostic bitmaps remain unchanged,
+the old five-word record and complements become retained, and the new current
+record is published. The unused sixth halfwords remain untouched.
+
+Event IDs, classes and masks below are hexadecimal; capture-kind values are
+decimal. `51C66/51D5E` accept event1..17F and reject lifecycle `82D4` values
+1/2/4/6. Event descriptor `2FC50+8*event` supplies capture flags in byte0,
+classifier in byte1, DTC index in byte2, and qualification/statistics selection
+in byte4. `52784` returns internal bitmap bits from `6090/60C0/60F0`; these
+three generations are **not** a recovered UDS eight-bit status encoding.
+
+| Operation | Current bitmap `6090` | Retained bitmaps `60C0/60F0` | Separate consequence |
+|---|---|---|---|
+| New failure, `522E4` | Set | Set both | Dirty flags and descriptor/DTC-qualified pending-code counters |
+| Ordinary pass, `523E2` | Clear if set | Retain | Dirty current-state flag only |
+| Pass for event `0E/51/BE/FF/20/120` | Clear | Clear both, even without a current bit | Dirty both generations and `5F84.bit5` |
+| `5F85==AA` | Preserve | Preserve | Does not necessarily suppress the reporter's classifier work |
+
+The pass reporter reads **entry** event state before `523E2`. If its current
+bit was set, it releases the descriptor's classifier even when `5F85==AA`
+prevents bitmap mutation. `514BC` decrements a nonzero class counter, without
+immediately clearing its latched flags. Conversely, `50FC8` increments the
+selected 16-bit counter with wrapping arithmetic and asserts class flags;
+class2 uses `82BA` and `82A3/82A5.bit0`. Existing classifier aging and the
+lossy `0x394` projection remain separate consumers in the
+[fault-status artifact](../../data/generated/camry_8965F3307000_fault_status.json).
+Native compositions distinguish [ordinary retained history](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_dem_ordinary_pass_retains_history.json),
+[exception-event history clearing](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_dem_exception_pass_clears_retained_only.json),
+and [inhibited bitmap with classifier release](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_dem_inhibited_bitmap_still_releases_classifier.json).
+The last establishes the local combined-state behavior, not the production
+reachability of every initialized lifecycle combination.
+
+Failure reporting snapshots **old** `82D5` before descriptor byte4.bit7 may
+set it to5A. That old value selects capture mask2 versus6 and the qualified
+capture branch. First-failure bitmap/capture/classifier work depends on the
+entry current bit; the `51BE8` statistics path can run separately when
+`6765.bit6` is clear. Its descriptor-selected counter saturates atFFFF, unlike
+the classifier increment. Event12E's exact descriptor selects class2 and
+DTC index2; `30860` contains packed `45D604`. The `EMPS_P5` GTS vocabulary
+joins that value to **C05D604, Power Steering Control Module Processor /
+System Internal Failure**. This names the diagnostic code, not an observed
+physical processor failure or the OEM identity of every upstream monitor.
+
+`52E18` constructs a **240-byte** capture, not a 72-byte record. Its
+72-byte prefix and extended profile fields come from staged software sources;
+offsets48..8F are a separate 72-byte retained supplement copied from `85AC`,
+or zero-filled for qualified capture. Event words at90/92 are duplicates,
+not complements. Kind4/kind10/default constructors retain distinct source
+banks: their application sample atB8 comes from `AC56/AFA4/B02C`, respectively.
+All project signed thermal estimates `6F7A/6F7C` and independent source/
+activity bytes `6F6C/6F6D` to D8/DA/DC/DD. Kind4/10 project `AF40` and its
+positive predicate; the default profile uses `AFD0`.
+
+Capture construction precedes the `6150==AA` storage-inhibit check and the
+PMR-protected slot update. Unqualified first capture fills `82DC` only while
+`6151==0`. A nonzero packed DTC distinct from both existing records, with
+`615A==5A`, also admits the secondary `83CC` record. Qualified capture uses
+`84BC` instead. Replacement consumes `615A`; occupancy and dirty bytes are
+separate for each slot. These are RAM lifetimes, not proof of coherent physical
+sampling or durable NvM storage.
+
+The [first-failure composition](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_dem_first_failure_captures_distinct_slots.json)
+runs the real reporter, bitmap writer, profile constructor, application
+projection, supplemental and whole-record copies, slot selection and classifier.
+It distinguishes the kind10 source from both alternate sources, verifies
+both selected captures and the untouched qualified slot, and restores the
+original PMR. Reproducible annotations describe the 56-byte application
+projection and 240-byte capture. The whole-record copy's real preservation
+of `r10` is essential: the caller keeps its saved PMR there. A target-local
+calling convention describes the exact leaf's preserved and clobbered registers,
+so all three calls retain that dependency. Repeated-loop inlining handled only
+the first call; neither an invented return nor a replacement implementation is
+used. The rebuilt C now restores the saved mask after every storage branch.
+
+
 #### Numeric routine-control joins and application service lifecycle
 
 Exact RID configuration at `26918` and the 19-row callback table at `256DC`
@@ -10374,31 +10457,34 @@ in a different context. Owner requests, reduced flags, selected outputs and
 mode caches are therefore not a single synchronous state transition.
 
 **Remaining high-value dependencies:** complete estimator consistency/plausibility
-and center-following domains; monitor detection-to-action and Dem/DTC joins;
+and center-following domains; remaining monitor detection-to-action and Dem/DTC
+joins; diagnostic aging, capture persistence and lifecycle reachability;
 upstream thermal estimation; OEM service identities, calibration units and
 physical source identity; ADC/DMA freshness and hardware feedback/update timing.
-The recovered acquisition, fault-action and thermal-arbitration contracts do not
-require a complete peripheral or NvM emulator. Static connectivity and bounded
-native scenarios are not exhaustive semantic closure or vehicle results.
+The recovered application, fault-action and diagnostic contracts do not require
+a complete peripheral or NvM emulator. Static connectivity and bounded native
+scenarios are not exhaustive semantic closure or vehicle results.
 
-**Verification checkpoint (2026-10-15, thermal, fault-action and estimator
-acquisition).** Independent four-stage rebuilds plus signature finalization
-agreed on the canonical inventory. Native compositions passed for thermal
-source arbitration and retained release, selective fault-record integrity and
-qualification, external-reference warmup, model-window commit/pause, and the
-wrapped `INT16_MIN` admission boundary. All used unmodified firmware and
-explicit RAM inputs, without replacement callees or peripheral-model extension.
-Regenerated C preserves the thermal reduction values, scalar release coefficients
-and signed estimator-correction return; the documented absolute-value narrowing
-still requires instruction/native evidence.
+**Verification checkpoint (2026-10-15, diagnostic event lifecycle and capture).**
+Independent four-stage rebuilds plus signature finalization agreed on the
+canonical inventory. Native compositions passed for first-failure capture and
+classifier publication, ordinary/exception pass history, classifier release
+under bitmap inhibition, and control-fault publication despite diagnostic
+reporting inhibition. All used unmodified firmware and explicit RAM inputs,
+without replacement callees or peripheral-model extension.
 
-Coverage, function-boundary, D5 provenance, command-cone, assist-oracle and B6
-composition/end-to-end/ingress gates passed; live coverage matched the canonical
-ledger exactly. The command-cone producer's obsolete decompiler-spelling check
-was removed, retaining its exact calibration-table and runtime-writer checks.
-The matching project/corpus were promoted after clean teardown. Changed
-subsystem evidence links resolve. These are software reconstruction results,
-not new vehicle observations.
+Rebuilt C retains the actual capture/application buffer extents and saved PMR
+through every whole-record copy call. Coverage, function-boundary, D5 provenance,
+command-cone, assist-oracle and B6 composition/end-to-end/ingress gates passed;
+live coverage matched the canonical ledger exactly. The matching project/corpus
+were promoted after clean teardown. Diagnostic evidence links resolve. These
+are software reconstruction results, not new vehicle observations.
+
+The preceding `0745f959` checkpoint contains thermal arbitration/release,
+selective fault-record integrity/qualification, and estimator reference
+acquisition, including the wrapped `INT16_MIN` boundary. Its command-cone
+producer repair removed an obsolete spelling check while retaining exact
+calibration-table and runtime-writer checks.
 
 The preceding `1e3a1d53` checkpoint contains sensing and observer/deadband
 composition; `a602ee87` contains the assist/service lifecycle compositions;

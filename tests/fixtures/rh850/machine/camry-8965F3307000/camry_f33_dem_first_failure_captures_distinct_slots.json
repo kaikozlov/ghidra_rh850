@@ -1,0 +1,225 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_dem_first_failure_captures_distinct_slots",
+  "entry": {
+    "role": "real first-failure event reporting composes bitmap state, kind10 application/thermal capture, primary and distinct-code record selection, and classifier publication; explicit staged RAM, no hardware acquisition or durable-flash claim",
+    "scope": "resolved-address",
+    "address": "0x51c66"
+  },
+  "max_instructions": 20000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xfe00",
+    "r6": "0x12e",
+    "r7": "0xa"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1800",
+      "size": 2048,
+      "fill": 165,
+      "evidence": "isolated initialized nested-call stack including the240-byte capture"
+    },
+    {
+      "address": "0xfebe5f70",
+      "size": 9984,
+      "fill": 0,
+      "evidence": "explicit empty diagnostic bitmap/capture state and zero software-staged sensor/profile sources; selected fields below override this initialization"
+    },
+    {
+      "address": "0xfebeac00",
+      "size": 5120,
+      "fill": 0,
+      "evidence": "explicit zero application-snapshot sources, with distinct current-limit and sample words below"
+    },
+    {
+      "address": "0xfebe615a",
+      "hex": "5a",
+      "evidence": "distinct packed-DTC replacement admitted for the secondary record"
+    },
+    {
+      "address": "0xfebe6f6c",
+      "hex": "0301",
+      "evidence": "independent ECU source3 and motor activity1"
+    },
+    {
+      "address": "0xfebe6f7a",
+      "hex": "0046004b",
+      "evidence": "distinct software-published ECU/motor thermal estimates"
+    },
+    {
+      "address": "0xfebeaf40",
+      "hex": "0807",
+      "evidence": "positive published current capacity, not commanded torque"
+    },
+    {
+      "address": "0xfebeafa4",
+      "hex": "3412",
+      "evidence": "kind10-specific application sample"
+    },
+    {
+      "address": "0xfebeac56",
+      "hex": "6745",
+      "evidence": "different kind4 sample must not be selected"
+    },
+    {
+      "address": "0xfebeb02c",
+      "hex": "8967",
+      "evidence": "different default-profile sample must not be selected"
+    },
+    {
+      "address": "0xfebe84bc",
+      "size": 240,
+      "fill": 165,
+      "evidence": "unselected qualified capture-slot canary"
+    },
+    {
+      "address": "0xfebe85ac",
+      "size": 72,
+      "fill": 60,
+      "evidence": "retained supplemental capture region copied for the unqualified branch"
+    }
+  ],
+  "checks": [
+    {
+      "name": "real reporter and capture/classifier callees return",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "nested stack restored",
+      "kind": "register",
+      "register": "sp",
+      "equals": "0xfebe2000"
+    },
+    {
+      "name": "capture copies preserve the saved mask across real leaf calls",
+      "kind": "register",
+      "register": "PMR",
+      "equals": "0xfe00"
+    },
+    {
+      "name": "new event enters current state",
+      "kind": "memory",
+      "address": "0xfebe60b4",
+      "size": 4,
+      "equals_hex": "00400000"
+    },
+    {
+      "name": "new event enters first retained generation",
+      "kind": "memory",
+      "address": "0xfebe60e4",
+      "size": 4,
+      "equals_hex": "00400000"
+    },
+    {
+      "name": "new event enters second retained generation",
+      "kind": "memory",
+      "address": "0xfebe6114",
+      "size": 4,
+      "equals_hex": "00400000"
+    },
+    {
+      "name": "two unqualified capture slots are occupied and dirtied independently",
+      "kind": "memory",
+      "address": "0xfebe6151",
+      "size": 6,
+      "equals_hex": "010100020200"
+    },
+    {
+      "name": "distinct-code admission latch is consumed",
+      "kind": "memory",
+      "address": "0xfebe615a",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "primary capture retains supplemental data",
+      "kind": "memory",
+      "address": "0xfebe8324",
+      "size": 72,
+      "equals_hex": "3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c"
+    },
+    {
+      "name": "primary capture binds both event words to12E",
+      "kind": "memory",
+      "address": "0xfebe836c",
+      "size": 4,
+      "equals_hex": "2e012e01"
+    },
+    {
+      "name": "primary capture uses the kind10 application source",
+      "kind": "memory",
+      "address": "0xfebe8394",
+      "size": 2,
+      "equals_hex": "3412"
+    },
+    {
+      "name": "primary capture preserves independent thermal values and activity",
+      "kind": "memory",
+      "address": "0xfebe83b4",
+      "size": 6,
+      "equals_hex": "0046004b0301"
+    },
+    {
+      "name": "distinct-code capture retains supplemental data",
+      "kind": "memory",
+      "address": "0xfebe8414",
+      "size": 72,
+      "equals_hex": "3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c"
+    },
+    {
+      "name": "distinct-code capture binds both event words to12E",
+      "kind": "memory",
+      "address": "0xfebe845c",
+      "size": 4,
+      "equals_hex": "2e012e01"
+    },
+    {
+      "name": "distinct-code capture uses the kind10 application source",
+      "kind": "memory",
+      "address": "0xfebe8484",
+      "size": 2,
+      "equals_hex": "3412"
+    },
+    {
+      "name": "distinct-code capture preserves independent thermal values and activity",
+      "kind": "memory",
+      "address": "0xfebe84a4",
+      "size": 6,
+      "equals_hex": "0046004b0301"
+    },
+    {
+      "name": "qualified capture slot is not overwritten",
+      "kind": "memory",
+      "address": "0xfebe84bc",
+      "size": 240,
+      "equals_hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5"
+    },
+    {
+      "name": "first failure increments its classifier once",
+      "kind": "memory",
+      "address": "0xfebe82ba",
+      "size": 2,
+      "equals_hex": "0100"
+    },
+    {
+      "name": "classifier assertion follows event capture",
+      "kind": "memory",
+      "address": "0xfebe82a3",
+      "size": 3,
+      "equals_hex": "010001"
+    }
+  ]
+}
