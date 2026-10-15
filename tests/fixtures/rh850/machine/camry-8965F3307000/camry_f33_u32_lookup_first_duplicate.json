@@ -1,0 +1,53 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_u32_lookup_first_duplicate",
+  "entry": {
+    "role": "actual Camry application record instructions with explicit RAM preconditions; no replaced callees",
+    "scope": "resolved-address",
+    "address": "0x73a86"
+  },
+  "max_instructions": 20000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xff00",
+    "r6": "0x12345678",
+    "r7": "0xdeadbeef",
+    "r8": "0xfebf2080"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "isolated initialized nested-call stack"
+    },
+    {
+      "address": "0xfebf2080",
+      "hex": "030000000021bffe",
+      "evidence": "counted pair table; empty case intentionally has no initialized row pointer"
+    },
+    {
+      "address": "0xfebf2100",
+      "hex": "010000807856341222222222785634123333333378563422",
+      "evidence": "synthetic value/key pairs"
+    }
+  ],
+  "checks": [
+    {
+      "name": "first full-width key match or fallback",
+      "kind": "register",
+      "register": "r10",
+      "equals": "0x80000001"
+    }
+  ]
+}

@@ -1,0 +1,104 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_consensus_copy1",
+  "entry": {
+    "role": "actual Camry application record instructions with explicit RAM preconditions; no replaced callees",
+    "scope": "resolved-address",
+    "address": "0x68e9e"
+  },
+  "max_instructions": 20000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xff00",
+    "r6": "0xbeef0006",
+    "r7": "0xcafe0006",
+    "r8": "0xdead0000"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "isolated initialized nested-call stack"
+    },
+    {
+      "address": "0xfebf0358",
+      "hex": "ff",
+      "evidence": "object completion byte is pending"
+    },
+    {
+      "address": "0xfebf0691",
+      "hex": "ff",
+      "evidence": "family-one busy byte"
+    },
+    {
+      "address": "0xfebf0694",
+      "hex": "02",
+      "evidence": "prior shared retry count"
+    },
+    {
+      "address": "0xfebf0698",
+      "hex": "5a000000",
+      "evidence": "explicit pre-callback failure mask"
+    },
+    {
+      "address": "0xfebef464",
+      "size": 24,
+      "fill": 165,
+      "evidence": "RAM object with canaries; staging intentionally uninitialized"
+    }
+  ],
+  "checks": [
+    {
+      "name": "dispatcher return",
+      "kind": "register",
+      "register": "r10",
+      "equals": "0x0"
+    },
+    {
+      "name": "first-copy reset or second-copy preservation",
+      "kind": "memory",
+      "address": "0xfebf0698",
+      "size": 4,
+      "equals_hex": "5a000000"
+    },
+    {
+      "name": "success resets shared retry counter",
+      "kind": "memory",
+      "address": "0xfebf0694",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "object remains pending",
+      "kind": "memory",
+      "address": "0xfebf0358",
+      "size": 1,
+      "equals_hex": "ff"
+    },
+    {
+      "name": "family remains busy",
+      "kind": "memory",
+      "address": "0xfebf0691",
+      "size": 1,
+      "equals_hex": "ff"
+    },
+    {
+      "name": "no early publication",
+      "kind": "memory",
+      "address": "0xfebef464",
+      "size": 24,
+      "equals_hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5"
+    }
+  ]
+}

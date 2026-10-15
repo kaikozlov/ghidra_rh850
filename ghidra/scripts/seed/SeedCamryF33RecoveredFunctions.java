@@ -698,7 +698,8 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
         new StructureDataType(category, "F33NvmFamily1RamDescriptor", 0);
     descriptor.setPackingEnabled(true);
     descriptor.add(u16, "payload_bytes", "Whole-word copy and checksum length.");
-    descriptor.add(u16, "opaque_02", "Not consumed by the getter or checksum leaves.");
+    descriptor.add(u16, "first_logical_handle",
+        "Three copies use this handle,+4,+8; FFFF disables the registered object.");
     descriptor.add(words, "buffer", "Application RAM object, not a DataFlash address.");
     semanticData(0x2AF0CL, new ArrayDataType(resolve(descriptor), count, 8),
         "f33_nvm_family1_ram_descriptors",
@@ -800,6 +801,177 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
             + "by35640. ReturnA55A5AA5 iff validation returns0, otherwise5AA5A55A. "
             + "Marker/status rejection precedes publication; range rejection follows "
             + "it without rollback. No single-snapshot or asynchronous completion claim.");
+  }
+  private void annotateApplicationReadCompletion() throws Exception {
+    CategoryPath category = new CategoryPath("/CamryF33");
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u16 = UnsignedShortDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    int logicalCount = currentProgram.getMemory().getShort(toAddr(0x26C08L)) & 0xFFFF;
+    int objectCount = currentProgram.getMemory().getShort(toAddr(0x2AD72L)) & 0xFFFF;
+    int requestCount = currentProgram.getMemory().getByte(toAddr(0x2AD8BL)) & 0xFF;
+    StructureDataType route = new StructureDataType(category, "F33NvmApplicationRoute", 0);
+    route.setPackingEnabled(true);
+    route.add(u8, "object", "Low byte; interpreted within the selected family.");
+    route.add(u8, "family", "68E9E handles only families0 and1.");
+    semanticData(0x2B010L, new ArrayDataType(resolve(route), logicalCount, 2),
+        "f33_nvm_logical_application_routes",
+        "Logical-indexed routing, not a physical-handle table. Entries0/1 areFFFF. "
+        + "Enabled family1 descriptors map base/base+4/base+8 to the same object.");
+    StructureDataType result = new StructureDataType(category, "F33NvmLogicalResultCell", 0);
+    result.setPackingEnabled(true);
+    result.add(u8, "result", "71D0A stores only this byte before notification.");
+    result.add(u8, "opaque_01", "Preserved by71D0A; no broader role assigned.");
+    semanticData(0xFEBF6000L, new ArrayDataType(resolve(result), logicalCount, 2),
+        "f33_nvm_logical_results", "Byte result in a two-byte cell; not a halfword store.");
+    StructureDataType stage = new StructureDataType(category, "F33NvmReadCopyStage", 0);
+    stage.setPackingEnabled(true);
+    DataType lane = new ArrayDataType(u8, 32, 1);
+    stage.add(lane, "raw", "Only this lane is repaired by encoded-copy consensus.");
+    stage.add(lane, "xor55", "Decode each payload byte with55.");
+    stage.add(lane, "xorAA", "Decode each payload byte withAA.");
+    semanticData(0xFEBF0B08L, new ArrayDataType(resolve(stage), 4, 96),
+        "f33_nvm_family1_read_stages",
+        "Slot=object&3. Payload lengths8/16/32 leave lane padding untouched. "
+        + "Shared-slot execution ordering is a separate queue/scheduler question.");
+    semanticData(0xFEBF0358L, new ArrayDataType(u8, objectCount, 1),
+        "f33_nvm_family1_completion",
+        "FF admits the application callback; read consensus publishes5A/A5. "
+        + "Distinct from the redundant application-status bytes atFEBF0328.");
+    semanticData(0xFEBF0691L, u8, "f33_nvm_family1_busy",
+        "68E9E clears this on leaf return5A, including failed read consensus. "
+        + "Its current value is not an admission gate in68E9E.");
+    semanticData(0xFEBF0694L, u8, "f33_nvm_family1_copy_read_retry",
+        "Shared per-copy retry counter. Success clears it; nonzero result retries "
+        + "while below2, consuming an attempt even if73FE8 rejects submission.");
+    semanticData(0xFEBF0698L, new ArrayDataType(u32, 4, 4),
+        "f33_nvm_family1_copy_failure_masks",
+        "One word per shared slot. Each copy uses bits5A in its byte, not an "
+        + "arbitrary-nonzero-byte test. Copy0 resets the entire word.");
+    StructureDataType request = new StructureDataType(category, "F33NvmFamily1RequestCell", 0);
+    request.setPackingEnabled(true);
+    request.add(u8, "state", "67AE6 does not inspect this byte.");
+    request.add(u8, "opaque_01", "Not interpreted by the membership/finalization proof.");
+    request.add(u16, "object", "FFFF marks an empty object field; membership scans all rows.");
+    semanticData(0xFEBF058CL, new ArrayDataType(resolve(request), requestCount, 4),
+        "f33_nvm_family1_request_cells",
+        "49 four-byte cells at058C, not048C.67AE6 ignores state and queue indices.");
+    semanticData(0x2AD8BL, u8, "f33_nvm_family1_request_cell_count",
+        "Registered count49; consumed by the full membership scan.");
+    semanticData(0xFEBF0689L, u8, "f33_nvm_family1_phase",
+        "67CCA handles11/22/33; completion cleanup stores0.");
+    semanticData(0xFEBF068AL, u8, "f33_nvm_family1_write_retry",
+        "Whole-write retry in phase33; distinct from the per-copy read counter0694.");
+    semanticData(0xFEBF068CL, u16, "f33_nvm_family1_active_object",
+        "67CCA snapshots this object; cleanup storesFFFF. Retry returns before cleanup.");
+    StructureDataType pair = new StructureDataType(category, "F33U32ValueKey", 0);
+    pair.setPackingEnabled(true);
+    pair.add(u32, "value", "Full-width result, not necessarily a byte event.");
+    pair.add(u32, "key", "Exact full32-bit comparison.");
+    DataType pairType = resolve(pair);
+    StructureDataType lookup = new StructureDataType(category, "F33U32LookupTable", 0);
+    lookup.setPackingEnabled(true);
+    lookup.add(u32, "count", "Unsigned row count; no sentinel.");
+    lookup.add(new PointerDataType(pairType, 4), "rows", "Value/key pairs, eight-byte stride.");
+    DataType lookupType = resolve(lookup);
+    int eventCount = currentProgram.getMemory().getInt(toAddr(0x275CCL));
+    long eventRows = currentProgram.getMemory().getInt(toAddr(0x275D0L)) & 0xFFFFFFFFL;
+    semanticData(0x275CCL, lookupType, "f33_nvm_operation_event_lookup",
+        "Nine registered pairs; A1A62093->6 and22AA8A36->7. Other event meanings "
+        + "are not inferred from their numeric values.");
+    semanticData(eventRows, new ArrayDataType(pairType, eventCount, 8),
+        "f33_nvm_operation_event_rows", "Consumed through the counted lookup header.");
+    FunctionDefinitionDataType callback =
+        new FunctionDefinitionDataType(category, "F33NvmApplicationResultCallback");
+    callback.setReturnType(u32);
+    callback.setArguments(
+        new ParameterDefinitionImpl("event", u8, null),
+        new ParameterDefinitionImpl("logical_handle", u16, null),
+        new ParameterDefinitionImpl("result", u8, null));
+    semanticData(0x26BFCL, new PointerDataType(callback, 4),
+        "f33_nvm_application_result_callback", "Registered target68E9E; caller ignores its result.");
+    FunctionDefinitionDataType zeroCallback =
+        new FunctionDefinitionDataType(category, "F33NvmZeroHandleResultCallback");
+    zeroCallback.setReturnType(VoidDataType.dataType);
+    zeroCallback.setArguments(
+        new ParameterDefinitionImpl("event", u8, null),
+        new ParameterDefinitionImpl("result", u8, null));
+    semanticData(0x26BF8L, new PointerDataType(zeroCallback, 4),
+        "f33_nvm_zero_handle_result_callback",
+        "NULL in this exact target. The caller has two arguments and consumes no return value.");
+    semanticFunction(0x73A86L, "f33_lookup_u32_value_by_key", u32,
+        new ParameterImpl("key", u32, currentProgram),
+        new ParameterImpl("fallback", u32, currentProgram),
+        new ParameterImpl("table", new PointerDataType(lookupType, 4), currentProgram))
+        .setComment("Linear unsigned-count scan of eight-byte value/key pairs. "
+            + "Return the FIRST full32-bit key match, otherwise full32 fallback. "
+            + "Count0 does not read the row pointer. No pointer or extent validation.");
+    semanticFunction(0x68A50L, "f33_nvm_get_family1_completion", u32,
+        new ParameterImpl("object", u16, currentProgram))
+        .setComment("Bound low16 object by the registered count16. Return the "
+            + "selected byte zero-extended, orA5 without an array read when out of bounds.");
+    semanticFunction(0x68CCAL, "f33_nvm_handle_family1_read_result", u32,
+        new ParameterImpl("result", u8, currentProgram),
+        new ParameterImpl("logical_handle", u16, currentProgram))
+        .setComment("Map low16 logical to low8 object, slot=object&3. Copy0 resets "
+            + "the mask; success clears shared retry. Nonzero result retries while "
+            + "counter<2 and ignores submission result; exhaustion marks that copy "
+            + "with5A and clears retry. Only copy2 without retry votes all payload "
+            + "bytes using trusted raw/AA,raw/55,then55/AA pairs. Encoded agreement "
+            + "repairs raw staging even when another byte fails. Publish destination "
+            + "only if every byte passes; completion5A/A5 distinguishes success/failure. "
+            + "Return5A for either completed vote, otherwise0. No local handle/object "
+            + "bound. Unmatched copy handle sets mask005A5A5A without reading retry.");
+    semanticFunction(0x68E9EL, "f33_nvm_route_application_result", u32,
+        new ParameterImpl("event", u8, currentProgram),
+        new ParameterImpl("logical_handle", u16, currentProgram),
+        new ParameterImpl("result", u8, currentProgram))
+        .setComment("Decode family/object from2B010. Require family completionFF "
+            + "and nonFFFF first handle; event6/7 selects read/write result handler. "
+            + "Leaf return5A clears that family's busy byte even on failed consensus. "
+            + "Always return0. Native proof covers family1 read/gates; family0 and "
+            + "write-result processing are separate, not established by this proof.");
+    semanticFunction(0x71D0AL, "f33_nvm_publish_logical_result", VoidDataType.dataType,
+        new ParameterImpl("logical_handle", u16, currentProgram),
+        new ParameterImpl("operation", u32, currentProgram),
+        new ParameterImpl("result", u8, currentProgram))
+        .setComment("Store only result low8 atFEBF6000+2*low16(handle), preserving "
+            + "the other byte; then route the same handle/operation/result. No local bound.");
+    semanticFunction(0x71E08L, "f33_nvm_route_logical_result", VoidDataType.dataType,
+        new ParameterImpl("logical_handle", u16, currentProgram),
+        new ParameterImpl("operation", u32, currentProgram),
+        new ParameterImpl("result", u8, currentProgram))
+        .setComment("Low16 handle0 calls the two-argument zero-handle notifier; "
+            + "otherwise preserve all three arguments for the logical notifier.");
+    semanticFunction(0x71DBAL, "f33_nvm_notify_logical_result", VoidDataType.dataType,
+        new ParameterImpl("logical_handle", u16, currentProgram),
+        new ParameterImpl("operation", u32, currentProgram),
+        new ParameterImpl("result", u8, currentProgram))
+        .setComment("Descriptor+A bit5 optionally calls747DC, whose exact body is "
+            + "JMP LP; all124 registered rows clear that bit. Result2 suppresses "
+            + "application notification. Otherwise nonNULL26BFC receives low8 "
+            + "lookup(operation,FF), low16 handle, low8 result. No local handle bound.");
+    semanticFunction(0x71D8CL, "f33_nvm_notify_zero_handle_result", VoidDataType.dataType,
+        new ParameterImpl("operation", u32, currentProgram),
+        new ParameterImpl("result", u8, currentProgram))
+        .setComment("Perform the event lookup even before checking result2 or "
+            + "callbackNULL. Conditional callback takes event/result only. Registered "
+            + "26BF8 isNULL, so this exact target emits no zero-handle application callback.");
+    semanticFunction(0x67AE6L, "f33_nvm_family1_has_request_cell", u32,
+        new ParameterImpl("object", u16, currentProgram))
+        .setComment("Scan all49 cell object halfwords atFEBF058E+4*i for low16 object; "
+            + "return1 on first match else0. Ignore state bytes, producer/consumer "
+            + "indices and empty-sentinel meaning; no local object bound.");
+    semanticFunction(0x67CCAL, "f33_nvm_handle_family1_completion", VoidDataType.dataType)
+        .setComment("Snapshot phase/object and queue indices. Phase11 sets0688=A5. "
+            + "Valid phase22/33 with completion5A publishes checksum seed then status10. "
+            + "Read failure uses68A6C to choose30/11. Write failure retries below2 "
+            + "through6869E and returns before cleanup regardless submission result; "
+            + "otherwise status31. Any matching request cell overrides status to20 "
+            + "after seed publication. Publish all three status planes, then clear "
+            + "phase, preserve recovered producer index and set active objectFFFF. "
+            + "Invalid phase/object performs cleanup only. Hardware-backed read-failure "
+            + "classification and accepted whole-write rearming remain separate.");
   }
   private void annotateDataFlashReads() throws Exception {
     DataType u8 = UnsignedCharDataType.dataType;
@@ -983,6 +1155,7 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     annotateNvmLogicalRequests();
     annotateNvmRecordIntegrity();
     annotateApplicationRecords();
+    annotateApplicationReadCompletion();
     annotateDataFlashReads();
     annotateFaciSubmission();
     annotatePwmCompareStaging();

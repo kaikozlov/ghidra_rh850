@@ -8278,8 +8278,8 @@ completion, the destination stayed unchanged in **1,331 instructions** and
 the published result was `FFFC`. The two retained cases exercise completion
 bank1 / bank0 respectively: table `27CC0` selects `27C0C+20→76248` or
 `27BA4+20→7502C`; both store the status at `FEBF6C1C`, then set their
-`FEBF6C58` / `FEBF6C55` notification byte. This is not yet the higher
-logical-request notification/consensus chain.
+`FEBF6C58` / `FEBF6C55` notification byte. This run does not exercise the
+higher logical dispatch; §77.15 reconstructs a separate callback/consensus boundary.
 
 Thirty-eight selected boundary/record scenarios passed across this increment;
 22 are retained. They cover load zero extension, address readback and busy
@@ -8323,10 +8323,10 @@ Eight additional contracts are persisted in the target-native seed:
 | `3584A` | `f33_restore_learned_quad` | Require first getter result `10` and marker **`A55A5AA5`**, then call the publisher and validator. Return `A55A5AA5` on range success, otherwise `5AA5A55A`. |
 
 **Application descriptor and integrity layout.** The count at `2AD72` is16.
-The eight-byte rows at `2AF0C` contain payload length at `+0`, a field not used
-by these getters at `+2`, and RAM-buffer pointer at `+4`. Object0 is the16-byte
-record at `FEBEF468`; object2 has8 bytes and object15 has32. This is not the
-physical six-byte descriptor table or the sixteen-byte logical-operation table.
+The eight-byte rows at `2AF0C` contain payload length at `+0`, first logical
+handle at `+2` (unused by these getters; see §77.15), and RAM-buffer pointer
+at `+4`. Object0 is the16-byte record at `FEBEF468`; object2 has8 bytes and
+object15 has32. These are not the physical or logical-operation descriptors.
 `F33NvmFamily1RamDescriptor`, `F33LearnedQuadRecord` and
 `F33LearnedQuadBounds` now preserve these distinct layouts.
 
@@ -8381,9 +8381,9 @@ used the registered DataFlash handle1 payload at offset `77C4` as the RAM
 record, with explicit application status and complementary seed: it also
 passed in576 instructions and published the expected four halfwords.
 Captured payload bytes are not copied into retained golden fixtures.
-This does **not** prove the missing physical-read → copy-consensus →
-application-status/seed sequence, startup restoration on a vehicle, or the
-downstream physical meaning of the four values.
+This run supplies RAM instead of executing physical acquisition and asynchronous
+completion; §77.15 separately exercises notification, consensus and application
+publication. Neither establishes startup restoration on a vehicle or physical units.
 
 Seventy-six selected native scenarios passed, including nonzero object2,
 last-valid object15 and its last checksum-seed slot. Twenty-seven focused
@@ -8398,4 +8398,159 @@ destination argument, typed descriptor fields and the correct unsigned marker.
 The three dependent NvM/B6 artifacts were regenerated; the six targeted checks
 and live-coverage parity passed. The relevant daemons were stopped before
 snapshot promotion. No vehicle run or full-project test sweep is claimed.
+
+### 77.15 2026-10-15 logical notification, read-copy consensus and publication
+
+The real `71D0A → 71E08 → 71DBA → 68E9E → 68CCA` read-result chain executes
+through copy consensus and destination publication. A separate `67CCA` entry
+executes application checksum/status publication. The request queue, physical
+acquisition and scheduling between those entries are **not substituted with
+success stubs, nor claimed to have run as one complete asynchronous pipeline**.
+
+Ten contracts are persisted in the target-native seed:
+
+| Entry | Durable name | Scope |
+|---|---|---|
+| `67AE6` | `f33_nvm_family1_has_request_cell` | Full49-cell object-membership scan, independent of state bytes or queue indices. |
+| `67CCA` | `f33_nvm_handle_family1_completion` | **Bounded:** phase completion, seed/status ordering, retry/cleanup branches; hardware-backed read-failure classification and accepted whole-write rearming remain separate. |
+| `68A50` | `f33_nvm_get_family1_completion` | Low16 object bound; zero-extended completion byte or `A5`. |
+| `68CCA` | `f33_nvm_handle_family1_read_result` | Per-copy retries, trusted-pair byte voting, staging repair and all-or-nothing destination publication. |
+| `68E9E` | `f33_nvm_route_application_result` | **Bounded:** family1 read and admission gates executed; family0 and write-result bodies remain separate. |
+| `71D0A` | `f33_nvm_publish_logical_result` | Byte-wide logical-result publication before notification. |
+| `71D8C` | `f33_nvm_notify_zero_handle_result` | Separate two-argument notification; registered callback isNULL. |
+| `71DBA` | `f33_nvm_notify_logical_result` | Pending-result suppression and three-argument application callback. |
+| `71E08` | `f33_nvm_route_logical_result` | Distinguish logical0 from nonzero logical handles without changing the operation/result. |
+| `73A86` | `f33_lookup_u32_value_by_key` | First full32-bit key match in a counted value/key table, otherwise full32 fallback. |
+
+**Namespaces and storage.** Application object, logical handle and physical
+storage handle are distinct. In the eight-byte application descriptor,
+`first_logical_handle` now replaces the previously opaque `+2` field.
+Enabled family1 objects use that logical handle and its `+4/+8` partners;
+five rows, objects7..11, have `FFFF` and are disabled. Object0 uses logical
+`2/6/A`, which map to physical `1/5/9`. Rows12..15 use bases `26/27/28/29`
+hex, not an inferred continuation of the earlier groups.
+
+| Storage | Recovered layout |
+|---|---|
+| `2B010` | 124 logical-indexed two-byte routes: object low byte, family high byte. Logical0/1 contain `FFFF`. |
+| `FEBF6000` | 124 two-byte result cells. `71D0A` writes only byte0; byte1 remains uninterpreted and is preserved by that writer. |
+| `FEBF0358` | 16 family1 completion bytes, distinct from the redundant application statuses at `0328/1088/10AC`. |
+| `FEBF0B08` | Four96-byte read-staging slots, selected by `object & 3`; each has32-byte raw/XOR55/XORAA lanes. |
+| `FEBF0698` | Four32-bit failure-mask words, one per shared slot. |
+| `FEBF0694` | Shared per-copy read-retry byte, distinct from whole-write retry `FEBF068A`. |
+| `FEBF058C` | 49 four-byte request cells: state byte, uninterpreted byte, object halfword. The base is **058C, not048C**. |
+
+The enabled descriptor routing is consistent with the logical map. An earlier
+scout's routing-skew claim was an indexing error, not a firmware defect.
+Shared staging slots still make actual queue ordering important: object0,
+object4 and object12 all select slot0. Isolated consensus proof does not
+establish their scheduling or exclude cross-request interleavings.
+
+**Logical notification.** `71D0A` narrows handle/result to16/8 bits, stores the
+result byte and then dispatches. Nonzero handles use callback pointer
+`26BFC→68E9E`; result `2` suppresses that callback. Descriptor `+A.bit5`
+conditionally calls `747DC`, but all124 registered descriptors clear the bit
+and the exact hook body is only `JMP LP`.
+
+The event lookup at `275CC` contains count9 and row pointer `275DC`. Rows are
+eight-byte **value/key** pairs, not key/value pairs or a sentinel list.
+`A1A62093→6`, `22AA8A36→7`; an unknown marker maps to fallback `FF`.
+Generic lookup tests distinguish first duplicate match, full-word keys and
+results, absent-key fallback, and count0 without an initialized row pointer.
+Other registered event values are not assigned OEM meanings.
+
+Logical0 takes `71D8C`, which performs the lookup before checking result or
+callback pointer. Its two-argument callback slot `26BF8` isNULL in this
+target. Nonzero notification instead forwards event, logical handle and result.
+The family1 router requires completion `FF` and an enabled descriptor, then
+selects event6/7. The family busy byte is **not** an admission gate.
+The router always returns0; leaf return `5A` clears busy even if the vote failed.
+
+**Read-copy consensus.** The `68CCA` ABI is `(result8, logical16)`, not an object
+argument. It takes the map's low object byte, selects its shared slot and
+identifies copy0/1/2 from the descriptor's three handles. Copy0 resets the
+entire mask word. A successful result clears the shared retry counter.
+A nonzero result retries through the real `73FE8` while the counter is below2;
+the counter advances **even if submission is rejected**. At exhaustion it
+clears the counter and ORs `5A << (8*copy)` into the mask.
+
+Only copy2 without a retry performs consensus. For each payload byte, the
+trusted comparisons are tried in this order:
+
+| Pair | Required mask test | Accepted byte |
+|---|---|---|
+| raw / decodedAA | `(mask & 5A005A) == 0` | raw |
+| raw / decoded55 | `(mask & 00005A5A) == 0` | raw |
+| decoded55 / decodedAA | `(mask & 005A5A00) == 0` | decoded value, also stored into raw staging |
+
+The masks test specific bits, not whether each byte is nonzero. Mask
+`00A5A5A5` therefore permits consensus, whereas a single masked bit can
+exclude a copy. Two failed copies cannot establish a trusted pair even when
+all three byte values happen to agree.
+
+Failure is sticky across the payload, but the loop continues: raw-lane repairs
+before **and after** a failed byte persist. The destination is copied only
+when every byte has a trusted pair; otherwise it remains entirely unchanged.
+Completion is `5A` for success or `A5` for failure. In both cases the leaf
+returns `5A`, meaning **vote completed**, not successful data admission.
+There is no local logical/object bound in this leaf.
+
+The62-case synthetic matrix exercises all eight combinations of whole-copy
+failure flags, five agreement profiles, ignored/single mask bits, all four
+slots, lengths8/16/32, retry exhaustion and repair on both sides of a failed
+byte. Six additional calls use the real already-pending rejection path in
+`743BC`: no queue entry is accepted, but the copy-retry budget is consumed.
+These isolated rejection inputs do not establish that an identical
+interleaving occurs in the deployed scheduler.
+
+A throwaway complete notification used the three registered DataFlash
+payloads for physical `1/5/9`. Their XOR-normalized bytes agree; all16 bytes
+reached the object0 destination in632 instructions, checked directly against
+the registered DataFlash with `memory-equal`. No captured payload/key bytes
+are duplicated in retained fixtures. Logical result changed and family busy
+cleared, but the application status and checksum seed stayed unchanged.
+
+**Later application publication.** `67CCA` snapshots phase, active object and
+queue indices. For valid phase `22/33` with completion `5A`, it first publishes
+the complementary checksum seed from live RAM, then selects status `10`.
+`67AE6` subsequently scans **all49 object fields**: any match overrides that
+status to `20`, irrespective of cell state or whether head and tail are equal.
+The native last-cell case deliberately has state `FF` and equal indices; it
+still produces `20/75/8A` after publishing the seed. Without a match the
+three planes receive `10/45/BA`.
+
+Phase `11` sets control byte `0688=A5`. A phase33 failure with retry below2
+increments the whole-write counter, calls `6869E`, and returns without cleanup
+even when that call rejects; exhaustion selects status `31`. Phase22 failure
+uses the hardware-backed `68A6C` classification to select `30/11`; that hardware
+path is not closed by the successful-consensus tests. Normal cleanup clears
+phase, preserves the recovered producer index and sets active object `FFFF`.
+Invalid phase/object takes cleanup without status publication.
+
+The synthetic read-completion and last-object write-completion calls executed
+in755 and798 instructions; the last-cell pending override in751. These are
+instruction counts, not elapsed-time or scheduler guarantees. The complete
+request/acquisition/notification lifecycle, family0 restoration and downstream
+physical meaning of the learned values remain separate reconstruction work.
+
+Two instruction-ordering probes distinguish the machine from a hoisted
+pseudocode expression: successful copy0 executes without an initialized prior
+retry byte, and an unmatched handle returns after replacing its mask without
+reading retry or staging. In the instructions, the success branch at `68D36`
+skips the retry load at `68D38`; canonical C can display that nonvolatile RAM
+expression earlier. The memory is not made artificially volatile to change
+the printed C. A separate full notification succeeds with busy already zero,
+matching the bulk-read admission rule rather than inventing a busy prerequisite.
+
+In total,101 selected native scenarios passed;34 focused synthetic regressions
+are retained and passed against the fresh reconstructed project. Independent
+four-stage rebuilds plus finalization agreed on **7,187 functions** and **90
+curated reviews** (82 verified, eight bounded); outside-function candidates
+remain929. Canonical C now carries the logical result-cell store and complete
+notification arguments, named route/descriptor/mask fields, and the separate
+completion/seed/status boundaries. The three dependent NvM/B6 artifacts were
+regenerated; all six targeted checks and live-coverage parity passed. The
+relevant daemons were stopped before snapshot/corpus promotion. Throwaway
+inputs, including the captured-payload probe, were removed; no vehicle result
+or whole-project verification is claimed.
 
