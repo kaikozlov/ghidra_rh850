@@ -115,13 +115,13 @@
     "0x0CDFF8": {
       "body_sha256": "c98e0bccbb22324f1f4d55db3666683ad4b8167f689fa9d7d1e27e92d8a47d25",
       "body_size": 182,
-      "decompiled_c_sha256": "bf74f3d353522d75462dc64fd8e015636cb17faae3ae09af3e92810e6ab66ca7",
+      "decompiled_c_sha256": "0b94ef9eeb31962cc6de3b4f3915f3714f1c083cedd71725ec8592f356debd87",
       "role": "mode-selected B6 supervisor"
     },
     "0x0CE144": {
       "body_sha256": "e8e705ee619f6ba492e9c5f59847dacb914977cf7983c3f7edbcf05e343444e7",
       "body_size": 298,
-      "decompiled_c_sha256": "c8bedd90f4e54ed2db513502b3756d08fe47094e9a16429ff07c92e08868c481",
+      "decompiled_c_sha256": "3c7b67fc593a43fdbb6ceb06c3134aaf62fc51ad8420c3396a9c73b30c5d8199",
       "role": "mode-selected B6 supervisor"
     },
     "0x0CE384": {
@@ -133,7 +133,7 @@
     "0x0CE6F4": {
       "body_sha256": "48271f642ac3b97a6c69295487439a0fb7addb7f1ee8f3666e3eef03aa8a4748",
       "body_size": 92,
-      "decompiled_c_sha256": "f2c280bca7b18857dc5dcc2a7918ea1dc4060c4c204988a0306ea307af23ee8b",
+      "decompiled_c_sha256": "2cd6ef47757a4d237553119b6fddc5fd38dc5ee4118c32c44c25b2da5cc75147",
       "role": "B6 supervisor consolidation"
     },
     "0x0CEFFC": {

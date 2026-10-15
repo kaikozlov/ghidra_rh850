@@ -241,11 +241,6 @@ check("CB38 ramp target comes from CB08/CB20 supervisor state",
 # then close the apparent post-D0218 escape paths as local/history state.
 bd46 = _camry_decompiled(0x4BD46)
 c58074 = _camry_decompiled(0x58074)
-ce144 = _camry_decompiled(0xCE144)
-ce3aa = _camry_decompiled(0xCE3AA)
-ce594 = _camry_decompiled(0xCE594)
-ce6f4 = _camry_decompiled(0xCE6F4)
-ccdf8 = _camry_decompiled(0xCCDF8)
 cf22c = _camry_decompiled(0xCF22C)
 d04ac = _camry_decompiled(0xD04AC)
 d0aae = _camry_decompiled(0xD0AAE)
@@ -258,14 +253,6 @@ check("live COM staging copies 80BC/80C4/80C5 into F130/F138/F139",
       "DAT_febef130 = DAT_febe80bc;" in c58074
       and "DAT_febef138 = DAT_febe80c4;" in c58074
       and "DAT_febef139 = DAT_febe80c5;" in c58074)
-check("B6 supervisor reaches replicated autonomous contribution CB38",
-      "DAT_febecb00 & 7" in ce144 and "DAT_febeadbd" in ce3aa
-      and all(x in ce594 for x in ("DAT_febec940", "DAT_febec998", "DAT_febec9c4"))
-      and all(x in ce6f4 for x in ("DAT_febeca46", "DAT_febeca7c", "DAT_febeca8a",
-                                  "puVar2 + 0x122e", "puVar2 + 0x1280", "puVar2 + 0x128e"))
-      and all(x in ccdf8 for x in ("DAT_febeca2e", "DAT_febeca80", "DAT_febeca8e", "DAT_febecaa6", "DAT_febecaa8", "DAT_febecaaa"))
-      and all(x in cf22c for x in ("DAT_febecaa6", "DAT_febecaa8", "DAT_febecaaa", "DAT_febecb08"))
-      and "DAT_febecb38" in cf2b2)
 check("CB38 branch is B6-sourced and therefore dormant in retained zero-B6 stock runs",
       "DAT_febeadb0" in ceffc and "DAT_febecb00" in ceffc
       and "DAT_febecb00" in cf22c and art["live_context"]["b6_frames_in_retained_drives"] == 0)

@@ -496,7 +496,7 @@
     "0x0CB0FC": {
       "body_sha256": "f09f7ca3eba91e1e425e661e852c0610c9f48723791c7a0d0c4e09b391381d7a",
       "body_size": 236,
-      "decompiled_c_sha256": "daeaa9f760073aaa86590b13fae1931b7700ecf463ef29499c8cc8ef1f2d87d4",
+      "decompiled_c_sha256": "56210df9c340b2d3cebac5a92819ecff1d4174fed7e346bf706071c1d3441d8d",
       "role": "B6 signal267 state-mode processor"
     },
     "0x0CB2A2": {
@@ -556,13 +556,13 @@
     "0x0CDFF8": {
       "body_sha256": "c98e0bccbb22324f1f4d55db3666683ad4b8167f689fa9d7d1e27e92d8a47d25",
       "body_size": 182,
-      "decompiled_c_sha256": "bf74f3d353522d75462dc64fd8e015636cb17faae3ae09af3e92810e6ab66ca7",
+      "decompiled_c_sha256": "0b94ef9eeb31962cc6de3b4f3915f3714f1c083cedd71725ec8592f356debd87",
       "role": "B6 sig270-weighted supervisor"
     },
     "0x0CE144": {
       "body_sha256": "e8e705ee619f6ba492e9c5f59847dacb914977cf7983c3f7edbcf05e343444e7",
       "body_size": 298,
-      "decompiled_c_sha256": "c8bedd90f4e54ed2db513502b3756d08fe47094e9a16429ff07c92e08868c481",
+      "decompiled_c_sha256": "3c7b67fc593a43fdbb6ceb06c3134aaf62fc51ad8420c3396a9c73b30c5d8199",
       "role": "bank-selected cooperative supervisor"
     },
     "0x0CE3AA": {
@@ -580,13 +580,13 @@
     "0x0CE594": {
       "body_sha256": "3f65c2dfea68424ed95624e3797e8a0c478def774a781e6bcbe9a14ba2fcfc4e",
       "body_size": 312,
-      "decompiled_c_sha256": "4efd9714ef2540165d54f09fffe8d5bf3d1403bd8be580a969ed5365914cfbe3",
+      "decompiled_c_sha256": "e7bd0508bf51ff4374e862f95b07a18dab9f15a4eeaab226be9064dd42d57715",
       "role": "cooperative supervisor shaping"
     },
     "0x0CE6F4": {
       "body_sha256": "48271f642ac3b97a6c69295487439a0fb7addb7f1ee8f3666e3eef03aa8a4748",
       "body_size": 92,
-      "decompiled_c_sha256": "f2c280bca7b18857dc5dcc2a7918ea1dc4060c4c204988a0306ea307af23ee8b",
+      "decompiled_c_sha256": "2cd6ef47757a4d237553119b6fddc5fd38dc5ee4118c32c44c25b2da5cc75147",
       "role": "cooperative supervisor consolidation"
     },
     "0x0CE772": {
@@ -634,13 +634,13 @@
     "0x0CEE7C": {
       "body_sha256": "6daac14656be82660ae0a31d48004351866f760162b7f5b1b1af77c22ee340ce",
       "body_size": 146,
-      "decompiled_c_sha256": "4f3dce0879fe3ca7ed35f55271aa122d0e701dbbbb536d4a87f4acc4dcc4cb5c",
+      "decompiled_c_sha256": "d0b74b281cbf47bdbe92802b179559f2c71f9d10ef0a8b27b1e64f60de19a750",
       "role": "cooperative target-angle inhibit synthesis"
     },
     "0x0CEF26": {
       "body_sha256": "2e0335c9f729c98cbfcce664ee8ac94ea94f8d0c654763b96d572dc9e3082b8f",
       "body_size": 126,
-      "decompiled_c_sha256": "5eff30b62bd6aff2be7d6298f788fccc3575799002b8c0de23534b901788f594",
+      "decompiled_c_sha256": "6e02f7cb9fb9d087d687862f0f7674e768e542f8f0e49e0ca549d867d52dbd1b",
       "role": "cooperative persistence/fault supervisor"
     },
     "0x0CEFA4": {

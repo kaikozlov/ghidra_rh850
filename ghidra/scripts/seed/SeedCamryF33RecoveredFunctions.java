@@ -2258,10 +2258,6 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     DataType v = VoidDataType.dataType;
     DataType s32 = IntegerDataType.dataType;
     DataType u16 = UnsignedShortDataType.dataType;
-    getFunctionAt(toAddr(0xD095EL)).setComment("Exact instruction contract: sign-extend input16; negate "
-        + "nonpositive input, then SXH R10 again. INT16_MIN therefore returns -32768 in signed32 R10, "
-        + "not32768 or32767. Decompiled unary-minus C can hide this narrowing; use instructions/native "
-        + "evidence for signed amplitude gates such asC34F8.");
     semanticFunction(0xC3498L, "f33_estimator_reference_correction", s32)
         .setComment("Return signed correction in R10, also storeBFD0; former void inference lost it. "
             + "BFC8=low32(BF7C-BF70); normalize its abs32 with low32 left shift10, unsigned division "
@@ -2334,6 +2330,165 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
         "Unsigned16 divisor/count threshold2000; not a fused32-bit scalar with following calibration.");
     semanticData(0xAF582L, u16, "f33_estimator_source_limit_default", "Exact default8000.");
     semanticData(0xAF584L, u16, "f33_estimator_source_limit_mode2", "Exact mode2 default8000.");
+  }
+  private void annotateEstablishedTracking() throws Exception {
+    DataType v = VoidDataType.dataType;
+    DataType s16 = ShortDataType.dataType;
+    DataType s32 = IntegerDataType.dataType;
+    DataType u16 = UnsignedShortDataType.dataType;
+    DataType words = new PointerDataType(s32, 4);
+    semanticFunction(0xD095EL, "f33_abs_s16_wrapping", s16,
+        new ParameterImpl("value", s16, currentProgram))
+        .setComment("SXH input, negate nonpositive input, then SXH R10 again. INT16_MIN remains-32768; "
+            + "the physical R10 result is sign-extended32. Signed16 return makes the narrowing explicit "
+            + "in C rather than falsely returning+32768. Not a saturating absolute value.");
+    semanticFunction(0xD0970L, "f33_abs_s32_wrapping", s32,
+        new ParameterImpl("value", s32, currentProgram))
+        .setComment("Return positive input unchanged, otherwise low32 negation. INT32_MIN remains "
+            + "negative. C unary-minus spelling does not establish a nonnegative result over all32-bit inputs.");
+    semanticFunction(0xC419CL, "f33_track_established_estimator_difference", v)
+        .setComment("With BFC5==0, first copyC0B4->BFEE. QualifiersC045/C044/C042=5A, AD18=11 and "
+            + "unsignedADF4>=3840 publishC074=low32(BF78-BFD4) and increment u16C064. Only count>100 "
+            + "runs bounded filter/source-count update, then pins100. Failed qualification resets warmup "
+            + "but holds C04C/C078/C074; BFC5!=0 instead clears filter/accumulator and warmup.");
+    semanticFunction(0xC4076L, "f33_filter_established_estimator_difference", v,
+        new ParameterImpl("difference", s32, currentProgram),
+        new ParameterImpl("filtered_difference", words, currentProgram),
+        new ParameterImpl("new_accumulator", words, currentProgram))
+        .setComment("Clip difference around C080 by AE38/1024. StateC08E selects curveAF77E/AF792/AF7A6 "
+            + "atADF6; gain=8192/curve, or8192 when zero. Clamp low32 error*low16(gain) to +/-8*AE38; "
+            + "add signed increment/4 to GLOBAL C078, publish accumulator/2048 through output pointer. "
+            + "Arithmetic is low32, not a saturating integral; third pointer is output-only.");
+    semanticFunction(0xC4144L, "f33_advance_estimator_source_count", v,
+        new ParameterImpl("candidate", s32, currentProgram),
+        new ParameterImpl("previous", s32, currentProgram))
+        .setComment("Start from C0B4, not oldBFEC. Below curve ceiling60000, increment if candidate "
+            + "changed or wrapped abs32(candidate-C080)<AE38/1024. Otherwise retain the input count, "
+            + "even above the ceiling. Publish BFEC and diagnostic ceilingC066.");
+    semanticFunction(0xC4404L, "f33_classify_estimator_source_band", v)
+        .setComment("Always snapshotC08E->C08A. Modes0/3 selectC06E0. Other mode bytes classify "
+            + "unsignedBFEC with exact lower1 and upper10880: below lower0, below upper11, otherwise22. "
+            + "Mode2 has separate calibration cells but the same exact thresholds.");
+    semanticFunction(0xC4464L, "f33_follow_estimator_center", v)
+        .setComment("BFC5==0 andBFF0==5A compute low32 residualBF78-BFD4-C080. First C06F0 call latches "
+            + "C06E->C08B andC06F5A without adopting the filter. Later calls adoptC04C and current band "
+            + "only when wrapped abs32(residual)<=480*AE38/1024. Closed gate clears center only, "
+            + "retaining C06F/C08B/C05C. This is separate from AD13's outer publication gate.");
+    semanticData(0xAF760L, s32, "f33_estimator_tracking_band_scale", "Exact1, normalized byAE38/1024.");
+    semanticData(0xAF764L, s32, "f33_estimator_tracking_step_scale", "Exact8192, normalized byAE38/1024.");
+    semanticData(0xAF76CL, s32, "f33_estimator_center_adoption_scale", "Exact480; inclusive residual gate.");
+    semanticData(0xAF772L, u16, "f33_estimator_tracking_warmup", "Exact100; incremented count must exceed it.");
+    semanticData(0xAF77AL, u16, "f33_estimator_upper_band_default", "Exact10880.");
+    semanticData(0xAF77CL, u16, "f33_estimator_upper_band_mode2", "Exact10880.");
+    semanticData(0xAF7CEL, u16, "f33_estimator_lower_band_default", "Exact1.");
+    semanticData(0xAF7D0L, u16, "f33_estimator_lower_band_mode2", "Exact1.");
+  }
+  private void annotateThermalModels() throws Exception {
+    DataType v = VoidDataType.dataType;
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    DataType s16 = ShortDataType.dataType;
+    DataType s32 = IntegerDataType.dataType;
+    CategoryPath category = new CategoryPath("/CamryF33");
+    StructureDataType following = new StructureDataType(category, "F33FractionalFollowing16", 0);
+    following.add(s16, "previous", "Prior quantized output.");
+    following.add(s16, "target", "Current target.");
+    following.add(s32, "accumulator", "Retained signed16.16 accumulator; low32 arithmetic.");
+    semanticFunction(0x6A63EL, "f33_follow_s16_fractional", v,
+        new ParameterImpl("state", new PointerDataType(resolve(following), 4), currentProgram),
+        new ParameterImpl("coefficient", u32, currentProgram),
+        new ParameterImpl("output", new PointerDataType(s16, 4), currentProgram),
+        new ParameterImpl("new_accumulator", new PointerDataType(s32, 4), currentProgram))
+        .setComment("Use coefficient1..65535, otherwise65536. Compute low32 accumulator + "
+            + "coefficient*(target-previous); publish signed division by65536 narrowed16, not SAR rounding.");
+    semanticFunction(0x39420L, "f33_scale_thermal_divisor", u32,
+        new ParameterImpl("base", u32, currentProgram),
+        new ParameterImpl("scale", u32, currentProgram))
+        .setComment("Unsigned low16 product >>10, cappedFFFF; high input bits ignored.");
+    semanticFunction(0x3943AL, "f33_update_nonnegative_thermal_pole", s32,
+        new ParameterImpl("previous", s32, currentProgram),
+        new ParameterImpl("drive", s32, currentProgram),
+        new ParameterImpl("divisor", u32, currentProgram))
+        .setComment("Saturate drive-previous to +/-7FFFFFFF, divide by low16 divisor if nonzero, "
+            + "saturating-add previous, then floor0. Zero divisor uses the whole error, not hold.");
+    semanticFunction(0x3949AL, "f33_scale_thermal_contribution", s32,
+        new ParameterImpl("state", s32, currentProgram),
+        new ParameterImpl("gain", s16, currentProgram),
+        new ParameterImpl("upper", s16, currentProgram),
+        new ParameterImpl("lower", s16, currentProgram))
+        .setComment("Signed state/128, symmetric saturating32 multiply by gain, signed /4096, then "
+            + "upper/lower clamp and sign-extended16 result. Preserve both truncation stages.");
+    semanticFunction(0x3A670L, "f33_update_motor_thermal_estimate", v)
+        .setComment("Only uninitialized6F80==0 requires7DCC/7BF6 both5A and restore3A5D4. Nonzero marker "
+            + "continues both branches without rechecking validity; publish signed maximum at6F82. "
+            + "Temperature estimation and later current-limit mapping are separate operations.");
+    semanticFunction(0x3A718L, "f33_update_motor_thermal_branch0", s32,
+        new ParameterImpl("upper", s16, currentProgram),
+        new ParameterImpl("lower", s16, currentProgram))
+        .setComment("Drive70B4 updates poles6F94/6F98. Divisors1000/250 use flat1024 gain map unless "
+            + "sat_abs16(64E2)>32 AND drive>1638400, selecting1536 scale and divisors1500/375. "
+            + "Contributions use gains5/38, bias384; clamp then offset/follow selector6. Real signedR10 "
+            + "adjusted estimate is both stored6F8C and consumed by the parent maximum.");
+    semanticFunction(0x3A85AL, "f33_update_motor_thermal_branch1", s32,
+        new ParameterImpl("upper", s16, currentProgram),
+        new ParameterImpl("lower", s16, currentProgram))
+        .setComment("Drive70B8 and poles6FA4/6FA8; same exact numerical coefficients as branch0, "
+            + "separate speed-axis6694 and selector7. Return/store adjusted6F9C, not void.");
+    semanticFunction(0x3AE10L, "f33_update_ecu_source3_thermal_estimate", v)
+        .setComment("Uninitialized6FE0 requires7DCC/7BF6 both5A and restore3AD72. Otherwise update "
+            + "both branches and publish signed maximum6FE2; source3 is a structural code, not an OEM component.");
+    semanticFunction(0x3AEB8L, "f33_update_ecu_source3_thermal_branch0", s32,
+        new ParameterImpl("upper", s16, currentProgram),
+        new ParameterImpl("lower", s16, currentProgram))
+        .setComment("Drive6EF4 updates6FF4/6FF8. Exact divisors1/1 and contribution gains/bias0 still "
+            + "evolve poles, while raw thermal contribution is0. Selector4 offset/following remains active; "
+            + "return adjusted6FEC. Do not infer an entirely disabled thermal path.");
+    semanticFunction(0x3AFD0L, "f33_update_ecu_source3_thermal_branch1", s32,
+        new ParameterImpl("upper", s16, currentProgram),
+        new ParameterImpl("lower", s16, currentProgram))
+        .setComment("Drive6EF8 updates7004/7008; exact zero contribution gains/bias and divisors1/1 "
+            + "as branch0. Selector5 supplies adjusted6FFC, returned in signedR10.");
+    semanticFunction(0x3A9AEL, "f33_publish_motor_thermal_limit_maps", v)
+        .setComment("Map signed6F82 through2B4E4/2B500 into6FAC/6FAE. Exact curves are flat22170/14965 "
+            + "before signed-axis7FFF terminators, at or above arbitration nominals22170/11085.");
+    semanticFunction(0x3B0FAL, "f33_publish_ecu_source3_thermal_limit_maps", v)
+        .setComment("Map signed6FE2 through2B554/2B570 into700C/700E; exact flat22170/14965 curves. "
+            + "This source alone does not lower either arbitration nominal.");
+    semanticFunction(0x3B960L, "f33_apply_thermal_offset_and_following", s32,
+        new ParameterImpl("selector", u32, currentProgram),
+        new ParameterImpl("raw_estimate", s16, currentProgram),
+        new ParameterImpl("previous", s16, currentProgram))
+        .setComment("Low8 selector indexes two-byte21258 rows without local bounds check. Use7014 "
+            + "offset bank unless both7BF8 masks22/2200 are nonzero, then7074. Saturating16 add and "
+            + "clamp[-6400,32000]. First selector use bypasses following; initialized modes7058=1/3 "
+            + "follow only for saturated absolute change>=128, otherwise set separate completion flags.");
+    semanticFunction(0x3B8E4L, "f33_follow_thermal_offset_target", s32,
+        new ParameterImpl("selector", u32, currentProgram),
+        new ParameterImpl("target", s16, currentProgram),
+        new ParameterImpl("previous", s16, currentProgram),
+        new ParameterImpl("bias", s16, currentProgram))
+        .setComment("Reseed selector accumulator7090 from previous<<16 when its signed /65536 "
+            + "narrowed16 disagrees. Apply fractional follower with exact coefficient800; add bias "
+            + "to accumulator/output, cap output at32000 and return signed16. Exact mode1/3 biases are0.");
+    semanticFunction(0x3A5D4L, "f33_restore_motor_thermal_model", v)
+        .setComment("Seed56-byte local from211E8 then get application record6. Status!=10 or markerA55A "
+            + "uses ROM terms307/2893 per branch. Otherwise retain four saved terms unless an absent7BF8 byte, "
+            + "marker!=5AA5 and3A56E==5A jointly select zero terms. Physical persistence is outside this API.");
+    semanticFunction(0x3AD72L, "f33_restore_ecu_source3_thermal_model", v)
+        .setComment("Seed56-byte local from21220 then get record6; use fields24/26/28/2A and marker32 "
+            + "(hex offsets). Status/marker rejection uses zero ROM terms; conditional zero selection "
+            + "also requires3AD0C==5A. Not a fresh acquisition or durable-write acknowledgement.");
+    semanticFunction(0x3B684L, "f33_stage_dual_thermal_squared_inputs", s32,
+        new ParameterImpl("upper", s16, currentProgram),
+        new ParameterImpl("lower", s16, currentProgram))
+        .setComment("Low32 sums66E6^2+66E8^2 and66EA^2+66EC^2 pass unsigned bounds and publish70B4/70B8. "
+            + "Their bounded sum also drives independent70BC/70C0 poles and a separate returned estimate. "
+            + "These staged squared-input drives are not measurements of power in watts.");
+    semanticFunction(0x397E6L, "f33_stage_ecu_thermal_squared_inputs", v)
+        .setComment("Low32 squares of32-bit6EFC and signed16 6EEC/6EEE, then signed calibration bounds, "
+            + "publish6EF0/6EF4/6EF8. Do not replace low32 multiplication by an unbounded mathematical square.");
+    semanticData(0x21258L, new ArrayDataType(u8, 16, 1), "f33_thermal_offset_source_pairs",
+        "Eight normal/alternate source-index pairs. Both indices for selectors4..7 are0.");
   }
   private void annotateThermalArbitration() throws Exception {
     DataType v = VoidDataType.dataType;
@@ -3131,6 +3286,8 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     annotateSensingPipeline();
     annotateRateObserver();
     annotateEstimatorAcquisition();
+    annotateEstablishedTracking();
+    annotateThermalModels();
     annotateThermalArbitration();
     annotateFaultActions();
     annotateDiagnosticEventLifecycle();

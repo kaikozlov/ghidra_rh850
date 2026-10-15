@@ -211,22 +211,17 @@ def main() -> int:
     # consumes C5EC and writes C5EE.  Thus DID 1C3E is a selector-modulated term proxy,
     # not an enum/state DID. C8678 independently proves C4C0 is selector-indexed too, but
     # no exact RDBI callback exposes C4C0 directly.
-    tokens(funcs, 0xC9812,
-           "uVar3 = (uint)DAT_febec156;",
-           "FUN_000d0768((&PTR_DAT_000d39dc)[uVar3 & 3],uVar5);",
-           "iVar6 = iVar6 * 0x400;",
-           "iVar6 = iVar6 / iVar7;",
-           "*(short *)(puVar4 + 0xdec) = (short)iVar6;")
-    need(0xFEBEB800 + 0xDEC == 0xFEBEC5EC, "C9812 C5EC GP geometry drift")
-    tokens(funcs, 0xC9A84,
-           "iVar2 = (int)*(short *)(puVar4 + 0xdec) + (int)*(short *)(puVar4 + -0xc06);",
-           "*(short *)(puVar4 + 0xdee) = (short)(((int)(short)iVar6 * (int)sVar1) / 0x400);")
-    need(0xFEBEB800 + 0xDEE == 0xFEBEC5EE, "C9A84 C5EE GP geometry drift")
-    tokens(funcs, 0xC8678,
-           "uVar2 = (uint)DAT_febec156;",
-           "FUN_000d0768((&PTR_LAB_000d3630)[uVar2 & 3],uVar5);",
-           "*(int *)(puVar3 + 0xcc0) = iVar7;")
-    need(0xFEBEB800 + 0xCC0 == 0xFEBEC4C0, "C8678 C4C0 GP geometry drift")
+    need(data_refs(funcs[0xC9812], 0xFEBEC156, "READ")
+         and data_refs(funcs[0xC9812], 0xD39DC)
+         and data_refs(funcs[0xC9812], 0xFEBEC5EC, "WRITE"),
+         "C9812 selector/table/intermediate references drift")
+    need(data_refs(funcs[0xC9A84], 0xFEBEC5EC, "READ")
+         and data_refs(funcs[0xC9A84], 0xFEBEC5EE, "WRITE"),
+         "C9A84 intermediate/term references drift")
+    need(data_refs(funcs[0xC8678], 0xFEBEC156, "READ")
+         and data_refs(funcs[0xC8678], 0xD3630)
+         and data_refs(funcs[0xC8678], 0xFEBEC4C0, "WRITE"),
+         "C8678 selector/table/term references drift")
 
     # Critically, the apparent selector dependency of both C5EE and C4C0 aliases away in
     # this exact calibration. All four C9812 selector table entries point to the same map;

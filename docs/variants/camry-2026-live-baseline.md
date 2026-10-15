@@ -2847,9 +2847,9 @@ The absolute-value helper `D095E` is **not saturating**: its final `sxh r10`
 narrowing makes `INT16_MIN` return−32768, which passes both signed `<` gates.
 The [wrapped-minimum native scenario](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_estimator_source_wrapped_minimum_amplitudes.json)
 confirms reference commitment with both raw amplitudes at that value.
-This does not establish that either physical producer can emit it. The
-decompiler's unary-minus C can hide the narrowing; the instruction and native
-result define this boundary.
+This does not establish that either physical producer can emit it. The previous
+unconstrained return type hid the narrowing; the tracked signed16 return now
+preserves it in rebuilt C. Instructions and native execution define the boundary.
 
 The external commit is
 `BFD4=low32(correction+BF78−BF84−BF7C+BFD8+BF70)`.
@@ -2891,6 +2891,56 @@ accepted sample `BFD8`. Neither clears its own request. `C4046` calls reseed
 **before** reset: when both requests are set, reset clears the newly seeded
 center before subsequent source prework. Separate acknowledgement consumption
 and qualification remain part of the `C492C` path.
+
+#### Established-source tracking and center adoption
+
+Once reference-valid `BFF0==5A`, `C419C` tracks `BF78−BFD4` rather than acquiring
+another reference. With `BFC5==0`, it refreshes `BFEE` from `C0B4` **before**
+checking the three `5A` qualifiers, `AD18==11` and unsigned `ADF4>=3840`.
+The consecutive unsigned16 warmup must increment **past100** before filtering;
+an admitted 99→100 call only publishes difference `C074`. A qualifier interruption
+resets warmup but retains difference/filter/accumulator. This differs from the
+acquisition model's paused accumulation window. `BFC5!=0` instead clears the
+filter, accumulator and warmup without refreshing `BFEE`.
+
+The established filter `C4076` composes bounded input, retained integration and
+quantization, not a fresh reference assignment:
+
+- Clip the difference to `C080 ± AE38/1024`. The three state-selected curves
+  at `AF77E/AF792/AF7A6` are identical in this image: ordinate40 through axis7680,
+  rising to100 at10240, then flat until the terminator.
+- At unsigned `ADF6`, divide8192 by the curve result; zero selects8192.
+  Multiply the error from prior filtered `C04C` by the low16 gain, preserving
+  low32 arithmetic, and clamp the step to `±8*AE38`.
+- Add signed `step/4` to **global `C078`**, then publish signed accumulator/2048
+  as `C04C`. The third argument receives the new accumulator; it is not the
+  source of the previous state.
+
+`C4144` starts its count from **`C0B4`, not old `BFEC`**. Below the exact curve
+ceiling60000, it increments when the filtered candidate changed or its wrapped
+absolute distance from the center is strictly below the input band. An already
+greater count is retained, not clipped. `C4404` classifies this count as0/11/22
+using thresholds1/10880; modes0/3 force class0.
+
+Center adoption `C4464` has its own lifetime. With `BFC5==0 && BFF0==5A`,
+the first call latches the class and initialization marker but **holds the
+center**. Later calls adopt `C04C` only when the wrapped absolute residual
+`BF78−BFD4−old C080` is at most `480*AE38/1024`. Closing this source gate clears
+the center but retains its initialization/class/residual cells. The outer
+`AD13` publication gate is separate. The signed32 absolute helper wraps at
+`INT32_MIN`; these are exact integer predicates, not unbounded real arithmetic.
+
+The composed [mature tracking](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_established_tracking_mature_clamped_step.json)
+scenario takes difference4000 around center100, clips it to101, clamps the
+gain-scaled step to8192, and publishes accumulator2048/filter1 and count11
+from source count10 despite old `BFEC=55`.
+The [warmup boundary](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_established_tracking_warmup_boundary.json)
+holds that filter at 99→100; the
+[qualifier interruption](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_established_tracking_qualifier_pause_retains_filter.json)
+retains prior filter/difference while resetting warmup and refreshing `BFEE`.
+These execute `C419C` and its admitted callees, not the enclosing qualifier
+refresh or every center-adoption domain. Consistency/plausibility and secondary
+prediction remain separate dependencies.
 
 #### Observer-dependent bounds are not a zero-output veto
 
@@ -2976,6 +3026,78 @@ The signed/unsigned axis sentinels are not interpolation endpoints. `37FD2`
 uses this publication `6F7E` as a signed floor in its ordinary branch, before
 the separate `71EC&3` half-scaling and retained transition filter. Constant
 calibration does not mean this floor can never bind.
+
+#### Upstream model state is not a derating request
+
+`3A670` maintains the motor estimate; `3AE10` maintains structural ECU source3.
+Only their uninitialized markers require `7DCC/7BF6==5A` and record restoration.
+Once initialized, they update without rechecking those validity bytes. Each
+publishes the signed maximum of two adjusted branch estimates. The branch
+functions really return signed values in R10; a void prototype hid this
+parent/child dataflow.
+
+| Model | Staged drive / retained poles | Exact branch coefficients | Adjusted result |
+|---|---|---|---|
+| Motor branch0 | `70B4` / `6F94,6F98` | Divisors1000/250; contribution gains5/38; bias384 | Offset/follow selector6 → `6F8C` |
+| Motor branch1 | `70B8` / `6FA4,6FA8` | Same coefficients, independent states and speed axis | Selector7 → `6F9C` |
+| ECU source3 branch0 | `6EF4` / `6FF4,6FF8` | Divisors1/1; contribution gains and bias0 | Selector4 → `6FEC` |
+| ECU source3 branch1 | `6EF8` / `7004,7008` | Same zero contribution gains, independent states | Selector5 → `6FFC` |
+
+For each motor branch, **both** saturated signed16 `abs(64E2)>32` and signed
+drive>1638400 select Q10 multiplier1536, giving divisors1500/375.
+Otherwise the exact speed-indexed multiplier map is flat1024. Equality at32
+does not select the high-load branch. The pole update saturates the drive
+error symmetrically to `±INT_MAX`, divides toward zero by the low16 divisor,
+saturating-adds it to the previous state, then floors at0. A zero divisor uses
+the undivided error, not a hold. Contribution calculation divides state by128,
+saturating-multiplies by signed16 gain, divides by4096, then clamps to the
+signed bounds−6400/32000. Preserve these separate truncation stages.
+
+Zero ECU source3 contribution gains do **not** eliminate its offset path.
+`3B960` selects a staged offset from `7014` unless both `7BF8` masks22/2200
+are nonzero, in which case it uses `7074`. The exact selector table gives
+selectors4..7 index0 in either bank. It adds/clamps the offset and applies
+per-selector initialization and mode1/3 following. At absolute change≥128,
+the retained signed16.16 accumulator follows with coefficient800/65536;
+smaller changes set the relevant completion flag. A stale accumulator is
+reseeded from the prior adjusted estimate before following. Other modes and
+first use bypass this following step.
+
+The exact temperature-to-current maps are **flat22170/14965** for both the
+motor (`2B4E4/2B500`) and ECU source3 (`2B554/2B570`). The signed-axis `7FFF`
+row terminates the lookup; its `FFFF` ordinate is not a request endpoint.
+These outputs do not undercut either bank's nominal22170/11085. This does not
+establish absence of thermal protection: other ECU sources, fault monitors,
+owner reduction and the retained release envelope remain separate.
+
+The [threshold-equality composition](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_motor_thermal_gain_threshold_equality.json)
+executes both motor branches at amplitude32 and publishes raw model estimate13503.
+The [high-load scheduler interval](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_motor_thermal_high_load_gain.json)
+also exercises mode1 offset following, the real maps and `3A4A0` arbitration:
+the branch outputs become13004/13006, while owner0 stays22170 and the inactive
+diagnostic markers and cached temperatures clear to0. The inactive DID sentinel
+is a later callback encoding, not that RAM value.
+The [ECU source3 interval](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_ecu_source3_zero_gain_preserves_offset.json)
+updates its poles to the staged drives, keeps contributions0, and publishes
+the nonzero offset12800 plus the exact flat current requests.
+
+These native intervals start at actual scheduler instructions `5F8F8` and
+`5F8E8`, respectively, and stop before the outer callback epilogue. They do not
+execute the complete mode callback or establish fresh acquisition. Static
+`5F610` dataflow places these model updates behind the admitted mode and
+generation bit4, while `3A4A0` runs even when that generation bit is clear.
+Arbitration can therefore consume held model/request generations; a foreground
+cadence is not automatically every child's update period.
+
+The drives themselves are software-staged squared-input combinations:
+`3B684` forms bounded low32 sums from `66E6/66E8` and `66EA/66EC` into
+`70B4/70B8`; `397E6` squares staged inputs into `6EF0/6EF4/6EF8`.
+These are not independently established measurements of watts. Restore wrappers
+read application record6 through the existing NvM API; rejected motor records
+select saved-term defaults307/2893 per branch, while source3 selects zeros.
+Record-marker qualification, upstream input freshness, the other ECU estimators
+and physical persistence remain explicit boundaries, not prerequisites for
+these software recurrence and arbitration contracts.
 
 #### A released thermal request can remain current-limiting
 
@@ -10457,28 +10579,36 @@ in a different context. Owner requests, reduced flags, selected outputs and
 mode caches are therefore not a single synchronous state transition.
 
 **Remaining high-value dependencies:** complete estimator consistency/plausibility
-and center-following domains; remaining monitor detection-to-action and Dem/DTC
-joins; diagnostic aging, capture persistence and lifecycle reachability;
-upstream thermal estimation; OEM service identities, calibration units and
-physical source identity; ADC/DMA freshness and hardware feedback/update timing.
+and secondary prediction; remaining monitor detection-to-action and Dem/DTC joins;
+diagnostic aging, capture persistence and lifecycle reachability; other ECU
+thermal estimators and restore qualification; OEM service identities, calibration
+units and physical source identity; ADC/DMA freshness and hardware feedback/update timing.
 The recovered application, fault-action and diagnostic contracts do not require
 a complete peripheral or NvM emulator. Static connectivity and bounded native
 scenarios are not exhaustive semantic closure or vehicle results.
 
-**Verification checkpoint (2026-10-15, diagnostic event lifecycle and capture).**
+**Verification checkpoint (2026-10-15, established tracking and upstream thermal models).**
 Independent four-stage rebuilds plus signature finalization agreed on the
-canonical inventory. Native compositions passed for first-failure capture and
-classifier publication, ordinary/exception pass history, classifier release
-under bitmap inhibition, and control-fault publication despite diagnostic
-reporting inhibition. All used unmodified firmware and explicit RAM inputs,
+canonical inventory. Native compositions passed for established tracking,
+warmup/interruption, the motor gain threshold, retained offset following, and
+model-to-map/arbitration intervals. The existing wrapped `INT16_MIN` acquisition
+regression also passed. All used unmodified firmware and explicit RAM inputs,
 without replacement callees or peripheral-model extension.
 
-Rebuilt C retains the actual capture/application buffer extents and saved PMR
-through every whole-record copy call. Coverage, function-boundary, D5 provenance,
+Rebuilt C retains the signed thermal branch returns, fractional-following record
+and signed16 absolute-value contract. Coverage, function-boundary, D5 provenance,
 command-cone, assist-oracle and B6 composition/end-to-end/ingress gates passed;
-live coverage matched the canonical ledger exactly. The matching project/corpus
-were promoted after clean teardown. Diagnostic evidence links resolve. These
-are software reconstruction results, not new vehicle observations.
+live coverage matched the canonical ledger exactly. Matching project/corpus
+were promoted after clean teardown, and the new evidence links resolve.
+The assist producer now checks selector/table/writer references instead of local
+variable spelling; an obsolete supervisor source-spelling assertion was removed,
+not repinned. Exact calibration checks and composed execution evidence remain.
+These are software reconstruction results, not new vehicle observations.
+
+The preceding `7261f2f1` checkpoint contains diagnostic failure/pass generations,
+capture selection, classifier release and control-fault independence. Its
+target-local copy convention preserves saved PMR across every whole-record copy;
+capture/application buffer extents are represented in reproducible types.
 
 The preceding `0745f959` checkpoint contains thermal arbitration/release,
 selective fault-record integrity/qualification, and estimator reference

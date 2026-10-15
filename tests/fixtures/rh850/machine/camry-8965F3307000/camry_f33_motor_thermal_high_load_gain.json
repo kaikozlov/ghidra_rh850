@@ -1,0 +1,321 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_motor_thermal_high_load_gain",
+  "entry": {
+    "role": "real scheduler interval5F8F8..5F904: initialized motor thermal model with retained offset following, exact limit maps and current-limit arbitration; other ECU requests are explicit inputs, not execution of the complete mode callback or fresh hardware acquisition",
+    "scope": "resolved-address",
+    "address": "0x5f8f8"
+  },
+  "max_instructions": 20000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xfe00"
+  },
+  "stop_addresses": [
+    "0x5f904"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1800",
+      "size": 2048,
+      "fill": 165,
+      "evidence": "isolated nested-call stack"
+    },
+    {
+      "address": "0xfebe6400",
+      "size": 3328,
+      "fill": 0,
+      "evidence": "explicit software-staged model state and offset sources"
+    },
+    {
+      "address": "0xfebe7bf0",
+      "size": 480,
+      "fill": 0,
+      "evidence": "acquisition validity7BF6/7DCC and alternate-offset selector7BF8 explicitly zero"
+    },
+    {
+      "address": "0xfebe6f68",
+      "hex": "9a564d2b",
+      "evidence": "explicit nominal ECU source2 requests"
+    },
+    {
+      "address": "0xfebe6f30",
+      "hex": "9a564d2b",
+      "evidence": "explicit nominal ECU source4 requests"
+    },
+    {
+      "address": "0xfebe6ee0",
+      "hex": "9a564d2b",
+      "evidence": "explicit nominal ECU source5 requests"
+    },
+    {
+      "address": "0xfebe700c",
+      "hex": "9a56753a",
+      "evidence": "ECU source3 requests matching its exact flat maps"
+    },
+    {
+      "address": "0xfebe6f6c",
+      "hex": "0301",
+      "evidence": "prior active diagnostic source and motor marker must clear"
+    },
+    {
+      "address": "0xfebe6f7a",
+      "hex": "b8220f27",
+      "evidence": "prior diagnostic estimates differ from inactive publication"
+    },
+    {
+      "address": "0xfebebd34",
+      "size": 20,
+      "fill": 165,
+      "evidence": "current-limit owner array canary; only owner0 may change"
+    },
+    {
+      "address": "0xfebe6f80",
+      "hex": "5a",
+      "evidence": "model initialized; acquisition validity is not rechecked"
+    },
+    {
+      "address": "0xfebe6f82",
+      "hex": "6400",
+      "evidence": "old maximum differs from reconstructed output"
+    },
+    {
+      "address": "0xfebe6f8c",
+      "hex": "c832",
+      "evidence": "prior branch0 adjusted estimate"
+    },
+    {
+      "address": "0xfebe6f9c",
+      "hex": "c832",
+      "evidence": "prior branch1 adjusted estimate"
+    },
+    {
+      "address": "0xfebe6f94",
+      "hex": "40420f00",
+      "evidence": "branch0 first retained pole"
+    },
+    {
+      "address": "0xfebe6f98",
+      "hex": "80841e00",
+      "evidence": "branch0 second retained pole"
+    },
+    {
+      "address": "0xfebe6fa4",
+      "hex": "c0c62d00",
+      "evidence": "branch1 first retained pole"
+    },
+    {
+      "address": "0xfebe6fa8",
+      "hex": "00093d00",
+      "evidence": "branch1 second retained pole"
+    },
+    {
+      "address": "0xfebe70b4",
+      "hex": "404b4c00",
+      "evidence": "branch0 staged power input"
+    },
+    {
+      "address": "0xfebe70b8",
+      "hex": "40548900",
+      "evidence": "branch1 staged power input"
+    },
+    {
+      "address": "0xfebe7014",
+      "hex": "0032",
+      "evidence": "selected offset source for selectors6/7"
+    },
+    {
+      "address": "0xfebe7074",
+      "hex": "204e",
+      "evidence": "alternate offset must not be selected"
+    },
+    {
+      "address": "0xfebe7058",
+      "hex": "01",
+      "evidence": "initialized mode1 follows offset targets rather than bypassing the fractional accumulator"
+    },
+    {
+      "address": "0xfebe705f",
+      "hex": "01",
+      "evidence": "branch6 correction initialized"
+    },
+    {
+      "address": "0xfebe7060",
+      "hex": "01",
+      "evidence": "branch7 correction initialized"
+    },
+    {
+      "address": "0xfebe64e2",
+      "hex": "2100",
+      "evidence": "strict amplitude threshold32 with both staged powers above1638400"
+    }
+  ],
+  "checks": [
+    {
+      "name": "real model-map-arbitration interval reaches its stop boundary",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x5f904"
+    },
+    {
+      "name": "nested stack restored",
+      "kind": "register",
+      "register": "sp",
+      "equals": "0xfebe2000"
+    },
+    {
+      "name": "exact motor maps publish22170 and14965 rather than thermal derating",
+      "kind": "memory",
+      "address": "0xfebe6fac",
+      "size": 4,
+      "equals_hex": "9a56753a"
+    },
+    {
+      "name": "nominal combined request reaches owner0",
+      "kind": "memory",
+      "address": "0xfebebd34",
+      "size": 2,
+      "equals_hex": "9a56"
+    },
+    {
+      "name": "other current-limit owners remain untouched",
+      "kind": "memory",
+      "address": "0xfebebd36",
+      "size": 18,
+      "equals_hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5"
+    },
+    {
+      "name": "inactive diagnostic markers do not echo model activity",
+      "kind": "memory",
+      "address": "0xfebe6f6c",
+      "size": 2,
+      "equals_hex": "0000"
+    },
+    {
+      "name": "inactive diagnostic temperatures clear despite a positive motor model estimate",
+      "kind": "memory",
+      "address": "0xfebe6f7a",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "branch0 adjusted estimate",
+      "kind": "memory",
+      "address": "0xfebe6f8c",
+      "size": 2,
+      "equals_hex": "cc32"
+    },
+    {
+      "name": "branch0 first bounded contribution",
+      "kind": "memory",
+      "address": "0xfebe6f8e",
+      "size": 2,
+      "equals_hex": "0900"
+    },
+    {
+      "name": "branch0 second bounded contribution",
+      "kind": "memory",
+      "address": "0xfebe6f90",
+      "size": 2,
+      "equals_hex": "9100"
+    },
+    {
+      "name": "branch0 raw summed estimate before offset",
+      "kind": "memory",
+      "address": "0xfebe6f92",
+      "size": 2,
+      "equals_hex": "1a02"
+    },
+    {
+      "name": "branch0 first retained pole",
+      "kind": "memory",
+      "address": "0xfebe6f94",
+      "size": 4,
+      "equals_hex": "aa4c0f00"
+    },
+    {
+      "name": "branch0 second retained pole",
+      "kind": "memory",
+      "address": "0xfebe6f98",
+      "size": 4,
+      "equals_hex": "c0a31e00"
+    },
+    {
+      "name": "branch1 adjusted estimate",
+      "kind": "memory",
+      "address": "0xfebe6f9c",
+      "size": 2,
+      "equals_hex": "ce32"
+    },
+    {
+      "name": "branch1 first bounded contribution",
+      "kind": "memory",
+      "address": "0xfebe6f9e",
+      "size": 2,
+      "equals_hex": "1c00"
+    },
+    {
+      "name": "branch1 second bounded contribution",
+      "kind": "memory",
+      "address": "0xfebe6fa0",
+      "size": 2,
+      "equals_hex": "2201"
+    },
+    {
+      "name": "branch1 raw summed estimate before offset",
+      "kind": "memory",
+      "address": "0xfebe6fa2",
+      "size": 2,
+      "equals_hex": "be02"
+    },
+    {
+      "name": "branch1 first retained pole",
+      "kind": "memory",
+      "address": "0xfebe6fa4",
+      "size": 4,
+      "equals_hex": "60d62d00"
+    },
+    {
+      "name": "branch1 second retained pole",
+      "kind": "memory",
+      "address": "0xfebe6fa8",
+      "size": 4,
+      "equals_hex": "153d3d00"
+    },
+    {
+      "name": "published estimate is signed maximum of adjusted branches",
+      "kind": "memory",
+      "address": "0xfebe6f82",
+      "size": 2,
+      "equals_hex": "ce32"
+    },
+    {
+      "name": "branch0 following reseeds from previous then retains fractional remainder",
+      "kind": "memory",
+      "address": "0xfebe70a8",
+      "size": 4,
+      "equals_hex": "4020cc32"
+    },
+    {
+      "name": "branch1 following uses its independent accumulator",
+      "kind": "memory",
+      "address": "0xfebe70ac",
+      "size": 4,
+      "equals_hex": "c020ce32"
+    },
+    {
+      "name": "initialized model runs despite absent acquisition-valid markers",
+      "kind": "memory",
+      "address": "0xfebe6f80",
+      "size": 1,
+      "equals_hex": "5a"
+    }
+  ]
+}
