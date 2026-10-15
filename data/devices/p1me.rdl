@@ -63,6 +63,28 @@ addrmap p1me {
         reset_rules="power-on:force;system-1-cvm:force;system-1-pin:force;system-2:force;application-1:controlled";
     } global_ram @ 0xFEEF8000;
 
+    // Exact Camry consumer 00067060 uses only DCRA1, CTL=00 (32-bit Ethernet/32-bit input).
+    reg {
+        regwidth=32; accesswidth=32; desc="DCRA1 CRC input; 32-bit register accesses only";
+        evidence="manual"; source_ref="R01UH0585EJ0120 pages2844,2849 Table33.7"; behavior="dcra";
+        trigger="dcra-input"; status_register="DCRA1COUT"; mode_register="DCRA1CTL";
+        field { sw=rw; reset=0; } value[31:0];
+    } DCRA1CIN @ 0xFFD51000;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="DCRA1 CRC data; reads XOR the internal Ethernet CRC state with FFFFFFFF";
+        evidence="manual"; source_ref="R01UH0585EJ0120 page2850 Table33.8 and page2852 Table33.10"; behavior="dcra";
+        trigger="dcra-seed"; mode_register="DCRA1CTL";
+        field { sw=rw; reset=0; } value[31:0];
+    } DCRA1COUT @ 0xFFD51004;
+
+    reg {
+        regwidth=8; accesswidth=8; desc="DCRA1 control; model supports only POL=00 ISZ=00, other modes fault";
+        evidence="manual"; source_ref="R01UH0585EJ0120 page2851 Table33.9"; behavior="dcra";
+        trigger="dcra-control";
+        field { sw=rw; reset=0; } value[7:0];
+    } DCRA1CTL @ 0xFFD51020;
+
     reg {
         regwidth=32; accesswidth=32; desc="Self-programming ID input word 0";
         evidence="manual"; source_ref="R01UH0615EJ0120 sections 3.3 and 4"; behavior="faci";

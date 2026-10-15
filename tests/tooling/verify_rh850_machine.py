@@ -607,6 +607,7 @@ def check_register_input_boundaries(output_root: Path) -> None:
         ("cpu-register", "PC", "0x100"),
         ("write-only-command", "DFERSTC", "1"),
         ("byte-register-overflow", "FPMON", "0x100"),
+        ("dcra-internal-state", "DCRA1COUT", "0"),
     ):
         scenario = {
             "schema": "rh850-p1me-machine-scenario-v2",

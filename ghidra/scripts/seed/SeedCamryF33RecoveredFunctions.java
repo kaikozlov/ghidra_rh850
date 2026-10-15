@@ -873,26 +873,32 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
         + "then encodes the latter lanes; bytes after payload length remain untouched.");
     semanticData(0xFEBF0358L, new ArrayDataType(u8, objectCount, 1),
         "f33_nvm_family1_completion",
-        "FF admits the application callback; read consensus publishes5A/A5. "
+        "FF admits the application callback; terminal read/write handlers publish5A/A5. "
         + "Distinct from the redundant application-status bytes atFEBF0328.");
     semanticData(0xFEBF0691L, u8, "f33_nvm_family1_busy",
-        "68E9E clears this on leaf return5A, including failed read consensus. "
+        "68E9E clears this on leaf return5A, including failed read/write completion. "
         + "Its current value is not an admission gate in68E9E.");
     semanticData(0xFEBF0694L, u8, "f33_nvm_copy_read_retry",
         "Shared by family0 and family1 read callbacks. Success clears it; nonzero "
         + "result retries below2, consuming an attempt even if73FE8 rejects submission.");
     semanticData(0xFEBF0698L, new ArrayDataType(u32, 4, 4),
         "f33_nvm_family1_copy_failure_masks",
-        "One word per shared slot. Each copy uses bits5A in its byte, not an "
-        + "arbitrary-nonzero-byte test. Copy0 resets the entire word.");
-    StructureDataType request = new StructureDataType(category, "F33NvmFamily1RequestCell", 0);
+        "One word per shared slot. Read voting tests5A bits in each copy byte; "
+        + "write completion tests the ENTIRE word for zero. Copy0 resets the word.");
+    StructureDataType request = new StructureDataType(category, "F33NvmRequestCell", 0);
     request.setPackingEnabled(true);
-    request.add(u8, "state", "67AE6 does not inspect this byte.");
-    request.add(u8, "opaque_01", "Not interpreted by the membership/finalization proof.");
+    request.add(u8, "state", "11 read;22 write;33 write unless completion5A. Membership ignores it.");
+    request.add(u8, "opaque_01", "Preserved by dequeue and initialization.");
     request.add(u16, "object", "FFFF marks an empty object field; membership scans all rows.");
     semanticData(0xFEBF058CL, new ArrayDataType(resolve(request), requestCount, 4),
         "f33_nvm_family1_request_cells",
         "49 four-byte cells at058C, not048C.67AE6 ignores state and queue indices.");
+    int family0RequestCount = currentProgram.getMemory().getByte(toAddr(0x2AD8AL)) & 0xFF;
+    semanticData(0xFEBF0488L, new ArrayDataType(resolve(request), family0RequestCount, 4),
+        "f33_nvm_family0_request_cells",
+        "65 four-byte cells.673DE scans every object field regardless of state or indices.");
+    semanticData(0x2AD8AL, u8, "f33_nvm_family0_request_cell_count",
+        "Registered count65; shared by index advancement, recovery and membership.");
     semanticData(0x2AD8BL, u8, "f33_nvm_family1_request_cell_count",
         "Registered count49; consumed by the full membership scan.");
     semanticData(0xFEBF0689L, u8, "f33_nvm_family1_phase",
@@ -959,6 +965,15 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
             + "only if every byte passes; completion5A/A5 distinguishes success/failure. "
             + "Return5A for either completed vote, otherwise0. No local handle/object "
             + "bound. Unmatched copy handle sets mask005A5A5A without reading retry.");
+    semanticFunction(0x68E16L, "f33_nvm_handle_family1_write_result", u32,
+        new ParameterImpl("result", u8, currentProgram),
+        new ParameterImpl("logical_handle", u16, currentProgram))
+        .setComment("Unchecked route object and family1 descriptor; slot=object&3. "
+            + "Copy0 resets the entire mask without reading it. Nonzero result ORs5A "
+            + "into that copy byte; success does not clear prior failures. Copy2 "
+            + "publishes5A iff the FULL32 mask is zero, otherwiseA5, and returns5A "
+            + "in both cases. Earlier copies return0. Unmatched handle sets005A5A5A "
+            + "and returns0. No read retry, data copy or physical-programming proof.");
     semanticFunction(0x68E9EL, "f33_nvm_route_application_result", u32,
         new ParameterImpl("event", u8, currentProgram),
         new ParameterImpl("logical_handle", u16, currentProgram),
@@ -966,8 +981,8 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
         .setComment("Decode family/object from2B010. Require family completionFF "
             + "and nonFFFF first handle; event6/7 selects read/write result handler. "
             + "Leaf return5A clears that family's busy byte even on failure. Always "
-            + "return0. Native family0 read/write and family1 read/gates; the "
-            + "family1 write-result leaf remains separate from write submission.");
+            + "return0. Native read/write handlers for both families; completion "
+            + "publication is not evidence of physical flash commitment.");
     semanticFunction(0x71D0AL, "f33_nvm_publish_logical_result", VoidDataType.dataType,
         new ParameterImpl("logical_handle", u16, currentProgram),
         new ParameterImpl("operation", u32, currentProgram),
@@ -1630,8 +1645,9 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
             + "advancesAA and forwards its charge to67D96 in the same call. EntryAA "
             + "uses fresh charge0. Completed67D96 or entryCC calls670C4 and clears "
             + "state. Recognized nonzero entry always returns1, including finalization; "
-            + "invalid state clears/returns0. Native normal-group finalization; active "
-            + "driver execution and670C4 non-normal CRC recomputation remain bounded.");
+            + "invalid state clears/returns0. Native finalization includes actual ROM "
+            + "CRC failures in groups1/3 and still clears state/returns1. Complete "
+            + "initialized physical acquisition remains outside these proofs.");
     semanticFunction(0x66B96L, "f33_nvm_run_bounded_initial_acquisition", VoidDataType.dataType)
         .setComment("Set0673=33 and arm0692=5A. Call66B16 at mostROM88 times, stopping "
             + "early on0; always clear0673 afterward. Native88-tick exhaustion leaves "
@@ -1644,7 +1660,7 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
             + "selects2 for family1 before1 for family0. Otherwise step66B16; busy "
             + "preserves current work. On idle completion,67B58==1 selects2, else "
             + "6740A==1 selects1, else preserve work. Native hold repair/fallback "
-            + "and phase priority; request-selection bodies remain separate.");
+            + "and phase priority; request selectors have separate native edge proofs.");
     semanticFunction(0x679B2L, "f33_nvm_get_family0_phase", u32)
         .setComment("Return zero-extended byte0680; snapshot precedes hold decoding.");
     semanticFunction(0x681F2L, "f33_nvm_get_family1_phase", u32)
@@ -1652,12 +1668,14 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     semanticFunction(0x79C60L, "f33_nvm_service_acquisition_driver", VoidDataType.dataType)
         .setComment("Real wrapper of74164, not a replacement readiness callback. "
             + "Native polling/budget cases exercise its service-state rejection; "
-            + "the initialized-driver branch remains separate.");
+            + "74164 also has initialized scheduler/terminal-state proofs, not a "
+            + "whole physical-acquisition proof.");
     semanticFunction(0x74164L, "f33_nvm_service_logical_and_physical_driver", VoidDataType.dataType)
         .setComment("Return if79470(14) or72148 rejects. Otherwise79A50,79C9E; only "
             + "mode result0 invokes73B2C(1),72EEA. Then79C4C(mode_result!=0),79A94. "
-            + "Native real uninitialized-service early exit; no initialized-driver "
-            + "or physical flash progress claim.");
+            + "Native uninitialized exit, initialized quiet scan/wrap, mode blocking "
+            + "and explicit terminal phases8/10/20. Queued work is bounded at726C4; "
+            + "deferred notification at7990E. No physical flash progress claim.");
     semanticFunction(0x72148L, "f33_nvm_service_uninitialized", u32)
         .setComment("Return full32 boolean(6102!=F0). Native service-state0 rejects "
             + "scheduler progress; queue admission itself is a different contract.");
@@ -1667,6 +1685,177 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
             + "hook always returns0, so this is not an additional live readiness check.");
     semanticFunction(0x79D2EL, "f33_nvm_driver_gate_hook", u32)
         .setComment("Exact MOV0,r10;JMPLP. No argument reads or hardware access.");
+  }
+  private void annotateNvmRequestSelection() throws Exception {
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u16 = UnsignedShortDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    DataType byteOut = new PointerDataType(u8, 4);
+    semanticData(0xFEBF067AL, u8, "f33_nvm_family0_request_producer", "Byte index into65 cells.");
+    semanticData(0xFEBF067BL, u8, "f33_nvm_family0_request_consumer", "Advanced even for invalid consumed objects/kinds.");
+    semanticData(0xFEBF067EL, u8, "f33_nvm_family0_span_request", "Exact5A selects the mapped-span branch.");
+    semanticData(0xFEBF0680L, u8, "f33_nvm_family0_phase", "Selector stores11/22/33; not an OEM enum.");
+    semanticData(0xFEBF0682L, u16, "f33_nvm_family0_active_object", "Set only for valid read/write selection.");
+    semanticData(0xFEBF0686L, u8, "f33_nvm_family1_request_producer", "Byte index into49 cells.");
+    semanticData(0xFEBF0687L, u8, "f33_nvm_family1_request_consumer", "Advanced even for invalid consumed objects/kinds.");
+    semanticData(0xFEBF0688L, u8, "f33_nvm_family1_span_request", "Exact5A selects the mapped-span branch.");
+    for (long entry : new long[] {0x67350L, 0x67A58L}) {
+      String family = entry == 0x67350L ? "0" : "1";
+      semanticFunction(entry, "f33_nvm_recover_family" + family + "_request_indices", VoidDataType.dataType,
+          new ParameterImpl("producer_out", byteOut, currentProgram),
+          new ParameterImpl("consumer_out", byteOut, currentProgram))
+          .setComment("If both stored byte indices are below the registered cell "
+              + "count, copy them without reading cells. Otherwise start both at0 "
+              + "and scan adjacent object halfwords from row1: last occupied-to-empty "
+              + "transition selects producer; last empty-to-occupied selects consumer. "
+              + "ObjectFFFF alone denotes empty; state is ignored. Store recovered "
+              + "indices globally and through outputs. No cell repair or explicit "
+              + "last-to-first comparison; all-empty/all-full recover0/0.");
+    }
+    for (long entry : new long[] {0x673C2L, 0x67ACAL}) {
+      String family = entry == 0x673C2L ? "0" : "1";
+      semanticFunction(entry, "f33_nvm_advance_family" + family + "_request_index", u32,
+          new ParameterImpl("index", u8, currentProgram))
+          .setComment("Return low8(index)+1 when index<count-1, otherwise0. Counts "
+              + "are65/49 in the registered target. No global index store.");
+    }
+    semanticFunction(0x673DEL, "f33_nvm_family0_has_request_cell", u32,
+        new ParameterImpl("object", u16, currentProgram))
+        .setComment("Scan all65 object halfwords at048A+4*i for low16 object; "
+            + "return1 on first match else0. Ignore state, queue indices and empty "
+            + "sentinel meaning. Native duplicate outside the active interval overrides "
+            + "the selector's status even when that cell's state isFF.");
+    semanticFunction(0x6740AL, "f33_nvm_select_family0_request", u32)
+        .setComment("Recover indices first. Span flag5A calls687DE, ignores return "
+            + "and selects phase11/return1 without dequeue. Empty ring returns0. "
+            + "Otherwise clear state/object but preserve+1, then advance consumer "
+            + "BEFORE object/kind validation. Kind11 calls684D0, selects phase22; "
+            + "22 always calls6853E,33 only when completion!=5A; both select phase33. "
+            + "Ignore arm return; set active object/status21 and return1. Unknown "
+            + "kind publishes32/returns0 without changing phase/active. Any matching "
+            + "remaining cell overrides status20. Invalid object only consumes cell. "
+            + "Bulk dispatch beyond the computed-span boundary is not proved.");
+    semanticFunction(0x67B58L, "f33_nvm_select_family1_request", u32)
+        .setComment("Same consume-before-validation and11/22/33 selection contract "
+            + "as family0, using68626/6869E and redundant status publication; write "
+            + "selection additionally clears068A. Span flag5A selects phase11 "
+            + "regardless6889A result. Empty ring scans repaired status triplets "
+            + "with fallback12; first status10 with failing live checksum calls68626 "
+            + "then stops, but still returns0 and preserves phase/active/completion. "
+            + "Native empty-ring failure queues three actual reads while leaving "
+            + "prior completion5A; caller reachability/restoration is not inferred.");
+    semanticFunction(0x687DEL, "f33_nvm_dispatch_family0_page_span", u32)
+        .setComment("Busy nonzero returnsFF. Otherwise map every enabled object's "
+            + "logical members; retain minimum/maximum pages and logical owner of "
+            + "the first strictly greatest page. Add that owner's chunk cost to "
+            + "the maximum; call6879C(min,low16(max+cost-min)). Return its result; "
+            + "zero sets busyA5. Exact table computes page10C/count164. Native "
+            + "admitted proof stops BEFORE6879C; no completed range operation.");
+    semanticFunction(0x6889AL, "f33_nvm_dispatch_family1_page_span", u32)
+        .setComment("Busy nonzero returnsFF. Map enabled base/+4/+8 handles, "
+            + "accumulating min/max successful pages. Call6879C(min,max+1-min); "
+            + "zero result sets busyA5. Exact table computes page1B0/count48. "
+            + "Native admitted proof stops BEFORE6879C; no physical operation claim.");
+  }
+  private void annotateRomGroupIntegrity() throws Exception {
+    CategoryPath category = new CategoryPath("/CamryF33");
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u16 = UnsignedShortDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    DataType words = new PointerDataType(u32, 4);
+    int count = currentProgram.getMemory().getShort(toAddr(0x2AD74L)) & 0xFFFF;
+    StructureDataType descriptor = new StructureDataType(category, "F33NvmFamily2Descriptor", 0);
+    descriptor.setPackingEnabled(true);
+    descriptor.add(u16, "payload_bytes", "67090 includes four additional bytes, with16-bit length wrap.");
+    descriptor.add(u16, "opaque_02", "Not interpreted by the CRC consumer.");
+    descriptor.add(words, "ram_buffer", "RAM destination used by other group consumers; NOT CRC source.");
+    descriptor.add(words, "rom_record", "CodeFlash source consumed by67090, including its trailing word.");
+    semanticData(0x2AF8CL, new ArrayDataType(resolve(descriptor), count, 12),
+        "f33_nvm_family2_descriptors", "Eleven12-byte records. Groups1/3 point to zero-filled ROM records.");
+    semanticData(0x2AD74L, u16, "f33_nvm_family2_object_count", "Registered count11.");
+    semanticData(0xFEBF0650L, new ArrayDataType(u8, count, 1),
+        "f33_nvm_family2_status", "670C4 bypasses ROM CRC for repaired10;67176 also publishes10 after a RAM update.");
+    semanticData(0xFEBF1098L, new ArrayDataType(u8, count, 1),
+        "f33_nvm_family2_status_xor55", "Redundant status plane, not CRC bytes.");
+    semanticData(0xFEBF10BCL, new ArrayDataType(u8, count, 1),
+        "f33_nvm_family2_status_xorAA", "Redundant status plane, not CRC bytes.");
+    semanticFunction(0x67060L, "f33_dcra1_crc_raw_words", u32,
+        new ParameterImpl("source", words, currentProgram),
+        new ParameterImpl("byte_count", u32, currentProgram),
+        new ParameterImpl("raw_seed", u32, currentProgram))
+        .setComment("Write CTL00 and COUT raw seed; feed exactly byte_count>>2 "
+            + "source words to CIN. Return complement of COUT read. Manual "
+            + "R01UH0585EJ0120 pp2844-2852 specifies reflected Ethernet CRC and "
+            + "COUT read XOR FFFFFFFF, so firmware returns RAW state, not ordinary "
+            + "CRC32. Trailing bytes ignored; count<4 reads no source and returns seed. "
+            + "Native real register sequence uses bounded CTL00 hardware model.");
+    semanticFunction(0x67090L, "f33_nvm_check_family2_rom_crc", u32,
+        new ParameterImpl("group", u16, currentProgram))
+        .setComment("Unchecked low16 group indexes12-byte2AF8C descriptor. Feed "
+            + "ROM pointer+8 and low16(payload+4) to67060 with raw seedFFFFFFFF. "
+            + "Return10 iff raw residue0, otherwise30. Immutable groups1/3 are "
+            + "entirely zero-filled and produce842A3990/F02A6472, not valid residues; "
+            + "other nine registered records produce0. Not a live RAM checksum.");
+    semanticFunction(0x670C4L, "f33_nvm_refresh_family2_status", VoidDataType.dataType)
+        .setComment("For11 groups, repair status triplet with fallback30. Exact10 "
+            + "bypasses CRC; other values call67090, retry exactly once only on "
+            + "non10, then publish last status across all planes. Real all-recompute "
+            + "sweep publishes10,30,10,30,10,10,10,10,10,10,10 with399 CIN writes. "
+            + "Status10 bypass can preserve prior10 even for the zero-filled groups.");
+  }
+  private void annotateInitializedNvmService() throws Exception {
+    CategoryPath category = new CategoryPath("/CamryF33");
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    DataType operation = getDataAt(toAddr(0xFEBF6AECL)).getDataType();
+    semanticData(0xFEBF6104L, operation, "f33_nvm_scheduler_operation",
+        "Same16-byte logical-operation layout; marker9DA70AE7 means idle. Padding+6 is not copied by721C6.");
+    semanticData(0xFEBF6124L, u8, "f33_nvm_scheduler_phase",
+        "721C6 classifies active phases08/10/20 as terminal status2; other active phases status1.");
+    semanticData(0xFEBF6B04L, new PointerDataType(VoidDataType.dataType, 4),
+        "f33_nvm_selected_service_poll",
+        "73EEE selects767EA for nonzero low8,766F4 for zero. Callback ABI not inferred here.");
+    StructureDataType guards = new StructureDataType(category, "F33NvmServiceGuards", 0);
+    guards.setPackingEnabled(true);
+    guards.add(u8, "service", "79A50 clears;79A94 sets1.");
+    guards.add(u8, "paired_call", "79AAA clears;79ABE sets1.");
+    guards.add(u8, "deferred", "79A32 consumes asFF only when both preceding bytes equal1.");
+    semanticData(0xFEBF6CCDL, resolve(guards), "f33_nvm_service_guards",
+        "Recovered byte comparisons, not an inferred mutex or interrupt mask.");
+    semanticData(0xFEBF6CDAL, u8, "f33_nvm_service_mode_nonzero",
+        "74164 writes mode_result!=0 after conditional scheduling; not the cause of its admission gate.");
+    semanticFunction(0x79A32L, "f33_nvm_consume_deferred_guard", VoidDataType.dataType)
+        .setComment("Only when6CCD==1 AND6CCE==1, set6CCF=FF; otherwise preserve it.");
+    semanticFunction(0x79A50L, "f33_nvm_enter_service_guard", VoidDataType.dataType)
+        .setComment("Call79A32 BEFORE storing6CCD=0. No lock or interrupt semantics inferred.");
+    semanticFunction(0x79A64L, "f33_nvm_finish_deferred_guard", VoidDataType.dataType)
+        .setComment("Only when6CCD==1 AND6CCE==1: call7990E if6CCF==0, then storeFF. "
+            + "Native non-notifying branches and exact7990E entry; its body is a "
+            + "separate dependency, not a substituted callback.");
+    semanticFunction(0x79A94L, "f33_nvm_leave_service_guard", VoidDataType.dataType)
+        .setComment("Store6CCD=1 then call79A64. Deferred7990E branch remains bounded at entry.");
+    semanticFunction(0x79C4CL, "f33_nvm_store_service_mode_nonzero", VoidDataType.dataType,
+        new ParameterImpl("value", u8, currentProgram))
+        .setComment("Only store low8 to6CDA. This is NOT a driver pump.");
+    semanticFunction(0x73EEEL, "f33_nvm_set_service_poll", VoidDataType.dataType,
+        new ParameterImpl("full_service", u8, currentProgram))
+        .setComment("Store767EA at6B04 for nonzero low8, otherwise766F4. Does not call the pointer.");
+    semanticFunction(0x73B2CL, "f33_nvm_select_service_poll", VoidDataType.dataType,
+        new ParameterImpl("full_service", u8, currentProgram))
+        .setComment("Zero-extend low8 and call73EEE. Initialized74164 selects the nonzero branch.");
+    semanticFunction(0x721C6L, "f33_nvm_snapshot_scheduler_operation", u32,
+        new ParameterImpl("output", new PointerDataType(operation, 4), currentProgram))
+        .setComment("Marker9DA70AE7 returns0 without output writes or remaining record reads. "
+            + "Otherwise return2 for phases08/10/20,1 for other phases; copy marker, "
+            + "logical handle and two pointers, preserving output padding+6. SETF "
+            + "and MOV establish full32 return. Native idle and terminal compositions.");
+    semanticFunction(0x72EEAL, "f33_nvm_service_scheduler", VoidDataType.dataType)
+        .setComment("Snapshot via721C6. Idle:73C76==1 calls72E70, otherwise abort72130 "
+            + "(lower operation state2). Active status1 calls72ED4; status2 skips it. "
+            + "Always finish723D6. Native quiet scans, ascending-header admission "
+            + "bounded before726C4, phase08 queue retention and explicit10/20 "
+            + "terminal dequeue/recycle/result1/6. These terminal inputs do not prove "
+            + "physical programming reached those phases.");
   }
   private void annotateDataFlashReads() throws Exception {
     DataType u8 = UnsignedCharDataType.dataType;
@@ -1856,6 +2045,9 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     annotateNvmPhysicalResults();
     annotateNvmPageClassification();
     annotateNvmAcquisition();
+    annotateNvmRequestSelection();
+    annotateRomGroupIntegrity();
+    annotateInitializedNvmService();
     annotateDataFlashReads();
     annotateFaciSubmission();
     annotatePwmCompareStaging();

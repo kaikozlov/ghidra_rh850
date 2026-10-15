@@ -1,0 +1,73 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_family1_write_result_last_object_uses_slot3",
+  "entry": {
+    "role": "real event7 application router and family1 write aggregation; explicit pending completion, no physical-programming claim",
+    "scope": "resolved-address",
+    "address": "0x68e9e"
+  },
+  "max_instructions": 20000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xff00",
+    "r6": "0xabcd0007",
+    "r7": "0xabcd0031",
+    "r8": "0xabcd0000"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "isolated initialized nested-call stack"
+    },
+    {
+      "address": "0xfebf0358",
+      "hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5ff",
+      "evidence": "only selected application completion is pending"
+    },
+    {
+      "address": "0xfebf0690",
+      "hex": "a5ffa5a502a5a5a5",
+      "evidence": "busy plus untouched shared read retry and neighbors"
+    },
+    {
+      "address": "0xfebf0698",
+      "hex": "4433221188776655ccbbaa9900000000",
+      "evidence": "explicit prior masks including non-5A bits"
+    }
+  ],
+  "checks": [
+    {
+      "name": "full-word write error accumulation and other slots",
+      "kind": "memory",
+      "address": "0xfebf0698",
+      "size": 16,
+      "equals_hex": "4433221188776655ccbbaa9900000000"
+    },
+    {
+      "name": "only terminal copy publishes completion",
+      "kind": "memory",
+      "address": "0xfebf0358",
+      "size": 16,
+      "equals_hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a55a"
+    },
+    {
+      "name": "terminal busy release leaves read retry untouched",
+      "kind": "memory",
+      "address": "0xfebf0690",
+      "size": 8,
+      "equals_hex": "a500a5a502a5a5a5"
+    }
+  ]
+}

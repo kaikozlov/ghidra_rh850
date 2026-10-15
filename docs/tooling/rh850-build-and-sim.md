@@ -287,6 +287,7 @@ flowchart LR
 |RSCFD|Retain the exact registered signer response resources plus the diagnostic transmit buffer; model common receive FIFOs 3 and 5 using generated control/status/window/pointer/interrupt relationships.|Transmit events identify the buffer derived from the modeled message-RAM address. Receive inputs explicitly start **post-filter**. Mode/enable gates, payload capacity, queue depth, overflow, interrupt threshold, sticky flags, oldest-message windows, and native pointer pops are modeled. CAN1's receive level is the OR of modeled FIFO sources. Acceptance-filter execution, global RFIFOs, arbitration, bus timing, and error-state evolution are not modeled.|
 |FACI / CodeFlash|Keep image bytes immutable. Model status clear in P/E mode, forced-stop `B3` acceptance, and incremental DataFlash blank-check submission `71,D0`, including both FHVE enables, keyed read/DataFlash mode transitions, address-register readback and busy-write suppression.|Bounded implementation. Stop/blank-check submission clears `FRDY`; completion requires explicit inputs. Stop accepts ready/busy/locked/reissued states in normal P/E mode, without requiring blank-check FHVE gates. No dump-derived blankness, automatic ready interrupt, erase/program, CodeFlash/FWE entry, OCD emulation, partial-prefix stop or sequencer timing. Unsupported commands/modes/ranges fault before the current write.|
 |DataFlash ECC/read controls|Use manual-backed `DFERSTR`/`DFERSTC` widths/reset and low-bit error clearing; keyed `DFECCCTL`/`DFTSTCTL` fields, masked `DFERRINT`, and `EEPRDCYCL` codes3..F.|Bounded implementation. Protection keys read zero; rejected keys preserve prior fields. Codes0..2 fault as prohibited. Non-normal ECC/test-mode payload reads fault rather than silently using ordinary dump bytes. Error flags remain explicit inputs; no ECC generation/correction, test-bit payload, error-address capture, overflow, ECM delivery or flash timing is synthesized.|
+|DCRA1|Use generated CIN/COUT/CTL relationships for the exact Camry `0x67060` register sequence: CTL=00, explicit seed, and whole-word input.|Bounded implementation from R01UH0585EJ0120 pp2844–2852. Only the 32-bit Ethernet polynomial with 32-bit input is modeled; other modes/reserved-bit writes and input before an explicit seed fault. No timing, other DCRA units, or external CRC-result injection.|
 |ICU-S|Expose only recovered registers and exact command-five/callback transitions. Treat supplied output words and the opaque offset20 word as scenario state, not generated cryptography or readiness.|Implemented within that recovered boundary. Offset20 has no assumed reset and supports only observed word reads; physical write semantics and bit meaning remain unknown. No provisioned-key or AES-CMAC silicon claim.|
 |Integration|Expose model generation through `tools/rh850 model update` and `tools/rh850 model check`, and batched execution through `tools/rh850 test firmware`; bind identity through the existing target registry; retain one JSON report per scenario under `build/out/`.|Implemented. No parallel capability manifest, target whitelist, project lifecycle, backend selector, or legacy CLI alias exists.|
 |Verification|Resolve every signer component from raw bytes and generate one functional scenario set for every registered signer target; retain target-specific fixtures only for device-model regression and negative cases.|`tools/test rh850_firmware` runs all generated signer scenarios on Camry, Crown, and both Corolla images, then the retained machine-boundary fixtures. `make verify-processor` requires this gate after the synthetic instruction fixture. GNU simulation remains an independent backend and raw-image build check.|
@@ -319,6 +320,26 @@ illegal widths, uninitialized state, and unsupported FACI commands are hard
 faults carrying PC, address, size, access kind, and evidence provenance.
 A known register without a behavior model remains ordinary typed storage; it
 does not acquire invented side effects.
+
+DCRA1 is a hardware CRC model, not a shortcut for a firmware CRC function.
+R01UH0585EJ0120 Table33.4 (p2844) locates `CIN`, `COUT`, and `CTL` at
+`FFD51000`, `FFD51004`, and `FFD51020`; Tables33.7–33.9 (pp2849–2851)
+require word, word, and byte accesses respectively. The supported `CTL=00`
+mode consumes input bit0 first, using the reflected `0xEDB88320` form of
+the p2845 Ethernet polynomial. A `COUT` write seeds the **raw** shift state;
+a read exposes that state XOR `FFFFFFFF` (Table33.8, p2850). The reset
+read value is zero, corresponding to raw state `FFFFFFFF` (Table33.10,
+p2852). Thus Camry `0x67060`'s final complement cancels the hardware read
+XOR: its return is raw state, not the usual final-XOR CRC32 value.
+It consumes only `length >> 2` words and ignores trailing bytes.
+
+The `camry_f33_crc_*` scenarios retain actual `0x67060`, ROM-default
+integrity selector `0x67090`, and composed status-repair sweep `0x670C4`
+instructions. Registered descriptors at `0x2AF8C` have length at `+0`,
+RAM pointer at `+4`, and the **ROM** pointer used by `0x67090` at `+8`.
+Their independent expectations use the manual's serial feedback circuit
+and immutable registered CodeFlash bytes, not injected CRC results.
+Printed page numbers above equal one-based PDF page indices for this manual.
 
 ICU-S is intentionally marked `recovered`: the public P1M-E manual names the
 block but does not publish its full register or cryptographic semantics. The

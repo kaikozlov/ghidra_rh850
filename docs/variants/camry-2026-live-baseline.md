@@ -8416,7 +8416,7 @@ Ten contracts are persisted in the target-native seed:
 | `67CCA` | `f33_nvm_handle_family1_completion` | **Bounded:** phase completion, seed/status ordering, retry/cleanup branches; hardware-backed read-failure classification and accepted whole-write rearming remain separate. |
 | `68A50` | `f33_nvm_get_family1_completion` | Low16 object bound; zero-extended completion byte or `A5`. |
 | `68CCA` | `f33_nvm_handle_family1_read_result` | Per-copy retries, trusted-pair byte voting, staging repair and all-or-nothing destination publication. |
-| `68E9E` | `f33_nvm_route_application_result` | **Bounded:** family1 read and admission gates executed; family0 and write-result bodies remain separate. |
+| `68E9E` | `f33_nvm_route_application_result` | Both families' read/write handlers now have scoped native proofs in [§77.21](#7721-2026-10-15-application-publication-and-acquisition-budgets) and [§77.22](#7722-2026-10-15-crc-request-selection-and-initialized-service); callback completion is not physical flash proof. |
 | `71D0A` | `f33_nvm_publish_logical_result` | Byte-wide logical-result publication before notification. |
 | `71D8C` | `f33_nvm_notify_zero_handle_result` | Separate two-argument notification; registered callback isNULL. |
 | `71DBA` | `f33_nvm_notify_logical_result` | Pending-result suppression and three-argument application callback. |
@@ -9050,7 +9050,8 @@ An accepted phase33 retry instead increments retry1→2, enqueues all three
 encoded writes and retains the active phase/object without publishing a
 checksum or application status. These are instruction counts under the stated
 inputs, not flash timing. Family1's separate write-result callback is not
-established merely by proving submission and rearming.
+established merely by proving submission and rearming; its independent proof
+is in [§77.22](#7722-2026-10-15-crc-request-selection-and-initialized-service).
 
 **Classification differs between families.** `68946` maps the **last** logical
 member of a family0 object, starts at
@@ -9113,9 +9114,9 @@ token then executes18 real service calls before the pending scan. The
 Every recognized nonzero entry returns1 **even when that call finishes and
 clears the state**. The completed-pass scenario initializes live family1
 payloads to zero; resulting`A55A` seeds are synthetic-RAM consequences, not
-evidence of restored flash content. Group-finalization scenarios supply
-already-normal redundant group statuses; they do not prove the non-normal
-CRC-recomputation branch.
+evidence of restored flash content. These initial group-finalization scenarios
+supplied already-normal statuses; [§77.22](#7722-2026-10-15-crc-request-selection-and-initialized-service)
+adds actual ROM CRC recomputation, including composed finalization with failures.
 
 `66B96` arms initial reads, calls the outer step at most88 times and always
 clears`0673` on exit. The50,391-instruction exhaustion scenario retains
@@ -9124,15 +9125,17 @@ clears`0673` on exit. The50,391-instruction exhaustion scenario retains
 service byte`6102=0`, rather than required`F0`. The driver hook`79D2E`
 really returns0; no callback was replaced and no`6CDC` shortcut was invented.
 Clearing the outer state therefore does not establish completed acquisition.
-The fully initialized logical/physical service branch remains a separate
-reconstruction boundary.
+Initialized scheduler and explicit terminal-state proofs are added in
+[§77.22](#7722-2026-10-15-crc-request-selection-and-initialized-service);
+whole physical acquisition remains outside those proofs.
 
 Finally,`66C5C` snapshots both family phases before decoding/repairing the
 `0670/10A8/10CC` hold triplet with fallback0. Decoded`5A` suppresses work
 selection/progression. With idle acquisition and active family phases,
 family1 work2 takes precedence over family0 work1. Otherwise acquisition
 progresses; a busy result retains the current work token. Its subsequent
-`67B58`/`6740A` request-selection bodies remain distinct unfinished work.
+`67B58`/`6740A` request selectors are recovered separately in
+[§77.22](#7722-2026-10-15-crc-request-selection-and-initialized-service).
 Native cases prove encoded-majority repair, all-different fallback and phase
 priority without inventing an additional permission system.
 
@@ -9146,4 +9149,177 @@ The three dependent artifacts, all six targeted selectors and exact
 live/canonical coverage comparison passed. Relevant daemons were stopped
 before snapshot/corpus promotion. These review counts are scoped contracts,
 not a percentage of whole-firmware understanding or a claim of completion.
+
+### 77.22 2026-10-15 CRC, request selection and initialized service
+
+Exact target remains **`camry-8965F3307000`**, with the CodeFlash/DataFlash
+identities stated in §77. No source firmware bytes were modified. This increment
+adds22 scoped function reviews and closes the remaining family1 write-result
+branch of`68E9E`; it does not complete the whole firmware or physical NvM path.
+
+**Hardware CRC and family2 records.** The primary P1M-E hardware manual
+`R01UH0585EJ0120 Rev.1.20`, pp2844–2852, specifies DCRA1:
+`CIN=FFD51000` and`COUT=FFD51004` require word accesses;
+`CTL=FFD51020` requires byte access. `CTL=00` selects the reflected Ethernet
+polynomial, with least-significant byte/bit first. A COUT **write seeds raw
+state**, while a COUT **read returns raw state XOR`FFFFFFFF`**.
+
+Consequently, the final complement in`67060` cancels the hardware read XOR.
+Its result is **raw CRC state, not ordinary CRC32 output**. The routine writes
+CTL00 and the supplied seed, feeds exactly`byte_count >> 2` words, and ignores
+trailing bytes. A length below4 reads no source data and returns the seed.
+The model implements this register behavior, not a replacement CRC function;
+unsupported modes, widths, reserved-bit writes and unseeded input fault.
+External `register-input` cannot inject CRC state. No CRC timing is modeled.
+
+The device-profile gate caught a missing Ghidra volatile mapping after adding
+the three register declarations. The actual profile now maps the narrow
+`FFD51000..FFD51020` bank, and project invariants require its volatility.
+Both the corrected device-profile gate and the shared multi-target native
+firmware gate passed. See the [model evidence boundary](../tooling/rh850-build-and-sim.md).
+
+`67090` indexes eleven12-byte descriptors at`2AF8C`: payload length at`+0`,
+RAM pointer at`+4`, **ROM pointer at`+8`**. It checks
+`low16(payload_length + 4)` ROM bytes with raw seed`FFFFFFFF`, returning
+`10` only for residue0, otherwise`30`.
+
+| Registered family2 objects | ROM record | Raw residue | Result |
+|---|---|---|---|
+| 0,2,4,5,6,7,8,9,10 | Exact registered records | `00000000` | `10` |
+| 1 | `A030`,12 bytes, entirely zero | `842A3990` | `30` |
+| 3 | `A088`,20 bytes, entirely zero | `F02A6472` | `30` |
+
+These are properties of the immutable image and manual-backed computation,
+**not evidence that the dump is corrupt**. `670C4` repairs the status planes
+`0650/1098/10BC` with fallback`30`. Repaired`10` bypasses CRC; otherwise it
+checks once, retries exactly once only on non-`10`, and publishes the last
+result. The all-recompute native sweep performs399 CIN writes and425 total
+MMIO writes. Already-`10` status can bypass even the zero-filled records.
+These status fields are not exclusively ROM validity: source writer`67176`
+also publishes`10` after updating the associated RAM object.
+
+Composed native entry`66B16` with phase`CC` runs the real sweep, records both
+`30` results, **clears the outer phase and still returns1**:5,802 instructions.
+That result denotes the recovered state-machine behavior, not successful
+physical acquisition.
+
+**Request rings and selection.** Family0 has65 cells at`0488`, family1 has49
+at`058C`; both now use the same four-byte recovered layout:
+`{state8, opaque8, object16}`. The opaque byte is preserved. Producer/consumer
+pairs are`067A/067B` and`0686/0687`.
+
+`67350`/`67A58` return valid stored indices without reading cells. If either
+index is out of range, they scan adjacent object fields from row1, retaining
+the **last** occupied→empty transition as producer and empty→occupied as
+consumer. Only object`FFFF` means empty; state is irrelevant. Both defaults
+are0, so all-empty and all-occupied arrays recover`0/0`. There is no explicit
+last→first comparison and no cell repair. `673C2`/`67ACA` advance a low-byte
+index below`count−1`, otherwise return0.
+
+The selectors`6740A`/`67B58` recover indices first. Ordinary dequeue clears
+state/object and advances the consumer **before** validating the object or
+kind. Arming return values do not govern selection:
+
+| Selected input | State/result behavior |
+|---|---|
+| `11` | Attempt a real read; select phase`22`, active object, status`21`, return1 even if arming is rejected. |
+| `22` | Always attempt a write; select phase`33`, active object, status`21`, return1. |
+| `33` | Attempt a write only when completion is not`5A`; select phase`33` even when the write is skipped. |
+| Unknown kind, valid object | Publish`32`, return0, preserve prior phase/active object. |
+| Out-of-range object | Consume the cell without status publication or phase/active assignment. |
+
+Write selection additionally clears family1 whole-write retry`068A`.
+Membership helpers scan **every** cell, ignoring indices and kind: a remaining
+matching object overrides the chosen status to`20`, including a state`FF`
+cell outside the active ring interval. Family1 publishes all three status
+planes; family0 writes its primary byte.
+
+Family0's empty ring returns0 without a checksum scan. Family1's empty ring
+repairs statuses with fallback`12`; the first status`10` with a failing
+live-RAM checksum calls real read submission and stops. It still returns0
+without changing phase/active object or rearming completion. The native
+1,305-instruction case queues logical2/6/10 in their distinct queues, sets
+busy and the copy mask, but leaves prior completion`5A`. This direct helper
+state proves neither caller reachability after RAM corruption nor restoration.
+
+Exact span-request flag`5A` takes precedence over dequeue. It calls the
+family's mapped-span helper, ignores its result and selects phase`11`/return1,
+including actual busy rejection. Admitted span calculations execute all real
+descriptor/page lookups and are bounded **before**`6879C`:
+
+| Helper | First page, hex | Page count, decimal | Byte interval, end exclusive |
+|---|---:|---:|---|
+| `687DE`, family0 | `10C` | 164 | `[4300,6C00)` |
+| `6889A`, family1 | `1B0` | 48 | `[6C00,7800)` |
+
+Family0 extends the maximum page by that page owner's chunk cost; family1
+uses maximum+1. These are covering spans, not a claim that every intervening
+page belongs to an enabled payload or that a physical operation completed.
+
+**Family1 write completion.** `68E16` uses slot`object & 3`. Copy0 resets the
+entire failure word without reading it. Nonzero result ORs`5A` into that copy's
+byte; success does not clear prior failures. Copy2 publishes completion`5A`
+only when the **entire32-bit word is zero**, otherwise`A5`; either completion
+returns`5A`, causing the real router to release busy. Earlier copies return0.
+Unlike read voting, even a residual bit outside the per-byte`5A` masks defeats
+write success. No shared read retry or payload byte is touched.
+
+Eight native router scenarios exercise first/middle/final results, failure
+accumulation, an unmasked error bit, slot3 and high argument bits. They close
+the scoped read/write dispatch contract for both families, not programming
+durability.
+
+**Initialized logical service.** `74164` now has native initialized-state
+proofs in addition to the earlier real rejection at service byte`6102 != F0`.
+It enters`79A50`, recomputes mode through`79C9E`, and only for mode result0
+selects poll pointer`767EA` through`73B2C→73EEE` and calls`72EEA`.
+`79C4C` then **only stores** the mode-result boolean at`6CDA`; it is not a
+physical pump. `73EEE`'s zero-input alternative is pointer`766F4`; selection
+does not itself call either pointer.
+
+`721C6` returns0 for idle marker`9DA70AE7` before reading the rest of the record
+or writing its output. Otherwise it snapshots marker/handle/two pointers,
+preserving output padding`+6`, and returns2 for phases`08/10/20`,1 for other
+active phases. The caller`72EEA`:
+
+- On idle, starts queue selection only when the lower operation is not state2;
+  otherwise it calls the real abort path.
+- For ordinary active status1, invokes`72ED4`; terminal status2 skips it.
+- Always invokes the registered phase dispatcher`723D6`.
+
+The native quiet scan advances five logical cells and wraps correctly.
+Queue selection scans headers2..126 **ascending**, peeking rather than
+unlinking. A fixture places handle3 in earlier slot0 and handle2 in later
+slot1; handle2 is admitted first, and both links remain intact at the real
+`726C4` entry boundary. Thus this is not one global slot FIFO. When an idle
+scheduler sees all three copy queues2/6/10, their headers5/9/13 establish that
+selection order; an already-active operation or intervening retry prevents
+treating it as an unconditional global callback-order guarantee.
+
+Explicit terminal-phase fixtures show`08` retiring the active marker while
+retaining the queue/result2; `10` and`20` dequeue/recycle the real slot and
+publish logical results1 and6 respectively through registered callbacks.
+Those phases are **input preconditions**, not observed physical write outcomes.
+
+The service guards are exact byte comparisons, not inferred locks:
+`79A32` consumes deferred`6CCF` as`FF` only if`6CCD==1 && 6CCE==1`;
+`79A50` does this before clearing`6CCD`. `79A94` sets`6CCD=1`, then`79A64`
+tests both guards and calls`7990E` only for pending0 before storing`FF`.
+Native non-notifying branches and entry into real`7990E` are proved; its
+body remains a separate dependency.
+
+Independent four-stage rebuilds again agreed on **7,187 functions**. The
+curated ledger now contains **206 reviews:187 verified,19 bounded**; the929
+outside-function candidates are unchanged. All76 retained increment scenarios
+passed on the fresh project:68 completed their stated execution/boundary checks
+and8 produced the required model-boundary faults. The three dependent artifacts,
+six targeted selectors and exact live/canonical coverage comparison passed;
+the clean snapshot and canonical corpus were promoted after stopping the
+relevant daemons.
+
+Regenerated C exposes the DCRA registers, family2 ROM source, recovered
+request-index argument and scheduler record fields. It still contains
+GP-relative code-pointer artifacts, and the snapshot getter's C hoists a RAM
+load that raw instructions keep behind the idle gate. Pseudocode remains a
+derived aid, not a replacement for access-order proof or original source.
 

@@ -417,6 +417,7 @@ public class RunP1MEMachine extends GhidraScript {
         int nextExternalEvent;
         long registerBeforeWrite;
         int faciPendingCommand;
+        boolean dcraSeeded;
         final Map<String, List<RegionDef>> aliases = new HashMap<>();
         final PriorityQueue<ScheduledEvent> scheduledEvents = new PriorityQueue<>(
             Comparator.comparingLong((ScheduledEvent event) -> event.tick)
@@ -731,6 +732,14 @@ public class RunP1MEMachine extends GhidraScript {
                 throw fault("read-prohibited", thread, address, size, "read",
                     register.evidence, "register is not software-readable: " + register.name);
             }
+            if ("dcra-seed".equals(register.trigger)) {
+                RegisterDef control = requiredRegister(register.name, "mode", register.mode_register);
+                if (registerValue(control) != 0) {
+                    throw fault("unsupported-dcra-mode", thread, control.address,
+                        control.size, "read", control.evidence,
+                        "COUT read XOR is modeled only for POL=00 ISZ=00");
+                }
+            }
             trace.access("read", pc(thread), address, size, register.evidence);
         }
 
@@ -855,6 +864,25 @@ public class RunP1MEMachine extends GhidraScript {
 
         void validateDeviceWrite(PcodeThread<byte[]> thread, RegisterDef register,
                                  byte[] value) {
+            if ("dcra".equals(register.behavior)) {
+                RegisterDef control = "dcra-control".equals(register.trigger) ? register
+                    : requiredRegister(register.name, "mode", register.mode_register);
+                long mode = control == register ? unsigned(value) : registerValue(control);
+                if (mode != 0) {
+                    throw fault("unsupported-dcra-mode", thread, control.address,
+                        control.size, "write", control.evidence,
+                        "only DCRA1 POL=00 ISZ=00 is modeled; reserved bits must be zero");
+                }
+                if ("dcra-input".equals(register.trigger)) {
+                    if (!dcraSeeded) {
+                        throw fault("uninitialized-dcra-seed", thread, register.address,
+                            value.length, "write", register.evidence,
+                            "DCRAnCOUT must be explicitly seeded before the first input word");
+                    }
+                    RegisterDef output = requiredRegister(register.name, "status", register.status_register);
+                    memory(thread, output.address, output.size);
+                }
+            }
             if ("faci-command".equals(register.trigger)) {
                 validateFaciWrite(thread, register, value);
             }
@@ -1334,6 +1362,17 @@ public class RunP1MEMachine extends GhidraScript {
             setRegisterValue(secondary.name, 0);
         }
 
+        void handleDcraInput(RegisterDef register, byte[] value) {
+            RegisterDef output = requiredRegister(register.name, "status", register.status_register);
+            // R01UH0585EJ0120 pp2845–2846,2850–2851: LSB first, reflected
+            // 04C11DB7 polynomial; COUT reads expose internal state XOR FFFFFFFF.
+            int crc = ~(int) registerValue(output) ^ (int) unsigned(value);
+            for (int bit = 0; bit < 32; bit++) {
+                crc = (crc >>> 1) ^ ((crc & 1) != 0 ? 0xedb88320 : 0);
+            }
+            setRegisterValue(output.name, Integer.toUnsignedLong(~crc));
+        }
+
         void handleRegisterWrite(PcodeThread<byte[]> thread, long address, int size, byte[] value) {
             RegisterDef register = register(address, size);
             if (register == null) return;
@@ -1346,6 +1385,14 @@ public class RunP1MEMachine extends GhidraScript {
             handleReceiveWrite(thread, register, value);
             if (register.trigger == null) return;
             switch (register.trigger) {
+                case "dcra-control":
+                    break; // Only unchanged CTL=00 is accepted; it does not reset the CRC.
+                case "dcra-seed":
+                    // Writes initialize raw state; reads apply the hardware's final XOR.
+                    setRegisterValue(register.name, unsigned(value) ^ 0xffffffffL);
+                    dcraSeeded = true;
+                    break;
+                case "dcra-input": handleDcraInput(register, value); break;
                 case "rscfd-transmit": handleRscfdWrite(thread, register, value); break;
                 case "faci-command": handleFaciWrite(thread, register, value); break;
                 case "faci-address":
@@ -1424,6 +1471,7 @@ public class RunP1MEMachine extends GhidraScript {
         }
 
         void initializeResetRegisters() {
+            dcraSeeded = false;
             for (RegisterDef register : registers) {
                 if (register.reset == null) continue;
                 setMemory(register.address, bytes(register.reset, register.size, language.isBigEndian()));
@@ -1471,6 +1519,11 @@ public class RunP1MEMachine extends GhidraScript {
             if (register == null || !register.access.contains("r")) {
                 throw new IllegalArgumentException(
                     "external register-input requires a mapped readable device register: "
+                    + input.register);
+            }
+            if ("dcra".equals(register.behavior)) {
+                throw new IllegalArgumentException(
+                    "DCRA has no external input pins; register-input cannot inject CRC state: "
                     + input.register);
             }
             long value = parseUnsigned(input.value);

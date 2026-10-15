@@ -282,6 +282,7 @@ public class AssertProjectInvariants extends GhidraScript {
         requireBlock("SFR_TAUJ", 0xFFE50000L, 0x3000L, true, true, false, true);
         requireBlock("SFR_EIC", 0xFFFFB000L, 0x1000L, true, true, false, true);
         requireBlock("SFR_RSCFD", 0xFFD20000L, 0x10000L, true, true, false, true);
+        requireBlock("SFR_DCRA1", 0xFFD51000L, 0x21L, true, true, false, true);
         requireBlock("SFR_ICUS", 0xFFC5D000L, 0x1000L, true, true, false, true);
 
         // Evidence-backed SFR labels from data/p1m_sfr_labels.csv.

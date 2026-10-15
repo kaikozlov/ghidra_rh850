@@ -144,6 +144,9 @@ address,name,size,access,comment
 0xFFD24408,CFDTMFDSTS_CH1_16,4,rw,Application CAN1 Tx buffer n=16 FD pointer/status word
 0xFFD2440C,CFDTMDF0_CH1_16,4,rw,Application CAN1 Tx buffer n=16 data bytes 0..3
 0xFFD24410,CFDTMDF1_CH1_16,4,rw,Application CAN1 Tx buffer n=16 data bytes 4..7
+0xFFD51000,DCRA1CIN,4,rw,DCRA1 CRC input; 32-bit register accesses only
+0xFFD51004,DCRA1COUT,4,rw,DCRA1 CRC data; reads XOR the internal Ethernet CRC state with FFFFFFFF
+0xFFD51020,DCRA1CTL,1,rw,"DCRA1 control; model supports only POL=00 ISZ=00, other modes fault"
 0xFFD60000,ECMMESET,1,w,ECM master error-source set trigger
 0xFFD60004,ECMMECLR,1,w,ECM master error-source clear trigger
 0xFFD60008,ECMMESSTR0,4,r,ECM master error-source status 0

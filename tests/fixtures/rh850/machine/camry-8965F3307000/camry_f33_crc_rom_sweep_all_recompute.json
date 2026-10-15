@@ -1,0 +1,76 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_crc_rom_sweep_all_recompute",
+  "entry": {
+    "role": "actual Camry DCRA1 and ROM-default integrity instructions; no replaced callees",
+    "scope": "resolved-address",
+    "address": "0x670c4"
+  },
+  "max_instructions": 50000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "isolated initialized nested-call stack"
+    },
+    {
+      "address": "0xfebf064f",
+      "hex": "a53030303030303030303030a5",
+      "evidence": "11 registered group status triplets with surrounding canaries; source bound at2AD74=000B; synthetic status inputs only"
+    },
+    {
+      "address": "0xfebf1097",
+      "hex": "a56565656565656565656565a5",
+      "evidence": "11 registered group status triplets with surrounding canaries; source bound at2AD74=000B; synthetic status inputs only"
+    },
+    {
+      "address": "0xfebf10bb",
+      "hex": "a59a9a9a9a9a9a9a9a9a9a9aa5",
+      "evidence": "11 registered group status triplets with surrounding canaries; source bound at2AD74=000B; synthetic status inputs only"
+    }
+  ],
+  "checks": [
+    {
+      "name": "all11 status cells and canaries; raw/XOR55/XORAA publication",
+      "kind": "memory",
+      "address": "0xfebf064f",
+      "size": 13,
+      "equals_hex": "a51030103010101010101010a5"
+    },
+    {
+      "name": "all11 status cells and canaries; raw/XOR55/XORAA publication",
+      "kind": "memory",
+      "address": "0xfebf1097",
+      "size": 13,
+      "equals_hex": "a54565456545454545454545a5"
+    },
+    {
+      "name": "all11 status cells and canaries; raw/XOR55/XORAA publication",
+      "kind": "memory",
+      "address": "0xfebf10bb",
+      "size": 13,
+      "equals_hex": "a5ba9aba9abababababababaa5"
+    },
+    {
+      "name": "exact MMIO write count proves whole-word feed and retry count",
+      "kind": "event-count",
+      "operation": "register-write",
+      "equals": "425"
+    }
+  ]
+}
