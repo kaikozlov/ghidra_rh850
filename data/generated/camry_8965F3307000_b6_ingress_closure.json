@@ -129,7 +129,7 @@
     "0x00071508": {
       "body_sha256": "0a68ffc255d72f4c3429e63355652dbedd2857d6961910d52be1d635a85a0691",
       "body_size": 170,
-      "decompiled_c_sha256": "006fd614292cf8b4c31b94ae110a17d1eb209df6b9a45060b0b20c7973467c65",
+      "decompiled_c_sha256": "bda80dae887ffec49e5d1cf59b7509dd8236df650416b040329b837b78e1de17",
       "role": "controller-1 receive interrupt wrapper"
     },
     "0x00079EBA": {

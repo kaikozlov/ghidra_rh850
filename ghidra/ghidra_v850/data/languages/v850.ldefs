@@ -19,7 +19,7 @@
             endian="little"
             size="32"
             variant="RH850G3M (P1M-E)"
-            version="0.10"
+            version="0.11"
             slafile="v850e3.sla"
             processorspec="v850.pspec"
             id="v850e3:LE:32:default">

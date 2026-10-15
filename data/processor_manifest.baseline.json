@@ -2,9 +2,9 @@
   "compiled_files": {
     "data/arithmetic/v850_arithmetic_reference_templates.json": "5519feefb16e95a3a20cb8f83e46f2200d36edeb70cfc2ac94d0d09ecd55cd67",
     "data/languages/v850.dwarf": "0d6a894482cd2bea5d62a6dee09af59f7b19adc55089d42529e76e618471720b",
-    "data/languages/v850.ldefs": "c04e10a148230940492d53cd00c00c86af3ba2ded1e400028e8f2b221dabf436",
+    "data/languages/v850.ldefs": "4aaa289cd9f6899744a352f0665481ec90d8d6d0f93db5fbc2efa085a6924d3f",
     "data/languages/v850.opinion": "01b3073bd126e754bd6568da60c4628cbb5660241b1f9d79122948e4131cf9d6",
-    "data/languages/v850.pspec": "1e11f9d7f34b4ce4bfe6d47b3edc16ff468ee2dc99b8c77309c7ac32ad8373c2",
+    "data/languages/v850.pspec": "d494da4285778798518c20a9946337c41deac8e880857bcdf741b9a2f40ac640",
     "data/languages/v850_ccrh.cspec": "d0f17190c2f1fc9b9b6bfdd079e1a0a9b16ac1e4f541bfddfb33a9976e3bce23",
     "data/languages/v850_ccrh_callee_ep.cspec": "c672969c5dc3506414f52e9e07c84484be55e7039692542d0f2f85283e5b1366",
     "data/languages/v850_ccrh_callee_ep_gp.cspec": "cfd4b584b88e92814dcb5b03be4218e5e487f655df395e2527cb16d3bc086b85",
@@ -71,9 +71,9 @@
     "ghidra/ghidra_v850/PROVENANCE.json": "e0628d71cc64aff3e6edf9c74231dbacbc7a047d2187829b5ef499aeb3e4d1af",
     "ghidra/ghidra_v850/data/arithmetic/v850_arithmetic_reference_templates.json": "5519feefb16e95a3a20cb8f83e46f2200d36edeb70cfc2ac94d0d09ecd55cd67",
     "ghidra/ghidra_v850/data/languages/v850.dwarf": "0d6a894482cd2bea5d62a6dee09af59f7b19adc55089d42529e76e618471720b",
-    "ghidra/ghidra_v850/data/languages/v850.ldefs": "125c4c6107c09e7e69f25e24d15b2cf4a8a2e8ee9917ce6b5adea8d65eb62d9e",
+    "ghidra/ghidra_v850/data/languages/v850.ldefs": "4f6003fa93c6aa6f720346fe0339765b60be4a33e5775c94841a4e8edb6df0e3",
     "ghidra/ghidra_v850/data/languages/v850.opinion": "01b3073bd126e754bd6568da60c4628cbb5660241b1f9d79122948e4131cf9d6",
-    "ghidra/ghidra_v850/data/languages/v850.pspec": "1e11f9d7f34b4ce4bfe6d47b3edc16ff468ee2dc99b8c77309c7ac32ad8373c2",
+    "ghidra/ghidra_v850/data/languages/v850.pspec": "d494da4285778798518c20a9946337c41deac8e880857bcdf741b9a2f40ac640",
     "ghidra/ghidra_v850/data/languages/v850_arithmetic.sinc": "857ba670b2a4121a6026cfba1886bc926158674eeb57e20950b5cb12ac274641",
     "ghidra/ghidra_v850/data/languages/v850_ccrh.cspec": "d0f17190c2f1fc9b9b6bfdd079e1a0a9b16ac1e4f541bfddfb33a9976e3bce23",
     "ghidra/ghidra_v850/data/languages/v850_common.sinc": "44286d5a0dfe746552c66cd022ad8c03ef2ee5c359e71b9203102d1c908d0742",
@@ -114,5 +114,5 @@
   "ghidra_version": "12.1.4",
   "language_id": "v850e3:LE:32:default",
   "schema_version": 2,
-  "source_fingerprint": "4fa73debca8936d96b4a3605176c86a67a8e1950d7a01c8fb93cc2cf85a83889"
+  "source_fingerprint": "ab873be3479407235df4c62c9cc840cf196dddb165625a6288cd0516cea67e4a"
 }

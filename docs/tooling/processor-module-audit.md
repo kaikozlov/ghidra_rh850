@@ -101,9 +101,24 @@ The processor fixture embeds the exact 136 bytes of Camry `8965F3307000`
 function `0x3614`. It exercises both modes with an explicit environment-supplied
 completion event, checks the shared return separately from opaque `SYNCI`, and
 requires reachable high-IR command writes, nonconstant ICCTRL polls and return.
-It does not test rendered C wording. This correction increments G3M registration
-to **0.10**; cached instructions in an older working project are not post-fix
-evidence. The selected Camry corpus must come from a fresh rebuild.
+It does not test rendered C wording. The cache correction first shipped with
+G3M registration **0.10**.
+
+**PMR** also uses native `register_data` volatility: its writes change the
+interrupt-priority ceiling even when no subsequent software read consumes the
+value (R01US0123EJ0140 Table 3-33, p.75). Previously the decompiler could discard
+those writes from Camry's `0x701C4`/`0x701EA` helpers. The processor fixture now
+embeds their exact 68 bytes, executes eighteen lower/equal/higher-mask,
+signed-comparison and unconditional-restore cases across both incoming ID states,
+and checks reachable high-IR PMR writes, old-mask-dependent branching and return.
+The execution cases seed `FPEC=0`; they do not simulate interrupt timing or prove
+pending-FPI behavior. The existing architecture-level FPI path remains intact.
+No new userop or firmware-specific instruction exception was introduced.
+
+This PMR observability correction increments G3M registration to **0.11**.
+Fresh Camry rebuilds retain both conditional-enter and unconditional-restore PMR
+writes in the rendered functions. Cached instructions in an older working
+project are not post-fix evidence; use a fresh rebuild and regenerated corpus.
 
 `EIC136`/`EIC292`/`EIC293` remain memory-mapped peripheral registers at
 `0xFFFFB110` / `0xFFFFB248` / `0xFFFFB24A`, accessed via `ld.w`/`st.w`, not

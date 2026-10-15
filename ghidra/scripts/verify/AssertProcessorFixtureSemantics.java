@@ -17,10 +17,16 @@ import ghidra.program.model.lang.UnknownInstructionException;
 import ghidra.program.util.DefaultLanguageService;
 import java.io.ByteArrayInputStream;
 import ghidra.program.model.address.Address;
+import ghidra.program.model.data.DWordDataType;
+import ghidra.program.model.data.VoidDataType;
+import ghidra.program.model.listing.Function;
+import ghidra.program.model.listing.ParameterImpl;
 import ghidra.program.model.listing.Instruction;
 import ghidra.program.model.pcode.PcodeOp;
 import ghidra.program.model.pcode.PcodeBlock;
 import ghidra.program.model.pcode.PcodeBlockBasic;
+import ghidra.program.model.pcode.Varnode;
+import ghidra.program.model.symbol.SourceType;
 import ghidra.program.model.symbol.FlowType;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -1200,6 +1206,247 @@ public class AssertProcessorFixtureSemantics extends GhidraScript {
         }
     }
 
+    private boolean priorityMaskDependsOn(Varnode value, Varnode source) {
+        if (value == null || source == null) return false;
+        Set<Varnode> seen = new HashSet<>();
+        List<Varnode> pending = new ArrayList<>();
+        seen.add(value);
+        pending.add(value);
+        for (int i = 0; i < pending.size(); i++) {
+            Varnode node = pending.get(i);
+            if (node == source) return true;
+            PcodeOp definition = node.getDef();
+            if (definition == null) continue;
+            for (int j = 0; j < definition.getNumInputs(); j++) {
+                Varnode input = definition.getInput(j);
+                if (seen.add(input)) pending.add(input);
+            }
+        }
+        return false;
+    }
+
+    private void verifyPriorityMaskIr(ProgramDB program, Address entry, boolean enter)
+            throws Exception {
+        String label = "priority mask " + (enter ? "enter" : "restore") + " IR";
+        if (!new DisassembleCommand(entry, null, true).applyTo(program, monitor)
+                || !new CreateFunctionCmd(entry).applyTo(program, monitor)) {
+            fail(label + ": cannot create exact-target function");
+            return;
+        }
+        Function function = program.getFunctionManager().getFunctionAt(entry);
+        function.setReturnType(enter ? DWordDataType.dataType : VoidDataType.dataType,
+                SourceType.USER_DEFINED);
+        function.replaceParameters(Function.FunctionUpdateType.DYNAMIC_STORAGE_FORMAL_PARAMS,
+                true, SourceType.USER_DEFINED,
+                new ParameterImpl("requested_mask", DWordDataType.dataType, program));
+        DecompInterface decompiler = new DecompInterface();
+        try {
+            decompiler.openProgram(program);
+            DecompileResults result = decompiler.decompileFunction(function, 60, monitor);
+            if (!result.decompileCompleted() || result.getHighFunction() == null) {
+                fail(label + ": decompilation failed: " + result.getErrorMessage());
+                return;
+            }
+            List<PcodeBlockBasic> blocks = result.getHighFunction().getBasicBlocks();
+            PcodeBlockBasic root = null;
+            for (PcodeBlockBasic block : blocks) {
+                if (block.contains(entry)) root = block;
+            }
+            if (root == null) {
+                fail(label + ": missing entry block");
+                return;
+            }
+            Set<PcodeBlock> reachable = cacheReachable(root, false);
+            Address pmr = program.getRegister("PMR").getAddress();
+            Address r6 = program.getRegister("r6").getAddress();
+            Varnode oldMask = null;
+            Varnode requestedMask = null;
+            for (PcodeBlockBasic block : blocks) {
+                if (!reachable.contains(block)) continue;
+                var operations = block.getIterator();
+                while (operations.hasNext()) {
+                    PcodeOp op = operations.next();
+                    for (int i = 0; i < op.getNumInputs(); i++) {
+                        Varnode input = op.getInput(i);
+                        if (input.isInput() && input.getSize() == 4
+                                && input.getAddress().equals(r6)) requestedMask = input;
+                    }
+                    if (enter && op.getSeqnum().getTarget().equals(entry)
+                            && op.getOpcode() == PcodeOp.CALLOTHER
+                            && op.getNumInputs() == 2 && op.getOutput() != null
+                            && op.getOutput().getSize() == 4
+                            && op.getInput(1).getAddress().equals(pmr)) {
+                        oldMask = op.getOutput();
+                    }
+                }
+            }
+            long firstWrite = enter ? 0x701d8 : 0x701f6;
+            long secondWrite = enter ? 0x701e2 : 0x70200;
+            long returnAt = enter ? 0x701e8 : 0x70206;
+            PcodeBlockBasic firstWriteBlock = null;
+            PcodeBlockBasic secondWriteBlock = null;
+            PcodeBlockBasic returnBlock = null;
+            PcodeBlockBasic maskBranch = null;
+            boolean returnsOldMask = false;
+            for (PcodeBlockBasic block : blocks) {
+                if (!reachable.contains(block)) continue;
+                var operations = block.getIterator();
+                while (operations.hasNext()) {
+                    PcodeOp op = operations.next();
+                    long at = op.getSeqnum().getTarget().getOffset();
+                    // Native register volatility lowers to a CALLOTHER with an
+                    // address annotation and value. Identify PMR itself, not
+                    // a DI/EI/SYNCP or pending-FPI side effect at this LDSR.
+                    if ((at == firstWrite || at == secondWrite)
+                            && op.getOpcode() == PcodeOp.CALLOTHER
+                            && op.getNumInputs() == 3 && op.getOutput() == null
+                            && op.getInput(1).getAddress().equals(pmr)
+                            && op.getInput(2).getSize() == 4
+                            && priorityMaskDependsOn(op.getInput(2), requestedMask)) {
+                        if (at == firstWrite) firstWriteBlock = block;
+                        else secondWriteBlock = block;
+                    }
+                    if (enter && at == 0x701ca && op.getOpcode() == PcodeOp.CBRANCH
+                            && block.getOutSize() == 2 && !op.getInput(1).isConstant()
+                            && priorityMaskDependsOn(op.getInput(1), oldMask)
+                            && priorityMaskDependsOn(op.getInput(1), requestedMask)) {
+                        maskBranch = block;
+                    }
+                    if (at == returnAt && op.getOpcode() == PcodeOp.RETURN) {
+                        returnBlock = block;
+                        for (int i = 1; i < op.getNumInputs(); i++) {
+                            returnsOldMask |= priorityMaskDependsOn(op.getInput(i), oldMask);
+                        }
+                    }
+                }
+            }
+            if (firstWriteBlock == null || secondWriteBlock == null) {
+                fail(label + ": missing reachable requested-mask write to PMR on an ID path");
+            }
+            if (returnBlock == null) {
+                fail(label + ": missing shared return");
+            } else {
+                Set<PcodeBlock> reachesReturn = cacheReachable(returnBlock, true);
+                if ((firstWriteBlock != null && !reachesReturn.contains(firstWriteBlock))
+                        || (secondWriteBlock != null
+                                && !reachesReturn.contains(secondWriteBlock))) {
+                    fail(label + ": PMR write cannot reach shared return");
+                }
+            }
+            if (enter) {
+                if (oldMask == null || !returnsOldMask || maskBranch == null) {
+                    fail(label + ": lost pre-write PMR read, returned old mask, or mask decision");
+                } else if (firstWriteBlock != null && secondWriteBlock != null
+                        && returnBlock != null) {
+                    boolean bypass = false;
+                    boolean updates = false;
+                    for (int i = 0; i < maskBranch.getOutSize(); i++) {
+                        Set<PcodeBlock> path = cacheReachable(maskBranch.getOut(i), false);
+                        bypass |= path.contains(returnBlock) && !path.contains(firstWriteBlock)
+                                && !path.contains(secondWriteBlock);
+                        updates |= path.contains(firstWriteBlock) && path.contains(secondWriteBlock);
+                    }
+                    if (!bypass || !updates) {
+                        fail(label + ": mask decision lost update/bypass paths");
+                    }
+                }
+            }
+        } finally {
+            decompiler.dispose();
+        }
+    }
+
+    private void verifyPriorityMaskExecution(ProgramDB program, boolean enter,
+            long oldMask, long requestedMask, int id) throws Exception {
+        String label = String.format("priority mask %s old=%08x requested=%08x ID=%d",
+                enter ? "enter" : "restore", oldMask, requestedMask, id);
+        EmulatorHelper emu = new EmulatorHelper(program);
+        try {
+            emu.writeRegister("PC", enter ? 0x701c4 : 0x701ea);
+            emu.writeRegister("lp", 0x70300);
+            emu.writeRegister("r6", requestedMask);
+            emu.writeRegister("PMR", oldMask);
+            emu.writeRegister("PSW", id << 5);
+            // This witnesses only the no-pending-FPI path. Existing fused
+            // arithmetic fixtures exercise real pending-FPI priority release.
+            emu.writeRegister("FPEC", 0);
+            int writes = 0;
+            int steps = 0;
+            while (emu.readRegister("PC").longValue() != 0x70300 && steps++ < 40) {
+                long pc = emu.readRegister("PC").longValue();
+                boolean write = pc == 0x701d8 || pc == 0x701e2
+                        || pc == 0x701f6 || pc == 0x70200;
+                if (write) {
+                    requireRegister(emu, label + " before write", "PMR", oldMask);
+                    if (enter) requireRegister(emu, label + " saved old mask", "r10", oldMask);
+                    writes++;
+                }
+                if (pc == 0x701d4 || pc == 0x701f2) {
+                    stepInterruptControl(emu, label, "__disable_irq");
+                    emu.writeRegister("PC", pc + 4);
+                } else if (pc == 0x701dc || pc == 0x701fa) {
+                    stepInterruptControl(emu, label, "__enable_irq");
+                    emu.writeRegister("PC", pc + 4);
+                } else if (pc == 0x701e6 || pc == 0x70204) {
+                    // Only advance past the existing opaque synchronization
+                    // boundary; no timing or interrupt event is manufactured.
+                    stepInterruptControl(emu, label, "__synchronize");
+                    emu.writeRegister("PC", pc + 2);
+                } else {
+                    step(emu, label);
+                }
+                if (write) requireRegister(emu, label + " after write", "PMR", requestedMask);
+            }
+            boolean updates = !enter || (int) oldMask < (int) requestedMask;
+            if (writes != (updates ? 1 : 0)) {
+                fail(label + ": wrong PMR write branch count " + writes);
+            }
+            requireRegister(emu, label, "PC", 0x70300);
+            requireRegister(emu, label, "PMR", updates ? requestedMask : oldMask);
+            if (enter) requireRegister(emu, label + " return", "r10", oldMask);
+            if (pswBit(emu, 5) != (id != 0)) fail(label + ": PSW.ID not preserved");
+        } finally {
+            emu.dispose();
+        }
+    }
+
+    private void verifyPriorityMaskHelpers() throws Exception {
+        Language language = DefaultLanguageService.getLanguageService()
+                .getLanguage(new LanguageID("v850e3:LE:32:default"));
+        // Exact adjacent helpers at Camry 8965F3307000 0x701c4 and 0x701ea,
+        // SHA256 42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7.
+        byte[] code = java.util.HexFormat.of().parseHex(
+                "eb574010e651fe0de50f4000860a810de0076001e65f2010e0876001"
+                + "b505e65f20101f007f00e50f4000860a810de0076001e65f2010"
+                + "e0876001b505e65f20101f007f00");
+        ProgramDB program = new ProgramDB("g3m-priority-mask", language,
+                language.getDefaultCompilerSpec(), this);
+        int transaction = program.startTransaction("priority mask fixtures");
+        try {
+            Address entry = program.getAddressFactory().getDefaultAddressSpace().getAddress(0x701c4);
+            program.getMemory().createInitializedBlock("priority-mask", entry,
+                    new ByteArrayInputStream(code), code.length, monitor, false).setExecute(true);
+            // Table 3-33 masks are contiguous from the lowest priority. The
+            // signed-negative request is rejected by enter before any write;
+            // do not assert reserved-bit writes/readback as hardware behavior.
+            long[][] masks = {{0, 0xff00}, {0xff00, 0xffc0}, {0xffc0, 0xffc0},
+                    {0xffff, 0xffc0}, {0xff00, 0x8000ffc0L}};
+            for (long[] pair : masks) {
+                for (int id = 0; id < 2; id++) {
+                    verifyPriorityMaskExecution(program, true, pair[0], pair[1], id);
+                    if (pair[1] <= 0xffff) {
+                        verifyPriorityMaskExecution(program, false, pair[0], pair[1], id);
+                    }
+                }
+            }
+            verifyPriorityMaskIr(program, entry, true);
+            verifyPriorityMaskIr(program, entry.getNewAddress(0x701ea), false);
+        } finally {
+            program.endTransaction(transaction, true);
+            program.release(this);
+        }
+    }
+
     private void verifyMaddfLanguageBoundary() throws Exception {
         // R01US0001EJ0100 pp. 374, 380, 386, 388: E2M four-register forms.
         // The low bit of reg4 is instruction bit 23, not bit 16.
@@ -1868,6 +2115,7 @@ public class AssertProcessorFixtureSemantics extends GhidraScript {
         verifyMaddfLanguageBoundary();
         verifyExactFusedArithmetic();
         verifyCacheControl();
+        verifyPriorityMaskHelpers();
 
         if (!failures.isEmpty()) {
             throw new IllegalStateException(failures.size() + " fixture failures: "

@@ -7880,9 +7880,15 @@ arguments that were previously lost in generic decompilation.
 
 Two independent rebuilds again agreed on 7,181 functions; live coverage matched
 31 curated reviews (30 verified, one bounded). The six targeted coverage,
-NvM and B6 checks passed. Fresh decompilation now shows the real four-argument
-voter/repair calls and status branches. The PMR helper still exposes a processor
-presentation limitation: ordinary-register optimization can elide its PMR write
-from C, despite the executed instruction-level effect. Its contract is therefore
-grounded in disassembly and machine execution, not that incomplete C rendering.
+NvM and B6 checks passed. Fresh decompilation shows the real four-argument
+voter/repair calls and status branches.
+
+The PMR presentation defect found during this reconstruction is also corrected:
+G3M registration **0.11** makes PMR natively volatile, so its externally visible
+writes survive ordinary-register optimization. Eighteen processor-fixture
+execution cases and high-IR checks passed against the exact 68-byte helper pair;
+a fresh target rebuild now displays the PMR assignments in both ID branches.
+This changes observability, not the firmware or the signed-comparison contract.
+Pending-FPI handling remains outside these `FPEC=0` execution cases; its existing
+architectural model was not suppressed to simplify the C.
 

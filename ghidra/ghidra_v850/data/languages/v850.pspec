@@ -26,5 +26,10 @@
          and enable/disable writes. Volatility does not make CDBCLR a busy
          status bit: STSR independently masks its write-only bit 1 to zero. -->
     <register name="CDBCR" volatile="true"/>
+    <!-- PMR writes control externally visible interrupt acceptance even when
+         no later instruction reads the register. Retain that effect through
+         native volatility; this does not model asynchronous PMR mutation or
+         change pending-FPI delivery in the instruction semantics. -->
+    <register name="PMR" volatile="true"/>
   </register_data>
 </processor_spec>
