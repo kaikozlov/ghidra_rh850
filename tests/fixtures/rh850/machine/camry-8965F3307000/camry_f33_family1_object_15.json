@@ -1,0 +1,94 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_family1_object_15",
+  "entry": {
+    "role": "actual Camry application record instructions with explicit RAM preconditions; no replaced callees",
+    "scope": "resolved-address",
+    "address": "0x66dfc"
+  },
+  "max_instructions": 20000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xff00",
+    "r6": "0xcafe010f",
+    "r7": "0xfebe2104"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "isolated initialized nested-call stack"
+    },
+    {
+      "address": "0xfebf02e8",
+      "hex": "e90827466584a3c2e1001f3e5d7c9bbad9f81736557493b2d1f00f2e4d6c8baa",
+      "evidence": "explicit selected RAM object at the exact descriptor address"
+    },
+    {
+      "address": "0xfebf0337",
+      "hex": "10",
+      "evidence": "selected primary status"
+    },
+    {
+      "address": "0xfebf1097",
+      "hex": "45",
+      "evidence": "selected XOR55 status"
+    },
+    {
+      "address": "0xfebf10bb",
+      "hex": "ba",
+      "evidence": "selected XORAA status"
+    },
+    {
+      "address": "0xfebf0446",
+      "hex": "ba0d",
+      "evidence": "selected checksum seed"
+    },
+    {
+      "address": "0xfebe2100",
+      "size": 40,
+      "fill": 165,
+      "evidence": "destination and exactly adjacent canaries"
+    }
+  ],
+  "checks": [
+    {
+      "name": "selected object admitted",
+      "kind": "register",
+      "register": "r10",
+      "equals": "0x10"
+    },
+    {
+      "name": "complete descriptor-sized copy",
+      "kind": "memory-equal",
+      "address": "0xfebe2104",
+      "source_address": "0xfebf02e8",
+      "size": 32
+    },
+    {
+      "name": "leading canary",
+      "kind": "memory",
+      "address": "0xfebe2100",
+      "size": 4,
+      "equals_hex": "a5a5a5a5"
+    },
+    {
+      "name": "trailing canary",
+      "kind": "memory",
+      "address": "0xfebe2124",
+      "size": 4,
+      "equals_hex": "a5a5a5a5"
+    }
+  ]
+}

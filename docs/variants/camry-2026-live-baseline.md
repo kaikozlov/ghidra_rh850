@@ -8302,3 +8302,100 @@ live-coverage parity passed. The comparison-error regressions also preserve an
 original execution fault when the second comparison operand is uninitialized.
 The relevant daemon was stopped before snapshot/corpus promotion.
 
+### 77.14 2026-10-15 application records and learned-quad restoration
+
+The application-side `3584A` call executes through the real getters, checksum,
+redundant-status repair, publication and range validator. This is a separate
+boundary from §77.13's physical-record read: application RAM/status/seed inputs
+are explicit, not assumed to have been established by asynchronous completion.
+
+Eight additional contracts are persisted in the target-native seed:
+
+| Entry | Durable name | Contract |
+|---|---|---|
+| `66DFC` | `f33_nvm_get_ram_record` | Selector bits8..15 choose getter `67948`/`68144`/`67208` for families0/1/2. Pass low8 object and the original destination; forward the result. Other families return `FF`. Upper16 bits are ignored. |
+| `68144` | `f33_nvm_get_family1_record` | Bound-check low16 object, then copy **before** status voting or checksum validation. Return the voted byte unchanged except status `10` with bad checksum returns `12`. |
+| `67B12` | `f33_nvm_check_family1_checksum` | Check the live RAM object's folded additive invariant below; return full32 `1` or `FFFFFFFF`, without repair. |
+| `67C8C` | `f33_nvm_publish_family1_checksum` | Store the selected 16-bit complementary seed; no status publication or return-value contract. |
+| `B73BA` | `f33_scale_u16_delta_s16_x4` | Return low32 of `(uint16(value)-uint16(origin))*int16(gain)*4`; no saturation. `FDEBC` is its actual tail-jump thunk. |
+| `355F6` | `f33_publish_learned_quad` | Get selector `100`; only result `10` publishes offsets `+4/+6/+8/+A` to `FEBE6AE6..6AEC`. No marker/range test and no zero fallback. |
+| `35640` | `f33_check_learned_quad_bounds` | Convert the four published values and apply two pairs of inclusive signed32 bounds. Return `5A` on any violation, otherwise zero; no published-state writes. |
+| `3584A` | `f33_restore_learned_quad` | Require first getter result `10` and marker **`A55A5AA5`**, then call the publisher and validator. Return `A55A5AA5` on range success, otherwise `5AA5A55A`. |
+
+**Application descriptor and integrity layout.** The count at `2AD72` is16.
+The eight-byte rows at `2AF0C` contain payload length at `+0`, a field not used
+by these getters at `+2`, and RAM-buffer pointer at `+4`. Object0 is the16-byte
+record at `FEBEF468`; object2 has8 bytes and object15 has32. This is not the
+physical six-byte descriptor table or the sixteen-byte logical-operation table.
+`F33NvmFamily1RamDescriptor`, `F33LearnedQuadRecord` and
+`F33LearnedQuadBounds` now preserve these distinct layouts.
+
+For `n = floor(payload_bytes/4)`, let
+`S = sum32(word[i] + (word[i] >> 16))` over the live RAM object.
+The seed at `FEBF0428 + 2*object` is `low16(A55A - S)`; admission requires
+`low16(S + seed) == A55A`. Both checksum leaves truncate the object to16 bits
+but have **no local object bound**. `68144` supplies the bound before calling
+the checker. This is distinct from the on-flash checksums in §77.10.
+The publisher's direct callers are `67CCA` and `67D96`; their complete
+asynchronous state-transition contracts are not established by this leaf proof.
+
+For object `i`, primary status is at `FEBF0328+i`, with XOR55/XORAA replicas
+at `FEBF1088+i` / `FEBF10AC+i`. Those replica addresses describe the
+**application phase**, not the earlier boot-resident flash-driver code.
+All-distinct zero bytes repair to `12/47/B8`, but the caller's record copy has
+already occurred. A valid status `11` is forwarded as `11`, with no checksum
+seed read. Checksum failure returns `12` without rewriting stored status `10`
+or undoing the copy. An overlapping destination can alter the source before
+the checksum re-reads it; the native overlap case exposes exactly that residue.
+
+**Range authority.** `BF3AA` copies the four ROM words at `AEF5C..AEF6B`
+into `FEBEE8E8/EC/F0/F4`; raw stores are at `BF3C2/BF3C8/BF3CE/BF3D4`.
+`BF97A` also initializes the same values at `C18C6..C18EC`.
+The pairs are both **+2,097,152 / −2,097,152**. They are not unknown
+startup data, and no absence-of-writer or runtime-constancy claim is made.
+`BF3AA` ran to its real return in614 instructions with an explicit source-RAM
+window; exact ROM-to-bound copies and selected byte/halfword/word/array/zero
+fields were checked. Other snapshot fields retain their unnamed OEM roles.
+
+The validator uses origin `0800` and signed gain `−09CD`, giving
+`converted = (2048 - uint16(value)) * 10036`. With the registered bounds,
+raw values **1840 through2256 inclusive** pass; 1839 and2257 fail.
+All four lanes were exercised at these boundaries. Separate exactly
+representable bounds prove equality is accepted and distinguish the two pairs.
+The generic scaling helper wraps; its learned-quad input domain does not
+overflow signed32 with this particular gain. No physical units are inferred.
+
+**Publication ordering is not transactional.** The first `3584A` getter checks
+marker `A55A5AA5`, not the superficially similar `AA5A5AA5`. The publisher
+then gets the record **again**, conditionally writes all four values, and
+returns no success indication. The validator reads the published state.
+Marker rejection therefore preserves the old values, while range rejection
+leaves the newly published values in place. There is no rollback or
+single-snapshot guarantee here. A mutation between the two getter calls has
+not been exercised; these runs do not establish that such an interleaving
+occurs in the deployed scheduler.
+
+The complete synthetic accepted call took576 instructions, range rejection
+after publication574, and wrong-marker rejection225. A separate throwaway
+used the registered DataFlash handle1 payload at offset `77C4` as the RAM
+record, with explicit application status and complementary seed: it also
+passed in576 instructions and published the expected four halfwords.
+Captured payload bytes are not copied into retained golden fixtures.
+This does **not** prove the missing physical-read → copy-consensus →
+application-status/seed sequence, startup restoration on a vehicle, or the
+downstream physical meaning of the four values.
+
+Seventy-six selected native scenarios passed, including nonzero object2,
+last-valid object15 and its last checksum-seed slot. Twenty-seven focused
+regressions are retained and passed again against the fresh reconstructed
+project. The captured-payload and heterogeneous-snapshot probes remain
+throwaway inputs rather than duplicated evidence.
+
+Two independent four-stage rebuilds plus finalization agreed on **7,187
+functions** and **80 curated reviews** (74 verified, six bounded); the
+outside-function census remains929. Canonical C now carries the dispatcher's
+destination argument, typed descriptor fields and the correct unsigned marker.
+The three dependent NvM/B6 artifacts were regenerated; the six targeted checks
+and live-coverage parity passed. The relevant daemons were stopped before
+snapshot promotion. No vehicle run or full-project test sweep is claimed.
+

@@ -686,6 +686,121 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
             + "canaries and completion cleanup; full multi-chunk and application "
             + "request/notification closure remain separate.");
   }
+  private void annotateApplicationRecords() throws Exception {
+    CategoryPath category = new CategoryPath("/CamryF33");
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u16 = UnsignedShortDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    DataType s32 = IntegerDataType.dataType;
+    DataType words = new PointerDataType(u32, 4);
+    int count = currentProgram.getMemory().getShort(toAddr(0x2AD72L)) & 0xFFFF;
+    StructureDataType descriptor =
+        new StructureDataType(category, "F33NvmFamily1RamDescriptor", 0);
+    descriptor.setPackingEnabled(true);
+    descriptor.add(u16, "payload_bytes", "Whole-word copy and checksum length.");
+    descriptor.add(u16, "opaque_02", "Not consumed by the getter or checksum leaves.");
+    descriptor.add(words, "buffer", "Application RAM object, not a DataFlash address.");
+    semanticData(0x2AF0CL, new ArrayDataType(resolve(descriptor), count, 8),
+        "f33_nvm_family1_ram_descriptors",
+        "Sixteen eight-byte rows selected by family byte1 at66DFC. "
+        + "Object0 has16 bytes atFEBEF468. Do not infer copy grouping from row order.");
+    semanticData(0x2AD72L, u16, "f33_nvm_family1_object_count",
+        "Getter68144 enforces this bound; checksum leaves67B12/67C8C do not.");
+    semanticData(0xFEBF0328L, new ArrayDataType(u8, count, 1),
+        "f33_nvm_family1_status", "Primary status bytes; not boolean validity flags.");
+    semanticData(0xFEBF1088L, new ArrayDataType(u8, count, 1),
+        "f33_app_nvm_family1_status_xor55",
+        "Application-phase XOR55 replicas. This RAM has a different boot-relocation role.");
+    semanticData(0xFEBF10ACL, new ArrayDataType(u8, count, 1),
+        "f33_app_nvm_family1_status_xorAA",
+        "Application-phase XORAA replicas. This RAM has a different boot-relocation role.");
+    semanticData(0xFEBF0428L, new ArrayDataType(u16, count, 2),
+        "f33_nvm_family1_checksum_seeds",
+        "Low16(A55A - sum(word + (word>>16))); distinct from physical-record checksums.");
+    semanticFunction(0x67B12L, "f33_nvm_check_family1_checksum", s32,
+        new ParameterImpl("object", u16, currentProgram))
+        .setComment("No local object bound. Read floor(payload_bytes/4) live RAM words "
+            + "and sum word+(word>>16) with32-bit wrap. Return1 iff low16(sum+seed)"
+            + "==A55A, otherwise full32 FFFFFFFF. No repair or publication.");
+    semanticFunction(0x67C8CL, "f33_nvm_publish_family1_checksum", VoidDataType.dataType,
+        new ParameterImpl("object", u16, currentProgram))
+        .setComment("No local object bound. Fold the same live RAM words as67B12 "
+            + "and store only low16(A55A-sum) in the selected seed. No status change.");
+    semanticFunction(0x68144L, "f33_nvm_get_family1_record", u32,
+        new ParameterImpl("object", u16, currentProgram),
+        new ParameterImpl("destination", words, currentProgram))
+        .setComment("Out-of-bound object returnsFF without a copy. Otherwise copy "
+            + "whole words BEFORE voting/repairing status with fallback12. Forward "
+            + "every voted status unchanged except10 with a failing live-source "
+            + "checksum returns12. Checksum failure does not rewrite stored status "
+            + "or undo the copy. Forward-copy aliasing can change the checked source.");
+    for (long entry : new long[] {0x67948L, 0x67208L}) {
+      Function getter = getFunctionAt(toAddr(entry));
+      if (getter == null) throw new IllegalStateException("missing record getter " + toAddr(entry));
+      getter.setReturnType(u32, SourceType.USER_DEFINED);
+      getter.replaceParameters(Function.FunctionUpdateType.DYNAMIC_STORAGE_FORMAL_PARAMS,
+          true, SourceType.USER_DEFINED,
+          new ParameterImpl("object", u16, currentProgram),
+          new ParameterImpl("destination", words, currentProgram));
+    }
+    semanticFunction(0x66DFCL, "f33_nvm_get_ram_record", u32,
+        new ParameterImpl("selector", u32, currentProgram),
+        new ParameterImpl("destination", words, currentProgram))
+        .setComment("Decode only selector bits8..15 and pass low8 object plus "
+            + "the unchanged destination to67948/68144/67208 for families0/1/2. "
+            + "Forward the callee result; other families returnFF without data access. "
+            + "Upper16 selector bits are ignored. This is not a physical NvM read.");
+    DataType quad = new ArrayDataType(u16, 4, 2);
+    StructureDataType record =
+        new StructureDataType(category, "F33LearnedQuadRecord", 0);
+    record.setPackingEnabled(true);
+    record.add(u32, "marker", "3584A requires A55A5AA5, not AA5A5AA5.");
+    record.add(quad, "values", "Four raw unsigned halfwords; physical units not recovered.");
+    record.add(u32, "opaque_tail", "Included in the application checksum; not published by355F6.");
+    semanticData(0xFEBEF468L, resolve(record), "f33_learned_quad_record",
+        "Family1 object0;16-byte RAM record. Physical-copy consensus and status "
+        + "publication are separate prerequisites, not implied by this layout.");
+    semanticData(0xFEBE6AE6L, quad, "f33_learned_quad",
+        "355F6 publishes all four values before3584A performs range validation. "
+        + "A failed range check does not roll this publication back.");
+    StructureDataType bounds =
+        new StructureDataType(category, "F33LearnedQuadBounds", 0);
+    bounds.setPackingEnabled(true);
+    bounds.add(s32, "pair1_upper", "Inclusive signed bound for values0 and1.");
+    bounds.add(s32, "pair1_lower", "Inclusive signed bound for values0 and1.");
+    bounds.add(s32, "pair2_upper", "Inclusive signed bound for values2 and3.");
+    bounds.add(s32, "pair2_lower", "Inclusive signed bound for values2 and3.");
+    DataType boundsType = resolve(bounds);
+    semanticData(0xAEF5CL, boundsType, "f33_learned_quad_rom_bounds",
+        "Exact target constants: +200000,-200000,+200000,-200000 hex. "
+        + "BF3AA copies these four words into the application snapshot.");
+    semanticData(0xFEBEE8E8L, boundsType, "f33_learned_quad_runtime_bounds",
+        "BF3AA copies the ROM bounds; BF97A also writes the same initial values. "
+        + "35640 consumes signed32 values here; no physical-unit inference.");
+    semanticFunction(0xB73BAL, "f33_scale_u16_delta_s16_x4", s32,
+        new ParameterImpl("value", u16, currentProgram),
+        new ParameterImpl("origin", u16, currentProgram),
+        new ParameterImpl("gain", ShortDataType.dataType, currentProgram))
+        .setComment("Return low32((uint16(value)-uint16(origin))*int16(gain)*4). "
+            + "MUL discards the high word, then SHL2 wraps. FDEBC is the real "
+            + "tail-jump thunk. No saturation or physical-unit contract.");
+    semanticFunction(0x355F6L, "f33_publish_learned_quad", VoidDataType.dataType)
+        .setComment("Initialize a16-byte local from210D0; get selector100 again. "
+            + "Only result10 publishes record offsets4/6/8/A toFEBE6AE6..6AEC. "
+            + "Other results preserve published values; there is no zero fallback. "
+            + "This helper does not test the marker or ranges.");
+    semanticFunction(0x35640L, "f33_check_learned_quad_bounds", u32)
+        .setComment("Convert each unsigned halfword with origin800 and gain-9CD "
+            + "through FDEBC/B73BA: (2048-value)*10036. Signed32 inclusive bounds "
+            + "use pair1 for values0/1 and pair2 for2/3. Return5A for any violation, "
+            + "otherwise0; no published-state writes.");
+    semanticFunction(0x3584AL, "f33_restore_learned_quad", u32)
+        .setComment("Get selector100; require result10 and markerA55A5AA5. Then "
+            + "355F6 performs a SECOND get and conditional publication, followed "
+            + "by35640. ReturnA55A5AA5 iff validation returns0, otherwise5AA5A55A. "
+            + "Marker/status rejection precedes publication; range rejection follows "
+            + "it without rollback. No single-snapshot or asynchronous completion claim.");
+  }
   private void annotateDataFlashReads() throws Exception {
     DataType u8 = UnsignedCharDataType.dataType;
     DataType u16 = UnsignedShortDataType.dataType;
@@ -867,6 +982,7 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     annotateNvmDescriptors();
     annotateNvmLogicalRequests();
     annotateNvmRecordIntegrity();
+    annotateApplicationRecords();
     annotateDataFlashReads();
     annotateFaciSubmission();
     annotatePwmCompareStaging();
