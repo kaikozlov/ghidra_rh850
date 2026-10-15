@@ -516,6 +516,62 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
             + "No operation/handle/pointer validation, interrupt mask or flash "
             + "execution at this layer. Step and padding remain unchanged.");
   }
+  private void annotatePwmCompareStaging() throws Exception {
+    CategoryPath category = new CategoryPath("/CamryF33");
+    DataType u16 = UnsignedShortDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    StructureDataType halfwords =
+        new StructureDataType(category, "F33PwmHalfwordStage", 0);
+    halfwords.setPackingEnabled(true);
+    halfwords.add(u16, "port_mask", "Consumed by61DFA;61C90 does not write this field.");
+    halfwords.add(u16, "u", "61E72 writes this value toTSG3nCMPUE.");
+    halfwords.add(u16, "v", "61E72 writes this value toTSG3nCMPVE.");
+    halfwords.add(u16, "w", "61E72 writes this value toTSG3nCMPWE.");
+    semanticData(0xFEBE38A0L, new ArrayDataType(resolve(halfwords), 2, 8),
+        "f33_pwm_halfword_stages",
+        "Two software slots.315D0 maps slots0/1 toTSG3 units1/0. "
+        + "The compare register identities do not establish output polarity or motor timing.");
+    StructureDataType words =
+        new StructureDataType(category, "F33PwmWordStage", 0);
+    words.setPackingEnabled(true);
+    words.add(u32, "w", "Zero-extended quantized third input; reverse lane order.");
+    words.add(u32, "v", "Zero-extended quantized second input.");
+    words.add(u32, "u", "Zero-extended quantized first input.");
+    semanticData(0xFEBE38B0L, new ArrayDataType(resolve(words), 2, 12),
+        "f33_pwm_word_stages",
+        "Initialized alongside halfword stages by61AEA, written by61D38. "
+        + "This annotation does not establish a hardware transfer consumer.");
+    semanticData(0x3166CL, u16, "f33_pwm_compare_span",
+        "Unsigned calibration4000 used by61C90/61D38; no clock-frequency claim.");
+    semanticData(0x3166EL, u16, "f33_pwm_compare_offset",
+        "Unsigned calibration80 used by61C90/61D38; distinct from31670/31672.");
+    semanticFunction(0x61AEAL, "f33_pwm_initialize_compare_stages", VoidDataType.dataType,
+        new ParameterImpl("compare", u16, currentProgram))
+        .setComment("For both slots copy low16(compare) to all three halfwords "
+            + "and zero-extend it into all three word lanes. Load port masks "
+            + "from31612+8*slot. No quantization or peripheral access here.");
+    semanticFunction(0x61C90L, "f33_pwm_stage_halfword_compares", VoidDataType.dataType,
+        new ParameterImpl("slot", u32, currentProgram),
+        new ParameterImpl("u_code", u16, currentProgram),
+        new ParameterImpl("v_code", u16, currentProgram),
+        new ParameterImpl("w_code", u16, currentProgram))
+        .setComment("Quantize each low16 input p: p==0 ->span+2*offset; "
+            + "0<p<8000 ->offset+(((8000-p)*span)>>15); p>=8000 ->0. "
+            + "Store low16 results atFEBE38A0+8*full32(slot)+2/+4/+6, "
+            + "preserving the port mask. Native MULU/SHR; no local index bound. "
+            + "This is compare staging, not a signed formula or physical duty claim.");
+    semanticFunction(0x61D38L, "f33_pwm_stage_word_compares", VoidDataType.dataType,
+        new ParameterImpl("slot", ShortDataType.dataType, currentProgram),
+        new ParameterImpl("u_code", u16, currentProgram),
+        new ParameterImpl("v_code", u16, currentProgram),
+        new ParameterImpl("w_code", u16, currentProgram))
+        .setComment("Same unsigned-input quantizer as61C90, but zero-extend each "
+            + "low16 result to a word and store in W/V/U order at "
+            + "FEBE38B0+12*signed16(slot). MULHI truncates/sign-extends the slot; "
+            + "unlike61C90 it does not use the full32-bit index. No local bounds. "
+            + "Execution includes high-bit truncation and slotFFFF writing before "
+            + "the declared two-slot array; not evidence that callers use that slot.");
+  }
   @Override public void run() throws Exception {
     String[] args = getScriptArgs();
     if (args.length != 1) throw new IllegalArgumentException("expected function_seeds.csv path");
@@ -544,6 +600,7 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     annotateBootDispatchAndCurves();
     annotateNvmDescriptors();
     annotateNvmLogicalRequests();
+    annotatePwmCompareStaging();
     println("SeedCamryF33RecoveredFunctions: seeded " + count
         + " evidence-backed entries and applied exact-F33 semantic prototypes");
   }

@@ -7937,3 +7937,51 @@ Two clean rebuilds agreed on 7,181 functions and produced 40 curated reviews
 contracts, not full request completion, checksum validation, logical copy
 consensus, learned-parameter restoration or physical flash timing.
 
+### 77.9 PWM compare staging, without an electrical-duty claim
+
+`61C90` and `61D38` consume three **unsigned low-16-bit codes**, not signed
+phase amplitudes. Their exact registered quantizer is:
+
+```text
+p = low16(input)
+q(p) = 4160                              if p == 0
+       80 + (((0x8000 - p) * 4000) >> 15) if 0 < p < 0x8000
+       0                                 if p >= 0x8000
+```
+
+The unsigned calibrations are `3166C = 4000` and **`3166E = 80`**.
+The adjacent `31670/31672 = 76` values are not this quantizer's offset.
+Zero is a special branch; it must not be replaced with ordinary interpolation.
+
+The two storage contracts differ:
+
+| Writer | Slot arithmetic | Software destination |
+|---|---|---|
+| `61C90` / `f33_pwm_stage_halfword_compares` | Full 32-bit slot × 8 | `FEBE38A0`: preserve `+0` port mask; write U/V/W halfwords at `+2/+4/+6`. |
+| `61D38` / `f33_pwm_stage_word_compares` | Signed low-16-bit slot × 12 | `FEBE38B0`: zero-extend the quantized values into **W/V/U** words at `+0/+4/+8`. |
+
+Neither writer checks the slot bound. The ordinary wrappers select slots 0/1;
+a separate boundary execution of the wide writer with slot `FFFF` demonstrated
+the signed address calculation, not an observed caller or vehicle condition.
+`61AEA` initializes both complete arrays with an already-formed compare value:
+low16 into the halfwords, zero-extension into the words, and port masks loaded
+from `31612 + 8*slot`. It does not run the quantizer.
+
+The halfword consumer `61E72` writes the **32-bit extended** TSG3 compare views:
+U→`CMPUE +188`, V→`CMPVE +184`, W→`CMPWE +180`, with slot→unit mapping `[1,0]`.
+These are the HT-PWM compare views in R01UH0585EJ0120 pp.2034–2036, not the
+HSP registers or the 16-bit views at `+B0/+B4/+B8`. Its instructions do not
+contain a ready-flag wait. `61DFA` separately updates port-function/output
+registers using the staged mask. A hardware consumer of
+the word array, complete motor-IRQ binding, output polarity, electrical duty,
+and update latency are not established by this local reconstruction.
+
+Twenty-nine exact-CodeFlash scenarios passed: twelve halfword quantizations,
+fourteen word quantizations and three complete initializations. Seven
+representative tracked scenarios also passed. They check branch boundaries,
+input/index narrowing, lane order, untouched masks/other slots and surrounding
+canaries; no timer event is injected. Fresh decompilation now exposes the two
+distinct typed layouts and unsigned arithmetic rather than anonymous RAM cells.
+Two clean rebuilds agreed on 7,181 functions and 43 curated reviews
+(42 verified, one bounded).
+
