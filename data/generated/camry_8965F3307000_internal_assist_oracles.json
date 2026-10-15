@@ -23,7 +23,7 @@
       "0x0005CF1C",
       "0x0005D5E0"
     ],
-    "classification": "verified distinction: AC56/EE40A/FEBE6772 is the diagnostic/model mirror of the pre-slew CC62 value. Two recovered callback predicates (3B400/3B4A8) also compare its saturated magnitude against FEBE6F6E/FEBE6F74 plus fixed ROM thresholds; they return status into the generic 6AE7C state machine and do not write the command funnel. The 6AF6->6E22/6E24 tail terminates in snapshot/report consumers. The physical motor-driving mirror is the sibling AC54/EE40C branch below. Canonical direct-reader census alone is insufficient to infer that CC62 is non-actuating because D042C writes CC62 and immediately reuses the same value intra-function to form CC66.",
+    "classification": "verified distinction: AC56/EE40A/FEBE6772 is the diagnostic/model mirror of the pre-final-clamp/gate CC62 value. Two recovered callback predicates (3B400/3B4A8) also compare its saturated magnitude against FEBE6F6E/FEBE6F74 plus fixed ROM thresholds; they return status into the generic 6AE7C state machine and do not write the command funnel. The 6AF6->6E22/6E24 tail terminates in snapshot/report consumers. The physical motor-driving mirror is the sibling AC54/EE40C branch below. Canonical direct-reader census alone is insufficient to infer that CC62 is non-actuating because D042C writes CC62 and immediately reuses the same value intra-function to form CC66.",
     "mirror_tail": {
       "0x35C4C": "FEBEE40A -> FEBE6AF6",
       "0x387CE": "FEBE6AF6 -> FEBE6E22/FEBE6E24",
@@ -42,7 +42,7 @@
       ]
     },
     "observable_chain": "FEBECC62 -> D0AAE/FEBEAC56 -> BF33E/FEBEE40A -> 5D5E0/FEBE6772 -> DID 0x1C02 Command Value Torque",
-    "pre_slew_value": "FEBECC62",
+    "pre_final_clamp_gate_value": "FEBECC62",
     "threshold_predicates": {
       "0x0003B400": "absolute/saturated FEBE6772 versus FEBE6F6E plus ROM threshold DAT_0002B5D8",
       "0x0003B4A8": "absolute/saturated FEBE6772 versus FEBE6F74 plus ROM threshold DAT_0002B5DC",
@@ -145,8 +145,8 @@
       },
       {
         "cell": "FEBEBF3C",
-        "classification": "nonnegative |measured torque| calibration-curve term",
-        "provenance": "C2B64 interpolates C28FC-selected curves over |C128| and scales by ROM gain; retained Normal-mode value0 can reach only equivalent banks 0/2, while Sport value2 selects distinct bank1",
+        "classification": "signed measured-torque calibration-curve term",
+        "provenance": "C2B64 interpolates C28FC-selected curves over |C128|, clamps the magnitude, then restores torque sign using AF888=+1024 or AF88A=-1024 divided by1024; retained Normal-mode value0 can reach only equivalent banks 0/2, while Sport value2 selects distinct bank1",
         "runtime_writer": "0x000C2B64"
       },
       {
@@ -944,8 +944,8 @@
     "zero_sig160_state_reduction": "retained drives have sig160/FEBEF050 value 0 route-wide; with FEBEB124==0, B35DC/B372A can emit FEBEB121 only 0 or 0x22 on the ordinary COM branch; C54A2 maps those to FEBEC158 0 or 0x44 and C5554 maps them to FEBEC156 0 or 2. Those two C28FC normal blocks are identical in both healthy and fallback banks, so ordinary zero-valued COM selector state cannot change C2B64 curves."
   },
   "physical_actuation_funnel": {
-    "chain": "D039E/FEBECC50 -> D042C/FEBECC62 -> D042C/FEBECC66 -> D047C/FEBECC64 -> D0AAE/FEBEAC54 -> BF33E/FEBEE40C -> 35C4C/FEBE6AF4 -> 387BA/FEBE6E0A -> 38502/FEBE6DEC -> 3835E/FEBE6DC8 + 384D8/FEBE6DD6 -> 38162 motor-control transform",
-    "classification": "verified cell-level physical-current convergence through the exact F33 command/current chain. CC62 is a real pre-slew stage in this funnel; AC56/EE40A/1C02 is its diagnostic mirror, while AC54/EE40C carries the motor-driving post-slew/override value. No second additive lateral-command injection is recovered downstream of CC50; special 35C4C and D047C branches are bounded internal limit/override selections. Factory LTA with B6 absent is therefore not contradictory to the exact F33 actuation architecture. The remaining stock-LTA question is which exact external/local state changes select or modulate the B6-independent D0218/CC60/CC50 path; no 0x08A-to-B6 transformation is implied or required.",
+    "chain": "D039E/FEBECC50 -> D042C/FEBECC62 -> D042C/FEBECC66 -> D047C/FEBECC64 -> D0AAE/FEBEAC54 -> BF33E/FEBEE40C -> 35C4C/FEBE6AF4 -> 387BA/FEBE6E0A -> 38502/FEBE6DEC -> 3835E/FEBE6DC8 + 384D8/FEBE6DD6 -> 38162 sixfold-angle correction -> 37F16 current-pair publication",
+    "classification": "verified cell-level physical-current convergence through the exact F33 command/current chain. CC62 is a real scaled pre-final-clamp/gate stage; AC56/EE40A/1C02 is its diagnostic mirror, while AC54/EE40C carries the motor-driving selected value. No second additive lateral-command injection is recovered downstream of CC50; special 35C4C and D047C branches are bounded internal limit/override selections. Factory LTA with B6 absent is therefore not contradictory to the exact F33 actuation architecture. The remaining stock-LTA question is which exact external/local state changes select or modulate the B6-independent D0218/CC60/CC50 path; no 0x08A-to-B6 transformation is implied or required.",
     "downstream_current_diagnostic_mirror": {
       "cells": [
         "FEBE6D84",
@@ -963,9 +963,9 @@
       },
       "runtime_copy": "0x00037F16: FEBE6D84=FEBE6DD6; FEBE6D86=FEBE6DC8"
     },
+    "final_command_override": "D047C normally copies FEBECC66->FEBECC64; if FEBECC98 is nonzero it substitutes clamp(FEBECC94,+/-0x569A), an internally generated return/limit path",
     "normal_motor_mirror": "0x35C4C normally sets FEBE6AF4=-FEBEE40C; service/limit branches can substitute bounded internal FEBE6AF8 before the same 6AF4 funnel",
-    "post_slew_override": "D047C normally copies FEBECC66->FEBECC64; if FEBECC98 is nonzero it substitutes clamp(FEBECC94,+/-0x569A), an internally generated return/limit path",
-    "pre_slew_intra_function_edge": "D042C computes FEBECC62=FEBECC50*FEBEAC5A/0x400, immediately loads it to iVar2, and writes/slew-limits FEBECC66 from the same value",
+    "scale_clamp_gate_edge": "D042C computes signed16(trunc(FEBECC50*u16(FEBEAC5A)/1024)), publishes FEBECC62, reuses the signed16 register value for the symmetric FEBEAC4C amplitude clamp, publishes ungated FEBECC54, then publishes FEBECC66 only when AC29!=0 and AC2A==0 (zero otherwise). No history or slew recurrence occurs here.",
     "writer_sets": {
       "FEBE6AF4": [
         "0x00035C4C",
@@ -1011,7 +1011,7 @@
     {
       "data_id": "0x1C02",
       "rank": 2,
-      "reason": "Toyota-named Command Value Torque pre-slew model/observable; diagnostic mirror of a value that D042C also feeds into the verified CC66/CC64 physical actuation funnel"
+      "reason": "Toyota-named Command Value Torque pre-final-clamp/gate observable; diagnostic mirror of a value that D042C also feeds into the verified CC66/CC64 physical actuation funnel"
     },
     {
       "data_id": "0x1C3E",
@@ -1019,7 +1019,7 @@
       "reason": "scaled/clamped FEBEC5EE proxy; useful control oracle, but exact selector maps alias and retained-drive evidence already bounds this moving-mode term to zero"
     }
   ],
-  "schema": "camry-8965f3307000-internal-assist-oracles-v1",
+  "schema": "camry-8965f3307000-internal-assist-oracles-v2",
   "selector_influence_observability": {
     "FEBEC4C0_no_direct_term_did": "C8678 syntactically indexes PTR_LAB_000D3630[FEBEC156&3] and selector-strided D3670/D3674 tables before writing FEBEC4C0, but exact pointer entries alias across all four selector banks (D3630=0xB1208 x4; D3670 family repeats 0xB1248/0xB121C). No exact F33 RDBI callback directly reads FEBEC4C0.",
     "FEBEC5EE_via_0x1C3E": "C9812 syntactically indexes PTR_DAT_000D39DC[FEBEC156&3], filters/integrates into FEBEC5EC; C9A84 consumes FEBEC5EC and writes FEBEC5EE; D0D7C/BF3AA then expose its scaled/clamped proxy at DID 0x1C3E. In exact 8965F3307000 all four selector entries alias 0xB018A, so this path cannot distinguish FEBEC156 choices in this calibration.",
@@ -1071,7 +1071,7 @@
   },
   "target": {
     "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
-    "corpus_function_count": 7178,
+    "corpus_function_count": 7187,
     "software_id": "8965F3307000"
   }
 }

@@ -439,8 +439,8 @@ def analyze() -> dict[str, Any]:
     "internal_override_trigger_and_replacement_are_exact": "DAT_febecc98 = uVar7" in c[0xD0528] and "DAT_febecc94 = -DAT_febecc80" in c[0xD0674] and all(x in c[0xD047C] for x in ("DAT_febecc98", "DAT_febecc94", "DAT_febecc64")),
     "motor_side_can_substitute_internal_bounded_source": all(x in c[0x35C4C] for x in ("DAT_febee40c", "DAT_febee780 == 'Z'", "DAT_febee406 == 'Z'", "DAT_febe6af4 = -sVar1")),
     "motor_mirror_path": "DAT_febee40c = DAT_febeac54" in c[0xBF33E] and "DAT_febe6af4 = -sVar1" in c[0x35C4C] and "DAT_febe6e0a = DAT_febe6af4" in c[0x387BA],
-    "motor_scheduler_runs_current_chain_in_order": all(f"FUN_{a:08x}();" in c[0x5DF5C] for a in (0x387BA, 0x38502, 0x3835E, 0x384D8, 0x38162)),
-    "separate_cyclic_roots": "FUN_0006679e" in c[0x65FEA] and "FUN_000667e6" in c[0x66062],
+    "motor_scheduler_runs_current_chain_in_order": all(f"{corpus[a]['name']}();" in c[0x5DF5C] for a in (0x387BA, 0x38502, 0x3835E, 0x384D8, 0x38162)),
+    "separate_cyclic_roots": corpus[0x6679E]["name"] in c[0x65FEA] and corpus[0x667E6]["name"] in c[0x66062],
     "application_task_contains_unpack_stage_snapshot_controller": all(x in c[0x58B5E] for x in ("FUN_0005ec24", "FUN_0005f610")) and "FUN_000d1130" in c[0xBCD62],
     "command_task_contains_common_gate_and_motor_mirror": "FUN_000bcaa6" in c[0xBCD02] and "FUN_000d1100" in c[0xBCD02] and "FUN_000bf33e" in c[0xC2000],
   }

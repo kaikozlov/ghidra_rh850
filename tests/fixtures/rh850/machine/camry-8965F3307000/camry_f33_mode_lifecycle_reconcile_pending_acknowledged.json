@@ -1,0 +1,70 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_mode_lifecycle_reconcile_pending_acknowledged",
+  "entry": {
+    "role": "real whole request reconciliation pass with materialization, acknowledged cancellation and pending-cancellation preservation; no mode callback or physical-state claim",
+    "scope": "resolved-address",
+    "address": "0xb1546"
+  },
+  "max_instructions": 20000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "isolated initialized nested-call stack"
+    },
+    {
+      "address": "0xfebeb090",
+      "hex": "40020000000004000900000000000200",
+      "evidence": "cancel6/9 and out-of-domain50; request0/3/49. Event3 is acknowledged,6 acknowledged/cancelled,9 pending/cancelled"
+    },
+    {
+      "address": "0xfebeb0a8",
+      "hex": "000000000000a55a00000000a55a000000005aa500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003cc3",
+      "evidence": "50 real status slots plus two-byte boundary canary atB10C; all inputs explicitly synthetic"
+    }
+  ],
+  "checks": [
+    {
+      "name": "whole reconciliation pass returns",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "held acknowledged3 becomes cancellation; request0 and49 remain",
+      "kind": "memory",
+      "address": "0xfebeb090",
+      "size": 16,
+      "equals_hex": "48020000000004000100000000000200"
+    },
+    {
+      "name": "pending9 survives cancellation; acknowledged6 clears;3 clears only on a later pass;49 is included and50 excluded",
+      "kind": "memory",
+      "address": "0xfebeb0a8",
+      "size": 102,
+      "equals_hex": "5aa500000000a55a000000000000000000005aa50000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000005aa53cc3"
+    },
+    {
+      "name": "request-bit update restores caller priority mask",
+      "kind": "register",
+      "register": "PMR",
+      "equals": "0xff00"
+    }
+  ]
+}

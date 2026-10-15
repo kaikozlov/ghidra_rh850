@@ -172,13 +172,13 @@
     "0x035C4C": {
       "body_sha256": "205df4739724fda0b8e0e8c09e44df61b42568bc5c92e9673462d3801db70b2a",
       "body_size": 156,
-      "decompiled_c_sha256": "9504bb6536cb2cbca2f9ef662d0ccf5fdd597a0d4a49db5643ae896cbbbf3764",
+      "decompiled_c_sha256": "c1b445fd86306b748c2cc05180961f286c41446c4d41963e03500cbe08f7596f",
       "role": "EE40C motor-side selection"
     },
     "0x038162": {
       "body_sha256": "fe6b7eff71c8177b1441e1db3851e074a6c6536bfe54267c36ba4054407d8037",
       "body_size": 504,
-      "decompiled_c_sha256": "fe5bc96b0da5b82b102a5f2baac2e01d8073709cc89d0740a8285b5bcccce4a3",
+      "decompiled_c_sha256": "9dbd2f6276c0f1612f8167b5c6c0d65293aba8ab54555ee57372b521e2a47d9d",
       "role": "downstream motor-current processing"
     },
     "0x03835E": {
@@ -190,13 +190,13 @@
     "0x0384D8": {
       "body_sha256": "91c5e85b853c58aec231c10bd3e185c3550c72ae2f3190632fa5f54d1d105696",
       "body_size": 38,
-      "decompiled_c_sha256": "e04359f9266b1d47f6fa43190e60727d34e1c4ea3a9a55f881809063820b3423",
+      "decompiled_c_sha256": "571e727d69c72a9a475d445b4a20353070b80c748500d8b38d9f0536339229e4",
       "role": "signed motor-current command stage"
     },
     "0x038502": {
       "body_sha256": "41eb9c6e202e6d80cb9d353888696fb3a1a5ebff1323ed4fab2b3c7be3dc04cc",
       "body_size": 124,
-      "decompiled_c_sha256": "8484f4c3c0ea0781201bfa803a6c352000b0e7f8f70359bac7037b6bc550f604",
+      "decompiled_c_sha256": "4dd74a428fbece3c0641cd3ea922a18c71ab452333192a59ca7dbb2196bb2ec6",
       "role": "motor-current command magnitude map"
     },
     "0x0387BA": {
@@ -232,13 +232,13 @@
     "0x058B5E": {
       "body_sha256": "0c6eb6b596dfffdc298158d0ae8928ae17ba244ba1716fcd7119b357170351d9",
       "body_size": 294,
-      "decompiled_c_sha256": "91de58b03da72bd59c83fcb4c5a313bc70296f6d886aec904c730b7ce020e542",
+      "decompiled_c_sha256": "f8a1a5837cc3256fae79419b9cc26b4f0963161c14d72cba78b5db7f7fe52e83",
       "role": "generated-COM/application task coordinator"
     },
     "0x05DF5C": {
       "body_sha256": "c496bf67475b688190f244ba164ea1535d676539ef21bb7bce020729b4c7546f",
       "body_size": 676,
-      "decompiled_c_sha256": "eec4675aa33566e18a7f27569013f0bff0e51ae642b62c79e998593c3b80ee84",
+      "decompiled_c_sha256": "d9890b3bcbd76908b79bcde836159fd8ab9f07440b0e8a2dea7319d0c6149d4e",
       "role": "motor-model scheduler aggregate"
     },
     "0x065FEA": {
@@ -250,7 +250,7 @@
     "0x066062": {
       "body_sha256": "b08f13a1f1d02c86eb0f461268b1ffd0ee6196907e31201c4b045bf8990f83dc",
       "body_size": 92,
-      "decompiled_c_sha256": "bd27d3fd27abfb8097d077f48ad4a9bb5470341a53a388f64ed8d8124e058e90",
+      "decompiled_c_sha256": "b9a2198c832dda88ba8747e6b572bd584424c7e169cda2630977765b5a585c66",
       "role": "communications/application cyclic task root"
     },
     "0x06679E": {
@@ -262,7 +262,7 @@
     "0x0667E6": {
       "body_sha256": "96d89859e02738c11ddd556d055628f6e75a1e0b88c8f129e2dba902a34a5307",
       "body_size": 32,
-      "decompiled_c_sha256": "4c93b2b1eac009afbe06ba81cfb0e025fc2ee98c2afb2be84867c13692ecf16c",
+      "decompiled_c_sha256": "a2cefcb24b107df29946a5fa2756a9381077090d2b8a0b408788bf9d7a0b2a27",
       "role": "communications/application aggregate"
     },
     "0x07D800": {
@@ -706,13 +706,13 @@
     "0x0D0284": {
       "body_sha256": "b4eadcf0a0f2d412955c6ed2776087bccac004c30a96401894801ba943676f71",
       "body_size": 86,
-      "decompiled_c_sha256": "10b9a5c39b0c8b342f92cbad28074ace6d9d66e5630039026effebcd4925dc87",
+      "decompiled_c_sha256": "c157ac5d142412ea8b9216d0ad4ab93c475d04c77037f27e3e3796d74cac83d4",
       "role": "shared command scale/clamp"
     },
     "0x0D02DA": {
       "body_sha256": "edb65881363e0b33f0a565d075c487c6cf94f785e0a9590e8743eff834eee238",
       "body_size": 168,
-      "decompiled_c_sha256": "2b0e04e2ce1fe5179136658f214d536024bc58bb9126d86a2e2c544432c4ea03",
+      "decompiled_c_sha256": "ebc9f1577158e7c6f18014b546e488930e3a652a8c031353cc5af145b3b8d9bd",
       "role": "shared command filter/slew"
     },
     "0x0D0382": {
@@ -724,19 +724,19 @@
     "0x0D039E": {
       "body_sha256": "993f8f98ca99f2370ae504726245106eda7443287bea6834ba32b757da35539e",
       "body_size": 142,
-      "decompiled_c_sha256": "a083ccf964ad1cc7db41274d3c3d33502d711a59d3dc8499c3439e80c6b1f53f",
+      "decompiled_c_sha256": "bbb8f38f663005e2f8c12cc89aaf9a7be86245d07bfde5cf5bfcbab797b7c7ff",
       "role": "shared command + local damping composition"
     },
     "0x0D042C": {
       "body_sha256": "5cec1b3bd6f5bbbce2832ae7ff417f75db1e11f053d568c143f8a48ee13539e5",
       "body_size": 80,
-      "decompiled_c_sha256": "3d59d9771c66e6bb670a825a21d96f39e92fbb393825134321ccace032d5b7da",
+      "decompiled_c_sha256": "826569388e75f2ca62cbd06a68816354e3a7de5576636de1fde81725fd6c529f",
       "role": "shared output scaling + common actuator gate"
     },
     "0x0D047C": {
       "body_sha256": "b7995271dcae87283b114788eb9719f086ea7ef78fde1e73ed9fa7336cec3e4c",
       "body_size": 48,
-      "decompiled_c_sha256": "b515c8173254fcf4d71e57598d1306f271a50e16beddcbf30e3d4ff56b24408b",
+      "decompiled_c_sha256": "3a54b3251dba1c838a43af1baaa65486b19261b775c39fa2289eb4521b890742",
       "role": "internal post-gate override"
     },
     "0x0D04F0": {
@@ -778,13 +778,13 @@
     "0x0D0AAE": {
       "body_sha256": "0eda7671aa6175f44503e1b9e6c42e1fb1c255fa4e4c0391269eefe40b61e01a",
       "body_size": 72,
-      "decompiled_c_sha256": "51d93da1f70ed9e57c8ba1220658f8903420cd64dfda2ebb2a7e01c60335b597",
+      "decompiled_c_sha256": "4b791ce3f32d42d3d1786f298a4dc6a59ba3b37ade3abd80bfcb80f48f621f6e",
       "role": "shared command snapshot"
     },
     "0x0D0AF6": {
       "body_sha256": "2eda8a4e734a3cd248c83c9cd41f906e0191ee48afa5ba72a73640da00823fc9",
       "body_size": 228,
-      "decompiled_c_sha256": "68fb362fae94cf8a89c3e602ca0a77b0da17dd40794402abfbbbf3b7263eb414",
+      "decompiled_c_sha256": "c512a9d970e51037244ee59614fbae8267ffc363dc900dc43781b003c5c1c73e",
       "role": "shared command aggregate"
     },
     "0x0D0EEC": {

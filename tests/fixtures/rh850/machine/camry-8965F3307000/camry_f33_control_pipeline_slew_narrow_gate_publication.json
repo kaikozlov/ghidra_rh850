@@ -1,0 +1,120 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_control_pipeline_slew_narrow_gate_publication",
+  "entry": {
+    "role": "real D0AF6 publication tail D0BB2..D0BD6: sum, scale, slew, clamp, composition, final gate, internal override and snapshot; upstream input preparation and caller-frame teardown are outside this boundary",
+    "scope": "resolved-address",
+    "address": "0xd0bb2"
+  },
+  "max_instructions": 20000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0xd0bd6"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "isolated initialized nested-call stack"
+    },
+    {
+      "address": "0xfebeac00",
+      "hex": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000005a0000000000000000000000000000000000000000000000000000000000000000640000000000d007000000000000ffff000000000000000000800000000000000000000000000000000000000000000000000000",
+      "evidence": "synthetic interface: reduced sum, blocked output gate, amplitude limit100, upstream limit2000, full-scale input32768 and unsigned gain65535; not a normal-calibration reachability claim"
+    },
+    {
+      "address": "0xfebecc00",
+      "hex": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001010000000000000000000001000200",
+      "evidence": "initialized command state, actual reset-style override init flags, enabled slew with shift2 and prior output0"
+    },
+    {
+      "address": "0xfebec790",
+      "hex": "0000000000000000000000000000000000010000000000000000fffeffff000000000000000000000000000000000000",
+      "evidence": "complement-valid base gain256 and local-addend gain0"
+    },
+    {
+      "address": "0xfebec4c0",
+      "hex": "00100000",
+      "evidence": "reduced-branch 32-bit term4096"
+    },
+    {
+      "address": "0xfebec3ba",
+      "hex": "0000",
+      "evidence": "reduced-branch short term0"
+    },
+    {
+      "address": "0xfebebf3c",
+      "hex": "00000000",
+      "evidence": "reduced-branch 32-bit term0"
+    },
+    {
+      "address": "0xfebec128",
+      "hex": "0000",
+      "evidence": "independent D0AAE diagnostic snapshot source; zero does not replace any command computation"
+    },
+    {
+      "address": "0xfebec172",
+      "hex": "0000",
+      "evidence": "independent D0AAE state snapshot source; exact copy at D0AE6"
+    },
+    {
+      "address": "0xfebec81a",
+      "hex": "0903",
+      "evidence": "real local addend is loaded but multiplied by valid gain0"
+    }
+  ],
+  "checks": [
+    {
+      "name": "real command tail completes before caller-frame teardown",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0xd0bd6"
+    },
+    {
+      "name": "sum4096 becomes actual slewed1024 before final scaling",
+      "kind": "memory",
+      "address": "0xfebecc48",
+      "size": 14,
+      "equals_hex": "001000000010000400040004ffff"
+    },
+    {
+      "name": "slew retained output is1024",
+      "kind": "memory",
+      "address": "0xfebecc3c",
+      "size": 4,
+      "equals_hex": "00040000"
+    },
+    {
+      "name": "signed16 narrowing precedes clamp and blocked gate",
+      "kind": "memory",
+      "address": "0xfebecc60",
+      "size": 10,
+      "equals_hex": "0004ffff000000006400"
+    },
+    {
+      "name": "snapshot preserves diagnostic minus1 separately from gated motor zero",
+      "kind": "memory",
+      "address": "0xfebeac54",
+      "size": 4,
+      "equals_hex": "0000ffff"
+    },
+    {
+      "name": "snapshot marks publication ready",
+      "kind": "memory",
+      "address": "0xfebeac3f",
+      "size": 1,
+      "equals_hex": "5a"
+    }
+  ]
+}

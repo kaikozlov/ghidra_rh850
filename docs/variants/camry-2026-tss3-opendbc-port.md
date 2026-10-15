@@ -3187,8 +3187,8 @@ The second profile follows the numeric result through the physical command funne
 | `CC4C`, `CC4E` | 4 | `D0284` bounded/scaled value, then `D02DA` slew result |
 | `AC52`, `CC60` | 4 | `D0382` limit and limited value |
 | `CC50` | 2 | `D039E` pre-scale command |
-| `AC5A`, `AC4C` | 4 | `D042C` scale and symmetric slew/limit inputs |
-| `CC62`, `CC66`, `CC64` | 6 | pre-slew, post-slew/gate, and selected command |
+| `AC5A`, `AC4C` | 4 | `D042C` scale and symmetric amplitude-limit inputs |
+| `CC62`, `CC66`, `CC64` | 6 | pre-final-clamp/gate, amplitude-clamped/gated, and selected command |
 | `AC54`, `AC56` | 4 | motor-driving `CC64` mirror and diagnostic `CC62` sibling |
 
 `FUN_000D0AF6` calls these stages in order: `D0218 -> D0284 -> D02DA -> D0382 ->
@@ -3203,6 +3203,13 @@ which the observer retains as an opaque wrapping hardware timer when present. Th
 current Comma/Panda binding returns `(address, data, bus)` and therefore exposes no
 `busTime`; the observer records null/empty timing evidence rather than dropping those
 frames. Host timestamps remain correlation aids rather than physical CAN ordering.
+
+Planner schema `camry-f33-steering-state-capture-v3` names these fields
+`AC4C_amplitude_limit`, `CC62_pre_clamp_gate`, and `CC66_clamped_gated`.
+Earlier planner labels incorrectly attributed slew limiting to `D042C`;
+the actual slew/filter is `D02DA`. Addresses and byte geometry are unchanged,
+and retained captures are not rewritten. See the exact arithmetic and alternate
+history-selection boundary in [the control-pipeline report](camry-2026-live-baseline.md#34-exact-f33-commandcurrent-pipeline-and-cross-rate-publication).
 
 The recovered profile geometry remains deterministic: a full sample would be eight
 classic-CAN DTOs if XCP command dispatch were enabled. On stock exact F33, however,

@@ -569,7 +569,7 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x00035c38,16,FUN_00035c38,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,2,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x00035c48,2,FUN_00035c48,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x00035c4a,2,FUN_00035c4a,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
-0x00035c4c,156,FUN_00035c4c,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,0,0,,14,10,4,0,3,0,application,unreviewed,,,,,,
+0x00035c4c,156,f33_sample_motor_command,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,2,0,0,,14,10,4,0,3,0,application,semantically_identified,verified,firmware/camry-8965F3307000/CodeFlash.bin,cfg_dataflow,,2026-10-15,Motor sample normally negates EE40C; family0500 permits two explicitly prioritized bounded service substitutions. Diagnostic mirror EE40A is a separate sample. Static instructions/dataflow; no new vehicle behavior.
 0x00035ce8,2,FUN_00035ce8,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x00035cea,2,FUN_00035cea,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x00035cec,104,FUN_00035cec,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,0,0,,7,4,3,0,3,0,application,unreviewed,,,,,,
@@ -592,7 +592,7 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x000360e0,96,FUN_000360e0,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,0,0,,5,5,2,0,3,0,application,unreviewed,,,,,,
 0x00036140,2,FUN_00036140,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x00036142,2,FUN_00036142,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
-0x00036144,338,FUN_00036144,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,0,0,,18,10,8,0,0,0,application,unreviewed,,,,,,
+0x00036144,338,f33_transform_measured_phase_currents,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,2,0,0,,18,10,8,0,0,0,application,structurally_bounded,bounded,firmware/camry-8965F3307000/CodeFlash.bin,cfg_dataflow,,2026-10-15,Dual-bank measured phase-to-rotating-frame transform preserves32-bit outputs and separate saturated halfword mirrors. Measured-frame coefficients differ from output-frame coefficients. ADC freshness and rotor/sample alignment not established.
 0x00036296,2,FUN_00036296,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x00036298,2,FUN_00036298,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x0003629a,170,FUN_0003629a,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,0,0,,10,10,3,0,6,0,application,unreviewed,,,,,,
@@ -671,7 +671,7 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x00037df4,80,FUN_00037df4,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,0,0,,2,2,2,0,2,0,application,unreviewed,,,,,,
 0x00037e44,2,FUN_00037e44,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x00037e46,2,FUN_00037e46,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
-0x00037e48,202,FUN_00037e48,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,0,0,,11,6,5,0,0,0,application,unreviewed,,,,,,
+0x00037e48,202,f33_compose_current_feedback,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,2,0,0,,11,6,5,0,0,0,application,semantically_identified,verified,firmware/camry-8965F3307000/CodeFlash.bin,cfg_dataflow,,2026-10-15,"Validity-masked common/difference feedback, including unsaturated32-bit second-axis sum6D78 and separate saturated mirror6D72. Reset follows8B28&40004; exact software dataflow, not acquisition validity."
 0x00037f12,2,FUN_00037f12,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x00037f14,2,FUN_00037f14,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x00037f16,120,FUN_00037f16,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,0,0,,12,6,6,0,2,0,application,unreviewed,,,,,,
@@ -682,13 +682,13 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x000380de,128,FUN_000380de,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,4,0,,6,5,1,0,3,0,application,unreviewed,,,,,,
 0x0003815e,2,FUN_0003815e,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x00038160,2,FUN_00038160,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
-0x00038162,504,FUN_00038162,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,2,0,,21,7,16,0,16,0,application,unreviewed,,,,,,
+0x00038162,504,f33_calculate_sixfold_current_correction,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,2,2,0,,21,7,16,0,16,0,application,semantically_identified,verified,firmware/camry-8965F3307000/CodeFlash.bin;tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_control_pipeline_negative_sample_to_current_publication.json,instruction_semantics,passed,2026-10-15,Squared-vector gain and wrapped sixfold-angle correction feed separate current-pair corrections. Native case exercises the zero-tail speed-gain branch; other gain and trigonometric branches instruction/dataflow checked. Not the complete motor transform.
 0x0003835a,2,FUN_0003835a,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x0003835c,2,FUN_0003835c,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x0003835e,52,FUN_0003835e,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,0,0,,5,3,2,0,2,0,application,unreviewed,,,,,,
 0x00038392,2,FUN_00038392,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x00038394,2,FUN_00038394,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
-0x00038396,322,FUN_00038396,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,6,1,5,0,14,0,application,unreviewed,,,,,,
+0x00038396,322,f33_interpolate_current_curve,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,0,0,,6,1,5,0,14,0,application,semantically_identified,verified,firmware/camry-8965F3307000/CodeFlash.bin;tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_control_pipeline_negative_sample_to_current_publication.json,instruction_semantics,passed,2026-10-15,"Interpolate signed first-component breakpoints and unsigned current-curve ordinates, publish interpolation state and return second-component magnitude. Native negative-command composition covers adjacent banks3/4; not exhaustive calibration-domain execution."
 0x000384d8,38,FUN_000384d8,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,1,0,,5,2,3,0,0,0,application,unreviewed,,,,,,
 0x000384fe,2,FUN_000384fe,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x00038500,2,FUN_00038500,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
@@ -728,9 +728,9 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x00038d6c,226,FUN_00038d6c,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,0,0,,7,4,3,0,0,0,application,unreviewed,,,,,,
 0x00038e4e,2,FUN_00038e4e,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x00038e50,2,FUN_00038e50,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
-0x00038e52,144,FUN_00038e52,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,12,4,8,0,5,0,application,unreviewed,,,,,,
-0x00038ee2,144,FUN_00038ee2,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,12,4,8,0,5,0,application,unreviewed,,,,,,
-0x00038f72,54,FUN_00038f72,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,4,0,,1,0,1,0,2,0,application,unreviewed,,,,,,
+0x00038e52,144,f33_scale_first_phase_codes,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,0,0,,12,4,8,0,5,0,application,semantically_identified,verified,firmware/camry-8965F3307000/CodeFlash.bin,cfg_dataflow,,2026-10-15,"Signed scale in r6, unsigned-halfword triplet destination in r7. Scale and modulation-dependent code bounds; real leaf p-code inlining preserves shared r6 for the second bank. No electrical-duty interpretation."
+0x00038ee2,144,f33_scale_second_phase_codes,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,0,0,,12,4,8,0,5,0,application,semantically_identified,verified,firmware/camry-8965F3307000/CodeFlash.bin,cfg_dataflow,,2026-10-15,Second-bank phase-code scaling and bound selection with the same two-argument interface. Exact instruction/dataflow review; native two-bank output execution is not claimed.
+0x00038f72,54,f33_publish_current_output_slot,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,2,4,0,,1,0,1,0,2,0,application,semantically_identified,verified,firmware/camry-8965F3307000/CodeFlash.bin,cfg_dataflow,,2026-10-15,"Publish bounded triplets to arbitration slot0 and enable it. First destination sp+6, second sp; shared r6 scale remains live across the first real helper. No replacement callee or binary patch."
 0x00038fa8,2,FUN_00038fa8,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x00038faa,2,FUN_00038faa,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x00038fac,26,FUN_00038fac,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,2,2,0,0,0,0,application,unreviewed,,,,,,
@@ -921,7 +921,7 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x0003c116,110,FUN_0003c116,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,44,1,1,,14,0,0,0,0,0,application,unreviewed,,,,,,
 0x0003c184,24,FUN_0003c184,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,44,0,1,,1,0,0,0,0,0,application,unreviewed,,,,,,
 0x0003c19c,150,FUN_0003c19c,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,8,1,0,0,0,0,application,unreviewed,,,,,,
-0x0003c232,94,FUN_0003c232,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,3,0,,4,4,0,0,0,0,application,unreviewed,,,,,,
+0x0003c232,94,f33_route_fault_action_mode_request,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,3,0,,4,4,0,0,0,0,application,semantically_identified,verified,firmware/camry-8965F3307000/CodeFlash.bin,cfg_dataflow,,2026-10-15,"Route R6 fault-action bits: hard action waits published zero output, soft action waits reduced channel flags, no action cancels event0. Waiting fault does not cancel. Exact predicates depend on71EC.bit15; OEM fault names remain unassigned."
 0x0003c290,128,FUN_0003c290,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,3,3,1,0,1,0,application,unreviewed,,,,,,
 0x0003c310,118,FUN_0003c310,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,4,0,,5,5,2,0,3,0,application,unreviewed,,,,,,
 0x0003c386,44,FUN_0003c386,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,4,0,,2,0,2,0,0,0,application,unreviewed,,,,,,
@@ -2630,7 +2630,7 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x0005797a,110,FUN_0005797a,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,3,1,2,0,0,0,application,unreviewed,,,,,,
 0x000579e8,12,FUN_000579e8,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,2,0,2,0,0,0,application,unreviewed,,,,,,
 0x000579f4,102,FUN_000579f4,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,22,0,22,0,0,0,application,unreviewed,,,,,,
-0x00057a5a,368,FUN_00057a5a,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,0,0,,28,20,14,0,1,0,application,unreviewed,,,,,,
+0x00057a5a,368,f33_select_phase_output_slots,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,2,0,0,,28,20,14,0,1,0,application,semantically_identified,verified,firmware/camry-8965F3307000/CodeFlash.bin,cfg_dataflow,,2026-10-15,"Highest enabled slot0..4 wins independently per bank; publish selected indices/inverses and triplets, with conditional symmetric code bounds. Slot indices are not physical-disable booleans."
 0x00057bca,126,FUN_00057bca,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,2,0,,6,0,0,0,1,0,application,unreviewed,,,,,,
 0x00057c48,54,FUN_00057c48,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,0,0,,4,0,2,0,0,0,application,unreviewed,,,,,,
 0x00057c7e,54,FUN_00057c7e,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,4,0,2,0,0,0,application,unreviewed,,,,,,
@@ -2671,7 +2671,7 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x00058a50,136,FUN_00058a50,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,10,0,,4,4,3,0,0,0,application,unreviewed,,,,,,
 0x00058ad8,66,FUN_00058ad8,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,2,0,,3,0,0,0,0,0,application,unreviewed,,,,,,
 0x00058b1a,68,FUN_00058b1a,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,8,0,,0,0,0,0,3,0,application,unreviewed,,,,,,
-0x00058b5e,294,FUN_00058b5e,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,17,0,,11,5,4,0,0,0,application,unreviewed,,,,,,
+0x00058b5e,294,f33_dispatch_foreground_mode_generation,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,17,0,,11,5,4,0,0,0,application,structurally_bounded,bounded,firmware/camry-8965F3307000/CodeFlash.bin,cfg_dataflow,,2026-10-15,"Mode-generation-aware dispatch separates live mode, published snapshot and task-local mode/inverse. Broken inverse repairs into steady dispatch. Central mode change does not replace mode arguments already passed to later workers. Physical timing unmeasured."
 0x00058c84,6,FUN_00058c84,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,1,1,0,0,0,0,application,unreviewed,,,,,,
 0x00058c8a,6,FUN_00058c8a,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,0,0,,1,1,0,0,0,0,application,unreviewed,,,,,,
 0x00058c90,6,FUN_00058c90,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,0,0,,1,1,0,0,0,0,application,unreviewed,,,,,,
@@ -2691,7 +2691,7 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x0005df5a,2,FUN_0005df5a,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x0005df5c,676,FUN_0005df5c,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,73,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x0005e200,2,FUN_0005e200,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
-0x0005e202,216,FUN_0005e202,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,37,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
+0x0005e202,216,f33_run_current_control_and_stage_output,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,37,0,,0,0,0,0,0,0,application,structurally_bounded,bounded,firmware/camry-8965F3307000/CodeFlash.bin;tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_control_pipeline_negative_sample_to_current_publication.json,instruction_semantics,passed,2026-10-15,Separate state>=0200 compute and state>=0101 staging gates under workmask bit1. Native scenario stops before38A58 after current-reference publication; complete regulator/output path is static reconstruction only. Snapshot publication is unconditional.
 0x0005e2da,180,FUN_0005e2da,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,19,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x0005e38e,60,FUN_0005e38e,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,5,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x0005e3ca,86,FUN_0005e3ca,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,10,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
@@ -2948,7 +2948,7 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x00065852,24,FUN_00065852,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x0006586a,244,FUN_0006586a,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,0,0,0,0,34,0,application,unreviewed,,,,,,
 0x0006595e,38,FUN_0006595e,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,2,0,1,0,1,0,application,unreviewed,,,,,,
-0x00065984,116,FUN_00065984,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,5,0,0,,0,0,0,0,16,0,application,unreviewed,,,,,,
+0x00065984,116,f33_apply_mpu_attribute_profile,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,5,0,0,,0,0,0,0,16,0,application,semantically_identified,verified,firmware/camry-8965F3307000/CodeFlash.bin,cfg_dataflow,,2026-10-15,"Apply MPAT0..15 attributes from31708+64*low8 selector, then synchronize. Not a scalar getter and not a region-bound update; no independent selector range check."
 0x000659f8,200,FUN_000659f8,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,5,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x00065ac0,138,FUN_00065ac0,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x00065b4a,138,FUN_00065b4a,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
@@ -2979,10 +2979,10 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x00066512,224,FUN_00066512,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,2,0,,0,0,0,6,12,0,application,unreviewed,,,,,,
 0x000665f2,202,FUN_000665f2,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,0,0,0,8,13,0,application,unreviewed,,,,,,
 0x000666bc,202,FUN_000666bc,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,48,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
-0x00066786,24,FUN_00066786,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,4,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
+0x00066786,24,f33_fast_control_cycle,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,4,0,,0,0,0,0,0,0,application,structurally_bounded,bounded,firmware/camry-8965F3307000/CodeFlash.bin,cfg_dataflow,,2026-10-15,"Fast cycle commits PREVIOUS compares before sample acquisition and dispatch of NEXT control/staging work. Exact software order; hardware latch timing, sample age and actuator response remain open."
 0x0006679e,24,FUN_0006679e,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,4,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x000667b6,48,FUN_000667b6,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,10,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
-0x000667e6,32,FUN_000667e6,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,6,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
+0x000667e6,32,f33_foreground_subsystem_cycle,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,6,0,,0,0,0,0,0,0,application,semantically_identified,verified,firmware/camry-8965F3307000/CodeFlash.bin,cfg_dataflow,,2026-10-15,"Foreground order is maintenance, communications/RX/SecOC, DCM, maintenance, application mode dispatch, timer reload. Enclosing application NvM service follows this aggregate. No scheduling jitter or guaranteed completion claim."
 0x00066806,12,FUN_00066806,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,0,1,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x00066812,12,FUN_00066812,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,0,1,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x0006681e,6,FUN_0006681e,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,1,0,1,0,0,0,application,unreviewed,,,,,,
@@ -5578,7 +5578,7 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x00098870,12,FUN_00098870,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x0009887c,28,FUN_0009887c,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,5,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x00098898,42,FUN_00098898,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,2,0,,1,0,1,0,1,0,application,unreviewed,,,,,,
-0x000988c2,34,FUN_000988c2,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,3,0,,1,1,1,0,0,0,application,unreviewed,,,,,,
+0x000988c2,34,f33_dcm_foreground_cycle,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,3,0,,1,1,1,0,0,0,application,semantically_identified,verified,firmware/camry-8965F3307000/CodeFlash.bin,cfg_dataflow,,2026-10-15,DCM main/timers/event queue gated by5E50==A5; not SecOC. Timer equality waits another invocation and queue drain snapshots entry count. Static exact instructions/dataflow.
 0x000988e4,4,FUN_000988e4,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x000988e8,20,FUN_000988e8,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,0,1,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x00098900,2,FUN_00098900,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
@@ -5681,20 +5681,20 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x000b149c,22,FUN_000b149c,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,1,0,0,0,0,0,application,unreviewed,,,,,,
 0x000b14b2,32,FUN_000b14b2,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,2,0,0,0,0,0,application,unreviewed,,,,,,
 0x000b14d2,116,FUN_000b14d2,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,3,3,1,,2,0,0,0,1,0,application,unreviewed,,,,,,
-0x000b1546,102,FUN_000b1546,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,3,0,,2,0,0,0,0,0,application,unreviewed,,,,,,
+0x000b1546,102,f33_reconcile_mode_requests,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,2,3,0,,2,0,0,0,0,0,application,semantically_identified,verified,firmware/camry-8965F3307000/CodeFlash.bin;tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_mode_lifecycle_reconcile_pending_acknowledged.json,instruction_semantics,passed,2026-10-15,"Reconcile50 bitmap requests and cancellations with pending A55A/acknowledged5AA5 slots. Native composed pass covers request precedence, acknowledged clearing, pending cancellation retention, PMR restoration and slot50 canary."
 0x000b15ac,116,FUN_000b15ac,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,21,3,1,,2,0,0,0,1,0,application,unreviewed,,,,,,
 0x000b1620,26,FUN_000b1620,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,7,1,0,,3,0,0,0,0,0,application,unreviewed,,,,,,
 0x000b163a,52,FUN_000b163a,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,6,1,4,0,0,0,application,unreviewed,,,,,,
 0x000b166e,16,FUN_000b166e,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,1,0,1,0,0,0,application,unreviewed,,,,,,
 0x000b167e,62,FUN_000b167e,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,2,0,,3,0,0,0,0,0,application,unreviewed,,,,,,
 0x000b16bc,54,FUN_000b16bc,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,6,0,0,,6,1,4,0,0,0,application,unreviewed,,,,,,
-0x000b16f4,68,FUN_000b16f4,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,3,1,0,,1,1,0,0,2,0,application,unreviewed,,,,,,
+0x000b16f4,68,f33_transition_application_mode,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,3,1,0,,1,1,0,0,2,0,application,semantically_identified,verified,firmware/camry-8965F3307000/CodeFlash.bin,cfg_dataflow,,2026-10-15,"Low16 mode and live mode must be below0A00; invoke old-family exit, then new-family entry, then publish live mode redundantly. Callbacks see old live mode. Typed ten-row entry/exit table atAEB00."
 0x000b1738,54,FUN_000b1738,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,6,0,0,,3,2,0,0,0,0,application,unreviewed,,,,,,
 0x000b176e,128,FUN_000b176e,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,3,0,,5,5,1,0,2,0,application,unreviewed,,,,,,
 0x000b17ee,26,FUN_000b17ee,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,4,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
-0x000b1808,1014,FUN_000b1808,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,21,0,,3,3,1,0,8,0,application,unreviewed,,,,,,
-0x000b1bfe,28,FUN_000b1bfe,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,1,0,0,0,1,0,application,unreviewed,,,,,,
-0x000b1c1a,24,FUN_000b1c1a,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,1,0,0,0,0,0,application,unreviewed,,,,,,
+0x000b1808,1014,f33_advance_application_mode,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,2,21,0,,3,3,1,0,8,0,application,structurally_bounded,bounded,firmware/camry-8965F3307000/CodeFlash.bin,cfg_dataflow,,2026-10-15,"Prioritized mode-family transitions consume materialized requests with selected-request acknowledgement. Fault/health, service and programming requests have distinct priorities and outputs; no generic diagnostic steering inhibit."
+0x000b1bfe,28,f33_materialize_mode_request,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,0,0,,1,0,0,0,1,0,application,semantically_identified,verified,firmware/camry-8965F3307000/CodeFlash.bin;tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_mode_lifecycle_reconcile_pending_acknowledged.json,instruction_semantics,passed,2026-10-15,"Materialize low-byte request slot asA55A unless already5AA5, returning full zero-extended status in r10. Native reconciliation consumes the real result; correcting false void prototype restores caller dataflow."
+0x000b1c1a,24,f33_clear_acknowledged_mode_request,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,0,0,,1,0,0,0,0,0,application,semantically_identified,verified,firmware/camry-8965F3307000/CodeFlash.bin;tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_mode_lifecycle_reconcile_pending_acknowledged.json,instruction_semantics,passed,2026-10-15,Clear only acknowledged5AA5 slots. Cancellation does not revoke an already materialized pendingA55A request. Native composed reconciliation distinguishes both statuses.
 0x000b1c34,12,FUN_000b1c34,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,0,0,,1,0,0,0,0,0,application,unreviewed,,,,,,
 0x000b1c40,20,FUN_000b1c40,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,2,2,0,0,0,0,application,unreviewed,,,,,,
 0x000b1c54,16,FUN_000b1c54,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
@@ -6943,11 +6943,11 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x000d01b4,100,FUN_000d01b4,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,25,0,25,0,0,0,application,unreviewed,,,,,,
 0x000d0218,108,FUN_000d0218,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,11,10,1,0,1,0,application,unreviewed,,,,,,
 0x000d0284,86,FUN_000d0284,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,4,2,2,0,5,0,application,unreviewed,,,,,,
-0x000d02da,168,FUN_000d02da,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,8,7,5,0,1,0,application,unreviewed,,,,,,
+0x000d02da,168,f33_filter_command_slew,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,0,0,,8,7,5,0,1,0,application,semantically_identified,verified,firmware/camry-8965F3307000/CodeFlash.bin;tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_control_pipeline_slew_narrow_gate_publication.json,instruction_semantics,passed,2026-10-15,Retained command slew/filter with conditional bypass and signed saturation. Composed native tail exercises filtered1024 publication; remaining branches instruction/dataflow checked. No wall-time slew-rate claim.
 0x000d0382,28,FUN_000d0382,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,3,2,1,0,0,0,application,unreviewed,,,,,,
-0x000d039e,142,FUN_000d039e,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,2,0,,12,5,7,0,3,0,application,unreviewed,,,,,,
-0x000d042c,80,FUN_000d042c,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,9,5,4,0,0,0,application,unreviewed,,,,,,
-0x000d047c,48,FUN_000d047c,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,4,3,1,0,1,0,application,unreviewed,,,,,,
+0x000d039e,142,f33_compose_command_sources,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,2,0,,12,5,7,0,3,0,application,semantically_identified,verified,firmware/camry-8965F3307000/CodeFlash.bin;tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_control_pipeline_slew_narrow_gate_publication.json,instruction_semantics,passed,2026-10-15,"Select current or delayed-history base, apply separately checked gains, optionally add local C81A, then clamp. Native composition covers current-base path; alternate branch remains static evidence."
+0x000d042c,80,f33_scale_clamp_gate_command,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,0,0,,9,5,4,0,0,0,application,semantically_identified,verified,firmware/camry-8965F3307000/CodeFlash.bin;tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_control_pipeline_slew_narrow_gate_publication.json,instruction_semantics,passed,2026-10-15,"Scale by AC5A/1024, narrow to signed16 BEFORE amplitude clamp, then apply AC29/AC2A gate. Native synthetic high-gain case distinguishes pre-clamp -1 from gated0; CC62 is not reloaded and this is not the slew limiter."
+0x000d047c,48,f33_select_final_command,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,0,0,,4,3,1,0,1,0,application,semantically_identified,verified,firmware/camry-8965F3307000/CodeFlash.bin;tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_control_pipeline_slew_narrow_gate_publication.json,instruction_semantics,passed,2026-10-15,Select ordinary CC66 or symmetrically bounded internal CC94 when CC98 is set. Native composition covers ordinary selection; override branch instruction/dataflow checked.
 0x000d04ac,68,FUN_000d04ac,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,7,6,4,0,0,0,application,unreviewed,,,,,,
 0x000d04f0,56,FUN_000d04f0,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,13,0,13,0,0,0,application,unreviewed,,,,,,
 0x000d0528,140,FUN_000d0528,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,7,5,2,0,5,0,application,unreviewed,,,,,,
@@ -6969,7 +6969,7 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x000d097a,90,FUN_000d097a,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,7,0,0,,0,0,0,0,1,0,application,unreviewed,,,,,,
 0x000d0a06,56,FUN_000d0a06,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x000d0a3e,112,FUN_000d0a3e,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,26,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
-0x000d0aae,72,FUN_000d0aae,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,19,8,11,0,0,0,application,unreviewed,,,,,,
+0x000d0aae,72,f33_publish_command_snapshot,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,0,0,,19,8,11,0,0,0,application,semantically_identified,verified,firmware/camry-8965F3307000/CodeFlash.bin;tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_control_pipeline_slew_narrow_gate_publication.json,instruction_semantics,passed,2026-10-15,"Sequentially publish selected command, pre-clamp/gate mirror, amplitude limit and independent diagnostic snapshots. Native case preserves selected0 versus pre-clamp -1. No atomic cross-reader snapshot claim."
 0x000d0af6,228,FUN_000d0af6,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,48,0,,1,1,0,0,0,0,application,unreviewed,,,,,,
 0x000d0bda,60,FUN_000d0bda,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,10,0,,2,0,2,0,0,0,application,unreviewed,,,,,,
 0x000d0c16,46,FUN_000d0c16,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,2,0,,6,3,3,0,1,0,application,unreviewed,,,,,,

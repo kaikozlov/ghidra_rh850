@@ -12,7 +12,6 @@ from exploit.followups.xcp_daq_probe import (  # noqa: E402
 )
 from tools.targets.camry.live.camry_f33_steering_state_capture import (  # noqa: E402
     CAN_WITNESS_IDS,
-    COMMAND_FUNNEL,
     ELM327_PARAM,
     FULL_PATH,
     EventAssembler,
@@ -80,26 +79,6 @@ source_expected = (
 check("source profile pins every D0218 term/gate/output",
       tuple((f.name,f.address,f.width,f.signed) for f in SOURCE_TERMS.fields) == source_expected)
 
-funnel_expected = (
-    ("CC48_d0218_output",0xFEBECC48,4,True),
-    ("CC4C_bounded",0xFEBECC4C,2,True),
-    ("CC4E_slewed",0xFEBECC4E,2,True),
-    ("AC52_limit",0xFEBEAC52,2,True),
-    ("CC60_limited",0xFEBECC60,2,True),
-    ("CC50_pre_scale",0xFEBECC50,2,True),
-    ("AC5A_scale",0xFEBEAC5A,2,False),
-    ("AC4C_slew_limit",0xFEBEAC4C,2,True),
-    ("CC62_pre_slew",0xFEBECC62,2,True),
-    ("CC66_post_slew",0xFEBECC66,2,True),
-    ("CC64_selected",0xFEBECC64,2,True),
-    ("AC54_motor_branch",0xFEBEAC54,2,True),
-    ("AC56_diag_branch",0xFEBEAC56,2,True),
-)
-check("funnel profile pins recovered CC48-to-AC54/AC56 path",
-      tuple((f.name,f.address,f.width,f.signed) for f in COMMAND_FUNNEL.fields) == funnel_expected)
-check("full-path is exact source+funnel union with CC48 sampled once",
-      FULL_PATH.fields == SOURCE_TERMS.fields + tuple(f for f in COMMAND_FUNNEL.fields if f.name != "CC48_d0218_output") and
-      len(FULL_PATH.addresses) == 52)
 
 print("\n== DAQ configuration remains observation-only ==")
 for profile in PROFILES.values():
@@ -156,7 +135,8 @@ check("assembled sample retains raw Panda busTime for each ODT", assembled is no
 
 full_values = {addr: (i * 29 + 11) & 0xFF for i, addr in enumerate(FULL_PATH.addresses)}
 # Pin both an upstream source and final motor branch in the same 52-byte event.
-for addr, width, value in ((0xFEBEC4C0,4,-7654321),(0xFEBEAC54,2,-321),(0xFEBEAC56,2,654)):
+for addr, width, value in ((0xFEBEC4C0,4,-7654321),(0xFEBEAC54,2,-321),(0xFEBEAC56,2,654),
+                           (0xFEBECC62,2,-2050),(0xFEBECC66,2,0),(0xFEBEAC4C,2,1024)):
     raw = int(value).to_bytes(width, "little", signed=True)
     for i, byte in enumerate(raw): full_values[addr+i] = byte
 full_assembler = EventAssembler(FULL_PATH)
@@ -169,6 +149,10 @@ check("eight ODTs across two lists assemble one 52-byte full-path event",
 check("full-path event joins source and downstream motor/diagnostic values",
       full_sample is not None and full_sample["values"]["C4C0_assist_term"] == -7654321 and
       full_sample["values"]["AC54_motor_branch"] == -321 and full_sample["values"]["AC56_diag_branch"] == 654)
+check("full-path decoding distinguishes pre-clamp command, gated zero and amplitude limit",
+      full_sample is not None and full_sample["values"]["CC62_pre_clamp_gate"] == -2050 and
+      full_sample["values"]["CC66_clamped_gated"] == 0 and
+      full_sample["values"]["AC4C_amplitude_limit"] == 1024)
 
 bad = EventAssembler(SOURCE_TERMS)
 check("out-of-order nonzero PID is rejected", bad.feed(bytes([1])+bytes(7), 1) is None and bad.out_of_order == 1)

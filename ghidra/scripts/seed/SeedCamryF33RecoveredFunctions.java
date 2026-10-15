@@ -2040,6 +2040,184 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
             + "the logical scan, selects callback766F4 and leaves application ownership idle. "
             + "Active flash sequencing remains a separate dependency.");
   }
+  private void annotateControlPipeline() throws Exception {
+    DataType v = VoidDataType.dataType;
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u16 = UnsignedShortDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    DataType s16 = ShortDataType.dataType;
+    DataType s32 = IntegerDataType.dataType;
+    DataType halfwords = new PointerDataType(u16, 4);
+    semanticFunction(0xD02DAL, "f33_filter_command_slew", v)
+        .setComment("ROM B1338==1 enables retained CC30/34/38/3C recurrence. Nonzero CC9C selects filtered output, "
+            + "otherwise CC4C bypasses to CC4E. Difference shift uses low5 CC9E with minimum nonzero step +/-1; "
+            + "selected filtered output saturates to +/-32767. Always retain published CC4E in CC3C. Invocation "
+            + "recurrence, not a wall-time rate.");
+    semanticFunction(0xD039EL, "f33_compose_command_sources", v)
+        .setComment("Select delayed AC10 history CC5A only when AC28==1, otherwise current CC60. Apply "
+            + "complement-checked base and local-addend gains from CB9C8/CB9AE, narrowing each gained term to "
+            + "signed16. Add local C81A term only when C797==0; clamp the sum to ROM B1334 and publish CC50. "
+            + "Therefore CC62 is not universally before or after the earlier slew path.");
+    semanticFunction(0xD042CL, "f33_scale_clamp_gate_command", v)
+        .setComment("Signed16 CC50 times unsigned16 AC5A, signed division by1024, then signed16 narrowing BEFORE "
+            + "amplitude clamp. Publish CC62 and reuse the register value, not a RAM reload. Clamp against signed "
+            + "AC4C into CC54; publish CC66 only when AC29!=0 and AC2A==0, else zero. Copy AC4C to CC68. No "
+            + "history or slew recurrence here.");
+    semanticFunction(0xD047CL, "f33_select_final_command", v)
+        .setComment("Normally select CC66. Nonzero CC98 selects signed32 CC94 clamped to +/-22170 instead. Publish "
+            + "CC64. Internal override selection can differ from both the diagnostic CC62 and normal gated CC66 "
+            + "values.");
+    semanticFunction(0xD0AAEL, "f33_publish_command_snapshot", v)
+        .setComment("Sequentially publish selected CC64 to AC54, normal gated CC66 to AC76, and pre-final-clamp/gate "
+            + "CC62 to AC56. Also copy CC60/CC68 and independent C128/C172 snapshots; publish override indication "
+            + "and AC3F=5A. Sequential RAM stores are not an all-reader atomic transaction.");
+    semanticFunction(0x35C4CL, "f33_sample_motor_command", v)
+        .setComment("Normally publish diagnostic6AF6=EE40A, pre-override6AF8=EE410 and motor6AF4=-EE40C. In mode "
+            + "family0500, E780==5A selects clamped EB10 first; otherwise EE406==5A selects clamped EE416. Exact "
+            + "ROM30F1C/31914 are zero, so their forced branch is inactive. Command publication and current "
+            + "conversion use separate interrupt contexts.");
+    semanticFunction(0x38396L, "f33_interpolate_current_curve", s32,
+        new ParameterImpl("first_component", s16, currentProgram))
+        .setComment("Use signed first component to select/blend five ROM curves over -12800,-10240,-7237,-3840,0. Each "
+            + "curve indexes saturating_abs(6E0A) with128-count spacing and unsigned ordinates; inter-curve "
+            + "weight is scaled1024. Publish bank/weight/ordinate state and return magnitude in R10. Caller384D8 "
+            + "applies command sign.");
+    semanticFunction(0x38162L, "f33_calculate_sixfold_current_correction", v)
+        .setComment("Use current-pair squared magnitude and a separate abs(5F36) map, quadrant-aware angle70BE0 and "
+            + "trig70E32. Sixfold wrapped phase produces corrections clamped to +/-1280;71EC low2bits suppress "
+            + "them. Publish6DA6/8=0 and6DAA/C corrections. This is not the complete downstream motor transform.");
+    semanticFunction(0x36144L, "f33_transform_measured_phase_currents", v)
+        .setComment("Transform two conditioned phase-current banks using measured-frame coefficient pairs7D4E/50 "
+            + "and7D5A/5C. Keep32-bit results6B3C/40/44/48 plus saturated halfword mirrors6B34..3A. ADC/DMA "
+            + "freshness and physical phase identity are separate dependencies.");
+    semanticFunction(0x37E48L, "f33_compose_current_feedback", v)
+        .setComment("Exclude bank0 for71EC.bit0 and bank1 forbit1, then form common/difference feedback. Preserve "
+            + "unsaturated32-bit second-axis sum6D78 separately from saturated6D72; the common regulator "
+            + "consumes6D78. Acquisition-status8B28&40004 takes the reset branch.");
+    semanticFunction(0x5E202L, "f33_run_current_control_and_stage_output", v,
+        new ParameterImpl("workmask", u32, currentProgram),
+        new ParameterImpl("state", u16, currentProgram))
+        .setComment("With workmask bit1, state>=0200 runs current conversion, feedback regulation, limiting, transforms "
+            + "and slot0 publication. Independently state>=0101 runs arbitration/history and compare staging, "
+            + "so0101..01FF can stage existing values without recomputing control.57FD2 always publishes "
+            + "snapshots. Native composed proof currently ends at38A58, not physical output.");
+    semanticFunction(0x38E52L, "f33_scale_first_phase_codes", v,
+        new ParameterImpl("scale", s32, currentProgram),
+        new ParameterImpl("triplet", halfwords, currentProgram))
+        .setComment("Scale first regulated phase triplet by shared scale/1024 with modulation-dependent output-code "
+            + "bounds; write three halfwords through R7. R6 remains the scale input used by subsequent38EE2.");
+    semanticFunction(0x38EE2L, "f33_scale_second_phase_codes", v,
+        new ParameterImpl("scale", s32, currentProgram),
+        new ParameterImpl("triplet", halfwords, currentProgram))
+        .setComment("Second-bank counterpart of38E52. Real ABI consumes scale in R6 and destination in R7; caller38F72 "
+            + "reuses retained R6 and supplies SP for this triplet, SP+6 for the first.");
+    semanticFunction(0x38F72L, "f33_publish_current_output_slot", v)
+        .setComment("Run both real phase-code scaling helpers with ROM31E38, publish the paired triplets "
+            + "through57BCA(2,0,...) and enable slot0 through57C48(0). Arbitration, staging and later hardware "
+            + "commit remain distinct operations.");
+    semanticFunction(0x57A5AL, "f33_select_phase_output_slots", v)
+        .setComment("Scan slots0..4 and choose the highest enabled slot for each bank. Publish selected "
+            + "index/complement and triplets8BEE..8BF8. Optional code clamp uses [8000-L,L], L bounded4000..8000. "
+            + "Selected indices are not boolean bridge-disable flags; slot4 can outrank mode-owned slot3.");
+    semanticFunction(0x66786L, "f33_fast_control_cycle", v)
+        .setComment("Commit PREVIOUS compare stage through61E72, then6289C, acquire/publish snapshots66824, and "
+            + "dispatch next application work588E8. New controller output is staged for a later cycle. No ADC "
+            + "freshness, timer-latch, electrical or mechanical proof.");
+    // Inline real leaf p-code so the shared R6 scale survives the first call.
+    getFunctionAt(toAddr(0x38E52L)).setInline(true);
+    getFunctionAt(toAddr(0x38EE2L)).setInline(true);
+    semanticData(0xB1330L, s32, "f33_command_sum_margin",
+        "Scalar5120 added to B132C before D0284 input limiting, not a CodeFlash pointer.");
+    semanticData(0x31CF0L, s16, "f33_first_current_curve_upper_bound", "Signed scalar0.");
+    semanticData(0x31CF2L, s16, "f33_first_current_curve_lower_bound", "Signed scalar-25600, not a pointer.");
+    semanticData(0x31B86L, s16, "f33_current_correction_coefficient_a", "Signed scalar1019.");
+    semanticData(0x31B8CL, s16, "f33_current_correction_coefficient_b", "Signed scalar-1019.");
+    semanticData(0x31B96L, s16, "f33_current_correction_phase_slope", "Signed scalar-853.");
+    getFunctionAt(toAddr(0x37228L)).setComment("Common first-axis regulator: error=sat(6D80-6D70), accumulator6C8C. Directional prior-saturation flags gate integration but not proportional error difference. Signed accumulator saturation +/-7FFFFFFF. On first channel-invalid transition, combine prior differential accumulator before division by2. Runs before differential370E6.");
+    getFunctionAt(toAddr(0x370E6L)).setComment("Differential first-axis regulator: error=sat(6D82-6D74), accumulator6C78. Prior output-direction flags gate integration; both nonzero selected slot indices or8B28&40004 reset state. Additional accumulator clamp uses ROM31A3C. Selected slot indices are not physical-disable booleans.");
+    getFunctionAt(toAddr(0x3777EL)).setComment("Common second-axis regulator aggregate375C2/375E6/3762E: error uses unsaturated32-bit feedback6D78, not halfword6D72. Persistent accumulator6CCC, directional anti-windup and first channel-invalid transition adjustment; additional clamp31A68.");
+    getFunctionAt(toAddr(0x37538L)).setComment("Differential second-axis regulator aggregate373E6/37418/37460: error=sat(6D7E-6D76), accumulator6CA0, directional anti-windup and additional clamp31A58. Reset follows selected arbitration indices and acquisition status, not a generic diagnostic inhibit.");
+    getFunctionAt(toAddr(0x38A58L)).setComment("Reference-derived first-bank phase transform used by compensation36750, not the final regulated output transform. Combine main/correction current pairs, halve when71EC low2bits clear, use output-frame coefficients7D54/56 and saturate triplet6E58/5A/5C.");
+    getFunctionAt(toAddr(0x38B6AL)).setComment("Second-bank reference-derived phase compensation transform, paired with38A58. Its triplet is distinct from the regulated output of38D6C.");
+    getFunctionAt(toAddr(0x38C7CL)).setComment("Transform limited first-bank regulated axis commands to phase triplet6E68/6A/6C using output-frame coefficients; signed saturation +/-32767. Compensation and modulation offset/clipping follow.");
+    getFunctionAt(toAddr(0x38D6CL)).setComment("Second-bank regulated axis-to-phase transform, publishing6E70/72/74. Not the same interface as measured-frame feedback coefficients or reference compensation.");
+  }
+  private void annotateApplicationLifecycle() throws Exception {
+    DataType v = VoidDataType.dataType;
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u16 = UnsignedShortDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    DataType s16 = ShortDataType.dataType;
+    DataType s32 = IntegerDataType.dataType;
+    DataType halfwords = new PointerDataType(u16, 4);
+    semanticFunction(0x667E6L, "f33_foreground_subsystem_cycle", v)
+        .setComment("Exact order69CA2,7A254,988C2,69E7C,58B5E,66512.7A254 contains RX drain then SecOC6A410;988C2 is "
+            + "DCM, not SecOC. Application work follows DCM and precedes the enclosing foreground NvM66CF6 "
+            + "service.");
+    semanticFunction(0x988C2L, "f33_dcm_foreground_cycle", v)
+        .setComment("Only when5E50==A5 run DCM worker91FBE, timers98AE4 and event queue98946 in that order. SecOC "
+            + "processing belongs upstream inside7A254. Timer expiry uses remaining<quantum, and the queue worker "
+            + "snapshots its entry event count.");
+    semanticFunction(0x58B5EL, "f33_dispatch_foreground_mode_generation", v)
+        .setComment("Use published modeE8CC and local8C06/inverse8C12. Valid changed mode takes transition workers; "
+            + "broken inverse repairs from snapshot and takes steady workers, not automatic failsafe. "
+            + "Mask=(~n&(n+2)&3E)|1, n+=2 modulo256. Central mode work can change live mode while remaining "
+            + "dispatchers still receive the previously captured mode.");
+    semanticFunction(0x65984L, "f33_apply_mpu_attribute_profile", v,
+        new ParameterImpl("selector", u8, currentProgram))
+        .setComment("Load MPAT0..15 from31708+64*low8(selector), then SYNCI/SYNCP. No index validation and no "
+            + "region-bound writes. Assembly system-register effects are authoritative; decompiler formerly "
+            + "exposed only the incidental last load in R10 as a false getter result.");
+    semanticFunction(0xB1546L, "f33_reconcile_mode_requests", v)
+        .setComment("Reconcile request and cancellation bitmaps for IDs0..49 into status slotsB0A8. Materialize "
+            + "requested/not-cancelled slots throughB1BFE; acknowledged5AA5 causes request cancellation but "
+            + "clears only on a later reconciliation. Cancelled pendingA55A is NOT revoked. Native mixed-state "
+            + "pass covers both bitmap words and the domain boundary.");
+    semanticFunction(0xB1BFEL, "f33_materialize_mode_request", u32,
+        new ParameterImpl("request_id", u32, currentProgram))
+        .setComment("Index by low8(request_id), without a local bounds check. Preserve acknowledged5AA5, otherwise "
+            + "publish pendingA55A. Return the zero-extended status in full R10; this return is consumed byB1546 "
+            + "and is not void.");
+    semanticFunction(0xB1C1AL, "f33_clear_acknowledged_mode_request", v,
+        new ParameterImpl("request_id", u32, currentProgram))
+        .setComment("Index low8(request_id), without a local bounds check. Clear only5AA5; preserve pendingA55A and "
+            + "every other value. Cancellation after materialization therefore does not revoke an unaccepted "
+            + "request.");
+    semanticFunction(0xB1808L, "f33_advance_application_mode", v)
+        .setComment("Family-specific prioritized mode FSM. Running families prioritize accepted event0/1 over "
+            + "diagnostic event9, with family-local service/transition requests below them. Acknowledgement is "
+            + "selected-ID/complement qualified; losing pending requests remain. Submode workers and OEM state "
+            + "meanings remain separate from this recovered dispatch contract.");
+    semanticFunction(0xB16F4L, "f33_transition_application_mode", v,
+        new ParameterImpl("new_mode", u16, currentProgram))
+        .setComment("Use AEB00 entry/exit pairs by mode high byte. Execute old-family exit, then new-family entry, then "
+            + "publish redundant live modeB11A/B0A0/B0A4. Callbacks therefore see the old live mode. Mode "
+            + "snapshotE8CC and per-task cached modes update separately; request-slot effects are not "
+            + "instantaneous hardware state.");
+    semanticFunction(0x3C232L, "f33_route_fault_action_mode_request", v,
+        new ParameterImpl("actions", u32, currentProgram))
+        .setComment("Hard action bit0 or gatedbit1 latchesB190 and requests event0 only when publishedEB9A==0. "
+            + "Otherwise soft bit3 or gatedbit4 waits for8AC8/8ACB==0.71EC.bit15 qualifies bits1/4. A "
+            + "still-present fault waiting for zero does not cancel; no action cancels event0. R6 action-mask "
+            + "input; no DTC identity or universal shutdown inference.");
+    CategoryPath category = new CategoryPath("/CamryF33");
+    FunctionDefinitionDataType callback = new FunctionDefinitionDataType(category, "F33ModeFamilyHook");
+    callback.setReturnType(v);
+    StructureDataType hooks = new StructureDataType(category, "F33ModeFamilyHooks", 0);
+    hooks.setPackingEnabled(true);
+    hooks.add(new PointerDataType(callback, 4), "entry", "Called before publishing new live mode.");
+    hooks.add(new PointerDataType(callback, 4), "exit", "Old-family exit precedes new-family entry.");
+    semanticData(0xAEB00L, new ArrayDataType(resolve(hooks), 10, 8), "f33_mode_family_hooks",
+        "Index is mode high byte. Entry/exit pairs for0000..0900; legitimate callers select0100..0900.");
+    getFunctionAt(toAddr(0x66062L)).setComment("Foreground polls and clears EIC136.bit12; a flag is not a counted backlog. Optional31910==5A hooks bracket bookkeeping, alternate-context physical NvM pump,667E6 subsystem cycle and alternate-context66CF6 application NvM cycle. Increment39DB after completion. Relative order is exact; execution time and missed-tick behavior are not a periodic-job guarantee.");
+    getFunctionAt(toAddr(0x71378L)).setComment("NONORDINARY PAIRED ABI: PUSHSP r1..ep saves120 bytes on original stack; r2 retains saved-frame SP, SP becomes FEBE2800, r20 preserves continuation, profile selectorROM31684=1 goes to65984. No PSW save or independent interrupt disable. Pair with71398; do not model as an ordinary leaf wrapper.");
+    getFunctionAt(toAddr(0x71398L)).setComment("PAIRED ABI exit: apply profileROM31683=0, restore SP from r2, restore r1..ep and return through preserved continuation. LP is outside the saved register range. Exact assembly, not ordinary C stack effects, defines this contract.");
+    getFunctionAt(toAddr(0x65AC0L)).setComment("Assembly MPAT0..15 save with persistent SP delta-64. Used in timer interrupt frames; not a normal stack-neutral leaf.");
+    getFunctionAt(toAddr(0x65B4AL)).setComment("Assembly MPAT0..15 restore with persistent SP delta+64, paired with65AC0. Restores the interrupted MPU profile, including foreground profile1.");
+    getFunctionAt(toAddr(0xB4FFCL)).setComment("Vote qualified health stateB20E/B20C/B20D; unrecoverable vote starts at0. States0/33 may select11,0 may select33,33 may clear,11 may select22 and latchB20F. Route the new state throughB4F8A BEFORE publishing it. Physical analog-channel identities and OEM state names remain bounded.");
+    getFunctionAt(toAddr(0xB4F8AL)).setComment("Health-state event routing:11 requests event1 with zero-output gates in families0400/0500;22 requests1 only in those families and2 in0700/0800. Exact0522 also checksAFCE!=11. No event1 cancellation here; do not infer universal immediate shutdown.");
+    getFunctionAt(toAddr(0x56AD2L)).setComment("OR-reduce five owner request slots, pass the combined mask to569DA, then read channel state through56A26. Instructions56AD6..56AFE retain OR and argument flow that current C recovery omits. Hardware-observed channel state remains a separate dependency.");
+  }
   private void annotateDataFlashReads() throws Exception {
     DataType u8 = UnsignedCharDataType.dataType;
     DataType u16 = UnsignedShortDataType.dataType;
@@ -2233,6 +2411,8 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     annotateInitializedNvmService();
     annotateApplicationRecordApis();
     annotateNvmDirectOperations();
+    annotateControlPipeline();
+    annotateApplicationLifecycle();
     annotateDataFlashReads();
     annotateFaciSubmission();
     annotatePwmCompareStaging();

@@ -1,38 +1,38 @@
 {
-  "bounded_semantics_count": 241,
+  "bounded_semantics_count": 267,
   "calling_convention_counts": {
     "__stdcall": 7187
   },
   "csv": "semantic_coverage_ledger.csv",
-  "deterministically_verified_count": 211,
+  "deterministically_verified_count": 221,
   "discovered_function_count": 7187,
   "discovery_source_counts": {
-    "auto-analysis": 6748,
-    "manual/other": 439
+    "auto-analysis": 6722,
+    "manual/other": 465
   },
   "evidence_grade_counts": {
-    "bounded": 27,
-    "verified": 214
+    "bounded": 32,
+    "verified": 235
   },
   "execution_status_counts": {
-    "passed": 238
+    "passed": 249
   },
   "function_count": 7187,
   "name_source_counts": {
-    "DEFAULT": 6748,
-    "USER_DEFINED": 439
+    "DEFAULT": 6722,
+    "USER_DEFINED": 465
   },
   "oracle_class_counts": {
-    "cfg_dataflow": 3,
+    "cfg_dataflow": 18,
     "independent_external_artifact": 1,
-    "instruction_semantics": 237
+    "instruction_semantics": 248
   },
   "review_state_counts": {
-    "semantically_identified": 214,
-    "structurally_bounded": 27,
-    "unreviewed": 6946
+    "semantically_identified": 235,
+    "structurally_bounded": 32,
+    "unreviewed": 6920
   },
-  "reviewed_function_count": 241,
+  "reviewed_function_count": 267,
   "root_kind_counts": {},
   "schema_version": 2,
   "subsystem_counts": {

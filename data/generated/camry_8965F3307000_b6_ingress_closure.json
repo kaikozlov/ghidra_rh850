@@ -105,7 +105,7 @@
     "0x000667E6": {
       "body_sha256": "96d89859e02738c11ddd556d055628f6e75a1e0b88c8f129e2dba902a34a5307",
       "body_size": 32,
-      "decompiled_c_sha256": "4c93b2b1eac009afbe06ba81cfb0e025fc2ee98c2afb2be84867c13692ecf16c",
+      "decompiled_c_sha256": "a2cefcb24b107df29946a5fa2756a9381077090d2b8a0b408788bf9d7a0b2a27",
       "role": "foreground communications/application aggregate"
     },
     "0x0006A32C": {
@@ -129,7 +129,7 @@
     "0x00071508": {
       "body_sha256": "0a68ffc255d72f4c3429e63355652dbedd2857d6961910d52be1d635a85a0691",
       "body_size": 170,
-      "decompiled_c_sha256": "bda80dae887ffec49e5d1cf59b7509dd8236df650416b040329b837b78e1de17",
+      "decompiled_c_sha256": "d5195335ded74e1d166f891c3a5d3d2cd40167cff924b80b68f4f329e44280ff",
       "role": "controller-1 receive interrupt wrapper"
     },
     "0x00079EBA": {
@@ -538,7 +538,7 @@
   ],
   "target": {
     "canonical_function_count": 7187,
-    "canonical_inventory_sha256": "03d824f4dfa42b7dc348c3af5f25536ae27aac7d3793354251c7021af087d69c",
+    "canonical_inventory_sha256": "8460a28bb87e8881a9b4c9b88bde01e663935ab224b78195cbf72c8d74d8c93c",
     "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
     "software_id": "8965F3307000"
   }

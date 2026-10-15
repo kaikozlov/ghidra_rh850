@@ -13,7 +13,7 @@
     "0x035C4C": {
       "body_sha256": "205df4739724fda0b8e0e8c09e44df61b42568bc5c92e9673462d3801db70b2a",
       "body_size": 156,
-      "decompiled_c_sha256": "9504bb6536cb2cbca2f9ef662d0ccf5fdd597a0d4a49db5643ae896cbbbf3764",
+      "decompiled_c_sha256": "c1b445fd86306b748c2cc05180961f286c41446c4d41963e03500cbe08f7596f",
       "role": "motor-driving EE40C consumer"
     },
     "0x05899E": {
@@ -31,7 +31,7 @@
     "0x0BCD62": {
       "body_sha256": "76d78c2605f902e96eb723f662d9fba543b1d1db85aedf62b9b3894b8c0220aa",
       "body_size": 2748,
-      "decompiled_c_sha256": "19bf7567411c639b46708348553e5183d492431751af42f570855b4661508793",
+      "decompiled_c_sha256": "92bf38fe2429215245f39996a22a519cae52923fbd92b88fb9762386fabeb55e",
       "role": "input snapshot plus B6 supervisor invocation"
     },
     "0x0BF33E": {
@@ -91,7 +91,7 @@
     "0x0CCF0E": {
       "body_sha256": "f5a250c7631463c3446661d0084dc80810d9c6ca49609fd334175507f1707cd9",
       "body_size": 164,
-      "decompiled_c_sha256": "9ae5e4afbe80bcbaff3e2ee8b2a91b654102eb22f40d233995860993bb25a6ec",
+      "decompiled_c_sha256": "ad9b454e5d3d6cff3c1be957ba7aa627ea257e33144ac0fbb86a43fa76431e80",
       "role": "B6 target-angle scale/continuity stage"
     },
     "0x0CCFB2": {
@@ -175,13 +175,13 @@
     "0x0D0284": {
       "body_sha256": "b4eadcf0a0f2d412955c6ed2776087bccac004c30a96401894801ba943676f71",
       "body_size": 86,
-      "decompiled_c_sha256": "10b9a5c39b0c8b342f92cbad28074ace6d9d66e5630039026effebcd4925dc87",
+      "decompiled_c_sha256": "c157ac5d142412ea8b9216d0ad4ab93c475d04c77037f27e3e3796d74cac83d4",
       "role": "shared command scale/clamp"
     },
     "0x0D02DA": {
       "body_sha256": "edb65881363e0b33f0a565d075c487c6cf94f785e0a9590e8743eff834eee238",
       "body_size": 168,
-      "decompiled_c_sha256": "2b0e04e2ce1fe5179136658f214d536024bc58bb9126d86a2e2c544432c4ea03",
+      "decompiled_c_sha256": "ebc9f1577158e7c6f18014b546e488930e3a652a8c031353cc5af145b3b8d9bd",
       "role": "shared command slew/filter"
     },
     "0x0D0382": {
@@ -193,20 +193,20 @@
     "0x0D039E": {
       "body_sha256": "993f8f98ca99f2370ae504726245106eda7443287bea6834ba32b757da35539e",
       "body_size": 142,
-      "decompiled_c_sha256": "b1b5b46545b5729aba8b13184fd0652deeffe5bfc9a84b2d29ed2a01bc82c597",
+      "decompiled_c_sha256": "bbb8f38f663005e2f8c12cc89aaf9a7be86245d07bfde5cf5bfcbab797b7c7ff",
       "role": "shared base plus local addend composition"
     },
     "0x0D042C": {
       "body_sha256": "5cec1b3bd6f5bbbce2832ae7ff417f75db1e11f053d568c143f8a48ee13539e5",
       "body_size": 80,
-      "decompiled_c_sha256": "3d59d9771c66e6bb670a825a21d96f39e92fbb393825134321ccace032d5b7da",
-      "role": "shared pre-slew command output"
+      "decompiled_c_sha256": "826569388e75f2ca62cbd06a68816354e3a7de5576636de1fde81725fd6c529f",
+      "role": "shared command scale/amplitude-clamp/gate"
     },
     "0x0D047C": {
       "body_sha256": "b7995271dcae87283b114788eb9719f086ea7ef78fde1e73ed9fa7336cec3e4c",
       "body_size": 48,
-      "decompiled_c_sha256": "b515c8173254fcf4d71e57598d1306f271a50e16beddcbf30e3d4ff56b24408b",
-      "role": "shared post-slew/override output"
+      "decompiled_c_sha256": "3a54b3251dba1c838a43af1baaa65486b19261b775c39fa2289eb4521b890742",
+      "role": "shared final command/override selection"
     },
     "0x0D0674": {
       "body_sha256": "ec9bcdb10dfd708d8e342efbd4d71e55675463d7147d0b0122a00d7b4b4fc5fc",
@@ -223,13 +223,13 @@
     "0x0D0AAE": {
       "body_sha256": "0eda7671aa6175f44503e1b9e6c42e1fb1c255fa4e4c0391269eefe40b61e01a",
       "body_size": 72,
-      "decompiled_c_sha256": "51d93da1f70ed9e57c8ba1220658f8903420cd64dfda2ebb2a7e01c60335b597",
+      "decompiled_c_sha256": "4b791ce3f32d42d3d1786f298a4dc6a59ba3b37ade3abd80bfcb80f48f621f6e",
       "role": "shared command snapshot"
     },
     "0x0D0AF6": {
       "body_sha256": "2eda8a4e734a3cd248c83c9cd41f906e0191ee48afa5ba72a73640da00823fc9",
       "body_size": 228,
-      "decompiled_c_sha256": "68fb362fae94cf8a89c3e602ca0a77b0da17dd40794402abfbbbf3b7263eb414",
+      "decompiled_c_sha256": "c512a9d970e51037244ee59614fbae8267ffc363dc900dc43781b003c5c1c73e",
       "role": "shared command-composition coordinator"
     },
     "0x0D0EEC": {
@@ -263,7 +263,7 @@
     "ordinary_eps_terms_remain_in_id11_composition": true,
     "stock_request_plane_boundary": "This proves EPS-side composition. It does not mean F33 literally adds the upstream 0x08A angle: exact F33 receives neither 0x08A nor 0x081. The Toyota/FRC request-to-chassis authority handoff is a separate upstream/local provenance question."
   },
-  "schema": "camry-f33-b6-command-composition-v1",
+  "schema": "camry-f33-b6-command-composition-v2",
   "selector_census": {
     "ADB0_address": "0xFEBEADB0",
     "ADB0_decompiled_functions": [
@@ -744,12 +744,12 @@
     "c81a_is_local_not_raw_b6_target": true,
     "d0218_adds_cb38_to_ordinary_terms": true,
     "d039e_retains_shared_base_and_local_addend": true,
+    "final_override_is_internal_not_b6_selected": true,
     "id11_does_not_arm_ca614_state_gate": true,
     "id11_does_not_arm_special_transient": true,
     "id11_maps_to_bank2": true,
     "motor_snapshot_uses_same_cc64": true,
     "no_cb00_function_directly_writes_or_reads_final_funnel": true,
-    "post_slew_override_is_internal_not_b6_selected": true,
     "shared_command_coordinator_always_calls_same_funnel": true
   },
   "shared_funnel_direct_references": {
@@ -1004,7 +1004,7 @@
   },
   "target": {
     "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
-    "corpus_function_count": 7178,
+    "corpus_function_count": 7187,
     "software_id": "8965F3307000"
   }
 }

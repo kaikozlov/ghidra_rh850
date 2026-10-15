@@ -168,8 +168,8 @@ CAMRY_HELPER_SYMBOLS = {
     "mem_copy": 0x00089F2E,
 }
 CAMRY_POSTAUTH_HELPER_SYMBOLS = {
-    "secoc_aggregate": 0x000988C2,
-    "comm_after_secoc": 0x00069E7C,
+    "dcm_foreground": 0x000988C2,
+    "foreground_maintenance": 0x00069E7C,
     "application_aggregate": 0x00058B5E,
     "aggregate_final": 0x00066512,
 }

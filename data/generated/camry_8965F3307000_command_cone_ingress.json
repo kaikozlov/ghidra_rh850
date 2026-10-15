@@ -457,12 +457,12 @@
   "pipeline": {
     "L1_raw_cells": {
       "count": 116,
-      "signal243_path": "0x4BB62 auStack_9 -> FEBE80A0",
+      "signal243_path": "0x4BB62 stack read/modify/write -> FEBE80A0",
       "span": "0xFEBE7FF0..0xFEBE80D6 (+0xFEBE80A0 stack-RMW via 0x4BB62)"
     },
     "L2_stage": {
       "copier": "0x00058074",
-      "edges": 105,
+      "edges": 106,
       "init_only_evidence": "no writer besides 0x58074 constants and 0x59448 zero-init exists in the corpus",
       "init_only_stage_cells": {
         "0xFEBEF098": 0,
@@ -471,11 +471,11 @@
         "0xFEBEF0AA": 0,
         "0xFEBEF1C0": 0
       },
-      "raw_cells_staged": 98
+      "raw_cells_staged": 99
     },
     "L2_unstaged_raw_closure": {
       "evidence": "each unstaged raw cell is accessed only by its own unpacker, the stage copier, and write-only initializer 0x58C9A; no consumer exists",
-      "unstaged_count": 18
+      "unstaged_count": 17
     },
     "L3_qualification": {
       "0xB34xx-B4Dxx": "per-signal qualification records into FEBEB1xx/FEBEB2xx/FEBEB4xx..B9xx (values+flags consumed by 0xBCD62/0xBCBD8 snapshots, 0xBF3AA telemetry, 0xBE070 diagnostic status)",
@@ -800,7 +800,7 @@
   "schema": "camry-8965f3307000-command-cone-ingress-v3",
   "target": {
     "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
-    "corpus_function_count": 7178,
+    "corpus_function_count": 7187,
     "software_id": "8965F3307000"
   }
 }

@@ -1951,13 +1951,13 @@ only READ into the generated-COM staging (`FEBE7F00..80E0`), control-snapshot
 (`FEBEAC00..AEFF`), or `FEBEF000..F200` regions is that same `0xBF33E` terminal;
 `0x59448`'s `FEBE7Fxx` references are WRITEs only. The `1C02` chain here is the **diagnostic sibling of a proved physical
 current-control join**, not an isolated observer/model cone. CORR-130/VAR-083 close the
-same-function edge that a direct-reader census misses: `D042C` writes pre-slew
-`FEBECC62` and immediately reuses that value to form/slew `FEBECC66`; `D047C` selects
+same-function edge that a direct-reader census misses: `D042C` writes pre-final-clamp/gate
+`FEBECC62` and immediately reuses that value to amplitude-clamp/gate `FEBECC66`; `D047C` selects
 `FEBECC64`, which is copied through `FEBEAC54 -> FEBEE40C -> FEBE6AF4 -> FEBE6E0A ->
 FEBE6DEC -> FEBE6DC8/FEBE6DD6` into the motor-control transform. In parallel,
-`D0AAE` copies pre-slew `CC62 -> AC56`, and `BF33E` mirrors that sibling as
+`D0AAE` copies pre-final-clamp/gate `CC62 -> AC56`, and `BF33E` mirrors that sibling as
 `EE40A -> FEBE6772 -> DID 0x1C02`. Thus `1C02` is a diagnostic mirror of a physically
-relevant pre-slew command value, while `AC54/EE40C` is the motor-driving sibling. The
+relevant pre-final-clamp/gate command value, while `AC54/EE40C` is the motor-driving sibling. The
 remaining unresolved question is upstream of `CC50/CC62`: what state/value grants
 factory-LTA lane authority there while B6 is absent. RH850/P1M-E has **exactly one
 RS-CANFD unit** (`RSCFD0`, base `0xFFD20000`; R01UH0585EJ0120 §17), so a second CAN
@@ -2187,7 +2187,13 @@ Deterministic evidence is the `firmware_exact_0x090` and
 
 CORR-127 closes the denominator question raised by the broader `0x58074` staging audit. The old VAR-065 `19/116 nonempty, 97 empty` count was a count through one fixed raw→stage→snapshot model, not an exhaustive census of every staged COM value and consumer. The exact-F33 pipeline is larger but still converges to the same external-command result.
 
-**L1/L2 denominator.** Exact `FUN_0007D12A` literal calls provide **116 scalar raw cells** (including signal243's stack-RMW path `0x4BB62 -> FEBE80A0`). The table-driven callers `0x693FE/0x697F4` add **14 configured extracts**, signals 90..103, spanning CAN `0x013..0x01F`; their qualification/forwarding state remains inside the communications-manager family and does not become a lateral magnitude. `FUN_00058074` stages **98 of the 116 scalar raw cells over 105 exact copy edges**. The other 18 raw cells have no consumer beyond their unpacker/staging/init machinery.
+**L1/L2 denominator.** Exact `FUN_0007D12A` literal calls provide **116 scalar raw cells** (including signal243's stack-RMW path `0x4BB62 -> FEBE80A0`). The table-driven callers `0x693FE/0x697F4` add **14 configured extracts**, signals 90..103, spanning CAN `0x013..0x01F`; their qualification/forwarding state remains inside the communications-manager family and does not become a lateral magnitude. `FUN_00058074` stages **99 of the 116 scalar raw cells over 106 exact copy edges**. The other 17 raw cells have no consumer beyond their unpacker/staging/init machinery.
+
+The 2026-10-15 regeneration repairs an overlapping-field parsing error:
+`DAT_febe8000._2_1_` denotes byte `FEBE8002`, not the containing word's base.
+Instructions `5851E/58522` copy that byte to `FEBEF0BA`, recovering the staging
+edge for `0x63D` signal83. The reducer now resolves source/destination subfield
+offsets and computes census totals rather than pinning old statement counts.
 
 **Stage/snapshot denominator.** The exact COM-derived stage-space has **51 reader functions**; **15** sit inside the recovered steering cluster and the highest direct stage reader is `0xBF0EC`. No C/D-family command-composition function reads those stage cells directly: it consumes the later snapshot bank. Five exact copiers — `0xBC96A`, `0xBCA08`, `0xBCAA6`, `0xBCBD8`, `0xBCD62` — account for **306 unique snapshot destinations**. This is the denominator the old 19-signal shortcut omitted.
 
@@ -2195,7 +2201,7 @@ CORR-127 closes the denominator question raised by the broader `0x58074` staging
 
 **Command-value composition.** The recovered `1C02` model/observable path is much narrower. `D039E` composes `FEBECC50`, later scaled/clamped through `D042C` into `FEBECC62 -> FEBEAC56`, and `BF33E` publishes the command-model/status block `FEBEE400..418` (including the Command Value Torque observable family at `FEBEE40A`). The only **generated-COM** value/mode inputs recovered at this level are B6: `CBA80` writes `FEBEC81A` from B6 sig262 snapshot `FEBEAE90`, while `CB73A` can raise the B6 assist-active state only when B6 sig261 snapshot `FEBEADB0=='1'`. Gain pairs are ROM-installed and internally adapted; without sig261 that B6-selected adaptation cannot activate. CORR-128 corrects one important distinction in the other branch: `FEBE71F2 -> FEBEEF8E -> FEBEAC52` does **not** supply the `FEBECC60` magnitude. `D0382` uses `FEBEAC52` only as a symmetric saturation limit on dynamic `FEBECC4E`; the actual B6-independent value comes from the internal `D0218 -> D0284 -> D02DA` chain closed in §30.
 
-Therefore the corrected statement is stronger and narrower than VAR-065's old shorthand: **many more ordinary COM values are staged and observed than the 19-signal model showed, but no non-B6 generated-COM value is recovered as a value/mode input to the shared `CC50/CC62` command funnel or as the B6 assist-activation input.** Exact F33 also contains a B6-independent internal magnitude path feeding that same funnel. CORR-130/VAR-083 close the downstream consequence that this section originally left open: `CC62` is a real pre-slew physical-command value and continues intra-function through `D042C -> CC66`, then `CC64/AC54/EE40C -> 6AF4 -> 6E0A -> 6DEC/6DC8/6DD6`. CORR-135 supersedes the subsequent attempt to move this negative into an `0x08A -> B6` transform. Bus-4 `0x08A` is a secured-looking request representation, while exact F33 already has a B6-independent internal magnitude path into the same physical funnel. The current discriminators are `0x08A`/`0x081` proxy/SecOC ownership and, independently, the chassis/reference-to-steering-assembly authority handoff outside the recovered F33 external-command surface. This does not authorize output.
+Therefore the corrected statement is stronger and narrower than VAR-065's old shorthand: **many more ordinary COM values are staged and observed than the 19-signal model showed, but no non-B6 generated-COM value is recovered as a value/mode input to the shared `CC50/CC62` command funnel or as the B6 assist-activation input.** Exact F33 also contains a B6-independent internal magnitude path feeding that same funnel. CORR-130/VAR-083 close the downstream consequence that this section originally left open: `CC62` is a real pre-final-clamp/gate physical-command value and continues intra-function through `D042C -> CC66`, then `CC64/AC54/EE40C -> 6AF4 -> 6E0A -> 6DEC/6DC8/6DD6`. CORR-135 supersedes the subsequent attempt to move this negative into an `0x08A -> B6` transform. Bus-4 `0x08A` is a secured-looking request representation, while exact F33 already has a B6-independent internal magnitude path into the same physical funnel. The current discriminators are `0x08A`/`0x081` proxy/SecOC ownership and, independently, the chassis/reference-to-steering-assembly authority handoff outside the recovered F33 external-command surface. This does not authorize output.
 
 Deterministic evidence is `data/generated/camry_8965F3307000_command_cone_ingress.json`, generated by `tools/targets/camry/builders/build_camry_8965F3307000_command_cone_ingress.py` and verified by `tests/targets/camry/verify_camry_8965F3307000_command_cone_ingress.py`.
 
@@ -2203,7 +2209,7 @@ Deterministic evidence is `data/generated/camry_8965F3307000_command_cone_ingres
 
 The residual command branch from §29 is now positively recovered far enough to correct its provenance. `FUN_000D0382` loads dynamic `FEBECC4E` and limit `FEBEAC52`, then computes `FEBECC60 = clamp(FEBECC4E, +/-FEBEAC52)`. `FEBEAC52 <- FEBEEF8E <- FEBE71F2` is therefore a **saturation bound**, not command magnitude. Exact runtime writer `0x3BDC6` chooses the minimum active value from ROM table `0x317E0` — entries are only `0x2B4D`, `0x3A75`, or `0x569A`, with `0x569A` as the default — from an internally protected status mask before storing `FEBE71F2`. The former “peripheral planner/magnitude” interpretation is rejected by CORR-128.
 
-The dynamic B6-independent magnitude enters earlier. `D0218` writes `FEBECC48`; `D0284` scales it by `FEBEAC64/0x8000` and clamps it to calibration `+/-B1334` as `FEBECC4C`; `D02DA` optionally slew/filters that value into `FEBECC4E`; `D0382` applies the limit above; then `D039E -> D042C` carries the result into `FEBECC62`. `D0AAE -> FEBEAC56 -> BF33E/FEBEE40A -> 1C02` is Toyota's recovered **pre-slew Command Value Torque diagnostic mirror**, while CORR-130/VAR-083 prove the same newly computed `CC62` value continues inside `D042C` through `CC66 -> CC64 -> AC54/EE40C` into the physical current-control funnel. The `D0284` multiplier is internal calibration state as well: `BCBD8` snapshots `FEBEB140 -> FEBEAC64`, while the complete `FEBEB140` writer census is `B3866/B389C/B38D2/BF97A`. The first three derive it from exact ROM u16 `0xAEF4C=0x5571` as `floor(0x2774564E/0x5571)=0x7636`; reset/default writer `BF97A` uses adjacent rounded constant `0x7637`. Thus no generated-COM/CAN value enters through the scale factor either.
+The dynamic B6-independent magnitude enters earlier. `D0218` writes `FEBECC48`; `D0284` scales it by `FEBEAC64/0x8000` and clamps it to calibration `+/-B1334` as `FEBECC4C`; `D02DA` optionally slew/filters that value into `FEBECC4E`; `D0382` applies the limit above; then `D039E -> D042C` carries the result into `FEBECC62`. `D0AAE -> FEBEAC56 -> BF33E/FEBEE40A -> 1C02` is Toyota's recovered **pre-final-clamp/gate Command Value Torque diagnostic mirror**, while CORR-130/VAR-083 prove the same newly computed `CC62` value continues inside `D042C` through `CC66 -> CC64 -> AC54/EE40C` into the physical current-control funnel. The `D0284` multiplier is internal calibration state as well: `BCBD8` snapshots `FEBEB140 -> FEBEAC64`, while the complete `FEBEB140` writer census is `B3866/B389C/B38D2/BF97A`. The first three derive it from exact ROM u16 `0xAEF4C=0x5571` as `floor(0x2774564E/0x5571)=0x7636`; reset/default writer `BF97A` uses adjacent rounded constant `0x7637`. Thus no generated-COM/CAN value enters through the scale factor either.
 
 `D0218` has three exact branches. When internal diagnostic flag `FEBEAC2B==0x5A`, it reduces to `FEBEC4C0 + FEBEC3BA + FEBEBF3C`. When B6-selected `FEBEC7BF==1`, it reduces to `FEBEC4C0 + FEBEBF3C`. In the ordinary B6-inactive branch it computes:
 
@@ -2249,7 +2255,7 @@ Two `D0218` terms do have exact passive RDBI projections. `D0D7C` computes `FEBE
 
 A tempting selector join also collapses under exact calibration bytes. `C9812` syntactically indexes `PTR_DAT_000D39DC[FEBEC156&3]` on the path to `FEBEC5EC -> C9A84 -> FEBEC5EE`, but all four exact pointer entries are the same `0xB018A`; VAR-075 also proves the resulting `FEBEC5EE` contribution is zero in both retained drives. `C8678` similarly indexes `PTR_LAB_000D3630[FEBEC156&3]` plus selector-strided `D3670/D3674` tables on the path to `FEBEC4C0`, but the exact maps alias (`0xB1208` x4; the pair family repeats `0xB1248/0xB121C` for all four banks), and no exact RDBI callback directly reads `FEBEC4C0`. So `0x1C3E` is a useful moving-assist/control oracle, **not** a selector-state discriminator. The selector's meaningful exact-image effect remains elsewhere, notably the `C28FC -> C2B64 -> FEBEBF3C` parameter-block path, for which no direct exact RDBI term readout is recovered.
 
-For any future passive validation capture, the most discriminating EPS reads remain: **`0x1C38` first** as a direct proxy for `FEBECB38`; **`0x1C02` second** as Toyota-named **pre-slew Command Value Torque diagnostic state**; and **`0x1C3E` as a control** expected to stay quiet under the retained-drive moving-mode conditions. VAR-083 now gives `1C02` a stronger interpretation: its `CC62` source is physically relevant because the same value continues intra-function into `CC66/CC64`, even though the `AC56/EE40A/1C02` copy itself is the diagnostic sibling rather than the motor-driving `AC54/EE40C` branch. These reads can be synchronized with FRC `0x1601`/`0x1914`; none requires or authorizes steering output.
+For any future passive validation capture, the most discriminating EPS reads remain: **`0x1C38` first** as a direct proxy for `FEBECB38`; **`0x1C02` second** as Toyota-named **pre-final-clamp/gate Command Value Torque diagnostic state**; and **`0x1C3E` as a control** expected to stay quiet under the retained-drive moving-mode conditions. VAR-083 now gives `1C02` a stronger interpretation: its `CC62` source is physically relevant because the same value continues intra-function into `CC66/CC64`, even though the `AC56/EE40A/1C02` copy itself is the diagnostic sibling rather than the motor-driving `AC54/EE40C` branch. These reads can be synchronized with FRC `0x1601`/`0x1914`; none requires or authorizes steering output.
 
 Deterministic evidence is `data/generated/camry_8965F3307000_internal_assist_oracles.json`, generated by `tools/targets/camry/builders/build_camry_8965F3307000_internal_assist_oracles.py` and verified by `tests/targets/camry/verify_camry_8965F3307000_internal_assist_oracles.py`.
 
@@ -2282,7 +2288,7 @@ Each predicate occupies callback slots 0 and 1 of its table.  Transition
 callback `0x3B434` calls `0x51C66(0x6E, 800)`, `0x545DE(3)`, and
 `0x51CF6(0, 800)`; paired callback `0x3B4DC` uses `(0x6D, 800)`, `2`, and
 `(1, 800)`.  This establishes internal state/diagnostic supervision of the
-same pre-slew Command Value Torque cell exposed by DID `0x1C02`.  It does
+same pre-final-clamp/gate Command Value Torque cell exposed by DID `0x1C02`.  It does
 **not** add an ingress, write `FEBE6772`, authorize steering, or establish an
 OEM name or engineering unit for either reference.
 The same refresh corrects three earlier B6 field bounds. `ADB0` has a third
@@ -2338,7 +2344,7 @@ corroboration, not a command candidate.
 This is a strong **ordinary-CAN matched negative**, not by itself an explanation of stock
 LTA authority. In particular, it must not be used to conclude that factory LTA was merely
 internal damping. CORR-130/VAR-083 now independently close the physical command/current
-convergence: `CC62` is the pre-slew value feeding `CC66/CC64 -> AC54/EE40C -> 6AF4 ->
+convergence: `CC62` is the pre-final-clamp/gate value feeding `CC66/CC64 -> AC54/EE40C -> 6AF4 ->
 6E0A -> 6DEC/6DC8/6DD6`, while `AC56/EE40A/1C02` is its diagnostic sibling. The
 remaining search therefore moves **upstream of `CC50/CC62`** and into the two hidden-
 ingress residuals bounded by VAR-084, not into another Bus-4 or downstream motor sweep. Deterministic evidence is
@@ -2347,18 +2353,18 @@ ingress residuals bounded by VAR-084, not into another Bus-4 or downstream motor
 `tests/targets/camry/verify_camry_2026_bus4_field_leadlag.py` (VAR-082). No vehicle traffic is sent and
 production output remains unauthorized.
 
-## 34. Exact F33 physical steering-current convergence: `CC62` is pre-slew; `AC56/EE40A/1C02` is its diagnostic mirror
+## 34. Exact F33 command/current pipeline and cross-rate publication
 
 A motor-side re-audit corrects the direct-reference-only reading of `FEBECC62`. The
 important subtlety is inside `D042C`: it **writes** `FEBECC62` from `FEBECC50 *
-FEBEAC5A / 0x400`, immediately reloads that same value into a local, and then uses it to
-form/slew `FEBECC66`. Canonical cross-function data references therefore show only
+FEBEAC5A / 0x400`, narrows to signed16, publishes it, and reuses the register value to
+amplitude-clamp/gate `FEBECC66`. Canonical cross-function data references therefore show only
 `C4F04` and `D0AAE` as direct *readers* of `CC62`, but that reader census misses the
 same-function `CC62 -> CC66` value-flow. The physical command/current chain is:
 
 `D039E/FEBECC50`
-→ `D042C/FEBECC62` (pre-slew value)
-→ `D042C/FEBECC66` (slew/gate)
+→ `D042C/FEBECC62` (pre-final-clamp/gate value)
+→ `D042C/FEBECC66` (amplitude clamp/gate)
 → `D047C/FEBECC64` (normal copy, or bounded internal `CC94/CC98` override)
 → `D0AAE/FEBEAC54`
 → `BF33E/FEBEE40C`
@@ -2366,7 +2372,7 @@ same-function `CC62 -> CC66` value-flow. The physical command/current chain is:
 → `387BA/FEBE6E0A`
 → `38502/FEBE6DEC`
 → `3835E/FEBE6DC8` + `384D8/FEBE6DD6`
-→ downstream motor-control transform `38162`.
+→ sixfold-angle current correction `38162` and current-pair publication `37F16`.
 
 The writer sets are narrow and mechanically pinned in the current canonical corpus.
 `CC64` is written by `D047C` plus reset/clear `D01B4`; `AC54` by `D0AAE` plus reset;
@@ -2378,8 +2384,8 @@ service/limit branches can substitute a bounded internal `6AF8` value before the
 `6AF4 -> 6E0A` funnel. `D047C` likewise has an internal `CC94/CC98` return/limit
 override. Neither is a recovered second additive external lateral target.
 
-This also explains the Toyota diagnostic observables cleanly. `D0AAE` simultaneously
-copies the pre-slew `CC62` to **`AC56`** while copying the motor-driving post-slew/override
+This also explains the Toyota diagnostic observables cleanly. `D0AAE` sequentially
+copies the pre-final-clamp/gate `CC62` to **`AC56`** while copying the motor-driving selected
 `CC64` to **`AC54`**. `BF33E` mirrors those as `EE40A` and `EE40C`, respectively.
 The `AC56/EE40A` branch continues to `FEBE6772 -> DID 0x1C02 Command Value Torque`; its
 motor-side sibling `EE40A -> 35C4C/6AF6 -> 387CE/6E22/6E24` terminates in
@@ -2389,7 +2395,7 @@ states `6DD6/6DC8` to `6D84/6D86`, the recovered `1152/1154` diagnostic family; 
 observers of the downstream current command, not its upstream source.
 
 So CORR-130 is not “`1C02` is unrelated to actuation.” The exact statement is:
-**`1C02` is a diagnostic mirror of the pre-slew `CC62` value, and that same `CC62` value
+**`1C02` is a diagnostic mirror of the pre-final-clamp/gate `CC62` value, and that same `CC62` value
 really does feed physical actuation through an intra-function `D042C -> CC66` edge and
 then the sibling `CC64/AC54/EE40C` branch.** This is why a pure cross-function
 reader census was misleading.
@@ -2397,7 +2403,7 @@ reader census was misleading.
 The B6-inactive `D0218` contribution is also preserved rather than re-derived. Its eight
 value terms reduce structurally to measured steering torque (`C43C`, `C3BA`),
 torque+speed map/gain state (`C4C0`), internal assist aggregation (`CC2C`), a
-nonnegative `|torque|` calibration term (`BF3C`), angle-domain ramp/return/dither
+torque-sign-restored magnitude-curve term (`BF3C`), angle-domain ramp/return/dither
 (`CB38`), retained-drive-zero moving-mode term (`C5EE`), and phase-window angle
 excitation/return (`CBE8`). The `C28FC/C2B64` normal selector is likewise closed:
 healthy selector 1 is the only distinct 0x220-byte bank, selectors 0/2/3 alias, all
@@ -2409,6 +2415,134 @@ The former “upstream contradiction” framing is now superseded by CORR-135. T
 Deterministic evidence is carried by
 `data/generated/camry_8965F3307000_internal_assist_oracles.json` and
 `tests/targets/camry/verify_camry_8965F3307000_internal_assist_oracles.py` (VAR-083 / CORR-130).
+
+### 34.1 Command arithmetic and publication boundaries
+
+The 2026-10-15 reconstruction uses the registered F33 images, not a family
+analogy. Addresses below omit the `FEBE` RAM prefix. The ordinary retained
+slew/filter is **`D02DA`**, before the final source composition. ROM `B1338=1`
+enables its `CC30/34/38/3C` recurrence; `CC9C` chooses filtered output or bypass.
+Its difference shift uses the low five bits of `CC9E`, with a minimum nonzero
+step of ±1 and signed output saturation. This is an invocation recurrence,
+not an independently established torque-per-second limit.
+
+`D039E` selects delayed `AC10` history (`CC5A`) when `AC28==1`, otherwise `CC60`.
+It applies complement-checked base and local-addend gains, narrowing each gained
+term to signed16 after division by256. The local `C81A` term participates only
+when `C797==0`; the sum is clamped to ±22170 (`B1334`). Consequently, calling
+`CC62` universally “pre-slew” or “post-slew” loses the alternate history path
+and the placement of the local addend.
+
+`D042C` computes signed `CC50 * unsigned AC5A / 1024`, **narrows the quotient
+to signed16 before clamping**, stores `CC62`, and reuses that register value.
+It clamps against signed `AC4C`, publishes `CC54`, and publishes `CC66` only
+when `AC29!=0 && AC2A==0`. `BCAA6` derives these two gates from `EF90` masks
+`70017001` and `40004`; `BCBD8` copies the limit and gain from `AF40/B1F8`.
+`D047C` can instead select bounded internal `CC94` when `CC98` is nonzero.
+The `D06D6` source is retained return/limit state, not a second external target.
+
+The composed native command-tail scenario runs the real `D0AF6` tail through
+`D0AAE`. A synthetic high-gain interface vector produces slew output1024,
+quotient65535, narrowed `CC62=-1`, and gated selected command0. Publication
+preserves that distinction in `AC56=-1` versus `AC54=0`. This checks arithmetic
+order and publication, not reachability of that gain in normal driving.
+`D0AAE` also reads independent diagnostic sources `C128/C172`; its stores are
+sequential, not an atomic snapshot for all asynchronous readers.
+
+### 34.2 Sampled command to current references
+
+Command publication and current control run in different task generations.
+CH1 reaches command publication through `5899E → C1F7A/C2000`, then samples
+it through `5E38E/5E420 → 35C4C`. CH0 subsequently consumes the published
+motor sample through `588E8 → 5DF5C/5E202`. Each dispatcher owns a separate
+last-mode/inverse pair; this is not one synchronous function chain.
+
+Normally `35C4C` copies `EE40A/EE410` to diagnostic samples `6AF6/6AF8` and
+sets `6AF4=-EE40C`. Only mode family0500 admits the recovered service
+substitutions: `E780==5A` selects bounded `EB10`; otherwise `EE406==5A`
+selects bounded `EE416`. Those alternatives still feed the same `6AF4` path.
+
+The conversion has three distinct mathematical responsibilities:
+
+- `38502` takes saturating absolute magnitude (`-32768 → 32767`), interpolates
+  signed ordinates at `2E33E` with seven fractional bits, and clamps the first
+  component into `[-25600,0]`. `3835E` combines this with dynamic limits.
+- `38396` blends unsigned ordinate curves selected by signed first-component
+  breakpoints `-12800,-10240,-7237,-3840,0`. `384D8` restores the original
+  command sign to the second component. The five curve bases come from `210E0`.
+- `38162` calculates a **sixfold-angle correction**: squared-vector gain,
+  speed-like gain input `5F36`, wrapped angle/trigonometric terms, and bounded
+  corrections. It is neither the complete current regulator nor the final
+  output transform. `37F16` publishes main/correction pairs separately.
+
+Native execution of `5E202(2,0200)` through the boundary before `38A58`
+converts a negative1024 sample into first component-53 and second component-1021,
+with the selected zero-tail correction-gain branch. This exercises real curve
+interpolation and current-pair publication; it does **not** execute the complete
+feedback regulator, output stage or acquisition path.
+
+### 34.3 Feedback regulation and output formation
+
+The measured path is `66824 → 6217E → 620FE/6213E`, then conditioning through
+`50B6A/486D0` and rotating-frame conversion `36144`. Conditioning uses both
+sample/offset inputs and retained output history `8B60..8B6A`. The transform
+preserves 32-bit banks `6B3C/40/44/48`, separately from saturated halfword
+mirrors. Its coefficient pairs `7D4E/50` and `7D5A/5C` are distinct from the
+output-frame pairs `7D54/56` and `7D60/62`.
+
+`37E48` excludes banks according to `71EC` bits0/1 and forms common/difference
+feedback. The second-axis common sum remains 32-bit in `6D78`; its saturated
+mirror `6D72` is **not** the regulator input.
+
+| Regulator | Error before saturation | Retained accumulator |
+|---|---|---|
+| `37228`, common first axis | `6D80 − 6D70` | `6C8C` |
+| `370E6`, differential first axis | `6D82 − 6D74` | `6C78` |
+| `3777E`, common second axis | `6D7C − 6D78` | `6CCC` |
+| `37538`, differential second axis | `6D7E − 6D76` | `6CA0` |
+
+Each incremental PI-like recurrence adds a clamped proportional error difference
+and a scaled sum of previous/current gated errors to retained state. Accumulator
+addition saturates at ±`7FFFFFFF`; some loops have additional ROM bounds.
+Previous output saturation direction suppresses integration only when the error
+would deepen that saturation; the proportional term still uses raw error.
+A first channel-invalid transition adjusts the common accumulator using retained
+differential state. `37228` runs before `370E6`, so that adjustment uses the
+**previous** differential accumulator.
+
+Both nonzero selected arbitration indices `8BAE/8BAF`, or status mask
+`8B28&40004`, reset the regulator states. These indices are not physical-disable
+booleans. `369E4/36CF0` combine common/difference accumulators into bank outputs,
+apply calibrated envelopes and publish saturation directions for the next update.
+Further retained filtering and conditional bounds precede the regulated
+axis-to-phase transforms **`38C7C/38D6C`**. By contrast, `38A58/38B6A` transform
+references for the compensation branch. Modulation state `0/5A/A5`, compensation,
+and offset/clipping selection all precede phase-code publication.
+
+`38F72` scales/clamps both triplets through `38E52/38EE2`, publishes slot0 via
+`57BCA(2,0,...)`, then enables it through `57C48(0)`. Its real ABI retains the
+shared scale in `r6`; destinations are `sp+6` and `sp`. Tracked leaf-p-code
+inlining preserves that register dataflow without substituting native callees.
+`57A5A` selects the **highest enabled slot0..4 independently per bank**, caches
+indices/inverses, and optionally applies symmetric code bounds. A mode-owned
+slot3 substitution therefore need not win against slot4.
+
+### 34.4 Temporal and hardware boundary
+
+`66786` first commits **previously staged** compares through `61E72`, then
+acquires samples and dispatches computation of the next stage. Within `5E202`,
+workmask bit1 and state≥0200 permit full computation; the separate state≥0101
+gate permits arbitration/history/compare staging. States0101..01FF can therefore
+stage existing outputs without recomputing the current controller. Snapshot
+publication `57FD2` runs regardless.
+
+Word-side history staging and halfword compare staging remain distinct interfaces;
+[§77.9](#779-pwm-compare-staging-without-an-electrical-duty-claim) owns their
+quantizer, lane/slot mapping and retained native regressions. The connected
+regulator/output reconstruction above is **instruction/dataflow evidence**, not
+new end-to-end native or vehicle execution. DMA ring indexing/consumption is
+bounded, but ADC age, DMA coherency, rotor/sample alignment, timer-latch timing,
+output polarity and physical bridge/motor response are not established here.
 
 ## 35. Hidden-ingress false-negative audit: no concrete alternate producer found; residuals closed in §36
 
@@ -7269,16 +7403,18 @@ authenticated 32-byte PDU44 into route44 raw COM at `FEBE4BFF` and advances sole
 route generation `FEBE5364`. Only later does `4BD46` unpack raw B3/B4:B5 and
 companions into generated COM, followed by `58074` staging and `BCD62` snapshot.
 
-The exact stock foreground order around that seam is also closed. Aggregate
-`667E6` executes receive work, SecOC aggregate `988C2`, communications follow-up
-`69E7C`, application aggregate `58B5E`, then `66512`. The resident already
-replays this aggregate. The new Camry field helper therefore replaces only the
-post-receive aggregate tail after it is armed:
+The exact stock foreground order around that seam is closed. Aggregate `667E6`
+runs `69CA2`, then `7A254` (receive drain `79EDE` followed by SecOC `6A410`),
+then **DCM `988C2`**, maintenance `69E7C`, application `58B5E`, and `66512`.
+`988C2` is not the SecOC worker: authenticated route44 delivery occurs upstream.
+The resident replays this order; its armed helper replaces only the tail after
+`7A254`, retaining the DCM and maintenance calls before the application override:
 
-```text
-receive drain -> stock SecOC 988C2 -> stock follow-up 69E7C
-             -> post-auth C7 application override
-             -> stock 58B5E -> stock 66512
+```mermaid
+flowchart LR
+  A["7A254: receive → SecOC → route44"] --> B["988C2: DCM"]
+  B --> C["69E7C: maintenance"] --> D["Post-auth C7 override"]
+  D --> E["58B5E: application"] --> F["66512: tail"]
 ```
 
 With no live C7 lease the helper changes nothing. A changed nonzero C7
@@ -9444,3 +9580,148 @@ snapshot was promoted after clean daemon teardown. Regenerated C retains all
 protected FLMD writes and the reverse-erase driver's real return value;
 instruction/dataflow proof remains authoritative for access ordering.
 
+
+### 77.24 Application scheduling, mode arbitration and consequential outputs
+
+This 2026-10-15 subsystem checkpoint joins the control pipeline in
+[§34](#34-exact-f33-commandcurrent-pipeline-and-cross-rate-publication), the
+existing PWM boundary (§77.9), communications/DCM and application NvM (§77.23).
+It uses the same registered CodeFlash/DataFlash identities and target-native
+seed; no hardware-model expansion is required for these software contracts.
+
+#### Foreground and interrupt ownership
+
+`66062` polls and clears the CH3 EIC136 pending flag. It performs bookkeeping,
+physical NvM work `66FF2` under the paired alternate stack/MPU context, then
+`667E6`: auxiliary maintenance, communications `7A254`, **DCM `988C2`**,
+maintenance, application dispatch `58B5E`, and timer reload `66512`.
+Application NvM `66CF6` follows, again under the alternate context.
+
+`7A254` drains receive work before calling SecOC `6A410`, allowing a protected
+request to be queued and consumed in the same invocation. `988C2`, gated by
+`5E50==A5`, instead runs DCM main, timers and queued events. Application work
+can enqueue persistence before that iteration's final NvM service; a programming
+handoff readiness check in application dispatch necessarily precedes that service.
+
+| Task | Entry and body | Dedicated stack | Steady timer count |
+|---|---|---|---|
+| CH0 | `713B0 → 65FAE → 66786 → 588E8` | `FEBE0800` | 16000 |
+| CH1 | `7145A → 65FEA → 6679E → 5899E` | `FEBE1000` | 32000 |
+| CH2 | `71506 → 66026 → 667B6 → 58A50` | `FEBE1800` | 80000 |
+| CH3 | foreground-polled pending flag | foreground | 400000 |
+
+ROM `30DF0` additionally supplies first-interval offsets800/9200/9600/10000.
+At the registered nominal80MHz timer domain these correspond to200µs/400µs/1ms/5ms;
+this is not a new board-clock measurement, execution-time bound or jitter result.
+Foreground consumes a flag, not a counted backlog. Its generation mask selects
+bit0 every dispatch and bits1..5 once per2/4/8/16/32 dispatches: not every child
+of `58B5E` is a “5ms task.” DCM timer equality subtracts to zero and expires on
+the next invocation (`remaining < quantum`, not `<=`); its event worker bounds
+the drain using the entry queue count.
+
+`71378/71398` are a paired nonordinary ABI: save `r1..ep` on the old stack,
+retain that frame in `r2`, switch to `FEBE2800`, and use `r20` for continuation.
+They apply MPAT profiles1/0 without independently saving PSW or disabling
+interrupts. `65984` writes MPAT0..15 from `31708+64*selector` and synchronizes;
+it is not a getter or a region-bound update. Timer ISRs save their exception,
+GPR and MPAT context on the interrupted stack before switching. The persistent
+stack effects of `65AC0/65B4A` remain assembly contracts, not ordinary C leaves.
+
+#### Published mode is not live mode or a pending request
+
+Live mode `B11A` has redundant copies `B0A0/B0A4`. `E8CC` is its published
+snapshot. Foreground `8C06/8C12` and each interrupt task retain separate
+last-mode/inverse pairs. A valid changed snapshot selects transition workers;
+a broken last-mode inverse is repaired from the snapshot and takes steady
+workers, **not an automatic zero/failsafe mode**.
+
+Central workers `C214C/C26A4` reconcile requests, advance live mode and later
+publish it through `BF3AA`. Their surrounding final worker still receives the
+mode captured before that change. New live state therefore does not atomically
+replace all arguments, snapshots and interrupt-task generations.
+
+`B15AC` sets a request bit and clears its cancellation bit. `B1546` materializes
+requests into pending `A55A` or acknowledged `5AA5` halfword slots. `B1BFE`
+returns that status in `r10`; the former void prototype lost consequential
+caller dataflow. **Cancellation does not revoke a materialized pending request:**
+`B1C1A` clears only acknowledged `5AA5`. Reconciliation can first cancel the
+request bitmap and clear its acknowledged slot on a later pass. Acknowledging
+a winning low-ID request does not silently consume losing pending requests.
+
+The composed native reconciliation scenario verifies these distinctions, request
+precedence, PMR restoration and the boundary after the last valid slot. This
+is a software request-lifecycle result, not execution of every mode callback.
+
+#### Fault, health, service and programming requests differ
+
+| Request | Provenance and qualification | Consequence/boundary |
+|---|---|---|
+| 0 | `3C008 → 3C232`, fault-action aggregate | Hard action waits published `EB9A==0`; soft action waits `8AC8/8ACB==0`. Waiting is not cancellation. |
+| 1 | `B4FFC → B4F8A`, qualified health states11/22 | Mode-specific zero-output gates; state22 can instead request2 in families0700/0800. |
+| 6 | `B3224(1..4)` and internal producers | Family0500 service sequencing and particular motor-sample substitutions, not a generic diagnostic inhibit. |
+| 9 | `4D604`, diagnostic programming/handoff adapter | Family0900, behind higher-priority fault/health transitions; readiness-dependent handoff. |
+
+The fault aggregate selects current/previous source records with complements.
+Its codes represent **actions**, not DTC identities. Real producers include the
+NvM record0100 non-success/non-pending path `3588A`. `3C232` qualifies first-word
+bits0/1/3/4 with `71EC.bit15`; hard/soft branches latch `B190` while waiting.
+The no-action branch alone cancels event0. Published `EB9A` comes from limiting
+state `BCC2`, so admission can depend on a prior software limiting/ramp result.
+
+The health path separately qualifies analog input, received control/status and
+application latches. `B4FFC` votes states0/11/22/33, routes the **new** state
+before publishing it, and `B4F8A` applies family0400/0500 zero-output gates plus
+the exact0522 `AFCE!=11` condition. It does not cancel event1. The analog chain
+from8210 through48146/7DB0/57F00/C1DE0 toB080 is recovered; physical channel
+identity, OEM units and OEM health-state names remain unresolved.
+
+Service admission requires live mode<0600 and rejects duplicate service IDs.
+Family0500 includes submodes0512/0522/0520; `FD49E` publishes that mode into
+`EB1E`, consumed by the bounded substitutions in `35C4C`. Ordinary diagnostic
+session entry has not been shown to impose a universal steering veto.
+
+Programming readiness `56CF6 → 66F1E` requires no family0/1 pending high-nibble20
+status, no repaired busy valueFF/A5, and `FEBF0673==0`. Admission raises PMR,
+clears the relevant interrupt registers, synchronizes and enters `9F00`.
+The ROM0514 invocation timeout requests event14 and emits the recovered negative
+response; family0900 then selects0800. This is not proof of elapsed wall time,
+flash completion or successful physical programming.
+
+#### Callback effects are requests, not instantaneous hardware state
+
+The typed `{entry,exit}` table at `AEB00` is indexed by mode high byte.
+`B16F4` calls **old exit → new entry → redundant live-mode store**; callbacks
+therefore see the old live mode. Families0100/0300/0800 have no-op entry/exit
+callbacks, while other families perform real initialization, service cleanup
+or request changes. Mode0700 and0900 both assert mode-owned `5737A` masks
+`70017001`, but differ in channel/validity requests and cleanup.
+
+`572E6` OR-reduces owners and can enable substitution slot3 with code4000 from
+ROM31908. Slot4 can outrank it. Other owner reductions publish separate channel
+flags; clearing one owner does not clear all owners. `56AD2` has an OR-reduction
+and argument-flow defect in the current C recovery: its instructions remain
+necessary evidence, and hardware-observed channel feedback remains a boundary.
+
+CH2 snapshots outputs before prework fault aggregation, and later reduces output
+requests in postwork. Foreground request reconciliation/mode publication occurs
+in a different context. Owner requests, reduced flags, selected outputs and
+mode caches are therefore not a single synchronous state transition.
+
+**Remaining high-value dependencies:** OEM identities of fault actions and service
+routines; complete upstream assist/health qualification semantics; calibration
+units and physical analog identity; ADC/DMA sample freshness; hardware channel
+feedback and output-update timing. These do not require finishing the physical
+NvM emulator before further application reconstruction. Static connectivity is
+not exhaustive semantic closure or a new vehicle result.
+
+**Verification checkpoint.** Independent four-stage rebuilds agreed. The composed
+command-tail, negative-current-reference and mode-request reconciliation scenarios
+passed on the fresh working project. Portable machine/coverage checks and the
+affected capture, command-cone, assist-oracle, B6 and NvM artifact gates passed;
+live coverage matched the canonical ledger exactly. The matching project and
+corpus were promoted after clean daemon teardown. Regenerated C preserves the
+request-status return, ordered mode hooks and shared scale across both phase-code
+banks. The capture planner exposes the corrected clamp/gate fields without live
+execution. The historical post-auth helper also rebuilt and passed its existing
+emulator-local checks with stock aggregate calls stubbed; that regression is
+not native execution of those EPS aggregates or a vehicle result.
