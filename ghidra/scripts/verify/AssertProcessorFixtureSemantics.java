@@ -4,6 +4,10 @@
 // Args: <absolute-manifest-json>
 import ghidra.app.script.GhidraScript;
 import ghidra.app.emulator.EmulatorHelper;
+import ghidra.app.cmd.disassemble.DisassembleCommand;
+import ghidra.app.cmd.function.CreateFunctionCmd;
+import ghidra.app.decompiler.DecompInterface;
+import ghidra.app.decompiler.DecompileResults;
 import ghidra.app.util.PseudoDisassembler;
 import ghidra.app.util.PseudoInstruction;
 import ghidra.program.database.ProgramDB;
@@ -15,6 +19,8 @@ import java.io.ByteArrayInputStream;
 import ghidra.program.model.address.Address;
 import ghidra.program.model.listing.Instruction;
 import ghidra.program.model.pcode.PcodeOp;
+import ghidra.program.model.pcode.PcodeBlock;
+import ghidra.program.model.pcode.PcodeBlockBasic;
 import ghidra.program.model.symbol.FlowType;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -992,6 +998,208 @@ public class AssertProcessorFixtureSemantics extends GhidraScript {
         verifyStsr(addrs, "stsr-cdbcr", "CDBCR", 0x00000004L);
     }
 
+    private Set<PcodeBlock> cacheReachable(PcodeBlock start, boolean reverse) {
+        Set<PcodeBlock> seen = new HashSet<>();
+        List<PcodeBlock> pending = new ArrayList<>();
+        seen.add(start);
+        pending.add(start);
+        for (int i = 0; i < pending.size(); i++) {
+            PcodeBlock block = pending.get(i);
+            int count = reverse ? block.getInSize() : block.getOutSize();
+            for (int j = 0; j < count; j++) {
+                PcodeBlock next = reverse ? block.getIn(j) : block.getOut(j);
+                if (seen.add(next)) pending.add(next);
+            }
+        }
+        return seen;
+    }
+
+    private void verifyCacheControlIr(ProgramDB program, Address entry) throws Exception {
+        if (!new DisassembleCommand(entry, null, true).applyTo(program, monitor)
+                || !new CreateFunctionCmd(entry).applyTo(program, monitor)) {
+            fail("cache control: cannot create exact-target function");
+            return;
+        }
+        DecompInterface decompiler = new DecompInterface();
+        try {
+            decompiler.openProgram(program);
+            DecompileResults result = decompiler.decompileFunction(
+                    program.getFunctionManager().getFunctionAt(entry), 60, monitor);
+            if (!result.decompileCompleted() || result.getHighFunction() == null) {
+                fail("cache control: decompilation failed: " + result.getErrorMessage());
+                return;
+            }
+            List<PcodeBlockBasic> blocks = result.getHighFunction().getBasicBlocks();
+            PcodeBlockBasic root = null;
+            for (PcodeBlockBasic block : blocks) {
+                if (block.contains(entry)) root = block;
+            }
+            if (root == null) {
+                fail("cache control: missing entry block");
+                return;
+            }
+            Set<PcodeBlock> reachable = cacheReachable(root, false);
+            // Observable writes on both mode paths, two hardware-dependent
+            // polling exits, and the shared return must survive optimization.
+            // Inspect reachable high IR, never the rendered C or userop names.
+            java.util.Map<Long, PcodeBlockBasic> effectBlocks = new java.util.HashMap<>();
+            for (long at : new long[]{0x361a, 0x3620, 0x362a, 0x3636,
+                    0x364a, 0x3654, 0x365c, 0x3670, 0x367a, 0x3684, 0x3690, 0x369a}) {
+                boolean found = false;
+                for (PcodeBlockBasic block : blocks) {
+                    if (!reachable.contains(block)) continue;
+                    var operations = block.getIterator();
+                    while (operations.hasNext()) {
+                        PcodeOp op = operations.next();
+                        if (op.getSeqnum().getTarget().getOffset() != at) continue;
+                        effectBlocks.put(at, block);
+                        if (at == 0x361a || at == 0x3654 || at == 0x367a) {
+                            found |= op.getOpcode() == PcodeOp.CBRANCH
+                                    && !op.getInput(1).isConstant()
+                                    && block.getOutSize() == 2;
+                        } else if (at == 0x369a) {
+                            found |= op.getOpcode() == PcodeOp.RETURN;
+                        } else {
+                            // A surviving write is either a register output
+                            // or a volatile side effect, not pure arithmetic.
+                            found |= (op.getOutput() != null
+                                    && op.getOutput().getAddress().isRegisterAddress())
+                                    || (op.getOpcode() == PcodeOp.CALLOTHER
+                                            && op.getOutput() == null);
+                        }
+                    }
+                }
+                if (!found) fail(String.format(
+                        "cache control: missing reachable effect/branch at 0x%x", at));
+            }
+            PcodeBlockBasic returnBlock = effectBlocks.get(0x369aL);
+            if (returnBlock != null) {
+                Set<PcodeBlock> reachesReturn = cacheReachable(returnBlock, true);
+                for (long at : new long[]{0x3620, 0x362a, 0x3636, 0x364a,
+                        0x3654, 0x365c, 0x3670, 0x367a, 0x3684, 0x3690}) {
+                    PcodeBlockBasic block = effectBlocks.get(at);
+                    if (block != null && !reachesReturn.contains(block)) {
+                        fail(String.format(
+                                "cache control: path at 0x%x cannot reach shared return", at));
+                    }
+                }
+            }
+            // Read-as-zero CDBCLR cannot leave a hardware-dependent loop.
+            var operations = result.getHighFunction().getPcodeOps();
+            while (operations.hasNext()) {
+                PcodeOp op = operations.next();
+                long at = op.getSeqnum().getTarget().getOffset();
+                if ((at == 0x3640 || at == 0x3666)
+                        && op.getOpcode() == PcodeOp.CBRANCH) {
+                    fail("cache control: read-as-zero command retained a conditional poll");
+                }
+            }
+        } finally {
+            decompiler.dispose();
+        }
+    }
+
+    private void verifyCacheControlExecution(ProgramDB program, int mode) throws Exception {
+        EmulatorHelper emu = new EmulatorHelper(program);
+        String label = "cache control mode " + mode;
+        long poll = mode == 0 ? 0x364e : 0x3674;
+        try {
+            emu.writeRegister("PC", 0x3614);
+            emu.writeRegister("r6", mode);
+            emu.writeRegister("CDBCR", 1);
+            emu.writeRegister("ICCTRL", 0x30003);
+            // This is a fixture bound, not a hardware completion latency.
+            int steps = 0;
+            while (emu.readRegister("PC").longValue() != poll && steps++ < 40) {
+                step(emu, label + " enter instruction-cache poll");
+            }
+            requireRegister(emu, label, "PC", poll);
+            requireRegister(emu, label + " data-buffer clear command", "CDBCR", 2 | mode);
+            long pending = emu.readRegister("ICCTRL").longValue() & 0xffffffffL;
+            if ((pending & 0x100) == 0) fail(label + ": clear request was lost");
+            // With no hardware event supplied, STSR must keep reporting busy.
+            // Repeated observations must not themselves manufacture completion.
+            for (int observation = 0; observation < 3; observation++) {
+                step(emu, label + " busy read");
+                requireRegister(emu, label, "r1", pending);
+                step(emu, label + " busy shift");
+                step(emu, label + " busy branch");
+                requireRegister(emu, label, "PC", poll);
+            }
+            // The environment supplies completion, not the CPU instruction.
+            emu.writeRegister("ICCTRL", pending & ~0x100L);
+            steps = 0;
+            while (emu.readRegister("PC").longValue() != 0x3698 && steps++ < 20) {
+                step(emu, label + " completed clear");
+            }
+            requireRegister(emu, label, "PC", 0x3698);
+            requireRegister(emu, label, "ICCTRL", (pending & ~0x101L) | mode);
+            requireRegister(emu, label, "CDBCR", mode == 0 ? 2 : 1);
+            // SYNCI is an existing opaque ordering boundary. The shared JMP
+            // itself is executable independently of a cache timing model.
+            emu.writeRegister("PC", 0x369a);
+            emu.writeRegister("lp", 0x3800);
+            step(emu, label + " return");
+            requireRegister(emu, label, "PC", 0x3800);
+        } finally {
+            emu.dispose();
+        }
+    }
+
+    private void verifyCacheControl() throws Exception {
+        Language language = DefaultLanguageService.getLanguageService()
+                .getLanguage(new LanguageID("v850e3:LE:32:default"));
+        // These are the exact 136 CodeFlash bytes at Camry 8965F3307000 0x3614,
+        // SHA256 42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7.
+        // Keep this witness in a disposable processor fixture, not a target seed.
+        byte[] code = java.util.HexFormat.of().parseHex(
+                "f80f4068d832fa1d1e9a5309e1c72068f80f40205309e1c72020"
+                + "f80f4068810e0200e1c72068f80f4068820ad1fdf80f4020810e0001"
+                + "e1c72020f80f4020890ad1fdf51d810e0200e1c72068f80f4068820a"
+                + "d1fdf80f4020810e0001e1c72020f80f4020890ad1fdf80f4068810e"
+                + "0100e1c72068f80f4020810e0100e1c72020f80f40201c007f00");
+        ProgramDB program = new ProgramDB("g3m-cache-control", language,
+                language.getDefaultCompilerSpec(), this);
+        int transaction = program.startTransaction("cache control fixtures");
+        try {
+            Address entry = program.getAddressFactory().getDefaultAddressSpace().getAddress(0x3614);
+            program.getMemory().createInitializedBlock("cache-control", entry,
+                    new ByteArrayInputStream(code), code.length, monitor, false).setExecute(true);
+            Address accessors = entry.getNewAddress(0x3700);
+            program.getMemory().createInitializedBlock("cache-accessors", accessors,
+                    new ByteArrayInputStream(new byte[16]), 16, monitor, false).setExecute(true);
+            putWords(program, 0x3700, 0x57f8, 0x6840); // STSR CDBCR,r10,13
+            putWords(program, 0x3704, 0xc7e6, 0x6820); // LDSR r6,CDBCR,13
+            putWords(program, 0x3708, 0x57f8, 0x2040); // STSR ICCTRL,r10,4
+            putWords(program, 0x370c, 0xc7e6, 0x2020); // LDSR r6,ICCTRL,4
+            EmulatorHelper emu = new EmulatorHelper(program);
+            try {
+                for (long value : new long[]{0, 1, 2, 3, 0xa5a50103L}) {
+                    emu.writeRegister("r6", value);
+                    emu.writeRegister("PC", 0x3704);
+                    step(emu, "CDBCR command write");
+                    requireRegister(emu, "CDBCR command retained", "CDBCR", value);
+                    emu.writeRegister("PC", 0x3700);
+                    step(emu, "CDBCR command read");
+                    requireRegister(emu, "CDBCR only bit1 reads zero", "r10", value & ~2L);
+                    emu.writeRegister("PC", 0x370c);
+                    step(emu, "ICCTRL control write");
+                    emu.writeRegister("PC", 0x3708);
+                    step(emu, "ICCTRL control read");
+                    requireRegister(emu, "ICCTRL preserves status and control", "r10", value);
+                }
+            } finally {
+                emu.dispose();
+            }
+            verifyCacheControlExecution(program, 0);
+            verifyCacheControlExecution(program, 1);
+            verifyCacheControlIr(program, entry);
+        } finally {
+            program.endTransaction(transaction, true);
+            program.release(this);
+        }
+    }
+
     private void verifyMaddfLanguageBoundary() throws Exception {
         // R01US0001EJ0100 pp. 374, 380, 386, 388: E2M four-register forms.
         // The low bit of reg4 is instruction bit 23, not bit 16.
@@ -1659,6 +1867,7 @@ public class AssertProcessorFixtureSemantics extends GhidraScript {
         runExecutionVectors(addrs);
         verifyMaddfLanguageBoundary();
         verifyExactFusedArithmetic();
+        verifyCacheControl();
 
         if (!failures.isEmpty()) {
             throw new IllegalStateException(failures.size() + " fixture failures: "

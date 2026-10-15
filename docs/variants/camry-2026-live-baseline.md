@@ -7683,16 +7683,27 @@ code, and explicit seeds recover the previously absent boot vector/dispatcher
 roots. The exact table traversal and executable boundary checks are in §77.5;
 this repair does not establish that all other function boundaries are closed.
 
-At `0x3614`, disassembly writes and polls `CDBCR` / `ICCTRL` bits, but the current
-decompiler register model folds the waits into infinite loops and removes later
-instructions. The G3M software manual **R01US0123EJ0140**, Table 3-64 (p.110),
-specifies that `CDBCR.CDBCLR` bit 1 is write-only and **always reads zero**.
-Table 3-60 (p.106) specifies that `ICCTRL.ICHCLR` bit 8 reads one until clearing
-completes, then zero. The first apparent infinite loop is therefore contradicted
-by documented register semantics; the second requires asynchronous hardware
-completion rather than a constant register value. No physical completion timing
-is established here. Raw instructions, dataflow, and hardware authority remain
-necessary proof; a successful decompiler export is insufficient.
+At `0x3614`, the former ordinary-register model folded cache-control waits into
+infinite loops and removed later instructions. The corrected G3M model follows
+**R01US0123EJ0140**: `CDBCR.CDBCLR` bit 1 always reads zero (Table 3-64, p.110),
+whereas `ICCTRL.ICHCLR` bit 8 reads one until hardware completes clearing
+(Table 3-60, p.106). Native register volatility preserves both external command
+writes and asynchronous observations; it does not invent a completion delay.
+The durable contract is `f33_boot_cache_set_enabled(enabled)`: low-byte zero
+disables both before clearing; nonzero clears first, then enables both.
+The exact-byte processor fixture checks executed register behavior and reachable
+high-IR branches, command effects and return, with explicit completion injected.
+Execution stops at opaque `SYNCI`; the shared return is exercised separately.
+This is not a cycle-accurate full-cache execution or a physical latency result.
+Raw instructions, dataflow and hardware authority remain necessary proof;
+a successful decompiler export is insufficient.
+
+Two fresh G3M-0.10 Camry rebuilds agreed on 7,181 functions. The rebuilt target
+decompilation retains both mode paths, hardware-dependent ICCTRL polls and the
+return; the false CDBCLR conditional loops disappear. SLEIGH resolution,
+processor execution/high-IR checks, the firmware-machine gate, six targeted
+coverage/NvM/B6 checks and live coverage parity passed. The processor gate's
+optional Sienna-specific whole-program audits were not run against Camry.
 
 The final current-to-PWM path, NvM restore grouping, calibration units and
 physical signal identities retain their existing bounded status until their

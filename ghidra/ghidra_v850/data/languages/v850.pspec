@@ -15,4 +15,16 @@
     <!-- Verified high P1M-E peripheral SFR subset; DataFlash at 0xFF200000 stays nonvolatile. -->
     <range space="ram" first="0xFF600000" last="0xFFFFFFFF"/>
   </volatile>
+  <register_data>
+    <!-- G3M Table 3-60: ICHCLR stays 1 until hardware clears the cache;
+         ICHEN/D1EIV also need not reflect a write immediately. Native
+         volatility keeps reads independent without inventing a completion
+         time. Executors still read/write register state; their hardware
+         model must supply completion. G4MH has a different ICHCLR contract. -->
+    <register name="ICCTRL" volatile="true"/>
+    <!-- G3M Table 3-64: retain externally observable data-buffer commands
+         and enable/disable writes. Volatility does not make CDBCLR a busy
+         status bit: STSR independently masks its write-only bit 1 to zero. -->
+    <register name="CDBCR" volatile="true"/>
+  </register_data>
 </processor_spec>

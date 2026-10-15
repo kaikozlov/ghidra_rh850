@@ -87,6 +87,24 @@ fixture includes `MCFG0`, `PMR`, `MCC`, and `CDBCR` transfers and asserts the
 decoded operand register, so a future name/selection regression fails before
 project analysis.
 
+G3M cache-control reads are not ordinary register round trips. **CDBCR.CDBCLR**
+bit 1 is write-only/read-as-zero (R01US0123EJ0140 Table 3-64, p.110): `STSR`
+masks that bit without discarding `LDSR` command writes. **ICCTRL.ICHCLR** bit 8
+instead reads one until hardware completes clearing (Table 3-60, p.106).
+Both registers use native `register_data` volatility: ICCTRL observations must
+remain hardware-dependent, and CDBCR command/control writes must remain
+externally observable. This is not a complete reserved-bit, cache-content or
+completion-timing model. G4MH is not assigned this G3M protocol: E2x-FCC2
+Table 3.79 (p.345) specifies that its ICHCLR reads zero.
+
+The processor fixture embeds the exact 136 bytes of Camry `8965F3307000`
+function `0x3614`. It exercises both modes with an explicit environment-supplied
+completion event, checks the shared return separately from opaque `SYNCI`, and
+requires reachable high-IR command writes, nonconstant ICCTRL polls and return.
+It does not test rendered C wording. This correction increments G3M registration
+to **0.10**; cached instructions in an older working project are not post-fix
+evidence. The selected Camry corpus must come from a fresh rebuild.
+
 `EIC136`/`EIC292`/`EIC293` remain memory-mapped peripheral registers at
 `0xFFFFB110` / `0xFFFFB248` / `0xFFFFB24A`, accessed via `ld.w`/`st.w`, not
 `ldsr`/`stsr`. They belong to the device profile and are not system-register
@@ -356,9 +374,11 @@ itself changed only inventory-version metadata; the compiled language and
 semantic project rows were unchanged at that milestone. Later P1M-E
 hardware-spec and G3M-instruction corrections intentionally change the
 processor language and persisted semantics; the current source fingerprint and
-compiled-SLA hash live in `data/processor_manifest.baseline.json` and are
-restated in the latest audit round below. Two independent clean rebuilds of
-every registered target agree under each compiled language. See
+compiled-SLA hash live in `data/processor_manifest.baseline.json`. At the recorded
+migration milestones, two independent clean rebuilds of every then-registered
+target agreed. The 2026-10-14 cache correction refreshes Camry; other target
+snapshots retain their recorded processor identities and require a rebuild before
+using the corrected cache semantics. See
 [the migration journal](../history/2026-09/GHIDRA_12_1_4_MIGRATION_2026-09-21.md)
 for the earlier version-only migration evidence.
 

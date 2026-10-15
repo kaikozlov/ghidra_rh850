@@ -55,6 +55,14 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
         + "the complete copied span and both canaries. The callback at "
         + "0xFEBF12B8 corresponds to ROM 0x8628 in this phase; application "
         + "crypto subsequently reuses the same RAM. This is not permanent RAM code.");
+    semanticFunction(0x3614L, "f33_boot_cache_set_enabled", VoidDataType.dataType,
+        new ParameterImpl("enabled", UnsignedCharDataType.dataType, currentProgram))
+        .setComment("Low-byte zero disables the data buffer and instruction cache "
+            + "before requesting both clears; nonzero clears first, then enables both. "
+            + "G3M CDBCR.CDBCLR reads zero; ICCTRL.ICHCLR remains hardware-dependent "
+            + "until completion. Final ICCTRL read, SYNCI and return are real code. "
+            + "Processor fixtures supply an explicit completion event; no cache "
+            + "contents, physical latency or guaranteed completion are inferred.");
     commit.setName("f33_freshness_commit_pending", SourceType.USER_DEFINED);
     commit.setReturnType(VoidDataType.dataType, SourceType.USER_DEFINED);
     commit.replaceParameters(Function.FunctionUpdateType.DYNAMIC_STORAGE_FORMAL_PARAMS,
