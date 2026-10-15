@@ -115,7 +115,7 @@
     "0x0CDFF8": {
       "body_sha256": "c98e0bccbb22324f1f4d55db3666683ad4b8167f689fa9d7d1e27e92d8a47d25",
       "body_size": 182,
-      "decompiled_c_sha256": "0b94ef9eeb31962cc6de3b4f3915f3714f1c083cedd71725ec8592f356debd87",
+      "decompiled_c_sha256": "b4d623da20cdd0c3932b30060d425679697f9f531ee5d795b5cb92c04be8a419",
       "role": "mode-selected B6 supervisor"
     },
     "0x0CE144": {
@@ -133,7 +133,7 @@
     "0x0CE6F4": {
       "body_sha256": "48271f642ac3b97a6c69295487439a0fb7addb7f1ee8f3666e3eef03aa8a4748",
       "body_size": 92,
-      "decompiled_c_sha256": "a044948fe8165542e2a1ed2e1097f32c9df8a0accfdea57b59071e06101c9dd4",
+      "decompiled_c_sha256": "7ee0e4f4b72d71d0943d15eeb2bac6edeb546eb9ac5df76c9e67086374f69fab",
       "role": "B6 supervisor consolidation"
     },
     "0x0CEFFC": {
@@ -229,13 +229,13 @@
     "0x0D0AF6": {
       "body_sha256": "2eda8a4e734a3cd248c83c9cd41f906e0191ee48afa5ba72a73640da00823fc9",
       "body_size": 228,
-      "decompiled_c_sha256": "647c5f42ef44c5f4cf5135fe328c58282bd7d980a761d89bdc17467797d93888",
+      "decompiled_c_sha256": "cc739d7fcf66e1f1a521efc6e7b14773bacf907cf5de320fc03d5ab6d06facac",
       "role": "shared command-composition coordinator"
     },
     "0x0D0EEC": {
       "body_sha256": "e58077923617544434467a6d0279d5037aa2cf1398960ef0fe62126f37e23231",
       "body_size": 488,
-      "decompiled_c_sha256": "efb383c945ae63cc319052875266b9daf4eed2e5661ade30ccab8a241d7d0d07",
+      "decompiled_c_sha256": "95d17582831c0b2cbfcc975e1dddf9bfe8127e18b2827900442fad6a82f6ed57",
       "role": "B6 supervisor cyclic coordinator"
     },
     "0x0D1100": {
@@ -1004,7 +1004,7 @@
   },
   "target": {
     "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
-    "corpus_function_count": 7232,
+    "corpus_function_count": 7240,
     "software_id": "8965F3307000"
   }
 }

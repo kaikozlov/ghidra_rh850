@@ -2031,8 +2031,10 @@ One runtime boundary remains explicit rather than guessed: retained PE1 RAM prov
 five normal PDUs were scheduler-armed, while retained external CAN captures expose
 `0x030` but not the four classic sibling PDUs. The classic messages use a valid sibling
 HTH on the same lower driver node; idle HTH state `0x69` is not a disabled flag. The
-reason for the capture/runtime discrepancy is therefore left unresolved below CanIf or
-in external topology/capture visibility. Deterministic evidence is
+reason for the capture/runtime discrepancy remains unresolved across CanIf/driver
+execution and external topology/capture visibility; armed timers are not
+per-frame completion witnesses. The [transmit lifecycle](camry-f33-eps-tx.md#31-queue-ownership-busy-results-and-the-hardware-boundary)
+keeps those boundaries separate. Deterministic inventory evidence is
 `data/generated/camry_8965F3307000_eps_tx.json` and suite `camry_f33_eps_tx`.
 
 ## 2. Canonical first-class source-reference census

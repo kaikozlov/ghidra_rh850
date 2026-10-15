@@ -165,7 +165,7 @@
     },
     "0x04C14E": {
       "body_size": 114,
-      "decompiled_c_sha256": "3d41ad2e170910481c567f7ff582814aaebf9cf826ef513637573c89a9cc722e",
+      "decompiled_c_sha256": "7d460ccb7e8ad612d722a4f17a7e4621116ae4afd1b3557a84a6f7badd4dc8b0",
       "role": "0x4A3 application staging"
     },
     "0x04C1C0": {
@@ -205,7 +205,7 @@
     },
     "0x04C490": {
       "body_size": 256,
-      "decompiled_c_sha256": "cef5d8c0c577037ed39b41d14773771eff99d69f9f7401f85d60d1fc173ef1ee",
+      "decompiled_c_sha256": "4b03d3f185e60a7bdb9c8368cdd25aa6ad34f22d3322b51fd2310948ef78fe78",
       "role": "0x030 torque/current staging"
     },
     "0x04C738": {
@@ -230,7 +230,7 @@
     },
     "0x04C97A": {
       "body_size": 1162,
-      "decompiled_c_sha256": "5e83dc88dea32e3a8dee514d83b52dcbf4f4a332f315d41ef0d6cb03e66eac9d",
+      "decompiled_c_sha256": "6088230aa4e56c576d1363999b2ac4f18c6627b2481ad618e63a7b678a9c9041",
       "role": "0x030 generated-COM packer"
     },
     "0x04CE08": {
@@ -250,7 +250,7 @@
     },
     "0x07BF60": {
       "body_size": 176,
-      "decompiled_c_sha256": "e04a4b04fabe8f9946e7de983da0375101aed5d7bc8240e4590557be021e7273",
+      "decompiled_c_sha256": "f937e07dc0c7ad80d545cdde02c357b22996fa955b57610266ada4bbaee6fc06",
       "role": "generated-COM group-mask distributor"
     },
     "0x07D1DC": {
@@ -265,27 +265,27 @@
     },
     "0x07D8AE": {
       "body_size": 520,
-      "decompiled_c_sha256": "c18b424099d66cbe8e5576edae1db687dd36babe840ef3981ee3880df68c7b1d",
+      "decompiled_c_sha256": "f33e44f6e39fa0ca17ece6e70ab53cd51b16cb83993605474cd79feb2b66b1c6",
       "role": "generated-COM group activation / timer arming"
     },
     "0x07DB0C": {
       "body_size": 404,
-      "decompiled_c_sha256": "93b27c62b11f388a6b108c161bfcd5585d69ad1ff484137a057e7b57fbfafdc7",
+      "decompiled_c_sha256": "73f8eee1dacf7be0ea6769e2107dcb8b614f010512ecd91d5f0899b3aeadb4f3",
       "role": "generated-COM cyclic timer service"
     },
     "0x07DF14": {
       "body_size": 306,
-      "decompiled_c_sha256": "50e24497e87fb2eec5c875c824174579677b5e28a9e3351457af9673c7d929b1",
+      "decompiled_c_sha256": "a341c787e90f021891059e8fe88ca3d8e6a7bbb6a4372db3a1418d25094c077b",
       "role": "generated-COM transmit dispatcher"
     },
     "0x07E13A": {
       "body_size": 92,
-      "decompiled_c_sha256": "bfd91449dc42859e81f1619d9688e0b2a3b613a0ea47da8a0f0e83cf2542eb3d",
+      "decompiled_c_sha256": "aaa533252d4f28033ffaaf872882d913e7ba2abdd74702c11f11a643ddbc6659",
       "role": "generated-COM pending-transmit service"
     },
     "0x07FEF8": {
       "body_size": 160,
-      "decompiled_c_sha256": "ece2f1afed3065c3750956310ce983fc178bcb78b2e84eb4e4c0a98f1d2fb1ac",
+      "decompiled_c_sha256": "e7d44992f57f186c7fd3e04b3467b14f89cd23da4bdb5c82dcc1841986de4030",
       "role": "direct CanIf transmit class dispatcher"
     },
     "0x0805C6": {
@@ -295,17 +295,17 @@
     },
     "0x081A7E": {
       "body_size": 26,
-      "decompiled_c_sha256": "01d68e17a84f0ac1fc78bc75b4a5165d2731a1fe3b0d1df5f37e743d92e58e24",
+      "decompiled_c_sha256": "e26b5467283a10ebd96255e91ed7632579939c4221bdb762d06f75ef04555487",
       "role": "PduR transmit shim"
     },
     "0x081AB2": {
       "body_size": 112,
-      "decompiled_c_sha256": "ba98827d8813f52896eb5b7715b74d605d96bb5c4272ce21850b179f30cb2b1d",
+      "decompiled_c_sha256": "e1fbb93957c70016d1cb36f8a07ddcc598a143e040e92110adb16b41102eed43",
       "role": "PduR lower-route dispatcher"
     },
     "0x085112": {
       "body_size": 166,
-      "decompiled_c_sha256": "25cfdad736e35e7812434953fe8fb60d0eb5039e7ffdde89a9b7c903a3fbc9ef",
+      "decompiled_c_sha256": "3d9c6e11f38136a545a785507622c764506864e89db9a692bf7ab0556f414390",
       "role": "lower CAN driver transmit dispatcher"
     },
     "0x0853AA": {
@@ -320,7 +320,7 @@
     },
     "0x08ED8E": {
       "body_size": 88,
-      "decompiled_c_sha256": "e8bb8fed4db2363f1bc10a04e5edc8c412d0b1097c3ae8aeb86f15d10b4c4a99",
+      "decompiled_c_sha256": "8e6c76e6e3888c6d2f61a7b4639ee7b80d7e81207f676d46aabc27b9b9167694",
       "role": "SecOC transmit ingress"
     }
   },
@@ -753,7 +753,7 @@
       ],
       "can_fd": true,
       "can_id": "0x030",
-      "configured_only_note": "signals 36, 37 and 283 are assigned to PDU0 by the exact signal->PDU table but no literal call to either generated pack helper exists anywhere in the 7,178-function canonical corpus; no wire field is invented for them",
+      "configured_only_note": "signals 36, 37 and 283 are assigned to PDU0 by the exact signal->PDU table but no literal call to either generated pack helper exists anywhere in the 7,240-function canonical corpus; no wire field is invented for them",
       "configured_without_direct_pack_call": [
         36,
         37,

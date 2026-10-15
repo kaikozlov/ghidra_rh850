@@ -262,7 +262,12 @@ def analyze() -> dict[str, Any]:
 
     # Opposite queue-family insertion exists but cannot populate the family1 receive queue:
     # it explicitly invokes 8E9C6(0,...), while B6 receive invokes 8E9C6(1,...).
-    need("FUN_0008e9c6(0" in c[0x8FABA] and "FUN_0008faba" in c[0x8ED8E], "opposite queue-family path drift")
+    # The guarded R29==0 is forwarded as R6; R7 carries the profile and R8
+    # the application descriptor. Bind this join without decompiler spelling.
+    need(img[0x8EDDA:0x8EDDE] == bytes.fromhex("80ffe00c")
+         and img[0x8FB02:0x8FB24] == bytes.fromhex(
+             "e0e9ca251cf0000d72981b381d300340630f0100e50f431b9309630f0400bfffa6ee"),
+         "opposite queue-family instruction/dataflow drift")
 
     # 5) The timing blind spot: software-ring drain/enqueue and SecOC consume are ordered
     # inside one 7A254 invocation, not separated by a foreground wait.

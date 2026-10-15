@@ -1,0 +1,199 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_compensation_selected_generation_replaces_dynamic_terms",
+  "entry": {
+    "role": "Real D0AF6 interval D0B6A..D0BB6: nonlinear torque shaping, nested assist reduction, retained derivative filtering, optionally refreshed dynamic compensation, three-term bound and ordinary command aggregation. Explicit staged inputs do not establish cross-task atomicity or physical reachability.",
+    "scope": "resolved-address",
+    "address": "0xd0b6a"
+  },
+  "max_instructions": 30000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "r29": "0x5a",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0xd0bb6"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "isolated initialized nested-call stack"
+    },
+    {
+      "address": "0xfebebf00",
+      "size": 3840,
+      "fill": 0,
+      "evidence": "explicit retained assist state through CDFf; later entries supply the selected input and older publication generations"
+    },
+    {
+      "address": "0xfebeabb0",
+      "size": 4,
+      "fill": 0,
+      "evidence": "second model-derivative term before this interval"
+    },
+    {
+      "address": "0xfebeac2b",
+      "hex": "00",
+      "evidence": "ordinary command aggregation; diagnostic branch is not selected"
+    },
+    {
+      "address": "0xfebeac3c",
+      "hex": "00",
+      "evidence": "registered calibration bank0"
+    },
+    {
+      "address": "0xfebeac6c",
+      "hex": "0008",
+      "evidence": "published three-term compensation magnitude bound2048"
+    },
+    {
+      "address": "0xfebeac6e",
+      "hex": "0004",
+      "evidence": "published nonlinear torque scale1024"
+    },
+    {
+      "address": "0xfebec128",
+      "hex": "0010",
+      "evidence": "conditioned torque at real scheduler boundary; upstream conditioning is outside this interval"
+    },
+    {
+      "address": "0xfebec150",
+      "hex": "0004",
+      "evidence": "published input for the selected-generation first-delta suppression path"
+    },
+    {
+      "address": "0xfebec156",
+      "hex": "0100",
+      "evidence": "healthy assist selector for the selected dynamic-map path"
+    },
+    {
+      "address": "0xfebec3a0",
+      "hex": "4101",
+      "evidence": "older nested assist term; this interval does not update its producer"
+    },
+    {
+      "address": "0xfebec43e",
+      "hex": "0004",
+      "evidence": "retained foreground speed gain for the nonlinear torque term"
+    },
+    {
+      "address": "0xfebec45a",
+      "hex": "8001",
+      "evidence": "older foreground angle-rate contribution; its producer is outside this interval"
+    },
+    {
+      "address": "0xfebebf3c",
+      "hex": "e8030000",
+      "evidence": "already-published base assistance; base evaluator precedes this interval"
+    },
+    {
+      "address": "0xfebec4c0",
+      "hex": "9cffffff",
+      "evidence": "older direct torque-rate compensation"
+    },
+    {
+      "address": "0xfebec3ba",
+      "hex": "ceff",
+      "evidence": "older direct model-derivative compensation"
+    },
+    {
+      "address": "0xfebecbe8",
+      "hex": "0a00",
+      "evidence": "separately published ordinary-command addend"
+    }
+  ],
+  "checks": [
+    {
+      "name": "real scheduler interval completes before downstream command scaling",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0xd0bb6"
+    },
+    {
+      "name": "nested calls restore the entry stack",
+      "kind": "register",
+      "register": "sp",
+      "equals": "0xfebe2000"
+    },
+    {
+      "name": "fresh nonlinear torque contribution uses exact ROM and staged speed gain",
+      "kind": "memory",
+      "address": "0xfebec44c",
+      "size": 2,
+      "equals_hex": "0c13"
+    },
+    {
+      "name": "older foreground rate contribution is retained",
+      "kind": "memory",
+      "address": "0xfebec45a",
+      "size": 2,
+      "equals_hex": "8001"
+    },
+    {
+      "name": "three-term sum joins fresh torque with older rate publication",
+      "kind": "memory",
+      "address": "0xfebec420",
+      "size": 4,
+      "equals_hex": "8c140000"
+    },
+    {
+      "name": "three-term result is bounded before ordinary command aggregation",
+      "kind": "memory",
+      "address": "0xfebec43c",
+      "size": 2,
+      "equals_hex": "0008"
+    },
+    {
+      "name": "nested aggregate consumes its separately published prior term",
+      "kind": "memory",
+      "address": "0xfebecc2c",
+      "size": 4,
+      "equals_hex": "41010000"
+    },
+    {
+      "name": "direct torque-rate term advances only on the captured selected generation",
+      "kind": "memory",
+      "address": "0xfebec4c0",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "direct model-derivative term advances only on the captured selected generation",
+      "kind": "memory",
+      "address": "0xfebec3ba",
+      "size": 2,
+      "equals_hex": "0000"
+    },
+    {
+      "name": "ordinary command joins the correct fresh and retained generations",
+      "kind": "memory",
+      "address": "0xfebecc48",
+      "size": 4,
+      "equals_hex": "330d0000"
+    },
+    {
+      "name": "first input-delta sample initializes history",
+      "kind": "memory",
+      "address": "0xfebec264",
+      "size": 1,
+      "equals_hex": "01"
+    },
+    {
+      "name": "first sample commits current torque despite suppressed delta",
+      "kind": "memory",
+      "address": "0xfebec24c",
+      "size": 2,
+      "equals_hex": "0004"
+    }
+  ]
+}

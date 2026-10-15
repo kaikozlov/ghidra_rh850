@@ -2875,9 +2875,32 @@ These calculations preserve machine arithmetic: intermediate signed16 narrowing,
 low32 products, and the actual **left-shift10 then signed division1024** in
 `C74BE/C8718` cannot be algebraically cancelled without losing wrap behavior.
 
-`C7E36` forms `C43C` from `C44C/C45A/C472`: nonlinear torque shaping, a `C172`
-angle-rate branch, and a direction-qualified filtered `C18A` branch. Suppression
-of the latter zeros its input **before its retained filter**, not its output.
+`C7E36` forms `C43C` from **different publication generations**, not a newly
+sampled three-input vector:
+
+| Contribution | Computation and exact-image calibration | Publication |
+|---|---|---|
+| `C44C` | `C7EA2`: nonlinear conditioned torque `C128`; 32-wide interpolation below magnitude4064, otherwise4876; restore sign, narrow after each `C43E/1024` and `AC6E/1024` product, then bound10240 | Fresh in `D0AF6` |
+| `C45A` | `C7FD4`: signed-axis map of wrapping `abs(C172)`, zero through480 and384 from1280; narrow speed and `AE4A` products, then bound768 | Each `D0EEC` invocation |
+| `C472` | `C8124` filters the direction-qualified `C18A` branch; `C81CE` bounds retained filter output to768 | `D0C44` only when captured `CCA0==1` |
+
+`C7E36` retains the signed32 raw sum at `C420`, then bounds it by unsigned
+`AC6C` into signed16 `C43C`. `D0EEC` maskbit3 updates the speed gains:
+the torque gain stays1024 through unsigned `ADF6=7680`, interpolates to614
+at12800 and holds; the angle-rate gain instead reaches zero at12800.
+The separately published torque-slope contribution `C44E` joins the base-curve
+slopes at `C2C32/BF40`; `AC2B==5A` suppresses that slope contribution.
+
+The directional branch qualifies `ADF2>0 && C18A<-80` or the opposite
+`ADF2<0 && C18A>80`. Counts must exceed3. A latched direction can survive
+counter reset until the rate sign releases it. Filtering occurs on `D0EEC`
+maskbit2: `A=A+input-oldY`, then `Y=s16(s32(A<<10)/5100)`.
+Suppression zeros input **before this retained filter**, not its output.
+Both usable map-ordinate families at `AFFE6/AFFFE` are zero in this exact image;
+the recovered initializer and normal producer chain therefore keep a zero
+initialized branch at zero. Generic nonzero-history behavior is not evidence
+that such a history is reachable in normal operation.
+
 `C172` differentiates `AC88`; `C18A/C1A2` derive from separate `AC14` delta/filter
 paths. First deltas are suppressed and rate publications saturate.
 
@@ -2887,6 +2910,16 @@ paths. First deltas are suppressed and rate publications saturate.
 observer-validity-dependent limits. `C41E` retains bounded `AC90` memory;
 `C53A` is a qualified filtered `C18A` term. Exact ROM values make `CC24` and
 `C5A8` zero here, without eliminating their generic code.
+
+The composed native `D0B6A..D0BB6` interval distinguishes
+[fresh torque with retained dynamic terms](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_compensation_nonselected_generation_clamps_fresh_torque.json),
+[negative interpolation with an older rate publication](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_compensation_negative_interpolation_keeps_prior_rate.json)
+and [selected-generation dynamic refresh](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_compensation_selected_generation_replaces_dynamic_terms.json).
+They execute the real nested reduction, filtering, optional dynamic producers,
+three-term bound and ordinary command aggregate. The selected case replaces
+older direct `C3BA/C4C0` while retaining the separately published nested term.
+These are explicit staged software states, not a production-reachability or
+cross-task atomicity proof.
 
 #### Retention and update order are part of the control law
 
@@ -10797,6 +10830,11 @@ of `58B5E` is a “5ms task.” DCM timer equality subtracts to zero and expires
 the next invocation (`remaining < quantum`, not `<=`); its event worker bounds
 the drain using the entry queue count.
 
+Transmit payload production, pending requests, protected snapshots and lower
+queue ownership have separate lifetimes. Their reconstruction and native
+admission cases are owned by the
+[EPS transmit report](camry-f33-eps-tx.md#21-payload-generation-is-not-transmit-admission).
+
 `71378/71398` are a paired nonordinary ABI: save `r1..ep` on the old stack,
 retain that frame in `r2`, switch to `FEBE2800`, and use `r20` for continuation.
 They apply MPAT profiles1/0 without independently saving PSW or disabling
@@ -11121,6 +11159,80 @@ Slot1 compositions exercise the
 and [ordinary/inverse qualification join](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_shared_slot1_qualification_inverse_monitor_join.json),
 including failure50→51, skipped healthy-observed reporting with retained failure,
 and independent diagnostic inhibition.
+
+#### Paired-source monitoring and feedback-cache retention
+
+Slot4 joins primary counter-change monitors, status-mask monitors and delayed
+paired-difference monitors. `5E9F2` schedules the composition in modes0200..0522:
+
+| Status indices | Producers | Inputs / admission |
+|---|---|---|
+| 0/1 | `3DDAE/3DF4E` | Changes in four interleaved snapshots `634C..6353`; own qualification bit7/8 clear |
+| 2/3 | `3E3FA/3E4CC` | Staged halfwords `6360..6366` intersecting mask05A0; own primary status exactly zero and own bit7/8 clear |
+| 6,7 / 8,9 | `3DA8A/3DC16` | Delayed changed bits1/2/10/20 at7554; no wrapper qualification disable |
+
+Either admission byte `7BC2/3==5A` permits the predicates. Its producer admits
+unsigned `7DB0` **or** the corresponding `7DA6/8` inside inclusive2125..4736;
+the EB85-selected calibration alternatives are identical here.
+The counter source chain is
+`62576/62488→627E0→38D6..38D9(+channel stride12)→629A2→66824→50BBC→5CA3A`.
+Local frame/status validation increments wrapping counters. Actual primary
+predicate invocation refreshes its comparison snapshots even on result44.
+Confirmed retained failure bypasses that predicate, so cause bytes and comparison
+generations can remain old while action/reporting repeats.
+The mask snapshots instead come through a separate four-generation ring;
+they are not an atomic companion to the counter snapshots. Physical source
+identity and freshness remain unresolved.
+
+`3E0C2` uses **signed16-wrapped** differences
+`824C−824E`, `824C−8250`, `8250−8252`; failure is outside inclusive±1274.
+Classification and confirmed statuses advance wrapping counters `754F..7552`.
+Later `5CA3A` snapshots these into `642C..642F`, and `3E1EA` compares that
+generation with `7555..7558` to form7554.
+For indices6..9, an own changed bit can fail despite qualification, but passing
+requires **whole7554==0**, own accumulated marker `7B44/46==FFFF`, and own
+qualification bit clear. The FFFF marker is coverage accumulation, not proof
+of fresh physical samples.
+
+Primary pass/fail thresholds are25; confirmation requires26.
+The mask/difference engines use pass-count/window and fail-count/window
+**25/500/25/500**. Window500 is admitted;501 clears pending state and its counts
+while preserving high-water. Confirmed failure remains latched: ordinary healthy
+input does not recover it because the retained-confirmation path bypasses the
+predicate. Qualification disable discards pending state but retains confirmed
+state/high-water; primary disable also clears cause bytes, not snapshots.
+
+Root `3E230` rebuilds slot4 from groups **{0,2,6,7} / {1,3,8,9}**.
+Complete22 selects kinds35/36, whose five words are
+`0002/0040/0400/0000/0080` and `0002/0040/0400/0000/0100`.
+Qualification overlap removes the first three action words while preserving
+the class and marking the rebuilt record current. Indices4/5 are excluded;
+the direct producer census does not establish an active producer for them.
+
+Pending hold `7566=5A` requires a complete11 transition **and an exact11 lower
+status OR** in either group. Otherwise refresh `7576←6292`, `7578←6298`.
+The downstream `47E4C` dataflow substitutes this cache only into `7D78/7D94`;
+live sample/accumulator updates continue. Thus the recovered contract is a
+publication hold, not halted acquisition. Cache blockers `615D/817D`, current
+actions, and diagnostic reporting admission remain independent.
+
+| Causes | Event arguments, hex | DTC index, decimal | Packed code |
+|---|---|---:|---|
+| Primary/mask A | 46/47/48/49/4D | 59 | 55D187 |
+| Primary/mask B | FB/FC/FD/FE/112 | 64 | 55D287 |
+| Paired A | 29/2A | 58 | 55D162 |
+| Paired B | 2B/2C | 63 | 55D262 |
+
+Qualification-selected paired alternatives22/23 or33/34 resolve to index0,
+not independently named DTCs. Failure callbacks use capture-kind10; healthy
+confirmation uses healthy-observed `51E2C`, not ordinary pass reporting.
+
+Native compositions cover [pending cache hold](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_monitor_pair_pending_holds_feedback.json),
+[confirmation and cache refresh](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_monitor_pair_confirmation_releases_feedback.json),
+[qualification at window equality](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_monitor_pair_qualification_window_equality.json)
+and [expiry with opposite retained failure](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_monitor_pair_window_expiry_retains_opposite_failure.json).
+They execute `5EA68..5EA88` through real callbacks, action merging and caches.
+They do **not** execute hardware acquisition or the later `47E4C` consumer.
 
 #### Communication generations and the local status-link boundary
 
@@ -11628,24 +11740,31 @@ The recovered application, fault-action and diagnostic contracts do not require
 a complete peripheral or NvM emulator. Static connectivity and bounded native
 scenarios are not exhaustive semantic closure or vehicle results.
 
-**Verification checkpoint (2026-10-15, selected-angle control, shared monitors,
-communication generations and thermal-history publication).**
-The composed native scenarios linked in the subsystem sections passed on
-unmodified CodeFlash with explicit RAM state, without replacement callees or
-peripheral-model extensions. Independent four-stage rebuilds and signature
-finalization matched; canonical inventory, corpus, semantic coverage and
-function-discovery outputs were regenerated. Live coverage and project parity
-passed, and the matching project/corpus were promoted after clean teardown.
+**Verification checkpoint (2026-10-15, compensation generations, paired-source
+monitors and transmit publication).**
+Composed native scenarios passed against the rebuilt A project with unmodified
+CodeFlash and explicit RAM, without replacement callees or peripheral-model
+extensions. Independent four-stage A/B rebuilds and signature finalization
+matched. Canonical inventory, corpus, semantic coverage and function-discovery
+outputs were regenerated; live coverage and project parity passed. The matching
+project/corpus were promoted after clean teardown. Native scenarios were run on
+A, not independently on B.
 
 Coverage, function-boundary, D5 provenance, assist-oracle, command-cone,
-B6 composition/end-to-end/ingress, CodeFlash, external-ingress and retained-log
-reconciliation gates passed, as did the protected-B6 acceptance ladder.
-Static-only CFG reviews without executable citations are graded **recovered**,
-not **verified**; executed assertions remain scoped to their cited scenarios.
-Retained-log regeneration again reported corrupted events on historical route
+B6 composition/end-to-end/ingress, CodeFlash, external-ingress, retained-log
+reconciliation, protected030 transmit and complete EPS transmit gates passed,
+as did the protected-B6 acceptance ladder. A redundant whole-dictionary MAC-domain
+assertion was removed; profile-derived payload/freshness/length invariants remain.
+Static-only reviews remain **recovered**; **verified** applies to the cited
+executed assertions, not every branch in an annotated function.
+Retained-log regeneration reported corrupted events on historical route
 `0000001c--574c06b528`; raw captures were unchanged. This checkpoint does not
 establish physical persistence, input freshness, vehicle reachability or
 whole-image semantic closure.
+
+The preceding `de19285e` checkpoint contains selected-angle control, shared
+monitors, communication generations and thermal-history publication, with
+composed native execution and matching independent rebuilds.
 
 **Preceding checkpoint `1161dd74` (2026-10-15, thermal models, torque conditioning and monitor/action composition).**
 Independent four-stage rebuilds plus signature finalization agreed on the

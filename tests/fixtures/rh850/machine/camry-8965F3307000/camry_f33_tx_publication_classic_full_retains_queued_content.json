@@ -1,0 +1,41 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_tx_publication_classic_full_retains_queued_content",
+  "entry": {
+    "role": "real cyclic due -> COM admission -> CanIf scratch generation before full queue rejection; old queued content and pending COM request survive; no driver or wire-transmission claim",
+    "scope": "resolved-address",
+    "address": "0x7e13a"
+  },
+  "max_instructions": 20000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {"sp": "0xfebe2000", "gp": "0xfebeb800", "tp": "0x23dfc", "lp": "0x798", "PSW": "0x20", "FPEC": "0x0", "PMR": "0xff00"},
+  "stop_addresses": ["0x798"],
+  "memory": [
+    {"address": "0xfebe1800", "size": 2048, "fill": 165, "evidence": "isolated initialized nested-call stack"},
+    {"address": "0xfebe39dc", "hex": "00000000", "evidence": "explicit empty priority-mask save stack"},
+    {"address": "0xfebe3df0", "size": 4624, "fill": 0, "evidence": "initialized queue, controller, scheduler and staging RAM through4FFF"},
+    {"address": "0xfebe48d8", "hex": "a857", "evidence": "controller initialized"},
+    {"address": "0xfebe48fe", "hex": "5555", "evidence": "controller consistency sentinel"},
+    {"address": "0xfebe4903", "hex": "5a", "evidence": "controller transmit enabled"},
+    {"address": "0xfebe493e", "hex": "8181818181", "evidence": "admitted normal PDU states"},
+    {"address": "0xfebe496e", "hex": "00000100000000000000", "evidence": "only PDU1 countdown becomes due"},
+    {"address": "0xfebe4a34", "hex": "00ff", "evidence": "valid nonbusy PDU bitmap pair"},
+    {"address": "0xfebe4a3b", "hex": "1010010100", "evidence": "stable enabled communication group and both admission classes"},
+    {"address": "0xfebe48e0", "hex": "050000000500", "evidence": "queue1 capacity7 already owns one5-word record; next record needs wrap padding2 plus5 words and cannot fit"},
+    {"address": "0xfebe3e2c", "hex": "04810100fb7efeff51030000deadbeef11223344a5a5a5a55a5a5a5a", "evidence": "valid retained length4 header/inverse ID351 old payload and unused-tail canaries"},
+    {"address": "0xfebe4a68", "hex": "1234b678", "evidence": "newer COM source must not replace retained queued DEADBEEF on queue-full"},
+    {"address": "0xfebe4fb2", "size": 64, "fill": 165, "evidence": "scratch snapshot occurs before capacity check even when queue fails"}
+  ],
+  "checks": [
+    {"name": "real composed scheduler returns", "kind": "register", "register": "PC", "equals": "0x798"},
+    {"name": "nested stack restored", "kind": "register", "register": "sp", "equals": "0xfebe2000"},
+    {"name": "periodic countdown reload happens before failed queue admission", "kind": "memory", "address": "0xfebe496e", "size": 10, "equals_hex": "0000c800000000000000"},
+    {"name": "lower return2 skips pending cleanup so periodic request survives", "kind": "memory", "address": "0xfebe4a39", "size": 2, "equals_hex": "0200"},
+    {"name": "full queue cursor and occupancy unchanged", "kind": "memory", "address": "0xfebe48e0", "size": 6, "equals_hex": "050000000500"},
+    {"name": "failed enqueue never replaces queued header payload or unused tail", "kind": "memory", "address": "0xfebe3e2c", "size": 28, "equals_hex": "04810100fb7efeff51030000deadbeef11223344a5a5a5a55a5a5a5a"},
+    {"name": "newer data nevertheless replaces scratch before rejection", "kind": "memory", "address": "0xfebe4fb2", "size": 8, "equals_hex": "1234b678a5a5a5a5"},
+    {"name": "new COM image remains available for retry", "kind": "memory", "address": "0xfebe4a68", "size": 4, "equals_hex": "1234b678"},
+    {"name": "busy failure still releases dispatcher marker", "kind": "memory", "address": "0xfebe4fb1", "size": 1, "equals_hex": "00"}
+  ]
+}

@@ -469,11 +469,16 @@ def main() -> int:
     # The four non-base-surface Sport differences are not dead calibration.  Three have
     # short, exact paths into D0162 terms C39C/C41E/C5A8; the fourth C6E7E family reaches
     # C39C through C362->C6F1E/C348->C6F58/C358->C6F68.
-    tokens(funcs, 0xC6E7E, "DAT_febec156", "puVar5 + 0xb62")
-    tokens(funcs, 0xC6F1E, "DAT_febec362", "puVar1 + 0xb48")
-    tokens(funcs, 0xC6F58, "DAT_febec358 = DAT_febec348")
-    tokens(funcs, 0xC6F68, "DAT_febec39c", "DAT_febec358")
-    tokens(funcs, 0xC7AB0, "DAT_febec156", "puVar2 + 0xc16")
+    for entry, source, destination in (
+        (0xC6E7E, 0xFEBEC156, 0xFEBEC362),
+        (0xC6F1E, 0xFEBEC362, 0xFEBEC348),
+        (0xC6F58, 0xFEBEC348, 0xFEBEC358),
+        (0xC6F68, 0xFEBEC358, 0xFEBEC39C),
+        (0xC7AB0, 0xFEBEC156, 0xFEBEC416),
+    ):
+        need(data_refs(funcs[entry], source, "READ")
+             and data_refs(funcs[entry], destination, "WRITE"),
+             f"{entry:#x} selector/assist data-reference edge drift")
     need(direct_users(funcs, 0xFEBEC418, "READ") == [0xC7C58], "C418 reader drift")
     need(direct_users(funcs, 0xFEBEC41E, "READ") == [0xD0162], "C41E D0162 reader drift")
     need(direct_users(funcs, 0xFEBEC5A8, "READ") == [0xD0162], "C5A8 D0162 reader drift")

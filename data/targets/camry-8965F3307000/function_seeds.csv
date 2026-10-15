@@ -128,3 +128,11 @@ address,provenance,note
 0x000479C6,firmware/camry-8965F3307000/CodeFlash.bin,monitor callback pointers at28F90/28F94
 0x000479FC,firmware/camry-8965F3307000/CodeFlash.bin,monitor callback pointers at28F98
 0x00047A6A,firmware/camry-8965F3307000/CodeFlash.bin,monitor callback pointers at28FCC
+0x0003DE00,firmware/camry-8965F3307000/CodeFlash.bin,paired-source predicate callback at282F4/282F8
+0x0003DFA0,firmware/camry-8965F3307000/CodeFlash.bin,paired-source predicate callback at28328/2832C
+0x0003E442,firmware/camry-8965F3307000/CodeFlash.bin,paired-source predicate callback at2835C/28360
+0x0003E514,firmware/camry-8965F3307000/CodeFlash.bin,paired-source predicate callback at28390/28394
+0x0003DAEA,firmware/camry-8965F3307000/CodeFlash.bin,paired-source predicate callback at28224/28228
+0x0003DB68,firmware/camry-8965F3307000/CodeFlash.bin,paired-source predicate callback at28258/2825C
+0x0003DC76,firmware/camry-8965F3307000/CodeFlash.bin,paired-source predicate callback at2828C/28290
+0x0003DCF4,firmware/camry-8965F3307000/CodeFlash.bin,paired-source predicate callback at282C0/282C4

@@ -153,7 +153,7 @@
     "0x0007A254": {
       "body_sha256": "30a60286baf7fbc844f1fcd156ead38429f9cbcc9a4e412d94fdf0b58ca06ef8",
       "body_size": 116,
-      "decompiled_c_sha256": "4be26d36568622ffb8bb90b640f096e4706d391d6961380b016c72cd2ffdce95",
+      "decompiled_c_sha256": "d08fec54cd0ef3b2b0f52ae2192f4d1f2f55a4891f68ff9dc6fe7c7244d56922",
       "role": "foreground CAN/PduR/SecOC aggregate"
     },
     "0x0007D72C": {
@@ -255,7 +255,7 @@
     "0x0008E862": {
       "body_sha256": "05ecc3e9977835b273ea0b2434788b8d8b5f7af2d3313052145bb376eb32ee56",
       "body_size": 62,
-      "decompiled_c_sha256": "42d884ff6732dabf4dedd526ca283b582c5d73b0b51df7b9142f41d940a4ccc5",
+      "decompiled_c_sha256": "ef29340df0f3aaedbbf9daa3c90fe19031408847911e3bb4e1402b7821935770",
       "role": "SecOC queue-family resolver"
     },
     "0x0008E8A0": {
@@ -279,7 +279,7 @@
     "0x0008ED8E": {
       "body_sha256": "e6c911e4b184c893852edc5bdb6d4def70c576e874c9ad9882dbe9e03ca58697",
       "body_size": 88,
-      "decompiled_c_sha256": "2ef5b78cd15da8cc17227bcd752086a04e5032bad65ee2ce31b9cb85dac2c710",
+      "decompiled_c_sha256": "8e6c76e6e3888c6d2f61a7b4639ee7b80d7e81207f676d46aabc27b9b9167694",
       "role": "opposite queue-family public ingress"
     },
     "0x0008EE7C": {
@@ -339,7 +339,7 @@
     "0x0008FABA": {
       "body_sha256": "e937244dfdbef8ec132299da455ddf9d6f5ff5cad5defed1b0485592a3b4aefd",
       "body_size": 152,
-      "decompiled_c_sha256": "e70e87c8353c5c41320cd62a41454c90a5873ebabf583d0337a3259a53031131",
+      "decompiled_c_sha256": "6707f74ea8cc2b6e8bbe68d0d5b63bba23366af977a74770ca52afd92328e563",
       "role": "opposite queue-family insertion helper"
     },
     "0x00090204": {
@@ -537,8 +537,8 @@
     "Joined to the Sep-10 ID63 marker experiment, the direct Panda B6 disappears before successful F33 controller1 decode/CanIf admission while native B6 continues to reach the same family1/profile2 queue."
   ],
   "target": {
-    "canonical_function_count": 7232,
-    "canonical_inventory_sha256": "686fc1d0092225f9893237141a7529ae76417e543fb2de614b0a1b510e6a23f5",
+    "canonical_function_count": 7240,
+    "canonical_inventory_sha256": "dbeceda2f96bc1637fef03eae2904d80ad71d4aadc45bb068b59de2f0aa012a1",
     "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
     "software_id": "8965F3307000"
   }

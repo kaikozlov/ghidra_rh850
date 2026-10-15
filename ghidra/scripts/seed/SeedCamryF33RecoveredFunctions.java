@@ -3739,6 +3739,258 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     semanticData(0xFEBECB20L, new ArrayDataType(u16, 8, 2), "f33_angle_controller_envelope_parameters",
         "Gain,rise,fall,fast,snap,old denominator,final slew,final absolute. Mode7 retains coefficients.");
   }
+  private void annotateCompensationPublication() throws Exception {
+    DataType v = VoidDataType.dataType;
+    DataType s16 = ShortDataType.dataType;
+    DataType u16 = UnsignedShortDataType.dataType;
+    DataType s32 = IntegerDataType.dataType;
+    semanticFunction(0xC7C78L, "f33_initialize_three_term_compensation", v)
+        .setComment("Clear C420/C43C and initialize both retained gain families to1024.");
+    semanticFunction(0xC7E36L, "f33_bound_three_term_compensation", v)
+        .setComment("Sum fresh nonlinear torqueC44C with separately published C45A/C472; retain raw signed32 C420, bound by unsigned AC6C and publish signed16 C43C.");
+    semanticFunction(0xC7E62L, "f33_initialize_nonlinear_torque_compensation", v)
+        .setComment("Clear speed gain, curve products, bounded term and separate slope contribution.");
+    semanticFunction(0xC7E88L, "f33_update_nonlinear_torque_speed_gain", v)
+        .setComment("Unsigned ADF6 through AFB8E: gain1024 through7680, interpolate to614 at12800, then retain614.");
+    semanticFunction(0xC7EA2L, "f33_update_nonlinear_torque_compensation", v)
+        .setComment("Unsigned wrapping magnitude of C128 selects32-wide interpolation below index127; otherwise4876. Restore sign, narrow after C43E/1024 and AC6E/1024 products, bound10240 into C44C.");
+    semanticFunction(0xC7F44L, "f33_update_nonlinear_torque_slope", v)
+        .setComment("Use AFDA8 indexed by abs(C128)>>5, else2713. Narrow speed-scaled slope; AC2B5A publishes C44E zero, otherwise scale by AC6E/1024.");
+    semanticFunction(0xC7FA0L, "f33_initialize_angle_rate_compensation", v)
+        .setComment("Clear C450..C45A angle-rate compensation publications.");
+    semanticFunction(0xC7FBAL, "f33_update_angle_rate_compensation_speed_gain", v)
+        .setComment("Unsigned ADF6 through AFFC4: gain1024 through7680, interpolate tozero at12800, then zero.");
+    semanticFunction(0xC7FD4L, "f33_update_angle_rate_compensation", v)
+        .setComment("Signed sentinel lookup of wrapping abs(C172): zero through480, rise to384 at1280. Restore sign; narrow C450/1024 and AE4A/1024 products; bound768 into C45A.");
+    semanticFunction(0xC8042L, "f33_initialize_directional_rate_compensation", v)
+        .setComment("Clear counters/latch, map products, retained accumulatorC45C/filterC46C and independently published C472.");
+    semanticFunction(0xC8070L, "f33_qualify_opposed_rate_direction", v)
+        .setComment("ADF2>0 and C18A<-80 qualify direction1; ADF2<0 and C18A>80 direction2. Increment while count<=3; strict>3 latches. Counts may reset while latch persists until the rate sign releases it.");
+    semanticFunction(0xC810AL, "f33_update_directional_rate_speed_gain", v)
+        .setComment("Unsigned ADF6 lookup at AFFFE. All ordinary ordinates are zero in this exact image.");
+    semanticFunction(0xC8124L, "f33_filter_directional_rate_compensation", v)
+        .setComment("Gate signed mapped C18A with retained direction and speed gain, AE4A and optional CDF4/CDEC suppression, then C42C scaling. Suppression zeros input, not history. Update A=A+input-oldY; Y=s16(s32(A<<10)/5100). Exact AFFE6 ordinates are zero.");
+    semanticFunction(0xC81CEL, "f33_publish_directional_rate_compensation", v)
+        .setComment("Bound retained C46C to768 into C472. D0C44 invokes on captured CCA0==1, separately from foreground filter updates.");
+    semanticFunction(0xD0C44L, "f33_run_observer_publication_slice", v)
+        .setComment("Capture CCA0/CCA1. Alternate observer acquisition and C472 publication use old CCA0==1; increment modulo2/modulo10 afterward. This is software generation ordering, not a clock or jitter measurement.");
+    semanticFunction(0xC2C32L, "f33_publish_combined_assist_slope", v)
+        .setComment("Interpolate prior base-curve slopes BF34/BF36 with C1A6, add nonlinear slopeC44E, then clamp by AF88C into signed16 BF40.");
+    semanticFunction(0xC6274L, "f33_repair_torque_rate_filter_state", v)
+        .setComment("Two stages independently compare current/mirror outputs and accumulator residuals. Strict mirror windows; residual equality repairs accumulator. Publish per-cycle and latched repair bits before filtering.");
+    semanticFunction(0xC61EAL, "f33_filter_torque_rate_compensation_input", v)
+        .setComment("Cascade retained accumulators with AF860/AF864, preserving low32 shifts and signed division. Publish mirrors and bound second output by AF868 into C266.");
+    semanticFunction(0xC73EEL, "f33_map_first_model_derivative_compensation", v)
+        .setComment("Signed C23C lookup at B11D2 times bank-specific combined-slope map and retained C3B0 gain; publish signed32 C3A4.");
+    semanticFunction(0xC7450L, "f33_map_second_model_derivative_compensation", v)
+        .setComment("Signed C23E lookup at B11E6, narrow its C3B2-scaled product before B11AE slope scaling; publish signed32 ABB0.");
+    semanticFunction(0xC74ACL, "f33_publish_model_derivative_compensation", v)
+        .setComment("Add ABB0+C3A4, retain C3AC, then real low32 shift10/signed division1024 into C3A8 before B11AC bound into C3BA. Shift/division cannot be cancelled under wrap.");
+    semanticFunction(0xC6F58L, "f33_sum_nonlinear_and_moving_assist", v)
+        .setComment("Publish C358=C348+C5F0 with machine signed32 arithmetic.");
+    semanticFunction(0xC6F68L, "f33_bound_nonlinear_and_moving_assist", v)
+        .setComment("Bound C358 to exact B00E8=5120 and publish signed32 C39C for the nested assist aggregate.");
+    semanticFunction(0xD0768L, "f33_interpolate_signed_sentinel_curve", s32,
+        new ParameterImpl("points", new PointerDataType(s16, 4), currentProgram),
+        new ParameterImpl("input", s16, currentProgram))
+        .setComment("Signed16 axis and ordinate pairs; 7FFF axis sentinel returns previous ordinate. Endpoint hold or signed32 linear interpolation with sign-extended16 result; no table-order/extent validation.");
+    semanticFunction(0xD0844L, "f33_interpolate_unsigned_axis_sentinel_curve", s32,
+        new ParameterImpl("points", new PointerDataType(u16, 4), currentProgram),
+        new ParameterImpl("input", u16, currentProgram))
+        .setComment("Unsigned16 axis, signed16 ordinate pairs; FFFF axis sentinel. Endpoint hold or signed32 interpolation and sign-extended16 result. SXH and ZXH input contracts differ from D0768.");
+    semanticData(0xAFFD8L, s32, "f33_directional_rate_filter_denominator",
+        "Exact5100; scalar denominator, not a code pointer.");
+    semanticData(0xB00E8L, s32, "f33_nonlinear_moving_assist_limit",
+        "Exact5120 signed32 nested-term magnitude bound, not a pointer.");
+    semanticData(0xB1324L, s32, "f33_nested_assist_sum_limit",
+        "Exact5120 signed32 aggregate bound, not a pointer.");
+  }
+  private void annotateTxPublication() throws Exception {
+    CategoryPath category = new CategoryPath("/CamryF33");
+    DataType v = VoidDataType.dataType;
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u16 = UnsignedShortDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    DataType s32 = IntegerDataType.dataType;
+    DataType bytes = new PointerDataType(u8, 4);
+    DataType halfwords = new PointerDataType(u16, 4);
+    StructureDataType info = new StructureDataType(category, "F33PduInfo", 0);
+    info.setPackingEnabled(true);
+    info.add(bytes, "data", "Application or queued payload pointer.");
+    info.add(u16, "length", "Byte extent.");
+    info.add(u16, "opaque_06", "Not read by the recovered TX paths.");
+    DataType infoPointer = new PointerDataType(resolve(info), 4);
+    StructureDataType record = new StructureDataType(category, "F33CanIfTxRecord", 0);
+    record.setPackingEnabled(true);
+    record.add(u32, "raw_id", "Includes protocol/format flags.");
+    record.add(u16, "source_pdu", "Decoded source namespace.");
+    record.add(u8, "class_flags", "Queue/callback class, not an on-wire byte.");
+    record.add(u8, "length", "Payload byte extent.");
+    record.add(bytes, "data", "Copied before ordinary controller admission.");
+    DataType recordPointer = new PointerDataType(resolve(record), 4);
+    StructureDataType queue = new StructureDataType(category, "F33CanQueueDescriptor", 0);
+    queue.setPackingEnabled(true);
+    queue.add(u16, "capacity_words", "Includes end allowance.");
+    queue.add(u8, "opaque_02", "Unassigned descriptor byte.");
+    queue.add(u8, "completion_policy", "Zero permits immediate next scheduling.");
+    queue.add(u8, "hardware_group", "Retained hardware-state selector.");
+    queue.add(u8, "opaque_05", "Unassigned descriptor byte.");
+    queue.add(u16, "driver_handle", "Handle in the lower driver namespace.");
+    queue.add(u16, "queue_index", "Selects cursor triple and buffer.");
+    DataType queueType = resolve(queue);
+    DataType queuePointer = new PointerDataType(queueType, 4);
+    StructureDataType driver = new StructureDataType(category, "F33CanDriverPdu", 0);
+    driver.setPackingEnabled(true);
+    driver.add(u16, "confirmation_handle", "Software completion routing.");
+    driver.add(u8, "length", "Payload byte extent.");
+    driver.add(u8, "opaque_03", "Not assigned an OEM meaning.");
+    driver.add(u32, "raw_id", "Bit30 selects the FD route.");
+    driver.add(bytes, "data", "Retained queue payload, not live COM storage.");
+    DataType driverPointer = new PointerDataType(resolve(driver), 4);
+    StructureDataType slot = new StructureDataType(category, "F33SecOcQueueSlot", 0);
+    slot.setPackingEnabled(true);
+    slot.add(u16, "length", "Application extent excluding reserved trailer.");
+    slot.add(u16, "next", "Queue linkage.");
+    slot.add(u16, "next_inverse", "Complemented linkage.");
+    slot.add(u16, "opaque_06", "Unassigned slot field.");
+    semanticFunction(0x7E13AL, "f33_service_com_tx_publication", v)
+        .setComment("Apply group transitions, service countdowns, then bounded dispatch. Exact21C5E allows one attempt per group per invocation.");
+    semanticFunction(0x7D8AEL, "f33_apply_com_tx_group_transition", v,
+        new ParameterImpl("group", u8, currentProgram))
+        .setComment("Enable/disable clears pending classes and updates flags/countdowns; neither transition copies or clears live COM payload.");
+    semanticFunction(0x7DB0CL, "f33_service_com_tx_countdowns", v)
+        .setComment("Advance periodic and minimum-delay countdowns; due requests enter pending bitmaps separately from payload generation.");
+    semanticFunction(0x7DCA0L, "f33_select_admissible_com_tx", s32,
+        new ParameterImpl("group", u8, currentProgram),
+        new ParameterImpl("selected_pdu", halfwords, currentProgram))
+        .setComment("Select admitted event before periodic request, zero minimum delay, active group and valid clear inhibit pair. Return2 event,1 periodic,-20 none.");
+    semanticFunction(0x7DF14L, "f33_dispatch_one_com_tx", s32,
+        new ParameterImpl("group", u8, currentProgram))
+        .setComment("Sample live COM after admission. Lower return2 maps to-19 and retains pending; other lower failures and success consume both pending classes. Exact normal descriptors bypass optional COM scratch/callout.");
+    semanticFunction(0x81A7EL, "f33_route_com_tx", u32,
+        new ParameterImpl("pdu", u16, currentProgram),
+        new ParameterImpl("info", infoPointer, currentProgram))
+        .setComment("Map route namespace and forward R7 descriptor unchanged to the configured upper TX dispatcher.");
+    semanticFunction(0x81AB2L, "f33_dispatch_upper_tx_route", u32,
+        new ParameterImpl("pdu", u16, currentProgram),
+        new ParameterImpl("info", infoPointer, currentProgram))
+        .setComment("Route classic traffic to CanIf and protected PDU0 to SecOC; R7 descriptor is a real preserved argument.");
+    semanticFunction(0x7FEF8L, "f33_canif_transmit", u32,
+        new ParameterImpl("source_pdu", u16, currentProgram),
+        new ParameterImpl("info", infoPointer, currentProgram))
+        .setComment("Decode source namespace and construct transmit record. Real R10 return defaults1 and propagates7FD46 status; not void.");
+    semanticFunction(0x7FD46L, "f33_snapshot_and_enqueue_can_tx", u32,
+        new ParameterImpl("controller", u8, currentProgram),
+        new ParameterImpl("route", u16, currentProgram),
+        new ParameterImpl("record", recordPointer, currentProgram))
+        .setComment("Normal class first copies up to64 bytes into4FB2 and calls811BE, before controller/route/capacity admission. Queue-full2 preserves old queue but scratch already contains newer data.");
+    semanticFunction(0x7FC0EL, "f33_enqueue_large_can_tx", u32,
+        new ParameterImpl("record", recordPointer, currentProgram),
+        new ParameterImpl("queue_index", u16, currentProgram),
+        new ParameterImpl("capacity_words", u16, currentProgram))
+        .setComment("Large-record queue path with retained cursor/capacity accounting; queue admission is not physical transmission.");
+    semanticFunction(0x8ED8EL, "f33_secoc_transmit", u32,
+        new ParameterImpl("source_pdu", u16, currentProgram),
+        new ParameterImpl("info", infoPointer, currentProgram))
+        .setComment("Require54F4FE01, nonnull descriptor/data, mapped source0 and exact allowed length4..32 before protected claim.");
+    semanticFunction(0x8FABAL, "f33_claim_secoc_tx_snapshot", u32,
+        new ParameterImpl("profile", u16, currentProgram),
+        new ParameterImpl("info", infoPointer, currentProgram))
+        .setComment("Require5568E1/55695A; claimD2/A5 and increment generation before copy. Subtract four reserved bytes. Occupied rejection21 preserves prior snapshot/head/count but COM consumes this request.");
+    semanticFunction(0x8025AL, "f33_service_can_tx_queues", v,
+        new ParameterImpl("controller", u8, currentProgram))
+        .setComment("Scan retained queues and attempt hardware admission; separate from COM publication and queue-copy generation.");
+    semanticFunction(0x8015CL, "f33_attempt_queued_can_tx", v,
+        new ParameterImpl("controller", u8, currentProgram),
+        new ParameterImpl("route_index", u8, currentProgram),
+        new ParameterImpl("descriptor", queuePointer, currentProgram),
+        new ParameterImpl("cursors", halfwords, currentProgram))
+        .setComment("Validate retained record/inverse and bounds, pass queued payload to85112. Rejection marks3C without consuming occupancy; admission marks hardware group and queue5A.");
+    semanticFunction(0x8043CL, "f33_complete_queued_can_tx", v,
+        new ParameterImpl("controller_route", u16, currentProgram))
+        .setComment("Queue state5A advances read cursor and subtracts occupied words; state3C does not consume the queued record.");
+    semanticFunction(0x85112L, "f33_driver_admit_can_tx", u32,
+        new ParameterImpl("driver_handle", u16, currentProgram),
+        new ParameterImpl("pdu", driverPointer, currentProgram))
+        .setComment("Require physical-channel initialization sentinel; choose classic853AA or FD8549E by raw-ID bit30. Subsequent CFDTMC request store is not proof of bus delivery.");
+    semanticFunction(0x815A0L, "f33_route_secured_lower_tx", u32,
+        new ParameterImpl("pdu", u16, currentProgram),
+        new ParameterImpl("info", infoPointer, currentProgram))
+        .setComment("Forward secured lower TX with preserved descriptor R7; no omitted argument in the actual ABI.");
+    semanticFunction(0x901D2L, "f33_secoc_lower_tx", u32,
+        new ParameterImpl("pdu", u16, currentProgram),
+        new ParameterImpl("info", infoPointer, currentProgram))
+        .setComment("Protected lower-route forwarding preserves R7 descriptor; application snapshot admission remains distinct from MAC/lower transmission completion.");
+    semanticData(0x21ACCL, new ArrayDataType(queueType, 5, 10), "f33_can_queue_descriptors",
+        "Five10-byte queue/hardware descriptors; software queue admission is separate from driver admission.");
+    semanticData(0xFEBE48DAL, new ArrayDataType(u16, 15, 2), "f33_can_tx_queue_cursors",
+        "Five triples: write cursor, read cursor, occupied words.");
+    semanticData(0xFEBE493EL, new ArrayDataType(u8, 5, 1), "f33_com_tx_pdu_flags", "Normal COM TX PDU flags.");
+    semanticData(0xFEBE496EL, new ArrayDataType(u16, 5, 2), "f33_com_tx_periodic_countdowns", "Separate from payload generation.");
+    semanticData(0xFEBE4978L, new ArrayDataType(u16, 5, 2), "f33_com_tx_minimum_delay_countdowns", "Zero required for dispatch admission.");
+    semanticData(0xFEBE4A34L, new ArrayDataType(u8, 2, 1), "f33_com_tx_inhibit_pair", "Bitmap and inverse; inconsistent pair rejects admission.");
+    semanticData(0xFEBE4A39L, new ArrayDataType(u8, 6, 1), "f33_com_tx_pending_and_group_state",
+        "Periodic/event pending, desired/current group mask, event/periodic admission enables.");
+    semanticData(0xFEBE5458L, resolve(slot), "f33_secoc_tx_queue_slot", "Initialized after application copy, before head publication.");
+    semanticData(0xFEBE5460L, new ArrayDataType(u16, 2, 2), "f33_secoc_tx_queue_head_pair", "Head and inverse.");
+    semanticData(0xFEBE5488L, new ArrayDataType(u8, 32, 1), "f33_secoc_tx_application_snapshot", "Ordinary32-byte COM input copies28 application bytes here.");
+  }
+  private void annotatePairedSourceMonitorComposition() throws Exception {
+    DataType v = VoidDataType.dataType;
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    semanticFunction(0x3DDAEL, "f33_step_paired_source_counter_monitor_a", v)
+        .setComment("Own qualification bit7 clear admits primary A; exact pass/fail25, strict26 confirmation. Disable clears cause bytes but retains confirmed state.");
+    semanticFunction(0x3DF4EL, "f33_step_paired_source_counter_monitor_b", v)
+        .setComment("Parallel primary B gated by bit8, with separate counter snapshots and retained state.");
+    semanticFunction(0x3E3FAL, "f33_step_paired_source_mask_monitor_a", v)
+        .setComment("Own bit7 admission and primary status exactlyzero precede maskA monitor; pass/fail25 with windows500.");
+    semanticFunction(0x3E4CCL, "f33_step_paired_source_mask_monitor_b", v)
+        .setComment("Parallel maskB monitor under own bit8; staged mask and counter snapshots need not share an acquisition generation.");
+    semanticFunction(0x3DA8AL, "f33_step_paired_source_difference_monitors_a", v)
+        .setComment("Step delayed-difference indices6/7 without wrapper qualification disable. Qualification can permit failure while preventing pass.");
+    semanticFunction(0x3DC16L, "f33_step_paired_source_difference_monitors_b", v)
+        .setComment("Parallel delayed-difference indices8/9, with independent retained windows and diagnostic reporting admission.");
+    semanticFunction(0x3E172L, "f33_accumulate_paired_source_difference_counts", v)
+        .setComment("Classify signed wrapped differences and retained failures; increment wrapping counters754F..7552. Later snapshot/recomparison, not direct per-cycle fail status.");
+    semanticFunction(0x3E1EAL, "f33_publish_paired_source_difference_changes", v)
+        .setComment("Compare642C..642F against7555..7558, publish changed bits1/2/10/20 at7554 and refresh comparison snapshots.");
+    semanticFunction(0x3E0C2L, "f33_classify_paired_source_sample_differences", u32)
+        .setComment("Signed16-wrapped824C-824E,824C-8250,8250-8252 outside inclusive[-1274,1274] set bits0/1/2; equality does not fail.");
+    semanticFunction(0x3E112L, "f33_classify_paired_source_difference_first", u32,
+        new ParameterImpl("mask", u32, currentProgram))
+        .setComment("Combine raw difference mask with confirmed first-group statuses.");
+    semanticFunction(0x3E132L, "f33_classify_paired_source_difference_middle", u32,
+        new ParameterImpl("mask", u32, currentProgram))
+        .setComment("Combine middle raw difference and retained paired monitor confirmations.");
+    semanticFunction(0x3E152L, "f33_classify_paired_source_difference_last", u32,
+        new ParameterImpl("mask", u32, currentProgram))
+        .setComment("Combine last raw difference and retained paired monitor confirmations.");
+    semanticFunction(0x3E3C4L, "f33_publish_paired_source_monitor_status", v,
+        new ParameterImpl("index", u32, currentProgram),
+        new ParameterImpl("packed", u32, currentProgram))
+        .setComment("Unsigned low8 index<10: low status byte to755C[index], bits16..23 to756A[index]. Normal producer census covers0/1/2/3/6/7/8/9.");
+    semanticFunction(0x3E230L, "f33_publish_paired_source_monitor_actions", v)
+        .setComment("Rebuild slot4 from groups0/2/6/7 and1/3/8/9; confirmed22 selects kinds35/36. Transition11 plus exact lower OR11 holds7576/7578; otherwise refresh6292/6298. Diagnostic admission does not gate action/caches.");
+    semanticFunction(0x3DE00L, "f33_classify_paired_source_counter_changes_a", u32)
+        .setComment("Compare four wrapping counter snapshots; actual invocation refreshes them even on44, but confirmed retained failure bypasses predicate.");
+    semanticFunction(0x3DFA0L, "f33_classify_paired_source_counter_changes_b", u32)
+        .setComment("Compare four wrapping counter snapshots; actual invocation refreshes them even on44, but confirmed retained failure bypasses predicate.");
+    semanticFunction(0x3E442L, "f33_classify_paired_source_status_masks_a", u32)
+        .setComment("Admission and own primary status exactlyzero required; either staged mask intersecting05A0 fails.");
+    semanticFunction(0x3E514L, "f33_classify_paired_source_status_masks_b", u32)
+        .setComment("Admission and own primary status exactlyzero required; either staged mask intersecting05A0 fails.");
+    semanticFunction(0x3DAEAL, "f33_classify_paired_source_delayed_difference_aa", u32)
+        .setComment("Changed bit fails under admission and primary-zero; pass requires whole7554 zero, ownFFFF marker and own qualification bit clear, otherwise33.");
+    semanticFunction(0x3DB68L, "f33_classify_paired_source_delayed_difference_ab", u32)
+        .setComment("Changed bit fails under admission and primary-zero; pass requires whole7554 zero, ownFFFF marker and own qualification bit clear, otherwise33.");
+    semanticFunction(0x3DC76L, "f33_classify_paired_source_delayed_difference_ba", u32)
+        .setComment("Changed bit fails under admission and primary-zero; pass requires whole7554 zero, ownFFFF marker and own qualification bit clear, otherwise33.");
+    semanticFunction(0x3DCF4L, "f33_classify_paired_source_delayed_difference_bb", u32)
+        .setComment("Changed bit fails under admission and primary-zero; pass requires whole7554 zero, ownFFFF marker and own qualification bit clear, otherwise33.");
+    semanticData(0xFEBE755CL, new ArrayDataType(u8, 10, 1), "f33_paired_source_monitor_status", "Slot4 lower statuses;4/5 excluded from reduction.");
+    semanticData(0xFEBE756AL, new ArrayDataType(u8, 10, 1), "f33_paired_source_monitor_transition", "Upper packed transition bytes.");
+  }
   private void annotateServiceLifecycle() throws Exception {
     DataType v = VoidDataType.dataType;
     DataType u8 = UnsignedCharDataType.dataType;
@@ -4158,6 +4410,9 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     annotateAssistComposition();
     annotateAssistConditioning();
     annotateAngleControllerComposition();
+    annotateCompensationPublication();
+    annotateTxPublication();
+    annotatePairedSourceMonitorComposition();
     annotateApplicationLifecycle();
     annotateServiceLifecycle();
     annotateDataFlashReads();
