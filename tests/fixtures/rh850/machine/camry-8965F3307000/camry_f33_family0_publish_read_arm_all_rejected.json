@@ -1,0 +1,125 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_family0_publish_read_arm_all_rejected",
+  "entry": {
+    "role": "actual Camry family0 instructions with explicit synthetic RAM; real callees, no firmware replacement",
+    "scope": "resolved-address",
+    "address": "0x684d0"
+  },
+  "max_instructions": 20000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xff00",
+    "r6": "0xcafe0005"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "isolated initialized nested-call stack; existing consensus fixture convention"
+    },
+    {
+      "address": "0xfebf0690",
+      "hex": "00a5",
+      "evidence": "family0 idle and family1 canary"
+    },
+    {
+      "address": "0xfebf033d",
+      "hex": "5a",
+      "evidence": "prior completion"
+    },
+    {
+      "address": "0xfebf0372",
+      "hex": "4500",
+      "evidence": "prior selected handle"
+    },
+    {
+      "address": "0xfebf03bc",
+      "hex": "78563412",
+      "evidence": "prior sequence"
+    },
+    {
+      "address": "0xfebf6080",
+      "hex": "02a502a502a502a502a502a5",
+      "evidence": "each real743BC rejects already-pending handles40..45"
+    },
+    {
+      "address": "0xfebf0c88",
+      "hex": "6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d",
+      "evidence": "read staging must not acquire data"
+    },
+    {
+      "address": "0xfebef42c",
+      "hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "evidence": "destination with four-byte leading/trailing canaries"
+    }
+  ],
+  "checks": [
+    {
+      "name": "exact publication extent or preserved destination",
+      "kind": "memory",
+      "address": "0xfebef42c",
+      "size": 16,
+      "equals_hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5"
+    },
+    {
+      "name": "selected handle",
+      "kind": "memory",
+      "address": "0xfebf0372",
+      "size": 2,
+      "equals_hex": "ffff"
+    },
+    {
+      "name": "selected sequence",
+      "kind": "memory",
+      "address": "0xfebf03bc",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "family0 completion",
+      "kind": "memory",
+      "address": "0xfebf033d",
+      "size": 1,
+      "equals_hex": "ff"
+    },
+    {
+      "name": "family0 busy transition; family1 untouched",
+      "kind": "memory",
+      "address": "0xfebf0690",
+      "size": 2,
+      "equals_hex": "ffa5"
+    },
+    {
+      "name": "all logical statuses unchanged despite six read calls",
+      "kind": "memory",
+      "address": "0xfebf6080",
+      "size": 12,
+      "equals_hex": "02a502a502a502a502a502a5"
+    },
+    {
+      "name": "arming leaves staging unchanged",
+      "kind": "memory",
+      "address": "0xfebf0c88",
+      "size": 64,
+      "equals_hex": "6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d"
+    },
+    {
+      "name": "actual function return",
+      "kind": "register",
+      "register": "r10",
+      "equals": "0x0"
+    }
+  ]
+}

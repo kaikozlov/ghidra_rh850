@@ -1,0 +1,98 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_acquisition_budget_family1_equal_limit",
+  "entry": {
+    "role": "actual67D96 permits15+3==18 for disabled ROM object7 (firstFFFF makes real68A6C reject without hardware), then stops before object8 at21",
+    "scope": "resolved-address",
+    "address": "0x67d96"
+  },
+  "max_instructions": 20000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xff00",
+    "r6": "0xf"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "isolated initialized nested-call stack"
+    },
+    {
+      "address": "0xfebf068e",
+      "hex": "0700",
+      "evidence": "cursor7 selects registered disabled descriptor"
+    },
+    {
+      "address": "0xfebf0358",
+      "size": 16,
+      "fill": 0,
+      "evidence": "not-complete inputs"
+    },
+    {
+      "address": "0xfebf0328",
+      "size": 16,
+      "fill": 165,
+      "evidence": "status canaries"
+    },
+    {
+      "address": "0xfebf1088",
+      "size": 16,
+      "fill": 165,
+      "evidence": "xor55 canaries"
+    },
+    {
+      "address": "0xfebf10ac",
+      "size": 16,
+      "fill": 165,
+      "evidence": "xorAA canaries"
+    }
+  ],
+  "checks": [
+    {
+      "name": "actual return register",
+      "kind": "register",
+      "register": "r10",
+      "equals": "0x0"
+    },
+    {
+      "name": "exact-limit object advances; next over-limit object stays unprocessed",
+      "kind": "memory",
+      "address": "0xfebf068e",
+      "size": 2,
+      "equals_hex": "0800"
+    },
+    {
+      "name": "only disabled object7 publishes nonzero-class11",
+      "kind": "memory",
+      "address": "0xfebf0328",
+      "size": 16,
+      "equals_hex": "a5a5a5a5a5a5a511a5a5a5a5a5a5a5a5"
+    },
+    {
+      "name": "only object7 xor55 publishes",
+      "kind": "memory",
+      "address": "0xfebf1088",
+      "size": 16,
+      "equals_hex": "a5a5a5a5a5a5a544a5a5a5a5a5a5a5a5"
+    },
+    {
+      "name": "only object7 xorAA publishes",
+      "kind": "memory",
+      "address": "0xfebf10ac",
+      "size": 16,
+      "equals_hex": "a5a5a5a5a5a5a5bba5a5a5a5a5a5a5a5"
+    }
+  ]
+}

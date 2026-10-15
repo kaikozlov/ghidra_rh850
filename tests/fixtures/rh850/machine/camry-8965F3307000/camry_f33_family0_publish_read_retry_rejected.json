@@ -1,0 +1,127 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_family0_publish_read_retry_rejected",
+  "entry": {
+    "role": "actual Camry family0 instructions with explicit synthetic RAM; real callees, no firmware replacement",
+    "scope": "resolved-address",
+    "address": "0x68e9e"
+  },
+  "max_instructions": 20000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xff00",
+    "r6": "0xbeef0006",
+    "r7": "0xcafe0045",
+    "r8": "0xdead0001"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "isolated initialized nested-call stack; existing consensus fixture convention"
+    },
+    {
+      "address": "0xfebf033d",
+      "hex": "ff",
+      "evidence": "68ECA completion admission FF"
+    },
+    {
+      "address": "0xfebf0690",
+      "hex": "ffa5",
+      "evidence": "family0 busy and untouched family1 neighbor"
+    },
+    {
+      "address": "0xfebf0372",
+      "hex": "ffff",
+      "evidence": "prior selected logical handle"
+    },
+    {
+      "address": "0xfebf03bc",
+      "hex": "99000000",
+      "evidence": "prior selected sequence"
+    },
+    {
+      "address": "0xfebf0694",
+      "hex": "01",
+      "evidence": "shared read retry byte used by 68B50/68B8C"
+    },
+    {
+      "address": "0xfebf608a",
+      "hex": "02a5",
+      "evidence": "real743BC rejects already-pending handle45; existing rejected-retry precondition"
+    },
+    {
+      "address": "0xfebef42c",
+      "hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "evidence": "destination with four-byte leading/trailing canaries"
+    }
+  ],
+  "checks": [
+    {
+      "name": "exact publication extent or preserved destination",
+      "kind": "memory",
+      "address": "0xfebef42c",
+      "size": 16,
+      "equals_hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5"
+    },
+    {
+      "name": "selected handle",
+      "kind": "memory",
+      "address": "0xfebf0372",
+      "size": 2,
+      "equals_hex": "ffff"
+    },
+    {
+      "name": "selected sequence",
+      "kind": "memory",
+      "address": "0xfebf03bc",
+      "size": 4,
+      "equals_hex": "99000000"
+    },
+    {
+      "name": "family0 completion",
+      "kind": "memory",
+      "address": "0xfebf033d",
+      "size": 1,
+      "equals_hex": "ff"
+    },
+    {
+      "name": "family0 busy transition; family1 untouched",
+      "kind": "memory",
+      "address": "0xfebf0690",
+      "size": 2,
+      "equals_hex": "ffa5"
+    },
+    {
+      "name": "failed retry admission still consumes attempt",
+      "kind": "memory",
+      "address": "0xfebf0694",
+      "size": 1,
+      "equals_hex": "02"
+    },
+    {
+      "name": "pending status preserved",
+      "kind": "memory",
+      "address": "0xfebf608a",
+      "size": 2,
+      "equals_hex": "02a5"
+    },
+    {
+      "name": "actual function return",
+      "kind": "register",
+      "register": "r10",
+      "equals": "0x0"
+    }
+  ]
+}

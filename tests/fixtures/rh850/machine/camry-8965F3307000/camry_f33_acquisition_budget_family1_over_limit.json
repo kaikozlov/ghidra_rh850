@@ -1,0 +1,98 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_acquisition_budget_family1_over_limit",
+  "entry": {
+    "role": "actual67D96 charges3 before classifying:16+3 exceedsROM18, so no classifier runs and cursor0 is retained",
+    "scope": "resolved-address",
+    "address": "0x67d96"
+  },
+  "max_instructions": 20000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xff00",
+    "r6": "0x10"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "isolated initialized nested-call stack"
+    },
+    {
+      "address": "0xfebf068e",
+      "hex": "0000",
+      "evidence": "family1 cursor0"
+    },
+    {
+      "address": "0xfebf0358",
+      "size": 16,
+      "fill": 0,
+      "evidence": "not-complete inputs require classification if budget permits"
+    },
+    {
+      "address": "0xfebf0328",
+      "size": 16,
+      "fill": 165,
+      "evidence": "status canaries"
+    },
+    {
+      "address": "0xfebf1088",
+      "size": 16,
+      "fill": 165,
+      "evidence": "xor55 canaries"
+    },
+    {
+      "address": "0xfebf10ac",
+      "size": 16,
+      "fill": 165,
+      "evidence": "xorAA canaries"
+    }
+  ],
+  "checks": [
+    {
+      "name": "actual return register",
+      "kind": "register",
+      "register": "r10",
+      "equals": "0x0"
+    },
+    {
+      "name": "over-budget object is not advanced",
+      "kind": "memory",
+      "address": "0xfebf068e",
+      "size": 2,
+      "equals_hex": "0000"
+    },
+    {
+      "name": "no status publication",
+      "kind": "memory",
+      "address": "0xfebf0328",
+      "size": 16,
+      "equals_hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5"
+    },
+    {
+      "name": "no encoded publication",
+      "kind": "memory",
+      "address": "0xfebf1088",
+      "size": 16,
+      "equals_hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5"
+    },
+    {
+      "name": "no encoded publication",
+      "kind": "memory",
+      "address": "0xfebf10ac",
+      "size": 16,
+      "equals_hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5"
+    }
+  ]
+}

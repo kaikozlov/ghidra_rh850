@@ -8525,16 +8525,18 @@ increments the whole-write counter, calls `6869E`, and returns without cleanup
 even when that call rejects; exhaustion selects status `31`. Phase22 failure
 uses the hardware-backed `68A6C` classification to select `30/11`; the classifier
 itself is reconstructed in [§77.20](#7720-2026-10-15-family1-page-classification-and-mode-exit-cancellation).
-The successful-consensus tests here do not establish that phase22 failure
-composition. Normal cleanup clears phase, preserves the recovered producer
-index and sets active object `FFFF`.
-Invalid phase/object takes cleanup without status publication.
+The original successful-consensus tests did not establish that composition.
+[§77.21](#7721-2026-10-15-application-publication-and-acquisition-budgets)
+adds composed failure publication and accepted whole-write rearming. Normal
+cleanup clears phase, preserves the recovered producer index and sets active
+object `FFFF`; invalid phase/object takes cleanup without status publication.
 
 The synthetic read-completion and last-object write-completion calls executed
 in755 and798 instructions; the last-cell pending override in751. These are
-instruction counts, not elapsed-time or scheduler guarantees. The complete
-request/acquisition/notification lifecycle, family0 restoration and downstream
-physical meaning of the learned values remain separate reconstruction work.
+instruction counts, not elapsed-time or scheduler guarantees. Family0
+publication and bounded acquisition are reconstructed in §77.21. Initialized
+driver scheduling and the downstream physical meaning of learned values remain
+separate work.
 
 Two instruction-ordering probes distinguish the machine from a hoisted
 pseudocode expression: successful copy0 executes without an initialized prior
@@ -8942,10 +8944,11 @@ does not model those reads; the execution faults there rather than fabricating
 read values or a completion. This does not affect the demonstrated completed
 path, but it prevents claiming complete timeout recovery.
 
-The composed`67CCA` phase22 failure publication, accepted whole-write
-rearming, family0 restoration and scheduler lifecycle remain separate
-reconstruction work; the earlier successful-consensus proof does not silently
-inherit these newly recovered classifier semantics.
+This increment stops at the classifier boundary.
+[§77.21](#7721-2026-10-15-application-publication-and-acquisition-budgets)
+adds the composed phase22 failure path, accepted whole-write rearming,
+family0 publication and acquisition budgets. Complete initialized-driver
+scheduling and the command-area-read timeout boundary remain unresolved.
 
 Independent rebuilds agreed on **7,187 functions** and **161 curated
 reviews:153 verified,8 bounded**;929 outside-function candidates remain
@@ -8953,4 +8956,194 @@ unresolved. All36 retained scenarios passed on the fresh project. Regenerated
 C spot-checks confirmed the restored output-pointer and return paths. The
 three dependent artifacts, six target selectors and exact live/canonical
 coverage comparison passed before clean snapshot/corpus promotion.
+
+### 77.21 2026-10-15 application publication and acquisition budgets
+
+**Target:** `camry-8965F3307000`, unchanged registered CodeFlash/DataFlash
+identities. This increment reconstructs23 additional function contracts and
+the family0 descriptor/state layouts, and closes the two previously bounded
+`67CCA` compositions. Forty-eight retained native scenarios execute the actual
+instructions and callees. FACI completion/blankness inputs remain explicit
+hypothetical events, not observations of physical flash.
+
+**Family0 records and publication.** The32 descriptors at`2AD8C`, stride12,
+contain payload length, logical-member count, first logical handle, an
+uninterpreted halfword and application-buffer pointer. Registered payloads are
+8..240 bytes; member counts are0/2/6. First handle`FFFF` disables an object.
+The associated state is:
+
+| Address | Recovered application-phase role |
+|---|---|
+| `FEBF0308[32]` | Public object status. |
+| `FEBF0338[32]` | Lower completion byte; distinct from public status. |
+| `FEBF0368[32]`, halfwords | Selected logical member; `FFFF` means no selection. |
+| `FEBF03A8[32]`, words | Selected/current sequence. |
+| `FEBF0690` | Family0 busy byte. |
+| `FEBF0694` | Read-retry byte shared by **both families**, not family1-only state. |
+| `FEBF0708`,1024 bytes | Family0 write envelope staging. |
+| `FEBF0C88`,1024 bytes | Family0 read record staging. |
+
+`68B2E` resolves the object through the logical route and applies the descriptor.
+On a nonzero result with retry below2 it calls the real read enqueue, increments
+the retry **even if enqueue rejects**, and returns before finalization.
+Success and exhausted retry clear the counter.
+
+The successful-result branch reads the sequence header from **fixed`0C88`**.
+Payload and inverse trailer instead use the supplied record pointer.
+The trailer offset is`3C` for payload length≤56, otherwise
+`low16(length+4)`. It requires header XOR trailer=`FFFFFFFF`, then accepts
+either no prior selection or unsigned32(sequence−previous sequence)≤`C0000000`.
+This is the recovered arithmetic predicate, not a general chronological
+“newest record” guarantee.
+
+An accepted member immediately copies exactly the payload bytes from record+4
+and updates sequence/selection. **Publication does not wait for the final
+member.** At or beyond the descriptor's final logical handle, completion becomes
+`5A` if any member was selected, otherwise`A5`; either outcome returns`5A`.
+The real`68E9E` dispatcher consequently clears busy even on failed final
+selection, and itself returns0. Native cases cover early short publication,
+160-byte publication, bad inverse, the exact sequence-delta boundary,
+preservation of an earlier selection and rejected/exhausted retries.
+These callback checks do not establish physical acquisition or replace the
+separate lower-record integrity contract.
+
+`68C5E` expects the selected member's successor, wrapping to the first member
+on old`FFFF` or past the end. Only result0 with that exact member updates
+selection and completion`5A`; error or unexpected member publishes`A5`.
+It always returns`5A`, so the dispatcher releases busy on both outcomes.
+The leaf does not consume the third argument prepared by its caller and does
+not update sequence, payload or a write-retry counter.
+
+**Arming is not queue acceptance.** `684D0` and`6853E` gate on busy0 and an
+enabled descriptor, but have no local object-index bound.
+Read arming attempts every member into shared`0C88`, ignores all enqueue
+results, and resets selection/sequence/completion/busy to`FFFF/0/FF/FF`.
+Write arming chooses successor/wrap, increments the sequence modulo32 and
+constructs the envelope at`0708`: little-endian sequence, payload, short-record
+zero padding through offset`3B`, then inverse sequence at the conditional
+trailer offset. It ignores the real write enqueue result and stores the new
+sequence plus pending/busy`FF`. Selection changes only on completion.
+Native rejected-enqueue cases still perform those changes; local return0 is
+not proof that a request was queued, much less committed to flash.
+
+`6869E` performs the corresponding family1 whole-write submission. It copies
+the live payload in three separate passes to the32-byte lanes at
+`06A8/06C8/06E8`, then XOR-encodes the latter two with`55/AA`. Unused lane bytes
+remain unchanged. The three real writes target base/base+4/base+8. Their
+individual results do not prevent busy`FF`, slot mask`005A5A5A`,
+completion`FF` or return0. Native cases cover accepted writes, all writes
+inhibited, only the middle write inhibited, maximum32-byte payload and
+busy/disabled rejection. The middle rejection neither stops the third
+submission nor rolls back the first. No atomic live-source snapshot is claimed.
+
+**Composed family1 completion.** Actual`67CCA` phase22 failure now executes
+classification, mode-exit cancellation and redundant status publication:
+
+| Supplied lower outcome | Classifier result | Published status planes | Native instructions |
+|---|---|---|---:|
+| Three blank classifications | `5A` | `11/44/BB` | 5,086 |
+| First nonblank classification | `0` | `30/65/9A` | 3,590 |
+| Blocked synchronous access | `FF` | `11/44/BB` | 1,272 |
+
+The failure paths leave checksum seeds untouched and complete manager cleanup.
+An accepted phase33 retry instead increments retry1→2, enqueues all three
+encoded writes and retains the active phase/object without publishing a
+checksum or application status. These are instruction counts under the stated
+inputs, not flash timing. Family1's separate write-result callback is not
+established merely by proving submission and rearming.
+
+**Classification differs between families.** `68946` maps the **last** logical
+member of a family0 object, starts at
+`low16(mapped_page+chunk_offset)<<6`, and probes ascending64-byte chunks.
+It enters probe mode once and exits once, including the real cancellation
+side effects established in §77.20. It continues only on lower class2.
+**Every other lower class returns0**, including blocked/error results;
+this differs from family1's class3→0 versus other errors→`FF`.
+All class2 results, or a zero chunk count, return`5A`. Invalid/disabled objects
+or failed page mapping return`FF` before mode changes. Native cases exercise
+two blank chunks, nonblank data, blocked access, zero count and invalid object.
+Neither a zero-count`5A` nor a family0 result0 is a physical-data-validity oracle.
+
+**Budgeted classification.** `675A4` resumes the family0 cursor at`0676`;
+`67D96` resumes the family1 cursor at`068E`. Completion`5A` is free:
+family0 publishes status`10` without reading the payload, while family1
+computes the live-RAM checksum seed and publishes`10/45/BA`.
+Other family0 objects cost:
+
+`low16(logical_count × max(2,(low16(payload_bytes+20)+63)>>6))`.
+
+The full cost is charged **before probing**, even if the first probe fails.
+A zero classifier result publishes status`30` and sets latch`067D=5A`;
+every nonzero full-object result publishes`11`. A native valid object whose
+driver access is blocked still costs6 and publishes`30`. A disabled
+descriptor costs4 and publishes`11`. These statuses must not be renamed
+“valid restored data” and “blank” from this code alone.
+
+The generic family0 split-object branch requires fresh charge0 and a single
+object cost above18. All32 exact registered descriptors cost at most12, so
+**that branch is unreachable with this image's immutable table and budget**.
+When an object would exceed an already-spent budget, the scan stops before it;
+the next pass starts with fresh charge0. This is a calibration-specific
+reachability result, not a claim that the split code does not exist.
+
+Each failed family1 completion adds3 modulo16 and stops if the result exceeds
+18; exact18 is admitted. Classification0 selects`30`, every nonzero value
+selects`11`. Unlike`67CCA`, this pass has no pending-request-cell override.
+Native tests cover exact/over-budget, disabled-object charging and the enabled
+last object's real blank/nonblank classification and cancellation.
+
+**Acquisition control.** `6842C` scans16 family1 completion bytes followed by
+32 family0 bytes. Any byte exactly`FF` retains its low8 input token; no`FF`
+returns0. Failure bytes such as`A5` do not retain the token: this is a
+“nothing pending” predicate, **not** “all objects succeeded.”
+
+`68488` consumes token`0692=5A` by calling bulk submission. Any nonzero local
+token then executes18 real service calls before the pending scan. The
+`66B16` outer state machine has these recovered transitions:
+
+| Entry state | Action and transition |
+|---|---|
+| `00` | Idle; return0. |
+| `33` | Step initial reads. A zero token advances to`55`; classification waits until a later call. |
+| `55` | Run family0 classification. On completion advance to`AA` and run family1 in the same call, forwarding the family0 charge. |
+| `AA` | Run family1 classification with fresh charge0. |
+| Completed family1, or entry`CC` | Run`670C4` group finalization and clear the outer state. |
+| Unrecognized state | Clear state and return0. |
+
+Every recognized nonzero entry returns1 **even when that call finishes and
+clears the state**. The completed-pass scenario initializes live family1
+payloads to zero; resulting`A55A` seeds are synthetic-RAM consequences, not
+evidence of restored flash content. Group-finalization scenarios supply
+already-normal redundant group statuses; they do not prove the non-normal
+CRC-recomputation branch.
+
+`66B96` arms initial reads, calls the outer step at most88 times and always
+clears`0673` on exit. The50,391-instruction exhaustion scenario retains
+`0692=FF` and three pending reads in **three distinct logical queues**, with
+119 normal slots still free. It uses the real`74164→72148` rejection:
+service byte`6102=0`, rather than required`F0`. The driver hook`79D2E`
+really returns0; no callback was replaced and no`6CDC` shortcut was invented.
+Clearing the outer state therefore does not establish completed acquisition.
+The fully initialized logical/physical service branch remains a separate
+reconstruction boundary.
+
+Finally,`66C5C` snapshots both family phases before decoding/repairing the
+`0670/10A8/10CC` hold triplet with fallback0. Decoded`5A` suppresses work
+selection/progression. With idle acquisition and active family phases,
+family1 work2 takes precedence over family0 work1. Otherwise acquisition
+progresses; a busy result retains the current work token. Its subsequent
+`67B58`/`6740A` request-selection bodies remain distinct unfinished work.
+Native cases prove encoded-majority repair, all-different fallback and phase
+priority without inventing an additional permission system.
+
+Independent four-stage rebuilds agreed on **7,187 functions** and **184 curated
+reviews:171 verified,13 bounded**; the929 outside-function candidates are
+unchanged. All48 retained scenarios passed on the fresh project. Regenerated
+C now exposes family0 descriptor fields, the shared retry counter, typed
+family1 write lanes and acquisition state/charge arguments; remaining
+GP-relative decompiler artifacts are not promoted to source-language facts.
+The three dependent artifacts, all six targeted selectors and exact
+live/canonical coverage comparison passed. Relevant daemons were stopped
+before snapshot/corpus promotion. These review counts are scoped contracts,
+not a percentage of whole-firmware understanding or a claim of completion.
 

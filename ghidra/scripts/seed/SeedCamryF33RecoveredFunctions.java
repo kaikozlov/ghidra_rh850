@@ -720,6 +720,38 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     semanticData(0xFEBF0428L, new ArrayDataType(u16, count, 2),
         "f33_nvm_family1_checksum_seeds",
         "Low16(A55A - sum(word + (word>>16))); distinct from physical-record checksums.");
+    int family0Count = currentProgram.getMemory().getShort(toAddr(0x2AD70L)) & 0xFFFF;
+    StructureDataType family0Descriptor =
+        new StructureDataType(category, "F33NvmFamily0RamDescriptor", 0);
+    family0Descriptor.setPackingEnabled(true);
+    family0Descriptor.add(u16, "payload_bytes", "Application payload; excludes sequence envelope.");
+    family0Descriptor.add(u16, "logical_count", "Inclusive first through first+count-1 member range.");
+    family0Descriptor.add(u16, "first_logical_handle", "FFFF disables this registered object.");
+    family0Descriptor.add(u16, "opaque_06", "Not interpreted by the publication contract.");
+    family0Descriptor.add(new PointerDataType(u8, 4), "buffer", "Byte-addressed application RAM mirror.");
+    semanticData(0x2AD8CL, new ArrayDataType(resolve(family0Descriptor), family0Count, 12),
+        "f33_nvm_family0_ram_descriptors",
+        "32 registered rows. Payload8..240 bytes and logical counts0/2/6; "
+        + "registered per-object probe costs are at most12, below budget18.");
+    semanticData(0x2AD70L, u16, "f33_nvm_family0_object_count",
+        "Registered32; completion getter and classification enforce this bound.");
+    semanticData(0xFEBF0308L, new ArrayDataType(u8, family0Count, 1),
+        "f33_nvm_family0_status", "Application status, distinct from lower completion0338.");
+    semanticData(0xFEBF0338L, new ArrayDataType(u8, family0Count, 1),
+        "f33_nvm_family0_completion",
+        "FF admits callbacks; final read/write handling publishes5A/A5, not public status10/30/31.");
+    semanticData(0xFEBF0368L, new ArrayDataType(u16, family0Count, 2),
+        "f33_nvm_family0_selected_logical_handles",
+        "FFFF means no selection. Read publication selects its member; successful expected write advances it.");
+    semanticData(0xFEBF03A8L, new ArrayDataType(u32, family0Count, 4),
+        "f33_nvm_family0_sequences",
+        "Read selection stores accepted sequence; write arming increments before completion, even if enqueue rejects.");
+    semanticData(0xFEBF0708L, new ArrayDataType(u8, 1024, 1),
+        "f33_nvm_family0_write_record",
+        "Shared sequence/payload/padding/inverse-sequence envelope, initialized separately from application mirrors.");
+    semanticData(0xFEBF0C88L, new ArrayDataType(u8, 1024, 1),
+        "f33_nvm_family0_read_record",
+        "Shared read staging.68B2E always reads its sequence header here, even though payload/trailer use r8.");
     semanticFunction(0x67B12L, "f33_nvm_check_family1_checksum", s32,
         new ParameterImpl("object", u16, currentProgram))
         .setComment("No local object bound. Read floor(payload_bytes/4) live RAM words "
@@ -804,7 +836,7 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
             + "Marker/status rejection precedes publication; range rejection follows "
             + "it without rollback. No single-snapshot or asynchronous completion claim.");
   }
-  private void annotateApplicationReadCompletion() throws Exception {
+  private void annotateApplicationCompletion() throws Exception {
     CategoryPath category = new CategoryPath("/CamryF33");
     DataType u8 = UnsignedCharDataType.dataType;
     DataType u16 = UnsignedShortDataType.dataType;
@@ -826,16 +858,19 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     result.add(u8, "write_inhibit", "743F8 rejects exactly1; other values pass.71CA0 initializes2 in this target.");
     semanticData(0xFEBF6000L, new ArrayDataType(resolve(result), logicalCount, 2),
         "f33_nvm_logical_results", "Byte result in a two-byte cell; not a halfword store.");
-    StructureDataType stage = new StructureDataType(category, "F33NvmReadCopyStage", 0);
+    StructureDataType stage = new StructureDataType(category, "F33NvmCopyStage", 0);
     stage.setPackingEnabled(true);
     DataType lane = new ArrayDataType(u8, 32, 1);
-    stage.add(lane, "raw", "Only this lane is repaired by encoded-copy consensus.");
+    stage.add(lane, "raw", "Raw payload; read consensus may repair this lane.");
     stage.add(lane, "xor55", "Decode each payload byte with55.");
     stage.add(lane, "xorAA", "Decode each payload byte withAA.");
     semanticData(0xFEBF0B08L, new ArrayDataType(resolve(stage), 4, 96),
         "f33_nvm_family1_read_stages",
         "Slot=object&3. Payload lengths8/16/32 leave lane padding untouched. "
         + "Shared-slot execution ordering is a separate queue/scheduler question.");
+    semanticData(0xFEBF06A8L, resolve(stage), "f33_nvm_family1_write_stage",
+        "One shared raw/55/AA snapshot.6869E copies the live source in three passes, "
+        + "then encodes the latter lanes; bytes after payload length remain untouched.");
     semanticData(0xFEBF0358L, new ArrayDataType(u8, objectCount, 1),
         "f33_nvm_family1_completion",
         "FF admits the application callback; read consensus publishes5A/A5. "
@@ -843,9 +878,9 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     semanticData(0xFEBF0691L, u8, "f33_nvm_family1_busy",
         "68E9E clears this on leaf return5A, including failed read consensus. "
         + "Its current value is not an admission gate in68E9E.");
-    semanticData(0xFEBF0694L, u8, "f33_nvm_family1_copy_read_retry",
-        "Shared per-copy retry counter. Success clears it; nonzero result retries "
-        + "while below2, consuming an attempt even if73FE8 rejects submission.");
+    semanticData(0xFEBF0694L, u8, "f33_nvm_copy_read_retry",
+        "Shared by family0 and family1 read callbacks. Success clears it; nonzero "
+        + "result retries below2, consuming an attempt even if73FE8 rejects submission.");
     semanticData(0xFEBF0698L, new ArrayDataType(u32, 4, 4),
         "f33_nvm_family1_copy_failure_masks",
         "One word per shared slot. Each copy uses bits5A in its byte, not an "
@@ -930,9 +965,9 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
         new ParameterImpl("result", u8, currentProgram))
         .setComment("Decode family/object from2B010. Require family completionFF "
             + "and nonFFFF first handle; event6/7 selects read/write result handler. "
-            + "Leaf return5A clears that family's busy byte even on failed consensus. "
-            + "Always return0. Native proof covers family1 read/gates; family0 and "
-            + "write-result processing are separate, not established by this proof.");
+            + "Leaf return5A clears that family's busy byte even on failure. Always "
+            + "return0. Native family0 read/write and family1 read/gates; the "
+            + "family1 write-result leaf remains separate from write submission.");
     semanticFunction(0x71D0AL, "f33_nvm_publish_logical_result", VoidDataType.dataType,
         new ParameterImpl("logical_handle", u16, currentProgram),
         new ParameterImpl("operation", u32, currentProgram),
@@ -966,14 +1001,25 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
             + "indices and empty-sentinel meaning; no local object bound.");
     semanticFunction(0x67CCAL, "f33_nvm_handle_family1_completion", VoidDataType.dataType)
         .setComment("Snapshot phase/object and queue indices. Phase11 sets0688=A5. "
-            + "Valid phase22/33 with completion5A publishes checksum seed then status10. "
-            + "Read failure uses68A6C to choose30/11. Write failure retries below2 "
-            + "through6869E and returns before cleanup regardless submission result; "
-            + "otherwise status31. Any matching request cell overrides status to20 "
-            + "after seed publication. Publish all three status planes, then clear "
-            + "phase, preserve recovered producer index and set active objectFFFF. "
-            + "Invalid phase/object performs cleanup only. Hardware-backed read-failure "
-            + "classification and accepted whole-write rearming remain separate.");
+            + "Valid phase22/33 completion5A publishes checksum seed then status10. "
+            + "Phase22 failure calls68A6C: zero->30, every other result->11; no "
+            + "checksum publication. Phase33 failure increments retry below2, calls "
+            + "6869E and returns before cleanup regardless rearm result; exhaustion "
+            + "selects31. A matching request cell overrides status to20 after any seed "
+            + "publication. Publish all status planes; clear phase, preserve recovered "
+            + "producer index, set active objectFFFF. Invalid phase/object only cleans "
+            + "up. Native real classifier/cancellation and accepted whole-write retry; "
+            + "explicit FACI events are not physical blankness or programming proof.");
+    semanticFunction(0x6869EL, "f33_nvm_submit_family1_write_copies", u32,
+        new ParameterImpl("object", u16, currentProgram))
+        .setComment("Read descriptor before busy0/nonFFFF gate; no local object bound. "
+            + "Copy payload bytes from live RAM in three separate passes to06A8/06C8/"
+            + "06E8, then XOR latter lanes55/AA; no atomic-snapshot claim. Submit "
+            + "base/+4/+8 via74014, ignoring each return. Set busyFF, selected slot "
+            + "mask005A5A5A and completionFF; return0 even with all writes rejected. "
+            + "Rejected local gate returnsFF without staging changes. Native lengths "
+            + "16/32, high object bits, busy/disabled rejection, partial/all inhibition "
+            + "and composed phase33 retry. Queued is not flash committed.");
   }
   private void annotateNvmQueues() throws Exception {
     CategoryPath category = new CategoryPath("/CamryF33");
@@ -1454,6 +1500,174 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
         .setComment("Low8 states0/1/4/6 store6B72 unconditionally;5 only from old1; "
             + "others preserve it. Native guarded accept/reject, high input bits,6 and unknown2.");
   }
+  private void annotateNvmAcquisition() throws Exception {
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u16 = UnsignedShortDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    DataType bytes = new PointerDataType(u8, 4);
+    semanticData(0x2AD76L, u16, "f33_nvm_classification_budget",
+        "18 charged64-byte chunks per acquisition pass; shared across family0 then family1.");
+    semanticData(0x2AD78L, u16, "f33_nvm_acquisition_service_steps",
+        "18 real79C60 calls per nonzero initial-read token.");
+    semanticData(0x2AD7AL, u16, "f33_nvm_initial_acquisition_limit",
+        "88 calls at most; exhaustion clears0673 without guaranteeing completion.");
+    semanticData(0xFEBF0670L, u8, "f33_nvm_work_hold",
+        "66C5C repairs this triplet with fallback0; decoded5A suppresses work selection/progression.");
+    semanticData(0xFEBF10A8L, u8, "f33_nvm_work_hold_xor55",
+        "Application-phase encoded replica of0670.");
+    semanticData(0xFEBF10CCL, u8, "f33_nvm_work_hold_xorAA",
+        "Application-phase encoded replica of0670.");
+    semanticData(0xFEBF0673L, u8, "f33_nvm_acquisition_phase",
+        "66B16 handles0/33/55/AA/CC. Recognized nonzero entry returns busy1 even when this call clears phase.");
+    semanticData(0xFEBF0676L, u16, "f33_nvm_family0_scan_cursor",
+        "675A4 resumes object-status classification at this registered-object index.");
+    semanticData(0xFEBF0678L, u16, "f33_nvm_family0_probe_offset",
+        "Partial-object offset. Full-object path clears it; registered max cost12 makes the split path unreachable under budget18.");
+    semanticData(0xFEBF067DL, u8, "f33_nvm_family0_classification_latch",
+        "675A4 sets5A on68946 result0, including a blocked probe; not proof of nonblank or valid payload.");
+    semanticData(0xFEBF0680L, u8, "f33_nvm_family0_phase",
+        "Snapshot by66C5C before hold decoding and acquisition progression.");
+    semanticData(0xFEBF068EL, u16, "f33_nvm_family1_scan_cursor",
+        "67D96 resumes status classification; completion reaches registered count16.");
+    semanticData(0xFEBF0690L, u8, "f33_nvm_family0_busy",
+        "Read/write arming requires0 and setsFF independently of enqueue success; completed callback clears it.");
+    semanticData(0xFEBF0692L, u8, "f33_nvm_initial_read_token",
+        "5A arms bulk submission; exactFF completion bytes retain a nonzero token. Not an all-success predicate.");
+
+    semanticFunction(0x68B2EL, "f33_nvm_handle_family0_read_result", u32,
+        new ParameterImpl("result", u8, currentProgram),
+        new ParameterImpl("logical_handle", u16, currentProgram),
+        new ParameterImpl("record", bytes, currentProgram))
+        .setComment("Resolve unchecked route object/descriptor. Nonzero result retries "
+            + "below2 via real73FE8, increments shared0694 regardless enqueue result, "
+            + "returns0 before finalization; exhaustion clears retry and skips copy. "
+            + "Success clears retry, reads sequence at fixed0C88, inverse trailer at "
+            + "record+3C for payload<=56, else record+low16(payload+4); accept inverse match and no selection "
+            + "or unsigned sequence delta<=C0000000. Copy exactly payload bytes from "
+            + "record+4 immediately, then update sequence/selection. At handle>=low16"
+            + "(first+count-1), completion is5A iff any selection exists elseA5, and "
+            + "return5A for either outcome; otherwise0. Native early/long publication, "
+            + "bad inverse, delta boundary and retry rejection/exhaustion through68E9E.");
+    semanticFunction(0x68C5EL, "f33_nvm_handle_family0_write_result", u32,
+        new ParameterImpl("result", u8, currentProgram),
+        new ParameterImpl("logical_handle", u16, currentProgram))
+        .setComment("Unchecked route object/descriptor. Expected member is low16"
+            + "(selection+1), wrapping to first on oldFFFF or past descriptor end. "
+            + "Only result0 and exact expected handle update selection and completion5A; "
+            + "otherwise completionA5. Always return5A, causing router busy release "
+            + "even on failure. No third argument, sequence/payload update or local retry.");
+    semanticFunction(0x684D0L, "f33_nvm_arm_family0_read", u32,
+        new ParameterImpl("object", u16, currentProgram))
+        .setComment("Read descriptor before busy0/first!=FFFF gate; no local object "
+            + "bound. Enqueue inclusive first..low16(first+count-1) reads to shared0C88, "
+            + "ignore every return, then selectionFFFF/sequence0/completionFF/busyFF. "
+            + "Return0 on local admission even if all reads reject, elseFF. "
+            + "Malformed ranges may wrap; registered ranges are bounded.");
+    semanticFunction(0x6853EL, "f33_nvm_arm_family0_write", u32,
+        new ParameterImpl("object", u16, currentProgram))
+        .setComment("Busy0 and nonFFFF descriptor admit; no local object bound. Choose "
+            + "selected successor/wrap, increment sequence modulo32, write LE sequence "
+            + "header at0708, payload at+4, zero short padding through+3B, inverse "
+            + "sequence at+3C for payload<=56, else+low16(payload+4). Real74014 result is ignored; "
+            + "save incremented sequence and completion/busyFF, return0. Selection "
+            + "changes only on completion. Native rejected enqueue still builds the "
+            + "exact envelope and wraps sequence; rejection of local gate returnsFF.");
+    semanticFunction(0x6892AL, "f33_nvm_get_family0_completion", u32,
+        new ParameterImpl("object", u16, currentProgram))
+        .setComment("Bound low16 object by registered32; return zero-extended0338 byte, "
+            + "orA5 without reading completion RAM when out of range.");
+    semanticFunction(0x68946L, "f33_nvm_classify_family0_chunks", u32,
+        new ParameterImpl("object", u16, currentProgram),
+        new ParameterImpl("chunk_offset", u16, currentProgram),
+        new ParameterImpl("chunk_count", u16, currentProgram))
+        .setComment("Reject invalid/disabled object or last-member page-map error withFF "
+            + "before mode changes. Otherwise base=(low16(mapped_last_page+offset)<<6); "
+            + "set0693=5A/reconcile once, probe count64-byte chunks in ascending order. "
+            + "Continue only on class2; every other class yields0, including driver "
+            + "errors, unlike68A6C. All2 or count0 yields5A. Clear/reconcile once, "
+            + "including real cancellation. Native blank/nonblank, blocked, zero-count "
+            + "and invalid-object paths; explicit FACI inputs do not prove blankness.");
+    semanticFunction(0x689DEL, "f33_nvm_family0_chunk_cost", u32,
+        new ParameterImpl("payload_bytes", u16, currentProgram))
+        .setComment("Return max(2,(low16(payload_bytes+20)+63)>>6). Truncate before "
+            + "rounding, not after. Native108->2,109->3,FFEC->2 with high input bits. "
+            + "Multiply by descriptor logical_count for full-object scan charge.");
+    semanticFunction(0x675A4L, "f33_nvm_classify_family0_pass", u32,
+        new ParameterImpl("charged_out", new PointerDataType(u16, 4), currentProgram))
+        .setComment("Resume0676 with fresh charge0. Completion5A publishes status10 "
+            + "without charge or payload access. Otherwise cost=low16(count*689DE"
+            + "(payload)); admit full object while cost+charge<=ROM18, charge before "
+            + "68946. Result0 publishes30 and latches067D=5A, including blocked reads; "
+            + "other full-object results publish11. Stop before exceeding budget. "
+            + "Generic split branch requires fresh charge0 and object cost>18; all32 "
+            + "registered costs<=12 make it unreachable here. Store cursor/offset and "
+            + "halfword charge; return5A iff cursor>=32. Native disabled charge4, "
+            + "blocked valid-object charge6 and free completed-object publication.");
+    semanticFunction(0x67D96L, "f33_nvm_classify_family1_pass", u32,
+        new ParameterImpl("already_charged", u16, currentProgram))
+        .setComment("Resume068E. Completion5A publishes live-RAM checksum/status10 "
+            + "without charge. Otherwise add3 modulo16; stop if aboveROM18, else "
+            + "call68A6C and choose30 only for result0,11 for every nonzero result. "
+            + "Publish all three planes, advance cursor, store068E; return5A iff "
+            + "cursor>=16. No pending-cell override. Native exact/over-budget, "
+            + "disabled and real last-object blank/nonblank classification.");
+    semanticFunction(0x6842CL, "f33_nvm_retain_token_while_reads_pending", u32,
+        new ParameterImpl("token", u8, currentProgram))
+        .setComment("Scan registered16 family1 bytes then32 family0 bytes. Any exactFF "
+            + "retains low8 token; noFF returns0. Early exit on pending family1 "
+            + "avoids family0 reads. NonFF failure values do not retain the token.");
+    semanticFunction(0x68488L, "f33_nvm_step_initial_read_acquisition", u32)
+        .setComment("Token0692==5A invokes68324 and replaces the local token with its "
+            + "result. Every nonzero token executes exactlyROM18 real79C60 calls, "
+            + "then6842C; store/return resulting token. Native no-work/completed and "
+            + "pending cases use the real uninitialized-service gate. Initialized "
+            + "driver scheduling remains outside these native proofs.");
+    semanticFunction(0x684C6L, "f33_nvm_arm_initial_read_acquisition", VoidDataType.dataType)
+        .setComment("Store only5A to0692; does not submit or complete any request.");
+    semanticFunction(0x66B16L, "f33_nvm_step_acquisition_pass", u32)
+        .setComment("State0673:0 idle;33 calls68488 and advances55 only on0, returning "
+            + "without classification that call.55 runs675A4 and, on completion, "
+            + "advancesAA and forwards its charge to67D96 in the same call. EntryAA "
+            + "uses fresh charge0. Completed67D96 or entryCC calls670C4 and clears "
+            + "state. Recognized nonzero entry always returns1, including finalization; "
+            + "invalid state clears/returns0. Native normal-group finalization; active "
+            + "driver execution and670C4 non-normal CRC recomputation remain bounded.");
+    semanticFunction(0x66B96L, "f33_nvm_run_bounded_initial_acquisition", VoidDataType.dataType)
+        .setComment("Set0673=33 and arm0692=5A. Call66B16 at mostROM88 times, stopping "
+            + "early on0; always clear0673 afterward. Native88-tick exhaustion leaves "
+            + "three pending reads in distinct logical queues,0692FF and no dequeue "
+            + "under real service-state0 rejection. Not successful acquisition.");
+    semanticFunction(0x66C5CL, "f33_nvm_select_acquisition_work", u32,
+        new ParameterImpl("current_work", u8, currentProgram))
+        .setComment("Snapshot family phases before repairing0670/10A8/10CC with "
+            + "fallback0. Decoded5A returns0. Idle acquisition with an active phase "
+            + "selects2 for family1 before1 for family0. Otherwise step66B16; busy "
+            + "preserves current work. On idle completion,67B58==1 selects2, else "
+            + "6740A==1 selects1, else preserve work. Native hold repair/fallback "
+            + "and phase priority; request-selection bodies remain separate.");
+    semanticFunction(0x679B2L, "f33_nvm_get_family0_phase", u32)
+        .setComment("Return zero-extended byte0680; snapshot precedes hold decoding.");
+    semanticFunction(0x681F2L, "f33_nvm_get_family1_phase", u32)
+        .setComment("Return zero-extended byte0689; snapshot precedes hold decoding.");
+    semanticFunction(0x79C60L, "f33_nvm_service_acquisition_driver", VoidDataType.dataType)
+        .setComment("Real wrapper of74164, not a replacement readiness callback. "
+            + "Native polling/budget cases exercise its service-state rejection; "
+            + "the initialized-driver branch remains separate.");
+    semanticFunction(0x74164L, "f33_nvm_service_logical_and_physical_driver", VoidDataType.dataType)
+        .setComment("Return if79470(14) or72148 rejects. Otherwise79A50,79C9E; only "
+            + "mode result0 invokes73B2C(1),72EEA. Then79C4C(mode_result!=0),79A94. "
+            + "Native real uninitialized-service early exit; no initialized-driver "
+            + "or physical flash progress claim.");
+    semanticFunction(0x72148L, "f33_nvm_service_uninitialized", u32)
+        .setComment("Return full32 boolean(6102!=F0). Native service-state0 rejects "
+            + "scheduler progress; queue admission itself is a different contract.");
+    semanticFunction(0x79470L, "f33_nvm_driver_gate_rejected", u32,
+        new ParameterImpl("ignored_service", u16, currentProgram))
+        .setComment("Mask input16, call79D2E and normalize nonzero to1. Exact target "
+            + "hook always returns0, so this is not an additional live readiness check.");
+    semanticFunction(0x79D2EL, "f33_nvm_driver_gate_hook", u32)
+        .setComment("Exact MOV0,r10;JMPLP. No argument reads or hardware access.");
+  }
   private void annotateDataFlashReads() throws Exception {
     DataType u8 = UnsignedCharDataType.dataType;
     DataType u16 = UnsignedShortDataType.dataType;
@@ -1636,11 +1850,12 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     annotateNvmLogicalRequests();
     annotateNvmRecordIntegrity();
     annotateApplicationRecords();
-    annotateApplicationReadCompletion();
+    annotateApplicationCompletion();
     annotateNvmQueues();
     annotateNvmStartup();
     annotateNvmPhysicalResults();
     annotateNvmPageClassification();
+    annotateNvmAcquisition();
     annotateDataFlashReads();
     annotateFaciSubmission();
     annotatePwmCompareStaging();
