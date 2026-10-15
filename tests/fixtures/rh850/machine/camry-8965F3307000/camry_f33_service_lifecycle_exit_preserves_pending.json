@@ -1,0 +1,181 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_service_lifecycle_exit_preserves_pending",
+  "entry": {
+    "role": "real family0500 exit: report mixed abort/cancel outcomes, clean engine substitution, restore owner masks and clear admission latches without dequeuing pending services",
+    "scope": "resolved-address",
+    "address": "0xb3204"
+  },
+  "max_instructions": 20000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "isolated initialized nested-call stack"
+    },
+    {
+      "address": "0xfebeb10e",
+      "hex": "1e",
+      "evidence": "all four application service requests pending"
+    },
+    {
+      "address": "0xfebeb3dc",
+      "hex": "00",
+      "evidence": "ID4 has no requested cancellation"
+    },
+    {
+      "address": "0xfebeb3dd",
+      "hex": "5a",
+      "evidence": "ID2 cancellation latch asserted"
+    },
+    {
+      "address": "0xfebe6add",
+      "hex": "88",
+      "evidence": "ID1 admitted internal request"
+    },
+    {
+      "address": "0xfebeb1a4",
+      "hex": "00",
+      "evidence": "ordinary mask-restoration branch"
+    },
+    {
+      "address": "0xfebeb1a7",
+      "hex": "5a",
+      "evidence": "service output-state latch active"
+    },
+    {
+      "address": "0xfebeb3cc",
+      "hex": "07",
+      "evidence": "active engine phase"
+    },
+    {
+      "address": "0xfebeb3d5",
+      "hex": "02",
+      "evidence": "active engine kind"
+    },
+    {
+      "address": "0xfebeb3d1",
+      "hex": "5a",
+      "evidence": "ID2/3 admission latch"
+    },
+    {
+      "address": "0xfebeb3d7",
+      "hex": "5a",
+      "evidence": "ID4 admission latch"
+    },
+    {
+      "address": "0xfebe819b",
+      "hex": "a5a5a5a5a5a5a5a501a5a5a501a50101",
+      "evidence": "four running diagnostic results and unrelated result-byte canaries"
+    },
+    {
+      "address": "0xfebeb3fc",
+      "hex": "5a5a2efba00f",
+      "evidence": "active nonzero engine substitution fields"
+    },
+    {
+      "address": "0xfebe8b2c",
+      "hex": "1111111122222222efbeadde",
+      "evidence": "two service-owned output masks and an independent owner"
+    }
+  ],
+  "checks": [
+    {
+      "name": "full native aggregate returns to the caller sentinel",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "nested calls restore the caller stack",
+      "kind": "register",
+      "register": "sp",
+      "equals": "0xfebe2000"
+    },
+    {
+      "name": "ID2 cancels while IDs1/3/4 fail; unrelated results are untouched",
+      "kind": "memory",
+      "address": "0xfebe819b",
+      "size": 16,
+      "equals_hex": "a5a5a5a5a5a5a5a503a5a5a500a50303"
+    },
+    {
+      "name": "abort reporting does not dequeue any pending service",
+      "kind": "memory",
+      "address": "0xfebeb10e",
+      "size": 1,
+      "equals_hex": "1e"
+    },
+    {
+      "name": "ID1 admitted state clears without becoming a completion",
+      "kind": "memory",
+      "address": "0xfebe6add",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "engine phase clears",
+      "kind": "memory",
+      "address": "0xfebeb3cc",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "engine kind clears",
+      "kind": "memory",
+      "address": "0xfebeb3d5",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "all engine substitution fields clear",
+      "kind": "memory",
+      "address": "0xfebeb3fc",
+      "size": 6,
+      "equals_hex": "000000000000"
+    },
+    {
+      "name": "ID2/3 admission latch clears",
+      "kind": "memory",
+      "address": "0xfebeb3d1",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "ID4 admission latch clears",
+      "kind": "memory",
+      "address": "0xfebeb3d7",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "service output-state latch clears",
+      "kind": "memory",
+      "address": "0xfebeb1a7",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "restore only the two service-owned masks",
+      "kind": "memory",
+      "address": "0xfebe8b2c",
+      "size": 12,
+      "equals_hex": "0170017001700170efbeadde"
+    }
+  ]
+}

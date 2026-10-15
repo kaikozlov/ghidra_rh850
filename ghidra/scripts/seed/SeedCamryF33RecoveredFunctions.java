@@ -2142,6 +2142,130 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     getFunctionAt(toAddr(0x38C7CL)).setComment("Transform limited first-bank regulated axis commands to phase triplet6E68/6A/6C using output-frame coefficients; signed saturation +/-32767. Compensation and modulation offset/clipping follow.");
     getFunctionAt(toAddr(0x38D6CL)).setComment("Second-bank regulated axis-to-phase transform, publishing6E70/72/74. Not the same interface as measured-frame feedback coefficients or reference compensation.");
   }
+  private void annotateAssistComposition() throws Exception {
+    DataType v = VoidDataType.dataType;
+    DataType s16 = ShortDataType.dataType;
+    DataType s32 = IntegerDataType.dataType;
+    semanticFunction(0xC2B64L, "f33_update_signed_speed_torque_assist", v)
+        .setComment("Select adjacent speed/torque curves throughC28FC, evaluate abs(C128), blend with C1A6/1024, "
+            + "clamp magnitude to0..29125, then restore torque sign using AF888=1024/AF88A=-1024. "
+            + "BF3C is signed32 assistance, not the nonnegative intermediate. Publish both curve slopes.");
+    semanticFunction(0xC4DF2L, "f33_condition_assist_torque", v)
+        .setComment("Condition bounded C150 through retained accumulator/output recurrences and C4D68. "
+            + "C12A selects bypass/reseed coefficients, not an external command. Input correction C523C uses "
+            + "bounded AC90 memory; C52FA narrows AC44+C146 to signed16 BEFORE its clamp.");
+    semanticFunction(0xC8678L, "f33_update_torque_rate_assist_compensation", v)
+        .setComment("Map signed torque rateC266 and multiply by a narrowed factor from assistance slopeBF40 "
+            + "and adjacent speed maps. Publish bounded signed32 C4C0. Preserve low32 products and the real "
+            + "left-shift10 followed by signed division1024; these are not algebraic identities under wrap.");
+    semanticFunction(0xD0162L, "f33_aggregate_internal_assist_terms", v)
+        .setComment("Sum signed32 CC24/C39C and signed16 C3A0/C41E/C53A/C5A8, clamp to+/-5120, publish CC2C. "
+            + "Nested rate, bounded-memory and moving-state terms retain separate attenuation/history. "
+            + "ROM B1328 makes CC24 zero; B1371 disables C5A8 in this image.");
+    semanticFunction(0xD0218L, "f33_aggregate_assist_command", v)
+        .setComment("Publish signed32 CC48 without whole-sum saturation. AC2B==5A selects C4C0+C3BA+BF3C; "
+            + "otherwise C7BF==1 selects C4C0+BF3C; ordinary branch adds C43C,CC2C,CBE8 and "
+            + "clamp(s32(CB38)+s32(C5EE),+/-12002). Selection does not reset skipped producers.");
+    semanticFunction(0xD0AF6L, "f33_run_assist_command_slice", v)
+        .setComment("Capture AC31 once. Non5A skips selected producers while torque conditioning, base assistance "
+            + "and other retained filters still advance. D0162 precedes fresh C266/C3BA/C4C0; D0218 sees those "
+            + "new direct terms but the earlier nested aggregate. Finish through command clamp/gate/publication.");
+    semanticFunction(0xCF33CL, "f33_update_angle_controller_output_envelope", v)
+        .setComment("Select envelope mode, evolve retained0..256 gain, vote target and prior output, scale, slew "
+            + "and saturate into CB38 plus duplicate publications. Never-active mode7 selects zero; after prior "
+            + "activation the envelope may finish fading. Not an always-active ordinary return controller.");
+    semanticFunction(0xCFD56L, "f33_update_windowed_excitation", v)
+        .setComment("Run waveform and bounded AC24-memory terms only when CBEB and CBFE are nonzero. Mode "
+            + "transition resets phase; window controls publication. Disable after activity resets retained "
+            + "blocks, while already-idle disable publishes zero. OEM request identity remains unassigned.");
+    semanticFunction(0xC51ACL, "f33_scale_torque_memory_correction", s16,
+        new ParameterImpl("value", s16, currentProgram))
+        .setComment("Unsigned C134 gain times signed16 R6, signed division1024, then SXH R10. Return and store "
+            + "the same narrowed result in C136; not void.");
+    semanticFunction(0xC7D5CL, "f33_scale_rate_assist_term", s16,
+        new ParameterImpl("value", s16, currentProgram))
+        .setComment("Unsigned C42C gain times signed16 R6, divide1024, SXH R10, store C42E and return it.");
+    semanticFunction(0xC6D5EL, "f33_apply_internal_assist_attenuation", s32,
+        new ParameterImpl("value", s32, currentProgram))
+        .setComment("Apply C2F4 then C2F6 through separate low32 products and signed divisions1024. "
+            + "Publish C2E4/C2E8 and return the second signed32 result in R10.");
+  }
+  private void annotateServiceLifecycle() throws Exception {
+    DataType v = VoidDataType.dataType;
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    DataType s16 = ShortDataType.dataType;
+    DataType s32 = IntegerDataType.dataType;
+    DataType samplePointer = new PointerDataType(s16, 4);
+    semanticFunction(0xB3224L, "f33_queue_application_service", s32,
+        new ParameterImpl("service_id", u8, currentProgram))
+        .setComment("IDs1..4 require live mode<0600. Return -1 queued,-7 duplicate,-6 rejected. IDs2/3 set B3D1, "
+            + "ID4 sets B3D7, and all three cancel event4 BEFORE duplicate detection. ID1 requests event6 only "
+            + "when published learned markerF208 is nonzero; acceptance is not guaranteed immediate mode entry.");
+    semanticFunction(0xB84B8L, "f33_qualify_service_admission", u32,
+        new ParameterImpl("kind", u8, currentProgram))
+        .setComment("Return0/5A from exact raw-unit input/status/mode/limit gates. Kinds1/2 additionally apply "
+            + "B8474 hysteresis. Diagnostic5062C passes kind1 in retained R6;5070A/507B2 pass2/3. "
+            + "No inferred physical stationary condition or engineering-unit interpretation.");
+    semanticFunction(0xB309CL, "f33_advance_service_family", v)
+        .setComment("Family0500 selects events2A/2C/2E into0512/0522/0520. Submodes independently qualify "
+            + "completion events and return0500. Accepted queue, selected submode, convergence, persistence "
+            + "and diagnostic result are separate states.");
+    semanticFunction(0xB3194L, "f33_report_pending_service_aborts", v)
+        .setComment("For pending IDs1/3 report failure; IDs2/4 report cancellation only with their stop latch5A, "
+            + "otherwise failure. Clear ID1 internal88 state. Does NOT clear pending bitsB10E.");
+    semanticFunction(0xB3204L, "f33_exit_service_family", v)
+        .setComment("Report pending aborts, clean engine/output state, clear admission latches, conditionally "
+            + "restore output masks. Pending bitsB10E survive; do not describe this as dequeue-all.");
+    semanticFunction(0xB83F8L, "f33_initialize_service_engine", v,
+        new ParameterImpl("kind", u8, currentProgram))
+        .setComment("Initialize0520 engine kind1/2/3. Kind2 preserves extrema and selector106. Kinds1/3 reset "
+            + "extrema and immediately queue selector106=0. Set phase1, reset qualification and request masks.");
+    semanticFunction(0xB7D38L, "f33_qualify_service_progress", u8,
+        new ParameterImpl("done", u8, currentProgram),
+        new ParameterImpl("cancel", u8, currentProgram))
+        .setComment("Cancellation precedes done; publish B3CB=0/2. Otherwise runtime predicates select "
+            + "continuing1 or failed3. Return5A for terminal,0 for continuing. Counts are not milliseconds.");
+    semanticFunction(0xB7F2EL, "f33_queue_service_center_and_check_geometry", u32)
+        .setComment("Queue learned selector106 scalar BEFORE B78F8 geometry establishment. Preserve its R10 "
+            + "status across the B3F0 store and return it;5A signals invalid B138>>3 geometry. Diagnostic "
+            + "completion does not await the separate selector106 persistence poll.");
+    semanticFunction(0xB80A2L, "f33_advance_service_excursion_phase", u8,
+        new ParameterImpl("phase", u8, currentProgram))
+        .setComment("Dispatch the kind1 initial excursion phases and return the selected child phase in R10; "
+            + "not void. Phase number alone is not a completion indication.");
+    // Each phase worker retains its input when its transition condition is not met.
+    // Formal child arguments are needed as well as the dispatcher's scalar return.
+    for (long entry : new long[] {
+        0xB7DBAL, 0xB7E44L, 0xB7EB2L, 0xB7EDCL,
+        0xB7F8AL, 0xB7FF4L, 0xB8040L, 0xB8070L}) {
+      semanticFunction(entry, getFunctionAt(toAddr(entry)).getName(), u8,
+          new ParameterImpl("phase", u8, currentProgram));
+    }
+    semanticFunction(0xB7E82L, "f33_update_service_minimum_excursion", u8,
+        new ParameterImpl("qualification", u8, currentProgram))
+        .setComment("Update minimum of -AFE8 while not qualified, call B7E66, retain and return B3C8 status.");
+    semanticFunction(0xB7EFEL, "f33_update_service_maximum_excursion", u8,
+        new ParameterImpl("qualification", u8, currentProgram))
+        .setComment("Update maximum of -AFE8 while not qualified, call B7E66, retain and return B3C9 status.");
+    semanticFunction(0xB8690L, "f33_select_service_kind1_sample", u32,
+        new ParameterImpl("sample", samplePointer, currentProgram))
+        .setComment("Write the phase-selected signed halfword through R6; return0/5A enable in full R10. "
+            + "Real leaf preserves caller R19=0, used as the secondary publication flag.");
+    semanticFunction(0xB86E8L, "f33_select_service_kind2_sample", u32,
+        new ParameterImpl("sample", samplePointer, currentProgram))
+        .setComment("Phase0A selects B3A6 and returns5A; otherwise write zero and return0. R6 is a real output pointer.");
+    semanticFunction(0xB8704L, "f33_select_service_kind3_sample", u32,
+        new ParameterImpl("sample", samplePointer, currentProgram))
+        .setComment("Select AC56 or directed ROM samples in phases0C..0F; write through R6 and return0/5A.");
+    semanticFunction(0xB8774L, "f33_publish_service_engine_substitution", v)
+        .setComment("Select sample by engine kind, derive bound, publish B3FC enable/B3FD secondary flag/"
+            + "B3FE sample/B400 bound. BF33E snapshots these for family0500 motor substitution. No physical actuation claim.");
+    // Preserve actual leaf register effects, including R19, without replacement callees.
+    getFunctionAt(toAddr(0xB8690L)).setInline(true);
+    getFunctionAt(toAddr(0xB86E8L)).setInline(true);
+    getFunctionAt(toAddr(0xB8704L)).setInline(true);
+  }
   private void annotateApplicationLifecycle() throws Exception {
     DataType v = VoidDataType.dataType;
     DataType u8 = UnsignedCharDataType.dataType;
@@ -2216,7 +2340,60 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     getFunctionAt(toAddr(0x65B4AL)).setComment("Assembly MPAT0..15 restore with persistent SP delta+64, paired with65AC0. Restores the interrupted MPU profile, including foreground profile1.");
     getFunctionAt(toAddr(0xB4FFCL)).setComment("Vote qualified health stateB20E/B20C/B20D; unrecoverable vote starts at0. States0/33 may select11,0 may select33,33 may clear,11 may select22 and latchB20F. Route the new state throughB4F8A BEFORE publishing it. Physical analog-channel identities and OEM state names remain bounded.");
     getFunctionAt(toAddr(0xB4F8AL)).setComment("Health-state event routing:11 requests event1 with zero-output gates in families0400/0500;22 requests1 only in those families and2 in0700/0800. Exact0522 also checksAFCE!=11. No event1 cancellation here; do not infer universal immediate shutdown.");
-    getFunctionAt(toAddr(0x56AD2L)).setComment("OR-reduce five owner request slots, pass the combined mask to569DA, then read channel state through56A26. Instructions56AD6..56AFE retain OR and argument flow that current C recovery omits. Hardware-observed channel state remains a separate dependency.");
+    semanticFunction(0x56B06L, "f33_set_channel_owner_request", v,
+        new ParameterImpl("owner", u8, currentProgram),
+        new ParameterImpl("request_mask", u32, currentProgram))
+        .setComment("Replace one of five owner masks when low8(owner)<5. Clearing one owner does not clear other owners.");
+    semanticFunction(0x569DAL, "f33_apply_channel_request_mask", v,
+        new ParameterImpl("request_mask", u32, currentProgram))
+        .setComment("Consume full R6. Bits1/17 select the requested rather than reference level for channels0/1. "
+            + "Both bits set, or the entire mask zero, also performs an early paired write before the per-channel "
+            + "writes. Preserve those repeated effects and their order; no physical channel identity is assigned.");
+    semanticFunction(0x56A26L, "f33_read_channel_mismatch_mask", u32)
+        .setComment("Return bit1/17 when the corresponding GPIO input differs from its ROM reference level. "
+            + "This is readback, not a copy of the requested mask or proof of actuator response.");
+    semanticFunction(0x56AD2L, "f33_update_channel_requests", v)
+        .setComment("OR-reduce five owner masks, apply the combined mask through569DA, then read GPIO mismatch "
+            + "through56A26 and qualify both channels through56A48/56A8C. Exact ROM318F8/F9 thresholds are zero: "
+            + "qualification directly selects state2 for matching reference, state0 otherwise. The formal R6 "
+            + "contract on569DA preserves the real OR-reduction in recovered C.");
+    semanticFunction(0x62050L, "f33_write_channel_reference_level", v,
+        new ParameterImpl("channel", u32, currentProgram))
+        .setComment("Descriptor-driven masked port write using reference_level; no local index validation.");
+    semanticFunction(0x62082L, "f33_write_channel_requested_level", v,
+        new ParameterImpl("channel", u32, currentProgram))
+        .setComment("Descriptor-driven masked port write using requested_level; no local index validation.");
+    semanticFunction(0x620B4L, "f33_read_channel_input_level", u32,
+        new ParameterImpl("channel", u32, currentProgram))
+        .setComment("Read the descriptor-selected halfword port input, isolate its bit, return zero-extended level. "
+            + "No local index validation; the two reviewed wrappers pass0/1.");
+    semanticFunction(0x66AB0L, "f33_channel0_matches_reference", u32)
+        .setComment("Return full-width0/1 for input channel0 equal to ROM31302 reference level1.");
+    semanticFunction(0x66AE8L, "f33_channel1_matches_reference", u32)
+        .setComment("Return full-width0/1 for input channel1 equal to ROM3130A reference level1.");
+    StructureDataType port = new StructureDataType(category, "F33ChannelPortDescriptor", 0);
+    port.setPackingEnabled(true);
+    port.add(u32, "output_selector", "Output bit in low4; output port in bits8..15.");
+    port.add(u8, "input_port", "Input register stride is0x40 bytes.");
+    port.add(u8, "input_bit", "Bit selected from a halfword port read.");
+    port.add(u8, "reference_level", "Compared against input and selected by a clear request bit.");
+    port.add(u8, "requested_level", "Selected by an asserted request bit.");
+    semanticData(0x312FCL, new ArrayDataType(resolve(port), 2, 8), "f33_channel_ports",
+        "Two rows consumed by channel wrappers: port0/bit10 and port3/bit5, reference1/requested0. "
+            + "OEM pin roles and physical response remain unassigned.");
+    StructureDataType channels = new StructureDataType(category, "F33ChannelRequestState", 0);
+    channels.setPackingEnabled(true);
+    channels.add(u8, "channel0_state", "0=mismatch,1=qualifying mismatch,2=match,3=qualifying match.");
+    channels.add(u8, "channel0_match_calls", "Consecutive matching invocations; not elapsed time.");
+    channels.add(u8, "channel0_mismatch_calls", "Consecutive mismatching invocations.");
+    channels.add(u8, "channel1_state", "Same software qualification encoding as channel0.");
+    channels.add(u8, "channel1_match_calls", "Consecutive matching invocations.");
+    channels.add(u8, "channel1_mismatch_calls", "Consecutive mismatching invocations.");
+    channels.add(new ArrayDataType(u8, 2, 1), "opaque_06", "Not interpreted by this reconstruction.");
+    channels.add(new ArrayDataType(u32, 5, 4), "owner_requests", "OR-reduced before output writes.");
+    channels.add(u32, "observed_mismatch", "Readback bits1/17, separate from owner requests.");
+    semanticData(0xFEBE8A68L, resolve(channels), "f33_channel_request_state",
+        "Software request, GPIO observation and qualification are distinct phases. ROM thresholds are zero in this image.");
   }
   private void annotateDataFlashReads() throws Exception {
     DataType u8 = UnsignedCharDataType.dataType;
@@ -2412,7 +2589,9 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     annotateApplicationRecordApis();
     annotateNvmDirectOperations();
     annotateControlPipeline();
+    annotateAssistComposition();
     annotateApplicationLifecycle();
+    annotateServiceLifecycle();
     annotateDataFlashReads();
     annotateFaciSubmission();
     annotatePwmCompareStaging();

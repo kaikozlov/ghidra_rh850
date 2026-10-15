@@ -43,13 +43,13 @@
     "0x0C1F7A": {
       "body_sha256": "fbfb8c51a516c55a44bcf76145bddf955775f8ff571f298cf7cbb6402c80b477",
       "body_size": 134,
-      "decompiled_c_sha256": "5e7c99529b96d9989e20c62c4659b56ae3378f65bb82968791d64658cc473b25",
+      "decompiled_c_sha256": "41023ab8180ca7eac7f78e2a9f5abdf4400cda3e285019d0ef63b8c27074d693",
       "role": "state transition command-composition caller"
     },
     "0x0C2000": {
       "body_sha256": "63736037e7ac683ccf6bbf7d8fd393f74e9a88b94c0ae399547f61c66db51002",
       "body_size": 68,
-      "decompiled_c_sha256": "a0a1bc36b72aa2bff3cfe42f8ed1b95faba0f44a2a7b6fb6e7a62fbab2dc0b06",
+      "decompiled_c_sha256": "56897c5f01bac97dc55fb92f98d6fb42292a74df79d638e437e08788d093d4f6",
       "role": "steady-state command-composition caller"
     },
     "0x0CA614": {
@@ -169,7 +169,7 @@
     "0x0D0218": {
       "body_sha256": "a509a296f50e426acede52ea4730ae44322e4d9fe309e8c93c553a5c674307b1",
       "body_size": 108,
-      "decompiled_c_sha256": "a828b79715c81640a7ede3f37edbe85a58465e9c1a8361129a39cb29d42eba33",
+      "decompiled_c_sha256": "4acd2ef97194905bd4b77989f8c032f5409638a7ddfc7b6670585641773bdea4",
       "role": "ordinary assist sum including CB38"
     },
     "0x0D0284": {
@@ -229,19 +229,19 @@
     "0x0D0AF6": {
       "body_sha256": "2eda8a4e734a3cd248c83c9cd41f906e0191ee48afa5ba72a73640da00823fc9",
       "body_size": 228,
-      "decompiled_c_sha256": "c512a9d970e51037244ee59614fbae8267ffc363dc900dc43781b003c5c1c73e",
+      "decompiled_c_sha256": "a73f2ed99427c3899d106d2bf56025540d7c6efb484c63178951fb4a866875f9",
       "role": "shared command-composition coordinator"
     },
     "0x0D0EEC": {
       "body_sha256": "e58077923617544434467a6d0279d5037aa2cf1398960ef0fe62126f37e23231",
       "body_size": 488,
-      "decompiled_c_sha256": "1e972cafb3e6afc4d60a0cbff2c63596f7dda6bdb87dc1bb53de2dd94b6e4f17",
+      "decompiled_c_sha256": "774f2291f58bc043a824853abe0e0b8c83bdedcf017cc53774c7ad70d3cf88b7",
       "role": "B6 supervisor cyclic coordinator"
     },
     "0x0D1100": {
       "body_sha256": "c73c370a83bd7615ef8132cd415ed3bdc754e2c2b80da9a86027dacfe4d4476d",
       "body_size": 12,
-      "decompiled_c_sha256": "0016b809d7b5893fa70a03adf9d669076c377306ef0a887c412c285f6b3092d5",
+      "decompiled_c_sha256": "357f960febedaafbd66acb200de42b87a44c3f8e75086dc9545977b5b74ea14d",
       "role": "shared command-composition wrapper"
     },
     "0x0D1130": {

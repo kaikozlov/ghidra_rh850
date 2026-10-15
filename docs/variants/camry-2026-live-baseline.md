@@ -2217,7 +2217,7 @@ The dynamic B6-independent magnitude enters earlier. `D0218` writes `FEBECC48`; 
 
 The direct runtime writers are all internal C/D-family algorithm state: `CF2B2 -> FEBECB38`, `C9A84 -> FEBEC5EE`, `C7E36 -> FEBEC43C`, `C8678 -> FEBEC4C0`, `C74AC -> FEBEC3BA`, `D0162 -> FEBECC2C`, `C2B64 -> FEBEBF3C`, and `CFCD4 -> FEBECBE8`. `FEBEAC2B` is an internal diagnostic/control snapshot (`BCBD8 <- FEBEB112`; `B338C` sets `0x5A`, `B330A` clears it), while `CB73A` can set `FEBEC7BF=1` only with B6 sig261 snapshot `FEBEADB0=='1'`. The complete generated-COM denominator in §29 therefore remains intact: this is an **EPS-internal baseline-assist path**, not a second generated-COM target ingress.
 
-This also bounds the retained-drive interpretation. VAR-075 pins the `FEBEC5EE` moving-mode contribution to zero in both retained drives because its `0x0D5` s213 source is identically zero; the other `D0218` terms remain live and, through the now-verified `CC62 -> CC66/CC64 -> AC54/EE40C` chain, can have a real current-control consequence with B6 absent. But semantic closure of all eight terms finds no independently recovered **lane-target** magnitude: they reduce to measured torque, torque+speed maps, internal aggregation/ROM state, `|torque|` curves, and angle return/dither/excitation. VAR-081 identifies the interval as LTA/LCA active. The unresolved question is therefore what upstream state/value gives this shared funnel factory lane-centering authority with B6 absent, not whether `CC62` reaches the motor. Nothing here authorizes output.
+The retained captures establish a zero `0x0D5` s213 **source**, not a zero `FEBEC5EE` contribution: the moving-state filter can hold earlier state while its gain decays. The composed native release scenario in §34.5 demonstrates that distinction; the retained drives lack the initial-state/history or direct term observation needed to infer this output. The `D0218` terms can reach the `CC62 -> CC66/CC64 -> AC54/EE40C` current-control chain with B6 absent. Their connected reconstruction in §34.5 recovers torque/rate compensation, bounded aggregates, stateful angle-controller envelopes and excitation, but no independently identified lane-target magnitude. VAR-081 identifies the captured interval as LTA/LCA active. The unresolved question is which upstream state/value selects or modulates this shared funnel during that interval, not whether `CC62` reaches current control. Nothing here authorizes output.
 
 **`CEFFC` / `CB00` is the recovered D0218 map-bank selector, and it is B6-fed.** Exact `FUN_000CEFFC` writes `FEBECB00`. Default is `7`. When `FEBEACBD==0` and `FEBECAFF==1`, B6 signal 261 snapshot `FEBEADB0` (Target Lateral ID, B3[5:0]) maps `1→0`, `4→1`, `0x0A→3`, `0x0B→2` (LTA/LCA), `0x12→5` (SDG), `0x13→4`. `CD094` and `CDFF8` then index return/dither tables as `(CB00&7)+(AC3C&1)*8`. That is how F33 would change D0218 angle-domain maps **if B6 carried ID 11/18**. Runtime writers of `FEBEADB0` are only snapshot copier `BCD62` and reset `BF97A`; `0x08A` is not a source. In the retained drives B6 is absent, so `ADB0` stays 0 and `CB00` stays **7**. The ID11/18 D0218 banks therefore do not run. `CEFFC` does not import the `0x08A` milliradian target; it only switches internal maps from B6's copy of the same Target Lateral ID dictionary. Hands-light motor tracking of `0x08A` error remains a separate plant observation, not this selector. VAR-090.
 
@@ -2253,9 +2253,9 @@ VAR-080 closes the most useful read-only diagnostic observability around the B6-
 
 Two `D0218` terms do have exact passive RDBI projections. `D0D7C` computes `FEBEAE12 = clamp(FEBEC5EE * FEBEAE3C / 0x8000, +/-0x569A)` and `FEBEAE6E = clamp(FEBECB38 * FEBEAE3C / 0x8000, +/-0x569A)`; `BF3AA` snapshots those to `FEBEE8B6` and `FEBEE8C2`. DID `0x1C3E` / callback `0x4EA90` returns `(FEBEE8B6*100)/0x80`, while DIDs `0x1C38`, `0x1C4A`, and `0x1C50` / callbacks `0x4EA06`, `0x4EB7C`, and `0x4EC06` all return `(FEBEE8C2*100)/0x80`; every callback saturates to signed16 before emitting the two-byte payload. `FEBEAE3C <- FEBEB140` is the internal calibration-derived scale already closed by VAR-078. These DIDs are therefore exact **scaled/clamped term proxies**, not raw `D0218` terms and not OEM-named engineering units. Current target-native `EMPS_P5` names none of these four exact F33 DIDs; Toyota's named downstream reference remains DID `0x1C02` **Command Value Torque**.
 
-A tempting selector join also collapses under exact calibration bytes. `C9812` syntactically indexes `PTR_DAT_000D39DC[FEBEC156&3]` on the path to `FEBEC5EC -> C9A84 -> FEBEC5EE`, but all four exact pointer entries are the same `0xB018A`; VAR-075 also proves the resulting `FEBEC5EE` contribution is zero in both retained drives. `C8678` similarly indexes `PTR_LAB_000D3630[FEBEC156&3]` plus selector-strided `D3670/D3674` tables on the path to `FEBEC4C0`, but the exact maps alias (`0xB1208` x4; the pair family repeats `0xB1248/0xB121C` for all four banks), and no exact RDBI callback directly reads `FEBEC4C0`. So `0x1C3E` is a useful moving-assist/control oracle, **not** a selector-state discriminator. The selector's meaningful exact-image effect remains elsewhere, notably the `C28FC -> C2B64 -> FEBEBF3C` parameter-block path, for which no direct exact RDBI term readout is recovered.
+A tempting selector join also collapses under exact calibration bytes. `C9812` syntactically indexes `PTR_DAT_000D39DC[FEBEC156&3]` on the path to `FEBEC5EC -> C9A84 -> FEBEC5EE`, but all four exact pointer entries are the same `0xB018A`. This alias proof does not establish a zero moving-state contribution; see §34.5 for its hold/decay behavior. `C8678` similarly indexes `PTR_LAB_000D3630[FEBEC156&3]` plus selector-strided `D3670/D3674` tables on the path to `FEBEC4C0`, but the exact maps alias (`0xB1208` x4; the pair family repeats `0xB1248/0xB121C` for all four banks), and no exact RDBI callback directly reads `FEBEC4C0`. So `0x1C3E` is a useful moving-state oracle, **not** a selector-state discriminator. The selector's meaningful exact-image effect remains elsewhere, notably the `C28FC -> C2B64 -> FEBEBF3C` parameter-block path, for which no direct exact RDBI term readout is recovered.
 
-For any future passive validation capture, the most discriminating EPS reads remain: **`0x1C38` first** as a direct proxy for `FEBECB38`; **`0x1C02` second** as Toyota-named **pre-final-clamp/gate Command Value Torque diagnostic state**; and **`0x1C3E` as a control** expected to stay quiet under the retained-drive moving-mode conditions. VAR-083 now gives `1C02` a stronger interpretation: its `CC62` source is physically relevant because the same value continues intra-function into `CC66/CC64`, even though the `AC56/EE40A/1C02` copy itself is the diagnostic sibling rather than the motor-driving `AC54/EE40C` branch. These reads can be synchronized with FRC `0x1601`/`0x1914`; none requires or authorizes steering output.
+For any future passive validation capture, the most discriminating EPS reads remain: **`0x1C38` first** as a direct proxy for `FEBECB38`; **`0x1C02` second** as Toyota-named **pre-final-clamp/gate Command Value Torque diagnostic state**; and **`0x1C3E` as a moving-state control**, measuring rather than assuming the retained contribution. VAR-083 gives `1C02` a stronger interpretation: its `CC62` source is relevant to current control because the same value continues intra-function into `CC66/CC64`, even though the `AC56/EE40A/1C02` copy itself is the diagnostic sibling rather than the motor-driving `AC54/EE40C` branch. These reads can be synchronized with FRC `0x1601`/`0x1914`; none requires or authorizes steering output.
 
 Deterministic evidence is `data/generated/camry_8965F3307000_internal_assist_oracles.json`, generated by `tools/targets/camry/builders/build_camry_8965F3307000_internal_assist_oracles.py` and verified by `tests/targets/camry/verify_camry_8965F3307000_internal_assist_oracles.py`.
 
@@ -2400,12 +2400,11 @@ really does feed physical actuation through an intra-function `D042C -> CC66` ed
 then the sibling `CC64/AC54/EE40C` branch.** This is why a pure cross-function
 reader census was misleading.
 
-The B6-inactive `D0218` contribution is also preserved rather than re-derived. Its eight
-value terms reduce structurally to measured steering torque (`C43C`, `C3BA`),
-torque+speed map/gain state (`C4C0`), internal assist aggregation (`CC2C`), a
-torque-sign-restored magnitude-curve term (`BF3C`), angle-domain ramp/return/dither
-(`CB38`), retained-drive-zero moving-mode term (`C5EE`), and phase-window angle
-excitation/return (`CBE8`). The `C28FC/C2B64` normal selector is likewise closed:
+The B6-inactive `D0218` contribution combines signed base assistance, dynamic
+torque/rate compensation, nested assist and separately gated controller/moving/
+excitation terms. [§34.5](#345-upstream-assist-composition-and-retained-state)
+owns their connected behavior; they are not eight interchangeable torque inputs
+or eight independent targets. The `C28FC/C2B64` normal selector is likewise closed:
 healthy selector 1 is the only distinct 0x220-byte bank, selectors 0/2/3 alias, all
 fallback banks alias, and route-zero ordinary sig160 can reach only equivalent selector
 0/2. None of those ordinary model inputs supplies an independently recovered lane target.
@@ -2543,6 +2542,129 @@ regulator/output reconstruction above is **instruction/dataflow evidence**, not
 new end-to-end native or vehicle execution. DMA ring indexing/consumption is
 bounded, but ADC age, DMA coherency, rotor/sample alignment, timer-latch timing,
 output polarity and physical bridge/motor response are not established here.
+
+### 34.5 Upstream assist composition and retained state
+
+This is exact-image instruction/dataflow reconstruction. Physical units, OEM
+algorithm names and hardware-time gains are not inferred from software counts.
+
+| Publication | Width | Recovered contribution |
+|---|---|---|
+| `BF3C` | signed32 | Speed-interpolated torque-magnitude surface, then torque-sign restoration |
+| `C4C0` | signed32 | Filtered torque rate multiplied by speed/assistance-slope shaping |
+| `C3BA` | signed16 | Sum of two differentiated, filtered torque-model branches |
+| `C43C` | signed16 | Bounded sum of torque-shaped and two angle-rate-shaped terms |
+| `CC2C` | signed32 | Bounded nested assist aggregation with independent retained states and attenuation |
+| `CB38` | signed16 | Voted angle-controller target after retained envelope, slew and saturation |
+| `C5EE` | signed16 | Moving-state contribution with held state and evolving gain |
+| `CBE8` | signed16 | Windowed waveform plus a separately filtered bounded-memory angle term |
+
+`D0218` publishes signed32 `CC48` without clamping the whole sum. Diagnostic
+`AC2B==5A` selects `C4C0+C3BA+BF3C`; otherwise `C7BF==1` selects `C4C0+BF3C`.
+The ordinary branch adds `C43C`, `CC2C`, `CBE8` and the separately clamped
+signed32 pair `CB38+C5EE` (±12002). Diagnostic selection has precedence;
+omitting a contribution does not reset its producer.
+
+#### Conditioned torque and the signed base surface
+
+`C523C` derives a bounded-memory correction from signed32 `AC90`: first use
+seeds the offset to `-AC90`; excursions beyond the mapped band move that offset,
+while the in-band residual produces a proportional correction. Torque magnitude,
+speed and retained mode coefficients shape the band/gain. Diagnostic `AC2B==5A`
+makes the band amplitude zero. Scaling narrows to signed16 before `C51AC`,
+which scales and narrows again before the final correction clamp.
+
+`C52FA` computes **`s16(AC44+C146)` before clamping** into `C150`. The two-stage
+`C4DF2/C4D68` recurrences then produce `C128`; denominator changes rescale
+retained accumulators. `C12A` selects bypass/reseed behavior, not another command
+source. Its detector observes previous command/base-assist and feedback residuals;
+`C4FDA` checks the accumulator/output representations, repairs them and latches
+repair indications into `C120`.
+
+`C58B8` supplies speed index/fraction `C1A4/C1A6`. `C28FC` selects adjacent
+0x44-byte curves from bank18100 or10100. Healthy rows use
+`base+((C156&3)*8+C1A4)*0x44`. The raw healthy speed axis is
+`0,0300,0780,0F00,1E00,3200,4B00,6400,FFFF` (last value is the sentinel).
+`C2B64` evaluates both curves at `|C128|`, blends with signed `C1A6/1024`,
+clamps the **magnitude** to0..29125, then multiplies by +1024 or−1024 and
+divides by1024. Final `BF3C` is therefore signed. The independently published
+curve slopes are blended and adjusted into `BF40`; they feed torque conditioning
+and dynamic compensation rather than another external setpoint.
+
+The composed [signed-surface native scenario](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_assist_composition_signed_surface.json)
+executes the real selector and both curve interpolators. It verifies negative
+final assistance after positive magnitude limiting, including signed fractional
+division truncating toward zero. It does not assign physical units or establish
+reachability of every selector/fraction combination.
+
+#### Dynamic and nested terms
+
+`C6182` differentiates `C150`, suppressing the first delta or a `C12A` reseed,
+then scales by1250/16 and saturates to±32767. Retained filtering produces
+`C266`. `C8678` maps its magnitude, restores sign and multiplies by a narrowed
+factor derived from `BF40` and adjacent speed maps, producing `C4C0`.
+The two `C3BA` branches instead differentiate retained second-order models driven
+by `AC44`, with consistency repair, first-sample suppression and separate filters.
+Their mapped outputs are summed and clamped by `C74AC`.
+
+These calculations preserve machine arithmetic: intermediate signed16 narrowing,
+low32 products, and the actual **left-shift10 then signed division1024** in
+`C74BE/C8718` cannot be algebraically cancelled without losing wrap behavior.
+
+`C7E36` forms `C43C` from `C44C/C45A/C472`: nonlinear torque shaping, a `C172`
+angle-rate branch, and a direction-qualified filtered `C18A` branch. Suppression
+of the latter zeros its input **before its retained filter**, not its output.
+`C172` differentiates `AC88`; `C18A/C1A2` derive from separate `AC14` delta/filter
+paths. First deltas are suppressed and rate publications saturate.
+
+`D0162` forms `CC2C` from `CC24+C39C+C3A0+C41E+C53A+C5A8`, bounded to±5120.
+`C39C` contains the nonlinear `C1A2` term plus separate moving-state `C5F0`;
+`C3A0` is itself a bounded composition of adaptive/fused-rate terms with
+observer-validity-dependent limits. `C41E` retains bounded `AC90` memory;
+`C53A` is a qualified filtered `C18A` term. Exact ROM values make `CC24` and
+`C5A8` zero here, without eliminating their generic code.
+
+#### Retention and update order are part of the control law
+
+Moving-state qualification controls both an added `C5EE` term **and attenuation
+of existing nested terms**. Loss of `C5F3` holds `C5EC` state while the `C5B8`
+gain can continue transitioning. Hysteresis/persistence and filtered 0/1024
+targets separately attenuate the `C2E2/C4A0/C524` paths. Admission loss is not
+an instantaneous reset of all contributions.
+
+The exact foreground subsequence `D0F9C..D0FA8` calls
+`C9812→C973A→C9A84`. The native
+[`release_retains_contribution` scenario](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_assist_composition_release_retains_contribution.json)
+starts with zero current source and inactive admission: `C5EC` stays1024,
+the gain sub-state releases1→0, gain decays512→426, and `C5EE` becomes426.
+This verifies a retained-state counterexample, not its occurrence in a vehicle.
+Zero captured s213 alone therefore cannot prove zero `C5EE`; initial state,
+history or a direct proxy observation is required.
+
+`CF33C` votes the target and previous output, evolves a retained0..256 envelope,
+then slews/clamps `CB38` and updates its duplicate publications. Never-active
+mode7 selects zero; after activation it can finish a decay before clearing the
+activity latch. The upstream angle controller is explicitly cleared in mode7
+by `CE384→CE26E`; an internal blend toward measured rate is not evidence for
+an always-active ordinary return controller.
+
+`CFD56` runs excitation only when `CBEB` and `CBFE` are nonzero. Mode changes
+reset phase; active windows select waveform sign from `C172`, and a separately
+filtered bounded-memory `AC24` term contributes only inside the window.
+Disable after activity resets both retained blocks; already-idle disable merely
+publishes zero. Event1A participates in qualification, but its OEM utility name
+has not been recovered.
+
+`D0AF6` captures `AC31` once. Non5A skips selected producer updates while other
+filters and aggregates still advance: this is mixed **hold/update**, not
+“assistance off.” New `C128/BF3C` precede slope refresh; `D0162` precedes the new
+`C266/C3BA/C4C0`; final `D0218` sees those fresh direct terms but the earlier
+nested aggregate. `D0C44` alternates some rate inputs/clamps while other filters
+advance every invocation. Foreground cadence bits select every2/4/8/16
+generations, not independently established milliseconds. Fused-observer
+semantics, physical input scaling and hardware-time alignment remain separate
+dependencies.
+
 
 ## 35. Hidden-ingress false-negative audit: no concrete alternate producer found; residuals closed in §36
 
@@ -9675,10 +9797,107 @@ the exact0522 `AFCE!=11` condition. It does not cancel event1. The analog chain
 from8210 through48146/7DB0/57F00/C1DE0 toB080 is recovered; physical channel
 identity, OEM units and OEM health-state names remain unresolved.
 
-Service admission requires live mode<0600 and rejects duplicate service IDs.
-Family0500 includes submodes0512/0522/0520; `FD49E` publishes that mode into
-`EB1E`, consumed by the bounded substitutions in `35C4C`. Ordinary diagnostic
-session entry has not been shown to impose a universal steering veto.
+#### Numeric routine-control joins and application service lifecycle
+
+Exact RID configuration at `26918` and the 19-row callback table at `256DC`
+join these diagnostic routines to application requests. These are numeric wire/
+callback joins, **not inferred OEM utility names**.
+
+| RID | Callback index | Precondition / action | Application service |
+|---|---|---|---|
+| `1103` | 11 | `503FA / 5043E` | Internal `6AE2=11` request, then `357C0→B3224(1)` |
+| `110A` | 15 | `5062C / 50698` | `B3224(2)` |
+| `110C` | 17 | `5070A / 5076A` | `B3224(3)` |
+| `110D` | 18 | `507B2 / 50820` | `B3224(4)` |
+
+Adjacent RID110B has two exact no-op callbacks returning zero; it is not another
+calibration request. Starts/results use control types1/3. Type2 stop wrappers
+exist for IDs2/4, not IDs1/3.
+
+`B3224` accepts IDs1..4 only while live `B11A<0600`, atomically updating pending
+bits `B10E`. Results are−1 queued,−7 duplicate,−6 rejected. Before duplicate
+detection, IDs2/3 set `B3D1=5A`, ID4 sets `B3D7=5A`, and all three cancel event4.
+**Duplicate rejection is not side-effect-free.** Accepted IDs2..4 request event6
+outside family0500; ID1 does so only when published learned marker `F208!=0`.
+Queue acceptance with an already-zero marker does not guarantee immediate entry.
+
+Diagnostic admission is stronger than this internal queue interface. Starts for
+IDs2..4 reject busy/result states and require `B84B8(kind)`; ID2 passes kind1 in
+retained R6, ID3 passes2, ID4 passes3. ID3 additionally requires `E889!=0`,
+which is published **ID2 completion flag `B3CA`**, not generic NvM validity.
+The shared admission gates require raw `B080≥2304`, `BEDE≤512`, `BEF0==11`,
+`B079==0`, family≤0500, `B38C==0`, clear `B082&81FF`, all `B010[0..9]` except
+index5≥22170, and saturating `|B054|<512`. Kinds1/2 additionally apply `B8474`
+hysteresis. RID1103 has a separate `35A06` precondition. These software tests
+do not establish physical stationary conditions or engineering units.
+
+**ID1: acquisition and persistence are separate.** `357C0` consumes the internal
+request and marks accepted state88. Family0500 entry clears learned selector100
+when its marker is nonzero; status high-nibble20 remains pending, status10
+completes, and other statuses produce failure/fault130. Entry into0522 waits
+for both published settling counter `F172==0` and learned marker `F208==0`.
+The initial clear/settling wait has no recovered local timeout that silently
+advances to acquisition.
+
+In0522, `B7728` runs the qualified waveform/settling path; activation also
+requires `AF44==1`, an application setting recovered from selector7, not merely
+diagnostic-session entry. `B73CC` collects30 samples from `B056/58/5A/5C`,
+checks status, inclusive mean limits, spreads and pair differences, then queues
+selector100 with the learned quad and marker `A55A5AA5`. Success requires both
+published completion44 and that marker. Speed/status/sample failures take the
+failure completion path instead. The distinct `6AE2=22` normalization request
+is not equivalent to this diagnostic acquisition sequence.
+
+**IDs2/3/4 share0520 but not one completion contract.** The0500 selector
+prioritizes ID2, then3, then4. `B83F8` initializes engine kind1/2/3:
+
+| Service | Retention and progression | Success indication |
+|---|---|---|
+| ID2 / kind1 | Reset extrema/tracking; immediately queue selector106=0; directed excursions, midpoint establishment, tracking and return | `B3CA=5A` |
+| ID3 / kind2 | Preserve extrema/selector106; invalidate exported tracking sample while retaining established center; resume convergence | `B3DB=5A`, tracking re-enabled |
+| ID4 / kind3 | Reset extrema; immediately queue selector106=0; qualified directional excursions and final convergence | `B3D6=5A` |
+
+The common guard `B7D38` prioritizes cancel over done, then runtime qualification:
+`B3CB=0` cancelled,2 complete,1 continuing,3 failed. Runtime checks include
+mode/status/fault gates and timeout/hysteresis flags. Timeout12000 is a worker
+count, not established milliseconds. ID4's final `B7FB8(0,12000)` requires
+zero absolute tracking error for the qualified-count threshold; its directional
+qualification uses raw torque thresholds±1024 and separate stability conditions.
+
+`B7F2E` queues the selector106 scalar **before** establishing geometry through
+`B78F8`. When `B138>>3==0`, that helper returns5A; `B7F2E` preserves and returns
+the status in R10. The old void recovery lost this consequential edge. Reaching
+phase9/10 without the corresponding done flag is not success, and selector106
+may already have changed. Its independent poll `B8622` distinguishes pending,
+success and failure/fault17E; diagnostic0520 completion does **not** await it.
+
+`B301E/B303E` report the terminal result, clean the active engine and clear
+**only its selected pending bit**, then return0500. In contrast, forced family
+exit `B3204→B3194` reports pending aborts and cleans outputs/admission latches
+but **does not clear `B10E`**. IDs2/4 report cancellation only with their stop
+latch; IDs1/3 report failure. Mask restoration and clearing `B1A7` depend on
+`B1A4==0`; cleanup does not erase the learned selector106 scalar.
+
+The composed [forced-exit native scenario](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_service_lifecycle_exit_preserves_pending.json)
+executes the real abort reporter and cleanup callees with mixed stop latches.
+It verifies retained pending bits, distinct cancellation/failure results, cleared
+substitution outputs and preservation of an independent output-mask owner.
+It does not execute physical calibration or prove persistent flash completion.
+
+Results `81A3/81A7/81A9/81AA` change only while running1: completion code0
+produces result2, cancellation30 produces0, other nonpending codes produce3.
+Callback8 maps to NRC24,5 to22,7 to12,9 to72. Acceptance, pending request,
+submode selection, physical convergence, asynchronous persistence and diagnostic
+result2 are distinct conditions.
+
+The two motor substitution sources remain family0500-qualified by published
+`EB1E`: `E780==5A` selects the bounded0522 waveform `EB10` first; otherwise
+`EE406==5A` selects the bounded0520 sample `EE416`. Real leaf-pointer contracts
+preserve this sample through `B8690/B86E8/B8704→B8774→BF33E`; the result
+still enters the existing negated `6AF4` path. Neither a routine start nor an
+ordinary diagnostic-session transition is a universal steering veto.
+
+#### Programming handoff remains a separate lifecycle
 
 Programming readiness `56CF6 → 66F1E` requires no family0/1 pending high-nibble20
 status, no repaired busy valueFF/A5, and `FEBF0673==0`. Admission raises PMR,
@@ -9698,9 +9917,30 @@ or request changes. Mode0700 and0900 both assert mode-owned `5737A` masks
 
 `572E6` OR-reduces owners and can enable substitution slot3 with code4000 from
 ROM31908. Slot4 can outrank it. Other owner reductions publish separate channel
-flags; clearing one owner does not clear all owners. `56AD2` has an OR-reduction
-and argument-flow defect in the current C recovery: its instructions remain
-necessary evidence, and hardware-observed channel feedback remains a boundary.
+flags; clearing one owner does not clear all owners. In the channel-request path,
+`56B06` replaces one of five owner masks; `56AD2` OR-reduces those masks and passes
+the result in **R6** to `569DA`. The formal argument contract restores this real
+reduction in regenerated C; it no longer disappears as an unused value.
+
+`569DA` selects the requested/reference port level independently with bits1/17.
+When both bits are set, or the entire mask is zero, it first performs an extra
+paired write, then still performs the individual writes. These repeated effects
+and their order are real instructions, not decompiler duplication. The two ROM
+descriptors at `312FC` establish this interface:
+
+| Logical channel | Mask bit | Masked output write | Input observation | Reference / requested level |
+|---|---|---|---|---|
+| 0 | 1 | `FFC10004`, port0 bit10 | `FFC1000C`, bit10 | 1 / 0 |
+| 1 | 17 | `FFC100C4`, port3 bit5 | `FFC100CC`, bit5 | 1 / 0 |
+
+`56A26` forms a separate mismatch mask from the two input observations and stores
+it at `8A84`; it does not echo the owner requests. `56A48/56A8C` then qualify the
+observations into `8A68/8A6B`. Both exact-image ROM thresholds at `318F8/F9` are
+zero, so these calls select state2 for a reference-level match and state0 for a
+mismatch without a qualifying delay. The general code also has qualifying
+states3/1 and invocation counters, not a measured-time contract. OEM pin roles,
+external circuitry, input settling and physical output response remain bounded;
+none is inferred from the requested bit or the software state encoding.
 
 CH2 snapshots outputs before prework fault aggregation, and later reduces output
 requests in postwork. Foreground request reconciliation/mode publication occurs
@@ -9708,20 +9948,24 @@ in a different context. Owner requests, reduced flags, selected outputs and
 mode caches are therefore not a single synchronous state transition.
 
 **Remaining high-value dependencies:** OEM identities of fault actions and service
-routines; complete upstream assist/health qualification semantics; calibration
+routines; fused-observer/health qualification semantics; calibration
 units and physical analog identity; ADC/DMA sample freshness; hardware channel
 feedback and output-update timing. These do not require finishing the physical
 NvM emulator before further application reconstruction. Static connectivity is
 not exhaustive semantic closure or a new vehicle result.
 
-**Verification checkpoint.** Independent four-stage rebuilds agreed. The composed
-command-tail, negative-current-reference and mode-request reconciliation scenarios
-passed on the fresh working project. Portable machine/coverage checks and the
-affected capture, command-cone, assist-oracle, B6 and NvM artifact gates passed;
-live coverage matched the canonical ledger exactly. The matching project and
-corpus were promoted after clean daemon teardown. Regenerated C preserves the
-request-status return, ordered mode hooks and shared scale across both phase-code
-banks. The capture planner exposes the corrected clamp/gate fields without live
-execution. The historical post-auth helper also rebuilt and passed its existing
-emulator-local checks with stock aggregate calls stubbed; that regression is
-not native execution of those EPS aggregates or a vehicle result.
+**Verification checkpoint (2026-10-15, assist and service lifecycle).** Two
+independent four-stage rebuilds plus signature finalization agreed on the
+canonical inventory. Native signed-surface composition, retained moving-state
+release and forced service-family exit passed on the unmodified image with
+explicit RAM-state boundaries. Regenerated C preserves scalar correction
+returns, service phase arguments/returns, sample-pointer effects and the real
+owner-mask reduction. Coverage, function-boundary, command-cone, assist-oracle
+and B6 composition/end-to-end/ingress gates passed; live coverage matched the
+canonical ledger exactly. The matching project and corpus were promoted after
+clean daemon teardown. No peripheral model was extended for this checkpoint.
+
+The preceding control/mode checkpoint `4f055cc6` contains the native command-tail,
+negative-current-reference and mode-request evidence. Its historical post-auth
+helper regression used stubbed stock aggregate calls; that remains emulator-local
+evidence, not native execution of those aggregates or a vehicle result.

@@ -3173,7 +3173,7 @@ decisive stock-source discriminator:
 | `CBE8` | 2 | final short contribution |
 | `CC48` | 4 | complete `D0218` summed output |
 
-This is the exact ordinary B6-inactive sum recovered from `FUN_000D0218`; no candidate
+This is the exact ordinary B6-inactive sum recovered from `D0218`; no candidate
 term is omitted. A stock ID11/ID18 capture synchronized with native `0x08A/0x081/0x030`
 therefore answers whether one of the previously unnamed EPS-internal terms changes with
 Toyota lateral authority, or whether `CC48` changes without a corresponding recovered
@@ -3191,7 +3191,7 @@ The second profile follows the numeric result through the physical command funne
 | `CC62`, `CC66`, `CC64` | 6 | pre-final-clamp/gate, amplitude-clamped/gated, and selected command |
 | `AC54`, `AC56` | 4 | motor-driving `CC64` mirror and diagnostic `CC62` sibling |
 
-`FUN_000D0AF6` calls these stages in order: `D0218 -> D0284 -> D02DA -> D0382 ->
+`D0AF6` calls these stages in order: `D0218 -> D0284 -> D02DA -> D0382 ->
 D039E -> D042C -> D06D6 -> D047C -> D0AAE`. The default `full-path` profile is the
 unique union of the two tables: **52 bytes**, with `CC48` sampled once, emitted as eight
 ODTs across lists 0 and 1 during the same event-worker invocation. ODT reads are still

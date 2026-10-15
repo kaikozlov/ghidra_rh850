@@ -564,14 +564,14 @@ def main() -> int:
     # magnitude; their primal values reduce to torque/speed/angle feedback, internal
     # phase/mode state, and ROM calibration.
     d0218_terms = [
-        {"cell": "FEBEC43C", "runtime_writer": "0x000C7E36", "classification": "measured steering-torque-shaped assist", "provenance": "C7E36 clamps C472+C45A+C44C against AC6C; the upstream family is the conditioned four-sensor steering-torque chain"},
-        {"cell": "FEBEC4C0", "runtime_writer": "0x000C8678", "classification": "torque+speed gain/map term", "provenance": "C8678 maps filtered torque-family C266 through ROM tables and crossfades with C1AA/BF40; exact ordinary selector maps alias"},
-        {"cell": "FEBEC3BA", "runtime_writer": "0x000C74AC", "classification": "measured steering-torque-family term", "provenance": "C74AC clamps ABB0+C3A4, both recovered in the torque-filter family"},
-        {"cell": "FEBECC2C", "runtime_writer": "0x000D0162", "classification": "internal assist aggregate with ROM slew bound", "provenance": "D0162 sums C3A0+C39C+C41E+C5A8+C53A with constant/ROM-bounded accumulator state"},
+        {"cell": "FEBEC43C", "runtime_writer": "0x000C7E36", "classification": "bounded torque and angle-rate composition", "provenance": "C7E36 clamps C472+C45A+C44C against AC6C; these combine conditioned torque and angle-rate feedback rather than a single measured-torque source"},
+        {"cell": "FEBEC4C0", "runtime_writer": "0x000C8678", "classification": "torque-rate and assist-slope/speed compensation", "provenance": "C8678 combines differentiated filtered torque C266 with speed-dependent gains and the C1AA/BF40 assist-curve slope blend; exact ordinary selector maps alias"},
+        {"cell": "FEBEC3BA", "runtime_writer": "0x000C74AC", "classification": "bounded differentiated torque-model composition", "provenance": "C74AC clamps ABB0+C3A4 from two separately filtered and differentiated torque-model branches"},
+        {"cell": "FEBECC2C", "runtime_writer": "0x000D0162", "classification": "bounded nested assist sum", "provenance": "D0162 sums C3A0+C39C+C41E+C5A8+C53A and amplitude-clamps the result; this summation is not itself a slew limiter"},
         {"cell": "FEBEBF3C", "runtime_writer": "0x000C2B64", "classification": "signed measured-torque calibration-curve term", "provenance": "C2B64 interpolates C28FC-selected curves over |C128|, clamps the magnitude, then restores torque sign using AF888=+1024 or AF88A=-1024 divided by1024; retained Normal-mode value0 can reach only equivalent banks 0/2, while Sport value2 selects distinct bank1"},
-        {"cell": "FEBECB38", "runtime_writer": "0x000CF2B2", "classification": "angle-domain ramp/return/dither term", "provenance": "CF2B2 slew/median-limits CB08*CB20/0x100; CB08 is recovered from the 0x025 angle-processing family and CB20 is an internal ramp sequencer"},
-        {"cell": "FEBEC5EE", "runtime_writer": "0x000C9A84", "classification": "moving-mode monitor/assist term; zero in retained drives", "provenance": "C9A84 scales C5EC by C5B8; retained 0x0D5 s213 source is identically zero"},
-        {"cell": "FEBECBE8", "runtime_writer": "0x000CFCD4", "classification": "phase-window angle excitation/return term", "provenance": "CFCD4 clamps CC22+CB64; both are internally sequenced angle/phase waveform state, not an external lane target"},
+        {"cell": "FEBECB38", "runtime_writer": "0x000CF2B2", "classification": "angle-controller output envelope and slew", "provenance": "CF2B2 bounds CB08*CB20/0x100 against the previous output; CB08 comes from the angle-controller composition and CB20 is its stateful envelope, including mode7 hold/fade behavior"},
+        {"cell": "FEBEC5EE", "runtime_writer": "0x000C9A84", "classification": "retained moving-state contribution with gain transition", "provenance": "C9812 holds C5EC when admission is inactive; C9A84 bounds C5EC+ABFA and scales by C5B8 while admission is active or retained gain exceeds its lower bound. A zero current 0x0D5 s213 source alone does not establish zero output"},
+        {"cell": "FEBECBE8", "runtime_writer": "0x000CFCD4", "classification": "gated window waveform and filtered bounded memory", "provenance": "CFCD4 clamps CC22+CB64: a gated phase/window waveform plus filtered bounded AC24 memory; no independent external lane-target magnitude is recovered"},
     ]
     runtime_writer_expect = {
         "FEBEC43C": 0xC7E36, "FEBEC4C0": 0xC8678, "FEBEC3BA": 0xC74AC,
@@ -727,7 +727,7 @@ def main() -> int:
             "speed_breakpoints_kph": speed_breakpoints_kph,
             "driver_torque_axis": "signed Q8.8 torque-domain axis; 0x100 counts corresponds to 1.000 Nm by the exact upstream DID 0x1035 Steering Wheel Torque scaling",
             "direct_bf3c_samples": drive_mode_samples,
-            "secondary_effect": "C29B2 also emits local curve slope; C2C32 speed-blends that slope into FEBEBF40, which C8678 consumes in the separate FEBEC4C0 torque+speed term. The mode bank therefore affects more than the direct BF3C magnitude.",
+            "secondary_effect": "C29B2 also emits local curve slope; C2C32 speed-blends that slope into FEBEBF40, which C8678 consumes in the separate FEBEC4C0 torque-rate and assist-slope/speed compensation. The mode bank therefore affects more than the direct BF3C magnitude.",
             "selector_reader_census": {
                 "FEBEC156_direct_readers": [f"0x{x:06X}" for x in c156_readers],
                 "direct_region_count": len(selector_group_census),
@@ -797,7 +797,7 @@ def main() -> int:
                 "rank": 2, "data_id": "0x1C02", "reason": "Toyota-named Command Value Torque pre-final-clamp/gate observable; diagnostic mirror of a value that D042C also feeds into the verified CC66/CC64 physical actuation funnel"
             },
             {
-                "rank": 3, "data_id": "0x1C3E", "reason": "scaled/clamped FEBEC5EE proxy; useful control oracle, but exact selector maps alias and retained-drive evidence already bounds this moving-mode term to zero"
+                "rank": 3, "data_id": "0x1C3E", "reason": "scaled/clamped FEBEC5EE proxy; useful moving-state oracle, but exact selector maps alias. Zero captured source does not determine retained output without initial-state/history or a direct proxy observation"
             },
         ],
         "production_output_authorized": False,

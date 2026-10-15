@@ -121,26 +121,26 @@
     "terms": [
       {
         "cell": "FEBEC43C",
-        "classification": "measured steering-torque-shaped assist",
-        "provenance": "C7E36 clamps C472+C45A+C44C against AC6C; the upstream family is the conditioned four-sensor steering-torque chain",
+        "classification": "bounded torque and angle-rate composition",
+        "provenance": "C7E36 clamps C472+C45A+C44C against AC6C; these combine conditioned torque and angle-rate feedback rather than a single measured-torque source",
         "runtime_writer": "0x000C7E36"
       },
       {
         "cell": "FEBEC4C0",
-        "classification": "torque+speed gain/map term",
-        "provenance": "C8678 maps filtered torque-family C266 through ROM tables and crossfades with C1AA/BF40; exact ordinary selector maps alias",
+        "classification": "torque-rate and assist-slope/speed compensation",
+        "provenance": "C8678 combines differentiated filtered torque C266 with speed-dependent gains and the C1AA/BF40 assist-curve slope blend; exact ordinary selector maps alias",
         "runtime_writer": "0x000C8678"
       },
       {
         "cell": "FEBEC3BA",
-        "classification": "measured steering-torque-family term",
-        "provenance": "C74AC clamps ABB0+C3A4, both recovered in the torque-filter family",
+        "classification": "bounded differentiated torque-model composition",
+        "provenance": "C74AC clamps ABB0+C3A4 from two separately filtered and differentiated torque-model branches",
         "runtime_writer": "0x000C74AC"
       },
       {
         "cell": "FEBECC2C",
-        "classification": "internal assist aggregate with ROM slew bound",
-        "provenance": "D0162 sums C3A0+C39C+C41E+C5A8+C53A with constant/ROM-bounded accumulator state",
+        "classification": "bounded nested assist sum",
+        "provenance": "D0162 sums C3A0+C39C+C41E+C5A8+C53A and amplitude-clamps the result; this summation is not itself a slew limiter",
         "runtime_writer": "0x000D0162"
       },
       {
@@ -151,20 +151,20 @@
       },
       {
         "cell": "FEBECB38",
-        "classification": "angle-domain ramp/return/dither term",
-        "provenance": "CF2B2 slew/median-limits CB08*CB20/0x100; CB08 is recovered from the 0x025 angle-processing family and CB20 is an internal ramp sequencer",
+        "classification": "angle-controller output envelope and slew",
+        "provenance": "CF2B2 bounds CB08*CB20/0x100 against the previous output; CB08 comes from the angle-controller composition and CB20 is its stateful envelope, including mode7 hold/fade behavior",
         "runtime_writer": "0x000CF2B2"
       },
       {
         "cell": "FEBEC5EE",
-        "classification": "moving-mode monitor/assist term; zero in retained drives",
-        "provenance": "C9A84 scales C5EC by C5B8; retained 0x0D5 s213 source is identically zero",
+        "classification": "retained moving-state contribution with gain transition",
+        "provenance": "C9812 holds C5EC when admission is inactive; C9A84 bounds C5EC+ABFA and scales by C5B8 while admission is active or retained gain exceeds its lower bound. A zero current 0x0D5 s213 source alone does not establish zero output",
         "runtime_writer": "0x000C9A84"
       },
       {
         "cell": "FEBECBE8",
-        "classification": "phase-window angle excitation/return term",
-        "provenance": "CFCD4 clamps CC22+CB64; both are internally sequenced angle/phase waveform state, not an external lane target",
+        "classification": "gated window waveform and filtered bounded memory",
+        "provenance": "CFCD4 clamps CC22+CB64: a gated phase/window waveform plus filtered bounded AC24 memory; no independent external lane-target magnitude is recovered",
         "runtime_writer": "0x000CFCD4"
       }
     ]
@@ -263,7 +263,7 @@
       },
       "source": "data/generated/gtsplus_2026/toyota_diag_registry_camry_2026.json"
     },
-    "secondary_effect": "C29B2 also emits local curve slope; C2C32 speed-blends that slope into FEBEBF40, which C8678 consumes in the separate FEBEC4C0 torque+speed term. The mode bank therefore affects more than the direct BF3C magnitude.",
+    "secondary_effect": "C29B2 also emits local curve slope; C2C32 speed-blends that slope into FEBEBF40, which C8678 consumes in the separate FEBEC4C0 torque-rate and assist-slope/speed compensation. The mode bank therefore affects more than the direct BF3C magnitude.",
     "selector_reader_census": {
       "C4E94_pointer_pairs": {
         "D2F38": [
@@ -1016,7 +1016,7 @@
     {
       "data_id": "0x1C3E",
       "rank": 3,
-      "reason": "scaled/clamped FEBEC5EE proxy; useful control oracle, but exact selector maps alias and retained-drive evidence already bounds this moving-mode term to zero"
+      "reason": "scaled/clamped FEBEC5EE proxy; useful moving-state oracle, but exact selector maps alias. Zero captured source does not determine retained output without initial-state/history or a direct proxy observation"
     }
   ],
   "schema": "camry-8965f3307000-internal-assist-oracles-v2",
