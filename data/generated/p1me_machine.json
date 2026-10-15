@@ -2,7 +2,7 @@
   "schema": "rh850-p1me-machine-v2",
   "source": {
     "path": "data/devices/p1me.rdl",
-    "sha256": "00406a0ee601e9beca577b51bb2ef8772889e1c6b25085702a5b1126ae261530",
+    "sha256": "fb1ede117e2a880a6e50607f642f5cf762efc4de7936b75ac31e34965cad5c75",
     "systemrdl_compiler": "1.33.0"
   },
   "products": [
@@ -582,7 +582,7 @@
         "reset": null,
         "behavior": "faci",
         "evidence": "manual",
-        "source_ref": "R01UH0615EJ0120 pages14-15,28,45-47,67-68",
+        "source_ref": "R01UH0615EJ0120 pages10-11,14-20,28,45-47,66-68",
         "description": "FACI command-issuing area",
         "trigger": "faci-command",
         "status_register": "FSTATR",

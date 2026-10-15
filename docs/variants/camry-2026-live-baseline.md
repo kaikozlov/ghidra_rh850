@@ -8679,7 +8679,7 @@ None is evidence that the other has completed.
 |`0x679B8` application initialization|49 request cells become state`FF`/object`FFFF`, preserving byte+1; byte+3 belongs to the object halfword. All16 checksum seeds become0 and status replicas become0/`55`/`AA`. Every descriptor buffer is cleared by `floor(length/4)` words, including disabled descriptors. `0686..068A` and cursor`068E` are cleared, active object`068C` becomes`FFFF`, and gap`068B` is preserved. The2115-instruction call checks the complete affected application extent from nonzero RAM, including untouched completion/staging areas.|
 |`0x632B2` application RAM clear|Exactly1024 word stores clear `FEBE7000..FEBE7FFF`; both adjacent words survive. Native5122 instructions. This is not the larger boot RAM clear.|
 |`0x1426..0x1466` startup-loop slice|204815 instructions clear96KiB at `FEBE8000..FEBFFFFF` and64KiB at `FEEF8000..FEF07FFF`, preserving the lower32KiB of LocalRAM. The first loop's start`FEBF7C00` exceeds end`FEBE7000`, so it executes no stores. The scenario enters after earlier hardware setup and stops at`0x1468` before its hardware write: neither complete reset nor warm-boot behavior is claimed.|
-|`0x68324` bulk family1 submission|For completion other than`5A` and a non-`FFFF` first handle, enqueue the three logical copies into raw/`55`/`AA` staging destinations selected by `object&3`, then set completion`FF`. Individual enqueue results are ignored. All11 enabled descriptors produce33 actual queued operations in12911 instructions, leaving89 normal free slots. A separately pending middle copy rejects while the other two queue; completion still becomes`FF` (1434 instructions). All-complete arrays return0 without accessing uninitialized queues (594 instructions). The subsequent family0 range path remains **bounded**, not natively closed by these cases.|
+|`0x68324` bulk family1 submission|For completion other than`5A` and a non-`FFFF` first handle, enqueue the three logical copies into raw/`55`/`AA` staging destinations selected by `object&3`, then set completion`FF`. Individual enqueue results are ignored. All11 enabled descriptors produce33 actual queued operations in12911 instructions, leaving89 normal free slots. A separately pending middle copy rejects while the other two queue; completion still becomes`FF` (1434 instructions). All-complete arrays return0 without accessing uninitialized queues (594 instructions). These cases did not close the family0 path; §77.18 adds the whole-table submission proof.|
 |`0x68626` single-object submission|Read the descriptor before checking busy and the `FFFF` handle sentinel; no local object bound. On admission, call the real enqueue routine three times, then set busy`FF` and the slot mask`005A5A5A`; return0. The retained call starts with completion`5A` and proves it remains`5A`: this helper does not rearm completion or acquire payloads.|
 |`0x7936E` DataFlash read controls|Eight instructions write `EEPRDCYCL=F`, `DFECCCTL=4000`, `DFERRINT=0`, `DFTSTCTL=4000`. Starting with nonzero ECC/test/notification controls verifies that normal ECC is restored, test mode and notifications are disabled, and protection-key bits do not remain set.|
 
@@ -8700,21 +8700,21 @@ registered dump into ECC-test bits or synthesize correction, ECC errors,
 ECM delivery or timing. Ghidra gains only the exact one-byte read-cycle
 window; the existing32-byte volatile ECC bank already covers its controls.
 
-**Remaining lower-initializer boundary.** Full `0x681F8` execution first
+**Checkpoint boundary, subsequently closed in §77.18.** Full `0x681F8` execution first
 exposed the intentionally uninitialized opaque ICU-S word at`FFC5D020`.
 With an explicit supplied zero—not an inferred reset value—the firmware
-runs19016 instructions before the unsupported `B3` FACI forced-stop write
-through `0x78CE6`. The checked prefix initializes both1024-byte publication
-areas (`0708..0B07` and`0C88..1087`), read/write staging, family completion
+ran19016 instructions before the then-unsupported `B3` FACI forced-stop write
+through `0x78CE6`. The checked prefix initializes both1024-byte buffers
+(`0708..0B07` and`0C88..1087`), read/write staging, family completion
 and logical queues. `0x749D0` additionally clears`FEBF6B1C`, outside the
 logical initializer's stores. This is a verified fault boundary, **not**
 successful physical-driver initialization, command completion or restored
-application data. The forced-stop path remains the next hardware-model
-prerequisite.
+application data. The forced-stop model prerequisite is closed below;
+application acquisition remains distinct from initialization.
 
 Thirty native regressions are retained for this increment. They include the
 previously exercised single-object completion-preservation contract; the
-unsupported full-initializer probe remains diagnostic workspace evidence.
+original full-initializer fault report remains diagnostic workspace evidence.
 
 Independent four-stage rebuilds and finalization agreed on **7,187 functions**.
 The curated set is now **126 reviews** (117 verified, nine bounded), with
@@ -8725,4 +8725,64 @@ machine boundaries. The three dependent NvM/B6 artifacts were regenerated;
 all six targeted checks and live-coverage parity passed. The stopped
 project and canonical corpus were promoted. These are offline instruction
 and model results, not a vehicle or physical flash-timing result.
+
+### 77.18 2026-10-15 forced stop, complete acquisition initializer and all-table submission
+
+**`0x681F8` now executes through its real lower-driver calls.** The machine
+supports `B3` acceptance from Renesas flash manual Tables4.2/4.7/4.15,
+6.3/6.4 and §6.3.14. No replacement firmware callee, return hook, patched
+CodeFlash or automatic ready response is used. The scenario supplies opaque
+ICU-S offset20 and `FASTAT` explicitly, and injects a hypothetical completed
+`FSTATR` state after actual command submission. That instruction scheduling
+point is not a measured flash latency.
+
+|Actual `0x681F8` input path|Instructions|Checked outcome|
+|---|---:|---|
+|ICU-S word0; externally completed forced stop|19535|Application completion/bookkeeping and staging reset; logical queues initialized; `6B1C` cleared by the actual lower callee; driver bytes`6CB0..6CB3 = 01 00 0E 00`; read mode restored and both FHVE enables off.|
+|ICU-S bit0 set; no completion event|19263|The call still finishes RAM initialization. Lower rejection sets`6CB1=1` but preserves the supplied prior`6CB0/6CB2/6CB3` bytes. There is no propagated initializer success result and no rollback of prior initialization.|
+
+**Submission versus completion remains explicit.** Forced stop accepts
+ready, busy, command-locked and already-stopping inputs in normal P/E mode;
+it does not inherit blank-check FHVE requirements. It records command
+history and clears the documented start-cleared error/suspension/ready bits.
+Access-error flags survive; they prevent `CMDLK` clearing even though
+`ILGLERR` is temporarily clear during stop processing. Correction flags
+control `ECRCT` clearing. Completion, buffer-empty status, reasserted
+access errors and interrupt delivery are not fabricated. Read mode, OCD
+emulation and interruption of an incomplete command prefix remain outside
+this supported submission boundary.
+
+The real `0x78CE6` leaf first handles its `ILGLERR`/`FASTAT` condition, writes
+`B3`, then calls `0x793F0(FSTATR,8000,8000,E5)`. Without completion it returns8
+after1859 instructions; an explicit completion input produces return0 after111.
+`0x793F0` reads once per iteration: first-mask intersection returns0 before
+second-mask intersection returns1; otherwise it decrements the32-bit count
+and returns2 at zero. It is **not masked equality**, and an initial zero
+count does not suppress the first read. The identical masks in the forced-stop
+caller make the poller's return1 unreachable on that call.
+
+**Both registered application families now have native submission proof.**
+`0x68324` runs34287 instructions and enqueues89 real requests:33 for the11
+enabled family1 objects, then56 for24 enabled family0 objects. Family0 uses
+the inclusive descriptor range `first..low16(first+count−1)` with shared
+destination`FEBF0C88`, resets object bookkeeping to`FFFF` and counters to0,
+and sets completion`FF` regardless of individual enqueue results. Exactly33
+normal free slots remain. Disabled bookkeeping and all staging bytes are
+preserved. This closes the previous family0 submission bound; it does not
+claim89 completed reads or restored application values. The firmware has no
+local guard against malformed count/range wrap.
+
+Eighteen regressions retain the hardware submission boundaries, real stop
+timeout/completion, mask precedence, both complete initializer paths, and
+all-table queue population. Erase/program and the higher-level acquisition/
+publication scheduler remain separate reconstruction work.
+
+Independent rebuilds agreed on **7,187 functions**, **129 curated reviews**
+(121 verified, eight bounded), and929 outside-function candidates. All18
+retained scenarios passed on the fresh project. The initial shared-model run
+still rejected`B3` in the long-lived default bridge; a clean bridge restart
+resolved that behavior without changing the source, and `rh850_firmware`
+then passed. The three dependent artifacts were regenerated; all six targeted
+checks and live-coverage parity passed. The stopped project and corpus were
+promoted. No physical flash operation or vehicle behavior was exercised.
 

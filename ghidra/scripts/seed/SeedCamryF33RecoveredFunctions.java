@@ -1176,14 +1176,25 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
             + "Includes disabled descriptors' buffers. Clear0686..068A and068E, "
             + "set active object068C=FFFF; preserve068B and unrelated completion/staging. "
             + "Native full call2115 instructions; no flash acquisition.");
+    semanticFunction(0x681F8L, "f33_nvm_initialize_acquisition", VoidDataType.dataType)
+        .setComment("Clear family0/1 completion; set family0 objectsFFFF/counters0; clear "
+            + "0690..0694, four failure masks, write staging, four read stages and "
+            + "both1024-byte buffers0708/0C88. Then call79B1E,73F0A,764E2; "
+            + "no lower initialization result is propagated. Native19535 instructions "
+            + "with explicit ICU-S zero and externally completed FACI forced stop. "
+            + "ICU-S bit0 rejection still returns after RAM initialization, preserving "
+            + "prior6CB0/6CB2/6CB3 and setting6CB1=1. Not acquired application data.");
     semanticFunction(0x68324L, "f33_nvm_submit_bulk_reads", u32)
         .setComment("For family1 completion!=5A and nonFFFF first handle, submit "
             + "base/base+4/base+8 to slot(object&3) raw/55/AA destinations, ignoring "
             + "each enqueue result, then set completionFF. No family busy gate or "
-            + "payload access. Then process family0 descriptor handle ranges. "
-            + "ReturnFF if any eligible object attempted, otherwise0. Native proof "
-            + "covers all11 enabled family1 objects, a rejected pending copy and "
-            + "already-complete arrays; family0 acquisition remains separate.");
+            + "payload access. Family0 noncomplete/nonFFFF descriptors enqueue each "
+            + "inclusive first..low16(first+count-1) handle to shared0C88, ignoring "
+            + "admission results, then set objectFFFF/counter0 and completionFF. "
+            + "ReturnFF if any eligible object attempted, otherwise0. Native all "
+            + "registered families enqueue89 requests, leave33 free slots and preserve "
+            + "staging; pending-copy rejection and already-complete arrays also checked. "
+            + "No local overflow/range guard; malformed count can wrap the handle loop.");
     semanticFunction(0x68626L, "f33_nvm_submit_family1_read_copies", u32,
         new ParameterImpl("object", u16, currentProgram))
         .setComment("Read descriptor before gating on busy0 and first handle!=FFFF; "
@@ -1191,11 +1202,28 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
             + "return values, set busyFF and slot failure mask005A5A5A, return0. "
             + "Rejected gate returnsFF. Preserve completion byte and staging; this "
             + "is submission, not acquired data or completed restoration.");
+    semanticFunction(0x78CE6L, "f33_faci_force_stop_and_poll", u32)
+        .setComment("If FSTATR.ILGLERR and FASTAT!=10, write FASTAT10. IssueB3, "
+            + "then793F0(FSTATR,8000,8000,E5); return0 for poll0/1, else8. "
+            + "Actual mask precedence makes poll1 unreachable for these identical masks. "
+            + "No P/E entry/exit or automatic completion; native timeout1859 instructions "
+            + "and explicit hypothetical completion111 instructions.");
     semanticFunction(0x7936EL, "f33_nvm_initialize_dataflash_read_controls", VoidDataType.dataType)
         .setComment("Write EEPRDCYCL=F, DFECCCTL=4000, DFERRINT=0, DFTSTCTL=4000. "
             + "Manual PROT01 keys are not retained: normal ECC enabled, ECC test "
             + "disabled, notification enables cleared. Eight native instructions "
             + "from nonzero control state; no physical timing or ECM delivery proof.");
+    semanticFunction(0x793F0L, "f33_poll_word_masks", u32,
+        new ParameterImpl("word", new PointerDataType(u32, 4), currentProgram),
+        new ParameterImpl("first_mask", u32, currentProgram),
+        new ParameterImpl("second_mask", u32, currentProgram),
+        new ParameterImpl("attempts", u32, currentProgram))
+        .setComment("Read one full word each iteration. First-mask intersection returns0; "
+            + "otherwise second-mask intersection returns1. If neither, decrement the "
+            + "32-bit attempt count and return2 when it reaches0. Zero count does not "
+            + "skip the first read; absent a match it wraps. Not masked equality, elapsed "
+            + "time, or a second independent read. Native precedence/second/exhaustion/zero "
+            + "cases plus the real forced-stop polling loop.");
   }
   private void annotateDataFlashReads() throws Exception {
     DataType u8 = UnsignedCharDataType.dataType;

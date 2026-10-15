@@ -342,6 +342,12 @@ working copy, run `tools/g stop` afterward. To promote a finished working copy
 into the committed snapshot, run `make finalize-project` for the selected target
 (daemon stop, target-specific verification, and snapshot promotion).
 
+After editing a Java script used by a persistent bridge, cleanly stop the
+relevant target bridge before verifying the changed behavior. A loaded script
+can retain the previous implementation even after its source changes:
+`tools/gtarget camry-8965F3307000 stop`. The next command starts a fresh runtime.
+This reload is distinct from rebuilding or promoting the working database.
+
 ### Persistent mechanical annotations (legacy Sienna ledger)
 
 Simple function renames, data labels, and listing comments for the legacy Sienna

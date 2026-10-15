@@ -1,0 +1,49 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_masked_poll_zero_count_reads_first",
+  "entry": {
+    "role": "actual Camry application record instructions with explicit RAM preconditions; no replaced callees",
+    "scope": "resolved-address",
+    "address": "0x793f0"
+  },
+  "max_instructions": 20000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xff00",
+    "r6": "0xfebe2100",
+    "r7": "0x1",
+    "r8": "0x2",
+    "r9": "0x0"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "isolated initialized nested-call stack"
+    },
+    {
+      "address": "0xfebe2100",
+      "hex": "01000000",
+      "evidence": "actual polling word; first-mask precedence and decrement-after-read"
+    }
+  ],
+  "checks": [
+    {
+      "name": "masked poll outcome",
+      "kind": "register",
+      "register": "r10",
+      "equals": "0x0"
+    }
+  ]
+}

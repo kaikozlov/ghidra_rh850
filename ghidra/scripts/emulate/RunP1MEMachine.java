@@ -394,6 +394,8 @@ public class RunP1MEMachine extends GhidraScript {
         static final long FSTATR_ILGLERR = 0x4000;
         static final long FSTATR_STATUS_CLEAR_MASK = 0x3703c;
         static final long FSTATR_COMMAND_LOCK_MASK = 0x27068;
+        static final long FSTATR_FORCED_STOP_CLEAR_MASK = FSTATR_STATUS_CLEAR_MASK | 0x8b40;
+        static final long FSTATR_CORRECTION_MASK = 0x10014;
         static final long RSCFD_TX_RAM_BASE = 0xFFD24000L;
         static final long RSCFD_TX_RECORD_SIZE = 0x20L;
 
@@ -1189,7 +1191,7 @@ public class RunP1MEMachine extends GhidraScript {
 
         void validateFaciWrite(PcodeThread<byte[]> thread, RegisterDef register, byte[] value) {
             int command = value[0] & 0xff;
-            if (command != 0x50 && command != 0x71 && command != 0xd0) {
+            if (command != 0x50 && command != 0x71 && command != 0xd0 && command != 0xb3) {
                 throw fault("unsupported-faci-command", thread, register.address,
                     value.length, "write", register.evidence,
                     String.format("FACI command 0x%02X has no implemented state transition", command));
@@ -1198,10 +1200,11 @@ public class RunP1MEMachine extends GhidraScript {
                     || (command != 0xd0 && faciPendingCommand != 0)) {
                 throw fault("unsupported-faci-sequence", thread, register.address,
                     value.length, "write", register.evidence,
-                    "supported sequences are 50 and DataFlash blank-check 71,D0");
+                    "supported sequences are 50, B3 and DataFlash blank-check 71,D0; stop during a partial prefix is not modeled");
             }
             RegisterDef status = requiredRegister(register.name, "status", register.status_register);
-            if ((unsigned(memory(thread, status.address, status.size)) & FSTATR_FRDY) == 0) {
+            if (command != 0xb3
+                    && (unsigned(memory(thread, status.address, status.size)) & FSTATR_FRDY) == 0) {
                 throw fault("faci-not-ready", thread, register.address,
                     value.length, "write", register.evidence, "FACI command requires FSTATR.FRDY=1");
             }
@@ -1211,11 +1214,20 @@ public class RunP1MEMachine extends GhidraScript {
             memory(thread, history.address, history.size);
             RegisterDef control = requiredRegister(register.name, "control", register.control_register);
             long controlValue = unsigned(memory(thread, control.address, control.size)) & 0x81;
-            if (command == 0x50) {
+            if (command == 0x50 || command == 0xb3) {
                 if (controlValue != 1 && controlValue != 0x80) {
                     throw fault("unsupported-faci-mode", thread, register.address,
                         value.length, "write", register.evidence,
-                        "FACI status clear requires CodeFlash or DataFlash P/E mode");
+                        "FACI status clear/forced stop requires CodeFlash or DataFlash P/E mode");
+                }
+                if (command == 0xb3) {
+                    RegisterDef emulation = requiredRegister(
+                        register.name, "emulation", register.emulation_register);
+                    if (unsigned(memory(thread, emulation.address, emulation.size)) != 0) {
+                        throw fault("unsupported-faci-emulation", thread, register.address,
+                            value.length, "write", register.evidence,
+                            "forced stop is bounded to normal FLEMU mode");
+                    }
                 }
                 return;
             }
@@ -1253,7 +1265,7 @@ public class RunP1MEMachine extends GhidraScript {
                 faciPendingCommand = command;
                 return;
             }
-            if (command != 0x50 && command != 0xd0) {
+            if (command != 0x50 && command != 0xd0 && command != 0xb3) {
                 throw new IllegalStateException("FACI write validation was bypassed");
             }
             RegisterDef statusRegister = requiredRegister(
@@ -1273,10 +1285,22 @@ public class RunP1MEMachine extends GhidraScript {
             else {
                 long accessStatus = unsigned(memory(accessRegister.address, accessRegister.size));
                 long commandHistory = unsigned(memory(historyRegister.address, historyRegister.size));
-                long nextStatus = status & ~FSTATR_STATUS_CLEAR_MASK;
-                if ((accessStatus & FASTAT_ACCESS_ERROR_MASK) != 0) nextStatus |= FSTATR_ILGLERR;
-                long nextAccessStatus = (nextStatus & FSTATR_COMMAND_LOCK_MASK) != 0
-                    ? accessStatus | FASTAT_CMDLK : accessStatus & ~FASTAT_CMDLK;
+                long nextStatus;
+                long nextAccessStatus;
+                if (command == 0xb3) {
+                    // Manual4.2/4.7: clear at acceptance, but never synthesize completion.
+                    // ILGLERR is temporarily clear even with CFAE/DFAE; CMDLK persists.
+                    nextStatus = status & ~FSTATR_FORCED_STOP_CLEAR_MASK;
+                    nextAccessStatus = (accessStatus & FASTAT_ACCESS_ERROR_MASK) != 0
+                        ? accessStatus : accessStatus & ~FASTAT_CMDLK;
+                    if ((status & FSTATR_CORRECTION_MASK) != 0) nextAccessStatus &= ~1L;
+                }
+                else {
+                    nextStatus = status & ~FSTATR_STATUS_CLEAR_MASK;
+                    if ((accessStatus & FASTAT_ACCESS_ERROR_MASK) != 0) nextStatus |= FSTATR_ILGLERR;
+                    nextAccessStatus = (nextStatus & FSTATR_COMMAND_LOCK_MASK) != 0
+                        ? accessStatus | FASTAT_CMDLK : accessStatus & ~FASTAT_CMDLK;
+                }
                 setRegisterValue(historyRegister.name, (command << 8) | ((commandHistory >>> 8) & 0xff));
                 setRegisterValue(statusRegister.name, nextStatus);
                 setRegisterValue(accessRegister.name, nextAccessStatus);
@@ -1287,7 +1311,8 @@ public class RunP1MEMachine extends GhidraScript {
             event.addProperty("pc", hex32(pc(thread)));
             event.addProperty("command", String.format("0x%02X", command));
             event.add("sequence", sequence);
-            event.addProperty("transition", command == 0xd0 ? "blank-check-started" : "status-cleared");
+            event.addProperty("transition", command == 0xd0 ? "blank-check-started"
+                : command == 0xb3 ? "forced-stop-started" : "status-cleared");
             event.addProperty("evidence", register.source_ref);
             trace.deviceEvents.add(event);
             faciPendingCommand = 0;

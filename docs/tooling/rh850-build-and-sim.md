@@ -285,7 +285,7 @@ flowchart LR
 |Interrupts|Arbitrate modeled EIC requests using EIMK, PSW.ID/NP, PMR, ISPR, priority, and channel-number tie-break; save EIPC/EIPSW/EIIC and select direct or INTBP vectors; invalidate the load-link reservation.|Implemented for modeled EIINT channels. Edge acceptance clears EIRF; level requests remain until their source clears. Native `EIRET` applies automatic ISPR release when pre-return EP=0 and INTCFG.ISPC=0; protected software ISPR writes are ignored. Reserved channels without a supported reset contract fault on injection.|
 |TAUJ|Progress software-triggered interval timers from explicit P-Bus cycles, applying CK0–CK2 prescalers, retaining fractional progress, reloading on underflow, and raising the channel request.|Implemented for the bounded TAUJ0 interval path, including MD0 immediate-start requests. CK3/BRS and other timer modes fault rather than invent behavior. Clock events are functional stimulus, not CPU/silicon timing.|
 |RSCFD|Retain the exact registered signer response resources plus the diagnostic transmit buffer; model common receive FIFOs 3 and 5 using generated control/status/window/pointer/interrupt relationships.|Transmit events identify the buffer derived from the modeled message-RAM address. Receive inputs explicitly start **post-filter**. Mode/enable gates, payload capacity, queue depth, overflow, interrupt threshold, sticky flags, oldest-message windows, and native pointer pops are modeled. CAN1's receive level is the OR of modeled FIFO sources. Acceptance-filter execution, global RFIFOs, arbitration, bus timing, and error-state evolution are not modeled.|
-|FACI / CodeFlash|Keep image bytes immutable. Model status clear in P/E mode and incremental DataFlash blank-check submission `71,D0`, including both FHVE enables, keyed read/DataFlash mode transitions, address-register readback and busy-write suppression.|Bounded implementation. Submission clears `FRDY`; completion, blankness and first-nonblank address require explicit inputs. No dump-derived blankness, automatic ready interrupt, erase/program, forced-stop, CodeFlash/FWE entry, OCD emulation or sequencer timing. Unsupported commands/modes/ranges fault before the current write rather than inventing a hardware error response.|
+|FACI / CodeFlash|Keep image bytes immutable. Model status clear in P/E mode, forced-stop `B3` acceptance, and incremental DataFlash blank-check submission `71,D0`, including both FHVE enables, keyed read/DataFlash mode transitions, address-register readback and busy-write suppression.|Bounded implementation. Stop/blank-check submission clears `FRDY`; completion requires explicit inputs. Stop accepts ready/busy/locked/reissued states in normal P/E mode, without requiring blank-check FHVE gates. No dump-derived blankness, automatic ready interrupt, erase/program, CodeFlash/FWE entry, OCD emulation, partial-prefix stop or sequencer timing. Unsupported commands/modes/ranges fault before the current write.|
 |DataFlash ECC/read controls|Use manual-backed `DFERSTR`/`DFERSTC` widths/reset and low-bit error clearing; keyed `DFECCCTL`/`DFTSTCTL` fields, masked `DFERRINT`, and `EEPRDCYCL` codes3..F.|Bounded implementation. Protection keys read zero; rejected keys preserve prior fields. Codes0..2 fault as prohibited. Non-normal ECC/test-mode payload reads fault rather than silently using ordinary dump bytes. Error flags remain explicit inputs; no ECC generation/correction, test-bit payload, error-address capture, overflow, ECM delivery or flash timing is synthesized.|
 |ICU-S|Expose only recovered registers and exact command-five/callback transitions. Treat supplied output words and the opaque offset20 word as scenario state, not generated cryptography or readiness.|Implemented within that recovered boundary. Offset20 has no assumed reset and supports only observed word reads; physical write semantics and bit meaning remain unknown. No provisioned-key or AES-CMAC silicon claim.|
 |Integration|Expose model generation through `tools/rh850 model update` and `tools/rh850 model check`, and batched execution through `tools/rh850 test firmware`; bind identity through the existing target registry; retain one JSON report per scenario under `build/out/`.|Implemented. No parallel capability manifest, target whitelist, project lifecycle, backend selector, or legacy CLI alias exists.|
@@ -313,7 +313,7 @@ The functional model currently covers PE1/self LocalRAM aliasing,
 STAC-controlled Application/System reset RAM rules, G3M alignment and MPU
 overlap permissions, per-register MMIO access widths, TAUJ0 interval progression,
 EIINT delivery, common receive FIFOs, recovered RSCFD transmit buffers, FACI
-status clear and DataFlash blank-check submission, DataFlash ECC/read controls,
+status clear, forced-stop acceptance and DataFlash blank-check submission, DataFlash ECC/read controls,
 and the explicitly recovered ICU-S surface. Unknown MMIO,
 illegal widths, uninitialized state, and unsupported FACI commands are hard
 faults carrying PC, address, size, access kind, and evidence provenance.
@@ -332,9 +332,10 @@ manual's 32-byte DataFlash ECC bank and exact one-byte `EEPRDCYCL` window as
 volatile; this does not grant the machine access to registers absent from its
 generated definition. P1M-E hardware manual Tables31.18/31.23/31.25 and35.13
 define the protected fields, notification enables and read-cycle encodings.
-The Camry `0x7936E` initializer executes against those controls from nonzero
-state; that leaf result is not proof of the larger driver's initialization,
-which also reaches the separately unsupported FACI forced-stop command.
+The Camry `0x7936E` leaf and complete `0x681F8` initializer execute against
+these controls. The latter requires explicit ICU-S/access-status inputs and
+forced-stop completion; its lower rejection path does not undo the earlier
+RAM initialization or report an initialization result to its caller.
 
 FACI blank checking is deliberately nonmutating and input-driven. Renesas flash
 manual R01UH0615EJ0120 §6.3.15 says erased-but-unprogrammed DataFlash reads are
@@ -344,6 +345,16 @@ accepts `71,D0` only in normal, incremental DataFlash P/E mode with both
 it does not set `FBCSTAT`, `FPSADDR`, completion time or an interrupt request.
 Supply result/completion through `register-input` events. Command-history
 visibility during an incomplete prefix is not modeled.
+
+Forced stop follows the flash manual's Tables4.2/4.7/4.15 and §6.3.14.
+`B3` shifts command history, clears the documented start-cleared error,
+suspension and ready bits, and clears `CMDLK` only when `CFAE/DFAE` are clear.
+With access-error flags, `ILGLERR` is temporarily clear during processing but
+`CMDLK` persists; the completion input must include any reasserted error.
+`ECRCT` clears when the corresponding correction flags were set. Buffer-empty
+status and final completion remain external; neither is assigned a latency.
+The real Camry `0x78CE6` routine returns8 after229 unsuccessful polling reads
+without a completion input, rather than receiving a fabricated success.
 
 `FSADDR`/`FEADDR` discard their read-only low two bits and ignore busy writes
 (flash manual pp14–15). `FENTRYR` key bits read zero; writes while busy are

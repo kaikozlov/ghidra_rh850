@@ -244,7 +244,7 @@ addrmap p1me {
 
     reg {
         regwidth=8; accesswidth=8; desc="FACI command-issuing area";
-        evidence="manual"; source_ref="R01UH0615EJ0120 pages14-15,28,45-47,67-68"; behavior="faci";
+        evidence="manual"; source_ref="R01UH0615EJ0120 pages10-11,14-20,28,45-47,66-68"; behavior="faci";
         trigger="faci-command"; status_register="FSTATR"; access_register="FASTAT"; history_register="FCMDR";
         control_register="FENTRYR"; mode_register="FBCCNT"; emulation_register="FLEMU";
         start_address_register="FSADDR"; end_address_register="FEADDR";
