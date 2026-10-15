@@ -1,0 +1,30 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_family2_api_consumer_reads_rom_not_set_ram",
+  "entry": {"role": "actual application field consumer32454 through family selector getter, immutable ROM CRC and real payload copy", "scope": "resolved-address", "address": "0x32454"},
+  "max_instructions": 20000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {"sp": "0xfebe2000", "gp": "0xfebeb800", "tp": "0x23dfc", "lp": "0x798", "PSW": "0x20", "FPEC": "0x0", "PMR": "0xff00", "r6": "0x0"},
+  "stop_addresses": ["0x798"],
+  "memory": [
+    {"address": "0xfebe1c00", "size": 1024, "fill": 165, "evidence": "isolated initialized nested-call stack"},
+    {"address": "0xfebefbd8", "hex": "a55a5aa534127856", "evidence": "explicit group8 setter-like RAM payload differs from immutable ROM; no startup claim"},
+    {"address": "0xfebf0658", "hex": "10", "evidence": "cached success from plausible prior setter"},
+    {"address": "0xfebf10a0", "hex": "45", "evidence": "cached success XOR55"},
+    {"address": "0xfebf10c4", "hex": "ba", "evidence": "cached success XORAA"},
+    {"address": "0xfebf0663", "hex": "5a", "evidence": "group8 setter flag must not redirect getter to RAM"},
+    {"address": "0xfebe68a8", "hex": "a5a5efbea5a5", "evidence": "consumer output halfword68AA and adjacent canaries"},
+    {"address": "0xfebe66ce", "hex": "cdab", "evidence": "explicit fallback halfword distinct from RAM source; success must not read fallback"}
+  ],
+  "checks": [
+    {"name": "consumer field comes from ROM group8 offset4", "kind": "memory-equal", "address": "0xfebe68aa", "source_address": "0xa60c", "size": 2},
+    {"name": "leading publication canary", "kind": "memory", "address": "0xfebe68a8", "size": 2, "equals_hex": "a5a5"},
+    {"name": "trailing publication canary", "kind": "memory", "address": "0xfebe68ac", "size": 2, "equals_hex": "a5a5"},
+    {"name": "setter RAM payload retained", "kind": "memory", "address": "0xfebefbd8", "size": 8, "equals_hex": "a55a5aa534127856"},
+    {"name": "setter flag retained", "kind": "memory", "address": "0xfebf0663", "size": 1, "equals_hex": "5a"},
+    {"name": "actual group8 CRC despite cached10", "kind": "event-count", "operation": "register-write", "equals": "5"},
+    {"name": "balanced stack", "kind": "register", "register": "sp", "equals": "0xfebe2000"},
+    {"name": "restored mask", "kind": "register", "register": "PMR", "equals": "0xff00"}
+  ]
+}

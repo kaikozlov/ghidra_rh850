@@ -1,0 +1,26 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_family2_api_cached_status_fallback10_without_crc",
+  "entry": {"role": "actual family2 cached-status accessor and real vote/repair; fallback10 is not a ROM integrity verdict", "scope": "resolved-address", "address": "0x671d0"},
+  "max_instructions": 10000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {"sp": "0xfebe2000", "gp": "0xfebeb800", "tp": "0x23dfc", "lp": "0x798", "PSW": "0x20", "FPEC": "0x0", "PMR": "0xff00", "r6": "0x1"},
+  "stop_addresses": ["0x798"],
+  "memory": [
+    {"address": "0xfebe1c00", "size": 1024, "fill": 165, "evidence": "isolated initialized nested-call stack"},
+    {"address": "0xfebf0650", "hex": "a500a5", "evidence": "unrecoverable group1 status triplet with neighboring canaries; raw normalizes0"},
+    {"address": "0xfebf1098", "hex": "a500a5", "evidence": "XOR55 input normalizes55"},
+    {"address": "0xfebf10bc", "hex": "a500a5", "evidence": "XORAA input normalizesAA"},
+    {"address": "0xfebf065c", "hex": "00", "evidence": "unset setter flag must remain unset despite fallback10"}
+  ],
+  "checks": [
+    {"name": "all-different vote falls back to10", "kind": "register", "register": "r10", "equals": "0x10"},
+    {"name": "raw repaired10", "kind": "memory", "address": "0xfebf0650", "size": 3, "equals_hex": "a510a5"},
+    {"name": "encoded55 repaired", "kind": "memory", "address": "0xfebf1098", "size": 3, "equals_hex": "a545a5"},
+    {"name": "encodedAA repaired", "kind": "memory", "address": "0xfebf10bc", "size": 3, "equals_hex": "a5baa5"},
+    {"name": "repair does not claim setter flag", "kind": "memory", "address": "0xfebf065c", "size": 1, "equals_hex": "00"},
+    {"name": "no CRC recomputation despite zero-filled bad ROM group1", "kind": "event-count", "operation": "register-write", "equals": "0"},
+    {"name": "balanced stack", "kind": "register", "register": "sp", "equals": "0xfebe2000"}
+  ]
+}

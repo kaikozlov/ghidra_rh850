@@ -1,0 +1,136 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_range_operation_interference9_reconciles_cleanup",
+  "entry": {
+    "role": "full real6879C rejection9 and real mode-exit cancellation via741D0/7664E; explicit mirrored interference inhibits hardware driver, not a substitute callback or physical completion",
+    "scope": "resolved-address",
+    "address": "0x6879c"
+  },
+  "max_instructions": 20000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xff00",
+    "r6": "0x10c",
+    "r7": "0xa4"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "isolated initialized nested-call stack"
+    },
+    {
+      "address": "0xfebf0690",
+      "hex": "0000a500",
+      "evidence": "explicit family busy bytes, adjacent canary and caller-owned temporary-mode request"
+    },
+    {
+      "address": "0xfebf6ccd",
+      "hex": "0101ff0101",
+      "evidence": "79B1E/79A0E paired guards and matched mirrored interference state; no mode-transition callback is suppressed"
+    },
+    {
+      "address": "0xfebf6cd9",
+      "hex": "a5a5a500",
+      "evidence": "explicit service result canaries and initial classification;6879C paths really recompute classification through79CB8"
+    },
+    {
+      "address": "0xfebf6104",
+      "hex": "00000000",
+      "evidence": "explicit non-magic scheduler guard;72248 still executes real73C4A cancellation before reading this"
+    },
+    {
+      "address": "0xfebf6124",
+      "hex": "a5",
+      "evidence": "phase canary;72248(0) publishes8 after real cancellation"
+    },
+    {
+      "address": "0xfebf6b00",
+      "hex": "00",
+      "evidence": "explicit idle logical operation;73C4A does not synthesize terminal operation phase"
+    },
+    {
+      "address": "0xfebf6b76",
+      "hex": "02a5",
+      "evidence": "secondary state2 and completion canary; real7664E converts state2 to3 and clears completion flag"
+    },
+    {
+      "address": "0xfebf6b72",
+      "hex": "01",
+      "evidence": "explicit pre-existing in-progress logical state; real cancellation may convert1 to5"
+    }
+  ],
+  "checks": [
+    {
+      "name": "real firmware reaches the stated return or pre-handler boundary",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "6879C returnsFF only after real79CB8 cleanup returns",
+      "kind": "register",
+      "register": "r10",
+      "equals": "0xff"
+    },
+    {
+      "name": "failed admission clears request without publishing family busy",
+      "kind": "memory",
+      "address": "0xfebf0690",
+      "size": 4,
+      "equals_hex": "0000a500"
+    },
+    {
+      "name": "exit notification completed before classification store0",
+      "kind": "memory",
+      "address": "0xfebf6cdc",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "real76AE6 cancellation converts pending1 to5; not hardware completion",
+      "kind": "memory",
+      "address": "0xfebf6b72",
+      "size": 1,
+      "equals_hex": "05"
+    },
+    {
+      "name": "real secondary cancellation state and flag",
+      "kind": "memory",
+      "address": "0xfebf6b76",
+      "size": 2,
+      "equals_hex": "0300"
+    },
+    {
+      "name": "72248(0) publishes phase8 after cancellation",
+      "kind": "memory",
+      "address": "0xfebf6124",
+      "size": 1,
+      "equals_hex": "08"
+    },
+    {
+      "name": "real nested guards restore with mirrored interference unchanged",
+      "kind": "memory",
+      "address": "0xfebf6ccd",
+      "size": 5,
+      "equals_hex": "0101ff0101"
+    },
+    {
+      "name": "no FACI command submitted before this software boundary",
+      "kind": "event-count",
+      "operation": "faci-command",
+      "equals": "0"
+    }
+  ]
+}

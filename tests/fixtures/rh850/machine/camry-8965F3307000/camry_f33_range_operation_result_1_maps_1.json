@@ -1,0 +1,64 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_range_operation_result_1_maps_1",
+  "entry": {
+    "role": "pure result-byte normalization through real768DE; explicit synthetic status input does not imply erase admission or physical completion",
+    "scope": "resolved-address",
+    "address": "0x79530"
+  },
+  "max_instructions": 20000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "isolated initialized nested-call stack"
+    },
+    {
+      "address": "0xfebf6b72",
+      "hex": "01",
+      "evidence": "explicit source-derived result input for79530 mapping"
+    }
+  ],
+  "checks": [
+    {
+      "name": "real firmware reaches the stated return or pre-handler boundary",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "0/1/5/6 preserved, all other raw bytes normalize to4",
+      "kind": "register",
+      "register": "r10",
+      "equals": "0x1"
+    },
+    {
+      "name": "poll-result reader has no state mutation",
+      "kind": "memory",
+      "address": "0xfebf6b72",
+      "size": 1,
+      "equals_hex": "01"
+    },
+    {
+      "name": "no FACI command submitted before this software boundary",
+      "kind": "event-count",
+      "operation": "faci-command",
+      "equals": "0"
+    }
+  ]
+}

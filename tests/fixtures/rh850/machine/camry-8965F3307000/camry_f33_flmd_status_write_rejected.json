@@ -1,0 +1,66 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_flmd_status_write_rejected",
+  "entry": {
+    "role": "real native register-access primitive exercising an explicit FLMD model boundary, not hardware error behavior",
+    "scope": "resolved-address",
+    "address": "0x78af2"
+  },
+  "max_instructions": 20000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xff00",
+    "r6": "0xffa00008",
+    "r7": "0x0"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "isolated initialized nested-call stack"
+    },
+    {
+      "address": "0xffa00000",
+      "hex": "01000000",
+      "evidence": "prior internal pull-up selection"
+    }
+  ],
+  "checks": [
+    {
+      "name": "rejected access preserves protected control",
+      "kind": "memory",
+      "address": "0xffa00000",
+      "size": 4,
+      "equals_hex": "01000000"
+    },
+    {
+      "name": "model fault does not fabricate hardware protection-error feedback",
+      "kind": "memory",
+      "address": "0xffa00008",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "invalid access issues no accepted register write",
+      "kind": "event-count",
+      "operation": "register-write",
+      "equals": "0"
+    }
+  ],
+  "expected_fault": {
+    "kind": "write-prohibited",
+    "address": "0xffa00008",
+    "access": "write"
+  }
+}

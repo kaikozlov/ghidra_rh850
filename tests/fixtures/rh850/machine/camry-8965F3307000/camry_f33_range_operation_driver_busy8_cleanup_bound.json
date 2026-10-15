@@ -1,0 +1,107 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_range_operation_driver_busy8_cleanup_bound",
+  "entry": {
+    "role": "real failed range admission and mode-request cleanup; honest pre741D0 exit-notification boundary, not completed cleanup or returnedFF; no replacement callee",
+    "scope": "resolved-address",
+    "address": "0x6879c"
+  },
+  "max_instructions": 20000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xff00",
+    "r6": "0x10c",
+    "r7": "0xa4"
+  },
+  "stop_addresses": [
+    "0x741d0",
+    "0x798"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "isolated initialized nested-call stack"
+    },
+    {
+      "address": "0xfebf0690",
+      "hex": "0000a500",
+      "evidence": "explicit family busy bytes, adjacent canary and caller-owned temporary-mode request"
+    },
+    {
+      "address": "0xfebf6ccd",
+      "hex": "0101ff0000",
+      "evidence": "79B1E/79A0E paired guards and matched mirrored interference state; no mode-transition callback is suppressed"
+    },
+    {
+      "address": "0xfebf6cd9",
+      "hex": "a5a5a500",
+      "evidence": "explicit service result canaries and initial classification;6879C paths really recompute classification through79CB8"
+    },
+    {
+      "address": "0xfebf6b20",
+      "hex": "a5a50100",
+      "evidence": "explicit74A5A diagnostics and admission inputs"
+    },
+    {
+      "address": "0xfebf6b72",
+      "hex": "01",
+      "evidence": "pre-existing logical in-progress byte; rejection does not fabricate completion"
+    },
+    {
+      "address": "0xfebf6c30",
+      "hex": "a5a5a5a5",
+      "evidence": "cursor canary;74B76 writes end before lower admission if reached"
+    }
+  ],
+  "checks": [
+    {
+      "name": "real firmware reaches the stated return or pre-handler boundary",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x741d0"
+    },
+    {
+      "name": "687CC cleared mode request but did not publish family busy",
+      "kind": "memory",
+      "address": "0xfebf0690",
+      "size": 4,
+      "equals_hex": "0000a500"
+    },
+    {
+      "name": "classification store0 is still pending after real exit notification741D0",
+      "kind": "memory",
+      "address": "0xfebf6cdc",
+      "size": 1,
+      "equals_hex": "55"
+    },
+    {
+      "name": "rejected range submission did not publish a result",
+      "kind": "memory",
+      "address": "0xfebf6b72",
+      "size": 1,
+      "equals_hex": "01"
+    },
+    {
+      "name": "no FACI command submitted before this software boundary",
+      "kind": "event-count",
+      "operation": "faci-command",
+      "equals": "0"
+    },
+    {
+      "name": "74B76 stores end before74A5A busy rejection",
+      "kind": "memory",
+      "address": "0xfebf6c30",
+      "size": 4,
+      "equals_hex": "006c0000"
+    }
+  ]
+}

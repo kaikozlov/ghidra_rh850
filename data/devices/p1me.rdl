@@ -63,6 +63,27 @@ addrmap p1me {
         reset_rules="power-on:force;system-1-cvm:force;system-1-pin:force;system-2:force;application-1:controlled";
     } global_ram @ 0xFEEF8000;
 
+    // Protected internal FLMD0 pull selection; this does not model the external pin level.
+    reg {
+        regwidth=32; accesswidth=32; desc="FLMD0 internal pull selection; protected A5/value/inverse/value sequence";
+        evidence="manual"; source_ref="R01UH0585EJ0120 pages2870-2871 Tables35.8-35.9"; behavior="flmd";
+        trigger="flmd-control"; status_register="FLMDPS";
+        field { sw=rw; reset=0; } value[31:0];
+    } FLMDCNT @ 0xFFA00000;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="FLMD write-protection command; only complete valid sequences are modeled";
+        evidence="manual"; source_ref="R01UH0585EJ0120 pages2871-2873 Table35.10"; behavior="flmd";
+        trigger="flmd-command";
+        field { sw=w; reset=0; } value[31:0];
+    } FLMDPCMD @ 0xFFA00004;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="FLMD write-sequence error monitor; bit0 cleared by successful protected update";
+        evidence="manual"; source_ref="R01UH0585EJ0120 pages2871,2874 Table35.11"; behavior="flmd";
+        field { sw=r; reset=0; } value[31:0];
+    } FLMDPS @ 0xFFA00008;
+
     // Exact Camry consumer 00067060 uses only DCRA1, CTL=00 (32-bit Ethernet/32-bit input).
     reg {
         regwidth=32; accesswidth=32; desc="DCRA1 CRC input; 32-bit register accesses only";

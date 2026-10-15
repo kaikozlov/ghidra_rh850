@@ -2,7 +2,7 @@
   "schema": "rh850-p1me-machine-v2",
   "source": {
     "path": "data/devices/p1me.rdl",
-    "sha256": "a116748e27299a85622b18939f60a65c9cb4e34b90d855c2c6f8bd017449a773",
+    "sha256": "6f3c51be028735622904fbd44ad0296d5bad67ae3045db54539350b3273a8862",
     "systemrdl_compiler": "1.33.0"
   },
   "products": [
@@ -156,6 +156,51 @@
       }
     ],
     "registers": [
+      {
+        "name": "FLMDCNT",
+        "address": 4288675840,
+        "size": 4,
+        "access_widths": [
+          4
+        ],
+        "access": "rw",
+        "reset": 0,
+        "behavior": "flmd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 pages2870-2871 Tables35.8-35.9",
+        "description": "FLMD0 internal pull selection; protected A5/value/inverse/value sequence",
+        "trigger": "flmd-control",
+        "status_register": "FLMDPS"
+      },
+      {
+        "name": "FLMDPCMD",
+        "address": 4288675844,
+        "size": 4,
+        "access_widths": [
+          4
+        ],
+        "access": "w",
+        "reset": 0,
+        "behavior": "flmd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 pages2871-2873 Table35.10",
+        "description": "FLMD write-protection command; only complete valid sequences are modeled",
+        "trigger": "flmd-command"
+      },
+      {
+        "name": "FLMDPS",
+        "address": 4288675848,
+        "size": 4,
+        "access_widths": [
+          4
+        ],
+        "access": "r",
+        "reset": 0,
+        "behavior": "flmd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 pages2871,2874 Table35.11",
+        "description": "FLMD write-sequence error monitor; bit0 cleared by successful protected update"
+      },
       {
         "name": "SELFID0",
         "address": 4288708608,

@@ -1,0 +1,138 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_family0_api_status_bound_returns_ff_without_mutation",
+  "entry": {
+    "role": "actual family0 API or real consumer with explicit RAM preconditions; no stubs and no persistence claim",
+    "scope": "resolved-address",
+    "address": "0x6792c"
+  },
+  "max_instructions": 20000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xff00",
+    "r6": "0x10020",
+    "r7": "0x0"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "isolated initialized nested-call stack"
+    },
+    {
+      "address": "0xfebf0488",
+      "hex": "ffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffff",
+      "evidence": "explicit family0 request cells; per-cell opaque bytes are not request fields"
+    },
+    {
+      "address": "0xfebf067a",
+      "hex": "0000a5a5a5a5a5a5a5a5",
+      "evidence": "explicit producer consumer and neighboring phase canaries"
+    },
+    {
+      "address": "0xfebf0308",
+      "hex": "1212121212121212121212121212121212121212121212121212121212121212",
+      "evidence": "prior cached status"
+    },
+    {
+      "address": "0xfebf0338",
+      "hex": "5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a",
+      "evidence": "prior completion is independent of application admission"
+    },
+    {
+      "address": "0xfebf0368",
+      "hex": "c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3",
+      "evidence": "prior selected-halfword plane untouched by admission"
+    },
+    {
+      "address": "0xfebf03a8",
+      "hex": "d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4",
+      "evidence": "prior sequence plane untouched by admission"
+    },
+    {
+      "address": "0xfebf0690",
+      "hex": "01a5a5a5a5a5a5a5",
+      "evidence": "real arm busy precondition and neighboring canaries"
+    }
+  ],
+  "checks": [
+    {
+      "name": "exact return",
+      "kind": "register",
+      "register": "r10",
+      "equals": "0xff"
+    },
+    {
+      "name": "balanced stack",
+      "kind": "register",
+      "register": "sp",
+      "equals": "0xfebe2000"
+    },
+    {
+      "name": "exact ring",
+      "kind": "memory",
+      "address": "0xfebf0488",
+      "size": 260,
+      "equals_hex": "ffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffff"
+    },
+    {
+      "name": "exact indices",
+      "kind": "memory",
+      "address": "0xfebf067a",
+      "size": 10,
+      "equals_hex": "0000a5a5a5a5a5a5a5a5"
+    },
+    {
+      "name": "exact status",
+      "kind": "memory",
+      "address": "0xfebf0308",
+      "size": 32,
+      "equals_hex": "1212121212121212121212121212121212121212121212121212121212121212"
+    },
+    {
+      "name": "exact completion",
+      "kind": "memory",
+      "address": "0xfebf0338",
+      "size": 32,
+      "equals_hex": "5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a"
+    },
+    {
+      "name": "exact selected",
+      "kind": "memory",
+      "address": "0xfebf0368",
+      "size": 64,
+      "equals_hex": "c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3"
+    },
+    {
+      "name": "exact sequence",
+      "kind": "memory",
+      "address": "0xfebf03a8",
+      "size": 128,
+      "equals_hex": "d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4"
+    },
+    {
+      "name": "exact busy",
+      "kind": "memory",
+      "address": "0xfebf0690",
+      "size": 8,
+      "equals_hex": "01a5a5a5a5a5a5a5"
+    },
+    {
+      "name": "no physical register commands",
+      "kind": "event-count",
+      "operation": "register-write",
+      "equals": "0"
+    }
+  ]
+}

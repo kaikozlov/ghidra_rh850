@@ -1,0 +1,168 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_family1_api_read_tail_duplicate_preserves_status",
+  "entry": {
+    "role": "67E48 suppresses only matching immediately preceding state11, returning1 without repairing or publishing the inconsistent status triplet",
+    "scope": "resolved-address",
+    "address": "0x67e48"
+  },
+  "max_instructions": 10000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xff00",
+    "r6": "0x2",
+    "r7": "0xfebe3000"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "isolated initialized nested-call stack"
+    },
+    {
+      "address": "0xfebf058c",
+      "hex": "11800200ff81ffffff82ffffff83ffffff84ffffff85ffffff86ffffff87ffffff88ffffff89ffffff8affffff8bffffff8cffffff8dffffff8effffff8fffffff90ffffff91ffffff92ffffff93ffffff94ffffff95ffffff96ffffff97ffffff98ffffff99ffffff9affffff9bffffff9cffffff9dffffff9effffff9fffffffa0ffffffa1ffffffa2ffffffa3ffffffa4ffffffa5ffffffa6ffffffa7ffffffa8ffffffa9ffffffaaffffffabffffffacffffffadffffffaeffffffafffffffb0ffff",
+      "evidence": "explicit four-byte request cells; per-position opaque canaries survive compaction"
+    },
+    {
+      "address": "0xfebf0686",
+      "hex": "0100",
+      "evidence": "explicit stored producer and consumer indices"
+    },
+    {
+      "address": "0xfebf0358",
+      "hex": "5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a",
+      "evidence": "separate completed lower-operation inputs; admission must not arm or clear them"
+    },
+    {
+      "address": "0xfebf0428",
+      "hex": "6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d",
+      "evidence": "checksum seed canaries; admission must not recompute or publish checksum"
+    },
+    {
+      "address": "0xfebf0691",
+      "hex": "7b",
+      "evidence": "nonzero busy canary is not an API admission gate"
+    },
+    {
+      "address": "0xfebef400",
+      "hex": "a5a5a5a5a5a5a5a5a5a5a5a5",
+      "evidence": "live application payload plus four-byte extent canary"
+    },
+    {
+      "address": "0xfebe3000",
+      "hex": "0102030405060708090a0b0c",
+      "evidence": "explicit synthetic source with bytes beyond registered payload"
+    },
+    {
+      "address": "0xfebf0328",
+      "hex": "10103010101010101010101010101010",
+      "evidence": "explicit status plane input"
+    },
+    {
+      "address": "0xfebf1088",
+      "hex": "45450045454545454545454545454545",
+      "evidence": "explicit status plane input"
+    },
+    {
+      "address": "0xfebf10ac",
+      "hex": "baba00bababababababababababababa",
+      "evidence": "explicit status plane input"
+    }
+  ],
+  "checks": [
+    {
+      "name": "predicted full-width return",
+      "kind": "register",
+      "register": "r10",
+      "equals": "0x1"
+    },
+    {
+      "name": "exact ring state and objects; every opaque byte preserved",
+      "kind": "memory",
+      "address": "0xfebf058c",
+      "size": 196,
+      "equals_hex": "11800200ff81ffffff82ffffff83ffffff84ffffff85ffffff86ffffff87ffffff88ffffff89ffffff8affffff8bffffff8cffffff8dffffff8effffff8fffffff90ffffff91ffffff92ffffff93ffffff94ffffff95ffffff96ffffff97ffffff98ffffff99ffffff9affffff9bffffff9cffffff9dffffff9effffff9fffffffa0ffffffa1ffffffa2ffffffa3ffffffa4ffffffa5ffffffa6ffffffa7ffffffa8ffffffa9ffffffaaffffffabffffffacffffffadffffffaeffffffafffffffb0ffff"
+    },
+    {
+      "name": "only the producer may be republished; consumer is untouched",
+      "kind": "memory",
+      "address": "0xfebf0686",
+      "size": 2,
+      "equals_hex": "0100"
+    },
+    {
+      "name": "completion unchanged by admission",
+      "kind": "memory",
+      "address": "0xfebf0358",
+      "size": 16,
+      "equals_hex": "5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a"
+    },
+    {
+      "name": "checksum seeds unchanged even after payload copy",
+      "kind": "memory",
+      "address": "0xfebf0428",
+      "size": 32,
+      "equals_hex": "6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d"
+    },
+    {
+      "name": "busy unchanged",
+      "kind": "memory",
+      "address": "0xfebf0691",
+      "size": 1,
+      "equals_hex": "7b"
+    },
+    {
+      "name": "exact live payload and no trailing copy",
+      "kind": "memory",
+      "address": "0xfebef400",
+      "size": 12,
+      "equals_hex": "a5a5a5a5a5a5a5a5a5a5a5a5"
+    },
+    {
+      "name": "source unchanged",
+      "kind": "memory",
+      "address": "0xfebe3000",
+      "size": 12,
+      "equals_hex": "0102030405060708090a0b0c"
+    },
+    {
+      "name": "balanced stack",
+      "kind": "register",
+      "register": "sp",
+      "equals": "0xfebe2000"
+    },
+    {
+      "name": "exact raw status plane",
+      "kind": "memory",
+      "address": "0xfebf0328",
+      "size": 16,
+      "equals_hex": "10103010101010101010101010101010"
+    },
+    {
+      "name": "exact XOR55 status plane",
+      "kind": "memory",
+      "address": "0xfebf1088",
+      "size": 16,
+      "equals_hex": "45450045454545454545454545454545"
+    },
+    {
+      "name": "exact XORAA status plane",
+      "kind": "memory",
+      "address": "0xfebf10ac",
+      "size": 16,
+      "equals_hex": "baba00bababababababababababababa"
+    }
+  ]
+}

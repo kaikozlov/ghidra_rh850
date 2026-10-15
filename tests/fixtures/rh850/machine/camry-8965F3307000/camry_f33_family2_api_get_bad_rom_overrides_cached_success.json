@@ -1,0 +1,30 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_family2_api_get_bad_rom_overrides_cached_success",
+  "entry": {"role": "actual family2 ROM getter recomputes immutable group1 and republishes failure; no fake CRC result", "scope": "resolved-address", "address": "0x67208"},
+  "max_instructions": 20000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {"sp": "0xfebe2000", "gp": "0xfebeb800", "tp": "0x23dfc", "lp": "0x798", "PSW": "0x20", "FPEC": "0x0", "PMR": "0xff00", "r6": "0x1", "r7": "0xfebe2104"},
+  "stop_addresses": ["0x798"],
+  "memory": [
+    {"address": "0xfebe1c00", "size": 1024, "fill": 165, "evidence": "isolated initialized nested-call stack"},
+    {"address": "0xfebe2100", "size": 16, "fill": 165, "evidence": "eight-byte destination and four-byte canaries; failed validation must not copy"},
+    {"address": "0xfebef600", "hex": "78563412efcdab90", "evidence": "plausible prior setter payload, different from immutable zero ROM"},
+    {"address": "0xfebf0651", "hex": "10", "evidence": "prior setter cached10 does not bypass ROM validation"},
+    {"address": "0xfebf1099", "hex": "45", "evidence": "cached10 XOR55"},
+    {"address": "0xfebf10bd", "hex": "ba", "evidence": "cached10 XORAA"},
+    {"address": "0xfebf065c", "hex": "5a", "evidence": "prior setter flag remains owned by setter/init"}
+  ],
+  "checks": [
+    {"name": "immutable zero ROM group1 fails both attempts", "kind": "register", "register": "r10", "equals": "0x30"},
+    {"name": "destination including payload is untouched", "kind": "memory", "address": "0xfebe2100", "size": 16, "equals_hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5"},
+    {"name": "RAM set payload retained on ROM failure", "kind": "memory", "address": "0xfebef600", "size": 8, "equals_hex": "78563412efcdab90"},
+    {"name": "cache now raw30", "kind": "memory", "address": "0xfebf0651", "size": 1, "equals_hex": "30"},
+    {"name": "cache now XOR55", "kind": "memory", "address": "0xfebf1099", "size": 1, "equals_hex": "65"},
+    {"name": "cache now XORAA", "kind": "memory", "address": "0xfebf10bd", "size": 1, "equals_hex": "9a"},
+    {"name": "ROM failure leaves setter flag5A", "kind": "memory", "address": "0xfebf065c", "size": 1, "equals_hex": "5a"},
+    {"name": "exactly two three-word ROM attempts", "kind": "event-count", "operation": "register-write", "equals": "10"},
+    {"name": "balanced stack", "kind": "register", "register": "sp", "equals": "0xfebe2000"}
+  ]
+}

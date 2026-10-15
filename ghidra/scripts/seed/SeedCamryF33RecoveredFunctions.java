@@ -769,22 +769,13 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
             + "every voted status unchanged except10 with a failing live-source "
             + "checksum returns12. Checksum failure does not rewrite stored status "
             + "or undo the copy. Forward-copy aliasing can change the checked source.");
-    for (long entry : new long[] {0x67948L, 0x67208L}) {
-      Function getter = getFunctionAt(toAddr(entry));
-      if (getter == null) throw new IllegalStateException("missing record getter " + toAddr(entry));
-      getter.setReturnType(u32, SourceType.USER_DEFINED);
-      getter.replaceParameters(Function.FunctionUpdateType.DYNAMIC_STORAGE_FORMAL_PARAMS,
-          true, SourceType.USER_DEFINED,
-          new ParameterImpl("object", u16, currentProgram),
-          new ParameterImpl("destination", words, currentProgram));
-    }
-    semanticFunction(0x66DFCL, "f33_nvm_get_ram_record", u32,
+    semanticFunction(0x66DFCL, "f33_nvm_get_record", u32,
         new ParameterImpl("selector", u32, currentProgram),
         new ParameterImpl("destination", words, currentProgram))
         .setComment("Decode only selector bits8..15 and pass low8 object plus "
             + "the unchanged destination to67948/68144/67208 for families0/1/2. "
             + "Forward the callee result; other families returnFF without data access. "
-            + "Upper16 selector bits are ignored. This is not a physical NvM read.");
+            + "Upper16 selector bits are ignored. Families0/1 copy RAM; family2 validates and copies ROM. Not a physical NvM read.");
     DataType quad = new ArrayDataType(u16, 4, 2);
     StructureDataType record =
         new StructureDataType(category, "F33LearnedQuadRecord", 0);
@@ -1396,21 +1387,21 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     semanticData(0x2798CL, new ArrayDataType(mapType, 11, 8),
         "f33_nvm_read_driver_result_map", "7494C translates its low8 input; key5->1. "
         + "Distinct namespace from saved driver status, despite shared lookup mechanics.");
-    semanticData(0x27CC8L, u16, "f33_nvm_probe_first_page",
-        "795D4 region lower bound in64-byte pages; exact image value0.");
-    semanticData(0x27CCAL, u16, "f33_nvm_probe_page_count",
-        "Exact480 pages; byte region0..77FF. Does not enforce alignment or nonzero length.");
-    semanticData(0xFEBF0693L, u8, "f33_nvm_direct_probe_request",
-        "Exact5A requests direct-probe mode through79D46/79CE2. Classifiers set5A then0.");
+    semanticData(0x27CC8L, u16, "f33_nvm_region_first_page",
+        "Registered direct-operation region starts at page0. Read and erase consumers have distinct bounds checks.");
+    semanticData(0x27CCAL, u16, "f33_nvm_region_page_count",
+        "Registered480 pages, byte region0..77FF; not the complete physical DataFlash capacity.");
+    semanticData(0xFEBF0693L, u8, "f33_nvm_direct_operation_request",
+        "Exact5A requests direct-operation mode through79D46/79CE2 for both page classification and span erasure.");
     semanticData(0xFEBF6B22L, u8, "f33_nvm_driver_block_latch",
         "Any nonzero value blocks74A36; separate from lower status6CB1==80.");
     semanticData(0xFEBF6B23L, u8, "f33_nvm_driver_phase",
         "74A5A admits only zero after the block-latch/lower-status checks.");
     semanticData(0xFEBF6B72L, u8, "f33_nvm_secondary_result_state",
         "7680C stores0/1/4/6 unconditionally;5 only from1. Other low8 values ignored.");
-    semanticData(0xFEBF6CDCL, u8, "f33_nvm_direct_probe_mode",
-        "79CE2 stores55 for request0693==5A. On exit, cancel before storing0 if prior mode!=0. "
-        + "79594 accepts any nonzero byte; this is not the returned busy indication from79C9E.");
+    semanticData(0xFEBF6CDCL, u8, "f33_nvm_direct_operation_mode",
+        "79CE2 stores55 for request0693==5A. Exit cancels before storing0. Shared by classification and erasure; "
+        + "not a read-only guarantee or the returned busy indication from79C9E.");
     semanticFunction(0x68A6CL, "f33_nvm_classify_family1_pages", u32,
         new ParameterImpl("object", u16, currentProgram))
         .setComment("Reject object>=16 or descriptor first_handleFFFF withFF before changing "
@@ -1857,6 +1848,198 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
             + "terminal dequeue/recycle/result1/6. These terminal inputs do not prove "
             + "physical programming reached those phases.");
   }
+  private void annotateApplicationRecordApis() throws Exception {
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    DataType words = new PointerDataType(u32, 4);
+    int count = currentProgram.getMemory().getShort(toAddr(0x2AD74L)) & 0xFFFF;
+    semanticData(0xFEBF065BL, new ArrayDataType(u8, count, 1),
+        "f33_nvm_family2_setter_flags", "66FFE clears and67176 writes5A. No reader recovered; not a proven persistence flag.");
+    semanticFunction(0x66D1AL, "f33_nvm_request_record_refresh", u32,
+        new ParameterImpl("selector", u32, currentProgram))
+        .setComment("Repair gate0671/10A9/10CD with fallback0; exact5A rejects. Decode family bits8..15 and low8 "
+            + "object, ignoring high16. Families0/1 enqueue read-kind11; family2 synchronously refreshes ROM "
+            + "status. Return acceptance, not persistence or CRC success.");
+    semanticFunction(0x66D6EL, "f33_nvm_set_record", u32,
+        new ParameterImpl("selector", u32, currentProgram),
+        new ParameterImpl("source", words, currentProgram))
+        .setComment("Repair gate0672/10AA/10CE with fallback0; exact5A rejects before source access. Dispatch "
+            + "family0/1 RAM update and request admission, or family2 RAM-only update. Unsupported families "
+            + "return0; high16 selector bits ignored.");
+    semanticFunction(0x66DCAL, "f33_nvm_get_record_status", u32,
+        new ParameterImpl("selector", u32, currentProgram))
+        .setComment("Dispatch low8 object by selector bits8..15. Family0 reads raw status; family1 votes with "
+            + "fallback12; family2 votes with fallback10. Unknown families returnFF; no physical flash read.");
+    semanticFunction(0x6768AL, "f33_nvm_family0_request_full", u32,
+        new ParameterImpl("producer", u32, currentProgram),
+        new ParameterImpl("consumer", u32, currentProgram))
+        .setComment("Truncate both indices to low8. Return producer+1==(consumer==0?ROM cell_count65:consumer). No "
+            + "cell inspection; reserves one cell.");
+    semanticFunction(0x676A4L, "f33_nvm_previous_family0_request", u32,
+        new ParameterImpl("index", u32, currentProgram))
+        .setComment("Return zero-extended low8 predecessor, with zero wrapping to ROM cell_count65 minus1. No "
+            + "general index validation.");
+    semanticFunction(0x676BAL, "f33_nvm_enqueue_family0_read", u32,
+        new ParameterImpl("object", u32, currentProgram))
+        .setComment("Low16 object. Recover indices before full and object<32 gates. Full rejects before duplicate "
+            + "detection. Only matching kind11 at predecessor(producer) suppresses insertion, even on an "
+            + "empty ring. Otherwise publish status20, kind11/object, and advance producer. Always republish "
+            + "producer; recovery may change both indices. Disabled descriptors are not checked.");
+    semanticFunction(0x6773AL, "f33_nvm_set_family0_record", u32,
+        new ParameterImpl("object", u32, currentProgram),
+        new ParameterImpl("source", words, currentProgram))
+        .setComment("Recover indices before full/object bounds. Scan consumer through producer inclusively for "
+            + "first matching kind22/33; kind11 does not coalesce. Compare/copy payload before queue "
+            + "mutation. Changed payload or prior22 selects22, otherwise33. Tail duplicate changes only kind; "
+            + "earlier duplicate compacts object/kind, preserving slot opaque bytes, then moves to tail. "
+            + "Other admissions publish20. No disabled/busy/completion gate or normal rejection after copy.");
+    semanticFunction(0x6792CL, "f33_nvm_get_family0_status", u32,
+        new ParameterImpl("object", u32, currentProgram))
+        .setComment("Return raw status byte for low16 object<32, otherwiseFF. No mutation or persistence "
+            + "inspection.");
+    semanticFunction(0x67948L, "f33_nvm_get_family0_record", u32,
+        new ParameterImpl("object", u32, currentProgram),
+        new ParameterImpl("destination", words, currentProgram))
+        .setComment("Low16 object>=32 returnsFF before data access. Otherwise copy descriptor-sized whole words "
+            + "from live RAM, then return raw status. No status-before-copy gate, disabled check or physical "
+            + "read.");
+    semanticFunction(0x67E18L, "f33_nvm_family1_request_full", u32,
+        new ParameterImpl("producer", u32, currentProgram),
+        new ParameterImpl("consumer", u32, currentProgram))
+        .setComment("Truncate both indices to low8. Return producer+1==(consumer==0?ROM cell_count49:consumer). No "
+            + "cell inspection; reserves one cell.");
+    semanticFunction(0x67E32L, "f33_nvm_previous_family1_request", u32,
+        new ParameterImpl("index", u32, currentProgram))
+        .setComment("Return zero-extended low8 predecessor, with zero wrapping to ROM cell_count49 minus1. No "
+            + "general index validation.");
+    semanticFunction(0x67E48L, "f33_nvm_enqueue_family1_read", u32,
+        new ParameterImpl("object", u32, currentProgram))
+        .setComment("Recover indices before full and low16 object<16 gates. Immediate predecessor kind11/object "
+            + "duplicate returns1 without status publication, even for empty indices. Otherwise store "
+            + "kind/object, advance producer and publish20/75/8A. Recovery can change both globals before "
+            + "rejection; this routine finally republishes producer. No descriptor, completion or busy gate.");
+    semanticFunction(0x67EDEL, "f33_nvm_set_family1_record", u32,
+        new ParameterImpl("object", u32, currentProgram),
+        new ParameterImpl("source", words, currentProgram))
+        .setComment("Reject low16 object>=16 before repair/recovery. Vote status with fallback12, recover indices, "
+            + "then reject full or voted21 before source/descriptor-content reads. Inclusive write-kind scan "
+            + "and changed-word copy precede placement as in family0. Tail duplicate republishes original "
+            + "voted status; other admissions publish20. Opaque bytes stay at physical slots. No checksum, "
+            + "completion, disabled-descriptor or busy gate; no normal rejection after copy.");
+    semanticFunction(0x6810CL, "f33_nvm_get_family1_status", u32,
+        new ParameterImpl("object", u32, currentProgram))
+        .setComment("Low16 object>=16 returnsFF before repair. Otherwise vote/repair0328/1088/10AC with fallback12. "
+            + "No checksum or physical read.");
+    semanticFunction(0x66FFEL, "f33_nvm_initialize_family2_ram", VoidDataType.dataType)
+        .setComment("For each registered family2 descriptor, clear setter flag, publish00/55/AA status and zero "
+            + "payload whole words in RAM. Preserve gaps and trailing bytes. No ROM-default copy or CRC "
+            + "computation.");
+    semanticFunction(0x6712CL, "f33_nvm_refresh_family2_record_status", u32,
+        new ParameterImpl("object", u32, currentProgram))
+        .setComment("Low16 object bound first. Validate immutable ROM, retry once on non10, and publish final "
+            + "status. Return1 for an in-range request even when status30; invalid returns0. RAM payload and "
+            + "setter flag unchanged.");
+    semanticFunction(0x67176L, "f33_nvm_set_family2_record", u32,
+        new ParameterImpl("object", u32, currentProgram),
+        new ParameterImpl("source", words, currentProgram))
+        .setComment("Low16 object bound before source. Copy payload whole words into descriptor RAM, set flag5A and "
+            + "publish10/45/BA. Return1, invalid0. No ROM CRC or flash programming; no flag reader recovered.");
+    semanticFunction(0x671D0L, "f33_nvm_get_family2_status", u32,
+        new ParameterImpl("object", u32, currentProgram))
+        .setComment("Low16 object>=11 returnsFF. Otherwise vote/repair0650/1098/10BC with fallback10, without CRC. "
+            + "Cached10 is not proof of ROM validity or persistence.");
+    semanticFunction(0x67208L, "f33_nvm_get_family2_rom_record", u32,
+        new ParameterImpl("object", u32, currentProgram),
+        new ParameterImpl("destination", words, currentProgram))
+        .setComment("Low16 object bound before CRC/destination. Validate ROM, retry once on non10 and publish "
+            + "result. Copy ROM payload, excluding trailer, only on10. Return10/30 or invalidFF. Neither RAM "
+            + "payload nor setter flag supplies this getter.");
+    semanticFunction(0x32454L, "f33_publish_family2_group8_halfword", VoidDataType.dataType,
+        new ParameterImpl("index", u32, currentProgram))
+        .setComment("Get selector0208 into an eight-byte stack record. Success10 selects halfword at "
+            + "record+4+2*low8(index); otherwise use FEBE66CE+2*index. Publish to FEBE68AA+2*index. No local "
+            + "index bound. Native index0 proves ROM source despite conflicting setter-like RAM; OEM meaning "
+            + "unnamed.");
+    semanticFunction(0x67276L, "f33_select_flmd0_internal_pulldown", VoidDataType.dataType)
+        .setComment("If FLMDCNT.bit0 is clear, return. Otherwise enter PMRFFFF, attempt at most three "
+            + "A5/0/FFFFFFFF/0 protected sequences, read back control, SYNCP and inspect FLMDPS.bit0; restore "
+            + "prior PMR. No final success result. Manual pp2869-2874 identifies internal pull control, not "
+            + "actual pin level or persistence.");
+  }
+  private void annotateNvmDirectOperations() throws Exception {
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    semanticFunction(0x6879CL, "f33_nvm_begin_page_erase_span", u32,
+        new ParameterImpl("first_page", u32, currentProgram),
+        new ParameterImpl("page_count", u32, currentProgram))
+        .setComment("Truncate page/count independently to16 bits and shift by6. Set direct-operation request5A and "
+            + "reconcile. Call794DA; return0 and retain mode only for result7. Otherwise clear request, "
+            + "perform real cancellation/reconciliation and returnFF. Native admitted path is bounded before "
+            + "opcode20, not erased data.");
+    semanticFunction(0x794DAL, "f33_nvm_request_erase_span", u32,
+        new ParameterImpl("unused_selector", u32, currentProgram),
+        new ParameterImpl("byte_offset", u32, currentProgram),
+        new ParameterImpl("byte_count", u32, currentProgram))
+        .setComment("Require nonzero direct-operation classification. Compute low16((byte_count+63 mod2^32)>>6), "
+            + "check79608, then guarded76872 admission. Preserve7 and9, normalize other outcomes to8. R6 is "
+            + "unused. Bounds use wrapped page arithmetic, not a generic nonzero-length test.");
+    semanticFunction(0x79608L, "f33_nvm_erase_span_outside_region", u32,
+        new ParameterImpl("byte_offset", u32, currentProgram),
+        new ParameterImpl("page_count", u32, currentProgram))
+        .setComment("Return1 unless registered first_page!=FFFF, low16(byte_offset>>6)>=first_page, and "
+            + "low16(page+page_count-1)<=low16(first_page+region_count-1). Exact region0/480 pages. No "
+            + "alignment or independent nonzero-count check; wrapped arithmetic is intentional "
+            + "reconstruction, not strengthened validation.");
+    semanticFunction(0x76872L, "f33_nvm_guarded_erase_admission", u32,
+        new ParameterImpl("byte_offset", u32, currentProgram),
+        new ParameterImpl("page_count", u32, currentProgram))
+        .setComment("Enter actual paired guards. Mirrored interference returns9; otherwise start reverse-block "
+            + "driver with low16 count and callback selector0B. Driver2 publishes secondary pending1 and "
+            + "returns7; other driver results return8. Always leave guard. Successful command submission "
+            + "remains a hardware dependency.");
+    semanticFunction(0x74B76L, "f33_nvm_start_reverse_erase", u32,
+        new ParameterImpl("byte_offset", u32, currentProgram),
+        new ParameterImpl("page_count", u32, currentProgram),
+        new ParameterImpl("callback_selector", u32, currentProgram))
+        .setComment("Store end cursor=offset+64*low16(count) before lower admission. Submit previous block. Only "
+            + "result2 publishes active1, remaining count and low8 callback selector; preserve driver result "
+            + "in R10. No completed erase proof.");
+    semanticFunction(0x74A8CL, "f33_nvm_submit_previous_erase_block", u32)
+        .setComment("Require74A5A result1, reset diagnostics, decrement cursor by64 BEFORE7867A(cursor,64). Driver0 "
+            + "installs completion callback and returns2; failure translates saved driver status. Native "
+            + "exact-family paths reach first opcode20 boundary with decreasing addresses.");
+    semanticFunction(0x7951CL, "f33_nvm_poll_direct_operation", VoidDataType.dataType)
+        .setComment("Dispatch guarded lower polling only when direct-operation classification6CDC is nonzero. Does "
+            + "not itself normalize result or release application ownership.");
+    semanticFunction(0x768AEL, "f33_nvm_guarded_direct_poll", VoidDataType.dataType)
+        .setComment("Enter paired guards. If mirrored interference is clear, execute79388,781BE,74E46(1); publish "
+            + "the interference predicate through79C56 and leave guard. Physical sequencer completion remains "
+            + "separately bounded.");
+    semanticFunction(0x768DEL, "f33_nvm_get_secondary_result", u32)
+        .setComment("Zero-extend byte6B72 to full32 R10; no mutation.");
+    semanticFunction(0x79530L, "f33_nvm_get_direct_operation_result", u32)
+        .setComment("Read actual secondary result; preserve0,1,5,6 and normalize every other byte to4. Result1 is "
+            + "pending, not terminal success.");
+    semanticFunction(0x769D4L, "f33_nvm_publish_erase_driver_result", VoidDataType.dataType,
+        new ParameterImpl("driver_result", u32, currentProgram))
+        .setComment("ROM callback selector0B at27A10. Driver1 publishes secondary0, full32 FFFF0000 publishes6, all "
+            + "other values publish4 through7680C. Synthetic terminal-input execution is not physical erase "
+            + "completion.");
+    semanticFunction(0x682D6L, "f33_nvm_service_and_release_erase_span", VoidDataType.dataType)
+        .setComment("Always call74114 first. If either family busy byte equalsA5, poll and normalize result. Retain "
+            + "both flags and direct-operation request only for result1; any other result clears both busy "
+            + "bytes and request, then performs real mode-exit cancellation/reconciliation.");
+    semanticFunction(0x74114L, "f33_nvm_service_application_cycle", VoidDataType.dataType)
+        .setComment("Require service14 and initialized-service gates. Enter service guards and classify direct "
+            + "mode. Mode0 selects callback766F4, services scheduler and74790; active direct mode skips "
+            + "ordinary scheduling. Publish classification predicate via79C42 and finish guards. Lower "
+            + "hardware completion is not inferred.");
+    semanticFunction(0x66CF6L, "f33_nvm_application_cycle", VoidDataType.dataType)
+        .setComment("Select work from current0674 through66C5C; service logical/range work via682D6; "
+            + "finish the selected application phase through66CC4 and publish its low8 result to0674; "
+            + "then maintain the FLMD0 internal pull-down. Composed initialized-idle execution advances "
+            + "the logical scan, selects callback766F4 and leaves application ownership idle. "
+            + "Active flash sequencing remains a separate dependency.");
+  }
   private void annotateDataFlashReads() throws Exception {
     DataType u8 = UnsignedCharDataType.dataType;
     DataType u16 = UnsignedShortDataType.dataType;
@@ -2048,6 +2231,8 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     annotateNvmRequestSelection();
     annotateRomGroupIntegrity();
     annotateInitializedNvmService();
+    annotateApplicationRecordApis();
+    annotateNvmDirectOperations();
     annotateDataFlashReads();
     annotateFaciSubmission();
     annotatePwmCompareStaging();

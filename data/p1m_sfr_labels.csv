@@ -1,4 +1,7 @@
 address,name,size,access,comment
+0xFFA00000,FLMDCNT,4,rw,FLMD0 internal pull selection; protected A5/value/inverse/value sequence
+0xFFA00004,FLMDPCMD,4,w,FLMD write-protection command; only complete valid sequences are modeled
+0xFFA00008,FLMDPS,4,r,FLMD write-sequence error monitor; bit0 cleared by successful protected update
 0xFFA08000,SELFID0,4,w,Self-programming ID input word 0
 0xFFA08004,SELFID1,4,w,Self-programming ID input word 1
 0xFFA08008,SELFID2,4,w,Self-programming ID input word 2

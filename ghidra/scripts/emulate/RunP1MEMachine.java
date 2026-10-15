@@ -418,6 +418,8 @@ public class RunP1MEMachine extends GhidraScript {
         long registerBeforeWrite;
         int faciPendingCommand;
         boolean dcraSeeded;
+        int flmdStage;
+        long flmdDesired;
         final Map<String, List<RegionDef>> aliases = new HashMap<>();
         final PriorityQueue<ScheduledEvent> scheduledEvents = new PriorityQueue<>(
             Comparator.comparingLong((ScheduledEvent event) -> event.tick)
@@ -777,7 +779,8 @@ public class RunP1MEMachine extends GhidraScript {
                     || "faci-address".equals(register.trigger)
                     || "faci-dataflash-mode".equals(register.trigger)
                     || "dataflash-ecc-control".equals(register.trigger)
-                    || "dataflash-ecc-test".equals(register.trigger)) {
+                    || "dataflash-ecc-test".equals(register.trigger)
+                    || "flmd-control".equals(register.trigger)) {
                 registerBeforeWrite = unsigned(memory(thread, register.address, register.size));
             }
             trace.access("write", pc(thread), address, size, register.evidence);
@@ -864,6 +867,20 @@ public class RunP1MEMachine extends GhidraScript {
 
         void validateDeviceWrite(PcodeThread<byte[]> thread, RegisterDef register,
                                  byte[] value) {
+            if ("flmd".equals(register.behavior)) {
+                long incoming = unsigned(value);
+                boolean valid = "flmd-command".equals(register.trigger)
+                    ? flmdStage == 0 && incoming == 0xa5
+                    : "flmd-control".equals(register.trigger)
+                        && (flmdStage == 1 && incoming <= 1
+                            || flmdStage == 2 && incoming == (flmdDesired ^ 0xffffffffL)
+                            || flmdStage == 3 && incoming == flmdDesired);
+                if (!valid) {
+                    throw fault("unsupported-flmd-sequence", thread, register.address,
+                        value.length, "write", register.evidence,
+                        "only uninterrupted A5/value/full-word-inverse/value writes are modeled; malformed-sequence error timing is not modeled");
+                }
+            }
             if ("dcra".equals(register.behavior)) {
                 RegisterDef control = "dcra-control".equals(register.trigger) ? register
                     : requiredRegister(register.name, "mode", register.mode_register);
@@ -1385,6 +1402,21 @@ public class RunP1MEMachine extends GhidraScript {
             handleReceiveWrite(thread, register, value);
             if (register.trigger == null) return;
             switch (register.trigger) {
+                case "flmd-command":
+                    flmdStage = 1;
+                    break;
+                case "flmd-control":
+                    if (flmdStage == 3) {
+                        flmdStage = 0;
+                        RegisterDef status = requiredRegister(register.name, "status", register.status_register);
+                        setRegisterValue(status.name, 0);
+                    }
+                    else {
+                        if (flmdStage == 1) flmdDesired = unsigned(value);
+                        flmdStage++;
+                        setRegisterValue(register.name, registerBeforeWrite);
+                    }
+                    break;
                 case "dcra-control":
                     break; // Only unchanged CTL=00 is accepted; it does not reset the CRC.
                 case "dcra-seed":
@@ -1472,6 +1504,7 @@ public class RunP1MEMachine extends GhidraScript {
 
         void initializeResetRegisters() {
             dcraSeeded = false;
+            flmdStage = 0;
             for (RegisterDef register : registers) {
                 if (register.reset == null) continue;
                 setMemory(register.address, bytes(register.reset, register.size, language.isBigEndian()));
@@ -1524,6 +1557,11 @@ public class RunP1MEMachine extends GhidraScript {
             if ("dcra".equals(register.behavior)) {
                 throw new IllegalArgumentException(
                     "DCRA has no external input pins; register-input cannot inject CRC state: "
+                    + input.register);
+            }
+            if ("flmd".equals(register.behavior)) {
+                throw new IllegalArgumentException(
+                    "register-input cannot inject protected FLMD control or sequence status: "
                     + input.register);
             }
             long value = parseUnsigned(input.value);

@@ -1,0 +1,34 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_family2_api_set_repaired_gate_blocks_source",
+  "entry": {"role": "actual family selector setter with encoded-pair gate repair before source access", "scope": "resolved-address", "address": "0x66d6e"},
+  "max_instructions": 10000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {"sp": "0xfebe2000", "gp": "0xfebeb800", "tp": "0x23dfc", "lp": "0x798", "PSW": "0x20", "FPEC": "0x0", "PMR": "0xff00", "r6": "0x201", "r7": "0x0"},
+  "stop_addresses": ["0x798"],
+  "memory": [
+    {"address": "0xfebe1c00", "size": 1024, "fill": 165, "evidence": "isolated initialized nested-call stack"},
+    {"address": "0xfebef5fc", "size": 16, "fill": 165, "evidence": "valid group1 target is untouched because repaired gate5A rejects first"},
+    {"address": "0xfebf0651", "hex": "30", "evidence": "explicit prior cached status"},
+    {"address": "0xfebf1099", "hex": "65", "evidence": "explicit prior XOR55 status"},
+    {"address": "0xfebf10bd", "hex": "9a", "evidence": "explicit prior XORAA status"},
+    {"address": "0xfebf065c", "hex": "33", "evidence": "explicit non5A prior flag"},
+    {"address": "0xfebf0672", "hex": "00", "evidence": "wrong raw gate; encoded replicas agree on5A"},
+    {"address": "0xfebf10aa", "hex": "0f", "evidence": "5A XOR55"},
+    {"address": "0xfebf10ce", "hex": "f0", "evidence": "5A XORAA"}
+  ],
+  "checks": [
+    {"name": "repaired blocking gate returns0", "kind": "register", "register": "r10", "equals": "0x0"},
+    {"name": "no payload copy", "kind": "memory", "address": "0xfebef5fc", "size": 16, "equals_hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5"},
+    {"name": "cached status untouched", "kind": "memory", "address": "0xfebf0651", "size": 1, "equals_hex": "30"},
+    {"name": "XOR55 status untouched", "kind": "memory", "address": "0xfebf1099", "size": 1, "equals_hex": "65"},
+    {"name": "XORAA status untouched", "kind": "memory", "address": "0xfebf10bd", "size": 1, "equals_hex": "9a"},
+    {"name": "setter flag untouched", "kind": "memory", "address": "0xfebf065c", "size": 1, "equals_hex": "33"},
+    {"name": "gate raw repaired before rejection", "kind": "memory", "address": "0xfebf0672", "size": 1, "equals_hex": "5a"},
+    {"name": "encoded pair preserved55", "kind": "memory", "address": "0xfebf10aa", "size": 1, "equals_hex": "0f"},
+    {"name": "encoded pair preservedAA", "kind": "memory", "address": "0xfebf10ce", "size": 1, "equals_hex": "f0"},
+    {"name": "no CRC or flash command", "kind": "event-count", "operation": "register-write", "equals": "0"},
+    {"name": "balanced stack", "kind": "register", "register": "sp", "equals": "0xfebe2000"}
+  ]
+}

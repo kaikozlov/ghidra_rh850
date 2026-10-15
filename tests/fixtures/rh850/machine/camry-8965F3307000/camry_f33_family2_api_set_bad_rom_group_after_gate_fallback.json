@@ -1,0 +1,38 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_family2_api_set_bad_rom_group_after_gate_fallback",
+  "entry": {"role": "actual selector setter, real gate repair, whole-word copy and publisher; no ROM patch or persistence claim", "scope": "resolved-address", "address": "0x66d6e"},
+  "max_instructions": 10000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {"sp": "0xfebe2000", "gp": "0xfebeb800", "tp": "0x23dfc", "lp": "0x798", "PSW": "0x20", "FPEC": "0x0", "PMR": "0xff00", "r6": "0xbeef0201", "r7": "0xfebe2104"},
+  "stop_addresses": ["0x798"],
+  "memory": [
+    {"address": "0xfebe1c00", "size": 1024, "fill": 165, "evidence": "isolated initialized nested-call stack"},
+    {"address": "0xfebe2100", "hex": "a5a5a5a578563412efcdab90a5a5a5a5", "evidence": "synthetic eight-byte source with canaries"},
+    {"address": "0xfebef5fc", "size": 16, "fill": 165, "evidence": "group1 RAM payload and canaries; immutable descriptor2AF98"},
+    {"address": "0xfebf0650", "hex": "a530a5", "evidence": "group1 prior cached30 between neighboring status canaries"},
+    {"address": "0xfebf1098", "hex": "a565a5", "evidence": "group1 XOR55 prior status"},
+    {"address": "0xfebf10bc", "hex": "a59aa5", "evidence": "group1 XORAA prior status"},
+    {"address": "0xfebf065b", "hex": "a500a5", "evidence": "group1 prior flag0 with neighboring flags"},
+    {"address": "0xfebf0672", "hex": "00", "evidence": "all-different normalized gate cells force fallback0, not an assumed startup state"},
+    {"address": "0xfebf10aa", "hex": "00", "evidence": "normalized55"},
+    {"address": "0xfebf10ce", "hex": "00", "evidence": "normalizedAA"}
+  ],
+  "checks": [
+    {"name": "set accepted despite immutable group1 ROM CRC failure", "kind": "register", "register": "r10", "equals": "0x1"},
+    {"name": "RAM contains source, not zero ROM payload", "kind": "memory-equal", "address": "0xfebef600", "source_address": "0xfebe2104", "size": 8},
+    {"name": "payload leading canary", "kind": "memory", "address": "0xfebef5fc", "size": 4, "equals_hex": "a5a5a5a5"},
+    {"name": "payload trailing canary", "kind": "memory", "address": "0xfebef608", "size": 4, "equals_hex": "a5a5a5a5"},
+    {"name": "setter publishes10", "kind": "memory", "address": "0xfebf0650", "size": 3, "equals_hex": "a510a5"},
+    {"name": "setter publishes XOR55", "kind": "memory", "address": "0xfebf1098", "size": 3, "equals_hex": "a545a5"},
+    {"name": "setter publishes XORAA", "kind": "memory", "address": "0xfebf10bc", "size": 3, "equals_hex": "a5baa5"},
+    {"name": "only group1 flag becomes5A", "kind": "memory", "address": "0xfebf065b", "size": 3, "equals_hex": "a55aa5"},
+    {"name": "gate fallback raw0", "kind": "memory", "address": "0xfebf0672", "size": 1, "equals_hex": "00"},
+    {"name": "gate fallback XOR55", "kind": "memory", "address": "0xfebf10aa", "size": 1, "equals_hex": "55"},
+    {"name": "gate fallback XORAA", "kind": "memory", "address": "0xfebf10ce", "size": 1, "equals_hex": "aa"},
+    {"name": "setter neither validates ROM nor starts flash persistence", "kind": "event-count", "operation": "register-write", "equals": "0"},
+    {"name": "balanced stack", "kind": "register", "register": "sp", "equals": "0xfebe2000"},
+    {"name": "restored mask", "kind": "register", "register": "PMR", "equals": "0xff00"}
+  ]
+}

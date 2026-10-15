@@ -8314,7 +8314,7 @@ Eight additional contracts are persisted in the target-native seed:
 
 | Entry | Durable name | Contract |
 |---|---|---|
-| `66DFC` | `f33_nvm_get_ram_record` | Selector bits8..15 choose getter `67948`/`68144`/`67208` for families0/1/2. Pass low8 object and the original destination; forward the result. Other families return `FF`. Upper16 bits are ignored. |
+| `66DFC` | `f33_nvm_get_record` | Selector bits8..15 choose getter `67948`/`68144`/`67208` for families0/1/2. Families0/1 copy RAM; family2 validates and copies ROM. Pass low8 object and the original destination; forward the result. Other families return `FF`. Upper16 bits are ignored. |
 | `68144` | `f33_nvm_get_family1_record` | Bound-check low16 object, then copy **before** status voting or checksum validation. Return the voted byte unchanged except status `10` with bad checksum returns `12`. |
 | `67B12` | `f33_nvm_check_family1_checksum` | Check the live RAM object's folded additive invariant below; return full32 `1` or `FFFFFFFF`, without repair. |
 | `67C8C` | `f33_nvm_publish_family1_checksum` | Store the selected 16-bit complementary seed; no status publication or return-value contract. |
@@ -9322,4 +9322,125 @@ request-index argument and scheduler record fields. It still contains
 GP-relative code-pointer artifacts, and the snapshot getter's C hoists a RAM
 load that raw instructions keep behind the idle gate. Pseudocode remains a
 derived aid, not a replacement for access-order proof or original source.
+
+### 77.23 Application record APIs, queues and direct-operation boundaries
+
+The application record interface is now reconstructed across all three
+namespaces. **RAM mutation, request admission, scheduler ownership, completion
+publication and physical persistence are separate events.** A returned `1` or
+cached status `10` cannot substitute for the later stages.
+
+#### Record-source and status semantics
+
+`66D1A` requests refresh, `66D6E` sets a record, `66DCA` reads cached status,
+and `66DFC` gets a record. Selectors use family bits8–15 and object bits0–7,
+ignoring the upper16 bits. Refresh and setter gates independently vote
+`0671/10A9/10CD` and `0672/10AA/10CE` with fallback0; exact repaired `5A`
+rejects. Leaf APIs independently truncate the object argument to16 bits.
+
+| Namespace | Refresh / setter | Getter / cached status |
+|---|---|---|
+| Family0 | Refresh admits a kind11 request. Setter compares/copies live RAM and coalesces or appends kind22/33. | Getter copies RAM **before** returning raw status; cached status is a raw byte. |
+| Family1 | Refresh admits kind11. Setter repairs status first; full ring or status21 rejects before source access. Accepted setters copy RAM without updating checksum seeds or completion. | Getter copies RAM before status/checksum checks (§77.14); cached status votes with fallback12. |
+| Family2 | Refresh validates ROM, retries once on failure and publishes the result; return1 means an in-range request, even for status30. Setter copies RAM, sets flag5A and publishes10 without CRC or flash programming. | Getter validates immutable ROM, retries once, and copies only a valid ROM payload, excluding its trailer. Cached status votes with fallback10 without CRC. |
+
+Family2 initialization zeros descriptor-sized RAM whole words, clears the
+setter flags and publishes00/55/AA; it does not restore ROM defaults.
+The setter flag array is `FEBF065B[11]`. Initializer and setter writers are
+recovered, but no consumer is established; **dirty/persistence semantics remain
+unproven**. The existing CRC sweep skips cached10, while explicit refresh/getter
+recompute ROM integrity. This explains how cached10 can coexist with the
+zero-filled ROM groups1/3 without making those records CRC-valid.
+
+The real `32454` consumer requests selector0208 and publishes a selected
+halfword from the returned record at `FEBE68AA+2*low8(index)`. Its successful
+native path follows ROM despite conflicting setter-like RAM. The function
+does not bound its low8 index; its fallback and OEM quantity are separate from
+the established ROM-versus-RAM distinction.
+
+#### Queue ownership and observable failure side effects
+
+The family0/family1 rings have65/49 cells and reserve one cell, giving active
+capacities64/48. Fullness depends on indices, not occupancy. Both read-admission
+paths recover indices **before** full/object checks. Recovery may therefore
+change both producer and consumer even when the API returns0.
+
+Read admission suppresses only a matching kind11 at the immediate predecessor
+of producer. It neither searches all duplicates nor special-cases an empty
+ring: a stale matching predecessor can suppress insertion with return1.
+Fullness rejects before this duplicate check. Neither admission API rejects
+a disabled descriptor.
+
+Setters search consumer through producer **inclusively** for the first matching
+kind22/33; kind11 is not coalesced. They compare/copy whole words forward,
+reading destination before source and storing only changed words. A changed
+word or existing kind22 selects22; otherwise the request becomes33. A stale
+kind22 in the nominally free producer cell therefore affects the choice.
+
+A tail match updates its kind without advancing producer. Family0 preserves
+status there; family1 republishes its original voted status. Earlier matches
+are compacted to the tail by moving object/kind only: the opaque byte stays
+with its physical slot, including across wrap. Other successful placements
+publish20. There is no normal returned failure after payload copying.
+
+The namespaces differ before copying: family0 recovery precedes full/object
+rejection; family1 rejects an invalid object before repair/recovery, but repairs
+valid-object status before full/status21 rejection. Thus a failed family1
+setter can repair status without reading the caller source. Neither setter
+adds a busy or descriptor-disabled gate. Shared RAM buffers among disabled
+objects remain real aliases, not independent payload storage.
+
+The downstream consumers make the distinction consequential: kind22 always
+attempts a write arm; kind33 attempts it only when completion is not5A.
+Dequeue and phase/status selection precede or ignore a rejected arm.
+The composed disabled-object path consumes the request and publishes active
+status21 without starting a physical write. This is not persistence success.
+
+#### Direct operation and cyclic-service interaction
+
+The shared `0693/6CDC` state is **direct-operation mode**, not a read-only probe
+permission. Page classifiers and mapped-span erasure both use it. While active,
+`74114` skips ordinary scheduling and publishes the classification predicate;
+`682D6` retains range-operation ownership only for normalized result1.
+Every other normalized result clears both family busy bytes and the request,
+then executes real cancellation/reconciliation before mode is cleared.
+
+`6879C → 794DA → 76872 → 74B76/74A8C → 7867A → 78EC6`
+is reverse-order,64-byte DataFlash block-erasure submission. The lower driver
+stores an end cursor and decrements it before each block. Consequently the
+registered family0 span begins at6BC0 and descends toward4300; family1 begins
+at77C0 and descends toward6C00. The registered region is480 pages, not the
+complete physical DataFlash capacity. Range checking uses16-bit page/end
+arithmetic and has no independent nonzero-count or alignment test; it must not
+be described as stronger validation than the instructions implement.
+
+Primary flash authority **R01UH0615EJ0120**, Table6.2 p45 and §6.3.10 p58,
+identifies `20,D0` as Block Erase. Native admitted paths currently stop at
+`78F0C`, **before** the20 store. Rejection, interference, cancellation,
+pending ownership and synthetic terminal-result paths execute through their
+real software callees. The callback at ROM27A10 maps driver1 to logical0,
+FFFF0000 to6, and other results to4; normalized1 remains pending.
+None of these scenarios proves an erased block or physical completion.
+
+The remaining hardware boundary is explicit: opcode20 acceptance/completion
+and some recovery-path halfword reads from command areaFFA20000 are not
+modeled. They are not prerequisites for continuing reconstruction of the EPS
+control algorithms, scheduler and diagnostic interactions.
+
+Finally, cyclic maintenance `67276` controls the **internal FLMD0 pull-down**,
+not record persistence. The manual-backed nominal protected-register model
+now executes its real idle/update paths and PMR restoration. The raw loop
+allows at most three attempts but returns no success result. External pin
+level, malformed-sequence hardware error timing and flash programming remain
+outside that proof; see [the native-model boundary](../tooling/rh850-build-and-sim.md).
+
+**Verification scope.** The composed initialized-idle `66CF6` cycle executes
+work selection, logical scheduling, phase handling and FLMD maintenance,
+advancing the logical scan while leaving application ownership idle. Retained
+record/queue/range scenarios, the device-profile gate and shared firmware gate
+passed. Independent four-stage rebuilds agreed; dependent artifacts, targeted
+NvM/B6 checks and exact live/canonical coverage parity passed. The matching
+snapshot was promoted after clean daemon teardown. Regenerated C retains all
+protected FLMD writes and the reverse-erase driver's real return value;
+instruction/dataflow proof remains authoritative for access ordering.
 

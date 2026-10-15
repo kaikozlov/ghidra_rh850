@@ -1,0 +1,213 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_range_operation_high_argument_bits_erase_command_bound",
+  "entry": {
+    "role": "real mode reconciliation and reverse64-byte DataFlash erase admission; stop78F0C immediately before opcode20 store because model lacks Block Erase; no command or physical completion claimed",
+    "scope": "resolved-address",
+    "address": "0x6879c"
+  },
+  "max_instructions": 20000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xff00",
+    "r6": "0xabcd010c",
+    "r7": "0x123400a4"
+  },
+  "stop_addresses": [
+    "0x78f0c",
+    "0x798"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "isolated initialized nested-call stack"
+    },
+    {
+      "address": "0xfebf0690",
+      "hex": "0000a500",
+      "evidence": "explicit family busy bytes, adjacent canary and caller-owned temporary-mode request"
+    },
+    {
+      "address": "0xfebf6ccd",
+      "hex": "0101ff0000",
+      "evidence": "79B1E/79A0E paired guards and matched mirrored interference state; no mode-transition callback is suppressed"
+    },
+    {
+      "address": "0xfebf6cd9",
+      "hex": "a5a5a500",
+      "evidence": "explicit service result canaries and initial classification;6879C paths really recompute classification through79CB8"
+    },
+    {
+      "address": "0xfebf6b20",
+      "hex": "a5a50000",
+      "evidence": "diagnostic canaries and clear74A5A admission bytes"
+    },
+    {
+      "address": "0xfebf6b72",
+      "hex": "00",
+      "evidence": "logical range result initially idle; only accepted submission76872 would change it to1"
+    },
+    {
+      "address": "0xfebf6c30",
+      "hex": "a5a5a5a5",
+      "evidence": "last-block cursor overwritten by74B76 then decremented by74A8C"
+    },
+    {
+      "address": "0xfebf6c48",
+      "hex": "a5a5",
+      "evidence": "remaining block count is published only after74A8C returns2"
+    },
+    {
+      "address": "0xfebf6c59",
+      "hex": "a5a5",
+      "evidence": "range flag and callback selector are published only after74A8C returns2"
+    },
+    {
+      "address": "0xfebf6cb0",
+      "hex": "01000e00",
+      "evidence": "explicit initialized lower driver ready1, result0, mode0E, substate0"
+    },
+    {
+      "address": "0xffc5d020",
+      "hex": "00000000",
+      "evidence": "explicit two-read ICU-S gate input; no OEM readiness interpretation"
+    },
+    {
+      "address": "0xffa10080",
+      "hex": "00800000",
+      "evidence": "explicit idle FACI status before any command"
+    },
+    {
+      "address": "0xffa10084",
+      "hex": "0000",
+      "evidence": "explicit hardware read mode; firmware must enter DataFlash P/E itself"
+    },
+    {
+      "address": "0xffa10010",
+      "hex": "00",
+      "evidence": "explicit unlocked access state"
+    },
+    {
+      "address": "0xfff8a430",
+      "hex": "00000000",
+      "evidence": "software primary enable initially disabled"
+    },
+    {
+      "address": "0xfff82410",
+      "hex": "00000000",
+      "evidence": "software secondary enable initially disabled"
+    }
+  ],
+  "checks": [
+    {
+      "name": "real firmware reaches the stated return or pre-handler boundary",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x78f0c"
+    },
+    {
+      "name": "real next store destination is FACI command area",
+      "kind": "register",
+      "register": "r6",
+      "equals": "0xffa20000"
+    },
+    {
+      "name": "real next byte is Block Erase opcode20, not programE8 or blank-check71",
+      "kind": "register",
+      "register": "r7",
+      "equals": "0x20"
+    },
+    {
+      "name": "family busy is not yet published; request mode5A remains caller-owned",
+      "kind": "memory",
+      "address": "0xfebf0690",
+      "size": 4,
+      "equals_hex": "0000a55a"
+    },
+    {
+      "name": "79CB8 genuinely recomputed classification55",
+      "kind": "memory",
+      "address": "0xfebf6cdc",
+      "size": 1,
+      "equals_hex": "55"
+    },
+    {
+      "name": "inner paired admission call still active at pre-command boundary",
+      "kind": "memory",
+      "address": "0xfebf6ccd",
+      "size": 5,
+      "equals_hex": "0100ff0000"
+    },
+    {
+      "name": "range walks backward: first submitted block is the last mapped block",
+      "kind": "memory",
+      "address": "0xfebf6c30",
+      "size": 4,
+      "equals_hex": "c06b0000"
+    },
+    {
+      "name": "real FACI address register writes and low-bit masking",
+      "kind": "memory",
+      "address": "0xffa10030",
+      "size": 8,
+      "equals_hex": "c06b0000fc6b0000"
+    },
+    {
+      "name": "firmware entered DataFlash P/E rather than synthetic readback",
+      "kind": "memory",
+      "address": "0xffa10084",
+      "size": 2,
+      "equals_hex": "8000"
+    },
+    {
+      "name": "firmware enabled primary flash gate",
+      "kind": "memory",
+      "address": "0xfff8a430",
+      "size": 4,
+      "equals_hex": "01000000"
+    },
+    {
+      "name": "firmware enabled secondary flash gate",
+      "kind": "memory",
+      "address": "0xfff82410",
+      "size": 4,
+      "equals_hex": "01000000"
+    },
+    {
+      "name": "no accepted result1 or completion synthesized",
+      "kind": "memory",
+      "address": "0xfebf6b72",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "remaining count not yet published",
+      "kind": "memory",
+      "address": "0xfebf6c48",
+      "size": 2,
+      "equals_hex": "a5a5"
+    },
+    {
+      "name": "range callback selector not yet published",
+      "kind": "memory",
+      "address": "0xfebf6c59",
+      "size": 2,
+      "equals_hex": "a5a5"
+    },
+    {
+      "name": "no FACI command submitted before this software boundary",
+      "kind": "event-count",
+      "operation": "faci-command",
+      "equals": "0"
+    }
+  ]
+}

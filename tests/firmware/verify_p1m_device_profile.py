@@ -24,6 +24,7 @@ WINDOWS = {
     "SFR_CPU_INTERNAL": (0xFFFEE000, 0x1000),
     "SFR_RSCFD": (0xFFD20000, 0x10000),
     "SFR_DCRA1": (0xFFD51000, 0x21),
+    "SFR_FLMD": (0xFFA00000, 0xC),
     "SFR_DATAFLASH_READ_CYCLE": (0xFFC59810, 0x1),
     # P1M-E Table31.17: the complete DataFlash ECC bank, not a whole SFR page.
     "SFR_DATAFLASH_ECC": (0xFFC5B000, 0x20),
