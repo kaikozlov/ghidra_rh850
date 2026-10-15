@@ -184,6 +184,7 @@ def _validate_events(rows: Any, context: str) -> list[dict[str, Any]]:
         "can-rx": {"fifo", "can_id", "data_hex", "extended", "fd", "boundary", "label", "timestamp"},
         "interrupt": {"channel"},
         "memory-write": {"address", "data_hex"},
+        "register-input": {"register", "value"},
     }
     for index, row in enumerate(normalized):
         item_context = f"{context}[{index}]"
@@ -195,6 +196,7 @@ def _validate_events(rows: Any, context: str) -> list[dict[str, Any]]:
             "can-rx": {"fifo", "can_id", "data_hex", "boundary"},
             "interrupt": {"channel"},
             "memory-write": {"address", "data_hex"},
+            "register-input": {"register", "value"},
         }[kind]
         _require_keys(
             row,
@@ -211,6 +213,16 @@ def _validate_events(rows: Any, context: str) -> list[dict[str, Any]]:
         elif kind == "interrupt":
             if type(row["channel"]) is not int or not 0 <= row["channel"] < 512:
                 raise P1MEMachineError(f"{item_context}: invalid interrupt channel")
+        elif kind == "register-input":
+            if not isinstance(row["register"], str) or not row["register"]:
+                raise P1MEMachineError(f"{item_context}: register name must be a nonempty string")
+            try:
+                value = int(row["value"], 0)
+            except (ValueError, TypeError) as exc:
+                raise P1MEMachineError(f"{item_context}: invalid register input value") from exc
+            if not 0 <= value <= 0xFFFFFFFF:
+                raise P1MEMachineError(f"{item_context}: register input exceeds 32-bit range")
+            row["value"] = hex(value)
         elif kind == "memory-write":
             try:
                 address = int(row["address"], 0)

@@ -283,6 +283,8 @@ public class RunP1MEMachine extends GhidraScript {
         long after_instructions;
         String evidence;
         String address;
+        String register;
+        String value;
         Long p_bus_cycles;
         Integer fifo;
         Integer channel;
@@ -1112,6 +1114,7 @@ public class RunP1MEMachine extends GhidraScript {
                     case "can-rx": receiveFrame(thread, input); break;
                     case "interrupt": requestInterrupt(thread, input.channel); break;
                     case "memory-write": externalMemoryWrite(input); break;
+                    case "register-input": externalRegisterInput(input); break;
                     default: throw new IllegalArgumentException("unknown external event " + input.kind);
                 }
             }
@@ -1219,6 +1222,14 @@ public class RunP1MEMachine extends GhidraScript {
             switch (register.trigger) {
                 case "rscfd-transmit": handleRscfdWrite(thread, register, value); break;
                 case "faci-command": handleFaciWrite(thread, register, value); break;
+                case "dataflash-ecc-clear":
+                    // Only writes covering the low ERRCLR bit act on status.
+                    if (address == register.address && (unsigned(value) & 1) != 0) {
+                        RegisterDef status = requiredRegister(
+                            register.name, "status", register.status_register);
+                        setRegisterValue(status.name, registerValue(status) & ~3L);
+                    }
+                    break;
                 case "icus-command": handleIcusWrite(thread, register, value); break;
                 case "tauj-start":
                 case "tauj-stop": handleTaujWrite(thread, register, value); break;
@@ -1287,6 +1298,31 @@ public class RunP1MEMachine extends GhidraScript {
             event.addProperty("kind", "external-memory-write");
             event.addProperty("address", hex32(address));
             event.addProperty("size", value.length);
+            event.addProperty("scheduler_tick", trace.instructions);
+            event.addProperty("evidence", input.evidence);
+            trace.deviceEvents.add(event);
+        }
+
+        void externalRegisterInput(ExternalEvent input) {
+            RegisterDef register = registersByName.get(input.register);
+            if (register == null || !register.access.contains("r")) {
+                throw new IllegalArgumentException(
+                    "external register-input requires a mapped readable device register: "
+                    + input.register);
+            }
+            long value = parseUnsigned(input.value);
+            long maximum = register.size >= 4 ? 0xffffffffL
+                : (1L << (register.size * 8)) - 1;
+            if (Long.compareUnsigned(value, maximum) > 0) {
+                throw new IllegalArgumentException(
+                    "external register-input exceeds register width: " + input.register);
+            }
+            setRegisterValue(register.name, value);
+            JsonObject event = new JsonObject();
+            event.addProperty("kind", "external-register-input");
+            event.addProperty("register", register.name);
+            event.addProperty("address", hex32(register.address));
+            event.addProperty("value", hex32(value));
             event.addProperty("scheduler_tick", trace.instructions);
             event.addProperty("evidence", input.evidence);
             trace.deviceEvents.add(event);

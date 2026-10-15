@@ -648,8 +648,9 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
             + "against context.checksum16 before copying; mismatch returnsFFFC "
             + "without destination write or remaining-count decrement. Larger "
             + "payloads copy before the later777CA checksum check. Native proof "
-            + "starts at post-read7775E and stops before the real epilogue; "
-            + "the hardware read remains unexecuted becauseFFC5D020 is unmapped.");
+            + "starts at post-read7775E and stops before the real epilogue. "
+            + "Lower788B6 reads are separately executed with explicit ICU-S/ECC "
+            + "inputs; this is not a complete NvM job or application restoration proof.");
     semanticFunction(0x777CAL, "f33_nvm_read_payload_checksum", u32,
         new ParameterImpl("handle", u16, currentProgram),
         new ParameterImpl("record_offset", u32, currentProgram),
@@ -659,6 +660,68 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
             + "compares the full word; mismatch returnsFFFC. No rollback of "
             + "earlier destination copies. Native proof starts at post-read777FC; "
             + "not an end-to-end hardware read or application restoration proof.");
+  }
+  private void annotateDataFlashReads() throws Exception {
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u16 = UnsignedShortDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    DataType words = new PointerDataType(u32, 4);
+    Function load = semanticFunction(0x78AE0L, "f33_load_u32", u32,
+        new ParameterImpl("source", words, currentProgram));
+    load.setComment("MOV r6,EP; SLD.W [EP],r10; JMP LP. Preserve r6/r7/r8. "
+        + "Inline the real p-code so repeated ICU-S reads and the DataFlash "
+        + "ECC-clear pointer/value retain their actual register dataflow.");
+    load.setInline(true);
+    Function store8 = semanticFunction(0x78AE6L, "f33_store_u8", VoidDataType.dataType,
+        new ParameterImpl("destination", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("value", u8, currentProgram));
+    store8.setComment("Store low8(r7) through r6. Only EP changes among GPRs; "
+        + "preserve the pointer/value and prior r10 through the real inline p-code.");
+    store8.setInline(true);
+    Function store16 = semanticFunction(0x78AECL, "f33_store_u16", VoidDataType.dataType,
+        new ParameterImpl("destination", new PointerDataType(u16, 4), currentProgram),
+        new ParameterImpl("value", u16, currentProgram));
+    store16.setComment("Store low16(r7) through r6. Only EP changes among GPRs. "
+        + "Native execution exercises the documented halfword ECC-clear access.");
+    store16.setInline(true);
+    Function store32 = semanticFunction(0x78AF2L, "f33_store_u32", VoidDataType.dataType,
+        new ParameterImpl("destination", words, currentProgram),
+        new ParameterImpl("value", u32, currentProgram));
+    store32.setComment("Store full32(r7) through r6. Only EP changes among GPRs. "
+        + "Native execution exercises the documented word ECC-clear access.");
+    store32.setInline(true);
+    semanticFunction(0x792FCL, "f33_icus20_second_read_bit0", u32)
+        .setComment("Read FFC5D020 twice through78AE0; return bit0 of the second "
+            + "word. The first result is discarded, not the first access. "
+            + "Explicit external transitions between the reads execute both "
+            + "directions. No recovered OEM bit name, reset or completion semantics.");
+    semanticFunction(0x8B018L, "f33_icus20_read_bit0", u32)
+        .setComment("Read FFC5D020 once and return zero/one from bit0. "
+            + "Different callers may use different polarity; no global permission "
+            + "or busy/ready meaning is assigned to this opaque hardware input.");
+    semanticFunction(0x78F28L, "f33_dataflash_copy_words_ecc", u32,
+        new ParameterImpl("dataflash_offset", u32, currentProgram),
+        new ParameterImpl("destination", words, currentProgram),
+        new ParameterImpl("byte_count", u32, currentProgram))
+        .setComment("Unchecked do/while copy from FF200000+offset. Clear DFERSTR "
+            + "SEDF/DEDF through DFERSTC before the first word, then sample status "
+            + "after each destination store. Nonzero status causes another clear; "
+            + "DEDF sets sticky return6, otherwise return0. No rollback. The loop "
+            + "compares unsigned source+4 against the wrapping computed end; "
+            + "zero count still copies one word. ECC flags are explicit model "
+            + "inputs, not calculated flash corruption/correction or timing.");
+    semanticFunction(0x788B6L, "f33_dataflash_read_words", u32,
+        new ParameterImpl("dataflash_offset", u32, currentProgram),
+        new ParameterImpl("destination", words, currentProgram),
+        new ParameterImpl("byte_count", u32, currentProgram))
+        .setComment("Ordered admission: second ICU-S offset20 bit0 set returnsB; "
+            + "FEBF6CB0!=1 returns4; FEBF6CB2!=E returnsC. Require nonNULL "
+            + "destination, aligned offset<8000, nonzero aligned length<=64 "
+            + "and inclusive source end<=7FFF; invalid arguments return3. "
+            + "No local destination bounds/alignment check. Run78F28 and map "
+            + "zero to2, nonzero to5. Return5 does not undo destination stores. "
+            + "Conditional native execution is not a hardware readiness or "
+            + "complete application NvM restoration claim.");
   }
   private void repairCodeTail(long entry, long tail, long last) throws Exception {
     Function function = getFunctionAt(toAddr(entry));
@@ -728,6 +791,7 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     annotateNvmDescriptors();
     annotateNvmLogicalRequests();
     annotateNvmRecordIntegrity();
+    annotateDataFlashReads();
     annotatePwmCompareStaging();
     println("SeedCamryF33RecoveredFunctions: seeded " + count
         + " evidence-backed entries and applied exact-F33 semantic prototypes");

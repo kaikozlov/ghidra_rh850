@@ -29,6 +29,8 @@ address,name,size,access,comment
 0xFFA10108,FDMYECC,2,rw,Flash dummy ECC value
 0xFFA20000,FACI_COMMAND_AREA,1,w,FACI command-issuing area
 0xFFC59008,BFASELR,2,rw,Boot-flash area selector
+0xFFC5B004,DFERSTR,4,r,DataFlash ECC status: bit0 SEDF and bit1 DEDF; error generation is an explicit external input
+0xFFC5B008,DFERSTC,4,w,DataFlash ECC status clear: writing low-bit ERRCLR=1 clears SEDF/DEDF; zero has no effect
 0xFFC5D000,ICUSCMD,4,rw,ICU-S command register; recovered MAC generate writes (selector<<16)|5 and CMAC verify writes (selector<<16)|7
 0xFFC5D004,ICUSDAT,4,rw,ICU-S data/parameter word written beside ICUSCMD (firmware role)
 0xFFC5D008,ICUSOUT,4,rw,ICU-S output word consumed by recovered completion callbacks
@@ -36,6 +38,7 @@ address,name,size,access,comment
 0xFFC5D014,ICUSSTS2,4,rw,ICU-S companion status; driver polls low bits with ICUSSTS
 0xFFC5D018,ICUSIRQSTS,4,rw,ICU-S interrupt/status word read by the recovered service dispatcher
 0xFFC5D01C,ICUSPARAM,4,rw,ICU-S operation parameter written by recovered command setup
+0xFFC5D020,ICUSREG20,4,r,"ICU-S offset20 word: exact Camry readers consume bit0; model permits observed word reads only, without a hardware reset value or bit meaning"
 0xFFC5D024,ICUSCTL,4,rw,ICU-S control/acknowledgement word written by recovered callbacks and reset paths
 0xFFC62000,UCFERRINT,4,rw,CodeFlash error-information control
 0xFFC62004,UCFSERSTCLR,4,w,CodeFlash ECC single-error status clear

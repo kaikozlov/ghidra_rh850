@@ -240,6 +240,19 @@ addrmap p1me {
     } BFASELR @ 0xFFC59008;
 
     reg {
+        regwidth=32; accesswidth=32; desc="DataFlash ECC status: bit0 SEDF and bit1 DEDF; error generation is an explicit external input";
+        evidence="manual"; source_ref="R01UH0585EJ0120 page2540 Table31.19"; behavior="storage";
+        field { sw=r; reset=0; } value[31:0];
+    } DFERSTR @ 0xFFC5B004;
+
+    reg {
+        regwidth=32; accesswidth=8; access_widths="1,2,4"; desc="DataFlash ECC status clear: writing low-bit ERRCLR=1 clears SEDF/DEDF; zero has no effect";
+        evidence="manual"; source_ref="R01UH0585EJ0120 page2541 Table31.20"; behavior="storage";
+        trigger="dataflash-ecc-clear"; status_register="DFERSTR";
+        field { sw=w; reset=0; } value[31:0];
+    } DFERSTC @ 0xFFC5B008;
+
+    reg {
         regwidth=32; accesswidth=32; desc="ICU-S command register; recovered MAC generate writes (selector<<16)|5 and CMAC verify writes (selector<<16)|7";
         evidence="recovered"; source_ref="Exact target CodeFlash ICU-S driver accesses; public P1M-E manual only identifies ICU-S presence"; behavior="icus_recovered";
         trigger="icus-command"; status_register="ICUSSTS"; secondary_status_register="ICUSSTS2";
@@ -281,6 +294,12 @@ addrmap p1me {
         evidence="recovered"; source_ref="Exact target CodeFlash command setup at 0x0008A63C"; behavior="icus_recovered";
         field { sw=rw; } value[31:0];
     } ICUSPARAM @ 0xFFC5D01C;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="ICU-S offset20 word: exact Camry readers consume bit0; model permits observed word reads only, without a hardware reset value or bit meaning";
+        evidence="recovered"; source_ref="Camry8965F3307000 792FC reads twice through78AE0;8B018 reads directly. R01UH0585EJ0120 p64 directs Security specification inquiries to the distributor"; behavior="icus_recovered";
+        field { sw=r; } value[31:0];
+    } ICUSREG20 @ 0xFFC5D020;
 
     reg {
         regwidth=32; accesswidth=32; desc="ICU-S control/acknowledgement word written by recovered callbacks and reset paths";

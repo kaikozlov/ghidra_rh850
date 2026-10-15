@@ -1,0 +1,77 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_dataflash_destination_alignment_not_guarded",
+  "entry": {
+    "role": "exact 788B6 read under explicit ICU-S word and software-state inputs; no ECC generation or startup inference",
+    "scope": "resolved-address",
+    "address": "0x788b6"
+  },
+  "max_instructions": 1000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "r6": "0x77c0",
+    "r7": "0xfebe2105",
+    "r8": "0x4",
+    "FPEC": "0x0",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "isolated nested-call stack"
+    },
+    {
+      "address": "0xfebe2100",
+      "size": 12,
+      "fill": 165,
+      "evidence": "destination and surrounding canaries"
+    },
+    {
+      "address": "0xfebf6cb0",
+      "hex": "01000e00",
+      "evidence": "explicit software admission-state precondition from788B6; not a startup observation"
+    },
+    {
+      "address": "0xFFC5B004",
+      "hex": "03000000",
+      "evidence": "explicit stale SEDF/DEDF flags; actual reader must clear them before reading"
+    },
+    {
+      "address": "0xFFC5D020",
+      "hex": "00000000",
+      "evidence": "explicit recovered ICU-S offset20 input; no hardware reset or OEM interpretation"
+    }
+  ],
+  "checks": [
+    {
+      "name": "complete registered DataFlash header and destination canaries",
+      "kind": "memory",
+      "address": "0xfebe2100",
+      "size": 12,
+      "equals_hex": "a5a5a5a5a5a5a5a5a5a5a5a5"
+    },
+    {
+      "name": "ECC flags cleared only after read admission",
+      "kind": "memory",
+      "address": "0xFFC5B004",
+      "size": 4,
+      "equals_hex": "00000000"
+    }
+  ],
+  "expected_fault": {
+    "kind": "misaligned-write",
+    "address": "0xfebe2105",
+    "access": "write"
+  }
+}

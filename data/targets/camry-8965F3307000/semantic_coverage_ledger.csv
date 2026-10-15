@@ -9,7 +9,7 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x0000079a,28,FUN_0000079a,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,boot,unreviewed,,,,,,
 0x000007b6,76,FUN_000007b6,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,boot,unreviewed,,,,,,
 0x00000802,58,FUN_00000802,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,2,,0,0,0,5,0,0,boot,unreviewed,,,,,,
-0x00000880,72,FUN_00000880,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,boot,unreviewed,,,,,,
+0x00000880,72,FUN_00000880,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,5,0,0,boot,unreviewed,,,,,,
 0x000008c8,166,FUN_000008c8,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,boot,unreviewed,,,,,,
 0x0000096e,740,FUN_0000096e,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,boot,unreviewed,,,,,,
 0x00000c52,72,FUN_00000c52,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,1,0,boot,unreviewed,,,,,,
@@ -3847,17 +3847,17 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x000787fa,146,FUN_000787fa,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,7,0,,3,3,2,0,0,0,application,unreviewed,,,,,,
 0x0007888c,10,FUN_0007888c,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,1,1,0,0,0,0,application,unreviewed,,,,,,
 0x00078896,10,FUN_00078896,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,1,1,0,0,0,0,application,unreviewed,,,,,,
-0x000788b6,116,FUN_000788b6,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,5,0,,2,2,0,0,0,0,application,unreviewed,,,,,,
+0x000788b6,116,f33_dataflash_read_words,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,5,0,,2,2,0,0,0,0,application,semantically_identified,verified,tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_dataflash_gate_precedes_arguments.json;tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_dataflash_gate_ignores_other_bits.json;tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_dataflash_fresh_ecc_2.json,instruction_semantics,passed,2026-10-14,Ordered read admission: second ICUSREG20 bit0 set returnsB; software bytes6CB0!=1 or6CB2!=E return4/C. Require nonNULL destination and aligned bounded DataFlash offset/count; invalid arguments return3. Copy result0 maps2 and nonzero maps5 without rollback. Destination alignment is not checked here. Explicit modeled hardware inputs; not a readiness or full NvM restoration claim.
 0x0007892a,184,FUN_0007892a,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,11,0,,3,2,1,0,0,0,application,unreviewed,,,,,,
 0x000789e2,116,FUN_000789e2,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,7,0,,2,2,1,0,0,0,application,unreviewed,,,,,,
 0x00078a56,116,FUN_00078a56,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,8,0,,3,3,1,0,0,0,application,unreviewed,,,,,,
 0x00078aca,10,FUN_00078aca,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,1,1,0,0,0,0,application,unreviewed,,,,,,
 0x00078ad4,6,FUN_00078ad4,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,6,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x00078ada,6,FUN_00078ada,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,3,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
-0x00078ae0,6,FUN_00078ae0,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,14,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
-0x00078ae6,6,FUN_00078ae6,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,12,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
-0x00078aec,6,FUN_00078aec,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,7,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
-0x00078af2,6,FUN_00078af2,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,4,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
+0x00078ae0,6,f33_load_u32,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,14,0,0,,0,0,0,3,0,0,application,semantically_identified,verified,tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_icus20_second_read_1_to_0.json;tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_dataflash_fresh_ecc_2.json,instruction_semantics,passed,2026-10-14,Read the full word throughr6 into r10 using EP. Preserve r6/r7/r8. Real p-code inlining recovers both ICU-S reads and the later ECC-clear pointer/value instead of inferred extraout arguments. Native scenarios execute the actual repeated loads and DataFlash copy.
+0x00078ae6,6,f33_store_u8,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,12,0,0,,0,0,0,5,0,0,application,semantically_identified,verified,tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_store_u8_extent_and_registers.json;tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_dataflash_ecc_clear_byte_zero.json,instruction_semantics,passed,2026-10-14,Store low8(r7) throughr6; among GPRs change only EP. Native execution checks byte extent and neighboring canaries plus full r6/r7/r10 preservation. Inline the real instructions; no ordinary return-value contract.
+0x00078aec,6,f33_store_u16,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,7,0,0,,0,0,0,3,2,0,application,semantically_identified,verified,tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_store_u16_extent_and_registers.json,instruction_semantics,passed,2026-10-14,Store low16(r7) throughr6; among GPRs change only EP. Native execution checks halfword extent and neighboring canaries plus full r6/r7/r10 preservation. Inline the real instructions; no ordinary return-value contract.
+0x00078af2,6,f33_store_u32,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,4,0,0,,0,0,0,1,0,0,application,semantically_identified,verified,tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_store_u32_extent_and_registers.json,instruction_semantics,passed,2026-10-14,Store full32(r7) throughr6; among GPRs change only EP. Native execution checks word extent and neighboring canaries plus full r6/r7/r10 preservation. Inline the real instructions; no ordinary return-value contract.
 0x00078af8,36,FUN_00078af8,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,4,0,0,,5,0,4,0,0,0,application,unreviewed,,,,,,
 0x00078b1c,30,FUN_00078b1c,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,4,0,4,0,0,0,application,unreviewed,,,,,,
 0x00078b3a,38,FUN_00078b3a,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,8,3,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
@@ -3879,7 +3879,7 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x00078e10,26,FUN_00078e10,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,3,0,,0,0,0,1,0,0,application,unreviewed,,,,,,
 0x00078e2a,156,FUN_00078e2a,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,6,0,,0,0,0,3,0,0,application,unreviewed,,,,,,
 0x00078ec6,98,FUN_00078ec6,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,3,5,0,,0,0,0,4,0,0,application,unreviewed,,,,,,
-0x00078f28,82,FUN_00078f28,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,2,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
+0x00078f28,82,f33_dataflash_copy_words_ecc,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,2,0,,0,0,0,2,0,0,application,semantically_identified,verified,tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_dataflash_fresh_ecc_1.json;tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_dataflash_fresh_ecc_2.json;tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_dataflash_leaf_zero_still_copies.json,instruction_semantics,passed,2026-10-14,"Unchecked do/while word copy fromFF200000+offset. Clear SEDF/DEDF before the first word; sample DFERSTR after each destination store. Nonzero status clears again; DEDF makes return6 sticky, otherwise0. Zero count still copies one word; unsigned wrapping computed-end comparison. No rollback. ECC status is explicit input, not generated hardware corruption/correction."
 0x00078f7a,24,FUN_00078f7a,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,4,2,0,,0,0,0,1,0,0,application,unreviewed,,,,,,
 0x00078f92,148,FUN_00078f92,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,6,0,,4,4,2,0,0,0,application,unreviewed,,,,,,
 0x00079026,30,FUN_00079026,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,1,0,,0,0,0,1,0,0,application,unreviewed,,,,,,
@@ -3897,10 +3897,10 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x000792a6,26,FUN_000792a6,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,1,0,,0,0,0,1,0,0,application,unreviewed,,,,,,
 0x000792c0,28,FUN_000792c0,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,2,0,,0,0,0,1,0,0,application,unreviewed,,,,,,
 0x000792dc,32,FUN_000792dc,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,3,0,,0,0,0,1,0,0,application,unreviewed,,,,,,
-0x000792fc,26,FUN_000792fc,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,10,1,0,,0,0,0,1,0,0,application,unreviewed,,,,,,
+0x000792fc,26,f33_icus20_second_read_bit0,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,10,1,0,,0,0,0,1,0,0,application,semantically_identified,verified,tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_icus20_second_read_1_to_0.json,instruction_semantics,passed,2026-10-14,"Read FFC5D020 twice through78AE0 and return bit0 of the second word. Native external transitions between the two samples prove the first result is discarded; the first access remains. No OEM bit name, reset, busy/ready or completion interpretation."
 0x00079316,86,FUN_00079316,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,0,5,0,,1,1,1,0,0,0,application,unreviewed,,,,,,
 0x0007936c,2,FUN_0007936c,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
-0x0007936e,26,FUN_0007936e,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
+0x0007936e,26,FUN_0007936e,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,0,0,,0,0,0,3,0,0,application,unreviewed,,,,,,
 0x00079388,12,FUN_00079388,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,1,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x0007939c,20,FUN_0007939c,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,5,1,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x000793b0,12,FUN_000793b0,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,8,1,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
@@ -4837,7 +4837,7 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x0008aed6,58,FUN_0008aed6,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,1,1,0,1,0,0,application,unreviewed,,,,,,
 0x0008af10,218,FUN_0008af10,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,6,3,0,,8,7,1,5,0,0,application,unreviewed,,,,,,
 0x0008afea,24,FUN_0008afea,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,8,1,0,,1,1,0,0,0,0,application,unreviewed,,,,,,
-0x0008b018,14,FUN_0008b018,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,1,0,0,application,unreviewed,,,,,,
+0x0008b018,14,f33_icus20_read_bit0,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,0,0,,0,0,0,1,0,0,application,semantically_identified,verified,tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_icus20_single_read_00000002.json;tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_icus20_single_read_ffffffff.json,instruction_semantics,passed,2026-10-14,Read FFC5D020 once and reduce bit0 to full32 zero/one through SHL31 and SETFNE. Native values0/1/2/80000000/FFFFFFFF confirm the extraction. Caller-specific polarity is not a global permission or busy/ready definition.
 0x0008b026,50,FUN_0008b026,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,2,2,0,0,1,0,application,unreviewed,,,,,,
 0x0008b060,4,FUN_0008b060,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x0008b070,110,FUN_0008b070,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,0,0,,13,0,13,0,0,0,application,unreviewed,,,,,,

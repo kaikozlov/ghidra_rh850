@@ -5,44 +5,14 @@ from __future__ import annotations
 import json
 import sys
 
-# Cardinality floors — device-profile mapping and vector recovery may increase
-# totals relative to the pre-profile snapshot. Exact equality is enforced only
-# for identity fields; numeric floors catch catastrophic analysis collapse.
-#
-# Memory blocks: imported flash, both architectural LocalRAM views, Global RAM,
-# and only the evidence-backed peripheral windows in ApplyP1MDeviceProfile.
-_MEMORY_SIZE = (
-    0x100000  # CodeFlash user area
-    + 0x8000  # DataFlash
-    + 0x20000 + 0x20000  # LocalRAM PE1 view / byte-mapped self alias
-    + 0x8000 + 0x8000  # GlobalRAM_A / GlobalRAM_B
-    + 0x40  # SFR_EIC0_31 INTC1 low-channel EIC bank (P1M-E 6.2.2)
-    + 0x1000  # SFR_EIC
-    + 0x10000  # SFR_RSCFD
-    + 0x1000  # SFR_ICUS
-    + 0x500  # SFR_CODEFLASH_ECC
-    + 0x2000  # SFR_CLKGEN
-    + 0x1000  # SFR_STAC
-    + 0x20 + 0x200 + 0x4 + 0x100  # FACI ID/register/command/config windows
-    + 0x100 + 0x100 + 0x100 + 0x100  # ECM master/checker/common/pulse
-    + 0x1000 + 0x1000  # SFR_ADCG0 / SFR_ADCG1
-    + 0x40  # SFR_DMAC_CM
-    + 0x2000  # SFR_TSG3
-    + 0x3000  # SFR_TAUJ0/1/2
-)
-_SECTIONS = 26
-
+# Cardinality floors catch catastrophic analysis collapse.
+# Check actual RAM/SFR addresses, permissions and volatility in
+# AssertProjectInvariants; aggregate mapped bytes and section counts do not
+# establish those properties and must not be repinned for each added window.
 EXPECTED_MIN = {
     "functions": 5560,
     "instructions": 173000,
     "symbols": 27773,
-    "memory_size": _MEMORY_SIZE,
-    "sections": _SECTIONS,
-}
-
-EXPECTED_EXACT = {
-    "memory_size": _MEMORY_SIZE,
-    "sections": _SECTIONS,
 }
 
 
@@ -77,13 +47,6 @@ def main() -> int:
         print(f"[{status}] {field} >= {minimum} (actual={actual})")
         if not ok:
             failures.append((field, f">={minimum}", actual))
-
-    for field, expected in EXPECTED_EXACT.items():
-        actual = stats.get(field)
-        status = "PASS" if actual == expected else "FAIL"
-        print(f"[{status}] {field} == {expected} (actual={actual})")
-        if actual != expected:
-            failures.append((field, expected, actual))
 
     if stats.get("program_name") != "RH850_P1M-E_CodeFlash.bin":
         failures.append(("program_name", "RH850_P1M-E_CodeFlash.bin", stats.get("program_name")))

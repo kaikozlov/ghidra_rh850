@@ -2,7 +2,7 @@
   "schema": "rh850-p1me-machine-v2",
   "source": {
     "path": "data/devices/p1me.rdl",
-    "sha256": "e94eddc6879053a0a9a5427612524ed4837c6d15d6dded274bdbfbe727989b27",
+    "sha256": "4f549fb63f5152a81ddc34ad9327bc632ac2b64cae4f54075e1a43fba473d26e",
     "systemrdl_compiler": "1.33.0"
   },
   "products": [
@@ -581,6 +581,38 @@
         "evidence": "manual",
         "source_ref": "R01UH0615EJ0120 sections 3.3 and 4",
         "description": "Boot-flash area selector"
+      },
+      {
+        "name": "DFERSTR",
+        "address": 4291145732,
+        "size": 4,
+        "access_widths": [
+          4
+        ],
+        "access": "r",
+        "reset": 0,
+        "behavior": "storage",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 page2540 Table31.19",
+        "description": "DataFlash ECC status: bit0 SEDF and bit1 DEDF; error generation is an explicit external input"
+      },
+      {
+        "name": "DFERSTC",
+        "address": 4291145736,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "w",
+        "reset": 0,
+        "behavior": "storage",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 page2541 Table31.20",
+        "description": "DataFlash ECC status clear: writing low-bit ERRCLR=1 clears SEDF/DEDF; zero has no effect",
+        "trigger": "dataflash-ecc-clear",
+        "status_register": "DFERSTR"
       },
       {
         "name": "UCFERRINT",
@@ -3783,6 +3815,20 @@
         "evidence": "recovered",
         "source_ref": "Exact target CodeFlash command setup at 0x0008A63C",
         "description": "ICU-S operation parameter written by recovered command setup"
+      },
+      {
+        "name": "ICUSREG20",
+        "address": 4291153952,
+        "size": 4,
+        "access_widths": [
+          4
+        ],
+        "access": "r",
+        "reset": null,
+        "behavior": "icus_recovered",
+        "evidence": "recovered",
+        "source_ref": "Camry8965F3307000 792FC reads twice through78AE0;8B018 reads directly. R01UH0585EJ0120 p64 directs Security specification inquiries to the distributor",
+        "description": "ICU-S offset20 word: exact Camry readers consume bit0; model permits observed word reads only, without a hardware reset value or bit meaning"
       },
       {
         "name": "ICUSCTL",

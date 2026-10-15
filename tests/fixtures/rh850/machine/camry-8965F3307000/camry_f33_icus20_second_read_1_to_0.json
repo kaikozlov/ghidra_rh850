@@ -1,0 +1,63 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "r6": "0x77c0",
+    "r7": "0xfebe2104",
+    "r8": "0x4",
+    "FPEC": "0x0",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "max_instructions": 100,
+  "memory": [
+    {
+      "address": "0xfebe1f80",
+      "size": 128,
+      "fill": 165,
+      "evidence": "isolated native-call stack"
+    },
+    {
+      "address": "0xffc5d020",
+      "hex": "01000000",
+      "evidence": "explicit first sampled opaque word"
+    }
+  ],
+  "name": "camry_f33_icus20_second_read_1_to_0",
+  "entry": {
+    "role": "second of two native word reads supplies bit0; first read is retained",
+    "scope": "resolved-address",
+    "address": "0x792fc"
+  },
+  "events": [
+    {
+      "kind": "register-input",
+      "after_instructions": 6,
+      "register": "ICUSREG20",
+      "value": "0x0",
+      "evidence": "explicit external transition after first helper return, before second read; not a modeled ICU-S completion"
+    }
+  ],
+  "checks": [
+    {
+      "name": "second sampled bit0 is returned",
+      "kind": "register",
+      "register": "r10",
+      "equals": "0x0"
+    },
+    {
+      "name": "stack restored",
+      "kind": "register",
+      "register": "sp",
+      "equals": "0xfebe2000"
+    }
+  ]
+}

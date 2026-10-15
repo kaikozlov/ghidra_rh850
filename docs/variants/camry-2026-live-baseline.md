@@ -8056,12 +8056,13 @@ passed. Inputs are synthetic; no captured payload/key bytes are duplicated.
 The actual analyzer separately evaluated the retained DataFlash and found
 57 checksum matches among the 57 admitted records.
 
-**Hardware boundary:** an attempted complete low-level read at `788B6`
-stopped at `78AE2` reading **`FFC5D020`**, which the current machine model does
-not map. No successful read was substituted. The integrity scenarios explicitly
-start at post-read `7775E` or `777FC` and stop before their real epilogues;
-they prove those software transitions, not hardware acquisition, flash timing,
-logical copy consensus or learned-parameter restoration.
+**Checkpoint boundary:** the checksum-only increment's attempted complete
+low-level read at `788B6` stopped at `78AE2` reading unmapped **`FFC5D020`**.
+[§77.12](#7712-physical-dataflash-read-and-explicit-hardware-inputs) now executes
+that lower read path with explicit hardware inputs. The original integrity
+scenarios still start at post-read `7775E` or `777FC` and stop before their
+epilogues; they do not establish a complete NvM job, logical copy consensus or
+learned-parameter restoration.
 
 Fresh canonical decompilation now retains the actual source-byte reads and
 32-bit sum return, typed destination copy, and both checksum comparisons.
@@ -8128,4 +8129,80 @@ functions or a measure of remaining OEM intent.
 The three tracked dispatch scenarios, six targeted coverage/NvM/B6 checks,
 and live-coverage parity passed. The corrected listing was inspected in the
 rebuilt working project before clean teardown and snapshot/corpus promotion.
+
+### 77.12 Physical DataFlash read and explicit hardware inputs
+
+The previously blocked `788B6` path now executes the real CodeFlash instructions
+through reads from the registered DataFlash, without replacement callees or
+flash overlays. **This is conditional software execution, not physical hardware
+readiness, ECC generation/correction, flash timing or vehicle observation.**
+
+| Register | Primary source | Executable model boundary |
+|---|---|---|
+| `DFERSTR`, `FFC5B004` | P1M-E hardware manual R01UH0585EJ0120, p2540 / Table31.19 | Read32; reset0; bit0 `SEDF`, bit1 `DEDF`. New errors are explicit inputs, not derived from captured bytes. |
+| `DFERSTC`, `FFC5B008` | Same manual, p2541 / Table31.20 | Write8/16/32; writing low-bit `ERRCLR=1` clears both flags; zero does not clear them. |
+| Structural `ICUSREG20`, `FFC5D020` | Exact Camry readers `792FC` and `8B018` | Only observed word reads are supported. No reset, busy/ready meaning or completion transition is invented. Missing input faults; this model restriction is not proof that the physical register is read-only. |
+
+The public hardware manual directs security-specification inquiries to the
+distributor on p64; it does not supply the missing ICU-S contract. `792FC`
+performs **two** reads and returns bit0 of the second. Native input transitions
+`1→0` and `0→1` between the reads prove that the first result is discarded,
+not that the first access can be deleted. `8B018` performs one read and returns
+bit0 as full-width zero/one. No global permission interpretation is assigned.
+
+`788B6` applies these checks in order:
+
+1. Second ICU-S sample bit0 set → return `B`, before software-state or argument
+   reads. The rejection scenario leaves the software-state bytes uninitialized.
+2. `FEBF6CB0 != 1` → `4`; otherwise `FEBF6CB2 != E` → `C`.
+3. Destination must be nonNULL; source offset must be four-byte aligned and
+   below `8000`; count must be nonzero, aligned and at most64; inclusive source
+   end must not exceed `7FFF`. Rejection returns `3`.
+4. Call `78F28`; map its zero result to `2`, nonzero to `5`.
+
+The destination receives **no local alignment or RAM-range check**. A nonNULL
+unaligned destination reaches the actual `ST.W` and the machine's alignment
+fault, rather than returning argument status3.
+
+`78F28` clears stale ECC flags before the first read, copies a word, then samples
+`DFERSTR`. Nonzero status causes another clear. `SEDF` alone leaves its result
+zero; `DEDF` sets a sticky result6. Native execution confirms that a later
+clean word does not clear that result. Destination stores happen **before**
+the status test and are not rolled back: wrapper result5 still accompanies
+copied bytes. This lower-layer status is not, by itself, an application
+acceptance/rejection decision.
+
+The copy is a do/while loop, not a checked byte-copy API. Its unsigned comparison
+uses the wrapping computed end; a direct zero-count call still copies one word.
+The checked wrapper rejects zero count before reaching it.
+
+Thirty-five native scenarios passed, covering ordered rejection, range/alignment
+edges, the final DataFlash word and final64-byte extent, explicit one-/two-bit
+ECC flags, sticky status, repeated/single ICU-S reads, and store widths with
+full input/result-register preservation. Sixteen representative scenarios are
+retained. Their captured expected data is limited to the four-byte record
+header; no captured payload/key bytes are duplicated.
+
+The target seed now gives `78AE0/78AE6/78AEC/78AF2` their exact load/store
+contracts and inlines their **real p-code**. They preserve the registers that
+the reader uses across calls; no helper implementation is substituted. The
+device-profile rebuild input adds the manual's complete 32-byte volatile
+DataFlash ECC bank (`FFC5B000..FFC5B01F`, Table31.17). The machine still admits
+only individually defined registers, not every address in that Ghidra window.
+
+Fresh canonical decompilation retains both volatile ICU-S reads and the actual
+byte-wide ECC-clear writes, without the former lost-pointer/value `extraout`
+artifacts. The rebuilt inventory confirms the 32-byte ECC window is volatile,
+uninitialized and non-executable. Aggregate memory-size/section-count assertions
+were removed rather than repinned; actual window properties remain checked.
+
+Two independent rebuilds agreed on **7,187 functions** and **61 curated reviews**
+(57 verified, four bounded); the outside-function census remains929. All16
+retained cases and two existing unsupported-command/alignment regressions passed
+against the fresh working project. The device-model check, 16 external-event
+schema rejections, two existing clock/interrupt boundary cases, three device-input
+rejections, six targeted coverage/NvM/B6 checks and live-coverage parity passed.
+The working project was stopped before snapshot/corpus promotion. These checks
+do not close the higher NvM request/notification machine or application-side
+copy consensus.
 

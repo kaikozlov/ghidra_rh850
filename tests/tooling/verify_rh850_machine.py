@@ -345,6 +345,38 @@ def check_event_schema_rejections(output_root: Path) -> None:
             },
         ),
         (
+            "register-input-empty-name",
+            {
+                "kind": "register-input", "after_instructions": 0,
+                "register": "", "value": "0",
+                "evidence": "scenario: unnamed external register input",
+            },
+        ),
+        (
+            "register-input-bool-value",
+            {
+                "kind": "register-input", "after_instructions": 0,
+                "register": "ICUSREG20", "value": True,
+                "evidence": "scenario: boolean is not an integer-string input",
+            },
+        ),
+        (
+            "register-input-negative",
+            {
+                "kind": "register-input", "after_instructions": 0,
+                "register": "ICUSREG20", "value": "-1",
+                "evidence": "scenario: negative device input",
+            },
+        ),
+        (
+            "register-input-overflow",
+            {
+                "kind": "register-input", "after_instructions": 0,
+                "register": "ICUSREG20", "value": "0x100000000",
+                "evidence": "scenario: oversized device input",
+            },
+        ),
+        (
             "unknown-event-kind",
             {**receive, "kind": "can-tx"},
         ),
@@ -525,6 +557,44 @@ def check_execution_event_boundaries(output_root: Path) -> None:
         print(f"PASS {path.stem}: {kind} faults at the external-event boundary")
 
 
+def check_register_input_boundaries(output_root: Path) -> None:
+    """External device input cannot alter CPU registers or issue device commands."""
+    output_dir = output_root / "register-input-boundaries"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    for name, register, value in (
+        ("cpu-register", "PC", "0x100"),
+        ("write-only-command", "DFERSTC", "1"),
+        ("byte-register-overflow", "FPMON", "0x100"),
+    ):
+        scenario = {
+            "schema": "rh850-p1me-machine-scenario-v2",
+            "name": f"reject-register-input-{name}",
+            "entry": PORTABLE_STORE_SELECTOR,
+            "max_instructions": 4,
+            "stop_addresses": ["0x00010000"],
+            "gpr_fill": "0",
+            "registers": {"lp": "0x00010000"},
+            "checks": [],
+            "events": [{
+                "kind": "register-input", "after_instructions": 0,
+                "register": register, "value": value,
+                "evidence": "scenario: invalid external device input boundary",
+            }],
+        }
+        path = output_dir / f"{name}.json"
+        path.write_text(json.dumps(scenario, indent=2) + "\n", encoding="utf-8")
+        run([
+            str(REPO_ROOT / "tools/rh850"), "test", "firmware",
+            "camry-8965F3307000", str(path), "--output-dir", str(output_dir),
+        ], expect_success=False)
+        report = json.loads((output_dir / f"{path.stem}.report.json").read_text())
+        if (report.get("passed") is not False
+                or report.get("termination_reason") != "runner-error"
+                or report.get("error", {}).get("type") != "IllegalArgumentException"):
+            raise AssertionError(f"{name}: device-input boundary did not reject the scenario")
+        print(f"PASS register-input {name} rejected at device-model boundary")
+
+
 def main() -> int:
     run([str(REPO_ROOT / "tools/rh850"), "model", "check"])
     with tempfile.TemporaryDirectory(prefix="verify-rh850-machine-", dir=REPO_ROOT / "build/tmp") as tmp:
@@ -536,6 +606,7 @@ def main() -> int:
         check_fault_check_error_boundary(output_root)
         check_event_schema_rejections(output_root)
         check_execution_event_boundaries(output_root)
+        check_register_input_boundaries(output_root)
     print("PASS specification-backed multi-target RH850/P1M-E machine")
     return 0
 
