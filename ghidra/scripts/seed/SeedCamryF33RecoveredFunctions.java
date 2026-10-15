@@ -2240,9 +2240,9 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
         .setComment("Reset external-source acquisition throughC2E14, then C084,C06C,C08E/F and C090/91. "
             + "Sibling estimator, acquisition verdicts and cross-rate interface have separate reset owners.");
     semanticFunction(0xC492CL, "f33_qualify_rate_observer_acquisition", v)
-        .setComment("Snapshot source/status/complement/residual inputs, acknowledge reseed one-shots, then "
-            + "run consistencyC4640 and plausibility/channel routingC489C. Qualification is distinct from "
-            + "C45C0 sampling and from actual hardware arrival timing.");
+        .setComment("Build56-byte published-source/reference snapshot; acknowledgementsC08D/C08C clear "
+            + "requestsC091/C090 but themselves hold. ConsistencyC4640 then routingC489C may reassert a "
+            + "request in the same invocation. Distinct from C45C0 rate sampling and physical freshness.");
     semanticFunction(0xC4BCEL, "f33_update_rate_observer_deadband", v)
         .setComment("Initialize band until state11/22 latches initialization; select32 for11/other,0 for22, "
             + "adapt one count per invocation, retain direction-dependent active band, then publish "
@@ -2412,6 +2412,76 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     semanticData(0xAF626L, new ArrayDataType(s16, 6, 2), "f33_estimator_source_amplitude_limits",
         "Six signed bounds, each1. Shared wrapping abs16 preserves INT16_MIN behavior.");
     semanticData(0xAF632L, u16, "f33_estimator_pair_axis_margin", "Exact1280; strict absolute-difference gate.");
+  }
+  private void annotateRetainedEstimatorQualification() throws Exception {
+    DataType v = VoidDataType.dataType;
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u16 = UnsignedShortDataType.dataType;
+    DataType s32 = IntegerDataType.dataType;
+    DataType bytes = new PointerDataType(u8, 4);
+    semanticFunction(0xC45FEL, "f33_initialize_retained_estimator_qualification", v)
+        .setComment("Full initialization clears residuals/bounds/counters, correctionABA8, reseed centerC0B0 "
+            + "and sticky plausibilityC0AE. Ordinary failure resetC4714 does not clear that latch.");
+    semanticFunction(0xC4640L, "f33_check_retained_estimator_consistency", v,
+        new ParameterImpl("snapshot", bytes, currentProgram))
+        .setComment("Separate evaluation admissionC0AD and passC0AC. Inadmission clearsAD but holdsAC. "
+            + "Admitted residuals are sample+difference-feedforward and sample+center-feedforward; "
+            + "wrapped abs32 must be strictly below signed low32(480/160*AC12)/1024. Bounds refresh "
+            + "after outer mode admission; residuals only after all source/count gates.");
+    semanticFunction(0xC4714L, "f33_clear_retained_estimator_and_request_reset", v)
+        .setComment("Clear candidate/publication qualification, counters, correctionABA8 and centerC0B0; "
+            + "assertC090. Do not execute raw-estimator reset, clear stickyC0AE or overwrite rateC084.");
+    semanticFunction(0xC475AL, "f33_count_retained_estimator_failure", v)
+        .setComment("Exclusive u16C0A8 failure counter reaches2 inclusively then callsC4714. Narrow "
+            + "increment before comparison; pre-existingFFFF wraps rather than saturating.");
+    semanticFunction(0xC478CL, "f33_accept_consistent_estimator_center", v,
+        new ParameterImpl("snapshot", bytes, currentProgram))
+        .setComment("ExclusiveC0A4 reaches3 inclusively: qualifyC0B6, adopt primary class/count, and "
+            + "copy published centerBF90 to BOTH correctionABA8 and reseed centerC0B0.");
+    semanticFunction(0xC47D8L, "f33_request_secondary_estimator_reseed", v,
+        new ParameterImpl("snapshot", bytes, currentProgram))
+        .setComment("ExclusiveC0A6 reaches3 inclusively: adopt secondary class/count and assertC091. "
+            + "Hold correctionABA8, reseed centerC0B0 and retained qualificationC0B6.");
+    semanticFunction(0xC4816L, "f33_accept_unqualified_estimator_center", v,
+        new ParameterImpl("snapshot", bytes, currentProgram))
+        .setComment("ExclusiveC0AA reaches3 inclusively: adopt primary class/count, clear qualification "
+            + "and copyBF90 toABA8 only; retain reseed centerC0B0.");
+    semanticFunction(0xC485AL, "f33_route_retained_estimator_qualification", v,
+        new ParameterImpl("snapshot", bytes, currentProgram))
+        .setComment("Admission/pass both5A select primary consistency; else retained qualification5A "
+            + "selects secondary reseed; else inadmission selects unqualified primary; otherwise failure. "
+            + "Exactly one branch runs and clears the other three consecutive counters.");
+    semanticFunction(0xC489CL, "f33_validate_and_route_retained_estimator", v,
+        new ParameterImpl("snapshot", bytes, currentProgram))
+        .setComment("Suppression/mode predicates and bitwise reference/marker complements precede "
+            + "widened abs(s16C172)<12000 and stickyC0AE==0. Structural rejection preserves latch; "
+            + "plausibility/latch failure sets5A. Rejection counts failure, not immediate raw reset.");
+    semanticFunction(0xC424CL, "f33_predict_estimator_source_sample", v,
+        new ParameterImpl("warmup", new PointerDataType(u16, 4), currentProgram),
+        new ParameterImpl("accepted", bytes, currentProgram),
+        new ParameterImpl("projection", new PointerDataType(s32, 4), currentProgram))
+        .setComment("Source markers, wrapped abs16 amplitudes<160/512 and unsigned abs32 difference "
+            + "<low32(24000*AE38)>>10 admit warmup. Incremented u16 count>10 pins10; C0DE5A additionally "
+            + "commits BFD8=BF7C-(BF78-BFD4-BF70), projection=C080+BFD8 and acceptance5A. "
+            + "Rejection clears warmup but holds acceptance/output.");
+    semanticFunction(0xC4BF2L, "f33_initialize_secondary_estimator_stability", v)
+        .setComment("Clear observationsC0D4/C0D8, counterC0DD and markerC0DE; seed tokenC0DC fromAD5B.");
+    semanticFunction(0xC4C0CL, "f33_qualify_secondary_estimator_change", v,
+        new ParameterImpl("change", s32, currentProgram),
+        new ParameterImpl("count", bytes, currentProgram),
+        new ParameterImpl("qualified", bytes, currentProgram))
+        .setComment("Require signed change<signed low32(43*AE38)/1024. Increment below2 and assert5A "
+            + "on reaching2; equality/large change clears count/status. Invocation count, not elapsed time.");
+    semanticFunction(0xC4C56L, "f33_update_secondary_estimator_stability", v)
+        .setComment("Admitted source with changedAD5B token evaluates BF84+BF7C-BF70 versusC0D8. "
+            + "Changed token updates both observations even on rejection; unchanged token holds. Closed "
+            + "admission clearsC0D8/count/marker but retainsC0D4. Always retain current token.");
+    semanticFunction(0xC37D4L, "f33_publish_retained_estimator_projection", v)
+        .setComment("Conditionally copyC07C/countC0B4 toAF04/AE0E using observer state, acceptance and "
+            + "prior snapshotBFFA/BFF8. Some BFFA5A branches hold values while publishingACEC5A; "
+            + "qualification is not freshness. Observed reset first clearsC07C/BFFA.");
+    semanticFunction(0xC37BAL, "f33_snapshot_retained_estimator_projection", v)
+        .setComment("Snapshot AF04/AE0E/ACEC intoBFF4/BFF8/BFFA for separate publication retention gates.");
   }
   private void annotateEstablishedTracking() throws Exception {
     DataType v = VoidDataType.dataType;
@@ -2996,6 +3066,49 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     semanticData(0x30E44L, u16, "f33_classifier_retained_age_threshold", "Exact600 invocations; strict expiry.");
     semanticData(0x30E46L, u16, "f33_classifier_age_release_threshold", "Exact22170; unsignedE8B0 inclusive gate.");
   }
+  private void annotateDiagnosticTransactions() throws Exception {
+    DataType v = VoidDataType.dataType;
+    semanticFunction(0x52186L, "f33_stage_diagnostic_history_record", v)
+        .setComment("PMRFF00-protected160-byte object0 serialization: eight bytes each5F71/5F79 then "
+            + "48 bytes each60C0/60F0/6120. Current bitmap6090 is excluded. Real66D6E acceptance is "
+            + "ignored; RAM mirror/queue publication is not durable storage.");
+    semanticFunction(0x521F2L, "f33_stage_diagnostic_invocation_record", v)
+        .setComment("PMRFF00-protected object10 serialization:6028/602A halfwords plus zero word. "
+            + "Submit real66D6E and restore mask without propagating acceptance.");
+    semanticFunction(0x52222L, "f33_publish_dirty_diagnostic_records", v)
+        .setComment("Snapshot5F84; permissionE8215A or dirty bits3/4 admit. Remove captured bits under "
+            + "PMR, then separately snapshot payloads. MasksBA/52 select objects0/10; bit3 arms object0, "
+            + "bit4 arms both completion trackers, irrespective of set-record acceptance.");
+    semanticFunction(0x52108L, "f33_poll_diagnostic_record_completion", v)
+        .setComment("Trackers5F83/86 equal1 inspect real software status: high20 stays1, high10 becomes2, "
+            + "other becomes3. Wait for every armed peer; then phase5F85=55 if either failed, else0, "
+            + "and clear trackers. Low nibble is ignored; no local timeout/retry or physical read.");
+    semanticFunction(0x52296L, "f33_service_diagnostic_record_transaction", v)
+        .setComment("Rebuild one pending derived bank, refresh derived presence, poll previous submissions "
+            + "BEFORE publishing new dirty records. Completion later in the scheduler may start a new "
+            + "dirty generation that cannot be serialized retroactively.");
+    semanticFunction(0x51632L, "f33_repair_diagnostic_queue_consumer", v)
+        .setComment("Only consumer82D7>=4 triggers bounded four-cell search beginning at producer82D6. "
+            + "A valid consumer pointing to an empty slot is not rescanned.");
+    semanticFunction(0x51A12L, "f33_dispatch_next_diagnostic_request", v)
+        .setComment("Repair consumer, clear lifecycle82D4, then skip unsupported nonzero entries and "
+            + "dispatch at most one of1/2/4/5/6. Clear consumed slot and advance circular consumer; "
+            + "stop at empty slot or after four unsupported entries. Opcode3 is not recognized.");
+    semanticFunction(0x51A98L, "f33_complete_diagnostic_request_and_dispatch", v)
+        .setComment("Active lifecycle waits while ANY phase5F85/6150/8608/89C4 isAA/A5. Terminal "
+            + "lifecycle-specific acknowledgement precedes bounded queue dispatch; phase55 is failure, "
+            + "not hold. A dispatched request can immediately restore busy phase and dirty state.");
+    semanticFunction(0x51B9EL, "f33_service_diagnostic_request_lifecycle", v)
+        .setComment("Nonzero82D4 invokes completion/dispatch, then independently run51B64 mode-gated "
+            + "callbacks. Those E85611/E85B0-or22 callbacks are not persistence acknowledgement.");
+    semanticFunction(0x52B3CL, "f33_poll_diagnostic_capture_completion", v)
+        .setComment("Objects1/2/3 use trackers6157..59: high20 pending, high10 success, other failure. "
+            + "Only after no tracker1 remains clear trackers and publish aggregate6150=0/55.");
+    semanticFunction(0x52BECL, "f33_publish_dirty_diagnostic_captures", v)
+        .setComment("Permission5A or aggregate dirtybit2 admits publication. Captured masks&6 submit "
+            + "240-byte objects1/2/3; bit2 arms trackers. Consume captured masks and ignore submission "
+            + "acceptance; do not infer physical completion from armed software trackers.");
+  }
   private void annotateAssistComposition() throws Exception {
     DataType v = VoidDataType.dataType;
     DataType s16 = ShortDataType.dataType;
@@ -3447,12 +3560,14 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     annotateRateObserver();
     annotateEstimatorAcquisition();
     annotateEstimatorQualifiers();
+    annotateRetainedEstimatorQualification();
     annotateEstablishedTracking();
     annotateThermalModels();
     annotateThermalArbitration();
     annotateFaultActions();
     annotateDiagnosticEventLifecycle();
     annotateDiagnosticAgingAndClear();
+    annotateDiagnosticTransactions();
     annotateAssistComposition();
     annotateApplicationLifecycle();
     annotateServiceLifecycle();

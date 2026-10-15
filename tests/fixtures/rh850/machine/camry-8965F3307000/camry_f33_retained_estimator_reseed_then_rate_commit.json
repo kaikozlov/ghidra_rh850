@@ -1,0 +1,59 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_retained_estimator_reseed_then_rate_commit",
+  "entry": {
+    "role": "real D0C68..D0C70 interval: C492C consumes prior acknowledgements, equality-to-residual-band rejects consistency, retained qualified secondary count2 reaches3 and requests reseed, then C45C0 publishes rate using the held correction; no replacement callees or physical-sample freshness claim",
+    "scope": "resolved-address",
+    "address": "0xd0c68"
+  },
+  "max_instructions": 12000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xfe00"
+  },
+  "stop_addresses": ["0xd0c70"],
+  "memory": [
+    {"address": "0xfebe1800", "size": 2048, "fill": 165, "evidence": "isolated real nested-call stack"},
+    {"address": "0xfebeaba0", "size": 5728, "fill": 0, "evidence": "explicit staged application/estimator RAM through C1FF; overrides below define retained history and source snapshots"},
+    {"address": "0xfebeaba0", "hex": "64000000", "evidence": "published acquired reference100, distinct from held correction64"},
+    {"address": "0xfebeaba8", "hex": "40000000", "evidence": "retained correction64 must not change on C47D8 reseed request"},
+    {"address": "0xfebeac07", "hex": "5a", "evidence": "enable real C45C0 protected rate publication"},
+    {"address": "0xfebeac12", "hex": "0004", "evidence": "normalization1024 makes C4640 bands480/160 and C452E divisor16"},
+    {"address": "0xfebeac18", "hex": "809effff", "evidence": "signed -24960; real C32AA negates to24960, so (24960-100*128-64*128)/8/16=31"},
+    {"address": "0xfebead3c", "hex": "01", "evidence": "admitted current mode; no disabled-mode sampling branch"},
+    {"address": "0xfebebf88", "hex": "64000000e00100004000000064000000", "evidence": "published sample100, difference480, center64, feedforward100: residuals100+480-100=480 and100+64-100=64"},
+    {"address": "0xfebebfaa", "hex": "02000700", "evidence": "published primary/secondary source counts2/7; mature secondary must replace retained count with7"},
+    {"address": "0xfebebfb9", "hex": "5a5a5a01221101005a00000000", "evidence": "sample valid, consistency-source valid, projection accepted, published mode1, primary class22, secondary class11, source mode1, status0, source enabled5A, remaining suppression bytes clear"},
+    {"address": "0xfebebfd4", "hex": "64000000", "evidence": "reference100 for real complement check"},
+    {"address": "0xfebebfe4", "hex": "9bffffff", "evidence": "bitwise complement of reference100, not arithmetic negation"},
+    {"address": "0xfebebff0", "hex": "5aa5a5", "evidence": "reference valid5A, unrelated acceptance sentinelA5, source inverse-markerA5; C492C checks BFF0 against byte complement of BFF2"},
+    {"address": "0xfebec078", "hex": "00000300", "evidence": "retained center accumulator96<<11; request generation does not execute C3F7A reseed"},
+    {"address": "0xfebec080", "hex": "60000000", "evidence": "retained raw center96 must remain until later reset/reseed owner runs"},
+    {"address": "0xfebec084", "hex": "19fcffff", "evidence": "prior rate-999 must be replaced by actual sampling"},
+    {"address": "0xfebec08c", "hex": "5a5a22005a5a", "evidence": "both prior acknowledgements and both old requests5A; retained observer state22/qualification0 differs from newly sampled11/5A"},
+    {"address": "0xfebec0a4", "hex": "0900020001000900", "evidence": "secondary reseed counter2 reaches exact AF7EA threshold3; competing primary/failure/unqualified counters must clear"},
+    {"address": "0xfebec0ac", "hex": "5a5a00", "evidence": "old consistency pass, admission and clear hard-plausibility latch; current equality-band residual must overwrite pass only"},
+    {"address": "0xfebec0b0", "hex": "6000000002005a22", "evidence": "held reseed center96, retained count2, qualified5A and candidate class22"}
+  ],
+  "checks": [
+    {"name": "real qualifier and rate-commit calls reach deadband boundary", "kind": "register", "register": "PC", "equals": "0xd0c70"},
+    {"name": "nested calls unwind without enclosing scheduler frame", "kind": "register", "register": "sp", "equals": "0xfebe2000"},
+    {"name": "priority mask restored after protected commit", "kind": "register", "register": "PMR", "equals": "0xfe00"},
+    {"name": "strict residual bands480 and160 reject equality480 but retain admitted state", "kind": "memory", "address": "0xfebec094", "size": 16, "equals_hex": "e001000040000000e0010000a0000000"},
+    {"name": "only secondary consecutive counter survives and reaches3", "kind": "memory", "address": "0xfebec0a4", "size": 8, "equals_hex": "0000030000000000"},
+    {"name": "consistency fails while admission and hard-plausibility state remain distinct", "kind": "memory", "address": "0xfebec0ac", "size": 3, "equals_hex": "005a00"},
+    {"name": "mature secondary uses published secondary count7 and class11 while holding center96", "kind": "memory", "address": "0xfebec0b0", "size": 8, "equals_hex": "6000000007005a11"},
+    {"name": "secondary reseed does not overwrite retained rate correction64", "kind": "memory", "address": "0xfebeaba8", "size": 4, "equals_hex": "40000000"},
+    {"name": "acknowledged reset request clears but mature secondary reasserts reseed request", "kind": "memory", "address": "0xfebec08c", "size": 6, "equals_hex": "5a5a115a005a"},
+    {"name": "request generation holds raw center and its scaled accumulator", "kind": "memory", "address": "0xfebec078", "size": 12, "equals_hex": "000003000000000060000000"},
+    {"name": "new secondary candidate publishes actual integer rate31", "kind": "memory", "address": "0xfebec084", "size": 4, "equals_hex": "1f000000"},
+    {"name": "real prework supplies negated rate source24960", "kind": "memory", "address": "0xfebeaba4", "size": 4, "equals_hex": "80610000"}
+  ]
+}

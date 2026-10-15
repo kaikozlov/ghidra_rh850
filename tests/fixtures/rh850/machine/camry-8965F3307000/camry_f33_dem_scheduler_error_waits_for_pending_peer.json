@@ -1,0 +1,42 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_dem_scheduler_error_waits_for_pending_peer",
+  "entry": {
+    "role": "real5F972 diagnostic branch composes record polling with lifecycle completion: object0 terminal31 latches tracker3, object10 pending20 keeps tracker1 and phaseA5, so callback1410 and queued clear1 remain owned and untouched; statuses are explicit retained software inputs, not synthetic callee returns or physical storage results",
+    "scope": "resolved-address",
+    "address": "0x5f972"
+  },
+  "max_instructions": 12000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {"sp": "0xfebe2000", "gp": "0xfebeb800", "tp": "0x23dfc", "lp": "0x798", "r28": "0x0", "r29": "0x102", "PSW": "0x20", "FPEC": "0x0", "PMR": "0xfe00"},
+  "stop_addresses": ["0x5f9a0"],
+  "memory": [
+    {"address": "0xfebe1800", "size": 2048, "fill": 165, "evidence": "explicit stack for real diagnostic branch calls"},
+    {"address": "0xfebe5f70", "size": 23, "fill": 0, "evidence": "explicit auxiliary dirty/derived region before retained transaction overrides"},
+    {"address": "0xfebe5f81", "hex": "00000100a501", "evidence": "trackers1/1, phaseA5, dirty0;52222 must not republish"},
+    {"address": "0xfebe602c", "size": 20, "fill": 0, "evidence": "derived-code presence scan is explicit and empty"},
+    {"address": "0xfebe6090", "size": 48, "fill": 17, "evidence": "queued clear must not mutate the current generation while the other object remains pending"},
+    {"address": "0xfebe6150", "hex": "000000000000000000005a01000000000000000000000000", "evidence": "capture group idle; explicit615B retained-supplement predicate and615A replacement latch avoid unrelated sample construction"},
+    {"address": "0xfebe81b2", "hex": "1014", "evidence": "clear callback ownership is pending1410"},
+    {"address": "0xfebe82d4", "hex": "8100010001000000", "evidence": "active81 with clear1 queued at consumer0; producer1. Completion must not drain this queue while phaseA5 remains"},
+    {"address": "0xfebe8606", "hex": "000000", "evidence": "object4 group inactive, no dirty publication"},
+    {"address": "0xfebe89c4", "size": 20, "fill": 0, "evidence": "independent group trackers and dirty masks are explicitly inactive"},
+    {"address": "0xfebee821", "hex": "00", "evidence": "ordinary publication gate closed"},
+    {"address": "0xfebee856", "hex": "00", "evidence": "four-callback dispatch mode not selected"},
+    {"address": "0xfebee85b", "hex": "00", "evidence": "51B6E loads this mode byte before E856 rejection; explicit input even though four-callback dispatch stays closed"},
+    {"address": "0xfebf0308", "hex": "31", "evidence": "retained object0 terminal non10/non20 class; genuine66DCA/6792C reads this byte"},
+    {"address": "0xfebf0312", "hex": "20", "evidence": "retained object10 pending class prevents whole-group completion even after object0 failure"}
+  ],
+  "checks": [
+    {"name": "real scheduler diagnostic branch reaches boundary", "kind": "register", "register": "PC", "equals": "0x5f9a0"},
+    {"name": "stack restored", "kind": "register", "register": "sp", "equals": "0xfebe2000"},
+    {"name": "priority mask retained", "kind": "register", "register": "PMR", "equals": "0xfe00"},
+    {"name": "error latched but pending peer holds whole phase", "kind": "memory", "address": "0xfebe5f83", "size": 4, "equals_hex": "0300a501"},
+    {"name": "callback ownership not acknowledged early", "kind": "memory", "address": "0xfebe81b2", "size": 2, "equals_hex": "1014"},
+    {"name": "lifecycle and queue not drained early", "kind": "memory", "address": "0xfebe82d4", "size": 8, "equals_hex": "8100010001000000"},
+    {"name": "queued clear did not run", "kind": "memory", "address": "0xfebe6090", "size": 48, "equals_hex": "111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111"},
+    {"name": "raw object statuses not overwritten by diagnostic polling", "kind": "memory", "address": "0xfebf0308", "size": 1, "equals_hex": "31"},
+    {"name": "pending object status remains pending", "kind": "memory", "address": "0xfebf0312", "size": 1, "equals_hex": "20"}
+  ]
+}

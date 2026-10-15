@@ -2973,7 +2973,7 @@ and stability-window10→11 transitions produce the admission bytes, then the
 same `C43E0` invocation runs established tracking and its bounded update.
 It stops before `C4358` projection. Producer validity bytes and sampled inputs
 are explicit RAM preconditions; the result does not establish their hardware
-freshness or close the separate retained `C492C` qualification path.
+freshness. Retained qualification has the separate contract below.
 
 #### Established-source tracking and center adoption
 
@@ -3023,7 +3023,103 @@ holds that filter at 99→100; the
 retains prior filter/difference while resetting warmup and refreshing `BFEE`.
 These three scenarios execute `C419C` and its admitted callees, not every
 center-adoption domain. The separate composition above covers upstream qualifier
-production; retained `C492C` qualification and secondary prediction remain dependencies.
+production; retained qualification and secondary prediction follow below.
+
+#### Retained qualification connects source history to rate publication
+
+`C492C` constructs a56-byte snapshot mixing published samples/status with the
+current reference/complement pair. It consumes prior acknowledgements:
+`C08D==5A` clears reseed request`C091`; `C08C==5A` clears reset request`C090`.
+The acknowledgement cells themselves hold. Consistency and routing run afterward,
+so a request can be reasserted in the same invocation.
+
+`C4640` separates **evaluation admission `C0AD`** from **consistency pass `C0AC`**.
+Admission requires published mode outside0/3, not source-mode pair2/0,
+`BFBB/BFC1/BFBA==5A`, and retained count`C0B4` at least the snapshot threshold1.
+The admitted residuals are:
+
+```text
+C094 = low32(BF8C + BF88 − BF94)
+C098 = low32(BF90 + BF88 − BF94)
+```
+
+Their wrapped signed32 magnitudes must be **strictly below** the respective
+signed bounds`low32(480*AC12)/1024` and`low32(160*AC12)/1024`. Both mode-selected
+calibration pairs are identical. Inadmission clears`C0AD` but **retains `C0AC`**.
+Bounds refresh after the outer mode gate; residuals refresh only after full
+admission. A retained pass byte is therefore not proof of a new evaluation.
+
+Before routing, `C489C` checks suppression/mode predicates and actual bitwise
+complements`BFD4==~BFE4` and`BFF0==low8(~BFF2)`. These are not arithmetic
+negations. Structural admission then requires widened signed16
+`abs(C172)<12000` and a clear sticky latch`C0AE`. Structural rejection preserves
+the latch; magnitude failure or an already nonzero latch asserts5A.
+Full initialization`C45FE` clears it; ordinary failure reset`C4714` does not.
+
+After those gates, exactly one consecutive-counter branch runs:
+
+| Branch | Selection | Counter / inclusive threshold | Mature consequence |
+|---|---|---|---|
+| Primary consistency | `C0AD==5A && C0AC==5A` | `C0A4 / 3` | Qualify; adopt primary class/count; copy`BF90` to both correction`ABA8` and reseed center`C0B0` |
+| Secondary/reseed | Otherwise, retained qualification`C0B6==5A` | `C0A6 / 3` | Adopt secondary class/count; assert`C091`; retain both centers and qualification |
+| Unqualified primary | Otherwise, `C0AD!=5A` | `C0AA / 3` | Adopt primary class/count; clear qualification; refresh`ABA8` only |
+| Failure | Rejected validation, or admitted inconsistency without retained qualification | `C0A8 / 2` | Clear retained context and assert reset request`C090` |
+
+Each branch clears the other counters. Increment narrows to unsigned16 before
+comparison, so a pre-existing65535 wraps; ordinary mature counts pin at their
+calibration. Failure clearing does not execute raw reset, clear`C0AE`, or
+overwrite rate`C084`. The separate raw-cycle owner consumes reseed before reset:
+simultaneous requests let reset overwrite the reseeded center.
+
+The composed native scenario
+[retained qualification through rate commit](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_retained_estimator_reseed_then_rate_commit.json)
+uses the real`D0C68→D0C70` scheduler interval. Its consequential boundary is
+residual480 equal to bound480: consistency rejects, retained secondary
+qualification reaches3, and routing reasserts reseed after acknowledgement
+consumption. Native execution holds correction64 and center96 distinct;
+real source prework and protected rate sampling produce31. This does not
+execute the later reseed consumer or prove physical sample freshness.
+
+#### Secondary prediction and publication have independent retention
+
+`C4C56` admits `BFB6/BFAF/BFB7==5A` with`AC02==0`, then evaluates a new
+`BF84+BF7C−BF70` observation only when token`AD5B` changes. The change from
+retained`C0D8` must be strictly below`low32(43*AE38)/1024`; an inclusive
+two-observation count qualifies`C0DE`. An unchanged admitted token holds state.
+A changed token updates both observation cells even on rejection. Closed
+admission clears comparison history/count/qualification but retains latest
+observation`C0D4`; the token always refreshes. Token changes are software events,
+not independently verified hardware arrivals.
+
+`C0DE` gates both external-reference acquisition and secondary prediction.
+Prediction requires clear`BFC5/BFC4`, valid`BFAF/BFF0/BFB7`, wrapped signed16
+magnitudes`abs(BF9C)<160` and`abs(BF98)<512`, plus an **unsigned** comparison of
+wrapped`abs32(BF7C−BF70)` against`low32(24000*AE38)>>10`.
+Warmup must increment **past10** before pinning10; commitment additionally
+requires`C0DE==5A`. It publishes:
+
+```text
+BFD8 = low32(BF7C − (BF78 − BFD4 − BF70))
+C07C = low32(C080 + BFD8)
+BFF1 = 5A
+```
+
+Failed admission resets warmup but holds acceptance/output. The already-accepted
+branch subsequently projects`C080+BFD8` directly. Source snapshot`C331C`
+publishes **`BFD8→BF88`**, not`C07C`.
+
+The separate`C37D4` publication copies`C07C/count` into`AF04/AE0E` conditionally:
+
+| Prior marker`BFFA` | Publication rule |
+|---|---|
+| 0 | Copy only for observer state11/22 with accepted`BFF1`; otherwise clear`ACEC` |
+| 5A | Copy for state11/22, acceptance and count≥`BFF8`; state0 with acceptance/count≥threshold clears`ACEC`; other cases **hold values while asserting`ACEC=5A`** |
+| Other | Clear`ACEC` |
+
+An observed reset request first clears`C07C/BFFA`. Publication qualification
+is not a fresh-copy witness. `BD87E` packs this interface into its existing
+eight-byte record; engineering units, actual invocation period and physical
+persistence remain outside these software contracts.
 
 #### Observer-dependent bounds are not a zero-output veto
 
@@ -10572,9 +10668,89 @@ Production callers exist: `8C104` invokes the clear callback; `5F91C` schedules
 classifier updates behind level≥102 and its generation bit1. This does not
 establish reachability of every synthetic state combination or an elapsed-time
 aging period. Reporters reject lifecycle1/2/4/6, not completed-RAM high-bit forms:
-81 is **not** a blanket reporting inhibit. Record staging/status polling
-(`52222`, `52186/521F2`, `52108`) and completion/queue draining `51A98` remain
-separate. The native clear returns pending, not an invented persistence success.
+81 is **not** a blanket reporting inhibit. Record staging/status polling and
+completion/queue dispatch have the separate transaction contract below.
+The native clear returns pending, not an invented persistence success.
+
+#### Diagnostic publication, acknowledgement and queued generations
+
+The actual steady-state scheduler branch orders`52296` record maintenance,
+`52DE4` capture maintenance, independent groups`54566/551BC`, then lifecycle
+completion`51B9E` at`5F99C`. Record maintenance **polls previous submissions
+before staging current dirty records**. A queued operation started by completion
+runs after that invocation's serializers; its new dirty generation waits for
+a later dispatch.
+
+The history transaction uses dirty mask`5F84`, phase`5F85`, and separate
+completion trackers`5F83/5F86`. These are not monotonic generation counters.
+`52222` admits a nonzero dirty snapshot with permission`E821==5A` **or dirty
+bit3/4**. It removes captured bits under PMR, then takes separate payload
+snapshots. Mask`BA` selects object0; mask`52` selects decimal object10 (`0x0A`).
+Bit3 arms object0; bit4 arms both trackers.
+
+| Record | Serialized payload |
+|---|---|
+| Object0,160 bytes | Two8-byte auxiliary banks`5F71/5F79`, then48 bytes each`60C0/60F0/6120`; **current bitmap6090 is excluded** |
+| Object10,8 bytes | Halfwords`6028/602A`, then a zero word |
+
+The serializers retain PMR`FF00` across real`66D6E` submission, but ignore
+its acceptance result. Dirty bits remain consumed and trackers may become1
+even when the repaired admission gate, bounds or full family0 ring reject the
+request. Accepted changes update the real RAM mirror and enqueue write-kind22;
+this is not durable storage. A tracker thus follows a subsequent **software
+status observation**, not a proven accepted-write token. An old pending or
+terminal status can still be observed after rejection; reachability of every
+such combination in production remains unproved.
+
+`52108` classifies only the status high nibble:20 remains pending tracker1,
+10 becomes success2, anything else failure3. Thus raw11 belongs to the10
+terminal class. A failed peer does not terminate a still-pending peer. Only
+after neither tracker remains1 does the aggregate become0 or failure55 and
+both trackers clear. There is no local timeout/retry or physical read.
+Capture objects1/2/3 use the analogous three-peer barrier at`6157..59` and
+aggregate`6150`; their240-byte publication has the same unchecked-acceptance
+boundary.
+
+Lifecycle completion first applies a **global hold barrier**: any group phase
+`5F85/6150/8608/89C4` equalAA/A5 blocks it, even where the subsequent result
+uses fewer groups. Phase55 is terminal failure, not hold.
+
+| Lifecycle | Acknowledgement result0 requires |
+|---|---|
+| 81 | `5F85==0 && 6150==0` |
+| 82 or86 | All four group phases zero |
+| 85 | `89C4==0` |
+
+Otherwise the applicable acknowledgement reports20. Clear completion changes
+owned callback`81B2` from1410 to1400 or1420 without releasing owner14; the later
+`4D63E` consumer releases it and returns0 or6. Terminal failure still proceeds
+to queue service. Independent mode-gated callbacks under`51B64` are not these
+persistence acknowledgements. Instructions`51B6C/51B6E` load both mode bytes
+before the outer gate, even where decompiled C presents a short-circuit condition.
+
+Queue service is **bounded dispatch**, not unconditional FIFO exhaustion.
+`51632` repairs a consumer≥4 with a bounded search from the producer; a valid
+consumer at an empty slot is not rescanned. `51A12` clears the active lifecycle,
+skips unsupported nonzero entries, and dispatches at most one recognized
+opcode1/2/4/5/6. Empty slots stop service. Opcode3 is not recognized by this
+switch, although`51DBE` can enqueue it; this does not establish an OEM intent
+or a production fault. Request producers deduplicate four slots but do not
+return an empty-slot/capacity acknowledgement. This is distinct from the
+explicit full check in the65-cell NvM family0 ring.
+
+The composed scenarios cover
+[real two-record RAM publication](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_dem_publish_two_ram_records.json),
+[acknowledgement followed by queued restart](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_dem_scheduler_ack_and_restart_queue.json),
+and [failed-peer retention while another remains pending](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_dem_scheduler_error_waits_for_pending_peer.json).
+The latter two execute the contiguous`5F972→5F9A0` branch with terminal/pending
+software statuses supplied explicitly. They distinguish acknowledgement of
+the old request from a newly busy clear generation, and failure latching from
+premature queue dispatch. They do not manufacture physical completion.
+
+The storage boundary remains deliberate: later family0 selection builds
+sequence/payload/complement staging and submits through`74014`; physical
+completion generation, power-loss durability and all operating-state
+reachability are not established by these application scenarios.
 
 #### Numeric routine-control joins and application service lifecycle
 
@@ -10726,40 +10902,45 @@ requests in postwork. Foreground request reconciliation/mode publication occurs
 in a different context. Owner requests, reduced flags, selected outputs and
 mode caches are therefore not a single synchronous state transition.
 
-**Remaining high-value dependencies:** retained `C492C` estimator qualification
-and secondary prediction; remaining monitor detection-to-action and Dem/DTC joins;
-diagnostic persistence and full lifecycle/queue reachability; other ECU thermal
-estimators and restore qualification; OEM service identities, calibration units
-and physical source identity; ADC/DMA freshness and hardware feedback/update timing.
+**Remaining high-value dependencies:** remaining monitor detection-to-action and
+Dem/DTC joins; production reachability across diagnostic groups and physical
+persistence; other ECU thermal estimators and restore qualification; OEM service
+identities, calibration units and physical source identity; ADC/DMA freshness
+and hardware feedback/update timing.
 The recovered application, fault-action and diagnostic contracts do not require
 a complete peripheral or NvM emulator. Static connectivity and bounded native
 scenarios are not exhaustive semantic closure or vehicle results.
 
-**Verification checkpoint (2026-10-15, regulation through compare staging, estimator admission and diagnostic lifecycle).**
+**Verification checkpoint (2026-10-15, retained estimator qualification and diagnostic transactions).**
 Independent four-stage rebuilds plus signature finalization agreed on the
-canonical inventory. Native compositions passed for full software regulation
-under prior saturation and first channel loss, qualifier production feeding
-established tracking, classifier-age boundaries, and selective diagnostic clear.
-They used unmodified firmware and explicit RAM inputs, without replacement
-callees or peripheral-model extension.
+canonical inventory. Native compositions passed for retained qualification
+through actual rate publication, two-record RAM/queue publication, old-request
+acknowledgement followed by queued restart, and failure latching while a peer
+remains pending. These use unmodified firmware and explicit RAM inputs,
+without replacement callees or peripheral-model extension.
 
-Rebuilt types retain actual grouped-status returns and the six-halfword clear
-preservation record. Coverage, function-boundary, D5 provenance, command-cone,
-assist-oracle, B6 composition/end-to-end/ingress, CodeFlash, external-ingress
-and retained-log reconciliation gates passed. Live coverage matched the
-canonical ledger exactly; matching project/corpus were promoted after clean
+Coverage, function-boundary, D5 provenance, command-cone, assist-oracle,
+B6 composition/end-to-end/ingress, CodeFlash, external-ingress and retained-log
+reconciliation gates passed. Live coverage matched the canonical ledger exactly;
+project parity passed and matching project/corpus were promoted after clean
 teardown.
 
-Provenance checks now resolve snapshot addresses and verify consequential
-instruction/dataflow boundaries instead of repinning temporary-variable spelling.
-The copy-edge normalizer also resolves code-symbol-plus-GP aliases as complete
-addresses; regression cases prevent losing the symbol or inventing a source
-when the GP base is unknown. Exact calibration and composed-execution checks remain.
+The boundary regression retains complete-body, false-child exclusion,
+receive-path recovery and inventory-bound corpus checks. Obsolete seed/C-spelling
+and census-count assertions were removed, not repinned to changed decompiler
+output or the more complete copy-edge normalizer. Consequential parser,
+calibration and composed-execution regressions remain.
 
 Retained-log provenance was regenerated with the existing external reader
 runtime. That replay emitted a corrupted-events warning on historical route
 `0000001c--574c06b528`; raw captures were not changed. These are bounded replay
 and software reconstruction results, not new vehicle observations.
+
+The preceding `980c61b6` checkpoint contains full regulation through software
+compare staging under saturation/channel loss, qualifier-to-tracker composition,
+classifier aging and selective diagnostic clear. It also replaces fragile
+provenance spelling with instruction/dataflow checks and resolves complete
+code-symbol-plus-GP snapshot addresses.
 
 The preceding `0d4df529` checkpoint contains established tracking,
 warmup/interruption, motor/source3 thermal models, offset following and

@@ -1,0 +1,48 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_dem_scheduler_ack_and_restart_queue",
+  "entry": {
+    "role": "real contiguous5F972..5F99C diagnostic lifecycle branch: poll retained object statuses, finish phase81 callback, repair circular dequeue index, skip unsupported request7, wrap and start queued clear1 through genuine callees; retained software terminal statuses are explicit inputs beyond the opaque storage boundary, not proof of durable writes",
+    "scope": "resolved-address",
+    "address": "0x5f972"
+  },
+  "max_instructions": 30000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {"sp": "0xfebe2000", "gp": "0xfebeb800", "tp": "0x23dfc", "lp": "0x798", "r28": "0x0", "r29": "0x102", "PSW": "0x20", "FPEC": "0x0", "PMR": "0xfe00"},
+  "stop_addresses": ["0x5f9a0"],
+  "memory": [
+    {"address": "0xfebe1800", "size": 2048, "fill": 165, "evidence": "explicit nested-call stack; enter inside the scheduler branch before its first diagnostic call and stop before unrelated56FCE"},
+    {"address": "0xfebe5f70", "size": 23, "fill": 0, "evidence": "explicit auxiliary/derived flags and tracker region, overridden by retained transaction bytes below"},
+    {"address": "0xfebe5f81", "hex": "00000100a501", "evidence": "both record trackers1 and transaction phaseA5; dirty0 prevents a new publication before completion"},
+    {"address": "0xfebe6028", "size": 104, "fill": 0, "evidence": "retained invocation/derived-word banks are explicit;52296 finds no active derived code"},
+    {"address": "0xfebe6090", "size": 48, "fill": 17, "evidence": "old current bitmap must clear when queued operation1 starts"},
+    {"address": "0xfebe60c0", "size": 48, "fill": 17, "evidence": "old first retained history must clear"},
+    {"address": "0xfebe60f0", "size": 48, "fill": 34, "evidence": "second retained history belongs to a different clear operation and must survive queue restart"},
+    {"address": "0xfebe6120", "size": 48, "fill": 51, "evidence": "queued clear rebuilds descriptor-derived generation"},
+    {"address": "0xfebe6150", "hex": "000000000000000000005a01000000000000000000000000", "evidence": "capture group idle and unoccupied, replacement latch5A;615B nonzero deliberately retains supplement instead of invoking physical/sample constructors"},
+    {"address": "0xfebe81b2", "hex": "1014", "evidence": "real clear callback owns pending1410;51A98/4D0A4 may update its low byte only"},
+    {"address": "0xfebe82a0", "size": 52, "fill": 0, "evidence": "explicit classifier state through82D3 before queued clear"},
+    {"address": "0xfebe82d4", "hex": "810003ff01050007", "evidence": "active81, qualifier0, producer3, invalid consumerFF; slots0/1 contain clear1 and request5, slot3 unsupported7.51632 repairs consumer from producer3, then51A12 skips7 and wraps to1"},
+    {"address": "0xfebe8606", "hex": "000000", "evidence": "independent object4 group has no tracker, dirty request or blocking phase"},
+    {"address": "0xfebe89c4", "size": 20, "fill": 0, "evidence": "independent capture-history group has no armed trackers or publication flags; real54E28/55040 run without storage submissions"},
+    {"address": "0xfebee821", "hex": "00", "evidence": "ordinary publication permission closed; no new dirty work at entry"},
+    {"address": "0xfebee856", "hex": "00", "evidence": "no exceptional-event restore or four-callback mode; does not replace those real branches"},
+    {"address": "0xfebee85b", "hex": "00", "evidence": "51B6E unconditionally loads the secondary mode byte before testing E856 at51B70; outer mode0 still prevents callbacks"},
+    {"address": "0xfebf0308", "size": 32, "fill": 16, "evidence": "explicit retained family0 software status10 for objects0 and10; this fixture does not generate, fake-return or physically validate these terminal inputs"}
+  ],
+  "checks": [
+    {"name": "real diagnostic scheduler slice reaches its next instruction", "kind": "register", "register": "PC", "equals": "0x5f9a0"},
+    {"name": "nested-call stack restored at scheduler boundary", "kind": "register", "register": "sp", "equals": "0xfebe2000"},
+    {"name": "priority mask retained", "kind": "register", "register": "PMR", "equals": "0xfe00"},
+    {"name": "first transaction callback acknowledged without consuming callback ownership", "kind": "memory", "address": "0xfebe81b2", "size": 2, "equals_hex": "0014"},
+    {"name": "queue repair skip wrap and single-valid-request restart", "kind": "memory", "address": "0xfebe82d4", "size": 8, "equals_hex": "8100030100050000"},
+    {"name": "old record trackers cleared, new clear dirty generation awaits staging", "kind": "memory", "address": "0xfebe5f81", "size": 6, "equals_hex": "5a5a0008a500"},
+    {"name": "queued clear removes current bitmap", "kind": "memory", "address": "0xfebe6090", "size": 48, "equals_hex": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"},
+    {"name": "queued clear removes first retained history", "kind": "memory", "address": "0xfebe60c0", "size": 48, "equals_hex": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"},
+    {"name": "second retained history survives", "kind": "memory", "address": "0xfebe60f0", "size": 48, "equals_hex": "222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222"},
+    {"name": "descriptor-derived generation rebuilt by real51E46", "kind": "memory", "address": "0xfebe6120", "size": 48, "equals_hex": "ffffffc52f00bff805c00f0030f007740020ffcf233bfffa233f20c7f36e168057fffbff87b0bffdf7ffdffbbebffedf"},
+    {"name": "empty capture bank does not create another persistence request", "kind": "memory", "address": "0xfebe6150", "size": 12, "equals_hex": "000000000000000000005a01"},
+    {"name": "real classifier reset restores age thresholds", "kind": "memory", "address": "0xfebe82ca", "size": 8, "equals_hex": "c800c80058020000"}
+  ]
+}

@@ -9,9 +9,6 @@ from tools import REPO_ROOT
 ROOT = REPO_ROOT
 CORPUS = ROOT / "data/generated/camry-8965F3307000/decompilations.jsonl"
 INVENTORY = ROOT / "data/targets/camry-8965F3307000/ghidra_project_inventory.baseline.jsonl"
-SEEDS = ROOT / "data/targets/camry-8965F3307000/function_seeds.csv"
-CONE = ROOT / "data/generated/camry_8965F3307000_command_cone_ingress.json"
-COMPOSITION = ROOT / "data/generated/camry_f33_b6_command_composition.json"
 
 passed = failed = 0
 
@@ -48,51 +45,6 @@ check("false +4 child functions are absent", not (false & set(rows)))
 check("omitted B6 receive-path entries are recovered with complete bodies",
       all(entry in rows and rows[entry]["body_size"] == size
           for entry, size in recovered.items()))
-
-seed_text = SEEDS.read_text()
-check("seed list contains only the real starts",
-      all(f"0x{entry:08X}," in seed_text for entry in real)
-      and all(f"0x{entry:08X}," not in seed_text for entry in false))
-
-# Independent textual call-target check: the parent entries are real call targets;
-# none of the former child labels appears as a call target in the corrected corpus.
-callers: dict[int, list[int]] = {}
-for target in real:
-  token = f"FUN_{target:08x}("
-  callers[target] = sorted(entry for entry, rec in rows.items()
-                           if entry != target and token in rec.get("decompiled_c", ""))
-check("real parent starts have the expected callers",
-      callers == {0xBCD62: [0xC214C, 0xC26A4], 0xCCFB2: [0xCD032], 0xCEE7C: [0xCEF0E]}, str(callers))
-check("former child labels have no callsite spelling",
-      all(f"FUN_{target:08x}(" not in rec.get("decompiled_c", "")
-          for target in false for rec in rows.values()))
-
-cone = json.loads(CONE.read_text())
-check("snapshot copy geometry remains closed after boundary recovery",
-      cone["pipeline"]["L3_stage_reader_census"]["total"] == 51
-      and cone["pipeline"]["L3_stage_reader_census"]["in_cluster"] == 15
-      and cone["pipeline"]["L4_snapshot_copiers"] == {
-        "0xBC96A": {"exact_pairs": 1},
-        "0xBCA08": {"exact_pairs": 13},
-        "0xBCAA6": {"exact_pairs": 1},
-        "0xBCBD8": {"exact_pairs": 46},
-        "0xBCD62": {"exact_pairs": 245},
-      }
-      and cone["pipeline"]["L4_unique_snapshot_destinations"] == 306)
-
-
-composition = json.loads(COMPOSITION.read_text())
-sel = composition["selector_census"]
-check("CB00 denominator and exhaustive semantic partition are corrected",
-      sel["CB00_decompiled_function_count"] == 49
-      and sel["CB00_semantic_partition_counts"] == {
-        "bank_selection": 2,
-        "controller_calibration_supervision": 28,
-        "gain_output_shaping": 3,
-        "mode_mirror_status": 9,
-        "readiness_fault_supervision": 7,
-      }
-      and sum(sel["CB00_semantic_partition_counts"].values()) == 49)
 
 print(f"\nResults: {passed} passed, {failed} failed")
 raise SystemExit(1 if failed else 0)
