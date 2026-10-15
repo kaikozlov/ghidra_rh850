@@ -1318,6 +1318,142 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
             + "unmapped bits ignored. Missing input/return types previously hid the work "
             + "as an empty loop in C; actual native composite/high-output/unmapped cases verify it.");
   }
+  private void annotateNvmPageClassification() throws Exception {
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u16 = UnsignedShortDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    DataType pageOut = new PointerDataType(u16, 4);
+    StructureDataType resultMap = new StructureDataType(
+        new CategoryPath("/CamryF33"), "F33NvmByteResultMap", 0);
+    resultMap.setPackingEnabled(true);
+    resultMap.add(u8, "key", "Compare the zero-extended low8 input.");
+    resultMap.add(Undefined3DataType.dataType, "opaque_01", "Not read by74912.");
+    resultMap.add(u32, "result", "Full32 return; FFFF0000 differs from0000FFFF.");
+    DataType mapType = resolve(resultMap);
+    semanticData(0x27934L, new ArrayDataType(mapType, 11, 8),
+        "f33_nvm_saved_driver_result_map", "74932 translates saved byte6B21; key5->FFFF0000.");
+    semanticData(0x2798CL, new ArrayDataType(mapType, 11, 8),
+        "f33_nvm_read_driver_result_map", "7494C translates its low8 input; key5->1. "
+        + "Distinct namespace from saved driver status, despite shared lookup mechanics.");
+    semanticData(0x27CC8L, u16, "f33_nvm_probe_first_page",
+        "795D4 region lower bound in64-byte pages; exact image value0.");
+    semanticData(0x27CCAL, u16, "f33_nvm_probe_page_count",
+        "Exact480 pages; byte region0..77FF. Does not enforce alignment or nonzero length.");
+    semanticData(0xFEBF0693L, u8, "f33_nvm_direct_probe_request",
+        "Exact5A requests direct-probe mode through79D46/79CE2. Classifiers set5A then0.");
+    semanticData(0xFEBF6B22L, u8, "f33_nvm_driver_block_latch",
+        "Any nonzero value blocks74A36; separate from lower status6CB1==80.");
+    semanticData(0xFEBF6B23L, u8, "f33_nvm_driver_phase",
+        "74A5A admits only zero after the block-latch/lower-status checks.");
+    semanticData(0xFEBF6B72L, u8, "f33_nvm_secondary_result_state",
+        "7680C stores0/1/4/6 unconditionally;5 only from1. Other low8 values ignored.");
+    semanticData(0xFEBF6CDCL, u8, "f33_nvm_direct_probe_mode",
+        "79CE2 stores55 for request0693==5A. On exit, cancel before storing0 if prior mode!=0. "
+        + "79594 accepts any nonzero byte; this is not the returned busy indication from79C9E.");
+    semanticFunction(0x68A6CL, "f33_nvm_classify_family1_pages", u32,
+        new ParameterImpl("object", u16, currentProgram))
+        .setComment("Reject object>=16 or descriptor first_handleFFFF withFF before changing "
+            + "probe mode. Set0693=5A and reconcile; translate logical base/+4/+8 through747E0 "
+            + "and classify64 bytes at page<<6. Continue only on class2; all three2->5A, "
+            + "first3->0, mapping failure/other classes->FF. Clear0693 and reconcile on every "
+            + "admitted exit. That exit invokes real physical cancellation, can issue B3, "
+            + "and sets logical phase8 if operation state2. No application payload publication; "
+            + "0 is not checksum/ECC integrity proof. Native first/last nonblank and all-blank "
+            + "cases use explicit FACI completion and a separate cancellation completion.");
+    semanticFunction(0x747E0L, "f33_nvm_get_logical_storage_page", u32,
+        new ParameterImpl("logical_handle", u16, currentProgram),
+        new ParameterImpl("page_out", pageOut, currentProgram))
+        .setComment("Accept low16 logical2..123, load logical descriptor+8 storage handle, "
+            + "then784E2 writes its page through the unchanged r7 pointer. Return0; invalid "
+            + "logical returns1 without touching output. Explicit output contract repairs "
+            + "the formerly missing pointer argument in C.");
+    semanticFunction(0x784E2L, "f33_nvm_get_storage_page", u32,
+        new ParameterImpl("storage_handle", u16, currentProgram),
+        new ParameterImpl("page_out", pageOut, currentProgram))
+        .setComment("Unchecked low16 storage index into six-byte descriptors at27634; "
+            + "write row.page as one halfword through r7 and return0. Caller747E0 supplies "
+            + "the logical namespace admission; do not conflate logical and storage handles.");
+    semanticFunction(0x795D4L, "f33_nvm_probe_range_rejected", u32,
+        new ParameterImpl("byte_offset", u32, currentProgram),
+        new ParameterImpl("byte_count", u32, currentProgram))
+        .setComment("Return1 unless first_page!=FFFF and unsigned offset is within "
+            + "[first_page*64,(first_page+page_count)*64-1] and count fits the remaining span. "
+            + "Exact region0..77FF. Zero length is allowed only with an in-region start; "
+            + "no alignment check or64-byte local-buffer bound is imposed here.");
+    semanticFunction(0x79594L, "f33_nvm_classify_storage_range", u32,
+        new ParameterImpl("ignored_selector", u32, currentProgram),
+        new ParameterImpl("byte_offset", u32, currentProgram),
+        new ParameterImpl("byte_count", u32, currentProgram))
+        .setComment("First ABI input unused. Return4 if6CDC==0 or795D4 rejects. Otherwise "
+            + "call76930 and preserve only2/3/6/9; map other results to4. This performs "
+            + "synchronous classification, not a queue submission.");
+    semanticFunction(0x76930L, "f33_nvm_probe_storage_range", u32,
+        new ParameterImpl("byte_offset", u32, currentProgram),
+        new ParameterImpl("byte_count", u16, currentProgram))
+        .setComment("Enter paired-call guard79AAA; nonzero6CD0 returns9 without reading. "
+            + "Otherwise call74D78(offset,low16 count,64-byte local buffer,1): result1->3, "
+            + "3->2,FFFF0000->6,other->4. Always79ABE before return. 68A6C passes64; "
+            + "the surrounding region check is not a local-buffer-size check.");
+    semanticFunction(0x74A36L, "f33_nvm_sync_access_blocked", u32)
+        .setComment("Return1 if6B22!=0; otherwise return whether lower status6CB1 equals80. "
+            + "The first branch does not read6CB1.");
+    semanticFunction(0x74A5AL, "f33_nvm_sync_admission_result", u32)
+        .setComment("74A36 true->FFFF0000; otherwise6B23==0->1, nonzero->0000FFF9. "
+            + "These are full32 results, not pointers.");
+    semanticFunction(0x74D78L, "f33_nvm_read_with_optional_blank_check", u32,
+        new ParameterImpl("byte_offset", u32, currentProgram),
+        new ParameterImpl("byte_count", u16, currentProgram),
+        new ParameterImpl("destination", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("blank_option", u8, currentProgram))
+        .setComment("Only admission result1 proceeds; any other result collapses toFFFF0000. "
+            + "Then set6B20/6B21=FF. Exact low8 option1 calls74D0C; only its result4 proceeds "
+            + "to74D40 read, other results return without copy. Other option bytes read directly. "
+            + "Low16 count; native option2/high-bit truncation, blank no-copy, and both rejection gates.");
+    semanticFunction(0x74D0CL, "f33_nvm_map_blank_check_result", u32,
+        new ParameterImpl("byte_offset", u32, currentProgram),
+        new ParameterImpl("byte_count", u16, currentProgram))
+        .setComment("Actual7892A blank check: result2->3,7->4; other results translate "
+            + "through7494C and pass74CD2 classification to74CE8 for side effects. "
+            + "Result4 here means continue into the reader, not a completed read.");
+    semanticFunction(0x74912L, "f33_nvm_lookup_byte_result", u32,
+        new ParameterImpl("key", u8, currentProgram),
+        new ParameterImpl("rows", new PointerDataType(mapType, 4), currentProgram),
+        new ParameterImpl("row_count", u32, currentProgram))
+        .setComment("Scan row_count eight-byte entries in order; first low8 key match "
+            + "returns full32 row+4. Exhaustion, including count0, returnsFFFFFFFF.");
+    semanticFunction(0x74932L, "f33_nvm_translate_saved_driver_result", u32)
+        .setComment("Translate saved byte6B21 through11 rows at27934 and preserve74912's "
+            + "full32 return. KeyFF->0; key5->FFFF0000, unlike direct read-result key5.");
+    semanticFunction(0x7494CL, "f33_nvm_translate_read_driver_result", u32,
+        new ParameterImpl("driver_result", u8, currentProgram))
+        .setComment("Translate low8 input through11 rows at2798C and preserve74912's full32 "
+            + "return. Key5->1; keyC reaches the final row; unknown keyA->FFFFFFFF.");
+    semanticFunction(0x79CE2L, "f33_nvm_refresh_direct_probe_mode", u32)
+        .setComment("Request0693 exactly5A stores/returns55. Otherwise, if old6CDC!=0, "
+            + "call741D0->72248->73C4A->7664E before storing/returning0. This exit can "
+            + "perform real cancellation/B3; it is not a pure flag refresh.");
+    semanticFunction(0x79C9EL, "f33_nvm_reconcile_probe_mode", u32)
+        .setComment("Sample79AF0 (including its redundant-state check), then refresh79CE2. "
+            + "If sampled6CD0!=0 return55 even when stored6CDC becomes0; otherwise return "
+            + "the refreshed mode. Native exact5A/non5A and interference-with-cancellation cases.");
+    semanticFunction(0x79CB8L, "f33_nvm_poll_probe_mode", u32)
+        .setComment("Preserve79C9E's return through the real call. 68A6C invokes this at68AA0 "
+            + "and68B24, around the whole classifier, not around each of its three page probes.");
+    semanticFunction(0x73C4AL, "f33_nvm_cancel_logical_operation", VoidDataType.dataType)
+        .setComment("Call physical cancellation7664E first; then if6B00==2 set6AFC=8. "
+            + "72248 calls this before inspecting its own module marker. Native classifier "
+            + "mode exit exercises the active and inactive logical-operation cases.");
+    semanticFunction(0x7664EL, "f33_nvm_cancel_physical_operation", VoidDataType.dataType)
+        .setComment("Reset completion context77C32 and both registered banks782DE. Enter "
+            + "79AAA, clear6B77; if6CD0==0 call74E94 (actual lower cancellation) then set6B77=1, "
+            + "ignoring74E94's result. Leave79ABE; request primary state3 and secondary state5, "
+            + "then76ADA's no-op hook. Native explicit B3 completion and interference skip; "
+            + "B3 timeout reaches command-area halfword reads not yet modeled.");
+    semanticFunction(0x7680CL, "f33_nvm_set_secondary_result_state", VoidDataType.dataType,
+        new ParameterImpl("state", u8, currentProgram))
+        .setComment("Low8 states0/1/4/6 store6B72 unconditionally;5 only from old1; "
+            + "others preserve it. Native guarded accept/reject, high input bits,6 and unknown2.");
+  }
   private void annotateDataFlashReads() throws Exception {
     DataType u8 = UnsignedCharDataType.dataType;
     DataType u16 = UnsignedShortDataType.dataType;
@@ -1425,7 +1561,7 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
             + "P/E and disable enables on the completed path. Return2 for blank, "
             + "7 for nonblank,8 for completion/setup failure; admissionB/4/C/3. "
             + "Native blank/nonblank results are explicit hardware inputs. "
-            + "Timeout reaches realB3 forced-stop, still an unsupported model boundary.");
+            + "Timeout reaches realB3 forced-stop; its completion is also an explicit hardware input.");
     Function sync = semanticFunction(0x7940EL, "f33_syncp", VoidDataType.dataType);
     sync.setComment("SYNCP; JMP LP. Inline the actual ordering operation; no "
         + "GPR modification or physical completion/timing claim.");
@@ -1504,6 +1640,7 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     annotateNvmQueues();
     annotateNvmStartup();
     annotateNvmPhysicalResults();
+    annotateNvmPageClassification();
     annotateDataFlashReads();
     annotateFaciSubmission();
     annotatePwmCompareStaging();

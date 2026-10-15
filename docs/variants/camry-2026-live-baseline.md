@@ -8238,10 +8238,11 @@ previously omitted precondition.
 Flash-manual §6.3.15 explicitly makes erased-but-unprogrammed DataFlash read
 values undefined. Neither an all-`FF` test nor this dump's record marker can
 replace the hardware blank-check result. Without completion input, the actual
-poll loop reached the `B3` forced-stop boundary after **7,801 instructions**;
-forced-stop behavior remains unsupported. Instruction boundaries used to
-inject completion are not elapsed-time measurements, and no ready interrupt
-is synthesized.
+poll loop reached the then-unsupported `B3` forced-stop boundary after
+**7,801 instructions**. [§77.18](#7718-2026-10-15-forced-stop-complete-acquisition-initializer-and-all-table-submission)
+subsequently models that command with explicit completion; complete blank-check
+timeout recovery remains bounded. Instruction boundaries used to inject
+completion are not elapsed-time measurements, and no ready interrupt is synthesized.
 
 Recovered software contracts:
 
@@ -8522,9 +8523,11 @@ three planes receive `10/45/BA`.
 Phase `11` sets control byte `0688=A5`. A phase33 failure with retry below2
 increments the whole-write counter, calls `6869E`, and returns without cleanup
 even when that call rejects; exhaustion selects status `31`. Phase22 failure
-uses the hardware-backed `68A6C` classification to select `30/11`; that hardware
-path is not closed by the successful-consensus tests. Normal cleanup clears
-phase, preserves the recovered producer index and sets active object `FFFF`.
+uses the hardware-backed `68A6C` classification to select `30/11`; the classifier
+itself is reconstructed in [§77.20](#7720-2026-10-15-family1-page-classification-and-mode-exit-cancellation).
+The successful-consensus tests here do not establish that phase22 failure
+composition. Normal cleanup clears phase, preserves the recovered producer
+index and sets active object `FFFF`.
 Invalid phase/object takes cleanup without status publication.
 
 The synthetic read-completion and last-object write-completion calls executed
@@ -8857,4 +8860,97 @@ followed by the six dependent target selectors and exact live/canonical
 coverage parity. The registered artifacts, corpus and cleanly stopped
 snapshot were regenerated and promoted. This is instruction-level software
 evidence, not physical flash or vehicle behavior.
+
+### 77.20 2026-10-15 family1 page classification and mode-exit cancellation
+
+Exact F33`0x68A6C` is synchronous **page classification**, not queue admission
+or application restoration. It truncates the object index to16 bits, rejects
+indices≥16 and disabled descriptors, then examines the three pages addressed
+by logical handles`first`, `first+4`, `first+8`. `0x747E0` admits logical2..123,
+loads each logical descriptor's storage handle, and`0x784E2` writes that
+storage descriptor's page through the original output pointer. The old
+standalone C omitted this pointer argument; the tracked signatures now retain it.
+
+`0x79594` accepts any nonzero temporary mode byte`6CDC`, checks the byte
+range through`0x795D4`, and invokes the real`0x76930` reader. Its first ABI
+argument is unused. It does **not** enqueue a job. The region fields at
+`27CC8/27CCA` are start0/count480 pages, giving byte offsets`0..77FF`.
+An empty span is accepted only if its starting offset is inside the region.
+This check does not enforce alignment or the64-byte local-buffer capacity
+in`0x76930`; `0x68A6C` supplies64.
+
+|Probe class from`76930`|Recovered software condition|`68A6C` action|
+|---|---|---|
+|`2`|Optional blank-check reader returned`3`|Continue to next page; all three yield aggregate`5A`.|
+|`3`|Reader returned`1`|Stop immediately with aggregate`0`.|
+|`6`|Reader returned`FFFF0000`|Stop with aggregate`FF`.|
+|`9`|Interference byte`6CD0` was nonzero|Stop with aggregate`FF`, without the read.|
+|`4`|Other reader result, or outer mode/range rejection|Stop with aggregate`FF`.|
+
+The hardware blank/nonblank result remains an explicit scenario input.
+Aggregate0 is **not** checksum validation or proof of an ECC-clean payload:
+the already-recovered`74D40` reader accepts lower return2 or5 as result1.
+No application payload is published by this classifier.
+
+**Mode exit has real cancellation effects.** An admitted classifier sets
+`0693=5A`, calls`79CB8` once before all probes, then clears`0693` and calls
+it once on exit. `79CE2` enables mode55 only for the exact request sentinel5A.
+When that request disappears while the old mode is nonzero, it invokes
+`741D0 → 72F76 → 72248 → 73C4A → 7664E` before storing mode0.
+`72248` performs this cancellation **before** checking its own module marker.
+
+`7664E` resets completion context and both registered banks, clears`6B77`,
+and—when`6CD0==0`—runs the actual lower cancellation, including FACI`B3`,
+then sets`6B77=1` regardless of the lower return. It requests primary
+state`6B76:2→3` and secondary state`6B72:1→5`; their setters preserve other
+prior states for those guarded requests. With nonzero interference the
+lower cancellation is skipped and`6B77` stays0, but context reset and the
+guarded state changes still occur. If the logical operation state`6B00` is2,
+`73C4A` also sets its phase`6AFC=8`.
+
+The mode byte and poll return are different signals. `79C9E` samples the
+interference state before refreshing mode; it returns55 for a nonzero sample
+even if cancellation has just cleared the stored mode to0. The native
+interference-exit case verifies both values and the active logical phase
+transition rather than treating this call as a side-effect-free getter.
+
+**Optional blank read and result namespaces.** `74D78` proceeds only on
+admission result1; both the block/lower-status rejection and busy-phase
+rejection become`FFFF0000`. Diagnostic bytes`6B20/6B21` are reset only after
+admission. Exact low8 option1 performs the blank check; only its translated
+result4 proceeds into the read. Other option bytes read directly. Length
+is low16. Native64-byte reads compare against the registered DataFlash
+image, and blank/rejected paths retain destination canaries.
+
+The shared lookup`74912` scans eight-byte rows for the first low8 key and
+returns the full32 mapped word, or`FFFFFFFF` on miss. The two11-row tables
+are intentionally separate: saved-status table`27934` maps key5 to`FFFF0000`,
+whereas direct read-result table`2798C` maps key5 to1. Explicit return
+contracts for`74932/7494C` preserve these values instead of the previous
+standalone void-looking C.
+
+Thirty-eight native scenarios exercised these paths;36 distinct regressions
+are retained with19 new function contracts. The complete all-blank classifier
+executed4,429 instructions; first/last nonblank cases executed2,931/4,933.
+These calls returned through the real cancellation chain with a **separate**
+forced-stop completion input. They are not physical timing measurements.
+
+One newly reached model boundary remains explicit: without that forced-stop
+completion, the firmware timeout path at`78D3E` performs two16-bit reads of
+`FFA20000`, the **FACI command-issuing area**, not FCURAM. The current machine
+does not model those reads; the execution faults there rather than fabricating
+read values or a completion. This does not affect the demonstrated completed
+path, but it prevents claiming complete timeout recovery.
+
+The composed`67CCA` phase22 failure publication, accepted whole-write
+rearming, family0 restoration and scheduler lifecycle remain separate
+reconstruction work; the earlier successful-consensus proof does not silently
+inherit these newly recovered classifier semantics.
+
+Independent rebuilds agreed on **7,187 functions** and **161 curated
+reviews:153 verified,8 bounded**;929 outside-function candidates remain
+unresolved. All36 retained scenarios passed on the fresh project. Regenerated
+C spot-checks confirmed the restored output-pointer and return paths. The
+three dependent artifacts, six target selectors and exact live/canonical
+coverage comparison passed before clean snapshot/corpus promotion.
 

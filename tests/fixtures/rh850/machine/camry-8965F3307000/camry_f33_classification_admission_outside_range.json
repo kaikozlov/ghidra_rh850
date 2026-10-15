@@ -1,0 +1,65 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_classification_admission_outside_range",
+  "entry": {
+    "role": "actual temporary-mode/range/inner-read admission with no replacement callees; first ABI input is ignored",
+    "scope": "resolved-address",
+    "address": "0x79594"
+  },
+  "max_instructions": 20000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xff00",
+    "r6": "0xdeadbeef",
+    "r7": "0x7800",
+    "r8": "0x40"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "isolated initialized nested-call stack"
+    },
+    {
+      "address": "0xfebf6cdc",
+      "hex": "55",
+      "evidence": "explicit mode gate"
+    },
+    {
+      "address": "0xfebf6ccd",
+      "hex": "0101ff0000",
+      "evidence": "explicit paired guard and matched interference state"
+    },
+    {
+      "address": "0xfebf6b22",
+      "hex": "0000",
+      "evidence": "explicit lower admission bytes"
+    }
+  ],
+  "checks": [
+    {
+      "name": "classification admission result",
+      "kind": "register",
+      "register": "r10",
+      "equals": "0x4"
+    },
+    {
+      "name": "paired guard restored",
+      "kind": "memory",
+      "address": "0xfebf6ccd",
+      "size": 5,
+      "equals_hex": "0101ff0000"
+    }
+  ]
+}

@@ -1,0 +1,92 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_optional_blank_read_lower_status_80",
+  "entry": {
+    "role": "actual synchronous read with exact low8 option1 blank-check gate and low16 length; no replaced driver",
+    "scope": "resolved-address",
+    "address": "0x74d78"
+  },
+  "max_instructions": 20000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xff00",
+    "r6": "0x77c0",
+    "r7": "0xa5000040",
+    "r8": "0xfebe2104",
+    "r9": "0x2"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "isolated initialized nested-call stack"
+    },
+    {
+      "address": "0xfebe2100",
+      "hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "evidence": "64-byte destination and both4-byte canaries"
+    },
+    {
+      "address": "0xfebf6b20",
+      "hex": "a5a50000",
+      "evidence": "explicit prior diagnostic bytes and admission flags"
+    },
+    {
+      "address": "0xfebf6cb0",
+      "hex": "01800e00",
+      "evidence": "explicit lower driver state"
+    },
+    {
+      "address": "0xffc5d020",
+      "hex": "00000000",
+      "evidence": "explicit ICU-S samples, not readiness semantics"
+    }
+  ],
+  "checks": [
+    {
+      "name": "read or blank classification result",
+      "kind": "register",
+      "register": "r10",
+      "equals": "0xffff0000"
+    },
+    {
+      "name": "leading destination canary",
+      "kind": "memory",
+      "address": "0xfebe2100",
+      "size": 4,
+      "equals_hex": "a5a5a5a5"
+    },
+    {
+      "name": "trailing destination canary",
+      "kind": "memory",
+      "address": "0xfebe2144",
+      "size": 4,
+      "equals_hex": "a5a5a5a5"
+    },
+    {
+      "name": "diagnostic initialization only after admission",
+      "kind": "memory",
+      "address": "0xfebf6b20",
+      "size": 2,
+      "equals_hex": "a5a5"
+    },
+    {
+      "name": "blank or rejected path preserves destination",
+      "kind": "memory",
+      "address": "0xfebe2104",
+      "size": 64,
+      "equals_hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5"
+    }
+  ]
+}

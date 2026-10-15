@@ -1,0 +1,47 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_secondary_result_unconditional_six",
+  "entry": {
+    "role": "actual low8 secondary-state setter; state5 accepted only from1",
+    "scope": "resolved-address",
+    "address": "0x7680c"
+  },
+  "max_instructions": 20000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xff00",
+    "r6": "0x6"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "isolated initialized nested-call stack"
+    },
+    {
+      "address": "0xfebf6b70",
+      "hex": "a5a505a5a5a5a5a5",
+      "evidence": "secondary state plus neighboring physical-context canaries"
+    }
+  ],
+  "checks": [
+    {
+      "name": "exact guarded transition and canaries",
+      "kind": "memory",
+      "address": "0xfebf6b70",
+      "size": 8,
+      "equals_hex": "a5a506a5a5a5a5a5"
+    }
+  ]
+}
