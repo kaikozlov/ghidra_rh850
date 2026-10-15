@@ -39,6 +39,82 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
         + "blocks then word/byte tails. Zero count performs no destination write. "
         + "Exact CodeFlash execution checks all alignments and bulk/tail boundaries.");
   }
+  private void annotateRedundantStatePrimitives() throws Exception {
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u16 = UnsignedShortDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    DataType s32 = IntegerDataType.dataType;
+    DataType bytes = new PointerDataType(u8, 4);
+    DataType halfwords = new PointerDataType(u16, 4);
+    DataType words = new PointerDataType(u32, 4);
+    semanticFunction(0x66E2EL, "f33_copy_whole_words", VoidDataType.dataType,
+        new ParameterImpl("destination", words, currentProgram),
+        new ParameterImpl("source", words, currentProgram),
+        new ParameterImpl("byte_count", u16, currentProgram))
+        .setComment("Copy floor(low16(byte_count)/4) words forward. Ignore trailing "
+            + "bytes; no pointer or alignment validation. Forward overlap propagates "
+            + "earlier stores, unlike memmove. No return-value contract.");
+    semanticFunction(0x66E50L, "f33_update_whole_words", u32,
+        new ParameterImpl("destination", words, currentProgram),
+        new ParameterImpl("source", words, currentProgram),
+        new ParameterImpl("byte_count", u16, currentProgram))
+        .setComment("Same forward whole-word extent as66E2E, but write only differing "
+            + "words. Return zero if none differ, otherwise one; the result remains "
+            + "one even when a later word already matches. Ignore trailing bytes.");
+    semanticFunction(0x701C4L, "f33_priority_mask_enter", u32,
+        new ParameterImpl("requested_mask", u32, currentProgram))
+        .setComment("Return the previous full PMR. Write requested_mask only when "
+            + "signed32(previous PMR) < signed32(requested_mask). Preserve incoming "
+            + "PSW.ID around the write; SYNCP follows a write. This is not a bitwise "
+            + "mask union or unconditional interrupt disable. Execution seeds "
+            + "FPEC=0; pending-FPI and physical interrupt timing remain outside proof.");
+    semanticFunction(0x701EAL, "f33_priority_mask_restore", VoidDataType.dataType,
+        new ParameterImpl("saved_mask", u32, currentProgram))
+        .setComment("Unconditionally write saved_mask to PMR, preserving incoming "
+            + "PSW.ID around the write, then SYNCP. No return-value contract. "
+            + "Executed with ID both clear and set, FPEC=0; no concurrent interrupt "
+            + "or physical timing claim.");
+    semanticFunction(0x70736L, "f33_vote_redundant_u8", s32,
+        new ParameterImpl("raw", bytes, currentProgram),
+        new ParameterImpl("xor55", bytes, currentProgram),
+        new ParameterImpl("xorAA", bytes, currentProgram),
+        new ParameterImpl("output", bytes, currentProgram))
+        .setComment("Reject any NULL pointer or output==raw with -1 and no write. "
+            + "Read three bytes under the FFC0 priority-mask pair, then normalize "
+            + "the encoded copies with55/AA. All agree: return0 and raw. Raw agrees "
+            + "with either encoded copy: return-11 and raw. Only encoded copies "
+            + "agree: return-12 and that value. All differ: return-13 but still "
+            + "write raw. Output may alias either encoded input; no input repair.");
+    semanticFunction(0x66C24L, "f33_read_repair_redundant_u8", u32,
+        new ParameterImpl("raw", bytes, currentProgram),
+        new ParameterImpl("xor55", bytes, currentProgram),
+        new ParameterImpl("xorAA", bytes, currentProgram),
+        new ParameterImpl("fallback", u8, currentProgram))
+        .setComment("Vote through70736. Status0 returns the agreed value without "
+            + "repair; -11/-12 republish the voted value to all three cells. Other "
+            + "nonzero statuses republish low8(fallback). The publisher rejects "
+            + "NULL pointers without partial stores, so invalid-pointer cases "
+            + "return fallback without repair. Final LD.BU zero-extends the byte "
+            + "to the full r10 return register.");
+    semanticFunction(0x70A0AL, "f33_publish_redundant_u8", s32,
+        new ParameterImpl("value", u8, currentProgram),
+        new ParameterImpl("raw", bytes, currentProgram),
+        new ParameterImpl("xor55", bytes, currentProgram),
+        new ParameterImpl("xorAA", bytes, currentProgram))
+        .setComment("Any NULL destination returns-1 before all stores. Otherwise "
+            + "publish low8(value), value^55, value^AA in that order under the "
+            + "FFC0 priority-mask pair and return0. No alias rejection; the three "
+            + "stores are not asserted atomic against every interrupt source.");
+    semanticFunction(0x70A4EL, "f33_publish_redundant_u16", s32,
+        new ParameterImpl("value", u16, currentProgram),
+        new ParameterImpl("raw", halfwords, currentProgram),
+        new ParameterImpl("xor5555", halfwords, currentProgram),
+        new ParameterImpl("xorAAAA", halfwords, currentProgram))
+        .setComment("Any NULL destination returns-1 without partial stores. Otherwise "
+            + "publish low16(value), value^5555, value^AAAA in that order under the "
+            + "FFC0 priority-mask pair and return0. No alias rejection or local "
+            + "alignment validation; no claim of global interrupt exclusion.");
+  }
   private void annotateBootAndFreshness() throws Exception {
     Function relocate = getFunctionAt(toAddr(0x35E4L));
     Function commit = getFunctionAt(toAddr(0x90D6AL));
@@ -369,6 +445,7 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
       }
     }
     annotateMemoryPrimitives();
+    annotateRedundantStatePrimitives();
     annotateBootAndFreshness();
     annotateFreshnessLayouts();
     annotateBootDispatchAndCurves();

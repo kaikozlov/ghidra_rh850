@@ -232,7 +232,7 @@
     "0x058B5E": {
       "body_sha256": "0c6eb6b596dfffdc298158d0ae8928ae17ba244ba1716fcd7119b357170351d9",
       "body_size": 294,
-      "decompiled_c_sha256": "f1485cd62abd6e15146e85801334906d747b9399aec96f3de644f632cf96fa14",
+      "decompiled_c_sha256": "91de58b03da72bd59c83fcb4c5a313bc70296f6d886aec904c730b7ce020e542",
       "role": "generated-COM/application task coordinator"
     },
     "0x05DF5C": {

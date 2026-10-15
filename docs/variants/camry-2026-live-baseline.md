@@ -7836,3 +7836,53 @@ The NvM decoder/regeneration, semantic-coverage and four B6 consumer checks
 passed. These checks establish the exercised software contracts, not checksum
 validity of all captured records, logical copy consensus or vehicle behavior.
 
+### 77.7 Redundant-state and whole-word primitives
+
+Eight further contracts now belong to the target seed, rather than speculative
+subsystem labels. The three redundant cells are a software representation;
+these helpers alone do not establish a DataFlash record grouping or a particular
+learned EPS parameter.
+
+| Entry / durable name | Recovered contract |
+|---|---|
+| `66E2E` / `f33_copy_whole_words` | Forward-copy `floor(low16(byte_count)/4)` words. Ignore trailing bytes; no pointer/alignment validation or return contract. Overlap propagates earlier stores, unlike `memmove`. |
+| `66E50` / `f33_update_whole_words` | Same extent, but store only differing words. Return full-register 0/1 for whether **any** word changed; a later equal word does not clear the result. |
+| `701C4` / `f33_priority_mask_enter` | Return old PMR. Replace it only when `signed32(old) < signed32(requested)`, preserving incoming `PSW.ID` around the write and executing `SYNCP`. This is not bitwise mask union or unconditional interrupt disable. |
+| `701EA` / `f33_priority_mask_restore` | Unconditionally write the supplied PMR, preserve incoming `PSW.ID`, then `SYNCP`. Other PSW flags are not restored by this contract. |
+| `70736` / `f33_vote_redundant_u8` | Reject any NULL pointer or `output == raw` with −1 and no output write. Otherwise snapshot three bytes under the `FFC0` priority-mask pair, normalize the encoded copies with `55/AA`, and apply the result table below. Only the output cell is written; it may alias either encoded input. |
+| `66C24` / `f33_read_repair_redundant_u8` | Status 0 returns the agreed value without repair. Status −11/−12 republishes the voted value; every other nonzero status republishes low8(fallback). Invalid pointers make the publisher reject without partial stores, but the wrapper still returns fallback. Final `LD.BU` zero-extends the full return register. |
+| `70A0A` / `f33_publish_redundant_u8` | Reject any NULL destination before all stores. Otherwise publish low8(value), value XOR `55`, value XOR `AA`, in that order under the `FFC0` mask pair; return 0. No alias rejection. |
+| `70A4E` / `f33_publish_redundant_u16` | Corresponding halfword publication, with low16(value) and masks `5555/AAAA`. Any NULL returns −1 without partial stores; no local alignment validation. |
+
+The voter compares **decoded** values:
+
+| Agreement | Signed return | Output byte |
+|---|---:|---|
+| All three agree | 0 | Raw value |
+| Raw agrees with either one of the encoded copies | −11 | Raw value |
+| Only the two encoded copies agree | −12 | Their decoded value |
+| All three differ | −13 | Raw value, **still written** |
+
+Verification executed 362 redundant-state/whole-word scenarios and twelve direct
+priority-mask scenarios against the exact CodeFlash. The sweep covered every
+single-bit fault in each of three lanes for six base values, complete
+disagreement, pointer rejection and permitted output aliasing, repair/default
+publication, scalar truncation, copy tails/overlap, and sticky change detection.
+Mask runs covered lower/equal/higher PMR values, a signed-negative request, and
+both incoming ID states. Twenty-one representative permanent scenarios were
+also executed from their tracked paths.
+
+These runs seed `FPEC=0` and inject no hardware event. They establish the
+exercised software operations, not pending-FPI handling, physical scheduling,
+global interrupt exclusion or atomicity against every interrupt source. The
+formal pointer/status types also expose the real voter output and repair
+arguments that were previously lost in generic decompilation.
+
+Two independent rebuilds again agreed on 7,181 functions; live coverage matched
+31 curated reviews (30 verified, one bounded). The six targeted coverage,
+NvM and B6 checks passed. Fresh decompilation now shows the real four-argument
+voter/repair calls and status branches. The PMR helper still exposes a processor
+presentation limitation: ordinary-register optimization can elide its PMR write
+from C, despite the executed instruction-level effect. Its contract is therefore
+grounded in disassembly and machine execution, not that incomplete C rendering.
+
