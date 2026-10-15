@@ -1,0 +1,36 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_checksum_sum_10000",
+  "entry": {
+    "role": "unsigned byte sum with low16 count; no flash/controller operation",
+    "scope": "resolved-address",
+    "address": "0x77356"
+  },
+  "max_instructions": 100,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "r6": "0x10000",
+    "r7": "0xdeadbeef",
+    "r8": "0x0",
+    "FPEC": "0x0",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "memory": [],
+  "checks": [
+    {
+      "name": "full unsigned byte sum",
+      "kind": "register",
+      "register": "r10",
+      "equals": "0x0"
+    }
+  ]
+}

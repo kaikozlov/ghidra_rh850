@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-"""Exact-F33 NvM descriptors, record markers and retained RAM observations.
+"""Exact-F33 NvM descriptors, record integrity and retained RAM observations.
 
 The descriptor accessors at 74884/74892/748A2 and allocation helper 748B0
 establish the six-byte table at 27634. The bound read by 77982 is at 27928.
 Handle zero has page FFFF; the remaining descriptors include multi-page
 allocations, not just the first 48 single-page records.
 
-Record header/commit-marker checks are not checksum validation or application
-copy consensus. Likewise, a direct-reference census cannot exclude transitive
-learned-state influence on assist. This tool records those evidence boundaries
-instead of treating a neutral-looking snapshot as an architectural proof.
+The 77B12 read path checks the commit marker and handle before comparing an
+additive checksum through 77356/7771A/777CA. These byte-level checks do not
+establish application copy consensus or successful hardware reads. Likewise,
+a direct-reference census cannot exclude transitive learned-state influence.
 
 All inputs are tracked. No payload or key bytes are printed.
 """
@@ -102,7 +102,7 @@ def decode_job_table(codeflash: bytes) -> list[dict]:
 
 
 def decode_dataflash_records(dump: bytes, jobs: list[dict]) -> list[dict]:
-    """Check the handle and final-allocation marker, not complete validity."""
+    """Evaluate the registered 77B12 record format after marker/handle admission."""
     out = []
     for job in jobs:
         if job["page"] == 0xFFFF:
@@ -116,6 +116,24 @@ def decode_dataflash_records(dump: bytes, jobs: list[dict]) -> list[dict]:
         # 778FE/77AA8 locate and compare the last word of the whole allocation.
         header_matches = stored_handle == job["handle"]
         marker_present = struct.unpack_from("<I", dump, off + size - 4)[0] == 0xAAAAAAAA
+        payload_len = job["payload_len"]
+        checksum_bits = 16 if payload_len <= 32 else 32
+        checksum_offset = off + (2 if checksum_bits == 16 else 4 + payload_len)
+        stored_checksum = struct.unpack_from(
+            "<H" if checksum_bits == 16 else "<I", dump, checksum_offset
+        )[0]
+        computed_checksum = None
+        if header_matches and marker_present:
+            # 77AA8 contributes four AA bytes; 7786A contributes only the
+            # two handle bytes. 7771A adds payload bytes. Small records use
+            # the header halfword and C000; large records use the word
+            # immediately after the payload and C0000000 (777CA).
+            byte_sum = (
+                4 * 0xAA + sum(dump[off:off + 2])
+                + sum(dump[off + 4:off + 4 + payload_len])
+            )
+            prefix = 0xC000 if checksum_bits == 16 else 0xC0000000
+            computed_checksum = (prefix + byte_sum) & ((1 << checksum_bits) - 1)
         out.append({
             "handle": job["handle"],
             "dataflash_address": f"0x{DATAFLASH_BASE + off:08x}",
@@ -123,19 +141,30 @@ def decode_dataflash_records(dump: bytes, jobs: list[dict]) -> list[dict]:
             "header_matches_handle": header_matches,
             "commit_marker_present": marker_present,
             "markers_match": header_matches and marker_present,
+            "checksum_bits": checksum_bits,
+            "stored_checksum": stored_checksum,
+            "computed_checksum": computed_checksum,
+            "checksum_matches": (
+                None if computed_checksum is None else stored_checksum == computed_checksum
+            ),
         })
     return out
 
 
-def marker_census(records: list[dict]) -> dict:
-    """Keep marker observations separate from logical copy identity."""
+def record_census(records: list[dict]) -> dict:
+    """Separate admitted record integrity from application copy consensus."""
     matching = [r["handle"] for r in records if r["markers_match"]]
     return {
         "mapped_records": len(records),
         "records_with_both_markers": len(matching),
-        "matching_handles": matching,
+        "marker_matching_handles": matching,
         "single_page_handles_1_48_with_markers": sum(1 <= h <= 48 for h in matching),
-        "checksum_or_copy_consensus_checked": False,
+        "records_checksum_checked": sum(r["checksum_matches"] is not None for r in records),
+        "records_with_matching_checksum": sum(r["checksum_matches"] is True for r in records),
+        "checksum_mismatch_handles": [
+            r["handle"] for r in records if r["checksum_matches"] is False
+        ],
+        "copy_consensus_checked": False,
     }
 
 
@@ -152,7 +181,7 @@ def main() -> int:
 
     jobs = decode_job_table(codeflash)
     records = decode_dataflash_records(dataflash, jobs)
-    markers = marker_census(records)
+    record_stats = record_census(records)
 
     # Live learned-state values from the retained READY LocalRAM dump.
     ram = F33_RAM.read_bytes()
@@ -185,7 +214,7 @@ def main() -> int:
             four_channel_consumers.append(rec["entry_addr"])
 
     result = {
-        "schema": "camry-8965f3307000-dataflash-nvm-owner-closure-v2",
+        "schema": "camry-8965f3307000-dataflash-nvm-owner-closure-v3",
         "software_id": "8965F3307000",
         "question": "Does unexamined F33 DataFlash learned NvM state feed the assist funnel?",
         "inputs": {
@@ -207,8 +236,8 @@ def main() -> int:
             "sentinel_handles": [job["handle"] for job in jobs if job["page"] == 0xFFFF],
             "descriptors": jobs,
         },
-        "record_marker_census": markers,
-        "record_markers": records,
+        "record_census": record_stats,
+        "records": records,
         "live_learned_state": {
             **live,
             "four_channel_words_equal_0800": four_channel_words_equal_0800,
@@ -226,7 +255,8 @@ def main() -> int:
             "reasons": [
                 "a same-function reference intersection cannot exclude indirect state propagation",
                 "equal staged/active snapshot values do not establish absence of a runtime dependency",
-                "record markers do not identify application copy groups or validate all checksums",
+                "record integrity does not identify application copy groups or restoration destinations",
+                "offline checksum agreement is not successful hardware read or application completion",
             ],
         },
     }
@@ -238,7 +268,11 @@ def main() -> int:
         print(text)
     else:
         print(f"job table: {len(jobs)} handles at ROM 0x{JOB_TABLE:05x}")
-        print(f"records with both markers: {markers['records_with_both_markers']}/{markers['mapped_records']}")
+        print(f"records with both markers: {record_stats['records_with_both_markers']}/{record_stats['mapped_records']}")
+        print(
+            "admitted records with matching checksum: "
+            f"{record_stats['records_with_matching_checksum']}/{record_stats['records_checksum_checked']}"
+        )
         print(f"live four-channel words equal 0x0800: {four_channel_words_equal_0800}")
         print(f"learned-cell functions: {len(learned_fns)}, funnel functions: {len(funnel_fns)}, both: {len(both_fns)}")
         print("assist influence: unresolved by this descriptor/snapshot/direct-reference analysis")

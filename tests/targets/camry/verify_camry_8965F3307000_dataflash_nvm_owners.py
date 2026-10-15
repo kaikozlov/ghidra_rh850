@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Exercise NvM descriptor boundaries, record markers and artifact regeneration."""
+"""Exercise NvM descriptor boundaries, record integrity and artifact regeneration."""
 from __future__ import annotations
 
 import struct
@@ -66,6 +66,49 @@ except ValueError:
     check("truncated allocation rejected", True)
 else:
     check("truncated allocation rejected", False)
+
+# The checksum-width transition is based on payload length, not allocation
+# size. These two records occupy one page each; the large record's unrelated
+# header halfword deliberately differs from its checksum word.
+integrity_jobs = [
+    {"handle": 1, "page": 0, "payload_len": 32, "allocation_pages": 1},
+    {"handle": 2, "page": 1, "payload_len": 36, "allocation_pages": 1},
+]
+integrity_dump = bytearray(b"\xff" * 128)
+struct.pack_into("<HH", integrity_dump, 0, 1, 0xC499)
+integrity_dump[4:36] = bytes(range(32))
+struct.pack_into("<I", integrity_dump, 60, 0xAAAAAAAA)
+struct.pack_into("<HH", integrity_dump, 64, 2, 0xBEEF)
+integrity_dump[68:104] = b"\x01" * 36
+struct.pack_into("<I", integrity_dump, 104, 0xC00002CE)
+struct.pack_into("<I", integrity_dump, 124, 0xAAAAAAAA)
+integrity_records = owner.decode_dataflash_records(bytes(integrity_dump), integrity_jobs)
+check("32-byte payload uses the header halfword checksum",
+      integrity_records[0]["checksum_matches"] is True
+      and integrity_records[0]["computed_checksum"] == 0xC499)
+check("larger payload uses the complete word after its payload",
+      integrity_records[1]["checksum_matches"] is True
+      and integrity_records[1]["computed_checksum"] == 0xC00002CE)
+
+corrupt = bytearray(integrity_dump)
+corrupt[4] ^= 1
+integrity_records = owner.decode_dataflash_records(bytes(corrupt), integrity_jobs)
+check("intact markers cannot conceal payload corruption",
+      integrity_records[0]["markers_match"]
+      and integrity_records[0]["checksum_matches"] is False)
+
+corrupt = bytearray(integrity_dump)
+corrupt[107] ^= 1
+integrity_records = owner.decode_dataflash_records(bytes(corrupt), integrity_jobs)
+check("large checksum comparison does not discard upper bits",
+      integrity_records[1]["markers_match"]
+      and integrity_records[1]["checksum_matches"] is False)
+
+corrupt[124] ^= 1
+integrity_records = owner.decode_dataflash_records(bytes(corrupt), integrity_jobs)
+check("marker rejection does not masquerade as an evaluated checksum",
+      not integrity_records[1]["commit_marker_present"]
+      and integrity_records[1]["checksum_matches"] is None)
 
 with tempfile.TemporaryDirectory() as td:
     regen = Path(td) / "nvm_owners.json"

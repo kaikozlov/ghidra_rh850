@@ -1,0 +1,74 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_checksum_trailer_accept",
+  "entry": {
+    "role": "post-read32-bit checksum boundary of777CA; hardware read excluded",
+    "scope": "resolved-address",
+    "address": "0x777fc"
+  },
+  "max_instructions": 100,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "r6": "0x0",
+    "r7": "0x0",
+    "r8": "0x0",
+    "FPEC": "0x0",
+    "PMR": "0xff00",
+    "r10": "0x1",
+    "r27": "0xfebf6b80"
+  },
+  "stop_addresses": [
+    "0x77820"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "nested helper stack"
+    },
+    {
+      "address": "0xfebf6c28",
+      "hex": "057e0000",
+      "evidence": "complete accumulated marker/header/payload byte sum"
+    },
+    {
+      "address": "0xfebf6b80",
+      "hex": "01000000000000000430befe057e00c0",
+      "evidence": "explicit completed trailer read into context+C"
+    },
+    {
+      "address": "0xfebe3004",
+      "hex": "0724415e7b98b5d2ef0c294663809dbad7f4112e4b6885a2bfdcf91633506d8aa7c4e1fe1b3855728facc9e603203d5a7794b1ceeb0825425f7c99b6d3f00d2a4764819ebbd8f5122f4c6986a3c0ddfa1734516e8ba8c5e2ff1c39567390adcae704213e5b7895b2cfec092643607d9ab7d4f10e2b4865829fbcd9f613304d6a87a4c1defb1835526f8ca9c6e3001d3a577491aecbe805223f5c7996b3d0ed0a2744617e9bb8d5f20f2c496683a0bddaf714314e6b88a5c2dffc193653708daac7e4011e3b587592afcce90623405d7a97b4d1ee0b2845627f9cb9d6f3102d4a6784a1bedbf815324f6c89a6c3e0fd1a3754718eabc8e502",
+      "evidence": "payload already copied before trailer validation"
+    }
+  ],
+  "checks": [
+    {
+      "name": "complete32-bit checksum comparison",
+      "kind": "register",
+      "register": "r10",
+      "equals": "0x1"
+    },
+    {
+      "name": "checksum prefix added exactly once",
+      "kind": "memory",
+      "address": "0xfebf6c28",
+      "size": 4,
+      "equals_hex": "057e00c0"
+    },
+    {
+      "name": "trailer failure does not undo earlier payload copies",
+      "kind": "memory",
+      "address": "0xfebe3004",
+      "size": 248,
+      "equals_hex": "0724415e7b98b5d2ef0c294663809dbad7f4112e4b6885a2bfdcf91633506d8aa7c4e1fe1b3855728facc9e603203d5a7794b1ceeb0825425f7c99b6d3f00d2a4764819ebbd8f5122f4c6986a3c0ddfa1734516e8ba8c5e2ff1c39567390adcae704213e5b7895b2cfec092643607d9ab7d4f10e2b4865829fbcd9f613304d6a87a4c1defb1835526f8ca9c6e3001d3a577491aecbe805223f5c7996b3d0ed0a2744617e9bb8d5f20f2c496683a0bddaf714314e6b88a5c2dffc193653708daac7e4011e3b587592afcce90623405d7a97b4d1ee0b2845627f9cb9d6f3102d4a6784a1bedbf815324f6c89a6c3e0fd1a3754718eabc8e502"
+    }
+  ]
+}

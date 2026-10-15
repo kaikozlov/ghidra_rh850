@@ -1,0 +1,107 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_checksum_small_payload_reject",
+  "entry": {
+    "role": "post-read checksum and payload-copy boundary of7771A; hardware read excluded",
+    "scope": "resolved-address",
+    "address": "0x7775e"
+  },
+  "max_instructions": 2500,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "r6": "0x0",
+    "r7": "0x0",
+    "r8": "0x0",
+    "FPEC": "0x0",
+    "PMR": "0xff00",
+    "r10": "0x1",
+    "r23": "0xfebf6c46",
+    "r26": "0x10",
+    "r27": "0x10",
+    "r29": "0x0"
+  },
+  "stop_addresses": [
+    "0x777c6"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "nested helpers use the real stack below the post-read buffer"
+    },
+    {
+      "address": "0xfebe2000",
+      "hex": "081a2b3c4d5e6f8091a2b3c4d5e6f708",
+      "evidence": "explicit synthetic completed-read buffer; no claim of executing the hardware reader"
+    },
+    {
+      "address": "0xfebe3000",
+      "hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "evidence": "destination and surrounding canaries"
+    },
+    {
+      "address": "0xfebf6b80",
+      "hex": "010031ca000000000430befe00000000",
+      "evidence": "existing record context with independent stored checksum"
+    },
+    {
+      "address": "0xfebf6c28",
+      "hex": "a9020000",
+      "evidence": "header and marker byte sum, plus earlier chunks where applicable"
+    },
+    {
+      "address": "0xfebf6c46",
+      "hex": "0100",
+      "evidence": "remaining payload chunks at post-read boundary"
+    }
+  ],
+  "checks": [
+    {
+      "name": "checksum-dependent exact destination extent",
+      "kind": "memory",
+      "address": "0xfebe3000",
+      "size": 24,
+      "equals_hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5"
+    },
+    {
+      "name": "full result at real epilogue",
+      "kind": "register",
+      "register": "r10",
+      "equals": "0xfffc"
+    },
+    {
+      "name": "exact checksum accumulation",
+      "kind": "memory",
+      "address": "0xfebf6c28",
+      "size": 4,
+      "equals_hex": "30ca0000"
+    },
+    {
+      "name": "remaining chunks advance only after accepted copy",
+      "kind": "memory",
+      "address": "0xfebf6c46",
+      "size": 2,
+      "equals_hex": "0100"
+    },
+    {
+      "name": "post-read source is unchanged",
+      "kind": "memory",
+      "address": "0xfebe2000",
+      "size": 16,
+      "equals_hex": "081a2b3c4d5e6f8091a2b3c4d5e6f708"
+    },
+    {
+      "name": "nested helpers restore stack",
+      "kind": "register",
+      "register": "sp",
+      "equals": "0xfebe2000"
+    }
+  ]
+}

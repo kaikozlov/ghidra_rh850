@@ -4127,15 +4127,19 @@ and are removed.
 `0x778FE` locates the trailer at `allocation_pages*64−4`; it is not always
 at byte 60 of the first page. The read chain at `0x77B12` checks the trailer
 through `0x77AA8`, then the stored handle through `0x7786A`, then payload and,
-for larger records, additional checksum handling. The stored header must match
-the **descriptor handle**, not a general `480−page` formula.
+for payloads longer than 32 bytes, the checksum word immediately after the
+payload. The stored header must match the **descriptor handle**, not a general
+`480−page` formula.
 
 On the retained DataFlash SHA `231fbdde…4432`, **57 of 122 mapped records**
 have both the expected handle and final `AAAAAAAA` marker. Nine are within the
-original 48-single-page subset. These are **marker observations**, not a
-claim that all 57 records pass checksum validation or form valid application
-copy consensus. Raw/XOR55/XORAA grouping must come from the application
-restore/selection machinery, not page order or payload resemblance alone.
+original 48-single-page subset. **All 57 also match the recovered additive
+checksum** described in §77.10; the decoder leaves checksum evaluation unset
+for the other 65 records rather than treating marker rejection as a checksum
+result. This establishes offline record integrity, not a successful hardware
+read or application copy consensus. Raw/XOR55/XORAA grouping must come from
+the application restore/selection machinery, not page order or payload
+resemblance alone.
 
 The retained **2026-08-26 post-application→boot-handoff PE1 LocalRAM capture**
 still shows four `0x0800` words at both `FEBE6AD2` and `FEBE6AE6`, and equal
@@ -4152,11 +4156,13 @@ copy grouping and learned-state propagation retain their separate evidence
 requirements.
 
 Owner: `tools/targets/camry/analysis/analyze_camry_8965F3307000_dataflash_nvm_owners.py`.
-Its generated artifact records every descriptor and marker result without
-printing payload/key bytes. Regression coverage protects descriptor alignment,
-the firmware-supplied table bound, sentinel exclusion, multi-page trailer
-placement, handle matching and truncated allocations. Exact instruction
-executions and durable Ghidra contracts are described in §77.6.
+Its generated artifact records every descriptor, marker and admitted checksum
+result without printing payload/key bytes. Regression coverage protects
+descriptor alignment, the firmware-supplied table bound, sentinel exclusion,
+multi-page trailer placement, handle matching, truncated allocations, the
+32-byte checksum-width boundary, payload corruption and full-word checksum
+comparison. Exact instruction executions and durable Ghidra contracts are
+described in §77.6 and §77.10.
 
 
 ## 56. Native Bus-1 FRC egress bound: direct carriers are negative; absence/private transport is not proved (VAR-113)
@@ -7984,4 +7990,83 @@ canaries; no timer event is injected. Fresh decompilation now exposes the two
 distinct typed layouts and unsigned arithmetic rather than anonymous RAM cells.
 Two clean rebuilds agreed on 7,181 functions and 43 curated reviews
 (42 verified, one bounded).
+
+### 77.10 NvM additive integrity and copy ordering
+
+The committed-record path `77B12 → 77AA8 → 7786A → 7771A → 777CA`
+separates marker, handle, payload and trailing-checksum admission. The last
+call applies only to payloads longer than 32 bytes. This is an **additive
+checksum**, not a CRC:
+
+```text
+s = sum(four accepted AA marker bytes)
+  + sum(two little-endian stored-handle bytes)
+  + sum(payload bytes)
+
+payload length <= 32: stored u16 at record+2 equals low16(0xC000 + s)
+payload length >  32: stored u32 at record+4+length equals 0xC0000000 + s
+```
+
+The large-record comparison uses all 32 bits. The header checksum bytes,
+alignment padding and unused allocation bytes do not contribute to this
+registered-format sum. All registered payload lengths are multiples of eight;
+the decoder does not generalize the chunker's unusual arithmetic to arbitrary
+record layouts.
+
+`F33NvmRecordContext` at `FEBF6B80` is now a typed 16-byte object:
+
+| Offset | Field | Recovered use |
+|---|---|---|
+| `+0` | unsigned16 storage handle | Two-byte header identity and checksum contribution. |
+| `+2` | unsigned16 checksum | Small-payload comparison through `772A8`. |
+| `+4` | source pointer | Consumed by `773FE` and write preparation. |
+| `+8` | destination pointer | Set by `772D8`; chunk copy `772C0` adds the low16 payload offset. |
+| `+C` | unsigned32 checksum | Large-payload trailer, read through `772DE`; **not another pointer**. |
+
+The separate outer object at `FEBF6B78` contains the record pointer and commit
+marker. The running sum is `FEBF6C28`; remaining payload chunks are `FEBF6C46`.
+These fields must not be conflated with the logical operation object at
+`FEBF6AEC`, whose `+C` really is a source pointer (§77.8).
+
+The ordering has a consequential boundary:
+
+- For small payloads, `7771A` updates the accumulator, adds `C000`, and checks
+  the low16 result **before copying**. A mismatch returns `FFFC`, without a
+  destination write or remaining-count decrement; it does not undo the
+  accumulator update.
+- Large payload chunks are copied and decrement the remaining count **before**
+  `777CA` checks the trailing word. A trailing mismatch returns `FFFC` without
+  rolling back those earlier destination writes.
+- A non-success read result at the payload post-read boundary returns unchanged
+  and preserves accumulator, destination and remaining count.
+
+`77356` now has its real `(u16 byte_count, u8 *source) → u32` contract. Its
+previous inferred `void` prototype hid the source reads and result in standalone
+decompilation. Zero/truncated-zero counts perform no source read; unaligned byte
+input is valid; 258 `FF` bytes sum to **65790**, without a 16-bit wrap.
+`77330` computes `r=min(low16(length-offset),64)`, then returns
+`low16(r+(r&3))`, zero-extended. It is not generic round-up-to-four:
+length64/offset1 returns66; offset beyond length wraps before clipping;
+offset exactly at the end returns zero.
+
+Eighty-two exact-CodeFlash scenarios passed: eleven sum boundaries, 63 chunk
+length/offset cases across all nine registered length classes, and eight
+post-read integrity/copy cases. Twelve representative tracked scenarios also
+passed. Inputs are synthetic; no captured payload/key bytes are duplicated.
+The actual analyzer separately evaluated the retained DataFlash and found
+57 checksum matches among the 57 admitted records.
+
+**Hardware boundary:** an attempted complete low-level read at `788B6`
+stopped at `78AE2` reading **`FFC5D020`**, which the current machine model does
+not map. No successful read was substituted. The integrity scenarios explicitly
+start at post-read `7775E` or `777FC` and stop before their real epilogues;
+they prove those software transitions, not hardware acquisition, flash timing,
+logical copy consensus or learned-parameter restoration.
+
+Fresh canonical decompilation now retains the actual source-byte reads and
+32-bit sum return, typed destination copy, and both checksum comparisons.
+Two independent rebuilds agreed on 7,181 functions and 51 curated reviews
+(48 verified, three bounded). The six targeted coverage/NvM/B6 checks and
+live-coverage parity passed; the stopped working project and regenerated corpus
+were promoted together.
 

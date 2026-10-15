@@ -572,6 +572,93 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
             + "Execution includes high-bit truncation and slotFFFF writing before "
             + "the declared two-slot array; not evidence that callers use that slot.");
   }
+  private void annotateNvmRecordIntegrity() throws Exception {
+    CategoryPath category = new CategoryPath("/CamryF33");
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u16 = UnsignedShortDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    DataType bytes = new PointerDataType(u8, 4);
+    StructureDataType record =
+        new StructureDataType(category, "F33NvmRecordContext", 0);
+    record.setPackingEnabled(true);
+    record.add(u16, "storage_handle", "First two on-flash header bytes.");
+    record.add(u16, "checksum16", "Header checksum used for payload lengths<=32.");
+    record.add(bytes, "source_buffer", "Source consumed by773FE and the write preparation path.");
+    record.add(bytes, "destination_buffer", "Destination set by772D8 and used by772C0.");
+    record.add(u32, "checksum32", "Large-record checksum read from immediately after the payload; not a pointer.");
+    DataType recordType = resolve(record);
+    DataType recordPointer = new PointerDataType(recordType, 4);
+    semanticData(0xFEBF6B80L, recordType, "f33_nvm_record_context",
+        "Metadata and buffer pointers, not an inline payload. The +C word "
+        + "is a checksum, distinct from the source pointer at+C inF33NvmOperation.");
+    StructureDataType commit =
+        new StructureDataType(category, "F33NvmCommitContext", 0);
+    commit.setPackingEnabled(true);
+    commit.add(recordPointer, "record", "Set by778C6.");
+    commit.add(u32, "marker", "77AA8 reads the final-allocation word here and requiresAAAAAAAA.");
+    semanticData(0xFEBF6B78L, resolve(commit), "f33_nvm_commit_context",
+        "Accepted marker contributes680 to the running byte sum.");
+    semanticData(0xFEBF6C28L, u32, "f33_nvm_checksum_accumulator",
+        "Running unsigned byte sum. Header contributes only its two handle bytes; "
+        + "the accepted marker contributes fourAA bytes. Small/large verification "
+        + "addsC000/C0000000 respectively.");
+    semanticData(0xFEBF6C46L, u16, "f33_nvm_payload_chunks_remaining",
+        "Decremented only after an accepted payload copy by7771A.");
+    semanticFunction(0x77356L, "f33_nvm_sum_bytes", u32,
+        new ParameterImpl("byte_count", u16, currentProgram),
+        new ParameterImpl("source", bytes, currentProgram))
+        .setComment("Sum exactly low16(byte_count) unsigned bytes into full32-bit "
+            + "r10. Zero count does not read source; unaligned byte input is valid. "
+            + "This is an additive sum, not a CRC. The prior inferredvoid prototype "
+            + "incorrectly hid the source reads and result in standalone C.");
+    semanticFunction(0x77330L, "f33_nvm_payload_chunk_length", u32,
+        new ParameterImpl("handle", u16, currentProgram),
+        new ParameterImpl("payload_offset", u16, currentProgram))
+        .setComment("Let r=min(low16(payload_length-payload_offset),64). Return "
+            + "low16(r+(r&3)), zero-extended. This is not generic round-up-to-four: "
+            + "length64/offset1 returns66, while offset past length wraps before "
+            + "clipping. Registered payloads and ordinary chunk offsets are aligned.");
+    semanticFunction(0x772A8L, "f33_nvm_header_checksum", u32,
+        new ParameterImpl("context", recordPointer, currentProgram))
+        .setComment("Load context+2 as unsigned16 and zero-extend to r10.");
+    semanticFunction(0x772DEL, "f33_nvm_tail_checksum", u32,
+        new ParameterImpl("context", recordPointer, currentProgram))
+        .setComment("Load full32-bit checksum from context+C; not a pointer read.");
+    semanticFunction(0x74830L, "f33_copy_bytes_forward", VoidDataType.dataType,
+        new ParameterImpl("destination", bytes, currentProgram),
+        new ParameterImpl("source", bytes, currentProgram),
+        new ParameterImpl("byte_count", u32, currentProgram))
+        .setComment("Forward byte loop with full32-bit count. No validation, "
+            + "overlap-safe memmove guarantee or return-value contract.");
+    semanticFunction(0x772C0L, "f33_nvm_copy_payload_chunk", VoidDataType.dataType,
+        new ParameterImpl("context", recordPointer, currentProgram),
+        new ParameterImpl("payload_offset", u16, currentProgram),
+        new ParameterImpl("byte_count", u16, currentProgram),
+        new ParameterImpl("source", bytes, currentProgram))
+        .setComment("Copy low16(byte_count) bytes into context.destination_buffer "
+            + "+low16(payload_offset), through the real74830 byte loop. "
+            + "No local destination bound or checksum validation.");
+    semanticFunction(0x7771AL, "f33_nvm_read_payload_chunk", u32,
+        new ParameterImpl("handle", u16, currentProgram),
+        new ParameterImpl("record_offset", u32, currentProgram),
+        new ParameterImpl("read_option", u8, currentProgram))
+        .setComment("Read the next payload chunk through776FA. On success add its "
+            + "unsigned byte sum. For lengths<=32 addC000 and compare low16 "
+            + "against context.checksum16 before copying; mismatch returnsFFFC "
+            + "without destination write or remaining-count decrement. Larger "
+            + "payloads copy before the later777CA checksum check. Native proof "
+            + "starts at post-read7775E and stops before the real epilogue; "
+            + "the hardware read remains unexecuted becauseFFC5D020 is unmapped.");
+    semanticFunction(0x777CAL, "f33_nvm_read_payload_checksum", u32,
+        new ParameterImpl("handle", u16, currentProgram),
+        new ParameterImpl("record_offset", u32, currentProgram),
+        new ParameterImpl("read_option", u8, currentProgram))
+        .setComment("Read four bytes at record_offset+payload_length+4 into "
+            + "context.checksum32. Success addsC0000000 to the accumulator and "
+            + "compares the full word; mismatch returnsFFFC. No rollback of "
+            + "earlier destination copies. Native proof starts at post-read777FC; "
+            + "not an end-to-end hardware read or application restoration proof.");
+  }
   @Override public void run() throws Exception {
     String[] args = getScriptArgs();
     if (args.length != 1) throw new IllegalArgumentException("expected function_seeds.csv path");
@@ -600,6 +687,7 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     annotateBootDispatchAndCurves();
     annotateNvmDescriptors();
     annotateNvmLogicalRequests();
+    annotateNvmRecordIntegrity();
     annotatePwmCompareStaging();
     println("SeedCamryF33RecoveredFunctions: seeded " + count
         + " evidence-backed entries and applied exact-F33 semantic prototypes");

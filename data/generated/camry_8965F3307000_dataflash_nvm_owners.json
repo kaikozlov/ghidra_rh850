@@ -1,5 +1,5 @@
 {
-  "schema": "camry-8965f3307000-dataflash-nvm-owner-closure-v2",
+  "schema": "camry-8965f3307000-dataflash-nvm-owner-closure-v3",
   "software_id": "8965F3307000",
   "question": "Does unexamined F33 DataFlash learned NvM state feed the assist funnel?",
   "inputs": {
@@ -1146,10 +1146,10 @@
       }
     ]
   },
-  "record_marker_census": {
+  "record_census": {
     "mapped_records": 122,
     "records_with_both_markers": 57,
-    "matching_handles": [
+    "marker_matching_handles": [
       1,
       3,
       5,
@@ -1209,16 +1209,23 @@
       106
     ],
     "single_page_handles_1_48_with_markers": 9,
-    "checksum_or_copy_consensus_checked": false
+    "records_checksum_checked": 57,
+    "records_with_matching_checksum": 57,
+    "checksum_mismatch_handles": [],
+    "copy_consensus_checked": false
   },
-  "record_markers": [
+  "records": [
     {
       "handle": 1,
       "dataflash_address": "0xff2077c0",
       "stored_handle": 1,
       "header_matches_handle": true,
       "commit_marker_present": true,
-      "markers_match": true
+      "markers_match": true,
+      "checksum_bits": 16,
+      "stored_checksum": 50375,
+      "computed_checksum": 50375,
+      "checksum_matches": true
     },
     {
       "handle": 2,
@@ -1226,7 +1233,11 @@
       "stored_handle": 65535,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 16,
+      "stored_checksum": 65535,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 3,
@@ -1234,7 +1245,11 @@
       "stored_handle": 3,
       "header_matches_handle": true,
       "commit_marker_present": true,
-      "markers_match": true
+      "markers_match": true,
+      "checksum_bits": 16,
+      "stored_checksum": 50345,
+      "computed_checksum": 50345,
+      "checksum_matches": true
     },
     {
       "handle": 4,
@@ -1242,7 +1257,11 @@
       "stored_handle": 65535,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 16,
+      "stored_checksum": 65535,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 5,
@@ -1250,7 +1269,11 @@
       "stored_handle": 5,
       "header_matches_handle": true,
       "commit_marker_present": true,
-      "markers_match": true
+      "markers_match": true,
+      "checksum_bits": 16,
+      "stored_checksum": 51399,
+      "computed_checksum": 51399,
+      "checksum_matches": true
     },
     {
       "handle": 6,
@@ -1258,7 +1281,11 @@
       "stored_handle": 65535,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 16,
+      "stored_checksum": 65535,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 7,
@@ -1266,7 +1293,11 @@
       "stored_handle": 7,
       "header_matches_handle": true,
       "commit_marker_present": true,
-      "markers_match": true
+      "markers_match": true,
+      "checksum_bits": 16,
+      "stored_checksum": 50689,
+      "computed_checksum": 50689,
+      "checksum_matches": true
     },
     {
       "handle": 8,
@@ -1274,7 +1305,11 @@
       "stored_handle": 65535,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 16,
+      "stored_checksum": 65535,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 9,
@@ -1282,7 +1317,11 @@
       "stored_handle": 9,
       "header_matches_handle": true,
       "commit_marker_present": true,
-      "markers_match": true
+      "markers_match": true,
+      "checksum_bits": 16,
+      "stored_checksum": 52359,
+      "computed_checksum": 52359,
+      "checksum_matches": true
     },
     {
       "handle": 10,
@@ -1290,7 +1329,11 @@
       "stored_handle": 0,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 16,
+      "stored_checksum": 0,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 11,
@@ -1298,7 +1341,11 @@
       "stored_handle": 11,
       "header_matches_handle": true,
       "commit_marker_present": true,
-      "markers_match": true
+      "markers_match": true,
+      "checksum_bits": 16,
+      "stored_checksum": 51033,
+      "computed_checksum": 51033,
+      "checksum_matches": true
     },
     {
       "handle": 12,
@@ -1306,7 +1353,11 @@
       "stored_handle": 65535,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 16,
+      "stored_checksum": 65535,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 13,
@@ -1314,7 +1365,11 @@
       "stored_handle": 0,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 16,
+      "stored_checksum": 0,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 14,
@@ -1322,7 +1377,11 @@
       "stored_handle": 14,
       "header_matches_handle": true,
       "commit_marker_present": true,
-      "markers_match": true
+      "markers_match": true,
+      "checksum_bits": 16,
+      "stored_checksum": 49846,
+      "computed_checksum": 49846,
+      "checksum_matches": true
     },
     {
       "handle": 15,
@@ -1330,7 +1389,11 @@
       "stored_handle": 0,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 16,
+      "stored_checksum": 0,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 16,
@@ -1338,7 +1401,11 @@
       "stored_handle": 0,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 16,
+      "stored_checksum": 0,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 17,
@@ -1346,7 +1413,11 @@
       "stored_handle": 62975,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 16,
+      "stored_checksum": 32767,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 18,
@@ -1354,7 +1425,11 @@
       "stored_handle": 18,
       "header_matches_handle": true,
       "commit_marker_present": true,
-      "markers_match": true
+      "markers_match": true,
+      "checksum_bits": 16,
+      "stored_checksum": 50530,
+      "computed_checksum": 50530,
+      "checksum_matches": true
     },
     {
       "handle": 19,
@@ -1362,7 +1437,11 @@
       "stored_handle": 0,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 16,
+      "stored_checksum": 0,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 20,
@@ -1370,7 +1449,11 @@
       "stored_handle": 0,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 16,
+      "stored_checksum": 0,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 21,
@@ -1378,7 +1461,11 @@
       "stored_handle": 65535,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 16,
+      "stored_checksum": 65535,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 22,
@@ -1386,7 +1473,11 @@
       "stored_handle": 22,
       "header_matches_handle": true,
       "commit_marker_present": true,
-      "markers_match": true
+      "markers_match": true,
+      "checksum_bits": 16,
+      "stored_checksum": 51214,
+      "computed_checksum": 51214,
+      "checksum_matches": true
     },
     {
       "handle": 23,
@@ -1394,7 +1485,11 @@
       "stored_handle": 65535,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 16,
+      "stored_checksum": 65535,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 24,
@@ -1402,7 +1497,11 @@
       "stored_handle": 65022,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 16,
+      "stored_checksum": 8189,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 25,
@@ -1410,7 +1509,11 @@
       "stored_handle": 65535,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 16,
+      "stored_checksum": 65535,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 26,
@@ -1418,7 +1521,11 @@
       "stored_handle": 65535,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 16,
+      "stored_checksum": 65535,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 27,
@@ -1426,7 +1533,11 @@
       "stored_handle": 65535,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 16,
+      "stored_checksum": 65535,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 28,
@@ -1434,7 +1545,11 @@
       "stored_handle": 65535,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 16,
+      "stored_checksum": 65535,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 29,
@@ -1442,7 +1557,11 @@
       "stored_handle": 0,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 16,
+      "stored_checksum": 0,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 30,
@@ -1450,7 +1569,11 @@
       "stored_handle": 65535,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 16,
+      "stored_checksum": 65535,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 31,
@@ -1458,7 +1581,11 @@
       "stored_handle": 0,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 16,
+      "stored_checksum": 0,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 32,
@@ -1466,7 +1593,11 @@
       "stored_handle": 0,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 16,
+      "stored_checksum": 0,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 33,
@@ -1474,7 +1605,11 @@
       "stored_handle": 65535,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 16,
+      "stored_checksum": 65535,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 34,
@@ -1482,7 +1617,11 @@
       "stored_handle": 0,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 16,
+      "stored_checksum": 0,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 35,
@@ -1490,7 +1629,11 @@
       "stored_handle": 65535,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 16,
+      "stored_checksum": 65535,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 36,
@@ -1498,7 +1641,11 @@
       "stored_handle": 0,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 16,
+      "stored_checksum": 0,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 37,
@@ -1506,7 +1653,11 @@
       "stored_handle": 65535,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 16,
+      "stored_checksum": 65535,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 38,
@@ -1514,7 +1665,11 @@
       "stored_handle": 65535,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 16,
+      "stored_checksum": 65535,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 39,
@@ -1522,7 +1677,11 @@
       "stored_handle": 0,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 16,
+      "stored_checksum": 0,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 40,
@@ -1530,7 +1689,11 @@
       "stored_handle": 65535,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 16,
+      "stored_checksum": 65535,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 41,
@@ -1538,7 +1701,11 @@
       "stored_handle": 65535,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 16,
+      "stored_checksum": 65535,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 42,
@@ -1546,7 +1713,11 @@
       "stored_handle": 0,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 16,
+      "stored_checksum": 0,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 43,
@@ -1554,7 +1725,11 @@
       "stored_handle": 65535,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 16,
+      "stored_checksum": 65535,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 44,
@@ -1562,7 +1737,11 @@
       "stored_handle": 65535,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 16,
+      "stored_checksum": 65535,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 45,
@@ -1570,7 +1749,11 @@
       "stored_handle": 65535,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 16,
+      "stored_checksum": 65535,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 46,
@@ -1578,7 +1761,11 @@
       "stored_handle": 65535,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 16,
+      "stored_checksum": 32221,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 47,
@@ -1586,7 +1773,11 @@
       "stored_handle": 65535,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 16,
+      "stored_checksum": 65535,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 48,
@@ -1594,7 +1785,11 @@
       "stored_handle": 0,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 16,
+      "stored_checksum": 0,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 49,
@@ -1602,7 +1797,11 @@
       "stored_handle": 49,
       "header_matches_handle": true,
       "commit_marker_present": true,
-      "markers_match": true
+      "markers_match": true,
+      "checksum_bits": 32,
+      "stored_checksum": 3221239431,
+      "computed_checksum": 3221239431,
+      "checksum_matches": true
     },
     {
       "handle": 50,
@@ -1610,7 +1809,11 @@
       "stored_handle": 50,
       "header_matches_handle": true,
       "commit_marker_present": true,
-      "markers_match": true
+      "markers_match": true,
+      "checksum_bits": 32,
+      "stored_checksum": 3221239434,
+      "computed_checksum": 3221239434,
+      "checksum_matches": true
     },
     {
       "handle": 51,
@@ -1618,7 +1821,11 @@
       "stored_handle": 51,
       "header_matches_handle": true,
       "commit_marker_present": true,
-      "markers_match": true
+      "markers_match": true,
+      "checksum_bits": 32,
+      "stored_checksum": 3221227223,
+      "computed_checksum": 3221227223,
+      "checksum_matches": true
     },
     {
       "handle": 52,
@@ -1626,7 +1833,11 @@
       "stored_handle": 52,
       "header_matches_handle": true,
       "commit_marker_present": true,
-      "markers_match": true
+      "markers_match": true,
+      "checksum_bits": 32,
+      "stored_checksum": 3221243096,
+      "computed_checksum": 3221243096,
+      "checksum_matches": true
     },
     {
       "handle": 53,
@@ -1634,7 +1845,11 @@
       "stored_handle": 53,
       "header_matches_handle": true,
       "commit_marker_present": true,
-      "markers_match": true
+      "markers_match": true,
+      "checksum_bits": 32,
+      "stored_checksum": 3221227225,
+      "computed_checksum": 3221227225,
+      "checksum_matches": true
     },
     {
       "handle": 54,
@@ -1642,7 +1857,11 @@
       "stored_handle": 54,
       "header_matches_handle": true,
       "commit_marker_present": true,
-      "markers_match": true
+      "markers_match": true,
+      "checksum_bits": 32,
+      "stored_checksum": 3221243098,
+      "computed_checksum": 3221243098,
+      "checksum_matches": true
     },
     {
       "handle": 55,
@@ -1650,7 +1869,11 @@
       "stored_handle": 55,
       "header_matches_handle": true,
       "commit_marker_present": true,
-      "markers_match": true
+      "markers_match": true,
+      "checksum_bits": 32,
+      "stored_checksum": 3221227227,
+      "computed_checksum": 3221227227,
+      "checksum_matches": true
     },
     {
       "handle": 56,
@@ -1658,7 +1881,11 @@
       "stored_handle": 0,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 32,
+      "stored_checksum": 4294967295,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 57,
@@ -1666,7 +1893,11 @@
       "stored_handle": 57,
       "header_matches_handle": true,
       "commit_marker_present": true,
-      "markers_match": true
+      "markers_match": true,
+      "checksum_bits": 32,
+      "stored_checksum": 3221227229,
+      "computed_checksum": 3221227229,
+      "checksum_matches": true
     },
     {
       "handle": 58,
@@ -1674,7 +1905,11 @@
       "stored_handle": 58,
       "header_matches_handle": true,
       "commit_marker_present": true,
-      "markers_match": true
+      "markers_match": true,
+      "checksum_bits": 32,
+      "stored_checksum": 3221227231,
+      "computed_checksum": 3221227231,
+      "checksum_matches": true
     },
     {
       "handle": 59,
@@ -1682,7 +1917,11 @@
       "stored_handle": 59,
       "header_matches_handle": true,
       "commit_marker_present": true,
-      "markers_match": true
+      "markers_match": true,
+      "checksum_bits": 32,
+      "stored_checksum": 3221227231,
+      "computed_checksum": 3221227231,
+      "checksum_matches": true
     },
     {
       "handle": 60,
@@ -1690,7 +1929,11 @@
       "stored_handle": 60,
       "header_matches_handle": true,
       "commit_marker_present": true,
-      "markers_match": true
+      "markers_match": true,
+      "checksum_bits": 32,
+      "stored_checksum": 3221227491,
+      "computed_checksum": 3221227491,
+      "checksum_matches": true
     },
     {
       "handle": 61,
@@ -1698,7 +1941,11 @@
       "stored_handle": 61,
       "header_matches_handle": true,
       "commit_marker_present": true,
-      "markers_match": true
+      "markers_match": true,
+      "checksum_bits": 32,
+      "stored_checksum": 3221227250,
+      "computed_checksum": 3221227250,
+      "checksum_matches": true
     },
     {
       "handle": 62,
@@ -1706,7 +1953,11 @@
       "stored_handle": 62,
       "header_matches_handle": true,
       "commit_marker_present": true,
-      "markers_match": true
+      "markers_match": true,
+      "checksum_bits": 32,
+      "stored_checksum": 3221227268,
+      "computed_checksum": 3221227268,
+      "checksum_matches": true
     },
     {
       "handle": 63,
@@ -1714,7 +1965,11 @@
       "stored_handle": 63,
       "header_matches_handle": true,
       "commit_marker_present": true,
-      "markers_match": true
+      "markers_match": true,
+      "checksum_bits": 32,
+      "stored_checksum": 3221227598,
+      "computed_checksum": 3221227598,
+      "checksum_matches": true
     },
     {
       "handle": 64,
@@ -1722,7 +1977,11 @@
       "stored_handle": 64,
       "header_matches_handle": true,
       "commit_marker_present": true,
-      "markers_match": true
+      "markers_match": true,
+      "checksum_bits": 32,
+      "stored_checksum": 3221227527,
+      "computed_checksum": 3221227527,
+      "checksum_matches": true
     },
     {
       "handle": 65,
@@ -1730,7 +1989,11 @@
       "stored_handle": 65,
       "header_matches_handle": true,
       "commit_marker_present": true,
-      "markers_match": true
+      "markers_match": true,
+      "checksum_bits": 32,
+      "stored_checksum": 3221227487,
+      "computed_checksum": 3221227487,
+      "checksum_matches": true
     },
     {
       "handle": 66,
@@ -1738,7 +2001,11 @@
       "stored_handle": 66,
       "header_matches_handle": true,
       "commit_marker_present": true,
-      "markers_match": true
+      "markers_match": true,
+      "checksum_bits": 32,
+      "stored_checksum": 3221227417,
+      "computed_checksum": 3221227417,
+      "checksum_matches": true
     },
     {
       "handle": 67,
@@ -1746,7 +2013,11 @@
       "stored_handle": 67,
       "header_matches_handle": true,
       "commit_marker_present": true,
-      "markers_match": true
+      "markers_match": true,
+      "checksum_bits": 32,
+      "stored_checksum": 3221227558,
+      "computed_checksum": 3221227558,
+      "checksum_matches": true
     },
     {
       "handle": 68,
@@ -1754,7 +2025,11 @@
       "stored_handle": 68,
       "header_matches_handle": true,
       "commit_marker_present": true,
-      "markers_match": true
+      "markers_match": true,
+      "checksum_bits": 32,
+      "stored_checksum": 3221227490,
+      "computed_checksum": 3221227490,
+      "checksum_matches": true
     },
     {
       "handle": 69,
@@ -1762,7 +2037,11 @@
       "stored_handle": 69,
       "header_matches_handle": true,
       "commit_marker_present": true,
-      "markers_match": true
+      "markers_match": true,
+      "checksum_bits": 32,
+      "stored_checksum": 3221227833,
+      "computed_checksum": 3221227833,
+      "checksum_matches": true
     },
     {
       "handle": 70,
@@ -1770,7 +2049,11 @@
       "stored_handle": 70,
       "header_matches_handle": true,
       "commit_marker_present": true,
-      "markers_match": true
+      "markers_match": true,
+      "checksum_bits": 32,
+      "stored_checksum": 3221229170,
+      "computed_checksum": 3221229170,
+      "checksum_matches": true
     },
     {
       "handle": 71,
@@ -1778,7 +2061,11 @@
       "stored_handle": 71,
       "header_matches_handle": true,
       "commit_marker_present": true,
-      "markers_match": true
+      "markers_match": true,
+      "checksum_bits": 32,
+      "stored_checksum": 3221227859,
+      "computed_checksum": 3221227859,
+      "checksum_matches": true
     },
     {
       "handle": 72,
@@ -1786,7 +2073,11 @@
       "stored_handle": 72,
       "header_matches_handle": true,
       "commit_marker_present": true,
-      "markers_match": true
+      "markers_match": true,
+      "checksum_bits": 32,
+      "stored_checksum": 3221228367,
+      "computed_checksum": 3221228367,
+      "checksum_matches": true
     },
     {
       "handle": 73,
@@ -1794,7 +2085,11 @@
       "stored_handle": 73,
       "header_matches_handle": true,
       "commit_marker_present": true,
-      "markers_match": true
+      "markers_match": true,
+      "checksum_bits": 32,
+      "stored_checksum": 3221229173,
+      "computed_checksum": 3221229173,
+      "checksum_matches": true
     },
     {
       "handle": 74,
@@ -1802,7 +2097,11 @@
       "stored_handle": 74,
       "header_matches_handle": true,
       "commit_marker_present": true,
-      "markers_match": true
+      "markers_match": true,
+      "checksum_bits": 32,
+      "stored_checksum": 3221227754,
+      "computed_checksum": 3221227754,
+      "checksum_matches": true
     },
     {
       "handle": 75,
@@ -1810,7 +2109,11 @@
       "stored_handle": 75,
       "header_matches_handle": true,
       "commit_marker_present": true,
-      "markers_match": true
+      "markers_match": true,
+      "checksum_bits": 32,
+      "stored_checksum": 3221227617,
+      "computed_checksum": 3221227617,
+      "checksum_matches": true
     },
     {
       "handle": 76,
@@ -1818,7 +2121,11 @@
       "stored_handle": 76,
       "header_matches_handle": true,
       "commit_marker_present": true,
-      "markers_match": true
+      "markers_match": true,
+      "checksum_bits": 32,
+      "stored_checksum": 3221227708,
+      "computed_checksum": 3221227708,
+      "checksum_matches": true
     },
     {
       "handle": 77,
@@ -1826,7 +2133,11 @@
       "stored_handle": 77,
       "header_matches_handle": true,
       "commit_marker_present": true,
-      "markers_match": true
+      "markers_match": true,
+      "checksum_bits": 32,
+      "stored_checksum": 3221227435,
+      "computed_checksum": 3221227435,
+      "checksum_matches": true
     },
     {
       "handle": 78,
@@ -1834,7 +2145,11 @@
       "stored_handle": 78,
       "header_matches_handle": true,
       "commit_marker_present": true,
-      "markers_match": true
+      "markers_match": true,
+      "checksum_bits": 32,
+      "stored_checksum": 3221227437,
+      "computed_checksum": 3221227437,
+      "checksum_matches": true
     },
     {
       "handle": 79,
@@ -1842,7 +2157,11 @@
       "stored_handle": 79,
       "header_matches_handle": true,
       "commit_marker_present": true,
-      "markers_match": true
+      "markers_match": true,
+      "checksum_bits": 32,
+      "stored_checksum": 3221227251,
+      "computed_checksum": 3221227251,
+      "checksum_matches": true
     },
     {
       "handle": 80,
@@ -1850,7 +2169,11 @@
       "stored_handle": 0,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 32,
+      "stored_checksum": 4294967295,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 81,
@@ -1858,7 +2181,11 @@
       "stored_handle": 81,
       "header_matches_handle": true,
       "commit_marker_present": true,
-      "markers_match": true
+      "markers_match": true,
+      "checksum_bits": 32,
+      "stored_checksum": 3221227253,
+      "computed_checksum": 3221227253,
+      "checksum_matches": true
     },
     {
       "handle": 82,
@@ -1866,7 +2193,11 @@
       "stored_handle": 65535,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 32,
+      "stored_checksum": 4294967295,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 83,
@@ -1874,7 +2205,11 @@
       "stored_handle": 83,
       "header_matches_handle": true,
       "commit_marker_present": true,
-      "markers_match": true
+      "markers_match": true,
+      "checksum_bits": 32,
+      "stored_checksum": 3221227766,
+      "computed_checksum": 3221227766,
+      "checksum_matches": true
     },
     {
       "handle": 84,
@@ -1882,7 +2217,11 @@
       "stored_handle": 84,
       "header_matches_handle": true,
       "commit_marker_present": true,
-      "markers_match": true
+      "markers_match": true,
+      "checksum_bits": 32,
+      "stored_checksum": 3221227736,
+      "computed_checksum": 3221227736,
+      "checksum_matches": true
     },
     {
       "handle": 85,
@@ -1890,7 +2229,11 @@
       "stored_handle": 85,
       "header_matches_handle": true,
       "commit_marker_present": true,
-      "markers_match": true
+      "markers_match": true,
+      "checksum_bits": 32,
+      "stored_checksum": 3221227663,
+      "computed_checksum": 3221227663,
+      "checksum_matches": true
     },
     {
       "handle": 86,
@@ -1898,7 +2241,11 @@
       "stored_handle": 86,
       "header_matches_handle": true,
       "commit_marker_present": true,
-      "markers_match": true
+      "markers_match": true,
+      "checksum_bits": 32,
+      "stored_checksum": 3221227258,
+      "computed_checksum": 3221227258,
+      "checksum_matches": true
     },
     {
       "handle": 87,
@@ -1906,7 +2253,11 @@
       "stored_handle": 87,
       "header_matches_handle": true,
       "commit_marker_present": true,
-      "markers_match": true
+      "markers_match": true,
+      "checksum_bits": 32,
+      "stored_checksum": 3221227259,
+      "computed_checksum": 3221227259,
+      "checksum_matches": true
     },
     {
       "handle": 88,
@@ -1914,7 +2265,11 @@
       "stored_handle": 65535,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 32,
+      "stored_checksum": 0,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 89,
@@ -1922,7 +2277,11 @@
       "stored_handle": 65535,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 32,
+      "stored_checksum": 4294967295,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 90,
@@ -1930,7 +2289,11 @@
       "stored_handle": 65535,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 32,
+      "stored_checksum": 3758096251,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 91,
@@ -1938,7 +2301,11 @@
       "stored_handle": 91,
       "header_matches_handle": true,
       "commit_marker_present": true,
-      "markers_match": true
+      "markers_match": true,
+      "checksum_bits": 32,
+      "stored_checksum": 3221227519,
+      "computed_checksum": 3221227519,
+      "checksum_matches": true
     },
     {
       "handle": 92,
@@ -1946,7 +2313,11 @@
       "stored_handle": 92,
       "header_matches_handle": true,
       "commit_marker_present": true,
-      "markers_match": true
+      "markers_match": true,
+      "checksum_bits": 32,
+      "stored_checksum": 3221227264,
+      "computed_checksum": 3221227264,
+      "checksum_matches": true
     },
     {
       "handle": 93,
@@ -1954,7 +2325,11 @@
       "stored_handle": 93,
       "header_matches_handle": true,
       "commit_marker_present": true,
-      "markers_match": true
+      "markers_match": true,
+      "checksum_bits": 32,
+      "stored_checksum": 3221227300,
+      "computed_checksum": 3221227300,
+      "checksum_matches": true
     },
     {
       "handle": 94,
@@ -1962,7 +2337,11 @@
       "stored_handle": 94,
       "header_matches_handle": true,
       "commit_marker_present": true,
-      "markers_match": true
+      "markers_match": true,
+      "checksum_bits": 32,
+      "stored_checksum": 3221227335,
+      "computed_checksum": 3221227335,
+      "checksum_matches": true
     },
     {
       "handle": 95,
@@ -1970,7 +2349,11 @@
       "stored_handle": 95,
       "header_matches_handle": true,
       "commit_marker_present": true,
-      "markers_match": true
+      "markers_match": true,
+      "checksum_bits": 32,
+      "stored_checksum": 3221232211,
+      "computed_checksum": 3221232211,
+      "checksum_matches": true
     },
     {
       "handle": 96,
@@ -1978,7 +2361,11 @@
       "stored_handle": 96,
       "header_matches_handle": true,
       "commit_marker_present": true,
-      "markers_match": true
+      "markers_match": true,
+      "checksum_bits": 32,
+      "stored_checksum": 3221227337,
+      "computed_checksum": 3221227337,
+      "checksum_matches": true
     },
     {
       "handle": 97,
@@ -1986,7 +2373,11 @@
       "stored_handle": 97,
       "header_matches_handle": true,
       "commit_marker_present": true,
-      "markers_match": true
+      "markers_match": true,
+      "checksum_bits": 32,
+      "stored_checksum": 3221227439,
+      "computed_checksum": 3221227439,
+      "checksum_matches": true
     },
     {
       "handle": 98,
@@ -1994,7 +2385,11 @@
       "stored_handle": 98,
       "header_matches_handle": true,
       "commit_marker_present": true,
-      "markers_match": true
+      "markers_match": true,
+      "checksum_bits": 32,
+      "stored_checksum": 3221236090,
+      "computed_checksum": 3221236090,
+      "checksum_matches": true
     },
     {
       "handle": 99,
@@ -2002,7 +2397,11 @@
       "stored_handle": 99,
       "header_matches_handle": true,
       "commit_marker_present": true,
-      "markers_match": true
+      "markers_match": true,
+      "checksum_bits": 32,
+      "stored_checksum": 3221227441,
+      "computed_checksum": 3221227441,
+      "checksum_matches": true
     },
     {
       "handle": 100,
@@ -2010,7 +2409,11 @@
       "stored_handle": 0,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 32,
+      "stored_checksum": 4294967295,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 101,
@@ -2018,7 +2421,11 @@
       "stored_handle": 65535,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 32,
+      "stored_checksum": 4294967295,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 102,
@@ -2026,7 +2433,11 @@
       "stored_handle": 0,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 32,
+      "stored_checksum": 0,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 103,
@@ -2034,7 +2445,11 @@
       "stored_handle": 103,
       "header_matches_handle": true,
       "commit_marker_present": true,
-      "markers_match": true
+      "markers_match": true,
+      "checksum_bits": 32,
+      "stored_checksum": 3221227445,
+      "computed_checksum": 3221227445,
+      "checksum_matches": true
     },
     {
       "handle": 104,
@@ -2042,7 +2457,11 @@
       "stored_handle": 65535,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 32,
+      "stored_checksum": 4294967295,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 105,
@@ -2050,7 +2469,11 @@
       "stored_handle": 105,
       "header_matches_handle": true,
       "commit_marker_present": true,
-      "markers_match": true
+      "markers_match": true,
+      "checksum_bits": 32,
+      "stored_checksum": 3221227277,
+      "computed_checksum": 3221227277,
+      "checksum_matches": true
     },
     {
       "handle": 106,
@@ -2058,7 +2481,11 @@
       "stored_handle": 106,
       "header_matches_handle": true,
       "commit_marker_present": true,
-      "markers_match": true
+      "markers_match": true,
+      "checksum_bits": 32,
+      "stored_checksum": 3221227303,
+      "computed_checksum": 3221227303,
+      "checksum_matches": true
     },
     {
       "handle": 107,
@@ -2066,7 +2493,11 @@
       "stored_handle": 0,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 32,
+      "stored_checksum": 4294967295,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 108,
@@ -2074,7 +2505,11 @@
       "stored_handle": 65535,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 32,
+      "stored_checksum": 3758022651,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 109,
@@ -2082,7 +2517,11 @@
       "stored_handle": 0,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 32,
+      "stored_checksum": 4294967295,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 110,
@@ -2090,7 +2529,11 @@
       "stored_handle": 0,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 32,
+      "stored_checksum": 4294967295,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 111,
@@ -2098,7 +2541,11 @@
       "stored_handle": 65535,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 32,
+      "stored_checksum": 4294967295,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 112,
@@ -2106,7 +2553,11 @@
       "stored_handle": 65535,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 32,
+      "stored_checksum": 4294967295,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 113,
@@ -2114,7 +2565,11 @@
       "stored_handle": 0,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 32,
+      "stored_checksum": 4294962938,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 114,
@@ -2122,7 +2577,11 @@
       "stored_handle": 65535,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 32,
+      "stored_checksum": 4294967295,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 115,
@@ -2130,7 +2589,11 @@
       "stored_handle": 0,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 32,
+      "stored_checksum": 0,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 116,
@@ -2138,7 +2601,11 @@
       "stored_handle": 65535,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 32,
+      "stored_checksum": 2147500544,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 117,
@@ -2146,7 +2613,11 @@
       "stored_handle": 65535,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 32,
+      "stored_checksum": 4294967295,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 118,
@@ -2154,7 +2625,11 @@
       "stored_handle": 0,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 32,
+      "stored_checksum": 0,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 119,
@@ -2162,7 +2637,11 @@
       "stored_handle": 0,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 32,
+      "stored_checksum": 0,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 120,
@@ -2170,7 +2649,11 @@
       "stored_handle": 0,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 32,
+      "stored_checksum": 0,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 121,
@@ -2178,7 +2661,11 @@
       "stored_handle": 0,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 32,
+      "stored_checksum": 0,
+      "computed_checksum": null,
+      "checksum_matches": null
     },
     {
       "handle": 122,
@@ -2186,7 +2673,11 @@
       "stored_handle": 65535,
       "header_matches_handle": false,
       "commit_marker_present": false,
-      "markers_match": false
+      "markers_match": false,
+      "checksum_bits": 32,
+      "stored_checksum": 4294967295,
+      "computed_checksum": null,
+      "checksum_matches": null
     }
   ],
   "live_learned_state": {
@@ -2212,7 +2703,8 @@
     "reasons": [
       "a same-function reference intersection cannot exclude indirect state propagation",
       "equal staged/active snapshot values do not establish absence of a runtime dependency",
-      "record markers do not identify application copy groups or validate all checksums"
+      "record integrity does not identify application copy groups or restoration destinations",
+      "offline checksum agreement is not successful hardware read or application completion"
     ]
   }
 }
